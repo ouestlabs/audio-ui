@@ -786,6 +786,24 @@ export const Index: Record<string, any> = {
     categories: ["synth"],
     meta: undefined,
   },
+  "particle-wave-shaper": {
+    name: "particle-wave-shaper",
+    description: "Wave shaper",
+    type: "registry:block",
+    registryDependencies: ["@audio/use-audio","@audio/fader","@audio/xypad","@audio/knob","@shadcn/toggle-group"],
+    files: [{
+      path: "src/registry/default/particles/particle-wave-shaper.tsx",
+      type: "registry:block",
+      target: ""
+    }],
+    component: React.lazy(async () => {
+      const mod = await import("@/registry/default/particles/particle-wave-shaper.tsx")
+      const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
+      return { default: mod.default || mod[exportName] }
+    }),
+    categories: ["synth"],
+    meta: undefined,
+  },
   "particle-player": {
     name: "particle-player",
     description: "Audio player",

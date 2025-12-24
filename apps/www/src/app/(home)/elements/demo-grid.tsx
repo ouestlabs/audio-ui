@@ -4,6 +4,7 @@ import AudioTrackListGridDemo from "@/registry/default/examples/track-list-grid-
 import AudioTrackSortableListGridDemo from "@/registry/default/examples/track-sortable-list-grid-demo";
 import ParticlePlayerWidget from "@/registry/default/particles/particle-player-widget";
 import ParticlePocketSynth from "@/registry/default/particles/particle-pocket-synth";
+import ParticleGranularSynth from "@/registry/default/particles/particle-wave-shaper";
 
 export function DemoGrid() {
   return (
@@ -15,6 +16,7 @@ export function DemoGrid() {
       </div>
       <div className="space-y-3">
         <PlayerQueueDemo />
+        <ParticleGranularSynth />
         <AudioTrackSortableListGridDemo />
         <PlayerDemo />
       </div>

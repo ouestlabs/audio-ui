@@ -7,6 +7,7 @@ import AudioTrackSortableListGridDemo from "../examples/track-sortable-list-grid
 import ParticleAudioPlayer from "./particle-player";
 import ParticlePlayerWidget from "./particle-player-widget";
 import ParticlePocketSynth from "./particle-pocket-synth";
+import ParticleWaveShaper from "./particle-wave-shaper";
 
 type ParticleComponent = React.ComponentType;
 
@@ -66,6 +67,12 @@ export const particles: ParticleItem[] = [
   {
     id: "particle-pocket-synth",
     component: ParticlePocketSynth,
+    category: ["synth"],
+    className: "**:data-[slot=particle-wrapper]:w-full",
+  },
+  {
+    id: "particle-wave-shaper",
+    component: ParticleWaveShaper,
     category: ["synth"],
     className: "**:data-[slot=particle-wrapper]:w-full",
   },

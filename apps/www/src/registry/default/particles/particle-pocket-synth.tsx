@@ -301,13 +301,18 @@ export default function ParticlePocketSynth() {
         variant="outline"
       >
         {filterOptions.map(({ label, value }) => (
-          <ToggleGroupItem className="flex-1" key={value} value={value}>
+          <ToggleGroupItem
+            aria-label={label}
+            className="flex-1"
+            key={value}
+            value={value}
+          >
             {label}
           </ToggleGroupItem>
         ))}
       </ToggleGroup>
 
-      <div className="flex items-center gap-3 p-3">
+      <div className="flex items-center gap-3 rounded-lg border bg-popover p-3">
         <label
           className="font-medium text-muted-foreground text-sm leading-tight"
           htmlFor="volume"
