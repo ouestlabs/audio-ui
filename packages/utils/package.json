@@ -1,6 +1,6 @@
 {
   "name": "@audio-ui/utils",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "A collection of utility functions for Audio UI.",
   "license": "MIT",
   "module": "dist/index.js",

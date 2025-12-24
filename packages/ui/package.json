@@ -1,6 +1,6 @@
 {
   "name": "audio-ui",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "A collection of React UI primitives for Audio UI.",
   "license": "MIT",
   "module": "dist/index.js",
@@ -42,7 +42,6 @@
   "dependencies": {
     "@audio-ui/utils": "workspace:*"
   },
-
   "devDependencies": {
     "@audio-ui/typescript": "workspace:*",
     "@types/react": "^19.2.7",
