@@ -52,7 +52,7 @@
       "name": "www",
       "version": "0.0.3",
       "dependencies": {
-        "@audio-ui/react": "workspace:*",
+        "@audio-ui/react": "latest",
         "@dnd-kit/core": "^6.3.1",
         "@dnd-kit/sortable": "^10.0.0",
         "@dnd-kit/utilities": "^3.2.2",
@@ -85,7 +85,7 @@
         "zustand": "^5.0.9",
       },
       "devDependencies": {
-        "@audio-ui/typescript": "workspace:*",
+        "@audio-ui/typescript": "latest",
         "@shikijs/transformers": "^3.19.0",
         "@tailwindcss/postcss": "^4.1.13",
         "@types/bun": "^1.3.3",
@@ -2402,6 +2402,10 @@
 
     "wrap-ansi-cjs/string-width": ["string-width@4.2.3", "", { "dependencies": { "emoji-regex": "^8.0.0", "is-fullwidth-code-point": "^3.0.0", "strip-ansi": "^6.0.1" } }, "sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g=="],
 
+    "www/@audio-ui/react": ["@audio-ui/react@0.0.3", "", { "dependencies": { "@audio-ui/utils": "latest" }, "peerDependencies": { "@types/react": "^18 || ^19", "react": "^18 || ^19", "react-dom": "^18 || ^19" }, "optionalPeers": ["@types/react"] }, "sha512-Pdd8eohKkEsllZ2aJ1mzaHAb8hO04Eb7EeACVS5vUo7rNm0Ayw+/2GcQPhJPCI9P6nuETfSHzujxp5IuE1Lh/Q=="],
+
+    "www/@audio-ui/typescript": ["@audio-ui/typescript@0.0.3", "", {}, "sha512-bC/xGk/Lh/vIFw9zZz7I9PG2Af+hAijBLevyfmvQqyzhv3gcej7/fTfSWqCRi6LIQiscqBPjmqMltoMHpKvMQA=="],
+
     "yargs/string-width": ["string-width@4.2.3", "", { "dependencies": { "emoji-regex": "^8.0.0", "is-fullwidth-code-point": "^3.0.0", "strip-ansi": "^6.0.1" } }, "sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g=="],
 
     "@dotenvx/dotenvx/execa/get-stream": ["get-stream@6.0.1", "", {}, "sha512-ts6Wi+2j3jQjqi70w5AlN8DFnkSwC+MqmxEzdEALB2qXZYV3X/b1CTfgPLGJNMeAWxdPfU8FO1ms3NUfaHCPYg=="],
@@ -2517,6 +2521,8 @@
     "wrap-ansi/string-width/emoji-regex": ["emoji-regex@9.2.2", "", {}, "sha512-L18DaJsXSUk2+42pv8mLs5jJT2hqFkFE4j21wOmgbUqsZ2hL72NsUU785g9RXgo3s0ZNgVl42TiHp3ZtOv/Vyg=="],
 
     "wrap-ansi/strip-ansi/ansi-regex": ["ansi-regex@6.2.2", "", {}, "sha512-Bq3SmSpyFHaWjPk8If9yc6svM8c56dB5BAtW4Qbw5jHTwwXXcTLoRMkpDJp6VL0XzlWaCHTXrkFURMYmD0sLqg=="],
+
+    "www/@audio-ui/react/@audio-ui/utils": ["@audio-ui/utils@0.0.3", "", {}, "sha512-U11D5qHJXJjxu3V/92SOOiXa2s3Va9WXqVZvADLAZ0vuxsEnL931GFFi/y7CPNeZ0WO3t9da2Ge8cJy2kv8tCQ=="],
 
     "yargs/string-width/emoji-regex": ["emoji-regex@8.0.0", "", {}, "sha512-MSjYzcWNOA0ewAHpz0MxpYFvwg6yjy1NG3xteoqz644VCo/RPgnr1/GGt+ic3iJTzQ8Eu3TdM14SawnVUmGE6A=="],
 
