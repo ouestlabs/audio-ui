@@ -50,7 +50,7 @@
     },
     "apps/www": {
       "name": "www",
-      "version": "0.0.2",
+      "version": "0.0.3",
       "dependencies": {
         "@audio-ui/react": "workspace:*",
         "@dnd-kit/core": "^6.3.1",
@@ -106,11 +106,11 @@
     },
     "packages/configs/typescript": {
       "name": "@audio-ui/typescript",
-      "version": "0.0.2",
+      "version": "0.0.3",
     },
     "packages/ui": {
       "name": "@audio-ui/react",
-      "version": "0.0.2",
+      "version": "0.0.3",
       "dependencies": {
         "@audio-ui/utils": "latest",
       },
@@ -133,7 +133,7 @@
     },
     "packages/utils": {
       "name": "@audio-ui/utils",
-      "version": "0.0.2",
+      "version": "0.0.3",
       "devDependencies": {
         "@audio-ui/typescript": "latest",
         "@types/bun": "^1.3.5",
@@ -2110,9 +2110,9 @@
 
     "@antfu/ni/package-manager-detector": ["package-manager-detector@1.6.0", "", {}, "sha512-61A5ThoTiDG/C8s8UMZwSorAGwMJ0ERVGj2OjoW5pAalsNOg15+iQiPzrLJ4jhZ1HJzmC2PIHT2oEiH3R5fzNA=="],
 
-    "@audio-ui/react/@audio-ui/typescript": ["@audio-ui/typescript@0.0.1", "", {}, "sha512-PeMmYPBmX17GK0aDuYtTK5GNCUYiXH6gQYYc3B6EftUjOpNBP8hN9MJ5Jl/mCMJUcYSXXMMcme9UMD+01GsRaQ=="],
+    "@audio-ui/react/@audio-ui/typescript": ["@audio-ui/typescript@0.0.3", "", {}, "sha512-bC/xGk/Lh/vIFw9zZz7I9PG2Af+hAijBLevyfmvQqyzhv3gcej7/fTfSWqCRi6LIQiscqBPjmqMltoMHpKvMQA=="],
 
-    "@audio-ui/react/@audio-ui/utils": ["@audio-ui/utils@0.0.2", "", {}, "sha512-+1eWlMHcGvylO76DbOM34ZLHmmk68Etu95/U3WrLZkbUpqUecxkpgc3CafSFGgBqji1MOr3AZ34JzxCGq2vkGQ=="],
+    "@audio-ui/react/@audio-ui/utils": ["@audio-ui/utils@0.0.3", "", {}, "sha512-U11D5qHJXJjxu3V/92SOOiXa2s3Va9WXqVZvADLAZ0vuxsEnL931GFFi/y7CPNeZ0WO3t9da2Ge8cJy2kv8tCQ=="],
 
     "@audio-ui/utils/@audio-ui/typescript": ["@audio-ui/typescript@0.0.1", "", {}, "sha512-PeMmYPBmX17GK0aDuYtTK5GNCUYiXH6gQYYc3B6EftUjOpNBP8hN9MJ5Jl/mCMJUcYSXXMMcme9UMD+01GsRaQ=="],
 
