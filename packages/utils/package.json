@@ -1,6 +1,6 @@
 {
   "name": "@audio-ui/utils",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A collection of utility functions for Audio UI.",
   "license": "MIT",
   "module": "dist/index.js",
@@ -32,9 +32,15 @@
       "import": "./dist/dom/index.js"
     }
   },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build:pkg": "tsup",
-    "dev": "tsup --watch"
+    "dev": "tsup --watch",
+    "lint": "biome check --write .",
+    "lint:fix": "biome check --write --unsafe .",
+    "clean": "rm -rf dist node_modules .turbo"
   },
   "devDependencies": {
     "@audio-ui/typescript": "latest",

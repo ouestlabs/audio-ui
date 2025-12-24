@@ -1,5 +1,12 @@
 # www
 
+## 0.0.3
+
+### Patch Changes
+
+- Updated dependencies [0f5070f]
+  - @audio-ui/react@0.0.3
+
 ## 0.0.2
 
 ### Patch Changes

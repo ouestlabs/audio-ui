@@ -1,6 +1,6 @@
 {
   "name": "@audio-ui/react",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A collection of React UI primitives for Audio UI.",
   "license": "MIT",
   "module": "dist/index.js",
@@ -37,7 +37,9 @@
   "scripts": {
     "build:pkg": "bunx --bun tsup",
     "dev": "bunx --bun tsup --watch",
-    "prepublishOnly": "bun run build:pkg"
+    "lint": "biome check --write .",
+    "lint:fix": "biome check --write --unsafe .",
+    "clean": "rm -rf dist node_modules .turbo"
   },
   "dependencies": {
     "@audio-ui/utils": "latest"
