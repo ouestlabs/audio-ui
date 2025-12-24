@@ -1,12 +1,12 @@
 ---
-title: Audio
+title: HTML Audio
 description: Core audio helper and singleton for loading and controlling HTML5 audio.
 links:
   doc: https://developer.mozilla.org/en-US/docs/Web/API/HTMLAudioElement
   api: https://html.spec.whatwg.org/multipage/media.html#htmlaudioelement
 ---
 
-The `$audio` singleton manages playback of HTML5 audio with automatic retry logic, event handling, and volume fading. Use it alongside the [Audio Store](/docs/lib/audio-store) for full player functionality.
+The `$htmlAudio` singleton manages playback of HTML5 audio with automatic retry logic, event handling, and volume fading. Use it alongside the [Audio Store](/docs/lib/audio-store) for full player functionality.
 
 ## Installation
 
@@ -18,7 +18,7 @@ The `$audio` singleton manages playback of HTML5 audio with automatic retry logi
   <TabsContent value="cli">
 
   ```bash
-  npx shadcn@latest add @audio/lib
+  npx shadcn@latest add @audio/html
   ```
 
   </TabsContent>
@@ -27,7 +27,7 @@ The `$audio` singleton manages playback of HTML5 audio with automatic retry logi
 
     <Steps>
       <Step>Copy and paste the following code into your project.</Step>
-        <Source name="lib" title="lib/audio.ts" />
+        <Source name="html" title="lib/html-audio.ts" />
       <Step>Update the import paths to match your project setup.</Step>
     </Steps>
 
@@ -39,29 +39,40 @@ The `$audio` singleton manages playback of HTML5 audio with automatic retry logi
 Import the singleton and helpers from the audio library:
 
 ```tsx
-import { $audio, formatDuration, isLive, type Track } from "@/lib/audio";
+import { $htmlAudio, formatDuration, type Track } from "@/lib/html-audio";
+```
+
+Or use the React hook for better integration:
+
+```tsx
+import { useAudio } from "@/hooks/use-audio";
+
+function MyComponent() {
+  const { htmlAudio } = useAudio();
+  // Use htmlAudio instead of $audio
+}
 ```
 
 ## Core API
 
-### $audio (Singleton)
+### $htmlAudio (Singleton)
 
 Manages the underlying `HTMLAudioElement`, playback state, retries, and events. Initialize on client start — the instance is server-safe.
 
 ```tsx
-import { $audio } from "@/lib/audio";
+import { $htmlAudio } from "@/lib/html-audio";
 
 // Initialize on the client
-$audio.init();
+$htmlAudio.init();
 
 // Load and play
-await $audio.load("https://example.com/audio.mp3", 0);
-await $audio.play();
+await $htmlAudio.load("https://example.com/audio.mp3", 0);
+await $htmlAudio.play();
 ```
 
 <Callout variant="info">
-  <strong>Client initialization:</strong> The <code>$audio</code> singleton must
-  be initialized on the client. Call <code>$audio.init()</code> from a client
+  <strong>Client initialization:</strong> The <code>$htmlAudio</code> singleton must
+  be initialized on the client. Call <code>$htmlAudio.init()</code> from a client
   component or inside <code>useEffect()</code> so the underlying{" "}
   <code>HTMLAudioElement</code> is created only in the browser environment.
 </Callout>
@@ -147,11 +158,11 @@ sequenceDiagram
 The library emits custom events via an internal `EventTarget`:
 
 ```tsx
-$audio.addEventListener("bufferingStart", () => console.log("Buffering..."));
-$audio.addEventListener("bufferingEnd", () => console.log("Ready to play"));
-$audio.addEventListener("playbackStarted", () => console.log("Playing"));
-$audio.addEventListener("audioError", () => console.error("Error"));
-$audio.addEventListener("bufferUpdate", (e) => {
+$htmlAudio.addEventListener("bufferingStart", () => console.log("Buffering..."));
+$htmlAudio.addEventListener("bufferingEnd", () => console.log("Ready to play"));
+$htmlAudio.addEventListener("playbackStarted", () => console.log("Playing"));
+$htmlAudio.addEventListener("audioError", () => console.error("Error"));
+$htmlAudio.addEventListener("bufferUpdate", (e) => {
   if (e instanceof CustomEvent) console.log("Buffered:", e.detail.bufferedTime);
 });
 ```
@@ -163,23 +174,35 @@ $audio.addEventListener("bufferUpdate", (e) => {
 Format seconds to `MM:SS` string. Handles invalid input by returning `"0:00"`.
 
 ```tsx
-import { formatDuration } from "@/lib/audio";
+import { formatDuration } from "@/lib/html-audio";
 
 formatDuration(125); // "2:05"
 formatDuration(3661); // "61:01"
 ```
 
-### isLive(track)
+### isLive(duration)
 
-Heuristic check for live streams based on URL patterns or `track.live` flag.
+Check if a duration value indicates a live stream. This is a method on the `HtmlAudio` class.
 
 ```tsx
-import { isLive } from "@/lib/audio";
+import { useAudio } from "@/hooks/use-audio";
 
-if (isLive(track)) {
-  // Handle live stream (no seeking)
+function MyComponent() {
+  const { htmlAudio } = useAudio();
+  const duration = htmlAudio.getDuration();
+  
+  if (htmlAudio.isLive(duration)) {
+    // Handle live stream (no seeking)
+  }
 }
 ```
+
+<Callout variant="info">
+  <strong>Live Stream Detection:</strong> The <code>isLive()</code> method checks
+  if a duration is <code>NaN</code>, <code>Infinity</code>, or{" "}
+  <code>-Infinity</code>. A duration of <code>0</code> is not considered a live
+  stream (it just means the duration hasn't loaded yet).
+</Callout>
 
 ## Types
 
@@ -206,14 +229,14 @@ Common audio track object with optional fields:
 ### Basic Playback
 
 ```tsx
-import { $audio } from "@/lib/audio";
+import { $htmlAudio } from "@/lib/html-audio";
 
-$audio.init();
+$htmlAudio.init();
 
 async function playTrack(url: string) {
   try {
-    await $audio.load(url, 0);
-    await $audio.play();
+    await $htmlAudio.load(url, 0);
+    await $htmlAudio.play();
   } catch (error) {
     console.error("Playback failed:", error);
   }
@@ -223,30 +246,30 @@ async function playTrack(url: string) {
 ### Volume Management
 
 ```tsx
-import { $audio } from "@/lib/audio";
+import { $htmlAudio } from "@/lib/html-audio";
 
 // Immediate change
-$audio.setVolume(0.5);
+$htmlAudio.setVolume(0.5);
 
 // Smooth fade over 1 second
-$audio.setVolume(0.8, 1000);
+$htmlAudio.setVolume(0.8, 1000);
 
 // Mute with memory
-$audio.setMuted(true);
-$audio.setMuted(false); // Restores previous volume
+$htmlAudio.setMuted(true);
+$htmlAudio.setMuted(false); // Restores previous volume
 ```
 
 ### React Component
 
 ```tsx
-import { $audio, formatDuration } from "@/lib/audio";
+import { $htmlAudio, formatDuration } from "@/lib/html-audio";
 import { useEffect, useState } from "react";
 
 function TimeDisplay() {
   const [time, setTime] = useState(0);
 
   useEffect(() => {
-    const updateTime = () => setTime($audio.getCurrentTime());
+    const updateTime = () => setTime($htmlAudio.getCurrentTime());
     const interval = setInterval(updateTime, 100);
     return () => clearInterval(interval);
   }, []);
@@ -258,17 +281,17 @@ function TimeDisplay() {
 ### Event Monitoring
 
 ```tsx
-import { $audio } from "@/lib/audio";
+import { $htmlAudio } from "@/lib/html-audio";
 
-$audio.addEventListener("bufferingStart", () => {
+$htmlAudio.addEventListener("bufferingStart", () => {
   console.log("Loading audio...");
 });
 
-$audio.addEventListener("bufferingEnd", () => {
+$htmlAudio.addEventListener("bufferingEnd", () => {
   console.log("Ready to play");
 });
 
-$audio.addEventListener("audioError", (event) => {
+$htmlAudio.addEventListener("audioError", (event) => {
   console.error("Audio error:", event);
 });
 ```
@@ -280,7 +303,7 @@ $audio.addEventListener("audioError", (event) => {
 
 ## Notes
 
-- Singleton pattern: All methods access the same `$audio` instance
+- Singleton pattern: All methods access the same `$htmlAudio` instance
 - Server-safe: Methods check for client-side availability before executing
 - Automatic retries: Handles load/play errors with exponential backoff (max 3 attempts)
 - Volume fading: Animations use `requestAnimationFrame` for smooth transitions
@@ -288,6 +311,14 @@ $audio.addEventListener("audioError", (event) => {
 - `formatDuration` handles edge cases (NaN, Infinity, negative values)
 
 ## Changelog
+
+### 2025-12-24 useAudio integration and live stream improvements
+
+- **Changed**: `isLive()` is now a method on the `HtmlAudio` class instead of a standalone function
+- **Removed**: `LIVE_STREAM_PATTERNS` URL pattern matching (now uses duration-based detection)
+- **Improved**: `isLive()` now correctly returns `false` for `duration === 0`
+- **Added**: Integration with `useAudio()` hook for React components
+- **Improved**: `setPlaybackRate()` uses `isLive()` method for live stream detection
 
 ### 2025-12-02 Live stream playback rate protection
 

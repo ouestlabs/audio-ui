@@ -90,11 +90,11 @@ function PlayerStatus() {
 
 ```mermaid
 graph TB
-    A[React Components] -->|useAudioStore selector| B[AudioStore Zustand]
+    A(React Components) -->|useAudioStore selector| B(AudioStore Zustand)
     B -->|State Updates| A
-    B -->|Actions| C[$audio Singleton]
-    C -->|HTMLAudioElement| D[Browser Audio API]
-    B -->|Persist| E[localStorage]
+    B -->|Actions| C($audio Singleton)
+    C -->|HTMLAudioElement| D(Browser Audio API)
+    B -->|Persist| E(localStorage)
     E -->|Restore| B
 ```
 
@@ -358,6 +358,13 @@ This allows users to resume playback and maintain queue state across page refres
 </Callout>
 
 ## Changelog
+
+### 2025-12-24 Provider integration and state management improvements
+
+- **Changed**: Store now focuses solely on state management (no direct audio element access)
+- **Improved**: Better separation of concerns between store and provider
+- **Improved**: Provider handles all direct audio interactions via `useAudio()` hook
+- **Fixed**: State synchronization between audio element and store is more reliable
 
 ### 2025-12-02 History removal and live stream improvements
 

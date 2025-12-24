@@ -1,9 +1,11 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "playback-speed-demo",
-  "type": "registry:example",
   "description": "Playback speed component example",
-  "registryDependencies": ["@audio/playback-speed", "@audio/player"],
+  "registryDependencies": [
+    "@audio/playback-speed",
+    "@audio/player"
+  ],
   "files": [
     {
       "path": "src/registry/default/examples/playback-speed-demo.tsx",
@@ -12,5 +14,8 @@
       "target": "components/audio/examples/playback-speed-demo.tsx"
     }
   ],
-  "categories": ["playback-speed"]
+  "categories": [
+    "playback-speed"
+  ],
+  "type": "registry:example"
 }

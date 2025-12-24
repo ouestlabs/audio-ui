@@ -35,4 +35,32 @@ export const ui: Registry["items"] = [
       },
     ],
   },
+  {
+    name: "knob",
+    type: "registry:ui",
+    dependencies: ["@audio-ui/react"],
+    files: [
+      {
+        path: "ui/audio/elements/knob.tsx",
+        type: "registry:ui",
+      },
+    ],
+  },
+  {
+    name: "fader",
+    type: "registry:ui",
+    dependencies: ["@audio-ui/react"],
+    files: [
+      {
+        path: "ui/audio/elements/fader.tsx",
+        type: "registry:ui",
+      },
+    ],
+  },
+  {
+    name: "xypad",
+    type: "registry:ui",
+    dependencies: ["@audio-ui/react"],
+    files: [{ path: "ui/audio/elements/xypad.tsx", type: "registry:ui" }],
+  },
 ];

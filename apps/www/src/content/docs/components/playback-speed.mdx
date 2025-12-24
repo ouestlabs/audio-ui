@@ -39,12 +39,20 @@ Dropdown button for adjusting playback speed (0.5x–2x). Auto-disabled for live
         npx shadcn@latest add button dropdown-menu tooltip
         ```
 
+      <Step>Install the required registry components:</Step>
+
+        ```bash
+        npx shadcn@latest add @audio/store @audio/html @audio/use-audio
+        ```
+
       <Step>Copy and paste the following code into your project.</Step>
         <Source name="playback-speed" title="components/audio/playback-speed.tsx" />
       <Step>Copy the required store file.</Step>
         <Source name="store" title="lib/audio-store.ts" />
       <Step>Copy the audio lib file.</Step>
-        <Source name="lib" title="lib/audio.ts" />
+        <Source name="html" title="lib/html-audio.ts" />
+      <Step>Copy the useAudio hook file.</Step>
+        <Source name="use-audio" title="hooks/use-audio.ts" />
       <Step>Update the import paths to match your project setup.</Step>
     </Steps>
 
@@ -144,4 +152,13 @@ With `size="icon"`, only the speed label is shown (no gauge icon):
 
 - [Audio Player](/docs/components/player) — Player component system
 - [Audio Store](/docs/lib/audio-store) — Playback state management
+- [Audio Provider](/docs/components/provider) — Audio context provider
+
+## Changelog
+
+### 2025-12-24 useAudio integration and live stream improvements
+
+- **Changed**: Now uses `useAudio()` hook to access `htmlAudio` singleton
+- **Improved**: Live stream detection uses `htmlAudio.isLive()` method
+- **Fixed**: Playback rate changes are properly prevented for live streams
 

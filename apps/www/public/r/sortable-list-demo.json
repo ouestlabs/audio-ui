@@ -1,9 +1,10 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "sortable-list-demo",
-  "type": "registry:example",
   "description": "Sortable list component examples",
-  "registryDependencies": ["@audio/sortable-list"],
+  "registryDependencies": [
+    "@audio/sortable-list"
+  ],
   "files": [
     {
       "path": "src/registry/default/examples/sortable-list-demo.tsx",
@@ -12,5 +13,9 @@
       "target": "components/audio/examples/sortable-list-demo.tsx"
     }
   ],
-  "categories": ["sortable-list", "ui"]
+  "categories": [
+    "sortable-list",
+    "ui"
+  ],
+  "type": "registry:example"
 }

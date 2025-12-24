@@ -1,0 +1,20 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "fader-volume-control-demo",
+  "description": "Fader component example with volume control",
+  "registryDependencies": [
+    "@audio/fader"
+  ],
+  "files": [
+    {
+      "path": "src/registry/default/examples/fader-volume-control-demo.tsx",
+      "content": "\"use client\";\nimport { useState } from \"react\";\nimport { Fader } from \"@/registry/default/ui/audio/elements/fader\";\n\nexport default function FaderVolumeControlDemo() {\n  const [volume, setVolume] = useState(50);\n\n  return (\n    <div className=\"flex h-max flex-col items-center gap-3\">\n      <Fader\n        max={100}\n        min={0}\n        onValueChange={setVolume}\n        orientation=\"vertical\"\n        step={1}\n        value={volume}\n      />\n      <output className=\"text-sm\">{volume}%</output>\n    </div>\n  );\n}\n",
+      "type": "registry:example",
+      "target": "components/audio/examples/fader-volume-control-demo.tsx"
+    }
+  ],
+  "categories": [
+    "fader"
+  ],
+  "type": "registry:example"
+}

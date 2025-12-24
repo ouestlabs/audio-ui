@@ -1,0 +1,20 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "knob-multiple-control-demo",
+  "description": "Knob component example with multiple controls",
+  "registryDependencies": [
+    "@audio/knob"
+  ],
+  "files": [
+    {
+      "path": "src/registry/default/examples/knob-multiple-control-demo.tsx",
+      "content": "import { Knob } from \"@/registry/default/ui/audio/elements/knob\";\n\nexport default function KnobMultipleControlDemo() {\n  return (\n    <section className=\"flex gap-4\">\n      {Array.from([\"Gain\", \"Reverb\", \"Delay\"]).map((effect) => (\n        <div className=\"flex flex-col items-center gap-2\" key={effect}>\n          <Knob defaultValue={50} max={100} min={0} step={1} />\n          <output className=\"text-xs\">{effect}</output>\n        </div>\n      ))}\n    </section>\n  );\n}\n",
+      "type": "registry:example",
+      "target": "components/audio/examples/knob-multiple-control-demo.tsx"
+    }
+  ],
+  "categories": [
+    "knob"
+  ],
+  "type": "registry:example"
+}

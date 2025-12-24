@@ -3,11 +3,13 @@ import PlayerQueueDemo from "@/registry/default/examples/player-queue-demo";
 import AudioTrackListGridDemo from "@/registry/default/examples/track-list-grid-demo";
 import AudioTrackSortableListGridDemo from "@/registry/default/examples/track-sortable-list-grid-demo";
 import ParticlePlayerWidget from "@/registry/default/particles/particle-player-widget";
+import ParticlePocketSynth from "@/registry/default/particles/particle-pocket-synth";
 
 export function DemoGrid() {
   return (
     <div className="grid gap-3 lg:grid-cols-2">
       <div className="space-y-3">
+        <ParticlePocketSynth />
         <ParticlePlayerWidget />
         <AudioTrackListGridDemo />
       </div>

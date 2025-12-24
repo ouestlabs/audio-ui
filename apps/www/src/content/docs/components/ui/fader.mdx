@@ -1,0 +1,117 @@
+---
+title: Fader
+description: A vertical or horizontal fader control for adjusting values. Built on audio-ui primitives.
+links:
+  doc:
+    - https://www.npmjs.com/package/audio-ui
+---
+
+A fader component that supports both vertical and horizontal orientations. Perfect for audio mixing interfaces, volume controls, and parameter adjustments.
+
+<Preview name="fader-demo" />
+
+## Installation
+
+<CodeTabs>
+  <TabsList>
+    <TabsTrigger value="cli">CLI</TabsTrigger>
+    <TabsTrigger value="manual">Manual</TabsTrigger>
+  </TabsList>
+  <TabsContent value="cli">
+  ```bash
+  npx shadcn@latest add @audio/fader
+  ```
+  </TabsContent>
+
+  <TabsContent value="manual">
+    <Steps>
+      <Step>Install the following dependencies:</Step>
+
+        ```bash
+        npm install @audio-ui/react class-variance-authority
+        ```
+
+      <Step>Copy and paste the following code into your project.</Step>
+        <Source name="fader" title="components/audio/fader.tsx" />
+      <Step>Update the import paths to match your project setup.</Step>
+    </Steps>
+
+  </TabsContent>
+</CodeTabs>
+
+## Usage
+
+```tsx
+import { Fader } from "@/components/audio/fader";
+```
+
+```tsx
+<Fader
+  defaultValue={50}
+  max={100}
+  min={0}
+  step={1}
+/>
+```
+
+### Horizontal Fader
+
+<Preview name="fader-horizontal-demo" />
+
+### Custom Thumb Marks
+
+<Preview name="fader-custom-thumb-marks-demo" />
+
+### No Thumb Marks
+
+<Preview name="fader-no-thumb-marks-demo" />
+
+## API Reference
+
+### Fader
+
+#### Props
+
+| Prop          | Type                              | Default       | Description                                                      |
+| ------------- | --------------------------------- | ------------- | ---------------------------------------------------------------- |
+| `orientation` | `"horizontal" \| "vertical"`      | `"vertical"`  | Fader orientation.                                               |
+| `size`        | `"sm" \| "default" \| "lg"`      | `"default"`    | Size variant.                                                    |
+| `thumbMarks`  | `number \| false`                 | `3`           | Number of thumb marks to display, or `false` to hide them.       |
+| `className`   | `string`                          | -             | Additional CSS classes.                                         |
+| `value`       | `number`                          | -             | Controlled value.                                                |
+| `defaultValue`| `number`                          | -             | Uncontrolled default value.                                     |
+| `min`         | `number`                          | `0`           | Minimum value.                                                   |
+| `max`         | `number`                          | `100`         | Maximum value.                                                   |
+| `step`        | `number`                          | `1`           | Step increment.                                                  |
+| `disabled`    | `boolean`                         | `false`       | Whether the fader is disabled.                                   |
+| `onValueChange` | `(value: number) => void`        | -             | Callback when value changes during interaction.                 |
+| `onValueCommit` | `(value: number) => void`        | -             | Callback when value is committed (on release).                   |
+
+All other props are inherited from the `FaderPrimitive.RootProps` from `audio-ui`.
+
+## Examples
+
+### Volume Control
+
+<Preview name="fader-volume-control-demo" />
+
+### Multiple Faders
+
+<Preview name="fader-multiple-control-demo" />
+
+## Notes
+
+<Callout variant="info">
+  <strong>Important Information:</strong>
+
+  - **Built on audio-ui:** This component is built on top of the `audio-ui`
+    package primitives, providing a high-quality, accessible fader control.
+  - **Orientation:** The fader supports both vertical and horizontal
+    orientations. The default is vertical, which is common in audio mixing
+    interfaces.
+  - **Thumb Marks:** The thumb marks provide visual feedback for the current
+    value. You can customize the number of marks or disable them entirely.
+  - **Size Variants:** Three size variants are available: `sm`, `default`, and
+    `lg`. These affect both the track and thumb dimensions.
+</Callout>
+

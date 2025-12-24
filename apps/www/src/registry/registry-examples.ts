@@ -179,4 +179,201 @@ export const examples: Registry["items"] = [
     ],
     categories: ["playback-speed"],
   },
+
+  {
+    name: "fader-demo",
+    description: "Fader component example",
+    type: "registry:example",
+    registryDependencies: ["@audio/fader"],
+    files: [
+      {
+        path: "examples/fader-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    categories: ["fader"],
+  },
+  {
+    name: "fader-horizontal-demo",
+    description: "Fader component example with horizontal orientation",
+    type: "registry:example",
+    registryDependencies: ["@audio/fader"],
+    files: [
+      {
+        path: "examples/fader-horizontal-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    categories: ["fader"],
+  },
+
+  {
+    name: "fader-no-thumb-marks-demo",
+    description: "Fader component example with no thumb marks",
+    type: "registry:example",
+    registryDependencies: ["@audio/fader"],
+    files: [
+      {
+        path: "examples/fader-no-thumb-marks-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    categories: ["fader"],
+  },
+  {
+    name: "fader-custom-thumb-marks-demo",
+    description: "Fader component example with custom thumb marks",
+    type: "registry:example",
+    registryDependencies: ["@audio/fader"],
+    files: [
+      {
+        path: "examples/fader-custom-thumb-marks-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    categories: ["fader"],
+  },
+  {
+    name: "fader-multiple-control-demo",
+    description: "Fader component example with multiple controls",
+    type: "registry:example",
+    registryDependencies: ["@audio/fader"],
+    files: [
+      {
+        path: "examples/fader-multiple-control-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    categories: ["fader"],
+  },
+  {
+    name: "fader-volume-control-demo",
+    description: "Fader component example with volume control",
+    type: "registry:example",
+    registryDependencies: ["@audio/fader"],
+    files: [
+      {
+        path: "examples/fader-volume-control-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    categories: ["fader"],
+  },
+  {
+    name: "knob-demo",
+    description: "Knob component example",
+    type: "registry:example",
+    registryDependencies: ["@audio/knob"],
+    files: [
+      {
+        path: "examples/knob-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    categories: ["knob"],
+  },
+  {
+    name: "knob-size-variants-demo",
+    description: "Knob component example with size variants",
+    type: "registry:example",
+    registryDependencies: ["@audio/knob"],
+    files: [
+      {
+        path: "examples/knob-size-variants-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    categories: ["knob"],
+  },
+  {
+    name: "knob-filter-control-demo",
+    description: "Knob component example with filter control",
+    type: "registry:example",
+    registryDependencies: ["@audio/knob"],
+    files: [
+      {
+        path: "examples/knob-filter-control-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    categories: ["knob"],
+  },
+  {
+    name: "knob-multiple-control-demo",
+    description: "Knob component example with multiple controls",
+    type: "registry:example",
+    registryDependencies: ["@audio/knob"],
+    files: [
+      {
+        path: "examples/knob-multiple-control-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    categories: ["knob"],
+  },
+  {
+    name: "xypad-demo",
+    description: "XYPad component example",
+    type: "registry:example",
+    registryDependencies: ["@audio/xypad"],
+    files: [
+      {
+        path: "examples/xypad-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    categories: ["xypad"],
+  },
+  {
+    name: "xypad-format-value-demo",
+    description: "XYPad component example with formatted value",
+    type: "registry:example",
+    registryDependencies: ["@audio/xypad"],
+    files: [
+      {
+        path: "examples/xypad-format-value-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    categories: ["xypad"],
+  },
+  {
+    name: "xypad-hide-value-demo",
+    description: "XYPad component example with hidden value",
+    type: "registry:example",
+    registryDependencies: ["@audio/xypad"],
+    files: [
+      {
+        path: "examples/xypad-hide-value-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    categories: ["xypad"],
+  },
+  {
+    name: "xypad-filter-control-demo",
+    description: "XYPad component example with filter control",
+    type: "registry:example",
+    registryDependencies: ["@audio/xypad"],
+    files: [
+      {
+        path: "examples/xypad-filter-control-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    categories: ["xypad"],
+  },
+  {
+    name: "xypad-synthesizer-control-demo",
+    description: "XYPad component example with synthesizer control",
+    type: "registry:example",
+    registryDependencies: ["@audio/xypad"],
+    files: [
+      {
+        path: "examples/xypad-synthesizer-control-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    categories: ["xypad"],
+  },
 ];

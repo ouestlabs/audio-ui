@@ -1,9 +1,11 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "queue-preferences-demo",
-  "type": "registry:example",
   "description": "Minimal queue with preferences dropdown",
-  "registryDependencies": ["@audio/player", "@audio/queue"],
+  "registryDependencies": [
+    "@audio/player",
+    "@audio/queue"
+  ],
   "files": [
     {
       "path": "src/registry/default/examples/queue-preferences-demo.tsx",
@@ -12,5 +14,8 @@
       "target": "components/audio/examples/queue-preferences-demo.tsx"
     }
   ],
-  "categories": ["queue"]
+  "categories": [
+    "queue"
+  ],
+  "type": "registry:example"
 }

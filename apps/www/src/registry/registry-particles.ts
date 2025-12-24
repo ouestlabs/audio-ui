@@ -2,6 +2,21 @@ import type { Registry } from "shadcn/schema";
 
 export const particles: Registry["items"] = [
   {
+    name: "particle-pocket-synth",
+    description: "Pocket synth",
+    type: "registry:block",
+    registryDependencies: [
+      "@audio/use-audio",
+      "@audio/fader",
+      "@audio/xypad",
+      "@shadcn/toggle-group",
+    ],
+    files: [
+      { path: "particles/particle-pocket-synth.tsx", type: "registry:block" },
+    ],
+    categories: ["synth"],
+  },
+  {
     name: "particle-player",
     description: "Audio player",
     type: "registry:block",
@@ -9,7 +24,7 @@ export const particles: Registry["items"] = [
       "@audio/player",
       "@audio/queue",
       "@audio/store",
-      "@audio/lib",
+      "@audio/html",
     ],
     files: [{ path: "particles/particle-player.tsx", type: "registry:block" }],
     categories: ["player", "queue"],
@@ -24,7 +39,7 @@ export const particles: Registry["items"] = [
       "@audio/queue",
       "@audio/track",
       "@audio/store",
-      "@audio/lib",
+      "@audio/html",
     ],
     files: [
       { path: "particles/particle-player-widget.tsx", type: "registry:block" },

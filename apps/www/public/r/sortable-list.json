@@ -1,14 +1,15 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "sortable-list",
-  "type": "registry:ui",
   "dependencies": [
     "@dnd-kit/core",
     "@dnd-kit/sortable",
     "@dnd-kit/utilities",
     "lucide-react"
   ],
-  "registryDependencies": ["@shadcn/button"],
+  "registryDependencies": [
+    "@shadcn/button"
+  ],
   "files": [
     {
       "path": "src/registry/default/ui/sortable-list.tsx",
@@ -16,5 +17,6 @@
       "type": "registry:ui",
       "target": "components/ui/sortable-list.tsx"
     }
-  ]
+  ],
+  "type": "registry:ui"
 }

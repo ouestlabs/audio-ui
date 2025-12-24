@@ -10,12 +10,12 @@ import {
 } from "lucide-react";
 import type { ComponentProps } from "react";
 import React from "react";
-import type { Track } from "@/registry/default/lib/audio";
 import {
   type InsertMode,
   type RepeatMode,
   useAudioStore,
 } from "@/registry/default/lib/audio-store";
+import type { Track } from "@/registry/default/lib/html-audio";
 import { cn } from "@/registry/default/lib/utils";
 import { AudioTrackList } from "@/registry/default/ui/audio/track";
 import { Button } from "@/registry/default/ui/button";

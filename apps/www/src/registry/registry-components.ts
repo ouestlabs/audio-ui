@@ -7,7 +7,8 @@ export const components: Registry["items"] = [
     dependencies: ["zustand", "lucide-react"],
     registryDependencies: [
       "@audio/store",
-      "@audio/lib",
+      "@audio/html",
+      "@audio/use-audio",
       "@audio/provider",
       "@audio/slider",
       "@shadcn/empty",
@@ -25,37 +26,17 @@ export const components: Registry["items"] = [
         path: "ui/audio/player.tsx",
         type: "registry:component",
       },
-      {
-        path: "lib/audio.ts",
-        type: "registry:lib",
-      },
-      {
-        path: "lib/audio-store.ts",
-        type: "registry:lib",
-      },
-      {
-        path: "ui/slider.tsx",
-        type: "registry:component",
-      },
     ],
   },
   {
     name: "provider",
     type: "registry:component",
     dependencies: ["zustand"],
-    registryDependencies: ["@audio/store", "@audio/lib"],
+    registryDependencies: ["@audio/store", "@audio/html", "@audio/use-audio"],
     files: [
       {
         path: "ui/audio/provider.tsx",
         type: "registry:component",
-      },
-      {
-        path: "lib/audio.ts",
-        type: "registry:lib",
-      },
-      {
-        path: "lib/audio-store.ts",
-        type: "registry:lib",
       },
     ],
   },
@@ -65,7 +46,8 @@ export const components: Registry["items"] = [
     dependencies: ["zustand", "lucide-react"],
     registryDependencies: [
       "@audio/store",
-      "@audio/lib",
+      "@audio/html",
+      "@audio/use-audio",
       "@audio/track",
       "@audio/provider",
       "@shadcn/empty",
@@ -84,18 +66,6 @@ export const components: Registry["items"] = [
         path: "ui/audio/queue.tsx",
         type: "registry:component",
       },
-      {
-        path: "lib/audio.ts",
-        type: "registry:lib",
-      },
-      {
-        path: "lib/audio-store.ts",
-        type: "registry:lib",
-      },
-      {
-        path: "ui/audio/track.tsx",
-        type: "registry:component",
-      },
     ],
   },
   {
@@ -104,7 +74,8 @@ export const components: Registry["items"] = [
     dependencies: ["lucide-react"],
     registryDependencies: [
       "@audio/store",
-      "@audio/lib",
+      "@audio/html",
+      "@audio/use-audio",
       "@audio/sortable-list",
       "@audio/provider",
       "@shadcn/badge",
@@ -119,18 +90,6 @@ export const components: Registry["items"] = [
         path: "ui/audio/track.tsx",
         type: "registry:component",
       },
-      {
-        path: "lib/audio.ts",
-        type: "registry:lib",
-      },
-      {
-        path: "lib/audio-store.ts",
-        type: "registry:lib",
-      },
-      {
-        path: "ui/sortable-list.tsx",
-        type: "registry:component",
-      },
     ],
   },
   {
@@ -139,7 +98,8 @@ export const components: Registry["items"] = [
     dependencies: ["lucide-react"],
     registryDependencies: [
       "@audio/store",
-      "@audio/lib",
+      "@audio/html",
+      "@audio/use-audio",
       "@shadcn/button",
       "@shadcn/dropdown-menu",
       "@shadcn/tooltip",
@@ -148,14 +108,6 @@ export const components: Registry["items"] = [
       {
         path: "ui/audio/playback-speed.tsx",
         type: "registry:component",
-      },
-      {
-        path: "lib/audio.ts",
-        type: "registry:lib",
-      },
-      {
-        path: "lib/audio-store.ts",
-        type: "registry:lib",
       },
     ],
   },

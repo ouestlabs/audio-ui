@@ -1,0 +1,20 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "xypad-hide-value-demo",
+  "description": "XYPad component example with hidden value",
+  "registryDependencies": [
+    "@audio/xypad"
+  ],
+  "files": [
+    {
+      "path": "src/registry/default/examples/xypad-hide-value-demo.tsx",
+      "content": "\"use client\";\nimport { XYPad } from \"@/registry/default/ui/audio/elements/xypad\";\n\nexport default function XypadHideValueDemo() {\n  return (\n    <XYPad\n      className=\"aspect-square\"\n      defaultValue={{ x: 50, y: 50 }}\n      maxX={100}\n      maxY={100}\n      minX={0}\n      minY={0}\n      showValueDisplay={false}\n    />\n  );\n}\n",
+      "type": "registry:example",
+      "target": "components/audio/examples/xypad-hide-value-demo.tsx"
+    }
+  ],
+  "categories": [
+    "xypad"
+  ],
+  "type": "registry:example"
+}

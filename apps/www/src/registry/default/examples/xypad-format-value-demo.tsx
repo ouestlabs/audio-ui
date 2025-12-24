@@ -1,0 +1,16 @@
+"use client";
+import { XYPad } from "@/registry/default/ui/audio/elements/xypad";
+
+export default function XypadFormatValueDemo() {
+  return (
+    <XYPad
+      className="aspect-square"
+      defaultValue={{ x: 50, y: 50 }}
+      formatValue={(val) => `X: ${val.x}, Y: ${val.y}`}
+      maxX={100}
+      maxY={100}
+      minX={0}
+      minY={0}
+    />
+  );
+}

@@ -1,0 +1,108 @@
+---
+title: Knob
+description: A circular knob control for adjusting values. Built on audio-ui primitives.
+links:
+  doc:
+    - https://www.npmjs.com/package/audio-ui
+---
+
+A knob component for adjusting values with a circular, rotary control. Perfect for audio parameter controls, filters, and effects.
+
+<Preview name="knob-demo" />
+
+## Installation
+
+<CodeTabs>
+  <TabsList>
+    <TabsTrigger value="cli">CLI</TabsTrigger>
+    <TabsTrigger value="manual">Manual</TabsTrigger>
+  </TabsList>
+  <TabsContent value="cli">
+  ```bash
+  npx shadcn@latest add @audio/knob
+  ```
+  </TabsContent>
+
+  <TabsContent value="manual">
+    <Steps>
+      <Step>Install the following dependencies:</Step>
+
+        ```bash
+        npm install @audio-ui/react class-variance-authority
+        ```
+
+      <Step>Copy and paste the following code into your project.</Step>
+        <Source name="knob" title="components/audio/knob.tsx" />
+      <Step>Update the import paths to match your project setup.</Step>
+    </Steps>
+
+  </TabsContent>
+</CodeTabs>
+
+## Usage
+
+```tsx
+import { Knob } from "@/components/audio/knob";
+```
+
+### Basic Knob
+
+```tsx
+<Knob
+  defaultValue={50}
+  max={100}
+  min={0}
+  step={1}
+/>
+```
+
+### Size Variants
+
+<Preview name="knob-size-variants-demo" />
+
+## API Reference
+
+### Knob
+
+#### Props
+
+| Prop          | Type                        | Default    | Description                                                      |
+| ------------- | --------------------------- | ---------- | ---------------------------------------------------------------- |
+| `size`        | `"sm" \| "default" \| "lg" \| "xl"` | `"default"` | Size variant.                                                    |
+| `className`   | `string`                    | -          | Additional CSS classes.                                         |
+| `value`       | `number`                    | -          | Controlled value.                                                |
+| `defaultValue`| `number`                    | -          | Uncontrolled default value.                                     |
+| `min`         | `number`                    | `0`        | Minimum value.                                                   |
+| `max`         | `number`                    | `100`      | Maximum value.                                                   |
+| `step`        | `number`                    | `1`        | Step increment.                                                 |
+| `disabled`    | `boolean`                   | `false`    | Whether the knob is disabled.                                   |
+| `onValueChange` | `(value: number) => void` | -          | Callback when value changes during interaction.                  |
+| `onValueCommit` | `(value: number) => void` | -          | Callback when value is committed (on release).                   |
+
+All other props are inherited from the `KnobPrimitive.RootProps` from `audio-ui`.
+
+## Examples
+
+### Filter Control
+
+<Preview name="knob-filter-control-demo" />
+
+### Multiple Knobs
+
+<Preview name="knob-multiple-control-demo" />
+
+## Notes
+
+<Callout variant="info">
+  <strong>Important Information:</strong>
+
+  - **Built on audio-ui:** This component is built on top of the `audio-ui`
+    package primitives, providing a high-quality, accessible knob control.
+  - **Visual Feedback:** The knob displays an arc indicator showing the current
+    value range and a pointer indicating the exact value.
+  - **Size Variants:** Four size variants are available: `sm`, `default`, `lg`,
+    and `xl`. These affect the overall knob diameter.
+  - **Interaction:** The knob supports mouse drag, touch, and keyboard
+    navigation for adjusting values.
+</Callout>
+

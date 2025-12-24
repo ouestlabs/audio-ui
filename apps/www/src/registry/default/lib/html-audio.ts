@@ -29,17 +29,7 @@ type FadeVolumeParams = {
   duration: number;
 };
 
-const LIVE_STREAM_PATTERNS = [
-  /\/live\./i,
-  /\/stream/i,
-  /\/radio/i,
-  /\.m3u8$/i,
-  /\.pls$/i,
-  /\.aac$/i,
-  /icecast|shoutcast/i,
-];
-
-class AudioLib {
+class HtmlAudio {
   private audio: HTMLAudioElement | null = null;
   private isInitialized = false;
   private playPromise: Promise<void> | null = null;
@@ -77,16 +67,7 @@ class AudioLib {
     }
 
     audio.addEventListener("error", () => {
-      const errorDetails = {
-        code: audio.error?.code,
-        message: audio.error?.message,
-        event_type: `error_code_${audio.error?.code || "unknown"}`,
-        src: audio.src,
-        readyState: audio.readyState,
-        networkState: audio.networkState,
-        raw_error_object: audio.error,
-      };
-      console.error("### Detailed Audio Element Error ###", errorDetails);
+      // Silent error handling - errors are handled via retry logic
 
       if (this.retryAttempts < this.maxRetries) {
         this.retryAttempts += 1;
@@ -279,12 +260,11 @@ class AudioLib {
           }
           isResolved = true;
           cleanup();
-          console.error("Error during initial audio load:", audio.error);
-          reject(
-            new Error(
-              `Audio load failed: ${audio.error?.message || "Unknown error"}`
-            )
-          );
+          const error = audio.error;
+          const errorMessage =
+            error?.message || `Error code: ${error?.code ?? "unknown"}`;
+          // Silent error - reject without console logging
+          reject(new Error(`Audio load failed: ${errorMessage}`));
         };
 
         timeoutId = setTimeout(handleTimeout, loadTimeout);
@@ -322,15 +302,7 @@ class AudioLib {
       this.playPromise = null;
     } catch (error) {
       this.playPromise = null;
-      const errorDetails = {
-        error,
-        message: error instanceof Error ? error.message : "Unknown error",
-        stack: error instanceof Error ? error.stack : undefined,
-        url: this.audio.src,
-        readyState: this.audio.readyState,
-        networkState: this.audio.networkState,
-      };
-      console.error("Play error:", errorDetails);
+      // Silent error - throw without console logging
       throw error;
     }
   }
@@ -356,7 +328,9 @@ class AudioLib {
       if (audio.readyState >= audio.HAVE_METADATA) {
         audio.currentTime = currentTime;
         if (wasPlaying) {
-          this.play().catch(console.error);
+          this.play().catch(() => {
+            // Silent error handling
+          });
         }
         audio.removeEventListener("loadedmetadata", setTimeAndPlay);
       }
@@ -543,12 +517,10 @@ class AudioLib {
   setPlaybackRate(rate: number): void {
     this.ifClient(() => {
       const audio = this.ensureAudio();
-      const url = audio.src.toLowerCase();
+      const duration = audio.duration;
 
-      // Check if current audio is a live stream using the same patterns as isLive()
-      const isLiveStream = LIVE_STREAM_PATTERNS.some((pattern) =>
-        pattern.test(url)
-      );
+      // Check if current audio is a live stream using duration
+      const isLiveStream = this.isLive(duration);
 
       // Don't allow playback rate changes for live streams
       if (isLiveStream) {
@@ -568,31 +540,31 @@ class AudioLib {
       }) ?? 1
     );
   }
+
+  /**
+   * Check if a duration value indicates a live stream
+   * Should only be called after metadata is loaded (`readyState >= HAVE_METADATA`)
+   *
+   * @param duration - The duration value to check
+   * @returns true if the duration indicates a live stream (NaN, Infinity, or -Infinity)
+   */
+  isLive(duration: number): boolean {
+    // duration === 0 is not a live stream - it just means duration is not yet loaded
+    if (duration === 0) {
+      return false;
+    }
+
+    return (
+      Number.isNaN(duration) ||
+      duration === Number.POSITIVE_INFINITY ||
+      duration === Number.NEGATIVE_INFINITY
+    );
+  }
 }
 
-export const $audio = new AudioLib();
+export const $htmlAudio = new HtmlAudio();
 
 const MINUTE_IN_SECONDS = 60;
-
-export function isLive(track: Track): boolean {
-  if (!track.url) {
-    return false;
-  }
-
-  const url = track.url.toLowerCase();
-
-  for (const pattern of LIVE_STREAM_PATTERNS) {
-    if (pattern.test(url)) {
-      return true;
-    }
-  }
-
-  if (track.live === true) {
-    return true;
-  }
-
-  return false;
-}
 
 export function formatDuration(seconds: number): string {
   if (!Number.isFinite(seconds) || seconds < 0) {

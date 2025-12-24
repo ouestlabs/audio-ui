@@ -1,9 +1,10 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "player-demo",
-  "type": "registry:example",
   "description": "Audio player demo",
-  "registryDependencies": ["@audio/player"],
+  "registryDependencies": [
+    "@audio/player"
+  ],
   "files": [
     {
       "path": "src/registry/default/examples/player-demo.tsx",
@@ -12,5 +13,8 @@
       "target": "components/audio/examples/player-demo.tsx"
     }
   ],
-  "categories": ["player"]
+  "categories": [
+    "player"
+  ],
+  "type": "registry:example"
 }

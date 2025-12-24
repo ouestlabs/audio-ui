@@ -46,12 +46,20 @@ A comprehensive queue management system. Includes shuffle, repeat modes, track s
         npx shadcn@latest add @audio/track
         ```
 
+      <Step>Install the required registry components:</Step>
+
+        ```bash
+        npx shadcn@latest add @audio/store @audio/html @audio/use-audio
+        ```
+
       <Step>Copy and paste the following code into your project.</Step>
         <Source name="queue" title="components/audio/queue.tsx" />
       <Step>Copy the required store file.</Step>
         <Source name="store" title="lib/audio-store.ts" />
       <Step>Copy the audio lib file.</Step>
-        <Source name="lib" title="lib/audio.ts" />
+        <Source name="html" title="lib/html-audio.ts" />
+      <Step>Copy the useAudio hook file.</Step>
+        <Source name="use-audio" title="hooks/use-audio.ts" />
       <Step>Update the import paths to match your project setup.</Step>
     </Steps>
 
@@ -308,6 +316,13 @@ Queue components are designed to work seamlessly with the `AudioPlayer` componen
   <strong>AudioProvider Requirement:</strong> <code>AudioProvider</code> (or the
   project's audio store) is required for queue components to work correctly. All
   components read from and update the global audio store state. The provider
-  manages the audio playback lifecycle and synchronizes queue state with the
-  audio element.
+  manages the audio playback lifecycle using the <code>useAudio()</code> hook
+  and synchronizes queue state with the audio element.
 </Callout>
+
+## Changelog
+
+### 2025-12-24 useAudio integration and improvements
+
+- **Changed**: Now uses `useAudio()` hook to access `htmlAudio` singleton
+- **Improved**: Better integration with audio provider lifecycle

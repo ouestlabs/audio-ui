@@ -1,9 +1,11 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "track-sortable-list-demo",
-  "type": "registry:example",
   "description": "Track list with sortable selection example",
-  "registryDependencies": ["@audio/player", "@audio/track"],
+  "registryDependencies": [
+    "@audio/player",
+    "@audio/track"
+  ],
   "files": [
     {
       "path": "src/registry/default/examples/track-sortable-list-demo.tsx",
@@ -12,5 +14,9 @@
       "target": "components/audio/examples/track-sortable-list-demo.tsx"
     }
   ],
-  "categories": ["track", "sortable"]
+  "categories": [
+    "track",
+    "sortable"
+  ],
+  "type": "registry:example"
 }

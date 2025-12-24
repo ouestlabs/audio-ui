@@ -1,0 +1,20 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "use-sound",
+  "registryDependencies": [
+    "@audio/use-audio"
+  ],
+  "files": [
+    {
+      "path": "src/registry/default/hooks/use-sound.ts",
+      "content": "\"use client\";\n\nimport * as React from \"react\";\nimport { useAudio } from \"@/registry/default/hooks/use-audio\";\n\n/**\n * Load and play a sound from a given URL using the Web Audio API.\n *\n * This hook fetches the audio file at the specified URL, decodes it, and prepares it for playback.\n * It returns a `play` function that can be called to play the loaded sound.\n * @author Original implementation by [ncdai](https://github.com/ncdai/chanhdai.com/blob/main/src/hooks/use-sound.ts)\n * @param url - The URL of the audio file to load and play.\n * @returns A function that, when called, plays the loaded sound.\n *\n * @example\n * ```tsx\n * const playClick = useSound('/sounds/click.wav');\n * // Later in an event handler:\n * playClick();\n * ```\n */\nexport function useSound(url: string) {\n  const { webAudio } = useAudio();\n  const bufferRef = React.useRef<AudioBuffer | null>(null);\n\n  React.useEffect(() => {\n    const ctx = webAudio.getContext();\n    if (!ctx) {\n      console.warn(\"Web Audio API is not supported in this browser.\");\n      return;\n    }\n\n    fetch(url)\n      .then((res) => res.arrayBuffer())\n      .then((data) => ctx.decodeAudioData(data))\n      .then((decoded) => {\n        bufferRef.current = decoded;\n      })\n      .catch((err) => {\n        console.log(`Failed to load click sound from ${url}:`, err);\n      });\n  }, [url, webAudio]);\n\n  const play = React.useCallback(\n    (volume = 1) => {\n      const ctx = webAudio.getContext();\n      if (ctx && bufferRef.current) {\n        const source = ctx.createBufferSource();\n        const gainNode = ctx.createGain();\n\n        source.buffer = bufferRef.current;\n        gainNode.gain.value = volume;\n\n        source.connect(gainNode);\n        gainNode.connect(ctx.destination);\n        source.start(0);\n      }\n    },\n    [webAudio]\n  );\n\n  return play;\n}\n",
+      "type": "registry:hook",
+      "target": "hooks/use-sound.ts"
+    }
+  ],
+  "categories": [
+    "audio",
+    "sound"
+  ],
+  "type": "registry:hook"
+}

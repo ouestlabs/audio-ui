@@ -2,7 +2,7 @@
 
 import { GaugeIcon } from "lucide-react";
 import type React from "react";
-import { isLive } from "@/registry/default/lib/audio";
+import { useAudio } from "@/registry/default/hooks/use-audio";
 import { useAudioStore } from "@/registry/default/lib/audio-store";
 import { cn } from "@/registry/default/lib/utils";
 import { Button } from "@/registry/default/ui/button";
@@ -74,8 +74,9 @@ function AudioPlaybackSpeed({
 }: AudioPlaybackSpeedProps) {
   const playbackRate = useAudioStore((state) => state.playbackRate);
   const setPlaybackRate = useAudioStore((state) => state.setPlaybackRate);
-  const currentTrack = useAudioStore((state) => state.currentTrack);
-  const isLiveStream = currentTrack ? isLive(currentTrack) : false;
+  const duration = useAudioStore((state) => state.duration);
+  const { htmlAudio } = useAudio();
+  const isLiveStream = htmlAudio.isLive(duration);
 
   const currentSpeed =
     speeds.find((s) => s.value === playbackRate) || speeds[2];

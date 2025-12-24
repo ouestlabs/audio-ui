@@ -3,8 +3,8 @@
 import { MoonIcon, SunIcon } from "lucide-react";
 import posthog from "posthog-js";
 import { useCallback } from "react";
-import { useSound } from "@/hooks/use-sound";
 import { useTheme } from "@/hooks/use-theme";
+import { useSound } from "@/registry/default/hooks/use-sound";
 import { Button } from "@/registry/default/ui/button";
 import { Kbd, KbdGroup } from "@/registry/default/ui/kbd";
 import {

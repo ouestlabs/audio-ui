@@ -1,7 +1,6 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "particle-player-widget",
-  "type": "registry:block",
   "description": "Audio player widget",
   "registryDependencies": [
     "@audio/provider",
@@ -9,7 +8,7 @@
     "@audio/queue",
     "@audio/track",
     "@audio/store",
-    "@audio/lib"
+    "@audio/html"
   ],
   "files": [
     {
@@ -19,5 +18,9 @@
       "target": "components/audio/particles/particle-player-widget.tsx"
     }
   ],
-  "categories": ["player", "widget"]
+  "categories": [
+    "player",
+    "widget"
+  ],
+  "type": "registry:block"
 }

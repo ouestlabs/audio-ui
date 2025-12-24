@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist, subscribeWithSelector } from "zustand/middleware";
-import { $audio, isLive, type Track } from "@/registry/default/lib/audio";
+import { $htmlAudio, type Track } from "@/registry/default/lib/html-audio";
 
 type RepeatMode = "none" | "one" | "all";
 type InsertMode = "first" | "last" | "after";
@@ -26,15 +26,18 @@ type AudioStore = {
   errorMessage: string | null;
   currentQueueIndex: number;
 
-  // Playback Actions
+  // Playback Actions (these update state only, audio control is handled by provider)
   play: () => void;
   pause: () => void;
   togglePlay: () => void;
   next: () => void;
   previous: () => void;
   seek: (time: number) => void;
-  setQueueAndPlay: (tracks: Track[], startIndex: number) => Promise<void>;
+  setQueueAndPlay: (tracks: Track[], startIndex: number) => void;
   handleTrackEnd: () => void;
+
+  // Internal: used by provider to sync audio state
+  syncTime: (currentTime: number, duration: number) => void;
 
   // Queue Actions
   addToQueue: (track: Track, mode?: InsertMode) => void;
@@ -56,7 +59,7 @@ type AudioStore = {
   setRepeatMode: (mode: RepeatMode) => void;
 
   // State Actions
-  setCurrentTrack: (track: Track | null) => Promise<void>;
+  setCurrentTrack: (track: Track | null) => void;
   setError: (message: string | null) => void;
 };
 
@@ -164,64 +167,44 @@ const getSuccessState = (params: { isPlaying?: boolean } = {}) => ({
   isPlaying: params.isPlaying ?? false,
 });
 
-/**
- * Default state after loading error
- */
-const getErrorState = (params: { errorMessage: string }) => ({
-  isLoading: false,
-  isPlaying: false,
-  isError: true,
-  errorMessage: params.errorMessage,
-  isBuffering: false,
-});
-
 type LoadAndPlayTrackParams = {
   track: Track;
   queueIndex: number;
   set: (partial: Partial<AudioStore>) => void;
   get: () => AudioStore;
-  errorMessage: string;
 };
 
 /**
  * Loads and plays a track with error handling
+ * Note: This function only updates state. Actual audio loading/playing
+ * is handled by the provider which listens to state changes.
  */
-const loadAndPlayTrack = async (
-  params: LoadAndPlayTrackParams
-): Promise<void> => {
-  const { track, queueIndex, set, get, errorMessage } = params;
-  const isLiveStream = isLive(track);
+const loadAndPlayTrack = (params: LoadAndPlayTrackParams): void => {
+  const { track, queueIndex, set, get } = params;
+  // Check if it's a live stream using track.live property or duration
+  const isLiveStream =
+    track.live === true ||
+    (track.duration !== undefined && $htmlAudio.isLive(track.duration));
 
   set({
     currentTrack: track,
     currentQueueIndex: queueIndex,
     isLoading: true,
     isBuffering: true,
+    isError: false,
+    errorMessage: null,
   });
 
-  try {
-    await $audio.load({
-      url: track.url,
-      startTime: 0,
-      isLiveStream,
-    });
-
-    // Reset playback rate to 1.0 for live streams
-    if (isLiveStream) {
-      const currentState = get();
-      if (currentState.playbackRate !== 1) {
-        $audio.setPlaybackRate(1);
-        set({ playbackRate: 1 });
-      }
+  // Reset playback rate to 1.0 for live streams
+  if (isLiveStream) {
+    const currentState = get();
+    if (currentState.playbackRate !== 1) {
+      set({ playbackRate: 1 });
     }
-
-    await $audio.play();
-    set(getSuccessState({ isPlaying: true }));
-  } catch (error) {
-    console.error(errorMessage, error);
-    set(getErrorState({ errorMessage }));
-    throw error;
   }
+
+  // State will be updated by provider when audio loads/plays
+  set(getSuccessState({ isPlaying: true }));
 };
 
 const useAudioStore = create<AudioStore>()(
@@ -247,30 +230,27 @@ const useAudioStore = create<AudioStore>()(
       errorMessage: null,
       currentQueueIndex: -1,
 
-      // Playback Actions
-      async play() {
+      // Playback Actions (state only - provider handles actual audio control)
+      play() {
         if (get().isLoading) {
           return;
         }
-        await $audio.play();
+        set({ isPlaying: true });
       },
 
       pause() {
-        $audio.pause();
+        set({ isPlaying: false });
       },
 
       togglePlay() {
         if (get().isLoading) {
           return;
         }
-        if ($audio.isPaused()) {
-          get().play();
-        } else {
-          get().pause();
-        }
+        const state = get();
+        set({ isPlaying: !state.isPlaying });
       },
 
-      async next() {
+      next() {
         const state = get();
         const nextIndex = calculateNextIndex({
           queue: state.queue,
@@ -281,37 +261,26 @@ const useAudioStore = create<AudioStore>()(
 
         const nextTrack = state.queue[nextIndex];
         if (nextIndex === -1 || !nextTrack) {
-          $audio.pause();
           set({ isLoading: false, isPlaying: false, isBuffering: false });
           return;
         }
 
-        await loadAndPlayTrack({
+        loadAndPlayTrack({
           track: nextTrack,
           queueIndex: nextIndex,
           set,
           get,
-          errorMessage: "Error loading/playing next track",
         });
       },
 
-      async previous() {
+      previous() {
         const state = get();
-        const currentTime = $audio.getCurrentTime();
         const RESTART_THRESHOLD = 3;
 
         // If track has more than 3 seconds and shuffle is not enabled, restart the track
-        if (currentTime > RESTART_THRESHOLD && !state.shuffleEnabled) {
-          set({ isLoading: true });
-          try {
-            $audio.setCurrentTime(0);
-            set({ currentTime: 0, progress: 0, isLoading: false });
-            return;
-          } catch (error) {
-            console.error("Error restarting current track:", error);
-            set({ isLoading: false });
-            return;
-          }
+        if (state.currentTime > RESTART_THRESHOLD && !state.shuffleEnabled) {
+          set({ currentTime: 0, progress: 0 });
+          return;
         }
 
         const prevIndex = calculatePreviousIndex({
@@ -328,31 +297,32 @@ const useAudioStore = create<AudioStore>()(
               "Inconsistency: previous index is valid but track not found"
             );
           }
-          $audio.pause();
           set({ isLoading: false, isPlaying: false, isBuffering: false });
           return;
         }
 
-        await loadAndPlayTrack({
+        loadAndPlayTrack({
           track: prevTrack,
           queueIndex: prevIndex,
           set,
           get,
-          errorMessage: "Error loading/playing previous track",
         });
       },
 
       seek(time: number) {
-        $audio.setCurrentTime(time);
-        set({ currentTime: time });
+        const state = get();
+        const duration = state.duration;
+        const validTime =
+          duration > 0 ? Math.max(0, Math.min(time, duration)) : time;
+        const newProgress = duration > 0 ? (validTime / duration) * 100 : 0;
+        set({ currentTime: validTime, progress: newProgress });
       },
 
-      async setQueueAndPlay(songs: Track[], startIndex: number) {
+      setQueueAndPlay(songs: Track[], startIndex: number) {
         const targetTrack = songs[startIndex];
         if (!targetTrack) {
           console.error("[Playback] Invalid startIndex for setQueueAndPlay");
           get().clearQueue();
-          $audio.pause();
           set({
             isPlaying: false,
             isLoading: false,
@@ -364,13 +334,11 @@ const useAudioStore = create<AudioStore>()(
 
         get().setQueue(songs, startIndex);
 
-        const errorMessage = `Error playing ${targetTrack.title || "track"}`;
-        await loadAndPlayTrack({
+        loadAndPlayTrack({
           track: targetTrack,
           queueIndex: startIndex,
           set,
           get,
-          errorMessage,
         });
       },
 
@@ -472,27 +440,24 @@ const useAudioStore = create<AudioStore>()(
         }
       },
 
-      // Control Actions
+      // Control Actions (state only - provider handles actual audio control)
       setVolume(params: { volume: number }) {
         const { volume } = params;
-        $audio.setVolume({ volume });
         set({ volume, isMuted: volume === 0 });
       },
 
       toggleMute() {
         const newMuted = !get().isMuted;
-        $audio.setMuted(newMuted);
         set({ isMuted: newMuted });
       },
 
       setPlaybackRate(rate: number) {
         const state = get();
         // Don't allow playback rate changes for live streams
-        if (state.currentTrack && isLive(state.currentTrack)) {
+        if (state.duration && $htmlAudio.isLive(state.duration)) {
           return;
         }
         const clampedRate = Math.max(0.25, Math.min(2, rate));
-        $audio.setPlaybackRate(clampedRate);
         set({ playbackRate: clampedRate });
       },
 
@@ -541,11 +506,10 @@ const useAudioStore = create<AudioStore>()(
       },
 
       // State Actions
-      async setCurrentTrack(track: Track | null) {
+      setCurrentTrack(track: Track | null) {
         const state = get();
 
         if (!track) {
-          $audio.cleanup();
           set({
             currentTrack: null,
             currentQueueIndex: -1,
@@ -565,8 +529,6 @@ const useAudioStore = create<AudioStore>()(
           return;
         }
 
-        const errorMessage = `Error: ${track.title || "Unknown track"}`;
-
         // Update queue with a single track
         set({
           currentTrack: track,
@@ -580,13 +542,18 @@ const useAudioStore = create<AudioStore>()(
           errorMessage: null,
         });
 
-        await loadAndPlayTrack({
+        loadAndPlayTrack({
           track,
           queueIndex: 0,
           set,
           get,
-          errorMessage,
         });
+      },
+
+      // Internal: used by provider to sync audio time
+      syncTime(currentTime: number, duration: number) {
+        const newProgress = duration > 0 ? (currentTime / duration) * 100 : 0;
+        set({ currentTime, duration, progress: newProgress });
       },
       setError: (message) => {
         set({
