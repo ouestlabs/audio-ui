@@ -1,9 +1,7 @@
+import { baseUrl } from "@/lib/config";
 import { Icons } from "@/lib/icons";
 import { cn } from "@/registry/default/lib/utils";
 import { Button } from "@/registry/default/ui/button";
-
-const baseUrl =
-  process.env.NEXT_PUBLIC_APP_URL || "https://audio-ui.vercel.app";
 
 export function OpenInV0Button({
   name,
@@ -20,7 +18,7 @@ export function OpenInV0Button({
       {...props}
     >
       <a
-        href={`https://v0.dev/chat/api/open?url=${encodeURIComponent(`${baseUrl}/r/${name}.json`)}`}
+        href={`https://v0.dev/chat/api/open?url=${encodeURIComponent(`${baseUrl.origin}/r/${name}.json`)}`}
         target="_blank"
       >
         Open in <Icons.v0 className="size-5" />
