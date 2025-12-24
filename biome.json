@@ -15,5 +15,39 @@
       "!**/.source"
     ]
   },
+  "linter": {
+    "rules": {
+      "style": {
+        "noEnum": "off",
+        "noNamespace": "off",
+        "noExportedImports": "off",
+        "useConsistentArrayType": "off",
+        "useFilenamingConvention": "off",
+        "useUnifiedTypeSignatures": "off",
+        "useReadonlyClassProperties": "off",
+        "useConsistentTypeDefinitions": "off"
+      },
+      "performance": {
+        "noBarrelFile": "off",
+        "noNamespaceImport": "off"
+      },
+      "nursery": {
+        "useMaxParams": "off"
+      },
+      "suspicious": {
+        "noConsole": "off",
+        "noExplicitAny": "off",
+        "noBitwiseOperators": "off",
+        "noDuplicateProperties": "off",
+        "noShadowRestrictedNames": "off",
+        "noDuplicateCustomProperties": "off",
+        "useAdjacentOverloadSignatures": "off"
+      },
+      "a11y": {
+        "useSemanticElements": "off",
+        "noNoninteractiveElementInteractions": "off"
+      }
+    }
+  },
   "extends": ["ultracite/core", "ultracite/react", "ultracite/next"]
 }

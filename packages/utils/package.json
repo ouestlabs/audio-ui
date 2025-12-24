@@ -1,0 +1,44 @@
+{
+  "name": "@audio-ui/utils",
+  "version": "0.0.0",
+  "description": "A collection of utility functions for Audio UI.",
+  "license": "MIT",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ouestlabs/audio-ui.git",
+    "directory": "packages/utils"
+  },
+  "homepage": "https://github.com/ouestlabs/audio-ui/tree/main/packages/utils",
+  "bugs": {
+    "url": "https://github.com/ouestlabs/audio-ui/issues"
+  },
+  "keywords": [
+    "audio-ui",
+    "utils"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./dom": {
+      "types": "./dist/dom/index.d.ts",
+      "import": "./dist/dom/index.js"
+    }
+  },
+  "scripts": {
+    "build:pkg": "tsup",
+    "dev": "tsup --watch"
+  },
+  "devDependencies": {
+    "@audio-ui/typescript": "workspace:*",
+    "@types/bun": "latest",
+    "tsup": "^8.5.0"
+  }
+}
