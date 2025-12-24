@@ -1,6 +1,6 @@
 {
   "name": "@audio-ui/utils",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A collection of utility functions for Audio UI.",
   "license": "MIT",
   "module": "dist/index.js",
@@ -37,8 +37,8 @@
     "dev": "tsup --watch"
   },
   "devDependencies": {
-    "@audio-ui/typescript": "workspace:*",
-    "@types/bun": "latest",
+    "@audio-ui/typescript": "latest",
+    "@types/bun": "^1.3.5",
     "tsup": "^8.5.0"
   }
 }
