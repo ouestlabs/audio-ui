@@ -1,13 +1,12 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "particle-player",
-  "type": "registry:block",
   "description": "Audio player",
   "registryDependencies": [
     "@audio/player",
     "@audio/queue",
     "@audio/store",
-    "@audio/lib"
+    "@audio/html"
   ],
   "files": [
     {
@@ -17,5 +16,9 @@
       "target": "components/audio/particles/particle-player.tsx"
     }
   ],
-  "categories": ["player", "queue"]
+  "categories": [
+    "player",
+    "queue"
+  ],
+  "type": "registry:block"
 }

@@ -1,13 +1,14 @@
 "use client";
 
 import React from "react";
-import { $audio, isLive, type Track } from "@/registry/default/lib/audio";
+import { useAudio } from "@/registry/default/hooks/use-audio";
 import {
   type AudioStore,
   calculateNextIndex,
   canUseDOM,
   useAudioStore,
 } from "@/registry/default/lib/audio-store";
+import type { Track } from "@/registry/default/lib/html-audio";
 
 const MAX_ERROR_RETRIES = 3;
 const ERROR_RETRY_DELAY = 1000;
@@ -81,8 +82,10 @@ function AudioProvider({
   tracks?: Track[];
   children: React.ReactNode;
 }) {
+  const { htmlAudio } = useAudio();
   const preloadAudioRef = React.useRef<HTMLAudioElement | null>(null);
   const errorRetryCountRef = React.useRef<number>(0);
+  const lastSeekTimeRef = React.useRef<number>(0);
 
   const setState = React.useCallback(
     (
@@ -116,45 +119,60 @@ function AudioProvider({
     }
   }, [tracks]);
 
-  const retryPlayback = React.useCallback(async (audio: HTMLAudioElement) => {
-    if (errorRetryCountRef.current >= MAX_ERROR_RETRIES) {
-      return false;
-    }
-
-    errorRetryCountRef.current += 1;
-
-    const delay = 2 ** (errorRetryCountRef.current - 1) * ERROR_RETRY_DELAY;
-    await new Promise((resolve) => setTimeout(resolve, delay));
-
-    if (typeof navigator !== "undefined" && !navigator.onLine) {
-      console.warn("Offline, delaying retry attempt further.");
-      return false;
-    }
-
-    try {
-      console.log(
-        `Retry attempt ${errorRetryCountRef.current}: Loading audio...`
-      );
-      const currentTime = audio.currentTime;
-      const wasPlaying = !audio.paused;
-      const state = useAudioStore.getState();
-      if (state.currentTrack) {
-        await $audio.load({
-          url: state.currentTrack.url,
-          startTime: currentTime,
-        });
-        if (wasPlaying) {
-          await $audio.play();
-        }
+  const retryPlayback = React.useCallback(
+    async (audio: HTMLAudioElement) => {
+      if (errorRetryCountRef.current >= MAX_ERROR_RETRIES) {
+        return false;
       }
-      return true;
-    } catch (error) {
-      console.error("Retry attempt failed:", error);
-      return false;
-    }
-  }, []);
+
+      errorRetryCountRef.current += 1;
+
+      const delay = 2 ** (errorRetryCountRef.current - 1) * ERROR_RETRY_DELAY;
+      await new Promise((resolve) => setTimeout(resolve, delay));
+
+      if (typeof navigator !== "undefined" && !navigator.onLine) {
+        console.warn("Offline, delaying retry attempt further.");
+        return false;
+      }
+
+      try {
+        console.log(
+          `Retry attempt ${errorRetryCountRef.current}: Loading audio...`
+        );
+        const currentTime = audio.currentTime;
+        const wasPlaying = !audio.paused;
+        const state = useAudioStore.getState();
+        if (state.currentTrack) {
+          await htmlAudio.load({
+            url: state.currentTrack.url,
+            startTime: currentTime,
+          });
+          if (wasPlaying) {
+            await htmlAudio.play();
+          }
+        }
+        return true;
+      } catch {
+        // Silent error: retry attempt failed
+        return false;
+      }
+    },
+    [htmlAudio]
+  );
 
   const lastUpdateTimeRef = React.useRef<number>(0);
+  const forceTimeUpdate = React.useCallback(() => {
+    const audio = htmlAudio.getAudioElement();
+    if (!audio) {
+      return;
+    }
+
+    const currentTime = audio.currentTime;
+    const duration = audio.duration || 0;
+    useAudioStore.getState().syncTime(currentTime, duration);
+    lastUpdateTimeRef.current = Date.now();
+  }, [htmlAudio]);
+
   const throttledTimeUpdate = React.useCallback(() => {
     const now = Date.now();
     if (now - lastUpdateTimeRef.current < THROTTLE_INTERVAL) {
@@ -162,7 +180,7 @@ function AudioProvider({
     }
     lastUpdateTimeRef.current = now;
 
-    const audio = $audio.getAudioElement();
+    const audio = htmlAudio.getAudioElement();
     if (!audio) {
       return;
     }
@@ -171,11 +189,10 @@ function AudioProvider({
     const state = useAudioStore.getState();
 
     if (Math.abs(state.currentTime - currentTime) > MIN_UPDATE_THRESHOLD) {
-      const duration = audio.duration;
-      const newProgress = duration > 0 ? (currentTime / duration) * 100 : 0;
-      useAudioStore.setState({ currentTime, progress: newProgress });
+      const duration = audio.duration || 0;
+      useAudioStore.getState().syncTime(currentTime, duration);
     }
-  }, []);
+  }, [htmlAudio]);
 
   const preloadTrack = React.useCallback((song: Track) => {
     if (!preloadAudioRef.current || preloadAudioRef.current.src === song.url) {
@@ -186,8 +203,8 @@ function AudioProvider({
       preloadAudioRef.current.src = song.url;
       preloadAudioRef.current.preload = "auto";
       preloadAudioRef.current.load();
-    } catch (error) {
-      console.error("Failed to preload next track:", error);
+    } catch {
+      // Silent error: failed to preload next track
       if (preloadAudioRef.current) {
         preloadAudioRef.current.src = "";
       }
@@ -224,27 +241,44 @@ function AudioProvider({
       return;
     }
 
-    $audio.init();
+    htmlAudio.init();
 
     preloadAudioRef.current = new Audio();
     preloadAudioRef.current.muted = true;
     preloadAudioRef.current.preload = "none";
 
-    const audio = $audio.getAudioElement();
+    const audio = htmlAudio.getAudioElement();
     if (!audio) {
-      console.error("Audio element initialization failed");
+      // Silent: audio element initialization failed
       return;
     }
+
+    const abortController = new AbortController();
+    const { signal } = abortController;
 
     const handlePlay = () => {
       errorRetryCountRef.current = 0;
       const state = useAudioStore.getState();
-      $audio.setPlaybackRate(state.playbackRate);
-      setState({ isPlaying: true, isLoading: false, isBuffering: false });
+      htmlAudio.setPlaybackRate(state.playbackRate);
+
+      setState({
+        isPlaying: true,
+        isLoading: false,
+        isBuffering: false,
+      });
+
+      forceTimeUpdate();
+      requestAnimationFrame(() => {
+        forceTimeUpdate();
+      });
+      setTimeout(() => {
+        forceTimeUpdate();
+      }, 50);
       preloadNextTrack();
     };
 
     const handlePause = () => {
+      forceTimeUpdate();
       setState({ isPlaying: false, isBuffering: false });
     };
 
@@ -260,22 +294,10 @@ function AudioProvider({
     };
 
     const handleError = async (e: Event) => {
-      const {
-        message: initialMessage,
-        recoverable,
-        errorCode,
-      } = parseAudioError(e, audio);
-
-      console.error("Audio error details:", {
-        event: e,
-        audioError: audio.error,
-        message: initialMessage,
-        recoverable,
-        code: errorCode,
-        src: audio.src,
-        readyState: audio.readyState,
-        networkState: audio.networkState,
-      });
+      const { message: initialMessage, recoverable } = parseAudioError(
+        e,
+        audio
+      );
 
       if (await handleErrorRetry(audio, recoverable)) {
         return;
@@ -300,8 +322,12 @@ function AudioProvider({
 
       const state = useAudioStore.getState();
 
-      if (state.currentTrack && isLive(state.currentTrack)) {
-        console.warn("Live stream ended unexpectedly");
+      const audioElement = htmlAudio.getAudioElement();
+      const audioDuration = audioElement?.duration || 0;
+      const isLiveStream = htmlAudio.isLive(audioDuration);
+
+      if (state.currentTrack && isLiveStream) {
+        // Silent: live stream ended unexpectedly
         setState({
           isError: true,
           errorMessage: "Live stream connection lost",
@@ -310,24 +336,22 @@ function AudioProvider({
       }
       if (state.repeatMode === "one" && state.currentTrack) {
         try {
-          const isLiveStream = isLive(state.currentTrack);
-          await $audio.load({
+          await htmlAudio.load({
             url: state.currentTrack.url,
             startTime: 0,
             isLiveStream,
           });
-          await $audio.play();
+          await htmlAudio.play();
           setState({ currentTime: 0, progress: 0 });
           return;
-        } catch (error) {
-          console.error("Repeat mode playback error:", error);
+        } catch {
+          // Silent error: repeat mode playback error
         }
       }
 
       state.handleTrackEnd();
     };
 
-    // Default state for successful loading events
     const getLoadingSuccessState = (duration = 0) => ({
       isLoading: false,
       isBuffering: false,
@@ -382,7 +406,9 @@ function AudioProvider({
       }
 
       const track = state.currentTrack;
-      const isLiveStream = isLive(track);
+      const audioElement = htmlAudio.getAudioElement();
+      const audioDuration = audioElement?.duration || state.duration || 0;
+      const isLiveStream = htmlAudio.isLive(audioDuration);
       const startTime = isLiveStream ? 0 : state.currentTime;
       const volume = state.volume;
       const muted = state.isMuted;
@@ -391,18 +417,18 @@ function AudioProvider({
       try {
         setState({ isLoading: true });
 
-        await $audio.load({
+        await htmlAudio.load({
           url: track.url,
           startTime,
           isLiveStream,
         });
-        $audio.setVolume({ volume });
-        $audio.setMuted(muted);
-        $audio.setPlaybackRate(playbackRate);
+        htmlAudio.setVolume({ volume });
+        htmlAudio.setMuted(muted);
+        htmlAudio.setPlaybackRate(playbackRate);
 
         setState({ isLoading: false, isPlaying: false });
-      } catch (error) {
-        console.error("State restoration error:", error);
+      } catch {
+        // Silent error: state restoration error
         setState({
           isError: true,
           errorMessage: "Error restoring audio state",
@@ -413,21 +439,21 @@ function AudioProvider({
       }
     };
 
-    audio.addEventListener("play", handlePlay);
-    audio.addEventListener("pause", handlePause);
-    audio.addEventListener("playing", handlePlaying);
-    audio.addEventListener("waiting", handleWaiting);
-    audio.addEventListener("loadstart", handleLoadStart);
-    audio.addEventListener("canplay", handleCanPlay);
-    audio.addEventListener("canplaythrough", handleCanPlay);
-    audio.addEventListener("timeupdate", throttledTimeUpdate);
-    audio.addEventListener("durationchange", handleDurationChange);
-    audio.addEventListener("loadedmetadata", handleDurationChange);
-    audio.addEventListener("volumechange", handleVolumeChange);
-    audio.addEventListener("ended", handleEnded);
-    audio.addEventListener("error", handleError);
+    audio.addEventListener("play", handlePlay, { signal });
+    audio.addEventListener("pause", handlePause, { signal });
+    audio.addEventListener("playing", handlePlaying, { signal });
+    audio.addEventListener("waiting", handleWaiting, { signal });
+    audio.addEventListener("loadstart", handleLoadStart, { signal });
+    audio.addEventListener("canplay", handleCanPlay, { signal });
+    audio.addEventListener("canplaythrough", handleCanPlay, { signal });
+    audio.addEventListener("timeupdate", throttledTimeUpdate, { signal });
+    audio.addEventListener("durationchange", handleDurationChange, { signal });
+    audio.addEventListener("loadedmetadata", handleDurationChange, { signal });
+    audio.addEventListener("volumechange", handleVolumeChange, { signal });
+    audio.addEventListener("ended", handleEnded, { signal });
+    audio.addEventListener("error", handleError, { signal });
 
-    $audio.addEventListener("bufferUpdate", handleBufferUpdate);
+    htmlAudio.addEventListener("bufferUpdate", handleBufferUpdate);
 
     restoreState();
 
@@ -444,26 +470,105 @@ function AudioProvider({
     const unsubscribePlaybackRate = useAudioStore.subscribe(
       (state) => state.playbackRate,
       (playbackRate) => {
-        $audio.setPlaybackRate(playbackRate);
+        htmlAudio.setPlaybackRate(playbackRate);
+      }
+    );
+
+    const unsubscribeIsPlaying = useAudioStore.subscribe(
+      (state) => state.isPlaying,
+      async (isPlaying) => {
+        const audioElement = htmlAudio.getAudioElement();
+        if (!audioElement) {
+          return;
+        }
+
+        const isPaused = audioElement.paused;
+        const shouldPlay = isPlaying && isPaused;
+        const isPlayingState = !isPaused;
+        const shouldPause = !isPlaying && isPlayingState;
+        const needsAction = shouldPlay || shouldPause;
+
+        if (!needsAction) {
+          return;
+        }
+
+        try {
+          if (shouldPlay) {
+            await htmlAudio.play();
+          } else {
+            htmlAudio.pause();
+          }
+        } catch {
+          // Silent error: error syncing play/pause state
+        }
+      }
+    );
+
+    const unsubscribeCurrentTrack = useAudioStore.subscribe(
+      (state) => state.currentTrack,
+      async (track, prevTrack) => {
+        if (!track || track.id === prevTrack?.id) {
+          return;
+        }
+
+        const audioElement = htmlAudio.getAudioElement();
+        if (!audioElement) {
+          return;
+        }
+
+        try {
+          await htmlAudio.load({
+            url: track.url,
+            startTime: 0,
+            isLiveStream: false,
+          });
+
+          const currentState = useAudioStore.getState();
+          if (currentState.isPlaying) {
+            await htmlAudio.play();
+          }
+        } catch {
+          // Silent error: error loading track
+          useAudioStore.getState().setError("Error loading track");
+        }
+      }
+    );
+
+    const unsubscribeSeek = useAudioStore.subscribe(
+      (state) => state.currentTime,
+      (currentTime) => {
+        const audioElement = htmlAudio.getAudioElement();
+        if (!audioElement) {
+          return;
+        }
+
+        const timeDiff = Math.abs(audioElement.currentTime - currentTime);
+        const isDifferentSeek = currentTime !== lastSeekTimeRef.current;
+        if (timeDiff > 0.1 && isDifferentSeek) {
+          lastSeekTimeRef.current = currentTime;
+          htmlAudio.setCurrentTime(currentTime);
+        }
+      }
+    );
+
+    const unsubscribeVolume = useAudioStore.subscribe(
+      (state) => state.volume,
+      (volume) => {
+        htmlAudio.setVolume({ volume });
+      }
+    );
+
+    const unsubscribeMuted = useAudioStore.subscribe(
+      (state) => state.isMuted,
+      (isMuted) => {
+        htmlAudio.setMuted(isMuted);
       }
     );
 
     return () => {
-      audio.removeEventListener("play", handlePlay);
-      audio.removeEventListener("pause", handlePause);
-      audio.removeEventListener("playing", handlePlaying);
-      audio.removeEventListener("waiting", handleWaiting);
-      audio.removeEventListener("loadstart", handleLoadStart);
-      audio.removeEventListener("canplay", handleCanPlay);
-      audio.removeEventListener("canplaythrough", handleCanPlay);
-      audio.removeEventListener("timeupdate", throttledTimeUpdate);
-      audio.removeEventListener("durationchange", handleDurationChange);
-      audio.removeEventListener("loadedmetadata", handleDurationChange);
-      audio.removeEventListener("volumechange", handleVolumeChange);
-      audio.removeEventListener("ended", handleEnded);
-      audio.removeEventListener("error", handleError);
+      abortController.abort();
 
-      $audio.removeEventListener("bufferUpdate", handleBufferUpdate);
+      htmlAudio.removeEventListener("bufferUpdate", handleBufferUpdate);
 
       if (preloadAudioRef.current) {
         preloadAudioRef.current.src = "";
@@ -472,8 +577,20 @@ function AudioProvider({
 
       unsubscribeTrack();
       unsubscribePlaybackRate();
+      unsubscribeIsPlaying();
+      unsubscribeCurrentTrack();
+      unsubscribeSeek();
+      unsubscribeVolume();
+      unsubscribeMuted();
     };
-  }, [throttledTimeUpdate, setState, retryPlayback, preloadNextTrack]);
+  }, [
+    throttledTimeUpdate,
+    setState,
+    retryPlayback,
+    preloadNextTrack,
+    htmlAudio,
+    forceTimeUpdate,
+  ]);
 
   React.useEffect(() => {
     const unsubscribe = useAudioStore.subscribe(

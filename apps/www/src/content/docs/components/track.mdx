@@ -48,6 +48,12 @@ Track components for displaying and managing audio tracks. These components supp
         npx shadcn@latest add @audio/sortable-list
         ```
 
+      <Step>Install the required registry components:</Step>
+
+        ```bash
+        npx shadcn@latest add @audio/provider @audio/store @audio/html @audio/use-audio
+        ```
+
       <Step>Copy and paste the following code into your project.</Step>
         <Source name="track" title="components/audio/track.tsx" />
       <Step>Copy the required provider file.</Step>
@@ -55,7 +61,9 @@ Track components for displaying and managing audio tracks. These components supp
       <Step>Copy the required store file.</Step>
         <Source name="store" title="lib/audio-store.ts" />
       <Step>Copy the audio lib file.</Step>
-        <Source name="lib" title="lib/audio.ts" />
+        <Source name="html" title="lib/html-audio.ts" />
+      <Step>Copy the useAudio hook file.</Step>
+        <Source name="use-audio" title="hooks/use-audio.ts" />
       <Step>Update the import paths to match your project setup.</Step>
     </Steps>
 
@@ -144,7 +152,8 @@ Key features:
     requires <code>AudioProvider</code> to be set up.
   - **Track Display:** Cover images are taken from <code>track.artwork</code> or{" "}
     <code>track.images[0]</code>. Live tracks show a "Live" badge and the duration
-    is hidden.
+    is hidden. Live detection uses <code>htmlAudio.isLive()</code> from the{" "}
+    <code>useAudio()</code> hook.
 </Callout>
 
 ### AudioTrackList
@@ -227,8 +236,17 @@ reordering behavior.
   - **AudioProvider Requirement:** <code>AudioProvider</code> (or the project's
     audio store) is required for store mode to work correctly. Make sure to wrap
     your app with the provider at the root level. The provider manages the audio
-    playback state and lifecycle, making it essential for all audio components.
+    playback state and lifecycle using the <code>useAudio()</code> hook, making
+    it essential for all audio components.
   - **Localization:** If you localize strings (e.g., empty labels), pass{" "}
     <code>emptyLabel</code> and <code>emptyDescription</code> to the list
     component.
 </Callout>
+
+## Changelog
+
+### 2025-12-24 useAudio integration and live stream detection improvements
+
+- **Changed**: Now uses `useAudio()` hook to access `htmlAudio` singleton
+- **Fixed**: Live stream detection now correctly uses `htmlAudio.isLive()` method
+- **Improved**: Better handling of track duration for live vs. regular tracks

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "xypad-demo",
+  "description": "XYPad component example",
+  "registryDependencies": [
+    "@audio/xypad"
+  ],
+  "files": [
+    {
+      "path": "src/registry/default/examples/xypad-demo.tsx",
+      "content": "import { XYPad } from \"@/registry/default/ui/audio/elements/xypad\";\n\nexport default function XypadDemo() {\n  return <XYPad className=\"aspect-square\" defaultValue={{ x: 50, y: 50 }} />;\n}\n",
+      "type": "registry:example",
+      "target": "components/audio/examples/xypad-demo.tsx"
+    }
+  ],
+  "categories": [
+    "xypad"
+  ],
+  "type": "registry:example"
+}

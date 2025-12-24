@@ -11,12 +11,13 @@
   "scripts": {
     "dev": "turbo dev",
     "build": "turbo build",
+    "build:pkg": "turbo build:pkg",
     "lint": "turbo lint",
     "lint:fix": "turbo lint:fix",
     "clean": "turbo clean && rm -rf node_modules bun.lock",
     "changeset": "changeset",
     "version-packages": "changeset version",
-    "release": "turbo build:pkg lint && changeset publish"
+    "release": "turbo build:pkg && changeset publish"
   },
   "packageManager": "bun@1.3.4",
   "engines": {

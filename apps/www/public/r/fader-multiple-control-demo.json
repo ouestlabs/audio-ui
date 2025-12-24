@@ -1,0 +1,20 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "fader-multiple-control-demo",
+  "description": "Fader component example with multiple controls",
+  "registryDependencies": [
+    "@audio/fader"
+  ],
+  "files": [
+    {
+      "path": "src/registry/default/examples/fader-multiple-control-demo.tsx",
+      "content": "import { Fader } from \"@/registry/default/ui/audio/elements/fader\";\n\nexport default function FaderMultipleControlDemo() {\n  return (\n    <section className=\"flex gap-5\">\n      {Array.from([\"CH1\", \"CH2\", \"CH3\"]).map((channel) => (\n        <div className=\"flex h-max flex-col items-center gap-2\" key={channel}>\n          <Fader defaultValue={50} max={100} min={0} step={1} />\n          <output className=\"text-xs\">{channel}</output>\n        </div>\n      ))}\n    </section>\n  );\n}\n",
+      "type": "registry:example",
+      "target": "components/audio/examples/fader-multiple-control-demo.tsx"
+    }
+  ],
+  "categories": [
+    "fader"
+  ],
+  "type": "registry:example"
+}

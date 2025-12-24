@@ -1,0 +1,20 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "fader-demo",
+  "description": "Fader component example",
+  "registryDependencies": [
+    "@audio/fader"
+  ],
+  "files": [
+    {
+      "path": "src/registry/default/examples/fader-demo.tsx",
+      "content": "import { Fader } from \"@/registry/default/ui/audio/elements/fader\";\n\nexport default function FaderDemo() {\n  return (\n    <div className=\"h-max\">\n      <Fader defaultValue={50} max={100} min={0} step={1} />\n    </div>\n  );\n}\n",
+      "type": "registry:example",
+      "target": "components/audio/examples/fader-demo.tsx"
+    }
+  ],
+  "categories": [
+    "fader"
+  ],
+  "type": "registry:example"
+}

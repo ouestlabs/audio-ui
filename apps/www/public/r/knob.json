@@ -1,0 +1,16 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "knob",
+  "dependencies": [
+    "@audio-ui/react"
+  ],
+  "files": [
+    {
+      "path": "src/registry/default/ui/audio/elements/knob.tsx",
+      "content": "\"use client\";\n\nimport { Knob as KnobPrimitive } from \"@audio-ui/react\";\nimport { cva, type VariantProps } from \"class-variance-authority\";\nimport { cn } from \"@/registry/default/lib/utils\";\n\nconst knobVariants = cva(\"\", {\n  variants: {\n    size: {\n      sm: \"size-8\",\n      default: \"size-12\",\n      lg: \"size-16\",\n      xl: \"size-24\",\n    },\n  },\n  defaultVariants: {\n    size: \"default\",\n  },\n});\n\nconst knobBodyVariants = cva(\n  \"absolute rounded-full border border-border bg-card shadow-sm transition-transform duration-100 ease-out\",\n  {\n    variants: {\n      size: {\n        sm: \"inset-0.5\",\n        default: \"inset-1\",\n        lg: \"inset-1.5\",\n        xl: \"inset-2\",\n      },\n    },\n    defaultVariants: {\n      size: \"default\",\n    },\n  }\n);\n\nconst knobIndicatorVariants = cva(\n  \"-translate-x-1/2 absolute left-1/2 rounded-full bg-primary\",\n  {\n    variants: {\n      size: {\n        sm: \"top-0.5 h-2 w-0.5\",\n        default: \"top-1 h-3 w-0.5\",\n        lg: \"top-1.5 h-4 w-0.5\",\n        xl: \"top-2 h-6 w-1\",\n      },\n    },\n    defaultVariants: {\n      size: \"default\",\n    },\n  }\n);\n\ninterface KnobProps\n  extends KnobPrimitive.RootProps,\n    VariantProps<typeof knobVariants> {}\n\nfunction Knob({ className, size, ...props }: KnobProps) {\n  return (\n    <KnobPrimitive.Root\n      className={cn(\"relative inline-flex\", className)}\n      {...props}\n    >\n      <KnobPrimitive.Slider\n        className={cn(\n          \"relative flex cursor-grab touch-none select-none\",\n          \"rounded-full border border-transparent bg-muted shadow-inner\",\n          \"transition-[color,border-color,box-shadow] duration-150 ease-out\",\n          \"hover:shadow-inner hover:ring-2 hover:ring-ring/50\",\n          \"focus-visible:border-ring focus-visible:shadow-inner focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50\",\n          \"active:cursor-grabbing active:border-ring active:shadow-inner active:ring-2 active:ring-ring\",\n          \"data-[disabled=true]:pointer-events-none data-[disabled=true]:cursor-not-allowed data-[disabled=true]:opacity-50\",\n          knobVariants({ size })\n        )}\n      >\n        <KnobPrimitive.Arc\n          className={cn(\n            \"pointer-events-none absolute inset-0 size-full overflow-visible\",\n            \"[&_path]:fill-primary [&_path]:opacity-60\"\n          )}\n        />\n        <KnobPrimitive.Body className={knobBodyVariants({ size })}>\n          <KnobPrimitive.Indicator\n            className={knobIndicatorVariants({ size })}\n          />\n        </KnobPrimitive.Body>\n      </KnobPrimitive.Slider>\n    </KnobPrimitive.Root>\n  );\n}\n\nexport { type KnobProps, Knob };\n",
+      "type": "registry:ui",
+      "target": "components/audio/knob.tsx"
+    }
+  ],
+  "type": "registry:ui"
+}

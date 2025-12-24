@@ -10,12 +10,9 @@ import {
   XIcon,
 } from "lucide-react";
 import type React from "react";
-import {
-  formatDuration,
-  isLive,
-  type Track,
-} from "@/registry/default/lib/audio";
+import { useAudio } from "@/registry/default/hooks/use-audio";
 import { useAudioStore } from "@/registry/default/lib/audio-store";
+import { formatDuration, type Track } from "@/registry/default/lib/html-audio";
 import { cn } from "@/registry/default/lib/utils";
 import {
   Avatar,
@@ -159,6 +156,7 @@ function AudioTrack({
   const duration = useAudioStore((state) => state.duration);
   const togglePlay = useAudioStore((state) => state.togglePlay);
   const setQueueAndPlay = useAudioStore((state) => state.setQueueAndPlay);
+  const { htmlAudio } = useAudio();
 
   const track =
     externalTrack ??
@@ -170,9 +168,13 @@ function AudioTrack({
 
   const isCurrent = currentTrack?.id === track.id;
   const actualIsPlaying = isPlaying && isCurrent;
-  const isLiveTrack = isLive(track);
-
   const trackDuration = isCurrent && duration > 0 ? duration : track.duration;
+
+  const isLiveTrack =
+    track.live === true ||
+    (trackDuration !== undefined &&
+      trackDuration !== null &&
+      htmlAudio.isLive(trackDuration));
 
   const handleRemove = (e: React.MouseEvent) => {
     e.stopPropagation();

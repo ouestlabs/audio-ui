@@ -1,9 +1,11 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "track-list-grid-demo",
-  "type": "registry:example",
   "description": "Track list with grid layout example",
-  "registryDependencies": ["@audio/player", "@audio/track"],
+  "registryDependencies": [
+    "@audio/player",
+    "@audio/track"
+  ],
   "files": [
     {
       "path": "src/registry/default/examples/track-list-grid-demo.tsx",
@@ -12,5 +14,9 @@
       "target": "components/audio/examples/track-list-grid-demo.tsx"
     }
   ],
-  "categories": ["track", "grid"]
+  "categories": [
+    "track",
+    "grid"
+  ],
+  "type": "registry:example"
 }

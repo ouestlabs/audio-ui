@@ -1,8 +1,9 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "slider",
-  "type": "registry:ui",
-  "dependencies": ["radix-ui"],
+  "dependencies": [
+    "radix-ui"
+  ],
   "registryDependencies": [],
   "files": [
     {
@@ -11,5 +12,6 @@
       "type": "registry:ui",
       "target": "components/ui/slider.tsx"
     }
-  ]
+  ],
+  "type": "registry:ui"
 }

@@ -16,8 +16,9 @@ import {
   VolumeXIcon,
 } from "lucide-react";
 import React from "react";
-import { formatDuration, isLive } from "@/registry/default/lib/audio";
+import { useAudio } from "@/registry/default/hooks/use-audio";
 import { useAudioStore } from "@/registry/default/lib/audio-store";
+import { formatDuration } from "@/registry/default/lib/html-audio";
 import { cn } from "@/registry/default/lib/utils";
 import { Button, type buttonVariants } from "@/registry/default/ui/button";
 import {
@@ -138,8 +139,9 @@ const AudioPlayerTimeDisplay = ({
   remaining,
   ...props
 }: AudioPlayerTimeDisplayProps) => {
-  const { currentTime, duration, currentTrack } = useAudioStore();
-  const isLiveStream = currentTrack ? isLive(currentTrack) : false;
+  const { currentTime, duration } = useAudioStore();
+  const { htmlAudio } = useAudio();
+  const isLiveStream = htmlAudio.isLive(duration);
 
   const formattedCurrentTime = React.useMemo(
     () => formatDuration(currentTime),
@@ -191,9 +193,9 @@ const AudioPlayerSeekBar = ({
   React.ComponentProps<typeof Slider>,
   "value" | "onValueChange" | "min" | "max" | "bufferValue"
 >) => {
-  const { currentTime, duration, seek, bufferedTime, currentTrack } =
-    useAudioStore();
-  const isLiveStream = currentTrack ? isLive(currentTrack) : false;
+  const { currentTime, duration, seek, bufferedTime } = useAudioStore();
+  const { htmlAudio } = useAudio();
+  const isLiveStream = htmlAudio.isLive(duration);
 
   const progress = React.useMemo(() => {
     if (isLiveStream) {
@@ -443,9 +445,11 @@ const AudioPlayerRewind = React.memo(
     ...props
   }: React.ComponentProps<typeof AudioPlayerButton>) => {
     const currentTime = useAudioStore((state) => state.currentTime);
+    const duration = useAudioStore((state) => state.duration);
     const seek = useAudioStore((state) => state.seek);
     const currentTrack = useAudioStore((state) => state.currentTrack);
-    const isLiveStream = currentTrack ? isLive(currentTrack) : false;
+    const { htmlAudio } = useAudio();
+    const isLiveStream = htmlAudio.isLive(duration);
 
     const seekBackward = React.useCallback(
       (seconds = 10) => {
@@ -497,7 +501,8 @@ const AudioPlayerFastForward = React.memo(
     const seek = useAudioStore((state) => state.seek);
     const duration = useAudioStore((state) => state.duration);
     const currentTrack = useAudioStore((state) => state.currentTrack);
-    const isLiveStream = currentTrack ? isLive(currentTrack) : false;
+    const { htmlAudio } = useAudio();
+    const isLiveStream = htmlAudio.isLive(duration);
 
     const seekForward = React.useCallback(
       (seconds = 10) => {

@@ -50,12 +50,20 @@ A fully composable audio player component system. Build custom audio interfaces 
 
       <Step>Copy and paste the following code into your project.</Step>
         <Source name="player" title="components/audio/player.tsx" />
+      <Step>Install the required registry components:</Step>
+
+        ```bash
+        npx shadcn@latest add @audio/provider @audio/store @audio/html @audio/use-audio
+        ```
+
       <Step>Copy the required provider file.</Step>
         <Source name="provider" title="components/audio/provider.tsx" />
-      <Step>Copy the audio lib file.</Step>
-        <Source name="lib" title="lib/audio.ts" />
       <Step>Copy the required store file.</Step>
         <Source name="store" title="lib/audio-store.ts" />
+      <Step>Copy the audio lib file.</Step>
+        <Source name="html" title="lib/html-audio.ts" />
+      <Step>Copy the useAudio hook file.</Step>
+        <Source name="use-audio" title="hooks/use-audio.ts" />
       <Step>Update the import paths to match your project setup.</Step>
     </Steps>
 
@@ -287,10 +295,11 @@ Inherits all props from `DropdownMenu` component.
     state directly from the global store. The audio player uses the HTML5 audio
     element under the hood.
   - **AudioProvider Role:** The `AudioProvider` component manages the audio
-    element lifecycle, handles playback events, manages error retries (up to 3
-    retries with 1 second delay), preloads next tracks, and synchronizes audio
-    state with the Zustand store. It's required for all audio components to
-    function correctly.
+    element lifecycle using the `useAudio()` hook to access the `htmlAudio`
+    singleton, handles playback events, manages error retries (up to 3 retries
+    with exponential backoff), preloads next tracks, and synchronizes audio state
+    with the Zustand store. It's required for all audio components to function
+    correctly.
   - **Previous Button Behavior:** The previous button restarts the track if it has
     been played for more than 3 seconds, otherwise it navigates to the previous
     track in the queue.
@@ -302,3 +311,12 @@ Inherits all props from `DropdownMenu` component.
   rewind, and fast-forward controls. The seek bar is disabled and shows 100%
   progress for live streams.
 </Callout>
+
+## Changelog
+
+### 2025-12-24 useAudio integration and improvements
+
+- **Changed**: Provider now uses `useAudio()` hook to access `htmlAudio` singleton
+- **Improved**: Better state synchronization between audio element and Zustand store
+- **Fixed**: Slider synchronization when pausing and resuming playback
+- **Improved**: Event listener management using `AbortController` for cleaner cleanup
