@@ -5,7 +5,7 @@
   "workspaces": {
     "packages": [
       "apps/*",
-      "configs/*"
+      "packages/**/*"
     ]
   },
   "scripts": {
@@ -22,7 +22,6 @@
   "devDependencies": {
     "@biomejs/biome": "2.3.4",
     "@manypkg/cli": "^0.25.1",
-    "shadcn": "^3.5.0",
     "turbo": "2.6.1",
     "ultracite": "6.3.2"
   }

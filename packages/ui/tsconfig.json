@@ -1,0 +1,7 @@
+{
+  "extends": "@audio-ui/typescript/react-library.json",
+  "compilerOptions": {
+    "lib": ["ESNext", "DOM", "DOM.Iterable"]
+  },
+  "exclude": ["dist", "node_modules"]
+}
