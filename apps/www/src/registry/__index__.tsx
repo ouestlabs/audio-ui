@@ -768,6 +768,24 @@ export const Index: Record<string, any> = {
     categories: undefined,
     meta: undefined,
   },
+  "particle-pocket-synth": {
+    name: "particle-pocket-synth",
+    description: "Pocket synth",
+    type: "registry:block",
+    registryDependencies: ["@audio/use-audio","@audio/fader","@audio/xypad","@shadcn/toggle-group"],
+    files: [{
+      path: "src/registry/default/particles/particle-pocket-synth.tsx",
+      type: "registry:block",
+      target: ""
+    }],
+    component: React.lazy(async () => {
+      const mod = await import("@/registry/default/particles/particle-pocket-synth.tsx")
+      const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
+      return { default: mod.default || mod[exportName] }
+    }),
+    categories: ["synth"],
+    meta: undefined,
+  },
   "particle-player": {
     name: "particle-player",
     description: "Audio player",
@@ -802,24 +820,6 @@ export const Index: Record<string, any> = {
       return { default: mod.default || mod[exportName] }
     }),
     categories: ["player","widget"],
-    meta: undefined,
-  },
-  "particle-pocket-synth": {
-    name: "particle-pocket-synth",
-    description: "Pocket synth",
-    type: "registry:block",
-    registryDependencies: ["@audio/use-audio","@audio/fader","@audio/xypad","@shadcn/toggle-group"],
-    files: [{
-      path: "src/registry/default/particles/particle-pocket-synth.tsx",
-      type: "registry:block",
-      target: ""
-    }],
-    component: React.lazy(async () => {
-      const mod = await import("@/registry/default/particles/particle-pocket-synth.tsx")
-      const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
-      return { default: mod.default || mod[exportName] }
-    }),
-    categories: ["synth"],
     meta: undefined,
   },
   "hooks": {
