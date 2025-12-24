@@ -17,6 +17,22 @@ export const particles: Registry["items"] = [
     categories: ["synth"],
   },
   {
+    name: "particle-wave-shaper",
+    description: "Wave shaper",
+    type: "registry:block",
+    registryDependencies: [
+      "@audio/use-audio",
+      "@audio/fader",
+      "@audio/xypad",
+      "@audio/knob",
+      "@shadcn/toggle-group",
+    ],
+    files: [
+      { path: "particles/particle-wave-shaper.tsx", type: "registry:block" },
+    ],
+    categories: ["synth"],
+  },
+  {
     name: "particle-player",
     description: "Audio player",
     type: "registry:block",

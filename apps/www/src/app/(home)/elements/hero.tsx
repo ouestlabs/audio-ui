@@ -24,7 +24,7 @@ export const Hero = memo(function _Hero() {
       />
 
       <div className="flex flex-col gap-6">
-        <PageHeader className="relative">
+        <PageHeader className="pointer-events-none relative">
           <PageHeaderHeading className="max-w-4xl! text-7xl!">
             <span className="flex items-baseline gap-2 font-serif sm:gap-3">
               <span className="font-bold leading-[0.95] tracking-[-0.03em]">
@@ -37,7 +37,7 @@ export const Hero = memo(function _Hero() {
             A set of accessible and composable Audio UI components. Built on top
             of shadcn/ui, it's designed for you to copy, paste, and own.
           </PageHeaderDescription>
-          <PageActions>
+          <PageActions className="pointer-events-auto">
             <Button asChild size="sm">
               <Link href="/docs">Get Started</Link>
             </Button>
