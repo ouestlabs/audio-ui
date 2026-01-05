@@ -3,7 +3,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "next-themes";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
-import { Snowfall } from "@/components/snow-fall";
 import { ActiveThemeProvider } from "@/components/theme/active";
 import { LayoutProvider } from "@/hooks/use-layout";
 import {
@@ -27,7 +26,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
           <NuqsAdapter>
             <ActiveThemeProvider>
               <AudioProvider tracks={demoTracks}>
-                <Snowfall />
                 {children}
               </AudioProvider>
               <Toaster position="top-center" richColors />
