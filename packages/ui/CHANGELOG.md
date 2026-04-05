@@ -1,5 +1,13 @@
 # @audio-ui/react
 
+## 0.0.4
+
+### Patch Changes
+
+- 2f2b275: Improve knob interaction consistency in `@audio-ui/react` with refined drag mode behavior, wheel guard updates, and double-tap/double-click reset to `defaultValue`.
+
+  Add `BiProcedure<T, U>` to `@audio-ui/utils` for two-argument callback typing used by updated interaction hooks.
+
 ## 0.0.3
 
 ### Patch Changes
