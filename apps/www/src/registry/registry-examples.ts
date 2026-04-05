@@ -194,6 +194,19 @@ export const examples: Registry["items"] = [
     categories: ["fader"],
   },
   {
+    name: "fader-vertical-live-demo",
+    description: "Vertical fader with live value output",
+    type: "registry:example",
+    registryDependencies: ["@audio/fader"],
+    files: [
+      {
+        path: "examples/fader-vertical-live-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    categories: ["fader"],
+  },
+  {
     name: "fader-horizontal-demo",
     description: "Fader component example with horizontal orientation",
     type: "registry:example",
@@ -201,6 +214,32 @@ export const examples: Registry["items"] = [
     files: [
       {
         path: "examples/fader-horizontal-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    categories: ["fader"],
+  },
+  {
+    name: "fader-horizontal-live-demo",
+    description: "Horizontal fader with live value output",
+    type: "registry:example",
+    registryDependencies: ["@audio/fader"],
+    files: [
+      {
+        path: "examples/fader-horizontal-live-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    categories: ["fader"],
+  },
+  {
+    name: "fader-size-variants-demo",
+    description: "Fader size variants (sm, default, lg)",
+    type: "registry:example",
+    registryDependencies: ["@audio/fader"],
+    files: [
+      {
+        path: "examples/fader-size-variants-demo.tsx",
         type: "registry:example",
       },
     ],
@@ -221,6 +260,19 @@ export const examples: Registry["items"] = [
     categories: ["fader"],
   },
   {
+    name: "fader-thumb-marks-variants-demo",
+    description: "Fader thumb marks variants (off, 1, 4)",
+    type: "registry:example",
+    registryDependencies: ["@audio/fader"],
+    files: [
+      {
+        path: "examples/fader-thumb-marks-variants-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    categories: ["fader"],
+  },
+  {
     name: "fader-custom-thumb-marks-demo",
     description: "Fader component example with custom thumb marks",
     type: "registry:example",
@@ -228,6 +280,19 @@ export const examples: Registry["items"] = [
     files: [
       {
         path: "examples/fader-custom-thumb-marks-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    categories: ["fader"],
+  },
+  {
+    name: "fader-bipolar-db-demo",
+    description: "Fader gain control in dB range (-60 to +6)",
+    type: "registry:example",
+    registryDependencies: ["@audio/fader"],
+    files: [
+      {
+        path: "examples/fader-bipolar-db-demo.tsx",
         type: "registry:example",
       },
     ],
@@ -273,6 +338,19 @@ export const examples: Registry["items"] = [
     categories: ["knob"],
   },
   {
+    name: "knob-disabled-demo",
+    description: "Knob disabled vs enabled comparison",
+    type: "registry:example",
+    registryDependencies: ["@audio/knob"],
+    files: [
+      {
+        path: "examples/knob-disabled-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    categories: ["knob"],
+  },
+  {
     name: "knob-size-variants-demo",
     description: "Knob component example with size variants",
     type: "registry:example",
@@ -286,6 +364,19 @@ export const examples: Registry["items"] = [
     categories: ["knob"],
   },
   {
+    name: "knob-fine-step-demo",
+    description: "Knob with fine-grained step control (0.01)",
+    type: "registry:example",
+    registryDependencies: ["@audio/knob"],
+    files: [
+      {
+        path: "examples/knob-fine-step-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    categories: ["knob"],
+  },
+  {
     name: "knob-filter-control-demo",
     description: "Knob component example with filter control",
     type: "registry:example",
@@ -293,6 +384,19 @@ export const examples: Registry["items"] = [
     files: [
       {
         path: "examples/knob-filter-control-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    categories: ["knob"],
+  },
+  {
+    name: "knob-change-vs-commit-demo",
+    description: "Knob live value vs committed value callbacks",
+    type: "registry:example",
+    registryDependencies: ["@audio/knob"],
+    files: [
+      {
+        path: "examples/knob-change-vs-commit-demo.tsx",
         type: "registry:example",
       },
     ],
