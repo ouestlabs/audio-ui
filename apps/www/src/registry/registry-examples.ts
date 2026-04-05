@@ -312,6 +312,85 @@ export const examples: Registry["items"] = [
     categories: ["knob"],
   },
   {
+    name: "knob-pan-control-demo",
+    description: "Knob component example with stereo pan control",
+    type: "registry:example",
+    registryDependencies: ["@audio/knob"],
+    files: [
+      {
+        path: "examples/knob-pan-control-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    categories: ["knob"],
+  },
+  {
+    name: "knob-arc-and-anchor-demo",
+    description: "Knob value arc (rail + highlight) and optional anchor range",
+    type: "registry:example",
+    registryDependencies: ["@audio/knob"],
+    files: [
+      {
+        path: "examples/knob-arc-and-anchor-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    categories: ["knob"],
+  },
+  {
+    name: "knob-circular-arc-demo",
+    description: "Knob with default arc pointer mapping and live value",
+    type: "registry:example",
+    registryDependencies: ["@audio/knob"],
+    files: [
+      {
+        path: "examples/knob-circular-arc-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    categories: ["knob"],
+  },
+  {
+    name: "knob-double-tap-reset-demo",
+    description: "Knob double-tap / double-click reset to defaultValue",
+    type: "registry:example",
+    registryDependencies: ["@audio/knob"],
+    files: [
+      {
+        path: "examples/knob-double-tap-reset-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    categories: ["knob"],
+  },
+  {
+    name: "knob-revolution-drag-demo",
+    description: "Knob with revolution (360°) drag sensitivity",
+    type: "registry:example",
+    registryDependencies: ["@audio/knob"],
+    files: [
+      {
+        path: "examples/knob-revolution-drag-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    categories: ["knob"],
+  },
+  {
+    name: "knob-vertical-drag-demo",
+    description:
+      "Knob with vertical fader-style pan via dragOptions.verticalPanEnabled",
+    type: "registry:example",
+    registryDependencies: ["@audio/knob"],
+    files: [
+      {
+        path: "examples/knob-vertical-drag-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    categories: ["knob"],
+  },
+  {
     name: "xypad-demo",
     description: "XYPad component example",
     type: "registry:example",

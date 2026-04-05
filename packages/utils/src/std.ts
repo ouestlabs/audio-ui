@@ -5,6 +5,7 @@ export type Nullable<T> = T | null;
 export type Maybe<T> = T | undefined | null;
 export type ValueOrProvider<T> = T | (() => T);
 export type Procedure<T> = (value: T) => void;
+export type BiProcedure<T, U> = (a: T, b: U) => void;
 export type Func<U, T> = (value: U) => T;
 export type AnyFunc = (...args: any[]) => any;
 export type AssertType<T> = (value: unknown) => value is T;

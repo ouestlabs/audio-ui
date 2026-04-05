@@ -628,6 +628,114 @@ export const Index: Record<string, any> = {
     categories: ["knob"],
     meta: undefined,
   },
+  "knob-pan-control-demo": {
+    name: "knob-pan-control-demo",
+    description: "Knob component example with stereo pan control",
+    type: "registry:example",
+    registryDependencies: ["@audio/knob"],
+    files: [{
+      path: "src/registry/default/examples/knob-pan-control-demo.tsx",
+      type: "registry:example",
+      target: ""
+    }],
+    component: React.lazy(async () => {
+      const mod = await import("@/registry/default/examples/knob-pan-control-demo.tsx")
+      const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
+      return { default: mod.default || mod[exportName] }
+    }),
+    categories: ["knob"],
+    meta: undefined,
+  },
+  "knob-arc-and-anchor-demo": {
+    name: "knob-arc-and-anchor-demo",
+    description: "Knob value arc (rail + highlight) and optional anchor range",
+    type: "registry:example",
+    registryDependencies: ["@audio/knob"],
+    files: [{
+      path: "src/registry/default/examples/knob-arc-and-anchor-demo.tsx",
+      type: "registry:example",
+      target: ""
+    }],
+    component: React.lazy(async () => {
+      const mod = await import("@/registry/default/examples/knob-arc-and-anchor-demo.tsx")
+      const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
+      return { default: mod.default || mod[exportName] }
+    }),
+    categories: ["knob"],
+    meta: undefined,
+  },
+  "knob-circular-arc-demo": {
+    name: "knob-circular-arc-demo",
+    description: "Knob with default arc pointer mapping and live value",
+    type: "registry:example",
+    registryDependencies: ["@audio/knob"],
+    files: [{
+      path: "src/registry/default/examples/knob-circular-arc-demo.tsx",
+      type: "registry:example",
+      target: ""
+    }],
+    component: React.lazy(async () => {
+      const mod = await import("@/registry/default/examples/knob-circular-arc-demo.tsx")
+      const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
+      return { default: mod.default || mod[exportName] }
+    }),
+    categories: ["knob"],
+    meta: undefined,
+  },
+  "knob-double-tap-reset-demo": {
+    name: "knob-double-tap-reset-demo",
+    description: "Knob double-tap / double-click reset to defaultValue",
+    type: "registry:example",
+    registryDependencies: ["@audio/knob"],
+    files: [{
+      path: "src/registry/default/examples/knob-double-tap-reset-demo.tsx",
+      type: "registry:example",
+      target: ""
+    }],
+    component: React.lazy(async () => {
+      const mod = await import("@/registry/default/examples/knob-double-tap-reset-demo.tsx")
+      const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
+      return { default: mod.default || mod[exportName] }
+    }),
+    categories: ["knob"],
+    meta: undefined,
+  },
+  "knob-revolution-drag-demo": {
+    name: "knob-revolution-drag-demo",
+    description: "Knob with revolution (360°) drag sensitivity",
+    type: "registry:example",
+    registryDependencies: ["@audio/knob"],
+    files: [{
+      path: "src/registry/default/examples/knob-revolution-drag-demo.tsx",
+      type: "registry:example",
+      target: ""
+    }],
+    component: React.lazy(async () => {
+      const mod = await import("@/registry/default/examples/knob-revolution-drag-demo.tsx")
+      const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
+      return { default: mod.default || mod[exportName] }
+    }),
+    categories: ["knob"],
+    meta: undefined,
+  },
+  "knob-vertical-drag-demo": {
+    name: "knob-vertical-drag-demo",
+    description: "Knob with vertical fader-style pan via dragOptions.verticalPanEnabled",
+    type: "registry:example",
+    registryDependencies: ["@audio/knob"],
+    files: [{
+      path: "src/registry/default/examples/knob-vertical-drag-demo.tsx",
+      type: "registry:example",
+      target: ""
+    }],
+    component: React.lazy(async () => {
+      const mod = await import("@/registry/default/examples/knob-vertical-drag-demo.tsx")
+      const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
+      return { default: mod.default || mod[exportName] }
+    }),
+    categories: ["knob"],
+    meta: undefined,
+  },
   "xypad-demo": {
     name: "xypad-demo",
     description: "XYPad component example",

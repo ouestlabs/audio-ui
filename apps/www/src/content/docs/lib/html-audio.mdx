@@ -57,7 +57,7 @@ function MyComponent() {
 
 ### $htmlAudio (Singleton)
 
-Manages the underlying `HTMLAudioElement`, playback state, retries, and events. Initialize on client start — the instance is server-safe.
+Manages the underlying `HTMLAudioElement`, playback state, retries, and events. Initialize on client start - the instance is server-safe.
 
 ```tsx
 import { $htmlAudio } from "@/lib/html-audio";
@@ -148,7 +148,7 @@ sequenceDiagram
 | --------------------- | -------------------------------------------------------------- |
 | `getDuration()`       | Return loaded source duration (seconds) or `0` if unavailable. |
 | `getCurrentTime()`    | Return current playback position (seconds).                    |
-| `isPaused()`          | Return boolean — is playback paused.                           |
+| `isPaused()`          | Return boolean - is playback paused.                           |
 | `getBufferedRanges()` | Return underlying `TimeRanges` or `null`.                      |
 | `getSource()`         | Return current source URL string.                              |
 | `getAudioElement()`   | Return raw `HTMLAudioElement` or `null` on server.             |
@@ -298,8 +298,8 @@ $htmlAudio.addEventListener("audioError", (event) => {
 
 ## Related
 
-- [Audio Store](/docs/lib/audio-store) — Zustand store for queue and playback state management
-- [Audio Player](/docs/components/player) — Composable player UI components
+- [Audio Store](/docs/lib/audio-store) - Zustand store for queue and playback state management
+- [Audio Player](/docs/components/player) - Composable player UI components
 
 ## Notes
 
