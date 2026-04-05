@@ -102,7 +102,7 @@ graph TB
 
 ### Track
 
-Common audio track object. See [Audio library](/docs/lib/audio#track) for full definition.
+Common audio track object. See [HTML Audio](/docs/lib/html-audio#track) for full definition.
 
 ### AudioStore State
 
@@ -335,7 +335,7 @@ This allows users to resume playback and maintain queue state across page refres
 
 ## Related
 
-- [Audio Library](/docs/lib/audio) - Core audio playback singleton
+- [HTML Audio](/docs/lib/html-audio) - Core audio playback singleton
 - [Audio Player](/docs/components/player) - Player UI components
 - [Audio Queue](/docs/components/queue) - Queue management UI
 
@@ -351,7 +351,7 @@ This allows users to resume playback and maintain queue state across page refres
   - <code>addToQueue</code> supports "first", "last", and "after" insert modes
   - Queue shuffling randomizes order but preserves track identity
   - <code>setQueueAndPlay</code> and similar actions trigger audio loading via the
-    [Audio library](/docs/lib/audio)
+    [HTML Audio](/docs/lib/html-audio)
   - Persistence is automatic; no manual save required
   - Direct store access via <code>getState()</code> is useful for non-React code
     or imperative operations

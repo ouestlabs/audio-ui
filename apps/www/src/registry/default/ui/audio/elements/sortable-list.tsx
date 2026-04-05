@@ -109,7 +109,6 @@ const SortableList = <TItem extends SortableBaseItem>({
             "flex list-inside list-none list-image-none flex-col p-0",
             className
           )}
-          role="application"
         >
           {items.map((item, index) => (
             <React.Fragment key={item.id}>
@@ -230,6 +229,7 @@ const SortableDragHandle = () => {
 
   return (
     <Button
+      aria-label="Reorder item"
       size="icon-sm"
       variant="ghost"
       {...attributes}

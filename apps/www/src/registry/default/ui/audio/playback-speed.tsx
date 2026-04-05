@@ -1,7 +1,7 @@
 "use client";
 
 import { GaugeIcon } from "lucide-react";
-import type React from "react";
+import React from "react";
 import { useAudio } from "@/registry/default/hooks/use-audio";
 import { useAudioStore } from "@/registry/default/lib/audio-store";
 import { cn } from "@/registry/default/lib/utils";
@@ -35,19 +35,23 @@ export type AudioPlaybackSpeedProps = React.ComponentProps<typeof Button> & {
 
 interface AudioPlaybackSpeedButtonProps
   extends React.ComponentProps<typeof Button> {
-  tooltip?: boolean;
   tooltipLabel?: string;
 }
 
 function AudioPlaybackSpeedButton({
-  tooltip = false,
   tooltipLabel,
   disabled,
   ...props
 }: AudioPlaybackSpeedButtonProps) {
-  const button = <Button disabled={disabled} {...props} />;
+  const button = (
+    <Button
+      aria-label={props["aria-label"] ?? tooltipLabel}
+      disabled={disabled}
+      {...props}
+    />
+  );
 
-  if (tooltip && tooltipLabel) {
+  if (tooltipLabel) {
     const trigger = disabled ? (
       <span className="inline-block">{button}</span>
     ) : (
@@ -82,13 +86,16 @@ function AudioPlaybackSpeed({
     speeds.find((s) => s.value === playbackRate) || speeds[2];
   const displayLabel = currentSpeed?.label;
 
-  const handleSpeedChange = (value: string) => {
-    if (isLiveStream) {
-      return;
-    }
-    const speed = Number.parseFloat(value);
-    setPlaybackRate(speed);
-  };
+  const handleSpeedChange = React.useCallback(
+    (value: string) => {
+      if (isLiveStream) {
+        return;
+      }
+      const speed = Number.parseFloat(value);
+      setPlaybackRate(speed);
+    },
+    [isLiveStream, setPlaybackRate]
+  );
 
   const tooltipLabel = isLiveStream
     ? "Not available for live streams"
@@ -104,7 +111,6 @@ function AudioPlaybackSpeed({
           data-slot="audio-playback-speed-button"
           disabled={isLiveStream}
           size={size}
-          tooltip
           tooltipLabel={tooltipLabel}
           variant={variant}
           {...props}

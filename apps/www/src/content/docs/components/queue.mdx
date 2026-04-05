@@ -13,6 +13,14 @@ links:
 
 A comprehensive queue management system. Includes shuffle, repeat modes, track selection, search, and drag-and-drop reordering.
 
+<Preview name="queue-shuffle-repeat-demo" />
+
+## Overview
+
+- **Queue dialog:** Search, select/play, remove, and clear actions in one surface.
+- **Adaptive reordering:** Queue drag-and-drop is active when not filtering.
+- **Composable controls:** Shuffle, repeat, and preferences can be combined per layout needs.
+
 ## Installation
 
 <CodeTabs>
@@ -82,6 +90,8 @@ import {
 ### Basic Queue
 
 The `AudioQueue` component opens a dialog showing the current queue with search functionality and track selection.
+
+Use this for the smallest integration footprint.
 
 ```tsx
 <AudioPlayer>
@@ -184,20 +194,18 @@ A dialog component that displays the current queue and allows track selection, s
 
 ### AudioQueueButton
 
-A button component with optional tooltip support, used internally by queue components.
+A button component with composed tooltip behavior, used internally by queue components.
 
 #### Props
 
-| Prop           | Type      | Default | Description                |
-| -------------- | --------- | ------- | -------------------------- |
-| `tooltip`      | `boolean` | `false` | Whether to show a tooltip. |
-| `tooltipLabel` | `string`  | -       | Tooltip text to display.   |
+| Prop           | Type     | Default | Description                                                         |
+| -------------- | -------- | ------- | ------------------------------------------------------------------- |
+| `tooltipLabel` | `string` | -       | Tooltip text to display. When provided, tooltip rendering is enabled. |
 
 #### Example
 
 ```tsx
 <AudioQueueButton
-  tooltip
   tooltipLabel="Open queue"
   variant="outline"
   size="icon"

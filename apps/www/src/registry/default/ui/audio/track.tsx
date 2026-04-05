@@ -9,7 +9,7 @@ import {
   RadioIcon,
   XIcon,
 } from "lucide-react";
-import type React from "react";
+import React from "react";
 import { useAudio } from "@/registry/default/hooks/use-audio";
 import { useAudioStore } from "@/registry/default/lib/audio-store";
 import { formatDuration, type Track } from "@/registry/default/lib/html-audio";
@@ -47,16 +47,26 @@ import {
  * Props for the AudioTrack component.
  * Supports two modes: store mode (using trackId) or controlled mode (using track).
  */
+export type AudioTrackMediaMode =
+  | "cover"
+  | "drag-handle"
+  | "drag-handle-with-cover"
+  | "index";
+
+export type AudioTrackActionMode =
+  | "none"
+  | "play-pause"
+  | "remove"
+  | "play-pause-with-remove";
+
 export type AudioTrackProps = {
   trackId?: string | number;
   track?: Track;
   index?: number;
   onClick?: () => void;
   onRemove?: (trackId: string) => void;
-  showRemove?: boolean;
-  showPlayPause?: boolean;
-  showDragHandle?: boolean;
-  showCover?: boolean;
+  media?: AudioTrackMediaMode;
+  actions?: AudioTrackActionMode;
   className?: string;
 } & (
   | { trackId: string | number; track?: never }
@@ -74,68 +84,138 @@ function getPlayPauseTitle(isCurrent: boolean, isPlaying: boolean): string {
   return "Play";
 }
 
+function handleTrackRemoveClick(
+  e: React.MouseEvent,
+  targetTrackId: string | number | undefined,
+  onRemove?: (id: string) => void
+) {
+  e.stopPropagation();
+  e.preventDefault();
+  if (targetTrackId !== undefined && onRemove) {
+    onRemove(String(targetTrackId));
+  }
+}
+
+function handleTrackPlayPauseClick(
+  e: React.MouseEvent,
+  isCurrent: boolean,
+  trackId: string | number | undefined,
+  queueItems: Track[],
+  togglePlay: () => void,
+  setQueueAndPlay: (tracks: Track[], index: number) => void
+) {
+  e.stopPropagation();
+  e.preventDefault();
+
+  if (isCurrent) {
+    togglePlay();
+    return;
+  }
+
+  const trackIndex = queueItems.findIndex((t) => t.id === trackId);
+  if (trackIndex >= 0) {
+    setQueueAndPlay(queueItems, trackIndex);
+  }
+}
+
+function renderTrackActions({
+  actions,
+  isCurrent,
+  onRemove,
+  onTrackRemoveClick,
+  onTrackPlayPauseClick,
+  playPauseTitle,
+  actualIsPlaying,
+}: {
+  actions: AudioTrackActionMode;
+  isCurrent: boolean;
+  onRemove?: (trackId: string) => void;
+  onTrackRemoveClick: (e: React.MouseEvent) => void;
+  onTrackPlayPauseClick: (e: React.MouseEvent) => void;
+  playPauseTitle: string;
+  actualIsPlaying: boolean;
+}) {
+  const showRemoveAction =
+    (actions === "remove" || actions === "play-pause-with-remove") &&
+    !isCurrent &&
+    !!onRemove;
+  const showPlayPauseAction =
+    actions === "play-pause" || actions === "play-pause-with-remove";
+
+  return (
+    <>
+      {showRemoveAction && (
+        <Button
+          aria-label="Remove track"
+          onClick={onTrackRemoveClick}
+          size="icon-sm"
+          title="Remove"
+          variant="ghost"
+        >
+          <XIcon />
+        </Button>
+      )}
+      {showPlayPauseAction && (
+        <Button
+          aria-label={playPauseTitle}
+          onClick={onTrackPlayPauseClick}
+          size="icon-sm"
+          title={playPauseTitle}
+          variant="ghost"
+        >
+          {actualIsPlaying ? (
+            <PauseIcon className="size-4 fill-current" />
+          ) : (
+            <PlayIcon className="size-4 fill-current" />
+          )}
+        </Button>
+      )}
+    </>
+  );
+}
+
 function renderTrackMedia(
-  showDragHandle: boolean,
-  showCover: boolean,
+  media: AudioTrackMediaMode,
   track: Track,
   index?: number
 ) {
-  if (showDragHandle && showCover) {
-    const coverImage = track.artwork || track.images?.[0];
-    return (
-      <div className="flex items-center gap-2">
-        <SortableDragHandle />
-        {coverImage ? (
-          <Avatar className="rounded-sm">
-            <AvatarImage
-              alt={track.title}
-              className="object-cover"
-              src={coverImage}
-            />
-            <AvatarFallback className="rounded-sm">
-              <MusicIcon className="size-4 text-muted-foreground" />
-            </AvatarFallback>
-          </Avatar>
-        ) : (
-          <div className="flex size-10 items-center justify-center rounded-sm bg-muted">
-            <MusicIcon className="size-4 text-muted-foreground" />
-          </div>
-        )}
-      </div>
-    );
-  }
+  const coverImage = track.artwork || track.images?.[0];
+  const cover = coverImage ? (
+    <Avatar className="rounded-sm">
+      <AvatarImage
+        alt={track.title}
+        className="object-cover"
+        src={coverImage}
+      />
+      <AvatarFallback className="rounded-sm">
+        <MusicIcon className="size-4 text-muted-foreground" />
+      </AvatarFallback>
+    </Avatar>
+  ) : (
+    <div className="flex size-10 items-center justify-center rounded-sm bg-muted">
+      <MusicIcon className="size-4 text-muted-foreground" />
+    </div>
+  );
 
-  if (showDragHandle) {
-    return <SortableDragHandle />;
-  }
-
-  if (showCover) {
-    const coverImage = track.artwork || track.images?.[0];
-    if (coverImage) {
+  switch (media) {
+    case "drag-handle-with-cover":
       return (
-        <Avatar className="rounded-sm">
-          <AvatarImage
-            alt={track.title}
-            className="object-cover"
-            src={coverImage}
-          />
-          <AvatarFallback className="rounded-sm">
-            <MusicIcon className="size-4 text-muted-foreground" />
-          </AvatarFallback>
-        </Avatar>
+        <div className="flex items-center gap-2">
+          <SortableDragHandle />
+          {cover}
+        </div>
+      );
+    case "drag-handle":
+      return <SortableDragHandle />;
+    case "cover":
+      return cover;
+    default: {
+      const displayIndex = index !== undefined ? index + 1 : "";
+      return (
+        <span className="text-muted-foreground/60 text-xs">{displayIndex}</span>
       );
     }
-    return (
-      <div className="flex size-10 items-center justify-center rounded-sm bg-muted">
-        <MusicIcon className="size-4 text-muted-foreground" />
-      </div>
-    );
   }
-
-  const displayIndex = index !== undefined ? index + 1 : "";
-  return (
-    <span className="text-muted-foreground/60 text-xs">{displayIndex}</span>
-  );
 }
 
 function AudioTrack({
@@ -144,10 +224,8 @@ function AudioTrack({
   index,
   onClick,
   onRemove,
-  showRemove = false,
-  showPlayPause = true,
-  showDragHandle = false,
-  showCover = true,
+  media = "cover",
+  actions = "play-pause",
   className,
 }: AudioTrackProps) {
   const queue = useAudioStore((state) => state.queue);
@@ -176,27 +254,19 @@ function AudioTrack({
       trackDuration !== null &&
       htmlAudio.isLive(trackDuration));
 
-  const handleRemove = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    e.preventDefault();
-    if (track.id && onRemove) {
-      onRemove(String(track.id));
-    }
-  };
+  const handleRemove = (e: React.MouseEvent) =>
+    handleTrackRemoveClick(e, track.id, onRemove);
 
-  const handlePlayPause = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    e.preventDefault();
-
-    if (isCurrent) {
-      togglePlay();
-    } else {
-      const trackIndex = queue.findIndex((t) => t.id === track.id);
-      if (trackIndex >= 0) {
-        setQueueAndPlay(queue, trackIndex);
-      }
-    }
-  };
+  const handlePlayPause = (e: React.MouseEvent) =>
+    handleTrackPlayPauseClick(
+      e,
+      isCurrent,
+      track.id,
+      queue,
+      togglePlay,
+      setQueueAndPlay
+    );
+  const playPauseTitle = getPlayPauseTitle(isCurrent, actualIsPlaying);
 
   return (
     <Item
@@ -213,9 +283,7 @@ function AudioTrack({
       size="sm"
       variant={isCurrent ? "outline" : "default"}
     >
-      <ItemMedia>
-        {renderTrackMedia(showDragHandle, showCover, track, index)}
-      </ItemMedia>
+      <ItemMedia>{renderTrackMedia(media, track, index)}</ItemMedia>
       <ItemContent className="min-w-0 flex-1 gap-0 overflow-hidden">
         <div className="flex items-center gap-1.5">
           <ItemTitle className="truncate font-medium text-sm">
@@ -236,30 +304,15 @@ function AudioTrack({
         </ItemContent>
       )}
       <ItemActions>
-        {showRemove && !isCurrent && onRemove && (
-          <Button
-            onClick={handleRemove}
-            size="icon-sm"
-            title="Remove"
-            variant="ghost"
-          >
-            <XIcon />
-          </Button>
-        )}
-        {showPlayPause && (
-          <Button
-            onClick={handlePlayPause}
-            size="icon-sm"
-            title={getPlayPauseTitle(isCurrent, actualIsPlaying)}
-            variant="ghost"
-          >
-            {actualIsPlaying ? (
-              <PauseIcon className="size-4 fill-current" />
-            ) : (
-              <PlayIcon className="size-4 fill-current" />
-            )}
-          </Button>
-        )}
+        {renderTrackActions({
+          actions,
+          isCurrent,
+          onRemove,
+          onTrackRemoveClick: handleRemove,
+          onTrackPlayPauseClick: handlePlayPause,
+          playPauseTitle,
+          actualIsPlaying,
+        })}
       </ItemActions>
     </Item>
   );
@@ -287,8 +340,9 @@ export type AudioTrackListProps = {
   tracks?: Track[];
   onTrackSelect?: (index: number, track?: Track) => void;
   onTrackRemove?: (trackId: string) => void;
-  sortable?: boolean;
-  showCover?: boolean;
+  mode?: "static" | "sortable";
+  media?: "cover" | "index";
+  actions?: AudioTrackActionMode;
   emptyLabel?: string;
   emptyDescription?: string;
   filterQuery?: string;
@@ -300,8 +354,9 @@ function AudioTrackList({
   tracks: externalTracks,
   onTrackSelect,
   onTrackRemove,
-  sortable = false,
-  showCover = true,
+  mode = "static",
+  media = "cover",
+  actions,
   variant = "default",
   emptyLabel = "No tracks found",
   emptyDescription = "Try adding some tracks",
@@ -331,6 +386,30 @@ function AudioTrackList({
 
   const isFiltered = (filterQuery?.trim().length ?? 0) > 0 || !!filterFn;
   const isExternalTracks = !!externalTracks;
+  const resolvedActions: AudioTrackActionMode =
+    actions ?? (onTrackRemove ? "play-pause-with-remove" : "play-pause");
+  const trackById = React.useMemo(() => {
+    const map = new Map<string, Track>();
+    for (const track of tracks) {
+      if (track.id !== undefined) {
+        map.set(String(track.id), track);
+      }
+    }
+    return map;
+  }, [tracks]);
+  const trackIndexById = React.useMemo(() => {
+    const map = new Map<string, number>();
+    tracks.forEach((track, index) => {
+      if (track.id !== undefined) {
+        map.set(String(track.id), index);
+      }
+    });
+    return map;
+  }, [tracks]);
+  const sortableItems = React.useMemo(
+    () => Array.from(trackById.keys(), (id) => ({ id })),
+    [trackById]
+  );
 
   const handleAutoReorder = (reorderedTracks: Track[]) => {
     if (!(isFiltered || isExternalTracks)) {
@@ -393,59 +472,58 @@ function AudioTrackList({
       return null;
     }
 
-    const showDragHandle = sortable && !isOverlay;
+    let trackMedia: AudioTrackMediaMode = media;
+    if (mode === "sortable") {
+      trackMedia = media === "cover" ? "drag-handle-with-cover" : "drag-handle";
+    }
 
     return (
       <AudioTrack
+        actions={resolvedActions}
         index={index}
         key={track.id}
+        media={isOverlay ? media : trackMedia}
         onClick={handleTrackClick}
         onRemove={onTrackRemove}
-        showCover={showCover}
-        showDragHandle={showDragHandle}
-        showRemove={!!onTrackRemove}
         track={track}
       />
     );
   };
 
-  const content = sortable ? (
-    <SortableList
-      className={
-        variant === "grid" ? "grid grid-cols-1 gap-2 xl:grid-cols-2" : "gap-1"
-      }
-      items={tracks
-        .filter((t) => t.id !== undefined)
-        .map((t) => ({ id: String(t.id) }))}
-      onChange={(reorderedTracks) => {
-        const reorderedTrackIds = reorderedTracks.map((t) => t.id);
-        const reorderedFullTracks = reorderedTrackIds
-          .map((id) => tracks.find((t) => String(t.id) === id))
-          .filter((t): t is Track => t !== undefined);
-        handleAutoReorder(reorderedFullTracks);
-      }}
-      renderItem={(item, index, isOverlay = false) => {
-        const track = tracks.find((t) => String(t.id) === item.id);
-        if (!track?.id) {
-          return null;
+  const content =
+    mode === "sortable" ? (
+      <SortableList
+        className={
+          variant === "grid" ? "grid grid-cols-1 gap-2 xl:grid-cols-2" : "gap-1"
         }
-        const originalIndex = tracks.findIndex((t) => t.id === track.id);
-        const trackIndex = originalIndex >= 0 ? originalIndex : index;
+        items={sortableItems}
+        onChange={(reorderedTracks) => {
+          const reorderedFullTracks = reorderedTracks
+            .map((item) => trackById.get(item.id))
+            .filter((t): t is Track => t !== undefined);
+          handleAutoReorder(reorderedFullTracks);
+        }}
+        renderItem={(item, index, isOverlay = false) => {
+          const track = trackById.get(item.id);
+          if (!track?.id) {
+            return null;
+          }
+          const trackIndex = trackIndexById.get(item.id) ?? index;
 
-        const trackContent = renderTrack(track, trackIndex, isOverlay);
+          const trackContent = renderTrack(track, trackIndex, isOverlay);
 
-        return (
-          <SortableItem id={String(track.id)} key={track.id}>
-            {trackContent}
-          </SortableItem>
-        );
-      }}
-    />
-  ) : (
-    <div className={cn(audioTrackListVariants({ variant }))}>
-      {tracks.map((track, index) => renderTrack(track, index))}
-    </div>
-  );
+          return (
+            <SortableItem id={String(track.id)} key={track.id}>
+              {trackContent}
+            </SortableItem>
+          );
+        }}
+      />
+    ) : (
+      <div className={cn(audioTrackListVariants({ variant }))}>
+        {tracks.map((track, index) => renderTrack(track, index))}
+      </div>
+    );
 
   return (
     <ScrollArea

@@ -9,11 +9,11 @@ export default function AudioTrackSortableListGridDemo() {
   return (
     <AudioTrackList
       className="w-full"
+      mode="sortable"
       onTrackSelect={(index) => {
         const track = queue[index];
         toast.info(`Playing ${track?.title}`);
       }}
-      sortable
       variant="grid"
     />
   );

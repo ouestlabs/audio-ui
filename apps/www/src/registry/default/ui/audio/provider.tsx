@@ -389,7 +389,11 @@ function AudioProvider({
     };
 
     const handleVolumeChange = () => {
-      setState({ volume: audio.volume, isMuted: audio.muted });
+      const prev = useAudioStore.getState();
+      const nextMuted = audio.muted;
+      if (prev.isMuted !== nextMuted) {
+        setState({ isMuted: nextMuted });
+      }
     };
 
     const handleBufferUpdate = (e: Event) => {

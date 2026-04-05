@@ -23,14 +23,14 @@ interface XYPadProps
   extends XYPadPrimitive.RootProps,
     VariantProps<typeof xypadVariants> {
   formatValue?: (value: { x: number; y: number }) => React.ReactNode;
-  showValueDisplay?: boolean;
+  valueDisplay?: "visible" | "hidden";
 }
 
 export function XYPad({
   className,
   size,
   formatValue,
-  showValueDisplay = true,
+  valueDisplay = "visible",
   ...props
 }: XYPadProps) {
   return (
@@ -40,7 +40,7 @@ export function XYPad({
         className={cn(
           "relative block w-full cursor-crosshair touch-none select-none overflow-hidden",
           "rounded-lg border border-border bg-card shadow-sm",
-          "transition-[color,border-color,box-shadow] duration-150 ease-out",
+          "transition-[color,border-color,box-shadow] duration-150 ease-out motion-reduce:transition-none",
           "hover:shadow-sm hover:ring-2 hover:ring-ring/50",
           "focus-visible:border-ring focus-visible:shadow-sm focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
           "active:border-ring active:shadow-sm active:ring-2 active:ring-ring",
@@ -96,12 +96,12 @@ export function XYPad({
         />
 
         <XYPadPrimitive.Cursor className="-translate-x-1/2 -translate-y-1/2 pointer-events-none absolute size-5 transition-none">
-          <XYPadPrimitive.CursorGlow className="absolute inset-0 rounded-full bg-primary opacity-30 blur-lg transition-opacity duration-200" />
-          <XYPadPrimitive.CursorDot className="absolute inset-1 rounded-full bg-primary shadow-lg shadow-primary/50" />
+          <XYPadPrimitive.CursorGlow className="absolute inset-0 rounded-full bg-primary opacity-20 blur-sm transition-opacity duration-200 motion-reduce:transition-none" />
+          <XYPadPrimitive.CursorDot className="absolute inset-1 rounded-full bg-primary shadow-sm" />
           <XYPadPrimitive.CursorHighlight className="absolute inset-2 rounded-full bg-primary-foreground opacity-30" />
         </XYPadPrimitive.Cursor>
 
-        {showValueDisplay && (
+        {valueDisplay === "visible" && (
           <XYPadPrimitive.ValueDisplay
             className={cn(
               "absolute top-1.5 right-1.5 z-10",
