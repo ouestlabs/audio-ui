@@ -1,14 +1,21 @@
 ---
 title: Fader
-description: A vertical or horizontal fader control for adjusting values. Built on audio-ui primitives.
+description: Linear slider control for gain and parameter adjustment with pointer, wheel, keyboard, orientation, and thumb mark variants.
 links:
   doc:
-    - https://www.npmjs.com/package/audio-ui
+    - https://www.npmjs.com/package/@audio-ui/react
 ---
 
-A fader component that supports both vertical and horizontal orientations. Perfect for audio mixing interfaces, volume controls, and parameter adjustments.
+Linear fader for continuous parameters (volume, gain, send level, etc.). The registry component wraps `Fader` primitives from `@audio-ui/react` with size variants and thumb mark styling.
 
-<Preview name="fader-demo" />
+<Preview name="fader-vertical-live-demo" />
+
+## Overview
+
+- **Interaction model:** Pointer drag on track or thumb, mouse wheel adjustment, keyboard nudging, and commit callbacks on release.
+- **Layout:** Vertical (default) or horizontal orientation, with `sm`, `default`, and `lg` size presets.
+- **Feedback:** Filled range + thumb with optional internal marks (`thumbMarks`).
+- **Accessibility:** The thumb is exposed as `role="slider"` with `aria-valuenow`, `aria-valuemin`, and `aria-valuemax`.
 
 ## Installation
 
@@ -45,73 +52,116 @@ A fader component that supports both vertical and horizontal orientations. Perfe
 import { Fader } from "@/components/audio/fader";
 ```
 
+**Uncontrolled** - initial value only:
+
 ```tsx
+<Fader defaultValue={0} max={6} min={-60} step={1} />
+```
+
+**Controlled** - drive value from state:
+
+```tsx
+const [gain, setGain] = useState(0);
+
 <Fader
-  defaultValue={50}
-  max={100}
-  min={0}
+  max={6}
+  min={-60}
+  onValueChange={setGain}
+  onValueCommit={(value) => console.log("Committed:", value)}
   step={1}
+  value={gain}
 />
 ```
 
-### Horizontal Fader
+## Interaction
 
-<Preview name="fader-horizontal-demo" />
+### Pointer
 
-### Custom Thumb Marks
+| Behavior | Details |
+| -------- | ------- |
+| **Track click / drag** | Clicking or dragging on the track updates the value from pointer position. |
+| **Thumb drag** | Dragging the thumb adjusts continuously, clamped to `min...max`. |
+| **Commit event** | `onValueCommit` fires when drag interaction ends. |
 
-<Preview name="fader-custom-thumb-marks-demo" />
+### Keyboard
 
-### No Thumb Marks
+Focused thumb supports:
 
-<Preview name="fader-no-thumb-marks-demo" />
+| Key | Action |
+| --- | ------ |
+| `ArrowUp` / `ArrowRight` | Increase by `step` |
+| `ArrowDown` / `ArrowLeft` | Decrease by `step` |
+| `PageUp` | Increase by `step × 10` |
+| `PageDown` | Decrease by `step × 10` |
+| `Home` | Set to `min` |
+| `End` | Set to `max` |
 
-## API Reference
+### Wheel
 
-### Fader
+When focused, wheel input nudges the value by `step`.
 
-#### Props
+## API reference
 
-| Prop          | Type                              | Default       | Description                                                      |
-| ------------- | --------------------------------- | ------------- | ---------------------------------------------------------------- |
-| `orientation` | `"horizontal" \| "vertical"`      | `"vertical"`  | Fader orientation.                                               |
-| `size`        | `"sm" \| "default" \| "lg"`      | `"default"`    | Size variant.                                                    |
-| `thumbMarks`  | `number \| false`                 | `3`           | Number of thumb marks to display, or `false` to hide them.       |
-| `className`   | `string`                          | -             | Additional CSS classes.                                         |
-| `value`       | `number`                          | -             | Controlled value.                                                |
-| `defaultValue`| `number`                          | -             | Uncontrolled default value.                                     |
-| `min`         | `number`                          | `0`           | Minimum value.                                                   |
-| `max`         | `number`                          | `100`         | Maximum value.                                                   |
-| `step`        | `number`                          | `1`           | Step increment.                                                  |
-| `disabled`    | `boolean`                         | `false`       | Whether the fader is disabled.                                   |
-| `onValueChange` | `(value: number) => void`        | -             | Callback when value changes during interaction.                 |
-| `onValueCommit` | `(value: number) => void`        | -             | Callback when value is committed (on release).                   |
+`Fader` accepts style props (`size`, `thumbMarks`, `className`) plus primitive props from `FaderPrimitive.RootProps`.
 
-All other props are inherited from the `FaderPrimitive.RootProps` from `audio-ui`.
+### Value and state
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `value` | `number` | - | Controlled value. |
+| `defaultValue` | `number` | midpoint | Uncontrolled initial value. Midpoint is `(min + max) / 2`. |
+| `min` | `number` | `-60` | Minimum value. |
+| `max` | `number` | `6` | Maximum value. |
+| `step` | `number` | `1` | Quantization step for drag, wheel, and keyboard. |
+| `disabled` | `boolean` | `false` | Disables interaction. |
+| `onValueChange` | `(value: number) => void` | - | Live updates while adjusting. |
+| `onValueCommit` | `(value: number) => void` | - | Fires when interaction is committed. |
+| `aria-label` | `string` | - | Accessible name for the slider. |
+| `aria-labelledby` | `string` | - | ID of a labeling element. |
+
+### Layout and visuals
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `orientation` | `"horizontal" \| "vertical"` | `"vertical"` | Direction of travel. |
+| `size` | `"sm" \| "default" \| "lg"` | `"default"` | Track and thumb size preset. |
+| `thumbMarks` | `number \| false` | `3` | Number of marks in the thumb or `false` to hide them. |
+| `className` | `string` | - | Root wrapper class name. |
+
+Additional valid HTML attributes passed to `Fader.Root` are forwarded.
 
 ## Examples
 
-### Volume Control
+### Vertical (default)
+
+<Preview name="fader-vertical-live-demo" />
+
+### Horizontal
+
+<Preview name="fader-horizontal-live-demo" />
+
+### Size variants
+
+<Preview name="fader-size-variants-demo" />
+
+### Thumb marks variants
+
+<Preview name="fader-thumb-marks-variants-demo" />
+
+### Gain range in dB (`-60..+6`)
+
+<Preview name="fader-bipolar-db-demo" />
+
+### Volume control (`0..100`)
 
 <Preview name="fader-volume-control-demo" />
 
-### Multiple Faders
+### Multi-channel strip
 
 <Preview name="fader-multiple-control-demo" />
 
-## Notes
+## Source package
 
 <Callout variant="info">
-  <strong>Important Information:</strong>
-
-  - **Built on audio-ui:** This component is built on top of the `audio-ui`
-    package primitives, providing a high-quality, accessible fader control.
-  - **Orientation:** The fader supports both vertical and horizontal
-    orientations. The default is vertical, which is common in audio mixing
-    interfaces.
-  - **Thumb Marks:** The thumb marks provide visual feedback for the current
-    value. You can customize the number of marks or disable them entirely.
-  - **Size Variants:** Three size variants are available: `sm`, `default`, and
-    `lg`. These affect both the track and thumb dimensions.
+  For low-level composition (`FaderPrimitive.Root`, `Track`, `Range`, `Thumb`, etc.), see [@audio-ui/react on npm](https://www.npmjs.com/package/@audio-ui/react).
 </Callout>
-

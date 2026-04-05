@@ -466,6 +466,24 @@ export const Index: Record<string, any> = {
     categories: ["fader"],
     meta: undefined,
   },
+  "fader-vertical-live-demo": {
+    name: "fader-vertical-live-demo",
+    description: "Vertical fader with live value output",
+    type: "registry:example",
+    registryDependencies: ["@audio/fader"],
+    files: [{
+      path: "src/registry/default/examples/fader-vertical-live-demo.tsx",
+      type: "registry:example",
+      target: ""
+    }],
+    component: React.lazy(async () => {
+      const mod = await import("@/registry/default/examples/fader-vertical-live-demo.tsx")
+      const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
+      return { default: mod.default || mod[exportName] }
+    }),
+    categories: ["fader"],
+    meta: undefined,
+  },
   "fader-horizontal-demo": {
     name: "fader-horizontal-demo",
     description: "Fader component example with horizontal orientation",
@@ -478,6 +496,42 @@ export const Index: Record<string, any> = {
     }],
     component: React.lazy(async () => {
       const mod = await import("@/registry/default/examples/fader-horizontal-demo.tsx")
+      const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
+      return { default: mod.default || mod[exportName] }
+    }),
+    categories: ["fader"],
+    meta: undefined,
+  },
+  "fader-horizontal-live-demo": {
+    name: "fader-horizontal-live-demo",
+    description: "Horizontal fader with live value output",
+    type: "registry:example",
+    registryDependencies: ["@audio/fader"],
+    files: [{
+      path: "src/registry/default/examples/fader-horizontal-live-demo.tsx",
+      type: "registry:example",
+      target: ""
+    }],
+    component: React.lazy(async () => {
+      const mod = await import("@/registry/default/examples/fader-horizontal-live-demo.tsx")
+      const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
+      return { default: mod.default || mod[exportName] }
+    }),
+    categories: ["fader"],
+    meta: undefined,
+  },
+  "fader-size-variants-demo": {
+    name: "fader-size-variants-demo",
+    description: "Fader size variants (sm, default, lg)",
+    type: "registry:example",
+    registryDependencies: ["@audio/fader"],
+    files: [{
+      path: "src/registry/default/examples/fader-size-variants-demo.tsx",
+      type: "registry:example",
+      target: ""
+    }],
+    component: React.lazy(async () => {
+      const mod = await import("@/registry/default/examples/fader-size-variants-demo.tsx")
       const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
       return { default: mod.default || mod[exportName] }
     }),
@@ -502,6 +556,24 @@ export const Index: Record<string, any> = {
     categories: ["fader"],
     meta: undefined,
   },
+  "fader-thumb-marks-variants-demo": {
+    name: "fader-thumb-marks-variants-demo",
+    description: "Fader thumb marks variants (off, 1, 4)",
+    type: "registry:example",
+    registryDependencies: ["@audio/fader"],
+    files: [{
+      path: "src/registry/default/examples/fader-thumb-marks-variants-demo.tsx",
+      type: "registry:example",
+      target: ""
+    }],
+    component: React.lazy(async () => {
+      const mod = await import("@/registry/default/examples/fader-thumb-marks-variants-demo.tsx")
+      const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
+      return { default: mod.default || mod[exportName] }
+    }),
+    categories: ["fader"],
+    meta: undefined,
+  },
   "fader-custom-thumb-marks-demo": {
     name: "fader-custom-thumb-marks-demo",
     description: "Fader component example with custom thumb marks",
@@ -514,6 +586,24 @@ export const Index: Record<string, any> = {
     }],
     component: React.lazy(async () => {
       const mod = await import("@/registry/default/examples/fader-custom-thumb-marks-demo.tsx")
+      const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
+      return { default: mod.default || mod[exportName] }
+    }),
+    categories: ["fader"],
+    meta: undefined,
+  },
+  "fader-bipolar-db-demo": {
+    name: "fader-bipolar-db-demo",
+    description: "Fader gain control in dB range (-60 to +6)",
+    type: "registry:example",
+    registryDependencies: ["@audio/fader"],
+    files: [{
+      path: "src/registry/default/examples/fader-bipolar-db-demo.tsx",
+      type: "registry:example",
+      target: ""
+    }],
+    component: React.lazy(async () => {
+      const mod = await import("@/registry/default/examples/fader-bipolar-db-demo.tsx")
       const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
       return { default: mod.default || mod[exportName] }
     }),
@@ -574,6 +664,24 @@ export const Index: Record<string, any> = {
     categories: ["knob"],
     meta: undefined,
   },
+  "knob-disabled-demo": {
+    name: "knob-disabled-demo",
+    description: "Knob disabled vs enabled comparison",
+    type: "registry:example",
+    registryDependencies: ["@audio/knob"],
+    files: [{
+      path: "src/registry/default/examples/knob-disabled-demo.tsx",
+      type: "registry:example",
+      target: ""
+    }],
+    component: React.lazy(async () => {
+      const mod = await import("@/registry/default/examples/knob-disabled-demo.tsx")
+      const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
+      return { default: mod.default || mod[exportName] }
+    }),
+    categories: ["knob"],
+    meta: undefined,
+  },
   "knob-size-variants-demo": {
     name: "knob-size-variants-demo",
     description: "Knob component example with size variants",
@@ -592,6 +700,24 @@ export const Index: Record<string, any> = {
     categories: ["knob"],
     meta: undefined,
   },
+  "knob-fine-step-demo": {
+    name: "knob-fine-step-demo",
+    description: "Knob with fine-grained step control (0.01)",
+    type: "registry:example",
+    registryDependencies: ["@audio/knob"],
+    files: [{
+      path: "src/registry/default/examples/knob-fine-step-demo.tsx",
+      type: "registry:example",
+      target: ""
+    }],
+    component: React.lazy(async () => {
+      const mod = await import("@/registry/default/examples/knob-fine-step-demo.tsx")
+      const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
+      return { default: mod.default || mod[exportName] }
+    }),
+    categories: ["knob"],
+    meta: undefined,
+  },
   "knob-filter-control-demo": {
     name: "knob-filter-control-demo",
     description: "Knob component example with filter control",
@@ -604,6 +730,24 @@ export const Index: Record<string, any> = {
     }],
     component: React.lazy(async () => {
       const mod = await import("@/registry/default/examples/knob-filter-control-demo.tsx")
+      const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
+      return { default: mod.default || mod[exportName] }
+    }),
+    categories: ["knob"],
+    meta: undefined,
+  },
+  "knob-change-vs-commit-demo": {
+    name: "knob-change-vs-commit-demo",
+    description: "Knob live value vs committed value callbacks",
+    type: "registry:example",
+    registryDependencies: ["@audio/knob"],
+    files: [{
+      path: "src/registry/default/examples/knob-change-vs-commit-demo.tsx",
+      type: "registry:example",
+      target: ""
+    }],
+    component: React.lazy(async () => {
+      const mod = await import("@/registry/default/examples/knob-change-vs-commit-demo.tsx")
       const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
       return { default: mod.default || mod[exportName] }
     }),
