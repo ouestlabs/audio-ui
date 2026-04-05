@@ -898,6 +898,114 @@ export const Index: Record<string, any> = {
     categories: ["xypad"],
     meta: undefined,
   },
+  "xypad-live-value-demo": {
+    name: "xypad-live-value-demo",
+    description: "XYPad with live x/y readout",
+    type: "registry:example",
+    registryDependencies: ["@audio/xypad"],
+    files: [{
+      path: "src/registry/default/examples/xypad-live-value-demo.tsx",
+      type: "registry:example",
+      target: ""
+    }],
+    component: React.lazy(async () => {
+      const mod = await import("@/registry/default/examples/xypad-live-value-demo.tsx")
+      const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
+      return { default: mod.default || mod[exportName] }
+    }),
+    categories: ["xypad"],
+    meta: undefined,
+  },
+  "xypad-size-sm-demo": {
+    name: "xypad-size-sm-demo",
+    description: "XYPad size small example",
+    type: "registry:example",
+    registryDependencies: ["@audio/xypad"],
+    files: [{
+      path: "src/registry/default/examples/xypad-size-sm-demo.tsx",
+      type: "registry:example",
+      target: ""
+    }],
+    component: React.lazy(async () => {
+      const mod = await import("@/registry/default/examples/xypad-size-sm-demo.tsx")
+      const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
+      return { default: mod.default || mod[exportName] }
+    }),
+    categories: ["xypad"],
+    meta: undefined,
+  },
+  "xypad-size-default-demo": {
+    name: "xypad-size-default-demo",
+    description: "XYPad size default example",
+    type: "registry:example",
+    registryDependencies: ["@audio/xypad"],
+    files: [{
+      path: "src/registry/default/examples/xypad-size-default-demo.tsx",
+      type: "registry:example",
+      target: ""
+    }],
+    component: React.lazy(async () => {
+      const mod = await import("@/registry/default/examples/xypad-size-default-demo.tsx")
+      const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
+      return { default: mod.default || mod[exportName] }
+    }),
+    categories: ["xypad"],
+    meta: undefined,
+  },
+  "xypad-size-lg-demo": {
+    name: "xypad-size-lg-demo",
+    description: "XYPad size large example",
+    type: "registry:example",
+    registryDependencies: ["@audio/xypad"],
+    files: [{
+      path: "src/registry/default/examples/xypad-size-lg-demo.tsx",
+      type: "registry:example",
+      target: ""
+    }],
+    component: React.lazy(async () => {
+      const mod = await import("@/registry/default/examples/xypad-size-lg-demo.tsx")
+      const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
+      return { default: mod.default || mod[exportName] }
+    }),
+    categories: ["xypad"],
+    meta: undefined,
+  },
+  "xypad-size-xl-demo": {
+    name: "xypad-size-xl-demo",
+    description: "XYPad size extra large example",
+    type: "registry:example",
+    registryDependencies: ["@audio/xypad"],
+    files: [{
+      path: "src/registry/default/examples/xypad-size-xl-demo.tsx",
+      type: "registry:example",
+      target: ""
+    }],
+    component: React.lazy(async () => {
+      const mod = await import("@/registry/default/examples/xypad-size-xl-demo.tsx")
+      const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
+      return { default: mod.default || mod[exportName] }
+    }),
+    categories: ["xypad"],
+    meta: undefined,
+  },
+  "xypad-disabled-demo": {
+    name: "xypad-disabled-demo",
+    description: "XYPad disabled state example",
+    type: "registry:example",
+    registryDependencies: ["@audio/xypad"],
+    files: [{
+      path: "src/registry/default/examples/xypad-disabled-demo.tsx",
+      type: "registry:example",
+      target: ""
+    }],
+    component: React.lazy(async () => {
+      const mod = await import("@/registry/default/examples/xypad-disabled-demo.tsx")
+      const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
+      return { default: mod.default || mod[exportName] }
+    }),
+    categories: ["xypad"],
+    meta: undefined,
+  },
   "xypad-format-value-demo": {
     name: "xypad-format-value-demo",
     description: "XYPad component example with formatted value",
@@ -910,6 +1018,42 @@ export const Index: Record<string, any> = {
     }],
     component: React.lazy(async () => {
       const mod = await import("@/registry/default/examples/xypad-format-value-demo.tsx")
+      const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
+      return { default: mod.default || mod[exportName] }
+    }),
+    categories: ["xypad"],
+    meta: undefined,
+  },
+  "xypad-bipolar-range-demo": {
+    name: "xypad-bipolar-range-demo",
+    description: "XYPad with bipolar pan/mix style ranges",
+    type: "registry:example",
+    registryDependencies: ["@audio/xypad"],
+    files: [{
+      path: "src/registry/default/examples/xypad-bipolar-range-demo.tsx",
+      type: "registry:example",
+      target: ""
+    }],
+    component: React.lazy(async () => {
+      const mod = await import("@/registry/default/examples/xypad-bipolar-range-demo.tsx")
+      const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
+      return { default: mod.default || mod[exportName] }
+    }),
+    categories: ["xypad"],
+    meta: undefined,
+  },
+  "xypad-change-vs-commit-demo": {
+    name: "xypad-change-vs-commit-demo",
+    description: "XYPad live value vs committed value callbacks",
+    type: "registry:example",
+    registryDependencies: ["@audio/xypad"],
+    files: [{
+      path: "src/registry/default/examples/xypad-change-vs-commit-demo.tsx",
+      type: "registry:example",
+      target: ""
+    }],
+    component: React.lazy(async () => {
+      const mod = await import("@/registry/default/examples/xypad-change-vs-commit-demo.tsx")
       const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
       return { default: mod.default || mod[exportName] }
     }),

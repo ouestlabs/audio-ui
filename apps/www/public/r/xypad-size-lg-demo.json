@@ -1,0 +1,20 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "xypad-size-lg-demo",
+  "description": "XYPad size large example",
+  "registryDependencies": [
+    "@audio/xypad"
+  ],
+  "files": [
+    {
+      "path": "src/registry/default/examples/xypad-size-lg-demo.tsx",
+      "content": "import { XYPad } from \"@/registry/default/ui/audio/elements/xypad\";\n\nexport default function XYPadSizeLgDemo() {\n  return (\n    <XYPad className=\"aspect-square\" defaultValue={{ x: 40, y: 65 }} size=\"lg\" />\n  );\n}\n",
+      "type": "registry:example",
+      "target": "components/audio/examples/xypad-size-lg-demo.tsx"
+    }
+  ],
+  "categories": [
+    "xypad"
+  ],
+  "type": "registry:example"
+}

@@ -1,14 +1,21 @@
 ---
 title: XY Pad
-description: A two-dimensional pad control for adjusting X and Y values simultaneously. Built on audio-ui primitives.
+description: Two-dimensional control surface for mapping and automating X/Y parameters with pointer, wheel, and keyboard input.
 links:
   doc:
-    - https://www.npmjs.com/package/audio-ui
+    - https://www.npmjs.com/package/@audio-ui/react
 ---
 
-An XY pad component for controlling two parameters simultaneously. Perfect for synthesizers, filters, and effects that need two-dimensional control.
+XY pad for simultaneous control of two values (for example filter cutoff/resonance, pan/mix, or macro controls). The registry component wraps `XYPad` primitives from `@audio-ui/react` and provides ready-to-use visuals (grid, crosshair, cursor, value display).
 
-<Preview name="xypad-demo" />
+<Preview name="xypad-live-value-demo" />
+
+## Overview
+
+- **Interaction model:** Pointer drag, wheel nudging, and keyboard nudging over both axes.
+- **Axes:** Independent ranges and steps for X (`minX`, `maxX`, `stepX`) and Y (`minY`, `maxY`, `stepY`).
+- **Feedback:** Grid lines, crosshair, animated cursor, and optional value display overlay.
+- **Accessibility:** Focusable interactive surface with ARIA labeling (`aria-label` / `aria-labelledby`).
 
 ## Installation
 
@@ -45,40 +52,72 @@ An XY pad component for controlling two parameters simultaneously. Perfect for s
 import { XYPad } from "@/components/audio/xypad";
 ```
 
-### Basic XY Pad
+**Uncontrolled** - initial value only:
 
 ```tsx
 <XYPad
-  defaultValue={{ x: 50, y: 50 }}
+  defaultValue={{ x: 0, y: 0 }}
+  maxX={100}
+  maxY={1}
+  minX={-100}
+  minY={-1}
+  stepX={1}
+  stepY={0.01}
+/>
+```
+
+**Controlled** - drive value from state:
+
+```tsx
+const [position, setPosition] = useState({ x: 50, y: 50 });
+
+<XYPad
   maxX={100}
   maxY={100}
   minX={0}
   minY={0}
+  onValueChange={setPosition}
+  onValueCommit={(value) => console.log("Committed:", value)}
+  value={position}
 />
 ```
 
-### Custom Value Display
+## Interaction
 
-<Preview name="xypad-format-value-demo" />
+### Pointer
 
-### Hide Value Display
+| Behavior | Details |
+| -------- | ------- |
+| **Click / drag on pad** | Pointer position maps directly to X/Y in bounds. |
+| **Clamping** | Values always clamp to configured axis ranges. |
+| **Commit event** | `onValueCommit` fires when drag interaction ends. |
 
-<Preview name="xypad-hide-value-demo" />
+### Keyboard
 
-## API Reference
+Focused XY pad:
 
-### XYPad
+| Key | Action |
+| --- | ------ |
+| `ArrowLeft` / `ArrowRight` | Decrease / increase X by `stepX` |
+| `ArrowUp` / `ArrowDown` | Increase / decrease Y by `stepY` |
+| `PageUp` / `PageDown` | Increase / decrease Y by `stepY × 10` |
+| `Home` | Jump to top-left logical corner (`x = minX`, `y = maxY`) |
+| `End` | Jump to bottom-right logical corner (`x = maxX`, `y = minY`) |
 
-#### Props
+### Wheel
+
+When focused, wheel deltas nudge both axes according to pad dimensions and axis ranges, then quantize with `stepX` and `stepY`.
+
+## API reference
+
+`XYPad` accepts style props (`size`, `formatValue`, `showValueDisplay`, `className`) plus primitive props from `XYPadPrimitive.RootProps`.
+
+### Value and state
 
 | Prop            | Type                                    | Default       | Description                                                      |
 | --------------- | --------------------------------------- | ------------- | ---------------------------------------------------------------- |
-| `size`          | `"sm" \| "default" \| "lg" \| "xl"`    | `"default"`   | Size variant (affects height).                                   |
-| `formatValue`   | `(value: { x: number; y: number }) => React.ReactNode` | - | Custom formatter for value display.                               |
-| `showValueDisplay` | `boolean`                           | `true`        | Whether to show the value display overlay.                       |
-| `className`     | `string`                                | -             | Additional CSS classes.                                         |
 | `value`         | `{ x: number; y: number }`             | -             | Controlled value.                                                 |
-| `defaultValue`  | `{ x: number; y: number }`            | -             | Uncontrolled default value.                                      |
+| `defaultValue`  | `{ x: number; y: number }`            | `{ x: 0, y: 0 }` | Uncontrolled default value.                                   |
 | `minX`          | `number`                                | `0`           | Minimum X value.                                                 |
 | `maxX`          | `number`                                | `100`         | Maximum X value.                                                 |
 | `minY`          | `number`                                | `0`           | Minimum Y value.                                                 |
@@ -88,31 +127,75 @@ import { XYPad } from "@/components/audio/xypad";
 | `disabled`      | `boolean`                               | `false`       | Whether the pad is disabled.                                     |
 | `onValueChange` | `(value: { x: number; y: number }) => void` | -        | Callback when value changes during interaction.                  |
 | `onValueCommit`  | `(value: { x: number; y: number }) => void` | -         | Callback when value is committed (on release).                   |
+| `aria-label` | `string` | `"XY Pad"` | Accessible name for the interactive surface. |
+| `aria-labelledby` | `string` | - | ID of a labeling element. |
 
-All other props are inherited from the `XYPadPrimitive.RootProps` from `audio-ui`.
+### Layout and display
+
+| Prop            | Type                                    | Default       | Description                                                      |
+| --------------- | --------------------------------------- | ------------- | ---------------------------------------------------------------- |
+| `size`          | `"sm" \| "default" \| "lg" \| "xl"`    | `"default"`   | Size variant (affects height).                                   |
+| `formatValue`   | `(value: { x: number; y: number }) => React.ReactNode` | - | Custom formatter for value display.                               |
+| `showValueDisplay` | `boolean`                           | `true`        | Whether to show the value display overlay.                       |
+| `className`     | `string`                                | -             | Additional CSS classes.                                         |
+
+Additional valid HTML attributes passed to `XYPad.Root` are forwarded.
 
 ## Examples
 
-### Synthesizer Control
+### Live value readout
+
+<Preview name="xypad-live-value-demo" />
+
+### Size variants
+
+#### `sm`
+
+<Preview name="xypad-size-sm-demo" />
+
+#### `default`
+
+<Preview name="xypad-size-default-demo" />
+
+#### `lg`
+
+<Preview name="xypad-size-lg-demo" />
+
+#### `xl`
+
+<Preview name="xypad-size-xl-demo" />
+
+### Disabled state
+
+<Preview name="xypad-disabled-demo" />
+
+### Custom formatted display
+
+<Preview name="xypad-format-value-demo" />
+
+### Hidden value display
+
+<Preview name="xypad-hide-value-demo" />
+
+### Bipolar ranges (pan and mix style)
+
+<Preview name="xypad-bipolar-range-demo" />
+
+### Live value vs committed value callbacks
+
+<Preview name="xypad-change-vs-commit-demo" />
+
+### Synthesizer control
 
 <Preview name="xypad-synthesizer-control-demo" />
 
-### Filter Control
+### Filter control
 
 <Preview name="xypad-filter-control-demo" />
 
-## Notes
+## Source package
 
 <Callout variant="info">
-  <strong>Important Information:</strong>
-
-  - **Built on audio-ui:** This component is built on top of the `audio-ui`
-    package primitives, providing a high-quality, accessible XY pad control.
-  - **Grid Display:** The pad includes a visual grid to help with positioning.
-  - **Crosshair:** Visual crosshairs indicate the current X and Y positions.
-  - **Value Display:** By default, a value display overlay shows the current
-    position. You can customize the format or hide it entirely.
-  - **Size Variants:** Four size variants are available: `sm`, `default`, `lg`,
-    and `xl`. These affect the pad height.
+  For low-level composition (`XYPadPrimitive.Root`, `Slider`, `Grid`, `Crosshair`, `Cursor`, etc.), see [@audio-ui/react on npm](https://www.npmjs.com/package/@audio-ui/react).
 </Callout>
 
