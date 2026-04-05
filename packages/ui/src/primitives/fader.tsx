@@ -297,7 +297,7 @@ export namespace Fader {
       <FaderContext.Provider value={contextValue}>
         <div
           className={className}
-          {...getDataAttributes("fader", { part: "wrapper" })}
+          {...getDataAttributes("fader", { part: "fader-wrapper" })}
           {...props}
         >
           {children}
