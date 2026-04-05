@@ -360,15 +360,22 @@ export namespace Fader {
 
   export function Range({ className, style, ...props }: RangeProps) {
     const { percentage, orientation } = useFaderContext();
+    const transform =
+      orientation === "horizontal"
+        ? `scaleX(${percentage})`
+        : `scaleY(${percentage})`;
+
     return (
       <div
         className={className}
         {...getDataAttributes("fader", { part: "range" })}
         style={{
+          width: "100%",
+          height: "100%",
+          transform,
+          transformOrigin:
+            orientation === "horizontal" ? "left center" : "center bottom",
           ...style,
-          ...(orientation === "horizontal"
-            ? { width: `${percentage * 100}%` }
-            : { height: `${percentage * 100}%` }),
         }}
         {...props}
       />
