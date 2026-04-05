@@ -110,7 +110,7 @@ When focused, wheel deltas nudge both axes according to pad dimensions and axis 
 
 ## API reference
 
-`XYPad` accepts style props (`size`, `formatValue`, `showValueDisplay`, `className`) plus primitive props from `XYPadPrimitive.RootProps`.
+`XYPad` accepts style props (`size`, `formatValue`, `valueDisplay`, `className`) plus primitive props from `XYPadPrimitive.RootProps`.
 
 ### Value and state
 
@@ -136,7 +136,7 @@ When focused, wheel deltas nudge both axes according to pad dimensions and axis 
 | --------------- | --------------------------------------- | ------------- | ---------------------------------------------------------------- |
 | `size`          | `"sm" \| "default" \| "lg" \| "xl"`    | `"default"`   | Size variant (affects height).                                   |
 | `formatValue`   | `(value: { x: number; y: number }) => React.ReactNode` | - | Custom formatter for value display.                               |
-| `showValueDisplay` | `boolean`                           | `true`        | Whether to show the value display overlay.                       |
+| `valueDisplay` | `"visible" \| "hidden"`              | `"visible"`   | Controls value display visibility. Use `"hidden"` to hide overlay. |
 | `className`     | `string`                                | -             | Additional CSS classes.                                         |
 
 Additional valid HTML attributes passed to `XYPad.Root` are forwarded.

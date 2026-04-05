@@ -10,7 +10,7 @@ export default function XypadHideValueDemo() {
       maxY={100}
       minX={0}
       minY={0}
-      showValueDisplay={false}
+      valueDisplay="hidden"
     />
   );
 }

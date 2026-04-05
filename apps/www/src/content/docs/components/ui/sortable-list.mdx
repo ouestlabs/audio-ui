@@ -156,28 +156,23 @@ Inherits all props from `Button` component.
 <Callout variant="info">
   <strong>Important Information:</strong>
 
-- **Custom Component:** This component is not part of the default shadcn/ui
-  registry. It's a custom component built specifically for audio/ui to enable
-  drag-and-drop reordering of tracks in the queue.
-- **Built with dnd-kit:** This component is built on top of <code>@dnd-kit</code>,
-  which provides full keyboard navigation support. Users can reorder items using
-  arrow keys and keyboard shortcuts. See the{" "}
-  <a
-    href="https://docs.dndkit.com/presets/sortable"
-    target="_blank"
-    rel="noopener noreferrer"
-  >
-    dnd-kit documentation
-  </a>
-  for more details.
-  - **Drag Handle:** The <code>SortableDragHandle</code> component uses shadcn/ui's{" "}
-    <code>Button</code> component and provides a pre-configured drag handle with proper
-    accessibility attributes.
-  - **Item IDs:** Each item must have a unique <code>id</code> property. The{" "}
-    <code>id</code> type must match between the item object and the <code>
-      SortableItem
-    </code> component.
+  - **Custom Component:** This component is not part of the default shadcn/ui
+    registry. It is custom to this project for drag-and-drop audio queue reordering.
+  - **Built with dnd-kit:** This component is built on top of <code>@dnd-kit</code>,
+    which includes keyboard-friendly drag-and-drop behavior. See the{" "}
+    <a
+      href="https://docs.dndkit.com/presets/sortable"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      dnd-kit documentation
+    </a>
+    for details.
+  - **Drag Handle:** <code>SortableDragHandle</code> uses the project <code>Button</code>{" "}
+    primitive and ships pre-wired accessibility attributes.
+  - **Item IDs:** Each item must have a unique <code>id</code> property. The
+    `id` type must match between the item object and the <code>SortableItem</code>{" "}
+    component.
   - **Usage in Audio Components:** This component is used by{" "}
-    <code>AudioTrackList</code> to enable drag-and-drop reordering of tracks in
-    the queue.
+    <code>AudioTrackList</code> for queue reordering.
 </Callout>

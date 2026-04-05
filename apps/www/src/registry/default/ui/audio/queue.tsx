@@ -51,27 +51,27 @@ import {
  * Props for the AudioQueueButton component.
  */
 export interface AudioQueueButtonProps extends ComponentProps<typeof Button> {
-  tooltip?: boolean;
   tooltipLabel?: string;
 }
 
-function AudioQueueButton({
-  tooltip = false,
-  tooltipLabel,
-  ...props
-}: AudioQueueButtonProps) {
-  if (tooltip && tooltipLabel) {
+function AudioQueueButton({ tooltipLabel, ...props }: AudioQueueButtonProps) {
+  const buttonProps = {
+    ...props,
+    "aria-label": props["aria-label"] ?? tooltipLabel,
+  };
+
+  if (tooltipLabel) {
     return (
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button {...props} />
+          <Button {...buttonProps} />
         </TooltipTrigger>
         <TooltipContent sideOffset={4}>{tooltipLabel}</TooltipContent>
       </Tooltip>
     );
   }
 
-  return <Button {...props} />;
+  return <Button {...buttonProps} />;
 }
 
 const AudioQueueRepeatMode = ({
@@ -96,6 +96,7 @@ const AudioQueueRepeatMode = ({
 
   const toggle = (
     <Toggle
+      aria-label={repeatTooltip}
       className={cn(
         className,
         isPressed && "bg-accent! text-accent-foreground!"
@@ -168,7 +169,6 @@ const AudioQueuePreferences = ({
   className,
   variant = "outline",
   size = "icon",
-  tooltip = true,
   tooltipLabel = "Queue preferences",
   ...props
 }: React.ComponentProps<typeof AudioQueueButton>) => {
@@ -184,7 +184,6 @@ const AudioQueuePreferences = ({
           className={cn(className)}
           data-slot="audio-queue-preferences-trigger"
           size={size}
-          tooltip
           tooltipLabel={tooltipLabel}
           variant={variant}
           {...props}
@@ -246,7 +245,6 @@ const AudioQueue = React.memo(
     emptyDescription = "Try searching for a different track",
   }: AudioQueueProps) => {
     const togglePlay = useAudioStore((state) => state.togglePlay);
-    const currentTrackId = useAudioStore((state) => state.currentTrack?.id);
     const setQueueAndPlay = useAudioStore((state) => state.setQueueAndPlay);
     const clearQueue = useAudioStore((state) => state.clearQueue);
     const removeFromQueue = useAudioStore((state) => state.removeFromQueue);
@@ -254,19 +252,21 @@ const AudioQueue = React.memo(
     const [dialogOpen, setDialogOpen] = React.useState(false);
     const [searchQuery, setSearchQuery] = React.useState("");
 
-    const isFiltered = searchQuery.trim().length > 0;
+    const normalizedSearchQuery = searchQuery.trim().toLowerCase();
+    const isFiltered = normalizedSearchQuery.length > 0;
 
     const handleTrackSelect = React.useCallback(
       (index: number) => {
-        const currentQueue = useAudioStore.getState().queue;
+        const currentState = useAudioStore.getState();
+        const currentQueue = currentState.queue;
+        const currentTrackId = currentState.currentTrack?.id;
         let filtered = currentQueue;
 
-        if (searchQuery.trim()) {
-          const query = searchQuery.toLowerCase();
+        if (normalizedSearchQuery) {
           filtered = currentQueue.filter(
             (t: Track) =>
-              t.title?.toLowerCase().includes(query) ||
-              t.artist?.toLowerCase().includes(query)
+              t.title?.toLowerCase().includes(normalizedSearchQuery) ||
+              t.artist?.toLowerCase().includes(normalizedSearchQuery)
           );
         }
 
@@ -290,7 +290,7 @@ const AudioQueue = React.memo(
         onTrackSelect?.(trackIndex);
         setDialogOpen(false);
       },
-      [searchQuery, currentTrackId, togglePlay, setQueueAndPlay, onTrackSelect]
+      [normalizedSearchQuery, togglePlay, setQueueAndPlay, onTrackSelect]
     );
 
     const handleTrackRemove = React.useCallback(
@@ -315,12 +315,7 @@ const AudioQueue = React.memo(
         open={dialogOpen}
       >
         <DialogTrigger asChild>
-          <AudioQueueButton
-            size="icon"
-            tooltip
-            tooltipLabel="Queue"
-            variant="outline"
-          >
+          <AudioQueueButton size="icon" tooltipLabel="Queue" variant="outline">
             <ListMusicIcon />
           </AudioQueueButton>
         </DialogTrigger>
@@ -357,9 +352,9 @@ const AudioQueue = React.memo(
                 emptyDescription={emptyDescription}
                 emptyLabel={emptyLabel}
                 filterQuery={searchQuery}
+                mode={isFiltered ? "static" : "sortable"}
                 onTrackRemove={handleTrackRemove}
                 onTrackSelect={handleTrackSelect}
-                sortable={!isFiltered}
               />
             </CommandList>
           </Command>

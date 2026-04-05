@@ -15,6 +15,14 @@ Track components for displaying and managing audio tracks. These components supp
 - Store mode: reads from and controls the global audio queue provided by the project's audio store.
 - Controlled mode: accepts an explicit list or single track for use in search results or external lists.
 
+<Preview name="track-list-demo" />
+
+## Overview
+
+- **Single row or full list:** Use `AudioTrack` for one item, `AudioTrackList` for queue/list rendering.
+- **Mode-based behavior:** `mode="static"` for fixed lists, `mode="sortable"` for drag-and-drop.
+- **Composable presentation:** `media` and `actions` variants replace multiple boolean display flags.
+
 ## Installation
 
 <CodeTabs>
@@ -100,7 +108,7 @@ Renders a list of tracks. Pass `tracks` for a controlled list, otherwise the com
 Key features:
 
 - Text filtering via `filterQuery` or a custom `filterFn`.
-- Optional drag-and-drop (`sortable`) - reordering updates the queue only when not filtered and when `tracks` is not provided.
+- Optional drag-and-drop (`mode="sortable"`) - reordering updates the queue only when not filtered and when `tracks` is not provided.
 - Per-item remove action and play/pause controls (configurable via props).
 
 <Preview name="track-list-demo" />
@@ -115,13 +123,19 @@ Key features:
 
 #### Grid Layout
 
+Use this when you want denser browsing (cover + metadata in a responsive grid).
+
 <Preview name="track-list-grid-demo" />
 
 #### Sortable
 
+Use this when queue ordering is part of the interaction (drag handle + reorder).
+
 <Preview name="track-sortable-list-demo" />
 
 #### Sortable Grid
+
+Use this when you want drag-and-drop behavior with a visual grid layout.
 
 <Preview name="track-sortable-list-grid-demo" />
 
@@ -138,10 +152,8 @@ Key features:
 | `index`          | `number`                    | -       | Display index (one-based when shown).                                                 |
 | `onClick`        | `() => void`                | -       | Click handler invoked when the item is clicked.                                       |
 | `onRemove`       | `(trackId: string) => void` | -       | Called when the remove action is used. Receives the track id as string.               |
-| `showRemove`     | `boolean`                   | `false` | Whether to show the remove (X) button. Hidden for the current playing track.          |
-| `showPlayPause`  | `boolean`                   | `true`  | Show play / pause control.                                                            |
-| `showDragHandle` | `boolean`                   | `false` | Show a drag handle (used together with sortable lists).                               |
-| `showCover`      | `boolean`                   | `true`  | Show album artwork (falls back to default icon).                                      |
+| `media`          | `"cover" \| "drag-handle" \| "drag-handle-with-cover" \| "index"` | `"cover"` | Track media variant (cover art, drag handle, both, or index text).                    |
+| `actions`        | `"none" \| "play-pause" \| "remove" \| "play-pause-with-remove"` | `"play-pause"` | Action variant rendered on the right side.                                              |
 | `className`      | `string`                    | -       | Additional CSS classes.                                                               |
 
 <Callout variant="info">
@@ -165,8 +177,9 @@ Key features:
 | `tracks`           | `Track[]`                                | -                          | Controlled list of tracks. When omitted the component reads from the global queue.                                                                         |
 | `onTrackSelect`    | `(index: number, track?: Track) => void` | -                          | Called when a track is selected or played. In store mode the index is the queue index. In controlled mode the index refers to the provided `tracks` array. |
 | `onTrackRemove`    | `(trackId: string) => void`              | -                          | Remove handler used by the per-item remove button.                                                                                                         |
-| `sortable`         | `boolean`                                | `false`                    | Enable drag-and-drop reordering. Reordering will update the store queue only when not filtered and when `tracks` is not provided.                          |
-| `showCover`        | `boolean`                                | `true`                     | Show track cover image.                                                                                                                                    |
+| `mode`             | `"static" \| "sortable"`                 | `"static"`                 | List behavior mode. Use `"sortable"` to enable drag-and-drop reordering.                                                                                   |
+| `media`            | `"cover" \| "index"`                     | `"cover"`                  | Media style for list items. In sortable mode, this is composed with a drag-handle variant automatically.                                                   |
+| `actions`          | `"none" \| "play-pause" \| "remove" \| "play-pause-with-remove"` | Auto (`"play-pause"` or `"play-pause-with-remove"`) | Explicit action variant for each row. By default, remove is enabled automatically when `onTrackRemove` is provided. |
 | `variant`          | `"default" \| "grid"`                    | `"default"`                | Layout variant: stacked list or responsive grid.                                                                                                           |
 | `filterQuery`      | `string`                                 | -                          | Simple text filter (matches title or artist).                                                                                                              |
 | `filterFn`         | `(track: Track) => boolean`              | -                          | Custom filter function. When provided, `filterQuery` is ignored.                                                                                           |
@@ -182,51 +195,16 @@ Key features:
 </Callout>
 
 <Callout variant="warning">
-  <strong>Sortable Behavior:</strong> When <code>sortable</code> is enabled,
+  <strong>Sortable Behavior:</strong> When <code>mode="sortable"</code> is enabled,
   reordering will update the store queue only when:
   - The list is not filtered (<code>filterQuery</code> and <code>filterFn</code>{" "}
     are not used)
   - The component is in store mode (<code>tracks</code> prop is not provided)
 
-Keep <code>sortable</code> disabled while filtering to avoid confusing
+Keep <code>mode="static"</code> while filtering to avoid confusing
 reordering behavior.
 
 </Callout>
-
-## Examples
-
-### Store mode (main queue)
-
-```tsx
-<AudioTrackList
-  sortable
-  onTrackSelect={(i) => console.log("play queue index", i)}
-/>
-```
-
-### Controlled mode (search results)
-
-```tsx
-<AudioTrackList
-  tracks={searchResults}
-  variant="grid"
-  onTrackSelect={(index, track) => addToQueue(track)}
-/>
-```
-
-### Filtering
-
-```tsx
-<AudioTrackList filterQuery="jazz" />
-// or
-<AudioTrackList filterFn={(t) => t.genre === 'jazz'} />
-```
-
-### With removal
-
-```tsx
-<AudioTrackList onTrackRemove={(id) => removeFromQueue(id)} />
-```
 
 ## Notes
 

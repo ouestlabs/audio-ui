@@ -42,10 +42,10 @@ A fully composable audio player component system. Build custom audio interfaces 
         npx shadcn@latest add button dialog dropdown-menu empty input item scroll-area toggle tooltip
         ```
 
-      <Step>Install the slider components from this registry:</Step>
+      <Step>Install the control primitives from this registry:</Step>
 
         ```bash
-        npx shadcn@latest add @audio/slider
+        npx shadcn@latest add @audio/slider @audio/fader
         ```
 
       <Step>Copy and paste the following code into your project.</Step>
@@ -116,23 +116,17 @@ import {
 } from "@/components/audio/player";
 ```
 
-```tsx
-<AudioPlayer>
-  <AudioPlayerControlBar>
-    <AudioPlayerControlGroup>
-      <AudioPlayerRewind />
-      <AudioPlayerSkipBack />
-      <AudioPlayerPlay />
-      <AudioPlayerSkipForward />
-      <AudioPlayerFastForward />
-      <AudioPlayerTimeDisplay />
-      <AudioPlayerSeekBar />
-      <AudioPlayerTimeDisplay remaining />
-      <AudioPlayerVolume />
-    </AudioPlayerControlGroup>
-  </AudioPlayerControlBar>
-</AudioPlayer>
-```
+Start with the default demo composition:
+
+<Preview name="player-demo" />
+
+### Example map
+
+Use each preview for one focused layout goal:
+
+- `player-demo`: compact baseline player controls
+- `player-stacked-demo`: stacked timeline + controls layout
+- `player-queue-demo`: player integrated with queue controls
 
 ### Stacked Layout
 
@@ -282,9 +276,9 @@ Displays the current playback time or remaining time.
 
 ### AudioPlayerVolume
 
-A dropdown menu button with a slider to control volume. Click to open the volume control menu.
+A dropdown menu button with a horizontal `Fader` to control volume. Click to open the volume control menu.
 
-Inherits all props from `DropdownMenu` component.
+Inherits all props from `Fader` except `value`, `onValueChange`, `min`, `max`, `orientation`, and `size`.
 
 ## Notes
 
