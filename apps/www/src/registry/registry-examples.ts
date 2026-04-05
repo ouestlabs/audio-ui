@@ -141,17 +141,30 @@ export const examples: Registry["items"] = [
     categories: ["track", "sortable", "grid"],
   },
   {
-    name: "slider-demo",
-    description: "Slider component examples",
+    name: "transport-demo",
+    description: "Transport timeline with buffered range example",
     type: "registry:example",
-    registryDependencies: ["@audio/slider"],
+    registryDependencies: ["@audio/transport"],
     files: [
       {
-        path: "examples/slider-demo.tsx",
+        path: "examples/transport-demo.tsx",
         type: "registry:example",
       },
     ],
-    categories: ["slider", "ui"],
+    categories: ["transport", "ui"],
+  },
+  {
+    name: "transport-vertical-demo",
+    description: "Transport timeline in vertical orientation",
+    type: "registry:example",
+    registryDependencies: ["@audio/transport"],
+    files: [
+      {
+        path: "examples/transport-vertical-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    categories: ["transport", "ui"],
   },
   {
     name: "sortable-list-demo",

@@ -10,7 +10,7 @@ export const Index: Record<string, any> = {
     name: "player",
     description: "",
     type: "registry:component",
-    registryDependencies: ["@audio/store","@audio/html","@audio/use-audio","@audio/provider","@audio/slider","@shadcn/empty","@shadcn/button","@shadcn/dialog","@shadcn/dropdown-menu","@shadcn/input","@shadcn/item","@shadcn/scroll-area","@shadcn/toggle","@shadcn/tooltip"],
+    registryDependencies: ["@audio/store","@audio/html","@audio/use-audio","@audio/provider","@audio/transport","@shadcn/empty","@shadcn/button","@shadcn/dialog","@shadcn/dropdown-menu","@shadcn/input","@shadcn/item","@shadcn/scroll-area","@shadcn/toggle","@shadcn/tooltip"],
     files: [{
       path: "src/registry/default/ui/audio/player.tsx",
       type: "registry:component",
@@ -100,24 +100,24 @@ export const Index: Record<string, any> = {
     name: "ui",
     description: "",
     type: "registry:ui",
-    registryDependencies: ["@audio/slider","@audio/sortable-list"],
+    registryDependencies: ["@audio/transport","@audio/sortable-list"],
     files: [undefined],
     component: null,
     categories: undefined,
     meta: undefined,
   },
-  "slider": {
-    name: "slider",
+  "transport": {
+    name: "transport",
     description: "",
     type: "registry:ui",
-    registryDependencies: [],
+    registryDependencies: undefined,
     files: [{
-      path: "src/registry/default/ui/slider.tsx",
+      path: "src/registry/default/ui/audio/elements/transport.tsx",
       type: "registry:ui",
       target: ""
     }],
     component: React.lazy(async () => {
-      const mod = await import("@/registry/default/ui/slider.tsx")
+      const mod = await import("@/registry/default/ui/audio/elements/transport.tsx")
       const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
       return { default: mod.default || mod[exportName] }
     }),
@@ -394,22 +394,40 @@ export const Index: Record<string, any> = {
     categories: ["track","sortable","grid"],
     meta: undefined,
   },
-  "slider-demo": {
-    name: "slider-demo",
-    description: "Slider component examples",
+  "transport-demo": {
+    name: "transport-demo",
+    description: "Transport timeline with buffered range example",
     type: "registry:example",
-    registryDependencies: ["@audio/slider"],
+    registryDependencies: ["@audio/transport"],
     files: [{
-      path: "src/registry/default/examples/slider-demo.tsx",
+      path: "src/registry/default/examples/transport-demo.tsx",
       type: "registry:example",
       target: ""
     }],
     component: React.lazy(async () => {
-      const mod = await import("@/registry/default/examples/slider-demo.tsx")
+      const mod = await import("@/registry/default/examples/transport-demo.tsx")
       const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
       return { default: mod.default || mod[exportName] }
     }),
-    categories: ["slider","ui"],
+    categories: ["transport","ui"],
+    meta: undefined,
+  },
+  "transport-vertical-demo": {
+    name: "transport-vertical-demo",
+    description: "Transport timeline in vertical orientation",
+    type: "registry:example",
+    registryDependencies: ["@audio/transport"],
+    files: [{
+      path: "src/registry/default/examples/transport-vertical-demo.tsx",
+      type: "registry:example",
+      target: ""
+    }],
+    component: React.lazy(async () => {
+      const mod = await import("@/registry/default/examples/transport-vertical-demo.tsx")
+      const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
+      return { default: mod.default || mod[exportName] }
+    }),
+    categories: ["transport","ui"],
     meta: undefined,
   },
   "sortable-list-demo": {

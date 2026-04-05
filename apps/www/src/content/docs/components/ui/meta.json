@@ -1,4 +1,4 @@
 {
   "title": "UI",
-  "pages": ["fader", "knob", "slider", "sortable-list", "xypad"]
+  "pages": ["fader", "knob", "sortable-list", "transport", "xypad"]
 }

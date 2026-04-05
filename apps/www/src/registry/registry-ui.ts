@@ -4,16 +4,15 @@ export const ui: Registry["items"] = [
   {
     name: "ui",
     type: "registry:ui",
-    registryDependencies: ["@audio/slider", "@audio/sortable-list"],
+    registryDependencies: ["@audio/transport", "@audio/sortable-list"],
   },
   {
-    name: "slider",
+    name: "transport",
     type: "registry:ui",
-    dependencies: ["radix-ui"],
-    registryDependencies: [],
+    dependencies: ["@audio-ui/react"],
     files: [
       {
-        path: "ui/slider.tsx",
+        path: "ui/audio/elements/transport.tsx",
         type: "registry:ui",
       },
     ],

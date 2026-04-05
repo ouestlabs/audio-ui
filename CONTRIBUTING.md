@@ -263,14 +263,14 @@ export const ui: Registry["items"] = [
 When adding dependencies, use the correct format:
 
 - **Official shadcn/ui components**: Use simple names (e.g., `"button"`, `"dialog"`)
-- **Custom components from this registry**: Use namespace format (e.g., `"@audio/player"`, `"@audio/slider"`)
+- **Custom components from this registry**: Use namespace format (e.g., `"@audio/player"`, `"@audio/fader"`)
 - **Library utilities**: Use namespace format with the registry name (e.g., `"@audio/store"`, `"@audio/lib"`)
 
 Example:
 ```tsx
 registryDependencies: [
   "@audio/player",      // Custom component
-  "@audio/slider",      // Custom component
+  "@audio/fader",       // Custom component
   "@audio/store", // Library store
   "@audio/lib",   // Library utilities
   "button",             // Official shadcn/ui

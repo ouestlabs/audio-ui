@@ -1,0 +1,21 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "transport-vertical-demo",
+  "description": "Transport timeline in vertical orientation",
+  "registryDependencies": [
+    "@audio/transport"
+  ],
+  "files": [
+    {
+      "path": "src/registry/default/examples/transport-vertical-demo.tsx",
+      "content": "\"use client\";\n\nimport React from \"react\";\nimport { Transport } from \"@/registry/default/ui/audio/elements/transport\";\n\nexport default function TransportVerticalDemo() {\n  const [value, setValue] = React.useState(42);\n\n  return (\n    <div className=\"flex items-end gap-4\">\n      <div className=\"h-40 w-8\">\n        <Transport\n          aria-label=\"Playback position\"\n          bufferedValue={78}\n          onSeek={setValue}\n          orientation=\"vertical\"\n          value={value}\n        />\n      </div>\n      <output\n        aria-live=\"polite\"\n        className=\"w-12 text-center font-mono text-foreground text-sm tabular-nums\"\n      >\n        {value.toFixed(0)}%\n      </output>\n    </div>\n  );\n}\n",
+      "type": "registry:example",
+      "target": "components/audio/examples/transport-vertical-demo.tsx"
+    }
+  ],
+  "categories": [
+    "transport",
+    "ui"
+  ],
+  "type": "registry:example"
+}

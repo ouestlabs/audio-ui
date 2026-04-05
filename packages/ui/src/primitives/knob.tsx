@@ -614,9 +614,14 @@ export namespace Knob {
       <KnobContext.Provider value={contextValue}>
         <div
           className={className}
-          {...getDataAttributes("knob", { part: "wrapper" })}
+          {...getDataAttributes("knob", { part: "knob-wrapper" })}
           {...props}
         >
+          {ariaLabel || ariaLabelledBy ? null : (
+            <span className="sr-only" id={`${elementId}-label`}>
+              Knob
+            </span>
+          )}
           {children}
         </div>
       </KnobContext.Provider>

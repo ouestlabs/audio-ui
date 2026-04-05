@@ -1,6 +1,5 @@
 import type { Procedure } from "@audio-ui/utils";
 import {
-  assertType,
   clamp,
   clampUnit,
   type Nullable,
@@ -17,14 +16,16 @@ import {
 import { useControlledValue, useValueAsRef } from "../hooks/state";
 import { getDataAttributes } from "./internal/data-attributes";
 
-interface FaderContextValue {
+interface TransportContextValue {
   value: number;
+  bufferedValue: number;
   min: number;
   max: number;
   step: number;
   orientation: "horizontal" | "vertical";
   disabled: boolean;
   percentage: number;
+  bufferedPercentage: number;
   elementId: string;
   trackRef: React.RefObject<Nullable<HTMLDivElement>>;
   thumbRef: React.RefObject<Nullable<HTMLDivElement>>;
@@ -37,8 +38,6 @@ interface FaderContextValue {
   pendingValueRef: React.RefObject<number>;
   shouldPreventFocusRef: React.RefObject<boolean>;
   valueRef: React.RefObject<number>;
-  setRawValue: Procedure<number>;
-  onValueCommit?: Procedure<number>;
   ariaLabel?: string;
   ariaLabelledBy?: string;
   wheelRef: Procedure<Nullable<HTMLDivElement>>;
@@ -48,17 +47,19 @@ interface FaderContextValue {
   onDragEnd: () => void;
 }
 
-const FaderContext = React.createContext<FaderContextValue | null>(null);
+const TransportContext = React.createContext<TransportContextValue | null>(
+  null
+);
 
-function useFaderContext() {
-  const context = React.useContext(FaderContext);
+function useTransportContext() {
+  const context = React.useContext(TransportContext);
   if (!context) {
-    throw new Error("Fader components must be used within Fader.Root");
+    throw new Error("Transport components must be used within Transport.Root");
   }
   return context;
 }
 
-export namespace Fader {
+export namespace Transport {
   export interface RootProps
     extends Omit<
       React.ComponentProps<"div">,
@@ -73,11 +74,13 @@ export namespace Fader {
     > {
     value?: number | number[];
     defaultValue?: number;
+    bufferedValue?: number;
     min?: number;
     max?: number;
     step?: number;
     orientation?: "horizontal" | "vertical";
     disabled?: boolean;
+    freezeValuesWhileDragging?: boolean;
     "aria-label"?: string;
     "aria-labelledby"?: string;
     onValueChange?: Procedure<number>;
@@ -87,11 +90,13 @@ export namespace Fader {
   export function Root({
     value: controlledValue,
     defaultValue,
-    min = -60,
-    max = 6,
+    bufferedValue = 0,
+    min = 0,
+    max = 100,
     step = 1,
-    orientation = "vertical",
+    orientation = "horizontal",
     disabled = false,
+    freezeValuesWhileDragging = false,
     "aria-label": ariaLabel,
     "aria-labelledby": ariaLabelledBy,
     onValueChange,
@@ -101,14 +106,14 @@ export namespace Fader {
     children,
     ...props
   }: RootProps) {
-    const faderId = React.useId();
+    const generatedId = React.useId();
+    const elementId = id || generatedId;
     const trackRef = React.useRef<HTMLDivElement>(null);
     const thumbRef = React.useRef<HTMLDivElement>(null);
 
     const normalizedValue = Array.isArray(controlledValue)
       ? controlledValue[0]
       : controlledValue;
-
     const computedDefaultValue =
       defaultValue ?? (max < min ? min : min + (max - min) / 2);
 
@@ -118,34 +123,49 @@ export namespace Fader {
         defaultValue: computedDefaultValue,
         onChange: onValueChange,
         transform: (val: number) => {
-          const numValue = Number(val);
-          if (Number.isNaN(numValue) || !Number.isFinite(numValue)) {
+          const n = Number(val);
+          if (Number.isNaN(n) || !Number.isFinite(n)) {
             return min;
           }
-          return clamp(numValue, min, max);
+          return clamp(n, min, max);
         },
       });
 
     const value = rawValue ?? min;
     const valueRef = useValueAsRef(value);
+    const [isDragging, setIsDragging] = React.useState(false);
+    const [optimisticValue, setOptimisticValue] = React.useState<number | null>(
+      null
+    );
+    const [frozenBufferedValue, setFrozenBufferedValue] =
+      React.useState(bufferedValue);
+
+    const normalizeValue = React.useCallback(
+      (nextValue: number) => {
+        const clampedValue = clamp(nextValue, min, max);
+        return quantizeRound(clampedValue, step);
+      },
+      [min, max, step]
+    );
 
     const updateValue = React.useCallback(
       (newValue: number) => {
-        const clampedValue = clamp(newValue, min, max);
-        const steppedValue = quantizeRound(clampedValue, step);
+        const steppedValue = normalizeValue(newValue);
+        if (freezeValuesWhileDragging) {
+          setOptimisticValue(steppedValue);
+        }
         setRawValue(steppedValue);
       },
-      [min, max, step, setRawValue]
+      [normalizeValue, freezeValuesWhileDragging, setRawValue]
     );
 
     const commitValue = React.useCallback(
       (newValue: number) => {
-        const clampedValue = clamp(newValue, min, max);
-        const steppedValue = quantizeRound(clampedValue, step);
+        const steppedValue = normalizeValue(newValue);
         setRawValue(steppedValue);
         onValueCommit?.(steppedValue);
       },
-      [min, max, step, setRawValue, onValueCommit]
+      [normalizeValue, setRawValue, onValueCommit]
     );
 
     const calculateValueFromPoint = React.useCallback(
@@ -156,9 +176,11 @@ export namespace Fader {
         }
 
         const rect = track.getBoundingClientRect();
-        const isVertical = orientation === "vertical";
+        if (rect.width <= 0 || rect.height <= 0) {
+          return valueRef.current;
+        }
 
-        if (isVertical) {
+        if (orientation === "vertical") {
           const clickY = point.y - rect.top;
           const percentage = 1 - clampUnit(clickY / rect.height);
           return min + percentage * (max - min);
@@ -177,14 +199,13 @@ export namespace Fader {
         if (!track) {
           return initialValue;
         }
-
         const rect = track.getBoundingClientRect();
-        const isVertical = orientation === "vertical";
-        const sensitivity = isVertical
-          ? (max - min) / rect.height
-          : (max - min) / rect.width;
+        const sensitivity =
+          orientation === "vertical"
+            ? (max - min) / Math.max(rect.height, 1)
+            : (max - min) / Math.max(rect.width, 1);
 
-        return isVertical
+        return orientation === "vertical"
           ? initialValue + delta.y * sensitivity
           : initialValue + delta.x * sensitivity;
       },
@@ -209,6 +230,10 @@ export namespace Fader {
 
     const onDragStart = React.useCallback(
       (e: React.PointerEvent) => {
+        setIsDragging(true);
+        if (freezeValuesWhileDragging) {
+          setFrozenBufferedValue(bufferedValue);
+        }
         isDragActiveRef.current = true;
         const newValue = calculateValueFromPoint({
           x: e.clientX,
@@ -218,7 +243,12 @@ export namespace Fader {
         pendingValueRef.current = newValue;
         updateValue(newValue);
       },
-      [calculateValueFromPoint, updateValue]
+      [
+        bufferedValue,
+        calculateValueFromPoint,
+        freezeValuesWhileDragging,
+        updateValue,
+      ]
     );
 
     const onDrag = React.useCallback(
@@ -234,6 +264,8 @@ export namespace Fader {
     );
 
     const onDragEnd = React.useCallback(() => {
+      setIsDragging(false);
+      setOptimisticValue(null);
       isDragActiveRef.current = false;
       commitValue(pendingValueRef.current);
     }, [commitValue]);
@@ -246,9 +278,8 @@ export namespace Fader {
           return;
         }
         const direction = delta.y < 0 ? 1 : -1;
-        const deltaValue = direction * step;
-        const newValue = clamp(valueRef.current + deltaValue, min, max);
-        commitValue(quantizeRound(newValue, step));
+        const nextValue = clamp(valueRef.current + direction * step, min, max);
+        commitValue(quantizeRound(nextValue, step));
       },
     });
 
@@ -259,17 +290,30 @@ export namespace Fader {
       }
     }, [value]);
 
-    const percentage = (value - min) / (max - min);
-    const elementId = id || faderId;
+    const displayedValue =
+      freezeValuesWhileDragging && optimisticValue !== null
+        ? optimisticValue
+        : value;
+    const displayedBufferedValue =
+      freezeValuesWhileDragging && isDragging
+        ? frozenBufferedValue
+        : bufferedValue;
 
-    const contextValue: FaderContextValue = {
+    const percentage = clampUnit((displayedValue - min) / (max - min || 1));
+    const bufferedPercentage = clampUnit(
+      (displayedBufferedValue - min) / (max - min || 1)
+    );
+
+    const contextValue: TransportContextValue = {
       value,
+      bufferedValue,
       min,
       max,
       step,
       orientation,
       disabled,
       percentage,
+      bufferedPercentage,
       elementId,
       trackRef,
       thumbRef,
@@ -282,8 +326,6 @@ export namespace Fader {
       pendingValueRef,
       shouldPreventFocusRef,
       valueRef,
-      setRawValue,
-      onValueCommit,
       ariaLabel,
       ariaLabelledBy,
       wheelRef,
@@ -294,32 +336,31 @@ export namespace Fader {
     };
 
     return (
-      <FaderContext.Provider value={contextValue}>
+      <TransportContext.Provider value={contextValue}>
         <div
           className={className}
-          {...getDataAttributes("fader", { part: "fader-wrapper" })}
+          {...getDataAttributes("transport", { part: "transport-wrapper" })}
           {...props}
         >
           {ariaLabel || ariaLabelledBy ? null : (
             <span className="sr-only" id={`${elementId}-label`}>
-              Fader
+              Transport
             </span>
           )}
           {children}
         </div>
-      </FaderContext.Provider>
+      </TransportContext.Provider>
     );
   }
 
   export interface SliderProps extends React.ComponentProps<"div"> {}
 
   export function Slider({ className, ...props }: SliderProps) {
-    const { disabled, orientation, trackRef, wheelRef } = useFaderContext();
-
+    const { disabled, orientation, trackRef, wheelRef } = useTransportContext();
     return (
       <div
         className={className}
-        {...getDataAttributes("fader", { orientation, disabled })}
+        {...getDataAttributes("transport", { orientation, disabled })}
         ref={(node) => {
           trackRef.current = node;
           wheelRef(node);
@@ -339,9 +380,9 @@ export namespace Fader {
       onDragStart,
       onDrag,
       onDragEnd,
-    } = useFaderContext();
+    } = useTransportContext();
 
-    const { pointerProps: trackPointerProps } = usePointerDrag({
+    const { pointerProps } = usePointerDrag({
       disabled,
       elementRef: trackRef,
       capturePointer: true,
@@ -354,8 +395,8 @@ export namespace Fader {
     return (
       <div
         className={className}
-        {...getDataAttributes("fader", { part: "track" })}
-        {...trackPointerProps}
+        {...getDataAttributes("transport", { part: "track" })}
+        {...pointerProps}
         {...props}
       />
     );
@@ -364,13 +405,13 @@ export namespace Fader {
   export interface RangeProps extends React.ComponentProps<"div"> {}
 
   export function Range({ className, style, ...props }: RangeProps) {
-    const { percentage, orientation } = useFaderContext();
+    const { percentage, orientation } = useTransportContext();
     const clampedPercentage = clampUnit(percentage);
 
     return (
       <div
         className={className}
-        {...getDataAttributes("fader", { part: "range" })}
+        {...getDataAttributes("transport", { part: "range" })}
         style={{
           ...(orientation === "horizontal"
             ? {
@@ -381,9 +422,45 @@ export namespace Fader {
                 willChange: "transform",
               }
             : {
-                height: "100%",
                 width: "100%",
+                height: "100%",
                 transform: `scaleY(${clampedPercentage})`,
+                transformOrigin: "center bottom",
+                willChange: "transform",
+              }),
+          ...style,
+        }}
+        {...props}
+      />
+    );
+  }
+
+  export interface BufferedRangeProps extends React.ComponentProps<"div"> {}
+
+  export function BufferedRange({
+    className,
+    style,
+    ...props
+  }: BufferedRangeProps) {
+    const { bufferedPercentage, orientation } = useTransportContext();
+    const clampedBufferedPercentage = clampUnit(bufferedPercentage);
+    return (
+      <div
+        className={className}
+        {...getDataAttributes("transport", { part: "buffered-range" })}
+        style={{
+          ...(orientation === "horizontal"
+            ? {
+                width: "100%",
+                height: "100%",
+                transform: `scaleX(${clampedBufferedPercentage})`,
+                transformOrigin: "left center",
+                willChange: "transform",
+              }
+            : {
+                width: "100%",
+                height: "100%",
+                transform: `scaleY(${clampedBufferedPercentage})`,
                 transformOrigin: "center bottom",
                 willChange: "transform",
               }),
@@ -416,18 +493,17 @@ export namespace Fader {
       valueRef,
       step,
       commitValue,
-    } = useFaderContext();
+    } = useTransportContext();
 
-    const { pointerProps: thumbPointerProps, isDragging: isThumbDragging } =
-      usePointerDrag({
-        disabled,
-        elementRef: thumbRef,
-        capturePointer: true,
-        onPointerDown,
-        onDragStart,
-        onDrag,
-        onDragEnd,
-      });
+    const { pointerProps } = usePointerDrag({
+      disabled,
+      elementRef: thumbRef,
+      capturePointer: true,
+      onPointerDown,
+      onDragStart,
+      onDrag,
+      onDragEnd,
+    });
 
     const { focusProps } = useFocus({
       disabled,
@@ -476,72 +552,10 @@ export namespace Fader {
       },
     });
 
-    const {
-      isDragActiveRef,
-      pendingValueRef,
-      setRawValue,
-      onValueCommit,
-      trackRef: contextTrackRef,
-    } = useFaderContext();
-
-    React.useEffect(() => {
-      if (!isThumbDragging) {
-        return;
-      }
-
-      const abortController = new AbortController();
-      const { signal } = abortController;
-
-      const handlePointerDown = (e: PointerEvent) => {
-        if (signal.aborted) {
-          return;
-        }
-
-        const target = e.target;
-        if (!(target instanceof Node)) {
-          return;
-        }
-        assertType<Node>(target);
-        const thumb = thumbRef.current;
-        const track = contextTrackRef.current;
-        const isInside = thumb?.contains(target) || track?.contains(target);
-
-        if (!isInside && isDragActiveRef.current) {
-          isDragActiveRef.current = false;
-          const pendingValue = pendingValueRef.current;
-          const clampedValue = clamp(pendingValue, min, max);
-          const steppedValue = quantizeRound(clampedValue, step);
-          setRawValue(steppedValue);
-          onValueCommit?.(steppedValue);
-        }
-      };
-
-      document.addEventListener("pointerdown", handlePointerDown, {
-        capture: true,
-        signal,
-      });
-
-      return () => {
-        abortController.abort();
-      };
-    }, [
-      isThumbDragging,
-      min,
-      max,
-      step,
-      thumbRef,
-      contextTrackRef,
-      isDragActiveRef,
-      pendingValueRef,
-      setRawValue,
-      onValueCommit,
-    ]);
-
     const baseTransform =
-      orientation === "horizontal" ? "translateX(-50%)" : "translateY(50%)";
-    const transform = style?.transform
-      ? `${baseTransform} ${style.transform}`
-      : baseTransform;
+      orientation === "horizontal"
+        ? "translate(-50%, -50%)"
+        : "translate(-50%, 50%)";
 
     return (
       <div
@@ -555,18 +569,18 @@ export namespace Fader {
         aria-valuemin={min}
         aria-valuenow={value}
         className={className}
-        {...getDataAttributes("fader", { part: "thumb", disabled })}
+        {...getDataAttributes("transport", { part: "thumb", disabled })}
         ref={thumbRef}
         role="slider"
         style={{
           ...(orientation === "horizontal"
-            ? { left: `${percentage * 100}%` }
-            : { bottom: `${percentage * 100}%` }),
+            ? { left: `${percentage * 100}%`, top: "50%" }
+            : { bottom: `${percentage * 100}%`, left: "50%" }),
+          transform: baseTransform,
           ...style,
-          transform,
         }}
         {...keyboardProps}
-        {...thumbPointerProps}
+        {...pointerProps}
         {...focusProps}
         onFocus={(e) => {
           if (shouldPreventFocusRef.current) {
@@ -586,7 +600,7 @@ export namespace Fader {
     return (
       <div
         className={className}
-        {...getDataAttributes("fader", { part: "thumb-inner" })}
+        {...getDataAttributes("transport", { part: "thumb-inner" })}
         {...props}
       />
     );
@@ -598,7 +612,7 @@ export namespace Fader {
     return (
       <div
         className={className}
-        {...getDataAttributes("fader", { part: "thumb-mark" })}
+        {...getDataAttributes("transport", { part: "thumb-mark" })}
         {...props}
       />
     );

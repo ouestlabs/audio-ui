@@ -4,7 +4,7 @@ export const PAGES_NEW = [
   "/docs/components/queue",
   "/docs/components/provider",
   "/docs/components/playback-speed",
-  "/docs/components/ui/slider",
+  "/docs/components/ui/transport",
   "/docs/components/ui/fader",
   "/docs/components/ui/knob",
   "/docs/components/ui/xypad",
