@@ -360,21 +360,30 @@ export namespace Fader {
 
   export function Range({ className, style, ...props }: RangeProps) {
     const { percentage, orientation } = useFaderContext();
-    const transform =
-      orientation === "horizontal"
-        ? `scaleX(${percentage})`
-        : `scaleY(${percentage})`;
+    const pct = clampUnit(percentage);
+    let filledSize = `calc(${pct * 100}% + 1px)`;
+    if (pct <= 0) {
+      filledSize = "0%";
+    } else if (pct >= 1) {
+      filledSize = "100%";
+    }
 
     return (
       <div
         className={className}
         {...getDataAttributes("fader", { part: "range" })}
         style={{
-          width: "100%",
-          height: "100%",
-          transform,
-          transformOrigin:
-            orientation === "horizontal" ? "left center" : "center bottom",
+          ...(orientation === "horizontal"
+            ? {
+                width: filledSize,
+                height: "100%",
+              }
+            : {
+                height: filledSize,
+                width: "100%",
+              }),
+          // Avoid fractional-zoom seams between filled and unfilled areas.
+          transform: "translateZ(0)",
           ...style,
         }}
         {...props}
