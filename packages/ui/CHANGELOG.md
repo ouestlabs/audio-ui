@@ -1,5 +1,11 @@
 # @audio-ui/react
 
+## 0.0.5
+
+### Patch Changes
+
+- f458ad7: Fix fader thumb positioning so it stays centered on the value track across orientations and thumb sizes, avoiding visible offset/line drift during interaction.
+
 ## 0.0.4
 
 ### Patch Changes
