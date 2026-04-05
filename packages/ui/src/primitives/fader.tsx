@@ -297,7 +297,7 @@ export namespace Fader {
       <FaderContext.Provider value={contextValue}>
         <div
           className={className}
-          {...getDataAttributes("fader", { part: "wrapper" })}
+          {...getDataAttributes("fader", { part: "fader-wrapper" })}
           {...props}
         >
           {children}
@@ -360,15 +360,31 @@ export namespace Fader {
 
   export function Range({ className, style, ...props }: RangeProps) {
     const { percentage, orientation } = useFaderContext();
+    const pct = clampUnit(percentage);
+    let filledSize = `calc(${pct * 100}% + 1px)`;
+    if (pct <= 0) {
+      filledSize = "0%";
+    } else if (pct >= 1) {
+      filledSize = "100%";
+    }
+
     return (
       <div
         className={className}
         {...getDataAttributes("fader", { part: "range" })}
         style={{
-          ...style,
           ...(orientation === "horizontal"
-            ? { width: `${percentage * 100}%` }
-            : { height: `${percentage * 100}%` }),
+            ? {
+                width: filledSize,
+                height: "100%",
+              }
+            : {
+                height: filledSize,
+                width: "100%",
+              }),
+          // Avoid fractional-zoom seams between filled and unfilled areas.
+          transform: "translateZ(0)",
+          ...style,
         }}
         {...props}
       />
@@ -518,6 +534,12 @@ export namespace Fader {
       onValueCommit,
     ]);
 
+    const baseTransform =
+      orientation === "horizontal" ? "translateX(-50%)" : "translateY(50%)";
+    const transform = style?.transform
+      ? `${baseTransform} ${style.transform}`
+      : baseTransform;
+
     return (
       <div
         aria-disabled={disabled}
@@ -534,10 +556,11 @@ export namespace Fader {
         ref={thumbRef}
         role="slider"
         style={{
-          ...style,
           ...(orientation === "horizontal"
-            ? { left: `calc(${percentage * 100}% - 10px)` }
-            : { bottom: `calc(${percentage * 100}% - 10px)` }),
+            ? { left: `${percentage * 100}%` }
+            : { bottom: `${percentage * 100}%` }),
+          ...style,
+          transform,
         }}
         {...keyboardProps}
         {...thumbPointerProps}
