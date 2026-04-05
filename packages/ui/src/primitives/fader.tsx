@@ -518,6 +518,12 @@ export namespace Fader {
       onValueCommit,
     ]);
 
+    const baseTransform =
+      orientation === "horizontal" ? "translateX(-50%)" : "translateY(50%)";
+    const transform = style?.transform
+      ? `${baseTransform} ${style.transform}`
+      : baseTransform;
+
     return (
       <div
         aria-disabled={disabled}
@@ -534,10 +540,11 @@ export namespace Fader {
         ref={thumbRef}
         role="slider"
         style={{
-          ...style,
           ...(orientation === "horizontal"
-            ? { left: `calc(${percentage * 100}% - 10px)` }
-            : { bottom: `calc(${percentage * 100}% - 10px)` }),
+            ? { left: `${percentage * 100}%` }
+            : { bottom: `${percentage * 100}%` }),
+          ...style,
+          transform,
         }}
         {...keyboardProps}
         {...thumbPointerProps}
