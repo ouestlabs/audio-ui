@@ -43,7 +43,7 @@ export function useWheel<T extends HTMLElement = HTMLElement>({
     const { signal } = abortController;
 
     const handleWheel = (e: WheelEvent) => {
-      if (signal.aborted) {
+      if (signal.aborted || e.ctrlKey || e.metaKey || !isDefined(onWheelRef)) {
         return;
       }
 
@@ -55,10 +55,6 @@ export function useWheel<T extends HTMLElement = HTMLElement>({
         x: e.deltaX,
         y: e.deltaY,
       };
-
-      if (!isDefined(onWheelRef)) {
-        return;
-      }
 
       if (onWheelTakesEvent) {
         assertType<(evt: WheelEvent, d: Point) => void>(onWheelRef);
