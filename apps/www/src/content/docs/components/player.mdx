@@ -45,7 +45,7 @@ A fully composable audio player component system. Build custom audio interfaces 
       <Step>Install the control primitives from this registry:</Step>
 
         ```bash
-        npx shadcn@latest add @audio/slider @audio/fader
+        npx shadcn@latest add @audio/transport @audio/fader
         ```
 
       <Step>Copy and paste the following code into your project.</Step>
@@ -259,9 +259,9 @@ Inherits all props from `AudioPlayerButton` (which extends shadcn/ui's `Button` 
 
 ### AudioPlayerSeekBar
 
-A slider component that shows playback progress and allows seeking. Automatically syncs with the current track's playback position.
+A transport timeline component that shows playback progress plus buffered progress and allows scrubbing.
 
-Inherits all props from `Slider` component (except `value`, `onValueChange`, `min`, `max`, `bufferValue`).
+Inherits all props from `Transport` (except `value`, `onSeek`, `bufferedValue`).
 
 ### AudioPlayerTimeDisplay
 

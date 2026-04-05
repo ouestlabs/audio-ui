@@ -21,13 +21,13 @@ import { useAudioStore } from "@/registry/default/lib/audio-store";
 import { formatDuration } from "@/registry/default/lib/html-audio";
 import { cn } from "@/registry/default/lib/utils";
 import { Fader } from "@/registry/default/ui/audio/elements/fader";
+import { Transport } from "@/registry/default/ui/audio/elements/transport";
 import { Button, type buttonVariants } from "@/registry/default/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/registry/default/ui/dropdown-menu";
-import { Slider } from "@/registry/default/ui/slider";
 import {
   Tooltip,
   TooltipContent,
@@ -177,8 +177,8 @@ const AudioPlayerSeekBar = ({
   className,
   ...props
 }: Omit<
-  React.ComponentProps<typeof Slider>,
-  "value" | "onValueChange" | "min" | "max" | "bufferValue"
+  React.ComponentProps<typeof Transport>,
+  "value" | "onSeek" | "bufferedValue"
 >) => {
   const currentTime = useAudioStore((state) => state.currentTime);
   const duration = useAudioStore((state) => state.duration);
@@ -201,64 +201,20 @@ const AudioPlayerSeekBar = ({
     bufferedProgress = (bufferedTime / duration) * 100;
   }
 
-  const handleSeek = (e: React.MouseEvent | React.TouchEvent) => {
-    if (isLiveStream || !duration) {
-      return;
-    }
-
-    const target = e.currentTarget;
-    let clientX: number;
-
-    if ("touches" in e) {
-      clientX = e.touches[0]?.clientX ?? 0;
-    } else {
-      clientX = e.clientX;
-    }
-
-    const rect = target.getBoundingClientRect();
-    const position = Math.max(
-      0,
-      Math.min(1, (clientX - rect.left) / rect.width)
-    );
-    seek(position * duration);
-  };
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    if (!isLiveStream) {
-      handleSeek(e);
-    }
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isLiveStream) {
-      e.preventDefault();
-      handleSeek(e);
-    }
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isLiveStream && e.buttons === 1) {
-      handleSeek(e);
-    }
-  };
-
   return (
-    <Slider
-      bufferValue={bufferedProgress}
+    <Transport
+      aria-label="Seek"
+      bufferedValue={bufferedProgress}
       className={cn("min-w-20 flex-1", className)}
       disabled={isLiveStream}
-      max={100}
-      min={0}
-      onMouseMove={handleMouseMove}
-      onTouchMove={handleTouchMove}
-      onTouchStart={handleTouchStart}
-      onValueChange={(value) => {
-        if (!isLiveStream && value?.[0] !== undefined && duration > 0) {
-          const newTime = (value[0] / 100) * duration;
+      freezeValuesWhileDragging
+      onSeek={(nextProgress) => {
+        if (!isLiveStream && duration > 0) {
+          const newTime = (nextProgress / 100) * duration;
           seek(newTime);
         }
       }}
-      value={[progress]}
+      value={progress}
       {...props}
     />
   );

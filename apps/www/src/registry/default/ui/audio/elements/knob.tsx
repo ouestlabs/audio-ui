@@ -9,7 +9,7 @@ const knobVariants = cva(
   {
     variants: {
       size: {
-        sm: "size-8",
+        sm: "size-11",
         default: "size-12",
         lg: "size-16",
         xl: "size-24",

@@ -47,7 +47,7 @@ const faderTrackVariants = cva(
 );
 
 const faderThumbVariants = cva(
-  "absolute block shrink-0 cursor-grab rounded-md border border-border bg-card shadow-sm outline-none transition-[border-color,box-shadow] duration-150 ease-out hover:ring-2 hover:ring-ring/50 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 active:cursor-grabbing active:border-ring active:ring-2 active:ring-ring motion-reduce:transition-none",
+  "before:-inset-2 absolute block shrink-0 cursor-grab rounded-md border border-border bg-card shadow-sm outline-none transition-[border-color,box-shadow] duration-150 ease-out before:absolute before:content-[''] hover:ring-2 hover:ring-ring/50 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 active:cursor-grabbing active:border-ring active:ring-2 active:ring-ring motion-reduce:transition-none",
   {
     variants: {
       size: {

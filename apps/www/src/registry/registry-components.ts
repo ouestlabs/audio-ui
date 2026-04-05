@@ -10,7 +10,7 @@ export const components: Registry["items"] = [
       "@audio/html",
       "@audio/use-audio",
       "@audio/provider",
-      "@audio/slider",
+      "@audio/transport",
       "@shadcn/empty",
       "@shadcn/button",
       "@shadcn/dialog",

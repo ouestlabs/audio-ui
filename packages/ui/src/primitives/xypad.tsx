@@ -318,13 +318,25 @@ export namespace XYPad {
     return (
       <Context.Provider value={contextValue}>
         <div className={className} {...props}>
+          {ariaLabel || ariaLabelledBy ? null : (
+            <span className="sr-only" id={`${elementId}-label`}>
+              XY Pad
+            </span>
+          )}
+          <span className="sr-only" id={`${elementId}-instructions`}>
+            Use arrow keys to adjust X and Y values.
+          </span>
           {children}
         </div>
       </Context.Provider>
     );
   }
 
-  export function Slider({ className, ...props }: React.ComponentProps<"div">) {
+  export function Slider({
+    className,
+    "aria-describedby": ariaDescribedBy,
+    ...props
+  }: React.ComponentProps<"div">) {
     const context = useContext();
     const {
       disabled,
@@ -426,6 +438,7 @@ export namespace XYPad {
 
     return (
       <div
+        aria-describedby={ariaDescribedBy || `${elementId}-instructions`}
         aria-disabled={disabled}
         aria-label={ariaLabel || "XY Pad"}
         aria-labelledby={
@@ -437,7 +450,7 @@ export namespace XYPad {
           containerRef.current = node;
           wheelRef(node);
         }}
-        role="application"
+        role="group"
         {...focusProps}
         {...keyboardProps}
         {...pointerProps}
