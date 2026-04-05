@@ -508,6 +508,84 @@ export const examples: Registry["items"] = [
     categories: ["xypad"],
   },
   {
+    name: "xypad-live-value-demo",
+    description: "XYPad with live x/y readout",
+    type: "registry:example",
+    registryDependencies: ["@audio/xypad"],
+    files: [
+      {
+        path: "examples/xypad-live-value-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    categories: ["xypad"],
+  },
+  {
+    name: "xypad-size-sm-demo",
+    description: "XYPad size small example",
+    type: "registry:example",
+    registryDependencies: ["@audio/xypad"],
+    files: [
+      {
+        path: "examples/xypad-size-sm-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    categories: ["xypad"],
+  },
+  {
+    name: "xypad-size-default-demo",
+    description: "XYPad size default example",
+    type: "registry:example",
+    registryDependencies: ["@audio/xypad"],
+    files: [
+      {
+        path: "examples/xypad-size-default-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    categories: ["xypad"],
+  },
+  {
+    name: "xypad-size-lg-demo",
+    description: "XYPad size large example",
+    type: "registry:example",
+    registryDependencies: ["@audio/xypad"],
+    files: [
+      {
+        path: "examples/xypad-size-lg-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    categories: ["xypad"],
+  },
+  {
+    name: "xypad-size-xl-demo",
+    description: "XYPad size extra large example",
+    type: "registry:example",
+    registryDependencies: ["@audio/xypad"],
+    files: [
+      {
+        path: "examples/xypad-size-xl-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    categories: ["xypad"],
+  },
+  {
+    name: "xypad-disabled-demo",
+    description: "XYPad disabled state example",
+    type: "registry:example",
+    registryDependencies: ["@audio/xypad"],
+    files: [
+      {
+        path: "examples/xypad-disabled-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    categories: ["xypad"],
+  },
+  {
     name: "xypad-format-value-demo",
     description: "XYPad component example with formatted value",
     type: "registry:example",
@@ -515,6 +593,32 @@ export const examples: Registry["items"] = [
     files: [
       {
         path: "examples/xypad-format-value-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    categories: ["xypad"],
+  },
+  {
+    name: "xypad-bipolar-range-demo",
+    description: "XYPad with bipolar pan/mix style ranges",
+    type: "registry:example",
+    registryDependencies: ["@audio/xypad"],
+    files: [
+      {
+        path: "examples/xypad-bipolar-range-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    categories: ["xypad"],
+  },
+  {
+    name: "xypad-change-vs-commit-demo",
+    description: "XYPad live value vs committed value callbacks",
+    type: "registry:example",
+    registryDependencies: ["@audio/xypad"],
+    files: [
+      {
+        path: "examples/xypad-change-vs-commit-demo.tsx",
         type: "registry:example",
       },
     ],

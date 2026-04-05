@@ -828,7 +828,7 @@
           "path": "src/registry/default/examples/knob-change-vs-commit-demo.tsx",
           "type": "registry:example",
           "target": "components/audio/examples/knob-change-vs-commit-demo.tsx",
-          "content": "\"use client\";\n\nimport { useState } from \"react\";\nimport { Knob } from \"@/components/audio/elements/knob\";\n\nexport default function KnobChangeVsCommitDemo() {\n  const [liveValue, setLiveValue] = useState(64);\n  const [committedValue, setCommittedValue] = useState(64);\n\n  return (\n    <div className=\"flex flex-col items-center gap-2\">\n      <Knob\n        max={100}\n        min={0}\n        onValueChange={setLiveValue}\n        onValueCommit={setCommittedValue}\n        step={1}\n        value={liveValue}\n      />\n      <div className=\"font-mono text-center text-foreground text-sm tabular-nums\">\n        <div>Live: {liveValue}</div>\n        <div className=\"text-muted-foreground\">Committed: {committedValue}</div>\n      </div>\n    </div>\n  );\n}\n"
+          "content": "\"use client\";\n\nimport { useState } from \"react\";\nimport { Knob } from \"@/components/audio/elements/knob\";\n\nexport default function KnobChangeVsCommitDemo() {\n  const [liveValue, setLiveValue] = useState(64);\n  const [committedValue, setCommittedValue] = useState(64);\n\n  return (\n    <div className=\"flex flex-col items-center gap-2\">\n      <Knob\n        max={100}\n        min={0}\n        onValueChange={setLiveValue}\n        onValueCommit={setCommittedValue}\n        step={1}\n        value={liveValue}\n      />\n      <div className=\"text-center font-mono text-foreground text-sm tabular-nums\">\n        <div>Live: {liveValue}</div>\n        <div className=\"text-muted-foreground\">Committed: {committedValue}</div>\n      </div>\n    </div>\n  );\n}\n"
         }
       ],
       "categories": [
@@ -988,6 +988,120 @@
       ]
     },
     {
+      "name": "xypad-live-value-demo",
+      "description": "XYPad with live x/y readout",
+      "type": "registry:example",
+      "registryDependencies": [
+        "@audio/xypad"
+      ],
+      "files": [
+        {
+          "path": "src/registry/default/examples/xypad-live-value-demo.tsx",
+          "type": "registry:example",
+          "target": "components/audio/examples/xypad-live-value-demo.tsx",
+          "content": "\"use client\";\n\nimport { useState } from \"react\";\nimport { XYPad } from \"@/components/audio/elements/xypad\";\n\nexport default function XYPadLiveValueDemo() {\n  const [value, setValue] = useState({ x: 50, y: 50 });\n\n  return (\n    <div className=\"flex flex-col items-center gap-2\">\n      <XYPad\n        className=\"aspect-square\"\n        maxX={100}\n        maxY={100}\n        minX={0}\n        minY={0}\n        onValueChange={setValue}\n        value={value}\n      />\n      <output\n        aria-live=\"polite\"\n        className=\"font-mono text-foreground text-sm tabular-nums\"\n      >\n        X: {value.x} - Y: {value.y}\n      </output>\n    </div>\n  );\n}\n"
+        }
+      ],
+      "categories": [
+        "xypad"
+      ]
+    },
+    {
+      "name": "xypad-size-sm-demo",
+      "description": "XYPad size small example",
+      "type": "registry:example",
+      "registryDependencies": [
+        "@audio/xypad"
+      ],
+      "files": [
+        {
+          "path": "src/registry/default/examples/xypad-size-sm-demo.tsx",
+          "type": "registry:example",
+          "target": "components/audio/examples/xypad-size-sm-demo.tsx",
+          "content": "import { XYPad } from \"@/components/audio/elements/xypad\";\n\nexport default function XYPadSizeSmDemo() {\n  return (\n    <XYPad className=\"aspect-square\" defaultValue={{ x: 40, y: 65 }} size=\"sm\" />\n  );\n}\n"
+        }
+      ],
+      "categories": [
+        "xypad"
+      ]
+    },
+    {
+      "name": "xypad-size-default-demo",
+      "description": "XYPad size default example",
+      "type": "registry:example",
+      "registryDependencies": [
+        "@audio/xypad"
+      ],
+      "files": [
+        {
+          "path": "src/registry/default/examples/xypad-size-default-demo.tsx",
+          "type": "registry:example",
+          "target": "components/audio/examples/xypad-size-default-demo.tsx",
+          "content": "import { XYPad } from \"@/components/audio/elements/xypad\";\n\nexport default function XYPadSizeDefaultDemo() {\n  return (\n    <XYPad\n      className=\"aspect-square\"\n      defaultValue={{ x: 40, y: 65 }}\n      size=\"default\"\n    />\n  );\n}\n"
+        }
+      ],
+      "categories": [
+        "xypad"
+      ]
+    },
+    {
+      "name": "xypad-size-lg-demo",
+      "description": "XYPad size large example",
+      "type": "registry:example",
+      "registryDependencies": [
+        "@audio/xypad"
+      ],
+      "files": [
+        {
+          "path": "src/registry/default/examples/xypad-size-lg-demo.tsx",
+          "type": "registry:example",
+          "target": "components/audio/examples/xypad-size-lg-demo.tsx",
+          "content": "import { XYPad } from \"@/components/audio/elements/xypad\";\n\nexport default function XYPadSizeLgDemo() {\n  return (\n    <XYPad className=\"aspect-square\" defaultValue={{ x: 40, y: 65 }} size=\"lg\" />\n  );\n}\n"
+        }
+      ],
+      "categories": [
+        "xypad"
+      ]
+    },
+    {
+      "name": "xypad-size-xl-demo",
+      "description": "XYPad size extra large example",
+      "type": "registry:example",
+      "registryDependencies": [
+        "@audio/xypad"
+      ],
+      "files": [
+        {
+          "path": "src/registry/default/examples/xypad-size-xl-demo.tsx",
+          "type": "registry:example",
+          "target": "components/audio/examples/xypad-size-xl-demo.tsx",
+          "content": "import { XYPad } from \"@/components/audio/elements/xypad\";\n\nexport default function XYPadSizeXlDemo() {\n  return (\n    <XYPad className=\"aspect-square\" defaultValue={{ x: 40, y: 65 }} size=\"xl\" />\n  );\n}\n"
+        }
+      ],
+      "categories": [
+        "xypad"
+      ]
+    },
+    {
+      "name": "xypad-disabled-demo",
+      "description": "XYPad disabled state example",
+      "type": "registry:example",
+      "registryDependencies": [
+        "@audio/xypad"
+      ],
+      "files": [
+        {
+          "path": "src/registry/default/examples/xypad-disabled-demo.tsx",
+          "type": "registry:example",
+          "target": "components/audio/examples/xypad-disabled-demo.tsx",
+          "content": "import { XYPad } from \"@/components/audio/elements/xypad\";\n\nexport default function XYPadDisabledDemo() {\n  return <XYPad className=\"aspect-square\" defaultValue={{ x: 50, y: 50 }} disabled />;\n}\n"
+        }
+      ],
+      "categories": [
+        "xypad"
+      ]
+    },
+    {
       "name": "xypad-format-value-demo",
       "description": "XYPad component example with formatted value",
       "type": "registry:example",
@@ -1000,6 +1114,44 @@
           "type": "registry:example",
           "target": "components/audio/examples/xypad-format-value-demo.tsx",
           "content": "\"use client\";\nimport { XYPad } from \"@/components/audio/elements/xypad\";\n\nexport default function XypadFormatValueDemo() {\n  return (\n    <XYPad\n      className=\"aspect-square\"\n      defaultValue={{ x: 50, y: 50 }}\n      formatValue={(val) => `X: ${val.x}, Y: ${val.y}`}\n      maxX={100}\n      maxY={100}\n      minX={0}\n      minY={0}\n    />\n  );\n}\n"
+        }
+      ],
+      "categories": [
+        "xypad"
+      ]
+    },
+    {
+      "name": "xypad-bipolar-range-demo",
+      "description": "XYPad with bipolar pan/mix style ranges",
+      "type": "registry:example",
+      "registryDependencies": [
+        "@audio/xypad"
+      ],
+      "files": [
+        {
+          "path": "src/registry/default/examples/xypad-bipolar-range-demo.tsx",
+          "type": "registry:example",
+          "target": "components/audio/examples/xypad-bipolar-range-demo.tsx",
+          "content": "\"use client\";\n\nimport { useState } from \"react\";\nimport { XYPad } from \"@/components/audio/elements/xypad\";\n\nexport default function XYPadBipolarRangeDemo() {\n  const [value, setValue] = useState({ x: 0, y: 0 });\n\n  return (\n    <div className=\"flex flex-col items-center gap-2\">\n      <XYPad\n        className=\"aspect-square\"\n        defaultValue={{ x: 0, y: 0 }}\n        formatValue={(next) => `Pan ${next.x} | Mix ${next.y.toFixed(2)}`}\n        maxX={100}\n        maxY={1}\n        minX={-100}\n        minY={-1}\n        onValueChange={setValue}\n        stepX={1}\n        stepY={0.01}\n        value={value}\n      />\n      <output\n        aria-live=\"polite\"\n        className=\"font-mono text-foreground text-sm tabular-nums\"\n      >\n        Pan: {value.x} - Mix: {value.y.toFixed(2)}\n      </output>\n    </div>\n  );\n}\n"
+        }
+      ],
+      "categories": [
+        "xypad"
+      ]
+    },
+    {
+      "name": "xypad-change-vs-commit-demo",
+      "description": "XYPad live value vs committed value callbacks",
+      "type": "registry:example",
+      "registryDependencies": [
+        "@audio/xypad"
+      ],
+      "files": [
+        {
+          "path": "src/registry/default/examples/xypad-change-vs-commit-demo.tsx",
+          "type": "registry:example",
+          "target": "components/audio/examples/xypad-change-vs-commit-demo.tsx",
+          "content": "\"use client\";\n\nimport { useState } from \"react\";\nimport { XYPad } from \"@/components/audio/elements/xypad\";\n\nexport default function XYPadChangeVsCommitDemo() {\n  const [live, setLive] = useState({ x: 50, y: 50 });\n  const [committed, setCommitted] = useState({ x: 50, y: 50 });\n\n  return (\n    <div className=\"flex flex-col items-center gap-2\">\n      <XYPad\n        className=\"aspect-square\"\n        maxX={100}\n        maxY={100}\n        minX={0}\n        minY={0}\n        onValueChange={setLive}\n        onValueCommit={setCommitted}\n        value={live}\n      />\n      <div className=\"text-center font-mono text-foreground text-sm tabular-nums\">\n        <div>\n          Live: X {live.x} - Y {live.y}\n        </div>\n        <div className=\"text-muted-foreground\">\n          Committed: X {committed.x} - Y {committed.y}\n        </div>\n      </div>\n    </div>\n  );\n}\n"
         }
       ],
       "categories": [

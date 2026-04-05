@@ -1,0 +1,20 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "xypad-bipolar-range-demo",
+  "description": "XYPad with bipolar pan/mix style ranges",
+  "registryDependencies": [
+    "@audio/xypad"
+  ],
+  "files": [
+    {
+      "path": "src/registry/default/examples/xypad-bipolar-range-demo.tsx",
+      "content": "\"use client\";\n\nimport { useState } from \"react\";\nimport { XYPad } from \"@/registry/default/ui/audio/elements/xypad\";\n\nexport default function XYPadBipolarRangeDemo() {\n  const [value, setValue] = useState({ x: 0, y: 0 });\n\n  return (\n    <div className=\"flex flex-col items-center gap-2\">\n      <XYPad\n        className=\"aspect-square\"\n        defaultValue={{ x: 0, y: 0 }}\n        formatValue={(next) => `Pan ${next.x} | Mix ${next.y.toFixed(2)}`}\n        maxX={100}\n        maxY={1}\n        minX={-100}\n        minY={-1}\n        onValueChange={setValue}\n        stepX={1}\n        stepY={0.01}\n        value={value}\n      />\n      <output\n        aria-live=\"polite\"\n        className=\"font-mono text-foreground text-sm tabular-nums\"\n      >\n        Pan: {value.x} - Mix: {value.y.toFixed(2)}\n      </output>\n    </div>\n  );\n}\n",
+      "type": "registry:example",
+      "target": "components/audio/examples/xypad-bipolar-range-demo.tsx"
+    }
+  ],
+  "categories": [
+    "xypad"
+  ],
+  "type": "registry:example"
+}
