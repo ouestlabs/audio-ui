@@ -20,10 +20,16 @@ export async function GET(
     notFound();
   }
 
-  const fontData = await loadGoogleFont(
-    "Instrument Serif",
-    `audio/ui ${page.data.title}`
-  );
+  let fontData: ArrayBuffer | null = null;
+  try {
+    fontData = await loadGoogleFont(
+      "Instrument Serif",
+      `audio/ui ${page.data.title}`
+    );
+  } catch {
+    // Fallback to default OG renderer fonts when remote font fetch fails.
+    fontData = null;
+  }
 
   return new ImageResponse(
     <div
@@ -77,16 +83,18 @@ export async function GET(
         </p>
       </div>
     </div>,
-    {
-      ...size,
-      fonts: [
-        {
-          name: "Instrument Serif",
-          data: fontData,
-          style: "normal",
-        },
-      ],
-    }
+    fontData
+      ? {
+          ...size,
+          fonts: [
+            {
+              name: "Instrument Serif",
+              data: fontData,
+              style: "normal",
+            },
+          ],
+        }
+      : size
   );
 }
 
