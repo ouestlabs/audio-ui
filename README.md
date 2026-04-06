@@ -2,7 +2,7 @@
 
 A set of accessible and composable Audio UI components. Built on top of [shadcn/ui](https://ui.shadcn.com/), it's designed for you to copy, paste, and own.
 
-![audio/ui](/apps/www/src/app/opengraph-image.png)
+![audio/ui](https://github.com/user-attachments/assets/fdb8289b-2d84-4c2f-b1b6-9efc45d3a961)
 
 ## Contributing
 
