@@ -10,18 +10,14 @@ links:
     - https://ui.shadcn.com/docs/components/scroll-area
 ---
 
-Track components for displaying and managing audio tracks. These components support two modes:
+Track components for rendering a single row or a full list.
 
-- Store mode: reads from and controls the global audio queue provided by the project's audio store.
-- Controlled mode: accepts an explicit list or single track for use in search results or external lists.
+Supports two data modes:
+
+- Store mode: reads from the global queue.
+- Controlled mode: receives explicit `track` or `tracks` data.
 
 <Preview name="track-list-demo" />
-
-## Overview
-
-- **Single row or full list:** Use `AudioTrack` for one item, `AudioTrackList` for queue/list rendering.
-- **Mode-based behavior:** `mode="static"` for fixed lists, `mode="sortable"` for drag-and-drop.
-- **Composable presentation:** `media` and `actions` variants replace multiple boolean display flags.
 
 ## Installation
 
@@ -80,13 +76,15 @@ Track components for displaying and managing audio tracks. These components supp
 
 ## Usage
 
+Import the components you need:
+
 ```tsx
 import { AudioTrack, AudioTrackList } from "@/components/audio/track";
 ```
 
-### AudioTrack
+### Track
 
-Displays a single track with optional cover, metadata and playback controls. Use either:
+Display one track row. Use either:
 
 - `trackId` to render an item from the project's audio queue, or
 - `track` to render a provided track object.
@@ -101,17 +99,15 @@ Displays a single track with optional cover, metadata and playback controls. Use
 <AudioTrack track={customTrack} onClick={() => handlePlay(customTrack)} />
 ```
 
-### AudioTrackList
+### Track List
 
-Renders a list of tracks. Pass `tracks` for a controlled list, otherwise the component renders the project queue.
+Render a full list of tracks. Pass `tracks` for controlled mode, or omit it to read from the queue.
 
 Key features:
 
 - Text filtering via `filterQuery` or a custom `filterFn`.
-- Optional drag-and-drop (`mode="sortable"`) - reordering updates the queue only when not filtered and when `tracks` is not provided.
+- Optional drag-and-drop (`mode="sortable"`) via [Sortable List](/docs/components/ui/sortable-list).
 - Per-item remove action and play/pause controls (configurable via props).
-
-<Preview name="track-list-demo" />
 
 ```tsx
 // Default: renders project queue
@@ -121,7 +117,7 @@ Key features:
 <AudioTrackList tracks={searchResults} onTrackSelect={handleSelect} />
 ```
 
-#### Grid Layout
+#### Grid
 
 Use this when you want denser browsing (cover + metadata in a responsive grid).
 
@@ -157,15 +153,9 @@ Use this when you want drag-and-drop behavior with a visual grid layout.
 | `className`      | `string`                    | -       | Additional CSS classes.                                                               |
 
 <Callout variant="info">
-  <strong>Important Information:</strong>
-
-  - **Operating Modes:** Use either <code>trackId</code> (store mode) or{" "}
-    <code>track</code> (controlled mode). Both should not be used together. Store mode
-    requires <code>AudioProvider</code> to be set up.
-  - **Track Display:** Cover images are taken from <code>track.artwork</code> or{" "}
-    <code>track.images[0]</code>. Live tracks show a "Live" badge and the duration
-    is hidden. Live detection uses <code>htmlAudio.isLive()</code> from the{" "}
-    <code>useAudio()</code> hook.
+  <strong>Mode Constraint:</strong> Use either <code>trackId</code> or{" "}
+  <code>track</code>, not both. Store mode requires
+  [Audio Provider](/docs/components/provider).
 </Callout>
 
 ### AudioTrackList
@@ -195,30 +185,16 @@ Use this when you want drag-and-drop behavior with a visual grid layout.
 </Callout>
 
 <Callout variant="warning">
-  <strong>Sortable Behavior:</strong> When <code>mode="sortable"</code> is enabled,
-  reordering will update the store queue only when:
-  - The list is not filtered (<code>filterQuery</code> and <code>filterFn</code>{" "}
-    are not used)
-  - The component is in store mode (<code>tracks</code> prop is not provided)
-
-Keep <code>mode="static"</code> while filtering to avoid confusing
-reordering behavior.
-
+  <strong>Sortable Constraint:</strong> Reordering updates the store only in
+  store mode and only when the list is not filtered.
 </Callout>
 
 ## Notes
 
 <Callout variant="info">
-  <strong>Important Information:</strong>
-
-  - **AudioProvider Requirement:** <code>AudioProvider</code> (or the project's
-    audio store) is required for store mode to work correctly. Make sure to wrap
-    your app with the provider at the root level. The provider manages the audio
-    playback state and lifecycle using the <code>useAudio()</code> hook, making
-    it essential for all audio components.
-  - **Localization:** If you localize strings (e.g., empty labels), pass{" "}
-    <code>emptyLabel</code> and <code>emptyDescription</code> to the list
-    component.
+  <strong>Required:</strong> Store mode needs
+  [Audio Provider](/docs/components/provider). For localized empty states, pass
+  <code>emptyLabel</code> and <code>emptyDescription</code>.
 </Callout>
 
 ## Changelog

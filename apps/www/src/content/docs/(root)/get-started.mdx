@@ -113,20 +113,38 @@ export default function RootLayout({ children }) {
 }
 ```
 
-### Step 4: Use the component
+### Step 4: Use the default layout
 
 ```tsx
 import {
   AudioPlayer,
   AudioPlayerControlBar,
+  AudioPlayerControlGroup,
   AudioPlayerPlay,
+  AudioPlayerSeekBar,
+  AudioPlayerSkipBack,
+  AudioPlayerSkipForward,
+  AudioPlayerTimeDisplay,
+  AudioPlayerVolume,
 } from "@/components/audio/player";
 
 export function MyAudioPlayer() {
   return (
     <AudioPlayer>
-      <AudioPlayerControlBar>
-        <AudioPlayerPlay />
+      <AudioPlayerControlBar variant="stacked">
+        <AudioPlayerControlGroup>
+          <AudioPlayerTimeDisplay />
+          <AudioPlayerSeekBar />
+          <AudioPlayerTimeDisplay remaining />
+        </AudioPlayerControlGroup>
+        <AudioPlayerControlGroup>
+          <AudioPlayerControlGroup className="justify-between md:justify-start">
+            <AudioPlayerSkipBack />
+            <AudioPlayerPlay />
+            <AudioPlayerSkipForward />
+          </AudioPlayerControlGroup>
+          <AudioPlayerVolume />
+        </AudioPlayerControlGroup>
       </AudioPlayerControlBar>
     </AudioPlayer>
   );

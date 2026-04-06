@@ -7,41 +7,39 @@ import {
 } from "@/components/layouts/global/headers/page";
 import { createMetadata } from "@/lib/metadata";
 import { getUniqueParticleCategories } from "@/lib/particle-categories";
+import { blocks } from "@/registry/default/blocks";
 import { cn } from "@/registry/default/lib/utils";
-import { particles } from "@/registry/default/particles";
 
+import { BlockDisplay } from "../block-display";
 import { CategoryNavigation } from "../category-navigation";
-import { ParticleDisplay } from "../particle-display";
 
-const particleCategories = getUniqueParticleCategories(particles);
+const blockCategories = getUniqueParticleCategories(blocks);
 
 function getCategoryDetails(categorySlug: string) {
-  const categoryObj = particleCategories.find(
-    (cat) => cat.slug === categorySlug
-  );
+  const categoryObj = blockCategories.find((cat) => cat.slug === categorySlug);
 
   if (!categoryObj) {
-    return { categoryObj: null, categoryParticles: [] };
+    return { categoryObj: null, categoryBlocks: [] };
   }
 
-  const categoryParticles = particles.filter((particle) =>
-    particle.category?.includes(categoryObj.name)
+  const categoryBlocks = blocks.filter((block) =>
+    block.category?.includes(categoryObj.name)
   );
 
-  return { categoryObj, categoryParticles };
+  return { categoryObj, categoryBlocks };
 }
 
 export function generateStaticParams() {
-  return particleCategories.map((category) => ({
+  return blockCategories.map((category) => ({
     category: category.slug,
   }));
 }
 
 export async function generateMetadata({
   params,
-}: PageProps<"/particles/[category]">): Promise<Metadata> {
+}: PageProps<"/blocks/[category]">): Promise<Metadata> {
   const { category: categorySlug } = await params;
-  const { categoryObj, categoryParticles } = getCategoryDetails(categorySlug);
+  const { categoryObj, categoryBlocks } = getCategoryDetails(categorySlug);
 
   if (!categoryObj) {
     notFound();
@@ -50,24 +48,24 @@ export async function generateMetadata({
   return createMetadata({
     title: `${
       categoryObj.name.charAt(0).toUpperCase() + categoryObj.name.slice(1)
-    } particle components`,
-    description: `Showing ${categoryParticles.length} particle component${
-      categoryParticles.length !== 1 ? "s" : ""
+    } blocks`,
+    description: `Showing ${categoryBlocks.length} block${
+      categoryBlocks.length !== 1 ? "s" : ""
     } in the ${categoryObj.name} category`,
   });
 }
 
 export default async function CategoryPage({
   params,
-}: PageProps<"/particles/[category]">) {
+}: PageProps<"/blocks/[category]">) {
   const { category: categorySlug } = await params;
-  const { categoryObj, categoryParticles } = getCategoryDetails(categorySlug);
+  const { categoryObj, categoryBlocks } = getCategoryDetails(categorySlug);
 
   if (!categoryObj) {
     notFound();
   }
 
-  if (categoryParticles.length === 0) {
+  if (categoryBlocks.length === 0) {
     notFound();
   }
 
@@ -75,32 +73,32 @@ export default async function CategoryPage({
     <div className="container w-full">
       <PageHeader>
         <PageHeaderHeading>
-          <span className="capitalize">{categoryObj.name}</span> particles
+          <span className="capitalize">{categoryObj.name}</span> blocks
         </PageHeaderHeading>
         <PageHeaderDescription>
-          Showing {categoryParticles.length} particle
-          {categoryParticles.length !== 1 ? "s" : ""} in the {categoryObj.name}{" "}
+          Showing {categoryBlocks.length} block
+          {categoryBlocks.length !== 1 ? "s" : ""} in the {categoryObj.name}{" "}
           category
         </PageHeaderDescription>
         <CategoryNavigation
-          categories={particleCategories}
+          categories={blockCategories}
           currentCategory={categorySlug}
         />
       </PageHeader>
       <div className="grid flex-1 items-stretch gap-3 pb-12 lg:grid-cols-2">
-        {categoryParticles.map((particle) => {
-          const ParticleComponent = particle.component;
+        {categoryBlocks.map((block) => {
+          const BlockComponent = block.component;
           return (
-            <ParticleDisplay
+            <BlockDisplay
               className={cn(
-                particle.fullWidth ? "lg:col-span-2" : "lg:col-span-1",
-                particle.className
+                block.fullWidth ? "lg:col-span-2" : "lg:col-span-1",
+                block.className
               )}
-              key={particle.id}
-              name={particle.id}
+              key={block.id}
+              name={block.id}
             >
-              <ParticleComponent />
-            </ParticleDisplay>
+              <BlockComponent />
+            </BlockDisplay>
           );
         })}
       </div>

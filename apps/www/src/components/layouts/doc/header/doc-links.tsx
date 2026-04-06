@@ -187,7 +187,10 @@ export function DocsLinks({ links }: DocLinksProps) {
             <ChevronDownIcon />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="ml-1 shadow-none">
+        <DropdownMenuContent
+          align="end"
+          className="min-w-(--dropdown-menu-width)"
+        >
           {menuItems.map((item) => (
             <DropdownMenuItem asChild key={item.url}>
               <Link

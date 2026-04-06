@@ -8,7 +8,7 @@ links:
     - https://ui.shadcn.com/docs/components/tooltip
 ---
 
-Dropdown button for adjusting playback speed (0.5x–2x). Auto-disabled for live streams with contextual tooltip. Shows current speed and visual feedback.
+A dropdown control for playback speed (0.5x to 2x).
 
 <Preview name="playback-speed-demo" />
 
@@ -59,6 +59,20 @@ Dropdown button for adjusting playback speed (0.5x–2x). Auto-disabled for live
   </TabsContent>
 </CodeTabs>
 
+## Setup
+
+Wrap your app with [Audio Provider](/docs/components/provider) at the root level.
+
+```tsx showLineNumbers
+import { AudioProvider } from "@/components/audio/provider";
+```
+
+```tsx showLineNumbers
+export default function RootLayout({ children }) {
+  return <AudioProvider tracks={initialTracks}>{children}</AudioProvider>;
+}
+```
+
 ## Usage
 
 ```tsx showLineNumbers
@@ -71,7 +85,7 @@ import { AudioPlaybackSpeed } from "@/components/audio/playback-speed";
 <AudioPlaybackSpeed />
 ```
 
-### Icon Style
+### Icon
 
 With `size="icon"`, only the speed label is shown (no gauge icon):
 
@@ -105,16 +119,9 @@ With `size="icon"`, only the speed label is shown (no gauge icon):
 | `variant`   | `ButtonVariant`                         | `"outline"`                | Button variant.                                |
 | `className` | `string`                                | -                          | Additional CSS classes.                        |
 
-#### Features
-
-- **Live streams**: Auto-disabled with "Not available for live streams" tooltip
-- **Persistence**: Speed saved to localStorage, restored on reload
-- **Visual feedback**: Current speed displayed, checkmark in dropdown
-- **Tooltip**: Always enabled, works on disabled buttons
-- **Icon mode**: `size="icon"` hides gauge icon, shows only label
-
 <Callout variant="info">
-  Requires <code>AudioProvider</code> or audio store. Speed persists via localStorage.
+  <strong>Required:</strong> This component needs
+  [Audio Provider](/docs/components/provider) (or an equivalent audio store).
 </Callout>
 
 ## Examples

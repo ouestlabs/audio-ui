@@ -12,7 +12,7 @@ import {
 type WaveformType = "sine" | "triangle" | "sawtooth" | "square";
 type FilterType = "lowpass" | "highpass" | "bandpass" | "allpass";
 
-export default function ParticlePocketSynth() {
+export default function BlockPocketSynth() {
   const { webAudio } = useAudio();
   const [waveform, setWaveform] = React.useState<WaveformType>("square");
   const [filterType, setFilterType] = React.useState<FilterType>("allpass");

@@ -12,7 +12,7 @@ import {
 
 type WaveformType = "sine" | "triangle" | "sawtooth" | "square";
 
-export default function ParticleWaveShaper() {
+export default function BlockWaveShaper() {
   const { webAudio } = useAudio();
   const [waveform, setWaveform] = React.useState<WaveformType>("sine");
   const [volume, setVolume] = React.useState(0.5);

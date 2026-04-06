@@ -104,7 +104,7 @@ export function getFileTarget(file: {
     case "registry:component":
       return `components/audio/${fileName}`;
     case "registry:block":
-      return `components/audio/particles/${fileName}`;
+      return `components/audio/blocks/${fileName}`;
     case "registry:example":
       return `components/audio/examples/${fileName}`;
     case "registry:ui":
@@ -179,7 +179,7 @@ export function fixImport(content: string) {
       return `@/components/audio/examples/${component}`;
     }
     if (type.endsWith("particles")) {
-      return `@/components/audio/particles/${component}`;
+      return `@/components/audio/blocks/${component}`;
     }
 
     return match;

@@ -18,7 +18,7 @@ export function CategoryNavigation({
           size="sm"
           variant={currentCategory ? "outline" : "default"}
         >
-          <Link href="/particles">All</Link>
+          <Link href="/blocks">All</Link>
         </Button>
         {categories?.map((cat) => {
           const isActive = cat.slug === currentCategory;
@@ -30,7 +30,7 @@ export function CategoryNavigation({
               size="sm"
               variant={isActive ? "default" : "outline"}
             >
-              <Link href={`/particles/${cat.slug}`}>{cat.name}</Link>
+              <Link href={`/blocks/${cat.slug}`}>{cat.name}</Link>
             </Button>
           );
         })}

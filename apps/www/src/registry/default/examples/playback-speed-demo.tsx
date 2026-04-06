@@ -6,30 +6,19 @@ import {
   AudioPlayerControlBar,
   AudioPlayerControlGroup,
   AudioPlayerPlay,
-  AudioPlayerSeekBar,
   AudioPlayerSkipBack,
   AudioPlayerSkipForward,
-  AudioPlayerTimeDisplay,
-  AudioPlayerVolume,
 } from "@/registry/default/ui/audio/player";
 
 export default function AudioPlaybackSpeedDemo() {
   return (
-    <AudioPlayer className="w-max">
+    <AudioPlayer className="w-fit">
       <AudioPlayerControlBar>
-        <AudioPlayerControlGroup>
+        <AudioPlayerControlGroup className="w-auto">
           <AudioPlayerSkipBack />
           <AudioPlayerPlay />
           <AudioPlayerSkipForward />
-        </AudioPlayerControlGroup>
-        <AudioPlayerControlGroup>
-          <AudioPlayerTimeDisplay />
-          <AudioPlayerSeekBar />
-          <AudioPlayerTimeDisplay remaining />
-        </AudioPlayerControlGroup>
-        <AudioPlayerControlGroup>
           <AudioPlaybackSpeed />
-          <AudioPlayerVolume />
         </AudioPlayerControlGroup>
       </AudioPlayerControlBar>
     </AudioPlayer>
