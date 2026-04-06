@@ -12,14 +12,15 @@ import {
   AudioPlayerVolume,
 } from "@/registry/default/ui/audio/player";
 import {
-  AudioQueue,
   AudioQueueRepeatMode,
   AudioQueueShuffle,
 } from "@/registry/default/ui/audio/queue";
+import { AudioTrackList } from "@/registry/default/ui/audio/track";
 
-export default function ParticleAudioPlayer() {
+export default function BlockPlayerWidget() {
   return (
-    <AudioPlayer>
+    <AudioPlayer className="flex flex-col gap-1.5">
+      <AudioTrackList className="h-36 w-full rounded-sm border bg-muted/50 p-1" />
       <AudioPlayerControlBar variant="stacked">
         <AudioPlayerControlGroup>
           <AudioPlayerTimeDisplay />
@@ -35,7 +36,6 @@ export default function ParticleAudioPlayer() {
           <AudioQueueShuffle />
           <AudioQueueRepeatMode />
           <AudioPlayerVolume />
-          <AudioQueue />
         </AudioPlayerControlGroup>
       </AudioPlayerControlBar>
     </AudioPlayer>

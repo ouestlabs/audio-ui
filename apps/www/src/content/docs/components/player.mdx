@@ -11,9 +11,9 @@ links:
     - https://ui.shadcn.com/docs/components/tooltip
 ---
 
-A fully composable audio player component system. Build custom audio interfaces by combining individual control components.
+A composable audio player built from small control primitives.
 
-<Preview name="player-demo" />
+<Preview name="player-stacked-demo" />
 
 ## Installation
 
@@ -72,18 +72,14 @@ A fully composable audio player component system. Build custom audio interfaces 
 
 ## Setup
 
-<Callout variant="info">
-  <strong>AudioProvider Required:</strong> Wrap your app with{" "}
-  <code>AudioProvider</code> at the root level. This provides the audio context
-  to all components. The provider manages audio playback state, handles events,
-  manages error retries, and preloads tracks.
-</Callout>
+Wrap your app with [Audio Provider](/docs/components/provider) at the root level:
 
-First, wrap your app with `AudioProvider` at the root level:
+```tsx showLineNumbers
+import { AudioProvider } from "@/components/audio/provider";
+```
 
 ```tsx showLineNumbers
 // app/layout.tsx or _app.tsx
-import { AudioProvider } from "@/components/audio/provider";
 
 export default function RootLayout({ children }) {
   return (
@@ -98,7 +94,7 @@ export default function RootLayout({ children }) {
 
 ## Usage
 
-Import the components you need:
+Start with this default layout:
 
 ```tsx showLineNumbers
 import {
@@ -108,160 +104,110 @@ import {
   AudioPlayerPlay,
   AudioPlayerSkipBack,
   AudioPlayerSkipForward,
-  AudioPlayerRewind,
-  AudioPlayerFastForward,
   AudioPlayerSeekBar,
   AudioPlayerTimeDisplay,
   AudioPlayerVolume,
 } from "@/components/audio/player";
 ```
 
-Start with the default demo composition:
+```tsx showLineNumbers
+export function PlayerDefault() {
+  return (
+    <AudioPlayer>
+      <AudioPlayerControlBar variant="stacked">
+        <AudioPlayerControlGroup>
+          <AudioPlayerTimeDisplay />
+          <AudioPlayerSeekBar />
+          <AudioPlayerTimeDisplay remaining />
+        </AudioPlayerControlGroup>
+        <AudioPlayerControlGroup>
+          <AudioPlayerControlGroup className="justify-between md:justify-start">
+            <AudioPlayerSkipBack />
+            <AudioPlayerPlay />
+            <AudioPlayerSkipForward />
+          </AudioPlayerControlGroup>
+          <AudioPlayerVolume />
+        </AudioPlayerControlGroup>
+      </AudioPlayerControlBar>
+    </AudioPlayer>
+  );
+}
+```
+
+### Compact
+
+A minimal layout for tighter spaces.
 
 <Preview name="player-demo" />
 
-### Example map
+### With Queue
 
-Use each preview for one focused layout goal:
-
-- `player-demo`: compact baseline player controls
-- `player-stacked-demo`: stacked timeline + controls layout
-- `player-queue-demo`: player integrated with queue controls
-
-### Stacked Layout
-
-A player with stacked variant, showing time displays above and below the seek bar.
-
-<Preview name="player-stacked-demo" />
-
-### Player with Queue
-
-A full-featured player with queue management, shuffle, and repeat controls. Uses `AudioPlayerControlGroup` for flexible layout management.
+A full layout with queue controls.
 
 <Preview name="player-queue-demo" />
 
-For more queue management options, see the [Audio Queue documentation](/docs/components/queue).
+For more queue options, see [Audio Queue](/docs/components/queue).
 
 ## API Reference
 
 ### AudioPlayer
 
-A styled container component for audio controls. This is a presentational wrapper that provides consistent styling. All audio components are self-contained and read state from the global store.
-
-#### Props
+Container for player controls.
 
 Inherits all props from `HTMLDivElement`.
 
-#### Example
-
-```tsx
-<AudioPlayer>{/* Your audio controls */}</AudioPlayer>
-```
-
 ### AudioPlayerControlBar
 
-A container component that holds audio player controls. Use it to wrap your control components.
-
-#### Props
+Groups controls in one row or stacked layout.
 
 | Prop        | Type                     | Default     | Description                         |
 | ----------- | ------------------------ | ----------- | ----------------------------------- |
 | `variant`   | `"compact" \| "stacked"` | `"compact"` | Layout variant for the control bar. |
 | `className` | `string`                 | -           | Additional CSS classes.             |
 
-#### Example
-
-```tsx
-<AudioPlayerControlBar>
-  <AudioPlayerPlay />
-  <AudioPlayerSeekBar />
-  <AudioPlayerTimeDisplay />
-</AudioPlayerControlBar>
-```
-
-#### Stacked Layout
-
-```tsx
-<AudioPlayerControlBar variant="stacked">
-  <AudioPlayerControlGroup>
-    <AudioPlayerTimeDisplay />
-    <AudioPlayerSeekBar />
-    <AudioPlayerTimeDisplay remaining />
-  </AudioPlayerControlGroup>
-</AudioPlayerControlBar>
-```
-
 ### AudioPlayerControlGroup
 
-A flexible wrapper component for grouping audio controls and managing flex layouts. Useful for creating custom layouts with `flex-col`, `justify-between`, etc.
-
-#### Props
+Flexible wrapper for arranging control clusters.
 
 | Prop        | Type     | Default | Description             |
 | ----------- | -------- | ------- | ----------------------- |
 | `className` | `string` | -       | Additional CSS classes. |
 
-#### Example
-
-```tsx showLineNumbers
-<AudioPlayerControlBar variant="stacked">
-  <AudioPlayerControlGroup>
-    <AudioPlayerTimeDisplay />
-    <AudioPlayerSeekBar />
-    <AudioPlayerTimeDisplay remaining />
-  </AudioPlayerControlGroup>
-  <AudioPlayerControlGroup className="justify-between">
-    <AudioPlayerControlGroup>
-      <AudioPlayerSkipBack />
-      <AudioPlayerPlay />
-      <AudioPlayerSkipForward />
-    </AudioPlayerControlGroup>
-    <AudioPlayerVolume />
-  </AudioPlayerControlGroup>
-</AudioPlayerControlBar>
-```
-
 ### AudioPlayerPlay
 
-A button that toggles play/pause state. Shows a loading spinner when buffering or loading, and automatically handles keyboard shortcuts (Space bar to play/pause).
+Play/pause button with loading state and spacebar shortcut.
 
-Inherits all props from `AudioPlayerButton` (which extends shadcn/ui's `Button` component).
-
-<Callout variant="info">
-  <strong>Keyboard Shortcuts:</strong> The <code>AudioPlayerPlay</code>{" "}
-  component automatically handles the Space bar keyboard shortcut for
-  play/pause. This works when the focus is on the document body.
-</Callout>
+Inherits all props from `AudioPlayerButton`.
 
 ### AudioPlayerSkipBack
 
-A button that navigates to the previous track.
+Go to previous track.
 
-Inherits all props from `AudioPlayerButton` (which extends shadcn/ui's `Button` component).
+Inherits all props from `AudioPlayerButton`.
 
 ### AudioPlayerSkipForward
 
-A button that navigates to the next track.
+Go to next track.
 
-Inherits all props from `AudioPlayerButton` (which extends shadcn/ui's `Button` component).
+Inherits all props from `AudioPlayerButton`.
 
 ### AudioPlayerRewind
 
-A button that seeks backward by 10 seconds.
+Seek backward by 10 seconds.
 
-Inherits all props from `AudioPlayerButton` (which extends shadcn/ui's `Button` component).
+Inherits all props from `AudioPlayerButton`.
 
 ### AudioPlayerFastForward
 
-A button that seeks forward by 10 seconds.
+Seek forward by 10 seconds.
 
-Inherits all props from `AudioPlayerButton` (which extends shadcn/ui's `Button` component).
+Inherits all props from `AudioPlayerButton`.
 
 ### AudioPlayerSeekBar
 
 A transport timeline component that shows playback progress plus buffered progress and allows scrubbing.
 
-Inherits all props from `Transport` (except `value`, `onSeek`, `bufferedValue`).
+Inherits all props from [Transport](/docs/components/ui/transport) (except `value`, `onSeek`, `bufferedValue`).
 
 ### AudioPlayerTimeDisplay
 
@@ -276,28 +222,15 @@ Displays the current playback time or remaining time.
 
 ### AudioPlayerVolume
 
-A dropdown menu button with a horizontal `Fader` to control volume. Click to open the volume control menu.
+A dropdown menu button with a horizontal [Fader](/docs/components/ui/fader) to control volume. Click to open the volume control menu.
 
-Inherits all props from `Fader` except `value`, `onValueChange`, `min`, `max`, `orientation`, and `size`.
+Inherits all props from [Fader](/docs/components/ui/fader) except `value`, `onValueChange`, `min`, `max`, `orientation`, and `size`.
 
 ## Notes
 
 <Callout variant="info">
-  <strong>Important Information:</strong>
-
-  - **Component Architecture:** All audio components are self-contained and read
-    state directly from the global store. The audio player uses the HTML5 audio
-    element under the hood.
-  - **AudioProvider Role:** The `AudioProvider` component manages the audio
-    element lifecycle using the `useAudio()` hook to access the `htmlAudio`
-    singleton, handles playback events, manages error retries (up to 3 retries
-    with exponential backoff), preloads next tracks, and synchronizes audio state
-    with the Zustand store. It's required for all audio components to function
-    correctly.
-  - **Previous Button Behavior:** The previous button restarts the track if it has
-    been played for more than 3 seconds, otherwise it navigates to the previous
-    track in the queue.
-
+  <strong>Behavior:</strong> The previous button restarts the current track if
+  playback has passed 3 seconds; otherwise it goes to the previous queue item.
 </Callout>
 
 <Callout variant="warning">
@@ -307,6 +240,23 @@ Inherits all props from `Fader` except `value`, `onValueChange`, `min`, `max`, `
 </Callout>
 
 ## Changelog
+
+### 2026-04-05 player API alignment and transport migration
+
+- **Changed**: `AudioPlayerSeekBar` now uses `Transport` instead of `Slider`.
+- **Changed**: Seek API moved from `onValueChange`/array values to `onSeek`/numeric values.
+- **Improved**: Added `freezeValuesWhileDragging` for smoother and more stable seek interaction.
+- **Changed**: `AudioPlayerVolume` now uses horizontal `Fader` (with `size="sm"` and `step={1}`).
+- **Improved**: Volume UX now keeps an `effectiveVolumePercent` state for clearer mute display.
+- **Improved**: Volume/mute controls now use explicit labels and cleaner menu ergonomics.
+
+### 2026-04-05 accessibility and control behavior hardening
+
+- **Improved**: `AudioPlayerButton` now applies a default `aria-label` from `tooltipLabel`.
+- **Changed**: Tooltip rendering is now directly controlled by `tooltipLabel` (removed `tooltip` flag).
+- **Improved**: Added explicit `aria-label` coverage on rewind/fast-forward/skip controls.
+- **Improved**: Skip/seek handlers now preserve consumer `onClick` callbacks before internal actions.
+- **Refined**: Simplified derived state and memoized branches for progress/disable logic.
 
 ### 2025-12-24 useAudio integration and improvements
 

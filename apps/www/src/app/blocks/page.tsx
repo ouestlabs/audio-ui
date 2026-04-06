@@ -5,17 +5,17 @@ import {
 } from "@/components/layouts/global/headers/page";
 import { createMetadata } from "@/lib/metadata";
 import { getUniqueParticleCategories } from "@/lib/particle-categories";
+import { blocks } from "@/registry/default/blocks";
 import { cn } from "@/registry/default/lib/utils";
-import { particles } from "@/registry/default/particles";
 
+import { BlockDisplay } from "./block-display";
 import { CategoryNavigation } from "./category-navigation";
-import { ParticleDisplay } from "./particle-display";
 
-const particleCategories = getUniqueParticleCategories(particles);
+const blockCategories = getUniqueParticleCategories(blocks);
 
-const title = "Particles";
+const title = "Blocks";
 const description =
-  "Particles are more than just components. They are the building blocks of your design system. Click on a category or browse them all.";
+  "Blocks are pre-assembled components that combine primitives into complete patterns. Browse by category or explore them all.";
 
 export const metadata = createMetadata({
   title,
@@ -30,22 +30,22 @@ export default function Page() {
         <PageHeaderDescription className="max-w-2xl">
           {description}
         </PageHeaderDescription>
-        <CategoryNavigation categories={particleCategories} />
+        <CategoryNavigation categories={blockCategories} />
       </PageHeader>
       <div className="grid flex-1 items-stretch gap-3 pb-12 lg:grid-cols-2">
-        {particles.map((particle) => {
-          const ParticleComponent = particle.component;
+        {blocks.map((block) => {
+          const BlockComponent = block.component;
           return (
-            <ParticleDisplay
+            <BlockDisplay
               className={cn(
-                particle.fullWidth ? "lg:col-span-2" : "lg:col-span-1",
-                particle.className
+                block.fullWidth ? "lg:col-span-2" : "lg:col-span-1",
+                block.className
               )}
-              key={particle.id}
-              name={particle.id}
+              key={block.id}
+              name={block.id}
             >
-              <ParticleComponent />
-            </ParticleDisplay>
+              <BlockComponent />
+            </BlockDisplay>
           );
         })}
       </div>

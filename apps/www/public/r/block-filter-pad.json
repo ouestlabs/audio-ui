@@ -1,0 +1,21 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "block-filter-pad",
+  "description": "Filter pad",
+  "registryDependencies": [
+    "@audio/xypad"
+  ],
+  "files": [
+    {
+      "path": "src/registry/default/blocks/block-filter-pad.tsx",
+      "content": "\"use client\";\n\nimport { useState } from \"react\";\nimport { XYPad } from \"@/registry/default/ui/audio/elements/xypad\";\n\nexport default function BlockFilterPad() {\n  const [value, setValue] = useState({ x: 30, y: 70 });\n\n  return (\n    <section className=\"flex flex-col gap-3 rounded-xl border bg-card p-4\">\n      <header className=\"flex items-center\">\n        <span className=\"font-medium text-muted-foreground text-xs\">\n          Filter\n        </span>\n      </header>\n      <XYPad\n        defaultValue={value}\n        formatValue={(next) => `Cut ${next.x} | Res ${next.y}`}\n        maxX={100}\n        maxY={100}\n        minX={0}\n        minY={0}\n        onValueChange={setValue}\n        stepX={1}\n        stepY={1}\n        value={value}\n        valueDisplay=\"hidden\"\n      />\n      <div className=\"font-mono text-muted-foreground text-xs tabular-nums\">\n        Cutoff: {value.x}% - Resonance: {value.y}%\n      </div>\n    </section>\n  );\n}\n",
+      "type": "registry:block",
+      "target": "components/audio/blocks/block-filter-pad.tsx"
+    }
+  ],
+  "categories": [
+    "xypad",
+    "ui"
+  ],
+  "type": "registry:block"
+}

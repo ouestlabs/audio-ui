@@ -32,7 +32,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 1,
     },
     {
-      url: url("/particles"),
+      url: url("/blocks"),
       changeFrequency: "monthly",
       priority: 0.8,
     },

@@ -20,8 +20,8 @@ export const appConfig = Object.freeze({
       label: "Docs",
     },
     {
-      href: "/particles",
-      label: "Particles",
+      href: "/blocks",
+      label: "Blocks",
     },
   ],
 });

@@ -1,0 +1,21 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "block-volume-slider",
+  "description": "Volume slider",
+  "registryDependencies": [
+    "@audio/fader"
+  ],
+  "files": [
+    {
+      "path": "src/registry/default/blocks/block-volume-slider.tsx",
+      "content": "\"use client\";\n\nimport { useId, useState } from \"react\";\nimport { Fader } from \"@/registry/default/ui/audio/elements/fader\";\n\nexport default function BlockVolumeSlider() {\n  const faderId = useId();\n  const labelId = useId();\n  const valueId = useId();\n  const [value, setValue] = useState(72);\n\n  return (\n    <section\n      aria-label=\"Volume control\"\n      className=\"flex w-full flex-col gap-4 rounded-xl border bg-card p-5\"\n    >\n      <header className=\"flex items-center justify-between\">\n        <label\n          className=\"font-medium text-muted-foreground text-xs\"\n          htmlFor={faderId}\n          id={labelId}\n        >\n          Volume\n        </label>\n        <output\n          aria-live=\"polite\"\n          className=\"w-12 truncate text-right font-medium text-muted-foreground text-xs tabular-nums\"\n          htmlFor={faderId}\n          id={valueId}\n          title={`${value}%`}\n        >\n          {value}%\n        </output>\n      </header>\n      <Fader\n        aria-describedby={valueId}\n        aria-labelledby={labelId}\n        id={faderId}\n        max={100}\n        min={0}\n        onValueChange={setValue}\n        orientation=\"horizontal\"\n        value={value}\n      />\n    </section>\n  );\n}\n",
+      "type": "registry:block",
+      "target": "components/audio/blocks/block-volume-slider.tsx"
+    }
+  ],
+  "categories": [
+    "fader",
+    "ui"
+  ],
+  "type": "registry:block"
+}

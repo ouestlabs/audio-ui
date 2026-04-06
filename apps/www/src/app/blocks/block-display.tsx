@@ -18,23 +18,23 @@ import {
   SheetTrigger,
 } from "@/registry/default/ui/sheet";
 
-export type Particle = z.infer<typeof registryItemSchema> & {
+export type Block = z.infer<typeof registryItemSchema> & {
   highlightedCode: string;
 };
 
-export async function ParticleDisplay({
+export async function BlockDisplay({
   name,
   children,
   className,
 }: { name: string } & React.ComponentProps<"div">) {
   const baseUrl =
     process.env.NEXT_PUBLIC_APP_URL || "https://audio-ui.vercel.app";
-  const particle = await getCachedRegistryItem(name);
-  const highlightedCode = await getParticleHighlightedCode(
-    particle?.files?.[0]?.content ?? ""
+  const block = await getCachedRegistryItem(name);
+  const highlightedCode = await getBlockHighlightedCode(
+    block?.files?.[0]?.content ?? ""
   );
 
-  if (!(particle && highlightedCode)) {
+  if (!(block && highlightedCode)) {
     return null;
   }
 
@@ -45,13 +45,15 @@ export async function ParticleDisplay({
         className
       )}
     >
-      <div className="-m-px flex min-w-0 flex-1 flex-col flex-wrap items-center justify-center overflow-x-auto rounded-xl border bg-background p-5">
-        <div data-slot="particle-wrapper">{children}</div>
+      <div className="-m-px flex min-w-0 flex-1 flex-col items-center justify-center overflow-hidden rounded-xl border bg-background p-5">
+        <div className="mx-auto max-w-3xl" data-slot="block-wrapper">
+          {children}
+        </div>
       </div>
       <div className="flex items-center gap-3 rounded-b-xl p-2">
         <p className="flex flex-1 gap-1 truncate text-muted-foreground text-xs">
           <InfoIcon className="size-3 h-lh shrink-0" />
-          <span className="truncate">{particle.description}</span>
+          <span className="truncate">{block.description}</span>
         </p>
         <div className="flex items-center gap-1.5">
           {process.env.NODE_ENV === "development" && (
@@ -59,10 +61,10 @@ export async function ParticleDisplay({
               className="text-xs"
               disabled
               size="sm"
-              title="Particle name"
+              title="Block name"
               variant="outline"
             >
-              {particle.name}
+              {block.name}
             </Button>
           )}
           <CopyRegistry value={`${baseUrl}/r/${name}.json`} variant="outline" />
@@ -75,7 +77,7 @@ export async function ParticleDisplay({
             <SheetContent className="bg-sidebar duration-200 data-ending-style:translate-x-8 data-starting-style:translate-x-8 data-ending-style:opacity-0 data-starting-style:opacity-0 sm:max-w-3xl">
               <SheetTitle className="sr-only">View code</SheetTitle>
               <SheetDescription className="sr-only">
-                View the code for the {name} particle.
+                View the code for the {name} block.
               </SheetDescription>
               <div className="flex flex-1 flex-col overflow-hidden p-6">
                 <div>
@@ -113,6 +115,6 @@ const getCachedRegistryItem = React.cache(
   async (name: string) => await getRegistryItem(name)
 );
 
-const getParticleHighlightedCode = React.cache(
+const getBlockHighlightedCode = React.cache(
   async (content: string) => await highlightCode(content)
 );

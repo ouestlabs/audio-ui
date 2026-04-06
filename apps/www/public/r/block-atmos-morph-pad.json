@@ -1,0 +1,22 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "block-atmos-morph-pad",
+  "description": "Atmos morph pad",
+  "registryDependencies": [
+    "@audio/xypad",
+    "@audio/fader"
+  ],
+  "files": [
+    {
+      "path": "src/registry/default/blocks/block-atmos-morph-pad.tsx",
+      "content": "\"use client\";\n\nimport { useState } from \"react\";\nimport { Fader } from \"@/registry/default/ui/audio/elements/fader\";\nimport { XYPad } from \"@/registry/default/ui/audio/elements/xypad\";\n\nexport default function BlockAtmosMorphPad() {\n  const [morph, setMorph] = useState({ x: 0, y: 25 });\n  const [mix, setMix] = useState(60);\n\n  return (\n    <section className=\"flex flex-col gap-3 rounded-xl border bg-card p-4\">\n      <header className=\"font-medium text-muted-foreground text-xs\">\n        Atmos Morph\n      </header>\n      <XYPad\n        defaultValue={morph}\n        formatValue={(next) => `Color ${next.x} | Space ${next.y}`}\n        maxX={100}\n        maxY={100}\n        minX={-100}\n        minY={-100}\n        onValueChange={setMorph}\n        stepX={1}\n        stepY={1}\n        value={morph}\n      />\n      <div className=\"flex items-center gap-3\">\n        <span className=\"font-medium text-muted-foreground text-xs\">Wet</span>\n        <Fader\n          className=\"h-8 flex-1\"\n          defaultValue={mix}\n          max={100}\n          min={0}\n          onValueChange={setMix}\n          orientation=\"horizontal\"\n          value={mix}\n        />\n        <span className=\"w-10 text-right font-medium text-muted-foreground text-xs tabular-nums\">\n          {mix}%\n        </span>\n      </div>\n    </section>\n  );\n}\n",
+      "type": "registry:block",
+      "target": "components/audio/blocks/block-atmos-morph-pad.tsx"
+    }
+  ],
+  "categories": [
+    "xypad",
+    "ui"
+  ],
+  "type": "registry:block"
+}

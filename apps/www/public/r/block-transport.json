@@ -1,0 +1,21 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "block-transport",
+  "description": "Transport timeline",
+  "registryDependencies": [
+    "@audio/transport"
+  ],
+  "files": [
+    {
+      "path": "src/registry/default/blocks/block-transport.tsx",
+      "content": "\"use client\";\n\nimport { Transport } from \"@/registry/default/ui/audio/elements/transport\";\n\nexport default function BlockTransport() {\n  return (\n    <div className=\"w-full rounded-xl border bg-card p-4\">\n      <Transport\n        aria-label=\"Seek\"\n        bufferedValue={62}\n        onSeek={() => {\n          //\n        }}\n        value={35}\n      />\n    </div>\n  );\n}\n",
+      "type": "registry:block",
+      "target": "components/audio/blocks/block-transport.tsx"
+    }
+  ],
+  "categories": [
+    "transport",
+    "ui"
+  ],
+  "type": "registry:block"
+}
