@@ -16,6 +16,7 @@ import {
 } from "../hooks/interactions";
 import { useControlledValue, useValueAsRef } from "../hooks/state";
 import { getDataAttributes } from "./internal/data-attributes";
+import { useInheritedOrientation } from "./internal/orientation-context";
 
 interface FaderContextValue {
   value: number;
@@ -90,7 +91,7 @@ export namespace Fader {
     min = -60,
     max = 6,
     step = 1,
-    orientation = "vertical",
+    orientation: orientationProp,
     disabled = false,
     "aria-label": ariaLabel,
     "aria-labelledby": ariaLabelledBy,
@@ -101,6 +102,9 @@ export namespace Fader {
     children,
     ...props
   }: RootProps) {
+    const inheritedOrientation = useInheritedOrientation();
+    const orientation = orientationProp ?? inheritedOrientation ?? "vertical";
+
     const faderId = React.useId();
     const trackRef = React.useRef<HTMLDivElement>(null);
     const thumbRef = React.useRef<HTMLDivElement>(null);
@@ -334,6 +338,7 @@ export namespace Fader {
   export function Track({ className, ...props }: TrackProps) {
     const {
       disabled,
+      orientation,
       trackRef,
       onPointerDown,
       onDragStart,
@@ -354,7 +359,7 @@ export namespace Fader {
     return (
       <div
         className={className}
-        {...getDataAttributes("fader", { part: "track" })}
+        {...getDataAttributes("fader", { part: "track", orientation })}
         {...trackPointerProps}
         {...props}
       />
@@ -370,7 +375,7 @@ export namespace Fader {
     return (
       <div
         className={className}
-        {...getDataAttributes("fader", { part: "range" })}
+        {...getDataAttributes("fader", { part: "range", orientation })}
         style={{
           ...(orientation === "horizontal"
             ? {
@@ -555,7 +560,11 @@ export namespace Fader {
         aria-valuemin={min}
         aria-valuenow={value}
         className={className}
-        {...getDataAttributes("fader", { part: "thumb", disabled })}
+        {...getDataAttributes("fader", {
+          part: "thumb",
+          disabled,
+          orientation,
+        })}
         ref={thumbRef}
         role="slider"
         style={{
@@ -583,10 +592,12 @@ export namespace Fader {
   export interface ThumbInnerProps extends React.ComponentProps<"div"> {}
 
   export function ThumbInner({ className, ...props }: ThumbInnerProps) {
+    const { orientation } = useFaderContext();
+
     return (
       <div
         className={className}
-        {...getDataAttributes("fader", { part: "thumb-inner" })}
+        {...getDataAttributes("fader", { part: "thumb-inner", orientation })}
         {...props}
       />
     );
@@ -595,10 +606,12 @@ export namespace Fader {
   export interface ThumbMarkProps extends React.ComponentProps<"div"> {}
 
   export function ThumbMark({ className, ...props }: ThumbMarkProps) {
+    const { orientation } = useFaderContext();
+
     return (
       <div
         className={className}
-        {...getDataAttributes("fader", { part: "thumb-mark" })}
+        {...getDataAttributes("fader", { part: "thumb-mark", orientation })}
         {...props}
       />
     );
