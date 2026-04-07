@@ -96,6 +96,24 @@ export const Index: Record<string, any> = {
     categories: undefined,
     meta: undefined,
   },
+  "channel-strip": {
+    name: "channel-strip",
+    description: "",
+    type: "registry:component",
+    registryDependencies: ["@audio/fader","@audio/knob"],
+    files: [{
+      path: "src/registry/default/ui/audio/elements/channel-strip.tsx",
+      type: "registry:component",
+      target: ""
+    }],
+    component: React.lazy(async () => {
+      const mod = await import("@/registry/default/ui/audio/elements/channel-strip.tsx")
+      const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
+      return { default: mod.default || mod[exportName] }
+    }),
+    categories: undefined,
+    meta: undefined,
+  },
   "ui": {
     name: "ui",
     description: "",
@@ -412,24 +430,6 @@ export const Index: Record<string, any> = {
     categories: ["transport","ui"],
     meta: undefined,
   },
-  "transport-vertical-demo": {
-    name: "transport-vertical-demo",
-    description: "Transport timeline in vertical orientation",
-    type: "registry:example",
-    registryDependencies: ["@audio/transport"],
-    files: [{
-      path: "src/registry/default/examples/transport-vertical-demo.tsx",
-      type: "registry:example",
-      target: ""
-    }],
-    component: React.lazy(async () => {
-      const mod = await import("@/registry/default/examples/transport-vertical-demo.tsx")
-      const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
-      return { default: mod.default || mod[exportName] }
-    }),
-    categories: ["transport","ui"],
-    meta: undefined,
-  },
   "sortable-list-demo": {
     name: "sortable-list-demo",
     description: "Sortable list component examples",
@@ -466,36 +466,18 @@ export const Index: Record<string, any> = {
     categories: ["playback-speed"],
     meta: undefined,
   },
-  "fader-demo": {
-    name: "fader-demo",
-    description: "Fader component example",
+  "fader-vertical-demo": {
+    name: "fader-vertical-demo",
+    description: "Vertical fader",
     type: "registry:example",
     registryDependencies: ["@audio/fader"],
     files: [{
-      path: "src/registry/default/examples/fader-demo.tsx",
+      path: "src/registry/default/examples/fader-vertical-demo.tsx",
       type: "registry:example",
       target: ""
     }],
     component: React.lazy(async () => {
-      const mod = await import("@/registry/default/examples/fader-demo.tsx")
-      const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
-      return { default: mod.default || mod[exportName] }
-    }),
-    categories: ["fader"],
-    meta: undefined,
-  },
-  "fader-vertical-live-demo": {
-    name: "fader-vertical-live-demo",
-    description: "Vertical fader with live value output",
-    type: "registry:example",
-    registryDependencies: ["@audio/fader"],
-    files: [{
-      path: "src/registry/default/examples/fader-vertical-live-demo.tsx",
-      type: "registry:example",
-      target: ""
-    }],
-    component: React.lazy(async () => {
-      const mod = await import("@/registry/default/examples/fader-vertical-live-demo.tsx")
+      const mod = await import("@/registry/default/examples/fader-vertical-demo.tsx")
       const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
       return { default: mod.default || mod[exportName] }
     }),
@@ -520,24 +502,6 @@ export const Index: Record<string, any> = {
     categories: ["fader"],
     meta: undefined,
   },
-  "fader-horizontal-live-demo": {
-    name: "fader-horizontal-live-demo",
-    description: "Horizontal fader with live value output",
-    type: "registry:example",
-    registryDependencies: ["@audio/fader"],
-    files: [{
-      path: "src/registry/default/examples/fader-horizontal-live-demo.tsx",
-      type: "registry:example",
-      target: ""
-    }],
-    component: React.lazy(async () => {
-      const mod = await import("@/registry/default/examples/fader-horizontal-live-demo.tsx")
-      const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
-      return { default: mod.default || mod[exportName] }
-    }),
-    categories: ["fader"],
-    meta: undefined,
-  },
   "fader-size-variants-demo": {
     name: "fader-size-variants-demo",
     description: "Fader size variants (sm, default, lg)",
@@ -556,24 +520,6 @@ export const Index: Record<string, any> = {
     categories: ["fader"],
     meta: undefined,
   },
-  "fader-no-thumb-marks-demo": {
-    name: "fader-no-thumb-marks-demo",
-    description: "Fader component example with no thumb marks",
-    type: "registry:example",
-    registryDependencies: ["@audio/fader"],
-    files: [{
-      path: "src/registry/default/examples/fader-no-thumb-marks-demo.tsx",
-      type: "registry:example",
-      target: ""
-    }],
-    component: React.lazy(async () => {
-      const mod = await import("@/registry/default/examples/fader-no-thumb-marks-demo.tsx")
-      const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
-      return { default: mod.default || mod[exportName] }
-    }),
-    categories: ["fader"],
-    meta: undefined,
-  },
   "fader-thumb-marks-variants-demo": {
     name: "fader-thumb-marks-variants-demo",
     description: "Fader thumb marks variants (off, 1, 4)",
@@ -586,78 +532,6 @@ export const Index: Record<string, any> = {
     }],
     component: React.lazy(async () => {
       const mod = await import("@/registry/default/examples/fader-thumb-marks-variants-demo.tsx")
-      const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
-      return { default: mod.default || mod[exportName] }
-    }),
-    categories: ["fader"],
-    meta: undefined,
-  },
-  "fader-custom-thumb-marks-demo": {
-    name: "fader-custom-thumb-marks-demo",
-    description: "Fader component example with custom thumb marks",
-    type: "registry:example",
-    registryDependencies: ["@audio/fader"],
-    files: [{
-      path: "src/registry/default/examples/fader-custom-thumb-marks-demo.tsx",
-      type: "registry:example",
-      target: ""
-    }],
-    component: React.lazy(async () => {
-      const mod = await import("@/registry/default/examples/fader-custom-thumb-marks-demo.tsx")
-      const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
-      return { default: mod.default || mod[exportName] }
-    }),
-    categories: ["fader"],
-    meta: undefined,
-  },
-  "fader-bipolar-db-demo": {
-    name: "fader-bipolar-db-demo",
-    description: "Fader gain control in dB range (-60 to +6)",
-    type: "registry:example",
-    registryDependencies: ["@audio/fader"],
-    files: [{
-      path: "src/registry/default/examples/fader-bipolar-db-demo.tsx",
-      type: "registry:example",
-      target: ""
-    }],
-    component: React.lazy(async () => {
-      const mod = await import("@/registry/default/examples/fader-bipolar-db-demo.tsx")
-      const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
-      return { default: mod.default || mod[exportName] }
-    }),
-    categories: ["fader"],
-    meta: undefined,
-  },
-  "fader-multiple-control-demo": {
-    name: "fader-multiple-control-demo",
-    description: "Fader component example with multiple controls",
-    type: "registry:example",
-    registryDependencies: ["@audio/fader"],
-    files: [{
-      path: "src/registry/default/examples/fader-multiple-control-demo.tsx",
-      type: "registry:example",
-      target: ""
-    }],
-    component: React.lazy(async () => {
-      const mod = await import("@/registry/default/examples/fader-multiple-control-demo.tsx")
-      const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
-      return { default: mod.default || mod[exportName] }
-    }),
-    categories: ["fader"],
-    meta: undefined,
-  },
-  "fader-volume-control-demo": {
-    name: "fader-volume-control-demo",
-    description: "Fader component example with volume control",
-    type: "registry:example",
-    registryDependencies: ["@audio/fader"],
-    files: [{
-      path: "src/registry/default/examples/fader-volume-control-demo.tsx",
-      type: "registry:example",
-      target: ""
-    }],
-    component: React.lazy(async () => {
-      const mod = await import("@/registry/default/examples/fader-volume-control-demo.tsx")
       const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
       return { default: mod.default || mod[exportName] }
     }),
@@ -772,42 +646,6 @@ export const Index: Record<string, any> = {
     categories: ["knob"],
     meta: undefined,
   },
-  "knob-multiple-control-demo": {
-    name: "knob-multiple-control-demo",
-    description: "Knob component example with multiple controls",
-    type: "registry:example",
-    registryDependencies: ["@audio/knob"],
-    files: [{
-      path: "src/registry/default/examples/knob-multiple-control-demo.tsx",
-      type: "registry:example",
-      target: ""
-    }],
-    component: React.lazy(async () => {
-      const mod = await import("@/registry/default/examples/knob-multiple-control-demo.tsx")
-      const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
-      return { default: mod.default || mod[exportName] }
-    }),
-    categories: ["knob"],
-    meta: undefined,
-  },
-  "knob-pan-control-demo": {
-    name: "knob-pan-control-demo",
-    description: "Knob component example with stereo pan control",
-    type: "registry:example",
-    registryDependencies: ["@audio/knob"],
-    files: [{
-      path: "src/registry/default/examples/knob-pan-control-demo.tsx",
-      type: "registry:example",
-      target: ""
-    }],
-    component: React.lazy(async () => {
-      const mod = await import("@/registry/default/examples/knob-pan-control-demo.tsx")
-      const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
-      return { default: mod.default || mod[exportName] }
-    }),
-    categories: ["knob"],
-    meta: undefined,
-  },
   "knob-arc-and-anchor-demo": {
     name: "knob-arc-and-anchor-demo",
     description: "Knob value arc (rail + highlight) and optional anchor range",
@@ -896,24 +734,6 @@ export const Index: Record<string, any> = {
       return { default: mod.default || mod[exportName] }
     }),
     categories: ["knob"],
-    meta: undefined,
-  },
-  "xypad-demo": {
-    name: "xypad-demo",
-    description: "XYPad component example",
-    type: "registry:example",
-    registryDependencies: ["@audio/xypad"],
-    files: [{
-      path: "src/registry/default/examples/xypad-demo.tsx",
-      type: "registry:example",
-      target: ""
-    }],
-    component: React.lazy(async () => {
-      const mod = await import("@/registry/default/examples/xypad-demo.tsx")
-      const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
-      return { default: mod.default || mod[exportName] }
-    }),
-    categories: ["xypad"],
     meta: undefined,
   },
   "xypad-live-value-demo": {
@@ -1096,42 +916,6 @@ export const Index: Record<string, any> = {
     categories: ["xypad"],
     meta: undefined,
   },
-  "xypad-filter-control-demo": {
-    name: "xypad-filter-control-demo",
-    description: "XYPad component example with filter control",
-    type: "registry:example",
-    registryDependencies: ["@audio/xypad"],
-    files: [{
-      path: "src/registry/default/examples/xypad-filter-control-demo.tsx",
-      type: "registry:example",
-      target: ""
-    }],
-    component: React.lazy(async () => {
-      const mod = await import("@/registry/default/examples/xypad-filter-control-demo.tsx")
-      const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
-      return { default: mod.default || mod[exportName] }
-    }),
-    categories: ["xypad"],
-    meta: undefined,
-  },
-  "xypad-synthesizer-control-demo": {
-    name: "xypad-synthesizer-control-demo",
-    description: "XYPad component example with synthesizer control",
-    type: "registry:example",
-    registryDependencies: ["@audio/xypad"],
-    files: [{
-      path: "src/registry/default/examples/xypad-synthesizer-control-demo.tsx",
-      type: "registry:example",
-      target: ""
-    }],
-    component: React.lazy(async () => {
-      const mod = await import("@/registry/default/examples/xypad-synthesizer-control-demo.tsx")
-      const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
-      return { default: mod.default || mod[exportName] }
-    }),
-    categories: ["xypad"],
-    meta: undefined,
-  },
   "theme-stone": {
     name: "theme-stone",
     description: "",
@@ -1184,7 +968,7 @@ export const Index: Record<string, any> = {
   },
   "block-pocket-synth": {
     name: "block-pocket-synth",
-    description: "Pocket synth",
+    description: "Pocket synth with oscillator, filter, and XY pad",
     type: "registry:block",
     registryDependencies: ["@audio/use-audio","@audio/fader","@audio/xypad","@shadcn/toggle-group"],
     files: [{
@@ -1202,7 +986,7 @@ export const Index: Record<string, any> = {
   },
   "block-wave-shaper": {
     name: "block-wave-shaper",
-    description: "Wave shaper",
+    description: "Wave shaper synth with distortion, tone, and detune controls",
     type: "registry:block",
     registryDependencies: ["@audio/use-audio","@audio/fader","@audio/xypad","@audio/knob","@shadcn/toggle-group"],
     files: [{
@@ -1238,7 +1022,7 @@ export const Index: Record<string, any> = {
   },
   "block-player-widget": {
     name: "block-player-widget",
-    description: "Audio player widget",
+    description: "Audio player with track list",
     type: "registry:block",
     registryDependencies: ["@audio/provider","@audio/player","@audio/queue","@audio/track","@audio/store","@audio/html"],
     files: [{
@@ -1272,184 +1056,292 @@ export const Index: Record<string, any> = {
     categories: ["queue","ui"],
     meta: undefined,
   },
-  "block-level-knob": {
-    name: "block-level-knob",
-    description: "Level knob",
+  "block-channel-strip-transport-vertical": {
+    name: "block-channel-strip-transport-vertical",
+    description: "Channel strip with transport seek bar in vertical orientation",
     type: "registry:block",
-    registryDependencies: ["@audio/knob"],
+    registryDependencies: ["@audio/channel-strip","@audio/transport"],
     files: [{
-      path: "src/registry/default/blocks/block-level-knob.tsx",
+      path: "src/registry/default/blocks/block-channel-strip-transport-vertical.tsx",
       type: "registry:block",
       target: ""
     }],
     component: React.lazy(async () => {
-      const mod = await import("@/registry/default/blocks/block-level-knob.tsx")
+      const mod = await import("@/registry/default/blocks/block-channel-strip-transport-vertical.tsx")
       const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
       return { default: mod.default || mod[exportName] }
     }),
-    categories: ["knob","ui"],
+    categories: ["channel-strip","transport"],
     meta: undefined,
   },
-  "block-macro-knob": {
-    name: "block-macro-knob",
-    description: "Macro knob",
+  "block-channel-strip-transport": {
+    name: "block-channel-strip-transport",
+    description: "Channel strip with transport seek bar in horizontal orientation",
     type: "registry:block",
-    registryDependencies: ["@audio/knob"],
+    registryDependencies: ["@audio/channel-strip","@audio/transport"],
     files: [{
-      path: "src/registry/default/blocks/block-macro-knob.tsx",
+      path: "src/registry/default/blocks/block-channel-strip-transport.tsx",
       type: "registry:block",
       target: ""
     }],
     component: React.lazy(async () => {
-      const mod = await import("@/registry/default/blocks/block-macro-knob.tsx")
+      const mod = await import("@/registry/default/blocks/block-channel-strip-transport.tsx")
       const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
       return { default: mod.default || mod[exportName] }
     }),
-    categories: ["knob","ui"],
+    categories: ["channel-strip","transport"],
     meta: undefined,
   },
-  "block-volume-slider": {
-    name: "block-volume-slider",
-    description: "Volume slider",
+  "block-channel-strip": {
+    name: "block-channel-strip",
+    description: "Channel strip with fader, header, and footer",
     type: "registry:block",
-    registryDependencies: ["@audio/fader"],
+    registryDependencies: ["@audio/channel-strip","@audio/fader"],
     files: [{
-      path: "src/registry/default/blocks/block-volume-slider.tsx",
+      path: "src/registry/default/blocks/block-channel-strip.tsx",
       type: "registry:block",
       target: ""
     }],
     component: React.lazy(async () => {
-      const mod = await import("@/registry/default/blocks/block-volume-slider.tsx")
+      const mod = await import("@/registry/default/blocks/block-channel-strip.tsx")
       const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
       return { default: mod.default || mod[exportName] }
     }),
-    categories: ["fader","ui"],
+    categories: ["channel-strip","fader","ui"],
     meta: undefined,
   },
-  "block-volume-inline": {
-    name: "block-volume-inline",
-    description: "Inline volume slider",
+  "block-channel-strip-horizontal": {
+    name: "block-channel-strip-horizontal",
+    description: "Channel strip with fader in horizontal orientation",
     type: "registry:block",
-    registryDependencies: ["@audio/fader"],
+    registryDependencies: ["@audio/channel-strip","@audio/fader"],
     files: [{
-      path: "src/registry/default/blocks/block-volume-inline.tsx",
+      path: "src/registry/default/blocks/block-channel-strip-horizontal.tsx",
       type: "registry:block",
       target: ""
     }],
     component: React.lazy(async () => {
-      const mod = await import("@/registry/default/blocks/block-volume-inline.tsx")
+      const mod = await import("@/registry/default/blocks/block-channel-strip-horizontal.tsx")
       const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
       return { default: mod.default || mod[exportName] }
     }),
-    categories: ["fader","ui"],
+    categories: ["channel-strip","fader","ui"],
     meta: undefined,
   },
-  "block-volume-strip": {
-    name: "block-volume-strip",
-    description: "Volume strip",
+  "block-channel-strip-fader": {
+    name: "block-channel-strip-fader",
+    description: "Channel strip with a minimal fader section",
     type: "registry:block",
-    registryDependencies: ["@audio/fader"],
+    registryDependencies: ["@audio/channel-strip","@audio/fader"],
     files: [{
-      path: "src/registry/default/blocks/block-volume-strip.tsx",
+      path: "src/registry/default/blocks/block-channel-strip-fader.tsx",
       type: "registry:block",
       target: ""
     }],
     component: React.lazy(async () => {
-      const mod = await import("@/registry/default/blocks/block-volume-strip.tsx")
+      const mod = await import("@/registry/default/blocks/block-channel-strip-fader.tsx")
       const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
       return { default: mod.default || mod[exportName] }
     }),
-    categories: ["fader","ui"],
+    categories: ["channel-strip","fader","ui"],
     meta: undefined,
   },
-  "block-filter-pad": {
-    name: "block-filter-pad",
-    description: "Filter pad",
+  "block-channel-strip-fader-gain-db": {
+    name: "block-channel-strip-fader-gain-db",
+    description: "Channel strip with bipolar gain fader (-60 dB to +6 dB)",
     type: "registry:block",
-    registryDependencies: ["@audio/xypad"],
+    registryDependencies: ["@audio/channel-strip","@audio/fader"],
     files: [{
-      path: "src/registry/default/blocks/block-filter-pad.tsx",
+      path: "src/registry/default/blocks/block-channel-strip-fader-gain-db.tsx",
       type: "registry:block",
       target: ""
     }],
     component: React.lazy(async () => {
-      const mod = await import("@/registry/default/blocks/block-filter-pad.tsx")
+      const mod = await import("@/registry/default/blocks/block-channel-strip-fader-gain-db.tsx")
       const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
       return { default: mod.default || mod[exportName] }
     }),
-    categories: ["xypad","ui"],
+    categories: ["channel-strip","fader","ui"],
     meta: undefined,
   },
-  "block-atmos-morph-pad": {
-    name: "block-atmos-morph-pad",
-    description: "Atmos morph pad",
+  "block-channel-strip-fader-multi": {
+    name: "block-channel-strip-fader-multi",
+    description: "Multiple fader channel strips in a row",
     type: "registry:block",
-    registryDependencies: ["@audio/xypad","@audio/fader"],
+    registryDependencies: ["@audio/channel-strip","@audio/fader"],
     files: [{
-      path: "src/registry/default/blocks/block-atmos-morph-pad.tsx",
+      path: "src/registry/default/blocks/block-channel-strip-fader-multi.tsx",
       type: "registry:block",
       target: ""
     }],
     component: React.lazy(async () => {
-      const mod = await import("@/registry/default/blocks/block-atmos-morph-pad.tsx")
+      const mod = await import("@/registry/default/blocks/block-channel-strip-fader-multi.tsx")
       const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
       return { default: mod.default || mod[exportName] }
     }),
-    categories: ["xypad","ui"],
+    categories: ["channel-strip","fader"],
     meta: undefined,
   },
-  "block-transport": {
-    name: "block-transport",
-    description: "Transport timeline",
+  "block-channel-strip-knob-multi": {
+    name: "block-channel-strip-knob-multi",
+    description: "Multiple knob channel strips in a row",
     type: "registry:block",
-    registryDependencies: ["@audio/transport"],
+    registryDependencies: ["@audio/channel-strip","@audio/knob"],
     files: [{
-      path: "src/registry/default/blocks/block-transport.tsx",
+      path: "src/registry/default/blocks/block-channel-strip-knob-multi.tsx",
       type: "registry:block",
       target: ""
     }],
     component: React.lazy(async () => {
-      const mod = await import("@/registry/default/blocks/block-transport.tsx")
+      const mod = await import("@/registry/default/blocks/block-channel-strip-knob-multi.tsx")
       const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
       return { default: mod.default || mod[exportName] }
     }),
-    categories: ["transport","ui"],
+    categories: ["channel-strip","knob"],
     meta: undefined,
   },
-  "block-pan-knob": {
-    name: "block-pan-knob",
-    description: "Pan knob",
+  "block-channel-strip-fader-horizontal": {
+    name: "block-channel-strip-fader-horizontal",
+    description: "Channel strip with a minimal fader section in horizontal orientation",
     type: "registry:block",
-    registryDependencies: ["@audio/knob"],
+    registryDependencies: ["@audio/channel-strip","@audio/fader"],
     files: [{
-      path: "src/registry/default/blocks/block-pan-knob.tsx",
+      path: "src/registry/default/blocks/block-channel-strip-fader-horizontal.tsx",
       type: "registry:block",
       target: ""
     }],
     component: React.lazy(async () => {
-      const mod = await import("@/registry/default/blocks/block-pan-knob.tsx")
+      const mod = await import("@/registry/default/blocks/block-channel-strip-fader-horizontal.tsx")
       const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
       return { default: mod.default || mod[exportName] }
     }),
-    categories: ["knob","ui"],
+    categories: ["channel-strip","fader","ui"],
     meta: undefined,
   },
-  "block-pan-width-controls": {
-    name: "block-pan-width-controls",
-    description: "Pan width controls",
+  "block-channel-strip-fader-slider": {
+    name: "block-channel-strip-fader-slider",
+    description: "Channel strip with horizontal fader and inline label",
     type: "registry:block",
-    registryDependencies: ["@audio/knob"],
+    registryDependencies: ["@audio/channel-strip","@audio/fader"],
     files: [{
-      path: "src/registry/default/blocks/block-pan-width-controls.tsx",
+      path: "src/registry/default/blocks/block-channel-strip-fader-slider.tsx",
       type: "registry:block",
       target: ""
     }],
     component: React.lazy(async () => {
-      const mod = await import("@/registry/default/blocks/block-pan-width-controls.tsx")
+      const mod = await import("@/registry/default/blocks/block-channel-strip-fader-slider.tsx")
       const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
       return { default: mod.default || mod[exportName] }
     }),
-    categories: ["knob","ui"],
+    categories: ["channel-strip","fader","ui"],
+    meta: undefined,
+  },
+  "block-channel-strip-knob-level": {
+    name: "block-channel-strip-knob-level",
+    description: "Channel strip with a level knob",
+    type: "registry:block",
+    registryDependencies: ["@audio/channel-strip","@audio/knob"],
+    files: [{
+      path: "src/registry/default/blocks/block-channel-strip-knob-level.tsx",
+      type: "registry:block",
+      target: ""
+    }],
+    component: React.lazy(async () => {
+      const mod = await import("@/registry/default/blocks/block-channel-strip-knob-level.tsx")
+      const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
+      return { default: mod.default || mod[exportName] }
+    }),
+    categories: ["channel-strip","knob","ui"],
+    meta: undefined,
+  },
+  "block-channel-strip-knob-macro": {
+    name: "block-channel-strip-knob-macro",
+    description: "Channel strip with an oversized macro knob",
+    type: "registry:block",
+    registryDependencies: ["@audio/channel-strip","@audio/knob"],
+    files: [{
+      path: "src/registry/default/blocks/block-channel-strip-knob-macro.tsx",
+      type: "registry:block",
+      target: ""
+    }],
+    component: React.lazy(async () => {
+      const mod = await import("@/registry/default/blocks/block-channel-strip-knob-macro.tsx")
+      const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
+      return { default: mod.default || mod[exportName] }
+    }),
+    categories: ["channel-strip","knob","ui"],
+    meta: undefined,
+  },
+  "block-channel-strip-knob-pan": {
+    name: "block-channel-strip-knob-pan",
+    description: "Channel strip with a bipolar pan knob",
+    type: "registry:block",
+    registryDependencies: ["@audio/channel-strip","@audio/knob"],
+    files: [{
+      path: "src/registry/default/blocks/block-channel-strip-knob-pan.tsx",
+      type: "registry:block",
+      target: ""
+    }],
+    component: React.lazy(async () => {
+      const mod = await import("@/registry/default/blocks/block-channel-strip-knob-pan.tsx")
+      const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
+      return { default: mod.default || mod[exportName] }
+    }),
+    categories: ["channel-strip","knob","ui"],
+    meta: undefined,
+  },
+  "block-channel-strip-knob-pan-width": {
+    name: "block-channel-strip-knob-pan-width",
+    description: "Channel strip with pan and width knobs in a row",
+    type: "registry:block",
+    registryDependencies: ["@audio/channel-strip","@audio/knob"],
+    files: [{
+      path: "src/registry/default/blocks/block-channel-strip-knob-pan-width.tsx",
+      type: "registry:block",
+      target: ""
+    }],
+    component: React.lazy(async () => {
+      const mod = await import("@/registry/default/blocks/block-channel-strip-knob-pan-width.tsx")
+      const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
+      return { default: mod.default || mod[exportName] }
+    }),
+    categories: ["channel-strip","knob","ui"],
+    meta: undefined,
+  },
+  "block-channel-strip-xypad-filter": {
+    name: "block-channel-strip-xypad-filter",
+    description: "Channel strip with an XY filter pad",
+    type: "registry:block",
+    registryDependencies: ["@audio/channel-strip","@audio/xypad"],
+    files: [{
+      path: "src/registry/default/blocks/block-channel-strip-xypad-filter.tsx",
+      type: "registry:block",
+      target: ""
+    }],
+    component: React.lazy(async () => {
+      const mod = await import("@/registry/default/blocks/block-channel-strip-xypad-filter.tsx")
+      const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
+      return { default: mod.default || mod[exportName] }
+    }),
+    categories: ["channel-strip","xypad","ui"],
+    meta: undefined,
+  },
+  "block-channel-strip-xypad-reverb": {
+    name: "block-channel-strip-xypad-reverb",
+    description: "Channel strip with XY spatial pad and wet knob",
+    type: "registry:block",
+    registryDependencies: ["@audio/channel-strip","@audio/xypad","@audio/knob"],
+    files: [{
+      path: "src/registry/default/blocks/block-channel-strip-xypad-reverb.tsx",
+      type: "registry:block",
+      target: ""
+    }],
+    component: React.lazy(async () => {
+      const mod = await import("@/registry/default/blocks/block-channel-strip-xypad-reverb.tsx")
+      const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
+      return { default: mod.default || mod[exportName] }
+    }),
+    categories: ["channel-strip","xypad","ui"],
     meta: undefined,
   },
   "hooks": {

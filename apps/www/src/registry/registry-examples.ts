@@ -154,19 +154,6 @@ export const examples: Registry["items"] = [
     categories: ["transport", "ui"],
   },
   {
-    name: "transport-vertical-demo",
-    description: "Transport timeline in vertical orientation",
-    type: "registry:example",
-    registryDependencies: ["@audio/transport"],
-    files: [
-      {
-        path: "examples/transport-vertical-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    categories: ["transport", "ui"],
-  },
-  {
     name: "sortable-list-demo",
     description: "Sortable list component examples",
     type: "registry:example",
@@ -194,26 +181,13 @@ export const examples: Registry["items"] = [
   },
 
   {
-    name: "fader-demo",
-    description: "Fader component example",
+    name: "fader-vertical-demo",
+    description: "Vertical fader",
     type: "registry:example",
     registryDependencies: ["@audio/fader"],
     files: [
       {
-        path: "examples/fader-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    categories: ["fader"],
-  },
-  {
-    name: "fader-vertical-live-demo",
-    description: "Vertical fader with live value output",
-    type: "registry:example",
-    registryDependencies: ["@audio/fader"],
-    files: [
-      {
-        path: "examples/fader-vertical-live-demo.tsx",
+        path: "examples/fader-vertical-demo.tsx",
         type: "registry:example",
       },
     ],
@@ -227,19 +201,6 @@ export const examples: Registry["items"] = [
     files: [
       {
         path: "examples/fader-horizontal-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    categories: ["fader"],
-  },
-  {
-    name: "fader-horizontal-live-demo",
-    description: "Horizontal fader with live value output",
-    type: "registry:example",
-    registryDependencies: ["@audio/fader"],
-    files: [
-      {
-        path: "examples/fader-horizontal-live-demo.tsx",
         type: "registry:example",
       },
     ],
@@ -260,19 +221,6 @@ export const examples: Registry["items"] = [
   },
 
   {
-    name: "fader-no-thumb-marks-demo",
-    description: "Fader component example with no thumb marks",
-    type: "registry:example",
-    registryDependencies: ["@audio/fader"],
-    files: [
-      {
-        path: "examples/fader-no-thumb-marks-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    categories: ["fader"],
-  },
-  {
     name: "fader-thumb-marks-variants-demo",
     description: "Fader thumb marks variants (off, 1, 4)",
     type: "registry:example",
@@ -280,58 +228,6 @@ export const examples: Registry["items"] = [
     files: [
       {
         path: "examples/fader-thumb-marks-variants-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    categories: ["fader"],
-  },
-  {
-    name: "fader-custom-thumb-marks-demo",
-    description: "Fader component example with custom thumb marks",
-    type: "registry:example",
-    registryDependencies: ["@audio/fader"],
-    files: [
-      {
-        path: "examples/fader-custom-thumb-marks-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    categories: ["fader"],
-  },
-  {
-    name: "fader-bipolar-db-demo",
-    description: "Fader gain control in dB range (-60 to +6)",
-    type: "registry:example",
-    registryDependencies: ["@audio/fader"],
-    files: [
-      {
-        path: "examples/fader-bipolar-db-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    categories: ["fader"],
-  },
-  {
-    name: "fader-multiple-control-demo",
-    description: "Fader component example with multiple controls",
-    type: "registry:example",
-    registryDependencies: ["@audio/fader"],
-    files: [
-      {
-        path: "examples/fader-multiple-control-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    categories: ["fader"],
-  },
-  {
-    name: "fader-volume-control-demo",
-    description: "Fader component example with volume control",
-    type: "registry:example",
-    registryDependencies: ["@audio/fader"],
-    files: [
-      {
-        path: "examples/fader-volume-control-demo.tsx",
         type: "registry:example",
       },
     ],
@@ -416,32 +312,6 @@ export const examples: Registry["items"] = [
     categories: ["knob"],
   },
   {
-    name: "knob-multiple-control-demo",
-    description: "Knob component example with multiple controls",
-    type: "registry:example",
-    registryDependencies: ["@audio/knob"],
-    files: [
-      {
-        path: "examples/knob-multiple-control-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    categories: ["knob"],
-  },
-  {
-    name: "knob-pan-control-demo",
-    description: "Knob component example with stereo pan control",
-    type: "registry:example",
-    registryDependencies: ["@audio/knob"],
-    files: [
-      {
-        path: "examples/knob-pan-control-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    categories: ["knob"],
-  },
-  {
     name: "knob-arc-and-anchor-demo",
     description: "Knob value arc (rail + highlight) and optional anchor range",
     type: "registry:example",
@@ -506,19 +376,6 @@ export const examples: Registry["items"] = [
       },
     ],
     categories: ["knob"],
-  },
-  {
-    name: "xypad-demo",
-    description: "XYPad component example",
-    type: "registry:example",
-    registryDependencies: ["@audio/xypad"],
-    files: [
-      {
-        path: "examples/xypad-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    categories: ["xypad"],
   },
   {
     name: "xypad-live-value-demo",
@@ -645,32 +502,6 @@ export const examples: Registry["items"] = [
     files: [
       {
         path: "examples/xypad-hide-value-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    categories: ["xypad"],
-  },
-  {
-    name: "xypad-filter-control-demo",
-    description: "XYPad component example with filter control",
-    type: "registry:example",
-    registryDependencies: ["@audio/xypad"],
-    files: [
-      {
-        path: "examples/xypad-filter-control-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    categories: ["xypad"],
-  },
-  {
-    name: "xypad-synthesizer-control-demo",
-    description: "XYPad component example with synthesizer control",
-    type: "registry:example",
-    registryDependencies: ["@audio/xypad"],
-    files: [
-      {
-        path: "examples/xypad-synthesizer-control-demo.tsx",
         type: "registry:example",
       },
     ],

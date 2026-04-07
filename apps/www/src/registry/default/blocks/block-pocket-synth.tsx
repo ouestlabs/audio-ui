@@ -2,6 +2,13 @@
 
 import * as React from "react";
 import { useAudio } from "@/registry/default/hooks/use-audio";
+import {
+  ChannelStrip,
+  ChannelStripContent,
+  ChannelStripLabel,
+  ChannelStripSection,
+  ChannelStripValue,
+} from "@/registry/default/ui/audio/elements/channel-strip";
 import { Fader } from "@/registry/default/ui/audio/elements/fader";
 import { XYPad } from "@/registry/default/ui/audio/elements/xypad";
 import {
@@ -14,6 +21,9 @@ type FilterType = "lowpass" | "highpass" | "bandpass" | "allpass";
 
 export default function BlockPocketSynth() {
   const { webAudio } = useAudio();
+  const faderId = React.useId();
+  const faderLabelId = React.useId();
+  const faderValueId = React.useId();
   const [waveform, setWaveform] = React.useState<WaveformType>("square");
   const [filterType, setFilterType] = React.useState<FilterType>("allpass");
   const [volume, setVolume] = React.useState(0.5);
@@ -50,18 +60,15 @@ export default function BlockPocketSynth() {
 
       oscillator.type = waveform;
       oscillator.frequency.setValueAtTime(getFrequency(x), now);
-
       filterNode.type = filterType;
       filterNode.frequency.setValueAtTime(getFilterCutoff(y), now);
       filterNode.Q.setValueAtTime(5, now);
-
       gainNode.gain.setValueAtTime(0, now);
       gainNode.gain.linearRampToValueAtTime(volume * 0.3, now + 0.02);
 
       oscillator.connect(filterNode);
       filterNode.connect(gainNode);
       gainNode.connect(ctx.destination);
-
       oscillator.start();
 
       oscillatorRef.current = oscillator;
@@ -258,12 +265,9 @@ export default function BlockPocketSynth() {
             startSound(normalizedX, normalizedY);
           }
         }}
-        onValueCommit={() => {
-          stopSound();
-        }}
+        onValueCommit={() => stopSound()}
         value={{ x: position.x * 100, y: position.y * 100 }}
       />
-
       <ToggleGroup
         className="w-full"
         onValueChange={(value) => {
@@ -287,7 +291,6 @@ export default function BlockPocketSynth() {
           </ToggleGroupItem>
         ))}
       </ToggleGroup>
-
       <ToggleGroup
         className="w-full"
         onValueChange={(value) => {
@@ -311,28 +314,26 @@ export default function BlockPocketSynth() {
           </ToggleGroupItem>
         ))}
       </ToggleGroup>
-
-      <div className="flex items-center gap-3 rounded-lg border bg-popover p-3">
-        <label
-          className="font-medium text-muted-foreground text-sm leading-tight"
-          htmlFor="volume"
-        >
-          Volume
-        </label>
-        <Fader
-          className="mx-1.5 flex-1"
-          id="volume"
-          max={1}
-          min={0}
-          onValueChange={setVolume}
-          orientation="horizontal"
-          step={0.01}
-          value={volume}
-        />
-        <output className="font-mono text-muted-foreground text-sm">
-          {Math.round(volume * 100)}%
-        </output>
-      </div>
+      <ChannelStrip aria-label="Volume" orientation="horizontal">
+        <ChannelStripContent>
+          <ChannelStripSection>
+            <ChannelStripLabel id={faderLabelId}>Volume</ChannelStripLabel>
+            <Fader
+              aria-describedby={faderValueId}
+              aria-labelledby={faderLabelId}
+              id={faderId}
+              max={1}
+              min={0}
+              onValueChange={setVolume}
+              step={0.01}
+              value={volume}
+            />
+            <ChannelStripValue id={faderValueId}>
+              {Math.round(volume * 100)}%
+            </ChannelStripValue>
+          </ChannelStripSection>
+        </ChannelStripContent>
+      </ChannelStrip>
     </div>
   );
 }
