@@ -11,7 +11,7 @@ export function ChannelStrip({
     <ChannelStripPrimitive.Root
       className={cn(
         "group/channel-strip mx-auto inline-flex rounded-xl border bg-card p-4 text-card-foreground shadow-sm",
-        "data-[orientation=vertical]:w-max data-[orientation=vertical]:flex-col data-[orientation=vertical]:items-center data-[orientation=vertical]:justify-center data-[orientation=vertical]:gap-4",
+        "data-[orientation=vertical]:w-full data-[orientation=vertical]:flex-col data-[orientation=vertical]:items-center data-[orientation=vertical]:justify-center data-[orientation=vertical]:gap-4",
         "data-[orientation=horizontal]:flex data-[orientation=horizontal]:w-full data-[orientation=horizontal]:flex-col data-[orientation=horizontal]:items-stretch data-[orientation=horizontal]:gap-3",
         "data-[orientation=horizontal]:has-data-footer:grid data-[orientation=horizontal]:has-data-footer:grid-cols-1 data-[orientation=horizontal]:has-data-footer:gap-y-3",
         "data-[orientation=horizontal]:has-data-footer:grid-rows-[auto_minmax(0,1fr)_auto]",
@@ -55,14 +55,14 @@ export function ChannelStripContent({
     <ChannelStripPrimitive.Content
       className={cn(
         "flex w-full flex-col gap-3",
-        "group-data-[orientation=vertical]/channel-strip:data-[layout=row]:md:flex-row",
-        "group-data-[orientation=vertical]/channel-strip:data-[layout=row]:md:flex-wrap",
-        "group-data-[orientation=vertical]/channel-strip:data-[layout=row]:md:items-stretch",
-        "group-data-[orientation=vertical]/channel-strip:data-[layout=row]:md:justify-center",
-        "group-data-[orientation=vertical]/channel-strip:data-[layout=row]:md:gap-4",
-        "group-data-[orientation=vertical]/channel-strip:data-[layout=row]:md:*:data-section:min-w-0",
-        "group-data-[orientation=vertical]/channel-strip:data-[layout=row]:md:*:data-section:flex-1",
-        "group-data-[orientation=vertical]/channel-strip:data-[layout=row]:md:*:data-section:basis-0",
+        "group-data-[orientation=vertical]/channel-strip:data-[layout=row]:flex-row",
+        "group-data-[orientation=vertical]/channel-strip:data-[layout=row]:flex-wrap",
+        "group-data-[orientation=vertical]/channel-strip:data-[layout=row]:items-stretch",
+        "group-data-[orientation=vertical]/channel-strip:data-[layout=row]:justify-center",
+        "group-data-[orientation=vertical]/channel-strip:data-[layout=row]:gap-4",
+        "group-data-[orientation=vertical]/channel-strip:data-[layout=row]:*:data-section:min-w-0",
+        "group-data-[orientation=vertical]/channel-strip:data-[layout=row]:*:data-section:flex-1",
+        "group-data-[orientation=vertical]/channel-strip:data-[layout=row]:*:data-section:basis-0",
         "group-data-[orientation=horizontal]/channel-strip:min-h-0 group-data-[orientation=horizontal]/channel-strip:min-w-0",
         "group-data-[orientation=horizontal]/channel-strip:justify-center group-data-[orientation=horizontal]/channel-strip:gap-4",
         "md:group-data-[orientation=horizontal]/channel-strip:flex-1 md:group-data-[orientation=horizontal]/channel-strip:items-stretch md:group-data-[orientation=horizontal]/channel-strip:justify-center md:group-data-[orientation=horizontal]/channel-strip:gap-4",
