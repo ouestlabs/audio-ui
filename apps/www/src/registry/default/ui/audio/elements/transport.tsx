@@ -5,31 +5,23 @@ import { cva, type VariantProps } from "class-variance-authority";
 import type React from "react";
 import { cn } from "@/registry/default/lib/utils";
 
-const transportSliderVariants = cva(
-  "relative flex touch-none select-none items-center data-disabled:opacity-50",
-  {
-    variants: {
-      size: {
-        sm: "",
-        default: "",
-        lg: "",
-      },
-      orientation: {
-        horizontal: "w-full",
-        vertical: "h-full w-full flex-col",
-      },
+const transportSliderVariants = cva("", {
+  variants: {
+    size: {
+      sm: "",
+      default: "",
+      lg: "",
     },
-    compoundVariants: [
-      { orientation: "horizontal", size: "sm", class: "h-4" },
-      { orientation: "horizontal", size: "default", class: "h-5" },
-      { orientation: "horizontal", size: "lg", class: "h-6" },
-    ],
-    defaultVariants: {
-      size: "default",
-      orientation: "horizontal",
-    },
-  }
-);
+  },
+  compoundVariants: [
+    { size: "sm", class: "data-[orientation=horizontal]:h-4" },
+    { size: "default", class: "data-[orientation=horizontal]:h-5" },
+    { size: "lg", class: "data-[orientation=horizontal]:h-6" },
+  ],
+  defaultVariants: {
+    size: "default",
+  },
+});
 
 const transportTrackVariants = cva(
   "relative grow cursor-pointer overflow-hidden rounded-full bg-muted",
@@ -40,22 +32,26 @@ const transportTrackVariants = cva(
         default: "",
         lg: "",
       },
-      orientation: {
-        horizontal: "w-full",
-        vertical: "h-full",
-      },
     },
     compoundVariants: [
-      { orientation: "horizontal", size: "sm", class: "h-1.5" },
-      { orientation: "horizontal", size: "default", class: "h-2" },
-      { orientation: "horizontal", size: "lg", class: "h-2.5" },
-      { orientation: "vertical", size: "sm", class: "w-1.5" },
-      { orientation: "vertical", size: "default", class: "w-2" },
-      { orientation: "vertical", size: "lg", class: "w-2.5" },
+      {
+        size: "sm",
+        class:
+          "data-[orientation=horizontal]:h-1.5 data-[orientation=vertical]:h-full data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-1.5",
+      },
+      {
+        size: "default",
+        class:
+          "data-[orientation=horizontal]:h-2 data-[orientation=vertical]:h-full data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-2",
+      },
+      {
+        size: "lg",
+        class:
+          "data-[orientation=horizontal]:h-2.5 data-[orientation=vertical]:h-full data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-2.5",
+      },
     ],
     defaultVariants: {
       size: "default",
-      orientation: "horizontal",
     },
   }
 );
@@ -69,22 +65,26 @@ const transportThumbVariants = cva(
         default: "",
         lg: "",
       },
-      orientation: {
-        horizontal: "",
-        vertical: "",
-      },
     },
     compoundVariants: [
-      { orientation: "horizontal", size: "sm", class: "h-5 w-3" },
-      { orientation: "horizontal", size: "default", class: "h-6 w-3.5" },
-      { orientation: "horizontal", size: "lg", class: "h-7 w-4" },
-      { orientation: "vertical", size: "sm", class: "h-3 w-5" },
-      { orientation: "vertical", size: "default", class: "h-3.5 w-6" },
-      { orientation: "vertical", size: "lg", class: "h-4 w-7" },
+      {
+        size: "sm",
+        class:
+          "data-[orientation=horizontal]:h-5 data-[orientation=vertical]:h-3 data-[orientation=horizontal]:w-3 data-[orientation=vertical]:w-5",
+      },
+      {
+        size: "default",
+        class:
+          "data-[orientation=horizontal]:h-6 data-[orientation=vertical]:h-3.5 data-[orientation=horizontal]:w-3.5 data-[orientation=vertical]:w-6",
+      },
+      {
+        size: "lg",
+        class:
+          "data-[orientation=horizontal]:h-7 data-[orientation=vertical]:h-4 data-[orientation=horizontal]:w-4 data-[orientation=vertical]:w-7",
+      },
     ],
     defaultVariants: {
       size: "default",
-      orientation: "horizontal",
     },
   }
 );
@@ -96,22 +96,26 @@ const transportThumbMarkVariants = cva("bg-muted-foreground opacity-30", {
       default: "",
       lg: "",
     },
-    orientation: {
-      horizontal: "",
-      vertical: "",
-    },
   },
   compoundVariants: [
-    { orientation: "horizontal", size: "sm", class: "h-2 w-px" },
-    { orientation: "horizontal", size: "default", class: "h-2.5 w-px" },
-    { orientation: "horizontal", size: "lg", class: "h-3 w-px" },
-    { orientation: "vertical", size: "sm", class: "h-px w-2" },
-    { orientation: "vertical", size: "default", class: "h-px w-2.5" },
-    { orientation: "vertical", size: "lg", class: "h-px w-3" },
+    {
+      size: "sm",
+      class:
+        "data-[orientation=horizontal]:h-2 data-[orientation=vertical]:h-px data-[orientation=horizontal]:w-px data-[orientation=vertical]:w-2",
+    },
+    {
+      size: "default",
+      class:
+        "data-[orientation=horizontal]:h-2.5 data-[orientation=vertical]:h-px data-[orientation=horizontal]:w-px data-[orientation=vertical]:w-2.5",
+    },
+    {
+      size: "lg",
+      class:
+        "data-[orientation=horizontal]:h-3 data-[orientation=vertical]:h-px data-[orientation=horizontal]:w-px data-[orientation=vertical]:w-3",
+    },
   ],
   defaultVariants: {
     size: "default",
-    orientation: "horizontal",
   },
 });
 
@@ -128,21 +132,17 @@ function Transport({
   value,
   bufferedValue,
   onSeek,
-  orientation = "horizontal",
   size,
   min = 0,
   max = 100,
   className,
+  orientation,
   ...props
 }: TransportProps) {
   return (
     <TransportPrimitive.Root
       bufferedValue={bufferedValue}
-      className={cn(
-        "relative",
-        orientation === "vertical" ? "h-full w-full" : "w-full",
-        className
-      )}
+      className={cn("relative w-full", className)}
       max={max}
       min={min}
       onValueChange={onSeek}
@@ -151,32 +151,39 @@ function Transport({
       {...props}
     >
       <TransportPrimitive.Slider
-        className={transportSliderVariants({ size, orientation })}
+        className={cn(
+          "relative flex touch-none select-none items-center data-disabled:opacity-50",
+          "data-[orientation=vertical]:h-full data-[orientation=vertical]:min-h-32 data-[orientation=vertical]:w-full data-[orientation=vertical]:flex-col",
+          "data-[orientation=horizontal]:w-full",
+          transportSliderVariants({ size })
+        )}
       >
-        <TransportPrimitive.Track
-          className={transportTrackVariants({ size, orientation })}
-        >
+        <TransportPrimitive.Track className={transportTrackVariants({ size })}>
           <TransportPrimitive.BufferedRange
-            className={
-              orientation === "horizontal"
-                ? "absolute inset-y-0 left-0 z-0 bg-primary/40"
-                : "absolute inset-x-0 bottom-0 z-0 bg-primary/40"
-            }
+            className={cn(
+              "absolute z-0 bg-primary/40",
+              "data-[orientation=horizontal]:inset-y-0 data-[orientation=horizontal]:left-0",
+              "data-[orientation=vertical]:inset-x-0 data-[orientation=vertical]:bottom-0"
+            )}
           />
           <TransportPrimitive.Range
-            className={
-              orientation === "horizontal"
-                ? "absolute inset-y-0 left-0 bg-primary"
-                : "absolute inset-x-0 bottom-0 bg-primary"
-            }
+            className={cn(
+              "absolute bg-primary",
+              "data-[orientation=horizontal]:inset-y-0 data-[orientation=horizontal]:left-0",
+              "data-[orientation=vertical]:inset-x-0 data-[orientation=vertical]:bottom-0"
+            )}
           />
         </TransportPrimitive.Track>
-        <TransportPrimitive.Thumb
-          className={transportThumbVariants({ size, orientation })}
-        >
-          <TransportPrimitive.ThumbInner className="flex h-full w-full items-center justify-center">
+        <TransportPrimitive.Thumb className={transportThumbVariants({ size })}>
+          <TransportPrimitive.ThumbInner
+            className={cn(
+              "flex h-full w-full items-center justify-center",
+              "data-[orientation=horizontal]:flex-row",
+              "data-[orientation=vertical]:flex-col"
+            )}
+          >
             <TransportPrimitive.ThumbMark
-              className={transportThumbMarkVariants({ size, orientation })}
+              className={transportThumbMarkVariants({ size })}
             />
           </TransportPrimitive.ThumbInner>
         </TransportPrimitive.Thumb>

@@ -11,7 +11,7 @@ export function ChannelStrip({
     <ChannelStripPrimitive.Root
       className={cn(
         "group/channel-strip mx-auto inline-flex rounded-xl border bg-card p-4 text-card-foreground shadow-sm",
-        "data-[orientation=vertical]:w-full data-[orientation=vertical]:flex-col data-[orientation=vertical]:items-center data-[orientation=vertical]:justify-center data-[orientation=vertical]:gap-4",
+        "data-[orientation=vertical]:flex-col data-[orientation=vertical]:items-center data-[orientation=vertical]:justify-center data-[orientation=vertical]:gap-4",
         "data-[orientation=horizontal]:flex data-[orientation=horizontal]:w-full data-[orientation=horizontal]:flex-col data-[orientation=horizontal]:items-stretch data-[orientation=horizontal]:gap-3",
         "data-[orientation=horizontal]:has-data-footer:grid data-[orientation=horizontal]:has-data-footer:grid-cols-1 data-[orientation=horizontal]:has-data-footer:gap-y-3",
         "data-[orientation=horizontal]:has-data-footer:grid-rows-[auto_minmax(0,1fr)_auto]",
@@ -99,7 +99,7 @@ export function ChannelStripSection({
       className={cn(
         "flex w-full",
         "data-[orientation=vertical]:flex-col data-[orientation=vertical]:items-center data-[orientation=vertical]:justify-center data-[orientation=vertical]:gap-3",
-        "data-[orientation=horizontal]:w-full data-[orientation=horizontal]:min-w-0 data-[orientation=horizontal]:items-center data-[orientation=horizontal]:justify-between data-[orientation=horizontal]:gap-4",
+        "data-[orientation=horizontal]:w-full data-[orientation=horizontal]:min-w-0 data-[orientation=horizontal]:items-center data-[orientation=horizontal]:justify-between data-[orientation=horizontal]:gap-4 data-[orientation=horizontal]:[&>*:not(output):not(span)]:min-w-0 data-[orientation=horizontal]:[&>*:not(output):not(span)]:flex-1",
         className
       )}
       {...props}
