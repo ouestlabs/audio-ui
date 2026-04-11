@@ -1,5 +1,13 @@
 # @audio-ui/react
 
+## 0.0.7
+
+### Patch Changes
+
+- 083a2be: - feat(ui): add ChannelStrip component and related primitives for audio UI
+  - refactor(ui): enhance audio component styles for orientation responsiveness
+  - refactor(www): align audio docs on channel-strip blocks and prune redundant demos
+
 ## 0.0.6
 
 ### Patch Changes
