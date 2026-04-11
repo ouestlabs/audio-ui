@@ -15,6 +15,7 @@ import {
 } from "../hooks/interactions";
 import { useControlledValue, useValueAsRef } from "../hooks/state";
 import { getDataAttributes } from "./internal/data-attributes";
+import { useInheritedOrientation } from "./internal/orientation-context";
 
 interface TransportContextValue {
   value: number;
@@ -94,7 +95,7 @@ export namespace Transport {
     min = 0,
     max = 100,
     step = 1,
-    orientation = "horizontal",
+    orientation: orientationProp,
     disabled = false,
     freezeValuesWhileDragging = false,
     "aria-label": ariaLabel,
@@ -106,6 +107,8 @@ export namespace Transport {
     children,
     ...props
   }: RootProps) {
+    const inheritedOrientation = useInheritedOrientation();
+    const orientation = orientationProp ?? inheritedOrientation ?? "horizontal";
     const generatedId = React.useId();
     const elementId = id || generatedId;
     const trackRef = React.useRef<HTMLDivElement>(null);
@@ -375,6 +378,7 @@ export namespace Transport {
   export function Track({ className, ...props }: TrackProps) {
     const {
       disabled,
+      orientation,
       trackRef,
       onPointerDown,
       onDragStart,
@@ -395,7 +399,7 @@ export namespace Transport {
     return (
       <div
         className={className}
-        {...getDataAttributes("transport", { part: "track" })}
+        {...getDataAttributes("transport", { part: "track", orientation })}
         {...pointerProps}
         {...props}
       />
@@ -411,7 +415,7 @@ export namespace Transport {
     return (
       <div
         className={className}
-        {...getDataAttributes("transport", { part: "range" })}
+        {...getDataAttributes("transport", { part: "range", orientation })}
         style={{
           ...(orientation === "horizontal"
             ? {
@@ -447,7 +451,10 @@ export namespace Transport {
     return (
       <div
         className={className}
-        {...getDataAttributes("transport", { part: "buffered-range" })}
+        {...getDataAttributes("transport", {
+          part: "buffered-range",
+          orientation,
+        })}
         style={{
           ...(orientation === "horizontal"
             ? {
@@ -569,7 +576,11 @@ export namespace Transport {
         aria-valuemin={min}
         aria-valuenow={value}
         className={className}
-        {...getDataAttributes("transport", { part: "thumb", disabled })}
+        {...getDataAttributes("transport", {
+          part: "thumb",
+          disabled,
+          orientation,
+        })}
         ref={thumbRef}
         role="slider"
         style={{
@@ -597,10 +608,15 @@ export namespace Transport {
   export interface ThumbInnerProps extends React.ComponentProps<"div"> {}
 
   export function ThumbInner({ className, ...props }: ThumbInnerProps) {
+    const { orientation } = useTransportContext();
+
     return (
       <div
         className={className}
-        {...getDataAttributes("transport", { part: "thumb-inner" })}
+        {...getDataAttributes("transport", {
+          part: "thumb-inner",
+          orientation,
+        })}
         {...props}
       />
     );
@@ -609,10 +625,15 @@ export namespace Transport {
   export interface ThumbMarkProps extends React.ComponentProps<"div"> {}
 
   export function ThumbMark({ className, ...props }: ThumbMarkProps) {
+    const { orientation } = useTransportContext();
+
     return (
       <div
         className={className}
-        {...getDataAttributes("transport", { part: "thumb-mark" })}
+        {...getDataAttributes("transport", {
+          part: "thumb-mark",
+          orientation,
+        })}
         {...props}
       />
     );

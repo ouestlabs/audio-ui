@@ -2,6 +2,13 @@
 
 import * as React from "react";
 import { useAudio } from "@/registry/default/hooks/use-audio";
+import {
+  ChannelStrip,
+  ChannelStripContent,
+  ChannelStripLabel,
+  ChannelStripSection,
+  ChannelStripValue,
+} from "@/registry/default/ui/audio/elements/channel-strip";
 import { Fader } from "@/registry/default/ui/audio/elements/fader";
 import { Knob } from "@/registry/default/ui/audio/elements/knob";
 import { XYPad } from "@/registry/default/ui/audio/elements/xypad";
@@ -14,6 +21,21 @@ type WaveformType = "sine" | "triangle" | "sawtooth" | "square";
 
 export default function BlockWaveShaper() {
   const { webAudio } = useAudio();
+  const driveId = React.useId();
+  const driveLabelId = React.useId();
+  const driveValueId = React.useId();
+  const toneId = React.useId();
+  const toneLabelId = React.useId();
+  const toneValueId = React.useId();
+  const detuneId = React.useId();
+  const detuneLabelId = React.useId();
+  const detuneValueId = React.useId();
+  const mixId = React.useId();
+  const mixLabelId = React.useId();
+  const mixValueId = React.useId();
+  const faderId = React.useId();
+  const faderLabelId = React.useId();
+  const faderValueId = React.useId();
   const [waveform, setWaveform] = React.useState<WaveformType>("sine");
   const [volume, setVolume] = React.useState(0.5);
   const [drive, setDrive] = React.useState(1);
@@ -396,113 +418,94 @@ export default function BlockWaveShaper() {
           </ToggleGroupItem>
         ))}
       </ToggleGroup>
-      <div className="grid grid-cols-4 gap-3 rounded-lg border bg-popover p-1.5">
-        <div className="flex flex-col items-center gap-1.5">
-          <label
-            className="font-medium text-muted-foreground text-xs"
-            htmlFor="drive"
-          >
-            Drive
-          </label>
-          <Knob
-            defaultValue={1}
-            id="drive"
-            max={100}
-            min={0}
-            onValueChange={setDrive}
-            size="sm"
-            step={1}
-          />
-          <output className="font-mono text-muted-foreground text-xs">
-            {drive}
-          </output>
-        </div>
-        <div className="flex flex-col items-center gap-1.5">
-          <label
-            className="font-medium text-muted-foreground text-xs"
-            htmlFor="tone"
-          >
-            Tone
-          </label>
-          <Knob
-            defaultValue={50}
-            id="tone"
-            max={100}
-            min={0}
-            onValueChange={setTone}
-            size="sm"
-            step={1}
-          />
-          <output className="font-mono text-muted-foreground text-xs">
-            {tone}
-          </output>
-        </div>
-
-        <div className="flex flex-col items-center gap-1.5">
-          <label
-            className="font-medium text-muted-foreground text-xs"
-            htmlFor="detune"
-          >
-            Detune
-          </label>
-          <Knob
-            defaultValue={0}
-            id="detune"
-            max={50}
-            min={-50}
-            onValueChange={setDetune}
-            size="sm"
-            step={1}
-          />
-          <output className="font-mono text-muted-foreground text-xs">
-            {detune > 0 ? "+" : ""}
-            {detune}
-          </output>
-        </div>
-
-        <div className="flex flex-col items-center gap-1.5">
-          <label
-            className="font-medium text-muted-foreground text-xs"
-            htmlFor="mix"
-          >
-            Mix
-          </label>
-          <Knob
-            defaultValue={50}
-            id="mix"
-            max={100}
-            min={0}
-            onValueChange={setMix}
-            size="sm"
-            step={1}
-          />
-          <output className="font-mono text-muted-foreground text-xs">
-            {mix}%
-          </output>
-        </div>
-      </div>
-
-      <div className="flex items-center gap-3 rounded-lg border bg-popover p-3">
-        <label
-          className="font-medium text-muted-foreground text-sm leading-tight"
-          htmlFor="volume"
-        >
-          Volume
-        </label>
-        <Fader
-          className="mx-1.5 flex-1"
-          id="volume"
-          max={1}
-          min={0}
-          onValueChange={setVolume}
-          orientation="horizontal"
-          step={0.01}
-          value={volume}
-        />
-        <output className="font-mono text-muted-foreground text-sm">
-          {Math.round(volume * 100)}%
-        </output>
-      </div>
+      <ChannelStrip aria-label="Shaper controls" className="w-full">
+        <ChannelStripContent layout="row">
+          <ChannelStripSection>
+            <ChannelStripLabel id={driveLabelId}>Drive</ChannelStripLabel>
+            <Knob
+              aria-describedby={driveValueId}
+              aria-labelledby={driveLabelId}
+              defaultValue={1}
+              id={driveId}
+              max={100}
+              min={0}
+              onValueChange={setDrive}
+              size="sm"
+              step={1}
+            />
+            <ChannelStripValue id={driveValueId}>{drive}</ChannelStripValue>
+          </ChannelStripSection>
+          <ChannelStripSection>
+            <ChannelStripLabel id={toneLabelId}>Tone</ChannelStripLabel>
+            <Knob
+              aria-describedby={toneValueId}
+              aria-labelledby={toneLabelId}
+              defaultValue={50}
+              id={toneId}
+              max={100}
+              min={0}
+              onValueChange={setTone}
+              size="sm"
+              step={1}
+            />
+            <ChannelStripValue id={toneValueId}>{tone}</ChannelStripValue>
+          </ChannelStripSection>
+          <ChannelStripSection>
+            <ChannelStripLabel id={detuneLabelId}>Detune</ChannelStripLabel>
+            <Knob
+              anchor={0}
+              aria-describedby={detuneValueId}
+              aria-labelledby={detuneLabelId}
+              defaultValue={0}
+              id={detuneId}
+              max={50}
+              min={-50}
+              onValueChange={setDetune}
+              size="sm"
+              step={1}
+            />
+            <ChannelStripValue id={detuneValueId}>
+              {detune > 0 ? "+" : ""}
+              {detune}
+            </ChannelStripValue>
+          </ChannelStripSection>
+          <ChannelStripSection>
+            <ChannelStripLabel id={mixLabelId}>Mix</ChannelStripLabel>
+            <Knob
+              aria-describedby={mixValueId}
+              aria-labelledby={mixLabelId}
+              defaultValue={50}
+              id={mixId}
+              max={100}
+              min={0}
+              onValueChange={setMix}
+              size="sm"
+              step={1}
+            />
+            <ChannelStripValue id={mixValueId}>{mix}%</ChannelStripValue>
+          </ChannelStripSection>
+        </ChannelStripContent>
+      </ChannelStrip>
+      <ChannelStrip aria-label="Volume" orientation="horizontal">
+        <ChannelStripContent>
+          <ChannelStripSection>
+            <ChannelStripLabel id={faderLabelId}>Volume</ChannelStripLabel>
+            <Fader
+              aria-describedby={faderValueId}
+              aria-labelledby={faderLabelId}
+              id={faderId}
+              max={1}
+              min={0}
+              onValueChange={setVolume}
+              step={0.01}
+              value={volume}
+            />
+            <ChannelStripValue id={faderValueId}>
+              {Math.round(volume * 100)}%
+            </ChannelStripValue>
+          </ChannelStripSection>
+        </ChannelStripContent>
+      </ChannelStrip>
     </div>
   );
 }

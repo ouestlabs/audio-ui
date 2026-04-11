@@ -1,7 +1,7 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "block-player-widget",
-  "description": "Audio player widget",
+  "description": "Audio player with track list",
   "registryDependencies": [
     "@audio/provider",
     "@audio/player",

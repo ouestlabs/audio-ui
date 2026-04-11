@@ -54,9 +54,17 @@ export interface AudioQueueButtonProps extends ComponentProps<typeof Button> {
   tooltipLabel?: string;
 }
 
-function AudioQueueButton({ tooltipLabel, ...props }: AudioQueueButtonProps) {
+function AudioQueueButton({
+  tooltipLabel,
+  className,
+  ...props
+}: AudioQueueButtonProps) {
   const buttonProps = {
     ...props,
+    className: cn(
+      "[&_svg.fill-current]:fill-primary [&_svg]:text-primary",
+      className
+    ),
     "aria-label": props["aria-label"] ?? tooltipLabel,
   };
 
@@ -98,6 +106,7 @@ const AudioQueueRepeatMode = ({
     <Toggle
       aria-label={repeatTooltip}
       className={cn(
+        "[&_svg.fill-current]:fill-primary [&_svg]:text-primary",
         className,
         isPressed && "bg-accent! text-accent-foreground!"
       )}
@@ -143,6 +152,7 @@ const AudioQueueShuffle = ({
     <Toggle
       aria-label="Shuffle"
       className={cn(
+        "[&_svg.fill-current]:fill-primary [&_svg]:text-primary",
         className,
         shuffleEnabled && "bg-accent! text-accent-foreground!"
       )}

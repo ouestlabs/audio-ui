@@ -38,9 +38,20 @@ interface AudioPlayerButtonProps extends React.ComponentProps<typeof Button> {
   tooltipLabel?: string;
 }
 
-function AudioPlayerButton({ tooltipLabel, ...props }: AudioPlayerButtonProps) {
+function AudioPlayerButton({
+  tooltipLabel,
+  className,
+  ...props
+}: AudioPlayerButtonProps) {
   const button = (
-    <Button aria-label={props["aria-label"] ?? tooltipLabel} {...props} />
+    <Button
+      aria-label={props["aria-label"] ?? tooltipLabel}
+      className={cn(
+        "[&_svg.fill-current]:fill-primary [&_svg]:text-primary",
+        className
+      )}
+      {...props}
+    />
   );
 
   if (tooltipLabel) {
@@ -274,7 +285,7 @@ const AudioPlayerVolume = ({
           }
           variant={variant}
         >
-          <Icon className={cn(isMuted && "opacity-40", "text-primary")} />
+          <Icon className={cn("text-primary", isMuted && "opacity-40")} />
         </AudioPlayerButton>
       </DropdownMenuTrigger>
       <DropdownMenuContent
@@ -299,7 +310,10 @@ const AudioPlayerVolume = ({
             variant="ghost"
           >
             <VolumeXIcon
-              className={cn("size-4", isMuted ? "opacity-40" : "opacity-60")}
+              className={cn(
+                "size-4 text-primary",
+                isMuted ? "opacity-40" : "opacity-60"
+              )}
             />
           </AudioPlayerButton>
 
@@ -316,7 +330,7 @@ const AudioPlayerVolume = ({
 
           <Volume2Icon
             aria-hidden="true"
-            className="ml-1.5 size-4 shrink-0 opacity-60"
+            className="ml-1.5 size-4 shrink-0 text-primary opacity-60"
           />
         </div>
       </DropdownMenuContent>

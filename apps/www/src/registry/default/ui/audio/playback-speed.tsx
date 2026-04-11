@@ -41,11 +41,16 @@ interface AudioPlaybackSpeedButtonProps
 function AudioPlaybackSpeedButton({
   tooltipLabel,
   disabled,
+  className,
   ...props
 }: AudioPlaybackSpeedButtonProps) {
   const button = (
     <Button
       aria-label={props["aria-label"] ?? tooltipLabel}
+      className={cn(
+        "[&_svg.fill-current]:fill-primary [&_svg]:text-primary",
+        className
+      )}
       disabled={disabled}
       {...props}
     />

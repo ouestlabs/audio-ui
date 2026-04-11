@@ -17,7 +17,7 @@ import {
   AudioQueueShuffle,
 } from "@/registry/default/ui/audio/queue";
 
-export default function BlockAudioPlayer() {
+export default function BlockPlayer() {
   return (
     <AudioPlayer>
       <AudioPlayerControlBar variant="stacked">

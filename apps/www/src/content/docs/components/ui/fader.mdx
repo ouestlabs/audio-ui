@@ -8,7 +8,7 @@ links:
 
 Linear fader for continuous parameters (volume, gain, send level, etc.). The registry component wraps `Fader` primitives from `@audio-ui/react` with size variants and thumb mark styling.
 
-<Preview name="fader-vertical-live-demo" />
+<Preview name="fader-vertical-demo" />
 
 ## Overview
 
@@ -134,11 +134,11 @@ Additional valid HTML attributes passed to `Fader.Root` are forwarded.
 
 ### Vertical (default)
 
-<Preview name="fader-vertical-live-demo" />
+<Preview name="fader-vertical-demo" />
 
 ### Horizontal
 
-<Preview name="fader-horizontal-live-demo" />
+<Preview name="fader-horizontal-demo" />
 
 ### Size variants
 
@@ -148,20 +148,17 @@ Additional valid HTML attributes passed to `Fader.Root` are forwarded.
 
 <Preview name="fader-thumb-marks-variants-demo" />
 
-### Gain range in dB (`-60..+6`)
+### Channel strip
 
-<Preview name="fader-bipolar-db-demo" />
+#### Gain range in dB (`-60..+6`)
 
-### Volume control (`0..100`)
+<Preview name="block-channel-strip-fader-gain-db" />
 
-<Preview name="fader-volume-control-demo" />
+#### Normalized range (`0..100`)
 
-### Multi-channel strip
+<Preview name="block-channel-strip-fader" />
 
-<Preview name="fader-multiple-control-demo" />
+#### Multi-channel strip
 
-## Source package
+<Preview name="block-channel-strip-fader-multi" />
 
-<Callout variant="info">
-  For low-level composition (`FaderPrimitive.Root`, `Track`, `Range`, `Thumb`, etc.), see [@audio-ui/react on npm](https://www.npmjs.com/package/@audio-ui/react).
-</Callout>

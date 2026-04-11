@@ -111,4 +111,16 @@ export const components: Registry["items"] = [
       },
     ],
   },
+  {
+    name: "channel-strip",
+    type: "registry:component",
+    dependencies: ["@audio-ui/react"],
+    registryDependencies: ["@audio/fader", "@audio/knob"],
+    files: [
+      {
+        path: "ui/audio/elements/channel-strip.tsx",
+        type: "registry:component",
+      },
+    ],
+  },
 ];

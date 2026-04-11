@@ -1,4 +1,4 @@
 {
   "title": "UI",
-  "pages": ["fader", "knob", "sortable-list", "transport", "xypad"]
+  "pages": ["channel-strip", "fader", "knob", "transport", "xypad"]
 }

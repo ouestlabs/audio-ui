@@ -147,6 +147,7 @@ function renderTrackActions({
       {showRemoveAction && (
         <Button
           aria-label="Remove track"
+          className="[&_svg.fill-current]:fill-primary [&_svg]:text-primary"
           onClick={onTrackRemoveClick}
           size="icon-sm"
           title="Remove"
@@ -158,6 +159,7 @@ function renderTrackActions({
       {showPlayPauseAction && (
         <Button
           aria-label={playPauseTitle}
+          className="[&_svg.fill-current]:fill-primary [&_svg]:text-primary"
           onClick={onTrackPlayPauseClick}
           size="icon-sm"
           title={playPauseTitle}
