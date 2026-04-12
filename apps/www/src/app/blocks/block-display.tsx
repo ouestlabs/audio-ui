@@ -1,22 +1,24 @@
-import { InfoIcon } from "lucide-react";
+import { InfoIcon } from "@phosphor-icons/react/dist/ssr";
 import React from "react";
 import type { registryItemSchema } from "shadcn/schema";
 import type { z } from "zod";
+import { BlockCodeDrawerActions } from "@/components/blocks/block-code-drawer-actions";
 import { CopyRegistry } from "@/components/copy-registry";
 import { Command } from "@/components/md/code";
 import { Source } from "@/components/md/preview";
-import { OpenInV0Button } from "@/components/open-in-v0-button";
 import { highlightCode } from "@/lib/highlight-code";
 import { getRegistryItem } from "@/lib/registry";
 import { cn } from "@/registry/default/lib/utils";
 import { Button } from "@/registry/default/ui/button";
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetTitle,
-  SheetTrigger,
-} from "@/registry/default/ui/sheet";
+  Drawer,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerPanel,
+  DrawerPopup,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/registry/default/ui/drawer";
 
 export type Block = z.infer<typeof registryItemSchema> & {
   highlightedCode: string;
@@ -41,11 +43,11 @@ export async function BlockDisplay({
   return (
     <div
       className={cn(
-        "relative flex min-w-0 flex-col rounded-xl border bg-muted/50",
+        "relative flex min-w-0 flex-col rounded-4xl border bg-card",
         className
       )}
     >
-      <div className="-m-px flex min-w-0 flex-1 flex-col items-center justify-center overflow-hidden rounded-xl border bg-background p-5">
+      <div className="-m-px flex min-w-0 flex-1 flex-col items-center justify-center overflow-hidden rounded-4xl border bg-background p-4">
         <div className="mx-auto max-w-3xl" data-slot="block-wrapper">
           {children}
         </div>
@@ -68,21 +70,26 @@ export async function BlockDisplay({
             </Button>
           )}
           <CopyRegistry value={`${baseUrl}/r/${name}.json`} variant="outline" />
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button className="text-xs" size="sm" variant="outline">
-                View code
-              </Button>
-            </SheetTrigger>
-            <SheetContent className="bg-sidebar duration-200 data-ending-style:translate-x-8 data-starting-style:translate-x-8 data-ending-style:opacity-0 data-starting-style:opacity-0 sm:max-w-3xl">
-              <SheetTitle className="sr-only">View code</SheetTitle>
-              <SheetDescription className="sr-only">
-                View the code for the {name} block.
-              </SheetDescription>
-              <div className="flex flex-1 flex-col overflow-hidden p-6">
-                <div>
-                  <h2 className="mb-4 font-heading text-xl">Installation</h2>
-                  <figure data-rehype-pretty-code-figure>
+          <Drawer position="right">
+            <DrawerTrigger render={<Button size="sm" variant="outline" />}>
+              View code
+            </DrawerTrigger>
+            <DrawerPopup
+              className="max-h-dvh min-h-0 w-full max-w-2xl"
+              position="right"
+              showBar
+              variant="straight"
+            >
+              <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+                <DrawerHeader allowSelection className="shrink-0">
+                  <DrawerTitle>View code</DrawerTitle>
+                  <DrawerDescription>
+                    Install with the CLI, then browse the source below.
+                  </DrawerDescription>
+                  <figure
+                    className="min-w-0 shrink-0"
+                    data-rehype-pretty-code-figure
+                  >
                     <Command
                       __bun__={`bunx --bun shadcn@latest add @audio/${name}`}
                       __npm__={`npx shadcn@latest add @audio/${name}`}
@@ -90,21 +97,32 @@ export async function BlockDisplay({
                       __yarn__={`yarn dlx shadcn@latest add @audio/${name}`}
                     />
                   </figure>
-                </div>
-                <div className="flex h-full flex-1 flex-col overflow-hidden">
-                  <div className="flex items-center justify-between gap-2">
-                    <h2 className="mt-6 mb-4 font-heading text-xl">Code</h2>
-                    <OpenInV0Button name={name} />
+                </DrawerHeader>
+                <DrawerPanel
+                  className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden"
+                  scrollable={false}
+                  scrollFade={false}
+                >
+                  <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+                    <Source
+                      className="**:data-rehype-pretty-code-figure:no-scrollbar min-h-0 min-w-0 flex-1 overflow-hidden **:data-rehype-pretty-code-figure:mt-0 **:data-rehype-pretty-code-figure:flex **:data-rehype-pretty-code-figure:min-h-0 **:data-rehype-pretty-code-figure:flex-1 **:data-rehype-pretty-code-figure:flex-col **:data-rehype-pretty-code-figure:overflow-hidden"
+                      collapsible={false}
+                      copyButton={false}
+                      fillHeight
+                      headerActions={
+                        <BlockCodeDrawerActions
+                          code={block.files[0]?.content ?? ""}
+                          name={name}
+                        />
+                      }
+                      name={name}
+                      pathLabel={block.files[0]?.path}
+                    />
                   </div>
-                  <Source
-                    className="*:data-rehype-pretty-code-figure:no-scrollbar h-full overflow-hidden *:data-rehype-pretty-code-figure:mt-0 *:data-rehype-pretty-code-figure:max-h-full *:data-rehype-pretty-code-figure:overflow-y-auto"
-                    collapsible={false}
-                    name={name}
-                  />
-                </div>
+                </DrawerPanel>
               </div>
-            </SheetContent>
-          </Sheet>
+            </DrawerPopup>
+          </Drawer>
         </div>
       </div>
     </div>

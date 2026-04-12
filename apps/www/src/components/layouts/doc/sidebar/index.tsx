@@ -41,22 +41,21 @@ function DocsSidebar({
                       return (
                         <SidebarMenuItem key={i.url}>
                           <SidebarMenuButton
-                            asChild
-                            className="after:-inset-y-1 relative h-[30px] 3xl:fixed:w-full w-fit 3xl:fixed:max-w-48 overflow-visible border border-transparent font-medium text-[0.8rem] after:absolute after:inset-x-0 after:z-0 after:rounded-md data-[active=true]:border-accent data-[active=true]:bg-accent"
                             isActive={i.url === pathname}
+                            render={
+                              <Link
+                                className="flex items-center justify-between gap-2"
+                                href={i.url}
+                              />
+                            }
                           >
-                            <Link
-                              className="flex items-center justify-between gap-2"
-                              href={i.url}
-                            >
-                              {i.name}
-                              {PAGES_NEW.includes(i.url) && (
-                                <span
-                                  className="flex size-2 rounded-full bg-primary"
-                                  title="New"
-                                />
-                              )}
-                            </Link>
+                            {i.name}
+                            {PAGES_NEW.includes(i.url) && (
+                              <span
+                                className="flex size-2 rounded-full bg-primary"
+                                title="New"
+                              />
+                            )}
                           </SidebarMenuButton>
                         </SidebarMenuItem>
                       );
@@ -74,22 +73,22 @@ function DocsSidebar({
                                   child.type === "page" && (
                                     <SidebarMenuItem key={child.url}>
                                       <SidebarMenuButton
-                                        asChild
                                         className="after:-inset-y-1 relative h-[30px] 3xl:fixed:w-full w-fit 3xl:fixed:max-w-48 overflow-visible border border-transparent font-medium text-[0.8rem] after:absolute after:inset-x-0 after:z-0 after:rounded-md data-[active=true]:border-accent data-[active=true]:bg-accent"
                                         isActive={child.url === pathname}
+                                        render={
+                                          <Link
+                                            className="flex items-center justify-between gap-2"
+                                            href={child.url}
+                                          />
+                                        }
                                       >
-                                        <Link
-                                          className="flex items-center justify-between gap-2"
-                                          href={child.url}
-                                        >
-                                          {child.name}
-                                          {PAGES_NEW.includes(child.url) && (
-                                            <span
-                                              className="flex size-2 rounded-full bg-primary"
-                                              title="New"
-                                            />
-                                          )}
-                                        </Link>
+                                        {child.name}
+                                        {PAGES_NEW.includes(child.url) && (
+                                          <span
+                                            className="flex size-2 rounded-full bg-primary"
+                                            title="New"
+                                          />
+                                        )}
                                       </SidebarMenuButton>
                                     </SidebarMenuItem>
                                   )

@@ -19,25 +19,24 @@ function MainNav({
     <nav className={cn("items-center", className)} {...props}>
       {items.map((item) => (
         <Button
-          asChild
           data-pressed={pathname.includes(item.href) || undefined}
           key={item.href}
-          onClick={() => {
-            posthog.capture("main_nav_link_clicked", {
-              href: item.href,
-              label: item.label,
-              current_pathname: pathname,
-            });
-          }}
-          size="sm"
+          render={
+            <Link
+              className={cn(pathname.includes(item.href) && "text-primary")}
+              href={item.href}
+              onClick={() => {
+                posthog.capture("main_nav_link_clicked", {
+                  href: item.href,
+                  label: item.label,
+                  current_pathname: pathname,
+                });
+              }}
+            />
+          }
           variant="ghost"
         >
-          <Link
-            className={cn(pathname.includes(item.href) && "text-primary")}
-            href={item.href}
-          >
-            {item.label}
-          </Link>
+          {item.label}
         </Button>
       ))}
     </nav>

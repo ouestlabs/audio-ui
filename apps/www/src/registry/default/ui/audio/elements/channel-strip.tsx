@@ -10,7 +10,7 @@ export function ChannelStrip({
   return (
     <ChannelStripPrimitive.Root
       className={cn(
-        "group/channel-strip mx-auto inline-flex rounded-xl border bg-card p-4 text-card-foreground shadow-sm",
+        "group/channel-strip mx-auto inline-flex rounded-4xl bg-card p-4 text-card-foreground shadow-md ring-1 ring-foreground/5 dark:ring-foreground/10",
         "data-[orientation=vertical]:flex-col data-[orientation=vertical]:items-center data-[orientation=vertical]:justify-center data-[orientation=vertical]:gap-4",
         "data-[orientation=horizontal]:flex data-[orientation=horizontal]:w-full data-[orientation=horizontal]:flex-col data-[orientation=horizontal]:items-stretch data-[orientation=horizontal]:gap-3",
         "data-[orientation=horizontal]:has-data-footer:grid data-[orientation=horizontal]:has-data-footer:grid-cols-1 data-[orientation=horizontal]:has-data-footer:gap-y-3",
@@ -36,7 +36,7 @@ export function ChannelStripHeader({
   return (
     <ChannelStripPrimitive.Header
       className={cn(
-        "w-full text-center font-medium text-sm",
+        "w-full text-center font-heading font-medium text-sm",
         "group-data-[orientation=horizontal]/channel-strip:text-left",
         "group-data-[orientation=horizontal]/channel-strip:flex group-data-[orientation=horizontal]/channel-strip:w-full group-data-[orientation=horizontal]/channel-strip:items-center group-data-[orientation=horizontal]/channel-strip:justify-between",
         className

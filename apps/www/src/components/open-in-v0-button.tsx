@@ -1,3 +1,5 @@
+import Link from "next/link";
+import type * as React from "react";
 import { baseUrl } from "@/lib/config";
 import { Icons } from "@/lib/icons";
 import { cn } from "@/registry/default/lib/utils";
@@ -12,17 +14,18 @@ export function OpenInV0Button({
 }) {
   return (
     <Button
-      asChild
-      className={cn("h-[1.8rem] gap-1", className)}
+      className={cn(className)}
+      render={
+        <Link
+          href={`https://v0.dev/chat/api/open?url=${encodeURIComponent(`${baseUrl.origin}/r/${name}.json`)}`}
+          rel="noopener noreferrer"
+          target="_blank"
+        />
+      }
       size="sm"
       {...props}
     >
-      <a
-        href={`https://v0.dev/chat/api/open?url=${encodeURIComponent(`${baseUrl.origin}/r/${name}.json`)}`}
-        target="_blank"
-      >
-        Open in <Icons.v0 className="size-5" />
-      </a>
+      Open in <Icons.v0 />
     </Button>
   );
 }

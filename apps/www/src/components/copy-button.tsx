@@ -1,6 +1,6 @@
 "use client";
 
-import { CopyCheckIcon, CopyIcon } from "lucide-react";
+import { CheckIcon, CopyIcon } from "@phosphor-icons/react";
 import posthog from "posthog-js";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 import { cn } from "@/registry/default/lib/utils";
@@ -35,28 +35,30 @@ function CopyButton({
 
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          className={cn(
-            "absolute top-3 right-2 z-10 size-7 bg-code hover:opacity-100 focus-visible:opacity-100",
-            className
-          )}
-          data-copied={isCopied}
-          data-slot="copy-button"
-          onClick={() => copyToClipboard(value)}
-          size="icon"
-          variant={variant}
-          {...props}
-        >
-          <span className="sr-only">Copy</span>
-          {isCopied ? <CopyCheckIcon /> : <CopyIcon />}
-        </Button>
+      <TooltipTrigger
+        render={
+          <Button
+            className={cn(
+              "absolute top-3 right-2 z-10 bg-code hover:opacity-100 focus-visible:opacity-100",
+              className
+            )}
+            data-copied={isCopied}
+            data-slot="copy-button"
+            onClick={() => copyToClipboard(value)}
+            size="icon"
+            variant={variant}
+            {...props}
+          />
+        }
+      >
+        <span className="sr-only">Copy</span>
+        {isCopied ? <CheckIcon /> : <CopyIcon />}
       </TooltipTrigger>
       <TooltipContent>
         {isCopied ? (
           "Copied"
         ) : (
-          <KbdGroup className="flex items-center gap-2.5">
+          <KbdGroup>
             {tooltip}
             <Kbd>
               <CopyIcon />

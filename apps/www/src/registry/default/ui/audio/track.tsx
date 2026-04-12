@@ -1,14 +1,14 @@
 "use client";
 
-import { cva, type VariantProps } from "class-variance-authority";
 import {
-  ListMusicIcon,
-  MusicIcon,
+  BroadcastIcon,
+  MusicNotesIcon,
   PauseIcon,
   PlayIcon,
-  RadioIcon,
+  QueueIcon,
   XIcon,
-} from "lucide-react";
+} from "@phosphor-icons/react";
+import { cva, type VariantProps } from "class-variance-authority";
 import React from "react";
 import { useAudio } from "@/registry/default/hooks/use-audio";
 import { useAudioStore } from "@/registry/default/lib/audio-store";
@@ -147,7 +147,7 @@ function renderTrackActions({
       {showRemoveAction && (
         <Button
           aria-label="Remove track"
-          className="[&_svg.fill-current]:fill-primary [&_svg]:text-primary"
+          className="[&_svg]:text-primary"
           onClick={onTrackRemoveClick}
           size="icon-sm"
           title="Remove"
@@ -159,16 +159,16 @@ function renderTrackActions({
       {showPlayPauseAction && (
         <Button
           aria-label={playPauseTitle}
-          className="[&_svg.fill-current]:fill-primary [&_svg]:text-primary"
+          className="[&_svg]:text-primary"
           onClick={onTrackPlayPauseClick}
           size="icon-sm"
           title={playPauseTitle}
           variant="ghost"
         >
           {actualIsPlaying ? (
-            <PauseIcon className="size-4 fill-current" />
+            <PauseIcon weight="fill" />
           ) : (
-            <PlayIcon className="size-4 fill-current" />
+            <PlayIcon weight="fill" />
           )}
         </Button>
       )}
@@ -183,19 +183,15 @@ function renderTrackMedia(
 ) {
   const coverImage = track.artwork || track.images?.[0];
   const cover = coverImage ? (
-    <Avatar className="rounded-sm">
-      <AvatarImage
-        alt={track.title}
-        className="object-cover"
-        src={coverImage}
-      />
-      <AvatarFallback className="rounded-sm">
-        <MusicIcon className="size-4 text-muted-foreground" />
+    <Avatar>
+      <AvatarImage alt={track.title} src={coverImage} />
+      <AvatarFallback>
+        <MusicNotesIcon />
       </AvatarFallback>
     </Avatar>
   ) : (
-    <div className="flex size-10 items-center justify-center rounded-sm bg-muted">
-      <MusicIcon className="size-4 text-muted-foreground" />
+    <div className="flex size-10 items-center justify-center rounded-full bg-muted">
+      <MusicNotesIcon className="size-4 text-muted-foreground" />
     </div>
   );
 
@@ -273,8 +269,7 @@ function AudioTrack({
   return (
     <Item
       className={cn(
-        "w-full cursor-pointer transition-all hover:bg-secondary/50",
-        isCurrent && "bg-secondary/80 backdrop-blur-sm",
+        "w-full cursor-pointer backdrop-blur-sm transition-all hover:bg-secondary/50",
         className
       )}
       onClick={(e) => {
@@ -288,17 +283,15 @@ function AudioTrack({
       <ItemMedia>{renderTrackMedia(media, track, index)}</ItemMedia>
       <ItemContent className="min-w-0 flex-1 gap-0 overflow-hidden">
         <div className="flex items-center gap-1.5">
-          <ItemTitle className="truncate font-medium text-sm">
-            {track.title}
-          </ItemTitle>
+          <ItemTitle>{track.title}</ItemTitle>
           {isLiveTrack && (
-            <Badge className="bg-destructive/10 px-1 py-0.5 font-medium text-[10px] text-destructive uppercase leading-none">
-              <RadioIcon className="size-2.5" />
+            <Badge variant="destructive">
+              <BroadcastIcon weight="fill" />
               Live
             </Badge>
           )}
         </div>
-        <ItemDescription className="text-xs">{track.artist}</ItemDescription>
+        <ItemDescription>{track.artist}</ItemDescription>
       </ItemContent>
       {!isLiveTrack && trackDuration !== undefined && (
         <ItemContent className="flex-none text-center">
@@ -319,8 +312,6 @@ function AudioTrack({
     </Item>
   );
 }
-
-AudioTrack.displayName = "AudioTrack";
 
 const audioTrackListVariants = cva("w-full", {
   variants: {
@@ -436,15 +427,13 @@ function AudioTrackList({
 
   if (tracks.length === 0) {
     return (
-      <Empty className={cn("mx-auto size-full border bg-muted/30", className)}>
+      <Empty className={cn(className)}>
         <EmptyHeader>
           <EmptyMedia variant="icon">
-            <ListMusicIcon />
+            <QueueIcon />
           </EmptyMedia>
           <EmptyTitle>{emptyLabel}</EmptyTitle>
-          <EmptyDescription className="text-xs/relaxed">
-            {emptyDescription}
-          </EmptyDescription>
+          <EmptyDescription>{emptyDescription}</EmptyDescription>
         </EmptyHeader>
       </Empty>
     );
@@ -528,9 +517,7 @@ function AudioTrackList({
     );
 
   return (
-    <ScrollArea
-      className={cn("w-full scroll-pt-2 scroll-pb-1.5 pt-1", className)}
-    >
+    <ScrollArea className={cn("max-h-[36vh] w-full pt-1", className)}>
       {content}
     </ScrollArea>
   );

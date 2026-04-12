@@ -38,11 +38,15 @@ export const Hero = memo(function _Hero() {
             of shadcn/ui, it's designed for you to copy, paste, and own.
           </PageHeaderDescription>
           <PageActions className="pointer-events-auto">
-            <Button asChild size="sm">
-              <Link href="/docs">Get Started</Link>
+            <Button render={<Link href="/docs" />} size="sm">
+              Get Started
             </Button>
-            <Button asChild size="sm" variant="ghost">
-              <Link href="/docs/components">View Components</Link>
+            <Button
+              render={<Link href="/docs/components" />}
+              size="sm"
+              variant="ghost"
+            >
+              View Components
             </Button>
           </PageActions>
         </PageHeader>

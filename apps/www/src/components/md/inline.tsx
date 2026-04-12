@@ -8,7 +8,7 @@ function Pre({ className, children, ...props }: React.ComponentProps<"pre">) {
   return (
     <pre
       className={cn(
-        "no-scrollbar min-w-0 overflow-x-auto px-4 py-3.5 text-[.8125rem] outline-none has-data-[slot=tabs]:p-0 has-data-highlighted-line:px-0 has-data-line-numbers:px-0",
+        "no-scrollbar min-w-0 overflow-x-auto px-4 py-3.5 text-[.8125rem] outline-none has-data-[slot=tabs]:p-0 has-data-line-numbers:p-0 has-data-highlighted-line:px-0",
         className
       )}
       {...props}

@@ -21,12 +21,20 @@ async function Source({
   language,
   collapsible = true,
   className,
+  fillHeight = false,
+  pathLabel,
+  headerActions,
+  copyButton = true,
 }: React.ComponentProps<"div"> & {
   name?: string;
   src?: string;
   title?: string;
   language?: string;
   collapsible?: boolean;
+  fillHeight?: boolean;
+  pathLabel?: string;
+  headerActions?: React.ReactNode;
+  copyButton?: boolean;
 }) {
   if (!(name || src)) {
     return null;
@@ -52,15 +60,37 @@ async function Source({
 
   if (!collapsible) {
     return (
-      <div className={cn("relative", className)}>
-        <CodeBlock code={code} language={lang} title={title} />
+      <div
+        className={cn(
+          fillHeight && "flex min-h-0 flex-1 flex-col",
+          "relative",
+          className
+        )}
+      >
+        <CodeBlock
+          code={code}
+          copyButton={copyButton}
+          fillHeight={fillHeight}
+          headerActions={headerActions}
+          language={lang}
+          pathLabel={pathLabel}
+          title={title}
+        />
       </div>
     );
   }
 
   return (
     <Collapse className={className}>
-      <CodeBlock code={code} language={lang} title={title} />
+      <CodeBlock
+        code={code}
+        copyButton={copyButton}
+        fillHeight={fillHeight}
+        headerActions={headerActions}
+        language={lang}
+        pathLabel={pathLabel}
+        title={title}
+      />
     </Collapse>
   );
 }
@@ -86,25 +116,15 @@ function PreviewTabs({
     >
       <Tabs defaultValue="preview">
         {!hideCode && (
-          <TabsList className="bg-transparent p-0">
-            <TabsTrigger
-              className="data-[state=active]:border data-[state=active]:border-border data-[state=active]:shadow-none"
-              value="preview"
-            >
-              Preview
-            </TabsTrigger>
-            <TabsTrigger
-              className="data-[state=active]:border data-[state=active]:border-border data-[state=active]:shadow-none"
-              value="code"
-            >
-              Code
-            </TabsTrigger>
+          <TabsList>
+            <TabsTrigger value="preview">Preview</TabsTrigger>
+            <TabsTrigger value="code">Code</TabsTrigger>
           </TabsList>
         )}
-        <TabsContent className="relative rounded-lg border" value="preview">
+        <TabsContent className="relative rounded-4xl border" value="preview">
           <div
             className={cn(
-              "preview flex h-[450px] w-full justify-center overflow-y-auto p-10 data-[align=start]:items-start data-[align=end]:items-end data-[align=center]:items-center max-sm:px-6"
+              "preview flex w-full justify-center overflow-y-auto p-10 data-[align=start]:items-start data-[align=end]:items-end data-[align=center]:items-center max-sm:px-6"
             )}
             data-align={align}
           >
@@ -139,12 +159,12 @@ function Preview({
 
   if (!Component) {
     return (
-      <p className="text-muted-foreground text-sm">
+      <p className="py-4 text-muted-foreground text-sm">
         Component{" "}
-        <code className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm">
+        <code className="relative rounded-4xl bg-muted px-[0.3rem] py-[0.2rem] font-mono text-destructive text-sm">
           {name}
         </code>{" "}
-        not found in registry.
+        not found.
       </p>
     );
   }

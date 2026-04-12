@@ -19,8 +19,8 @@ import { AudioTrackList } from "@/registry/default/ui/audio/track";
 
 export default function BlockPlayerWidget() {
   return (
-    <AudioPlayer className="flex flex-col gap-1.5">
-      <AudioTrackList className="h-36 w-full rounded-sm border bg-muted/50 p-1" />
+    <AudioPlayer className="flex flex-col gap-4">
+      <AudioTrackList className="h-40 w-full rounded-2xl border p-1" />
       <AudioPlayerControlBar variant="stacked">
         <AudioPlayerControlGroup>
           <AudioPlayerTimeDisplay />

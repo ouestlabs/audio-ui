@@ -22,7 +22,7 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical } from "lucide-react";
+import { DotsSixVerticalIcon } from "@phosphor-icons/react";
 import React from "react";
 import { createPortal } from "react-dom";
 import { cn } from "@/registry/default/lib/utils";
@@ -142,7 +142,7 @@ const dropAnimationConfig: DropAnimation = {
 
 const Overlay = ({ children }: React.PropsWithChildren) => (
   <DragOverlay
-    className="z-100 overflow-hidden rounded-md shadow-elevation-card-hover [&>li]:border-b-0"
+    className="z-100 overflow-hidden rounded-4xl shadow-lg ring-1 ring-foreground/10 [&>li]:border-b-0"
     dropAnimation={dropAnimationConfig}
     style={{
       cursor: "grabbing",
@@ -237,7 +237,7 @@ const SortableDragHandle = () => {
       className="cursor-grab touch-none active:cursor-grabbing"
       ref={ref}
     >
-      <GripVertical className="size-4" />
+      <DotsSixVerticalIcon />
     </Button>
   );
 };

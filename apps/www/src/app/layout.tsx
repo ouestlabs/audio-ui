@@ -1,5 +1,6 @@
 import "../styles/globals.css";
 
+import { Inter } from "next/font/google";
 import { SiteHeader } from "@/components/layouts/global/headers/site";
 import { fontMono, fontSans, fontSerif } from "@/lib/fonts";
 import {
@@ -10,6 +11,8 @@ import {
 import { cn } from "@/registry/default/lib/utils";
 import { Providers } from "./_providers";
 
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
+
 export const metadata = createMetadata();
 export const viewport = createViewport();
 
@@ -19,7 +22,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html data-scroll-behavior="smooth" lang="en" suppressHydrationWarning>
+    <html
+      className={cn("font-sans", inter.variable)}
+      data-scroll-behavior="smooth"
+      lang="en"
+      suppressHydrationWarning
+    >
       <head>
         <script
           // biome-ignore lint/security/noDangerouslySetInnerHtml: necessary for setting theme color based on user preference

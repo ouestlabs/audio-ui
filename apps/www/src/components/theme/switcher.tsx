@@ -1,6 +1,6 @@
 "use client";
 
-import { MoonIcon, SunIcon } from "lucide-react";
+import { MoonIcon, SunIcon } from "@phosphor-icons/react/dist/ssr";
 import posthog from "posthog-js";
 import { useCallback } from "react";
 import { useTheme } from "@/hooks/use-theme";
@@ -25,23 +25,25 @@ export function ThemeSwitcher() {
 
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <Button onClick={handleToggleTheme} size="icon-sm" variant="outline">
-          <MoonIcon className="dark:hidden" />
-          <SunIcon className="hidden dark:block" />
-          <span className="sr-only">Toggle theme</span>
-        </Button>
+      <TooltipTrigger
+        render={
+          <Button onClick={handleToggleTheme} size="icon" variant="outline" />
+        }
+      >
+        <MoonIcon className="dark:hidden" />
+        <SunIcon className="hidden dark:block" />
+        <span className="sr-only">Toggle theme</span>
       </TooltipTrigger>
       <TooltipContent sideOffset={8}>
         {resolvedTheme === "dark" ? (
-          <KbdGroup className="flex items-center gap-2.5">
+          <KbdGroup>
             Switch to light mode
             <Kbd>
               <SunIcon />
             </Kbd>
           </KbdGroup>
         ) : (
-          <KbdGroup className="flex items-center gap-2.5">
+          <KbdGroup>
             Switch to dark mode
             <Kbd>
               <MoonIcon />

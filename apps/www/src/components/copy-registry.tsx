@@ -1,5 +1,5 @@
 "use client";
-import { CheckIcon } from "lucide-react";
+import { CheckIcon } from "@phosphor-icons/react";
 import type * as React from "react";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 import { Icons } from "@/lib/icons";
@@ -25,28 +25,26 @@ export function CopyRegistry({
 
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          className={cn(className)}
-          data-slot="copy-button"
-          onClick={() => copyToClipboard(value)}
-          size="icon-sm"
-          variant={variant}
-          {...props}
-        >
-          <span className="sr-only">Copy</span>
-          {isCopied ? (
-            <CheckIcon className="size-3.5" />
-          ) : (
-            <Icons.mcp className="size-3.5" />
-          )}
-        </Button>
+      <TooltipTrigger
+        render={
+          <Button
+            className={cn(className)}
+            data-slot="copy-button"
+            onClick={() => copyToClipboard(value)}
+            size="icon-sm"
+            variant={variant}
+            {...props}
+          />
+        }
+      >
+        <span className="sr-only">Copy</span>
+        {isCopied ? <CheckIcon /> : <Icons.mcp />}
       </TooltipTrigger>
       <TooltipContent>
         {isCopied ? (
           "Copied"
         ) : (
-          <KbdGroup className="flex items-center gap-2.5">
+          <KbdGroup>
             Copy Registry URL
             <Kbd>
               <Icons.mcp />

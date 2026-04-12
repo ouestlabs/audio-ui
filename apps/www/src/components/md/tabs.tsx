@@ -27,7 +27,7 @@ function TabsTrigger({
   return (
     <UITabsTrigger
       className={cn(
-        "rounded-lg data-[state=active]:border data-[state=active]:border-border data-[state=active]:shadow-none",
+        "rounded-4xl data-[state=active]:border data-[state=active]:border-border data-[state=active]:shadow-none",
         className
       )}
       {...props}
@@ -54,4 +54,4 @@ function Tab({ className, ...props }: React.ComponentProps<"div">) {
   return <div className={cn(className)} {...props} />;
 }
 
-export { Tabs, TabsList, TabsTrigger, TabsContent, Tab };
+export { Tab, Tabs, TabsContent, TabsList, TabsTrigger };

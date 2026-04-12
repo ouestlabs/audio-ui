@@ -1,12 +1,11 @@
 import { transformerNotationWordHighlight } from "@shikijs/transformers";
-import type { ShikiTransformer } from "shiki";
-import { codeToHtml } from "shiki";
+import { codeToHtml, type ShikiTransformer } from "shiki";
+
 export const transformers = [
   {
     code(node) {
       if (node.tagName === "code") {
         const raw = this.source;
-        node.properties.__raw__ = raw;
 
         if (raw.startsWith("npm install")) {
           node.properties.__npm__ = raw;
@@ -22,7 +21,6 @@ export const transformers = [
           node.properties.__bun__ = raw.replace("npx", "bunx --bun");
         }
 
-        // npm create.
         if (raw.startsWith("npm create")) {
           node.properties.__npm__ = raw;
           node.properties.__yarn__ = raw.replace("npm create", "yarn create");
@@ -30,7 +28,6 @@ export const transformers = [
           node.properties.__bun__ = raw.replace("npm create", "bun create");
         }
 
-        // npx.
         if (raw.startsWith("npx")) {
           node.properties.__npm__ = raw;
           node.properties.__yarn__ = raw.replace("npx", "yarn dlx");
@@ -38,7 +35,6 @@ export const transformers = [
           node.properties.__bun__ = raw.replace("npx", "bunx --bun");
         }
 
-        // npm run.
         if (raw.startsWith("npm run")) {
           node.properties.__npm__ = raw;
           node.properties.__yarn__ = raw.replace("npm run", "yarn");
@@ -68,7 +64,7 @@ export async function highlightCode(
       {
         pre(node) {
           node.properties.class =
-            "no-scrollbar text-[.8125rem] min-w-0 overflow-x-auto px-4 py-3.5 outline-none has-data-[highlighted-line]:px-0 has-data-[line-numbers]:px-0 has-data-[slot=tabs]:p-0 !bg-transparent";
+            "text-[.8125rem] min-w-0 px-4 py-3.5 outline-none has-data-[highlighted-line]:px-0 has-data-[line-numbers]:p-0 has-data-[slot=tabs]:p-0";
         },
         code(node) {
           if (showLineNumbers) {
