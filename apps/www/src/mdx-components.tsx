@@ -47,7 +47,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     img: Img,
     hr: HorizontalRule,
     table: (props: React.ComponentProps<"table">) => (
-      <div className="no-scrollbar my-6 w-full overflow-y-auto rounded-lg border bg-card">
+      <div className="no-scrollbar my-6 w-full overflow-y-auto rounded-4xl border bg-card">
         <Table {...props} />
       </div>
     ),

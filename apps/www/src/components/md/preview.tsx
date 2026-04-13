@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import type React from "react";
 import { CodeBlock } from "@/components/md/block";
-import { Collapse, CopyCode } from "@/components/md/code";
+import { Collapse, CopyButton } from "@/components/md/code";
 import { getRegistryItem } from "@/lib/registry";
 import { Index } from "@/registry/__index__";
 import { cn } from "@/registry/default/lib/utils";
@@ -16,7 +16,68 @@ import {
   TabsTrigger,
 } from "@/registry/default/ui/tabs";
 
+// Source helpers
+
+async function loadSourceCode(
+  name?: string,
+  src?: string
+): Promise<{ code: string; inferredPathLabel: string } | null> {
+  if (name) {
+    const item = await getRegistryItem(name);
+    const code = item?.files?.[0]?.content;
+    const inferredPathLabel = item?.files?.[0]?.path ?? "";
+    if (code) {
+      return { code, inferredPathLabel };
+    }
+  }
+  if (src) {
+    const code = await fs.readFile(path.join(process.cwd(), src), "utf-8");
+    return { code, inferredPathLabel: src };
+  }
+  return null;
+}
+
+function buildSourceActions({
+  collapsible,
+  copyButton,
+  headerActions,
+  code,
+}: {
+  collapsible: boolean;
+  copyButton: boolean;
+  headerActions?: React.ReactNode;
+  code: string;
+}): React.ReactNode {
+  if (collapsible) {
+    return (
+      <span className="flex items-center gap-1">
+        {headerActions}
+        <CollapsibleTrigger render={<Button size="sm" variant="ghost" />}>
+          <span className="group-data-open/collapsible:hidden">Expand</span>
+          <span className="hidden group-data-open/collapsible:inline">
+            Collapse
+          </span>
+        </CollapsibleTrigger>
+        {copyButton ? (
+          <Separator className="mx-0.5" orientation="vertical" />
+        ) : null}
+        {copyButton ? (
+          <CopyButton size="icon-sm" value={code} variant="ghost" />
+        ) : null}
+      </span>
+    );
+  }
+  if (headerActions !== undefined) {
+    return headerActions;
+  }
+  if (!copyButton) {
+    return null;
+  }
+  // returning nothing → CodeBlock renders its default CopyButton
+}
+
 // Source
+
 async function Source({
   name,
   src,
@@ -26,6 +87,7 @@ async function Source({
   className,
   fillHeight = false,
   pathLabel,
+  showPath = true,
   headerActions,
   copyButton = true,
 }: React.ComponentProps<"div"> & {
@@ -36,6 +98,8 @@ async function Source({
   collapsible?: boolean;
   fillHeight?: boolean;
   pathLabel?: string;
+  /** Set to false to hide the inferred file path (e.g. in Preview tabs). */
+  showPath?: boolean;
   headerActions?: React.ReactNode;
   copyButton?: boolean;
 }) {
@@ -43,81 +107,45 @@ async function Source({
     return null;
   }
 
-  let code: string | undefined;
-  let inferredPathLabel: string | undefined;
-
-  if (name) {
-    const item = await getRegistryItem(name);
-    code = item?.files?.[0]?.content;
-    inferredPathLabel = item?.files?.[0]?.path;
-  }
-
-  if (src) {
-    const file = await fs.readFile(path.join(process.cwd(), src), "utf-8");
-    code = file;
-    inferredPathLabel = src;
-  }
-
-  if (!code) {
+  const loaded = await loadSourceCode(name, src);
+  if (!loaded) {
     return null;
   }
 
+  const { code, inferredPathLabel } = loaded;
   const lang = language ?? title?.split(".").pop() ?? "tsx";
+  const actions = buildSourceActions({ collapsible, copyButton, headerActions, code });
 
-  if (!collapsible) {
-    return (
-      <div
-        className={cn(
-          fillHeight && "flex min-h-0 flex-1 flex-col",
-          "relative",
-          className
-        )}
-      >
-        <CodeBlock
-          code={code}
-          copyButton={copyButton}
-          fillHeight={fillHeight}
-          headerActions={headerActions}
-          language={lang}
-          pathLabel={pathLabel ?? inferredPathLabel}
-          title={title}
-        />
-      </div>
-    );
+  const block = (
+    <CodeBlock
+      actions={actions}
+      code={code}
+      language={lang}
+      pathLabel={showPath ? (pathLabel ?? inferredPathLabel) : pathLabel}
+      title={title}
+      variant={fillHeight ? "fill" : "default"}
+    />
+  );
+
+  if (collapsible) {
+    return <Collapse className={className}>{block}</Collapse>;
   }
 
   return (
-    <Collapse className={className}>
-      <CodeBlock
-        code={code}
-        copyButton={copyButton}
-        fillHeight={fillHeight}
-        headerActions={
-          <span className="flex items-center gap-1">
-            {headerActions}
-            <CollapsibleTrigger render={<Button size="sm" variant="ghost" />}>
-              <span className="group-data-open/collapsible:hidden">Expand</span>
-              <span className="hidden group-data-open/collapsible:inline">
-                Collapse
-              </span>
-            </CollapsibleTrigger>
-            {copyButton ? (
-              <Separator className="mx-0.5" orientation="vertical" />
-            ) : null}
-            {copyButton ? (
-              <CopyCode size="icon-sm" value={code} variant="ghost" />
-            ) : null}
-          </span>
-        }
-        language={lang}
-        pathLabel={pathLabel ?? inferredPathLabel}
-        title={title}
-      />
-    </Collapse>
+    <div
+      className={cn(
+        fillHeight && "flex min-h-0 flex-1 flex-col",
+        "relative",
+        className
+      )}
+    >
+      {block}
+    </div>
   );
 }
 
-// Preview Tabs
+// PreviewTabs
+
 function PreviewTabs({
   className,
   align = "center",
@@ -165,6 +193,7 @@ function PreviewTabs({
 }
 
 // Preview
+
 function Preview({
   name,
   className,
@@ -197,7 +226,7 @@ function Preview({
       className={className}
       component={<Component />}
       hideCode={hideCode}
-      source={<Source collapsible={false} name={name} />}
+      source={<Source collapsible={false} name={name} showPath={false} />}
       {...props}
     />
   );

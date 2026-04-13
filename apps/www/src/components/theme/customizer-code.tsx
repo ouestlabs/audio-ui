@@ -6,7 +6,7 @@ import {
   CodeFrame,
   CodeFrameHeader,
   CodeFrameScroll,
-  CopyCode,
+  CopyButton,
 } from "@/components/md/code";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 import { Icons } from "@/lib/icons";
@@ -60,7 +60,7 @@ function ThemeCodeBlock({ copied, onCopy, children }: ThemeCodeBlockProps) {
     <CodeFrame className="mx-0 mt-0" fillHeight>
       <CodeFrameHeader
         actions={
-          <CopyCode
+          <CopyButton
             copied={copied}
             onAction={onCopy}
             size="icon-sm"

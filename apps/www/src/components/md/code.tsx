@@ -12,6 +12,7 @@ import {
   CollapsibleTrigger,
   Collapsible as UICollapsible,
 } from "@/registry/default/ui/collapsible";
+import { Kbd, KbdGroup } from "@/registry/default/ui/kbd";
 import { ScrollArea } from "@/registry/default/ui/scroll-area";
 import {
   Tabs,
@@ -19,6 +20,13 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/registry/default/ui/tabs";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/registry/default/ui/tooltip";
+
+// CodeFrame
 
 type CodeFrameProps = React.ComponentProps<"figure"> & {
   fillHeight?: boolean;
@@ -41,6 +49,8 @@ function CodeFrame({
   );
 }
 
+// CodeFrameHeader
+
 type CodeFrameHeaderProps = Omit<
   React.ComponentProps<"figcaption">,
   "title"
@@ -54,50 +64,52 @@ type CodeFrameHeaderProps = Omit<
   fillHeight?: boolean;
 };
 
-/* biome-ignore lint/complexity/noExcessiveCognitiveComplexity: centralizes code frame header variants in one reusable component */
-function CodeFrameHeader({
+function PathHeader({
   language,
   title,
   pathLabel,
   actions,
   icon,
-  compact = false,
-  fillHeight = false,
+  fillHeight,
   className,
   ...props
 }: CodeFrameHeaderProps) {
-  if (!(title || pathLabel || actions)) {
-    return null;
-  }
-
-  if (pathLabel || actions) {
-    return (
-      <figcaption
-        className={cn(
-          "flex items-center justify-between gap-3 px-3 py-2 font-medium text-muted-foreground text-xs [&_svg]:size-3.5 [&_svg]:shrink-0 [&_svg]:text-foreground/70",
-          fillHeight && "shrink-0",
-          className
-        )}
-        data-language={language}
-        data-rehype-pretty-code-title
-        {...props}
-      >
-        <span className="flex min-w-0 flex-1 items-center gap-3">
-          {icon ?? getIconForLanguageExtension(language)}
-          {pathLabel ? (
-            <span className="truncate font-mono text-[0.8125rem] text-code-foreground">
-              {pathLabel}
-            </span>
-          ) : null}
-          {!pathLabel && title ? title : null}
-        </span>
-        {actions ? (
-          <span className="flex shrink-0 items-center">{actions}</span>
+  return (
+    <figcaption
+      className={cn(
+        "flex items-center justify-between gap-3 px-3 py-2 font-medium text-muted-foreground text-xs [&_svg]:size-3.5 [&_svg]:shrink-0 [&_svg]:text-foreground/70",
+        fillHeight && "shrink-0",
+        className
+      )}
+      data-language={language}
+      data-rehype-pretty-code-title
+      {...props}
+    >
+      <span className="flex min-w-0 flex-1 items-center gap-3">
+        {icon ?? getIconForLanguageExtension(language)}
+        {pathLabel ? (
+          <span className="truncate font-mono text-[0.8125rem] text-code-foreground">
+            {pathLabel}
+          </span>
         ) : null}
-      </figcaption>
-    );
-  }
+        {!pathLabel && title ? title : null}
+      </span>
+      {actions ? (
+        <span className="flex shrink-0 items-center">{actions}</span>
+      ) : null}
+    </figcaption>
+  );
+}
 
+function TitleHeader({
+  language,
+  title,
+  icon,
+  compact,
+  fillHeight,
+  className,
+  ...props
+}: CodeFrameHeaderProps) {
   return (
     <figcaption
       className={cn(
@@ -117,6 +129,19 @@ function CodeFrameHeader({
     </figcaption>
   );
 }
+
+function CodeFrameHeader(props: CodeFrameHeaderProps) {
+  const { title, pathLabel, actions } = props;
+  if (!(title || pathLabel || actions)) {
+    return null;
+  }
+  if (pathLabel || actions) {
+    return <PathHeader {...props} />;
+  }
+  return <TitleHeader {...props} />;
+}
+
+// CodeFrameScroll
 
 type CodeFrameScrollProps = React.ComponentProps<typeof ScrollArea> & {
   fillHeight?: boolean;
@@ -142,46 +167,79 @@ function CodeFrameScroll({
   );
 }
 
-type CopyCodeProps = {
+// CopyButton — unified copy button (no tooltip by default)
+
+type CopyButtonProps = {
   value?: string;
   copied?: boolean;
   onAction?: () => void;
   onCopied?: () => void;
+  tooltip?: string | false;
+  icon?: React.ReactNode;
 } & Omit<React.ComponentProps<typeof Button>, "onClick">;
 
-function CopyCode({
+function CopyButton({
   value,
   copied,
   onAction,
   onCopied,
+  tooltip = false,
+  icon,
+  className,
   ...props
-}: CopyCodeProps) {
+}: CopyButtonProps) {
   const { isCopied, copyToClipboard } = useCopyToClipboard({
     onCopy: onCopied,
   });
   const hasCopied = copied ?? isCopied;
+  const currentIcon = hasCopied ? <CheckIcon /> : (icon ?? <CopyIcon />);
 
-  return (
+  const button = (
     <Button
       aria-label={hasCopied ? "Copied" : "Copy to clipboard"}
+      className={className}
+      data-copied={hasCopied}
       data-slot="copy-button"
       onClick={() => {
         if (value) {
           copyToClipboard(value);
           return;
         }
-
         onAction?.();
       }}
       title={hasCopied ? "Copied" : "Copy"}
       {...props}
     >
-      {hasCopied ? <CheckIcon /> : <CopyIcon />}
+      <span className="sr-only">Copy</span>
+      {currentIcon}
     </Button>
+  );
+
+  if (!tooltip) {
+    return button;
+  }
+
+  return (
+    <Tooltip>
+      <TooltipTrigger render={button} />
+      <TooltipContent>
+        {hasCopied ? (
+          "Copied"
+        ) : (
+          <KbdGroup>
+            {tooltip}
+            <Kbd>
+              <CopyIcon />
+            </Kbd>
+          </KbdGroup>
+        )}
+      </TooltipContent>
+    </Tooltip>
   );
 }
 
-// Collapsible
+// Collapse
+
 function Collapse({
   className,
   children,
@@ -219,7 +277,8 @@ function Collapse({
   );
 }
 
-// Command
+// Command — package manager tabs
+
 function Command({
   __npm__,
   __yarn__,
@@ -257,7 +316,7 @@ function Command({
       >
         <CodeFrameHeader
           actions={
-            <CopyCode
+            <CopyButton
               size="icon"
               value={tabs[packageManager] ?? ""}
               variant="ghost"
@@ -300,7 +359,8 @@ function Command({
   );
 }
 
-// Tabs
+// CodeTabs — installation type tabs
+
 function CodeTabs({ children }: React.ComponentProps<typeof Tabs>) {
   const [config, setConfig] = useConfig();
 
@@ -329,5 +389,5 @@ export {
   CodeFrame,
   CodeFrameHeader,
   CodeFrameScroll,
-  CopyCode,
+  CopyButton,
 };

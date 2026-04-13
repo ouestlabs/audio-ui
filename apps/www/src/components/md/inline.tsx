@@ -1,6 +1,10 @@
 import type * as React from "react";
-import { CopyButton } from "@/components/copy-button";
-import { CodeFrame, CodeFrameHeader, Command } from "@/components/md/code";
+import {
+  CodeFrame,
+  CodeFrameHeader,
+  Command,
+  CopyButton,
+} from "@/components/md/code";
 import { cn } from "@/registry/default/lib/utils";
 
 function Pre({ className, children, ...props }: React.ComponentProps<"pre">) {
@@ -85,7 +89,13 @@ function Code({
 
   return (
     <>
-      {__raw__ && <CopyButton src={__src__} value={__raw__} />}
+      {__raw__ && (
+        <CopyButton
+          className="absolute top-3 right-2 z-10 bg-code hover:opacity-100 focus-visible:opacity-100"
+          tooltip="Copy to Clipboard"
+          value={__raw__}
+        />
+      )}
       <code {...props} />
     </>
   );

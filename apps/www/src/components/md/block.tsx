@@ -3,62 +3,66 @@ import {
   CodeFrame,
   CodeFrameHeader,
   CodeFrameScroll,
-  CopyCode,
+  CopyButton,
 } from "@/components/md/code";
 import { highlightCode } from "@/lib/highlight-code";
 import { cn } from "@/registry/default/lib/utils";
+
+type CodeBlockVariant = "default" | "fill" | "compact";
 
 async function CodeBlock({
   code,
   language,
   title,
-  copyButton = true,
-  showLineNumbers = true,
-  fillHeight = false,
+  variant = "default",
   pathLabel,
-  headerActions,
+  actions,
 }: {
   code: string;
   language: string;
-  title?: string | undefined;
-  copyButton?: boolean;
-  showLineNumbers?: boolean;
-  /** Stretch to fill a flex parent (e.g. drawer panel); scroll happens inside the pre. */
-  fillHeight?: boolean;
+  title?: string;
+  /** "default" — standard; "fill" — stretches in flex containers; "compact" — no line numbers */
+  variant?: CodeBlockVariant;
   pathLabel?: string;
-  /** Right side of the caption row (e.g. copy + v0 in a ButtonGroup). */
-  headerActions?: ReactNode;
+  /** Custom right-side actions. Pass `null` to suppress the default copy button. */
+  actions?: ReactNode;
 }) {
+  const fillHeight = variant === "fill";
+  const showLineNumbers = variant !== "compact";
+
   const highlightedCode = await highlightCode(code, language, {
     showLineNumbers,
   });
 
-  const panelHeader = Boolean(pathLabel ?? headerActions ?? title);
-  const resolvedHeaderActions = (
-    <span className="flex items-center gap-1">
-      {headerActions}
-      {!headerActions && copyButton ? (
-        <CopyCode size="icon-sm" value={code} variant="ghost" />
-      ) : null}
-    </span>
-  );
+  const defaultCopy = <CopyButton size="icon-sm" value={code} variant="ghost" />;
+  const resolvedActions = actions !== undefined ? actions : defaultCopy;
+
+  // When there's no metadata (no path, no title), the copy button floats as an
+  // overlay instead of rendering a header bar with border/bg.
+  const hasMetadata = Boolean(pathLabel || title);
 
   return (
     <CodeFrame
-      className={cn(panelHeader && "mx-0 rounded-4xl")}
+      className={cn(hasMetadata && "mx-0 rounded-4xl", !hasMetadata && "relative")}
       fillHeight={fillHeight}
     >
-      <CodeFrameHeader
-        actions={resolvedHeaderActions}
-        fillHeight={fillHeight}
-        language={language}
-        pathLabel={pathLabel}
-        title={title}
-      />
+      {hasMetadata ? (
+        <CodeFrameHeader
+          actions={resolvedActions ?? undefined}
+          fillHeight={fillHeight}
+          language={language}
+          pathLabel={pathLabel}
+          title={title}
+        />
+      ) : (
+        resolvedActions && (
+          <span className="absolute top-2 right-2 z-10">{resolvedActions}</span>
+        )
+      )}
       <CodeFrameScroll fillHeight={fillHeight}>
         <div
           className={cn(
-            "min-w-0 [&_pre]:m-0 [&_pre]:p-0",
+            "min-w-0 [&_pre]:m-0 [&_pre]:px-0 [&_pre]:py-3.5",
             fillHeight &&
               "flex min-h-0 flex-1 flex-col [&_pre]:min-h-0 [&_pre]:flex-1 [&_pre]:overflow-x-auto [&_pre]:overflow-y-auto"
           )}
