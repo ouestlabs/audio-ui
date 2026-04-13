@@ -1,4 +1,4 @@
-import { FileIcon } from "lucide-react";
+import { FileIcon } from "@phosphor-icons/react/dist/ssr";
 
 type IconProps = React.HTMLAttributes<SVGElement>;
 

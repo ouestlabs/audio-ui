@@ -27,6 +27,7 @@ function GithubStars() {
     <Tooltip>
       <TooltipTrigger render={<ButtonGroup />}>
         <Button
+          nativeButton={false}
           render={
             <Link
               aria-label="GitHub"

@@ -24,6 +24,7 @@ function SiteHeader() {
           />
           <Button
             className="hidden md:flex"
+            nativeButton={false}
             render={
               <Link
                 aria-label="Home"

@@ -21,6 +21,7 @@ function MainNav({
         <Button
           data-pressed={pathname.includes(item.href) || undefined}
           key={item.href}
+          nativeButton={false}
           render={
             <Link
               className={cn(pathname.includes(item.href) && "text-primary")}

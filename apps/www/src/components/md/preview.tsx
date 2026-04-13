@@ -2,10 +2,13 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import type React from "react";
 import { CodeBlock } from "@/components/md/block";
-import { Collapse } from "@/components/md/code";
+import { Collapse, CopyCode } from "@/components/md/code";
 import { getRegistryItem } from "@/lib/registry";
 import { Index } from "@/registry/__index__";
 import { cn } from "@/registry/default/lib/utils";
+import { Button } from "@/registry/default/ui/button";
+import { CollapsibleTrigger } from "@/registry/default/ui/collapsible";
+import { Separator } from "@/registry/default/ui/separator";
 import {
   Tabs,
   TabsContent,
@@ -41,15 +44,18 @@ async function Source({
   }
 
   let code: string | undefined;
+  let inferredPathLabel: string | undefined;
 
   if (name) {
     const item = await getRegistryItem(name);
     code = item?.files?.[0]?.content;
+    inferredPathLabel = item?.files?.[0]?.path;
   }
 
   if (src) {
     const file = await fs.readFile(path.join(process.cwd(), src), "utf-8");
     code = file;
+    inferredPathLabel = src;
   }
 
   if (!code) {
@@ -73,7 +79,7 @@ async function Source({
           fillHeight={fillHeight}
           headerActions={headerActions}
           language={lang}
-          pathLabel={pathLabel}
+          pathLabel={pathLabel ?? inferredPathLabel}
           title={title}
         />
       </div>
@@ -86,9 +92,25 @@ async function Source({
         code={code}
         copyButton={copyButton}
         fillHeight={fillHeight}
-        headerActions={headerActions}
+        headerActions={
+          <span className="flex items-center gap-1">
+            {headerActions}
+            <CollapsibleTrigger render={<Button size="sm" variant="ghost" />}>
+              <span className="group-data-open/collapsible:hidden">Expand</span>
+              <span className="hidden group-data-open/collapsible:inline">
+                Collapse
+              </span>
+            </CollapsibleTrigger>
+            {copyButton ? (
+              <Separator className="mx-0.5" orientation="vertical" />
+            ) : null}
+            {copyButton ? (
+              <CopyCode size="icon-sm" value={code} variant="ghost" />
+            ) : null}
+          </span>
+        }
         language={lang}
-        pathLabel={pathLabel}
+        pathLabel={pathLabel ?? inferredPathLabel}
         title={title}
       />
     </Collapse>
@@ -111,7 +133,7 @@ function PreviewTabs({
 }) {
   return (
     <div
-      className={cn("group relative mt-4 mb-12 flex flex-col gap-2", className)}
+      className={cn("group relative mt-4 mb-12 flex flex-col", className)}
       {...props}
     >
       <Tabs defaultValue="preview">

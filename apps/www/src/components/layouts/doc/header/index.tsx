@@ -72,6 +72,7 @@ function DocNavButton({
   return (
     <Button
       className={className}
+      nativeButton={false}
       render={<Link href={href} />}
       size="icon"
       variant="outline"

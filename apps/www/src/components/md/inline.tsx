@@ -1,7 +1,6 @@
 import type * as React from "react";
 import { CopyButton } from "@/components/copy-button";
-import { Command } from "@/components/md/code";
-import { getIconForLanguageExtension } from "@/lib/icons";
+import { CodeFrame, CodeFrameHeader, Command } from "@/components/md/code";
 import { cn } from "@/registry/default/lib/utils";
 
 function Pre({ className, children, ...props }: React.ComponentProps<"pre">) {
@@ -19,7 +18,7 @@ function Pre({ className, children, ...props }: React.ComponentProps<"pre">) {
 }
 
 function Figure({ className, ...props }: React.ComponentProps<"figure">) {
-  return <figure className={cn(className)} {...props} />;
+  return <CodeFrame className={cn(className)} {...props} />;
 }
 
 function Figcaption({
@@ -29,20 +28,17 @@ function Figcaption({
 }: React.ComponentProps<"figcaption">) {
   const iconExtension =
     "data-language" in props && typeof props["data-language"] === "string"
-      ? getIconForLanguageExtension(props["data-language"])
+      ? props["data-language"]
       : null;
 
   return (
-    <figcaption
-      className={cn(
-        "flex items-center gap-2 text-code-foreground [&_svg]:size-5 [&_svg]:text-code-foreground [&_svg]:opacity-70 sm:[&_svg]:size-4",
-        className
-      )}
+    <CodeFrameHeader
+      className={cn(className)}
+      compact
+      language={iconExtension ?? "text"}
+      title={children}
       {...props}
-    >
-      {iconExtension}
-      {children}
-    </figcaption>
+    />
   );
 }
 

@@ -14,6 +14,7 @@ export function CategoryNavigation({
     <div className="mx-auto mt-4 w-full max-w-4xl">
       <div className="flex flex-wrap justify-center gap-2">
         <Button
+          nativeButton={false}
           render={<Link href="/blocks" />}
           size="sm"
           variant={currentCategory ? "outline" : "default"}
@@ -26,6 +27,7 @@ export function CategoryNavigation({
             <Button
               className="capitalize"
               key={cat.slug}
+              nativeButton={false}
               render={<Link href={`/blocks/${cat.slug}`} />}
               size="sm"
               variant={isActive ? "default" : "outline"}

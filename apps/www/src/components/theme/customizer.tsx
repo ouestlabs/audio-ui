@@ -122,7 +122,7 @@ export function CopyCodeButton({
         className="max-w-2xl"
         position="right"
         showBar
-        variant="inset"
+        variant="straight"
       >
         <Tabs
           className="flex min-h-0 flex-1 flex-col"

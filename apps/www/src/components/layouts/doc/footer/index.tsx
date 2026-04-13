@@ -16,6 +16,7 @@ export function DocFooter({ neighbours }: DocFooterProps) {
       {neighbours.previous && (
         <Button
           className="shadow-none"
+          nativeButton={false}
           render={<Link href={neighbours.previous.url} />}
           variant="outline"
         >
@@ -25,6 +26,7 @@ export function DocFooter({ neighbours }: DocFooterProps) {
       {neighbours.next && (
         <Button
           className="ms-auto shadow-none"
+          nativeButton={false}
           render={<Link href={neighbours.next.url} />}
           variant="outline"
         >

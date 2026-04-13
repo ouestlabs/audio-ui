@@ -18,96 +18,38 @@
   }
 
   [data-rehype-pretty-code-figure] {
-    position: relative;
-    margin-top: calc(var(--spacing) * 6);
-    padding: 0;
-    overflow: hidden;
-    font-size: var(--text-sm);
-    color: var(--color-code-foreground);
-    outline: none;
-    background-color: var(--color-code);
-    border-color: var(--border);
-    border-style: solid;
-    border-width: 1px;
-    border-radius: var(--radius-4xl);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-
+    @apply relative mt-6 overflow-hidden [-webkit-font-smoothing:antialiased] [-moz-osx-font-smoothing:grayscale] text-sm text-code-foreground outline-none bg-code border-border border rounded-4xl;
     :where(*[data-tab="code"]) & {
       border-width: 0;
     }
+  }
+
+  [data-rehype-pretty-code-figure][data-ring-only] {
+    @apply border-0 ring-1 ring-border/80;
   }
 
   [data-rehype-pretty-code-figure] > pre {
     @apply relative;
   }
 
-  [data-rehype-pretty-code-figure] [data-slot="copy-button"] {
-    @apply absolute z-10;
-    top: calc(var(--spacing) * 1.5) !important;
-    inset-inline-end: calc(var(--spacing) * 1.5);
-  }
-
   [data-rehype-pretty-code-title] {
-    min-height: calc(var(--spacing) * 11);
-    padding-block: calc(var(--spacing) * 2.5);
-    padding-inline: calc(var(--spacing) * 4);
-    font-family: var(--font-mono);
-    font-weight: 500;
-    font-size: 0.75rem;
-    letter-spacing: 0.025em;
-    color: var(--color-code-foreground);
-    border-bottom-style: solid;
-    border-bottom-width: 1px;
-    border-bottom-color: color-mix(in oklab, var(--border) 64%, transparent);
+    @apply min-h-11 py-2.5 px-4 font-mono font-medium text-sm tracking-tight text-code-foreground border-b border-b-border/64;
   }
 
   [data-line-numbers] {
-    display: grid;
-    min-width: 100%;
-    white-space: pre;
-    border: 0;
-    background: transparent;
-    padding: 0;
-    counter-reset: line;
-    box-decoration-break: clone;
+    @apply grid min-w-full whitespace-pre border-0 bg-transparent p-0 [counter-reset:line] box-decoration-clone;
   }
 
   [data-line-numbers] [data-line]::before {
-    position: sticky;
-    left: 0;
-    display: inline-block;
-    width: calc(var(--spacing) * 10);
-    padding-right: calc(var(--spacing) * 2);
-    font-size: var(--text-sm);
-    font-weight: 500;
-    font-variant-numeric: tabular-nums;
-    line-height: inherit;
-    color: var(--color-muted-foreground);
-    text-align: right;
-    vertical-align: top;
-    content: counter(line);
-    counter-increment: line;
-    background-color: var(--color-code);
+    @apply sticky font-medium [counter-increment:line] content-[counter(line)] bg-popover/70 text-muted-foreground backdrop-blur-2xl backdrop-saturate-150 left-0 inline-block w-16 pr-6 text-sm tabular-nums align-top text-right;
   }
 
   [data-line-numbers] [data-highlighted-line][data-line]::before {
-    background-color: var(--color-code-highlight);
-    backdrop-filter: blur(var(--blur-xs));
+    @apply bg-code-highlight backdrop-blur-2xl backdrop-saturate-150;
   }
 
   [data-line] {
-    display: inline-block;
-    width: 100%;
-    min-height: calc(var(--spacing) * 1);
-    padding-top: calc(var(--spacing) * 0.5);
-    padding-bottom: calc(var(--spacing) * 0.5);
-  }
-
-  [data-line-numbers] [data-line] {
-    min-height: 0;
-    padding-top: 0;
-    padding-bottom: 0;
+    @apply inline-block w-full min-h-1 pt-px pb-px;
   }
 
   [data-line] span {
@@ -120,34 +62,17 @@
 
   [data-highlighted-line],
   [data-highlighted-chars] {
-    position: relative;
-    border-radius: 0;
-    background-color: var(--color-code-highlight);
+    @apply relative rounded-none bg-code-highlight;
   }
 
   [data-highlighted-line] {
     &:after {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 2px;
-      height: 100%;
-      content: "";
-      border-radius: 9999px;
-      background-color: color-mix(
-        in oklab,
-        var(--muted-foreground) 50%,
-        transparent
-      );
+      @apply absolute top-0 left-0 w-0.5 h-full content-[''] rounded-full bg-muted-foreground/50;
     }
   }
 
   [data-highlighted-chars] {
-    padding-block: 0.1rem;
-    padding-inline: 0.3rem;
-    font-family: var(--font-mono);
-    font-size: 0.8rem;
-    border-radius: var(--radius-sm);
+    @apply py-[0.1rem] px-[0.3rem] rounded-sm font-mono text-xs;
     box-shadow: 0 0 0 1px
       color-mix(in oklab, var(--color-primary) 18%, transparent);
   }
@@ -185,22 +110,15 @@
     }
   }
 }
-
 [data-rehype-pretty-code-figure] [data-slot="scroll-area-viewport"],
 [data-rehype-pretty-code-figure] [data-slot="scroll-area-viewport"] > div {
-  padding: 0 !important;
-  margin: 0 !important;
-  background-color: var(--color-code) !important;
+  @apply bg-code!;
 }
 
 pre:has(> code[data-line-numbers]) {
-  padding: 0 !important;
-  margin: 0 !important;
-  background-color: var(--color-code) !important;
+  @apply bg-code!;
 }
 
 code[data-line-numbers] {
-  padding: 0 !important;
-  padding-inline-end: calc(var(--spacing) * 4) !important;
-  background-color: var(--color-code) !important;
+  @apply bg-code!;
 }

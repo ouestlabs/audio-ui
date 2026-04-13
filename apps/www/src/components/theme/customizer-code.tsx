@@ -1,8 +1,13 @@
 "use client";
 
-import { CheckIcon, CopyIcon } from "@phosphor-icons/react";
 import template from "lodash/template";
 import React from "react";
+import {
+  CodeFrame,
+  CodeFrameHeader,
+  CodeFrameScroll,
+  CopyCode,
+} from "@/components/md/code";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 import { Icons } from "@/lib/icons";
 import {
@@ -10,7 +15,6 @@ import {
   baseColors,
   baseColorsOKLCH,
 } from "@/registry/base-colors";
-import { Button } from "@/registry/default/ui/button";
 import { TabsContent } from "@/registry/default/ui/tabs";
 
 type BaseColorOKLCH = {
@@ -53,36 +57,28 @@ type ThemeCodeBlockProps = {
 
 function ThemeCodeBlock({ copied, onCopy, children }: ThemeCodeBlockProps) {
   return (
-    <figure
-      className="mx-0 mt-0 flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl"
-      data-rehype-pretty-code-figure
-    >
-      <figcaption
-        className="flex shrink-0 items-center justify-between gap-2 px-3 py-2 font-medium text-muted-foreground text-xs [&_svg]:size-3.5 [&_svg]:shrink-0 [&_svg]:text-foreground/70"
-        data-language="css"
-        data-rehype-pretty-code-title=""
-        data-theme="github-dark github-light-default"
-      >
-        <span className="flex min-w-0 items-center gap-2">
-          <Icons.css aria-hidden className="fill-foreground" />
-          app/globals.css
-        </span>
-        <Button
-          aria-label="Copy to clipboard"
-          data-slot="copy-button"
-          onClick={onCopy}
-          size="icon-sm"
-          variant="ghost"
-        >
-          {copied ? <CheckIcon /> : <CopyIcon />}
-        </Button>
-      </figcaption>
-      <pre className="no-scrollbar min-h-0 min-w-0 flex-1 overflow-x-auto overflow-y-auto px-3 py-3 font-mono text-[13px] leading-relaxed">
-        <code data-language="css" data-line-numbers>
-          {children}
-        </code>
-      </pre>
-    </figure>
+    <CodeFrame className="mx-0 mt-0" fillHeight>
+      <CodeFrameHeader
+        actions={
+          <CopyCode
+            copied={copied}
+            onAction={onCopy}
+            size="icon-sm"
+            variant="ghost"
+          />
+        }
+        icon={<Icons.css aria-hidden className="fill-foreground" />}
+        language="css"
+        pathLabel="app/globals.css"
+      />
+      <CodeFrameScroll fillHeight>
+        <pre className="no-scrollbar min-h-0 min-w-0 flex-1 overflow-x-auto overflow-y-auto px-3 py-3 font-mono text-[13px] leading-relaxed outline-none has-data-line-numbers:p-0 has-data-highlighted-line:px-0">
+          <code data- data-language="css" data-line-numbers>
+            {children}
+          </code>
+        </pre>
+      </CodeFrameScroll>
+    </CodeFrame>
   );
 }
 
