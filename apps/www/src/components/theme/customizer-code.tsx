@@ -57,7 +57,7 @@ type ThemeCodeBlockProps = {
 
 function ThemeCodeBlock({ copied, onCopy, children }: ThemeCodeBlockProps) {
   return (
-    <CodeFrame className="mx-0 mt-0" fillHeight>
+    <CodeFrame className="mx-0 mt-0" data-has-metadata data-variant="fill">
       <CodeFrameHeader
         actions={
           <CopyButton
@@ -71,8 +71,8 @@ function ThemeCodeBlock({ copied, onCopy, children }: ThemeCodeBlockProps) {
         language="css"
         pathLabel="app/globals.css"
       />
-      <CodeFrameScroll fillHeight>
-        <pre className="no-scrollbar min-h-0 min-w-0 flex-1 overflow-x-auto overflow-y-auto px-3 py-3 font-mono text-[13px] leading-relaxed outline-none has-data-line-numbers:p-0 has-data-highlighted-line:px-0">
+      <CodeFrameScroll>
+        <pre className="no-scrollbar min-h-0 min-w-0 flex-1 overflow-x-auto overflow-y-auto px-3 py-3 font-mono text-[13px] leading-relaxed outline-none">
           <code data- data-language="css" data-line-numbers>
             {children}
           </code>

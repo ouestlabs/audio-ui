@@ -5,7 +5,7 @@ import type { registryItemSchema } from "shadcn/schema";
 import type { z } from "zod";
 import { Command, CopyButton } from "@/components/md/code";
 import { Source } from "@/components/md/preview";
-import { appConfig } from "@/lib/config";
+import { appConfig, baseUrl } from "@/lib/config";
 import { highlightCode } from "@/lib/highlight-code";
 import { Icons } from "@/lib/icons";
 import { getRegistryItem } from "@/lib/registry";
@@ -35,8 +35,6 @@ function BlockCodeDrawer({
   filePath?: string;
   fileContent?: string;
 }) {
-  const v0Href = `https://v0.dev/chat/api/open?url=${encodeURIComponent(`${appConfig.url}/r/${name}.json`)}`;
-
   return (
     <Drawer position="right">
       <DrawerTrigger render={<Button size="sm" variant="outline" />}>
@@ -70,22 +68,21 @@ function BlockCodeDrawer({
             copyButton={false}
             fillHeight
             headerActions={
-              <ButtonGroup className="not-prose!">
+              <ButtonGroup>
                 <CopyButton value={fileContent} variant="outline" />
                 <Button
-                  aria-label="Open in v0"
                   nativeButton={false}
                   render={
                     <Link
-                      href={v0Href}
+                      href={`https://v0.dev/chat/api/open?url=${encodeURIComponent(`${baseUrl.origin}/r/${name}.json`)}`}
                       rel="noopener noreferrer"
                       target="_blank"
                     />
                   }
-                  title="Open in v0"
+                  size="icon"
+                  variant="outline"
                 >
-                  <span>Open in</span>
-                  <Icons.v0 className="fill-background" />
+                  <Icons.v0 />
                 </Button>
               </ButtonGroup>
             }

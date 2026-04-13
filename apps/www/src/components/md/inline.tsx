@@ -10,10 +10,7 @@ import { cn } from "@/registry/default/lib/utils";
 function Pre({ className, children, ...props }: React.ComponentProps<"pre">) {
   return (
     <pre
-      className={cn(
-        "no-scrollbar min-w-0 overflow-x-auto px-4 py-3.5 text-[.8125rem] outline-none has-data-[slot=tabs]:p-0 has-data-line-numbers:p-0 has-data-highlighted-line:px-0",
-        className
-      )}
+      className={cn("no-scrollbar min-w-0 overflow-x-auto", className)}
       {...props}
     >
       {children}
@@ -91,7 +88,7 @@ function Code({
     <>
       {__raw__ && (
         <CopyButton
-          className="absolute top-3 right-2 z-10 bg-code hover:opacity-100 focus-visible:opacity-100"
+          data-overlay
           tooltip="Copy to Clipboard"
           value={__raw__}
         />

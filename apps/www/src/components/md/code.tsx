@@ -26,30 +26,15 @@ import {
   TooltipTrigger,
 } from "@/registry/default/ui/tooltip";
 
-// CodeFrame
-
-type CodeFrameProps = React.ComponentProps<"figure"> & {
-  fillHeight?: boolean;
-};
-
-function CodeFrame({
-  className,
-  fillHeight = false,
-  ...props
-}: CodeFrameProps) {
+function CodeFrame({ className, ...props }: React.ComponentProps<"figure">) {
   return (
     <figure
-      className={cn(
-        fillHeight && "flex min-h-0 flex-1 flex-col overflow-hidden",
-        className
-      )}
+      className={cn(className)}
       data-rehype-pretty-code-figure
       {...props}
     />
   );
 }
-
-// CodeFrameHeader
 
 type CodeFrameHeaderProps = Omit<
   React.ComponentProps<"figcaption">,
@@ -61,7 +46,6 @@ type CodeFrameHeaderProps = Omit<
   actions?: React.ReactNode;
   icon?: React.ReactNode;
   compact?: boolean;
-  fillHeight?: boolean;
 };
 
 function PathHeader({
@@ -70,7 +54,6 @@ function PathHeader({
   pathLabel,
   actions,
   icon,
-  fillHeight,
   className,
   ...props
 }: CodeFrameHeaderProps) {
@@ -78,7 +61,6 @@ function PathHeader({
     <figcaption
       className={cn(
         "flex items-center justify-between gap-3 px-3 py-2 font-medium text-muted-foreground text-xs [&_svg]:size-3.5 [&_svg]:shrink-0 [&_svg]:text-foreground/70",
-        fillHeight && "shrink-0",
         className
       )}
       data-language={language}
@@ -106,20 +88,13 @@ function TitleHeader({
   title,
   icon,
   compact,
-  fillHeight,
   className,
   ...props
 }: CodeFrameHeaderProps) {
   return (
     <figcaption
-      className={cn(
-        "flex items-center gap-3 text-code-foreground sm:[&_svg]:size-4",
-        compact
-          ? "[&_svg]:size-3.5 [&_svg]:text-foreground/70"
-          : "[&_svg]:size-5 [&_svg]:text-code-foreground [&_svg]:opacity-70",
-        fillHeight && "shrink-0",
-        className
-      )}
+      className={cn("flex items-center gap-3 text-code-foreground", className)}
+      data-compact={compact || undefined}
       data-language={language}
       data-rehype-pretty-code-title
       {...props}
@@ -141,23 +116,15 @@ function CodeFrameHeader(props: CodeFrameHeaderProps) {
   return <TitleHeader {...props} />;
 }
 
-// CodeFrameScroll
-
-type CodeFrameScrollProps = React.ComponentProps<typeof ScrollArea> & {
-  fillHeight?: boolean;
-};
-
 function CodeFrameScroll({
   className,
-  fillHeight = false,
   children,
   ...props
-}: CodeFrameScrollProps) {
+}: React.ComponentProps<typeof ScrollArea>) {
   return (
     <ScrollArea
       className={cn(
         "w-full bg-code **:data-[slot=scroll-area-viewport]:p-0",
-        fillHeight ? "min-h-0 min-w-0 flex-1" : "h-auto",
         className
       )}
       {...props}
@@ -166,8 +133,6 @@ function CodeFrameScroll({
     </ScrollArea>
   );
 }
-
-// CopyButton — unified copy button (no tooltip by default)
 
 type CopyButtonProps = {
   value?: string;
@@ -238,8 +203,6 @@ function CopyButton({
   );
 }
 
-// Collapse
-
 function Collapse({
   className,
   children,
@@ -277,8 +240,6 @@ function Collapse({
   );
 }
 
-// Command — package manager tabs
-
 function Command({
   __npm__,
   __yarn__,
@@ -291,27 +252,18 @@ function Command({
   __bun__?: string;
 }) {
   const [config, setConfig] = useConfig();
-
   const packageManager = config?.packageManager || "bun";
   const tabs = React.useMemo(
-    () => ({
-      pnpm: __pnpm__,
-      npm: __npm__,
-      yarn: __yarn__,
-      bun: __bun__,
-    }),
+    () => ({ pnpm: __pnpm__, npm: __npm__, yarn: __yarn__, bun: __bun__ }),
     [__npm__, __pnpm__, __yarn__, __bun__]
   );
 
   return (
-    <CodeFrame className="mt-0 overflow-hidden" data-ring-only>
+    <CodeFrame className="mt-0 overflow-hidden">
       <Tabs
-        onValueChange={(value) => {
-          setConfig({
-            ...config,
-            packageManager: value,
-          });
-        }}
+        onValueChange={(value) =>
+          setConfig({ ...config, packageManager: value })
+        }
         value={packageManager}
       >
         <CodeFrameHeader
@@ -359,11 +311,8 @@ function Command({
   );
 }
 
-// CodeTabs — installation type tabs
-
 function CodeTabs({ children }: React.ComponentProps<typeof Tabs>) {
   const [config, setConfig] = useConfig();
-
   const installationType = React.useMemo(
     () => config.installationType || "cli",
     [config]

@@ -6,7 +6,6 @@ import {
   CopyButton,
 } from "@/components/md/code";
 import { highlightCode } from "@/lib/highlight-code";
-import { cn } from "@/registry/default/lib/utils";
 
 type CodeBlockVariant = "default" | "fill" | "compact";
 
@@ -27,45 +26,40 @@ async function CodeBlock({
   /** Custom right-side actions. Pass `null` to suppress the default copy button. */
   actions?: ReactNode;
 }) {
-  const fillHeight = variant === "fill";
-  const showLineNumbers = variant !== "compact";
-
   const highlightedCode = await highlightCode(code, language, {
-    showLineNumbers,
+    showLineNumbers: variant !== "compact",
   });
 
-  const defaultCopy = <CopyButton size="icon-sm" value={code} variant="ghost" />;
-  const resolvedActions = actions !== undefined ? actions : defaultCopy;
-
-  // When there's no metadata (no path, no title), the copy button floats as an
-  // overlay instead of rendering a header bar with border/bg.
   const hasMetadata = Boolean(pathLabel || title);
+
+  const defaultCopy = (
+    <CopyButton
+      data-overlay={!hasMetadata || undefined}
+      size="icon-sm"
+      value={code}
+      variant="ghost"
+    />
+  );
+  const resolvedActions = actions !== undefined ? actions : defaultCopy;
 
   return (
     <CodeFrame
-      className={cn(hasMetadata && "mx-0 rounded-4xl", !hasMetadata && "relative")}
-      fillHeight={fillHeight}
+      data-has-metadata={hasMetadata || undefined}
+      data-variant={variant !== "default" ? variant : undefined}
     >
       {hasMetadata ? (
         <CodeFrameHeader
           actions={resolvedActions ?? undefined}
-          fillHeight={fillHeight}
           language={language}
           pathLabel={pathLabel}
           title={title}
         />
       ) : (
-        resolvedActions && (
-          <span className="absolute top-2 right-2 z-10">{resolvedActions}</span>
-        )
+        resolvedActions
       )}
-      <CodeFrameScroll fillHeight={fillHeight}>
+      <CodeFrameScroll>
         <div
-          className={cn(
-            "min-w-0 [&_pre]:m-0 [&_pre]:px-0 [&_pre]:py-3.5",
-            fillHeight &&
-              "flex min-h-0 flex-1 flex-col [&_pre]:min-h-0 [&_pre]:flex-1 [&_pre]:overflow-x-auto [&_pre]:overflow-y-auto"
-          )}
+          className="min-w-0 [&_pre]:m-0"
           /* biome-ignore lint/security/noDangerouslySetInnerHtml: shiki HTML is server-trusted */
           dangerouslySetInnerHTML={{ __html: highlightedCode }}
         />
