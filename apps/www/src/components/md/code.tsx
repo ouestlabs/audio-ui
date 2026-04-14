@@ -26,14 +26,8 @@ import {
   TooltipTrigger,
 } from "@/registry/default/ui/tooltip";
 
-function CodeFrame({ className, ...props }: React.ComponentProps<"figure">) {
-  return (
-    <figure
-      className={cn(className)}
-      data-rehype-pretty-code-figure
-      {...props}
-    />
-  );
+function CodeFrame({ ...props }: React.ComponentProps<"figure">) {
+  return <figure data-rehype-pretty-code-figure {...props} />;
 }
 
 type CodeFrameHeaderProps = Omit<
@@ -149,8 +143,8 @@ function CopyButton({
   onAction,
   onCopied,
   tooltip = false,
-  icon,
   className,
+  icon,
   ...props
 }: CopyButtonProps) {
   const { isCopied, copyToClipboard } = useCopyToClipboard({
@@ -162,7 +156,7 @@ function CopyButton({
   const button = (
     <Button
       aria-label={hasCopied ? "Copied" : "Copy to clipboard"}
-      className={className}
+      className={cn("cursor-pointer", className)}
       data-copied={hasCopied}
       data-slot="copy-button"
       onClick={() => {
@@ -172,6 +166,7 @@ function CopyButton({
         }
         onAction?.();
       }}
+      size="icon"
       title={hasCopied ? "Copied" : "Copy"}
       {...props}
     >
@@ -219,7 +214,7 @@ function Collapse({
     >
       <CollapsibleContent
         className={cn(
-          "mt-6 h-full overflow-hidden data-closed:max-h-64 [&>figure]:mt-0 [&>figure]:md:mx-0!",
+          "mt-6 h-full p-px data-closed:max-h-64 [&>figure]:mt-0 [&>figure]:md:mx-0!",
           "data-closed:[-webkit-mask-image:linear-gradient(to_bottom,black_0%,black_72%,transparent_100%)]",
           "data-closed:mask-[linear-gradient(to_bottom,black_0%,black_72%,transparent_100%)]"
         )}
@@ -311,7 +306,7 @@ function Command({
   );
 }
 
-function CodeTabs({ children }: React.ComponentProps<typeof Tabs>) {
+function CodeTabs(props: React.ComponentProps<typeof Tabs>) {
   const [config, setConfig] = useConfig();
   const installationType = React.useMemo(
     () => config.installationType || "cli",
@@ -325,9 +320,8 @@ function CodeTabs({ children }: React.ComponentProps<typeof Tabs>) {
         setConfig({ ...config, installationType: value })
       }
       value={installationType}
-    >
-      {children}
-    </Tabs>
+      {...props}
+    />
   );
 }
 

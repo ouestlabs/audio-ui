@@ -132,6 +132,7 @@ function DrawerViewport({
   );
 }
 
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: intentional
 function DrawerPopup({
   className,
   children,

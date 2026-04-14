@@ -22,18 +22,13 @@ Channel strip layout for grouping labels, controls, and value readouts in a mixe
     <TabsTrigger value="manual">Manual</TabsTrigger>
   </TabsList>
   <TabsContent value="cli">
-  ```bash
-  npx shadcn@latest add @audio/channel-strip
-  ```
+    <Install component="channel-strip" />
   </TabsContent>
 
   <TabsContent value="manual">
     <Steps>
       <Step>Install the following dependencies:</Step>
-
-        ```bash
-        npm install @audio-ui/react
-        ```
+        <Install pkg="@audio-ui/react" />
 
       <Step>Copy and paste the following code into your project.</Step>
         <Source name="channel-strip" title="components/audio/elements/channel-strip.tsx" />

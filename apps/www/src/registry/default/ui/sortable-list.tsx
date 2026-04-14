@@ -1,3 +1,5 @@
+"use client";
+
 import {
   type Active,
   DndContext,
@@ -21,7 +23,7 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical } from "lucide-react";
+import { DotsSixVerticalIcon } from "@phosphor-icons/react";
 import React from "react";
 import { createPortal } from "react-dom";
 import { cn } from "@/registry/default/lib/utils";
@@ -236,7 +238,7 @@ const SortableDragHandle = () => {
       className="cursor-grab touch-none active:cursor-grabbing"
       ref={ref}
     >
-      <GripVertical className="size-4" />
+      <DotsSixVerticalIcon className="size-4" />
     </Button>
   );
 };

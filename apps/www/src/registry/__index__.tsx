@@ -10,7 +10,7 @@ export const Index: Record<string, any> = {
     name: "player",
     description: "",
     type: "registry:component",
-    registryDependencies: ["@audio/store","@audio/html","@audio/use-audio","@audio/provider","@audio/transport","@shadcn/empty","@shadcn/button","@shadcn/dialog","@shadcn/dropdown-menu","@shadcn/input","@shadcn/item","@shadcn/scroll-area","@shadcn/toggle","@shadcn/tooltip"],
+    registryDependencies: ["@audio/store","@audio/html","@audio/use-audio","@audio/provider","@audio/fader","@audio/transport","@shadcn/button","@shadcn/dropdown-menu","@shadcn/spinner","@shadcn/tooltip"],
     files: [{
       path: "src/registry/default/ui/audio/player.tsx",
       type: "registry:component",
@@ -46,7 +46,7 @@ export const Index: Record<string, any> = {
     name: "queue",
     description: "",
     type: "registry:component",
-    registryDependencies: ["@audio/store","@audio/html","@audio/use-audio","@audio/track","@audio/provider","@shadcn/empty","@shadcn/button","@shadcn/command","@shadcn/dialog","@shadcn/dropdown-menu","@shadcn/input","@shadcn/item","@shadcn/scroll-area","@shadcn/toggle","@shadcn/tooltip"],
+    registryDependencies: ["@audio/store","@audio/track","@shadcn/button","@shadcn/command","@shadcn/dialog","@shadcn/dropdown-menu","@shadcn/toggle","@shadcn/tooltip"],
     files: [{
       path: "src/registry/default/ui/audio/queue.tsx",
       type: "registry:component",
@@ -64,7 +64,7 @@ export const Index: Record<string, any> = {
     name: "track",
     description: "",
     type: "registry:component",
-    registryDependencies: ["@audio/store","@audio/html","@audio/use-audio","@audio/sortable-list","@audio/provider","@shadcn/badge","@shadcn/empty","@shadcn/avatar","@shadcn/button","@shadcn/item","@shadcn/scroll-area"],
+    registryDependencies: ["@audio/store","@audio/html","@audio/use-audio","@audio/sortable-list","@shadcn/badge","@shadcn/empty","@shadcn/avatar","@shadcn/button","@shadcn/item","@shadcn/scroll-area"],
     files: [{
       path: "src/registry/default/ui/audio/track.tsx",
       type: "registry:component",
@@ -100,7 +100,7 @@ export const Index: Record<string, any> = {
     name: "channel-strip",
     description: "",
     type: "registry:component",
-    registryDependencies: ["@audio/fader","@audio/knob"],
+    registryDependencies: undefined,
     files: [{
       path: "src/registry/default/ui/audio/elements/channel-strip.tsx",
       type: "registry:component",

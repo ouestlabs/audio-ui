@@ -2,23 +2,20 @@
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "player",
   "dependencies": [
-    "zustand",
-    "lucide-react"
+    "@phosphor-icons/react",
+    "class-variance-authority",
+    "@base-ui/react"
   ],
   "registryDependencies": [
     "@audio/store",
     "@audio/html",
     "@audio/use-audio",
     "@audio/provider",
+    "@audio/fader",
     "@audio/transport",
-    "@shadcn/empty",
     "@shadcn/button",
-    "@shadcn/dialog",
     "@shadcn/dropdown-menu",
-    "@shadcn/input",
-    "@shadcn/item",
-    "@shadcn/scroll-area",
-    "@shadcn/toggle",
+    "@shadcn/spinner",
     "@shadcn/tooltip"
   ],
   "files": [

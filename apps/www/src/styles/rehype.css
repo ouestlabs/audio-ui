@@ -32,20 +32,20 @@
     @apply flex min-h-0 flex-1 flex-col overflow-hidden;
   }
 
-  [data-rehype-pretty-code-figure] > pre {
-    @apply relative no-scrollbar min-w-0 px-4 py-3.5 text-[.8125rem] outline-none;
+  [data-rehype-pretty-code-figure] pre {
+    @apply no-scrollbar min-w-0 px-4 py-3.5 text-[.8125rem] outline-none;
   }
 
-  [data-rehype-pretty-code-figure] > pre:has([data-highlighted-line]),
-  [data-rehype-pretty-code-figure] > pre:has([data-line-numbers]) {
+  [data-rehype-pretty-code-figure] pre:has([data-highlighted-line]),
+  [data-rehype-pretty-code-figure] pre:has([data-line-numbers]) {
     @apply px-0;
   }
 
-  [data-rehype-pretty-code-figure] > pre:has([data-slot="tabs"]) {
+  [data-rehype-pretty-code-figure] pre:has([data-slot="tabs"]) {
     @apply p-0;
   }
 
-  [data-rehype-pretty-code-figure][data-variant="fill"] > pre {
+  [data-rehype-pretty-code-figure][data-variant="fill"] pre {
     @apply min-h-0 flex-1 overflow-x-auto overflow-y-auto;
   }
 
@@ -67,7 +67,12 @@
   }
 
   [data-slot="copy-button"][data-overlay] {
-    @apply absolute top-3 right-2 z-10 bg-code hover:opacity-100 focus-visible:opacity-100;
+    @apply absolute top-2 right-2 z-10 bg-code;
+  }
+
+  [data-rehype-pretty-code-figure]:has([data-rehype-pretty-code-title])
+    [data-slot="copy-button"][data-overlay] {
+    @apply top-1.5 bg-transparent;
   }
 
   [data-line-numbers] {

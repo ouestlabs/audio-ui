@@ -1,15 +1,12 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "track",
-  "dependencies": [
-    "lucide-react"
-  ],
+  "dependencies": ["@phosphor-icons/react", "class-variance-authority"],
   "registryDependencies": [
     "@audio/store",
     "@audio/html",
     "@audio/use-audio",
     "@audio/sortable-list",
-    "@audio/provider",
     "@shadcn/badge",
     "@shadcn/empty",
     "@shadcn/avatar",

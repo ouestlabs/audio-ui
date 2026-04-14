@@ -1,23 +1,18 @@
 import type { MDXComponents } from "mdx/types";
 import { ComponentsList } from "@/components/components-list";
 import { Callout } from "@/components/md/callout";
-import { CodeTabs, Collapse } from "@/components/md/code";
+import { CodeTabs } from "@/components/md/code";
 import { H1, H2, H3, H4, H5, H6 } from "@/components/md/heading";
 import { Code, Figcaption, Figure, Pre } from "@/components/md/inline";
+import { Install } from "@/components/md/install";
 import { Link } from "@/components/md/link";
 import { ListItem, OrderedList, UnorderedList } from "@/components/md/list";
-import { HorizontalRule, Image, Img } from "@/components/md/media";
+import { HorizontalRule, Img } from "@/components/md/media";
 import { Mermaid } from "@/components/md/mermaid";
 import { Preview, Source } from "@/components/md/preview";
 import { Step, Steps } from "@/components/md/steps";
-import {
-  Tab,
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/md/tabs";
 import { Blockquote, Paragraph, Strong } from "@/components/md/text";
+import { cn } from "@/registry/default/lib/utils";
 import {
   Table,
   TableBody,
@@ -28,6 +23,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/registry/default/ui/table";
+import {
+  TabsContent as UITabsContent,
+  TabsList as UITabsList,
+  TabsTrigger as UITabsTrigger,
+} from "@/registry/default/ui/tabs";
 
 export function getMDXComponents(components?: MDXComponents): MDXComponents {
   return {
@@ -64,17 +64,22 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     code: Code,
     Step,
     Steps,
-    Image,
-    Tabs,
-    TabsList,
-    TabsTrigger,
-    TabsContent,
-    Tab,
+    Install,
+    TabsList: UITabsList,
+    TabsTrigger: UITabsTrigger,
+    TabsContent: (props: React.ComponentProps<typeof UITabsContent>) => (
+      <UITabsContent
+        {...props}
+        className={cn(
+          "relative [&>.steps]:mt-6 [&_h3]:font-medium [&_h3]:text-base *:[figure]:first:mt-0",
+          props.className
+        )}
+      />
+    ),
     Callout,
     CodeTabs,
     Preview,
     Source,
-    Collapse,
     ComponentsList,
     Mermaid,
     ...components,

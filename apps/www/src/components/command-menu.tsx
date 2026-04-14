@@ -209,7 +209,7 @@ function CommandMenu({
           <CommandInput placeholder="Search documentation…" />
           <CommandList>
             <CommandEmpty>
-              <Empty className="border">
+              <Empty>
                 <EmptyMedia variant="icon">
                   <MagnifyingGlassIcon />
                 </EmptyMedia>

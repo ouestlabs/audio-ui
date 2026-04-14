@@ -112,7 +112,7 @@ export async function BlockDisplay({
   return (
     <div
       className={cn(
-        "relative flex min-w-0 flex-col rounded-4xl border bg-card",
+        "relative flex min-w-0 flex-col rounded-4xl bg-card ring-1 ring-border/80",
         className
       )}
     >

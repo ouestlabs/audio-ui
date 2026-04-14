@@ -1,5 +1,5 @@
+import { ArrowLeftIcon, ArrowRightIcon } from "@phosphor-icons/react/dist/ssr";
 import type { Item } from "fumadocs-core/page-tree";
-import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/registry/default/ui/button";
 

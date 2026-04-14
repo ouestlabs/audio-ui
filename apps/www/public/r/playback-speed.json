@@ -1,9 +1,7 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "playback-speed",
-  "dependencies": [
-    "lucide-react"
-  ],
+  "dependencies": ["@phosphor-icons/react"],
   "registryDependencies": [
     "@audio/store",
     "@audio/html",

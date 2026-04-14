@@ -4,21 +4,21 @@ export const components: Registry["items"] = [
   {
     name: "player",
     type: "registry:component",
-    dependencies: ["zustand", "lucide-react"],
+    dependencies: [
+      "@phosphor-icons/react",
+      "class-variance-authority",
+      "@base-ui/react",
+    ],
     registryDependencies: [
       "@audio/store",
       "@audio/html",
       "@audio/use-audio",
       "@audio/provider",
+      "@audio/fader",
       "@audio/transport",
-      "@shadcn/empty",
       "@shadcn/button",
-      "@shadcn/dialog",
       "@shadcn/dropdown-menu",
-      "@shadcn/input",
-      "@shadcn/item",
-      "@shadcn/scroll-area",
-      "@shadcn/toggle",
+      "@shadcn/spinner",
       "@shadcn/tooltip",
     ],
     files: [
@@ -31,7 +31,6 @@ export const components: Registry["items"] = [
   {
     name: "provider",
     type: "registry:component",
-    dependencies: ["zustand"],
     registryDependencies: ["@audio/store", "@audio/html", "@audio/use-audio"],
     files: [
       {
@@ -43,21 +42,14 @@ export const components: Registry["items"] = [
   {
     name: "queue",
     type: "registry:component",
-    dependencies: ["zustand", "lucide-react"],
+    dependencies: ["@phosphor-icons/react"],
     registryDependencies: [
       "@audio/store",
-      "@audio/html",
-      "@audio/use-audio",
       "@audio/track",
-      "@audio/provider",
-      "@shadcn/empty",
       "@shadcn/button",
       "@shadcn/command",
       "@shadcn/dialog",
       "@shadcn/dropdown-menu",
-      "@shadcn/input",
-      "@shadcn/item",
-      "@shadcn/scroll-area",
       "@shadcn/toggle",
       "@shadcn/tooltip",
     ],
@@ -71,13 +63,12 @@ export const components: Registry["items"] = [
   {
     name: "track",
     type: "registry:component",
-    dependencies: ["lucide-react"],
+    dependencies: ["@phosphor-icons/react", "class-variance-authority"],
     registryDependencies: [
       "@audio/store",
       "@audio/html",
       "@audio/use-audio",
       "@audio/sortable-list",
-      "@audio/provider",
       "@shadcn/badge",
       "@shadcn/empty",
       "@shadcn/avatar",
@@ -95,7 +86,7 @@ export const components: Registry["items"] = [
   {
     name: "playback-speed",
     type: "registry:component",
-    dependencies: ["lucide-react"],
+    dependencies: ["@phosphor-icons/react"],
     registryDependencies: [
       "@audio/store",
       "@audio/html",
@@ -115,7 +106,6 @@ export const components: Registry["items"] = [
     name: "channel-strip",
     type: "registry:component",
     dependencies: ["@audio-ui/react"],
-    registryDependencies: ["@audio/fader", "@audio/knob"],
     files: [
       {
         path: "ui/audio/elements/channel-strip.tsx",

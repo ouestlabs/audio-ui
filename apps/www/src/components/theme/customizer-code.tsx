@@ -72,7 +72,7 @@ function ThemeCodeBlock({ copied, onCopy, children }: ThemeCodeBlockProps) {
         pathLabel="app/globals.css"
       />
       <CodeFrameScroll>
-        <pre className="no-scrollbar min-h-0 min-w-0 flex-1 overflow-x-auto overflow-y-auto px-3 py-3 font-mono text-[13px] leading-relaxed outline-none">
+        <pre className="font-mono leading-relaxed">
           <code data- data-language="css" data-line-numbers>
             {children}
           </code>
@@ -93,7 +93,7 @@ function OklchTabContent({
 }) {
   return (
     <TabsContent
-      className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden"
+      className="flex min-h-0 min-w-0 flex-1 flex-col"
       value="v4-oklch"
     >
       <ThemeCodeBlock
@@ -149,7 +149,7 @@ function HslTabContent({
 
   return (
     <TabsContent
-      className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden"
+      className="flex min-h-0 min-w-0 flex-1 flex-col"
       value="v4-hsl"
     >
       <ThemeCodeBlock
@@ -263,10 +263,7 @@ function V3TabContent({
   const indent2 = "\u00a0\u00a0";
 
   return (
-    <TabsContent
-      className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden"
-      value="v3"
-    >
+    <TabsContent className="flex min-h-0 min-w-0 flex-1 flex-col" value="v3">
       <ThemeCodeBlock
         copied={hasCopied}
         onCopy={() => {

@@ -18,9 +18,6 @@
       "target": "components/audio/blocks/block-player-widget.tsx"
     }
   ],
-  "categories": [
-    "player",
-    "widget"
-  ],
+  "categories": ["player", "widget"],
   "type": "registry:block"
 }

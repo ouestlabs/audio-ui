@@ -43,6 +43,7 @@ export function MobileNav({
 
   return (
     <Popover
+      modal
       onOpenChange={(isOpen) => {
         setOpen(isOpen);
         posthog.capture("mobile-nav-toggled", { open: isOpen });
@@ -82,7 +83,7 @@ export function MobileNav({
         align="start"
         className="h-(--available-height) w-(--available-width)"
         side="bottom"
-        sideOffset={15}
+        sideOffset={14}
       >
         <ScrollArea>
           <div className="flex flex-col gap-4">

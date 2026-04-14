@@ -1,4 +1,4 @@
-import { RssIcon } from "lucide-react";
+import { RssSimpleIcon } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
 
 export function SiteFooter() {
@@ -37,7 +37,7 @@ export function SiteFooter() {
           rel="noopener noreferrer"
           target="_blank"
         >
-          <RssIcon className="size-3" />
+          <RssSimpleIcon className="size-3" />
           RSS
         </Link>
       </div>

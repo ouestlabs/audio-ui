@@ -11,20 +11,13 @@ description: Zustand-based store and helper actions for queue and playback manag
     <TabsTrigger value="manual">Manual</TabsTrigger>
   </TabsList>
   <TabsContent value="cli">
-
-  ```bash
-  npx shadcn@latest add @audio/store
-  ```
-
+    <Install component="store" />
   </TabsContent>
 
   <TabsContent value="manual">
     <Steps>
       <Step>Install the runtime dependencies:</Step>
-
-        ```bash
-        npm install zustand
-        ```
+        <Install pkg="zustand" />
 
       <Step>Copy and paste the following code into your project.</Step>
         <Source name="store" title="lib/audio-store.ts" />

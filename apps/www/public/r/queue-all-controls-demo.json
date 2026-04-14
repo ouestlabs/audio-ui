@@ -2,10 +2,7 @@
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "queue-all-controls-demo",
   "description": "Queue with all controls (shuffle, repeat, preferences)",
-  "registryDependencies": [
-    "@audio/player",
-    "@audio/queue"
-  ],
+  "registryDependencies": ["@audio/player", "@audio/queue"],
   "files": [
     {
       "path": "src/registry/default/examples/queue-all-controls-demo.tsx",
@@ -14,8 +11,6 @@
       "target": "components/audio/examples/queue-all-controls-demo.tsx"
     }
   ],
-  "categories": [
-    "queue"
-  ],
+  "categories": ["queue"],
   "type": "registry:example"
 }

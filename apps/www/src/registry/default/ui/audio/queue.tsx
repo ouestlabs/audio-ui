@@ -339,7 +339,7 @@ const AudioQueue = React.memo(
           data-slot="audio-queue"
           showCloseButton={false}
         >
-          <DialogHeader>
+          <DialogHeader className="sr-only">
             <DialogTitle>Audio Queue</DialogTitle>
             <DialogDescription>
               Select a track from the queue to play

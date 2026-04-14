@@ -114,7 +114,12 @@ async function Source({
 
   const { code, inferredPathLabel } = loaded;
   const lang = language ?? title?.split(".").pop() ?? "tsx";
-  const actions = buildSourceActions({ collapsible, copyButton, headerActions, code });
+  const actions = buildSourceActions({
+    collapsible,
+    copyButton,
+    headerActions,
+    code,
+  });
 
   const block = (
     <CodeBlock
@@ -182,7 +187,7 @@ function PreviewTabs({
           </div>
         </TabsContent>
         <TabsContent
-          className="relative rounded-none **:[figure]:m-0! **:[pre]:h-[450px]"
+          className="relative rounded-none **:[figure]:m-0! **:[pre]:h-max **:[pre]:max-h-[450px]"
           value="code"
         >
           {source}

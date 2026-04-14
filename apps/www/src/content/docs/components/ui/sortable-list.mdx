@@ -16,24 +16,15 @@ description: A drag-and-drop sortable list component built with dnd-kit.
     <TabsTrigger value="manual">Manual</TabsTrigger>
   </TabsList>
   <TabsContent value="cli">
-  ```bash
-  npx shadcn@latest add @audio/sortable-list
-  ```
+    <Install component="sortable-list" />
   </TabsContent>
 
   <TabsContent value="manual">
     <Steps>
       <Step>Install the following dependencies:</Step>
-
-        ```bash
-        npm install @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities lucide-react
-        ```
-
+        <Install pkg="@dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities @phosphor-icons/react" />
       <Step>Install the required shadcn/ui primitives:</Step>
-
-        ```bash
-        npx shadcn@latest add button
-        ```
+        <Install shadcn="button" />
 
       <Step>Copy and paste the following code into your project.</Step>
         <Source name="sortable-list" title="components/ui/sortable-list.tsx" />

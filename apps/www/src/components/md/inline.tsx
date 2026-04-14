@@ -1,11 +1,10 @@
 import type * as React from "react";
-import {
-  CodeFrame,
-  CodeFrameHeader,
-  Command,
-  CopyButton,
-} from "@/components/md/code";
+import { CodeFrame, CodeFrameHeader, CopyButton } from "@/components/md/code";
 import { cn } from "@/registry/default/lib/utils";
+
+function Figure({ className, ...props }: React.ComponentProps<"figure">) {
+  return <CodeFrame className={cn(className)} {...props} />;
+}
 
 function Pre({ className, children, ...props }: React.ComponentProps<"pre">) {
   return (
@@ -18,26 +17,24 @@ function Pre({ className, children, ...props }: React.ComponentProps<"pre">) {
   );
 }
 
-function Figure({ className, ...props }: React.ComponentProps<"figure">) {
-  return <CodeFrame className={cn(className)} {...props} />;
-}
-
 function Figcaption({
   className,
   children,
   ...props
 }: React.ComponentProps<"figcaption">) {
-  const iconExtension =
+  const language =
     "data-language" in props && typeof props["data-language"] === "string"
       ? props["data-language"]
-      : null;
+      : "text";
+
+  const isFilePath = typeof children === "string" && children.includes(".");
 
   return (
     <CodeFrameHeader
       className={cn(className)}
-      compact
-      language={iconExtension ?? "text"}
-      title={children}
+      language={language}
+      pathLabel={isFilePath ? children : undefined}
+      title={isFilePath ? undefined : children}
       {...props}
     />
   );
@@ -46,19 +43,9 @@ function Figcaption({
 function Code({
   className,
   __raw__,
-  __src__,
-  __npm__,
-  __yarn__,
-  __pnpm__,
-  __bun__,
   ...props
 }: React.ComponentProps<"code"> & {
   __raw__?: string;
-  __src__?: string;
-  __npm__?: string;
-  __yarn__?: string;
-  __pnpm__?: string;
-  __bun__?: string;
 }) {
   if (typeof props.children === "string") {
     return (
@@ -72,25 +59,14 @@ function Code({
     );
   }
 
-  const isNpmCommand = __npm__ && __yarn__ && __pnpm__ && __bun__;
-  if (isNpmCommand) {
-    return (
-      <Command
-        __bun__={__bun__}
-        __npm__={__npm__}
-        __pnpm__={__pnpm__}
-        __yarn__={__yarn__}
-      />
-    );
-  }
-
   return (
     <>
       {__raw__ && (
         <CopyButton
           data-overlay
-          tooltip="Copy to Clipboard"
+          size="icon-sm"
           value={__raw__}
+          variant="outline"
         />
       )}
       <code {...props} />

@@ -1,6 +1,6 @@
 "use client";
 
-import { CopyIcon } from "lucide-react";
+import { CopyIcon } from "@phosphor-icons/react";
 import React from "react";
 import { useThemeConfig } from "@/components/theme/active";
 import { CustomizerCode } from "@/components/theme/customizer-code";

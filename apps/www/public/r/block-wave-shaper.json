@@ -17,9 +17,6 @@
       "target": "components/audio/blocks/block-wave-shaper.tsx"
     }
   ],
-  "categories": [
-    "synth",
-    "xypad"
-  ],
+  "categories": ["synth", "xypad"],
   "type": "registry:block"
 }

@@ -10,11 +10,15 @@ function Slider({
   max = 100,
   ...props
 }: SliderPrimitive.Root.Props) {
-  const _values = Array.isArray(value)
-    ? value
-    : Array.isArray(defaultValue)
-      ? defaultValue
-      : [min, max];
+  let _values = [min, max];
+
+  if (Array.isArray(defaultValue)) {
+    _values = defaultValue;
+  }
+
+  if (Array.isArray(value)) {
+    _values = value;
+  }
 
   return (
     <SliderPrimitive.Root
@@ -41,7 +45,7 @@ function Slider({
           <SliderPrimitive.Thumb
             className="block h-4 w-6 shrink-0 select-none rounded-full bg-white not-dark:bg-clip-padding shadow-md ring-1 ring-black/10 transition-[color,box-shadow,background-color] hover:ring-4 hover:ring-ring/30 focus-visible:outline-hidden focus-visible:ring-4 focus-visible:ring-ring/30 disabled:pointer-events-none disabled:opacity-50 data-vertical:h-6 data-vertical:w-4"
             data-slot="slider-thumb"
-            key={index}
+            key={String(index)}
           />
         ))}
       </SliderPrimitive.Control>

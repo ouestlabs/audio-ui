@@ -21,18 +21,13 @@ Rotary knob for continuous parameters (level, cutoff, pan, etc.). The registry c
     <TabsTrigger value="manual">Manual</TabsTrigger>
   </TabsList>
   <TabsContent value="cli">
-  ```bash
-  npx shadcn@latest add @audio/knob
-  ```
+    <Install component="knob" />
   </TabsContent>
 
   <TabsContent value="manual">
     <Steps>
       <Step>Install the following dependencies:</Step>
-
-        ```bash
-        npm install @audio-ui/react class-variance-authority
-        ```
+        <Install pkg="@audio-ui/react class-variance-authority" />
 
       <Step>Copy and paste the following code into your project.</Step>
         <Source name="knob" title="components/audio/knob.tsx" />
