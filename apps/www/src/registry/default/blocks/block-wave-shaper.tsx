@@ -397,14 +397,14 @@ export default function BlockWaveShaper() {
       />
       <ToggleGroup
         className="w-full"
-        onValueChange={(value) => {
-          if (value) {
-            setWaveform(value as WaveformType);
+        onValueChange={(values) => {
+          const next = values.at(-1);
+          if (next) {
+            setWaveform(next as WaveformType);
           }
         }}
         size="sm"
-        type="single"
-        value={waveform}
+        value={[waveform]}
         variant="outline"
       >
         {waveformOptions.map(({ icon, label, value }) => (
