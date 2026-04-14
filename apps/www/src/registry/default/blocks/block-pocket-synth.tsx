@@ -293,14 +293,14 @@ export default function BlockPocketSynth() {
       </ToggleGroup>
       <ToggleGroup
         className="w-full"
-        onValueChange={(value) => {
-          if (value) {
-            setFilterType(value as unknown as FilterType);
+        onValueChange={(values) => {
+          const next = values.at(-1);
+          if (next) {
+            setFilterType(next as FilterType);
           }
         }}
         size="sm"
-        type="single"
-        value={filterType}
+        value={[filterType]}
         variant="outline"
       >
         {filterOptions.map(({ label, value }) => (
