@@ -1,9 +1,6 @@
 ---
 title: HTML Audio
 description: Core audio helper and singleton for loading and controlling HTML5 audio.
-links:
-  doc: https://developer.mozilla.org/en-US/docs/Web/API/HTMLAudioElement
-  api: https://html.spec.whatwg.org/multipage/media.html#htmlaudioelement
 ---
 
 The `$htmlAudio` singleton manages playback of HTML5 audio with automatic retry logic, event handling, and volume fading. Use it alongside the [Audio Store](/docs/lib/audio-store) for full player functionality.
@@ -16,11 +13,7 @@ The `$htmlAudio` singleton manages playback of HTML5 audio with automatic retry 
     <TabsTrigger value="manual">Manual</TabsTrigger>
   </TabsList>
   <TabsContent value="cli">
-
-  ```bash
-  npx shadcn@latest add @audio/html
-  ```
-
+    <Install component="html" />
   </TabsContent>
 
   <TabsContent value="manual">

@@ -248,7 +248,7 @@ export default function BlockPocketSynth() {
   ];
 
   return (
-    <div className="flex w-full min-w-0 flex-col gap-1.5 rounded-xl border bg-card p-1.5">
+    <div className="flex w-full min-w-0 flex-col gap-4 rounded-4xl border bg-card p-4">
       <XYPad
         formatValue={formatValue}
         maxX={100}
@@ -270,14 +270,9 @@ export default function BlockPocketSynth() {
       />
       <ToggleGroup
         className="w-full"
-        onValueChange={(value) => {
-          if (value) {
-            setWaveform(value as WaveformType);
-          }
-        }}
+        onValueChange={(values) => setWaveform(values[0] as WaveformType)}
         size="sm"
-        type="single"
-        value={waveform}
+        value={[waveform]}
         variant="outline"
       >
         {waveformOptions.map(({ icon, label, value }) => (
@@ -293,14 +288,9 @@ export default function BlockPocketSynth() {
       </ToggleGroup>
       <ToggleGroup
         className="w-full"
-        onValueChange={(value) => {
-          if (value) {
-            setFilterType(value as FilterType);
-          }
-        }}
+        onValueChange={(values) => setFilterType(values[0] as FilterType)}
         size="sm"
-        type="single"
-        value={filterType}
+        value={[filterType]}
         variant="outline"
       >
         {filterOptions.map(({ label, value }) => (

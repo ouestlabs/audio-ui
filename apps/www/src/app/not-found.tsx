@@ -1,4 +1,4 @@
-import { ArrowLeftIcon } from "lucide-react";
+import { CaretLeftIcon } from "@phosphor-icons/react/dist/ssr";
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
@@ -21,17 +21,15 @@ export default function NotFound() {
       <PageHeader>
         <PageHeaderHeading>Page Not Found</PageHeaderHeading>
         <PageHeaderDescription>
-          The page you&apos;re looking for doesn't exist or may have been moved.
+          The page you're looking for doesn't exist or may have been moved.
         </PageHeaderDescription>
         <div className="mt-4">
-          <Button asChild className="group">
-            <Link href="/">
-              <ArrowLeftIcon
-                aria-hidden="true"
-                className="-ms-1 group-hover:-translate-x-0.5 opacity-60 transition-transform"
-              />
-              Back to Home
-            </Link>
+          <Button className="group" render={<Link href="/" />}>
+            <CaretLeftIcon
+              aria-hidden="true"
+              className="group-hover:-translate-x-0.5 opacity-60 transition-transform"
+            />
+            Back to Home
           </Button>
         </div>
       </PageHeader>

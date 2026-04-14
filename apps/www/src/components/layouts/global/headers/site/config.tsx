@@ -1,6 +1,6 @@
 "use client";
 
-import { GalleryHorizontalIcon } from "lucide-react";
+import { SlideshowIcon } from "@phosphor-icons/react";
 import { useLayout } from "@/hooks/use-layout";
 import { cn } from "@/registry/default/lib/utils";
 import { Button } from "@/registry/default/ui/button";
@@ -10,7 +10,7 @@ export function SiteConfig({ className }: React.ComponentProps<typeof Button>) {
 
   return (
     <Button
-      className={cn("size-8", className)}
+      className={cn(className)}
       onClick={() => {
         const newLayout = layout === "fixed" ? "full" : "fixed";
         setLayout(newLayout);
@@ -20,7 +20,7 @@ export function SiteConfig({ className }: React.ComponentProps<typeof Button>) {
       variant="ghost"
     >
       <span className="sr-only">Toggle layout</span>
-      <GalleryHorizontalIcon />
+      <SlideshowIcon />
     </Button>
   );
 }

@@ -24,7 +24,7 @@ export const ui: Registry["items"] = [
       "@dnd-kit/core",
       "@dnd-kit/sortable",
       "@dnd-kit/utilities",
-      "lucide-react",
+      "@phosphor-icons/react",
     ],
     registryDependencies: ["@shadcn/button"],
     files: [

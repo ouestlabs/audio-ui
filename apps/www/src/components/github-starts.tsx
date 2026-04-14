@@ -1,5 +1,6 @@
 "use client";
-import { StarIcon } from "lucide-react";
+import { StarIcon } from "@phosphor-icons/react";
+import Link from "next/link";
 import { useGithubStars } from "@/hooks/use-github";
 import { Icons } from "@/lib/icons";
 import { cn } from "@/registry/default/lib/utils";
@@ -17,44 +18,49 @@ import {
 } from "@/registry/default/ui/tooltip";
 
 function GithubStars() {
-  const { stargazersCount, isLoading } = useGithubStars("ouestlabs", "omi3");
+  const { stargazersCount, isLoading } = useGithubStars(
+    "ouestlabs",
+    "audio-ui"
+  );
 
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <ButtonGroup>
-          <Button asChild size="icon-sm" variant="outline">
-            <a
+      <TooltipTrigger render={<ButtonGroup />}>
+        <Button
+          nativeButton={false}
+          render={
+            <Link
               aria-label="GitHub"
               href="https://github.com/ouestlabs/audio-ui"
               rel="noopener noreferrer"
               target="_blank"
-            >
-              <Icons.github />
-            </a>
-          </Button>
-          <ButtonGroupText
-            className={cn(
-              "tabular-num relative text-muted-foreground",
-              isLoading && "px-0.5"
-            )}
-          >
-            {isLoading ? (
-              <Skeleton className="h-6.5 w-11 rounded-s-none rounded-e" />
-            ) : (
-              new Intl.NumberFormat("en-US", {
-                notation: "compact",
-                compactDisplay: "short",
-              }).format(stargazersCount)
-            )}
-          </ButtonGroupText>
-        </ButtonGroup>
+            />
+          }
+          variant="outline"
+        >
+          <Icons.github />
+        </Button>
+        <ButtonGroupText
+          className={cn(
+            "tabular-num relative text-muted-foreground",
+            isLoading && "px-1"
+          )}
+        >
+          {isLoading ? (
+            <Skeleton className="h-6.5 w-11 rounded-s-none rounded-e-full bg-background/50" />
+          ) : (
+            new Intl.NumberFormat("en-US", {
+              notation: "compact",
+              compactDisplay: "short",
+            }).format(stargazersCount)
+          )}
+        </ButtonGroupText>
       </TooltipTrigger>
       <TooltipContent>
-        <KbdGroup className="gap-2">
+        <KbdGroup>
           {new Intl.NumberFormat("en-US").format(stargazersCount)} stars
           <Kbd>
-            <StarIcon />
+            <StarIcon weight="duotone" />
           </Kbd>
         </KbdGroup>
       </TooltipContent>

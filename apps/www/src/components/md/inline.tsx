@@ -1,16 +1,15 @@
 import type * as React from "react";
-import { CopyButton } from "@/components/copy-button";
-import { Command } from "@/components/md/code";
-import { getIconForLanguageExtension } from "@/lib/icons";
+import { CodeFrame, CodeFrameHeader, CopyButton } from "@/components/md/code";
 import { cn } from "@/registry/default/lib/utils";
+
+function Figure({ className, ...props }: React.ComponentProps<"figure">) {
+  return <CodeFrame className={cn(className)} {...props} />;
+}
 
 function Pre({ className, children, ...props }: React.ComponentProps<"pre">) {
   return (
     <pre
-      className={cn(
-        "no-scrollbar min-w-0 overflow-x-auto px-4 py-3.5 text-[.8125rem] outline-none has-data-[slot=tabs]:p-0 has-data-highlighted-line:px-0 has-data-line-numbers:px-0",
-        className
-      )}
+      className={cn("no-scrollbar min-w-0 overflow-x-auto", className)}
       {...props}
     >
       {children}
@@ -18,50 +17,35 @@ function Pre({ className, children, ...props }: React.ComponentProps<"pre">) {
   );
 }
 
-function Figure({ className, ...props }: React.ComponentProps<"figure">) {
-  return <figure className={cn(className)} {...props} />;
-}
-
 function Figcaption({
   className,
   children,
   ...props
 }: React.ComponentProps<"figcaption">) {
-  const iconExtension =
+  const language =
     "data-language" in props && typeof props["data-language"] === "string"
-      ? getIconForLanguageExtension(props["data-language"])
-      : null;
+      ? props["data-language"]
+      : "text";
+
+  const isFilePath = typeof children === "string" && children.includes(".");
 
   return (
-    <figcaption
-      className={cn(
-        "flex items-center gap-2 text-code-foreground [&_svg]:size-5 [&_svg]:text-code-foreground [&_svg]:opacity-70 sm:[&_svg]:size-4",
-        className
-      )}
+    <CodeFrameHeader
+      className={cn(className)}
+      language={language}
+      pathLabel={isFilePath ? children : undefined}
+      title={isFilePath ? undefined : children}
       {...props}
-    >
-      {iconExtension}
-      {children}
-    </figcaption>
+    />
   );
 }
 
 function Code({
   className,
   __raw__,
-  __src__,
-  __npm__,
-  __yarn__,
-  __pnpm__,
-  __bun__,
   ...props
 }: React.ComponentProps<"code"> & {
   __raw__?: string;
-  __src__?: string;
-  __npm__?: string;
-  __yarn__?: string;
-  __pnpm__?: string;
-  __bun__?: string;
 }) {
   if (typeof props.children === "string") {
     return (
@@ -75,21 +59,16 @@ function Code({
     );
   }
 
-  const isNpmCommand = __npm__ && __yarn__ && __pnpm__ && __bun__;
-  if (isNpmCommand) {
-    return (
-      <Command
-        __bun__={__bun__}
-        __npm__={__npm__}
-        __pnpm__={__pnpm__}
-        __yarn__={__yarn__}
-      />
-    );
-  }
-
   return (
     <>
-      {__raw__ && <CopyButton src={__src__} value={__raw__} />}
+      {__raw__ && (
+        <CopyButton
+          data-overlay
+          size="icon-sm"
+          value={__raw__}
+          variant="outline"
+        />
+      )}
       <code {...props} />
     </>
   );

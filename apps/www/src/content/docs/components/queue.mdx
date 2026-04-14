@@ -1,14 +1,6 @@
 ---
 title: Audio Queue
 description: Composable queue management components with shuffle, repeat, and track selection.
-links:
-  doc:
-    - https://ui.shadcn.com/docs/components/button
-    - https://ui.shadcn.com/docs/components/dialog
-    - https://ui.shadcn.com/docs/components/dropdown-menu
-    - https://ui.shadcn.com/docs/components/input
-    - https://ui.shadcn.com/docs/components/toggle
-    - https://ui.shadcn.com/docs/components/tooltip
 ---
 
 A composable queue with search, selection, shuffle, repeat, and optional reordering.
@@ -23,36 +15,19 @@ A composable queue with search, selection, shuffle, repeat, and optional reorder
     <TabsTrigger value="manual">Manual</TabsTrigger>
   </TabsList>
   <TabsContent value="cli">
-  ```bash
-  npx shadcn@latest add @audio/queue
-  ```
+    <Install component="queue" />
   </TabsContent>
 
   <TabsContent value="manual">
     <Steps>
       <Step>Install the runtime dependencies:</Step>
-
-        ```bash
-        npm install zustand lucide-react
-        ```
-
+        <Install pkg="@phosphor-icons/react" />
       <Step>Install the required shadcn/ui primitives:</Step>
-
-        ```bash
-        npx shadcn@latest add button dialog dropdown-menu input empty item scroll-area toggle tooltip
-        ```
-
+        <Install shadcn="button dialog dropdown-menu input empty item scroll-area toggle tooltip" />
       <Step>Install the track component used by the queue:</Step>
-
-        ```bash
-        npx shadcn@latest add @audio/track
-        ```
-
+        <Install component="track" />
       <Step>Install the required registry components:</Step>
-
-        ```bash
-        npx shadcn@latest add @audio/store @audio/html @audio/use-audio
-        ```
+        <Install component="store html use-audio" />
 
       <Step>Copy and paste the following code into your project.</Step>
         <Source name="queue" title="components/audio/queue.tsx" />

@@ -1,13 +1,12 @@
+import { ArrowLeftIcon, ArrowRightIcon } from "@phosphor-icons/react/dist/ssr";
 import type { Item } from "fumadocs-core/page-tree";
 import type { InferPageType } from "fumadocs-core/source";
-import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
 import Link from "next/link";
 import { absoluteUrl } from "@/lib/config";
 import type { source } from "@/lib/source";
 import { getGitHubUrl, getMarkdownUrl } from "@/lib/source";
 import { Button } from "@/registry/default/ui/button";
 import { DocsCopyPage } from "./copy-page";
-import { DocsLinks } from "./doc-links";
 
 type DocHeaderProps = {
   doc: InferPageType<typeof source>["data"];
@@ -57,9 +56,6 @@ export function DocHeader({
       {doc.description && (
         <p className="text-muted-foreground sm:text-lg">{doc.description}</p>
       )}
-      <div className="flex items-center space-x-2 pt-4">
-        <DocsLinks links={doc.links} />
-      </div>
     </div>
   );
 }
@@ -74,20 +70,14 @@ function DocNavButton({
   className?: string;
 }) {
   return (
-    <Button asChild className={className} size="icon-sm" variant="outline">
-      <Link href={href}>
-        {direction === "previous" ? (
-          <>
-            <ArrowLeftIcon />
-            <span className="sr-only">Previous</span>
-          </>
-        ) : (
-          <>
-            <span className="sr-only">Next</span>
-            <ArrowRightIcon />
-          </>
-        )}
-      </Link>
+    <Button
+      className={className}
+      nativeButton={false}
+      render={<Link href={href} />}
+      size="icon"
+      variant="outline"
+    >
+      {direction === "previous" ? <ArrowLeftIcon /> : <ArrowRightIcon />}
     </Button>
   );
 }

@@ -1,8 +1,10 @@
 "use client";
 
-import { TerminalIcon } from "lucide-react";
+import { CheckIcon, CopyIcon, TerminalIcon } from "@phosphor-icons/react";
 import React from "react";
 import { useConfig } from "@/hooks/use-config";
+import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
+import { getIconForLanguageExtension } from "@/lib/icons";
 import { cn } from "@/registry/default/lib/utils";
 import { Button } from "@/registry/default/ui/button";
 import {
@@ -10,16 +12,192 @@ import {
   CollapsibleTrigger,
   Collapsible as UICollapsible,
 } from "@/registry/default/ui/collapsible";
-import { Separator } from "@/registry/default/ui/separator";
+import { Kbd, KbdGroup } from "@/registry/default/ui/kbd";
+import { ScrollArea } from "@/registry/default/ui/scroll-area";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from "@/registry/default/ui/tabs";
-import { CopyButton } from "../copy-button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/registry/default/ui/tooltip";
 
-// Collapsible
+function CodeFrame({ ...props }: React.ComponentProps<"figure">) {
+  return <figure data-rehype-pretty-code-figure {...props} />;
+}
+
+type CodeFrameHeaderProps = Omit<
+  React.ComponentProps<"figcaption">,
+  "title"
+> & {
+  language: string;
+  title?: React.ReactNode;
+  pathLabel?: string;
+  actions?: React.ReactNode;
+  icon?: React.ReactNode;
+  compact?: boolean;
+};
+
+function PathHeader({
+  language,
+  title,
+  pathLabel,
+  actions,
+  icon,
+  className,
+  ...props
+}: CodeFrameHeaderProps) {
+  return (
+    <figcaption
+      className={cn(
+        "flex items-center justify-between gap-3 px-3 py-2 font-medium text-muted-foreground text-xs [&_svg]:size-3.5 [&_svg]:shrink-0 [&_svg]:text-foreground/70",
+        className
+      )}
+      data-language={language}
+      data-rehype-pretty-code-title
+      {...props}
+    >
+      <span className="flex min-w-0 flex-1 items-center gap-3">
+        {icon ?? getIconForLanguageExtension(language)}
+        {pathLabel ? (
+          <span className="truncate font-mono text-[0.8125rem] text-code-foreground">
+            {pathLabel}
+          </span>
+        ) : null}
+        {!pathLabel && title ? title : null}
+      </span>
+      {actions ? (
+        <span className="flex shrink-0 items-center">{actions}</span>
+      ) : null}
+    </figcaption>
+  );
+}
+
+function TitleHeader({
+  language,
+  title,
+  icon,
+  compact,
+  className,
+  ...props
+}: CodeFrameHeaderProps) {
+  return (
+    <figcaption
+      className={cn("flex items-center gap-3 text-code-foreground", className)}
+      data-compact={compact || undefined}
+      data-language={language}
+      data-rehype-pretty-code-title
+      {...props}
+    >
+      {icon ?? getIconForLanguageExtension(language)}
+      {title}
+    </figcaption>
+  );
+}
+
+function CodeFrameHeader(props: CodeFrameHeaderProps) {
+  const { title, pathLabel, actions } = props;
+  if (!(title || pathLabel || actions)) {
+    return null;
+  }
+  if (pathLabel || actions) {
+    return <PathHeader {...props} />;
+  }
+  return <TitleHeader {...props} />;
+}
+
+function CodeFrameScroll({
+  className,
+  children,
+  ...props
+}: React.ComponentProps<typeof ScrollArea>) {
+  return (
+    <ScrollArea
+      className={cn(
+        "w-full bg-code **:data-[slot=scroll-area-viewport]:p-0",
+        className
+      )}
+      {...props}
+    >
+      {children}
+    </ScrollArea>
+  );
+}
+
+type CopyButtonProps = {
+  value?: string;
+  copied?: boolean;
+  onAction?: () => void;
+  onCopied?: () => void;
+  tooltip?: string | false;
+  icon?: React.ReactNode;
+} & Omit<React.ComponentProps<typeof Button>, "onClick">;
+
+function CopyButton({
+  value,
+  copied,
+  onAction,
+  onCopied,
+  tooltip = false,
+  className,
+  icon,
+  ...props
+}: CopyButtonProps) {
+  const { isCopied, copyToClipboard } = useCopyToClipboard({
+    onCopy: onCopied,
+  });
+  const hasCopied = copied ?? isCopied;
+  const currentIcon = hasCopied ? <CheckIcon /> : (icon ?? <CopyIcon />);
+
+  const button = (
+    <Button
+      aria-label={hasCopied ? "Copied" : "Copy to clipboard"}
+      className={cn("cursor-pointer", className)}
+      data-copied={hasCopied}
+      data-slot="copy-button"
+      onClick={() => {
+        if (value) {
+          copyToClipboard(value);
+          return;
+        }
+        onAction?.();
+      }}
+      size="icon"
+      title={hasCopied ? "Copied" : "Copy"}
+      {...props}
+    >
+      <span className="sr-only">Copy</span>
+      {currentIcon}
+    </Button>
+  );
+
+  if (!tooltip) {
+    return button;
+  }
+
+  return (
+    <Tooltip>
+      <TooltipTrigger render={button} />
+      <TooltipContent>
+        {hasCopied ? (
+          "Copied"
+        ) : (
+          <KbdGroup>
+            {tooltip}
+            <Kbd>
+              <CopyIcon />
+            </Kbd>
+          </KbdGroup>
+        )}
+      </TooltipContent>
+    </Tooltip>
+  );
+}
+
 function Collapse({
   className,
   children,
@@ -29,33 +207,34 @@ function Collapse({
 
   return (
     <UICollapsible
-      className={cn("group/collapsible md:-mx-1 relative", className)}
+      className={cn("group/collapsible md:-mx-1", className)}
       onOpenChange={setIsOpened}
       open={isOpened}
       {...props}
     >
-      <div className="absolute top-1.5 right-10 z-10 flex items-center">
-        <CollapsibleTrigger asChild>
-          <Button className="text-muted-foreground" size="sm" variant="ghost">
-            {isOpened ? "Collapse" : "Expand"}
-          </Button>
-        </CollapsibleTrigger>
-        <Separator className="mx-1.5 h-5!" orientation="vertical" />
-      </div>
       <CollapsibleContent
-        className="relative mt-6 h-full overflow-hidden data-[state=closed]:h-auto! data-[state=closed]:max-h-64! [&>figure]:mt-0 [&>figure]:md:mx-0!"
-        forceMount
+        className={cn(
+          "mt-6 h-full p-px data-closed:max-h-64 [&>figure]:mt-0 [&>figure]:md:mx-0!",
+          "data-closed:[-webkit-mask-image:linear-gradient(to_bottom,black_0%,black_72%,transparent_100%)]",
+          "data-closed:mask-[linear-gradient(to_bottom,black_0%,black_72%,transparent_100%)]"
+        )}
+        hidden={false}
+        keepMounted
       >
         {children}
       </CollapsibleContent>
-      <CollapsibleTrigger className="-bottom-2 absolute inset-x-0 flex h-20 cursor-pointer items-center justify-center rounded-b-lg bg-linear-to-b from-transparent via-50% via-background to-background font-medium text-muted-foreground text-sm transition-colors hover:text-foreground group-data-[state=open]/collapsible:hidden">
-        {isOpened ? "Collapse" : "Expand"}
+      <CollapsibleTrigger
+        className="relative flex w-full items-end justify-center pb-2 text-muted-foreground transition-colors hover:text-foreground group-data-open/collapsible:hidden"
+        render={
+          <Button className="cursor-pointer bg-transparent!" variant="ghost" />
+        }
+      >
+        Expand
       </CollapsibleTrigger>
     </UICollapsible>
   );
 }
 
-// Command
 function Command({
   __npm__,
   __yarn__,
@@ -68,77 +247,67 @@ function Command({
   __bun__?: string;
 }) {
   const [config, setConfig] = useConfig();
-
   const packageManager = config?.packageManager || "bun";
   const tabs = React.useMemo(
-    () => ({
-      pnpm: __pnpm__,
-      npm: __npm__,
-      yarn: __yarn__,
-      bun: __bun__,
-    }),
+    () => ({ pnpm: __pnpm__, npm: __npm__, yarn: __yarn__, bun: __bun__ }),
     [__npm__, __pnpm__, __yarn__, __bun__]
   );
 
-  const commandToCopy = tabs[packageManager] || "";
-
   return (
-    <div className="overflow-x-auto">
+    <CodeFrame className="mt-0 overflow-hidden">
       <Tabs
-        className="gap-0"
-        onValueChange={(value) => {
-          setConfig({
-            ...config,
-            packageManager: value as typeof packageManager,
-          });
-        }}
+        onValueChange={(value) =>
+          setConfig({ ...config, packageManager: value })
+        }
         value={packageManager}
       >
-        <div className="flex items-center gap-2 border-border/64 border-b px-4 py-1 font-mono">
-          <TerminalIcon />
-          <TabsList className="bg-transparent p-0">
-            {Object.entries(tabs).map(([key]) => (
-              <TabsTrigger
-                className="rounded-lg data-[state=active]:border data-[state=active]:border-border data-[state=active]:shadow-none"
-                key={key}
-                value={key}
-              >
-                {key}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </div>
+        <CodeFrameHeader
+          actions={
+            <CopyButton
+              size="icon"
+              value={tabs[packageManager] ?? ""}
+              variant="ghost"
+            />
+          }
+          icon={<TerminalIcon className="hidden sm:flex" weight="duotone" />}
+          language="bash"
+          title={
+            <TabsList>
+              {Object.entries(tabs).map(([key]) => (
+                <TabsTrigger
+                  className="text-xs sm:text-sm"
+                  key={key}
+                  value={key}
+                >
+                  {key}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          }
+        />
         <div className="no-scrollbar overflow-x-auto">
           {Object.entries(tabs).map(([key, value]) => (
-            <TabsContent className="mt-0 px-4 py-3.5" key={key} value={key}>
-              <pre>
-                <code
-                  className="relative font-mono text-[.8125rem] leading-none"
-                  data-language="bash"
-                >
-                  {value}
-                </code>
-              </pre>
+            <TabsContent key={key} value={key}>
+              <CodeFrameScroll>
+                <pre className="px-4 pt-1.5 pb-4">
+                  <code
+                    className="relative pr-4 font-mono text-[.8125rem] leading-none"
+                    data-language="bash"
+                  >
+                    {value}
+                  </code>
+                </pre>
+              </CodeFrameScroll>
             </TabsContent>
           ))}
         </div>
       </Tabs>
-      <CopyButton
-        className="absolute top-1.5 right-1.5 z-3 size-9 opacity-70 hover:opacity-100 focus-visible:opacity-100 sm:size-8"
-        data-slot="copy-button"
-        src="command_code_block"
-        tooltip="Copy to Clipboard"
-        value={commandToCopy}
-        variant="ghost"
-      />
-    </div>
+    </CodeFrame>
   );
 }
 
-// Tabs
-function CodeTabs({ children }: React.ComponentProps<typeof Tabs>) {
+function CodeTabs(props: React.ComponentProps<typeof Tabs>) {
   const [config, setConfig] = useConfig();
-
   const installationType = React.useMemo(
     () => config.installationType || "cli",
     [config]
@@ -148,13 +317,20 @@ function CodeTabs({ children }: React.ComponentProps<typeof Tabs>) {
     <Tabs
       className="relative mt-6 w-full"
       onValueChange={(value) =>
-        setConfig({ ...config, installationType: value as "cli" | "manual" })
+        setConfig({ ...config, installationType: value })
       }
       value={installationType}
-    >
-      {children}
-    </Tabs>
+      {...props}
+    />
   );
 }
 
-export { Collapse, Command, CodeTabs };
+export {
+  Collapse,
+  Command,
+  CodeTabs,
+  CodeFrame,
+  CodeFrameHeader,
+  CodeFrameScroll,
+  CopyButton,
+};

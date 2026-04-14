@@ -65,8 +65,8 @@ export default async function Page(props: {
       className="flex min-h-[calc(100vh-var(--header-height)+5px)] items-stretch sm:text-[.9375rem] xl:w-full"
       data-slot="docs"
     >
-      <div className="relative mb-16 flex min-w-0 flex-1 flex-col bg-muted/50 sm:mb-15 lg:my-8 lg:mr-4 lg:rounded-2xl lg:border">
-        <div className="-m-px flex flex-1 flex-col bg-background p-6 lg:rounded-2xl lg:border">
+      <div className="relative mb-16 flex min-w-0 flex-1 flex-col bg-muted/50 sm:mb-15 lg:my-8 lg:mr-4 lg:rounded-4xl lg:border">
+        <div className="-m-px flex flex-1 flex-col bg-background p-6 lg:rounded-4xl lg:border">
           <div className="mx-auto flex w-full flex-1 flex-col lg:max-w-4xl">
             <div className="flex flex-1 flex-col gap-8 pb-16 sm:pb-0">
               <DocHeader

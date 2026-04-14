@@ -2,9 +2,7 @@
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "player-stacked-demo",
   "description": "Audio player with stacked layout",
-  "registryDependencies": [
-    "@audio/player"
-  ],
+  "registryDependencies": ["@audio/player"],
   "files": [
     {
       "path": "src/registry/default/examples/player-stacked-demo.tsx",
@@ -13,8 +11,6 @@
       "target": "components/audio/examples/player-stacked-demo.tsx"
     }
   ],
-  "categories": [
-    "player"
-  ],
+  "categories": ["player"],
   "type": "registry:example"
 }

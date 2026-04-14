@@ -1,13 +1,6 @@
 ---
 title: Audio Track
 description: Track display components with list management and track information.
-links:
-  doc:
-    - https://ui.shadcn.com/docs/components/avatar
-    - https://ui.shadcn.com/docs/components/badge
-    - https://ui.shadcn.com/docs/components/button
-    - https://ui.shadcn.com/docs/components/item
-    - https://ui.shadcn.com/docs/components/scroll-area
 ---
 
 Track components for rendering a single row or a full list.
@@ -27,36 +20,19 @@ Supports two data modes:
     <TabsTrigger value="manual">Manual</TabsTrigger>
   </TabsList>
   <TabsContent value="cli">
-  ```bash
-  npx shadcn@latest add @audio/track
-  ```
+    <Install component="track" />
   </TabsContent>
 
   <TabsContent value="manual">
     <Steps>
       <Step>Install the runtime dependencies:</Step>
-
-        ```bash
-        npm install zustand lucide-react class-variance-authority
-        ```
-
+        <Install pkg="@phosphor-icons/react class-variance-authority" />
       <Step>Install the required shadcn/ui primitives:</Step>
-
-        ```bash
-        npx shadcn@latest add avatar badge button item scroll-area empty
-        ```
-
+        <Install shadcn="avatar badge button item scroll-area empty" />
       <Step>Install the sortable helper used by the examples:</Step>
-
-        ```bash
-        npx shadcn@latest add @audio/sortable-list
-        ```
-
+        <Install component="sortable-list" />
       <Step>Install the required registry components:</Step>
-
-        ```bash
-        npx shadcn@latest add @audio/provider @audio/store @audio/html @audio/use-audio
-        ```
+        <Install component="provider store html use-audio" />
 
       <Step>Copy and paste the following code into your project.</Step>
         <Source name="track" title="components/audio/track.tsx" />

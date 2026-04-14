@@ -1,9 +1,6 @@
 ---
 title: Transport
 description: Timeline transport control for playback progress and scrubbing, with buffered range visualization, keyboard, wheel, and pointer interactions.
-links:
-  doc:
-    - https://www.npmjs.com/package/@audio-ui/react
 ---
 
 Timeline control for playback progress (current value + buffered range). The registry component wraps `Transport` primitives from `@audio-ui/react` with audio-focused defaults for player seek bars and scrub interactions.
@@ -25,18 +22,13 @@ Timeline control for playback progress (current value + buffered range). The reg
     <TabsTrigger value="manual">Manual</TabsTrigger>
   </TabsList>
   <TabsContent value="cli">
-  ```bash
-  npx shadcn@latest add @audio/transport
-  ```
+    <Install component="transport" />
   </TabsContent>
 
   <TabsContent value="manual">
     <Steps>
       <Step>Install the following dependencies:</Step>
-
-        ```bash
-        npm install @audio-ui/react
-        ```
+        <Install pkg="@audio-ui/react" />
 
       <Step>Copy and paste the following code into your project.</Step>
         <Source name="transport" title="components/audio/transport.tsx" />

@@ -1,53 +1,65 @@
 "use client";
 
-import { cva, type VariantProps } from "class-variance-authority";
+import type { BaseUIEvent } from "@base-ui/react";
 import {
+  BroadcastIcon,
   FastForwardIcon,
-  Loader2Icon,
   PauseIcon,
   PlayIcon,
-  RadioIcon,
   RewindIcon,
   SkipBackIcon,
   SkipForwardIcon,
-  Volume1Icon,
-  Volume2Icon,
-  VolumeIcon,
-  VolumeXIcon,
-} from "lucide-react";
+  SpeakerHighIcon,
+  SpeakerLowIcon,
+  SpeakerNoneIcon,
+  SpeakerSlashIcon,
+} from "@phosphor-icons/react";
+import { cva, type VariantProps } from "class-variance-authority";
 import React from "react";
+import { Fader } from "@/components/audio/fader";
+import { Transport } from "@/components/audio/transport";
 import { Button, type buttonVariants } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Slider } from "@/components/ui/slider";
+import { Spinner } from "@/components/ui/spinner";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { formatDuration, isLive } from "@/lib/audio";
+import { useAudio } from "@/hooks/use-audio";
 import { useAudioStore } from "@/lib/audio-store";
+import { formatDuration } from "@/lib/html-audio";
 import { cn } from "@/lib/utils";
 
 interface AudioPlayerButtonProps extends React.ComponentProps<typeof Button> {
-  tooltip?: boolean;
   tooltipLabel?: string;
 }
 
 function AudioPlayerButton({
-  tooltip = false,
   tooltipLabel,
+  className,
   ...props
 }: AudioPlayerButtonProps) {
-  const button = <Button {...props} />;
+  const button = (
+    <Button
+      aria-label={props["aria-label"] ?? tooltipLabel}
+      className={cn("[&_svg]:text-primary", className)}
+      {...props}
+    />
+  );
 
-  if (tooltip && tooltipLabel) {
+  if (tooltipLabel) {
     return (
       <Tooltip>
-        <TooltipTrigger asChild>{button}</TooltipTrigger>
+        <TooltipTrigger render={button} />
         <TooltipContent sideOffset={4}>{tooltipLabel}</TooltipContent>
       </Tooltip>
     );
@@ -64,7 +76,7 @@ function AudioPlayer({
   return (
     <div
       className={cn(
-        "w-full rounded-(--radius) border bg-card p-1.5",
+        "w-full rounded-4xl bg-card p-4 shadow-md ring-1 ring-foreground/5 dark:ring-foreground/10",
         className
       )}
       data-slot="audio-player"
@@ -138,30 +150,20 @@ const AudioPlayerTimeDisplay = ({
   remaining,
   ...props
 }: AudioPlayerTimeDisplayProps) => {
-  const { currentTime, duration, currentTrack } = useAudioStore();
-  const isLiveStream = currentTrack ? isLive(currentTrack) : false;
+  const currentTime = useAudioStore((state) => state.currentTime);
+  const duration = useAudioStore((state) => state.duration);
+  const { htmlAudio } = useAudio();
+  const isLiveStream = htmlAudio.isLive(duration);
 
-  const formattedCurrentTime = React.useMemo(
-    () => formatDuration(currentTime),
-    [currentTime]
-  );
-
-  const formattedRemainingTime = React.useMemo(
-    () => formatDuration(duration - currentTime),
-    [duration, currentTime]
-  );
-
-  const timeValue = React.useMemo(() => {
-    if (isLiveStream && remaining) {
-      return "LIVE";
-    }
-
-    if (isLiveStream && !remaining) {
-      return formattedCurrentTime;
-    }
-
-    return remaining ? formattedRemainingTime : formattedCurrentTime;
-  }, [isLiveStream, remaining, formattedCurrentTime, formattedRemainingTime]);
+  const formattedCurrentTime = formatDuration(currentTime);
+  const formattedRemainingTime = formatDuration(duration - currentTime);
+  let timeValue = formattedCurrentTime;
+  if (remaining) {
+    timeValue = formattedRemainingTime;
+  }
+  if (isLiveStream && remaining) {
+    timeValue = "LIVE";
+  }
 
   const showLiveIcon = isLiveStream && remaining;
 
@@ -178,7 +180,9 @@ const AudioPlayerTimeDisplay = ({
       data-slot="audio-time-display"
       {...props}
     >
-      {showLiveIcon && <RadioIcon className="size-3 animate-pulse" />}
+      {showLiveIcon && (
+        <BroadcastIcon className="size-3 shrink-0 animate-pulse" />
+      )}
       {timeValue}
     </time>
   );
@@ -188,91 +192,44 @@ const AudioPlayerSeekBar = ({
   className,
   ...props
 }: Omit<
-  React.ComponentProps<typeof Slider>,
-  "value" | "onValueChange" | "min" | "max" | "bufferValue"
+  React.ComponentProps<typeof Transport>,
+  "value" | "onSeek" | "bufferedValue"
 >) => {
-  const { currentTime, duration, seek, bufferedTime, currentTrack } =
-    useAudioStore();
-  const isLiveStream = currentTrack ? isLive(currentTrack) : false;
+  const currentTime = useAudioStore((state) => state.currentTime);
+  const duration = useAudioStore((state) => state.duration);
+  const seek = useAudioStore((state) => state.seek);
+  const bufferedTime = useAudioStore((state) => state.bufferedTime);
+  const { htmlAudio } = useAudio();
+  const isLiveStream = htmlAudio.isLive(duration);
 
-  const progress = React.useMemo(() => {
-    if (isLiveStream) {
-      return 100;
-    }
-    if (!duration) {
-      return 0;
-    }
-    return (currentTime / duration) * 100;
-  }, [isLiveStream, currentTime, duration]);
+  let progress = 0;
+  if (isLiveStream) {
+    progress = 100;
+  } else if (duration) {
+    progress = (currentTime / duration) * 100;
+  }
 
-  const bufferedProgress = React.useMemo(() => {
-    if (isLiveStream) {
-      return 100;
-    }
-    if (!duration) {
-      return 0;
-    }
-    return (bufferedTime / duration) * 100;
-  }, [isLiveStream, bufferedTime, duration]);
-
-  const handleSeek = (e: React.MouseEvent | React.TouchEvent) => {
-    if (isLiveStream || !duration) {
-      return;
-    }
-
-    const target = e.currentTarget;
-    let clientX: number;
-
-    if ("touches" in e) {
-      clientX = e.touches[0]?.clientX ?? 0;
-    } else {
-      clientX = e.clientX;
-    }
-
-    const rect = target.getBoundingClientRect();
-    const position = Math.max(
-      0,
-      Math.min(1, (clientX - rect.left) / rect.width)
-    );
-    seek(position * duration);
-  };
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    if (!isLiveStream) {
-      handleSeek(e);
-    }
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isLiveStream) {
-      e.preventDefault();
-      handleSeek(e);
-    }
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isLiveStream && e.buttons === 1) {
-      handleSeek(e);
-    }
-  };
+  let bufferedProgress = 0;
+  if (isLiveStream) {
+    bufferedProgress = 100;
+  } else if (duration) {
+    bufferedProgress = (bufferedTime / duration) * 100;
+  }
 
   return (
-    <Slider
-      bufferValue={bufferedProgress}
+    <Transport
+      aria-label="Seek"
+      bufferedValue={bufferedProgress}
       className={cn("min-w-20 flex-1", className)}
       disabled={isLiveStream}
-      max={100}
-      min={0}
-      onMouseMove={handleMouseMove}
-      onTouchMove={handleTouchMove}
-      onTouchStart={handleTouchStart}
-      onValueChange={(value) => {
-        if (!isLiveStream && value?.[0] !== undefined && duration > 0) {
-          const newTime = (value[0] / 100) * duration;
+      freezeValuesWhileDragging
+      onSeek={(nextProgress) => {
+        if (!isLiveStream && duration > 0) {
+          const newTime = (nextProgress / 100) * duration;
           seek(newTime);
         }
       }}
-      value={[progress]}
+      value={progress}
       {...props}
     />
   );
@@ -284,8 +241,8 @@ const AudioPlayerVolume = ({
   variant = "outline",
   ...props
 }: Omit<
-  React.ComponentProps<typeof Slider>,
-  "value" | "onValueChange" | "min" | "max"
+  React.ComponentProps<typeof Fader>,
+  "value" | "onValueChange" | "min" | "max" | "orientation" | "size"
 > & {
   size?: VariantProps<typeof buttonVariants>["size"];
   variant?: VariantProps<typeof buttonVariants>["variant"];
@@ -296,78 +253,109 @@ const AudioPlayerVolume = ({
   const toggleMute = useAudioStore((state) => state.toggleMute);
 
   const volumePercent = Math.round(volume * 100);
+  const effectiveVolumePercent = isMuted ? 0 : volumePercent;
 
   const getVolumeIcon = () => {
     if (isMuted || volume === 0) {
-      return VolumeXIcon;
+      return SpeakerSlashIcon;
     }
     if (volumePercent < 33) {
-      return VolumeIcon;
+      return SpeakerNoneIcon;
     }
     if (volumePercent < 66) {
-      return Volume1Icon;
+      return SpeakerLowIcon;
     }
-    return Volume2Icon;
+    return SpeakerHighIcon;
   };
 
   const Icon = getVolumeIcon();
+
+  const handleVolumeChange = React.useCallback(
+    (nextVolumePercent: number) => {
+      setVolume({ volume: nextVolumePercent / 100 });
+    },
+    [setVolume]
+  );
+
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <AudioPlayerButton
-          className={cn("hidden md:flex", className)}
-          data-slot="audio-volume-button"
-          size={size}
-          tooltip
-          tooltipLabel={
-            isMuted ? "Muted" : `Volume ${Math.round(volumePercent)}%`
-          }
-          variant={variant}
-        >
-          <Icon className={cn(isMuted && "opacity-40", "text-primary")} />
-        </AudioPlayerButton>
+      <DropdownMenuTrigger
+        render={
+          <AudioPlayerButton
+            className={cn("hidden md:flex", className)}
+            data-slot="audio-volume-button"
+            size={size}
+            tooltipLabel={
+              isMuted
+                ? "Muted"
+                : `Volume ${Math.round(effectiveVolumePercent)}%`
+            }
+            variant={variant}
+          />
+        }
+      >
+        <Icon className={cn(isMuted && "opacity-40")} />
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        className={cn("flex w-48 flex-col gap-1.5 p-1.5", className)}
+        align="center"
+        className={cn(
+          "flex w-(--dropdown-menu-content-width) flex-col gap-0",
+          className
+        )}
       >
-        <div className="flex items-center justify-between">
-          <span className="text-sm">Volume</span>
-          <span className="font-mono text-sm tabular-nums">
-            {volumePercent}%
-          </span>
-        </div>
-        <div className="flex items-center gap-2">
-          <VolumeXIcon
-            aria-hidden="true"
-            className={cn(
-              "size-4 shrink-0 cursor-pointer",
-              isMuted ? "opacity-40" : "opacity-60"
-            )}
-            onClick={toggleMute}
-            role="button"
-          />
-          <Slider
-            className={cn(className)}
-            max={100}
-            min={0}
-            onValueChange={(value) => {
-              if (value?.[0] !== undefined) {
-                setVolume({ volume: value[0] / 100 });
-                if (value[0] === 0) {
-                  toggleMute();
-                } else if (isMuted) {
-                  toggleMute();
-                }
-              }
-            }}
-            value={[volumePercent]}
-            {...props}
-          />
-          <Volume2Icon
-            aria-hidden="true"
-            className="size-4 shrink-0 opacity-60"
-          />
-        </div>
+        <DropdownMenuGroup>
+          <DropdownMenuLabel className="flex items-center justify-between">
+            <span>Volume</span>
+            <output className="font-mono text-foreground text-xs tabular-nums">
+              {effectiveVolumePercent}
+            </output>
+          </DropdownMenuLabel>
+        </DropdownMenuGroup>
+        <DropdownMenuSeparator />
+        <DropdownMenuGroup>
+          <DropdownMenuItem closeOnClick={false}>
+            <div className="flex items-center gap-2">
+              <AudioPlayerButton
+                aria-label={isMuted ? "Unmute" : "Mute"}
+                onClick={toggleMute}
+                size="icon-sm"
+                tooltipLabel={isMuted ? "Unmute" : "Mute"}
+                variant="ghost"
+              >
+                <SpeakerSlashIcon
+                  className={cn(
+                    "text-primary",
+                    isMuted ? "opacity-40" : "opacity-60"
+                  )}
+                />
+              </AudioPlayerButton>
+
+              <Fader
+                max={100}
+                min={0}
+                onValueChange={handleVolumeChange}
+                orientation="horizontal"
+                size="sm"
+                step={1}
+                value={effectiveVolumePercent}
+                {...props}
+              />
+              <AudioPlayerButton
+                aria-hidden="true"
+                aria-readonly
+                disabled
+                size="icon-sm"
+                tooltipLabel="Maximum volume"
+                variant="ghost"
+              >
+                <SpeakerHighIcon
+                  aria-hidden="true"
+                  className="text-primary opacity-60"
+                />
+              </AudioPlayerButton>
+            </div>
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -406,7 +394,7 @@ const AudioPlayerPlay = React.memo(
     const showSpinner = isLoading || isBuffering;
 
     const handleClick = React.useCallback(
-      (e: React.MouseEvent<HTMLButtonElement>) => {
+      (e: BaseUIEvent<React.MouseEvent<HTMLButtonElement>>) => {
         onClick?.(e);
         togglePlay();
       },
@@ -421,14 +409,13 @@ const AudioPlayerPlay = React.memo(
         disabled={showSpinner || !currentTrack}
         onClick={handleClick}
         size={size}
-        tooltip
         tooltipLabel={isPlaying ? "Pause" : "Play"}
         variant={variant}
         {...props}
       >
-        {showSpinner && <Loader2Icon className="animate-spin" />}
-        {!showSpinner && isPlaying && <PauseIcon fill="currentColor" />}
-        {!(showSpinner || isPlaying) && <PlayIcon fill="currentColor" />}
+        {showSpinner && <Spinner />}
+        {!showSpinner && isPlaying && <PauseIcon weight="fill" />}
+        {!(showSpinner || isPlaying) && <PlayIcon weight="fill" />}
       </AudioPlayerButton>
     );
   }
@@ -443,9 +430,11 @@ const AudioPlayerRewind = React.memo(
     ...props
   }: React.ComponentProps<typeof AudioPlayerButton>) => {
     const currentTime = useAudioStore((state) => state.currentTime);
+    const duration = useAudioStore((state) => state.duration);
     const seek = useAudioStore((state) => state.seek);
     const currentTrack = useAudioStore((state) => state.currentTrack);
-    const isLiveStream = currentTrack ? isLive(currentTrack) : false;
+    const { htmlAudio } = useAudio();
+    const isLiveStream = htmlAudio.isLive(duration);
 
     const seekBackward = React.useCallback(
       (seconds = 10) => {
@@ -455,13 +444,12 @@ const AudioPlayerRewind = React.memo(
       [currentTime, seek]
     );
 
-    const disableSeekBackward = React.useMemo(
-      () => !currentTrack || currentTime <= 0 || isLiveStream,
-      [currentTrack, currentTime, isLiveStream]
-    );
+    const disableSeekBackward =
+      !currentTrack || currentTime <= 0 || isLiveStream;
 
     return (
       <AudioPlayerButton
+        aria-label={isLiveStream ? "Skip backward disabled" : "Skip backward"}
         className={cn(className)}
         data-slot="audio-rewind-button"
         disabled={disableSeekBackward}
@@ -472,14 +460,13 @@ const AudioPlayerRewind = React.memo(
           }
         }}
         size={size}
-        tooltip
         tooltipLabel={
           isLiveStream ? "Not available for live streams" : "Skip backward"
         }
         variant={variant}
         {...props}
       >
-        <RewindIcon fill="currentColor" />
+        <RewindIcon weight="fill" />
       </AudioPlayerButton>
     );
   }
@@ -497,7 +484,8 @@ const AudioPlayerFastForward = React.memo(
     const seek = useAudioStore((state) => state.seek);
     const duration = useAudioStore((state) => state.duration);
     const currentTrack = useAudioStore((state) => state.currentTrack);
-    const isLiveStream = currentTrack ? isLive(currentTrack) : false;
+    const { htmlAudio } = useAudio();
+    const isLiveStream = htmlAudio.isLive(duration);
 
     const seekForward = React.useCallback(
       (seconds = 10) => {
@@ -507,15 +495,14 @@ const AudioPlayerFastForward = React.memo(
       [duration, seek, currentTime]
     );
 
-    const disableSeekForward = React.useMemo(() => {
-      if (!currentTrack || isLiveStream) {
-        return true;
-      }
-      return duration > 0 && currentTime >= duration;
-    }, [currentTrack, currentTime, duration, isLiveStream]);
+    const disableSeekForward =
+      !currentTrack ||
+      isLiveStream ||
+      (duration > 0 && currentTime >= duration);
 
     return (
       <AudioPlayerButton
+        aria-label={isLiveStream ? "Skip forward disabled" : "Skip forward"}
         className={cn(className)}
         data-slot="audio-fast-forward-button"
         disabled={disableSeekForward}
@@ -526,14 +513,13 @@ const AudioPlayerFastForward = React.memo(
           }
         }}
         size={size}
-        tooltip
         tooltipLabel={
           isLiveStream ? "Not available for live streams" : "Skip forward"
         }
         variant={variant}
         {...props}
       >
-        <FastForwardIcon fill="currentColor" />
+        <FastForwardIcon weight="fill" />
       </AudioPlayerButton>
     );
   }
@@ -554,11 +540,15 @@ const AudioPlayerSkipForward = React.memo(
 
     const next = useAudioStore((state) => state.next);
 
-    const disableNext = React.useMemo(
-      () =>
-        !currentTrack ||
-        (currentQueueIndex === queueLength - 1 && repeatMode !== "all"),
-      [currentTrack, currentQueueIndex, queueLength, repeatMode]
+    const disableNext =
+      !currentTrack ||
+      (currentQueueIndex === queueLength - 1 && repeatMode !== "all");
+    const handleClick = React.useCallback(
+      (e: BaseUIEvent<React.MouseEvent<HTMLButtonElement>>) => {
+        onClick?.(e);
+        next();
+      },
+      [onClick, next]
     );
 
     return (
@@ -567,14 +557,13 @@ const AudioPlayerSkipForward = React.memo(
         className={cn(className)}
         data-slot="audio-skip-forward-button"
         disabled={disableNext}
-        onClick={next}
+        onClick={handleClick}
         size={size}
-        tooltip
         tooltipLabel="Next"
         variant={variant}
         {...props}
       >
-        <SkipForwardIcon fill="currentColor" />
+        <SkipForwardIcon weight="fill" />
       </AudioPlayerButton>
     );
   }
@@ -594,24 +583,29 @@ const AudioPlayerSkipBack = React.memo(
 
     const previous = useAudioStore((state) => state.previous);
 
-    const disablePrevious = React.useMemo(
-      () => !currentTrack || (currentQueueIndex === 0 && repeatMode !== "all"),
-      [currentTrack, currentQueueIndex, repeatMode]
+    const disablePrevious =
+      !currentTrack || (currentQueueIndex === 0 && repeatMode !== "all");
+    const handleClick = React.useCallback(
+      (e: BaseUIEvent<React.MouseEvent<HTMLButtonElement>>) => {
+        onClick?.(e);
+        previous();
+      },
+      [onClick, previous]
     );
 
     return (
       <AudioPlayerButton
+        aria-label="Previous"
         className={cn(className)}
         data-slot="audio-skip-back-button"
         disabled={disablePrevious}
-        onClick={previous}
+        onClick={handleClick}
         size={size}
-        tooltip
         tooltipLabel="Previous"
         variant={variant}
         {...props}
       >
-        <SkipBackIcon fill="currentColor" />
+        <SkipBackIcon weight="fill" />
       </AudioPlayerButton>
     );
   }

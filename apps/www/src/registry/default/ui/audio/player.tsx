@@ -1,20 +1,20 @@
 "use client";
 
-import { cva, type VariantProps } from "class-variance-authority";
+import type { BaseUIEvent } from "@base-ui/react";
 import {
+  BroadcastIcon,
   FastForwardIcon,
-  Loader2Icon,
   PauseIcon,
   PlayIcon,
-  RadioIcon,
   RewindIcon,
   SkipBackIcon,
   SkipForwardIcon,
-  Volume1Icon,
-  Volume2Icon,
-  VolumeIcon,
-  VolumeXIcon,
-} from "lucide-react";
+  SpeakerHighIcon,
+  SpeakerLowIcon,
+  SpeakerNoneIcon,
+  SpeakerSlashIcon,
+} from "@phosphor-icons/react";
+import { cva, type VariantProps } from "class-variance-authority";
 import React from "react";
 import { useAudio } from "@/registry/default/hooks/use-audio";
 import { useAudioStore } from "@/registry/default/lib/audio-store";
@@ -26,8 +26,13 @@ import { Button, type buttonVariants } from "@/registry/default/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/registry/default/ui/dropdown-menu";
+import { Spinner } from "@/registry/default/ui/spinner";
 import {
   Tooltip,
   TooltipContent,
@@ -46,10 +51,7 @@ function AudioPlayerButton({
   const button = (
     <Button
       aria-label={props["aria-label"] ?? tooltipLabel}
-      className={cn(
-        "[&_svg.fill-current]:fill-primary [&_svg]:text-primary",
-        className
-      )}
+      className={cn("[&_svg]:text-primary", className)}
       {...props}
     />
   );
@@ -57,7 +59,7 @@ function AudioPlayerButton({
   if (tooltipLabel) {
     return (
       <Tooltip>
-        <TooltipTrigger asChild>{button}</TooltipTrigger>
+        <TooltipTrigger render={button} />
         <TooltipContent sideOffset={4}>{tooltipLabel}</TooltipContent>
       </Tooltip>
     );
@@ -74,7 +76,7 @@ function AudioPlayer({
   return (
     <div
       className={cn(
-        "w-full rounded-(--radius) border bg-card p-1.5",
+        "w-full rounded-4xl bg-card p-4 shadow-md ring-1 ring-foreground/5 dark:ring-foreground/10",
         className
       )}
       data-slot="audio-player"
@@ -178,7 +180,9 @@ const AudioPlayerTimeDisplay = ({
       data-slot="audio-time-display"
       {...props}
     >
-      {showLiveIcon && <RadioIcon className="size-3 animate-pulse" />}
+      {showLiveIcon && (
+        <BroadcastIcon className="size-3 shrink-0 animate-pulse" />
+      )}
       {timeValue}
     </time>
   );
@@ -253,15 +257,15 @@ const AudioPlayerVolume = ({
 
   const getVolumeIcon = () => {
     if (isMuted || volume === 0) {
-      return VolumeXIcon;
+      return SpeakerSlashIcon;
     }
     if (volumePercent < 33) {
-      return VolumeIcon;
+      return SpeakerNoneIcon;
     }
     if (volumePercent < 66) {
-      return Volume1Icon;
+      return SpeakerLowIcon;
     }
-    return Volume2Icon;
+    return SpeakerHighIcon;
   };
 
   const Icon = getVolumeIcon();
@@ -275,64 +279,83 @@ const AudioPlayerVolume = ({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <AudioPlayerButton
-          className={cn("hidden md:flex", className)}
-          data-slot="audio-volume-button"
-          size={size}
-          tooltipLabel={
-            isMuted ? "Muted" : `Volume ${Math.round(effectiveVolumePercent)}%`
-          }
-          variant={variant}
-        >
-          <Icon className={cn("text-primary", isMuted && "opacity-40")} />
-        </AudioPlayerButton>
+      <DropdownMenuTrigger
+        render={
+          <AudioPlayerButton
+            className={cn("hidden md:flex", className)}
+            data-slot="audio-volume-button"
+            size={size}
+            tooltipLabel={
+              isMuted
+                ? "Muted"
+                : `Volume ${Math.round(effectiveVolumePercent)}%`
+            }
+            variant={variant}
+          />
+        }
+      >
+        <Icon className={cn(isMuted && "opacity-40")} />
       </DropdownMenuTrigger>
       <DropdownMenuContent
+        align="center"
         className={cn(
-          "flex w-(--dropdown-menu-content-width) flex-col gap-1.5 p-1.5",
+          "flex w-(--dropdown-menu-content-width) flex-col gap-0",
           className
         )}
       >
-        <div className="flex w-full items-center justify-between px-1">
-          <span className="text-muted-foreground text-xs">Vol</span>
-          <span className="font-mono text-foreground text-xs tabular-nums">
-            {effectiveVolumePercent}
-          </span>
-        </div>
+        <DropdownMenuGroup>
+          <DropdownMenuLabel className="flex items-center justify-between">
+            <span>Volume</span>
+            <output className="font-mono text-foreground text-xs tabular-nums">
+              {effectiveVolumePercent}
+            </output>
+          </DropdownMenuLabel>
+        </DropdownMenuGroup>
+        <DropdownMenuSeparator />
+        <DropdownMenuGroup>
+          <DropdownMenuItem closeOnClick={false}>
+            <div className="flex items-center gap-2">
+              <AudioPlayerButton
+                aria-label={isMuted ? "Unmute" : "Mute"}
+                onClick={toggleMute}
+                size="icon-sm"
+                tooltipLabel={isMuted ? "Unmute" : "Mute"}
+                variant="ghost"
+              >
+                <SpeakerSlashIcon
+                  className={cn(
+                    "text-primary",
+                    isMuted ? "opacity-40" : "opacity-60"
+                  )}
+                />
+              </AudioPlayerButton>
 
-        <div className="flex items-center gap-2">
-          <AudioPlayerButton
-            aria-label={isMuted ? "Unmute" : "Mute"}
-            onClick={toggleMute}
-            size="icon-sm"
-            tooltipLabel={isMuted ? "Unmute" : "Mute"}
-            variant="ghost"
-          >
-            <VolumeXIcon
-              className={cn(
-                "size-4 text-primary",
-                isMuted ? "opacity-40" : "opacity-60"
-              )}
-            />
-          </AudioPlayerButton>
-
-          <Fader
-            max={100}
-            min={0}
-            onValueChange={handleVolumeChange}
-            orientation="horizontal"
-            size="sm"
-            step={1}
-            value={effectiveVolumePercent}
-            {...props}
-          />
-
-          <Volume2Icon
-            aria-hidden="true"
-            className="ml-1.5 size-4 shrink-0 text-primary opacity-60"
-          />
-        </div>
+              <Fader
+                max={100}
+                min={0}
+                onValueChange={handleVolumeChange}
+                orientation="horizontal"
+                size="sm"
+                step={1}
+                value={effectiveVolumePercent}
+                {...props}
+              />
+              <AudioPlayerButton
+                aria-hidden="true"
+                aria-readonly
+                disabled
+                size="icon-sm"
+                tooltipLabel="Maximum volume"
+                variant="ghost"
+              >
+                <SpeakerHighIcon
+                  aria-hidden="true"
+                  className="text-primary opacity-60"
+                />
+              </AudioPlayerButton>
+            </div>
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -371,7 +394,7 @@ const AudioPlayerPlay = React.memo(
     const showSpinner = isLoading || isBuffering;
 
     const handleClick = React.useCallback(
-      (e: React.MouseEvent<HTMLButtonElement>) => {
+      (e: BaseUIEvent<React.MouseEvent<HTMLButtonElement>>) => {
         onClick?.(e);
         togglePlay();
       },
@@ -390,9 +413,9 @@ const AudioPlayerPlay = React.memo(
         variant={variant}
         {...props}
       >
-        {showSpinner && <Loader2Icon className="animate-spin" />}
-        {!showSpinner && isPlaying && <PauseIcon fill="currentColor" />}
-        {!(showSpinner || isPlaying) && <PlayIcon fill="currentColor" />}
+        {showSpinner && <Spinner />}
+        {!showSpinner && isPlaying && <PauseIcon weight="fill" />}
+        {!(showSpinner || isPlaying) && <PlayIcon weight="fill" />}
       </AudioPlayerButton>
     );
   }
@@ -443,7 +466,7 @@ const AudioPlayerRewind = React.memo(
         variant={variant}
         {...props}
       >
-        <RewindIcon fill="currentColor" />
+        <RewindIcon weight="fill" />
       </AudioPlayerButton>
     );
   }
@@ -496,7 +519,7 @@ const AudioPlayerFastForward = React.memo(
         variant={variant}
         {...props}
       >
-        <FastForwardIcon fill="currentColor" />
+        <FastForwardIcon weight="fill" />
       </AudioPlayerButton>
     );
   }
@@ -521,7 +544,7 @@ const AudioPlayerSkipForward = React.memo(
       !currentTrack ||
       (currentQueueIndex === queueLength - 1 && repeatMode !== "all");
     const handleClick = React.useCallback(
-      (e: React.MouseEvent<HTMLButtonElement>) => {
+      (e: BaseUIEvent<React.MouseEvent<HTMLButtonElement>>) => {
         onClick?.(e);
         next();
       },
@@ -540,7 +563,7 @@ const AudioPlayerSkipForward = React.memo(
         variant={variant}
         {...props}
       >
-        <SkipForwardIcon fill="currentColor" />
+        <SkipForwardIcon weight="fill" />
       </AudioPlayerButton>
     );
   }
@@ -563,7 +586,7 @@ const AudioPlayerSkipBack = React.memo(
     const disablePrevious =
       !currentTrack || (currentQueueIndex === 0 && repeatMode !== "all");
     const handleClick = React.useCallback(
-      (e: React.MouseEvent<HTMLButtonElement>) => {
+      (e: BaseUIEvent<React.MouseEvent<HTMLButtonElement>>) => {
         onClick?.(e);
         previous();
       },
@@ -582,7 +605,7 @@ const AudioPlayerSkipBack = React.memo(
         variant={variant}
         {...props}
       >
-        <SkipBackIcon fill="currentColor" />
+        <SkipBackIcon weight="fill" />
       </AudioPlayerButton>
     );
   }

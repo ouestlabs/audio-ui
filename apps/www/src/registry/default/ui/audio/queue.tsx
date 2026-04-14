@@ -1,20 +1,15 @@
 "use client";
 
 import {
-  ListMusicIcon,
-  Repeat1Icon,
+  QueueIcon,
   RepeatIcon,
+  RepeatOnceIcon,
   ShuffleIcon,
   SlidersHorizontalIcon,
-  TrashIcon,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import type { ComponentProps } from "react";
 import React from "react";
-import {
-  type InsertMode,
-  type RepeatMode,
-  useAudioStore,
-} from "@/registry/default/lib/audio-store";
+import { useAudioStore } from "@/registry/default/lib/audio-store";
 import type { Track } from "@/registry/default/lib/html-audio";
 import { cn } from "@/registry/default/lib/utils";
 import { AudioTrackList } from "@/registry/default/ui/audio/track";
@@ -28,6 +23,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -35,9 +31,11 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuLabel,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/registry/default/ui/dropdown-menu";
 import { Toggle } from "@/registry/default/ui/toggle";
@@ -57,29 +55,27 @@ export interface AudioQueueButtonProps extends ComponentProps<typeof Button> {
 function AudioQueueButton({
   tooltipLabel,
   className,
+  children,
   ...props
 }: AudioQueueButtonProps) {
   const buttonProps = {
     ...props,
-    className: cn(
-      "[&_svg.fill-current]:fill-primary [&_svg]:text-primary",
-      className
-    ),
+    className: cn("[&_svg]:text-primary", className),
     "aria-label": props["aria-label"] ?? tooltipLabel,
   };
 
   if (tooltipLabel) {
     return (
       <Tooltip>
-        <TooltipTrigger asChild>
-          <Button {...buttonProps} />
+        <TooltipTrigger render={<Button {...buttonProps} />}>
+          {children}
         </TooltipTrigger>
         <TooltipContent sideOffset={4}>{tooltipLabel}</TooltipContent>
       </Tooltip>
     );
   }
 
-  return <Button {...buttonProps} />;
+  return <Button {...buttonProps}>{children}</Button>;
 }
 
 const AudioQueueRepeatMode = ({
@@ -92,7 +88,7 @@ const AudioQueueRepeatMode = ({
     changeRepeatMode();
   }, [changeRepeatMode]);
 
-  const Icon = repeatMode === "one" ? Repeat1Icon : RepeatIcon;
+  const Icon = repeatMode === "one" ? RepeatOnceIcon : RepeatIcon;
   let repeatTooltip = "Disable repeat";
   if (repeatMode === "one") {
     repeatTooltip = "Repeat this track";
@@ -102,26 +98,26 @@ const AudioQueueRepeatMode = ({
 
   const isPressed = repeatMode !== "none";
 
-  const toggle = (
-    <Toggle
-      aria-label={repeatTooltip}
-      className={cn(
-        "[&_svg.fill-current]:fill-primary [&_svg]:text-primary",
-        className,
-        isPressed && "bg-accent! text-accent-foreground!"
-      )}
-      data-slot="audio-queue-repeat-mode"
-      onPressedChange={handleRepeat}
-      pressed={isPressed}
-      {...props}
-    >
-      <Icon className="size-4" />
-    </Toggle>
-  );
-
   return (
     <Tooltip>
-      <TooltipTrigger asChild>{toggle}</TooltipTrigger>
+      <TooltipTrigger
+        render={
+          <Toggle
+            aria-label={repeatTooltip}
+            className={cn(
+              "[&_svg]:text-primary",
+              className,
+              isPressed && "bg-accent! text-accent-foreground!"
+            )}
+            data-slot="audio-queue-repeat-mode"
+            onPressedChange={handleRepeat}
+            pressed={isPressed}
+            {...props}
+          />
+        }
+      >
+        <Icon />
+      </TooltipTrigger>
       <TooltipContent side="top" sideOffset={4}>
         {repeatTooltip}
       </TooltipContent>
@@ -148,26 +144,26 @@ const AudioQueueShuffle = ({
     [shuffle, unshuffle]
   );
 
-  const toggle = (
-    <Toggle
-      aria-label="Shuffle"
-      className={cn(
-        "[&_svg.fill-current]:fill-primary [&_svg]:text-primary",
-        className,
-        shuffleEnabled && "bg-accent! text-accent-foreground!"
-      )}
-      data-slot="audio-queue-shuffle"
-      onPressedChange={handleShuffle}
-      pressed={shuffleEnabled}
-      {...props}
-    >
-      <ShuffleIcon className="size-4" />
-    </Toggle>
-  );
-
   return (
     <Tooltip>
-      <TooltipTrigger asChild>{toggle}</TooltipTrigger>
+      <TooltipTrigger
+        render={
+          <Toggle
+            aria-label="Shuffle"
+            className={cn(
+              "[&_svg]:text-primary",
+              className,
+              shuffleEnabled && "bg-accent! text-accent-foreground!"
+            )}
+            data-slot="audio-queue-shuffle"
+            onPressedChange={handleShuffle}
+            pressed={shuffleEnabled}
+            {...props}
+          />
+        }
+      >
+        <ShuffleIcon />
+      </TooltipTrigger>
       <TooltipContent side="top" sideOffset={4}>
         Shuffle {shuffleEnabled ? "on" : "off"}
       </TooltipContent>
@@ -189,49 +185,52 @@ const AudioQueuePreferences = ({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <AudioQueueButton
-          className={cn(className)}
-          data-slot="audio-queue-preferences-trigger"
-          size={size}
-          tooltipLabel={tooltipLabel}
-          variant={variant}
-          {...props}
-        >
-          <SlidersHorizontalIcon className="size-4" />
-        </AudioQueueButton>
+      <DropdownMenuTrigger
+        render={
+          <AudioQueueButton
+            className={cn(className)}
+            data-slot="audio-queue-preferences-trigger"
+            size={size}
+            tooltipLabel={tooltipLabel}
+            variant={variant}
+            {...props}
+          />
+        }
+      >
+        <SlidersHorizontalIcon />
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        className={cn("w-45", className)}
+        className={cn(className)}
         data-slot="audio-queue-preferences-content"
       >
-        <DropdownMenuLabel className="text-muted-foreground">
-          Repeat Mode
-        </DropdownMenuLabel>
-        <DropdownMenuRadioGroup
-          onValueChange={(value) => setRepeatMode(value as RepeatMode)}
-          value={repeatMode}
-        >
-          <DropdownMenuRadioItem value="none">None</DropdownMenuRadioItem>
-          <DropdownMenuRadioItem value="one">One</DropdownMenuRadioItem>
-          <DropdownMenuRadioItem value="all">All</DropdownMenuRadioItem>
-        </DropdownMenuRadioGroup>
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>Repeat Mode</DropdownMenuLabel>
+          <DropdownMenuRadioGroup
+            onValueChange={(value) => setRepeatMode(value)}
+            value={repeatMode}
+          >
+            <DropdownMenuRadioItem value="none">None</DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="one">One</DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="all">All</DropdownMenuRadioItem>
+          </DropdownMenuRadioGroup>
+        </DropdownMenuGroup>
 
-        <DropdownMenuLabel className="text-muted-foreground">
-          Insert Mode
-        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
 
-        <DropdownMenuRadioGroup
-          onValueChange={(value) => setInsertMode(value as InsertMode)}
-          value={insertMode}
-        >
-          <DropdownMenuRadioItem value="first">First</DropdownMenuRadioItem>
-          <DropdownMenuRadioItem value="last">Last</DropdownMenuRadioItem>
-          <DropdownMenuRadioItem value="after">
-            After Current
-          </DropdownMenuRadioItem>
-        </DropdownMenuRadioGroup>
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>Insert Mode</DropdownMenuLabel>
+          <DropdownMenuRadioGroup
+            onValueChange={(value) => setInsertMode(value)}
+            value={insertMode}
+          >
+            <DropdownMenuRadioItem value="first">First</DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="last">Last</DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="after">
+              After Current
+            </DropdownMenuRadioItem>
+          </DropdownMenuRadioGroup>
+        </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -324,14 +323,19 @@ const AudioQueue = React.memo(
         }}
         open={dialogOpen}
       >
-        <DialogTrigger asChild>
-          <AudioQueueButton size="icon" tooltipLabel="Queue" variant="outline">
-            <ListMusicIcon />
-          </AudioQueueButton>
+        <DialogTrigger
+          render={
+            <AudioQueueButton
+              size="icon"
+              tooltipLabel="Queue"
+              variant="outline"
+            />
+          }
+        >
+          <QueueIcon />
         </DialogTrigger>
         <DialogContent
           aria-label="Select a track"
-          className="rounded-xl border-none bg-clip-padding p-2 pb-11 shadow-2xl ring-4 ring-neutral-200/80 dark:bg-neutral-900 dark:ring-neutral-800"
           data-slot="audio-queue"
           showCloseButton={false}
         >
@@ -342,7 +346,6 @@ const AudioQueue = React.memo(
             </DialogDescription>
           </DialogHeader>
           <Command
-            className="rounded-none bg-transparent **:data-[slot=command-input-wrapper]:mb-0 **:data-[slot=command-input-wrapper]:h-9! **:data-[slot=command-input]:h-9! **:data-[slot=command-input-wrapper]:rounded-md **:data-[slot=command-input-wrapper]:border **:data-[slot=command-input-wrapper]:border-input **:data-[slot=command-input-wrapper]:bg-input/50 **:data-[slot=command-input]:py-0"
             filter={(value, search, keywords) => {
               const extendValue = `${value} ${keywords?.join(" ") || ""}`;
               if (extendValue.toLowerCase().includes(search.toLowerCase())) {
@@ -356,9 +359,8 @@ const AudioQueue = React.memo(
               placeholder={searchPlaceholder}
               value={searchQuery}
             />
-            <CommandList className="pt-2 pb-1">
+            <CommandList>
               <AudioTrackList
-                className="mx-0"
                 emptyDescription={emptyDescription}
                 emptyLabel={emptyLabel}
                 filterQuery={searchQuery}
@@ -368,17 +370,16 @@ const AudioQueue = React.memo(
               />
             </CommandList>
           </Command>
-          <div className="absolute inset-x-0 bottom-0 z-20 flex items-center gap-2 rounded-b-xl border-t border-t-neutral-100 bg-neutral-50 p-1 font-medium text-muted-foreground text-xs dark:border-t-neutral-700 dark:bg-neutral-800">
+          <DialogFooter>
             <AudioQueueButton
               className="w-full"
               onClick={handleClearQueue}
-              size="sm"
               title="Clear queue"
               variant="destructive"
             >
-              <TrashIcon className="size-4" /> Clear
+              Clear
             </AudioQueueButton>
-          </div>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     );

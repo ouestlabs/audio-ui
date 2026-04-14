@@ -16,9 +16,6 @@
       "target": "components/audio/blocks/block-player.tsx"
     }
   ],
-  "categories": [
-    "player",
-    "queue"
-  ],
+  "categories": ["player", "queue"],
   "type": "registry:block"
 }

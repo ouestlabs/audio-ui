@@ -1,4 +1,4 @@
-import { FileIcon } from "lucide-react";
+import { FileIcon } from "@phosphor-icons/react/dist/ssr";
 
 type IconProps = React.HTMLAttributes<SVGElement>;
 
@@ -33,24 +33,16 @@ export const Icons = {
   ),
   audioUi: (props: IconProps) => (
     <svg
-      fill="none"
-      height="24"
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth="2"
-      viewBox="0 0 24 24"
-      width="24"
+      fill="currentColor"
+      height="32"
+      viewBox="0 0 256 256"
+      width="32"
       xmlns="http://www.w3.org/2000/svg"
       {...props}
     >
       <title>Audio UI</title>
-      <path d="M2 10v3" />
-      <path d="M6 6v11" />
-      <path d="M10 3v18" />
-      <path d="M14 8v7" />
-      <path d="M18 5v13" />
-      <path d="M22 10v3" />
+      <path d="M208,96v64H48V96Z" opacity="0.2" />
+      <path d="M56,96v64a8,8,0,0,1-16,0V96a8,8,0,0,1,16,0ZM88,24a8,8,0,0,0-8,8V224a8,8,0,0,0,16,0V32A8,8,0,0,0,88,24Zm40,32a8,8,0,0,0-8,8V192a8,8,0,0,0,16,0V64A8,8,0,0,0,128,56Zm40,32a8,8,0,0,0-8,8v64a8,8,0,0,0,16,0V96A8,8,0,0,0,168,88Zm40-16a8,8,0,0,0-8,8v96a8,8,0,0,0,16,0V80A8,8,0,0,0,208,72Z" />
     </svg>
   ),
   v0: (props: IconProps) => (

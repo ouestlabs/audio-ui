@@ -1,10 +1,6 @@
 ---
 title: Audio Provider
 description: React provider component that manages audio playback lifecycle, state synchronization, and error handling.
-links:
-  doc:
-    - https://react.dev/reference/react/useEffect
-    - https://developer.mozilla.org/en-US/docs/Web/API/HTMLAudioElement
 ---
 
 The provider that connects the audio element to your app state.
@@ -17,24 +13,15 @@ The provider that connects the audio element to your app state.
     <TabsTrigger value="manual">Manual</TabsTrigger>
   </TabsList>
   <TabsContent value="cli">
-  ```bash
-  npx shadcn@latest add @audio/provider
-  ```
+    <Install component="provider" />
   </TabsContent>
 
   <TabsContent value="manual">
     <Steps>
       <Step>Install the runtime dependencies:</Step>
-
-        ```bash
-        npm install zustand
-        ```
-
+        <Install pkg="zustand" />
       <Step>Install the required registry components:</Step>
-
-        ```bash
-        npx shadcn@latest add @audio/store @audio/html @audio/use-audio
-        ```
+        <Install component="store html use-audio" />
 
       <Step>Copy and paste the following code into your project.</Step>
         <Source name="provider" title="components/audio/provider.tsx" />

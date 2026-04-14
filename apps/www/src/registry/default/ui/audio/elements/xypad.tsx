@@ -39,11 +39,11 @@ export function XYPad({
       <XYPadPrimitive.Slider
         className={cn(
           "relative block w-full cursor-crosshair touch-none select-none overflow-hidden",
-          "rounded-lg border border-border bg-card shadow-sm",
+          "rounded-4xl border border-transparent bg-card shadow-md ring-1 ring-foreground/5",
           "transition-[color,border-color,box-shadow] duration-150 ease-out motion-reduce:transition-none",
-          "hover:shadow-sm hover:ring-2 hover:ring-ring/50",
-          "focus-visible:border-ring focus-visible:shadow-sm focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
-          "active:border-ring active:shadow-sm active:ring-2 active:ring-ring",
+          "hover:shadow-md hover:ring-2 hover:ring-ring/50 dark:ring-foreground/10",
+          "focus-visible:border-ring focus-visible:shadow-md focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
+          "active:border-ring active:shadow-md active:ring-2 active:ring-ring",
           "data-[disabled=true]:pointer-events-none data-[disabled=true]:cursor-not-allowed data-[disabled=true]:opacity-50",
           xypadVariants({ size }),
           className
@@ -104,8 +104,8 @@ export function XYPad({
         {valueDisplay === "visible" && (
           <XYPadPrimitive.ValueDisplay
             className={cn(
-              "absolute top-1.5 right-1.5 z-10",
-              "rounded-sm border border-border bg-background/80 backdrop-blur-sm",
+              "absolute top-2.5 right-2.5 z-10",
+              "rounded-2xl bg-background/90 ring-1 ring-foreground/10 backdrop-blur-md",
               "px-2 py-1 font-mono text-muted-foreground text-xs"
             )}
             formatValue={formatValue}

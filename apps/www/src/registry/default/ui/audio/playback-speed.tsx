@@ -1,6 +1,6 @@
 "use client";
 
-import { GaugeIcon } from "lucide-react";
+import { GaugeIcon } from "@phosphor-icons/react";
 import React from "react";
 import { useAudio } from "@/registry/default/hooks/use-audio";
 import { useAudioStore } from "@/registry/default/lib/audio-store";
@@ -9,6 +9,7 @@ import { Button } from "@/registry/default/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuLabel,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
@@ -42,36 +43,50 @@ function AudioPlaybackSpeedButton({
   tooltipLabel,
   disabled,
   className,
+  children,
   ...props
 }: AudioPlaybackSpeedButtonProps) {
-  const button = (
-    <Button
-      aria-label={props["aria-label"] ?? tooltipLabel}
-      className={cn(
-        "[&_svg.fill-current]:fill-primary [&_svg]:text-primary",
-        className
-      )}
-      disabled={disabled}
-      {...props}
-    />
-  );
+  const buttonClassName = cn("[&_svg]:text-primary", className);
 
   if (tooltipLabel) {
-    const trigger = disabled ? (
-      <span className="inline-block">{button}</span>
-    ) : (
-      button
-    );
-
     return (
       <Tooltip>
-        <TooltipTrigger asChild>{trigger}</TooltipTrigger>
+        <TooltipTrigger
+          render={
+            disabled ? (
+              <Button
+                aria-label={props["aria-label"] ?? tooltipLabel}
+                className={buttonClassName}
+                disabled={disabled}
+                {...props}
+              />
+            ) : (
+              <Button
+                aria-label={props["aria-label"] ?? tooltipLabel}
+                className={buttonClassName}
+                disabled={disabled}
+                {...props}
+              />
+            )
+          }
+        >
+          {children}
+        </TooltipTrigger>
         <TooltipContent sideOffset={4}>{tooltipLabel}</TooltipContent>
       </Tooltip>
     );
   }
 
-  return button;
+  return (
+    <Button
+      aria-label={props["aria-label"] ?? tooltipLabel}
+      className={buttonClassName}
+      disabled={disabled}
+      {...props}
+    >
+      {children}
+    </Button>
+  );
 }
 
 function AudioPlaybackSpeed({
@@ -110,41 +125,44 @@ function AudioPlaybackSpeed({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild disabled={isLiveStream}>
-        <AudioPlaybackSpeedButton
-          className={cn(className)}
-          data-slot="audio-playback-speed-button"
-          disabled={isLiveStream}
-          size={size}
-          tooltipLabel={tooltipLabel}
-          variant={variant}
-          {...props}
-        >
-          {!isIconSize && <GaugeIcon className="size-4" />}
-          <span className="font-mono text-xs">{displayLabel}</span>
-        </AudioPlaybackSpeedButton>
+      <DropdownMenuTrigger
+        disabled={isLiveStream}
+        render={
+          <AudioPlaybackSpeedButton
+            className={cn(className)}
+            data-slot="audio-playback-speed-button"
+            disabled={isLiveStream}
+            size={size}
+            tooltipLabel={tooltipLabel}
+            variant={variant}
+            {...props}
+          />
+        }
+      >
+        {!isIconSize && <GaugeIcon />}
+        <span className="font-mono text-xs">{displayLabel}</span>
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        className={cn("w-40", className)}
+        className={cn(className)}
         data-slot="audio-playback-speed-content"
       >
-        <DropdownMenuLabel className="text-muted-foreground">
-          Playback Speed
-        </DropdownMenuLabel>
-        <DropdownMenuRadioGroup
-          onValueChange={handleSpeedChange}
-          value={String(playbackRate)}
-        >
-          {speeds.map((speed) => (
-            <DropdownMenuRadioItem
-              key={speed.value}
-              value={String(speed.value)}
-            >
-              {speed.label}
-            </DropdownMenuRadioItem>
-          ))}
-        </DropdownMenuRadioGroup>
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>Playback Speed</DropdownMenuLabel>
+          <DropdownMenuRadioGroup
+            onValueChange={handleSpeedChange}
+            value={String(playbackRate)}
+          >
+            {speeds.map((speed) => (
+              <DropdownMenuRadioItem
+                key={speed.value}
+                value={String(speed.value)}
+              >
+                {speed.label}
+              </DropdownMenuRadioItem>
+            ))}
+          </DropdownMenuRadioGroup>
+        </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
   );

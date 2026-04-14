@@ -6,20 +6,12 @@ import {
 } from "fumadocs-mdx/config";
 import lastModified from "fumadocs-mdx/plugins/last-modified";
 import rehypePrettyCode from "rehype-pretty-code";
-import { z } from "zod";
 import { transformers } from "@/lib/highlight-code";
 
 export const docs = defineDocs({
   dir: "src/content/docs",
   docs: {
-    schema: frontmatterSchema.extend({
-      links: z
-        .object({
-          doc: z.union([z.string(), z.array(z.string())]).optional(),
-          api: z.union([z.string(), z.array(z.string())]).optional(),
-        })
-        .optional(),
-    }),
+    schema: frontmatterSchema,
     postprocess: {
       includeProcessedMarkdown: true,
     },

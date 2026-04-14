@@ -39,23 +39,22 @@ function ThemeHotkey() {
   const { resolvedTheme, setTheme } = useTheme();
 
   useEffect(() => {
+    function shouldIgnoreKeyDown(event: KeyboardEvent) {
+      return (
+        event.defaultPrevented ||
+        event.repeat ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.altKey ||
+        event.key.toLowerCase() !== "d" ||
+        isTypingTarget(event.target)
+      );
+    }
+
     function onKeyDown(event: KeyboardEvent) {
-      if (event.defaultPrevented || event.repeat) {
+      if (shouldIgnoreKeyDown(event)) {
         return;
       }
-
-      if (event.metaKey || event.ctrlKey || event.altKey) {
-        return;
-      }
-
-      if (event.key.toLowerCase() !== "d") {
-        return;
-      }
-
-      if (isTypingTarget(event.target)) {
-        return;
-      }
-
       setTheme(resolvedTheme === "dark" ? "light" : "dark");
     }
 

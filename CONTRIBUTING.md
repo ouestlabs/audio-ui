@@ -1,323 +1,424 @@
 # Contributing to `audio/ui`
 
-Thank you for your interest in contributing to `audio/ui`! This guide will help you understand how to contribute components, examples, particles, and library utilities to our design system.
+Thank you for your interest in contributing to `audio/ui`! This guide covers everything you need to know to add components, blocks, examples, and library utilities.
+
+---
 
 ## Overview
 
-**audio/ui** consists of several types of items:
+**audio/ui** has four types of registry items:
 
-1. **UI Components** - Core reusable components (`Button`, `Input`, `Slider`, etc.)
-2. **Examples** - Demonstrations of how to use UI components
-3. **Particles** - Pre-assembled audio player patterns and composite components
-4. **Library** - Utility functions and stores (`audio-store`, `audio-lib`, etc.)
+
+| Type              | Location                     | Purpose                                             |
+| ----------------- | ---------------------------- | --------------------------------------------------- |
+| **UI Components** | `registry/default/ui/`       | Styled wrappers around `@audio-ui/react` primitives |
+| **Blocks**        | `registry/default/blocks/`   | Pre-assembled, ready-to-use audio UI patterns       |
+| **Examples**      | `registry/default/examples/` | Focused demos showing how to use one component      |
+| **Library**       | `registry/default/lib/`      | Utilities and stores (`audio-store`, etc.)          |
+
+
+---
 
 ## Project Structure
 
 ```
-registry/default/
-├── ui/          # UI components
-├── examples/    # Example components
-├── particles/   # Particle components
-└── lib/         # Library utilities
+apps/www/src/registry/
+├── default/
+│   ├── ui/
+│   │   ├── audio/          # AudioProvider, AudioPlayer, AudioQueue, AudioTrack...
+│   │   └── audio/elements/ # Transport, Fader, Knob, XYPad, ChannelStrip (styled)
+│   ├── blocks/             # block-{component}-{variant}.tsx
+│   ├── examples/           # {component}-demo.tsx
+│   └── lib/                # audio-store.ts, audio-lib.ts...
+├── registry-ui.ts
+├── registry-components.ts
+├── registry-blocks.ts
+├── registry-examples.ts
+└── registry-lib.ts
 ```
+
+---
+
+## Block Development
+
+Blocks are the main contribution surface. They are pre-assembled, copy-paste-ready patterns that combine `audio/ui`components.
+
+### File Naming
+
+**Location:** `apps/www/src/registry/default/blocks/`
+
+**Convention:** `block-{component}-{variant}.tsx`
+
+- `{component}`: primary component used (e.g., `player`, `queue`, `fader`, `channel-strip`)
+- `{variant}`: optional descriptor for the variation (e.g., `widget`, `horizontal`, `multi`)
+- Use hyphens throughout
+
+**Examples:**
+
+- `block-{component}.tsx` — standard variant
+- `block-{component}-{variant}.tsx` — named variant (e.g., `horizontal`, `multi`, `compact`)
+
+### Function Signature
+
+**Default export named `Block` + PascalCase of the filename:**
+
+```tsx
+// block-{component}-{variant}.tsx
+export default function Block{Component}{Variant}() {
+  return (
+    // JSX here
+  );
+}
+```
+
+- One default export per file, no parameters
+
+### `"use client"` Directive
+
+**Add `"use client"` only when the block uses:**
+
+- React hooks (`useState`, `useEffect`, `useRef`, etc.)
+- Event handlers that modify state
+- Browser APIs (`window`, `document`, etc.)
+
+**Do NOT add `"use client"` for:**
+
+- Stateless components
+- Components that only render UI
+- Simple compositions without interactivity
+
+```tsx
+// ✅ Needs "use client" — uses state
+"use client";
+
+import { useState } from "react";
+import { ComponentName } from "@/registry/default/ui/audio/{component}";
+
+export default function Block{Component}() {
+  const [active, setActive] = useState(false);
+  return <ComponentName onActiveChange={setActive} />;
+}
+```
+
+```tsx
+// ✅ Does NOT need "use client" — stateless
+import { ComponentName } from "@/registry/default/ui/audio/{component}";
+
+export default function Block{Component}() {
+  return <ComponentName />;
+}
+```
+
+### Import Patterns
+
+**Icons — named imports from `@phosphor-icons/react` only:**
+
+```tsx
+import { IconName, OtherIconName } from "@phosphor-icons/react";
+```
+
+Never import the entire library (`import * from "@phosphor-icons/react"`).
+
+**Components — from the registry path:**
+
+```tsx
+import { ComponentName } from "@/registry/default/ui/audio/{component}";
+import { ElementName } from "@/registry/default/ui/audio/elements/{element}";
+```
+
+**React — named imports only, never the namespace:**
+
+```tsx
+import { useState, useEffect, useId, useRef } from "react";
+```
+
+Don't import React at all for stateless components.
+
+### Static Data
+
+Define static data **outside** the component function:
+
+```tsx
+const items = [
+  { id: "1", label: "Item One" },
+  { id: "2", label: "Item Two" },
+];
+
+export default function Block{Component}() {
+  return <ComponentName items={items} />;
+}
+```
+
+---
+
+## Icon Handling & Accessibility
+
+### Icon Sizing
+
+Never use numeric `size` props on icons. Use Tailwind classes when explicit sizing is needed:
+
+```tsx
+// ✅ Default context sizing (no size prop needed)
+<button type="button">
+  <IconName aria-hidden="true" />
+</button>
+
+// ✅ Explicit sizing with Tailwind
+<IconName className="size-4" aria-hidden="true" />
+<OtherIconName className="size-3.5" aria-hidden="true" />
+```
+
+Common icon sizes: `size-3` (12px) · `size-3.5` (14px) · `size-4` (16px, most common)
+
+### `aria-hidden` and `aria-label`
+
+
+| Context                                  | Rule                                                         |
+| ---------------------------------------- | ------------------------------------------------------------ |
+| Icon-only button                         | `aria-label` on the button, `aria-hidden="true"` on the icon |
+| Button with icon + text                  | `aria-hidden="true"` on the icon (text is the label)         |
+| Decorative icons                         | `aria-hidden="true"`                                         |
+| Semantic icons (e.g., status indicators) | No `aria-hidden` — let screen readers announce them          |
+
+
+```tsx
+// ✅ Icon-only button
+<button type="button" aria-label="Action label">
+  <IconName aria-hidden="true" />
+</button>
+
+// ✅ Button with text + icon
+<button type="button">
+  <IconName aria-hidden="true" />
+  Label
+</button>
+
+// ✅ Semantic icon (conveys meaning beyond decoration)
+<span role="status">
+  <IconName /> {/* no aria-hidden — meaning is conveyed by the icon */}
+  Status label
+</span>
+```
+
+Prefer `aria-label` over `sr-only` text spans for accessible names on interactive elements.
+
+---
+
+## Styling
+
+### Use Semantic Color Tokens
+
+Always use design tokens, never raw Tailwind color values:
+
+```tsx
+// ✅ Good
+className="text-muted-foreground"
+className="bg-destructive text-destructive-foreground"
+
+// ❌ Bad
+className="text-gray-500"
+className="bg-red-500 text-white"
+```
+
+### `border-border` is the Default
+
+Never add `border-border` — it's the default set in `globals.css`:
+
+```tsx
+// ❌ Redundant
+className="border-b border-border"
+
+// ✅ Correct
+className="border-b"
+```
+
+### Hover States with `data-slot`
+
+Prefer `in-*` selectors with `data-slot` over the `group` class pattern:
+
+```tsx
+// ❌ Avoid
+<div className="group">
+  <ArrowRight className="transition-transform group-hover:translate-x-0.5" />
+</div>
+
+// ✅ Prefer
+<div>
+  <ArrowRight
+    aria-hidden="true"
+    className="in-[[data-slot=button]:hover]:translate-x-0.5 transition-transform"
+  />
+</div>
+```
+
+---
+
+## Registry Metadata
+
+After creating a block, add its entry to `registry/registry-blocks.ts`:
+
+```ts
+{
+  name: "block-{component}-{variant}",
+  description: "Short description of what this block does",
+  type: "registry:block",
+  registryDependencies: ["@audio/{dep-a}", "@audio/{dep-b}"],
+  files: [{ path: "blocks/block-{component}-{variant}.tsx", type: "registry:block" }],
+  categories: ["{category}"],
+}
+```
+
+**Required fields:**
+
+- `name`: matches filename without `.tsx`
+- `description`: ≤ 15 words, focus on what it does
+- `type`: always `"registry:block"`
+- `registryDependencies`: `@audio/{name}` for audio/ui items, plain name for shadcn/ui
+- `files`: path + `type: "registry:block"`
+
+**Registry dependency format:**
+
+```ts
+registryDependencies: [
+  "@audio/{component}", // audio/ui component or lib → @audio/name
+  "{shadcn-component}", // official shadcn/ui        → plain name
+]
+```
+
+---
+
+## Adding New Blocks
+
+See the Block Development section above for naming, signature, and `"use client"` rules.
 
 ## Adding New Examples
 
-Examples are component demonstrations that showcase how to use our UI components.
-
-### Step 1: Create the Example Component
-
-1. Create a new file in `registry/default/examples/` with a descriptive name:
-   ```bash
-   touch registry/default/examples/audio-player-custom-demo.tsx
-   ```
-
-2. Write your example component:
-   ```tsx
-   // registry/default/examples/audio-player-custom-demo.tsx
-   import {
-     AudioPlayer,
-     AudioPlayerControlBar,
-     AudioPlayerPlay,
-     AudioPlayerSeekBar,
-   } from "@/registry/default/ui/audio/player"
-
-   export default function AudioPlayerCustomDemo() {
-     return (
-       <AudioPlayer>
-         <AudioPlayerControlBar>
-           <AudioPlayerPlay />
-           <AudioPlayerSeekBar />
-         </AudioPlayerControlBar>
-       </AudioPlayer>
-     )
-   }
-   ```
-
-### Step 2: Add to Registry Examples
-
-Add your example to `registry/registry-examples.ts`:
+### Step 1: Create the file
 
 ```tsx
-// registry/registry-examples.ts
-import type { Registry } from "shadcn/schema"
+// registry/default/examples/{component}-demo.tsx
+import { ComponentName } from "@/registry/default/ui/audio/{component}";
 
-export const examples: Registry["items"] = [
-  // ... existing examples
-  {
-    name: "audio-player-custom-demo",
-    description: "Custom audio player demo",
-    type: "registry:example",
-    registryDependencies: ["@audio/player"],
-    files: [
-      { path: "examples/audio-player-custom-demo.tsx", type: "registry:example" },
-    ],
-    categories: ["player"],
-  },
-]
+export default function {Component}Demo() {
+  return <ComponentName />;
+}
 ```
 
-**Important fields:**
-- `name`: Unique identifier (kebab-case)
-- `description`: Concise description
-- `type`: Always `"registry:example"`
-- `registryDependencies`: Array of registry components used (e.g., `["@audio/player"]`)
-- `files`: Array with the file path
-- `categories`: Array of categories for filtering
+### Step 2: Register in `registry-examples.ts`
 
-## Adding New Particles
-
-Particles are pre-assembled components that combine multiple UI components into ready-to-use solutions.
-
-### Step 1: Create the Particle Component
-
-1. Create a new file in `registry/default/particles/`:
-   ```bash
-   touch registry/default/particles/particle-custom-player.tsx
-   ```
-
-2. Write your particle component:
-   ```tsx
-   // registry/default/particles/particle-custom-player.tsx
-   import {
-     AudioPlayer,
-     AudioPlayerControlBar,
-     AudioPlayerPlay,
-   } from "@/registry/default/ui/audio/player"
-
-   export default function ParticleCustomPlayer() {
-     return (
-       <AudioPlayer>
-         <AudioPlayerControlBar>
-           <AudioPlayerPlay />
-         </AudioPlayerControlBar>
-       </AudioPlayer>
-     )
-   }
-   ```
-
-### Step 2: Add to Particles Index
-
-Add your particle to `registry/default/particles/index.tsx`:
-
-```tsx
-// registry/default/particles/index.tsx
-import ParticleCustomPlayer from "./particle-custom-player"
-
-export const particles: ParticleItem[] = [
-  // ... existing particles
-  {
-    id: "particle-custom-player",
-    component: ParticleCustomPlayer,
-    category: ["player"],
-    className: "**:data-[slot=particle-wrapper]:w-full", // Optional
-  },
-]
+```ts
+{
+  name: "{component}-demo",
+  description: "Short description of what this example shows",
+  type: "registry:example",
+  registryDependencies: ["@audio/{component}"],
+  files: [{ path: "examples/{component}-demo.tsx", type: "registry:example" }],
+  categories: ["{category}"],
+}
 ```
 
-**ParticleItem properties:**
-- `id`: Unique identifier (kebab-case)
-- `component`: The component to render
-- `category`: Array of categories for filtering
-- `className`: Optional CSS classes for the wrapper
-- `fullWidth`: Optional boolean for full-width display
-
-### Step 3: Add to Registry Particles
-
-Add your particle to `registry/registry-particles.ts`:
-
-```tsx
-// registry/registry-particles.ts
-import type { Registry } from "shadcn/schema"
-
-export const particles: Registry["items"] = [
-  // ... existing particles
-  {
-    name: "particle-custom-player",
-    description: "Custom audio player",
-    type: "registry:block",
-    registryDependencies: ["@audio/player", "@audio/store", "@audio/lib"],
-    files: [
-      { path: "particles/particle-custom-player.tsx", type: "registry:block" },
-    ],
-    categories: ["player"],
-  },
-]
-```
-
-**Important fields:**
-- `name`: Unique identifier (kebab-case)
-- `description`: Concise description
-- `type`: Always `"registry:block"`
-- `registryDependencies`: Array of registry components used
-- `files`: Array with the file path
-- `categories`: Array of categories for filtering
-
-## Adding New Library Utilities
-
-Library utilities are helper functions and stores that can be used across the project.
-
-### Step 1: Create the Library File
-
-1. Create a new file in `registry/default/lib/`:
-   ```bash
-   touch registry/default/lib/custom-utils.ts
-   ```
-
-2. Write your utility:
-   ```tsx
-   // registry/default/lib/custom-utils.ts
-   export function formatTime(seconds: number): string {
-     // Your implementation
-   }
-   ```
-
-### Step 2: Add to Registry Lib
-
-Add your library item to `registry/registry-lib.ts`:
-
-```tsx
-// registry/registry-lib.ts
-import type { Registry } from "shadcn/schema"
-
-export const lib: Registry["items"] = [
-  // ... existing lib items
-  {
-    name: "custom-utils",
-    description: "Custom utility functions",
-    type: "registry:lib",
-    dependencies: [],
-    registryDependencies: [],
-    files: [{ path: "lib/custom-utils.ts", type: "registry:lib" }],
-    categories: ["lib", "utils"],
-  },
-]
-```
+---
 
 ## Adding New UI Components
 
-UI components are core reusable components built on shadcn/ui.
-
-### Step 1: Create the Component
-
-1. Create a new file in `registry/default/ui/`:
-   ```bash
-   touch registry/default/ui/custom-component.tsx
-   ```
-
-2. Write your component following shadcn/ui patterns:
-   ```tsx
-   // registry/default/ui/custom-component.tsx
-   import { cn } from "@/registry/default/lib/utils"
-   import type * as React from "react"
-
-   export function CustomComponent({ className, ...props }: React.ComponentProps<"div">) {
-     return <div className={cn("custom-styles", className)} {...props} />
-   }
-   ```
-
-### Step 2: Add to Registry UI
-
-Add your component to `registry/registry-ui.ts`:
+### Step 1: Create the component
 
 ```tsx
-// registry/registry-ui.ts
-import type { Registry } from "shadcn/schema"
+// registry/default/ui/audio/elements/{component}.tsx
+import { cn } from "@/registry/default/lib/utils";
+import type * as React from "react";
 
-export const ui: Registry["items"] = [
-  // ... existing components
-  {
-    name: "custom-component",
-    type: "registry:ui",
-    dependencies: [],
-    registryDependencies: [],
-    files: [
-      { path: "ui/custom-component.tsx", type: "registry:ui" },
-    ],
-  },
-]
+export function {ComponentName}({ className, ...props }: React.ComponentProps<"div">) {
+  return <div className={cn("...", className)} {...props} />;
+}
 ```
 
-## Registry Dependencies
+### Step 2: Register in `registry-ui.ts`
 
-When adding dependencies, use the correct format:
-
-- **Official shadcn/ui components**: Use simple names (e.g., `"button"`, `"dialog"`)
-- **Custom components from this registry**: Use namespace format (e.g., `"@audio/player"`, `"@audio/fader"`)
-- **Library utilities**: Use namespace format with the registry name (e.g., `"@audio/store"`, `"@audio/lib"`)
-
-Example:
-```tsx
-registryDependencies: [
-  "@audio/player",      // Custom component
-  "@audio/fader",       // Custom component
-  "@audio/store", // Library store
-  "@audio/lib",   // Library utilities
-  "button",             // Official shadcn/ui
-  "dialog",             // Official shadcn/ui
-]
+```ts
+{
+  name: "{component}",
+  type: "registry:ui",
+  dependencies: ["@audio-ui/react"],
+  registryDependencies: [],
+  files: [{ path: "ui/audio/elements/{component}.tsx", type: "registry:ui" }],
+}
 ```
 
-## Final Steps
+---
 
-After adding your component, run these scripts:
+## Adding New Library Utilities
 
-```bash
-# Format code and fix linting issues
+### Step 1: Create the file
+
+```ts
+// registry/default/lib/{utility}.ts
+export function utilityFunction(input: InputType): OutputType {
+  // implementation
+}
+```
+
+### Step 2: Register in `registry-lib.ts`
+
+```ts
+{
+  name: "{utility}",
+  type: "registry:lib",
+  files: [{ path: "lib/{utility}.ts", type: "registry:lib" }],
+  categories: ["lib"],
+}
+```
+
+---
+
+## Final Steps (after any registry addition)
+
+```sh
+# 1. Fix linting
 bun run lint:fix
 
-# Build registry JSON files
-bun run build:registry
+# 2. Rebuild registry JSON
+cd apps/www && bun run build:registry
 ```
 
-## Guidelines
+---
 
-### Code Style
-- Use TypeScript
-- Follow existing naming conventions
-- Use meaningful, descriptive names
-- Keep components focused and single-purpose
-- Use shadcn/ui patterns for UI components
+## Block Creation Checklist
 
-### Categories
-- Use categories that correspond to actual components or features
-- For composite components, include all relevant categories
-- Categories are used for filtering on the particles page
+- File at `registry/default/blocks/block-{component}-{variant}.tsx`
+- Default export named `Block{ComponentVariant}` matching the filename
+- `"use client"` added only if hooks/state/event handlers are used
+- Components imported from `@/registry/default/ui/{component}`
+- Icons imported specifically from `@phosphor-icons/react`
+- `aria-label` on all icon-only interactive elements
+- `aria-hidden="true"` on all decorative icons
+- Semantic color tokens used (no raw Tailwind colors)
+- Static data defined outside the component function
+- Entry added to `registry-blocks.ts` with correct `registryDependencies`
+- `bun run lint:fix` passes
+- `bun run build:registry` succeeds
 
-### Descriptions
-- Keep descriptions concise but informative
-- Focus on what the component does, not how it's implemented
-- Descriptions appear in the registry and documentation
+---
 
-### Dependencies
-- Be accurate with `dependencies` (npm packages) and `registryDependencies` (registry components)
-- These are used for installation and dependency resolution
+## Code Style
+
+This project uses **Biome via Ultracite**. Run `npx ultracite fix` before committing.
+
+- TypeScript throughout — explicit types where they add clarity
+- `const` by default, `let` only when needed, never `var`
+- `async/await` over promise chains
+- `for...of` over `.forEach()`
+- Named imports from React (`import { useState } from "react"`)
+- No `console.log` in production code
+- Early returns over nested conditionals
+- Meaningful, descriptive names — no magic numbers
+
+---
 
 ## Getting Help
 
-- Check existing examples in `registry/default/examples/` for patterns
-- Look at similar components for reference
-- Review the [documentation](/apps/www/src/content/docs) for component usage
-- Check the [GitHub repository](https://github.com/ouestlabs/audio-ui) for issues and discussions
+- Browse existing blocks in `registry/default/blocks/` for patterns
+- Read docs at [https://audio-ui.xyz](https://audio-ui.xyz/docs)
+- Open an issue on [GitHub](https://github.com/ouestlabs/audio-ui/issues)
 
-Thank you for contributing to `audio/ui`! 🎉
+Thank you for contributing to `audio/ui`!

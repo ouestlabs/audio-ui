@@ -1,40 +1,70 @@
-import { CopyButton } from "@/components/copy-button";
+import type { ReactNode } from "react";
+import {
+  CodeFrame,
+  CodeFrameHeader,
+  CodeFrameScroll,
+  CopyButton,
+} from "@/components/md/code";
 import { highlightCode } from "@/lib/highlight-code";
-import { getIconForLanguageExtension } from "@/lib/icons";
+
+type CodeBlockVariant = "default" | "fill" | "compact";
 
 async function CodeBlock({
   code,
   language,
   title,
-  copyButton = true,
-  showLineNumbers = true,
+  variant = "default",
+  pathLabel,
+  actions,
 }: {
   code: string;
   language: string;
-  title?: string | undefined;
-  copyButton?: boolean;
-  showLineNumbers?: boolean;
+  title?: string;
+  /** "default" — standard; "fill" — stretches in flex containers; "compact" — no line numbers */
+  variant?: CodeBlockVariant;
+  pathLabel?: string;
+  /** Custom right-side actions. Pass `null` to suppress the default copy button. */
+  actions?: ReactNode;
 }) {
   const highlightedCode = await highlightCode(code, language, {
-    showLineNumbers,
+    showLineNumbers: variant !== "compact",
   });
 
+  const hasMetadata = Boolean(pathLabel || title);
+
+  const defaultCopy = (
+    <CopyButton
+      data-overlay={!hasMetadata || undefined}
+      size="icon-sm"
+      value={code}
+      variant="ghost"
+    />
+  );
+  const resolvedActions = actions !== undefined ? actions : defaultCopy;
+
   return (
-    <figure data-rehype-pretty-code-figure>
-      {title && (
-        <figcaption
-          className="flex items-center gap-2 text-code-foreground [&_svg]:size-5 [&_svg]:text-code-foreground sm:[&_svg]:size-4"
-          data-language={language}
-          data-rehype-pretty-code-title=""
-        >
-          {getIconForLanguageExtension(language)}
-          {title}
-        </figcaption>
+    <CodeFrame
+      data-has-metadata={hasMetadata || undefined}
+      data-variant={variant !== "default" ? variant : undefined}
+    >
+      {hasMetadata ? (
+        <CodeFrameHeader
+          actions={resolvedActions ?? undefined}
+          language={language}
+          pathLabel={pathLabel}
+          title={title}
+        />
+      ) : (
+        resolvedActions
       )}
-      {copyButton && <CopyButton value={code} />}
-      {/** biome-ignore lint/security/noDangerouslySetInnerHtml: shiki needs this */}
-      <div dangerouslySetInnerHTML={{ __html: highlightedCode }} />
-    </figure>
+      <CodeFrameScroll>
+        <div
+          className="min-w-0 [&_pre]:m-0"
+          /* biome-ignore lint/security/noDangerouslySetInnerHtml: shiki HTML is server-trusted */
+          dangerouslySetInnerHTML={{ __html: highlightedCode }}
+        />
+      </CodeFrameScroll>
+    </CodeFrame>
   );
 }
 

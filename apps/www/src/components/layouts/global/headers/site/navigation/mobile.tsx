@@ -14,6 +14,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/registry/default/ui/popover";
+import { ScrollArea } from "@/registry/default/ui/scroll-area";
 
 const TOP_LEVEL_SECTIONS = [
   { name: "Get Started", href: "/docs" },
@@ -42,50 +43,49 @@ export function MobileNav({
 
   return (
     <Popover
+      modal
       onOpenChange={(isOpen) => {
         setOpen(isOpen);
         posthog.capture("mobile-nav-toggled", { open: isOpen });
       }}
       open={open && isMobile}
     >
-      <PopoverTrigger asChild>
-        <Button
-          className={cn(
-            "extend-touch-target h-8 touch-manipulation items-center justify-start gap-2.5 p-0! hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 active:bg-transparent dark:hover:bg-transparent",
-            className
-          )}
-          variant="ghost"
-        >
-          <div className="relative flex h-8 w-4 items-center justify-center">
-            <div className="relative size-4">
-              <span
-                className={cn(
-                  "absolute left-0 block h-0.5 w-4 bg-foreground transition-all duration-100",
-                  open ? "-rotate-45 top-[0.4rem]" : "top-1"
-                )}
-              />
-              <span
-                className={cn(
-                  "absolute left-0 block h-0.5 w-4 bg-foreground transition-all duration-100",
-                  open ? "top-[0.4rem] rotate-45" : "top-2.5"
-                )}
-              />
-            </div>
-            <span className="sr-only">Toggle Menu</span>
+      <PopoverTrigger
+        render={
+          <Button
+            className={cn("extend-touch-target touch-manipulation", className)}
+            variant="ghost"
+          />
+        }
+      >
+        <div className="relative flex items-center justify-center">
+          <div className="relative size-4">
+            <span
+              className={cn(
+                "absolute left-0 block h-0.5 w-4 bg-foreground transition-all duration-100",
+                open ? "-rotate-45 top-[0.4rem]" : "top-1"
+              )}
+            />
+            <span
+              className={cn(
+                "absolute left-0 block h-0.5 w-4 bg-foreground transition-all duration-100",
+                open ? "top-[0.4rem] rotate-45" : "top-2.5"
+              )}
+            />
           </div>
-          <span className="flex h-8 items-center font-medium text-lg leading-none">
-            Menu
-          </span>
-        </Button>
+          <span className="sr-only">Toggle Menu</span>
+        </div>
+        <span className="flex items-center font-medium text-lg leading-none">
+          Menu
+        </span>
       </PopoverTrigger>
       <PopoverContent
         align="start"
-        alignOffset={-16}
-        className="no-scrollbar h-(--radix-popper-available-height) w-(--radix-popper-available-width) overflow-y-auto rounded-none border-none bg-background/90 p-0 shadow-none backdrop-blur duration-100"
+        className="h-(--available-height) w-(--available-width)"
         side="bottom"
-        sideOffset={16}
+        sideOffset={14}
       >
-        <div className="flex flex-col gap-12 overflow-auto px-6 py-6">
+        <ScrollArea>
           <div className="flex flex-col gap-4">
             <div className="font-medium text-muted-foreground text-sm">
               Menu
@@ -183,7 +183,7 @@ export function MobileNav({
               return null;
             })}
           </div>
-        </div>
+        </ScrollArea>
       </PopoverContent>
     </Popover>
   );

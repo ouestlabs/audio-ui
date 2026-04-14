@@ -14,23 +14,25 @@ export function CategoryNavigation({
     <div className="mx-auto mt-4 w-full max-w-4xl">
       <div className="flex flex-wrap justify-center gap-2">
         <Button
-          asChild
+          nativeButton={false}
+          render={<Link href="/blocks" />}
           size="sm"
           variant={currentCategory ? "outline" : "default"}
         >
-          <Link href="/blocks">All</Link>
+          All
         </Button>
         {categories?.map((cat) => {
           const isActive = cat.slug === currentCategory;
           return (
             <Button
-              asChild
               className="capitalize"
               key={cat.slug}
+              nativeButton={false}
+              render={<Link href={`/blocks/${cat.slug}`} />}
               size="sm"
               variant={isActive ? "default" : "outline"}
             >
-              <Link href={`/blocks/${cat.slug}`}>{cat.name}</Link>
+              {cat.name}
             </Button>
           );
         })}

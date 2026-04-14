@@ -56,28 +56,17 @@ You can add components **automatically with the shadcn CLI** or **manually by co
     <TabsTrigger value="manual">Manual</TabsTrigger>
   </TabsList>
   <TabsContent value="cli">
-  ```bash
-  npx shadcn@latest add @audio/player
-  ```
+    <Install component="player" />
   </TabsContent>
 
   <TabsContent value="manual">
     <Steps>
       <Step>Install the runtime dependencies:</Step>
-
-        ```bash
-        npm install zustand lucide-react
-        ```
+        <Install pkg="@phosphor-icons/react class-variance-authority @base-ui/react" />
       <Step>Install the required shadcn/ui primitives:</Step>
-
-        ```bash
-        npx shadcn@latest add button dialog dropdown-menu empty input item scroll-area toggle tooltip
-        ```
+        <Install shadcn="button dialog dropdown-menu empty input item scroll-area toggle tooltip" />
       <Step>Install the timeline and level primitives from this registry:</Step>
-
-        ```bash
-        npx shadcn@latest add @audio/transport @audio/fader
-        ```
+        <Install component="transport fader" />
       <Step>Copy and paste the following code into your project.</Step>
         <Source name="player" title="components/audio/player.tsx" />
       <Step>Copy the required provider file.</Step>
