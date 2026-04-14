@@ -270,12 +270,7 @@ export default function BlockPocketSynth() {
       />
       <ToggleGroup
         className="w-full"
-        onValueChange={(values) => {
-          const next = values.at(-1);
-          if (next) {
-            setWaveform(next as WaveformType);
-          }
-        }}
+        onValueChange={(values) => setWaveform(values[0] as WaveformType)}
         size="sm"
         value={[waveform]}
         variant="outline"
@@ -293,12 +288,7 @@ export default function BlockPocketSynth() {
       </ToggleGroup>
       <ToggleGroup
         className="w-full"
-        onValueChange={(values) => {
-          const next = values.at(-1);
-          if (next) {
-            setFilterType(next as FilterType);
-          }
-        }}
+        onValueChange={(values) => setFilterType(values[0] as FilterType)}
         size="sm"
         value={[filterType]}
         variant="outline"
