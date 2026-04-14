@@ -23,7 +23,7 @@ export function ThemeSelector({ className }: React.ComponentProps<"div">) {
       <Label className="sr-only" htmlFor="theme-selector">
         Theme
       </Label>
-      <Select onValueChange={setActiveTheme} value={value}>
+      <Select onValueChange={(v) => v && setActiveTheme(v)} value={value}>
         <SelectTrigger
           className="justify-start border-secondary bg-secondary text-secondary-foreground shadow-none *:data-[slot=select-value]:w-12"
           id="theme-selector"

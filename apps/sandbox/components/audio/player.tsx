@@ -16,10 +16,6 @@ import {
 } from "@phosphor-icons/react";
 import { cva, type VariantProps } from "class-variance-authority";
 import React from "react";
-import { useAudio } from "@/hooks/use-audio";
-import { useAudioStore } from "@/lib/audio-store";
-import { formatDuration } from "@/lib/html-audio";
-import { cn } from "@/lib/utils";
 import { Fader } from "@/components/audio/fader";
 import { Transport } from "@/components/audio/transport";
 import { Button, type buttonVariants } from "@/components/ui/button";
@@ -38,6 +34,10 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useAudio } from "@/hooks/use-audio";
+import { useAudioStore } from "@/lib/audio-store";
+import { formatDuration } from "@/lib/html-audio";
+import { cn } from "@/lib/utils";
 
 interface AudioPlayerButtonProps extends React.ComponentProps<typeof Button> {
   tooltipLabel?: string;

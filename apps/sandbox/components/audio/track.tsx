@@ -10,15 +10,7 @@ import {
 } from "@phosphor-icons/react";
 import { cva, type VariantProps } from "class-variance-authority";
 import React from "react";
-import { useAudio } from "@/hooks/use-audio";
-import { useAudioStore } from "@/lib/audio-store";
-import { formatDuration, type Track } from "@/lib/html-audio";
-import { cn } from "@/lib/utils";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -42,6 +34,10 @@ import {
   SortableItem,
   SortableList,
 } from "@/components/ui/sortable-list";
+import { useAudio } from "@/hooks/use-audio";
+import { useAudioStore } from "@/lib/audio-store";
+import { formatDuration, type Track } from "@/lib/html-audio";
+import { cn } from "@/lib/utils";
 
 /**
  * Props for the AudioTrack component.

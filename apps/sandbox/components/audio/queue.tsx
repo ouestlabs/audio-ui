@@ -9,16 +9,9 @@ import {
 } from "@phosphor-icons/react";
 import type { ComponentProps } from "react";
 import React from "react";
-import { useAudioStore } from "@/lib/audio-store";
-import type { Track } from "@/lib/html-audio";
-import { cn } from "@/lib/utils";
 import { AudioTrackList } from "@/components/audio/track";
 import { Button } from "@/components/ui/button";
-import {
-  Command,
-  CommandInput,
-  CommandList,
-} from "@/components/ui/command";
+import { Command, CommandInput, CommandList } from "@/components/ui/command";
 import {
   Dialog,
   DialogContent,
@@ -44,6 +37,9 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useAudioStore } from "@/lib/audio-store";
+import type { Track } from "@/lib/html-audio";
+import { cn } from "@/lib/utils";
 
 /**
  * Props for the AudioQueueButton component.
