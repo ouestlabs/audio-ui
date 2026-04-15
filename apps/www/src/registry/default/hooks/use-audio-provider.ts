@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useAudio } from "@/registry/default/hooks/use-audio";
 import {
   type AudioStore,
@@ -54,11 +54,11 @@ const parseAudioError = (
 
 export function useAudioProvider({ tracks = [] }: { tracks?: Track[] } = {}) {
   const { htmlAudio } = useAudio();
-  const preloadAudioRef = React.useRef<HTMLAudioElement | null>(null);
-  const errorRetryCountRef = React.useRef<number>(0);
-  const lastSeekTimeRef = React.useRef<number>(0);
+  const preloadAudioRef = useRef<HTMLAudioElement | null>(null);
+  const errorRetryCountRef = useRef<number>(0);
+  const lastSeekTimeRef = useRef<number>(0);
 
-  const setState = React.useCallback(
+  const setState = useCallback(
     (
       partial:
         | Partial<AudioStore>
@@ -69,7 +69,7 @@ export function useAudioProvider({ tracks = [] }: { tracks?: Track[] } = {}) {
     []
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (tracks && tracks.length > 0) {
       const state = useAudioStore.getState();
       const currentQueue = state.queue;
@@ -90,7 +90,7 @@ export function useAudioProvider({ tracks = [] }: { tracks?: Track[] } = {}) {
     }
   }, [tracks]);
 
-  const retryPlayback = React.useCallback(
+  const retryPlayback = useCallback(
     async (audio: HTMLAudioElement) => {
       if (errorRetryCountRef.current >= MAX_ERROR_RETRIES) {
         return false;
@@ -131,8 +131,8 @@ export function useAudioProvider({ tracks = [] }: { tracks?: Track[] } = {}) {
     [htmlAudio]
   );
 
-  const lastUpdateTimeRef = React.useRef<number>(0);
-  const forceTimeUpdate = React.useCallback(() => {
+  const lastUpdateTimeRef = useRef<number>(0);
+  const forceTimeUpdate = useCallback(() => {
     const audio = htmlAudio.getAudioElement();
     if (!audio) {
       return;
@@ -144,7 +144,7 @@ export function useAudioProvider({ tracks = [] }: { tracks?: Track[] } = {}) {
     lastUpdateTimeRef.current = Date.now();
   }, [htmlAudio]);
 
-  const throttledTimeUpdate = React.useCallback(() => {
+  const throttledTimeUpdate = useCallback(() => {
     const now = Date.now();
     if (now - lastUpdateTimeRef.current < THROTTLE_INTERVAL) {
       return;
@@ -165,7 +165,7 @@ export function useAudioProvider({ tracks = [] }: { tracks?: Track[] } = {}) {
     }
   }, [htmlAudio]);
 
-  const preloadTrack = React.useCallback((song: Track) => {
+  const preloadTrack = useCallback((song: Track) => {
     if (!preloadAudioRef.current || preloadAudioRef.current.src === song.url) {
       return;
     }
@@ -182,7 +182,7 @@ export function useAudioProvider({ tracks = [] }: { tracks?: Track[] } = {}) {
     }
   }, []);
 
-  const preloadNextTrack = React.useCallback(() => {
+  const preloadNextTrack = useCallback(() => {
     if (!preloadAudioRef.current) {
       return;
     }
@@ -207,7 +207,7 @@ export function useAudioProvider({ tracks = [] }: { tracks?: Track[] } = {}) {
     preloadTrack(nextSong);
   }, [preloadTrack]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!canUseDOM()) {
       return;
     }
@@ -563,7 +563,7 @@ export function useAudioProvider({ tracks = [] }: { tracks?: Track[] } = {}) {
     forceTimeUpdate,
   ]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const unsubscribe = useAudioStore.subscribe(
       (state) => state.queue,
       (newQueue, oldQueue) => {

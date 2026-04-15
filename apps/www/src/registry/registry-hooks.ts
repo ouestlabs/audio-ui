@@ -14,13 +14,6 @@ export const hooks: Registry["items"] = [
     categories: ["audio"],
   },
   {
-    name: "use-audio-provider",
-    type: "registry:hook",
-    registryDependencies: ["@audio/use-audio", "@audio/store", "@audio/html"],
-    files: [{ path: "hooks/use-audio-provider.ts", type: "registry:hook" }],
-    categories: ["audio"],
-  },
-  {
     name: "use-sound",
     type: "registry:hook",
     registryDependencies: ["@audio/use-audio"],

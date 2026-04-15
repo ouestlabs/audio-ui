@@ -13,7 +13,6 @@ export const components: Registry["items"] = [
       "@audio/store",
       "@audio/html",
       "@audio/use-audio",
-      "@audio/use-audio-provider",
       "@audio/fader",
       "@audio/transport",
       "@audio/sortable-list",
@@ -34,6 +33,10 @@ export const components: Registry["items"] = [
       {
         path: "ui/audio/player.tsx",
         type: "registry:component",
+      },
+      {
+        path: "hooks/use-audio-provider.ts",
+        type: "registry:hook",
       },
     ],
   },
