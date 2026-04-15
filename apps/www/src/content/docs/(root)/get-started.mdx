@@ -21,22 +21,27 @@ npx shadcn@latest init
 
 Then, add the `registries` section to your `components.json` file:
 
-```json {18-18}  title="components.json" showLineNumbers 
+```json {23-23}  title="components.json" showLineNumbers 
 {
   "$schema": "https://ui.shadcn.com/schema.json",
-  "style": "default",
+  "style": "base-luma",
   "rsc": true,
   "tsx": true,
   "tailwind": {
     "config": "",
+    "prefix": "",
     "css": "src/styles/globals.css",
     "baseColor": "neutral",
     "cssVariables": true
   },
+  "iconLibrary": "phosphor",
+  "rtl": false,
   "aliases": {
     "components": "@/components",
     "utils": "@/lib/utils",
-    "ui": "@/components/ui"
+    "ui": "@/components/ui",
+    "lib": "@/lib",
+    "hooks": "@/hooks"
   },
   "registries": {
     "@audio": "https://audio-ui.xyz/r/{name}.json"
