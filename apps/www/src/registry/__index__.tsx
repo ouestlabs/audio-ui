@@ -10,86 +10,18 @@ export const Index: Record<string, any> = {
     name: "player",
     description: "",
     type: "registry:component",
-    registryDependencies: ["@audio/store","@audio/html","@audio/use-audio","@audio/provider","@audio/fader","@audio/transport","@shadcn/button","@shadcn/dropdown-menu","@shadcn/spinner","@shadcn/tooltip"],
+    registryDependencies: ["@audio/store","@audio/html","@audio/use-audio","@audio/fader","@audio/transport","@audio/sortable-list","@shadcn/button","@shadcn/dropdown-menu","@shadcn/spinner","@shadcn/tooltip","@shadcn/command","@shadcn/dialog","@shadcn/toggle","@shadcn/badge","@shadcn/empty","@shadcn/avatar","@shadcn/item","@shadcn/scroll-area"],
     files: [{
       path: "src/registry/default/ui/audio/player.tsx",
       type: "registry:component",
       target: ""
+    },{
+      path: "src/registry/default/hooks/use-audio-provider.ts",
+      type: "registry:hook",
+      target: ""
     }],
     component: React.lazy(async () => {
       const mod = await import("@/registry/default/ui/audio/player.tsx")
-      const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
-      return { default: mod.default || mod[exportName] }
-    }),
-    categories: undefined,
-    meta: undefined,
-  },
-  "provider": {
-    name: "provider",
-    description: "",
-    type: "registry:component",
-    registryDependencies: ["@audio/store","@audio/html","@audio/use-audio"],
-    files: [{
-      path: "src/registry/default/ui/audio/provider.tsx",
-      type: "registry:component",
-      target: ""
-    }],
-    component: React.lazy(async () => {
-      const mod = await import("@/registry/default/ui/audio/provider.tsx")
-      const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
-      return { default: mod.default || mod[exportName] }
-    }),
-    categories: undefined,
-    meta: undefined,
-  },
-  "queue": {
-    name: "queue",
-    description: "",
-    type: "registry:component",
-    registryDependencies: ["@audio/store","@audio/track","@shadcn/button","@shadcn/command","@shadcn/dialog","@shadcn/dropdown-menu","@shadcn/toggle","@shadcn/tooltip"],
-    files: [{
-      path: "src/registry/default/ui/audio/queue.tsx",
-      type: "registry:component",
-      target: ""
-    }],
-    component: React.lazy(async () => {
-      const mod = await import("@/registry/default/ui/audio/queue.tsx")
-      const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
-      return { default: mod.default || mod[exportName] }
-    }),
-    categories: undefined,
-    meta: undefined,
-  },
-  "track": {
-    name: "track",
-    description: "",
-    type: "registry:component",
-    registryDependencies: ["@audio/store","@audio/html","@audio/use-audio","@audio/sortable-list","@shadcn/badge","@shadcn/empty","@shadcn/avatar","@shadcn/button","@shadcn/item","@shadcn/scroll-area"],
-    files: [{
-      path: "src/registry/default/ui/audio/track.tsx",
-      type: "registry:component",
-      target: ""
-    }],
-    component: React.lazy(async () => {
-      const mod = await import("@/registry/default/ui/audio/track.tsx")
-      const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
-      return { default: mod.default || mod[exportName] }
-    }),
-    categories: undefined,
-    meta: undefined,
-  },
-  "playback-speed": {
-    name: "playback-speed",
-    description: "",
-    type: "registry:component",
-    registryDependencies: ["@audio/store","@audio/html","@audio/use-audio","@shadcn/button","@shadcn/dropdown-menu","@shadcn/tooltip"],
-    files: [{
-      path: "src/registry/default/ui/audio/playback-speed.tsx",
-      type: "registry:component",
-      target: ""
-    }],
-    component: React.lazy(async () => {
-      const mod = await import("@/registry/default/ui/audio/playback-speed.tsx")
       const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
       return { default: mod.default || mod[exportName] }
     }),
@@ -236,7 +168,7 @@ export const Index: Record<string, any> = {
     name: "player-queue-demo",
     description: "Audio player with queue demo",
     type: "registry:example",
-    registryDependencies: ["@audio/player","@audio/queue"],
+    registryDependencies: ["@audio/player"],
     files: [{
       path: "src/registry/default/examples/player-queue-demo.tsx",
       type: "registry:example",
@@ -268,144 +200,162 @@ export const Index: Record<string, any> = {
     categories: ["player"],
     meta: undefined,
   },
-  "queue-shuffle-repeat-demo": {
-    name: "queue-shuffle-repeat-demo",
+  "player-queue-shuffle-repeat-demo": {
+    name: "player-queue-shuffle-repeat-demo",
     description: "Minimal queue with shuffle and repeat controls",
     type: "registry:example",
-    registryDependencies: ["@audio/player","@audio/queue"],
+    registryDependencies: ["@audio/player"],
     files: [{
-      path: "src/registry/default/examples/queue-shuffle-repeat-demo.tsx",
+      path: "src/registry/default/examples/player-queue-shuffle-repeat-demo.tsx",
       type: "registry:example",
       target: ""
     }],
     component: React.lazy(async () => {
-      const mod = await import("@/registry/default/examples/queue-shuffle-repeat-demo.tsx")
+      const mod = await import("@/registry/default/examples/player-queue-shuffle-repeat-demo.tsx")
       const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
       return { default: mod.default || mod[exportName] }
     }),
     categories: ["queue"],
     meta: undefined,
   },
-  "queue-preferences-demo": {
-    name: "queue-preferences-demo",
+  "player-queue-preferences-demo": {
+    name: "player-queue-preferences-demo",
     description: "Minimal queue with preferences dropdown",
     type: "registry:example",
-    registryDependencies: ["@audio/player","@audio/queue"],
+    registryDependencies: ["@audio/player"],
     files: [{
-      path: "src/registry/default/examples/queue-preferences-demo.tsx",
+      path: "src/registry/default/examples/player-queue-preferences-demo.tsx",
       type: "registry:example",
       target: ""
     }],
     component: React.lazy(async () => {
-      const mod = await import("@/registry/default/examples/queue-preferences-demo.tsx")
+      const mod = await import("@/registry/default/examples/player-queue-preferences-demo.tsx")
       const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
       return { default: mod.default || mod[exportName] }
     }),
     categories: ["queue"],
     meta: undefined,
   },
-  "queue-all-controls-demo": {
-    name: "queue-all-controls-demo",
+  "player-queue-simple-demo": {
+    name: "player-queue-simple-demo",
+    description: "Stacked player with queue and preferences",
+    type: "registry:example",
+    registryDependencies: ["@audio/player"],
+    files: [{
+      path: "src/registry/default/examples/player-queue-simple-demo.tsx",
+      type: "registry:example",
+      target: ""
+    }],
+    component: React.lazy(async () => {
+      const mod = await import("@/registry/default/examples/player-queue-simple-demo.tsx")
+      const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
+      return { default: mod.default || mod[exportName] }
+    }),
+    categories: ["queue"],
+    meta: undefined,
+  },
+  "player-queue-all-controls-demo": {
+    name: "player-queue-all-controls-demo",
     description: "Queue with all controls (shuffle, repeat, preferences)",
     type: "registry:example",
-    registryDependencies: ["@audio/player","@audio/queue"],
+    registryDependencies: ["@audio/player"],
     files: [{
-      path: "src/registry/default/examples/queue-all-controls-demo.tsx",
+      path: "src/registry/default/examples/player-queue-all-controls-demo.tsx",
       type: "registry:example",
       target: ""
     }],
     component: React.lazy(async () => {
-      const mod = await import("@/registry/default/examples/queue-all-controls-demo.tsx")
+      const mod = await import("@/registry/default/examples/player-queue-all-controls-demo.tsx")
       const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
       return { default: mod.default || mod[exportName] }
     }),
     categories: ["queue"],
     meta: undefined,
   },
-  "track-demo": {
-    name: "track-demo",
+  "player-track-demo": {
+    name: "player-track-demo",
     description: "Minimal track component example",
     type: "registry:example",
-    registryDependencies: ["@audio/player","@audio/track"],
+    registryDependencies: ["@audio/player"],
     files: [{
-      path: "src/registry/default/examples/track-demo.tsx",
+      path: "src/registry/default/examples/player-track-demo.tsx",
       type: "registry:example",
       target: ""
     }],
     component: React.lazy(async () => {
-      const mod = await import("@/registry/default/examples/track-demo.tsx")
+      const mod = await import("@/registry/default/examples/player-track-demo.tsx")
       const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
       return { default: mod.default || mod[exportName] }
     }),
     categories: ["track"],
     meta: undefined,
   },
-  "track-list-demo": {
-    name: "track-list-demo",
+  "player-track-list-demo": {
+    name: "player-track-list-demo",
     description: "Track list with selection example",
     type: "registry:example",
-    registryDependencies: ["@audio/player","@audio/track"],
+    registryDependencies: ["@audio/player"],
     files: [{
-      path: "src/registry/default/examples/track-list-demo.tsx",
+      path: "src/registry/default/examples/player-track-list-demo.tsx",
       type: "registry:example",
       target: ""
     }],
     component: React.lazy(async () => {
-      const mod = await import("@/registry/default/examples/track-list-demo.tsx")
+      const mod = await import("@/registry/default/examples/player-track-list-demo.tsx")
       const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
       return { default: mod.default || mod[exportName] }
     }),
     categories: ["track"],
     meta: undefined,
   },
-  "track-list-grid-demo": {
-    name: "track-list-grid-demo",
+  "player-track-list-grid-demo": {
+    name: "player-track-list-grid-demo",
     description: "Track list with grid layout example",
     type: "registry:example",
-    registryDependencies: ["@audio/player","@audio/track"],
+    registryDependencies: ["@audio/player"],
     files: [{
-      path: "src/registry/default/examples/track-list-grid-demo.tsx",
+      path: "src/registry/default/examples/player-track-list-grid-demo.tsx",
       type: "registry:example",
       target: ""
     }],
     component: React.lazy(async () => {
-      const mod = await import("@/registry/default/examples/track-list-grid-demo.tsx")
+      const mod = await import("@/registry/default/examples/player-track-list-grid-demo.tsx")
       const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
       return { default: mod.default || mod[exportName] }
     }),
     categories: ["track","grid"],
     meta: undefined,
   },
-  "track-sortable-list-demo": {
-    name: "track-sortable-list-demo",
+  "player-track-sortable-list-demo": {
+    name: "player-track-sortable-list-demo",
     description: "Track list with sortable selection example",
     type: "registry:example",
-    registryDependencies: ["@audio/player","@audio/track"],
+    registryDependencies: ["@audio/player"],
     files: [{
-      path: "src/registry/default/examples/track-sortable-list-demo.tsx",
+      path: "src/registry/default/examples/player-track-sortable-list-demo.tsx",
       type: "registry:example",
       target: ""
     }],
     component: React.lazy(async () => {
-      const mod = await import("@/registry/default/examples/track-sortable-list-demo.tsx")
+      const mod = await import("@/registry/default/examples/player-track-sortable-list-demo.tsx")
       const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
       return { default: mod.default || mod[exportName] }
     }),
     categories: ["track","sortable"],
     meta: undefined,
   },
-  "track-sortable-list-grid-demo": {
-    name: "track-sortable-list-grid-demo",
+  "player-track-sortable-list-grid-demo": {
+    name: "player-track-sortable-list-grid-demo",
     description: "Track list with sortable selection and grid layout example",
     type: "registry:example",
-    registryDependencies: ["@audio/player","@audio/track"],
+    registryDependencies: ["@audio/player"],
     files: [{
-      path: "src/registry/default/examples/track-sortable-list-grid-demo.tsx",
+      path: "src/registry/default/examples/player-track-sortable-list-grid-demo.tsx",
       type: "registry:example",
       target: ""
     }],
     component: React.lazy(async () => {
-      const mod = await import("@/registry/default/examples/track-sortable-list-grid-demo.tsx")
+      const mod = await import("@/registry/default/examples/player-track-sortable-list-grid-demo.tsx")
       const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
       return { default: mod.default || mod[exportName] }
     }),
@@ -448,18 +398,18 @@ export const Index: Record<string, any> = {
     categories: ["sortable-list","ui"],
     meta: undefined,
   },
-  "playback-speed-demo": {
-    name: "playback-speed-demo",
+  "player-playback-speed-demo": {
+    name: "player-playback-speed-demo",
     description: "Playback speed component example",
     type: "registry:example",
-    registryDependencies: ["@audio/playback-speed","@audio/player"],
+    registryDependencies: ["@audio/player"],
     files: [{
-      path: "src/registry/default/examples/playback-speed-demo.tsx",
+      path: "src/registry/default/examples/player-playback-speed-demo.tsx",
       type: "registry:example",
       target: ""
     }],
     component: React.lazy(async () => {
-      const mod = await import("@/registry/default/examples/playback-speed-demo.tsx")
+      const mod = await import("@/registry/default/examples/player-playback-speed-demo.tsx")
       const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
       return { default: mod.default || mod[exportName] }
     }),
@@ -1006,7 +956,7 @@ export const Index: Record<string, any> = {
     name: "block-player",
     description: "Audio player",
     type: "registry:block",
-    registryDependencies: ["@audio/player","@audio/queue","@audio/store","@audio/html"],
+    registryDependencies: ["@audio/player","@audio/store","@audio/html"],
     files: [{
       path: "src/registry/default/blocks/block-player.tsx",
       type: "registry:block",
@@ -1024,7 +974,7 @@ export const Index: Record<string, any> = {
     name: "block-player-widget",
     description: "Audio player with track list",
     type: "registry:block",
-    registryDependencies: ["@audio/provider","@audio/player","@audio/queue","@audio/track","@audio/store","@audio/html"],
+    registryDependencies: ["@audio/player","@audio/store","@audio/html"],
     files: [{
       path: "src/registry/default/blocks/block-player-widget.tsx",
       type: "registry:block",
@@ -1042,7 +992,7 @@ export const Index: Record<string, any> = {
     name: "block-queue",
     description: "Queue controls",
     type: "registry:block",
-    registryDependencies: ["@audio/player","@audio/queue"],
+    registryDependencies: ["@audio/player"],
     files: [{
       path: "src/registry/default/blocks/block-queue.tsx",
       type: "registry:block",

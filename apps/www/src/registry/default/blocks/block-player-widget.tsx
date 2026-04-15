@@ -10,12 +10,10 @@ import {
   AudioPlayerSkipForward,
   AudioPlayerTimeDisplay,
   AudioPlayerVolume,
-} from "@/registry/default/ui/audio/player";
-import {
   AudioQueueRepeatMode,
   AudioQueueShuffle,
-} from "@/registry/default/ui/audio/queue";
-import { AudioTrackList } from "@/registry/default/ui/audio/track";
+  AudioTrackList,
+} from "@/registry/default/ui/audio/player";
 
 export default function BlockPlayerWidget() {
   return (

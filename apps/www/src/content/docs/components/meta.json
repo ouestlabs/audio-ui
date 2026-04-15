@@ -1,4 +1,4 @@
 {
   "title": "Components",
-  "pages": ["ui", "player", "provider", "queue", "track", "playback-speed"]
+  "pages": ["ui", "player"]
 }

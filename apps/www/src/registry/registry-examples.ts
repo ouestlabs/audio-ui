@@ -14,7 +14,7 @@ export const examples: Registry["items"] = [
     name: "player-queue-demo",
     description: "Audio player with queue demo",
     type: "registry:example",
-    registryDependencies: ["@audio/player", "@audio/queue"],
+    registryDependencies: ["@audio/player"],
     files: [
       {
         path: "examples/player-queue-demo.tsx",
@@ -37,104 +37,117 @@ export const examples: Registry["items"] = [
     categories: ["player"],
   },
   {
-    name: "queue-shuffle-repeat-demo",
+    name: "player-queue-shuffle-repeat-demo",
     description: "Minimal queue with shuffle and repeat controls",
     type: "registry:example",
-    registryDependencies: ["@audio/player", "@audio/queue"],
+    registryDependencies: ["@audio/player"],
     files: [
       {
-        path: "examples/queue-shuffle-repeat-demo.tsx",
+        path: "examples/player-queue-shuffle-repeat-demo.tsx",
         type: "registry:example",
       },
     ],
     categories: ["queue"],
   },
   {
-    name: "queue-preferences-demo",
+    name: "player-queue-preferences-demo",
     description: "Minimal queue with preferences dropdown",
     type: "registry:example",
-    registryDependencies: ["@audio/player", "@audio/queue"],
+    registryDependencies: ["@audio/player"],
     files: [
       {
-        path: "examples/queue-preferences-demo.tsx",
+        path: "examples/player-queue-preferences-demo.tsx",
         type: "registry:example",
       },
     ],
     categories: ["queue"],
   },
   {
-    name: "queue-all-controls-demo",
+    name: "player-queue-simple-demo",
+    description: "Stacked player with queue and preferences",
+    type: "registry:example",
+    registryDependencies: ["@audio/player"],
+    files: [
+      {
+        path: "examples/player-queue-simple-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    categories: ["queue"],
+  },
+  {
+    name: "player-queue-all-controls-demo",
     description: "Queue with all controls (shuffle, repeat, preferences)",
     type: "registry:example",
-    registryDependencies: ["@audio/player", "@audio/queue"],
+    registryDependencies: ["@audio/player"],
     files: [
       {
-        path: "examples/queue-all-controls-demo.tsx",
+        path: "examples/player-queue-all-controls-demo.tsx",
         type: "registry:example",
       },
     ],
     categories: ["queue"],
   },
   {
-    name: "track-demo",
+    name: "player-track-demo",
     description: "Minimal track component example",
     type: "registry:example",
-    registryDependencies: ["@audio/player", "@audio/track"],
+    registryDependencies: ["@audio/player"],
     files: [
       {
-        path: "examples/track-demo.tsx",
+        path: "examples/player-track-demo.tsx",
         type: "registry:example",
       },
     ],
     categories: ["track"],
   },
   {
-    name: "track-list-demo",
+    name: "player-track-list-demo",
     description: "Track list with selection example",
     type: "registry:example",
-    registryDependencies: ["@audio/player", "@audio/track"],
+    registryDependencies: ["@audio/player"],
     files: [
       {
-        path: "examples/track-list-demo.tsx",
+        path: "examples/player-track-list-demo.tsx",
         type: "registry:example",
       },
     ],
     categories: ["track"],
   },
   {
-    name: "track-list-grid-demo",
+    name: "player-track-list-grid-demo",
     description: "Track list with grid layout example",
     type: "registry:example",
-    registryDependencies: ["@audio/player", "@audio/track"],
+    registryDependencies: ["@audio/player"],
     files: [
       {
-        path: "examples/track-list-grid-demo.tsx",
+        path: "examples/player-track-list-grid-demo.tsx",
         type: "registry:example",
       },
     ],
     categories: ["track", "grid"],
   },
   {
-    name: "track-sortable-list-demo",
+    name: "player-track-sortable-list-demo",
     description: "Track list with sortable selection example",
     type: "registry:example",
-    registryDependencies: ["@audio/player", "@audio/track"],
+    registryDependencies: ["@audio/player"],
     files: [
       {
-        path: "examples/track-sortable-list-demo.tsx",
+        path: "examples/player-track-sortable-list-demo.tsx",
         type: "registry:example",
       },
     ],
     categories: ["track", "sortable"],
   },
   {
-    name: "track-sortable-list-grid-demo",
+    name: "player-track-sortable-list-grid-demo",
     description: "Track list with sortable selection and grid layout example",
     type: "registry:example",
-    registryDependencies: ["@audio/player", "@audio/track"],
+    registryDependencies: ["@audio/player"],
     files: [
       {
-        path: "examples/track-sortable-list-grid-demo.tsx",
+        path: "examples/player-track-sortable-list-grid-demo.tsx",
         type: "registry:example",
       },
     ],
@@ -167,13 +180,13 @@ export const examples: Registry["items"] = [
     categories: ["sortable-list", "ui"],
   },
   {
-    name: "playback-speed-demo",
+    name: "player-playback-speed-demo",
     description: "Playback speed component example",
     type: "registry:example",
-    registryDependencies: ["@audio/playback-speed", "@audio/player"],
+    registryDependencies: ["@audio/player"],
     files: [
       {
-        path: "examples/playback-speed-demo.tsx",
+        path: "examples/player-playback-speed-demo.tsx",
         type: "registry:example",
       },
     ],

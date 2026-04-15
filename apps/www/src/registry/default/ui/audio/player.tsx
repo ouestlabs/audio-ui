@@ -4,40 +4,174 @@ import type { BaseUIEvent } from "@base-ui/react";
 import {
   BroadcastIcon,
   FastForwardIcon,
+  GaugeIcon,
+  MusicNotesIcon,
   PauseIcon,
   PlayIcon,
+  QueueIcon,
+  RepeatIcon,
+  RepeatOnceIcon,
   RewindIcon,
+  ShuffleIcon,
   SkipBackIcon,
   SkipForwardIcon,
+  SlidersHorizontalIcon,
   SpeakerHighIcon,
   SpeakerLowIcon,
   SpeakerNoneIcon,
   SpeakerSlashIcon,
+  XIcon,
 } from "@phosphor-icons/react";
 import { cva, type VariantProps } from "class-variance-authority";
 import React from "react";
 import { useAudio } from "@/registry/default/hooks/use-audio";
 import { useAudioStore } from "@/registry/default/lib/audio-store";
-import { formatDuration } from "@/registry/default/lib/html-audio";
+import { formatDuration, type Track } from "@/registry/default/lib/html-audio";
 import { cn } from "@/registry/default/lib/utils";
 import { Fader } from "@/registry/default/ui/audio/elements/fader";
 import { Transport } from "@/registry/default/ui/audio/elements/transport";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/registry/default/ui/avatar";
+import { Badge } from "@/registry/default/ui/badge";
 import { Button, type buttonVariants } from "@/registry/default/ui/button";
+import {
+  Command,
+  CommandInput,
+  CommandList,
+} from "@/registry/default/ui/command";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/registry/default/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/registry/default/ui/dropdown-menu";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/registry/default/ui/empty";
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemMedia,
+  ItemTitle,
+} from "@/registry/default/ui/item";
+import { ScrollArea } from "@/registry/default/ui/scroll-area";
+import {
+  SortableDragHandle,
+  SortableItem,
+  SortableList,
+} from "@/registry/default/ui/sortable-list";
 import { Spinner } from "@/registry/default/ui/spinner";
+import { Toggle } from "@/registry/default/ui/toggle";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/registry/default/ui/tooltip";
+import { useAudioProvider } from "../../hooks/use-audio-provider";
+
+const PLAYBACK_SPEEDS = [
+  { value: 0.5, label: "0.5x" },
+  { value: 0.75, label: "0.75x" },
+  { value: 1, label: "1x" },
+  { value: 1.25, label: "1.25x" },
+  { value: 1.5, label: "1.5x" },
+  { value: 2, label: "2x" },
+] as const;
+
+function AudioProvider({
+  tracks,
+  children,
+}: {
+  tracks: Track[];
+  children: React.ReactNode;
+}) {
+  useAudioProvider({ tracks });
+  return <>{children}</>;
+}
+const demoTracks: Track[] = [
+  {
+    id: "1",
+    title: "Beautiful Loop",
+    artist: "Flavio Concini",
+    album: "Pixabay Music",
+    url: "https://cdn.pixabay.com/audio/2024/10/21/audio_78251ef8e3.mp3",
+    genre: "Upbeat",
+  },
+  {
+    id: "2",
+    title: "Type",
+    artist: "Aliabbas Abasov",
+    album: "Pixabay Music",
+    url: "https://cdn.pixabay.com/audio/2024/02/28/audio_60f7a54400.mp3",
+    genre: "Hip Hop",
+  },
+  {
+    id: "3",
+    title: "Radio Tuxnet",
+    artist: "Tuxnet",
+    url: "/radio/live.aac?host=ice2.tuxnet.me",
+    genre: "Hip Hop",
+    artwork: "/icon",
+  },
+  {
+    id: "4",
+    title: "Live Radio",
+    artist: "Audio UI",
+    url: "https://radio.sevalla.app/live.aac",
+    artwork: "/icon",
+    genre: "Hip Hop",
+  },
+];
+
+function AudioPlayer({
+  children,
+  className,
+  tracks,
+  ...props
+}: React.ComponentProps<"div"> & { tracks?: Track[] }) {
+  const content = (
+    <div
+      className={cn(
+        "w-full rounded-4xl bg-card p-4 shadow-md ring-1 ring-foreground/5 dark:ring-foreground/10",
+        className
+      )}
+      data-slot="audio-player"
+      role="presentation"
+      {...props}
+    >
+      {children}
+    </div>
+  );
+
+  if (tracks) {
+    return <AudioProvider tracks={tracks}>{content}</AudioProvider>;
+  }
+
+  return content;
+}
 
 interface AudioPlayerButtonProps extends React.ComponentProps<typeof Button> {
   tooltipLabel?: string;
@@ -68,26 +202,6 @@ function AudioPlayerButton({
   return button;
 }
 
-function AudioPlayer({
-  children,
-  className,
-  ...props
-}: React.ComponentProps<"div">) {
-  return (
-    <div
-      className={cn(
-        "w-full rounded-4xl bg-card p-4 shadow-md ring-1 ring-foreground/5 dark:ring-foreground/10",
-        className
-      )}
-      data-slot="audio-player"
-      role="presentation"
-      {...props}
-    >
-      {children}
-    </div>
-  );
-}
-
 const audioControlBarVariants = cva(
   "group/audio-control-bar flex w-full min-w-0 items-center gap-1.5",
   {
@@ -103,10 +217,7 @@ const audioControlBarVariants = cva(
   }
 );
 
-/**
- * Props for the AudioPlayerControlBar component.
- */
-export type AudioPlayerControlBarProps = React.ComponentProps<"div"> &
+type AudioPlayerControlBarProps = React.ComponentProps<"div"> &
   VariantProps<typeof audioControlBarVariants>;
 
 const AudioPlayerControlBar = ({
@@ -122,10 +233,7 @@ const AudioPlayerControlBar = ({
   />
 );
 
-/**
- * Props for the AudioPlayerControlGroup component.
- */
-export type AudioPlayerControlGroupProps = React.ComponentProps<"div">;
+type AudioPlayerControlGroupProps = React.ComponentProps<"div">;
 
 const AudioPlayerControlGroup = ({
   className,
@@ -138,10 +246,7 @@ const AudioPlayerControlGroup = ({
   />
 );
 
-/**
- * Props for the AudioPlayerTimeDisplay component.
- */
-export type AudioPlayerTimeDisplayProps = React.ComponentProps<"time"> & {
+type AudioPlayerTimeDisplayProps = React.ComponentProps<"time"> & {
   remaining?: boolean;
 };
 
@@ -611,17 +716,886 @@ const AudioPlayerSkipBack = React.memo(
   }
 );
 
+type AudioTrackMediaMode =
+  | "cover"
+  | "drag-handle"
+  | "drag-handle-with-cover"
+  | "index";
+
+type AudioTrackActionMode =
+  | "none"
+  | "play-pause"
+  | "remove"
+  | "play-pause-with-remove";
+
+type AudioTrackProps = {
+  trackId?: string | number;
+  track?: Track;
+  index?: number;
+  onClick?: () => void;
+  onRemove?: (trackId: string) => void;
+  media?: AudioTrackMediaMode;
+  actions?: AudioTrackActionMode;
+  className?: string;
+} & (
+  | { trackId: string | number; track?: never }
+  | { track: Track; trackId?: never }
+  | { trackId?: never; track?: never }
+);
+
+function getPlayPauseTitle(isCurrent: boolean, isPlaying: boolean): string {
+  if (!isCurrent) {
+    return "Play this track";
+  }
+  if (isPlaying) {
+    return "Pause";
+  }
+  return "Play";
+}
+
+function handleTrackRemoveClick(
+  e: React.MouseEvent,
+  targetTrackId: string | number | undefined,
+  onRemove?: (id: string) => void
+) {
+  e.stopPropagation();
+  e.preventDefault();
+  if (targetTrackId !== undefined && onRemove) {
+    onRemove(String(targetTrackId));
+  }
+}
+
+function handleTrackPlayPauseClick(
+  e: React.MouseEvent,
+  isCurrent: boolean,
+  trackId: string | number | undefined,
+  queueItems: Track[],
+  togglePlay: () => void,
+  setQueueAndPlay: (tracks: Track[], index: number) => void
+) {
+  e.stopPropagation();
+  e.preventDefault();
+
+  if (isCurrent) {
+    togglePlay();
+    return;
+  }
+
+  const trackIndex = queueItems.findIndex((t) => t.id === trackId);
+  if (trackIndex >= 0) {
+    setQueueAndPlay(queueItems, trackIndex);
+  }
+}
+
+function renderTrackActions({
+  actions,
+  isCurrent,
+  onRemove,
+  onTrackRemoveClick,
+  onTrackPlayPauseClick,
+  playPauseTitle,
+  actualIsPlaying,
+}: {
+  actions: AudioTrackActionMode;
+  isCurrent: boolean;
+  onRemove?: (trackId: string) => void;
+  onTrackRemoveClick: (e: React.MouseEvent) => void;
+  onTrackPlayPauseClick: (e: React.MouseEvent) => void;
+  playPauseTitle: string;
+  actualIsPlaying: boolean;
+}) {
+  const showRemoveAction =
+    (actions === "remove" || actions === "play-pause-with-remove") &&
+    !isCurrent &&
+    !!onRemove;
+  const showPlayPauseAction =
+    actions === "play-pause" || actions === "play-pause-with-remove";
+
+  return (
+    <>
+      {showRemoveAction && (
+        <Button
+          aria-label="Remove track"
+          className="[&_svg]:text-primary"
+          onClick={onTrackRemoveClick}
+          size="icon-sm"
+          title="Remove"
+          variant="ghost"
+        >
+          <XIcon />
+        </Button>
+      )}
+      {showPlayPauseAction && (
+        <Button
+          aria-label={playPauseTitle}
+          className="[&_svg]:text-primary"
+          onClick={onTrackPlayPauseClick}
+          size="icon-sm"
+          title={playPauseTitle}
+          variant="ghost"
+        >
+          {actualIsPlaying ? (
+            <PauseIcon weight="fill" />
+          ) : (
+            <PlayIcon weight="fill" />
+          )}
+        </Button>
+      )}
+    </>
+  );
+}
+
+function renderTrackMedia(
+  media: AudioTrackMediaMode,
+  track: Track,
+  index?: number
+) {
+  const coverImage = track.artwork || track.images?.[0];
+  const cover = coverImage ? (
+    <Avatar>
+      <AvatarImage alt={track.title} src={coverImage} />
+      <AvatarFallback>
+        <MusicNotesIcon />
+      </AvatarFallback>
+    </Avatar>
+  ) : (
+    <div className="flex size-10 items-center justify-center rounded-full bg-muted">
+      <MusicNotesIcon className="size-4 text-muted-foreground" />
+    </div>
+  );
+
+  switch (media) {
+    case "drag-handle-with-cover":
+      return (
+        <div className="flex items-center gap-2">
+          <SortableDragHandle />
+          {cover}
+        </div>
+      );
+    case "drag-handle":
+      return <SortableDragHandle />;
+    case "cover":
+      return cover;
+    default: {
+      const displayIndex = index !== undefined ? index + 1 : "";
+      return (
+        <span className="text-muted-foreground/60 text-xs">{displayIndex}</span>
+      );
+    }
+  }
+}
+
+function AudioTrack({
+  trackId,
+  track: externalTrack,
+  index,
+  onClick,
+  onRemove,
+  media = "cover",
+  actions = "play-pause",
+  className,
+}: AudioTrackProps) {
+  const queue = useAudioStore((state) => state.queue);
+  const currentTrack = useAudioStore((state) => state.currentTrack);
+  const isPlaying = useAudioStore((state) => state.isPlaying);
+  const duration = useAudioStore((state) => state.duration);
+  const togglePlay = useAudioStore((state) => state.togglePlay);
+  const setQueueAndPlay = useAudioStore((state) => state.setQueueAndPlay);
+  const { htmlAudio } = useAudio();
+
+  const track =
+    externalTrack ??
+    (trackId ? queue.find((t) => String(t.id) === String(trackId)) : undefined);
+
+  if (!track) {
+    return null;
+  }
+
+  const isCurrent = currentTrack?.id === track.id;
+  const actualIsPlaying = isPlaying && isCurrent;
+  const trackDuration = isCurrent && duration > 0 ? duration : track.duration;
+
+  const isLiveTrack =
+    track.live === true ||
+    (trackDuration !== undefined &&
+      trackDuration !== null &&
+      htmlAudio.isLive(trackDuration));
+
+  const handleRemove = (e: React.MouseEvent) =>
+    handleTrackRemoveClick(e, track.id, onRemove);
+
+  const handlePlayPause = (e: React.MouseEvent) =>
+    handleTrackPlayPauseClick(
+      e,
+      isCurrent,
+      track.id,
+      queue,
+      togglePlay,
+      setQueueAndPlay
+    );
+  const playPauseTitle = getPlayPauseTitle(isCurrent, actualIsPlaying);
+
+  return (
+    <Item
+      className={cn(
+        "w-full cursor-pointer backdrop-blur-sm transition-all hover:bg-secondary/50",
+        className
+      )}
+      onClick={(e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        onClick?.();
+      }}
+      size="sm"
+      variant={isCurrent ? "outline" : "default"}
+    >
+      <ItemMedia>{renderTrackMedia(media, track, index)}</ItemMedia>
+      <ItemContent className="min-w-0 flex-1 gap-0 overflow-hidden">
+        <div className="flex items-center gap-1.5">
+          <ItemTitle>{track.title}</ItemTitle>
+          {isLiveTrack && (
+            <Badge variant="destructive">
+              <BroadcastIcon weight="fill" />
+              Live
+            </Badge>
+          )}
+        </div>
+        <ItemDescription>{track.artist}</ItemDescription>
+      </ItemContent>
+      {!isLiveTrack && trackDuration !== undefined && (
+        <ItemContent className="flex-none text-center">
+          <ItemDescription>{formatDuration(trackDuration)}</ItemDescription>
+        </ItemContent>
+      )}
+      <ItemActions>
+        {renderTrackActions({
+          actions,
+          isCurrent,
+          onRemove,
+          onTrackRemoveClick: handleRemove,
+          onTrackPlayPauseClick: handlePlayPause,
+          playPauseTitle,
+          actualIsPlaying,
+        })}
+      </ItemActions>
+    </Item>
+  );
+}
+
+const audioTrackListVariants = cva("w-full", {
+  variants: {
+    variant: {
+      default: "space-y-2",
+      grid: "grid grid-cols-1 gap-2 xl:grid-cols-2",
+    },
+  },
+  defaultVariants: {
+    variant: "default",
+  },
+});
+
+type AudioTrackListProps = {
+  tracks?: Track[];
+  onTrackSelect?: (index: number, track?: Track) => void;
+  onTrackRemove?: (trackId: string) => void;
+  mode?: "static" | "sortable";
+  media?: "cover" | "index";
+  actions?: AudioTrackActionMode;
+  emptyLabel?: string;
+  emptyDescription?: string;
+  filterQuery?: string;
+  filterFn?: (track: Track) => boolean;
+  className?: string;
+} & VariantProps<typeof audioTrackListVariants>;
+
+function AudioTrackList({
+  tracks: externalTracks,
+  onTrackSelect,
+  onTrackRemove,
+  mode = "static",
+  media = "cover",
+  actions,
+  variant = "default",
+  emptyLabel = "No tracks found",
+  emptyDescription = "Try adding some tracks",
+  filterQuery,
+  filterFn,
+  className,
+}: AudioTrackListProps) {
+  const queue = useAudioStore((state) => state.queue);
+  const currentTrack = useAudioStore((state) => state.currentTrack);
+  const setQueueAndPlay = useAudioStore((state) => state.setQueueAndPlay);
+  const togglePlay = useAudioStore((state) => state.togglePlay);
+  const setQueue = useAudioStore((state) => state.setQueue);
+  const currentQueueIndex = useAudioStore((state) => state.currentQueueIndex);
+
+  let tracks = externalTracks ?? queue;
+
+  if (filterFn) {
+    tracks = tracks.filter(filterFn);
+  } else if (filterQuery?.trim()) {
+    const query = filterQuery.toLowerCase();
+    tracks = tracks.filter(
+      (track: Track) =>
+        track.title?.toLowerCase().includes(query) ||
+        track.artist?.toLowerCase().includes(query)
+    );
+  }
+
+  const isFiltered = (filterQuery?.trim().length ?? 0) > 0 || !!filterFn;
+  const isExternalTracks = !!externalTracks;
+  const resolvedActions: AudioTrackActionMode =
+    actions ?? (onTrackRemove ? "play-pause-with-remove" : "play-pause");
+  const trackById = React.useMemo(() => {
+    const map = new Map<string, Track>();
+    for (const track of tracks) {
+      if (track.id !== undefined) {
+        map.set(String(track.id), track);
+      }
+    }
+    return map;
+  }, [tracks]);
+  const trackIndexById = React.useMemo(() => {
+    const map = new Map<string, number>();
+    tracks.forEach((track, index) => {
+      if (track.id !== undefined) {
+        map.set(String(track.id), index);
+      }
+    });
+    return map;
+  }, [tracks]);
+  const sortableItems = React.useMemo(
+    () => Array.from(trackById.keys(), (id) => ({ id })),
+    [trackById]
+  );
+
+  const handleAutoReorder = (reorderedTracks: Track[]) => {
+    if (!(isFiltered || isExternalTracks)) {
+      const newIndex =
+        currentTrack?.id !== undefined
+          ? reorderedTracks.findIndex((t) => t.id === currentTrack.id)
+          : -1;
+
+      let finalIndex = 0;
+      if (newIndex >= 0) {
+        finalIndex = newIndex;
+      } else if (
+        currentQueueIndex >= 0 &&
+        currentQueueIndex < reorderedTracks.length
+      ) {
+        finalIndex = currentQueueIndex;
+      }
+
+      setQueue(reorderedTracks, finalIndex);
+    }
+  };
+
+  if (tracks.length === 0) {
+    return (
+      <Empty className={cn(className)}>
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <QueueIcon />
+          </EmptyMedia>
+          <EmptyTitle>{emptyLabel}</EmptyTitle>
+          <EmptyDescription>{emptyDescription}</EmptyDescription>
+        </EmptyHeader>
+      </Empty>
+    );
+  }
+
+  const renderTrack = (track: Track, index: number, isOverlay = false) => {
+    const handleTrackClick = () => {
+      if (isExternalTracks) {
+        onTrackSelect?.(index, track);
+      } else {
+        const queueIndex = queue.findIndex((t) => t.id === track.id);
+        if (queueIndex >= 0) {
+          if (currentTrack?.id === track.id) {
+            togglePlay();
+          } else {
+            setQueueAndPlay(queue, queueIndex);
+          }
+          const originalTrack = queue[queueIndex];
+          onTrackSelect?.(queueIndex, originalTrack);
+        } else {
+          onTrackSelect?.(index, track);
+        }
+      }
+    };
+
+    if (!track.id) {
+      return null;
+    }
+
+    let trackMedia: AudioTrackMediaMode = media;
+    if (mode === "sortable") {
+      trackMedia = media === "cover" ? "drag-handle-with-cover" : "drag-handle";
+    }
+
+    return (
+      <AudioTrack
+        actions={resolvedActions}
+        index={index}
+        key={track.id}
+        media={isOverlay ? media : trackMedia}
+        onClick={handleTrackClick}
+        onRemove={onTrackRemove}
+        track={track}
+      />
+    );
+  };
+
+  const content =
+    mode === "sortable" ? (
+      <SortableList
+        className={
+          variant === "grid" ? "grid grid-cols-1 gap-2 xl:grid-cols-2" : "gap-1"
+        }
+        items={sortableItems}
+        onChange={(reorderedTracks) => {
+          const reorderedFullTracks = reorderedTracks
+            .map((item) => trackById.get(item.id))
+            .filter((t): t is Track => t !== undefined);
+          handleAutoReorder(reorderedFullTracks);
+        }}
+        renderItem={(item, index, isOverlay = false) => {
+          const track = trackById.get(item.id);
+          if (!track?.id) {
+            return null;
+          }
+          const trackIndex = trackIndexById.get(item.id) ?? index;
+
+          const trackContent = renderTrack(track, trackIndex, isOverlay);
+
+          return (
+            <SortableItem id={String(track.id)} key={track.id}>
+              {trackContent}
+            </SortableItem>
+          );
+        }}
+      />
+    ) : (
+      <div className={cn(audioTrackListVariants({ variant }))}>
+        {tracks.map((track, index) => renderTrack(track, index))}
+      </div>
+    );
+
+  return (
+    <ScrollArea className={cn("max-h-[36vh] w-full pt-1", className)}>
+      {content}
+    </ScrollArea>
+  );
+}
+
+type AudioQueueProps = {
+  onTrackSelect?: (index: number) => void;
+  searchPlaceholder?: string;
+  emptyLabel?: string;
+  emptyDescription?: string;
+};
+
+const AudioQueueRepeatMode = ({
+  className,
+  ...props
+}: React.ComponentProps<typeof Toggle>) => {
+  const repeatMode = useAudioStore((state) => state.repeatMode);
+  const changeRepeatMode = useAudioStore((state) => state.changeRepeatMode);
+  const handleRepeat = React.useCallback(() => {
+    changeRepeatMode();
+  }, [changeRepeatMode]);
+
+  const Icon = repeatMode === "one" ? RepeatOnceIcon : RepeatIcon;
+  let repeatTooltip = "Disable repeat";
+  if (repeatMode === "one") {
+    repeatTooltip = "Repeat this track";
+  } else if (repeatMode === "all") {
+    repeatTooltip = "Repeat playlist";
+  }
+
+  const isPressed = repeatMode !== "none";
+
+  return (
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <Toggle
+            aria-label={repeatTooltip}
+            className={cn(
+              "[&_svg]:text-primary",
+              className,
+              isPressed && "bg-accent! text-accent-foreground!"
+            )}
+            data-slot="audio-queue-repeat-mode"
+            onPressedChange={handleRepeat}
+            pressed={isPressed}
+            {...props}
+          />
+        }
+      >
+        <Icon />
+      </TooltipTrigger>
+      <TooltipContent side="top" sideOffset={4}>
+        {repeatTooltip}
+      </TooltipContent>
+    </Tooltip>
+  );
+};
+
+const AudioQueueShuffle = ({
+  className,
+  ...props
+}: Omit<React.ComponentProps<typeof Toggle>, "onPressedChange">) => {
+  const shuffle = useAudioStore((state) => state.shuffle);
+  const unshuffle = useAudioStore((state) => state.unshuffle);
+  const shuffleEnabled = useAudioStore((state) => state.shuffleEnabled);
+
+  const handleShuffle = React.useCallback(
+    (pressed: boolean) => {
+      if (pressed) {
+        shuffle();
+      } else {
+        unshuffle();
+      }
+    },
+    [shuffle, unshuffle]
+  );
+
+  return (
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <Toggle
+            aria-label="Shuffle"
+            className={cn(
+              "[&_svg]:text-primary",
+              className,
+              shuffleEnabled && "bg-accent! text-accent-foreground!"
+            )}
+            data-slot="audio-queue-shuffle"
+            onPressedChange={handleShuffle}
+            pressed={shuffleEnabled}
+            {...props}
+          />
+        }
+      >
+        <ShuffleIcon />
+      </TooltipTrigger>
+      <TooltipContent side="top" sideOffset={4}>
+        Shuffle {shuffleEnabled ? "on" : "off"}
+      </TooltipContent>
+    </Tooltip>
+  );
+};
+
+const AudioQueuePreferences = ({
+  className,
+  variant = "outline",
+  size = "icon",
+  tooltipLabel = "Queue preferences",
+  ...props
+}: React.ComponentProps<typeof AudioPlayerButton>) => {
+  const repeatMode = useAudioStore((state) => state.repeatMode);
+  const setRepeatMode = useAudioStore((state) => state.setRepeatMode);
+  const insertMode = useAudioStore((state) => state.insertMode);
+  const setInsertMode = useAudioStore((state) => state.setInsertMode);
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        render={
+          <AudioPlayerButton
+            className={cn(className)}
+            data-slot="audio-queue-preferences-trigger"
+            size={size}
+            tooltipLabel={tooltipLabel}
+            variant={variant}
+            {...props}
+          />
+        }
+      >
+        <SlidersHorizontalIcon />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        align="end"
+        className={cn(className)}
+        data-slot="audio-queue-preferences-content"
+      >
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>Repeat Mode</DropdownMenuLabel>
+          <DropdownMenuRadioGroup
+            onValueChange={(value) => setRepeatMode(value)}
+            value={repeatMode}
+          >
+            <DropdownMenuRadioItem value="none">None</DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="one">One</DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="all">All</DropdownMenuRadioItem>
+          </DropdownMenuRadioGroup>
+        </DropdownMenuGroup>
+
+        <DropdownMenuSeparator />
+
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>Insert Mode</DropdownMenuLabel>
+          <DropdownMenuRadioGroup
+            onValueChange={(value) => setInsertMode(value)}
+            value={insertMode}
+          >
+            <DropdownMenuRadioItem value="first">First</DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="last">Last</DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="after">
+              After Current
+            </DropdownMenuRadioItem>
+          </DropdownMenuRadioGroup>
+        </DropdownMenuGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
+
+const AudioQueue = React.memo(
+  ({
+    onTrackSelect,
+    searchPlaceholder = "Search for a track...",
+    emptyLabel = "No tracks found",
+    emptyDescription = "Try searching for a different track",
+  }: AudioQueueProps) => {
+    const togglePlay = useAudioStore((state) => state.togglePlay);
+    const setQueueAndPlay = useAudioStore((state) => state.setQueueAndPlay);
+    const clearQueue = useAudioStore((state) => state.clearQueue);
+    const removeFromQueue = useAudioStore((state) => state.removeFromQueue);
+
+    const [dialogOpen, setDialogOpen] = React.useState(false);
+    const [searchQuery, setSearchQuery] = React.useState("");
+
+    const normalizedSearchQuery = searchQuery.trim().toLowerCase();
+    const isFiltered = normalizedSearchQuery.length > 0;
+
+    const handleTrackSelect = React.useCallback(
+      (index: number) => {
+        const currentState = useAudioStore.getState();
+        const currentQueue = currentState.queue;
+        const currentTrackId = currentState.currentTrack?.id;
+        let filtered = currentQueue;
+
+        if (normalizedSearchQuery) {
+          filtered = currentQueue.filter(
+            (t: Track) =>
+              t.title?.toLowerCase().includes(normalizedSearchQuery) ||
+              t.artist?.toLowerCase().includes(normalizedSearchQuery)
+          );
+        }
+
+        const selectedTrack = filtered[index];
+        if (!selectedTrack) {
+          return;
+        }
+
+        const trackIndex = currentQueue.findIndex(
+          (t) => t.id === selectedTrack.id
+        );
+        if (trackIndex < 0) {
+          return;
+        }
+
+        if (currentTrackId === selectedTrack.id) {
+          togglePlay();
+        } else if (currentQueue.length > 0) {
+          setQueueAndPlay(currentQueue, trackIndex);
+        }
+        onTrackSelect?.(trackIndex);
+        setDialogOpen(false);
+      },
+      [normalizedSearchQuery, togglePlay, setQueueAndPlay, onTrackSelect]
+    );
+
+    const handleTrackRemove = React.useCallback(
+      (trackId: string) => {
+        removeFromQueue(trackId);
+      },
+      [removeFromQueue]
+    );
+
+    const handleClearQueue = React.useCallback(() => {
+      clearQueue();
+    }, [clearQueue]);
+
+    return (
+      <Dialog
+        onOpenChange={(isOpen) => {
+          setDialogOpen(isOpen);
+          if (!isOpen) {
+            setSearchQuery("");
+          }
+        }}
+        open={dialogOpen}
+      >
+        <DialogTrigger
+          render={
+            <AudioPlayerButton
+              size="icon"
+              tooltipLabel="Queue"
+              variant="outline"
+            />
+          }
+        >
+          <QueueIcon />
+        </DialogTrigger>
+        <DialogContent
+          aria-label="Select a track"
+          data-slot="audio-queue"
+          showCloseButton={false}
+        >
+          <DialogHeader className="sr-only">
+            <DialogTitle>Audio Queue</DialogTitle>
+            <DialogDescription>
+              Select a track from the queue to play
+            </DialogDescription>
+          </DialogHeader>
+          <Command
+            filter={(value, search, keywords) => {
+              const extendValue = `${value} ${keywords?.join(" ") || ""}`;
+              if (extendValue.toLowerCase().includes(search.toLowerCase())) {
+                return 1;
+              }
+              return 0;
+            }}
+          >
+            <CommandInput
+              onValueChange={setSearchQuery}
+              placeholder={searchPlaceholder}
+              value={searchQuery}
+            />
+            <CommandList>
+              <AudioTrackList
+                emptyDescription={emptyDescription}
+                emptyLabel={emptyLabel}
+                filterQuery={searchQuery}
+                mode={isFiltered ? "static" : "sortable"}
+                onTrackRemove={handleTrackRemove}
+                onTrackSelect={handleTrackSelect}
+              />
+            </CommandList>
+          </Command>
+          <DialogFooter>
+            <AudioPlayerButton
+              className="w-full"
+              onClick={handleClearQueue}
+              title="Clear queue"
+              variant="destructive"
+            >
+              Clear
+            </AudioPlayerButton>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+);
+
+type AudioPlaybackSpeedProps = React.ComponentProps<typeof Button> & {
+  speeds?: readonly { value: number; label: string }[];
+};
+
+function AudioPlaybackSpeed({
+  className,
+  size,
+  variant = "outline",
+  speeds = PLAYBACK_SPEEDS,
+  ...props
+}: AudioPlaybackSpeedProps) {
+  const playbackRate = useAudioStore((state) => state.playbackRate);
+  const setPlaybackRate = useAudioStore((state) => state.setPlaybackRate);
+  const duration = useAudioStore((state) => state.duration);
+  const { htmlAudio } = useAudio();
+  const isLiveStream = htmlAudio.isLive(duration);
+
+  const currentSpeed =
+    speeds.find((s) => s.value === playbackRate) || speeds[2];
+  const displayLabel = currentSpeed?.label;
+
+  const handleSpeedChange = React.useCallback(
+    (value: string) => {
+      if (isLiveStream) {
+        return;
+      }
+      const speed = Number.parseFloat(value);
+      setPlaybackRate(speed);
+    },
+    [isLiveStream, setPlaybackRate]
+  );
+
+  const tooltipLabel = isLiveStream
+    ? "Not available for live streams"
+    : "Playback speed";
+
+  const isIconSize = size === "icon";
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        disabled={isLiveStream}
+        render={
+          <AudioPlayerButton
+            className={cn(className)}
+            data-slot="audio-playback-speed-button"
+            disabled={isLiveStream}
+            size={size}
+            tooltipLabel={tooltipLabel}
+            variant={variant}
+            {...props}
+          />
+        }
+      >
+        {!isIconSize && <GaugeIcon />}
+        <span className="font-mono text-xs">{displayLabel}</span>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        align="end"
+        className={cn(className)}
+        data-slot="audio-playback-speed-content"
+      >
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>Playback Speed</DropdownMenuLabel>
+          <DropdownMenuRadioGroup
+            onValueChange={handleSpeedChange}
+            value={String(playbackRate)}
+          >
+            {speeds.map((speed) => (
+              <DropdownMenuRadioItem
+                key={speed.value}
+                value={String(speed.value)}
+              >
+                {speed.label}
+              </DropdownMenuRadioItem>
+            ))}
+          </DropdownMenuRadioGroup>
+        </DropdownMenuGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
 export {
+  AudioProvider,
+  demoTracks,
+  AudioPlayer,
   AudioPlayerButton,
   AudioPlayerControlBar,
   AudioPlayerControlGroup,
-  AudioPlayerFastForward,
+  AudioPlayerTimeDisplay,
+  AudioPlayerSeekBar,
+  AudioPlayerVolume,
   AudioPlayerPlay,
   AudioPlayerRewind,
-  AudioPlayerSeekBar,
-  AudioPlayerSkipBack,
+  AudioPlayerFastForward,
   AudioPlayerSkipForward,
-  AudioPlayerTimeDisplay,
-  AudioPlayerVolume,
-  AudioPlayer,
+  AudioPlayerSkipBack,
+  AudioTrack,
+  AudioTrackList,
+  AudioQueuePreferences,
+  AudioQueueRepeatMode,
+  AudioQueueShuffle,
+  AudioQueue,
+  AudioPlaybackSpeed,
 };

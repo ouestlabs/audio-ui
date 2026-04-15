@@ -55,7 +55,7 @@ This package is **published to npm**. Don't break its public API without a chang
 Styled components users install via `npx shadcn@latest add @audio/player`:
 
 ```
-ui/audio/          # provider, player, queue, track, playback-speed
+ui/audio/player.tsx # single file: provider, player controls, tracks, queue, playback-speed
 ui/audio/elements/ # transport, fader, knob, xypad, channel-strip (styled wrappers)
 blocks/            # Pre-assembled ready-to-use patterns (block-{component}-{variant}.tsx)
 examples/          # Usage demos

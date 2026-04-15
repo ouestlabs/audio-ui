@@ -1,0 +1,16 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "player-track-sortable-list-demo",
+  "description": "Track list with sortable selection example",
+  "registryDependencies": ["@audio/player"],
+  "files": [
+    {
+      "path": "src/registry/default/examples/player-track-sortable-list-demo.tsx",
+      "content": "\"use client\";\nimport { toast } from \"sonner\";\nimport { useAudioStore } from \"@/registry/default/lib/audio-store\";\nimport { AudioTrackList } from \"@/registry/default/ui/audio/player\";\n\nexport default function AudioTrackSortableListDemo() {\n  const queue = useAudioStore((state) => state.queue);\n\n  return (\n    <AudioTrackList\n      className=\"w-full\"\n      mode=\"sortable\"\n      onTrackSelect={(index) => {\n        const track = queue[index];\n        toast.info(`Playing ${track?.title}`);\n      }}\n    />\n  );\n}\n",
+      "type": "registry:example",
+      "target": "components/audio/examples/player-track-sortable-list-demo.tsx"
+    }
+  ],
+  "categories": ["track", "sortable"],
+  "type": "registry:example"
+}
