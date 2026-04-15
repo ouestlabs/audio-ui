@@ -2,9 +2,7 @@
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "xypad-change-vs-commit-demo",
   "description": "XYPad live value vs committed value callbacks",
-  "registryDependencies": [
-    "@audio/xypad"
-  ],
+  "registryDependencies": ["@audio/xypad"],
   "files": [
     {
       "path": "src/registry/default/examples/xypad-change-vs-commit-demo.tsx",
@@ -13,8 +11,6 @@
       "target": "components/audio/examples/xypad-change-vs-commit-demo.tsx"
     }
   ],
-  "categories": [
-    "xypad"
-  ],
+  "categories": ["xypad"],
   "type": "registry:example"
 }

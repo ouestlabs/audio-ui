@@ -2,11 +2,7 @@
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "block-player-widget",
   "description": "Audio player with track list",
-  "registryDependencies": [
-    "@audio/player",
-    "@audio/store",
-    "@audio/html"
-  ],
+  "registryDependencies": ["@audio/player", "@audio/store", "@audio/html"],
   "files": [
     {
       "path": "src/registry/default/blocks/block-player-widget.tsx",
@@ -15,9 +11,6 @@
       "target": "components/audio/blocks/block-player-widget.tsx"
     }
   ],
-  "categories": [
-    "player",
-    "widget"
-  ],
+  "categories": ["player", "widget"],
   "type": "registry:block"
 }

@@ -3,8 +3,8 @@ import BlockPocketSynth from "@/registry/default/blocks/block-pocket-synth";
 import BlockGranularSynth from "@/registry/default/blocks/block-wave-shaper";
 import PlayerDemo from "@/registry/default/examples/player-demo";
 import PlayerQueueDemo from "@/registry/default/examples/player-queue-demo";
-import AudioTrackListGridDemo from "@/registry/default/examples/track-list-grid-demo";
-import AudioTrackSortableListGridDemo from "@/registry/default/examples/track-sortable-list-grid-demo";
+import AudioTrackListGridDemo from "@/registry/default/examples/player-track-list-grid-demo";
+import AudioTrackSortableListGridDemo from "@/registry/default/examples/player-track-sortable-list-grid-demo";
 
 export function DemoGrid() {
   return (

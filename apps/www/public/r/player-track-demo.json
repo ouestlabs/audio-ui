@@ -2,9 +2,7 @@
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "player-track-demo",
   "description": "Minimal track component example",
-  "registryDependencies": [
-    "@audio/player"
-  ],
+  "registryDependencies": ["@audio/player"],
   "files": [
     {
       "path": "src/registry/default/examples/player-track-demo.tsx",
@@ -13,8 +11,6 @@
       "target": "components/audio/examples/player-track-demo.tsx"
     }
   ],
-  "categories": [
-    "track"
-  ],
+  "categories": ["track"],
   "type": "registry:example"
 }
