@@ -1,7 +1,7 @@
 "use client";
 import { toast } from "sonner";
 import { useAudioStore } from "@/registry/default/lib/audio-store";
-import { AudioTrackList } from "@/registry/default/ui/audio/track";
+import { AudioTrackList } from "@/registry/default/ui/audio/player";
 
 export default function AudioTrackListGridDemo() {
   const queue = useAudioStore((state) => state.queue);

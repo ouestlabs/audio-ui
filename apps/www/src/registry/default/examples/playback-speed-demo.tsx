@@ -1,7 +1,7 @@
 "use client";
 
-import { AudioPlaybackSpeed } from "@/registry/default/ui/audio/playback-speed";
 import {
+  AudioPlaybackSpeed,
   AudioPlayer,
   AudioPlayerControlBar,
   AudioPlayerControlGroup,

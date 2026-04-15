@@ -8,12 +8,10 @@ import {
   AudioPlayerSkipForward,
   AudioPlayerTimeDisplay,
   AudioPlayerVolume,
-} from "@/registry/default/ui/audio/player";
-import {
   AudioQueue,
   AudioQueueRepeatMode,
   AudioQueueShuffle,
-} from "@/registry/default/ui/audio/queue";
+} from "@/registry/default/ui/audio/player";
 
 export default function AudioPlayerQueueDemo() {
   return (

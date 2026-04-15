@@ -1,3 +1,5 @@
+"use client";
+
 import {
   AudioPlayer,
   AudioPlayerControlBar,
@@ -8,11 +10,9 @@ import {
   AudioPlayerSkipForward,
   AudioPlayerTimeDisplay,
   AudioPlayerVolume,
-} from "@/registry/default/ui/audio/player";
-import {
   AudioQueue,
   AudioQueuePreferences,
-} from "@/registry/default/ui/audio/queue";
+} from "@/registry/default/ui/audio/player";
 
 export default function AudioQueueSimpleDemo() {
   return (
@@ -29,7 +29,7 @@ export default function AudioQueueSimpleDemo() {
             <AudioPlayerPlay />
             <AudioPlayerSkipForward />
           </AudioPlayerControlGroup>
-          <AudioPlayerControlGroup>
+          <AudioPlayerControlGroup className="flex-1">
             <AudioPlayerVolume />
             <AudioQueuePreferences />
             <AudioQueue />

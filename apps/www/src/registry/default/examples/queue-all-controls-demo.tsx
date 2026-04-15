@@ -1,13 +1,11 @@
 import {
   AudioPlayer,
   AudioPlayerControlBar,
-} from "@/registry/default/ui/audio/player";
-import {
   AudioQueue,
   AudioQueuePreferences,
   AudioQueueRepeatMode,
   AudioQueueShuffle,
-} from "@/registry/default/ui/audio/queue";
+} from "@/registry/default/ui/audio/player";
 
 export default function AudioQueueAllControlsDemo() {
   return (

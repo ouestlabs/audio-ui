@@ -1,9 +1,9 @@
 ---
 title: Audio Player
-description: A composable audio player component system.
+description: A composable audio player. One component, one install, fully owned by you.
 ---
 
-A composable audio player built from small control primitives.
+Everything you need to build an audio player is in a single file: the engine, the UI controls, the queue, tracks, and playback speed. No separate installs, no cross-file wiring. Just one component you copy, paste, and own.
 
 <Preview name="player-stacked-demo" />
 
@@ -23,38 +23,45 @@ A composable audio player built from small control primitives.
       <Step>Install the runtime dependencies:</Step>
         <Install pkg="@phosphor-icons/react class-variance-authority @base-ui/react" />
       <Step>Install the required shadcn/ui primitives:</Step>
-        <Install shadcn="button dialog dropdown-menu empty input item scroll-area toggle tooltip" />
-      <Step>Install the control primitives from this registry:</Step>
-        <Install component="transport fader" />
+        <Install shadcn="avatar badge button command dialog dropdown-menu empty item scroll-area spinner toggle tooltip" />
+      <Step>Install the control primitives:</Step>
+        <Install component="fader transport sortable-list" />
+      <Step>Install the required hooks and libs:</Step>
+        <Install component="store html use-audio use-audio-provider" />
       <Step>Copy and paste the following code into your project.</Step>
         <Source name="player" title="components/audio/player.tsx" />
-      <Step>Install the required registry components:</Step>
-        <Install component="provider store html use-audio" />
-
-      <Step>Copy the required provider file.</Step>
-        <Source name="provider" title="components/audio/provider.tsx" />
-      <Step>Copy the required store file.</Step>
-        <Source name="store" title="lib/audio-store.ts" />
-      <Step>Copy the audio lib file.</Step>
-        <Source name="html" title="lib/html-audio.ts" />
-      <Step>Copy the useAudio hook file.</Step>
-        <Source name="use-audio" title="hooks/use-audio.ts" />
       <Step>Update the import paths to match your project setup.</Step>
     </Steps>
-
   </TabsContent>
 </CodeTabs>
 
+## Philosophy
+
+**Composable by default.** `AudioPlayer` is just a container. Every control (seek bar, volume, queue, playback speed) is an independent component you drop in where you need it. No black-box layout, no hidden markup.
+
+**State lives in the store, not in components.** All playback state (current track, progress, queue, shuffle, repeat) is held in a Zustand store. Components read and write that store directly. No prop drilling, no context threading.
+
+**The engine is separate from the UI.** `AudioProvider` wires up the HTML audio element to the store: event listeners, retries, preloading, state restoration. UI components just read state and call store actions.
+
 ## Setup
 
-Wrap your app with [Audio Provider](/docs/components/provider) at the root level:
+Pass `tracks` directly to `AudioPlayer` for a self-contained widget:
 
-```tsx showLineNumbers
-import { AudioProvider } from "@/components/audio/provider";
+```tsx
+import { AudioPlayer, AudioPlayerControlBar, AudioPlayerPlay } from "@/components/audio/player";
+
+<AudioPlayer tracks={myTracks}>
+  <AudioPlayerControlBar>
+    <AudioPlayerPlay />
+  </AudioPlayerControlBar>
+</AudioPlayer>
 ```
 
-```tsx showLineNumbers
-// app/layout.tsx or _app.tsx
+For shared state across multiple players or app-wide persistence, mount `AudioProvider` once at the root:
+
+```tsx
+// app/layout.tsx
+import { AudioProvider } from "@/components/audio/player";
 
 export default function RootLayout({ children }) {
   return (
@@ -67,175 +74,255 @@ export default function RootLayout({ children }) {
 }
 ```
 
-## Usage
+<Callout variant="info">
+  <strong>tracks vs AudioProvider:</strong> Use <code>tracks</code> on <code>AudioPlayer</code> for self-contained widgets. Use <code>AudioProvider</code> at the root when multiple components share the same playback session.
+</Callout>
 
-Start with this default layout:
-
-```tsx showLineNumbers
-import {
-  AudioPlayer,
-  AudioPlayerControlBar,
-  AudioPlayerControlGroup,
-  AudioPlayerPlay,
-  AudioPlayerSkipBack,
-  AudioPlayerSkipForward,
-  AudioPlayerSeekBar,
-  AudioPlayerTimeDisplay,
-  AudioPlayerVolume,
-} from "@/components/audio/player";
-```
-
-```tsx showLineNumbers
-export function PlayerDefault() {
-  return (
-    <AudioPlayer>
-      <AudioPlayerControlBar variant="stacked">
-        <AudioPlayerControlGroup>
-          <AudioPlayerTimeDisplay />
-          <AudioPlayerSeekBar />
-          <AudioPlayerTimeDisplay remaining />
-        </AudioPlayerControlGroup>
-        <AudioPlayerControlGroup>
-          <AudioPlayerControlGroup className="justify-between md:justify-start">
-            <AudioPlayerSkipBack />
-            <AudioPlayerPlay />
-            <AudioPlayerSkipForward />
-          </AudioPlayerControlGroup>
-          <AudioPlayerVolume />
-        </AudioPlayerControlGroup>
-      </AudioPlayerControlBar>
-    </AudioPlayer>
-  );
-}
-```
+## Player
 
 ### Compact
 
-A minimal layout for tighter spaces.
-
 <Preview name="player-demo" />
 
-### With Queue
-
-A full layout with queue controls.
+### With queue
 
 <Preview name="player-queue-demo" />
 
-For more queue options, see [Audio Queue](/docs/components/queue).
-
-## API Reference
-
 ### AudioPlayer
 
-Container for player controls.
+Container for all player controls.
 
-Inherits all props from `HTMLDivElement`.
+| Prop        | Type      | Default | Description                                                       |
+| ----------- | --------- | ------- | ----------------------------------------------------------------- |
+| `tracks`    | `Track[]` | -       | When provided, wraps children with `AudioProvider` automatically. |
+| `className` | `string`  | -       | Additional CSS classes.                                           |
+
+Inherits all other props from `HTMLDivElement`.
+
+### AudioProvider
+
+Connects the HTML audio element to the Zustand store. Handles event listeners, retries, preloading, and state restoration.
+
+| Prop       | Type        | Default | Description                               |
+| ---------- | ----------- | ------- | ----------------------------------------- |
+| `tracks`   | `Track[]`   | `[]`    | Initial tracks to populate the queue.     |
+| `children` | `ReactNode` | -       | Components that share this audio session. |
+
+### AudioPlayerButton
+
+Shared button primitive used by all player controls. Wraps a `Button` with an optional tooltip.
+
+| Prop           | Type     | Default | Description                                   |
+| -------------- | -------- | ------- | --------------------------------------------- |
+| `tooltipLabel` | `string` | -       | When provided, wraps the button in a tooltip. |
+
+Inherits all other props from `Button`.
 
 ### AudioPlayerControlBar
 
-Groups controls in one row or stacked layout.
+Groups controls in a single row or stacked column layout.
 
-| Prop        | Type                     | Default     | Description                         |
-| ----------- | ------------------------ | ----------- | ----------------------------------- |
-| `variant`   | `"compact" \| "stacked"` | `"compact"` | Layout variant for the control bar. |
-| `className` | `string`                 | -           | Additional CSS classes.             |
+| Prop      | Type                     | Default     | Description          |
+| --------- | ------------------------ | ----------- | -------------------- |
+| `variant` | `"compact" \| "stacked"` | `"compact"` | Controls the layout. |
 
 ### AudioPlayerControlGroup
 
-Flexible wrapper for arranging control clusters.
-
-| Prop        | Type     | Default | Description             |
-| ----------- | -------- | ------- | ----------------------- |
-| `className` | `string` | -       | Additional CSS classes. |
+Flexible row wrapper for arranging control clusters. Use `className` to adjust alignment.
 
 ### AudioPlayerPlay
 
-Play/pause button with loading state and spacebar shortcut.
+Play/pause button. Shows a spinner during loading/buffering. Spacebar shortcut is enabled automatically.
 
 Inherits all props from `AudioPlayerButton`.
 
-### AudioPlayerSkipBack
+### AudioPlayerSkipBack / AudioPlayerSkipForward
 
-Go to previous track.
-
-Inherits all props from `AudioPlayerButton`.
-
-### AudioPlayerSkipForward
-
-Go to next track.
+Navigate between tracks.
 
 Inherits all props from `AudioPlayerButton`.
 
-### AudioPlayerRewind
+### AudioPlayerRewind / AudioPlayerFastForward
 
-Seek backward by 10 seconds.
-
-Inherits all props from `AudioPlayerButton`.
-
-### AudioPlayerFastForward
-
-Seek forward by 10 seconds.
+Seek backward or forward by 10 seconds. Disabled for live streams.
 
 Inherits all props from `AudioPlayerButton`.
 
 ### AudioPlayerSeekBar
 
-A transport timeline component that shows playback progress plus buffered progress and allows scrubbing.
+Seek timeline showing playback and buffered progress. Locked to 100% for live streams.
 
 Inherits all props from [Transport](/docs/components/ui/transport) (except `value`, `onSeek`, `bufferedValue`).
 
 ### AudioPlayerTimeDisplay
 
-Displays the current playback time or remaining time.
+Displays current time or remaining time. Shows a live indicator for streams.
 
-#### Props
-
-| Prop        | Type      | Default | Description                                     |
-| ----------- | --------- | ------- | ----------------------------------------------- |
-| `remaining` | `boolean` | `false` | Display remaining time instead of current time. |
-| `className` | `string`  | -       | Additional CSS classes.                         |
+| Prop        | Type      | Default | Description                                  |
+| ----------- | --------- | ------- | -------------------------------------------- |
+| `remaining` | `boolean` | `false` | Show remaining time instead of elapsed time. |
 
 ### AudioPlayerVolume
 
-A dropdown menu button with a horizontal [Fader](/docs/components/ui/fader) to control volume. Click to open the volume control menu.
+Dropdown with a horizontal fader to control volume and mute.
 
-Inherits all props from [Fader](/docs/components/ui/fader) except `value`, `onValueChange`, `min`, `max`, `orientation`, and `size`.
+Inherits all props from [Fader](/docs/components/ui/fader) (except `value`, `onValueChange`, `min`, `max`, `orientation`, `size`).
+
+## Tracks
+
+`AudioTrackList` renders a list of tracks. Omit `tracks` to read from the global queue; pass `tracks` for controlled mode.
+
+### Single track
+
+<Preview name="track-demo" />
+
+### Default
+
+<Preview name="track-list-demo" />
+
+### Grid
+
+<Preview name="track-list-grid-demo" />
+
+### Sortable
+
+<Preview name="track-sortable-list-demo" />
+
+### Sortable Grid
+
+<Preview name="track-sortable-list-grid-demo" />
+
+### AudioTrack
+
+Renders a single track row.
+
+| Prop       | Type                                                               | Default        | Description                                        |
+| ---------- | ------------------------------------------------------------------ | -------------- | -------------------------------------------------- |
+| `trackId`  | `string \| number`                                                 | -              | Look up a track from the queue by id (store mode). |
+| `track`    | `Track`                                                            | -              | Render a provided track object (controlled mode).  |
+| `index`    | `number`                                                           | -              | Display index (one-based when shown).              |
+| `onClick`  | `() => void`                                                       | -              | Called when the row is clicked.                    |
+| `onRemove` | `(trackId: string) => void`                                        | -              | Called when the remove action is triggered.        |
+| `media`    | `"cover" \| "drag-handle" \| "drag-handle-with-cover" \| "index"` | `"cover"`      | Left-side media variant.                           |
+| `actions`  | `"none" \| "play-pause" \| "remove" \| "play-pause-with-remove"`  | `"play-pause"` | Right-side action variant.                         |
+
+<Callout variant="info">
+  <strong>Mode constraint:</strong> Use either <code>trackId</code> or <code>track</code>, not both. <code>trackId</code> requires an <code>AudioProvider</code> in the tree.
+</Callout>
+
+### AudioTrackList
+
+| Prop               | Type                                                              | Default                    | Description                                                                           |
+| ------------------ | ----------------------------------------------------------------- | -------------------------- | ------------------------------------------------------------------------------------- |
+| `tracks`           | `Track[]`                                                         | -                          | Controlled list. Omit to read from the global queue.                                  |
+| `onTrackSelect`    | `(index: number, track?: Track) => void`                          | -                          | Called when a track is selected.                                                      |
+| `onTrackRemove`    | `(trackId: string) => void`                                       | -                          | Called when a track is removed. Enables remove actions automatically.                 |
+| `mode`             | `"static" \| "sortable"`                                          | `"static"`                 | Enable drag-and-drop reordering.                                                      |
+| `media`            | `"cover" \| "index"`                                              | `"cover"`                  | Media style. In sortable mode a drag handle is added automatically.                   |
+| `actions`          | `"none" \| "play-pause" \| "remove" \| "play-pause-with-remove"` | Auto                       | Action variant per row. Auto: `"play-pause-with-remove"` when `onTrackRemove` is set. |
+| `variant`          | `"default" \| "grid"`                                             | `"default"`                | Stacked list or responsive grid.                                                      |
+| `filterQuery`      | `string`                                                          | -                          | Text filter (matches title or artist).                                                |
+| `filterFn`         | `(track: Track) => boolean`                                       | -                          | Custom filter. Overrides `filterQuery` when both are set.                             |
+| `emptyLabel`       | `string`                                                          | `"No tracks found"`        | Empty state label.                                                                    |
+| `emptyDescription` | `string`                                                          | `"Try adding some tracks"` | Empty state description.                                                              |
+
+<Callout variant="warning">
+  <strong>Sortable constraint:</strong> Drag-and-drop reordering only updates the store when the list is unfiltered and in store mode.
+</Callout>
+
+## Queue
+
+All queue controls work together or independently.
+
+### Simple
+
+<Preview name="queue-simple-demo" />
+
+### All controls
+
+<Preview name="queue-all-controls-demo" />
+
+### Shuffle and repeat
+
+<Preview name="queue-shuffle-repeat-demo" />
+
+### Preferences
+
+<Preview name="queue-preferences-demo" />
+
+### AudioQueue
+
+A dialog with the full queue: search, selection, remove, and drag-and-drop reordering.
+
+| Prop                | Type                      | Default                                 | Description                                     |
+| ------------------- | ------------------------- | --------------------------------------- | ----------------------------------------------- |
+| `onTrackSelect`     | `(index: number) => void` | -                                       | Called when a track is selected from the queue. |
+| `searchPlaceholder` | `string`                  | `"Search for a track..."`               | Search input placeholder.                       |
+| `emptyLabel`        | `string`                  | `"No tracks found"`                     | Empty state label.                              |
+| `emptyDescription`  | `string`                  | `"Try searching for a different track"` | Empty state description.                        |
+
+<Callout variant="info">
+  <strong>Search and reorder:</strong> Drag-and-drop is disabled while a search filter is active.
+</Callout>
+
+### AudioQueueShuffle
+
+Toggle that enables/disables shuffle. Persisted to localStorage.
+
+Inherits all props from `Toggle` (except `onPressedChange`).
+
+### AudioQueueRepeatMode
+
+Toggle that cycles through repeat modes: `none` → `all` → `one`. Persisted to localStorage.
+
+Inherits all props from `Toggle`.
+
+### AudioQueuePreferences
+
+Dropdown combining repeat mode and insert mode (`first`, `last`, `after current`) in one compact menu.
+
+Inherits all props from `AudioPlayerButton`.
+
+## Playback Speed
+
+<Preview name="playback-speed-demo" />
+
+### AudioPlaybackSpeed
+
+Dropdown to change playback speed. Disabled automatically for live streams.
+
+| Prop      | Type                                          | Default           | Description                                                |
+| --------- | --------------------------------------------- | ----------------- | ---------------------------------------------------------- |
+| `speeds`  | `readonly { value: number; label: string }[]` | `PLAYBACK_SPEEDS` | Speed options. Default: 0.5×, 0.75×, 1×, 1.25×, 1.5×, 2×. |
+| `size`    | `ButtonSize`                                  | -                 | `"icon"` hides the gauge icon, shows only the label.      |
+| `variant` | `ButtonVariant`                               | `"outline"`       | Button variant.                                            |
 
 ## Notes
 
-<Callout variant="info">
-  <strong>Behavior:</strong> The previous button restarts the current track if
-  playback has passed 3 seconds; otherwise it goes to the previous queue item.
+<Callout variant="warning">
+  <strong>Live streams:</strong> Seeking, rewind, fast-forward, and playback speed are disabled automatically. The seek bar locks to 100%.
 </Callout>
 
-<Callout variant="warning">
-  <strong>Live Stream Limitations:</strong> Live streams disable seeking,
-  rewind, and fast-forward controls. The seek bar is disabled and shows 100%
-  progress for live streams.
+<Callout variant="info">
+  <strong>Spacebar shortcut:</strong> <code>AudioPlayerPlay</code> registers a global keydown listener for Space when the document body is focused.
 </Callout>
 
 ## Changelog
 
-### 2026-04-05 player API alignment and transport migration
+### 2026-04-15 Unified into single file
 
-- **Changed**: `AudioPlayerSeekBar` now uses `Transport` instead of `Slider`.
-- **Changed**: Seek API moved from `onValueChange`/array values to `onSeek`/numeric values.
-- **Improved**: Added `freezeValuesWhileDragging` for smoother and more stable seek interaction.
-- **Changed**: `AudioPlayerVolume` now uses horizontal `Fader` (with `size="sm"` and `step={1}`).
-- **Improved**: Volume UX now keeps an `effectiveVolumePercent` state for clearer mute display.
-- **Improved**: Volume/mute controls now use explicit labels and cleaner menu ergonomics.
+- **Changed**: `provider.tsx`, `queue.tsx`, `track.tsx`, `playback-speed.tsx` merged into `player.tsx`
+- **Changed**: Provider logic extracted into `useAudioProvider` hook
+- **Added**: `AudioPlayer` now accepts a `tracks` prop, self-provisions the audio engine
+- **Removed**: `AudioQueueButton`, `AudioPlaybackSpeedButton`, consolidated into `AudioPlayerButton`
 
-### 2026-04-05 accessibility and control behavior hardening
+### 2026-04-05 Player API alignment and transport migration
 
-- **Improved**: `AudioPlayerButton` now applies a default `aria-label` from `tooltipLabel`.
-- **Changed**: Tooltip rendering is now directly controlled by `tooltipLabel` (removed `tooltip` flag).
-- **Improved**: Added explicit `aria-label` coverage on rewind/fast-forward/skip controls.
-- **Improved**: Skip/seek handlers now preserve consumer `onClick` callbacks before internal actions.
-- **Refined**: Simplified derived state and memoized branches for progress/disable logic.
+- **Changed**: `AudioPlayerSeekBar` now uses `Transport` instead of `Slider`
+- **Changed**: `AudioPlayerVolume` now uses horizontal `Fader`
+- **Improved**: `AudioPlayerButton` applies `aria-label` from `tooltipLabel` by default
 
-### 2025-12-24 useAudio integration and improvements
+### 2025-12-24 useAudio integration
 
-- **Changed**: Provider now uses `useAudio()` hook to access `htmlAudio` singleton
-- **Improved**: Better state synchronization between audio element and Zustand store
-- **Fixed**: Slider synchronization when pausing and resuming playback
-- **Improved**: Event listener management using `AbortController` for cleaner cleanup
+- **Changed**: Provider now uses `useAudio()` hook for the audio singleton
+- **Improved**: Event listeners managed via `AbortController`

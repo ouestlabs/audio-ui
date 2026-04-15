@@ -2,15 +2,19 @@
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "playback-speed-demo",
   "description": "Playback speed component example",
-  "registryDependencies": ["@audio/playback-speed", "@audio/player"],
+  "registryDependencies": [
+    "@audio/player"
+  ],
   "files": [
     {
       "path": "src/registry/default/examples/playback-speed-demo.tsx",
-      "content": "\"use client\";\n\nimport { AudioPlaybackSpeed } from \"@/registry/default/ui/audio/playback-speed\";\nimport {\n  AudioPlayer,\n  AudioPlayerControlBar,\n  AudioPlayerControlGroup,\n  AudioPlayerPlay,\n  AudioPlayerSkipBack,\n  AudioPlayerSkipForward,\n} from \"@/registry/default/ui/audio/player\";\n\nexport default function AudioPlaybackSpeedDemo() {\n  return (\n    <AudioPlayer className=\"w-fit\">\n      <AudioPlayerControlBar>\n        <AudioPlayerControlGroup className=\"w-auto\">\n          <AudioPlayerSkipBack />\n          <AudioPlayerPlay />\n          <AudioPlayerSkipForward />\n          <AudioPlaybackSpeed />\n        </AudioPlayerControlGroup>\n      </AudioPlayerControlBar>\n    </AudioPlayer>\n  );\n}\n",
+      "content": "\"use client\";\n\nimport {\n  AudioPlaybackSpeed,\n  AudioPlayer,\n  AudioPlayerControlBar,\n  AudioPlayerControlGroup,\n  AudioPlayerPlay,\n  AudioPlayerSkipBack,\n  AudioPlayerSkipForward,\n} from \"@/registry/default/ui/audio/player\";\n\nexport default function AudioPlaybackSpeedDemo() {\n  return (\n    <AudioPlayer className=\"w-fit\">\n      <AudioPlayerControlBar>\n        <AudioPlayerControlGroup className=\"w-auto\">\n          <AudioPlayerSkipBack />\n          <AudioPlayerPlay />\n          <AudioPlayerSkipForward />\n          <AudioPlaybackSpeed />\n        </AudioPlayerControlGroup>\n      </AudioPlayerControlBar>\n    </AudioPlayer>\n  );\n}\n",
       "type": "registry:example",
       "target": "components/audio/examples/playback-speed-demo.tsx"
     }
   ],
-  "categories": ["playback-speed"],
+  "categories": [
+    "playback-speed"
+  ],
   "type": "registry:example"
 }

@@ -15,12 +15,6 @@ const ERROR_RETRY_DELAY = 1000;
 const THROTTLE_INTERVAL = 100;
 const MIN_UPDATE_THRESHOLD = 0.5;
 
-/**
- * Gets error information from a MediaError error code.
- *
- * @param errorCode - The MediaError error code
- * @returns An object containing the error message and whether it's recoverable
- */
 const getErrorInfo = (
   errorCode: number
 ): { message: string; recoverable: boolean } => {
@@ -30,30 +24,17 @@ const getErrorInfo = (
     case MediaError.MEDIA_ERR_NETWORK:
       return { message: "Network error", recoverable: true };
     case MediaError.MEDIA_ERR_DECODE:
-      return {
-        message: "Audio file decoding error",
-        recoverable: false,
-      };
+      return { message: "Audio file decoding error", recoverable: false };
     case MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED:
       return {
         message: "File/network loading error (Code 4)",
         recoverable: true,
       };
     default:
-      return {
-        message: `Unknown error (${errorCode})`,
-        recoverable: true,
-      };
+      return { message: `Unknown error (${errorCode})`, recoverable: true };
   }
 };
 
-/**
- * Parses an audio error and returns its information.
- *
- * @param e - The error event
- * @param audio - The HTML audio element that triggered the error
- * @returns An object containing the error message, whether it's recoverable, and the error code
- */
 const parseAudioError = (
   e: Event,
   audio: HTMLAudioElement
@@ -68,20 +49,10 @@ const parseAudioError = (
     return { message: e.message, recoverable: true, errorCode: 0 };
   }
 
-  return {
-    message: "Unknown audio error",
-    recoverable: false,
-    errorCode: 0,
-  };
+  return { message: "Unknown audio error", recoverable: false, errorCode: 0 };
 };
 
-function AudioProvider({
-  tracks = [],
-  children,
-}: {
-  tracks?: Track[];
-  children: React.ReactNode;
-}) {
+export function useAudioProvider({ tracks = [] }: { tracks?: Track[] } = {}) {
   const { htmlAudio } = useAudio();
   const preloadAudioRef = React.useRef<HTMLAudioElement | null>(null);
   const errorRetryCountRef = React.useRef<number>(0);
@@ -249,7 +220,6 @@ function AudioProvider({
 
     const audio = htmlAudio.getAudioElement();
     if (!audio) {
-      // Silent: audio element initialization failed
       return;
     }
 
@@ -327,7 +297,6 @@ function AudioProvider({
       const isLiveStream = htmlAudio.isLive(audioDuration);
 
       if (state.currentTrack && isLiveStream) {
-        // Silent: live stream ended unexpectedly
         setState({
           isError: true,
           errorMessage: "Live stream connection lost",
@@ -432,7 +401,6 @@ function AudioProvider({
 
         setState({ isLoading: false, isPlaying: false });
       } catch {
-        // Silent error: state restoration error
         setState({
           isError: true,
           errorMessage: "Error restoring audio state",
@@ -532,7 +500,6 @@ function AudioProvider({
             await htmlAudio.play();
           }
         } catch {
-          // Silent error: error loading track
           useAudioStore.getState().setError("Error loading track");
         }
       }
@@ -610,41 +577,4 @@ function AudioProvider({
     );
     return unsubscribe;
   }, []);
-
-  return children;
 }
-const demoTracks: Track[] = [
-  {
-    id: "1",
-    title: "Beautiful Loop",
-    artist: "Flavio Concini",
-    album: "Pixabay Music",
-    url: "https://cdn.pixabay.com/audio/2024/10/21/audio_78251ef8e3.mp3",
-    genre: "Upbeat",
-  },
-  {
-    id: "2",
-    title: "Type",
-    artist: "Aliabbas Abasov",
-    album: "Pixabay Music",
-    url: "https://cdn.pixabay.com/audio/2024/02/28/audio_60f7a54400.mp3",
-    genre: "Hip Hop",
-  },
-  {
-    id: "3",
-    title: "Radio Tuxnet",
-    artist: "Tuxnet",
-    url: "/radio/live.aac?host=ice2.tuxnet.me",
-    genre: "Hip Hop",
-    artwork: "/icon",
-  },
-  {
-    id: "4",
-    title: "Live Radio",
-    artist: "Audio UI",
-    url: "https://radio.sevalla.app/live.aac",
-    artwork: "/icon",
-    genre: "Hip Hop",
-  },
-];
-export { AudioProvider, demoTracks };
