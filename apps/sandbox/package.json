@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "biome check --write .",
-    "lint:fix": "biome check --write --unsafe ."
+    "lint:fix": "biome check --write --unsafe .",
+    "reset": "bun scripts/reset.ts"
   },
   "dependencies": {
     "@audio-ui/react": "^0.0.7",
