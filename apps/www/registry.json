@@ -1,6 +1,6 @@
 {
-  "name": "shadcn/ui",
-  "homepage": "https://ui.shadcn.com",
+  "name": "audio/ui",
+  "homepage": "https://audio-ui.xyz",
   "items": [
     {
       "name": "player",
