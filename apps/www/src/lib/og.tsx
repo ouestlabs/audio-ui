@@ -4,24 +4,27 @@ import { appConfig } from "@/lib/config";
 
 export const OG_SIZE = { width: 1200, height: 630 };
 
-export const C = Object.freeze({
-  bg: "#0a0a0a",
-  card: "#1a1a1a",
-  cardMid: "#151515",
-  cardBack: "#111111",
+export const tokens = Object.freeze({
+  background: "#0a0a0a",
+  surface: "#1a1a1a",
+  surfaceMid: "#151515",
+  surfaceBack: "#111111",
+
   border: "#333333",
   borderMid: "#282828",
   borderBack: "#1e1e1e",
-  track: "#242424",
-  trackFill: "#404040",
-  knobBody: "#202020",
-  knobBorder: "#3a3a3a",
-  knobDot: "#686868",
-  thumb: "#303030",
-  thumbBorder: "#505050",
+
+  controlTrack: "#242424",
+  controlFill: "#404040",
+  controlBody: "#202020",
+  controlBorder: "#3a3a3a",
+  controlThumb: "#303030",
+  controlThumbBorder: "#505050",
+
+  accent: "#686868",
+  foreground: "#e8e8e8",
 });
 
-// Knob: angle in degrees, 0=top, clockwise. Range: -135° to +135°
 export function Knob({ angle }: { angle: number }) {
   const rad = (angle * Math.PI) / 180;
   const cx = 30;
@@ -52,31 +55,30 @@ export function Knob({ angle }: { angle: number }) {
       <circle
         cx={30}
         cy={30}
-        fill={C.knobBody}
+        fill={tokens.controlBody}
         r={27}
-        stroke={C.knobBorder}
+        stroke={tokens.controlBorder}
         strokeWidth="1"
       />
       <path
         d={arcD}
         fill="none"
-        stroke="#2e2e2e"
+        stroke={tokens.controlBorder}
         strokeLinecap="round"
         strokeWidth="2.5"
       />
       <path
         d={activeD}
         fill="none"
-        stroke="#484848"
+        stroke={tokens.accent}
         strokeLinecap="round"
         strokeWidth="2.5"
       />
-      <circle cx={dotX} cy={dotY} fill={C.knobDot} r={4} />
+      <circle cx={dotX} cy={dotY} fill={tokens.accent} r={4} />
     </svg>
   );
 }
 
-// Vertical fader: pos 0=top (max), 1=bottom (min)
 export function Fader({ pos }: { pos: number }) {
   const trackH = 108;
   const thumbH = 12;
@@ -98,9 +100,9 @@ export function Fader({ pos }: { pos: number }) {
           position: "absolute",
           width: "6px",
           height: `${trackH}px`,
-          backgroundColor: C.track,
+          backgroundColor: tokens.controlTrack,
           borderRadius: "3px",
-          border: "1px solid #303030",
+          border: `1px solid ${tokens.controlBorder}`,
           left: "17px",
         }}
       />
@@ -109,8 +111,8 @@ export function Fader({ pos }: { pos: number }) {
           position: "absolute",
           width: "38px",
           height: "14px",
-          backgroundColor: C.thumb,
-          border: `1px solid ${C.thumbBorder}`,
+          backgroundColor: tokens.controlThumb,
+          border: `1px solid ${tokens.controlThumbBorder}`,
           borderRadius: "4px",
           top: `${thumbTop}px`,
           left: "1px",
@@ -120,16 +122,16 @@ export function Fader({ pos }: { pos: number }) {
   );
 }
 
-// Horizontal transport bar
 export function Transport({ progress }: { progress: number }) {
   const w = 760;
   const thumbX = Math.round(progress * w);
+
   return (
     <div
       style={{
         width: `${w}px`,
         height: "5px",
-        backgroundColor: C.track,
+        backgroundColor: tokens.controlTrack,
         borderRadius: "999px",
         display: "flex",
         position: "relative",
@@ -139,7 +141,7 @@ export function Transport({ progress }: { progress: number }) {
         style={{
           width: `${thumbX}px`,
           height: "100%",
-          backgroundColor: C.trackFill,
+          backgroundColor: tokens.controlFill,
           borderRadius: "999px",
         }}
       />
@@ -149,8 +151,8 @@ export function Transport({ progress }: { progress: number }) {
           width: "8px",
           height: "8px",
           borderRadius: "50%",
-          backgroundColor: "#484848",
-          border: "1px solid #585858",
+          backgroundColor: tokens.accent,
+          border: `1px solid ${tokens.controlThumbBorder}`,
           top: "-2px",
           left: `${thumbX - 4}px`,
         }}
@@ -159,11 +161,11 @@ export function Transport({ progress }: { progress: number }) {
   );
 }
 
-// XY Pad — size matches strip height: knob(60) + gap(14) + fader(108) = 182
 export function XYPad({ x, y }: { x: number; y: number }) {
   const s = 182;
   const dotX = +(x * s).toFixed(1);
   const dotY = +((1 - y) * s).toFixed(1);
+
   return (
     <svg
       aria-hidden="true"
@@ -172,19 +174,26 @@ export function XYPad({ x, y }: { x: number; y: number }) {
       viewBox={`0 0 ${s} ${s}`}
       width={s}
     >
-      <rect fill={C.track} height={s} rx="6" width={s} x="0" y="0" />
+      <rect
+        fill={tokens.controlTrack}
+        height={s}
+        rx="6"
+        width={s}
+        x="0"
+        y="0"
+      />
       <rect
         fill="none"
         height={s}
         rx="6"
-        stroke="#303030"
+        stroke={tokens.controlBorder}
         strokeWidth="1"
         width={s}
         x="0"
         y="0"
       />
       <line
-        stroke="#333333"
+        stroke={tokens.controlBorder}
         strokeWidth="1"
         x1="0"
         x2={s}
@@ -192,7 +201,7 @@ export function XYPad({ x, y }: { x: number; y: number }) {
         y2={dotY}
       />
       <line
-        stroke="#333333"
+        stroke={tokens.controlBorder}
         strokeWidth="1"
         x1={dotX}
         x2={dotX}
@@ -202,17 +211,16 @@ export function XYPad({ x, y }: { x: number; y: number }) {
       <circle
         cx={dotX}
         cy={dotY}
-        fill="#505050"
+        fill={tokens.accent}
         r="6"
-        stroke="#686868"
+        stroke={tokens.controlThumbBorder}
         strokeWidth="1"
       />
     </svg>
   );
 }
 
-// Channel strip data: [knobAngle, faderPos]
-const STRIPS: [number, number][] = [
+const STRIPS: [angle: number, pos: number][] = [
   [-60, 0.25],
   [30, 0.55],
   [90, 0.35],
@@ -237,13 +245,12 @@ export function generateHomeOG(): ReactElement {
         height: "100%",
         display: "flex",
         flexDirection: "column",
-        backgroundColor: C.bg,
+        backgroundColor: tokens.background,
         fontFamily: "Instrument Serif, Georgia, serif",
         overflow: "hidden",
         position: "relative",
       }}
     >
-      {/* Hero */}
       <div
         style={{
           display: "flex",
@@ -257,17 +264,17 @@ export function generateHomeOG(): ReactElement {
           style={{
             fontSize: "88px",
             fontWeight: 700,
-            color: "#e8e8e8",
+            color: tokens.foreground,
             lineHeight: 1,
             letterSpacing: "-0.01em",
           }}
         >
-          audio/ui
+          {appConfig.name}
         </span>
         <span
           style={{
             fontSize: "26px",
-            color: "#666666",
+            color: tokens.accent,
             letterSpacing: "0.01em",
             maxWidth: "780px",
             textAlign: "center",
@@ -278,45 +285,41 @@ export function generateHomeOG(): ReactElement {
         </span>
       </div>
 
-      {/* Card back 2 */}
       <div
         style={{
           ...cardBase,
           top: CARD_TOP - 20,
           left: 196,
           right: 196,
-          backgroundColor: C.cardBack,
-          borderTop: `1px solid ${C.borderBack}`,
-          borderLeft: `1px solid ${C.borderBack}`,
-          borderRight: `1px solid ${C.borderBack}`,
+          backgroundColor: tokens.surfaceBack,
+          borderTop: `1px solid ${tokens.borderBack}`,
+          borderLeft: `1px solid ${tokens.borderBack}`,
+          borderRight: `1px solid ${tokens.borderBack}`,
         }}
       />
-
-      {/* Card back 1 */}
       <div
         style={{
           ...cardBase,
           top: CARD_TOP - 10,
           left: 178,
           right: 178,
-          backgroundColor: C.cardMid,
-          borderTop: `1px solid ${C.borderMid}`,
-          borderLeft: `1px solid ${C.borderMid}`,
-          borderRight: `1px solid ${C.borderMid}`,
+          backgroundColor: tokens.surfaceMid,
+          borderTop: `1px solid ${tokens.borderMid}`,
+          borderLeft: `1px solid ${tokens.borderMid}`,
+          borderRight: `1px solid ${tokens.borderMid}`,
         }}
       />
 
-      {/* Main card */}
       <div
         style={{
           ...cardBase,
           top: CARD_TOP,
           left: 160,
           right: 160,
-          backgroundColor: C.card,
-          borderTop: `1px solid ${C.border}`,
-          borderLeft: `1px solid ${C.border}`,
-          borderRight: `1px solid ${C.border}`,
+          backgroundColor: tokens.surface,
+          borderTop: `1px solid ${tokens.border}`,
+          borderLeft: `1px solid ${tokens.border}`,
+          borderRight: `1px solid ${tokens.border}`,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
@@ -324,18 +327,10 @@ export function generateHomeOG(): ReactElement {
           gap: "18px",
         }}
       >
-        {/* Channel strips row */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "flex-end",
-            gap: "32px",
-          }}
-        >
+        <div style={{ display: "flex", alignItems: "flex-end", gap: "32px" }}>
           {STRIPS.map(([angle, pos], i) => (
             <div
-              // biome-ignore lint/suspicious/noArrayIndexKey: static decorative element
-              key={i}
+              key={String(i)}
               style={{
                 display: "flex",
                 flexDirection: "column",
@@ -352,7 +347,7 @@ export function generateHomeOG(): ReactElement {
             style={{
               width: "1px",
               height: "182px",
-              backgroundColor: "#1e1e1e",
+              backgroundColor: tokens.border,
             }}
           />
 
@@ -372,7 +367,6 @@ function DocsWaveform() {
   const barW = 7;
   const gap = (W - bars * barW) / (bars - 1);
 
-  // Bars hang from top — only bottom half visible (cropped by parent overflow:hidden)
   const heights = Array.from({ length: bars }, (_, i) => {
     const t = i / bars;
     const wave =
@@ -391,21 +385,17 @@ function DocsWaveform() {
       viewBox={`0 0 ${W} ${H}`}
       width="100%"
     >
-      {heights.map((h, i) => {
-        const barH = Math.round(h * H);
-        const x = i * (barW + gap);
-        return (
-          <rect
-            fill="#1c1c1c"
-            height={barH}
-            key={String(i)}
-            rx="3"
-            width={barW}
-            x={x}
-            y={0}
-          />
-        );
-      })}
+      {heights.map((h, i) => (
+        <rect
+          fill={tokens.borderMid}
+          height={Math.round(h * H)}
+          key={String(i)}
+          rx="3"
+          width={barW}
+          x={i * (barW + gap)}
+          y={0}
+        />
+      ))}
     </svg>
   );
 }
@@ -424,14 +414,13 @@ export function generateDocsOG({
         height: "100%",
         display: "flex",
         flexDirection: "column",
-        backgroundColor: C.bg,
+        backgroundColor: tokens.background,
         fontFamily: "Instrument Serif, Georgia, serif",
         position: "relative",
         overflow: "hidden",
         padding: "72px 80px",
       }}
     >
-      {/* Waveform — absolute, hung from top, cropped at midpoint */}
       <div
         style={{
           position: "absolute",
@@ -446,14 +435,13 @@ export function generateDocsOG({
         <DocsWaveform />
       </div>
 
-      {/* Title */}
       <span
         style={{
           fontSize: "88px",
           fontWeight: 700,
-          color: "#e8e8e8",
+          color: tokens.foreground,
           lineHeight: 1,
-          letterSpacing: "-0.02em",
+          letterSpacing: "-0.01em",
           maxWidth: "720px",
           marginTop: "auto",
         }}
@@ -461,12 +449,11 @@ export function generateDocsOG({
         {title}
       </span>
 
-      {/* Description */}
       {description ? (
         <span
           style={{
             fontSize: "26px",
-            color: "#666666",
+            color: tokens.accent,
             maxWidth: "680px",
             lineHeight: 1.4,
             marginTop: "20px",
