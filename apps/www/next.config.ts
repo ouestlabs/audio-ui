@@ -13,12 +13,17 @@ const nextConfig: NextConfig = {
   experimental: {
     turbopackFileSystemCacheForDev: true,
   },
-  serverExternalPackages: ["ts-morph", "shiki"],
+  serverExternalPackages: [
+    "ts-morph",
+    "shiki",
+    "fumadocs-core",
+    "fumadocs-mdx",
+  ],
   images: {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "avatar.vercel.sh",
+        hostname: "*",
       },
     ],
   },
