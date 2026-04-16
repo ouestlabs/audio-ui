@@ -1,5 +1,5 @@
 <img width="4800" height="2520" alt="Background" src="https://github.com/user-attachments/assets/f666ebfd-fd18-484a-8bc7-bcc21b82c8d6" />
-<img width="2882" height="1782" alt="image" src="https://github.com/user-attachments/assets/9a6f4a98-1117-42f5-8205-971c9c9d7f42" />
+<img width="2880" height="1780" alt="image" src="https://github.com/user-attachments/assets/84a1686d-6a79-461a-87e3-7e4ba6782193" />
 
 ## Contributing
 
