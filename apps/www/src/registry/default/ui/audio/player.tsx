@@ -275,7 +275,7 @@ const AudioPlayerTimeDisplay = ({
   return (
     <time
       className={cn(
-        "min-w-12 shrink-0 px-1.5 text-left font-mono text-sm tabular-nums",
+        "min-w-12 shrink-0 text-left font-mono text-sm tabular-nums",
         remaining && "text-right",
         showLiveIcon && "flex items-center gap-1 text-red-500 text-xs",
         className

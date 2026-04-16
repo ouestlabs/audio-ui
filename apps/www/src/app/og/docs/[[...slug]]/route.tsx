@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { loadGoogleFont } from "@/lib/fonts";
+import { loadOGFont } from "@/lib/fonts";
 import { generateDocsOG, makeImageResponse } from "@/lib/og";
 import { source } from "@/lib/source";
 
@@ -16,15 +16,7 @@ export async function GET(
     notFound();
   }
 
-  let fontData: ArrayBuffer | null = null;
-  try {
-    fontData = await loadGoogleFont(
-      "Instrument Serif",
-      `audio/ui docs ${page.data.title} ${page.data.description ?? ""}`
-    );
-  } catch {
-    fontData = null;
-  }
+  const fontData = await loadOGFont();
 
   return makeImageResponse(
     generateDocsOG({
