@@ -109,7 +109,7 @@ function AudioProvider({
   children: React.ReactNode;
 }) {
   useAudioProvider({ tracks });
-  return <>{children}</>;
+  return children;
 }
 const demoTracks: Track[] = [
   {
