@@ -1,8 +1,5 @@
-# audio/ui
-
-A set of accessible and composable Audio UI components. Built on top of [shadcn/ui](https://ui.shadcn.com/), it's designed for you to copy, paste, and own.
-
-![audio/ui](https://github.com/user-attachments/assets/fdb8289b-2d84-4c2f-b1b6-9efc45d3a961)
+<img width="4800" height="2520" alt="Background" src="https://github.com/user-attachments/assets/f666ebfd-fd18-484a-8bc7-bcc21b82c8d6" />
+<img width="2882" height="1782" alt="image" src="https://github.com/user-attachments/assets/9a6f4a98-1117-42f5-8205-971c9c9d7f42" />
 
 ## Contributing
 
