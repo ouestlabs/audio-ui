@@ -20,19 +20,22 @@ function generateLLMPrompt(url: string, markdownUrl?: string): string {
       ? new URL(markdownUrl, window.location.origin).toString()
       : markdownUrl || url;
 
-  return `I'm working with the audio/ui documentation. Here's the context:
+  return `I'm building a React app using audio/ui, an open-source library of accessible Audio UI components built on top of shadcn/ui.
 
+## Registry
+- Registry endpoint: https://audio-ui.xyz/r/{name}.json
+- Install components with: npx shadcn@latest add https://audio-ui.xyz/r/{name}.json
+- Example: npx shadcn@latest add https://audio-ui.xyz/r/player.json
+
+## Documentation
 - Page URL: ${url}
 - Markdown source: ${fullMarkdownUrl}
 
-Please help me understand this documentation deeply. I may need you to:
-- Explain concepts and APIs
-- Provide usage examples
-- Help debug issues
-- Answer questions about implementation details
-- Suggest best practices
+## Stack
+audio/ui is built on React, Tailwind CSS v4, shadcn/ui, and @audio-ui/react (headless primitives).
+Components are copied into your project via the shadcn CLI — you own the code.
 
-Be ready to engage with the full context of this documentation page.`;
+Please read the documentation above and help me implement the component shown on this page in my project.`;
 }
 
 export function DocsCopyPage({
