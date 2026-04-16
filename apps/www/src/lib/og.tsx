@@ -231,12 +231,12 @@ const STRIPS: [angle: number, pos: number][] = [
 const CARD_TOP = 358;
 
 export function generateHomeOG(): ReactElement {
-  const cardBase = {
-    position: "absolute" as const,
+  const cardBase = Object.freeze({
+    position: "absolute",
     bottom: 0,
     borderTopLeftRadius: "18px",
     borderTopRightRadius: "18px",
-  };
+  });
 
   return (
     <div
