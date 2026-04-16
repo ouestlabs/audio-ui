@@ -146,19 +146,22 @@ const demoTracks: Track[] = [
   },
 ];
 
+type AudioPlayerProps = React.ComponentProps<"div"> &
+  VariantProps<typeof audioPlayerVariants> & { tracks?: Track[] };
+
 function AudioPlayer({
   children,
   className,
   tracks,
+  size,
+  variant,
   ...props
-}: React.ComponentProps<"div"> & { tracks?: Track[] }) {
+}: AudioPlayerProps) {
   const content = (
     <div
-      className={cn(
-        "w-full rounded-4xl bg-card p-4 shadow-md ring-1 ring-foreground/5 dark:ring-foreground/10",
-        className
-      )}
+      className={cn(audioPlayerVariants({ size, variant }), className)}
       data-slot="audio-player"
+      data-variant={variant ?? "default"}
       role="presentation"
       {...props}
     >
@@ -186,6 +189,7 @@ function AudioPlayerButton({
     <Button
       aria-label={props["aria-label"] ?? tooltipLabel}
       className={cn("[&_svg]:text-primary", className)}
+      data-slot="audio-player-button"
       {...props}
     />
   );
@@ -201,6 +205,25 @@ function AudioPlayerButton({
 
   return button;
 }
+
+const audioPlayerVariants = cva("w-full bg-card shadow-md ring-1", {
+  variants: {
+    size: {
+      sm: "rounded-3xl p-3",
+      default: "rounded-4xl p-4",
+      lg: "rounded-4xl p-6",
+    },
+    variant: {
+      default: "ring-foreground/5 dark:ring-foreground/10",
+      ghost: "bg-transparent shadow-none ring-transparent",
+      outline: "ring-foreground/10 dark:ring-foreground/20",
+    },
+  },
+  defaultVariants: {
+    size: "default",
+    variant: "default",
+  },
+});
 
 const audioControlBarVariants = cva(
   "group/audio-control-bar flex w-full min-w-0 items-center gap-1.5",
@@ -326,6 +349,7 @@ const AudioPlayerSeekBar = ({
       aria-label="Seek"
       bufferedValue={bufferedProgress}
       className={cn("min-w-20 flex-1", className)}
+      data-slot="audio-seek-bar"
       disabled={isLiveStream}
       freezeValuesWhileDragging
       onSeek={(nextProgress) => {
@@ -941,6 +965,8 @@ function AudioTrack({
         "w-full cursor-pointer backdrop-blur-sm transition-all hover:bg-secondary/50",
         className
       )}
+      data-current={isCurrent ? "true" : undefined}
+      data-slot="audio-track"
       onClick={(e) => {
         e.stopPropagation();
         e.preventDefault();
@@ -1182,7 +1208,10 @@ function AudioTrackList({
     );
 
   return (
-    <ScrollArea className={cn("max-h-[36vh] w-full pt-1", className)}>
+    <ScrollArea
+      className={cn("max-h-[36vh] w-full pt-1", className)}
+      data-slot="audio-track-list"
+    >
       {content}
     </ScrollArea>
   );
@@ -1433,6 +1462,7 @@ const AudioQueue = React.memo(
         <DialogTrigger
           render={
             <AudioPlayerButton
+              data-slot="audio-queue-trigger"
               size="icon"
               tooltipLabel="Queue"
               variant="outline"
@@ -1577,6 +1607,7 @@ function AudioPlaybackSpeed({
 }
 
 export {
+  audioPlayerVariants,
   AudioProvider,
   demoTracks,
   AudioPlayer,
