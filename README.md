@@ -1,6 +1,5 @@
-<img width="4800" height="2520" alt="Background" src="https://github.com/user-attachments/assets/f666ebfd-fd18-484a-8bc7-bcc21b82c8d6" />
-
-<img width="2880" height="1780" alt="image" src="https://github.com/user-attachments/assets/84a1686d-6a79-461a-87e3-7e4ba6782193" />
+![Audio UI Illustration](/apps/www/public/illustration.svg)
+![Audio UI Overview](/apps/www/public/overview.png)
 
 ## Contributing
 
