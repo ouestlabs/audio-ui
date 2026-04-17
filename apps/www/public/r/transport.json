@@ -1,7 +1,9 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "transport",
-  "dependencies": ["@audio-ui/react"],
+  "dependencies": [
+    "@audio-ui/react"
+  ],
   "files": [
     {
       "path": "src/registry/default/ui/audio/elements/transport.tsx",

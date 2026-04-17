@@ -2,7 +2,9 @@
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "knob-change-vs-commit-demo",
   "description": "Knob live value vs committed value callbacks",
-  "registryDependencies": ["@audio/knob"],
+  "registryDependencies": [
+    "@audio/knob"
+  ],
   "files": [
     {
       "path": "src/registry/default/examples/knob-change-vs-commit-demo.tsx",
@@ -11,6 +13,8 @@
       "target": "components/audio/examples/knob-change-vs-commit-demo.tsx"
     }
   ],
-  "categories": ["knob"],
+  "categories": [
+    "knob"
+  ],
   "type": "registry:example"
 }

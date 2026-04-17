@@ -24,6 +24,32 @@ export const examples: Registry["items"] = [
     categories: ["player", "queue"],
   },
   {
+    name: "player-variant-demo",
+    description: "AudioPlayer variant options (default, outline, ghost)",
+    type: "registry:example",
+    registryDependencies: ["@audio/player"],
+    files: [
+      {
+        path: "examples/player-variant-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    categories: ["player"],
+  },
+  {
+    name: "player-size-demo",
+    description: "AudioPlayer size options (sm, default, lg)",
+    type: "registry:example",
+    registryDependencies: ["@audio/player"],
+    files: [
+      {
+        path: "examples/player-size-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    categories: ["player"],
+  },
+  {
     name: "player-stacked-demo",
     description: "Audio player with stacked layout",
     type: "registry:example",

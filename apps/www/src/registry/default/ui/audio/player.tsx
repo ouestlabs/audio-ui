@@ -146,19 +146,44 @@ const demoTracks: Track[] = [
   },
 ];
 
+const audioPlayerVariants = cva(
+  "before:-z-1 relative w-full before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:backdrop-blur-xl before:backdrop-saturate-150",
+  {
+    variants: {
+      size: {
+        sm: "rounded-3xl py-3",
+        default: "rounded-4xl py-4",
+      },
+      variant: {
+        default:
+          "bg-card/70 shadow-md ring-1 ring-foreground/5 dark:ring-foreground/10",
+        ghost: "bg-transparent hover:bg-muted/30",
+      },
+    },
+    defaultVariants: {
+      size: "default",
+      variant: "default",
+    },
+  }
+);
+
+type AudioPlayerProps = React.ComponentProps<"div"> &
+  VariantProps<typeof audioPlayerVariants> & { tracks?: Track[] };
+
 function AudioPlayer({
   children,
   className,
   tracks,
+  size,
+  variant,
   ...props
-}: React.ComponentProps<"div"> & { tracks?: Track[] }) {
+}: AudioPlayerProps) {
   const content = (
     <div
-      className={cn(
-        "w-full rounded-4xl bg-card p-4 shadow-md ring-1 ring-foreground/5 dark:ring-foreground/10",
-        className
-      )}
+      className={cn(audioPlayerVariants({ size, variant }), className)}
+      data-size={size ?? "default"}
       data-slot="audio-player"
+      data-variant={variant ?? "default"}
       role="presentation"
       {...props}
     >
@@ -186,6 +211,7 @@ function AudioPlayerButton({
     <Button
       aria-label={props["aria-label"] ?? tooltipLabel}
       className={cn("[&_svg]:text-primary", className)}
+      data-slot="audio-player-button"
       {...props}
     />
   );
@@ -203,7 +229,7 @@ function AudioPlayerButton({
 }
 
 const audioControlBarVariants = cva(
-  "group/audio-control-bar flex w-full min-w-0 items-center gap-1.5",
+  "flex w-full min-w-0 items-center gap-4 in-data-[size=sm]:gap-3 in-data-[size=sm]:px-3 px-4",
   {
     variants: {
       variant: {
@@ -240,7 +266,10 @@ const AudioPlayerControlGroup = ({
   ...props
 }: AudioPlayerControlGroupProps) => (
   <div
-    className={cn("flex w-full items-center gap-1.5", className)}
+    className={cn(
+      "flex w-full items-center gap-3 in-data-[size=sm]:gap-2",
+      className
+    )}
     data-slot="audio-control-group"
     {...props}
   />
@@ -326,6 +355,7 @@ const AudioPlayerSeekBar = ({
       aria-label="Seek"
       bufferedValue={bufferedProgress}
       className={cn("min-w-20 flex-1", className)}
+      data-slot="audio-seek-bar"
       disabled={isLiveStream}
       freezeValuesWhileDragging
       onSeek={(nextProgress) => {
@@ -941,6 +971,8 @@ function AudioTrack({
         "w-full cursor-pointer backdrop-blur-sm transition-all hover:bg-secondary/50",
         className
       )}
+      data-current={isCurrent ? "true" : undefined}
+      data-slot="audio-track"
       onClick={(e) => {
         e.stopPropagation();
         e.preventDefault();
@@ -1182,7 +1214,10 @@ function AudioTrackList({
     );
 
   return (
-    <ScrollArea className={cn("max-h-[36vh] w-full pt-1", className)}>
+    <ScrollArea
+      className={cn("max-h-[36vh] w-full pt-1", className)}
+      data-slot="audio-track-list"
+    >
       {content}
     </ScrollArea>
   );
@@ -1433,6 +1468,7 @@ const AudioQueue = React.memo(
         <DialogTrigger
           render={
             <AudioPlayerButton
+              data-slot="audio-queue-trigger"
               size="icon"
               tooltipLabel="Queue"
               variant="outline"
@@ -1577,6 +1613,7 @@ function AudioPlaybackSpeed({
 }
 
 export {
+  audioPlayerVariants,
   AudioProvider,
   demoTracks,
   AudioPlayer,

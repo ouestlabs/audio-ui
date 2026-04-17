@@ -88,16 +88,26 @@ export default function RootLayout({ children }) {
 
 <Preview name="player-queue-demo" />
 
+### Variants
+
+<Preview name="player-variant-demo" />
+
+### Sizes
+
+<Preview name="player-size-demo" />
+
 ### AudioPlayer
 
 Container for all player controls.
 
-| Prop        | Type      | Default | Description                                                       |
-| ----------- | --------- | ------- | ----------------------------------------------------------------- |
-| `tracks`    | `Track[]` | -       | When provided, wraps children with `AudioProvider` automatically. |
-| `className` | `string`  | -       | Additional CSS classes.                                           |
+| Prop        | Type                              | Default     | Description                                                       |
+| ----------- | --------------------------------- | ----------- | ----------------------------------------------------------------- |
+| `tracks`    | `Track[]`                         | -           | When provided, wraps children with `AudioProvider` automatically. |
+| `variant`   | `"default" \| "ghost"`              | `"default"` | Visual style. `ghost` is transparent with a hover background.                                            |
+| `size`      | `"sm" \| "default"`                 | `"default"` | Controls padding and border radius.                               |
+| `className` | `string`                          | -           | Additional CSS classes.                                           |
 
-Inherits all other props from `HTMLDivElement`.
+Inherits all other props from `HTMLDivElement`. The underlying CVA definition is exported as `audioPlayerVariants` for extension.
 
 ### AudioProvider
 
@@ -308,6 +318,14 @@ Dropdown to change playback speed. Disabled automatically for live streams.
 </Callout>
 
 ## Changelog
+
+### 2026-04-17 data-slot coverage and AudioPlayer variants
+
+- **Added**: `AudioPlayer` now accepts `variant` (`default` | `ghost` | `outline`) and `size` (`sm` | `default` | `lg`) props via CVA
+- **Added**: `audioPlayerVariants` exported for extension
+- **Added**: `data-slot` attributes on all components for CSS targeting (`audio-player`, `audio-player-button`, `audio-seek-bar`, `audio-track`, `audio-track-list`, `audio-queue-trigger`)
+- **Added**: `data-current="true"` on `AudioTrack` when it is the active track
+- **Added**: `data-variant` on `AudioPlayer` and `AudioPlayerControlBar`
 
 ### 2026-04-15 Unified into single file
 

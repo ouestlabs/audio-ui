@@ -182,6 +182,42 @@ export const Index: Record<string, any> = {
     categories: ["player","queue"],
     meta: undefined,
   },
+  "player-variant-demo": {
+    name: "player-variant-demo",
+    description: "AudioPlayer variant options (default, outline, ghost)",
+    type: "registry:example",
+    registryDependencies: ["@audio/player"],
+    files: [{
+      path: "src/registry/default/examples/player-variant-demo.tsx",
+      type: "registry:example",
+      target: ""
+    }],
+    component: React.lazy(async () => {
+      const mod = await import("@/registry/default/examples/player-variant-demo.tsx")
+      const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
+      return { default: mod.default || mod[exportName] }
+    }),
+    categories: ["player"],
+    meta: undefined,
+  },
+  "player-size-demo": {
+    name: "player-size-demo",
+    description: "AudioPlayer size options (sm, default, lg)",
+    type: "registry:example",
+    registryDependencies: ["@audio/player"],
+    files: [{
+      path: "src/registry/default/examples/player-size-demo.tsx",
+      type: "registry:example",
+      target: ""
+    }],
+    component: React.lazy(async () => {
+      const mod = await import("@/registry/default/examples/player-size-demo.tsx")
+      const exportName = Object.keys(mod).find(key => typeof mod[key] === 'function' || typeof mod[key] === 'object') || item.name
+      return { default: mod.default || mod[exportName] }
+    }),
+    categories: ["player"],
+    meta: undefined,
+  },
   "player-stacked-demo": {
     name: "player-stacked-demo",
     description: "Audio player with stacked layout",
