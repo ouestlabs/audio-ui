@@ -1,0 +1,20 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "fader-thumb-marks-variants-demo",
+  "description": "Fader thumb marks variants (off, 1, 4)",
+  "registryDependencies": [
+    "@audio/fader"
+  ],
+  "files": [
+    {
+      "path": "src/registry/default/examples/fader-thumb-marks-variants-demo.tsx",
+      "content": "import { Fader } from \"@/registry/default/ui/audio/elements/fader\";\n\nexport default function FaderThumbMarksVariantsDemo() {\n  return (\n    <div className=\"flex items-end gap-6\">\n      <div className=\"flex h-max flex-col items-center gap-2\">\n        <Fader\n          defaultValue={50}\n          max={100}\n          min={0}\n          step={1}\n          thumbMarks={false}\n        />\n        <p className=\"text-center text-muted-foreground text-xs\">No marks</p>\n      </div>\n\n      <div className=\"flex h-max flex-col items-center gap-2\">\n        <Fader defaultValue={50} max={100} min={0} step={1} thumbMarks={1} />\n        <p className=\"text-center text-muted-foreground text-xs\">1 mark</p>\n      </div>\n\n      <div className=\"flex h-max flex-col items-center gap-2\">\n        <Fader defaultValue={50} max={100} min={0} step={1} thumbMarks={4} />\n        <p className=\"text-center text-muted-foreground text-xs\">4 marks</p>\n      </div>\n    </div>\n  );\n}\n",
+      "type": "registry:example",
+      "target": "components/audio/examples/fader-thumb-marks-variants-demo.tsx"
+    }
+  ],
+  "categories": [
+    "fader"
+  ],
+  "type": "registry:example"
+}

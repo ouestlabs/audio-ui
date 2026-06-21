@@ -1,0 +1,20 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "player-track-demo",
+  "description": "Minimal track component example",
+  "registryDependencies": [
+    "@audio/player"
+  ],
+  "files": [
+    {
+      "path": "src/registry/default/examples/player-track-demo.tsx",
+      "content": "\"use client\";\n\nimport { AudioTrack } from \"@/registry/default/ui/audio/player\";\n\nexport default function AudioTrackDemo() {\n  return <AudioTrack className=\"w-full\" trackId={\"4\"} />;\n}\n",
+      "type": "registry:example",
+      "target": "components/audio/examples/player-track-demo.tsx"
+    }
+  ],
+  "categories": [
+    "track"
+  ],
+  "type": "registry:example"
+}

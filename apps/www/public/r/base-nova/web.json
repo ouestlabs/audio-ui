@@ -1,0 +1,21 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "web",
+  "description": "Web Audio Lib",
+  "dependencies": [],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "src/registry/default/lib/web-audio.ts",
+      "content": "declare global {\n  interface Window {\n    webkitAudioContext: typeof AudioContext;\n  }\n}\nexport class WebAudio {\n  #audioContext: AudioContext | null = null;\n  #isInitialized = false;\n\n  init(): void {\n    if (this.#isInitialized || !this.isClient()) {\n      return;\n    }\n\n    this.#isInitialized = true;\n\n    if (this.isClient()) {\n      const AudioContextClass =\n        window.AudioContext || window.webkitAudioContext;\n      if (AudioContextClass) {\n        this.#audioContext = new AudioContextClass();\n      }\n    }\n  }\n\n  getContext(): AudioContext | null {\n    if (!this.isClient()) {\n      return null;\n    }\n\n    if (!this.#audioContext) {\n      const AudioContextClass =\n        window.AudioContext || window.webkitAudioContext;\n      if (!AudioContextClass) {\n        return null;\n      }\n      this.#audioContext = new AudioContextClass();\n    }\n\n    const ctx = this.#audioContext;\n\n    return ctx;\n  }\n\n  cleanup(): void {\n    if (this.#audioContext) {\n      this.#audioContext.close();\n      this.#audioContext = null;\n    }\n    this.#isInitialized = false;\n  }\n\n  private isClient(): boolean {\n    return typeof window !== \"undefined\" && !!window.document;\n  }\n}\n\nexport const $webAudio = new WebAudio();\n",
+      "type": "registry:lib",
+      "target": "lib/web-audio.ts"
+    }
+  ],
+  "categories": [
+    "lib",
+    "audio",
+    "web-audio"
+  ],
+  "type": "registry:lib"
+}

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "use-audio",
+  "registryDependencies": [
+    "@audio/html",
+    "@audio/web"
+  ],
+  "files": [
+    {
+      "path": "src/registry/default/hooks/use-audio.ts",
+      "content": "\"use client\";\n\nimport { $htmlAudio } from \"@/registry/default/lib/html-audio\";\nimport { $webAudio } from \"@/registry/default/lib/web-audio\";\n\n/**\n * Unified React hook to access both HTML Audio and Web Audio API instances\n * - htmlAudio: For HTML5 audio playback (tracks, streaming)\n * - webAudio: For Web Audio API (synthesis, effects, sound effects)\n *\n * @returns An object with both audio instances\n *\n * @example\n * ```tsx\n * const { htmlAudio, webAudio } = useAudio();\n *\n * // Use HTML Audio for playback\n * await htmlAudio.load({ url: track.url });\n * htmlAudio.play();\n *\n * // Use Web Audio for synthesis\n * const ctx = webAudio.getContext();\n * const oscillator = ctx.createOscillator();\n * ```\n */\nexport function useAudio() {\n  return {\n    htmlAudio: $htmlAudio,\n    webAudio: $webAudio,\n  };\n}\n",
+      "type": "registry:hook",
+      "target": "hooks/use-audio.ts"
+    }
+  ],
+  "categories": [
+    "audio"
+  ],
+  "type": "registry:hook"
+}
