@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { DemoGrid } from "@/app/(home)/elements/demo-grid";
 import { BuilderProvider } from "./components/builder-provider";
 import { Customizer } from "./components/customizer";
 import { BuilderPreview } from "./components/preview";
+import { PreviewWall } from "./components/preview-wall";
 
 export const metadata: Metadata = {
   title: "Create — audio/ui",
@@ -20,7 +20,7 @@ export default function CreatePage() {
             <Customizer />
             <div className="flex min-h-0 flex-1 overflow-hidden">
               <BuilderPreview>
-                <DemoGrid />
+                <PreviewWall />
               </BuilderPreview>
             </div>
           </div>
