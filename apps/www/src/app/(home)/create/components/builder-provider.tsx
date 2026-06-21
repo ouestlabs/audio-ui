@@ -17,7 +17,27 @@ import {
 } from "../lib/search-params";
 
 const THEME_STYLE_ELEMENT_ID = "builder-theme-vars";
-const MANAGED_BODY_CLASS_PREFIXES = ["style-", "base-color-"] as const;
+const MANAGED_BODY_CLASS_PREFIXES = [
+  "style-",
+  "base-color-",
+  "menu-color-",
+  "menu-accent-",
+] as const;
+
+// Base Color drives the neutral surfaces; Theme overrides these accent vars.
+const ACCENT_VAR_KEYS = [
+  "primary",
+  "primary-foreground",
+  "ring",
+  "sidebar-primary",
+  "sidebar-primary-foreground",
+  "sidebar-ring",
+  "chart-1",
+  "chart-2",
+  "chart-3",
+  "chart-4",
+  "chart-5",
+] as const;
 
 function removeManagedBodyClasses(body: HTMLElement) {
   for (const className of Array.from(body.classList)) {
@@ -80,32 +100,44 @@ export function BuilderProvider({ children }: { children: ReactNode }) {
     removeManagedBodyClasses(body);
     body.classList.add(
       `style-${params.style}`,
-      `base-color-${params.baseColor}`
+      `base-color-${params.baseColor}`,
+      `menu-color-${params.menuColor}`,
+      `menu-accent-${params.menuAccent}`
     );
     setIsReady(true);
-  }, [params.style, params.baseColor]);
+  }, [params.style, params.baseColor, params.menuColor, params.menuAccent]);
 
-  // Inject CSS vars for the selected base color
+  // Inject CSS vars: Base Color drives the surfaces, Theme drives the accent.
   useLayoutEffect(() => {
-    const colorEntry =
+    const baseEntry =
       baseColorsOKLCH[params.baseColor as keyof typeof baseColorsOKLCH];
-    if (!colorEntry) {
+    if (!baseEntry) {
       return;
     }
 
+    const themeEntry =
+      baseColorsOKLCH[params.theme as keyof typeof baseColorsOKLCH];
     const radiusValue = RADIUS_CSS[params.radius];
-    const rootVars: Record<string, string> = {
-      ...colorEntry.light,
-      radius: radiusValue,
-    };
-    const darkVars: Record<string, string> = {
-      ...colorEntry.dark,
-      radius: radiusValue,
+
+    const merge = (mode: "light" | "dark"): Record<string, string> => {
+      const vars: Record<string, string> = { ...baseEntry[mode] };
+      const themeVars = themeEntry?.[mode] as
+        | Record<string, string>
+        | undefined;
+      if (themeVars) {
+        for (const key of ACCENT_VAR_KEYS) {
+          if (themeVars[key]) {
+            vars[key] = themeVars[key];
+          }
+        }
+      }
+      vars.radius = radiusValue;
+      return vars;
     };
 
     const cssText = [
-      buildCssRule(":root", rootVars),
-      buildCssRule(".dark", darkVars),
+      buildCssRule(":root", merge("light")),
+      buildCssRule(".dark", merge("dark")),
     ].join("\n");
 
     let el = document.getElementById(
@@ -117,7 +149,7 @@ export function BuilderProvider({ children }: { children: ReactNode }) {
       document.head.appendChild(el);
     }
     el.textContent = cssText;
-  }, [params.baseColor, params.radius]);
+  }, [params.baseColor, params.theme, params.radius]);
 
   if (!isReady) {
     return null;

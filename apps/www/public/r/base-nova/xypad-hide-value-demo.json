@@ -2,9 +2,7 @@
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "xypad-hide-value-demo",
   "description": "XYPad component example with hidden value",
-  "registryDependencies": [
-    "@audio/xypad"
-  ],
+  "registryDependencies": ["@audio/xypad"],
   "files": [
     {
       "path": "src/registry/default/examples/xypad-hide-value-demo.tsx",
@@ -13,8 +11,6 @@
       "target": "components/audio/examples/xypad-hide-value-demo.tsx"
     }
   ],
-  "categories": [
-    "xypad"
-  ],
+  "categories": ["xypad"],
   "type": "registry:example"
 }

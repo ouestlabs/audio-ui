@@ -2,9 +2,7 @@
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "xypad-live-value-demo",
   "description": "XYPad with live x/y readout",
-  "registryDependencies": [
-    "@audio/xypad"
-  ],
+  "registryDependencies": ["@audio/xypad"],
   "files": [
     {
       "path": "src/registry/default/examples/xypad-live-value-demo.tsx",
@@ -13,8 +11,6 @@
       "target": "components/audio/examples/xypad-live-value-demo.tsx"
     }
   ],
-  "categories": [
-    "xypad"
-  ],
+  "categories": ["xypad"],
   "type": "registry:example"
 }

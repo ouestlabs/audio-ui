@@ -2,10 +2,7 @@
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "block-channel-strip-fader-multi",
   "description": "Multiple fader channel strips in a row",
-  "registryDependencies": [
-    "@audio/channel-strip",
-    "@audio/fader"
-  ],
+  "registryDependencies": ["@audio/channel-strip", "@audio/fader"],
   "files": [
     {
       "path": "src/registry/default/blocks/block-channel-strip-fader-multi.tsx",
@@ -14,9 +11,6 @@
       "target": "components/audio/blocks/block-channel-strip-fader-multi.tsx"
     }
   ],
-  "categories": [
-    "channel-strip",
-    "fader"
-  ],
+  "categories": ["channel-strip", "fader"],
   "type": "registry:block"
 }

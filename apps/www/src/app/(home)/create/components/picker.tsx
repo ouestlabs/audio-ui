@@ -1,7 +1,8 @@
 "use client";
 
+import { Popover as PopoverPrimitive } from "@base-ui/react/popover";
 import { CaretUpDownIcon, CheckIcon } from "@phosphor-icons/react";
-import { type ReactNode, useState } from "react";
+import type { ReactNode } from "react";
 import { cn } from "@/registry/default/lib/utils";
 import {
   Popover,
@@ -30,10 +31,8 @@ export function Picker<T extends string>({
   options: PickerOption<T>[];
   onValueChange: (value: T) => void;
 }) {
-  const [open, setOpen] = useState(false);
-
   return (
-    <Popover onOpenChange={setOpen} open={open}>
+    <Popover>
       <PopoverTrigger
         className={cn(
           "relative flex w-full items-center rounded-xl px-3 py-2 text-left ring-1 ring-foreground/10 transition-colors",
@@ -59,25 +58,21 @@ export function Picker<T extends string>({
         sideOffset={10}
       >
         {options.map((option) => (
-          <button
+          <PopoverPrimitive.Close
             className={cn(
               "flex w-full items-center gap-2.5 rounded-xl px-2 py-1.5 text-left text-sm transition-colors",
               "hover:bg-accent hover:text-accent-foreground",
               value === option.value && "bg-accent text-accent-foreground"
             )}
             key={option.value}
-            onClick={() => {
-              onValueChange(option.value);
-              setOpen(false);
-            }}
-            type="button"
+            onClick={() => onValueChange(option.value)}
           >
             {option.swatch}
             <span className="min-w-0 flex-1 truncate">{option.label}</span>
             {value === option.value && (
               <CheckIcon aria-hidden="true" className="size-4 shrink-0" />
             )}
-          </button>
+          </PopoverPrimitive.Close>
         ))}
       </PopoverContent>
     </Popover>

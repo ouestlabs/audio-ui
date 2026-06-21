@@ -11,6 +11,8 @@ export const STYLES = [
   "base-maia",
   "base-lyra",
   "base-mira",
+  "base-rhea",
+  "base-sera",
 ] as const;
 
 export type Style = (typeof STYLES)[number];

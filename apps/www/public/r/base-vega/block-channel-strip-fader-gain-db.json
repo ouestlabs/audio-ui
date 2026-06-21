@@ -2,10 +2,7 @@
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "block-channel-strip-fader-gain-db",
   "description": "Channel strip with bipolar gain fader (-60 dB to +6 dB)",
-  "registryDependencies": [
-    "@audio/channel-strip",
-    "@audio/fader"
-  ],
+  "registryDependencies": ["@audio/channel-strip", "@audio/fader"],
   "files": [
     {
       "path": "src/registry/default/blocks/block-channel-strip-fader-gain-db.tsx",
@@ -14,10 +11,6 @@
       "target": "components/audio/blocks/block-channel-strip-fader-gain-db.tsx"
     }
   ],
-  "categories": [
-    "channel-strip",
-    "fader",
-    "ui"
-  ],
+  "categories": ["channel-strip", "fader", "ui"],
   "type": "registry:block"
 }

@@ -4,6 +4,8 @@ import { Separator } from "@/registry/default/ui/separator";
 import { BaseColorPicker } from "./base-color-picker";
 import { FontPicker } from "./font-picker";
 import { IconLibraryPicker } from "./icon-library-picker";
+import { MenuAccentPicker } from "./menu-accent-picker";
+import { MenuColorPicker } from "./menu-color-picker";
 import { ModeSwitcher } from "./mode-switcher";
 import { PresetActions } from "./preset-actions";
 import { RadiusPicker } from "./radius-picker";
@@ -28,6 +30,9 @@ export function Customizer() {
         <FontPicker label="Heading" param="fontHeading" />
         <FontPicker label="Font" param="font" />
         <IconLibraryPicker />
+        <Separator />
+        <MenuColorPicker />
+        <MenuAccentPicker />
       </div>
 
       <footer className="flex shrink-0 flex-col gap-2 border-t p-3">

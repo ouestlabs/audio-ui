@@ -2,9 +2,7 @@
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "fader-thumb-marks-variants-demo",
   "description": "Fader thumb marks variants (off, 1, 4)",
-  "registryDependencies": [
-    "@audio/fader"
-  ],
+  "registryDependencies": ["@audio/fader"],
   "files": [
     {
       "path": "src/registry/default/examples/fader-thumb-marks-variants-demo.tsx",
@@ -13,8 +11,6 @@
       "target": "components/audio/examples/fader-thumb-marks-variants-demo.tsx"
     }
   ],
-  "categories": [
-    "fader"
-  ],
+  "categories": ["fader"],
   "type": "registry:example"
 }

@@ -2,9 +2,7 @@
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "knob-circular-arc-demo",
   "description": "Knob with default arc pointer mapping and live value",
-  "registryDependencies": [
-    "@audio/knob"
-  ],
+  "registryDependencies": ["@audio/knob"],
   "files": [
     {
       "path": "src/registry/default/examples/knob-circular-arc-demo.tsx",
@@ -13,8 +11,6 @@
       "target": "components/audio/examples/knob-circular-arc-demo.tsx"
     }
   ],
-  "categories": [
-    "knob"
-  ],
+  "categories": ["knob"],
   "type": "registry:example"
 }

@@ -2,10 +2,7 @@
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "block-channel-strip-xypad-filter",
   "description": "Channel strip with an XY filter pad",
-  "registryDependencies": [
-    "@audio/channel-strip",
-    "@audio/xypad"
-  ],
+  "registryDependencies": ["@audio/channel-strip", "@audio/xypad"],
   "files": [
     {
       "path": "src/registry/default/blocks/block-channel-strip-xypad-filter.tsx",
@@ -14,10 +11,6 @@
       "target": "components/audio/blocks/block-channel-strip-xypad-filter.tsx"
     }
   ],
-  "categories": [
-    "channel-strip",
-    "xypad",
-    "ui"
-  ],
+  "categories": ["channel-strip", "xypad", "ui"],
   "type": "registry:block"
 }
