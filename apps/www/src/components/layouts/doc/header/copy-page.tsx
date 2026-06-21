@@ -23,9 +23,9 @@ function generateLLMPrompt(url: string, markdownUrl?: string): string {
   return `I'm building a React app using audio/ui, an open-source library of accessible Audio UI components built on top of shadcn/ui.
 
 ## Registry
-- Registry endpoint: https://audio-ui.xyz/r/{name}.json
-- Install components with: npx shadcn@latest add https://audio-ui.xyz/r/{name}.json
-- Example: npx shadcn@latest add https://audio-ui.xyz/r/player.json
+- Registry endpoint: https://audio-ui.xyz/r/{style}/{name}.json
+- Install components with: npx shadcn@latest add https://audio-ui.xyz/r/base-luma/player.json
+- Example: npx shadcn@latest add https://audio-ui.xyz/r/base-luma/player.json
 
 ## Documentation
 - Page URL: ${url}

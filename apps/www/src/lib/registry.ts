@@ -144,7 +144,7 @@ function fixFilePaths(
 
 export function fixImport(content: string) {
   const fixed = content.replace(
-    /@\/registry\/default\/ui\/audio\/([\w-]+)/g,
+    /@\/registry\/[\w-]+\/ui\/audio\/([\w-]+)/g,
     (_, component) => `@/components/audio/${component}`
   );
 
