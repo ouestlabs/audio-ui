@@ -2,7 +2,9 @@
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "fader-vertical-demo",
   "description": "Vertical fader",
-  "registryDependencies": ["@audio/fader"],
+  "registryDependencies": [
+    "@audio/fader"
+  ],
   "files": [
     {
       "path": "src/registry/default/examples/fader-vertical-demo.tsx",
@@ -11,6 +13,8 @@
       "target": "components/audio/examples/fader-vertical-demo.tsx"
     }
   ],
-  "categories": ["fader"],
+  "categories": [
+    "fader"
+  ],
   "type": "registry:example"
 }

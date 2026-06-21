@@ -2,7 +2,9 @@
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "knob-fine-step-demo",
   "description": "Knob with fine-grained step control (0.01)",
-  "registryDependencies": ["@audio/knob"],
+  "registryDependencies": [
+    "@audio/knob"
+  ],
   "files": [
     {
       "path": "src/registry/default/examples/knob-fine-step-demo.tsx",
@@ -11,6 +13,8 @@
       "target": "components/audio/examples/knob-fine-step-demo.tsx"
     }
   ],
-  "categories": ["knob"],
+  "categories": [
+    "knob"
+  ],
   "type": "registry:example"
 }

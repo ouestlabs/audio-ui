@@ -2,7 +2,10 @@
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "block-channel-strip-knob-multi",
   "description": "Multiple knob channel strips in a row",
-  "registryDependencies": ["@audio/channel-strip", "@audio/knob"],
+  "registryDependencies": [
+    "@audio/channel-strip",
+    "@audio/knob"
+  ],
   "files": [
     {
       "path": "src/registry/default/blocks/block-channel-strip-knob-multi.tsx",
@@ -11,6 +14,9 @@
       "target": "components/audio/blocks/block-channel-strip-knob-multi.tsx"
     }
   ],
-  "categories": ["channel-strip", "knob"],
+  "categories": [
+    "channel-strip",
+    "knob"
+  ],
   "type": "registry:block"
 }

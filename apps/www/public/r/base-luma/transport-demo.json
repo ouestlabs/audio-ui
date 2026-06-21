@@ -2,7 +2,9 @@
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "transport-demo",
   "description": "Transport timeline with buffered range example",
-  "registryDependencies": ["@audio/transport"],
+  "registryDependencies": [
+    "@audio/transport"
+  ],
   "files": [
     {
       "path": "src/registry/default/examples/transport-demo.tsx",
@@ -11,6 +13,9 @@
       "target": "components/audio/examples/transport-demo.tsx"
     }
   ],
-  "categories": ["transport", "ui"],
+  "categories": [
+    "transport",
+    "ui"
+  ],
   "type": "registry:example"
 }
