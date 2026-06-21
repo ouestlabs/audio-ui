@@ -1,0 +1,20 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "knob-double-tap-reset-demo",
+  "description": "Knob double-tap / double-click reset to defaultValue",
+  "registryDependencies": [
+    "@audio/knob"
+  ],
+  "files": [
+    {
+      "path": "src/registry/default/examples/knob-double-tap-reset-demo.tsx",
+      "content": "\"use client\";\n\nimport { useState } from \"react\";\nimport { Knob } from \"@/registry/default/ui/audio/elements/knob\";\n\nexport default function KnobDoubleTapResetDemo() {\n  const [value, setValue] = useState(72);\n\n  return (\n    <div className=\"flex max-w-xs flex-col items-center gap-2\">\n      <Knob\n        defaultValue={30}\n        max={100}\n        min={0}\n        onValueChange={setValue}\n        step={1}\n        value={value}\n      />\n      <output\n        aria-live=\"polite\"\n        className=\"font-mono text-foreground text-sm tabular-nums\"\n      >\n        {value}\n      </output>\n      <p className=\"text-center text-muted-foreground text-xs leading-snug\">\n        Double-tap the control to jump back to{\" \"}\n        <span className=\"text-foreground\">30</span> (\n        <code className=\"text-foreground\">defaultValue</code>).\n      </p>\n    </div>\n  );\n}\n",
+      "type": "registry:example",
+      "target": "components/audio/examples/knob-double-tap-reset-demo.tsx"
+    }
+  ],
+  "categories": [
+    "knob"
+  ],
+  "type": "registry:example"
+}

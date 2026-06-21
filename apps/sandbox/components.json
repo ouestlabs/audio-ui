@@ -21,6 +21,6 @@
   "menuColor": "inverted-translucent",
   "menuAccent": "subtle",
   "registries": {
-    "@audio": "http://localhost:3000/r/{name}.json"
+    "@audio": "http://localhost:3000/r/{style}/{name}.json"
   }
 }

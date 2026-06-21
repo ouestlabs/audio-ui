@@ -1,0 +1,20 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "knob-arc-and-anchor-demo",
+  "description": "Knob value arc (rail + highlight) and optional anchor range",
+  "registryDependencies": [
+    "@audio/knob"
+  ],
+  "files": [
+    {
+      "path": "src/registry/default/examples/knob-arc-and-anchor-demo.tsx",
+      "content": "\"use client\";\n\nimport { Knob } from \"@/registry/default/ui/audio/elements/knob\";\n\nexport default function KnobArcAndAnchorDemo() {\n  return (\n    <div className=\"flex flex-wrap items-center gap-8\">\n      <div className=\"flex flex-col items-center gap-2\">\n        <Knob defaultValue={72} max={100} min={0} step={1} />\n        <p className=\"text-center text-muted-foreground text-xs\">Value only</p>\n      </div>\n      <div className=\"flex flex-col items-center gap-2\">\n        <Knob anchor={30} defaultValue={75} max={100} min={0} step={1} />\n        <p className=\"text-center text-muted-foreground text-xs\">\n          With <code className=\"text-foreground\">anchor</code> range\n        </p>\n      </div>\n    </div>\n  );\n}\n",
+      "type": "registry:example",
+      "target": "components/audio/examples/knob-arc-and-anchor-demo.tsx"
+    }
+  ],
+  "categories": [
+    "knob"
+  ],
+  "type": "registry:example"
+}

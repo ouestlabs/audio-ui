@@ -1,0 +1,23 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "block-channel-strip",
+  "description": "Channel strip with fader, header, and footer",
+  "registryDependencies": [
+    "@audio/channel-strip",
+    "@audio/fader"
+  ],
+  "files": [
+    {
+      "path": "src/registry/default/blocks/block-channel-strip.tsx",
+      "content": "\"use client\";\n\nimport { useId, useState } from \"react\";\nimport {\n  ChannelStrip,\n  ChannelStripContent,\n  ChannelStripFooter,\n  ChannelStripHeader,\n  ChannelStripLabel,\n  ChannelStripSection,\n  ChannelStripValue,\n} from \"@/registry/default/ui/audio/elements/channel-strip\";\nimport { Fader } from \"@/registry/default/ui/audio/elements/fader\";\n\nexport default function BlockChannelStrip() {\n  const volumeId = useId();\n  const [volume, setVolume] = useState(72);\n\n  return (\n    <ChannelStrip aria-label=\"Channel 1 strip\">\n      <ChannelStripHeader>Channel 1</ChannelStripHeader>\n      <ChannelStripContent>\n        <ChannelStripSection>\n          <ChannelStripLabel>Volume</ChannelStripLabel>\n          <Fader\n            aria-label=\"Volume\"\n            id={volumeId}\n            max={100}\n            min={0}\n            onValueChange={setVolume}\n            value={volume}\n          />\n          <ChannelStripValue>{`${volume}%`}</ChannelStripValue>\n        </ChannelStripSection>\n      </ChannelStripContent>\n      <ChannelStripFooter>Output</ChannelStripFooter>\n    </ChannelStrip>\n  );\n}\n",
+      "type": "registry:block",
+      "target": "components/audio/blocks/block-channel-strip.tsx"
+    }
+  ],
+  "categories": [
+    "channel-strip",
+    "fader",
+    "ui"
+  ],
+  "type": "registry:block"
+}

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "xypad-disabled-demo",
+  "description": "XYPad disabled state example",
+  "registryDependencies": [
+    "@audio/xypad"
+  ],
+  "files": [
+    {
+      "path": "src/registry/default/examples/xypad-disabled-demo.tsx",
+      "content": "import { XYPad } from \"@/registry/default/ui/audio/elements/xypad\";\n\nexport default function XYPadDisabledDemo() {\n  return (\n    <XYPad className=\"aspect-square\" defaultValue={{ x: 50, y: 50 }} disabled />\n  );\n}\n",
+      "type": "registry:example",
+      "target": "components/audio/examples/xypad-disabled-demo.tsx"
+    }
+  ],
+  "categories": [
+    "xypad"
+  ],
+  "type": "registry:example"
+}

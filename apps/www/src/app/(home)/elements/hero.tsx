@@ -43,6 +43,13 @@ export const Hero = memo(function _Hero() {
             </Button>
             <Button
               nativeButton={false}
+              render={<Link href="/create" />}
+              variant="outline"
+            >
+              Create
+            </Button>
+            <Button
+              nativeButton={false}
               render={<Link href="/docs/components" />}
               variant="ghost"
             >

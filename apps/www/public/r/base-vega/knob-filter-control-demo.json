@@ -1,0 +1,20 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "knob-filter-control-demo",
+  "description": "Knob component example with filter control",
+  "registryDependencies": [
+    "@audio/knob"
+  ],
+  "files": [
+    {
+      "path": "src/registry/default/examples/knob-filter-control-demo.tsx",
+      "content": "\"use client\";\nimport { useState } from \"react\";\nimport { Knob } from \"@/registry/default/ui/audio/elements/knob\";\n\nexport default function KnobFilterControlDemo() {\n  const [cutoff, setCutoff] = useState(1000);\n\n  return (\n    <div className=\"flex flex-col items-center gap-2\">\n      <Knob\n        max={20_000}\n        min={20}\n        onValueChange={setCutoff}\n        step={1}\n        value={cutoff}\n      />\n      <output className=\"text-sm\">{cutoff} Hz</output>\n    </div>\n  );\n}\n",
+      "type": "registry:example",
+      "target": "components/audio/examples/knob-filter-control-demo.tsx"
+    }
+  ],
+  "categories": [
+    "knob"
+  ],
+  "type": "registry:example"
+}
