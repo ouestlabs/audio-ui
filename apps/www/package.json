@@ -37,7 +37,6 @@
     "posthog-js": "^1.299.0",
     "posthog-node": "^5.15.0",
     "postprocessing": "^6.38.0",
-    "radix-ui": "^1.4.3",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
     "shadcn": "^4.2.0",
