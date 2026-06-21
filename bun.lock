@@ -2124,7 +2124,7 @@
 
     "@audio-ui/react/@audio-ui/typescript": ["@audio-ui/typescript@0.0.3", "", {}, "sha512-bC/xGk/Lh/vIFw9zZz7I9PG2Af+hAijBLevyfmvQqyzhv3gcej7/fTfSWqCRi6LIQiscqBPjmqMltoMHpKvMQA=="],
 
-    "@audio-ui/react/@audio-ui/utils": ["@audio-ui/utils@0.0.3", "", {}, "sha512-U11D5qHJXJjxu3V/92SOOiXa2s3Va9WXqVZvADLAZ0vuxsEnL931GFFi/y7CPNeZ0WO3t9da2Ge8cJy2kv8tCQ=="],
+    "@audio-ui/react/@audio-ui/utils": ["@audio-ui/utils@0.0.4", "", {}, "sha512-3YwTeGosycK0Gl/bpGRXGnXIZO4pS+VmFgJjSmdUNYq7BQV5ZTuvBNZ/cBcPdDv+Zyx72HmdmQhhUSTbLzUwjA=="],
 
     "@audio-ui/utils/@audio-ui/typescript": ["@audio-ui/typescript@0.0.3", "", {}, "sha512-bC/xGk/Lh/vIFw9zZz7I9PG2Af+hAijBLevyfmvQqyzhv3gcej7/fTfSWqCRi6LIQiscqBPjmqMltoMHpKvMQA=="],
 
@@ -2402,8 +2402,6 @@
 
     "rimraf/glob": ["glob@13.0.0", "", { "dependencies": { "minimatch": "^10.1.1", "minipass": "^7.1.2", "path-scurry": "^2.0.0" } }, "sha512-tvZgpqk6fz4BaNZ66ZsRaZnbHvP/jG3uKJvAZOwEVUL4RTA5nJeeLYfyN9/VA8NX/V3IBG+hkeuGpKjvELkVhA=="],
 
-    "sandbox/@audio-ui/react": ["@audio-ui/react@0.0.7", "", { "dependencies": { "@audio-ui/utils": "latest" }, "peerDependencies": { "@types/react": "^18 || ^19", "react": "^18 || ^19", "react-dom": "^18 || ^19" }, "optionalPeers": ["@types/react"] }, "sha512-Kb/O2Z8Kmjy+GNMeaA3BuSNLBg5FAKKT1BMl6k7LDtmCtmsCFCmNV97iloeo4FpkulO1t6XxAqtRIC1xn+Td5Q=="],
-
     "shadcn/fs-extra": ["fs-extra@11.3.3", "", { "dependencies": { "graceful-fs": "^4.2.0", "jsonfile": "^6.0.1", "universalify": "^2.0.0" } }, "sha512-VWSRii4t0AFm6ixFFmLLx1t7wS1gh+ckoa84aOeapGum0h+EZd1EhEumSB+ZdDLnEPuucsVB9oB7cxJHap6Afg=="],
 
     "shadcn/ts-morph": ["ts-morph@26.0.0", "", { "dependencies": { "@ts-morph/common": "~0.27.0", "code-block-writer": "^13.0.3" } }, "sha512-ztMO++owQnz8c/gIENcM9XfCEzgoGphTv+nKpYNM1bgsdOVC/jRZuEBf6N+mLLDNg68Kl+GgUZfOySaRiG1/Ug=="],
@@ -2537,8 +2535,6 @@
     "ora/strip-ansi/ansi-regex": ["ansi-regex@6.2.2", "", {}, "sha512-Bq3SmSpyFHaWjPk8If9yc6svM8c56dB5BAtW4Qbw5jHTwwXXcTLoRMkpDJp6VL0XzlWaCHTXrkFURMYmD0sLqg=="],
 
     "read-yaml-file/js-yaml/argparse": ["argparse@1.0.10", "", { "dependencies": { "sprintf-js": "~1.0.2" } }, "sha512-o5Roy6tNG4SL/FOkCAN6RzjiakZS25RLYFrcMttJqbdd8BWrnA+fGz57iN5Pb06pvBGvl5gQ0B48dJlslXvoTg=="],
-
-    "sandbox/@audio-ui/react/@audio-ui/utils": ["@audio-ui/utils@0.0.4", "", {}, "sha512-3YwTeGosycK0Gl/bpGRXGnXIZO4pS+VmFgJjSmdUNYq7BQV5ZTuvBNZ/cBcPdDv+Zyx72HmdmQhhUSTbLzUwjA=="],
 
     "shadcn/fs-extra/jsonfile": ["jsonfile@6.2.0", "", { "dependencies": { "universalify": "^2.0.0" }, "optionalDependencies": { "graceful-fs": "^4.1.6" } }, "sha512-FGuPw30AdOIUTRMC2OMRtQV+jkVj2cfPqSeWXv1NEAJ1qZ5zb1X6z1mFhbfOB/iy3ssJCD+3KuZ8r8C3uVFlAg=="],
 

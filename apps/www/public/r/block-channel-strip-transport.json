@@ -2,10 +2,7 @@
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "block-channel-strip-transport",
   "description": "Channel strip with transport seek bar in horizontal orientation",
-  "registryDependencies": [
-    "@audio/channel-strip",
-    "@audio/transport"
-  ],
+  "registryDependencies": ["@audio/channel-strip", "@audio/transport"],
   "files": [
     {
       "path": "src/registry/default/blocks/block-channel-strip-transport.tsx",
@@ -14,9 +11,6 @@
       "target": "components/audio/blocks/block-channel-strip-transport.tsx"
     }
   ],
-  "categories": [
-    "channel-strip",
-    "transport"
-  ],
+  "categories": ["channel-strip", "transport"],
   "type": "registry:block"
 }

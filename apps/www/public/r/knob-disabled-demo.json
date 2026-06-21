@@ -2,9 +2,7 @@
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "knob-disabled-demo",
   "description": "Knob disabled vs enabled comparison",
-  "registryDependencies": [
-    "@audio/knob"
-  ],
+  "registryDependencies": ["@audio/knob"],
   "files": [
     {
       "path": "src/registry/default/examples/knob-disabled-demo.tsx",
@@ -13,8 +11,6 @@
       "target": "components/audio/examples/knob-disabled-demo.tsx"
     }
   ],
-  "categories": [
-    "knob"
-  ],
+  "categories": ["knob"],
   "type": "registry:example"
 }

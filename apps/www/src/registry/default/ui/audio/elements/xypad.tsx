@@ -39,7 +39,7 @@ export function XYPad({
       <XYPadPrimitive.Slider
         className={cn(
           "relative block w-full cursor-crosshair touch-none select-none overflow-hidden",
-          "rounded-4xl border border-transparent bg-card shadow-md ring-1 ring-foreground/5",
+          "rounded-2xl border border-transparent bg-card shadow-md ring-1 ring-foreground/5",
           "transition-[color,border-color,box-shadow] duration-150 ease-out motion-reduce:transition-none",
           "hover:shadow-md hover:ring-2 hover:ring-ring/50 dark:ring-foreground/10",
           "focus-visible:border-ring focus-visible:shadow-md focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",

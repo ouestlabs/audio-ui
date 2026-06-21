@@ -158,6 +158,8 @@ const audioPlayerVariants = cva(
         default:
           "bg-card/70 shadow-md ring-1 ring-foreground/5 dark:ring-foreground/10",
         ghost: "bg-transparent hover:bg-muted/30",
+        widget:
+          "bg-card/70 shadow-md ring-1 ring-foreground/5 dark:ring-foreground/10",
       },
     },
     defaultVariants: {
@@ -229,7 +231,7 @@ function AudioPlayerButton({
 }
 
 const audioControlBarVariants = cva(
-  "flex w-full min-w-0 items-center gap-4 in-data-[size=sm]:gap-3 in-data-[size=sm]:px-3 px-4",
+  "flex w-full min-w-0 items-center gap-4 in-data-[size=sm]:gap-3 in-data-[size=sm]:px-3 px-4 in-data-[size=sm]:in-data-[variant=widget]:pt-3 in-data-[variant=widget]:pt-4",
   {
     variants: {
       variant: {
@@ -1215,7 +1217,14 @@ function AudioTrackList({
 
   return (
     <ScrollArea
-      className={cn("max-h-[36vh] w-full pt-1", className)}
+      className={cn(
+        "w-full pt-1",
+        "in-data-[variant=widget]:h-40 in-data-[variant=widget]:border-b in-data-[variant=widget]:px-4 in-data-[variant=widget]:pb-4",
+        "in-data-[size=sm]:in-data-[variant=widget]:h-32 in-data-[size=sm]:in-data-[variant=widget]:px-3 in-data-[size=sm]:in-data-[variant=widget]:pb-3",
+        "in-data-[variant=widget]:**:data-[slot=scroll-area-viewport]:snap-y in-data-[variant=widget]:**:data-[slot=scroll-area-viewport]:snap-mandatory",
+        "in-data-[variant=widget]:**:data-[slot=audio-track]:snap-start",
+        className
+      )}
       data-slot="audio-track-list"
     >
       {content}
@@ -1257,7 +1266,7 @@ const AudioQueueRepeatMode = ({
           <Toggle
             aria-label={repeatTooltip}
             className={cn(
-              "[&_svg]:text-primary",
+              "size-9 [&_svg]:text-primary",
               className,
               isPressed && "bg-accent! text-accent-foreground!"
             )}
@@ -1303,7 +1312,7 @@ const AudioQueueShuffle = ({
           <Toggle
             aria-label="Shuffle"
             className={cn(
-              "[&_svg]:text-primary",
+              "size-9 [&_svg]:text-primary",
               className,
               shuffleEnabled && "bg-accent! text-accent-foreground!"
             )}
