@@ -12,7 +12,7 @@ import { ThemePicker } from "./theme-picker";
 
 export function Customizer() {
   return (
-    <aside className="dark isolate flex w-full shrink-0 flex-col self-start overflow-hidden rounded-2xl bg-card text-card-foreground shadow-xl ring-1 ring-foreground/10 backdrop-blur-xl md:max-h-full md:w-[--customizer-width]">
+    <aside className="dark isolate flex w-full shrink-0 flex-col self-start overflow-hidden rounded-2xl bg-card text-card-foreground shadow-xl ring-1 ring-foreground/10 backdrop-blur-xl md:max-h-full md:w-(--customizer-width)">
       <header className="flex shrink-0 items-center justify-between gap-2 border-b px-4 py-3">
         <span className="font-medium text-sm">Customize</span>
         <ModeSwitcher />
