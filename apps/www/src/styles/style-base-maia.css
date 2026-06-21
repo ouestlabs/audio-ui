@@ -1,0 +1,25 @@
+/*
+ * base-maia — bubbly, pillowed, max-round.
+ * Audio/ui components only. Never shadcn-native primitives.
+ */
+
+.style-base-maia {
+  [data-slot="xypad"] {
+    @apply rounded-3xl border-transparent shadow-lg hover:shadow-lg;
+  }
+
+  [data-slot="knob"] {
+    @apply border-transparent shadow-md;
+  }
+  [data-slot="knob-body"] {
+    @apply shadow-md;
+  }
+
+  [data-slot="fader-thumb"] {
+    @apply rounded-full shadow-md hover:ring-4 hover:ring-ring/40 focus-visible:ring-4 focus-visible:ring-ring/40;
+  }
+
+  [data-slot="transport-thumb"] {
+    @apply rounded-full shadow-md hover:ring-4 hover:ring-ring/40 focus-visible:ring-4 focus-visible:ring-ring/40;
+  }
+}

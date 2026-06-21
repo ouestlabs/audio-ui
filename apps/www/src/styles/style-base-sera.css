@@ -1,0 +1,31 @@
+/*
+ * base-sera — fluid, organic, airy softness.
+ * Audio/ui components only. Never shadcn-native primitives.
+ */
+
+.style-base-sera {
+  [data-slot="xypad"] {
+    @apply rounded-3xl border-transparent shadow-lg ring-1 ring-ring/10 hover:shadow-lg hover:ring-ring/20;
+  }
+
+  [data-slot="knob"] {
+    @apply border-transparent shadow-sm ring-ring/10;
+  }
+  [data-slot="knob-body"] {
+    @apply shadow-sm;
+  }
+
+  [data-slot="fader-track"] {
+    @apply bg-input/60;
+  }
+  [data-slot="fader-thumb"] {
+    @apply rounded-full shadow-sm ring-ring/10 hover:ring-4 hover:ring-ring/20 focus-visible:ring-4 focus-visible:ring-ring/20;
+  }
+
+  [data-slot="transport-track"] {
+    @apply bg-input/60;
+  }
+  [data-slot="transport-thumb"] {
+    @apply rounded-full shadow-sm ring-ring/10 hover:ring-4 hover:ring-ring/20 focus-visible:ring-4 focus-visible:ring-ring/20;
+  }
+}

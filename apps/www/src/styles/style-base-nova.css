@@ -25,11 +25,18 @@
     @apply shadow-xs;
   }
 
-  /* Fader: muted track + squared thumb + tighter ring. */
+  /* Fader + Transport: muted track + squared thumb + tighter ring. */
   [data-slot="fader-track"] {
     @apply bg-muted;
   }
   [data-slot="fader-thumb"] {
+    @apply rounded-lg shadow-sm ring-ring/50 hover:ring-3 hover:ring-ring/50 focus-visible:ring-3 focus-visible:ring-ring/50;
+  }
+
+  [data-slot="transport-track"] {
+    @apply bg-muted;
+  }
+  [data-slot="transport-thumb"] {
     @apply rounded-lg shadow-sm ring-ring/50 hover:ring-3 hover:ring-ring/50 focus-visible:ring-3 focus-visible:ring-ring/50;
   }
 }

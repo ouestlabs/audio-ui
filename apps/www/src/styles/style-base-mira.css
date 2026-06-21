@@ -1,0 +1,31 @@
+/*
+ * base-mira — technical, flat, mid-radius.
+ * Audio/ui components only. Never shadcn-native primitives.
+ */
+
+.style-base-mira {
+  [data-slot="xypad"] {
+    @apply rounded-md border-input shadow-none hover:shadow-none hover:ring-2 hover:ring-ring/50;
+  }
+
+  [data-slot="knob"] {
+    @apply border-input/70 shadow-none;
+  }
+  [data-slot="knob-body"] {
+    @apply shadow-none;
+  }
+
+  [data-slot="fader-track"] {
+    @apply rounded-sm bg-muted/80;
+  }
+  [data-slot="fader-thumb"] {
+    @apply rounded-md shadow-none hover:ring-2 hover:ring-ring/50 focus-visible:ring-2 focus-visible:ring-ring/50;
+  }
+
+  [data-slot="transport-track"] {
+    @apply rounded-sm bg-muted/80;
+  }
+  [data-slot="transport-thumb"] {
+    @apply rounded-md shadow-none hover:ring-2 hover:ring-ring/50 focus-visible:ring-2 focus-visible:ring-ring/50;
+  }
+}

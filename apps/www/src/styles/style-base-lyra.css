@@ -1,0 +1,28 @@
+/*
+ * base-lyra — musical, signal-tinted, primary-accented.
+ * Audio/ui components only. Never shadcn-native primitives.
+ */
+
+.style-base-lyra {
+  [data-slot="xypad"] {
+    @apply border-primary/20 hover:border-primary/40;
+  }
+
+  [data-slot="knob"] {
+    @apply border-primary/20;
+  }
+
+  [data-slot="fader-track"] {
+    @apply bg-primary/8;
+  }
+  [data-slot="fader-thumb"] {
+    @apply ring-primary/20 hover:ring-4 hover:ring-primary/40 focus-visible:ring-4 focus-visible:ring-primary/40;
+  }
+
+  [data-slot="transport-track"] {
+    @apply bg-primary/8;
+  }
+  [data-slot="transport-thumb"] {
+    @apply ring-primary/20 hover:ring-4 hover:ring-primary/40 focus-visible:ring-4 focus-visible:ring-primary/40;
+  }
+}

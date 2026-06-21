@@ -156,7 +156,10 @@ function Transport({
           transportSliderVariants({ size })
         )}
       >
-        <TransportPrimitive.Track className={transportTrackVariants({ size })}>
+        <TransportPrimitive.Track
+          className={transportTrackVariants({ size })}
+          data-slot="transport-track"
+        >
           <TransportPrimitive.BufferedRange
             className={cn(
               "absolute z-0 select-none bg-primary/40",
@@ -172,7 +175,10 @@ function Transport({
             )}
           />
         </TransportPrimitive.Track>
-        <TransportPrimitive.Thumb className={transportThumbVariants({ size })}>
+        <TransportPrimitive.Thumb
+          className={transportThumbVariants({ size })}
+          data-slot="transport-thumb"
+        >
           <TransportPrimitive.ThumbInner
             className={cn(
               "flex h-full w-full items-center justify-center",

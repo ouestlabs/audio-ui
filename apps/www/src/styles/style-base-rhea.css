@@ -1,0 +1,31 @@
+/*
+ * base-rhea — crystalline, faceted, micro-radius.
+ * Audio/ui components only. Never shadcn-native primitives.
+ */
+
+.style-base-rhea {
+  [data-slot="xypad"] {
+    @apply rounded-sm border-foreground/10 shadow-none hover:shadow-none hover:ring-1 hover:ring-foreground/20;
+  }
+
+  [data-slot="knob"] {
+    @apply border-foreground/10 shadow-none;
+  }
+  [data-slot="knob-body"] {
+    @apply shadow-none;
+  }
+
+  [data-slot="fader-track"] {
+    @apply rounded-sm bg-input/80;
+  }
+  [data-slot="fader-thumb"] {
+    @apply rounded-sm shadow-none ring-foreground/15 hover:ring-2 hover:ring-foreground/25 focus-visible:ring-2 focus-visible:ring-foreground/25;
+  }
+
+  [data-slot="transport-track"] {
+    @apply rounded-sm bg-input/80;
+  }
+  [data-slot="transport-thumb"] {
+    @apply rounded-sm shadow-none ring-foreground/15 hover:ring-2 hover:ring-foreground/25 focus-visible:ring-2 focus-visible:ring-foreground/25;
+  }
+}

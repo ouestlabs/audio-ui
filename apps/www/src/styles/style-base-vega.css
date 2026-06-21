@@ -1,0 +1,31 @@
+/*
+ * base-vega — industrial, angular, zero-radius.
+ * Audio/ui components only. Never shadcn-native primitives.
+ */
+
+.style-base-vega {
+  [data-slot="xypad"] {
+    @apply rounded-none border-foreground/15 shadow-none hover:shadow-none;
+  }
+
+  [data-slot="knob"] {
+    @apply border-foreground/15 shadow-none;
+  }
+  [data-slot="knob-body"] {
+    @apply shadow-none;
+  }
+
+  [data-slot="fader-track"] {
+    @apply rounded-none;
+  }
+  [data-slot="fader-thumb"] {
+    @apply rounded-none shadow-none ring-foreground/15 hover:ring-2 hover:ring-foreground/30 focus-visible:ring-2 focus-visible:ring-foreground/30;
+  }
+
+  [data-slot="transport-track"] {
+    @apply rounded-none;
+  }
+  [data-slot="transport-thumb"] {
+    @apply rounded-none shadow-none ring-foreground/15 hover:ring-2 hover:ring-foreground/30 focus-visible:ring-2 focus-visible:ring-foreground/30;
+  }
+}
