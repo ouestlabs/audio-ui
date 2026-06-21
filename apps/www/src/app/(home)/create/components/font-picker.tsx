@@ -1,16 +1,8 @@
 "use client";
 
-import { cn } from "@/registry/default/lib/utils";
-import { Label } from "@/registry/default/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/registry/default/ui/select";
+import { TextAaIcon } from "@phosphor-icons/react";
 import { useBuilder } from "./builder-provider";
+import { Picker } from "./picker";
 
 const FONT_OPTIONS = [
   { value: "inter", label: "Inter" },
@@ -19,31 +11,32 @@ const FONT_OPTIONS = [
   { value: "system", label: "System UI" },
 ] as const;
 
-export function FontPicker() {
+const labelFor = (value: string) =>
+  FONT_OPTIONS.find((font) => font.value === value)?.label ?? "Inter";
+
+export function FontPicker({
+  label,
+  param,
+}: {
+  label: string;
+  param: "font" | "fontHeading";
+}) {
   const { params, setParams } = useBuilder();
+  const value = params[param] === "inherit" ? "inter" : params[param];
 
   return (
-    <div className="flex flex-col gap-2">
-      <Label
-        className="text-muted-foreground text-xs uppercase tracking-wider"
-        htmlFor="font-select"
-      >
-        Font
-      </Label>
-      <Select onValueChange={(v) => setParams({ font: v })} value={params.font}>
-        <SelectTrigger className={cn("w-full")} id="font-select">
-          <SelectValue placeholder="Select font" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectGroup>
-            {FONT_OPTIONS.map((f) => (
-              <SelectItem key={f.value} value={f.value}>
-                {f.label}
-              </SelectItem>
-            ))}
-          </SelectGroup>
-        </SelectContent>
-      </Select>
-    </div>
+    <Picker
+      display={labelFor(value)}
+      indicator={<TextAaIcon aria-hidden="true" className="size-4" />}
+      label={label}
+      onValueChange={(next) =>
+        setParams(param === "font" ? { font: next } : { fontHeading: next })
+      }
+      options={FONT_OPTIONS.map((font) => ({
+        value: font.value,
+        label: font.label,
+      }))}
+      value={value}
+    />
   );
 }

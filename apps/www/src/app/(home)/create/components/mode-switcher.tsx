@@ -1,7 +1,6 @@
 "use client";
 
 import { MoonIcon, SunIcon } from "@phosphor-icons/react";
-import { cn } from "@/registry/default/lib/utils";
 import { Button } from "@/registry/default/ui/button";
 import { useBuilder } from "./builder-provider";
 
@@ -12,16 +11,15 @@ export function ModeSwitcher() {
   return (
     <Button
       aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-      className={cn("w-full justify-start gap-2")}
       onClick={() => setParams({ mode: isDark ? "light" : "dark" })}
-      variant="outline"
+      size="icon-sm"
+      variant="ghost"
     >
       {isDark ? (
-        <SunIcon aria-hidden="true" className="size-4" />
-      ) : (
         <MoonIcon aria-hidden="true" className="size-4" />
+      ) : (
+        <SunIcon aria-hidden="true" className="size-4" />
       )}
-      {isDark ? "Light mode" : "Dark mode"}
     </Button>
   );
 }

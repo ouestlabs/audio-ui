@@ -1,35 +1,33 @@
 "use client";
 
-import { cn } from "@/registry/default/lib/utils";
-import { Label } from "@/registry/default/ui/label";
+import { baseColors } from "@/registry/base-colors";
 import { BASE_COLOR_NAMES } from "../lib/search-params";
 import { useBuilder } from "./builder-provider";
+import { Picker, Swatch } from "./picker";
+
+const titleCase = (value: string) =>
+  value.charAt(0).toUpperCase() + value.slice(1);
+
+function swatchColor(name: string) {
+  const active = baseColors.find((color) => color.name === name)?.activeColor;
+  return active ? `hsl(${active.dark})` : "var(--primary)";
+}
 
 export function BaseColorPicker() {
   const { params, setParams } = useBuilder();
 
   return (
-    <div className="flex flex-col gap-2">
-      <Label className="text-muted-foreground text-xs uppercase tracking-wider">
-        Base Color
-      </Label>
-      <div className="grid grid-cols-2 gap-1.5">
-        {BASE_COLOR_NAMES.map((color) => (
-          <button
-            className={cn(
-              "rounded-lg border px-3 py-2 text-left text-sm capitalize transition-colors",
-              params.baseColor === color
-                ? "border-primary bg-primary/10 font-medium text-primary"
-                : "border-border bg-transparent text-muted-foreground hover:border-border/80 hover:bg-muted/50 hover:text-foreground"
-            )}
-            key={color}
-            onClick={() => setParams({ baseColor: color })}
-            type="button"
-          >
-            {color}
-          </button>
-        ))}
-      </div>
-    </div>
+    <Picker
+      display={titleCase(params.baseColor)}
+      indicator={<Swatch color={swatchColor(params.baseColor)} />}
+      label="Base Color"
+      onValueChange={(value) => setParams({ baseColor: value })}
+      options={BASE_COLOR_NAMES.map((name) => ({
+        value: name,
+        label: titleCase(name),
+        swatch: <Swatch color={swatchColor(name)} />,
+      }))}
+      value={params.baseColor}
+    />
   );
 }

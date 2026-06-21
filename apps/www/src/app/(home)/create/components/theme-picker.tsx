@@ -1,35 +1,29 @@
 "use client";
 
 import { THEMES } from "@/lib/themes";
-import { cn } from "@/registry/default/lib/utils";
-import { Label } from "@/registry/default/ui/label";
 import { useBuilder } from "./builder-provider";
+import { Picker, Swatch } from "./picker";
+
+const swatch = (theme: (typeof THEMES)[number]) => (
+  <Swatch color={`hsl(${theme.activeColor.dark})`} />
+);
 
 export function ThemePicker() {
   const { params, setParams } = useBuilder();
+  const current = THEMES.find((theme) => theme.name === params.theme);
 
   return (
-    <div className="flex flex-col gap-2">
-      <Label className="text-muted-foreground text-xs uppercase tracking-wider">
-        Theme
-      </Label>
-      <div className="grid grid-cols-2 gap-1.5">
-        {THEMES.map((theme) => (
-          <button
-            className={cn(
-              "rounded-lg border px-3 py-2 text-left text-sm capitalize transition-colors",
-              params.theme === theme.name
-                ? "border-primary bg-primary/10 font-medium text-primary"
-                : "border-border bg-transparent text-muted-foreground hover:border-border/80 hover:bg-muted/50 hover:text-foreground"
-            )}
-            key={theme.name}
-            onClick={() => setParams({ theme: theme.name })}
-            type="button"
-          >
-            {theme.name === "neutral" ? "Default" : theme.name}
-          </button>
-        ))}
-      </div>
-    </div>
+    <Picker
+      display={current?.label ?? params.theme}
+      indicator={current ? swatch(current) : undefined}
+      label="Theme"
+      onValueChange={(value) => setParams({ theme: value })}
+      options={THEMES.map((theme) => ({
+        value: theme.name,
+        label: theme.label,
+        swatch: swatch(theme),
+      }))}
+      value={params.theme}
+    />
   );
 }
