@@ -233,6 +233,11 @@
     text-rendering: optimizeLegibility;
   }
 
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+
   [data-slot="layout"] {
     @apply 3xl:p-2 3xl:fixed:p-0 overscroll-none;
   }
