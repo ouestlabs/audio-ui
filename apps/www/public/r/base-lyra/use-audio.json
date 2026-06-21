@@ -1,10 +1,7 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "use-audio",
-  "registryDependencies": [
-    "@audio/html",
-    "@audio/web"
-  ],
+  "registryDependencies": ["@audio/html", "@audio/web"],
   "files": [
     {
       "path": "src/registry/default/hooks/use-audio.ts",
@@ -13,8 +10,6 @@
       "target": "hooks/use-audio.ts"
     }
   ],
-  "categories": [
-    "audio"
-  ],
+  "categories": ["audio"],
   "type": "registry:hook"
 }

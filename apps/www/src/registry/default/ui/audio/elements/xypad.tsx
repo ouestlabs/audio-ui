@@ -48,6 +48,7 @@ export function XYPad({
           xypadVariants({ size }),
           className
         )}
+        data-slot="xypad"
       >
         <XYPadPrimitive.Grid className="pointer-events-none absolute inset-0">
           {Array.from({ length: 4 }, (_, i) => {

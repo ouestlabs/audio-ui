@@ -2,9 +2,7 @@
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "fader-horizontal-demo",
   "description": "Fader component example with horizontal orientation",
-  "registryDependencies": [
-    "@audio/fader"
-  ],
+  "registryDependencies": ["@audio/fader"],
   "files": [
     {
       "path": "src/registry/default/examples/fader-horizontal-demo.tsx",
@@ -13,8 +11,6 @@
       "target": "components/audio/examples/fader-horizontal-demo.tsx"
     }
   ],
-  "categories": [
-    "fader"
-  ],
+  "categories": ["fader"],
   "type": "registry:example"
 }

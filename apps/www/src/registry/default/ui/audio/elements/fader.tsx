@@ -144,7 +144,10 @@ export function Fader({
           faderVariants({ size })
         )}
       >
-        <FaderPrimitive.Track className={faderTrackVariants({ size })}>
+        <FaderPrimitive.Track
+          className={faderTrackVariants({ size })}
+          data-slot="fader-track"
+        >
           <FaderPrimitive.Range
             className={cn(
               "absolute select-none bg-primary",
@@ -159,6 +162,7 @@ export function Fader({
             faderThumbVariants({ size }),
             "data-[disabled=true]:cursor-not-allowed"
           )}
+          data-slot="fader-thumb"
         >
           <FaderPrimitive.ThumbInner
             className={cn(

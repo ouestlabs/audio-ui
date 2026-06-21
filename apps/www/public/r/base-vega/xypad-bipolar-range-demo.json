@@ -2,9 +2,7 @@
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "xypad-bipolar-range-demo",
   "description": "XYPad with bipolar pan/mix style ranges",
-  "registryDependencies": [
-    "@audio/xypad"
-  ],
+  "registryDependencies": ["@audio/xypad"],
   "files": [
     {
       "path": "src/registry/default/examples/xypad-bipolar-range-demo.tsx",
@@ -13,8 +11,6 @@
       "target": "components/audio/examples/xypad-bipolar-range-demo.tsx"
     }
   ],
-  "categories": [
-    "xypad"
-  ],
+  "categories": ["xypad"],
   "type": "registry:example"
 }

@@ -2,9 +2,7 @@
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "player-size-demo",
   "description": "AudioPlayer size options (sm, default, lg)",
-  "registryDependencies": [
-    "@audio/player"
-  ],
+  "registryDependencies": ["@audio/player"],
   "files": [
     {
       "path": "src/registry/default/examples/player-size-demo.tsx",
@@ -13,8 +11,6 @@
       "target": "components/audio/examples/player-size-demo.tsx"
     }
   ],
-  "categories": [
-    "player"
-  ],
+  "categories": ["player"],
   "type": "registry:example"
 }

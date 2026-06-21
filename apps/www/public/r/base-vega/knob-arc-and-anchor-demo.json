@@ -2,9 +2,7 @@
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "knob-arc-and-anchor-demo",
   "description": "Knob value arc (rail + highlight) and optional anchor range",
-  "registryDependencies": [
-    "@audio/knob"
-  ],
+  "registryDependencies": ["@audio/knob"],
   "files": [
     {
       "path": "src/registry/default/examples/knob-arc-and-anchor-demo.tsx",
@@ -13,8 +11,6 @@
       "target": "components/audio/examples/knob-arc-and-anchor-demo.tsx"
     }
   ],
-  "categories": [
-    "knob"
-  ],
+  "categories": ["knob"],
   "type": "registry:example"
 }

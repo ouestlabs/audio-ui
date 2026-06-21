@@ -2,10 +2,7 @@
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "block-channel-strip-fader-slider",
   "description": "Channel strip with horizontal fader and inline label",
-  "registryDependencies": [
-    "@audio/channel-strip",
-    "@audio/fader"
-  ],
+  "registryDependencies": ["@audio/channel-strip", "@audio/fader"],
   "files": [
     {
       "path": "src/registry/default/blocks/block-channel-strip-fader-slider.tsx",
@@ -14,10 +11,6 @@
       "target": "components/audio/blocks/block-channel-strip-fader-slider.tsx"
     }
   ],
-  "categories": [
-    "channel-strip",
-    "fader",
-    "ui"
-  ],
+  "categories": ["channel-strip", "fader", "ui"],
   "type": "registry:block"
 }

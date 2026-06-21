@@ -4,6 +4,7 @@
 @import "./rehype.css";
 @import "./utilities.css";
 @import "shadcn/tailwind.css";
+@import "./style-base-nova.css";
 
 @custom-variant dark (&:is(.dark *));
 @custom-variant fixed (&:is(.layout-fixed *));

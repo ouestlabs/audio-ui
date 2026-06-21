@@ -7,9 +7,7 @@
     "@dnd-kit/utilities",
     "@phosphor-icons/react"
   ],
-  "registryDependencies": [
-    "@shadcn/button"
-  ],
+  "registryDependencies": ["@shadcn/button"],
   "files": [
     {
       "path": "src/registry/default/ui/sortable-list.tsx",

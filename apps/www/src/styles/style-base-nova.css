@@ -1,0 +1,35 @@
+/*
+ * base-nova style overrides for the /create live preview.
+ *
+ * Scope: audio/ui's OWN components only (fader, knob, xy-pad …) — never the
+ * shadcn-native primitives (card, button …). The default components ship the
+ * base-luma look (round, soft shadow); nova is sharper, flatter, with visible
+ * borders. The builder adds `style-base-nova` to <body>.
+ *
+ * Imported into globals.css (after Tailwind), so @apply resolves here; the
+ * rules are unlayered, so they win over the components' inline (layered)
+ * utilities.
+ */
+
+.style-base-nova {
+  /* XY-pad: squared corners + a visible border (vs luma's rounded-2xl, borderless). */
+  [data-slot="xypad"] {
+    @apply rounded-lg border-input shadow-sm hover:shadow-sm;
+  }
+
+  /* Knob: visible ring/border + flatter surface. */
+  [data-slot="knob"] {
+    @apply border-input/60 shadow-xs;
+  }
+  [data-slot="knob-body"] {
+    @apply shadow-xs;
+  }
+
+  /* Fader: muted track + squared thumb + tighter ring. */
+  [data-slot="fader-track"] {
+    @apply bg-muted;
+  }
+  [data-slot="fader-thumb"] {
+    @apply rounded-lg shadow-sm ring-ring/50 hover:ring-3 hover:ring-ring/50 focus-visible:ring-3 focus-visible:ring-ring/50;
+  }
+}

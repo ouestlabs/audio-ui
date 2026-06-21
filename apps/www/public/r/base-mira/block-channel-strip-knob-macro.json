@@ -2,10 +2,7 @@
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "block-channel-strip-knob-macro",
   "description": "Channel strip with an oversized macro knob",
-  "registryDependencies": [
-    "@audio/channel-strip",
-    "@audio/knob"
-  ],
+  "registryDependencies": ["@audio/channel-strip", "@audio/knob"],
   "files": [
     {
       "path": "src/registry/default/blocks/block-channel-strip-knob-macro.tsx",
@@ -14,10 +11,6 @@
       "target": "components/audio/blocks/block-channel-strip-knob-macro.tsx"
     }
   ],
-  "categories": [
-    "channel-strip",
-    "knob",
-    "ui"
-  ],
+  "categories": ["channel-strip", "knob", "ui"],
   "type": "registry:block"
 }

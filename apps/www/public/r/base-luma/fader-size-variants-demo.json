@@ -2,9 +2,7 @@
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "fader-size-variants-demo",
   "description": "Fader size variants (sm, default, lg)",
-  "registryDependencies": [
-    "@audio/fader"
-  ],
+  "registryDependencies": ["@audio/fader"],
   "files": [
     {
       "path": "src/registry/default/examples/fader-size-variants-demo.tsx",
@@ -13,8 +11,6 @@
       "target": "components/audio/examples/fader-size-variants-demo.tsx"
     }
   ],
-  "categories": [
-    "fader"
-  ],
+  "categories": ["fader"],
   "type": "registry:example"
 }
