@@ -14,29 +14,49 @@ import BlockWaveShaper from "@/registry/default/blocks/block-wave-shaper";
 
 type Card = { id: string; Component: ComponentType };
 
-// Only full-width "card" blocks (synths, xy-pads, mixer rows, players, lists)
-// so every card fills its column and the masonry balancer packs them densely.
-const CARDS: Card[] = [
-  { id: "pocket-synth", Component: BlockPocketSynth },
-  { id: "knob-multi", Component: BlockChannelStripKnobMulti },
-  { id: "xypad-filter", Component: BlockChannelStripXypadFilter },
-  { id: "player-widget", Component: BlockPlayerWidget },
-  { id: "wave-shaper", Component: BlockWaveShaper },
-  { id: "queue", Component: BlockQueue },
-  { id: "xypad-reverb", Component: BlockChannelStripXypadReverb },
-  { id: "track-list-grid", Component: BlockTrackListGrid },
-  { id: "track-list", Component: BlockTrackList },
-  { id: "player", Component: BlockPlayer },
-  { id: "track-sortable-grid", Component: BlockTrackSortableListGrid },
-  { id: "track-sortable-list", Component: BlockTrackSortableList },
+// Hand-balanced columns: even heights, no gaps. The player widget sits directly
+// under the channel-strip filter (column B), per design.
+const COLUMNS: { key: string; cards: Card[] }[] = [
+  {
+    key: "a",
+    cards: [
+      { id: "pocket-synth", Component: BlockPocketSynth },
+      { id: "knob-multi", Component: BlockChannelStripKnobMulti },
+      { id: "track-list", Component: BlockTrackList },
+      { id: "track-sortable-list", Component: BlockTrackSortableList },
+    ],
+  },
+  {
+    key: "b",
+    cards: [
+      { id: "xypad-filter", Component: BlockChannelStripXypadFilter },
+      { id: "player-widget", Component: BlockPlayerWidget },
+      { id: "queue", Component: BlockQueue },
+      { id: "track-list-grid", Component: BlockTrackListGrid },
+    ],
+  },
+  {
+    key: "c",
+    cards: [
+      { id: "wave-shaper", Component: BlockWaveShaper },
+      { id: "xypad-reverb", Component: BlockChannelStripXypadReverb },
+      { id: "player", Component: BlockPlayer },
+      { id: "track-sortable-grid", Component: BlockTrackSortableListGrid },
+    ],
+  },
 ];
 
 export function PreviewWall() {
   return (
-    <div className="h-full w-[1320px] columns-3 gap-(--gap) [&>*]:mb-(--gap) [&>*]:w-full [&>*]:break-inside-avoid">
-      {CARDS.map(({ id, Component }) => (
-        <div className="break-inside-avoid" key={id}>
-          <Component />
+    <div className="flex items-start gap-(--gap)">
+      {COLUMNS.map((column) => (
+        <div
+          className="flex w-fit shrink-0 flex-col gap-(--gap)"
+          key={column.key}
+        >
+          {column.cards.map(({ id, Component }) => (
+            <Component key={id} />
+          ))}
         </div>
       ))}
     </div>
