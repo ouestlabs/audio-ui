@@ -61,8 +61,4 @@
     height: 1.25rem;
     width: 1rem;
   }
-  [data-slot="fader-thumb-inner"],
-  [data-slot="transport-thumb-inner"] {
-    display: none;
-  }
 }
