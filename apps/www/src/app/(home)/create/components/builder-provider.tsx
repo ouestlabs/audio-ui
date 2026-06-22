@@ -3,9 +3,11 @@
 import {
   createContext,
   type ReactNode,
+  useCallback,
   useContext,
   useEffect,
   useLayoutEffect,
+  useRef,
   useState,
 } from "react";
 import { useTheme } from "@/hooks/use-theme";
@@ -24,7 +26,6 @@ const MANAGED_BODY_CLASS_PREFIXES = [
   "menu-accent-",
 ] as const;
 
-// Base Color drives the neutral surfaces; Theme overrides these accent vars.
 const ACCENT_VAR_KEYS = [
   "primary",
   "primary-foreground",
@@ -63,6 +64,10 @@ function buildCssRule(selector: string, vars?: Record<string, string>) {
 type BuilderContextType = {
   params: BuilderSearchParams;
   setParams: ReturnType<typeof useBuilderSearchParams>[1];
+  canGoBack: boolean;
+  canGoForward: boolean;
+  goBack: () => void;
+  goForward: () => void;
 };
 
 const BuilderContext = createContext<BuilderContextType | undefined>(undefined);
@@ -80,12 +85,71 @@ export function BuilderProvider({ children }: { children: ReactNode }) {
   const [isReady, setIsReady] = useState(false);
   const { setTheme } = useTheme();
 
-  // Sync mode param to next-themes
-  useEffect(() => {
-    setTheme(params.mode);
-  }, [params.mode, setTheme]);
+  // --- History ---
+  const [history, setHistory] = useState<BuilderSearchParams[]>([]);
+  const [future, setFuture] = useState<BuilderSearchParams[]>([]);
+  const isNavigatingRef = useRef(false);
+  const prevParamsRef = useRef<BuilderSearchParams | null>(null);
 
-  // Cleanup on unmount
+  useEffect(() => {
+    if (isNavigatingRef.current) {
+      isNavigatingRef.current = false;
+      prevParamsRef.current = params;
+      return;
+    }
+    if (prevParamsRef.current !== null) {
+      const snapshot = prevParamsRef.current;
+      setHistory((h) => [...h.slice(-50), snapshot]);
+      setFuture([]);
+    }
+    prevParamsRef.current = params;
+  }, [params]);
+
+  const goBack = useCallback(() => {
+    if (history.length === 0) {
+      return;
+    }
+    const prev = history.at(-1) as BuilderSearchParams;
+    isNavigatingRef.current = true;
+    setHistory((h) => h.slice(0, -1));
+    setFuture((f) => [params, ...f.slice(0, 50)]);
+    setParams(prev);
+  }, [history, params, setParams]);
+
+  const goForward = useCallback(() => {
+    const next = future.at(0);
+    if (!next) {
+      return;
+    }
+    isNavigatingRef.current = true;
+    setHistory((h) => [...h, params]);
+    setFuture(future.slice(1));
+    setParams(next);
+  }, [future, params, setParams]);
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      const modifierHeld = e.metaKey || e.ctrlKey;
+      const inTextField =
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement;
+      if (!modifierHeld || inTextField) {
+        return;
+      }
+      const isRedo = (e.key === "z" && e.shiftKey) || e.key === "y";
+      if (isRedo) {
+        e.preventDefault();
+        goForward();
+      } else if (e.key === "z") {
+        e.preventDefault();
+        goBack();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [goBack, goForward]);
+
+  // --- Cleanup on unmount ---
   useEffect(
     () => () => {
       removeManagedBodyClasses(document.body);
@@ -93,6 +157,11 @@ export function BuilderProvider({ children }: { children: ReactNode }) {
     },
     []
   );
+
+  // Sync mode param to next-themes
+  useEffect(() => {
+    setTheme(params.mode);
+  }, [params.mode, setTheme]);
 
   // Apply body classes synchronously before paint
   useLayoutEffect(() => {
@@ -107,7 +176,7 @@ export function BuilderProvider({ children }: { children: ReactNode }) {
     setIsReady(true);
   }, [params.style, params.baseColor, params.menuColor, params.menuAccent]);
 
-  // Inject CSS vars: Base Color drives the surfaces, Theme drives the accent.
+  // Inject CSS vars
   useLayoutEffect(() => {
     const baseEntry =
       baseColorsOKLCH[params.baseColor as keyof typeof baseColorsOKLCH];
@@ -117,7 +186,6 @@ export function BuilderProvider({ children }: { children: ReactNode }) {
 
     const themeEntry =
       baseColorsOKLCH[params.theme as keyof typeof baseColorsOKLCH];
-    // lyra is always sharp — force radius=none regardless of the picker value.
     const effectiveRadius =
       params.style === "base-lyra" ? "none" : params.radius;
     const radiusValue =
@@ -161,7 +229,16 @@ export function BuilderProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <BuilderContext.Provider value={{ params, setParams }}>
+    <BuilderContext.Provider
+      value={{
+        params,
+        setParams,
+        canGoBack: history.length > 0,
+        canGoForward: future.length > 0,
+        goBack,
+        goForward,
+      }}
+    >
       {children}
     </BuilderContext.Provider>
   );

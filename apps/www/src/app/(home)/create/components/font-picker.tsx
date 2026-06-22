@@ -2,6 +2,7 @@
 
 import { TextAaIcon } from "@phosphor-icons/react";
 import { useBuilder } from "./builder-provider";
+import { LockButton } from "./lock-button";
 import { Picker } from "./picker";
 
 const FONT_OPTIONS = [
@@ -25,18 +26,21 @@ export function FontPicker({
   const value = params[param] === "inherit" ? "inter" : params[param];
 
   return (
-    <Picker
-      display={labelFor(value)}
-      indicator={<TextAaIcon aria-hidden="true" className="size-4" />}
-      label={label}
-      onValueChange={(next) =>
-        setParams(param === "font" ? { font: next } : { fontHeading: next })
-      }
-      options={FONT_OPTIONS.map((font) => ({
-        value: font.value,
-        label: font.label,
-      }))}
-      value={value}
-    />
+    <div className="group/picker relative">
+      <Picker
+        display={labelFor(value)}
+        indicator={<TextAaIcon aria-hidden="true" className="size-4" />}
+        label={label}
+        onValueChange={(next) =>
+          setParams(param === "font" ? { font: next } : { fontHeading: next })
+        }
+        options={FONT_OPTIONS.map((font) => ({
+          value: font.value,
+          label: font.label,
+        }))}
+        value={value}
+      />
+      <LockButton param={param} />
+    </div>
   );
 }
