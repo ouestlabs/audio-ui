@@ -46,6 +46,8 @@ content-marketing
 .cursor/commands
 
 # Claude Code
-.claude/worktrees/
+.claude/
+.agents/
 .playwright-mcp/
 plans/
+skills-lock.json
