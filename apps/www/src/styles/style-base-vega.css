@@ -1,31 +1,46 @@
 /*
- * base-vega — industrial, angular, zero-radius.
+ * base-vega — "Clean, neutral, and familiar"
+ * Exact shadcn slider tokens: h-1.5 track, size-4 circle thumb, border-primary, shadow-sm.
  * Audio/ui components only. Never shadcn-native primitives.
  */
 
 .style-base-vega {
+  /* XY-pad: matches vega card (rounded-xl, shadow-xs). */
   [data-slot="xypad"] {
-    @apply rounded-none border-foreground/15 shadow-none hover:shadow-none;
+    @apply rounded-xl border-foreground/10 shadow-xs hover:shadow-xs hover:ring-2 hover:ring-ring/50;
   }
 
+  /* Knob: primary-tinted border. */
   [data-slot="knob"] {
-    @apply border-foreground/15 shadow-none;
+    @apply border-primary/30 shadow-sm;
   }
   [data-slot="knob-body"] {
-    @apply shadow-none;
+    @apply shadow-sm;
   }
 
-  [data-slot="fader-track"] {
-    @apply rounded-none;
-  }
-  [data-slot="fader-thumb"] {
-    @apply rounded-none shadow-none ring-foreground/15 hover:ring-2 hover:ring-foreground/30 focus-visible:ring-2 focus-visible:ring-foreground/30;
-  }
-
+  /* Fader/Transport track: h-1.5, muted bg. */
+  [data-slot="fader-track"],
   [data-slot="transport-track"] {
-    @apply rounded-none;
+    @apply rounded-full bg-muted;
   }
+  [data-slot="fader-track"][data-orientation="horizontal"],
+  [data-slot="transport-track"][data-orientation="horizontal"] {
+    height: 0.375rem;
+  }
+  [data-slot="fader-track"][data-orientation="vertical"],
+  [data-slot="transport-track"][data-orientation="vertical"] {
+    width: 0.375rem;
+  }
+
+  /* Fader/Transport thumb: size-4 circle, border-primary, shadow-sm. */
+  [data-slot="fader-thumb"],
   [data-slot="transport-thumb"] {
-    @apply rounded-none shadow-none ring-foreground/15 hover:ring-2 hover:ring-foreground/30 focus-visible:ring-2 focus-visible:ring-foreground/30;
+    width: 1rem;
+    height: 1rem;
+    @apply rounded-full border border-primary bg-white shadow-sm ring-ring/50 hover:ring-4 hover:ring-ring/50 focus-visible:ring-4 focus-visible:ring-ring/50 dark:bg-white;
+  }
+  [data-slot="fader-thumb-inner"],
+  [data-slot="transport-thumb-inner"] {
+    display: none;
   }
 }

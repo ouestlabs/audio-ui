@@ -2,7 +2,9 @@
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "xypad-format-value-demo",
   "description": "XYPad component example with formatted value",
-  "registryDependencies": ["@audio/xypad"],
+  "registryDependencies": [
+    "@audio/xypad"
+  ],
   "files": [
     {
       "path": "src/registry/default/examples/xypad-format-value-demo.tsx",
@@ -11,6 +13,8 @@
       "target": "components/audio/examples/xypad-format-value-demo.tsx"
     }
   ],
-  "categories": ["xypad"],
+  "categories": [
+    "xypad"
+  ],
   "type": "registry:example"
 }

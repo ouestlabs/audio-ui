@@ -1,0 +1,47 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e5]:
+        - navigation [ref=e6]:
+          - link "Home" [ref=e7] [cursor=pointer]:
+            - /url: /
+          - link "Docs" [ref=e8] [cursor=pointer]:
+            - /url: /docs/installation
+          - link "Components" [ref=e9] [cursor=pointer]:
+            - /url: /docs/components
+          - link "Blocks" [ref=e10] [cursor=pointer]:
+            - /url: /blocks
+          - link "Charts" [ref=e11] [cursor=pointer]:
+            - /url: /charts/area
+          - link "Directory" [ref=e12] [cursor=pointer]:
+            - /url: /docs/directory
+          - link "Create" [ref=e13] [cursor=pointer]:
+            - /url: /create
+        - generic [ref=e14]:
+          - button "Search documentation..." [ref=e16]:
+            - generic [ref=e17]: Search documentation...
+          - link "117k" [ref=e18] [cursor=pointer]:
+            - /url: https://github.com/shadcn-ui/ui
+            - img
+            - generic [ref=e19]: 117k
+          - button "Toggle theme" [ref=e20]:
+            - img
+            - generic [ref=e21]: Toggle theme
+          - link "New" [ref=e23] [cursor=pointer]:
+            - /url: /create
+            - img
+            - text: New
+    - main [ref=e24]
+    - contentinfo [ref=e25]:
+      - generic [ref=e28]:
+        - text: Built by
+        - link "shadcn" [ref=e29] [cursor=pointer]:
+          - /url: https://twitter.com/shadcn
+        - text: at
+        - link "Vercel" [ref=e30] [cursor=pointer]:
+          - /url: https://vercel.com/new?utm_source=shadcn_site&utm_medium=web&utm_campaign=docs_cta_deploy_now_callout
+        - text: . The source code is available on
+        - link "GitHub" [ref=e31] [cursor=pointer]:
+          - /url: https://github.com/shadcn-ui/ui
+        - text: .
+  - region "Notifications alt+T"

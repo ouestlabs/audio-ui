@@ -1,25 +1,46 @@
 /*
- * base-maia — bubbly, pillowed, max-round.
+ * base-maia — "Rounded, with generous spacing"
+ * Exact shadcn slider tokens: h-3 thick track, rounded-4xl, size-4 thumb, border-primary, shadow-sm.
  * Audio/ui components only. Never shadcn-native primitives.
  */
 
 .style-base-maia {
+  /* XY-pad: matches maia card (rounded-2xl, no shadow, subtle ring). */
   [data-slot="xypad"] {
-    @apply rounded-3xl border-transparent shadow-lg hover:shadow-lg;
+    @apply rounded-2xl border-foreground/10 shadow-none hover:shadow-none hover:ring-2 hover:ring-ring/50;
   }
 
+  /* Knob: rounded, primary border. */
   [data-slot="knob"] {
-    @apply border-transparent shadow-md;
+    @apply border-primary/30 shadow-sm;
   }
   [data-slot="knob-body"] {
-    @apply shadow-md;
+    @apply shadow-sm;
   }
 
-  [data-slot="fader-thumb"] {
-    @apply rounded-full shadow-md hover:ring-4 hover:ring-ring/40 focus-visible:ring-4 focus-visible:ring-ring/40;
+  /* Fader/Transport track: h-3 chunky, rounded-4xl, muted bg. */
+  [data-slot="fader-track"],
+  [data-slot="transport-track"] {
+    @apply rounded-4xl bg-muted;
+  }
+  [data-slot="fader-track"][data-orientation="horizontal"],
+  [data-slot="transport-track"][data-orientation="horizontal"] {
+    height: 0.75rem;
+  }
+  [data-slot="fader-track"][data-orientation="vertical"],
+  [data-slot="transport-track"][data-orientation="vertical"] {
+    width: 0.75rem;
   }
 
+  /* Fader/Transport thumb: size-4, rounded-4xl, border-primary, shadow-sm. */
+  [data-slot="fader-thumb"],
   [data-slot="transport-thumb"] {
-    @apply rounded-full shadow-md hover:ring-4 hover:ring-ring/40 focus-visible:ring-4 focus-visible:ring-ring/40;
+    width: 1rem;
+    height: 1rem;
+    @apply rounded-4xl border border-primary bg-white shadow-sm ring-ring/50 hover:ring-4 hover:ring-ring/50 focus-visible:ring-4 focus-visible:ring-ring/50 dark:bg-white;
+  }
+  [data-slot="fader-thumb-inner"],
+  [data-slot="transport-thumb-inner"] {
+    display: none;
   }
 }

@@ -1,28 +1,46 @@
 /*
- * base-lyra — musical, signal-tinted, primary-accented.
+ * base-lyra — "Boxy and sharp. For mono fonts."
+ * Exact shadcn slider tokens: h-1 track, rounded-none (square), size-3 thumb, border-ring, no shadow.
  * Audio/ui components only. Never shadcn-native primitives.
  */
 
 .style-base-lyra {
+  /* XY-pad: matches lyra card (rounded-none, no shadow, subtle ring). */
   [data-slot="xypad"] {
-    @apply border-primary/20 hover:border-primary/40;
+    @apply rounded-none border-foreground/10 shadow-none hover:shadow-none hover:ring-1 hover:ring-ring/50;
   }
 
+  /* Knob: sharp — knob is always circular but border is square-styled. */
   [data-slot="knob"] {
-    @apply border-primary/20;
+    @apply border-foreground/15 shadow-none;
+  }
+  [data-slot="knob-body"] {
+    @apply shadow-none;
   }
 
-  [data-slot="fader-track"] {
-    @apply bg-primary/8;
-  }
-  [data-slot="fader-thumb"] {
-    @apply ring-primary/20 hover:ring-4 hover:ring-primary/40 focus-visible:ring-4 focus-visible:ring-primary/40;
-  }
-
+  /* Fader/Transport track: h-1, rounded-none (square), muted bg. */
+  [data-slot="fader-track"],
   [data-slot="transport-track"] {
-    @apply bg-primary/8;
+    @apply rounded-none bg-muted;
   }
+  [data-slot="fader-track"][data-orientation="horizontal"],
+  [data-slot="transport-track"][data-orientation="horizontal"] {
+    height: 0.25rem;
+  }
+  [data-slot="fader-track"][data-orientation="vertical"],
+  [data-slot="transport-track"][data-orientation="vertical"] {
+    width: 0.25rem;
+  }
+
+  /* Fader/Transport thumb: size-3 square, border-ring, no shadow. */
+  [data-slot="fader-thumb"],
   [data-slot="transport-thumb"] {
-    @apply ring-primary/20 hover:ring-4 hover:ring-primary/40 focus-visible:ring-4 focus-visible:ring-primary/40;
+    width: 0.75rem;
+    height: 0.75rem;
+    @apply rounded-none border border-ring bg-white shadow-none ring-ring/50 hover:ring-1 hover:ring-ring/50 focus-visible:ring-1 focus-visible:ring-ring/50 dark:bg-white;
+  }
+  [data-slot="fader-thumb-inner"],
+  [data-slot="transport-thumb-inner"] {
+    display: none;
   }
 }

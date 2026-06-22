@@ -1,0 +1,38 @@
+[     193ms] [LOG] [PostHog.js] send "$pageleave" {uuid: 019eeafd-be26-7fc0-901d-b7797dfaa715, event: $pageleave, properties: Object, timestamp: Sun Jun 21 2026 16:22:38 GMT+0000 (heure moyenne de Greenwich)} @ http://localhost:3001/_next/static/chunks/0twy_next_dist_06yi1o8._.js:2482
+[     344ms] [LOG] [PostHog.js] set_config {config: Object, oldConfig: Object, newConfig: Object} @ http://localhost:3001/_next/static/chunks/036~_posthog-js_dist_module_0gzr43h.js:878
+[     344ms] [LOG] [PostHog.js] Persistence loaded localStorage+cookie {distinct_id: 019eea13-5def-7b1c-975b-49305a733d4a, $sesid: Array(3), $initial_person_info: Object, $initialization_time: 2026-06-21T16:12:16.538Z, $configured_session_timeout_ms: 1800000} @ http://localhost:3001/_next/static/chunks/036~_posthog-js_dist_module_0gzr43h.js:878
+[     345ms] [LOG] [PostHog.js] Persistence loaded sessionStorage {$sdk_debug_extensions_init_method: synchronous, $sdk_debug_extensions_init_time_ms: 1, $referrer: $direct, $referring_domain: $direct} @ http://localhost:3001/_next/static/chunks/036~_posthog-js_dist_module_0gzr43h.js:878
+[     345ms] [LOG] [PostHog.js] Initializing extensions synchronously @ http://localhost:3001/_next/static/chunks/036~_posthog-js_dist_module_0gzr43h.js:878
+[     346ms] [LOG] [PostHog.js] History API monitoring enabled, starting... @ http://localhost:3001/_next/static/chunks/036~_posthog-js_dist_module_0gzr43h.js:878
+[     346ms] [LOG] [PostHog.js] [Heatmaps] starting... @ http://localhost:3001/_next/static/chunks/036~_posthog-js_dist_module_0gzr43h.js:878
+[     346ms] [LOG] [PostHog.js] [Web Vitals] enabled, starting... @ http://localhost:3001/_next/static/chunks/036~_posthog-js_dist_module_0gzr43h.js:878
+[     347ms] [LOG] [PostHog.js] [ExceptionAutocapture] enabled @ http://localhost:3001/_next/static/chunks/036~_posthog-js_dist_module_0gzr43h.js:878
+[     347ms] [LOG] [PostHog.js] [ExceptionAutocapture] enabled @ http://localhost:3001/_next/static/chunks/036~_posthog-js_dist_module_0gzr43h.js:878
+[     347ms] [LOG] [PostHog.js] Starting in debug mode {this: qo, config: Object, thisC: Object, p: Object, s: Object} @ http://localhost:3001/_next/static/chunks/036~_posthog-js_dist_module_0gzr43h.js:878
+[     350ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3001/_next/static/chunks/0twy_next_dist_06yi1o8._.js:2482
+[     362ms] [LOG] [PostHog.js] [Dead Clicks] starting... @ http://localhost:3001/_next/static/chunks/0twy_next_dist_06yi1o8._.js:2482
+[     366ms] [LOG] [PostHog.js] send "$pageview" {uuid: 019eeafd-bed4-7754-9e12-6466934b937b, event: $pageview, properties: Object, timestamp: Sun Jun 21 2026 16:22:38 GMT+0000 (heure moyenne de Greenwich)} @ http://localhost:3001/_next/static/chunks/0twy_next_dist_06yi1o8._.js:2482
+[     374ms] [LOG] [HMR] connected @ http://localhost:3001/_next/static/chunks/0twy_next_dist_06yi1o8._.js:2482
+[     910ms] [LOG] [PostHog.js] Persistence loaded sessionStorage {$sdk_debug_extensions_init_method: synchronous, $sdk_debug_extensions_init_time_ms: 1, $referrer: $direct, $referring_domain: $direct} @ http://localhost:3001/_next/static/chunks/0twy_next_dist_06yi1o8._.js:2482
+[     910ms] [LOG] [PostHog.js] set_config {config: Object, oldConfig: Object, newConfig: Object} @ http://localhost:3001/_next/static/chunks/0twy_next_dist_06yi1o8._.js:2482
+[     910ms] [LOG] [PostHog.js] [ExceptionAutocapture] enabled @ http://localhost:3001/_next/static/chunks/0twy_next_dist_06yi1o8._.js:2482
+[     911ms] [LOG] [PostHog.js] [Surveys] flags response received, isSurveysEnabled: false @ http://localhost:3001/_next/static/chunks/0twy_next_dist_06yi1o8._.js:2482
+[     911ms] [LOG] [PostHog.js] [ExceptionAutocapture] enabled @ http://localhost:3001/_next/static/chunks/0twy_next_dist_06yi1o8._.js:2482
+[     912ms] [LOG] [PostHog.js] [Surveys] Surveys loaded successfully @ http://localhost:3001/_next/static/chunks/0twy_next_dist_06yi1o8._.js:2482
+[    1012ms] [LOG] [PostHog.js] [RemoteConfig] __preview_remote_config is disabled. Logging config instead {analytics: Object, autocaptureExceptions: true, autocapture_opt_out: false, captureDeadClicks: false, capturePerformance: Object} @ http://localhost:3001/_next/static/chunks/0twy_next_dist_06yi1o8._.js:2482
+[    5371ms] [LOG] [PostHog.js] send "$web_vitals" {uuid: 019eeafd-d262-79c0-8ffa-0da6703f16af, event: $web_vitals, properties: Object, timestamp: Sun Jun 21 2026 16:22:43 GMT+0000 (heure moyenne de Greenwich)} @ http://localhost:3001/_next/static/chunks/0twy_next_dist_06yi1o8._.js:2482
+[   54236ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3001/_next/static/chunks/0twy_next_dist_06yi1o8._.js:2482
+[   54485ms] [LOG] [Fast Refresh] done in 235ms @ http://localhost:3001/_next/static/chunks/0twy_next_dist_06yi1o8._.js:2482
+[   57307ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3001/_next/static/chunks/0twy_next_dist_06yi1o8._.js:2482
+[   57327ms] [LOG] [Fast Refresh] done in 121ms @ http://localhost:3001/_next/static/chunks/0twy_next_dist_06yi1o8._.js:2482
+[   57439ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3001/_next/static/chunks/0twy_next_dist_06yi1o8._.js:2482
+[   57477ms] [LOG] [Fast Refresh] done in 140ms @ http://localhost:3001/_next/static/chunks/0twy_next_dist_06yi1o8._.js:2482
+[  474873ms] [LOG] [HMR] connected @ http://localhost:3001/_next/static/chunks/0twy_next_dist_06yi1o8._.js:2482
+[  700410ms] [LOG] [HMR] connected @ http://localhost:3001/_next/static/chunks/0twy_next_dist_06yi1o8._.js:2482
+[  967599ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3001/_next/static/chunks/0twy_next_dist_06yi1o8._.js:2482
+[  967968ms] [LOG] [Fast Refresh] done in 467ms @ http://localhost:3001/_next/static/chunks/0twy_next_dist_06yi1o8._.js:2482
+[  972423ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3001/_next/static/chunks/0twy_next_dist_06yi1o8._.js:2482
+[  972741ms] [LOG] [Fast Refresh] done in 419ms @ http://localhost:3001/_next/static/chunks/0twy_next_dist_06yi1o8._.js:2482
+[  977388ms] [LOG] [HMR] connected @ http://localhost:3001/_next/static/chunks/0twy_next_dist_06yi1o8._.js:2482
+[ 3381124ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3001/_next/static/chunks/0twy_next_dist_06yi1o8._.js:2482
+[ 3381234ms] [LOG] [Fast Refresh] done in 127ms @ http://localhost:3001/_next/static/chunks/0twy_next_dist_06yi1o8._.js:2482

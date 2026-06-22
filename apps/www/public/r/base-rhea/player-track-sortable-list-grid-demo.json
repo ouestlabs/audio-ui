@@ -2,7 +2,9 @@
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "player-track-sortable-list-grid-demo",
   "description": "Track list with sortable selection and grid layout example",
-  "registryDependencies": ["@audio/player"],
+  "registryDependencies": [
+    "@audio/player"
+  ],
   "files": [
     {
       "path": "src/registry/default/examples/player-track-sortable-list-grid-demo.tsx",
@@ -11,6 +13,10 @@
       "target": "components/audio/examples/player-track-sortable-list-grid-demo.tsx"
     }
   ],
-  "categories": ["track", "sortable", "grid"],
+  "categories": [
+    "track",
+    "sortable",
+    "grid"
+  ],
   "type": "registry:example"
 }

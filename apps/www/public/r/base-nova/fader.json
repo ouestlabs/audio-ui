@@ -1,7 +1,9 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "fader",
-  "dependencies": ["@audio-ui/react"],
+  "dependencies": [
+    "@audio-ui/react"
+  ],
   "files": [
     {
       "path": "src/registry/base-nova/ui/audio/elements/fader.tsx",

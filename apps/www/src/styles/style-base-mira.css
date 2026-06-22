@@ -1,31 +1,46 @@
 /*
- * base-mira — technical, flat, mid-radius.
+ * base-mira — "Made for compact interfaces"
+ * Exact shadcn slider tokens: h-1 track, rounded-md, size-3 thumb, border-ring, no shadow.
  * Audio/ui components only. Never shadcn-native primitives.
  */
 
 .style-base-mira {
+  /* XY-pad: matches mira card (rounded-lg, no shadow, subtle ring). */
   [data-slot="xypad"] {
-    @apply rounded-md border-input shadow-none hover:shadow-none hover:ring-2 hover:ring-ring/50;
+    @apply rounded-lg border-foreground/10 shadow-none hover:shadow-none hover:ring-2 hover:ring-ring/30;
   }
 
+  /* Knob: medium radius, flat. */
   [data-slot="knob"] {
-    @apply border-input/70 shadow-none;
+    @apply border-foreground/15 shadow-none;
   }
   [data-slot="knob-body"] {
     @apply shadow-none;
   }
 
-  [data-slot="fader-track"] {
-    @apply rounded-sm bg-muted/80;
+  /* Fader/Transport track: h-1, rounded-md, muted bg. */
+  [data-slot="fader-track"],
+  [data-slot="transport-track"] {
+    @apply rounded-md bg-muted;
   }
-  [data-slot="fader-thumb"] {
-    @apply rounded-md shadow-none hover:ring-2 hover:ring-ring/50 focus-visible:ring-2 focus-visible:ring-ring/50;
+  [data-slot="fader-track"][data-orientation="horizontal"],
+  [data-slot="transport-track"][data-orientation="horizontal"] {
+    height: 0.25rem;
+  }
+  [data-slot="fader-track"][data-orientation="vertical"],
+  [data-slot="transport-track"][data-orientation="vertical"] {
+    width: 0.25rem;
   }
 
-  [data-slot="transport-track"] {
-    @apply rounded-sm bg-muted/80;
-  }
+  /* Fader/Transport thumb: size-3, rounded-md, border-ring, no shadow. */
+  [data-slot="fader-thumb"],
   [data-slot="transport-thumb"] {
-    @apply rounded-md shadow-none hover:ring-2 hover:ring-ring/50 focus-visible:ring-2 focus-visible:ring-ring/50;
+    width: 0.75rem;
+    height: 0.75rem;
+    @apply rounded-md border border-ring bg-white shadow-none ring-ring/30 hover:ring-2 hover:ring-ring/30 focus-visible:ring-2 focus-visible:ring-ring/30 dark:bg-white;
+  }
+  [data-slot="fader-thumb-inner"],
+  [data-slot="transport-thumb-inner"] {
+    display: none;
   }
 }

@@ -1,0 +1,28 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e3]:
+    - generic [ref=e5]:
+      - button "Home" [ref=e6] [cursor=pointer]:
+        - generic [ref=e7]:
+          - img
+          - paragraph [ref=e8]: audio/ui
+      - navigation [ref=e9]:
+        - button "Docs" [ref=e10] [cursor=pointer]
+        - button "Blocks" [ref=e11] [cursor=pointer]
+      - generic [ref=e12]:
+        - generic [ref=e13]:
+          - button "Search documentation... ⌘ K" [ref=e14] [cursor=pointer]:
+            - generic [ref=e15]: Search documentation...
+            - generic [ref=e17]:
+              - generic: ⌘
+              - generic: K
+          - generic [ref=e18]:
+            - heading "Search documentation..." [level=2] [ref=e19]
+            - paragraph [ref=e20]: Search for a command to run...
+        - group [ref=e21]:
+          - button "GitHub" [ref=e22] [cursor=pointer]:
+            - img "GitHub"
+        - button "Toggle theme" [ref=e25] [cursor=pointer]:
+          - img
+          - generic [ref=e26]: Toggle theme
+  - region "Notifications alt+T"
+  - alert [ref=e28]

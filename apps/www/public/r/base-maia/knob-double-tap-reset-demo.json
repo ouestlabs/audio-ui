@@ -2,7 +2,9 @@
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "knob-double-tap-reset-demo",
   "description": "Knob double-tap / double-click reset to defaultValue",
-  "registryDependencies": ["@audio/knob"],
+  "registryDependencies": [
+    "@audio/knob"
+  ],
   "files": [
     {
       "path": "src/registry/default/examples/knob-double-tap-reset-demo.tsx",
@@ -11,6 +13,8 @@
       "target": "components/audio/examples/knob-double-tap-reset-demo.tsx"
     }
   ],
-  "categories": ["knob"],
+  "categories": [
+    "knob"
+  ],
   "type": "registry:example"
 }

@@ -1,31 +1,46 @@
 /*
- * base-rhea — crystalline, faceted, micro-radius.
+ * base-rhea — generous rounded with shadow
+ * Exact shadcn slider tokens: h-1 track, rounded-2xl, size-4 thumb, no border, shadow-md.
  * Audio/ui components only. Never shadcn-native primitives.
  */
 
 .style-base-rhea {
+  /* XY-pad: matches rhea card (very rounded, shadow-sm). */
   [data-slot="xypad"] {
-    @apply rounded-sm border-foreground/10 shadow-none hover:shadow-none hover:ring-1 hover:ring-foreground/20;
+    @apply rounded-3xl border-transparent shadow-sm hover:shadow-sm;
   }
 
+  /* Knob: soft shadow, subtle ring. */
   [data-slot="knob"] {
-    @apply border-foreground/10 shadow-none;
+    @apply border-transparent shadow-sm;
   }
   [data-slot="knob-body"] {
-    @apply shadow-none;
+    @apply shadow-sm;
   }
 
-  [data-slot="fader-track"] {
-    @apply rounded-sm bg-input/80;
-  }
-  [data-slot="fader-thumb"] {
-    @apply rounded-sm shadow-none ring-foreground/15 hover:ring-2 hover:ring-foreground/25 focus-visible:ring-2 focus-visible:ring-foreground/25;
-  }
-
+  /* Fader/Transport track: h-1, rounded-2xl, input/90 bg. */
+  [data-slot="fader-track"],
   [data-slot="transport-track"] {
-    @apply rounded-sm bg-input/80;
+    @apply rounded-2xl bg-input/90;
   }
+  [data-slot="fader-track"][data-orientation="horizontal"],
+  [data-slot="transport-track"][data-orientation="horizontal"] {
+    height: 0.25rem;
+  }
+  [data-slot="fader-track"][data-orientation="vertical"],
+  [data-slot="transport-track"][data-orientation="vertical"] {
+    width: 0.25rem;
+  }
+
+  /* Fader/Transport thumb: size-4, rounded-2xl, no border, shadow-md. */
+  [data-slot="fader-thumb"],
   [data-slot="transport-thumb"] {
-    @apply rounded-sm shadow-none ring-foreground/15 hover:ring-2 hover:ring-foreground/25 focus-visible:ring-2 focus-visible:ring-foreground/25;
+    width: 1rem;
+    height: 1rem;
+    @apply rounded-2xl border-transparent bg-white shadow-md ring-1 ring-black/10 hover:ring-4 hover:ring-ring/30 focus-visible:ring-4 focus-visible:ring-ring/30 dark:bg-card;
+  }
+  [data-slot="fader-thumb-inner"],
+  [data-slot="transport-thumb-inner"] {
+    display: none;
   }
 }

@@ -174,6 +174,7 @@ export function Fader({
               size === "lg" &&
                 "data-[orientation=horizontal]:px-2 data-[orientation=vertical]:px-1 data-[orientation=horizontal]:py-1 data-[orientation=vertical]:py-2"
             )}
+            data-slot="fader-thumb-inner"
           >
             {thumbMarks !== false &&
               Array.from({ length: thumbMarks }, (_, i) => (

@@ -2,7 +2,11 @@
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "block-player",
   "description": "Audio player",
-  "registryDependencies": ["@audio/player", "@audio/store", "@audio/html"],
+  "registryDependencies": [
+    "@audio/player",
+    "@audio/store",
+    "@audio/html"
+  ],
   "files": [
     {
       "path": "src/registry/default/blocks/block-player.tsx",
@@ -11,6 +15,9 @@
       "target": "components/audio/blocks/block-player.tsx"
     }
   ],
-  "categories": ["player", "queue"],
+  "categories": [
+    "player",
+    "queue"
+  ],
   "type": "registry:block"
 }

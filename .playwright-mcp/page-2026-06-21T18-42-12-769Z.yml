@@ -1,0 +1,335 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e5]:
+        - button "Home" [ref=e6] [cursor=pointer]:
+          - generic [ref=e7]:
+            - img
+            - paragraph [ref=e8]: audio/ui
+        - navigation [ref=e9]:
+          - button "Docs" [ref=e10] [cursor=pointer]
+          - button "Blocks" [ref=e11] [cursor=pointer]
+        - generic [ref=e12]:
+          - generic [ref=e13]:
+            - button "Search documentation... ⌘ K" [ref=e14] [cursor=pointer]:
+              - generic [ref=e15]: Search documentation...
+              - generic [ref=e17]:
+                - generic: ⌘
+                - generic: K
+            - generic [ref=e18]:
+              - heading "Search documentation..." [level=2] [ref=e19]
+              - paragraph [ref=e20]: Search for a command to run...
+          - group [ref=e21]:
+            - button "GitHub" [ref=e22] [cursor=pointer]:
+              - img "GitHub"
+          - button "Toggle theme" [ref=e25] [cursor=pointer]:
+            - img
+            - generic [ref=e26]: Toggle theme
+    - generic [ref=e28]:
+      - complementary [ref=e29]:
+        - generic [ref=e30]:
+          - generic [ref=e31]: Customize
+          - button "Switch to dark mode" [ref=e32] [cursor=pointer]:
+            - img
+        - generic [ref=e33]:
+          - button "Style Nova" [ref=e34] [cursor=pointer]:
+            - generic [ref=e35]:
+              - generic [ref=e36]: Style
+              - generic [ref=e37]: Nova
+            - img [ref=e39]
+          - separator [ref=e41]
+          - button "Base Color Neutral" [ref=e42] [cursor=pointer]:
+            - generic [ref=e43]:
+              - generic [ref=e44]: Base Color
+              - generic [ref=e45]: Neutral
+          - button "Theme Blue" [ref=e48] [cursor=pointer]:
+            - generic [ref=e49]:
+              - generic [ref=e50]: Theme
+              - generic [ref=e51]: Blue
+          - separator [ref=e54]
+          - button "Radius Default" [ref=e55] [cursor=pointer]:
+            - generic [ref=e56]:
+              - generic [ref=e57]: Radius
+              - generic [ref=e58]: Default
+          - button "Heading Inter" [ref=e61] [cursor=pointer]:
+            - generic [ref=e62]:
+              - generic [ref=e63]: Heading
+              - generic [ref=e64]: Inter
+            - img [ref=e66]
+          - button "Font Inter" [ref=e68] [cursor=pointer]:
+            - generic [ref=e69]:
+              - generic [ref=e70]: Font
+              - generic [ref=e71]: Inter
+            - img [ref=e73]
+          - button "Icons Phosphor" [ref=e75] [cursor=pointer]:
+            - generic [ref=e76]:
+              - generic [ref=e77]: Icons
+              - generic [ref=e78]: Phosphor
+            - img [ref=e80]
+          - separator [ref=e82]
+          - button "Menu Inverted Translucent" [ref=e83] [cursor=pointer]:
+            - generic [ref=e84]:
+              - generic [ref=e85]: Menu
+              - generic [ref=e86]: Inverted Translucent
+            - img [ref=e88]
+          - button "Menu Accent Subtle" [ref=e90] [cursor=pointer]:
+            - generic [ref=e91]:
+              - generic [ref=e92]: Menu Accent
+              - generic [ref=e93]: Subtle
+            - img [ref=e95]
+        - generic [ref=e97]:
+          - button "--preset 1ou0lw" [ref=e98] [cursor=pointer]:
+            - generic [ref=e99]: "--preset 1ou0lw"
+            - img [ref=e100]
+          - generic [ref=e102]:
+            - button "Shuffle" [ref=e103] [cursor=pointer]:
+              - img
+              - text: Shuffle
+            - button "Get Code" [ref=e104] [cursor=pointer]:
+              - img
+              - text: Get Code
+      - generic [ref=e107]:
+        - generic [ref=e108]:
+          - generic [ref=e109]:
+            - generic [ref=e110]:
+              - generic [ref=e111]: XY Pad
+              - generic [ref=e112]: Use arrow keys to adjust X and Y values.
+              - status [ref=e113]: "X: 50.0, Y: 50.0"
+              - group "XY Pad" [ref=e114]:
+                - generic [ref=e115]:
+                  - generic [ref=e116]: 177Hz
+                  - text: ","
+                  - generic [ref=e117]: 1265Hz
+            - group [ref=e118]:
+              - button "Sine wave" [ref=e119] [cursor=pointer]:
+                - img "Sine wave"
+              - button "Triangle wave" [ref=e120] [cursor=pointer]:
+                - img "Triangle wave"
+              - button "Sawtooth wave" [ref=e121] [cursor=pointer]:
+                - img "Sawtooth wave"
+              - button "Square wave" [pressed] [ref=e122] [cursor=pointer]:
+                - img "Square wave"
+            - group [ref=e123]:
+              - button "Allpass" [pressed] [ref=e124] [cursor=pointer]
+              - button "Lowpass" [ref=e125] [cursor=pointer]
+              - button "Highpass" [ref=e126] [cursor=pointer]
+              - button "Bandpass" [ref=e127] [cursor=pointer]
+            - region "Volume" [ref=e128]:
+              - generic [ref=e130]:
+                - generic [ref=e131]: Volume
+                - slider "Volume" [ref=e136]
+                - status [ref=e141]: 50%
+          - generic [ref=e142]:
+            - region "Gain" [ref=e143]:
+              - generic [ref=e144]: Gain
+              - generic [ref=e146]:
+                - slider "Gain" [ref=e148]:
+                  - img "Knob arc"
+                  - img
+                - status [ref=e150]: 50%
+              - generic [ref=e151]: FX
+            - region "Reverb" [ref=e152]:
+              - generic [ref=e153]: Reverb
+              - generic [ref=e155]:
+                - slider "Reverb" [ref=e157]:
+                  - img "Knob arc"
+                  - img
+                - status [ref=e159]: 50%
+              - generic [ref=e160]: FX
+            - region "Delay" [ref=e161]:
+              - generic [ref=e162]: Delay
+              - generic [ref=e164]:
+                - slider "Delay" [ref=e166]:
+                  - img "Knob arc"
+                  - img
+                - status [ref=e168]: 50%
+              - generic [ref=e169]: FX
+            - region "Drive" [ref=e170]:
+              - generic [ref=e171]: Drive
+              - generic [ref=e173]:
+                - slider "Drive" [ref=e175]:
+                  - img "Knob arc"
+                  - img
+                - status [ref=e177]: 50%
+              - generic [ref=e178]: FX
+        - generic [ref=e179]:
+          - generic [ref=e181]:
+            - generic [ref=e182] [cursor=pointer]:
+              - generic [ref=e184]:
+                - img
+              - generic [ref=e185]:
+                - generic [ref=e187]: Beautiful Loop
+                - paragraph [ref=e188]: Flavio Concini
+              - button "Play this track" [ref=e190]:
+                - img
+            - generic [ref=e191] [cursor=pointer]:
+              - generic [ref=e193]:
+                - img
+              - generic [ref=e194]:
+                - generic [ref=e196]: Type
+                - paragraph [ref=e197]: Aliabbas Abasov
+              - button "Play this track" [ref=e199]:
+                - img
+            - generic [ref=e200] [cursor=pointer]:
+              - generic [ref=e203]:
+                - img
+              - generic [ref=e204]:
+                - generic [ref=e206]: Radio Tuxnet
+                - paragraph [ref=e207]: Tuxnet
+              - button "Play this track" [ref=e209]:
+                - img
+            - generic [ref=e210] [cursor=pointer]:
+              - generic [ref=e213]:
+                - img
+              - generic [ref=e214]:
+                - generic [ref=e216]: Live Radio
+                - paragraph [ref=e217]: Audio UI
+              - button "Play" [ref=e219]:
+                - img
+          - generic [ref=e220]:
+            - generic [ref=e221]:
+              - time [ref=e222]: 0:00
+              - slider "Seek" [ref=e226]
+              - time [ref=e229]: 0:00
+            - generic [ref=e230]:
+              - generic [ref=e231]:
+                - button "Previous" [ref=e232] [cursor=pointer]:
+                  - img
+                - button "Play" [ref=e233] [cursor=pointer]:
+                  - img
+                - button "Next" [disabled]:
+                  - img
+              - button "Shuffle" [ref=e234] [cursor=pointer]:
+                - img
+              - button "Disable repeat" [ref=e235] [cursor=pointer]:
+                - img
+              - button "Volume 48%" [ref=e236] [cursor=pointer]:
+                - img
+          - generic [ref=e237]:
+            - application [ref=e238]:
+              - listitem [ref=e239]:
+                - generic [ref=e240] [cursor=pointer]:
+                  - generic [ref=e242]:
+                    - button [ref=e243]:
+                      - img
+                    - generic [ref=e244]:
+                      - img
+                  - generic [ref=e245]:
+                    - generic [ref=e247]: Beautiful Loop
+                    - paragraph [ref=e248]: Flavio Concini
+                  - button "Play this track" [ref=e250]:
+                    - img
+              - listitem [ref=e251]:
+                - generic [ref=e252] [cursor=pointer]:
+                  - generic [ref=e254]:
+                    - button [ref=e255]:
+                      - img
+                    - generic [ref=e256]:
+                      - img
+                  - generic [ref=e257]:
+                    - generic [ref=e259]: Type
+                    - paragraph [ref=e260]: Aliabbas Abasov
+                  - button "Play this track" [ref=e262]:
+                    - img
+              - listitem [ref=e263]:
+                - generic [ref=e264] [cursor=pointer]:
+                  - generic [ref=e266]:
+                    - button [ref=e267]:
+                      - img
+                    - generic [ref=e269]:
+                      - img
+                  - generic [ref=e270]:
+                    - generic [ref=e272]: Radio Tuxnet
+                    - paragraph [ref=e273]: Tuxnet
+                  - button "Play this track" [ref=e275]:
+                    - img
+              - listitem [ref=e276]:
+                - generic [ref=e277] [cursor=pointer]:
+                  - generic [ref=e279]:
+                    - button [ref=e280]:
+                      - img
+                    - generic [ref=e282]:
+                      - img
+                  - generic [ref=e283]:
+                    - generic [ref=e285]: Live Radio
+                    - paragraph [ref=e286]: Audio UI
+                  - button "Play" [ref=e288]:
+                    - img
+            - status [ref=e289]
+          - region "Transport" [ref=e290]:
+            - generic [ref=e291]: Track 1
+            - slider "Seek" [ref=e299]
+            - status [ref=e303]: 0:35 / 1:42
+        - generic [ref=e304]:
+          - generic [ref=e305]:
+            - generic [ref=e306]:
+              - generic [ref=e307]: XY Pad
+              - generic [ref=e308]: Use arrow keys to adjust X and Y values.
+              - status [ref=e309]: "X: 50.0, Y: 50.0"
+              - group "XY Pad" [ref=e310]:
+                - generic [ref=e311]:
+                  - generic [ref=e312]: 220Hz
+                  - generic [ref=e313]: ", Q: 8.0"
+            - group [ref=e314]:
+              - button "Sine wave" [pressed] [ref=e315] [cursor=pointer]:
+                - img "Sine wave"
+              - button "Triangle wave" [ref=e316] [cursor=pointer]:
+                - img "Triangle wave"
+              - button "Sawtooth wave" [ref=e317] [cursor=pointer]:
+                - img "Sawtooth wave"
+              - button "Square wave" [ref=e318] [cursor=pointer]:
+                - img "Square wave"
+            - region "Shaper controls" [ref=e319]:
+              - generic [ref=e320]:
+                - generic [ref=e321]:
+                  - generic [ref=e322]: Drive
+                  - slider "Drive" [ref=e324]:
+                    - img "Knob arc"
+                    - img
+                  - status [ref=e326]: "1"
+                - generic [ref=e327]:
+                  - generic [ref=e328]: Tone
+                  - slider "Tone" [ref=e330]:
+                    - img "Knob arc"
+                    - img
+                  - status [ref=e332]: "50"
+                - generic [ref=e333]:
+                  - generic [ref=e334]: Detune
+                  - slider "Detune" [ref=e336]:
+                    - img "Knob arc"
+                    - img
+                  - status [ref=e338]: "0"
+                - generic [ref=e339]:
+                  - generic [ref=e340]: Mix
+                  - slider "Mix" [ref=e342]:
+                    - img "Knob arc"
+                    - img
+                  - status [ref=e344]: 50%
+            - region "Volume" [ref=e345]:
+              - generic [ref=e347]:
+                - generic [ref=e348]: Volume
+                - slider "Volume" [ref=e353]
+                - status [ref=e358]: 50%
+          - generic [ref=e359]:
+            - generic [ref=e360]:
+              - time [ref=e361]: 0:00
+              - slider "Seek" [ref=e365]
+              - time [ref=e368]: 0:00
+            - generic [ref=e369]:
+              - generic [ref=e370]:
+                - button "Previous" [ref=e371] [cursor=pointer]:
+                  - img
+                - button "Play" [ref=e372] [cursor=pointer]:
+                  - img
+                - button "Next" [disabled]:
+                  - img
+              - button "Shuffle" [ref=e373] [cursor=pointer]:
+                - img
+              - button "Disable repeat" [ref=e374] [cursor=pointer]:
+                - img
+              - button "Volume 48%" [ref=e375] [cursor=pointer]:
+                - img
+              - button "Queue" [ref=e376] [cursor=pointer]:
+                - img
+  - region "Notifications alt+T"
+  - alert [ref=e377]

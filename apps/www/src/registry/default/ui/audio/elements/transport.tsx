@@ -189,6 +189,7 @@ function Transport({
               size === "lg" &&
                 "data-[orientation=horizontal]:px-2 data-[orientation=vertical]:px-1 data-[orientation=horizontal]:py-1 data-[orientation=vertical]:py-2"
             )}
+            data-slot="transport-thumb-inner"
           >
             <TransportPrimitive.ThumbMark
               className={transportThumbMarkVariants({ size })}

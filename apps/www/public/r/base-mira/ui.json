@@ -1,7 +1,10 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "ui",
-  "registryDependencies": ["@audio/transport", "@audio/sortable-list"],
+  "registryDependencies": [
+    "@audio/transport",
+    "@audio/sortable-list"
+  ],
   "files": [],
   "type": "registry:ui"
 }

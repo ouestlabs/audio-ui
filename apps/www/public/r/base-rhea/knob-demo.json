@@ -2,7 +2,9 @@
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "knob-demo",
   "description": "Knob component example",
-  "registryDependencies": ["@audio/knob"],
+  "registryDependencies": [
+    "@audio/knob"
+  ],
   "files": [
     {
       "path": "src/registry/default/examples/knob-demo.tsx",
@@ -11,6 +13,8 @@
       "target": "components/audio/examples/knob-demo.tsx"
     }
   ],
-  "categories": ["knob"],
+  "categories": [
+    "knob"
+  ],
   "type": "registry:example"
 }

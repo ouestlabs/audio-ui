@@ -1,0 +1,50 @@
+- generic:
+  - generic [active]:
+    - generic [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e5]:
+          - navigation [ref=e6]:
+            - button "previous" [disabled] [ref=e7]:
+              - img "previous" [ref=e8]
+            - generic [ref=e10]:
+              - generic [ref=e11]: 1/
+              - text: "1"
+            - button "next" [disabled] [ref=e12]:
+              - img "next" [ref=e13]
+          - img
+        - generic [ref=e15]:
+          - link "Next.js 16.2.6 (stale) Turbopack" [ref=e16] [cursor=pointer]:
+            - /url: https://nextjs.org/docs/messages/version-staleness
+            - img [ref=e17]
+            - generic "There is a newer version (16.2.9) available, upgrade recommended!" [ref=e19]: Next.js 16.2.6 (stale)
+            - generic [ref=e20]: Turbopack
+          - img
+      - dialog "Build Error" [ref=e22]:
+        - generic [ref=e25]:
+          - generic [ref=e26]:
+            - generic [ref=e27]:
+              - generic [ref=e29]: Build Error
+              - generic [ref=e30]:
+                - button "Copy Error Info" [ref=e31] [cursor=pointer]:
+                  - img [ref=e32]
+                - button "No related documentation found" [disabled] [ref=e34]:
+                  - img [ref=e35]
+                - button "Attach Node.js inspector" [ref=e37] [cursor=pointer]:
+                  - img [ref=e38]
+            - generic [ref=e47]: Error evaluating Node.js code
+          - generic [ref=e49]:
+            - generic [ref=e51]:
+              - img [ref=e53]
+              - generic [ref=e55]: ./apps/www/src/styles/globals.css
+              - button "Open in editor" [ref=e56] [cursor=pointer]:
+                - img [ref=e58]
+            - generic [ref=e62]: "Error evaluating Node.js code CssSyntaxError: tailwindcss: /Users/macbook/Documents/lUlU/audio-ui/apps/www/src/styles/globals.css:1:1: Exceeded maximum recursion depth while resolving `./globals.css` in `/Users/macbook/Documents/lUlU/audio-ui/apps/www/src/styles`) [at Input.error (turbopack:///[project]/node_modules/.bun/postcss@8.4.31/node_modules/postcss/lib/input.js:106:16)] [at Root.error (turbopack:///[project]/node_modules/.bun/postcss@8.4.31/node_modules/postcss/lib/node.js:115:32)] [at Object.Once (/Users/macbook/Documents/lUlU/audio-ui/node_modules/.bun/@tailwindcss+postcss@4.1.18/node_modules/@tailwindcss/postcss/dist/index.js:10:6911)] [at async LazyResult.runAsync (turbopack:///[project]/node_modules/.bun/postcss@8.4.31/node_modules/postcss/lib/lazy-result.js:261:11)] [at async transform (turbopack:///[turbopack-node]/transforms/postcss.ts:70:34)] [at async run (turbopack:///[turbopack-node]/child_process/evaluate.ts:89:23)] Import trace: Client Component Browser: ./apps/www/src/styles/globals.css [Client Component Browser] ./apps/www/src/app/layout.tsx [Server Component]"
+        - generic [ref=e63]: "1"
+        - generic [ref=e64]: "2"
+    - button "Open issues overlay" [ref=e71] [cursor=pointer]:
+      - img [ref=e73]
+      - generic [ref=e75]:
+        - generic [ref=e76]: "0"
+        - generic [ref=e77]: "1"
+      - generic [ref=e78]: Issue
+  - alert [ref=e79]

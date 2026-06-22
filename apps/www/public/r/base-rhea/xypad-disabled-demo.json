@@ -2,7 +2,9 @@
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "xypad-disabled-demo",
   "description": "XYPad disabled state example",
-  "registryDependencies": ["@audio/xypad"],
+  "registryDependencies": [
+    "@audio/xypad"
+  ],
   "files": [
     {
       "path": "src/registry/default/examples/xypad-disabled-demo.tsx",
@@ -11,6 +13,8 @@
       "target": "components/audio/examples/xypad-disabled-demo.tsx"
     }
   ],
-  "categories": ["xypad"],
+  "categories": [
+    "xypad"
+  ],
   "type": "registry:example"
 }

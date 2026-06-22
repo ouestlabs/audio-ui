@@ -1,0 +1,120 @@
+[      41ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3001/create?style=base-nova:0
+[     256ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3001/_next/static/chunks/0~2w_react-dom_0sbm542._.js:15305
+[     311ms] [LOG] [PostHog.js] set_config {config: Object, oldConfig: Object, newConfig: Object} @ http://localhost:3001/_next/static/chunks/036~_posthog-js_dist_module_0ds7ukn.js:878
+[     313ms] [LOG] [PostHog.js] Persistence loaded localStorage+cookie {distinct_id: 019eea13-5def-7b1c-975b-49305a733d4a, $sesid: Array(3), $initial_person_info: Object, $initialization_time: 2026-06-21T18:29:46.219Z, $configured_session_timeout_ms: 1800000} @ http://localhost:3001/_next/static/chunks/036~_posthog-js_dist_module_0ds7ukn.js:878
+[     315ms] [LOG] [PostHog.js] Persistence loaded sessionStorage {} @ http://localhost:3001/_next/static/chunks/036~_posthog-js_dist_module_0ds7ukn.js:878
+[     315ms] [LOG] [PostHog.js] Initializing extensions synchronously @ http://localhost:3001/_next/static/chunks/036~_posthog-js_dist_module_0ds7ukn.js:878
+[     316ms] [LOG] [PostHog.js] History API monitoring enabled, starting... @ http://localhost:3001/_next/static/chunks/036~_posthog-js_dist_module_0ds7ukn.js:878
+[     316ms] [LOG] [PostHog.js] [Heatmaps] starting... @ http://localhost:3001/_next/static/chunks/036~_posthog-js_dist_module_0ds7ukn.js:878
+[     318ms] [LOG] [PostHog.js] [Web Vitals] enabled, starting... @ http://localhost:3001/_next/static/chunks/036~_posthog-js_dist_module_0ds7ukn.js:878
+[     318ms] [LOG] [PostHog.js] [ExceptionAutocapture] enabled @ http://localhost:3001/_next/static/chunks/036~_posthog-js_dist_module_0ds7ukn.js:878
+[     318ms] [LOG] [PostHog.js] [ExceptionAutocapture] enabled @ http://localhost:3001/_next/static/chunks/036~_posthog-js_dist_module_0ds7ukn.js:878
+[     319ms] [LOG] [PostHog.js] Starting in debug mode {this: qo, config: Object, thisC: Object, p: Object, s: Object} @ http://localhost:3001/_next/static/chunks/036~_posthog-js_dist_module_0ds7ukn.js:878
+[     323ms] [LOG] [Client Instrumentation Hook] Slow execution detected: 23ms (Note: Code download overhead is not included in this measurement) @ http://localhost:3001/_next/static/chunks/0twy_next_dist_0w53qog._.js:702
+[     337ms] Error: ./apps/www/src/styles/globals.css
+Error evaluating Node.js code
+CssSyntaxError: tailwindcss: /Users/macbook/Documents/lUlU/audio-ui/apps/www/src/styles/globals.css:1:1: Exceeded maximum recursion depth while resolving `./globals.css` in `/Users/macbook/Documents/lUlU/audio-ui/apps/www/src/styles`)
+    [at Input.error (turbopack:///[project]/node_modules/.bun/postcss@8.4.31/node_modules/postcss/lib/input.js:106:16)]
+    [at Root.error (turbopack:///[project]/node_modules/.bun/postcss@8.4.31/node_modules/postcss/lib/node.js:115:32)]
+    [at Object.Once (/Users/macbook/Documents/lUlU/audio-ui/node_modules/.bun/@tailwindcss+postcss@4.1.18/node_modules/@tailwindcss/postcss/dist/index.js:10:6911)]
+    [at async LazyResult.runAsync (turbopack:///[project]/node_modules/.bun/postcss@8.4.31/node_modules/postcss/lib/lazy-result.js:261:11)]
+    [at async transform (turbopack:///[turbopack-node]/transforms/postcss.ts:70:34)]
+    [at async run (turbopack:///[turbopack-node]/child_process/evaluate.ts:89:23)]
+
+Import trace:
+  Client Component Browser:
+    ./apps/www/src/styles/globals.css [Client Component Browser]
+    ./apps/www/src/app/layout.tsx [Server Component]
+
+
+    at Object.getCompilationErrors (file:///Users/macbook/Documents/lUlU/audio-ui/node_modules/.bun/next@16.2.6+a8e167bbfea182cf/node_modules/next/dist/server/dev/hot-reloader-turbopack.js:1186:59)
+    at DevBundlerService.getCompilationError (file:///Users/macbook/Documents/lUlU/audio-ui/node_modules/.bun/next@16.2.6+a8e167bbfea182cf/node_modules/next/dist/server/lib/dev-bundler-service.js:44:55)
+    at DevServer.getCompilationError (file:///Users/macbook/Documents/lUlU/audio-ui/node_modules/.bun/next@16.2.6+a8e167bbfea182cf/node_modules/next/dist/server/dev/next-dev-server.js:720:42)
+    at DevServer.findPageComponents (file:///Users/macbook/Documents/lUlU/audio-ui/node_modules/.bun/next@16.2.6+a8e167bbfea182cf/node_modules/next/dist/server/dev/next-dev-server.js:690:43)
+    at async DevServer.renderErrorToResponseImpl (file:///Users/macbook/Documents/lUlU/audio-ui/node_modules/.bun/next@16.2.6+a8e167bbfea182cf/node_modules/next/dist/server/base-server.js:1753:26)
+[     353ms] [LOG] [PostHog.js] send "$pageview" {uuid: 019eeb7a-2107-7926-a43d-46cc5f85ec97, event: $pageview, properties: Object, timestamp: Sun Jun 21 2026 18:38:30 GMT+0000 (heure moyenne de Greenwich)} @ http://localhost:3001/_next/static/chunks/0twy_next_dist_0w53qog._.js:1385
+[     356ms] [LOG] [PostHog.js] [Dead Clicks] starting... @ http://localhost:3001/_next/static/chunks/0twy_next_dist_0w53qog._.js:1385
+[     360ms] [LOG] [HMR] connected @ http://localhost:3001/_next/static/chunks/0twy_next_dist_0w53qog._.js:1385
+[     363ms] [ERROR] ./apps/www/src/styles/globals.css
+Error evaluating Node.js code
+CssSyntaxError: tailwindcss: /Users/macbook/Documents/lUlU/audio-ui/apps/www/src/styles/globals.css:1:1: Exceeded maximum recursion depth while resolving `./globals.css` in `/Users/macbook/Documents/lUlU/audio-ui/apps/www/src/styles`)
+    [at Input.error (turbopack:///[project]/node_modules/.bun/postcss@8.4.31/node_modules/postcss/lib/input.js:106:16)]
+    [at Root.error (turbopack:///[project]/node_modules/.bun/postcss@8.4.31/node_modules/postcss/lib/node.js:115:32)]
+    [at Object.Once (/Users/macbook/Documents/lUlU/audio-ui/node_modules/.bun/@tailwindcss+postcss@4.1.18/node_modules/@tailwindcss/postcss/dist/index.js:10:6911)]
+    [at async LazyResult.runAsync (turbopack:///[project]/node_modules/.bun/postcss@8.4.31/node_modules/postcss/lib/lazy-result.js:261:11)]
+    [at async transform (turbopack:///[turbopack-node]/transforms/postcss.ts:70:34)]
+    [at async run (turbopack:///[turbopack-node]/child_process/evaluate.ts:89:23)]
+
+Import trace:
+  Client Component Browser:
+    ./apps/www/src/styles/globals.css [Client Component Browser]
+    ./apps/www/src/app/layout.tsx [Server Component] @ http://localhost:3001/_next/static/chunks/0twy_next_dist_0w53qog._.js:2104
+[     363ms] [ERROR] ./apps/www/src/styles/globals.css
+Error evaluating Node.js code
+CssSyntaxError: tailwindcss: /Users/macbook/Documents/lUlU/audio-ui/apps/www/src/styles/globals.css:1:1: Exceeded maximum recursion depth while resolving `./globals.css` in `/Users/macbook/Documents/lUlU/audio-ui/apps/www/src/styles`)
+    [at Input.error (turbopack:///[project]/node_modules/.bun/postcss@8.4.31/node_modules/postcss/lib/input.js:106:16)]
+    [at Root.error (turbopack:///[project]/node_modules/.bun/postcss@8.4.31/node_modules/postcss/lib/node.js:115:32)]
+    [at Object.Once (/Users/macbook/Documents/lUlU/audio-ui/node_modules/.bun/@tailwindcss+postcss@4.1.18/node_modules/@tailwindcss/postcss/dist/index.js:10:6911)]
+    [at async LazyResult.runAsync (turbopack:///[project]/node_modules/.bun/postcss@8.4.31/node_modules/postcss/lib/lazy-result.js:261:11)]
+    [at async transform (turbopack:///[turbopack-node]/transforms/postcss.ts:70:34)]
+    [at async run (turbopack:///[turbopack-node]/child_process/evaluate.ts:89:23)]
+
+Import trace:
+  Client Component Browser:
+    ./apps/www/src/styles/globals.css [Client Component Browser]
+    ./apps/www/src/app/layout.tsx [Server Component] @ http://localhost:3001/_next/static/chunks/0twy_next_dist_0w53qog._.js:2104
+[     432ms] [ERROR] ./apps/www/src/styles/globals.css
+Error evaluating Node.js code
+CssSyntaxError: tailwindcss: /Users/macbook/Documents/lUlU/audio-ui/apps/www/src/styles/globals.css:1:1: Exceeded maximum recursion depth while resolving `./globals.css` in `/Users/macbook/Documents/lUlU/audio-ui/apps/www/src/styles`)
+    [at Input.error (turbopack:///[project]/node_modules/.bun/postcss@8.4.31/node_modules/postcss/lib/input.js:106:16)]
+    [at Root.error (turbopack:///[project]/node_modules/.bun/postcss@8.4.31/node_modules/postcss/lib/node.js:115:32)]
+    [at Object.Once (/Users/macbook/Documents/lUlU/audio-ui/node_modules/.bun/@tailwindcss+postcss@4.1.18/node_modules/@tailwindcss/postcss/dist/index.js:10:6911)]
+    [at async LazyResult.runAsync (turbopack:///[project]/node_modules/.bun/postcss@8.4.31/node_modules/postcss/lib/lazy-result.js:261:11)]
+    [at async transform (turbopack:///[turbopack-node]/transforms/postcss.ts:70:34)]
+    [at async run (turbopack:///[turbopack-node]/child_process/evaluate.ts:89:23)]
+
+Import trace:
+  Client Component Browser:
+    ./apps/www/src/styles/globals.css [Client Component Browser]
+    ./apps/www/src/app/layout.tsx [Server Component] @ http://localhost:3001/_next/static/chunks/0twy_next_dist_0w53qog._.js:2104
+[     466ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3001/_next/static/chunks/0twy_next_dist_0w53qog._.js:1385
+[     835ms] [LOG] [PostHog.js] [RemoteConfig] __preview_remote_config is disabled. Logging config instead {analytics: Object, autocaptureExceptions: true, autocapture_opt_out: false, captureDeadClicks: false, capturePerformance: Object} @ http://localhost:3001/_next/static/chunks/0twy_next_dist_0w53qog._.js:1385
+[     845ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3001/favicon.ico:0
+[    1138ms] [LOG] [PostHog.js] Persistence loaded sessionStorage {$sdk_debug_extensions_init_method: synchronous, $sdk_debug_extensions_init_time_ms: 3, $referrer: $direct, $referring_domain: $direct} @ http://localhost:3001/_next/static/chunks/0twy_next_dist_0w53qog._.js:1385
+[    1138ms] [LOG] [PostHog.js] set_config {config: Object, oldConfig: Object, newConfig: Object} @ http://localhost:3001/_next/static/chunks/0twy_next_dist_0w53qog._.js:1385
+[    1138ms] [LOG] [PostHog.js] [ExceptionAutocapture] enabled @ http://localhost:3001/_next/static/chunks/0twy_next_dist_0w53qog._.js:1385
+[    1139ms] [LOG] [PostHog.js] [Surveys] flags response received, isSurveysEnabled: false @ http://localhost:3001/_next/static/chunks/0twy_next_dist_0w53qog._.js:1385
+[    1139ms] [LOG] [PostHog.js] [ExceptionAutocapture] enabled @ http://localhost:3001/_next/static/chunks/0twy_next_dist_0w53qog._.js:1385
+[    1145ms] [LOG] [PostHog.js] [Surveys] Surveys loaded successfully @ http://localhost:3001/_next/static/chunks/0twy_next_dist_0w53qog._.js:1385
+[    5536ms] [LOG] [PostHog.js] send "$web_vitals" {uuid: 019eeb7a-3555-7566-b1b4-716e4d91e333, event: $web_vitals, properties: Object, timestamp: Sun Jun 21 2026 18:38:35 GMT+0000 (heure moyenne de Greenwich)} @ http://localhost:3001/_next/static/chunks/0twy_next_dist_0w53qog._.js:1385
+[   16152ms] [ERROR] ./apps/www/src/styles/globals.css
+Error evaluating Node.js code
+CssSyntaxError: tailwindcss: /Users/macbook/Documents/lUlU/audio-ui/apps/www/src/styles/globals.css:1:1: Exceeded maximum recursion depth while resolving `./globals.css` in `/Users/macbook/Documents/lUlU/audio-ui/apps/www/src/styles`)
+    [at Input.error (turbopack:///[project]/node_modules/.bun/postcss@8.4.31/node_modules/postcss/lib/input.js:106:16)]
+    [at Root.error (turbopack:///[project]/node_modules/.bun/postcss@8.4.31/node_modules/postcss/lib/node.js:115:32)]
+    [at Object.Once (/Users/macbook/Documents/lUlU/audio-ui/node_modules/.bun/@tailwindcss+postcss@4.1.18/node_modules/@tailwindcss/postcss/dist/index.js:10:6911)]
+    [at async LazyResult.runAsync (turbopack:///[project]/node_modules/.bun/postcss@8.4.31/node_modules/postcss/lib/lazy-result.js:261:11)]
+    [at async transform (turbopack:///[turbopack-node]/transforms/postcss.ts:70:34)]
+    [at async run (turbopack:///[turbopack-node]/child_process/evaluate.ts:89:23)]
+
+Import trace:
+  Client Component Browser:
+    ./apps/www/src/styles/globals.css [Client Component Browser]
+    ./apps/www/src/app/layout.tsx [Server Component] @ http://localhost:3001/_next/static/chunks/0twy_next_dist_0w53qog._.js:2104
+[   16185ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3001/_next/static/chunks/0twy_next_dist_0w53qog._.js:1385
+[   25321ms] [LOG] [PostHog.js] send "$$heatmap" {uuid: 019eeb7a-829e-7958-9556-94d06bbf0a77, event: $$heatmap, properties: Object, timestamp: Sun Jun 21 2026 18:38:55 GMT+0000 (heure moyenne de Greenwich)} @ http://localhost:3001/_next/static/chunks/0twy_next_dist_0w53qog._.js:1385
+[   63935ms] [ERROR] ./apps/www/src/styles/globals.css
+Error evaluating Node.js code
+CssSyntaxError: tailwindcss: /Users/macbook/Documents/lUlU/audio-ui/apps/www/src/styles/globals.css:1:1: Exceeded maximum recursion depth while resolving `./globals.css` in `/Users/macbook/Documents/lUlU/audio-ui/apps/www/src/styles`)
+    [at Input.error (turbopack:///[project]/node_modules/.bun/postcss@8.4.31/node_modules/postcss/lib/input.js:106:16)]
+    [at Root.error (turbopack:///[project]/node_modules/.bun/postcss@8.4.31/node_modules/postcss/lib/node.js:115:32)]
+    [at Object.Once (/Users/macbook/Documents/lUlU/audio-ui/node_modules/.bun/@tailwindcss+postcss@4.1.18/node_modules/@tailwindcss/postcss/dist/index.js:10:6911)]
+    [at async LazyResult.runAsync (turbopack:///[project]/node_modules/.bun/postcss@8.4.31/node_modules/postcss/lib/lazy-result.js:261:11)]
+    [at async transform (turbopack:///[turbopack-node]/transforms/postcss.ts:70:34)]
+    [at async run (turbopack:///[turbopack-node]/child_process/evaluate.ts:89:23)]
+
+Import trace:
+  Client Component Browser:
+    ./apps/www/src/styles/globals.css [Client Component Browser]
+    ./apps/www/src/app/layout.tsx [Server Component] @ http://localhost:3001/_next/static/chunks/0twy_next_dist_0w53qog._.js:2104
+[   64002ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3001/_next/static/chunks/0twy_next_dist_0w53qog._.js:1385

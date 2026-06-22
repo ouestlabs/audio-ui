@@ -2,7 +2,9 @@
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "knob-revolution-drag-demo",
   "description": "Knob with revolution (360°) drag sensitivity",
-  "registryDependencies": ["@audio/knob"],
+  "registryDependencies": [
+    "@audio/knob"
+  ],
   "files": [
     {
       "path": "src/registry/default/examples/knob-revolution-drag-demo.tsx",
@@ -11,6 +13,8 @@
       "target": "components/audio/examples/knob-revolution-drag-demo.tsx"
     }
   ],
-  "categories": ["knob"],
+  "categories": [
+    "knob"
+  ],
   "type": "registry:example"
 }

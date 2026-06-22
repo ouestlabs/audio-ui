@@ -2,8 +2,12 @@
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "store",
   "description": "Audio store",
-  "dependencies": ["zustand"],
-  "registryDependencies": ["@audio/html"],
+  "dependencies": [
+    "zustand"
+  ],
+  "registryDependencies": [
+    "@audio/html"
+  ],
   "files": [
     {
       "path": "src/registry/default/lib/audio-store.ts",
@@ -12,6 +16,10 @@
       "target": "lib/audio-store.ts"
     }
   ],
-  "categories": ["lib", "audio", "store"],
+  "categories": [
+    "lib",
+    "audio",
+    "store"
+  ],
   "type": "registry:lib"
 }
