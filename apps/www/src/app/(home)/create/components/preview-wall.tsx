@@ -9,8 +9,6 @@ import BlockWaveShaper from "@/registry/default/blocks/block-wave-shaper";
 
 type Card = { id: string; Component: ComponentType };
 
-// Hand-balanced columns: even heights, no gaps. The player widget sits directly
-// under the channel-strip filter (column B), per design.
 const COLUMNS: { key: string; cards: Card[] }[] = [
   {
     key: "a",

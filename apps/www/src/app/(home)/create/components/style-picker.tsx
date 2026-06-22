@@ -1,54 +1,46 @@
 "use client";
 
-import {
-  CircleIcon,
-  DiamondIcon,
-  DropIcon,
-  HexagonIcon,
-  type Icon,
-  SparkleIcon,
-  SquareIcon,
-  StarIcon,
-  SunIcon,
-  WaveformIcon,
-} from "@phosphor-icons/react";
+import { cloneElement } from "react";
 import { STYLES } from "@/registry/styles";
 import { useBuilder } from "./builder-provider";
-import { Picker } from "./picker";
-
-const STYLE_META: Record<string, { label: string; icon: Icon }> = {
-  "base-luma": { label: "Luma", icon: SunIcon },
-  "base-nova": { label: "Nova", icon: SparkleIcon },
-  "base-vega": { label: "Vega", icon: StarIcon },
-  "base-maia": { label: "Maia", icon: CircleIcon },
-  "base-lyra": { label: "Lyra", icon: WaveformIcon },
-  "base-mira": { label: "Mira", icon: HexagonIcon },
-  "base-rhea": { label: "Rhea", icon: DiamondIcon },
-  "base-sera": { label: "Sera", icon: DropIcon },
-};
-
-const meta = (style: string) =>
-  STYLE_META[style] ?? { label: style, icon: SquareIcon };
+import {
+  Picker,
+  PickerContent,
+  PickerRadioGroup,
+  PickerRadioItem,
+  PickerTrigger,
+} from "./picker";
 
 export function StylePicker() {
   const { params, setParams } = useBuilder();
-  const CurrentIcon = meta(params.style).icon;
+  const current = STYLES.find((s) => s.name === params.style) ?? STYLES[0];
 
   return (
-    <Picker
-      display={meta(params.style).label}
-      indicator={<CurrentIcon aria-hidden="true" className="size-4" />}
-      label="Style"
-      onValueChange={(value) => setParams({ style: value })}
-      options={STYLES.map((style) => {
-        const StyleIcon = meta(style).icon;
-        return {
-          value: style,
-          label: meta(style).label,
-          swatch: <StyleIcon aria-hidden="true" className="size-4 shrink-0" />,
-        };
-      })}
-      value={params.style}
-    />
+    <Picker>
+      <PickerTrigger>
+        <span className="flex min-w-0 flex-1 flex-col">
+          <span className="text-muted-foreground text-xs">Style</span>
+          <span className="truncate font-medium text-foreground text-sm">
+            {current.label}
+          </span>
+        </span>
+        {cloneElement(current.icon, {
+          className: "size-4 shrink-0 text-muted-foreground",
+        })}
+      </PickerTrigger>
+      <PickerContent>
+        <PickerRadioGroup
+          onValueChange={(value) => setParams({ style: value })}
+          value={params.style}
+        >
+          {STYLES.map(({ name, label, icon }) => (
+            <PickerRadioItem key={name} value={name}>
+              {cloneElement(icon, { className: "size-4 shrink-0" })}
+              {label}
+            </PickerRadioItem>
+          ))}
+        </PickerRadioGroup>
+      </PickerContent>
+    </Picker>
   );
 }

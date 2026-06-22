@@ -1,11 +1,8 @@
-import type { Registry } from "shadcn/schema";
+import type { RegistryItem } from "shadcn/schema";
+import { THEMES } from "@/registry/themes";
 
-import { baseColorsV4 } from "@/registry/base-colors";
-
-export const themes: Registry["items"] = Object.keys(baseColorsV4).map(
-  (color) => ({
-    name: `theme-${color}`,
-    type: "registry:theme",
-    cssVars: baseColorsV4[color as keyof typeof baseColorsV4],
-  })
-);
+export const themes: RegistryItem[] = THEMES.map((theme) => ({
+  name: `theme-${theme.name}`,
+  type: "registry:theme",
+  cssVars: theme.cssVars,
+}));

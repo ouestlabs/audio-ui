@@ -1,6 +1,6 @@
-import type { Registry } from "shadcn/schema";
+import type { RegistryItem } from "shadcn/schema";
 
-export const hooks: Registry["items"] = [
+export const hooks: RegistryItem[] = [
   {
     name: "hooks",
     type: "registry:hook",

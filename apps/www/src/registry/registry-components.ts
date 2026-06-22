@@ -1,6 +1,6 @@
-import type { Registry } from "shadcn/schema";
+import type { RegistryItem } from "shadcn/schema";
 
-export const components: Registry["items"] = [
+export const components: RegistryItem[] = [
   {
     name: "player",
     type: "registry:component",

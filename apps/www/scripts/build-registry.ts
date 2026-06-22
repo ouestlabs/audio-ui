@@ -171,7 +171,7 @@ try {
 
   const tempFiles: string[] = [];
 
-  for (const style of STYLES) {
+  for (const { name: style } of STYLES) {
     console.log(`💅 Building registry for style: ${style}...`);
     const tempFile = await buildStyleRegistryJson(style);
     tempFiles.push(tempFile);

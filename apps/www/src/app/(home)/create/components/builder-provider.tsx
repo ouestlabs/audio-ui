@@ -7,14 +7,14 @@ import {
   useContext,
   useEffect,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
 import { useTheme } from "@/hooks/use-theme";
-import { baseColorsOKLCH } from "@/registry/base-colors";
+import { buildRegistryTheme } from "@/registry/config";
 import {
   type BuilderSearchParams,
-  RADIUS_CSS,
   useBuilderSearchParams,
 } from "../lib/search-params";
 
@@ -24,20 +24,6 @@ const MANAGED_BODY_CLASS_PREFIXES = [
   "base-color-",
   "menu-color-",
   "menu-accent-",
-] as const;
-
-const ACCENT_VAR_KEYS = [
-  "primary",
-  "primary-foreground",
-  "ring",
-  "sidebar-primary",
-  "sidebar-primary-foreground",
-  "sidebar-ring",
-  "chart-1",
-  "chart-2",
-  "chart-3",
-  "chart-4",
-  "chart-5",
 ] as const;
 
 function removeManagedBodyClasses(body: HTMLElement) {
@@ -176,41 +162,25 @@ export function BuilderProvider({ children }: { children: ReactNode }) {
     setIsReady(true);
   }, [params.style, params.baseColor, params.menuColor, params.menuAccent]);
 
-  // Inject CSS vars
+  // Compute CSS vars from config
+  const registryTheme = useMemo(
+    () =>
+      buildRegistryTheme({
+        baseColor: params.baseColor,
+        theme: params.theme,
+        radius: params.radius,
+        style: params.style,
+      }),
+    [params.baseColor, params.theme, params.radius, params.style]
+  );
+
+  // Inject CSS vars synchronously before paint
   useLayoutEffect(() => {
-    const baseEntry =
-      baseColorsOKLCH[params.baseColor as keyof typeof baseColorsOKLCH];
-    if (!baseEntry) {
-      return;
-    }
-
-    const themeEntry =
-      baseColorsOKLCH[params.theme as keyof typeof baseColorsOKLCH];
-    const effectiveRadius =
-      params.style === "base-lyra" ? "none" : params.radius;
-    const radiusValue =
-      RADIUS_CSS[effectiveRadius as keyof typeof RADIUS_CSS] ??
-      RADIUS_CSS[params.radius];
-
-    const merge = (mode: "light" | "dark"): Record<string, string> => {
-      const vars: Record<string, string> = { ...baseEntry[mode] };
-      const themeVars = themeEntry?.[mode] as
-        | Record<string, string>
-        | undefined;
-      if (themeVars) {
-        for (const key of ACCENT_VAR_KEYS) {
-          if (themeVars[key]) {
-            vars[key] = themeVars[key];
-          }
-        }
-      }
-      vars.radius = radiusValue;
-      return vars;
-    };
+    const { theme: themeVars, light, dark } = registryTheme.cssVars;
 
     const cssText = [
-      buildCssRule(":root", merge("light")),
-      buildCssRule(".dark", merge("dark")),
+      buildCssRule(":root", { ...(themeVars ?? {}), ...(light ?? {}) }),
+      buildCssRule(".dark", dark),
     ].join("\n");
 
     let el = document.getElementById(
@@ -222,7 +192,7 @@ export function BuilderProvider({ children }: { children: ReactNode }) {
       document.head.appendChild(el);
     }
     el.textContent = cssText;
-  }, [params.baseColor, params.theme, params.radius, params.style]);
+  }, [registryTheme]);
 
   if (!isReady) {
     return null;

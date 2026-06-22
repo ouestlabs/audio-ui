@@ -1,3 +1,4 @@
+import { ArrowRightIcon } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
 import { memo } from "react";
 import { PixelBlast } from "@/app/(home)/elements/pixel-blast";
@@ -38,22 +39,9 @@ export const Hero = memo(function _Hero() {
             of shadcn/ui, it's designed for you to copy, paste, and own.
           </PageHeaderDescription>
           <PageActions className="pointer-events-auto">
-            <Button nativeButton={false} render={<Link href="/docs" />}>
-              Get Started
-            </Button>
-            <Button
-              nativeButton={false}
-              render={<Link href="/create" />}
-              variant="outline"
-            >
-              Create
-            </Button>
-            <Button
-              nativeButton={false}
-              render={<Link href="/docs/components" />}
-              variant="ghost"
-            >
-              View Components
+            <Button nativeButton={false} render={<Link href="/create" />}>
+              Build Your Own
+              <ArrowRightIcon aria-hidden="true" />
             </Button>
           </PageActions>
         </PageHeader>

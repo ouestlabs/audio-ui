@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { CommandMenu } from "@/components/command-menu";
 import { GithubStars } from "@/components/github-starts";
-import { ThemeSwitcher } from "@/components/theme/switcher";
+import { ThemeSwitcher } from "@/components/theme-switcher";
 import { appConfig } from "@/lib/config";
 import { Icons } from "@/lib/icons";
 import { source } from "@/lib/source";

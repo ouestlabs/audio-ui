@@ -19,7 +19,7 @@ export function LockButton({
     <button
       aria-label={locked ? `Unlock ${param}` : `Lock ${param}`}
       className={cn(
-        "-translate-y-1/2 absolute top-1/2 right-2 z-10",
+        "-translate-y-1/2 absolute top-1/2 right-9 z-10",
         "flex size-5 items-center justify-center rounded-md",
         "text-muted-foreground transition-opacity",
         "opacity-0 hover:bg-foreground/10 hover:text-foreground group-hover/picker:opacity-100",

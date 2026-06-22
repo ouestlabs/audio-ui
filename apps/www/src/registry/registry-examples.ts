@@ -1,6 +1,6 @@
-import type { Registry } from "shadcn/schema";
+import type { RegistryItem } from "shadcn/schema";
 
-export const examples: Registry["items"] = [
+export const examples: RegistryItem[] = [
   {
     name: "player-demo",
     description: "Audio player demo",

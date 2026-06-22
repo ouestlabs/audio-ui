@@ -1,6 +1,6 @@
-import type { Registry } from "shadcn/schema";
+import type { RegistryItem } from "shadcn/schema";
 
-export const lib: Registry["items"] = [
+export const lib: RegistryItem[] = [
   {
     name: "html",
     description: "HTML Audio Lib",

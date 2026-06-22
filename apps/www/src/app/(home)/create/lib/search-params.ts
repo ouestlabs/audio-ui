@@ -5,13 +5,11 @@ import {
   parseAsStringLiteral,
   useQueryStates,
 } from "nuqs";
-import { THEMES } from "@/lib/themes";
-import { baseColorsOKLCH } from "@/registry/base-colors";
+import { BASE_COLORS } from "@/registry/base-colors";
 import { STYLES } from "@/registry/styles";
+import { THEMES } from "@/registry/themes";
 
-export const BASE_COLOR_NAMES = Object.keys(baseColorsOKLCH) as Array<
-  keyof typeof baseColorsOKLCH
->;
+export const BASE_COLOR_NAMES = BASE_COLORS.map((t) => t.name);
 
 export const RADIUS_VALUES = ["none", "sm", "default", "lg"] as const;
 export type RadiusValue = (typeof RADIUS_VALUES)[number];
@@ -57,14 +55,13 @@ export const MENU_ACCENT_LABELS: Record<MenuAccentValue, string> = {
   bold: "Bold",
 };
 
-const THEME_NAMES = THEMES.map((t) => t.name) as [string, ...string[]];
-const STYLE_VALUES = [...STYLES] as [string, ...string[]];
-const BASE_COLORS = BASE_COLOR_NAMES as [string, ...string[]];
+const THEME_NAMES = THEMES.map((t) => t.name);
+const STYLE_VALUES = STYLES.map((s) => s.name);
 
 export const builderSearchParams = {
   style: parseAsStringLiteral(STYLE_VALUES).withDefault("base-luma"),
   theme: parseAsString.withDefault(THEME_NAMES[0] ?? "neutral"),
-  baseColor: parseAsStringLiteral(BASE_COLORS).withDefault("neutral"),
+  baseColor: parseAsStringLiteral(BASE_COLOR_NAMES).withDefault("neutral"),
   radius: parseAsStringLiteral(RADIUS_VALUES).withDefault("default"),
   font: parseAsString.withDefault("inter"),
   fontHeading: parseAsString.withDefault("inherit"),

@@ -23,6 +23,10 @@ export const appConfig = Object.freeze({
       href: "/blocks",
       label: "Blocks",
     },
+    {
+      href: "/create",
+      label: "Create",
+    },
   ],
 });
 
