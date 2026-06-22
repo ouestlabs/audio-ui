@@ -5,6 +5,17 @@
  */
 
 .style-base-vega {
+  /* Card: rounded-xl, shadow-xs, slightly stronger ring. */
+  [data-slot="card"] {
+    @apply rounded-xl shadow-xs ring-foreground/10 dark:ring-foreground/10;
+  }
+  [data-slot="card-header"] {
+    @apply rounded-t-xl;
+  }
+  [data-slot="card-footer"] {
+    @apply rounded-b-xl;
+  }
+
   /* XY-pad: matches vega card (rounded-xl, shadow-xs). */
   [data-slot="xypad"] {
     @apply rounded-xl border-foreground/10 shadow-xs hover:shadow-xs hover:ring-2 hover:ring-ring/50;

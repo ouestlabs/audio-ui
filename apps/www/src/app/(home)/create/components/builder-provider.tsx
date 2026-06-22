@@ -117,7 +117,12 @@ export function BuilderProvider({ children }: { children: ReactNode }) {
 
     const themeEntry =
       baseColorsOKLCH[params.theme as keyof typeof baseColorsOKLCH];
-    const radiusValue = RADIUS_CSS[params.radius];
+    // lyra is always sharp — force radius=none regardless of the picker value.
+    const effectiveRadius =
+      params.style === "base-lyra" ? "none" : params.radius;
+    const radiusValue =
+      RADIUS_CSS[effectiveRadius as keyof typeof RADIUS_CSS] ??
+      RADIUS_CSS[params.radius];
 
     const merge = (mode: "light" | "dark"): Record<string, string> => {
       const vars: Record<string, string> = { ...baseEntry[mode] };
@@ -149,7 +154,7 @@ export function BuilderProvider({ children }: { children: ReactNode }) {
       document.head.appendChild(el);
     }
     el.textContent = cssText;
-  }, [params.baseColor, params.theme, params.radius]);
+  }, [params.baseColor, params.theme, params.radius, params.style]);
 
   if (!isReady) {
     return null;

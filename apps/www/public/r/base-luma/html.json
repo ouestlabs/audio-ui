@@ -12,10 +12,6 @@
       "target": "lib/html-audio.ts"
     }
   ],
-  "categories": [
-    "lib",
-    "audio",
-    "html-audio"
-  ],
+  "categories": ["lib", "audio", "html-audio"],
   "type": "registry:lib"
 }

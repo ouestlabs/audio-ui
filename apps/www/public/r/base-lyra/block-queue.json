@@ -2,9 +2,7 @@
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "block-queue",
   "description": "Queue controls",
-  "registryDependencies": [
-    "@audio/player"
-  ],
+  "registryDependencies": ["@audio/player"],
   "files": [
     {
       "path": "src/registry/default/blocks/block-queue.tsx",
@@ -13,9 +11,6 @@
       "target": "components/audio/blocks/block-queue.tsx"
     }
   ],
-  "categories": [
-    "queue",
-    "ui"
-  ],
+  "categories": ["queue", "ui"],
   "type": "registry:block"
 }

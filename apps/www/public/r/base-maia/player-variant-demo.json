@@ -2,9 +2,7 @@
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "player-variant-demo",
   "description": "AudioPlayer variant options (default, outline, ghost)",
-  "registryDependencies": [
-    "@audio/player"
-  ],
+  "registryDependencies": ["@audio/player"],
   "files": [
     {
       "path": "src/registry/default/examples/player-variant-demo.tsx",
@@ -13,8 +11,6 @@
       "target": "components/audio/examples/player-variant-demo.tsx"
     }
   ],
-  "categories": [
-    "player"
-  ],
+  "categories": ["player"],
   "type": "registry:example"
 }

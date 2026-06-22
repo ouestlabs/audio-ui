@@ -2,9 +2,7 @@
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "player-queue-demo",
   "description": "Audio player with queue demo",
-  "registryDependencies": [
-    "@audio/player"
-  ],
+  "registryDependencies": ["@audio/player"],
   "files": [
     {
       "path": "src/registry/default/examples/player-queue-demo.tsx",
@@ -13,9 +11,6 @@
       "target": "components/audio/examples/player-queue-demo.tsx"
     }
   ],
-  "categories": [
-    "player",
-    "queue"
-  ],
+  "categories": ["player", "queue"],
   "type": "registry:example"
 }

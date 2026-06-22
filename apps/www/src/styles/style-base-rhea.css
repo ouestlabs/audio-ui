@@ -5,6 +5,17 @@
  */
 
 .style-base-rhea {
+  /* Card: very rounded (capped at 24px like shadcn rhea), shadow-sm. */
+  [data-slot="card"] {
+    @apply rounded-3xl shadow-sm ring-foreground/5 dark:ring-foreground/10;
+  }
+  [data-slot="card-header"] {
+    @apply rounded-t-3xl;
+  }
+  [data-slot="card-footer"] {
+    @apply rounded-b-3xl;
+  }
+
   /* XY-pad: matches rhea card (very rounded, shadow-sm). */
   [data-slot="xypad"] {
     @apply rounded-3xl border-transparent shadow-sm hover:shadow-sm;

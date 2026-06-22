@@ -2,9 +2,7 @@
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "knob-vertical-drag-demo",
   "description": "Knob with vertical fader-style pan via dragOptions.verticalPanEnabled",
-  "registryDependencies": [
-    "@audio/knob"
-  ],
+  "registryDependencies": ["@audio/knob"],
   "files": [
     {
       "path": "src/registry/default/examples/knob-vertical-drag-demo.tsx",
@@ -13,8 +11,6 @@
       "target": "components/audio/examples/knob-vertical-drag-demo.tsx"
     }
   ],
-  "categories": [
-    "knob"
-  ],
+  "categories": ["knob"],
   "type": "registry:example"
 }

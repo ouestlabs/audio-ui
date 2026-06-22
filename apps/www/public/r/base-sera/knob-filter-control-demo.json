@@ -2,9 +2,7 @@
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "knob-filter-control-demo",
   "description": "Knob component example with filter control",
-  "registryDependencies": [
-    "@audio/knob"
-  ],
+  "registryDependencies": ["@audio/knob"],
   "files": [
     {
       "path": "src/registry/default/examples/knob-filter-control-demo.tsx",
@@ -13,8 +11,6 @@
       "target": "components/audio/examples/knob-filter-control-demo.tsx"
     }
   ],
-  "categories": [
-    "knob"
-  ],
+  "categories": ["knob"],
   "type": "registry:example"
 }

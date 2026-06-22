@@ -5,6 +5,17 @@
  */
 
 .style-base-nova {
+  /* Card: rounded-xl, no shadow, slightly stronger ring. */
+  [data-slot="card"] {
+    @apply rounded-xl shadow-none ring-foreground/10 dark:ring-foreground/10;
+  }
+  [data-slot="card-header"] {
+    @apply rounded-t-xl;
+  }
+  [data-slot="card-footer"] {
+    @apply rounded-b-xl border-t bg-muted/50;
+  }
+
   /* XY-pad: matches nova card (rounded-xl, no shadow, subtle ring). */
   [data-slot="xypad"] {
     @apply rounded-xl border-foreground/10 shadow-none hover:shadow-none hover:ring-2 hover:ring-ring/50;

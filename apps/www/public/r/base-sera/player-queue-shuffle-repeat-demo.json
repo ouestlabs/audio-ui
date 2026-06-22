@@ -2,9 +2,7 @@
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "player-queue-shuffle-repeat-demo",
   "description": "Minimal queue with shuffle and repeat controls",
-  "registryDependencies": [
-    "@audio/player"
-  ],
+  "registryDependencies": ["@audio/player"],
   "files": [
     {
       "path": "src/registry/default/examples/player-queue-shuffle-repeat-demo.tsx",
@@ -13,8 +11,6 @@
       "target": "components/audio/examples/player-queue-shuffle-repeat-demo.tsx"
     }
   ],
-  "categories": [
-    "queue"
-  ],
+  "categories": ["queue"],
   "type": "registry:example"
 }

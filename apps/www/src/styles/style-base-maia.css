@@ -5,6 +5,17 @@
  */
 
 .style-base-maia {
+  /* Card: rounded-2xl, no shadow, slightly stronger ring. */
+  [data-slot="card"] {
+    @apply rounded-2xl shadow-none ring-foreground/10 dark:ring-foreground/10;
+  }
+  [data-slot="card-header"] {
+    @apply rounded-t-xl;
+  }
+  [data-slot="card-footer"] {
+    @apply rounded-b-xl;
+  }
+
   /* XY-pad: matches maia card (rounded-2xl, no shadow, subtle ring). */
   [data-slot="xypad"] {
     @apply rounded-2xl border-foreground/10 shadow-none hover:shadow-none hover:ring-2 hover:ring-ring/50;

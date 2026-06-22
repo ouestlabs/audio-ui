@@ -5,6 +5,17 @@
  */
 
 .style-base-sera {
+  /* Card: no rounding (square), shadow-sm. */
+  [data-slot="card"] {
+    @apply rounded-none shadow-sm ring-foreground/5 dark:ring-foreground/5;
+  }
+  [data-slot="card-header"] {
+    @apply rounded-none;
+  }
+  [data-slot="card-footer"] {
+    @apply rounded-none;
+  }
+
   /* XY-pad: matches sera card (no explicit rounded, shadow-sm). */
   [data-slot="xypad"] {
     @apply rounded-none border-transparent shadow-sm hover:shadow-sm hover:ring-1 hover:ring-ring/20;
