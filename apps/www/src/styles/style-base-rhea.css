@@ -1,11 +1,10 @@
 /*
- * base-rhea — generous rounded with shadow
- * Exact shadcn slider tokens: h-1 track, rounded-2xl, size-4 thumb, no border, shadow-md.
- * Audio/ui components only. Never shadcn-native primitives.
+ * base-rhea — "Generous rounded with shadow"
+ * Audio/ui components only (+ card). Never shadcn-native primitives beyond card.
  */
 
 .style-base-rhea {
-  /* Card: very rounded (capped at 24px like shadcn rhea), shadow-sm. */
+  /* Card: very rounded, shadow-sm, softer ring. */
   [data-slot="card"] {
     @apply rounded-3xl shadow-sm ring-foreground/5 dark:ring-foreground/10;
   }
@@ -18,40 +17,47 @@
 
   /* XY-pad: matches rhea card (very rounded, shadow-sm). */
   [data-slot="xypad"] {
-    @apply rounded-3xl border-transparent shadow-sm hover:shadow-sm;
+    @apply rounded-3xl border-transparent shadow-sm hover:shadow-sm hover:ring-2 hover:ring-ring/50;
   }
 
-  /* Knob: soft shadow, subtle ring. */
+  /* Knob: soft shadow, no visible border. */
   [data-slot="knob"] {
-    @apply border-transparent shadow-sm;
+    @apply border-transparent shadow-md;
   }
   [data-slot="knob-body"] {
-    @apply shadow-sm;
+    @apply shadow-md;
   }
 
-  /* Fader/Transport track: h-1, rounded-2xl, input/90 bg. */
+  /*
+   * Fader/Transport — same pill size as luma (h-4×w-6) with rounded-2xl + shadow-md.
+   * Familiar fader shape but pillow-rounded and floating. No border.
+   * Thumb marks show (full luma size).
+   */
   [data-slot="fader-track"],
   [data-slot="transport-track"] {
     @apply rounded-2xl bg-input/90;
   }
   [data-slot="fader-track"][data-orientation="horizontal"],
   [data-slot="transport-track"][data-orientation="horizontal"] {
-    height: 0.25rem;
+    height: 0.375rem;
   }
   [data-slot="fader-track"][data-orientation="vertical"],
   [data-slot="transport-track"][data-orientation="vertical"] {
-    width: 0.25rem;
+    width: 0.375rem;
   }
 
-  /* Fader/Transport thumb: size-4, rounded-2xl, no border, shadow-md. */
   [data-slot="fader-thumb"],
   [data-slot="transport-thumb"] {
-    width: 1rem;
-    height: 1rem;
-    @apply rounded-2xl border-transparent bg-white shadow-md ring-1 ring-black/10 hover:ring-4 hover:ring-ring/30 focus-visible:ring-4 focus-visible:ring-ring/30 dark:bg-card;
+    @apply rounded-2xl border-transparent bg-white shadow-md ring-1 ring-black/10 hover:ring-4 hover:ring-ring/40 focus-visible:ring-4 focus-visible:ring-ring/40 dark:bg-card;
   }
-  [data-slot="fader-thumb-inner"],
-  [data-slot="transport-thumb-inner"] {
-    display: none;
+  [data-slot="fader-thumb"][data-orientation="horizontal"],
+  [data-slot="transport-thumb"][data-orientation="horizontal"] {
+    height: 1rem;
+    width: 1.5rem;
+  }
+  [data-slot="fader-thumb"][data-orientation="vertical"],
+  [data-slot="transport-thumb"][data-orientation="vertical"] {
+    height: 1.5rem;
+    width: 1rem;
   }
 }

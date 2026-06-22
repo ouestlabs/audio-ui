@@ -1,11 +1,10 @@
 /*
- * base-sera — ultra-minimal, primary-colored thumb dot
- * Exact shadcn slider tokens: h-0.5 track, no rounded, size-3 bare bg-primary thumb.
- * Audio/ui components only. Never shadcn-native primitives.
+ * base-sera — "Ultra-minimal, accent-colored fader"
+ * Audio/ui components only (+ card). Never shadcn-native primitives beyond card.
  */
 
 .style-base-sera {
-  /* Card: no rounding (square), shadow-sm. */
+  /* Card: no rounding, shadow-sm, softer ring. */
   [data-slot="card"] {
     @apply rounded-none shadow-sm ring-foreground/5 dark:ring-foreground/5;
   }
@@ -16,12 +15,12 @@
     @apply rounded-none;
   }
 
-  /* XY-pad: matches sera card (no explicit rounded, shadow-sm). */
+  /* XY-pad: matches sera card (flat, shadow-sm). */
   [data-slot="xypad"] {
     @apply rounded-none border-transparent shadow-sm hover:shadow-sm hover:ring-1 hover:ring-ring/20;
   }
 
-  /* Knob: minimal, no border, soft shadow. */
+  /* Knob: minimal. */
   [data-slot="knob"] {
     @apply border-transparent shadow-xs;
   }
@@ -29,7 +28,11 @@
     @apply shadow-xs;
   }
 
-  /* Fader/Transport track: h-0.5 hairline, no rounding, input/50 bg. */
+  /*
+   * Fader/Transport — accent pill (h-4×w-5, rounded-sm, bg-primary), hairline track.
+   * Distinctive: primary-colored fader thumb on a nearly invisible track.
+   * Thumb marks hidden (minimalist look).
+   */
   [data-slot="fader-track"],
   [data-slot="transport-track"] {
     @apply rounded-none bg-input/50;
@@ -43,12 +46,19 @@
     width: 0.125rem;
   }
 
-  /* Fader/Transport thumb: size-3 bare primary dot, no border, no shadow, no ring base. */
   [data-slot="fader-thumb"],
   [data-slot="transport-thumb"] {
-    width: 0.75rem;
-    height: 0.75rem;
-    @apply rounded-full border-none bg-primary shadow-none ring-0 hover:ring-2 hover:ring-ring/30 focus-visible:ring-2 focus-visible:ring-ring/30 dark:bg-primary;
+    @apply rounded-sm border-none bg-primary shadow-none ring-0 hover:ring-2 hover:ring-primary/40 focus-visible:ring-2 focus-visible:ring-primary/40 dark:bg-primary;
+  }
+  [data-slot="fader-thumb"][data-orientation="horizontal"],
+  [data-slot="transport-thumb"][data-orientation="horizontal"] {
+    height: 1rem;
+    width: 1.25rem;
+  }
+  [data-slot="fader-thumb"][data-orientation="vertical"],
+  [data-slot="transport-thumb"][data-orientation="vertical"] {
+    height: 1.25rem;
+    width: 1rem;
   }
   [data-slot="fader-thumb-inner"],
   [data-slot="transport-thumb-inner"] {

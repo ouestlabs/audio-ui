@@ -1,7 +1,6 @@
 /*
  * base-vega — "Clean, neutral, and familiar"
- * Exact shadcn slider tokens: h-1.5 track, size-4 circle thumb, border-primary, shadow-sm.
- * Audio/ui components only. Never shadcn-native primitives.
+ * Audio/ui components only (+ card). Never shadcn-native primitives beyond card.
  */
 
 .style-base-vega {
@@ -29,29 +28,26 @@
     @apply shadow-sm;
   }
 
-  /* Fader/Transport track: h-1.5, muted bg. */
+  /*
+   * Fader/Transport — full luma pill size (h-4×w-6) with primary border + shadow-sm.
+   * Same familiar shape as luma, but clearly "vega" via primary accent border.
+   * Thumb marks show (enough room).
+   */
   [data-slot="fader-track"],
   [data-slot="transport-track"] {
     @apply rounded-full bg-muted;
   }
   [data-slot="fader-track"][data-orientation="horizontal"],
   [data-slot="transport-track"][data-orientation="horizontal"] {
-    height: 0.375rem;
+    height: 0.5rem;
   }
   [data-slot="fader-track"][data-orientation="vertical"],
   [data-slot="transport-track"][data-orientation="vertical"] {
-    width: 0.375rem;
+    width: 0.5rem;
   }
 
-  /* Fader/Transport thumb: size-4 circle, border-primary, shadow-sm. */
   [data-slot="fader-thumb"],
   [data-slot="transport-thumb"] {
-    width: 1rem;
-    height: 1rem;
-    @apply rounded-full border border-primary bg-white shadow-sm ring-ring/50 hover:ring-4 hover:ring-ring/50 focus-visible:ring-4 focus-visible:ring-ring/50 dark:bg-white;
-  }
-  [data-slot="fader-thumb-inner"],
-  [data-slot="transport-thumb-inner"] {
-    display: none;
+    @apply rounded-(--radius) border border-primary bg-white shadow-sm ring-ring/50 hover:ring-4 hover:ring-ring/50 focus-visible:ring-4 focus-visible:ring-ring/50 dark:bg-card;
   }
 }

@@ -1,7 +1,6 @@
 /*
- * base-mira — "Made for compact interfaces"
- * Exact shadcn slider tokens: h-1 track, rounded-md, size-3 thumb, border-ring, no shadow.
- * Audio/ui components only. Never shadcn-native primitives.
+ * base-mira — "Clean and minimal"
+ * Audio/ui components only (+ card). Never shadcn-native primitives beyond card.
  */
 
 .style-base-mira {
@@ -16,23 +15,27 @@
     @apply rounded-b-lg;
   }
 
-  /* XY-pad: matches mira card (rounded-lg, no shadow, subtle ring). */
+  /* XY-pad: matches mira card (rounded-lg, clean). */
   [data-slot="xypad"] {
-    @apply rounded-lg border-foreground/10 shadow-none hover:shadow-none hover:ring-2 hover:ring-ring/30;
+    @apply rounded-lg border-foreground/10 shadow-none hover:shadow-none hover:ring-2 hover:ring-ring/50;
   }
 
-  /* Knob: medium radius, flat. */
+  /* Knob: subtle, clean. */
   [data-slot="knob"] {
-    @apply border-foreground/15 shadow-none;
+    @apply border-foreground/10 shadow-none;
   }
   [data-slot="knob-body"] {
     @apply shadow-none;
   }
 
-  /* Fader/Transport track: h-1, rounded-md, muted bg. */
+  /*
+   * Fader/Transport — compact pill (h-3×w-5, rounded-md), border-ring, no shadow.
+   * Slightly smaller than luma, clean mira aesthetic.
+   * Thumb marks hidden (too small).
+   */
   [data-slot="fader-track"],
   [data-slot="transport-track"] {
-    @apply rounded-md bg-muted;
+    @apply rounded-sm bg-muted;
   }
   [data-slot="fader-track"][data-orientation="horizontal"],
   [data-slot="transport-track"][data-orientation="horizontal"] {
@@ -43,12 +46,19 @@
     width: 0.25rem;
   }
 
-  /* Fader/Transport thumb: size-3, rounded-md, border-ring, no shadow. */
   [data-slot="fader-thumb"],
   [data-slot="transport-thumb"] {
-    width: 0.75rem;
+    @apply rounded-md border border-ring bg-white shadow-none ring-ring/50 hover:ring-2 hover:ring-ring/50 focus-visible:ring-2 focus-visible:ring-ring/50 dark:bg-card;
+  }
+  [data-slot="fader-thumb"][data-orientation="horizontal"],
+  [data-slot="transport-thumb"][data-orientation="horizontal"] {
     height: 0.75rem;
-    @apply rounded-md border border-ring bg-white shadow-none ring-ring/30 hover:ring-2 hover:ring-ring/30 focus-visible:ring-2 focus-visible:ring-ring/30 dark:bg-white;
+    width: 1.25rem;
+  }
+  [data-slot="fader-thumb"][data-orientation="vertical"],
+  [data-slot="transport-thumb"][data-orientation="vertical"] {
+    height: 1.25rem;
+    width: 0.75rem;
   }
   [data-slot="fader-thumb-inner"],
   [data-slot="transport-thumb-inner"] {

@@ -1,11 +1,11 @@
 /*
  * base-lyra — "Boxy and sharp. For mono fonts."
- * Exact shadcn slider tokens: h-1 track, rounded-none (square), size-3 thumb, border-ring, no shadow.
- * Audio/ui components only. Never shadcn-native primitives.
+ * Audio/ui components only (+ card). Never shadcn-native primitives beyond card.
+ * Note: builder-provider forces --radius=0 when this style is active.
  */
 
 .style-base-lyra {
-  /* Card: fully square, no shadow, slightly stronger ring + footer separator. */
+  /* Card: fully square, no shadow + footer separator. */
   [data-slot="card"] {
     @apply rounded-none shadow-none ring-foreground/10 dark:ring-foreground/10;
   }
@@ -16,12 +16,12 @@
     @apply rounded-none border-t bg-muted/50;
   }
 
-  /* XY-pad: matches lyra card (rounded-none, no shadow, subtle ring). */
+  /* XY-pad: square, no shadow. */
   [data-slot="xypad"] {
     @apply rounded-none border-foreground/10 shadow-none hover:shadow-none hover:ring-1 hover:ring-ring/50;
   }
 
-  /* Knob: sharp — knob is always circular but border is square-styled. */
+  /* Knob: sharp — always circular but border is crisp. */
   [data-slot="knob"] {
     @apply border-foreground/15 shadow-none;
   }
@@ -29,26 +29,37 @@
     @apply shadow-none;
   }
 
-  /* Fader/Transport track: h-1, rounded-none (square), muted bg. */
+  /*
+   * Fader/Transport — boxy pill (h-4×w-5, rounded-none), border-ring, no shadow.
+   * The pill shape is preserved but with sharp corners — distinctly "lyra" audio fader.
+   * Thumb marks hidden (keeps the boxy look clean).
+   */
   [data-slot="fader-track"],
   [data-slot="transport-track"] {
     @apply rounded-none bg-muted;
   }
   [data-slot="fader-track"][data-orientation="horizontal"],
   [data-slot="transport-track"][data-orientation="horizontal"] {
-    height: 0.25rem;
+    height: 0.375rem;
   }
   [data-slot="fader-track"][data-orientation="vertical"],
   [data-slot="transport-track"][data-orientation="vertical"] {
-    width: 0.25rem;
+    width: 0.375rem;
   }
 
-  /* Fader/Transport thumb: size-3 square, border-ring, no shadow. */
   [data-slot="fader-thumb"],
   [data-slot="transport-thumb"] {
-    width: 0.75rem;
-    height: 0.75rem;
-    @apply rounded-none border border-ring bg-white shadow-none ring-ring/50 hover:ring-1 hover:ring-ring/50 focus-visible:ring-1 focus-visible:ring-ring/50 dark:bg-white;
+    @apply rounded-none border border-ring bg-white shadow-none ring-ring/50 hover:ring-1 hover:ring-ring/50 focus-visible:ring-1 focus-visible:ring-ring/50 dark:bg-card;
+  }
+  [data-slot="fader-thumb"][data-orientation="horizontal"],
+  [data-slot="transport-thumb"][data-orientation="horizontal"] {
+    height: 1rem;
+    width: 1.25rem;
+  }
+  [data-slot="fader-thumb"][data-orientation="vertical"],
+  [data-slot="transport-thumb"][data-orientation="vertical"] {
+    height: 1.25rem;
+    width: 1rem;
   }
   [data-slot="fader-thumb-inner"],
   [data-slot="transport-thumb-inner"] {

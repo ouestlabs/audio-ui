@@ -23,6 +23,7 @@ export function Picker<T extends string>({
   value,
   options,
   onValueChange,
+  disabled,
 }: {
   label: string;
   display: ReactNode;
@@ -30,14 +31,17 @@ export function Picker<T extends string>({
   value: T;
   options: PickerOption<T>[];
   onValueChange: (value: T) => void;
+  disabled?: boolean;
 }) {
   return (
     <Popover>
       <PopoverTrigger
         className={cn(
           "relative flex w-full items-center rounded-xl px-3 py-2 text-left ring-1 ring-foreground/10 transition-colors",
-          "hover:bg-foreground/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          "hover:bg-foreground/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+          disabled && "cursor-not-allowed opacity-60 hover:bg-transparent"
         )}
+        disabled={disabled}
       >
         <span className="flex min-w-0 flex-1 flex-col">
           <span className="text-muted-foreground text-xs">{label}</span>

@@ -1,7 +1,6 @@
 /*
  * base-maia — "Rounded, with generous spacing"
- * Exact shadcn slider tokens: h-3 thick track, rounded-4xl, size-4 thumb, border-primary, shadow-sm.
- * Audio/ui components only. Never shadcn-native primitives.
+ * Audio/ui components only (+ card). Never shadcn-native primitives beyond card.
  */
 
 .style-base-maia {
@@ -16,42 +15,49 @@
     @apply rounded-b-xl;
   }
 
-  /* XY-pad: matches maia card (rounded-2xl, no shadow, subtle ring). */
+  /* XY-pad: matches maia card (rounded-2xl, generous). */
   [data-slot="xypad"] {
     @apply rounded-2xl border-foreground/10 shadow-none hover:shadow-none hover:ring-2 hover:ring-ring/50;
   }
 
-  /* Knob: rounded, primary border. */
+  /* Knob: pillowed, primary border. */
   [data-slot="knob"] {
-    @apply border-primary/30 shadow-sm;
+    @apply border-primary/30 shadow-md;
   }
   [data-slot="knob-body"] {
-    @apply shadow-sm;
+    @apply shadow-md;
   }
 
-  /* Fader/Transport track: h-3 chunky, rounded-4xl, muted bg. */
+  /*
+   * Fader/Transport — generous pill (h-5×w-8), fully rounded, primary border + shadow-sm.
+   * Bigger and softer than luma — "more generous" audio fader.
+   * Thumb marks show (plenty of room).
+   */
   [data-slot="fader-track"],
   [data-slot="transport-track"] {
-    @apply rounded-4xl bg-muted;
+    @apply rounded-full bg-muted;
   }
   [data-slot="fader-track"][data-orientation="horizontal"],
   [data-slot="transport-track"][data-orientation="horizontal"] {
-    height: 0.75rem;
+    height: 0.625rem;
   }
   [data-slot="fader-track"][data-orientation="vertical"],
   [data-slot="transport-track"][data-orientation="vertical"] {
-    width: 0.75rem;
+    width: 0.625rem;
   }
 
-  /* Fader/Transport thumb: size-4, rounded-4xl, border-primary, shadow-sm. */
   [data-slot="fader-thumb"],
   [data-slot="transport-thumb"] {
-    width: 1rem;
-    height: 1rem;
-    @apply rounded-4xl border border-primary bg-white shadow-sm ring-ring/50 hover:ring-4 hover:ring-ring/50 focus-visible:ring-4 focus-visible:ring-ring/50 dark:bg-white;
+    @apply rounded-full border border-primary bg-white shadow-sm ring-ring/50 hover:ring-4 hover:ring-ring/50 focus-visible:ring-4 focus-visible:ring-ring/50 dark:bg-card;
   }
-  [data-slot="fader-thumb-inner"],
-  [data-slot="transport-thumb-inner"] {
-    display: none;
+  [data-slot="fader-thumb"][data-orientation="horizontal"],
+  [data-slot="transport-thumb"][data-orientation="horizontal"] {
+    height: 1.25rem;
+    width: 2rem;
+  }
+  [data-slot="fader-thumb"][data-orientation="vertical"],
+  [data-slot="transport-thumb"][data-orientation="vertical"] {
+    height: 2rem;
+    width: 1.25rem;
   }
 }
