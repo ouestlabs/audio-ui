@@ -44,3 +44,8 @@ test-results
 content-marketing
 # Cursor
 .cursor/commands
+
+# Claude Code
+.claude/worktrees/
+.playwright-mcp/
+plans/
