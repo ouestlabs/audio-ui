@@ -1,0 +1,34 @@
+"use client";
+
+import {
+  ChannelStrip,
+  ChannelStripContent,
+  ChannelStripFooter,
+  ChannelStripHeader,
+  ChannelStripSection,
+  ChannelStripValue,
+} from "@/registry/bases/base/ui/audio/elements/channel-strip";
+import { Transport } from "@/registry/bases/base/ui/audio/elements/transport";
+
+export default function BlockChannelStripTransport() {
+  return (
+    <ChannelStrip aria-label="Transport" orientation="horizontal">
+      <ChannelStripHeader>Track 1</ChannelStripHeader>
+      <ChannelStripContent>
+        <ChannelStripSection>
+          <Transport
+            aria-label="Seek"
+            bufferedValue={62}
+            onSeek={() => {
+              //
+            }}
+            value={35}
+          />
+        </ChannelStripSection>
+      </ChannelStripContent>
+      <ChannelStripFooter>
+        <ChannelStripValue>0:35 / 1:42</ChannelStripValue>
+      </ChannelStripFooter>
+    </ChannelStrip>
+  );
+}
