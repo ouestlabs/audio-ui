@@ -1,4 +1,4 @@
-export const BASE_STYLE_DIR = "default";
+export const BASE_STYLE_DIR = "bases/base";
 
 export const STYLES = [
   {

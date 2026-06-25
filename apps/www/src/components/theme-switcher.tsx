@@ -4,14 +4,14 @@ import { MoonIcon, SunIcon } from "@phosphor-icons/react/dist/ssr";
 import posthog from "posthog-js";
 import { useCallback } from "react";
 import { useTheme } from "@/hooks/use-theme";
-import { useSound } from "@/registry/default/hooks/use-sound";
-import { Button } from "@/registry/default/ui/button";
-import { Kbd, KbdGroup } from "@/registry/default/ui/kbd";
+import { useSound } from "@/registry/bases/base/hooks/use-sound";
+import { Button } from "@/registry/bases/base/ui/button";
+import { Kbd, KbdGroup } from "@/registry/bases/base/ui/kbd";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/registry/default/ui/tooltip";
+} from "@/registry/bases/base/ui/tooltip";
 
 export function ThemeSwitcher() {
   const { resolvedTheme, toggleTheme } = useTheme();

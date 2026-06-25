@@ -1,6 +1,6 @@
 import NextLink from "next/link";
 import type * as React from "react";
-import { cn } from "@/registry/default/lib/utils";
+import { cn } from "@/registry/bases/base/lib/utils";
 
 function Link({ className, ...props }: React.ComponentProps<typeof NextLink>) {
   return (

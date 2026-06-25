@@ -1,4 +1,4 @@
-import { cn } from "@/registry/default/lib/utils";
+import { cn } from "@/registry/bases/base/lib/utils";
 
 function PageHeader({
   className,

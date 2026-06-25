@@ -3,19 +3,19 @@ import { StarIcon } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useGithubStars } from "@/hooks/use-github";
 import { Icons } from "@/lib/icons";
-import { cn } from "@/registry/default/lib/utils";
-import { Button } from "@/registry/default/ui/button";
+import { cn } from "@/registry/bases/base/lib/utils";
+import { Button } from "@/registry/bases/base/ui/button";
 import {
   ButtonGroup,
   ButtonGroupText,
-} from "@/registry/default/ui/button-group";
-import { Kbd, KbdGroup } from "@/registry/default/ui/kbd";
-import { Skeleton } from "@/registry/default/ui/skeleton";
+} from "@/registry/bases/base/ui/button-group";
+import { Kbd, KbdGroup } from "@/registry/bases/base/ui/kbd";
+import { Skeleton } from "@/registry/bases/base/ui/skeleton";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/registry/default/ui/tooltip";
+} from "@/registry/bases/base/ui/tooltip";
 
 function GithubStars() {
   const { stargazersCount, isLoading } = useGithubStars(

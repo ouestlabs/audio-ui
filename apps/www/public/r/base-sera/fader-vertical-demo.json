@@ -5,8 +5,8 @@
   "registryDependencies": ["@audio/fader"],
   "files": [
     {
-      "path": "src/registry/default/examples/fader-vertical-demo.tsx",
-      "content": "import { Fader } from \"@/registry/default/ui/audio/elements/fader\";\n\nexport default function FaderVerticalDemo() {\n  return <Fader defaultValue={50} max={100} min={0} step={1} />;\n}\n",
+      "path": "src/registry/bases/base/examples/fader-vertical-demo.tsx",
+      "content": "import { Fader } from \"@/registry/bases/base/ui/audio/elements/fader\";\n\nexport default function FaderVerticalDemo() {\n  return <Fader defaultValue={50} max={100} min={0} step={1} />;\n}\n",
       "type": "registry:example",
       "target": "components/audio/examples/fader-vertical-demo.tsx"
     }

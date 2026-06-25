@@ -5,14 +5,14 @@ import Link from "next/link";
 import type React from "react";
 import { useMemo } from "react";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
-import { Button } from "@/registry/default/ui/button";
-import { ButtonGroup } from "@/registry/default/ui/button-group";
+import { Button } from "@/registry/bases/base/ui/button";
+import { ButtonGroup } from "@/registry/bases/base/ui/button-group";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/registry/default/ui/dropdown-menu";
+} from "@/registry/bases/base/ui/dropdown-menu";
 
 function generateLLMPrompt(url: string, markdownUrl?: string): string {
   const fullMarkdownUrl =

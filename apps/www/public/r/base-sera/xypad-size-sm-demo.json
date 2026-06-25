@@ -5,8 +5,8 @@
   "registryDependencies": ["@audio/xypad"],
   "files": [
     {
-      "path": "src/registry/default/examples/xypad-size-sm-demo.tsx",
-      "content": "import { XYPad } from \"@/registry/default/ui/audio/elements/xypad\";\n\nexport default function XYPadSizeSmDemo() {\n  return (\n    <XYPad\n      className=\"aspect-square\"\n      defaultValue={{ x: 40, y: 65 }}\n      size=\"sm\"\n    />\n  );\n}\n",
+      "path": "src/registry/bases/base/examples/xypad-size-sm-demo.tsx",
+      "content": "import { XYPad } from \"@/registry/bases/base/ui/audio/elements/xypad\";\n\nexport default function XYPadSizeSmDemo() {\n  return (\n    <XYPad\n      className=\"aspect-square\"\n      defaultValue={{ x: 40, y: 65 }}\n      size=\"sm\"\n    />\n  );\n}\n",
       "type": "registry:example",
       "target": "components/audio/examples/xypad-size-sm-demo.tsx"
     }

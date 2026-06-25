@@ -5,8 +5,8 @@
   "registryDependencies": ["@audio/player"],
   "files": [
     {
-      "path": "src/registry/default/examples/player-demo.tsx",
-      "content": "import {\n  AudioPlayer,\n  AudioPlayerControlBar,\n  AudioPlayerPlay,\n  AudioPlayerSeekBar,\n  AudioPlayerTimeDisplay,\n  AudioPlayerVolume,\n} from \"@/registry/default/ui/audio/player\";\n\nexport default function AudioDemoPlayer() {\n  return (\n    <AudioPlayer>\n      <AudioPlayerControlBar>\n        <AudioPlayerPlay />\n        <AudioPlayerSeekBar />\n        <AudioPlayerTimeDisplay />\n        <AudioPlayerVolume />\n      </AudioPlayerControlBar>\n    </AudioPlayer>\n  );\n}\n",
+      "path": "src/registry/bases/base/examples/player-demo.tsx",
+      "content": "import {\n  AudioPlayer,\n  AudioPlayerControlBar,\n  AudioPlayerPlay,\n  AudioPlayerSeekBar,\n  AudioPlayerTimeDisplay,\n  AudioPlayerVolume,\n} from \"@/registry/bases/base/ui/audio/player\";\n\nexport default function AudioDemoPlayer() {\n  return (\n    <AudioPlayer>\n      <AudioPlayerControlBar>\n        <AudioPlayerPlay />\n        <AudioPlayerSeekBar />\n        <AudioPlayerTimeDisplay />\n        <AudioPlayerVolume />\n      </AudioPlayerControlBar>\n    </AudioPlayer>\n  );\n}\n",
       "type": "registry:example",
       "target": "components/audio/examples/player-demo.tsx"
     }

@@ -1,7 +1,7 @@
 import { ArrowLeftIcon, ArrowRightIcon } from "@phosphor-icons/react/dist/ssr";
 import type { Item } from "fumadocs-core/page-tree";
 import Link from "next/link";
-import { Button } from "@/registry/default/ui/button";
+import { Button } from "@/registry/bases/base/ui/button";
 
 type DocFooterProps = {
   neighbours: {

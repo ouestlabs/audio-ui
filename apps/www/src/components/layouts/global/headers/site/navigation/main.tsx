@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import posthog from "posthog-js";
-import { cn } from "@/registry/default/lib/utils";
-import { Button } from "@/registry/default/ui/button";
+import { cn } from "@/registry/bases/base/lib/utils";
+import { Button } from "@/registry/bases/base/ui/button";
 
 function MainNav({
   items,

@@ -7,8 +7,8 @@ import {
 } from "@/components/layouts/global/headers/page";
 import { createMetadata } from "@/lib/metadata";
 import { getUniqueParticleCategories } from "@/lib/particle-categories";
-import { blocks } from "@/registry/default/blocks";
-import { cn } from "@/registry/default/lib/utils";
+import { blocks } from "@/registry/bases/base/blocks";
+import { cn } from "@/registry/bases/base/lib/utils";
 
 import { BlockDisplay } from "../block-display";
 import { CategoryNavigation } from "../category-navigation";

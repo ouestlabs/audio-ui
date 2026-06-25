@@ -1,0 +1,25 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "style",
+  "dependencies": [
+    "@audio-ui/react",
+    "@base-ui/react",
+    "class-variance-authority",
+    "@phosphor-icons/react"
+  ],
+  "devDependencies": ["tw-animate-css"],
+  "registryDependencies": ["utils"],
+  "files": [],
+  "cssVars": {},
+  "css": {
+    "@layer base": {
+      "*": {
+        "@apply border-border outline-ring/50": {}
+      },
+      "body": {
+        "@apply bg-background text-foreground": {}
+      }
+    }
+  },
+  "type": "registry:style"
+}

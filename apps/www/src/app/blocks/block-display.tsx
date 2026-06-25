@@ -9,9 +9,9 @@ import { appConfig, baseUrl } from "@/lib/config";
 import { highlightCode } from "@/lib/highlight-code";
 import { Icons } from "@/lib/icons";
 import { getRegistryItem } from "@/lib/registry";
-import { cn } from "@/registry/default/lib/utils";
-import { Button } from "@/registry/default/ui/button";
-import { ButtonGroup } from "@/registry/default/ui/button-group";
+import { cn } from "@/registry/bases/base/lib/utils";
+import { Button } from "@/registry/bases/base/ui/button";
+import { ButtonGroup } from "@/registry/bases/base/ui/button-group";
 import {
   Drawer,
   DrawerDescription,
@@ -20,7 +20,7 @@ import {
   DrawerPopup,
   DrawerTitle,
   DrawerTrigger,
-} from "@/registry/default/ui/drawer";
+} from "@/registry/bases/base/ui/drawer";
 
 export type Block = z.infer<typeof registryItemSchema> & {
   highlightedCode: string;

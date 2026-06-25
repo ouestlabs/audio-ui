@@ -5,8 +5,8 @@ import {
   CardContent,
   CardFooter,
   CardHeader,
-} from "@/registry/default/ui/card";
-import { FieldGroup, FieldSeparator } from "@/registry/default/ui/field";
+} from "@/registry/bases/base/ui/card";
+import { FieldGroup, FieldSeparator } from "@/registry/bases/base/ui/field";
 import { LocksProvider } from "../hooks/use-locks";
 import { MenuAccentPicker } from "./accent-picker";
 import { BaseColorPicker } from "./base-color-picker";
@@ -25,7 +25,7 @@ export function Customizer() {
   return (
     <LocksProvider>
       <Card
-        className="dark top-24 right-12 isolate z-10 max-h-full min-h-0 w-full self-start rounded-2xl bg-card/90 backdrop-blur-xl md:w-(--customizer-width)"
+        className="dark top-24 right-12 isolate z-10 max-h-full min-h-0 w-full gap-0! self-start rounded-2xl bg-card/90 backdrop-blur-xl md:w-(--customizer-width)"
         size="sm"
       >
         <CardHeader className="hidden items-center justify-between gap-2 border-b group-data-reversed/layout:flex-row-reverse md:flex">
@@ -33,7 +33,7 @@ export function Customizer() {
         </CardHeader>
 
         <CardContent className="no-scrollbar min-h-0 flex-1 overflow-x-auto overflow-y-hidden md:overflow-y-auto">
-          <FieldGroup className="**:data-[slot=field-separator]:-mx-4 flex-row gap-2.5 py-px **:data-[slot=field-separator]:w-auto md:flex-col md:gap-3.25">
+          <FieldGroup className="**:data-[slot=field-separator]:-mx-4 flex-row gap-2.5 py-4 **:data-[slot=field-separator]:w-auto md:flex-col md:gap-3.25">
             <StylePicker />
             <FieldSeparator className="hidden md:block" />
             <BaseColorPicker />
@@ -48,7 +48,7 @@ export function Customizer() {
             <MenuAccentPicker />
           </FieldGroup>
         </CardContent>
-        <CardFooter className="flex min-w-0 gap-2 md:flex-col md:rounded-b-none! md:**:[button,a]:w-full">
+        <CardFooter className="flex min-w-0 gap-2 border-t md:flex-col md:rounded-b-none! md:**:[button,a]:w-full">
           <CopyPreset />
           <RandomButton />
           <GetCode />

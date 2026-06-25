@@ -1,6 +1,6 @@
 import type * as React from "react";
 import { CodeFrame, CodeFrameHeader, CopyButton } from "@/components/md/code";
-import { cn } from "@/registry/default/lib/utils";
+import { cn } from "@/registry/bases/base/lib/utils";
 
 function Figure({ className, ...props }: React.ComponentProps<"figure">) {
   return <CodeFrame className={cn(className)} {...props} />;

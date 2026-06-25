@@ -23,7 +23,8 @@ function RadiusGlyph({ radius }: { radius: string }) {
 
 export function RadiusPicker() {
   const { params, setParams } = useBuilder();
-  const isLocked = params.style === "base-lyra";
+  const ZERO_RADIUS_STYLES = new Set(["base-lyra", "base-sera"]);
+  const isLocked = ZERO_RADIUS_STYLES.has(params.style);
   const effectiveRadius = isLocked ? "none" : params.radius;
 
   return (

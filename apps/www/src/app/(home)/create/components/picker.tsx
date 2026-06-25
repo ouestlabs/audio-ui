@@ -2,7 +2,7 @@
 
 import { Menu as MenuPrimitive } from "@base-ui/react/menu";
 import { CaretRightIcon, CheckIcon } from "@phosphor-icons/react";
-import { cn } from "@/registry/default/lib/utils";
+import { cn } from "@/registry/bases/base/lib/utils";
 
 function Picker({ ...props }: MenuPrimitive.Root.Props) {
   return <MenuPrimitive.Root data-slot="picker" {...props} />;
@@ -56,13 +56,12 @@ function PickerContent({
       >
         <MenuPrimitive.Popup
           className={cn(
-            "cn-menu-target no-scrollbar z-50 max-h-(--available-height)",
-            "w-[calc(var(--available-width)-(--spacing(6)))] min-w-32 md:w-52",
+            "no-scrollbar z-50 max-h-(--available-height)",
+            "w-[calc(var(--available-width)-(--spacing(6)))] min-w-32 md:w-48",
             "origin-(--transform-origin) translate-y-2",
             "overflow-y-auto overflow-x-hidden rounded-xl p-1.5 outline-none",
             "border-0 bg-neutral-950/80 text-neutral-100",
             "ring-1 ring-neutral-950/80 backdrop-blur-xl",
-            "dark:bg-neutral-800/90 dark:ring-neutral-700/50",
             "data-closed:overflow-hidden",
             className
           )}

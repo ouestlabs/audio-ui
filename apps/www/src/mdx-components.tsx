@@ -12,7 +12,7 @@ import { Mermaid } from "@/components/md/mermaid";
 import { Preview, Source } from "@/components/md/preview";
 import { Step, Steps } from "@/components/md/steps";
 import { Blockquote, Paragraph, Strong } from "@/components/md/text";
-import { cn } from "@/registry/default/lib/utils";
+import { cn } from "@/registry/bases/base/lib/utils";
 import {
   Table,
   TableBody,
@@ -22,12 +22,12 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/registry/default/ui/table";
+} from "@/registry/bases/base/ui/table";
 import {
   TabsContent as UITabsContent,
   TabsList as UITabsList,
   TabsTrigger as UITabsTrigger,
-} from "@/registry/default/ui/tabs";
+} from "@/registry/bases/base/ui/tabs";
 
 export function getMDXComponents(components?: MDXComponents): MDXComponents {
   return {

@@ -8,7 +8,7 @@ import {
   createViewport,
   META_THEME_COLORS,
 } from "@/lib/metadata";
-import { cn } from "@/registry/default/lib/utils";
+import { cn } from "@/registry/bases/base/lib/utils";
 import { Providers } from "./_providers";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });

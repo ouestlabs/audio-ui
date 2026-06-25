@@ -33,9 +33,8 @@ export function StylePicker() {
           onValueChange={(value) => setParams({ style: value })}
           value={params.style}
         >
-          {STYLES.map(({ name, label, icon }) => (
+          {STYLES.map(({ name, label }) => (
             <PickerRadioItem key={name} value={name}>
-              {cloneElement(icon, { className: "size-4 shrink-0" })}
               {label}
             </PickerRadioItem>
           ))}

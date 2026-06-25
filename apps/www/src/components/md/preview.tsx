@@ -5,16 +5,16 @@ import { CodeBlock } from "@/components/md/block";
 import { Collapse, CopyButton } from "@/components/md/code";
 import { getRegistryItem } from "@/lib/registry";
 import { Index } from "@/registry/__index__";
-import { cn } from "@/registry/default/lib/utils";
-import { Button } from "@/registry/default/ui/button";
-import { CollapsibleTrigger } from "@/registry/default/ui/collapsible";
-import { Separator } from "@/registry/default/ui/separator";
+import { cn } from "@/registry/bases/base/lib/utils";
+import { Button } from "@/registry/bases/base/ui/button";
+import { CollapsibleTrigger } from "@/registry/bases/base/ui/collapsible";
+import { Separator } from "@/registry/bases/base/ui/separator";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "@/registry/default/ui/tabs";
+} from "@/registry/bases/base/ui/tabs";
 
 // Source helpers
 

@@ -13,6 +13,7 @@ function ThemeProvider({
       attribute="class"
       defaultTheme="system"
       disableTransitionOnChange
+      enableColorScheme
       enableSystem
       {...props}
     >

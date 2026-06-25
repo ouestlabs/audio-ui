@@ -1,39 +1,163 @@
 /*
- * base-lyra — "Boxy and sharp. For mono fonts."
- * Audio/ui components only (+ card). Never shadcn-native primitives beyond card.
+ * base-lyra — "Hexagonal precision"
  * Note: builder-provider forces --radius=0 when this style is active.
  */
 
+@layer components {
+  .style-base-lyra {
+    /* ── Spacing tokens ────────────────────────────────────────────── */
+    --spacing-container: 1rem;
+    --spacing-container-sm: 0.75rem;
+    --spacing-gap: 1rem;
+    --spacing-gap-sm: 0.75rem;
+
+    /* ── Generic UI cn-* tokens ─────────────────────────────────────────── */
+
+    .cn-button {
+      @apply rounded-none border border-transparent bg-clip-padding font-medium text-xs focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring/50 active:not-aria-[haspopup]:translate-y-px aria-invalid:border-destructive aria-invalid:ring-1 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg:not([class*='size-'])]:size-3.5;
+    }
+    .cn-button-variant-default {
+      @apply bg-primary text-primary-foreground hover:bg-primary/80;
+    }
+    .cn-button-variant-outline {
+      @apply border-border bg-background hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:bg-transparent dark:hover:bg-input/30;
+    }
+    .cn-button-variant-secondary {
+      @apply bg-secondary text-secondary-foreground hover:bg-secondary/80 aria-expanded:bg-secondary aria-expanded:text-secondary-foreground;
+    }
+    .cn-button-variant-ghost {
+      @apply hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50;
+    }
+    .cn-button-variant-destructive {
+      @apply bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:focus-visible:ring-destructive/40 dark:hover:bg-destructive/30;
+    }
+    .cn-button-variant-link {
+      @apply text-primary underline-offset-4 hover:underline;
+    }
+    .cn-button-size-default {
+      @apply h-8 gap-1.5 px-3 has-data-[icon=inline-end]:pr-2.5 has-data-[icon=inline-start]:pl-2.5;
+    }
+    .cn-button-size-xs {
+      @apply h-6 gap-1 px-2 has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3;
+    }
+    .cn-button-size-sm {
+      @apply h-7 gap-1 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2;
+    }
+    .cn-button-size-lg {
+      @apply h-9 gap-1.5 px-4 has-data-[icon=inline-end]:pr-3 has-data-[icon=inline-start]:pl-3;
+    }
+    .cn-button-size-icon {
+      @apply size-8;
+    }
+    .cn-button-size-icon-xs {
+      @apply size-6 [&_svg:not([class*='size-'])]:size-3;
+    }
+    .cn-button-size-icon-sm {
+      @apply size-7;
+    }
+    .cn-button-size-icon-lg {
+      @apply size-9;
+    }
+
+    /* ── Card ───────────────────────────────────────────────────────── */
+
+    .cn-card {
+      @apply overflow-hidden rounded-none bg-card text-card-foreground text-sm shadow-none ring-1 ring-foreground/10 dark:ring-foreground/10 has-[>img:first-child]:pt-0;
+      padding-block: var(--spacing-container);
+      gap: var(--spacing-gap);
+
+      &[data-size="sm"] {
+        padding-block: var(--spacing-container-sm);
+        gap: var(--spacing-gap-sm);
+      }
+    }
+    .cn-card-header {
+      @apply auto-rows-min items-start gap-1.5 rounded-none has-data-[slot=card-action]:grid-cols-[1fr_auto] has-data-[slot=card-description]:grid-rows-[auto_auto];
+      padding-inline: var(--spacing-container);
+
+      &.border-b {
+        padding-bottom: var(--spacing-container);
+      }
+      .group\/card[data-size="sm"] & {
+        padding-inline: var(--spacing-container-sm);
+
+        &.border-b {
+          padding-bottom: var(--spacing-container-sm);
+        }
+      }
+    }
+    .cn-card-title {
+      @apply font-heading font-medium text-base;
+    }
+    .cn-card-description {
+      @apply text-muted-foreground text-sm;
+    }
+    .cn-card-content {
+      padding-inline: var(--spacing-container);
+
+      .group\/card[data-size="sm"] & {
+        padding-inline: var(--spacing-container-sm);
+      }
+    }
+    .cn-card-footer {
+      @apply rounded-none border-t bg-muted/50;
+      padding-inline: var(--spacing-container);
+
+      &.border-t {
+        padding-top: var(--spacing-container);
+      }
+      .group\/card[data-size="sm"] & {
+        padding-inline: var(--spacing-container-sm);
+
+        &.border-t {
+          padding-top: var(--spacing-container-sm);
+        }
+      }
+    }
+
+    .cn-input {
+      @apply h-8 rounded-none border border-transparent bg-input/50 px-3 py-1 text-xs transition-[color,box-shadow,background-color] file:h-6 file:font-medium file:text-foreground file:text-xs focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-1 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40;
+    }
+
+    .cn-badge {
+      @apply h-5 rounded-none border border-transparent bg-clip-padding px-2 py-0.5 font-medium text-xs focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40;
+    }
+    .cn-badge-variant-default {
+      @apply bg-primary text-primary-foreground [a]:hover:bg-primary/80;
+    }
+    .cn-badge-variant-secondary {
+      @apply bg-secondary text-secondary-foreground [a]:hover:bg-secondary/80;
+    }
+    .cn-badge-variant-destructive {
+      @apply bg-destructive/10 text-destructive focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:focus-visible:ring-destructive/40 [a]:hover:bg-destructive/20;
+    }
+    .cn-badge-variant-outline {
+      @apply border-border text-foreground [a]:hover:bg-muted [a]:hover:text-muted-foreground;
+    }
+    .cn-badge-variant-ghost {
+      @apply hover:bg-muted hover:text-muted-foreground dark:hover:bg-muted/50;
+    }
+    .cn-badge-variant-link {
+      @apply text-primary underline-offset-4 hover:underline;
+    }
+
+    .cn-font-heading {
+      @apply font-heading font-medium text-base;
+    }
+
+    /* ── Channel Strip ───────────────────────────────────────────────── */
+
+    .cn-channel-strip {
+      @apply rounded-none bg-card shadow-none ring-1 ring-foreground/10 dark:ring-foreground/10;
+      padding: var(--spacing-container);
+    }
+  }
+}
+
+/* ── Audio — unlayered to override component utilities ───────────────────── */
 .style-base-lyra {
-  /* Card: fully square, no shadow + footer separator. */
-  [data-slot="card"] {
-    @apply rounded-none shadow-none ring-foreground/10 dark:ring-foreground/10;
-  }
-  [data-slot="card-header"] {
-    @apply rounded-none;
-  }
-  [data-slot="card-footer"] {
-    @apply rounded-none border-t bg-muted/50;
-  }
+  /* ── Fader / Transport ───────────────────────────────────────────── */
 
-  /* XY-pad: square, no shadow. */
-  [data-slot="xypad"] {
-    @apply rounded-none border-foreground/10 shadow-none hover:shadow-none hover:ring-1 hover:ring-ring/50;
-  }
-
-  /* Knob: sharp — always circular but border is crisp. */
-  [data-slot="knob"] {
-    @apply border-foreground/15 shadow-none;
-  }
-  [data-slot="knob-body"] {
-    @apply shadow-none;
-  }
-
-  /*
-   * Fader/Transport — boxy pill (h-4×w-5, rounded-none), border-ring, no shadow.
-   * The pill shape is preserved but with sharp corners — distinctly "lyra" audio fader.
-   * Thumb marks hidden (keeps the boxy look clean).
-   */
   [data-slot="fader-track"],
   [data-slot="transport-track"] {
     @apply rounded-none bg-muted;
@@ -49,7 +173,7 @@
 
   [data-slot="fader-thumb"],
   [data-slot="transport-thumb"] {
-    @apply rounded-none border border-ring bg-white shadow-none ring-ring/50 hover:ring-1 hover:ring-ring/50 focus-visible:ring-1 focus-visible:ring-ring/50 dark:bg-card;
+    @apply rounded-none border border-ring bg-white shadow-none transition-[color,box-shadow,background-color] hover:ring-1 hover:ring-ring/50 focus-visible:ring-1 focus-visible:ring-ring/50 dark:bg-card;
   }
   [data-slot="fader-thumb"][data-orientation="horizontal"],
   [data-slot="transport-thumb"][data-orientation="horizontal"] {
@@ -60,5 +184,20 @@
   [data-slot="transport-thumb"][data-orientation="vertical"] {
     height: 1.25rem;
     width: 1rem;
+  }
+
+  /* ── Knob ────────────────────────────────────────────────────────── */
+
+  [data-slot="knob"] {
+    @apply border border-foreground/15 shadow-none ring-0 focus-within:border-ring focus-within:ring-1 focus-within:ring-ring/50 hover:ring-1 hover:ring-ring/50;
+  }
+  [data-slot="knob-body"] {
+    @apply rounded-full bg-card shadow-none ring-1 ring-foreground/10 dark:ring-foreground/10;
+  }
+
+  /* ── XYPad ───────────────────────────────────────────────────────── */
+
+  [data-slot="xypad"] {
+    @apply rounded-none border border-foreground/10 bg-card shadow-none ring-0 hover:border-ring/50 hover:ring-1 hover:ring-ring/50 focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring/50;
   }
 }

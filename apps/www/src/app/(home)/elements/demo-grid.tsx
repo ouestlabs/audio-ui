@@ -1,10 +1,10 @@
-import BlockPlayerWidget from "@/registry/default/blocks/block-player-widget";
-import BlockPocketSynth from "@/registry/default/blocks/block-pocket-synth";
-import BlockGranularSynth from "@/registry/default/blocks/block-wave-shaper";
-import PlayerDemo from "@/registry/default/examples/player-demo";
-import PlayerQueueDemo from "@/registry/default/examples/player-queue-demo";
-import AudioTrackListGridDemo from "@/registry/default/examples/player-track-list-grid-demo";
-import AudioTrackSortableListGridDemo from "@/registry/default/examples/player-track-sortable-list-grid-demo";
+import BlockPlayerWidget from "@/registry/bases/base/blocks/block-player-widget";
+import BlockPocketSynth from "@/registry/bases/base/blocks/block-pocket-synth";
+import BlockGranularSynth from "@/registry/bases/base/blocks/block-wave-shaper";
+import PlayerDemo from "@/registry/bases/base/examples/player-demo";
+import PlayerQueueDemo from "@/registry/bases/base/examples/player-queue-demo";
+import AudioTrackListGridDemo from "@/registry/bases/base/examples/player-track-list-grid-demo";
+import AudioTrackSortableListGridDemo from "@/registry/bases/base/examples/player-track-sortable-list-grid-demo";
 
 export function DemoGrid() {
   return (

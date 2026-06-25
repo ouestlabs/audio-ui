@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowsClockwiseIcon } from "@phosphor-icons/react";
-import { Button } from "@/registry/default/ui/button";
+import { Button } from "@/registry/bases/base/ui/button";
 import { STYLES } from "@/registry/styles";
 import { THEMES } from "@/registry/themes";
 import { useLocks } from "../hooks/use-locks";

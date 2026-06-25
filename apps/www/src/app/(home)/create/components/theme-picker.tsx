@@ -24,6 +24,7 @@ const ACCENT_THEMES = THEMES.filter(
 export function ThemePicker() {
   const { params, setParams } = useBuilder();
   const current = THEMES.find((theme) => theme.name === params.theme);
+  const themeIsBaseColor = BASE_COLOR_NAMES.has(params.theme as never);
 
   return (
     <div className="group/picker relative">
@@ -35,13 +36,11 @@ export function ThemePicker() {
               {current?.title ?? params.theme}
             </span>
           </span>
-          {current && (
-            <Swatch
-              color={
-                current.cssVars.dark?.primary ?? current.cssVars.light?.primary
-              }
-            />
-          )}
+          <Swatch
+            color={
+              themeIsBaseColor ? "var(--muted-foreground)" : "var(--primary)"
+            }
+          />
         </PickerTrigger>
         <PickerContent className="max-h-96">
           <PickerRadioGroup

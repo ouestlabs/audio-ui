@@ -5,26 +5,26 @@ import React from "react";
 import { useConfig } from "@/hooks/use-config";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 import { getIconForLanguageExtension } from "@/lib/icons";
-import { cn } from "@/registry/default/lib/utils";
-import { Button } from "@/registry/default/ui/button";
+import { cn } from "@/registry/bases/base/lib/utils";
+import { Button } from "@/registry/bases/base/ui/button";
 import {
   CollapsibleContent,
   CollapsibleTrigger,
   Collapsible as UICollapsible,
-} from "@/registry/default/ui/collapsible";
-import { Kbd, KbdGroup } from "@/registry/default/ui/kbd";
-import { ScrollArea } from "@/registry/default/ui/scroll-area";
+} from "@/registry/bases/base/ui/collapsible";
+import { Kbd, KbdGroup } from "@/registry/bases/base/ui/kbd";
+import { ScrollArea } from "@/registry/bases/base/ui/scroll-area";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "@/registry/default/ui/tabs";
+} from "@/registry/bases/base/ui/tabs";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/registry/default/ui/tooltip";
+} from "@/registry/bases/base/ui/tooltip";
 
 function CodeFrame({ ...props }: React.ComponentProps<"figure">) {
   return <figure data-rehype-pretty-code-figure {...props} />;

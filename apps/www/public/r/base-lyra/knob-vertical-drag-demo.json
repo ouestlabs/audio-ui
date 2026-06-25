@@ -5,8 +5,8 @@
   "registryDependencies": ["@audio/knob"],
   "files": [
     {
-      "path": "src/registry/default/examples/knob-vertical-drag-demo.tsx",
-      "content": "\"use client\";\n\nimport { useState } from \"react\";\nimport { Knob } from \"@/registry/default/ui/audio/elements/knob\";\n\nexport default function KnobVerticalDragDemo() {\n  const [value, setValue] = useState(50);\n\n  return (\n    <div className=\"flex flex-col items-center gap-2\">\n      <Knob\n        dragOptions={{ verticalPanEnabled: true }}\n        dragSensitivity=\"arc\"\n        max={100}\n        min={0}\n        onValueChange={setValue}\n        step={1}\n        value={value}\n      />\n      <output\n        aria-live=\"polite\"\n        className=\"font-mono text-foreground text-sm tabular-nums\"\n      >\n        {value}\n      </output>\n    </div>\n  );\n}\n",
+      "path": "src/registry/bases/base/examples/knob-vertical-drag-demo.tsx",
+      "content": "\"use client\";\n\nimport { useState } from \"react\";\nimport { Knob } from \"@/registry/bases/base/ui/audio/elements/knob\";\n\nexport default function KnobVerticalDragDemo() {\n  const [value, setValue] = useState(50);\n\n  return (\n    <div className=\"flex flex-col items-center gap-2\">\n      <Knob\n        dragOptions={{ verticalPanEnabled: true }}\n        dragSensitivity=\"arc\"\n        max={100}\n        min={0}\n        onValueChange={setValue}\n        step={1}\n        value={value}\n      />\n      <output\n        aria-live=\"polite\"\n        className=\"font-mono text-foreground text-sm tabular-nums\"\n      >\n        {value}\n      </output>\n    </div>\n  );\n}\n",
       "type": "registry:example",
       "target": "components/audio/examples/knob-vertical-drag-demo.tsx"
     }

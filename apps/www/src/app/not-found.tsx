@@ -7,7 +7,7 @@ import {
   PageHeaderHeading,
 } from "@/components/layouts/global/headers/page";
 
-import { Button } from "@/registry/default/ui/button";
+import { Button } from "@/registry/bases/base/ui/button";
 
 export const metadata: Metadata = {
   title: "Page Not Found",

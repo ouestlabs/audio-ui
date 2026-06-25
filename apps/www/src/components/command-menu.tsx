@@ -15,8 +15,8 @@ import { useConfig } from "@/hooks/use-config";
 import { useIsMac } from "@/hooks/use-is-mac";
 import { useMutationObserver } from "@/hooks/use-mutation-observer";
 import type { source } from "@/lib/source";
-import { cn } from "@/registry/default/lib/utils";
-import { Button } from "@/registry/default/ui/button";
+import { cn } from "@/registry/bases/base/lib/utils";
+import { Button } from "@/registry/bases/base/ui/button";
 import {
   Command,
   CommandEmpty,
@@ -24,7 +24,7 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/registry/default/ui/command";
+} from "@/registry/bases/base/ui/command";
 import {
   Dialog,
   DialogContent,
@@ -32,16 +32,16 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/registry/default/ui/dialog";
+} from "@/registry/bases/base/ui/dialog";
 import {
   Empty,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from "@/registry/default/ui/empty";
-import { Kbd, KbdGroup } from "@/registry/default/ui/kbd";
-import { Separator } from "@/registry/default/ui/separator";
+} from "@/registry/bases/base/ui/empty";
+import { Kbd, KbdGroup } from "@/registry/bases/base/ui/kbd";
+import { Separator } from "@/registry/bases/base/ui/separator";
 
 function setupCommandMenuKeydown(options: {
   copyPayload: string;

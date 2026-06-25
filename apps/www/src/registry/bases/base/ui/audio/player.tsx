@@ -989,7 +989,7 @@ function AudioTrack({
       <ItemMedia>{renderTrackMedia(media, track, index)}</ItemMedia>
       <ItemContent className="min-w-0 flex-1 gap-0 overflow-hidden">
         <div className="flex items-center gap-1.5">
-          <ItemTitle>{track.title}</ItemTitle>
+          <ItemTitle className="line-clamp-1">{track.title}</ItemTitle>
           {isLiveTrack && (
             <Badge variant="destructive">
               <BroadcastIcon weight="fill" />
@@ -997,7 +997,7 @@ function AudioTrack({
             </Badge>
           )}
         </div>
-        <ItemDescription>{track.artist}</ItemDescription>
+        <ItemDescription className="truncate">{track.artist}</ItemDescription>
       </ItemContent>
       {!isLiveTrack && trackDuration !== undefined && (
         <ItemContent className="flex-none text-center">

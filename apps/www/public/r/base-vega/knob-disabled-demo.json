@@ -5,8 +5,8 @@
   "registryDependencies": ["@audio/knob"],
   "files": [
     {
-      "path": "src/registry/default/examples/knob-disabled-demo.tsx",
-      "content": "import { Knob } from \"@/registry/default/ui/audio/elements/knob\";\n\nexport default function KnobDisabledDemo() {\n  return (\n    <div className=\"flex flex-wrap items-center gap-8\">\n      <div className=\"flex flex-col items-center gap-2\">\n        <Knob defaultValue={38} disabled max={100} min={0} step={1} />\n        <p className=\"text-center text-muted-foreground text-xs\">Disabled</p>\n      </div>\n\n      <div className=\"flex flex-col items-center gap-2\">\n        <Knob defaultValue={38} max={100} min={0} step={1} />\n        <p className=\"text-center text-muted-foreground text-xs\">Enabled</p>\n      </div>\n    </div>\n  );\n}\n",
+      "path": "src/registry/bases/base/examples/knob-disabled-demo.tsx",
+      "content": "import { Knob } from \"@/registry/bases/base/ui/audio/elements/knob\";\n\nexport default function KnobDisabledDemo() {\n  return (\n    <div className=\"flex flex-wrap items-center gap-8\">\n      <div className=\"flex flex-col items-center gap-2\">\n        <Knob defaultValue={38} disabled max={100} min={0} step={1} />\n        <p className=\"text-center text-muted-foreground text-xs\">Disabled</p>\n      </div>\n\n      <div className=\"flex flex-col items-center gap-2\">\n        <Knob defaultValue={38} max={100} min={0} step={1} />\n        <p className=\"text-center text-muted-foreground text-xs\">Enabled</p>\n      </div>\n    </div>\n  );\n}\n",
       "type": "registry:example",
       "target": "components/audio/examples/knob-disabled-demo.tsx"
     }

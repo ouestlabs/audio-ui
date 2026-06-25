@@ -6,6 +6,7 @@ export type DesignSystemConfig = {
   theme: string;
   radius: string;
   style: string;
+  menuAccent?: string;
 };
 
 const RADIUS_CSS = Object.freeze({
@@ -30,11 +31,12 @@ const ACCENT_VAR_KEYS = [
 ] as const;
 
 export function buildRegistryTheme(config: DesignSystemConfig) {
-  const { baseColor, theme, radius, style } = config;
+  const { baseColor, theme, radius, style, menuAccent } = config;
 
   const baseEntry = BASE_COLORS.find((t) => t.name === baseColor)?.cssVars;
   const themeEntry = THEMES.find((t) => t.name === theme)?.cssVars;
-  const effectiveRadius = style === "base-lyra" ? "none" : radius;
+  const ZERO_RADIUS_STYLES = new Set(["base-lyra", "base-sera"]);
+  const effectiveRadius = ZERO_RADIUS_STYLES.has(style) ? "none" : radius;
   const radiusValue =
     RADIUS_CSS[effectiveRadius as keyof typeof RADIUS_CSS] ??
     RADIUS_CSS.default;
@@ -50,6 +52,10 @@ export function buildRegistryTheme(config: DesignSystemConfig) {
           vars[key] = val;
         }
       }
+    }
+    if (menuAccent === "bold") {
+      vars.accent = vars.primary;
+      vars["accent-foreground"] = vars["primary-foreground"];
     }
     return vars;
   };

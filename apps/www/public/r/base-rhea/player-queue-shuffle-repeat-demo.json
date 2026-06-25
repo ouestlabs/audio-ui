@@ -5,8 +5,8 @@
   "registryDependencies": ["@audio/player"],
   "files": [
     {
-      "path": "src/registry/default/examples/player-queue-shuffle-repeat-demo.tsx",
-      "content": "import {\n  AudioPlayer,\n  AudioPlayerControlBar,\n  AudioQueue,\n  AudioQueueRepeatMode,\n  AudioQueueShuffle,\n} from \"@/registry/default/ui/audio/player\";\n\nexport default function AudioQueueShuffleRepeatDemo() {\n  return (\n    <AudioPlayer className=\"w-max\">\n      <AudioPlayerControlBar>\n        <AudioQueueShuffle />\n        <AudioQueueRepeatMode />\n        <AudioQueue />\n      </AudioPlayerControlBar>\n    </AudioPlayer>\n  );\n}\n",
+      "path": "src/registry/bases/base/examples/player-queue-shuffle-repeat-demo.tsx",
+      "content": "import {\n  AudioPlayer,\n  AudioPlayerControlBar,\n  AudioQueue,\n  AudioQueueRepeatMode,\n  AudioQueueShuffle,\n} from \"@/registry/bases/base/ui/audio/player\";\n\nexport default function AudioQueueShuffleRepeatDemo() {\n  return (\n    <AudioPlayer className=\"w-max\">\n      <AudioPlayerControlBar>\n        <AudioQueueShuffle />\n        <AudioQueueRepeatMode />\n        <AudioQueue />\n      </AudioPlayerControlBar>\n    </AudioPlayer>\n  );\n}\n",
       "type": "registry:example",
       "target": "components/audio/examples/player-queue-shuffle-repeat-demo.tsx"
     }

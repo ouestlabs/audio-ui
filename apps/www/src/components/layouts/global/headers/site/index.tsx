@@ -5,7 +5,7 @@ import { ThemeSwitcher } from "@/components/theme-switcher";
 import { appConfig } from "@/lib/config";
 import { Icons } from "@/lib/icons";
 import { source } from "@/lib/source";
-import { Button } from "@/registry/default/ui/button";
+import { Button } from "@/registry/bases/base/ui/button";
 import { SiteConfig } from "./config";
 import { MainNav } from "./navigation/main";
 import { MobileNav } from "./navigation/mobile";

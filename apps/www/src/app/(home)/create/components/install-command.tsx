@@ -2,26 +2,28 @@
 
 import { CheckIcon, CopyIcon } from "@phosphor-icons/react";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
-import { cn } from "@/registry/default/lib/utils";
-import { Button } from "@/registry/default/ui/button";
+import { cn } from "@/registry/bases/base/lib/utils";
+import { Button } from "@/registry/bases/base/ui/button";
+import { getPresetCode } from "../lib/preset-code";
 import { useBuilder } from "./builder-provider";
 
 export function InstallCommand() {
   const { params } = useBuilder();
-  const command = `npx shadcn@latest add https://audio-ui.xyz/r/${params.style}/player.json`;
+  const presetCode = getPresetCode(params);
+  const command = `npx shadcn@latest add --preset ${presetCode}`;
   const { isCopied, copyToClipboard } = useCopyToClipboard({ timeout: 2000 });
 
   return (
     <div className="flex flex-col gap-2">
       <p className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
-        Install command
+        Preset
       </p>
       <div className="flex items-center gap-2 overflow-hidden rounded-lg border bg-muted/50 px-3 py-2">
         <code className="min-w-0 flex-1 truncate font-mono text-xs">
           {command}
         </code>
         <Button
-          aria-label={isCopied ? "Copied" : "Copy install command"}
+          aria-label={isCopied ? "Copied" : "Copy preset command"}
           className={cn("shrink-0")}
           onClick={() => copyToClipboard(command)}
           size="icon-sm"

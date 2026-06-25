@@ -7,8 +7,6 @@ import { META_THEME_COLORS } from "@/lib/metadata";
 
 function useTheme() {
   const { setTheme, resolvedTheme } = useNextTheme();
-  const [, startTransition] = React.useTransition();
-
   const setMetaColor = React.useCallback((color: string) => {
     document
       .querySelector('meta[name="theme-color"]')
@@ -18,15 +16,13 @@ function useTheme() {
   const metaColor =
     resolvedTheme !== "dark" ? META_THEME_COLORS.light : META_THEME_COLORS.dark;
 
-  function toggleTheme() {
-    startTransition(() => {
-      const newTheme = resolvedTheme === "dark" ? "light" : "dark";
-      setTheme(newTheme);
-      setMetaColor(
-        newTheme === "dark" ? META_THEME_COLORS.dark : META_THEME_COLORS.light
-      );
-    });
-  }
+  const toggleTheme = React.useCallback(() => {
+    const newTheme = resolvedTheme === "dark" ? "light" : "dark";
+    setTheme(newTheme);
+    setMetaColor(
+      newTheme === "dark" ? META_THEME_COLORS.dark : META_THEME_COLORS.light
+    );
+  }, [resolvedTheme, setTheme, setMetaColor]);
 
   return {
     setTheme,

@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { PAGES_NEW } from "@/lib/docs";
 import { source } from "@/lib/source";
-import { Badge } from "@/registry/default/ui/badge";
+import { Badge } from "@/registry/bases/base/ui/badge";
 
 export function ComponentsList() {
   const components = source.pageTree.children.find(

@@ -45,7 +45,7 @@ export async function getRegistryItem(name: string) {
 
 async function getFileContent(file: { path: string; type?: string }) {
   // Resolve path relative to process.cwd()
-  // Paths from index are either "src/registry/default/..." or absolute paths
+  // Paths from index are either "src/registry/bases/base/..." or absolute paths
   const resolvedPath = path.isAbsolute(file.path)
     ? file.path
     : path.join(process.cwd(), file.path);

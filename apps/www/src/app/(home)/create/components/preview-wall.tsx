@@ -1,11 +1,14 @@
 import type { ComponentType } from "react";
-import BlockChannelStripKnobMulti from "@/registry/default/blocks/block-channel-strip-knob-multi";
-import BlockChannelStripTransport from "@/registry/default/blocks/block-channel-strip-transport";
-import BlockPlayer from "@/registry/default/blocks/block-player";
-import BlockPlayerWidget from "@/registry/default/blocks/block-player-widget";
-import BlockPocketSynth from "@/registry/default/blocks/block-pocket-synth";
-import BlockTrackSortableListGrid from "@/registry/default/blocks/block-track-sortable-list-grid";
-import BlockWaveShaper from "@/registry/default/blocks/block-wave-shaper";
+import BlockChannelStripFaderMulti from "@/registry/bases/base/blocks/block-channel-strip-fader-multi";
+import BlockChannelStripHorizontal from "@/registry/bases/base/blocks/block-channel-strip-horizontal";
+import BlockChannelStripKnobMulti from "@/registry/bases/base/blocks/block-channel-strip-knob-multi";
+import BlockChannelStripKnobPanWidth from "@/registry/bases/base/blocks/block-channel-strip-knob-pan-width";
+import BlockChannelStripXypadFilter from "@/registry/bases/base/blocks/block-channel-strip-xypad-filter";
+import BlockChannelStripXypadReverb from "@/registry/bases/base/blocks/block-channel-strip-xypad-reverb";
+import BlockPlayer from "@/registry/bases/base/blocks/block-player";
+import BlockPlayerWidget from "@/registry/bases/base/blocks/block-player-widget";
+import BlockPocketSynth from "@/registry/bases/base/blocks/block-pocket-synth";
+import BlockWaveShaper from "@/registry/bases/base/blocks/block-wave-shaper";
 
 type Card = { id: string; Component: ComponentType };
 
@@ -14,22 +17,28 @@ const COLUMNS: { key: string; cards: Card[] }[] = [
     key: "a",
     cards: [
       { id: "pocket-synth", Component: BlockPocketSynth },
-      { id: "knob-multi", Component: BlockChannelStripKnobMulti },
+      { id: "player-widget", Component: BlockPlayerWidget },
+      { id: "fader-multi", Component: BlockChannelStripFaderMulti },
     ],
   },
   {
     key: "b",
     cards: [
-      { id: "player-widget", Component: BlockPlayerWidget },
-      { id: "track-sortable-grid", Component: BlockTrackSortableListGrid },
-      { id: "transport", Component: BlockChannelStripTransport },
+      { id: "wave-shaper", Component: BlockWaveShaper },
+      { id: "player", Component: BlockPlayer },
+      { id: "knob-multi", Component: BlockChannelStripKnobMulti },
+      {
+        id: "channel-strip-horizontal",
+        Component: BlockChannelStripHorizontal,
+      },
     ],
   },
   {
     key: "c",
     cards: [
-      { id: "wave-shaper", Component: BlockWaveShaper },
-      { id: "player", Component: BlockPlayer },
+      { id: "knob-pan-width", Component: BlockChannelStripKnobPanWidth },
+      { id: "xypad-filter", Component: BlockChannelStripXypadFilter },
+      { id: "xypad-reverb", Component: BlockChannelStripXypadReverb },
     ],
   },
 ];

@@ -3,8 +3,11 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { LayoutProvider } from "@/hooks/use-layout";
-import { AudioProvider, demoTracks } from "@/registry/default/ui/audio/player";
-import { Toaster } from "@/registry/default/ui/sonner";
+import {
+  AudioProvider,
+  demoTracks,
+} from "@/registry/bases/base/ui/audio/player";
+import { Toaster } from "@/registry/bases/base/ui/sonner";
 import { ThemeProvider } from "./theme";
 
 const queryClient = new QueryClient();

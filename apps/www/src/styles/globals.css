@@ -4,6 +4,8 @@
 @import "./rehype.css";
 @import "./utilities.css";
 @import "shadcn/tailwind.css";
+@import "./style-base.css";
+@import "./style-base-luma.css";
 @import "./style-base-nova.css";
 @import "./style-base-vega.css";
 @import "./style-base-maia.css";

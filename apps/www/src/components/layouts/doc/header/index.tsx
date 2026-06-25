@@ -5,7 +5,7 @@ import Link from "next/link";
 import { absoluteUrl } from "@/lib/config";
 import type { source } from "@/lib/source";
 import { getGitHubUrl, getMarkdownUrl } from "@/lib/source";
-import { Button } from "@/registry/default/ui/button";
+import { Button } from "@/registry/bases/base/ui/button";
 import { DocsCopyPage } from "./copy-page";
 
 type DocHeaderProps = {

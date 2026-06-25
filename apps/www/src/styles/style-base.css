@@ -1,0 +1,185 @@
+/* ── Spacing tokens (default = luma scale) ──────────────────────────────── */
+:root {
+  --spacing-container: 1.5rem;
+  --spacing-container-sm: 1rem;
+  --spacing-gap: 1.5rem;
+  --spacing-gap-sm: 1rem;
+}
+
+/*
+ * Global cn-* base tokens — default (luma) visual style.
+ * Applied whenever no .style-base-X class is on the body (e.g. docs, standalone use).
+ * Per-style CSS files override these via .style-base-X .cn-* selectors.
+ *
+ * Uses @layer components so Tailwind utilities (rounded-r-none, etc.) from
+ * ButtonGroup and other composites always win at equal specificity.
+ */
+
+@layer components {
+  /* ── Button ─────────────────────────────────────────────────────────────── */
+
+  .cn-button {
+    @apply rounded-4xl border border-transparent bg-clip-padding font-medium text-sm focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30 active:not-aria-[haspopup]:translate-y-px aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg:not([class*='size-'])]:size-4;
+  }
+
+  .cn-button-variant-default {
+    @apply bg-primary text-primary-foreground hover:bg-primary/80;
+  }
+  .cn-button-variant-outline {
+    @apply border-border bg-background hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:bg-transparent dark:hover:bg-input/30;
+  }
+  .cn-button-variant-secondary {
+    @apply bg-secondary text-secondary-foreground hover:bg-secondary/80 aria-expanded:bg-secondary aria-expanded:text-secondary-foreground;
+  }
+  .cn-button-variant-ghost {
+    @apply hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50;
+  }
+  .cn-button-variant-destructive {
+    @apply bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:focus-visible:ring-destructive/40 dark:hover:bg-destructive/30;
+  }
+  .cn-button-variant-link {
+    @apply text-primary underline-offset-4 hover:underline;
+  }
+
+  .cn-button-size-default {
+    @apply h-9 gap-1.5 px-3 has-data-[icon=inline-end]:pr-2.5 has-data-[icon=inline-start]:pl-2.5;
+  }
+  .cn-button-size-xs {
+    @apply h-6 gap-1 px-2.5 text-xs has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 [&_svg:not([class*='size-'])]:size-3;
+  }
+  .cn-button-size-sm {
+    @apply h-8 gap-1 px-3 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2;
+  }
+  .cn-button-size-lg {
+    @apply h-10 gap-1.5 px-4 has-data-[icon=inline-end]:pr-3 has-data-[icon=inline-start]:pl-3;
+  }
+  .cn-button-size-icon {
+    @apply size-9;
+  }
+  .cn-button-size-icon-xs {
+    @apply size-6 [&_svg:not([class*='size-'])]:size-3;
+  }
+  .cn-button-size-icon-sm {
+    @apply size-8;
+  }
+  .cn-button-size-icon-lg {
+    @apply size-10;
+  }
+
+  /* ── Card ──────────────────────────────────────────────────────────────── */
+
+  .cn-card {
+    @apply overflow-hidden rounded-2xl bg-card text-card-foreground text-sm shadow-md ring-1 ring-foreground/5 dark:ring-foreground/10 has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-t-2xl *:[img:last-child]:rounded-b-2xl;
+    padding-block: var(--spacing-container);
+    gap: var(--spacing-gap);
+
+    &[data-size="sm"] {
+      padding-block: var(--spacing-container-sm);
+      gap: var(--spacing-gap-sm);
+    }
+  }
+  .cn-card-header {
+    @apply auto-rows-min items-start gap-1.5 rounded-t-2xl has-data-[slot=card-action]:grid-cols-[1fr_auto] has-data-[slot=card-description]:grid-rows-[auto_auto];
+    padding-inline: var(--spacing-container);
+
+    &.border-b {
+      padding-bottom: var(--spacing-container);
+    }
+    .group\/card[data-size="sm"] & {
+      padding-inline: var(--spacing-container-sm);
+
+      &.border-b {
+        padding-bottom: var(--spacing-container-sm);
+      }
+    }
+  }
+  .cn-card-title {
+    @apply font-heading font-medium text-base;
+  }
+  .cn-card-description {
+    @apply text-muted-foreground text-sm;
+  }
+  .cn-card-content {
+    padding-inline: var(--spacing-container);
+
+    .group\/card[data-size="sm"] & {
+      padding-inline: var(--spacing-container-sm);
+    }
+  }
+  .cn-card-footer {
+    @apply rounded-b-2xl;
+    padding-inline: var(--spacing-container);
+
+    &.border-t {
+      padding-top: var(--spacing-container);
+    }
+    .group\/card[data-size="sm"] & {
+      padding-inline: var(--spacing-container-sm);
+
+      &.border-t {
+        padding-top: var(--spacing-container-sm);
+      }
+    }
+  }
+
+  /* ── Input ───────────────────────────────────────────────────────────────── */
+
+  .cn-input {
+    @apply h-9 rounded-3xl border border-transparent bg-input/50 px-3 py-1 text-base transition-[color,box-shadow,background-color] file:h-7 file:font-medium file:text-foreground file:text-sm focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 md:text-sm dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40;
+  }
+
+  /* ── Badge ───────────────────────────────────────────────────────────────── */
+
+  .cn-badge {
+    @apply h-5 rounded-3xl border border-transparent bg-clip-padding px-2 py-0.5 font-medium text-xs focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40;
+  }
+  .cn-badge-variant-default {
+    @apply bg-primary text-primary-foreground [a]:hover:bg-primary/80;
+  }
+  .cn-badge-variant-secondary {
+    @apply bg-secondary text-secondary-foreground [a]:hover:bg-secondary/80;
+  }
+  .cn-badge-variant-destructive {
+    @apply bg-destructive/10 text-destructive focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:focus-visible:ring-destructive/40 [a]:hover:bg-destructive/20;
+  }
+  .cn-badge-variant-outline {
+    @apply border-border text-foreground [a]:hover:bg-muted [a]:hover:text-muted-foreground;
+  }
+  .cn-badge-variant-ghost {
+    @apply hover:bg-muted hover:text-muted-foreground dark:hover:bg-muted/50;
+  }
+  .cn-badge-variant-link {
+    @apply text-primary underline-offset-4 hover:underline;
+  }
+
+  /* ── Heading font ────────────────────────────────────────────────────────── */
+
+  .cn-font-heading {
+    @apply font-heading font-medium text-base;
+  }
+
+  /* ── Channel Strip ───────────────────────────────────────────────────── */
+
+  .cn-channel-strip {
+    @apply rounded-2xl bg-card shadow-md ring-1 ring-foreground/5 dark:ring-foreground/10;
+    padding: var(--spacing-container);
+  }
+
+  /* ── Dropdown / Select content ───────────────────────────────────────── */
+
+  .cn-dropdown-menu-content {
+    @apply rounded-2xl bg-popover p-1.5 text-popover-foreground shadow-lg ring-1 ring-foreground/5 dark:ring-foreground/10;
+  }
+
+  .cn-select-content {
+    @apply rounded-2xl bg-popover text-popover-foreground shadow-lg ring-1 ring-foreground/5 dark:ring-foreground/10;
+  }
+} /* @layer components */
+
+/* ── Menu translucent effect ────────────────────────────────────────────────
+   Applied by the builder when menuColor = "default-translucent" or
+   "inverted-translucent". Must be outside @layer to beat component utilities.
+──────────────────────────────────────────────────────────────────────────── */
+.cn-menu-translucent {
+  @apply animate-none! relative bg-popover/70 before:pointer-events-none before:absolute before:inset-0 before:-z-1 before:rounded-[inherit] before:backdrop-blur-2xl before:backdrop-saturate-150 **:data-[slot$=-item]:focus:bg-foreground/10 **:data-[slot$=-item]:data-highlighted:bg-foreground/10 **:data-[slot$=-separator]:bg-foreground/5 **:data-[slot$=-trigger]:focus:bg-foreground/10 **:data-[slot$=-trigger]:aria-expanded:bg-foreground/10! **:data-[variant=destructive]:focus:bg-foreground/10! **:data-[variant=destructive]:text-accent-foreground! **:data-[variant=destructive]:**:text-accent-foreground!;
+}

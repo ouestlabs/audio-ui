@@ -6,15 +6,15 @@ import posthog from "posthog-js";
 import React from "react";
 import { PAGES_NEW } from "@/lib/docs";
 import type { source } from "@/lib/source";
-import { useIsMobile } from "@/registry/default/hooks/use-mobile";
-import { cn } from "@/registry/default/lib/utils";
-import { Button } from "@/registry/default/ui/button";
+import { useIsMobile } from "@/registry/bases/base/hooks/use-mobile";
+import { cn } from "@/registry/bases/base/lib/utils";
+import { Button } from "@/registry/bases/base/ui/button";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/registry/default/ui/popover";
-import { ScrollArea } from "@/registry/default/ui/scroll-area";
+} from "@/registry/bases/base/ui/popover";
+import { ScrollArea } from "@/registry/bases/base/ui/scroll-area";
 
 const TOP_LEVEL_SECTIONS = [
   { name: "Get Started", href: "/docs" },

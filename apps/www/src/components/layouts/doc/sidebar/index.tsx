@@ -13,7 +13,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/registry/default/ui/sidebar";
+} from "@/registry/bases/base/ui/sidebar";
 
 function DocsSidebar({
   tree,

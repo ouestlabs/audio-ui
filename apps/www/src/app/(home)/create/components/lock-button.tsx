@@ -1,7 +1,7 @@
 "use client";
 
 import { LockIcon, LockOpenIcon } from "@phosphor-icons/react";
-import { cn } from "@/registry/default/lib/utils";
+import { cn } from "@/registry/bases/base/lib/utils";
 import { useLocks } from "../hooks/use-locks";
 import type { BuilderSearchParams } from "../lib/search-params";
 

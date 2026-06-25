@@ -5,8 +5,8 @@
   "registryDependencies": ["@audio/fader"],
   "files": [
     {
-      "path": "src/registry/default/examples/fader-horizontal-demo.tsx",
-      "content": "import { Fader } from \"@/registry/default/ui/audio/elements/fader\";\n\nexport default function FaderHorizontalDemo() {\n  return (\n    <Fader\n      defaultValue={50}\n      max={100}\n      min={0}\n      orientation=\"horizontal\"\n      step={1}\n    />\n  );\n}\n",
+      "path": "src/registry/bases/base/examples/fader-horizontal-demo.tsx",
+      "content": "import { Fader } from \"@/registry/bases/base/ui/audio/elements/fader\";\n\nexport default function FaderHorizontalDemo() {\n  return (\n    <Fader\n      defaultValue={50}\n      max={100}\n      min={0}\n      orientation=\"horizontal\"\n      step={1}\n    />\n  );\n}\n",
       "type": "registry:example",
       "target": "components/audio/examples/fader-horizontal-demo.tsx"
     }

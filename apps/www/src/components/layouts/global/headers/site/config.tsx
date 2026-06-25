@@ -2,8 +2,8 @@
 
 import { SlideshowIcon } from "@phosphor-icons/react";
 import { useLayout } from "@/hooks/use-layout";
-import { cn } from "@/registry/default/lib/utils";
-import { Button } from "@/registry/default/ui/button";
+import { cn } from "@/registry/bases/base/lib/utils";
+import { Button } from "@/registry/bases/base/ui/button";
 
 export function SiteConfig({ className }: React.ComponentProps<typeof Button>) {
   const { layout, setLayout } = useLayout();

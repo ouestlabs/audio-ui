@@ -22,24 +22,24 @@ export const Index: Record<string, any> = {`;
     const resolveFiles =
       item.files?.map(
         (file: (typeof item.files)[number]) =>
-          `src/registry/default/${file.path}`
+          `src/registry/bases/base/${file.path}`
       ) ?? [];
     if (!resolveFiles) {
       continue;
     }
 
     const componentPath = item.files?.[0]?.path
-      ? `@/registry/default/${item.files[0].path}`
+      ? `@/registry/bases/base/${item.files[0].path}`
       : "";
 
     index += `
   "${item.name}": {
     name: "${item.name}",
-    description: "${item.description ?? ""}",
+    description: "${(item as Record<string, unknown>).description ?? ""}",
     type: "${item.type}",
     registryDependencies: ${JSON.stringify(item.registryDependencies)},
     files: [${item.files?.map((file: (typeof item.files)[number]) => {
-      const filePath = `src/registry/default/${typeof file === "string" ? file : file.path}`;
+      const filePath = `src/registry/bases/base/${typeof file === "string" ? file : file.path}`;
       const resolvedFilePath = path.resolve(filePath);
       return typeof file === "string"
         ? `"${resolvedFilePath}"`
@@ -58,8 +58,8 @@ export const Index: Record<string, any> = {`;
     })`
         : "null"
     },
-    categories: ${JSON.stringify(item.categories)},
-    meta: ${JSON.stringify(item.meta)},
+    categories: ${JSON.stringify((item as Record<string, unknown>).categories)},
+    meta: ${JSON.stringify((item as Record<string, unknown>).meta)},
   },`;
   }
 
