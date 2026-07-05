@@ -1,0 +1,13 @@
+{
+  "root": true,
+  "title": "Base UI",
+  "pages": [
+    "player",
+    "knob",
+    "fader",
+    "xypad",
+    "transport",
+    "channel-strip",
+    "sortable-list"
+  ]
+}

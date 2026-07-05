@@ -1,0 +1,151 @@
+---
+title: Transport
+description: Timeline transport control for playback progress and scrubbing, with buffered range visualization, keyboard, wheel, and pointer interactions.
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="transport-demo" />
+
+Timeline control for playback progress (current value + buffered range). The registry component wraps `Transport` primitives from `@audio-ui/react` with audio-focused defaults for player seek bars and scrub interactions.
+
+## Overview
+
+- **Interaction model:** Pointer drag on track/thumb, wheel stepping, keyboard nudging, and commit callbacks.
+- **Visual model:** Base track + buffered range + played range + thumb.
+- **Playback UX:** Supports `freezeValuesWhileDragging` to avoid jitter/flicker while scrubbing.
+- **Accessibility:** Thumb is exposed as `role="slider"` with `aria-valuenow`, `aria-valuemin`, and `aria-valuemax`.
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">CLI</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash component
+npx shadcn@latest add @audio/transport
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the following dependencies:</Step>
+
+```bash
+npm install @audio-ui/react
+```
+
+<Step>Copy and paste the following code into your project.</Step>
+
+<ComponentSource
+  styleName="base-nova"
+  name="transport"
+  title="components/audio/transport.tsx"
+/>
+
+<Step>Update the import paths to match your project setup.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import { Transport } from "@/components/audio/transport";
+```
+
+**Controlled** (typical in player UIs):
+
+```tsx
+const [progress, setProgress] = useState(42);
+
+<Transport
+  aria-label="Playback position"
+  bufferedValue={78}
+  onSeek={setProgress}
+  value={progress}
+/>
+```
+
+## Interaction
+
+### Pointer
+
+| Behavior | Details |
+| -------- | ------- |
+| **Track click / drag** | Updates value from pointer position along the rail. |
+| **Thumb drag** | Continuous scrubbing, clamped to `min...max`. |
+| **Commit event** | `onValueCommit` fires when drag interaction ends (primitive-level callback). |
+
+### Keyboard
+
+Focused thumb supports:
+
+| Key | Action |
+| --- | ------ |
+| `ArrowUp` / `ArrowRight` | Increase by `step` |
+| `ArrowDown` / `ArrowLeft` | Decrease by `step` |
+| `PageUp` | Increase by `step × 10` |
+| `PageDown` | Decrease by `step × 10` |
+| `Home` | Set to `min` |
+| `End` | Set to `max` |
+
+### Wheel
+
+When focused, wheel input nudges the value by `step`.
+
+## API reference
+
+`Transport` keeps an audio-focused API (`value`, `bufferedValue`, `onSeek`) and forwards remaining root props to `TransportPrimitive.Root`.
+
+### Value and state
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `value` | `number` | - | Current transport value (typically `0..100`). |
+| `bufferedValue` | `number` | `0` | Buffered position (same scale as `value`). |
+| `onSeek` | `(nextValue: number) => void` | - | Called when scrubbing or keyboard/wheel changes value. |
+| `freezeValuesWhileDragging` | `boolean` | `false` | Freezes rendered values during active drag for smoother visual feedback. |
+| `disabled` | `boolean` | `false` | Disables interaction. |
+| `aria-label` | `string` | - | Accessible name for the slider. |
+| `aria-labelledby` | `string` | - | ID of the associated label element. |
+
+For production usage, pass either `aria-label` or `aria-labelledby` explicitly.
+
+### Layout and behavior
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` (registry wrapper) | Direction of travel. |
+| `size` | `"sm" \| "default" \| "lg"` | `"default"` | Thumb/rail density preset. |
+| `min` | `number` | `0` | Minimum value. |
+| `max` | `number` | `100` | Maximum value. |
+| `step` | `number` | `1` | Quantization step for drag/wheel/keyboard. |
+| `className` | `string` | - | Wrapper class name. |
+
+## Examples
+
+### Basic transport timeline
+
+<ComponentPreview styleName="base-nova" name="transport-demo" />
+
+### Channel strip
+
+#### Horizontal
+
+<ComponentPreview styleName="base-nova" name="block-channel-strip-transport" />
+
+#### Vertical
+
+<ComponentPreview styleName="base-nova" name="block-channel-strip-transport-vertical" />

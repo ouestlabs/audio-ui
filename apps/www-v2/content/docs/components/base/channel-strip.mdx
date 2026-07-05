@@ -1,0 +1,197 @@
+---
+title: Channel Strip
+description: Layout shell for channel-style columns—header, sections with label, control, and readout, and footer—with vertical or horizontal orientation.
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="block-channel-strip" />
+
+Channel strip layout for grouping labels, controls, and value readouts in a mixer-style column. The registry component wraps `ChannelStrip` primitives from `@audio-ui/react` with card chrome, orientation-aware spacing, and header/footer layout presets.
+
+## Overview
+
+- **Interaction model:** The strip wrapper does not handle pointer, wheel, or keyboard input; those behaviors come from the controls you render inside each `ChannelStripSection`.
+- **Layout:** Vertical (default) or horizontal `orientation`; optional `ChannelStripHeader` and `ChannelStripFooter`. With a footer, the styled root uses a responsive grid on wide screens so header and footer stay in distinct grid areas.
+- **Composition:** One `ChannelStripSection` per control line (label, control slot, readout). On a vertical strip, `ChannelStripContent` supports `layout="row"` so multiple sections sit side by side from the `md` breakpoint (flex row + wrap), and stack in one column on smaller viewports.
+- **Accessibility:** The root is a `section` with header/footer landmarks where used. `ChannelStripValue` is an `output` with `aria-live="polite"`. Name the strip with `aria-label` or `aria-labelledby`; wire controls with `id` / `aria-label` / `aria-labelledby` as usual.
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">CLI</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash component
+npx shadcn@latest add @audio/channel-strip
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the following dependencies:</Step>
+
+```bash
+npm install @audio-ui/react
+```
+
+<Step>Copy and paste the following code into your project.</Step>
+
+<ComponentSource
+  styleName="base-nova"
+  name="channel-strip"
+  title="components/channel-strip.tsx"
+/>
+
+<Step>Update the import paths to match your project setup.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import {
+  ChannelStrip,
+  ChannelStripContent,
+  ChannelStripFooter,
+  ChannelStripHeader,
+  ChannelStripLabel,
+  ChannelStripSection,
+  ChannelStripValue,
+} from "@/components/channel-strip";
+```
+
+**Vertical (default)** - header, one section, footer:
+
+```tsx
+<ChannelStrip aria-label="Strip">
+  <ChannelStripHeader>Channel 1</ChannelStripHeader>
+  <ChannelStripContent>
+    <ChannelStripSection>
+      <ChannelStripLabel>Level</ChannelStripLabel>
+      {/* your control */}
+      <ChannelStripValue>—</ChannelStripValue>
+    </ChannelStripSection>
+  </ChannelStripContent>
+  <ChannelStripFooter>Metadata</ChannelStripFooter>
+</ChannelStrip>
+```
+
+**Horizontal** - set `orientation` on the root:
+
+```tsx
+<ChannelStrip aria-label="Strip" orientation="horizontal">
+  <ChannelStripHeader>Channel 1</ChannelStripHeader>
+  <ChannelStripContent>
+    <ChannelStripSection>{/* label, control, readout */}</ChannelStripSection>
+  </ChannelStripContent>
+  <ChannelStripFooter>Metadata</ChannelStripFooter>
+</ChannelStrip>
+```
+
+**Sections in a row (vertical strip)** — responsive flex, not CSS Grid; narrow screens stack, from `md` up sections share a row and wrap if needed:
+
+```tsx
+<ChannelStrip aria-label="Strip">
+  <ChannelStripHeader>Channel 1</ChannelStripHeader>
+  <ChannelStripContent layout="row">
+    <ChannelStripSection>{/* A */}</ChannelStripSection>
+    <ChannelStripSection>{/* B */}</ChannelStripSection>
+  </ChannelStripContent>
+  <ChannelStripFooter>Metadata</ChannelStripFooter>
+</ChannelStrip>
+```
+
+## Interaction
+
+### Pointer
+
+| Behavior | Details |
+| -------- | ------- |
+| **Strip root** | Not an interactive target; pointer gestures are handled by child controls (`Fader`, `Knob`, etc.). |
+| **Sections** | Layout only; hit testing applies to controls you place inside each section. |
+
+### Keyboard
+
+| Key | Action |
+| --- | ------ |
+| `Tab` / `Shift+Tab` | Moves focus among focusable elements inside the strip in DOM order. |
+
+The strip root is not focused as a control; there is no strip-level shortcut table beyond focus navigation.
+
+### Wheel
+
+Wheel deltas are handled by whatever control currently has focus (if that control implements wheel), not by the strip wrapper.
+
+## API reference
+
+`ChannelStrip` and its subcomponents accept `className` plus primitive props from the matching `ChannelStripPrimitive.*` typings in `@audio-ui/react`.
+
+### Subcomponents
+
+| Export | Element | Role |
+| --- | --- | --- |
+| `ChannelStrip` | `section` | Root; orientation and card chrome. |
+| `ChannelStripHeader` | `header` | Optional title region. |
+| `ChannelStripContent` | `div` | Required wrapper for sections. |
+| `ChannelStripSection` | `div` | One label / control / value group. |
+| `ChannelStripLabel` | `span` | Section label. |
+| `ChannelStripValue` | `output` | Readout. |
+| `ChannelStripFooter` | `footer` | Optional footer region. |
+
+### Root props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `orientation` | `"vertical" \| "horizontal"` | `"vertical"` | Layout direction. |
+| `className` | `string` | - | Classes on the root `section`. |
+
+### `ChannelStripContent`
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `layout` | `"stack" \| "row"` | `"stack"` | `stack`: sections in a column. `row` (vertical strip only in the styled registry): sections in a row from `md` with `flex-wrap`, stacked on small viewports. |
+| `className` | `string` | - | Classes on the content wrapper. |
+
+### Section props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `orientation` | `"vertical" \| "horizontal"` | inherited | Optional per-section layout override. |
+| `className` | `string` | - | Classes on the section wrapper. |
+
+Additional valid HTML attributes on each primitive part are forwarded where applicable.
+
+## Examples
+
+### Vertical (default)
+
+<ComponentPreview styleName="base-nova" name="block-channel-strip" />
+
+### Horizontal
+
+<ComponentPreview styleName="base-nova" name="block-channel-strip-horizontal" />
+
+### Pan knob
+
+<ComponentPreview styleName="base-nova" name="block-channel-strip-knob-pan" />
+
+### Pan / width
+
+<ComponentPreview styleName="base-nova" name="block-channel-strip-knob-pan-width" />
+
+### XY filter pad
+
+<ComponentPreview styleName="base-nova" name="block-channel-strip-xypad-filter" />

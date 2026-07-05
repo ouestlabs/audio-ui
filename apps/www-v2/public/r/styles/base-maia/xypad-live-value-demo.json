@@ -1,0 +1,15 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "xypad-live-value-demo",
+  "type": "registry:example",
+  "description": "XYPad with live x/y readout",
+  "registryDependencies": ["@audio/xypad"],
+  "files": [
+    {
+      "path": "xypad-live-value-demo.tsx",
+      "type": "registry:example",
+      "content": "\"use client\";\n\nimport { useState } from \"react\";\nimport { XYPad } from \"@/components/audio/elements/xypad\";\n\nexport function XYPadLiveValueDemo() {\n  const [value, setValue] = useState({ x: 50, y: 50 });\n\n  return (\n    <div className=\"flex flex-col items-center gap-2\">\n      <XYPad\n        className=\"aspect-square\"\n        maxX={100}\n        maxY={100}\n        minX={0}\n        minY={0}\n        onValueChange={setValue}\n        value={value}\n      />\n      <output\n        aria-live=\"polite\"\n        className=\"font-mono text-foreground text-sm tabular-nums\"\n      >\n        X: {value.x} - Y: {value.y}\n      </output>\n    </div>\n  );\n}",
+      "target": "components/examples/xypad-live-value-demo.tsx"
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+"use client";
+
+import { BookOpenTextIcon } from "lucide-react";
+import Link from "next/link";
+import * as React from "react";
+import { useDesignSystemSearchParams } from "@/app/(create)/lib/search-params";
+import { Button } from "@/components/ui/button";
+import { useConfig } from "@/hooks/use-config";
+import { isCanonicalComponentDoc } from "@/lib/seo";
+
+export function ComponentDocsLink({ slug }: { slug: string }) {
+  const [mounted, setMounted] = React.useState(false);
+  const [params] = useDesignSystemSearchParams();
+  const [config] = useConfig();
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!isCanonicalComponentDoc(slug)) {
+    return null;
+  }
+
+  const base = mounted
+    ? (params.base ?? config.base ?? "base")
+    : (params.base ?? "base");
+  const docsHref = `/docs/components/${base === "radix" ? "radix" : "base"}/${slug}`;
+
+  return (
+    <Button asChild className="shrink-0" size="sm" variant="outline">
+      <Link href={docsHref}>
+        <BookOpenTextIcon className="size-3.5 opacity-60" />
+        View docs
+      </Link>
+    </Button>
+  );
+}

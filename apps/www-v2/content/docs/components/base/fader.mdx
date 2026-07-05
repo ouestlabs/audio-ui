@@ -1,0 +1,176 @@
+---
+title: Fader
+description: Linear slider control for gain and parameter adjustment with pointer, wheel, keyboard, orientation, and thumb mark variants.
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="fader-vertical-demo" />
+
+Linear fader for continuous parameters (volume, gain, send level, etc.). The registry component wraps `Fader` primitives from `@audio-ui/react` with size variants and thumb mark styling.
+
+## Overview
+
+- **Interaction model:** Pointer drag on track or thumb, mouse wheel adjustment, keyboard nudging, and commit callbacks on release.
+- **Layout:** Vertical (default) or horizontal orientation, with `sm`, `default`, and `lg` size presets.
+- **Feedback:** Filled range + thumb with optional internal marks (`thumbMarks`).
+- **Accessibility:** The thumb is exposed as `role="slider"` with `aria-valuenow`, `aria-valuemin`, and `aria-valuemax`.
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">CLI</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash component
+npx shadcn@latest add @audio/fader
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the following dependencies:</Step>
+
+```bash
+npm install @audio-ui/react class-variance-authority
+```
+
+<Step>Copy and paste the following code into your project.</Step>
+
+<ComponentSource
+  styleName="base-nova"
+  name="fader"
+  title="components/audio/fader.tsx"
+/>
+
+<Step>Update the import paths to match your project setup.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import { Fader } from "@/components/audio/fader";
+```
+
+**Uncontrolled** - initial value only:
+
+```tsx
+<Fader defaultValue={0} max={6} min={-60} step={1} />
+```
+
+**Controlled** - drive value from state:
+
+```tsx
+const [gain, setGain] = useState(0);
+
+<Fader
+  max={6}
+  min={-60}
+  onValueChange={setGain}
+  onValueCommit={(value) => console.log("Committed:", value)}
+  step={1}
+  value={gain}
+/>
+```
+
+## Interaction
+
+### Pointer
+
+| Behavior | Details |
+| -------- | ------- |
+| **Track click / drag** | Clicking or dragging on the track updates the value from pointer position. |
+| **Thumb drag** | Dragging the thumb adjusts continuously, clamped to `min...max`. |
+| **Commit event** | `onValueCommit` fires when drag interaction ends. |
+
+### Keyboard
+
+Focused thumb supports:
+
+| Key | Action |
+| --- | ------ |
+| `ArrowUp` / `ArrowRight` | Increase by `step` |
+| `ArrowDown` / `ArrowLeft` | Decrease by `step` |
+| `PageUp` | Increase by `step × 10` |
+| `PageDown` | Decrease by `step × 10` |
+| `Home` | Set to `min` |
+| `End` | Set to `max` |
+
+### Wheel
+
+When focused, wheel input nudges the value by `step`.
+
+## API reference
+
+`Fader` accepts style props (`size`, `thumbMarks`, `className`) plus primitive props from `FaderPrimitive.RootProps`.
+
+### Value and state
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `value` | `number` | - | Controlled value. |
+| `defaultValue` | `number` | midpoint | Uncontrolled initial value. Midpoint is `(min + max) / 2`. |
+| `min` | `number` | `-60` | Minimum value. |
+| `max` | `number` | `6` | Maximum value. |
+| `step` | `number` | `1` | Quantization step for drag, wheel, and keyboard. |
+| `disabled` | `boolean` | `false` | Disables interaction. |
+| `onValueChange` | `(value: number) => void` | - | Live updates while adjusting. |
+| `onValueCommit` | `(value: number) => void` | - | Fires when interaction is committed. |
+| `aria-label` | `string` | - | Accessible name for the slider. |
+| `aria-labelledby` | `string` | - | ID of a labeling element. |
+
+### Layout and visuals
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `orientation` | `"horizontal" \| "vertical"` | `"vertical"` | Direction of travel. |
+| `size` | `"sm" \| "default" \| "lg"` | `"default"` | Track and thumb size preset. |
+| `thumbMarks` | `number \| false` | `3` | Number of marks in the thumb or `false` to hide them. |
+| `className` | `string` | - | Root wrapper class name. |
+
+Additional valid HTML attributes passed to `Fader.Root` are forwarded.
+
+## Examples
+
+### Vertical (default)
+
+<ComponentPreview styleName="base-nova" name="fader-vertical-demo" />
+
+### Horizontal
+
+<ComponentPreview styleName="base-nova" name="fader-horizontal-demo" />
+
+### Size variants
+
+<ComponentPreview styleName="base-nova" name="fader-size-variants-demo" />
+
+### Thumb marks variants
+
+<ComponentPreview styleName="base-nova" name="fader-thumb-marks-variants-demo" />
+
+### Channel strip
+
+#### Gain range in dB (`-60..+6`)
+
+<ComponentPreview styleName="base-nova" name="block-channel-strip-fader-gain-db" />
+
+#### Normalized range (`0..100`)
+
+<ComponentPreview styleName="base-nova" name="block-channel-strip-fader" />
+
+#### Multi-channel strip
+
+<ComponentPreview styleName="base-nova" name="block-channel-strip-fader-multi" />

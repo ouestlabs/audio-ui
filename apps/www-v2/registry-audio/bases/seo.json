@@ -1,0 +1,74 @@
+{
+  "root": {
+    "title": "Audio UI Components",
+    "description": "Accessible, composable Audio UI components for React. {{count}} copy-ready blocks and demos covering players, faders, knobs, XY pads, and transport controls, built on top of shadcn/ui.",
+    "intro": "Browse {{count}} audio/ui components for React and Tailwind CSS. Built on shadcn/ui and @audio-ui/react's headless primitives, every block is copy-ready and fully compatible with your shadcn/ui setup.",
+    "keywords": [
+      "audio ui components",
+      "react audio components",
+      "shadcn audio components",
+      "web audio react",
+      "audio player react",
+      "knob component react",
+      "fader component react",
+      "xy pad react",
+      "channel strip react",
+      "shadcn/ui audio"
+    ]
+  },
+  "channel-strip": {
+    "title": "Channel Strip",
+    "description": "Channel strip patterns combining faders, knobs, and transport controls. {{count}} components.",
+    "intro": "Browse {{count}} channel strip components for audio/ui, built on top of shadcn/ui."
+  },
+  "fader": {
+    "title": "Fader",
+    "description": "Fader components for level, gain, and mix controls. {{count}} components.",
+    "intro": "Browse {{count}} fader components for audio/ui, built on top of shadcn/ui."
+  },
+  "knob": {
+    "title": "Knob",
+    "description": "Rotary knob components for continuous parameters like level, cutoff, and pan. {{count}} components.",
+    "intro": "Browse {{count}} knob components for audio/ui, built on top of shadcn/ui."
+  },
+  "playback-speed": {
+    "title": "Playback Speed",
+    "description": "Playback speed controls for audio and video players. {{count}} components.",
+    "intro": "Browse {{count}} playback speed components for audio/ui, built on top of shadcn/ui."
+  },
+  "player": {
+    "title": "Player",
+    "description": "Audio player components for track playback, queues, and playback speed control. {{count}} components.",
+    "intro": "Browse {{count}} player components for audio/ui, built on top of shadcn/ui."
+  },
+  "queue": {
+    "title": "Queue",
+    "description": "Queue management components for building playlists and up-next lists. {{count}} components.",
+    "intro": "Browse {{count}} queue components for audio/ui, built on top of shadcn/ui."
+  },
+  "sortable-list": {
+    "title": "Sortable List",
+    "description": "Drag-and-drop sortable list components for reordering tracks and items. {{count}} components.",
+    "intro": "Browse {{count}} sortable list components for audio/ui, built on top of shadcn/ui."
+  },
+  "synth": {
+    "title": "Synth",
+    "description": "Synth control patterns combining knobs, XY pads, and toggles. {{count}} components.",
+    "intro": "Browse {{count}} synth components for audio/ui, built on top of shadcn/ui."
+  },
+  "track": {
+    "title": "Track",
+    "description": "Track list and grid components for browsing audio content. {{count}} components.",
+    "intro": "Browse {{count}} track components for audio/ui, built on top of shadcn/ui."
+  },
+  "transport": {
+    "title": "Transport",
+    "description": "Transport controls for play, pause, and seek. {{count}} components.",
+    "intro": "Browse {{count}} transport components for audio/ui, built on top of shadcn/ui."
+  },
+  "xypad": {
+    "title": "XY Pad",
+    "description": "Two-dimensional XY pad components for filter and effect controls. {{count}} components.",
+    "intro": "Browse {{count}} xy pad components for audio/ui, built on top of shadcn/ui."
+  }
+}

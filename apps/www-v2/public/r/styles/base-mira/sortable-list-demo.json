@@ -1,0 +1,15 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "sortable-list-demo",
+  "type": "registry:example",
+  "description": "Sortable list component examples",
+  "registryDependencies": ["@audio/sortable-list"],
+  "files": [
+    {
+      "path": "sortable-list-demo.tsx",
+      "type": "registry:example",
+      "content": "\"use client\";\n\nimport { useState } from \"react\";\nimport {\n  Item,\n  ItemActions,\n  ItemContent,\n  ItemDescription,\n  ItemTitle,\n} from \"@/components/ui/item\";\nimport {\n  SortableDragHandle,\n  SortableItem,\n  SortableList,\n} from \"@/components/audio/sortable-list\";\n\nconst initialItems = [\n  {\n    id: \"1\",\n    title: \"Item 1\",\n    description: \"Description for item 1\",\n  },\n  {\n    id: \"2\",\n    title: \"Item 2\",\n    description: \"Description for item 2\",\n  },\n  {\n    id: \"3\",\n    title: \"Item 3\",\n    description: \"Description for item 3\",\n  },\n  {\n    id: \"4\",\n    title: \"Item 4\",\n    description: \"Description for item 4\",\n  },\n];\n\nexport function SortableListDemo() {\n  const [items, setItems] = useState(initialItems);\n\n  return (\n    <SortableList\n      className=\"w-full gap-1\"\n      items={items}\n      onChange={setItems}\n      renderItem={(item) => (\n        <SortableItem id={item.id}>\n          <Item className=\"w-full border-border\" size=\"sm\" variant=\"muted\">\n            <ItemActions>\n              <SortableDragHandle />\n            </ItemActions>\n            <ItemContent>\n              <ItemTitle>{item.title}</ItemTitle>\n              <ItemDescription>{item.description}</ItemDescription>\n            </ItemContent>\n          </Item>\n        </SortableItem>\n      )}\n    />\n  );\n}",
+      "target": "components/examples/sortable-list-demo.tsx"
+    }
+  ]
+}
