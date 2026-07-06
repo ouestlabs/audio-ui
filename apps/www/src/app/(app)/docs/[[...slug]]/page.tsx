@@ -230,13 +230,8 @@ export default async function Page(props: {
             <div className="w-full flex-1 *:data-[slot=alert]:first:mt-0">
               <MDX
                 components={getMDXComponents({
-                  // Bun resolves two peer-variant copies of fumadocs-core@16.7.7
-                  // (app vs fumadocs-ui), making the two LoaderOutput types
-                  // nominally incompatible while identical at runtime.
                   a: createRelativeLink(
-                    source as unknown as Parameters<
-                      typeof createRelativeLink
-                    >[0],
+                    source,
                     page
                   ),
                 })}
