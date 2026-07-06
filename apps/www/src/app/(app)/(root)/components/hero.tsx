@@ -14,34 +14,10 @@ import { getTotalComponentCount } from "@/lib/registry";
 export default function Hero() {
   const totalCount = getTotalComponentCount();
 
-  const brands = [
-    {
-      title: "shadcn/ui",
-      logo: Icons.shadcn,
-      tooltip: "",
-    },
-    {
-      title: "Base UI",
-      logo: Icons.base,
-      tooltip: "",
-      className: "h-full w-full ms-1",
-    },
-    {
-      title: "Tailwind 4",
-      logo: Icons.tailwind,
-      tooltip: "",
-    },
-    {
-      title: "React 19",
-      logo: Icons.react,
-      tooltip: "",
-    },
-  ];
-
   return (
     <section
       aria-labelledby="hero-heading"
-      className="container-wrapper relative overflow-hidden py-16 lg:py-24"
+      className="container-wrapper relative flex flex-1 flex-col items-center justify-center overflow-hidden py-16 lg:py-24"
     >
       <PixelBlast
         enableRipples
@@ -86,23 +62,6 @@ export default function Hero() {
             />
           </PageActions>
         </PageHeader>
-        <div className="flex items-center justify-center gap-6 pt-2">
-          {brands.map((brand, index) => (
-            <div
-              className="flex flex-col items-center"
-              key={String(index)}
-              title={brand.title}
-            >
-              <div className="size-5">
-                {brand.logo({
-                  className:
-                    "" +
-                    (brand.className ? ` ${brand.className}` : "h-full w-full"),
-                })}
-              </div>
-            </div>
-          ))}
-        </div>
       </div>
     </section>
   );

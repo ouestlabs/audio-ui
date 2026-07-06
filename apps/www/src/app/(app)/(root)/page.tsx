@@ -35,7 +35,7 @@ export const metadata: Metadata = buildPageMetadata({
 
 export default function IndexPage() {
   return (
-    <div className="homepage relative overflow-hidden bg-linear-to-b to-35% to-background">
+    <div className="homepage relative flex flex-1 flex-col overflow-hidden bg-linear-to-b to-35% to-background">
       <Hero />
     </div>
   );
