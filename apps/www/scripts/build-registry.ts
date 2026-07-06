@@ -384,7 +384,7 @@ async function main() {
   ({ isCatalogItemName } = await import("../src/lib/catalog-name.ts"));
   ({ transformStyleClassNames } = await import("../src/lib/code-utils.ts"));
   // Base-only launch: audio components only exist for the Base UI base.
-  BASES = ALL_BASES.filter((b: { name: string }) => b.name === "base");
+  BASES = (ALL_BASES as { name: string }[]).filter((b) => b.name === "base");
 
   const startTime = Date.now();
   console.log("Building static registry...");
