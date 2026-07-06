@@ -1,21 +1,20 @@
-"use client";
+"use client"
 
-import type * as React from "react";
+import * as React from "react"
 
-import { cn } from "@/registry/bases/base/lib/utils";
+import { cn } from "@/registry/bases/base/lib/utils"
 
 function Label({ className, ...props }: React.ComponentProps<"label">) {
   return (
-    // biome-ignore lint/a11y/noLabelWithoutControl: intentional
     <label
+      data-slot="label"
       className={cn(
-        "flex select-none items-center gap-2 font-medium text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-50 group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50",
+        "cn-label flex items-center select-none group-data-[disabled=true]:pointer-events-none peer-disabled:cursor-not-allowed",
         className
       )}
-      data-slot="label"
       {...props}
     />
-  );
+  )
 }
 
-export { Label };
+export { Label }

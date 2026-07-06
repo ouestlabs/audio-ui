@@ -1,20 +1,68 @@
-import "../styles/globals.css";
+import type { Metadata } from "next";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
+import { JsonLd } from "@/components/json-ld";
+import { QueryProvider } from "@/components/query-provider";
+import { TailwindIndicator } from "@/components/tailwind-indicator";
+import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "@/components/ui/sonner";
+import { META_THEME_COLORS, siteConfig } from "@/lib/config";
 
-import { Inter } from "next/font/google";
-import { SiteHeader } from "@/components/layouts/global/headers/site";
 import { fontMono, fontSans, fontSerif } from "@/lib/fonts";
 import {
-  createMetadata,
-  createViewport,
-  META_THEME_COLORS,
-} from "@/lib/metadata";
-import { cn } from "@/registry/bases/base/lib/utils";
-import { Providers } from "./_providers";
+  buildOrganizationJsonLd,
+  buildPageSocialMetadata,
+  buildWebSiteJsonLd,
+  getSiteAuthors,
+  getSiteUrl,
+} from "@/lib/seo";
+import { cn } from "@/lib/utils";
+
+import "@/styles/globals.css";
+import { Inter } from "next/font/google";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
-export const metadata = createMetadata();
-export const viewport = createViewport();
+const appUrl = getSiteUrl();
+export const metadata: Metadata = {
+  title: {
+    default: siteConfig.name,
+    template: siteConfig.metadata.titleTemplate,
+  },
+  metadataBase: new URL(appUrl),
+  alternates: {
+    canonical: "/",
+  },
+  description: siteConfig.description,
+  keywords: [
+    "audio ui components",
+    "react audio components",
+    "shadcn audio components",
+    "web audio react",
+    "audio player react",
+    "knob component react",
+    "fader component react",
+    "xy pad react",
+    "channel strip react",
+    "shadcn/ui audio",
+    "shadcn/ui",
+    "shadcn ui",
+    "shadcn ecosystem",
+    "React components",
+    "Tailwind CSS components",
+    "open source UI",
+    "component library",
+    "design system",
+  ],
+  authors: getSiteAuthors(),
+  creator: siteConfig.name,
+  publisher: siteConfig.name,
+  ...buildPageSocialMetadata({
+    title: siteConfig.name,
+    description: siteConfig.description,
+    path: "/",
+  }),
+  manifest: "/manifest.webmanifest",
+};
 
 export default function RootLayout({
   children,
@@ -23,7 +71,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      className={cn("font-sans", inter.variable)}
+      className={cn("overscroll-none", "font-sans", inter.variable)}
       data-scroll-behavior="smooth"
       lang="en"
       suppressHydrationWarning
@@ -46,15 +94,28 @@ export default function RootLayout({
         />
         <meta content={META_THEME_COLORS.light} name="theme-color" />
       </head>
+
       <body
-        className={cn(fontSans.variable, fontSerif.variable, fontMono.variable)}
+        className={cn(
+          fontSans.variable,
+          fontSerif.variable,
+          fontMono.variable,
+          "group/body overscroll-none antialiased [--footer-height:--spacing(14)] [--header-height:--spacing(14)] xl:[--footer-height:--spacing(24)]",
+          "[&:not(:has([data-slot=component-preview]))]:font-site-sans"
+        )}
+        suppressHydrationWarning
       >
-        <Providers>
-          <div className="before:-z-10 relative flex min-h-svh flex-col overflow-clip [--header-height:4rem] before:pointer-events-none before:absolute before:inset-0 before:bg-sidebar">
-            <SiteHeader />
-            {children}
-          </div>
-        </Providers>
+        <JsonLd data={buildWebSiteJsonLd()} />
+        <JsonLd data={buildOrganizationJsonLd()} />
+        <ThemeProvider>
+          <QueryProvider>
+            <NuqsAdapter>
+              {children}
+              <TailwindIndicator />
+              <Toaster position="top-center" />
+            </NuqsAdapter>
+          </QueryProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

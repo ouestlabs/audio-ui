@@ -1,22 +1,19 @@
 "use client";
 
+import type { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
 import {
   ArrowBendDownLeftIcon,
   BookIcon,
   BookOpenIcon,
   DiamondsFourIcon,
   MagnifyingGlassIcon,
-} from "@phosphor-icons/react";
+  SquaresFourIcon,
+} from "@phosphor-icons/react/ssr";
 import { useRouter } from "next/navigation";
-import posthog from "posthog-js";
-import type { ComponentProps } from "react";
-import React from "react";
-import { useConfig } from "@/hooks/use-config";
-import { useIsMac } from "@/hooks/use-is-mac";
-import { useMutationObserver } from "@/hooks/use-mutation-observer";
-import type { source } from "@/lib/source";
-import { cn } from "@/registry/bases/base/lib/utils";
-import { Button } from "@/registry/bases/base/ui/button";
+import * as React from "react";
+import { copyToClipboardWithMeta } from "@/components/copy-button";
+import { Button } from "@/components/ui/button";
+import { ButtonGroup } from "@/components/ui/button-group";
 import {
   Command,
   CommandEmpty,
@@ -24,7 +21,7 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/registry/bases/base/ui/command";
+} from "@/components/ui/command";
 import {
   Dialog,
   DialogContent,
@@ -32,115 +29,64 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/registry/bases/base/ui/dialog";
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/registry/bases/base/ui/empty";
-import { Kbd, KbdGroup } from "@/registry/bases/base/ui/kbd";
-import { Separator } from "@/registry/bases/base/ui/separator";
+} from "@/components/ui/dialog";
+import { Kbd, KbdGroup } from "@/components/ui/kbd";
+import { Separator } from "@/components/ui/separator";
+import { useConfig } from "@/hooks/use-config";
+import { useIsMac } from "@/hooks/use-is-mac";
+import { useMutationObserver } from "@/hooks/use-mutation-observer";
+import type { CategoryInfo } from "@/lib/registry";
+import { cn, normalizeSlug } from "@/lib/utils";
 
-function setupCommandMenuKeydown(options: {
-  copyPayload: string;
-  runCommand: (command: () => unknown) => void;
-  selectedType: "page" | "component" | null;
-  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
-}): () => void {
-  const { copyPayload, runCommand, selectedType, setOpen } = options;
+type CommandPage = {
+  url: string;
+  name: string;
+  isComponent: boolean;
+};
 
-  const isToggleShortcut = (e: KeyboardEvent) =>
-    (e.key === "k" && (e.metaKey || e.ctrlKey)) || e.key === "/";
-
-  const isCopyShortcut = (e: KeyboardEvent) =>
-    e.key === "c" && (e.metaKey || e.ctrlKey);
-
-  const isEditableTarget = (target: EventTarget | null) => {
-    if (!(target instanceof HTMLElement)) {
-      return false;
-    }
-    if (target.isContentEditable) {
-      return true;
-    }
-    return (
-      target instanceof HTMLInputElement ||
-      target instanceof HTMLTextAreaElement ||
-      target instanceof HTMLSelectElement
-    );
-  };
-
-  const down = (e: KeyboardEvent) => {
-    if (isToggleShortcut(e)) {
-      if (!isEditableTarget(e.target)) {
-        e.preventDefault();
-        setOpen((prevOpen) => !prevOpen);
-      }
-      return;
-    }
-
-    if (
-      isCopyShortcut(e) &&
-      (selectedType === "page" || selectedType === "component")
-    ) {
-      if (copyPayload) {
-        posthog.capture("command_menu_command_copied", {
-          command: copyPayload,
-        });
-      }
-      runCommand(() => {
-        if (navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(copyPayload);
-        }
-      });
-    }
-  };
-
-  document.addEventListener("keydown", down);
-  return () => document.removeEventListener("keydown", down);
+function isEditableTarget(target: EventTarget | null) {
+  return (
+    (target instanceof HTMLElement && target.isContentEditable) ||
+    target instanceof HTMLInputElement ||
+    target instanceof HTMLTextAreaElement ||
+    target instanceof HTMLSelectElement
+  );
 }
 
-function CommandMenu({
-  tree,
+export type CommandMenuGroup = {
+  id: string;
+  name: string;
+  pages: CommandPage[];
+};
+
+export function CommandMenu({
+  groups,
   navItems,
+  componentCategories = [],
   ...props
-}: Omit<ComponentProps<typeof Dialog>, "children"> & {
-  tree: typeof source.pageTree;
-  navItems?: { href: string; label: string }[];
+}: DialogPrimitive.Root.Props & {
+  groups: CommandMenuGroup[];
+  navItems?: { href: string; label: string; soon?: boolean }[];
+  componentCategories?: CategoryInfo[];
 }) {
   const router = useRouter();
   const isMac = useIsMac();
   const [config] = useConfig();
   const [open, setOpen] = React.useState(false);
   const [selectedType, setSelectedType] = React.useState<
-    "page" | "component" | null
+    "color" | "page" | "component" | "category" | null
   >(null);
   const [copyPayload, setCopyPayload] = React.useState("");
-  const packageManager = config?.packageManager || "pnpm";
+  const packageManager = config.packageManager || "pnpm";
 
   const handlePageHighlight = React.useCallback(
     (isComponent: boolean, item: { url: string; name?: React.ReactNode }) => {
       if (isComponent) {
         const componentName = item.url.split("/").pop();
         setSelectedType("component");
-        const registryItem = `@audio/${componentName}`;
-        let cmd: string;
-        switch (packageManager) {
-          case "pnpm":
-            cmd = `pnpm dlx shadcn@latest add ${registryItem}`;
-            break;
-          case "bun":
-            cmd = `bunx --bun shadcn@latest add ${registryItem}`;
-            break;
-          case "yarn":
-            cmd = `yarn dlx shadcn@latest add ${registryItem}`;
-            break;
-          default:
-            cmd = `npx shadcn@latest add ${registryItem}`;
-        }
-
-        setCopyPayload(cmd);
+        setCopyPayload(
+          `${packageManager} dlx shadcn@latest add ${componentName}`
+        );
       } else {
         setSelectedType("page");
         setCopyPayload("");
@@ -149,54 +95,95 @@ function CommandMenu({
     [packageManager]
   );
 
+  const handleCategoryHighlight = React.useCallback(() => {
+    setSelectedType("category");
+    setCopyPayload("");
+  }, []);
+
   const runCommand = React.useCallback((command: () => unknown) => {
     setOpen(false);
     command();
   }, []);
 
-  React.useEffect(
-    () =>
-      setupCommandMenuKeydown({
-        copyPayload,
-        runCommand,
-        selectedType,
-        setOpen,
-      }),
-    [copyPayload, runCommand, selectedType]
-  );
+  const copyStateRef = React.useRef({
+    selectedType,
+    copyPayload,
+    packageManager,
+  });
+  React.useEffect(() => {
+    copyStateRef.current = { selectedType, copyPayload, packageManager };
+  }, [selectedType, copyPayload, packageManager]);
+
+  const copyHighlightedPayload = React.useCallback(() => {
+    const current = copyStateRef.current;
+
+    if (current.selectedType === "color") {
+      copyToClipboardWithMeta(current.copyPayload, {
+        name: "copy_command",
+        properties: { color: current.copyPayload },
+      });
+    }
+
+    if (
+      current.selectedType === "page" ||
+      current.selectedType === "component"
+    ) {
+      copyToClipboardWithMeta(current.copyPayload, {
+        name: "copy_command",
+        properties: {
+          command: current.copyPayload,
+          pm: current.packageManager,
+        },
+      });
+    }
+  }, []);
+
+  React.useEffect(() => {
+    const down = (e: KeyboardEvent) => {
+      if ((e.key === "k" && (e.metaKey || e.ctrlKey)) || e.key === "/") {
+        if (isEditableTarget(e.target)) {
+          return;
+        }
+
+        e.preventDefault();
+        setOpen((isOpen) => !isOpen);
+      }
+
+      if (e.key === "c" && (e.metaKey || e.ctrlKey)) {
+        runCommand(copyHighlightedPayload);
+      }
+    };
+
+    document.addEventListener("keydown", down);
+    return () => document.removeEventListener("keydown", down);
+  }, [runCommand, copyHighlightedPayload]);
 
   return (
     <Dialog onOpenChange={setOpen} open={open}>
       <DialogTrigger
+        nativeButton={false}
         render={
-          <Button
-            className={cn(
-              "relative w-full justify-start pl-3 font-medium text-foreground sm:pr-12 md:w-48 lg:w-60 xl:w-64 dark:bg-card"
-            )}
-            onClick={() => setOpen(true)}
-            variant="outline"
-            {...props}
-          />
+          <ButtonGroup onClick={() => setOpen(true)} {...props}>
+            <Button size="icon" variant="secondary">
+              <MagnifyingGlassIcon className="shrink-0 opacity-60" />
+            </Button>
+            <Button className="px-1" variant="secondary">
+              <KbdGroup>
+                <Kbd className="border">{isMac ? "⌘" : "Ctrl"}</Kbd>
+                <Kbd className="border">K</Kbd>
+              </KbdGroup>
+            </Button>
+          </ButtonGroup>
         }
-      >
-        <span className="hidden lg:inline-flex">Search documentation...</span>
-        <span className="inline-flex lg:hidden">Search...</span>
-
-        <div className="absolute top-1.5 right-1.5 hidden gap-1 sm:flex">
-          <KbdGroup>
-            <Kbd className="border">{isMac ? "⌘" : "Ctrl"}</Kbd>
-            <Kbd className="border">K</Kbd>
-          </KbdGroup>
-        </div>
-      </DialogTrigger>
-      <DialogHeader className="sr-only">
-        <DialogTitle>Search documentation...</DialogTitle>
-        <DialogDescription>Search for a command to run...</DialogDescription>
-      </DialogHeader>
+      />
       <DialogContent
-        className="p-1 pb-11 ring-4 ring-border/80"
+        className="site-rounded-xl border-none bg-clip-padding p-2 pb-11 shadow-2xl ring-4 ring-neutral-200/80 sm:max-w-xl dark:bg-neutral-900 dark:ring-neutral-800"
         showCloseButton={false}
       >
+        <DialogHeader className="sr-only">
+          <DialogTitle>Search...</DialogTitle>
+          <DialogDescription>Search for a command to run...</DialogDescription>
+        </DialogHeader>
         <Command
           filter={(value, search, keywords) => {
             const extendValue = `${value} ${keywords?.join(" ") || ""}`;
@@ -206,22 +193,11 @@ function CommandMenu({
             return 0;
           }}
         >
-          <CommandInput placeholder="Search documentation…" />
-          <CommandList>
-            <CommandEmpty>
-              <Empty>
-                <EmptyMedia variant="icon">
-                  <MagnifyingGlassIcon />
-                </EmptyMedia>
-                <EmptyHeader>
-                  <EmptyTitle>No results found</EmptyTitle>
-                  <EmptyDescription>
-                    Try searching with different keywords.
-                  </EmptyDescription>
-                </EmptyHeader>
-              </Empty>
+          <CommandInput placeholder="Search..." />
+          <CommandList className="no-scrollbar scroll-fade min-h-80 scroll-pt-2 scroll-pb-1.5">
+            <CommandEmpty className="py-12 text-center text-site-muted-foreground text-sm">
+              No results found.
             </CommandEmpty>
-
             {navItems && navItems.length > 0 && (
               <CommandGroup
                 className="p-0! **:[[cmdk-group-heading]]:scroll-mt-16 **:[[cmdk-group-heading]]:p-3! **:[[cmdk-group-heading]]:pb-1!"
@@ -229,6 +205,7 @@ function CommandMenu({
               >
                 {navItems.map((item) => (
                   <CommandMenuItem
+                    disabled={item.soon}
                     key={item.href}
                     keywords={["nav", "navigation", item.label.toLowerCase()]}
                     onHighlight={() => {
@@ -236,86 +213,111 @@ function CommandMenu({
                       setCopyPayload("");
                     }}
                     onSelect={() => {
-                      posthog.capture("command_menu_item_selected", {
-                        item_url: item.href,
-                        item_name: item.label,
-                        item_type: "page",
-                      });
-                      runCommand(() => router.push(item.href));
+                      if (!item.soon) {
+                        runCommand(() => router.push(item.href));
+                      }
                     }}
                     value={`Navigation ${item.label}`}
                   >
                     <BookOpenIcon weight="duotone" />
-
-                    {item.label}
+                    <span
+                      className={cn(
+                        "min-w-0 flex-1 truncate",
+                        item.soon && "opacity-50"
+                      )}
+                    >
+                      {item.label}
+                    </span>
+                    {item.soon && (
+                      <span className="site-rounded-sm ml-auto bg-site-muted px-1.5 py-0.5 font-medium text-[10px] text-site-muted-foreground leading-none">
+                        Soon
+                      </span>
+                    )}
                   </CommandMenuItem>
                 ))}
               </CommandGroup>
             )}
-            {tree.children.map((group) => (
+            {groups.map((group) => (
               <CommandGroup
                 className="p-0! **:[[cmdk-group-heading]]:scroll-mt-16 **:[[cmdk-group-heading]]:p-3! **:[[cmdk-group-heading]]:pb-1!"
                 heading={group.name}
-                key={group.$id}
+                key={group.id}
               >
-                {group.type === "folder" &&
-                  group.children.map((item) => {
-                    if (item.type === "page") {
-                      const isComponent = item.url.includes("/components/");
-
-                      return (
-                        <CommandMenuItem
-                          key={item.url}
-                          keywords={isComponent ? ["component"] : undefined}
-                          onHighlight={() =>
-                            handlePageHighlight(isComponent, item)
-                          }
-                          onSelect={() => {
-                            posthog.capture("command_menu_item_selected", {
-                              item_url: item.url,
-                              item_name: item.name?.toString(),
-                              item_type: isComponent ? "component" : "page",
-                            });
-                            runCommand(() => router.push(item.url));
-                          }}
-                          value={
-                            item.name?.toString()
-                              ? `${group.name} ${item.name}`
-                              : ""
-                          }
-                        >
-                          {isComponent ? (
-                            <DiamondsFourIcon weight="duotone" />
-                          ) : (
-                            <BookIcon weight="duotone" />
-                          )}
-                          {item.name}
-                        </CommandMenuItem>
-                      );
+                {group.pages.map((item) => (
+                  <CommandMenuItem
+                    key={item.url}
+                    keywords={item.isComponent ? ["component"] : undefined}
+                    onHighlight={() =>
+                      handlePageHighlight(item.isComponent, item)
                     }
-                    return null;
-                  })}
+                    onSelect={() => {
+                      runCommand(() => router.push(item.url));
+                    }}
+                    value={item.name ? `${group.name} ${item.name}` : ""}
+                  >
+                    {item.isComponent ? (
+                      <DiamondsFourIcon weight="duotone" />
+                    ) : (
+                      <BookIcon weight="duotone" />
+                    )}
+                    <span className="min-w-0 flex-1 truncate">{item.name}</span>
+                  </CommandMenuItem>
+                ))}
               </CommandGroup>
             ))}
+            {componentCategories.length > 0 && (
+              <CommandGroup
+                className="p-0! **:[[cmdk-group-heading]]:p-3!"
+                heading="Components"
+              >
+                {componentCategories.map((category) => (
+                  <CommandMenuItem
+                    key={`component-cat-${category.name}`}
+                    keywords={[
+                      "component",
+                      "category",
+                      category.name,
+                      category.label,
+                    ]}
+                    onHighlight={handleCategoryHighlight}
+                    onSelect={() => {
+                      runCommand(() =>
+                        router.push(
+                          `/components/${normalizeSlug(category.name)}`
+                        )
+                      );
+                    }}
+                    value={`Component category ${category.label}`}
+                  >
+                    <SquaresFourIcon />
+                    <span className="min-w-0 flex-1 truncate">
+                      {category.label}
+                    </span>
+                  </CommandMenuItem>
+                ))}
+              </CommandGroup>
+            )}
           </CommandList>
         </Command>
-        <div className="absolute inset-x-0 bottom-0 z-20 flex h-10 items-center gap-2 rounded-b-4xl border-t border-t-neutral-100 bg-neutral-50 px-4 font-medium text-muted-foreground text-xs dark:border-t-neutral-700 dark:bg-neutral-800">
-          <div className="flex items-center gap-2">
+        <div className="absolute inset-x-0 bottom-0 z-20 flex h-10 items-center gap-2 rounded-b-[12px] border-t border-t-neutral-100 bg-neutral-50 px-4 font-medium text-site-muted-foreground text-xs dark:border-t-neutral-700 dark:bg-neutral-800">
+          <div className="flex shrink-0 items-center gap-2">
             <CommandMenuKbd>
               <ArrowBendDownLeftIcon weight="duotone" />
             </CommandMenuKbd>{" "}
-            <span className="truncate">
-              {selectedType === "page" || selectedType === "component"
-                ? "Go to Page"
-                : null}
-            </span>
+            {selectedType === "page" || selectedType === "component"
+              ? "Go to Page"
+              : null}
+            {selectedType === "category" ? "View Category" : null}
+            {selectedType === "color" ? "Copy OKLCH" : null}
           </div>
           {copyPayload && (
             <>
-              <Separator className="self-center! h-5!" orientation="vertical" />
-              <div className="flex min-w-0 items-center gap-1">
-                <CommandMenuKbd>{isMac ? "⌘" : "Ctrl"}</CommandMenuKbd>
-                <CommandMenuKbd>C</CommandMenuKbd>
+              <Separator orientation="vertical" />
+              <div className="flex min-w-0 flex-1 items-center gap-1">
+                <CommandMenuKbd className="shrink-0">
+                  {isMac ? "⌘" : "Ctrl"}
+                </CommandMenuKbd>
+                <CommandMenuKbd className="shrink-0">C</CommandMenuKbd>
                 <span className="truncate">{copyPayload}</span>
               </div>
             </>
@@ -353,7 +355,7 @@ function CommandMenuItem({
   return (
     <CommandItem
       className={cn(
-        "h-9 rounded-md border border-transparent px-3! font-medium data-[selected=true]:border-input data-[selected=true]:bg-input/50",
+        "site-rounded-md h-9 border border-transparent px-3! font-medium data-[selected=true]:border-site-input data-[selected=true]:bg-site-input/50",
         className
       )}
       ref={ref}
@@ -368,12 +370,10 @@ function CommandMenuKbd({ className, ...props }: React.ComponentProps<"kbd">) {
   return (
     <kbd
       className={cn(
-        "pointer-events-none flex h-5 select-none items-center justify-center gap-1 rounded border bg-background px-1 font-medium font-sans text-[0.7rem] text-muted-foreground [&_svg:not([class*='size-'])]:size-3",
+        "site-rounded-sm pointer-events-none flex h-5 select-none items-center justify-center gap-1 border border-site-border bg-site-background px-1 font-medium font-site-sans text-[0.7rem] text-site-muted-foreground [&_svg:not([class*='size-'])]:size-3",
         className
       )}
       {...props}
     />
   );
 }
-
-export { CommandMenu };

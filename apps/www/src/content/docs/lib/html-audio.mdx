@@ -8,23 +8,38 @@ The `$htmlAudio` singleton manages playback of HTML5 audio with automatic retry 
 ## Installation
 
 <CodeTabs>
-  <TabsList>
-    <TabsTrigger value="cli">CLI</TabsTrigger>
-    <TabsTrigger value="manual">Manual</TabsTrigger>
-  </TabsList>
-  <TabsContent value="cli">
-    <Install component="html" />
-  </TabsContent>
 
-  <TabsContent value="manual">
+<TabsList>
+  <TabsTrigger value="cli">CLI</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
 
-    <Steps>
-      <Step>Copy and paste the following code into your project.</Step>
-        <Source name="html" title="lib/html-audio.ts" />
-      <Step>Update the import paths to match your project setup.</Step>
-    </Steps>
+<TabsContent value="cli">
 
-  </TabsContent>
+```bash component
+npx shadcn@latest add @audio/html
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Copy and paste the following code into your project.</Step>
+
+<ComponentSource
+  styleName="base-nova"
+  name="html"
+  title="lib/html-audio.ts"
+/>
+
+<Step>Update the import paths to match your project setup.</Step>
+
+</Steps>
+
+</TabsContent>
+
 </CodeTabs>
 
 ### Import
@@ -73,7 +88,7 @@ await $htmlAudio.play();
 #### Lifecycle
 
 | Method      | Description                                             |
-| ----------- | ------------------------------------------------------- |
+| ----------- | --------------------------------------------------------- |
 | `init()`    | Initialize on the client. Safe to call multiple times.  |
 | `cleanup()` | Reset and release the audio element (pause, clear src). |
 
@@ -107,7 +122,7 @@ sequenceDiagram
 #### Playback
 
 | Method                           | Description                                                                                                                     |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
 | `load(url, startTime?, isLive?)` | Load an audio source and wait for readiness. Pass `isLive` for live streams (longer timeout, no seek). Returns `Promise<void>`. |
 | `play()`                         | Start or resume playback. Returns promise that resolves when browser allows playback.                                           |
 | `pause()`                        | Pause playback immediately.                                                                                                     |
@@ -130,7 +145,7 @@ sequenceDiagram
 #### Volume
 
 | Method                         | Description                                                     |
-| ------------------------------ | --------------------------------------------------------------- |
+| --------------------------------- | ------------------------------------------------------------------ |
 | `setVolume(volume, fadeTime?)` | Set or fade volume (0–1). If `fadeTime` > 0, animates smoothly. |
 | `getVolume()`                  | Return current volume (0–1).                                    |
 | `setMuted(muted)`              | Mute or unmute. Restores previous volume when unmuting.         |
@@ -138,7 +153,7 @@ sequenceDiagram
 #### State
 
 | Method                | Description                                                    |
-| --------------------- | -------------------------------------------------------------- |
+| ------------------------ | ------------------------------------------------------------------ |
 | `getDuration()`       | Return loaded source duration (seconds) or `0` if unavailable. |
 | `getCurrentTime()`    | Return current playback position (seconds).                    |
 | `isPaused()`          | Return boolean - is playback paused.                           |
@@ -183,7 +198,7 @@ import { useAudio } from "@/hooks/use-audio";
 function MyComponent() {
   const { htmlAudio } = useAudio();
   const duration = htmlAudio.getDuration();
-  
+
   if (htmlAudio.isLive(duration)) {
     // Handle live stream (no seeking)
   }
@@ -204,7 +219,7 @@ function MyComponent() {
 Common audio track object with optional fields:
 
 | Prop            | Type               | Default | Description                      |
-| --------------- | ------------------ | ------- | -------------------------------- |
+| ------------------ | -------------------- | --------- | ----------------------------------- |
 | `id`            | `string \| number` | -       | Unique identifier for the track. |
 | `url`           | `string`           | -       | URL of the audio file or stream. |
 | `title`         | `string`           | -       | Track title.                     |
@@ -292,7 +307,7 @@ $htmlAudio.addEventListener("audioError", (event) => {
 ## Related
 
 - [Audio Store](/docs/lib/audio-store) - Zustand store for queue and playback state management
-- [Audio Player](/docs/components/player) - Composable player UI components
+- [Audio Player](/docs/components/base/player) - Composable player UI components
 
 ## Notes
 
@@ -302,19 +317,3 @@ $htmlAudio.addEventListener("audioError", (event) => {
 - Volume fading: Animations use `requestAnimationFrame` for smooth transitions
 - Live streams: Disable seeking and use extended timeout for reliability
 - `formatDuration` handles edge cases (NaN, Infinity, negative values)
-
-## Changelog
-
-### 2025-12-24 useAudio integration and live stream improvements
-
-- **Changed**: `isLive()` is now a method on the `HtmlAudio` class instead of a standalone function
-- **Removed**: `LIVE_STREAM_PATTERNS` URL pattern matching (now uses duration-based detection)
-- **Improved**: `isLive()` now correctly returns `false` for `duration === 0`
-- **Added**: Integration with `useAudio()` hook for React components
-- **Improved**: `setPlaybackRate()` uses `isLive()` method for live stream detection
-
-### 2025-12-02 Live stream playback rate protection
-
-- **Added**: `setPlaybackRate()` now prevents rate changes for live streams
-- **Fixed**: `LIVE_STREAM_PATTERNS` moved to top-level scope for better performance
-- **Improved**: Live stream detection uses consistent patterns across the library

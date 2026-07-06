@@ -3,6 +3,7 @@ import path from "node:path";
 import {
   Geist_Mono as FontMono,
   Bricolage_Grotesque as FontSans,
+  Inter,
 } from "next/font/google";
 import FontSerif from "next/font/local";
 
@@ -36,5 +37,6 @@ const fontMono = FontMono({
   weight: ["400"],
   variable: "--font-mono",
 });
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
-export { loadOGFont, fontSans, fontSerif, fontMono };
+export { loadOGFont, fontSans, fontSerif, fontMono, inter };

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import * as React from "react";
 
 export function useCopyToClipboard({
   timeout = 2000,
@@ -32,7 +32,7 @@ export function useCopyToClipboard({
           setIsCopied(false);
         }, timeout);
       }
-    });
+    }, console.error);
   };
 
   return { isCopied, copyToClipboard };

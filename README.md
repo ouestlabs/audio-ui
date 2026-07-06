@@ -1,5 +1,4 @@
 ![Audio UI Illustration](/apps/www/public/illustration.svg)
-![Audio UI Overview](/apps/www/public/overview.png)
 
 ## Contributing
 

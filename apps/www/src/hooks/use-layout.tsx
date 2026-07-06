@@ -1,23 +1,23 @@
 "use client";
 
-import React from "react";
+import * as React from "react";
 
 type Layout = "fixed" | "full";
 
-type LayoutProviderProps = {
+interface LayoutProviderProps {
   children: React.ReactNode;
   defaultLayout?: Layout;
   forcedLayout?: Layout;
   storageKey?: string;
   attribute?: string | string[];
   value?: Record<string, string>;
-};
+}
 
-type LayoutProviderState = {
+interface LayoutProviderState {
   layout: Layout;
   setLayout: (layout: Layout | ((prev: Layout) => Layout)) => void;
   forcedLayout?: Layout;
-};
+}
 
 const isServer = typeof window === "undefined";
 const LayoutContext = React.createContext<LayoutProviderState | undefined>(
@@ -52,32 +52,26 @@ const Layout = ({
     if (isServer) {
       return defaultLayout;
     }
-
-    let saved: string | null = null;
     try {
-      saved = localStorage.getItem(storageKey);
+      const saved = localStorage.getItem(storageKey);
+      if (saved === "fixed" || saved === "full") {
+        return saved;
+      }
+      return defaultLayout;
     } catch {
-      // If localStorage fails, saved remains null
+      return defaultLayout;
     }
-
-    if (saved === "fixed" || saved === "full") {
-      return saved;
-    }
-    return defaultLayout;
   });
 
-  const attrs = React.useMemo(
-    () => (value ? Object.values(value) : ["layout-fixed", "layout-full"]),
-    [value]
-  );
+  const attrs = value ? Object.values(value) : ["layout-fixed", "layout-full"];
 
   const applyLayout = React.useCallback(
-    (lay: Layout) => {
-      if (!lay) {
+    (layout: Layout) => {
+      if (!layout) {
         return;
       }
 
-      const name = value ? value[lay] : `layout-${lay}`;
+      const name = value ? value[layout] : `layout-${layout}`;
       const d = document.documentElement;
 
       const handleAttribute = (attr: string) => {
@@ -105,16 +99,16 @@ const Layout = ({
   );
 
   const setLayout = React.useCallback(
-    (val: Layout | ((prev: Layout) => Layout)) => {
-      if (typeof val === "function") {
+    (value: Layout | ((prev: Layout) => Layout)) => {
+      if (typeof value === "function") {
         setLayoutState((prevLayout) => {
-          const newLayout = val(prevLayout);
+          const newLayout = value(prevLayout);
           saveToLS(storageKey, newLayout);
           return newLayout;
         });
       } else {
-        setLayoutState(val);
-        saveToLS(storageKey, val);
+        setLayoutState(value);
+        saveToLS(storageKey, value);
       }
     },
     [storageKey]
@@ -138,11 +132,13 @@ const Layout = ({
     return () => window.removeEventListener("storage", handleStorage);
   }, [setLayout, storageKey, defaultLayout]);
 
+  // Apply layout on mount and when it changes
   React.useEffect(() => {
     const currentLayout = forcedLayout ?? layout;
     applyLayout(currentLayout);
   }, [forcedLayout, layout, applyLayout]);
 
+  // Prevent layout changes during hydration
   const [isHydrated, setIsHydrated] = React.useState(false);
   React.useEffect(() => {
     setIsHydrated(true);
@@ -167,6 +163,7 @@ const Layout = ({
 const LayoutProvider = (props: LayoutProviderProps) => {
   const context = React.useContext(LayoutContext);
 
+  // Ignore nested context providers, just passthrough children
   if (context) {
     return <>{props.children}</>;
   }

@@ -1,27 +1,67 @@
-import { transformerNotationWordHighlight } from "@shikijs/transformers";
-import { codeToHtml, type ShikiTransformer } from "shiki";
+import { LRUCache } from "lru-cache";
+import type { ShikiTransformer } from "shiki";
+
+const highlightCache = new LRUCache<string, string>({
+  max: 500,
+  ttl: 1000 * 60 * 60 * 24, // 24 hours
+});
 
 export const transformers = [
   {
     code(node) {
       if (node.tagName === "code") {
-        node.properties.__raw__ = this.source;
-        if (this.source.includes("\n")) {
-          node.properties["data-line-numbers"] = "";
+        const raw = this.source;
+
+        if (raw.startsWith("npm install")) {
+          node.properties.__npm__ = raw;
+          node.properties.__yarn__ = raw.replace("npm install", "yarn add");
+          node.properties.__pnpm__ = raw.replace("npm install", "pnpm add");
+          node.properties.__bun__ = raw.replace("npm install", "bun add");
+        }
+
+        if (raw.startsWith("npx create-")) {
+          node.properties.__npm__ = raw;
+          node.properties.__yarn__ = raw.replace("npx create-", "yarn create ");
+          node.properties.__pnpm__ = raw.replace("npx create-", "pnpm create ");
+          node.properties.__bun__ = raw.replace("npx", "bunx --bun");
+        }
+
+        // npm create.
+        if (raw.startsWith("npm create")) {
+          node.properties.__npm__ = raw;
+          node.properties.__yarn__ = raw.replace("npm create", "yarn create");
+          node.properties.__pnpm__ = raw.replace("npm create", "pnpm create");
+          node.properties.__bun__ = raw.replace("npm create", "bun create");
+        }
+
+        // npx.
+        if (raw.startsWith("npx")) {
+          node.properties.__npm__ = raw;
+          node.properties.__yarn__ = raw.replace("npx", "yarn");
+          node.properties.__pnpm__ = raw.replace("npx", "pnpm dlx");
+          node.properties.__bun__ = raw.replace("npx", "bunx --bun");
+        }
+
+        // npm run.
+        if (raw.startsWith("npm run")) {
+          node.properties.__npm__ = raw;
+          node.properties.__yarn__ = raw.replace("npm run", "yarn");
+          node.properties.__pnpm__ = raw.replace("npm run", "pnpm");
+          node.properties.__bun__ = raw.replace("npm run", "bun");
         }
       }
     },
   },
-  transformerNotationWordHighlight(),
-] satisfies ShikiTransformer[];
+] as ShikiTransformer[];
 
-export async function highlightCode(
-  code: string,
-  language = "tsx",
-  options?: { showLineNumbers?: boolean }
-) {
-  const { showLineNumbers = true } = options ?? {};
+export async function highlightCode(code: string, language = "tsx") {
+  const cacheKey = `${language}:${code}`;
+  const cached = highlightCache.get(cacheKey);
+  if (cached !== undefined) {
+    return cached;
+  }
 
+  const { codeToHtml } = await import("shiki");
   const html = await codeToHtml(code, {
     lang: language,
     themes: {
@@ -30,18 +70,20 @@ export async function highlightCode(
     },
     transformers: [
       {
+        pre(node) {
+          node.properties.class =
+            "no-scrollbar scroll-fade min-w-0 overflow-x-auto px-4 py-3.5 outline-none has-[[data-highlighted-line]]:px-0 has-[[data-line-numbers]]:px-0 has-[[data-slot=tabs]]:p-0 !bg-transparent";
+        },
         code(node) {
-          if (showLineNumbers) {
-            node.properties["data-line-numbers"] = "";
-          }
+          node.properties["data-line-numbers"] = "";
         },
         line(node) {
           node.properties["data-line"] = "";
         },
       },
-      transformerNotationWordHighlight(),
     ],
   });
 
+  highlightCache.set(cacheKey, html);
   return html;
 }

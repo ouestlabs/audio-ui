@@ -1,7 +1,0 @@
-{
-  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
-  "name": "hooks",
-  "type": "registry:hook",
-  "registryDependencies": ["@audio/use-audio", "@audio/use-sound"],
-  "files": []
-}

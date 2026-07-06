@@ -1,25 +1,24 @@
 import { Feed } from "feed";
-import { appConfig } from "@/lib/config";
+import { siteConfig } from "@/lib/config";
 import { source } from "@/lib/source";
 
 export function getRSS() {
   const feed = new Feed({
-    title: appConfig.name,
-    description: appConfig.description,
-    id: `${appConfig.url}/docs`,
-    link: `${appConfig.url}/docs`,
+    title: siteConfig.name,
+    description: siteConfig.description,
+    id: `${siteConfig.url}/docs`,
+    link: `${siteConfig.url}/docs`,
     language: "en",
-    image: appConfig.ogImage ?? `${appConfig.url}/opengraph-image.png`,
-    favicon: `${appConfig.url}/icon`,
-    copyright: `All rights reserved ${new Date().getFullYear()}, ${appConfig.name}`,
-    generator: appConfig.name,
+    favicon: `${siteConfig.url}/icon`,
+    copyright: `All rights reserved ${new Date().getFullYear()}, ${siteConfig.name}`,
+    generator: siteConfig.name,
     feedLinks: {
-      rss: `${appConfig.url}/rss.xml`,
+      rss: `${siteConfig.url}/rss.xml`,
     },
   });
 
   for (const page of source.getPages()) {
-    const href = `${appConfig.url}${page.url}`;
+    const href = `${siteConfig.url}${page.url}`;
     const date = page.data.lastModified
       ? new Date(page.data.lastModified)
       : new Date();
@@ -32,8 +31,8 @@ export function getRSS() {
       date,
       author: [
         {
-          name: appConfig.name,
-          link: appConfig.links.twitter,
+          name: siteConfig.name,
+          link: siteConfig.links.twitter,
         },
       ],
     });

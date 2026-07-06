@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 import type { ReactElement } from "react";
-import { appConfig } from "@/lib/config";
+import { siteConfig } from "@/lib/config";
 
 export const OG_SIZE = { width: 1200, height: 630 };
 
@@ -269,7 +269,7 @@ export function generateHomeOG(): ReactElement {
             letterSpacing: "-0.01em",
           }}
         >
-          {appConfig.name}
+          {siteConfig.name}
         </span>
         <span
           style={{
@@ -281,7 +281,7 @@ export function generateHomeOG(): ReactElement {
             lineHeight: 1.4,
           }}
         >
-          {appConfig.description}
+          {siteConfig.description}
         </span>
       </div>
 
