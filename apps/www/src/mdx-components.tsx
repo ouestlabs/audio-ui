@@ -124,7 +124,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
       <hr className="my-4 md:my-8" {...props} />
     ),
     table: ({ className, ...props }: React.ComponentProps<"table">) => (
-      <div className="scrollbar site-rounded-lg my-6 w-full overflow-y-auto border border-site-border">
+      <div className="no-scrollbar site-rounded-lg my-6 w-full overflow-y-auto border border-site-border">
         <table
           className={cn(
             "relative w-full overflow-hidden border-none text-sm [&_tbody_tr:last-child]:border-b-0",
@@ -290,25 +290,13 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
       className,
       ...props
     }: React.ComponentProps<typeof TabsList>) => (
-      <TabsList
-        className={cn(
-          "site-rounded-none justify-start gap-4 bg-transparent px-0",
-          className
-        )}
-        {...props}
-      />
+      <TabsList {...props} />
     ),
     TabsTrigger: ({
       className,
       ...props
     }: React.ComponentProps<typeof TabsTrigger>) => (
-      <TabsTrigger
-        className={cn(
-          "site-rounded-none border-0 border-transparent border-b-2 bg-transparent px-0 pb-3 text-base text-site-muted-foreground hover:text-site-primary data-[state=active]:border-site-primary data-[state=active]:bg-transparent data-[state=active]:text-site-foreground data-[state=active]:shadow-none dark:data-[state=active]:border-site-primary dark:data-[state=active]:bg-transparent",
-          className
-        )}
-        {...props}
-      />
+      <TabsTrigger {...props} />
     ),
     TabsContent: ({
       className,

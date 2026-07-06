@@ -16,7 +16,7 @@ import type { IconLibraryName } from "@/registry/config";
 const DEFAULT_STYLE_NAME = "base-nova";
 
 const COLLAPSIBLE_COPY_BUTTON_CLASS_NAME =
-  "pointer-events-none invisible opacity-0 transition-opacity group-data-[state=open]/collapsible:pointer-events-auto group-data-[state=open]/collapsible:visible group-data-[state=open]/collapsible:opacity-100";
+  "pointer-events-none invisible opacity-0 transition-opacity group-data-open/collapsible:pointer-events-auto group-data-open/collapsible:visible group-data-open/collapsible:opacity-100";
 
 const clientCodeCache = new Map<string, string>();
 

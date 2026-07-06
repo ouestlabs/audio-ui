@@ -34,27 +34,48 @@ export function CodeCollapsibleWrapper({
             )}
           >
             <Button
-              className="site-rounded-md h-7 px-2 text-site-muted-foreground"
+              className="text-site-muted-foreground"
               size="sm"
-              variant="ghost"
+              variant="outline"
             >
               {isOpened ? "Collapse" : "Expand"}
             </Button>
             {isOpened && (
-              <Separator className="mx-1.5 h-4!" orientation="vertical" />
+              <Separator className="mx-1.5" orientation="vertical" />
             )}
+            
           </div>
         }
       />
       <CollapsibleContent
-        className="relative mt-6 overflow-hidden data-[state=closed]:max-h-64 [&>figure]:mt-0 [&>figure]:md:mx-0!"
+        className={cn(
+          "mt-6 h-full p-px data-closed:max-h-64 [&>figure]:mt-0 [&>figure]:md:mx-0!",
+          "data-closed:[-webkit-mask-image:linear-gradient(to_bottom,black_0%,black_72%,transparent_100%)]",
+          "data-closed:mask-[linear-gradient(to_bottom,black_0%,black_72%,transparent_100%)]"
+        )}
         keepMounted
+        hidden={false}
       >
         {children}
       </CollapsibleContent>
-      <CollapsibleTrigger className="site-rounded-b-lg -bottom-2 absolute inset-x-0 flex h-20 items-center justify-center bg-linear-to-b from-site-code/70 to-site-code text-site-muted-foreground text-sm group-data-[state=open]/collapsible:hidden">
-        {isOpened ? "Collapse" : "Expand"}
-      </CollapsibleTrigger>
+      <CollapsibleTrigger
+        nativeButton={false}
+        render={
+          <div
+            className={cn(
+              "site-rounded-b-lg -bottom-2 absolute inset-x-0 flex h-20 items-center justify-center bg-linear-to-b from-site-code/70 to-site-code",
+              "group-data-open/collapsible:hidden"
+            )}
+          >
+            <Button
+              className="cursor-pointer bg-transparent! text-site-muted-foreground text-sm"
+              variant="ghost"
+            >
+              {isOpened ? "Collapse" : "Expand"}
+            </Button>
+          </div>
+        }
+      />
     </Collapsible>
   );
 }
