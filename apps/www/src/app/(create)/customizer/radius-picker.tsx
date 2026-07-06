@@ -51,23 +51,12 @@ export function RadiusPicker({
               {mounted ? currentRadius?.label : "..."}
             </div>
           </div>
-          <div className="-translate-y-1/2 pointer-events-none absolute top-1/2 right-4 flex size-4 rotate-90 select-none items-center justify-center text-base text-site-foreground">
-            <svg
-              className="text-site-foreground"
-              height="24"
-              viewBox="0 0 24 24"
-              width="24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M4 20v-5C4 8.925 8.925 4 15 4h5"
-                fill="none"
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-              />
-            </svg>
+          <div className="-translate-y-1/2 pointer-events-none absolute top-1/2 right-4 flex size-4 rotate-90 select-none items-center justify-center text-site-foreground">
+            <div
+              aria-hidden="true"
+              className="size-3 border-current border-t-2 border-l-2 transition-[border-radius] duration-150"
+              style={{ borderTopLeftRadius: "var(--radius)" }}
+            />
           </div>
         </PickerTrigger>
         <PickerContent
