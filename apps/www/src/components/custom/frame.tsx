@@ -25,7 +25,7 @@ export const Frame = ({
       <Link
         className={cn(
           outerClasses,
-          "transition-all hover:shadow-lg hover:ring-site-foreground/10"
+          "transition-shadow duration-200 ease-out hover:shadow-lg hover:ring-site-foreground/10"
         )}
         href={url}
         ref={ref as any}
@@ -51,7 +51,7 @@ export function FrameContent({
   return (
     <div
       className={cn(
-        "site-rounded-xl relative overflow-hidden border border-site-border",
+        "relative overflow-hidden rounded-[14px] border border-site-border",
         className
       )}
       {...props}
