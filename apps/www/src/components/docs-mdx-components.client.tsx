@@ -15,6 +15,10 @@ import {
 import { getRegistryComponent } from "@/lib/registry";
 import type { IconLibraryName } from "@/registry/config";
 
+const emptySubscribe = () => () => {
+  // Nothing to clean up: localStorage config presence is read per render.
+};
+
 type DocsComponentPreviewProps = React.ComponentProps<"div"> & {
   name: string;
   styleName?: string;
@@ -33,11 +37,11 @@ function useResolvedRegistryOptions(
   initialIconLibrary: IconLibraryName
 ) {
   const [config] = useConfig();
-  const [hasStoredConfig, setHasStoredConfig] = React.useState(false);
-
-  React.useEffect(() => {
-    setHasStoredConfig(window.localStorage.getItem("config") !== null);
-  }, []);
+  const hasStoredConfig = React.useSyncExternalStore(
+    emptySubscribe,
+    () => window.localStorage.getItem("config") !== null,
+    () => false
+  );
 
   const resolvedStyleName = React.useMemo(
     () =>

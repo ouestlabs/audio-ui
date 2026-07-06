@@ -12,6 +12,7 @@ import {
 } from "@/app/(create)/customizer/picker";
 import { useDesignSystemSearchParams } from "@/app/(create)/lib/search-params";
 import { useConfig } from "@/hooks/use-config";
+import { useMounted } from "@/hooks/use-mounted";
 import { type Preset, STYLES } from "@/registry/config";
 
 export function PresetPicker({
@@ -23,14 +24,10 @@ export function PresetPicker({
   isMobile: boolean;
   anchorRef: React.RefObject<HTMLDivElement | null>;
 }) {
-  const [mounted, setMounted] = React.useState(false);
+  const mounted = useMounted();
   const context = React.use(DesignSystemContext);
   const [params, setParams] = useDesignSystemSearchParams();
   const [config, setConfig] = useConfig();
-
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const effectiveParams = React.useMemo(
     () => ({

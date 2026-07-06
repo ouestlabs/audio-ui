@@ -17,6 +17,10 @@ import { useConfig } from "@/hooks/use-config";
 import { useMounted } from "@/hooks/use-mounted";
 import { BASE_COLORS, type Theme, type ThemeName } from "@/registry/config";
 
+const BASE_COLOR_NAMES = new Set(
+  BASE_COLORS.map((baseColor) => baseColor.name)
+);
+
 export function ThemePicker({
   themes,
   isMobile,
@@ -36,12 +40,18 @@ export function ThemePicker({
     [themes, params.theme, config.theme]
   );
 
-  const currentThemeIsBaseColor = React.useMemo(
-    () =>
-      BASE_COLORS.find(
-        (baseColor) => baseColor.name === (params.theme ?? config.theme)
-      ),
-    [params.theme, config.theme]
+  const currentThemeIsBaseColor = BASE_COLOR_NAMES.has(
+    params.theme ?? config.theme
+  );
+
+  const baseColorThemes = React.useMemo(
+    () => themes.filter((theme) => BASE_COLOR_NAMES.has(theme.name)),
+    [themes]
+  );
+
+  const otherThemes = React.useMemo(
+    () => themes.filter((theme) => !BASE_COLOR_NAMES.has(theme.name)),
+    [themes]
   );
 
   const handleValueChange = React.useCallback(
@@ -100,53 +110,35 @@ export function ThemePicker({
             value={currentTheme?.name}
           >
             <PickerGroup>
-              {themes
-                .filter((theme) =>
-                  BASE_COLORS.find((baseColor) => baseColor.name === theme.name)
-                )
-                .map((theme) => {
-                  const isBaseColor = BASE_COLORS.find(
-                    (baseColor) => baseColor.name === theme.name
-                  );
-                  return (
-                    <PickerRadioItem key={theme.name} value={theme.name}>
-                      <div className="flex items-start gap-2">
-                        {mounted && resolvedTheme && (
-                          <div
-                            className="site-rounded-full size-4 translate-y-1 bg-(--color)"
-                            style={
-                              {
-                                "--color":
-                                  theme.cssVars?.[
-                                    resolvedTheme as "light" | "dark"
-                                  ]?.[
-                                    isBaseColor ? "muted-foreground" : "primary"
-                                  ],
-                              } as React.CSSProperties
-                            }
-                          />
-                        )}
-                        <div className="flex flex-col justify-start pointer-coarse:gap-1">
-                          <div>{theme.title}</div>
-                          <div className="pointer-coarse:text-sm text-site-muted-foreground text-xs">
-                            Match base color
-                          </div>
-                        </div>
+              {baseColorThemes.map((theme) => (
+                <PickerRadioItem key={theme.name} value={theme.name}>
+                  <div className="flex items-start gap-2">
+                    {mounted && resolvedTheme && (
+                      <div
+                        className="site-rounded-full size-4 translate-y-1 bg-(--color)"
+                        style={
+                          {
+                            "--color":
+                              theme.cssVars?.[
+                                resolvedTheme as "light" | "dark"
+                              ]?.["muted-foreground"],
+                          } as React.CSSProperties
+                        }
+                      />
+                    )}
+                    <div className="flex flex-col justify-start pointer-coarse:gap-1">
+                      <div>{theme.title}</div>
+                      <div className="pointer-coarse:text-sm text-site-muted-foreground text-xs">
+                        Match base color
                       </div>
-                    </PickerRadioItem>
-                  );
-                })}
+                    </div>
+                  </div>
+                </PickerRadioItem>
+              ))}
             </PickerGroup>
             <PickerSeparator />
             <PickerGroup>
-              {themes
-                .filter(
-                  (theme) =>
-                    !BASE_COLORS.find(
-                      (baseColor) => baseColor.name === theme.name
-                    )
-                )
-                .map((theme) => (
+              {otherThemes.map((theme) => (
                   <PickerRadioItem key={theme.name} value={theme.name}>
                     <div className="flex items-center gap-2">
                       {mounted && resolvedTheme && (

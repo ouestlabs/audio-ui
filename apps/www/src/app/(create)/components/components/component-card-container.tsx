@@ -81,19 +81,13 @@ export function ComponentCardContainer({
 }: ComponentCardContainerProps) {
   const containerRef = React.useRef<HTMLDivElement>(null);
 
-  const isIntersecting = useIntersectionObserver(containerRef, {
+  // freezeOnceVisible latches isIntersecting to true once seen, so it also
+  // serves as the "has been visible" flag.
+  const hasBeenVisible = useIntersectionObserver(containerRef, {
     rootMargin: "800px",
     threshold: 0,
     freezeOnceVisible: true,
   });
-
-  const [hasBeenVisible, setHasBeenVisible] = React.useState(false);
-
-  React.useEffect(() => {
-    if (isIntersecting && !hasBeenVisible) {
-      setHasBeenVisible(true);
-    }
-  }, [isIntersecting, hasBeenVisible]);
 
   return (
     <Frame

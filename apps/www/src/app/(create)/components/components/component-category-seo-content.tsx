@@ -114,10 +114,13 @@ function renderBacktickContent(content: string, key: string): React.ReactNode {
  * - `{{count}}` / `[[count]]` stay literal until `applySeoCountPlaceholder`
  * - Legacy: `[[pkg:…]]`, `[[slug|Label]]` (same link style as `[Label](/components/slug)`)
  */
-export function renderSeoLinkedText(
-  text: string,
-  keyPrefix: string
-): React.ReactNode {
+export function SeoLinkedText({
+  text,
+  keyPrefix,
+}: {
+  text: string;
+  keyPrefix: string;
+}): React.ReactNode {
   const parts: React.ReactNode[] = [];
   let pos = 0;
   let k = 0;
@@ -246,7 +249,7 @@ export function renderSeoLinkedText(
 export function ComponentCategoryHeroIntro({ intro }: { intro: string }) {
   return (
     <p className="mt-4 block w-full max-w-none text-base text-site-muted-foreground leading-7">
-      {renderSeoLinkedText(intro, "cat-hero-intro")}
+      <SeoLinkedText keyPrefix="cat-hero-intro" text={intro} />
     </p>
   );
 }
@@ -276,7 +279,10 @@ export function ComponentCategoryRelatedComponents({
         <div className="w-full space-y-4 text-pretty text-[15px] text-site-muted-foreground leading-7 sm:text-base">
           {block.integrationBody.map((paragraph, paragraphIndex) => (
             <p key={paragraphIndex}>
-              {renderSeoLinkedText(paragraph, `int${paragraphIndex}`)}
+              <SeoLinkedText
+                keyPrefix={`int${paragraphIndex}`}
+                text={paragraph}
+              />
             </p>
           ))}
         </div>
@@ -399,7 +405,7 @@ export function ComponentCategorySeoContent({
                     className="w-full text-pretty text-site-muted-foreground text-sm leading-7 sm:text-base"
                     key={i}
                   >
-                    {renderSeoLinkedText(paragraph, `sum-${i}`)}
+                    <SeoLinkedText keyPrefix={`sum-${i}`} text={paragraph} />
                   </p>
                 ))}
               </div>
@@ -414,7 +420,10 @@ export function ComponentCategorySeoContent({
 
                   {section.intro ? (
                     <p className="w-full text-pretty text-site-muted-foreground text-sm leading-7 sm:text-base">
-                      {renderSeoLinkedText(section.intro, `sec-${si}-intro`)}
+                      <SeoLinkedText
+                        keyPrefix={`sec-${si}-intro`}
+                        text={section.intro}
+                      />
                     </p>
                   ) : null}
 
@@ -442,28 +451,28 @@ export function ComponentCategorySeoContent({
                             {bullets.length > 0 ? (
                               <>
                                 <p className="mt-2 text-pretty text-site-muted-foreground text-sm leading-6">
-                                  {renderSeoLinkedText(
-                                    lead,
-                                    `comp-${item.slug}-lead`
-                                  )}
+                                  <SeoLinkedText
+                                    keyPrefix={`comp-${item.slug}-lead`}
+                                    text={lead}
+                                  />
                                 </p>
                                 <ul className="mt-2 list-disc space-y-1.5 pl-5 text-site-muted-foreground text-sm leading-6 sm:list-outside">
                                   {bullets.map((b, bi) => (
                                     <li className="text-pretty" key={bi}>
-                                      {renderSeoLinkedText(
-                                        b,
-                                        `comp-${item.slug}-b${bi}`
-                                      )}
+                                      <SeoLinkedText
+                                        keyPrefix={`comp-${item.slug}-b${bi}`}
+                                        text={b}
+                                      />
                                     </li>
                                   ))}
                                 </ul>
                               </>
                             ) : (
                               <p className="mt-2 text-pretty text-site-muted-foreground text-sm leading-6">
-                                {renderSeoLinkedText(
-                                  item.description,
-                                  `comp-${item.slug}`
-                                )}
+                                <SeoLinkedText
+                                  keyPrefix={`comp-${item.slug}`}
+                                  text={item.description}
+                                />
                               </p>
                             )}
                           </li>
@@ -477,7 +486,10 @@ export function ComponentCategorySeoContent({
                       className="w-full text-pretty text-site-muted-foreground text-sm leading-7 sm:text-base"
                       key={pi}
                     >
-                      {renderSeoLinkedText(paragraph, `sec-${si}-p${pi}`)}
+                      <SeoLinkedText
+                        keyPrefix={`sec-${si}-p${pi}`}
+                        text={paragraph}
+                      />
                     </p>
                   ))}
 
@@ -492,9 +504,12 @@ export function ComponentCategorySeoContent({
                               className="text-pretty"
                               key={`sec-${si}-feat-${fi}`}
                             >
-                              {renderSeoLinkedText(item.title, keyT)}
+                              <SeoLinkedText keyPrefix={keyT} text={item.title} />
                               <span aria-hidden="true">: </span>
-                              {renderSeoLinkedText(item.description, keyD)}
+                              <SeoLinkedText
+                                keyPrefix={keyD}
+                                text={item.description}
+                              />
                             </li>
                           );
                         }
@@ -506,7 +521,10 @@ export function ComponentCategorySeoContent({
                             <span className="font-medium text-foreground">
                               {item.title}
                             </span>{" "}
-                            {renderSeoLinkedText(item.description, keyD)}
+                            <SeoLinkedText
+                              keyPrefix={keyD}
+                              text={item.description}
+                            />
                           </li>
                         );
                       })}
@@ -517,10 +535,10 @@ export function ComponentCategorySeoContent({
                     <ul className="w-full list-disc space-y-2 pl-6 text-site-muted-foreground text-sm leading-7 sm:list-outside sm:pl-7 sm:text-base">
                       {section.bullets.map((bullet, bidx) => (
                         <li className="text-pretty" key={bullet}>
-                          {renderSeoLinkedText(
-                            bullet,
-                            `sec-${si}-bull-${bidx}`
-                          )}
+                          <SeoLinkedText
+                            keyPrefix={`sec-${si}-bull-${bidx}`}
+                            text={bullet}
+                          />
                         </li>
                       ))}
                     </ul>
@@ -554,7 +572,10 @@ export function ComponentCategorySeoContent({
                       {faq.question}
                     </AccordionTrigger>
                     <AccordionContent className="text-pretty text-site-muted-foreground text-sm leading-7 sm:text-base">
-                      {renderSeoLinkedText(faq.answer, `faq-${index}`)}
+                      <SeoLinkedText
+                        keyPrefix={`faq-${index}`}
+                        text={faq.answer}
+                      />
                     </AccordionContent>
                   </AccordionItem>
                 ))}

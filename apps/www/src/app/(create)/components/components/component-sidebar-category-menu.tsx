@@ -12,7 +12,7 @@ import { SidebarGroup, SidebarGroupContent } from "@/components/ui/sidebar";
 import { getCategoryNames } from "@/lib/registry";
 import { cn, formatLabel, normalizeSlug } from "@/lib/utils";
 
-import { useComponents } from "./components-provider";
+import { useComponents } from "./components-context";
 
 interface ComponentSidebarCategoryMenuProps {
   onSelect?: () => void;

@@ -49,15 +49,15 @@ export function transformStyleClassNames(
 
       const resolved = content
         .split(WHITESPACE_REGEX)
-        .map((cls: string) => {
+        .flatMap((cls: string) => {
           if (cls.startsWith("style-")) {
-            return cls.startsWith(stylePrefix)
+            const stripped = cls.startsWith(stylePrefix)
               ? cls.slice(stylePrefix.length)
               : null;
+            return stripped ? [stripped] : [];
           }
-          return cls;
+          return cls ? [cls] : [];
         })
-        .filter(Boolean)
         .join(" ")
         .trim();
 

@@ -5,6 +5,7 @@ import * as React from "react";
 import { CopyButton } from "@/components/copy-button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DEFAULT_CONFIG, useConfig } from "@/hooks/use-config";
+import { useMounted } from "@/hooks/use-mounted";
 
 export function CodeBlockCommand({
   __npm__,
@@ -18,11 +19,7 @@ export function CodeBlockCommand({
   __bun__?: string;
 }) {
   const [config, setConfig] = useConfig();
-  const [mounted, setMounted] = React.useState(false);
-
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useMounted();
 
   const packageManager = mounted
     ? (config.packageManager ?? DEFAULT_CONFIG.packageManager)

@@ -3,7 +3,14 @@
 import { MagnifyingGlassIcon, XIcon } from "@phosphor-icons/react/ssr";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useQueryState } from "nuqs";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useEffectEvent,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -14,7 +21,7 @@ import {
 import { parseAsSearchStringClient } from "@/lib/nuqs";
 import { cn } from "@/lib/utils";
 
-import { useComponents } from "./components-provider";
+import { useComponents } from "./components-context";
 
 const SEARCH_DEBOUNCE_MS = 320;
 
@@ -130,6 +137,10 @@ export function ComponentHeaderSearch({
     setLocalQuery(committedSearch);
   }, [committedSearch]);
 
+  const commitLocalQuery = useEffectEvent(() => {
+    commitSearch(localQuery);
+  });
+
   // Debounced URL update: search runs only after typing pauses,
   // and only once the query becomes an active search (3+ chars).
   useEffect(() => {
@@ -140,11 +151,11 @@ export function ComponentHeaderSearch({
     }
 
     const timer = setTimeout(() => {
-      commitSearch(localQuery);
+      commitLocalQuery();
     }, SEARCH_DEBOUNCE_MS);
 
     return () => clearTimeout(timer);
-  }, [localQuery, committedSearch, getSearchValueToCommit, commitSearch]);
+  }, [localQuery, committedSearch, getSearchValueToCommit]);
 
   const handleClear = () => {
     setLocalQuery("");
@@ -223,6 +234,7 @@ export function ComponentHeaderSearch({
         />
       </div>
       <input
+        aria-label="Search components"
         className={cn(
           "flex h-9 w-full border-0 bg-transparent py-1 pl-6 text-sm ring-offset-site-background file:border-0 file:bg-transparent file:font-medium file:text-sm placeholder:text-site-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50",
           localQuery ? "pr-32" : "pr-4"

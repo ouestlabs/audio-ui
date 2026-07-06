@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { renderSeoLinkedText } from "@/app/(create)/components/components/component-category-seo-content";
+import { SeoLinkedText } from "@/app/(create)/components/components/component-category-seo-content";
 import { cn } from "@/lib/utils";
 
 interface DocsComponentCatalogCtaProps {
@@ -34,7 +34,9 @@ export function DocsComponentCatalogCta({
         More Shadcn {label} components
       </h2>
       <div className="mt-4 space-y-4 text-pretty text-[1.05rem] text-site-muted-foreground leading-7 sm:text-base">
-        <p>{renderSeoLinkedText(intro, "docs-components-intro")}</p>
+        <p>
+          <SeoLinkedText keyPrefix="docs-components-intro" text={intro} />
+        </p>
         <p>
           <Link
             className="font-medium text-site-primary underline decoration-site-primary/60 underline-offset-[3px] hover:decoration-site-primary"

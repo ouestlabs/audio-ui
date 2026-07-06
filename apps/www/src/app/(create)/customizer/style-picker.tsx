@@ -13,6 +13,7 @@ import {
 } from "@/app/(create)/customizer/picker";
 import { useDesignSystemSearchParams } from "@/app/(create)/lib/search-params";
 import { useConfig } from "@/hooks/use-config";
+import { useMounted } from "@/hooks/use-mounted";
 import type { Style, StyleName } from "@/registry/config";
 
 export function StylePicker({
@@ -24,13 +25,9 @@ export function StylePicker({
   isMobile: boolean;
   anchorRef: React.RefObject<HTMLDivElement | null>;
 }) {
-  const [mounted, setMounted] = React.useState(false);
+  const mounted = useMounted();
   const [params, setParams] = useDesignSystemSearchParams();
   const [config, setConfig] = useConfig();
-
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const styleValue = params.style ?? config.style;
   const currentStyle = styles.find((style) => style.name === styleValue);

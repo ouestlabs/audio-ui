@@ -5,7 +5,7 @@ import * as React from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 
-import { useCustomizer } from "./components-provider";
+import { useCustomizer } from "./components-context";
 import { CustomizerSidebarHeader } from "./customizer-sidebar-header";
 
 /** Client-only: nuqs + jotai + theme pickers diverge from SSR; avoids hydration errors. */

@@ -7,6 +7,7 @@ import type { IconLibraryName } from "shadcn/icons";
 import { DesignSystemContext } from "@/app/(create)/customizer/design-system-provider";
 import { useDesignSystemSearchParams } from "@/app/(create)/lib/search-params";
 import { useConfig } from "@/hooks/use-config";
+import { useMounted } from "@/hooks/use-mounted";
 
 const IconLucide = lazy(() =>
   import("@/registry/icons/icon-lucide").then((mod) => ({
@@ -43,14 +44,10 @@ export function IconPlaceholder({
 }: {
   [K in IconLibraryName]: string;
 } & React.ComponentProps<"svg">) {
-  const [mounted, setMounted] = React.useState(false);
+  const mounted = useMounted();
   const context = React.use(DesignSystemContext);
   const [params] = useDesignSystemSearchParams();
   const [config] = useConfig();
-
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
 
   // Priority: Context (includes overrides) > URL Params > LocalStorage Config
   const iconLibraryValue =

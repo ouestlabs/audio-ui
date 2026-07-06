@@ -21,6 +21,10 @@ import {
   getThemesForBaseColor,
 } from "@/registry/config";
 
+const BASE_COLOR_NAMES = new Set(
+  BASE_COLORS.map((baseColor) => baseColor.name)
+);
+
 export function ChartColorPicker({
   isMobile,
   anchorRef,
@@ -48,10 +52,19 @@ export function ChartColorPicker({
     [availableChartColors, effectiveChartColor]
   );
 
-  const currentChartColorIsBaseColor = React.useMemo(
+  const currentChartColorIsBaseColor =
+    BASE_COLOR_NAMES.has(effectiveChartColor);
+
+  const baseColorThemes = React.useMemo(
     () =>
-      BASE_COLORS.find((baseColor) => baseColor.name === effectiveChartColor),
-    [effectiveChartColor]
+      availableChartColors.filter((theme) => BASE_COLOR_NAMES.has(theme.name)),
+    [availableChartColors]
+  );
+
+  const otherThemes = React.useMemo(
+    () =>
+      availableChartColors.filter((theme) => !BASE_COLOR_NAMES.has(theme.name)),
+    [availableChartColors]
   );
 
   React.useEffect(() => {
@@ -112,58 +125,39 @@ export function ChartColorPicker({
             value={currentChartColor?.name}
           >
             <PickerGroup>
-              {availableChartColors
-                .filter((theme) =>
-                  BASE_COLORS.find((baseColor) => baseColor.name === theme.name)
-                )
-                .map((theme) => {
-                  const isBaseColor = BASE_COLORS.find(
-                    (baseColor) => baseColor.name === theme.name
-                  );
-
-                  return (
-                    <PickerRadioItem
-                      closeOnClick={isMobile}
-                      key={theme.name}
-                      value={theme.name}
-                    >
-                      <div className="flex items-start gap-2">
-                        {mounted && resolvedTheme && (
-                          <div
-                            className="site-rounded-full size-4 translate-y-1 bg-(--color)"
-                            style={
-                              {
-                                "--color":
-                                  theme.cssVars?.[
-                                    resolvedTheme as "light" | "dark"
-                                  ]?.[
-                                    isBaseColor ? "muted-foreground" : "primary"
-                                  ],
-                              } as React.CSSProperties
-                            }
-                          />
-                        )}
-                        <div className="flex flex-col justify-start pointer-coarse:gap-1">
-                          <div>{theme.title}</div>
-                          <div className="pointer-coarse:text-sm text-site-muted-foreground text-xs">
-                            Match base color
-                          </div>
-                        </div>
+              {baseColorThemes.map((theme) => (
+                <PickerRadioItem
+                  closeOnClick={isMobile}
+                  key={theme.name}
+                  value={theme.name}
+                >
+                  <div className="flex items-start gap-2">
+                    {mounted && resolvedTheme && (
+                      <div
+                        className="site-rounded-full size-4 translate-y-1 bg-(--color)"
+                        style={
+                          {
+                            "--color":
+                              theme.cssVars?.[
+                                resolvedTheme as "light" | "dark"
+                              ]?.["muted-foreground"],
+                          } as React.CSSProperties
+                        }
+                      />
+                    )}
+                    <div className="flex flex-col justify-start pointer-coarse:gap-1">
+                      <div>{theme.title}</div>
+                      <div className="pointer-coarse:text-sm text-site-muted-foreground text-xs">
+                        Match base color
                       </div>
-                    </PickerRadioItem>
-                  );
-                })}
+                    </div>
+                  </div>
+                </PickerRadioItem>
+              ))}
             </PickerGroup>
             <PickerSeparator />
             <PickerGroup>
-              {availableChartColors
-                .filter(
-                  (theme) =>
-                    !BASE_COLORS.find(
-                      (baseColor) => baseColor.name === theme.name
-                    )
-                )
-                .map((theme) => (
+              {otherThemes.map((theme) => (
                   <PickerRadioItem
                     closeOnClick={isMobile}
                     key={theme.name}

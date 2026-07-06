@@ -582,25 +582,39 @@ export function DesignSystemProvider({
     };
   }, [menuColor]);
 
+  const contextValue = React.useMemo(
+    () => ({
+      style,
+      theme,
+      font,
+      fontHeading,
+      chartColor,
+      baseColor,
+      menuAccent,
+      menuColor,
+      radius,
+      iconLibrary,
+    }),
+    [
+      style,
+      theme,
+      font,
+      fontHeading,
+      chartColor,
+      baseColor,
+      menuAccent,
+      menuColor,
+      radius,
+      iconLibrary,
+    ]
+  );
+
   if (!isReady) {
     return null;
   }
 
   return (
-    <DesignSystemContext.Provider
-      value={{
-        style,
-        theme,
-        font,
-        fontHeading,
-        chartColor,
-        baseColor,
-        menuAccent,
-        menuColor,
-        radius,
-        iconLibrary,
-      }}
-    >
+    <DesignSystemContext.Provider value={contextValue}>
       {children}
     </DesignSystemContext.Provider>
   );

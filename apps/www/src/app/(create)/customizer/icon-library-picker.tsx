@@ -14,6 +14,7 @@ import {
 } from "@/app/(create)/customizer/picker";
 import { useDesignSystemSearchParams } from "@/app/(create)/lib/search-params";
 import { useConfig } from "@/hooks/use-config";
+import { useMounted } from "@/hooks/use-mounted";
 import { Item, ItemContent, ItemTitle } from "@/registry/bases/radix/ui/item";
 import {
   type IconLibrary,
@@ -236,13 +237,9 @@ export function IconLibraryPicker({
   isMobile: boolean;
   anchorRef: React.RefObject<HTMLDivElement | null>;
 }) {
-  const [mounted, setMounted] = React.useState(false);
+  const mounted = useMounted();
   const [params, setParams] = useDesignSystemSearchParams();
   const [config, setConfig] = useConfig();
-
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const currentIconLibrary = React.useMemo(
     () =>

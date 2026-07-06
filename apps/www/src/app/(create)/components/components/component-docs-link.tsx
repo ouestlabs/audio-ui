@@ -6,16 +6,13 @@ import * as React from "react";
 import { useDesignSystemSearchParams } from "@/app/(create)/lib/search-params";
 import { Button } from "@/components/ui/button";
 import { useConfig } from "@/hooks/use-config";
+import { useMounted } from "@/hooks/use-mounted";
 import { isCanonicalComponentDoc } from "@/lib/seo";
 
 export function ComponentDocsLink({ slug }: { slug: string }) {
-  const [mounted, setMounted] = React.useState(false);
+  const mounted = useMounted();
   const [params] = useDesignSystemSearchParams();
   const [config] = useConfig();
-
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
 
   if (!isCanonicalComponentDoc(slug)) {
     return null;

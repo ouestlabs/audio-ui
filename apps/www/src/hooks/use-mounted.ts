@@ -1,11 +1,13 @@
 import * as React from "react";
 
+const emptySubscribe = () => () => {
+  // Nothing to clean up: hydration status never changes after mount.
+};
+
 export function useMounted() {
-  const [mounted, setMounted] = React.useState(false);
-
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  return mounted;
+  return React.useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
 }

@@ -3,14 +3,11 @@
 import * as React from "react";
 import { Tabs } from "@/components/ui/tabs";
 import { DEFAULT_CONFIG, useConfig } from "@/hooks/use-config";
+import { useMounted } from "@/hooks/use-mounted";
 
 export function CodeTabs({ children }: React.ComponentProps<typeof Tabs>) {
   const [config, setConfig] = useConfig();
-  const [mounted, setMounted] = React.useState(false);
-
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useMounted();
 
   // localStorage-backed config differs from DEFAULT_CONFIG on the client; keep
   // the first client paint aligned with SSR to avoid Radix Tabs hydration errors.

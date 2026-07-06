@@ -96,10 +96,10 @@ export function buildPageSocialMetadata({
   PageMetadataOptions,
   "title" | "description" | "path" | "type" | "image"
 >): Pick<Metadata, "openGraph" | "twitter"> {
-  // No explicit image -> omit `images` entirely so pages inherit the
-  // file-convention opengraph-image/twitter-image (home, or /og/docs/{slug}
-  // for docs) instead of pointing at a made-up URL.
-  const imageUrl = image ? getAbsoluteMetadataUrl(image) : undefined;
+  // Explicit fallback to the generated /opengraph-image route: Next 16 stopped
+  // injecting the og:image tag from the file convention (the route itself still
+  // works), so relying on inheritance ships pages without any og:image.
+  const imageUrl = getAbsoluteMetadataUrl(image ?? "/opengraph-image");
   const twitterCreator = getSocialHandle(siteConfig.links.twitter);
 
   return {
@@ -110,13 +110,13 @@ export function buildPageSocialMetadata({
       type,
       siteName: siteConfig.name,
       locale: siteConfig.metadata.locale,
-      ...(imageUrl ? { images: [{ url: imageUrl }] } : {}),
+      images: [{ url: imageUrl }],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      ...(imageUrl ? { images: [{ url: imageUrl }] } : {}),
+      images: [{ url: imageUrl }],
       ...(twitterCreator ? { creator: twitterCreator } : {}),
     },
   };

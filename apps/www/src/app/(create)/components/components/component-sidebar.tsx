@@ -6,7 +6,7 @@ import { Sidebar, SidebarContent, useSidebar } from "@/components/ui/sidebar";
 
 import { ComponentSidebarContent } from "./component-sidebar-content";
 import { ComponentSidebarHeader } from "./component-sidebar-header";
-import { useComponents } from "./components-provider";
+import { useComponents } from "./components-context";
 
 export function ComponentSidebar() {
   const { toggleSidebar, isMobile } = useSidebar();

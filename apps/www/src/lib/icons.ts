@@ -4,13 +4,13 @@ import {
   PRESETS,
 } from "@/registry/config";
 
-const KNOWN_ICON_LIBRARIES = [
+const KNOWN_ICON_LIBRARIES = new Set([
   "lucide",
   "tabler",
   "hugeicons",
   "phosphor",
   "remixicon",
-];
+]);
 
 const SELF_CLOSING_TAG_REGEX = /\/>/;
 const TAG_CLOSE_REGEX = />/;
@@ -65,7 +65,7 @@ function parseIconAttributes(
 
     if (name === libraryName) {
       iconName = value;
-    } else if (KNOWN_ICON_LIBRARIES.includes(name)) {
+    } else if (KNOWN_ICON_LIBRARIES.has(name)) {
       replacedIcons.push(value);
     } else {
       attributes[name] = value;

@@ -105,14 +105,14 @@ export function DocsTableOfContents({
   const activeHeading = useActiveItem(itemIds);
   const activeIndex = toc.findIndex((item) => item.url === `#${activeHeading}`);
   const activeItemUrl = toc[activeIndex]?.url;
-  const itemRefs = React.useRef<Map<string, HTMLLIElement>>(new Map());
+  const itemRefs = React.useRef<Map<string, HTMLLIElement> | null>(null);
 
   React.useEffect(() => {
     if (!(pinned && activeItemUrl)) {
       return;
     }
     itemRefs.current
-      .get(activeItemUrl)
+      ?.get(activeItemUrl)
       ?.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }, [pinned, activeItemUrl]);
 
@@ -226,9 +226,10 @@ export function DocsTableOfContents({
               key={item.url}
               ref={(el) => {
                 if (el) {
+                  itemRefs.current ??= new Map();
                   itemRefs.current.set(item.url, el);
                 } else {
-                  itemRefs.current.delete(item.url);
+                  itemRefs.current?.delete(item.url);
                 }
               }}
             >

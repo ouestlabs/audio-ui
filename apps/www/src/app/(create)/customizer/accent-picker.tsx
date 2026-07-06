@@ -12,6 +12,7 @@ import {
 } from "@/app/(create)/customizer/picker";
 import { useDesignSystemSearchParams } from "@/app/(create)/lib/search-params";
 import { useConfig } from "@/hooks/use-config";
+import { useMounted } from "@/hooks/use-mounted";
 import { MENU_ACCENTS, type MenuAccentValue } from "@/registry/config";
 
 export function MenuAccentPicker({
@@ -21,13 +22,9 @@ export function MenuAccentPicker({
   isMobile: boolean;
   anchorRef: React.RefObject<HTMLDivElement | null>;
 }) {
-  const [mounted, setMounted] = React.useState(false);
+  const mounted = useMounted();
   const [params, setParams] = useDesignSystemSearchParams();
   const [config, setConfig] = useConfig();
-
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const menuAccentValue = params.menuAccent ?? config.menuAccent;
   const currentAccent = MENU_ACCENTS.find(

@@ -17,7 +17,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useComponents } from "./components-provider";
+import { useComponents } from "./components-context";
 
 export function ComponentSidebarHeader() {
   const { toggleSidebar } = useSidebar();
@@ -38,6 +38,7 @@ export function ComponentSidebarHeader() {
       <div className="flex w-full items-center gap-2">
         <FunnelIcon className="shrink-0 opacity-60" weight="duotone" />
         <input
+          aria-label="Filter categories"
           className="w-full font-medium text-sm outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
           onChange={(e) => setSidebarCategoryFilter(e.target.value)}
           placeholder="Filter categories..."

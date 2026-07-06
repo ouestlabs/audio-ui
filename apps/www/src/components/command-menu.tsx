@@ -59,10 +59,12 @@ export type CommandMenuGroup = {
   pages: CommandPage[];
 };
 
+const NO_COMPONENT_CATEGORIES: CategoryInfo[] = [];
+
 export function CommandMenu({
   groups,
   navItems,
-  componentCategories = [],
+  componentCategories = NO_COMPONENT_CATEGORIES,
   ...props
 }: DialogPrimitive.Root.Props & {
   groups: CommandMenuGroup[];
@@ -138,6 +140,10 @@ export function CommandMenu({
     }
   }, []);
 
+  const onCopyShortcut = React.useEffectEvent(() => {
+    runCommand(copyHighlightedPayload);
+  });
+
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if ((e.key === "k" && (e.metaKey || e.ctrlKey)) || e.key === "/") {
@@ -150,13 +156,13 @@ export function CommandMenu({
       }
 
       if (e.key === "c" && (e.metaKey || e.ctrlKey)) {
-        runCommand(copyHighlightedPayload);
+        onCopyShortcut();
       }
     };
 
     document.addEventListener("keydown", down);
     return () => document.removeEventListener("keydown", down);
-  }, [runCommand, copyHighlightedPayload]);
+  }, []);
 
   return (
     <Dialog onOpenChange={setOpen} open={open}>

@@ -47,8 +47,8 @@ export function MobileNav({
   );
   const componentCategoryLinks = React.useMemo(
     () =>
-      [...mobileComponentCategories]
-        .sort((a, b) => a.label.localeCompare(b.label))
+      mobileComponentCategories
+        .toSorted((a, b) => a.label.localeCompare(b.label))
         .map((category) => ({
           ...category,
           href: `/components/${normalizeSlug(category.name)}`,

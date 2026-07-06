@@ -11,6 +11,7 @@ import {
 } from "@/app/(create)/customizer/picker";
 import { useDesignSystemSearchParams } from "@/app/(create)/lib/search-params";
 import { useConfig } from "@/hooks/use-config";
+import { useMounted } from "@/hooks/use-mounted";
 import { BASES as ALL_BASES } from "@/registry/config";
 
 // Base-only launch: audio components only exist for the Base UI base.
@@ -23,13 +24,9 @@ export function BasePicker({
   isMobile: boolean;
   anchorRef: React.RefObject<HTMLDivElement | null>;
 }) {
-  const [mounted, setMounted] = React.useState(false);
+  const mounted = useMounted();
   const [params, setParams] = useDesignSystemSearchParams();
   const [config, setConfig] = useConfig();
-
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const currentBase = React.useMemo(
     () =>

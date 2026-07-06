@@ -12,7 +12,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useCustomizer } from "./components-provider";
+import { useCustomizer } from "./components-context";
 
 export function CustomizerSidebarToggle() {
   const { customizerOpen, toggleCustomizer } = useCustomizer();
