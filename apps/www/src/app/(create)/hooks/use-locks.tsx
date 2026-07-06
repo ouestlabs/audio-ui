@@ -51,7 +51,7 @@ export function LocksProvider({ children }: { children: React.ReactNode }) {
 }
 
 export function useLocks() {
-  const context = React.useContext(LocksContext);
+  const context = React.use(LocksContext);
   if (!context) {
     throw new Error("useLocks must be used within LocksProvider");
   }

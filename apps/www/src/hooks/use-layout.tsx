@@ -33,7 +33,7 @@ const saveToLS = (storageKey: string, value: string) => {
 };
 
 const useLayout = () => {
-  const context = React.useContext(LayoutContext);
+  const context = React.use(LayoutContext);
   if (context === undefined) {
     throw new Error("useLayout must be used within a LayoutProvider");
   }
@@ -161,7 +161,7 @@ const Layout = ({
 };
 
 const LayoutProvider = (props: LayoutProviderProps) => {
-  const context = React.useContext(LayoutContext);
+  const context = React.use(LayoutContext);
 
   // Ignore nested context providers, just passthrough children
   if (context) {

@@ -44,7 +44,7 @@ export function IconPlaceholder({
   [K in IconLibraryName]: string;
 } & React.ComponentProps<"svg">) {
   const [mounted, setMounted] = React.useState(false);
-  const context = React.useContext(DesignSystemContext);
+  const context = React.use(DesignSystemContext);
   const [params] = useDesignSystemSearchParams();
   const [config] = useConfig();
 

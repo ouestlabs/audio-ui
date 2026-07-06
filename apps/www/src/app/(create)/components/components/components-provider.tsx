@@ -2,8 +2,8 @@
 
 import {
   createContext,
+  use,
   useCallback,
-  useContext,
   useEffect,
   useMemo,
   useState,
@@ -42,7 +42,7 @@ const ComponentsContext = createContext<ComponentsContextValue | null>(null);
 const CustomizerContext = createContext<CustomizerContextValue | null>(null);
 
 export function useComponents() {
-  const context = useContext(ComponentsContext);
+  const context = use(ComponentsContext);
   if (!context) {
     throw new Error("useComponents must be used within a ComponentsProvider");
   }
@@ -50,7 +50,7 @@ export function useComponents() {
 }
 
 export function useCustomizer() {
-  const context = useContext(CustomizerContext);
+  const context = use(CustomizerContext);
   if (!context) {
     throw new Error("useCustomizer must be used within a ComponentsProvider");
   }

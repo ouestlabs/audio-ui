@@ -37,7 +37,7 @@ export const DesignSystemContext =
   React.createContext<DesignSystemContextValue | null>(null);
 
 export function useDesignSystem() {
-  const context = React.useContext(DesignSystemContext);
+  const context = React.use(DesignSystemContext);
   if (!context) {
     throw new Error(
       "useDesignSystem must be used within a DesignSystemProvider"

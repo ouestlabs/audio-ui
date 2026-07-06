@@ -24,7 +24,7 @@ export function PresetPicker({
   anchorRef: React.RefObject<HTMLDivElement | null>;
 }) {
   const [mounted, setMounted] = React.useState(false);
-  const context = React.useContext(DesignSystemContext);
+  const context = React.use(DesignSystemContext);
   const [params, setParams] = useDesignSystemSearchParams();
   const [config, setConfig] = useConfig();
 
