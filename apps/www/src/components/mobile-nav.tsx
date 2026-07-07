@@ -114,7 +114,7 @@ export function MobileNav({
         align="start"
         className="scroll-fade-y no-scrollbar h-(--available-height) w-(--available-width) overflow-y-auto overscroll-contain rounded-2xl!"
         side="bottom"
-        sideOffset={12}
+        sideOffset={16}
       >
         <div className="flex flex-col gap-8 px-6 py-6">
           <div className="flex flex-col gap-4">
