@@ -168,7 +168,7 @@ export function DocsTableOfContents({
       )}
       data-pinned={pinned}
     >
-      <div className="flex flex-col items-end gap-3 py-2 transition-opacity duration-100 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover/toc:opacity-0 group-hover/toc:duration-150 group-data-[pinned=true]/toc:opacity-0 group-data-[pinned=true]/toc:duration-150">
+      <div className="relative flex flex-col items-end gap-3 py-2 before:absolute before:-inset-y-2 before:-inset-x-6 before:content-[''] transition-opacity duration-100 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover/toc:opacity-0 group-hover/toc:duration-150 group-focus-within/toc:opacity-0 group-focus-within/toc:duration-150 group-data-[pinned=true]/toc:opacity-0 group-data-[pinned=true]/toc:duration-150">
         {toc.map((item, index) => (
           <span
             className={cn(
@@ -183,7 +183,7 @@ export function DocsTableOfContents({
           />
         ))}
       </div>
-      <nav className="-translate-y-1/2 site-rounded-2xl pointer-events-none absolute top-1/2 right-0 flex max-h-[60vh] w-60 origin-right scale-95 flex-col border border-site-border bg-site-popover p-2 opacity-0 shadow-lg transition-[opacity,scale] duration-100 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover/toc:pointer-events-auto group-hover/toc:scale-100 group-hover/toc:opacity-100 group-hover/toc:duration-150 group-data-[pinned=true]/toc:pointer-events-auto group-data-[pinned=true]/toc:scale-100 group-data-[pinned=true]/toc:opacity-100 group-data-[pinned=true]/toc:duration-150 motion-reduce:scale-100 motion-reduce:transition-opacity">
+      <nav className="-translate-y-1/2 site-rounded-2xl pointer-events-none absolute top-1/2 right-0 flex max-h-[60vh] w-60 origin-right scale-95 flex-col border border-site-border bg-site-popover p-2 opacity-0 shadow-lg transition-[opacity,scale] duration-100 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover/toc:pointer-events-auto group-hover/toc:scale-100 group-hover/toc:opacity-100 group-hover/toc:duration-150 group-focus-within/toc:pointer-events-auto group-focus-within/toc:scale-100 group-focus-within/toc:opacity-100 group-focus-within/toc:duration-150 group-data-[pinned=true]/toc:pointer-events-auto group-data-[pinned=true]/toc:scale-100 group-data-[pinned=true]/toc:opacity-100 group-data-[pinned=true]/toc:duration-150 motion-reduce:scale-100 motion-reduce:transition-opacity">
         <div className="flex items-center justify-between gap-2 pb-1 pl-2">
           <span className="font-medium text-site-muted-foreground text-xs">
             On This Page
