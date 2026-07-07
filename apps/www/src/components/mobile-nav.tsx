@@ -94,13 +94,13 @@ export function MobileNav({
               <div className="relative size-4">
                 <span
                   className={cn(
-                    "absolute left-0 block h-0.5 w-4 bg-site-foreground transition-all duration-100",
+                    "absolute left-0 block h-0.5 w-4 bg-site-foreground transition-[top,transform] duration-150 ease-in-out",
                     open ? "-rotate-45 top-[0.4rem]" : "top-1"
                   )}
                 />
                 <span
                   className={cn(
-                    "absolute left-0 block h-0.5 w-4 bg-site-foreground transition-all duration-100",
+                    "absolute left-0 block h-0.5 w-4 bg-site-foreground transition-[top,transform] duration-150 ease-in-out",
                     open ? "top-[0.4rem] rotate-45" : "top-2.5"
                   )}
                 />

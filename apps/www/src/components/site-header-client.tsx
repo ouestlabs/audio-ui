@@ -13,7 +13,7 @@ const CommandMenu = dynamic(
     loading: () => (
       <Button
         aria-hidden="true"
-        className="relative h-8 w-full justify-start bg-transparent pl-2! font-medium text-site-foreground shadow-none sm:pr-12 md:w-21"
+        className="relative w-full justify-start bg-transparent pl-2! font-medium text-site-foreground shadow-none sm:pr-12 md:w-21"
         disabled
         variant="secondary"
       >
