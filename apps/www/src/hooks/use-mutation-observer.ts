@@ -1,4 +1,4 @@
-import React from "react";
+import * as React from "react";
 
 export const useMutationObserver = (
   ref: React.RefObject<HTMLElement | null>,

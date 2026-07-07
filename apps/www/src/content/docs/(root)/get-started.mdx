@@ -1,160 +1,41 @@
 ---
 title: Get Started
-description: A quick guide to adding your first component.
+description: A quick guide to adding audio/ui components to your application.
 ---
 
-This guide provides the essentials for adding **audio/ui** components to your React application.
+This guide walks you through the essential steps to add audio/ui to your shadcn project.
 
 ## Prerequisites
 
-Our components are built with [Tailwind CSS v4](https://tailwindcss.com). Before you begin, make sure you have a React project set up with Tailwind CSS.
+audio/ui is built on **React 19** and [Tailwind CSS v4](https://tailwindcss.com). Ensure your project is set up with these technologies before proceeding. We recommend following the [Official shadcn/ui Installation Guide](https://ui.shadcn.com/docs/installation) to prepare your environment.
 
-## Registry Configuration
+## Setup the audio/ui Registry
 
-Before adding components, you need to configure the registry in your `components.json` file. 
+Add the audio/ui registry namespace to your `components.json` and set your component library and style. Learn more about registry config from [shadcn registry docs](https://ui.shadcn.com/docs/registry).
 
-If you don't have a `components.json` file yet, initialize it by running:
-
-```bash
-npx shadcn@latest init
-```
-
-Then, add the `registries` section to your `components.json` file:
-
-```json {23-23}  title="components.json" showLineNumbers 
+```json
 {
-  "$schema": "https://ui.shadcn.com/schema.json",
-  "style": "base-luma",
-  "rsc": true,
-  "tsx": true,
-  "tailwind": {
-    "config": "",
-    "prefix": "",
-    "css": "src/styles/globals.css",
-    "baseColor": "neutral",
-    "cssVariables": true
-  },
-  "iconLibrary": "phosphor",
-  "rtl": false,
-  "aliases": {
-    "components": "@/components",
-    "utils": "@/lib/utils",
-    "ui": "@/components/ui",
-    "lib": "@/lib",
-    "hooks": "@/hooks"
-  },
   "registries": {
-    "@audio": "https://audio-ui.xyz/r/{name}.json"
+    "@audio": "https://audio-ui.xyz/r/{style}/{name}.json"
   }
 }
 ```
 
-The `registries` field allows you to configure custom registries. The `{name}` placeholder will be replaced with the component name when fetching from the registry.
+## Components
 
-## Adding Components
-
-You can add components **automatically with the shadcn CLI** or **manually by copying the files**.
-
-<CodeTabs>
-  <TabsList>
-    <TabsTrigger value="cli">CLI</TabsTrigger>
-    <TabsTrigger value="manual">Manual</TabsTrigger>
-  </TabsList>
-  <TabsContent value="cli">
-    <Install component="player" />
-  </TabsContent>
-
-  <TabsContent value="manual">
-    <Steps>
-      <Step>Install the runtime dependencies:</Step>
-        <Install pkg="@phosphor-icons/react class-variance-authority @base-ui/react" />
-      <Step>Install the required shadcn/ui primitives:</Step>
-        <Install shadcn="button dialog dropdown-menu empty input item scroll-area toggle tooltip" />
-      <Step>Install the timeline and level primitives from this registry:</Step>
-        <Install component="transport fader" />
-      <Step>Copy and paste the following code into your project.</Step>
-        <Source name="player" title="components/audio/player.tsx" />
-      <Step>Copy the required provider file.</Step>
-        <Source name="provider" title="components/audio/provider.tsx" />
-      <Step>Copy the audio lib file.</Step>
-        <Source name="lib" title="lib/audio.ts" />
-      <Step>Copy the required store file.</Step>
-        <Source name="store" title="lib/audio-store.ts" />
-      <Step>Update the import paths to match your project setup.</Step>
-    </Steps>
-
-  </TabsContent>
-</CodeTabs>
-
-### Step 3: Setup AudioProvider
-
-The `AudioProvider` is a core component that manages the audio playback state and lifecycle for all audio components. It initializes the audio element, handles playback events, manages error retries, preloads next tracks, and synchronizes audio state with the Zustand store.
-
-Wrap your app with `AudioProvider` at the root level:
-
-```tsx
-// app/layout.tsx or _app.tsx
-import { AudioProvider } from "@/components/audio/provider";
-
-export default function RootLayout({ children }) {
-  return (
-    <html>
-      <body>
-        <AudioProvider tracks={initialTracks}>{children}</AudioProvider>
-      </body>
-    </html>
-  );
-}
-```
-
-### Step 4: Use the default layout
-
-```tsx
-import {
-  AudioPlayer,
-  AudioPlayerControlBar,
-  AudioPlayerControlGroup,
-  AudioPlayerPlay,
-  AudioPlayerSeekBar,
-  AudioPlayerSkipBack,
-  AudioPlayerSkipForward,
-  AudioPlayerTimeDisplay,
-  AudioPlayerVolume,
-} from "@/components/audio/player";
-
-export function MyAudioPlayer() {
-  return (
-    <AudioPlayer>
-      <AudioPlayerControlBar variant="stacked">
-        <AudioPlayerControlGroup>
-          <AudioPlayerTimeDisplay />
-          <AudioPlayerSeekBar />
-          <AudioPlayerTimeDisplay remaining />
-        </AudioPlayerControlGroup>
-        <AudioPlayerControlGroup>
-          <AudioPlayerControlGroup className="justify-between md:justify-start">
-            <AudioPlayerSkipBack />
-            <AudioPlayerPlay />
-            <AudioPlayerSkipForward />
-          </AudioPlayerControlGroup>
-          <AudioPlayerVolume />
-        </AudioPlayerControlGroup>
-      </AudioPlayerControlBar>
-    </AudioPlayer>
-  );
-}
-```
+You can install audio/ui using the [**shadcn CLI**](https://ui.shadcn.com/docs/cli) for automation or by manual installation for full control. Both methods apply to everything in [Docs](/docs/) and the [component catalog](/components), including the `block-*` blocks and demos you install with `@audio/…`.
 
 ## Styling
 
-Components are styled with a design token system defined by CSS variables and implemented with Tailwind CSS. The variables follow the same approach as shadcn/ui and are fully customizable.
+Components are styled with a design token system defined by CSS variables and implemented with Tailwind CSS, following the same conventions as shadcn/ui so they're fully customizable. See the [Styling guide](/docs/styling) for details.
 
-For detailed information about styling, color tokens, and customization options, see the [shadcn/ui theming documentation](https://ui.shadcn.com/docs/theming).
+## AI-Enhanced Workflow
 
-## Working with LLMs
+audio/ui is designed from the ground up to be **AI-friendly**, making it easier for language models to understand and modify your UI.
 
-We structure the documentation to make the components **AI-friendly**, so language models can understand, reason about, and modify them. To support this, we include:
+- **llms.txt**: Access our [llms.txt](/llms.txt) file for a structured map of our documentation and architecture optimized for AI agents.
+- **Copy Markdown**: Every page includes a **Copy Markdown** feature, allowing you to instantly feed documentation or code into your AI-driven development workflows.
 
-- A [llms.txt](/llms.txt) file that provides a map of the documentation and component structure for your AI agent.
-- A [llms-full.txt](/llms-full.txt) file containing an expanded view of the docs and component sources for deeper analysis.
-- A **Copy Markdown** button on every page, so you can easily share content or feed it to your AI workflows.
+## Next Steps
+
+Head over to the [Audio Player](/docs/components/base/player) docs to install your first component, or browse the [component catalog](/components) for ready-to-use blocks.

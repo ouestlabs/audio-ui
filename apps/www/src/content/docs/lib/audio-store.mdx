@@ -6,25 +6,44 @@ description: Zustand-based store and helper actions for queue and playback manag
 ## Installation
 
 <CodeTabs>
-  <TabsList>
-    <TabsTrigger value="cli">CLI</TabsTrigger>
-    <TabsTrigger value="manual">Manual</TabsTrigger>
-  </TabsList>
-  <TabsContent value="cli">
-    <Install component="store" />
-  </TabsContent>
 
-  <TabsContent value="manual">
-    <Steps>
-      <Step>Install the runtime dependencies:</Step>
-        <Install pkg="zustand" />
+<TabsList>
+  <TabsTrigger value="cli">CLI</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
 
-      <Step>Copy and paste the following code into your project.</Step>
-        <Source name="store" title="lib/audio-store.ts" />
-      <Step>Update the import paths to match your project setup.</Step>
-    </Steps>
+<TabsContent value="cli">
 
-  </TabsContent>
+```bash component
+npx shadcn@latest add @audio/store
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the runtime dependencies:</Step>
+
+```bash
+npm install zustand
+```
+
+<Step>Copy and paste the following code into your project.</Step>
+
+<ComponentSource
+  styleName="base-nova"
+  name="store"
+  title="lib/audio-store.ts"
+/>
+
+<Step>Update the import paths to match your project setup.</Step>
+
+</Steps>
+
+</TabsContent>
+
 </CodeTabs>
 
 ### Import
@@ -99,7 +118,7 @@ Common audio track object. See [HTML Audio](/docs/lib/html-audio#track) for full
 The store exposes state organized by concern:
 
 | Category          | Property            | Type                           | Description                  |
-| ----------------- | ------------------- | ------------------------------ | ---------------------------- |
+| ----------------- | -------------------- | -------------------------------- | ------------------------------- |
 | **Playback**      | `isPlaying`         | `boolean`                      | Currently playing            |
 |                   | `isLoading`         | `boolean`                      | Loading track                |
 |                   | `isBuffering`       | `boolean`                      | Buffering audio              |
@@ -121,7 +140,7 @@ The store exposes state organized by concern:
 ### Types
 
 | Type         | Values                         | Description                             |
-| ------------ | ------------------------------ | --------------------------------------- |
+| ------------ | -------------------------------- | ------------------------------------------ |
 | `RepeatMode` | `"none" \| "one" \| "all"`     | Repeat playback mode                    |
 | `InsertMode` | `"first" \| "last" \| "after"` | Where new tracks are added to the queue |
 
@@ -202,7 +221,7 @@ if (canUseDOM()) {
 Access actions via selectors: `const action = useAudioStore((s) => s.actionName)`
 
 | Category       | Action             | Signature                                                | Description                                            |
-| -------------- | ------------------ | -------------------------------------------------------- | ------------------------------------------------------ |
+| -------------- | ------------------- | ----------------------------------------------------------- | ---------------------------------------------------------- |
 | **Playback**   | `play`             | `() => Promise<void>`                                    | Start or resume playback                               |
 |                | `pause`            | `() => void`                                             | Pause playback                                         |
 |                | `togglePlay`       | `() => void`                                             | Toggle play/pause state                                |
@@ -314,7 +333,7 @@ const unsubscribe = useAudioStore.subscribe(
 The store automatically persists a subset of state to localStorage using Zustand's `persist` middleware:
 
 | Category     | Properties                                                        |
-| ------------ | ----------------------------------------------------------------- |
+| ------------ | --------------------------------------------------------------------- |
 | **Playback** | `currentTrack`, `currentTime`, `currentQueueIndex`                |
 | **Queue**    | `queue`                                                           |
 | **Settings** | `volume`, `isMuted`, `repeatMode`, `shuffleEnabled`, `insertMode` |
@@ -326,8 +345,7 @@ This allows users to resume playback and maintain queue state across page refres
 ## Related
 
 - [HTML Audio](/docs/lib/html-audio) - Core audio playback singleton
-- [Audio Player](/docs/components/player) - Player UI components
-- [Audio Queue](/docs/components/queue) - Queue management UI
+- [Audio Player](/docs/components/base/player) - Player UI components
 
 ## Notes
 
@@ -346,19 +364,3 @@ This allows users to resume playback and maintain queue state across page refres
   - Direct store access via <code>getState()</code> is useful for non-React code
     or imperative operations
 </Callout>
-
-## Changelog
-
-### 2025-12-24 Provider integration and state management improvements
-
-- **Changed**: Store now focuses solely on state management (no direct audio element access)
-- **Improved**: Better separation of concerns between store and provider
-- **Improved**: Provider handles all direct audio interactions via `useAudio()` hook
-- **Fixed**: State synchronization between audio element and store is more reliable
-
-### 2025-12-02 History removal and live stream improvements
-
-- **Removed**: `history` state and `addToHistory` action (feature deprecated)
-- **Added**: `setPlaybackRate()` now prevents rate changes for live streams
-- **Fixed**: Playback rate automatically resets to 1.0 when loading live streams
-- **Improved**: Live stream detection integrated into playback rate controls

@@ -3,7 +3,7 @@ title: Roadmap
 description: Current state of audio/ui and where we're headed next.
 ---
 
-**audio/ui** is a modern component library for building audio interfaces in React applications. Built on top of [shadcn/ui](https://ui.shadcn.com/), we provide accessible, composable components that you can copy, paste, and customize to fit your needs.
+**audio/ui** is a component library for building audio interfaces in React applications. Built on top of [shadcn/ui](https://ui.shadcn.com/), we provide accessible, composable components that you can copy, paste, and customize to fit your needs.
 
 ## Current Status
 
@@ -12,39 +12,24 @@ We're actively building and improving `audio/ui`. Here's what's available today:
 ### Components
 
 - **Audio Player**: A fully-featured, composable audio player with queue management, shuffle, repeat modes, and volume control
-- **Audio Queue**: Queue management components with search, sortable tracks, and preferences
-- **Custom UI Components**: Extended components like `slider` (with buffer support) and `empty` that complement shadcn/ui's component set
+- **Controls**: Knob, Fader, XY Pad, and Transport primitives for building custom audio interfaces
+- **Channel Strip**: Layout patterns for mixer-style columns combining controls, labels, and readouts
 
 ### Library
 
 - **Audio Store**: A Zustand-based state management solution for audio playback with localStorage persistence
-- **Audio Utilities**: Helper functions for formatting durations and managing audio playback
+- **HTML Audio**: Core singleton for loading and controlling HTML5 audio with retry logic and event handling
 
 ### Blocks
 
-- **Pre-assembled Patterns**: Ready-to-use audio player patterns that combine multiple components
+- **Pre-assembled Patterns**: Ready-to-use audio player and channel strip patterns that combine multiple components — browse the [component catalog](/components)
 
 ## What's Next
-
-We're continuously working on improving and expanding `audio/ui`. Here's what we're planning:
-
-### Components
 
 - **More Audio Components**: Additional audio-specific UI patterns and controls
 - **Enhanced Player Features**: Advanced playback controls, playlist management, and audio visualization
 - **Visualization Components**: Waveform displays, spectrum analyzers, and other audio visualizations
-
-### Documentation
-
-- **More Examples**: Additional usage examples and patterns
-- **Guides**: Best practices and advanced usage guides
-- **API Reference**: Comprehensive API documentation
-
-### Performance & Quality
-
-- **Performance Optimizations**: Further improvements to component performance and bundle size
-- **Accessibility Enhancements**: Continued focus on making all components fully accessible
-- **TypeScript Improvements**: Enhanced type safety and better developer experience
+- **Radix UI Support**: A Radix-based variant of the component set, alongside the current Base UI implementation
 
 ## Contributing
 

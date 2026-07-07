@@ -4,7 +4,7 @@ import { generateDocsOG, makeImageResponse } from "@/lib/og";
 import { source } from "@/lib/source";
 
 export const revalidate = false;
-export const size = { width: 1200, height: 630 };
+export const size = { height: 630, width: 1200 };
 
 export async function GET(
   _req: Request,
@@ -20,8 +20,8 @@ export async function GET(
 
   return makeImageResponse(
     generateDocsOG({
-      title: page.data.title,
       description: page.data.description,
+      title: page.data.title,
     }),
     fontData
   );

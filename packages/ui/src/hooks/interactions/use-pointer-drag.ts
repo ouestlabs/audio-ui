@@ -18,20 +18,20 @@ function releaseAllPointerCaptures(element: HTMLElement) {
 }
 
 export interface UsePointerDragOptions<T extends HTMLElement = HTMLElement> {
+  capturePointer?: boolean;
   disabled?: boolean;
-  onDragStart?: Procedure<React.PointerEvent<T>>;
+  elementRef?: React.RefObject<Nullable<T>>;
   onDrag?:
     | ((e: React.PointerEvent<T>, delta: Point) => void)
     | ((delta: Point) => void);
-  onDragEnd?: Procedure<React.PointerEvent<T>>;
   onDragCancel?: Procedure<React.PointerEvent<T>>;
-  elementRef?: React.RefObject<Nullable<T>>;
-  capturePointer?: boolean;
-  releaseOnOutsideClick?: boolean;
+  onDragEnd?: Procedure<React.PointerEvent<T>>;
+  onDragStart?: Procedure<React.PointerEvent<T>>;
+  onPointerCancel?: Procedure<React.PointerEvent<T>>;
   onPointerDown?: Procedure<React.PointerEvent<T>>;
   onPointerMove?: Procedure<React.PointerEvent<T>>;
   onPointerUp?: Procedure<React.PointerEvent<T>>;
-  onPointerCancel?: Procedure<React.PointerEvent<T>>;
+  releaseOnOutsideClick?: boolean;
 }
 
 export interface UsePointerDragReturn<T extends HTMLElement = HTMLElement> {
@@ -217,10 +217,10 @@ export function usePointerDrag<T extends HTMLElement = HTMLElement>({
 
   const pointerProps = React.useMemo(
     () => ({
+      onPointerCancel: composedPointerCancel,
       onPointerDown: composedPointerDown,
       onPointerMove: composedPointerMove,
       onPointerUp: composedPointerUp,
-      onPointerCancel: composedPointerCancel,
     }),
     [
       composedPointerDown,

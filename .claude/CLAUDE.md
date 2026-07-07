@@ -3,7 +3,7 @@
 **audio/ui** is an open-source library of accessible, composable Audio UI components for React — built on top of [shadcn/ui](https://ui.shadcn.com/), designed to be copied, pasted, and owned.
 
 - Site: https://audio-ui.xyz · Repo: https://github.com/ouestlabs/audio-ui
-- Registry endpoint: `https://audio-ui.xyz/r/{name}.json`
+- Registry endpoint: `https://audio-ui.xyz/r/{style}/{name}.json`
 
 ---
 
@@ -14,7 +14,7 @@ Turborepo + Bun workspaces. **Always use `bun`, never `npm` or `pnpm`.**
 ```
 audio-ui/
 ├── apps/
-│   ├── www/        # Next.js docs site (Fumadocs + MDX) → localhost:3000
+│   ├── www/        # Next.js docs site + registry (Fumadocs + MDX) → localhost:4000
 │   └── sandbox/    # Dev sandbox
 └── packages/
     ├── ui/         # @audio-ui/react — published npm package (headless primitives)
@@ -33,12 +33,13 @@ bun run changeset       # Create a changeset before versioning
 
 From `apps/www/`:
 ```sh
-bun run build:registry  # Regenerate registry JSON — run after adding any component
+bun run registry:build  # Regenerate static registry JSON (public/r/styles/) — run after adding any item
+bun run icons:build     # Regenerate icon mappings — run after adding icons
 ```
 
 ## Stack
 
-Next.js App Router · Fumadocs + MDX · Tailwind CSS v4 · shadcn/ui + Base UI · Phosphor Icons · Biome/Ultracite
+Next.js App Router · Fumadocs + MDX · Tailwind CSS v4 · shadcn/ui + Base UI · 5 icon libraries (Lucide/Phosphor/Tabler/Hugeicons/Remixicon) via `IconPlaceholder` · Biome/Ultracite
 
 ## Where Things Live
 
@@ -50,41 +51,42 @@ Next.js App Router · Fumadocs + MDX · Tailwind CSS v4 · shadcn/ui + Base UI �
 
 This package is **published to npm**. Don't break its public API without a changeset.
 
-### Registry (`apps/www/src/registry/default/`)
+### Two registry trees in `apps/www/src/`
 
-Styled components users install via `npx shadcn@latest add @audio/player`:
+- `registry/` — fork of shadcn/ui (bases, styles, icons, fonts, themes). **Synced from upstream** via `bun run registry:sync` — never hand-edit.
+- `registry-audio/` — audio/ui's own registry, **the actual contribution surface**:
 
 ```
-ui/audio/player.tsx # single file: provider, player controls, tracks, queue, playback-speed
-ui/audio/elements/ # transport, fader, knob, xypad, channel-strip (styled wrappers)
-blocks/            # Pre-assembled ready-to-use patterns (block-{component}-{variant}.tsx)
-examples/          # Usage demos
-lib/               # Utilities and stores (audio-store, etc.)
+registry-audio/bases/base/
+├── audio/          # player.tsx, sortable-list.tsx, elements/ (fader, knob, transport, xypad, channel-strip)
+├── components/     # Catalog: block-{component}-{variant}.tsx + {component}-*-demo.tsx, grouped by category folder
+├── hooks/          # use-audio.ts, use-sound.ts, use-audio-provider.ts
+└── lib/            # audio-store.ts, html-audio.ts, web-audio.ts
 ```
 
-Registry config files — **update these when adding anything**:
-- `registry/registry-ui.ts` · `registry/registry-components.ts`
-- `registry/registry-examples.ts` · `registry/registry-blocks.ts` · `registry/registry-lib.ts`
+Each of `audio/`, `components/`, `hooks/`, `lib/` has an `_registry.ts` (`export const {audio,components,hooks,lib}: RegistryItem[]`) — **update the matching one when adding anything**. File paths inside are relative to `bases/base/`.
+
+For blocks/demos specifically, also update the hand-maintained manifests: `registry-audio/bases/components.json` (catalog entry) and `registry-audio/bases/registry.json` (category item counts; new category → add `seo.json` copy too).
 
 ### Docs (`apps/www/src/content/docs/`)
 
-MDX files. Use existing custom components (`<Install>`, `<CodeTabs>`, `<Preview>`) — not raw HTML.
+MDX files under `(root)/`, `components/base/`, `lib/`. Use existing custom components (`<ComponentPreview>`, `<ComponentSource>`, `<CodeTabs>`, `<Steps>`) — not raw HTML.
 
 ## Registry Rules
 
 > [CONTRIBUTING.md](../CONTRIBUTING.md)
 
-**After any registry change:** run `bun run build:registry` from `apps/www/`, then `bun run lint:fix`.
+**After any registry change:** run `bun run registry:build` from `apps/www/`, then `bun run lint:fix`.
 
 **Registry dependency format:**
-- audio/ui items → `"@audio/{name}"`
-- official shadcn/ui → plain name (e.g., `"button"`)
+- audio/ui items (component, hook, or lib) → `"@audio/{name}"`
+- official shadcn/ui → `"@shadcn/{name}"`
 
-**Block rules** (`registry/default/blocks/`):
-- Filename: `block-{component}-{variant}.tsx`
-- Export: `export default function Block{Component}{Variant}()` — PascalCase of filename, no params
-- `"use client"` only if the block uses hooks, state, or browser APIs
-- Icons: named imports from `@phosphor-icons/react` only, no numeric `size` prop — use `className="size-4"`
+**Block/demo rules** (`registry-audio/bases/base/components/{category}/`):
+- Filename: `block-{component}-{variant}.tsx` (blocks) or `{component}-{feature}-demo.tsx` (demos)
+- Export: `export default function Block{Component}{Variant}()` / `{Component}{Feature}Demo()` — PascalCase of filename, no params
+- `"use client"` only if the file uses hooks, state, or browser APIs
+- Icons: via `IconPlaceholder` (`@/app/(create)/components/icon-placeholder`) with a name for every library — `lucide`, `phosphor`, `tabler`, `hugeicons`, `remixicon`; no numeric `size` prop — use `className="size-4"`
 - Icon-only interactive elements must have `aria-label`; decorative icons get `aria-hidden="true"`
 - Static data defined outside the component function
 - Semantic color tokens only — never raw Tailwind colors (`text-gray-500`, `bg-red-500`, etc.)
@@ -173,15 +175,15 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 # Ultracite Code Standards
 
-This project uses **Ultracite**, a zero-config Biome preset that enforces strict code quality standards through automated formatting and linting.
+This project uses **Ultracite**, a zero-config preset that enforces strict code quality standards through automated formatting and linting.
 
 ## Quick Reference
 
-- **Format code**: `npx ultracite fix`
-- **Check for issues**: `npx ultracite check`
-- **Diagnose setup**: `npx ultracite doctor`
+- **Format code**: `bun x ultracite fix`
+- **Check for issues**: `bun x ultracite check`
+- **Diagnose setup**: `bun x ultracite doctor`
 
-Biome (the underlying engine) provides extremely fast Rust-based linting and formatting. Most issues are automatically fixable.
+Biome (the underlying engine) provides robust linting and formatting. Most issues are automatically fixable.
 
 ---
 
@@ -293,4 +295,4 @@ Biome's linter will catch most issues automatically. Focus your attention on:
 
 ---
 
-Most formatting and common issues are automatically fixed by Biome. Run `npx ultracite fix` before committing to ensure compliance.
+Most formatting and common issues are automatically fixed by Biome. Run `bun x ultracite fix` before committing to ensure compliance.

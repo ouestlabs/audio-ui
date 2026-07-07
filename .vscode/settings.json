@@ -1,5 +1,5 @@
 {
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.defaultFormatter": "biomejs.biome",
   "[javascript]": {
     "editor.defaultFormatter": "biomejs.biome"
   },
@@ -24,7 +24,7 @@
   "[graphql]": {
     "editor.defaultFormatter": "biomejs.biome"
   },
-  "typescript.tsdk": "node_modules/typescript/lib",
+  "js/ts.tsdk.path": "node_modules/typescript/lib",
   "editor.formatOnSave": true,
   "editor.formatOnPaste": true,
   "emmet.showExpandedAbbreviation": "never",
@@ -41,5 +41,25 @@
   "tailwindCSS.classFunctions": [
     "cva",
     "cn"
-  ]
+  ],
+  "git.ignoreLimitWarning": true,
+  "js/ts.tsdk.promptToUseWorkspaceVersion": true,
+  "[html]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[markdown]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[mdx]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[svelte]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[vue]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[yaml]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  }
 }

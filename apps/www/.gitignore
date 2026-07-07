@@ -41,5 +41,10 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# fumadocs
+
+# generated content
+.contentlayer
+.content-collections
 .source
+.env*.local
+src/registry/__index__.tsx

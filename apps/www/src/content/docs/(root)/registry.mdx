@@ -1,0 +1,32 @@
+---
+title: Registry
+description: Learn how to use the audio/ui Registry with shadcn/ui.
+---
+
+The audio/ui Registry gives you instant access to production-ready audio components. Add it once, then pull in flexible, composable blocks on demand.
+
+## Setup the audio/ui Registry
+
+Add the audio/ui registry namespace to your `components.json`. Learn more about registry config from [shadcn registry docs](https://ui.shadcn.com/docs/registry).
+
+```json
+{
+  "registries": {
+    "@audio": "https://audio-ui.xyz/r/{style}/{name}.json"
+  }
+}
+```
+
+## Usage
+
+Install blocks via the shadcn CLI using the `@audio/{name}` syntax.
+
+```bash
+npx shadcn@latest add @audio/block-pocket-synth
+```
+
+Install components via the shadcn CLI using the `@audio/{name}` syntax.
+
+```bash
+npx shadcn@latest add @audio/knob
+```

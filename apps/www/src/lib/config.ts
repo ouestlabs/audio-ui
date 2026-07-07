@@ -1,31 +1,41 @@
+const siteName = "audio/ui";
 export const baseUrl =
   process.env.NODE_ENV === "development" ||
   !process.env.VERCEL_PROJECT_PRODUCTION_URL
-    ? new URL("http://localhost:3000")
+    ? new URL("http://localhost:4000")
     : new URL(`https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`);
 
-export const appConfig = Object.freeze({
-  name: "audio/ui",
-  url: baseUrl.origin,
-  ogImage: `${baseUrl.origin}/opengraph-image.png`,
+export const siteConfig = {
   description:
     "A set of accessible and composable Audio UI components. Built on top of shadcn/ui, it's designed for you to copy, paste, and own.",
+
   links: Object.freeze({
-    twitter: "https://x.com/ouestlabs",
     github: "https://github.com/ouestlabs/audio-ui",
+    twitter: "https://x.com/ouestlabs",
   }),
+  metadata: {
+    locale: "en_US",
+    titleSuffixes: {
+      componentCategory: "UI Components",
+      site: siteName,
+    },
+    titleTemplate: "%s",
+  },
+  name: siteName,
   navItems: [
+    {
+      href: "/components",
+      label: "Components",
+    },
     {
       href: "/docs",
       label: "Docs",
     },
-    {
-      href: "/blocks",
-      label: "Blocks",
-    },
   ],
-});
+  url: baseUrl.origin,
+};
 
-export function absoluteUrl(path: string) {
-  return `${baseUrl.origin}${path}`;
-}
+export const META_THEME_COLORS = {
+  dark: "#09090b",
+  light: "#ffffff",
+};

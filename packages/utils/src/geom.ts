@@ -77,10 +77,10 @@ export namespace Point {
 
 export namespace Rect {
   export const Empty: Readonly<Rect> = Object.freeze({
+    height: 0,
+    width: 0,
     x: 0,
     y: 0,
-    width: 0,
-    height: 0,
   });
 
   export const corners = (rectangle: Rect): Array<Point> => {
@@ -97,10 +97,10 @@ export namespace Rect {
   };
 
   export const inflate = (rect: Rect, amount: number): Rect => ({
+    height: rect.height + amount * 2.0,
+    width: rect.width + amount * 2.0,
     x: rect.x - amount,
     y: rect.y - amount,
-    width: rect.width + amount * 2.0,
-    height: rect.height + amount * 2.0,
   });
 
   export const contains = (outer: Rect, inner: Rect): boolean => {
@@ -188,10 +188,10 @@ export namespace Rect {
 }
 
 export interface AABB {
-  xMin: number;
   xMax: number;
-  yMin: number;
+  xMin: number;
   yMax: number;
+  yMin: number;
 }
 
 export namespace AABB {
@@ -307,14 +307,14 @@ export namespace CohenSutherland {
 }
 
 export interface ValueAxis {
-  valueToAxis(value: number): number;
-  axisToValue(axis: number): number;
+  axisToValue: (axis: number) => number;
+  valueToAxis: (value: number) => number;
 }
 
 export namespace ValueAxis {
   export const Identity: ValueAxis = {
-    valueToAxis: (value: number): number => value,
     axisToValue: (axis: number): number => axis,
+    valueToAxis: (value: number): number => value,
   };
 
   export const toClamped = (
@@ -322,14 +322,14 @@ export namespace ValueAxis {
     min: number,
     max: number
   ): ValueAxis => ({
-    valueToAxis: (value: number): number =>
-      valueAxis.valueToAxis(clamp(value, min, max)),
     axisToValue: (axis: number): number =>
       clamp(valueAxis.axisToValue(axis), min, max),
+    valueToAxis: (value: number): number =>
+      valueAxis.valueToAxis(clamp(value, min, max)),
   });
 
   export const createClamped = (min: number, max: number): ValueAxis => ({
-    valueToAxis: (value: number): number => clamp(value, min, max),
     axisToValue: (axis: number): number => clamp(axis, min, max),
+    valueToAxis: (value: number): number => clamp(value, min, max),
   });
 }

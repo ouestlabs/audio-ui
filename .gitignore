@@ -40,7 +40,6 @@ yarn-error.log*
 storybook-static
 test-results
 
-# Content marketing
-content-marketing
-# Cursor
-.cursor/commands
+# Claude Code
+.playwright-mcp/
+plans/

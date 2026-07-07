@@ -1,46 +1,32 @@
 import type { MetadataRoute } from "next";
-import { appConfig } from "@/lib/config";
+
+import { getCategories } from "@/lib/registry";
+import { getSiteUrl } from "@/lib/seo";
 import { source } from "@/lib/source";
 
-export const revalidate = false;
+/**
+ * All published doc routes (same set as `source.generateParams()`), including
+ * every `/docs/components/base/...` and `/docs/components/radix/...` page. Using `getPages()` avoids
+ * dropping URLs when two pages share the same `name` in the page tree.
+ */
+function collectDocUrls(): string[] {
+  const pages = source.getPages();
+  const urls = [...new Set(pages.map((p) => p.url))];
+  return urls.filter((url) => url !== "/docs" && !url.startsWith("http"));
+}
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const url = (path: string): string => new URL(path, appConfig.url).toString();
-  const items = await Promise.all(
-    source.getPages().map((page) => {
-      const { lastModified: date } = page.data;
-      let lastModified: Date | undefined;
-      if (date) {
-        const newDate = new Date(date);
-        if (!Number.isNaN(newDate.getTime())) {
-          lastModified = newDate;
-        }
-      }
-      return {
-        url: url(page.url),
-        lastModified,
-        changeFrequency: "weekly",
-        priority: 0.5,
-      } as MetadataRoute.Sitemap[number];
-    })
+export default function sitemap(): MetadataRoute.Sitemap {
+  const baseUrl = getSiteUrl();
+
+  const staticPaths = [baseUrl, `${baseUrl}/docs`, `${baseUrl}/components`];
+
+  const docPaths = collectDocUrls().map((path) => `${baseUrl}${path}`);
+
+  const componentCategoryPaths = getCategories().map(
+    (category) => `${baseUrl}/components/${category.name}`
   );
 
-  return [
-    {
-      url: url("/"),
-      changeFrequency: "monthly",
-      priority: 1,
-    },
-    {
-      url: url("/blocks"),
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: url("/docs"),
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    ...items.filter((v) => v !== undefined),
-  ];
+  const allUrls = [...staticPaths, ...docPaths, ...componentCategoryPaths];
+
+  return allUrls.map((url) => ({ url }));
 }

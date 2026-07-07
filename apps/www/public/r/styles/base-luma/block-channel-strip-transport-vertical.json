@@ -1,0 +1,15 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "block-channel-strip-transport-vertical",
+  "type": "registry:block",
+  "description": "Channel strip with transport seek bar in vertical orientation",
+  "registryDependencies": ["@audio/channel-strip", "@audio/transport"],
+  "files": [
+    {
+      "path": "block-channel-strip-transport-vertical.tsx",
+      "type": "registry:block",
+      "content": "\"use client\";\n\nimport {\n  ChannelStrip,\n  ChannelStripContent,\n  ChannelStripFooter,\n  ChannelStripHeader,\n  ChannelStripSection,\n  ChannelStripValue,\n} from \"@/components/audio/elements/channel-strip\";\nimport { Transport } from \"@/components/audio/elements/transport\";\n\nexport function BlockChannelStripTransportVertical() {\n  return (\n    <ChannelStrip aria-label=\"Transport\">\n      <ChannelStripHeader>Track 1</ChannelStripHeader>\n      <ChannelStripContent>\n        <ChannelStripSection>\n          <Transport\n            aria-label=\"Seek\"\n            bufferedValue={62}\n            onSeek={() => {\n              //\n            }}\n            value={35}\n          />\n        </ChannelStripSection>\n      </ChannelStripContent>\n      <ChannelStripFooter>\n        <ChannelStripValue>0:35 / 1:42</ChannelStripValue>\n      </ChannelStripFooter>\n    </ChannelStrip>\n  );\n}",
+      "target": "components/examples/block-channel-strip-transport-vertical.tsx"
+    }
+  ]
+}

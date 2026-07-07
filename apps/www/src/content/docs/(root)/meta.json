@@ -1,5 +1,13 @@
 {
+  "root": true,
   "title": "Overview",
-  "pages": ["index", "get-started", "roadmap"],
-  "root": true
+  "pages": [
+    "index",
+    "get-started",
+    "styling",
+    "mcp",
+    "registry",
+    "roadmap",
+    "[llms.txt](/llms.txt)"
+  ]
 }

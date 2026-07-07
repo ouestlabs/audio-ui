@@ -1,0 +1,24 @@
+---
+title: MCP
+description: Learn how to use the shadcn/ui MCP (Model Context Protocol) with audio/ui.
+---
+
+MCP is an open protocol that standardizes how applications provide context to LLMs.
+
+## Configure MCP
+
+Run the following command to configure the mcp server:
+
+```bash
+npx shadcn@latest mcp init
+```
+
+Select your MCP client as prompted, then enable the MCP server in your client to finish setup.
+
+## Usage
+
+You can now ask your IDE to use any audio/ui component. Here are some prompt examples:
+
+- Build an audio player with queue management, shuffle, and repeat modes using the Audio Player.
+- Create a synth control panel with Knob, XY Pad, and Channel Strip components.
+- Add a mixer-style channel strip with Fader and Transport controls for a DAW-like interface.

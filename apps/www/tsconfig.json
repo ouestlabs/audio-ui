@@ -1,23 +1,37 @@
 {
-  "extends": "@audio-ui/typescript/nextjs",
   "compilerOptions": {
-    "declaration": false,
-    "declarationMap": false,
+    "target": "ES2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
     "esModuleInterop": true,
-    "baseUrl": "./",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "allowImportingTsExtensions": true,
+    "jsx": "react-jsx",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
-      "@source/*": [".source/*"],
-      "@audio-ui/react": ["../../packages/ui/src/index.ts"]
-    },
-    "strictNullChecks": true
+      "@/*": ["./src/*"],
+      "fumadocs-mdx:collections/*": [".source/*"]
+    }
   },
   "include": [
     "next-env.d.ts",
-    "next.config.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    "next.config.ts",
+    ".next/dev/types/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }

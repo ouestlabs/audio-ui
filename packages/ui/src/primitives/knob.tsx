@@ -51,8 +51,8 @@ function knobAnglesFromBottomGap(gapRad: number): {
     panic(`angle gap must be in (0, PI_HALF), got ${gapRad}`);
   }
   return {
-    angleRangeDeg: radToDeg(TAU - 2.0 * gapRad),
     angleOffsetDeg: 90.0 + radToDeg(PI_HALF + gapRad),
+    angleRangeDeg: radToDeg(TAU - 2.0 * gapRad),
   };
 }
 
@@ -89,35 +89,35 @@ function knobArcAlongTrack(
 }
 
 interface KnobContextValue {
-  value: number;
-  min: number;
-  max: number;
-  step: number;
-  disabled: boolean;
-  angleRange: number;
-  angleOffset: number;
-  percentage: number;
   anchorPercentage: number;
-  rotation: number;
-  elementId: string;
-  arcTrackRadius: number;
+  angleOffset: number;
+  angleRange: number;
   arcStrokeWidth: number;
+  arcTrackRadius: number;
+  ariaLabel?: string;
+  ariaLabelledBy?: string;
+  commitValue: Procedure<number>;
+  disabled: boolean;
+  elementId: string;
   indicatorSpan: readonly [number, number];
   indicatorWidth: number;
   knobRef: React.RefObject<Nullable<HTMLDivElement>>;
-  updateValue: Procedure<number>;
-  commitValue: Procedure<number>;
-  shouldPreventFocusRef: React.RefObject<boolean>;
-  valueRef: React.RefObject<number>;
-  setRawValue: Procedure<number>;
-  onValueCommit?: Procedure<number>;
-  ariaLabel?: string;
-  ariaLabelledBy?: string;
-  wheelRef: Procedure<Nullable<HTMLDivElement>>;
-  onPointerDown: (e: React.PointerEvent) => void;
-  onDragStart: Procedure<React.PointerEvent>;
+  max: number;
+  min: number;
   onDrag: (e: React.PointerEvent, delta: Point) => void;
   onDragEnd: Procedure<React.PointerEvent>;
+  onDragStart: Procedure<React.PointerEvent>;
+  onPointerDown: (e: React.PointerEvent) => void;
+  onValueCommit?: Procedure<number>;
+  percentage: number;
+  rotation: number;
+  setRawValue: Procedure<number>;
+  shouldPreventFocusRef: React.RefObject<boolean>;
+  step: number;
+  updateValue: Procedure<number>;
+  value: number;
+  valueRef: React.RefObject<number>;
+  wheelRef: Procedure<Nullable<HTMLDivElement>>;
 }
 
 const KnobContext = React.createContext<KnobContextValue | null>(null);
@@ -183,14 +183,14 @@ export namespace Knob {
 
   function resolvedDragConfig(partial?: DragOptions): ResolvedDragConfig {
     const base: ResolvedDragConfig = {
-      verticalPanEnabled: false,
-      panSensitivityDivisor: KNOB_DRAG_PAN_SENSITIVITY_DIVISOR,
-      centerDeadZoneRel: KNOB_DRAG_CENTER_DEAD_ZONE_REL,
       centerDeadZoneMinPx: KNOB_DRAG_CENTER_DEAD_ZONE_MIN_PX,
+      centerDeadZoneRel: KNOB_DRAG_CENTER_DEAD_ZONE_REL,
       modeLockMinPx: KNOB_DRAG_MODE_LOCK_MIN_PX,
       modeLockRel: KNOB_DRAG_MODE_LOCK_REL,
-      panMinVerticalPx: KNOB_DRAG_PAN_MIN_VERTICAL_PX,
       panDominanceRatio: KNOB_DRAG_PAN_DOMINANCE_RATIO,
+      panMinVerticalPx: KNOB_DRAG_PAN_MIN_VERTICAL_PX,
+      panSensitivityDivisor: KNOB_DRAG_PAN_SENSITIVITY_DIVISOR,
+      verticalPanEnabled: false,
     };
     if (!partial) {
       return base;
@@ -215,30 +215,30 @@ export namespace Knob {
       | "max"
       | "step"
     > {
-    value?: number;
-    defaultValue?: number;
-    min?: number;
-    max?: number;
-    step?: number;
-    disabled?: boolean;
     anchor?: number;
-    angleRange?: number;
+    /** Bottom gap in radians (`0 … π/2`); sets sweep when paired with defaults. Ignored if you rely only on `angleOffset`/`angleRange`. */
+    angleGapRad?: number;
     angleOffset?: number;
-    "aria-label"?: string;
-    "aria-labelledby"?: string;
-    onValueChange?: Procedure<number>;
-    onValueCommit?: Procedure<number>;
+    angleRange?: number;
     /** ViewBox geometry (48×48 space). Sensible defaults are built in; override only when needed. */
     arcRadius?: number;
     arcStrokeWidth?: number;
-    /** Bottom gap in radians (`0 … π/2`); sets sweep when paired with defaults. Ignored if you rely only on `angleOffset`/`angleRange`. */
-    angleGapRad?: number;
-    indicatorSpan?: readonly [number, number];
-    indicatorWidth?: number;
-    /** How pointer rotation maps to value; default `arc`. */
-    dragSensitivity?: DragSensitivity;
+    "aria-label"?: string;
+    "aria-labelledby"?: string;
+    defaultValue?: number;
+    disabled?: boolean;
     /** Fine-tune pan vs rotate, dead zone, and vertical sensitivity. */
     dragOptions?: DragOptions;
+    /** How pointer rotation maps to value; default `arc`. */
+    dragSensitivity?: DragSensitivity;
+    indicatorSpan?: readonly [number, number];
+    indicatorWidth?: number;
+    max?: number;
+    min?: number;
+    onValueChange?: Procedure<number>;
+    onValueCommit?: Procedure<number>;
+    step?: number;
+    value?: number;
   }
 
   /**
@@ -293,7 +293,6 @@ export namespace Knob {
 
     const { value: rawValue, setValue: setRawValue } =
       useControlledValue<number>({
-        value: controlledValue,
         defaultValue: computedDefaultValue,
         onChange: onValueChange,
         transform: (val: number) => {
@@ -303,6 +302,7 @@ export namespace Knob {
           }
           return clamp(numValue, min, max);
         },
+        value: controlledValue,
       });
 
     const value = rawValue ?? min;
@@ -543,41 +543,41 @@ export namespace Knob {
 
     const percentage = (value - min) / (max - min);
     const anchorPercentage =
-      anchor !== undefined ? clamp((anchor - min) / (max - min), 0, 1) : 0;
+      anchor === undefined ? 0 : clamp((anchor - min) / (max - min), 0, 1);
     const rotation = angleOffset + percentage * angleRange;
     const elementId = id || knobId;
 
     const contextValue = React.useMemo<KnobContextValue>(
       () => ({
-        value,
-        min,
-        max,
-        step,
-        disabled,
-        angleRange,
-        angleOffset,
-        percentage,
         anchorPercentage,
-        rotation,
-        elementId,
-        arcTrackRadius,
+        angleOffset,
+        angleRange,
         arcStrokeWidth,
+        arcTrackRadius,
+        ariaLabel,
+        ariaLabelledBy,
+        commitValue,
+        disabled,
+        elementId,
         indicatorSpan,
         indicatorWidth,
         knobRef,
-        updateValue,
-        commitValue,
-        shouldPreventFocusRef,
-        valueRef,
-        setRawValue,
-        onValueCommit,
-        ariaLabel,
-        ariaLabelledBy,
-        wheelRef,
-        onPointerDown,
-        onDragStart,
+        max,
+        min,
         onDrag,
         onDragEnd,
+        onDragStart,
+        onPointerDown,
+        onValueCommit,
+        percentage,
+        rotation,
+        setRawValue,
+        shouldPreventFocusRef,
+        step,
+        updateValue,
+        value,
+        valueRef,
+        wheelRef,
       }),
       [
         value,
@@ -653,7 +653,7 @@ export namespace Knob {
         wheelRef(node);
         if (typeof ref === "function") {
           ref(node);
-        } else if (ref != null) {
+        } else if (ref !== null) {
           ref.current = node;
         }
       },
@@ -847,15 +847,15 @@ export namespace Knob {
     } = useKnobContext();
 
     const { pointerProps } = usePointerDrag({
+      capturePointer: true,
       disabled,
       elementRef: knobRef,
-      capturePointer: true,
-      releaseOnOutsideClick: true,
-      onPointerDown,
-      onDragStart,
       onDrag,
-      onDragEnd,
       onDragCancel: onDragEnd,
+      onDragEnd,
+      onDragStart,
+      onPointerDown,
+      releaseOnOutsideClick: true,
     });
 
     const { focusProps } = useFocus({
@@ -870,14 +870,6 @@ export namespace Knob {
     const { keyboardProps } = useKeyboardNavigation({
       disabled,
       handlers: {
-        onArrowUp: () => {
-          commitValue(valueRef.current + step);
-          return true;
-        },
-        onArrowRight: () => {
-          commitValue(valueRef.current + step);
-          return true;
-        },
         onArrowDown: () => {
           commitValue(valueRef.current - step);
           return true;
@@ -886,39 +878,47 @@ export namespace Knob {
           commitValue(valueRef.current - step);
           return true;
         },
-        onHome: () => {
-          commitValue(min);
+        onArrowRight: () => {
+          commitValue(valueRef.current + step);
+          return true;
+        },
+        onArrowUp: () => {
+          commitValue(valueRef.current + step);
           return true;
         },
         onEnd: () => {
           commitValue(max);
           return true;
         },
-        onPageUp: () => {
-          commitValue(valueRef.current + step * 10);
+        onHome: () => {
+          commitValue(min);
           return true;
         },
         onPageDown: () => {
           commitValue(valueRef.current - step * 10);
           return true;
         },
+        onPageUp: () => {
+          commitValue(valueRef.current + step * 10);
+          return true;
+        },
       },
     });
 
     return {
-      disabled,
-      elementId,
       ariaLabel,
       ariaLabelledBy,
-      min,
-      max,
-      value,
-      knobRef,
-      wheelRef,
+      disabled,
+      elementId,
       focusProps,
       keyboardProps,
+      knobRef,
+      max,
+      min,
       pointerProps,
       shouldPreventFocusRef,
+      value,
+      wheelRef,
     };
   }
 }

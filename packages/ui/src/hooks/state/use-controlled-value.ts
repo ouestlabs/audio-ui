@@ -10,15 +10,15 @@ import * as React from "react";
 import { useCallbackRef } from "../use-callback-ref";
 
 export interface UseControlledValueOptions<T> {
-  value?: T;
   defaultValue?: T;
   onChange?: Procedure<T>;
   transform?: Func<T, T>;
+  value?: T;
 }
 
 export interface UseControlledValueReturn<T> {
-  value: Optional<T>;
   setValue: Procedure<T>;
+  value: Optional<T>;
 }
 
 export function useControlledValue<T>({
@@ -54,7 +54,7 @@ export function useControlledValue<T>({
   );
 
   return {
-    value,
     setValue,
+    value,
   };
 }

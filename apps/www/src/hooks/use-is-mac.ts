@@ -1,11 +1,13 @@
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
+
+const emptySubscribe = () => () => {
+  // Nothing to clean up: the platform never changes at runtime.
+};
 
 export function useIsMac() {
-  const [isMac, setIsMac] = useState(true);
-
-  useEffect(() => {
-    setIsMac(navigator.platform.toUpperCase().includes("MAC"));
-  }, []);
-
-  return isMac;
+  return useSyncExternalStore(
+    emptySubscribe,
+    () => navigator.platform.toUpperCase().includes("MAC"),
+    () => true
+  );
 }

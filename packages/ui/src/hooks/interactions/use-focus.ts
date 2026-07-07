@@ -4,8 +4,8 @@ import { useCallbackRef } from "../use-callback-ref";
 
 export interface UseFocusOptions<T extends HTMLElement = HTMLElement> {
   disabled?: boolean;
-  onFocus?: Procedure<React.FocusEvent<T>>;
   onBlur?: Procedure<React.FocusEvent<T>>;
+  onFocus?: Procedure<React.FocusEvent<T>>;
   tabIndex?: number;
 }
 
@@ -46,9 +46,9 @@ export function useFocus<T extends HTMLElement = HTMLElement>({
 
   const focusProps = React.useMemo(
     () => ({
-      tabIndex,
-      onFocus: handleFocus,
       onBlur: handleBlur,
+      onFocus: handleFocus,
+      tabIndex,
     }),
     [tabIndex, handleFocus, handleBlur]
   );

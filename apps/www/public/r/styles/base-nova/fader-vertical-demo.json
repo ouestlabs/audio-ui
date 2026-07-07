@@ -1,0 +1,15 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "fader-vertical-demo",
+  "type": "registry:example",
+  "description": "Vertical fader",
+  "registryDependencies": ["@audio/fader"],
+  "files": [
+    {
+      "path": "fader-vertical-demo.tsx",
+      "type": "registry:example",
+      "content": "import { Fader } from \"@/components/audio/elements/fader\";\n\nexport function FaderVerticalDemo() {\n  return <Fader defaultValue={50} max={100} min={0} step={1} />;\n}",
+      "target": "components/examples/fader-vertical-demo.tsx"
+    }
+  ]
+}

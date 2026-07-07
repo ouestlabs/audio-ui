@@ -1,0 +1,15 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "block-channel-strip-fader-slider",
+  "type": "registry:block",
+  "description": "Channel strip with horizontal fader and inline label",
+  "registryDependencies": ["@audio/channel-strip", "@audio/fader"],
+  "files": [
+    {
+      "path": "block-channel-strip-fader-slider.tsx",
+      "type": "registry:block",
+      "content": "\"use client\";\n\nimport { useId, useState } from \"react\";\nimport {\n  ChannelStrip,\n  ChannelStripContent,\n  ChannelStripHeader,\n  ChannelStripLabel,\n  ChannelStripSection,\n  ChannelStripValue,\n} from \"@/components/audio/elements/channel-strip\";\nimport { Fader } from \"@/components/audio/elements/fader\";\n\nexport function BlockChannelStripFaderSlider() {\n  const faderId = useId();\n  const labelId = useId();\n  const valueId = useId();\n  const [value, setValue] = useState(72);\n\n  return (\n    <ChannelStrip aria-label=\"Fader control\" orientation=\"horizontal\">\n      <ChannelStripHeader>\n        <ChannelStripLabel id={labelId}>Fader</ChannelStripLabel>\n        <ChannelStripValue id={valueId} title={`${value}%`}>\n          {value}%\n        </ChannelStripValue>\n      </ChannelStripHeader>\n      <ChannelStripContent>\n        <ChannelStripSection>\n          <Fader\n            aria-describedby={valueId}\n            aria-labelledby={labelId}\n            id={faderId}\n            max={100}\n            min={0}\n            onValueChange={setValue}\n            value={value}\n          />\n        </ChannelStripSection>\n      </ChannelStripContent>\n    </ChannelStrip>\n  );\n}",
+      "target": "components/examples/block-channel-strip-fader-slider.tsx"
+    }
+  ]
+}

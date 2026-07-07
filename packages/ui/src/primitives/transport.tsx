@@ -18,34 +18,34 @@ import { getDataAttributes } from "./internal/data-attributes";
 import { useInheritedOrientation } from "./internal/orientation-context";
 
 interface TransportContextValue {
-  value: number;
-  bufferedValue: number;
-  min: number;
-  max: number;
-  step: number;
-  orientation: "horizontal" | "vertical";
-  disabled: boolean;
-  percentage: number;
-  bufferedPercentage: number;
-  elementId: string;
-  trackRef: React.RefObject<Nullable<HTMLDivElement>>;
-  thumbRef: React.RefObject<Nullable<HTMLDivElement>>;
-  updateValue: (newValue: number) => void;
-  commitValue: (newValue: number) => void;
-  calculateValueFromPoint: (point: Point) => number;
-  calculateValueFromDelta: (delta: Point, initialValue: number) => number;
-  dragStartValueRef: React.RefObject<number>;
-  isDragActiveRef: React.RefObject<boolean>;
-  pendingValueRef: React.RefObject<number>;
-  shouldPreventFocusRef: React.RefObject<boolean>;
-  valueRef: React.RefObject<number>;
   ariaLabel?: string;
   ariaLabelledBy?: string;
-  wheelRef: Procedure<Nullable<HTMLDivElement>>;
-  onPointerDown: (e: React.PointerEvent) => void;
-  onDragStart: (e: React.PointerEvent) => void;
+  bufferedPercentage: number;
+  bufferedValue: number;
+  calculateValueFromDelta: (delta: Point, initialValue: number) => number;
+  calculateValueFromPoint: (point: Point) => number;
+  commitValue: (newValue: number) => void;
+  disabled: boolean;
+  dragStartValueRef: React.RefObject<number>;
+  elementId: string;
+  isDragActiveRef: React.RefObject<boolean>;
+  max: number;
+  min: number;
   onDrag: (delta: Point) => void;
   onDragEnd: () => void;
+  onDragStart: (e: React.PointerEvent) => void;
+  onPointerDown: (e: React.PointerEvent) => void;
+  orientation: "horizontal" | "vertical";
+  pendingValueRef: React.RefObject<number>;
+  percentage: number;
+  shouldPreventFocusRef: React.RefObject<boolean>;
+  step: number;
+  thumbRef: React.RefObject<Nullable<HTMLDivElement>>;
+  trackRef: React.RefObject<Nullable<HTMLDivElement>>;
+  updateValue: (newValue: number) => void;
+  value: number;
+  valueRef: React.RefObject<number>;
+  wheelRef: Procedure<Nullable<HTMLDivElement>>;
 }
 
 const TransportContext = React.createContext<TransportContextValue | null>(
@@ -73,19 +73,19 @@ export namespace Transport {
       | "max"
       | "step"
     > {
-    value?: number | number[];
-    defaultValue?: number;
-    bufferedValue?: number;
-    min?: number;
-    max?: number;
-    step?: number;
-    orientation?: "horizontal" | "vertical";
-    disabled?: boolean;
-    freezeValuesWhileDragging?: boolean;
     "aria-label"?: string;
     "aria-labelledby"?: string;
+    bufferedValue?: number;
+    defaultValue?: number;
+    disabled?: boolean;
+    freezeValuesWhileDragging?: boolean;
+    max?: number;
+    min?: number;
     onValueChange?: Procedure<number>;
     onValueCommit?: Procedure<number>;
+    orientation?: "horizontal" | "vertical";
+    step?: number;
+    value?: number | number[];
   }
 
   export function Root({
@@ -122,7 +122,6 @@ export namespace Transport {
 
     const { value: rawValue, setValue: setRawValue } =
       useControlledValue<number>({
-        value: normalizedValue,
         defaultValue: computedDefaultValue,
         onChange: onValueChange,
         transform: (val: number) => {
@@ -132,6 +131,7 @@ export namespace Transport {
           }
           return clamp(n, min, max);
         },
+        value: normalizedValue,
       });
 
     const value = rawValue ?? min;
@@ -308,34 +308,34 @@ export namespace Transport {
     );
 
     const contextValue: TransportContextValue = {
-      value,
-      bufferedValue,
-      min,
-      max,
-      step,
-      orientation,
-      disabled,
-      percentage,
-      bufferedPercentage,
-      elementId,
-      trackRef,
-      thumbRef,
-      updateValue,
-      commitValue,
-      calculateValueFromPoint,
-      calculateValueFromDelta,
-      dragStartValueRef,
-      isDragActiveRef,
-      pendingValueRef,
-      shouldPreventFocusRef,
-      valueRef,
       ariaLabel,
       ariaLabelledBy,
-      wheelRef,
-      onPointerDown,
-      onDragStart,
+      bufferedPercentage,
+      bufferedValue,
+      calculateValueFromDelta,
+      calculateValueFromPoint,
+      commitValue,
+      disabled,
+      dragStartValueRef,
+      elementId,
+      isDragActiveRef,
+      max,
+      min,
       onDrag,
       onDragEnd,
+      onDragStart,
+      onPointerDown,
+      orientation,
+      pendingValueRef,
+      percentage,
+      shouldPreventFocusRef,
+      step,
+      thumbRef,
+      trackRef,
+      updateValue,
+      value,
+      valueRef,
+      wheelRef,
     };
 
     return (
@@ -363,7 +363,7 @@ export namespace Transport {
     return (
       <div
         className={className}
-        {...getDataAttributes("transport", { orientation, disabled })}
+        {...getDataAttributes("transport", { disabled, orientation })}
         ref={(node) => {
           trackRef.current = node;
           wheelRef(node);
@@ -387,19 +387,19 @@ export namespace Transport {
     } = useTransportContext();
 
     const { pointerProps } = usePointerDrag({
+      capturePointer: true,
       disabled,
       elementRef: trackRef,
-      capturePointer: true,
-      onPointerDown,
-      onDragStart,
       onDrag,
       onDragEnd,
+      onDragStart,
+      onPointerDown,
     });
 
     return (
       <div
         className={className}
-        {...getDataAttributes("transport", { part: "track", orientation })}
+        {...getDataAttributes("transport", { orientation, part: "track" })}
         {...pointerProps}
         {...props}
       />
@@ -415,21 +415,21 @@ export namespace Transport {
     return (
       <div
         className={className}
-        {...getDataAttributes("transport", { part: "range", orientation })}
+        {...getDataAttributes("transport", { orientation, part: "range" })}
         style={{
           ...(orientation === "horizontal"
             ? {
-                width: "100%",
                 height: "100%",
                 transform: `scaleX(${clampedPercentage})`,
                 transformOrigin: "left center",
+                width: "100%",
                 willChange: "transform",
               }
             : {
-                width: "100%",
                 height: "100%",
                 transform: `scaleY(${clampedPercentage})`,
                 transformOrigin: "center bottom",
+                width: "100%",
                 willChange: "transform",
               }),
           ...style,
@@ -452,23 +452,23 @@ export namespace Transport {
       <div
         className={className}
         {...getDataAttributes("transport", {
-          part: "buffered-range",
           orientation,
+          part: "buffered-range",
         })}
         style={{
           ...(orientation === "horizontal"
             ? {
-                width: "100%",
                 height: "100%",
                 transform: `scaleX(${clampedBufferedPercentage})`,
                 transformOrigin: "left center",
+                width: "100%",
                 willChange: "transform",
               }
             : {
-                width: "100%",
                 height: "100%",
                 transform: `scaleY(${clampedBufferedPercentage})`,
                 transformOrigin: "center bottom",
+                width: "100%",
                 willChange: "transform",
               }),
           ...style,
@@ -503,13 +503,13 @@ export namespace Transport {
     } = useTransportContext();
 
     const { pointerProps } = usePointerDrag({
+      capturePointer: true,
       disabled,
       elementRef: thumbRef,
-      capturePointer: true,
-      onPointerDown,
-      onDragStart,
       onDrag,
       onDragEnd,
+      onDragStart,
+      onPointerDown,
     });
 
     const { focusProps } = useFocus({
@@ -524,14 +524,6 @@ export namespace Transport {
     const { keyboardProps } = useKeyboardNavigation({
       disabled,
       handlers: {
-        onArrowUp: () => {
-          commitValue(valueRef.current + step);
-          return true;
-        },
-        onArrowRight: () => {
-          commitValue(valueRef.current + step);
-          return true;
-        },
         onArrowDown: () => {
           commitValue(valueRef.current - step);
           return true;
@@ -540,20 +532,28 @@ export namespace Transport {
           commitValue(valueRef.current - step);
           return true;
         },
-        onHome: () => {
-          commitValue(min);
+        onArrowRight: () => {
+          commitValue(valueRef.current + step);
+          return true;
+        },
+        onArrowUp: () => {
+          commitValue(valueRef.current + step);
           return true;
         },
         onEnd: () => {
           commitValue(max);
           return true;
         },
-        onPageUp: () => {
-          commitValue(valueRef.current + step * 10);
+        onHome: () => {
+          commitValue(min);
           return true;
         },
         onPageDown: () => {
           commitValue(valueRef.current - step * 10);
+          return true;
+        },
+        onPageUp: () => {
+          commitValue(valueRef.current + step * 10);
           return true;
         },
       },
@@ -577,9 +577,9 @@ export namespace Transport {
         aria-valuenow={value}
         className={className}
         {...getDataAttributes("transport", {
-          part: "thumb",
           disabled,
           orientation,
+          part: "thumb",
         })}
         ref={thumbRef}
         role="slider"
@@ -614,8 +614,8 @@ export namespace Transport {
       <div
         className={className}
         {...getDataAttributes("transport", {
-          part: "thumb-inner",
           orientation,
+          part: "thumb-inner",
         })}
         {...props}
       />
@@ -631,8 +631,8 @@ export namespace Transport {
       <div
         className={className}
         {...getDataAttributes("transport", {
-          part: "thumb-mark",
           orientation,
+          part: "thumb-mark",
         })}
         {...props}
       />

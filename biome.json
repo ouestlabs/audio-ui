@@ -1,18 +1,24 @@
 {
+  "extends": [
+    "ultracite/biome/core",
+    "ultracite/biome/react",
+    "ultracite/biome/next",
+    "ultracite/biome/tanstack",
+    "ultracite/biome/vitest"
+  ],
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "files": {
     "ignoreUnknown": false,
     "includes": [
-      "**",
       "!**/.next",
-      "!**/__index__.tsx",
       "!**/dist",
       "!**/.turbo",
       "!**/dev-dist",
       "!**/.zed",
       "!**/.vscode",
       "!**/routeTree.gen.ts",
-      "!**/.source"
+      "!**/.source",
+      "!apps/www/public/r"
     ]
   },
   "linter": {
@@ -31,9 +37,7 @@
         "noBarrelFile": "off",
         "noNamespaceImport": "off"
       },
-      "nursery": {
-        "useMaxParams": "off"
-      },
+      "nursery": "off",
       "suspicious": {
         "noConsole": "off",
         "noExplicitAny": "off",
@@ -48,6 +52,5 @@
         "noNoninteractiveElementInteractions": "off"
       }
     }
-  },
-  "extends": ["ultracite/core", "ultracite/react", "ultracite/next"]
+  }
 }

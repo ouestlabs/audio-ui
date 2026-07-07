@@ -1,0 +1,15 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "player-queue-preferences-demo",
+  "type": "registry:example",
+  "description": "Minimal queue with preferences dropdown",
+  "registryDependencies": ["@audio/player"],
+  "files": [
+    {
+      "path": "player-queue-preferences-demo.tsx",
+      "type": "registry:example",
+      "content": "import {\n  AudioPlayer,\n  AudioPlayerControlBar,\n  AudioQueue,\n  AudioQueuePreferences,\n} from \"@/components/audio/player\";\n\nexport function AudioQueuePreferencesDemo() {\n  return (\n    <AudioPlayer className=\"w-max\">\n      <AudioPlayerControlBar>\n        <AudioQueuePreferences />\n        <AudioQueue />\n      </AudioPlayerControlBar>\n    </AudioPlayer>\n  );\n}",
+      "target": "components/examples/player-queue-preferences-demo.tsx"
+    }
+  ]
+}
