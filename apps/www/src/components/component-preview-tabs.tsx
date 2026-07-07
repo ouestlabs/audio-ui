@@ -2,6 +2,8 @@
 
 import * as React from "react";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
+import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
 import { cn } from "@/lib/utils";
 
 export function ComponentPreviewTabs({
@@ -24,6 +26,17 @@ export function ComponentPreviewTabs({
   sourcePreview?: React.ReactNode;
 }) {
   const [isCodeExpanded, setIsCodeExpanded] = React.useState(false);
+  const previewRef = React.useRef<HTMLDivElement>(null);
+
+  // Docs pages can mount a dozen+ live previews on one page (real audio
+  // elements, pointer listeners, etc.). Defer mounting each one until it's
+  // near the viewport, same pattern as the components catalog grid
+  // (component-card-container.tsx), to keep docs pages from feeling laggy.
+  const hasBeenVisible = useIntersectionObserver(previewRef, {
+    rootMargin: "800px",
+    threshold: 0,
+    freezeOnceVisible: true,
+  });
 
   return (
     <div
@@ -42,8 +55,13 @@ export function ComponentPreviewTabs({
           )}
           data-align={align}
           data-chromeless={chromeLessOnMobile}
+          ref={previewRef}
         >
-          {component}
+          {hasBeenVisible ? (
+            component
+          ) : (
+            <Spinner className="text-site-muted-foreground/40" />
+          )}
         </div>
         {!hideCode && (
           <div
