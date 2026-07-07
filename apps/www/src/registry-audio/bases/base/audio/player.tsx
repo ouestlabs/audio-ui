@@ -159,6 +159,35 @@ function PauseGlyph() {
   );
 }
 
+function PlayPauseGlyphSwap({ isPlaying }: { isPlaying: boolean }) {
+  return (
+    <span className="relative flex items-center justify-center">
+      <span
+        aria-hidden="true"
+        className={cn(
+          "absolute inset-0 flex items-center justify-center transition-[opacity,filter,scale] duration-250 ease-in-out will-change-[opacity,filter,scale] motion-reduce:transition-none",
+          isPlaying
+            ? "scale-100 opacity-100 blur-0"
+            : "scale-[0.25] opacity-0 blur-[2px]"
+        )}
+      >
+        <PauseGlyph />
+      </span>
+      <span
+        aria-hidden="true"
+        className={cn(
+          "flex items-center justify-center transition-[opacity,filter,scale] duration-250 ease-in-out will-change-[opacity,filter,scale] motion-reduce:transition-none",
+          isPlaying
+            ? "scale-[0.25] opacity-0 blur-[2px]"
+            : "scale-100 opacity-100 blur-0"
+        )}
+      >
+        <PlayGlyph />
+      </span>
+    </span>
+  );
+}
+
 function MutedGlyph() {
   return (
     <IconPlaceholder
@@ -643,9 +672,11 @@ const AudioPlayerPlay = React.memo(
         variant={variant}
         {...props}
       >
-        {showSpinner && <Spinner />}
-        {!showSpinner && isPlaying && <PauseGlyph />}
-        {!(showSpinner || isPlaying) && <PlayGlyph />}
+        {showSpinner ? (
+          <Spinner />
+        ) : (
+          <PlayPauseGlyphSwap isPlaying={isPlaying} />
+        )}
       </AudioPlayerButton>
     );
   }
@@ -1124,7 +1155,7 @@ function AudioTrackPlayPauseAction({ className }: { className?: string }) {
       title={title}
       variant="ghost"
     >
-      {isPlaying ? <PauseGlyph /> : <PlayGlyph />}
+      <PlayPauseGlyphSwap isPlaying={isPlaying} />
     </Button>
   );
 }
