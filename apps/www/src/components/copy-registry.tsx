@@ -84,19 +84,19 @@ export function CopyRegistry({ value, ...props }: CopyRegistryProps) {
             <div className="relative">
               <div
                 className={cn(
-                  "absolute inset-0 flex items-center justify-center transition-[opacity,filter,scale] duration-300 ease-in-out will-change-[opacity,filter,scale]",
+                  "absolute inset-0 flex items-center justify-center transition-[opacity,filter,scale] duration-250 ease-in-out will-change-[opacity,filter,scale] motion-reduce:transition-none",
                   hasCopied
                     ? "scale-100 opacity-100 blur-0"
-                    : "scale-[0.25] opacity-0 blur-xs"
+                    : "scale-[0.25] opacity-0 blur-[2px]"
                 )}
               >
                 <CheckIcon />
               </div>
               <div
                 className={cn(
-                  "transition-[opacity,filter,scale] duration-300 ease-in-out will-change-[opacity,filter,scale]",
+                  "transition-[opacity,filter,scale] duration-250 ease-in-out will-change-[opacity,filter,scale] motion-reduce:transition-none",
                   hasCopied
-                    ? "scale-[0.25] opacity-0 blur-xs"
+                    ? "scale-[0.25] opacity-0 blur-[2px]"
                     : "scale-100 opacity-100 blur-0"
                 )}
               >
