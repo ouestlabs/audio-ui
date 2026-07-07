@@ -32,7 +32,7 @@ const createPreviewFontAttrs = {
 function ComponentsLayoutFallback() {
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="sticky top-(--header-height) z-10 flex h-[51px] items-center gap-2 border-site-border/80 border-b bg-site-background px-6 sm:px-8 xl:px-10">
+      <div className="sticky top-(--header-height) z-20 flex h-[51px] items-center gap-2 border-site-border/80 border-b bg-site-background px-6 sm:px-8 xl:px-10">
         <Skeleton className="h-9 flex-1" />
         <Skeleton className="size-8 shrink-0" />
         <Skeleton className="size-8 shrink-0" />
