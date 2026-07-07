@@ -115,7 +115,7 @@ function Transport({
     >
       <TransportPrimitive.Slider
         className={cn(
-          "relative flex w-full touch-none select-none items-center data-disabled:opacity-50",
+          "relative flex w-full touch-none select-none items-center transition-opacity duration-150 ease-out motion-reduce:transition-none data-disabled:opacity-50",
           "data-[orientation=vertical]:h-full data-[orientation=vertical]:min-h-40 data-[orientation=vertical]:w-auto data-[orientation=vertical]:flex-col",
           "data-[orientation=horizontal]:w-full data-[orientation=horizontal]:min-w-32",
           transportSliderVariants({ size })

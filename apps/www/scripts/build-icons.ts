@@ -173,7 +173,7 @@ ${finalIcons.map((icon) => `export { ${icon} } from "${config.export}"`).join("\
       fs.writeFileSync(path.join(outputDir, filename), content);
 
       console.log(`  - ${config.title}: ${finalIcons.length} icons`);
-    } catch (_e) {
+    } catch {
       console.error(
         `  - ${config.title}: Failed to load library "${config.export}"`
       );

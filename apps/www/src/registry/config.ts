@@ -613,7 +613,7 @@ export function buildRegistryTheme(config: DesignSystemConfig) {
   // Apply radius transformation.
   if (config.radius && config.radius !== "default") {
     const radius = RADII.find((r) => r.name === config.radius);
-    if (radius && radius.value) {
+    if (radius?.value) {
       lightVars.radius = radius.value;
     }
   }

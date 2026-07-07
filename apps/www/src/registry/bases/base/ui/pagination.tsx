@@ -12,7 +12,6 @@ function Pagination({ className, ...props }: React.ComponentProps<"nav">) {
         className
       )}
       data-slot="pagination"
-      role="navigation"
       {...props}
     />
   );

@@ -27,7 +27,7 @@
   }
 
   .cn-knob-control {
-    @apply bg-secondary text-secondary-foreground shadow-xs transition-[color,background-color,box-shadow,border-color] duration-150 ease-out hover:bg-secondary/90 active:shadow-[inset_0_-14px_28px_-12px_rgb(0_0_0/0.14)] motion-reduce:transition-none dark:bg-secondary/60 dark:hover:bg-secondary/70 dark:active:shadow-[inset_0_-14px_28px_-12px_rgb(0_0_0/0.28)];
+    @apply bg-secondary text-secondary-foreground shadow-xs transition-[color,background-color,box-shadow,border-color,opacity] duration-150 ease-out hover:bg-secondary/90 active:shadow-[inset_0_-14px_28px_-12px_rgb(0_0_0/0.14)] motion-reduce:transition-none dark:bg-secondary/60 dark:hover:bg-secondary/70 dark:active:shadow-[inset_0_-14px_28px_-12px_rgb(0_0_0/0.28)];
   }
 
   .cn-knob-body {

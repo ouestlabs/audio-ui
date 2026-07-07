@@ -275,7 +275,7 @@ async function buildRegistryItem(
     let content = "";
     try {
       content = await fs.readFile(fullPath, "utf-8");
-    } catch (_error) {
+    } catch {
       console.error(`  Failed to read: ${fullPath}`);
       continue;
     }

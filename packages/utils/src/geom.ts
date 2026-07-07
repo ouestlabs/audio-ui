@@ -307,8 +307,8 @@ export namespace CohenSutherland {
 }
 
 export interface ValueAxis {
-  axisToValue(axis: number): number;
-  valueToAxis(value: number): number;
+  axisToValue: (axis: number) => number;
+  valueToAxis: (value: number) => number;
 }
 
 export namespace ValueAxis {

@@ -653,7 +653,7 @@ export namespace Knob {
         wheelRef(node);
         if (typeof ref === "function") {
           ref(node);
-        } else if (ref != null) {
+        } else if (ref !== null) {
           ref.current = node;
         }
       },
