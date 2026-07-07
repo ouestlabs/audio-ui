@@ -1829,7 +1829,12 @@ function AudioPlaybackSpeed({
             tabler="IconGauge"
           />
         )}
-        <span className="font-mono text-xs">{displayLabel}</span>
+        <span
+          className="starting:blur-[2px] starting:opacity-0 starting:translate-y-1 inline-block font-mono text-xs transition-[opacity,filter,translate] duration-150 ease-in-out will-change-[opacity,filter,translate] motion-reduce:transition-none"
+          key={displayLabel}
+        >
+          {displayLabel}
+        </span>
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
