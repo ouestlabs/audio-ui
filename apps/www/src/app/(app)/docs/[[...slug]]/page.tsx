@@ -226,11 +226,9 @@ export default async function Page(props: {
                 </div>
               ) : null}
             </div>
-            <DocsTableOfContents
-              className="w-fit xl:hidden"
-              toc={toc}
-              variant="dropdown"
-            />
+            <div className="hidden md:block xl:hidden">
+              {toc.length ? <DocsTableOfContents toc={toc} /> : null}
+            </div>
             <div className="w-full flex-1 *:data-[slot=alert]:first:mt-0">
               <ContentWrapper>
                 <MDX

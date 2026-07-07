@@ -1,13 +1,8 @@
 "use client";
 
-import { ListIcon, PushPinIcon } from "@phosphor-icons/react/ssr";
+import { PushPinIcon } from "@phosphor-icons/react/ssr";
 import * as React from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
 const LINE_WIDTH_BY_DEPTH: Record<number, string> = {
@@ -85,7 +80,6 @@ function useActiveItem(itemIds: string[]) {
 
 export function DocsTableOfContents({
   toc,
-  variant = "list",
   className,
 }: {
   toc: {
@@ -93,10 +87,8 @@ export function DocsTableOfContents({
     url: string;
     depth: number;
   }[];
-  variant?: "dropdown" | "list";
   className?: string;
 }) {
-  const [open, setOpen] = React.useState(false);
   const [pinned, setPinned] = React.useState(false);
   const itemIds = React.useMemo(
     () => toc.map((item) => item.url.replace("#", "")),
@@ -118,46 +110,6 @@ export function DocsTableOfContents({
 
   if (!toc?.length) {
     return null;
-  }
-
-  if (variant === "dropdown") {
-    return (
-      <Popover onOpenChange={setOpen} open={open}>
-        <PopoverTrigger
-          render={
-            <Button className={cn(className)} variant="outline">
-              <ListIcon /> On This Page
-            </Button>
-          }
-        />
-        <PopoverContent
-          align="start"
-          className="no-scrollbar scroll-fade max-h-[50svh] min-h-0 w-64 overflow-y-auto"
-          side="bottom"
-        >
-          <div className="flex flex-col gap-0.5">
-            {toc.map((item) => (
-              <a
-                className={cn(
-                  "site-rounded-md block truncate px-2 py-1.5 text-sm transition-colors hover:bg-site-muted data-[depth=3]:pl-6 data-[depth=4]:pl-8",
-                  item.url === `#${activeHeading}`
-                    ? "text-site-primary"
-                    : "text-site-foreground/80"
-                )}
-                data-depth={item.depth}
-                href={item.url}
-                key={item.url}
-                onClick={() => {
-                  setOpen(false);
-                }}
-              >
-                {item.title}
-              </a>
-            ))}
-          </div>
-        </PopoverContent>
-      </Popover>
-    );
   }
 
   return (
