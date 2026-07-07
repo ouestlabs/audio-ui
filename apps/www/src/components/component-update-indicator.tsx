@@ -22,7 +22,7 @@ export function ComponentUpdateIndicator({ category }: { category: string }) {
             <span className="sr-only">{hint}</span>
             <span
               aria-hidden="true"
-              className="site-rounded-md size-2 bg-blue-500"
+              className="site-rounded-md size-2 animate-badge-pop bg-blue-500 motion-reduce:animate-none"
             />
           </span>
         }
