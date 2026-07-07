@@ -1,3 +1,4 @@
+import { Provider as JotaiProvider } from "jotai";
 import type { Metadata } from "next";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { JsonLd } from "@/components/json-ld";
@@ -115,9 +116,11 @@ export default function RootLayout({
         <ThemeProvider>
           <QueryProvider>
             <NuqsAdapter>
-              {children}
-              <TailwindIndicator />
-              <Toaster position="top-center" />
+              <JotaiProvider>
+                {children}
+                <TailwindIndicator />
+                <Toaster position="top-center" />
+              </JotaiProvider>
             </NuqsAdapter>
           </QueryProvider>
         </ThemeProvider>

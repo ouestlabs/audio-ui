@@ -1,4 +1,3 @@
-import { Provider as JotaiProvider } from "jotai";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Suspense } from "react";
 import { ComponentsProvider } from "@/app/(create)/components/components/components-provider";
@@ -75,19 +74,17 @@ export default function ComponentsLayout({
       <SiteHeader />
       <main className="flex min-h-0 flex-1 flex-col">
         <Suspense fallback={<ComponentsLayoutFallback />}>
-          <JotaiProvider>
-            <LocksProvider>
-              <DesignSystemProvider>
-                <ComponentsProvider
-                  catalogItems={catalogItems}
-                  categoryCounts={categoryCounts}
-                  totalCount={totalCount}
-                >
-                  {children}
-                </ComponentsProvider>
-              </DesignSystemProvider>
-            </LocksProvider>
-          </JotaiProvider>
+          <LocksProvider>
+            <DesignSystemProvider>
+              <ComponentsProvider
+                catalogItems={catalogItems}
+                categoryCounts={categoryCounts}
+                totalCount={totalCount}
+              >
+                {children}
+              </ComponentsProvider>
+            </DesignSystemProvider>
+          </LocksProvider>
         </Suspense>
       </main>
     </div>

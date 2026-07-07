@@ -1,4 +1,3 @@
-import { Provider as JotaiProvider } from "jotai";
 import { DocsDesignSystemSync } from "@/components/docs-design-system-sync";
 import { DocsSidebar } from "@/components/docs-sidebar";
 import { SiteFooter } from "@/components/site-footer";
@@ -14,17 +13,15 @@ export default function DocsLayout({
   return (
     <>
       <SiteHeader />
-      <JotaiProvider>
-        <DocsDesignSystemSync>
-          <div className="container-wrapper flex flex-1 flex-col px-2">
-            <SidebarProvider className="3xl:fixed:container min-h-min flex-1 items-start 3xl:fixed:px-3 px-0 [--sidebar-width:220px] [--top-spacing:0] lg:grid lg:grid-cols-[var(--sidebar-width)_minmax(0,1fr)] lg:[--sidebar-width:240px] lg:[--top-spacing:--spacing(4)]">
-              <DocsSidebar tree={source.getPageTree()} />
-              <div className="size-full">{children}</div>
-            </SidebarProvider>
-          </div>
-          <SiteFooter />
-        </DocsDesignSystemSync>
-      </JotaiProvider>
+      <DocsDesignSystemSync>
+        <div className="container-wrapper flex flex-1 flex-col px-2">
+          <SidebarProvider className="3xl:fixed:container min-h-min flex-1 items-start 3xl:fixed:px-3 px-0 [--sidebar-width:220px] [--top-spacing:0] lg:grid lg:grid-cols-[var(--sidebar-width)_minmax(0,1fr)] lg:[--sidebar-width:240px] lg:[--top-spacing:--spacing(4)]">
+            <DocsSidebar tree={source.getPageTree()} />
+            <div className="size-full">{children}</div>
+          </SidebarProvider>
+        </div>
+        <SiteFooter />
+      </DocsDesignSystemSync>
     </>
   );
 }
