@@ -1,6 +1,6 @@
 {
   "name": "sandbox",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack --port 4000",
@@ -11,7 +11,7 @@
     "reset": "bun scripts/reset.ts"
   },
   "dependencies": {
-    "@audio-ui/react": "^0.0.7",
+    "@audio-ui/react": "^0.0.8",
     "@base-ui/react": "^1.4.0",
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
