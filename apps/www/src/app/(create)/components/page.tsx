@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Suspense } from "react";
 import { GridSkeleton } from "@/components/grid-skeleton";
 import { JsonLd } from "@/components/json-ld";
@@ -19,44 +18,6 @@ const totalComponentCount = getTotalComponentCount();
 const allCatalogItems = searchCatalog("");
 const title = "Audio UI Components";
 const description = `Browse ${totalComponentCount}+ free audio/ui components for React and Tailwind CSS`;
-const featuredCategories = [
-  {
-    href: "/components/player",
-    label: "Player",
-  },
-  {
-    href: "/components/channel-strip",
-    label: "Channel Strip",
-  },
-  {
-    href: "/components/knob",
-    label: "Knob",
-  },
-  {
-    href: "/components/fader",
-    label: "Fader",
-  },
-  {
-    href: "/components/xypad",
-    label: "XY Pad",
-  },
-  {
-    href: "/components/transport",
-    label: "Transport",
-  },
-  {
-    href: "/components/queue",
-    label: "Queue",
-  },
-  {
-    href: "/components/synth",
-    label: "Synth",
-  },
-  {
-    href: "/components/sortable-list",
-    label: "Sortable List",
-  },
-] as const;
 
 export const metadata: Metadata = buildPageMetadata({
   description,
@@ -97,17 +58,6 @@ export default function ComponentsPage() {
             primitives to polished audio product UI — players, mixers, synths,
             and channel strips.
           </p>
-          <div className="mt-5 flex flex-wrap gap-2">
-            {featuredCategories.map((category) => (
-              <Link
-                className="site-rounded-full border border-site-border bg-site-background px-3 py-1.5 text-sm transition-colors hover:bg-site-muted"
-                href={category.href}
-                key={category.href}
-              >
-                {category.label}
-              </Link>
-            ))}
-          </div>
         </div>
       </section>
       <Suspense

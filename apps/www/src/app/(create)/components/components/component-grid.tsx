@@ -86,7 +86,7 @@ function ComponentGridContent({
           "grid items-stretch gap-4 pb-4 sm:gap-6",
           gridColumns === 1 && "grid-cols-1",
           gridColumns === 2 &&
-            "grid-cols-[repeat(auto-fill,minmax(max(420px,calc((100%-24px)/2)),1fr))]"
+            "grid-cols-[repeat(auto-fill,minmax(max(320px,calc((100%-24px)/2)),1fr))]"
         )}
       >
         {filteredItems.map((item) => (
@@ -107,7 +107,7 @@ export function ComponentGrid({ catalogItems }: ComponentGridProps) {
       <Suspense
         fallback={
           <div className="w-full px-4 py-4 sm:px-6 sm:py-6">
-            <div className="grid items-stretch gap-4 sm:gap-6 grid-cols-[repeat(auto-fill,minmax(max(420px,calc((100%-24px)/2)),1fr))]">
+            <div className="grid items-stretch gap-4 sm:gap-6 grid-cols-[repeat(auto-fill,minmax(max(320px,calc((100%-24px)/2)),1fr))]">
               {Array.from({ length: 6 }).map((_, i) => (
                 <ComponentCardSkeleton key={i} />
               ))}
