@@ -41,13 +41,15 @@ function ShowcaseCustomizerAside() {
   return (
     <aside
       className={cn(
-        "flex w-64 shrink-0 flex-col overflow-hidden border-site-border/80 border-l bg-site-background transition-[width,border-color] duration-200 ease-[cubic-bezier(0.77,0,0.175,1)]",
+        "flex w-64 shrink-0 flex-col overflow-hidden border-site-border/80 border-l bg-site-background transition-[width] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
         !customizerOpen && "w-0 border-l-0"
       )}
       ref={anchorRef}
     >
-      <CustomizerSidebarHeader />
-      <CustomizerSidebarContent anchorRef={anchorRef} isMobile={isMobile} />
+      <div className="flex h-full w-64 flex-col">
+        <CustomizerSidebarHeader />
+        <CustomizerSidebarContent anchorRef={anchorRef} isMobile={isMobile} />
+      </div>
     </aside>
   );
 }
