@@ -1,4 +1,11 @@
 {
+  "extends": [
+    "ultracite/biome/core",
+    "ultracite/biome/react",
+    "ultracite/biome/next",
+    "ultracite/biome/tanstack",
+    "ultracite/biome/vitest"
+  ],
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "files": {
     "ignoreUnknown": false,
@@ -45,10 +52,5 @@
         "noNoninteractiveElementInteractions": "off"
       }
     }
-  },
-  "extends": [
-    "ultracite/biome/core",
-    "ultracite/biome/react",
-    "ultracite/biome/next"
-  ]
+  }
 }

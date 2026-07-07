@@ -194,7 +194,7 @@
 
   /* MARK: XY Pad (pad ← cn-card, value chip ← cn-button) */
   .cn-xypad {
-    @apply rounded-2xl border border-transparent bg-card ring-1 ring-foreground/10 transition-[color,border-color,box-shadow] duration-150 ease-out hover:ring-4 hover:ring-ring/50 focus-visible:ring-4 focus-visible:ring-ring/50 active:ring-4 active:ring-ring/50 focus-visible:border-ring active:border-ring motion-reduce:transition-none;
+    @apply rounded-2xl border border-transparent bg-card ring-1 ring-foreground/10 transition-[color,border-color,box-shadow,opacity] duration-150 ease-out hover:ring-4 hover:ring-ring/50 focus-visible:ring-4 focus-visible:ring-ring/50 active:ring-4 active:ring-ring/50 focus-visible:border-ring active:border-ring motion-reduce:transition-none;
   }
 
   .cn-xypad-size-sm {
