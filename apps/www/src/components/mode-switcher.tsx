@@ -60,8 +60,16 @@ export function ModeSwitcher() {
             size="icon"
             variant="ghost"
           >
-            <SunIcon className="hidden [html.dark_&]:block" />
-            <MoonIcon className="hidden [html.light_&]:block" />
+            <span className="relative flex items-center justify-center">
+              <SunIcon
+                aria-hidden="true"
+                className="absolute inset-0 m-auto scale-[0.25] opacity-0 blur-[2px] transition-[opacity,filter,scale] duration-250 ease-in-out will-change-[opacity,filter,scale] motion-reduce:transition-none [html.dark_&]:scale-100 [html.dark_&]:opacity-100 [html.dark_&]:blur-[0px]"
+              />
+              <MoonIcon
+                aria-hidden="true"
+                className="scale-[0.25] opacity-0 blur-[2px] transition-[opacity,filter,scale] duration-250 ease-in-out will-change-[opacity,filter,scale] motion-reduce:transition-none [html.light_&]:scale-100 [html.light_&]:opacity-100 [html.light_&]:blur-[0px]"
+              />
+            </span>
             <span className="sr-only">Toggle theme</span>
           </Button>
         }
