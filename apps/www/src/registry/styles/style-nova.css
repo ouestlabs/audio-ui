@@ -314,7 +314,7 @@
   }
 
   .cn-combobox-list {
-    @apply no-scrollbar max-h-[min(calc(--spacing(72)---spacing(9)),calc(var(--available-height)---spacing(9)))] scroll-py-1 overflow-y-auto p-1 data-empty:p-0;
+    @apply no-scrollbar max-h-[min(calc(--spacing(72)-(--spacing(9))),calc(var(--available-height)-(--spacing(9))))] scroll-py-1 overflow-y-auto p-1 data-empty:p-0;
   }
 
   .cn-combobox-item-text {
@@ -1237,11 +1237,11 @@
   }
 
   .cn-table-head {
-    @apply text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0;
+    @apply text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap has-[[role=checkbox]]:pr-0;
   }
 
   .cn-table-cell {
-    @apply p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0;
+    @apply p-2 align-middle whitespace-nowrap has-[[role=checkbox]]:pr-0;
   }
 
   .cn-table-caption {
