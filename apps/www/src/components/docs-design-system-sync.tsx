@@ -69,9 +69,9 @@ export function DocsDesignSystemSync({
 
     if (!previousFontStateRef.current) {
       previousFontStateRef.current = {
-        fontSans: root.style.getPropertyValue("--font-sans"),
-        fontHeading: root.style.getPropertyValue("--font-heading"),
         bodyFontFamily: body.style.fontFamily,
+        fontHeading: root.style.getPropertyValue("--font-heading"),
+        fontSans: root.style.getPropertyValue("--font-sans"),
       };
     }
 
@@ -105,8 +105,8 @@ export function DocsDesignSystemSync({
     });
 
     observer.observe(body, {
-      attributes: true,
       attributeFilter: ["class"],
+      attributes: true,
     });
 
     return () => {

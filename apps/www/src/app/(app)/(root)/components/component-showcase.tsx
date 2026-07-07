@@ -24,8 +24,8 @@ const CustomizerSidebarContent = dynamic(
       "@/app/(create)/components/components/customizer-sidebar-content"
     ).then((m) => m.CustomizerSidebarContent),
   {
-    ssr: false,
     loading: () => <div aria-hidden className="flex-1" />,
+    ssr: false,
   }
 );
 
@@ -63,8 +63,8 @@ export function ComponentShowcase({
   const customizerValue = React.useMemo(
     () => ({
       customizerOpen,
-      toggleCustomizer: () => setCustomizerOpen((open) => !open),
       setCustomizerOpen,
+      toggleCustomizer: () => setCustomizerOpen((open) => !open),
     }),
     [customizerOpen]
   );

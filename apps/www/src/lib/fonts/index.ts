@@ -34,9 +34,9 @@ const fontSerif = FontSerif({
 
 const fontMono = FontMono({
   subsets: ["latin"],
-  weight: ["400"],
   variable: "--font-mono",
+  weight: ["400"],
 });
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
-export { loadOGFont, fontSans, fontSerif, fontMono, inter };
+export { fontMono, fontSans, fontSerif, inter, loadOGFont };

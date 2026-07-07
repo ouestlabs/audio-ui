@@ -21,18 +21,18 @@ const COLLAPSIBLE_COPY_BUTTON_CLASS_NAME =
 const clientCodeCache = new Map<string, string>();
 
 export interface ComponentSourceClientProps {
-  name?: string;
-  src?: string;
-  title?: string;
-  language?: string;
-  collapsible?: boolean;
-  styleName?: string;
-  iconLibrary?: IconLibraryName;
-  maxLines?: number;
-  code?: string;
   className?: string;
+  code?: string;
+  collapsible?: boolean;
   eventName?: "copy_component_code";
+  iconLibrary?: IconLibraryName;
+  language?: string;
+  maxLines?: number;
+  name?: string;
   showCopyButton?: boolean;
+  src?: string;
+  styleName?: string;
+  title?: string;
 }
 
 export function ComponentSourceClient({
@@ -251,10 +251,10 @@ function ComponentCode({
           className={copyButtonClassName}
           event={eventName as any}
           properties={{
-            name,
             base: config?.base,
-            style: config?.style,
             iconLibrary: config?.iconLibrary,
+            name,
+            style: config?.style,
           }}
           value={code}
         />

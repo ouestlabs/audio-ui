@@ -2,45 +2,45 @@ import type { RegistryItem } from "shadcn/schema";
 
 export const lib: RegistryItem[] = [
   {
-    name: "html",
-    description: "HTML Audio Lib",
-    type: "registry:lib",
+    categories: ["lib", "audio", "html-audio"],
     dependencies: [],
-    registryDependencies: [],
+    description: "HTML Audio Lib",
     files: [
       {
         path: "lib/html-audio.ts",
         type: "registry:lib",
       },
     ],
-    categories: ["lib", "audio", "html-audio"],
+    name: "html",
+    registryDependencies: [],
+    type: "registry:lib",
   },
   {
-    name: "web",
-    description: "Web Audio Lib",
-    type: "registry:lib",
+    categories: ["lib", "audio", "web-audio"],
     dependencies: [],
-    registryDependencies: [],
+    description: "Web Audio Lib",
     files: [
       {
         path: "lib/web-audio.ts",
         type: "registry:lib",
       },
     ],
-    categories: ["lib", "audio", "web-audio"],
+    name: "web",
+    registryDependencies: [],
+    type: "registry:lib",
   },
   {
-    name: "store",
-    description: "Audio store",
-    type: "registry:lib",
+    categories: ["lib", "audio", "store"],
     dependencies: ["zustand"],
-    registryDependencies: ["@audio/html"],
+    description: "Audio store",
     files: [
       {
         path: "lib/audio-store.ts",
         type: "registry:lib",
       },
     ],
-    categories: ["lib", "audio", "store"],
+    name: "store",
+    registryDependencies: ["@audio/html"],
+    type: "registry:lib",
   },
 ];

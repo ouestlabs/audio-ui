@@ -3,16 +3,15 @@
   "files": {
     "ignoreUnknown": false,
     "includes": [
-      "**",
       "!**/.next",
-      "!**/__index__.tsx",
       "!**/dist",
       "!**/.turbo",
       "!**/dev-dist",
       "!**/.zed",
       "!**/.vscode",
       "!**/routeTree.gen.ts",
-      "!**/.source"
+      "!**/.source",
+      "!apps/www/public/r"
     ]
   },
   "linter": {
@@ -31,9 +30,7 @@
         "noBarrelFile": "off",
         "noNamespaceImport": "off"
       },
-      "nursery": {
-        "useMaxParams": "off"
-      },
+      "nursery": "off",
       "suspicious": {
         "noConsole": "off",
         "noExplicitAny": "off",
@@ -49,5 +46,9 @@
       }
     }
   },
-  "extends": ["ultracite/core", "ultracite/react", "ultracite/next"]
+  "extends": [
+    "ultracite/biome/core",
+    "ultracite/biome/react",
+    "ultracite/biome/next"
+  ]
 }

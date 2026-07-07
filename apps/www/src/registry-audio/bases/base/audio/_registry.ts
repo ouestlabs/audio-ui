@@ -3,12 +3,10 @@ import type { RegistryItem } from "shadcn/schema";
 export const audio: RegistryItem[] = [
   {
     name: "ui",
-    type: "registry:ui",
     registryDependencies: ["@audio/transport", "@audio/sortable-list"],
+    type: "registry:ui",
   },
   {
-    name: "transport",
-    type: "registry:ui",
     dependencies: ["@audio-ui/react"],
     files: [
       {
@@ -16,27 +14,27 @@ export const audio: RegistryItem[] = [
         type: "registry:ui",
       },
     ],
+    name: "transport",
+    type: "registry:ui",
   },
   {
-    name: "sortable-list",
-    type: "registry:ui",
     dependencies: [
       "@dnd-kit/core",
       "@dnd-kit/sortable",
       "@dnd-kit/utilities",
       "@phosphor-icons/react",
     ],
-    registryDependencies: ["@shadcn/button"],
     files: [
       {
         path: "audio/sortable-list.tsx",
         type: "registry:ui",
       },
     ],
+    name: "sortable-list",
+    registryDependencies: ["@shadcn/button"],
+    type: "registry:ui",
   },
   {
-    name: "knob",
-    type: "registry:ui",
     dependencies: ["@audio-ui/react"],
     files: [
       {
@@ -44,10 +42,10 @@ export const audio: RegistryItem[] = [
         type: "registry:ui",
       },
     ],
+    name: "knob",
+    type: "registry:ui",
   },
   {
-    name: "fader",
-    type: "registry:ui",
     dependencies: ["@audio-ui/react"],
     files: [
       {
@@ -55,10 +53,10 @@ export const audio: RegistryItem[] = [
         type: "registry:ui",
       },
     ],
+    name: "fader",
+    type: "registry:ui",
   },
   {
-    name: "xypad",
-    type: "registry:ui",
     dependencies: ["@audio-ui/react"],
     files: [
       {
@@ -66,15 +64,26 @@ export const audio: RegistryItem[] = [
         type: "registry:ui",
       },
     ],
+    name: "xypad",
+    type: "registry:ui",
   },
   {
-    name: "player",
-    type: "registry:component",
     dependencies: [
       "@phosphor-icons/react",
       "class-variance-authority",
       "@base-ui/react",
     ],
+    files: [
+      {
+        path: "audio/player.tsx",
+        type: "registry:component",
+      },
+      {
+        path: "hooks/use-audio-provider.ts",
+        type: "registry:hook",
+      },
+    ],
+    name: "player",
     registryDependencies: [
       "@audio/store",
       "@audio/html",
@@ -94,20 +103,9 @@ export const audio: RegistryItem[] = [
       "@shadcn/avatar",
       "@shadcn/item",
     ],
-    files: [
-      {
-        path: "audio/player.tsx",
-        type: "registry:component",
-      },
-      {
-        path: "hooks/use-audio-provider.ts",
-        type: "registry:hook",
-      },
-    ],
+    type: "registry:component",
   },
   {
-    name: "channel-strip",
-    type: "registry:component",
     dependencies: ["@audio-ui/react"],
     files: [
       {
@@ -115,5 +113,7 @@ export const audio: RegistryItem[] = [
         type: "registry:component",
       },
     ],
+    name: "channel-strip",
+    type: "registry:component",
   },
 ];

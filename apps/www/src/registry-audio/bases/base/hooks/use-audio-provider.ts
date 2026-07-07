@@ -46,10 +46,10 @@ const parseAudioError = (
   }
 
   if (e instanceof ErrorEvent) {
-    return { message: e.message, recoverable: true, errorCode: 0 };
+    return { errorCode: 0, message: e.message, recoverable: true };
   }
 
-  return { message: "Unknown audio error", recoverable: false, errorCode: 0 };
+  return { errorCode: 0, message: "Unknown audio error", recoverable: false };
 };
 
 export function useAudioProvider({ tracks = [] }: { tracks?: Track[] } = {}) {
@@ -81,10 +81,10 @@ export function useAudioProvider({ tracks = [] }: { tracks?: Track[] } = {}) {
       if (tracksChanged) {
         const firstTrack = tracks[0];
         useAudioStore.setState({
-          queue: tracks,
-          currentTrack: state.currentTrack || firstTrack,
           currentQueueIndex:
             state.currentQueueIndex === -1 ? 0 : state.currentQueueIndex,
+          currentTrack: state.currentTrack || firstTrack,
+          queue: tracks,
         });
       }
     }
@@ -115,8 +115,8 @@ export function useAudioProvider({ tracks = [] }: { tracks?: Track[] } = {}) {
         const state = useAudioStore.getState();
         if (state.currentTrack) {
           await htmlAudio.load({
-            url: state.currentTrack.url,
             startTime: currentTime,
+            url: state.currentTrack.url,
           });
           if (wasPlaying) {
             await htmlAudio.play();
@@ -189,10 +189,10 @@ export function useAudioProvider({ tracks = [] }: { tracks?: Track[] } = {}) {
 
     const state = useAudioStore.getState();
     const nextIndex = calculateNextIndex({
-      queue: state.queue,
       currentQueueIndex: state.currentQueueIndex,
-      shuffleEnabled: state.shuffleEnabled,
+      queue: state.queue,
       repeatMode: state.repeatMode,
+      shuffleEnabled: state.shuffleEnabled,
     });
 
     if (nextIndex === -1 || nextIndex >= state.queue.length) {
@@ -232,9 +232,9 @@ export function useAudioProvider({ tracks = [] }: { tracks?: Track[] } = {}) {
       htmlAudio.setPlaybackRate(state.playbackRate);
 
       setState({
-        isPlaying: true,
-        isLoading: false,
         isBuffering: false,
+        isLoading: false,
+        isPlaying: true,
       });
 
       forceTimeUpdate();
@@ -249,7 +249,7 @@ export function useAudioProvider({ tracks = [] }: { tracks?: Track[] } = {}) {
 
     const handlePause = () => {
       forceTimeUpdate();
-      setState({ isPlaying: false, isBuffering: false });
+      setState({ isBuffering: false, isPlaying: false });
     };
 
     const handleErrorRetry = async (
@@ -279,16 +279,16 @@ export function useAudioProvider({ tracks = [] }: { tracks?: Track[] } = {}) {
           : initialMessage;
 
       setState({
-        isPlaying: false,
-        isLoading: false,
+        errorMessage: finalMessage,
         isBuffering: false,
         isError: true,
-        errorMessage: finalMessage,
+        isLoading: false,
+        isPlaying: false,
       });
     };
 
     const handleEnded = async () => {
-      setState({ isPlaying: false, isBuffering: false });
+      setState({ isBuffering: false, isPlaying: false });
 
       const state = useAudioStore.getState();
 
@@ -298,17 +298,17 @@ export function useAudioProvider({ tracks = [] }: { tracks?: Track[] } = {}) {
 
       if (state.currentTrack && isLiveStream) {
         setState({
-          isError: true,
           errorMessage: "Live stream connection lost",
+          isError: true,
         });
         return;
       }
       if (state.repeatMode === "one" && state.currentTrack) {
         try {
           await htmlAudio.load({
-            url: state.currentTrack.url,
-            startTime: 0,
             isLiveStream,
+            startTime: 0,
+            url: state.currentTrack.url,
           });
           await htmlAudio.play();
           setState({ currentTime: 0, progress: 0 });
@@ -322,19 +322,19 @@ export function useAudioProvider({ tracks = [] }: { tracks?: Track[] } = {}) {
     };
 
     const getLoadingSuccessState = (duration = 0) => ({
-      isLoading: false,
-      isBuffering: false,
       duration,
-      isError: false,
       errorMessage: null,
+      isBuffering: false,
+      isError: false,
+      isLoading: false,
     });
 
     const handleLoadStart = () => {
       setState({
-        isLoading: true,
+        errorMessage: null,
         isBuffering: false,
         isError: false,
-        errorMessage: null,
+        isLoading: true,
       });
     };
 
@@ -391,9 +391,9 @@ export function useAudioProvider({ tracks = [] }: { tracks?: Track[] } = {}) {
         setState({ isLoading: true });
 
         await htmlAudio.load({
-          url: track.url,
-          startTime,
           isLiveStream,
+          startTime,
+          url: track.url,
         });
         htmlAudio.setVolume({ volume });
         htmlAudio.setMuted(muted);
@@ -402,11 +402,11 @@ export function useAudioProvider({ tracks = [] }: { tracks?: Track[] } = {}) {
         setState({ isLoading: false, isPlaying: false });
       } catch {
         setState({
-          isError: true,
           errorMessage: "Error restoring audio state",
-          isPlaying: false,
-          isLoading: false,
           isBuffering: false,
+          isError: true,
+          isLoading: false,
+          isPlaying: false,
         });
       }
     };
@@ -490,9 +490,9 @@ export function useAudioProvider({ tracks = [] }: { tracks?: Track[] } = {}) {
 
         try {
           await htmlAudio.load({
-            url: track.url,
-            startTime: 0,
             isLiveStream: false,
+            startTime: 0,
+            url: track.url,
           });
 
           const currentState = useAudioStore.getState();

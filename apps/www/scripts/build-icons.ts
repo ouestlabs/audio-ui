@@ -204,8 +204,8 @@ if (isWatchMode) {
 
     const watcher = chokidar.watch(SCAN_DIRS, {
       ignored: /(^|[/\\])\../,
-      persistent: true,
       ignoreInitial: true,
+      persistent: true,
     });
 
     const rebuild = async (filename: string) => {

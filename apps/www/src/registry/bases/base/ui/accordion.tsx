@@ -1,26 +1,25 @@
-import { Accordion as AccordionPrimitive } from "@base-ui/react/accordion"
-
-import { cn } from "@/registry/bases/base/lib/utils"
-import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder"
+import { Accordion as AccordionPrimitive } from "@base-ui/react/accordion";
+import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder";
+import { cn } from "@/registry/bases/base/lib/utils";
 
 function Accordion({ className, ...props }: AccordionPrimitive.Root.Props) {
   return (
     <AccordionPrimitive.Root
-      data-slot="accordion"
       className={cn("cn-accordion flex w-full flex-col", className)}
+      data-slot="accordion"
       {...props}
     />
-  )
+  );
 }
 
 function AccordionItem({ className, ...props }: AccordionPrimitive.Item.Props) {
   return (
     <AccordionPrimitive.Item
-      data-slot="accordion-item"
       className={cn("cn-accordion-item", className)}
+      data-slot="accordion-item"
       {...props}
     />
-  )
+  );
 }
 
 function AccordionTrigger({
@@ -31,35 +30,35 @@ function AccordionTrigger({
   return (
     <AccordionPrimitive.Header className="flex">
       <AccordionPrimitive.Trigger
-        data-slot="accordion-trigger"
         className={cn(
           "cn-accordion-trigger group/accordion-trigger relative flex flex-1 items-start justify-between border border-transparent transition-all outline-none aria-disabled:pointer-events-none aria-disabled:opacity-50",
           className
         )}
+        data-slot="accordion-trigger"
         {...props}
       >
         {children}
         <IconPlaceholder
-          lucide="ChevronDownIcon"
-          tabler="IconChevronDown"
+          className="cn-accordion-trigger-icon pointer-events-none shrink-0 group-aria-expanded/accordion-trigger:hidden"
           data-slot="accordion-trigger-icon"
           hugeicons="ArrowDown01Icon"
+          lucide="ChevronDownIcon"
           phosphor="CaretDownIcon"
           remixicon="RiArrowDownSLine"
-          className="cn-accordion-trigger-icon pointer-events-none shrink-0 group-aria-expanded/accordion-trigger:hidden"
+          tabler="IconChevronDown"
         />
         <IconPlaceholder
-          lucide="ChevronUpIcon"
-          tabler="IconChevronUp"
+          className="cn-accordion-trigger-icon pointer-events-none hidden shrink-0 group-aria-expanded/accordion-trigger:inline"
           data-slot="accordion-trigger-icon"
           hugeicons="ArrowUp01Icon"
+          lucide="ChevronUpIcon"
           phosphor="CaretUpIcon"
           remixicon="RiArrowUpSLine"
-          className="cn-accordion-trigger-icon pointer-events-none hidden shrink-0 group-aria-expanded/accordion-trigger:inline"
+          tabler="IconChevronUp"
         />
       </AccordionPrimitive.Trigger>
     </AccordionPrimitive.Header>
-  )
+  );
 }
 
 function AccordionContent({
@@ -69,8 +68,8 @@ function AccordionContent({
 }: AccordionPrimitive.Panel.Props) {
   return (
     <AccordionPrimitive.Panel
-      data-slot="accordion-content"
       className="cn-accordion-content overflow-hidden"
+      data-slot="accordion-content"
       {...props}
     >
       <div
@@ -82,7 +81,7 @@ function AccordionContent({
         {children}
       </div>
     </AccordionPrimitive.Panel>
-  )
+  );
 }
 
-export { Accordion, AccordionItem, AccordionTrigger, AccordionContent }
+export { Accordion, AccordionContent, AccordionItem, AccordionTrigger };

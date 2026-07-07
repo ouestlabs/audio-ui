@@ -4,17 +4,17 @@ import { source } from "@/lib/source";
 
 export function getRSS() {
   const feed = new Feed({
-    title: siteConfig.name,
-    description: siteConfig.description,
-    id: `${siteConfig.url}/docs`,
-    link: `${siteConfig.url}/docs`,
-    language: "en",
-    favicon: `${siteConfig.url}/icon`,
     copyright: `All rights reserved ${new Date().getFullYear()}, ${siteConfig.name}`,
-    generator: siteConfig.name,
+    description: siteConfig.description,
+    favicon: `${siteConfig.url}/icon`,
     feedLinks: {
       rss: `${siteConfig.url}/rss.xml`,
     },
+    generator: siteConfig.name,
+    id: `${siteConfig.url}/docs`,
+    language: "en",
+    link: `${siteConfig.url}/docs`,
+    title: siteConfig.name,
   });
 
   for (const page of source.getPages()) {
@@ -24,17 +24,17 @@ export function getRSS() {
       : new Date();
 
     feed.addItem({
-      id: href,
-      title: page.data.title,
-      description: page.data.description,
-      link: href,
-      date,
       author: [
         {
-          name: siteConfig.name,
           link: siteConfig.links.twitter,
+          name: siteConfig.name,
         },
       ],
+      date,
+      description: page.data.description,
+      id: href,
+      link: href,
+      title: page.data.title,
     });
   }
 

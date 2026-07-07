@@ -1,43 +1,42 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { OTPInput, OTPInputContext } from "input-otp"
-
-import { cn } from "@/registry/bases/radix/lib/utils"
-import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder"
+import { OTPInput, OTPInputContext } from "input-otp";
+import * as React from "react";
+import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder";
+import { cn } from "@/registry/bases/radix/lib/utils";
 
 function InputOTP({
   className,
   containerClassName,
   ...props
 }: React.ComponentProps<typeof OTPInput> & {
-  containerClassName?: string
+  containerClassName?: string;
 }) {
   return (
     <OTPInput
-      data-slot="input-otp"
-      containerClassName={cn(
-        "cn-input-otp flex items-center has-disabled:opacity-50",
-        containerClassName
-      )}
-      spellCheck={false}
       className={cn(
         "cn-input-otp-input disabled:cursor-not-allowed",
         className
       )}
+      containerClassName={cn(
+        "cn-input-otp flex items-center has-disabled:opacity-50",
+        containerClassName
+      )}
+      data-slot="input-otp"
+      spellCheck={false}
       {...props}
     />
-  )
+  );
 }
 
 function InputOTPGroup({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
-      data-slot="input-otp-group"
       className={cn("cn-input-otp-group flex items-center", className)}
+      data-slot="input-otp-group"
       {...props}
     />
-  )
+  );
 }
 
 function InputOTPSlot({
@@ -45,19 +44,19 @@ function InputOTPSlot({
   className,
   ...props
 }: React.ComponentProps<"div"> & {
-  index: number
+  index: number;
 }) {
-  const inputOTPContext = React.useContext(OTPInputContext)
-  const { char, hasFakeCaret, isActive } = inputOTPContext?.slots[index] ?? {}
+  const inputOTPContext = React.useContext(OTPInputContext);
+  const { char, hasFakeCaret, isActive } = inputOTPContext?.slots[index] ?? {};
 
   return (
     <div
-      data-slot="input-otp-slot"
-      data-active={isActive}
       className={cn(
         "cn-input-otp-slot relative flex items-center justify-center data-[active=true]:z-10",
         className
       )}
+      data-active={isActive}
+      data-slot="input-otp-slot"
       {...props}
     >
       {char}
@@ -67,26 +66,26 @@ function InputOTPSlot({
         </div>
       )}
     </div>
-  )
+  );
 }
 
 function InputOTPSeparator({ ...props }: React.ComponentProps<"div">) {
   return (
     <div
-      data-slot="input-otp-separator"
       className="cn-input-otp-separator flex items-center"
+      data-slot="input-otp-separator"
       role="separator"
       {...props}
     >
       <IconPlaceholder
-        lucide="MinusIcon"
-        tabler="IconMinus"
         hugeicons="MinusSignIcon"
+        lucide="MinusIcon"
         phosphor="MinusIcon"
         remixicon="RiSubtractLine"
+        tabler="IconMinus"
       />
     </div>
-  )
+  );
 }
 
-export { InputOTP, InputOTPGroup, InputOTPSlot, InputOTPSeparator }
+export { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot };

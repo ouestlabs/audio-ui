@@ -18,9 +18,9 @@ export function groupItemsByType(
 
   return Object.entries(grouped)
     .map(([type, items]) => ({
-      type,
-      title: mapping[type as keyof typeof mapping] || type,
       items,
+      title: mapping[type as keyof typeof mapping] || type,
+      type,
     }))
     .sort((a, b) => {
       const aIndex = Object.keys(mapping).indexOf(a.type);

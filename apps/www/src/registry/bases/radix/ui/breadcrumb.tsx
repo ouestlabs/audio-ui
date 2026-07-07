@@ -1,41 +1,40 @@
-import * as React from "react"
-import { Slot } from "radix-ui"
-
-import { cn } from "@/registry/bases/radix/lib/utils"
-import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder"
+import { Slot } from "radix-ui";
+import type * as React from "react";
+import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder";
+import { cn } from "@/registry/bases/radix/lib/utils";
 
 function Breadcrumb({ className, ...props }: React.ComponentProps<"nav">) {
   return (
     <nav
       aria-label="breadcrumb"
-      data-slot="breadcrumb"
       className={cn("cn-breadcrumb", className)}
+      data-slot="breadcrumb"
       {...props}
     />
-  )
+  );
 }
 
 function BreadcrumbList({ className, ...props }: React.ComponentProps<"ol">) {
   return (
     <ol
-      data-slot="breadcrumb-list"
       className={cn(
         "cn-breadcrumb-list flex flex-wrap items-center wrap-break-word",
         className
       )}
+      data-slot="breadcrumb-list"
       {...props}
     />
-  )
+  );
 }
 
 function BreadcrumbItem({ className, ...props }: React.ComponentProps<"li">) {
   return (
     <li
-      data-slot="breadcrumb-item"
       className={cn("cn-breadcrumb-item inline-flex items-center", className)}
+      data-slot="breadcrumb-item"
       {...props}
     />
-  )
+  );
 }
 
 function BreadcrumbLink({
@@ -43,30 +42,30 @@ function BreadcrumbLink({
   className,
   ...props
 }: React.ComponentProps<"a"> & {
-  asChild?: boolean
+  asChild?: boolean;
 }) {
-  const Comp = asChild ? Slot.Root : "a"
+  const Comp = asChild ? Slot.Root : "a";
 
   return (
     <Comp
-      data-slot="breadcrumb-link"
       className={cn("cn-breadcrumb-link", className)}
+      data-slot="breadcrumb-link"
       {...props}
     />
-  )
+  );
 }
 
 function BreadcrumbPage({ className, ...props }: React.ComponentProps<"span">) {
   return (
     <span
+      aria-current="page"
+      aria-disabled="true"
+      className={cn("cn-breadcrumb-page", className)}
       data-slot="breadcrumb-page"
       role="link"
-      aria-disabled="true"
-      aria-current="page"
-      className={cn("cn-breadcrumb-page", className)}
       {...props}
     />
-  )
+  );
 }
 
 function BreadcrumbSeparator({
@@ -76,24 +75,24 @@ function BreadcrumbSeparator({
 }: React.ComponentProps<"li">) {
   return (
     <li
-      data-slot="breadcrumb-separator"
-      role="presentation"
       aria-hidden="true"
       className={cn("cn-breadcrumb-separator", className)}
+      data-slot="breadcrumb-separator"
+      role="presentation"
       {...props}
     >
       {children ?? (
         <IconPlaceholder
-          lucide="ChevronRightIcon"
-          tabler="IconChevronRight"
+          className="cn-rtl-flip"
           hugeicons="ArrowRight01Icon"
+          lucide="ChevronRightIcon"
           phosphor="CaretRightIcon"
           remixicon="RiArrowRightSLine"
-          className="cn-rtl-flip"
+          tabler="IconChevronRight"
         />
       )}
     </li>
-  )
+  );
 }
 
 function BreadcrumbEllipsis({
@@ -102,33 +101,33 @@ function BreadcrumbEllipsis({
 }: React.ComponentProps<"span">) {
   return (
     <span
-      data-slot="breadcrumb-ellipsis"
-      role="presentation"
       aria-hidden="true"
       className={cn(
         "cn-breadcrumb-ellipsis flex items-center justify-center",
         className
       )}
+      data-slot="breadcrumb-ellipsis"
+      role="presentation"
       {...props}
     >
       <IconPlaceholder
-        lucide="MoreHorizontalIcon"
-        tabler="IconDots"
         hugeicons="MoreHorizontalCircle01Icon"
+        lucide="MoreHorizontalIcon"
         phosphor="DotsThreeIcon"
         remixicon="RiMoreLine"
+        tabler="IconDots"
       />
       <span className="sr-only">More</span>
     </span>
-  )
+  );
 }
 
 export {
   Breadcrumb,
-  BreadcrumbList,
+  BreadcrumbEllipsis,
   BreadcrumbItem,
   BreadcrumbLink,
+  BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-  BreadcrumbEllipsis,
-}
+};

@@ -272,18 +272,18 @@ function PickerShortcut({ className, ...props }: React.ComponentProps<"span">) {
 
 export {
   Picker,
-  PickerPortal,
-  PickerTrigger,
+  PickerCheckboxItem,
   PickerContent,
   PickerGroup,
-  PickerLabel,
   PickerItem,
-  PickerCheckboxItem,
+  PickerLabel,
+  PickerPortal,
   PickerRadioGroup,
   PickerRadioItem,
   PickerSeparator,
   PickerShortcut,
   PickerSub,
-  PickerSubTrigger,
   PickerSubContent,
+  PickerSubTrigger,
+  PickerTrigger,
 };

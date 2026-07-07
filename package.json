@@ -28,6 +28,6 @@
     "@changesets/cli": "^2.30.0",
     "@manypkg/cli": "^0.25.1",
     "turbo": "2.6.1",
-    "ultracite": "6.3.2"
+    "ultracite": "7.9.2"
   }
 }

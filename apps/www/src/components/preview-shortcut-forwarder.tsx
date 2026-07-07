@@ -45,8 +45,8 @@ export function PreviewShortcutForwarder({
       if (window.parent && window.parent !== window) {
         window.parent.postMessage(
           {
-            type: forwardType,
             key: event.key,
+            type: forwardType,
           },
           window.location.origin
         );

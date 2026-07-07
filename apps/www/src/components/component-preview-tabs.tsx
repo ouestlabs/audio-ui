@@ -33,9 +33,9 @@ export function ComponentPreviewTabs({
   // near the viewport, same pattern as the components catalog grid
   // (component-card-container.tsx), to keep docs pages from feeling laggy.
   const hasBeenVisible = useIntersectionObserver(previewRef, {
+    freezeOnceVisible: true,
     rootMargin: "800px",
     threshold: 0,
-    freezeOnceVisible: true,
   });
 
   return (

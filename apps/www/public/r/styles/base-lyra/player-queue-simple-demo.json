@@ -1,1 +1,15 @@
-{"$schema":"https://ui.shadcn.com/schema/registry-item.json","name":"player-queue-simple-demo","type":"registry:example","description":"Stacked player with queue and preferences","registryDependencies":["@audio/player"],"files":[{"path":"player-queue-simple-demo.tsx","type":"registry:example","content":"\"use client\";\n\nimport {\n  AudioPlayer,\n  AudioPlayerControlBar,\n  AudioPlayerControlGroup,\n  AudioPlayerPlay,\n  AudioPlayerSeekBar,\n  AudioPlayerSkipBack,\n  AudioPlayerSkipForward,\n  AudioPlayerTimeDisplay,\n  AudioPlayerVolume,\n  AudioQueue,\n  AudioQueuePreferences,\n} from \"@/components/audio/player\";\n\nexport function AudioQueueSimpleDemo() {\n  return (\n    <AudioPlayer>\n      <AudioPlayerControlBar variant=\"stacked\">\n        <AudioPlayerControlGroup>\n          <AudioPlayerTimeDisplay />\n          <AudioPlayerSeekBar />\n          <AudioPlayerTimeDisplay remaining />\n        </AudioPlayerControlGroup>\n        <AudioPlayerControlGroup className=\"justify-between\">\n          <AudioPlayerControlGroup>\n            <AudioPlayerSkipBack />\n            <AudioPlayerPlay />\n            <AudioPlayerSkipForward />\n          </AudioPlayerControlGroup>\n          <AudioPlayerControlGroup className=\"flex-1\">\n            <AudioPlayerVolume />\n            <AudioQueuePreferences />\n            <AudioQueue />\n          </AudioPlayerControlGroup>\n        </AudioPlayerControlGroup>\n      </AudioPlayerControlBar>\n    </AudioPlayer>\n  );\n}","target":"components/examples/player-queue-simple-demo.tsx"}]}
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "player-queue-simple-demo",
+  "type": "registry:example",
+  "description": "Stacked player with queue and preferences",
+  "registryDependencies": ["@audio/player"],
+  "files": [
+    {
+      "path": "player-queue-simple-demo.tsx",
+      "type": "registry:example",
+      "content": "\"use client\";\n\nimport {\n  AudioPlayer,\n  AudioPlayerControlBar,\n  AudioPlayerControlGroup,\n  AudioPlayerPlay,\n  AudioPlayerSeekBar,\n  AudioPlayerSkipBack,\n  AudioPlayerSkipForward,\n  AudioPlayerTimeDisplay,\n  AudioPlayerVolume,\n  AudioQueue,\n  AudioQueuePreferences,\n} from \"@/components/audio/player\";\n\nexport function AudioQueueSimpleDemo() {\n  return (\n    <AudioPlayer>\n      <AudioPlayerControlBar variant=\"stacked\">\n        <AudioPlayerControlGroup>\n          <AudioPlayerTimeDisplay />\n          <AudioPlayerSeekBar />\n          <AudioPlayerTimeDisplay remaining />\n        </AudioPlayerControlGroup>\n        <AudioPlayerControlGroup className=\"justify-between\">\n          <AudioPlayerControlGroup>\n            <AudioPlayerSkipBack />\n            <AudioPlayerPlay />\n            <AudioPlayerSkipForward />\n          </AudioPlayerControlGroup>\n          <AudioPlayerControlGroup className=\"flex-1\">\n            <AudioPlayerVolume />\n            <AudioQueuePreferences />\n            <AudioQueue />\n          </AudioPlayerControlGroup>\n        </AudioPlayerControlGroup>\n      </AudioPlayerControlBar>\n    </AudioPlayer>\n  );\n}",
+      "target": "components/examples/player-queue-simple-demo.tsx"
+    }
+  ]
+}

@@ -15,10 +15,10 @@ const CustomizerSidebarContent = dynamic(
       (m) => m.CustomizerSidebarContent
     ),
   {
-    ssr: false,
     loading: () => (
       <div aria-hidden className="max-h-[calc(100svh-240px)] flex-1" />
     ),
+    ssr: false,
   }
 );
 

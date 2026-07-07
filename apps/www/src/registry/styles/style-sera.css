@@ -1338,7 +1338,7 @@
   }
 
   .cn-input-group-button {
-    @apply gap-2 rounded-none text-sm ;
+    @apply gap-2 rounded-none text-sm;
   }
 
   .cn-input-group-button-size-xs {

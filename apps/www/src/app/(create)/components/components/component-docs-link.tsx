@@ -2,7 +2,6 @@
 
 import { BookOpenTextIcon } from "@phosphor-icons/react/ssr";
 import Link from "next/link";
-import * as React from "react";
 import { useDesignSystemSearchParams } from "@/app/(create)/lib/search-params";
 import { Button } from "@/components/ui/button";
 import { useConfig } from "@/hooks/use-config";

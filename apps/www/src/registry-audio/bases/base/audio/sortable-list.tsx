@@ -200,9 +200,9 @@ const SortableItem = <TItem extends SortableBaseItem>({
   const context = React.useMemo(
     () => ({
       attributes,
+      isDragging,
       listeners,
       ref: setActivatorNodeRef,
-      isDragging,
     }),
     [attributes, listeners, setActivatorNodeRef, isDragging]
   );
@@ -249,4 +249,5 @@ const SortableDragHandle = () => {
     </Button>
   );
 };
-export { SortableList, SortableItem, SortableDragHandle };
+
+export { SortableDragHandle, SortableItem, SortableList };

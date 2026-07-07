@@ -4,20 +4,20 @@ import { createContext, use } from "react";
 import type { ComponentCatalogItem } from "@/lib/registry";
 
 export interface ComponentsContextValue {
-  totalCount: number;
-  categoryCounts: Record<string, number>;
   /** Full catalog list for search result counts in the header */
   catalogItems: ComponentCatalogItem[];
-  sidebarCategoryFilter: string;
+  categoryCounts: Record<string, number>;
   setSidebarCategoryFilter: (filter: string) => void;
-  sidebarMenuView: "menu" | "inline";
   setSidebarMenuView: (view: "menu" | "inline") => void;
+  sidebarCategoryFilter: string;
+  sidebarMenuView: "menu" | "inline";
+  totalCount: number;
 }
 
 export interface CustomizerContextValue {
   customizerOpen: boolean;
-  toggleCustomizer: () => void;
   setCustomizerOpen: (open: boolean) => void;
+  toggleCustomizer: () => void;
 }
 
 export const ComponentsContext = createContext<ComponentsContextValue | null>(

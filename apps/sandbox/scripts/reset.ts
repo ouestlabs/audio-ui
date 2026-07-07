@@ -31,7 +31,7 @@ const managed = new Set(
 
 console.log("→ Removing shadcn-managed directories...");
 for (const dir of managed) {
-  rmSync(dir, { recursive: true, force: true });
+  rmSync(dir, { force: true, recursive: true });
   console.log(`  removed  ./${dir.replace(`${root}/`, "")}`);
 }
 

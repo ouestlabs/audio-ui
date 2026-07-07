@@ -5,16 +5,16 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/registry/bases/base/lib/utils";
 
 const knobVariants = cva("cn-knob relative inline-flex outline-none", {
-  variants: {
-    size: {
-      sm: "cn-knob-size-sm",
-      default: "cn-knob-size-default",
-      lg: "cn-knob-size-lg",
-      xl: "cn-knob-size-xl",
-    },
-  },
   defaultVariants: {
     size: "default",
+  },
+  variants: {
+    size: {
+      default: "cn-knob-size-default",
+      lg: "cn-knob-size-lg",
+      sm: "cn-knob-size-sm",
+      xl: "cn-knob-size-xl",
+    },
   },
 });
 
@@ -22,16 +22,16 @@ const knobControlClassName =
   "cn-knob-control transform-[translateZ(0)] relative isolate flex size-full cursor-grab touch-none select-none outline-none [clip-path:circle(50%_at_50%_50%)] focus-visible:outline-none active:cursor-grabbing data-[disabled=true]:pointer-events-none data-[disabled=true]:cursor-not-allowed data-[disabled=true]:opacity-50";
 
 const knobBodyVariants = cva("cn-knob-body absolute z-0", {
-  variants: {
-    size: {
-      sm: "cn-knob-body-size-sm",
-      default: "cn-knob-body-size-default",
-      lg: "cn-knob-body-size-lg",
-      xl: "cn-knob-body-size-xl",
-    },
-  },
   defaultVariants: {
     size: "default",
+  },
+  variants: {
+    size: {
+      default: "cn-knob-body-size-default",
+      lg: "cn-knob-body-size-lg",
+      sm: "cn-knob-body-size-sm",
+      xl: "cn-knob-body-size-xl",
+    },
   },
 });
 

@@ -102,9 +102,9 @@ export function FontPicker({
     }
 
     return Array.from(groups.entries()).map(([type, items]) => ({
-      type,
-      label: `${type.charAt(0).toUpperCase()}${type.slice(1)}`,
       items,
+      label: `${type.charAt(0).toUpperCase()}${type.slice(1)}`,
+      type,
     }));
   }, [fonts, param]);
 

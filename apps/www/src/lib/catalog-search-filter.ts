@@ -1,14 +1,14 @@
 /** Minimal shape for catalog search (matches `CatalogItem` / `ComponentCatalogItem`). */
 export interface CatalogSearchable {
-  name: string;
   categories?: string[];
-  searchText?: string;
   meta?: {
     className?: string;
     colSpan?: number;
     gridSize?: 1 | 2;
     order?: number;
   };
+  name: string;
+  searchText?: string;
 }
 const CATALOG_SEARCH_SPLIT_REGEXP = /\s+/;
 export const CATALOG_SEARCH_MIN_CHARS = 3;

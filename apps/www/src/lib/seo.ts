@@ -66,9 +66,7 @@ function getSocialHandle(url: string) {
     const socialUrl = new URL(url);
     const handle = socialUrl.pathname.split("/").filter(Boolean)[0];
     return handle ? `@${handle}` : undefined;
-  } catch {
-    return;
-  }
+  } catch {}
 }
 
 function getAbsoluteMetadataUrl(path: string) {
@@ -104,19 +102,19 @@ export function buildPageSocialMetadata({
 
   return {
     openGraph: {
-      title,
       description,
-      url: getAbsoluteMetadataUrl(path),
-      type,
-      siteName: siteConfig.name,
-      locale: siteConfig.metadata.locale,
       images: [{ url: imageUrl }],
+      locale: siteConfig.metadata.locale,
+      siteName: siteConfig.name,
+      title,
+      type,
+      url: getAbsoluteMetadataUrl(path),
     },
     twitter: {
       card: "summary_large_image",
-      title,
       description,
       images: [{ url: imageUrl }],
+      title,
       ...(twitterCreator ? { creator: twitterCreator } : {}),
     },
   };
@@ -135,8 +133,6 @@ export function buildPageMetadata({
   const resolvedTitle = titleSuffix ? `${title} - ${titleSuffix}` : title;
 
   return {
-    title: resolvedTitle,
-    description,
     alternates: {
       canonical: path,
       types: {
@@ -145,14 +141,16 @@ export function buildPageMetadata({
         ],
       },
     },
+    description,
+    title: resolvedTitle,
     ...(keywords ? { keywords } : {}),
     ...(robots ? { robots } : {}),
     ...buildPageSocialMetadata({
-      title,
       description,
-      path,
-      type,
       image,
+      path,
+      title,
+      type,
     }),
   };
 }
@@ -168,14 +166,14 @@ function getGenericComponentDocDescription(label: string) {
 }
 
 export interface ComponentDocSeo {
+  canonicalPath: string;
+  description: string;
   /** Visible H1 and breadcrumb: the plain component label (e.g. "Knob") */
   displayTitle: string;
   /** Subtitle shown under the H1: the original MDX description, if any */
   leadDescription: string;
-  title: string;
-  description: string;
-  canonicalPath: string;
   shouldIndex: boolean;
+  title: string;
 }
 
 /**
@@ -202,12 +200,12 @@ export function getComponentDocSeo(
     : `${label} for React and Tailwind CSS, built on top of shadcn/ui. ${docHook || getGenericComponentDocDescription(label)}`;
 
   return {
+    canonicalPath,
+    description: description.replace(/\s+/g, " ").trim(),
     displayTitle,
     leadDescription,
-    title,
-    description: description.replace(/\s+/g, " ").trim(),
-    canonicalPath,
     shouldIndex: base === "base",
+    title,
   };
 }
 
@@ -241,9 +239,9 @@ export function buildBreadcrumbJsonLd(items: BreadcrumbItem[]) {
     "@type": "BreadcrumbList",
     itemListElement: items.map((item, index) => ({
       "@type": "ListItem",
-      position: index + 1,
-      name: item.name,
       item: absoluteUrl(item.path),
+      name: item.name,
+      position: index + 1,
     })),
   };
 }
@@ -252,10 +250,10 @@ export function buildOrganizationJsonLd() {
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: siteConfig.name,
-    url: getSiteUrl(),
     logo: absoluteUrl("/icon"),
+    name: siteConfig.name,
     sameAs: [siteConfig.links.github, siteConfig.links.twitter],
+    url: getSiteUrl(),
   };
 }
 
@@ -263,18 +261,18 @@ export function buildWebSiteJsonLd() {
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: siteConfig.name,
-    url: getSiteUrl(),
     description: siteConfig.description,
+    name: siteConfig.name,
+    potentialAction: {
+      "@type": "SearchAction",
+      "query-input": "required name=search_term_string",
+      target: absoluteUrl("/components?search={search_term_string}"),
+    },
     publisher: {
       "@type": "Organization",
       name: siteConfig.name,
       url: getSiteUrl(),
     },
-    potentialAction: {
-      "@type": "SearchAction",
-      target: absoluteUrl("/components?search={search_term_string}"),
-      "query-input": "required name=search_term_string",
-    },
+    url: getSiteUrl(),
   };
 }

@@ -43,7 +43,6 @@ export function CodeCollapsibleWrapper({
             {isOpened && (
               <Separator className="mx-1.5" orientation="vertical" />
             )}
-            
           </div>
         }
       />
@@ -53,8 +52,8 @@ export function CodeCollapsibleWrapper({
           "data-closed:[-webkit-mask-image:linear-gradient(to_bottom,black_0%,black_72%,transparent_100%)]",
           "data-closed:mask-[linear-gradient(to_bottom,black_0%,black_72%,transparent_100%)]"
         )}
-        keepMounted
         hidden={false}
+        keepMounted
       >
         {children}
       </CollapsibleContent>

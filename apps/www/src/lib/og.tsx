@@ -2,27 +2,26 @@ import { ImageResponse } from "next/og";
 import type { ReactElement } from "react";
 import { siteConfig } from "@/lib/config";
 
-export const OG_SIZE = { width: 1200, height: 630 };
+export const OG_SIZE = { height: 630, width: 1200 };
 
 export const tokens = Object.freeze({
+  accent: "#686868",
   background: "#0a0a0a",
-  surface: "#1a1a1a",
-  surfaceMid: "#151515",
-  surfaceBack: "#111111",
 
   border: "#333333",
-  borderMid: "#282828",
   borderBack: "#1e1e1e",
-
-  controlTrack: "#242424",
-  controlFill: "#404040",
+  borderMid: "#282828",
   controlBody: "#202020",
   controlBorder: "#3a3a3a",
+  controlFill: "#404040",
   controlThumb: "#303030",
   controlThumbBorder: "#505050",
 
-  accent: "#686868",
+  controlTrack: "#242424",
   foreground: "#e8e8e8",
+  surface: "#1a1a1a",
+  surfaceBack: "#111111",
+  surfaceMid: "#151515",
 });
 
 export function Knob({ angle }: { angle: number }) {
@@ -87,35 +86,35 @@ export function Fader({ pos }: { pos: number }) {
   return (
     <div
       style={{
-        width: "40px",
-        height: `${trackH}px`,
-        display: "flex",
         alignItems: "center",
+        display: "flex",
+        height: `${trackH}px`,
         justifyContent: "center",
         position: "relative",
+        width: "40px",
       }}
     >
       <div
         style={{
+          backgroundColor: tokens.controlTrack,
+          border: `1px solid ${tokens.controlBorder}`,
+          borderRadius: "3px",
+          height: `${trackH}px`,
+          left: "17px",
           position: "absolute",
           width: "6px",
-          height: `${trackH}px`,
-          backgroundColor: tokens.controlTrack,
-          borderRadius: "3px",
-          border: `1px solid ${tokens.controlBorder}`,
-          left: "17px",
         }}
       />
       <div
         style={{
-          position: "absolute",
-          width: "38px",
-          height: "14px",
           backgroundColor: tokens.controlThumb,
           border: `1px solid ${tokens.controlThumbBorder}`,
           borderRadius: "4px",
-          top: `${thumbTop}px`,
+          height: "14px",
           left: "1px",
+          position: "absolute",
+          top: `${thumbTop}px`,
+          width: "38px",
         }}
       />
     </div>
@@ -129,32 +128,32 @@ export function Transport({ progress }: { progress: number }) {
   return (
     <div
       style={{
-        width: `${w}px`,
-        height: "5px",
         backgroundColor: tokens.controlTrack,
         borderRadius: "999px",
         display: "flex",
+        height: "5px",
         position: "relative",
+        width: `${w}px`,
       }}
     >
       <div
         style={{
-          width: `${thumbX}px`,
-          height: "100%",
           backgroundColor: tokens.controlFill,
           borderRadius: "999px",
+          height: "100%",
+          width: `${thumbX}px`,
         }}
       />
       <div
         style={{
-          position: "absolute",
-          width: "8px",
-          height: "8px",
-          borderRadius: "50%",
           backgroundColor: tokens.accent,
           border: `1px solid ${tokens.controlThumbBorder}`,
-          top: "-2px",
+          borderRadius: "50%",
+          height: "8px",
           left: `${thumbX - 4}px`,
+          position: "absolute",
+          top: "-2px",
+          width: "8px",
         }}
       />
     </div>
@@ -232,53 +231,53 @@ const CARD_TOP = 358;
 
 export function generateHomeOG(): ReactElement {
   const cardBase = {
-    position: "absolute" as const,
-    bottom: 0,
     borderTopLeftRadius: "18px",
     borderTopRightRadius: "18px",
+    bottom: 0,
+    position: "absolute" as const,
   };
 
   return (
     <div
       style={{
-        width: "100%",
-        height: "100%",
+        backgroundColor: tokens.background,
         display: "flex",
         flexDirection: "column",
-        backgroundColor: tokens.background,
         fontFamily: "Instrument Serif, Georgia, serif",
+        height: "100%",
         overflow: "hidden",
         position: "relative",
+        width: "100%",
       }}
     >
       <div
         style={{
+          alignItems: "center",
           display: "flex",
           flexDirection: "column",
-          alignItems: "center",
-          paddingTop: "68px",
           gap: "14px",
+          paddingTop: "68px",
         }}
       >
         <span
           style={{
+            color: tokens.foreground,
             fontSize: "88px",
             fontWeight: 700,
-            color: tokens.foreground,
-            lineHeight: 1,
             letterSpacing: "-0.01em",
+            lineHeight: 1,
           }}
         >
           {siteConfig.name}
         </span>
         <span
           style={{
-            fontSize: "26px",
             color: tokens.accent,
+            fontSize: "26px",
             letterSpacing: "0.01em",
+            lineHeight: 1.4,
             maxWidth: "780px",
             textAlign: "center",
-            lineHeight: 1.4,
           }}
         >
           {siteConfig.description}
@@ -288,53 +287,53 @@ export function generateHomeOG(): ReactElement {
       <div
         style={{
           ...cardBase,
-          top: CARD_TOP - 20,
-          left: 196,
-          right: 196,
           backgroundColor: tokens.surfaceBack,
-          borderTop: `1px solid ${tokens.borderBack}`,
           borderLeft: `1px solid ${tokens.borderBack}`,
           borderRight: `1px solid ${tokens.borderBack}`,
+          borderTop: `1px solid ${tokens.borderBack}`,
+          left: 196,
+          right: 196,
+          top: CARD_TOP - 20,
         }}
       />
       <div
         style={{
           ...cardBase,
-          top: CARD_TOP - 10,
-          left: 178,
-          right: 178,
           backgroundColor: tokens.surfaceMid,
-          borderTop: `1px solid ${tokens.borderMid}`,
           borderLeft: `1px solid ${tokens.borderMid}`,
           borderRight: `1px solid ${tokens.borderMid}`,
+          borderTop: `1px solid ${tokens.borderMid}`,
+          left: 178,
+          right: 178,
+          top: CARD_TOP - 10,
         }}
       />
 
       <div
         style={{
           ...cardBase,
-          top: CARD_TOP,
-          left: 160,
-          right: 160,
+          alignItems: "center",
           backgroundColor: tokens.surface,
-          borderTop: `1px solid ${tokens.border}`,
           borderLeft: `1px solid ${tokens.border}`,
           borderRight: `1px solid ${tokens.border}`,
+          borderTop: `1px solid ${tokens.border}`,
           display: "flex",
           flexDirection: "column",
-          alignItems: "center",
-          padding: "26px 40px 0",
           gap: "18px",
+          left: 160,
+          padding: "26px 40px 0",
+          right: 160,
+          top: CARD_TOP,
         }}
       >
-        <div style={{ display: "flex", alignItems: "flex-end", gap: "32px" }}>
+        <div style={{ alignItems: "flex-end", display: "flex", gap: "32px" }}>
           {STRIPS.map(([angle, pos], i) => (
             <div
               key={String(i)}
               style={{
+                alignItems: "center",
                 display: "flex",
                 flexDirection: "column",
-                alignItems: "center",
                 gap: "14px",
               }}
             >
@@ -345,9 +344,9 @@ export function generateHomeOG(): ReactElement {
 
           <div
             style={{
-              width: "1px",
-              height: "182px",
               backgroundColor: tokens.border,
+              height: "182px",
+              width: "1px",
             }}
           />
 
@@ -381,7 +380,7 @@ function DocsWaveform() {
     <svg
       aria-hidden="true"
       height={H}
-      style={{ width: "100%", display: "block" }}
+      style={{ display: "block", width: "100%" }}
       viewBox={`0 0 ${W} ${H}`}
       width="100%"
     >
@@ -410,26 +409,26 @@ export function generateDocsOG({
   return (
     <div
       style={{
-        width: "100%",
-        height: "100%",
+        backgroundColor: tokens.background,
         display: "flex",
         flexDirection: "column",
-        backgroundColor: tokens.background,
         fontFamily: "Instrument Serif, Georgia, serif",
-        position: "relative",
+        height: "100%",
         overflow: "hidden",
         padding: "72px 80px",
+        position: "relative",
+        width: "100%",
       }}
     >
       <div
         style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          height: "260px",
-          overflow: "hidden",
           display: "flex",
+          height: "260px",
+          left: 0,
+          overflow: "hidden",
+          position: "absolute",
+          right: 0,
+          top: 0,
         }}
       >
         <DocsWaveform />
@@ -437,13 +436,13 @@ export function generateDocsOG({
 
       <span
         style={{
+          color: tokens.foreground,
           fontSize: "88px",
           fontWeight: 700,
-          color: tokens.foreground,
-          lineHeight: 1,
           letterSpacing: "-0.01em",
-          maxWidth: "720px",
+          lineHeight: 1,
           marginTop: "auto",
+          maxWidth: "720px",
         }}
       >
         {title}
@@ -452,11 +451,11 @@ export function generateDocsOG({
       {description ? (
         <span
           style={{
-            fontSize: "26px",
             color: tokens.accent,
-            maxWidth: "680px",
+            fontSize: "26px",
             lineHeight: 1.4,
             marginTop: "20px",
+            maxWidth: "680px",
           }}
         >
           {description}
@@ -475,8 +474,8 @@ export function makeImageResponse(
     fonts: fontData
       ? [
           {
-            name: "Instrument Serif",
             data: fontData,
+            name: "Instrument Serif",
             style: "normal",
             weight: 700,
           },

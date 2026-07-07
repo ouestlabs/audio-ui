@@ -21,8 +21,8 @@ import { useConfig } from "@/hooks/use-config";
 import { getThemesForBaseColor, PRESETS, STYLES } from "@/registry/config";
 
 interface CustomizerSidebarContentProps {
-  isMobile: boolean;
   anchorRef: React.RefObject<HTMLDivElement | null>;
+  isMobile: boolean;
 }
 
 export function CustomizerSidebarContent({

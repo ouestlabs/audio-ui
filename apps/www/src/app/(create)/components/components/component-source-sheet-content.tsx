@@ -16,8 +16,8 @@ import { siteConfig } from "@/lib/config";
 import { getRegistryJsonAbsoluteUrl } from "@/lib/registry";
 
 interface ComponentSourceSheetContentProps {
-  name: string;
   base: string;
+  name: string;
 }
 
 export function ComponentSourceSheetContent({

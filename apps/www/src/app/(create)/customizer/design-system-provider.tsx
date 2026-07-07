@@ -21,16 +21,16 @@ import {
 } from "@/registry/config";
 
 interface DesignSystemContextValue {
-  style: string | null;
-  theme: string | null;
+  baseColor: string | null;
+  chartColor: string | null;
   font: string | null;
   fontHeading: string | null;
-  chartColor: string | null;
-  baseColor: string | null;
+  iconLibrary: IconLibraryName | null;
   menuAccent: string | null;
   menuColor: string | null;
   radius: string | null;
-  iconLibrary: IconLibraryName | null;
+  style: string | null;
+  theme: string | null;
 }
 
 export const DesignSystemContext =
@@ -127,8 +127,8 @@ export function DesignSystemProvider({
   children: React.ReactNode;
 }) {
   const [params, setParams] = useDesignSystemSearchParams({
-    shallow: true,
     history: "replace",
+    shallow: true,
   });
   const [config, setConfig] = useConfig();
 
@@ -202,15 +202,15 @@ export function DesignSystemProvider({
 
     if (!previousDocumentStateRef.current) {
       previousDocumentStateRef.current = {
-        styleClasses: Array.from(body.classList).filter((className) =>
-          className.startsWith("style-")
-        ),
         baseColorClasses: Array.from(body.classList).filter((className) =>
           className.startsWith("base-color-")
         ),
-        fontSans: root.style.getPropertyValue("--font-sans"),
-        fontHeading: root.style.getPropertyValue("--font-heading"),
         bodyFontFamily: body.style.fontFamily,
+        fontHeading: root.style.getPropertyValue("--font-heading"),
+        fontSans: root.style.getPropertyValue("--font-sans"),
+        styleClasses: Array.from(body.classList).filter((className) =>
+          className.startsWith("style-")
+        ),
       };
     }
 
@@ -331,10 +331,10 @@ export function DesignSystemProvider({
     const themeConfig: DesignSystemConfig = {
       ...DEFAULT_CONFIG,
       baseColor,
-      theme,
       chartColor,
       menuAccent,
       radius: effectiveRadius,
+      theme,
     };
 
     return buildRegistryTheme(themeConfig);
@@ -448,7 +448,7 @@ export function DesignSystemProvider({
 
       lastHeight = nextHeight;
       window.parent.postMessage(
-        { type: "iframe-height", height: nextHeight },
+        { height: nextHeight, type: "iframe-height" },
         window.location.origin
       );
     };
@@ -475,9 +475,9 @@ export function DesignSystemProvider({
     });
 
     mutationObserver.observe(document.body, {
+      characterData: true,
       childList: true,
       subtree: true,
-      characterData: true,
     });
 
     window.addEventListener("resize", scheduleHeightUpdate);
@@ -584,16 +584,16 @@ export function DesignSystemProvider({
 
   const contextValue = React.useMemo(
     () => ({
-      style,
-      theme,
+      baseColor,
+      chartColor,
       font,
       fontHeading,
-      chartColor,
-      baseColor,
+      iconLibrary,
       menuAccent,
       menuColor,
       radius,
-      iconLibrary,
+      style,
+      theme,
     }),
     [
       style,

@@ -25,19 +25,19 @@ export function ResetButton() {
     // Update URL params - set to null to clear them from URL
     setParams({
       base: null,
-      style: null,
       baseColor: null,
-      theme: null,
       chartColor: null,
-      iconLibrary: null,
       font: null,
       fontHeading: null,
+      iconLibrary: null,
+      item: null,
       menuAccent: null,
       menuColor: null,
       radius: null,
-      template: null,
-      item: null,
       search: null, // Also clear search
+      style: null,
+      template: null,
+      theme: null,
     });
 
     // Also update config storage directly for immediate persistence

@@ -5,11 +5,11 @@ import { SeoLinkedText } from "@/app/(create)/components/components/component-ca
 import { cn } from "@/lib/utils";
 
 interface DocsComponentCatalogCtaProps {
-  label: string;
-  componentCount: number;
   catalogHref: string;
-  intro: string;
   className?: string;
+  componentCount: number;
+  intro: string;
+  label: string;
 }
 
 /**

@@ -9,8 +9,6 @@ import {
   AudioPlayerTimeDisplay,
   AudioPlayerVolume,
   AudioQueue,
-  AudioQueueRepeatMode,
-  AudioQueueShuffle,
 } from "@/registry-audio/bases/base/audio/player";
 
 export default function AudioPlayerQueueDemo() {

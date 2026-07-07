@@ -174,7 +174,7 @@ class HtmlAudio {
   async load(params: LoadParams): Promise<void> {
     const { url, startTime = 0, isLiveStream = false } = params;
     const result = this.ifClient(() =>
-      this._load({ url, startTime, isLiveStream })
+      this._load({ isLiveStream, startTime, url })
     );
     if (result) {
       await result;
@@ -366,8 +366,8 @@ class HtmlAudio {
 
       this.fadeVolume({
         audio,
-        targetVolume: volume,
         duration: fadeTime,
+        targetVolume: volume,
       });
     });
   }
@@ -422,14 +422,14 @@ class HtmlAudio {
         if (audio.volume > 0) {
           this.lastVolume = audio.volume;
         }
-        this.fadeVolume({ audio, targetVolume: 0, duration: 200 });
+        this.fadeVolume({ audio, duration: 200, targetVolume: 0 });
         audio.muted = true;
       } else {
         audio.muted = false;
         this.fadeVolume({
           audio,
-          targetVolume: this.lastVolume,
           duration: 200,
+          targetVolume: this.lastVolume,
         });
       }
     });

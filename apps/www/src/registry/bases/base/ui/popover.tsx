@@ -1,16 +1,16 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Popover as PopoverPrimitive } from "@base-ui/react/popover"
+import { Popover as PopoverPrimitive } from "@base-ui/react/popover";
+import type * as React from "react";
 
-import { cn } from "@/registry/bases/base/lib/utils"
+import { cn } from "@/registry/bases/base/lib/utils";
 
 function Popover({ ...props }: PopoverPrimitive.Root.Props) {
-  return <PopoverPrimitive.Root data-slot="popover" {...props} />
+  return <PopoverPrimitive.Root data-slot="popover" {...props} />;
 }
 
 function PopoverTrigger({ ...props }: PopoverPrimitive.Trigger.Props) {
-  return <PopoverPrimitive.Trigger data-slot="popover-trigger" {...props} />
+  return <PopoverPrimitive.Trigger data-slot="popover-trigger" {...props} />;
 }
 
 function PopoverContent({
@@ -30,41 +30,41 @@ function PopoverContent({
       <PopoverPrimitive.Positioner
         align={align}
         alignOffset={alignOffset}
+        className="isolate z-50"
         side={side}
         sideOffset={sideOffset}
-        className="isolate z-50"
       >
         <PopoverPrimitive.Popup
-          data-slot="popover-content"
           className={cn(
             "cn-popover-content cn-popover-content-logical z-50 w-72 origin-(--transform-origin) outline-hidden",
             className
           )}
+          data-slot="popover-content"
           {...props}
         />
       </PopoverPrimitive.Positioner>
     </PopoverPrimitive.Portal>
-  )
+  );
 }
 
 function PopoverHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
-      data-slot="popover-header"
       className={cn("cn-popover-header", className)}
+      data-slot="popover-header"
       {...props}
     />
-  )
+  );
 }
 
 function PopoverTitle({ className, ...props }: PopoverPrimitive.Title.Props) {
   return (
     <PopoverPrimitive.Title
-      data-slot="popover-title"
       className={cn("cn-popover-title", className)}
+      data-slot="popover-title"
       {...props}
     />
-  )
+  );
 }
 
 function PopoverDescription({
@@ -73,11 +73,11 @@ function PopoverDescription({
 }: PopoverPrimitive.Description.Props) {
   return (
     <PopoverPrimitive.Description
-      data-slot="popover-description"
       className={cn("cn-popover-description", className)}
+      data-slot="popover-description"
       {...props}
     />
-  )
+  );
 }
 
 export {
@@ -87,4 +87,4 @@ export {
   PopoverHeader,
   PopoverTitle,
   PopoverTrigger,
-}
+};

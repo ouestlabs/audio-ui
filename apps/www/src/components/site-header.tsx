@@ -47,9 +47,9 @@ function collectCommandMenuPages(
 
     seen.add(key);
     pages.push({
-      url: item.url,
-      name,
       isComponent: item.url.includes("/components/"),
+      name,
+      url: item.url,
     });
   }
 }

@@ -1,19 +1,19 @@
-import * as React from "react"
-import { cva, type VariantProps } from "class-variance-authority"
+import { cva, type VariantProps } from "class-variance-authority";
+import type * as React from "react";
 
-import { cn } from "@/registry/bases/base/lib/utils"
+import { cn } from "@/registry/bases/base/lib/utils";
 
 const alertVariants = cva("cn-alert group/alert relative w-full", {
+  defaultVariants: {
+    variant: "default",
+  },
   variants: {
     variant: {
       default: "cn-alert-variant-default",
       destructive: "cn-alert-variant-destructive",
     },
   },
-  defaultVariants: {
-    variant: "default",
-  },
-})
+});
 
 function Alert({
   className,
@@ -22,25 +22,25 @@ function Alert({
 }: React.ComponentProps<"div"> & VariantProps<typeof alertVariants>) {
   return (
     <div
+      className={cn(alertVariants({ variant }), className)}
       data-slot="alert"
       role="alert"
-      className={cn(alertVariants({ variant }), className)}
       {...props}
     />
-  )
+  );
 }
 
 function AlertTitle({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
-      data-slot="alert-title"
       className={cn(
         "cn-alert-title [&_a]:underline [&_a]:underline-offset-3 [&_a]:hover:text-foreground",
         className
       )}
+      data-slot="alert-title"
       {...props}
     />
-  )
+  );
 }
 
 function AlertDescription({
@@ -49,24 +49,24 @@ function AlertDescription({
 }: React.ComponentProps<"div">) {
   return (
     <div
-      data-slot="alert-description"
       className={cn(
         "cn-alert-description [&_a]:underline [&_a]:underline-offset-3 [&_a]:hover:text-foreground",
         className
       )}
+      data-slot="alert-description"
       {...props}
     />
-  )
+  );
 }
 
 function AlertAction({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
-      data-slot="alert-action"
       className={cn("cn-alert-action", className)}
+      data-slot="alert-action"
       {...props}
     />
-  )
+  );
 }
 
-export { Alert, AlertTitle, AlertDescription, AlertAction }
+export { Alert, AlertAction, AlertDescription, AlertTitle };

@@ -18,55 +18,40 @@ function createVersionedRegistryRedirects(
 ): Redirect[] {
   return [
     {
-      source,
+      destination: versionedRegistryDestination(destination),
       missing: [
         {
-          type: "query",
           key: "v",
+          type: "query",
         },
       ],
-      destination: versionedRegistryDestination(destination),
       permanent: false,
+      source,
     },
     {
-      source,
+      destination: `${destination}?v=:registryVersion`,
       has: [
         {
-          type: "query",
           key: "v",
+          type: "query",
           value: "(?<registryVersion>.*)",
         },
       ],
-      destination: `${destination}?v=:registryVersion`,
       permanent: true,
+      source,
     },
   ];
 }
 
 const nextConfig: NextConfig = {
   devIndicators: false,
-  // This is required to support PostHog trailing slash API requests
-  skipTrailingSlashRedirect: true,
-  skipProxyUrlNormalize: true,
   env: {
     // Shared with the browser so registry JSON URLs rotate on every deploy.
     // Build timestamp is the last fallback so redeploys still invalidate caches
     // even if Vercel system env exposure is disabled.
     NEXT_PUBLIC_VERCEL_DEPLOYMENT_ID: registryDeploymentId,
   },
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  outputFileTracingIncludes: {
-    "/*": [
-      "./src/registry/**/*",
-      "./src/registry-audio/**/*",
-      "./public/r/styles/**/*",
-    ],
-  },
   experimental: {
-    // Enable file system cache for development
-    turbopackFileSystemCacheForDev: true,
     optimizePackageImports: [
       "lucide-react",
       "@tabler/icons-react",
@@ -76,32 +61,8 @@ const nextConfig: NextConfig = {
       "motion",
       "jotai",
     ],
-  },
-  logging: {
-    fetches: {
-      fullUrl: true,
-    },
-  },
-  images: {
-    minimumCacheTTL: 2_592_000, // 30 days - reduce image re-optimizations
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "avatars.githubusercontent.com",
-      },
-      {
-        protocol: "https",
-        hostname: "images.unsplash.com",
-      },
-      {
-        protocol: "https",
-        hostname: "avatar.vercel.sh",
-      },
-      {
-        protocol: "https",
-        hostname: "picsum.photos",
-      },
-    ],
+    // Enable file system cache for development
+    turbopackFileSystemCacheForDev: true,
   },
   headers() {
     const versionedRegistryHeaders = [
@@ -152,31 +113,29 @@ const nextConfig: NextConfig = {
 
     return [
       {
-        // Versioned registry assets are immutable for the lifetime of a deploy.
-        source: "/r/styles/:path*",
         has: [
           {
-            type: "query",
             key: "v",
+            type: "query",
           },
         ],
         headers: versionedRegistryHeaders,
+        // Versioned registry assets are immutable for the lifetime of a deploy.
+        source: "/r/styles/:path*",
       },
       {
+        headers: redirectRegistryHeaders,
+        missing: [
+          {
+            key: "v",
+            type: "query",
+          },
+        ],
         // Bare registry URLs must not cache the redirect response, otherwise a
         // client could stay pinned to an older deployment id.
         source: "/r/:path*",
-        missing: [
-          {
-            type: "query",
-            key: "v",
-          },
-        ],
-        headers: redirectRegistryHeaders,
       },
       {
-        // All pages: allow same-origin + approved external sites to embed in iframes
-        source: "/(.*)",
         headers: [
           ...securityHeaders,
           {
@@ -185,42 +144,60 @@ const nextConfig: NextConfig = {
               "frame-ancestors 'self' https://shoogle.dev https://*.shoogle.dev",
           },
         ],
+        // All pages: allow same-origin + approved external sites to embed in iframes
+        source: "/(.*)",
       },
       {
-        // API routes: block iframes entirely
-        source: "/api/:path*",
         headers: [
           {
             key: "Content-Security-Policy",
             value: "frame-ancestors 'none'",
           },
         ],
+        // API routes: block iframes entirely
+        source: "/api/:path*",
       },
     ];
   },
-  rewrites() {
-    return [
+  images: {
+    minimumCacheTTL: 2_592_000, // 30 days - reduce image re-optimizations
+    remotePatterns: [
       {
-        source: "/docs/:path*.md",
-        destination: "/llm/:path*",
-      },
-      // PostHog rewrites
-      {
-        source: "/ingest/static/:path*",
-        destination: "https://us-assets.i.posthog.com/static/:path*",
+        hostname: "avatars.githubusercontent.com",
+        protocol: "https",
       },
       {
-        source: "/ingest/:path*",
-        destination: "https://us.i.posthog.com/:path*",
+        hostname: "images.unsplash.com",
+        protocol: "https",
       },
-    ];
+      {
+        hostname: "avatar.vercel.sh",
+        protocol: "https",
+      },
+      {
+        hostname: "picsum.photos",
+        protocol: "https",
+      },
+    ],
+  },
+  logging: {
+    fetches: {
+      fullUrl: true,
+    },
+  },
+  outputFileTracingIncludes: {
+    "/*": [
+      "./src/registry/**/*",
+      "./src/registry-audio/**/*",
+      "./public/r/styles/**/*",
+    ],
   },
   redirects() {
     return [
       {
-        source: "/docs/:path*.mdx",
         destination: "/docs/:path*.md",
         permanent: true,
+        source: "/docs/:path*.mdx",
       },
       // Canonicalize registry URLs to a deploy-scoped cache key.
       ...createVersionedRegistryRedirects(
@@ -228,21 +205,44 @@ const nextConfig: NextConfig = {
         "/r/styles/base-nova/:name.json"
       ),
       {
-        source: "/r/styles/:path*",
+        destination: versionedRegistryDestination("/r/styles/:path*"),
         missing: [
           {
-            type: "query",
             key: "v",
+            type: "query",
           },
         ],
-        destination: versionedRegistryDestination("/r/styles/:path*"),
         permanent: false,
+        source: "/r/styles/:path*",
       },
       ...createVersionedRegistryRedirects(
         "/r/:style/:name.json",
         "/r/styles/:style/:name.json"
       ),
     ];
+  },
+  rewrites() {
+    return [
+      {
+        destination: "/llm/:path*",
+        source: "/docs/:path*.md",
+      },
+      // PostHog rewrites
+      {
+        destination: "https://us-assets.i.posthog.com/static/:path*",
+        source: "/ingest/static/:path*",
+      },
+      {
+        destination: "https://us.i.posthog.com/:path*",
+        source: "/ingest/:path*",
+      },
+    ];
+  },
+  skipProxyUrlNormalize: true,
+  // This is required to support PostHog trailing slash API requests
+  skipTrailingSlashRedirect: true,
+  typescript: {
+    ignoreBuildErrors: true,
   },
 };
 

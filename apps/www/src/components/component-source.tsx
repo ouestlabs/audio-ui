@@ -235,9 +235,9 @@ function ComponentCode({
           className={copyButtonClassName}
           event={eventName as any}
           properties={{
+            iconLibrary,
             name,
             style: styleName,
-            iconLibrary,
           }}
           value={code}
         />

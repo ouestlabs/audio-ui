@@ -19,7 +19,7 @@ export namespace ChannelStrip {
     return (
       <OrientationProvider value={orientation}>
         <section
-          {...getDataAttributes("channel-strip", { part: "root", orientation })}
+          {...getDataAttributes("channel-strip", { orientation, part: "root" })}
           {...props}
         >
           {children}
@@ -46,7 +46,7 @@ export namespace ChannelStrip {
   export function Content({ layout = "stack", ...props }: ContentProps) {
     return (
       <div
-        {...getDataAttributes("channel-strip", { part: "content", layout })}
+        {...getDataAttributes("channel-strip", { layout, part: "content" })}
         {...props}
       />
     );
@@ -75,8 +75,8 @@ export namespace ChannelStrip {
     return (
       <div
         {...getDataAttributes("channel-strip", {
-          part: "section",
           orientation: resolvedOrientation,
+          part: "section",
         })}
         {...props}
       >

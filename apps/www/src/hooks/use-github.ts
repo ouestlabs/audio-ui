@@ -17,15 +17,15 @@ async function fetchGithubStars(
 
 export function useGithubStars(owner: string, repo: string) {
   const { data, isLoading, error } = useQuery({
-    queryKey: ["githubStars", owner, repo],
     queryFn: () => fetchGithubStars(owner, repo),
-    staleTime: 60_000,
+    queryKey: ["githubStars", owner, repo],
     refetchOnWindowFocus: false,
+    staleTime: 60_000,
   });
 
   return {
-    stargazersCount: data?.stargazers_count ?? 0,
-    isLoading,
     error,
+    isLoading,
+    stargazersCount: data?.stargazers_count ?? 0,
   };
 }

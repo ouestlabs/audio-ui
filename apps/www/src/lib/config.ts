@@ -6,23 +6,22 @@ export const baseUrl =
     : new URL(`https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`);
 
 export const siteConfig = {
-  name: siteName,
-  url: baseUrl.origin,
   description:
     "A set of accessible and composable Audio UI components. Built on top of shadcn/ui, it's designed for you to copy, paste, and own.",
-  metadata: {
-    locale: "en_US",
-    titleTemplate: "%s",
-    titleSuffixes: {
-      site: siteName,
-      componentCategory: "UI Components",
-    },
-  },
 
   links: Object.freeze({
-    twitter: "https://x.com/ouestlabs",
     github: "https://github.com/ouestlabs/audio-ui",
+    twitter: "https://x.com/ouestlabs",
   }),
+  metadata: {
+    locale: "en_US",
+    titleSuffixes: {
+      componentCategory: "UI Components",
+      site: siteName,
+    },
+    titleTemplate: "%s",
+  },
+  name: siteName,
   navItems: [
     {
       href: "/components",
@@ -33,9 +32,10 @@ export const siteConfig = {
       label: "Docs",
     },
   ],
+  url: baseUrl.origin,
 };
 
 export const META_THEME_COLORS = {
-  light: "#ffffff",
   dark: "#09090b",
+  light: "#ffffff",
 };

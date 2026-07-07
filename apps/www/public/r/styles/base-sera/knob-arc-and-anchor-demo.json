@@ -1,1 +1,15 @@
-{"$schema":"https://ui.shadcn.com/schema/registry-item.json","name":"knob-arc-and-anchor-demo","type":"registry:example","description":"Knob value arc (rail + highlight) and optional anchor range","registryDependencies":["@audio/knob"],"files":[{"path":"knob-arc-and-anchor-demo.tsx","type":"registry:example","content":"\"use client\";\n\nimport { Knob } from \"@/components/audio/elements/knob\";\n\nexport function KnobArcAndAnchorDemo() {\n  return (\n    <div className=\"flex flex-wrap items-center gap-8\">\n      <div className=\"flex flex-col items-center gap-2\">\n        <Knob defaultValue={72} max={100} min={0} step={1} />\n        <p className=\"text-center text-muted-foreground text-xs\">Value only</p>\n      </div>\n      <div className=\"flex flex-col items-center gap-2\">\n        <Knob anchor={30} defaultValue={75} max={100} min={0} step={1} />\n        <p className=\"text-center text-muted-foreground text-xs\">\n          With <code className=\"text-foreground\">anchor</code> range\n        </p>\n      </div>\n    </div>\n  );\n}","target":"components/examples/knob-arc-and-anchor-demo.tsx"}]}
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "knob-arc-and-anchor-demo",
+  "type": "registry:example",
+  "description": "Knob value arc (rail + highlight) and optional anchor range",
+  "registryDependencies": ["@audio/knob"],
+  "files": [
+    {
+      "path": "knob-arc-and-anchor-demo.tsx",
+      "type": "registry:example",
+      "content": "\"use client\";\n\nimport { Knob } from \"@/components/audio/elements/knob\";\n\nexport function KnobArcAndAnchorDemo() {\n  return (\n    <div className=\"flex flex-wrap items-center gap-8\">\n      <div className=\"flex flex-col items-center gap-2\">\n        <Knob defaultValue={72} max={100} min={0} step={1} />\n        <p className=\"text-center text-muted-foreground text-xs\">Value only</p>\n      </div>\n      <div className=\"flex flex-col items-center gap-2\">\n        <Knob anchor={30} defaultValue={75} max={100} min={0} step={1} />\n        <p className=\"text-center text-muted-foreground text-xs\">\n          With <code className=\"text-foreground\">anchor</code> range\n        </p>\n      </div>\n    </div>\n  );\n}",
+      "target": "components/examples/knob-arc-and-anchor-demo.tsx"
+    }
+  ]
+}

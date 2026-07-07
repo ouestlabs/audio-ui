@@ -71,59 +71,59 @@ export function getRegistryJsonAbsoluteUrl(
 // ============================================================================
 
 export interface CategorySeoInfo {
-  title?: string;
+  content?: CategorySeoContent;
   /** Optional; use `{{count}}` (or legacy `[[count]]`) for the live component count from `registry.json` (same as `intro`). */
   description?: string;
+  docsDescription?: string;
+  highlights?: string[];
   /** Use `{{count}}` where the live component count from registry should appear (replaced at runtime). */
   intro?: string;
-  highlights?: string[];
   keywords?: string[];
-  content?: CategorySeoContent;
-  docsDescription?: string;
   relatedComponents?: RelatedComponentsBlock;
+  title?: string;
 }
 
 /** Title + inline description (features list) */
 export interface CategorySeoFeatureItem {
-  title: string;
   description: string;
+  title: string;
 }
 
 export interface CategorySeoComponentListItem {
-  slug: string;
-  title: string;
   badge?: string;
   description: string;
   href: string;
+  slug: string;
+  title: string;
 }
 
 export interface CategorySeoSection {
-  title: string;
+  bullets?: string[];
+  /** Rich cards linking to component category pages (catalog index SEO) */
+  componentList?: CategorySeoComponentListItem[];
+  /** Structured features: bold title + description on one line each */
+  featureItems?: CategorySeoFeatureItem[];
   /** Lead-in paragraph before structured lists (e.g. catalog index "Popular Components") */
   intro?: string;
   paragraphs?: string[];
-  bullets?: string[];
-  /** Structured features: bold title + description on one line each */
-  featureItems?: CategorySeoFeatureItem[];
-  /** Rich cards linking to component category pages (catalog index SEO) */
-  componentList?: CategorySeoComponentListItem[];
+  title: string;
 }
 
 export interface CategorySeoFaq {
-  question: string;
   answer: string;
+  question: string;
 }
 
 export interface CategorySeoContent {
-  title: string;
-  summary: string[];
-  sections: CategorySeoSection[];
   faqs?: CategorySeoFaq[];
+  sections: CategorySeoSection[];
+  summary: string[];
+  title: string;
 }
 
 export interface RelatedComponentRef {
-  slug: string;
   label: string;
+  slug: string;
 }
 
 /**
@@ -131,40 +131,37 @@ export interface RelatedComponentRef {
  * Use **Shadcn {Name}** in the visible label (e.g. `[[button|Shadcn Button]]`, `[[alert-dialog|Shadcn Alert Dialog]]`).
  */
 export interface RelatedComponentsBlock {
-  /** e.g. "Integrating With Other Components" (Title Case) */
-  title: string;
+  /** 2–3 paragraphs; `[[slug|Label]]` renders as internal links */
+  integrationBody?: string[];
   /** Optional reference list for authors only; not rendered on the page */
   items?: RelatedComponentRef[];
   /** Component catalog index: internal links to `/components/{slug}` */
   links?: RelatedComponentRef[];
-  /** 2–3 paragraphs; `[[slug|Label]]` renders as internal links */
-  integrationBody?: string[];
+  /** e.g. "Integrating With Other Components" (Title Case) */
+  title: string;
 }
 
 export interface CategoryInfo {
-  name: string;
-  label: string;
-  description: string;
   count: number;
+  description: string;
+  label: string;
+  name: string;
 }
 
 export interface ComponentCategorySeo {
-  title: string;
+  content?: CategorySeoContent;
   description: string;
-  intro: string;
   /** @deprecated Category pages no longer surface highlight chips; kept optional for compatibility */
   highlights?: string[];
+  intro: string;
   keywords: string[];
-  content?: CategorySeoContent;
   relatedComponents?: RelatedComponentsBlock;
+  title: string;
 }
 
 export interface ComponentCatalogItem {
-  name: string;
-  title: string;
-  description: string | undefined;
   categories: string[];
-  primaryCategory: string;
+  description: string | undefined;
   meta:
     | {
         className?: string;
@@ -173,29 +170,32 @@ export interface ComponentCatalogItem {
         order?: number;
       }
     | undefined;
+  name: string;
+  primaryCategory: string;
   searchText: string;
+  title: string;
 }
 
 interface RegistryItemFile {
-  path: string;
-  type: string;
   content?: string;
   highlightedContent?: string;
+  path: string;
   target?: string;
+  type: string;
 }
 
 export interface RegistryItem {
+  categories?: string[];
+  cssVars?: Record<string, any>;
+  dependencies?: string[];
+  description?: string;
+  devDependencies?: string[];
+  files?: RegistryItemFile[];
+  meta?: Record<string, unknown>;
   name: string;
+  registryDependencies?: string[];
   title: string;
   type: string;
-  description?: string;
-  files?: RegistryItemFile[];
-  registryDependencies?: string[];
-  dependencies?: string[];
-  devDependencies?: string[];
-  categories?: string[];
-  meta?: Record<string, unknown>;
-  cssVars?: Record<string, any>;
 }
 
 // Legacy type aliases for backwards compatibility
@@ -485,12 +485,12 @@ export function getComponentCategorySeo(
     const intro = applySeoCountPlaceholder(seo.intro || genericIntro, count);
 
     return {
-      title,
+      content: seo?.content,
       description: baseDescription,
       intro,
       keywords: seo?.keywords ?? [],
-      content: seo?.content,
       relatedComponents: seo?.relatedComponents,
+      title,
     };
   }
 
@@ -503,12 +503,12 @@ export function getComponentCategorySeo(
       : `Browse production-ready shadcn ${label.toLowerCase()} components built to help you move from primitives to polished product UI faster.`;
 
   return {
-    title,
+    content: seo?.content,
     description: applySeoCountPlaceholder(genericDescription, count),
     intro: applySeoCountPlaceholder(genericIntro, count),
     keywords: [],
-    content: seo?.content,
     relatedComponents: seo?.relatedComponents,
+    title,
   };
 }
 
@@ -518,34 +518,34 @@ function applyCountToSeoContent(
 ): CategorySeoContent {
   return {
     ...content,
-    title: applySeoCountPlaceholder(content.title, count),
-    summary: content.summary.map((s) => applySeoCountPlaceholder(s, count)),
+    faqs: content.faqs?.map((faq) => ({
+      ...faq,
+      answer: applySeoCountPlaceholder(faq.answer, count),
+      question: applySeoCountPlaceholder(faq.question, count),
+    })),
     sections: content.sections.map((section) => ({
       ...section,
-      title: applySeoCountPlaceholder(section.title, count),
+      bullets: section.bullets?.map((b) => applySeoCountPlaceholder(b, count)),
+      componentList: section.componentList?.map((item) => ({
+        ...item,
+        description: applySeoCountPlaceholder(item.description, count),
+        title: applySeoCountPlaceholder(item.title, count),
+      })),
+      featureItems: section.featureItems?.map((fi) => ({
+        ...fi,
+        description: applySeoCountPlaceholder(fi.description, count),
+        title: applySeoCountPlaceholder(fi.title, count),
+      })),
       intro: section.intro
         ? applySeoCountPlaceholder(section.intro, count)
         : undefined,
       paragraphs: section.paragraphs?.map((p) =>
         applySeoCountPlaceholder(p, count)
       ),
-      bullets: section.bullets?.map((b) => applySeoCountPlaceholder(b, count)),
-      featureItems: section.featureItems?.map((fi) => ({
-        ...fi,
-        title: applySeoCountPlaceholder(fi.title, count),
-        description: applySeoCountPlaceholder(fi.description, count),
-      })),
-      componentList: section.componentList?.map((item) => ({
-        ...item,
-        title: applySeoCountPlaceholder(item.title, count),
-        description: applySeoCountPlaceholder(item.description, count),
-      })),
+      title: applySeoCountPlaceholder(section.title, count),
     })),
-    faqs: content.faqs?.map((faq) => ({
-      ...faq,
-      question: applySeoCountPlaceholder(faq.question, count),
-      answer: applySeoCountPlaceholder(faq.answer, count),
-    })),
+    summary: content.summary.map((s) => applySeoCountPlaceholder(s, count)),
+    title: applySeoCountPlaceholder(content.title, count),
   };
 }
 
@@ -559,10 +559,10 @@ export function getComponentIndexSeo(): ComponentCategorySeo {
 
   if (!(root?.content || root?.description || root?.intro)) {
     return {
-      title: "Shadcn UI Components",
       description: fallbackDescription,
       intro: fallbackDescription,
       keywords: [],
+      title: "Shadcn UI Components",
     };
   }
 
@@ -581,20 +581,20 @@ export function getComponentIndexSeo(): ComponentCategorySeo {
     : undefined;
   const relatedComponents = root.relatedComponents
     ? {
-        title: root.relatedComponents.title,
-        links: root.relatedComponents.links,
         integrationBody: root.relatedComponents.integrationBody,
         items: root.relatedComponents.items,
+        links: root.relatedComponents.links,
+        title: root.relatedComponents.title,
       }
     : undefined;
 
   return {
-    title,
+    content,
     description,
     intro,
     keywords,
-    content,
     relatedComponents,
+    title,
   };
 }
 
@@ -640,7 +640,6 @@ export const componentCategories = new Proxy([] as string[], {
     if (typeof prop === "string" && prop in Array.prototype) {
       return (names as any)[prop];
     }
-    return;
   },
   has(_target, prop) {
     return getStats().categories.some((c) => c.name === prop);
@@ -685,13 +684,13 @@ function loadCatalogItemsByName(): Map<string, ComponentCatalogItem> {
         .toLowerCase();
 
       itemsByName.set(item.name, {
-        name: item.name,
-        title: item.title || "",
-        description: item.description || "",
         categories: itemCategories,
-        primaryCategory,
+        description: item.description || "",
         meta: item.meta,
+        name: item.name,
+        primaryCategory,
         searchText,
+        title: item.title || "",
       });
     }
   } catch (e) {
@@ -887,16 +886,16 @@ export async function getRegistryItem(
             const data = await res.json();
             const rawCode = data.files?.[0]?.content;
             const item: RegistryItem = {
+              files: [
+                {
+                  content: rawCode,
+                  path: "",
+                  type: "registry:ui",
+                },
+              ],
               name: data.name || name,
               title: data.title || data.name || name,
               type: "registry:ui",
-              files: [
-                {
-                  path: "",
-                  type: "registry:ui",
-                  content: rawCode,
-                },
-              ],
             };
             registryCache.set(cacheKey, item);
             return item;
@@ -979,8 +978,8 @@ export async function getRegistryItem(
           }
           return {
             ...file,
-            path: pathNode.relative(process.cwd(), file.path),
             content,
+            path: pathNode.relative(process.cwd(), file.path),
           };
         })
       );
@@ -1126,7 +1125,7 @@ function insertFilePathIntoTree(root: FileTree[], filePath: string) {
       currentLevel.push({ name: part, path: filePath });
     } else {
       const children: FileTree[] = [];
-      currentLevel.push({ name: part, children });
+      currentLevel.push({ children, name: part });
       currentLevel = children;
     }
   }

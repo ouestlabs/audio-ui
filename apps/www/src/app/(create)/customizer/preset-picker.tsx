@@ -32,15 +32,15 @@ export function PresetPicker({
   const effectiveParams = React.useMemo(
     () => ({
       base: context?.style?.split("-")[0] ?? params.base ?? config.base,
-      style: context?.style ?? params.style ?? config.style,
       baseColor: context?.baseColor ?? params.baseColor ?? config.baseColor,
-      theme: context?.theme ?? params.theme ?? config.theme,
+      font: context?.font ?? params.font ?? config.font,
       iconLibrary:
         context?.iconLibrary ?? params.iconLibrary ?? config.iconLibrary,
-      font: context?.font ?? params.font ?? config.font,
       menuAccent: context?.menuAccent ?? params.menuAccent ?? config.menuAccent,
       menuColor: context?.menuColor ?? params.menuColor ?? config.menuColor,
       radius: context?.radius ?? params.radius ?? config.radius,
+      style: context?.style ?? params.style ?? config.style,
+      theme: context?.theme ?? params.theme ?? config.theme,
     }),
     [context, params, config]
   );
@@ -89,15 +89,15 @@ export function PresetPicker({
 
     const newValues = {
       base: preset.base,
-      style: preset.style,
       baseColor: preset.baseColor,
-      theme: preset.theme,
-      iconLibrary: preset.iconLibrary,
+      custom: false,
       font: preset.font,
+      iconLibrary: preset.iconLibrary,
       menuAccent: preset.menuAccent,
       menuColor: preset.menuColor,
       radius: preset.radius,
-      custom: false,
+      style: preset.style,
+      theme: preset.theme,
     };
 
     // Update all params including base.

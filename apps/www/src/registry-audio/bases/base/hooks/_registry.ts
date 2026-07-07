@@ -3,31 +3,31 @@ import type { RegistryItem } from "shadcn/schema";
 export const hooks: RegistryItem[] = [
   {
     name: "hooks",
-    type: "registry:hook",
     registryDependencies: ["@audio/use-audio", "@audio/use-sound"],
+    type: "registry:hook",
   },
   {
-    name: "use-audio",
-    type: "registry:hook",
-    registryDependencies: ["@audio/html", "@audio/web"],
+    categories: ["audio"],
     files: [
       {
         path: "hooks/use-audio.ts",
         type: "registry:hook",
       },
     ],
-    categories: ["audio"],
+    name: "use-audio",
+    registryDependencies: ["@audio/html", "@audio/web"],
+    type: "registry:hook",
   },
   {
-    name: "use-sound",
-    type: "registry:hook",
-    registryDependencies: ["@audio/use-audio"],
+    categories: ["audio", "sound"],
     files: [
       {
         path: "hooks/use-sound.ts",
         type: "registry:hook",
       },
     ],
-    categories: ["audio", "sound"],
+    name: "use-sound",
+    registryDependencies: ["@audio/use-audio"],
+    type: "registry:hook",
   },
 ];

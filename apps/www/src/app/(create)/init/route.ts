@@ -9,15 +9,15 @@ export function GET(request: NextRequest) {
 
     const result = designSystemConfigSchema.safeParse({
       base: searchParams.get("base"),
-      style: searchParams.get("style"),
-      iconLibrary: searchParams.get("iconLibrary"),
       baseColor: searchParams.get("baseColor"),
-      theme: searchParams.get("theme"),
       font: searchParams.get("font"),
+      iconLibrary: searchParams.get("iconLibrary"),
       menuAccent: searchParams.get("menuAccent"),
       menuColor: searchParams.get("menuColor"),
       radius: searchParams.get("radius"),
+      style: searchParams.get("style"),
       template: searchParams.get("template"),
+      theme: searchParams.get("theme"),
     });
 
     if (!result.success) {
@@ -33,8 +33,8 @@ export function GET(request: NextRequest) {
     if (!parseResult.success) {
       return NextResponse.json(
         {
-          error: "Invalid registry base item",
           details: parseResult.error.format(),
+          error: "Invalid registry base item",
         },
         { status: 500 }
       );

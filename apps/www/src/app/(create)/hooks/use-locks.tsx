@@ -43,7 +43,7 @@ export function LocksProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const value = React.useMemo(
-    () => ({ locks, isLocked, toggleLock }),
+    () => ({ isLocked, locks, toggleLock }),
     [locks, isLocked, toggleLock]
   );
 

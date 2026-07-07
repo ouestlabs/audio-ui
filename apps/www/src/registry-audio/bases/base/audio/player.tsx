@@ -77,12 +77,12 @@ import {
 } from "@/registry-audio/bases/base/lib/html-audio";
 
 const PLAYBACK_SPEEDS = [
-  { value: 0.5, label: "0.5x" },
-  { value: 0.75, label: "0.75x" },
-  { value: 1, label: "1x" },
-  { value: 1.25, label: "1.25x" },
-  { value: 1.5, label: "1.5x" },
-  { value: 2, label: "2x" },
+  { label: "0.5x", value: 0.5 },
+  { label: "0.75x", value: 0.75 },
+  { label: "1x", value: 1 },
+  { label: "1.25x", value: 1.25 },
+  { label: "1.5x", value: 1.5 },
+  { label: "2x", value: 2 },
 ] as const;
 
 type AudioStoreApi = typeof useAudioStore;
@@ -214,56 +214,56 @@ function AudioProvider({
 }
 const demoTracks: Track[] = [
   {
+    album: "Pixabay Music",
+    artist: "Flavio Concini",
+    genre: "Upbeat",
     id: "1",
     title: "Beautiful Loop",
-    artist: "Flavio Concini",
-    album: "Pixabay Music",
     url: "https://cdn.pixabay.com/audio/2024/10/21/audio_78251ef8e3.mp3",
-    genre: "Upbeat",
   },
   {
+    album: "Pixabay Music",
+    artist: "Aliabbas Abasov",
+    genre: "Hip Hop",
     id: "2",
     title: "Type",
-    artist: "Aliabbas Abasov",
-    album: "Pixabay Music",
     url: "https://cdn.pixabay.com/audio/2024/02/28/audio_60f7a54400.mp3",
-    genre: "Hip Hop",
   },
   {
+    artist: "Tuxnet",
+    artwork: "/icon",
+    genre: "Hip Hop",
     id: "3",
     title: "Radio Tuxnet",
-    artist: "Tuxnet",
     url: "/radio/live.aac?host=ice2.tuxnet.me",
-    genre: "Hip Hop",
-    artwork: "/icon",
   },
   {
-    id: "4",
-    title: "Live Radio",
     artist: "Audio UI",
-    url: "https://radio.sevalla.app/live.aac",
     artwork: "/icon",
     genre: "Hip Hop",
+    id: "4",
+    title: "Live Radio",
+    url: "https://radio.sevalla.app/live.aac",
   },
 ];
 
 const audioPlayerVariants = cva(
   "cn-audio-player before:-z-1 relative w-full before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit]",
   {
+    defaultVariants: {
+      size: "default",
+      variant: "default",
+    },
     variants: {
       size: {
-        sm: "cn-audio-player-size-sm",
         default: "cn-audio-player-size-default",
+        sm: "cn-audio-player-size-sm",
       },
       variant: {
         default: "cn-audio-player-variant-default",
         ghost: "cn-audio-player-variant-ghost",
         widget: "cn-audio-player-variant-widget",
       },
-    },
-    defaultVariants: {
-      size: "default",
-      variant: "default",
     },
   }
 );
@@ -332,14 +332,14 @@ function AudioPlayerButton({
 const audioControlBarVariants = cva(
   "flex w-full min-w-0 items-center gap-4 in-data-[size=sm]:gap-3 in-data-[size=sm]:px-3 px-4 in-data-[size=sm]:in-data-[variant=widget]:pt-3 in-data-[variant=widget]:pt-4",
   {
+    defaultVariants: {
+      variant: "compact",
+    },
     variants: {
       variant: {
         compact: "flex-row",
         stacked: "flex-col",
       },
-    },
-    defaultVariants: {
-      variant: "compact",
     },
   }
 );
@@ -1025,11 +1025,12 @@ function AudioTrack({
       htmlAudio.isLive(trackDuration));
 
   const contextValue: AudioTrackContextValue = {
-    track,
     index,
     isCurrent,
     isPlaying: actualIsPlaying,
-    trackDuration,
+    onRemove: onRemove
+      ? (e) => handleTrackRemoveClick(e, track.id, onRemove)
+      : undefined,
     onTogglePlayPause: (e) =>
       handleTrackPlayPauseClick(
         e,
@@ -1039,9 +1040,8 @@ function AudioTrack({
         togglePlay,
         setQueueAndPlay
       ),
-    onRemove: onRemove
-      ? (e) => handleTrackRemoveClick(e, track.id, onRemove)
-      : undefined,
+    track,
+    trackDuration,
   };
 
   return (
@@ -1133,7 +1133,7 @@ function AudioTrackCover({ className }: { className?: string }) {
 
 function AudioTrackIndex({ className }: { className?: string }) {
   const { index } = useAudioTrackContext();
-  const displayIndex = index !== undefined ? index + 1 : "";
+  const displayIndex = index === undefined ? "" : index + 1;
 
   return (
     <span className={cn("text-muted-foreground/60 text-xs", className)}>
@@ -1224,14 +1224,14 @@ function resolveTrackActions(
 }
 
 const audioTrackListVariants = cva("w-full", {
+  defaultVariants: {
+    variant: "default",
+  },
   variants: {
     variant: {
       default: "flex flex-col gap-2",
       grid: "grid grid-cols-1 gap-2 xl:grid-cols-2",
     },
-  },
-  defaultVariants: {
-    variant: "default",
   },
 });
 
@@ -1317,9 +1317,9 @@ function AudioTrackList({
   const handleAutoReorder = (reorderedTracks: Track[]) => {
     if (!(isFiltered || isExternalTracks)) {
       const newIndex =
-        currentTrack?.id !== undefined
-          ? reorderedTracks.findIndex((t) => t.id === currentTrack.id)
-          : -1;
+        currentTrack?.id === undefined
+          ? -1
+          : reorderedTracks.findIndex((t) => t.id === currentTrack.id);
 
       let finalIndex = 0;
       if (newIndex >= 0) {
@@ -1863,30 +1863,30 @@ function AudioPlaybackSpeed({
 }
 
 export {
-  audioPlayerVariants,
-  AudioProvider,
-  demoTracks,
+  AudioPlaybackSpeed,
   AudioPlayer,
   AudioPlayerButton,
   AudioPlayerControlBar,
   AudioPlayerControlGroup,
-  AudioPlayerTimeDisplay,
-  AudioPlayerSeekBar,
-  AudioPlayerVolume,
+  AudioPlayerFastForward,
   AudioPlayerPlay,
   AudioPlayerRewind,
-  AudioPlayerFastForward,
-  AudioPlayerSkipForward,
+  AudioPlayerSeekBar,
   AudioPlayerSkipBack,
-  AudioTrack,
-  AudioTrackCover,
-  AudioTrackIndex,
-  AudioTrackPlayPauseAction,
-  AudioTrackRemoveAction,
-  AudioTrackList,
+  AudioPlayerSkipForward,
+  AudioPlayerTimeDisplay,
+  AudioPlayerVolume,
+  AudioProvider,
+  AudioQueue,
   AudioQueuePreferences,
   AudioQueueRepeatMode,
   AudioQueueShuffle,
-  AudioQueue,
-  AudioPlaybackSpeed,
+  AudioTrack,
+  AudioTrackCover,
+  AudioTrackIndex,
+  AudioTrackList,
+  AudioTrackPlayPauseAction,
+  AudioTrackRemoveAction,
+  audioPlayerVariants,
+  demoTracks,
 };

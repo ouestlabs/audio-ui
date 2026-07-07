@@ -1,38 +1,38 @@
-import * as React from "react"
-import { cva, type VariantProps } from "class-variance-authority"
-import { Slot } from "radix-ui"
+import { cva, type VariantProps } from "class-variance-authority";
+import { Slot } from "radix-ui";
+import type * as React from "react";
 
-import { cn } from "@/registry/bases/radix/lib/utils"
+import { cn } from "@/registry/bases/radix/lib/utils";
 
 function BubbleGroup({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
-      data-slot="bubble-group"
       className={cn("cn-bubble-group flex min-w-0 flex-col", className)}
+      data-slot="bubble-group"
       {...props}
     />
-  )
+  );
 }
 
 const bubbleVariants = cva(
   "cn-bubble group/bubble relative flex w-fit min-w-0 flex-col",
   {
-    variants: {
-      variant: {
-        default: "cn-bubble-variant-default",
-        secondary: "cn-bubble-variant-secondary",
-        muted: "cn-bubble-variant-muted",
-        tinted: "cn-bubble-variant-tinted",
-        outline: "cn-bubble-variant-outline",
-        ghost: "cn-bubble-variant-ghost",
-        destructive: "cn-bubble-variant-destructive",
-      },
-    },
     defaultVariants: {
       variant: "default",
     },
+    variants: {
+      variant: {
+        default: "cn-bubble-variant-default",
+        destructive: "cn-bubble-variant-destructive",
+        ghost: "cn-bubble-variant-ghost",
+        muted: "cn-bubble-variant-muted",
+        outline: "cn-bubble-variant-outline",
+        secondary: "cn-bubble-variant-secondary",
+        tinted: "cn-bubble-variant-tinted",
+      },
+    },
   }
-)
+);
 
 function Bubble({
   variant = "default",
@@ -41,17 +41,17 @@ function Bubble({
   ...props
 }: React.ComponentProps<"div"> &
   VariantProps<typeof bubbleVariants> & {
-    align?: "start" | "end"
+    align?: "start" | "end";
   }) {
   return (
     <div
+      className={cn(bubbleVariants({ variant }), className)}
+      data-align={align}
       data-slot="bubble"
       data-variant={variant}
-      data-align={align}
-      className={cn(bubbleVariants({ variant }), className)}
       {...props}
     />
-  )
+  );
 }
 
 function BubbleContent({
@@ -59,41 +59,41 @@ function BubbleContent({
   className,
   ...props
 }: React.ComponentProps<"div"> & {
-  asChild?: boolean
+  asChild?: boolean;
 }) {
-  const Comp = asChild ? Slot.Root : "div"
+  const Comp = asChild ? Slot.Root : "div";
 
   return (
     <Comp
-      data-slot="bubble-content"
       className={cn(
         "cn-bubble-content w-fit max-w-full min-w-0 overflow-hidden wrap-break-word [button]:text-left [button,a]:transition-colors",
         className
       )}
+      data-slot="bubble-content"
       {...props}
     />
-  )
+  );
 }
 
 const bubbleReactionsVariants = cva(
   "cn-bubble-reactions absolute z-10 flex w-fit items-center justify-center",
   {
-    variants: {
-      side: {
-        top: "cn-bubble-reactions-side-top",
-        bottom: "cn-bubble-reactions-side-bottom",
-      },
-      align: {
-        start: "cn-bubble-reactions-align-start",
-        end: "cn-bubble-reactions-align-end",
-      },
-    },
     defaultVariants: {
-      side: "bottom",
       align: "end",
+      side: "bottom",
+    },
+    variants: {
+      align: {
+        end: "cn-bubble-reactions-align-end",
+        start: "cn-bubble-reactions-align-start",
+      },
+      side: {
+        bottom: "cn-bubble-reactions-side-bottom",
+        top: "cn-bubble-reactions-side-top",
+      },
     },
   }
-)
+);
 
 function BubbleReactions({
   side = "bottom",
@@ -101,18 +101,18 @@ function BubbleReactions({
   className,
   ...props
 }: React.ComponentProps<"div"> & {
-  align?: "start" | "end"
-  side?: "top" | "bottom"
+  align?: "start" | "end";
+  side?: "top" | "bottom";
 }) {
   return (
     <div
-      data-slot="bubble-reactions"
+      className={cn(bubbleReactionsVariants({ align, side }), className)}
       data-align={align}
       data-side={side}
-      className={cn(bubbleReactionsVariants({ side, align }), className)}
+      data-slot="bubble-reactions"
       {...props}
     />
-  )
+  );
 }
 
-export { BubbleGroup, Bubble, BubbleContent, BubbleReactions }
+export { Bubble, BubbleContent, BubbleGroup, BubbleReactions };

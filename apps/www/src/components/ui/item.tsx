@@ -36,21 +36,21 @@ function ItemSeparator({
 const itemVariants = cva(
   "group/item flex w-full flex-wrap items-center rounded-lg border text-sm outline-none transition-colors duration-100 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 [a]:transition-colors [a]:hover:bg-muted",
   {
+    defaultVariants: {
+      size: "default",
+      variant: "default",
+    },
     variants: {
-      variant: {
-        default: "border-transparent",
-        outline: "border-border",
-        muted: "border-transparent bg-muted/50",
-      },
       size: {
         default: "gap-2.5 px-3 py-2.5",
         sm: "gap-2.5 px-3 py-2.5",
         xs: "gap-2 in-data-[slot=dropdown-menu-content]:p-0 px-2.5 py-2",
       },
-    },
-    defaultVariants: {
-      variant: "default",
-      size: "default",
+      variant: {
+        default: "border-transparent",
+        muted: "border-transparent bg-muted/50",
+        outline: "border-border",
+      },
     },
   }
 );
@@ -66,15 +66,15 @@ function Item({
     defaultTagName: "div",
     props: mergeProps<"div">(
       {
-        className: cn(itemVariants({ variant, size, className })),
+        className: cn(itemVariants({ className, size, variant })),
       },
       props
     ),
     render,
     state: {
+      size,
       slot: "item",
       variant,
-      size,
     },
   });
 }
@@ -82,6 +82,9 @@ function Item({
 const itemMediaVariants = cva(
   "flex shrink-0 items-center justify-center gap-2 group-has-data-[slot=item-description]/item:translate-y-0.5 group-has-data-[slot=item-description]/item:self-start [&_svg]:pointer-events-none",
   {
+    defaultVariants: {
+      variant: "default",
+    },
     variants: {
       variant: {
         default: "bg-transparent",
@@ -89,9 +92,6 @@ const itemMediaVariants = cva(
         image:
           "size-10 overflow-hidden rounded-sm group-data-[size=sm]/item:size-8 group-data-[size=xs]/item:size-6 [&_img]:size-full [&_img]:object-cover",
       },
-    },
-    defaultVariants: {
-      variant: "default",
     },
   }
 );
@@ -103,7 +103,7 @@ function ItemMedia({
 }: React.ComponentProps<"div"> & VariantProps<typeof itemMediaVariants>) {
   return (
     <div
-      className={cn(itemMediaVariants({ variant, className }))}
+      className={cn(itemMediaVariants({ className, variant }))}
       data-slot="item-media"
       data-variant={variant}
       {...props}
@@ -188,13 +188,13 @@ function ItemFooter({ className, ...props }: React.ComponentProps<"div">) {
 
 export {
   Item,
-  ItemMedia,
-  ItemContent,
   ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemFooter,
   ItemGroup,
+  ItemHeader,
+  ItemMedia,
   ItemSeparator,
   ItemTitle,
-  ItemDescription,
-  ItemHeader,
-  ItemFooter,
 };

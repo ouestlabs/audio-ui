@@ -15,8 +15,8 @@ import { cn, formatLabel, normalizeSlug } from "@/lib/utils";
 import { useComponents } from "./components-context";
 
 interface ComponentSidebarCategoryMenuProps {
-  onSelect?: () => void;
   filter?: string;
+  onSelect?: () => void;
   view?: "list" | "compact";
 }
 

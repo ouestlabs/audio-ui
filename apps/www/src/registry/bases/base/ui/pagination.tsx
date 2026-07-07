@@ -1,22 +1,21 @@
-import * as React from "react"
-
-import { cn } from "@/registry/bases/base/lib/utils"
-import { Button } from "@/registry/bases/base/ui/button"
-import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder"
+import type * as React from "react";
+import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder";
+import { cn } from "@/registry/bases/base/lib/utils";
+import { Button } from "@/registry/bases/base/ui/button";
 
 function Pagination({ className, ...props }: React.ComponentProps<"nav">) {
   return (
     <nav
-      role="navigation"
       aria-label="pagination"
-      data-slot="pagination"
       className={cn(
         "cn-pagination mx-auto flex w-full justify-center",
         className
       )}
+      data-slot="pagination"
+      role="navigation"
       {...props}
     />
-  )
+  );
 }
 
 function PaginationContent({
@@ -25,21 +24,21 @@ function PaginationContent({
 }: React.ComponentProps<"ul">) {
   return (
     <ul
-      data-slot="pagination-content"
       className={cn("cn-pagination-content flex items-center", className)}
+      data-slot="pagination-content"
       {...props}
     />
-  )
+  );
 }
 
 function PaginationItem({ ...props }: React.ComponentProps<"li">) {
-  return <li data-slot="pagination-item" {...props} />
+  return <li data-slot="pagination-item" {...props} />;
 }
 
 type PaginationLinkProps = {
-  isActive?: boolean
+  isActive?: boolean;
 } & Pick<React.ComponentProps<typeof Button>, "size"> &
-  React.ComponentProps<"a">
+  React.ComponentProps<"a">;
 
 function PaginationLink({
   className,
@@ -49,20 +48,20 @@ function PaginationLink({
 }: PaginationLinkProps) {
   return (
     <Button
-      variant={isActive ? "outline" : "ghost"}
-      size={size}
       className={cn("cn-pagination-link", className)}
       nativeButton={false}
       render={
         <a
           aria-current={isActive ? "page" : undefined}
-          data-slot="pagination-link"
           data-active={isActive}
+          data-slot="pagination-link"
           {...props}
         />
       }
+      size={size}
+      variant={isActive ? "outline" : "ghost"}
     />
-  )
+  );
 }
 
 function PaginationPrevious({
@@ -73,24 +72,24 @@ function PaginationPrevious({
   return (
     <PaginationLink
       aria-label="Go to previous page"
-      size="default"
       className={cn("cn-pagination-previous", className)}
+      size="default"
       {...props}
     >
       <IconPlaceholder
-        lucide="ChevronLeftIcon"
-        tabler="IconChevronLeft"
+        className="cn-rtl-flip"
+        data-icon="inline-start"
         hugeicons="ArrowLeft01Icon"
+        lucide="ChevronLeftIcon"
         phosphor="CaretLeftIcon"
         remixicon="RiArrowLeftSLine"
-        data-icon="inline-start"
-        className="cn-rtl-flip"
+        tabler="IconChevronLeft"
       />
       <span className="cn-pagination-previous-text hidden sm:block">
         {text}
       </span>
     </PaginationLink>
-  )
+  );
 }
 
 function PaginationNext({
@@ -101,22 +100,22 @@ function PaginationNext({
   return (
     <PaginationLink
       aria-label="Go to next page"
-      size="default"
       className={cn("cn-pagination-next", className)}
+      size="default"
       {...props}
     >
       <span className="cn-pagination-next-text hidden sm:block">{text}</span>
       <IconPlaceholder
-        lucide="ChevronRightIcon"
-        tabler="IconChevronRight"
+        className="cn-rtl-flip"
+        data-icon="inline-end"
         hugeicons="ArrowRight01Icon"
+        lucide="ChevronRightIcon"
         phosphor="CaretRightIcon"
         remixicon="RiArrowRightSLine"
-        data-icon="inline-end"
-        className="cn-rtl-flip"
+        tabler="IconChevronRight"
       />
     </PaginationLink>
-  )
+  );
 }
 
 function PaginationEllipsis({
@@ -126,23 +125,23 @@ function PaginationEllipsis({
   return (
     <span
       aria-hidden
-      data-slot="pagination-ellipsis"
       className={cn(
         "cn-pagination-ellipsis flex items-center justify-center",
         className
       )}
+      data-slot="pagination-ellipsis"
       {...props}
     >
       <IconPlaceholder
-        lucide="MoreHorizontalIcon"
-        tabler="IconDots"
         hugeicons="MoreHorizontalCircle01Icon"
+        lucide="MoreHorizontalIcon"
         phosphor="DotsThreeIcon"
         remixicon="RiMoreLine"
+        tabler="IconDots"
       />
       <span className="sr-only">More pages</span>
     </span>
-  )
+  );
 }
 
 export {
@@ -153,4 +152,4 @@ export {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-}
+};

@@ -26,8 +26,8 @@ import { useComponents } from "./components-context";
 const SEARCH_DEBOUNCE_MS = 320;
 
 interface ComponentHeaderSearchProps {
-  placeholder?: string;
   className?: string;
+  placeholder?: string;
 }
 
 export function ComponentHeaderSearch({
@@ -49,8 +49,8 @@ export function ComponentHeaderSearch({
   const [, setCurrentUrlQuery] = useQueryState(
     "search",
     parseAsSearchStringClient.withOptions({
-      shallow: true,
       history: "replace",
+      shallow: true,
     })
   );
 

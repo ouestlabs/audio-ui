@@ -1,1 +1,15 @@
-{"$schema":"https://ui.shadcn.com/schema/registry-item.json","name":"fader-size-variants-demo","type":"registry:example","description":"Fader size variants (sm, default, lg)","registryDependencies":["@audio/fader"],"files":[{"path":"fader-size-variants-demo.tsx","type":"registry:example","content":"import { Fader } from \"@/components/audio/elements/fader\";\n\nexport function FaderSizeVariantsDemo() {\n  return (\n    <div className=\"flex items-end gap-6\">\n      <div className=\"flex h-max flex-col items-center gap-2\">\n        <Fader defaultValue={38} max={100} min={0} size=\"sm\" step={1} />\n        <p className=\"text-muted-foreground text-xs\">sm</p>\n      </div>\n\n      <div className=\"flex h-max flex-col items-center gap-2\">\n        <Fader defaultValue={50} max={100} min={0} size=\"default\" step={1} />\n        <p className=\"text-muted-foreground text-xs\">default</p>\n      </div>\n\n      <div className=\"flex h-max flex-col items-center gap-2\">\n        <Fader defaultValue={62} max={100} min={0} size=\"lg\" step={1} />\n        <p className=\"text-muted-foreground text-xs\">lg</p>\n      </div>\n    </div>\n  );\n}","target":"components/examples/fader-size-variants-demo.tsx"}]}
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "fader-size-variants-demo",
+  "type": "registry:example",
+  "description": "Fader size variants (sm, default, lg)",
+  "registryDependencies": ["@audio/fader"],
+  "files": [
+    {
+      "path": "fader-size-variants-demo.tsx",
+      "type": "registry:example",
+      "content": "import { Fader } from \"@/components/audio/elements/fader\";\n\nexport function FaderSizeVariantsDemo() {\n  return (\n    <div className=\"flex items-end gap-6\">\n      <div className=\"flex h-max flex-col items-center gap-2\">\n        <Fader defaultValue={38} max={100} min={0} size=\"sm\" step={1} />\n        <p className=\"text-muted-foreground text-xs\">sm</p>\n      </div>\n\n      <div className=\"flex h-max flex-col items-center gap-2\">\n        <Fader defaultValue={50} max={100} min={0} size=\"default\" step={1} />\n        <p className=\"text-muted-foreground text-xs\">default</p>\n      </div>\n\n      <div className=\"flex h-max flex-col items-center gap-2\">\n        <Fader defaultValue={62} max={100} min={0} size=\"lg\" step={1} />\n        <p className=\"text-muted-foreground text-xs\">lg</p>\n      </div>\n    </div>\n  );\n}",
+      "target": "components/examples/fader-size-variants-demo.tsx"
+    }
+  ]
+}

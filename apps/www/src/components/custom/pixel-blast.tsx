@@ -115,10 +115,10 @@ const resolveCssColor = (value: string, scopeEl: HTMLElement | null) => {
 };
 
 const SHAPE_MAP: Record<PixelBlastVariant, number> = {
-  square: 0,
   circle: 1,
-  triangle: 2,
   diamond: 3,
+  square: 0,
+  triangle: 2,
 };
 
 const VAR_RE = /\bvar\(/;
@@ -386,9 +386,9 @@ export const PixelBlast: React.FC<PixelBlastProps> = ({
       }
       const canvas = document.createElement("canvas");
       const renderer = new WebGLRenderer({
-        canvas,
-        antialias,
         alpha: true,
+        antialias,
+        canvas,
         powerPreference: "high-performance",
       });
       renderer.domElement.style.width = "100%";
@@ -401,34 +401,34 @@ export const PixelBlast: React.FC<PixelBlastProps> = ({
         renderer.setClearColor(0x00_00_00, 1);
       }
       const uniforms = {
-        uResolution: { value: new Vector2(0, 0) },
-        uTime: { value: 0 },
-        uColor: { value: new Color(1, 1, 1) },
         uClickPos: {
           value: Array.from({ length: MAX_CLICKS }, () => new Vector2(-1, -1)),
         },
         uClickTimes: { value: new Float32Array(MAX_CLICKS) },
-        uShapeType: { value: SHAPE_MAP[variant] ?? 0 },
-        uPixelSize: { value: pixelSize * renderer.getPixelRatio() },
-        uScale: { value: patternScale },
+        uColor: { value: new Color(1, 1, 1) },
         uDensity: { value: patternDensity },
-        uPixelJitter: { value: pixelSizeJitter },
+        uEdgeFade: { value: edgeFade },
         uEnableRipples: { value: enableRipples ? 1 : 0 },
+        uPixelJitter: { value: pixelSizeJitter },
+        uPixelSize: { value: pixelSize * renderer.getPixelRatio() },
+        uResolution: { value: new Vector2(0, 0) },
+        uRippleIntensity: { value: rippleIntensityScale },
         uRippleSpeed: { value: rippleSpeed },
         uRippleThickness: { value: rippleThickness },
-        uRippleIntensity: { value: rippleIntensityScale },
-        uEdgeFade: { value: edgeFade },
+        uScale: { value: patternScale },
+        uShapeType: { value: SHAPE_MAP[variant] ?? 0 },
+        uTime: { value: 0 },
       };
       const scene = new Scene();
       const camera = new OrthographicCamera(-1, 1, 1, -1, 0, 1);
       const material = new ShaderMaterial({
-        vertexShader: VERTEX_SRC,
-        fragmentShader: FRAGMENT_SRC,
-        uniforms,
-        transparent: true,
         depthTest: false,
         depthWrite: false,
+        fragmentShader: FRAGMENT_SRC,
         glslVersion: GLSL3,
+        transparent: true,
+        uniforms,
+        vertexShader: VERTEX_SRC,
       });
       const quadGeom = new PlaneGeometry(2, 2);
       const quad = new Mesh(quadGeom, material);
@@ -507,8 +507,8 @@ export const PixelBlast: React.FC<PixelBlastProps> = ({
         return {
           fx,
           fy,
-          w: renderer.domElement.width,
           h: renderer.domElement.height,
+          w: renderer.domElement.width,
         };
       };
       const onPointerDown = (e: PointerEvent) => {
@@ -572,20 +572,20 @@ export const PixelBlast: React.FC<PixelBlastProps> = ({
       };
       raf = requestAnimationFrame(animate);
       threeRef.current = {
-        renderer,
-        scene,
         camera,
-        material,
-        timer,
         clickIx: 0,
-        uniforms,
-        resizeObserver: ro,
-        raf,
-        quad,
-        timeOffset,
+        colorInput: color,
         composer,
         lastResolvedColor: initialResolved,
-        colorInput: color,
+        material,
+        quad,
+        raf,
+        renderer,
+        resizeObserver: ro,
+        scene,
+        timeOffset,
+        timer,
+        uniforms,
       };
     } else {
       const t = threeRef.current;

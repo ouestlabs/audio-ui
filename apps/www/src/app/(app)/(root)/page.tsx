@@ -35,9 +35,7 @@ export const dynamic = "force-static";
 export const revalidate = false;
 
 export const metadata: Metadata = buildPageMetadata({
-  title,
   description,
-  path: "/",
   keywords: [
     "audio ui components",
     "react audio components",
@@ -55,6 +53,8 @@ export const metadata: Metadata = buildPageMetadata({
     "free shadcn components",
     "open-source shadcn components",
   ],
+  path: "/",
+  title,
 });
 
 export default function IndexPage() {

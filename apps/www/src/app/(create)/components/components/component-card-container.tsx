@@ -10,8 +10,8 @@ import { cn } from "@/lib/utils";
 
 interface ComponentCardContainerProps {
   children: React.ReactNode;
-  footer: React.ReactNode;
   className?: string;
+  footer: React.ReactNode;
   isFullWidth?: boolean;
 }
 
@@ -84,9 +84,9 @@ export function ComponentCardContainer({
   // freezeOnceVisible latches isIntersecting to true once seen, so it also
   // serves as the "has been visible" flag.
   const hasBeenVisible = useIntersectionObserver(containerRef, {
+    freezeOnceVisible: true,
     rootMargin: "800px",
     threshold: 0,
-    freezeOnceVisible: true,
   });
 
   return (

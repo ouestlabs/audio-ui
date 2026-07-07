@@ -1,21 +1,21 @@
-import { cn } from "@/registry/bases/base/lib/utils"
-import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder"
+import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder";
+import { cn } from "@/registry/bases/base/lib/utils";
 
 function Spinner({ className, ...props }: React.ComponentProps<"svg">) {
   return (
     <IconPlaceholder
-      lucide="Loader2Icon"
-      tabler="IconLoader"
-      hugeicons="Loading03Icon"
-      phosphor="SpinnerIcon"
-      remixicon="RiLoaderLine"
-      data-slot="spinner"
-      role="status"
       aria-label="Loading"
       className={cn("size-4 animate-spin", className)}
+      data-slot="spinner"
+      hugeicons="Loading03Icon"
+      lucide="Loader2Icon"
+      phosphor="SpinnerIcon"
+      remixicon="RiLoaderLine"
+      role="status"
+      tabler="IconLoader"
       {...props}
     />
-  )
+  );
 }
 
-export { Spinner }
+export { Spinner };

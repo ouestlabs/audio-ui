@@ -57,4 +57,5 @@ function PageActions({ className, ...props }: React.ComponentProps<"div">) {
     />
   );
 }
-export { PageHeader, PageHeaderDescription, PageHeaderHeading, PageActions };
+
+export { PageActions, PageHeader, PageHeaderDescription, PageHeaderHeading };

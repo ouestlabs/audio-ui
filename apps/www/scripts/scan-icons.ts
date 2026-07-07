@@ -121,8 +121,8 @@ async function scanIcons() {
                   const iconName = prop.getName().trim();
                   if (iconName && /^[A-Z]/.test(iconName)) {
                     unmappedMatches.push({
-                      icon: iconName,
                       _path: file,
+                      icon: iconName,
                     });
                   }
                 }
@@ -156,9 +156,9 @@ async function scanIcons() {
                 const iconName = importedNames.get(localName)?.trim();
                 if (iconName && /^[A-Z]/.test(iconName)) {
                   unmappedMatches.push({
-                    icon: iconName,
-                    localName: localName !== iconName ? localName : undefined,
                     _path: file,
+                    icon: iconName,
+                    localName: localName === iconName ? undefined : localName,
                   });
                 }
               }

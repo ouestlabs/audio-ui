@@ -53,11 +53,11 @@ export function CopyRegistry({ value, ...props }: CopyRegistryProps) {
       trackEvent({
         name: "copy_component_cli",
         properties: {
-          command,
-          pm,
           base: config?.base,
-          style: config?.style,
+          command,
           iconLibrary: config?.iconLibrary,
+          pm,
+          style: config?.style,
         },
       });
     } catch (err) {

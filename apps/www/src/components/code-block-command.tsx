@@ -27,10 +27,10 @@ export function CodeBlockCommand({
 
   const tabs = React.useMemo(
     () => ({
-      pnpm: __pnpm__,
-      npm: __npm__,
-      yarn: __yarn__,
       bun: __bun__,
+      npm: __npm__,
+      pnpm: __pnpm__,
+      yarn: __yarn__,
     }),
     [__npm__, __pnpm__, __yarn__, __bun__]
   );
@@ -82,11 +82,11 @@ export function CodeBlockCommand({
         className="top-1 right-1 bg-transparent opacity-70"
         event="copy_command"
         properties={{
-          command,
-          pm: packageManager,
           base: config.base,
-          style: config.style,
+          command,
           iconLibrary: config.iconLibrary,
+          pm: packageManager,
+          style: config.style,
         }}
         value={command}
       />

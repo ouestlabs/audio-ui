@@ -39,18 +39,17 @@ const fontHeadingLiterals = [
 
 const designSystemSearchParams = {
   base: parseAsStringLiteral<BaseName>(BASES.map((b) => b.name)),
-  item: parseAsString.withOptions({ shallow: true }),
-  iconLibrary: parseAsStringLiteral<IconLibraryName>(
-    Object.values(iconLibraries).map((i) => i.name)
-  ),
-  style: parseAsStringLiteral<StyleName>(STYLES.map((s) => s.name)),
-  theme: parseAsStringLiteral<ThemeName>(THEMES.map((t) => t.name)),
-  chartColor: parseAsStringLiteral<ChartColorName>(THEMES.map((t) => t.name)),
-  font: parseAsStringLiteral<FontValue>(FONTS.map((f) => f.value)),
-  fontHeading: parseAsStringLiteral<FontHeadingValue>(fontHeadingLiterals),
   baseColor: parseAsStringLiteral<BaseColorName>(
     BASE_COLORS.map((b) => b.name)
   ),
+  chartColor: parseAsStringLiteral<ChartColorName>(THEMES.map((t) => t.name)),
+  custom: parseAsBoolean,
+  font: parseAsStringLiteral<FontValue>(FONTS.map((f) => f.value)),
+  fontHeading: parseAsStringLiteral<FontHeadingValue>(fontHeadingLiterals),
+  iconLibrary: parseAsStringLiteral<IconLibraryName>(
+    Object.values(iconLibraries).map((i) => i.name)
+  ),
+  item: parseAsString.withOptions({ shallow: true }),
   menuAccent: parseAsStringLiteral<MenuAccentValue>(
     MENU_ACCENTS.map((a) => a.value)
   ),
@@ -58,10 +57,11 @@ const designSystemSearchParams = {
     MENU_COLORS.map((m) => m.value)
   ),
   radius: parseAsStringLiteral<RadiusValue>(RADII.map((r) => r.name)),
-  template: parseAsStringLiteral(["next", "start", "vite"] as const),
-  size: parseAsInteger,
-  custom: parseAsBoolean,
   search: parseAsString.withOptions({ shallow: true }),
+  size: parseAsInteger,
+  style: parseAsStringLiteral<StyleName>(STYLES.map((s) => s.name)),
+  template: parseAsStringLiteral(["next", "start", "vite"] as const),
+  theme: parseAsStringLiteral<ThemeName>(THEMES.map((t) => t.name)),
 };
 
 export const loadDesignSystemSearchParams = createLoader(
@@ -74,8 +74,8 @@ export const serializeDesignSystemSearchParams = createSerializer(
 
 export const useDesignSystemSearchParams = (options: Options = {}) =>
   useQueryStates(designSystemSearchParams, {
-    shallow: true,
     history: "push",
+    shallow: true,
     ...options,
   });
 

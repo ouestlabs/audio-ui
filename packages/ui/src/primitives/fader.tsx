@@ -19,34 +19,34 @@ import { getDataAttributes } from "./internal/data-attributes";
 import { useInheritedOrientation } from "./internal/orientation-context";
 
 interface FaderContextValue {
-  value: number;
-  min: number;
-  max: number;
-  step: number;
-  orientation: "horizontal" | "vertical";
-  disabled: boolean;
-  percentage: number;
-  elementId: string;
-  trackRef: React.RefObject<Nullable<HTMLDivElement>>;
-  thumbRef: React.RefObject<Nullable<HTMLDivElement>>;
-  updateValue: (newValue: number) => void;
-  commitValue: (newValue: number) => void;
-  calculateValueFromPoint: (point: Point) => number;
-  calculateValueFromDelta: (delta: Point, initialValue: number) => number;
-  dragStartValueRef: React.RefObject<number>;
-  isDragActiveRef: React.RefObject<boolean>;
-  pendingValueRef: React.RefObject<number>;
-  shouldPreventFocusRef: React.RefObject<boolean>;
-  valueRef: React.RefObject<number>;
-  setRawValue: Procedure<number>;
-  onValueCommit?: Procedure<number>;
   ariaLabel?: string;
   ariaLabelledBy?: string;
-  wheelRef: Procedure<Nullable<HTMLDivElement>>;
-  onPointerDown: (e: React.PointerEvent) => void;
-  onDragStart: (e: React.PointerEvent) => void;
+  calculateValueFromDelta: (delta: Point, initialValue: number) => number;
+  calculateValueFromPoint: (point: Point) => number;
+  commitValue: (newValue: number) => void;
+  disabled: boolean;
+  dragStartValueRef: React.RefObject<number>;
+  elementId: string;
+  isDragActiveRef: React.RefObject<boolean>;
+  max: number;
+  min: number;
   onDrag: (delta: Point) => void;
   onDragEnd: () => void;
+  onDragStart: (e: React.PointerEvent) => void;
+  onPointerDown: (e: React.PointerEvent) => void;
+  onValueCommit?: Procedure<number>;
+  orientation: "horizontal" | "vertical";
+  pendingValueRef: React.RefObject<number>;
+  percentage: number;
+  setRawValue: Procedure<number>;
+  shouldPreventFocusRef: React.RefObject<boolean>;
+  step: number;
+  thumbRef: React.RefObject<Nullable<HTMLDivElement>>;
+  trackRef: React.RefObject<Nullable<HTMLDivElement>>;
+  updateValue: (newValue: number) => void;
+  value: number;
+  valueRef: React.RefObject<number>;
+  wheelRef: Procedure<Nullable<HTMLDivElement>>;
 }
 
 const FaderContext = React.createContext<FaderContextValue | null>(null);
@@ -72,17 +72,17 @@ export namespace Fader {
       | "max"
       | "step"
     > {
-    value?: number | number[];
-    defaultValue?: number;
-    min?: number;
-    max?: number;
-    step?: number;
-    orientation?: "horizontal" | "vertical";
-    disabled?: boolean;
     "aria-label"?: string;
     "aria-labelledby"?: string;
+    defaultValue?: number;
+    disabled?: boolean;
+    max?: number;
+    min?: number;
     onValueChange?: Procedure<number>;
     onValueCommit?: Procedure<number>;
+    orientation?: "horizontal" | "vertical";
+    step?: number;
+    value?: number | number[];
   }
 
   export function Root({
@@ -118,7 +118,6 @@ export namespace Fader {
 
     const { value: rawValue, setValue: setRawValue } =
       useControlledValue<number>({
-        value: normalizedValue,
         defaultValue: computedDefaultValue,
         onChange: onValueChange,
         transform: (val: number) => {
@@ -128,6 +127,7 @@ export namespace Fader {
           }
           return clamp(numValue, min, max);
         },
+        value: normalizedValue,
       });
 
     const value = rawValue ?? min;
@@ -267,34 +267,34 @@ export namespace Fader {
     const elementId = id || faderId;
 
     const contextValue: FaderContextValue = {
-      value,
-      min,
-      max,
-      step,
-      orientation,
-      disabled,
-      percentage,
-      elementId,
-      trackRef,
-      thumbRef,
-      updateValue,
-      commitValue,
-      calculateValueFromPoint,
-      calculateValueFromDelta,
-      dragStartValueRef,
-      isDragActiveRef,
-      pendingValueRef,
-      shouldPreventFocusRef,
-      valueRef,
-      setRawValue,
-      onValueCommit,
       ariaLabel,
       ariaLabelledBy,
-      wheelRef,
-      onPointerDown,
-      onDragStart,
+      calculateValueFromDelta,
+      calculateValueFromPoint,
+      commitValue,
+      disabled,
+      dragStartValueRef,
+      elementId,
+      isDragActiveRef,
+      max,
+      min,
       onDrag,
       onDragEnd,
+      onDragStart,
+      onPointerDown,
+      onValueCommit,
+      orientation,
+      pendingValueRef,
+      percentage,
+      setRawValue,
+      shouldPreventFocusRef,
+      step,
+      thumbRef,
+      trackRef,
+      updateValue,
+      value,
+      valueRef,
+      wheelRef,
     };
 
     return (
@@ -323,7 +323,7 @@ export namespace Fader {
     return (
       <div
         className={className}
-        {...getDataAttributes("fader", { orientation, disabled })}
+        {...getDataAttributes("fader", { disabled, orientation })}
         ref={(node) => {
           trackRef.current = node;
           wheelRef(node);
@@ -347,19 +347,19 @@ export namespace Fader {
     } = useFaderContext();
 
     const { pointerProps: trackPointerProps } = usePointerDrag({
+      capturePointer: true,
       disabled,
       elementRef: trackRef,
-      capturePointer: true,
-      onPointerDown,
-      onDragStart,
       onDrag,
       onDragEnd,
+      onDragStart,
+      onPointerDown,
     });
 
     return (
       <div
         className={className}
-        {...getDataAttributes("fader", { part: "track", orientation })}
+        {...getDataAttributes("fader", { orientation, part: "track" })}
         {...trackPointerProps}
         {...props}
       />
@@ -375,21 +375,21 @@ export namespace Fader {
     return (
       <div
         className={className}
-        {...getDataAttributes("fader", { part: "range", orientation })}
+        {...getDataAttributes("fader", { orientation, part: "range" })}
         style={{
           ...(orientation === "horizontal"
             ? {
-                width: "100%",
                 height: "100%",
                 transform: `scaleX(${clampedPercentage})`,
                 transformOrigin: "left center",
+                width: "100%",
                 willChange: "transform",
               }
             : {
                 height: "100%",
-                width: "100%",
                 transform: `scaleY(${clampedPercentage})`,
                 transformOrigin: "center bottom",
+                width: "100%",
                 willChange: "transform",
               }),
           ...style,
@@ -425,13 +425,13 @@ export namespace Fader {
 
     const { pointerProps: thumbPointerProps, isDragging: isThumbDragging } =
       usePointerDrag({
+        capturePointer: true,
         disabled,
         elementRef: thumbRef,
-        capturePointer: true,
-        onPointerDown,
-        onDragStart,
         onDrag,
         onDragEnd,
+        onDragStart,
+        onPointerDown,
       });
 
     const { focusProps } = useFocus({
@@ -446,14 +446,6 @@ export namespace Fader {
     const { keyboardProps } = useKeyboardNavigation({
       disabled,
       handlers: {
-        onArrowUp: () => {
-          commitValue(valueRef.current + step);
-          return true;
-        },
-        onArrowRight: () => {
-          commitValue(valueRef.current + step);
-          return true;
-        },
         onArrowDown: () => {
           commitValue(valueRef.current - step);
           return true;
@@ -462,20 +454,28 @@ export namespace Fader {
           commitValue(valueRef.current - step);
           return true;
         },
-        onHome: () => {
-          commitValue(min);
+        onArrowRight: () => {
+          commitValue(valueRef.current + step);
+          return true;
+        },
+        onArrowUp: () => {
+          commitValue(valueRef.current + step);
           return true;
         },
         onEnd: () => {
           commitValue(max);
           return true;
         },
-        onPageUp: () => {
-          commitValue(valueRef.current + step * 10);
+        onHome: () => {
+          commitValue(min);
           return true;
         },
         onPageDown: () => {
           commitValue(valueRef.current - step * 10);
+          return true;
+        },
+        onPageUp: () => {
+          commitValue(valueRef.current + step * 10);
           return true;
         },
       },
@@ -561,9 +561,9 @@ export namespace Fader {
         aria-valuenow={value}
         className={className}
         {...getDataAttributes("fader", {
-          part: "thumb",
           disabled,
           orientation,
+          part: "thumb",
         })}
         ref={thumbRef}
         role="slider"
@@ -597,7 +597,7 @@ export namespace Fader {
     return (
       <div
         className={className}
-        {...getDataAttributes("fader", { part: "thumb-inner", orientation })}
+        {...getDataAttributes("fader", { orientation, part: "thumb-inner" })}
         {...props}
       />
     );
@@ -611,7 +611,7 @@ export namespace Fader {
     return (
       <div
         className={className}
-        {...getDataAttributes("fader", { part: "thumb-mark", orientation })}
+        {...getDataAttributes("fader", { orientation, part: "thumb-mark" })}
         {...props}
       />
     );

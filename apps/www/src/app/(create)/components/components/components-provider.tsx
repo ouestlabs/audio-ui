@@ -22,10 +22,10 @@ const DEFAULT_SIDEBAR_MENU_VIEW: "menu" | "inline" = "menu";
 const DEFAULT_CUSTOMIZER_OPEN = true;
 
 interface ComponentsProviderProps {
+  catalogItems: ComponentCatalogItem[];
+  categoryCounts: Record<string, number>;
   children: React.ReactNode;
   totalCount: number;
-  categoryCounts: Record<string, number>;
-  catalogItems: ComponentCatalogItem[];
 }
 
 export function ComponentsProvider({
@@ -99,13 +99,13 @@ export function ComponentsProvider({
   // Memoize context values to prevent unnecessary re-renders
   const componentsValue = useMemo<ComponentsContextValue>(
     () => ({
-      totalCount,
-      categoryCounts,
       catalogItems,
-      sidebarCategoryFilter,
+      categoryCounts,
       setSidebarCategoryFilter,
-      sidebarMenuView,
       setSidebarMenuView,
+      sidebarCategoryFilter,
+      sidebarMenuView,
+      totalCount,
     }),
     [
       totalCount,
@@ -120,8 +120,8 @@ export function ComponentsProvider({
   const customizerValue = useMemo<CustomizerContextValue>(
     () => ({
       customizerOpen,
-      toggleCustomizer,
       setCustomizerOpen: handleSetCustomizerOpen,
+      toggleCustomizer,
     }),
     [customizerOpen, toggleCustomizer, handleSetCustomizerOpen]
   );

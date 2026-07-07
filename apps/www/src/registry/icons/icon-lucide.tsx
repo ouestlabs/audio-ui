@@ -1,3 +1,3 @@
-import { createIconLoader } from "./create-icon-loader"
+import { createIconLoader } from "./create-icon-loader";
 
-export const IconLucide = createIconLoader("lucide")
+export const IconLucide = createIconLoader("lucide");

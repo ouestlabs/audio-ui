@@ -5,8 +5,8 @@ import * as React from "react";
 import { ComponentSidebarCategoryMenu } from "./component-sidebar-category-menu";
 
 interface ComponentSidebarContentProps {
-  onSelect?: () => void;
   filter?: string;
+  onSelect?: () => void;
   view?: "list" | "compact";
 }
 

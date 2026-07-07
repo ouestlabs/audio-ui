@@ -74,7 +74,7 @@ function parseIconAttributes(
     attrMatch = attrRegex.exec(attrs);
   }
 
-  return { iconName, replacedIcons, attributes };
+  return { attributes, iconName, replacedIcons };
 }
 
 // Build the icon usage snippet from the library template and extra attributes.
@@ -166,7 +166,7 @@ function insertIconImport(code: string, importStatement: string): string {
   }
 
   if (useClientIndex !== -1 || useClientSingleIndex !== -1) {
-    const index = useClientIndex !== -1 ? useClientIndex : useClientSingleIndex;
+    const index = useClientIndex === -1 ? useClientSingleIndex : useClientIndex;
     const endOfUseClient = code.indexOf("\n", index) + 1;
     return (
       code.slice(0, endOfUseClient) +

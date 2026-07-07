@@ -4,21 +4,21 @@ import { META_THEME_COLORS, siteConfig } from "@/lib/config";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: siteConfig.name,
-    short_name: siteConfig.name,
-    description: siteConfig.description,
-    start_url: "/",
-    scope: "/",
-    display: "standalone",
     background_color: META_THEME_COLORS.light,
-    theme_color: META_THEME_COLORS.dark,
+    description: siteConfig.description,
+    display: "standalone",
     icons: [
       {
-        src: "/icon",
-        sizes: "32x32",
-        type: "image/png",
         purpose: "any",
+        sizes: "32x32",
+        src: "/icon",
+        type: "image/png",
       },
     ],
+    name: siteConfig.name,
+    scope: "/",
+    short_name: siteConfig.name,
+    start_url: "/",
+    theme_color: META_THEME_COLORS.dark,
   };
 }

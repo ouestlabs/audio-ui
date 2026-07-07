@@ -50,9 +50,9 @@ export async function generateMetadata({
 
   if (!category) {
     return {
-      title: "Components",
       description:
         "Browse composed shadcn/ui examples by category and tags to find the right component for your project.",
+      title: "Components",
     };
   }
 
@@ -61,8 +61,8 @@ export async function generateMetadata({
 
   if (!categoryInfo) {
     return {
-      title: "Components",
       description: "Category not found",
+      title: "Components",
     };
   }
 
@@ -70,10 +70,7 @@ export async function generateMetadata({
   const seo = getComponentCategorySeo(normalized);
 
   return buildPageMetadata({
-    title: seo.title,
-    titleSuffix: siteConfig.metadata.titleSuffixes.componentCategory,
     description: seo.description,
-    path: `/components/${normalized}`,
     keywords: [
       seo.title,
       `shadcn ${categoryLabel.toLowerCase()}`,
@@ -82,6 +79,9 @@ export async function generateMetadata({
       "open source shadcn components",
       ...seo.keywords,
     ],
+    path: `/components/${normalized}`,
+    title: seo.title,
+    titleSuffix: siteConfig.metadata.titleSuffixes.componentCategory,
   });
 }
 
@@ -106,11 +106,11 @@ export default async function CategoryComponentsPage({
         "@type": "FAQPage",
         mainEntity: seo.content.faqs.map((faq) => ({
           "@type": "Question",
-          name: faq.question,
           acceptedAnswer: {
             "@type": "Answer",
             text: faq.answer,
           },
+          name: faq.question,
         })),
       }
     : null;

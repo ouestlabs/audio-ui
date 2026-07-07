@@ -52,16 +52,16 @@ export function useKeyboardNavigation({
         string,
         KeyboardNavigationHandler | undefined
       > = {
-        ArrowUp: h.onArrowUp,
         ArrowDown: h.onArrowDown,
         ArrowLeft: h.onArrowLeft,
         ArrowRight: h.onArrowRight,
-        Home: h.onHome,
+        ArrowUp: h.onArrowUp,
         End: h.onEnd,
-        PageUp: h.onPageUp,
-        PageDown: h.onPageDown,
         Enter: h.onEnter,
         Escape: h.onEscape,
+        Home: h.onHome,
+        PageDown: h.onPageDown,
+        PageUp: h.onPageUp,
       };
 
       const handler = keyHandlerMap[e.key];

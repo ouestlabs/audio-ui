@@ -18,38 +18,38 @@ import { getDataAttributes } from "./internal/data-attributes";
 
 export namespace XYPad {
   interface ContextValue {
-    value: Point;
-    minX: number;
-    maxX: number;
-    minY: number;
-    maxY: number;
-    stepX: number;
-    stepY: number;
-    disabled: boolean;
-    percentageX: number;
-    percentageY: number;
-    thumbX: number;
-    thumbY: number;
-    elementId: string;
-    containerRef: React.RefObject<Nullable<HTMLDivElement>>;
-    updateValue: Procedure<Point>;
-    commitValue: Procedure<Point>;
-    calculateValueFromPoint: Func<Point, Point>;
-    calculateValueFromDelta: (delta: Point, initialValue: Point) => Point;
-    dragStartValueRef: React.RefObject<Point>;
-    isDragActiveRef: React.RefObject<boolean>;
-    pendingValueRef: React.RefObject<Point>;
-    shouldPreventFocusRef: React.RefObject<boolean>;
-    valueRef: React.RefObject<Point>;
-    setRawValue: Procedure<Point>;
-    onValueCommit?: Procedure<Point>;
     ariaLabel?: string;
     ariaLabelledBy?: string;
-    wheelRef: Procedure<Nullable<HTMLDivElement>>;
-    onPointerDown: Procedure<React.PointerEvent>;
-    onDragStart: Procedure<React.PointerEvent>;
+    calculateValueFromDelta: (delta: Point, initialValue: Point) => Point;
+    calculateValueFromPoint: Func<Point, Point>;
+    commitValue: Procedure<Point>;
+    containerRef: React.RefObject<Nullable<HTMLDivElement>>;
+    disabled: boolean;
+    dragStartValueRef: React.RefObject<Point>;
+    elementId: string;
+    isDragActiveRef: React.RefObject<boolean>;
+    maxX: number;
+    maxY: number;
+    minX: number;
+    minY: number;
     onDrag: Procedure<Point>;
     onDragEnd: () => void;
+    onDragStart: Procedure<React.PointerEvent>;
+    onPointerDown: Procedure<React.PointerEvent>;
+    onValueCommit?: Procedure<Point>;
+    pendingValueRef: React.RefObject<Point>;
+    percentageX: number;
+    percentageY: number;
+    setRawValue: Procedure<Point>;
+    shouldPreventFocusRef: React.RefObject<boolean>;
+    stepX: number;
+    stepY: number;
+    thumbX: number;
+    thumbY: number;
+    updateValue: Procedure<Point>;
+    value: Point;
+    valueRef: React.RefObject<Point>;
+    wheelRef: Procedure<Nullable<HTMLDivElement>>;
   }
 
   const Context = React.createContext<ContextValue | null>(null);
@@ -66,19 +66,19 @@ export namespace XYPad {
       React.ComponentProps<"div">,
       "onChange" | "onInput" | "type" | "value" | "defaultValue"
     > {
-    value?: Point;
-    defaultValue?: Point;
-    minX?: number;
-    maxX?: number;
-    minY?: number;
-    maxY?: number;
-    stepX?: number;
-    stepY?: number;
-    disabled?: boolean;
     "aria-label"?: string;
     "aria-labelledby"?: string;
+    defaultValue?: Point;
+    disabled?: boolean;
+    maxX?: number;
+    maxY?: number;
+    minX?: number;
+    minY?: number;
     onValueChange?: Procedure<Point>;
     onValueCommit?: Procedure<Point>;
+    stepX?: number;
+    stepY?: number;
+    value?: Point;
   }
 
   export function Root({
@@ -110,7 +110,6 @@ export namespace XYPad {
 
     const { value: rawValue, setValue: setRawValue } =
       useControlledValue<Point>({
-        value: controlledValue,
         defaultValue: computedDefaultValue,
         onChange: onValueChange,
         transform: (val: Point) => {
@@ -126,6 +125,7 @@ export namespace XYPad {
               : clamp(numY, minY, maxY);
           return { x: clampedX, y: clampedY };
         },
+        value: controlledValue,
       });
 
     const value = rawValue ?? { x: minX, y: minY };
@@ -281,38 +281,38 @@ export namespace XYPad {
     const elementId = id || xypadId;
 
     const contextValue: ContextValue = {
-      value,
-      minX,
-      maxX,
-      minY,
-      maxY,
-      stepX,
-      stepY,
-      disabled,
-      percentageX,
-      percentageY,
-      thumbX,
-      thumbY,
-      elementId,
-      containerRef,
-      updateValue,
-      commitValue,
-      calculateValueFromPoint,
-      calculateValueFromDelta,
-      dragStartValueRef,
-      isDragActiveRef,
-      pendingValueRef,
-      shouldPreventFocusRef,
-      valueRef,
-      setRawValue,
-      onValueCommit,
       ariaLabel,
       ariaLabelledBy,
-      wheelRef,
-      onPointerDown,
-      onDragStart,
+      calculateValueFromDelta,
+      calculateValueFromPoint,
+      commitValue,
+      containerRef,
+      disabled,
+      dragStartValueRef,
+      elementId,
+      isDragActiveRef,
+      maxX,
+      maxY,
+      minX,
+      minY,
       onDrag,
       onDragEnd,
+      onDragStart,
+      onPointerDown,
+      onValueCommit,
+      pendingValueRef,
+      percentageX,
+      percentageY,
+      setRawValue,
+      shouldPreventFocusRef,
+      stepX,
+      stepY,
+      thumbX,
+      thumbY,
+      updateValue,
+      value,
+      valueRef,
+      wheelRef,
     };
 
     return (
@@ -361,14 +361,14 @@ export namespace XYPad {
     } = context;
 
     const { pointerProps } = usePointerDrag({
+      capturePointer: true,
       disabled,
       elementRef: containerRef,
-      capturePointer: true,
-      releaseOnOutsideClick: true,
-      onPointerDown,
-      onDragStart,
       onDrag,
       onDragEnd,
+      onDragStart,
+      onPointerDown,
+      releaseOnOutsideClick: true,
     });
 
     const { focusProps } = useFocus({
@@ -383,6 +383,13 @@ export namespace XYPad {
     const { keyboardProps } = useKeyboardNavigation({
       disabled,
       handlers: {
+        onArrowDown: () => {
+          commitValue({
+            x: valueRef.current.x,
+            y: valueRef.current.y - stepY,
+          });
+          return true;
+        },
         onArrowLeft: () => {
           commitValue({
             x: valueRef.current.x - stepX,
@@ -404,32 +411,25 @@ export namespace XYPad {
           });
           return true;
         },
-        onArrowDown: () => {
-          commitValue({
-            x: valueRef.current.x,
-            y: valueRef.current.y - stepY,
-          });
+        onEnd: () => {
+          commitValue({ x: maxX, y: minY });
           return true;
         },
         onHome: () => {
           commitValue({ x: minX, y: maxY });
           return true;
         },
-        onEnd: () => {
-          commitValue({ x: maxX, y: minY });
+        onPageDown: () => {
+          commitValue({
+            x: valueRef.current.x,
+            y: valueRef.current.y - stepY * 10,
+          });
           return true;
         },
         onPageUp: () => {
           commitValue({
             x: valueRef.current.x,
             y: valueRef.current.y + stepY * 10,
-          });
-          return true;
-        },
-        onPageDown: () => {
-          commitValue({
-            x: valueRef.current.x,
-            y: valueRef.current.y - stepY * 10,
           });
           return true;
         },
@@ -495,9 +495,9 @@ export namespace XYPad {
         aria-hidden="true"
         className={className}
         {...getDataAttributes("xypad", {
-          part: "grid-line",
           "grid-horizontal-line": orientation === "horizontal",
           "grid-vertical-line": orientation === "vertical",
+          part: "grid-line",
         })}
         style={
           orientation === "vertical"
@@ -524,9 +524,9 @@ export namespace XYPad {
         aria-hidden="true"
         className={className}
         {...getDataAttributes("xypad", {
-          part: "crosshair",
           "crosshair-horizontal": orientation === "horizontal",
           "crosshair-vertical": orientation === "vertical",
+          part: "crosshair",
         })}
         style={
           orientation === "vertical"
@@ -649,15 +649,15 @@ export namespace XYPad {
         id={`${elementId}-label`}
         role="status"
         style={{
-          position: "absolute",
-          width: 1,
+          border: 0,
+          clip: "rect(0, 0, 0, 0)",
           height: 1,
-          padding: 0,
           margin: -1,
           overflow: "hidden",
-          clip: "rect(0, 0, 0, 0)",
+          padding: 0,
+          position: "absolute",
           whiteSpace: "nowrap",
-          border: 0,
+          width: 1,
         }}
         {...props}
       >

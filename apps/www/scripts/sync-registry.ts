@@ -95,10 +95,10 @@ const SYNC_ITEMS = [
 
 interface Stats {
   added: number;
-  updated: number;
-  unchanged: number;
   deleted: number;
   skipped: number;
+  unchanged: number;
+  updated: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -274,10 +274,10 @@ async function sync() {
 
     const totals: Stats = {
       added: 0,
-      updated: 0,
-      unchanged: 0,
       deleted: 0,
       skipped: 0,
+      unchanged: 0,
+      updated: 0,
     };
 
     for (const item of SYNC_ITEMS) {
@@ -342,7 +342,7 @@ async function sync() {
     }
     console.log("──────────────────────────────────────────────\n");
   } finally {
-    fs.rmSync(cloneDir, { recursive: true, force: true });
+    fs.rmSync(cloneDir, { force: true, recursive: true });
   }
 }
 

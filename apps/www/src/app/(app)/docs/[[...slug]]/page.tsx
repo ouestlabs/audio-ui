@@ -73,19 +73,19 @@ export async function generateMetadata(props: {
   const canonicalPath = componentSeo?.canonicalPath ?? page.url;
 
   return buildPageMetadata({
-    title: metadataTitle,
-    titleSuffix: siteConfig.metadata.titleSuffixes.site,
     description: metadataDescription,
-    path: canonicalPath,
-    type: "article",
     image: getPageImage(page).url,
+    path: canonicalPath,
     robots:
       componentSeo && !componentSeo.shouldIndex
         ? {
-            index: false,
             follow: true,
+            index: false,
           }
         : undefined,
+    title: metadataTitle,
+    titleSuffix: siteConfig.metadata.titleSuffixes.site,
+    type: "article",
   });
 }
 
@@ -107,15 +107,15 @@ export default async function Page(props: {
   const { attributes } = fm(raw);
   const { links, base, component, audioProvider } = z
     .object({
-      links: z
-        .object({
-          doc: z.string().optional(),
-          api: z.string().optional(),
-        })
-        .optional(),
+      audioProvider: z.boolean().optional(),
       base: z.enum(["base", "radix"]).optional(),
       component: z.boolean().optional(),
-      audioProvider: z.boolean().optional(),
+      links: z
+        .object({
+          api: z.string().optional(),
+          doc: z.string().optional(),
+        })
+        .optional(),
     })
     .parse(attributes);
 

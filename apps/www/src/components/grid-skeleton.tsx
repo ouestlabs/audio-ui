@@ -4,8 +4,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
 interface GridSkeletonProps {
-  count?: number;
   className?: string;
+  count?: number;
   showHeader?: boolean;
 }
 

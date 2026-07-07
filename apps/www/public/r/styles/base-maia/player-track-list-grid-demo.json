@@ -1,1 +1,15 @@
-{"$schema":"https://ui.shadcn.com/schema/registry-item.json","name":"player-track-list-grid-demo","type":"registry:example","description":"Track list with grid layout example","registryDependencies":["@audio/player"],"files":[{"path":"player-track-list-grid-demo.tsx","type":"registry:example","content":"\"use client\";\nimport { toast } from \"sonner\";\nimport { AudioTrackList } from \"@/components/audio/player\";\nimport { useAudioStore } from \"@/lib/audio-store\";\n\nexport function AudioTrackListGridDemo() {\n  const queue = useAudioStore((state) => state.queue);\n\n  return (\n    <AudioTrackList\n      className=\"w-full\"\n      onTrackSelect={(index) => {\n        const track = queue[index];\n        toast.info(`Playing: ${track?.title}`);\n      }}\n      variant=\"grid\"\n    />\n  );\n}","target":"components/examples/player-track-list-grid-demo.tsx"}]}
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "player-track-list-grid-demo",
+  "type": "registry:example",
+  "description": "Track list with grid layout example",
+  "registryDependencies": ["@audio/player"],
+  "files": [
+    {
+      "path": "player-track-list-grid-demo.tsx",
+      "type": "registry:example",
+      "content": "\"use client\";\nimport { toast } from \"sonner\";\nimport { AudioTrackList } from \"@/components/audio/player\";\nimport { useAudioStore } from \"@/lib/audio-store\";\n\nexport function AudioTrackListGridDemo() {\n  const queue = useAudioStore((state) => state.queue);\n\n  return (\n    <AudioTrackList\n      className=\"w-full\"\n      onTrackSelect={(index) => {\n        const track = queue[index];\n        toast.info(`Playing: ${track?.title}`);\n      }}\n      variant=\"grid\"\n    />\n  );\n}",
+      "target": "components/examples/player-track-list-grid-demo.tsx"
+    }
+  ]
+}

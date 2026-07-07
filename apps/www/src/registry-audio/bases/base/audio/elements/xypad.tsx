@@ -6,16 +6,16 @@ import type * as React from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 
 const xypadVariants = cva("", {
-  variants: {
-    size: {
-      sm: "cn-xypad-size-sm",
-      default: "cn-xypad-size-default",
-      lg: "cn-xypad-size-lg",
-      xl: "cn-xypad-size-xl",
-    },
-  },
   defaultVariants: {
     size: "default",
+  },
+  variants: {
+    size: {
+      default: "cn-xypad-size-default",
+      lg: "cn-xypad-size-lg",
+      sm: "cn-xypad-size-sm",
+      xl: "cn-xypad-size-xl",
+    },
   },
 });
 

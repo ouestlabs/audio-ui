@@ -24,14 +24,11 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 const appUrl = getSiteUrl();
 export const metadata: Metadata = {
-  title: {
-    default: siteConfig.name,
-    template: siteConfig.metadata.titleTemplate,
-  },
-  metadataBase: new URL(appUrl),
   alternates: {
     canonical: "/",
   },
+  authors: getSiteAuthors(),
+  creator: siteConfig.name,
   description: siteConfig.description,
   keywords: [
     "audio ui components",
@@ -53,13 +50,16 @@ export const metadata: Metadata = {
     "component library",
     "design system",
   ],
-  authors: getSiteAuthors(),
-  creator: siteConfig.name,
+  metadataBase: new URL(appUrl),
   publisher: siteConfig.name,
+  title: {
+    default: siteConfig.name,
+    template: siteConfig.metadata.titleTemplate,
+  },
   ...buildPageSocialMetadata({
-    title: siteConfig.name,
     description: siteConfig.description,
     path: "/",
+    title: siteConfig.name,
   }),
   manifest: "/manifest.webmanifest",
 };

@@ -1,8 +1,8 @@
 import { cn } from "@/lib/utils";
 
 interface ComponentEmptyStateProps {
-  message: string;
   className?: string;
+  message: string;
 }
 
 export function ComponentEmptyState({

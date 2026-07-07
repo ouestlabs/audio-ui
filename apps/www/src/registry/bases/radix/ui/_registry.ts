@@ -1,9 +1,7 @@
-import { type Registry } from "shadcn/schema"
+import type { Registry } from "shadcn/schema";
 
 export const ui: Registry["items"] = [
   {
-    name: "accordion",
-    type: "registry:ui",
     files: [
       {
         path: "ui/accordion.tsx",
@@ -12,16 +10,16 @@ export const ui: Registry["items"] = [
     ],
     meta: {
       links: {
+        api: "https://www.radix-ui.com/primitives/docs/components/accordion.md",
         docs: "https://ui.shadcn.com/docs/components/radix/accordion",
         examples:
           "https://ui.shadcn.com/code/apps/v4/registry/bases/radix/examples/accordion-example.tsx",
-        api: "https://www.radix-ui.com/primitives/docs/components/accordion.md",
       },
     },
+    name: "accordion",
+    type: "registry:ui",
   },
   {
-    name: "alert",
-    type: "registry:ui",
     files: [
       {
         path: "ui/alert.tsx",
@@ -35,11 +33,10 @@ export const ui: Registry["items"] = [
           "https://ui.shadcn.com/code/apps/v4/registry/bases/radix/examples/alert-example.tsx",
       },
     },
+    name: "alert",
+    type: "registry:ui",
   },
   {
-    name: "alert-dialog",
-    type: "registry:ui",
-    registryDependencies: ["button"],
     files: [
       {
         path: "ui/alert-dialog.tsx",
@@ -48,16 +45,17 @@ export const ui: Registry["items"] = [
     ],
     meta: {
       links: {
+        api: "https://www.radix-ui.com/primitives/docs/components/alert-dialog.md",
         docs: "https://ui.shadcn.com/docs/components/radix/alert-dialog",
         examples:
           "https://ui.shadcn.com/code/apps/v4/registry/bases/radix/examples/alert-dialog-example.tsx",
-        api: "https://www.radix-ui.com/primitives/docs/components/alert-dialog.md",
       },
     },
+    name: "alert-dialog",
+    registryDependencies: ["button"],
+    type: "registry:ui",
   },
   {
-    name: "aspect-ratio",
-    type: "registry:ui",
     files: [
       {
         path: "ui/aspect-ratio.tsx",
@@ -66,16 +64,16 @@ export const ui: Registry["items"] = [
     ],
     meta: {
       links: {
+        api: "https://www.radix-ui.com/primitives/docs/components/aspect-ratio.md",
         docs: "https://ui.shadcn.com/docs/components/radix/aspect-ratio",
         examples:
           "https://ui.shadcn.com/code/apps/v4/registry/bases/radix/examples/aspect-ratio-example.tsx",
-        api: "https://www.radix-ui.com/primitives/docs/components/aspect-ratio.md",
       },
     },
+    name: "aspect-ratio",
+    type: "registry:ui",
   },
   {
-    name: "avatar",
-    type: "registry:ui",
     files: [
       {
         path: "ui/avatar.tsx",
@@ -84,16 +82,16 @@ export const ui: Registry["items"] = [
     ],
     meta: {
       links: {
+        api: "https://www.radix-ui.com/primitives/docs/components/avatar.md",
         docs: "https://ui.shadcn.com/docs/components/radix/avatar",
         examples:
           "https://ui.shadcn.com/code/apps/v4/registry/bases/radix/examples/avatar-example.tsx",
-        api: "https://www.radix-ui.com/primitives/docs/components/avatar.md",
       },
     },
+    name: "avatar",
+    type: "registry:ui",
   },
   {
-    name: "badge",
-    type: "registry:ui",
     files: [
       {
         path: "ui/badge.tsx",
@@ -107,10 +105,10 @@ export const ui: Registry["items"] = [
           "https://ui.shadcn.com/code/apps/v4/registry/bases/radix/examples/badge-example.tsx",
       },
     },
+    name: "badge",
+    type: "registry:ui",
   },
   {
-    name: "breadcrumb",
-    type: "registry:ui",
     files: [
       {
         path: "ui/breadcrumb.tsx",
@@ -124,10 +122,10 @@ export const ui: Registry["items"] = [
           "https://ui.shadcn.com/code/apps/v4/registry/bases/radix/examples/breadcrumb-example.tsx",
       },
     },
+    name: "breadcrumb",
+    type: "registry:ui",
   },
   {
-    name: "button",
-    type: "registry:ui",
     files: [
       {
         path: "ui/button.tsx",
@@ -141,11 +139,10 @@ export const ui: Registry["items"] = [
           "https://ui.shadcn.com/code/apps/v4/registry/bases/radix/examples/button-example.tsx",
       },
     },
+    name: "button",
+    type: "registry:ui",
   },
   {
-    name: "button-group",
-    type: "registry:ui",
-    registryDependencies: ["separator"],
     files: [
       {
         path: "ui/button-group.tsx",
@@ -159,12 +156,12 @@ export const ui: Registry["items"] = [
           "https://ui.shadcn.com/code/apps/v4/registry/bases/radix/examples/button-group-example.tsx",
       },
     },
+    name: "button-group",
+    registryDependencies: ["separator"],
+    type: "registry:ui",
   },
   {
-    name: "calendar",
-    type: "registry:ui",
     dependencies: ["react-day-picker@latest", "date-fns"],
-    registryDependencies: ["button"],
     files: [
       {
         path: "ui/calendar.tsx",
@@ -173,16 +170,17 @@ export const ui: Registry["items"] = [
     ],
     meta: {
       links: {
+        api: "https://react-day-picker.js.org",
         docs: "https://ui.shadcn.com/docs/components/radix/calendar",
         examples:
           "https://ui.shadcn.com/code/apps/v4/registry/bases/radix/examples/calendar-example.tsx",
-        api: "https://react-day-picker.js.org",
       },
     },
+    name: "calendar",
+    registryDependencies: ["button"],
+    type: "registry:ui",
   },
   {
-    name: "card",
-    type: "registry:ui",
     files: [
       {
         path: "ui/card.tsx",
@@ -196,37 +194,37 @@ export const ui: Registry["items"] = [
           "https://ui.shadcn.com/code/apps/v4/registry/bases/radix/examples/card-example.tsx",
       },
     },
+    name: "card",
+    type: "registry:ui",
   },
   {
-    name: "carousel",
-    type: "registry:ui",
+    dependencies: ["embla-carousel-react"],
     files: [
       {
         path: "ui/carousel.tsx",
         type: "registry:ui",
       },
     ],
-    registryDependencies: ["button"],
-    dependencies: ["embla-carousel-react"],
     meta: {
       links: {
+        api: "https://www.embla-carousel.com/get-started/react",
         docs: "https://ui.shadcn.com/docs/components/radix/carousel",
         examples:
           "https://ui.shadcn.com/code/apps/v4/registry/bases/radix/examples/carousel-example.tsx",
-        api: "https://www.embla-carousel.com/get-started/react",
       },
     },
+    name: "carousel",
+    registryDependencies: ["button"],
+    type: "registry:ui",
   },
   {
-    name: "chart",
-    type: "registry:ui",
+    dependencies: ["recharts@3.8.0"],
     files: [
       {
         path: "ui/chart.tsx",
         type: "registry:ui",
       },
     ],
-    dependencies: ["recharts@3.8.0"],
     meta: {
       links: {
         docs: "https://ui.shadcn.com/docs/components/radix/chart",
@@ -234,10 +232,10 @@ export const ui: Registry["items"] = [
           "https://ui.shadcn.com/code/apps/v4/registry/bases/radix/examples/chart-example.tsx",
       },
     },
+    name: "chart",
+    type: "registry:ui",
   },
   {
-    name: "checkbox",
-    type: "registry:ui",
     files: [
       {
         path: "ui/checkbox.tsx",
@@ -246,16 +244,16 @@ export const ui: Registry["items"] = [
     ],
     meta: {
       links: {
+        api: "https://www.radix-ui.com/docs/primitives/components/checkbox.md",
         docs: "https://ui.shadcn.com/docs/components/radix/checkbox",
         examples:
           "https://ui.shadcn.com/code/apps/v4/registry/bases/radix/examples/checkbox-example.tsx",
-        api: "https://www.radix-ui.com/docs/primitives/components/checkbox.md",
       },
     },
+    name: "checkbox",
+    type: "registry:ui",
   },
   {
-    name: "collapsible",
-    type: "registry:ui",
     files: [
       {
         path: "ui/collapsible.tsx",
@@ -264,17 +262,16 @@ export const ui: Registry["items"] = [
     ],
     meta: {
       links: {
+        api: "https://www.radix-ui.com/docs/primitives/components/collapsible.md",
         docs: "https://ui.shadcn.com/docs/components/radix/collapsible",
         examples:
           "https://ui.shadcn.com/code/apps/v4/registry/bases/radix/examples/collapsible-example.tsx",
-        api: "https://www.radix-ui.com/docs/primitives/components/collapsible.md",
       },
     },
+    name: "collapsible",
+    type: "registry:ui",
   },
   {
-    name: "combobox",
-    type: "registry:ui",
-    registryDependencies: ["button", "input-group"],
     dependencies: ["@base-ui/react"],
     files: [
       {
@@ -284,18 +281,18 @@ export const ui: Registry["items"] = [
     ],
     meta: {
       links: {
+        api: "https://base-ui.com/react/components/combobox",
         docs: "https://ui.shadcn.com/docs/components/radix/combobox",
         examples:
           "https://ui.shadcn.com/code/apps/v4/registry/bases/radix/examples/combobox-example.tsx",
-        api: "https://base-ui.com/react/components/combobox",
       },
     },
+    name: "combobox",
+    registryDependencies: ["button", "input-group"],
+    type: "registry:ui",
   },
   {
-    name: "command",
-    type: "registry:ui",
     dependencies: ["cmdk"],
-    registryDependencies: ["dialog", "input-group"],
     files: [
       {
         path: "ui/command.tsx",
@@ -304,16 +301,17 @@ export const ui: Registry["items"] = [
     ],
     meta: {
       links: {
+        api: "https://github.com/dip/cmdk",
         docs: "https://ui.shadcn.com/docs/components/radix/command",
         examples:
           "https://ui.shadcn.com/code/apps/v4/registry/bases/radix/examples/command-example.tsx",
-        api: "https://github.com/dip/cmdk",
       },
     },
+    name: "command",
+    registryDependencies: ["dialog", "input-group"],
+    type: "registry:ui",
   },
   {
-    name: "context-menu",
-    type: "registry:ui",
     files: [
       {
         path: "ui/context-menu.tsx",
@@ -322,17 +320,16 @@ export const ui: Registry["items"] = [
     ],
     meta: {
       links: {
+        api: "https://www.radix-ui.com/docs/primitives/components/context-menu.md",
         docs: "https://ui.shadcn.com/docs/components/radix/context-menu",
         examples:
           "https://ui.shadcn.com/code/apps/v4/registry/bases/radix/examples/context-menu-example.tsx",
-        api: "https://www.radix-ui.com/docs/primitives/components/context-menu.md",
       },
     },
+    name: "context-menu",
+    type: "registry:ui",
   },
   {
-    name: "dialog",
-    type: "registry:ui",
-    registryDependencies: ["button"],
     files: [
       {
         path: "ui/dialog.tsx",
@@ -341,16 +338,17 @@ export const ui: Registry["items"] = [
     ],
     meta: {
       links: {
+        api: "https://www.radix-ui.com/docs/primitives/components/dialog.md",
         docs: "https://ui.shadcn.com/docs/components/radix/dialog",
         examples:
           "https://ui.shadcn.com/code/apps/v4/registry/bases/radix/examples/dialog-example.tsx",
-        api: "https://www.radix-ui.com/docs/primitives/components/dialog.md",
       },
     },
+    name: "dialog",
+    registryDependencies: ["button"],
+    type: "registry:ui",
   },
   {
-    name: "drawer",
-    type: "registry:ui",
     dependencies: ["vaul"],
     files: [
       {
@@ -360,16 +358,16 @@ export const ui: Registry["items"] = [
     ],
     meta: {
       links: {
+        api: "https://vaul.emilkowal.ski/getting-started",
         docs: "https://ui.shadcn.com/docs/components/radix/drawer",
         examples:
           "https://ui.shadcn.com/code/apps/v4/registry/bases/radix/examples/drawer-example.tsx",
-        api: "https://vaul.emilkowal.ski/getting-started",
       },
     },
+    name: "drawer",
+    type: "registry:ui",
   },
   {
-    name: "dropdown-menu",
-    type: "registry:ui",
     files: [
       {
         path: "ui/dropdown-menu.tsx",
@@ -378,16 +376,16 @@ export const ui: Registry["items"] = [
     ],
     meta: {
       links: {
+        api: "https://www.radix-ui.com/docs/primitives/components/dropdown-menu.md",
         docs: "https://ui.shadcn.com/docs/components/radix/dropdown-menu",
         examples:
           "https://ui.shadcn.com/code/apps/v4/registry/bases/radix/examples/dropdown-menu-example.tsx",
-        api: "https://www.radix-ui.com/docs/primitives/components/dropdown-menu.md",
       },
     },
+    name: "dropdown-menu",
+    type: "registry:ui",
   },
   {
-    name: "empty",
-    type: "registry:ui",
     files: [
       {
         path: "ui/empty.tsx",
@@ -401,11 +399,10 @@ export const ui: Registry["items"] = [
           "https://ui.shadcn.com/code/apps/v4/registry/bases/radix/examples/empty-example.tsx",
       },
     },
+    name: "empty",
+    type: "registry:ui",
   },
   {
-    name: "field",
-    type: "registry:ui",
-    registryDependencies: ["label", "separator"],
     files: [
       {
         path: "ui/field.tsx",
@@ -419,14 +416,15 @@ export const ui: Registry["items"] = [
           "https://ui.shadcn.com/code/apps/v4/registry/bases/radix/examples/field-example.tsx",
       },
     },
+    name: "field",
+    registryDependencies: ["label", "separator"],
+    type: "registry:ui",
   },
   {
     name: "form",
     type: "registry:ui",
   },
   {
-    name: "hover-card",
-    type: "registry:ui",
     files: [
       {
         path: "ui/hover-card.tsx",
@@ -435,16 +433,16 @@ export const ui: Registry["items"] = [
     ],
     meta: {
       links: {
+        api: "https://www.radix-ui.com/docs/primitives/components/hover-card.md",
         docs: "https://ui.shadcn.com/docs/components/radix/hover-card",
         examples:
           "https://ui.shadcn.com/code/apps/v4/registry/bases/radix/examples/hover-card-example.tsx",
-        api: "https://www.radix-ui.com/docs/primitives/components/hover-card.md",
       },
     },
+    name: "hover-card",
+    type: "registry:ui",
   },
   {
-    name: "input",
-    type: "registry:ui",
     files: [
       {
         path: "ui/input.tsx",
@@ -458,11 +456,10 @@ export const ui: Registry["items"] = [
           "https://ui.shadcn.com/code/apps/v4/registry/bases/radix/examples/input-example.tsx",
       },
     },
+    name: "input",
+    type: "registry:ui",
   },
   {
-    name: "input-group",
-    type: "registry:ui",
-    registryDependencies: ["button", "input", "textarea"],
     files: [
       {
         path: "ui/input-group.tsx",
@@ -476,10 +473,11 @@ export const ui: Registry["items"] = [
           "https://ui.shadcn.com/code/apps/v4/registry/bases/radix/examples/input-group-example.tsx",
       },
     },
+    name: "input-group",
+    registryDependencies: ["button", "input", "textarea"],
+    type: "registry:ui",
   },
   {
-    name: "input-otp",
-    type: "registry:ui",
     dependencies: ["input-otp"],
     files: [
       {
@@ -489,17 +487,16 @@ export const ui: Registry["items"] = [
     ],
     meta: {
       links: {
+        api: "https://input-otp.rodz.dev",
         docs: "https://ui.shadcn.com/docs/components/radix/input-otp",
         examples:
           "https://ui.shadcn.com/code/apps/v4/registry/bases/radix/examples/input-otp-example.tsx",
-        api: "https://input-otp.rodz.dev",
       },
     },
+    name: "input-otp",
+    type: "registry:ui",
   },
   {
-    name: "item",
-    type: "registry:ui",
-    registryDependencies: ["separator"],
     files: [
       {
         path: "ui/item.tsx",
@@ -513,10 +510,11 @@ export const ui: Registry["items"] = [
           "https://ui.shadcn.com/code/apps/v4/registry/bases/radix/examples/item-example.tsx",
       },
     },
+    name: "item",
+    registryDependencies: ["separator"],
+    type: "registry:ui",
   },
   {
-    name: "label",
-    type: "registry:ui",
     files: [
       {
         path: "ui/label.tsx",
@@ -525,16 +523,16 @@ export const ui: Registry["items"] = [
     ],
     meta: {
       links: {
+        api: "https://www.radix-ui.com/docs/primitives/components/label.md",
         docs: "https://ui.shadcn.com/docs/components/radix/label",
         examples:
           "https://ui.shadcn.com/code/apps/v4/registry/bases/radix/examples/label-example.tsx",
-        api: "https://www.radix-ui.com/docs/primitives/components/label.md",
       },
     },
+    name: "label",
+    type: "registry:ui",
   },
   {
-    name: "menubar",
-    type: "registry:ui",
     files: [
       {
         path: "ui/menubar.tsx",
@@ -543,16 +541,16 @@ export const ui: Registry["items"] = [
     ],
     meta: {
       links: {
+        api: "https://www.radix-ui.com/docs/primitives/components/menubar.md",
         docs: "https://ui.shadcn.com/docs/components/radix/menubar",
         examples:
           "https://ui.shadcn.com/code/apps/v4/registry/bases/radix/examples/menubar-example.tsx",
-        api: "https://www.radix-ui.com/docs/primitives/components/menubar.md",
       },
     },
+    name: "menubar",
+    type: "registry:ui",
   },
   {
-    name: "navigation-menu",
-    type: "registry:ui",
     files: [
       {
         path: "ui/navigation-menu.tsx",
@@ -561,17 +559,16 @@ export const ui: Registry["items"] = [
     ],
     meta: {
       links: {
+        api: "https://www.radix-ui.com/docs/primitives/components/navigation-menu.md",
         docs: "https://ui.shadcn.com/docs/components/radix/navigation-menu",
         examples:
           "https://ui.shadcn.com/code/apps/v4/registry/bases/radix/examples/navigation-menu-example.tsx",
-        api: "https://www.radix-ui.com/docs/primitives/components/navigation-menu.md",
       },
     },
+    name: "navigation-menu",
+    type: "registry:ui",
   },
   {
-    name: "pagination",
-    type: "registry:ui",
-    registryDependencies: ["button"],
     files: [
       {
         path: "ui/pagination.tsx",
@@ -585,10 +582,11 @@ export const ui: Registry["items"] = [
           "https://ui.shadcn.com/code/apps/v4/registry/bases/radix/examples/pagination-example.tsx",
       },
     },
+    name: "pagination",
+    registryDependencies: ["button"],
+    type: "registry:ui",
   },
   {
-    name: "popover",
-    type: "registry:ui",
     files: [
       {
         path: "ui/popover.tsx",
@@ -597,16 +595,16 @@ export const ui: Registry["items"] = [
     ],
     meta: {
       links: {
+        api: "https://www.radix-ui.com/docs/primitives/components/popover.md",
         docs: "https://ui.shadcn.com/docs/components/radix/popover",
         examples:
           "https://ui.shadcn.com/code/apps/v4/registry/bases/radix/examples/popover-example.tsx",
-        api: "https://www.radix-ui.com/docs/primitives/components/popover.md",
       },
     },
+    name: "popover",
+    type: "registry:ui",
   },
   {
-    name: "progress",
-    type: "registry:ui",
     files: [
       {
         path: "ui/progress.tsx",
@@ -615,16 +613,16 @@ export const ui: Registry["items"] = [
     ],
     meta: {
       links: {
+        api: "https://www.radix-ui.com/docs/primitives/components/progress.md",
         docs: "https://ui.shadcn.com/docs/components/radix/progress",
         examples:
           "https://ui.shadcn.com/code/apps/v4/registry/bases/radix/examples/progress-example.tsx",
-        api: "https://www.radix-ui.com/docs/primitives/components/progress.md",
       },
     },
+    name: "progress",
+    type: "registry:ui",
   },
   {
-    name: "radio-group",
-    type: "registry:ui",
     files: [
       {
         path: "ui/radio-group.tsx",
@@ -633,16 +631,16 @@ export const ui: Registry["items"] = [
     ],
     meta: {
       links: {
+        api: "https://www.radix-ui.com/docs/primitives/components/radio-group.md",
         docs: "https://ui.shadcn.com/docs/components/radix/radio-group",
         examples:
           "https://ui.shadcn.com/code/apps/v4/registry/bases/radix/examples/radio-group-example.tsx",
-        api: "https://www.radix-ui.com/docs/primitives/components/radio-group.md",
       },
     },
+    name: "radio-group",
+    type: "registry:ui",
   },
   {
-    name: "resizable",
-    type: "registry:ui",
     dependencies: ["react-resizable-panels"],
     files: [
       {
@@ -652,16 +650,16 @@ export const ui: Registry["items"] = [
     ],
     meta: {
       links: {
+        api: "https://github.com/bvaughn/react-resizable-panels",
         docs: "https://ui.shadcn.com/docs/components/radix/resizable",
         examples:
           "https://ui.shadcn.com/code/apps/v4/registry/bases/radix/examples/resizable-example.tsx",
-        api: "https://github.com/bvaughn/react-resizable-panels",
       },
     },
+    name: "resizable",
+    type: "registry:ui",
   },
   {
-    name: "scroll-area",
-    type: "registry:ui",
     files: [
       {
         path: "ui/scroll-area.tsx",
@@ -670,16 +668,16 @@ export const ui: Registry["items"] = [
     ],
     meta: {
       links: {
+        api: "https://www.radix-ui.com/docs/primitives/components/scroll-area.md",
         docs: "https://ui.shadcn.com/docs/components/radix/scroll-area",
         examples:
           "https://ui.shadcn.com/code/apps/v4/registry/bases/radix/examples/scroll-area-example.tsx",
-        api: "https://www.radix-ui.com/docs/primitives/components/scroll-area.md",
       },
     },
+    name: "scroll-area",
+    type: "registry:ui",
   },
   {
-    name: "select",
-    type: "registry:ui",
     files: [
       {
         path: "ui/select.tsx",
@@ -688,16 +686,16 @@ export const ui: Registry["items"] = [
     ],
     meta: {
       links: {
+        api: "https://www.radix-ui.com/docs/primitives/components/select.md",
         docs: "https://ui.shadcn.com/docs/components/radix/select",
         examples:
           "https://ui.shadcn.com/code/apps/v4/registry/bases/radix/examples/select-example.tsx",
-        api: "https://www.radix-ui.com/docs/primitives/components/select.md",
       },
     },
+    name: "select",
+    type: "registry:ui",
   },
   {
-    name: "separator",
-    type: "registry:ui",
     files: [
       {
         path: "ui/separator.tsx",
@@ -706,17 +704,16 @@ export const ui: Registry["items"] = [
     ],
     meta: {
       links: {
+        api: "https://www.radix-ui.com/docs/primitives/components/separator.md",
         docs: "https://ui.shadcn.com/docs/components/radix/separator",
         examples:
           "https://ui.shadcn.com/code/apps/v4/registry/bases/radix/examples/separator-example.tsx",
-        api: "https://www.radix-ui.com/docs/primitives/components/separator.md",
       },
     },
+    name: "separator",
+    type: "registry:ui",
   },
   {
-    name: "sheet",
-    type: "registry:ui",
-    registryDependencies: ["button"],
     files: [
       {
         path: "ui/sheet.tsx",
@@ -725,25 +722,17 @@ export const ui: Registry["items"] = [
     ],
     meta: {
       links: {
+        api: "https://www.radix-ui.com/docs/primitives/components/dialog.md",
         docs: "https://ui.shadcn.com/docs/components/radix/sheet",
         examples:
           "https://ui.shadcn.com/code/apps/v4/registry/bases/radix/examples/sheet-example.tsx",
-        api: "https://www.radix-ui.com/docs/primitives/components/dialog.md",
       },
     },
+    name: "sheet",
+    registryDependencies: ["button"],
+    type: "registry:ui",
   },
   {
-    name: "sidebar",
-    type: "registry:ui",
-    registryDependencies: [
-      "button",
-      "separator",
-      "sheet",
-      "tooltip",
-      "input",
-      "use-mobile",
-      "skeleton",
-    ],
     files: [
       {
         path: "ui/sidebar.tsx",
@@ -757,10 +746,19 @@ export const ui: Registry["items"] = [
           "https://ui.shadcn.com/code/apps/v4/registry/bases/radix/examples/sidebar-example.tsx",
       },
     },
+    name: "sidebar",
+    registryDependencies: [
+      "button",
+      "separator",
+      "sheet",
+      "tooltip",
+      "input",
+      "use-mobile",
+      "skeleton",
+    ],
+    type: "registry:ui",
   },
   {
-    name: "skeleton",
-    type: "registry:ui",
     files: [
       {
         path: "ui/skeleton.tsx",
@@ -774,10 +772,10 @@ export const ui: Registry["items"] = [
           "https://ui.shadcn.com/code/apps/v4/registry/bases/radix/examples/skeleton-example.tsx",
       },
     },
+    name: "skeleton",
+    type: "registry:ui",
   },
   {
-    name: "slider",
-    type: "registry:ui",
     files: [
       {
         path: "ui/slider.tsx",
@@ -786,16 +784,16 @@ export const ui: Registry["items"] = [
     ],
     meta: {
       links: {
+        api: "https://www.radix-ui.com/docs/primitives/components/slider.md",
         docs: "https://ui.shadcn.com/docs/components/radix/slider",
         examples:
           "https://ui.shadcn.com/code/apps/v4/registry/bases/radix/examples/slider-example.tsx",
-        api: "https://www.radix-ui.com/docs/primitives/components/slider.md",
       },
     },
+    name: "slider",
+    type: "registry:ui",
   },
   {
-    name: "sonner",
-    type: "registry:ui",
     dependencies: ["sonner", "next-themes"],
     files: [
       {
@@ -805,16 +803,16 @@ export const ui: Registry["items"] = [
     ],
     meta: {
       links: {
+        api: "https://sonner.emilkowal.ski",
         docs: "https://ui.shadcn.com/docs/components/radix/sonner",
         examples:
           "https://ui.shadcn.com/code/apps/v4/registry/bases/radix/examples/sonner-example.tsx",
-        api: "https://sonner.emilkowal.ski",
       },
     },
+    name: "sonner",
+    type: "registry:ui",
   },
   {
-    name: "spinner",
-    type: "registry:ui",
     files: [
       {
         path: "ui/spinner.tsx",
@@ -828,10 +826,10 @@ export const ui: Registry["items"] = [
           "https://ui.shadcn.com/code/apps/v4/registry/bases/radix/examples/spinner-example.tsx",
       },
     },
+    name: "spinner",
+    type: "registry:ui",
   },
   {
-    name: "switch",
-    type: "registry:ui",
     files: [
       {
         path: "ui/switch.tsx",
@@ -840,16 +838,16 @@ export const ui: Registry["items"] = [
     ],
     meta: {
       links: {
+        api: "https://www.radix-ui.com/docs/primitives/components/switch.md",
         docs: "https://ui.shadcn.com/docs/components/radix/switch",
         examples:
           "https://ui.shadcn.com/code/apps/v4/registry/bases/radix/examples/switch-example.tsx",
-        api: "https://www.radix-ui.com/docs/primitives/components/switch.md",
       },
     },
+    name: "switch",
+    type: "registry:ui",
   },
   {
-    name: "table",
-    type: "registry:ui",
     files: [
       {
         path: "ui/table.tsx",
@@ -863,10 +861,10 @@ export const ui: Registry["items"] = [
           "https://ui.shadcn.com/code/apps/v4/registry/bases/radix/examples/table-example.tsx",
       },
     },
+    name: "table",
+    type: "registry:ui",
   },
   {
-    name: "tabs",
-    type: "registry:ui",
     files: [
       {
         path: "ui/tabs.tsx",
@@ -875,16 +873,16 @@ export const ui: Registry["items"] = [
     ],
     meta: {
       links: {
+        api: "https://www.radix-ui.com/docs/primitives/components/tabs.md",
         docs: "https://ui.shadcn.com/docs/components/radix/tabs",
         examples:
           "https://ui.shadcn.com/code/apps/v4/registry/bases/radix/examples/tabs-example.tsx",
-        api: "https://www.radix-ui.com/docs/primitives/components/tabs.md",
       },
     },
+    name: "tabs",
+    type: "registry:ui",
   },
   {
-    name: "textarea",
-    type: "registry:ui",
     files: [
       {
         path: "ui/textarea.tsx",
@@ -898,10 +896,10 @@ export const ui: Registry["items"] = [
           "https://ui.shadcn.com/code/apps/v4/registry/bases/radix/examples/textarea-example.tsx",
       },
     },
+    name: "textarea",
+    type: "registry:ui",
   },
   {
-    name: "toggle",
-    type: "registry:ui",
     files: [
       {
         path: "ui/toggle.tsx",
@@ -910,17 +908,16 @@ export const ui: Registry["items"] = [
     ],
     meta: {
       links: {
+        api: "https://www.radix-ui.com/docs/primitives/components/toggle.md",
         docs: "https://ui.shadcn.com/docs/components/radix/toggle",
         examples:
           "https://ui.shadcn.com/code/apps/v4/registry/bases/radix/examples/toggle-example.tsx",
-        api: "https://www.radix-ui.com/docs/primitives/components/toggle.md",
       },
     },
+    name: "toggle",
+    type: "registry:ui",
   },
   {
-    name: "toggle-group",
-    type: "registry:ui",
-    registryDependencies: ["toggle"],
     files: [
       {
         path: "ui/toggle-group.tsx",
@@ -929,16 +926,17 @@ export const ui: Registry["items"] = [
     ],
     meta: {
       links: {
+        api: "https://www.radix-ui.com/docs/primitives/components/toggle-group.md",
         docs: "https://ui.shadcn.com/docs/components/radix/toggle-group",
         examples:
           "https://ui.shadcn.com/code/apps/v4/registry/bases/radix/examples/toggle-group-example.tsx",
-        api: "https://www.radix-ui.com/docs/primitives/components/toggle-group.md",
       },
     },
+    name: "toggle-group",
+    registryDependencies: ["toggle"],
+    type: "registry:ui",
   },
   {
-    name: "tooltip",
-    type: "registry:ui",
     docs: `The \`tooltip\` component has been added. Remember to wrap your app with the \`TooltipProvider\` component.
 
 \`\`\`tsx title="app/layout.tsx"
@@ -963,16 +961,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     ],
     meta: {
       links: {
+        api: "https://www.radix-ui.com/docs/primitives/components/tooltip.md",
         docs: "https://ui.shadcn.com/docs/components/radix/tooltip",
         examples:
           "https://ui.shadcn.com/code/apps/v4/registry/bases/radix/examples/tooltip-example.tsx",
-        api: "https://www.radix-ui.com/docs/primitives/components/tooltip.md",
       },
     },
+    name: "tooltip",
+    type: "registry:ui",
   },
   {
-    name: "kbd",
-    type: "registry:ui",
     files: [
       {
         path: "ui/kbd.tsx",
@@ -986,10 +984,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           "https://ui.shadcn.com/code/apps/v4/registry/bases/radix/examples/kbd-example.tsx",
       },
     },
+    name: "kbd",
+    type: "registry:ui",
   },
   {
-    name: "native-select",
-    type: "registry:ui",
     files: [
       {
         path: "ui/native-select.tsx",
@@ -1003,10 +1001,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           "https://ui.shadcn.com/code/apps/v4/registry/bases/radix/examples/native-select-example.tsx",
       },
     },
+    name: "native-select",
+    type: "registry:ui",
   },
   {
-    name: "direction",
-    type: "registry:ui",
     files: [
       {
         path: "ui/direction.tsx",
@@ -1015,62 +1013,64 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     ],
     meta: {
       links: {
-        docs: "https://ui.shadcn.com/docs/components/radix/direction",
         api: "https://www.radix-ui.com/primitives/docs/utilities/direction-provider.md",
+        docs: "https://ui.shadcn.com/docs/components/radix/direction",
       },
     },
+    name: "direction",
+    type: "registry:ui",
   },
   {
-    name: "attachment",
-    type: "registry:ui",
-    registryDependencies: ["button"],
     files: [
       {
         path: "ui/attachment.tsx",
         type: "registry:ui",
       },
     ],
+    name: "attachment",
+    registryDependencies: ["button"],
+    type: "registry:ui",
   },
   {
-    name: "bubble",
-    type: "registry:ui",
     files: [
       {
         path: "ui/bubble.tsx",
         type: "registry:ui",
       },
     ],
+    name: "bubble",
+    type: "registry:ui",
   },
   {
-    name: "message-scroller",
-    type: "registry:ui",
     dependencies: ["@shadcn/react"],
-    registryDependencies: ["button"],
     files: [
       {
         path: "ui/message-scroller.tsx",
         type: "registry:ui",
       },
     ],
+    name: "message-scroller",
+    registryDependencies: ["button"],
+    type: "registry:ui",
   },
   {
-    name: "marker",
-    type: "registry:ui",
     files: [
       {
         path: "ui/marker.tsx",
         type: "registry:ui",
       },
     ],
+    name: "marker",
+    type: "registry:ui",
   },
   {
-    name: "message",
-    type: "registry:ui",
     files: [
       {
         path: "ui/message.tsx",
         type: "registry:ui",
       },
     ],
+    name: "message",
+    type: "registry:ui",
   },
-]
+];

@@ -6,14 +6,14 @@ export default function robots(): MetadataRoute.Robots {
   const siteUrl = getSiteUrl();
 
   return {
+    host: siteUrl,
     rules: [
       {
-        userAgent: "*",
         allow: "/",
         disallow: ["/api/", "/r/", "/*?*"],
+        userAgent: "*",
       },
     ],
     sitemap: `${siteUrl}/sitemap.xml`,
-    host: siteUrl,
   };
 }

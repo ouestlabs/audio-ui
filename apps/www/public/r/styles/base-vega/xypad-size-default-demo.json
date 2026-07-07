@@ -1,1 +1,15 @@
-{"$schema":"https://ui.shadcn.com/schema/registry-item.json","name":"xypad-size-default-demo","type":"registry:example","description":"XYPad size default example","registryDependencies":["@audio/xypad"],"files":[{"path":"xypad-size-default-demo.tsx","type":"registry:example","content":"import { XYPad } from \"@/components/audio/elements/xypad\";\n\nexport function XYPadSizeDefaultDemo() {\n  return (\n    <XYPad\n      className=\"aspect-square\"\n      defaultValue={{ x: 40, y: 65 }}\n      size=\"default\"\n    />\n  );\n}","target":"components/examples/xypad-size-default-demo.tsx"}]}
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "xypad-size-default-demo",
+  "type": "registry:example",
+  "description": "XYPad size default example",
+  "registryDependencies": ["@audio/xypad"],
+  "files": [
+    {
+      "path": "xypad-size-default-demo.tsx",
+      "type": "registry:example",
+      "content": "import { XYPad } from \"@/components/audio/elements/xypad\";\n\nexport function XYPadSizeDefaultDemo() {\n  return (\n    <XYPad\n      className=\"aspect-square\"\n      defaultValue={{ x: 40, y: 65 }}\n      size=\"default\"\n    />\n  );\n}",
+      "target": "components/examples/xypad-size-default-demo.tsx"
+    }
+  ]
+}

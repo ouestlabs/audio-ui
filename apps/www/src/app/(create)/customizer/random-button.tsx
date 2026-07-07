@@ -46,15 +46,15 @@ export function RandomButton() {
   const effectiveParams = React.useMemo(
     () => ({
       baseColor: params.baseColor ?? config.baseColor,
-      style: params.style ?? config.style,
-      theme: params.theme ?? config.theme,
       chartColor: params.chartColor ?? config.chartColor,
       font: params.font ?? config.font,
       fontHeading: params.fontHeading ?? config.fontHeading,
-      radius: params.radius ?? config.radius,
       iconLibrary: params.iconLibrary ?? config.iconLibrary,
       menuAccent: params.menuAccent ?? config.menuAccent,
       menuColor: params.menuColor ?? config.menuColor,
+      radius: params.radius ?? config.radius,
+      style: params.style ?? config.style,
+      theme: params.theme ?? config.theme,
     }),
     [
       params.baseColor,
@@ -92,8 +92,8 @@ export function RandomButton() {
 
     // Build context for bias application.
     const context: RandomizeContext = {
-      style: selectedStyle,
       baseColor,
+      style: selectedStyle,
     };
 
     const availableThemes = getThemesForBaseColor(baseColor);
@@ -132,16 +132,16 @@ export function RandomButton() {
     context.radius = selectedRadius;
 
     const newValues = {
-      style: selectedStyle,
       baseColor,
-      theme: selectedTheme,
       chartColor: selectedChartColor,
-      iconLibrary: selectedIconLibrary,
       font: selectedFont,
       fontHeading: selectedFontHeading,
+      iconLibrary: selectedIconLibrary,
       menuAccent: selectedMenuAccent,
       menuColor: selectedMenuColor,
       radius: selectedRadius,
+      style: selectedStyle,
+      theme: selectedTheme,
     };
 
     // Update URL params and config storage

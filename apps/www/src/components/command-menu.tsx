@@ -108,12 +108,12 @@ export function CommandMenu({
   }, []);
 
   const copyStateRef = React.useRef({
-    selectedType,
     copyPayload,
     packageManager,
+    selectedType,
   });
   React.useEffect(() => {
-    copyStateRef.current = { selectedType, copyPayload, packageManager };
+    copyStateRef.current = { copyPayload, packageManager, selectedType };
   }, [selectedType, copyPayload, packageManager]);
 
   const copyHighlightedPayload = React.useCallback(() => {

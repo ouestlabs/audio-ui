@@ -59,7 +59,7 @@ function useResolvedRegistryOptions(
     [config.iconLibrary, hasStoredConfig, initialIconLibrary, resolvedStyleName]
   );
 
-  return { resolvedStyleName, resolvedIconLibrary };
+  return { resolvedIconLibrary, resolvedStyleName };
 }
 
 export function DocsComponentSourceSwitch({

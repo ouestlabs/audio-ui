@@ -364,7 +364,7 @@ function extractComponentListLeadAndBullets(description: string): {
         .slice(0, 12)
     : [];
 
-  return { lead, bullets };
+  return { bullets, lead };
 }
 
 interface ComponentCategorySeoContentProps {
@@ -504,7 +504,10 @@ export function ComponentCategorySeoContent({
                               className="text-pretty"
                               key={`sec-${si}-feat-${fi}`}
                             >
-                              <SeoLinkedText keyPrefix={keyT} text={item.title} />
+                              <SeoLinkedText
+                                keyPrefix={keyT}
+                                text={item.title}
+                              />
                               <span aria-hidden="true">: </span>
                               <SeoLinkedText
                                 keyPrefix={keyD}

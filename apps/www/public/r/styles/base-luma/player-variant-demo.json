@@ -1,1 +1,15 @@
-{"$schema":"https://ui.shadcn.com/schema/registry-item.json","name":"player-variant-demo","type":"registry:example","description":"AudioPlayer variant options (default, outline, ghost)","registryDependencies":["@audio/player"],"files":[{"path":"player-variant-demo.tsx","type":"registry:example","content":"import {\n  AudioPlayer,\n  AudioPlayerControlBar,\n  AudioPlayerPlay,\n  AudioPlayerSeekBar,\n  AudioPlayerTimeDisplay,\n  AudioPlayerVolume,\n} from \"@/components/audio/player\";\n\nexport function AudioPlayerVariantDemo() {\n  const controls = (\n    <AudioPlayerControlBar>\n      <AudioPlayerPlay />\n      <AudioPlayerSeekBar />\n      <AudioPlayerTimeDisplay />\n      <AudioPlayerVolume />\n    </AudioPlayerControlBar>\n  );\n\n  return (\n    <div className=\"flex w-full flex-col gap-6\">\n      <div className=\"flex flex-col gap-2\">\n        <AudioPlayer variant=\"default\">{controls}</AudioPlayer>\n        <p className=\"text-center text-muted-foreground text-xs\">default</p>\n      </div>\n      <div className=\"flex flex-col gap-2\">\n        <AudioPlayer variant=\"ghost\">{controls}</AudioPlayer>\n        <p className=\"text-center text-muted-foreground text-xs\">ghost</p>\n      </div>\n    </div>\n  );\n}","target":"components/examples/player-variant-demo.tsx"}]}
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "player-variant-demo",
+  "type": "registry:example",
+  "description": "AudioPlayer variant options (default, outline, ghost)",
+  "registryDependencies": ["@audio/player"],
+  "files": [
+    {
+      "path": "player-variant-demo.tsx",
+      "type": "registry:example",
+      "content": "import {\n  AudioPlayer,\n  AudioPlayerControlBar,\n  AudioPlayerPlay,\n  AudioPlayerSeekBar,\n  AudioPlayerTimeDisplay,\n  AudioPlayerVolume,\n} from \"@/components/audio/player\";\n\nexport function AudioPlayerVariantDemo() {\n  const controls = (\n    <AudioPlayerControlBar>\n      <AudioPlayerPlay />\n      <AudioPlayerSeekBar />\n      <AudioPlayerTimeDisplay />\n      <AudioPlayerVolume />\n    </AudioPlayerControlBar>\n  );\n\n  return (\n    <div className=\"flex w-full flex-col gap-6\">\n      <div className=\"flex flex-col gap-2\">\n        <AudioPlayer variant=\"default\">{controls}</AudioPlayer>\n        <p className=\"text-center text-muted-foreground text-xs\">default</p>\n      </div>\n      <div className=\"flex flex-col gap-2\">\n        <AudioPlayer variant=\"ghost\">{controls}</AudioPlayer>\n        <p className=\"text-center text-muted-foreground text-xs\">ghost</p>\n      </div>\n    </div>\n  );\n}",
+      "target": "components/examples/player-variant-demo.tsx"
+    }
+  ]
+}

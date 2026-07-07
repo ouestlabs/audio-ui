@@ -1,1 +1,7 @@
-{"$schema":"https://ui.shadcn.com/schema/registry-item.json","name":"ui","type":"registry:ui","registryDependencies":["@audio/transport","@audio/sortable-list"],"files":[]}
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "ui",
+  "type": "registry:ui",
+  "registryDependencies": ["@audio/transport", "@audio/sortable-list"],
+  "files": []
+}

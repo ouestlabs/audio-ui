@@ -13,15 +13,15 @@ const BUILT_IN_PREVIEW_FONTS = new Set<FontName>(["inter"]);
 const loadedPreviewFonts = new Set<string>();
 
 const LOCAL_PREVIEW_FONT_VARIABLES: Partial<Record<FontName, string>> = {
-  inter: "--font-inter",
   geist: "--font-geist-sans",
   "geist-mono": "--font-geist-mono",
+  inter: "--font-inter",
 };
 
 const LOCAL_PREVIEW_FONT_FAMILIES: Partial<Record<FontName, string>> = {
-  inter: "var(--font-inter, 'Inter Variable'), sans-serif",
   geist: "var(--font-geist-sans, 'Geist Variable'), sans-serif",
   "geist-mono": "var(--font-geist-mono, 'Geist Mono'), monospace",
+  inter: "var(--font-inter, 'Inter Variable'), sans-serif",
 };
 
 function hasLocalPreviewFont(fontName: FontName) {
@@ -70,10 +70,10 @@ function createFontOption(name: FontName) {
   }
 
   return {
-    name: definition.title,
-    value: definition.name,
     font: PREVIEW_FONTS[name],
+    name: definition.title,
     type: definition.type,
+    value: definition.name,
   } as const;
 }
 
@@ -139,10 +139,10 @@ export type Font = (typeof FONTS)[number];
 
 export const FONT_HEADING_OPTIONS = [
   {
-    name: "Inherit",
-    value: "inherit",
     font: null,
+    name: "Inherit",
     type: "default",
+    value: "inherit",
   },
   ...FONTS,
 ] as const;

@@ -158,29 +158,28 @@ export function ChartColorPicker({
             <PickerSeparator />
             <PickerGroup>
               {otherThemes.map((theme) => (
-                  <PickerRadioItem
-                    closeOnClick={isMobile}
-                    key={theme.name}
-                    value={theme.name}
-                  >
-                    <div className="flex items-center gap-2">
-                      {mounted && resolvedTheme && (
-                        <div
-                          className="site-rounded-full size-4 bg-(--color)"
-                          style={
-                            {
-                              "--color":
-                                theme.cssVars?.[
-                                  resolvedTheme as "light" | "dark"
-                                ]?.primary,
-                            } as React.CSSProperties
-                          }
-                        />
-                      )}
-                      {theme.title}
-                    </div>
-                  </PickerRadioItem>
-                ))}
+                <PickerRadioItem
+                  closeOnClick={isMobile}
+                  key={theme.name}
+                  value={theme.name}
+                >
+                  <div className="flex items-center gap-2">
+                    {mounted && resolvedTheme && (
+                      <div
+                        className="site-rounded-full size-4 bg-(--color)"
+                        style={
+                          {
+                            "--color":
+                              theme.cssVars?.[resolvedTheme as "light" | "dark"]
+                                ?.primary,
+                          } as React.CSSProperties
+                        }
+                      />
+                    )}
+                    {theme.title}
+                  </div>
+                </PickerRadioItem>
+              ))}
             </PickerGroup>
           </PickerRadioGroup>
         </PickerContent>

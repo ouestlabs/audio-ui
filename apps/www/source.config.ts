@@ -11,7 +11,6 @@ export const docs = defineDocs({
 
 export default defineConfig({
   mdxOptions: {
-    remarkPlugins: [remarkMdxMermaid],
     rehypePlugins: (plugins) => {
       plugins.shift();
       plugins.push([
@@ -27,6 +26,7 @@ export default defineConfig({
 
       return plugins;
     },
+    remarkPlugins: [remarkMdxMermaid],
   },
   plugins: [lastModified()],
 });

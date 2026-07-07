@@ -9,7 +9,6 @@ import type { CategoryInfo } from "@/lib/registry";
 const CommandMenu = dynamic(
   () => import("@/components/command-menu").then((mod) => mod.CommandMenu),
   {
-    ssr: false,
     loading: () => (
       <Button
         aria-hidden="true"
@@ -20,22 +19,23 @@ const CommandMenu = dynamic(
         <MagnifyingGlassIcon className="size-4 shrink-0 opacity-60" />
       </Button>
     ),
+    ssr: false,
   }
 );
 
 const MobileNav = dynamic(
   () => import("@/components/mobile-nav").then((mod) => mod.MobileNav),
   {
-    ssr: false,
     loading: () => <div aria-hidden="true" className="size-8 lg:hidden" />,
+    ssr: false,
   }
 );
 
 const ModeSwitcher = dynamic(
   () => import("@/components/mode-switcher").then((mod) => mod.ModeSwitcher),
   {
-    ssr: false,
     loading: () => <div aria-hidden="true" className="size-8" />,
+    ssr: false,
   }
 );
 

@@ -1,1 +1,15 @@
-{"$schema":"https://ui.shadcn.com/schema/registry-item.json","name":"player-track-demo","type":"registry:example","description":"Minimal track component example","registryDependencies":["@audio/player"],"files":[{"path":"player-track-demo.tsx","type":"registry:example","content":"\"use client\";\n\nimport {\n  AudioTrack,\n  AudioTrackCover,\n  AudioTrackPlayPauseAction,\n} from \"@/components/audio/player\";\n\nexport function AudioTrackDemo() {\n  return (\n    <AudioTrack\n      actions={<AudioTrackPlayPauseAction />}\n      className=\"w-full\"\n      media={<AudioTrackCover />}\n      trackId={\"4\"}\n    />\n  );\n}","target":"components/examples/player-track-demo.tsx"}]}
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "player-track-demo",
+  "type": "registry:example",
+  "description": "Minimal track component example",
+  "registryDependencies": ["@audio/player"],
+  "files": [
+    {
+      "path": "player-track-demo.tsx",
+      "type": "registry:example",
+      "content": "\"use client\";\n\nimport {\n  AudioTrack,\n  AudioTrackCover,\n  AudioTrackPlayPauseAction,\n} from \"@/components/audio/player\";\n\nexport function AudioTrackDemo() {\n  return (\n    <AudioTrack\n      actions={<AudioTrackPlayPauseAction />}\n      className=\"w-full\"\n      media={<AudioTrackCover />}\n      trackId={\"4\"}\n    />\n  );\n}",
+      "target": "components/examples/player-track-demo.tsx"
+    }
+  ]
+}

@@ -1,6 +1,6 @@
-import { Slider as SliderPrimitive } from "@base-ui/react/slider"
+import { Slider as SliderPrimitive } from "@base-ui/react/slider";
 
-import { cn } from "@/registry/bases/base/lib/utils"
+import { cn } from "@/registry/bases/base/lib/utils";
 
 function Slider({
   className,
@@ -14,39 +14,39 @@ function Slider({
     ? value
     : Array.isArray(defaultValue)
       ? defaultValue
-      : [min, max]
+      : [min, max];
 
   return (
     <SliderPrimitive.Root
       className={cn("data-horizontal:w-full data-vertical:h-full", className)}
       data-slot="slider"
       defaultValue={defaultValue}
-      value={value}
-      min={min}
       max={max}
+      min={min}
       thumbAlignment="edge"
+      value={value}
       {...props}
     >
       <SliderPrimitive.Control className="cn-slider relative flex w-full touch-none items-center select-none data-disabled:opacity-50 data-vertical:h-full data-vertical:w-auto data-vertical:flex-col">
         <SliderPrimitive.Track
-          data-slot="slider-track"
           className="cn-slider-track relative grow overflow-hidden select-none"
+          data-slot="slider-track"
         >
           <SliderPrimitive.Indicator
-            data-slot="slider-range"
             className="cn-slider-range select-none data-horizontal:h-full data-vertical:w-full"
+            data-slot="slider-range"
           />
         </SliderPrimitive.Track>
         {Array.from({ length: _values.length }, (_, index) => (
           <SliderPrimitive.Thumb
+            className="cn-slider-thumb block shrink-0 select-none disabled:pointer-events-none disabled:opacity-50"
             data-slot="slider-thumb"
             key={index}
-            className="cn-slider-thumb block shrink-0 select-none disabled:pointer-events-none disabled:opacity-50"
           />
         ))}
       </SliderPrimitive.Control>
     </SliderPrimitive.Root>
-  )
+  );
 }
 
-export { Slider }
+export { Slider };

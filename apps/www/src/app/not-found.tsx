@@ -12,11 +12,11 @@ import { Button } from "@/components/ui/button";
 import { buildPageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "Page Not Found",
   description:
     "The page you're looking for doesn't exist or may have been moved.",
   path: "/404",
-  robots: { index: false, follow: true },
+  robots: { follow: true, index: false },
+  title: "Page Not Found",
 });
 
 export default function NotFound() {

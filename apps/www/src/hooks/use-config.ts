@@ -43,28 +43,27 @@ export type Config = {
 };
 
 export const DEFAULT_CONFIG: Config = {
-  // App preferences
-  packageManager: "pnpm",
-  installationType: "cli",
-  gridColumns: 2,
-  customizerOpen: true,
-
   // Design system defaults (matching DEFAULT_CONFIG from registry/config.ts)
   base: "base",
-  style: "nova",
-  theme: "neutral",
   baseColor: "neutral",
   chartColor: "sky",
+  custom: false,
+  customizerOpen: true,
   font: "inter",
   fontHeading: "inherit",
+  gridColumns: 2,
   iconLibrary: "lucide",
+  installationType: "cli",
+  item: "preview",
   menuAccent: "subtle",
   menuColor: "default",
+  // App preferences
+  packageManager: "pnpm",
   radius: "default",
-  item: "preview",
-  template: "next",
   size: 100,
-  custom: false,
+  style: "nova",
+  template: "next",
+  theme: "neutral",
 };
 
 export const configAtom = atomWithStorage<Config>(
@@ -79,16 +78,16 @@ export function useConfig() {
 }
 
 export interface ComponentsLayoutState {
-  sidebarOpen: boolean;
   activeCategory?: string;
   sidebarMenuView?: "menu" | "inline";
+  sidebarOpen: boolean;
 }
 
 const componentsLayoutStateAtom = atomWithStorage<ComponentsLayoutState>(
   "components-layout",
   {
-    sidebarOpen: true,
     sidebarMenuView: "menu",
+    sidebarOpen: true,
   }
 );
 
@@ -98,8 +97,8 @@ export function useComponentsLayoutState() {
 
 // Blocks states configuration
 export interface BlocksState {
-  sidebarOpen: boolean;
   activeCategory?: string;
+  sidebarOpen: boolean;
 }
 
 const blocksStateAtom = atomWithStorage<BlocksState>("blocks-state", {

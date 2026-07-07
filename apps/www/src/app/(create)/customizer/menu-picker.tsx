@@ -40,10 +40,10 @@ function getMenuColorValue(
 }
 
 const MENU_OPTIONS: { value: MenuColorValue; label: string }[] = [
-  { value: "default", label: "Default / Solid" },
-  { value: "default-translucent", label: "Default / Translucent" },
-  { value: "inverted", label: "Inverted / Solid" },
-  { value: "inverted-translucent", label: "Inverted / Translucent" },
+  { label: "Default / Solid", value: "default" },
+  { label: "Default / Translucent", value: "default-translucent" },
+  { label: "Inverted / Solid", value: "inverted" },
+  { label: "Inverted / Translucent", value: "inverted-translucent" },
 ];
 
 // ── Component ──
@@ -106,13 +106,13 @@ export function MenuColorPicker({
         ? "subtle"
         : lastSolidMenuAccentRef.current;
       setParams({
-        menuColor: nextMenuColor,
         menuAccent: nextMenuAccent,
+        menuColor: nextMenuColor,
       });
       setConfig((prev) => ({
         ...prev,
-        menuColor: nextMenuColor,
         menuAccent: nextMenuAccent ?? prev.menuAccent,
+        menuColor: nextMenuColor,
       }));
     },
     [colorChoice, setParams, setConfig]

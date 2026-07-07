@@ -121,8 +121,8 @@ const calculateQueueIndex = (params: CalculateQueueIndexParams): number => {
     return queue.length === 1
       ? singleTrackIndex
       : getRandomShuffleIndex({
-          queueLength: queue.length,
           currentIndex: currentQueueIndex,
+          queueLength: queue.length,
         });
   }
 
@@ -163,10 +163,10 @@ const calculatePreviousIndex = (params: QueueNavigationParams): number =>
  * Default state after successful track loading
  */
 const getSuccessState = (params: { isPlaying?: boolean } = {}) => ({
-  isLoading: false,
-  isError: false,
   errorMessage: null,
   isBuffering: false,
+  isError: false,
+  isLoading: false,
   isPlaying: params.isPlaying ?? false,
 });
 
@@ -190,12 +190,12 @@ const loadAndPlayTrack = (params: LoadAndPlayTrackParams): void => {
     (track.duration !== undefined && $htmlAudio.isLive(track.duration));
 
   set({
-    currentTrack: track,
     currentQueueIndex: queueIndex,
-    isLoading: true,
+    currentTrack: track,
+    errorMessage: null,
     isBuffering: true,
     isError: false,
-    errorMessage: null,
+    isLoading: true,
   });
 
   // Reset playback rate to 1.0 for live streams
@@ -213,162 +213,12 @@ const loadAndPlayTrack = (params: LoadAndPlayTrackParams): void => {
 const useAudioStore = create<AudioStore>()(
   persist(
     subscribeWithSelector((set, get) => ({
-      // Initial State
-      currentTrack: null,
-      queue: [],
-      isPlaying: false,
-      isLoading: false,
-      isBuffering: false,
-      volume: 1,
-      isMuted: false,
-      playbackRate: 1,
-      repeatMode: "none",
-      shuffleEnabled: false,
-      currentTime: 0,
-      duration: 0,
-      progress: 0,
-      bufferedTime: 0,
-      insertMode: "last",
-      isError: false,
-      errorMessage: null,
-      currentQueueIndex: -1,
-
-      // Playback Actions (state only - provider handles actual audio control)
-      play() {
-        if (get().isLoading) {
-          return;
-        }
-        set({ isPlaying: true });
-      },
-
-      pause() {
-        set({ isPlaying: false });
-      },
-
-      togglePlay() {
-        if (get().isLoading) {
-          return;
-        }
-        const state = get();
-        set({ isPlaying: !state.isPlaying });
-      },
-
-      next() {
-        const state = get();
-        const nextIndex = calculateNextIndex({
-          queue: state.queue,
-          currentQueueIndex: state.currentQueueIndex,
-          shuffleEnabled: state.shuffleEnabled,
-          repeatMode: state.repeatMode,
-        });
-
-        const nextTrack = state.queue[nextIndex];
-        if (nextIndex === -1 || !nextTrack) {
-          set({ isLoading: false, isPlaying: false, isBuffering: false });
-          return;
-        }
-
-        loadAndPlayTrack({
-          track: nextTrack,
-          queueIndex: nextIndex,
-          set,
-          get,
-        });
-      },
-
-      previous() {
-        const state = get();
-        const RESTART_THRESHOLD = 3;
-
-        // If track has more than 3 seconds and shuffle is not enabled, restart the track
-        if (state.currentTime > RESTART_THRESHOLD && !state.shuffleEnabled) {
-          set({ currentTime: 0, progress: 0 });
-          return;
-        }
-
-        const prevIndex = calculatePreviousIndex({
-          queue: state.queue,
-          currentQueueIndex: state.currentQueueIndex,
-          shuffleEnabled: state.shuffleEnabled,
-          repeatMode: state.repeatMode,
-        });
-
-        const prevTrack = state.queue[prevIndex];
-        if (prevIndex === -1 || !prevTrack) {
-          if (prevIndex !== -1) {
-            console.error(
-              "Inconsistency: previous index is valid but track not found"
-            );
-          }
-          set({ isLoading: false, isPlaying: false, isBuffering: false });
-          return;
-        }
-
-        loadAndPlayTrack({
-          track: prevTrack,
-          queueIndex: prevIndex,
-          set,
-          get,
-        });
-      },
-
-      seek(time: number) {
-        const state = get();
-        const duration = state.duration;
-        const validTime =
-          duration > 0 ? Math.max(0, Math.min(time, duration)) : time;
-        const newProgress = duration > 0 ? (validTime / duration) * 100 : 0;
-        set({ currentTime: validTime, progress: newProgress });
-      },
-
-      setQueueAndPlay(songs: Track[], startIndex: number) {
-        const targetTrack = songs[startIndex];
-        if (!targetTrack) {
-          console.error("[Playback] Invalid startIndex for setQueueAndPlay");
-          get().clearQueue();
-          set({
-            isPlaying: false,
-            isLoading: false,
-            currentTrack: null,
-            currentQueueIndex: -1,
-          });
-          return;
-        }
-
-        get().setQueue(songs, startIndex);
-
-        loadAndPlayTrack({
-          track: targetTrack,
-          queueIndex: startIndex,
-          set,
-          get,
-        });
-      },
-
-      handleTrackEnd() {
-        get().next();
-      },
-
-      // Queue Actions
-      setQueue(tracks: Track[], startIndex = 0) {
-        const currentTrack = tracks[startIndex] ?? null;
-        set({
-          queue: tracks,
-          currentQueueIndex: currentTrack ? startIndex : -1,
-          currentTrack,
-        });
-      },
-
-      getCurrentQueueIndex() {
-        return get().currentQueueIndex;
-      },
-
       addToQueue(track: Track, mode = "last") {
         const state = get();
         if (!state.currentTrack) {
           set({
-            currentTrack: track,
             currentQueueIndex: 0,
+            currentTrack: track,
             queue: [track],
           });
           return;
@@ -377,8 +227,8 @@ const useAudioStore = create<AudioStore>()(
         switch (mode) {
           case "first":
             set({
-              queue: [track, ...state.queue],
               currentQueueIndex: state.currentQueueIndex + 1,
+              queue: [track, ...state.queue],
             });
             break;
           case "after":
@@ -393,38 +243,6 @@ const useAudioStore = create<AudioStore>()(
           default:
             set({ queue: [...state.queue, track] });
         }
-      },
-
-      removeFromQueue(trackId) {
-        const state = get();
-        const index = state.queue.findIndex((s) => s.id === trackId);
-        if (index === -1) {
-          return;
-        }
-
-        const newQueue = state.queue.filter((s) => s.id !== trackId);
-        set({
-          queue: newQueue,
-          currentQueueIndex:
-            index < state.currentQueueIndex
-              ? state.currentQueueIndex - 1
-              : state.currentQueueIndex,
-        });
-      },
-
-      clearQueue() {
-        set({ queue: [] });
-      },
-
-      moveInQueue(fromIndex, toIndex) {
-        const newQueue = [...get().queue];
-        const [movedItem] = newQueue.splice(fromIndex, 1);
-        if (!movedItem) {
-          return;
-        }
-
-        newQueue.splice(toIndex, 0, movedItem);
-        set({ queue: newQueue });
       },
 
       addTracksToEndOfQueue(tracksToAdd: Track[]) {
@@ -442,16 +260,206 @@ const useAudioStore = create<AudioStore>()(
           set({ queue: [...state.queue, ...newTracks] });
         }
       },
+      bufferedTime: 0,
 
-      // Control Actions (state only - provider handles actual audio control)
-      setVolume(params: { volume: number }) {
-        const { volume } = params;
-        set({ volume, isMuted: volume === 0 });
+      changeRepeatMode() {
+        const modes: RepeatMode[] = ["none", "one", "all"];
+        const currentIndex = modes.indexOf(get().repeatMode);
+        const newMode = modes[(currentIndex + 1) % modes.length];
+        set({ repeatMode: newMode });
       },
 
-      toggleMute() {
-        const newMuted = !get().isMuted;
-        set({ isMuted: newMuted });
+      clearQueue() {
+        set({ queue: [] });
+      },
+      currentQueueIndex: -1,
+      currentTime: 0,
+      // Initial State
+      currentTrack: null,
+      duration: 0,
+      errorMessage: null,
+
+      getCurrentQueueIndex() {
+        return get().currentQueueIndex;
+      },
+
+      handleTrackEnd() {
+        get().next();
+      },
+      insertMode: "last",
+      isBuffering: false,
+      isError: false,
+      isLoading: false,
+      isMuted: false,
+      isPlaying: false,
+
+      moveInQueue(fromIndex, toIndex) {
+        const newQueue = [...get().queue];
+        const [movedItem] = newQueue.splice(fromIndex, 1);
+        if (!movedItem) {
+          return;
+        }
+
+        newQueue.splice(toIndex, 0, movedItem);
+        set({ queue: newQueue });
+      },
+
+      next() {
+        const state = get();
+        const nextIndex = calculateNextIndex({
+          currentQueueIndex: state.currentQueueIndex,
+          queue: state.queue,
+          repeatMode: state.repeatMode,
+          shuffleEnabled: state.shuffleEnabled,
+        });
+
+        const nextTrack = state.queue[nextIndex];
+        if (nextIndex === -1 || !nextTrack) {
+          set({ isBuffering: false, isLoading: false, isPlaying: false });
+          return;
+        }
+
+        loadAndPlayTrack({
+          get,
+          queueIndex: nextIndex,
+          set,
+          track: nextTrack,
+        });
+      },
+
+      pause() {
+        set({ isPlaying: false });
+      },
+
+      // Playback Actions (state only - provider handles actual audio control)
+      play() {
+        if (get().isLoading) {
+          return;
+        }
+        set({ isPlaying: true });
+      },
+      playbackRate: 1,
+
+      previous() {
+        const state = get();
+        const RESTART_THRESHOLD = 3;
+
+        // If track has more than 3 seconds and shuffle is not enabled, restart the track
+        if (state.currentTime > RESTART_THRESHOLD && !state.shuffleEnabled) {
+          set({ currentTime: 0, progress: 0 });
+          return;
+        }
+
+        const prevIndex = calculatePreviousIndex({
+          currentQueueIndex: state.currentQueueIndex,
+          queue: state.queue,
+          repeatMode: state.repeatMode,
+          shuffleEnabled: state.shuffleEnabled,
+        });
+
+        const prevTrack = state.queue[prevIndex];
+        if (prevIndex === -1 || !prevTrack) {
+          if (prevIndex !== -1) {
+            console.error(
+              "Inconsistency: previous index is valid but track not found"
+            );
+          }
+          set({ isBuffering: false, isLoading: false, isPlaying: false });
+          return;
+        }
+
+        loadAndPlayTrack({
+          get,
+          queueIndex: prevIndex,
+          set,
+          track: prevTrack,
+        });
+      },
+      progress: 0,
+      queue: [],
+
+      removeFromQueue(trackId) {
+        const state = get();
+        const index = state.queue.findIndex((s) => s.id === trackId);
+        if (index === -1) {
+          return;
+        }
+
+        const newQueue = state.queue.filter((s) => s.id !== trackId);
+        set({
+          currentQueueIndex:
+            index < state.currentQueueIndex
+              ? state.currentQueueIndex - 1
+              : state.currentQueueIndex,
+          queue: newQueue,
+        });
+      },
+      repeatMode: "none",
+
+      seek(time: number) {
+        const state = get();
+        const duration = state.duration;
+        const validTime =
+          duration > 0 ? Math.max(0, Math.min(time, duration)) : time;
+        const newProgress = duration > 0 ? (validTime / duration) * 100 : 0;
+        set({ currentTime: validTime, progress: newProgress });
+      },
+
+      // State Actions
+      setCurrentTrack(track: Track | null) {
+        const state = get();
+
+        if (!track) {
+          set({
+            currentQueueIndex: -1,
+            currentTime: 0,
+            currentTrack: null,
+            duration: 0,
+            errorMessage: null,
+            isError: false,
+            isLoading: false,
+            isPlaying: false,
+            queue: [],
+          });
+          return;
+        }
+
+        // Avoid reloading the same track
+        if (state.currentTrack?.id === track.id) {
+          return;
+        }
+
+        // Update queue with a single track
+        set({
+          currentQueueIndex: 0,
+          currentTime: 0,
+          currentTrack: track,
+          duration: 0,
+          errorMessage: null,
+          isError: false,
+          isLoading: true,
+          isPlaying: false,
+          queue: [track],
+        });
+
+        loadAndPlayTrack({
+          get,
+          queueIndex: 0,
+          set,
+          track,
+        });
+      },
+      setError: (message) => {
+        set({
+          errorMessage: message,
+          isError: !!message,
+          isLoading: false,
+          isPlaying: false,
+        });
+      },
+
+      setInsertMode(mode) {
+        set({ insertMode: mode });
       },
 
       setPlaybackRate(rate: number) {
@@ -464,19 +472,48 @@ const useAudioStore = create<AudioStore>()(
         set({ playbackRate: clampedRate });
       },
 
-      changeRepeatMode() {
-        const modes: RepeatMode[] = ["none", "one", "all"];
-        const currentIndex = modes.indexOf(get().repeatMode);
-        const newMode = modes[(currentIndex + 1) % modes.length];
-        set({ repeatMode: newMode });
+      // Queue Actions
+      setQueue(tracks: Track[], startIndex = 0) {
+        const currentTrack = tracks[startIndex] ?? null;
+        set({
+          currentQueueIndex: currentTrack ? startIndex : -1,
+          currentTrack,
+          queue: tracks,
+        });
+      },
+
+      setQueueAndPlay(songs: Track[], startIndex: number) {
+        const targetTrack = songs[startIndex];
+        if (!targetTrack) {
+          console.error("[Playback] Invalid startIndex for setQueueAndPlay");
+          get().clearQueue();
+          set({
+            currentQueueIndex: -1,
+            currentTrack: null,
+            isLoading: false,
+            isPlaying: false,
+          });
+          return;
+        }
+
+        get().setQueue(songs, startIndex);
+
+        loadAndPlayTrack({
+          get,
+          queueIndex: startIndex,
+          set,
+          track: targetTrack,
+        });
       },
 
       setRepeatMode(mode) {
         set({ repeatMode: mode });
       },
 
-      setInsertMode(mode) {
-        set({ insertMode: mode });
+      // Control Actions (state only - provider handles actual audio control)
+      setVolume(params: { volume: number }) {
+        const { volume } = params;
+        set({ isMuted: volume === 0, volume });
       },
 
       shuffle() {
@@ -498,99 +535,61 @@ const useAudioStore = create<AudioStore>()(
         const newQueue = [state.currentTrack, ...shuffledRemaining];
 
         set({
-          queue: newQueue,
           currentQueueIndex: 0,
+          queue: newQueue,
           shuffleEnabled: true,
         });
       },
-
-      unshuffle() {
-        set({ shuffleEnabled: false });
-      },
-
-      // State Actions
-      setCurrentTrack(track: Track | null) {
-        const state = get();
-
-        if (!track) {
-          set({
-            currentTrack: null,
-            currentQueueIndex: -1,
-            isPlaying: false,
-            currentTime: 0,
-            duration: 0,
-            queue: [],
-            isLoading: false,
-            isError: false,
-            errorMessage: null,
-          });
-          return;
-        }
-
-        // Avoid reloading the same track
-        if (state.currentTrack?.id === track.id) {
-          return;
-        }
-
-        // Update queue with a single track
-        set({
-          currentTrack: track,
-          queue: [track],
-          currentQueueIndex: 0,
-          isLoading: true,
-          isPlaying: false,
-          currentTime: 0,
-          duration: 0,
-          isError: false,
-          errorMessage: null,
-        });
-
-        loadAndPlayTrack({
-          track,
-          queueIndex: 0,
-          set,
-          get,
-        });
-      },
+      shuffleEnabled: false,
 
       // Internal: used by provider to sync audio time
       syncTime(currentTime: number, duration: number) {
         const newProgress = duration > 0 ? (currentTime / duration) * 100 : 0;
         set({ currentTime, duration, progress: newProgress });
       },
-      setError: (message) => {
-        set({
-          isError: !!message,
-          errorMessage: message,
-          isLoading: false,
-          isPlaying: false,
-        });
+
+      toggleMute() {
+        const newMuted = !get().isMuted;
+        set({ isMuted: newMuted });
       },
+
+      togglePlay() {
+        if (get().isLoading) {
+          return;
+        }
+        const state = get();
+        set({ isPlaying: !state.isPlaying });
+      },
+
+      unshuffle() {
+        set({ shuffleEnabled: false });
+      },
+      volume: 1,
     })),
     {
       name: "audio:ui:store",
       partialize: (state) => ({
+        currentQueueIndex: state.currentQueueIndex,
+        currentTime: state.currentTime,
         currentTrack: state.currentTrack,
-        queue: state.queue,
-        volume: state.volume,
+        insertMode: state.insertMode,
         isMuted: state.isMuted,
         playbackRate: state.playbackRate,
+        queue: state.queue,
         repeatMode: state.repeatMode,
         shuffleEnabled: state.shuffleEnabled,
-        currentTime: state.currentTime,
-        insertMode: state.insertMode,
-        currentQueueIndex: state.currentQueueIndex,
+        volume: state.volume,
       }),
     }
   )
 );
 
 export {
+  type AudioStore,
   calculateNextIndex,
   calculatePreviousIndex,
   canUseDOM,
-  useAudioStore,
-  type AudioStore,
-  type RepeatMode,
   type InsertMode,
+  type RepeatMode,
+  useAudioStore,
 };

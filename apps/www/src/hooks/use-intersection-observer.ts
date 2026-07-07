@@ -79,7 +79,7 @@ export function useIntersectionObserver(
       return;
     }
 
-    const observer = getSharedObserver({ threshold, root, rootMargin });
+    const observer = getSharedObserver({ root, rootMargin, threshold });
 
     observer.observe(element, (intersecting) => {
       setIntersecting(intersecting);

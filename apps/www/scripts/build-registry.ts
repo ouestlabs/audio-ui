@@ -49,24 +49,24 @@ const STYLES = [
 
 // Types
 interface RegistryItemFile {
-  path: string;
-  type: string;
   content?: string;
+  path: string;
   target?: string;
+  type: string;
 }
 
 interface RegistryItem {
+  categories?: string[];
+  cssVars?: Record<string, any>;
+  dependencies?: string[];
+  description?: string;
+  devDependencies?: string[];
+  files?: RegistryItemFile[];
+  meta?: Record<string, unknown>;
   name: string;
+  registryDependencies?: string[];
   title: string;
   type: string;
-  description?: string;
-  files?: RegistryItemFile[];
-  registryDependencies?: string[];
-  dependencies?: string[];
-  devDependencies?: string[];
-  categories?: string[];
-  meta?: Record<string, unknown>;
-  cssVars?: Record<string, any>;
 }
 
 interface MetadataData {
@@ -311,10 +311,10 @@ async function buildRegistryItem(
     }
 
     files.push({
-      path: filePath.split("/").pop() || filePath,
-      type: fileType,
       content: content.trim(),
+      path: filePath.split("/").pop() || filePath,
       target,
+      type: fileType,
     });
   }
 
@@ -327,15 +327,15 @@ async function buildRegistryItem(
 
   return {
     $schema: "https://ui.shadcn.com/schema/registry-item.json",
-    name: itemMetadata.name,
-    type: itemMetadata.type,
-    title: itemMetadata.title,
-    description: itemMetadata.description,
-    dependencies: itemMetadata.dependencies,
-    devDependencies: itemMetadata.devDependencies,
-    registryDependencies: itemMetadata.registryDependencies,
-    files,
     cssVars: itemMetadata.cssVars,
+    dependencies: itemMetadata.dependencies,
+    description: itemMetadata.description,
+    devDependencies: itemMetadata.devDependencies,
+    files,
+    name: itemMetadata.name,
+    registryDependencies: itemMetadata.registryDependencies,
+    title: itemMetadata.title,
+    type: itemMetadata.type,
   };
 }
 
@@ -414,7 +414,7 @@ async function main() {
 
   // Clean existing output
   try {
-    await fs.rm(outputRoot, { recursive: true, force: true });
+    await fs.rm(outputRoot, { force: true, recursive: true });
   } catch {}
 
   let totalFiles = 0;
@@ -460,13 +460,13 @@ async function main() {
 
   // Write styles/index.json
   const stylesIndex = [
-    { name: "default", label: "Default" },
+    { label: "Default", name: "default" },
     ...styleNames.map((name) => ({
-      name,
       label: name
         .split("-")
         .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
         .join(" "),
+      name,
     })),
   ];
   await fs.writeFile(

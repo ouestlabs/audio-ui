@@ -1,10 +1,9 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Menubar as MenubarPrimitive } from "radix-ui"
-
-import { cn } from "@/registry/bases/radix/lib/utils"
-import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder"
+import { Menubar as MenubarPrimitive } from "radix-ui";
+import type * as React from "react";
+import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder";
+import { cn } from "@/registry/bases/radix/lib/utils";
 
 function Menubar({
   className,
@@ -12,29 +11,29 @@ function Menubar({
 }: React.ComponentProps<typeof MenubarPrimitive.Root>) {
   return (
     <MenubarPrimitive.Root
-      data-slot="menubar"
       className={cn("cn-menubar flex items-center", className)}
+      data-slot="menubar"
       {...props}
     />
-  )
+  );
 }
 
 function MenubarMenu({
   ...props
 }: React.ComponentProps<typeof MenubarPrimitive.Menu>) {
-  return <MenubarPrimitive.Menu data-slot="menubar-menu" {...props} />
+  return <MenubarPrimitive.Menu data-slot="menubar-menu" {...props} />;
 }
 
 function MenubarGroup({
   ...props
 }: React.ComponentProps<typeof MenubarPrimitive.Group>) {
-  return <MenubarPrimitive.Group data-slot="menubar-group" {...props} />
+  return <MenubarPrimitive.Group data-slot="menubar-group" {...props} />;
 }
 
 function MenubarPortal({
   ...props
 }: React.ComponentProps<typeof MenubarPrimitive.Portal>) {
-  return <MenubarPrimitive.Portal data-slot="menubar-portal" {...props} />
+  return <MenubarPrimitive.Portal data-slot="menubar-portal" {...props} />;
 }
 
 function MenubarRadioGroup({
@@ -42,7 +41,7 @@ function MenubarRadioGroup({
 }: React.ComponentProps<typeof MenubarPrimitive.RadioGroup>) {
   return (
     <MenubarPrimitive.RadioGroup data-slot="menubar-radio-group" {...props} />
-  )
+  );
 }
 
 function MenubarTrigger({
@@ -51,14 +50,14 @@ function MenubarTrigger({
 }: React.ComponentProps<typeof MenubarPrimitive.Trigger>) {
   return (
     <MenubarPrimitive.Trigger
-      data-slot="menubar-trigger"
       className={cn(
         "cn-menubar-trigger flex items-center outline-hidden select-none",
         className
       )}
+      data-slot="menubar-trigger"
       {...props}
     />
-  )
+  );
 }
 
 function MenubarContent({
@@ -71,18 +70,18 @@ function MenubarContent({
   return (
     <MenubarPortal>
       <MenubarPrimitive.Content
-        data-slot="menubar-content"
         align={align}
         alignOffset={alignOffset}
-        sideOffset={sideOffset}
         className={cn(
           "cn-menubar-content cn-menu-target cn-menu-translucent z-50 origin-(--radix-menubar-content-transform-origin) overflow-hidden",
           className
         )}
+        data-slot="menubar-content"
+        sideOffset={sideOffset}
         {...props}
       />
     </MenubarPortal>
-  )
+  );
 }
 
 function MenubarItem({
@@ -91,21 +90,21 @@ function MenubarItem({
   variant = "default",
   ...props
 }: React.ComponentProps<typeof MenubarPrimitive.Item> & {
-  inset?: boolean
-  variant?: "default" | "destructive"
+  inset?: boolean;
+  variant?: "default" | "destructive";
 }) {
   return (
     <MenubarPrimitive.Item
-      data-slot="menubar-item"
-      data-inset={inset}
-      data-variant={variant}
       className={cn(
         "cn-menubar-item group/menubar-item relative flex cursor-default items-center outline-hidden select-none data-disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0",
         className
       )}
+      data-inset={inset}
+      data-slot="menubar-item"
+      data-variant={variant}
       {...props}
     />
-  )
+  );
 }
 
 function MenubarCheckboxItem({
@@ -115,33 +114,33 @@ function MenubarCheckboxItem({
   inset,
   ...props
 }: React.ComponentProps<typeof MenubarPrimitive.CheckboxItem> & {
-  inset?: boolean
+  inset?: boolean;
 }) {
   return (
     <MenubarPrimitive.CheckboxItem
-      data-slot="menubar-checkbox-item"
-      data-inset={inset}
+      checked={checked}
       className={cn(
         "cn-menubar-checkbox-item relative flex cursor-default items-center outline-hidden select-none data-disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0",
         className
       )}
-      checked={checked}
+      data-inset={inset}
+      data-slot="menubar-checkbox-item"
       {...props}
     >
       <span className="cn-menubar-checkbox-item-indicator pointer-events-none absolute flex items-center justify-center">
         <MenubarPrimitive.ItemIndicator>
           <IconPlaceholder
-            lucide="CheckIcon"
-            tabler="IconCheck"
             hugeicons="Tick02Icon"
+            lucide="CheckIcon"
             phosphor="CheckIcon"
             remixicon="RiCheckLine"
+            tabler="IconCheck"
           />
         </MenubarPrimitive.ItemIndicator>
       </span>
       {children}
     </MenubarPrimitive.CheckboxItem>
-  )
+  );
 }
 
 function MenubarRadioItem({
@@ -150,32 +149,32 @@ function MenubarRadioItem({
   inset,
   ...props
 }: React.ComponentProps<typeof MenubarPrimitive.RadioItem> & {
-  inset?: boolean
+  inset?: boolean;
 }) {
   return (
     <MenubarPrimitive.RadioItem
-      data-slot="menubar-radio-item"
-      data-inset={inset}
       className={cn(
         "cn-menubar-radio-item relative flex cursor-default items-center outline-hidden select-none data-disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0",
         className
       )}
+      data-inset={inset}
+      data-slot="menubar-radio-item"
       {...props}
     >
       <span className="cn-menubar-radio-item-indicator pointer-events-none absolute flex items-center justify-center">
         <MenubarPrimitive.ItemIndicator>
           <IconPlaceholder
-            lucide="CheckIcon"
-            tabler="IconCheck"
             hugeicons="Tick02Icon"
+            lucide="CheckIcon"
             phosphor="CheckIcon"
             remixicon="RiCheckLine"
+            tabler="IconCheck"
           />
         </MenubarPrimitive.ItemIndicator>
       </span>
       {children}
     </MenubarPrimitive.RadioItem>
-  )
+  );
 }
 
 function MenubarLabel({
@@ -183,16 +182,16 @@ function MenubarLabel({
   inset,
   ...props
 }: React.ComponentProps<typeof MenubarPrimitive.Label> & {
-  inset?: boolean
+  inset?: boolean;
 }) {
   return (
     <MenubarPrimitive.Label
-      data-slot="menubar-label"
-      data-inset={inset}
       className={cn("cn-menubar-label", className)}
+      data-inset={inset}
+      data-slot="menubar-label"
       {...props}
     />
-  )
+  );
 }
 
 function MenubarSeparator({
@@ -201,11 +200,11 @@ function MenubarSeparator({
 }: React.ComponentProps<typeof MenubarPrimitive.Separator>) {
   return (
     <MenubarPrimitive.Separator
-      data-slot="menubar-separator"
       className={cn("cn-menubar-separator -mx-1 my-1 h-px", className)}
+      data-slot="menubar-separator"
       {...props}
     />
-  )
+  );
 }
 
 function MenubarShortcut({
@@ -214,17 +213,17 @@ function MenubarShortcut({
 }: React.ComponentProps<"span">) {
   return (
     <span
-      data-slot="menubar-shortcut"
       className={cn("cn-menubar-shortcut ml-auto", className)}
+      data-slot="menubar-shortcut"
       {...props}
     />
-  )
+  );
 }
 
 function MenubarSub({
   ...props
 }: React.ComponentProps<typeof MenubarPrimitive.Sub>) {
-  return <MenubarPrimitive.Sub data-slot="menubar-sub" {...props} />
+  return <MenubarPrimitive.Sub data-slot="menubar-sub" {...props} />;
 }
 
 function MenubarSubTrigger({
@@ -233,29 +232,29 @@ function MenubarSubTrigger({
   children,
   ...props
 }: React.ComponentProps<typeof MenubarPrimitive.SubTrigger> & {
-  inset?: boolean
+  inset?: boolean;
 }) {
   return (
     <MenubarPrimitive.SubTrigger
-      data-slot="menubar-sub-trigger"
-      data-inset={inset}
       className={cn(
         "cn-menubar-sub-trigger flex cursor-default items-center outline-none select-none",
         className
       )}
+      data-inset={inset}
+      data-slot="menubar-sub-trigger"
       {...props}
     >
       {children}
       <IconPlaceholder
-        lucide="ChevronRightIcon"
-        tabler="IconChevronRight"
+        className="cn-rtl-flip ml-auto size-4"
         hugeicons="ArrowRight01Icon"
+        lucide="ChevronRightIcon"
         phosphor="CaretRightIcon"
         remixicon="RiArrowRightSLine"
-        className="cn-rtl-flip ml-auto size-4"
+        tabler="IconChevronRight"
       />
     </MenubarPrimitive.SubTrigger>
-  )
+  );
 }
 
 function MenubarSubContent({
@@ -264,31 +263,31 @@ function MenubarSubContent({
 }: React.ComponentProps<typeof MenubarPrimitive.SubContent>) {
   return (
     <MenubarPrimitive.SubContent
-      data-slot="menubar-sub-content"
       className={cn(
         "cn-menubar-sub-content cn-menu-target cn-menu-translucent z-50 origin-(--radix-menubar-content-transform-origin) overflow-hidden",
         className
       )}
+      data-slot="menubar-sub-content"
       {...props}
     />
-  )
+  );
 }
 
 export {
   Menubar,
-  MenubarPortal,
-  MenubarMenu,
-  MenubarTrigger,
+  MenubarCheckboxItem,
   MenubarContent,
   MenubarGroup,
-  MenubarSeparator,
-  MenubarLabel,
   MenubarItem,
-  MenubarShortcut,
-  MenubarCheckboxItem,
+  MenubarLabel,
+  MenubarMenu,
+  MenubarPortal,
   MenubarRadioGroup,
   MenubarRadioItem,
+  MenubarSeparator,
+  MenubarShortcut,
   MenubarSub,
-  MenubarSubTrigger,
   MenubarSubContent,
-}
+  MenubarSubTrigger,
+  MenubarTrigger,
+};

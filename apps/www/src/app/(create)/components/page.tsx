@@ -59,9 +59,7 @@ const featuredCategories = [
 ] as const;
 
 export const metadata: Metadata = buildPageMetadata({
-  title: `${title} - audio/ui`,
   description,
-  path: "/components",
   keywords: [
     "audio ui components",
     "react audio components",
@@ -73,6 +71,8 @@ export const metadata: Metadata = buildPageMetadata({
     "React components",
     "Tailwind components",
   ],
+  path: "/components",
+  title: `${title} - audio/ui`,
 });
 
 export default function ComponentsPage() {

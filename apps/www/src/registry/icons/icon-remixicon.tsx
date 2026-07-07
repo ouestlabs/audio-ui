@@ -1,3 +1,3 @@
-import { createIconLoader } from "./create-icon-loader"
+import { createIconLoader } from "./create-icon-loader";
 
-export const IconRemixicon = createIconLoader("remixicon")
+export const IconRemixicon = createIconLoader("remixicon");

@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import type * as React from "react";
 import { Tabs } from "@/components/ui/tabs";
 import { DEFAULT_CONFIG, useConfig } from "@/hooks/use-config";
 import { useMounted } from "@/hooks/use-mounted";
