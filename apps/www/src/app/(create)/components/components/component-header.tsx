@@ -29,7 +29,7 @@ export function ComponentHeader() {
   const showGridToggle = Boolean(currentCategory) || hasSearch;
 
   return (
-    <div className="sticky top-(--header-height) z-10 flex h-[51px] items-center gap-2 border-site-border/80 border-b bg-site-background px-2">
+    <div className="sticky top-(--header-height) z-20 flex h-[51px] items-center gap-2 border-site-border/80 border-b bg-site-background px-2">
       <ComponentHeaderMobileDrawer />
 
       {!open && (
