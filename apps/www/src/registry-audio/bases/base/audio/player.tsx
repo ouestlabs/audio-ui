@@ -67,7 +67,10 @@ import {
 } from "@/registry-audio/bases/base/audio/sortable-list";
 import { useAudio } from "@/registry-audio/bases/base/hooks/use-audio";
 import { useAudioProvider } from "@/registry-audio/bases/base/hooks/use-audio-provider";
-import { useAudioStore } from "@/registry-audio/bases/base/lib/audio-store";
+import {
+  type AudioStore,
+  useAudioStore,
+} from "@/registry-audio/bases/base/lib/audio-store";
 import {
   formatDuration,
   type Track,
@@ -82,6 +85,92 @@ const PLAYBACK_SPEEDS = [
   { value: 2, label: "2x" },
 ] as const;
 
+type AudioStoreApi = typeof useAudioStore;
+
+const AudioStoreContext = React.createContext<AudioStoreApi | null>(null);
+
+/**
+ * Reads the audio store through context so player controls depend on the
+ * context interface, not a hard import. Falls back to the global store when
+ * used outside an `AudioProvider`, keeping standalone controls working.
+ */
+function useAudioStoreSelector<T>(selector: (state: AudioStore) => T): T {
+  const store = React.use(AudioStoreContext) ?? useAudioStore;
+  return store(selector);
+}
+
+/** Derives whether the current media is a live stream from its duration. */
+function useIsLiveStream(): boolean {
+  const duration = useAudioStoreSelector((state) => state.duration);
+  const { htmlAudio } = useAudio();
+  return htmlAudio.isLive(duration);
+}
+
+let spacebarRefCount = 0;
+let removeSpacebarListener: (() => void) | null = null;
+
+function useSpacebarTogglePlay() {
+  React.useEffect(() => {
+    spacebarRefCount += 1;
+    if (spacebarRefCount === 1) {
+      const handleKeyDown = (event: KeyboardEvent) => {
+        if (event.code === "Space" && event.target === document.body) {
+          event.preventDefault();
+          useAudioStore.getState().togglePlay();
+        }
+      };
+      document.addEventListener("keydown", handleKeyDown);
+      removeSpacebarListener = () => {
+        document.removeEventListener("keydown", handleKeyDown);
+      };
+    }
+    return () => {
+      spacebarRefCount -= 1;
+      if (spacebarRefCount === 0) {
+        removeSpacebarListener?.();
+        removeSpacebarListener = null;
+      }
+    };
+  }, []);
+}
+
+// Shared glyphs for icons that appear across multiple player controls.
+function PlayGlyph() {
+  return (
+    <IconPlaceholder
+      hugeicons="PlayIcon"
+      lucide="PlayIcon"
+      phosphor="PlayIcon"
+      remixicon="RiPlayLine"
+      tabler="IconPlayerPlay"
+    />
+  );
+}
+
+function PauseGlyph() {
+  return (
+    <IconPlaceholder
+      hugeicons="PauseIcon"
+      lucide="PauseIcon"
+      phosphor="PauseIcon"
+      remixicon="RiPauseLine"
+      tabler="IconPlayerPause"
+    />
+  );
+}
+
+function MutedGlyph() {
+  return (
+    <IconPlaceholder
+      hugeicons="VolumeOffIcon"
+      lucide="VolumeXIcon"
+      phosphor="SpeakerSlashIcon"
+      remixicon="RiVolumeMuteFill"
+      tabler="IconVolumeOff"
+    />
+  );
+}
+
 function AudioProvider({
   tracks,
   children,
@@ -90,7 +179,9 @@ function AudioProvider({
   children: React.ReactNode;
 }) {
   useAudioProvider({ tracks });
-  return <>{children}</>;
+  return (
+    <AudioStoreContext value={useAudioStore}>{children}</AudioStoreContext>
+  );
 }
 const demoTracks: Track[] = [
   {
@@ -265,10 +356,9 @@ const AudioPlayerTimeDisplay = ({
   remaining,
   ...props
 }: AudioPlayerTimeDisplayProps) => {
-  const currentTime = useAudioStore((state) => state.currentTime);
-  const duration = useAudioStore((state) => state.duration);
-  const { htmlAudio } = useAudio();
-  const isLiveStream = htmlAudio.isLive(duration);
+  const currentTime = useAudioStoreSelector((state) => state.currentTime);
+  const duration = useAudioStoreSelector((state) => state.duration);
+  const isLiveStream = useIsLiveStream();
 
   const formattedCurrentTime = formatDuration(currentTime);
   const formattedRemainingTime = formatDuration(duration - currentTime);
@@ -317,12 +407,11 @@ const AudioPlayerSeekBar = ({
   React.ComponentProps<typeof Transport>,
   "value" | "onSeek" | "bufferedValue"
 >) => {
-  const currentTime = useAudioStore((state) => state.currentTime);
-  const duration = useAudioStore((state) => state.duration);
-  const seek = useAudioStore((state) => state.seek);
-  const bufferedTime = useAudioStore((state) => state.bufferedTime);
-  const { htmlAudio } = useAudio();
-  const isLiveStream = htmlAudio.isLive(duration);
+  const currentTime = useAudioStoreSelector((state) => state.currentTime);
+  const duration = useAudioStoreSelector((state) => state.duration);
+  const seek = useAudioStoreSelector((state) => state.seek);
+  const bufferedTime = useAudioStoreSelector((state) => state.bufferedTime);
+  const isLiveStream = useIsLiveStream();
 
   let progress = 0;
   if (isLiveStream) {
@@ -370,25 +459,17 @@ const AudioPlayerVolume = ({
   size?: VariantProps<typeof buttonVariants>["size"];
   variant?: VariantProps<typeof buttonVariants>["variant"];
 }) => {
-  const volume = useAudioStore((state) => state.volume);
-  const isMuted = useAudioStore((state) => state.isMuted);
-  const setVolume = useAudioStore((state) => state.setVolume);
-  const toggleMute = useAudioStore((state) => state.toggleMute);
+  const volume = useAudioStoreSelector((state) => state.volume);
+  const isMuted = useAudioStoreSelector((state) => state.isMuted);
+  const setVolume = useAudioStoreSelector((state) => state.setVolume);
+  const toggleMute = useAudioStoreSelector((state) => state.toggleMute);
 
   const volumePercent = Math.round(volume * 100);
   const effectiveVolumePercent = isMuted ? 0 : volumePercent;
 
   const renderVolumeIcon = () => {
     if (isMuted || volume === 0) {
-      return (
-        <IconPlaceholder
-          hugeicons="VolumeOffIcon"
-          lucide="VolumeXIcon"
-          phosphor="SpeakerSlashIcon"
-          remixicon="RiVolumeMuteFill"
-          tabler="IconVolumeOff"
-        />
-      );
+      return <MutedGlyph />;
     }
     if (volumePercent < 33) {
       return (
@@ -483,13 +564,7 @@ const AudioPlayerVolume = ({
                     isMuted ? "opacity-40" : "opacity-60"
                   )}
                 >
-                  <IconPlaceholder
-                    hugeicons="VolumeOffIcon"
-                    lucide="VolumeXIcon"
-                    phosphor="SpeakerSlashIcon"
-                    remixicon="RiVolumeMuteFill"
-                    tabler="IconVolumeOff"
-                  />
+                  <MutedGlyph />
                 </span>
               </AudioPlayerButton>
 
@@ -537,27 +612,14 @@ const AudioPlayerPlay = React.memo(
     variant = "ghost",
     ...props
   }: React.ComponentProps<typeof AudioPlayerButton>) => {
-    const isPlaying = useAudioStore((state) => state.isPlaying);
-    const isLoading = useAudioStore((state) => state.isLoading);
-    const isBuffering = useAudioStore((state) => state.isBuffering);
-    const currentTrack = useAudioStore((state) => state.currentTrack);
+    const isPlaying = useAudioStoreSelector((state) => state.isPlaying);
+    const isLoading = useAudioStoreSelector((state) => state.isLoading);
+    const isBuffering = useAudioStoreSelector((state) => state.isBuffering);
+    const currentTrack = useAudioStoreSelector((state) => state.currentTrack);
 
-    const togglePlay = useAudioStore((state) => state.togglePlay);
+    const togglePlay = useAudioStoreSelector((state) => state.togglePlay);
 
-    const handleKeyPress = React.useCallback(
-      (event: KeyboardEvent) => {
-        if (event.code === "Space" && event.target === document.body) {
-          event.preventDefault();
-          togglePlay();
-        }
-      },
-      [togglePlay]
-    );
-
-    React.useEffect(() => {
-      document.addEventListener("keydown", handleKeyPress);
-      return () => document.removeEventListener("keydown", handleKeyPress);
-    }, [handleKeyPress]);
+    useSpacebarTogglePlay();
 
     const showSpinner = isLoading || isBuffering;
 
@@ -582,24 +644,8 @@ const AudioPlayerPlay = React.memo(
         {...props}
       >
         {showSpinner && <Spinner />}
-        {!showSpinner && isPlaying && (
-          <IconPlaceholder
-            hugeicons="PauseIcon"
-            lucide="PauseIcon"
-            phosphor="PauseIcon"
-            remixicon="RiPauseLine"
-            tabler="IconPlayerPause"
-          />
-        )}
-        {!(showSpinner || isPlaying) && (
-          <IconPlaceholder
-            hugeicons="PlayIcon"
-            lucide="PlayIcon"
-            phosphor="PlayIcon"
-            remixicon="RiPlayLine"
-            tabler="IconPlayerPlay"
-          />
-        )}
+        {!showSpinner && isPlaying && <PauseGlyph />}
+        {!(showSpinner || isPlaying) && <PlayGlyph />}
       </AudioPlayerButton>
     );
   }
@@ -613,12 +659,10 @@ const AudioPlayerRewind = React.memo(
     variant = "ghost",
     ...props
   }: React.ComponentProps<typeof AudioPlayerButton>) => {
-    const currentTime = useAudioStore((state) => state.currentTime);
-    const duration = useAudioStore((state) => state.duration);
-    const seek = useAudioStore((state) => state.seek);
-    const currentTrack = useAudioStore((state) => state.currentTrack);
-    const { htmlAudio } = useAudio();
-    const isLiveStream = htmlAudio.isLive(duration);
+    const currentTime = useAudioStoreSelector((state) => state.currentTime);
+    const seek = useAudioStoreSelector((state) => state.seek);
+    const currentTrack = useAudioStoreSelector((state) => state.currentTrack);
+    const isLiveStream = useIsLiveStream();
 
     const seekBackward = React.useCallback(
       (seconds = 10) => {
@@ -670,12 +714,11 @@ const AudioPlayerFastForward = React.memo(
     variant = "ghost",
     ...props
   }: React.ComponentProps<typeof AudioPlayerButton>) => {
-    const currentTime = useAudioStore((state) => state.currentTime);
-    const seek = useAudioStore((state) => state.seek);
-    const duration = useAudioStore((state) => state.duration);
-    const currentTrack = useAudioStore((state) => state.currentTrack);
-    const { htmlAudio } = useAudio();
-    const isLiveStream = htmlAudio.isLive(duration);
+    const currentTime = useAudioStoreSelector((state) => state.currentTime);
+    const seek = useAudioStoreSelector((state) => state.seek);
+    const duration = useAudioStoreSelector((state) => state.duration);
+    const currentTrack = useAudioStoreSelector((state) => state.currentTrack);
+    const isLiveStream = useIsLiveStream();
 
     const seekForward = React.useCallback(
       (seconds = 10) => {
@@ -729,12 +772,14 @@ const AudioPlayerSkipForward = React.memo(
     variant = "ghost",
     ...props
   }: React.ComponentProps<typeof AudioPlayerButton>) => {
-    const repeatMode = useAudioStore((state) => state.repeatMode);
-    const queueLength = useAudioStore((state) => state.queue.length);
-    const currentQueueIndex = useAudioStore((state) => state.currentQueueIndex);
-    const currentTrack = useAudioStore((state) => state.currentTrack);
+    const repeatMode = useAudioStoreSelector((state) => state.repeatMode);
+    const queueLength = useAudioStoreSelector((state) => state.queue.length);
+    const currentQueueIndex = useAudioStoreSelector(
+      (state) => state.currentQueueIndex
+    );
+    const currentTrack = useAudioStoreSelector((state) => state.currentTrack);
 
-    const next = useAudioStore((state) => state.next);
+    const next = useAudioStoreSelector((state) => state.next);
 
     const disableNext =
       !currentTrack ||
@@ -779,11 +824,13 @@ const AudioPlayerSkipBack = React.memo(
     variant = "ghost",
     ...props
   }: React.ComponentProps<typeof AudioPlayerButton>) => {
-    const repeatMode = useAudioStore((state) => state.repeatMode);
-    const currentQueueIndex = useAudioStore((state) => state.currentQueueIndex);
-    const currentTrack = useAudioStore((state) => state.currentTrack);
+    const repeatMode = useAudioStoreSelector((state) => state.repeatMode);
+    const currentQueueIndex = useAudioStoreSelector(
+      (state) => state.currentQueueIndex
+    );
+    const currentTrack = useAudioStoreSelector((state) => state.currentTrack);
 
-    const previous = useAudioStore((state) => state.previous);
+    const previous = useAudioStoreSelector((state) => state.previous);
 
     const disablePrevious =
       !currentTrack || (currentQueueIndex === 0 && repeatMode !== "all");
@@ -918,12 +965,14 @@ function AudioTrack({
   actions,
   className,
 }: AudioTrackProps) {
-  const queue = useAudioStore((state) => state.queue);
-  const currentTrack = useAudioStore((state) => state.currentTrack);
-  const isPlaying = useAudioStore((state) => state.isPlaying);
-  const duration = useAudioStore((state) => state.duration);
-  const togglePlay = useAudioStore((state) => state.togglePlay);
-  const setQueueAndPlay = useAudioStore((state) => state.setQueueAndPlay);
+  const queue = useAudioStoreSelector((state) => state.queue);
+  const currentTrack = useAudioStoreSelector((state) => state.currentTrack);
+  const isPlaying = useAudioStoreSelector((state) => state.isPlaying);
+  const duration = useAudioStoreSelector((state) => state.duration);
+  const togglePlay = useAudioStoreSelector((state) => state.togglePlay);
+  const setQueueAndPlay = useAudioStoreSelector(
+    (state) => state.setQueueAndPlay
+  );
   const { htmlAudio } = useAudio();
 
   const track =
@@ -1075,23 +1124,7 @@ function AudioTrackPlayPauseAction({ className }: { className?: string }) {
       title={title}
       variant="ghost"
     >
-      {isPlaying ? (
-        <IconPlaceholder
-          hugeicons="PauseIcon"
-          lucide="PauseIcon"
-          phosphor="PauseIcon"
-          remixicon="RiPauseLine"
-          tabler="IconPlayerPause"
-        />
-      ) : (
-        <IconPlaceholder
-          hugeicons="PlayIcon"
-          lucide="PlayIcon"
-          phosphor="PlayIcon"
-          remixicon="RiPlayLine"
-          tabler="IconPlayerPlay"
-        />
-      )}
+      {isPlaying ? <PauseGlyph /> : <PlayGlyph />}
     </Button>
   );
 }
@@ -1162,7 +1195,7 @@ function resolveTrackActions(
 const audioTrackListVariants = cva("w-full", {
   variants: {
     variant: {
-      default: "space-y-2",
+      default: "flex flex-col gap-2",
       grid: "grid grid-cols-1 gap-2 xl:grid-cols-2",
     },
   },
@@ -1199,12 +1232,16 @@ function AudioTrackList({
   filterFn,
   className,
 }: AudioTrackListProps) {
-  const queue = useAudioStore((state) => state.queue);
-  const currentTrack = useAudioStore((state) => state.currentTrack);
-  const setQueueAndPlay = useAudioStore((state) => state.setQueueAndPlay);
-  const togglePlay = useAudioStore((state) => state.togglePlay);
-  const setQueue = useAudioStore((state) => state.setQueue);
-  const currentQueueIndex = useAudioStore((state) => state.currentQueueIndex);
+  const queue = useAudioStoreSelector((state) => state.queue);
+  const currentTrack = useAudioStoreSelector((state) => state.currentTrack);
+  const setQueueAndPlay = useAudioStoreSelector(
+    (state) => state.setQueueAndPlay
+  );
+  const togglePlay = useAudioStoreSelector((state) => state.togglePlay);
+  const setQueue = useAudioStoreSelector((state) => state.setQueue);
+  const currentQueueIndex = useAudioStoreSelector(
+    (state) => state.currentQueueIndex
+  );
 
   let tracks = externalTracks ?? queue;
 
@@ -1387,8 +1424,10 @@ const AudioQueueRepeatMode = ({
   className,
   ...props
 }: React.ComponentProps<typeof AudioPlayerButton>) => {
-  const repeatMode = useAudioStore((state) => state.repeatMode);
-  const changeRepeatMode = useAudioStore((state) => state.changeRepeatMode);
+  const repeatMode = useAudioStoreSelector((state) => state.repeatMode);
+  const changeRepeatMode = useAudioStoreSelector(
+    (state) => state.changeRepeatMode
+  );
 
   let repeatTooltip = "Disable repeat";
   if (repeatMode === "one") {
@@ -1436,9 +1475,9 @@ const AudioQueueShuffle = ({
   className,
   ...props
 }: React.ComponentProps<typeof AudioPlayerButton>) => {
-  const shuffle = useAudioStore((state) => state.shuffle);
-  const unshuffle = useAudioStore((state) => state.unshuffle);
-  const shuffleEnabled = useAudioStore((state) => state.shuffleEnabled);
+  const shuffle = useAudioStoreSelector((state) => state.shuffle);
+  const unshuffle = useAudioStoreSelector((state) => state.unshuffle);
+  const shuffleEnabled = useAudioStoreSelector((state) => state.shuffleEnabled);
 
   const handleShuffle = React.useCallback(() => {
     if (shuffleEnabled) {
@@ -1480,10 +1519,10 @@ const AudioQueuePreferences = ({
   tooltipLabel = "Queue preferences",
   ...props
 }: React.ComponentProps<typeof AudioPlayerButton>) => {
-  const repeatMode = useAudioStore((state) => state.repeatMode);
-  const setRepeatMode = useAudioStore((state) => state.setRepeatMode);
-  const insertMode = useAudioStore((state) => state.insertMode);
-  const setInsertMode = useAudioStore((state) => state.setInsertMode);
+  const repeatMode = useAudioStoreSelector((state) => state.repeatMode);
+  const setRepeatMode = useAudioStoreSelector((state) => state.setRepeatMode);
+  const insertMode = useAudioStoreSelector((state) => state.insertMode);
+  const setInsertMode = useAudioStoreSelector((state) => state.setInsertMode);
 
   return (
     <DropdownMenu>
@@ -1551,10 +1590,15 @@ const AudioQueue = React.memo(
     emptyLabel = "No tracks found",
     emptyDescription = "Try searching for a different track",
   }: AudioQueueProps) => {
-    const togglePlay = useAudioStore((state) => state.togglePlay);
-    const setQueueAndPlay = useAudioStore((state) => state.setQueueAndPlay);
-    const clearQueue = useAudioStore((state) => state.clearQueue);
-    const removeFromQueue = useAudioStore((state) => state.removeFromQueue);
+    const togglePlay = useAudioStoreSelector((state) => state.togglePlay);
+    const setQueueAndPlay = useAudioStoreSelector(
+      (state) => state.setQueueAndPlay
+    );
+    const clearQueue = useAudioStoreSelector((state) => state.clearQueue);
+    const removeFromQueue = useAudioStoreSelector(
+      (state) => state.removeFromQueue
+    );
+    const store = React.use(AudioStoreContext) ?? useAudioStore;
 
     const [dialogOpen, setDialogOpen] = React.useState(false);
     const [searchQuery, setSearchQuery] = React.useState("");
@@ -1564,7 +1608,7 @@ const AudioQueue = React.memo(
 
     const handleTrackSelect = React.useCallback(
       (index: number) => {
-        const currentState = useAudioStore.getState();
+        const currentState = store.getState();
         const currentQueue = currentState.queue;
         const currentTrackId = currentState.currentTrack?.id;
         let filtered = currentQueue;
@@ -1597,7 +1641,7 @@ const AudioQueue = React.memo(
         onTrackSelect?.(trackIndex);
         setDialogOpen(false);
       },
-      [normalizedSearchQuery, togglePlay, setQueueAndPlay, onTrackSelect]
+      [normalizedSearchQuery, togglePlay, setQueueAndPlay, onTrackSelect, store]
     );
 
     const handleTrackRemove = React.useCallback(
@@ -1702,11 +1746,11 @@ function AudioPlaybackSpeed({
   speeds = PLAYBACK_SPEEDS,
   ...props
 }: AudioPlaybackSpeedProps) {
-  const playbackRate = useAudioStore((state) => state.playbackRate);
-  const setPlaybackRate = useAudioStore((state) => state.setPlaybackRate);
-  const duration = useAudioStore((state) => state.duration);
-  const { htmlAudio } = useAudio();
-  const isLiveStream = htmlAudio.isLive(duration);
+  const playbackRate = useAudioStoreSelector((state) => state.playbackRate);
+  const setPlaybackRate = useAudioStoreSelector(
+    (state) => state.setPlaybackRate
+  );
+  const isLiveStream = useIsLiveStream();
 
   const currentSpeed =
     speeds.find((s) => s.value === playbackRate) || speeds[2];
