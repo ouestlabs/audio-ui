@@ -112,7 +112,7 @@ export function MobileNav({
       />
       <PopoverContent
         align="start"
-        className="scroll-fade-y no-scrollbar h-(--available-height) w-(--available-width) overflow-y-auto overscroll-contain"
+        className="scroll-fade-y no-scrollbar h-(--available-height) w-(--available-width) overflow-y-auto overscroll-contain rounded-2xl!"
         side="bottom"
         sideOffset={16}
       >

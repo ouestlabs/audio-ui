@@ -30,8 +30,6 @@ export default function BlockPlayer() {
             <AudioPlayerPlay />
             <AudioPlayerSkipForward />
           </AudioPlayerControlGroup>
-          <AudioQueueShuffle />
-          <AudioQueueRepeatMode />
           <AudioPlayerVolume />
           <AudioQueue />
         </AudioPlayerControlGroup>

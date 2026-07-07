@@ -3,6 +3,7 @@ title: Audio Player
 description: A composable audio player. One component, one install, fully owned by you.
 component: true
 base: base
+audioProvider: true
 ---
 
 <ComponentPreview styleName="base-nova" name="player-stacked-demo" />
@@ -41,7 +42,7 @@ npm install @phosphor-icons/react class-variance-authority @base-ui/react
 <Step>Install the required shadcn/ui primitives:</Step>
 
 ```bash
-npx shadcn@latest add avatar badge button command dialog dropdown-menu empty item scroll-area spinner toggle tooltip
+npx shadcn@latest add avatar badge button command dialog dropdown-menu empty item spinner toggle tooltip
 ```
 
 <Step>
@@ -238,17 +239,45 @@ Inherits all props from [Fader](/docs/components/base/fader) (except `value`, `o
 
 ### AudioTrack
 
-Renders a single track row.
+Renders a single track row. `media` and `actions` are composed, not configured — pass the pieces you want.
 
-| Prop       | Type                                                               | Default        | Description                                        |
-| ---------- | -------------------------------------------------------------------- | -------------- | ------------------------------------------------- |
-| `trackId`  | `string \| number`                                                 | -              | Look up a track from the queue by id (store mode). |
-| `track`    | `Track`                                                            | -              | Render a provided track object (controlled mode).  |
-| `index`    | `number`                                                           | -              | Display index (one-based when shown).              |
-| `onClick`  | `() => void`                                                       | -              | Called when the row is clicked.                    |
-| `onRemove` | `(trackId: string) => void`                                        | -              | Called when the remove action is triggered.        |
-| `media`    | `"cover" \| "drag-handle" \| "drag-handle-with-cover" \| "index"` | `"cover"`      | Left-side media variant.                           |
-| `actions`  | `"none" \| "play-pause" \| "remove" \| "play-pause-with-remove"`  | `"play-pause"` | Right-side action variant.                         |
+| Prop       | Type                         | Default | Description                                        |
+| ---------- | ---------------------------- | ------- | ------------------------------------------------- |
+| `trackId`  | `string \| number`           | -       | Look up a track from the queue by id (store mode). |
+| `track`    | `Track`                      | -       | Render a provided track object (controlled mode).  |
+| `index`    | `number`                     | -       | Display index, exposed to `AudioTrackIndex`.       |
+| `onClick`  | `() => void`                 | -       | Called when the row is clicked.                    |
+| `onRemove` | `(trackId: string) => void`  | -       | Enables `AudioTrackRemoveAction` when provided.    |
+| `media`    | `React.ReactNode`            | -       | Left-side content, e.g. `<AudioTrackCover />`.     |
+| `actions`  | `React.ReactNode`            | -       | Right-side content, e.g. `<AudioTrackPlayPauseAction />`. |
+
+```tsx
+<AudioTrack
+  trackId={track.id}
+  media={<AudioTrackCover />}
+  actions={<AudioTrackPlayPauseAction />}
+/>
+
+// Sortable row with remove support
+<AudioTrack
+  trackId={track.id}
+  media={
+    <>
+      <SortableDragHandle />
+      <AudioTrackCover />
+    </>
+  }
+  actions={
+    <>
+      <AudioTrackRemoveAction />
+      <AudioTrackPlayPauseAction />
+    </>
+  }
+  onRemove={handleRemove}
+/>
+```
+
+`AudioTrackCover`, `AudioTrackIndex`, `AudioTrackPlayPauseAction`, and `AudioTrackRemoveAction` read track state from context — they only work inside `AudioTrack`. `AudioTrackRemoveAction` renders nothing for the currently playing track or when `onRemove` isn't set.
 
 <Callout variant="info">
   <strong>Mode constraint:</strong> Use either <code>trackId</code> or <code>track</code>, not both. <code>trackId</code> requires an <code>AudioProvider</code> in the tree.

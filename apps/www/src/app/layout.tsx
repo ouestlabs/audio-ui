@@ -71,7 +71,12 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      className={cn("overscroll-none", "font-sans", inter.variable)}
+      className={cn(
+        "overscroll-none",
+        "no-scrollbar",
+        "font-sans",
+        inter.variable
+      )}
       data-scroll-behavior="smooth"
       lang="en"
       suppressHydrationWarning

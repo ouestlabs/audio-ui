@@ -93,7 +93,6 @@ export const audio: RegistryItem[] = [
       "@shadcn/empty",
       "@shadcn/avatar",
       "@shadcn/item",
-      "@shadcn/scroll-area",
     ],
     files: [
       {

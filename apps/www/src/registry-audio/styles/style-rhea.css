@@ -80,19 +80,19 @@
   }
 
   .cn-fader-thumb {
-    @apply rounded-2xl bg-card shadow-md ring-1 ring-foreground/10 transition-[color,box-shadow] hover:ring-4 hover:ring-ring/30 focus-visible:ring-4 focus-visible:ring-ring/30 active:ring-4 active:ring-ring/30 motion-reduce:transition-none;
+    @apply bg-card shadow-md ring-1 ring-foreground/10 transition-[color,box-shadow] hover:ring-4 hover:ring-ring/30 focus-visible:ring-4 focus-visible:ring-ring/30 active:ring-4 active:ring-ring/30 motion-reduce:transition-none;
   }
 
   .cn-fader-thumb-size-sm {
-    @apply data-[orientation=horizontal]:h-3.5 data-[orientation=vertical]:h-5 data-[orientation=horizontal]:w-5 data-[orientation=vertical]:w-3.5;
+    @apply rounded-[min(var(--radius-sm),8px)] data-[orientation=horizontal]:h-3.5 data-[orientation=vertical]:h-5 data-[orientation=horizontal]:w-5 data-[orientation=vertical]:w-3.5;
   }
 
   .cn-fader-thumb-size-default {
-    @apply data-[orientation=horizontal]:h-4 data-[orientation=vertical]:h-6 data-[orientation=horizontal]:w-6 data-[orientation=vertical]:w-4;
+    @apply rounded-[min(var(--radius-md),10px)] data-[orientation=horizontal]:h-4 data-[orientation=vertical]:h-6 data-[orientation=horizontal]:w-6 data-[orientation=vertical]:w-4;
   }
 
   .cn-fader-thumb-size-lg {
-    @apply data-[orientation=horizontal]:h-5 data-[orientation=vertical]:h-7 data-[orientation=horizontal]:w-7 data-[orientation=vertical]:w-5;
+    @apply rounded-[min(var(--radius-lg),12px)] data-[orientation=horizontal]:h-5 data-[orientation=vertical]:h-7 data-[orientation=horizontal]:w-7 data-[orientation=vertical]:w-5;
   }
 
   .cn-fader-thumb-inner-size-sm {
@@ -149,19 +149,19 @@
   }
 
   .cn-transport-thumb {
-    @apply rounded-2xl bg-card shadow-md ring-1 ring-foreground/10 transition-[color,box-shadow] hover:ring-4 hover:ring-ring/30 focus-visible:ring-4 focus-visible:ring-ring/30 active:ring-4 active:ring-ring/30 motion-reduce:transition-none;
+    @apply bg-card shadow-md ring-1 ring-foreground/10 transition-[color,box-shadow] hover:ring-4 hover:ring-ring/30 focus-visible:ring-4 focus-visible:ring-ring/30 active:ring-4 active:ring-ring/30 motion-reduce:transition-none;
   }
 
   .cn-transport-thumb-size-sm {
-    @apply data-[orientation=horizontal]:h-3.5 data-[orientation=vertical]:h-5 data-[orientation=horizontal]:w-5 data-[orientation=vertical]:w-3.5;
+    @apply rounded-[min(var(--radius-sm),8px)] data-[orientation=horizontal]:h-3.5 data-[orientation=vertical]:h-5 data-[orientation=horizontal]:w-5 data-[orientation=vertical]:w-3.5;
   }
 
   .cn-transport-thumb-size-default {
-    @apply data-[orientation=horizontal]:h-4 data-[orientation=vertical]:h-6 data-[orientation=horizontal]:w-6 data-[orientation=vertical]:w-4;
+    @apply rounded-[min(var(--radius-md),10px)] data-[orientation=horizontal]:h-4 data-[orientation=vertical]:h-6 data-[orientation=horizontal]:w-6 data-[orientation=vertical]:w-4;
   }
 
   .cn-transport-thumb-size-lg {
-    @apply data-[orientation=horizontal]:h-5 data-[orientation=vertical]:h-7 data-[orientation=horizontal]:w-7 data-[orientation=vertical]:w-5;
+    @apply rounded-[min(var(--radius-lg),12px)] data-[orientation=horizontal]:h-5 data-[orientation=vertical]:h-7 data-[orientation=horizontal]:w-7 data-[orientation=vertical]:w-5;
   }
 
   .cn-transport-thumb-inner-size-sm {
@@ -235,7 +235,7 @@
   }
 
   .cn-xypad-value {
-    @apply rounded-2xl bg-background/90 px-2 py-1 font-mono text-muted-foreground text-xs ring-1 ring-foreground/10 backdrop-blur-md;
+    @apply rounded-[min(var(--radius-2xl),12px)] bg-background/90 px-2 py-1 font-mono text-muted-foreground text-xs ring-1 ring-foreground/10 backdrop-blur-md;
   }
 
   /* MARK: Channel Strip */

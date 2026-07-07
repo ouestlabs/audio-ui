@@ -28,8 +28,6 @@ export default function AudioPlayerQueueDemo() {
             <AudioPlayerPlay />
             <AudioPlayerSkipForward />
           </AudioPlayerControlGroup>
-          <AudioQueueShuffle />
-          <AudioQueueRepeatMode />
           <AudioPlayerVolume />
           <AudioQueue />
         </AudioPlayerControlGroup>

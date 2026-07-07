@@ -1,7 +1,31 @@
 import type { Metadata } from "next";
+import { searchCatalog } from "@/lib/registry";
 import { buildPageMetadata } from "@/lib/seo";
 
-import Hero from "./components/hero";
+import { ComponentShowcase } from "./components/component-showcase";
+
+const SHOWCASE_NAMES = [
+  "block-player-widget",
+  "block-pocket-synth",
+  "block-wave-shaper",
+  "block-player",
+] as const;
+
+const SHOWCASE_FULL_WIDTH = new Set(["block-player", "block-player-widget"]);
+
+function getShowcaseCatalogItems() {
+  const catalog = searchCatalog("");
+  const byName = new Map(catalog.map((item) => [item.name, item]));
+
+  return SHOWCASE_NAMES.map((name) => byName.get(name))
+    .filter((item): item is NonNullable<typeof item> => item !== undefined)
+    .map((item) => ({
+      ...item,
+      meta: SHOWCASE_FULL_WIDTH.has(item.name)
+        ? { ...item.meta, gridSize: 1 as const }
+        : item.meta,
+    }));
+}
 
 const title = "audio/ui – Audio UI Components for React";
 const description =
@@ -34,9 +58,11 @@ export const metadata: Metadata = buildPageMetadata({
 });
 
 export default function IndexPage() {
+  const catalogItems = getShowcaseCatalogItems();
+
   return (
-    <div className="homepage relative flex flex-1 flex-col overflow-hidden bg-linear-to-b to-35% to-background">
-      <Hero />
+    <div className="homepage relative flex flex-1 flex-col">
+      <ComponentShowcase catalogItems={catalogItems} />
     </div>
   );
 }

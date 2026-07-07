@@ -52,7 +52,6 @@ import {
   ItemMedia,
   ItemTitle,
 } from "@/registry/bases/base/ui/item";
-import { ScrollArea } from "@/registry/bases/base/ui/scroll-area";
 import { Spinner } from "@/registry/bases/base/ui/spinner";
 import {
   Tooltip,
@@ -820,17 +819,35 @@ const AudioPlayerSkipBack = React.memo(
   }
 );
 
-type AudioTrackMediaMode =
-  | "cover"
-  | "drag-handle"
-  | "drag-handle-with-cover"
-  | "index";
-
 type AudioTrackActionMode =
   | "none"
   | "play-pause"
   | "remove"
   | "play-pause-with-remove";
+
+type AudioTrackContextValue = {
+  track: Track;
+  index?: number;
+  isCurrent: boolean;
+  isPlaying: boolean;
+  trackDuration?: number;
+  onTogglePlayPause: (e: React.MouseEvent) => void;
+  onRemove?: (e: React.MouseEvent) => void;
+};
+
+const AudioTrackContext = React.createContext<AudioTrackContextValue | null>(
+  null
+);
+
+function useAudioTrackContext() {
+  const context = React.use(AudioTrackContext);
+  if (!context) {
+    throw new Error(
+      "AudioTrack subcomponents must be rendered within <AudioTrack>"
+    );
+  }
+  return context;
+}
 
 type AudioTrackProps = {
   trackId?: string | number;
@@ -838,8 +855,8 @@ type AudioTrackProps = {
   index?: number;
   onClick?: () => void;
   onRemove?: (trackId: string) => void;
-  media?: AudioTrackMediaMode;
-  actions?: AudioTrackActionMode;
+  media?: React.ReactNode;
+  actions?: React.ReactNode;
   className?: string;
 } & (
   | { trackId: string | number; track?: never }
@@ -891,143 +908,14 @@ function handleTrackPlayPauseClick(
   }
 }
 
-function renderTrackActions({
-  actions,
-  isCurrent,
-  onRemove,
-  onTrackRemoveClick,
-  onTrackPlayPauseClick,
-  playPauseTitle,
-  actualIsPlaying,
-}: {
-  actions: AudioTrackActionMode;
-  isCurrent: boolean;
-  onRemove?: (trackId: string) => void;
-  onTrackRemoveClick: (e: React.MouseEvent) => void;
-  onTrackPlayPauseClick: (e: React.MouseEvent) => void;
-  playPauseTitle: string;
-  actualIsPlaying: boolean;
-}) {
-  const showRemoveAction =
-    (actions === "remove" || actions === "play-pause-with-remove") &&
-    !isCurrent &&
-    !!onRemove;
-  const showPlayPauseAction =
-    actions === "play-pause" || actions === "play-pause-with-remove";
-
-  return (
-    <>
-      {showRemoveAction && (
-        <Button
-          aria-label="Remove track"
-          className="[&_svg]:text-primary"
-          onClick={onTrackRemoveClick}
-          size="icon-sm"
-          title="Remove"
-          variant="ghost"
-        >
-          <IconPlaceholder
-            hugeicons="Cancel01Icon"
-            lucide="XIcon"
-            phosphor="XIcon"
-            remixicon="RiCloseLine"
-            tabler="IconX"
-          />
-        </Button>
-      )}
-      {showPlayPauseAction && (
-        <Button
-          aria-label={playPauseTitle}
-          className="[&_svg]:text-primary"
-          onClick={onTrackPlayPauseClick}
-          size="icon-sm"
-          title={playPauseTitle}
-          variant="ghost"
-        >
-          {actualIsPlaying ? (
-            <IconPlaceholder
-              hugeicons="PauseIcon"
-              lucide="PauseIcon"
-              phosphor="PauseIcon"
-              remixicon="RiPauseLine"
-              tabler="IconPlayerPause"
-            />
-          ) : (
-            <IconPlaceholder
-              hugeicons="PlayIcon"
-              lucide="PlayIcon"
-              phosphor="PlayIcon"
-              remixicon="RiPlayLine"
-              tabler="IconPlayerPlay"
-            />
-          )}
-        </Button>
-      )}
-    </>
-  );
-}
-
-function renderTrackMedia(
-  media: AudioTrackMediaMode,
-  track: Track,
-  index?: number
-) {
-  const coverImage = track.artwork || track.images?.[0];
-  const cover = coverImage ? (
-    <Avatar>
-      <AvatarImage alt={track.title} src={coverImage} />
-      <AvatarFallback>
-        <IconPlaceholder
-          hugeicons="MusicNote01Icon"
-          lucide="MusicIcon"
-          phosphor="MusicNotesIcon"
-          remixicon="RiMusic2Line"
-          tabler="IconMusic"
-        />
-      </AvatarFallback>
-    </Avatar>
-  ) : (
-    <div className="flex size-10 items-center justify-center rounded-full bg-muted">
-      <IconPlaceholder
-        className="size-4 text-muted-foreground"
-        hugeicons="MusicNote01Icon"
-        lucide="MusicIcon"
-        phosphor="MusicNotesIcon"
-        remixicon="RiMusic2Line"
-        tabler="IconMusic"
-      />
-    </div>
-  );
-
-  switch (media) {
-    case "drag-handle-with-cover":
-      return (
-        <div className="flex items-center gap-2">
-          <SortableDragHandle />
-          {cover}
-        </div>
-      );
-    case "drag-handle":
-      return <SortableDragHandle />;
-    case "cover":
-      return cover;
-    default: {
-      const displayIndex = index !== undefined ? index + 1 : "";
-      return (
-        <span className="text-muted-foreground/60 text-xs">{displayIndex}</span>
-      );
-    }
-  }
-}
-
 function AudioTrack({
   trackId,
   track: externalTrack,
   index,
   onClick,
   onRemove,
-  media = "cover",
-  actions = "play-pause",
+  media,
+  actions,
   className,
 }: AudioTrackProps) {
   const queue = useAudioStore((state) => state.queue);
@@ -1056,73 +944,219 @@ function AudioTrack({
       trackDuration !== null &&
       htmlAudio.isLive(trackDuration));
 
-  const handleRemove = (e: React.MouseEvent) =>
-    handleTrackRemoveClick(e, track.id, onRemove);
-
-  const handlePlayPause = (e: React.MouseEvent) =>
-    handleTrackPlayPauseClick(
-      e,
-      isCurrent,
-      track.id,
-      queue,
-      togglePlay,
-      setQueueAndPlay
-    );
-  const playPauseTitle = getPlayPauseTitle(isCurrent, actualIsPlaying);
+  const contextValue: AudioTrackContextValue = {
+    track,
+    index,
+    isCurrent,
+    isPlaying: actualIsPlaying,
+    trackDuration,
+    onTogglePlayPause: (e) =>
+      handleTrackPlayPauseClick(
+        e,
+        isCurrent,
+        track.id,
+        queue,
+        togglePlay,
+        setQueueAndPlay
+      ),
+    onRemove: onRemove
+      ? (e) => handleTrackRemoveClick(e, track.id, onRemove)
+      : undefined,
+  };
 
   return (
-    <Item
-      className={cn(
-        "cn-audio-track w-full cursor-pointer transition-all",
-        className
-      )}
-      data-current={isCurrent ? "true" : undefined}
-      data-slot="audio-track"
-      onClick={(e) => {
-        e.stopPropagation();
-        e.preventDefault();
-        onClick?.();
-      }}
-      size="sm"
-      variant={isCurrent ? "outline" : "default"}
-    >
-      <ItemMedia>{renderTrackMedia(media, track, index)}</ItemMedia>
-      <ItemContent className="min-w-0 flex-1 gap-0 overflow-hidden">
-        <div className="flex items-center gap-1.5">
-          <ItemTitle className="line-clamp-1">{track.title}</ItemTitle>
-          {isLiveTrack && (
-            <Badge variant="destructive">
-              <IconPlaceholder
-                hugeicons="RadioIcon"
-                lucide="RadioIcon"
-                phosphor="BroadcastIcon"
-                remixicon="RiBroadcastLine"
-                tabler="IconBroadcast"
-              />
-              Live
-            </Badge>
-          )}
-        </div>
-        <ItemDescription className="truncate">{track.artist}</ItemDescription>
-      </ItemContent>
-      {!isLiveTrack && trackDuration !== undefined && (
-        <ItemContent className="flex-none text-center">
-          <ItemDescription>{formatDuration(trackDuration)}</ItemDescription>
+    <AudioTrackContext value={contextValue}>
+      <Item
+        className={cn(
+          "cn-audio-track w-full cursor-pointer transition-colors",
+          className
+        )}
+        data-current={isCurrent ? "true" : undefined}
+        data-slot="audio-track"
+        onClick={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          onClick?.();
+        }}
+        size="sm"
+        variant={isCurrent ? "outline" : "default"}
+      >
+        {media && <ItemMedia className="gap-2">{media}</ItemMedia>}
+        <ItemContent className="min-w-0 flex-1 gap-0 overflow-hidden">
+          <div className="flex items-center gap-1.5">
+            <ItemTitle className="line-clamp-1">{track.title}</ItemTitle>
+            {isLiveTrack && (
+              <Badge variant="destructive">
+                <IconPlaceholder
+                  hugeicons="RadioIcon"
+                  lucide="RadioIcon"
+                  phosphor="BroadcastIcon"
+                  remixicon="RiBroadcastLine"
+                  tabler="IconBroadcast"
+                />
+                Live
+              </Badge>
+            )}
+          </div>
+          <ItemDescription className="truncate">{track.artist}</ItemDescription>
         </ItemContent>
-      )}
-      <ItemActions>
-        {renderTrackActions({
-          actions,
-          isCurrent,
-          onRemove,
-          onTrackRemoveClick: handleRemove,
-          onTrackPlayPauseClick: handlePlayPause,
-          playPauseTitle,
-          actualIsPlaying,
-        })}
-      </ItemActions>
-    </Item>
+        {!isLiveTrack && trackDuration !== undefined && (
+          <ItemContent className="flex-none text-center">
+            <ItemDescription>{formatDuration(trackDuration)}</ItemDescription>
+          </ItemContent>
+        )}
+        {actions && <ItemActions>{actions}</ItemActions>}
+      </Item>
+    </AudioTrackContext>
   );
+}
+
+function AudioTrackCover({ className }: { className?: string }) {
+  const { track } = useAudioTrackContext();
+  const coverImage = track.artwork || track.images?.[0];
+
+  if (!coverImage) {
+    return (
+      <div
+        className={cn(
+          "flex size-10 items-center justify-center rounded-full bg-muted",
+          className
+        )}
+      >
+        <IconPlaceholder
+          className="size-4 text-muted-foreground"
+          hugeicons="MusicNote01Icon"
+          lucide="MusicIcon"
+          phosphor="MusicNotesIcon"
+          remixicon="RiMusic2Line"
+          tabler="IconMusic"
+        />
+      </div>
+    );
+  }
+
+  return (
+    <Avatar className={className}>
+      <AvatarImage alt={track.title} src={coverImage} />
+      <AvatarFallback>
+        <IconPlaceholder
+          hugeicons="MusicNote01Icon"
+          lucide="MusicIcon"
+          phosphor="MusicNotesIcon"
+          remixicon="RiMusic2Line"
+          tabler="IconMusic"
+        />
+      </AvatarFallback>
+    </Avatar>
+  );
+}
+
+function AudioTrackIndex({ className }: { className?: string }) {
+  const { index } = useAudioTrackContext();
+  const displayIndex = index !== undefined ? index + 1 : "";
+
+  return (
+    <span className={cn("text-muted-foreground/60 text-xs", className)}>
+      {displayIndex}
+    </span>
+  );
+}
+
+function AudioTrackPlayPauseAction({ className }: { className?: string }) {
+  const { isCurrent, isPlaying, onTogglePlayPause } = useAudioTrackContext();
+  const title = getPlayPauseTitle(isCurrent, isPlaying);
+
+  return (
+    <Button
+      aria-label={title}
+      className={cn("[&_svg]:text-primary", className)}
+      onClick={onTogglePlayPause}
+      size="icon-sm"
+      title={title}
+      variant="ghost"
+    >
+      {isPlaying ? (
+        <IconPlaceholder
+          hugeicons="PauseIcon"
+          lucide="PauseIcon"
+          phosphor="PauseIcon"
+          remixicon="RiPauseLine"
+          tabler="IconPlayerPause"
+        />
+      ) : (
+        <IconPlaceholder
+          hugeicons="PlayIcon"
+          lucide="PlayIcon"
+          phosphor="PlayIcon"
+          remixicon="RiPlayLine"
+          tabler="IconPlayerPlay"
+        />
+      )}
+    </Button>
+  );
+}
+
+function AudioTrackRemoveAction({ className }: { className?: string }) {
+  const { isCurrent, onRemove } = useAudioTrackContext();
+
+  if (isCurrent || !onRemove) {
+    return null;
+  }
+
+  return (
+    <Button
+      aria-label="Remove track"
+      className={cn("[&_svg]:text-primary", className)}
+      onClick={onRemove}
+      size="icon-sm"
+      title="Remove"
+      variant="ghost"
+    >
+      <IconPlaceholder
+        hugeicons="Cancel01Icon"
+        lucide="XIcon"
+        phosphor="XIcon"
+        remixicon="RiCloseLine"
+        tabler="IconX"
+      />
+    </Button>
+  );
+}
+
+function resolveTrackMedia(
+  media: "cover" | "index",
+  isSortable: boolean,
+  isOverlay: boolean
+): React.ReactNode {
+  if (isOverlay || !isSortable) {
+    return media === "index" ? <AudioTrackIndex /> : <AudioTrackCover />;
+  }
+  return (
+    <>
+      <SortableDragHandle />
+      {media === "cover" && <AudioTrackCover />}
+    </>
+  );
+}
+
+function resolveTrackActions(
+  actionMode: AudioTrackActionMode
+): React.ReactNode {
+  switch (actionMode) {
+    case "none":
+      return null;
+    case "remove":
+      return <AudioTrackRemoveAction />;
+    case "play-pause-with-remove":
+      return (
+        <>
+          <AudioTrackRemoveAction />
+          <AudioTrackPlayPauseAction />
+        </>
+      );
+    default:
+      return <AudioTrackPlayPauseAction />;
+  }
 }
 
 const audioTrackListVariants = cva("w-full", {
@@ -1277,17 +1311,12 @@ function AudioTrackList({
       return null;
     }
 
-    let trackMedia: AudioTrackMediaMode = media;
-    if (mode === "sortable") {
-      trackMedia = media === "cover" ? "drag-handle-with-cover" : "drag-handle";
-    }
-
     return (
       <AudioTrack
-        actions={resolvedActions}
+        actions={resolveTrackActions(resolvedActions)}
         index={index}
         key={track.id}
-        media={isOverlay ? media : trackMedia}
+        media={resolveTrackMedia(media, mode === "sortable", isOverlay)}
         onClick={handleTrackClick}
         onRemove={onTrackRemove}
         track={track}
@@ -1331,19 +1360,19 @@ function AudioTrackList({
     );
 
   return (
-    <ScrollArea
+    <div
       className={cn(
-        "w-full pt-1",
-        "in-data-[variant=widget]:h-40 in-data-[variant=widget]:border-b in-data-[variant=widget]:px-4 in-data-[variant=widget]:pb-4",
+        "no-scrollbar scroll-fade-y w-full overflow-y-auto pt-1",
+        "in-data-[variant=widget]:h-40 in-data-[variant=widget]:px-4 in-data-[variant=widget]:pb-4",
         "in-data-[size=sm]:in-data-[variant=widget]:h-32 in-data-[size=sm]:in-data-[variant=widget]:px-3 in-data-[size=sm]:in-data-[variant=widget]:pb-3",
-        "in-data-[variant=widget]:**:data-[slot=scroll-area-viewport]:snap-y in-data-[variant=widget]:**:data-[slot=scroll-area-viewport]:snap-mandatory",
+        "in-data-[variant=widget]:snap-y in-data-[variant=widget]:snap-mandatory",
         "in-data-[variant=widget]:**:data-[slot=audio-track]:snap-start",
         className
       )}
       data-slot="audio-track-list"
     >
       {content}
-    </ScrollArea>
+    </div>
   );
 }
 
@@ -1770,6 +1799,10 @@ export {
   AudioPlayerSkipForward,
   AudioPlayerSkipBack,
   AudioTrack,
+  AudioTrackCover,
+  AudioTrackIndex,
+  AudioTrackPlayPauseAction,
+  AudioTrackRemoveAction,
   AudioTrackList,
   AudioQueuePreferences,
   AudioQueueRepeatMode,
