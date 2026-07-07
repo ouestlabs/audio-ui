@@ -1,6 +1,5 @@
 "use client";
 
-import { Provider as JotaiProvider } from "jotai";
 import dynamic from "next/dynamic";
 import * as React from "react";
 import { ComponentGrid } from "@/app/(create)/components/components/component-grid";
@@ -72,27 +71,25 @@ export function ComponentShowcase({
   return (
     <section className="container-wrapper flex h-[calc(100dvh-var(--header-height))] flex-col pb-4 lg:pb-6">
       <React.Suspense fallback={<div className="flex-1" />}>
-        <JotaiProvider>
-          <LocksProvider>
-            <DesignSystemProvider>
-              <AudioDemoProvider>
-                <CustomizerContext value={customizerValue}>
-                  <div className="flex min-h-0 flex-1 overflow-hidden rounded-2xl border border-site-border/80 bg-site-background shadow-xl">
-                    <div className="relative min-h-0 flex-1">
-                      <div className="no-scrollbar scroll-fade-y absolute inset-0 overflow-y-auto">
-                        <ComponentGrid catalogItems={catalogItems} />
-                      </div>
-                      <div className="absolute top-3 right-3 z-10">
-                        <CustomizerSidebarToggle />
-                      </div>
+        <LocksProvider>
+          <DesignSystemProvider>
+            <AudioDemoProvider>
+              <CustomizerContext value={customizerValue}>
+                <div className="flex min-h-0 flex-1 overflow-hidden rounded-2xl border border-site-border/80 bg-site-background shadow-xl">
+                  <div className="relative min-h-0 flex-1">
+                    <div className="no-scrollbar scroll-fade-y absolute inset-0 overflow-y-auto">
+                      <ComponentGrid catalogItems={catalogItems} />
                     </div>
-                    <ShowcaseCustomizerAside />
+                    <div className="absolute top-3 right-3 z-10">
+                      <CustomizerSidebarToggle />
+                    </div>
                   </div>
-                </CustomizerContext>
-              </AudioDemoProvider>
-            </DesignSystemProvider>
-          </LocksProvider>
-        </JotaiProvider>
+                  <ShowcaseCustomizerAside />
+                </div>
+              </CustomizerContext>
+            </AudioDemoProvider>
+          </DesignSystemProvider>
+        </LocksProvider>
       </React.Suspense>
     </section>
   );
