@@ -11,13 +11,12 @@ import {
   TAU,
 } from "@audio-ui/utils";
 import * as React from "react";
-import {
-  useFocus,
-  useKeyboardNavigation,
-  usePointerDrag,
-  useWheel,
-} from "../hooks/interactions";
-import { useControlledValue, useValueAsRef } from "../hooks/state";
+import { useFocus } from "../hooks/interactions/use-focus";
+import { useKeyboardNavigation } from "../hooks/interactions/use-keyboard-navigation";
+import { usePointerDrag } from "../hooks/interactions/use-pointer-drag";
+import { useWheel } from "../hooks/interactions/use-wheel";
+import { useControlledValue } from "../hooks/state/use-controlled-value";
+import { useValueAsRef } from "../hooks/state/use-value-as-ref";
 import { getDataAttributes } from "./internal/data-attributes";
 
 const KNOB_VIEWBOX_CX = 24;
@@ -283,9 +282,8 @@ export namespace Knob {
       arcRadiusProp ?? KNOB_DEFAULT_ARC_RADIUS,
       arcStrokeWidth
     );
-    const indicatorSpan: readonly [number, number] = indicatorSpanProp
-      ? [indicatorSpanProp[0], indicatorSpanProp[1]]
-      : KNOB_DEFAULT_INDICATOR_SPAN;
+    const indicatorSpan: readonly [number, number] =
+      indicatorSpanProp ?? KNOB_DEFAULT_INDICATOR_SPAN;
     const indicatorWidth = indicatorWidthProp ?? KNOB_DEFAULT_INDICATOR_WIDTH;
 
     const computedDefaultValue =
@@ -653,7 +651,7 @@ export namespace Knob {
         wheelRef(node);
         if (typeof ref === "function") {
           ref(node);
-        } else if (ref !== null) {
+        } else if (ref) {
           ref.current = node;
         }
       },

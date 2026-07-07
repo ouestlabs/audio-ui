@@ -7,14 +7,25 @@ import {
   quantizeRound,
 } from "@audio-ui/utils";
 import * as React from "react";
-import {
-  useFocus,
-  useKeyboardNavigation,
-  usePointerDrag,
-  useWheel,
-} from "../hooks/interactions";
-import { useControlledValue, useValueAsRef } from "../hooks/state";
+import { useFocus } from "../hooks/interactions/use-focus";
+import { useKeyboardNavigation } from "../hooks/interactions/use-keyboard-navigation";
+import { usePointerDrag } from "../hooks/interactions/use-pointer-drag";
+import { useWheel } from "../hooks/interactions/use-wheel";
+import { useControlledValue } from "../hooks/state/use-controlled-value";
+import { useValueAsRef } from "../hooks/state/use-value-as-ref";
 import { getDataAttributes } from "./internal/data-attributes";
+
+const VISUALLY_HIDDEN_STYLE: React.CSSProperties = {
+  border: 0,
+  clip: "rect(0, 0, 0, 0)",
+  height: 1,
+  margin: -1,
+  overflow: "hidden",
+  padding: 0,
+  position: "absolute",
+  whiteSpace: "nowrap",
+  width: 1,
+};
 
 export namespace XYPad {
   interface ContextValue {
@@ -280,40 +291,71 @@ export namespace XYPad {
     const thumbY = (1 - percentageY) * 100;
     const elementId = id || xypadId;
 
-    const contextValue: ContextValue = {
-      ariaLabel,
-      ariaLabelledBy,
-      calculateValueFromDelta,
-      calculateValueFromPoint,
-      commitValue,
-      containerRef,
-      disabled,
-      dragStartValueRef,
-      elementId,
-      isDragActiveRef,
-      maxX,
-      maxY,
-      minX,
-      minY,
-      onDrag,
-      onDragEnd,
-      onDragStart,
-      onPointerDown,
-      onValueCommit,
-      pendingValueRef,
-      percentageX,
-      percentageY,
-      setRawValue,
-      shouldPreventFocusRef,
-      stepX,
-      stepY,
-      thumbX,
-      thumbY,
-      updateValue,
-      value,
-      valueRef,
-      wheelRef,
-    };
+    const contextValue = React.useMemo<ContextValue>(
+      () => ({
+        ariaLabel,
+        ariaLabelledBy,
+        calculateValueFromDelta,
+        calculateValueFromPoint,
+        commitValue,
+        containerRef,
+        disabled,
+        dragStartValueRef,
+        elementId,
+        isDragActiveRef,
+        maxX,
+        maxY,
+        minX,
+        minY,
+        onDrag,
+        onDragEnd,
+        onDragStart,
+        onPointerDown,
+        onValueCommit,
+        pendingValueRef,
+        percentageX,
+        percentageY,
+        setRawValue,
+        shouldPreventFocusRef,
+        stepX,
+        stepY,
+        thumbX,
+        thumbY,
+        updateValue,
+        value,
+        valueRef,
+        wheelRef,
+      }),
+      [
+        ariaLabel,
+        ariaLabelledBy,
+        calculateValueFromDelta,
+        calculateValueFromPoint,
+        commitValue,
+        disabled,
+        elementId,
+        maxX,
+        maxY,
+        minX,
+        minY,
+        onDrag,
+        onDragEnd,
+        onDragStart,
+        onPointerDown,
+        onValueCommit,
+        percentageX,
+        percentageY,
+        setRawValue,
+        stepX,
+        stepY,
+        thumbX,
+        thumbY,
+        updateValue,
+        value,
+        valueRef,
+        wheelRef,
+      ]
+    );
 
     return (
       <Context.Provider value={contextValue}>
@@ -648,17 +690,7 @@ export namespace XYPad {
         className={className}
         id={`${elementId}-label`}
         role="status"
-        style={{
-          border: 0,
-          clip: "rect(0, 0, 0, 0)",
-          height: 1,
-          margin: -1,
-          overflow: "hidden",
-          padding: 0,
-          position: "absolute",
-          whiteSpace: "nowrap",
-          width: 1,
-        }}
+        style={VISUALLY_HIDDEN_STYLE}
         {...props}
       >
         {`X: ${value.x.toFixed(1)}, Y: ${value.y.toFixed(1)}`}
