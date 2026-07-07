@@ -7,13 +7,12 @@ import {
   quantizeRound,
 } from "@audio-ui/utils";
 import * as React from "react";
-import {
-  useFocus,
-  useKeyboardNavigation,
-  usePointerDrag,
-  useWheel,
-} from "../hooks/interactions";
-import { useControlledValue, useValueAsRef } from "../hooks/state";
+import { useFocus } from "../hooks/interactions/use-focus";
+import { useKeyboardNavigation } from "../hooks/interactions/use-keyboard-navigation";
+import { usePointerDrag } from "../hooks/interactions/use-pointer-drag";
+import { useWheel } from "../hooks/interactions/use-wheel";
+import { useControlledValue } from "../hooks/state/use-controlled-value";
+import { useValueAsRef } from "../hooks/state/use-value-as-ref";
 import { getDataAttributes } from "./internal/data-attributes";
 import { useInheritedOrientation } from "./internal/orientation-context";
 
@@ -307,36 +306,62 @@ export namespace Transport {
       (displayedBufferedValue - min) / (max - min || 1)
     );
 
-    const contextValue: TransportContextValue = {
-      ariaLabel,
-      ariaLabelledBy,
-      bufferedPercentage,
-      bufferedValue,
-      calculateValueFromDelta,
-      calculateValueFromPoint,
-      commitValue,
-      disabled,
-      dragStartValueRef,
-      elementId,
-      isDragActiveRef,
-      max,
-      min,
-      onDrag,
-      onDragEnd,
-      onDragStart,
-      onPointerDown,
-      orientation,
-      pendingValueRef,
-      percentage,
-      shouldPreventFocusRef,
-      step,
-      thumbRef,
-      trackRef,
-      updateValue,
-      value,
-      valueRef,
-      wheelRef,
-    };
+    const contextValue = React.useMemo<TransportContextValue>(
+      () => ({
+        ariaLabel,
+        ariaLabelledBy,
+        bufferedPercentage,
+        bufferedValue,
+        calculateValueFromDelta,
+        calculateValueFromPoint,
+        commitValue,
+        disabled,
+        dragStartValueRef,
+        elementId,
+        isDragActiveRef,
+        max,
+        min,
+        onDrag,
+        onDragEnd,
+        onDragStart,
+        onPointerDown,
+        orientation,
+        pendingValueRef,
+        percentage,
+        shouldPreventFocusRef,
+        step,
+        thumbRef,
+        trackRef,
+        updateValue,
+        value,
+        valueRef,
+        wheelRef,
+      }),
+      [
+        ariaLabel,
+        ariaLabelledBy,
+        bufferedPercentage,
+        bufferedValue,
+        calculateValueFromDelta,
+        calculateValueFromPoint,
+        commitValue,
+        disabled,
+        elementId,
+        max,
+        min,
+        onDrag,
+        onDragEnd,
+        onDragStart,
+        onPointerDown,
+        orientation,
+        percentage,
+        step,
+        updateValue,
+        value,
+        valueRef,
+        wheelRef,
+      ]
+    );
 
     return (
       <TransportContext.Provider value={contextValue}>
