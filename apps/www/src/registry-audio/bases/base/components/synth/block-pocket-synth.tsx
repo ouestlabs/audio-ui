@@ -241,10 +241,10 @@ export default function BlockPocketSynth() {
   ];
 
   const filterOptions: { label: string; value: FilterType }[] = [
-    { label: "Allpass", value: "allpass" },
-    { label: "Lowpass", value: "lowpass" },
-    { label: "Highpass", value: "highpass" },
-    { label: "Bandpass", value: "bandpass" },
+    { label: "AP", value: "allpass" },
+    { label: "LP", value: "lowpass" },
+    { label: "HP", value: "highpass" },
+    { label: "BP", value: "bandpass" },
   ];
 
   return (

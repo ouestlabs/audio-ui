@@ -58,7 +58,7 @@ export function ModeSwitcher() {
             className="group/toggle extend-touch-target"
             onClick={toggleTheme}
             size="icon"
-            variant="ghost"
+            variant="outline"
           >
             <span className="relative flex items-center justify-center">
               <SunIcon

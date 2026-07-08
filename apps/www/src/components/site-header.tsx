@@ -119,8 +119,8 @@ export function SiteHeader({ sticky = true }: { sticky?: boolean } = {}) {
             navItems={siteConfig.navItems}
             tree={pageTree}
           />
-          <div className="ml-auto flex items-center gap-1 md:flex-1 md:justify-end">
-            <div className="mr-2 hidden w-full flex-1 md:flex md:w-auto md:flex-none">
+          <div className="ml-auto flex items-center gap-2 md:flex-1 md:justify-end">
+            <div className="hidden w-full flex-1 md:flex md:w-auto md:flex-none">
               <SiteHeaderCommandMenu
                 commandGroups={commandGroups}
                 componentCategories={componentCategories}
@@ -132,7 +132,7 @@ export function SiteHeader({ sticky = true }: { sticky?: boolean } = {}) {
 
             <Separator className="hidden lg:flex" orientation="vertical" />
 
-            <div className="flex items-center gap-0">
+            <div className="flex items-center gap-1">
               <GitHubLink />
               <XLink />
               <SiteHeaderModeSwitcher />

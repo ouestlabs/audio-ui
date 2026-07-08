@@ -14,7 +14,8 @@ export function XLink() {
           <span className="sr-only">X</span>
         </Link>
       }
-      variant="ghost"
+      size="icon"
+
     />
   );
 }

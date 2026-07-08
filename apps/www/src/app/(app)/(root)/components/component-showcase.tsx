@@ -14,6 +14,11 @@ import { LocksProvider } from "@/app/(create)/hooks/use-locks";
 import { AudioDemoProvider } from "@/components/audio-demo-provider";
 import { Frame, FrameContent } from "@/components/custom/frame";
 import { Button } from "@/components/ui/button";
+import { useConfig } from "@/hooks/use-config";
+import { useMounted } from "@/hooks/use-mounted";
+
+// SSR-safe default — must match server render to avoid hydration mismatch
+const DEFAULT_CUSTOMIZER_OPEN = true;
 
 function ShowcaseHeader() {
   const { customizerOpen, toggleCustomizer } = useCustomizer();
@@ -40,14 +45,24 @@ export function ComponentShowcase({
 }: {
   catalogItems: CatalogItem[];
 }) {
-  const [customizerOpen, setCustomizerOpen] = React.useState(true);
+  const mounted = useMounted();
+  const [config, setConfig] = useConfig();
+  const customizerOpen = mounted
+    ? (config.customizerOpen ?? DEFAULT_CUSTOMIZER_OPEN)
+    : DEFAULT_CUSTOMIZER_OPEN;
+
   const customizerValue = React.useMemo(
     () => ({
       customizerOpen,
-      setCustomizerOpen,
-      toggleCustomizer: () => setCustomizerOpen((open) => !open),
+      setCustomizerOpen: (open: boolean) =>
+        setConfig((prev) => ({ ...prev, customizerOpen: open })),
+      toggleCustomizer: () =>
+        setConfig((prev) => ({
+          ...prev,
+          customizerOpen: !prev.customizerOpen,
+        })),
     }),
-    [customizerOpen]
+    [customizerOpen, setConfig]
   );
 
   return (
