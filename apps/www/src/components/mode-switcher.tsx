@@ -55,7 +55,7 @@ export function ModeSwitcher() {
       <TooltipTrigger
         render={
           <Button
-            className="group/toggle extend-touch-target size-8"
+            className="group/toggle extend-touch-target"
             onClick={toggleTheme}
             size="icon"
             variant="ghost"
