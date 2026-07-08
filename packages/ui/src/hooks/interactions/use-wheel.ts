@@ -25,12 +25,9 @@ export function useWheel<T extends HTMLElement = HTMLElement>({
   preventDefault = true,
 }: UseWheelOptions<T> = {}): UseWheelReturn<T> {
   const onWheelRef = useCallbackRef(onWheelInternal);
-  const onWheelTakesEvent = React.useMemo(() => {
-    if (!isDefined(onWheelInternal)) {
-      return false;
-    }
-    return onWheelInternal.length === 2;
-  }, [onWheelInternal]);
+  const onWheelTakesEvent = isDefined(onWheelInternal)
+    ? onWheelInternal.length === 2
+    : false;
   const elementRefInternal = React.useRef<Nullable<T>>(null);
 
   React.useEffect(() => {

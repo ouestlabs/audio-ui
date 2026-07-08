@@ -17,7 +17,7 @@ import { useValueAsRef } from "../hooks/state/use-value-as-ref";
 import { getDataAttributes } from "./internal/data-attributes";
 import { useInheritedOrientation } from "./internal/orientation-context";
 
-interface FaderContextValue {
+interface FaderConfigContextValue {
   ariaLabel?: string;
   ariaLabelledBy?: string;
   calculateValueFromDelta: (delta: Point, initialValue: number) => number;
@@ -36,26 +36,47 @@ interface FaderContextValue {
   onValueCommit?: Procedure<number>;
   orientation: "horizontal" | "vertical";
   pendingValueRef: React.RefObject<number>;
-  percentage: number;
   setRawValue: Procedure<number>;
   shouldPreventFocusRef: React.RefObject<boolean>;
   step: number;
   thumbRef: React.RefObject<Nullable<HTMLDivElement>>;
   trackRef: React.RefObject<Nullable<HTMLDivElement>>;
   updateValue: (newValue: number) => void;
-  value: number;
   valueRef: React.RefObject<number>;
   wheelRef: Procedure<Nullable<HTMLDivElement>>;
 }
 
-const FaderContext = React.createContext<FaderContextValue | null>(null);
+/** Split from config: changes every drag frame, so only components that render live position subscribe to it. */
+interface FaderValueContextValue {
+  percentage: number;
+  value: number;
+}
 
-function useFaderContext() {
-  const context = React.useContext(FaderContext);
+const FaderConfigContext = React.createContext<FaderConfigContextValue | null>(
+  null
+);
+const FaderValueContext = React.createContext<FaderValueContextValue | null>(
+  null
+);
+
+function useFaderConfigContext() {
+  const context = React.useContext(FaderConfigContext);
   if (!context) {
     throw new Error("Fader components must be used within Fader.Root");
   }
   return context;
+}
+
+function useFaderValueContext() {
+  const context = React.useContext(FaderValueContext);
+  if (!context) {
+    throw new Error("Fader components must be used within Fader.Root");
+  }
+  return context;
+}
+
+function useFaderContext() {
+  return { ...useFaderConfigContext(), ...useFaderValueContext() };
 }
 
 export namespace Fader {
@@ -115,17 +136,22 @@ export namespace Fader {
     const computedDefaultValue =
       defaultValue ?? (max < min ? min : min + (max - min) / 2);
 
+    const transformValue = React.useCallback(
+      (val: number) => {
+        const numValue = Number(val);
+        if (Number.isNaN(numValue) || !Number.isFinite(numValue)) {
+          return min;
+        }
+        return clamp(numValue, min, max);
+      },
+      [min, max]
+    );
+
     const { value: rawValue, setValue: setRawValue } =
       useControlledValue<number>({
         defaultValue: computedDefaultValue,
         onChange: onValueChange,
-        transform: (val: number) => {
-          const numValue = Number(val);
-          if (Number.isNaN(numValue) || !Number.isFinite(numValue)) {
-            return min;
-          }
-          return clamp(numValue, min, max);
-        },
+        transform: transformValue,
         value: normalizedValue,
       });
 
@@ -265,7 +291,7 @@ export namespace Fader {
     const percentage = (value - min) / (max - min);
     const elementId = id || faderId;
 
-    const contextValue = React.useMemo<FaderContextValue>(
+    const configValue = React.useMemo<FaderConfigContextValue>(
       () => ({
         ariaLabel,
         ariaLabelledBy,
@@ -285,14 +311,12 @@ export namespace Fader {
         onValueCommit,
         orientation,
         pendingValueRef,
-        percentage,
         setRawValue,
         shouldPreventFocusRef,
         step,
         thumbRef,
         trackRef,
         updateValue,
-        value,
         valueRef,
         wheelRef,
       }),
@@ -312,38 +336,44 @@ export namespace Fader {
         onPointerDown,
         onValueCommit,
         orientation,
-        percentage,
         setRawValue,
         step,
         updateValue,
-        value,
         valueRef,
         wheelRef,
       ]
     );
 
+    const valueContextValue = React.useMemo<FaderValueContextValue>(
+      () => ({ percentage, value }),
+      [percentage, value]
+    );
+
     return (
-      <FaderContext.Provider value={contextValue}>
-        <div
-          className={className}
-          {...getDataAttributes("fader", { part: "fader-wrapper" })}
-          {...props}
-        >
-          {ariaLabel || ariaLabelledBy ? null : (
-            <span className="sr-only" id={`${elementId}-label`}>
-              Fader
-            </span>
-          )}
-          {children}
-        </div>
-      </FaderContext.Provider>
+      <FaderConfigContext.Provider value={configValue}>
+        <FaderValueContext.Provider value={valueContextValue}>
+          <div
+            className={className}
+            {...getDataAttributes("fader", { part: "fader-wrapper" })}
+            {...props}
+          >
+            {ariaLabel || ariaLabelledBy ? null : (
+              <span className="sr-only" id={`${elementId}-label`}>
+                Fader
+              </span>
+            )}
+            {children}
+          </div>
+        </FaderValueContext.Provider>
+      </FaderConfigContext.Provider>
     );
   }
 
   export interface SliderProps extends React.ComponentProps<"div"> {}
 
   export function Slider({ className, ...props }: SliderProps) {
-    const { disabled, orientation, trackRef, wheelRef } = useFaderContext();
+    const { disabled, orientation, trackRef, wheelRef } =
+      useFaderConfigContext();
 
     return (
       <div
@@ -369,7 +399,7 @@ export namespace Fader {
       onDragStart,
       onDrag,
       onDragEnd,
-    } = useFaderContext();
+    } = useFaderConfigContext();
 
     const { pointerProps: trackPointerProps } = usePointerDrag({
       capturePointer: true,
@@ -394,7 +424,8 @@ export namespace Fader {
   export interface RangeProps extends React.ComponentProps<"div"> {}
 
   export function Range({ className, style, ...props }: RangeProps) {
-    const { percentage, orientation } = useFaderContext();
+    const { orientation } = useFaderConfigContext();
+    const { percentage } = useFaderValueContext();
     const clampedPercentage = clampUnit(percentage);
 
     return (
@@ -617,7 +648,7 @@ export namespace Fader {
   export interface ThumbInnerProps extends React.ComponentProps<"div"> {}
 
   export function ThumbInner({ className, ...props }: ThumbInnerProps) {
-    const { orientation } = useFaderContext();
+    const { orientation } = useFaderConfigContext();
 
     return (
       <div
@@ -631,7 +662,7 @@ export namespace Fader {
   export interface ThumbMarkProps extends React.ComponentProps<"div"> {}
 
   export function ThumbMark({ className, ...props }: ThumbMarkProps) {
-    const { orientation } = useFaderContext();
+    const { orientation } = useFaderConfigContext();
 
     return (
       <div

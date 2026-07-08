@@ -66,12 +66,7 @@ export function usePointerDrag<T extends HTMLElement = HTMLElement>({
   const onDragEndRef = useCallbackRef(onDragEnd);
   const onDragCancelRef = useCallbackRef(onDragCancel);
 
-  const onDragTakesEvent = React.useMemo(() => {
-    if (!onDrag) {
-      return false;
-    }
-    return onDrag.length === 2;
-  }, [onDrag]);
+  const onDragTakesEvent = onDrag ? onDrag.length === 2 : false;
   const externalOnPointerDownRef = useCallbackRef(externalOnPointerDown);
   const externalOnPointerMoveRef = useCallbackRef(externalOnPointerMove);
   const externalOnPointerUpRef = useCallbackRef(externalOnPointerUp);

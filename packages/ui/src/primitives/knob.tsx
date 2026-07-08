@@ -289,17 +289,22 @@ export namespace Knob {
     const computedDefaultValue =
       defaultValue ?? (max < min ? min : min + (max - min) / 2);
 
+    const transformValue = React.useCallback(
+      (val: number) => {
+        const numValue = Number(val);
+        if (Number.isNaN(numValue) || !Number.isFinite(numValue)) {
+          return min;
+        }
+        return clamp(numValue, min, max);
+      },
+      [min, max]
+    );
+
     const { value: rawValue, setValue: setRawValue } =
       useControlledValue<number>({
         defaultValue: computedDefaultValue,
         onChange: onValueChange,
-        transform: (val: number) => {
-          const numValue = Number(val);
-          if (Number.isNaN(numValue) || !Number.isFinite(numValue)) {
-            return min;
-          }
-          return clamp(numValue, min, max);
-        },
+        transform: transformValue,
         value: controlledValue,
       });
 
@@ -340,7 +345,10 @@ export namespace Knob {
     const dragKnobRectRef = React.useRef<DOMRect | null>(null);
     const dragSensitivityRef = React.useRef<DragSensitivity>(dragSensitivity);
     dragSensitivityRef.current = dragSensitivity;
-    const resolvedDragConfigState = resolvedDragConfig(dragOptions);
+    const resolvedDragConfigState = React.useMemo(
+      () => resolvedDragConfig(dragOptions),
+      [dragOptions]
+    );
     const resolvedDragRef = React.useRef(resolvedDragConfigState);
     resolvedDragRef.current = resolvedDragConfigState;
 

@@ -16,11 +16,9 @@ import { useValueAsRef } from "../hooks/state/use-value-as-ref";
 import { getDataAttributes } from "./internal/data-attributes";
 import { useInheritedOrientation } from "./internal/orientation-context";
 
-interface TransportContextValue {
+interface TransportConfigContextValue {
   ariaLabel?: string;
   ariaLabelledBy?: string;
-  bufferedPercentage: number;
-  bufferedValue: number;
   calculateValueFromDelta: (delta: Point, initialValue: number) => number;
   calculateValueFromPoint: (point: Point) => number;
   commitValue: (newValue: number) => void;
@@ -36,27 +34,46 @@ interface TransportContextValue {
   onPointerDown: (e: React.PointerEvent) => void;
   orientation: "horizontal" | "vertical";
   pendingValueRef: React.RefObject<number>;
-  percentage: number;
   shouldPreventFocusRef: React.RefObject<boolean>;
   step: number;
   thumbRef: React.RefObject<Nullable<HTMLDivElement>>;
   trackRef: React.RefObject<Nullable<HTMLDivElement>>;
   updateValue: (newValue: number) => void;
-  value: number;
   valueRef: React.RefObject<number>;
   wheelRef: Procedure<Nullable<HTMLDivElement>>;
 }
 
-const TransportContext = React.createContext<TransportContextValue | null>(
-  null
-);
+/** Split from config: changes every drag frame, so only components that render live position subscribe to it. */
+interface TransportValueContextValue {
+  bufferedPercentage: number;
+  bufferedValue: number;
+  percentage: number;
+  value: number;
+}
 
-function useTransportContext() {
-  const context = React.useContext(TransportContext);
+const TransportConfigContext =
+  React.createContext<TransportConfigContextValue | null>(null);
+const TransportValueContext =
+  React.createContext<TransportValueContextValue | null>(null);
+
+function useTransportConfigContext() {
+  const context = React.useContext(TransportConfigContext);
   if (!context) {
     throw new Error("Transport components must be used within Transport.Root");
   }
   return context;
+}
+
+function useTransportValueContext() {
+  const context = React.useContext(TransportValueContext);
+  if (!context) {
+    throw new Error("Transport components must be used within Transport.Root");
+  }
+  return context;
+}
+
+function useTransportContext() {
+  return { ...useTransportConfigContext(), ...useTransportValueContext() };
 }
 
 export namespace Transport {
@@ -119,17 +136,22 @@ export namespace Transport {
     const computedDefaultValue =
       defaultValue ?? (max < min ? min : min + (max - min) / 2);
 
+    const transformValue = React.useCallback(
+      (val: number) => {
+        const n = Number(val);
+        if (Number.isNaN(n) || !Number.isFinite(n)) {
+          return min;
+        }
+        return clamp(n, min, max);
+      },
+      [min, max]
+    );
+
     const { value: rawValue, setValue: setRawValue } =
       useControlledValue<number>({
         defaultValue: computedDefaultValue,
         onChange: onValueChange,
-        transform: (val: number) => {
-          const n = Number(val);
-          if (Number.isNaN(n) || !Number.isFinite(n)) {
-            return min;
-          }
-          return clamp(n, min, max);
-        },
+        transform: transformValue,
         value: normalizedValue,
       });
 
@@ -306,12 +328,10 @@ export namespace Transport {
       (displayedBufferedValue - min) / (max - min || 1)
     );
 
-    const contextValue = React.useMemo<TransportContextValue>(
+    const configValue = React.useMemo<TransportConfigContextValue>(
       () => ({
         ariaLabel,
         ariaLabelledBy,
-        bufferedPercentage,
-        bufferedValue,
         calculateValueFromDelta,
         calculateValueFromPoint,
         commitValue,
@@ -327,21 +347,17 @@ export namespace Transport {
         onPointerDown,
         orientation,
         pendingValueRef,
-        percentage,
         shouldPreventFocusRef,
         step,
         thumbRef,
         trackRef,
         updateValue,
-        value,
         valueRef,
         wheelRef,
       }),
       [
         ariaLabel,
         ariaLabelledBy,
-        bufferedPercentage,
-        bufferedValue,
         calculateValueFromDelta,
         calculateValueFromPoint,
         commitValue,
@@ -354,37 +370,43 @@ export namespace Transport {
         onDragStart,
         onPointerDown,
         orientation,
-        percentage,
         step,
         updateValue,
-        value,
         valueRef,
         wheelRef,
       ]
     );
 
+    const valueContextValue = React.useMemo<TransportValueContextValue>(
+      () => ({ bufferedPercentage, bufferedValue, percentage, value }),
+      [bufferedPercentage, bufferedValue, percentage, value]
+    );
+
     return (
-      <TransportContext.Provider value={contextValue}>
-        <div
-          className={className}
-          {...getDataAttributes("transport", { part: "transport-wrapper" })}
-          {...props}
-        >
-          {ariaLabel || ariaLabelledBy ? null : (
-            <span className="sr-only" id={`${elementId}-label`}>
-              Transport
-            </span>
-          )}
-          {children}
-        </div>
-      </TransportContext.Provider>
+      <TransportConfigContext.Provider value={configValue}>
+        <TransportValueContext.Provider value={valueContextValue}>
+          <div
+            className={className}
+            {...getDataAttributes("transport", { part: "transport-wrapper" })}
+            {...props}
+          >
+            {ariaLabel || ariaLabelledBy ? null : (
+              <span className="sr-only" id={`${elementId}-label`}>
+                Transport
+              </span>
+            )}
+            {children}
+          </div>
+        </TransportValueContext.Provider>
+      </TransportConfigContext.Provider>
     );
   }
 
   export interface SliderProps extends React.ComponentProps<"div"> {}
 
   export function Slider({ className, ...props }: SliderProps) {
-    const { disabled, orientation, trackRef, wheelRef } = useTransportContext();
+    const { disabled, orientation, trackRef, wheelRef } =
+      useTransportConfigContext();
     return (
       <div
         className={className}
@@ -409,7 +431,7 @@ export namespace Transport {
       onDragStart,
       onDrag,
       onDragEnd,
-    } = useTransportContext();
+    } = useTransportConfigContext();
 
     const { pointerProps } = usePointerDrag({
       capturePointer: true,
@@ -434,7 +456,8 @@ export namespace Transport {
   export interface RangeProps extends React.ComponentProps<"div"> {}
 
   export function Range({ className, style, ...props }: RangeProps) {
-    const { percentage, orientation } = useTransportContext();
+    const { orientation } = useTransportConfigContext();
+    const { percentage } = useTransportValueContext();
     const clampedPercentage = clampUnit(percentage);
 
     return (
@@ -471,7 +494,8 @@ export namespace Transport {
     style,
     ...props
   }: BufferedRangeProps) {
-    const { bufferedPercentage, orientation } = useTransportContext();
+    const { orientation } = useTransportConfigContext();
+    const { bufferedPercentage } = useTransportValueContext();
     const clampedBufferedPercentage = clampUnit(bufferedPercentage);
     return (
       <div
@@ -633,7 +657,7 @@ export namespace Transport {
   export interface ThumbInnerProps extends React.ComponentProps<"div"> {}
 
   export function ThumbInner({ className, ...props }: ThumbInnerProps) {
-    const { orientation } = useTransportContext();
+    const { orientation } = useTransportConfigContext();
 
     return (
       <div
@@ -650,7 +674,7 @@ export namespace Transport {
   export interface ThumbMarkProps extends React.ComponentProps<"div"> {}
 
   export function ThumbMark({ className, ...props }: ThumbMarkProps) {
-    const { orientation } = useTransportContext();
+    const { orientation } = useTransportConfigContext();
 
     return (
       <div

@@ -28,7 +28,7 @@ const VISUALLY_HIDDEN_STYLE: React.CSSProperties = {
 };
 
 export namespace XYPad {
-  interface ContextValue {
+  interface ConfigContextValue {
     ariaLabel?: string;
     ariaLabelledBy?: string;
     calculateValueFromDelta: (delta: Point, initialValue: Point) => Point;
@@ -49,28 +49,45 @@ export namespace XYPad {
     onPointerDown: Procedure<React.PointerEvent>;
     onValueCommit?: Procedure<Point>;
     pendingValueRef: React.RefObject<Point>;
-    percentageX: number;
-    percentageY: number;
     setRawValue: Procedure<Point>;
     shouldPreventFocusRef: React.RefObject<boolean>;
     stepX: number;
     stepY: number;
-    thumbX: number;
-    thumbY: number;
     updateValue: Procedure<Point>;
-    value: Point;
     valueRef: React.RefObject<Point>;
     wheelRef: Procedure<Nullable<HTMLDivElement>>;
   }
 
-  const Context = React.createContext<ContextValue | null>(null);
+  /** Split from config: changes every drag frame, so only components that render live position subscribe to it. */
+  interface ValueContextValue {
+    percentageX: number;
+    percentageY: number;
+    thumbX: number;
+    thumbY: number;
+    value: Point;
+  }
 
-  function useContext() {
-    const context = React.useContext(Context);
+  const ConfigContext = React.createContext<ConfigContextValue | null>(null);
+  const ValueContext = React.createContext<ValueContextValue | null>(null);
+
+  function useConfigContext() {
+    const context = React.useContext(ConfigContext);
     if (!context) {
       panic("XYPad components must be used within XYPad.Root");
     }
     return context;
+  }
+
+  function useValueContext() {
+    const context = React.useContext(ValueContext);
+    if (!context) {
+      panic("XYPad components must be used within XYPad.Root");
+    }
+    return context;
+  }
+
+  function useContext() {
+    return { ...useConfigContext(), ...useValueContext() };
   }
   export interface RootProps
     extends Omit<
@@ -119,23 +136,28 @@ export namespace XYPad {
       y: (minY + maxY) / 2,
     };
 
+    const transformValue = React.useCallback(
+      (val: Point) => {
+        const numX = Number(val.x);
+        const numY = Number(val.y);
+        const clampedX =
+          Number.isNaN(numX) || !Number.isFinite(numX)
+            ? minX
+            : clamp(numX, minX, maxX);
+        const clampedY =
+          Number.isNaN(numY) || !Number.isFinite(numY)
+            ? minY
+            : clamp(numY, minY, maxY);
+        return { x: clampedX, y: clampedY };
+      },
+      [minX, maxX, minY, maxY]
+    );
+
     const { value: rawValue, setValue: setRawValue } =
       useControlledValue<Point>({
         defaultValue: computedDefaultValue,
         onChange: onValueChange,
-        transform: (val: Point) => {
-          const numX = Number(val.x);
-          const numY = Number(val.y);
-          const clampedX =
-            Number.isNaN(numX) || !Number.isFinite(numX)
-              ? minX
-              : clamp(numX, minX, maxX);
-          const clampedY =
-            Number.isNaN(numY) || !Number.isFinite(numY)
-              ? minY
-              : clamp(numY, minY, maxY);
-          return { x: clampedX, y: clampedY };
-        },
+        transform: transformValue,
         value: controlledValue,
       });
 
@@ -291,7 +313,7 @@ export namespace XYPad {
     const thumbY = (1 - percentageY) * 100;
     const elementId = id || xypadId;
 
-    const contextValue = React.useMemo<ContextValue>(
+    const configValue = React.useMemo<ConfigContextValue>(
       () => ({
         ariaLabel,
         ariaLabelledBy,
@@ -313,16 +335,11 @@ export namespace XYPad {
         onPointerDown,
         onValueCommit,
         pendingValueRef,
-        percentageX,
-        percentageY,
         setRawValue,
         shouldPreventFocusRef,
         stepX,
         stepY,
-        thumbX,
-        thumbY,
         updateValue,
-        value,
         valueRef,
         wheelRef,
       }),
@@ -343,34 +360,36 @@ export namespace XYPad {
         onDragStart,
         onPointerDown,
         onValueCommit,
-        percentageX,
-        percentageY,
         setRawValue,
         stepX,
         stepY,
-        thumbX,
-        thumbY,
         updateValue,
-        value,
         valueRef,
         wheelRef,
       ]
     );
 
+    const valueContextValue = React.useMemo<ValueContextValue>(
+      () => ({ percentageX, percentageY, thumbX, thumbY, value }),
+      [percentageX, percentageY, thumbX, thumbY, value]
+    );
+
     return (
-      <Context.Provider value={contextValue}>
-        <div className={className} {...props}>
-          {ariaLabel || ariaLabelledBy ? null : (
-            <span className="sr-only" id={`${elementId}-label`}>
-              XY Pad
+      <ConfigContext.Provider value={configValue}>
+        <ValueContext.Provider value={valueContextValue}>
+          <div className={className} {...props}>
+            {ariaLabel || ariaLabelledBy ? null : (
+              <span className="sr-only" id={`${elementId}-label`}>
+                XY Pad
+              </span>
+            )}
+            <span className="sr-only" id={`${elementId}-instructions`}>
+              Use arrow keys to adjust X and Y values.
             </span>
-          )}
-          <span className="sr-only" id={`${elementId}-instructions`}>
-            Use arrow keys to adjust X and Y values.
-          </span>
-          {children}
-        </div>
-      </Context.Provider>
+            {children}
+          </div>
+        </ValueContext.Provider>
+      </ConfigContext.Provider>
     );
   }
 
@@ -379,7 +398,7 @@ export namespace XYPad {
     "aria-describedby": ariaDescribedBy,
     ...props
   }: React.ComponentProps<"div">) {
-    const context = useContext();
+    const context = useConfigContext();
     const {
       disabled,
       elementId,
@@ -560,7 +579,7 @@ export namespace XYPad {
     orientation,
     ...props
   }: CrosshairProps) {
-    const { thumbX, thumbY } = useContext();
+    const { thumbX, thumbY } = useValueContext();
     return (
       <div
         aria-hidden="true"
@@ -583,7 +602,7 @@ export namespace XYPad {
   export interface CursorProps extends React.ComponentProps<"div"> {}
 
   export function Cursor({ className, ...props }: CursorProps) {
-    const { thumbX, thumbY } = useContext();
+    const { thumbX, thumbY } = useValueContext();
     return (
       <div
         aria-hidden="true"
@@ -650,7 +669,7 @@ export namespace XYPad {
     formatValue,
     ...props
   }: ValueDisplayProps) {
-    const { value } = useContext();
+    const { value } = useValueContext();
 
     const content = formatValue ? (
       formatValue(value)
