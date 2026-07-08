@@ -28,9 +28,9 @@ export function ComponentHeaderMobileDrawer() {
         <DrawerTrigger
           render={
             <Button
-              className="text-site-muted-foreground hover:bg-transparent hover:text-site-foreground"
+              className="text-site-muted-foreground"
               size="icon"
-              variant="ghost"
+              variant="outline"
             >
               <FunnelIcon />
             </Button>

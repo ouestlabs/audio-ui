@@ -15,7 +15,7 @@ import { useMounted } from "@/hooks/use-mounted";
 import { BASES as ALL_BASES } from "@/registry/config";
 
 // Base-only launch: audio components only exist for the Base UI base.
-const BASES = (ALL_BASES as any[]).filter((base) => base.name === "base");
+const BASES = ALL_BASES.filter((base) => base.name === "base");
 
 export function BasePicker({
   isMobile,
@@ -29,22 +29,19 @@ export function BasePicker({
   const [config, setConfig] = useConfig();
 
   const currentBase = React.useMemo(
-    () =>
-      (BASES as any[]).find(
-        (base) => base.name === (params.base ?? config.base)
-      ),
+    () => BASES.find((base) => base.name === (params.base ?? config.base)),
     [params.base, config.base]
   );
 
   const handleValueChange = React.useCallback(
     (value: string) => {
-      const newBase = (BASES as any[]).find((base) => base.name === value);
+      const newBase = BASES.find((base) => base.name === value);
       if (!newBase) {
         return;
       }
 
       setParams({ base: newBase.name });
-      setConfig((prev) => ({ ...prev, base: newBase.name as any }));
+      setConfig((prev) => ({ ...prev, base: newBase.name }));
     },
     [setParams, setConfig]
   );
@@ -79,7 +76,7 @@ export function BasePicker({
           value={currentBase?.name}
         >
           <PickerGroup>
-            {(BASES as any[]).map((base) => (
+            {BASES.map((base) => (
               <PickerRadioItem key={base.name} value={base.name}>
                 {base.meta?.logo && (
                   <div

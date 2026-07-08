@@ -46,7 +46,7 @@ export const DEFAULT_CONFIG: Config = {
   // Design system defaults (matching DEFAULT_CONFIG from registry/config.ts)
   base: "base",
   baseColor: "neutral",
-  chartColor: "sky",
+  chartColor: "neutral",
   custom: false,
   customizerOpen: true,
   font: "inter",

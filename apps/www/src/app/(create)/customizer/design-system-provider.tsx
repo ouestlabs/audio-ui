@@ -109,7 +109,6 @@ export function DesignSystemSyncProvider({
         return next;
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setConfig]); // Run only once on mount
 
   // Render children immediately - don't wait for sync to complete.

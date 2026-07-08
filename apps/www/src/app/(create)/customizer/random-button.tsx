@@ -1,6 +1,5 @@
 "use client";
 
-import { DiceFiveIcon } from "@phosphor-icons/react/ssr";
 import * as React from "react";
 import { useLocks } from "@/app/(create)/hooks/use-locks";
 import { FONTS } from "@/app/(create)/lib/fonts";
