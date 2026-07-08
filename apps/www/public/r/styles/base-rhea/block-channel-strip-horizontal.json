@@ -1,15 +1,1 @@
-{
-  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
-  "name": "block-channel-strip-horizontal",
-  "type": "registry:block",
-  "description": "Channel strip with fader in horizontal orientation",
-  "registryDependencies": ["@audio/channel-strip", "@audio/fader"],
-  "files": [
-    {
-      "path": "block-channel-strip-horizontal.tsx",
-      "type": "registry:block",
-      "content": "\"use client\";\n\nimport { useId, useState } from \"react\";\nimport {\n  ChannelStrip,\n  ChannelStripContent,\n  ChannelStripFooter,\n  ChannelStripHeader,\n  ChannelStripLabel,\n  ChannelStripSection,\n  ChannelStripValue,\n} from \"@/components/audio/elements/channel-strip\";\nimport { Fader } from \"@/components/audio/elements/fader\";\n\nexport function BlockChannelStripHorizontal() {\n  const volumeId = useId();\n  const [volume, setVolume] = useState(72);\n\n  return (\n    <ChannelStrip\n      aria-label=\"Channel 1 strip horizontal\"\n      orientation=\"horizontal\"\n    >\n      <ChannelStripHeader>Channel 1</ChannelStripHeader>\n      <ChannelStripContent>\n        <ChannelStripSection>\n          <ChannelStripLabel>Volume</ChannelStripLabel>\n          <Fader\n            aria-label=\"Volume\"\n            id={volumeId}\n            max={100}\n            min={0}\n            onValueChange={setVolume}\n            value={volume}\n          />\n          <ChannelStripValue>{`${volume}%`}</ChannelStripValue>\n        </ChannelStripSection>\n      </ChannelStripContent>\n      <ChannelStripFooter>Output</ChannelStripFooter>\n    </ChannelStrip>\n  );\n}",
-      "target": "components/examples/block-channel-strip-horizontal.tsx"
-    }
-  ]
-}
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","description":"Channel strip with fader in horizontal orientation","files":[{"content":"\"use client\";\n\nimport { useId, useState } from \"react\";\nimport {\n  ChannelStrip,\n  ChannelStripContent,\n  ChannelStripFooter,\n  ChannelStripHeader,\n  ChannelStripLabel,\n  ChannelStripSection,\n  ChannelStripValue,\n} from \"@/components/audio/elements/channel-strip\";\nimport { Fader } from \"@/components/audio/elements/fader\";\n\nexport function BlockChannelStripHorizontal() {\n  const volumeId = useId();\n  const [volume, setVolume] = useState(72);\n\n  return (\n    <ChannelStrip\n      aria-label=\"Channel 1 strip horizontal\"\n      orientation=\"horizontal\"\n    >\n      <ChannelStripHeader>Channel 1</ChannelStripHeader>\n      <ChannelStripContent>\n        <ChannelStripSection>\n          <ChannelStripLabel>Volume</ChannelStripLabel>\n          <Fader\n            aria-label=\"Volume\"\n            id={volumeId}\n            max={100}\n            min={0}\n            onValueChange={setVolume}\n            value={volume}\n          />\n          <ChannelStripValue>{`${volume}%`}</ChannelStripValue>\n        </ChannelStripSection>\n      </ChannelStripContent>\n      <ChannelStripFooter>Output</ChannelStripFooter>\n    </ChannelStrip>\n  );\n}","path":"block-channel-strip-horizontal.tsx","target":"components/examples/block-channel-strip-horizontal.tsx","type":"registry:block"}],"name":"block-channel-strip-horizontal","registryDependencies":["@audio/channel-strip","@audio/fader"],"type":"registry:block"}

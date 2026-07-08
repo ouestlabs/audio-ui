@@ -1,15 +1,1 @@
-{
-  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
-  "name": "block-channel-strip-fader-gain-db",
-  "type": "registry:block",
-  "description": "Channel strip with bipolar gain fader (-60 dB to +6 dB)",
-  "registryDependencies": ["@audio/channel-strip", "@audio/fader"],
-  "files": [
-    {
-      "path": "block-channel-strip-fader-gain-db.tsx",
-      "type": "registry:block",
-      "content": "\"use client\";\n\nimport { useId, useState } from \"react\";\nimport {\n  ChannelStrip,\n  ChannelStripContent,\n  ChannelStripLabel,\n  ChannelStripSection,\n  ChannelStripValue,\n} from \"@/components/audio/elements/channel-strip\";\nimport { Fader } from \"@/components/audio/elements/fader\";\n\nexport function BlockChannelStripFaderGainDb() {\n  const faderId = useId();\n  const labelId = useId();\n  const valueId = useId();\n  const [gain, setGain] = useState(0);\n\n  return (\n    <ChannelStrip aria-label=\"Gain control\">\n      <ChannelStripContent>\n        <ChannelStripSection>\n          <ChannelStripLabel id={labelId}>Gain</ChannelStripLabel>\n          <Fader\n            aria-describedby={valueId}\n            aria-labelledby={labelId}\n            id={faderId}\n            max={6}\n            min={-60}\n            onValueChange={setGain}\n            value={gain}\n          />\n          <ChannelStripValue id={valueId}>\n            {gain > 0 ? `+${gain}` : gain} dB\n          </ChannelStripValue>\n        </ChannelStripSection>\n      </ChannelStripContent>\n    </ChannelStrip>\n  );\n}",
-      "target": "components/examples/block-channel-strip-fader-gain-db.tsx"
-    }
-  ]
-}
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","description":"Channel strip with bipolar gain fader (-60 dB to +6 dB)","files":[{"content":"\"use client\";\n\nimport { useId, useState } from \"react\";\nimport {\n  ChannelStrip,\n  ChannelStripContent,\n  ChannelStripLabel,\n  ChannelStripSection,\n  ChannelStripValue,\n} from \"@/components/audio/elements/channel-strip\";\nimport { Fader } from \"@/components/audio/elements/fader\";\n\nexport function BlockChannelStripFaderGainDb() {\n  const faderId = useId();\n  const labelId = useId();\n  const valueId = useId();\n  const [gain, setGain] = useState(0);\n\n  return (\n    <ChannelStrip aria-label=\"Gain control\">\n      <ChannelStripContent>\n        <ChannelStripSection>\n          <ChannelStripLabel id={labelId}>Gain</ChannelStripLabel>\n          <Fader\n            aria-describedby={valueId}\n            aria-labelledby={labelId}\n            id={faderId}\n            max={6}\n            min={-60}\n            onValueChange={setGain}\n            value={gain}\n          />\n          <ChannelStripValue id={valueId}>\n            {gain > 0 ? `+${gain}` : gain} dB\n          </ChannelStripValue>\n        </ChannelStripSection>\n      </ChannelStripContent>\n    </ChannelStrip>\n  );\n}","path":"block-channel-strip-fader-gain-db.tsx","target":"components/examples/block-channel-strip-fader-gain-db.tsx","type":"registry:block"}],"name":"block-channel-strip-fader-gain-db","registryDependencies":["@audio/channel-strip","@audio/fader"],"type":"registry:block"}

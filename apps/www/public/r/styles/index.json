@@ -1,38 +1,38 @@
 [
   {
-    "name": "default",
-    "label": "Default"
+    "label": "Default",
+    "name": "default"
   },
   {
-    "name": "base-vega",
-    "label": "Base Vega"
+    "label": "Base Vega",
+    "name": "base-vega"
   },
   {
-    "name": "base-nova",
-    "label": "Base Nova"
+    "label": "Base Nova",
+    "name": "base-nova"
   },
   {
-    "name": "base-maia",
-    "label": "Base Maia"
+    "label": "Base Maia",
+    "name": "base-maia"
   },
   {
-    "name": "base-lyra",
-    "label": "Base Lyra"
+    "label": "Base Lyra",
+    "name": "base-lyra"
   },
   {
-    "name": "base-mira",
-    "label": "Base Mira"
+    "label": "Base Mira",
+    "name": "base-mira"
   },
   {
-    "name": "base-luma",
-    "label": "Base Luma"
+    "label": "Base Luma",
+    "name": "base-luma"
   },
   {
-    "name": "base-rhea",
-    "label": "Base Rhea"
+    "label": "Base Rhea",
+    "name": "base-rhea"
   },
   {
-    "name": "base-sera",
-    "label": "Base Sera"
+    "label": "Base Sera",
+    "name": "base-sera"
   }
 ]

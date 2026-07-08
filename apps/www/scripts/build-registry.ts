@@ -57,6 +57,7 @@ interface RegistryItemFile {
 
 interface RegistryItem {
   categories?: string[];
+  css?: Record<string, any>;
   cssVars?: Record<string, any>;
   dependencies?: string[];
   description?: string;
@@ -76,6 +77,72 @@ interface MetadataData {
 // Constants
 const DEFAULT_STYLE = "base-nova";
 const AUDIO_REGISTRY_NAMESPACE = "@audio";
+
+// ---------------------------------------------------------------------------
+// cn-* class expansion — mirrors how ui.shadcn.com serves its own registry:
+// components reference placeholder classes like `cn-fader-track`, defined in
+// registry-audio/styles/style-{style}.css (a `.style-{name} { .cn-x { @apply
+// ...; } }` block). The official registry never ships that placeholder text —
+// it's resolved to real utility classes before the JSON is served, so the
+// shadcn CLI's own `add` never sees a `cn-*` token to deal with. We mirror
+// that here instead of sending unresolved `cn-*` tokens down the wire, which
+// the CLI silently strips since it has no definition for them.
+// ---------------------------------------------------------------------------
+
+const cnClassMapCache: Record<string, Map<string, string>> = {};
+
+async function getCnClassMap(style: string): Promise<Map<string, string>> {
+  if (cnClassMapCache[style]) {
+    return cnClassMapCache[style];
+  }
+
+  const map = new Map<string, string>();
+  const cssPath = path.join(
+    PROJECT_ROOT,
+    "src",
+    "registry-audio",
+    "styles",
+    `style-${style}.css`
+  );
+
+  let raw: string;
+  try {
+    raw = await fs.readFile(cssPath, "utf-8");
+  } catch {
+    cnClassMapCache[style] = map;
+    return map;
+  }
+
+  const withoutComments = raw.replace(/\/\*[\s\S]*?\*\//g, "");
+  const wrapperMatch = withoutComments.match(
+    /\.style-[a-z]+\s*\{([\s\S]*)\}\s*$/
+  );
+  const inner = wrapperMatch ? wrapperMatch[1] : withoutComments;
+
+  const ruleRegex = /\.([a-zA-Z0-9_-]+)\s*\{\s*@apply\s+([^;]+);\s*\}/g;
+  let match: RegExpExecArray | null;
+  match = ruleRegex.exec(inner);
+  while (match !== null) {
+    const [, className, applyValue] = match;
+    map.set(className, applyValue.trim());
+    match = ruleRegex.exec(inner);
+  }
+
+  cnClassMapCache[style] = map;
+  return map;
+}
+
+const CN_TOKEN_REGEX = /\bcn-[a-zA-Z0-9_-]+\b/g;
+
+function expandCnClasses(content: string, cnMap: Map<string, string>): string {
+  if (cnMap.size === 0) {
+    return content;
+  }
+  return content.replace(CN_TOKEN_REGEX, (token) => {
+    const expansion = cnMap.get(token);
+    return expansion === undefined ? token : expansion;
+  });
+}
 
 // ---------------------------------------------------------------------------
 // Metadata loading (mirrors registry-server.ts but with absolute paths)
@@ -251,6 +318,9 @@ async function buildRegistryItem(
     return null;
   }
 
+  const { style } = parseStyleName(styleName);
+  const cnMap = await getCnClassMap(style);
+
   const files: Array<{
     path: string;
     type: string;
@@ -283,10 +353,13 @@ async function buildRegistryItem(
     // 1. Transform style-specific classNames (style-vega:bg-white → bg-white)
     content = transformStyleClassNames(content, styleName);
 
-    // 2. Transform import paths
+    // 2. Expand cn-* placeholder classes to their real utility classes
+    content = expandCnClasses(content, cnMap);
+
+    // 3. Transform import paths
     content = transformImportPaths(content, base);
 
-    // 3. Transform export default → export
+    // 4. Transform export default → export
     if (fileType !== "registry:page") {
       content = content.replace(/export default/g, "export");
     }
@@ -557,7 +630,18 @@ async function main() {
             );
           }
 
-          // 6. Check for unresolved internal import paths
+          // 6. Check for unresolved cn-* placeholder classes (should all be
+          // expanded to real utility classes by getCnClassMap/expandCnClasses)
+          if (CN_TOKEN_REGEX.test(file.content)) {
+            verifyErrors++;
+            corruptedFiles.push(`${styleName}/${entry}`);
+            console.error(
+              `  UNEXPANDED CN CLASS: ${styleName}/${entry} — still contains cn-* tokens`
+            );
+          }
+          CN_TOKEN_REGEX.lastIndex = 0;
+
+          // 7. Check for unresolved internal import paths
           if (
             /@\/registry-audio\//.test(file.content) ||
             /@\/registry\/bases\//.test(file.content)

@@ -1,15 +1,1 @@
-{
-  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
-  "name": "transport-demo",
-  "type": "registry:example",
-  "description": "Transport timeline with buffered range example",
-  "registryDependencies": ["@audio/transport"],
-  "files": [
-    {
-      "path": "transport-demo.tsx",
-      "type": "registry:example",
-      "content": "\"use client\";\n\nimport { useState } from \"react\";\nimport { Transport } from \"@/components/audio/elements/transport\";\n\nexport function TransportDemo() {\n  const [value, setValue] = useState(42);\n\n  return (\n    <Transport\n      aria-label=\"Playback position\"\n      bufferedValue={78}\n      onSeek={setValue}\n      value={value}\n    />\n  );\n}",
-      "target": "components/examples/transport-demo.tsx"
-    }
-  ]
-}
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","description":"Transport timeline with buffered range example","files":[{"content":"\"use client\";\n\nimport { useState } from \"react\";\nimport { Transport } from \"@/components/audio/elements/transport\";\n\nexport function TransportDemo() {\n  const [value, setValue] = useState(42);\n\n  return (\n    <Transport\n      aria-label=\"Playback position\"\n      bufferedValue={78}\n      onSeek={setValue}\n      value={value}\n    />\n  );\n}","path":"transport-demo.tsx","target":"components/examples/transport-demo.tsx","type":"registry:example"}],"name":"transport-demo","registryDependencies":["@audio/transport"],"type":"registry:example"}

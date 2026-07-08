@@ -1,15 +1,1 @@
-{
-  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
-  "name": "xypad-format-value-demo",
-  "type": "registry:example",
-  "description": "XYPad component example with formatted value",
-  "registryDependencies": ["@audio/xypad"],
-  "files": [
-    {
-      "path": "xypad-format-value-demo.tsx",
-      "type": "registry:example",
-      "content": "\"use client\";\nimport { XYPad } from \"@/components/audio/elements/xypad\";\n\nexport function XypadFormatValueDemo() {\n  return (\n    <XYPad\n      className=\"aspect-square\"\n      defaultValue={{ x: 50, y: 50 }}\n      formatValue={(val) => `X: ${val.x}, Y: ${val.y}`}\n      maxX={100}\n      maxY={100}\n      minX={0}\n      minY={0}\n    />\n  );\n}",
-      "target": "components/examples/xypad-format-value-demo.tsx"
-    }
-  ]
-}
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","description":"XYPad component example with formatted value","files":[{"content":"\"use client\";\nimport { XYPad } from \"@/components/audio/elements/xypad\";\n\nexport function XypadFormatValueDemo() {\n  return (\n    <XYPad\n      className=\"aspect-square\"\n      defaultValue={{ x: 50, y: 50 }}\n      formatValue={(val) => `X: ${val.x}, Y: ${val.y}`}\n      maxX={100}\n      maxY={100}\n      minX={0}\n      minY={0}\n    />\n  );\n}","path":"xypad-format-value-demo.tsx","target":"components/examples/xypad-format-value-demo.tsx","type":"registry:example"}],"name":"xypad-format-value-demo","registryDependencies":["@audio/xypad"],"type":"registry:example"}

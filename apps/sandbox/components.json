@@ -20,7 +20,8 @@
   },
   "menuColor": "inverted-translucent",
   "menuAccent": "subtle",
+  "rtl": false,
   "registries": {
-    "@audio": "http://localhost:3000/r/{style}/{name}.json"
+    "@audio": "http://localhost:4000/r/{style}/{name}.json"
   }
 }

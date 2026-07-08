@@ -1,15 +1,1 @@
-{
-  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
-  "name": "knob-filter-control-demo",
-  "type": "registry:example",
-  "description": "Knob component example with filter control",
-  "registryDependencies": ["@audio/knob"],
-  "files": [
-    {
-      "path": "knob-filter-control-demo.tsx",
-      "type": "registry:example",
-      "content": "\"use client\";\nimport { useState } from \"react\";\nimport { Knob } from \"@/components/audio/elements/knob\";\n\nexport function KnobFilterControlDemo() {\n  const [cutoff, setCutoff] = useState(1000);\n\n  return (\n    <div className=\"flex flex-col items-center gap-2\">\n      <Knob\n        max={20_000}\n        min={20}\n        onValueChange={setCutoff}\n        step={1}\n        value={cutoff}\n      />\n      <output className=\"text-sm\">{cutoff} Hz</output>\n    </div>\n  );\n}",
-      "target": "components/examples/knob-filter-control-demo.tsx"
-    }
-  ]
-}
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","description":"Knob component example with filter control","files":[{"content":"\"use client\";\nimport { useState } from \"react\";\nimport { Knob } from \"@/components/audio/elements/knob\";\n\nexport function KnobFilterControlDemo() {\n  const [cutoff, setCutoff] = useState(1000);\n\n  return (\n    <div className=\"flex flex-col items-center gap-2\">\n      <Knob\n        max={20_000}\n        min={20}\n        onValueChange={setCutoff}\n        step={1}\n        value={cutoff}\n      />\n      <output className=\"text-sm\">{cutoff} Hz</output>\n    </div>\n  );\n}","path":"knob-filter-control-demo.tsx","target":"components/examples/knob-filter-control-demo.tsx","type":"registry:example"}],"name":"knob-filter-control-demo","registryDependencies":["@audio/knob"],"type":"registry:example"}

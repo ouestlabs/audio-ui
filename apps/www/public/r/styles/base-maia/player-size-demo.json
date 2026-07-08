@@ -1,15 +1,1 @@
-{
-  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
-  "name": "player-size-demo",
-  "type": "registry:example",
-  "description": "AudioPlayer size options (sm, default, lg)",
-  "registryDependencies": ["@audio/player"],
-  "files": [
-    {
-      "path": "player-size-demo.tsx",
-      "type": "registry:example",
-      "content": "import {\n  AudioPlayer,\n  AudioPlayerControlBar,\n  AudioPlayerPlay,\n  AudioPlayerSeekBar,\n  AudioPlayerTimeDisplay,\n  AudioPlayerVolume,\n} from \"@/components/audio/player\";\n\nexport function AudioPlayerSizeDemo() {\n  const controls = (\n    <AudioPlayerControlBar>\n      <AudioPlayerPlay />\n      <AudioPlayerSeekBar />\n      <AudioPlayerTimeDisplay />\n      <AudioPlayerVolume />\n    </AudioPlayerControlBar>\n  );\n\n  return (\n    <div className=\"flex w-full flex-col gap-6\">\n      <div className=\"flex flex-col gap-2\">\n        <AudioPlayer size=\"sm\">{controls}</AudioPlayer>\n        <p className=\"text-center text-muted-foreground text-xs\">sm</p>\n      </div>\n      <div className=\"flex flex-col gap-2\">\n        <AudioPlayer size=\"default\">{controls}</AudioPlayer>\n        <p className=\"text-center text-muted-foreground text-xs\">default</p>\n      </div>\n    </div>\n  );\n}",
-      "target": "components/examples/player-size-demo.tsx"
-    }
-  ]
-}
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","description":"AudioPlayer size options (sm, default, lg)","files":[{"content":"import {\n  AudioPlayer,\n  AudioPlayerControlBar,\n  AudioPlayerPlay,\n  AudioPlayerSeekBar,\n  AudioPlayerTimeDisplay,\n  AudioPlayerVolume,\n} from \"@/components/audio/player\";\n\nexport function AudioPlayerSizeDemo() {\n  const controls = (\n    <AudioPlayerControlBar>\n      <AudioPlayerPlay />\n      <AudioPlayerSeekBar />\n      <AudioPlayerTimeDisplay />\n      <AudioPlayerVolume />\n    </AudioPlayerControlBar>\n  );\n\n  return (\n    <div className=\"flex w-full flex-col gap-6\">\n      <div className=\"flex flex-col gap-2\">\n        <AudioPlayer size=\"sm\">{controls}</AudioPlayer>\n        <p className=\"text-center text-muted-foreground text-xs\">sm</p>\n      </div>\n      <div className=\"flex flex-col gap-2\">\n        <AudioPlayer size=\"default\">{controls}</AudioPlayer>\n        <p className=\"text-center text-muted-foreground text-xs\">default</p>\n      </div>\n    </div>\n  );\n}","path":"player-size-demo.tsx","target":"components/examples/player-size-demo.tsx","type":"registry:example"}],"name":"player-size-demo","registryDependencies":["@audio/player"],"type":"registry:example"}

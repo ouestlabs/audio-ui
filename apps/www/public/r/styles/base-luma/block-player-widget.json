@@ -1,15 +1,1 @@
-{
-  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
-  "name": "block-player-widget",
-  "type": "registry:block",
-  "description": "Audio player with track list",
-  "registryDependencies": ["@audio/player", "@audio/store", "@audio/html"],
-  "files": [
-    {
-      "path": "block-player-widget.tsx",
-      "type": "registry:block",
-      "content": "\"use client\";\n\nimport {\n  AudioPlayer,\n  AudioPlayerControlBar,\n  AudioPlayerControlGroup,\n  AudioPlayerPlay,\n  AudioPlayerSeekBar,\n  AudioPlayerSkipBack,\n  AudioPlayerSkipForward,\n  AudioPlayerTimeDisplay,\n  AudioPlayerVolume,\n  AudioQueueRepeatMode,\n  AudioQueueShuffle,\n  AudioTrackList,\n} from \"@/components/audio/player\";\n\nexport function BlockPlayerWidget() {\n  return (\n    <AudioPlayer variant=\"widget\">\n      <AudioTrackList />\n      <AudioPlayerControlBar variant=\"stacked\">\n        <AudioPlayerControlGroup>\n          <AudioPlayerTimeDisplay />\n          <AudioPlayerSeekBar />\n          <AudioPlayerTimeDisplay remaining />\n        </AudioPlayerControlGroup>\n        <AudioPlayerControlGroup>\n          <AudioPlayerControlGroup>\n            <AudioPlayerSkipBack />\n            <AudioPlayerPlay />\n            <AudioPlayerSkipForward />\n          </AudioPlayerControlGroup>\n          <AudioQueueShuffle />\n          <AudioQueueRepeatMode />\n          <AudioPlayerVolume />\n        </AudioPlayerControlGroup>\n      </AudioPlayerControlBar>\n    </AudioPlayer>\n  );\n}",
-      "target": "components/examples/block-player-widget.tsx"
-    }
-  ]
-}
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","description":"Audio player with track list","files":[{"content":"\"use client\";\n\nimport {\n  AudioPlayer,\n  AudioPlayerControlBar,\n  AudioPlayerControlGroup,\n  AudioPlayerPlay,\n  AudioPlayerSeekBar,\n  AudioPlayerSkipBack,\n  AudioPlayerSkipForward,\n  AudioPlayerTimeDisplay,\n  AudioPlayerVolume,\n  AudioQueueRepeatMode,\n  AudioQueueShuffle,\n  AudioTrackList,\n} from \"@/components/audio/player\";\n\nexport function BlockPlayerWidget() {\n  return (\n    <AudioPlayer variant=\"widget\">\n      <AudioTrackList />\n      <AudioPlayerControlBar variant=\"stacked\">\n        <AudioPlayerControlGroup>\n          <AudioPlayerTimeDisplay />\n          <AudioPlayerSeekBar />\n          <AudioPlayerTimeDisplay remaining />\n        </AudioPlayerControlGroup>\n        <AudioPlayerControlGroup>\n          <AudioPlayerControlGroup>\n            <AudioPlayerSkipBack />\n            <AudioPlayerPlay />\n            <AudioPlayerSkipForward />\n          </AudioPlayerControlGroup>\n          <AudioQueueShuffle />\n          <AudioQueueRepeatMode />\n          <AudioPlayerVolume />\n        </AudioPlayerControlGroup>\n      </AudioPlayerControlBar>\n    </AudioPlayer>\n  );\n}","path":"block-player-widget.tsx","target":"components/examples/block-player-widget.tsx","type":"registry:block"}],"name":"block-player-widget","registryDependencies":["@audio/player","@audio/store","@audio/html"],"type":"registry:block"}

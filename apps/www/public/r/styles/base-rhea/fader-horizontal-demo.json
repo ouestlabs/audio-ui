@@ -1,15 +1,1 @@
-{
-  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
-  "name": "fader-horizontal-demo",
-  "type": "registry:example",
-  "description": "Fader component example with horizontal orientation",
-  "registryDependencies": ["@audio/fader"],
-  "files": [
-    {
-      "path": "fader-horizontal-demo.tsx",
-      "type": "registry:example",
-      "content": "import { Fader } from \"@/components/audio/elements/fader\";\n\nexport function FaderHorizontalDemo() {\n  return (\n    <Fader\n      defaultValue={50}\n      max={100}\n      min={0}\n      orientation=\"horizontal\"\n      step={1}\n    />\n  );\n}",
-      "target": "components/examples/fader-horizontal-demo.tsx"
-    }
-  ]
-}
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","description":"Fader component example with horizontal orientation","files":[{"content":"import { Fader } from \"@/components/audio/elements/fader\";\n\nexport function FaderHorizontalDemo() {\n  return (\n    <Fader\n      defaultValue={50}\n      max={100}\n      min={0}\n      orientation=\"horizontal\"\n      step={1}\n    />\n  );\n}","path":"fader-horizontal-demo.tsx","target":"components/examples/fader-horizontal-demo.tsx","type":"registry:example"}],"name":"fader-horizontal-demo","registryDependencies":["@audio/fader"],"type":"registry:example"}

@@ -1,15 +1,1 @@
-{
-  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
-  "name": "player-demo",
-  "type": "registry:example",
-  "description": "Audio player demo",
-  "registryDependencies": ["@audio/player"],
-  "files": [
-    {
-      "path": "player-demo.tsx",
-      "type": "registry:example",
-      "content": "import {\n  AudioPlayer,\n  AudioPlayerControlBar,\n  AudioPlayerPlay,\n  AudioPlayerSeekBar,\n  AudioPlayerTimeDisplay,\n  AudioPlayerVolume,\n} from \"@/components/audio/player\";\n\nexport function AudioDemoPlayer() {\n  return (\n    <AudioPlayer>\n      <AudioPlayerControlBar>\n        <AudioPlayerPlay />\n        <AudioPlayerSeekBar />\n        <AudioPlayerTimeDisplay />\n        <AudioPlayerVolume />\n      </AudioPlayerControlBar>\n    </AudioPlayer>\n  );\n}",
-      "target": "components/examples/player-demo.tsx"
-    }
-  ]
-}
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","description":"Audio player demo","files":[{"content":"import {\n  AudioPlayer,\n  AudioPlayerControlBar,\n  AudioPlayerPlay,\n  AudioPlayerSeekBar,\n  AudioPlayerTimeDisplay,\n  AudioPlayerVolume,\n} from \"@/components/audio/player\";\n\nexport function AudioDemoPlayer() {\n  return (\n    <AudioPlayer>\n      <AudioPlayerControlBar>\n        <AudioPlayerPlay />\n        <AudioPlayerSeekBar />\n        <AudioPlayerTimeDisplay />\n        <AudioPlayerVolume />\n      </AudioPlayerControlBar>\n    </AudioPlayer>\n  );\n}","path":"player-demo.tsx","target":"components/examples/player-demo.tsx","type":"registry:example"}],"name":"player-demo","registryDependencies":["@audio/player"],"type":"registry:example"}

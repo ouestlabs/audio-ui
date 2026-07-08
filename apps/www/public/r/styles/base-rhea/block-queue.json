@@ -1,15 +1,1 @@
-{
-  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
-  "name": "block-queue",
-  "type": "registry:block",
-  "description": "Queue controls",
-  "registryDependencies": ["@audio/player"],
-  "files": [
-    {
-      "path": "block-queue.tsx",
-      "type": "registry:block",
-      "content": "\"use client\";\n\nimport {\n  AudioPlayer,\n  AudioPlayerControlBar,\n  AudioPlayerControlGroup,\n  AudioQueue,\n  AudioQueuePreferences,\n  AudioQueueRepeatMode,\n  AudioQueueShuffle,\n} from \"@/components/audio/player\";\n\nexport function BlockQueue() {\n  return (\n    <AudioPlayer>\n      <AudioPlayerControlBar>\n        <AudioPlayerControlGroup className=\"justify-end\">\n          <AudioQueueShuffle />\n          <AudioQueueRepeatMode />\n          <AudioQueuePreferences />\n          <AudioQueue />\n        </AudioPlayerControlGroup>\n      </AudioPlayerControlBar>\n    </AudioPlayer>\n  );\n}",
-      "target": "components/examples/block-queue.tsx"
-    }
-  ]
-}
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","description":"Queue controls","files":[{"content":"\"use client\";\n\nimport {\n  AudioPlayer,\n  AudioPlayerControlBar,\n  AudioPlayerControlGroup,\n  AudioQueue,\n  AudioQueuePreferences,\n  AudioQueueRepeatMode,\n  AudioQueueShuffle,\n} from \"@/components/audio/player\";\n\nexport function BlockQueue() {\n  return (\n    <AudioPlayer>\n      <AudioPlayerControlBar>\n        <AudioPlayerControlGroup className=\"justify-end\">\n          <AudioQueueShuffle />\n          <AudioQueueRepeatMode />\n          <AudioQueuePreferences />\n          <AudioQueue />\n        </AudioPlayerControlGroup>\n      </AudioPlayerControlBar>\n    </AudioPlayer>\n  );\n}","path":"block-queue.tsx","target":"components/examples/block-queue.tsx","type":"registry:block"}],"name":"block-queue","registryDependencies":["@audio/player"],"type":"registry:block"}

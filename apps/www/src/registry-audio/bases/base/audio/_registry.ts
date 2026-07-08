@@ -110,6 +110,7 @@ export const audio: RegistryItem[] = [
     files: [
       {
         path: "audio/elements/channel-strip.tsx",
+        target: "components/audio/channel-strip.tsx",
         type: "registry:component",
       },
     ],

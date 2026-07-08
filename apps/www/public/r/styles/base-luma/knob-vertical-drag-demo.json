@@ -1,15 +1,1 @@
-{
-  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
-  "name": "knob-vertical-drag-demo",
-  "type": "registry:example",
-  "description": "Knob with vertical fader-style pan via dragOptions.verticalPanEnabled",
-  "registryDependencies": ["@audio/knob"],
-  "files": [
-    {
-      "path": "knob-vertical-drag-demo.tsx",
-      "type": "registry:example",
-      "content": "\"use client\";\n\nimport { useState } from \"react\";\nimport { Knob } from \"@/components/audio/elements/knob\";\n\nexport function KnobVerticalDragDemo() {\n  const [value, setValue] = useState(50);\n\n  return (\n    <div className=\"flex flex-col items-center gap-2\">\n      <Knob\n        dragOptions={{ verticalPanEnabled: true }}\n        dragSensitivity=\"arc\"\n        max={100}\n        min={0}\n        onValueChange={setValue}\n        step={1}\n        value={value}\n      />\n      <output\n        aria-live=\"polite\"\n        className=\"font-mono text-foreground text-sm tabular-nums\"\n      >\n        {value}\n      </output>\n    </div>\n  );\n}",
-      "target": "components/examples/knob-vertical-drag-demo.tsx"
-    }
-  ]
-}
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","description":"Knob with vertical fader-style pan via dragOptions.verticalPanEnabled","files":[{"content":"\"use client\";\n\nimport { useState } from \"react\";\nimport { Knob } from \"@/components/audio/elements/knob\";\n\nexport function KnobVerticalDragDemo() {\n  const [value, setValue] = useState(50);\n\n  return (\n    <div className=\"flex flex-col items-center gap-2\">\n      <Knob\n        dragOptions={{ verticalPanEnabled: true }}\n        dragSensitivity=\"arc\"\n        max={100}\n        min={0}\n        onValueChange={setValue}\n        step={1}\n        value={value}\n      />\n      <output\n        aria-live=\"polite\"\n        className=\"font-mono text-foreground text-sm tabular-nums\"\n      >\n        {value}\n      </output>\n    </div>\n  );\n}","path":"knob-vertical-drag-demo.tsx","target":"components/examples/knob-vertical-drag-demo.tsx","type":"registry:example"}],"name":"knob-vertical-drag-demo","registryDependencies":["@audio/knob"],"type":"registry:example"}
