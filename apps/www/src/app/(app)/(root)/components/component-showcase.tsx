@@ -20,9 +20,6 @@ function ShowcaseHeader() {
 
   return (
     <div className="flex min-h-12 shrink-0 items-center justify-between p-2">
-      <Button className="text-site-muted-foreground" disabled variant="ghost">
-        Components
-      </Button>
       {!customizerOpen && (
         <Button onClick={toggleCustomizer} variant="outline">
           <SlidersHorizontalIcon className="size-4" weight="duotone" />
