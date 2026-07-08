@@ -16,7 +16,7 @@ export const Frame = ({
   ...props
 }: FrameProps & { ref?: React.RefObject<HTMLDivElement | null> }) => {
   const outerClasses = cn(
-    "relative flex flex-col overflow-hidden rounded-[16px] border border-site-border/80 bg-site-muted/50 p-0.5 shadow-black/5 shadow-sm",
+    "relative flex flex-col overflow-hidden rounded-[16px] border border-site-border/80 bg-site-muted/50 p-0.5 shadow-black/5 shadow-none",
     className
   );
 

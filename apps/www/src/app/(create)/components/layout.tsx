@@ -68,7 +68,7 @@ export default function ComponentsLayout({
       className={cn(
         createPreviewSans.variable,
         createPreviewMono.variable,
-        "overscroll-behavior- relative flex min-h-svh flex-col bg-site-background font-site-sans has-[.bordered-sidebar]:bg-site-card/25! dark:has-[.bordered-sidebar]:bg-site-background has-[.bordered-sidebar]:[&_header]:border-site-border/80"
+        "overscroll-behavior- relative flex min-h-svh flex-col bg-site-background font-site-sans has-[.bordered-sidebar]:bg-site-card/50! dark:has-[.bordered-sidebar]:bg-site-background has-[.bordered-sidebar]:[&_header]:border-site-border/80"
       )}
     >
       <SiteHeader />

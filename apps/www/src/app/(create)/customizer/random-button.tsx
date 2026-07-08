@@ -193,7 +193,6 @@ export function RandomButton() {
                 Try Random
               </div>
             </div>
-            <DiceFiveIcon className="size-5 md:hidden in-data-[slot=sheet-content]:hidden" />
             <Kbd className="hidden bg-site-foreground/10 text-site-foreground md:flex in-data-[slot=sheet-content]:flex">
               R
             </Kbd>
