@@ -113,7 +113,10 @@ export function ChannelStripLabel({
 }: ChannelStripPrimitive.LabelProps) {
   return (
     <ChannelStripPrimitive.Label
-      className={cn("text-muted-foreground text-xs uppercase text-center", className)}
+      className={cn(
+        "text-muted-foreground text-xs uppercase text-center",
+        className
+      )}
       {...props}
     />
   );
@@ -125,7 +128,10 @@ export function ChannelStripValue({
 }: ChannelStripPrimitive.ValueProps) {
   return (
     <ChannelStripPrimitive.Value
-      className={cn("font-medium text-muted-foreground text-sm tabular-nums min-w-12 text-center", className)}
+      className={cn(
+        "font-medium text-muted-foreground text-sm tabular-nums min-w-12 text-center",
+        className
+      )}
       {...props}
     />
   );
