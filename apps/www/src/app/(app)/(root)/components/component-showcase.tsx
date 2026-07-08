@@ -20,6 +20,11 @@ function ShowcaseHeader() {
 
   return (
     <div className="flex min-h-12 shrink-0 items-center justify-between p-2">
+      <div aria-hidden="true" className="flex items-center gap-1.5 px-2">
+        <span className="size-2.5 rounded-full bg-site-destructive" />
+        <span className="size-2.5 rounded-full bg-site-warning" />
+        <span className="size-2.5 rounded-full bg-site-success" />
+      </div>
       {!customizerOpen && (
         <Button onClick={toggleCustomizer} variant="outline">
           <SlidersHorizontalIcon className="size-4" weight="duotone" />

@@ -10,7 +10,7 @@ export function XLink() {
       nativeButton={false}
       render={
         <Link href={siteConfig.links.twitter} rel="noreferrer" target="_blank">
-          <Icons.twitter  />
+          <Icons.twitter />
           <span className="sr-only">X</span>
         </Link>
       }

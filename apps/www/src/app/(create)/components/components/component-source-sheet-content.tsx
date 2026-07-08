@@ -51,7 +51,7 @@ export function ComponentSourceSheetContent({
   }, [styleName, name, params]);
 
   return (
-    <SheetContent className="flex flex-col gap-0 bg-site-sidebar duration-200 data-ending-style:translate-x-8 data-starting-style:translate-x-8 data-ending-style:opacity-0 data-starting-style:opacity-0 sm:max-w-2xl! [&_button.ring-offset-site-background]:hidden">
+    <SheetContent className="flex flex-col gap-0 bg-site-sidebar duration-200 data-ending-style:translate-x-8 data-starting-style:translate-x-8 data-ending-style:opacity-0 data-starting-style:opacity-0 sm:max-w-2xl! w-full! [&_button.ring-offset-site-background]:hidden">
       <SheetHeader>
         <SheetTitle>Installation</SheetTitle>
       </SheetHeader>

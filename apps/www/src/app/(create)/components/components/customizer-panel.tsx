@@ -81,7 +81,11 @@ function CustomizerPanelSheet() {
 
   return (
     <Sheet onOpenChange={setCustomizerOpen} open={customizerOpen}>
-      <SheetContent className="gap-0" ref={anchorRef} showCloseButton={false}>
+      <SheetContent
+        className="gap-0 w-full!"
+        ref={anchorRef}
+        showCloseButton={false}
+      >
         <SheetTitle className="sr-only">Customize</SheetTitle>
         <SheetDescription className="sr-only">
           Adjust the style, colors, fonts, and other design system options.

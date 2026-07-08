@@ -82,7 +82,7 @@ export function ComponentCardContainer({
     <Frame className={cn(isFullWidth && "md:col-span-2", className)}>
       <FrameContent
         className={cn(
-          "flex min-h-50 min-w-0 flex-1 flex-col flex-wrap items-center justify-center overflow-x-auto bg-site-background p-6 font-sans **:data-[slot=preview]:w-full sm:**:data-[slot=preview]:max-w-[80%] lg:px-8 lg:py-12"
+          "flex min-h-50 min-w-0 flex-1 flex-col flex-wrap items-center justify-center overflow-x-auto bg-site-background p-3 font-sans **:data-[slot=preview]:w-full sm:p-6 sm:**:data-[slot=preview]:max-w-[80%] lg:px-8 lg:py-12"
         )}
       >
         <React.Suspense
