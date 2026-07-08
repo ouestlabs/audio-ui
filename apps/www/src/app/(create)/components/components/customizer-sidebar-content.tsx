@@ -8,7 +8,6 @@ import { ChartColorPicker } from "@/app/(create)/customizer/chart-color-picker";
 import { FontPicker } from "@/app/(create)/customizer/font-picker";
 import { IconLibraryPicker } from "@/app/(create)/customizer/icon-library-picker";
 import { MenuColorPicker } from "@/app/(create)/customizer/menu-picker";
-import { PresetPicker } from "@/app/(create)/customizer/preset-picker";
 import { RadiusPicker } from "@/app/(create)/customizer/radius-picker";
 import { RandomButton } from "@/app/(create)/customizer/random-button";
 import { ResetButton } from "@/app/(create)/customizer/reset-button";
@@ -18,7 +17,7 @@ import { FONT_HEADING_OPTIONS, FONTS } from "@/app/(create)/lib/fonts";
 import { useDesignSystemSearchParams } from "@/app/(create)/lib/search-params";
 import { FieldGroup } from "@/components/ui/field";
 import { useConfig } from "@/hooks/use-config";
-import { getThemesForBaseColor, PRESETS, STYLES } from "@/registry/config";
+import { getThemesForBaseColor, STYLES } from "@/registry/config";
 
 interface CustomizerSidebarContentProps {
   anchorRef: React.RefObject<HTMLDivElement | null>;
@@ -41,14 +40,9 @@ export function CustomizerSidebarContent({
 
   return (
     <>
-      <div className="scroll-fade-y no-scrollbar max-h-[calc(100svh-240px)] flex-1 overflow-y-auto">
+      <div className="scroll-fade-y no-scrollbar min-h-0 flex-1 overflow-y-auto">
         <div className="p-2">
           <FieldGroup className="flex flex-col gap-0">
-            <PresetPicker
-              anchorRef={anchorRef}
-              isMobile={isMobile}
-              presets={PRESETS}
-            />
             <BasePicker anchorRef={anchorRef} isMobile={isMobile} />
             <StylePicker
               anchorRef={anchorRef}
@@ -83,7 +77,7 @@ export function CustomizerSidebarContent({
           </FieldGroup>
         </div>
       </div>
-      <div className="flex flex-col gap-0 border-site-border/80 border-t p-3">
+      <div className="mt-auto flex flex-col gap-0 border-site-border/80 border-t p-3">
         <RandomButton />
         <ResetButton />
       </div>

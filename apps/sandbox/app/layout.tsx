@@ -1,9 +1,16 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Inter } from "next/font/google";
+import { Geist, Geist_Mono, Noto_Serif, Oxanium } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
+const oxaniumHeading = Oxanium({
+  subsets: ["latin"],
+  variable: "--font-heading",
+});
+
+const notoSerif = Noto_Serif({ subsets: ["latin"], variable: "--font-serif" });
+
+const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
 const geistSans = Geist({
   subsets: ["latin"],
@@ -26,7 +33,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html className={cn("font-sans", inter.variable)} lang="en">
+    <html
+      className={cn(
+        notoSerif.variable,
+        oxaniumHeading.variable,
+        "font-sans",
+        geist.variable
+      )}
+      lang="en"
+    >
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

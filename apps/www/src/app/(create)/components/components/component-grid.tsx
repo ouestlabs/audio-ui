@@ -67,7 +67,7 @@ function ComponentGridContent({
 
   if (filteredItems.length === 0) {
     return (
-      <div className="w-full px-4 py-4 sm:px-6 sm:py-6">
+      <div className="w-full px-6 py-6 sm:px-8 xl:px-10">
         <ComponentEmptyState
           message={
             hasActiveSearch
@@ -80,7 +80,7 @@ function ComponentGridContent({
   }
 
   return (
-    <div className="w-full px-4 py-4 sm:px-6 sm:py-6">
+    <div className="w-full px-6 py-6 sm:px-8 xl:px-10">
       <div
         className={cn(
           "grid items-stretch gap-4 pb-4 sm:gap-6",
@@ -106,7 +106,7 @@ export function ComponentGrid({ catalogItems }: ComponentGridProps) {
     <div className="flex flex-col">
       <Suspense
         fallback={
-          <div className="w-full px-4 py-4 sm:px-6 sm:py-6">
+          <div className="w-full px-6 py-6 sm:px-8 xl:px-10">
             <div className="grid items-stretch gap-4 sm:gap-6 grid-cols-[repeat(auto-fill,minmax(max(320px,calc((100%-24px)/2)),1fr))]">
               {Array.from({ length: 6 }).map((_, i) => (
                 <ComponentCardSkeleton key={i} />

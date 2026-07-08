@@ -1,11 +1,9 @@
 "use client";
 
-import { GearSixIcon } from "@phosphor-icons/react/ssr";
+import { SlidersHorizontalIcon } from "@phosphor-icons/react/ssr";
 import * as React from "react";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { ButtonGroup, ButtonGroupText } from "@/components/ui/button-group";
 import { Kbd } from "@/components/ui/kbd";
 import {
   Tooltip,
@@ -43,30 +41,23 @@ export function CustomizerSidebarToggle() {
   }
 
   return (
-    <ButtonGroup>
-      <ButtonGroupText>
-        <GearSixIcon weight="duotone" />
-      </ButtonGroupText>
-      <Tooltip>
-        <TooltipTrigger
-          render={
-            <Button onClick={toggleCustomizer} variant="outline">
-              <span className="inline-flex items-center gap-1">
-                <Avatar className="size-4">
-                  <AvatarImage src="https://github.com/shadcn.png" />
-                  <AvatarFallback>CN</AvatarFallback>
-                </Avatar>
-                <span className="leading-none">/</span>
-                <span className="leading-none">create</span>
-              </span>
-            </Button>
-          }
-        />
-        <TooltipContent className="flex items-center gap-2" side="right">
-          Toggle shadcn/create customizer
-          <Kbd>C</Kbd>
-        </TooltipContent>
-      </Tooltip>
-    </ButtonGroup>
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <Button
+            className="hidden lg:inline-flex"
+            onClick={toggleCustomizer}
+            variant="outline"
+          >
+            <SlidersHorizontalIcon className="size-4" weight="bold" />
+            Customize
+          </Button>
+        }
+      />
+      <TooltipContent className="flex items-center gap-2" side="right">
+        Open customizer
+        <Kbd>C</Kbd>
+      </TooltipContent>
+    </Tooltip>
   );
 }

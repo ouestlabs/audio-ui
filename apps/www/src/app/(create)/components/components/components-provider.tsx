@@ -14,7 +14,7 @@ import {
   CustomizerContext,
   type CustomizerContextValue,
 } from "./components-context";
-import { CustomizerSidebar } from "./customizer-sidebar";
+import { CustomizerPanel } from "./customizer-panel";
 
 // SSR-safe defaults — must match server render to avoid hydration mismatch
 const DEFAULT_SIDEBAR_OPEN = true;
@@ -150,11 +150,13 @@ export function ComponentsProvider({
             suppressHydrationWarning
           >
             <ComponentSidebar />
-            <SidebarInset className="min-h-0 bg-transparent">
+            <SidebarInset className="h-[calc(100svh-var(--header-height))] min-h-0 bg-transparent">
               <ComponentHeader />
-              <div className="flex min-h-0 flex-col">{children}</div>
+              <div className="scroll-fade-y no-scrollbar flex min-h-0 flex-1 flex-col overflow-y-auto">
+                {children}
+              </div>
             </SidebarInset>
-            <CustomizerSidebar />
+            <CustomizerPanel />
           </SidebarProvider>
         </div>
       </CustomizerContext.Provider>

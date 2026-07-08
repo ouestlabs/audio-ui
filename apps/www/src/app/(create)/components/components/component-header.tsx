@@ -1,7 +1,6 @@
 "use client";
 
-import { SidebarIcon } from "@phosphor-icons/react/ssr";
-import { usePathname, useSearchParams } from "next/navigation";
+import { SidebarIcon, SlidersHorizontalIcon } from "@phosphor-icons/react/ssr";
 import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
 import { useSidebar } from "@/components/ui/sidebar";
@@ -10,28 +9,19 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { hasActiveCatalogSearch } from "@/lib/catalog-search-filter";
 
 import { ComponentHeaderGridToggle } from "./component-header-grid-toggle";
 import { ComponentHeaderMobileDrawer } from "./component-header-mobile-drawer";
 import { ComponentHeaderSearch } from "./component-header-search";
+import { useCustomizer } from "./components-context";
 import { CustomizerSidebarToggle } from "./customizer-sidebar-toggle";
 
 export function ComponentHeader() {
   const { open, toggleSidebar } = useSidebar();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const hasSearch = hasActiveCatalogSearch(searchParams.get("search") || "");
-  const currentCategory =
-    pathname.startsWith("/components/") && pathname !== "/components"
-      ? (pathname.split("/").at(-1) ?? "")
-      : "";
-  const showGridToggle = Boolean(currentCategory) || hasSearch;
+  const { toggleCustomizer } = useCustomizer();
 
   return (
-    <div className="sticky top-(--header-height) z-20 flex h-[51px] items-center gap-2 border-site-border/80 border-b bg-site-background px-2">
-      <ComponentHeaderMobileDrawer />
-
+    <div className="sticky top-(--header-height) z-20 flex items-center gap-2 border-site-border/80 border-b bg-site-background p-2">
       {!open && (
         <Tooltip>
           <TooltipTrigger
@@ -40,7 +30,7 @@ export function ComponentHeader() {
                 className="hidden text-site-muted-foreground md:flex"
                 onClick={toggleSidebar}
                 size="icon"
-                variant="ghost"
+                variant="outline"
               >
                 <SidebarIcon />
               </Button>
@@ -52,11 +42,32 @@ export function ComponentHeader() {
         </Tooltip>
       )}
 
+      <ComponentHeaderMobileDrawer />
+
       <ComponentHeaderSearch />
 
       <div className="ml-auto flex items-center gap-2">
-        {showGridToggle && <ComponentHeaderGridToggle />}
+        <ComponentHeaderGridToggle />
         <CustomizerSidebarToggle />
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                className="lg:hidden"
+                onClick={toggleCustomizer}
+                size="icon"
+                variant="outline"
+              >
+                <SlidersHorizontalIcon weight="bold" />
+                <span className="sr-only">Customize</span>
+              </Button>
+            }
+          />
+          <TooltipContent className="flex items-center gap-2" side="right">
+            Open customizer
+            <Kbd>C</Kbd>
+          </TooltipContent>
+        </Tooltip>
       </div>
     </div>
   );

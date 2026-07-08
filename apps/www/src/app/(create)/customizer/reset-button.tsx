@@ -54,7 +54,7 @@ export function ResetButton() {
       <AlertDialogTrigger
         render={
           <Button
-            className="site-rounded-xl sm:site-rounded-lg md:site-rounded-lg hidden h-[calc(--spacing(13.5))] w-[140px] touch-manipulation select-none justify-between border border-site-foreground/10 bg-site-muted/50 focus-visible:border-transparent focus-visible:ring-1 md:flex md:w-full md:border-transparent md:bg-transparent md:pr-3.5! md:pl-2!"
+            className="site-rounded-xl sm:site-rounded-lg md:site-rounded-lg in-data-[slot=sheet-content]:site-rounded-lg hidden h-[calc(--spacing(13.5))] w-[140px] touch-manipulation select-none justify-between border border-site-foreground/10 bg-site-muted/50 focus-visible:border-transparent focus-visible:ring-1 md:flex in-data-[slot=sheet-content]:flex md:w-full in-data-[slot=sheet-content]:w-full md:border-transparent in-data-[slot=sheet-content]:border-transparent md:bg-transparent in-data-[slot=sheet-content]:bg-transparent md:pr-3.5! in-data-[slot=sheet-content]:pr-3.5! md:pl-2! in-data-[slot=sheet-content]:pl-2!"
             size="sm"
             variant="ghost"
           >

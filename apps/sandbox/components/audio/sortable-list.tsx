@@ -144,7 +144,7 @@ const dropAnimationConfig: DropAnimation = {
 
 const Overlay = ({ children }: React.PropsWithChildren) => (
   <DragOverlay
-    className="z-100 overflow-hidden [&>li]:border-b-0"
+    className="rounded-3xl shadow-lg z-100 overflow-hidden [&>li]:border-b-0"
     dropAnimation={dropAnimationConfig}
     style={{
       cursor: "grabbing",

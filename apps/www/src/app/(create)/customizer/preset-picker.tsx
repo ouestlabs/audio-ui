@@ -31,7 +31,7 @@ export function PresetPicker({
 
   const effectiveParams = React.useMemo(
     () => ({
-      base: context?.style?.split("-")[0] ?? params.base ?? config.base,
+      base: params.base ?? config.base,
       baseColor: context?.baseColor ?? params.baseColor ?? config.baseColor,
       font: context?.font ?? params.font ?? config.font,
       iconLibrary:

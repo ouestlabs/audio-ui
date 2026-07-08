@@ -14,13 +14,15 @@
     },
     "apps/sandbox": {
       "name": "sandbox",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "dependencies": {
         "@audio-ui/react": "workspace:*",
         "@base-ui/react": "^1.4.0",
         "@dnd-kit/core": "^6.3.1",
         "@dnd-kit/sortable": "^10.0.0",
         "@dnd-kit/utilities": "^3.2.2",
+        "@hugeicons/core-free-icons": "^4.2.2",
+        "@hugeicons/react": "^1.1.9",
         "@phosphor-icons/react": "^2.1.10",
         "@radix-ui/react-avatar": "^1.1.11",
         "@radix-ui/react-dialog": "^1.1.15",
@@ -30,6 +32,7 @@
         "@radix-ui/react-slot": "^1.2.4",
         "@radix-ui/react-toggle": "^1.1.10",
         "@radix-ui/react-tooltip": "^1.2.8",
+        "@remixicon/react": "^4.9.0",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
         "cmdk": "^1.1.1",
@@ -124,7 +127,7 @@
     },
     "packages/ui": {
       "name": "@audio-ui/react",
-      "version": "0.0.8",
+      "version": "0.0.9",
       "dependencies": {
         "@audio-ui/utils": "latest",
       },
@@ -2323,7 +2326,7 @@
 
     "wsl-utils/is-wsl": ["is-wsl@3.1.1", "", { "dependencies": { "is-inside-container": "^1.0.0" } }, "sha512-e6rvdUCiQCAuumZslxRJWR/Doq4VpPR82kqclvcS0efgt430SlGIk05vdCN58+VrzgtIcfNODjozVielycD4Sw=="],
 
-    "www/@audio-ui/react": ["@audio-ui/react@0.0.8", "", { "dependencies": { "@audio-ui/utils": "latest" }, "peerDependencies": { "@types/react": "^18 || ^19", "react": "^18 || ^19", "react-dom": "^18 || ^19" }, "optionalPeers": ["@types/react"] }, "sha512-nI1uRIdFAcsNtAcLZUFOnVFxS8nn7ynt3AbzTuWvt1K2c9coDovA5sGOpleSa6CmciOo7dkoBRpGfZvf8QUgwQ=="],
+    "www/@audio-ui/react": ["@audio-ui/react@0.0.9", "", { "dependencies": { "@audio-ui/utils": "latest" }, "peerDependencies": { "@types/react": "^18 || ^19", "react": "^18 || ^19", "react-dom": "^18 || ^19" }, "optionalPeers": ["@types/react"] }, "sha512-Icl3xHtfcmht0nfxGOe/HKbWXNed1QBJpKQA5CbaSLebUfQNN7KGb7jQbPWQ2BUFAbuh3pOi+u46ZP0IIJCLfg=="],
 
     "www/@types/node": ["@types/node@25.9.4", "", { "dependencies": { "undici-types": ">=7.24.0 <7.24.7" } }, "sha512-dszCsrKb5U7ZsVZBWiHFklTloVl0mSEnWH/iZXfZUlI4rzCUnsvGmgqfuVRHL54ugE7/wRuxEIXRa2iMZ+BG6g=="],
 

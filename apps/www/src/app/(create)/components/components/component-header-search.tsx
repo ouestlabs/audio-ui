@@ -226,18 +226,18 @@ export function ComponentHeaderSearch({
     resultCount > 0;
 
   return (
-    <div className={cn("group relative flex-1", className)}>
-      <div className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-0 flex items-center pl-0">
-        <MagnifyingGlassIcon
-          className="size-4 text-site-muted-foreground transition-colors group-focus-within:text-site-foreground"
-          weight="duotone"
-        />
-      </div>
+    <div
+      className={cn("group relative flex flex-1 items-center gap-2", className)}
+    >
+      <MagnifyingGlassIcon
+        className="size-4 mx-1 shrink-0 text-site-muted-foreground transition-colors group-focus-within:text-site-foreground"
+        weight="duotone"
+      />
       <input
         aria-label="Search components"
         className={cn(
-          "flex h-9 w-full border-0 bg-transparent py-1 pl-6 text-sm ring-offset-site-background file:border-0 file:bg-transparent file:font-medium file:text-sm placeholder:text-site-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50",
-          localQuery ? "pr-32" : "pr-4"
+          "h-8 w-full border-0 bg-transparent py-1 text-sm placeholder:text-site-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50",
+          localQuery ? "pr-32" : "pr-0"
         )}
         onBlur={flushOnBlur}
         onChange={(e) => setLocalQuery(e.target.value)}
@@ -247,10 +247,10 @@ export function ComponentHeaderSearch({
         type="text"
         value={localQuery}
       />
-      <div className="-translate-y-1/2 absolute top-1/2 right-0 flex items-center gap-1 pr-1">
+      <div className="-translate-y-1/2 absolute top-1/2 right-2 flex items-center gap-1.5">
         {showFound ? (
           <div className="flex items-center gap-1.5">
-            <div className="hidden items-center gap-1.5 font-medium text-site-muted-foreground text-xs sm:flex">
+            <div className="hidden items-center gap-1.5 font-medium text-site-muted-foreground text-xs tabular-nums sm:flex">
               Found {resultCount}{" "}
               {resultCount === 1 ? "component" : "components"}
             </div>

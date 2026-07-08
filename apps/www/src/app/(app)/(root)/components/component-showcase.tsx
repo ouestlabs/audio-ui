@@ -1,55 +1,35 @@
 "use client";
 
-import dynamic from "next/dynamic";
+import { SlidersHorizontalIcon } from "@phosphor-icons/react/ssr";
 import * as React from "react";
 import { ComponentGrid } from "@/app/(create)/components/components/component-grid";
 import {
   CustomizerContext,
   useCustomizer,
 } from "@/app/(create)/components/components/components-context";
-import { CustomizerSidebarHeader } from "@/app/(create)/components/components/customizer-sidebar-header";
-import { CustomizerSidebarToggle } from "@/app/(create)/components/components/customizer-sidebar-toggle";
+import { CustomizerPanel } from "@/app/(create)/components/components/customizer-panel";
 import type { CatalogItem } from "@/app/(create)/components/types";
 import { DesignSystemProvider } from "@/app/(create)/customizer/design-system-provider";
 import { LocksProvider } from "@/app/(create)/hooks/use-locks";
 import { AudioDemoProvider } from "@/components/audio-demo-provider";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { cn } from "@/lib/utils";
+import { Frame, FrameContent } from "@/components/custom/frame";
+import { Button } from "@/components/ui/button";
 
-/** Client-only: nuqs + jotai + theme pickers diverge from SSR; avoids hydration errors. */
-const CustomizerSidebarContent = dynamic(
-  () =>
-    import(
-      "@/app/(create)/components/components/customizer-sidebar-content"
-    ).then((m) => m.CustomizerSidebarContent),
-  {
-    loading: () => <div aria-hidden className="flex-1" />,
-    ssr: false,
-  }
-);
-
-function ShowcaseCustomizerAside() {
-  const isMobile = useIsMobile();
-  const { customizerOpen } = useCustomizer();
-  const anchorRef = React.useRef<HTMLDivElement>(null);
-
-  if (isMobile) {
-    return null;
-  }
+function ShowcaseHeader() {
+  const { customizerOpen, toggleCustomizer } = useCustomizer();
 
   return (
-    <aside
-      className={cn(
-        "flex w-64 shrink-0 flex-col overflow-hidden border-site-border/80 border-l bg-site-background transition-[width] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
-        !customizerOpen && "w-0 border-l-0"
+    <div className="flex min-h-12 shrink-0 items-center justify-between p-2">
+      <Button className="text-site-muted-foreground" disabled variant="ghost">
+        Components
+      </Button>
+      {!customizerOpen && (
+        <Button onClick={toggleCustomizer} variant="outline">
+          <SlidersHorizontalIcon className="size-4" weight="duotone" />
+          Customize
+        </Button>
       )}
-      ref={anchorRef}
-    >
-      <div className="flex h-full w-64 flex-col">
-        <CustomizerSidebarHeader />
-        <CustomizerSidebarContent anchorRef={anchorRef} isMobile={isMobile} />
-      </div>
-    </aside>
+    </div>
   );
 }
 
@@ -75,16 +55,16 @@ export function ComponentShowcase({
           <DesignSystemProvider>
             <AudioDemoProvider>
               <CustomizerContext value={customizerValue}>
-                <div className="flex min-h-0 flex-1 overflow-hidden rounded-2xl border border-site-border/80 bg-site-background shadow-xl">
-                  <div className="relative min-h-0 flex-1">
-                    <div className="no-scrollbar scroll-fade-y absolute inset-0 overflow-y-auto">
-                      <ComponentGrid catalogItems={catalogItems} />
-                    </div>
-                    <div className="absolute top-3 right-3 z-10">
-                      <CustomizerSidebarToggle />
-                    </div>
-                  </div>
-                  <ShowcaseCustomizerAside />
+                <div className="flex min-h-0 flex-1 gap-2">
+                  <Frame className="flex min-h-0 flex-1 flex-col">
+                    <ShowcaseHeader />
+                    <FrameContent className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
+                      <div className="no-scrollbar scroll-fade-y min-h-0 flex-1 overflow-y-auto">
+                        <ComponentGrid catalogItems={catalogItems} />
+                      </div>
+                    </FrameContent>
+                  </Frame>
+                  <CustomizerPanel variant="frame" />
                 </div>
               </CustomizerContext>
             </AudioDemoProvider>

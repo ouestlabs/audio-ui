@@ -1,8 +1,7 @@
 "use client";
 
-import { SidebarIcon } from "@phosphor-icons/react/ssr";
+import { SlidersHorizontalIcon, XIcon } from "@phosphor-icons/react/ssr";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
 import {
@@ -11,26 +10,23 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
+import { cn } from "@/lib/utils";
 import { useCustomizer } from "./components-context";
 
-export function CustomizerSidebarHeader() {
+export function CustomizerSidebarHeader({ className }: { className?: string }) {
   const { toggleCustomizer } = useCustomizer();
 
   return (
-    <div className="flex h-[51px] shrink-0 items-center justify-between overflow-hidden border-site-border/80 border-b pr-2 pl-3">
-      <div className="min-w-0 flex-1 whitespace-nowrap">
-        <h2 className="inline-flex items-center gap-1 font-medium text-site-foreground">
-          <Avatar className="size-4">
-            <AvatarImage src="https://github.com/shadcn.png" />
-            <AvatarFallback>CN</AvatarFallback>
-          </Avatar>
-          <span className="leading-none">/</span>
-          <span className="text-sm leading-none">create</span>
-        </h2>
-        <p className="text-site-muted-foreground text-xs leading-none">
-          Adjust shadcn styles
-        </p>
-      </div>
+    <div
+      className={cn(
+        "flex shrink-0 items-center justify-between overflow-hidden border-site-border/80 border-b p-2",
+        className
+      )}
+    >
+      <h2 className="inline-flex items-center gap-1.5 px-2 font-medium text-site-foreground">
+        <SlidersHorizontalIcon className="size-4 shrink-0" weight="duotone" />
+        <span className="text-sm leading-none">Customize</span>
+      </h2>
       <Tooltip>
         <TooltipTrigger
           render={
@@ -40,7 +36,7 @@ export function CustomizerSidebarHeader() {
               size="icon"
               variant="ghost"
             >
-              <SidebarIcon weight="duotone" />
+              <XIcon weight="bold" />
             </Button>
           }
         />

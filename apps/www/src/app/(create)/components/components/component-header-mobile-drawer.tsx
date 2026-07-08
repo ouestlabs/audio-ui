@@ -19,7 +19,7 @@ export function ComponentHeaderMobileDrawer() {
   const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
 
   return (
-    <div className="flex items-center gap-2 lg:hidden">
+    <div className="flex items-center gap-2 md:hidden">
       <Drawer
         onOpenChange={setIsDrawerOpen}
         open={isDrawerOpen}
@@ -28,8 +28,8 @@ export function ComponentHeaderMobileDrawer() {
         <DrawerTrigger
           render={
             <Button
-              className="-ml-2 text-site-muted-foreground hover:bg-transparent hover:text-site-foreground"
-              size="icon-sm"
+              className="text-site-muted-foreground hover:bg-transparent hover:text-site-foreground"
+              size="icon"
               variant="ghost"
             >
               <FunnelIcon />

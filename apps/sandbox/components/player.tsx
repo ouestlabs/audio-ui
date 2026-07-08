@@ -230,7 +230,7 @@ const demoTracks: Track[] = [
 ];
 
 const audioPlayerVariants = cva(
-  "before:-z-1 relative w-full before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit]",
+  "before:backdrop-blur-xl before:backdrop-saturate-150 before:-z-1 relative w-full before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit]",
   {
     defaultVariants: {
       size: "default",
@@ -238,13 +238,13 @@ const audioPlayerVariants = cva(
     },
     variants: {
       size: {
-        default: "",
-        sm: "",
+        default: "rounded-4xl py-4",
+        sm: "rounded-4xl py-3",
       },
       variant: {
-        default: "",
-        ghost: "",
-        widget: "",
+        default: "bg-card/70 shadow-md ring-1 ring-foreground/10",
+        ghost: "bg-transparent hover:bg-muted/30",
+        widget: "bg-card/70 shadow-md ring-1 ring-foreground/10",
       },
     },
   }
@@ -293,7 +293,7 @@ function AudioPlayerButton({
   const button = (
     <Button
       aria-label={props["aria-label"] ?? tooltipLabel}
-      className={cn("", className)}
+      className={cn("[&_svg]:text-primary", className)}
       data-slot="audio-player-button"
       {...props}
     />
@@ -386,9 +386,9 @@ const AudioPlayerTimeDisplay = ({
   return (
     <time
       className={cn(
-        "min-w-12 shrink-0 text-left",
+        "font-mono text-sm tabular-nums min-w-12 shrink-0 text-left",
         remaining && "text-right",
-        showLiveIcon && "flex items-center gap-1",
+        showLiveIcon && "text-destructive text-xs flex items-center gap-1",
         className
       )}
       data-live={isLiveStream ? "true" : undefined}
@@ -969,7 +969,10 @@ function AudioTrack({
   return (
     <AudioTrackContext value={contextValue}>
       <Item
-        className={cn("w-full cursor-pointer transition-colors", className)}
+        className={cn(
+          "backdrop-blur-sm hover:bg-secondary/50 w-full cursor-pointer transition-colors",
+          className
+        )}
         data-current={isCurrent ? "true" : undefined}
         data-slot="audio-track"
         onClick={(e) => {

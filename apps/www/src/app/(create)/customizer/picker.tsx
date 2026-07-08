@@ -17,7 +17,7 @@ function PickerTrigger({ className, ...props }: MenuPrimitive.Trigger.Props) {
   return (
     <MenuPrimitive.Trigger
       className={cn(
-        "site-rounded-xl md:site-rounded-lg relative w-[160px] shrink-0 touch-manipulation select-none border border-site-foreground/10 bg-site-muted/50 p-2 font-site-sans hover:bg-site-muted disabled:opacity-50 data-popup-open:bg-site-muted md:w-full md:border-transparent md:bg-transparent",
+        "site-rounded-xl md:site-rounded-lg in-data-[slot=sheet-content]:site-rounded-lg relative w-[160px] shrink-0 touch-manipulation select-none border border-site-foreground/10 bg-site-muted/50 p-2 font-site-sans hover:bg-site-muted disabled:opacity-50 data-popup-open:bg-site-muted md:w-full in-data-[slot=sheet-content]:w-full md:border-transparent in-data-[slot=sheet-content]:border-transparent md:bg-transparent in-data-[slot=sheet-content]:bg-transparent",
         className
       )}
       data-slot="dropdown-menu-trigger"
@@ -46,12 +46,13 @@ function PickerContent({
         alignOffset={alignOffset}
         anchor={anchor}
         className="isolate z-50 outline-none"
+        collisionAvoidance={{ fallbackAxisSide: "end" }}
         side={side}
         sideOffset={sideOffset}
       >
         <MenuPrimitive.Popup
           className={cn(
-            "data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 cn-menu-target no-scrollbar site-rounded-xl z-50 max-h-(--available-height) w-[calc(var(--available-width)-(--spacing(3.5)))] min-w-32 origin-(--transform-origin) overflow-y-auto overflow-x-hidden border-0 bg-site-popover p-1 font-site-sans text-site-popover-foreground shadow-md outline-none ring-1 ring-site-foreground/10 duration-100 data-closed:animate-out data-open:animate-in data-closed:overflow-hidden md:w-52",
+            "data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 cn-menu-target no-scrollbar site-rounded-xl z-50 max-h-(--available-height) w-[calc(var(--anchor-width)-(--spacing(3.5)))] min-w-32 origin-(--transform-origin) overflow-y-auto overflow-x-hidden border-0 bg-site-popover p-1 font-site-sans text-site-popover-foreground shadow-md outline-none ring-1 ring-site-foreground/10 duration-100 data-closed:animate-out data-open:animate-in data-closed:overflow-hidden md:w-52",
             className
           )}
           data-slot="dropdown-menu-content"
@@ -77,7 +78,7 @@ function PickerLabel({
   return (
     <MenuPrimitive.GroupLabel
       className={cn(
-        "px-2 py-1.5 font-medium text-site-muted-foreground text-xs data-[inset]:pl-8",
+        "px-2 py-1.5 font-medium text-site-muted-foreground text-xs data-inset:pl-8",
         className
       )}
       data-inset={inset}
@@ -99,7 +100,7 @@ function PickerItem({
   return (
     <MenuPrimitive.Item
       className={cn(
-        "group/dropdown-menu-item site-rounded-sm relative flex cursor-default select-none items-center gap-2 px-2 pointer-coarse:py-2.5 py-1.5 pointer-coarse:pl-3 pointer-coarse:text-base text-sm outline-hidden focus:bg-site-accent focus:text-site-accent-foreground not-data-[variant=destructive]:focus:**:text-site-accent-foreground data-disabled:pointer-events-none data-[inset]:pl-8 data-[variant=destructive]:text-site-destructive data-disabled:opacity-50 data-[variant=destructive]:focus:bg-site-destructive/10 data-[variant=destructive]:focus:text-site-destructive dark:data-[variant=destructive]:focus:bg-site-destructive/20 [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0 data-[variant=destructive]:*:[svg]:text-site-destructive",
+        "group/dropdown-menu-item site-rounded-sm relative flex cursor-default select-none items-center gap-2 px-2 pointer-coarse:py-2.5 py-1.5 pointer-coarse:pl-3 pointer-coarse:text-base text-sm outline-hidden focus:bg-site-accent focus:text-site-accent-foreground not-data-[variant=destructive]:focus:**:text-site-accent-foreground data-disabled:pointer-events-none data-inset:pl-8 data-[variant=destructive]:text-site-destructive data-disabled:opacity-50 data-[variant=destructive]:focus:bg-site-destructive/10 data-[variant=destructive]:focus:text-site-destructive dark:data-[variant=destructive]:focus:bg-site-destructive/20 [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0 data-[variant=destructive]:*:[svg]:text-site-destructive",
         className
       )}
       data-inset={inset}
@@ -125,7 +126,7 @@ function PickerSubTrigger({
   return (
     <MenuPrimitive.SubmenuTrigger
       className={cn(
-        "site-rounded-sm flex cursor-default select-none items-center gap-2 px-2 py-1.5 text-sm outline-hidden focus:bg-site-accent focus:text-site-accent-foreground not-data-[variant=destructive]:focus:**:text-site-accent-foreground data-open:bg-site-accent data-[inset]:pl-8 data-open:text-site-accent-foreground [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+        "site-rounded-sm flex cursor-default select-none items-center gap-2 px-2 py-1.5 text-sm outline-hidden focus:bg-site-accent focus:text-site-accent-foreground not-data-[variant=destructive]:focus:**:text-site-accent-foreground data-open:bg-site-accent data-inset:pl-8 data-open:text-site-accent-foreground [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0",
         className
       )}
       data-inset={inset}
@@ -179,7 +180,7 @@ function PickerCheckboxItem({
     <MenuPrimitive.CheckboxItem
       checked={checked}
       className={cn(
-        "site-rounded-sm relative flex cursor-default select-none items-center gap-2 py-1.5 pr-8 pl-2 text-sm outline-hidden focus:bg-site-accent focus:text-site-accent-foreground focus:**:text-site-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+        "site-rounded-sm relative flex cursor-default select-none items-center gap-2 py-1.5 pr-8 pl-2 text-sm outline-hidden focus:bg-site-accent focus:text-site-accent-foreground focus:**:text-site-accent-foreground data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0",
         className
       )}
       data-slot="dropdown-menu-checkbox-item"
@@ -218,7 +219,7 @@ function PickerRadioItem({
   return (
     <MenuPrimitive.RadioItem
       className={cn(
-        "site-rounded-lg relative flex cursor-default select-none items-center gap-2 pointer-coarse:gap-3 pointer-coarse:py-2.5 py-1.5 pr-8 pl-2 pointer-coarse:pl-3 pointer-coarse:text-base text-sm outline-hidden focus:bg-site-accent focus:text-site-accent-foreground focus:**:text-site-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+        "site-rounded-lg relative flex cursor-default select-none items-center gap-2 pointer-coarse:gap-3 pointer-coarse:py-2.5 py-1.5 pr-8 pl-2 pointer-coarse:pl-3 pointer-coarse:text-base text-sm outline-hidden focus:bg-site-accent focus:text-site-accent-foreground focus:**:text-site-accent-foreground data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0",
         className
       )}
       data-slot="dropdown-menu-radio-item"

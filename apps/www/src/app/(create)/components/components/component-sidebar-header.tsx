@@ -34,7 +34,7 @@ export function ComponentSidebarHeader() {
   }, [sidebarMenuView, setSidebarMenuView]);
 
   return (
-    <SidebarHeader className="flex h-[51px] flex-row items-center justify-between border-site-border/80 border-b pl-3">
+    <SidebarHeader className="flex flex-row items-center justify-between border-site-border/80 border-b p-2">
       <div className="flex w-full items-center gap-2">
         <FunnelIcon className="shrink-0 opacity-60" weight="duotone" />
         <input
