@@ -1,6 +1,6 @@
 import { describe, expect, mock, test } from "bun:test";
 import { fireEvent, render } from "@testing-library/react";
-import { Knob } from "../src/primitives/knob";
+import { Knob } from "./knob";
 
 /** Defaults: min 0, max 100, step 1, defaultValue 0. */
 function renderKnob(props: Knob.RootProps = {}) {

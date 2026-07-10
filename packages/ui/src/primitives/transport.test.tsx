@@ -1,7 +1,7 @@
 import { describe, expect, mock, test } from "bun:test";
 import { fireEvent, render } from "@testing-library/react";
-import { Transport } from "../src/primitives/transport";
-import { mockRect } from "./helpers";
+import { Transport } from "./transport";
+import { mockRect } from "../../test/helpers";
 
 /** Defaults: min 0, max 100, step 1 → midpoint default value 50, horizontal. */
 function renderTransport(props: Transport.RootProps = {}) {
