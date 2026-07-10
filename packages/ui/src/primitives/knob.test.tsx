@@ -4,8 +4,8 @@ import { Knob } from "./knob";
 
 /** Defaults: min 0, max 100, step 1, defaultValue 0. */
 function renderKnob(props: Knob.RootProps = {}) {
-  const onValueChange = mock(() => {});
-  const onValueCommit = mock(() => {});
+  const onValueChange = mock(() => undefined);
+  const onValueCommit = mock(() => undefined);
   const view = render(
     <Knob.Root
       onValueChange={onValueChange}

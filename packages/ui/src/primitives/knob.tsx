@@ -524,6 +524,7 @@ export namespace Knob {
         indicatorWidth,
         keyboardProps,
         parameterDragCallbacks,
+        shouldPreventFocusRef,
         ariaLabel,
         ariaLabelledBy,
         wheelRef,

@@ -5,8 +5,8 @@ import { Fader } from "./fader";
 
 /** Defaults: min -60, max 6, step 1 → midpoint default value -27. */
 function renderFader(props: Fader.RootProps = {}) {
-  const onValueChange = mock(() => {});
-  const onValueCommit = mock(() => {});
+  const onValueChange = mock(() => undefined);
+  const onValueCommit = mock(() => undefined);
   const view = render(
     <Fader.Root
       onValueChange={onValueChange}

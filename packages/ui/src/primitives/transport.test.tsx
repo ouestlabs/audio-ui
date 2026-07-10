@@ -5,8 +5,8 @@ import { Transport } from "./transport";
 
 /** Defaults: min 0, max 100, step 1 → midpoint default value 50, horizontal. */
 function renderTransport(props: Transport.RootProps = {}) {
-  const onValueChange = mock(() => {});
-  const onValueCommit = mock(() => {});
+  const onValueChange = mock(() => undefined);
+  const onValueCommit = mock(() => undefined);
   const view = render(
     <Transport.Root
       onValueChange={onValueChange}

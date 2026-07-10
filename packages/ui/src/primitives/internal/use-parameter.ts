@@ -285,7 +285,7 @@ export function useParameter({
       if (signal.aborted) {
         return;
       }
-      const target = e.target;
+      const { target } = e;
       if (!(target instanceof Node)) {
         return;
       }

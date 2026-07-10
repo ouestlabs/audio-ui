@@ -5,16 +5,20 @@ import type { UseParameterOptions } from "./use-parameter";
 import { useParameter } from "./use-parameter";
 
 function keyEvent(key: string) {
-  return { key, preventDefault: () => {} } as React.KeyboardEvent;
+  return { key, preventDefault: () => undefined } as React.KeyboardEvent;
 }
 
 function pointerEvent(clientX: number, clientY: number) {
-  return { clientX, clientY, preventDefault: () => {} } as React.PointerEvent;
+  return {
+    clientX,
+    clientY,
+    preventDefault: () => undefined,
+  } as React.PointerEvent;
 }
 
 function renderParameter(options: Partial<UseParameterOptions> = {}) {
-  const onValueChange = mock(() => {});
-  const onValueCommit = mock(() => {});
+  const onValueChange = mock(() => undefined);
+  const onValueCommit = mock(() => undefined);
   const hook = renderHook(
     (props: Partial<UseParameterOptions>) =>
       useParameter({
