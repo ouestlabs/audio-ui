@@ -1,7 +1,7 @@
 import { describe, expect, mock, test } from "bun:test";
 import { fireEvent, render } from "@testing-library/react";
-import { mockRect } from "../../test-helpers";
-import { Fader } from "./fader";
+import { Fader } from "../src/primitives/fader";
+import { mockRect } from "./helpers";
 
 /** Defaults: min -60, max 6, step 1 → midpoint default value -27. */
 function renderFader(props: Fader.RootProps = {}) {
