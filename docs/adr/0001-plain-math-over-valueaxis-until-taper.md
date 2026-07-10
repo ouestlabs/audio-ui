@@ -1,0 +1,3 @@
+# Plain math in useParameter instead of ValueAxis, until a taper feature exists
+
+`@audio-ui/utils` ships a `ValueAxis` abstraction (`geom.ts`) that no primitive uses, and an architecture review will keep suggesting the parameter module stand on it. We decided `useParameter` keeps plain `clamp`/`quantizeRound` math instead: `ValueAxis` has exactly one conceivable implementation (identity/clamped) until a non-linear taper feature — log/dB fader curves — is actually requested, and one adapter means a hypothetical seam. When a taper feature lands, introduce it as an additive `taper?: ValueAxis` option on `useParameter`; the hook is an internal seam, so this is a non-breaking change confined to one module.
