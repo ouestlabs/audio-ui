@@ -36,7 +36,7 @@
     "dist"
   ],
   "scripts": {
-    "build:pkg": "tsup",
+    "build:pkg": "tsup && tsc -p tsconfig.build.json",
     "dev": "tsup --watch",
     "lint": "biome check --write .",
     "lint:fix": "biome check --write --unsafe .",
