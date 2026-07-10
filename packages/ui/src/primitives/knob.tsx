@@ -6,18 +6,14 @@ import {
   type Point,
   type Procedure,
   panic,
-  quantizeRound,
   radToDeg,
   TAU,
 } from "@audio-ui/utils";
 import * as React from "react";
 import { useFocus } from "../hooks/interactions/use-focus";
-import { useKeyboardNavigation } from "../hooks/interactions/use-keyboard-navigation";
 import { usePointerDrag } from "../hooks/interactions/use-pointer-drag";
-import { useWheel } from "../hooks/interactions/use-wheel";
-import { useControlledValue } from "../hooks/state/use-controlled-value";
-import { useValueAsRef } from "../hooks/state/use-value-as-ref";
 import { getDataAttributes } from "./internal/data-attributes";
+import { useParameter } from "./internal/use-parameter";
 
 const KNOB_VIEWBOX_CX = 24;
 const KNOB_VIEWBOX_CY = 24;
@@ -95,11 +91,11 @@ interface KnobContextValue {
   arcTrackRadius: number;
   ariaLabel?: string;
   ariaLabelledBy?: string;
-  commitValue: Procedure<number>;
   disabled: boolean;
   elementId: string;
   indicatorSpan: readonly [number, number];
   indicatorWidth: number;
+  keyboardProps: { onKeyDown: Procedure<React.KeyboardEvent> };
   knobRef: React.RefObject<Nullable<HTMLDivElement>>;
   max: number;
   min: number;
@@ -107,15 +103,10 @@ interface KnobContextValue {
   onDragEnd: Procedure<React.PointerEvent>;
   onDragStart: Procedure<React.PointerEvent>;
   onPointerDown: (e: React.PointerEvent) => void;
-  onValueCommit?: Procedure<number>;
   percentage: number;
   rotation: number;
-  setRawValue: Procedure<number>;
   shouldPreventFocusRef: React.RefObject<boolean>;
-  step: number;
-  updateValue: Procedure<number>;
   value: number;
-  valueRef: React.RefObject<number>;
   wheelRef: Procedure<Nullable<HTMLDivElement>>;
 }
 
@@ -286,54 +277,30 @@ export namespace Knob {
       indicatorSpanProp ?? KNOB_DEFAULT_INDICATOR_SPAN;
     const indicatorWidth = indicatorWidthProp ?? KNOB_DEFAULT_INDICATOR_WIDTH;
 
-    const computedDefaultValue =
-      defaultValue ?? (max < min ? min : min + (max - min) / 2);
+    const {
+      beginDrag,
+      dragCallbacks: parameterDragCallbacks,
+      dragStartValueRef,
+      dragTo,
+      endDrag,
+      keyboardProps,
+      percentage,
+      shouldPreventFocusRef,
+      value,
+      valueRef,
+      wheelRef,
+    } = useParameter({
+      defaultValue,
+      disabled,
+      focusRef: knobRef,
+      max,
+      min,
+      onValueChange,
+      onValueCommit,
+      step,
+      value: controlledValue,
+    });
 
-    const transformValue = React.useCallback(
-      (val: number) => {
-        const numValue = Number(val);
-        if (Number.isNaN(numValue) || !Number.isFinite(numValue)) {
-          return min;
-        }
-        return clamp(numValue, min, max);
-      },
-      [min, max]
-    );
-
-    const { value: rawValue, setValue: setRawValue } =
-      useControlledValue<number>({
-        defaultValue: computedDefaultValue,
-        onChange: onValueChange,
-        transform: transformValue,
-        value: controlledValue,
-      });
-
-    const value = rawValue ?? min;
-    const valueRef = useValueAsRef(value);
-
-    const updateValue = React.useCallback(
-      (newValue: number) => {
-        const clampedValue = clamp(newValue, min, max);
-        const steppedValue = quantizeRound(clampedValue, step);
-        setRawValue(steppedValue);
-      },
-      [min, max, step, setRawValue]
-    );
-
-    const commitValue = React.useCallback(
-      (newValue: number) => {
-        const clampedValue = clamp(newValue, min, max);
-        const steppedValue = quantizeRound(clampedValue, step);
-        setRawValue(steppedValue);
-        onValueCommit?.(steppedValue);
-      },
-      [min, max, step, setRawValue, onValueCommit]
-    );
-
-    const dragStartValueRef = React.useRef(value);
-    const isDragActiveRef = React.useRef(false);
-    const pendingValueRef = React.useRef(value);
-    const shouldPreventFocusRef = React.useRef(false);
     const prevAngleRef = React.useRef(0);
     const accumulatedAngleDeltaRef = React.useRef(0);
     const dragModeRef = React.useRef<"undecided" | "pan" | "rotate">(
@@ -351,17 +318,6 @@ export namespace Knob {
     );
     const resolvedDragRef = React.useRef(resolvedDragConfigState);
     resolvedDragRef.current = resolvedDragConfigState;
-
-    const onPointerDown = React.useCallback(
-      (e: React.PointerEvent) => {
-        shouldPreventFocusRef.current = true;
-        e.preventDefault();
-        if (knobRef.current && !disabled) {
-          knobRef.current.focus();
-        }
-      },
-      [disabled]
-    );
 
     const calculateValueFromDelta = React.useCallback(
       (delta: Point, initialValue: number) => {
@@ -451,12 +407,12 @@ export namespace Knob {
           newValue = dragStartValueRef.current + valueDelta;
         }
 
-        pendingValueRef.current = newValue;
-        updateValue(newValue);
+        dragTo(newValue);
       },
       [
         calculateValueFromDelta,
-        updateValue,
+        dragTo,
+        dragStartValueRef,
         angleRange,
         max,
         min,
@@ -467,9 +423,7 @@ export namespace Knob {
 
     const onDragStart = React.useCallback(
       (e: React.PointerEvent) => {
-        isDragActiveRef.current = true;
-        dragStartValueRef.current = value;
-        pendingValueRef.current = value;
+        beginDrag(valueRef.current);
         accumulatedAngleDeltaRef.current = 0;
         dragModeRef.current = "undecided";
         dragStartPosRef.current = { x: e.clientX, y: e.clientY };
@@ -486,12 +440,11 @@ export namespace Knob {
           );
         }
       },
-      [value]
+      [beginDrag, valueRef]
     );
 
     const onDragEnd = React.useCallback(
       (e: React.PointerEvent) => {
-        isDragActiveRef.current = false;
         dragModeRef.current = "undecided";
         dragKnobRectRef.current = null;
 
@@ -507,11 +460,7 @@ export namespace Knob {
           performance.now() - lastTapAtRef.current <= KNOB_DOUBLE_TAP_MAX_MS
         ) {
           lastTapAtRef.current = 0;
-          const resetTo = quantizeRound(
-            clamp(computedDefaultValue, min, max),
-            step
-          );
-          commitValue(resetTo);
+          endDrag(defaultValue);
           return;
         }
 
@@ -521,33 +470,11 @@ export namespace Knob {
           lastTapAtRef.current = 0;
         }
 
-        commitValue(pendingValueRef.current);
+        endDrag();
       },
-      [commitValue, computedDefaultValue, disabled, max, min, step]
+      [defaultValue, disabled, endDrag]
     );
 
-    const { wheelRef } = useWheel({
-      disabled,
-      elementRef: knobRef,
-      onWheel: (delta: Point) => {
-        if (Math.abs(delta.y) < 0.1) {
-          return;
-        }
-        const direction = delta.y < 0 ? 1 : -1;
-        const deltaValue = direction * step;
-        const newValue = clamp(valueRef.current + deltaValue, min, max);
-        commitValue(quantizeRound(newValue, step));
-      },
-    });
-
-    React.useEffect(() => {
-      if (!isDragActiveRef.current) {
-        dragStartValueRef.current = value;
-        pendingValueRef.current = value;
-      }
-    }, [value]);
-
-    const percentage = (value - min) / (max - min);
     const anchorPercentage =
       anchor === undefined ? 0 : clamp((anchor - min) / (max - min), 0, 1);
     const rotation = angleOffset + percentage * angleRange;
@@ -562,34 +489,28 @@ export namespace Knob {
         arcTrackRadius,
         ariaLabel,
         ariaLabelledBy,
-        commitValue,
         disabled,
         elementId,
         indicatorSpan,
         indicatorWidth,
+        keyboardProps,
         knobRef,
         max,
         min,
         onDrag,
         onDragEnd,
         onDragStart,
-        onPointerDown,
-        onValueCommit,
+        onPointerDown: parameterDragCallbacks.onPointerDown,
         percentage,
         rotation,
-        setRawValue,
         shouldPreventFocusRef,
-        step,
-        updateValue,
         value,
-        valueRef,
         wheelRef,
       }),
       [
         value,
         min,
         max,
-        step,
         disabled,
         angleRange,
         angleOffset,
@@ -601,15 +522,12 @@ export namespace Knob {
         arcStrokeWidth,
         indicatorSpan,
         indicatorWidth,
-        updateValue,
-        commitValue,
-        valueRef,
-        setRawValue,
-        onValueCommit,
+        keyboardProps,
+        parameterDragCallbacks,
+        shouldPreventFocusRef,
         ariaLabel,
         ariaLabelledBy,
         wheelRef,
-        onPointerDown,
         onDragStart,
         onDrag,
         onDragEnd,
@@ -847,9 +765,7 @@ export namespace Knob {
       onDrag,
       onDragEnd,
       shouldPreventFocusRef,
-      valueRef,
-      step,
-      commitValue,
+      keyboardProps,
     } = useKnobContext();
 
     const { pointerProps } = usePointerDrag({
@@ -870,44 +786,6 @@ export namespace Knob {
         if (shouldPreventFocusRef.current) {
           shouldPreventFocusRef.current = false;
         }
-      },
-    });
-
-    const { keyboardProps } = useKeyboardNavigation({
-      disabled,
-      handlers: {
-        onArrowDown: () => {
-          commitValue(valueRef.current - step);
-          return true;
-        },
-        onArrowLeft: () => {
-          commitValue(valueRef.current - step);
-          return true;
-        },
-        onArrowRight: () => {
-          commitValue(valueRef.current + step);
-          return true;
-        },
-        onArrowUp: () => {
-          commitValue(valueRef.current + step);
-          return true;
-        },
-        onEnd: () => {
-          commitValue(max);
-          return true;
-        },
-        onHome: () => {
-          commitValue(min);
-          return true;
-        },
-        onPageDown: () => {
-          commitValue(valueRef.current - step * 10);
-          return true;
-        },
-        onPageUp: () => {
-          commitValue(valueRef.current + step * 10);
-          return true;
-        },
       },
     });
 

@@ -1,45 +1,28 @@
 import type { Procedure } from "@audio-ui/utils";
-import {
-  clamp,
-  clampUnit,
-  type Nullable,
-  type Point,
-  quantizeRound,
-} from "@audio-ui/utils";
+import { clampUnit, type Nullable, type Point } from "@audio-ui/utils";
 import * as React from "react";
 import { useFocus } from "../hooks/interactions/use-focus";
-import { useKeyboardNavigation } from "../hooks/interactions/use-keyboard-navigation";
 import { usePointerDrag } from "../hooks/interactions/use-pointer-drag";
-import { useWheel } from "../hooks/interactions/use-wheel";
-import { useControlledValue } from "../hooks/state/use-controlled-value";
-import { useValueAsRef } from "../hooks/state/use-value-as-ref";
 import { getDataAttributes } from "./internal/data-attributes";
 import { useInheritedOrientation } from "./internal/orientation-context";
+import {
+  type UseParameterDragCallbacks,
+  useParameter,
+} from "./internal/use-parameter";
 
 interface TransportConfigContextValue {
   ariaLabel?: string;
   ariaLabelledBy?: string;
-  calculateValueFromDelta: (delta: Point, initialValue: number) => number;
-  calculateValueFromPoint: (point: Point) => number;
-  commitValue: (newValue: number) => void;
   disabled: boolean;
-  dragStartValueRef: React.RefObject<number>;
+  dragCallbacks: UseParameterDragCallbacks;
   elementId: string;
-  isDragActiveRef: React.RefObject<boolean>;
+  keyboardProps: { onKeyDown: Procedure<React.KeyboardEvent> };
   max: number;
   min: number;
-  onDrag: (delta: Point) => void;
-  onDragEnd: () => void;
-  onDragStart: (e: React.PointerEvent) => void;
-  onPointerDown: (e: React.PointerEvent) => void;
   orientation: "horizontal" | "vertical";
-  pendingValueRef: React.RefObject<number>;
   shouldPreventFocusRef: React.RefObject<boolean>;
-  step: number;
   thumbRef: React.RefObject<Nullable<HTMLDivElement>>;
   trackRef: React.RefObject<Nullable<HTMLDivElement>>;
-  updateValue: (newValue: number) => void;
-  valueRef: React.RefObject<number>;
   wheelRef: Procedure<Nullable<HTMLDivElement>>;
 }
 
@@ -70,10 +53,6 @@ function useTransportValueContext() {
     throw new Error("Transport components must be used within Transport.Root");
   }
   return context;
-}
-
-function useTransportContext() {
-  return { ...useTransportConfigContext(), ...useTransportValueContext() };
 }
 
 export namespace Transport {
@@ -133,75 +112,17 @@ export namespace Transport {
     const normalizedValue = Array.isArray(controlledValue)
       ? controlledValue[0]
       : controlledValue;
-    const computedDefaultValue =
-      defaultValue ?? (max < min ? min : min + (max - min) / 2);
-
-    const transformValue = React.useCallback(
-      (val: number) => {
-        const n = Number(val);
-        if (Number.isNaN(n) || !Number.isFinite(n)) {
-          return min;
-        }
-        return clamp(n, min, max);
-      },
-      [min, max]
-    );
-
-    const { value: rawValue, setValue: setRawValue } =
-      useControlledValue<number>({
-        defaultValue: computedDefaultValue,
-        onChange: onValueChange,
-        transform: transformValue,
-        value: normalizedValue,
-      });
-
-    const value = rawValue ?? min;
-    const valueRef = useValueAsRef(value);
-    const [isDragging, setIsDragging] = React.useState(false);
-    const [optimisticValue, setOptimisticValue] = React.useState<number | null>(
-      null
-    );
-    const [frozenBufferedValue, setFrozenBufferedValue] =
-      React.useState(bufferedValue);
-
-    const normalizeValue = React.useCallback(
-      (nextValue: number) => {
-        const clampedValue = clamp(nextValue, min, max);
-        return quantizeRound(clampedValue, step);
-      },
-      [min, max, step]
-    );
-
-    const updateValue = React.useCallback(
-      (newValue: number) => {
-        const steppedValue = normalizeValue(newValue);
-        if (freezeValuesWhileDragging) {
-          setOptimisticValue(steppedValue);
-        }
-        setRawValue(steppedValue);
-      },
-      [normalizeValue, freezeValuesWhileDragging, setRawValue]
-    );
-
-    const commitValue = React.useCallback(
-      (newValue: number) => {
-        const steppedValue = normalizeValue(newValue);
-        setRawValue(steppedValue);
-        onValueCommit?.(steppedValue);
-      },
-      [normalizeValue, setRawValue, onValueCommit]
-    );
 
     const calculateValueFromPoint = React.useCallback(
-      (point: Point) => {
+      (point: Point): Nullable<number> => {
         const track = trackRef.current;
         if (!track) {
-          return valueRef.current;
+          return null;
         }
 
         const rect = track.getBoundingClientRect();
         if (rect.width <= 0 || rect.height <= 0) {
-          return valueRef.current;
+          return null;
         }
 
         if (orientation === "vertical") {
@@ -214,7 +135,7 @@ export namespace Transport {
         const percentage = clampUnit(clickX / rect.width);
         return min + percentage * (max - min);
       },
-      [orientation, min, max, valueRef]
+      [orientation, min, max]
     );
 
     const calculateValueFromDelta = React.useCallback(
@@ -236,94 +157,59 @@ export namespace Transport {
       [orientation, min, max]
     );
 
-    const dragStartValueRef = React.useRef(value);
-    const isDragActiveRef = React.useRef(false);
-    const pendingValueRef = React.useRef(value);
-    const shouldPreventFocusRef = React.useRef(false);
-
-    const onPointerDown = React.useCallback(
-      (e: React.PointerEvent) => {
-        shouldPreventFocusRef.current = true;
-        e.preventDefault();
-        if (thumbRef.current && !disabled) {
-          thumbRef.current.focus();
-        }
-      },
-      [disabled]
+    const containsTarget = React.useCallback(
+      (target: Node) =>
+        Boolean(
+          thumbRef.current?.contains(target) ||
+            trackRef.current?.contains(target)
+        ),
+      []
     );
 
-    const onDragStart = React.useCallback(
-      (e: React.PointerEvent) => {
-        setIsDragging(true);
-        if (freezeValuesWhileDragging) {
-          setFrozenBufferedValue(bufferedValue);
-        }
-        isDragActiveRef.current = true;
-        const newValue = calculateValueFromPoint({
-          x: e.clientX,
-          y: e.clientY,
-        });
-        dragStartValueRef.current = newValue;
-        pendingValueRef.current = newValue;
-        updateValue(newValue);
-      },
-      [
-        bufferedValue,
-        calculateValueFromPoint,
-        freezeValuesWhileDragging,
-        updateValue,
-      ]
-    );
-
-    const onDrag = React.useCallback(
-      (delta: Point) => {
-        const newValue = calculateValueFromDelta(
-          delta,
-          dragStartValueRef.current
-        );
-        pendingValueRef.current = newValue;
-        updateValue(newValue);
-      },
-      [calculateValueFromDelta, updateValue]
-    );
-
-    const onDragEnd = React.useCallback(() => {
-      setIsDragging(false);
-      setOptimisticValue(null);
-      isDragActiveRef.current = false;
-      commitValue(pendingValueRef.current);
-    }, [commitValue]);
-
-    const { wheelRef } = useWheel({
+    const {
+      dragCallbacks: parameterDragCallbacks,
+      isDragging,
+      keyboardProps,
+      percentage,
+      shouldPreventFocusRef,
+      value,
+      wheelRef,
+    } = useParameter({
+      containsTarget,
+      defaultValue,
+      deltaToValue: calculateValueFromDelta,
       disabled,
-      elementRef: trackRef,
-      onWheel: (delta: Point) => {
-        if (Math.abs(delta.y) < 0.1) {
-          return;
-        }
-        const direction = delta.y < 0 ? 1 : -1;
-        const nextValue = clamp(valueRef.current + direction * step, min, max);
-        commitValue(quantizeRound(nextValue, step));
-      },
+      focusRef: thumbRef,
+      freezeWhileDragging: freezeValuesWhileDragging,
+      max,
+      min,
+      onValueChange,
+      onValueCommit,
+      pointToValue: calculateValueFromPoint,
+      step,
+      value: normalizedValue,
     });
 
-    React.useEffect(() => {
-      if (!isDragActiveRef.current) {
-        dragStartValueRef.current = value;
-        pendingValueRef.current = value;
-      }
-    }, [value]);
+    const [frozenBufferedValue, setFrozenBufferedValue] =
+      React.useState(bufferedValue);
 
-    const displayedValue =
-      freezeValuesWhileDragging && optimisticValue !== null
-        ? optimisticValue
-        : value;
+    const dragCallbacks = React.useMemo<UseParameterDragCallbacks>(
+      () => ({
+        ...parameterDragCallbacks,
+        onDragStart: (e: React.PointerEvent) => {
+          if (freezeValuesWhileDragging) {
+            setFrozenBufferedValue(bufferedValue);
+          }
+          parameterDragCallbacks.onDragStart(e);
+        },
+      }),
+      [parameterDragCallbacks, freezeValuesWhileDragging, bufferedValue]
+    );
+
     const displayedBufferedValue =
       freezeValuesWhileDragging && isDragging
         ? frozenBufferedValue
         : bufferedValue;
-
-    const percentage = clampUnit((displayedValue - min) / (max - min || 1));
     const bufferedPercentage = clampUnit(
       (displayedBufferedValue - min) / (max - min || 1)
     );
@@ -332,47 +218,29 @@ export namespace Transport {
       () => ({
         ariaLabel,
         ariaLabelledBy,
-        calculateValueFromDelta,
-        calculateValueFromPoint,
-        commitValue,
         disabled,
-        dragStartValueRef,
+        dragCallbacks,
         elementId,
-        isDragActiveRef,
+        keyboardProps,
         max,
         min,
-        onDrag,
-        onDragEnd,
-        onDragStart,
-        onPointerDown,
         orientation,
-        pendingValueRef,
         shouldPreventFocusRef,
-        step,
         thumbRef,
         trackRef,
-        updateValue,
-        valueRef,
         wheelRef,
       }),
       [
         ariaLabel,
         ariaLabelledBy,
-        calculateValueFromDelta,
-        calculateValueFromPoint,
-        commitValue,
         disabled,
+        dragCallbacks,
         elementId,
+        keyboardProps,
         max,
         min,
-        onDrag,
-        onDragEnd,
-        onDragStart,
-        onPointerDown,
         orientation,
-        step,
-        updateValue,
-        valueRef,
+        shouldPreventFocusRef,
         wheelRef,
       ]
     );
@@ -423,24 +291,14 @@ export namespace Transport {
   export interface TrackProps extends React.ComponentProps<"div"> {}
 
   export function Track({ className, ...props }: TrackProps) {
-    const {
-      disabled,
-      orientation,
-      trackRef,
-      onPointerDown,
-      onDragStart,
-      onDrag,
-      onDragEnd,
-    } = useTransportConfigContext();
+    const { disabled, orientation, trackRef, dragCallbacks } =
+      useTransportConfigContext();
 
     const { pointerProps } = usePointerDrag({
       capturePointer: true,
       disabled,
       elementRef: trackRef,
-      onDrag,
-      onDragEnd,
-      onDragStart,
-      onPointerDown,
+      ...dragCallbacks,
     });
 
     return (
@@ -531,34 +389,25 @@ export namespace Transport {
 
   export function Thumb({ className, style, ...props }: ThumbProps) {
     const {
-      disabled,
-      orientation,
-      percentage,
-      elementId,
       ariaLabel,
       ariaLabelledBy,
-      min,
+      disabled,
+      dragCallbacks,
+      elementId,
+      keyboardProps,
       max,
-      value,
-      thumbRef,
-      onPointerDown,
-      onDragStart,
-      onDrag,
-      onDragEnd,
+      min,
+      orientation,
       shouldPreventFocusRef,
-      valueRef,
-      step,
-      commitValue,
-    } = useTransportContext();
+      thumbRef,
+    } = useTransportConfigContext();
+    const { percentage, value } = useTransportValueContext();
 
     const { pointerProps } = usePointerDrag({
       capturePointer: true,
       disabled,
       elementRef: thumbRef,
-      onDrag,
-      onDragEnd,
-      onDragStart,
-      onPointerDown,
+      ...dragCallbacks,
     });
 
     const { focusProps } = useFocus({
@@ -567,44 +416,6 @@ export namespace Transport {
         if (shouldPreventFocusRef.current) {
           shouldPreventFocusRef.current = false;
         }
-      },
-    });
-
-    const { keyboardProps } = useKeyboardNavigation({
-      disabled,
-      handlers: {
-        onArrowDown: () => {
-          commitValue(valueRef.current - step);
-          return true;
-        },
-        onArrowLeft: () => {
-          commitValue(valueRef.current - step);
-          return true;
-        },
-        onArrowRight: () => {
-          commitValue(valueRef.current + step);
-          return true;
-        },
-        onArrowUp: () => {
-          commitValue(valueRef.current + step);
-          return true;
-        },
-        onEnd: () => {
-          commitValue(max);
-          return true;
-        },
-        onHome: () => {
-          commitValue(min);
-          return true;
-        },
-        onPageDown: () => {
-          commitValue(valueRef.current - step * 10);
-          return true;
-        },
-        onPageUp: () => {
-          commitValue(valueRef.current + step * 10);
-          return true;
-        },
       },
     });
 

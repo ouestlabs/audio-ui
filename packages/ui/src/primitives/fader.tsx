@@ -1,48 +1,28 @@
 import type { Procedure } from "@audio-ui/utils";
-import {
-  assertType,
-  clamp,
-  clampUnit,
-  type Nullable,
-  type Point,
-  quantizeRound,
-} from "@audio-ui/utils";
+import { clampUnit, type Nullable, type Point } from "@audio-ui/utils";
 import * as React from "react";
 import { useFocus } from "../hooks/interactions/use-focus";
-import { useKeyboardNavigation } from "../hooks/interactions/use-keyboard-navigation";
 import { usePointerDrag } from "../hooks/interactions/use-pointer-drag";
-import { useWheel } from "../hooks/interactions/use-wheel";
-import { useControlledValue } from "../hooks/state/use-controlled-value";
-import { useValueAsRef } from "../hooks/state/use-value-as-ref";
 import { getDataAttributes } from "./internal/data-attributes";
 import { useInheritedOrientation } from "./internal/orientation-context";
+import {
+  type UseParameterDragCallbacks,
+  useParameter,
+} from "./internal/use-parameter";
 
 interface FaderConfigContextValue {
   ariaLabel?: string;
   ariaLabelledBy?: string;
-  calculateValueFromDelta: (delta: Point, initialValue: number) => number;
-  calculateValueFromPoint: (point: Point) => number;
-  commitValue: (newValue: number) => void;
   disabled: boolean;
-  dragStartValueRef: React.RefObject<number>;
+  dragCallbacks: UseParameterDragCallbacks;
   elementId: string;
-  isDragActiveRef: React.RefObject<boolean>;
+  keyboardProps: { onKeyDown: Procedure<React.KeyboardEvent> };
   max: number;
   min: number;
-  onDrag: (delta: Point) => void;
-  onDragEnd: () => void;
-  onDragStart: (e: React.PointerEvent) => void;
-  onPointerDown: (e: React.PointerEvent) => void;
-  onValueCommit?: Procedure<number>;
   orientation: "horizontal" | "vertical";
-  pendingValueRef: React.RefObject<number>;
-  setRawValue: Procedure<number>;
   shouldPreventFocusRef: React.RefObject<boolean>;
-  step: number;
   thumbRef: React.RefObject<Nullable<HTMLDivElement>>;
   trackRef: React.RefObject<Nullable<HTMLDivElement>>;
-  updateValue: (newValue: number) => void;
-  valueRef: React.RefObject<number>;
   wheelRef: Procedure<Nullable<HTMLDivElement>>;
 }
 
@@ -73,10 +53,6 @@ function useFaderValueContext() {
     throw new Error("Fader components must be used within Fader.Root");
   }
   return context;
-}
-
-function useFaderContext() {
-  return { ...useFaderConfigContext(), ...useFaderValueContext() };
 }
 
 export namespace Fader {
@@ -133,61 +109,19 @@ export namespace Fader {
       ? controlledValue[0]
       : controlledValue;
 
-    const computedDefaultValue =
-      defaultValue ?? (max < min ? min : min + (max - min) / 2);
-
-    const transformValue = React.useCallback(
-      (val: number) => {
-        const numValue = Number(val);
-        if (Number.isNaN(numValue) || !Number.isFinite(numValue)) {
-          return min;
-        }
-        return clamp(numValue, min, max);
-      },
-      [min, max]
-    );
-
-    const { value: rawValue, setValue: setRawValue } =
-      useControlledValue<number>({
-        defaultValue: computedDefaultValue,
-        onChange: onValueChange,
-        transform: transformValue,
-        value: normalizedValue,
-      });
-
-    const value = rawValue ?? min;
-    const valueRef = useValueAsRef(value);
-
-    const updateValue = React.useCallback(
-      (newValue: number) => {
-        const clampedValue = clamp(newValue, min, max);
-        const steppedValue = quantizeRound(clampedValue, step);
-        setRawValue(steppedValue);
-      },
-      [min, max, step, setRawValue]
-    );
-
-    const commitValue = React.useCallback(
-      (newValue: number) => {
-        const clampedValue = clamp(newValue, min, max);
-        const steppedValue = quantizeRound(clampedValue, step);
-        setRawValue(steppedValue);
-        onValueCommit?.(steppedValue);
-      },
-      [min, max, step, setRawValue, onValueCommit]
-    );
-
     const calculateValueFromPoint = React.useCallback(
-      (point: Point) => {
+      (point: Point): Nullable<number> => {
         const track = trackRef.current;
         if (!track) {
-          return valueRef.current;
+          return null;
         }
 
         const rect = track.getBoundingClientRect();
-        const isVertical = orientation === "vertical";
+        if (rect.width <= 0 || rect.height <= 0) {
+          return null;
+        }
 
-        if (isVertical) {
+        if (orientation === "vertical") {
           const clickY = point.y - rect.top;
           const percentage = 1 - clampUnit(clickY / rect.height);
           return min + percentage * (max - min);
@@ -197,7 +131,7 @@ export namespace Fader {
         const percentage = clampUnit(clickX / rect.width);
         return min + percentage * (max - min);
       },
-      [orientation, min, max, valueRef]
+      [orientation, min, max]
     );
 
     const calculateValueFromDelta = React.useCallback(
@@ -208,138 +142,78 @@ export namespace Fader {
         }
 
         const rect = track.getBoundingClientRect();
-        const isVertical = orientation === "vertical";
-        const sensitivity = isVertical
-          ? (max - min) / rect.height
-          : (max - min) / rect.width;
+        const sensitivity =
+          orientation === "vertical"
+            ? (max - min) / Math.max(rect.height, 1)
+            : (max - min) / Math.max(rect.width, 1);
 
-        return isVertical
+        return orientation === "vertical"
           ? initialValue + delta.y * sensitivity
           : initialValue + delta.x * sensitivity;
       },
       [orientation, min, max]
     );
 
-    const dragStartValueRef = React.useRef(value);
-    const isDragActiveRef = React.useRef(false);
-    const pendingValueRef = React.useRef(value);
-    const shouldPreventFocusRef = React.useRef(false);
-
-    const onPointerDown = React.useCallback(
-      (e: React.PointerEvent) => {
-        shouldPreventFocusRef.current = true;
-        e.preventDefault();
-        if (thumbRef.current && !disabled) {
-          thumbRef.current.focus();
-        }
-      },
-      [disabled]
+    const containsTarget = React.useCallback(
+      (target: Node) =>
+        Boolean(
+          thumbRef.current?.contains(target) ||
+            trackRef.current?.contains(target)
+        ),
+      []
     );
 
-    const onDragStart = React.useCallback(
-      (e: React.PointerEvent) => {
-        isDragActiveRef.current = true;
-        const newValue = calculateValueFromPoint({
-          x: e.clientX,
-          y: e.clientY,
-        });
-        dragStartValueRef.current = newValue;
-        pendingValueRef.current = newValue;
-        updateValue(newValue);
-      },
-      [calculateValueFromPoint, updateValue]
-    );
-
-    const onDrag = React.useCallback(
-      (delta: Point) => {
-        const newValue = calculateValueFromDelta(
-          delta,
-          dragStartValueRef.current
-        );
-        pendingValueRef.current = newValue;
-        updateValue(newValue);
-      },
-      [calculateValueFromDelta, updateValue]
-    );
-
-    const onDragEnd = React.useCallback(() => {
-      isDragActiveRef.current = false;
-      commitValue(pendingValueRef.current);
-    }, [commitValue]);
-
-    const { wheelRef } = useWheel({
+    const {
+      dragCallbacks,
+      keyboardProps,
+      percentage,
+      shouldPreventFocusRef,
+      value,
+      wheelRef,
+    } = useParameter({
+      containsTarget,
+      defaultValue,
+      deltaToValue: calculateValueFromDelta,
       disabled,
-      elementRef: trackRef,
-      onWheel: (delta: Point) => {
-        if (Math.abs(delta.y) < 0.1) {
-          return;
-        }
-        const direction = delta.y < 0 ? 1 : -1;
-        const deltaValue = direction * step;
-        const newValue = clamp(valueRef.current + deltaValue, min, max);
-        commitValue(quantizeRound(newValue, step));
-      },
+      focusRef: thumbRef,
+      max,
+      min,
+      onValueChange,
+      onValueCommit,
+      pointToValue: calculateValueFromPoint,
+      step,
+      value: normalizedValue,
     });
 
-    React.useEffect(() => {
-      if (!isDragActiveRef.current) {
-        dragStartValueRef.current = value;
-        pendingValueRef.current = value;
-      }
-    }, [value]);
-
-    const percentage = (value - min) / (max - min);
     const elementId = id || faderId;
 
     const configValue = React.useMemo<FaderConfigContextValue>(
       () => ({
         ariaLabel,
         ariaLabelledBy,
-        calculateValueFromDelta,
-        calculateValueFromPoint,
-        commitValue,
         disabled,
-        dragStartValueRef,
+        dragCallbacks,
         elementId,
-        isDragActiveRef,
+        keyboardProps,
         max,
         min,
-        onDrag,
-        onDragEnd,
-        onDragStart,
-        onPointerDown,
-        onValueCommit,
         orientation,
-        pendingValueRef,
-        setRawValue,
         shouldPreventFocusRef,
-        step,
         thumbRef,
         trackRef,
-        updateValue,
-        valueRef,
         wheelRef,
       }),
       [
         ariaLabel,
         ariaLabelledBy,
-        calculateValueFromDelta,
-        calculateValueFromPoint,
-        commitValue,
         disabled,
+        dragCallbacks,
         elementId,
+        keyboardProps,
         max,
         min,
-        onDrag,
-        onDragEnd,
-        onDragStart,
-        onPointerDown,
-        onValueCommit,
         orientation,
-        setRawValue,
-        step,
-        updateValue,
-        valueRef,
+        shouldPreventFocusRef,
         wheelRef,
       ]
     );
@@ -391,24 +265,14 @@ export namespace Fader {
   export interface TrackProps extends React.ComponentProps<"div"> {}
 
   export function Track({ className, ...props }: TrackProps) {
-    const {
-      disabled,
-      orientation,
-      trackRef,
-      onPointerDown,
-      onDragStart,
-      onDrag,
-      onDragEnd,
-    } = useFaderConfigContext();
+    const { disabled, orientation, trackRef, dragCallbacks } =
+      useFaderConfigContext();
 
     const { pointerProps: trackPointerProps } = usePointerDrag({
       capturePointer: true,
       disabled,
       elementRef: trackRef,
-      onDrag,
-      onDragEnd,
-      onDragStart,
-      onPointerDown,
+      ...dragCallbacks,
     });
 
     return (
@@ -459,36 +323,26 @@ export namespace Fader {
 
   export function Thumb({ className, style, ...props }: ThumbProps) {
     const {
-      disabled,
-      orientation,
-      percentage,
-      elementId,
       ariaLabel,
       ariaLabelledBy,
-      min,
+      disabled,
+      dragCallbacks,
+      elementId,
+      keyboardProps,
       max,
-      value,
-      thumbRef,
-      onPointerDown,
-      onDragStart,
-      onDrag,
-      onDragEnd,
+      min,
+      orientation,
       shouldPreventFocusRef,
-      valueRef,
-      step,
-      commitValue,
-    } = useFaderContext();
+      thumbRef,
+    } = useFaderConfigContext();
+    const { percentage, value } = useFaderValueContext();
 
-    const { pointerProps: thumbPointerProps, isDragging: isThumbDragging } =
-      usePointerDrag({
-        capturePointer: true,
-        disabled,
-        elementRef: thumbRef,
-        onDrag,
-        onDragEnd,
-        onDragStart,
-        onPointerDown,
-      });
+    const { pointerProps: thumbPointerProps } = usePointerDrag({
+      capturePointer: true,
+      disabled,
+      elementRef: thumbRef,
+      ...dragCallbacks,
+    });
 
     const { focusProps } = useFocus({
       disabled,
@@ -498,105 +352,6 @@ export namespace Fader {
         }
       },
     });
-
-    const { keyboardProps } = useKeyboardNavigation({
-      disabled,
-      handlers: {
-        onArrowDown: () => {
-          commitValue(valueRef.current - step);
-          return true;
-        },
-        onArrowLeft: () => {
-          commitValue(valueRef.current - step);
-          return true;
-        },
-        onArrowRight: () => {
-          commitValue(valueRef.current + step);
-          return true;
-        },
-        onArrowUp: () => {
-          commitValue(valueRef.current + step);
-          return true;
-        },
-        onEnd: () => {
-          commitValue(max);
-          return true;
-        },
-        onHome: () => {
-          commitValue(min);
-          return true;
-        },
-        onPageDown: () => {
-          commitValue(valueRef.current - step * 10);
-          return true;
-        },
-        onPageUp: () => {
-          commitValue(valueRef.current + step * 10);
-          return true;
-        },
-      },
-    });
-
-    const {
-      isDragActiveRef,
-      pendingValueRef,
-      setRawValue,
-      onValueCommit,
-      trackRef: contextTrackRef,
-    } = useFaderContext();
-
-    React.useEffect(() => {
-      if (!isThumbDragging) {
-        return;
-      }
-
-      const abortController = new AbortController();
-      const { signal } = abortController;
-
-      const handlePointerDown = (e: PointerEvent) => {
-        if (signal.aborted) {
-          return;
-        }
-
-        const target = e.target;
-        if (!(target instanceof Node)) {
-          return;
-        }
-        assertType<Node>(target);
-        const thumb = thumbRef.current;
-        const track = contextTrackRef.current;
-        const isInside = thumb?.contains(target) || track?.contains(target);
-
-        if (!isInside && isDragActiveRef.current) {
-          isDragActiveRef.current = false;
-          const pendingValue = pendingValueRef.current;
-          const clampedValue = clamp(pendingValue, min, max);
-          const steppedValue = quantizeRound(clampedValue, step);
-          setRawValue(steppedValue);
-          onValueCommit?.(steppedValue);
-        }
-      };
-
-      document.addEventListener("pointerdown", handlePointerDown, {
-        capture: true,
-        signal,
-      });
-
-      return () => {
-        abortController.abort();
-      };
-    }, [
-      isThumbDragging,
-      min,
-      max,
-      step,
-      thumbRef,
-      contextTrackRef,
-      isDragActiveRef,
-      pendingValueRef,
-      setRawValue,
-      onValueCommit,
-    ]);
 
     const baseTransform =
       orientation === "horizontal" ? "translateX(-50%)" : "translateY(50%)";

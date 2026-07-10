@@ -24,7 +24,6 @@
   "[graphql]": {
     "editor.defaultFormatter": "biomejs.biome"
   },
-  "js/ts.tsdk.path": "node_modules/typescript/lib",
   "editor.formatOnSave": true,
   "editor.formatOnPaste": true,
   "emmet.showExpandedAbbreviation": "never",
@@ -43,7 +42,6 @@
     "cn"
   ],
   "git.ignoreLimitWarning": true,
-  "js/ts.tsdk.promptToUseWorkspaceVersion": true,
   "[html]": {
     "editor.defaultFormatter": "biomejs.biome"
   },
@@ -61,5 +59,7 @@
   },
   "[yaml]": {
     "editor.defaultFormatter": "biomejs.biome"
-  }
+  },
+  "typescript.tsdk": "packages/ui/node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true
 }
