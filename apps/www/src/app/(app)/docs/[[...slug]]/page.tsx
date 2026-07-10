@@ -229,7 +229,7 @@ export default async function Page(props: {
             <div className="hidden md:block xl:hidden">
               {toc.length ? <DocsTableOfContents toc={toc} /> : null}
             </div>
-            <div className="w-full flex-1 *:data-[slot=alert]:first:mt-0">
+            <div className="typeset typeset-changelog w-full flex-1 *:data-[slot=alert]:first:mt-0">
               <ContentWrapper>
                 <MDX
                   components={getMDXComponents({
