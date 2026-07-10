@@ -1,5 +1,11 @@
 # @audio-ui/utils
 
+## 0.0.5
+
+### Patch Changes
+
+- 34233f9: Bump the `typescript` dev dependency to `^6.0.3`.
+
 ## 0.0.4
 
 ### Patch Changes
