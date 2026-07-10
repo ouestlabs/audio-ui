@@ -202,6 +202,106 @@ async function getMetadata(base: string): Promise<MetadataData> {
 }
 
 // ---------------------------------------------------------------------------
+// Manifest generation — components.json, registry.json, and seo.json are
+// DERIVED from components/_registry.ts (items) and categories.ts (curated
+// editorial). Category counts are computed, never hand-summed. Item tags not
+// listed in categories.ts are free-form search tags and are left alone; a
+// curated category with zero items fails the build.
+// ---------------------------------------------------------------------------
+
+const MANIFEST_BASE = "base";
+
+async function buildManifests(): Promise<void> {
+  const { components } = (await import(
+    `../src/registry-audio/bases/${MANIFEST_BASE}/components/_registry.ts`
+  )) as { components: RegistryItem[] };
+  const { categories, rootSeo } = await import(
+    "../src/registry-audio/bases/categories.ts"
+  );
+
+  const items = components || [];
+  const basesDir = path.join(PROJECT_ROOT, "src", "registry-audio", "bases");
+
+  const catalog = items.map((item) => ({
+    categories: item.categories ?? [],
+    name: item.name,
+    title: item.title ?? item.name,
+  }));
+
+  const categoryEntries = categories.map((def) => {
+    const count = items.filter((item) =>
+      (item.categories ?? []).includes(def.name)
+    ).length;
+    if (count === 0) {
+      throw new Error(
+        `Category "${def.name}" in categories.ts has no catalog items — remove it from categories.ts or tag items with it.`
+      );
+    }
+    return {
+      count,
+      description: def.description,
+      label: def.label,
+      name: def.name,
+    };
+  });
+
+  const seo: Record<string, unknown> = {
+    root: {
+      description: rootSeo.description,
+      intro: rootSeo.intro,
+      keywords: rootSeo.keywords,
+      title: rootSeo.title,
+    },
+  };
+  for (const def of categories) {
+    seo[def.name] = {
+      description:
+        def.seo?.description ?? `${def.description} {{count}} components.`,
+      intro:
+        def.seo?.intro ??
+        `Browse {{count}} ${def.label.toLowerCase()} components for audio/ui, built on top of shadcn/ui.`,
+      title: def.seo?.title ?? def.label,
+    };
+  }
+
+  const writeJson = (file: string, data: unknown) =>
+    fs.writeFile(
+      path.join(basesDir, file),
+      `${JSON.stringify(data, null, 2)}\n`
+    );
+
+  await writeJson("components.json", catalog);
+  await writeJson("registry.json", {
+    categories: categoryEntries,
+    totalComponents: items.length,
+  });
+  await writeJson("seo.json", seo);
+
+  // Normalize to the repo's biome formatting so build → lint is idempotent.
+  try {
+    const { execFileSync } = await import("node:child_process");
+    execFileSync(
+      "bunx",
+      [
+        "biome",
+        "check",
+        "--write",
+        "src/registry-audio/bases/components.json",
+        "src/registry-audio/bases/registry.json",
+        "src/registry-audio/bases/seo.json",
+      ],
+      { cwd: PROJECT_ROOT, stdio: "ignore" }
+    );
+  } catch {
+    console.warn("  Manifests: biome formatting pass failed (non-fatal)");
+  }
+
+  console.log(
+    `  Manifests: components.json (${catalog.length} items), registry.json (${categoryEntries.length} categories, counts derived), seo.json`
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Parse style name
 // ---------------------------------------------------------------------------
 
@@ -211,8 +311,8 @@ function parseStyleName(styleName: string): { base: string; style: string } {
     const base = parts[0];
     const style = parts.slice(1).join("-");
     if (
-      BASES.some((b: any) => b.name === base) &&
-      STYLES.some((s: any) => s.name === style)
+      BASES.some((b) => b.name === base) &&
+      STYLES.some((s) => s.name === style)
     ) {
       return { base, style };
     }
@@ -461,6 +561,7 @@ async function main() {
 
   const startTime = Date.now();
   console.log("Building static registry...");
+  await buildManifests();
   console.log(`  Internal registry namespace: ${AUDIO_REGISTRY_NAMESPACE}`);
 
   // Collect all style names (2 bases × 5 styles = 10)
