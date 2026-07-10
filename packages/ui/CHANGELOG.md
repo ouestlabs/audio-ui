@@ -1,5 +1,15 @@
 # @audio-ui/react
 
+## 0.1.0
+
+### Minor Changes
+
+- cea33ba: Extract the internal `useParameter` hook: Fader, Transport, and Knob now share one implementation of value clamping/stepping, commit semantics, keyboard navigation, wheel handling, and the drag lifecycle. No public API changes. Fixes inherited by the unification: Fader now guards against zero-sized track rects (previously a division by zero), Fader's thumb position is guarded when `max === min`, and Transport gains the outside-click commit that previously existed only in Fader.
+
+### Patch Changes
+
+- 34233f9: Bump the `typescript` dev dependency to `^6.0.3`.
+
 ## 0.0.9
 
 ### Patch Changes
