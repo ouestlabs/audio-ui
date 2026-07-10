@@ -35,7 +35,7 @@
     "dist"
   ],
   "scripts": {
-    "build:pkg": "bunx --bun tsup",
+    "build:pkg": "bunx --bun tsup && tsc -p tsconfig.build.json",
     "dev": "bunx --bun tsup --watch",
     "lint": "biome check --write .",
     "lint:fix": "biome check --write --unsafe .",

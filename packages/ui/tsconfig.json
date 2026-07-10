@@ -2,8 +2,7 @@
   "extends": "@audio-ui/typescript/react-library.json",
   "compilerOptions": {
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
-    "strictNullChecks": true,
-    "types": ["bun", "react", "react-dom"]
+    "strictNullChecks": true
   },
   "exclude": ["dist", "node_modules"]
 }
