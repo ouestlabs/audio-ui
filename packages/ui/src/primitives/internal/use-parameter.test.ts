@@ -226,3 +226,24 @@ describe("useParameter granular ops (Knob path)", () => {
     expect(hook.result.current.isDragging).toBe(false);
   });
 });
+
+describe("useParameter outside-click commit under freeze", () => {
+  test("clears the frozen optimistic value and the dragging state", () => {
+    const { hook } = renderParameter({
+      containsTarget: () => false,
+      freezeWhileDragging: true,
+      pointToValue: (point: Point) => point.x,
+      value: 10,
+    });
+    act(() => {
+      hook.result.current.dragCallbacks.onDragStart(pointerEvent(30, 0));
+    });
+    expect(hook.result.current.displayValue).toBe(30);
+
+    fireEvent.pointerDown(document.body);
+    // The commit must also unfreeze the display and end the drag state,
+    // otherwise the control stops following external value updates.
+    expect(hook.result.current.displayValue).toBe(10);
+    expect(hook.result.current.isDragging).toBe(false);
+  });
+});

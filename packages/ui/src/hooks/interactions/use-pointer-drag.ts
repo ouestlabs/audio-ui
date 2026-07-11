@@ -82,7 +82,7 @@ export function usePointerDrag<T extends HTMLElement = HTMLElement>({
       startPos.current = { x: e.clientX, y: e.clientY };
 
       if (capturePointer) {
-        const target = elementRef?.current || e.currentTarget;
+        const target = e.currentTarget;
         if (target instanceof HTMLElement) {
           target.setPointerCapture(e.pointerId);
         }
@@ -90,7 +90,7 @@ export function usePointerDrag<T extends HTMLElement = HTMLElement>({
 
       onDragStartRef(e);
     },
-    [disabled, onDragStartRef, elementRef, capturePointer]
+    [disabled, onDragStartRef, capturePointer]
   );
 
   const handlePointerMove = React.useCallback(
@@ -100,7 +100,7 @@ export function usePointerDrag<T extends HTMLElement = HTMLElement>({
       }
 
       if (capturePointer) {
-        const target = elementRef?.current || e.currentTarget;
+        const target = e.currentTarget;
         if (
           target instanceof HTMLElement &&
           !target.hasPointerCapture(e.pointerId)
@@ -128,14 +128,7 @@ export function usePointerDrag<T extends HTMLElement = HTMLElement>({
         onDragRef(deltaValue);
       }
     },
-    [
-      disabled,
-      isDragging,
-      onDragRef,
-      onDragTakesEvent,
-      capturePointer,
-      elementRef,
-    ]
+    [disabled, isDragging, onDragRef, onDragTakesEvent, capturePointer]
   );
 
   const handlePointerUp = React.useCallback(
@@ -144,7 +137,7 @@ export function usePointerDrag<T extends HTMLElement = HTMLElement>({
         setIsDragging(false);
         startPos.current = { x: 0, y: 0 };
         if (capturePointer) {
-          const target = elementRef?.current || e.currentTarget;
+          const target = e.currentTarget;
           if (
             target instanceof HTMLElement &&
             target.hasPointerCapture(e.pointerId)
@@ -155,7 +148,7 @@ export function usePointerDrag<T extends HTMLElement = HTMLElement>({
         onDragEndRef(e);
       }
     },
-    [isDragging, onDragEndRef, elementRef, capturePointer]
+    [isDragging, onDragEndRef, capturePointer]
   );
 
   const handlePointerCancel = React.useCallback(
@@ -164,7 +157,7 @@ export function usePointerDrag<T extends HTMLElement = HTMLElement>({
         setIsDragging(false);
         startPos.current = { x: 0, y: 0 };
         if (capturePointer) {
-          const target = elementRef?.current || e.currentTarget;
+          const target = e.currentTarget;
           if (
             target instanceof HTMLElement &&
             target.hasPointerCapture(e.pointerId)
@@ -175,7 +168,7 @@ export function usePointerDrag<T extends HTMLElement = HTMLElement>({
         onDragCancelRef(e);
       }
     },
-    [isDragging, onDragCancelRef, elementRef, capturePointer]
+    [isDragging, onDragCancelRef, capturePointer]
   );
 
   const composedPointerDown = React.useMemo(
