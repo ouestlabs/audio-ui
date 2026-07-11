@@ -1,4 +1,4 @@
-import type { Func, Nullable, Procedure } from "@audio-ui/utils";
+import type { Nullable, Procedure } from "@audio-ui/utils";
 import {
   clamp,
   clampUnit,
@@ -11,9 +11,11 @@ import { useFocus } from "../hooks/interactions/use-focus";
 import { useKeyboardNavigation } from "../hooks/interactions/use-keyboard-navigation";
 import { usePointerDrag } from "../hooks/interactions/use-pointer-drag";
 import { useWheel } from "../hooks/interactions/use-wheel";
-import { useControlledValue } from "../hooks/state/use-controlled-value";
-import { useValueAsRef } from "../hooks/state/use-value-as-ref";
 import { getDataAttributes } from "./internal/data-attributes";
+import {
+  type UseParameterCoreDragCallbacks,
+  useParameterCore,
+} from "./internal/use-parameter-core";
 
 const VISUALLY_HIDDEN_STYLE: React.CSSProperties = {
   border: 0,
@@ -31,30 +33,12 @@ export namespace XYPad {
   interface ConfigContextValue {
     ariaLabel?: string;
     ariaLabelledBy?: string;
-    calculateValueFromDelta: (delta: Point, initialValue: Point) => Point;
-    calculateValueFromPoint: Func<Point, Point>;
-    commitValue: Procedure<Point>;
     containerRef: React.RefObject<Nullable<HTMLDivElement>>;
     disabled: boolean;
-    dragStartValueRef: React.RefObject<Point>;
+    dragCallbacks: UseParameterCoreDragCallbacks;
     elementId: string;
-    isDragActiveRef: React.RefObject<boolean>;
-    maxX: number;
-    maxY: number;
-    minX: number;
-    minY: number;
-    onDrag: Procedure<Point>;
-    onDragEnd: () => void;
-    onDragStart: Procedure<React.PointerEvent>;
-    onPointerDown: Procedure<React.PointerEvent>;
-    onValueCommit?: Procedure<Point>;
-    pendingValueRef: React.RefObject<Point>;
-    setRawValue: Procedure<Point>;
+    keyboardProps: { onKeyDown: Procedure<React.KeyboardEvent> };
     shouldPreventFocusRef: React.RefObject<boolean>;
-    stepX: number;
-    stepY: number;
-    updateValue: Procedure<Point>;
-    valueRef: React.RefObject<Point>;
     wheelRef: Procedure<Nullable<HTMLDivElement>>;
   }
 
@@ -131,11 +115,6 @@ export namespace XYPad {
     const xypadId = React.useId();
     const containerRef = React.useRef<HTMLDivElement>(null);
 
-    const computedDefaultValue = defaultValue ?? {
-      x: (minX + maxX) / 2,
-      y: (minY + maxY) / 2,
-    };
-
     const transformValue = React.useCallback(
       (val: Point) => {
         const numX = Number(val.x);
@@ -153,48 +132,25 @@ export namespace XYPad {
       [minX, maxX, minY, maxY]
     );
 
-    const { value: rawValue, setValue: setRawValue } =
-      useControlledValue<Point>({
-        defaultValue: computedDefaultValue,
-        onChange: onValueChange,
-        transform: transformValue,
-        value: controlledValue,
-      });
-
-    const value = rawValue ?? { x: minX, y: minY };
-    const valueRef = useValueAsRef(value);
-
-    const updateValue = React.useCallback(
-      (newValue: Point) => {
-        const clampedX = clamp(newValue.x, minX, maxX);
-        const clampedY = clamp(newValue.y, minY, maxY);
-        const steppedX = quantizeRound(clampedX, stepX);
-        const steppedY = quantizeRound(clampedY, stepY);
-        setRawValue({ x: steppedX, y: steppedY });
-      },
-      [minX, maxX, minY, maxY, stepX, stepY, setRawValue]
-    );
-
-    const commitValue = React.useCallback(
-      (newValue: Point) => {
-        const clampedX = clamp(newValue.x, minX, maxX);
-        const clampedY = clamp(newValue.y, minY, maxY);
-        const steppedX = quantizeRound(clampedX, stepX);
-        const steppedY = quantizeRound(clampedY, stepY);
-        setRawValue({ x: steppedX, y: steppedY });
-        onValueCommit?.({ x: steppedX, y: steppedY });
-      },
-      [minX, maxX, minY, maxY, stepX, stepY, setRawValue, onValueCommit]
+    const clampStep = React.useCallback(
+      (next: Point) => ({
+        x: quantizeRound(clamp(next.x, minX, maxX), stepX),
+        y: quantizeRound(clamp(next.y, minY, maxY), stepY),
+      }),
+      [minX, maxX, stepX, minY, maxY, stepY]
     );
 
     const calculateValueFromPoint = React.useCallback(
-      (point: Point) => {
+      (point: Point): Nullable<Point> => {
         const container = containerRef.current;
         if (!container) {
-          return valueRef.current;
+          return null;
         }
 
         const rect = container.getBoundingClientRect();
+        if (rect.width <= 0 || rect.height <= 0) {
+          return null;
+        }
         const normalizedX = clampUnit((point.x - rect.left) / rect.width);
         const normalizedY = clampUnit((point.y - rect.top) / rect.height);
 
@@ -203,7 +159,7 @@ export namespace XYPad {
           y: maxY - normalizedY * (maxY - minY),
         };
       },
-      [minX, maxX, minY, maxY, valueRef]
+      [minX, maxX, minY, maxY]
     );
 
     const calculateValueFromDelta = React.useCallback(
@@ -214,8 +170,8 @@ export namespace XYPad {
         }
 
         const rect = container.getBoundingClientRect();
-        const sensitivityX = (maxX - minX) / rect.width;
-        const sensitivityY = (maxY - minY) / rect.height;
+        const sensitivityX = (maxX - minX) / Math.max(rect.width, 1);
+        const sensitivityY = (maxY - minY) / Math.max(rect.height, 1);
 
         return {
           x: initialValue.x + delta.x * sensitivityX,
@@ -225,220 +181,24 @@ export namespace XYPad {
       [minX, maxX, minY, maxY]
     );
 
-    const dragStartValueRef = React.useRef(value);
-    const isDragActiveRef = React.useRef(false);
-    const pendingValueRef = React.useRef(value);
-    const shouldPreventFocusRef = React.useRef(false);
-
-    const onPointerDown = React.useCallback(
-      (e: React.PointerEvent) => {
-        shouldPreventFocusRef.current = true;
-        e.preventDefault();
-        if (containerRef.current && !disabled) {
-          containerRef.current.focus();
-        }
-      },
-      [disabled]
-    );
-
-    const onDragStart = React.useCallback(
-      (e: React.PointerEvent) => {
-        isDragActiveRef.current = true;
-        const newValue = calculateValueFromPoint({
-          x: e.clientX,
-          y: e.clientY,
-        });
-        dragStartValueRef.current = newValue;
-        pendingValueRef.current = newValue;
-        updateValue(newValue);
-      },
-      [calculateValueFromPoint, updateValue]
-    );
-
-    const onDrag = React.useCallback(
-      (delta: Point) => {
-        const newValue = calculateValueFromDelta(
-          delta,
-          dragStartValueRef.current
-        );
-        pendingValueRef.current = newValue;
-        updateValue(newValue);
-      },
-      [calculateValueFromDelta, updateValue]
-    );
-
-    const onDragEnd = React.useCallback(() => {
-      isDragActiveRef.current = false;
-      commitValue(pendingValueRef.current);
-    }, [commitValue]);
-
-    const { wheelRef } = useWheel({
-      disabled,
-      elementRef: containerRef,
-      onWheel: (delta: Point) => {
-        const container = containerRef.current;
-        if (!container) {
-          return;
-        }
-
-        const rect = container.getBoundingClientRect();
-        const sensitivityX = (maxX - minX) / rect.width;
-        const sensitivityY = (maxY - minY) / rect.height;
-
-        const deltaX = -delta.x * sensitivityX;
-        const deltaY = delta.y * sensitivityY;
-
-        const newValue = {
-          x: clamp(valueRef.current.x + deltaX, minX, maxX),
-          y: clamp(valueRef.current.y + deltaY, minY, maxY),
-        };
-
-        commitValue({
-          x: quantizeRound(newValue.x, stepX),
-          y: quantizeRound(newValue.y, stepY),
-        });
-      },
-    });
-
-    React.useEffect(() => {
-      if (!isDragActiveRef.current) {
-        dragStartValueRef.current = value;
-        pendingValueRef.current = value;
-      }
-    }, [value]);
-
-    const percentageX = (value.x - minX) / (maxX - minX);
-    const percentageY = (value.y - minY) / (maxY - minY);
-    const thumbX = percentageX * 100;
-    const thumbY = (1 - percentageY) * 100;
-    const elementId = id || xypadId;
-
-    const configValue = React.useMemo<ConfigContextValue>(
-      () => ({
-        ariaLabel,
-        ariaLabelledBy,
-        calculateValueFromDelta,
-        calculateValueFromPoint,
-        commitValue,
-        containerRef,
-        disabled,
-        dragStartValueRef,
-        elementId,
-        isDragActiveRef,
-        maxX,
-        maxY,
-        minX,
-        minY,
-        onDrag,
-        onDragEnd,
-        onDragStart,
-        onPointerDown,
-        onValueCommit,
-        pendingValueRef,
-        setRawValue,
-        shouldPreventFocusRef,
-        stepX,
-        stepY,
-        updateValue,
-        valueRef,
-        wheelRef,
-      }),
-      [
-        ariaLabel,
-        ariaLabelledBy,
-        calculateValueFromDelta,
-        calculateValueFromPoint,
-        commitValue,
-        disabled,
-        elementId,
-        maxX,
-        maxY,
-        minX,
-        minY,
-        onDrag,
-        onDragEnd,
-        onDragStart,
-        onPointerDown,
-        onValueCommit,
-        setRawValue,
-        stepX,
-        stepY,
-        updateValue,
-        valueRef,
-        wheelRef,
-      ]
-    );
-
-    const valueContextValue = React.useMemo<ValueContextValue>(
-      () => ({ percentageX, percentageY, thumbX, thumbY, value }),
-      [percentageX, percentageY, thumbX, thumbY, value]
-    );
-
-    return (
-      <ConfigContext.Provider value={configValue}>
-        <ValueContext.Provider value={valueContextValue}>
-          <div className={className} {...props}>
-            {ariaLabel || ariaLabelledBy ? null : (
-              <span className="sr-only" id={`${elementId}-label`}>
-                XY Pad
-              </span>
-            )}
-            <span className="sr-only" id={`${elementId}-instructions`}>
-              Use arrow keys to adjust X and Y values.
-            </span>
-            {children}
-          </div>
-        </ValueContext.Provider>
-      </ConfigContext.Provider>
-    );
-  }
-
-  export function Slider({
-    className,
-    "aria-describedby": ariaDescribedBy,
-    ...props
-  }: React.ComponentProps<"div">) {
-    const context = useConfigContext();
     const {
-      disabled,
-      elementId,
-      ariaLabel,
-      ariaLabelledBy,
-      containerRef,
-      wheelRef,
-      onPointerDown,
-      onDragStart,
-      onDrag,
-      onDragEnd,
-      shouldPreventFocusRef,
       commitValue,
+      dragCallbacks,
+      shouldPreventFocusRef,
+      value,
       valueRef,
-      stepX,
-      stepY,
-      minX,
-      maxX,
-      minY,
-      maxY,
-    } = context;
-
-    const { pointerProps } = usePointerDrag({
-      capturePointer: true,
+    } = useParameterCore<Point>({
+      clampStep,
+      defaultValue,
+      deltaToValue: calculateValueFromDelta,
       disabled,
-      elementRef: containerRef,
-      onDrag,
-      onDragEnd,
-      onDragStart,
-      onPointerDown,
-      releaseOnOutsideClick: true,
-    });
-
-    const { focusProps } = useFocus({
-      disabled,
-      onFocus: () => {
-        if (shouldPreventFocusRef.current) {
-          shouldPreventFocusRef.current = false;
-        }
-      },
+      fallbackValue: { x: minX, y: minY },
+      focusRef: containerRef,
+      onValueChange,
+      onValueCommit,
+      pointToValue: calculateValueFromPoint,
+      transform: transformValue,
+      value: controlledValue,
     });
 
     const { keyboardProps } = useKeyboardNavigation({
@@ -494,6 +254,114 @@ export namespace XYPad {
           });
           return true;
         },
+      },
+    });
+
+    const { wheelRef } = useWheel({
+      disabled,
+      onWheel: (delta: Point) => {
+        const container = containerRef.current;
+        if (!container) {
+          return;
+        }
+
+        const rect = container.getBoundingClientRect();
+        const sensitivityX = (maxX - minX) / Math.max(rect.width, 1);
+        const sensitivityY = (maxY - minY) / Math.max(rect.height, 1);
+
+        commitValue({
+          x: valueRef.current.x - delta.x * sensitivityX,
+          y: valueRef.current.y + delta.y * sensitivityY,
+        });
+      },
+    });
+
+    const percentageX = clampUnit((value.x - minX) / (maxX - minX || 1));
+    const percentageY = clampUnit((value.y - minY) / (maxY - minY || 1));
+    const thumbX = percentageX * 100;
+    const thumbY = (1 - percentageY) * 100;
+    const elementId = id || xypadId;
+
+    const configValue = React.useMemo<ConfigContextValue>(
+      () => ({
+        ariaLabel,
+        ariaLabelledBy,
+        containerRef,
+        disabled,
+        dragCallbacks,
+        elementId,
+        keyboardProps,
+        shouldPreventFocusRef,
+        wheelRef,
+      }),
+      [
+        ariaLabel,
+        ariaLabelledBy,
+        disabled,
+        dragCallbacks,
+        elementId,
+        keyboardProps,
+        shouldPreventFocusRef,
+        wheelRef,
+      ]
+    );
+
+    const valueContextValue = React.useMemo<ValueContextValue>(
+      () => ({ percentageX, percentageY, thumbX, thumbY, value }),
+      [percentageX, percentageY, thumbX, thumbY, value]
+    );
+
+    return (
+      <ConfigContext.Provider value={configValue}>
+        <ValueContext.Provider value={valueContextValue}>
+          <div className={className} {...props}>
+            {ariaLabel || ariaLabelledBy ? null : (
+              <span className="sr-only" id={`${elementId}-label`}>
+                XY Pad
+              </span>
+            )}
+            <span className="sr-only" id={`${elementId}-instructions`}>
+              Use arrow keys to adjust X and Y values.
+            </span>
+            {children}
+          </div>
+        </ValueContext.Provider>
+      </ConfigContext.Provider>
+    );
+  }
+
+  export function Slider({
+    className,
+    "aria-describedby": ariaDescribedBy,
+    ...props
+  }: React.ComponentProps<"div">) {
+    const context = useConfigContext();
+    const {
+      disabled,
+      elementId,
+      ariaLabel,
+      ariaLabelledBy,
+      containerRef,
+      wheelRef,
+      dragCallbacks,
+      shouldPreventFocusRef,
+      keyboardProps,
+    } = context;
+
+    const { pointerProps } = usePointerDrag({
+      capturePointer: true,
+      disabled,
+      elementRef: containerRef,
+      releaseOnOutsideClick: true,
+      ...dragCallbacks,
+    });
+
+    const { focusProps } = useFocus({
+      disabled,
+      onFocus: () => {
+        if (shouldPreventFocusRef.current) {
+          shouldPreventFocusRef.current = false;
+        }
       },
     });
 
