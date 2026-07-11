@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { $htmlAudio, formatDuration } from "./html-audio";
+import { $htmlAudio, formatDuration } from "@/registry-audio/bases/base/lib/html-audio";
 
 describe("isLive (pure, no init required)", () => {
   test("0 is not live — duration not yet loaded", () => {
