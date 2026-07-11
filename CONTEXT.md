@@ -23,3 +23,11 @@ _Avoid_: component (when the headless building block is meant), widget
 **Element**:
 A styled registry wrapper over a primitive, copied into user projects via the registry. Adds appearance only — never behavior.
 _Avoid_: styled component, wrapper
+
+**Category**:
+A curated, editorial grouping of catalog items (label, description, SEO, its own page). Declared in `categories.ts`; counts are derived, never hand-written.
+_Avoid_: tag (for a curated grouping), section
+
+**Tag**:
+A free-form search label carried by a catalog item (e.g. `ui`, `grid`). Not a category: no page, no count, no SEO.
+_Avoid_: category (for a free-form label)

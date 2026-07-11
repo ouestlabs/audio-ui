@@ -1,70 +1,70 @@
 {
   "categories": [
     {
-      "name": "channel-strip",
-      "label": "Channel Strip",
+      "count": 16,
       "description": "Channel strip patterns combining faders, knobs, and transport controls.",
-      "count": 16
+      "label": "Channel Strip",
+      "name": "channel-strip"
     },
     {
-      "name": "fader",
-      "label": "Fader",
+      "count": 11,
       "description": "Fader components for level, gain, and mix controls.",
-      "count": 4
+      "label": "Fader",
+      "name": "fader"
     },
     {
-      "name": "knob",
-      "label": "Knob",
+      "count": 16,
       "description": "Rotary knob components for continuous parameters like level, cutoff, and pan.",
-      "count": 11
+      "label": "Knob",
+      "name": "knob"
     },
     {
-      "name": "playback-speed",
-      "label": "Playback Speed",
+      "count": 1,
       "description": "Playback speed controls for audio and video players.",
-      "count": 1
+      "label": "Playback Speed",
+      "name": "playback-speed"
     },
     {
-      "name": "player",
-      "label": "Player",
+      "count": 7,
       "description": "Audio player components for track playback, queues, and playback speed control.",
-      "count": 7
+      "label": "Player",
+      "name": "player"
     },
     {
-      "name": "queue",
-      "label": "Queue",
+      "count": 7,
       "description": "Queue management components for building playlists and up-next lists.",
-      "count": 5
+      "label": "Queue",
+      "name": "queue"
     },
     {
-      "name": "sortable-list",
-      "label": "Sortable List",
+      "count": 1,
       "description": "Drag-and-drop sortable list components for reordering tracks and items.",
-      "count": 1
+      "label": "Sortable List",
+      "name": "sortable-list"
     },
     {
-      "name": "synth",
-      "label": "Synth",
+      "count": 2,
       "description": "Synth control patterns combining knobs, XY pads, and toggles.",
-      "count": 2
+      "label": "Synth",
+      "name": "synth"
     },
     {
-      "name": "track",
-      "label": "Track",
+      "count": 5,
       "description": "Track list and grid components for browsing audio content.",
-      "count": 5
+      "label": "Track",
+      "name": "track"
     },
     {
-      "name": "transport",
-      "label": "Transport",
+      "count": 3,
       "description": "Transport controls for play, pause, and seek.",
-      "count": 1
+      "label": "Transport",
+      "name": "transport"
     },
     {
-      "name": "xypad",
-      "label": "XY Pad",
+      "count": 14,
       "description": "Two-dimensional XY pad components for filter and effect controls.",
-      "count": 10
+      "label": "XY Pad",
+      "name": "xypad"
     }
   ],
   "totalComponents": 63

@@ -66,7 +66,7 @@ registry-audio/bases/base/
 
 Each of `audio/`, `components/`, `hooks/`, `lib/` has an `_registry.ts` (`export const {audio,components,hooks,lib}: RegistryItem[]`) — **update the matching one when adding anything**. File paths inside are relative to `bases/base/`.
 
-For blocks/demos specifically, also update the hand-maintained manifests: `registry-audio/bases/components.json` (catalog entry) and `registry-audio/bases/registry.json` (category item counts; new category → add `seo.json` copy too).
+The site manifests (`registry-audio/bases/{components,registry,seo}.json`) are **generated** by `bun run registry:build` from the `_registry.ts` files and `registry-audio/bases/categories.ts` — never edit them by hand. New category → add it to `categories.ts` (label + description; SEO copy is templated from those, with optional overrides). A category listed there with zero items fails the build; item tags not listed there (e.g. `ui`, `grid`) are free-form search tags, not categories.
 
 ### Docs (`apps/www/src/content/docs/`)
 
