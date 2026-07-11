@@ -38,16 +38,18 @@ export class FakeEngine implements PlaybackEngine {
     this.record("init", []);
   }
 
-  async load(params: LoadEngineParams): Promise<void> {
+  load(params: LoadEngineParams): Promise<void> {
     this.record("load", [params]);
     this.src = params.url;
     this.currentTime = params.startTime ?? 0;
+    return Promise.resolve();
   }
 
-  async play(): Promise<void> {
+  play(): Promise<void> {
     this.record("play", []);
     this.paused = false;
     this.emit("play");
+    return Promise.resolve();
   }
 
   pause(): void {

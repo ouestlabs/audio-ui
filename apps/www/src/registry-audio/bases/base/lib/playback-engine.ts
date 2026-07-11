@@ -68,30 +68,30 @@ export type PlaybackEngineErrorDetail = {
  * production adapter; `FakeEngine` is the in-memory test adapter.
  */
 export interface PlaybackEngine {
-  addEventListener(
+  addEventListener: (
     type: PlaybackEngineEventType,
     listener: EventListenerOrEventListenerObject | null,
     options?: boolean | AddEventListenerOptions
-  ): void;
-  getBufferedRanges(): TimeRanges | null;
-  getCurrentTime(): number;
-  getDuration(): number;
-  getPlaybackRate(): number;
-  getSource(): string;
-  getVolume(): number;
-  init(): void;
-  isMuted(): boolean;
-  isPaused(): boolean;
-  load(params: LoadEngineParams): Promise<void>;
-  pause(): void;
-  play(): Promise<void>;
-  removeEventListener(
+  ) => void;
+  getBufferedRanges: () => TimeRanges | null;
+  getCurrentTime: () => number;
+  getDuration: () => number;
+  getPlaybackRate: () => number;
+  getSource: () => string;
+  getVolume: () => number;
+  init: () => void;
+  isMuted: () => boolean;
+  isPaused: () => boolean;
+  load: (params: LoadEngineParams) => Promise<void>;
+  pause: () => void;
+  play: () => Promise<void>;
+  removeEventListener: (
     type: PlaybackEngineEventType,
     listener: EventListenerOrEventListenerObject | null,
     options?: boolean | EventListenerOptions
-  ): void;
-  setCurrentTime(time: number): void;
-  setMuted(muted: boolean): void;
-  setPlaybackRate(rate: number): void;
-  setVolume(params: SetEngineVolumeParams): void;
+  ) => void;
+  setCurrentTime: (time: number) => void;
+  setMuted: (muted: boolean) => void;
+  setPlaybackRate: (rate: number) => void;
+  setVolume: (params: SetEngineVolumeParams) => void;
 }
