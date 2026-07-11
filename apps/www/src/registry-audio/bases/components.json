@@ -265,6 +265,161 @@
     "title": "knob-vertical-drag-demo"
   },
   {
+    "categories": ["envelope"],
+    "name": "envelope-size-default-demo",
+    "title": "envelope-size-default-demo"
+  },
+  {
+    "categories": ["envelope"],
+    "name": "envelope-controlled-demo",
+    "title": "envelope-controlled-demo"
+  },
+  {
+    "categories": ["envelope"],
+    "name": "envelope-presets-demo",
+    "title": "envelope-presets-demo"
+  },
+  {
+    "categories": ["envelope"],
+    "name": "envelope-no-new-points-demo",
+    "title": "envelope-no-new-points-demo"
+  },
+  {
+    "categories": ["envelope"],
+    "name": "envelope-size-sm-demo",
+    "title": "envelope-size-sm-demo"
+  },
+  {
+    "categories": ["envelope"],
+    "name": "envelope-size-lg-demo",
+    "title": "envelope-size-lg-demo"
+  },
+  {
+    "categories": ["envelope"],
+    "name": "envelope-disabled-demo",
+    "title": "envelope-disabled-demo"
+  },
+  {
+    "categories": ["piano"],
+    "name": "piano-size-default-demo",
+    "title": "piano-size-default-demo"
+  },
+  {
+    "categories": ["piano"],
+    "name": "piano-note-events-demo",
+    "title": "piano-note-events-demo"
+  },
+  {
+    "categories": ["piano"],
+    "name": "piano-active-notes-demo",
+    "title": "piano-active-notes-demo"
+  },
+  {
+    "categories": ["piano"],
+    "name": "piano-size-sm-demo",
+    "title": "piano-size-sm-demo"
+  },
+  {
+    "categories": ["piano"],
+    "name": "piano-size-lg-demo",
+    "title": "piano-size-lg-demo"
+  },
+  {
+    "categories": ["piano"],
+    "name": "piano-disabled-demo",
+    "title": "piano-disabled-demo"
+  },
+  {
+    "categories": ["meter"],
+    "name": "meter-size-default-demo",
+    "title": "meter-size-default-demo"
+  },
+  {
+    "categories": ["meter"],
+    "name": "meter-live-demo",
+    "title": "meter-live-demo"
+  },
+  {
+    "categories": ["meter"],
+    "name": "meter-clipping-demo",
+    "title": "meter-clipping-demo"
+  },
+  {
+    "categories": ["meter"],
+    "name": "meter-size-sm-demo",
+    "title": "meter-size-sm-demo"
+  },
+  {
+    "categories": ["meter"],
+    "name": "meter-size-lg-demo",
+    "title": "meter-size-lg-demo"
+  },
+  {
+    "categories": ["meter"],
+    "name": "meter-horizontal-demo",
+    "title": "meter-horizontal-demo"
+  },
+  {
+    "categories": ["sequencer"],
+    "name": "sequencer-size-default-demo",
+    "title": "sequencer-size-default-demo"
+  },
+  {
+    "categories": ["sequencer"],
+    "name": "sequencer-playing-demo",
+    "title": "sequencer-playing-demo"
+  },
+  {
+    "categories": ["sequencer"],
+    "name": "sequencer-controlled-demo",
+    "title": "sequencer-controlled-demo"
+  },
+  {
+    "categories": ["sequencer"],
+    "name": "sequencer-size-sm-demo",
+    "title": "sequencer-size-sm-demo"
+  },
+  {
+    "categories": ["sequencer"],
+    "name": "sequencer-size-lg-demo",
+    "title": "sequencer-size-lg-demo"
+  },
+  {
+    "categories": ["sequencer"],
+    "name": "sequencer-disabled-demo",
+    "title": "sequencer-disabled-demo"
+  },
+  {
+    "categories": ["multislider"],
+    "name": "multislider-size-default-demo",
+    "title": "multislider-size-default-demo"
+  },
+  {
+    "categories": ["multislider"],
+    "name": "multislider-controlled-demo",
+    "title": "multislider-controlled-demo"
+  },
+  {
+    "categories": ["multislider"],
+    "name": "multislider-stepped-demo",
+    "title": "multislider-stepped-demo"
+  },
+  {
+    "categories": ["multislider"],
+    "name": "multislider-horizontal-demo",
+    "title": "multislider-horizontal-demo"
+  },
+  {
+    "categories": ["multislider"],
+    "name": "multislider-thumbs-demo",
+    "title": "multislider-thumbs-demo"
+  },
+  {
+    "categories": ["multislider"],
+    "name": "multislider-disabled-demo",
+    "title": "multislider-disabled-demo"
+  },
+  {
     "categories": ["xypad"],
     "name": "xypad-live-value-demo",
     "title": "xypad-live-value-demo"

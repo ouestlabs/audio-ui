@@ -4,8 +4,13 @@
   "pages": [
     "player",
     "knob",
+    "meter",
     "fader",
     "xypad",
+    "multislider",
+    "sequencer",
+    "piano",
+    "envelope",
     "transport",
     "channel-strip",
     "sortable-list"

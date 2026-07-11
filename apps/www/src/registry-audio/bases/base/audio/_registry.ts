@@ -18,6 +18,17 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
+    dependencies: ["@audio-ui/react"],
+    files: [
+      {
+        path: "audio/elements/envelope.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "envelope",
+    type: "registry:ui",
+  },
+  {
     dependencies: [
       "@dnd-kit/core",
       "@dnd-kit/sortable",
@@ -65,6 +76,50 @@ export const audio: RegistryItem[] = [
       },
     ],
     name: "xypad",
+    type: "registry:ui",
+  },
+  {
+    dependencies: ["@audio-ui/react"],
+    files: [
+      {
+        path: "audio/elements/multislider.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "multislider",
+    type: "registry:ui",
+  },
+  {
+    dependencies: ["@audio-ui/react"],
+    files: [
+      {
+        path: "audio/elements/sequencer.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "sequencer",
+    type: "registry:ui",
+  },
+  {
+    dependencies: ["@audio-ui/react"],
+    files: [
+      {
+        path: "audio/elements/piano.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "piano",
+    type: "registry:ui",
+  },
+  {
+    dependencies: ["@audio-ui/react"],
+    files: [
+      {
+        path: "audio/elements/meter.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "meter",
     type: "registry:ui",
   },
   {

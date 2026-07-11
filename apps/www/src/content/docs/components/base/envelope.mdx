@@ -1,0 +1,168 @@
+---
+title: Envelope
+description: Interactive linear ramp visualization — drag breakpoints, double-click to add or remove them, built on SVG.
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="envelope-size-default-demo" />
+
+Envelope for editing a linear ramp (an ADSR shape, an automation curve, any breakpoint-based ramp). The registry component wraps `Envelope` primitives from `@audio-ui/react` and renders an SVG polyline connecting draggable points.
+
+## Overview
+
+- **Value model:** `value: { x: number; y: number }[]`, both axes normalized 0-1 and sorted by `x`. The consumer maps the normalized range to its own domain (time, level, frequency — whatever the ramp represents).
+- **Interaction model:** Drag a point to move it — dragging never deletes a point. Double-click empty space to add a point there; double-click an existing point to remove it. A point's `x` is clamped between its neighbors, so points can never cross or reorder mid-drag.
+- **Point count:** Dynamic — points are added and removed via interaction, floored at `minPoints` (default `2`, since a ramp needs at least a start and an end).
+- **Accessibility:** One roving tab stop; arrow keys nudge the focused point's `x`/`y`, `Delete` or `Backspace` removes it — the same outcome as double-clicking, reachable from the keyboard.
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">CLI</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash component
+npx shadcn@latest add @audio/envelope
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the following dependencies:</Step>
+
+```bash
+npm install @audio-ui/react class-variance-authority
+```
+
+<Step>Copy and paste the following code into your project.</Step>
+
+<ComponentSource
+  styleName="base-nova"
+  name="envelope"
+  title="components/audio/envelope.tsx"
+/>
+
+<Step>Update the import paths to match your project setup.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import { Envelope } from "@/components/audio/envelope";
+```
+
+**Uncontrolled** - initial points only:
+
+```tsx
+<Envelope
+  defaultValue={[
+    { x: 0, y: 0 },
+    { x: 0.2, y: 1 },
+    { x: 0.6, y: 0.5 },
+    { x: 1, y: 0 },
+  ]}
+/>
+```
+
+**Controlled** - drive points from state:
+
+```tsx
+const [points, setPoints] = useState(initialPoints);
+
+<Envelope
+  onValueChange={setPoints}
+  onValueCommit={(next) => console.log("Committed:", next)}
+  value={points}
+/>
+```
+
+## Interaction
+
+### Pointer
+
+| Behavior | Details |
+| -------- | ------- |
+| **Drag a point** | Moves it; `x` clamps between its neighbors, `y` clamps to [0,1]. Never deletes. |
+| **Double-click empty space** | Adds a point at that location (disable with `allowAddPoints={false}`). |
+| **Double-click a point** | Removes it, unless at `minPoints` (disable with `allowRemovePoints={false}`). |
+| **Commit event** | `onValueCommit` fires when a drag ends, or immediately for add/remove. |
+
+### Keyboard
+
+One tab stop for the whole envelope; focus then roves between points:
+
+| Key | Action |
+| --- | ------ |
+| `ArrowUp` / `ArrowDown` | Nudge the focused point's `y` |
+| `ArrowLeft` / `ArrowRight` | Nudge the focused point's `x` (clamped between neighbors) |
+| `Delete` / `Backspace` | Remove the focused point, unless at `minPoints` |
+
+## API reference
+
+`Envelope` accepts style props (`size`, `className`) plus primitive props from `EnvelopePrimitive.RootProps`.
+
+### Value and state
+
+| Prop            | Type                          | Default | Description                                                      |
+| --------------- | ------------------------------ | ------- | ------------------------------------------------------------------ |
+| `value`         | `{ x: number; y: number }[]`  | -       | Controlled points, normalized 0-1, sorted by `x`.                |
+| `defaultValue`  | `{ x: number; y: number }[]`  | ADSR-like 4-point shape | Uncontrolled default points.                             |
+| `allowAddPoints` | `boolean`                    | `true`  | Whether double-clicking empty space adds a point.                |
+| `allowRemovePoints` | `boolean`                 | `true`  | Whether double-clicking (or Delete/Backspace on) a point removes it. |
+| `minPoints`     | `number`                       | `2`     | Floor on the number of points; removal is blocked at this count. |
+| `disabled`      | `boolean`                      | `false` | Whether the envelope is disabled.                                 |
+| `onValueChange` | `(points) => void`             | -       | Callback when points change during interaction.                  |
+| `onValueCommit` | `(points) => void`             | -       | Callback when points are committed (on release, add, or remove). |
+| `aria-label`    | `string`                       | `"Envelope"` | Accessible name for the envelope.                            |
+| `aria-labelledby` | `string`                     | -       | ID of a labeling element.                                         |
+
+### Layout and display
+
+| Prop        | Type                          | Default     | Description                        |
+| ----------- | ------------------------------ | ----------- | ----------------------------------- |
+| `size`      | `"sm" \| "default" \| "lg"`   | `"default"` | Size variant (sets the envelope height). |
+| `className` | `string`                      | -           | Additional CSS classes.            |
+
+Additional valid HTML attributes passed to `Envelope.Root` are forwarded.
+
+## Examples
+
+### Common audio envelope presets
+
+<ComponentPreview styleName="base-nova" name="envelope-presets-demo" />
+
+### Controlled with live point count
+
+<ComponentPreview styleName="base-nova" name="envelope-controlled-demo" />
+
+### Fixed points (no add/remove)
+
+<ComponentPreview styleName="base-nova" name="envelope-no-new-points-demo" />
+
+### Size variants
+
+#### `sm`
+
+<ComponentPreview styleName="base-nova" name="envelope-size-sm-demo" />
+
+#### `lg`
+
+<ComponentPreview styleName="base-nova" name="envelope-size-lg-demo" />
+
+### Disabled state
+
+<ComponentPreview styleName="base-nova" name="envelope-disabled-demo" />

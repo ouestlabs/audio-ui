@@ -238,6 +238,139 @@
     @apply rounded-[min(var(--radius-md),10px)] bg-background/90 px-2 py-1 font-mono text-muted-foreground text-xs ring-1 ring-foreground/10 backdrop-blur-md;
   }
 
+  /* MARK: Multislider (container ← cn-xypad, fill ← cn-fader-range) */
+  .cn-multislider {
+    @apply rounded-xl border border-transparent bg-card ring-1 ring-foreground/10 transition-[color,border-color,box-shadow,opacity] duration-150 ease-out hover:ring-3 hover:ring-ring/50 has-focus-visible:ring-3 has-focus-visible:ring-ring/50 active:ring-3 active:ring-ring/50 has-focus-visible:border-ring active:border-ring motion-reduce:transition-none;
+  }
+
+  .cn-multislider-size-sm {
+    @apply h-40;
+  }
+
+  .cn-multislider-size-default {
+    @apply h-48;
+  }
+
+  .cn-multislider-size-lg {
+    @apply h-64;
+  }
+
+  .cn-multislider-size-xl {
+    @apply h-96;
+  }
+
+  .cn-multislider-slider {
+    @apply outline-none focus-visible:bg-ring/10 focus-visible:ring-1 focus-visible:ring-ring/60 focus-visible:ring-inset;
+  }
+
+  .cn-multislider-fill {
+    @apply bg-primary;
+  }
+
+  .cn-multislider-thumb {
+    @apply bg-foreground/70;
+  }
+
+  /* MARK: Sequencer (container ← cn-xypad, cell off/on ← cn-fader-track/range) */
+  .cn-sequencer {
+    @apply rounded-xl border border-transparent bg-card ring-1 ring-foreground/10 transition-[color,border-color,box-shadow,opacity] duration-150 ease-out hover:ring-3 hover:ring-ring/50 has-focus-visible:ring-3 has-focus-visible:ring-ring/50 active:ring-3 active:ring-ring/50 has-focus-visible:border-ring active:border-ring motion-reduce:transition-none;
+  }
+
+  .cn-sequencer-size-sm {
+    @apply gap-0.5 p-0.5;
+  }
+
+  .cn-sequencer-size-default {
+    @apply gap-1 p-1;
+  }
+
+  .cn-sequencer-size-lg {
+    @apply gap-1.5 p-1.5;
+  }
+
+  .cn-sequencer-cell {
+    @apply rounded-[min(var(--radius-sm),6px)] bg-input/70 transition-[background-color,box-shadow] duration-150 ease-out hover:ring-3 hover:ring-ring/50 focus-visible:ring-3 focus-visible:ring-ring/50 active:ring-3 active:ring-ring/50 data-[active-step=true]:ring-2 data-[active-step=true]:ring-ring data-[state=on]:bg-primary motion-reduce:transition-none;
+  }
+
+  /* MARK: Meter (channel ← cn-fader-track, fill ← success/destructive on clip) */
+  .cn-meter {
+    @apply relative;
+  }
+
+  .cn-meter-size-sm {
+    @apply h-32;
+  }
+
+  .cn-meter-size-default {
+    @apply h-48;
+  }
+
+  .cn-meter-size-lg {
+    @apply h-64;
+  }
+
+  .cn-meter-channel {
+    @apply rounded-[min(var(--radius-sm),6px)] bg-input/70 transition-shadow duration-150 ease-out data-[clip=true]:ring-2 data-[clip=true]:ring-destructive;
+  }
+
+  .cn-meter-fill {
+    @apply bg-success data-[clip=true]:bg-destructive;
+  }
+
+  .cn-meter-peak {
+    @apply bg-foreground;
+  }
+
+  /* MARK: Piano (container ← cn-xypad, white/black keys ← cn-fader-track/cn-knob-body) */
+  .cn-piano {
+    @apply rounded-xl border border-transparent bg-card ring-1 ring-foreground/10 transition-[color,border-color,box-shadow,opacity] duration-150 ease-out hover:ring-3 hover:ring-ring/50 has-focus-visible:ring-3 has-focus-visible:ring-ring/50 active:ring-3 active:ring-ring/50 has-focus-visible:border-ring active:border-ring motion-reduce:transition-none;
+  }
+
+  .cn-piano-size-sm {
+    @apply h-24;
+  }
+
+  .cn-piano-size-default {
+    @apply h-32;
+  }
+
+  .cn-piano-size-lg {
+    @apply h-40;
+  }
+
+  .cn-piano-key {
+    @apply top-0 outline-none transition-colors duration-100 ease-out focus-visible:z-20 focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-inset data-[color=white]:z-0 data-[color=white]:h-full data-[color=white]:border-border data-[color=white]:border-x data-[color=white]:bg-background data-[color=black]:z-10 data-[color=black]:h-[60%] data-[color=black]:rounded-b-[min(var(--radius-sm),4px)] data-[color=black]:bg-foreground data-[pressed=true]:bg-primary motion-reduce:transition-none;
+  }
+
+  /* MARK: Envelope (container ← cn-xypad, path/point ← cn-fader-range/thumb) */
+  .cn-envelope {
+    @apply rounded-xl border border-transparent bg-card ring-1 ring-foreground/10 transition-[color,border-color,box-shadow,opacity] duration-150 ease-out hover:ring-3 hover:ring-ring/50 has-focus-visible:ring-3 has-focus-visible:ring-ring/50 active:ring-3 active:ring-ring/50 has-focus-visible:border-ring active:border-ring motion-reduce:transition-none;
+  }
+
+  .cn-envelope-size-sm {
+    @apply h-32;
+  }
+
+  .cn-envelope-size-default {
+    @apply h-48;
+  }
+
+  .cn-envelope-size-lg {
+    @apply h-64;
+  }
+
+  .cn-envelope-path {
+    @apply stroke-primary stroke-2;
+  }
+
+  .cn-envelope-fill {
+    @apply fill-primary/15 stroke-none;
+  }
+
+  .cn-envelope-point {
+    @apply rounded-[min(var(--radius-md),10px)] border-ring border bg-card size-3.5 transition-[color,box-shadow] hover:ring-3 hover:ring-ring/50 focus-visible:ring-3 focus-visible:ring-ring/50 active:ring-3 active:ring-ring/50 data-[disabled=true]:pointer-events-none motion-reduce:transition-none;
+  }
+
   /* MARK: Channel Strip */
   .cn-channel-strip {
     @apply text-card-foreground;

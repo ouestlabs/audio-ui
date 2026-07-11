@@ -1,0 +1,175 @@
+---
+title: Sequencer
+description: Grid of buttons with a built-in step-sequencer interaction model — paint a pattern with a single drag, or program it row by row.
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="sequencer-size-default-demo" />
+
+Sequencer for programming step patterns (drum triggers, gate sequences, or any on/off grid). The registry component wraps `Sequencer` primitives from `@audio-ui/react` and renders one button per matrix cell. The primitive is display and interaction only — pair it with the `use-step-clock` hook (or Tone.js, or any other clock) to drive a playhead.
+
+## Overview
+
+- **Interaction model:** Paintbrush dragging — the first touched cell's inverse state is painted across every cell the drag crosses (press an off cell to draw on, press an on cell to erase).
+- **Value model:** `value` / `defaultValue` is a `boolean[][]` matrix; row count and column count come from the array shape.
+- **Playhead:** An optional controlled `activeStep` prop highlights a column across every row. The primitive has no internal clock — timing is the consumer's choice.
+- **Accessibility:** WAI-ARIA grid pattern (`role="grid"` / `role="gridcell"`) with one roving tab stop; arrow keys move focus, `Space` or `Enter` toggles the focused cell.
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">CLI</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash component
+npx shadcn@latest add @audio/sequencer
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the following dependencies:</Step>
+
+```bash
+npm install @audio-ui/react class-variance-authority
+```
+
+<Step>Copy and paste the following code into your project.</Step>
+
+<ComponentSource
+  styleName="base-nova"
+  name="sequencer"
+  title="components/audio/sequencer.tsx"
+/>
+
+<Step>Update the import paths to match your project setup.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import { Sequencer } from "@/components/audio/sequencer";
+```
+
+**Uncontrolled** - initial pattern only:
+
+```tsx
+<Sequencer
+  defaultValue={[
+    [true, false, false, false, true, false, false, false],
+    [false, false, true, false, false, false, true, false],
+  ]}
+/>
+```
+
+**Controlled** - drive the pattern from state:
+
+```tsx
+const [pattern, setPattern] = useState(initialPattern);
+
+<Sequencer
+  onValueChange={setPattern}
+  onValueCommit={(matrix) => console.log("Committed:", matrix)}
+  value={pattern}
+/>
+```
+
+## Playhead
+
+`activeStep` is a plain number prop — the primitive doesn't schedule anything. The `use-step-clock` hook (`npx shadcn@latest add @audio/use-step-clock`) provides a drift-free scheduler (built on the AudioContext clock, not `setInterval`) that you can wire up as needed:
+
+```tsx
+const { isPlaying, start, step, stop } = useStepClock({
+  bpm: 120,
+  totalSteps: pattern[0]?.length ?? 0,
+});
+
+<Sequencer activeStep={isPlaying ? step : undefined} value={pattern} />;
+```
+
+## Interaction
+
+### Pointer
+
+| Behavior | Details |
+| -------- | ------- |
+| **Press a cell** | Toggles that cell; its new state becomes the paint value for the drag. |
+| **Drag across cells** | Every cell the pointer crosses is set to the paint value (paint on, or erase off). |
+| **Commit event** | `onValueCommit` fires when the drag ends. |
+
+### Keyboard
+
+One tab stop for the whole grid; focus then roves between cells:
+
+| Key | Action |
+| --- | ------ |
+| `ArrowUp` / `ArrowDown` | Move focus to the cell above / below |
+| `ArrowLeft` / `ArrowRight` | Move focus to the previous / next cell in the row |
+| `Space` / `Enter` | Toggle the focused cell |
+| `Home` / `End` | Move focus to the row's first / last column |
+
+## API reference
+
+`Sequencer` accepts style props (`size`, `className`) plus primitive props from `SequencerPrimitive.RootProps`.
+
+### Value and state
+
+| Prop            | Type                          | Default | Description                                                      |
+| --------------- | ----------------------------- | ------- | ------------------------------------------------------------------ |
+| `value`         | `boolean[][]`                 | -       | Controlled matrix; row/column counts come from its shape.        |
+| `defaultValue`  | `boolean[][]`                 | 4×16 grid, all off | Uncontrolled default matrix.                          |
+| `activeStep`    | `number`                      | -       | Highlights this column across every row.                         |
+| `disabled`      | `boolean`                     | `false` | Whether the sequencer is disabled.                                |
+| `onValueChange` | `(matrix: boolean[][]) => void` | -     | Callback when the matrix changes during interaction.              |
+| `onValueCommit` | `(matrix: boolean[][]) => void` | -     | Callback when the matrix is committed (on release or toggle).     |
+| `aria-label`    | `string`                      | `"Sequencer"` | Accessible name for the grid.                              |
+| `aria-labelledby` | `string`                    | -       | ID of a labeling element.                                         |
+
+### Layout and display
+
+| Prop        | Type                                | Default     | Description                        |
+| ----------- | ------------------------------------ | ----------- | ----------------------------------- |
+| `size`      | `"sm" \| "default" \| "lg"`         | `"default"` | Size variant (sets the default grid height). |
+| `className` | `string`                            | -           | Additional CSS classes, applied to the grid — pass a height or aspect-ratio utility to override the size variant's default. |
+
+The grid always fills its box: columns and rows are CSS Grid `fr` tracks derived from the matrix shape, so every cell stretches to fill the available width and height, however the container is sized.
+
+Additional valid HTML attributes passed to `Sequencer.Root` are forwarded.
+
+## Examples
+
+### Playing with a step clock
+
+<ComponentPreview styleName="base-nova" name="sequencer-playing-demo" />
+
+### Controlled with live step count
+
+<ComponentPreview styleName="base-nova" name="sequencer-controlled-demo" />
+
+### Size variants
+
+#### `sm`
+
+<ComponentPreview styleName="base-nova" name="sequencer-size-sm-demo" />
+
+#### `lg`
+
+<ComponentPreview styleName="base-nova" name="sequencer-size-lg-demo" />
+
+### Disabled state
+
+<ComponentPreview styleName="base-nova" name="sequencer-disabled-demo" />

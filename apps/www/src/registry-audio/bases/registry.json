@@ -7,6 +7,12 @@
       "name": "channel-strip"
     },
     {
+      "count": 7,
+      "description": "Interactive envelope components for editing linear ramp breakpoints.",
+      "label": "Envelope",
+      "name": "envelope"
+    },
+    {
       "count": 11,
       "description": "Fader components for level, gain, and mix controls.",
       "label": "Fader",
@@ -17,6 +23,24 @@
       "description": "Rotary knob components for continuous parameters like level, cutoff, and pan.",
       "label": "Knob",
       "name": "knob"
+    },
+    {
+      "count": 6,
+      "description": "Decibel meter components for monitoring stereo and multi-channel audio levels.",
+      "label": "Meter",
+      "name": "meter"
+    },
+    {
+      "count": 6,
+      "description": "Multislider components for drawing value arrays like step levels, harmonics, and EQ bands.",
+      "label": "Multislider",
+      "name": "multislider"
+    },
+    {
+      "count": 6,
+      "description": "Virtual piano keyboard components with MIDI note ranges and glissando.",
+      "label": "Piano",
+      "name": "piano"
     },
     {
       "count": 1,
@@ -35,6 +59,12 @@
       "description": "Queue management components for building playlists and up-next lists.",
       "label": "Queue",
       "name": "queue"
+    },
+    {
+      "count": 6,
+      "description": "Step sequencer components — grids of buttons for programming patterns and triggers.",
+      "label": "Sequencer",
+      "name": "sequencer"
     },
     {
       "count": 1,
@@ -67,5 +97,5 @@
       "name": "xypad"
     }
   ],
-  "totalComponents": 63
+  "totalComponents": 94
 }

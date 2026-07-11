@@ -46,4 +46,26 @@ export const hooks: RegistryItem[] = [
     registryDependencies: ["@audio/use-web-audio"],
     type: "registry:hook",
   },
+  {
+    categories: ["audio", "sequencer"],
+    files: [
+      {
+        path: "hooks/use-step-clock.ts",
+        type: "registry:hook",
+      },
+    ],
+    name: "use-step-clock",
+    type: "registry:hook",
+  },
+  {
+    categories: ["audio", "meter"],
+    files: [
+      {
+        path: "hooks/use-audio-levels.ts",
+        type: "registry:hook",
+      },
+    ],
+    name: "use-audio-levels",
+    type: "registry:hook",
+  },
 ];

@@ -710,6 +710,414 @@ export const components: RegistryItem[] = [
     type: "registry:example",
   },
   {
+    categories: ["envelope"],
+    description: "Envelope size default example",
+    files: [
+      {
+        path: "components/envelope/envelope-size-default-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "envelope-size-default-demo",
+    registryDependencies: ["@audio/envelope"],
+    type: "registry:example",
+  },
+  {
+    categories: ["envelope"],
+    description: "Controlled envelope with a live point count",
+    files: [
+      {
+        path: "components/envelope/envelope-controlled-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "envelope-controlled-demo",
+    registryDependencies: ["@audio/envelope"],
+    type: "registry:example",
+  },
+  {
+    categories: ["envelope"],
+    description:
+      "Envelope with common audio envelope presets — ADSR, Bass, Gate, Pad, Pluck",
+    files: [
+      {
+        path: "components/envelope/envelope-presets-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "envelope-presets-demo",
+    registryDependencies: ["@audio/envelope", "@shadcn/button"],
+    type: "registry:example",
+  },
+  {
+    categories: ["envelope"],
+    description: "Envelope with adding and removing points disabled",
+    files: [
+      {
+        path: "components/envelope/envelope-no-new-points-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "envelope-no-new-points-demo",
+    registryDependencies: ["@audio/envelope"],
+    type: "registry:example",
+  },
+  {
+    categories: ["envelope"],
+    description: "Envelope size small example",
+    files: [
+      {
+        path: "components/envelope/envelope-size-sm-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "envelope-size-sm-demo",
+    registryDependencies: ["@audio/envelope"],
+    type: "registry:example",
+  },
+  {
+    categories: ["envelope"],
+    description: "Envelope size large example",
+    files: [
+      {
+        path: "components/envelope/envelope-size-lg-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "envelope-size-lg-demo",
+    registryDependencies: ["@audio/envelope"],
+    type: "registry:example",
+  },
+  {
+    categories: ["envelope"],
+    description: "Disabled envelope example",
+    files: [
+      {
+        path: "components/envelope/envelope-disabled-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "envelope-disabled-demo",
+    registryDependencies: ["@audio/envelope"],
+    type: "registry:example",
+  },
+  {
+    categories: ["piano"],
+    description: "Piano size default example",
+    files: [
+      {
+        path: "components/piano/piano-size-default-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "piano-size-default-demo",
+    registryDependencies: ["@audio/piano"],
+    type: "registry:example",
+  },
+  {
+    categories: ["piano"],
+    description: "Piano with onNoteOn/onNoteOff events",
+    files: [
+      {
+        path: "components/piano/piano-note-events-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "piano-note-events-demo",
+    registryDependencies: ["@audio/piano"],
+    type: "registry:example",
+  },
+  {
+    categories: ["piano"],
+    description: "Piano lit from an external source via activeNotes",
+    files: [
+      {
+        path: "components/piano/piano-active-notes-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "piano-active-notes-demo",
+    registryDependencies: ["@audio/piano"],
+    type: "registry:example",
+  },
+  {
+    categories: ["piano"],
+    description: "Piano size small example",
+    files: [
+      {
+        path: "components/piano/piano-size-sm-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "piano-size-sm-demo",
+    registryDependencies: ["@audio/piano"],
+    type: "registry:example",
+  },
+  {
+    categories: ["piano"],
+    description: "Piano size large example",
+    files: [
+      {
+        path: "components/piano/piano-size-lg-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "piano-size-lg-demo",
+    registryDependencies: ["@audio/piano"],
+    type: "registry:example",
+  },
+  {
+    categories: ["piano"],
+    description: "Disabled piano example",
+    files: [
+      {
+        path: "components/piano/piano-disabled-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "piano-disabled-demo",
+    registryDependencies: ["@audio/piano"],
+    type: "registry:example",
+  },
+  {
+    categories: ["meter"],
+    description: "Meter size default example",
+    files: [
+      {
+        path: "components/meter/meter-size-default-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "meter-size-default-demo",
+    registryDependencies: ["@audio/meter"],
+    type: "registry:example",
+  },
+  {
+    categories: ["meter"],
+    description: "Meter with simulated live levels and peak-hold decay",
+    files: [
+      {
+        path: "components/meter/meter-live-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "meter-live-demo",
+    registryDependencies: ["@audio/meter"],
+    type: "registry:example",
+  },
+  {
+    categories: ["meter"],
+    description: "Meter showing the clip indicator at 0 dB and above",
+    files: [
+      {
+        path: "components/meter/meter-clipping-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "meter-clipping-demo",
+    registryDependencies: ["@audio/meter"],
+    type: "registry:example",
+  },
+  {
+    categories: ["meter"],
+    description: "Meter size small example",
+    files: [
+      {
+        path: "components/meter/meter-size-sm-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "meter-size-sm-demo",
+    registryDependencies: ["@audio/meter"],
+    type: "registry:example",
+  },
+  {
+    categories: ["meter"],
+    description: "Meter size large example",
+    files: [
+      {
+        path: "components/meter/meter-size-lg-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "meter-size-lg-demo",
+    registryDependencies: ["@audio/meter"],
+    type: "registry:example",
+  },
+  {
+    categories: ["meter"],
+    description: "Horizontal meter example",
+    files: [
+      {
+        path: "components/meter/meter-horizontal-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "meter-horizontal-demo",
+    registryDependencies: ["@audio/meter"],
+    type: "registry:example",
+  },
+  {
+    categories: ["sequencer"],
+    description: "Sequencer size default example",
+    files: [
+      {
+        path: "components/sequencer/sequencer-size-default-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "sequencer-size-default-demo",
+    registryDependencies: ["@audio/sequencer"],
+    type: "registry:example",
+  },
+  {
+    categories: ["sequencer"],
+    description: "Playing sequencer driven by the use-step-clock hook",
+    files: [
+      {
+        path: "components/sequencer/sequencer-playing-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "sequencer-playing-demo",
+    registryDependencies: [
+      "@audio/sequencer",
+      "@audio/use-step-clock",
+      "@shadcn/button",
+    ],
+    type: "registry:example",
+  },
+  {
+    categories: ["sequencer"],
+    description: "Controlled sequencer with a live active-step count",
+    files: [
+      {
+        path: "components/sequencer/sequencer-controlled-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "sequencer-controlled-demo",
+    registryDependencies: ["@audio/sequencer"],
+    type: "registry:example",
+  },
+  {
+    categories: ["sequencer"],
+    description: "Sequencer size small example",
+    files: [
+      {
+        path: "components/sequencer/sequencer-size-sm-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "sequencer-size-sm-demo",
+    registryDependencies: ["@audio/sequencer"],
+    type: "registry:example",
+  },
+  {
+    categories: ["sequencer"],
+    description: "Sequencer size large example",
+    files: [
+      {
+        path: "components/sequencer/sequencer-size-lg-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "sequencer-size-lg-demo",
+    registryDependencies: ["@audio/sequencer"],
+    type: "registry:example",
+  },
+  {
+    categories: ["sequencer"],
+    description: "Disabled sequencer example",
+    files: [
+      {
+        path: "components/sequencer/sequencer-disabled-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "sequencer-disabled-demo",
+    registryDependencies: ["@audio/sequencer"],
+    type: "registry:example",
+  },
+  {
+    categories: ["multislider"],
+    description: "Multislider size default example",
+    files: [
+      {
+        path: "components/multislider/multislider-size-default-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "multislider-size-default-demo",
+    registryDependencies: ["@audio/multislider"],
+    type: "registry:example",
+  },
+  {
+    categories: ["multislider"],
+    description: "Controlled multislider with live value readout",
+    files: [
+      {
+        path: "components/multislider/multislider-controlled-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "multislider-controlled-demo",
+    registryDependencies: ["@audio/multislider"],
+    type: "registry:example",
+  },
+  {
+    categories: ["multislider"],
+    description: "Stepped multislider for integer step levels",
+    files: [
+      {
+        path: "components/multislider/multislider-stepped-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "multislider-stepped-demo",
+    registryDependencies: ["@audio/multislider"],
+    type: "registry:example",
+  },
+  {
+    categories: ["multislider"],
+    description: "Horizontal multislider example",
+    files: [
+      {
+        path: "components/multislider/multislider-horizontal-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "multislider-horizontal-demo",
+    registryDependencies: ["@audio/multislider"],
+    type: "registry:example",
+  },
+  {
+    categories: ["multislider"],
+    description: "Multislider with thumb marks visible",
+    files: [
+      {
+        path: "components/multislider/multislider-thumbs-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "multislider-thumbs-demo",
+    registryDependencies: ["@audio/multislider"],
+    type: "registry:example",
+  },
+  {
+    categories: ["multislider"],
+    description: "Disabled multislider example",
+    files: [
+      {
+        path: "components/multislider/multislider-disabled-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "multislider-disabled-demo",
+    registryDependencies: ["@audio/multislider"],
+    type: "registry:example",
+  },
+  {
     categories: ["xypad"],
     description: "XYPad with live x/y readout",
     files: [

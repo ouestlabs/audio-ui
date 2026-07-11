@@ -64,6 +64,12 @@ export const categories: CategoryDef[] = [
     name: "channel-strip",
   },
   {
+    description:
+      "Interactive envelope components for editing linear ramp breakpoints.",
+    label: "Envelope",
+    name: "envelope",
+  },
+  {
     description: "Fader components for level, gain, and mix controls.",
     label: "Fader",
     name: "fader",
@@ -73,6 +79,24 @@ export const categories: CategoryDef[] = [
       "Rotary knob components for continuous parameters like level, cutoff, and pan.",
     label: "Knob",
     name: "knob",
+  },
+  {
+    description:
+      "Decibel meter components for monitoring stereo and multi-channel audio levels.",
+    label: "Meter",
+    name: "meter",
+  },
+  {
+    description:
+      "Multislider components for drawing value arrays like step levels, harmonics, and EQ bands.",
+    label: "Multislider",
+    name: "multislider",
+  },
+  {
+    description:
+      "Virtual piano keyboard components with MIDI note ranges and glissando.",
+    label: "Piano",
+    name: "piano",
   },
   {
     description: "Playback speed controls for audio and video players.",
@@ -90,6 +114,12 @@ export const categories: CategoryDef[] = [
       "Queue management components for building playlists and up-next lists.",
     label: "Queue",
     name: "queue",
+  },
+  {
+    description:
+      "Step sequencer components — grids of buttons for programming patterns and triggers.",
+    label: "Sequencer",
+    name: "sequencer",
   },
   {
     description:

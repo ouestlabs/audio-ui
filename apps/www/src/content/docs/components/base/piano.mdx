@@ -1,0 +1,155 @@
+---
+title: Piano
+description: Virtual piano keyboard with a MIDI note range, glissando, multi-touch polyphony, and an activeNotes overlay for external sources.
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="piano-size-default-demo" />
+
+Piano for playing or displaying notes (a virtual instrument, a MIDI visualizer, a chord reference). The registry component wraps `Piano` primitives from `@audio-ui/react` and renders classic white/black key layout for any MIDI note range.
+
+## Overview
+
+- **Range:** `startNote` / `endNote` are MIDI note numbers (defaults `48`/`72` — C3 to C5). Key color (white/black) and layout are computed from the chromatic pattern starting at C.
+- **Events:** `onNoteOn` / `onNoteOff` fire the MIDI note number — exactly what an audio engine consumes.
+- **Interaction model:** Press and hold a key to sustain the note. Drag across keys (mouse) for a glissando — each key retriggers as the pointer crosses it. Multiple simultaneous pointers (multi-touch) each independently hold their own key — true polyphony.
+- **External notes:** An optional controlled `activeNotes` prop lights up keys from outside pointer interaction (a MIDI input device, a sequencer's current chord) without affecting `onNoteOn`/`onNoteOff`.
+- **Accessibility:** One roving tab stop; arrow keys move focus between keys, `Space` or `Enter` triggers a momentary tap (`onNoteOn` immediately followed by `onNoteOff`).
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">CLI</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash component
+npx shadcn@latest add @audio/piano
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the following dependencies:</Step>
+
+```bash
+npm install @audio-ui/react class-variance-authority
+```
+
+<Step>Copy and paste the following code into your project.</Step>
+
+<ComponentSource
+  styleName="base-nova"
+  name="piano"
+  title="components/audio/piano.tsx"
+/>
+
+<Step>Update the import paths to match your project setup.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import { Piano } from "@/components/audio/piano";
+```
+
+**Note events:**
+
+```tsx
+<Piano
+  endNote={72}
+  onNoteOff={(note) => synth.release(note)}
+  onNoteOn={(note) => synth.trigger(note)}
+  startNote={48}
+/>
+```
+
+**External notes (MIDI input, a sequencer's current chord):**
+
+```tsx
+<Piano activeNotes={midiInputNotes} endNote={72} startNote={48} />
+```
+
+## Interaction
+
+### Pointer
+
+| Behavior | Details |
+| -------- | ------- |
+| **Press a key** | Fires `onNoteOn`; the key stays pressed while held. |
+| **Release** | Fires `onNoteOff`. |
+| **Drag across keys** | Glissando — the previous key releases (`onNoteOff`) and the new one triggers (`onNoteOn`) as the pointer crosses it. |
+| **Multiple pointers** | Each pointer (finger) independently holds its own key — true polyphony on touch devices. |
+
+### Keyboard
+
+One tab stop for the whole keyboard; focus then roves between keys:
+
+| Key | Action |
+| --- | ------ |
+| `ArrowLeft` / `ArrowRight` | Move focus to the previous / next key (chromatically) |
+| `Space` / `Enter` | Momentary tap: `onNoteOn` immediately followed by `onNoteOff` |
+| `Home` / `End` | Move focus to the first / last key |
+
+## API reference
+
+`Piano` accepts style props (`size`, `className`) plus primitive props from `PianoPrimitive.RootProps`.
+
+### Value and state
+
+| Prop            | Type                  | Default | Description                                                      |
+| --------------- | ---------------------- | ------- | ------------------------------------------------------------------ |
+| `startNote`     | `number`               | `48`    | Lowest MIDI note on the keyboard.                                 |
+| `endNote`       | `number`               | `72`    | Highest MIDI note on the keyboard.                                |
+| `activeNotes`   | `number[]`              | -       | Notes highlighted from outside pointer interaction. Merged with pointer-pressed notes for display. |
+| `disabled`      | `boolean`               | `false` | Whether the keyboard is disabled.                                 |
+| `onNoteOn`      | `(note: number) => void` | -     | Callback when a note starts (pointer press, tap, or glissando).   |
+| `onNoteOff`     | `(note: number) => void` | -     | Callback when a note ends (release or glissando).                 |
+| `aria-label`    | `string`                | `"Piano"` | Accessible name for the keyboard.                                |
+| `aria-labelledby` | `string`              | -       | ID of a labeling element.                                         |
+
+### Layout and display
+
+| Prop        | Type                          | Default     | Description                        |
+| ----------- | ------------------------------ | ----------- | ----------------------------------- |
+| `size`      | `"sm" \| "default" \| "lg"`   | `"default"` | Size variant (sets the keyboard height). |
+| `className` | `string`                      | -           | Additional CSS classes.            |
+
+Additional valid HTML attributes passed to `Piano.Root` are forwarded.
+
+## Examples
+
+### Note events
+
+<ComponentPreview styleName="base-nova" name="piano-note-events-demo" />
+
+### External notes via activeNotes
+
+<ComponentPreview styleName="base-nova" name="piano-active-notes-demo" />
+
+### Size variants
+
+#### `sm`
+
+<ComponentPreview styleName="base-nova" name="piano-size-sm-demo" />
+
+#### `lg`
+
+<ComponentPreview styleName="base-nova" name="piano-size-lg-demo" />
+
+### Disabled state
+
+<ComponentPreview styleName="base-nova" name="piano-disabled-demo" />

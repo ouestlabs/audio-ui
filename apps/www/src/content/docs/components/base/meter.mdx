@@ -1,0 +1,139 @@
+---
+title: Meter
+description: Display-only stereo and multi-channel decibel meter with peak-hold, driven by whatever level data you feed it.
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="meter-size-default-demo" />
+
+Meter for monitoring audio levels (stereo output, individual channel strips, or any multi-channel source). The registry component wraps `Meter` primitives from `@audio-ui/react` and renders one bar per channel, switching from success to destructive when a channel clips, with an optional peak-hold mark. The primitive is display only — there is no pointer, keyboard, or focus handling, since there is nothing to control.
+
+## Overview
+
+- **Value model:** `value: number[]` is a dB reading per channel (stereo = `[left, right]`); array length is the channel count.
+- **Peak hold:** An optional `peak: number[]` prop positions a peak-hold mark per channel. The primitive has no clock — the [`use-audio-levels`](#feeding-real-levels) hook (or Tone.js, or any other source) computes and decays it.
+- **Clipping:** Channels at or above `clipThreshold` (default `0` dB) get a `data-clip="true"` attribute for styling a clip indicator.
+- **Accessibility:** Each channel is a native `role="meter"` with `aria-valuenow`/`min`/`max` — a static, query-able value, not an `aria-live` region, so a fast-changing meter doesn't spam screen readers with every update.
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">CLI</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash component
+npx shadcn@latest add @audio/meter
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the following dependencies:</Step>
+
+```bash
+npm install @audio-ui/react class-variance-authority
+```
+
+<Step>Copy and paste the following code into your project.</Step>
+
+<ComponentSource
+  styleName="base-nova"
+  name="meter"
+  title="components/audio/meter.tsx"
+/>
+
+<Step>Update the import paths to match your project setup.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import { Meter } from "@/components/audio/meter";
+```
+
+**Static levels:**
+
+```tsx
+<Meter value={[-9, -14]} />
+```
+
+**With a peak-hold mark:**
+
+```tsx
+<Meter peak={[-4, -8]} value={[-9, -14]} />
+```
+
+## Feeding real levels
+
+`value` and `peak` are plain number props — the primitive doesn't sample anything. The `use-audio-levels` hook (`npx shadcn@latest add @audio/use-audio-levels`) samples RMS level (in dB) from one `AnalyserNode` per channel at ~30fps, with a peak-hold mark that holds the loudest recent level for 1.5s before decaying:
+
+```tsx
+const { levels, peaks } = useAudioLevels([leftAnalyser, rightAnalyser]);
+
+<Meter peak={peaks} value={levels} />;
+```
+
+## API reference
+
+`Meter` accepts style props (`size`, `peakMarks`, `className`) plus primitive props from `MeterPrimitive.RootProps`.
+
+### Value and state
+
+| Prop            | Type                       | Default | Description                                                      |
+| --------------- | -------------------------- | ------- | ------------------------------------------------------------------ |
+| `value`         | `number[]`                 | -       | Required. Instant level (dB) per channel; array length is the channel count. |
+| `peak`          | `number[]`                 | -       | Peak-hold level (dB) per channel. Omit to hide peak marks.       |
+| `min`           | `number`                   | `-60`   | Minimum of the dB range.                                         |
+| `max`           | `number`                   | `6`     | Maximum of the dB range.                                         |
+| `clipThreshold` | `number`                   | `0`     | Level (dB) at or above which a channel is marked as clipping.    |
+| `orientation`   | `"vertical" \| "horizontal"` | `"vertical"` | Bar direction.                                              |
+| `aria-label`    | `string`                   | `"Meter"` | Accessible name for the meter group.                            |
+| `aria-labelledby` | `string`                 | -       | ID of a labeling element.                                         |
+
+### Layout and display
+
+| Prop         | Type                          | Default     | Description                        |
+| ------------ | ------------------------------ | ----------- | ----------------------------------- |
+| `size`       | `"sm" \| "default" \| "lg"`   | `"default"` | Size variant (sets the meter height). |
+| `peakMarks`  | `"visible" \| "hidden"`       | `"visible"` | Shows or hides the peak-hold mark per channel. |
+| `className`  | `string`                      | -           | Additional CSS classes.            |
+
+Additional valid HTML attributes passed to `Meter.Root` are forwarded.
+
+## Examples
+
+### Live levels with peak-hold decay
+
+<ComponentPreview styleName="base-nova" name="meter-live-demo" />
+
+### Clipping indicator
+
+<ComponentPreview styleName="base-nova" name="meter-clipping-demo" />
+
+### Size variants
+
+#### `sm`
+
+<ComponentPreview styleName="base-nova" name="meter-size-sm-demo" />
+
+#### `lg`
+
+<ComponentPreview styleName="base-nova" name="meter-size-lg-demo" />
+
+### Horizontal orientation
+
+<ComponentPreview styleName="base-nova" name="meter-horizontal-demo" />
