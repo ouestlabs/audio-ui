@@ -79,6 +79,21 @@ describe("Transport wheel", () => {
   });
 });
 
+describe("Transport pointer capture", () => {
+  test("captures on the element whose handlers drive the drag, not its parent", () => {
+    // Capturing on the Slider retargets pointermove/pointerup away from the
+    // Track's React handlers, so the drag never ends and freeze sticks.
+    const { slider, track } = renderTransport();
+    mockRect(slider, { height: 20, width: 200 });
+
+    fireEvent.pointerDown(track, { clientX: 60, clientY: 10, pointerId: 9 });
+    expect(track.hasPointerCapture(9)).toBe(true);
+    expect(slider.hasPointerCapture(9)).toBe(false);
+
+    fireEvent.pointerUp(track, { clientX: 60, clientY: 10, pointerId: 9 });
+  });
+});
+
 describe("Transport drag (horizontal slider 200×20 at origin)", () => {
   test("pointer down jumps to the pointed value and release commits", () => {
     const { slider, track, onValueChange, onValueCommit } = renderTransport();

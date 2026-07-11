@@ -215,6 +215,10 @@ export function useParameterCore<T>({
       }
       if (!containsTarget(target) && isDragActiveRef.current) {
         isDragActiveRef.current = false;
+        // Full drag teardown: without clearing the freeze/drag state, a
+        // frozen display would stop following external value updates.
+        setIsDragging(false);
+        setOptimisticValue(null);
         commitValue(pendingValueRef.current);
       }
     };
