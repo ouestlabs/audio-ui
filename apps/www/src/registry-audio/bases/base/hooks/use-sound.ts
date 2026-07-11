@@ -36,8 +36,8 @@ export function useSound(url: string) {
       .then((decoded) => {
         bufferRef.current = decoded;
       })
-      .catch((err) => {
-        console.log(`Failed to load click sound from ${url}:`, err);
+      .catch(() => {
+        // Silent: no error channel exposed to the caller of useSound
       });
   }, [url, webAudio]);
 

@@ -295,6 +295,15 @@ function AudioPlayer({
     return <AudioProvider tracks={tracks}>{content}</AudioProvider>;
   }
 
+  if (
+    process.env.NODE_ENV !== "production" &&
+    React.use(AudioStoreContext) === null
+  ) {
+    console.warn(
+      "AudioPlayer: no `tracks` prop and no ambient <AudioProvider> — playback controls will not function. Pass `tracks` or wrap this player in <AudioProvider tracks={...}>."
+    );
+  }
+
   return content;
 }
 
@@ -398,7 +407,7 @@ const AudioPlayerTimeDisplay = ({
     timeValue = "LIVE";
   }
 
-  const showLiveIcon = isLiveStream && remaining;
+  const showLiveIcon = Boolean(isLiveStream && remaining);
 
   return (
     <time
@@ -1016,11 +1025,12 @@ function AudioTrack({
   const actualIsPlaying = isPlaying && isCurrent;
   const trackDuration = isCurrent && duration > 0 ? duration : track.duration;
 
-  const isLiveTrack =
+  const isLiveTrack = Boolean(
     track.live === true ||
-    (trackDuration !== undefined &&
-      trackDuration !== null &&
-      isLive(trackDuration));
+      (trackDuration !== undefined &&
+        trackDuration !== null &&
+        isLive(trackDuration))
+  );
 
   const contextValue: AudioTrackContextValue = {
     index,
@@ -1059,7 +1069,9 @@ function AudioTrack({
         size="sm"
         variant={isCurrent ? "outline" : "default"}
       >
-        {media && <ItemMedia className="gap-2">{media}</ItemMedia>}
+        {media !== null && media !== undefined && (
+          <ItemMedia className="gap-2">{media}</ItemMedia>
+        )}
         <ItemContent className="min-w-0 flex-1 gap-0 overflow-hidden">
           <div className="flex items-center gap-1.5">
             <ItemTitle className="line-clamp-1">{track.title}</ItemTitle>
@@ -1083,7 +1095,9 @@ function AudioTrack({
             <ItemDescription>{formatDuration(trackDuration)}</ItemDescription>
           </ItemContent>
         )}
-        {actions && <ItemActions>{actions}</ItemActions>}
+        {actions !== null && actions !== undefined && (
+          <ItemActions>{actions}</ItemActions>
+        )}
       </Item>
     </AudioTrackContext>
   );
