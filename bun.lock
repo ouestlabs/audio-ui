@@ -14,7 +14,7 @@
     },
     "apps/sandbox": {
       "name": "sandbox",
-      "version": "0.1.2",
+      "version": "0.1.4",
       "dependencies": {
         "@audio-ui/react": "workspace:*",
         "@base-ui/react": "^1.4.0",
@@ -109,6 +109,8 @@
         "zustand": "^5.0.14",
       },
       "devDependencies": {
+        "@happy-dom/global-registrator": "^20.10.6",
+        "@testing-library/react": "^16.3.2",
         "@types/mdx": "^2.0.13",
         "@types/node": "^25.5.0",
         "@types/react": "19.2.17",
@@ -127,7 +129,7 @@
     },
     "packages/ui": {
       "name": "@audio-ui/react",
-      "version": "0.0.9",
+      "version": "0.1.1",
       "dependencies": {
         "@audio-ui/utils": "latest",
       },
@@ -152,7 +154,7 @@
     },
     "packages/utils": {
       "name": "@audio-ui/utils",
-      "version": "0.0.4",
+      "version": "0.0.5",
       "devDependencies": {
         "@audio-ui/typescript": "latest",
         "@types/bun": "^1.3.5",
@@ -2370,7 +2372,7 @@
 
     "wsl-utils/is-wsl": ["is-wsl@3.1.1", "", { "dependencies": { "is-inside-container": "^1.0.0" } }, "sha512-e6rvdUCiQCAuumZslxRJWR/Doq4VpPR82kqclvcS0efgt430SlGIk05vdCN58+VrzgtIcfNODjozVielycD4Sw=="],
 
-    "www/@audio-ui/react": ["@audio-ui/react@0.0.9", "", { "dependencies": { "@audio-ui/utils": "latest" }, "peerDependencies": { "@types/react": "^18 || ^19", "react": "^18 || ^19", "react-dom": "^18 || ^19" }, "optionalPeers": ["@types/react"] }, "sha512-Icl3xHtfcmht0nfxGOe/HKbWXNed1QBJpKQA5CbaSLebUfQNN7KGb7jQbPWQ2BUFAbuh3pOi+u46ZP0IIJCLfg=="],
+    "www/@audio-ui/react": ["@audio-ui/react@0.1.2", "", { "dependencies": { "@audio-ui/utils": "latest" }, "peerDependencies": { "@types/react": "^18 || ^19", "react": "^19.2.7", "react-dom": "^19.2.7" }, "optionalPeers": ["@types/react"] }, "sha512-nhcGj7cU0krwn8ZDZllvPceo2DtyCzmK16IlzJY+2G8CT51oflO224fudzCbQ76jErWV9L1zYAvSPya7nUwcdA=="],
 
     "www/@types/node": ["@types/node@25.9.5", "", { "dependencies": { "undici-types": ">=7.24.0 <7.24.7" } }, "sha512-OScDchr2fwuUmWdf4kZ9h7PcJiYDVInhJizG/biAq3cAvqwYktuy/TYGGdZNMtNTFUP7rnb0NU4TUdm82kt4Rg=="],
 
@@ -2492,7 +2494,11 @@
 
     "tsup/chokidar/readdirp": ["readdirp@4.1.2", "", {}, "sha512-GDhwkLfywWL2s6vEjyhri+eXmfH6j1L7JE27WhqLeYzoh/A3DBaYGEj2H/HFZCn/kMfim73FXxEJTw06WtxQwg=="],
 
-    "www/@audio-ui/react/@audio-ui/utils": ["@audio-ui/utils@0.0.4", "", {}, "sha512-3YwTeGosycK0Gl/bpGRXGnXIZO4pS+VmFgJjSmdUNYq7BQV5ZTuvBNZ/cBcPdDv+Zyx72HmdmQhhUSTbLzUwjA=="],
+    "www/@audio-ui/react/@audio-ui/utils": ["@audio-ui/utils@0.0.5", "", {}, "sha512-D+yJLWahXlhN/po8vXXjCRaNCKVkVsb2kozjh+gJrjH2oiH1Kh89IGtzTGQMAskbal84Gj2CZ7aut4I9PBIVPw=="],
+
+    "www/@audio-ui/react/react": ["react@19.2.7", "", {}, "sha512-HNe9WslTbXmFK8o8cmwgAeJFSBvt1bPdHCVKtaaV+WlAN36mpT4hcRpwbf3fY56ar2oIXzsBpOAiIRHAdY0OlQ=="],
+
+    "www/@audio-ui/react/react-dom": ["react-dom@19.2.7", "", { "dependencies": { "scheduler": "^0.27.0" }, "peerDependencies": { "react": "^19.2.7" } }, "sha512-t0BRVXvbiE/o20Hfw669rLbMCDWtYZLvmJigy2f0MxsXF+71pxhR3xOkspmsO8h3ZlNzyibAmtCa3l4lYKk6gQ=="],
 
     "www/@types/node/undici-types": ["undici-types@7.24.6", "", {}, "sha512-WRNW+sJgj5OBN4/0JpHFqtqzhpbnV0GuB+OozA9gCL7a993SmU+1JBZCzLNxYsbMfIeDL+lTsphD5jN5N+n0zg=="],
 
