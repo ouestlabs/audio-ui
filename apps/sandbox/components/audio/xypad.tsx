@@ -38,7 +38,7 @@ export function XYPad({
       <XYPadPrimitive.Label />
       <XYPadPrimitive.Slider
         className={cn(
-          "rounded-4xl border border-transparent bg-card shadow-md ring-1 ring-foreground/10 transition-[color,border-color,box-shadow,opacity] duration-150 ease-out hover:ring-4 hover:ring-ring/30 focus-visible:ring-4 focus-visible:ring-ring/30 active:ring-4 active:ring-ring/30 focus-visible:border-ring active:border-ring motion-reduce:transition-none relative block w-full cursor-crosshair touch-none select-none overflow-hidden",
+          "rounded-xl border border-transparent bg-card ring-1 ring-foreground/10 transition-[color,border-color,box-shadow,opacity] duration-150 ease-out hover:ring-3 hover:ring-ring/50 focus-visible:ring-3 focus-visible:ring-ring/50 active:ring-3 active:ring-ring/50 focus-visible:border-ring active:border-ring motion-reduce:transition-none relative block w-full cursor-crosshair touch-none select-none overflow-hidden",
           "focus-visible:outline-none",
           "data-[disabled=true]:pointer-events-none data-[disabled=true]:cursor-not-allowed data-[disabled=true]:opacity-50",
           xypadVariants({ size }),
@@ -100,7 +100,7 @@ export function XYPad({
 
         {valueDisplay === "visible" && (
           <XYPadPrimitive.ValueDisplay
-            className="rounded-4xl bg-background/90 px-2 py-1 font-mono text-muted-foreground text-xs ring-1 ring-foreground/10 backdrop-blur-md absolute top-2.5 right-2.5 z-10"
+            className="rounded-[min(var(--radius-md),10px)] bg-background/90 px-2 py-1 font-mono text-muted-foreground text-xs ring-1 ring-foreground/10 backdrop-blur-md absolute top-2.5 right-2.5 z-10"
             formatValue={formatValue}
           />
         )}

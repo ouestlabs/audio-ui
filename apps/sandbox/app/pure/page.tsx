@@ -9,13 +9,13 @@ import {
   ChannelStripLabel,
   ChannelStripSection,
   ChannelStripValue,
-} from "@/components/audio/channel-strip";
-import { Fader } from "@/components/audio/fader";
-import { Knob } from "@/components/audio/knob";
-import { Transport } from "@/components/audio/transport";
-import { XYPad } from "@/components/audio/xypad";
+} from "@/components/pure/channel-strip";
+import { Fader } from "@/components/pure/fader";
+import { Knob } from "@/components/pure/knob";
+import { Transport } from "@/components/pure/transport";
+import { XYPad } from "@/components/pure/xypad";
 
-export default function Home() {
+export default function Pure() {
   const volumeId = useId();
   const [volume, setVolume] = useState(72);
   const [pan, setPan] = useState(50);
@@ -24,8 +24,8 @@ export default function Home() {
 
   return (
     <div className="mx-auto flex min-h-screen max-w-3xl flex-col items-center justify-center gap-10 p-8">
-      <p className="text-muted-foreground text-xs">
-        registry · shadcn-installed · base-nova
+      <p className="text-neutral-500 text-xs">
+        pure · @audio-ui/react · default headless visual
       </p>
       <div className="flex flex-wrap items-start justify-center gap-6">
         <ChannelStrip aria-label="Volume channel strip">
@@ -55,7 +55,6 @@ export default function Home() {
                 max={100}
                 min={0}
                 onValueChange={setPan}
-                size="lg"
                 value={pan}
               />
               <ChannelStripValue>{`${pan}%`}</ChannelStripValue>
@@ -80,11 +79,7 @@ export default function Home() {
         </ChannelStrip>
       </div>
 
-      <ChannelStrip
-        aria-label="Transport"
-        className="w-full"
-        orientation="horizontal"
-      >
+      <ChannelStrip aria-label="Transport" orientation="horizontal">
         <ChannelStripHeader>Master</ChannelStripHeader>
         <ChannelStripContent>
           <ChannelStripSection>

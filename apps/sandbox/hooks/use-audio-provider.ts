@@ -1,59 +1,32 @@
 "use client";
 
 import { useCallback, useEffect, useRef } from "react";
-import { useAudio } from "@/hooks/use-audio";
 import {
   type AudioStore,
   calculateNextIndex,
   canUseDOM,
   useAudioStore,
 } from "@/lib/audio-store";
-import type { Track } from "@/lib/html-audio";
+import { $htmlAudio } from "@/lib/html-audio";
+import {
+  isLive,
+  type PlaybackEngine,
+  type PlaybackEngineErrorDetail,
+  type Track,
+} from "@/lib/playback-engine";
 
 const MAX_ERROR_RETRIES = 3;
 const ERROR_RETRY_DELAY = 1000;
 const THROTTLE_INTERVAL = 100;
 const MIN_UPDATE_THRESHOLD = 0.5;
 
-const getErrorInfo = (
-  errorCode: number
-): { message: string; recoverable: boolean } => {
-  switch (errorCode) {
-    case MediaError.MEDIA_ERR_ABORTED:
-      return { message: "Playback cancelled", recoverable: true };
-    case MediaError.MEDIA_ERR_NETWORK:
-      return { message: "Network error", recoverable: true };
-    case MediaError.MEDIA_ERR_DECODE:
-      return { message: "Audio file decoding error", recoverable: false };
-    case MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED:
-      return {
-        message: "File/network loading error (Code 4)",
-        recoverable: true,
-      };
-    default:
-      return { message: `Unknown error (${errorCode})`, recoverable: true };
-  }
-};
-
-const parseAudioError = (
-  e: Event,
-  audio: HTMLAudioElement
-): { message: string; recoverable: boolean; errorCode: number } => {
-  if (audio.error) {
-    const errorCode = audio.error.code;
-    const errorInfo = getErrorInfo(errorCode);
-    return { ...errorInfo, errorCode };
-  }
-
-  if (e instanceof ErrorEvent) {
-    return { errorCode: 0, message: e.message, recoverable: true };
-  }
-
-  return { errorCode: 0, message: "Unknown audio error", recoverable: false };
-};
-
-export function useAudioProvider({ tracks = [] }: { tracks?: Track[] } = {}) {
-  const { htmlAudio } = useAudio();
+export function useAudioProvider({
+  tracks = [],
+  engine = $htmlAudio,
+}: {
+  tracks?: Track[];
+  engine?: PlaybackEngine;
+} = {}) {
   const preloadAudioRef = useRef<HTMLAudioElement | null>(null);
   const errorRetryCountRef = useRef<number>(0);
   const lastSeekTimeRef = useRef<number>(0);
@@ -90,59 +63,48 @@ export function useAudioProvider({ tracks = [] }: { tracks?: Track[] } = {}) {
     }
   }, [tracks]);
 
-  const retryPlayback = useCallback(
-    async (audio: HTMLAudioElement) => {
-      if (errorRetryCountRef.current >= MAX_ERROR_RETRIES) {
-        return false;
-      }
+  const retryPlayback = useCallback(async () => {
+    if (errorRetryCountRef.current >= MAX_ERROR_RETRIES) {
+      return false;
+    }
 
-      errorRetryCountRef.current += 1;
+    errorRetryCountRef.current += 1;
 
-      const delay = 2 ** (errorRetryCountRef.current - 1) * ERROR_RETRY_DELAY;
-      await new Promise((resolve) => setTimeout(resolve, delay));
+    const delay = 2 ** (errorRetryCountRef.current - 1) * ERROR_RETRY_DELAY;
+    await new Promise((resolve) => setTimeout(resolve, delay));
 
-      if (typeof navigator !== "undefined" && !navigator.onLine) {
-        console.warn("Offline, delaying retry attempt further.");
-        return false;
-      }
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      console.warn("Offline, delaying retry attempt further.");
+      return false;
+    }
 
-      try {
-        console.log(
-          `Retry attempt ${errorRetryCountRef.current}: Loading audio...`
-        );
-        const currentTime = audio.currentTime;
-        const wasPlaying = !audio.paused;
-        const state = useAudioStore.getState();
-        if (state.currentTrack) {
-          await htmlAudio.load({
-            startTime: currentTime,
-            url: state.currentTrack.url,
-          });
-          if (wasPlaying) {
-            await htmlAudio.play();
-          }
+    try {
+      const currentTime = engine.getCurrentTime();
+      const wasPlaying = !engine.isPaused();
+      const state = useAudioStore.getState();
+      if (state.currentTrack) {
+        await engine.load({
+          startTime: currentTime,
+          url: state.currentTrack.url,
+        });
+        if (wasPlaying) {
+          await engine.play();
         }
-        return true;
-      } catch {
-        // Silent error: retry attempt failed
-        return false;
       }
-    },
-    [htmlAudio]
-  );
+      return true;
+    } catch {
+      // Silent error: retry attempt failed
+      return false;
+    }
+  }, [engine]);
 
   const lastUpdateTimeRef = useRef<number>(0);
   const forceTimeUpdate = useCallback(() => {
-    const audio = htmlAudio.getAudioElement();
-    if (!audio) {
-      return;
-    }
-
-    const currentTime = audio.currentTime;
-    const duration = audio.duration || 0;
+    const currentTime = engine.getCurrentTime();
+    const duration = engine.getDuration() || 0;
     useAudioStore.getState().syncTime(currentTime, duration);
     lastUpdateTimeRef.current = Date.now();
-  }, [htmlAudio]);
+  }, [engine]);
 
   const throttledTimeUpdate = useCallback(() => {
     const now = Date.now();
@@ -151,19 +113,14 @@ export function useAudioProvider({ tracks = [] }: { tracks?: Track[] } = {}) {
     }
     lastUpdateTimeRef.current = now;
 
-    const audio = htmlAudio.getAudioElement();
-    if (!audio) {
-      return;
-    }
-
-    const currentTime = audio.currentTime;
+    const currentTime = engine.getCurrentTime();
     const state = useAudioStore.getState();
 
     if (Math.abs(state.currentTime - currentTime) > MIN_UPDATE_THRESHOLD) {
-      const duration = audio.duration || 0;
+      const duration = engine.getDuration() || 0;
       useAudioStore.getState().syncTime(currentTime, duration);
     }
-  }, [htmlAudio]);
+  }, [engine]);
 
   const preloadTrack = useCallback((song: Track) => {
     if (!preloadAudioRef.current || preloadAudioRef.current.src === song.url) {
@@ -212,16 +169,11 @@ export function useAudioProvider({ tracks = [] }: { tracks?: Track[] } = {}) {
       return;
     }
 
-    htmlAudio.init();
+    engine.init();
 
     preloadAudioRef.current = new Audio();
     preloadAudioRef.current.muted = true;
     preloadAudioRef.current.preload = "none";
-
-    const audio = htmlAudio.getAudioElement();
-    if (!audio) {
-      return;
-    }
 
     const abortController = new AbortController();
     const { signal } = abortController;
@@ -229,7 +181,7 @@ export function useAudioProvider({ tracks = [] }: { tracks?: Track[] } = {}) {
     const handlePlay = () => {
       errorRetryCountRef.current = 0;
       const state = useAudioStore.getState();
-      htmlAudio.setPlaybackRate(state.playbackRate);
+      engine.setPlaybackRate(state.playbackRate);
 
       setState({
         isBuffering: false,
@@ -252,24 +204,23 @@ export function useAudioProvider({ tracks = [] }: { tracks?: Track[] } = {}) {
       setState({ isBuffering: false, isPlaying: false });
     };
 
-    const handleErrorRetry = async (
-      audioElement: HTMLAudioElement,
-      recoverable: boolean
-    ): Promise<boolean> => {
+    const handleErrorRetry = async (recoverable: boolean): Promise<boolean> => {
       if (!recoverable || errorRetryCountRef.current >= MAX_ERROR_RETRIES) {
         return false;
       }
 
-      return await retryPlayback(audioElement);
+      return await retryPlayback();
     };
 
     const handleError = async (e: Event) => {
-      const { message: initialMessage, recoverable } = parseAudioError(
-        e,
-        audio
-      );
+      const detail =
+        e instanceof CustomEvent
+          ? (e.detail as PlaybackEngineErrorDetail | undefined)
+          : undefined;
+      const initialMessage = detail?.message ?? "Unknown audio error";
+      const recoverable = detail?.recoverable ?? false;
 
-      if (await handleErrorRetry(audio, recoverable)) {
+      if (await handleErrorRetry(recoverable)) {
         return;
       }
 
@@ -292,9 +243,8 @@ export function useAudioProvider({ tracks = [] }: { tracks?: Track[] } = {}) {
 
       const state = useAudioStore.getState();
 
-      const audioElement = htmlAudio.getAudioElement();
-      const audioDuration = audioElement?.duration || 0;
-      const isLiveStream = htmlAudio.isLive(audioDuration);
+      const audioDuration = engine.getDuration() || 0;
+      const isLiveStream = isLive(audioDuration);
 
       if (state.currentTrack && isLiveStream) {
         setState({
@@ -305,12 +255,12 @@ export function useAudioProvider({ tracks = [] }: { tracks?: Track[] } = {}) {
       }
       if (state.repeatMode === "one" && state.currentTrack) {
         try {
-          await htmlAudio.load({
+          await engine.load({
             isLiveStream,
             startTime: 0,
             url: state.currentTrack.url,
           });
-          await htmlAudio.play();
+          await engine.play();
           setState({ currentTime: 0, progress: 0 });
           return;
         } catch {
@@ -339,7 +289,7 @@ export function useAudioProvider({ tracks = [] }: { tracks?: Track[] } = {}) {
     };
 
     const handleCanPlay = () => {
-      setState(getLoadingSuccessState(audio.duration || 0));
+      setState(getLoadingSuccessState(engine.getDuration() || 0));
     };
 
     const handleWaiting = () => {
@@ -354,12 +304,12 @@ export function useAudioProvider({ tracks = [] }: { tracks?: Track[] } = {}) {
     };
 
     const handleDurationChange = () => {
-      setState({ duration: audio.duration || 0 });
+      setState({ duration: engine.getDuration() || 0 });
     };
 
     const handleVolumeChange = () => {
       const prev = useAudioStore.getState();
-      const nextMuted = audio.muted;
+      const nextMuted = engine.isMuted();
       if (prev.isMuted !== nextMuted) {
         setState({ isMuted: nextMuted });
       }
@@ -374,14 +324,13 @@ export function useAudioProvider({ tracks = [] }: { tracks?: Track[] } = {}) {
     const restoreState = async () => {
       const state = useAudioStore.getState();
 
-      if (!state.currentTrack || state.currentTime <= 0) {
+      if (!state.currentTrack) {
         return;
       }
 
       const track = state.currentTrack;
-      const audioElement = htmlAudio.getAudioElement();
-      const audioDuration = audioElement?.duration || state.duration || 0;
-      const isLiveStream = htmlAudio.isLive(audioDuration);
+      const audioDuration = engine.getDuration() || state.duration || 0;
+      const isLiveStream = isLive(audioDuration);
       const startTime = isLiveStream ? 0 : state.currentTime;
       const volume = state.volume;
       const muted = state.isMuted;
@@ -390,16 +339,24 @@ export function useAudioProvider({ tracks = [] }: { tracks?: Track[] } = {}) {
       try {
         setState({ isLoading: true });
 
-        await htmlAudio.load({
+        await engine.load({
           isLiveStream,
           startTime,
           url: track.url,
         });
-        htmlAudio.setVolume({ volume });
-        htmlAudio.setMuted(muted);
-        htmlAudio.setPlaybackRate(playbackRate);
+        engine.setVolume({ volume });
+        engine.setMuted(muted);
+        engine.setPlaybackRate(playbackRate);
 
-        setState({ isLoading: false, isPlaying: false });
+        setState({ isLoading: false });
+
+        if (useAudioStore.getState().isPlaying) {
+          try {
+            await engine.play();
+          } catch {
+            // Silent error: play sync after load failed
+          }
+        }
       } catch {
         setState({
           errorMessage: "Error restoring audio state",
@@ -411,21 +368,21 @@ export function useAudioProvider({ tracks = [] }: { tracks?: Track[] } = {}) {
       }
     };
 
-    audio.addEventListener("play", handlePlay, { signal });
-    audio.addEventListener("pause", handlePause, { signal });
-    audio.addEventListener("playing", handlePlaying, { signal });
-    audio.addEventListener("waiting", handleWaiting, { signal });
-    audio.addEventListener("loadstart", handleLoadStart, { signal });
-    audio.addEventListener("canplay", handleCanPlay, { signal });
-    audio.addEventListener("canplaythrough", handleCanPlay, { signal });
-    audio.addEventListener("timeupdate", throttledTimeUpdate, { signal });
-    audio.addEventListener("durationchange", handleDurationChange, { signal });
-    audio.addEventListener("loadedmetadata", handleDurationChange, { signal });
-    audio.addEventListener("volumechange", handleVolumeChange, { signal });
-    audio.addEventListener("ended", handleEnded, { signal });
-    audio.addEventListener("error", handleError, { signal });
-
-    htmlAudio.addEventListener("bufferUpdate", handleBufferUpdate);
+    engine.addEventListener("play", handlePlay, { signal });
+    engine.addEventListener("pause", handlePause, { signal });
+    engine.addEventListener("playing", handlePlaying, { signal });
+    engine.addEventListener("waiting", handleWaiting, { signal });
+    engine.addEventListener("loadstart", handleLoadStart, { signal });
+    engine.addEventListener("canplay", handleCanPlay, { signal });
+    engine.addEventListener("canplaythrough", handleCanPlay, { signal });
+    engine.addEventListener("timeupdate", throttledTimeUpdate, { signal });
+    engine.addEventListener("durationchange", handleDurationChange, {
+      signal,
+    });
+    engine.addEventListener("volumechange", handleVolumeChange, { signal });
+    engine.addEventListener("ended", handleEnded, { signal });
+    engine.addEventListener("error", handleError, { signal });
+    engine.addEventListener("bufferupdate", handleBufferUpdate, { signal });
 
     restoreState();
 
@@ -442,19 +399,14 @@ export function useAudioProvider({ tracks = [] }: { tracks?: Track[] } = {}) {
     const unsubscribePlaybackRate = useAudioStore.subscribe(
       (state) => state.playbackRate,
       (playbackRate) => {
-        htmlAudio.setPlaybackRate(playbackRate);
+        engine.setPlaybackRate(playbackRate);
       }
     );
 
     const unsubscribeIsPlaying = useAudioStore.subscribe(
       (state) => state.isPlaying,
       async (isPlaying) => {
-        const audioElement = htmlAudio.getAudioElement();
-        if (!audioElement) {
-          return;
-        }
-
-        const isPaused = audioElement.paused;
+        const isPaused = engine.isPaused();
         const shouldPlay = isPlaying && isPaused;
         const isPlayingState = !isPaused;
         const shouldPause = !isPlaying && isPlayingState;
@@ -466,9 +418,9 @@ export function useAudioProvider({ tracks = [] }: { tracks?: Track[] } = {}) {
 
         try {
           if (shouldPlay) {
-            await htmlAudio.play();
+            await engine.play();
           } else {
-            htmlAudio.pause();
+            engine.pause();
           }
         } catch {
           // Silent error: error syncing play/pause state
@@ -483,13 +435,8 @@ export function useAudioProvider({ tracks = [] }: { tracks?: Track[] } = {}) {
           return;
         }
 
-        const audioElement = htmlAudio.getAudioElement();
-        if (!audioElement) {
-          return;
-        }
-
         try {
-          await htmlAudio.load({
+          await engine.load({
             isLiveStream: false,
             startTime: 0,
             url: track.url,
@@ -497,7 +444,7 @@ export function useAudioProvider({ tracks = [] }: { tracks?: Track[] } = {}) {
 
           const currentState = useAudioStore.getState();
           if (currentState.isPlaying) {
-            await htmlAudio.play();
+            await engine.play();
           }
         } catch {
           useAudioStore.getState().setError("Error loading track");
@@ -508,16 +455,12 @@ export function useAudioProvider({ tracks = [] }: { tracks?: Track[] } = {}) {
     const unsubscribeSeek = useAudioStore.subscribe(
       (state) => state.currentTime,
       (currentTime) => {
-        const audioElement = htmlAudio.getAudioElement();
-        if (!audioElement) {
-          return;
-        }
-
-        const timeDiff = Math.abs(audioElement.currentTime - currentTime);
+        const engineTime = engine.getCurrentTime();
+        const timeDiff = Math.abs(engineTime - currentTime);
         const isDifferentSeek = currentTime !== lastSeekTimeRef.current;
         if (timeDiff > 0.1 && isDifferentSeek) {
           lastSeekTimeRef.current = currentTime;
-          htmlAudio.setCurrentTime(currentTime);
+          engine.setCurrentTime(currentTime);
         }
       }
     );
@@ -525,21 +468,19 @@ export function useAudioProvider({ tracks = [] }: { tracks?: Track[] } = {}) {
     const unsubscribeVolume = useAudioStore.subscribe(
       (state) => state.volume,
       (volume) => {
-        htmlAudio.setVolume({ volume });
+        engine.setVolume({ volume });
       }
     );
 
     const unsubscribeMuted = useAudioStore.subscribe(
       (state) => state.isMuted,
       (isMuted) => {
-        htmlAudio.setMuted(isMuted);
+        engine.setMuted(isMuted);
       }
     );
 
     return () => {
       abortController.abort();
-
-      htmlAudio.removeEventListener("bufferUpdate", handleBufferUpdate);
 
       if (preloadAudioRef.current) {
         preloadAudioRef.current.src = "";
@@ -559,7 +500,7 @@ export function useAudioProvider({ tracks = [] }: { tracks?: Track[] } = {}) {
     setState,
     retryPlayback,
     preloadNextTrack,
-    htmlAudio,
+    engine,
     forceTimeUpdate,
   ]);
 

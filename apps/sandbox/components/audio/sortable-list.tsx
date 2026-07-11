@@ -23,11 +23,11 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { DotsSixVerticalIcon } from "@phosphor-icons/react";
 import React from "react";
 import { createPortal } from "react-dom";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { DotsSixVerticalIcon } from "@phosphor-icons/react";
 
 const DRAG_OPACITY = 0.4;
 
@@ -144,7 +144,7 @@ const dropAnimationConfig: DropAnimation = {
 
 const Overlay = ({ children }: React.PropsWithChildren) => (
   <DragOverlay
-    className="rounded-3xl shadow-lg z-100 overflow-hidden [&>li]:border-b-0"
+    className="rounded-lg shadow-lg z-100 overflow-hidden [&>li]:border-b-0"
     dropAnimation={dropAnimationConfig}
     style={{
       cursor: "grabbing",

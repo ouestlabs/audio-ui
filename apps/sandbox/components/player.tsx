@@ -1,40 +1,21 @@
 "use client";
 
 import type { BaseUIEvent } from "@base-ui/react";
-import {
-  BroadcastIcon,
-  FastForwardIcon,
-  GaugeIcon,
-  MusicNotesIcon,
-  PauseIcon,
-  PlayIcon,
-  QueueIcon,
-  RepeatIcon,
-  RepeatOnceIcon,
-  RewindIcon,
-  ShuffleIcon,
-  SkipBackIcon,
-  SkipForwardIcon,
-  SlidersHorizontalIcon,
-  SpeakerHighIcon,
-  SpeakerLowIcon,
-  SpeakerNoneIcon,
-  SpeakerSlashIcon,
-  XIcon,
-} from "@phosphor-icons/react";
 import { cva, type VariantProps } from "class-variance-authority";
 import React from "react";
-import { Fader } from "@/components/audio/fader";
+import { cn } from "@/lib/utils";
 import {
-  SortableDragHandle,
-  SortableItem,
-  SortableList,
-} from "@/components/audio/sortable-list";
-import { Transport } from "@/components/audio/transport";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button, type buttonVariants } from "@/components/ui/button";
-import { Command, CommandInput, CommandList } from "@/components/ui/command";
+import {
+  Command,
+  CommandInput,
+  CommandList,
+} from "@/components/ui/command";
 import {
   Dialog,
   DialogContent,
@@ -76,11 +57,29 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useAudio } from "@/hooks/use-audio";
+import { Fader } from "@/components/audio/fader";
+import { Transport } from "@/components/audio/transport";
+import {
+  SortableDragHandle,
+  SortableItem,
+  SortableList,
+} from "@/components/audio/sortable-list";
 import { useAudioProvider } from "@/hooks/use-audio-provider";
-import { type AudioStore, useAudioStore } from "@/lib/audio-store";
-import { formatDuration, type Track } from "@/lib/html-audio";
-import { cn } from "@/lib/utils";
+import {
+  useAudioStore,
+  usePlaybackRate,
+  usePlaybackState,
+  useQueuePreferences,
+  useQueueState,
+  useSeekState,
+  useVolumeState,
+} from "@/lib/audio-store";
+import { formatDuration } from "@/lib/html-audio";
+import {
+  isLive,
+  type Track,
+} from "@/lib/playback-engine";
+import { PlayIcon, PauseIcon, SpeakerSlashIcon, BroadcastIcon, SpeakerNoneIcon, SpeakerLowIcon, SpeakerHighIcon, RewindIcon, FastForwardIcon, SkipForwardIcon, SkipBackIcon, MusicNotesIcon, XIcon, QueueIcon, RepeatOnceIcon, RepeatIcon, ShuffleIcon, SlidersHorizontalIcon, GaugeIcon } from "@phosphor-icons/react";
 
 const PLAYBACK_SPEEDS = [
   { label: "0.5x", value: 0.5 },
@@ -91,25 +90,13 @@ const PLAYBACK_SPEEDS = [
   { label: "2x", value: 2 },
 ] as const;
 
-type AudioStoreApi = typeof useAudioStore;
-
-const AudioStoreContext = React.createContext<AudioStoreApi | null>(null);
-
-/**
- * Reads the audio store through context so player controls depend on the
- * context interface, not a hard import. Falls back to the global store when
- * used outside an `AudioProvider`, keeping standalone controls working.
- */
-function useAudioStoreSelector<T>(selector: (state: AudioStore) => T): T {
-  const store = React.use(AudioStoreContext) ?? useAudioStore;
-  return store(selector);
-}
+/** Marks whether an ambient `<AudioProvider>` wraps the current subtree. */
+const AudioProviderContext = React.createContext(false);
 
 /** Derives whether the current media is a live stream from its duration. */
 function useIsLiveStream(): boolean {
-  const duration = useAudioStoreSelector((state) => state.duration);
-  const { htmlAudio } = useAudio();
-  return htmlAudio.isLive(duration);
+  const duration = useAudioStore((state) => state.duration);
+  return isLive(duration);
 }
 
 let spacebarRefCount = 0;
@@ -142,11 +129,17 @@ function useSpacebarTogglePlay() {
 
 // Shared glyphs for icons that appear across multiple player controls.
 function PlayGlyph() {
-  return <PlayIcon />;
+  return (
+    <PlayIcon
+    />
+  );
 }
 
 function PauseGlyph() {
-  return <PauseIcon />;
+  return (
+    <PauseIcon
+    />
+  );
 }
 
 function PlayPauseGlyphSwap({ isPlaying }: { isPlaying: boolean }) {
@@ -179,7 +172,10 @@ function PlayPauseGlyphSwap({ isPlaying }: { isPlaying: boolean }) {
 }
 
 function MutedGlyph() {
-  return <SpeakerSlashIcon />;
+  return (
+    <SpeakerSlashIcon
+    />
+  );
 }
 
 function AudioProvider({
@@ -190,9 +186,7 @@ function AudioProvider({
   children: React.ReactNode;
 }) {
   useAudioProvider({ tracks });
-  return (
-    <AudioStoreContext value={useAudioStore}>{children}</AudioStoreContext>
-  );
+  return <AudioProviderContext value={true}>{children}</AudioProviderContext>;
 }
 const demoTracks: Track[] = [
   {
@@ -210,14 +204,6 @@ const demoTracks: Track[] = [
     id: "2",
     title: "Type",
     url: "https://cdn.pixabay.com/audio/2024/02/28/audio_60f7a54400.mp3",
-  },
-  {
-    artist: "Tuxnet",
-    artwork: "/icon",
-    genre: "Hip Hop",
-    id: "3",
-    title: "Radio Tuxnet",
-    url: "/radio/live.aac?host=ice2.tuxnet.me",
   },
   {
     artist: "Audio UI",
@@ -238,13 +224,13 @@ const audioPlayerVariants = cva(
     },
     variants: {
       size: {
-        default: "rounded-4xl py-4",
-        sm: "rounded-4xl py-3",
+        default: "rounded-xl py-4",
+        sm: "rounded-xl py-3",
       },
       variant: {
-        default: "bg-card/70 shadow-md ring-1 ring-foreground/10",
+        default: "bg-card/70 ring-1 ring-foreground/10",
         ghost: "bg-transparent hover:bg-muted/30",
-        widget: "bg-card/70 shadow-md ring-1 ring-foreground/10",
+        widget: "bg-card/70 ring-1 ring-foreground/10",
       },
     },
   }
@@ -276,6 +262,15 @@ function AudioPlayer({
 
   if (tracks) {
     return <AudioProvider tracks={tracks}>{content}</AudioProvider>;
+  }
+
+  if (
+    process.env.NODE_ENV !== "production" &&
+    !React.use(AudioProviderContext)
+  ) {
+    console.warn(
+      "AudioPlayer: no `tracks` prop and no ambient <AudioProvider> — playback controls will not function. Pass `tracks` or wrap this player in <AudioProvider tracks={...}>."
+    );
   }
 
   return content;
@@ -350,7 +345,7 @@ const AudioPlayerControlGroup = ({
 }: AudioPlayerControlGroupProps) => (
   <div
     className={cn(
-      "flex w-full items-center gap-3 in-data-[size=sm]:gap-2",
+      "no-scrollbar scroll-fade-x -m-1 flex w-full snap-x snap-mandatory items-center gap-3 overflow-x-auto p-1 in-data-[size=sm]:gap-2 *:snap-start",
       className
     )}
     data-slot="audio-control-group"
@@ -367,8 +362,7 @@ const AudioPlayerTimeDisplay = ({
   remaining,
   ...props
 }: AudioPlayerTimeDisplayProps) => {
-  const currentTime = useAudioStoreSelector((state) => state.currentTime);
-  const duration = useAudioStoreSelector((state) => state.duration);
+  const { currentTime, duration } = useSeekState();
   const isLiveStream = useIsLiveStream();
 
   const formattedCurrentTime = formatDuration(currentTime);
@@ -381,7 +375,7 @@ const AudioPlayerTimeDisplay = ({
     timeValue = "LIVE";
   }
 
-  const showLiveIcon = isLiveStream && remaining;
+  const showLiveIcon = Boolean(isLiveStream && remaining);
 
   return (
     <time
@@ -411,10 +405,7 @@ const AudioPlayerSeekBar = ({
   React.ComponentProps<typeof Transport>,
   "value" | "onSeek" | "bufferedValue"
 >) => {
-  const currentTime = useAudioStoreSelector((state) => state.currentTime);
-  const duration = useAudioStoreSelector((state) => state.duration);
-  const seek = useAudioStoreSelector((state) => state.seek);
-  const bufferedTime = useAudioStoreSelector((state) => state.bufferedTime);
+  const { currentTime, duration, seek, bufferedTime } = useSeekState();
   const isLiveStream = useIsLiveStream();
 
   let progress = 0;
@@ -463,10 +454,7 @@ const AudioPlayerVolume = ({
   size?: VariantProps<typeof buttonVariants>["size"];
   variant?: VariantProps<typeof buttonVariants>["variant"];
 }) => {
-  const volume = useAudioStoreSelector((state) => state.volume);
-  const isMuted = useAudioStoreSelector((state) => state.isMuted);
-  const setVolume = useAudioStoreSelector((state) => state.setVolume);
-  const toggleMute = useAudioStoreSelector((state) => state.toggleMute);
+  const { volume, isMuted, setVolume, toggleMute } = useVolumeState();
 
   const volumePercent = Math.round(volume * 100);
   const effectiveVolumePercent = isMuted ? 0 : volumePercent;
@@ -476,12 +464,21 @@ const AudioPlayerVolume = ({
       return <MutedGlyph />;
     }
     if (volumePercent < 33) {
-      return <SpeakerNoneIcon />;
+      return (
+        <SpeakerNoneIcon
+        />
+      );
     }
     if (volumePercent < 66) {
-      return <SpeakerLowIcon />;
+      return (
+        <SpeakerLowIcon
+        />
+      );
     }
-    return <SpeakerHighIcon />;
+    return (
+      <SpeakerHighIcon
+      />
+    );
   };
 
   const handleVolumeChange = React.useCallback(
@@ -493,25 +490,29 @@ const AudioPlayerVolume = ({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger
-        render={
-          <AudioPlayerButton
-            className={cn("hidden md:flex", className)}
-            data-slot="audio-volume-button"
-            size={size}
-            tooltipLabel={
-              isMuted
-                ? "Muted"
-                : `Volume ${Math.round(effectiveVolumePercent)}%`
-            }
-            variant={variant}
-          />
-        }
-      >
-        <span className={cn(isMuted && "opacity-40")}>
-          {renderVolumeIcon()}
-        </span>
-      </DropdownMenuTrigger>
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <DropdownMenuTrigger
+              render={
+                <AudioPlayerButton
+                  className={cn("hidden md:flex", className)}
+                  data-slot="audio-volume-button"
+                  size={size}
+                  variant={variant}
+                />
+              }
+            >
+              <span className={cn(isMuted && "opacity-40")}>
+                {renderVolumeIcon()}
+              </span>
+            </DropdownMenuTrigger>
+          }
+        />
+        <TooltipContent sideOffset={4}>
+          {isMuted ? "Muted" : `Volume ${Math.round(effectiveVolumePercent)}%`}
+        </TooltipContent>
+      </Tooltip>
       <DropdownMenuContent
         align="center"
         className={cn(
@@ -566,10 +567,7 @@ const AudioPlayerVolume = ({
                 tooltipLabel="Maximum volume"
                 variant="ghost"
               >
-                <SpeakerHighIcon
-                  aria-hidden="true"
-                  className="text-primary opacity-60"
-                />
+                <SpeakerHighIcon aria-hidden="true" className="text-primary opacity-60" />
               </AudioPlayerButton>
             </div>
           </DropdownMenuItem>
@@ -587,12 +585,8 @@ const AudioPlayerPlay = React.memo(
     variant = "ghost",
     ...props
   }: React.ComponentProps<typeof AudioPlayerButton>) => {
-    const isPlaying = useAudioStoreSelector((state) => state.isPlaying);
-    const isLoading = useAudioStoreSelector((state) => state.isLoading);
-    const isBuffering = useAudioStoreSelector((state) => state.isBuffering);
-    const currentTrack = useAudioStoreSelector((state) => state.currentTrack);
-
-    const togglePlay = useAudioStoreSelector((state) => state.togglePlay);
+    const { isPlaying, isLoading, isBuffering, currentTrack, togglePlay } =
+      usePlaybackState();
 
     useSpacebarTogglePlay();
 
@@ -636,9 +630,7 @@ const AudioPlayerRewind = React.memo(
     variant = "ghost",
     ...props
   }: React.ComponentProps<typeof AudioPlayerButton>) => {
-    const currentTime = useAudioStoreSelector((state) => state.currentTime);
-    const seek = useAudioStoreSelector((state) => state.seek);
-    const currentTrack = useAudioStoreSelector((state) => state.currentTrack);
+    const { currentTime, currentTrack, seek } = useSeekState();
     const isLiveStream = useIsLiveStream();
 
     const seekBackward = React.useCallback(
@@ -671,7 +663,8 @@ const AudioPlayerRewind = React.memo(
         variant={variant}
         {...props}
       >
-        <RewindIcon />
+        <RewindIcon
+        />
       </AudioPlayerButton>
     );
   }
@@ -685,10 +678,7 @@ const AudioPlayerFastForward = React.memo(
     variant = "ghost",
     ...props
   }: React.ComponentProps<typeof AudioPlayerButton>) => {
-    const currentTime = useAudioStoreSelector((state) => state.currentTime);
-    const seek = useAudioStoreSelector((state) => state.seek);
-    const duration = useAudioStoreSelector((state) => state.duration);
-    const currentTrack = useAudioStoreSelector((state) => state.currentTrack);
+    const { currentTime, currentTrack, duration, seek } = useSeekState();
     const isLiveStream = useIsLiveStream();
 
     const seekForward = React.useCallback(
@@ -723,7 +713,8 @@ const AudioPlayerFastForward = React.memo(
         variant={variant}
         {...props}
       >
-        <FastForwardIcon />
+        <FastForwardIcon
+        />
       </AudioPlayerButton>
     );
   }
@@ -737,14 +728,9 @@ const AudioPlayerSkipForward = React.memo(
     variant = "ghost",
     ...props
   }: React.ComponentProps<typeof AudioPlayerButton>) => {
-    const repeatMode = useAudioStoreSelector((state) => state.repeatMode);
-    const queueLength = useAudioStoreSelector((state) => state.queue.length);
-    const currentQueueIndex = useAudioStoreSelector(
-      (state) => state.currentQueueIndex
-    );
-    const currentTrack = useAudioStoreSelector((state) => state.currentTrack);
-
-    const next = useAudioStoreSelector((state) => state.next);
+    const { queue, currentTrack, currentQueueIndex, repeatMode, next } =
+      useQueueState();
+    const queueLength = queue.length;
 
     const disableNext =
       !currentTrack ||
@@ -769,7 +755,8 @@ const AudioPlayerSkipForward = React.memo(
         variant={variant}
         {...props}
       >
-        <SkipForwardIcon />
+        <SkipForwardIcon
+        />
       </AudioPlayerButton>
     );
   }
@@ -783,13 +770,8 @@ const AudioPlayerSkipBack = React.memo(
     variant = "ghost",
     ...props
   }: React.ComponentProps<typeof AudioPlayerButton>) => {
-    const repeatMode = useAudioStoreSelector((state) => state.repeatMode);
-    const currentQueueIndex = useAudioStoreSelector(
-      (state) => state.currentQueueIndex
-    );
-    const currentTrack = useAudioStoreSelector((state) => state.currentTrack);
-
-    const previous = useAudioStoreSelector((state) => state.previous);
+    const { currentTrack, currentQueueIndex, repeatMode, previous } =
+      useQueueState();
 
     const disablePrevious =
       !currentTrack || (currentQueueIndex === 0 && repeatMode !== "all");
@@ -813,7 +795,8 @@ const AudioPlayerSkipBack = React.memo(
         variant={variant}
         {...props}
       >
-        <SkipBackIcon />
+        <SkipBackIcon
+        />
       </AudioPlayerButton>
     );
   }
@@ -918,15 +901,9 @@ function AudioTrack({
   actions,
   className,
 }: AudioTrackProps) {
-  const queue = useAudioStoreSelector((state) => state.queue);
-  const currentTrack = useAudioStoreSelector((state) => state.currentTrack);
-  const isPlaying = useAudioStoreSelector((state) => state.isPlaying);
-  const duration = useAudioStoreSelector((state) => state.duration);
-  const togglePlay = useAudioStoreSelector((state) => state.togglePlay);
-  const setQueueAndPlay = useAudioStoreSelector(
-    (state) => state.setQueueAndPlay
-  );
-  const { htmlAudio } = useAudio();
+  const { queue, currentTrack, togglePlay, setQueueAndPlay } = useQueueState();
+  const { isPlaying } = usePlaybackState();
+  const { duration } = useSeekState();
 
   const track =
     externalTrack ??
@@ -940,11 +917,12 @@ function AudioTrack({
   const actualIsPlaying = isPlaying && isCurrent;
   const trackDuration = isCurrent && duration > 0 ? duration : track.duration;
 
-  const isLiveTrack =
+  const isLiveTrack = Boolean(
     track.live === true ||
-    (trackDuration !== undefined &&
-      trackDuration !== null &&
-      htmlAudio.isLive(trackDuration));
+      (trackDuration !== undefined &&
+        trackDuration !== null &&
+        isLive(trackDuration))
+  );
 
   const contextValue: AudioTrackContextValue = {
     index,
@@ -983,13 +961,16 @@ function AudioTrack({
         size="sm"
         variant={isCurrent ? "outline" : "default"}
       >
-        {media && <ItemMedia className="gap-2">{media}</ItemMedia>}
+        {media !== null && media !== undefined && (
+          <ItemMedia className="gap-2">{media}</ItemMedia>
+        )}
         <ItemContent className="min-w-0 flex-1 gap-0 overflow-hidden">
           <div className="flex items-center gap-1.5">
             <ItemTitle className="line-clamp-1">{track.title}</ItemTitle>
             {isLiveTrack && (
               <Badge variant="destructive">
-                <BroadcastIcon />
+                <BroadcastIcon
+                />
                 Live
               </Badge>
             )}
@@ -1001,7 +982,9 @@ function AudioTrack({
             <ItemDescription>{formatDuration(trackDuration)}</ItemDescription>
           </ItemContent>
         )}
-        {actions && <ItemActions>{actions}</ItemActions>}
+        {actions !== null && actions !== undefined && (
+          <ItemActions>{actions}</ItemActions>
+        )}
       </Item>
     </AudioTrackContext>
   );
@@ -1028,7 +1011,8 @@ function AudioTrackCover({ className }: { className?: string }) {
     <Avatar className={className}>
       <AvatarImage alt={track.title} src={coverImage} />
       <AvatarFallback>
-        <MusicNotesIcon />
+        <MusicNotesIcon
+        />
       </AvatarFallback>
     </Avatar>
   );
@@ -1079,7 +1063,8 @@ function AudioTrackRemoveAction({ className }: { className?: string }) {
       title="Remove"
       variant="ghost"
     >
-      <XIcon />
+      <XIcon
+      />
     </Button>
   );
 }
@@ -1160,16 +1145,14 @@ function AudioTrackList({
   filterFn,
   className,
 }: AudioTrackListProps) {
-  const queue = useAudioStoreSelector((state) => state.queue);
-  const currentTrack = useAudioStoreSelector((state) => state.currentTrack);
-  const setQueueAndPlay = useAudioStoreSelector(
-    (state) => state.setQueueAndPlay
-  );
-  const togglePlay = useAudioStoreSelector((state) => state.togglePlay);
-  const setQueue = useAudioStoreSelector((state) => state.setQueue);
-  const currentQueueIndex = useAudioStoreSelector(
-    (state) => state.currentQueueIndex
-  );
+  const {
+    queue,
+    currentTrack,
+    setQueueAndPlay,
+    togglePlay,
+    setQueue,
+    currentQueueIndex,
+  } = useQueueState();
 
   let tracks = externalTracks ?? queue;
 
@@ -1237,7 +1220,8 @@ function AudioTrackList({
       <Empty className={cn(className)}>
         <EmptyHeader>
           <EmptyMedia variant="icon">
-            <QueueIcon />
+            <QueueIcon
+            />
           </EmptyMedia>
           <EmptyTitle>{emptyLabel}</EmptyTitle>
           <EmptyDescription>{emptyDescription}</EmptyDescription>
@@ -1346,10 +1330,7 @@ const AudioQueueRepeatMode = ({
   className,
   ...props
 }: React.ComponentProps<typeof AudioPlayerButton>) => {
-  const repeatMode = useAudioStoreSelector((state) => state.repeatMode);
-  const changeRepeatMode = useAudioStoreSelector(
-    (state) => state.changeRepeatMode
-  );
+  const { repeatMode, changeRepeatMode } = useQueuePreferences();
 
   let repeatTooltip = "Disable repeat";
   if (repeatMode === "one") {
@@ -1372,7 +1353,13 @@ const AudioQueueRepeatMode = ({
       variant={isActive ? "secondary" : "ghost"}
       {...props}
     >
-      {repeatMode === "one" ? <RepeatOnceIcon /> : <RepeatIcon />}
+      {repeatMode === "one" ? (
+        <RepeatOnceIcon
+        />
+      ) : (
+        <RepeatIcon
+        />
+      )}
     </AudioPlayerButton>
   );
 };
@@ -1381,9 +1368,7 @@ const AudioQueueShuffle = ({
   className,
   ...props
 }: React.ComponentProps<typeof AudioPlayerButton>) => {
-  const shuffle = useAudioStoreSelector((state) => state.shuffle);
-  const unshuffle = useAudioStoreSelector((state) => state.unshuffle);
-  const shuffleEnabled = useAudioStoreSelector((state) => state.shuffleEnabled);
+  const { shuffle, unshuffle, shuffleEnabled } = useQueuePreferences();
 
   const handleShuffle = React.useCallback(() => {
     if (shuffleEnabled) {
@@ -1407,7 +1392,8 @@ const AudioQueueShuffle = ({
       variant={shuffleEnabled ? "secondary" : "ghost"}
       {...props}
     >
-      <ShuffleIcon />
+      <ShuffleIcon
+      />
     </AudioPlayerButton>
   );
 };
@@ -1419,27 +1405,32 @@ const AudioQueuePreferences = ({
   tooltipLabel = "Queue preferences",
   ...props
 }: React.ComponentProps<typeof AudioPlayerButton>) => {
-  const repeatMode = useAudioStoreSelector((state) => state.repeatMode);
-  const setRepeatMode = useAudioStoreSelector((state) => state.setRepeatMode);
-  const insertMode = useAudioStoreSelector((state) => state.insertMode);
-  const setInsertMode = useAudioStoreSelector((state) => state.setInsertMode);
+  const { repeatMode, setRepeatMode, insertMode, setInsertMode } =
+    useQueuePreferences();
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger
-        render={
-          <AudioPlayerButton
-            className={cn(className)}
-            data-slot="audio-queue-preferences-trigger"
-            size={size}
-            tooltipLabel={tooltipLabel}
-            variant={variant}
-            {...props}
-          />
-        }
-      >
-        <SlidersHorizontalIcon />
-      </DropdownMenuTrigger>
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <DropdownMenuTrigger
+              render={
+                <AudioPlayerButton
+                  className={cn(className)}
+                  data-slot="audio-queue-preferences-trigger"
+                  size={size}
+                  variant={variant}
+                  {...props}
+                />
+              }
+            >
+              <SlidersHorizontalIcon
+              />
+            </DropdownMenuTrigger>
+          }
+        />
+        <TooltipContent sideOffset={4}>{tooltipLabel}</TooltipContent>
+      </Tooltip>
       <DropdownMenuContent
         align="end"
         className={cn(className)}
@@ -1484,15 +1475,8 @@ const AudioQueue = React.memo(
     emptyLabel = "No tracks found",
     emptyDescription = "Try searching for a different track",
   }: AudioQueueProps) => {
-    const togglePlay = useAudioStoreSelector((state) => state.togglePlay);
-    const setQueueAndPlay = useAudioStoreSelector(
-      (state) => state.setQueueAndPlay
-    );
-    const clearQueue = useAudioStoreSelector((state) => state.clearQueue);
-    const removeFromQueue = useAudioStoreSelector(
-      (state) => state.removeFromQueue
-    );
-    const store = React.use(AudioStoreContext) ?? useAudioStore;
+    const { togglePlay, setQueueAndPlay, clearQueue, removeFromQueue } =
+      useQueueState();
 
     const [dialogOpen, setDialogOpen] = React.useState(false);
     const [searchQuery, setSearchQuery] = React.useState("");
@@ -1502,7 +1486,7 @@ const AudioQueue = React.memo(
 
     const handleTrackSelect = React.useCallback(
       (index: number) => {
-        const currentState = store.getState();
+        const currentState = useAudioStore.getState();
         const currentQueue = currentState.queue;
         const currentTrackId = currentState.currentTrack?.id;
         let filtered = currentQueue;
@@ -1535,7 +1519,7 @@ const AudioQueue = React.memo(
         onTrackSelect?.(trackIndex);
         setDialogOpen(false);
       },
-      [normalizedSearchQuery, togglePlay, setQueueAndPlay, onTrackSelect, store]
+      [normalizedSearchQuery, togglePlay, setQueueAndPlay, onTrackSelect]
     );
 
     const handleTrackRemove = React.useCallback(
@@ -1559,18 +1543,25 @@ const AudioQueue = React.memo(
         }}
         open={dialogOpen}
       >
-        <DialogTrigger
-          render={
-            <AudioPlayerButton
-              data-slot="audio-queue-trigger"
-              size="icon"
-              tooltipLabel="Queue"
-              variant="outline"
-            />
-          }
-        >
-          <QueueIcon />
-        </DialogTrigger>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <DialogTrigger
+                render={
+                  <AudioPlayerButton
+                    data-slot="audio-queue-trigger"
+                    size="icon"
+                    variant="outline"
+                  />
+                }
+              >
+                <QueueIcon
+                />
+              </DialogTrigger>
+            }
+          />
+          <TooltipContent sideOffset={4}>Queue</TooltipContent>
+        </Tooltip>
         <DialogContent
           aria-label="Select a track"
           data-slot="audio-queue"
@@ -1634,10 +1625,7 @@ function AudioPlaybackSpeed({
   speeds = PLAYBACK_SPEEDS,
   ...props
 }: AudioPlaybackSpeedProps) {
-  const playbackRate = useAudioStoreSelector((state) => state.playbackRate);
-  const setPlaybackRate = useAudioStoreSelector(
-    (state) => state.setPlaybackRate
-  );
+  const { playbackRate, setPlaybackRate } = usePlaybackRate();
   const isLiveStream = useIsLiveStream();
 
   const currentSpeed =
@@ -1663,28 +1651,37 @@ function AudioPlaybackSpeed({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger
-        disabled={isLiveStream}
-        render={
-          <AudioPlayerButton
-            className={cn(className)}
-            data-slot="audio-playback-speed-button"
-            disabled={isLiveStream}
-            size={size}
-            tooltipLabel={tooltipLabel}
-            variant={variant}
-            {...props}
-          />
-        }
-      >
-        {!isIconSize && <GaugeIcon />}
-        <span
-          className="starting:blur-[2px] starting:opacity-0 starting:translate-y-1 inline-block font-mono text-xs transition-[opacity,filter,translate] duration-150 ease-in-out will-change-[opacity,filter,translate] motion-reduce:transition-none"
-          key={displayLabel}
-        >
-          {displayLabel}
-        </span>
-      </DropdownMenuTrigger>
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <DropdownMenuTrigger
+              disabled={isLiveStream}
+              render={
+                <AudioPlayerButton
+                  className={cn(className)}
+                  data-slot="audio-playback-speed-button"
+                  disabled={isLiveStream}
+                  size={size}
+                  variant={variant}
+                  {...props}
+                />
+              }
+            >
+              {!isIconSize && (
+                <GaugeIcon
+                />
+              )}
+              <span
+                className="starting:blur-[2px] starting:opacity-0 starting:translate-y-1 inline-block font-mono text-xs transition-[opacity,filter,translate] duration-150 ease-in-out will-change-[opacity,filter,translate] motion-reduce:transition-none"
+                key={displayLabel}
+              >
+                {displayLabel}
+              </span>
+            </DropdownMenuTrigger>
+          }
+        />
+        <TooltipContent sideOffset={4}>{tooltipLabel}</TooltipContent>
+      </Tooltip>
       <DropdownMenuContent
         align="end"
         className={cn(className)}
