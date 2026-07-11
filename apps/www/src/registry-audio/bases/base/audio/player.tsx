@@ -65,7 +65,6 @@ import {
   SortableItem,
   SortableList,
 } from "@/registry-audio/bases/base/audio/sortable-list";
-import { useAudio } from "@/registry-audio/bases/base/hooks/use-audio";
 import { useAudioProvider } from "@/registry-audio/bases/base/hooks/use-audio-provider";
 import {
   type AudioStore,
@@ -75,6 +74,7 @@ import {
   formatDuration,
   type Track,
 } from "@/registry-audio/bases/base/lib/html-audio";
+import { isLive } from "@/registry-audio/bases/base/lib/playback-engine";
 
 const PLAYBACK_SPEEDS = [
   { label: "0.5x", value: 0.5 },
@@ -102,8 +102,7 @@ function useAudioStoreSelector<T>(selector: (state: AudioStore) => T): T {
 /** Derives whether the current media is a live stream from its duration. */
 function useIsLiveStream(): boolean {
   const duration = useAudioStoreSelector((state) => state.duration);
-  const { htmlAudio } = useAudio();
-  return htmlAudio.isLive(duration);
+  return isLive(duration);
 }
 
 let spacebarRefCount = 0;
@@ -1004,7 +1003,6 @@ function AudioTrack({
   const setQueueAndPlay = useAudioStoreSelector(
     (state) => state.setQueueAndPlay
   );
-  const { htmlAudio } = useAudio();
 
   const track =
     externalTrack ??
@@ -1022,7 +1020,7 @@ function AudioTrack({
     track.live === true ||
     (trackDuration !== undefined &&
       trackDuration !== null &&
-      htmlAudio.isLive(trackDuration));
+      isLive(trackDuration));
 
   const contextValue: AudioTrackContextValue = {
     index,

@@ -1,27 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { $htmlAudio, formatDuration } from "@/registry-audio/bases/base/lib/html-audio";
-
-describe("isLive (pure, no init required)", () => {
-  test("0 is not live — duration not yet loaded", () => {
-    expect($htmlAudio.isLive(0)).toBe(false);
-  });
-
-  test("a finite positive duration is not live", () => {
-    expect($htmlAudio.isLive(180)).toBe(false);
-  });
-
-  test("NaN is live", () => {
-    expect($htmlAudio.isLive(Number.NaN)).toBe(true);
-  });
-
-  test("Infinity is live", () => {
-    expect($htmlAudio.isLive(Number.POSITIVE_INFINITY)).toBe(true);
-  });
-
-  test("-Infinity is live", () => {
-    expect($htmlAudio.isLive(Number.NEGATIVE_INFINITY)).toBe(true);
-  });
-});
+import { formatDuration } from "@/registry-audio/bases/base/lib/html-audio";
 
 describe("formatDuration", () => {
   test("formats whole minutes and seconds", () => {

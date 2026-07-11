@@ -24,6 +24,10 @@ _Avoid_: component (when the headless building block is meant), widget
 A styled registry wrapper over a primitive, copied into user projects via the registry. Adds appearance only — never behavior.
 _Avoid_: styled component, wrapper
 
+**PlaybackEngine**:
+The seam between the audio-store (domain: queue, playback intent) and a concrete audio backend. Commands flow in (load, play, pause, seek, setVolume…), events flow out (play, pause, timeupdate, ended, error…) through one interface — no caller reaches past it into a raw `HTMLAudioElement`. `HtmlAudioEngine` is the production adapter; a `FakeEngine` is the in-memory test adapter.
+_Avoid_: audio engine (ambiguous with Web Audio), device, backend
+
 **Category**:
 A curated, editorial grouping of catalog items (label, description, SEO, its own page). Declared in `categories.ts`; counts are derived, never hand-written.
 _Avoid_: tag (for a curated grouping), section

@@ -1,9 +1,10 @@
 import { create } from "zustand";
 import { persist, subscribeWithSelector } from "zustand/middleware";
+import type { Track } from "@/registry-audio/bases/base/lib/html-audio";
 import {
-  $htmlAudio,
-  type Track,
-} from "@/registry-audio/bases/base/lib/html-audio";
+  clampPlaybackRate,
+  isLive,
+} from "@/registry-audio/bases/base/lib/playback-engine";
 
 type RepeatMode = "none" | "one" | "all";
 type InsertMode = "first" | "last" | "after";
@@ -187,7 +188,7 @@ const loadAndPlayTrack = (params: LoadAndPlayTrackParams): void => {
   // Check if it's a live stream using track.live property or duration
   const isLiveStream =
     track.live === true ||
-    (track.duration !== undefined && $htmlAudio.isLive(track.duration));
+    (track.duration !== undefined && isLive(track.duration));
 
   set({
     currentQueueIndex: queueIndex,
@@ -465,11 +466,10 @@ const useAudioStore = create<AudioStore>()(
       setPlaybackRate(rate: number) {
         const state = get();
         // Don't allow playback rate changes for live streams
-        if (state.duration && $htmlAudio.isLive(state.duration)) {
+        if (state.duration && isLive(state.duration)) {
           return;
         }
-        const clampedRate = Math.max(0.25, Math.min(2, rate));
-        set({ playbackRate: clampedRate });
+        set({ playbackRate: clampPlaybackRate(rate) });
       },
 
       // Queue Actions

@@ -1,5 +1,8 @@
 import { describe, expect, test } from "bun:test";
-import { calculateNextIndex, calculatePreviousIndex } from "@/registry-audio/bases/base/lib/audio-store";
+import {
+  calculateNextIndex,
+  calculatePreviousIndex,
+} from "@/registry-audio/bases/base/lib/audio-store";
 
 const queue = [
   { id: "1", url: "a" },

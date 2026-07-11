@@ -1,3 +1,11 @@
+import type {
+  LoadEngineParams,
+  PlaybackEngine,
+  PlaybackEngineErrorDetail,
+  PlaybackEngineEventType,
+  SetEngineVolumeParams,
+} from "@/registry-audio/bases/base/lib/playback-engine";
+
 export type Track = {
   id?: string | number;
   url: string;
@@ -12,24 +20,60 @@ export type Track = {
   [key: string]: unknown;
 };
 
-type LoadParams = {
-  url: string;
-  startTime?: number;
-  isLiveStream?: boolean;
-};
-
-type SetVolumeParams = {
-  volume: number;
-  fadeTime?: number;
-};
-
 type FadeVolumeParams = {
   audio: HTMLAudioElement;
   targetVolume: number;
   duration: number;
 };
 
-class HtmlAudio {
+/** Maps a native `MediaError` code to a message and whether a retry is worth attempting. */
+function getErrorInfo(errorCode: number): {
+  message: string;
+  recoverable: boolean;
+} {
+  switch (errorCode) {
+    case MediaError.MEDIA_ERR_ABORTED:
+      return { message: "Playback cancelled", recoverable: true };
+    case MediaError.MEDIA_ERR_NETWORK:
+      return { message: "Network error", recoverable: true };
+    case MediaError.MEDIA_ERR_DECODE:
+      return { message: "Audio file decoding error", recoverable: false };
+    case MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED:
+      return {
+        message: "File/network loading error (Code 4)",
+        recoverable: true,
+      };
+    default:
+      return { message: `Unknown error (${errorCode})`, recoverable: true };
+  }
+}
+
+function describeAudioError(
+  audio: HTMLAudioElement
+): PlaybackEngineErrorDetail {
+  if (audio.error) {
+    const errorCode = audio.error.code;
+    return { ...getErrorInfo(errorCode), errorCode };
+  }
+  return { errorCode: 0, message: "Unknown audio error", recoverable: false };
+}
+
+/** Native `<audio>` events forwarded verbatim onto the engine's own EventTarget. */
+const FORWARDED_AUDIO_EVENTS: readonly PlaybackEngineEventType[] = [
+  "play",
+  "pause",
+  "playing",
+  "waiting",
+  "loadstart",
+  "canplay",
+  "canplaythrough",
+  "timeupdate",
+  "durationchange",
+  "volumechange",
+  "ended",
+];
+
+class HtmlAudioEngine implements PlaybackEngine {
   private audio: HTMLAudioElement | null = null;
   private isInitialized = false;
   private playPromise: Promise<void> | null = null;
@@ -66,6 +110,19 @@ class HtmlAudio {
       return;
     }
 
+    for (const type of FORWARDED_AUDIO_EVENTS) {
+      audio.addEventListener(type, () => {
+        this.eventTarget.dispatchEvent(new CustomEvent(type));
+      });
+    }
+
+    // Safari can report duration from `loadedmetadata` before `durationchange`
+    // fires — re-dispatch it under the same engine-level event so callers
+    // only ever need to know about one duration-changed event.
+    audio.addEventListener("loadedmetadata", () => {
+      this.eventTarget.dispatchEvent(new CustomEvent("durationchange"));
+    });
+
     audio.addEventListener("error", () => {
       // Silent error handling - errors are handled via retry logic
 
@@ -77,22 +134,17 @@ class HtmlAudio {
         }, 1000);
       }
 
-      this.eventTarget.dispatchEvent(new CustomEvent("audioError"));
+      this.eventTarget.dispatchEvent(
+        new CustomEvent("error", { detail: describeAudioError(audio) })
+      );
     });
 
     audio.addEventListener("playing", () => {
       this.retryAttempts = 0;
-      this.eventTarget.dispatchEvent(new CustomEvent("bufferingEnd"));
-      this.eventTarget.dispatchEvent(new CustomEvent("playbackStarted"));
     });
 
     audio.addEventListener("canplaythrough", () => {
       this.retryAttempts = 0;
-      this.eventTarget.dispatchEvent(new CustomEvent("bufferingEnd"));
-    });
-
-    audio.addEventListener("waiting", () => {
-      this.eventTarget.dispatchEvent(new CustomEvent("bufferingStart"));
     });
 
     audio.addEventListener("progress", () => {
@@ -117,7 +169,7 @@ class HtmlAudio {
 
       if (bufferedEnd > 0) {
         this.eventTarget.dispatchEvent(
-          new CustomEvent("bufferUpdate", {
+          new CustomEvent("bufferupdate", {
             detail: { bufferedTime: bufferedEnd },
           })
         );
@@ -138,13 +190,6 @@ class HtmlAudio {
     }
 
     this.playPromise = null;
-  }
-
-  getAudioElement(): HTMLAudioElement | null {
-    if (!this.isClient()) {
-      return null;
-    }
-    return this.audio;
   }
 
   private isClient(): boolean {
@@ -171,7 +216,7 @@ class HtmlAudio {
     return fn();
   }
 
-  async load(params: LoadParams): Promise<void> {
+  async load(params: LoadEngineParams): Promise<void> {
     const { url, startTime = 0, isLiveStream = false } = params;
     const result = this.ifClient(() =>
       this._load({ isLiveStream, startTime, url })
@@ -346,7 +391,7 @@ class HtmlAudio {
     });
   }
 
-  setVolume(params: SetVolumeParams): void {
+  setVolume(params: SetEngineVolumeParams): void {
     const { volume, fadeTime = 0 } = params;
     this.ifClient(() => {
       const audio = this.ensureAudio();
@@ -435,6 +480,15 @@ class HtmlAudio {
     });
   }
 
+  isMuted(): boolean {
+    return (
+      this.ifClient(() => {
+        const audio = this.ensureAudio();
+        return audio.muted;
+      }) ?? false
+    );
+  }
+
   getDuration(): number {
     return (
       this.ifClient(() => {
@@ -474,7 +528,7 @@ class HtmlAudio {
   }
 
   addEventListener(
-    type: string,
+    type: PlaybackEngineEventType,
     listener: EventListenerOrEventListenerObject | null,
     options?: boolean | AddEventListenerOptions
   ): void {
@@ -482,7 +536,7 @@ class HtmlAudio {
   }
 
   removeEventListener(
-    type: string,
+    type: PlaybackEngineEventType,
     callback: EventListenerOrEventListenerObject | null,
     options?: EventListenerOptions | boolean
   ): void {
@@ -514,21 +568,11 @@ class HtmlAudio {
     return this.audio.buffered;
   }
 
+  /** `rate` must already be clamped by the caller — see ADR-0002. */
   setPlaybackRate(rate: number): void {
     this.ifClient(() => {
       const audio = this.ensureAudio();
-      const duration = audio.duration;
-
-      // Check if current audio is a live stream using duration
-      const isLiveStream = this.isLive(duration);
-
-      // Don't allow playback rate changes for live streams
-      if (isLiveStream) {
-        return;
-      }
-
-      const clampedRate = Math.max(0.25, Math.min(2, rate));
-      audio.playbackRate = clampedRate;
+      audio.playbackRate = rate;
     });
   }
 
@@ -540,29 +584,9 @@ class HtmlAudio {
       }) ?? 1
     );
   }
-
-  /**
-   * Check if a duration value indicates a live stream
-   * Should only be called after metadata is loaded (`readyState >= HAVE_METADATA`)
-   *
-   * @param duration - The duration value to check
-   * @returns true if the duration indicates a live stream (NaN, Infinity, or -Infinity)
-   */
-  isLive(duration: number): boolean {
-    // duration === 0 is not a live stream - it just means duration is not yet loaded
-    if (duration === 0) {
-      return false;
-    }
-
-    return (
-      Number.isNaN(duration) ||
-      duration === Number.POSITIVE_INFINITY ||
-      duration === Number.NEGATIVE_INFINITY
-    );
-  }
 }
 
-export const $htmlAudio = new HtmlAudio();
+export const $htmlAudio: PlaybackEngine = new HtmlAudioEngine();
 
 const MINUTE_IN_SECONDS = 60;
 
