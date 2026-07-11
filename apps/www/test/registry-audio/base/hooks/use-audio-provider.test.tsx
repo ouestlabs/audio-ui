@@ -51,12 +51,29 @@ describe("useAudioProvider — mount wiring", () => {
     renderHook(() => useAudioProvider({ engine, tracks: [track1] }));
     expect(engine.calls.some((c) => c.method === "init")).toBe(true);
   });
+
+  test("loads the first track on a fresh session (currentTime is 0, nothing persisted)", async () => {
+    const engine = new FakeEngine();
+    renderHook(() => useAudioProvider({ engine, tracks: [track1] }));
+
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(engine.calls.some((c) => c.method === "load")).toBe(true);
+    expect(engine.src).toBe(track1.url);
+  });
 });
 
 describe("useAudioProvider — store → engine", () => {
   test("store.play() calls engine.play()", async () => {
     const engine = new FakeEngine();
     renderHook(() => useAudioProvider({ engine, tracks: [track1] }));
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
 
     await act(async () => {
       useAudioStore.getState().play();
@@ -70,6 +87,10 @@ describe("useAudioProvider — store → engine", () => {
   test("store.pause() calls engine.pause()", async () => {
     const engine = new FakeEngine();
     renderHook(() => useAudioProvider({ engine, tracks: [track1] }));
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
 
     await act(async () => {
       useAudioStore.getState().play();

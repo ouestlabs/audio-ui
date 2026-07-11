@@ -327,7 +327,7 @@ export function useAudioProvider({
     const restoreState = async () => {
       const state = useAudioStore.getState();
 
-      if (!state.currentTrack || state.currentTime <= 0) {
+      if (!state.currentTrack) {
         return;
       }
 
@@ -351,7 +351,15 @@ export function useAudioProvider({
         engine.setMuted(muted);
         engine.setPlaybackRate(playbackRate);
 
-        setState({ isLoading: false, isPlaying: false });
+        setState({ isLoading: false });
+
+        if (useAudioStore.getState().isPlaying) {
+          try {
+            await engine.play();
+          } catch {
+            // Silent error: play sync after load failed
+          }
+        }
       } catch {
         setState({
           errorMessage: "Error restoring audio state",
