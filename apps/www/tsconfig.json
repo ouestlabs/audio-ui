@@ -19,11 +19,11 @@
         "name": "next"
       }
     ],
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "fumadocs-mdx:collections/*": [".source/*"]
-    }
+      "fumadocs-mdx:collections/*": ["./.source/*"]
+    },
+    "types": ["bun", "mdx", "node", "react", "react-dom", "three"]
   },
   "include": [
     "next-env.d.ts",
