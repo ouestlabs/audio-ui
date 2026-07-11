@@ -67,8 +67,13 @@ import {
 } from "@/registry-audio/bases/base/audio/sortable-list";
 import { useAudioProvider } from "@/registry-audio/bases/base/hooks/use-audio-provider";
 import {
-  type AudioStore,
   useAudioStore,
+  usePlaybackRate,
+  usePlaybackState,
+  useQueuePreferences,
+  useQueueState,
+  useSeekState,
+  useVolumeState,
 } from "@/registry-audio/bases/base/lib/audio-store";
 import { formatDuration } from "@/registry-audio/bases/base/lib/html-audio";
 import {
@@ -85,23 +90,12 @@ const PLAYBACK_SPEEDS = [
   { label: "2x", value: 2 },
 ] as const;
 
-type AudioStoreApi = typeof useAudioStore;
-
-const AudioStoreContext = React.createContext<AudioStoreApi | null>(null);
-
-/**
- * Reads the audio store through context so player controls depend on the
- * context interface, not a hard import. Falls back to the global store when
- * used outside an `AudioProvider`, keeping standalone controls working.
- */
-function useAudioStoreSelector<T>(selector: (state: AudioStore) => T): T {
-  const store = React.use(AudioStoreContext) ?? useAudioStore;
-  return store(selector);
-}
+/** Marks whether an ambient `<AudioProvider>` wraps the current subtree. */
+const AudioProviderContext = React.createContext(false);
 
 /** Derives whether the current media is a live stream from its duration. */
 function useIsLiveStream(): boolean {
-  const duration = useAudioStoreSelector((state) => state.duration);
+  const duration = useAudioStore((state) => state.duration);
   return isLive(duration);
 }
 
@@ -207,9 +201,7 @@ function AudioProvider({
   children: React.ReactNode;
 }) {
   useAudioProvider({ tracks });
-  return (
-    <AudioStoreContext value={useAudioStore}>{children}</AudioStoreContext>
-  );
+  return <AudioProviderContext value={true}>{children}</AudioProviderContext>;
 }
 const demoTracks: Track[] = [
   {
@@ -227,14 +219,6 @@ const demoTracks: Track[] = [
     id: "2",
     title: "Type",
     url: "https://cdn.pixabay.com/audio/2024/02/28/audio_60f7a54400.mp3",
-  },
-  {
-    artist: "Tuxnet",
-    artwork: "/icon",
-    genre: "Hip Hop",
-    id: "3",
-    title: "Radio Tuxnet",
-    url: "/radio/live.aac?host=ice2.tuxnet.me",
   },
   {
     artist: "Audio UI",
@@ -297,7 +281,7 @@ function AudioPlayer({
 
   if (
     process.env.NODE_ENV !== "production" &&
-    React.use(AudioStoreContext) === null
+    !React.use(AudioProviderContext)
   ) {
     console.warn(
       "AudioPlayer: no `tracks` prop and no ambient <AudioProvider> — playback controls will not function. Pass `tracks` or wrap this player in <AudioProvider tracks={...}>."
@@ -393,8 +377,7 @@ const AudioPlayerTimeDisplay = ({
   remaining,
   ...props
 }: AudioPlayerTimeDisplayProps) => {
-  const currentTime = useAudioStoreSelector((state) => state.currentTime);
-  const duration = useAudioStoreSelector((state) => state.duration);
+  const { currentTime, duration } = useSeekState();
   const isLiveStream = useIsLiveStream();
 
   const formattedCurrentTime = formatDuration(currentTime);
@@ -444,10 +427,7 @@ const AudioPlayerSeekBar = ({
   React.ComponentProps<typeof Transport>,
   "value" | "onSeek" | "bufferedValue"
 >) => {
-  const currentTime = useAudioStoreSelector((state) => state.currentTime);
-  const duration = useAudioStoreSelector((state) => state.duration);
-  const seek = useAudioStoreSelector((state) => state.seek);
-  const bufferedTime = useAudioStoreSelector((state) => state.bufferedTime);
+  const { currentTime, duration, seek, bufferedTime } = useSeekState();
   const isLiveStream = useIsLiveStream();
 
   let progress = 0;
@@ -496,10 +476,7 @@ const AudioPlayerVolume = ({
   size?: VariantProps<typeof buttonVariants>["size"];
   variant?: VariantProps<typeof buttonVariants>["variant"];
 }) => {
-  const volume = useAudioStoreSelector((state) => state.volume);
-  const isMuted = useAudioStoreSelector((state) => state.isMuted);
-  const setVolume = useAudioStoreSelector((state) => state.setVolume);
-  const toggleMute = useAudioStoreSelector((state) => state.toggleMute);
+  const { volume, isMuted, setVolume, toggleMute } = useVolumeState();
 
   const volumePercent = Math.round(volume * 100);
   const effectiveVolumePercent = isMuted ? 0 : volumePercent;
@@ -649,12 +626,8 @@ const AudioPlayerPlay = React.memo(
     variant = "ghost",
     ...props
   }: React.ComponentProps<typeof AudioPlayerButton>) => {
-    const isPlaying = useAudioStoreSelector((state) => state.isPlaying);
-    const isLoading = useAudioStoreSelector((state) => state.isLoading);
-    const isBuffering = useAudioStoreSelector((state) => state.isBuffering);
-    const currentTrack = useAudioStoreSelector((state) => state.currentTrack);
-
-    const togglePlay = useAudioStoreSelector((state) => state.togglePlay);
+    const { isPlaying, isLoading, isBuffering, currentTrack, togglePlay } =
+      usePlaybackState();
 
     useSpacebarTogglePlay();
 
@@ -698,9 +671,7 @@ const AudioPlayerRewind = React.memo(
     variant = "ghost",
     ...props
   }: React.ComponentProps<typeof AudioPlayerButton>) => {
-    const currentTime = useAudioStoreSelector((state) => state.currentTime);
-    const seek = useAudioStoreSelector((state) => state.seek);
-    const currentTrack = useAudioStoreSelector((state) => state.currentTrack);
+    const { currentTime, currentTrack, seek } = useSeekState();
     const isLiveStream = useIsLiveStream();
 
     const seekBackward = React.useCallback(
@@ -753,10 +724,7 @@ const AudioPlayerFastForward = React.memo(
     variant = "ghost",
     ...props
   }: React.ComponentProps<typeof AudioPlayerButton>) => {
-    const currentTime = useAudioStoreSelector((state) => state.currentTime);
-    const seek = useAudioStoreSelector((state) => state.seek);
-    const duration = useAudioStoreSelector((state) => state.duration);
-    const currentTrack = useAudioStoreSelector((state) => state.currentTrack);
+    const { currentTime, currentTrack, duration, seek } = useSeekState();
     const isLiveStream = useIsLiveStream();
 
     const seekForward = React.useCallback(
@@ -811,14 +779,9 @@ const AudioPlayerSkipForward = React.memo(
     variant = "ghost",
     ...props
   }: React.ComponentProps<typeof AudioPlayerButton>) => {
-    const repeatMode = useAudioStoreSelector((state) => state.repeatMode);
-    const queueLength = useAudioStoreSelector((state) => state.queue.length);
-    const currentQueueIndex = useAudioStoreSelector(
-      (state) => state.currentQueueIndex
-    );
-    const currentTrack = useAudioStoreSelector((state) => state.currentTrack);
-
-    const next = useAudioStoreSelector((state) => state.next);
+    const { queue, currentTrack, currentQueueIndex, repeatMode, next } =
+      useQueueState();
+    const queueLength = queue.length;
 
     const disableNext =
       !currentTrack ||
@@ -863,13 +826,8 @@ const AudioPlayerSkipBack = React.memo(
     variant = "ghost",
     ...props
   }: React.ComponentProps<typeof AudioPlayerButton>) => {
-    const repeatMode = useAudioStoreSelector((state) => state.repeatMode);
-    const currentQueueIndex = useAudioStoreSelector(
-      (state) => state.currentQueueIndex
-    );
-    const currentTrack = useAudioStoreSelector((state) => state.currentTrack);
-
-    const previous = useAudioStoreSelector((state) => state.previous);
+    const { currentTrack, currentQueueIndex, repeatMode, previous } =
+      useQueueState();
 
     const disablePrevious =
       !currentTrack || (currentQueueIndex === 0 && repeatMode !== "all");
@@ -1004,14 +962,9 @@ function AudioTrack({
   actions,
   className,
 }: AudioTrackProps) {
-  const queue = useAudioStoreSelector((state) => state.queue);
-  const currentTrack = useAudioStoreSelector((state) => state.currentTrack);
-  const isPlaying = useAudioStoreSelector((state) => state.isPlaying);
-  const duration = useAudioStoreSelector((state) => state.duration);
-  const togglePlay = useAudioStoreSelector((state) => state.togglePlay);
-  const setQueueAndPlay = useAudioStoreSelector(
-    (state) => state.setQueueAndPlay
-  );
+  const { queue, currentTrack, togglePlay, setQueueAndPlay } = useQueueState();
+  const { isPlaying } = usePlaybackState();
+  const { duration } = useSeekState();
 
   const track =
     externalTrack ??
@@ -1275,16 +1228,14 @@ function AudioTrackList({
   filterFn,
   className,
 }: AudioTrackListProps) {
-  const queue = useAudioStoreSelector((state) => state.queue);
-  const currentTrack = useAudioStoreSelector((state) => state.currentTrack);
-  const setQueueAndPlay = useAudioStoreSelector(
-    (state) => state.setQueueAndPlay
-  );
-  const togglePlay = useAudioStoreSelector((state) => state.togglePlay);
-  const setQueue = useAudioStoreSelector((state) => state.setQueue);
-  const currentQueueIndex = useAudioStoreSelector(
-    (state) => state.currentQueueIndex
-  );
+  const {
+    queue,
+    currentTrack,
+    setQueueAndPlay,
+    togglePlay,
+    setQueue,
+    currentQueueIndex,
+  } = useQueueState();
 
   let tracks = externalTracks ?? queue;
 
@@ -1467,10 +1418,7 @@ const AudioQueueRepeatMode = ({
   className,
   ...props
 }: React.ComponentProps<typeof AudioPlayerButton>) => {
-  const repeatMode = useAudioStoreSelector((state) => state.repeatMode);
-  const changeRepeatMode = useAudioStoreSelector(
-    (state) => state.changeRepeatMode
-  );
+  const { repeatMode, changeRepeatMode } = useQueuePreferences();
 
   let repeatTooltip = "Disable repeat";
   if (repeatMode === "one") {
@@ -1518,9 +1466,7 @@ const AudioQueueShuffle = ({
   className,
   ...props
 }: React.ComponentProps<typeof AudioPlayerButton>) => {
-  const shuffle = useAudioStoreSelector((state) => state.shuffle);
-  const unshuffle = useAudioStoreSelector((state) => state.unshuffle);
-  const shuffleEnabled = useAudioStoreSelector((state) => state.shuffleEnabled);
+  const { shuffle, unshuffle, shuffleEnabled } = useQueuePreferences();
 
   const handleShuffle = React.useCallback(() => {
     if (shuffleEnabled) {
@@ -1562,10 +1508,8 @@ const AudioQueuePreferences = ({
   tooltipLabel = "Queue preferences",
   ...props
 }: React.ComponentProps<typeof AudioPlayerButton>) => {
-  const repeatMode = useAudioStoreSelector((state) => state.repeatMode);
-  const setRepeatMode = useAudioStoreSelector((state) => state.setRepeatMode);
-  const insertMode = useAudioStoreSelector((state) => state.insertMode);
-  const setInsertMode = useAudioStoreSelector((state) => state.setInsertMode);
+  const { repeatMode, setRepeatMode, insertMode, setInsertMode } =
+    useQueuePreferences();
 
   return (
     <DropdownMenu>
@@ -1633,15 +1577,8 @@ const AudioQueue = React.memo(
     emptyLabel = "No tracks found",
     emptyDescription = "Try searching for a different track",
   }: AudioQueueProps) => {
-    const togglePlay = useAudioStoreSelector((state) => state.togglePlay);
-    const setQueueAndPlay = useAudioStoreSelector(
-      (state) => state.setQueueAndPlay
-    );
-    const clearQueue = useAudioStoreSelector((state) => state.clearQueue);
-    const removeFromQueue = useAudioStoreSelector(
-      (state) => state.removeFromQueue
-    );
-    const store = React.use(AudioStoreContext) ?? useAudioStore;
+    const { togglePlay, setQueueAndPlay, clearQueue, removeFromQueue } =
+      useQueueState();
 
     const [dialogOpen, setDialogOpen] = React.useState(false);
     const [searchQuery, setSearchQuery] = React.useState("");
@@ -1651,7 +1588,7 @@ const AudioQueue = React.memo(
 
     const handleTrackSelect = React.useCallback(
       (index: number) => {
-        const currentState = store.getState();
+        const currentState = useAudioStore.getState();
         const currentQueue = currentState.queue;
         const currentTrackId = currentState.currentTrack?.id;
         let filtered = currentQueue;
@@ -1684,7 +1621,7 @@ const AudioQueue = React.memo(
         onTrackSelect?.(trackIndex);
         setDialogOpen(false);
       },
-      [normalizedSearchQuery, togglePlay, setQueueAndPlay, onTrackSelect, store]
+      [normalizedSearchQuery, togglePlay, setQueueAndPlay, onTrackSelect]
     );
 
     const handleTrackRemove = React.useCallback(
@@ -1789,10 +1726,7 @@ function AudioPlaybackSpeed({
   speeds = PLAYBACK_SPEEDS,
   ...props
 }: AudioPlaybackSpeedProps) {
-  const playbackRate = useAudioStoreSelector((state) => state.playbackRate);
-  const setPlaybackRate = useAudioStoreSelector(
-    (state) => state.setPlaybackRate
-  );
+  const { playbackRate, setPlaybackRate } = usePlaybackRate();
   const isLiveStream = useIsLiveStream();
 
   const currentSpeed =

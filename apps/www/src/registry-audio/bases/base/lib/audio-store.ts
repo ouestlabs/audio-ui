@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist, subscribeWithSelector } from "zustand/middleware";
+import { useShallow } from "zustand/react/shallow";
 import {
   clampPlaybackRate,
   isLive,
@@ -584,6 +585,93 @@ const useAudioStore = create<AudioStore>()(
   )
 );
 
+/** Now playing: identity + loading lifecycle. */
+function usePlaybackState() {
+  return useAudioStore(
+    useShallow((state) => ({
+      currentTrack: state.currentTrack,
+      isBuffering: state.isBuffering,
+      isLoading: state.isLoading,
+      isPlaying: state.isPlaying,
+      pause: state.pause,
+      play: state.play,
+      togglePlay: state.togglePlay,
+    }))
+  );
+}
+
+/** Scrub position: current time, duration, buffered range, seeking. */
+function useSeekState() {
+  return useAudioStore(
+    useShallow((state) => ({
+      bufferedTime: state.bufferedTime,
+      currentTime: state.currentTime,
+      currentTrack: state.currentTrack,
+      duration: state.duration,
+      seek: state.seek,
+    }))
+  );
+}
+
+/** Queue contents and navigation. */
+function useQueueState() {
+  return useAudioStore(
+    useShallow((state) => ({
+      addToQueue: state.addToQueue,
+      clearQueue: state.clearQueue,
+      currentQueueIndex: state.currentQueueIndex,
+      currentTrack: state.currentTrack,
+      moveInQueue: state.moveInQueue,
+      next: state.next,
+      previous: state.previous,
+      queue: state.queue,
+      removeFromQueue: state.removeFromQueue,
+      repeatMode: state.repeatMode,
+      setQueue: state.setQueue,
+      setQueueAndPlay: state.setQueueAndPlay,
+      togglePlay: state.togglePlay,
+    }))
+  );
+}
+
+/** How the queue behaves: repeat, shuffle, insert position. */
+function useQueuePreferences() {
+  return useAudioStore(
+    useShallow((state) => ({
+      changeRepeatMode: state.changeRepeatMode,
+      insertMode: state.insertMode,
+      repeatMode: state.repeatMode,
+      setInsertMode: state.setInsertMode,
+      setRepeatMode: state.setRepeatMode,
+      shuffle: state.shuffle,
+      shuffleEnabled: state.shuffleEnabled,
+      unshuffle: state.unshuffle,
+    }))
+  );
+}
+
+/** Volume and mute. */
+function useVolumeState() {
+  return useAudioStore(
+    useShallow((state) => ({
+      isMuted: state.isMuted,
+      setVolume: state.setVolume,
+      toggleMute: state.toggleMute,
+      volume: state.volume,
+    }))
+  );
+}
+
+/** Playback speed. */
+function usePlaybackRate() {
+  return useAudioStore(
+    useShallow((state) => ({
+      playbackRate: state.playbackRate,
+      setPlaybackRate: state.setPlaybackRate,
+    }))
+  );
+}
+
 export {
   type AudioStore,
   calculateNextIndex,
@@ -592,4 +680,10 @@ export {
   type InsertMode,
   type RepeatMode,
   useAudioStore,
+  usePlaybackRate,
+  usePlaybackState,
+  useQueuePreferences,
+  useQueueState,
+  useSeekState,
+  useVolumeState,
 };

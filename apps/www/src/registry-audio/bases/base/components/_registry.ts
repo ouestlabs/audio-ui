@@ -432,7 +432,7 @@ export const components: RegistryItem[] = [
       },
     ],
     name: "player-track-list-demo",
-    registryDependencies: ["@audio/player"],
+    registryDependencies: ["@audio/player", "@audio/store"],
     type: "registry:example",
   },
   {
@@ -445,7 +445,7 @@ export const components: RegistryItem[] = [
       },
     ],
     name: "player-track-list-grid-demo",
-    registryDependencies: ["@audio/player"],
+    registryDependencies: ["@audio/player", "@audio/store"],
     type: "registry:example",
   },
   {
@@ -458,7 +458,7 @@ export const components: RegistryItem[] = [
       },
     ],
     name: "player-track-sortable-list-demo",
-    registryDependencies: ["@audio/player"],
+    registryDependencies: ["@audio/player", "@audio/store"],
     type: "registry:example",
   },
   {
@@ -471,7 +471,7 @@ export const components: RegistryItem[] = [
       },
     ],
     name: "player-track-sortable-list-grid-demo",
-    registryDependencies: ["@audio/player"],
+    registryDependencies: ["@audio/player", "@audio/store"],
     type: "registry:example",
   },
   {
