@@ -1,9 +1,9 @@
 import { create } from "zustand";
 import { persist, subscribeWithSelector } from "zustand/middleware";
-import type { Track } from "@/registry-audio/bases/base/lib/html-audio";
 import {
   clampPlaybackRate,
   isLive,
+  type Track,
 } from "@/registry-audio/bases/base/lib/playback-engine";
 
 type RepeatMode = "none" | "one" | "all";

@@ -12,7 +12,7 @@ export const components: RegistryItem[] = [
     ],
     name: "block-pocket-synth",
     registryDependencies: [
-      "@audio/use-audio",
+      "@audio/use-web-audio",
       "@audio/fader",
       "@audio/xypad",
       "@shadcn/toggle-group",
@@ -30,7 +30,7 @@ export const components: RegistryItem[] = [
     ],
     name: "block-wave-shaper",
     registryDependencies: [
-      "@audio/use-audio",
+      "@audio/use-web-audio",
       "@audio/fader",
       "@audio/xypad",
       "@audio/knob",

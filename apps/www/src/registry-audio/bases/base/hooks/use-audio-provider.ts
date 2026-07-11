@@ -7,15 +7,13 @@ import {
   canUseDOM,
   useAudioStore,
 } from "@/registry-audio/bases/base/lib/audio-store";
+import { $htmlAudio } from "@/registry-audio/bases/base/lib/html-audio";
 import {
-  $htmlAudio,
+  isLive,
+  type PlaybackEngine,
+  type PlaybackEngineErrorDetail,
   type Track,
-} from "@/registry-audio/bases/base/lib/html-audio";
-import type {
-  PlaybackEngine,
-  PlaybackEngineErrorDetail,
 } from "@/registry-audio/bases/base/lib/playback-engine";
-import { isLive } from "@/registry-audio/bases/base/lib/playback-engine";
 
 const MAX_ERROR_RETRIES = 3;
 const ERROR_RETRY_DELAY = 1000;

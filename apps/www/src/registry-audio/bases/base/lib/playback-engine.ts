@@ -1,3 +1,17 @@
+export type Track = {
+  id?: string | number;
+  url: string;
+  title?: string;
+  artist?: string;
+  artwork?: string;
+  images?: string[];
+  duration?: number;
+  album?: string;
+  genre?: string;
+  live?: boolean;
+  [key: string]: unknown;
+};
+
 const PLAYBACK_RATE_MIN = 0.25;
 const PLAYBACK_RATE_MAX = 2;
 

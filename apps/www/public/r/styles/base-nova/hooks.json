@@ -1,1 +1,1 @@
-{"$schema":"https://ui.shadcn.com/schema/registry-item.json","files":[],"name":"hooks","registryDependencies":["@audio/use-audio","@audio/use-sound"],"type":"registry:hook"}
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","files":[],"name":"hooks","registryDependencies":["@audio/use-html-audio","@audio/use-web-audio","@audio/use-sound"],"type":"registry:hook"}
