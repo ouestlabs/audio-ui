@@ -360,7 +360,7 @@ const AudioPlayerControlGroup = ({
 }: AudioPlayerControlGroupProps) => (
   <div
     className={cn(
-      "flex w-full items-center gap-3 in-data-[size=sm]:gap-2",
+      "no-scrollbar scroll-fade-x -m-1 flex w-full snap-x snap-mandatory items-center gap-3 overflow-x-auto p-1 in-data-[size=sm]:gap-2 *:snap-start",
       className
     )}
     data-slot="audio-control-group"
@@ -527,25 +527,29 @@ const AudioPlayerVolume = ({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger
-        render={
-          <AudioPlayerButton
-            className={cn("hidden md:flex", className)}
-            data-slot="audio-volume-button"
-            size={size}
-            tooltipLabel={
-              isMuted
-                ? "Muted"
-                : `Volume ${Math.round(effectiveVolumePercent)}%`
-            }
-            variant={variant}
-          />
-        }
-      >
-        <span className={cn(isMuted && "opacity-40")}>
-          {renderVolumeIcon()}
-        </span>
-      </DropdownMenuTrigger>
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <DropdownMenuTrigger
+              render={
+                <AudioPlayerButton
+                  className={cn("hidden md:flex", className)}
+                  data-slot="audio-volume-button"
+                  size={size}
+                  variant={variant}
+                />
+              }
+            >
+              <span className={cn(isMuted && "opacity-40")}>
+                {renderVolumeIcon()}
+              </span>
+            </DropdownMenuTrigger>
+          }
+        />
+        <TooltipContent sideOffset={4}>
+          {isMuted ? "Muted" : `Volume ${Math.round(effectiveVolumePercent)}%`}
+        </TooltipContent>
+      </Tooltip>
       <DropdownMenuContent
         align="center"
         className={cn(
@@ -1513,26 +1517,32 @@ const AudioQueuePreferences = ({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger
-        render={
-          <AudioPlayerButton
-            className={cn(className)}
-            data-slot="audio-queue-preferences-trigger"
-            size={size}
-            tooltipLabel={tooltipLabel}
-            variant={variant}
-            {...props}
-          />
-        }
-      >
-        <IconPlaceholder
-          hugeicons="Settings02Icon"
-          lucide="SlidersHorizontalIcon"
-          phosphor="SlidersHorizontalIcon"
-          remixicon="RiEqualizer2Line"
-          tabler="IconAdjustmentsHorizontal"
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <DropdownMenuTrigger
+              render={
+                <AudioPlayerButton
+                  className={cn(className)}
+                  data-slot="audio-queue-preferences-trigger"
+                  size={size}
+                  variant={variant}
+                  {...props}
+                />
+              }
+            >
+              <IconPlaceholder
+                hugeicons="Settings02Icon"
+                lucide="SlidersHorizontalIcon"
+                phosphor="SlidersHorizontalIcon"
+                remixicon="RiEqualizer2Line"
+                tabler="IconAdjustmentsHorizontal"
+              />
+            </DropdownMenuTrigger>
+          }
         />
-      </DropdownMenuTrigger>
+        <TooltipContent sideOffset={4}>{tooltipLabel}</TooltipContent>
+      </Tooltip>
       <DropdownMenuContent
         align="end"
         className={cn(className)}
@@ -1645,24 +1655,30 @@ const AudioQueue = React.memo(
         }}
         open={dialogOpen}
       >
-        <DialogTrigger
-          render={
-            <AudioPlayerButton
-              data-slot="audio-queue-trigger"
-              size="icon"
-              tooltipLabel="Queue"
-              variant="outline"
-            />
-          }
-        >
-          <IconPlaceholder
-            hugeicons="Playlist03Icon"
-            lucide="ListMusicIcon"
-            phosphor="QueueIcon"
-            remixicon="RiPlayList2Line"
-            tabler="IconPlaylist"
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <DialogTrigger
+                render={
+                  <AudioPlayerButton
+                    data-slot="audio-queue-trigger"
+                    size="icon"
+                    variant="outline"
+                  />
+                }
+              >
+                <IconPlaceholder
+                  hugeicons="Playlist03Icon"
+                  lucide="ListMusicIcon"
+                  phosphor="QueueIcon"
+                  remixicon="RiPlayList2Line"
+                  tabler="IconPlaylist"
+                />
+              </DialogTrigger>
+            }
           />
-        </DialogTrigger>
+          <TooltipContent sideOffset={4}>Queue</TooltipContent>
+        </Tooltip>
         <DialogContent
           aria-label="Select a track"
           data-slot="audio-queue"
@@ -1752,36 +1768,42 @@ function AudioPlaybackSpeed({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger
-        disabled={isLiveStream}
-        render={
-          <AudioPlayerButton
-            className={cn(className)}
-            data-slot="audio-playback-speed-button"
-            disabled={isLiveStream}
-            size={size}
-            tooltipLabel={tooltipLabel}
-            variant={variant}
-            {...props}
-          />
-        }
-      >
-        {!isIconSize && (
-          <IconPlaceholder
-            hugeicons="DashboardSpeed01Icon"
-            lucide="GaugeIcon"
-            phosphor="GaugeIcon"
-            remixicon="RiSpeedLine"
-            tabler="IconGauge"
-          />
-        )}
-        <span
-          className="starting:blur-[2px] starting:opacity-0 starting:translate-y-1 inline-block font-mono text-xs transition-[opacity,filter,translate] duration-150 ease-in-out will-change-[opacity,filter,translate] motion-reduce:transition-none"
-          key={displayLabel}
-        >
-          {displayLabel}
-        </span>
-      </DropdownMenuTrigger>
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <DropdownMenuTrigger
+              disabled={isLiveStream}
+              render={
+                <AudioPlayerButton
+                  className={cn(className)}
+                  data-slot="audio-playback-speed-button"
+                  disabled={isLiveStream}
+                  size={size}
+                  variant={variant}
+                  {...props}
+                />
+              }
+            >
+              {!isIconSize && (
+                <IconPlaceholder
+                  hugeicons="DashboardSpeed01Icon"
+                  lucide="GaugeIcon"
+                  phosphor="GaugeIcon"
+                  remixicon="RiSpeedLine"
+                  tabler="IconGauge"
+                />
+              )}
+              <span
+                className="starting:blur-[2px] starting:opacity-0 starting:translate-y-1 inline-block font-mono text-xs transition-[opacity,filter,translate] duration-150 ease-in-out will-change-[opacity,filter,translate] motion-reduce:transition-none"
+                key={displayLabel}
+              >
+                {displayLabel}
+              </span>
+            </DropdownMenuTrigger>
+          }
+        />
+        <TooltipContent sideOffset={4}>{tooltipLabel}</TooltipContent>
+      </Tooltip>
       <DropdownMenuContent
         align="end"
         className={cn(className)}
