@@ -1,6 +1,6 @@
 {
   "name": "@audio-ui/react",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A collection of React UI primitives for Audio UI.",
   "license": "MIT",
   "module": "dist/index.js",
