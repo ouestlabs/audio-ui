@@ -14,13 +14,13 @@ import {
 } from "@/registry-audio/bases/base/audio/elements/channel-strip";
 import { Fader } from "@/registry-audio/bases/base/audio/elements/fader";
 import { XYPad } from "@/registry-audio/bases/base/audio/elements/xypad";
-import { useAudio } from "@/registry-audio/bases/base/hooks/use-audio";
+import { useWebAudio } from "@/registry-audio/bases/base/hooks/use-web-audio";
 
 type WaveformType = "sine" | "triangle" | "sawtooth" | "square";
 type FilterType = "lowpass" | "highpass" | "bandpass" | "allpass";
 
 export default function BlockPocketSynth() {
-  const { webAudio } = useAudio();
+  const webAudio = useWebAudio();
   const faderId = React.useId();
   const faderLabelId = React.useId();
   const faderValueId = React.useId();

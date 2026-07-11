@@ -88,7 +88,6 @@ export const audio: RegistryItem[] = [
       "@audio/store",
       "@audio/html",
       "@audio/playback-engine",
-      "@audio/use-audio",
       "@audio/fader",
       "@audio/transport",
       "@audio/sortable-list",

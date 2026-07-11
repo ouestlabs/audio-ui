@@ -70,11 +70,11 @@ import {
   type AudioStore,
   useAudioStore,
 } from "@/registry-audio/bases/base/lib/audio-store";
+import { formatDuration } from "@/registry-audio/bases/base/lib/html-audio";
 import {
-  formatDuration,
+  isLive,
   type Track,
-} from "@/registry-audio/bases/base/lib/html-audio";
-import { isLive } from "@/registry-audio/bases/base/lib/playback-engine";
+} from "@/registry-audio/bases/base/lib/playback-engine";
 
 const PLAYBACK_SPEEDS = [
   { label: "0.5x", value: 0.5 },

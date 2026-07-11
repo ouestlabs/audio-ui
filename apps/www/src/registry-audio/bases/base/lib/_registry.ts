@@ -55,7 +55,7 @@ export const lib: RegistryItem[] = [
       },
     ],
     name: "store",
-    registryDependencies: ["@audio/html", "@audio/playback-engine"],
+    registryDependencies: ["@audio/playback-engine"],
     type: "registry:lib",
   },
 ];

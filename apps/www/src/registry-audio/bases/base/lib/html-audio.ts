@@ -6,20 +6,6 @@ import type {
   SetEngineVolumeParams,
 } from "@/registry-audio/bases/base/lib/playback-engine";
 
-export type Track = {
-  id?: string | number;
-  url: string;
-  title?: string;
-  artist?: string;
-  artwork?: string;
-  images?: string[];
-  duration?: number;
-  album?: string;
-  genre?: string;
-  live?: boolean;
-  [key: string]: unknown;
-};
-
 type FadeVolumeParams = {
   audio: HTMLAudioElement;
   targetVolume: number;

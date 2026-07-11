@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useAudio } from "@/registry-audio/bases/base/hooks/use-audio";
+import { useWebAudio } from "@/registry-audio/bases/base/hooks/use-web-audio";
 
 /**
  * Load and play a sound from a given URL using the Web Audio API.
@@ -20,7 +20,7 @@ import { useAudio } from "@/registry-audio/bases/base/hooks/use-audio";
  * ```
  */
 export function useSound(url: string) {
-  const { webAudio } = useAudio();
+  const webAudio = useWebAudio();
   const bufferRef = React.useRef<AudioBuffer | null>(null);
 
   React.useEffect(() => {

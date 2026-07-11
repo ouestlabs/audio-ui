@@ -15,12 +15,12 @@ import {
 import { Fader } from "@/registry-audio/bases/base/audio/elements/fader";
 import { Knob } from "@/registry-audio/bases/base/audio/elements/knob";
 import { XYPad } from "@/registry-audio/bases/base/audio/elements/xypad";
-import { useAudio } from "@/registry-audio/bases/base/hooks/use-audio";
+import { useWebAudio } from "@/registry-audio/bases/base/hooks/use-web-audio";
 
 type WaveformType = "sine" | "triangle" | "sawtooth" | "square";
 
 export default function BlockWaveShaper() {
-  const { webAudio } = useAudio();
+  const webAudio = useWebAudio();
   const driveId = React.useId();
   const driveLabelId = React.useId();
   const driveValueId = React.useId();
