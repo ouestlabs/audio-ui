@@ -223,93 +223,87 @@ class HtmlAudioEngine implements PlaybackEngine {
       return;
     }
 
-    try {
-      this.retryAttempts = 0;
-      if (audio.src === url) {
-        if (audio.currentTime !== startTime && !isLiveStream) {
+    this.retryAttempts = 0;
+    if (audio.src === url) {
+      if (audio.currentTime !== startTime && !isLiveStream) {
+        audio.currentTime = startTime;
+      }
+      return;
+    }
+
+    audio.pause();
+    audio.src = "";
+
+    audio.src = url;
+    audio.preload = "auto";
+
+    const loadTimeout = isLiveStream
+      ? this.LOAD_TIMEOUT_LIVE
+      : this.LOAD_TIMEOUT_NORMAL;
+
+    await new Promise<void>((resolve, reject) => {
+      let timeoutId: NodeJS.Timeout | null = null;
+      let isResolved = false;
+
+      const cleanup = () => {
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+          timeoutId = null;
+        }
+        audio.removeEventListener("loadedmetadata", handleLoadSuccess);
+        audio.removeEventListener("canplay", handleLoadSuccess);
+        audio.removeEventListener("canplaythrough", handleLoadSuccess);
+        audio.removeEventListener("error", handleErrorLoading);
+      };
+
+      const handleTimeout = () => {
+        if (isResolved) {
+          return;
+        }
+        isResolved = true;
+        cleanup();
+
+        reject(
+          new Error(
+            `Audio load timeout (${loadTimeout / 1000}s). ReadyState: ${audio.readyState}, NetworkState: ${audio.networkState}, URL: ${audio.src}`
+          )
+        );
+      };
+
+      const handleLoadSuccess = () => {
+        if (isResolved) {
+          return;
+        }
+        isResolved = true;
+        cleanup();
+
+        // Don't set currentTime for live streams
+        if (startTime > 0 && !isLiveStream) {
           audio.currentTime = startTime;
         }
-        return;
-      }
+        resolve();
+      };
 
-      audio.pause();
-      audio.src = "";
+      const handleErrorLoading = () => {
+        if (isResolved) {
+          return;
+        }
+        isResolved = true;
+        cleanup();
+        const error = audio.error;
+        const errorMessage =
+          error?.message || `Error code: ${error?.code ?? "unknown"}`;
+        reject(new Error(`Audio load failed: ${errorMessage}`));
+      };
 
-      audio.src = url;
-      audio.preload = "auto";
+      timeoutId = setTimeout(handleTimeout, loadTimeout);
 
-      const loadTimeout = isLiveStream
-        ? this.LOAD_TIMEOUT_LIVE
-        : this.LOAD_TIMEOUT_NORMAL;
-
-      await new Promise<void>((resolve, reject) => {
-        let timeoutId: NodeJS.Timeout | null = null;
-        let isResolved = false;
-
-        const cleanup = () => {
-          if (timeoutId) {
-            clearTimeout(timeoutId);
-            timeoutId = null;
-          }
-          audio.removeEventListener("loadedmetadata", handleLoadSuccess);
-          audio.removeEventListener("canplay", handleLoadSuccess);
-          audio.removeEventListener("canplaythrough", handleLoadSuccess);
-          audio.removeEventListener("error", handleErrorLoading);
-        };
-
-        const handleTimeout = () => {
-          if (isResolved) {
-            return;
-          }
-          isResolved = true;
-          cleanup();
-
-          reject(
-            new Error(
-              `Audio load timeout (${loadTimeout / 1000}s). ReadyState: ${audio.readyState}, NetworkState: ${audio.networkState}, URL: ${audio.src}`
-            )
-          );
-        };
-
-        const handleLoadSuccess = () => {
-          if (isResolved) {
-            return;
-          }
-          isResolved = true;
-          cleanup();
-
-          // Don't set currentTime for live streams
-          if (startTime > 0 && !isLiveStream) {
-            audio.currentTime = startTime;
-          }
-          resolve();
-        };
-
-        const handleErrorLoading = () => {
-          if (isResolved) {
-            return;
-          }
-          isResolved = true;
-          cleanup();
-          const error = audio.error;
-          const errorMessage =
-            error?.message || `Error code: ${error?.code ?? "unknown"}`;
-          // Silent error - reject without console logging
-          reject(new Error(`Audio load failed: ${errorMessage}`));
-        };
-
-        timeoutId = setTimeout(handleTimeout, loadTimeout);
-
-        audio.addEventListener("loadedmetadata", handleLoadSuccess);
-        audio.addEventListener("canplay", handleLoadSuccess);
-        audio.addEventListener("canplaythrough", handleLoadSuccess);
-        audio.addEventListener("error", handleErrorLoading);
-        audio.load();
-      });
-    } catch (error) {
-      console.error("Audio load process error:", error);
-      throw error;
-    }
+      audio.addEventListener("loadedmetadata", handleLoadSuccess);
+      audio.addEventListener("canplay", handleLoadSuccess);
+      audio.addEventListener("canplaythrough", handleLoadSuccess);
+      audio.addEventListener("error", handleErrorLoading);
+      audio.load();
+    });
   }
 
   async play(): Promise<void> {
@@ -333,7 +327,6 @@ class HtmlAudioEngine implements PlaybackEngine {
       this.playPromise = null;
     } catch (error) {
       this.playPromise = null;
-      // Silent error - throw without console logging
       throw error;
     }
   }

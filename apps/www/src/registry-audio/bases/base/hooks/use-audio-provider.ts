@@ -79,9 +79,6 @@ export function useAudioProvider({
     }
 
     try {
-      console.log(
-        `Retry attempt ${errorRetryCountRef.current}: Loading audio...`
-      );
       const currentTime = engine.getCurrentTime();
       const wasPlaying = !engine.isPaused();
       const state = useAudioStore.getState();
