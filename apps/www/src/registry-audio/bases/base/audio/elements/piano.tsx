@@ -23,12 +23,15 @@ interface PianoProps
 
 export function Piano({ className, size, ...props }: PianoProps) {
   return (
-    <PianoPrimitive.Root className="w-full" {...props}>
+    <PianoPrimitive.Root
+      className="w-full data-[disabled=true]:cursor-not-allowed"
+      {...props}
+    >
       <PianoPrimitive.Track
         className={cn(
           "cn-piano w-full touch-none select-none overflow-hidden",
           "focus-visible:outline-none",
-          "data-[disabled=true]:pointer-events-none data-[disabled=true]:cursor-not-allowed data-[disabled=true]:opacity-50",
+          "data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50",
           pianoVariants({ size }),
           className
         )}

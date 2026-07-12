@@ -228,7 +228,10 @@ export namespace Fader {
         <FaderValueContext.Provider value={valueContextValue}>
           <div
             className={className}
-            {...getDataAttributes("fader", { part: "fader-wrapper" })}
+            {...getDataAttributes("fader", {
+              disabled,
+              part: "fader-wrapper",
+            })}
             {...props}
           >
             {ariaLabel || ariaLabelledBy ? null : (

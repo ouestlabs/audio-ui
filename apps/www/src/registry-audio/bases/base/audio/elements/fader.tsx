@@ -34,7 +34,7 @@ const faderTrackVariants = cva(
 );
 
 const faderThumbVariants = cva(
-  "cn-fader-thumb before:-inset-2 absolute z-10 block shrink-0 cursor-grab select-none outline-none before:absolute before:content-[''] active:cursor-grabbing data-[disabled=true]:pointer-events-none data-[disabled=true]:cursor-not-allowed",
+  "cn-fader-thumb before:-inset-2 absolute z-10 block shrink-0 cursor-grab select-none outline-none before:absolute before:content-[''] active:cursor-grabbing data-[disabled=true]:pointer-events-none",
   {
     defaultVariants: {
       size: "default",
@@ -94,7 +94,7 @@ export function Fader({
   return (
     <FaderPrimitive.Root
       className={cn(
-        "relative data-[orientation=vertical]:h-full data-[orientation=horizontal]:w-full",
+        "relative data-[orientation=vertical]:h-full data-[orientation=horizontal]:w-full data-[disabled=true]:cursor-not-allowed",
         className
       )}
       orientation={orientation}
@@ -105,7 +105,7 @@ export function Fader({
           "relative flex w-full touch-none select-none items-center",
           "data-[orientation=vertical]:h-full data-[orientation=vertical]:min-h-40 data-[orientation=vertical]:w-auto data-[orientation=vertical]:flex-col",
           "data-[orientation=horizontal]:w-full data-[orientation=horizontal]:min-w-32",
-          "transition-opacity duration-150 ease-out motion-reduce:transition-none data-[disabled=true]:pointer-events-none data-[disabled=true]:cursor-not-allowed data-[disabled=true]:opacity-50",
+          "transition-opacity duration-150 ease-out motion-reduce:transition-none data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50",
           faderVariants({ size })
         )}
       >

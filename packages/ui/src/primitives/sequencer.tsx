@@ -344,6 +344,7 @@ export namespace Sequencer {
           <div
             className={className}
             {...getDataAttributes("sequencer", {
+              disabled,
               part: "sequencer-wrapper",
             })}
             {...props}

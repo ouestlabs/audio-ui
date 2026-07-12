@@ -23,12 +23,15 @@ interface EnvelopeProps
 
 export function Envelope({ className, size, ...props }: EnvelopeProps) {
   return (
-    <EnvelopePrimitive.Root className="w-full" {...props}>
+    <EnvelopePrimitive.Root
+      className="w-full data-[disabled=true]:cursor-not-allowed"
+      {...props}
+    >
       <EnvelopePrimitive.Svg
         className={cn(
           "cn-envelope w-full touch-none select-none overflow-hidden",
           "focus-visible:outline-none",
-          "data-[disabled=true]:pointer-events-none data-[disabled=true]:cursor-not-allowed data-[disabled=true]:opacity-50",
+          "data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50",
           envelopeVariants({ size }),
           className
         )}

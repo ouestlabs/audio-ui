@@ -371,6 +371,12 @@
     @apply bg-primary size-3.5 transition-colors hover:ring-2 hover:ring-ring/30 focus-visible:ring-2 focus-visible:ring-ring/30 active:ring-2 active:ring-ring/30 data-[disabled=true]:pointer-events-none motion-reduce:transition-none;
   }
 
+  /* Blocked-action feedback: removing at minPoints or adding with allowAddPoints=false. */
+  .cn-envelope[data-blocked="true"],
+  .cn-envelope-point[data-blocked="true"] {
+    @apply animate-[cn-envelope-shake_280ms_linear] motion-reduce:animate-none;
+  }
+
   /* MARK: Channel Strip */
   .cn-channel-strip {
     @apply text-card-foreground;
@@ -441,5 +447,28 @@
   /* MARK: Panel — block surface radius ← cn-card (synth, device-style blocks) */
   .cn-audio-panel {
     @apply rounded-none;
+  }
+}
+
+/* Envelope blocked-action shake — per-segment easing so each leg follows its own curve. Animates the standalone `translate` property (not `transform`) so it composites with Point's inline positioning transform instead of fighting it. */
+@keyframes cn-envelope-shake {
+  0% {
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    translate: 0 0;
+  }
+  28.57% {
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    translate: 6px 0;
+  }
+  57.14% {
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    translate: -6px 0;
+  }
+  78.57% {
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    translate: 4px 0;
+  }
+  100% {
+    translate: 0 0;
   }
 }

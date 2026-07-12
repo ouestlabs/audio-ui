@@ -538,7 +538,10 @@ export namespace Knob {
       <KnobContext.Provider value={contextValue}>
         <div
           className={className}
-          {...getDataAttributes("knob", { part: "knob-wrapper" })}
+          {...getDataAttributes("knob", {
+            disabled,
+            part: "knob-wrapper",
+          })}
           {...props}
         >
           {ariaLabel || ariaLabelledBy ? null : (

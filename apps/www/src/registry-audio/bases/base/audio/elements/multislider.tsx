@@ -31,13 +31,19 @@ export function Multislider({
   ...props
 }: MultisliderProps) {
   return (
-    <MultisliderPrimitive.Root className={cn("w-full", className)} {...props}>
+    <MultisliderPrimitive.Root
+      className={cn(
+        "w-full data-[disabled=true]:cursor-not-allowed",
+        className
+      )}
+      {...props}
+    >
       <MultisliderPrimitive.Track
         className={cn(
           "cn-multislider relative flex w-full cursor-crosshair touch-none select-none overflow-hidden",
           "gap-px data-[orientation=horizontal]:flex-col",
           "focus-visible:outline-none",
-          "data-[disabled=true]:pointer-events-none data-[disabled=true]:cursor-not-allowed data-[disabled=true]:opacity-50",
+          "data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50",
           multisliderVariants({ size })
         )}
         data-slot="multislider"

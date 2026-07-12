@@ -34,13 +34,16 @@ export function XYPad({
   ...props
 }: XYPadProps) {
   return (
-    <XYPadPrimitive.Root {...props}>
+    <XYPadPrimitive.Root
+      className="data-[disabled=true]:cursor-not-allowed"
+      {...props}
+    >
       <XYPadPrimitive.Label />
       <XYPadPrimitive.Slider
         className={cn(
           "cn-xypad relative block w-full cursor-crosshair touch-none select-none overflow-hidden",
           "focus-visible:outline-none",
-          "data-[disabled=true]:pointer-events-none data-[disabled=true]:cursor-not-allowed data-[disabled=true]:opacity-50",
+          "data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50",
           xypadVariants({ size }),
           className
         )}

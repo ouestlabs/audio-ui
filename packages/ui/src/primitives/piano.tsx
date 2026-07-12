@@ -438,7 +438,10 @@ export namespace Piano {
         <ValueContext.Provider value={valueContextValue}>
           <div
             className={className}
-            {...getDataAttributes("piano", { part: "piano-wrapper" })}
+            {...getDataAttributes("piano", {
+              disabled,
+              part: "piano-wrapper",
+            })}
             {...props}
           >
             {ariaLabel || ariaLabelledBy ? null : (

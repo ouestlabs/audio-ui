@@ -35,7 +35,7 @@ export function Sequencer({
 
   return (
     <SequencerPrimitive.Root
-      className="w-full"
+      className="w-full data-[disabled=true]:cursor-not-allowed"
       defaultValue={defaultValue}
       value={value}
       {...props}
@@ -44,7 +44,7 @@ export function Sequencer({
         className={cn(
           "cn-sequencer mx-auto grid w-full touch-none select-none",
           "focus-visible:outline-none",
-          "data-[disabled=true]:pointer-events-none data-[disabled=true]:cursor-not-allowed data-[disabled=true]:opacity-50",
+          "data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50",
           sequencerVariants({ size }),
           className
         )}

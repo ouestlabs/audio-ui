@@ -314,7 +314,14 @@ export namespace XYPad {
     return (
       <ConfigContext.Provider value={configValue}>
         <ValueContext.Provider value={valueContextValue}>
-          <div className={className} {...props}>
+          <div
+            className={className}
+            {...getDataAttributes("xypad", {
+              disabled,
+              part: "xypad-wrapper",
+            })}
+            {...props}
+          >
             {ariaLabel || ariaLabelledBy ? null : (
               <span className="sr-only" id={`${elementId}-label`}>
                 XY Pad

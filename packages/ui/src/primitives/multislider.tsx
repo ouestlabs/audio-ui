@@ -388,6 +388,7 @@ export namespace Multislider {
           <div
             className={className}
             {...getDataAttributes("multislider", {
+              disabled,
               part: "multislider-wrapper",
             })}
             {...props}

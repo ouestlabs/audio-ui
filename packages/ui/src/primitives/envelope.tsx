@@ -7,6 +7,8 @@ import { useParameterCore } from "./internal/use-parameter-core";
 
 const MIN_POINTS = 2;
 const KEYBOARD_STEP = 0.01;
+/** How long a blocked-action signal (data-blocked) stays on before it clears — matched to the shake animation's total duration. */
+const BLOCKED_DURATION_MS = 320;
 /** ADSR-shaped: attack to peak, decay to a sustain plateau, release — reads as an envelope rather than a bare triangle. */
 const DEFAULT_VALUE: GeomPoint[] = [
   { x: 0, y: 0.05 },
@@ -18,6 +20,11 @@ const DEFAULT_VALUE: GeomPoint[] = [
 
 function sortPoints(points: GeomPoint[]): GeomPoint[] {
   return [...points].sort((a, b) => a.x - b.x);
+}
+
+/** One decimal place is plenty of precision for a 0-100 SVG coordinate, and keeps the `points` string short during drag. */
+function roundCoord(n: number): number {
+  return Math.round(n * 10) / 10;
 }
 
 function sanitizePoints(points: GeomPoint[]): GeomPoint[] {
@@ -52,9 +59,11 @@ export namespace Envelope {
     ariaLabel?: string;
     ariaLabelledBy?: string;
     beginPointDrag: () => void;
+    blockedIndex: Nullable<number>;
     commitDrag: () => void;
     dragPoint: (index: number, next: GeomPoint) => void;
     handleSvgDoubleClick: (point: GeomPoint) => void;
+    isAddBlocked: boolean;
     minPoints: number;
     pointsConfig: {
       disabled: boolean;
@@ -129,6 +138,25 @@ export namespace Envelope {
     const svgRef = React.useRef<SVGSVGElement>(null);
     const pointElementsRef = React.useRef(new Map<number, HTMLElement>());
     const [focusedIndex, setFocusedIndex] = React.useState(0);
+    const [blockedIndex, setBlockedIndex] =
+      React.useState<Nullable<number>>(null);
+    const [isAddBlocked, setIsAddBlocked] = React.useState(false);
+    const blockedIndexTimeoutRef =
+      React.useRef<Nullable<ReturnType<typeof setTimeout>>>(null);
+    const addBlockedTimeoutRef =
+      React.useRef<Nullable<ReturnType<typeof setTimeout>>>(null);
+
+    React.useEffect(
+      () => () => {
+        if (blockedIndexTimeoutRef.current) {
+          clearTimeout(blockedIndexTimeoutRef.current);
+        }
+        if (addBlockedTimeoutRef.current) {
+          clearTimeout(addBlockedTimeoutRef.current);
+        }
+      },
+      []
+    );
 
     const {
       beginDrag,
@@ -170,6 +198,35 @@ export namespace Envelope {
       []
     );
 
+    const triggerBlockedPoint = React.useCallback((index: number) => {
+      if (blockedIndexTimeoutRef.current) {
+        clearTimeout(blockedIndexTimeoutRef.current);
+      }
+      // Clear then re-set on the next frame so the data-blocked attribute
+      // is observably removed and re-added, guaranteeing the CSS shake
+      // replays even when the same point is blocked again in quick succession.
+      setBlockedIndex(null);
+      requestAnimationFrame(() => {
+        setBlockedIndex(index);
+        blockedIndexTimeoutRef.current = setTimeout(() => {
+          setBlockedIndex(null);
+        }, BLOCKED_DURATION_MS);
+      });
+    }, []);
+
+    const triggerAddBlocked = React.useCallback(() => {
+      if (addBlockedTimeoutRef.current) {
+        clearTimeout(addBlockedTimeoutRef.current);
+      }
+      setIsAddBlocked(false);
+      requestAnimationFrame(() => {
+        setIsAddBlocked(true);
+        addBlockedTimeoutRef.current = setTimeout(() => {
+          setIsAddBlocked(false);
+        }, BLOCKED_DURATION_MS);
+      });
+    }, []);
+
     const beginPointDrag = React.useCallback(() => {
       beginDrag(valueRef.current);
     }, [beginDrag, valueRef]);
@@ -208,7 +265,11 @@ export namespace Envelope {
 
     const handleSvgDoubleClick = React.useCallback(
       (point: GeomPoint) => {
-        if (disabled || !allowAddPoints) {
+        if (disabled) {
+          return;
+        }
+        if (!allowAddPoints) {
+          triggerAddBlocked();
           return;
         }
         const clamped: GeomPoint = {
@@ -221,13 +282,23 @@ export namespace Envelope {
         shouldPreventFocusRef.current = true;
         setFocusedIndex(index);
       },
-      [disabled, allowAddPoints, valueRef, commitValue, shouldPreventFocusRef]
+      [
+        disabled,
+        allowAddPoints,
+        triggerAddBlocked,
+        valueRef,
+        commitValue,
+        shouldPreventFocusRef,
+      ]
     );
 
     const removePoint = React.useCallback(
       (index: number) => {
         const base = valueRef.current;
         if (disabled || !allowRemovePoints || base.length <= minPoints) {
+          if (!disabled) {
+            triggerBlockedPoint(index);
+          }
           return;
         }
         const nextPoints = base.filter((_, i) => i !== index);
@@ -241,6 +312,7 @@ export namespace Envelope {
         valueRef,
         commitValue,
         focusPoint,
+        triggerBlockedPoint,
       ]
     );
 
@@ -254,9 +326,11 @@ export namespace Envelope {
         ariaLabel,
         ariaLabelledBy,
         beginPointDrag,
+        blockedIndex,
         commitDrag,
         dragPoint,
         handleSvgDoubleClick,
+        isAddBlocked,
         minPoints,
         pointsConfig,
         registerPoint,
@@ -270,9 +344,11 @@ export namespace Envelope {
         ariaLabel,
         ariaLabelledBy,
         beginPointDrag,
+        blockedIndex,
         commitDrag,
         dragPoint,
         handleSvgDoubleClick,
+        isAddBlocked,
         minPoints,
         pointsConfig,
         registerPoint,
@@ -291,7 +367,10 @@ export namespace Envelope {
         <ValueContext.Provider value={valueContextValue}>
           <div
             className={className}
-            {...getDataAttributes("envelope", { part: "envelope-wrapper" })}
+            {...getDataAttributes("envelope", {
+              disabled,
+              part: "envelope-wrapper",
+            })}
             style={{ position: "relative", ...style }}
             {...props}
           >
@@ -320,6 +399,7 @@ export namespace Envelope {
       ariaLabel,
       ariaLabelledBy,
       handleSvgDoubleClick,
+      isAddBlocked,
       pointsConfig,
       svgRef,
     } = useConfigContext();
@@ -327,7 +407,7 @@ export namespace Envelope {
 
     const handleDoubleClick = React.useCallback(
       (e: React.MouseEvent<SVGSVGElement>) => {
-        if (disabled || e.target !== svgRef.current) {
+        if (disabled) {
           return;
         }
         const svg = svgRef.current;
@@ -358,7 +438,11 @@ export namespace Envelope {
         ref={svgRef}
         role="group"
         viewBox="0 0 100 100"
-        {...getDataAttributes("envelope", { disabled, part: "svg" })}
+        {...getDataAttributes("envelope", {
+          blocked: isAddBlocked,
+          disabled,
+          part: "svg",
+        })}
         {...props}
       >
         {children}
@@ -376,9 +460,12 @@ export namespace Envelope {
         return "";
       }
       const segments = [
-        `0,${(1 - first.y) * 100}`,
-        ...value.map((point) => `${point.x * 100},${(1 - point.y) * 100}`),
-        `100,${(1 - last.y) * 100}`,
+        `0,${roundCoord((1 - first.y) * 100)}`,
+        ...value.map(
+          (point) =>
+            `${roundCoord(point.x * 100)},${roundCoord((1 - point.y) * 100)}`
+        ),
+        `100,${roundCoord((1 - last.y) * 100)}`,
       ];
       return segments.join(" ");
     }, [value]);
@@ -434,6 +521,7 @@ export namespace Envelope {
     const {
       adjustPoint,
       beginPointDrag,
+      blockedIndex,
       commitDrag,
       dragPoint,
       minPoints,
@@ -567,6 +655,7 @@ export namespace Envelope {
     }
 
     const isFocusTarget = index === focusedIndex;
+    const isBlocked = index === blockedIndex;
     const baseTransform = "translate(-50%, 50%)";
     const transform = style?.transform
       ? `${baseTransform} ${style.transform}`
@@ -582,6 +671,7 @@ export namespace Envelope {
         aria-valuetext={`x: ${point.x.toFixed(2)}, y: ${point.y.toFixed(2)}`}
         className={className}
         {...getDataAttributes("envelope", {
+          blocked: isBlocked,
           disabled,
           part: "point",
           removable: value.length > minPoints,
