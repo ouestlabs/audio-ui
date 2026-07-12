@@ -1317,4 +1317,22 @@ export const components: RegistryItem[] = [
     registryDependencies: ["@audio/xypad"],
     type: "registry:example",
   },
+  {
+    categories: ["waveform"],
+    description:
+      "A seekable waveform player — click or drag the waveform to scrub, Play/Pause to auto-advance through a synthetic sample set standing in for real decoded audio",
+    files: [
+      {
+        path: "components/waveform/block-waveform-player.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-waveform-player",
+    registryDependencies: [
+      "@audio/waveform",
+      "@audio/waveform-path",
+      "@shadcn/button",
+    ],
+    type: "registry:block",
+  },
 ];

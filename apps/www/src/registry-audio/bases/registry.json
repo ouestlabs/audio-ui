@@ -91,11 +91,17 @@
       "name": "transport"
     },
     {
+      "count": 1,
+      "description": "Seekable waveform components for scrubbing and visualizing audio playback.",
+      "label": "Waveform",
+      "name": "waveform"
+    },
+    {
       "count": 14,
       "description": "Two-dimensional XY pad components for filter and effect controls.",
       "label": "XY Pad",
       "name": "xypad"
     }
   ],
-  "totalComponents": 97
+  "totalComponents": 98
 }

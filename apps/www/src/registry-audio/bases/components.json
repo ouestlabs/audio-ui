@@ -483,5 +483,10 @@
     "categories": ["xypad"],
     "name": "xypad-hide-value-demo",
     "title": "xypad-hide-value-demo"
+  },
+  {
+    "categories": ["waveform"],
+    "name": "block-waveform-player",
+    "title": "block-waveform-player"
   }
 ]

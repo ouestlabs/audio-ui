@@ -145,6 +145,12 @@ export const categories: CategoryDef[] = [
   },
   {
     description:
+      "Seekable waveform components for scrubbing and visualizing audio playback.",
+    label: "Waveform",
+    name: "waveform",
+  },
+  {
+    description:
       "Two-dimensional XY pad components for filter and effect controls.",
     label: "XY Pad",
     name: "xypad",

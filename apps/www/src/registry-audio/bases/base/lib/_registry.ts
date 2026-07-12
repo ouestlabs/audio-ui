@@ -103,4 +103,19 @@ export const lib: RegistryItem[] = [
     registryDependencies: [],
     type: "registry:lib",
   },
+  {
+    categories: ["lib", "audio", "waveform"],
+    dependencies: [],
+    description:
+      "Audio-sample downsampling/normalization and SVG waveform path generation — decodeAudioSamples/downsampleWaveform/normalizeWaveform/linearWaveformPath",
+    files: [
+      {
+        path: "lib/waveform-path.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "waveform-path",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
 ];

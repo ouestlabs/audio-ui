@@ -456,6 +456,23 @@
     @apply bg-foreground;
   }
 
+  /* MARK: Waveform */
+  .cn-waveform {
+    @apply relative h-20 overflow-hidden rounded-4xl border border-transparent bg-card shadow-md ring-1 ring-foreground/10;
+  }
+
+  .cn-waveform-path {
+    @apply pointer-events-none fill-none stroke-border stroke-2;
+  }
+
+  .cn-waveform-progress {
+    @apply pointer-events-none fill-none stroke-primary stroke-2;
+  }
+
+  .cn-waveform-thumb {
+    @apply size-3.5 rounded-full bg-card shadow-md ring-1 ring-foreground/10 transition-[color,box-shadow] hover:ring-4 hover:ring-ring/30 focus-visible:ring-4 focus-visible:ring-ring/30 active:ring-4 active:ring-ring/30 motion-reduce:transition-none;
+  }
+
   /* MARK: Channel Strip */
   .cn-channel-strip {
     @apply text-card-foreground;

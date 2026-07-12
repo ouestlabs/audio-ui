@@ -91,6 +91,11 @@
     "intro": "Browse {{count}} transport components for audio/ui, built on top of shadcn/ui.",
     "title": "Transport"
   },
+  "waveform": {
+    "description": "Seekable waveform components for scrubbing and visualizing audio playback. {{count}} components.",
+    "intro": "Browse {{count}} waveform components for audio/ui, built on top of shadcn/ui.",
+    "title": "Waveform"
+  },
   "xypad": {
     "description": "Two-dimensional XY pad components for filter and effect controls. {{count}} components.",
     "intro": "Browse {{count}} xy pad components for audio/ui, built on top of shadcn/ui.",

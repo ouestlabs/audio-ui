@@ -145,6 +145,17 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
+    dependencies: ["@audio-ui/react"],
+    files: [
+      {
+        path: "audio/elements/waveform.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "waveform",
+    type: "registry:ui",
+  },
+  {
     files: [
       {
         path: "audio/elements/bpm-control.tsx",

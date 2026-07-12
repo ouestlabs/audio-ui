@@ -12,4 +12,5 @@ export * from "./primitives/piano-roll";
 export * from "./primitives/ruler";
 export * from "./primitives/sequencer";
 export * from "./primitives/transport";
+export * from "./primitives/waveform";
 export * from "./primitives/xypad";
