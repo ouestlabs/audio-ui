@@ -8,6 +8,7 @@ export * from "./primitives/knob";
 export * from "./primitives/meter";
 export * from "./primitives/multislider";
 export * from "./primitives/piano";
+export * from "./primitives/piano-roll";
 export * from "./primitives/sequencer";
 export * from "./primitives/transport";
 export * from "./primitives/xypad";

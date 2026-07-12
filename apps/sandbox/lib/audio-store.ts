@@ -1,11 +1,7 @@
 import { create } from "zustand";
 import { persist, subscribeWithSelector } from "zustand/middleware";
 import { useShallow } from "zustand/react/shallow";
-import {
-  clampPlaybackRate,
-  isLive,
-  type Track,
-} from "@/lib/playback-engine";
+import { clampPlaybackRate, isLive, type Track } from "@/lib/playback-engine";
 
 type RepeatMode = "none" | "one" | "all";
 type InsertMode = "first" | "last" | "after";

@@ -880,6 +880,53 @@ export const components: RegistryItem[] = [
     type: "registry:example",
   },
   {
+    categories: ["piano", "envelope", "synth"],
+    description:
+      "Polyphonic synth keyboard shaped by a visual ADSR envelope, playable by mouse/touch or a connected MIDI keyboard — hold a key through attack/decay into sustain, release to hear the envelope's tail",
+    files: [
+      {
+        path: "components/piano/block-polysynth.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-polysynth",
+    registryDependencies: [
+      "@audio/piano",
+      "@audio/envelope",
+      "@audio/fader",
+      "@audio/channel-strip",
+      "@audio/midi-connect-control",
+      "@audio/use-synth-voices",
+      "@audio/use-web-audio",
+      "@audio/use-midi-input",
+    ],
+    type: "registry:block",
+  },
+  {
+    categories: ["piano", "synth"],
+    description:
+      "A DAW-style piano roll — a pitch-reference key strip beside an editable note grid, click to add notes, drag to move or resize either edge, shift-click to select and move several at once, double-click to delete — with a fixed BPM-driven loop that plays back in real time. Tap a key or connect a MIDI keyboard to audition pitches, with a mute toggle for the live preview",
+    files: [
+      {
+        path: "components/piano/block-piano-roll.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-piano-roll",
+    registryDependencies: [
+      "@audio/piano-roll",
+      "@audio/fader",
+      "@audio/channel-strip",
+      "@audio/midi-connect-control",
+      "@audio/use-synth-voices",
+      "@audio/use-web-audio",
+      "@audio/use-midi-input",
+      "@shadcn/button",
+      "@shadcn/input-group",
+    ],
+    type: "registry:block",
+  },
+  {
     categories: ["meter"],
     description: "Meter size default example",
     files: [
@@ -1038,6 +1085,29 @@ export const components: RegistryItem[] = [
     name: "sequencer-disabled-demo",
     registryDependencies: ["@audio/sequencer"],
     type: "registry:example",
+  },
+  {
+    categories: ["sequencer", "synth"],
+    description:
+      "Step-sequenced drum machine with real WebAudio kick, snare, and hihat synthesis",
+    files: [
+      {
+        path: "components/sequencer/block-drum-machine.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-drum-machine",
+    registryDependencies: [
+      "@audio/sequencer",
+      "@audio/use-step-clock",
+      "@audio/use-web-audio",
+      "@audio/drum-synthesis",
+      "@audio/fader",
+      "@audio/channel-strip",
+      "@shadcn/button",
+      "@shadcn/input-group",
+    ],
+    type: "registry:block",
   },
   {
     categories: ["multislider"],

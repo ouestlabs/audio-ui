@@ -330,6 +330,16 @@
     "title": "piano-disabled-demo"
   },
   {
+    "categories": ["piano", "envelope", "synth"],
+    "name": "block-polysynth",
+    "title": "block-polysynth"
+  },
+  {
+    "categories": ["piano", "synth"],
+    "name": "block-piano-roll",
+    "title": "block-piano-roll"
+  },
+  {
     "categories": ["meter"],
     "name": "meter-size-default-demo",
     "title": "meter-size-default-demo"
@@ -388,6 +398,11 @@
     "categories": ["sequencer"],
     "name": "sequencer-disabled-demo",
     "title": "sequencer-disabled-demo"
+  },
+  {
+    "categories": ["sequencer", "synth"],
+    "name": "block-drum-machine",
+    "title": "block-drum-machine"
   },
   {
     "categories": ["multislider"],

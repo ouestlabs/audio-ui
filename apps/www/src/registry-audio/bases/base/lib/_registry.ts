@@ -58,4 +58,49 @@ export const lib: RegistryItem[] = [
     registryDependencies: ["@audio/playback-engine"],
     type: "registry:lib",
   },
+  {
+    categories: ["lib", "audio", "synth", "sequencer"],
+    dependencies: [],
+    description:
+      "One-shot percussion synthesis (kick, snare, hihat) built from oscillators and noise bursts",
+    files: [
+      {
+        path: "lib/drum-synthesis.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "drum-synthesis",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "synth", "piano", "envelope"],
+    dependencies: [],
+    description:
+      "Note-to-frequency conversion and envelope-curve-to-gain-automation helpers for polyphonic synth voices",
+    files: [
+      {
+        path: "lib/synth-voice.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "synth-voice",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "piano", "synth"],
+    dependencies: [],
+    description:
+      "Web MIDI message parsing — note-on/note-off/velocity from raw MIDI bytes",
+    files: [
+      {
+        path: "lib/midi.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "midi",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
 ];

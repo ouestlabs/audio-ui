@@ -115,11 +115,37 @@ export const audio: RegistryItem[] = [
     dependencies: ["@audio-ui/react"],
     files: [
       {
+        path: "audio/elements/piano-roll.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "piano-roll",
+    type: "registry:ui",
+  },
+  {
+    dependencies: ["@audio-ui/react"],
+    files: [
+      {
         path: "audio/elements/meter.tsx",
         type: "registry:ui",
       },
     ],
     name: "meter",
+    type: "registry:ui",
+  },
+  {
+    files: [
+      {
+        path: "audio/elements/midi-connect-control.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "midi-connect-control",
+    registryDependencies: [
+      "@audio/use-midi-input",
+      "@shadcn/button",
+      "@shadcn/button-group",
+    ],
     type: "registry:ui",
   },
   {

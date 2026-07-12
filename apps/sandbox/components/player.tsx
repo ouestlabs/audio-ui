@@ -1,21 +1,40 @@
 "use client";
 
 import type { BaseUIEvent } from "@base-ui/react";
+import {
+  BroadcastIcon,
+  FastForwardIcon,
+  GaugeIcon,
+  MusicNotesIcon,
+  PauseIcon,
+  PlayIcon,
+  QueueIcon,
+  RepeatIcon,
+  RepeatOnceIcon,
+  RewindIcon,
+  ShuffleIcon,
+  SkipBackIcon,
+  SkipForwardIcon,
+  SlidersHorizontalIcon,
+  SpeakerHighIcon,
+  SpeakerLowIcon,
+  SpeakerNoneIcon,
+  SpeakerSlashIcon,
+  XIcon,
+} from "@phosphor-icons/react";
 import { cva, type VariantProps } from "class-variance-authority";
 import React from "react";
-import { cn } from "@/lib/utils";
+import { Fader } from "@/components/audio/fader";
 import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar";
+  SortableDragHandle,
+  SortableItem,
+  SortableList,
+} from "@/components/audio/sortable-list";
+import { Transport } from "@/components/audio/transport";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button, type buttonVariants } from "@/components/ui/button";
-import {
-  Command,
-  CommandInput,
-  CommandList,
-} from "@/components/ui/command";
+import { Command, CommandInput, CommandList } from "@/components/ui/command";
 import {
   Dialog,
   DialogContent,
@@ -57,13 +76,6 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Fader } from "@/components/audio/fader";
-import { Transport } from "@/components/audio/transport";
-import {
-  SortableDragHandle,
-  SortableItem,
-  SortableList,
-} from "@/components/audio/sortable-list";
 import { useAudioProvider } from "@/hooks/use-audio-provider";
 import {
   useAudioStore,
@@ -75,11 +87,8 @@ import {
   useVolumeState,
 } from "@/lib/audio-store";
 import { formatDuration } from "@/lib/html-audio";
-import {
-  isLive,
-  type Track,
-} from "@/lib/playback-engine";
-import { PlayIcon, PauseIcon, SpeakerSlashIcon, BroadcastIcon, SpeakerNoneIcon, SpeakerLowIcon, SpeakerHighIcon, RewindIcon, FastForwardIcon, SkipForwardIcon, SkipBackIcon, MusicNotesIcon, XIcon, QueueIcon, RepeatOnceIcon, RepeatIcon, ShuffleIcon, SlidersHorizontalIcon, GaugeIcon } from "@phosphor-icons/react";
+import { isLive, type Track } from "@/lib/playback-engine";
+import { cn } from "@/lib/utils";
 
 const PLAYBACK_SPEEDS = [
   { label: "0.5x", value: 0.5 },
@@ -129,17 +138,11 @@ function useSpacebarTogglePlay() {
 
 // Shared glyphs for icons that appear across multiple player controls.
 function PlayGlyph() {
-  return (
-    <PlayIcon
-    />
-  );
+  return <PlayIcon />;
 }
 
 function PauseGlyph() {
-  return (
-    <PauseIcon
-    />
-  );
+  return <PauseIcon />;
 }
 
 function PlayPauseGlyphSwap({ isPlaying }: { isPlaying: boolean }) {
@@ -172,10 +175,7 @@ function PlayPauseGlyphSwap({ isPlaying }: { isPlaying: boolean }) {
 }
 
 function MutedGlyph() {
-  return (
-    <SpeakerSlashIcon
-    />
-  );
+  return <SpeakerSlashIcon />;
 }
 
 function AudioProvider({
@@ -464,21 +464,12 @@ const AudioPlayerVolume = ({
       return <MutedGlyph />;
     }
     if (volumePercent < 33) {
-      return (
-        <SpeakerNoneIcon
-        />
-      );
+      return <SpeakerNoneIcon />;
     }
     if (volumePercent < 66) {
-      return (
-        <SpeakerLowIcon
-        />
-      );
+      return <SpeakerLowIcon />;
     }
-    return (
-      <SpeakerHighIcon
-      />
-    );
+    return <SpeakerHighIcon />;
   };
 
   const handleVolumeChange = React.useCallback(
@@ -567,7 +558,10 @@ const AudioPlayerVolume = ({
                 tooltipLabel="Maximum volume"
                 variant="ghost"
               >
-                <SpeakerHighIcon aria-hidden="true" className="text-primary opacity-60" />
+                <SpeakerHighIcon
+                  aria-hidden="true"
+                  className="text-primary opacity-60"
+                />
               </AudioPlayerButton>
             </div>
           </DropdownMenuItem>
@@ -663,8 +657,7 @@ const AudioPlayerRewind = React.memo(
         variant={variant}
         {...props}
       >
-        <RewindIcon
-        />
+        <RewindIcon />
       </AudioPlayerButton>
     );
   }
@@ -713,8 +706,7 @@ const AudioPlayerFastForward = React.memo(
         variant={variant}
         {...props}
       >
-        <FastForwardIcon
-        />
+        <FastForwardIcon />
       </AudioPlayerButton>
     );
   }
@@ -755,8 +747,7 @@ const AudioPlayerSkipForward = React.memo(
         variant={variant}
         {...props}
       >
-        <SkipForwardIcon
-        />
+        <SkipForwardIcon />
       </AudioPlayerButton>
     );
   }
@@ -795,8 +786,7 @@ const AudioPlayerSkipBack = React.memo(
         variant={variant}
         {...props}
       >
-        <SkipBackIcon
-        />
+        <SkipBackIcon />
       </AudioPlayerButton>
     );
   }
@@ -969,8 +959,7 @@ function AudioTrack({
             <ItemTitle className="line-clamp-1">{track.title}</ItemTitle>
             {isLiveTrack && (
               <Badge variant="destructive">
-                <BroadcastIcon
-                />
+                <BroadcastIcon />
                 Live
               </Badge>
             )}
@@ -1011,8 +1000,7 @@ function AudioTrackCover({ className }: { className?: string }) {
     <Avatar className={className}>
       <AvatarImage alt={track.title} src={coverImage} />
       <AvatarFallback>
-        <MusicNotesIcon
-        />
+        <MusicNotesIcon />
       </AvatarFallback>
     </Avatar>
   );
@@ -1063,8 +1051,7 @@ function AudioTrackRemoveAction({ className }: { className?: string }) {
       title="Remove"
       variant="ghost"
     >
-      <XIcon
-      />
+      <XIcon />
     </Button>
   );
 }
@@ -1220,8 +1207,7 @@ function AudioTrackList({
       <Empty className={cn(className)}>
         <EmptyHeader>
           <EmptyMedia variant="icon">
-            <QueueIcon
-            />
+            <QueueIcon />
           </EmptyMedia>
           <EmptyTitle>{emptyLabel}</EmptyTitle>
           <EmptyDescription>{emptyDescription}</EmptyDescription>
@@ -1353,13 +1339,7 @@ const AudioQueueRepeatMode = ({
       variant={isActive ? "secondary" : "ghost"}
       {...props}
     >
-      {repeatMode === "one" ? (
-        <RepeatOnceIcon
-        />
-      ) : (
-        <RepeatIcon
-        />
-      )}
+      {repeatMode === "one" ? <RepeatOnceIcon /> : <RepeatIcon />}
     </AudioPlayerButton>
   );
 };
@@ -1392,8 +1372,7 @@ const AudioQueueShuffle = ({
       variant={shuffleEnabled ? "secondary" : "ghost"}
       {...props}
     >
-      <ShuffleIcon
-      />
+      <ShuffleIcon />
     </AudioPlayerButton>
   );
 };
@@ -1424,8 +1403,7 @@ const AudioQueuePreferences = ({
                 />
               }
             >
-              <SlidersHorizontalIcon
-              />
+              <SlidersHorizontalIcon />
             </DropdownMenuTrigger>
           }
         />
@@ -1555,8 +1533,7 @@ const AudioQueue = React.memo(
                   />
                 }
               >
-                <QueueIcon
-                />
+                <QueueIcon />
               </DialogTrigger>
             }
           />
@@ -1667,10 +1644,7 @@ function AudioPlaybackSpeed({
                 />
               }
             >
-              {!isIconSize && (
-                <GaugeIcon
-                />
-              )}
+              {!isIconSize && <GaugeIcon />}
               <span
                 className="starting:blur-[2px] starting:opacity-0 starting:translate-y-1 inline-block font-mono text-xs transition-[opacity,filter,translate] duration-150 ease-in-out will-change-[opacity,filter,translate] motion-reduce:transition-none"
                 key={displayLabel}

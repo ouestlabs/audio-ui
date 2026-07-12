@@ -377,6 +377,60 @@
     @apply animate-[cn-envelope-shake_280ms_linear] motion-reduce:animate-none;
   }
 
+  /* MARK: Piano Roll */
+  .cn-piano-roll {
+    @apply rounded-none border border-transparent bg-card shadow-sm ring-1 ring-foreground/10 transition-[color,border-color,box-shadow,opacity] duration-150 ease-out hover:ring-2 hover:ring-ring/30 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring/30 active:ring-2 active:ring-ring/30 has-[:focus-visible]:border-ring active:border-ring motion-reduce:transition-none;
+  }
+
+  /* Static container shape for the key strip — no interactive ring escalation, unlike .cn-piano-roll: it's a row of many individually-highlighted keys, not one interactive surface. */
+  .cn-piano-roll-keys {
+    @apply rounded-none border border-transparent bg-card shadow-sm ring-1 ring-foreground/10;
+  }
+
+  .cn-piano-roll-size-sm {
+    @apply h-32;
+  }
+
+  .cn-piano-roll-size-default {
+    @apply h-48;
+  }
+
+  .cn-piano-roll-size-lg {
+    @apply h-64;
+  }
+
+  .cn-piano-roll-line {
+    @apply pointer-events-none bg-border;
+  }
+
+  .cn-piano-roll-note {
+    @apply rounded-none bg-primary transition-[background-color,box-shadow] duration-150 ease-out hover:ring-2 hover:ring-ring/30 focus-visible:ring-2 focus-visible:ring-ring/30 active:ring-2 active:ring-ring/30 data-[disabled=true]:pointer-events-none motion-reduce:transition-none;
+  }
+
+  .cn-piano-roll-note[data-selected="true"] {
+    @apply ring-2 ring-ring;
+  }
+
+  .cn-piano-roll-note-handle {
+    @apply bg-foreground/20 transition-colors hover:bg-foreground/40 motion-reduce:transition-none;
+  }
+
+  .cn-piano-roll-playhead {
+    @apply bg-foreground;
+  }
+
+  .cn-piano-roll-key {
+    @apply border-border/40 border-b bg-card transition-colors duration-150 ease-out last:border-b-0 motion-reduce:transition-none;
+  }
+
+  .cn-piano-roll-key[data-color="black"] {
+    @apply bg-muted-foreground/70;
+  }
+
+  .cn-piano-roll-key[data-active="true"] {
+    @apply bg-primary;
+  }
+
   /* MARK: Channel Strip */
   .cn-channel-strip {
     @apply text-card-foreground;

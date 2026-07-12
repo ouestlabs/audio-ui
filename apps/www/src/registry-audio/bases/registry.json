@@ -7,7 +7,7 @@
       "name": "channel-strip"
     },
     {
-      "count": 7,
+      "count": 8,
       "description": "Interactive envelope components for editing linear ramp breakpoints.",
       "label": "Envelope",
       "name": "envelope"
@@ -37,7 +37,7 @@
       "name": "multislider"
     },
     {
-      "count": 6,
+      "count": 8,
       "description": "Virtual piano keyboard components with MIDI note ranges and glissando.",
       "label": "Piano",
       "name": "piano"
@@ -61,7 +61,7 @@
       "name": "queue"
     },
     {
-      "count": 6,
+      "count": 7,
       "description": "Step sequencer components — grids of buttons for programming patterns and triggers.",
       "label": "Sequencer",
       "name": "sequencer"
@@ -73,7 +73,7 @@
       "name": "sortable-list"
     },
     {
-      "count": 2,
+      "count": 5,
       "description": "Synth control patterns combining knobs, XY pads, and toggles.",
       "label": "Synth",
       "name": "synth"
@@ -97,5 +97,5 @@
       "name": "xypad"
     }
   ],
-  "totalComponents": 94
+  "totalComponents": 97
 }

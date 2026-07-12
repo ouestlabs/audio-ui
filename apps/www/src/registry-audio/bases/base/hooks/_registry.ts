@@ -55,6 +55,7 @@ export const hooks: RegistryItem[] = [
       },
     ],
     name: "use-step-clock",
+    registryDependencies: ["@audio/use-web-audio"],
     type: "registry:hook",
   },
   {
@@ -66,6 +67,30 @@ export const hooks: RegistryItem[] = [
       },
     ],
     name: "use-audio-levels",
+    type: "registry:hook",
+  },
+  {
+    categories: ["audio", "synth", "piano", "envelope"],
+    files: [
+      {
+        path: "hooks/use-synth-voices.ts",
+        type: "registry:hook",
+      },
+    ],
+    name: "use-synth-voices",
+    registryDependencies: ["@audio/synth-voice"],
+    type: "registry:hook",
+  },
+  {
+    categories: ["audio", "piano", "synth"],
+    files: [
+      {
+        path: "hooks/use-midi-input.ts",
+        type: "registry:hook",
+      },
+    ],
+    name: "use-midi-input",
+    registryDependencies: ["@audio/midi"],
     type: "registry:hook",
   },
 ];
