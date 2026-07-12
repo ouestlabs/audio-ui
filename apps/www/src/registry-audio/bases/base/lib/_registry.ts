@@ -92,7 +92,7 @@ export const lib: RegistryItem[] = [
     categories: ["lib", "audio", "piano", "synth"],
     dependencies: [],
     description:
-      "Web MIDI message parsing — note-on/note-off/velocity from raw MIDI bytes",
+      "Web MIDI message parsing (note-on/note-off/velocity from raw MIDI bytes) plus Standard MIDI File (.mid) import/export — parseMidiFile/encodeMidiFile",
     files: [
       {
         path: "lib/midi.ts",

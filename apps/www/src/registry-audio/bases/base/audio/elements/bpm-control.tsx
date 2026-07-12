@@ -1,0 +1,135 @@
+"use client";
+
+import { useCallback, useEffect, useId, useState } from "react";
+import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from "@/registry/bases/base/ui/input-group";
+import {
+  ChannelStrip,
+  ChannelStripContent,
+  ChannelStripLabel,
+  ChannelStripSection,
+} from "@/registry-audio/bases/base/audio/elements/channel-strip";
+
+const DEFAULT_MIN_BPM = 20;
+const DEFAULT_MAX_BPM = 200;
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value));
+}
+
+interface BpmControlProps {
+  max?: number;
+  min?: number;
+  onValueChange: (bpm: number) => void;
+  value: number;
+}
+
+/** A labeled BPM stepper — a decrement/increment `InputGroup` around a numeric field, synced to an external controlled `value`. Typed input is held in a local draft until blur/Enter so mid-typing states (an empty field, a partial number) never get clamped away on every keystroke. */
+export function BpmControl({
+  max = DEFAULT_MAX_BPM,
+  min = DEFAULT_MIN_BPM,
+  onValueChange,
+  value,
+}: BpmControlProps) {
+  const inputId = useId();
+  const labelId = useId();
+  const [draft, setDraft] = useState(String(value));
+
+  useEffect(() => {
+    setDraft(String(value));
+  }, [value]);
+
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setDraft(e.target.value);
+    },
+    []
+  );
+
+  const commitDraft = useCallback(() => {
+    const parsed = Number(draft);
+    if (!Number.isNaN(parsed)) {
+      onValueChange(clamp(parsed, min, max));
+    }
+  }, [draft, max, min, onValueChange]);
+
+  const handleInputKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === "Enter") {
+        e.currentTarget.blur();
+      }
+    },
+    []
+  );
+
+  const handleDecrement = useCallback(() => {
+    onValueChange(clamp(value - 1, min, max));
+  }, [max, min, onValueChange, value]);
+
+  const handleIncrement = useCallback(() => {
+    onValueChange(clamp(value + 1, min, max));
+  }, [max, min, onValueChange, value]);
+
+  return (
+    <ChannelStrip aria-label="BPM" orientation="horizontal">
+      <ChannelStripContent>
+        <ChannelStripSection>
+          <ChannelStripLabel className="text-left" id={labelId}>
+            BPM
+          </ChannelStripLabel>
+          <InputGroup>
+            <InputGroupAddon align="inline-start">
+              <InputGroupButton
+                aria-label="Decrease BPM"
+                onClick={handleDecrement}
+                size="icon-xs"
+              >
+                <IconPlaceholder
+                  hugeicons="MinusSignIcon"
+                  lucide="Minus"
+                  phosphor="MinusIcon"
+                  remixicon="RiSubtractLine"
+                  tabler="IconMinus"
+                />
+              </InputGroupButton>
+            </InputGroupAddon>
+            <InputGroupInput
+              aria-labelledby={labelId}
+              className="[appearance:textfield] text-center [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+              id={inputId}
+              inputMode="numeric"
+              max={max}
+              min={min}
+              onBlur={commitDraft}
+              onChange={handleInputChange}
+              onKeyDown={handleInputKeyDown}
+              step={1}
+              type="number"
+              value={draft}
+            />
+            <InputGroupAddon align="inline-end">
+              <InputGroupButton
+                aria-label="Increase BPM"
+                onClick={handleIncrement}
+                size="icon-xs"
+              >
+                <IconPlaceholder
+                  hugeicons="PlusSignIcon"
+                  lucide="Plus"
+                  phosphor="PlusIcon"
+                  remixicon="RiAddLine"
+                  tabler="IconPlus"
+                />
+              </InputGroupButton>
+            </InputGroupAddon>
+          </InputGroup>
+        </ChannelStripSection>
+      </ChannelStripContent>
+    </ChannelStrip>
+  );
+}

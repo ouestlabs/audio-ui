@@ -1,15 +1,12 @@
 "use client";
 
-import type { PianoRoll as PianoRollPrimitive } from "@audio-ui/react";
+import type {
+  PianoRoll as PianoRollPrimitive,
+  Ruler as RulerPrimitive,
+} from "@audio-ui/react";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
-import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder";
 import { Button } from "@/registry/bases/base/ui/button";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupButton,
-  InputGroupInput,
-} from "@/registry/bases/base/ui/input-group";
+import { BpmControl } from "@/registry-audio/bases/base/audio/elements/bpm-control";
 import {
   ChannelStrip,
   ChannelStripContent,
@@ -18,28 +15,37 @@ import {
   ChannelStripValue,
 } from "@/registry-audio/bases/base/audio/elements/channel-strip";
 import { Fader } from "@/registry-audio/bases/base/audio/elements/fader";
-import { MidiConnectControl } from "@/registry-audio/bases/base/audio/elements/midi-connect-control";
 import { PianoRoll } from "@/registry-audio/bases/base/audio/elements/piano-roll";
-import { useMidiInput } from "@/registry-audio/bases/base/hooks/use-midi-input";
+import { Ruler } from "@/registry-audio/bases/base/audio/elements/ruler";
 import {
   type UseSynthVoicesReturn,
   useSynthVoices,
 } from "@/registry-audio/bases/base/hooks/use-synth-voices";
 import { useWebAudio } from "@/registry-audio/bases/base/hooks/use-web-audio";
+import {
+  encodeMidiFile,
+  type MidiFileNote,
+  parseMidiFile,
+} from "@/registry-audio/bases/base/lib/midi";
 import type { EnvelopePoint } from "@/registry-audio/bases/base/lib/synth-voice";
 
 const START_NOTE = 48;
 const END_NOTE = 72;
 const DEFAULT_VOLUME = 0.7;
-const MIDI_MAX_VELOCITY = 127;
 const TOTAL_STEPS = 16;
 const BEATS_PER_BAR = 4;
-const MIN_BPM = 60;
-const MAX_BPM = 200;
 const DEFAULT_BPM = 120;
-const LOOP_SCHEDULE_LEAD_MS = 100;
+const MIN_BPM = 20;
+const MAX_BPM = 200;
+/** Look-ahead scheduler constants — the standard Web Audio pattern : poll frequently and only ever commit whatever falls within a short rolling window of `ctx.currentTime`, instead of sleeping for a whole loop and betting everything on one timer firing exactly on time. */
+const SCHEDULER_POLL_MS = 25;
+const SCHEDULE_AHEAD_SECONDS = 0.1;
 /** How long a discrete (non-drag) grid edit — a click-add, a keyboard nudge — keeps its key-strip highlight lit after the instant audio blip. */
 const BLIP_HIGHLIGHT_MS = 200;
+/** Standard MIDI File resolution — ticks per quarter note, a common round value shared by most DAWs' own exports. */
+const MIDI_TICKS_PER_QUARTER_NOTE = 480;
+const MICROSECONDS_PER_MINUTE = 60_000_000;
+const MIDI_FILE_ACCEPT = ".mid,.midi,audio/midi,audio/x-midi";
 
 /** ADSR-shaped, matching the Envelope primitive's own default — this block doesn't expose an editable envelope, keeping it focused on the note grid. */
 const DEFAULT_ENVELOPE: EnvelopePoint[] = [
@@ -51,9 +57,70 @@ const DEFAULT_ENVELOPE: EnvelopePoint[] = [
 ];
 
 type Note = PianoRollPrimitive.Note;
+type LoopRegion = RulerPrimitive.Region;
+
+/** No region set — the loop spans the full grid, the original always-loop-everything behavior. */
+const FULL_LOOP_REGION: LoopRegion = { end: TOTAL_STEPS, start: 0 };
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
+}
+
+/** Quantizes a parsed MIDI file's tick-based notes onto the grid's fixed `TOTAL_STEPS` window, adopting the file's own tempo (clamped to the BPM control's range) rather than the grid's current one — notes starting at or past the last step are dropped, matching this block's fixed one-bar-loop model. */
+function notesFromMidiFile(parsed: {
+  microsecondsPerQuarterNote: number;
+  notes: MidiFileNote[];
+  ticksPerQuarterNote: number;
+}): { bpm: number; notes: Note[] } {
+  const bpm = clamp(
+    Math.round(MICROSECONDS_PER_MINUTE / parsed.microsecondsPerQuarterNote),
+    MIN_BPM,
+    MAX_BPM
+  );
+  const secondsPerTick =
+    parsed.microsecondsPerQuarterNote / 1_000_000 / parsed.ticksPerQuarterNote;
+  const stepDuration = ((60 / bpm) * BEATS_PER_BAR) / TOTAL_STEPS;
+
+  const notes: Note[] = [];
+  for (const midiNote of parsed.notes) {
+    const startStep = Math.round(
+      (midiNote.startTick * secondsPerTick) / stepDuration
+    );
+    if (startStep < 0 || startStep >= TOTAL_STEPS) {
+      continue;
+    }
+    const durationSteps = clamp(
+      Math.round((midiNote.durationTicks * secondsPerTick) / stepDuration),
+      1,
+      TOTAL_STEPS - startStep
+    );
+    notes.push({
+      duration: durationSteps,
+      id: `midi-import-${notes.length}`,
+      note: clamp(midiNote.note, START_NOTE, END_NOTE),
+      startStep,
+      velocity: clamp(midiNote.velocity, 0, 1),
+    });
+  }
+  return { bpm, notes };
+}
+
+/** The grid's own step/BPM timing converted to MIDI ticks at a fixed, common resolution — the inverse of `notesFromMidiFile`. */
+function notesToMidiFile(notes: Note[], bpm: number): Uint8Array {
+  const ticksPerStep =
+    (MIDI_TICKS_PER_QUARTER_NOTE * BEATS_PER_BAR) / TOTAL_STEPS;
+  const midiNotes: MidiFileNote[] = notes.map((note) => ({
+    channel: 0,
+    durationTicks: Math.round(note.duration * ticksPerStep),
+    note: note.note,
+    startTick: Math.round(note.startStep * ticksPerStep),
+    velocity: note.velocity ?? 1,
+  }));
+  return encodeMidiFile({
+    bpm,
+    notes: midiNotes,
+    ticksPerQuarterNote: MIDI_TICKS_PER_QUARTER_NOTE,
+  });
 }
 
 /** Creates a master GainNode once on mount and keeps it synced to `volume`. Split out purely to keep the block component's cognitive complexity manageable. */
@@ -90,7 +157,7 @@ function useMasterGain(
 
 interface UsePianoRollOptions {
   bpm: number;
-  isMuted: boolean;
+  loopRegion: LoopRegion | null;
   releaseAll: UseSynthVoicesReturn["releaseAll"];
   releaseNote: UseSynthVoicesReturn["releaseNote"];
   triggerNote: UseSynthVoicesReturn["triggerNote"];
@@ -100,21 +167,25 @@ interface UsePianoRollOptions {
 /**
  * Owns the note grid's data (fed to the PianoRoll primitive as a controlled
  * value — click/drag/keyboard edits flow back in through `onValueChange`),
- * live-preview triggering for the key strip and MIDI input, a short-lived
- * "which pitch was just edited" highlight for the key strip, and the
- * loop-playback state machine. Split out of the block component purely to
- * keep its cognitive complexity manageable.
+ * live-preview triggering for the key strip, a short-lived "which pitch was
+ * just edited" highlight for the key strip, and the loop-playback state
+ * machine (region-aware via `loopRegion`, seekable via `seekTo`). Split out
+ * of the block component purely to keep its cognitive complexity manageable.
  */
 function usePianoRoll({
   bpm,
-  isMuted,
+  loopRegion,
   releaseAll,
   releaseNote,
   triggerNote,
   webAudio,
 }: UsePianoRollOptions) {
-  const loopDuration = (60 / bpm) * BEATS_PER_BAR;
-  const stepDuration = loopDuration / TOTAL_STEPS;
+  // Step duration stays bpm/tempo-derived regardless of the loop region —
+  // only how many steps repeat changes, never how long each one lasts.
+  const barSeconds = (60 / bpm) * BEATS_PER_BAR;
+  const stepDuration = barSeconds / TOTAL_STEPS;
+  const region = loopRegion ?? FULL_LOOP_REGION;
+  const loopDuration = (region.end - region.start) * stepDuration;
 
   const [notes, setNotesState] = useState<Note[]>([]);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -129,14 +200,18 @@ function usePianoRoll({
   loopDurationRef.current = loopDuration;
   const stepDurationRef = useRef(stepDuration);
   stepDurationRef.current = stepDuration;
-  const isMutedRef = useRef(isMuted);
-  isMutedRef.current = isMuted;
+  const regionRef = useRef(region);
+  regionRef.current = region;
   const isPlayingRef = useRef(isPlaying);
   isPlayingRef.current = isPlaying;
 
-  const playbackTimeoutRef = useRef<number | null>(null);
+  const schedulerIntervalRef = useRef<number | null>(null);
+  /** Fixed reference point (AudioContext time of the region's step 0) set once per play/seek/region-restart — never advanced by the scheduler poll itself, since `elapsed % duration` is already self-correcting for display regardless of how many iterations have actually played. */
   const loopAnchorTimeRef = useRef(0);
+  /** Rolling scheduling cursor — the next AudioContext time boundary that still needs its notes committed. Runs ahead of `loopAnchorTimeRef`/real playback by up to `SCHEDULE_AHEAD_SECONDS`, and is what the look-ahead poller actually advances. */
+  const scheduledUntilTimeRef = useRef(0);
   const playheadRef = useRef<HTMLDivElement | null>(null);
+  const rulerPlayheadRef = useRef<HTMLDivElement | null>(null);
   /** The pitches currently sounding because of an in-progress grid drag — held (not blipped) for as long as the drag continues, released on pointerup, same as the key strip's own hold semantics. A group move shifts every selected note by the same delta, so whenever any pitch changes they all change together on that frame — the edited set IS the group's complete new pitch set. */
   const heldGridPitchesRef = useRef<Set<number>>(new Set());
   const gridPointerUpHandlerRef = useRef<(() => void) | null>(null);
@@ -146,10 +221,8 @@ function usePianoRoll({
 
   const releaseAllHeldGridPitches = useCallback(() => {
     if (heldGridPitchesRef.current.size > 0) {
-      if (!isMutedRef.current) {
-        for (const pitch of heldGridPitchesRef.current) {
-          releaseNote(pitch, DEFAULT_ENVELOPE);
-        }
+      for (const pitch of heldGridPitchesRef.current) {
+        releaseNote(pitch, DEFAULT_ENVELOPE);
       }
       heldGridPitchesRef.current = new Set();
     }
@@ -201,7 +274,7 @@ function usePianoRoll({
   /** Actively dragging: swap the held set to match `editedPitches` — release whatever's no longer part of it, trigger whatever's newly in it. Skipped while the loop is playing: the loop schedules its own notes ahead of time through the same voice pool, and a live-preview trigger/release on a pitch the loop already has scheduled would fight over that voice and cut it off or mis-time it. The highlight and bookkeeping still update — only the audio is held back. */
   const holdEditedPitches = useCallback(
     (editedPitches: Set<number>) => {
-      if (!(isMutedRef.current || isPlayingRef.current)) {
+      if (!isPlayingRef.current) {
         for (const pitch of heldGridPitchesRef.current) {
           if (!editedPitches.has(pitch)) {
             releaseNote(pitch, DEFAULT_ENVELOPE);
@@ -222,7 +295,7 @@ function usePianoRoll({
   /** A discrete action (click-add, keyboard nudge) — no drag to hold through, so just blip each newly-edited pitch and let the highlight fade shortly after. Consecutive blips (e.g. rapid arrow-key nudges) share one cancelable timer so an earlier blip's clear can never wipe out a highlight a later blip just set. Skipped while playing, for the same voice-stealing reason as `holdEditedPitches`. */
   const blipEditedPitches = useCallback(
     (editedPitches: Set<number>) => {
-      if (!(isMutedRef.current || isPlayingRef.current)) {
+      if (!isPlayingRef.current) {
         for (const pitch of editedPitches) {
           triggerNote(pitch, DEFAULT_ENVELOPE, 1);
           releaseNote(pitch, DEFAULT_ENVELOPE);
@@ -266,55 +339,38 @@ function usePianoRoll({
 
   const handleNoteOn = useCallback(
     (note: number) => {
-      if (!isMutedRef.current) {
-        triggerNote(note, DEFAULT_ENVELOPE, 1);
-      }
+      triggerNote(note, DEFAULT_ENVELOPE, 1);
     },
     [triggerNote]
   );
 
   const handleNoteOff = useCallback(
     (note: number) => {
-      if (!isMutedRef.current) {
-        releaseNote(note, DEFAULT_ENVELOPE);
-      }
-    },
-    [releaseNote]
-  );
-
-  const handleMidiNoteOn = useCallback(
-    (note: number, velocity: number) => {
-      if (!isMutedRef.current) {
-        triggerNote(note, DEFAULT_ENVELOPE, velocity / MIDI_MAX_VELOCITY);
-      }
-    },
-    [triggerNote]
-  );
-
-  const handleMidiNoteOff = useCallback(
-    (note: number) => {
-      if (!isMutedRef.current) {
-        releaseNote(note, DEFAULT_ENVELOPE);
-      }
+      releaseNote(note, DEFAULT_ENVELOPE);
     },
     [releaseNote]
   );
 
   const stopPlayback = useCallback(() => {
-    if (playbackTimeoutRef.current !== null) {
-      window.clearTimeout(playbackTimeoutRef.current);
-      playbackTimeoutRef.current = null;
+    if (schedulerIntervalRef.current !== null) {
+      window.clearInterval(schedulerIntervalRef.current);
+      schedulerIntervalRef.current = null;
     }
     setIsPlaying(false);
     releaseAll();
   }, [releaseAll]);
 
-  const scheduleLoopIteration = useCallback(
+  /** Schedules exactly one loop iteration's notes, anchored at `anchorTime` — a single, precisely-timed batch of Web Audio `start`/`stop` calls, sample-accurate regardless of when this function itself happens to run. */
+  const scheduleIterationNotes = useCallback(
     (anchorTime: number) => {
-      loopAnchorTimeRef.current = anchorTime;
       const stepSeconds = stepDurationRef.current;
+      const { end, start } = regionRef.current;
       for (const recordedNote of notesRef.current) {
-        const onTime = anchorTime + recordedNote.startStep * stepSeconds;
+        if (recordedNote.startStep < start || recordedNote.startStep >= end) {
+          continue;
+        }
+        const onTime =
+          anchorTime + (recordedNote.startStep - start) * stepSeconds;
         const offTime = onTime + recordedNote.duration * stepSeconds;
         triggerNote(
           recordedNote.note,
@@ -324,15 +380,69 @@ function usePianoRoll({
         );
         releaseNote(recordedNote.note, DEFAULT_ENVELOPE, offTime);
       }
-      const delayMs = Math.max(
-        0,
-        loopDurationRef.current * 1000 - LOOP_SCHEDULE_LEAD_MS
-      );
-      playbackTimeoutRef.current = window.setTimeout(() => {
-        scheduleLoopIteration(anchorTime + loopDurationRef.current);
-      }, delayMs);
     },
     [releaseNote, triggerNote]
+  );
+
+  /** The look-ahead poll itself: commits every loop iteration boundary that falls within `SCHEDULE_AHEAD_SECONDS` of right now. The `while` (not `if`) is what makes this self-correcting — if a poll is ever delayed past a full loop duration (a stalled main thread, a throttled background tab), the next poll just catches up by scheduling more than one iteration, rather than a boundary silently slipping past unscheduled. */
+  const pollScheduler = useCallback(() => {
+    const ctx = webAudio.getContext();
+    if (!ctx) {
+      return;
+    }
+    const horizon = ctx.currentTime + SCHEDULE_AHEAD_SECONDS;
+    while (scheduledUntilTimeRef.current < horizon) {
+      scheduleIterationNotes(scheduledUntilTimeRef.current);
+      scheduledUntilTimeRef.current += loopDurationRef.current;
+    }
+  }, [scheduleIterationNotes, webAudio]);
+
+  /** (Re)starts the look-ahead scheduler from `anchorTime` — used to begin playback, and whenever the loop region changes or the ruler is used to seek mid-playback, so the change is audible immediately instead of waiting for a stale iteration to finish. */
+  const restartLoopFrom = useCallback(
+    (anchorTime: number) => {
+      if (schedulerIntervalRef.current !== null) {
+        window.clearInterval(schedulerIntervalRef.current);
+      }
+      releaseAll();
+      loopAnchorTimeRef.current = anchorTime;
+      scheduledUntilTimeRef.current = anchorTime;
+      pollScheduler();
+      schedulerIntervalRef.current = window.setInterval(
+        pollScheduler,
+        SCHEDULER_POLL_MS
+      );
+    },
+    [pollScheduler, releaseAll]
+  );
+
+  /** Fired on `Ruler`'s `onValueCommit` — the region drag has already streamed through `onValueChange`, so `regionRef.current` is fresh by the time this runs. Only meaningful mid-playback; an idle loop just remembers the new region for its next `Play`. */
+  const commitLoopRegion = useCallback(() => {
+    if (!isPlayingRef.current) {
+      return;
+    }
+    const ctx = webAudio.getContext();
+    if (ctx) {
+      restartLoopFrom(ctx.currentTime);
+    }
+  }, [restartLoopFrom, webAudio]);
+
+  /** Fired on `Ruler`'s `onSeek` (a plain click on the ruler track). Only meaningful mid-playback, same as `commitLoopRegion` — there's no stopped-state playhead to seek yet. */
+  const seekTo = useCallback(
+    (step: number) => {
+      if (!isPlayingRef.current) {
+        return;
+      }
+      const ctx = webAudio.getContext();
+      if (!ctx) {
+        return;
+      }
+      const { end, start } = regionRef.current;
+      const clampedStep = clamp(step, start, end - 1);
+      const anchorTime =
+        ctx.currentTime - (clampedStep - start) * stepDurationRef.current;
+      restartLoopFrom(anchorTime);
+    },
+    [restartLoopFrom, webAudio]
   );
 
   const startPlayback = useCallback(() => {
@@ -341,13 +451,22 @@ function usePianoRoll({
       return;
     }
     setIsPlaying(true);
-    scheduleLoopIteration(ctx.currentTime);
-  }, [scheduleLoopIteration, webAudio]);
+    restartLoopFrom(ctx.currentTime);
+  }, [restartLoopFrom, webAudio]);
 
   const clearNotes = useCallback(() => {
     stopPlayback();
     setNotesState([]);
   }, [stopPlayback]);
+
+  /** Replaces the whole grid at once — e.g. after a MIDI file import — bypassing `setNotes`'s per-edit live-preview bookkeeping, which is meant for interactive clicks/drags, not a bulk load. */
+  const importNotes = useCallback(
+    (next: Note[]) => {
+      stopPlayback();
+      setNotesState(next);
+    },
+    [stopPlayback]
+  );
 
   useEffect(() => {
     if (!isPlaying) {
@@ -363,17 +482,26 @@ function usePianoRoll({
     const tick = () => {
       const elapsed = ctx.currentTime - loopAnchorTimeRef.current;
       const duration = loopDurationRef.current;
-      const percent =
-        duration > 0 ? ((elapsed % duration) / duration) * 100 : 0;
+      const positionInLoop = duration > 0 ? elapsed % duration : 0;
+      const stepSeconds = stepDurationRef.current;
+      const { end, start } = regionRef.current;
+      // Position within the region maps onto the *full* grid width — the
+      // playhead only sweeps the region's span, not the whole timeline.
+      const stepPosition = start + positionInLoop / stepSeconds;
+      const percent = (stepPosition / TOTAL_STEPS) * 100;
       if (playheadRef.current) {
         playheadRef.current.style.left = `${percent}%`;
       }
+      if (rulerPlayheadRef.current) {
+        rulerPlayheadRef.current.style.left = `${percent}%`;
+      }
 
-      const positionInLoop = duration > 0 ? elapsed % duration : 0;
-      const stepSeconds = stepDurationRef.current;
       const sounding = notesRef.current
         .filter((n) => {
-          const onTime = n.startStep * stepSeconds;
+          if (n.startStep < start || n.startStep >= end) {
+            return false;
+          }
+          const onTime = (n.startStep - start) * stepSeconds;
           const offTime = onTime + n.duration * stepSeconds;
           return positionInLoop >= onTime && positionInLoop < offTime;
         })
@@ -396,15 +524,17 @@ function usePianoRoll({
 
   return {
     clearNotes,
+    commitLoopRegion,
     gridHighlightNotes,
-    handleMidiNoteOff,
-    handleMidiNoteOn,
     handleNoteOff,
     handleNoteOn,
+    importNotes,
     isPlaying,
     notes,
     playheadRef,
     playingHighlightNotes,
+    rulerPlayheadRef,
+    seekTo,
     setNotes,
     startPlayback,
     stopPlayback,
@@ -416,60 +546,40 @@ export default function BlockPianoRoll() {
   const volumeId = useId();
   const volumeLabelId = useId();
   const volumeValueId = useId();
-  const bpmId = useId();
-  const bpmLabelId = useId();
 
   const [volume, setVolume] = useState(DEFAULT_VOLUME);
   const [bpm, setBpm] = useState(DEFAULT_BPM);
-  const [bpmDraft, setBpmDraft] = useState(String(DEFAULT_BPM));
-  const [isMuted, setIsMuted] = useState(false);
+  const [loopRegion, setLoopRegion] = useState<LoopRegion | null>(null);
   const masterGain = useMasterGain(webAudio, volume);
 
-  const { releaseAll, releaseNote, setPitchBend, triggerNote } = useSynthVoices(
-    { destination: masterGain }
-  );
+  const { releaseAll, releaseNote, triggerNote } = useSynthVoices({
+    destination: masterGain,
+  });
 
   const {
     clearNotes,
+    commitLoopRegion,
     gridHighlightNotes,
-    handleMidiNoteOff,
-    handleMidiNoteOn,
     handleNoteOff,
     handleNoteOn,
+    importNotes,
     isPlaying,
     notes,
     playheadRef,
     playingHighlightNotes,
+    rulerPlayheadRef,
+    seekTo,
     setNotes,
     startPlayback,
     stopPlayback,
   } = usePianoRoll({
     bpm,
-    isMuted,
+    loopRegion,
     releaseAll,
     releaseNote,
     triggerNote,
     webAudio,
   });
-
-  const midi = useMidiInput({
-    onNoteOff: handleMidiNoteOff,
-    onNoteOn: handleMidiNoteOn,
-    onPitchBend: setPitchBend,
-  });
-
-  const handleMidiToggle = useCallback(() => {
-    if (midi.isConnected) {
-      midi.disconnect();
-      releaseAll();
-    } else {
-      midi.requestAccess();
-    }
-  }, [midi, releaseAll]);
-
-  const handleMuteToggle = useCallback(() => {
-    setIsMuted((muted) => !muted);
-  }, []);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -491,49 +601,119 @@ export default function BlockPianoRoll() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isPlaying, notes.length, startPlayback, stopPlayback]);
 
-  const activeKeyNotes = [
-    ...midi.activeNotes,
-    ...gridHighlightNotes,
-    ...playingHighlightNotes,
-  ];
+  const activeKeyNotes = [...gridHighlightNotes, ...playingHighlightNotes];
 
-  const handleBpmInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setBpmDraft(e.target.value);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [isDraggingFile, setIsDraggingFile] = useState(false);
+
+  const importMidiFile = useCallback(
+    async (file: File) => {
+      const buffer = await file.arrayBuffer();
+      const parsed = parseMidiFile(buffer);
+      const imported = notesFromMidiFile(parsed);
+      importNotes(imported.notes);
+      setBpm(imported.bpm);
     },
-    []
+    [importNotes]
   );
 
-  const commitBpmDraft = useCallback(() => {
-    const parsed = Number(bpmDraft);
-    setBpm((value) =>
-      Number.isNaN(parsed) ? value : clamp(parsed, MIN_BPM, MAX_BPM)
-    );
-  }, [bpmDraft]);
+  const handleImportButtonClick = useCallback(() => {
+    fileInputRef.current?.click();
+  }, []);
 
-  const handleBpmInputKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === "Enter") {
-        e.currentTarget.blur();
+  const handleFileInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      e.target.value = "";
+      if (file) {
+        importMidiFile(file);
       }
     },
-    []
+    [importMidiFile]
   );
 
-  const handleBpmDecrement = useCallback(() => {
-    setBpm((value) => clamp(value - 1, MIN_BPM, MAX_BPM));
+  const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    if (!e.dataTransfer.types.includes("Files")) {
+      return;
+    }
+    e.preventDefault();
+    setIsDraggingFile(true);
   }, []);
 
-  const handleBpmIncrement = useCallback(() => {
-    setBpm((value) => clamp(value + 1, MIN_BPM, MAX_BPM));
+  const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    if (e.currentTarget.contains(e.relatedTarget as Node | null)) {
+      return;
+    }
+    setIsDraggingFile(false);
   }, []);
 
-  useEffect(() => {
-    setBpmDraft(String(bpm));
-  }, [bpm]);
+  const handleDrop = useCallback(
+    (e: React.DragEvent<HTMLDivElement>) => {
+      const [file] = e.dataTransfer.files;
+      if (!file) {
+        return;
+      }
+      e.preventDefault();
+      setIsDraggingFile(false);
+      importMidiFile(file);
+    },
+    [importMidiFile]
+  );
+
+  const handleExportMidiFile = useCallback(() => {
+    const bytes = notesToMidiFile(notes, bpm);
+    // `Uint8Array`'s `.buffer` types as `ArrayBufferLike` (which also covers
+    // `SharedArrayBuffer`) while `BlobPart` wants a concrete `ArrayBuffer` —
+    // safe here since `encodeMidiFile` always builds a fresh, non-shared one.
+    const blob = new Blob([bytes.buffer as ArrayBuffer], {
+      type: "audio/midi",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "piano-roll.mid";
+    link.click();
+    URL.revokeObjectURL(url);
+  }, [bpm, notes]);
 
   return (
-    <div className="cn-audio-panel flex w-full min-w-0 flex-col gap-4 border bg-card p-4">
+    <div
+      className="cn-audio-panel relative flex w-full min-w-0 flex-col gap-4 border bg-card p-4"
+      onDragLeave={handleDragLeave}
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
+      role="group"
+    >
+      <input
+        accept={MIDI_FILE_ACCEPT}
+        className="sr-only"
+        onChange={handleFileInputChange}
+        ref={fileInputRef}
+        type="file"
+      />
+      {isDraggingFile ? (
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center rounded-[inherit] border-2 border-primary border-dashed bg-background/80 font-medium text-sm"
+        >
+          Drop a MIDI file to import
+        </div>
+      ) : null}
+      <div className="flex w-full min-w-0 gap-2">
+        {/* Spacer matching PianoRoll's own KeysTrack width, so the ruler's steps line up with the grid's steps below it rather than the full card width. */}
+        <div aria-hidden="true" className="w-10 shrink-0" />
+        <Ruler
+          aria-label="Loop region"
+          className="flex-1"
+          isPlaying={isPlaying}
+          onSeek={seekTo}
+          onValueChange={setLoopRegion}
+          onValueCommit={commitLoopRegion}
+          playheadRef={rulerPlayheadRef}
+          totalSteps={TOTAL_STEPS}
+          value={loopRegion}
+        />
+      </div>
       <PianoRoll
         activeNotes={activeKeyNotes}
         aria-label="Piano roll grid"
@@ -568,76 +748,24 @@ export default function BlockPianoRoll() {
             Clear
           </Button>
           <Button
-            aria-pressed={isMuted}
-            onClick={handleMuteToggle}
+            onClick={handleImportButtonClick}
             size="sm"
             type="button"
-            variant={isMuted ? "default" : "outline"}
+            variant="outline"
           >
-            <IconPlaceholder
-              className="size-4"
-              hugeicons={isMuted ? "VolumeOffIcon" : "VolumeHighIcon"}
-              lucide={isMuted ? "VolumeX" : "Volume2"}
-              phosphor={isMuted ? "SpeakerSlashIcon" : "SpeakerHighIcon"}
-              remixicon={isMuted ? "RiVolumeMuteLine" : "RiVolumeUpLine"}
-              tabler={isMuted ? "IconVolumeOff" : "IconVolume"}
-            />
-            {isMuted ? "Muted" : "Live Preview"}
+            Import MIDI
+          </Button>
+          <Button
+            disabled={notes.length === 0}
+            onClick={handleExportMidiFile}
+            size="sm"
+            type="button"
+            variant="outline"
+          >
+            Export MIDI
           </Button>
         </div>
-        <div className="flex items-center gap-2">
-          <ChannelStripLabel className="text-left" id={bpmLabelId}>
-            BPM
-          </ChannelStripLabel>
-          <InputGroup>
-            <InputGroupAddon align="inline-start">
-              <InputGroupButton
-                aria-label="Decrease BPM"
-                onClick={handleBpmDecrement}
-                size="icon-xs"
-              >
-                <IconPlaceholder
-                  className="size-4"
-                  hugeicons="MinusSignIcon"
-                  lucide="Minus"
-                  phosphor="MinusIcon"
-                  remixicon="RiSubtractLine"
-                  tabler="IconMinus"
-                />
-              </InputGroupButton>
-            </InputGroupAddon>
-            <InputGroupInput
-              aria-labelledby={bpmLabelId}
-              className="[appearance:textfield] text-center [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-              id={bpmId}
-              inputMode="numeric"
-              max={MAX_BPM}
-              min={MIN_BPM}
-              onBlur={commitBpmDraft}
-              onChange={handleBpmInputChange}
-              onKeyDown={handleBpmInputKeyDown}
-              step={1}
-              type="number"
-              value={bpmDraft}
-            />
-            <InputGroupAddon align="inline-end">
-              <InputGroupButton
-                aria-label="Increase BPM"
-                onClick={handleBpmIncrement}
-                size="icon-xs"
-              >
-                <IconPlaceholder
-                  className="size-4"
-                  hugeicons="PlusSignIcon"
-                  lucide="Plus"
-                  phosphor="PlusIcon"
-                  remixicon="RiAddLine"
-                  tabler="IconPlus"
-                />
-              </InputGroupButton>
-            </InputGroupAddon>
-          </InputGroup>
-        </div>
+        <BpmControl onValueChange={setBpm} value={bpm} />
       </div>
       <div className="flex flex-wrap items-center justify-between gap-4">
         <ChannelStrip
@@ -664,7 +792,6 @@ export default function BlockPianoRoll() {
             </ChannelStripSection>
           </ChannelStripContent>
         </ChannelStrip>
-        <MidiConnectControl midi={midi} onToggle={handleMidiToggle} />
       </div>
     </div>
   );

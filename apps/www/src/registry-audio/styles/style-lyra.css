@@ -431,6 +431,31 @@
     @apply bg-primary;
   }
 
+  /* MARK: Ruler */
+  .cn-ruler {
+    @apply relative h-6 overflow-hidden rounded-none border border-transparent bg-card ring-1 ring-foreground/10 transition-[color,border-color,box-shadow,opacity] duration-150 ease-out hover:ring-1 hover:ring-ring/50 has-[:focus-visible]:ring-1 has-[:focus-visible]:ring-ring/50 active:ring-1 active:ring-ring/50 has-[:focus-visible]:border-ring active:border-ring motion-reduce:transition-none;
+  }
+
+  .cn-ruler-mark {
+    @apply pointer-events-none bottom-0 h-1.5 bg-border;
+  }
+
+  .cn-ruler-mark-beat {
+    @apply h-full bg-border;
+  }
+
+  .cn-ruler-region {
+    @apply rounded-none bg-primary/25 ring-1 ring-primary/40 transition-[background-color,box-shadow] duration-150 ease-out hover:bg-primary/35 focus-visible:ring-1 focus-visible:ring-ring/50 active:ring-1 active:ring-ring/50 data-[disabled=true]:pointer-events-none motion-reduce:transition-none;
+  }
+
+  .cn-ruler-region-handle {
+    @apply bg-foreground/20 transition-colors hover:bg-foreground/40 motion-reduce:transition-none;
+  }
+
+  .cn-ruler-playhead {
+    @apply bg-foreground;
+  }
+
   /* MARK: Channel Strip */
   .cn-channel-strip {
     @apply text-card-foreground;

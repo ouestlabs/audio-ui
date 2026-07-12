@@ -126,11 +126,33 @@ export const audio: RegistryItem[] = [
     dependencies: ["@audio-ui/react"],
     files: [
       {
+        path: "audio/elements/ruler.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "ruler",
+    type: "registry:ui",
+  },
+  {
+    dependencies: ["@audio-ui/react"],
+    files: [
+      {
         path: "audio/elements/meter.tsx",
         type: "registry:ui",
       },
     ],
     name: "meter",
+    type: "registry:ui",
+  },
+  {
+    files: [
+      {
+        path: "audio/elements/bpm-control.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "bpm-control",
+    registryDependencies: ["@audio/channel-strip", "@shadcn/input-group"],
     type: "registry:ui",
   },
   {
