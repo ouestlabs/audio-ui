@@ -44,6 +44,7 @@ export {
   SidebarLeftIcon,
   Tick02Icon,
   UnfoldMoreIcon,
+  Upload01Icon,
   VolumeHighIcon,
   VolumeLowIcon,
   VolumeMute02Icon,

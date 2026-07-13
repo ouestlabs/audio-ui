@@ -39,6 +39,7 @@ export {
   IconShare,
   IconShoppingBag,
   IconTrash,
+  IconUpload,
   IconVolume,
   IconVolume2,
   IconVolume3,

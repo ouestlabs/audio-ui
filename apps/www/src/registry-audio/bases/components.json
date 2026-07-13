@@ -488,5 +488,15 @@
     "categories": ["waveform"],
     "name": "block-waveform-player",
     "title": "block-waveform-player"
+  },
+  {
+    "categories": ["waveform"],
+    "name": "waveform-demo",
+    "title": "waveform-demo"
+  },
+  {
+    "categories": ["waveform"],
+    "name": "waveform-playhead-demo",
+    "title": "waveform-playhead-demo"
   }
 ]

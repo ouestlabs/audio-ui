@@ -13,6 +13,7 @@
     "envelope",
     "transport",
     "channel-strip",
-    "sortable-list"
+    "sortable-list",
+    "waveform"
   ]
 }

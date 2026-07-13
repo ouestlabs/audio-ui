@@ -23,13 +23,13 @@ export default function AudioQueueSimpleDemo() {
           <AudioPlayerSeekBar />
           <AudioPlayerTimeDisplay remaining />
         </AudioPlayerControlGroup>
-        <AudioPlayerControlGroup className="justify-between">
+        <AudioPlayerControlGroup>
           <AudioPlayerControlGroup>
             <AudioPlayerSkipBack />
             <AudioPlayerPlay />
             <AudioPlayerSkipForward />
           </AudioPlayerControlGroup>
-          <AudioPlayerControlGroup className="flex-1">
+          <AudioPlayerControlGroup className="justify-end">
             <AudioPlayerVolume />
             <AudioQueuePreferences />
             <AudioQueue />

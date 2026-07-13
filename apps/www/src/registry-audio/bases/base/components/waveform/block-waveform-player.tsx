@@ -1,122 +1,271 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { ChangeEvent } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder";
 import { Button } from "@/registry/bases/base/ui/button";
+import { ButtonGroup } from "@/registry/bases/base/ui/button-group";
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/registry/bases/base/ui/empty";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/registry/bases/base/ui/tabs";
 import { Waveform } from "@/registry-audio/bases/base/audio/elements/waveform";
 import {
+  decodeAudioSamples,
   downsampleWaveform,
-  linearWaveformPath,
   normalizeWaveform,
+  waveformBars,
 } from "@/registry-audio/bases/base/lib/waveform-path";
 
-const SAMPLE_COUNT = 4000;
 const PATH_SAMPLES = 100;
 const PATH_WIDTH = 800;
 const PATH_HEIGHT = 100;
-const DURATION_SECONDS = 30;
-/** Caps how much a single frame can advance progress — a backgrounded or throttled tab can leave `requestAnimationFrame` idle for seconds at a time, and without this a resumed frame would read that whole gap as elapsed playback time and jump straight to the end instead of just continuing from where it left off. */
-const MAX_FRAME_SECONDS = 0.1;
-
-/** A deterministic stand-in for real decoded audio samples — a few sine partials summed and shaped by a slow envelope, so the waveform has visually interesting peaks and valleys without needing an actual audio file. Swap for `decodeAudioSamples` fed by a real file's bytes. */
-function generateSyntheticSamples(count: number): number[] {
-  const samples: number[] = [];
-  for (let i = 0; i < count; i += 1) {
-    const t = i / count;
-    const envelope = 0.4 + 0.6 * Math.abs(Math.sin(t * Math.PI * 3));
-    const wave =
-      Math.sin(t * 220) * 0.6 +
-      Math.sin(t * 55) * 0.3 +
-      Math.sin(t * 660) * 0.1;
-    samples.push(wave * envelope);
-  }
-  return samples;
-}
 
 function formatTime(seconds: number): string {
+  if (!Number.isFinite(seconds)) {
+    return "0:00";
+  }
   const minutes = Math.floor(seconds / 60);
   const remainingSeconds = Math.floor(seconds % 60);
   return `${minutes}:${String(remainingSeconds).padStart(2, "0")}`;
 }
 
-/** A seekable waveform player — click or drag the waveform to scrub, Play/Pause to auto-advance. The waveform shape comes from a synthetic sample set standing in for real decoded audio (see `generateSyntheticSamples`'s doc comment for the real-audio equivalent). */
+function toIsoDuration(seconds: number): string {
+  if (!Number.isFinite(seconds)) {
+    return "PT0S";
+  }
+  const whole = Math.floor(seconds);
+  const minutes = Math.floor(whole / 60);
+  const remainingSeconds = whole % 60;
+  return `PT${minutes}M${remainingSeconds}S`;
+}
+
+/** A seekable waveform player driven entirely by a user-supplied file — nothing is preloaded. Picking a file decodes its real PCM samples via `decodeAudioSamples`/`waveformBars` once, shared across two tabbed presentations of the same data: a plain recolored bar chart, and an `AudioScrubber`-style read with a `Playhead` line and `Thumb` handle. The primitive only owns the seek value, not the audio itself. */
 export default function BlockWaveformPlayer() {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const objectUrlRef = useRef<string | null>(null);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [fileName, setFileName] = useState("");
+  const [bars, setBars] = useState<ReturnType<typeof waveformBars>>([]);
+  const [duration, setDuration] = useState(0);
   const [progress, setProgress] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const frameRef = useRef<number | null>(null);
-  const lastFrameTimeRef = useRef(0);
 
-  const d = useMemo(() => {
-    const samples = generateSyntheticSamples(SAMPLE_COUNT);
-    const downsampled = downsampleWaveform(samples, PATH_SAMPLES);
-    const normalized = normalizeWaveform(downsampled);
-    return linearWaveformPath(normalized, {
-      height: PATH_HEIGHT,
-      style: "steps",
-      width: PATH_WIDTH,
-    });
+  useEffect(
+    () => () => {
+      if (objectUrlRef.current) {
+        URL.revokeObjectURL(objectUrlRef.current);
+      }
+    },
+    []
+  );
+
+  const handleFileChange = useCallback(
+    async (event: ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      event.target.value = "";
+      if (!file) {
+        return;
+      }
+
+      if (objectUrlRef.current) {
+        URL.revokeObjectURL(objectUrlRef.current);
+      }
+      const url = URL.createObjectURL(file);
+      objectUrlRef.current = url;
+
+      setIsPlaying(false);
+      setProgress(0);
+      setDuration(0);
+      setBars([]);
+      setFileName(file.name);
+      setAudioUrl(url);
+
+      const context = new AudioContext();
+      const buffer = await file.arrayBuffer();
+      const samples = await decodeAudioSamples(context, buffer);
+      await context.close();
+
+      const downsampled = downsampleWaveform(samples, PATH_SAMPLES);
+      const normalized = normalizeWaveform(downsampled);
+      setBars(
+        waveformBars(normalized, { height: PATH_HEIGHT, width: PATH_WIDTH })
+      );
+    },
+    []
+  );
+
+  const handleUploadClick = useCallback(() => {
+    fileInputRef.current?.click();
   }, []);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: audioUrl gates when audioRef.current first exists
   useEffect(() => {
-    if (!isPlaying) {
+    const audio = audioRef.current;
+    if (!audio) {
       return;
     }
-    lastFrameTimeRef.current = performance.now();
-    const tick = (now: number) => {
-      const elapsedSeconds = Math.min(
-        MAX_FRAME_SECONDS,
-        (now - lastFrameTimeRef.current) / 1000
-      );
-      lastFrameTimeRef.current = now;
-      setProgress((current) => {
-        const next = current + elapsedSeconds / DURATION_SECONDS;
-        if (next >= 1) {
-          setIsPlaying(false);
-          return 1;
-        }
-        return next;
-      });
-      frameRef.current = requestAnimationFrame(tick);
+    const controller = new AbortController();
+    const { signal } = controller;
+
+    const handleTimeUpdate = () => {
+      setProgress(audio.duration ? audio.currentTime / audio.duration : 0);
     };
-    frameRef.current = requestAnimationFrame(tick);
-    return () => {
-      if (frameRef.current !== null) {
-        cancelAnimationFrame(frameRef.current);
-      }
-    };
-  }, [isPlaying]);
+    const handleDurationChange = () => setDuration(audio.duration);
+    const handleEnded = () => setIsPlaying(false);
+
+    audio.addEventListener("timeupdate", handleTimeUpdate, { signal });
+    audio.addEventListener("loadedmetadata", handleDurationChange, {
+      signal,
+    });
+    audio.addEventListener("durationchange", handleDurationChange, {
+      signal,
+    });
+    audio.addEventListener("ended", handleEnded, { signal });
+    if (audio.readyState >= HTMLMediaElement.HAVE_METADATA) {
+      handleDurationChange();
+      handleTimeUpdate();
+    }
+    return () => controller.abort();
+  }, [audioUrl]);
 
   const handlePlayToggle = useCallback(() => {
-    setIsPlaying((playing) => {
-      if (!playing && progress >= 1) {
-        setProgress(0);
-      }
-      return !playing;
-    });
-  }, [progress]);
+    const audio = audioRef.current;
+    if (!audio) {
+      return;
+    }
+    if (isPlaying) {
+      audio.pause();
+      setIsPlaying(false);
+    } else {
+      audio.play();
+      setIsPlaying(true);
+    }
+  }, [isPlaying]);
 
-  const currentSeconds = progress * DURATION_SECONDS;
+  const handleSeek = useCallback((value: number) => {
+    setProgress(value);
+    const audio = audioRef.current;
+    if (audio && Number.isFinite(audio.duration)) {
+      audio.currentTime = value * audio.duration;
+    }
+  }, []);
+
+  const hasAudio = bars.length > 0;
 
   return (
     <div className="cn-audio-panel flex w-full min-w-0 flex-col gap-4 border bg-card p-4">
-      <Waveform
-        aria-label="Track progress"
-        d={d}
-        onValueChange={setProgress}
-        onValueCommit={setProgress}
-        value={progress}
+      <input
+        accept="audio/*"
+        className="sr-only"
+        onChange={handleFileChange}
+        ref={fileInputRef}
+        type="file"
       />
+      {audioUrl ? (
+        <audio ref={audioRef} src={audioUrl}>
+          <track kind="metadata" />
+        </audio>
+      ) : null}
+      {hasAudio ? (
+        <Tabs className="gap-4" defaultValue="default">
+          <TabsList>
+            <TabsTrigger value="default">Default</TabsTrigger>
+            <TabsTrigger value="playhead">Playhead</TabsTrigger>
+          </TabsList>
+          <TabsContent value="default">
+            <Waveform
+              aria-label="Track progress"
+              bars={bars}
+              onValueChange={handleSeek}
+              onValueCommit={handleSeek}
+              value={progress}
+            />
+          </TabsContent>
+          <TabsContent value="playhead">
+            <Waveform
+              aria-label="Track progress"
+              bars={bars}
+              onValueChange={handleSeek}
+              onValueCommit={handleSeek}
+              value={progress}
+              variant="playhead"
+            />
+          </TabsContent>
+        </Tabs>
+      ) : (
+        <Empty className="h-20 border">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <IconPlaceholder
+                hugeicons="MusicNote01Icon"
+                lucide="Music"
+                phosphor="MusicNotesIcon"
+                remixicon="RiMusicLine"
+                tabler="IconMusic"
+              />
+            </EmptyMedia>
+            <EmptyTitle>No audio loaded</EmptyTitle>
+          </EmptyHeader>
+        </Empty>
+      )}
       <div className="flex items-center justify-between gap-4">
-        <Button
-          onClick={handlePlayToggle}
-          size="sm"
-          type="button"
-          variant="outline"
-        >
-          {isPlaying ? "Pause" : "Play"}
-        </Button>
-        <span className="text-muted-foreground text-sm tabular-nums">
-          {formatTime(currentSeconds)} / {formatTime(DURATION_SECONDS)}
-        </span>
+        <ButtonGroup>
+          <Button
+            aria-label={isPlaying ? "Pause" : "Play"}
+            disabled={!hasAudio}
+            onClick={handlePlayToggle}
+            size="icon"
+            type="button"
+            variant="outline"
+          >
+            <IconPlaceholder
+              hugeicons={isPlaying ? "PauseIcon" : "PlayIcon"}
+              lucide={isPlaying ? "PauseIcon" : "PlayIcon"}
+              phosphor={isPlaying ? "PauseIcon" : "PlayIcon"}
+              remixicon={isPlaying ? "RiPauseLine" : "RiPlayLine"}
+              tabler={isPlaying ? "IconPlayerPause" : "IconPlayerPlay"}
+            />
+          </Button>
+          <Button
+            aria-label={hasAudio ? "Change file" : "Upload audio"}
+            onClick={handleUploadClick}
+            size="icon"
+            type="button"
+            variant="outline"
+          >
+            <IconPlaceholder
+              hugeicons="Upload01Icon"
+              lucide="UploadIcon"
+              phosphor="UploadIcon"
+              remixicon="RiUploadLine"
+              tabler="IconUpload"
+            />
+          </Button>
+        </ButtonGroup>
+        {hasAudio ? (
+          <div className="flex min-w-0 items-center gap-2 text-muted-foreground text-xs">
+            <span className="min-w-8 flex-1 truncate">{fileName}</span>
+            <span className="shrink-0 whitespace-nowrap tabular-nums">
+              <time dateTime={toIsoDuration(progress * duration)}>
+                {formatTime(progress * duration)}
+              </time>{" "}
+              /{" "}
+              <time dateTime={toIsoDuration(duration)}>
+                {formatTime(duration)}
+              </time>
+            </span>
+          </div>
+        ) : null}
       </div>
     </div>
   );

@@ -1,0 +1,145 @@
+---
+title: Waveform
+description: Seekable bar-chart waveform — click, drag, or use a real handle to scrub through a track built from real decoded audio samples.
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="waveform-demo" />
+
+Waveform for scrubbing through audio — a track of recolored bars that fill in as `value` advances. The registry component wraps `Waveform` primitives from `@audio-ui/react`; the primitive itself has no opinion on where the bar data came from (real decoded PCM samples, a placeholder curve, anything), the same way `PianoRoll` has no opinion on where its notes came from.
+
+## Overview
+
+- **Value model:** `value` is a plain `0–1` fraction (or pass `min`/`max`, e.g. a track's duration in seconds) — the primitive only owns the seek position, never the audio itself. Wire `onValueChange`/`onValueCommit` to your own `<audio>` element.
+- **Bar data:** `bars` is a `WaveformBar[]` you compute — see [Feeding real audio](#feeding-real-audio) for turning a real audio file into one with `waveform-path.ts`.
+- **Variants:** `variant="default"` renders just the recolored bars. `variant="playhead"` additionally renders a playhead line and a real handle at the current position.
+- **Accessibility:** `variant="playhead"`'s handle is a native `role="slider"` with `aria-valuenow`/`min`/`max` and full arrow key / <kbd>Home</kbd> / <kbd>End</kbd> / <kbd>Page Up</kbd> / <kbd>Page Down</kbd> support. `variant="default"` is click/drag-to-seek only — pick `playhead` when keyboard access matters.
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">CLI</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash component
+npx shadcn@latest add @audio/waveform
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the following dependencies:</Step>
+
+```bash
+npm install @audio-ui/react
+```
+
+<Step>Copy and paste the following code into your project.</Step>
+
+<ComponentSource
+  styleName="base-nova"
+  name="waveform"
+  title="components/audio/elements/waveform.tsx"
+/>
+
+<Step>Update the import paths to match your project setup.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import { Waveform } from "@/components/audio/elements/waveform";
+```
+
+**Bars only:**
+
+```tsx
+<Waveform aria-label="Track progress" bars={bars} value={progress} />
+```
+
+**With a playhead line and handle:**
+
+```tsx
+<Waveform
+  aria-label="Track progress"
+  bars={bars}
+  onValueChange={setProgress}
+  onValueCommit={setProgress}
+  value={progress}
+  variant="playhead"
+/>
+```
+
+## Feeding real audio
+
+`bars` is a plain prop — the primitive doesn't decode anything. `waveform-path.ts` (`npx shadcn@latest add @audio/waveform-path`) turns a decoded audio file into it: `decodeAudioSamples` reads PCM samples out of an `AudioContext`, `downsampleWaveform` block-averages them down to a bar count, `normalizeWaveform` scales the peak to `1`, and `waveformBars` lays the result out as bar geometry.
+
+```tsx
+const context = new AudioContext();
+const buffer = await file.arrayBuffer();
+const samples = await decodeAudioSamples(context, buffer);
+
+const downsampled = downsampleWaveform(samples, 100);
+const normalized = normalizeWaveform(downsampled);
+const bars = waveformBars(normalized, { height: 100, width: 800 });
+```
+
+Playback itself is a plain `<audio>` element — `onValueChange`/`onValueCommit` set `audio.currentTime`, and the element's own `timeupdate` event feeds `value` back in. See `block-waveform-player`'s source for the full wiring, including the upload flow and a `requestAnimationFrame`-free `timeupdate` listener.
+
+## API reference
+
+`Waveform` accepts style props (`bars`, `variant`, `viewBox`) plus primitive props from `WaveformPrimitive.RootProps`.
+
+### Value and state
+
+| Prop              | Type                  | Default    | Description                                                             |
+| ----------------- | --------------------- | ---------- | ------------------------------------------------------------------------- |
+| `bars`            | `WaveformBar[]`       | -          | Required. Bar geometry — see [Feeding real audio](#feeding-real-audio). |
+| `value`           | `number`              | -          | Controlled seek position.                                               |
+| `defaultValue`    | `number`              | -          | Uncontrolled initial seek position.                                     |
+| `min`             | `number`              | `0`        | Lower bound of the seek value.                                          |
+| `max`             | `number`              | `1`        | Upper bound — pass e.g. a track's duration in seconds.                  |
+| `step`            | `number`              | `0.001`    | Keyboard/quantize step.                                                 |
+| `disabled`        | `boolean`             | `false`    | Disables pointer and keyboard interaction.                              |
+| `onValueChange`   | `(value: number) => void` | -      | Fires continuously while dragging or on click.                          |
+| `onValueCommit`   | `(value: number) => void` | -      | Fires once when a drag ends (or immediately for a click/keyboard step). |
+| `aria-label`      | `string`              | -          | Accessible name (falls back to a visually-hidden "Waveform" label).     |
+| `aria-labelledby` | `string`              | -          | ID of a labeling element.                                               |
+
+### Layout and display
+
+| Prop        | Type                       | Default             | Description                                              |
+| ----------- | -------------------------- | -------------------- | ---------------------------------------------------------- |
+| `variant`   | `"default" \| "playhead"`  | `"default"`          | `playhead` adds a playhead line and a real handle.        |
+| `viewBox`   | `string`                   | `"0 0 800 100"`      | Must match the `width`/`height` `bars` was generated against. |
+| `className` | `string`                   | -                     | Additional CSS classes.                                   |
+
+Additional valid HTML attributes passed to `Waveform.Root` are forwarded.
+
+## Examples
+
+### Default
+
+<ComponentPreview styleName="base-nova" name="waveform-demo" />
+
+### Playhead
+
+<ComponentPreview styleName="base-nova" name="waveform-playhead-demo" />
+
+### Player, wired to a real uploaded file
+
+<ComponentPreview styleName="base-nova" name="block-waveform-player" />

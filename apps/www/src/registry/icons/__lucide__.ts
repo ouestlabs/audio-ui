@@ -76,6 +76,8 @@ export {
   TrashIcon,
   TriangleAlert,
   TriangleAlertIcon,
+  Upload,
+  UploadIcon,
   Volume,
   Volume1,
   Volume1Icon,

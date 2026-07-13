@@ -39,6 +39,7 @@ export {
   SpeakerSlashIcon,
   SpinnerIcon,
   TrashIcon,
+  UploadIcon,
   WarningCircleIcon,
   WarningIcon,
   XCircleIcon,

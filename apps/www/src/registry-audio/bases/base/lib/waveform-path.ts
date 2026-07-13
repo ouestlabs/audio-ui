@@ -46,54 +46,30 @@ export function normalizeWaveform(values: number[]): number[] {
   return values.map((value) => value / peak);
 }
 
-export type WaveformPathStyle = "bars" | "steps";
-
 export interface LinearWaveformPathOptions {
-  /** Total rendered height — the path is vertically centered within it for "steps", or rises from the bottom for "bars". */
+  /** Total rendered height — the path is vertically centered within it. */
   height?: number;
-  style?: WaveformPathStyle;
   /** Total rendered width, spread evenly across every value. */
   width?: number;
 }
 
 /**
  * Builds an SVG path `d` string tracing `values` (each expected in [0, 1] —
- * see `downsampleWaveform`/`normalizeWaveform`) left to right, for
- * `Waveform.Path`/`Waveform.Progress`.
- *
- * A simplified, single-template port of jerosoler/waveform-path's
- * `linearPath` — that library also supports a "mirror" type and fully
- * custom per-sample path segments (Bézier curves, arcs, animation frames,
- * ...); this keeps to the two most common looks ("steps", a zigzag
- * resembling a classic audio waveform, and "bars", a vertical bar per
- * value) and leaves further customization to hand-written `d` strings —
- * the primitive itself doesn't care how `d` was produced.
+ * see `downsampleWaveform`/`normalizeWaveform`) left to right as a zigzag
+ * line, for `Waveform.Path`/`Waveform.Progress` — a simplified,
+ * single-template port of jerosoler/waveform-path's `linearPath` "steps"
+ * type. For a discrete bar-chart look instead, see `waveformBars`.
  */
 export function linearWaveformPath(
   values: number[],
   options: LinearWaveformPathOptions = {}
 ): string {
-  const {
-    height = DEFAULT_HEIGHT,
-    style = "steps",
-    width = DEFAULT_WIDTH,
-  } = options;
+  const { height = DEFAULT_HEIGHT, width = DEFAULT_WIDTH } = options;
   const count = values.length;
   if (count === 0) {
     return "";
   }
   const stepWidth = width / count;
-
-  if (style === "bars") {
-    const segments: string[] = [];
-    for (let i = 0; i < count; i += 1) {
-      const x = (i + 0.5) * stepWidth;
-      const barHeight = clampUnit(values[i] ?? 0) * height;
-      segments.push(`M ${x} ${height} L ${x} ${height - barHeight}`);
-    }
-    return segments.join(" ");
-  }
-
   const centerY = height / 2;
   const segments: string[] = [];
   for (let i = 0; i < count; i += 1) {
@@ -103,4 +79,63 @@ export function linearWaveformPath(
     segments.push(`${i === 0 ? "M" : "L"} ${x} ${y}`);
   }
   return segments.join(" ");
+}
+
+export interface WaveformBar {
+  height: number;
+  opacity: number;
+  width: number;
+  x: number;
+  y: number;
+}
+
+export interface WaveformBarsOptions {
+  /** Fraction of each bar's step reserved as the gap to its neighbor, in [0, 1) — mirrors the `barWidth`/`barGap` ratio common bar-chart waveform components (e.g. SoundCloud-style scrubbers) use. */
+  gap?: number;
+  /** Total rendered height — each bar rises symmetrically from its own vertical center. */
+  height?: number;
+  /** Total rendered width, spread evenly across every value. */
+  width?: number;
+}
+
+const DEFAULT_BAR_GAP = 0.25;
+const MIN_BAR_HEIGHT_RATIO = 0.02;
+const MIN_OPACITY = 0.3;
+const MAX_OPACITY_RANGE = 0.7;
+
+/**
+ * Lays out `values` (each expected in [0, 1] — see
+ * `downsampleWaveform`/`normalizeWaveform`) as discrete rounded bars for
+ * `Waveform.Bars`/`Waveform.BarsProgress` — each bar's height tracks its
+ * amplitude and its opacity fades in with it too, the same visual language
+ * voice-message/SoundCloud-style waveform scrubbers use. Positions are
+ * plain data (no color, no rounding radius) — the primitive doesn't care
+ * how they were produced.
+ */
+export function waveformBars(
+  values: number[],
+  options: WaveformBarsOptions = {}
+): WaveformBar[] {
+  const {
+    gap = DEFAULT_BAR_GAP,
+    height = DEFAULT_HEIGHT,
+    width = DEFAULT_WIDTH,
+  } = options;
+  const count = values.length;
+  if (count === 0) {
+    return [];
+  }
+  const step = width / count;
+  const barWidth = step * (1 - gap);
+  return values.map((value, i) => {
+    const clamped = clampUnit(value);
+    const barHeight = Math.max(height * MIN_BAR_HEIGHT_RATIO, clamped * height);
+    return {
+      height: barHeight,
+      opacity: MIN_OPACITY + clamped * MAX_OPACITY_RANGE,
+      width: barWidth,
+      x: i * step + (step - barWidth) / 2,
+      y: (height - barHeight) / 2,
+    };
+  });
 }

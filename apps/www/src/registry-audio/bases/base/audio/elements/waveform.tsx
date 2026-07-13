@@ -2,38 +2,53 @@
 
 import { Waveform as WaveformPrimitive } from "@audio-ui/react";
 import { cn } from "@/registry/bases/base/lib/utils";
+import type { WaveformBar } from "@/registry-audio/bases/base/lib/waveform-path";
 
-/** Matches `linearWaveformPath`'s own default width/height, so a `viewBox` "just works" when the path was generated with defaults. */
 const DEFAULT_VIEW_BOX = "0 0 800 100";
 
 interface WaveformProps extends WaveformPrimitive.RootProps {
-  /** The waveform's SVG path `d` string — see `linearWaveformPath` in `lib/waveform-path.ts`. Rendered twice internally: the full shape, and a value-clipped "progress" copy. */
-  d: string;
+  bars: WaveformBar[];
+  variant?: "default" | "playhead";
   viewBox?: string;
 }
 
 export function Waveform({
+  bars,
   className,
-  d,
+  variant = "default",
   viewBox = DEFAULT_VIEW_BOX,
   ...props
 }: WaveformProps) {
   return (
-    <WaveformPrimitive.Root className="w-full min-w-0" {...props}>
+    <WaveformPrimitive.Root
+      className="w-full min-w-0 data-[disabled=true]:cursor-not-allowed"
+      {...props}
+    >
       <WaveformPrimitive.Track
         className={cn(
-          "cn-waveform relative w-full min-w-0 touch-none select-none",
+          "cn-waveform relative w-full min-w-0 cursor-pointer touch-none select-none overflow-hidden py-1",
           "focus-within:outline-none",
           "data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50",
           className
         )}
         data-slot="waveform"
       >
-        <WaveformPrimitive.Svg viewBox={viewBox}>
-          <WaveformPrimitive.Path className="cn-waveform-path" d={d} />
-          <WaveformPrimitive.Progress className="cn-waveform-progress" d={d} />
+        <WaveformPrimitive.Svg
+          className="[-webkit-mask-image:linear-gradient(to_right,transparent,black_16px,black_calc(100%-16px),transparent)] mask-[linear-gradient(to_right,transparent,black_16px,black_calc(100%-16px),transparent)]"
+          viewBox={viewBox}
+        >
+          <WaveformPrimitive.Bars bars={bars} className="cn-waveform-bars" />
+          <WaveformPrimitive.BarsProgress
+            bars={bars}
+            className="cn-waveform-bars-progress"
+          />
         </WaveformPrimitive.Svg>
-        <WaveformPrimitive.Thumb className="cn-waveform-thumb" />
+        {variant === "playhead" && (
+          <>
+            <WaveformPrimitive.Playhead className="cn-waveform-playhead" />
+            <WaveformPrimitive.Thumb className="cn-waveform-thumb" />
+          </>
+        )}
       </WaveformPrimitive.Track>
     </WaveformPrimitive.Root>
   );

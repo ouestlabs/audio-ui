@@ -1320,7 +1320,7 @@ export const components: RegistryItem[] = [
   {
     categories: ["waveform"],
     description:
-      "A seekable waveform player — click or drag the waveform to scrub, Play/Pause to auto-advance through a synthetic sample set standing in for real decoded audio",
+      "A seekable waveform player driven by a user-uploaded audio file — pick a file to decode its real PCM samples into a bar-chart waveform, then switch tabs to compare a plain recolored bar chart against an AudioScrubber-style playhead and handle",
     files: [
       {
         path: "components/waveform/block-waveform-player.tsx",
@@ -1332,7 +1332,36 @@ export const components: RegistryItem[] = [
       "@audio/waveform",
       "@audio/waveform-path",
       "@shadcn/button",
+      "@shadcn/button-group",
+      "@shadcn/empty",
+      "@shadcn/tabs",
     ],
     type: "registry:block",
+  },
+  {
+    categories: ["waveform"],
+    description: "Waveform default example",
+    files: [
+      {
+        path: "components/waveform/waveform-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "waveform-demo",
+    registryDependencies: ["@audio/waveform", "@audio/waveform-path"],
+    type: "registry:example",
+  },
+  {
+    categories: ["waveform"],
+    description: "Waveform with a playhead line and handle",
+    files: [
+      {
+        path: "components/waveform/waveform-playhead-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "waveform-playhead-demo",
+    registryDependencies: ["@audio/waveform", "@audio/waveform-path"],
+    type: "registry:example",
   },
 ];

@@ -55,17 +55,6 @@ function useWaveformValueContext() {
   return context;
 }
 
-/**
- * A seekable waveform — the interaction half of the pairing waveform-path
- * (https://github.com/jerosoler/waveform-path) and wave-audio-path-player
- * (https://github.com/jerosoler/wave-audio-path-player) popularized: drag
- * (or click) anywhere along the track to seek, the same left-to-right value
- * model as `Fader` in its horizontal orientation. The actual waveform shape
- * is a plain `d` string a consumer supplies to `Path`/`Progress` — this
- * primitive has no opinion on how that shape was generated (audio
- * samples, a placeholder curve, anything), the same way `PianoRoll` has no
- * opinion on where its notes came from.
- */
 export namespace Waveform {
   export interface RootProps
     extends Omit<
@@ -262,7 +251,12 @@ export namespace Waveform {
         className={className}
         {...getDataAttributes("waveform", { disabled, part: "svg" })}
         preserveAspectRatio="none"
-        style={{ display: "block", pointerEvents: "none", width: "100%" }}
+        style={{
+          display: "block",
+          height: "100%",
+          pointerEvents: "none",
+          width: "100%",
+        }}
         {...props}
       />
     );
@@ -299,6 +293,99 @@ export namespace Waveform {
         {...getDataAttributes("waveform", { disabled, part: "progress" })}
         style={{
           clipPath: `inset(0 ${(1 - percentage) * 100}% 0 0)`,
+          ...style,
+        }}
+        {...props}
+      />
+    );
+  }
+
+  export interface WaveformBarValue {
+    height: number;
+    opacity?: number;
+    width: number;
+    x: number;
+    y: number;
+  }
+
+  function renderBarRects(bars: WaveformBarValue[], radius: number) {
+    return bars.map((bar) => (
+      <rect
+        fillOpacity={bar.opacity}
+        height={bar.height}
+        key={bar.x}
+        rx={radius}
+        width={bar.width}
+        x={bar.x}
+        y={bar.y}
+      />
+    ));
+  }
+
+  export interface BarsProps
+    extends Omit<React.ComponentProps<"g">, "children"> {
+    bars: WaveformBarValue[];
+    radius?: number;
+  }
+
+  /** The full waveform shape as discrete bars, purely decorative — each bar's position/size/opacity a consumer computed (from real audio samples, a placeholder curve, anything) and passed in, the same "no opinion on the data" split `Path` uses for a continuous line. */
+  export function Bars({ bars, radius = 0, className, ...props }: BarsProps) {
+    const { disabled } = useWaveformConfigContext();
+    return (
+      <g
+        className={className}
+        {...getDataAttributes("waveform", { disabled, part: "bars" })}
+        {...props}
+      >
+        {renderBarRects(bars, radius)}
+      </g>
+    );
+  }
+
+  export interface BarsProgressProps extends BarsProps {}
+
+  /** The same bars as `Bars`, clipped to reveal only the portion up to the current value — the bar-chart equivalent of `Progress`. */
+  export function BarsProgress({
+    bars,
+    radius = 0,
+    className,
+    style,
+    ...props
+  }: BarsProgressProps) {
+    const { disabled } = useWaveformConfigContext();
+    const { percentage } = useWaveformValueContext();
+
+    return (
+      <g
+        className={className}
+        {...getDataAttributes("waveform", { disabled, part: "bars-progress" })}
+        style={{
+          clipPath: `inset(0 ${(1 - percentage) * 100}% 0 0)`,
+          ...style,
+        }}
+        {...props}
+      >
+        {renderBarRects(bars, radius)}
+      </g>
+    );
+  }
+
+  export interface PlayheadProps extends React.ComponentProps<"div"> {}
+
+  /** A purely decorative marker at the current value's position — unlike `Thumb`, carries no interaction or ARIA semantics of its own, for when a consumer wants a visual echo of the position (a line, a glow, anything) alongside the actual `Thumb`. */
+  export function Playhead({ className, style, ...props }: PlayheadProps) {
+    const { disabled } = useWaveformConfigContext();
+    const { percentage } = useWaveformValueContext();
+
+    return (
+      <div
+        aria-hidden="true"
+        className={className}
+        {...getDataAttributes("waveform", { disabled, part: "playhead" })}
+        style={{
+          left: `${percentage * 100}%`,
+          pointerEvents: "none",
+          position: "absolute",
           ...style,
         }}
         {...props}

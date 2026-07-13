@@ -91,7 +91,7 @@
       "name": "transport"
     },
     {
-      "count": 1,
+      "count": 3,
       "description": "Seekable waveform components for scrubbing and visualizing audio playback.",
       "label": "Waveform",
       "name": "waveform"
@@ -103,5 +103,5 @@
       "name": "xypad"
     }
   ],
-  "totalComponents": 98
+  "totalComponents": 100
 }

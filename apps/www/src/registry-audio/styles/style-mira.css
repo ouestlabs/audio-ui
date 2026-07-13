@@ -458,19 +458,23 @@
 
   /* MARK: Waveform */
   .cn-waveform {
-    @apply relative h-20 overflow-hidden rounded-lg border border-transparent bg-card ring-1 ring-foreground/10;
+    @apply relative h-20 rounded-lg border bg-card;
   }
 
-  .cn-waveform-path {
-    @apply pointer-events-none fill-none stroke-border stroke-2;
+  .cn-waveform-bars {
+    @apply pointer-events-none fill-border [rx:1];
   }
 
-  .cn-waveform-progress {
-    @apply pointer-events-none fill-none stroke-primary stroke-2;
+  .cn-waveform-bars-progress {
+    @apply pointer-events-none fill-primary [rx:1];
+  }
+
+  .cn-waveform-playhead {
+    @apply inset-y-0 w-0.5 -translate-x-1/2 bg-primary;
   }
 
   .cn-waveform-thumb {
-    @apply size-3.5 rounded-full bg-card ring-1 ring-foreground/10 transition-[color,box-shadow] hover:ring-2 hover:ring-ring/30 focus-visible:ring-2 focus-visible:ring-ring/30 active:ring-2 active:ring-ring/30 motion-reduce:transition-none;
+    @apply inset-y-0 my-auto size-3.5 rounded-sm border-2 border-background bg-primary shadow-md;
   }
 
   /* MARK: Channel Strip */

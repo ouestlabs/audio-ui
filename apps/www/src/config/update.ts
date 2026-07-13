@@ -5,6 +5,7 @@ export const DOCS_MENU_UPDATES: Record<string, string> = {
   piano: "New",
   player: "Updated",
   sequencer: "New",
+  waveform: "New",
 };
 
 export const PATTERNS_MENU_UPDATES: Record<string, string> = {
@@ -14,4 +15,5 @@ export const PATTERNS_MENU_UPDATES: Record<string, string> = {
   piano: "New",
   player: "Updated",
   sequencer: "New",
+  waveform: "New",
 };
