@@ -103,4 +103,34 @@ export const lib: RegistryItem[] = [
     registryDependencies: [],
     type: "registry:lib",
   },
+  {
+    categories: ["lib", "audio", "sequencer", "piano"],
+    dependencies: [],
+    description:
+      "Framework-free core of the look-ahead scheduler — the drift-free stepping cursor and self-correcting catch-up loop behind use-step-clock and use-transport-clock",
+    files: [
+      {
+        path: "lib/lookahead-scheduler.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "lookahead-scheduler",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "waveform"],
+    dependencies: [],
+    description:
+      "Framework-free waveform DSP — decode audio bytes to samples, downsample to peak amplitudes, normalize, and lay out bars for rendering",
+    files: [
+      {
+        path: "lib/waveform-dsp.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "waveform-dsp",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
 ];

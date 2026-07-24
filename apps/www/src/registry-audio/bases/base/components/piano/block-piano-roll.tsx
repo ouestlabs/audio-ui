@@ -17,11 +17,12 @@ import {
 import { Fader } from "@/registry-audio/bases/base/audio/elements/fader";
 import { PianoRoll } from "@/registry-audio/bases/base/audio/elements/piano-roll";
 import { Ruler } from "@/registry-audio/bases/base/audio/elements/ruler";
+import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 import {
   type UseSynthVoicesReturn,
   useSynthVoices,
 } from "@/registry-audio/bases/base/hooks/use-synth-voices";
-import { useWebAudio } from "@/registry-audio/bases/base/hooks/use-web-audio";
+import { useTransportClock } from "@/registry-audio/bases/base/hooks/use-transport-clock";
 import {
   encodeMidiFile,
   type MidiFileNote,
@@ -37,9 +38,6 @@ const BEATS_PER_BAR = 4;
 const DEFAULT_BPM = 120;
 const MIN_BPM = 20;
 const MAX_BPM = 200;
-/** Look-ahead scheduler constants — the standard Web Audio pattern : poll frequently and only ever commit whatever falls within a short rolling window of `ctx.currentTime`, instead of sleeping for a whole loop and betting everything on one timer firing exactly on time. */
-const SCHEDULER_POLL_MS = 25;
-const SCHEDULE_AHEAD_SECONDS = 0.1;
 /** How long a discrete (non-drag) grid edit — a click-add, a keyboard nudge — keeps its key-strip highlight lit after the instant audio blip. */
 const BLIP_HIGHLIGHT_MS = 200;
 /** Standard MIDI File resolution — ticks per quarter note, a common round value shared by most DAWs' own exports. */
@@ -123,54 +121,23 @@ function notesToMidiFile(notes: Note[], bpm: number): Uint8Array {
   });
 }
 
-/** Creates a master GainNode once on mount and keeps it synced to `volume`. Split out purely to keep the block component's cognitive complexity manageable. */
-function useMasterGain(
-  webAudio: ReturnType<typeof useWebAudio>,
-  volume: number
-) {
-  const [masterGain, setMasterGain] = useState<GainNode | null>(null);
-
-  useEffect(() => {
-    const ctx = webAudio.getContext();
-    if (!ctx) {
-      return;
-    }
-    const gain = ctx.createGain();
-    gain.gain.value = DEFAULT_VOLUME;
-    gain.connect(ctx.destination);
-    setMasterGain(gain);
-    return () => {
-      gain.disconnect();
-    };
-  }, [webAudio]);
-
-  useEffect(() => {
-    const ctx = webAudio.getContext();
-    if (!(ctx && masterGain)) {
-      return;
-    }
-    masterGain.gain.setTargetAtTime(volume, ctx.currentTime, 0.01);
-  }, [volume, masterGain, webAudio]);
-
-  return masterGain;
-}
-
 interface UsePianoRollOptions {
   bpm: number;
   loopRegion: LoopRegion | null;
   releaseAll: UseSynthVoicesReturn["releaseAll"];
   releaseNote: UseSynthVoicesReturn["releaseNote"];
   triggerNote: UseSynthVoicesReturn["triggerNote"];
-  webAudio: ReturnType<typeof useWebAudio>;
 }
 
 /**
  * Owns the note grid's data (fed to the PianoRoll primitive as a controlled
  * value — click/drag/keyboard edits flow back in through `onValueChange`),
  * live-preview triggering for the key strip, a short-lived "which pitch was
- * just edited" highlight for the key strip, and the loop-playback state
- * machine (region-aware via `loopRegion`, seekable via `seekTo`). Split out
- * of the block component purely to keep its cognitive complexity manageable.
+ * just edited" highlight for the key strip, and the loop-playback wiring. The
+ * drift-free look-ahead timing lives in `useTransportClock`; this hook only
+ * schedules note-pairs on its step boundaries and reads its playhead position,
+ * so the audio-scheduling and visual highlight derive from one source. Split
+ * out of the block component purely to keep its cognitive complexity manageable.
  */
 function usePianoRoll({
   bpm,
@@ -178,17 +145,10 @@ function usePianoRoll({
   releaseAll,
   releaseNote,
   triggerNote,
-  webAudio,
 }: UsePianoRollOptions) {
-  // Step duration stays bpm/tempo-derived regardless of the loop region —
-  // only how many steps repeat changes, never how long each one lasts.
-  const barSeconds = (60 / bpm) * BEATS_PER_BAR;
-  const stepDuration = barSeconds / TOTAL_STEPS;
   const region = loopRegion ?? FULL_LOOP_REGION;
-  const loopDuration = (region.end - region.start) * stepDuration;
 
   const [notes, setNotesState] = useState<Note[]>([]);
-  const [isPlaying, setIsPlaying] = useState(false);
   const [gridHighlightNotes, setGridHighlightNotes] = useState<number[]>([]);
   const [playingHighlightNotes, setPlayingHighlightNotes] = useState<number[]>(
     []
@@ -196,20 +156,9 @@ function usePianoRoll({
 
   const notesRef = useRef(notes);
   notesRef.current = notes;
-  const loopDurationRef = useRef(loopDuration);
-  loopDurationRef.current = loopDuration;
-  const stepDurationRef = useRef(stepDuration);
-  stepDurationRef.current = stepDuration;
   const regionRef = useRef(region);
   regionRef.current = region;
-  const isPlayingRef = useRef(isPlaying);
-  isPlayingRef.current = isPlaying;
 
-  const schedulerIntervalRef = useRef<number | null>(null);
-  /** Fixed reference point (AudioContext time of the region's step 0) set once per play/seek/region-restart — never advanced by the scheduler poll itself, since `elapsed % duration` is already self-correcting for display regardless of how many iterations have actually played. */
-  const loopAnchorTimeRef = useRef(0);
-  /** Rolling scheduling cursor — the next AudioContext time boundary that still needs its notes committed. Runs ahead of `loopAnchorTimeRef`/real playback by up to `SCHEDULE_AHEAD_SECONDS`, and is what the look-ahead poller actually advances. */
-  const scheduledUntilTimeRef = useRef(0);
   const playheadRef = useRef<HTMLDivElement | null>(null);
   const rulerPlayheadRef = useRef<HTMLDivElement | null>(null);
   /** The pitches currently sounding because of an in-progress grid drag — held (not blipped) for as long as the drag continues, released on pointerup, same as the key strip's own hold semantics. A group move shifts every selected note by the same delta, so whenever any pitch changes they all change together on that frame — the edited set IS the group's complete new pitch set. */
@@ -218,6 +167,10 @@ function usePianoRoll({
   /** Real physical pointer state, tracked independently of the primitive's own drag lifecycle: a plain click resolves its `pointerup` *before* the resulting `click`/`onValueChange` fires, so reactively arming a "release on next pointerup" listener from inside `setNotes` would miss that pointerup and hold the note until some unrelated future one. Checking real pointer-down state lets us tell a click (blip) from a drag (hold) apart. */
   const isPointerDownRef = useRef(false);
   const blipClearTimeoutRef = useRef<number | null>(null);
+  /** The current tempo's step duration, mirrored from the transport clock so note-off offsets use its canonical step↔time mapping instead of a second copy. */
+  const secondsPerStepRef = useRef(0);
+  /** Mirrors the clock's `isPlaying` for the voice-steal guard, which runs inside pointer callbacks rather than on render. */
+  const isPlayingRef = useRef(false);
 
   const releaseAllHeldGridPitches = useCallback(() => {
     if (heldGridPitchesRef.current.size > 0) {
@@ -351,32 +304,20 @@ function usePianoRoll({
     [releaseNote]
   );
 
-  const stopPlayback = useCallback(() => {
-    if (schedulerIntervalRef.current !== null) {
-      window.clearInterval(schedulerIntervalRef.current);
-      schedulerIntervalRef.current = null;
-    }
-    setIsPlaying(false);
-    releaseAll();
-  }, [releaseAll]);
-
-  /** Schedules exactly one loop iteration's notes, anchored at `anchorTime` — a single, precisely-timed batch of Web Audio `start`/`stop` calls, sample-accurate regardless of when this function itself happens to run. */
-  const scheduleIterationNotes = useCallback(
-    (anchorTime: number) => {
-      const stepSeconds = stepDurationRef.current;
-      const { end, start } = regionRef.current;
+  /** Fired on each step boundary the clock emits: schedules every note that starts on `step` as an absolute-time on/off pair, sample-accurate regardless of when the poll ran. Notes outside the loop region never match a step the clock emits, so they never sound — the region filter is the clock's, not ours. */
+  const scheduleStep = useCallback(
+    (step: number, time: number) => {
+      const secondsPerStep = secondsPerStepRef.current;
       for (const recordedNote of notesRef.current) {
-        if (recordedNote.startStep < start || recordedNote.startStep >= end) {
+        if (recordedNote.startStep !== step) {
           continue;
         }
-        const onTime =
-          anchorTime + (recordedNote.startStep - start) * stepSeconds;
-        const offTime = onTime + recordedNote.duration * stepSeconds;
+        const offTime = time + recordedNote.duration * secondsPerStep;
         triggerNote(
           recordedNote.note,
           DEFAULT_ENVELOPE,
           recordedNote.velocity ?? 1,
-          onTime
+          time
         );
         releaseNote(recordedNote.note, DEFAULT_ENVELOPE, offTime);
       }
@@ -384,75 +325,40 @@ function usePianoRoll({
     [releaseNote, triggerNote]
   );
 
-  /** The look-ahead poll itself: commits every loop iteration boundary that falls within `SCHEDULE_AHEAD_SECONDS` of right now. The `while` (not `if`) is what makes this self-correcting — if a poll is ever delayed past a full loop duration (a stalled main thread, a throttled background tab), the next poll just catches up by scheduling more than one iteration, rather than a boundary silently slipping past unscheduled. */
-  const pollScheduler = useCallback(() => {
-    const ctx = webAudio.getContext();
-    if (!ctx) {
-      return;
-    }
-    const horizon = ctx.currentTime + SCHEDULE_AHEAD_SECONDS;
-    while (scheduledUntilTimeRef.current < horizon) {
-      scheduleIterationNotes(scheduledUntilTimeRef.current);
-      scheduledUntilTimeRef.current += loopDurationRef.current;
-    }
-  }, [scheduleIterationNotes, webAudio]);
+  const { getPosition, isPlaying, reanchor, secondsPerStep, start, stop } =
+    useTransportClock({
+      bpm,
+      onReset: releaseAll,
+      onStep: scheduleStep,
+      region: loopRegion,
+      stepsPerBeat: TOTAL_STEPS / BEATS_PER_BAR,
+      totalSteps: TOTAL_STEPS,
+    });
+  secondsPerStepRef.current = secondsPerStep;
+  isPlayingRef.current = isPlaying;
 
-  /** (Re)starts the look-ahead scheduler from `anchorTime` — used to begin playback, and whenever the loop region changes or the ruler is used to seek mid-playback, so the change is audible immediately instead of waiting for a stale iteration to finish. */
-  const restartLoopFrom = useCallback(
-    (anchorTime: number) => {
-      if (schedulerIntervalRef.current !== null) {
-        window.clearInterval(schedulerIntervalRef.current);
-      }
-      releaseAll();
-      loopAnchorTimeRef.current = anchorTime;
-      scheduledUntilTimeRef.current = anchorTime;
-      pollScheduler();
-      schedulerIntervalRef.current = window.setInterval(
-        pollScheduler,
-        SCHEDULER_POLL_MS
-      );
-    },
-    [pollScheduler, releaseAll]
-  );
-
-  /** Fired on `Ruler`'s `onValueCommit` — the region drag has already streamed through `onValueChange`, so `regionRef.current` is fresh by the time this runs. Only meaningful mid-playback; an idle loop just remembers the new region for its next `Play`. */
-  const commitLoopRegion = useCallback(() => {
-    if (!isPlayingRef.current) {
-      return;
-    }
-    const ctx = webAudio.getContext();
-    if (ctx) {
-      restartLoopFrom(ctx.currentTime);
-    }
-  }, [restartLoopFrom, webAudio]);
-
-  /** Fired on `Ruler`'s `onSeek` (a plain click on the ruler track). Only meaningful mid-playback, same as `commitLoopRegion` — there's no stopped-state playhead to seek yet. */
-  const seekTo = useCallback(
-    (step: number) => {
-      if (!isPlayingRef.current) {
-        return;
-      }
-      const ctx = webAudio.getContext();
-      if (!ctx) {
-        return;
-      }
-      const { end, start } = regionRef.current;
-      const clampedStep = clamp(step, start, end - 1);
-      const anchorTime =
-        ctx.currentTime - (clampedStep - start) * stepDurationRef.current;
-      restartLoopFrom(anchorTime);
-    },
-    [restartLoopFrom, webAudio]
-  );
+  const stopPlayback = stop;
 
   const startPlayback = useCallback(() => {
-    const ctx = webAudio.getContext();
-    if (!ctx || notesRef.current.length === 0) {
+    if (notesRef.current.length === 0) {
       return;
     }
-    setIsPlaying(true);
-    restartLoopFrom(ctx.currentTime);
-  }, [restartLoopFrom, webAudio]);
+    start();
+  }, [start]);
+
+  /** Fired on `Ruler`'s `onValueCommit` — re-anchors the loop so a region change is audible immediately instead of waiting for a stale iteration to finish. No-op while stopped. */
+  const commitLoopRegion = useCallback(() => {
+    reanchor();
+  }, [reanchor]);
+
+  /** Fired on `Ruler`'s `onSeek` (a plain click on the ruler track). Clamps into the region, then re-anchors so that step plays now. No-op while stopped. */
+  const seekTo = useCallback(
+    (step: number) => {
+      const { end, start: regionStart } = regionRef.current;
+      reanchor(clamp(step, regionStart, end - 1));
+    },
+    [reanchor]
+  );
 
   const clearNotes = useCallback(() => {
     stopPlayback();
@@ -468,27 +374,21 @@ function usePianoRoll({
     [stopPlayback]
   );
 
+  // Playhead + "which pitches are sounding" highlight, both derived from the
+  // clock's continuous position (fractional grid steps) — one source, so there
+  // is no second note→time formula to keep in sync. Position updates far too
+  // fast for React state, so the playhead is written imperatively.
   useEffect(() => {
     if (!isPlaying) {
       setPlayingHighlightNotes([]);
       return;
     }
-    const ctx = webAudio.getContext();
-    if (!ctx) {
-      return;
-    }
     let rafId: number;
     let lastSounding: number[] = [];
     const tick = () => {
-      const elapsed = ctx.currentTime - loopAnchorTimeRef.current;
-      const duration = loopDurationRef.current;
-      const positionInLoop = duration > 0 ? elapsed % duration : 0;
-      const stepSeconds = stepDurationRef.current;
-      const { end, start } = regionRef.current;
-      // Position within the region maps onto the *full* grid width — the
-      // playhead only sweeps the region's span, not the whole timeline.
-      const stepPosition = start + positionInLoop / stepSeconds;
-      const percent = (stepPosition / TOTAL_STEPS) * 100;
+      const position = getPosition();
+      const { end, start: regionStart } = regionRef.current;
+      const percent = (position / TOTAL_STEPS) * 100;
       if (playheadRef.current) {
         playheadRef.current.style.left = `${percent}%`;
       }
@@ -498,12 +398,10 @@ function usePianoRoll({
 
       const sounding = notesRef.current
         .filter((n) => {
-          if (n.startStep < start || n.startStep >= end) {
+          if (n.startStep < regionStart || n.startStep >= end) {
             return false;
           }
-          const onTime = (n.startStep - start) * stepSeconds;
-          const offTime = onTime + n.duration * stepSeconds;
-          return positionInLoop >= onTime && positionInLoop < offTime;
+          return position >= n.startStep && position < n.startStep + n.duration;
         })
         .map((n) => n.note);
       const changed =
@@ -518,9 +416,7 @@ function usePianoRoll({
     };
     rafId = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(rafId);
-  }, [isPlaying, webAudio]);
-
-  useEffect(() => stopPlayback, [stopPlayback]);
+  }, [getPosition, isPlaying]);
 
   return {
     clearNotes,
@@ -542,7 +438,6 @@ function usePianoRoll({
 }
 
 export default function BlockPianoRoll() {
-  const webAudio = useWebAudio();
   const volumeId = useId();
   const volumeLabelId = useId();
   const volumeValueId = useId();
@@ -550,7 +445,7 @@ export default function BlockPianoRoll() {
   const [volume, setVolume] = useState(DEFAULT_VOLUME);
   const [bpm, setBpm] = useState(DEFAULT_BPM);
   const [loopRegion, setLoopRegion] = useState<LoopRegion | null>(null);
-  const masterGain = useMasterGain(webAudio, volume);
+  const masterGain = useMasterBus(volume);
 
   const { releaseAll, releaseNote, triggerNote } = useSynthVoices({
     destination: masterGain,
@@ -578,7 +473,6 @@ export default function BlockPianoRoll() {
     releaseAll,
     releaseNote,
     triggerNote,
-    webAudio,
   });
 
   useEffect(() => {

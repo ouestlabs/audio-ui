@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useState } from "react";
 import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder";
 import { Button } from "@/registry/bases/base/ui/button";
 import {
@@ -18,6 +18,7 @@ import {
 } from "@/registry-audio/bases/base/audio/elements/channel-strip";
 import { Fader } from "@/registry-audio/bases/base/audio/elements/fader";
 import { Sequencer } from "@/registry-audio/bases/base/audio/elements/sequencer";
+import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 import { useStepClock } from "@/registry-audio/bases/base/hooks/use-step-clock";
 import { useWebAudio } from "@/registry-audio/bases/base/hooks/use-web-audio";
 import {
@@ -110,39 +111,25 @@ export default function BlockDrumMachine() {
   const [bpmDraft, setBpmDraft] = useState(String(DEFAULT_BPM));
   const [volume, setVolume] = useState(DEFAULT_VOLUME);
 
-  const masterGainRef = useRef<GainNode | null>(null);
-
-  const getMasterGain = useCallback(() => {
-    const ctx = webAudio.getContext();
-    if (!ctx) {
-      return null;
-    }
-    if (!masterGainRef.current) {
-      const gain = ctx.createGain();
-      gain.connect(ctx.destination);
-      masterGainRef.current = gain;
-    }
-    return { ctx, gain: masterGainRef.current };
-  }, [webAudio]);
+  const masterBus = useMasterBus(volume);
 
   const handleStep = useCallback(
     (stepIndex: number, time: number) => {
-      const nodes = getMasterGain();
-      if (!nodes) {
+      const ctx = webAudio.getContext();
+      if (!(ctx && masterBus)) {
         return;
       }
-      const { ctx, gain } = nodes;
       if (pattern[KICK_ROW]?.[stepIndex]) {
-        triggerKick(ctx, gain, time);
+        triggerKick(ctx, masterBus, time);
       }
       if (pattern[SNARE_ROW]?.[stepIndex]) {
-        triggerSnare(ctx, gain, time);
+        triggerSnare(ctx, masterBus, time);
       }
       if (pattern[HIHAT_ROW]?.[stepIndex]) {
-        triggerHihat(ctx, gain, time);
+        triggerHihat(ctx, masterBus, time);
       }
     },
-    [getMasterGain, pattern]
+    [masterBus, pattern, webAudio]
   );
 
   const { isPlaying, start, step, stop } = useStepClock({
@@ -183,21 +170,6 @@ export default function BlockDrumMachine() {
   useEffect(() => {
     setBpmDraft(String(bpm));
   }, [bpm]);
-
-  useEffect(() => {
-    const ctx = webAudio.getContext();
-    if (masterGainRef.current && ctx) {
-      masterGainRef.current.gain.setTargetAtTime(volume, ctx.currentTime, 0.01);
-    }
-  }, [volume, webAudio]);
-
-  useEffect(
-    () => () => {
-      masterGainRef.current?.disconnect();
-      masterGainRef.current = null;
-    },
-    []
-  );
 
   return (
     <div className="cn-audio-panel flex w-full min-w-0 flex-col gap-4 border bg-card p-4">

@@ -55,7 +55,22 @@ export const hooks: RegistryItem[] = [
       },
     ],
     name: "use-step-clock",
-    registryDependencies: ["@audio/use-web-audio"],
+    registryDependencies: ["@audio/use-transport-clock"],
+    type: "registry:hook",
+  },
+  {
+    categories: ["audio", "sequencer", "piano"],
+    files: [
+      {
+        path: "hooks/use-transport-clock.ts",
+        type: "registry:hook",
+      },
+    ],
+    name: "use-transport-clock",
+    registryDependencies: [
+      "@audio/use-web-audio",
+      "@audio/lookahead-scheduler",
+    ],
     type: "registry:hook",
   },
   {
@@ -67,6 +82,18 @@ export const hooks: RegistryItem[] = [
       },
     ],
     name: "use-audio-levels",
+    type: "registry:hook",
+  },
+  {
+    categories: ["audio", "synth", "sequencer"],
+    files: [
+      {
+        path: "hooks/use-master-bus.ts",
+        type: "registry:hook",
+      },
+    ],
+    name: "use-master-bus",
+    registryDependencies: ["@audio/use-web-audio"],
     type: "registry:hook",
   },
   {

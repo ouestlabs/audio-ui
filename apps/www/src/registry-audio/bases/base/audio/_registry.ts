@@ -153,6 +153,7 @@ export const audio: RegistryItem[] = [
       },
     ],
     name: "waveform",
+    registryDependencies: ["@audio/waveform-dsp"],
     type: "registry:ui",
   },
   {

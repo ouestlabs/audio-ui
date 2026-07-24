@@ -17,12 +17,12 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/registry/bases/base/ui/tabs";
+import { Waveform } from "@/registry-audio/bases/base/audio/elements/waveform";
 import {
   decodeAudioSamples,
   downsampleWaveform,
   normalizeWaveform,
-  Waveform,
-} from "@/registry-audio/bases/base/audio/elements/waveform";
+} from "@/registry-audio/bases/base/lib/waveform-dsp";
 
 const PATH_SAMPLES = 100;
 

@@ -1,10 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useWebAudio } from "@/registry-audio/bases/base/hooks/use-web-audio";
+import { useEffect, useRef, useState } from "react";
+import { useTransportClock } from "@/registry-audio/bases/base/hooks/use-transport-clock";
 
-const LOOKAHEAD_MS = 25;
-const SCHEDULE_AHEAD_SECONDS = 0.1;
+const DEFAULT_BPM = 120;
+const DEFAULT_STEPS_PER_BEAT = 4;
 
 export interface UseStepClockOptions {
   bpm?: number;
@@ -25,75 +25,43 @@ export interface UseStepClockReturn {
  * Drift-free step clock: schedules steps against the shared AudioContext's
  * clock (not setInterval) with a lookahead scheduler, so playback stays in
  * sync even when the tab is throttled in the background. Pass `step` to a
- * Sequencer's `activeStep` prop to drive the playhead.
+ * Sequencer's `activeStep` prop to drive the playhead. A thin adapter over
+ * `useTransportClock` (the region-aware clock) with no loop region — it only
+ * adds the reactive `step` a Sequencer needs.
  */
 export function useStepClock({
-  bpm = 120,
+  bpm = DEFAULT_BPM,
   onStep,
-  stepsPerBeat = 4,
+  stepsPerBeat = DEFAULT_STEPS_PER_BEAT,
   totalSteps,
 }: UseStepClockOptions): UseStepClockReturn {
-  const webAudio = useWebAudio();
-  const [isPlaying, setIsPlaying] = useState(false);
   const [step, setStep] = useState(0);
+  const { getPosition, isPlaying, start, stop } = useTransportClock({
+    bpm,
+    onStep,
+    stepsPerBeat,
+    totalSteps,
+  });
 
-  const nextStepTimeRef = useRef(0);
-  const currentStepRef = useRef(0);
-  const intervalIdRef = useRef<number | null>(null);
-  const onStepRef = useRef(onStep);
-  onStepRef.current = onStep;
-  // Read fresh on every scheduled step (not captured once at start()) so a
-  // tempo change while playing takes effect on the next step, not on the
-  // next stop/start cycle.
-  const bpmRef = useRef(bpm);
-  bpmRef.current = bpm;
-  const stepsPerBeatRef = useRef(stepsPerBeat);
-  stepsPerBeatRef.current = stepsPerBeat;
+  const getPositionRef = useRef(getPosition);
+  getPositionRef.current = getPosition;
 
-  const stop = useCallback(() => {
-    if (intervalIdRef.current !== null) {
-      window.clearInterval(intervalIdRef.current);
-      intervalIdRef.current = null;
-    }
-    setIsPlaying(false);
-  }, []);
-
-  const start = useCallback(() => {
-    const audioContext = webAudio.getContext();
-    if (!audioContext) {
+  // The reactive `step` for a Sequencer's `activeStep`, derived from the
+  // clock's continuous position in a single rAF — it flips within a frame of
+  // the real boundary without the clock setting state on every scheduled step.
+  useEffect(() => {
+    if (!isPlaying) {
       return;
     }
-
-    currentStepRef.current = 0;
-    nextStepTimeRef.current = audioContext.currentTime;
-    setStep(0);
-    setIsPlaying(true);
-
-    intervalIdRef.current = window.setInterval(() => {
-      while (
-        nextStepTimeRef.current <
-        audioContext.currentTime + SCHEDULE_AHEAD_SECONDS
-      ) {
-        const scheduledStep = currentStepRef.current;
-        const scheduledTime = nextStepTimeRef.current;
-        const delayMs = Math.max(
-          0,
-          (scheduledTime - audioContext.currentTime) * 1000
-        );
-
-        window.setTimeout(() => {
-          setStep(scheduledStep);
-          onStepRef.current?.(scheduledStep, scheduledTime);
-        }, delayMs);
-
-        const secondsPerStep = 60 / bpmRef.current / stepsPerBeatRef.current;
-        currentStepRef.current = (scheduledStep + 1) % totalSteps;
-        nextStepTimeRef.current += secondsPerStep;
-      }
-    }, LOOKAHEAD_MS);
-  }, [totalSteps, webAudio]);
-
-  useEffect(() => stop, [stop]);
+    let rafId: number;
+    const tick = () => {
+      const next = Math.floor(getPositionRef.current()) % totalSteps;
+      setStep((current) => (current === next ? current : next));
+      rafId = requestAnimationFrame(tick);
+    };
+    rafId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafId);
+  }, [isPlaying, totalSteps]);
 
   return { isPlaying, start, step, stop };
 }
