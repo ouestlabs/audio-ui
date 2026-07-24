@@ -3,7 +3,7 @@ import { fireEvent, render } from "@testing-library/react";
 import { mockRect } from "../../test/helpers";
 import { Waveform } from "./waveform";
 
-const SAMPLE_PATH = "M0 50 L100 50";
+const SAMPLE_BARS = [{ height: 10, width: 5, x: 0, y: 45 }];
 
 /** Defaults: min 0, max 1, step 0.001 → midpoint default value 0.5. */
 function renderWaveform(props: Waveform.RootProps = {}) {
@@ -17,8 +17,7 @@ function renderWaveform(props: Waveform.RootProps = {}) {
     >
       <Waveform.Track data-testid="track">
         <Waveform.Svg viewBox="0 0 100 100">
-          <Waveform.Path d={SAMPLE_PATH} />
-          <Waveform.Progress d={SAMPLE_PATH} />
+          <Waveform.Bars bars={SAMPLE_BARS} />
         </Waveform.Svg>
         <Waveform.Thumb data-testid="thumb" />
       </Waveform.Track>

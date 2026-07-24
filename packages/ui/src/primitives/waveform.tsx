@@ -242,7 +242,7 @@ export namespace Waveform {
     viewBox?: string;
   }
 
-  /** Purely a rendering surface for `Path`/`Progress` — its `viewBox` should match whatever `width`/`height` the consumer generated the waveform path against. Interaction lives on the enclosing `Track`, not here. */
+  /** Purely a rendering surface for `Bars`/`BarsProgress` — its `viewBox` should match the coordinate space the consumer laid the bars out in. Interaction lives on the enclosing `Track`, not here. */
   export function Svg({ className, ...props }: SvgProps) {
     const { disabled } = useWaveformConfigContext();
     return (
@@ -256,44 +256,6 @@ export namespace Waveform {
           height: "100%",
           pointerEvents: "none",
           width: "100%",
-        }}
-        {...props}
-      />
-    );
-  }
-
-  export interface PathProps extends React.ComponentProps<"path"> {
-    d: string;
-  }
-
-  /** The full waveform shape, purely decorative — the shape a consumer generated (from real audio samples, a placeholder curve, anything) and passed as `d`. */
-  export function Path({ className, ...props }: PathProps) {
-    const { disabled } = useWaveformConfigContext();
-    return (
-      <path
-        className={className}
-        {...getDataAttributes("waveform", { disabled, part: "path" })}
-        {...props}
-      />
-    );
-  }
-
-  export interface ProgressProps extends React.ComponentProps<"path"> {
-    d: string;
-  }
-
-  /** The same waveform shape as `Path`, clipped to reveal only the portion up to the current value — the "played" half of the two-path technique wave-audio-path-player uses. */
-  export function Progress({ className, style, ...props }: ProgressProps) {
-    const { disabled } = useWaveformConfigContext();
-    const { percentage } = useWaveformValueContext();
-
-    return (
-      <path
-        className={className}
-        {...getDataAttributes("waveform", { disabled, part: "progress" })}
-        style={{
-          clipPath: `inset(0 ${(1 - percentage) * 100}% 0 0)`,
-          ...style,
         }}
         {...props}
       />
