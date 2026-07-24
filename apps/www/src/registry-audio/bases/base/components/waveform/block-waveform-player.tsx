@@ -17,17 +17,14 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/registry/bases/base/ui/tabs";
-import { Waveform } from "@/registry-audio/bases/base/audio/elements/waveform";
 import {
   decodeAudioSamples,
   downsampleWaveform,
   normalizeWaveform,
-  waveformBars,
-} from "@/registry-audio/bases/base/lib/waveform-path";
+  Waveform,
+} from "@/registry-audio/bases/base/audio/elements/waveform";
 
 const PATH_SAMPLES = 100;
-const PATH_WIDTH = 800;
-const PATH_HEIGHT = 100;
 
 function formatTime(seconds: number): string {
   if (!Number.isFinite(seconds)) {
@@ -48,14 +45,14 @@ function toIsoDuration(seconds: number): string {
   return `PT${minutes}M${remainingSeconds}S`;
 }
 
-/** A seekable waveform player driven entirely by a user-supplied file — nothing is preloaded. Picking a file decodes its real PCM samples via `decodeAudioSamples`/`waveformBars` once, shared across two tabbed presentations of the same data: a plain recolored bar chart, and an `AudioScrubber`-style read with a `Playhead` line and `Thumb` handle. The primitive only owns the seek value, not the audio itself. */
+/** A seekable waveform player driven entirely by a user-supplied file — nothing is preloaded. Picking a file decodes its real PCM samples via `decodeAudioSamples`/`downsampleWaveform`/`normalizeWaveform` once, shared across two tabbed presentations of the same data: a plain recolored bar chart, and an `AudioScrubber`-style read with a `Playhead` line and `Thumb` handle. The primitive only owns the seek value, not the audio itself. */
 export default function BlockWaveformPlayer() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const objectUrlRef = useRef<string | null>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [fileName, setFileName] = useState("");
-  const [bars, setBars] = useState<ReturnType<typeof waveformBars>>([]);
+  const [values, setValues] = useState<number[]>([]);
   const [duration, setDuration] = useState(0);
   const [progress, setProgress] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -86,7 +83,7 @@ export default function BlockWaveformPlayer() {
       setIsPlaying(false);
       setProgress(0);
       setDuration(0);
-      setBars([]);
+      setValues([]);
       setFileName(file.name);
       setAudioUrl(url);
 
@@ -96,10 +93,7 @@ export default function BlockWaveformPlayer() {
       await context.close();
 
       const downsampled = downsampleWaveform(samples, PATH_SAMPLES);
-      const normalized = normalizeWaveform(downsampled);
-      setBars(
-        waveformBars(normalized, { height: PATH_HEIGHT, width: PATH_WIDTH })
-      );
+      setValues(normalizeWaveform(downsampled));
     },
     []
   );
@@ -160,7 +154,7 @@ export default function BlockWaveformPlayer() {
     }
   }, []);
 
-  const hasAudio = bars.length > 0;
+  const hasAudio = values.length > 0;
 
   return (
     <div className="cn-audio-panel flex w-full min-w-0 flex-col gap-4 border bg-card p-4">
@@ -185,19 +179,19 @@ export default function BlockWaveformPlayer() {
           <TabsContent value="default">
             <Waveform
               aria-label="Track progress"
-              bars={bars}
               onValueChange={handleSeek}
               onValueCommit={handleSeek}
               value={progress}
+              values={values}
             />
           </TabsContent>
           <TabsContent value="playhead">
             <Waveform
               aria-label="Track progress"
-              bars={bars}
               onValueChange={handleSeek}
               onValueCommit={handleSeek}
               value={progress}
+              values={values}
               variant="playhead"
             />
           </TabsContent>

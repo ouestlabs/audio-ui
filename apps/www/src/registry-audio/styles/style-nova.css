@@ -462,11 +462,11 @@
   }
 
   .cn-waveform-bars {
-    @apply pointer-events-none fill-border [rx:1];
+    @apply pointer-events-none fill-border [rx:max(0px,min(var(--radius-sm),3px))];
   }
 
   .cn-waveform-bars-progress {
-    @apply pointer-events-none fill-primary [rx:1];
+    @apply pointer-events-none fill-primary [rx:max(0px,min(var(--radius-sm),3px))];
   }
 
   .cn-waveform-playhead {

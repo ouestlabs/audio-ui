@@ -12,7 +12,7 @@ Waveform for scrubbing through audio — a track of recolored bars that fill in 
 ## Overview
 
 - **Value model:** `value` is a plain `0–1` fraction (or pass `min`/`max`, e.g. a track's duration in seconds) — the primitive only owns the seek position, never the audio itself. Wire `onValueChange`/`onValueCommit` to your own `<audio>` element.
-- **Bar data:** `bars` is a `WaveformBar[]` you compute — see [Feeding real audio](#feeding-real-audio) for turning a real audio file into one with `waveform-path.ts`.
+- **Bar data:** pass `values` (raw `0–1` amplitudes) and the component lays out the bars for you, or pass fully-computed `bars: WaveformBar[]` yourself for precomputed/server-side peaks — see [Feeding real audio](#feeding-real-audio) for turning a real audio file into `values`.
 - **Variants:** `variant="default"` renders just the recolored bars. `variant="playhead"` additionally renders a playhead line and a real handle at the current position.
 - **Accessibility:** `variant="playhead"`'s handle is a native `role="slider"` with `aria-valuenow`/`min`/`max` and full arrow key / <kbd>Home</kbd> / <kbd>End</kbd> / <kbd>Page Up</kbd> / <kbd>Page Down</kbd> support. `variant="default"` is click/drag-to-seek only — pick `playhead` when keyboard access matters.
 
@@ -68,7 +68,7 @@ import { Waveform } from "@/components/audio/elements/waveform";
 **Bars only:**
 
 ```tsx
-<Waveform aria-label="Track progress" bars={bars} value={progress} />
+<Waveform aria-label="Track progress" value={progress} values={values} />
 ```
 
 **With a playhead line and handle:**
@@ -76,39 +76,49 @@ import { Waveform } from "@/components/audio/elements/waveform";
 ```tsx
 <Waveform
   aria-label="Track progress"
-  bars={bars}
   onValueChange={setProgress}
   onValueCommit={setProgress}
   value={progress}
+  values={values}
   variant="playhead"
 />
 ```
 
 ## Feeding real audio
 
-`bars` is a plain prop — the primitive doesn't decode anything. `waveform-path.ts` (`npx shadcn@latest add @audio/waveform-path`) turns a decoded audio file into it: `decodeAudioSamples` reads PCM samples out of an `AudioContext`, `downsampleWaveform` block-averages them down to a bar count, `normalizeWaveform` scales the peak to `1`, and `waveformBars` lays the result out as bar geometry.
+`values`/`bars` are plain props — the component doesn't decode anything on its own, but it does ship `decodeAudioSamples`/`downsampleWaveform`/`normalizeWaveform` alongside `Waveform` for turning a real audio file into `values`: `decodeAudioSamples` reads PCM samples out of an `AudioContext`, `downsampleWaveform` reduces them down to a bar count (keeping each block's peak, not its average, so transients stay sharp), and `normalizeWaveform` scales the peak to `1`.
 
 ```tsx
+import {
+  decodeAudioSamples,
+  downsampleWaveform,
+  normalizeWaveform,
+} from "@/components/audio/elements/waveform";
+
 const context = new AudioContext();
 const buffer = await file.arrayBuffer();
 const samples = await decodeAudioSamples(context, buffer);
 
 const downsampled = downsampleWaveform(samples, 100);
-const normalized = normalizeWaveform(downsampled);
-const bars = waveformBars(normalized, { height: 100, width: 800 });
+const values = normalizeWaveform(downsampled);
 ```
+
+<Callout variant="warning">
+  <strong>Sample count vs. rendered width:</strong> the second argument to <code>downsampleWaveform</code> is a bar count, not a duration — it has nothing to do with how long the audio is. Because <code>Waveform.Svg</code> stretches to the container's actual CSS width, too few bars for a wide track reads as a chunky bar chart, and too many bars for a narrow one (e.g. a chat bubble voice message) reads as a thin, barely-visible smear. Pick the count from the width you'll actually render at — roughly one bar every 4-6px — not from the audio's duration.
+</Callout>
 
 Playback itself is a plain `<audio>` element — `onValueChange`/`onValueCommit` set `audio.currentTime`, and the element's own `timeupdate` event feeds `value` back in. See `block-waveform-player`'s source for the full wiring, including the upload flow and a `requestAnimationFrame`-free `timeupdate` listener.
 
 ## API reference
 
-`Waveform` accepts style props (`bars`, `variant`, `viewBox`) plus primitive props from `WaveformPrimitive.RootProps`.
+`Waveform` accepts style props (`values`, `bars`, `variant`, `viewBox`) plus primitive props from `WaveformPrimitive.RootProps`.
 
 ### Value and state
 
 | Prop              | Type                  | Default    | Description                                                             |
 | ----------------- | --------------------- | ---------- | ------------------------------------------------------------------------- |
-| `bars`            | `WaveformBar[]`       | -          | Required. Bar geometry — see [Feeding real audio](#feeding-real-audio). |
+| `values`          | `number[]`            | -          | Raw `0–1` amplitudes — the component lays out bars for you. Required unless `bars` is passed. |
+| `bars`            | `WaveformBar[]`       | -          | Precomputed bar geometry, for server-side peaks or custom layouts. Required unless `values` is passed. |
 | `value`           | `number`              | -          | Controlled seek position.                                               |
 | `defaultValue`    | `number`              | -          | Uncontrolled initial seek position.                                     |
 | `min`             | `number`              | `0`        | Lower bound of the seek value.                                          |
@@ -125,7 +135,7 @@ Playback itself is a plain `<audio>` element — `onValueChange`/`onValueCommit`
 | Prop        | Type                       | Default             | Description                                              |
 | ----------- | -------------------------- | -------------------- | ---------------------------------------------------------- |
 | `variant`   | `"default" \| "playhead"`  | `"default"`          | `playhead` adds a playhead line and a real handle.        |
-| `viewBox`   | `string`                   | `"0 0 800 100"`      | Must match the `width`/`height` `bars` was generated against. |
+| `viewBox`   | `string`                   | `"0 0 800 100"`      | Its width/height are used to lay out `values` into bars, and must match what `bars` was generated against if you pass that instead. |
 | `className` | `string`                   | -                     | Additional CSS classes.                                   |
 
 Additional valid HTML attributes passed to `Waveform.Root` are forwarded.

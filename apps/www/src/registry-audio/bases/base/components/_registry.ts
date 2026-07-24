@@ -1330,7 +1330,6 @@ export const components: RegistryItem[] = [
     name: "block-waveform-player",
     registryDependencies: [
       "@audio/waveform",
-      "@audio/waveform-path",
       "@shadcn/button",
       "@shadcn/button-group",
       "@shadcn/empty",
@@ -1348,7 +1347,7 @@ export const components: RegistryItem[] = [
       },
     ],
     name: "waveform-demo",
-    registryDependencies: ["@audio/waveform", "@audio/waveform-path"],
+    registryDependencies: ["@audio/waveform"],
     type: "registry:example",
   },
   {
@@ -1361,7 +1360,7 @@ export const components: RegistryItem[] = [
       },
     ],
     name: "waveform-playhead-demo",
-    registryDependencies: ["@audio/waveform", "@audio/waveform-path"],
+    registryDependencies: ["@audio/waveform"],
     type: "registry:example",
   },
 ];

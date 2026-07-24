@@ -700,8 +700,6 @@ export default function BlockPianoRoll() {
         </div>
       ) : null}
       <div className="flex w-full min-w-0 gap-2">
-        {/* Spacer matching PianoRoll's own KeysTrack width, so the ruler's steps line up with the grid's steps below it rather than the full card width. */}
-        <div aria-hidden="true" className="w-10 shrink-0" />
         <Ruler
           aria-label="Loop region"
           className="flex-1"

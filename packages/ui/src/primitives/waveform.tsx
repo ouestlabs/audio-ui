@@ -308,9 +308,14 @@ export namespace Waveform {
     y: number;
   }
 
-  function renderBarRects(bars: WaveformBarValue[], radius: number) {
+  function renderBarRects(
+    bars: WaveformBarValue[],
+    radius: number,
+    className: string | undefined
+  ) {
     return bars.map((bar) => (
       <rect
+        className={className}
         fillOpacity={bar.opacity}
         height={bar.height}
         key={bar.x}
@@ -323,8 +328,9 @@ export namespace Waveform {
   }
 
   export interface BarsProps
-    extends Omit<React.ComponentProps<"g">, "children"> {
+    extends Omit<React.ComponentProps<"g">, "children" | "className"> {
     bars: WaveformBarValue[];
+    className?: string;
     radius?: number;
   }
 
@@ -333,11 +339,10 @@ export namespace Waveform {
     const { disabled } = useWaveformConfigContext();
     return (
       <g
-        className={className}
         {...getDataAttributes("waveform", { disabled, part: "bars" })}
         {...props}
       >
-        {renderBarRects(bars, radius)}
+        {renderBarRects(bars, radius, className)}
       </g>
     );
   }
@@ -357,7 +362,6 @@ export namespace Waveform {
 
     return (
       <g
-        className={className}
         {...getDataAttributes("waveform", { disabled, part: "bars-progress" })}
         style={{
           clipPath: `inset(0 ${(1 - percentage) * 100}% 0 0)`,
@@ -365,7 +369,7 @@ export namespace Waveform {
         }}
         {...props}
       >
-        {renderBarRects(bars, radius)}
+        {renderBarRects(bars, radius, className)}
       </g>
     );
   }

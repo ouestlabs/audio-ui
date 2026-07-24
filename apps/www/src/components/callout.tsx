@@ -15,10 +15,12 @@ export function Callout({
   return (
     <Alert
       className={cn(
-        "md:-mx-1 mt-6 w-auto border border-site-border bg-site-background text-site-foreground",
+        "md:-mx-1 mt-6 w-auto",
+        variant === "default" &&
+          "border-site-border bg-site-background text-site-foreground",
         className
       )}
-      data-variant={variant}
+      variant={variant}
       {...props}
     >
       {icon}
