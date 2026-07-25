@@ -186,7 +186,7 @@ export default function BlockVoiceRecorder() {
       )}
 
       {hasTake && tracks ? (
-        <AudioPlayer engine={engine} tracks={tracks} >
+        <AudioPlayer engine={engine} tracks={tracks}>
           <AudioPlayerControlBar variant="stacked">
             <AudioPlayerControlGroup>
               <AudioPlayerTimeDisplay />
