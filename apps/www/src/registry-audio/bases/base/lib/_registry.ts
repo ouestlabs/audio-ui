@@ -133,4 +133,34 @@ export const lib: RegistryItem[] = [
     registryDependencies: [],
     type: "registry:lib",
   },
+  {
+    categories: ["lib", "audio", "sequencer", "ai"],
+    dependencies: ["zod"],
+    description:
+      "AI-native tool surface for a drum machine — createDrumMachineTools builds typed, agent-agnostic tools (setPattern/setInstrument/toggleStep/clear/setTempo) an LLM calls to write beats from natural language, parameterized by the consumer's own kit and grid",
+    files: [
+      {
+        path: "lib/drum-machine-tools.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "drum-machine-tools",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "piano", "ai"],
+    dependencies: ["zod"],
+    description:
+      "AI-native tool surface for a piano roll — createPianoRollTools builds typed, agent-agnostic tools (setNotes/addNotes/removeNotes/transpose/clear/setTempo) an LLM calls to compose melodies and basslines from natural language, parameterized by the roll's pitch range and grid",
+    files: [
+      {
+        path: "lib/piano-roll-tools.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "piano-roll-tools",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
 ];
