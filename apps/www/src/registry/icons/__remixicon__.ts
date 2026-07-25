@@ -21,6 +21,7 @@ export {
   RiInformationLine,
   RiLoaderLine,
   RiMicLine,
+  RiMicOffLine,
   RiMoreLine,
   RiMusic2Line,
   RiMusicLine,

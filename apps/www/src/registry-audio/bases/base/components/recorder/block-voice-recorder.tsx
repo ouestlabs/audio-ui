@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder";
 import { Button } from "@/registry/bases/base/ui/button";
 import { ButtonGroup } from "@/registry/bases/base/ui/button-group";
@@ -11,8 +11,18 @@ import {
   EmptyTitle,
 } from "@/registry/bases/base/ui/empty";
 import { Meter } from "@/registry-audio/bases/base/audio/elements/meter";
+import {
+  AudioPlayer,
+  AudioPlayerControlBar,
+  AudioPlayerControlGroup,
+  AudioPlayerPlay,
+  AudioPlayerSeekBar,
+  AudioPlayerTimeDisplay,
+  AudioPlayerVolume,
+} from "@/registry-audio/bases/base/audio/player";
 import { useAudioLevels } from "@/registry-audio/bases/base/hooks/use-audio-levels";
 import { useMicRecorder } from "@/registry-audio/bases/base/hooks/use-mic-recorder";
+import { HtmlAudioEngine } from "@/registry-audio/bases/base/lib/html-audio";
 import { formatRecordingTime } from "@/registry-audio/bases/base/lib/recording";
 
 function MicIcon() {
@@ -98,7 +108,7 @@ function StatusLine({
 /** A voice recorder: capture from the microphone with a live input meter and elapsed time, then play back or download the take. The recorder owns permission, the MediaRecorder, and the blob's object URL — this block only presents them. */
 export default function BlockVoiceRecorder() {
   const {
-    analyser,
+    analyser: micAnalyser,
     clear,
     durationMs,
     error,
@@ -111,11 +121,43 @@ export default function BlockVoiceRecorder() {
     stop,
   } = useMicRecorder();
 
-  // Memoized: a new array identity restarts level sampling every render.
-  const analysers = useMemo(() => [analyser], [analyser]);
+  const hasTake = Boolean(recording) && !isRecording;
+
+  // The block owns the playback engine so it can read the analyser tapping
+  // its output — that is what lets the meter follow playback, not just capture.
+  const [engine] = useState(() => new HtmlAudioEngine());
+  const [playbackAnalyser, setPlaybackAnalyser] = useState<AnalyserNode | null>(
+    null
+  );
+
+  useEffect(() => {
+    if (!hasTake) {
+      setPlaybackAnalyser(null);
+      return;
+    }
+    // By now the player has mounted and initialised the engine's element.
+    setPlaybackAnalyser(engine.getAnalyser?.() ?? null);
+  }, [engine, hasTake]);
+
+  // The meter watches whichever source is live: the mic while recording, the
+  // player once there is a take. Memoized — a new array identity restarts
+  // level sampling every render.
+  const analysers = useMemo(
+    () => [isRecording ? micAnalyser : playbackAnalyser],
+    [isRecording, micAnalyser, playbackAnalyser]
+  );
   const { levels, peaks } = useAudioLevels(analysers);
 
-  const hasTake = Boolean(recording) && !isRecording;
+  // The finished take as a one-track queue, memoized on the object URL so
+  // re-renders never reload it mid-playback. The player session is ephemeral
+  // and private to this block — it has no persistKey and its own engine.
+  const tracks = useMemo(
+    () =>
+      recording
+        ? [{ id: "recording", title: "Recording", url: recording.url }]
+        : null,
+    [recording]
+  );
 
   return (
     <div className="cn-audio-panel flex w-full min-w-0 flex-col gap-4 border bg-card p-4">
@@ -143,13 +185,20 @@ export default function BlockVoiceRecorder() {
         </Empty>
       )}
 
-      {hasTake && recording ? (
-        // Deliberately a plain element, not our own AudioPlayer: the player's
-        // store and engine are module-level singletons, so mounting it here
-        // would join — and fight over — whatever playback session the page
-        // already has. Switch to AudioPlayer once it is instance-scoped.
-        // biome-ignore lint/a11y/useMediaCaption: a just-captured microphone take has no caption track to offer
-        <audio className="w-full" controls src={recording.url} />
+      {hasTake && tracks ? (
+        <AudioPlayer engine={engine} tracks={tracks} >
+          <AudioPlayerControlBar variant="stacked">
+            <AudioPlayerControlGroup>
+              <AudioPlayerTimeDisplay />
+              <AudioPlayerSeekBar />
+              <AudioPlayerTimeDisplay remaining />
+            </AudioPlayerControlGroup>
+            <AudioPlayerControlGroup>
+              <AudioPlayerPlay />
+              <AudioPlayerVolume />
+            </AudioPlayerControlGroup>
+          </AudioPlayerControlBar>
+        </AudioPlayer>
       ) : null}
 
       <div className="flex items-center justify-between gap-4">

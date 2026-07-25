@@ -197,6 +197,10 @@ export const audio: RegistryItem[] = [
         path: "hooks/use-audio-provider.ts",
         type: "registry:hook",
       },
+      {
+        path: "hooks/use-audio-session.ts",
+        type: "registry:hook",
+      },
     ],
     name: "player",
     registryDependencies: [

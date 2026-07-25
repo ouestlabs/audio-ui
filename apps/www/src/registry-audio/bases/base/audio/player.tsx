@@ -67,17 +67,24 @@ import {
 } from "@/registry-audio/bases/base/audio/sortable-list";
 import { useAudioProvider } from "@/registry-audio/bases/base/hooks/use-audio-provider";
 import {
+  AudioStoreContext,
   useAudioStore,
+  useAudioStoreApi,
   usePlaybackRate,
   usePlaybackState,
   useQueuePreferences,
   useQueueState,
   useSeekState,
   useVolumeState,
-} from "@/registry-audio/bases/base/lib/audio-store";
-import { formatDuration } from "@/registry-audio/bases/base/lib/html-audio";
+} from "@/registry-audio/bases/base/hooks/use-audio-session";
+import { createAudioStore } from "@/registry-audio/bases/base/lib/audio-store";
+import {
+  formatDuration,
+  HtmlAudioEngine,
+} from "@/registry-audio/bases/base/lib/html-audio";
 import {
   isLive,
+  type PlaybackEngine,
   type Track,
 } from "@/registry-audio/bases/base/lib/playback-engine";
 
@@ -91,7 +98,7 @@ const PLAYBACK_SPEEDS = [
 ] as const;
 
 /** Marks whether an ambient `<AudioProvider>` wraps the current subtree. */
-const AudioProviderContext = React.createContext(false);
+// Presence is derived from the session context — no separate boolean needed.
 
 /** Derives whether the current media is a live stream from its duration. */
 function useIsLiveStream(): boolean {
@@ -103,13 +110,14 @@ let spacebarRefCount = 0;
 let removeSpacebarListener: (() => void) | null = null;
 
 function useSpacebarTogglePlay() {
+  const api = useAudioStoreApi();
   React.useEffect(() => {
     spacebarRefCount += 1;
     if (spacebarRefCount === 1) {
       const handleKeyDown = (event: KeyboardEvent) => {
         if (event.code === "Space" && event.target === document.body) {
           event.preventDefault();
-          useAudioStore.getState().togglePlay();
+          api.getState().togglePlay();
         }
       };
       document.addEventListener("keydown", handleKeyDown);
@@ -124,7 +132,9 @@ function useSpacebarTogglePlay() {
         removeSpacebarListener = null;
       }
     };
-  }, []);
+    // Only one document-level listener exists at a time; with several players
+    // mounted it drives the session that registered it first.
+  }, [api]);
 }
 
 // Shared glyphs for icons that appear across multiple player controls.
@@ -196,12 +206,24 @@ function MutedGlyph() {
 function AudioProvider({
   tracks,
   children,
+  engine,
+  persistKey,
 }: {
   tracks: Track[];
   children: React.ReactNode;
+  /** Bring your own adapter; defaults to a private HTMLAudioElement engine. */
+  engine?: PlaybackEngine;
+  /** Persist this session under a localStorage key. Omit to keep it ephemeral. */
+  persistKey?: string;
 }) {
-  useAudioProvider({ tracks });
-  return <AudioProviderContext value={true}>{children}</AudioProviderContext>;
+  // Created once per provider: the session's state and its device are both
+  // private, so two players on a page never share a queue or a position.
+  const [api] = React.useState(() => createAudioStore({ persistKey }));
+  const [sessionEngine] = React.useState(() => engine ?? new HtmlAudioEngine());
+
+  useAudioProvider({ api, engine: sessionEngine, tracks });
+
+  return <AudioStoreContext value={api}>{children}</AudioStoreContext>;
 }
 const demoTracks: Track[] = [
   {
@@ -252,11 +274,19 @@ const audioPlayerVariants = cva(
 );
 
 type AudioPlayerProps = React.ComponentProps<"div"> &
-  VariantProps<typeof audioPlayerVariants> & { tracks?: Track[] };
+  VariantProps<typeof audioPlayerVariants> & {
+    /** Bring your own adapter — e.g. to read its analyser for a level meter. */
+    engine?: PlaybackEngine;
+    /** Persist this session under a localStorage key; omit to keep it ephemeral. */
+    persistKey?: string;
+    tracks?: Track[];
+  };
 
 function AudioPlayer({
   children,
   className,
+  engine,
+  persistKey,
   tracks,
   size,
   variant,
@@ -276,13 +306,14 @@ function AudioPlayer({
   );
 
   if (tracks) {
-    return <AudioProvider tracks={tracks}>{content}</AudioProvider>;
+    return (
+      <AudioProvider engine={engine} persistKey={persistKey} tracks={tracks}>
+        {content}
+      </AudioProvider>
+    );
   }
 
-  if (
-    process.env.NODE_ENV !== "production" &&
-    !React.use(AudioProviderContext)
-  ) {
+  if (process.env.NODE_ENV !== "production" && !React.use(AudioStoreContext)) {
     console.warn(
       "AudioPlayer: no `tracks` prop and no ambient <AudioProvider> — playback controls will not function. Pass `tracks` or wrap this player in <AudioProvider tracks={...}>."
     );
@@ -1596,9 +1627,11 @@ const AudioQueue = React.memo(
     const normalizedSearchQuery = searchQuery.trim().toLowerCase();
     const isFiltered = normalizedSearchQuery.length > 0;
 
+    const api = useAudioStoreApi();
+
     const handleTrackSelect = React.useCallback(
       (index: number) => {
-        const currentState = useAudioStore.getState();
+        const currentState = api.getState();
         const currentQueue = currentState.queue;
         const currentTrackId = currentState.currentTrack?.id;
         let filtered = currentQueue;
@@ -1631,7 +1664,7 @@ const AudioQueue = React.memo(
         onTrackSelect?.(trackIndex);
         setDialogOpen(false);
       },
-      [normalizedSearchQuery, togglePlay, setQueueAndPlay, onTrackSelect]
+      [api, normalizedSearchQuery, togglePlay, setQueueAndPlay, onTrackSelect]
     );
 
     const handleTrackRemove = React.useCallback(

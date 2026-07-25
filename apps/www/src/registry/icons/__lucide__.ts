@@ -36,6 +36,8 @@ export {
   Loader2Icon,
   Mic,
   MicIcon,
+  MicOff,
+  MicOffIcon,
   Minus,
   MinusIcon,
   MoreHorizontal,

@@ -5,6 +5,7 @@ import type {
   PlaybackEngineEventType,
   SetEngineVolumeParams,
 } from "@/registry-audio/bases/base/lib/playback-engine";
+import { $webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 type FadeVolumeParams = {
   audio: HTMLAudioElement;
@@ -61,6 +62,7 @@ const FORWARDED_AUDIO_EVENTS: readonly PlaybackEngineEventType[] = [
 
 class HtmlAudioEngine implements PlaybackEngine {
   private audio: HTMLAudioElement | null = null;
+  private analyser: AnalyserNode | null = null;
   private isInitialized = false;
   private playPromise: Promise<void> | null = null;
   private lastVolume = 1;
@@ -180,6 +182,34 @@ class HtmlAudioEngine implements PlaybackEngine {
 
   private isClient(): boolean {
     return typeof window !== "undefined" && !!window.document;
+  }
+
+  /**
+   * A Web Audio analyser tapping this engine's output, for level meters and
+   * visualisers. Created on first call and cached: `createMediaElementSource`
+   * may only run once per element, and it reroutes the element's output into
+   * the graph — hence the explicit connection on to the destination, without
+   * which playback would go silent.
+   *
+   * Note: a cross-origin source served without CORS headers yields silence
+   * through Web Audio, so this stays lazy — a player that never meters is
+   * never rerouted.
+   */
+  getAnalyser(): AnalyserNode | null {
+    if (this.analyser) {
+      return this.analyser;
+    }
+    const context = $webAudio.getContext();
+    if (!(context && this.audio)) {
+      return null;
+    }
+    // Connected nodes are kept alive by the graph, so no field is needed.
+    const source = context.createMediaElementSource(this.audio);
+    const analyser = context.createAnalyser();
+    source.connect(analyser);
+    analyser.connect(context.destination);
+    this.analyser = analyser;
+    return analyser;
   }
 
   private ensureAudio(): HTMLAudioElement {
@@ -565,6 +595,13 @@ class HtmlAudioEngine implements PlaybackEngine {
   }
 }
 
+export { HtmlAudioEngine };
+
+/**
+ * A process-wide engine instance. Prefer `new HtmlAudioEngine()` per session —
+ * this singleton exists for app-level players that deliberately share one
+ * playback session across the whole page.
+ */
 export const $htmlAudio: PlaybackEngine = new HtmlAudioEngine();
 
 const MINUTE_IN_SECONDS = 60;

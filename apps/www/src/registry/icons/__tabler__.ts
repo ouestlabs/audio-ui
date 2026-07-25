@@ -23,6 +23,7 @@ export {
   IconLayoutSidebar,
   IconLoader,
   IconMicrophone,
+  IconMicrophoneOff,
   IconMinus,
   IconMusic,
   IconPlayerPause,

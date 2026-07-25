@@ -3,9 +3,9 @@
 import { useCallback, useEffect, useRef } from "react";
 import {
   type AudioStore,
+  type AudioStoreApi,
   calculateNextIndex,
   canUseDOM,
-  useAudioStore,
 } from "@/registry-audio/bases/base/lib/audio-store";
 import { $htmlAudio } from "@/registry-audio/bases/base/lib/html-audio";
 import {
@@ -21,12 +21,15 @@ const THROTTLE_INTERVAL = 100;
 const MIN_UPDATE_THRESHOLD = 0.5;
 
 export function useAudioProvider({
+  api,
   tracks = [],
   engine = $htmlAudio,
 }: {
+  /** The session store this provider drives — one per `AudioProvider`. */
+  api: AudioStoreApi;
   tracks?: Track[];
   engine?: PlaybackEngine;
-} = {}) {
+}) {
   const preloadAudioRef = useRef<HTMLAudioElement | null>(null);
   const errorRetryCountRef = useRef<number>(0);
   const lastSeekTimeRef = useRef<number>(0);
@@ -37,14 +40,14 @@ export function useAudioProvider({
         | Partial<AudioStore>
         | ((state: AudioStore) => Partial<AudioStore>)
     ) => {
-      useAudioStore.setState(partial);
+      api.setState(partial);
     },
     []
   );
 
   useEffect(() => {
     if (tracks && tracks.length > 0) {
-      const state = useAudioStore.getState();
+      const state = api.getState();
       const currentQueue = state.queue;
       const tracksChanged =
         currentQueue.length === 0 ||
@@ -53,7 +56,7 @@ export function useAudioProvider({
 
       if (tracksChanged) {
         const firstTrack = tracks[0];
-        useAudioStore.setState({
+        api.setState({
           currentQueueIndex:
             state.currentQueueIndex === -1 ? 0 : state.currentQueueIndex,
           currentTrack: state.currentTrack || firstTrack,
@@ -81,7 +84,7 @@ export function useAudioProvider({
     try {
       const currentTime = engine.getCurrentTime();
       const wasPlaying = !engine.isPaused();
-      const state = useAudioStore.getState();
+      const state = api.getState();
       if (state.currentTrack) {
         await engine.load({
           startTime: currentTime,
@@ -102,7 +105,7 @@ export function useAudioProvider({
   const forceTimeUpdate = useCallback(() => {
     const currentTime = engine.getCurrentTime();
     const duration = engine.getDuration() || 0;
-    useAudioStore.getState().syncTime(currentTime, duration);
+    api.getState().syncTime(currentTime, duration);
     lastUpdateTimeRef.current = Date.now();
   }, [engine]);
 
@@ -114,11 +117,11 @@ export function useAudioProvider({
     lastUpdateTimeRef.current = now;
 
     const currentTime = engine.getCurrentTime();
-    const state = useAudioStore.getState();
+    const state = api.getState();
 
     if (Math.abs(state.currentTime - currentTime) > MIN_UPDATE_THRESHOLD) {
       const duration = engine.getDuration() || 0;
-      useAudioStore.getState().syncTime(currentTime, duration);
+      api.getState().syncTime(currentTime, duration);
     }
   }, [engine]);
 
@@ -144,7 +147,7 @@ export function useAudioProvider({
       return;
     }
 
-    const state = useAudioStore.getState();
+    const state = api.getState();
     const nextIndex = calculateNextIndex({
       currentQueueIndex: state.currentQueueIndex,
       queue: state.queue,
@@ -180,7 +183,7 @@ export function useAudioProvider({
 
     const handlePlay = () => {
       errorRetryCountRef.current = 0;
-      const state = useAudioStore.getState();
+      const state = api.getState();
       engine.setPlaybackRate(state.playbackRate);
 
       setState({
@@ -241,7 +244,7 @@ export function useAudioProvider({
     const handleEnded = async () => {
       setState({ isBuffering: false, isPlaying: false });
 
-      const state = useAudioStore.getState();
+      const state = api.getState();
 
       const audioDuration = engine.getDuration() || 0;
       const isLiveStream = isLive(audioDuration);
@@ -308,7 +311,7 @@ export function useAudioProvider({
     };
 
     const handleVolumeChange = () => {
-      const prev = useAudioStore.getState();
+      const prev = api.getState();
       const nextMuted = engine.isMuted();
       if (prev.isMuted !== nextMuted) {
         setState({ isMuted: nextMuted });
@@ -322,7 +325,7 @@ export function useAudioProvider({
     };
 
     const restoreState = async () => {
-      const state = useAudioStore.getState();
+      const state = api.getState();
 
       if (!state.currentTrack) {
         return;
@@ -350,7 +353,7 @@ export function useAudioProvider({
 
         setState({ isLoading: false });
 
-        if (useAudioStore.getState().isPlaying) {
+        if (api.getState().isPlaying) {
           try {
             await engine.play();
           } catch {
@@ -386,7 +389,7 @@ export function useAudioProvider({
 
     restoreState();
 
-    const unsubscribeTrack = useAudioStore.subscribe(
+    const unsubscribeTrack = api.subscribe(
       (state) => state.currentTrack?.id,
       (newSongId, oldSongId) => {
         if (newSongId && newSongId !== oldSongId) {
@@ -396,14 +399,14 @@ export function useAudioProvider({
       }
     );
 
-    const unsubscribePlaybackRate = useAudioStore.subscribe(
+    const unsubscribePlaybackRate = api.subscribe(
       (state) => state.playbackRate,
       (playbackRate) => {
         engine.setPlaybackRate(playbackRate);
       }
     );
 
-    const unsubscribeIsPlaying = useAudioStore.subscribe(
+    const unsubscribeIsPlaying = api.subscribe(
       (state) => state.isPlaying,
       async (isPlaying) => {
         const isPaused = engine.isPaused();
@@ -428,7 +431,7 @@ export function useAudioProvider({
       }
     );
 
-    const unsubscribeCurrentTrack = useAudioStore.subscribe(
+    const unsubscribeCurrentTrack = api.subscribe(
       (state) => state.currentTrack,
       async (track, prevTrack) => {
         if (!track || track.id === prevTrack?.id) {
@@ -442,17 +445,17 @@ export function useAudioProvider({
             url: track.url,
           });
 
-          const currentState = useAudioStore.getState();
+          const currentState = api.getState();
           if (currentState.isPlaying) {
             await engine.play();
           }
         } catch {
-          useAudioStore.getState().setError("Error loading track");
+          api.getState().setError("Error loading track");
         }
       }
     );
 
-    const unsubscribeSeek = useAudioStore.subscribe(
+    const unsubscribeSeek = api.subscribe(
       (state) => state.currentTime,
       (currentTime) => {
         const engineTime = engine.getCurrentTime();
@@ -465,14 +468,14 @@ export function useAudioProvider({
       }
     );
 
-    const unsubscribeVolume = useAudioStore.subscribe(
+    const unsubscribeVolume = api.subscribe(
       (state) => state.volume,
       (volume) => {
         engine.setVolume({ volume });
       }
     );
 
-    const unsubscribeMuted = useAudioStore.subscribe(
+    const unsubscribeMuted = api.subscribe(
       (state) => state.isMuted,
       (isMuted) => {
         engine.setMuted(isMuted);
@@ -505,7 +508,7 @@ export function useAudioProvider({
   ]);
 
   useEffect(() => {
-    const unsubscribe = useAudioStore.subscribe(
+    const unsubscribe = api.subscribe(
       (state) => state.queue,
       (newQueue, oldQueue) => {
         if (

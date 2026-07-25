@@ -87,6 +87,13 @@ export interface PlaybackEngine {
     listener: EventListenerOrEventListenerObject | null,
     options?: boolean | AddEventListenerOptions
   ) => void;
+  /**
+   * A Web Audio analyser tapping this engine's output, for level meters and
+   * visualisers. Optional: an adapter that cannot expose one returns null.
+   * Exposing an AnalyserNode keeps the seam audio-domain — unlike handing back
+   * the underlying media element.
+   */
+  getAnalyser?: () => AnalyserNode | null;
   getBufferedRanges: () => TimeRanges | null;
   getCurrentTime: () => number;
   getDuration: () => number;

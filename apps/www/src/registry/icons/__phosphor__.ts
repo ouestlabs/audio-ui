@@ -19,6 +19,7 @@ export {
   InfoIcon,
   MagnifyingGlassIcon,
   MicrophoneIcon,
+  MicrophoneSlashIcon,
   MinusIcon,
   MusicNotesIcon,
   PauseIcon,
