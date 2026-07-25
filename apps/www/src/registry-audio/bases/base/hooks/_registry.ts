@@ -97,6 +97,18 @@ export const hooks: RegistryItem[] = [
     type: "registry:hook",
   },
   {
+    categories: ["audio", "recorder"],
+    files: [
+      {
+        path: "hooks/use-mic-recorder.ts",
+        type: "registry:hook",
+      },
+    ],
+    name: "use-mic-recorder",
+    registryDependencies: ["@audio/use-web-audio", "@audio/recording"],
+    type: "registry:hook",
+  },
+  {
     categories: ["audio", "synth", "piano", "envelope"],
     files: [
       {

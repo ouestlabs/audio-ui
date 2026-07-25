@@ -117,6 +117,12 @@ export const categories: CategoryDef[] = [
   },
   {
     description:
+      "Microphone recording components with live input metering, for voice and transcription apps.",
+    label: "Recorder",
+    name: "recorder",
+  },
+  {
+    description:
       "Step sequencer components — grids of buttons for programming patterns and triggers.",
     label: "Sequencer",
     name: "sequencer",

@@ -490,6 +490,11 @@
     "title": "block-waveform-player"
   },
   {
+    "categories": ["recorder", "meter"],
+    "name": "block-voice-recorder",
+    "title": "block-voice-recorder"
+  },
+  {
     "categories": ["waveform"],
     "name": "waveform-demo",
     "title": "waveform-demo"

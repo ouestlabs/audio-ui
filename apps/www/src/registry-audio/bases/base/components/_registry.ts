@@ -1341,6 +1341,28 @@ export const components: RegistryItem[] = [
     type: "registry:block",
   },
   {
+    categories: ["recorder", "meter"],
+    description:
+      "A voice recorder that captures from the microphone with a live input meter and elapsed time, then plays back or downloads the take — the capture surface for voice-agent and transcription apps",
+    files: [
+      {
+        path: "components/recorder/block-voice-recorder.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-voice-recorder",
+    registryDependencies: [
+      "@audio/meter",
+      "@audio/use-audio-levels",
+      "@audio/use-mic-recorder",
+      "@audio/recording",
+      "@shadcn/button",
+      "@shadcn/button-group",
+      "@shadcn/empty",
+    ],
+    type: "registry:block",
+  },
+  {
     categories: ["waveform"],
     description: "Waveform default example",
     files: [

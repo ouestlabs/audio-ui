@@ -25,7 +25,7 @@
       "name": "knob"
     },
     {
-      "count": 6,
+      "count": 7,
       "description": "Decibel meter components for monitoring stereo and multi-channel audio levels.",
       "label": "Meter",
       "name": "meter"
@@ -59,6 +59,12 @@
       "description": "Queue management components for building playlists and up-next lists.",
       "label": "Queue",
       "name": "queue"
+    },
+    {
+      "count": 1,
+      "description": "Microphone recording components with live input metering, for voice and transcription apps.",
+      "label": "Recorder",
+      "name": "recorder"
     },
     {
       "count": 7,
@@ -103,5 +109,5 @@
       "name": "xypad"
     }
   ],
-  "totalComponents": 100
+  "totalComponents": 101
 }

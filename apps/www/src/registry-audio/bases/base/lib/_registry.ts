@@ -178,4 +178,19 @@ export const lib: RegistryItem[] = [
     registryDependencies: [],
     type: "registry:lib",
   },
+  {
+    categories: ["lib", "audio", "recorder"],
+    dependencies: [],
+    description:
+      "Framework-free microphone-recording helpers — picks a MediaRecorder container the platform actually supports, and formats elapsed recording time",
+    files: [
+      {
+        path: "lib/recording.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "recording",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
 ];

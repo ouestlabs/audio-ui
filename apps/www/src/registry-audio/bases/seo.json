@@ -66,6 +66,11 @@
     "intro": "Browse {{count}} queue components for audio/ui, built on top of shadcn/ui.",
     "title": "Queue"
   },
+  "recorder": {
+    "description": "Microphone recording components with live input metering, for voice and transcription apps. {{count}} components.",
+    "intro": "Browse {{count}} recorder components for audio/ui, built on top of shadcn/ui.",
+    "title": "Recorder"
+  },
   "sequencer": {
     "description": "Step sequencer components — grids of buttons for programming patterns and triggers. {{count}} components.",
     "intro": "Browse {{count}} sequencer components for audio/ui, built on top of shadcn/ui.",
