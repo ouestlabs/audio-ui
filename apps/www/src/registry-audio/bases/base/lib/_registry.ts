@@ -163,4 +163,19 @@ export const lib: RegistryItem[] = [
     registryDependencies: [],
     type: "registry:lib",
   },
+  {
+    categories: ["lib", "audio", "channel-strip", "ai"],
+    dependencies: ["zod"],
+    description:
+      "AI-native tool surface for a channel strip — createChannelStripTools builds typed, agent-agnostic tools (setParam/setParams/reset) an LLM calls to move a mix from natural language, parameterized by the channel's own named params (gain, pan, sends, EQ, mute…) and their ranges",
+    files: [
+      {
+        path: "lib/channel-strip-tools.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "channel-strip-tools",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
 ];
