@@ -278,6 +278,19 @@
     @apply animate-[cn-envelope-shake_280ms_linear] motion-reduce:animate-none;
   }
 
+  /* MARK: Transport */
+  .cn-transport-track {
+    @apply rounded-full bg-muted has-focus-visible:ring-2 has-focus-visible:ring-ring/50;
+  }
+
+  .cn-transport-fill {
+    @apply rounded-full bg-primary;
+  }
+
+  .cn-transport-thumb {
+    @apply rounded-full border-2 border-primary bg-background shadow-xs;
+  }
+
   /* MARK: Sequencer */
   .cn-sequencer {
     @apply [--sequencer-off:var(--muted)];

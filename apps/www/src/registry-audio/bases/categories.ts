@@ -105,6 +105,11 @@ export const categories: CategoryDef[] = [
     name: "sequencer",
   },
   {
+    description: "Transport controls: play or pause, position and a bar to seek on.",
+    label: "Transport",
+    name: "transport",
+  },
+  {
     description:
       "Zoomable, snapping timeline components for arrangements, clip editors and piano rolls.",
     label: "Timeline",

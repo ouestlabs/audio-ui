@@ -1,0 +1,85 @@
+---
+title: Transport
+description: Play or pause, the position, a bar to seek on and the length.
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="transport-demo" />
+
+The controls under a player or an editor. The bar is a `Timeline` ruler, so a press jumps to the pointer, a drag scrubs (four times finer with Shift), and the keyboard moves it. The position is a live `source`: the bar and the clock follow it straight in the DOM, with no React render per frame.
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">CLI</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash component
+npx shadcn@latest add @audio/transport
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the following dependencies:</Step>
+
+```bash
+npm install @audio-ui/react
+```
+
+<Step>Copy and paste the following code into your project.</Step>
+
+<ComponentSource
+  styleName="base-nova"
+  name="transport"
+  title="components/audio/elements/transport.tsx"
+/>
+
+<Step>Update the import paths to match your project setup.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import { createSource } from "@audio-ui/react";
+import { Transport } from "@/components/audio/elements/transport";
+
+const position = createSource(0); // seconds; set it from your player's clock
+
+<Transport
+  duration={215}
+  onPlayingChange={(playing) => (playing ? player.play() : player.pause())}
+  onSeek={(seconds) => player.seek(seconds)}
+  playing={isPlaying}
+  source={position}
+/>;
+```
+
+## Keyboard
+
+The bar holds a native `<input type="range">`: the arrow keys move it by a second, `Page Up` and `Page Down` by ten, `Home` and `End` go to the ends. It announces the position as a clock, such as "1:15".
+
+## API reference
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `source` | `{ getSnapshot, subscribe }` | The playback position in seconds, a live value. |
+| `duration` | `number` | Length of the track, in seconds. |
+| `playing` | `boolean` | Whether it is playing: the button shows pause. |
+| `onPlayingChange` | `(playing: boolean) => void` | The play button was pressed. |
+| `onSeek` | `(seconds: number) => void` | The bar was pressed, dragged or moved by key. |
+| `aria-label` | `string` | Names the bar. Defaults to "Playback position". |

@@ -468,4 +468,18 @@ export const components: RegistryItem[] = [
     registryDependencies: ["@audio/sequencer"],
     type: "registry:example",
   },
+  {
+    categories: ["transport"],
+    description:
+      "Play or pause, the position, a bar to seek on and the length: a clock stands in for a player, and the bar and the time follow it",
+    files: [
+      {
+        path: "components/transport/transport-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "transport-demo",
+    registryDependencies: ["@audio/transport"],
+    type: "registry:example",
+  },
 ];

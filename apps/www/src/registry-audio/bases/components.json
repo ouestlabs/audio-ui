@@ -153,5 +153,10 @@
     "categories": ["sequencer"],
     "name": "sequencer-demo",
     "title": "sequencer-demo"
+  },
+  {
+    "categories": ["transport"],
+    "name": "transport-demo",
+    "title": "transport-demo"
   }
 ]

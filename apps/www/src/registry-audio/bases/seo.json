@@ -56,6 +56,11 @@
     "intro": "Browse {{count}} sequencer components for audio/ui, built on top of shadcn/ui.",
     "title": "Sequencer"
   },
+  "transport": {
+    "description": "Transport controls: play or pause, position and a bar to seek on. {{count}} components.",
+    "intro": "Browse {{count}} transport components for audio/ui, built on top of shadcn/ui.",
+    "title": "Transport"
+  },
   "timeline": {
     "description": "Zoomable, snapping timeline components for arrangements, clip editors and piano rolls. {{count}} components.",
     "intro": "Browse {{count}} timeline components for audio/ui, built on top of shadcn/ui.",
