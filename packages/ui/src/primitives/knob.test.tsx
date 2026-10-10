@@ -1,6 +1,6 @@
 import { describe, expect, mock, test } from "bun:test";
 import { fireEvent, render } from "@testing-library/react";
-import { Knob } from "./knob";
+import { Knob } from "../knob";
 
 /** Defaults: min 0, max 100, step 1 → midpoint default value 50. */
 function renderKnob(props: Knob.RootProps = {}) {

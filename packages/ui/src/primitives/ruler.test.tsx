@@ -1,7 +1,7 @@
 import { describe, expect, mock, test } from "bun:test";
 import { fireEvent, render } from "@testing-library/react";
 import { mockRect } from "../../test/helpers";
-import { Ruler } from "./ruler";
+import { Ruler } from "../ruler";
 
 /** 8-step timeline, 25px/step at a 200×100 rect, so drag-threshold and step-boundary assertions stay exact. */
 function renderRuler(props: Partial<Ruler.RootProps> = {}) {

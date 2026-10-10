@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { render } from "@testing-library/react";
-import { Meter } from "./meter";
+import { Meter } from "../meter";
 
 /** Integer dB domain (-60..6) so percentage assertions stay exact. */
 function renderMeter(props: Partial<Meter.RootProps> & { value: number[] }) {

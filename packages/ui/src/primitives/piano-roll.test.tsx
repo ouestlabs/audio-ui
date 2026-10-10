@@ -1,7 +1,7 @@
 import { describe, expect, mock, test } from "bun:test";
 import { fireEvent, render } from "@testing-library/react";
 import { mockRect } from "../../test/helpers";
-import { PianoRoll } from "./piano-roll";
+import { PianoRoll } from "../piano-roll";
 
 /** 1 note, 4-step timeline, 4-semitone range (60-63), so paint/keyboard/drag assertions stay exact. */
 const TEST_NOTES: PianoRoll.Note[] = [

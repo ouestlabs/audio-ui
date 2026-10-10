@@ -1,7 +1,7 @@
 import { describe, expect, mock, test } from "bun:test";
 import { fireEvent, render } from "@testing-library/react";
 import { mockRect } from "../../test/helpers";
-import { Piano } from "./piano";
+import { Piano } from "../piano";
 
 /** C3 (48) to C4 (60): 8 white keys, 5 black keys, 13 keys total. */
 function renderPiano(props: Partial<Piano.RootProps> = {}) {

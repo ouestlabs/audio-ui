@@ -1,7 +1,7 @@
 import { describe, expect, mock, test } from "bun:test";
 import { fireEvent, render } from "@testing-library/react";
 import { mockRect } from "../../test/helpers";
-import { Sequencer } from "./sequencer";
+import { Sequencer } from "../sequencer";
 
 /** 2 rows × 4 columns, all off, so paint/keyboard assertions stay exact. */
 function renderSequencer(props: Sequencer.RootProps = {}) {

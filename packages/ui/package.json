@@ -29,6 +29,46 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./envelope": {
+      "types": "./dist/envelope.d.ts",
+      "import": "./dist/envelope.js"
+    },
+    "./fader": {
+      "types": "./dist/fader.d.ts",
+      "import": "./dist/fader.js"
+    },
+    "./knob": {
+      "types": "./dist/knob.d.ts",
+      "import": "./dist/knob.js"
+    },
+    "./meter": {
+      "types": "./dist/meter.d.ts",
+      "import": "./dist/meter.js"
+    },
+    "./piano": {
+      "types": "./dist/piano.d.ts",
+      "import": "./dist/piano.js"
+    },
+    "./piano-roll": {
+      "types": "./dist/piano-roll.d.ts",
+      "import": "./dist/piano-roll.js"
+    },
+    "./ruler": {
+      "types": "./dist/ruler.d.ts",
+      "import": "./dist/ruler.js"
+    },
+    "./sequencer": {
+      "types": "./dist/sequencer.d.ts",
+      "import": "./dist/sequencer.js"
+    },
+    "./waveform": {
+      "types": "./dist/waveform.d.ts",
+      "import": "./dist/waveform.js"
+    },
+    "./xypad": {
+      "types": "./dist/xypad.d.ts",
+      "import": "./dist/xypad.js"
     }
   },
   "files": [
