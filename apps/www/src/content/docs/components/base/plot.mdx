@@ -7,6 +7,8 @@ base: base
 
 <ComponentPreview styleName="base-nova" name="plot-demo" />
 
+The default example is an equalizer built the way studio equalizers are: each band's handle sits on the curve, so it follows the pointer one to one; scroll over a band to widen or narrow it, double-click to flatten it, and the selected band's own curve is drawn over the others.
+
 A plot is two axes and what you draw on them: a curve, a rule, a shaded band, and handles to drag. Everything is placed in your own units (Hz, dB, anything), and an axis can be logarithmic, the way frequency is drawn.
 
 ## Installation
@@ -77,7 +79,7 @@ import { eqResponse } from "@/lib/filter-response";
 </Plot>;
 ```
 
-`fn` is `y = fn(x)` in the axes' units. The `filter-response` lib gives you the functions for the usual curves: `eqResponse`, `biquadResponse` and `compressorOutput`.
+`fn` is `y = fn(x)` in the axes' units. The `filter-response` lib gives you the functions for the usual curves: `eqResponse`, `biquadResponse` and `compressorOutput`, and for keeping a band's handle on the curve, `bandHandleDb` (where it sits) and `bandGainForHandle` (the gain that puts it where the pointer is).
 
 ## Handles
 

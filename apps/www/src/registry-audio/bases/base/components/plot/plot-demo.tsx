@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Plot,
   PlotArea,
@@ -11,6 +11,9 @@ import {
   PlotMark,
 } from "@/registry-audio/bases/base/audio/elements/plot";
 import {
+  bandGainForHandle,
+  bandHandleDb,
+  biquadResponse,
   type EqBand,
   eqResponse,
   formatDb,
@@ -25,55 +28,116 @@ const BANDS: EqBand[] = [
 const MIN_HZ = 20;
 const MAX_HZ = 20_000;
 const MAX_DB = 18;
+const MIN_Q = 0.3;
+const MAX_Q = 12;
+/** How far one unit of wheel delta widens or narrows a band, as an exponent. */
+const WHEEL_Q_SENSITIVITY = 0.002;
 const DB_LABELS = [-12, 0, 12];
-const formatDbMark = (db: number) => (db > 0 ? `+${db}` : String(db));
 const HZ_LABELS = [
   { hz: 100, label: "100" },
   { hz: 1000, label: "1k" },
   { hz: 10_000, label: "10k" },
 ];
 
+const formatDbMark = (db: number) => (db > 0 ? `+${db}` : String(db));
 const describeValue = (value: number, axis: "x" | "y") =>
   axis === "x" ? formatHz(value) : formatDb(value);
+const clampGain = (gainDb: number) =>
+  Math.min(MAX_DB, Math.max(-MAX_DB, gainDb));
 
 interface BandHandleProps {
-  band: EqBand;
+  active: boolean;
+  bands: readonly EqBand[];
   index: number;
-  onChange: (index: number, frequency: number, gainDb: number) => void;
+  onChange: (index: number, patch: Partial<EqBand>) => void;
+  onSelect: (index: number) => void;
 }
 
-/** One band's handle: its frequency across, its gain up. */
-function BandHandle({ band, index, onChange }: BandHandleProps) {
+/**
+ * One band's handle. It sits on the equalizer's curve, so it follows the
+ * pointer one to one; the wheel widens or narrows the band, and a
+ * double-click flattens it.
+ */
+function BandHandle({
+  active,
+  bands,
+  index,
+  onChange,
+  onSelect,
+}: BandHandleProps) {
+  const ref = useRef<HTMLDivElement>(null);
+  const band = bands[index];
+  const q = band?.q;
+
+  // Attached natively: React listens to wheel passively, so it could not
+  // stop the page from scrolling while the wheel widens the band.
+  useEffect(() => {
+    const element = ref.current;
+    if (!element) {
+      return;
+    }
+    const handleWheel = (event: WheelEvent) => {
+      event.preventDefault();
+      onSelect(index);
+      const next = (q ?? 1) * Math.exp(-event.deltaY * WHEEL_Q_SENSITIVITY);
+      onChange(index, { q: Math.min(MAX_Q, Math.max(MIN_Q, next)) });
+    };
+    element.addEventListener("wheel", handleWheel, { passive: false });
+    return () => element.removeEventListener("wheel", handleWheel);
+  }, [index, onChange, onSelect, q]);
+
   const handleChange = useCallback(
-    ({ x, y }: { x: number; y: number }) => onChange(index, x, y),
+    ({ x, y }: { x: number; y: number }) => {
+      onSelect(index);
+      onChange(index, {
+        frequency: x,
+        gainDb: clampGain(bandGainForHandle(bands, index, x, y)),
+      });
+    },
+    [bands, index, onChange, onSelect]
+  );
+  const reset = useCallback(
+    () => onChange(index, { gainDb: 0 }),
     [index, onChange]
   );
+
   return (
     <PlotHandle
       aria-label={`Band ${index + 1}`}
+      data-active={active || undefined}
       getAriaValueText={describeValue}
+      onDoubleClick={reset}
       onValueChange={handleChange}
-      value={{ x: band.frequency, y: band.gainDb ?? 0 }}
+      ref={ref}
+      value={{
+        x: band?.frequency ?? MIN_HZ,
+        y: bandHandleDb(bands, index),
+      }}
     />
   );
 }
 
-/** An equalizer: drag each band to set its frequency and gain; the curve is the response of all three. */
+/**
+ * An equalizer. Each band's handle sits on the curve: drag it to set the
+ * band's frequency and gain, scroll over it to widen or narrow the band,
+ * double-click to flatten it. The selected band's own curve is drawn in
+ * the foreground, the others faintly.
+ */
 export default function PlotDemo() {
   const [bands, setBands] = useState(BANDS);
   const [selected, setSelected] = useState(1);
   const response = useMemo(() => eqResponse(bands), [bands]);
-  const changeBand = useCallback(
-    (index: number, frequency: number, gainDb: number) => {
-      setSelected(index);
-      setBands((current) =>
-        current.map((other, at) =>
-          at === index ? { ...other, frequency, gainDb } : other
-        )
-      );
-    },
-    []
+  const bandCurves = useMemo(
+    () => bands.map((item) => biquadResponse(item)),
+    [bands]
   );
+  const changeBand = useCallback((index: number, patch: Partial<EqBand>) => {
+    setBands((current) =>
+      current.map((other, at) =>
+        at === index ? { ...other, ...patch } : other
+      )
+    );
+  }, []);
   const band = bands[selected];
 
   return (
@@ -98,6 +162,19 @@ export default function PlotDemo() {
               value={db}
             />
           ))}
+          {bandCurves.map((curve, index) => (
+            <PlotCurve
+              className={
+                index === selected
+                  ? "stroke-primary/60 [stroke-dasharray:3_3]"
+                  : "stroke-foreground/10"
+              }
+              fn={curve}
+              // The bands never come or go, so their order is their identity.
+              // biome-ignore lint/suspicious/noArrayIndexKey: fixed list.
+              key={index}
+            />
+          ))}
           <PlotArea fillTo={0} fn={response} />
           <PlotCurve fn={response} />
         </PlotGraph>
@@ -111,20 +188,22 @@ export default function PlotDemo() {
             {formatDbMark(db)}
           </PlotMark>
         ))}
-        {bands.map((item, index) => (
+        {bands.map((_, index) => (
           <BandHandle
-            band={item}
+            active={index === selected}
+            bands={bands}
             index={index}
-            // The bands never come or go, so their order is their identity.
             // biome-ignore lint/suspicious/noArrayIndexKey: fixed list.
             key={index}
             onChange={changeBand}
+            onSelect={setSelected}
           />
         ))}
       </Plot>
       <output className="text-center font-mono text-muted-foreground text-xs">
         Band {selected + 1}: {formatHz(band?.frequency ?? 0)},{" "}
         {formatDb(band?.gainDb ?? 0)}
+        {band?.q === undefined ? "" : `, Q ${band.q.toFixed(1)}`}
       </output>
     </div>
   );

@@ -148,6 +148,46 @@ export function eqResponse(bands: readonly EqBand[]): (hz: number) => number {
   return (hz) => responses.reduce((db, response) => db + response(hz), 0);
 }
 
+/** A gain big enough to measure a band's effect at its own frequency without noise. */
+const PROBE_DB = 12;
+
+/**
+ * Where a band's handle sits on an equalizer's curve: the response of all
+ * the bands at the band's own frequency. A peak's handle is at its gain; a
+ * shelf's is halfway up its slope; and other bands' reach adds to both.
+ */
+export function bandHandleDb(bands: readonly EqBand[], index: number): number {
+  const band = bands[index];
+  return band ? eqResponse(bands)(band.frequency) : 0;
+}
+
+/**
+ * The inverse, for dragging: the gain a band needs at `frequency` for its
+ * handle to sit at `responseDb` on the curve, so the handle follows the
+ * pointer one to one instead of the gain drifting from it. A band that does
+ * not take a gain (a cut, a notch) keeps the one it has.
+ */
+export function bandGainForHandle(
+  bands: readonly EqBand[],
+  index: number,
+  frequency: number,
+  responseDb: number
+): number {
+  const band = bands[index];
+  if (!band) {
+    return 0;
+  }
+  const others = eqResponse(bands.filter((_, at) => at !== index))(frequency);
+  const share =
+    biquadResponse({ ...band, frequency, gainDb: PROBE_DB })(frequency) /
+    PROBE_DB;
+  const own = biquadResponse({ ...band, frequency, gainDb: 0 })(frequency);
+  if (Math.abs(share - own / PROBE_DB) < 0.05) {
+    return band.gainDb ?? 0;
+  }
+  return (responseDb - others - own) / (share - own / PROBE_DB);
+}
+
 export interface CompressorSettings {
   /** Width in dB of the soft bend around the threshold. @default 0 */
   kneeDb?: number;

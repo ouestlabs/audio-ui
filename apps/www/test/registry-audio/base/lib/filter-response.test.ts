@@ -1,5 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import {
+  bandGainForHandle,
+  bandHandleDb,
   biquadResponse,
   compressorOutput,
   eqResponse,
@@ -73,6 +75,41 @@ describe("eqResponse", () => {
 
   test("is flat with no bands", () => {
     expect(eqResponse([])(1000)).toBe(0);
+  });
+});
+
+describe("band handles", () => {
+  const bands = [
+    { frequency: 100, gainDb: 6, type: "lowshelf" as const },
+    { frequency: 1000, gainDb: -4, q: 1, type: "peak" as const },
+  ];
+
+  test("a peak's handle sits at its gain, plus what the others add there", () => {
+    const alone = [{ frequency: 1000, gainDb: 6, q: 1, type: "peak" as const }];
+    expect(bandHandleDb(alone, 0)).toBeCloseTo(6, 1);
+    expect(bandHandleDb(bands, 1)).toBeCloseTo(-4, 0);
+  });
+
+  test("a shelf's handle sits halfway up its slope", () => {
+    const alone = [{ frequency: 100, gainDb: 8, type: "lowshelf" as const }];
+    expect(bandHandleDb(alone, 0)).toBeCloseTo(4, 0);
+  });
+
+  test("dragging inverts it: the gain that puts the handle where the pointer is", () => {
+    for (const index of [0, 1]) {
+      const band = bands[index];
+      const target = 5;
+      const gain = bandGainForHandle(bands, index, band?.frequency ?? 0, target);
+      const next = bands.map((other, at) =>
+        at === index ? { ...other, gainDb: gain } : other
+      );
+      expect(bandHandleDb(next, index)).toBeCloseTo(target, 1);
+    }
+  });
+
+  test("keeps the gain of a band that takes none", () => {
+    const cut = [{ frequency: 100, gainDb: 0, type: "lowcut" as const }];
+    expect(bandGainForHandle(cut, 0, 100, 5)).toBe(0);
   });
 });
 
