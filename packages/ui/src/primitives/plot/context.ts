@@ -16,6 +16,13 @@ export interface PlotContextValue {
   meta: {
     /** The plot's element: what pointer moves are measured against. */
     elementRef: React.RefObject<HTMLElement | null>;
+    /**
+     * The plot's box in the viewport. Reading it forces the browser to lay the
+     * page out, which it would otherwise do once per frame at most, so the
+     * box is kept until the plot is resized or the page scrolls; `fresh` reads
+     * it again, for the start of a gesture.
+     */
+    measure: (fresh?: boolean) => DOMRect | null;
     x: PlotAxis;
     y: PlotAxis;
   };
@@ -53,11 +60,11 @@ export function useValueAtPointer(): (
   clientY: number
 ) => { x: number; y: number } | null {
   const { meta } = usePlotContext("useValueAtPointer");
-  const { elementRef, x, y } = meta;
+  const { measure, x, y } = meta;
   return React.useCallback(
     (clientX: number, clientY: number) => {
-      const rect = elementRef.current?.getBoundingClientRect();
-      if (!(rect && rect.width > 0 && rect.height > 0)) {
+      const rect = measure();
+      if (!rect) {
         return null;
       }
       const across = Math.min(
@@ -70,6 +77,6 @@ export function useValueAtPointer(): (
       );
       return { x: valueOn(x, across), y: valueOn(y, up) };
     },
-    [elementRef, x, y]
+    [measure, x, y]
   );
 }

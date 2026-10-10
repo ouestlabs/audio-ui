@@ -29,6 +29,8 @@ interface DragGesture {
   /** Where the handle was, as positions along each axis, when the drag began or Shift last changed. */
   origin: Point;
   pointerId: number;
+  /** The plot's box when the press began: it does not move under a drag. */
+  rect: DOMRect | null;
   start: Point;
 }
 
@@ -145,6 +147,7 @@ export function Handle(componentProps: Handle.Props) {
       fine: event.shiftKey,
       origin: positionOf(valueRef.current),
       pointerId: event.pointerId,
+      rect: meta.measure(true),
       start: { x: event.clientX, y: event.clientY },
     };
     setDragging(true);
@@ -152,7 +155,8 @@ export function Handle(componentProps: Handle.Props) {
 
   const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
     const gesture = gestureRef.current;
-    const rect = meta.elementRef.current?.getBoundingClientRect();
+    // Measured when the press began: the plot does not move under a drag.
+    const rect = gesture?.rect;
     if (!(gesture && rect) || gesture.pointerId !== event.pointerId) {
       return;
     }

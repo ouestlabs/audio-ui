@@ -27,7 +27,7 @@ export function Cursor(componentProps: Cursor.Props) {
   const { meta, state } = usePlotContext("Cursor");
   const nodeRef = React.useRef<HTMLDivElement>(null);
   const [store] = React.useState(() => createStore<Point | null>(null));
-  const { elementRef, x, y } = meta;
+  const { elementRef, measure, x, y } = meta;
 
   React.useEffect(() => {
     const plot = elementRef.current;
@@ -39,8 +39,8 @@ export function Cursor(componentProps: Cursor.Props) {
       if (event.pointerType === "touch") {
         return;
       }
-      const rect = plot.getBoundingClientRect();
-      if (!(rect.width > 0 && rect.height > 0)) {
+      const rect = measure();
+      if (!rect) {
         return;
       }
       const across = Math.min(
@@ -56,17 +56,22 @@ export function Cursor(componentProps: Cursor.Props) {
       node.setAttribute("data-active", "");
       store.set({ x: valueOn(x, across), y: valueOn(y, 1 - down) });
     };
+    const handleEnter = () => {
+      measure(true);
+    };
     const handleLeave = () => {
       node.removeAttribute("data-active");
       store.set(null);
     };
+    plot.addEventListener("pointerenter", handleEnter);
     plot.addEventListener("pointermove", handleMove);
     plot.addEventListener("pointerleave", handleLeave);
     return () => {
+      plot.removeEventListener("pointerenter", handleEnter);
       plot.removeEventListener("pointermove", handleMove);
       plot.removeEventListener("pointerleave", handleLeave);
     };
-  }, [elementRef, store, x, y]);
+  }, [elementRef, measure, store, x, y]);
 
   const element = useRender({
     defaultTagName: "div",

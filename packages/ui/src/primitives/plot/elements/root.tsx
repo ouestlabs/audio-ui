@@ -31,23 +31,54 @@ export function Root(componentProps: Root.Props) {
   } = componentProps;
   const elementRef = React.useRef<HTMLDivElement>(null);
 
+  const rectRef = React.useRef<DOMRect | null>(null);
+  const measure = React.useCallback((fresh = false) => {
+    if (fresh || !rectRef.current) {
+      const rect = elementRef.current?.getBoundingClientRect();
+      rectRef.current = rect && rect.width > 0 && rect.height > 0 ? rect : null;
+    }
+    return rectRef.current;
+  }, []);
+  // The box is only good until the plot is resized or the page moves under it.
+  React.useEffect(() => {
+    const element = elementRef.current;
+    const forget = () => {
+      rectRef.current = null;
+    };
+    const observer =
+      typeof ResizeObserver === "undefined" ? null : new ResizeObserver(forget);
+    if (element) {
+      observer?.observe(element);
+    }
+    window.addEventListener("scroll", forget, { capture: true, passive: true });
+    window.addEventListener("resize", forget, { passive: true });
+    return () => {
+      observer?.disconnect();
+      window.removeEventListener("scroll", forget, { capture: true });
+      window.removeEventListener("resize", forget);
+    };
+  }, []);
+
   const state = React.useMemo<Root.State>(() => ({ disabled }), [disabled]);
   const context = React.useMemo<PlotContextValue>(
     () => ({
       meta: {
         elementRef,
+        measure,
         x: { max: maxX, min: minX, scale: resolveScale(scaleX) },
         y: { max: maxY, min: minY, scale: resolveScale(scaleY) },
       },
       state,
     }),
-    [maxX, maxY, minX, minY, scaleX, scaleY, state]
+    [maxX, maxY, measure, minX, minY, scaleX, scaleY, state]
   );
 
   const element = useRender({
     defaultTagName: "div",
     props: mergeProps<"div">(
-      { style: { position: "relative" } },
+      // Layout containment: what moves inside the plot never makes the page
+      // around it lay out again.
+      { style: { contain: "layout style", position: "relative" } },
       { ...elementProps, ...resolveStyling(className, style, state) }
     ),
     ref: ref ? [ref, elementRef] : elementRef,
