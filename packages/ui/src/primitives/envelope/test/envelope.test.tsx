@@ -308,6 +308,24 @@ describe("Envelope pointer drag (graph 200×100)", () => {
   });
 });
 
+describe("Envelope alt-click remove", () => {
+  test("Alt + click on a point removes it, with a remove reason", () => {
+    const { onValueChange, point } = renderEnvelope();
+    fireEvent.pointerDown(point(1), { altKey: true, button: 0, pointerId: 1 });
+    const [value, details] = lastCall(onValueChange);
+    expect(value).toHaveLength(3);
+    expect(details.reason).toBe("remove");
+  });
+
+  test("it is refused at minPoints, like any removal", () => {
+    const { onValueChange, point } = renderEnvelope({
+      defaultValue: TWO_POINTS,
+    });
+    fireEvent.pointerDown(point(0), { altKey: true, button: 0, pointerId: 1 });
+    expect(onValueChange).not.toHaveBeenCalled();
+  });
+});
+
 describe("Envelope double-click add/remove", () => {
   test("double-clicking empty graph space adds a point there, with an add reason", () => {
     const { graph, onValueCommitted } = renderEnvelope();

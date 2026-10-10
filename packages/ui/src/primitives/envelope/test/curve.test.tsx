@@ -314,3 +314,107 @@ describe("Envelope snap", () => {
     expect(lastCall(onValueChange)[0][2]).toEqual({ x: 0.5, y: 0 });
   });
 });
+
+describe("Envelope alt-drag on a segment", () => {
+  // The graph is 200×100: the first segment rises from (0, 0) to (0.2, 1).
+  test("Alt + dragging a segment bends it, with a curve reason, and commits on release", () => {
+    const { onValueChange, onValueCommitted, view } = renderEnvelope();
+    const graph = view.getByTestId("graph");
+    fireEvent.pointerDown(graph, {
+      altKey: true,
+      button: 0,
+      clientX: 20,
+      clientY: 50,
+      pointerId: 1,
+    });
+    fireEvent.pointerMove(graph, {
+      altKey: true,
+      clientX: 20,
+      clientY: 80,
+      pointerId: 1,
+    });
+    const [value, details] = lastCall(onValueChange);
+    expect(details.reason).toBe("curve");
+    // Dragging down lowers the midpoint: the segment holds its start, a positive curve.
+    expect(value[0]?.curve).toBeGreaterThan(0);
+    expect(onValueCommitted).not.toHaveBeenCalled();
+    fireEvent.pointerUp(graph, { clientX: 20, clientY: 80, pointerId: 1 });
+    expect(lastCall(onValueCommitted)[1].reason).toBe("curve");
+  });
+
+  test("a press far from any segment does not bend one", () => {
+    const { onValueChange, view } = renderEnvelope();
+    const graph = view.getByTestId("graph");
+    fireEvent.pointerDown(graph, {
+      altKey: true,
+      button: 0,
+      clientX: 20,
+      clientY: 95,
+      pointerId: 1,
+    });
+    fireEvent.pointerMove(graph, {
+      altKey: true,
+      clientX: 20,
+      clientY: 60,
+      pointerId: 1,
+    });
+    expect(onValueChange).not.toHaveBeenCalled();
+  });
+
+  test("without Alt a press on the graph does nothing", () => {
+    const { onValueChange, view } = renderEnvelope();
+    const graph = view.getByTestId("graph");
+    fireEvent.pointerDown(graph, {
+      button: 0,
+      clientX: 20,
+      clientY: 50,
+      pointerId: 1,
+    });
+    fireEvent.pointerMove(graph, { clientX: 20, clientY: 80, pointerId: 1 });
+    expect(onValueChange).not.toHaveBeenCalled();
+  });
+
+  test("Alt + double click straightens the segment instead of adding a point", () => {
+    const { onValueChange, view } = renderEnvelope({
+      defaultValue: POINTS.map((point, index) =>
+        index === 0 ? { ...point, curve: 0.6 } : point
+      ),
+    });
+    const graph = view.getByTestId("graph");
+    // On the bent curve at x = 20: (0.1) -> its level is below the straight line's.
+    fireEvent.doubleClick(graph, { altKey: true, clientX: 20, clientY: 85 });
+    const [value, details] = lastCall(onValueChange);
+    expect(details.reason).toBe("curve");
+    expect(value).toHaveLength(4);
+    expect(value[0]?.curve).toBeUndefined();
+  });
+
+  test("a mouse coming back with no button down ends the bend", () => {
+    const { onValueChange, onValueCommitted, view } = renderEnvelope();
+    const graph = view.getByTestId("graph");
+    const mouse = { pointerId: 1, pointerType: "mouse" };
+    fireEvent.pointerDown(graph, {
+      altKey: true,
+      button: 0,
+      buttons: 1,
+      clientX: 20,
+      clientY: 50,
+      ...mouse,
+    });
+    fireEvent.pointerMove(graph, {
+      buttons: 1,
+      clientX: 20,
+      clientY: 80,
+      ...mouse,
+    });
+    const changes = onValueChange.mock.calls.length;
+    fireEvent.pointerMove(graph, {
+      buttons: 0,
+      clientX: 20,
+      clientY: 30,
+      ...mouse,
+    });
+    expect(onValueChange.mock.calls.length).toBe(changes);
+    expect(onValueCommitted).toHaveBeenCalledTimes(1);
+  });
+});

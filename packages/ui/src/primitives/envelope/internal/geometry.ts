@@ -198,3 +198,35 @@ export function polylinePoints(value: Breakpoint[]): string {
   coordinates.push(coordinate(1, last.y));
   return coordinates.join(" ");
 }
+
+/** How far from a curve, as a share of the graph's height, a press still counts as on it. */
+export const CURVE_HIT_TOLERANCE = 0.12;
+
+/** Where a bent segment is at a share `t` of its length, as a level. */
+export function levelAt(from: Breakpoint, to: Breakpoint, t: number): number {
+  return from.y + (to.y - from.y) * segmentShape(t, from.curve);
+}
+
+/**
+ * The segment that has the point (x, y) on it or close to it, or null: one
+ * that is not flat, since a flat segment has nothing to bend.
+ */
+export function segmentNear(
+  value: Breakpoint[],
+  x: number,
+  y: number
+): number | null {
+  for (let index = 0; index < value.length - 1; index += 1) {
+    const from = value[index];
+    const to = value[index + 1];
+    if (!(from && to) || x < from.x || x > to.x || to.x <= from.x) {
+      continue;
+    }
+    if (Math.abs(to.y - from.y) < 1e-6) {
+      return null;
+    }
+    const at = levelAt(from, to, (x - from.x) / (to.x - from.x));
+    return Math.abs(at - y) <= CURVE_HIT_TOLERANCE ? index : null;
+  }
+  return null;
+}

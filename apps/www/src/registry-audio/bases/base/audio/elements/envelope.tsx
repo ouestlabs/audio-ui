@@ -21,6 +21,11 @@ const envelopeVariants = cva("", {
 /** The frame's room for the end points, which the grid's lines are measured from. */
 const INSET = "0.875rem";
 const DEFAULT_GRID_STEP = 0.25;
+/** A segment's bend as a signed percentage: positive holds the start of the segment, negative the end. */
+const describeCurve = (curve = 0) =>
+  `Curve ${curve > 0 ? "+" : ""}${Math.round(curve * 100)}%`;
+/** Above this level a point's label sits under it, not over it. */
+const LABEL_FLIP_ABOVE = 0.8;
 
 /** A line every `step` across and down, spread over the whole frame like a plot's: they sit on the data's own coordinates, so a point is on a line at 0, ¼, ½, ¾ and 1. */
 function gridLines(step: number): CSSProperties {
@@ -88,7 +93,7 @@ export function Envelope({
   return (
     <div
       className={cn(
-        "cn-envelope group/envelope box-border w-full touch-none select-none p-3.5",
+        "cn-envelope group/envelope box-border w-full cursor-crosshair touch-none select-none p-3.5",
         "has-data-disabled:pointer-events-none has-data-disabled:opacity-50",
         envelopeVariants({ size }),
         className
@@ -104,17 +109,24 @@ export function Envelope({
       >
         <EnvelopePrimitive.Graph className="size-full overflow-visible">
           <EnvelopePrimitive.Fill className="cn-envelope-fill" />
-          <EnvelopePrimitive.Line className="cn-envelope-path [stroke-linejoin:round]" />
+          <EnvelopePrimitive.Line className="cn-envelope-path [stroke-linejoin:round] transition-[stroke-width] duration-150 group-hover/envelope:[stroke-width:2.5px] motion-reduce:transition-none" />
         </EnvelopePrimitive.Graph>
         {curves ? (
           <EnvelopePrimitive.Segments>
-            {(_point, index) => (
+            {(point, index) => (
               <EnvelopePrimitive.Segment
                 aria-label={`Curve ${index + 1}`}
-                className="cn-envelope-curve cursor-ns-resize opacity-0 outline-none after:absolute after:-inset-2 pointer-coarse:opacity-100 pointer-coarse:after:-inset-4 group-focus-within/envelope:opacity-100 group-hover/envelope:opacity-100 data-dragging:opacity-100"
+                className="cn-envelope-curve group/segment cursor-ns-resize opacity-0 outline-none after:absolute after:-inset-2 pointer-coarse:opacity-100 pointer-coarse:after:-inset-4 group-focus-within/envelope:opacity-100 group-hover/envelope:opacity-100 data-dragging:opacity-100"
                 index={index}
                 key={index}
-              />
+              >
+                <span
+                  aria-hidden="true"
+                  className="cn-envelope-point-value -translate-x-1/2 pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 hidden whitespace-nowrap group-data-dragging/segment:block"
+                >
+                  {describeCurve(point.curve)}
+                </span>
+              </EnvelopePrimitive.Segment>
             )}
           </EnvelopePrimitive.Segments>
         ) : null}
@@ -122,14 +134,20 @@ export function Envelope({
           {(point, index, points) => (
             <EnvelopePrimitive.Point
               aria-label={`Point ${index + 1} of ${points.length}`}
-              className="cn-envelope-point group/point size-4 cursor-grab touch-none select-none outline-none after:absolute after:-inset-2 pointer-coarse:after:-inset-3.5 active:cursor-grabbing"
+              className="cn-envelope-point group/point size-4 cursor-grab data-dragging:bg-primary focus-visible:bg-primary touch-none select-none outline-none after:absolute after:-inset-2 pointer-coarse:after:-inset-3.5 active:cursor-grabbing"
               getAriaValueText={describe}
               index={index}
               key={index}
             >
               <span
                 aria-hidden="true"
-                className="cn-envelope-point-value -translate-x-1/2 pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 hidden whitespace-nowrap group-data-dragging/point:block group-focus-visible/point:block"
+                className={cn(
+                  "cn-envelope-point-value -translate-x-1/2 pointer-events-none absolute left-1/2 z-10 hidden whitespace-nowrap group-hover/point:block group-data-dragging/point:block group-focus-visible/point:block",
+                  // Near the top the label goes under the point, so it stays inside the page.
+                  point.y > LABEL_FLIP_ABOVE
+                    ? "top-full mt-2"
+                    : "bottom-full mb-2"
+                )}
               >
                 {describe(point)}
               </span>

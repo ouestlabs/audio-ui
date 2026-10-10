@@ -12,3 +12,5 @@ Envelope: bend the segments, and drag with finer control.
 - **Grid:** `snap` takes the distance between grid lines in normalized units; the pointer snaps dragged and added points to it, and Cmd/Ctrl leaves the grid.
 - **Adding on a curve:** a point added inside a bent segment sits on the curve, and both halves are bent to follow it, so the shape is kept.
 - **Tab stops:** the segment handles are one tab stop; Left and Right move between them.
+- **Alt gestures:** as in a DAW's automation lane, Alt + drag on a segment bends it (reason `"curve"`), Alt + double click straightens it, and Alt + click on a point removes it. They sit beside the segment handles, which stay for touch and keyboard.
+- **Lost release:** a drag now ends when its button was released where the page could not see it, outside the window or over a menu.

@@ -124,6 +124,9 @@ const [points, setPoints] = useState(initialPoints);
 | **Double-click empty space** | Adds a point at that location, unless at `maxPoints`. Added on a bent segment it sits on the curve, and each half is bent to keep its shape. |
 | **Double-click a point** | Removes it, unless at `minPoints`. |
 | **Hold Shift while dragging a point** | Moves it a quarter of the pointer's distance, for fine adjustments. The point does not jump when Shift is pressed or released mid-drag. |
+| **Alt + drag a segment** | Bends it, like a DAW's automation lane: the segment's midpoint follows the pointer. A flat segment, or a press away from any segment, does nothing. |
+| **Alt + double-click a segment** | Straightens it, instead of adding a point. |
+| **Alt + click a point** | Removes it, unless at `minPoints`. |
 | **Drag a segment's handle** | Bends the segment: its midpoint follows the pointer up or down. A segment between two points of the same level has nothing to bend. |
 | **Double-click a segment's handle** | Straightens the segment. |
 | **Commit event** | `onValueCommitted` fires when a drag that moved a point ends, or immediately for add/remove. |

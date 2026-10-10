@@ -65,6 +65,13 @@ export function Point(componentProps: Point.Props) {
     if (state.disabled || event.button !== 0) {
       return;
     }
+    // Alt + click removes the point, as in a DAW's automation lane.
+    if (event.altKey) {
+      event.preventDefault();
+      event.stopPropagation();
+      actions.removePoint(index, event.nativeEvent);
+      return;
+    }
     event.preventDefault();
     event.stopPropagation();
     event.currentTarget.setPointerCapture?.(event.pointerId);
