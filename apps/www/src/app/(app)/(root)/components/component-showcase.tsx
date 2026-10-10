@@ -11,7 +11,6 @@ import { CustomizerPanel } from "@/app/(create)/components/components/customizer
 import type { CatalogItem } from "@/app/(create)/components/types";
 import { DesignSystemProvider } from "@/app/(create)/customizer/design-system-provider";
 import { LocksProvider } from "@/app/(create)/hooks/use-locks";
-import { AudioDemoProvider } from "@/components/audio-demo-provider";
 import { Frame, FrameContent } from "@/components/custom/frame";
 import { Button } from "@/components/ui/button";
 import { useConfig } from "@/hooks/use-config";
@@ -70,7 +69,6 @@ export function ComponentShowcase({
       <React.Suspense fallback={<div className="flex-1" />}>
         <LocksProvider>
           <DesignSystemProvider>
-            <AudioDemoProvider>
               <CustomizerContext value={customizerValue}>
                 <div className="flex min-h-0 flex-1 gap-2">
                   <Frame className="flex min-h-0 flex-1 flex-col">
@@ -84,7 +82,6 @@ export function ComponentShowcase({
                   <CustomizerPanel variant="frame" />
                 </div>
               </CustomizerContext>
-            </AudioDemoProvider>
           </DesignSystemProvider>
         </LocksProvider>
       </React.Suspense>

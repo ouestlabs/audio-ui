@@ -9,9 +9,7 @@ import { createRelativeLink } from "fumadocs-ui/mdx";
 import nextDynamic from "next/dynamic";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Fragment } from "react";
 import z from "zod";
-import { AudioDemoProvider } from "@/components/audio-demo-provider";
 import { DocsBaseSwitcher } from "@/components/docs-base-switcher";
 import { DocsComponentCatalogSection } from "@/components/docs-component-catalog-section";
 import { DocsCopyPage } from "@/components/docs-copy-page";
@@ -105,9 +103,8 @@ export default async function Page(props: {
 
   const raw = await page.data.getText("raw");
   const { attributes } = fm(raw);
-  const { links, base, component, audioProvider } = z
+  const { links, base, component } = z
     .object({
-      audioProvider: z.boolean().optional(),
       base: z.enum(["base", "radix"]).optional(),
       component: z.boolean().optional(),
       links: z
@@ -132,7 +129,6 @@ export default async function Page(props: {
   const breadcrumbPath = componentSeo?.canonicalPath ?? page.url;
   const docHeadingTitle = componentSeo?.displayTitle ?? doc.title;
   const docLead = componentSeo?.leadDescription ?? doc.description ?? undefined;
-  const ContentWrapper = audioProvider ? AudioDemoProvider : Fragment;
 
   return (
     <>
@@ -230,13 +226,11 @@ export default async function Page(props: {
               {toc.length ? <DocsTableOfContents toc={toc} /> : null}
             </div>
             <div className="typeset typeset-changelog w-full flex-1 *:data-[slot=alert]:first:mt-0">
-              <ContentWrapper>
-                <MDX
-                  components={getMDXComponents({
-                    a: createRelativeLink(source, page),
-                  })}
-                />
-              </ContentWrapper>
+              <MDX
+                components={getMDXComponents({
+                  a: createRelativeLink(source, page),
+                })}
+              />
             </div>
             {isComponentDoc && componentName && base ? (
               <DocsComponentCatalogSection

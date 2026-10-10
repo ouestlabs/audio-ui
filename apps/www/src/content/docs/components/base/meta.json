@@ -2,18 +2,14 @@
   "root": true,
   "title": "Base UI",
   "pages": [
-    "player",
     "knob",
-    "meter",
     "fader",
     "xypad",
-    "sequencer",
-    "piano",
     "envelope",
-    "transport",
-    "channel-strip",
-    "sortable-list",
+    "meter",
     "waveform",
-    "timeline"
+    "timeline",
+    "piano",
+    "plot"
   ]
 }

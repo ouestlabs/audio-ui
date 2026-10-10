@@ -5,13 +5,6 @@ import {
   ToggleGroup,
   ToggleGroupItem,
 } from "@/registry/bases/base/ui/toggle-group";
-import {
-  ChannelStrip,
-  ChannelStripContent,
-  ChannelStripLabel,
-  ChannelStripSection,
-  ChannelStripValue,
-} from "@/registry-audio/bases/base/audio/elements/channel-strip";
 import { Fader } from "@/registry-audio/bases/base/audio/elements/fader";
 import { Knob } from "@/registry-audio/bases/base/audio/elements/knob";
 import { XYPad } from "@/registry-audio/bases/base/audio/elements/xypad";
@@ -414,10 +407,15 @@ export default function BlockWaveShaper() {
           </ToggleGroupItem>
         ))}
       </ToggleGroup>
-      <ChannelStrip aria-label="Shaper controls" className="w-full">
-        <ChannelStripContent layout="row">
-          <ChannelStripSection>
-            <ChannelStripLabel id={driveLabelId}>Drive</ChannelStripLabel>
+      <div aria-label="Shaper controls" className="w-full" role="group">
+        <div className="flex flex-wrap items-stretch justify-center gap-4">
+          <div className="flex min-w-0 flex-1 basis-0 flex-col items-center justify-center gap-3">
+            <span
+              className="text-center text-muted-foreground text-xs"
+              id={driveLabelId}
+            >
+              Drive
+            </span>
             <Knob
               aria-describedby={driveValueId}
               aria-labelledby={driveLabelId}
@@ -430,10 +428,21 @@ export default function BlockWaveShaper() {
               step={1}
               valueLabel="hidden"
             />
-            <ChannelStripValue id={driveValueId}>{drive}</ChannelStripValue>
-          </ChannelStripSection>
-          <ChannelStripSection>
-            <ChannelStripLabel id={toneLabelId}>Tone</ChannelStripLabel>
+            <output
+              aria-live="polite"
+              className="min-w-12 text-center font-mono text-muted-foreground text-xs tabular-nums"
+              id={driveValueId}
+            >
+              {drive}
+            </output>
+          </div>
+          <div className="flex min-w-0 flex-1 basis-0 flex-col items-center justify-center gap-3">
+            <span
+              className="text-center text-muted-foreground text-xs"
+              id={toneLabelId}
+            >
+              Tone
+            </span>
             <Knob
               aria-describedby={toneValueId}
               aria-labelledby={toneLabelId}
@@ -446,10 +455,21 @@ export default function BlockWaveShaper() {
               step={1}
               valueLabel="hidden"
             />
-            <ChannelStripValue id={toneValueId}>{tone}</ChannelStripValue>
-          </ChannelStripSection>
-          <ChannelStripSection>
-            <ChannelStripLabel id={detuneLabelId}>Detune</ChannelStripLabel>
+            <output
+              aria-live="polite"
+              className="min-w-12 text-center font-mono text-muted-foreground text-xs tabular-nums"
+              id={toneValueId}
+            >
+              {tone}
+            </output>
+          </div>
+          <div className="flex min-w-0 flex-1 basis-0 flex-col items-center justify-center gap-3">
+            <span
+              className="text-center text-muted-foreground text-xs"
+              id={detuneLabelId}
+            >
+              Detune
+            </span>
             <Knob
               anchor={0}
               aria-describedby={detuneValueId}
@@ -463,13 +483,22 @@ export default function BlockWaveShaper() {
               step={1}
               valueLabel="hidden"
             />
-            <ChannelStripValue id={detuneValueId}>
+            <output
+              aria-live="polite"
+              className="min-w-12 text-center font-mono text-muted-foreground text-xs tabular-nums"
+              id={detuneValueId}
+            >
               {detune > 0 ? "+" : ""}
               {detune}
-            </ChannelStripValue>
-          </ChannelStripSection>
-          <ChannelStripSection>
-            <ChannelStripLabel id={mixLabelId}>Mix</ChannelStripLabel>
+            </output>
+          </div>
+          <div className="flex min-w-0 flex-1 basis-0 flex-col items-center justify-center gap-3">
+            <span
+              className="text-center text-muted-foreground text-xs"
+              id={mixLabelId}
+            >
+              Mix
+            </span>
             <Knob
               aria-describedby={mixValueId}
               aria-labelledby={mixLabelId}
@@ -482,14 +511,25 @@ export default function BlockWaveShaper() {
               step={1}
               valueLabel="hidden"
             />
-            <ChannelStripValue id={mixValueId}>{mix}%</ChannelStripValue>
-          </ChannelStripSection>
-        </ChannelStripContent>
-      </ChannelStrip>
-      <ChannelStrip aria-label="Volume" orientation="horizontal">
-        <ChannelStripContent>
-          <ChannelStripSection>
-            <ChannelStripLabel id={faderLabelId}>Volume</ChannelStripLabel>
+            <output
+              aria-live="polite"
+              className="min-w-12 text-center font-mono text-muted-foreground text-xs tabular-nums"
+              id={mixValueId}
+            >
+              {mix}%
+            </output>
+          </div>
+        </div>
+      </div>
+      <div aria-label="Volume" role="group">
+        <div className="flex w-full min-w-0 flex-col gap-3">
+          <div className="flex w-full min-w-0 items-center justify-between gap-4 [&>*:not(output):not(span)]:min-w-0 [&>*:not(output):not(span)]:flex-1">
+            <span
+              className="text-center text-muted-foreground text-xs"
+              id={faderLabelId}
+            >
+              Volume
+            </span>
             <Fader
               aria-describedby={faderValueId}
               aria-labelledby={faderLabelId}
@@ -502,12 +542,16 @@ export default function BlockWaveShaper() {
               value={volume}
               valueLabel="hidden"
             />
-            <ChannelStripValue id={faderValueId}>
+            <output
+              aria-live="polite"
+              className="min-w-12 text-center font-mono text-muted-foreground text-xs tabular-nums"
+              id={faderValueId}
+            >
               {Math.round(volume * 100)}%
-            </ChannelStripValue>
-          </ChannelStripSection>
-        </ChannelStripContent>
-      </ChannelStrip>
+            </output>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

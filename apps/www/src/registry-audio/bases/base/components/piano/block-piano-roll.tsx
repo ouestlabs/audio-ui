@@ -7,13 +7,6 @@ import {
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { Button } from "@/registry/bases/base/ui/button";
 import { BpmControl } from "@/registry-audio/bases/base/audio/elements/bpm-control";
-import {
-  ChannelStrip,
-  ChannelStripContent,
-  ChannelStripLabel,
-  ChannelStripSection,
-  ChannelStripValue,
-} from "@/registry-audio/bases/base/audio/elements/channel-strip";
 import { Fader } from "@/registry-audio/bases/base/audio/elements/fader";
 import {
   PianoRoll,
@@ -600,7 +593,7 @@ export default function BlockPianoRoll() {
       >
         <PianoRoll
           activePitches={playingPitches}
-          className="h-[26rem]"
+          className="h-104"
           folded={folded}
           getNoteLabel={describeNote}
           maxPitch={MAX_PITCH}
@@ -698,14 +691,15 @@ export default function BlockPianoRoll() {
         clears the selection.
       </p>
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <ChannelStrip
-          aria-label="Volume"
-          className="flex-1"
-          orientation="horizontal"
-        >
-          <ChannelStripContent>
-            <ChannelStripSection>
-              <ChannelStripLabel id={volumeLabelId}>Volume</ChannelStripLabel>
+        <div aria-label="Volume" className="flex-1" role="group">
+          <div className="flex w-full min-w-0 flex-col gap-3">
+            <div className="flex w-full min-w-0 items-center justify-between gap-4 [&>*:not(output):not(span)]:min-w-0 [&>*:not(output):not(span)]:flex-1">
+              <span
+                className="text-center text-muted-foreground text-xs"
+                id={volumeLabelId}
+              >
+                Volume
+              </span>
               <Fader
                 aria-describedby={volumeValueId}
                 aria-labelledby={volumeLabelId}
@@ -718,12 +712,16 @@ export default function BlockPianoRoll() {
                 value={volume}
                 valueLabel="hidden"
               />
-              <ChannelStripValue id={volumeValueId}>
+              <output
+                aria-live="polite"
+                className="min-w-12 text-center font-mono text-muted-foreground text-xs tabular-nums"
+                id={volumeValueId}
+              >
                 {Math.round(volume * 100)}%
-              </ChannelStripValue>
-            </ChannelStripSection>
-          </ChannelStripContent>
-        </ChannelStrip>
+              </output>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

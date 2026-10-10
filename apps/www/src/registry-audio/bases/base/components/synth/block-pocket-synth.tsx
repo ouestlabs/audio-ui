@@ -5,13 +5,6 @@ import {
   ToggleGroup,
   ToggleGroupItem,
 } from "@/registry/bases/base/ui/toggle-group";
-import {
-  ChannelStrip,
-  ChannelStripContent,
-  ChannelStripLabel,
-  ChannelStripSection,
-  ChannelStripValue,
-} from "@/registry-audio/bases/base/audio/elements/channel-strip";
 import { Fader } from "@/registry-audio/bases/base/audio/elements/fader";
 import { XYPad } from "@/registry-audio/bases/base/audio/elements/xypad";
 import { useWebAudio } from "@/registry-audio/bases/base/hooks/use-web-audio";
@@ -305,10 +298,15 @@ export default function BlockPocketSynth() {
           </ToggleGroupItem>
         ))}
       </ToggleGroup>
-      <ChannelStrip aria-label="Volume" orientation="horizontal">
-        <ChannelStripContent>
-          <ChannelStripSection>
-            <ChannelStripLabel id={faderLabelId}>Volume</ChannelStripLabel>
+      <div aria-label="Volume" role="group">
+        <div className="flex w-full min-w-0 flex-col gap-3">
+          <div className="flex w-full min-w-0 items-center justify-between gap-4 [&>*:not(output):not(span)]:min-w-0 [&>*:not(output):not(span)]:flex-1">
+            <span
+              className="text-center text-muted-foreground text-xs"
+              id={faderLabelId}
+            >
+              Volume
+            </span>
             <Fader
               aria-describedby={faderValueId}
               aria-labelledby={faderLabelId}
@@ -321,12 +319,16 @@ export default function BlockPocketSynth() {
               value={volume}
               valueLabel="hidden"
             />
-            <ChannelStripValue id={faderValueId}>
+            <output
+              aria-live="polite"
+              className="min-w-12 text-center font-mono text-muted-foreground text-xs tabular-nums"
+              id={faderValueId}
+            >
               {Math.round(volume * 100)}%
-            </ChannelStripValue>
-          </ChannelStripSection>
-        </ChannelStripContent>
-      </ChannelStrip>
+            </output>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

@@ -59,12 +59,6 @@ export const rootSeo: RootSeo = {
 export const categories: CategoryDef[] = [
   {
     description:
-      "Channel strip patterns combining faders, knobs, and transport controls.",
-    label: "Channel Strip",
-    name: "channel-strip",
-  },
-  {
-    description:
       "Interactive envelope components for editing linear ramp breakpoints.",
     label: "Envelope",
     name: "envelope",
@@ -99,55 +93,10 @@ export const categories: CategoryDef[] = [
     name: "piano",
   },
   {
-    description: "Playback speed controls for audio and video players.",
-    label: "Playback Speed",
-    name: "playback-speed",
-  },
-  {
-    description:
-      "Audio player components for track playback, queues, and playback speed control.",
-    label: "Player",
-    name: "player",
-  },
-  {
-    description:
-      "Queue management components for building playlists and up-next lists.",
-    label: "Queue",
-    name: "queue",
-  },
-  {
-    description:
-      "Microphone recording components with live input metering, for voice and transcription apps.",
-    label: "Recorder",
-    name: "recorder",
-  },
-  {
-    description:
-      "Step sequencer components — grids of buttons for programming patterns and triggers.",
-    label: "Sequencer",
-    name: "sequencer",
-  },
-  {
-    description:
-      "Drag-and-drop sortable list components for reordering tracks and items.",
-    label: "Sortable List",
-    name: "sortable-list",
-  },
-  {
     description:
       "Synth control patterns combining knobs, XY pads, and toggles.",
     label: "Synth",
     name: "synth",
-  },
-  {
-    description: "Track list and grid components for browsing audio content.",
-    label: "Track",
-    name: "track",
-  },
-  {
-    description: "Transport controls for play, pause, and seek.",
-    label: "Transport",
-    name: "transport",
   },
   {
     description:

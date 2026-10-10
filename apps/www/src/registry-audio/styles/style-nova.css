@@ -147,75 +147,6 @@
     @apply data-[orientation=horizontal]:h-3 data-[orientation=vertical]:h-px data-[orientation=horizontal]:w-px data-[orientation=vertical]:w-3;
   }
 
-  /* MARK: Transport (track ← cn-slider-track, thumb ← cn-slider-thumb) */
-  .cn-transport-track {
-    @apply rounded-full bg-input/90;
-  }
-
-  .cn-transport-track-size-sm {
-    @apply data-[orientation=horizontal]:h-1.5 data-[orientation=vertical]:h-full data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-1.5;
-  }
-
-  .cn-transport-track-size-default {
-    @apply data-[orientation=horizontal]:h-2 data-[orientation=vertical]:h-full data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-2;
-  }
-
-  .cn-transport-track-size-lg {
-    @apply data-[orientation=horizontal]:h-2.5 data-[orientation=vertical]:h-full data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-2.5;
-  }
-
-  .cn-transport-buffered-range {
-    @apply bg-primary/40;
-  }
-
-  .cn-transport-range {
-    @apply bg-primary;
-  }
-
-  .cn-transport-thumb {
-    @apply border-ring border bg-card transition-[color,box-shadow] hover:ring-3 hover:ring-ring/50 has-focus-visible:ring-3 has-focus-visible:ring-ring/50 active:ring-3 active:ring-ring/50 motion-reduce:transition-none;
-  }
-
-  .cn-transport-thumb-size-sm {
-    @apply rounded-[min(var(--radius-sm),8px)] data-[orientation=horizontal]:h-3.5 data-[orientation=vertical]:h-5 data-[orientation=horizontal]:w-5 data-[orientation=vertical]:w-3.5;
-  }
-
-  .cn-transport-thumb-size-default {
-    @apply rounded-[min(var(--radius-md),10px)] data-[orientation=horizontal]:h-4 data-[orientation=vertical]:h-6 data-[orientation=horizontal]:w-6 data-[orientation=vertical]:w-4;
-  }
-
-  .cn-transport-thumb-size-lg {
-    @apply rounded-[min(var(--radius-lg),12px)] data-[orientation=horizontal]:h-5 data-[orientation=vertical]:h-7 data-[orientation=horizontal]:w-7 data-[orientation=vertical]:w-5;
-  }
-
-  .cn-transport-thumb-inner-size-sm {
-    @apply data-[orientation=horizontal]:px-1 data-[orientation=horizontal]:py-0.5 data-[orientation=vertical]:px-0.5 data-[orientation=vertical]:py-1;
-  }
-
-  .cn-transport-thumb-inner-size-default {
-    @apply data-[orientation=horizontal]:px-1.5 data-[orientation=horizontal]:py-1 data-[orientation=vertical]:px-1 data-[orientation=vertical]:py-1.5;
-  }
-
-  .cn-transport-thumb-inner-size-lg {
-    @apply data-[orientation=horizontal]:px-2 data-[orientation=horizontal]:py-1 data-[orientation=vertical]:px-1 data-[orientation=vertical]:py-2;
-  }
-
-  .cn-transport-thumb-mark {
-    @apply bg-primary opacity-50;
-  }
-
-  .cn-transport-thumb-mark-size-sm {
-    @apply data-[orientation=horizontal]:h-2.5 data-[orientation=vertical]:h-px data-[orientation=horizontal]:w-px data-[orientation=vertical]:w-2.5;
-  }
-
-  .cn-transport-thumb-mark-size-default {
-    @apply data-[orientation=horizontal]:h-2.5 data-[orientation=vertical]:h-px data-[orientation=horizontal]:w-px data-[orientation=vertical]:w-2.5;
-  }
-
-  .cn-transport-thumb-mark-size-lg {
-    @apply data-[orientation=horizontal]:h-3 data-[orientation=vertical]:h-px data-[orientation=horizontal]:w-px data-[orientation=vertical]:w-3;
-  }
-
   /* MARK: XY Pad (pad ← cn-card, value chip ← cn-button) */
   .cn-xypad {
     @apply rounded-xl border border-transparent bg-card ring-1 ring-foreground/10 transition-[color,border-color,box-shadow,opacity] duration-150 ease-out hover:ring-3 hover:ring-ring/50 has-focus-visible:ring-3 has-focus-visible:ring-ring/50 active:ring-3 active:ring-ring/50 has-focus-visible:border-ring active:border-ring motion-reduce:transition-none;
@@ -260,27 +191,6 @@
 
   .cn-xypad-value {
     @apply rounded-[min(var(--radius-md),10px)] bg-background/90 px-2 py-1 font-mono text-muted-foreground text-xs ring-1 ring-foreground/10 backdrop-blur-md;
-  }
-
-  /* MARK: Sequencer (container ← cn-xypad, cell off/on ← cn-fader-track/range) */
-  .cn-sequencer {
-    @apply rounded-xl border border-transparent bg-card ring-1 ring-foreground/10 transition-[color,border-color,box-shadow,opacity] duration-150 ease-out hover:ring-3 hover:ring-ring/50 has-focus-visible:ring-3 has-focus-visible:ring-ring/50 active:ring-3 active:ring-ring/50 has-focus-visible:border-ring active:border-ring motion-reduce:transition-none;
-  }
-
-  .cn-sequencer-size-sm {
-    @apply gap-0.5 p-0.5;
-  }
-
-  .cn-sequencer-size-default {
-    @apply gap-1 p-1;
-  }
-
-  .cn-sequencer-size-lg {
-    @apply gap-1.5 p-1.5;
-  }
-
-  .cn-sequencer-cell {
-    @apply rounded-[min(var(--radius-sm),6px)] bg-input/70 transition-[background-color,box-shadow] duration-150 ease-out hover:ring-3 hover:ring-ring/50 focus-visible:ring-3 focus-visible:ring-ring/50 active:ring-3 active:ring-ring/50 data-[active-step=true]:ring-2 data-[active-step=true]:ring-ring data-[state=on]:bg-primary motion-reduce:transition-none;
   }
 
   /* MARK: Meter (channel ← cn-fader-track, fill ← success/destructive on clip) */
@@ -564,73 +474,6 @@
 
   .cn-bar-visualizer-bar {
     @apply rounded-full bg-current;
-  }
-
-  /* MARK: Channel Strip */
-  .cn-channel-strip {
-    @apply text-card-foreground;
-  }
-
-  .cn-channel-strip-header {
-    @apply font-heading font-medium text-sm;
-  }
-
-  .cn-channel-strip-footer {
-    @apply text-muted-foreground text-xs;
-  }
-
-  .cn-channel-strip-label {
-    @apply text-muted-foreground text-xs uppercase;
-  }
-
-  .cn-channel-strip-value {
-    @apply font-medium text-muted-foreground text-sm tabular-nums;
-  }
-
-  /* MARK: Audio Player (surface ← cn-card) */
-  .cn-audio-player {
-    @apply before:backdrop-blur-xl before:backdrop-saturate-150;
-  }
-
-  .cn-audio-player-size-sm {
-    @apply rounded-xl py-3;
-  }
-
-  .cn-audio-player-size-default {
-    @apply rounded-xl py-4;
-  }
-
-  .cn-audio-player-variant-default {
-    @apply bg-card/70 ring-1 ring-foreground/10;
-  }
-
-  .cn-audio-player-variant-ghost {
-    @apply bg-transparent hover:bg-muted/30;
-  }
-
-  .cn-audio-player-variant-widget {
-    @apply bg-card/70 ring-1 ring-foreground/10;
-  }
-
-  .cn-audio-player-button {
-    @apply [&_svg]:text-primary;
-  }
-
-  .cn-audio-time-display {
-    @apply font-mono text-sm tabular-nums;
-  }
-
-  .cn-audio-time-display-live {
-    @apply text-destructive text-xs;
-  }
-
-  .cn-audio-track {
-    @apply backdrop-blur-sm hover:bg-secondary/50;
-  }
-
-  /* MARK: Sortable List (floating overlay ← cn-popover-content) */
-  .cn-sortable-list-overlay {
-    @apply rounded-lg shadow-lg;
   }
 
   /* MARK: Panel — block surface radius ← cn-card (synth, device-style blocks) */

@@ -2,35 +2,6 @@ import type { RegistryItem } from "shadcn/schema";
 
 export const lib: RegistryItem[] = [
   {
-    categories: ["lib", "audio", "playback-engine"],
-    dependencies: [],
-    description:
-      "PlaybackEngine interface — the seam between the audio store and a device backend",
-    files: [
-      {
-        path: "lib/playback-engine.ts",
-        type: "registry:lib",
-      },
-    ],
-    name: "playback-engine",
-    registryDependencies: [],
-    type: "registry:lib",
-  },
-  {
-    categories: ["lib", "audio", "html-audio"],
-    dependencies: [],
-    description: "HTML Audio Lib",
-    files: [
-      {
-        path: "lib/html-audio.ts",
-        type: "registry:lib",
-      },
-    ],
-    name: "html",
-    registryDependencies: ["@audio/playback-engine"],
-    type: "registry:lib",
-  },
-  {
     categories: ["lib", "audio", "web-audio"],
     dependencies: [],
     description: "Web Audio Lib",
@@ -41,35 +12,6 @@ export const lib: RegistryItem[] = [
       },
     ],
     name: "web",
-    registryDependencies: [],
-    type: "registry:lib",
-  },
-  {
-    categories: ["lib", "audio", "store"],
-    dependencies: ["zustand"],
-    description: "Audio store",
-    files: [
-      {
-        path: "lib/audio-store.ts",
-        type: "registry:lib",
-      },
-    ],
-    name: "store",
-    registryDependencies: ["@audio/playback-engine"],
-    type: "registry:lib",
-  },
-  {
-    categories: ["lib", "audio", "synth", "sequencer"],
-    dependencies: [],
-    description:
-      "One-shot percussion synthesis (kick, snare, hihat) built from oscillators and noise bursts",
-    files: [
-      {
-        path: "lib/drum-synthesis.ts",
-        type: "registry:lib",
-      },
-    ],
-    name: "drum-synthesis",
     registryDependencies: [],
     type: "registry:lib",
   },
@@ -149,21 +91,6 @@ export const lib: RegistryItem[] = [
     type: "registry:lib",
   },
   {
-    categories: ["lib", "audio", "sequencer", "ai"],
-    dependencies: ["zod"],
-    description:
-      "AI-native tool surface for a drum machine — createDrumMachineTools builds typed, agent-agnostic tools (setPattern/setInstrument/toggleStep/clear/setTempo) an LLM calls to write beats from natural language, parameterized by the consumer's own kit and grid",
-    files: [
-      {
-        path: "lib/drum-machine-tools.ts",
-        type: "registry:lib",
-      },
-    ],
-    name: "drum-machine-tools",
-    registryDependencies: [],
-    type: "registry:lib",
-  },
-  {
     categories: ["lib", "audio", "piano", "ai"],
     dependencies: ["zod"],
     description:
@@ -175,36 +102,6 @@ export const lib: RegistryItem[] = [
       },
     ],
     name: "piano-roll-tools",
-    registryDependencies: [],
-    type: "registry:lib",
-  },
-  {
-    categories: ["lib", "audio", "channel-strip", "ai"],
-    dependencies: ["zod"],
-    description:
-      "AI-native tool surface for a channel strip — createChannelStripTools builds typed, agent-agnostic tools (setParam/setParams/reset) an LLM calls to move a mix from natural language, parameterized by the channel's own named params (gain, pan, sends, EQ, mute…) and their ranges",
-    files: [
-      {
-        path: "lib/channel-strip-tools.ts",
-        type: "registry:lib",
-      },
-    ],
-    name: "channel-strip-tools",
-    registryDependencies: [],
-    type: "registry:lib",
-  },
-  {
-    categories: ["lib", "audio", "recorder"],
-    dependencies: [],
-    description:
-      "Framework-free microphone-recording helpers — picks a MediaRecorder container the platform actually supports, and formats elapsed recording time",
-    files: [
-      {
-        path: "lib/recording.ts",
-        type: "registry:lib",
-      },
-    ],
-    name: "recording",
     registryDependencies: [],
     type: "registry:lib",
   },

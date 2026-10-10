@@ -160,60 +160,14 @@ Wheel input over the knob steps the value by `step` and reports `eventDetails.re
 
 ## Examples
 
-### Disabled state
-
-<ComponentPreview styleName="base-nova" name="knob-disabled-demo" />
-
-### Size variants
-
-<ComponentPreview styleName="base-nova" name="knob-size-variants-demo" />
-
 ### Rail, anchor, and range highlight
 
 Use `anchor` to show a reference point on the rail (for example **center** on a bipolar control). The arc highlights the interval between `anchor` and the current value.
 
 <ComponentPreview styleName="base-nova" name="knob-arc-and-anchor-demo" />
 
-### Pointer mapping
+### Logarithmic scale
 
-Each preview shows one mapping in isolation (live value under the control).
-
-#### Default arc (circular)
-
-<ComponentPreview styleName="base-nova" name="knob-circular-arc-demo" />
-
-#### Vertical fader-style drag
-
-<ComponentPreview styleName="base-nova" name="knob-vertical-drag-demo" />
-
-#### Revolution (360° reference)
-
-<ComponentPreview styleName="base-nova" name="knob-revolution-drag-demo" />
-
-### Reset with double-tap
-
-<ComponentPreview styleName="base-nova" name="knob-double-tap-reset-demo" />
-
-### Fine step precision (`step={0.01}`)
-
-<ComponentPreview styleName="base-nova" name="knob-fine-step-demo" />
-
-### Live value vs committed value callbacks
-
-<ComponentPreview styleName="base-nova" name="knob-change-vs-commit-demo" />
-
-### Scale marks and value readout
-
-`marks` draws a ruler around the dial, on its scale: on a log cutoff the decades are evenly spaced. The value shows under the dial while you hover, turn or focus it.
-
-<ComponentPreview styleName="base-nova" name="knob-scale-demo" />
-
-### Filter cutoff, on a log scale
+`scale="log"` spreads a frequency evenly by ratio, so a quarter turn goes from 1 kHz to 8.7 kHz rather than hiding the useful range in the first few degrees.
 
 <ComponentPreview styleName="base-nova" name="knob-filter-control-demo" />
-
-### Channel strip
-
-<ComponentPreview styleName="base-nova" name="block-channel-strip-knob-pan" />
-
-<ComponentPreview styleName="base-nova" name="block-channel-strip-knob-multi" />

@@ -1,13 +1,6 @@
 "use client";
 
 import { useCallback, useId, useState } from "react";
-import {
-  ChannelStrip,
-  ChannelStripContent,
-  ChannelStripLabel,
-  ChannelStripSection,
-  ChannelStripValue,
-} from "@/registry-audio/bases/base/audio/elements/channel-strip";
 import { Envelope } from "@/registry-audio/bases/base/audio/elements/envelope";
 import { Fader } from "@/registry-audio/bases/base/audio/elements/fader";
 import { MidiConnectControl } from "@/registry-audio/bases/base/audio/elements/midi-connect-control";
@@ -102,14 +95,15 @@ export default function BlockPolysynth() {
         onNoteOn={handleNoteOn}
       />
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <ChannelStrip
-          aria-label="Volume"
-          className="flex-1"
-          orientation="horizontal"
-        >
-          <ChannelStripContent>
-            <ChannelStripSection>
-              <ChannelStripLabel id={volumeLabelId}>Volume</ChannelStripLabel>
+        <div aria-label="Volume" className="flex-1" role="group">
+          <div className="flex w-full min-w-0 flex-col gap-3">
+            <div className="flex w-full min-w-0 items-center justify-between gap-4 [&>*:not(output):not(span)]:min-w-0 [&>*:not(output):not(span)]:flex-1">
+              <span
+                className="text-center text-muted-foreground text-xs"
+                id={volumeLabelId}
+              >
+                Volume
+              </span>
               <Fader
                 aria-describedby={volumeValueId}
                 aria-labelledby={volumeLabelId}
@@ -122,12 +116,16 @@ export default function BlockPolysynth() {
                 value={volume}
                 valueLabel="hidden"
               />
-              <ChannelStripValue id={volumeValueId}>
+              <output
+                aria-live="polite"
+                className="min-w-12 text-center font-mono text-muted-foreground text-xs tabular-nums"
+                id={volumeValueId}
+              >
                 {Math.round(volume * 100)}%
-              </ChannelStripValue>
-            </ChannelStripSection>
-          </ChannelStripContent>
-        </ChannelStrip>
+              </output>
+            </div>
+          </div>
+        </div>
         <MidiConnectControl midi={midi} onToggle={handleMidiToggle} />
       </div>
     </div>
