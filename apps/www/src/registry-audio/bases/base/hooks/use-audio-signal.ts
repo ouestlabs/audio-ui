@@ -21,6 +21,8 @@ export interface AudioSignal {
   bands: AudioSignalSource;
   /** The loudest sample of the moment, as a single level: for a waveform that scrolls. */
   level: AudioSignalSource;
+  /** The raw samples of the moment, -1 to 1: for an oscilloscope trace. */
+  samples: AudioSignalSource;
 }
 
 export interface UseAudioSignalOptions
@@ -63,9 +65,10 @@ function peakOf(samples: Float32Array): number {
 
 /**
  * Reads an AnalyserNode every animation frame (paused automatically while the
- * tab is in the background) into two live signals: `level`, the loudest sample
- * of the moment, and `bands`, the spectrum as log-spaced frequency bands. Each
- * is only computed while something is subscribed to it.
+ * tab is in the background) into three live signals: `level`, the loudest
+ * sample of the moment; `bands`, the spectrum as log-spaced frequency bands;
+ * and `samples`, the raw waveform. Each is only computed while something is
+ * subscribed to it.
  *
  * Returns stable sources rather than React state, so sampling never re-renders
  * the component that calls it. Without an analyser both signals fall silent
@@ -78,22 +81,25 @@ export function useAudioSignal(
   const [stores] = useState(() => ({
     bands: createSignalStore(),
     level: createSignalStore(),
+    samples: createSignalStore(),
   }));
   const [signal] = useState<AudioSignal>(() => ({
     bands: stores.bands.source,
     level: stores.level.source,
+    samples: stores.samples.source,
   }));
 
   useEffect(() => {
     const bands = new Float32Array(bandCount);
     const level = new Float32Array(1);
+    const samples = new Float32Array(analyser?.fftSize ?? 0);
     stores.bands.publish(bands);
     stores.level.publish(level);
+    stores.samples.publish(samples);
     if (!analyser) {
       return;
     }
 
-    const samples = new Float32Array(analyser.fftSize);
     const spectrum = new Float32Array(analyser.frequencyBinCount);
     const bandsOptions = {
       maxDb: analyser.maxDecibels,
@@ -105,8 +111,15 @@ export function useAudioSignal(
     let frameId: number;
 
     const tick = () => {
-      if (stores.level.isWatched()) {
+      const watchesSamples = stores.samples.isWatched();
+      const watchesLevel = stores.level.isWatched();
+      if (watchesSamples || watchesLevel) {
         analyser.getFloatTimeDomainData(samples);
+      }
+      if (watchesSamples) {
+        stores.samples.publish(samples);
+      }
+      if (watchesLevel) {
         level[0] = peakOf(samples);
         stores.level.publish(level);
       }

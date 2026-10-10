@@ -1,8 +1,10 @@
 /**
  * `bars` stands the bars on the baseline, `mirror` centers them on the middle
  * line, and `line` joins the levels into one continuous, centered shape.
+ * `scope` is for raw samples rather than levels: it traces them, -1…1, as a
+ * single line through the middle, like an oscilloscope.
  */
-export type WaveformVariant = "bars" | "line" | "mirror";
+export type WaveformVariant = "bars" | "line" | "mirror" | "scope";
 
 /** Where the bars go on the canvas bitmap. Every length is in device pixels. */
 export interface BarLayout {
@@ -133,4 +135,55 @@ export function scrollShift(
   const { barWidth, pitch, width } = layout;
   const settled = width - barWidth - (count - 1) * pitch;
   return settled + Math.round((1 - Math.min(1, Math.max(0, progress))) * pitch);
+}
+
+/** Where each level goes, left to right. `shift` moves the whole row. */
+export function barRects(
+  levels: ArrayLike<number>,
+  layout: BarLayout,
+  shift = 0
+): BarRect[] {
+  return Array.from(levels, (level, index) =>
+    barRect(level, index, layout, shift)
+  );
+}
+
+/**
+ * Where each level of a history goes when it scrolls outwards from the
+ * middle, left to right: the newest stays in the center, growing out of the
+ * one before it, while older ones slide away on both sides. `progress` is how
+ * far the newest has come in, 0…1.
+ */
+export function mirroredScrollRects(
+  levels: ArrayLike<number>,
+  progress: number,
+  layout: BarLayout
+): BarRect[] {
+  const last = levels.length - 1;
+  if (last < 0) {
+    return [];
+  }
+  const { barWidth, pitch, width } = layout;
+  const center = Math.round((width - barWidth) / 2);
+  const slide = Math.min(1, Math.max(0, progress));
+  const newest = levels[last] ?? 0;
+  const previous = levels[last - 1] ?? newest;
+  const left: BarRect[] = [];
+  const right: BarRect[] = [];
+  for (let age = 1; age <= last; age += 1) {
+    const distance = Math.round((age - 1 + slide) * pitch);
+    if (distance > center + barWidth) {
+      break;
+    }
+    const level = levels[last - age] ?? 0;
+    left.unshift(barRect(level, 0, layout, center - distance));
+    right.push(barRect(level, 0, layout, center + distance));
+  }
+  const middle = barRect(
+    previous + (newest - previous) * slide,
+    0,
+    layout,
+    center
+  );
+  return [...left, middle, ...right];
 }

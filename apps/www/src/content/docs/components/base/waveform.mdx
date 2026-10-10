@@ -14,7 +14,7 @@ One family for drawing audio. `Waveform` shows a whole file and lets you scrub t
 - **Two kinds of data:** a file's shape is known upfront, so `Waveform` takes `values` (raw `0–1` amplitudes, at any resolution). A live signal isn't, so `LiveWaveform` and `BarVisualizer` take a [`source`](#live-signals) they follow outside React.
 - **Value model:** `value` is the playback position, from `0` to `duration` (default `1`, so a plain `0–1` fraction; pass the track's length in seconds to work in seconds). The primitive only owns the seek position, never the audio itself: wire `onValueChange` to your own `<audio>` element.
 - **Sharp at any size:** the canvas draws as many bars as fit its real width and keeps the loudest amplitude in each bar's slice, so the waveform keeps its detail from a chat bubble to a full-width editor. Bars are laid out on the screen's physical pixels, so their edges stay sharp at any pixel density or zoom level. See [Feeding real audio](#feeding-real-audio).
-- **Shapes:** `shape="mirror"` (the default) centers the bars, `"bars"` stands them on the baseline and `"line"` joins the levels into one continuous shape.
+- **Shapes:** `shape="mirror"` (the default) centers the bars, `"bars"` stands them on the baseline and `"line"` joins the levels into one continuous shape. A live waveform can also be a `"scope"`: raw samples traced as a single line, like an oscilloscope.
 - **On the timeline:** [`WaveformRegion`](#regions-and-markers) is a stretch you can move and resize, such as a loop; `WaveformMarker` is a labelled point; `WaveformHover` follows the pointer and prints the hovered time.
 - **Nothing wasted:** every moving part is painted outside React and only when something changed. A waveform that is off screen, or has come to rest, costs no frames. With reduced motion requested, live waveforms repaint a few times a second, without smoothing or idle animation.
 - **Accessibility:** the seekable waveform holds a native `<input type="range">`: it takes focus, carries `aria-label`, announces the played share (or whatever `getAriaValueText` returns, e.g. a time), and supports arrow keys / <kbd>Home</kbd> / <kbd>End</kbd> / <kbd>Page Up</kbd> / <kbd>Page Down</kbd>. Each region handle holds one too. Live waveforms are images: give them an `aria-label`.
@@ -173,11 +173,12 @@ interface LevelsSource {
 The `use-audio-signal` hook (`npx shadcn@latest add @audio/use-audio-signal`) reads two of them from an `AnalyserNode`, every animation frame and only while something is drawing them:
 
 ```tsx
-const { level, bands } = useAudioSignal(analyser, { bandCount: 32 });
+const { level, bands, samples } = useAudioSignal(analyser, { bandCount: 32 });
 ```
 
-- `level` is the loudest sample of the moment, as a single level. Draw it with `mode="scrolling"`: the waveform records it over time, the newest entering from the right. When the signal stops (pass `null` as the analyser to pause), the trace holds still.
+- `level` is the loudest sample of the moment, as a single level. Draw it with `mode="scrolling"`: the waveform records it over time, the newest entering from the right, or from the middle outwards with `mirrored`. When the signal stops (pass `null` as the analyser to pause), the trace holds still.
 - `bands` is the spectrum as log-spaced frequency bands, low to high. Draw it with a `BarVisualizer`, or a `LiveWaveform` in its default `mode="static"`: the bars stay in place and follow the bands, rising at once and falling smoothly.
+- `samples` is the raw waveform of the moment, `-1` to `1`. Draw it with `shape="scope"`.
 
 Any signal will do. `createSource` from `@audio-ui/react` makes a source you push to yourself, from a WebSocket, a worklet or a test:
 
@@ -250,9 +251,9 @@ The bars of a `BarVisualizer` are plain elements: restyle them with `.cn-bar-vis
 | `source` | `LevelsSource \| null` | - | The live signal. |
 | `mode` | `"static" \| "scrolling"` | `"static"` | `static` spreads the current levels across the width; `scrolling` records the loudest one over time. |
 | `scrollSpeed` | `number` | `60` | How fast `scrolling` moves, in pixels per second. |
-| `shape` | `"mirror" \| "bars" \| "line"` | `"mirror"` | How the levels are drawn. |
+| `shape` | `"mirror" \| "bars" \| "line" \| "scope"` | `"mirror"` | How the signal is drawn. `scope` traces raw samples instead of levels. |
 | `gain` | `number` | `1` | Visual gain applied to the levels. |
-| `mirrored` | `boolean` | `false` | In `static` mode, mirrors the levels around the middle bar. |
+| `mirrored` | `boolean` | `false` | Makes the drawing symmetric: the first level in the center, or, when scrolling, the newest one, with older ones moving out on both sides. |
 | `idle` | `"none" \| "pulse" \| "wave"` | `"none"` | In `static` mode, what the bars do while there is no signal. |
 | `loading` | `boolean` | `false` | Sweeps across the bars while the signal is on its way. |
 
@@ -278,7 +279,7 @@ The bars of a `BarVisualizer` are plain elements: restyle them with `.cn-bar-vis
 | ---- | ---- |
 | `Waveform.Root` | Owns the data (`peaks`, or a live `levels` source) and the position (`value`, `source`, `duration`). Carries `data-active` while a live signal is audible. |
 | `Waveform.Control` | The seekable surface; holds the input. Leave it out for a waveform that is only shown. |
-| `Waveform.Canvas` | Draws on a canvas: `variant`, `mode`, `scrollSpeed`, `barWidth`, `barGap`, `barRadius`, `minBarHeight`, `gain`, `mirrored`, `idle`. |
+| `Waveform.Canvas` | Draws on a canvas: `variant`, `mode`, `scrollSpeed`, `barWidth`, `barGap`, `barRadius`, `minBarHeight`, `lineWidth`, `gain`, `mirrored`, `idle`. |
 | `Waveform.Bars`, `Waveform.Bar` | Draws as elements: `count`, `minLevel`, `gain`, `mirrored`, `idle`. Each bar gets `--waveform-level`, `data-index` and `data-played`. |
 | `Waveform.Region`, `Waveform.RegionHandle` | A stretch of the timeline, and the handle of one of its edges. |
 | `Waveform.Marker` | A point on the timeline. |
@@ -307,7 +308,19 @@ Every part accepts a `render` prop and `className` / `style` as functions of sta
 
 ### Live
 
+The signal is recorded as it comes in, the newest level entering from the right.
+
 <ComponentPreview styleName="base-nova" name="waveform-live-demo" />
+
+### Live, from the middle
+
+With `mirrored`, the newest level stays in the center and older ones move out on both sides.
+
+<ComponentPreview styleName="base-nova" name="waveform-live-mirrored-demo" />
+
+### Scope
+
+<ComponentPreview styleName="base-nova" name="waveform-scope-demo" />
 
 ### Bar visualizer
 

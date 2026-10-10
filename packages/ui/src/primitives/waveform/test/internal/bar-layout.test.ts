@@ -3,7 +3,9 @@ import {
   barCount,
   barLayout,
   barRect,
+  barRects,
   bitmapLength,
+  mirroredScrollRects,
   scrollShift,
 } from "../../internal/bar-layout";
 
@@ -141,5 +143,61 @@ describe("scrollShift", () => {
     for (const progress of [0.1, 0.33, 0.5, 0.71, 0.99]) {
       expect(Number.isInteger(scrollShift(11, progress, layout))).toBe(true);
     }
+  });
+});
+
+describe("barRects", () => {
+  test("gives one rect per level, left to right", () => {
+    const layout = {
+      barWidth: 4,
+      count: 3,
+      height: 100,
+      minBarHeight: 2,
+      pitch: 6,
+      variant: "mirror" as const,
+      width: 16,
+    };
+    expect(barRects([0.5, 1], layout, 2).map((rect) => rect.x)).toEqual([2, 8]);
+  });
+});
+
+describe("mirroredScrollRects", () => {
+  // The middle bar starts at (64 - 4) / 2 = 30
+  const layout = {
+    barWidth: 4,
+    count: 10,
+    height: 100,
+    minBarHeight: 2,
+    pitch: 6,
+    variant: "mirror" as const,
+    width: 64,
+  };
+  const history = [0.2, 0.4, 0.6, 0.8];
+
+  test("once settled: the newest in the middle, older ones a pitch apart on both sides", () => {
+    const rects = mirroredScrollRects(history, 1, layout);
+    expect(rects.map((rect) => rect.x)).toEqual([12, 18, 24, 30, 36, 42, 48]);
+    expect(rects.map((rect) => rect.height)).toEqual([
+      20, 40, 60, 80, 60, 40, 20,
+    ]);
+  });
+
+  test("as an entry arrives: the middle still shows the one before, which hides behind it", () => {
+    const rects = mirroredScrollRects(history, 0, layout);
+    expect(rects.at(3)).toMatchObject({ height: 60, x: 30 });
+    expect(rects.map((rect) => rect.x)).toEqual([18, 24, 30, 30, 30, 36, 42]);
+  });
+
+  test("halfway: the middle grows towards the newest while the others slide out", () => {
+    const rects = mirroredScrollRects(history, 0.5, layout);
+    expect(rects.at(3)).toMatchObject({ height: 70, x: 30 });
+    expect(rects.map((rect) => rect.x)).toEqual([15, 21, 27, 30, 33, 39, 45]);
+  });
+
+  test("stops at the edges, and draws nothing without a history", () => {
+    const long = new Float32Array(100).fill(0.5);
+    const rects = mirroredScrollRects(long, 1, layout);
+    expect(Math.min(...rects.map((rect) => rect.x))).toBeGreaterThanOrEqual(-4);
+    expect(mirroredScrollRects([], 1, layout)).toEqual([]);
   });
 });

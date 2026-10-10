@@ -1355,6 +1355,33 @@ export const components: RegistryItem[] = [
   {
     categories: ["waveform"],
     description:
+      "Live waveform scrolling outwards from the middle, the newest level in the center",
+    files: [
+      {
+        path: "components/waveform/waveform-live-mirrored-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "waveform-live-mirrored-demo",
+    registryDependencies: ["@audio/waveform"],
+    type: "registry:example",
+  },
+  {
+    categories: ["waveform"],
+    description: "Live waveform tracing raw samples, like an oscilloscope",
+    files: [
+      {
+        path: "components/waveform/waveform-scope-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "waveform-scope-demo",
+    registryDependencies: ["@audio/waveform"],
+    type: "registry:example",
+  },
+  {
+    categories: ["waveform"],
+    description:
       "Bar visualizer following a voice, idling and waiting for a connection",
     files: [
       {

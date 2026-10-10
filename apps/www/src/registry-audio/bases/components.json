@@ -491,6 +491,16 @@
   },
   {
     "categories": ["waveform"],
+    "name": "waveform-live-mirrored-demo",
+    "title": "waveform-live-mirrored-demo"
+  },
+  {
+    "categories": ["waveform"],
+    "name": "waveform-scope-demo",
+    "title": "waveform-scope-demo"
+  },
+  {
+    "categories": ["waveform"],
     "name": "waveform-bars-demo",
     "title": "waveform-bars-demo"
   }

@@ -9,9 +9,11 @@ import { observeVisibility } from "../../internal/visibility";
 import { useWaveformContext, type WaveformState } from "../context";
 import {
   type BarLayout,
+  type BarRect,
   barLayout,
-  barRect,
+  barRects,
   bitmapLength,
+  mirroredScrollRects,
   scrollShift,
   type WaveformVariant,
 } from "../internal/bar-layout";
@@ -25,6 +27,7 @@ import {
   type LevelsEngine,
   type WaveformIdle,
 } from "../internal/levels-engine";
+import { type ScopePoint, scopePoints } from "../internal/scope";
 
 const BAR_RADIUS_PROPERTY = "--waveform-bar-radius";
 const THEME_ATTRIBUTES = ["class", "style", "data-theme"];
@@ -58,16 +61,10 @@ function registerBarRadiusProperty() {
   }
 }
 
-/** One rectangle per level. */
-function barsPath(
-  levels: Float32Array,
-  layout: BarLayout,
-  shift: number,
-  radius: number
-): Path2D {
+/** One rectangle per bar. */
+function barsPath(rects: BarRect[], radius: number): Path2D {
   const path = new Path2D();
-  for (let index = 0; index < levels.length; index += 1) {
-    const bar = barRect(levels[index] ?? 0, index, layout, shift);
+  for (const bar of rects) {
     if (radius > 0 && typeof path.roundRect === "function") {
       path.roundRect(
         bar.x,
@@ -83,22 +80,28 @@ function barsPath(
   return path;
 }
 
-/** One closed shape: along the top of every level, then back along the bottoms. */
-function linePath(
-  levels: Float32Array,
-  layout: BarLayout,
-  shift: number
-): Path2D {
+/** One closed shape: along the top of every bar, then back along the bottoms. */
+function linePath(rects: BarRect[]): Path2D {
   const path = new Path2D();
-  for (let index = 0; index < levels.length; index += 1) {
-    const bar = barRect(levels[index] ?? 0, index, layout, shift);
+  for (const bar of rects) {
     path.lineTo(bar.x + bar.width / 2, bar.y);
   }
-  for (let index = levels.length - 1; index >= 0; index -= 1) {
-    const bar = barRect(levels[index] ?? 0, index, layout, shift);
-    path.lineTo(bar.x + bar.width / 2, bar.y + bar.height);
+  for (let index = rects.length - 1; index >= 0; index -= 1) {
+    const bar = rects[index];
+    if (bar) {
+      path.lineTo(bar.x + bar.width / 2, bar.y + bar.height);
+    }
   }
   path.closePath();
+  return path;
+}
+
+/** One open line through the points, to be stroked. */
+function scopePath(points: ScopePoint[]): Path2D {
+  const path = new Path2D();
+  for (const point of points) {
+    path.lineTo(point.x, point.y);
+  }
   return path;
 }
 
@@ -110,7 +113,8 @@ function linePath(
  *
  * With `peaks`, the played part is drawn in one color and the rest in another.
  * With a live `levels` signal, `mode` picks between the current levels across
- * the width and a scrolling record of the loudest one.
+ * the width and a scrolling record of the loudest one. The `scope` variant
+ * takes raw samples instead of levels, and traces them as they are.
  *
  * Colors come from CSS: `--waveform-color` and `--waveform-progress-color`
  * (both default to the text color). The bar corner radius is `barRadius`, or
@@ -124,6 +128,7 @@ export function Canvas(componentProps: Canvas.Props) {
     className,
     gain = 1,
     idle = "none",
+    lineWidth = 1.5,
     minBarHeight = 2,
     mirrored = false,
     mode = "static",
@@ -153,6 +158,7 @@ export function Canvas(componentProps: Canvas.Props) {
     let history: LevelHistory | null = null;
     let shape = new Path2D();
     let radius = 0;
+    let strokeWidth = 0;
     let input = live ? live.getSnapshot() : peaks;
     // Whether the bars must be laid out again before the next paint.
     let stale = true;
@@ -162,6 +168,7 @@ export function Canvas(componentProps: Canvas.Props) {
     let urgent = false;
     let visible = true;
     let clock = 0;
+    let running = false;
     let unpaintedMs = 0;
     let sincePaintMs = Number.POSITIVE_INFINITY;
 
@@ -183,15 +190,21 @@ export function Canvas(componentProps: Canvas.Props) {
             getComputedStyle(canvas).getPropertyValue(BAR_RADIUS_PROPERTY)
           ) ||
             0)) * pixelRatio;
-      if (live && mode === "scrolling") {
-        // One entry more than fits: the newest slides in as the oldest slides out.
+      strokeWidth = lineWidth * pixelRatio;
+      engine = null;
+      if (variant === "scope") {
+        history = null;
+      } else if (live && mode === "scrolling") {
+        // One entry more than fits: the newest slides in as the oldest slides
+        // out. From the middle outwards, each side shows half as many.
         const pitch = layout.pitch / pixelRatio;
         history = createLevelHistory(
-          layout.count + 1,
+          (mirrored ? Math.ceil(layout.count / 2) : layout.count) + 1,
           (pitch / Math.max(scrollSpeed, 1)) * MS_PER_SECOND,
           history?.levels
         );
       } else {
+        history = null;
         engine = createLevelsEngine({
           count: layout.count,
           gain,
@@ -205,37 +218,52 @@ export function Canvas(componentProps: Canvas.Props) {
       moving = true;
     };
 
+    /** Where the bars are now. Sets `running` while they are still moving. */
+    const place = (grid: BarLayout): BarRect[] => {
+      if (history) {
+        running = history.step(performance.now());
+        const progress = reducedMotion ? 1 : history.progress;
+        return mirrored
+          ? mirroredScrollRects(history.levels, progress, grid)
+          : barRects(
+              history.levels,
+              grid,
+              scrollShift(history.levels.length, progress, grid)
+            );
+      }
+      if (engine) {
+        engine.step(clock, input);
+        running = !engine.settled;
+        return barRects(engine.levels, grid);
+      }
+      return [];
+    };
+
     /** Move the levels on by `elapsedMs` and rebuild the shape. Returns whether they are still moving. */
     const advance = (elapsedMs: number): boolean => {
       if (!layout) {
         return false;
       }
       clock += elapsedMs;
-      let levels = engine?.levels;
-      let shift = 0;
-      let running = false;
-      if (history) {
-        running = history.step(elapsedMs);
-        ({ levels } = history);
-        shift = scrollShift(
-          levels.length,
-          reducedMotion ? 1 : history.progress,
-          layout
+      running = false;
+      if (variant === "scope") {
+        shape = scopePath(
+          scopePoints(input ?? [], {
+            gain,
+            height: layout.height,
+            inset: strokeWidth,
+            width: layout.width,
+          })
         );
-      } else if (engine) {
-        engine.step(clock, input);
-        running = !engine.settled;
+        return false;
       }
-      if (levels) {
-        shape =
-          variant === "line"
-            ? linePath(levels, layout, shift)
-            : barsPath(levels, layout, shift, radius);
-      }
+      const rects = place(layout);
+      shape = variant === "line" ? linePath(rects) : barsPath(rects, radius);
       return running;
     };
 
-    const fill = (color: string, from: number, to: number) => {
+    /** Ink the shape in `color`, between two columns of the bitmap. */
+    const ink = (color: string, from: number, to: number) => {
       if (to <= from) {
         return;
       }
@@ -243,8 +271,15 @@ export function Canvas(componentProps: Canvas.Props) {
       context.beginPath();
       context.rect(from, 0, to - from, canvas.height);
       context.clip();
-      context.fillStyle = color;
-      context.fill(shape);
+      if (variant === "scope") {
+        context.lineJoin = "round";
+        context.lineWidth = strokeWidth;
+        context.strokeStyle = color;
+        context.stroke(shape);
+      } else {
+        context.fillStyle = color;
+        context.fill(shape);
+      }
       context.restore();
     };
 
@@ -257,8 +292,8 @@ export function Canvas(componentProps: Canvas.Props) {
         computed.getPropertyValue("--waveform-progress-color").trim() || color;
       // Split on a whole pixel: no column ever blends the two colors.
       const played = Math.round(position.get() * canvas.width);
-      fill(progressColor, 0, played);
-      fill(color, played, canvas.width);
+      ink(progressColor, 0, played);
+      ink(color, played, canvas.width);
     };
 
     const task = createFrameTask((elapsedMs) => {
@@ -372,7 +407,13 @@ export function Canvas(componentProps: Canvas.Props) {
     const unsubscribePosition = position.subscribe(task.wake);
     const unsubscribeLevels = live?.subscribe(() => {
       input = live.getSnapshot();
-      history?.feed(clampUnit(loudest(input) * gain));
+      if (history) {
+        // The record follows the signal, not the paints: it stays true while
+        // the canvas is off screen or holds its frames back.
+        const now = performance.now();
+        history.feed(clampUnit(loudest(input) * gain), now);
+        history.step(now);
+      }
       moving = true;
       task.wake();
     });
@@ -392,6 +433,7 @@ export function Canvas(componentProps: Canvas.Props) {
     barWidth,
     gain,
     idle,
+    lineWidth,
     live,
     loading,
     minBarHeight,
@@ -429,9 +471,16 @@ export namespace Canvas {
     gain?: number;
     /** What the bars do while there is no signal, outside the scrolling mode. @default "none" */
     idle?: WaveformIdle;
+    /** Thickness of the `scope` trace, in CSS pixels. @default 1.5 */
+    lineWidth?: number;
     /** Shortest bar, in CSS pixels: silence still draws a sliver, so the timeline stays readable. @default 2 */
     minBarHeight?: number;
-    /** Mirrors the levels around the middle bar, the first one in the center, outside the scrolling mode. @default false */
+    /**
+     * Makes the drawing symmetric around the middle: the first level sits in
+     * the center, or, when scrolling, the newest one, with older ones moving
+     * out on both sides.
+     * @default false
+     */
     mirrored?: boolean;
     /**
      * How a live `levels` signal is drawn: `static` spreads the current levels
@@ -444,7 +493,8 @@ export namespace Canvas {
     scrollSpeed?: number;
     /**
      * `mirror` centers the bars on the middle line, `bars` stands them on the
-     * baseline, and `line` joins the levels into one continuous, centered shape.
+     * baseline, and `line` joins the levels into one continuous, centered
+     * shape. `scope` traces raw samples, -1…1, as a single line.
      * @default "mirror"
      */
     variant?: WaveformVariant;

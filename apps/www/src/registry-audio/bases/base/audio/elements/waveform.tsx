@@ -8,7 +8,9 @@ import { cn } from "@/registry/bases/base/lib/utils";
 const EDGE_FADE =
   "[-webkit-mask-image:linear-gradient(to_right,transparent,black_16px,black_calc(100%-16px),transparent)] mask-[linear-gradient(to_right,transparent,black_16px,black_calc(100%-16px),transparent)]";
 
-type WaveformShape = WaveformPrimitive.Canvas.Props["variant"];
+type LiveWaveformShape = NonNullable<WaveformPrimitive.Canvas.Props["variant"]>;
+/** A file is drawn from its levels: the raw trace is for live samples. */
+type WaveformShape = Exclude<LiveWaveformShape, "scope">;
 
 type WaveformProps = Omit<WaveformPrimitive.Root.Props, "levels" | "peaks"> &
   Pick<WaveformPrimitive.Control.Props, "getAriaValueText"> & {
@@ -159,9 +161,9 @@ type LiveWaveformProps = Omit<
   > & {
     /** Shows a sweep while the signal is on its way. */
     loading?: boolean;
-    /** How the levels are drawn. */
-    shape?: WaveformShape;
-    /** A live signal, such as `useAudioSignal(analyser).level` to scroll or `.bands` to dance. */
+    /** How the signal is drawn. `scope` traces raw samples instead of levels. */
+    shape?: LiveWaveformShape;
+    /** A live signal, such as `useAudioSignal(analyser).level` to scroll, `.bands` to dance or `.samples` for a scope. */
     source?: WaveformPrimitive.Root.Levels | null;
   };
 
