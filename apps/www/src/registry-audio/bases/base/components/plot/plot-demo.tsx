@@ -4,14 +4,18 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder";
 import { Button } from "@/registry/bases/base/ui/button";
 import {
-  NativeSelect,
-  NativeSelectOption,
-} from "@/registry/bases/base/ui/native-select";
-import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/registry/bases/base/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/registry/bases/base/ui/select";
 import { Knob } from "@/registry-audio/bases/base/audio/elements/knob";
 import {
   Plot,
@@ -127,8 +131,11 @@ const formatQ = (q: number) => `Q ${q.toFixed(1)}`;
 /** What a band is and how wide: its type, and its Q on a logarithmic knob. */
 function BandEditor({ band, index, onChange }: BandEditorProps) {
   const handleTypeChange = useCallback(
-    (event: React.ChangeEvent<HTMLSelectElement>) =>
-      onChange(index, { type: event.target.value as BiquadType }),
+    (type: BiquadType | null) => {
+      if (type) {
+        onChange(index, { type });
+      }
+    },
     [index, onChange]
   );
   const handleWidthChange = useCallback(
@@ -140,18 +147,28 @@ function BandEditor({ band, index, onChange }: BandEditorProps) {
     <div className="flex items-center justify-between gap-4">
       <div className="flex flex-col gap-2">
         <span className="font-medium text-xs">Band {index + 1}</span>
-        <NativeSelect
-          aria-label={`Band ${index + 1} type`}
-          onChange={handleTypeChange}
-          size="sm"
+        <Select
+          items={BAND_TYPES}
+          onValueChange={handleTypeChange}
           value={band.type}
         >
-          {BAND_TYPES.map((item) => (
-            <NativeSelectOption key={item.value} value={item.value}>
-              {item.label}
-            </NativeSelectOption>
-          ))}
-        </NativeSelect>
+          <SelectTrigger
+            aria-label={`Band ${index + 1} type`}
+            className="w-28"
+            size="sm"
+          >
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              {BAND_TYPES.map((item) => (
+                <SelectItem key={item.value} value={item.value}>
+                  {item.label}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
       </div>
       <Knob
         aria-label={`Band ${index + 1} width`}
