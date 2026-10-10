@@ -1,10 +1,10 @@
 "use client";
 
+import { createSource } from "@audio-ui/react";
 import type { ChangeEvent } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder";
 import { Button } from "@/registry/bases/base/ui/button";
-import { ButtonGroup } from "@/registry/bases/base/ui/button-group";
 import {
   Empty,
   EmptyHeader,
@@ -17,6 +17,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/registry/bases/base/ui/tabs";
+import { Scrubber } from "@/registry-audio/bases/base/audio/elements/scrubber";
 import { Waveform } from "@/registry-audio/bases/base/audio/elements/waveform";
 import {
   type AudioPeaks,
@@ -28,25 +29,6 @@ import {
 // More slices than the waveform has bars at any width; it keeps each bar's lowest and highest.
 const PEAK_COUNT = 2048;
 const EMPTY_PEAKS: number[] = [];
-
-function formatTime(seconds: number): string {
-  if (!Number.isFinite(seconds)) {
-    return "0:00";
-  }
-  const minutes = Math.floor(seconds / 60);
-  const remainingSeconds = Math.floor(seconds % 60);
-  return `${minutes}:${String(remainingSeconds).padStart(2, "0")}`;
-}
-
-function toIsoDuration(seconds: number): string {
-  if (!Number.isFinite(seconds)) {
-    return "PT0S";
-  }
-  const whole = Math.floor(seconds);
-  const minutes = Math.floor(whole / 60);
-  const remainingSeconds = whole % 60;
-  return `PT${minutes}M${remainingSeconds}S`;
-}
 
 /** A seekable waveform player driven entirely by a user-supplied file — nothing is preloaded. Picking a file decodes its real PCM samples via `decodeAudioChannels`/`computePeaks`/`normalizePeaks` once, keeping each slice's lowest and highest sample,, shared across two tabbed presentations of the same data: a plain recolored bar chart, and an `AudioScrubber`-style read with a `Playhead` line and `Thumb` handle. The primitive only owns the seek value, not the audio itself. */
 export default function BlockWaveformPlayer() {
@@ -60,6 +42,7 @@ export default function BlockWaveformPlayer() {
   const [progress, setProgress] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isDecoding, setIsDecoding] = useState(false);
+  const [position] = useState(() => createSource(0));
 
   useEffect(
     () => () => {
@@ -86,6 +69,7 @@ export default function BlockWaveformPlayer() {
 
       setIsPlaying(false);
       setProgress(0);
+      position.set(0);
       setDuration(0);
       setPeaks(null);
       setFileName(file.name);
@@ -103,7 +87,7 @@ export default function BlockWaveformPlayer() {
         setIsDecoding(false);
       }
     },
-    []
+    [position]
   );
 
   const handleUploadClick = useCallback(() => {
@@ -121,6 +105,7 @@ export default function BlockWaveformPlayer() {
 
     const handleTimeUpdate = () => {
       setProgress(audio.duration ? audio.currentTime / audio.duration : 0);
+      position.set(audio.currentTime);
     };
     const handleDurationChange = () => setDuration(audio.duration);
     const handleEnded = () => setIsPlaying(false);
@@ -138,29 +123,44 @@ export default function BlockWaveformPlayer() {
       handleTimeUpdate();
     }
     return () => controller.abort();
-  }, [audioUrl]);
+  }, [audioUrl, position]);
 
-  const handlePlayToggle = useCallback(() => {
+  const handlePlayingChange = useCallback((play: boolean) => {
     const audio = audioRef.current;
     if (!audio) {
       return;
     }
-    if (isPlaying) {
-      audio.pause();
-      setIsPlaying(false);
-    } else {
+    if (play) {
       audio.play();
-      setIsPlaying(true);
+    } else {
+      audio.pause();
     }
-  }, [isPlaying]);
-
-  const handleSeek = useCallback((value: number) => {
-    setProgress(value);
-    const audio = audioRef.current;
-    if (audio && Number.isFinite(audio.duration)) {
-      audio.currentTime = value * audio.duration;
-    }
+    setIsPlaying(play);
   }, []);
+
+  const handleSeekSeconds = useCallback(
+    (seconds: number) => {
+      const audio = audioRef.current;
+      if (audio) {
+        audio.currentTime = seconds;
+      }
+      position.set(seconds);
+      setProgress(duration ? seconds / duration : 0);
+    },
+    [duration, position]
+  );
+
+  const handleSeek = useCallback(
+    (value: number) => {
+      setProgress(value);
+      position.set(value * duration);
+      const audio = audioRef.current;
+      if (audio && Number.isFinite(audio.duration)) {
+        audio.currentTime = value * audio.duration;
+      }
+    },
+    [duration, position]
+  );
 
   const hasAudio = peaks !== null;
 
@@ -222,54 +222,34 @@ export default function BlockWaveformPlayer() {
           </EmptyHeader>
         </Empty>
       )}
-      <div className="flex items-center justify-between gap-4">
-        <ButtonGroup>
-          <Button
-            aria-label={isPlaying ? "Pause" : "Play"}
-            disabled={!hasAudio}
-            onClick={handlePlayToggle}
-            size="icon"
-            type="button"
-            variant="outline"
-          >
-            <IconPlaceholder
-              hugeicons={isPlaying ? "PauseIcon" : "PlayIcon"}
-              lucide={isPlaying ? "PauseIcon" : "PlayIcon"}
-              phosphor={isPlaying ? "PauseIcon" : "PlayIcon"}
-              remixicon={isPlaying ? "RiPauseLine" : "RiPlayLine"}
-              tabler={isPlaying ? "IconPlayerPause" : "IconPlayerPlay"}
-            />
-          </Button>
-          <Button
-            aria-label={hasAudio ? "Change file" : "Upload audio"}
-            onClick={handleUploadClick}
-            size="icon"
-            type="button"
-            variant="outline"
-          >
-            <IconPlaceholder
-              hugeicons="Upload01Icon"
-              lucide="UploadIcon"
-              phosphor="UploadIcon"
-              remixicon="RiUploadLine"
-              tabler="IconUpload"
-            />
-          </Button>
-        </ButtonGroup>
-        {hasAudio ? (
-          <div className="flex min-w-0 items-center gap-2 text-muted-foreground text-xs">
-            <span className="min-w-8 flex-1 truncate">{fileName}</span>
-            <span className="shrink-0 whitespace-nowrap tabular-nums">
-              <time dateTime={toIsoDuration(progress * duration)}>
-                {formatTime(progress * duration)}
-              </time>{" "}
-              /{" "}
-              <time dateTime={toIsoDuration(duration)}>
-                {formatTime(duration)}
-              </time>
-            </span>
-          </div>
-        ) : null}
+      {hasAudio && duration > 0 ? (
+        <Scrubber
+          duration={duration}
+          onPlayingChange={handlePlayingChange}
+          onSeek={handleSeekSeconds}
+          playing={isPlaying}
+          source={position}
+        />
+      ) : null}
+      <div className="flex items-center gap-2 text-muted-foreground text-xs">
+        <Button
+          aria-label={hasAudio ? "Change file" : "Upload audio"}
+          onClick={handleUploadClick}
+          size="icon-sm"
+          type="button"
+          variant="outline"
+        >
+          <IconPlaceholder
+            hugeicons="Upload01Icon"
+            lucide="UploadIcon"
+            phosphor="UploadIcon"
+            remixicon="RiUploadLine"
+            tabler="IconUpload"
+          />
+        </Button>
+        <span className="min-w-0 flex-1 truncate">
+          {hasAudio ? fileName : "Choose an audio file"}
+        </span>
       </div>
     </div>
   );

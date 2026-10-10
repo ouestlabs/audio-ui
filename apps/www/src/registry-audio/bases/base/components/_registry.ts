@@ -333,10 +333,10 @@ export const components: RegistryItem[] = [
     ],
     name: "block-waveform-player",
     registryDependencies: [
+      "@audio/scrubber",
       "@audio/waveform",
       "@audio/waveform-dsp",
       "@shadcn/button",
-      "@shadcn/button-group",
       "@shadcn/empty",
       "@shadcn/tabs",
     ],
