@@ -148,6 +148,16 @@ One handle sets the threshold, the other the ratio.
 | `source` | `{ getSnapshot, subscribe }` | A live `{ x, y }`, followed without re-rendering. |
 | `value` | `{ x: number; y: number }` | A still point. |
 
+### PlotCursor
+
+Crosshair lines that follow the mouse over the plot, with a readout in the corner of what is under it. It is for mouse and pen, not touch, and does its work in the DOM as the pointer moves, so it costs no React render.
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `format` | `(value: { x, y }) => string` | Turns the value under the pointer, in the axes' units, into the text shown, such as `1.2 kHz · +3.0 dB`. |
+
+On the primitive, `Plot.Cursor` sets `--plot-cursor-x` and `--plot-cursor-y` (the pointer's place across and down the plot) and `data-active` while the pointer is over it, and `Plot.CursorReadout` writes the text; compose your own lines from the two variables.
+
 ### PlotLine, PlotMark, PlotBand
 
 | Prop | Type | Description |

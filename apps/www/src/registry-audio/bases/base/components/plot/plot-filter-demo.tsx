@@ -5,6 +5,7 @@ import {
   Plot,
   PlotArea,
   PlotBand,
+  PlotCursor,
   PlotCurve,
   PlotGraph,
   PlotHandle,
@@ -30,6 +31,8 @@ const HZ_LABELS = [
 const DB_LABELS = [-24, 0, 12];
 const AUDIBLE_HZ: readonly [number, number] = [100, 10_000];
 
+const describePointer = (point: { x: number; y: number }) =>
+  `${formatHz(point.x)} · ${point.y.toFixed(1)} dB`;
 const getAriaLabel = (axis: "x" | "y") =>
   axis === "x" ? "Cutoff" : "Resonance";
 const describeValue = (value: number, axis: "x" | "y") =>
@@ -83,6 +86,7 @@ export default function PlotFilterDemo() {
             {formatDbMark(db)}
           </PlotMark>
         ))}
+        <PlotCursor format={describePointer} />
         <PlotHandle
           aria-label="Cutoff and resonance"
           getAriaLabel={getAriaLabel}

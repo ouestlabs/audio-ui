@@ -93,6 +93,36 @@ function PlotLine({ className, ...props }: PlotPrimitive.Line.Props) {
   );
 }
 
+type PlotCursorProps = Omit<PlotPrimitive.Cursor.Props, "children"> & {
+  /** Turns the value under the pointer, in the axes' units, into the text shown in the corner. */
+  format: (value: { x: number; y: number }) => string;
+};
+
+/** Crosshair lines and a readout of what is under the pointer, for mouse and pen. */
+function PlotCursor({ className, format, ...props }: PlotCursorProps) {
+  return (
+    <PlotPrimitive.Cursor
+      className={cn("group/cursor", className)}
+      data-slot="plot-cursor"
+      {...props}
+    >
+      <div
+        className="cn-plot-cursor-line absolute inset-y-0 w-px opacity-0 group-data-[active]/cursor:opacity-100"
+        style={{ left: "var(--plot-cursor-x)" }}
+      />
+      <div
+        className="cn-plot-cursor-line absolute inset-x-0 h-px opacity-0 group-data-[active]/cursor:opacity-100"
+        style={{ top: "var(--plot-cursor-y)" }}
+      />
+      <PlotPrimitive.CursorReadout
+        className="cn-plot-cursor-readout tabular-nums opacity-0 group-data-[active]/cursor:opacity-100"
+        format={format}
+        style={{ left: "auto", right: "0.5rem", top: "0.375rem" }}
+      />
+    </PlotPrimitive.Cursor>
+  );
+}
+
 /** A label at a value on an axis: "1k" under a frequency, "+12" by a gain. */
 function PlotMark({ axis, className, ...props }: PlotPrimitive.Mark.Props) {
   return (
@@ -143,6 +173,7 @@ export {
   Plot,
   PlotArea,
   PlotBand,
+  PlotCursor,
   PlotCurve,
   PlotDot,
   PlotGraph,

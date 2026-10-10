@@ -1,5 +1,6 @@
 export { useValueAtPointer } from "./context";
 export { Band } from "./elements/band";
+export { Cursor, CursorReadout } from "./elements/cursor";
 export { Curve } from "./elements/curve";
 export { Dot } from "./elements/dot";
 export { Graph } from "./elements/graph";

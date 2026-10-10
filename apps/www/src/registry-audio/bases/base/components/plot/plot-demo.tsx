@@ -6,6 +6,7 @@ import { Button } from "@/registry/bases/base/ui/button";
 import {
   Plot,
   PlotArea,
+  PlotCursor,
   PlotCurve,
   PlotGraph,
   PlotHandle,
@@ -53,6 +54,8 @@ const HZ_LABELS = [
 ];
 
 const formatDbMark = (db: number) => (db > 0 ? `+${db}` : String(db));
+const describePointer = (point: { x: number; y: number }) =>
+  `${formatHz(point.x)} · ${formatDb(point.y)}`;
 const describeValue = (value: number, axis: "x" | "y") =>
   axis === "x" ? formatHz(value) : formatDb(value);
 const clampGain = (gainDb: number) =>
@@ -232,6 +235,7 @@ export default function PlotDemo() {
         minY={-MAX_DB}
         scaleX="log"
       >
+        <PlotCursor format={describePointer} />
         <BandAdder bands={bands} onAdd={addBand} />
         <PlotGraph>
           {HZ_LABELS.map(({ hz }) => (

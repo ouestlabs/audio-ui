@@ -5,6 +5,7 @@ import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder";
 import { Button } from "@/registry/bases/base/ui/button";
 import {
   Plot,
+  PlotCursor,
   PlotCurve,
   PlotDot,
   PlotGraph,
@@ -23,6 +24,8 @@ const MAX_RATIO = 20;
 /** The least the loudest level can rise above the threshold, so the ratio stays finite. */
 const MIN_RISE_DB = 0.5;
 const DB_LABELS = [-48, -24, 0];
+const describePointer = (point: { x: number; y: number }) =>
+  `in ${point.x.toFixed(0)} dB`;
 const UNITY = (inputDb: number) => inputDb;
 
 /** A compressor's transfer curve: one handle sets the threshold, the other how hard the loudest level is held down (the ratio). */
@@ -90,6 +93,7 @@ export default function PlotCompressorDemo() {
           />
           <PlotCurve fn={output} />
         </PlotGraph>
+        <PlotCursor format={describePointer} />
         <PlotDot source={dot} />
         {DB_LABELS.map((db) => (
           <PlotMark axis="x" key={`x${db}`} value={db}>
