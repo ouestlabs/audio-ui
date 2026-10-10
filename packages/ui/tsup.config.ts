@@ -21,11 +21,13 @@ const primitives = [
 // rejects.
 export default defineConfig({
   clean: true,
-  entry: [
-    "src/index.ts",
-    "src/source.ts",
-    ...primitives.map((name) => `src/${name}.ts`),
-  ],
+  entry: {
+    index: "src/index.ts",
+    source: "src/source.ts",
+    ...Object.fromEntries(
+      primitives.map((name) => [name, `src/entries/${name}.ts`])
+    ),
+  },
   format: ["esm"],
   sourcemap: true,
   splitting: true,

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { act, fireEvent, render } from "@testing-library/react";
-import { Waveform } from "../../../../waveform";
+import { Waveform } from "../../../../entries/waveform";
 import { createTestSource, renderWaveform } from "../helpers";
 
 const clock = (value: number, duration: number) =>

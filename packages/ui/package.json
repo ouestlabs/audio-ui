@@ -31,39 +31,39 @@
       "import": "./dist/index.js"
     },
     "./envelope": {
-      "types": "./dist/envelope.d.ts",
+      "types": "./dist/entries/envelope.d.ts",
       "import": "./dist/envelope.js"
     },
     "./fader": {
-      "types": "./dist/fader.d.ts",
+      "types": "./dist/entries/fader.d.ts",
       "import": "./dist/fader.js"
     },
     "./knob": {
-      "types": "./dist/knob.d.ts",
+      "types": "./dist/entries/knob.d.ts",
       "import": "./dist/knob.js"
     },
     "./meter": {
-      "types": "./dist/meter.d.ts",
+      "types": "./dist/entries/meter.d.ts",
       "import": "./dist/meter.js"
     },
     "./piano": {
-      "types": "./dist/piano.d.ts",
+      "types": "./dist/entries/piano.d.ts",
       "import": "./dist/piano.js"
     },
     "./piano-roll": {
-      "types": "./dist/piano-roll.d.ts",
+      "types": "./dist/entries/piano-roll.d.ts",
       "import": "./dist/piano-roll.js"
     },
     "./plot": {
-      "types": "./dist/plot.d.ts",
+      "types": "./dist/entries/plot.d.ts",
       "import": "./dist/plot.js"
     },
     "./sequencer": {
-      "types": "./dist/sequencer.d.ts",
+      "types": "./dist/entries/sequencer.d.ts",
       "import": "./dist/sequencer.js"
     },
     "./timeline": {
-      "types": "./dist/timeline.d.ts",
+      "types": "./dist/entries/timeline.d.ts",
       "import": "./dist/timeline.js"
     },
     "./source": {
@@ -71,11 +71,11 @@
       "import": "./dist/source.js"
     },
     "./waveform": {
-      "types": "./dist/waveform.d.ts",
+      "types": "./dist/entries/waveform.d.ts",
       "import": "./dist/waveform.js"
     },
     "./xypad": {
-      "types": "./dist/xypad.d.ts",
+      "types": "./dist/entries/xypad.d.ts",
       "import": "./dist/xypad.js"
     }
   },

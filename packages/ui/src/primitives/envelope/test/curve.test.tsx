@@ -1,7 +1,7 @@
 import { describe, expect, mock, test } from "bun:test";
 import { fireEvent, render } from "@testing-library/react";
 import { mockRect } from "../../../../test/helpers";
-import { Envelope } from "../../../envelope";
+import { Envelope } from "../../../entries/envelope";
 
 const POINTS: Envelope.Breakpoint[] = [
   { x: 0, y: 0 },

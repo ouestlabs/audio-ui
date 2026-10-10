@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { render } from "@testing-library/react";
-import { Timeline } from "../../../../timeline";
+import { Timeline } from "../../../../entries/timeline";
 import { renderTimeline } from "../helpers";
 
 describe("Timeline.Lane", () => {

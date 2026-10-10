@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { act, fireEvent, render } from "@testing-library/react";
-import { Sequencer } from "../../../../sequencer";
+import { Sequencer } from "../../../../entries/sequencer";
 import { createSource } from "../../../../source";
 import { lastCall, renderSequencer } from "../helpers";
 

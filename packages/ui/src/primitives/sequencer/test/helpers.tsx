@@ -1,7 +1,7 @@
 import { mock } from "bun:test";
 import { type RenderResult, render } from "@testing-library/react";
 import { mockRect } from "../../../../test/helpers";
-import { Sequencer } from "../../../sequencer";
+import { Sequencer } from "../../../entries/sequencer";
 
 /** Two rows of four steps, each cell 10px square at (10 × step, 10 × row). */
 export function renderSequencer(props: Sequencer.Root.Props = {}) {

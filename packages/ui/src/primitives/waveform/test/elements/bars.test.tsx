@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { render } from "@testing-library/react";
 import { installFrames } from "../../../../../test/helpers";
-import { Waveform } from "../../../../waveform";
+import { Waveform } from "../../../../entries/waveform";
 import { createTestSource } from "../helpers";
 
 const levelOf = (bar: Element) =>

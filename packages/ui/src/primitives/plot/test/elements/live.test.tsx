@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { act, render } from "@testing-library/react";
 import { mockRect } from "../../../../../test/helpers";
-import { Plot } from "../../../../plot";
+import { Plot } from "../../../../entries/plot";
 import { createSource } from "../../../../source";
 import { LINEAR_SCALE } from "../../../internal/parameter-scale";
 import { tracePath } from "../../internal/path";

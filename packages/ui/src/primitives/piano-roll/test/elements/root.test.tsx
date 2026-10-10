@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { render } from "@testing-library/react";
-import { PianoRoll } from "../../../../piano-roll";
+import { PianoRoll } from "../../../../entries/piano-roll";
 import { drag, lastCall, NOTES, notesById, renderRoll } from "../helpers";
 
 const NOTE_NAME = /to/;

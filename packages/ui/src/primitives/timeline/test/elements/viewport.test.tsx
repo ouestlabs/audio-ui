@@ -2,7 +2,7 @@ import { describe, expect, mock, test } from "bun:test";
 import { act, render } from "@testing-library/react";
 import { useState } from "react";
 import { mockRect } from "../../../../../test/helpers";
-import { Timeline } from "../../../../timeline";
+import { Timeline } from "../../../../entries/timeline";
 
 /**
  * A viewport 300px wide at the origin, its lane starting 40px in (past a

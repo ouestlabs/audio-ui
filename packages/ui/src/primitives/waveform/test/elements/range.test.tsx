@@ -1,7 +1,7 @@
 import { describe, expect, mock, test } from "bun:test";
 import { fireEvent, render } from "@testing-library/react";
 import { mockRect } from "../../../../../test/helpers";
-import { Waveform } from "../../../../waveform";
+import { Waveform } from "../../../../entries/waveform";
 import { lastCall } from "../helpers";
 
 /**
