@@ -52,6 +52,31 @@ function renderXYPad(
 const lastCall = <T extends unknown[]>(fn: { mock: { calls: T[] } }) =>
   fn.mock.calls.at(-1) as T;
 
+describe("XYPad lost release", () => {
+  test("a mouse coming back with no button down ends the drag instead of resuming it", () => {
+    const { onValueChange, onValueCommitted, pad } = renderXYPad();
+    const mouse = { pointerId: 1, pointerType: "mouse" };
+    fireEvent.pointerDown(pad, { clientX: 50, clientY: 150, ...mouse });
+    fireEvent.pointerMove(pad, {
+      buttons: 1,
+      clientX: 100,
+      clientY: 100,
+      ...mouse,
+    });
+    const changes = onValueChange.mock.calls.length;
+    expect(changes).toBeGreaterThan(0);
+
+    fireEvent.pointerMove(pad, {
+      buttons: 0,
+      clientX: 150,
+      clientY: 50,
+      ...mouse,
+    });
+    expect(onValueChange.mock.calls.length).toBe(changes);
+    expect(onValueCommitted).toHaveBeenCalledTimes(1);
+  });
+});
+
 describe("XYPad value semantics", () => {
   test("defaults to the center, with one named native range input per axis", () => {
     const { inputX, inputY } = renderXYPad();

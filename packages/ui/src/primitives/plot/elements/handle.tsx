@@ -8,6 +8,7 @@ import {
   type CommitEventDetails as ExtraCommitEventDetails,
 } from "../../internal/event-details";
 import { type PartProps, resolveStyling } from "../../internal/part";
+import { isReleased } from "../../internal/pointer";
 import { VISUALLY_HIDDEN } from "../../internal/visually-hidden";
 import { type PlotAxis, positionOn, usePlotContext, valueOn } from "../context";
 
@@ -158,6 +159,10 @@ export function Handle(componentProps: Handle.Props) {
     // Measured when the press began: the plot does not move under a drag.
     const rect = gesture?.rect;
     if (!(gesture && rect) || gesture.pointerId !== event.pointerId) {
+      return;
+    }
+    if (isReleased(event)) {
+      handlePointerEnd(event);
       return;
     }
     // Shift pressed or let go mid-drag: carry on from here at the new speed.

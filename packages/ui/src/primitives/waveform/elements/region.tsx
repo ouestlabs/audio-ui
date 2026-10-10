@@ -7,6 +7,7 @@ import {
   type CommitEventDetails as ExtraCommitEventDetails,
 } from "../../internal/event-details";
 import { type PartProps, resolveStyling } from "../../internal/part";
+import { isReleased } from "../../internal/pointer";
 import {
   moveRange as moveRegion,
   normalizeRange as normalizeRegion,
@@ -100,6 +101,10 @@ function useRegionDrag(
     if (!gesture || gesture.pointerId !== event.pointerId) {
       return;
     }
+    if (isReleased(event)) {
+      onPointerEnd(event);
+      return;
+    }
     event.stopPropagation();
     const delta = (event.clientX - gesture.startX) * actions.unitsPerPixel();
     const eventDetails = Object.assign(
@@ -135,6 +140,7 @@ function useRegionDrag(
   };
 
   return {
+    onLostPointerCapture: onPointerEnd,
     onPointerCancel: onPointerEnd,
     onPointerDown,
     onPointerMove,

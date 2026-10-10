@@ -4,6 +4,7 @@ import * as React from "react";
 import { clampUnit } from "../../../utils";
 import { createChangeEventDetails } from "../../internal/event-details";
 import { type PartProps, resolveStyling } from "../../internal/part";
+import { isReleased } from "../../internal/pointer";
 import { VISUALLY_HIDDEN } from "../../internal/visually-hidden";
 import {
   type DescribeValue,
@@ -85,6 +86,10 @@ export function Control(componentProps: Control.Props) {
     meta.hover.set(at);
     const gesture = gestureRef.current;
     if (!gesture || gesture.pointerId !== event.pointerId) {
+      return;
+    }
+    if (isReleased(event)) {
+      handlePointerEnd(event);
       return;
     }
     gesture.moved = true;
@@ -195,6 +200,7 @@ export function Control(componentProps: Control.Props) {
             />
           </>
         ),
+        onLostPointerCapture: handlePointerEnd,
         onPointerCancel: handlePointerEnd,
         onPointerDown: handlePointerDown,
         onPointerLeave: () => meta.hover.set(null),

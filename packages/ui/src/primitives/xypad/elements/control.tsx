@@ -4,6 +4,7 @@ import * as React from "react";
 import { clamp, type Point } from "../../../utils";
 import { createChangeEventDetails } from "../../internal/event-details";
 import { type PartProps, resolveStyling } from "../../internal/part";
+import { isReleased } from "../../internal/pointer";
 import { useXYPadContext } from "../context";
 import { STATE_ATTRIBUTES_MAPPING } from "../internal/shared";
 import type { Root } from "./root";
@@ -72,6 +73,10 @@ export function Control(componentProps: Control.Props) {
     if (!gesture || gesture.pointerId !== event.pointerId) {
       return;
     }
+    if (isReleased(event)) {
+      handlePointerEnd(event);
+      return;
+    }
     gesture.moved = true;
     if (
       actions.change(
@@ -102,6 +107,7 @@ export function Control(componentProps: Control.Props) {
     defaultTagName: "div",
     props: mergeProps<"div">(
       {
+        onLostPointerCapture: handlePointerEnd,
         onPointerCancel: handlePointerEnd,
         onPointerDown: handlePointerDown,
         onPointerMove: handlePointerMove,

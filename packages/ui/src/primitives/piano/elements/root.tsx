@@ -3,6 +3,7 @@ import { useRender } from "@base-ui/react/use-render";
 import * as React from "react";
 import { createChangeEventDetails } from "../../internal/event-details";
 import { type PartProps, resolveStyling } from "../../internal/part";
+import { isReleased } from "../../internal/pointer";
 import {
   type NoteOffEventDetails,
   type NoteOnEventDetails,
@@ -170,6 +171,10 @@ export function Root(componentProps: Root.Props) {
 
   const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
     const held = pointersRef.current.get(event.pointerId);
+    if (held && isReleased(event)) {
+      handlePointerEnd(event);
+      return;
+    }
     const pitch = held ? pitchAt(event) : null;
     if (!held || pitch === null || pitch === held.pitch) {
       return;

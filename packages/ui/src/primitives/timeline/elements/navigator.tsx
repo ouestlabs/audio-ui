@@ -3,6 +3,7 @@ import { useRender } from "@base-ui/react/use-render";
 import * as React from "react";
 import { createChangeEventDetails } from "../../internal/event-details";
 import { type PartProps, resolveStyling } from "../../internal/part";
+import { isReleased } from "../../internal/pointer";
 import { VISUALLY_HIDDEN } from "../../internal/visually-hidden";
 import {
   type DescribePosition,
@@ -225,6 +226,10 @@ function useNavigatorPart(part: NavigatorPart, disabled: boolean) {
     if (!gesture || gesture.pointerId !== event.pointerId) {
       return;
     }
+    if (isReleased(event)) {
+      onPointerEnd(event);
+      return;
+    }
     event.stopPropagation();
     const delta = (event.clientX - gesture.startX) * navigator.unitsPerPixel();
     apply(
@@ -281,6 +286,7 @@ function useNavigatorPart(part: NavigatorPart, disabled: boolean) {
     input: { onChange, onKeyDown },
     navigator,
     pointer: {
+      onLostPointerCapture: onPointerEnd,
       onPointerCancel: onPointerEnd,
       onPointerDown,
       onPointerMove,

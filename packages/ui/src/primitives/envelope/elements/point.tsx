@@ -4,6 +4,7 @@ import * as React from "react";
 import type { Point as GeomPoint } from "../../../utils";
 import { createChangeEventDetails } from "../../internal/event-details";
 import { type PartProps, resolveStyling } from "../../internal/part";
+import { isReleased } from "../../internal/pointer";
 import { STATE_ATTRIBUTES_MAPPING, useEnvelopeContext } from "../context";
 import { LARGE_STEP_MULTIPLIER, snapTo } from "../internal/geometry";
 import type { Root } from "./root";
@@ -81,6 +82,10 @@ export function Point(componentProps: Point.Props) {
     const gesture = gestureRef.current;
     const graph = meta.graphRef.current;
     if (!(gesture && graph) || gesture.pointerId !== event.pointerId) {
+      return;
+    }
+    if (isReleased(event)) {
+      handlePointerEnd(event);
       return;
     }
     const rect = graph.getBoundingClientRect();
@@ -208,6 +213,7 @@ export function Point(componentProps: Point.Props) {
         onDoubleClick: handleDoubleClick,
         onFocus: () => actions.setFocusedIndex(index),
         onKeyDown: handleKeyDown,
+        onLostPointerCapture: handlePointerEnd,
         onPointerCancel: handlePointerEnd,
         onPointerDown: handlePointerDown,
         onPointerMove: handlePointerMove,

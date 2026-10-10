@@ -4,6 +4,7 @@ import * as React from "react";
 import { degToRad, TAU } from "../../../utils";
 import { createChangeEventDetails } from "../../internal/event-details";
 import { type PartProps, resolveStyling } from "../../internal/part";
+import { isReleased } from "../../internal/pointer";
 import { useKnobContext } from "../context";
 import {
   CENTER_DEAD_ZONE_MIN_PX,
@@ -116,6 +117,10 @@ export function Control(componentProps: Control.Props) {
     if (!gesture || gesture.pointerId !== event.pointerId) {
       return;
     }
+    if (isReleased(event)) {
+      endGesture(event, true);
+      return;
+    }
     gesture.maxDistance = Math.max(
       gesture.maxDistance,
       Math.hypot(event.clientX - gesture.startX, event.clientY - gesture.startY)
@@ -170,6 +175,7 @@ export function Control(componentProps: Control.Props) {
     defaultTagName: "div",
     props: mergeProps<"div">(
       {
+        onLostPointerCapture: (event) => endGesture(event, true),
         onPointerCancel: (event) => endGesture(event, false),
         onPointerDown: handlePointerDown,
         onPointerMove: handlePointerMove,

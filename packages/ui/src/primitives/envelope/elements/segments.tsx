@@ -3,6 +3,7 @@ import { useRender } from "@base-ui/react/use-render";
 import * as React from "react";
 import { createChangeEventDetails } from "../../internal/event-details";
 import { type PartProps, resolveStyling } from "../../internal/part";
+import { isReleased } from "../../internal/pointer";
 import { STATE_ATTRIBUTES_MAPPING, useEnvelopeContext } from "../context";
 import {
   type Breakpoint,
@@ -104,6 +105,10 @@ export function Segment(componentProps: Segment.Props) {
       return;
     }
     if (gesture.pointerId !== event.pointerId) {
+      return;
+    }
+    if (isReleased(event)) {
+      handlePointerEnd(event);
       return;
     }
     const rect = graph.getBoundingClientRect();
@@ -227,6 +232,7 @@ export function Segment(componentProps: Segment.Props) {
         onDoubleClick: handleDoubleClick,
         onFocus: () => actions.setFocusedSegmentIndex(index),
         onKeyDown: handleKeyDown,
+        onLostPointerCapture: handlePointerEnd,
         onPointerCancel: handlePointerEnd,
         onPointerDown: handlePointerDown,
         onPointerMove: handlePointerMove,

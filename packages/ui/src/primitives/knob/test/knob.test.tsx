@@ -199,6 +199,43 @@ describe("Knob wheel", () => {
   });
 });
 
+describe("Knob lost release", () => {
+  test("a mouse coming back with no button down ends the drag instead of resuming it", () => {
+    const { control, onValueChange, onValueCommitted } = renderKnob({
+      dragMode: "vertical",
+    });
+    const mouse = { pointerId: 1, pointerType: "mouse" };
+    fireEvent.pointerDown(control, { clientX: 50, clientY: 90, ...mouse });
+    fireEvent.pointerMove(control, {
+      buttons: 1,
+      clientX: 50,
+      clientY: 75,
+      ...mouse,
+    });
+    expect(control.hasAttribute("data-dragging")).toBe(true);
+    const changes = onValueChange.mock.calls.length;
+
+    // The button was let go outside the window: only a move comes back.
+    fireEvent.pointerMove(control, {
+      buttons: 0,
+      clientX: 50,
+      clientY: 40,
+      ...mouse,
+    });
+    expect(control.hasAttribute("data-dragging")).toBe(false);
+    expect(onValueChange.mock.calls.length).toBe(changes);
+    expect(onValueCommitted).toHaveBeenCalledTimes(1);
+
+    fireEvent.pointerMove(control, {
+      buttons: 0,
+      clientX: 50,
+      clientY: 20,
+      ...mouse,
+    });
+    expect(onValueChange.mock.calls.length).toBe(changes);
+  });
+});
+
 describe("Knob drag modes", () => {
   test("circular: a quarter turn clockwise adds a quarter turn of the 288° sweep", () => {
     const { control, onValueChange, onValueCommitted } = renderKnob();

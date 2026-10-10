@@ -4,6 +4,7 @@ import * as React from "react";
 import type { Source } from "../../../source";
 import { createChangeEventDetails } from "../../internal/event-details";
 import { type PartProps, resolveStyling } from "../../internal/part";
+import { isReleased } from "../../internal/pointer";
 import {
   SequencerContext,
   type SequencerContextValue,
@@ -169,6 +170,10 @@ export function Root(componentProps: Root.Props) {
   const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
     const paint = paintRef.current;
     if (!paint || paint.pointerId !== event.pointerId) {
+      return;
+    }
+    if (isReleased(event)) {
+      handlePointerEnd(event);
       return;
     }
     const boxes = [...nodesRef.current].map(

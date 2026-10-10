@@ -3,6 +3,7 @@ import { useRender } from "@base-ui/react/use-render";
 import * as React from "react";
 import { createChangeEventDetails } from "../../internal/event-details";
 import { type PartProps, resolveStyling } from "../../internal/part";
+import { isReleased } from "../../internal/pointer";
 import { valueAtPointer } from "../../timeline/context";
 import { LaneContext, useLaneProps } from "../../timeline/elements/lane";
 import { bypassesGrid, snapToGrid } from "../../timeline/internal/snap";
@@ -171,6 +172,10 @@ export function Grid(componentProps: Grid.Props) {
   const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
     const gesture = gestureRef.current;
     if (!gesture || gesture.pointerId !== event.pointerId) {
+      return;
+    }
+    if (isReleased(event)) {
+      handlePointerEnd(event);
       return;
     }
     const element = event.currentTarget;

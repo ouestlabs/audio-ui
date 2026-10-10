@@ -3,6 +3,7 @@ import { useRender } from "@base-ui/react/use-render";
 import * as React from "react";
 import { createChangeEventDetails } from "../../internal/event-details";
 import { type PartProps, resolveStyling } from "../../internal/part";
+import { isReleased } from "../../internal/pointer";
 import { VISUALLY_HIDDEN } from "../../internal/visually-hidden";
 import { placedAt } from "../../timeline/context";
 import { LaneContext, useLaneProps } from "../../timeline/elements/lane";
@@ -172,6 +173,10 @@ export function Velocity(componentProps: Velocity.Props) {
   const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
     const gesture = gestureRef.current;
     if (!gesture || gesture.pointerId !== event.pointerId || !gesture.height) {
+      return;
+    }
+    if (isReleased(event)) {
+      handlePointerEnd(event);
       return;
     }
     // Up is louder: the bar follows the pointer.

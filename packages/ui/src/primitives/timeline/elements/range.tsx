@@ -7,6 +7,7 @@ import {
   type CommitEventDetails as ExtraCommitEventDetails,
 } from "../../internal/event-details";
 import { type PartProps, resolveStyling } from "../../internal/part";
+import { isReleased } from "../../internal/pointer";
 import {
   normalizeRange,
   type RangeEdge,
@@ -104,6 +105,10 @@ function useRangeDrag(
     if (!gesture || gesture.pointerId !== event.pointerId) {
       return;
     }
+    if (isReleased(event)) {
+      onPointerEnd(event);
+      return;
+    }
     event.stopPropagation();
     const delta = (event.clientX - gesture.startX) * actions.unitsPerPixel();
     const grid = bypassesGrid(event) ? { offset: 0, step: 0 } : meta.grid;
@@ -136,6 +141,7 @@ function useRangeDrag(
   };
 
   return {
+    onLostPointerCapture: onPointerEnd,
     onPointerCancel: onPointerEnd,
     onPointerDown,
     onPointerMove,
