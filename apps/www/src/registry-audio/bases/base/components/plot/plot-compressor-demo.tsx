@@ -48,9 +48,9 @@ export default function PlotCompressorDemo() {
   );
 
   return (
-    <div className="flex w-full max-w-xs flex-col gap-2">
+    <div className="flex w-full max-w-xl flex-col gap-2">
       <Plot
-        className="aspect-square h-auto"
+        className="h-40"
         maxX={PLOT_MAX_DB}
         maxY={PLOT_MAX_DB}
         minX={MIN_DB}

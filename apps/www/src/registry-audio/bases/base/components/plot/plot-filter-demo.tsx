@@ -56,6 +56,7 @@ export default function PlotFilterDemo() {
   return (
     <div className="flex w-full max-w-xl flex-col gap-2">
       <Plot
+        className="h-40"
         maxX={MAX_HZ}
         maxY={MAX_DB}
         minX={MIN_HZ}
