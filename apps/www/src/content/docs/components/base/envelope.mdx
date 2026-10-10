@@ -15,6 +15,7 @@ Envelope for editing a ramp (an ADSR shape, an automation curve, any breakpoint-
 - **Curved segments:** a point's `curve`, from -1 to 1, bends the segment that leaves it; 0 or unset is a straight line. A positive curve holds the start of the segment and rushes its end, a negative one the opposite. The last point has no segment to bend.
 - **Interaction model:** Drag a point to move it — dragging never deletes a point. Double-click empty space to add a point there; double-click an existing point to remove it. A point's `x` is clamped between its neighbors, so points can never cross or reorder mid-drag.
 - **Point count:** Dynamic — points are added and removed via interaction, between `minPoints` (default `2`, since a ramp needs at least a start and an end) and `maxPoints`. Set both to the same count to fix the shape.
+- **Grid:** `snap` sets the grid the pointer snaps points to (0.25 for quarters); the registry component draws it, and holding Cmd/Ctrl leaves it. Without `snap`, points move freely.
 - **Fine control:** hold Shift while dragging a point to move it a quarter of the pointer's distance; the registry component prints the point's value above it while it is dragged or focused.
 - **Accessibility:** One roving tab stop; arrow keys nudge the focused point's `x`/`y`, `Delete` or `Backspace` removes it — the same outcome as double-clicking, reachable from the keyboard. Each point is a `role="slider"` on its level, named "Point n of N" by the registry component; the primitive leaves naming (`aria-label`) and value text (`getAriaValueText`) to you.
 
@@ -120,7 +121,7 @@ const [points, setPoints] = useState(initialPoints);
 | Behavior | Details |
 | -------- | ------- |
 | **Drag a point** | Moves it; `x` clamps between its neighbors, `y` clamps to [0,1]. Never deletes. While dragging, the point follows the pointer even if a controlled `value` updates late. |
-| **Double-click empty space** | Adds a point at that location, unless at `maxPoints`. |
+| **Double-click empty space** | Adds a point at that location, unless at `maxPoints`. Added on a bent segment it sits on the curve, and each half is bent to keep its shape. |
 | **Double-click a point** | Removes it, unless at `minPoints`. |
 | **Hold Shift while dragging a point** | Moves it a quarter of the pointer's distance, for fine adjustments. The point does not jump when Shift is pressed or released mid-drag. |
 | **Drag a segment's handle** | Bends the segment: its midpoint follows the pointer up or down. A segment between two points of the same level has nothing to bend. |
@@ -140,10 +141,11 @@ One tab stop for the whole envelope; focus then roves between points:
 | `Shift` + arrow | Nudge by 10 steps |
 | `Delete` / `Backspace` | Remove the focused point, unless at `minPoints` |
 
-A segment's handle is a slider on its curve, with its own tab stop:
+A segment's handles are sliders on their curves, with one tab stop among them:
 
 | Key | Action |
 | --- | ------ |
+| `ArrowLeft` / `ArrowRight` | Move to the previous or next segment's handle |
 | `ArrowUp` / `ArrowDown` | Lift or lower the handle, bending the segment by 5 steps |
 | `Shift` + arrow | Bend by 50 steps |
 | `Delete` / `Backspace` | Straighten the segment |
@@ -165,6 +167,7 @@ Groups all parts of the breakpoint envelope and owns its points, each normalized
 | `onValueChange` | `( value: GeomPoint[], eventDetails: ChangeEventDetails ) => void` |  | Fires on every change: drag, keyboard, add and remove. |
 | `onValueCommitted` | `( value: GeomPoint[], eventDetails: CommitEventDetails ) => void` |  | Fires when an interaction that changed the points ends. |
 | `step` | `number` | `0.01` | Keyboard step on both axes, in normalized units. |
+| `snap` | `number` | `0` | Grid the pointer snaps points to, in normalized units: `0.25` snaps to quarters, `0` is no grid. Cmd/Ctrl leaves the grid and Shift's fine drag ignores it. |
 | `value` | `GeomPoint[]` |  |  |
 
 | Data attribute | Description |
@@ -248,7 +251,9 @@ A draggable handle for the point at `index`, positioned with `left`/`bottom` per
 | ---- | ---- | ------- | ----------- |
 | `size` | `"sm" \| "default" \| "lg"` | `"default"` | Size variant (sets the envelope height). |
 | `curves` | `boolean` | `true` | Whether a handle on each segment bends it. |
-| `formatValue` | `(point: { x: number; y: number }) => string` | percentages | Prints a point's value in the label shown while it is dragged or focused. |
+| `formatValue` | `(point: { x: number; y: number }) => string` | from the domains | Prints a point's value in its label and its accessible value text. |
+| `xDomain` / `yDomain` | `[number, number]` | percent | The values each axis runs from and to, so the labels read in real units: `xDomain={[0, 2000]}`. |
+| `xUnit` / `yUnit` | `string` | - | The unit written after the value, such as `"ms"` or `"dB"`. |
 | `className` | `string` | - | Classes for the graph surface. |
 
 

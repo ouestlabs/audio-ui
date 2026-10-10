@@ -9,3 +9,6 @@ Envelope: bend the segments, and drag with finer control.
 - **Events:** `onValueChange` and `onValueCommitted` report bends with `reason: "curve"`.
 - **Fine drag:** holding Shift while dragging a point moves it a quarter of the pointer's distance, without a jump when Shift is pressed or released.
 - **Types:** `Envelope.Breakpoint` is `{ x, y, curve? }`, the type of the value.
+- **Grid:** `snap` takes the distance between grid lines in normalized units; the pointer snaps dragged and added points to it, and Cmd/Ctrl leaves the grid.
+- **Adding on a curve:** a point added inside a bent segment sits on the curve, and both halves are bent to follow it, so the shape is kept.
+- **Tab stops:** the segment handles are one tab stop; Left and Right move between them.
