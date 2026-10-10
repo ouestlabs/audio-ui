@@ -31,6 +31,7 @@ export function CustomizerSidebarHeader({ className }: { className?: string }) {
         <TooltipTrigger
           render={
             <Button
+              aria-label="Close customizer"
               className="shrink-0"
               onClick={toggleCustomizer}
               size="icon"

@@ -112,7 +112,7 @@ function CustomizerPanelFloating({ animate }: { animate: boolean }) {
           className={cn(
             "site-rounded-xl flex w-[calc(100vw-1.5rem)] origin-(--transform-origin) flex-col overflow-hidden bg-site-background shadow-xl outline-none ring-1 ring-site-foreground/10 md:w-64 md:h-[calc(100dvh-8rem)] md:max-h-none",
             animate &&
-              "data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 data-closed:animate-out data-open:animate-in data-closed:duration-100 data-open:duration-150 motion-reduce:animate-none"
+              "data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 data-closed:animate-out data-open:animate-in data-closed:duration-100 data-open:duration-150 motion-reduce:data-closed:animate-none motion-reduce:data-open:animate-none"
           )}
           data-slot="customizer-popover"
           ref={anchorRef}
