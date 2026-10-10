@@ -40,6 +40,9 @@ export function useLaneProps(part: string) {
 
   const style: React.CSSProperties = {
     [UNIT_PROPERTY as string]: unitLength(meta.zoom, meta.duration),
+    // What sticks out of a lane, such as a handle's widened hit area at the
+    // timeline's end, must not make the timeline scroll further than it is long.
+    overflowX: "clip",
     position: "relative",
     // Zoomed, the lane is at least as long as the timeline; it may grow to
     // fill the view, and its parts stay put since they are placed in px.

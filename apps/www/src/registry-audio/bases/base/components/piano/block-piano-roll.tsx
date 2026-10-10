@@ -1,8 +1,8 @@
 "use client";
 
-import type {
-  PianoRoll as PianoRollPrimitive,
-  Ruler as RulerPrimitive,
+import {
+  createSource,
+  type PianoRoll as PianoRollPrimitive,
 } from "@audio-ui/react";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { Button } from "@/registry/bases/base/ui/button";
@@ -16,13 +16,24 @@ import {
 } from "@/registry-audio/bases/base/audio/elements/channel-strip";
 import { Fader } from "@/registry-audio/bases/base/audio/elements/fader";
 import { PianoRoll } from "@/registry-audio/bases/base/audio/elements/piano-roll";
-import { Ruler } from "@/registry-audio/bases/base/audio/elements/ruler";
+import {
+  Timeline,
+  TimelineLane,
+  TimelineMark,
+  TimelinePlayhead,
+  TimelineRange,
+  TimelineRangeHandle,
+  TimelineRuler,
+} from "@/registry-audio/bases/base/audio/elements/timeline";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 import {
   type UseSynthVoicesReturn,
   useSynthVoices,
 } from "@/registry-audio/bases/base/hooks/use-synth-voices";
-import { useTransportClock } from "@/registry-audio/bases/base/hooks/use-transport-clock";
+import {
+  type TransportRegion,
+  useTransportClock,
+} from "@/registry-audio/bases/base/hooks/use-transport-clock";
 import {
   encodeMidiFile,
   type MidiFileNote,
@@ -35,6 +46,13 @@ const END_NOTE = 72;
 const DEFAULT_VOLUME = 0.7;
 const TOTAL_STEPS = 16;
 const BEATS_PER_BAR = 4;
+/** The ruler's labels: the first step of each beat. */
+const BEAT_STEPS = Array.from(
+  { length: BEATS_PER_BAR },
+  (_, beat) => (beat * TOTAL_STEPS) / BEATS_PER_BAR
+);
+
+const describeStep = (step: number) => `Step ${Math.floor(step) + 1}`;
 const DEFAULT_BPM = 120;
 const MIN_BPM = 20;
 const MAX_BPM = 200;
@@ -55,7 +73,7 @@ const DEFAULT_ENVELOPE: EnvelopePoint[] = [
 ];
 
 type Note = PianoRollPrimitive.Note;
-type LoopRegion = RulerPrimitive.Region;
+type LoopRegion = TransportRegion;
 
 /** No region set — the loop spans the full grid, the original always-loop-everything behavior. */
 const FULL_LOOP_REGION: LoopRegion = { end: TOTAL_STEPS, start: 0 };
@@ -160,7 +178,8 @@ function usePianoRoll({
   regionRef.current = region;
 
   const playheadRef = useRef<HTMLDivElement | null>(null);
-  const rulerPlayheadRef = useRef<HTMLDivElement | null>(null);
+  /** The clock's position, in steps, for the timeline's playhead to follow outside React. */
+  const [position] = useState(() => createSource(0));
   /** The pitches currently sounding because of an in-progress grid drag — held (not blipped) for as long as the drag continues, released on pointerup, same as the key strip's own hold semantics. A group move shifts every selected note by the same delta, so whenever any pitch changes they all change together on that frame — the edited set IS the group's complete new pitch set. */
   const heldGridPitchesRef = useRef<Set<number>>(new Set());
   const gridPointerUpHandlerRef = useRef<(() => void) | null>(null);
@@ -346,16 +365,16 @@ function usePianoRoll({
     start();
   }, [start]);
 
-  /** Fired on `Ruler`'s `onValueCommit` — re-anchors the loop so a region change is audible immediately instead of waiting for a stale iteration to finish. No-op while stopped. */
+  /** Fired when a change to the loop range ends — re-anchors the loop so a region change is audible immediately instead of waiting for a stale iteration to finish. No-op while stopped. */
   const commitLoopRegion = useCallback(() => {
     reanchor();
   }, [reanchor]);
 
-  /** Fired on `Ruler`'s `onSeek` (a plain click on the ruler track). Clamps into the region, then re-anchors so that step plays now. No-op while stopped. */
+  /** Fired when the timeline's ruler moves the position. Clamps onto a step inside the region, then re-anchors so that step plays now. No-op while stopped. */
   const seekTo = useCallback(
     (step: number) => {
       const { end, start: regionStart } = regionRef.current;
-      reanchor(clamp(step, regionStart, end - 1));
+      reanchor(clamp(Math.floor(step), regionStart, end - 1));
     },
     [reanchor]
   );
@@ -386,22 +405,22 @@ function usePianoRoll({
     let rafId: number;
     let lastSounding: number[] = [];
     const tick = () => {
-      const position = getPosition();
+      const position_ = getPosition();
       const { end, start: regionStart } = regionRef.current;
-      const percent = (position / TOTAL_STEPS) * 100;
+      const percent = (position_ / TOTAL_STEPS) * 100;
       if (playheadRef.current) {
         playheadRef.current.style.left = `${percent}%`;
       }
-      if (rulerPlayheadRef.current) {
-        rulerPlayheadRef.current.style.left = `${percent}%`;
-      }
+      position.set(position_);
 
       const sounding = notesRef.current
         .filter((n) => {
           if (n.startStep < regionStart || n.startStep >= end) {
             return false;
           }
-          return position >= n.startStep && position < n.startStep + n.duration;
+          return (
+            position_ >= n.startStep && position_ < n.startStep + n.duration
+          );
         })
         .map((n) => n.note);
       const changed =
@@ -416,7 +435,7 @@ function usePianoRoll({
     };
     rafId = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(rafId);
-  }, [getPosition, isPlaying]);
+  }, [getPosition, isPlaying, position]);
 
   return {
     clearNotes,
@@ -429,7 +448,7 @@ function usePianoRoll({
     notes,
     playheadRef,
     playingHighlightNotes,
-    rulerPlayheadRef,
+    position,
     seekTo,
     setNotes,
     startPlayback,
@@ -445,6 +464,16 @@ export default function BlockPianoRoll() {
   const [volume, setVolume] = useState(DEFAULT_VOLUME);
   const [bpm, setBpm] = useState(DEFAULT_BPM);
   const [loopRegion, setLoopRegion] = useState<LoopRegion | null>(null);
+  const loopRange: readonly [number, number] = loopRegion
+    ? [loopRegion.start, loopRegion.end]
+    : [0, TOTAL_STEPS];
+  /** The loop range moves freely under the pointer; the loop itself is in whole steps. */
+  const changeLoopRegion = useCallback(
+    ([start, end]: readonly [number, number]) => {
+      setLoopRegion({ end: Math.round(end), start: Math.round(start) });
+    },
+    []
+  );
   const masterGain = useMasterBus(volume);
 
   const { releaseAll, releaseNote, triggerNote } = useSynthVoices({
@@ -462,7 +491,7 @@ export default function BlockPianoRoll() {
     notes,
     playheadRef,
     playingHighlightNotes,
-    rulerPlayheadRef,
+    position,
     seekTo,
     setNotes,
     startPlayback,
@@ -474,6 +503,12 @@ export default function BlockPianoRoll() {
     releaseNote,
     triggerNote,
   });
+
+  /** A double-click on the loop goes back to looping the whole grid. */
+  const clearLoopRegion = useCallback(() => {
+    setLoopRegion(null);
+    commitLoopRegion();
+  }, [commitLoopRegion]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -593,19 +628,36 @@ export default function BlockPianoRoll() {
           Drop a MIDI file to import
         </div>
       ) : null}
-      <div className="flex w-full min-w-0 gap-2">
-        <Ruler
-          aria-label="Loop region"
-          className="flex-1"
-          isPlaying={isPlaying}
-          onSeek={seekTo}
-          onValueChange={setLoopRegion}
-          onValueCommit={commitLoopRegion}
-          playheadRef={rulerPlayheadRef}
-          totalSteps={TOTAL_STEPS}
-          value={loopRegion}
-        />
-      </div>
+      <Timeline
+        className="overflow-hidden rounded-md border"
+        duration={TOTAL_STEPS}
+        onPositionChange={seekTo}
+        source={position}
+        step={1}
+      >
+        <TimelineRuler aria-label="Playhead" getAriaValueText={describeStep}>
+          {BEAT_STEPS.map((step, beat) => (
+            <TimelineMark key={step} value={step}>
+              {beat + 1}
+            </TimelineMark>
+          ))}
+          {isPlaying ? <TimelinePlayhead /> : null}
+        </TimelineRuler>
+        <TimelineLane className="h-4 cursor-cell">
+          <TimelineRange
+            aria-label="Loop region"
+            drawable
+            getAriaValueText={describeStep}
+            onDoubleClick={clearLoopRegion}
+            onValueChange={changeLoopRegion}
+            onValueCommitted={commitLoopRegion}
+            value={loopRange}
+          >
+            <TimelineRangeHandle aria-label="Loop start" edge="start" />
+            <TimelineRangeHandle aria-label="Loop end" edge="end" />
+          </TimelineRange>
+        </TimelineLane>
+      </Timeline>
       <PianoRoll
         activeNotes={activeKeyNotes}
         aria-label="Piano roll grid"

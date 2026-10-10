@@ -4,7 +4,6 @@ export { Knob } from "./knob";
 export { Meter } from "./meter";
 export { Piano } from "./piano";
 export { PianoRoll } from "./piano-roll";
-export { Ruler } from "./ruler";
 export { Sequencer } from "./sequencer";
 export { createSource, type Source, type WritableSource } from "./source";
 export { Timeline } from "./timeline";

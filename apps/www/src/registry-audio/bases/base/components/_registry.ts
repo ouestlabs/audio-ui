@@ -905,7 +905,7 @@ export const components: RegistryItem[] = [
   {
     categories: ["piano", "synth"],
     description:
-      "A DAW-style piano roll — a pitch-reference key strip beside an editable note grid, click to add notes, drag to move or resize either edge, shift-click to select and move several at once, double-click to delete — with a BPM-driven loop that plays back in real time and always-on live preview as you edit. A ruler above the grid lets you click to seek or drag out a loop region to dial in a short phrase instead of always looping the whole grid. Drop a MIDI file onto the panel (or use the Import MIDI button) to load its notes and tempo onto the grid, and Export MIDI to save the current pattern back out as a .mid file",
+      "A DAW-style piano roll — a pitch-reference key strip beside an editable note grid, click to add notes, drag to move or resize either edge, shift-click to select and move several at once, double-click to delete — with a BPM-driven loop that plays back in real time and always-on live preview as you edit. A timeline above the grid lets you click to seek or drag out a loop range to dial in a short phrase instead of always looping the whole grid. Drop a MIDI file onto the panel (or use the Import MIDI button) to load its notes and tempo onto the grid, and Export MIDI to save the current pattern back out as a .mid file",
     files: [
       {
         path: "components/piano/block-piano-roll.tsx",
@@ -915,7 +915,7 @@ export const components: RegistryItem[] = [
     name: "block-piano-roll",
     registryDependencies: [
       "@audio/piano-roll",
-      "@audio/ruler",
+      "@audio/timeline",
       "@audio/fader",
       "@audio/channel-strip",
       "@audio/bpm-control",

@@ -54,10 +54,6 @@
       "types": "./dist/piano-roll.d.ts",
       "import": "./dist/piano-roll.js"
     },
-    "./ruler": {
-      "types": "./dist/ruler.d.ts",
-      "import": "./dist/ruler.js"
-    },
     "./sequencer": {
       "types": "./dist/sequencer.d.ts",
       "import": "./dist/sequencer.js"

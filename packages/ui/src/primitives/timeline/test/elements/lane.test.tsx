@@ -20,6 +20,10 @@ describe("Timeline.Lane", () => {
     expect(view.getByTestId("root").hasAttribute("data-fitted")).toBe(false);
   });
 
+  test("keeps what sticks out of it from lengthening the timeline", () => {
+    expect(renderTimeline().lane.style.overflowX).toBe("clip");
+  });
+
   test("must be used within a timeline", () => {
     expect(() => render(<Timeline.Lane />)).toThrow(
       "Timeline.Lane must be used within Timeline.Root"

@@ -9,7 +9,6 @@ const primitives = [
   "meter",
   "piano",
   "piano-roll",
-  "ruler",
   "sequencer",
   "timeline",
   "waveform",

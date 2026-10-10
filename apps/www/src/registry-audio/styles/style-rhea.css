@@ -398,31 +398,6 @@
     @apply bg-primary;
   }
 
-  /* MARK: Ruler */
-  .cn-ruler {
-    @apply relative h-6 overflow-hidden rounded-4xl border border-transparent bg-card shadow-sm ring-1 ring-foreground/10 transition-[color,border-color,box-shadow,opacity] duration-150 ease-out hover:ring-4 hover:ring-ring/30 has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-ring/30 active:ring-4 active:ring-ring/30 has-[:focus-visible]:border-ring active:border-ring motion-reduce:transition-none;
-  }
-
-  .cn-ruler-mark {
-    @apply pointer-events-none bottom-0 h-1.5 bg-border;
-  }
-
-  .cn-ruler-mark-beat {
-    @apply h-full bg-border;
-  }
-
-  .cn-ruler-region {
-    @apply rounded-[min(var(--radius-sm),6px)] bg-primary/25 ring-1 ring-primary/40 transition-[background-color,box-shadow] duration-150 ease-out hover:bg-primary/35 focus-visible:ring-4 focus-visible:ring-ring/30 active:ring-4 active:ring-ring/30 data-[disabled=true]:pointer-events-none motion-reduce:transition-none;
-  }
-
-  .cn-ruler-region-handle {
-    @apply bg-foreground/20 transition-colors hover:bg-foreground/40 motion-reduce:transition-none;
-  }
-
-  .cn-ruler-playhead {
-    @apply bg-foreground;
-  }
-
   /* MARK: Timeline */
   .cn-timeline {
     @apply [--timeline-grid-color:color-mix(in_oklab,var(--border)_70%,transparent)];
