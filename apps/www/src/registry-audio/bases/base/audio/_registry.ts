@@ -124,6 +124,11 @@ export const audio: RegistryItem[] = [
         path: "audio/elements/timeline.tsx",
         type: "registry:ui",
       },
+      {
+        path: "components/timeline/timeline-demo.tsx",
+        target: "components/audio/timeline-default.tsx",
+        type: "registry:component",
+      },
     ],
     name: "timeline",
     registryDependencies: ["@audio/musical-time"],

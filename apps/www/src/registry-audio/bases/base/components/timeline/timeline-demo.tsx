@@ -2,9 +2,6 @@
 
 import { createSource } from "@audio-ui/react";
 import { useCallback, useEffect, useState } from "react";
-import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder";
-import { Button } from "@/registry/bases/base/ui/button";
-import { ButtonGroup } from "@/registry/bases/base/ui/button-group";
 import {
   Timeline,
   TimelineLane,
@@ -30,6 +27,8 @@ const MIN_ZOOM = 8;
 const MAX_ZOOM = 240;
 const ZOOM_STEP = 1.5;
 const LANES = ["drums", "bass"];
+const BUTTON_CLASS =
+  "h-8 min-w-8 rounded-md border bg-background px-3 text-sm outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring/50 disabled:opacity-50";
 
 /** A transport clock as a source: the playhead follows it without re-rendering React. */
 function usePlaybackClock() {
@@ -85,52 +84,29 @@ export default function TimelineDemo() {
   return (
     <div className="flex w-full min-w-0 flex-col gap-3">
       <div className="flex items-center justify-between gap-2">
-        <Button
-          aria-label={playing ? "Pause" : "Play"}
-          onClick={togglePlaying}
-          size="icon"
-          variant="outline"
-        >
-          <IconPlaceholder
-            hugeicons={playing ? "PauseIcon" : "PlayIcon"}
-            lucide={playing ? "PauseIcon" : "PlayIcon"}
-            phosphor={playing ? "PauseIcon" : "PlayIcon"}
-            remixicon={playing ? "RiPauseLine" : "RiPlayLine"}
-            tabler={playing ? "IconPlayerPause" : "IconPlayerPlay"}
-          />
-        </Button>
-        <ButtonGroup>
-          <Button
+        <button className={BUTTON_CLASS} onClick={togglePlaying} type="button">
+          {playing ? "Pause" : "Play"}
+        </button>
+        <div className="flex gap-1">
+          <button
             aria-label="Zoom out"
+            className={BUTTON_CLASS}
             disabled={zoom <= MIN_ZOOM}
             onClick={zoomOut}
-            size="icon"
-            variant="outline"
+            type="button"
           >
-            <IconPlaceholder
-              hugeicons="ZoomOutAreaIcon"
-              lucide="ZoomOutIcon"
-              phosphor="MagnifyingGlassMinusIcon"
-              remixicon="RiZoomOutLine"
-              tabler="IconZoomOut"
-            />
-          </Button>
-          <Button
+            −
+          </button>
+          <button
             aria-label="Zoom in"
+            className={BUTTON_CLASS}
             disabled={zoom >= MAX_ZOOM}
             onClick={zoomIn}
-            size="icon"
-            variant="outline"
+            type="button"
           >
-            <IconPlaceholder
-              hugeicons="ZoomInAreaIcon"
-              lucide="ZoomInIcon"
-              phosphor="MagnifyingGlassPlusIcon"
-              remixicon="RiZoomInLine"
-              tabler="IconZoomIn"
-            />
-          </Button>
-        </ButtonGroup>
+            +
+          </button>
+        </div>
       </div>
       <Timeline
         className="gap-2"
