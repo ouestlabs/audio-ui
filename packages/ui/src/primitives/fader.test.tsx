@@ -1,184 +1,212 @@
 import { describe, expect, mock, test } from "bun:test";
 import { fireEvent, render } from "@testing-library/react";
+import { createRef } from "react";
 import { mockRect } from "../../test/helpers";
 import { Fader } from "../fader";
 
-/** Defaults: min -60, max 6, step 1 → midpoint default value -27. */
-function renderFader(props: Fader.RootProps = {}) {
-  const onValueChange = mock(() => undefined);
-  const onValueCommit = mock(() => undefined);
+/** Defaults: min -60, max 6, step 1, vertical → midpoint default value -27. */
+function renderFader(
+  props: Fader.Root.Props = {},
+  thumbProps: Fader.Thumb.Props = {}
+) {
+  const onValueChange = mock(
+    (_value: number, _details: Fader.Root.ChangeEventDetails) => undefined
+  );
+  const onValueCommitted = mock(
+    (_value: number, _details: Fader.Root.CommitEventDetails) => undefined
+  );
   const view = render(
     <Fader.Root
       onValueChange={onValueChange}
-      onValueCommit={onValueCommit}
+      onValueCommitted={onValueCommitted}
       {...props}
     >
-      <Fader.Slider data-testid="slider">
-        <Fader.Track data-testid="track">
-          <Fader.Range />
-          <Fader.Thumb data-testid="thumb" />
+      <Fader.Control data-testid="control">
+        <Fader.Track>
+          <Fader.Indicator />
         </Fader.Track>
-      </Fader.Slider>
+        <Fader.Thumb aria-label="Volume" data-testid="thumb" {...thumbProps} />
+      </Fader.Control>
     </Fader.Root>
   );
   return {
+    control: view.getByTestId("control"),
+    input: view.getByRole("slider") as HTMLInputElement,
     onValueChange,
-    onValueCommit,
-    slider: view.getByTestId("slider"),
+    onValueCommitted,
     thumb: view.getByTestId("thumb"),
-    track: view.getByTestId("track"),
     view,
   };
 }
 
+const lastCall = <T extends unknown[]>(fn: { mock: { calls: T[] } }) =>
+  fn.mock.calls.at(-1) as T;
+
 describe("Fader value semantics", () => {
-  test("defaults to the midpoint of min/max", () => {
-    const { thumb } = renderFader();
-    expect(thumb.getAttribute("role")).toBe("slider");
-    expect(thumb.getAttribute("aria-valuemin")).toBe("-60");
-    expect(thumb.getAttribute("aria-valuemax")).toBe("6");
-    expect(thumb.getAttribute("aria-valuenow")).toBe("-27");
-  });
-
-  test("clamps an out-of-range controlled value", () => {
-    const { thumb } = renderFader({ value: 100 });
-    expect(thumb.getAttribute("aria-valuenow")).toBe("6");
-  });
-
-  test("falls back to min for a NaN controlled value", () => {
-    const { thumb } = renderFader({ value: Number.NaN });
-    expect(thumb.getAttribute("aria-valuenow")).toBe("-60");
-  });
-
-  test("uses the first entry of an array value", () => {
-    const { thumb } = renderFader({ value: [3] });
-    expect(thumb.getAttribute("aria-valuenow")).toBe("3");
+  test("defaults to the midpoint, vertical, with an accessible native input", () => {
+    const { input } = renderFader();
+    expect(input.type).toBe("range");
+    expect(input.value).toBe("-27");
+    expect(input.getAttribute("aria-label")).toBe("Volume");
+    expect(input.getAttribute("aria-orientation")).toBe("vertical");
   });
 
   test("respects defaultValue when uncontrolled", () => {
-    const { thumb } = renderFader({ defaultValue: -10 });
-    expect(thumb.getAttribute("aria-valuenow")).toBe("-10");
+    const { input } = renderFader({ defaultValue: -6 });
+    expect(input.value).toBe("-6");
+  });
+
+  test("formats aria-valuetext with Intl options", () => {
+    const { input } = renderFader({
+      format: { maximumFractionDigits: 1, minimumFractionDigits: 1 },
+      value: -6,
+    });
+    expect(input.getAttribute("aria-valuetext")).toBe("-6.0");
   });
 });
 
 describe("Fader keyboard", () => {
-  const cases: [string, number][] = [
-    ["ArrowUp", -26],
-    ["ArrowRight", -26],
-    ["ArrowDown", -28],
-    ["ArrowLeft", -28],
-    ["Home", -60],
-    ["End", 6],
-    ["PageUp", -17],
-    ["PageDown", -37],
-  ];
-
-  for (const [key, expected] of cases) {
-    test(`${key} commits ${expected} from the default -27`, () => {
-      const { thumb, onValueChange, onValueCommit } = renderFader();
-      fireEvent.keyDown(thumb, { key });
-      expect(onValueChange).toHaveBeenLastCalledWith(expected);
-      expect(onValueCommit).toHaveBeenLastCalledWith(expected);
-      expect(thumb.getAttribute("aria-valuenow")).toBe(String(expected));
-    });
-  }
-
-  test("clamps keyboard steps at max", () => {
-    const { thumb, onValueCommit } = renderFader({ value: 6 });
-    fireEvent.keyDown(thumb, { key: "ArrowUp" });
-    expect(onValueCommit).toHaveBeenLastCalledWith(6);
+  test("ArrowUp changes and commits +step with a keyboard reason", () => {
+    const { input, onValueChange, onValueCommitted } = renderFader();
+    fireEvent.keyDown(input, { key: "ArrowUp" });
+    const [value, details] = lastCall(onValueChange);
+    expect(value).toBe(-26);
+    expect(details.reason).toBe("keyboard");
+    expect(lastCall(onValueCommitted)[0]).toBe(-26);
+    expect(input.value).toBe("-26");
   });
 
-  test("ignores keys when disabled", () => {
-    const { thumb, onValueChange, onValueCommit } = renderFader({
-      disabled: true,
-    });
-    fireEvent.keyDown(thumb, { key: "ArrowUp" });
-    expect(onValueChange).not.toHaveBeenCalled();
-    expect(onValueCommit).not.toHaveBeenCalled();
-    expect(thumb.tabIndex).toBe(-1);
+  test("a consumer onKeyDown on the thumb does not replace keyboard control", () => {
+    const onKeyDown = mock(() => undefined);
+    const { input, onValueChange } = renderFader({}, { onKeyDown });
+    fireEvent.keyDown(input, { key: "ArrowUp" });
+    expect(onKeyDown).toHaveBeenCalled();
+    expect(lastCall(onValueChange)[0]).toBe(-26);
   });
 });
 
 describe("Fader wheel", () => {
-  test("wheel up commits +step", () => {
-    const { slider, onValueCommit } = renderFader();
-    fireEvent.wheel(slider, { deltaY: -100 });
-    expect(onValueCommit).toHaveBeenLastCalledWith(-26);
+  test("wheel up changes and commits +step with a wheel reason", () => {
+    const { control, input, onValueChange, onValueCommitted } = renderFader();
+    fireEvent.wheel(control, { deltaY: -100 });
+    const [value, details] = lastCall(onValueChange);
+    expect(value).toBe(-26);
+    expect(details.reason).toBe("wheel");
+    expect(lastCall(onValueCommitted)).toEqual([
+      -26,
+      expect.objectContaining({ reason: "wheel" }),
+    ]);
+    expect(input.value).toBe("-26");
   });
 
-  test("wheel down commits -step", () => {
-    const { slider, onValueCommit } = renderFader();
-    fireEvent.wheel(slider, { deltaY: 100 });
-    expect(onValueCommit).toHaveBeenLastCalledWith(-28);
+  test("wheel down changes -step and snaps decimal steps without float noise", () => {
+    const { control, onValueChange } = renderFader({
+      defaultValue: 0.3,
+      max: 1,
+      min: 0,
+      step: 0.1,
+    });
+    fireEvent.wheel(control, { deltaY: 100 });
+    expect(lastCall(onValueChange)[0]).toBe(0.2);
   });
 
-  test("ignores sub-threshold wheel deltas", () => {
-    const { slider, onValueCommit } = renderFader();
-    fireEvent.wheel(slider, { deltaY: 0.05 });
-    expect(onValueCommit).not.toHaveBeenCalled();
+  test("ignores sub-threshold deltas and clamps at max", () => {
+    const { control, onValueChange } = renderFader({ defaultValue: 6 });
+    fireEvent.wheel(control, { deltaY: -0.01 });
+    fireEvent.wheel(control, { deltaY: -100 });
+    expect(onValueChange).not.toHaveBeenCalled();
+  });
+
+  test("eventDetails.cancel() keeps the uncontrolled value", () => {
+    const { control, input, onValueCommitted } = renderFader({
+      onValueChange: (_value, details) => details.cancel(),
+    });
+    fireEvent.wheel(control, { deltaY: -100 });
+    expect(input.value).toBe("-27");
+    expect(onValueCommitted).not.toHaveBeenCalled();
+  });
+
+  test("is ignored when disabled", () => {
+    const { control, onValueChange } = renderFader({ disabled: true });
+    fireEvent.wheel(control, { deltaY: -100 });
+    expect(onValueChange).not.toHaveBeenCalled();
   });
 });
 
-describe("Fader drag (vertical slider 20×200 at origin)", () => {
-  test("pointer down jumps to the pointed value, drag updates, release commits", () => {
-    const { slider, track, onValueChange, onValueCommit } = renderFader();
-    mockRect(slider, { height: 200, width: 20 });
+describe("Fader pointer (vertical control 20×200 at origin)", () => {
+  test("track press jumps to the pointed value, drag updates, release commits", () => {
+    const { control, onValueChange, onValueCommitted } = renderFader();
+    mockRect(control, { bottom: 200, height: 200, right: 20, width: 20 });
 
-    fireEvent.pointerDown(track, { clientX: 10, clientY: 0, pointerId: 1 });
-    expect(onValueChange).toHaveBeenLastCalledWith(6);
+    fireEvent.pointerDown(control, { clientX: 10, clientY: 0, pointerId: 1 });
+    expect(lastCall(onValueChange)).toEqual([
+      6,
+      expect.objectContaining({ reason: "track-press" }),
+    ]);
 
-    fireEvent.pointerMove(track, { clientX: 10, clientY: 100, pointerId: 1 });
-    expect(onValueChange).toHaveBeenLastCalledWith(-27);
+    fireEvent.pointerMove(document, {
+      buttons: 1,
+      clientX: 10,
+      clientY: 100,
+      pointerId: 1,
+    });
+    expect(lastCall(onValueChange)).toEqual([
+      -27,
+      expect.objectContaining({ reason: "drag" }),
+    ]);
 
-    fireEvent.pointerUp(track, { clientX: 10, clientY: 100, pointerId: 1 });
-    expect(onValueCommit).toHaveBeenLastCalledWith(-27);
-  });
-
-  test("a pointerdown outside the fader mid-drag commits the pending value", () => {
-    const { slider, thumb, onValueCommit } = renderFader();
-    mockRect(slider, { height: 200, width: 20 });
-
-    fireEvent.pointerDown(thumb, { clientX: 10, clientY: 100, pointerId: 7 });
-    expect(onValueCommit).not.toHaveBeenCalled();
-
-    fireEvent.pointerDown(document.body, { pointerId: 8 });
-    expect(onValueCommit).toHaveBeenLastCalledWith(-27);
+    fireEvent.pointerUp(document, { clientX: 10, clientY: 100, pointerId: 1 });
+    expect(lastCall(onValueCommitted)[0]).toBe(-27);
   });
 });
 
-describe("Fader freezeWhileDragging (horizontal slider 200×20 at origin)", () => {
-  const seekProps: Fader.RootProps = {
+describe("Fader freezeWhileDragging (horizontal control 200×20 at origin)", () => {
+  const seekProps: Fader.Root.Props = {
     max: 100,
     min: 0,
     orientation: "horizontal",
     value: 10,
   };
 
-  test("keeps the thumb at the dragged position while the controlled value lags", () => {
-    const { slider, track, thumb, onValueChange, onValueCommit } = renderFader({
+  test("keeps the thumb on the dragged position while the controlled value lags", () => {
+    const { control, thumb, onValueChange } = renderFader({
       ...seekProps,
       freezeWhileDragging: true,
     });
-    mockRect(slider, { height: 20, width: 200 });
+    mockRect(control, { bottom: 20, height: 20, right: 200, width: 200 });
 
-    fireEvent.pointerDown(track, { clientX: 60, clientY: 10, pointerId: 1 });
-    expect(onValueChange).toHaveBeenLastCalledWith(30);
-    // displayed position follows the drag (optimistic), aria stays on the raw controlled value
-    expect(thumb.style.left).toBe("30%");
-    expect(thumb.getAttribute("aria-valuenow")).toBe("10");
+    fireEvent.pointerDown(control, { clientX: 60, clientY: 10, pointerId: 1 });
+    expect(lastCall(onValueChange)[0]).toBe(30);
+    expect(thumb.style.insetInlineStart).toBe("30%");
 
-    fireEvent.pointerUp(track, { clientX: 60, clientY: 10, pointerId: 1 });
-    expect(onValueCommit).toHaveBeenLastCalledWith(30);
-    // optimistic value clears after the drag; controlled value still rules
-    expect(thumb.style.left).toBe("10%");
+    fireEvent.pointerUp(document, { clientX: 60, clientY: 10, pointerId: 1 });
+    fireEvent.pointerUp(window, { pointerId: 1 });
+    // the drag is over: the controlled value rules again
+    expect(thumb.style.insetInlineStart).toBe("10%");
   });
 
   test("without freeze, the thumb tracks the controlled value even mid-drag", () => {
-    const { slider, track, thumb } = renderFader(seekProps);
-    mockRect(slider, { height: 20, width: 200 });
+    const { control, thumb } = renderFader(seekProps);
+    mockRect(control, { bottom: 20, height: 20, right: 200, width: 200 });
 
-    fireEvent.pointerDown(track, { clientX: 60, clientY: 10, pointerId: 1 });
-    expect(thumb.style.left).toBe("10%");
+    fireEvent.pointerDown(control, { clientX: 60, clientY: 10, pointerId: 1 });
+    expect(thumb.style.insetInlineStart).toBe("10%");
+  });
+});
+
+describe("Fader.Control", () => {
+  test("sets touch-action: none and merges the consumer's style and ref", () => {
+    const ref = createRef<HTMLDivElement>();
+    const view = render(
+      <Fader.Root>
+        <Fader.Control data-testid="control" ref={ref} style={{ opacity: 0.5 }}>
+          <Fader.Thumb aria-label="Volume" />
+        </Fader.Control>
+      </Fader.Root>
+    );
+    const control = view.getByTestId("control");
+    expect(control.style.touchAction).toBe("none");
+    expect(control.style.opacity).toBe("0.5");
+    expect(ref.current).toBe(control as HTMLDivElement);
   });
 });

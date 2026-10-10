@@ -80,7 +80,7 @@
   }
 
   .cn-fader-thumb {
-    @apply border-ring border bg-card transition-[color,box-shadow] hover:ring-2 hover:ring-ring/30 focus-visible:ring-2 focus-visible:ring-ring/30 active:ring-2 active:ring-ring/30 motion-reduce:transition-none;
+    @apply border-ring border bg-card transition-[color,box-shadow] hover:ring-2 hover:ring-ring/30 has-focus-visible:ring-2 has-focus-visible:ring-ring/30 active:ring-2 active:ring-ring/30 motion-reduce:transition-none;
   }
 
   .cn-fader-thumb-size-sm {
@@ -149,7 +149,7 @@
   }
 
   .cn-transport-thumb {
-    @apply border-ring border bg-card transition-[color,box-shadow] hover:ring-2 hover:ring-ring/30 focus-visible:ring-2 focus-visible:ring-ring/30 active:ring-2 active:ring-ring/30 motion-reduce:transition-none;
+    @apply border-ring border bg-card transition-[color,box-shadow] hover:ring-2 hover:ring-ring/30 has-focus-visible:ring-2 has-focus-visible:ring-ring/30 active:ring-2 active:ring-ring/30 motion-reduce:transition-none;
   }
 
   .cn-transport-thumb-size-sm {

@@ -14,7 +14,7 @@ Timeline control for playback progress (current value + buffered range). The reg
 - **Interaction model:** Pointer drag on track/thumb, wheel stepping, keyboard nudging, and commit callbacks.
 - **Visual model:** Base track + buffered range + played range + thumb.
 - **Playback UX:** Supports `freezeWhileDragging` to avoid jitter/flicker while scrubbing.
-- **Accessibility:** Thumb is exposed as `role="slider"` with `aria-valuenow`, `aria-valuemin`, and `aria-valuemax`.
+- **Accessibility:** The thumb contains a native `<input type="range">` that carries the accessible name (`aria-label` / `aria-labelledby`) and the value text.
 
 ## Installation
 
@@ -86,7 +86,7 @@ const [progress, setProgress] = useState(42);
 | -------- | ------- |
 | **Track click / drag** | Updates value from pointer position along the rail. |
 | **Thumb drag** | Continuous scrubbing, clamped to `min...max`. |
-| **Commit event** | `onValueCommit` fires when drag interaction ends (primitive-level callback). |
+| **Commit event** | `onValueCommitted` fires when drag interaction ends (primitive-level callback). |
 
 ### Keyboard
 
@@ -96,14 +96,14 @@ Focused thumb supports:
 | --- | ------ |
 | `ArrowUp` / `ArrowRight` | Increase by `step` |
 | `ArrowDown` / `ArrowLeft` | Decrease by `step` |
-| `PageUp` | Increase by `step × 10` |
-| `PageDown` | Decrease by `step × 10` |
+| `PageUp` / `Shift` + `ArrowUp` | Increase by `largeStep` (default `10`) |
+| `PageDown` / `Shift` + `ArrowDown` | Decrease by `largeStep` (default `10`) |
 | `Home` | Set to `min` |
 | `End` | Set to `max` |
 
 ### Wheel
 
-When focused, wheel input nudges the value by `step`.
+Wheel input over the bar nudges the value by `step`.
 
 ## API reference
 

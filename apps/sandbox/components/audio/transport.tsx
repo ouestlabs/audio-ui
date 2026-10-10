@@ -36,7 +36,7 @@ const transportTrackVariants = cva(
 );
 
 const transportThumbVariants = cva(
-  "border-ring border bg-card transition-[color,box-shadow] hover:ring-3 hover:ring-ring/50 focus-visible:ring-3 focus-visible:ring-ring/50 active:ring-3 active:ring-ring/50 motion-reduce:transition-none before:-inset-2 absolute z-10 block shrink-0 cursor-grab select-none outline-none before:absolute before:content-[''] active:cursor-grabbing data-[disabled=true]:pointer-events-none data-[disabled=true]:cursor-not-allowed",
+  "border-ring border bg-card transition-[color,box-shadow] hover:ring-3 hover:ring-ring/50 has-focus-visible:ring-3 has-focus-visible:ring-ring/50 active:ring-3 active:ring-ring/50 motion-reduce:transition-none before:-inset-2 absolute z-10 block shrink-0 cursor-grab select-none outline-none before:absolute before:content-[''] active:cursor-grabbing data-disabled:pointer-events-none data-disabled:cursor-not-allowed",
   {
     defaultVariants: {
       size: "default",
@@ -93,6 +93,9 @@ type TransportProps = Omit<
 } & VariantProps<typeof transportSliderVariants>;
 
 function Transport({
+  "aria-describedby": ariaDescribedBy,
+  "aria-label": ariaLabel,
+  "aria-labelledby": ariaLabelledBy,
   value,
   bufferedValue = 0,
   onSeek,
@@ -121,7 +124,7 @@ function Transport({
       value={value}
       {...props}
     >
-      <FaderPrimitive.Slider
+      <FaderPrimitive.Control
         className={cn(
           "relative flex w-full touch-none select-none items-center transition-opacity duration-150 ease-out motion-reduce:transition-none data-disabled:opacity-50",
           "data-[orientation=vertical]:h-full data-[orientation=vertical]:min-h-40 data-[orientation=vertical]:w-auto data-[orientation=vertical]:flex-col",
@@ -147,7 +150,7 @@ function Transport({
                   : `scaleY(${bufferedPercentage})`,
             }}
           />
-          <FaderPrimitive.Range
+          <FaderPrimitive.Indicator
             className={cn(
               "bg-primary absolute select-none",
               "data-[orientation=horizontal]:inset-y-0 data-[orientation=horizontal]:left-0",
@@ -156,19 +159,24 @@ function Transport({
           />
         </FaderPrimitive.Track>
         <FaderPrimitive.Thumb
+          aria-describedby={ariaDescribedBy}
+          aria-label={ariaLabel}
+          aria-labelledby={ariaLabelledBy}
           className={transportThumbVariants({ size })}
           data-slot="transport-thumb"
         >
-          <FaderPrimitive.ThumbInner
+          <div
             className={transportThumbInnerVariants({ size })}
+            data-orientation={orientation}
             data-slot="transport-thumb-inner"
           >
-            <FaderPrimitive.ThumbMark
+            <div
               className={transportThumbMarkVariants({ size })}
+              data-orientation={orientation}
             />
-          </FaderPrimitive.ThumbInner>
+          </div>
         </FaderPrimitive.Thumb>
-      </FaderPrimitive.Slider>
+      </FaderPrimitive.Control>
     </FaderPrimitive.Root>
   );
 }

@@ -7,14 +7,14 @@ base: base
 
 <ComponentPreview styleName="base-nova" name="fader-vertical-demo" />
 
-Linear fader for continuous parameters (volume, gain, send level, etc.). The registry component wraps `Fader` primitives from `@audio-ui/react` with size variants and thumb mark styling.
+Linear fader for continuous parameters (volume, gain, send level, etc.). The registry component wraps the `Fader` primitive from `@audio-ui/react` — built on Base UI's `Slider` — with size variants and thumb mark styling.
 
 ## Overview
 
 - **Interaction model:** Pointer drag on track or thumb, mouse wheel adjustment, keyboard nudging, and commit callbacks on release.
 - **Layout:** Vertical (default) or horizontal orientation, with `sm`, `default`, and `lg` size presets.
 - **Feedback:** Filled range + thumb with optional internal marks (`thumbMarks`).
-- **Accessibility:** The thumb is exposed as `role="slider"` with `aria-valuenow`, `aria-valuemin`, and `aria-valuemax`.
+- **Accessibility:** The thumb contains a native `<input type="range">` that carries the accessible name (`aria-label` / `aria-labelledby`), the value text (formatted with `format`), and the form value (`name`).
 
 ## Installation
 
@@ -80,7 +80,7 @@ const [gain, setGain] = useState(0);
   max={6}
   min={-60}
   onValueChange={setGain}
-  onValueCommit={(value) => console.log("Committed:", value)}
+  onValueCommitted={(value, details) => console.log("Committed:", value, details.reason)}
   step={1}
   value={gain}
 />
@@ -94,7 +94,7 @@ const [gain, setGain] = useState(0);
 | -------- | ------- |
 | **Track click / drag** | Clicking or dragging on the track updates the value from pointer position. |
 | **Thumb drag** | Dragging the thumb adjusts continuously, clamped to `min...max`. |
-| **Commit event** | `onValueCommit` fires when drag interaction ends. |
+| **Commit event** | `onValueCommitted` fires when an interaction ends with a new value. |
 
 ### Keyboard
 
@@ -104,18 +104,18 @@ Focused thumb supports:
 | --- | ------ |
 | `ArrowUp` / `ArrowRight` | Increase by `step` |
 | `ArrowDown` / `ArrowLeft` | Decrease by `step` |
-| `PageUp` | Increase by `step × 10` |
-| `PageDown` | Decrease by `step × 10` |
+| `PageUp` / `Shift` + `ArrowUp` | Increase by `largeStep` (default `10`) |
+| `PageDown` / `Shift` + `ArrowDown` | Decrease by `largeStep` (default `10`) |
 | `Home` | Set to `min` |
 | `End` | Set to `max` |
 
 ### Wheel
 
-When focused, wheel input nudges the value by `step`.
+Wheel input over the fader nudges the value by `step` and reports `eventDetails.reason === "wheel"`.
 
 ## API reference
 
-`Fader` accepts style props (`size`, `thumbMarks`, `className`) plus primitive props from `FaderPrimitive.RootProps`.
+`Fader` accepts style props (`size`, `thumbMarks`, `className`) plus primitive props from `FaderPrimitive.Root.Props` (Base UI `Slider.Root` props: `name`, `format`, `locale`, `largeStep`, `render`, …). `aria-label`, `aria-labelledby`, and `aria-describedby` are forwarded to the thumb's input.
 
 ### Value and state
 
@@ -127,8 +127,9 @@ When focused, wheel input nudges the value by `step`.
 | `max` | `number` | `6` | Maximum value. |
 | `step` | `number` | `1` | Quantization step for drag, wheel, and keyboard. |
 | `disabled` | `boolean` | `false` | Disables interaction. |
-| `onValueChange` | `(value: number) => void` | - | Live updates while adjusting. |
-| `onValueCommit` | `(value: number) => void` | - | Fires when interaction is committed. |
+| `onValueChange` | `(value: number, eventDetails) => void` | - | Live updates while adjusting. `eventDetails.reason` is `"drag"`, `"track-press"`, `"keyboard"`, `"wheel"`, `"input-change"`, or `"none"`; call `eventDetails.cancel()` to reject the change. |
+| `onValueCommitted` | `(value: number, eventDetails) => void` | - | Fires when an interaction ends with a new value. |
+| `freezeWhileDragging` | `boolean` | `false` | Keeps the thumb on the dragged position while a controlled `value` lags behind. |
 | `aria-label` | `string` | - | Accessible name for the slider. |
 | `aria-labelledby` | `string` | - | ID of a labeling element. |
 
