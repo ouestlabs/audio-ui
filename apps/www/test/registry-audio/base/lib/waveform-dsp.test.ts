@@ -1,6 +1,8 @@
 import { describe, expect, test } from "bun:test";
 import {
+  computePeaks,
   downsampleWaveform,
+  normalizePeaks,
   normalizeWaveform,
   spectrumBands,
 } from "@/registry-audio/bases/base/lib/waveform-dsp";
@@ -86,5 +88,47 @@ describe("spectrumBands", () => {
     expect(
       rounded(spectrumBands([], new Float32Array([0.5, 0.5]), { sampleRate }))
     ).toEqual([0, 0]);
+  });
+});
+
+describe("computePeaks", () => {
+  const rounded = (values: Float32Array) =>
+    Array.from(values, (value) => Math.round(value * 100) / 100);
+
+  test("keeps each slice's lowest and highest sample", () => {
+    const { max, min } = computePeaks([[0.1, -0.5, 0.8, 0.2, -0.1, 0.3]], 2);
+    expect(rounded(max)).toEqual([0.8, 0.3]);
+    expect(rounded(min)).toEqual([-0.5, -0.1]);
+  });
+
+  test("folds every channel in, so a hard-panned take still draws", () => {
+    const left = [0, 0, 0, 0];
+    const right = [0.6, -0.4, 0.2, -0.9];
+    const { max, min } = computePeaks([left, right], 2);
+    expect(rounded(max)).toEqual([0.6, 0.2]);
+    expect(rounded(min)).toEqual([-0.4, -0.9]);
+  });
+
+  test("returns empty peaks for no audio or no slices", () => {
+    expect(computePeaks([], 4).max.length).toBe(4);
+    expect(computePeaks([[0.5]], 0).max.length).toBe(0);
+  });
+});
+
+describe("normalizePeaks", () => {
+  test("scales the loudest sample, either way, to full height", () => {
+    const peaks = normalizePeaks({
+      max: new Float32Array([0.25, 0.1]),
+      min: new Float32Array([-0.5, -0.2]),
+    });
+    const rounded = (values: Float32Array) =>
+      Array.from(values, (value) => Math.round(value * 100) / 100);
+    expect(rounded(peaks.max)).toEqual([0.5, 0.2]);
+    expect(rounded(peaks.min)).toEqual([-1, -0.4]);
+  });
+
+  test("leaves silence alone", () => {
+    const silent = { max: new Float32Array(2), min: new Float32Array(2) };
+    expect(normalizePeaks(silent)).toBe(silent);
   });
 });

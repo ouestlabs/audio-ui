@@ -52,9 +52,8 @@ export function Control(componentProps: Control.Props) {
 
   const valueAt = (event: React.PointerEvent<HTMLDivElement>): number => {
     const rect = event.currentTarget.getBoundingClientRect();
-    return (
-      clampUnit((event.clientX - rect.left) / Math.max(rect.width, 1)) *
-      duration
+    return meta.atShare(
+      clampUnit((event.clientX - rect.left) / Math.max(rect.width, 1))
     );
   };
 
@@ -125,15 +124,17 @@ export function Control(componentProps: Control.Props) {
         ArrowLeft: current - arrowStep,
         ArrowRight: current + arrowStep,
         ArrowUp: current + arrowStep,
-        End: duration,
-        Home: 0,
+        End: meta.range[1],
+        Home: meta.range[0],
         PageDown: current - meta.largeStep,
         PageUp: current + meta.largeStep,
       };
-      const next = targets[event.key];
-      if (next === undefined) {
+      const target = targets[event.key];
+      if (target === undefined) {
         return;
       }
+      // The keys move within the stretch shown.
+      const next = Math.min(meta.range[1], Math.max(meta.range[0], target));
       event.preventDefault();
       const native = event.nativeEvent;
       if (actions.change(next, createChangeEventDetails("keyboard", native))) {
@@ -143,7 +144,7 @@ export function Control(componentProps: Control.Props) {
         });
       }
     },
-    [actions, duration, inert, meta]
+    [actions, inert, meta]
   );
 
   const handleChange = React.useCallback(
@@ -183,8 +184,8 @@ export function Control(componentProps: Control.Props) {
               aria-valuetext={describe(initialValue, duration)}
               defaultValue={initialValue}
               disabled={state.disabled}
-              max={duration}
-              min={0}
+              max={meta.range[1]}
+              min={meta.range[0]}
               onChange={handleChange}
               onKeyDown={handleKeyDown}
               ref={meta.inputRef}

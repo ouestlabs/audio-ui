@@ -506,6 +506,11 @@
   },
   {
     "categories": ["waveform"],
+    "name": "waveform-window-demo",
+    "title": "waveform-window-demo"
+  },
+  {
+    "categories": ["waveform"],
     "name": "waveform-live-demo",
     "title": "waveform-live-demo"
   },

@@ -13,8 +13,7 @@ export function Marker(componentProps: Marker.Props) {
     componentProps;
   const { meta, state } = useWaveformContext("Marker");
   const { duration } = meta;
-  const fraction =
-    duration > 0 ? clampFinite(value, 0, duration) / duration : 0;
+  const fraction = meta.toShare(clampFinite(value, 0, duration));
   return useRender({
     defaultTagName: "div",
     props: mergeProps<"div">(

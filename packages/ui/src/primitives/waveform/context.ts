@@ -5,6 +5,7 @@ import type {
   CommitEventDetails as ExtraCommitEventDetails,
 } from "../internal/event-details";
 import type { Store } from "../internal/store";
+import type { WaveformPeaks } from "./internal/peaks";
 
 export const POSITION_PROPERTY = "--waveform-position";
 
@@ -62,7 +63,13 @@ export interface WaveformContextValue {
     largeStep: number;
     /** The live signal, when there is one. */
     levels: LevelsSource | undefined;
-    peaks: ArrayLike<number> | undefined;
+    peaks: WaveformPeaks | undefined;
+    /** The stretch of the audio shown, `[start, end]` in `duration` units. */
+    range: readonly [number, number];
+    /** The value at `share` of the way across the shown stretch. */
+    atShare: (share: number) => number;
+    /** How far across the shown stretch `value` is: 0 at its start, 1 at its end, beyond outside it. */
+    toShare: (value: number) => number;
     /** The played share, 0…1, observable outside React. */
     position: Store<number>;
     step: number;

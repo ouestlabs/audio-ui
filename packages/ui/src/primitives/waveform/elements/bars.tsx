@@ -10,6 +10,7 @@ import {
   createLevelsEngine,
   type WaveformIdle,
 } from "../internal/levels-engine";
+import { peakCount, peakMagnitudes, rangeShares } from "../internal/peaks";
 
 const LEVEL_PROPERTY = "--waveform-level";
 /** A level has to move this much before its bar is written to again. */
@@ -55,7 +56,7 @@ export function Bars(componentProps: Bars.Props) {
     ...elementProps
   } = componentProps;
   const { meta, state } = useWaveformContext("Bars");
-  const { levels: live, peaks, position } = meta;
+  const { duration, levels: live, peaks, position, range } = meta;
   const { loading } = state;
   const reducedMotion = useReducedMotion();
   const rootRef = React.useRef<HTMLDivElement>(null);
@@ -83,7 +84,15 @@ export function Bars(componentProps: Bars.Props) {
       reducedMotion,
     });
     const shown = new Float32Array(engine.levels.length).fill(-1);
-    let input = live ? live.getSnapshot() : peaks;
+    let input: ArrayLike<number> | undefined;
+    if (live) {
+      input = live.getSnapshot();
+    } else if (peaks) {
+      // The shown stretch at the data's own resolution: the engine fits it to the bars.
+      const [from, to] = rangeShares(range, duration);
+      const entries = Math.max(1, Math.round((to - from) * peakCount(peaks)));
+      input = peakMagnitudes(peaks, from, to, entries);
+    }
     let visible = true;
     let clock = 0;
     let unpaintedMs = 0;
@@ -143,6 +152,7 @@ export function Bars(componentProps: Bars.Props) {
     };
   }, [
     count,
+    duration,
     gain,
     idle,
     live,
@@ -151,6 +161,7 @@ export function Bars(componentProps: Bars.Props) {
     mirrored,
     peaks,
     position,
+    range,
     reducedMotion,
   ]);
 

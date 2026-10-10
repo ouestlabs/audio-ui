@@ -19,13 +19,15 @@ import {
 } from "@/registry/bases/base/ui/tabs";
 import { Waveform } from "@/registry-audio/bases/base/audio/elements/waveform";
 import {
-  decodeAudioSamples,
-  downsampleWaveform,
-  normalizeWaveform,
+  type AudioPeaks,
+  computePeaks,
+  decodeAudioChannels,
+  normalizePeaks,
 } from "@/registry-audio/bases/base/lib/waveform-dsp";
 
-// More peaks than the waveform has bars at any width; it keeps the loudest per bar.
-const PEAK_COUNT = 1024;
+// More slices than the waveform has bars at any width; it keeps each bar's lowest and highest.
+const PEAK_COUNT = 2048;
+const EMPTY_PEAKS: number[] = [];
 
 function formatTime(seconds: number): string {
   if (!Number.isFinite(seconds)) {
@@ -46,14 +48,14 @@ function toIsoDuration(seconds: number): string {
   return `PT${minutes}M${remainingSeconds}S`;
 }
 
-/** A seekable waveform player driven entirely by a user-supplied file — nothing is preloaded. Picking a file decodes its real PCM samples via `decodeAudioSamples`/`downsampleWaveform`/`normalizeWaveform` once, shared across two tabbed presentations of the same data: a plain recolored bar chart, and an `AudioScrubber`-style read with a `Playhead` line and `Thumb` handle. The primitive only owns the seek value, not the audio itself. */
+/** A seekable waveform player driven entirely by a user-supplied file — nothing is preloaded. Picking a file decodes its real PCM samples via `decodeAudioChannels`/`computePeaks`/`normalizePeaks` once, keeping each slice's lowest and highest sample,, shared across two tabbed presentations of the same data: a plain recolored bar chart, and an `AudioScrubber`-style read with a `Playhead` line and `Thumb` handle. The primitive only owns the seek value, not the audio itself. */
 export default function BlockWaveformPlayer() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const objectUrlRef = useRef<string | null>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [fileName, setFileName] = useState("");
-  const [values, setValues] = useState<number[]>([]);
+  const [peaks, setPeaks] = useState<AudioPeaks | null>(null);
   const [duration, setDuration] = useState(0);
   const [progress, setProgress] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -85,7 +87,7 @@ export default function BlockWaveformPlayer() {
       setIsPlaying(false);
       setProgress(0);
       setDuration(0);
-      setValues([]);
+      setPeaks(null);
       setFileName(file.name);
       setAudioUrl(url);
 
@@ -94,9 +96,8 @@ export default function BlockWaveformPlayer() {
       const context = new AudioContext();
       try {
         const buffer = await file.arrayBuffer();
-        const samples = await decodeAudioSamples(context, buffer);
-        const downsampled = downsampleWaveform(samples, PEAK_COUNT);
-        setValues(normalizeWaveform(downsampled));
+        const channels = await decodeAudioChannels(context, buffer);
+        setPeaks(normalizePeaks(computePeaks(channels, PEAK_COUNT)));
       } finally {
         await context.close();
         setIsDecoding(false);
@@ -161,7 +162,7 @@ export default function BlockWaveformPlayer() {
     }
   }, []);
 
-  const hasAudio = values.length > 0;
+  const hasAudio = peaks !== null;
 
   return (
     <div className="cn-audio-panel flex w-full min-w-0 flex-col gap-4 border bg-card p-4">
@@ -190,7 +191,7 @@ export default function BlockWaveformPlayer() {
               onValueChange={handleSeek}
               onValueCommitted={handleSeek}
               value={progress}
-              values={values}
+              values={peaks ?? EMPTY_PEAKS}
             />
           </TabsContent>
           <TabsContent value="playhead">
@@ -200,7 +201,7 @@ export default function BlockWaveformPlayer() {
               onValueChange={handleSeek}
               onValueCommitted={handleSeek}
               value={progress}
-              values={values}
+              values={peaks ?? EMPTY_PEAKS}
               variant="playhead"
             />
           </TabsContent>

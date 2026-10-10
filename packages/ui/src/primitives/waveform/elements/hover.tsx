@@ -13,13 +13,13 @@ export function Hover(componentProps: Hover.Props) {
   const { children, className, ref, render, style, ...elementProps } =
     componentProps;
   const { meta, state } = useWaveformContext("Hover");
-  const { duration, hover } = meta;
+  const { hover } = meta;
   const hovered = React.useSyncExternalStore(
     hover.subscribe,
     hover.get,
     hover.get
   );
-  const fraction = hovered !== null && duration > 0 ? hovered / duration : 0;
+  const fraction = hovered === null ? 0 : meta.toShare(hovered);
   return useRender({
     defaultTagName: "div",
     enabled: hovered !== null && !(state.disabled || state.loading),

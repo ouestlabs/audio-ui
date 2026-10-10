@@ -1,8 +1,9 @@
 /**
- * Framework-free waveform DSP: decode raw audio bytes into one channel's
- * samples, then reduce those samples to a fixed number of amplitude values
- * for the Waveform's `values`; and reduce a live analyser's spectrum to
- * frequency bands. Pure and audio-only, so it stays off any `"use client"`
+ * Framework-free waveform DSP: decode raw audio bytes into samples, then
+ * reduce them to the Waveform's `values` — the lowest and highest sample of
+ * each slice (`computePeaks`), or one amplitude per slice
+ * (`downsampleWaveform`); and reduce a live analyser's spectrum to frequency
+ * bands. Pure and audio-only, so it stays off any `"use client"`
  * surface; the Waveform itself fits the values to its width.
  */
 
@@ -15,6 +16,78 @@ export async function decodeAudioSamples(
   const audioBuffer = await context.decodeAudioData(buffer.slice(0));
   const channelIndex = Math.min(channel, audioBuffer.numberOfChannels - 1);
   return audioBuffer.getChannelData(channelIndex);
+}
+
+/** Decodes raw audio bytes into every channel's PCM samples, ready for `computePeaks`. Like `decodeAudioSamples`, it takes the caller's context and decodes a copy of the bytes. */
+export async function decodeAudioChannels(
+  context: BaseAudioContext,
+  buffer: ArrayBuffer
+): Promise<Float32Array[]> {
+  const audioBuffer = await context.decodeAudioData(buffer.slice(0));
+  return Array.from({ length: audioBuffer.numberOfChannels }, (_, channel) =>
+    audioBuffer.getChannelData(channel)
+  );
+}
+
+/** The lowest and highest sample of each slice of the audio, -1 to 1: what the Waveform draws as the waveform really is, lopsided where the audio is. */
+export interface AudioPeaks {
+  max: Float32Array;
+  min: Float32Array;
+}
+
+/** Reduces PCM samples to `bucketCount` slices, keeping each slice's lowest and highest sample across every channel — a take panned hard to one side still draws, rather than reading as a flat line on the channel it isn't on. Compute it once per file, at a resolution above the widest waveform you expect (a few thousand slices); the Waveform fits it to its width and to any `range`. */
+export function computePeaks(
+  channels: readonly ArrayLike<number>[],
+  bucketCount: number
+): AudioPeaks {
+  const count = Math.max(0, Math.floor(bucketCount));
+  const min = new Float32Array(count);
+  const max = new Float32Array(count);
+  const length = Math.max(0, ...channels.map((channel) => channel.length));
+  if (count === 0 || length === 0) {
+    return { max, min };
+  }
+  for (let bucket = 0; bucket < count; bucket += 1) {
+    const start = Math.floor((bucket * length) / count);
+    const end = Math.max(
+      start + 1,
+      Math.floor(((bucket + 1) * length) / count)
+    );
+    let low = 0;
+    let high = 0;
+    for (const channel of channels) {
+      for (
+        let index = start;
+        index < end && index < channel.length;
+        index += 1
+      ) {
+        const sample = channel[index] ?? 0;
+        low = Math.min(low, sample);
+        high = Math.max(high, sample);
+      }
+    }
+    min[bucket] = low;
+    max[bucket] = high;
+  }
+  return { max, min };
+}
+
+/** Scales peaks so the loudest sample, either way, reaches full height, keeping each slice's lopsidedness. */
+export function normalizePeaks(peaks: AudioPeaks): AudioPeaks {
+  let loudest = 0;
+  for (const value of peaks.max) {
+    loudest = Math.max(loudest, Math.abs(value));
+  }
+  for (const value of peaks.min) {
+    loudest = Math.max(loudest, Math.abs(value));
+  }
+  if (loudest === 0) {
+    return peaks;
+  }
+  return {
+    max: peaks.max.map((value) => value / loudest),
+    min: peaks.min.map((value) => value / loudest),
+  };
 }
 
 /** Downsamples raw PCM samples into `targetLength` blocks, each block's value the peak (max) absolute amplitude within it — the reduction wavesurfer.js/audiowaveform-style waveform visualizers use, since a block average flattens short transients into a softer-looking curve than the audio actually has. */

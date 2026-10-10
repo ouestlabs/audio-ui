@@ -228,8 +228,12 @@ export function Region(componentProps: Region.Props) {
     const region = regionRef.current;
     // Its percentages resolve against the element it is positioned in.
     const track = region?.offsetParent ?? region?.parentElement;
-    return duration / Math.max(track?.getBoundingClientRect().width ?? 0, 1);
-  }, [duration]);
+    const [shownStart, shownEnd] = root.range;
+    return (
+      (shownEnd - shownStart) /
+      Math.max(track?.getBoundingClientRect().width ?? 0, 1)
+    );
+  }, [root.range]);
 
   const state = React.useMemo<Region.State>(
     () => ({ disabled, dragging }),
@@ -265,8 +269,9 @@ export function Region(componentProps: Region.Props) {
 
   const drag = useRegionDrag(context, "both", movable && !disabled);
   const [start, end] = displayedValue;
+  const span = root.range[1] - root.range[0];
   const toPercent = (length: number) =>
-    `${(duration > 0 ? length / duration : 0) * 100}%`;
+    `${(span > 0 ? length / span : 0) * 100}%`;
 
   const element = useRender({
     defaultTagName: "div",
@@ -274,7 +279,7 @@ export function Region(componentProps: Region.Props) {
       {
         ...drag,
         style: {
-          left: toPercent(start),
+          left: toPercent(start - root.range[0]),
           position: "absolute",
           touchAction: "none",
           width: toPercent(end - start),

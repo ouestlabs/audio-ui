@@ -3,6 +3,7 @@ import { useRender } from "@base-ui/react/use-render";
 import * as React from "react";
 import { clampFinite } from "../../../utils";
 import { type PartProps, resolveStyling } from "../../internal/part";
+import { normalizeRange } from "../../internal/range-geometry";
 import { createStore } from "../../internal/store";
 import {
   describeAsPercent,
@@ -16,6 +17,7 @@ import {
   type WaveformState,
 } from "../context";
 import { isAudible } from "../internal/levels";
+import type { WaveformPeaks } from "../internal/peaks";
 
 /**
  * Groups the parts of a waveform and owns what they show: the audio's shape
@@ -39,6 +41,7 @@ export function Root(componentProps: Root.Props) {
     onValueChange,
     onValueCommitted,
     peaks,
+    range: rangeProp,
     ref,
     render,
     source,
@@ -49,6 +52,24 @@ export function Root(componentProps: Root.Props) {
   } = componentProps;
   const step = stepProp ?? duration / 100;
   const largeStep = largeStepProp ?? duration / 10;
+
+  // The stretch of the audio shown: the whole of it unless told otherwise.
+  const [rangeStart, rangeEnd] = rangeProp
+    ? normalizeRange(rangeProp, duration)
+    : [0, duration];
+  const range = React.useMemo<readonly [number, number]>(
+    () => (rangeEnd > rangeStart ? [rangeStart, rangeEnd] : [0, duration]),
+    [duration, rangeEnd, rangeStart]
+  );
+  const toShare = React.useCallback(
+    (value: number) =>
+      range[1] > range[0] ? (value - range[0]) / (range[1] - range[0]) : 0,
+    [range]
+  );
+  const atShare = React.useCallback(
+    (share: number) => range[0] + share * (range[1] - range[0]),
+    [range]
+  );
 
   const isControlled = valueProp !== undefined;
   const [uncontrolledValue, setUncontrolledValue] =
@@ -68,9 +89,7 @@ export function Root(componentProps: Root.Props) {
   const rootRef = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
   const describeRef = React.useRef(describeAsPercent);
-  const [position] = React.useState(() =>
-    createStore(duration > 0 ? knownValue / duration : 0)
-  );
+  const [position] = React.useState(() => createStore(toShare(knownValue)));
   const [hover] = React.useState(() => createStore<number | null>(null));
 
   // The single place a position reaches the DOM: the CSS variable the
@@ -80,12 +99,15 @@ export function Root(componentProps: Root.Props) {
     (value: number) => {
       const next = clampFinite(value, 0, duration);
       valueRef.current = next;
-      const fraction = duration > 0 ? next / duration : 0;
-      rootRef.current?.style.setProperty(
+      const share = toShare(next);
+      const root = rootRef.current;
+      root?.style.setProperty(
         POSITION_PROPERTY,
-        `${fraction * 100}%`
+        `${Math.min(1, Math.max(0, share)) * 100}%`
       );
-      position.set(fraction);
+      // Outside the stretch shown, a playhead has nowhere true to stand.
+      root?.toggleAttribute("data-outside", share < 0 || share > 1);
+      position.set(share);
       const input = inputRef.current;
       if (input) {
         const text = describeRef.current(next, duration);
@@ -95,7 +117,7 @@ export function Root(componentProps: Root.Props) {
         }
       }
     },
-    [duration, position]
+    [duration, position, toShare]
   );
 
   // While the pointer drags, the waveform follows it: neither a lagging
@@ -184,6 +206,7 @@ export function Root(componentProps: Root.Props) {
     () => ({
       actions: { change, commit, setDragging },
       meta: {
+        atShare,
         describeRef,
         duration,
         hover,
@@ -192,7 +215,9 @@ export function Root(componentProps: Root.Props) {
         levels,
         peaks,
         position,
+        range,
         step,
+        toShare,
         valueRef,
       },
       state,
@@ -206,9 +231,12 @@ export function Root(componentProps: Root.Props) {
       levels,
       peaks,
       position,
+      range,
       setDragging,
       state,
       step,
+      atShare,
+      toShare,
     ]
   );
 
@@ -219,7 +247,7 @@ export function Root(componentProps: Root.Props) {
     props: mergeProps<"div">(
       {
         style: {
-          [POSITION_PROPERTY]: `${(duration > 0 ? renderedValue / duration : 0) * 100}%`,
+          [POSITION_PROPERTY]: `${Math.min(1, Math.max(0, toShare(renderedValue))) * 100}%`,
         } as React.CSSProperties,
       },
       { ...elementProps, ...resolveStyling(className, style, state) }
@@ -235,6 +263,8 @@ export function Root(componentProps: Root.Props) {
 export namespace Root {
   export type State = WaveformState;
   export type Source = PositionSource;
+  /** The audio's shape: a level per slice, or `{ min, max }` samples per slice. */
+  export type Peaks = WaveformPeaks;
   export type Levels = LevelsSource;
 
   export type ChangeEventReason = ChangeEventDetails["reason"];
@@ -261,8 +291,19 @@ export namespace Root {
       value: number,
       eventDetails: CommitEventDetails
     ) => void;
-    /** Amplitudes of the audio, 0…1 each, at any resolution: the parts fit them to their size. */
-    peaks?: ArrayLike<number>;
+    /**
+     * The audio's shape, at any resolution: a level per slice (0…1), or the
+     * lowest and highest sample of each (`{ min, max }`, -1…1), which draws
+     * the waveform lopsided where the audio is. The parts fit it to their size.
+     */
+    peaks?: WaveformPeaks;
+    /**
+     * The stretch of the audio to show, `[start, end]` in `duration` units:
+     * a clip's window onto its source, a zoomed view. The playhead, seeking,
+     * hover, regions and markers all follow it. Defaults to the whole audio.
+     * While the position is outside it, the root carries `data-outside`.
+     */
+    range?: readonly [number, number];
     /** A live position followed outside React; takes precedence over `value`. */
     source?: Source;
     /** Step for the arrow keys. Defaults to a hundredth of `duration`. */

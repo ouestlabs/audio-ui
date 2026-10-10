@@ -5,6 +5,7 @@ import {
   barRect,
   barRects,
   bitmapLength,
+  envelopeRects,
   mirroredScrollRects,
   scrollShift,
 } from "../../internal/bar-layout";
@@ -199,5 +200,41 @@ describe("mirroredScrollRects", () => {
     const rects = mirroredScrollRects(long, 1, layout);
     expect(Math.min(...rects.map((rect) => rect.x))).toBeGreaterThanOrEqual(-4);
     expect(mirroredScrollRects([], 1, layout)).toEqual([]);
+  });
+});
+
+describe("envelopeRects", () => {
+  const layout = {
+    barWidth: 4,
+    count: 3,
+    height: 100,
+    minBarHeight: 2,
+    pitch: 6,
+    variant: "mirror" as const,
+    width: 16,
+  };
+  const envelope = {
+    high: new Float32Array([0.8, 0.5, 0]),
+    low: new Float32Array([-0.2, -0.5, 0]),
+  };
+
+  test("runs each bar from its high to its low around the middle", () => {
+    const [lopsided, even] = envelopeRects(envelope, layout);
+    expect(lopsided).toEqual({ height: 50, width: 4, x: 0, y: 10 });
+    expect(even).toEqual({ height: 50, width: 4, x: 6, y: 25 });
+  });
+
+  test("silence still draws a sliver around the middle", () => {
+    expect(envelopeRects(envelope, layout).at(2)).toEqual({
+      height: 2,
+      width: 4,
+      x: 12,
+      y: 49,
+    });
+  });
+
+  test("bars stand on the baseline, as tall as they reach either way", () => {
+    const [lopsided] = envelopeRects(envelope, { ...layout, variant: "bars" });
+    expect(lopsided).toMatchObject({ height: 80, y: 20 });
   });
 });

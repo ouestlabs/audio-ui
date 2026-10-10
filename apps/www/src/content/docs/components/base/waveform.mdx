@@ -13,7 +13,9 @@ One family for drawing audio. `Waveform` shows a whole file and lets you scrub t
 
 - **Two kinds of data:** a file's shape is known upfront, so `Waveform` takes `values` (raw `0–1` amplitudes, at any resolution). A live signal isn't, so `LiveWaveform` and `BarVisualizer` take a [`source`](#live-signals) they follow outside React.
 - **Value model:** `value` is the playback position, from `0` to `duration` (default `1`, so a plain `0–1` fraction; pass the track's length in seconds to work in seconds). The primitive only owns the seek position, never the audio itself: wire `onValueChange` to your own `<audio>` element.
-- **Sharp at any size:** the canvas draws as many bars as fit its real width and keeps the loudest amplitude in each bar's slice, so the waveform keeps its detail from a chat bubble to a full-width editor. Bars are laid out on the screen's physical pixels, so their edges stay sharp at any pixel density or zoom level. See [Feeding real audio](#feeding-real-audio).
+- **The real shape:** give `values` each slice's lowest and highest sample (`{ min, max }`) and the waveform is drawn lopsided where the audio is, as a DAW draws it; plain amplitudes (`0–1`) draw it the same above and below the middle.
+- **Part of the audio:** `range` shows just a stretch of it (a clip's window onto its source, a zoomed view), and the playhead, seeking, hover, regions and markers all follow that stretch. See [Showing part of the audio](#showing-part-of-the-audio).
+- **Sharp at any size:** the canvas draws as many bars as fit its real width and keeps the loudest of each bar's slice, so the waveform keeps its detail from a chat bubble to a full-width editor. Bars are laid out on the screen's physical pixels, so their edges stay sharp at any pixel density or zoom level. See [Feeding real audio](#feeding-real-audio).
 - **Shapes:** `shape="mirror"` (the default) centers the bars, `"bars"` stands them on the baseline and `"line"` joins the levels into one continuous shape. A live waveform can also be a `"scope"`: raw samples traced as a single line, like an oscilloscope.
 - **On the timeline:** [`WaveformRegion`](#regions-and-markers) is a stretch you can move and resize, such as a loop; `WaveformMarker` is a labelled point; `WaveformHover` follows the pointer and prints the hovered time.
 - **Nothing wasted:** every moving part is painted outside React and only when something changed. A waveform that is off screen, or has come to rest, costs no frames. With reduced motion requested, live waveforms repaint a few times a second, without smoothing or idle animation.
@@ -109,23 +111,37 @@ const { bands } = useAudioSignal(analyser);
 
 ## Feeding real audio
 
-`values` is a plain prop: the component doesn't decode anything on its own. The `waveform-dsp` lib (`npx shadcn@latest add @audio/waveform-dsp`) turns a real audio file into `values`: `decodeAudioSamples` reads PCM samples out of an `AudioContext`, `downsampleWaveform` reduces them to a manageable number of amplitudes (keeping each block's peak, not its average, so transients stay sharp), and `normalizeWaveform` scales them so the loudest reaches full height.
+`values` is a plain prop: the component doesn't decode anything on its own. The `waveform-dsp` lib (`npx shadcn@latest add @audio/waveform-dsp`) turns a real audio file into `values`: `decodeAudioChannels` reads every channel's PCM samples out of an `AudioContext`, `computePeaks` reduces them to each slice's lowest and highest sample across all channels (so a take panned hard to one side still draws), and `normalizePeaks` scales them so the loudest sample reaches full height.
 
 ```tsx
 import {
-  decodeAudioSamples,
-  downsampleWaveform,
-  normalizeWaveform,
+  computePeaks,
+  decodeAudioChannels,
+  normalizePeaks,
 } from "@/lib/waveform-dsp";
 
 const context = new AudioContext();
-const buffer = await file.arrayBuffer();
-const samples = await decodeAudioSamples(context, buffer);
+const channels = await decodeAudioChannels(context, await file.arrayBuffer());
 
-const values = normalizeWaveform(downsampleWaveform(samples, 1000));
+const values = normalizePeaks(computePeaks(channels, 4096));
 ```
 
-The second argument to `downsampleWaveform` is a resolution, not a bar count: the canvas fits whatever you pass to its own width. Give it more values than the widest bar count you expect (a thousand is plenty) rather than tuning it per layout.
+The second argument to `computePeaks` is a resolution, not a bar count: the canvas fits whatever you pass to its own width and to any `range`. Compute it once per file, with more slices than the widest view you expect will show (a few thousand covers a zoomed-in clip editor). For a simpler shape, `downsampleWaveform` and `normalizeWaveform` give one amplitude per slice instead.
+
+## Showing part of the audio
+
+`range` is the stretch of the audio to show, `[start, end]` in `duration` units. Everything follows it: the bars are drawn from that stretch of `values` alone, a press seeks inside it, the input's keys stay inside it, and regions and markers are placed across it.
+
+```tsx
+<Waveform
+  aria-label="Clip"
+  duration={source.duration}
+  range={[clip.offset, clip.offset + clip.length]}
+  values={source.peaks}
+/>
+```
+
+When the position is outside the stretch, the root carries `data-outside` and the playhead is hidden, rather than pinned to an edge it hasn't reached. Past the largest canvas a browser will draw (16,384 pixels a side), the bitmap is drawn coarser rather than going blank.
 
 ## Following playback
 
@@ -214,7 +230,8 @@ The bars of a `BarVisualizer` are plain elements: restyle them with `.cn-bar-vis
 
 | Prop | Type | Default | Description |
 | ---- | ---- | ------- | ----------- |
-| `values` | `ArrayLike<number>` | - | Raw `0–1` amplitudes, at any resolution. |
+| `values` | `ArrayLike<number> \| { min, max }` | - | The audio's shape at any resolution: `0–1` amplitudes, or each slice's lowest and highest sample, `-1–1`. |
+| `range` | `readonly [number, number]` | whole audio | The stretch shown, in `duration` units. |
 | `value` | `number` | - | Controlled position, from `0` to `duration`. |
 | `defaultValue` | `number` | `0` | Uncontrolled starting position. |
 | `source` | `WaveformSource` | - | A live position followed outside React; takes precedence over `value`. |
@@ -325,6 +342,12 @@ With `mirrored`, the newest level stays in the center and older ones move out on
 ### Bar visualizer
 
 <ComponentPreview styleName="base-nova" name="waveform-bars-demo" />
+
+### Overview and zoom
+
+The top waveform shows the whole track; drag or resize the stretch on it, and the one below shows just that stretch, with each slice's lowest and highest sample.
+
+<ComponentPreview styleName="base-nova" name="waveform-window-demo" />
 
 ### Player, wired to a real uploaded file
 

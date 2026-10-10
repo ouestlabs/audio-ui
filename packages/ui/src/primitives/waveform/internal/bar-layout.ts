@@ -6,6 +6,8 @@
  */
 export type WaveformVariant = "bars" | "line" | "mirror" | "scope";
 
+import type { PeakEnvelope } from "./peaks";
+
 /** Where the bars go on the canvas bitmap. Every length is in device pixels. */
 export interface BarLayout {
   barWidth: number;
@@ -186,4 +188,30 @@ export function mirroredScrollRects(
     center
   );
   return [...left, middle, ...right];
+}
+
+/**
+ * Where each bar of an envelope goes, in whole device pixels: from its high
+ * to its low around the middle, never thinner than the shortest bar. `bars`
+ * stands each one on the baseline instead, as tall as it reaches either way.
+ */
+export function envelopeRects(
+  envelope: PeakEnvelope,
+  layout: BarLayout
+): BarRect[] {
+  const { barWidth, height, minBarHeight, pitch, variant } = layout;
+  const middle = height / 2;
+  return Array.from(envelope.high, (high, index) => {
+    const low = envelope.low[index] ?? 0;
+    if (variant === "bars") {
+      return barRect(Math.max(high, -low), index, layout);
+    }
+    let top = Math.round(middle - high * middle);
+    let bottom = Math.round(middle - low * middle);
+    if (bottom - top < minBarHeight) {
+      top = Math.round((top + bottom - minBarHeight) / 2);
+      bottom = top + minBarHeight;
+    }
+    return { height: bottom - top, width: barWidth, x: index * pitch, y: top };
+  });
 }

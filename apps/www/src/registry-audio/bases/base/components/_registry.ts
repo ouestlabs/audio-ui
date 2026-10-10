@@ -1403,6 +1403,20 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["waveform"],
+    description:
+      "An overview of a whole track with a window you move and resize, shown zoomed below with each slice's lowest and highest sample",
+    files: [
+      {
+        path: "components/waveform/waveform-window-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "waveform-window-demo",
+    registryDependencies: ["@audio/waveform"],
+    type: "registry:example",
+  },
+  {
+    categories: ["waveform"],
     description: "Live waveform scrolling with the incoming signal",
     files: [
       {

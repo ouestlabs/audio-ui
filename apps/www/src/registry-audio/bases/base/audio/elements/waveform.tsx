@@ -16,8 +16,8 @@ type WaveformProps = Omit<WaveformPrimitive.Root.Props, "levels" | "peaks"> &
   Pick<WaveformPrimitive.Control.Props, "getAriaValueText"> & {
     /** How the amplitudes are drawn. */
     shape?: WaveformShape;
-    /** Amplitudes of the audio, 0-1 each, at any resolution. */
-    values: ArrayLike<number>;
+    /** The audio's shape, at any resolution: amplitudes (0-1), or `{ min, max }` samples (-1-1) per slice. */
+    values: WaveformPrimitive.Root.Peaks;
     variant?: "default" | "playhead";
   };
 
@@ -35,7 +35,7 @@ function Waveform({
 }: WaveformProps) {
   return (
     <WaveformPrimitive.Root
-      className="w-full min-w-0 data-disabled:cursor-not-allowed"
+      className="group/waveform w-full min-w-0 data-disabled:cursor-not-allowed"
       peaks={values}
       {...props}
     >
@@ -59,8 +59,8 @@ function Waveform({
         {children}
         {variant === "playhead" ? (
           <>
-            <WaveformPrimitive.Playhead className="cn-waveform-playhead" />
-            <WaveformPrimitive.Thumb className="cn-waveform-thumb" />
+            <WaveformPrimitive.Playhead className="cn-waveform-playhead group-data-outside/waveform:hidden" />
+            <WaveformPrimitive.Thumb className="cn-waveform-thumb group-data-outside/waveform:hidden" />
           </>
         ) : null}
       </WaveformPrimitive.Control>

@@ -13,6 +13,7 @@ import {
   barLayout,
   barRects,
   bitmapLength,
+  envelopeRects,
   mirroredScrollRects,
   scrollShift,
   type WaveformVariant,
@@ -27,6 +28,7 @@ import {
   type LevelsEngine,
   type WaveformIdle,
 } from "../internal/levels-engine";
+import { fitPeaks, type PeakEnvelope, rangeShares } from "../internal/peaks";
 import { type ScopePoint, scopePoints } from "../internal/scope";
 
 const BAR_RADIUS_PROPERTY = "--waveform-bar-radius";
@@ -34,6 +36,12 @@ const THEME_ATTRIBUTES = ["class", "style", "data-theme"];
 /** With reduced motion, a moving waveform repaints this often at most. */
 const REDUCED_MOTION_INTERVAL_MS = 250;
 const MS_PER_SECOND = 1000;
+/**
+ * Browsers refuse canvases much larger than this on a side, and a refused
+ * canvas draws nothing. Past it the bitmap is drawn coarser instead: a
+ * zoomed-in clip blurs a little rather than going blank.
+ */
+const MAX_BITMAP_SIDE = 16_384;
 
 let barRadiusPropertyRegistered = false;
 
@@ -140,7 +148,7 @@ export function Canvas(componentProps: Canvas.Props) {
     ...elementProps
   } = componentProps;
   const { meta, state } = useWaveformContext("Canvas");
-  const { levels: live, peaks, position } = meta;
+  const { duration, levels: live, peaks, position, range } = meta;
   const { loading } = state;
   const reducedMotion = useReducedMotion();
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
@@ -156,10 +164,16 @@ export function Canvas(componentProps: Canvas.Props) {
     let layout: BarLayout | null = null;
     let engine: LevelsEngine | null = null;
     let history: LevelHistory | null = null;
+    /** The file's shape over the shown stretch, when it is drawn as it is rather than live. */
+    let envelope: PeakEnvelope | null = null;
+    /** A live record's levels, carried over when a resize starts a new one. */
+    let previousHistory: Float32Array | undefined;
+    /** Bitmap px per CSS px: the pixel density, unless the bitmap had to be capped. */
+    let bitmapRatio = window.devicePixelRatio || 1;
     let shape = new Path2D();
     let radius = 0;
     let strokeWidth = 0;
-    let input = live ? live.getSnapshot() : peaks;
+    let input: ArrayLike<number> | undefined = live?.getSnapshot();
     // Whether the bars must be laid out again before the next paint.
     let stale = true;
     // Whether the levels may have moved since the shape was built.
@@ -172,9 +186,48 @@ export function Canvas(componentProps: Canvas.Props) {
     let unpaintedMs = 0;
     let sincePaintMs = Number.POSITIVE_INFINITY;
 
+    /** Sets up what the bars follow: the file as it is, a live record, or live levels. */
+    const prepareLevels = (grid: BarLayout, pixelRatio: number) => {
+      engine = null;
+      envelope = null;
+      history = null;
+      if (variant === "scope") {
+        return;
+      }
+      if (!(live || loading)) {
+        // A file's shape is known: drawn as it is, with nothing to animate.
+        const [from, to] = rangeShares(range, duration);
+        envelope = fitPeaks(peaks ?? [], from, to, {
+          high: new Float32Array(grid.count),
+          low: new Float32Array(grid.count),
+        });
+        return;
+      }
+      if (live && mode === "scrolling") {
+        // One entry more than fits: the newest slides in as the oldest slides
+        // out. From the middle outwards, each side shows half as many.
+        const pitch = grid.pitch / pixelRatio;
+        history = createLevelHistory(
+          (mirrored ? Math.ceil(grid.count / 2) : grid.count) + 1,
+          (pitch / Math.max(scrollSpeed, 1)) * MS_PER_SECOND,
+          previousHistory
+        );
+        return;
+      }
+      engine = createLevelsEngine({
+        count: grid.count,
+        gain,
+        idle,
+        loading,
+        minLevel: 0,
+        mirrored,
+        reducedMotion,
+      });
+    };
+
     const measure = () => {
       stale = false;
-      const pixelRatio = window.devicePixelRatio || 1;
+      const pixelRatio = bitmapRatio;
       layout = barLayout({
         barGap,
         barWidth,
@@ -191,35 +244,16 @@ export function Canvas(componentProps: Canvas.Props) {
           ) ||
             0)) * pixelRatio;
       strokeWidth = lineWidth * pixelRatio;
-      engine = null;
-      if (variant === "scope") {
-        history = null;
-      } else if (live && mode === "scrolling") {
-        // One entry more than fits: the newest slides in as the oldest slides
-        // out. From the middle outwards, each side shows half as many.
-        const pitch = layout.pitch / pixelRatio;
-        history = createLevelHistory(
-          (mirrored ? Math.ceil(layout.count / 2) : layout.count) + 1,
-          (pitch / Math.max(scrollSpeed, 1)) * MS_PER_SECOND,
-          history?.levels
-        );
-      } else {
-        history = null;
-        engine = createLevelsEngine({
-          count: layout.count,
-          gain,
-          idle,
-          loading,
-          minLevel: 0,
-          mirrored,
-          reducedMotion,
-        });
-      }
+      previousHistory = history?.levels;
+      prepareLevels(layout, pixelRatio);
       moving = true;
     };
 
     /** Where the bars are now. Sets `running` while they are still moving. */
     const place = (grid: BarLayout): BarRect[] => {
+      if (envelope) {
+        return envelopeRects(envelope, grid);
+      }
       if (history) {
         running = history.step(performance.now());
         const progress = reducedMotion ? 1 : history.progress;
@@ -330,16 +364,27 @@ export function Canvas(componentProps: Canvas.Props) {
     const resize = (entry: ResizeObserverEntry) => {
       const pixelRatio = window.devicePixelRatio || 1;
       const exact = entry.devicePixelContentBoxSize?.[0];
-      const width = bitmapLength(
+      const fullWidth = bitmapLength(
         entry.contentRect.width,
         pixelRatio,
         exact?.inlineSize
       );
-      const height = bitmapLength(
+      const fullHeight = bitmapLength(
         entry.contentRect.height,
         pixelRatio,
         exact?.blockSize
       );
+      const cap = Math.min(
+        1,
+        MAX_BITMAP_SIDE / Math.max(fullWidth, 1),
+        MAX_BITMAP_SIDE / Math.max(fullHeight, 1)
+      );
+      const width = Math.max(1, Math.floor(fullWidth * cap));
+      const height = Math.max(1, Math.floor(fullHeight * cap));
+      bitmapRatio =
+        entry.contentRect.width > 0
+          ? width / entry.contentRect.width
+          : pixelRatio * cap;
       if (canvas.width !== width || canvas.height !== height) {
         canvas.width = width;
         canvas.height = height;
@@ -439,8 +484,10 @@ export function Canvas(componentProps: Canvas.Props) {
     minBarHeight,
     mirrored,
     mode,
+    duration,
     peaks,
     position,
+    range,
     reducedMotion,
     scrollSpeed,
     variant,
