@@ -52,6 +52,35 @@ function renderXYPad(
 const lastCall = <T extends unknown[]>(fn: { mock: { calls: T[] } }) =>
   fn.mock.calls.at(-1) as T;
 
+describe("XYPad reset", () => {
+  test("a double click, an Alt + click and Delete return to the default", () => {
+    const { inputX, onValueChange, pad } = renderXYPad({
+      defaultValue: { x: 20, y: 80 },
+    });
+    fireEvent.pointerDown(pad, { clientX: 150, clientY: 50, pointerId: 1 });
+    fireEvent.pointerUp(pad, { pointerId: 1 });
+    fireEvent.doubleClick(pad);
+    expect(lastCall(onValueChange)[0]).toEqual({ x: 20, y: 80 });
+    expect(lastCall(onValueChange)[1].reason).toBe("reset");
+
+    fireEvent.pointerDown(pad, { clientX: 150, clientY: 50, pointerId: 2 });
+    fireEvent.pointerUp(pad, { pointerId: 2 });
+    fireEvent.pointerDown(pad, {
+      altKey: true,
+      button: 0,
+      clientX: 150,
+      clientY: 50,
+      pointerId: 3,
+    });
+    expect(lastCall(onValueChange)[0]).toEqual({ x: 20, y: 80 });
+
+    fireEvent.pointerDown(pad, { clientX: 150, clientY: 50, pointerId: 4 });
+    fireEvent.pointerUp(pad, { pointerId: 4 });
+    fireEvent.keyDown(inputX, { key: "Delete" });
+    expect(lastCall(onValueChange)[0]).toEqual({ x: 20, y: 80 });
+  });
+});
+
 describe("XYPad lost release", () => {
   test("a mouse coming back with no button down ends the drag instead of resuming it", () => {
     const { onValueChange, onValueCommitted, pad } = renderXYPad();

@@ -8,7 +8,7 @@ import { useFaderContext } from "../context";
  * Renders a `<div>` element.
  */
 export function Control({ ref, style, ...props }: Control.Props) {
-  const { wheelRef } = useFaderContext("Control");
+  const { disabled, reset, wheelRef } = useFaderContext("Control");
   const setRef = React.useCallback(
     (node: HTMLDivElement | null) => {
       wheelRef(node);
@@ -25,7 +25,45 @@ export function Control({ ref, style, ...props }: Control.Props) {
       ? (state) => ({ touchAction: "none", ...style(state) })
       : { touchAction: "none", ...style };
 
-  return <Slider.Control {...props} ref={setRef} style={controlStyle} />;
+  // A double click, an Alt + click or the Delete key return to the default, as in a DAW.
+  const handleDoubleClick = React.useCallback(
+    (event: React.MouseEvent<HTMLDivElement>) => {
+      if (!disabled) {
+        reset(event.nativeEvent);
+      }
+    },
+    [disabled, reset]
+  );
+  const handlePointerDownCapture = React.useCallback(
+    (event: React.PointerEvent<HTMLDivElement>) => {
+      if (event.altKey && event.button === 0 && !disabled) {
+        event.preventDefault();
+        event.stopPropagation();
+        reset(event.nativeEvent);
+      }
+    },
+    [disabled, reset]
+  );
+  const handleKeyDown = React.useCallback(
+    (event: React.KeyboardEvent<HTMLDivElement>) => {
+      if (!disabled && (event.key === "Delete" || event.key === "Backspace")) {
+        event.preventDefault();
+        reset(event.nativeEvent);
+      }
+    },
+    [disabled, reset]
+  );
+
+  return (
+    <Slider.Control
+      {...props}
+      onDoubleClick={handleDoubleClick}
+      onKeyDown={handleKeyDown}
+      onPointerDownCapture={handlePointerDownCapture}
+      ref={setRef}
+      style={controlStyle}
+    />
+  );
 }
 
 export namespace Control {

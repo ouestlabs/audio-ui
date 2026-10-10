@@ -199,6 +199,37 @@ describe("Knob wheel", () => {
   });
 });
 
+describe("Knob reset", () => {
+  test("Alt + click returns to the default, with a reset reason", () => {
+    const { control, input, onValueChange, onValueCommitted } = renderKnob({
+      defaultValue: 30,
+      value: undefined,
+    });
+    fireEvent.change(input, { target: { value: "80" } });
+    fireEvent.pointerDown(control, {
+      altKey: true,
+      button: 0,
+      clientX: 50,
+      clientY: 10,
+      pointerId: 1,
+    });
+    expect(lastCall(onValueChange)).toEqual([
+      30,
+      expect.objectContaining({ reason: "reset" }),
+    ]);
+    expect(lastCall(onValueCommitted)[1].reason).toBe("reset");
+    expect(control.hasAttribute("data-dragging")).toBe(false);
+  });
+
+  test("Delete on the thumb returns to the default", () => {
+    const { input, onValueChange } = renderKnob({ defaultValue: 30 });
+    fireEvent.change(input, { target: { value: "80" } });
+    fireEvent.keyDown(input, { key: "Delete" });
+    expect(lastCall(onValueChange)[0]).toBe(30);
+    expect(lastCall(onValueChange)[1].reason).toBe("reset");
+  });
+});
+
 describe("Knob lost release", () => {
   test("a mouse coming back with no button down ends the drag instead of resuming it", () => {
     const { control, onValueChange, onValueCommitted } = renderKnob({

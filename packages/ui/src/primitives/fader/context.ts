@@ -8,6 +8,8 @@ export interface FaderContextValue {
   min: number;
   orientation: "horizontal" | "vertical";
   /** The value as displayed. */
+  /** Returns to the default value, reporting a `"reset"` change and commit. */
+  reset: (event: KeyboardEvent | MouseEvent | PointerEvent) => void;
   value: number;
   wheelRef: (node: Nullable<HTMLElement>) => void;
 }

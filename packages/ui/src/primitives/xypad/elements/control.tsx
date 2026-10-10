@@ -46,11 +46,30 @@ export function Control(componentProps: Control.Props) {
     };
   };
 
+  const reset = (native: MouseEvent | PointerEvent) => {
+    if (
+      actions.change(meta.resetValue, createChangeEventDetails("reset", native))
+    ) {
+      actions.commit(meta.valueRef.current, { event: native, reason: "reset" });
+    }
+  };
+
+  const handleDoubleClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (!state.disabled) {
+      reset(event.nativeEvent);
+    }
+  };
+
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
     if (state.disabled || event.button !== 0) {
       return;
     }
     event.preventDefault();
+    // Alt + click returns to the default, as in a DAW.
+    if (event.altKey) {
+      reset(event.nativeEvent);
+      return;
+    }
     const control = event.currentTarget;
     control.setPointerCapture?.(event.pointerId);
     meta.inputRef.current?.focus({ focusVisible: false, preventScroll: true });
@@ -107,6 +126,7 @@ export function Control(componentProps: Control.Props) {
     defaultTagName: "div",
     props: mergeProps<"div">(
       {
+        onDoubleClick: handleDoubleClick,
         onLostPointerCapture: handlePointerEnd,
         onPointerCancel: handlePointerEnd,
         onPointerDown: handlePointerDown,

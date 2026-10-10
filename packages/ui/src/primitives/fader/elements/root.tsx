@@ -35,9 +35,8 @@ export function Root({
   ...props
 }: Root.Props) {
   const isControlled = valueProp !== undefined;
-  const [uncontrolledValue, setUncontrolledValue] = React.useState(
-    () => defaultValue ?? min + (max - min) / 2
-  );
+  const resetValue = defaultValue ?? min + (max - min) / 2;
+  const [uncontrolledValue, setUncontrolledValue] = React.useState(resetValue);
   const value = clampFinite(
     isControlled ? valueProp : uncontrolledValue,
     min,
@@ -93,6 +92,27 @@ export function Root({
   const valueRef = React.useRef(displayedValue);
   valueRef.current = displayedValue;
 
+  const reset = React.useCallback(
+    (event: KeyboardEvent | MouseEvent | PointerEvent) => {
+      const next = clamp(resetValue, min, max);
+      if (next === valueRef.current) {
+        return;
+      }
+      const details = Object.assign(createChangeEventDetails("reset", event), {
+        activeThumbIndex: 0,
+      });
+      onValueChange?.(next, details);
+      if (details.isCanceled) {
+        return;
+      }
+      if (!isControlled) {
+        setUncontrolledValue(next);
+      }
+      onValueCommitted?.(next, { event, reason: "reset" });
+    },
+    [isControlled, max, min, onValueChange, onValueCommitted, resetValue]
+  );
+
   const { wheelRef } = useWheel({
     disabled,
     onWheel: (event: WheelEvent, delta: Point) => {
@@ -130,10 +150,11 @@ export function Root({
       max,
       min,
       orientation,
+      reset,
       value: displayedValue,
       wheelRef,
     }),
-    [anchor, disabled, displayedValue, max, min, orientation, wheelRef]
+    [anchor, disabled, displayedValue, max, min, orientation, reset, wheelRef]
   );
 
   return (
@@ -155,16 +176,30 @@ export function Root({
 
 export namespace Root {
   export type State = Slider.Root.State;
-  export type ChangeEventReason = Slider.Root.ChangeEventReason | "wheel";
+  export type ChangeEventReason =
+    | Slider.Root.ChangeEventReason
+    | "reset"
+    | "wheel";
   export type ChangeEventDetails =
     | Slider.Root.ChangeEventDetails
     | (ExtraChangeEventDetails<"wheel", WheelEvent> & {
         activeThumbIndex: number;
-      });
-  export type CommitEventReason = Slider.Root.CommitEventReason | "wheel";
+      })
+    | (ExtraChangeEventDetails<
+        "reset",
+        KeyboardEvent | MouseEvent | PointerEvent
+      > & { activeThumbIndex: number });
+  export type CommitEventReason =
+    | Slider.Root.CommitEventReason
+    | "reset"
+    | "wheel";
   export type CommitEventDetails =
     | Slider.Root.CommitEventDetails
-    | ExtraCommitEventDetails<"wheel", WheelEvent>;
+    | ExtraCommitEventDetails<"wheel", WheelEvent>
+    | ExtraCommitEventDetails<
+        "reset",
+        KeyboardEvent | MouseEvent | PointerEvent
+      >;
 
   export interface Props
     extends Omit<
@@ -179,7 +214,7 @@ export namespace Root {
     > {
     /** Value the `Indicator` fills from, such as `0` on a -1…1 pan. Defaults to `min`. */
     anchor?: number;
-    /** Uncontrolled starting value; defaults to the midpoint of `min…max`. */
+    /** Uncontrolled starting value, and what a double click, an Alt + click or the Delete key return to; defaults to the midpoint of `min…max`. */
     defaultValue?: number;
     /** @default 6 */
     max?: number;

@@ -225,20 +225,20 @@ export namespace Root {
     | ExtraChangeEventDetails<"drag", PointerEvent>
     | ExtraChangeEventDetails<"keyboard", KeyboardEvent>
     | ExtraChangeEventDetails<"wheel", WheelEvent>
-    | ExtraChangeEventDetails<"reset", PointerEvent>
+    | ExtraChangeEventDetails<"reset", KeyboardEvent | PointerEvent>
     | ExtraChangeEventDetails<"input-change", Event>;
   export type CommitEventReason = CommitEventDetails["reason"];
   export type CommitEventDetails =
     | ExtraCommitEventDetails<"drag", PointerEvent>
     | ExtraCommitEventDetails<"keyboard", KeyboardEvent>
     | ExtraCommitEventDetails<"wheel", WheelEvent>
-    | ExtraCommitEventDetails<"reset", PointerEvent>
+    | ExtraCommitEventDetails<"reset", KeyboardEvent | PointerEvent>
     | ExtraCommitEventDetails<"input-change", Event>;
 
   export interface Props extends Omit<PartProps<"div", State>, "defaultValue"> {
     /** Value the indicator arc grows from (e.g. `0` on a -1…1 pan knob). Defaults to `min`. */
     anchor?: number;
-    /** Uncontrolled starting value, and the double-tap reset target. Defaults to the middle of the dial's travel. */
+    /** Uncontrolled starting value, and the reset target of a double tap, an Alt + click and the Delete key. Defaults to the middle of the dial's travel. */
     defaultValue?: number;
     disabled?: boolean;
     /** @default "circular" */

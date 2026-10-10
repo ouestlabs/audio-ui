@@ -42,13 +42,16 @@ export function Root(componentProps: Root.Props) {
   } = componentProps;
 
   const isControlled = valueProp !== undefined;
-  const [uncontrolledValue, setUncontrolledValue] = React.useState<Point>(
+  const resetValue = React.useMemo<Point>(
     () =>
       defaultValue ?? {
         x: minX + (maxX - minX) / 2,
         y: minY + (maxY - minY) / 2,
-      }
+      },
+    [defaultValue, maxX, maxY, minX, minY]
   );
+  const [uncontrolledValue, setUncontrolledValue] =
+    React.useState<Point>(resetValue);
   const rawValue = isControlled ? valueProp : uncontrolledValue;
   const value = React.useMemo(
     () => ({
@@ -166,6 +169,7 @@ export function Root(componentProps: Root.Props) {
         labelId,
         percentX,
         percentY,
+        resetValue,
         setLabelId,
         stepX,
         stepY,
@@ -182,6 +186,7 @@ export function Root(componentProps: Root.Props) {
       labelId,
       percentX,
       percentY,
+      resetValue,
       setDragging,
       state,
       stepX,
@@ -228,6 +233,10 @@ export namespace Root {
     | ExtraChangeEventDetails<"drag", PointerEvent>
     | ExtraChangeEventDetails<"keyboard", KeyboardEvent>
     | ExtraChangeEventDetails<"wheel", WheelEvent>
+    | ExtraChangeEventDetails<
+        "reset",
+        KeyboardEvent | MouseEvent | PointerEvent
+      >
     | ExtraChangeEventDetails<"input-change", Event>;
   export type CommitEventReason = CommitEventDetails["reason"];
   export type CommitEventDetails =
@@ -235,6 +244,10 @@ export namespace Root {
     | ExtraCommitEventDetails<"drag", PointerEvent>
     | ExtraCommitEventDetails<"keyboard", KeyboardEvent>
     | ExtraCommitEventDetails<"wheel", WheelEvent>
+    | ExtraCommitEventDetails<
+        "reset",
+        KeyboardEvent | MouseEvent | PointerEvent
+      >
     | ExtraCommitEventDetails<"input-change", Event>;
 
   export interface Props extends Omit<PartProps<"div", State>, "defaultValue"> {

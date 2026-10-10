@@ -19,6 +19,8 @@ export interface XYPadContextValue {
     percentX: number;
     /** Value position, 0…1 from the bottom. */
     percentY: number;
+    /** Where a double click, an Alt + click or the Delete key return to. */
+    resetValue: Point;
     setLabelId: (id: string | undefined) => void;
     stepX: number;
     stepY: number;

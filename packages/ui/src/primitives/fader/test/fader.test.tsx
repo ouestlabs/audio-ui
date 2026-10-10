@@ -43,6 +43,44 @@ function renderFader(
 const lastCall = <T extends unknown[]>(fn: { mock: { calls: T[] } }) =>
   fn.mock.calls.at(-1) as T;
 
+describe("Fader reset", () => {
+  test("a double click returns to the default, with a reset reason", () => {
+    const { control, onValueChange, onValueCommitted } = renderFader({
+      defaultValue: -12,
+    });
+    fireEvent.doubleClick(control);
+    // Already at the default: nothing to report.
+    expect(onValueChange).not.toHaveBeenCalled();
+    mockRect(control, { bottom: 200, height: 200, right: 20, width: 20 });
+    fireEvent.pointerDown(control, { clientX: 10, clientY: 0, pointerId: 1 });
+    fireEvent.pointerUp(document, { pointerId: 1 });
+    fireEvent.doubleClick(control);
+    expect(lastCall(onValueChange)).toEqual([
+      -12,
+      expect.objectContaining({ reason: "reset" }),
+    ]);
+    expect(lastCall(onValueCommitted)[1].reason).toBe("reset");
+  });
+
+  test("Alt + click and the Delete key do the same", () => {
+    const { control, input, onValueChange } = renderFader({
+      defaultValue: -12,
+    });
+    fireEvent.change(input, { target: { value: "0" } });
+    fireEvent.pointerDown(control, {
+      altKey: true,
+      button: 0,
+      clientX: 10,
+      clientY: 50,
+      pointerId: 1,
+    });
+    expect(lastCall(onValueChange)[1].reason).toBe("reset");
+    fireEvent.change(input, { target: { value: "3" } });
+    fireEvent.keyDown(control, { key: "Delete" });
+    expect(lastCall(onValueChange)[0]).toBe(-12);
+  });
+});
+
 describe("Fader value semantics", () => {
   test("defaults to the midpoint, vertical, with an accessible native input", () => {
     const { input } = renderFader();

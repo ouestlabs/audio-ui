@@ -109,7 +109,7 @@ export function Envelope({
       >
         <EnvelopePrimitive.Graph className="size-full overflow-visible">
           <EnvelopePrimitive.Fill className="cn-envelope-fill" />
-          <EnvelopePrimitive.Line className="cn-envelope-path [stroke-linejoin:round] transition-[stroke-width] duration-150 group-hover/envelope:[stroke-width:2.5px] motion-reduce:transition-none" />
+          <EnvelopePrimitive.Line className="cn-envelope-path [stroke-linejoin:round]" />
         </EnvelopePrimitive.Graph>
         {curves ? (
           <EnvelopePrimitive.Segments>

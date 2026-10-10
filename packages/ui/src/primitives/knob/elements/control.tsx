@@ -40,7 +40,7 @@ interface DragGesture {
 
 /**
  * The interactive surface: pointer drags (see `dragMode`), mouse-wheel
- * stepping, and double tap to reset. Sets `touch-action: none` so touch drags
+ * stepping, and double tap (or Alt + click) to reset. Sets `touch-action: none` so touch drags
  * don't scroll the page. Renders a `<div>` element.
  */
 export function Control(componentProps: Control.Props) {
@@ -90,6 +90,22 @@ export function Control(componentProps: Control.Props) {
       return;
     }
     event.preventDefault();
+    // Alt + click returns to the default, as in a DAW.
+    if (event.altKey) {
+      const native = event.nativeEvent;
+      if (
+        actions.change(
+          meta.resetValue,
+          createChangeEventDetails("reset", native)
+        )
+      ) {
+        actions.commit(meta.valueRef.current, {
+          event: native,
+          reason: "reset",
+        });
+      }
+      return;
+    }
     const control = event.currentTarget;
     control.setPointerCapture?.(event.pointerId);
     meta.inputRef.current?.focus({ focusVisible: false, preventScroll: true });

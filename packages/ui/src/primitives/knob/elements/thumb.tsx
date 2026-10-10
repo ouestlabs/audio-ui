@@ -67,12 +67,28 @@ export function Thumb(componentProps: Thumb.Props) {
         PageDown: steppedValue(current, -1, true, options),
         PageUp: steppedValue(current, 1, true, options),
       };
+      const native = event.nativeEvent;
+      // Delete returns to the default, as in a DAW.
+      if (event.key === "Delete" || event.key === "Backspace") {
+        event.preventDefault();
+        if (
+          actions.change(
+            meta.resetValue,
+            createChangeEventDetails("reset", native)
+          )
+        ) {
+          actions.commit(meta.valueRef.current, {
+            event: native,
+            reason: "reset",
+          });
+        }
+        return;
+      }
       const next = targets[event.key];
       if (next === undefined) {
         return;
       }
       event.preventDefault();
-      const native = event.nativeEvent;
       if (actions.change(next, createChangeEventDetails("keyboard", native))) {
         actions.commit(meta.valueRef.current, {
           event: native,
