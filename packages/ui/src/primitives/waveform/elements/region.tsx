@@ -7,18 +7,18 @@ import {
   type CommitEventDetails as ExtraCommitEventDetails,
 } from "../../internal/event-details";
 import { type PartProps, resolveStyling } from "../../internal/part";
+import {
+  moveRange as moveRegion,
+  normalizeRange as normalizeRegion,
+  type RangeEdge as RegionEdge,
+  type RangeValue as RegionValue,
+} from "../../internal/range-geometry";
 import { VISUALLY_HIDDEN } from "../../internal/visually-hidden";
 import {
   type DescribeValue,
   describeAsPercent,
   useWaveformContext,
 } from "../context";
-import {
-  moveRegion,
-  normalizeRegion,
-  type RegionEdge,
-  type RegionValue,
-} from "../internal/region-geometry";
 
 type WithEdge<Details> = Details & {
   /** What moved: one edge, or the whole region with `"both"`. */

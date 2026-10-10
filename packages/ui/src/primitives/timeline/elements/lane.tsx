@@ -9,6 +9,13 @@ import {
   useTimelineContext,
 } from "../context";
 
+export interface LaneContextValue {
+  elementRef: React.RefObject<HTMLElement | null>;
+}
+
+/** The lane a part sits in: what pointer positions are measured against. */
+export const LaneContext = React.createContext<LaneContextValue | null>(null);
+
 /**
  * What every lane shares: it registers with the root, so the first one
  * mounted is where value 0 is measured from, and it sets the unit its parts
@@ -19,14 +26,17 @@ export function useLaneProps(part: string) {
   const { actions, meta } = context;
   const { registerLane } = actions;
   const unregisterRef = React.useRef<(() => void) | null>(null);
+  const elementRef = React.useRef<HTMLElement | null>(null);
 
   const laneRef = React.useCallback(
     (node: HTMLElement | null) => {
+      elementRef.current = node;
       unregisterRef.current?.();
       unregisterRef.current = node ? registerLane(node) : null;
     },
     [registerLane]
   );
+  const [lane] = React.useState<LaneContextValue>(() => ({ elementRef }));
 
   const style: React.CSSProperties = {
     [UNIT_PROPERTY as string]: unitLength(meta.zoom, meta.duration),
@@ -36,7 +46,7 @@ export function useLaneProps(part: string) {
     ...(meta.zoom === null ? {} : { minWidth: meta.duration * meta.zoom }),
   };
 
-  return { context, laneRef, style };
+  return { context, lane, laneRef, style };
 }
 
 /**
@@ -48,9 +58,9 @@ export function useLaneProps(part: string) {
  */
 export function Lane(componentProps: Lane.Props) {
   const { className, ref, render, style, ...elementProps } = componentProps;
-  const { context, laneRef, style: laneStyle } = useLaneProps("Lane");
+  const { context, lane, laneRef, style: laneStyle } = useLaneProps("Lane");
   const { state } = context;
-  return useRender({
+  const element = useRender({
     defaultTagName: "div",
     props: mergeProps<"div">(
       { style: laneStyle },
@@ -60,6 +70,7 @@ export function Lane(componentProps: Lane.Props) {
     render,
     state,
   });
+  return <LaneContext value={lane}>{element}</LaneContext>;
 }
 
 export namespace Lane {

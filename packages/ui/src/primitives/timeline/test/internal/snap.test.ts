@@ -1,5 +1,10 @@
 import { describe, expect, test } from "bun:test";
-import { bypassesGrid, snapMove, snapToGrid } from "../../internal/snap";
+import {
+  bypassesGrid,
+  snapMove,
+  snapRangeMove,
+  snapToGrid,
+} from "../../internal/snap";
 
 const grid = { offset: 0, step: 4 };
 
@@ -40,5 +45,29 @@ describe("bypassesGrid", () => {
     expect(bypassesGrid({ metaKey: true })).toBe(true);
     expect(bypassesGrid({ ctrlKey: true })).toBe(true);
     expect(bypassesGrid({})).toBe(false);
+  });
+});
+
+describe("snapRangeMove", () => {
+  const limits = { duration: 100, minLength: 2 };
+
+  test("a whole range moves by whole steps, keeping its length", () => {
+    expect(snapRangeMove([1, 9], "both", 4.4, limits, grid)).toEqual([5, 13]);
+  });
+
+  test("a whole range lands on a line when that is nearer", () => {
+    expect(snapRangeMove([1, 9], "both", 6.8, limits, grid)).toEqual([8, 16]);
+  });
+
+  test("an edge snaps on its own, the other stays", () => {
+    expect(snapRangeMove([1, 9], "end", 2.6, limits, grid)).toEqual([1, 12]);
+    expect(snapRangeMove([1, 9], "start", -0.8, limits, grid)).toEqual([0, 9]);
+  });
+
+  test("never shorter than the minimum, nor off the timeline", () => {
+    expect(snapRangeMove([1, 9], "end", -20, limits, grid)).toEqual([1, 3]);
+    expect(snapRangeMove([90, 98], "both", 30, limits, grid)).toEqual([
+      92, 100,
+    ]);
   });
 });

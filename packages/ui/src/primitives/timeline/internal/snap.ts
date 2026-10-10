@@ -1,3 +1,10 @@
+import {
+  moveRange,
+  type RangeEdge,
+  type RangeLimits,
+  type RangeValue,
+} from "../../internal/range-geometry";
+
 /** Grid lines `step` apart, starting from `offset`. A `step` of 0 or less is no grid. */
 export interface Grid {
   offset: number;
@@ -39,4 +46,26 @@ export function snapMove(target: number, origin: number, grid: Grid): number {
   return Math.abs(onLine - target) <= Math.abs(bySteps - target)
     ? onLine
     : bySteps;
+}
+
+/**
+ * Where one edge of a range dragged from `origin`, or the whole range with
+ * `"both"`, should land when the pointer has moved it by `delta`: the
+ * dragged edge snaps the way anything dragged does, and the range keeps
+ * within the timeline and its minimum length.
+ */
+export function snapRangeMove(
+  origin: RangeValue,
+  edge: RangeEdge,
+  delta: number,
+  limits: RangeLimits,
+  grid: Grid
+): RangeValue {
+  const from = edge === "end" ? origin[1] : origin[0];
+  return moveRange(
+    origin,
+    edge,
+    snapMove(from + delta, from, grid) - from,
+    limits
+  );
 }

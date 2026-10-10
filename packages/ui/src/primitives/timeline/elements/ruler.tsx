@@ -10,7 +10,7 @@ import {
   valueAtPointer,
 } from "../context";
 import { bypassesGrid, snapToGrid } from "../internal/snap";
-import { useLaneProps } from "./lane";
+import { LaneContext, useLaneProps } from "./lane";
 
 /** Holding Shift scrubs this much slower than the pointer moves. */
 const FINE_SCRUB = 0.25;
@@ -49,7 +49,7 @@ export function Ruler(componentProps: Ruler.Props) {
     style,
     ...elementProps
   } = componentProps;
-  const { context, laneRef, style: laneStyle } = useLaneProps("Ruler");
+  const { context, lane, laneRef, style: laneStyle } = useLaneProps("Ruler");
   const { actions, meta, state } = context;
   const { duration, grid, position, zoom } = meta;
   const elementRef = React.useRef<HTMLDivElement>(null);
@@ -197,7 +197,7 @@ export function Ruler(componentProps: Ruler.Props) {
 
   const initialValue = position.get();
 
-  return useRender({
+  const element = useRender({
     defaultTagName: "div",
     props: mergeProps<"div">(
       {
@@ -234,6 +234,7 @@ export function Ruler(componentProps: Ruler.Props) {
     render,
     state,
   });
+  return <LaneContext value={lane}>{element}</LaneContext>;
 }
 
 export namespace Ruler {
