@@ -190,7 +190,7 @@ A graduation of the level scale at `value`, such as -18 dB: placed along the met
 
 ### Registry component
 
-`Meter` accepts style props (`size`, `peakMarks`, `className`) plus primitive props from `MeterPrimitive.Root.Props`.
+`Meter` accepts style props (`size`, `peakMarks`, `marks`, `className`) plus primitive props from `MeterPrimitive.Root.Props`.
 
 #### Value and state
 
@@ -212,6 +212,8 @@ A graduation of the level scale at `value`, such as -18 dB: placed along the met
 | ---- | ---- | ------- | ----------- |
 | `size` | `"sm" \| "default" \| "lg"` | `"default"` | Size variant (sets the meter height). |
 | `peakMarks` | `"visible" \| "hidden"` | `"visible"` | Shows or hides the peak-hold mark per channel. |
+| `marks` | `number[]` |  | Levels graduated along the meter, each with a tick and its label, such as `[6, 0, -6, -12, -20, -30, -40, -60]`. |
+| `scale` | `"linear" \| "iec" \| (level) => number` | `"iec"` | How levels are spread along the length: the registry element starts on the IEC scale of digital peak meters. |
 | `className` | `string` | - | Additional CSS classes. |
 
 
