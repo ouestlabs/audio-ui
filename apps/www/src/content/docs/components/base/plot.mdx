@@ -62,11 +62,13 @@ import {
   PlotArea,
   PlotCurve,
   PlotGraph,
+  PlotGrid,
   PlotHandle,
 } from "@/components/audio/elements/plot";
 import { eqResponse } from "@/lib/filter-response";
 
 <Plot minX={20} maxX={20000} minY={-18} maxY={18} scaleX="log">
+  <PlotGrid x={{ count: 6 }} y={{ ticks: [-12, 0, 12] }} />
   <PlotGraph>
     <PlotArea fillTo={0} fn={response} />
     <PlotCurve fn={response} />
@@ -157,6 +159,16 @@ Crosshair lines that follow the mouse over the plot, with a readout in the corne
 | `format` | `(value: { x, y }) => string` | Turns the value under the pointer, in the axes' units, into the text shown, such as `1.2 kHz · +3.0 dB`. |
 
 On the primitive, `Plot.Cursor` sets `--plot-cursor-x` and `--plot-cursor-y` (the pointer's place across and down the plot) and `data-active` while the pointer is over it, and `Plot.CursorReadout` writes the text; compose your own lines from the two variables.
+
+### PlotGrid
+
+Grid lines and their labels, worked out from the axes: round values spread along each axis you give, by powers of ten on a logarithmic one, so a plot reads without a line and a label placed by hand for each value.
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `x`, `y` | `{ ticks?, count?, format?, labels? }` | What to draw along each axis; leave one out for none. `ticks` sets the values, otherwise about `count` (5) round ones are chosen. `format` writes a label (default "1k", "0.5"), and `labels: false` draws lines alone. |
+
+The line at zero carries `data-zero`, and the parts `data-part="line"` and `"label"` with `data-axis`, for your own styling.
 
 ### PlotLine, PlotMark, PlotBand
 

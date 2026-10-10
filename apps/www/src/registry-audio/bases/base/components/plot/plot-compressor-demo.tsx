@@ -9,9 +9,9 @@ import {
   PlotCurve,
   PlotDot,
   PlotGraph,
+  PlotGrid,
   PlotHandle,
   PlotLine,
-  PlotMark,
 } from "@/registry-audio/bases/base/audio/elements/plot";
 import { usePulsesThroughCompressor } from "@/registry-audio/bases/base/hooks/use-pulses-through-compressor";
 import { compressorOutput } from "@/registry-audio/bases/base/lib/filter-response";
@@ -23,7 +23,7 @@ const PLOT_MAX_DB = 6;
 const MAX_RATIO = 20;
 /** The least the loudest level can rise above the threshold, so the ratio stays finite. */
 const MIN_RISE_DB = 0.5;
-const DB_LABELS = [-48, -24, 0];
+const DB_TICKS = [-48, -24, 0];
 const describePointer = (point: { x: number; y: number }) =>
   `in ${point.x.toFixed(0)} dB`;
 const UNITY = (inputDb: number) => inputDb;
@@ -80,12 +80,6 @@ export default function PlotCompressorDemo() {
             className="stroke-border [stroke-dasharray:4_4]"
             fn={UNITY}
           />
-          {DB_LABELS.map((db) => (
-            <PlotLine axis="x" key={`x${db}`} value={db} />
-          ))}
-          {DB_LABELS.map((db) => (
-            <PlotLine axis="y" key={`y${db}`} value={db} />
-          ))}
           <PlotLine
             axis="x"
             className="stroke-foreground/40"
@@ -93,18 +87,9 @@ export default function PlotCompressorDemo() {
           />
           <PlotCurve fn={output} />
         </PlotGraph>
+        <PlotGrid x={{ ticks: DB_TICKS }} y={{ ticks: DB_TICKS.slice(0, 2) }} />
         <PlotCursor format={describePointer} />
         <PlotDot source={dot} />
-        {DB_LABELS.map((db) => (
-          <PlotMark axis="x" key={`x${db}`} value={db}>
-            {db}
-          </PlotMark>
-        ))}
-        {DB_LABELS.slice(0, 2).map((db) => (
-          <PlotMark axis="y" key={`y${db}`} value={db}>
-            {db}
-          </PlotMark>
-        ))}
         <PlotHandle
           aria-label="Threshold"
           axis="x"

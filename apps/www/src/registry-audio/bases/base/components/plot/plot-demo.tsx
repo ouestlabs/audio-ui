@@ -9,9 +9,8 @@ import {
   PlotCursor,
   PlotCurve,
   PlotGraph,
+  PlotGrid,
   PlotHandle,
-  PlotLine,
-  PlotMark,
   PlotTraceArea,
   useValueAtPointer,
 } from "@/registry-audio/bases/base/audio/elements/plot";
@@ -46,12 +45,7 @@ const WHEEL_Q_SENSITIVITY = 0.002;
 /** The scale the spectrum is drawn on, in dB of level: its own, behind the gain axis. */
 const SPECTRUM_MIN_DB = -100;
 const SPECTRUM_MAX_DB = -10;
-const DB_LABELS = [-12, 0, 12];
-const HZ_LABELS = [
-  { hz: 100, label: "100" },
-  { hz: 1000, label: "1k" },
-  { hz: 10_000, label: "10k" },
-];
+const DB_TICKS = [-12, 0, 12];
 
 const formatDbMark = (db: number) => (db > 0 ? `+${db}` : String(db));
 const describePointer = (point: { x: number; y: number }) =>
@@ -236,19 +230,12 @@ export default function PlotDemo() {
         scaleX="log"
       >
         <PlotCursor format={describePointer} />
+        <PlotGrid
+          x={{ count: 6 }}
+          y={{ format: formatDbMark, ticks: DB_TICKS }}
+        />
         <BandAdder bands={bands} onAdd={addBand} />
         <PlotGraph>
-          {HZ_LABELS.map(({ hz }) => (
-            <PlotLine axis="x" key={hz} value={hz} />
-          ))}
-          {DB_LABELS.map((db) => (
-            <PlotLine
-              axis="y"
-              className={db === 0 ? "stroke-foreground/30" : undefined}
-              key={db}
-              value={db}
-            />
-          ))}
           <PlotTraceArea
             fillTo={SPECTRUM_MIN_DB}
             max={SPECTRUM_MAX_DB}
@@ -271,16 +258,6 @@ export default function PlotDemo() {
           <PlotArea fillTo={0} fn={response} />
           <PlotCurve fn={response} />
         </PlotGraph>
-        {HZ_LABELS.map(({ hz, label }) => (
-          <PlotMark axis="x" key={hz} value={hz}>
-            {label}
-          </PlotMark>
-        ))}
-        {DB_LABELS.map((db) => (
-          <PlotMark axis="y" key={db} value={db}>
-            {formatDbMark(db)}
-          </PlotMark>
-        ))}
         {bands.map((item, index) => (
           <BandHandle
             active={index === selected}

@@ -319,6 +319,10 @@
     @apply rounded-sm bg-card/80 px-1 font-mono text-[10px] text-muted-foreground;
   }
 
+  .cn-plot-grid {
+    @apply text-muted-foreground;
+  }
+
   .cn-plot-mark {
     @apply bg-card/80 px-0.5 text-muted-foreground;
   }
