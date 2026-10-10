@@ -13,8 +13,8 @@ Envelope for editing a linear ramp (an ADSR shape, an automation curve, any brea
 
 - **Value model:** `value: { x: number; y: number }[]`, both axes normalized 0-1 and sorted by `x`. The consumer maps the normalized range to its own domain (time, level, frequency — whatever the ramp represents).
 - **Interaction model:** Drag a point to move it — dragging never deletes a point. Double-click empty space to add a point there; double-click an existing point to remove it. A point's `x` is clamped between its neighbors, so points can never cross or reorder mid-drag.
-- **Point count:** Dynamic — points are added and removed via interaction, floored at `minPoints` (default `2`, since a ramp needs at least a start and an end).
-- **Accessibility:** One roving tab stop; arrow keys nudge the focused point's `x`/`y`, `Delete` or `Backspace` removes it — the same outcome as double-clicking, reachable from the keyboard.
+- **Point count:** Dynamic — points are added and removed via interaction, between `minPoints` (default `2`, since a ramp needs at least a start and an end) and `maxPoints`. Set both to the same count to fix the shape.
+- **Accessibility:** One roving tab stop; arrow keys nudge the focused point's `x`/`y`, `Delete` or `Backspace` removes it — the same outcome as double-clicking, reachable from the keyboard. Each point is a `role="slider"` on its level, named "Point n of N" by the registry component; the primitive leaves naming (`aria-label`) and value text (`getAriaValueText`) to you.
 
 ## Installation
 
@@ -85,7 +85,7 @@ const [points, setPoints] = useState(initialPoints);
 
 <Envelope
   onValueChange={setPoints}
-  onValueCommit={(next) => console.log("Committed:", next)}
+  onValueCommitted={(next, details) => console.log("Committed:", next, details.reason)}
   value={points}
 />
 ```
@@ -96,10 +96,12 @@ const [points, setPoints] = useState(initialPoints);
 
 | Behavior | Details |
 | -------- | ------- |
-| **Drag a point** | Moves it; `x` clamps between its neighbors, `y` clamps to [0,1]. Never deletes. |
-| **Double-click empty space** | Adds a point at that location (disable with `allowAddPoints={false}`). |
-| **Double-click a point** | Removes it, unless at `minPoints` (disable with `allowRemovePoints={false}`). |
-| **Commit event** | `onValueCommit` fires when a drag ends, or immediately for add/remove. |
+| **Drag a point** | Moves it; `x` clamps between its neighbors, `y` clamps to [0,1]. Never deletes. While dragging, the point follows the pointer even if a controlled `value` updates late. |
+| **Double-click empty space** | Adds a point at that location, unless at `maxPoints`. |
+| **Double-click a point** | Removes it, unless at `minPoints`. |
+| **Commit event** | `onValueCommitted` fires when a drag that moved a point ends, or immediately for add/remove. |
+
+A refused add or remove sets `data-blocked` for a moment on the graph or the point, which the registry styles turn into a short shake.
 
 ### Keyboard
 
@@ -107,37 +109,39 @@ One tab stop for the whole envelope; focus then roves between points:
 
 | Key | Action |
 | --- | ------ |
-| `ArrowUp` / `ArrowDown` | Nudge the focused point's `y` |
-| `ArrowLeft` / `ArrowRight` | Nudge the focused point's `x` (clamped between neighbors) |
+| `ArrowUp` / `ArrowDown` | Nudge the focused point's `y` by `step` |
+| `ArrowLeft` / `ArrowRight` | Nudge the focused point's `x` by `step` (clamped between neighbors) |
+| `Shift` + arrow | Nudge by 10 steps |
 | `Delete` / `Backspace` | Remove the focused point, unless at `minPoints` |
 
 ## API reference
 
-`Envelope` accepts style props (`size`, `className`) plus primitive props from `EnvelopePrimitive.RootProps`.
+`Envelope` accepts style props (`size`, `className`) plus primitive props from `EnvelopePrimitive.Root.Props`. `aria-label` / `aria-labelledby` name the envelope group.
 
 ### Value and state
 
-| Prop            | Type                          | Default | Description                                                      |
-| --------------- | ------------------------------ | ------- | ------------------------------------------------------------------ |
-| `value`         | `{ x: number; y: number }[]`  | -       | Controlled points, normalized 0-1, sorted by `x`.                |
-| `defaultValue`  | `{ x: number; y: number }[]`  | ADSR-like 4-point shape | Uncontrolled default points.                             |
-| `allowAddPoints` | `boolean`                    | `true`  | Whether double-clicking empty space adds a point.                |
-| `allowRemovePoints` | `boolean`                 | `true`  | Whether double-clicking (or Delete/Backspace on) a point removes it. |
-| `minPoints`     | `number`                       | `2`     | Floor on the number of points; removal is blocked at this count. |
-| `disabled`      | `boolean`                      | `false` | Whether the envelope is disabled.                                 |
-| `onValueChange` | `(points) => void`             | -       | Callback when points change during interaction.                  |
-| `onValueCommit` | `(points) => void`             | -       | Callback when points are committed (on release, add, or remove). |
-| `aria-label`    | `string`                       | `"Envelope"` | Accessible name for the envelope.                            |
-| `aria-labelledby` | `string`                     | -       | ID of a labeling element.                                         |
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `value` | `{ x: number; y: number }[]` | - | Controlled points, normalized 0-1, sorted by `x`. |
+| `defaultValue` | `{ x: number; y: number }[]` | ADSR-like 5-point shape | Uncontrolled starting points. |
+| `minPoints` | `number` | `2` | Floor on the number of points; removal is blocked at this count. |
+| `maxPoints` | `number` | - | Ceiling on the number of points; adding is blocked at this count. |
+| `step` | `number` | `0.01` | Keyboard step on both axes, in normalized units. |
+| `disabled` | `boolean` | `false` | Whether the envelope is disabled. |
+| `format` | `Intl.NumberFormatOptions` | - | Formats point coordinates for each point's value text. |
+| `onValueChange` | `(points, eventDetails) => void` | - | Every change. `eventDetails.reason` is `"drag"`, `"keyboard"`, `"add"`, or `"remove"`, and `eventDetails.index` is the affected point; call `eventDetails.cancel()` to reject it. |
+| `onValueCommitted` | `(points, eventDetails) => void` | - | When an interaction that changed the points ends (release, key press, add, or remove). |
 
 ### Layout and display
 
-| Prop        | Type                          | Default     | Description                        |
-| ----------- | ------------------------------ | ----------- | ----------------------------------- |
-| `size`      | `"sm" \| "default" \| "lg"`   | `"default"` | Size variant (sets the envelope height). |
-| `className` | `string`                      | -           | Additional CSS classes.            |
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `size` | `"sm" \| "default" \| "lg"` | `"default"` | Size variant (sets the envelope height). |
+| `className` | `string` | - | Classes for the graph surface. |
 
-Additional valid HTML attributes passed to `Envelope.Root` are forwarded.
+### Primitive parts
+
+`@audio-ui/react/envelope` exposes `Envelope.Root`, `Envelope.Graph` (the SVG surface; double-click to add), `Envelope.Line` and `Envelope.Fill` (the curve and the area under it), `Envelope.Points` (renders one child per point) and `Envelope.Point` (the draggable handle). Every part accepts a `render` prop and `className` / `style` as functions of state; points expose `data-dragging`, `data-removable`, `data-blocked`, `data-disabled` and `data-index`.
 
 ## Examples
 

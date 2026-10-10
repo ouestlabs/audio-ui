@@ -335,12 +335,12 @@
   }
 
   .cn-envelope-point {
-    @apply rounded-[min(var(--radius-md),5px)] border-ring border bg-card size-3.5 transition-[color,box-shadow] hover:ring-2 hover:ring-ring/30 focus-visible:ring-2 focus-visible:ring-ring/30 active:ring-2 active:ring-ring/30 data-[disabled=true]:pointer-events-none motion-reduce:transition-none;
+    @apply rounded-[min(var(--radius-md),5px)] border-ring border bg-card size-3.5 transition-[color,box-shadow] hover:ring-2 hover:ring-ring/30 focus-visible:ring-2 focus-visible:ring-ring/30 active:ring-2 active:ring-ring/30 data-disabled:pointer-events-none motion-reduce:transition-none;
   }
 
   /* Blocked-action feedback: removing at minPoints or adding with allowAddPoints=false. */
-  .cn-envelope[data-blocked="true"],
-  .cn-envelope-point[data-blocked="true"] {
+  .cn-envelope[data-blocked],
+  .cn-envelope-point[data-blocked] {
     @apply animate-[cn-envelope-shake_280ms_linear] motion-reduce:animate-none;
   }
 

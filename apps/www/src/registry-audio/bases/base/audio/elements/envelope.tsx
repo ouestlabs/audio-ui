@@ -18,31 +18,32 @@ const envelopeVariants = cva("", {
 });
 
 interface EnvelopeProps
-  extends EnvelopePrimitive.RootProps,
+  extends EnvelopePrimitive.Root.Props,
     VariantProps<typeof envelopeVariants> {}
 
 export function Envelope({ className, size, ...props }: EnvelopeProps) {
   return (
     <EnvelopePrimitive.Root
-      className="w-full data-[disabled=true]:cursor-not-allowed"
+      className="w-full data-disabled:cursor-not-allowed"
+      role="group"
       {...props}
     >
-      <EnvelopePrimitive.Svg
+      <EnvelopePrimitive.Graph
         className={cn(
           "cn-envelope w-full touch-none select-none overflow-hidden",
-          "focus-visible:outline-none",
-          "data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50",
+          "data-disabled:pointer-events-none data-disabled:opacity-50",
           envelopeVariants({ size }),
           className
         )}
         data-slot="envelope"
       >
         <EnvelopePrimitive.Fill className="cn-envelope-fill" />
-        <EnvelopePrimitive.Path className="cn-envelope-path" />
-      </EnvelopePrimitive.Svg>
+        <EnvelopePrimitive.Line className="cn-envelope-path" />
+      </EnvelopePrimitive.Graph>
       <EnvelopePrimitive.Points>
-        {(_point, index) => (
+        {(_point, index, points) => (
           <EnvelopePrimitive.Point
+            aria-label={`Point ${index + 1} of ${points.length}`}
             className="cn-envelope-point cursor-grab touch-none select-none outline-none active:cursor-grabbing"
             index={index}
             key={index}

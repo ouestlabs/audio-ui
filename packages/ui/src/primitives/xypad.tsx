@@ -14,6 +14,7 @@ import {
   type ChangeEventDetails as ExtraChangeEventDetails,
   type CommitEventDetails as ExtraCommitEventDetails,
 } from "./internal/event-details";
+import { createPairFormatter } from "./internal/format-pair";
 import { type PartProps, resolveStyling } from "./internal/part";
 
 /** Shift + arrows and Page Up/Down move this many steps at once. */
@@ -54,6 +55,8 @@ interface XYPadContextValue {
     setDragging: (dragging: boolean) => void;
   };
   meta: {
+    /** Formats both axes as one string, for `Value`. */
+    formatPair: (x: number, y: number) => string;
     formatter: Intl.NumberFormat;
     inputRef: React.RefObject<HTMLInputElement | null>;
     labelId: string | undefined;
@@ -203,6 +206,10 @@ export function Root(componentProps: Root.Props) {
     () => new Intl.NumberFormat(locale, format),
     [format, locale]
   );
+  const formatPair = React.useMemo(
+    () => createPairFormatter(formatter),
+    [formatter]
+  );
 
   const state = React.useMemo<Root.State>(
     () => ({
@@ -224,6 +231,7 @@ export function Root(componentProps: Root.Props) {
     () => ({
       actions: { change, commit, setDragging },
       meta: {
+        formatPair,
         formatter,
         inputRef,
         labelId,
@@ -240,6 +248,7 @@ export function Root(componentProps: Root.Props) {
     [
       change,
       commit,
+      formatPair,
       formatter,
       labelId,
       percentX,
@@ -619,7 +628,7 @@ export function Value(componentProps: Value.Props) {
         children:
           typeof children === "function"
             ? children(formattedX, formattedY, state.value)
-            : (children ?? `${formattedX}, ${formattedY}`),
+            : (children ?? meta.formatPair(state.value.x, state.value.y)),
       },
       { ...elementProps, ...resolveStyling(className, style, state) }
     ),

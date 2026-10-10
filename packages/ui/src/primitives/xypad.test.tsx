@@ -18,6 +18,7 @@ function renderXYPad(
   const view = render(
     <XYPad.Root
       data-testid="root"
+      locale="en-US"
       onValueChange={onValueChange}
       onValueCommitted={onValueCommitted}
       {...props}
@@ -96,6 +97,16 @@ describe("XYPad value semantics", () => {
   test("Value prints both formatted axes", () => {
     const { value } = renderXYPad({ value: { x: 25, y: 80 } });
     expect(value.textContent).toBe("25, 80");
+  });
+
+  test("Value joins the axes with a semicolon where the decimal mark is a comma", () => {
+    const { value } = renderXYPad({
+      locale: "fr-FR",
+      stepX: 0.1,
+      stepY: 0.1,
+      value: { x: 2.5, y: 0.5 },
+    });
+    expect(value.textContent).toBe("2,5; 0,5");
   });
 });
 

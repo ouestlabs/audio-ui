@@ -1,13 +1,25 @@
+import { mergeProps } from "@base-ui/react/merge-props";
+import { useRender } from "@base-ui/react/use-render";
 import * as React from "react";
-import { useKeyboardNavigation } from "../hooks/interactions/use-keyboard-navigation";
-import type { Point as GeomPoint, Nullable, Procedure } from "../utils";
-import { clamp, clampUnit, panic } from "../utils";
-import { getDataAttributes } from "./internal/data-attributes";
-import { useParameterCore } from "./internal/use-parameter-core";
+import {
+  clamp,
+  clampUnit,
+  type Point as GeomPoint,
+  type Nullable,
+} from "../utils";
+import {
+  createChangeEventDetails,
+  type ChangeEventDetails as ExtraChangeEventDetails,
+  type CommitEventDetails as ExtraCommitEventDetails,
+} from "./internal/event-details";
+import { createPairFormatter } from "./internal/format-pair";
+import { type PartProps, resolveStyling } from "./internal/part";
 
-const MIN_POINTS = 2;
-const KEYBOARD_STEP = 0.01;
-/** How long a blocked-action signal (data-blocked) stays on before it clears — matched to the shake animation's total duration. */
+const DEFAULT_MIN_POINTS = 2;
+const DEFAULT_STEP = 0.01;
+/** Shift + arrows move this many steps at once. */
+const LARGE_STEP_MULTIPLIER = 10;
+/** How long a blocked-action signal (data-blocked) stays on before it clears, long enough for a feedback animation to play. */
 const BLOCKED_DURATION_MS = 320;
 /** ADSR-shaped: attack to peak, decay to a sustain plateau, release — reads as an envelope rather than a bare triangle. */
 const DEFAULT_VALUE: GeomPoint[] = [
@@ -17,6 +29,11 @@ const DEFAULT_VALUE: GeomPoint[] = [
   { x: 0.7, y: 0.6 },
   { x: 1, y: 0.05 },
 ];
+
+/** The points array and its indices stay in `state`; they don't become data attributes. */
+const STATE_ATTRIBUTES_MAPPING = {
+  value: () => null,
+};
 
 function sortPoints(points: GeomPoint[]): GeomPoint[] {
   return [...points].sort((a, b) => a.x - b.x);
@@ -33,159 +50,173 @@ function sanitizePoints(points: GeomPoint[]): GeomPoint[] {
   );
 }
 
+function samePoints(a: GeomPoint[], b: GeomPoint[]): boolean {
+  return (
+    a.length === b.length &&
+    a.every((point, i) => point.x === b[i]?.x && point.y === b[i]?.y)
+  );
+}
+
 /** Clamp a candidate point's x between its neighbors in `base` (so points can never cross or reorder) and y to [0,1]. */
 function clampToNeighbors(
   base: GeomPoint[],
   index: number,
   next: GeomPoint
 ): Nullable<GeomPoint> {
-  const current = base[index];
-  if (!current) {
+  if (!base[index]) {
     return null;
   }
   const prev = base[index - 1];
   const nextNeighbor = base[index + 1];
-  const lowX = prev ? prev.x : 0;
-  const highX = nextNeighbor ? nextNeighbor.x : 1;
   return {
-    x: clamp(next.x, lowX, highX),
+    x: clamp(next.x, prev ? prev.x : 0, nextNeighbor ? nextNeighbor.x : 1),
     y: clampUnit(next.y),
   };
 }
 
-interface ConfigContextValue {
-  adjustPoint: (index: number, next: GeomPoint) => void;
-  ariaLabel?: string;
-  ariaLabelledBy?: string;
-  beginPointDrag: () => void;
-  blockedIndex: Nullable<number>;
-  commitDrag: () => void;
-  dragPoint: (index: number, next: GeomPoint) => void;
-  handleSvgDoubleClick: (point: GeomPoint) => void;
-  isAddBlocked: boolean;
-  minPoints: number;
-  pointsConfig: {
-    disabled: boolean;
+/** Polyline coordinates: flat lead-in from x=0 to the first point, the points themselves, flat lead-out from the last point to x=1. */
+function polylinePoints(value: GeomPoint[]): string {
+  const [first] = value;
+  const last = value.at(-1);
+  if (!(first && last)) {
+    return "";
+  }
+  return [
+    `0,${roundCoord((1 - first.y) * 100)}`,
+    ...value.map(
+      (point) =>
+        `${roundCoord(point.x * 100)},${roundCoord((1 - point.y) * 100)}`
+    ),
+    `100,${roundCoord((1 - last.y) * 100)}`,
+  ].join(" ");
+}
+
+interface EnvelopeContextValue {
+  actions: {
+    /** Add a point (normalized 0…1); blocked at `maxPoints`. */
+    addPoint: (point: GeomPoint, event: MouseEvent) => void;
+    commit: (value: GeomPoint[], eventDetails: Root.CommitEventDetails) => void;
+    /** Move one point, clamped between its neighbors; returns whether it changed. */
+    movePoint: (
+      index: number,
+      target: GeomPoint,
+      eventDetails: Root.ChangeEventDetails
+    ) => boolean;
+    registerPoint: (index: number, node: Nullable<HTMLElement>) => void;
+    /** Remove a point; blocked at `minPoints`. */
+    removePoint: (index: number, event: MouseEvent | KeyboardEvent) => void;
+    setDraggingIndex: (index: number | null) => void;
+    setFocusedIndex: (index: number) => void;
   };
-  registerPoint: (index: number, node: Nullable<HTMLElement>) => void;
-  removePoint: (index: number) => void;
-  setFocusedIndex: Procedure<number>;
-  shouldPreventFocusRef: React.RefObject<boolean>;
-  svgRef: React.RefObject<Nullable<SVGSVGElement>>;
+  meta: {
+    blockedIndex: number | null;
+    draggingIndex: number | null;
+    /** The roving tab stop among the points. */
+    focusedIndex: number;
+    /** Formats a point's `x` and `y` as one string. */
+    formatPoint: (x: number, y: number) => string;
+    graphRef: React.RefObject<SVGSVGElement | null>;
+    isAddBlocked: boolean;
+    minPoints: number;
+    step: number;
+    /** Latest displayed value, readable from event handlers. */
+    valueRef: React.RefObject<GeomPoint[]>;
+  };
+  state: Root.State;
 }
 
-/** Split from config: changes every drag frame, so only components that render live positions subscribe to it. */
-interface ValueContextValue {
-  focusedIndex: number;
-  value: GeomPoint[];
-}
+const EnvelopeContext = React.createContext<EnvelopeContextValue | null>(null);
 
-const ConfigContext = React.createContext<ConfigContextValue | null>(null);
-const ValueContext = React.createContext<ValueContextValue | null>(null);
-
-function useConfigContext() {
-  const context = React.useContext(ConfigContext);
+function useEnvelopeContext(part: string): EnvelopeContextValue {
+  const context = React.use(EnvelopeContext);
   if (!context) {
-    panic("Envelope components must be used within Envelope.Root");
+    throw new Error(`Envelope.${part} must be used within Envelope.Root`);
   }
   return context;
 }
 
-function useValueContext() {
-  const context = React.useContext(ValueContext);
-  if (!context) {
-    panic("Envelope components must be used within Envelope.Root");
-  }
-  return context;
-}
-
-export interface RootProps
-  extends Omit<React.ComponentProps<"div">, "onChange" | "defaultValue"> {
-  /** Whether double-clicking empty space adds a point. */
-  allowAddPoints?: boolean;
-  /** Whether double-clicking (or Delete/Backspace on) a point removes it. */
-  allowRemovePoints?: boolean;
-  "aria-label"?: string;
-  "aria-labelledby"?: string;
-  defaultValue?: GeomPoint[];
-  disabled?: boolean;
-  /** Floor on the number of points; removal is blocked at this count. */
-  minPoints?: number;
-  onValueChange?: Procedure<GeomPoint[]>;
-  onValueCommit?: Procedure<GeomPoint[]>;
-  value?: GeomPoint[];
-}
-
-export function Root({
-  value: controlledValue,
-  defaultValue = DEFAULT_VALUE,
-  allowAddPoints = true,
-  allowRemovePoints = true,
-  minPoints = MIN_POINTS,
-  disabled = false,
-  "aria-label": ariaLabel,
-  "aria-labelledby": ariaLabelledBy,
-  onValueChange,
-  onValueCommit,
-  id,
-  className,
-  style,
-  children,
-  ...props
-}: RootProps) {
-  const envelopeId = React.useId();
-  const svgRef = React.useRef<SVGSVGElement>(null);
-  const pointElementsRef = React.useRef(new Map<number, HTMLElement>());
-  const [focusedIndex, setFocusedIndex] = React.useState(0);
-  const [blockedIndex, setBlockedIndex] =
-    React.useState<Nullable<number>>(null);
-  const [isAddBlocked, setIsAddBlocked] = React.useState(false);
-  const blockedIndexTimeoutRef =
-    React.useRef<Nullable<ReturnType<typeof setTimeout>>>(null);
-  const addBlockedTimeoutRef =
-    React.useRef<Nullable<ReturnType<typeof setTimeout>>>(null);
-
-  React.useEffect(
-    () => () => {
-      if (blockedIndexTimeoutRef.current) {
-        clearTimeout(blockedIndexTimeoutRef.current);
-      }
-      if (addBlockedTimeoutRef.current) {
-        clearTimeout(addBlockedTimeoutRef.current);
-      }
-    },
-    []
-  );
-
+/**
+ * Groups all parts of the breakpoint envelope and owns its points, each
+ * normalized to 0…1 on both axes and kept sorted by `x`. Points are dragged
+ * and nudged with the keyboard; a double click on the `Graph` adds one and a
+ * double click (or Delete) on a `Point` removes it, within `minPoints` /
+ * `maxPoints`. Renders a `<div>` element.
+ */
+export function Root(componentProps: Root.Props) {
   const {
-    beginDrag,
-    commitValue,
-    dragTo,
-    endDrag,
-    pendingValueRef,
-    shouldPreventFocusRef,
-    value: points,
-    valueRef,
-  } = useParameterCore<GeomPoint[]>({
-    clampStep: sanitizePoints,
-    defaultValue: sanitizePoints(defaultValue),
-    disabled,
-    fallbackValue: sanitizePoints(defaultValue),
+    className,
+    defaultValue = DEFAULT_VALUE,
+    disabled = false,
+    format,
+    locale,
+    maxPoints = Number.POSITIVE_INFINITY,
+    minPoints = DEFAULT_MIN_POINTS,
     onValueChange,
-    onValueCommit,
-    transform: sanitizePoints,
-    value: controlledValue,
-  });
+    onValueCommitted,
+    ref,
+    render,
+    step = DEFAULT_STEP,
+    style,
+    value: valueProp,
+    ...elementProps
+  } = componentProps;
 
-  const focusPoint = React.useCallback(
-    (index: number) => {
-      const clamped = clamp(index, 0, valueRef.current.length - 1);
-      setFocusedIndex(clamped);
-      pointElementsRef.current.get(clamped)?.focus();
+  const isControlled = valueProp !== undefined;
+  const [uncontrolledValue, setUncontrolledValue] = React.useState(() =>
+    sanitizePoints(defaultValue)
+  );
+  const rawValue = isControlled ? valueProp : uncontrolledValue;
+  const value = React.useMemo(() => sanitizePoints(rawValue), [rawValue]);
+
+  // While a point is dragged, the envelope follows the pointer even if a
+  // controlled value lags behind; on release the controlled value rules again.
+  const [draggingIndex, setDraggingIndexState] = React.useState<number | null>(
+    null
+  );
+  const [dragValue, setDragValue] = React.useState<GeomPoint[] | null>(null);
+  const draggingRef = React.useRef(false);
+  const displayedValue = dragValue ?? value;
+  const valueRef = React.useRef(displayedValue);
+  valueRef.current = displayedValue;
+
+  const setDraggingIndex = React.useCallback((index: number | null) => {
+    draggingRef.current = index !== null;
+    setDraggingIndexState(index);
+    if (index === null) {
+      setDragValue(null);
+    }
+  }, []);
+
+  const change = React.useCallback(
+    (next: GeomPoint[], eventDetails: Root.ChangeEventDetails) => {
+      if (samePoints(next, valueRef.current)) {
+        return false;
+      }
+      onValueChange?.(next, eventDetails);
+      if (eventDetails.isCanceled) {
+        return false;
+      }
+      valueRef.current = next;
+      if (!isControlled) {
+        setUncontrolledValue(next);
+      }
+      if (isControlled && draggingRef.current) {
+        setDragValue(next);
+      }
+      return true;
     },
-    [valueRef]
+    [isControlled, onValueChange]
   );
 
+  const commit = React.useCallback(
+    (committed: GeomPoint[], eventDetails: Root.CommitEventDetails) => {
+      onValueCommitted?.(committed, eventDetails);
+    },
+    [onValueCommitted]
+  );
+
+  const [focusedIndex, setFocusedIndex] = React.useState(0);
+  const pointElementsRef = React.useRef(new Map<number, HTMLElement>());
   const registerPoint = React.useCallback(
     (index: number, node: Nullable<HTMLElement>) => {
       if (node) {
@@ -197,23 +228,41 @@ export function Root({
     []
   );
 
-  const triggerBlockedPoint = React.useCallback((index: number) => {
-    if (blockedIndexTimeoutRef.current) {
-      clearTimeout(blockedIndexTimeoutRef.current);
+  // Blocked feedback: the attribute is cleared, then set on the next frame, so
+  // it is observably removed and re-added and a CSS animation replays even
+  // when the same action is blocked twice in a row.
+  const [blockedIndex, setBlockedIndex] = React.useState<number | null>(null);
+  const [isAddBlocked, setIsAddBlocked] = React.useState(false);
+  const blockedTimeoutRef =
+    React.useRef<Nullable<ReturnType<typeof setTimeout>>>(null);
+  const addBlockedTimeoutRef =
+    React.useRef<Nullable<ReturnType<typeof setTimeout>>>(null);
+  React.useEffect(
+    () => () => {
+      if (blockedTimeoutRef.current) {
+        clearTimeout(blockedTimeoutRef.current);
+      }
+      if (addBlockedTimeoutRef.current) {
+        clearTimeout(addBlockedTimeoutRef.current);
+      }
+    },
+    []
+  );
+
+  const signalBlockedPoint = React.useCallback((index: number) => {
+    if (blockedTimeoutRef.current) {
+      clearTimeout(blockedTimeoutRef.current);
     }
-    // Clear then re-set on the next frame so the data-blocked attribute
-    // is observably removed and re-added, guaranteeing the CSS shake
-    // replays even when the same point is blocked again in quick succession.
     setBlockedIndex(null);
     requestAnimationFrame(() => {
       setBlockedIndex(index);
-      blockedIndexTimeoutRef.current = setTimeout(() => {
+      blockedTimeoutRef.current = setTimeout(() => {
         setBlockedIndex(null);
       }, BLOCKED_DURATION_MS);
     });
   }, []);
 
-  const triggerAddBlocked = React.useCallback(() => {
+  const signalAddBlocked = React.useCallback(() => {
     if (addBlockedTimeoutRef.current) {
       clearTimeout(addBlockedTimeoutRef.current);
     }
@@ -226,473 +275,530 @@ export function Root({
     });
   }, []);
 
-  const beginPointDrag = React.useCallback(() => {
-    beginDrag(valueRef.current);
-  }, [beginDrag, valueRef]);
-
-  const dragPoint = React.useCallback(
-    (index: number, next: GeomPoint) => {
-      const base = pendingValueRef.current;
-      const clamped = clampToNeighbors(base, index, next);
-      if (!clamped) {
-        return;
-      }
-      const nextPoints = [...base];
-      nextPoints[index] = clamped;
-      dragTo(nextPoints);
-    },
-    [dragTo, pendingValueRef]
-  );
-
-  const commitDrag = React.useCallback(() => {
-    endDrag();
-  }, [endDrag]);
-
-  const adjustPoint = React.useCallback(
-    (index: number, next: GeomPoint) => {
+  const movePoint = React.useCallback(
+    (
+      index: number,
+      target: GeomPoint,
+      eventDetails: Root.ChangeEventDetails
+    ) => {
       const base = valueRef.current;
-      const clamped = clampToNeighbors(base, index, next);
+      const clamped = clampToNeighbors(base, index, target);
       if (!clamped) {
-        return;
+        return false;
       }
-      const nextPoints = [...base];
-      nextPoints[index] = clamped;
-      commitValue(nextPoints);
+      const next = [...base];
+      next[index] = clamped;
+      return change(next, eventDetails);
     },
-    [commitValue, valueRef]
+    [change]
   );
 
-  const handleSvgDoubleClick = React.useCallback(
-    (point: GeomPoint) => {
+  const addPoint = React.useCallback(
+    (point: GeomPoint, event: MouseEvent) => {
       if (disabled) {
         return;
       }
-      if (!allowAddPoints) {
-        triggerAddBlocked();
+      const base = valueRef.current;
+      if (base.length >= maxPoints) {
+        signalAddBlocked();
         return;
       }
-      const clamped: GeomPoint = {
-        x: clampUnit(point.x),
-        y: clampUnit(point.y),
-      };
-      const nextPoints = sortPoints([...valueRef.current, clamped]);
-      const index = nextPoints.indexOf(clamped);
-      commitValue(nextPoints);
-      shouldPreventFocusRef.current = true;
-      setFocusedIndex(index);
+      const added = { x: clampUnit(point.x), y: clampUnit(point.y) };
+      const next = sortPoints([...base, added]);
+      const index = next.indexOf(added);
+      const eventDetails = Object.assign(
+        createChangeEventDetails("add", event),
+        { index }
+      );
+      if (change(next, eventDetails)) {
+        commit(next, { event, index, reason: "add" });
+        setFocusedIndex(index);
+      }
     },
-    [
-      disabled,
-      allowAddPoints,
-      triggerAddBlocked,
-      valueRef,
-      commitValue,
-      shouldPreventFocusRef,
-    ]
+    [change, commit, disabled, maxPoints, signalAddBlocked]
   );
 
   const removePoint = React.useCallback(
-    (index: number) => {
-      const base = valueRef.current;
-      if (disabled || !allowRemovePoints || base.length <= minPoints) {
-        if (!disabled) {
-          triggerBlockedPoint(index);
-        }
+    (index: number, event: MouseEvent | KeyboardEvent) => {
+      if (disabled) {
         return;
       }
-      const nextPoints = base.filter((_, i) => i !== index);
-      commitValue(nextPoints);
-      focusPoint(Math.min(index, nextPoints.length - 1));
+      const base = valueRef.current;
+      if (base.length <= minPoints) {
+        signalBlockedPoint(index);
+        return;
+      }
+      const next = base.filter((_, i) => i !== index);
+      const eventDetails = Object.assign(
+        createChangeEventDetails("remove", event),
+        { index }
+      );
+      if (change(next, eventDetails)) {
+        commit(next, { event, index, reason: "remove" });
+        const focusTarget = Math.min(index, next.length - 1);
+        setFocusedIndex(focusTarget);
+        pointElementsRef.current.get(focusTarget)?.focus();
+      }
     },
-    [
-      disabled,
-      allowRemovePoints,
-      minPoints,
-      valueRef,
-      commitValue,
-      focusPoint,
-      triggerBlockedPoint,
-    ]
+    [change, commit, disabled, minPoints, signalBlockedPoint]
   );
 
-  const elementId = id || envelopeId;
+  const graphRef = React.useRef<SVGSVGElement>(null);
+  const formatPoint = React.useMemo(
+    () => createPairFormatter(new Intl.NumberFormat(locale, format)),
+    [format, locale]
+  );
 
-  const pointsConfig = React.useMemo(() => ({ disabled }), [disabled]);
-
-  const configValue = React.useMemo<ConfigContextValue>(
+  const state = React.useMemo<Root.State>(
     () => ({
-      adjustPoint,
-      ariaLabel,
-      ariaLabelledBy,
-      beginPointDrag,
-      blockedIndex,
-      commitDrag,
-      dragPoint,
-      handleSvgDoubleClick,
-      isAddBlocked,
-      minPoints,
-      pointsConfig,
-      registerPoint,
-      removePoint,
-      setFocusedIndex,
-      shouldPreventFocusRef,
-      svgRef,
+      disabled,
+      dragging: draggingIndex !== null,
+      value: displayedValue,
+    }),
+    [disabled, displayedValue, draggingIndex]
+  );
+
+  const context = React.useMemo<EnvelopeContextValue>(
+    () => ({
+      actions: {
+        addPoint,
+        commit,
+        movePoint,
+        registerPoint,
+        removePoint,
+        setDraggingIndex,
+        setFocusedIndex,
+      },
+      meta: {
+        blockedIndex,
+        draggingIndex,
+        focusedIndex,
+        formatPoint,
+        graphRef,
+        isAddBlocked,
+        minPoints,
+        step,
+        valueRef,
+      },
+      state,
     }),
     [
-      adjustPoint,
-      ariaLabel,
-      ariaLabelledBy,
-      beginPointDrag,
+      addPoint,
       blockedIndex,
-      commitDrag,
-      dragPoint,
-      handleSvgDoubleClick,
+      commit,
+      draggingIndex,
+      focusedIndex,
+      formatPoint,
       isAddBlocked,
       minPoints,
-      pointsConfig,
+      movePoint,
       registerPoint,
       removePoint,
-      shouldPreventFocusRef,
+      setDraggingIndex,
+      state,
+      step,
     ]
   );
 
-  const valueContextValue = React.useMemo<ValueContextValue>(
-    () => ({ focusedIndex, value: points }),
-    [focusedIndex, points]
-  );
-
-  return (
-    <ConfigContext.Provider value={configValue}>
-      <ValueContext.Provider value={valueContextValue}>
-        <div
-          className={className}
-          {...getDataAttributes("envelope", {
-            disabled,
-            part: "envelope-wrapper",
-          })}
-          style={{ position: "relative", ...style }}
-          {...props}
-        >
-          {ariaLabel || ariaLabelledBy ? null : (
-            <span className="sr-only" id={`${elementId}-label`}>
-              Envelope
-            </span>
-          )}
-          <span className="sr-only" id={`${elementId}-instructions`}>
-            Use arrow keys to adjust the focused point, delete or backspace to
-            remove it. Double-click empty space to add a point, or a point to
-            remove it.
-          </span>
-          {children}
-        </div>
-      </ValueContext.Provider>
-    </ConfigContext.Provider>
-  );
-}
-
-export interface SvgProps
-  extends Omit<React.ComponentProps<"svg">, "viewBox"> {}
-
-export function Svg({ className, children, ...props }: SvgProps) {
-  const {
-    ariaLabel,
-    ariaLabelledBy,
-    handleSvgDoubleClick,
-    isAddBlocked,
-    pointsConfig,
-    svgRef,
-  } = useConfigContext();
-  const { disabled } = pointsConfig;
-
-  const handleDoubleClick = React.useCallback(
-    (e: React.MouseEvent<SVGSVGElement>) => {
-      if (disabled) {
-        return;
-      }
-      const svg = svgRef.current;
-      if (!svg) {
-        return;
-      }
-      const rect = svg.getBoundingClientRect();
-      if (rect.width <= 0 || rect.height <= 0) {
-        return;
-      }
-      handleSvgDoubleClick({
-        x: (e.clientX - rect.left) / rect.width,
-        y: 1 - (e.clientY - rect.top) / rect.height,
-      });
-    },
-    [disabled, handleSvgDoubleClick, svgRef]
-  );
-
-  return (
-    <svg
-      aria-label={ariaLabel || "Envelope"}
-      aria-labelledby={
-        ariaLabelledBy || (ariaLabel ? undefined : "envelope-label")
-      }
-      className={className}
-      onDoubleClick={handleDoubleClick}
-      preserveAspectRatio="none"
-      ref={svgRef}
-      role="group"
-      viewBox="0 0 100 100"
-      {...getDataAttributes("envelope", {
-        blocked: isAddBlocked,
-        disabled,
-        part: "svg",
-      })}
-      {...props}
-    >
-      {children}
-    </svg>
-  );
-}
-
-/** Polyline coordinates: flat lead-in from x=0 to the first point, the points themselves, flat lead-out from the last point to x=1. */
-function useEnvelopePath() {
-  const { value } = useValueContext();
-  return React.useMemo(() => {
-    const [first] = value;
-    const last = value.at(-1);
-    if (!(first && last)) {
-      return "";
-    }
-    const segments = [
-      `0,${roundCoord((1 - first.y) * 100)}`,
-      ...value.map(
-        (point) =>
-          `${roundCoord(point.x * 100)},${roundCoord((1 - point.y) * 100)}`
-      ),
-      `100,${roundCoord((1 - last.y) * 100)}`,
-    ];
-    return segments.join(" ");
-  }, [value]);
-}
-
-export interface PathProps extends React.ComponentProps<"polyline"> {}
-
-export function Path({ className, style, ...props }: PathProps) {
-  const path = useEnvelopePath();
-  return (
-    <polyline
-      className={className}
-      fill="none"
-      {...getDataAttributes("envelope", { part: "path" })}
-      points={path}
-      style={{ vectorEffect: "non-scaling-stroke", ...style }}
-      {...props}
-    />
-  );
-}
-
-export interface FillProps extends React.ComponentProps<"polyline"> {}
-
-export function Fill({ className, ...props }: FillProps) {
-  const path = useEnvelopePath();
-  const closedPath = path ? `${path} 100,100 0,100` : "";
-  return (
-    <polyline
-      className={className}
-      {...getDataAttributes("envelope", { part: "fill" })}
-      points={closedPath}
-      {...props}
-    />
-  );
-}
-
-export interface PointsProps {
-  children: (point: GeomPoint, index: number) => React.ReactNode;
-}
-
-export function Points({ children }: PointsProps) {
-  const { value } = useValueContext();
-  return <>{value.map((point, index) => children(point, index))}</>;
-}
-
-export interface PointProps
-  extends Omit<React.ComponentProps<"div">, "children"> {
-  index: number;
-}
-
-/** A draggable handle positioned via left/bottom percentage, same technique as Fader.Thumb — decoupled from the Svg's own (non-uniformly scaled) coordinate system so it always renders as a true circle/radius, never a stretched ellipse. */
-export function Point({ index, className, style, ...props }: PointProps) {
-  const {
-    adjustPoint,
-    beginPointDrag,
-    blockedIndex,
-    commitDrag,
-    dragPoint,
-    minPoints,
-    pointsConfig,
-    registerPoint,
-    removePoint,
-    setFocusedIndex,
-    shouldPreventFocusRef,
-    svgRef,
-  } = useConfigContext();
-  const { disabled } = pointsConfig;
-  const { focusedIndex, value } = useValueContext();
-  const point = value[index];
-
-  const isDraggingRef = React.useRef(false);
-
-  const handlePointerDown = React.useCallback(
-    (e: React.PointerEvent<HTMLDivElement>) => {
-      if (disabled) {
-        return;
-      }
-      e.preventDefault();
-      e.stopPropagation();
-      e.currentTarget.setPointerCapture(e.pointerId);
-      isDraggingRef.current = true;
-      shouldPreventFocusRef.current = true;
-      setFocusedIndex(index);
-      e.currentTarget.focus();
-      beginPointDrag();
-    },
-    [disabled, index, setFocusedIndex, shouldPreventFocusRef, beginPointDrag]
-  );
-
-  const handlePointerMove = React.useCallback(
-    (e: React.PointerEvent<HTMLDivElement>) => {
-      if (!isDraggingRef.current) {
-        return;
-      }
-      const svg = svgRef.current;
-      if (!svg) {
-        return;
-      }
-      const rect = svg.getBoundingClientRect();
-      if (rect.width <= 0 || rect.height <= 0) {
-        return;
-      }
-      dragPoint(index, {
-        x: (e.clientX - rect.left) / rect.width,
-        y: 1 - (e.clientY - rect.top) / rect.height,
-      });
-    },
-    [index, dragPoint, svgRef]
-  );
-
-  const handlePointerUp = React.useCallback(
-    (e: React.PointerEvent<HTMLDivElement>) => {
-      if (!isDraggingRef.current) {
-        return;
-      }
-      isDraggingRef.current = false;
-      e.currentTarget.releasePointerCapture(e.pointerId);
-      commitDrag();
-    },
-    [commitDrag]
-  );
-
-  const handleDoubleClick = React.useCallback(
-    (e: React.MouseEvent) => {
-      if (disabled) {
-        return;
-      }
-      e.stopPropagation();
-      removePoint(index);
-    },
-    [disabled, index, removePoint]
-  );
-
-  const { keyboardProps } = useKeyboardNavigation({
-    disabled,
-    handlers: {
-      onArrowDown: () => {
-        if (point) {
-          adjustPoint(index, { x: point.x, y: point.y - KEYBOARD_STEP });
-        }
-        return true;
-      },
-      onArrowLeft: () => {
-        if (point) {
-          adjustPoint(index, { x: point.x - KEYBOARD_STEP, y: point.y });
-        }
-        return true;
-      },
-      onArrowRight: () => {
-        if (point) {
-          adjustPoint(index, { x: point.x + KEYBOARD_STEP, y: point.y });
-        }
-        return true;
-      },
-      onArrowUp: () => {
-        if (point) {
-          adjustPoint(index, { x: point.x, y: point.y + KEYBOARD_STEP });
-        }
-        return true;
-      },
-    },
-    onKeyDown: (e) => {
-      if (disabled) {
-        return;
-      }
-      if (e.key === "Delete" || e.key === "Backspace") {
-        e.preventDefault();
-        removePoint(index);
-      }
-    },
+  const element = useRender({
+    defaultTagName: "div",
+    props: mergeProps<"div">(
+      { style: { position: "relative" } },
+      { ...elementProps, ...resolveStyling(className, style, state) }
+    ),
+    ref,
+    render,
+    state,
+    stateAttributesMapping: STATE_ATTRIBUTES_MAPPING,
   });
 
-  const handleFocus = React.useCallback(() => {
-    if (shouldPreventFocusRef.current) {
-      shouldPreventFocusRef.current = false;
-    }
-    setFocusedIndex(index);
-  }, [index, setFocusedIndex, shouldPreventFocusRef]);
+  return <EnvelopeContext value={context}>{element}</EnvelopeContext>;
+}
 
-  const pointRef = React.useCallback(
-    (node: Nullable<HTMLDivElement>) => registerPoint(index, node),
+export namespace Root {
+  export type State = {
+    disabled: boolean;
+    /** Whether a point is being dragged. */
+    dragging: boolean;
+    value: GeomPoint[];
+  };
+
+  /** The affected point's index travels with every event. */
+  type WithIndex<T> = T & { index: number };
+
+  export type ChangeEventReason = ChangeEventDetails["reason"];
+  export type ChangeEventDetails =
+    | WithIndex<ExtraChangeEventDetails<"drag", PointerEvent>>
+    | WithIndex<ExtraChangeEventDetails<"keyboard", KeyboardEvent>>
+    | WithIndex<ExtraChangeEventDetails<"add", MouseEvent>>
+    | WithIndex<ExtraChangeEventDetails<"remove", MouseEvent | KeyboardEvent>>;
+  export type CommitEventReason = CommitEventDetails["reason"];
+  export type CommitEventDetails =
+    | WithIndex<ExtraCommitEventDetails<"drag", PointerEvent>>
+    | WithIndex<ExtraCommitEventDetails<"keyboard", KeyboardEvent>>
+    | WithIndex<ExtraCommitEventDetails<"add", MouseEvent>>
+    | WithIndex<ExtraCommitEventDetails<"remove", MouseEvent | KeyboardEvent>>;
+
+  export interface Props extends Omit<PartProps<"div", State>, "defaultValue"> {
+    /** Uncontrolled starting points. Defaults to an ADSR-like shape. */
+    defaultValue?: GeomPoint[];
+    disabled?: boolean;
+    /** Formats point coordinates for each point's `aria-valuetext`. */
+    format?: Intl.NumberFormatOptions;
+    locale?: Intl.LocalesArgument;
+    /** Ceiling on the number of points; adding is blocked at this count. Equal to `minPoints`, the shape is fixed. */
+    maxPoints?: number;
+    /** Floor on the number of points; removal is blocked at this count. @default 2 */
+    minPoints?: number;
+    /** Fires on every change: drag, keyboard, add and remove. */
+    onValueChange?: (
+      value: GeomPoint[],
+      eventDetails: ChangeEventDetails
+    ) => void;
+    /** Fires when an interaction that changed the points ends. */
+    onValueCommitted?: (
+      value: GeomPoint[],
+      eventDetails: CommitEventDetails
+    ) => void;
+    /** Keyboard step on both axes, in normalized units. @default 0.01 */
+    step?: number;
+    value?: GeomPoint[];
+  }
+}
+
+/**
+ * The drawing surface, a 100×100 stretched viewBox: holds `Line` and `Fill`,
+ * and a double click on it adds a point. Carries `data-blocked` briefly when
+ * adding is refused at `maxPoints`. Renders an `<svg>` element.
+ */
+export function Graph(componentProps: Graph.Props) {
+  const { className, ref, render, style, ...elementProps } = componentProps;
+  const { actions, meta, state } = useEnvelopeContext("Graph");
+  const graphState = React.useMemo<Graph.State>(
+    () => ({ ...state, blocked: meta.isAddBlocked }),
+    [meta.isAddBlocked, state]
+  );
+
+  const handleDoubleClick = (event: React.MouseEvent<SVGSVGElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) {
+      return;
+    }
+    actions.addPoint(
+      {
+        x: (event.clientX - rect.left) / rect.width,
+        y: 1 - (event.clientY - rect.top) / rect.height,
+      },
+      event.nativeEvent
+    );
+  };
+
+  return useRender({
+    defaultTagName: "svg",
+    props: mergeProps<"svg">(
+      {
+        "aria-hidden": true,
+        onDoubleClick: handleDoubleClick,
+        preserveAspectRatio: "none",
+        viewBox: "0 0 100 100",
+      },
+      { ...elementProps, ...resolveStyling(className, style, graphState) }
+    ),
+    ref: ref ? [ref, meta.graphRef] : meta.graphRef,
+    render,
+    state: graphState,
+    stateAttributesMapping: STATE_ATTRIBUTES_MAPPING,
+  });
+}
+
+export namespace Graph {
+  export type State = Root.State & {
+    /** Briefly true after an add was refused at `maxPoints`. */
+    blocked: boolean;
+  };
+  export type Props = PartProps<"svg", State>;
+}
+
+/** The envelope curve through the points. Renders a `<polyline>` element. */
+export function Line(componentProps: Line.Props) {
+  const { className, ref, render, style, ...elementProps } = componentProps;
+  const { state } = useEnvelopeContext("Line");
+  return useRender({
+    defaultTagName: "polyline",
+    props: mergeProps<"polyline">(
+      {
+        fill: "none",
+        points: polylinePoints(state.value),
+        style: { vectorEffect: "non-scaling-stroke" },
+      },
+      { ...elementProps, ...resolveStyling(className, style, state) }
+    ),
+    ref,
+    render,
+    state,
+    stateAttributesMapping: STATE_ATTRIBUTES_MAPPING,
+  });
+}
+
+export namespace Line {
+  export type State = Root.State;
+  export type Props = PartProps<"polyline", State>;
+}
+
+/** The area under the curve. Renders a `<polyline>` element. */
+export function Fill(componentProps: Fill.Props) {
+  const { className, ref, render, style, ...elementProps } = componentProps;
+  const { state } = useEnvelopeContext("Fill");
+  const points = polylinePoints(state.value);
+  return useRender({
+    defaultTagName: "polyline",
+    props: mergeProps<"polyline">(
+      { points: points ? `${points} 100,100 0,100` : "" },
+      { ...elementProps, ...resolveStyling(className, style, state) }
+    ),
+    ref,
+    render,
+    state,
+    stateAttributesMapping: STATE_ATTRIBUTES_MAPPING,
+  });
+}
+
+export namespace Fill {
+  export type State = Root.State;
+  export type Props = PartProps<"polyline", State>;
+}
+
+/** Renders one child per point, in `x` order. */
+export function Points({ children }: Points.Props) {
+  const { state } = useEnvelopeContext("Points");
+  return (
+    <>
+      {state.value.map((point, index) => children(point, index, state.value))}
+    </>
+  );
+}
+
+export namespace Points {
+  export interface Props {
+    children: (
+      point: GeomPoint,
+      index: number,
+      points: GeomPoint[]
+    ) => React.ReactNode;
+  }
+}
+
+interface PointGesture {
+  /** Whether the gesture moved the point at least once; if so its end commits. */
+  changed: boolean;
+  pointerId: number;
+}
+
+/**
+ * A draggable handle for the point at `index`, positioned with `left`/`bottom`
+ * percentages over the `Graph`. It is a `role="slider"` on the point's level
+ * (`y`): give it an `aria-label`. One point at a time is the tab stop; arrow
+ * keys move it (Shift for larger steps), Delete or a double click removes it.
+ * Carries `data-blocked` briefly when removal is refused at `minPoints`.
+ * Renders a `<div>` element.
+ */
+export function Point(componentProps: Point.Props) {
+  const {
+    className,
+    getAriaValueText,
+    index,
+    ref,
+    render,
+    style,
+    ...elementProps
+  } = componentProps;
+  const { actions, meta, state } = useEnvelopeContext("Point");
+  const point = state.value[index];
+  const gestureRef = React.useRef<PointGesture | null>(null);
+
+  const pointState = React.useMemo<Point.State>(
+    () => ({
+      blocked: meta.blockedIndex === index,
+      disabled: state.disabled,
+      dragging: meta.draggingIndex === index,
+      index,
+      removable: state.value.length > meta.minPoints,
+      value: state.value,
+    }),
+    [
+      index,
+      meta.blockedIndex,
+      meta.draggingIndex,
+      meta.minPoints,
+      state.disabled,
+      state.value,
+    ]
+  );
+
+  const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (state.disabled || event.button !== 0) {
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    event.currentTarget.setPointerCapture?.(event.pointerId);
+    event.currentTarget.focus({ preventScroll: true });
+    gestureRef.current = { changed: false, pointerId: event.pointerId };
+    actions.setFocusedIndex(index);
+    actions.setDraggingIndex(index);
+  };
+
+  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    const gesture = gestureRef.current;
+    const graph = meta.graphRef.current;
+    if (!(gesture && graph) || gesture.pointerId !== event.pointerId) {
+      return;
+    }
+    const rect = graph.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) {
+      return;
+    }
+    const moved = actions.movePoint(
+      index,
+      {
+        x: (event.clientX - rect.left) / rect.width,
+        y: 1 - (event.clientY - rect.top) / rect.height,
+      },
+      Object.assign(createChangeEventDetails("drag", event.nativeEvent), {
+        index,
+      })
+    );
+    if (moved) {
+      gesture.changed = true;
+    }
+  };
+
+  const handlePointerEnd = (event: React.PointerEvent<HTMLDivElement>) => {
+    const gesture = gestureRef.current;
+    if (!gesture || gesture.pointerId !== event.pointerId) {
+      return;
+    }
+    gestureRef.current = null;
+    actions.setDraggingIndex(null);
+    if (gesture.changed) {
+      actions.commit(meta.valueRef.current, {
+        event: event.nativeEvent,
+        index,
+        reason: "drag",
+      });
+    }
+  };
+
+  const handleDoubleClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    event.stopPropagation();
+    actions.removePoint(index, event.nativeEvent);
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    const current = meta.valueRef.current[index];
+    if (state.disabled || !current) {
+      return;
+    }
+    const native = event.nativeEvent;
+    if (event.key === "Delete" || event.key === "Backspace") {
+      event.preventDefault();
+      actions.removePoint(index, native);
+      return;
+    }
+    const distance = meta.step * (event.shiftKey ? LARGE_STEP_MULTIPLIER : 1);
+    const targets: Record<string, GeomPoint> = {
+      ArrowDown: { x: current.x, y: current.y - distance },
+      ArrowLeft: { x: current.x - distance, y: current.y },
+      ArrowRight: { x: current.x + distance, y: current.y },
+      ArrowUp: { x: current.x, y: current.y + distance },
+    };
+    const target = targets[event.key];
+    if (!target) {
+      return;
+    }
+    event.preventDefault();
+    const moved = actions.movePoint(
+      index,
+      target,
+      Object.assign(createChangeEventDetails("keyboard", native), { index })
+    );
+    if (moved) {
+      actions.commit(meta.valueRef.current, {
+        event: native,
+        index,
+        reason: "keyboard",
+      });
+    }
+  };
+
+  const { registerPoint } = actions;
+  const registerRef = React.useCallback(
+    (node: HTMLDivElement | null) => registerPoint(index, node),
     [index, registerPoint]
   );
 
-  if (!point) {
-    return null;
-  }
-
-  const isFocusTarget = index === focusedIndex;
-  const isBlocked = index === blockedIndex;
+  const resolved = resolveStyling(className, style, pointState);
+  // Centering stays in `transform` so a feedback animation can use the
+  // standalone `translate` property without fighting it.
   const baseTransform = "translate(-50%, 50%)";
-  const transform = style?.transform
-    ? `${baseTransform} ${style.transform}`
-    : baseTransform;
 
-  return (
-    <div
-      aria-disabled={disabled}
-      aria-label={`Point ${index + 1} of ${value.length}`}
-      aria-valuemax={1}
-      aria-valuemin={0}
-      aria-valuenow={point.y}
-      aria-valuetext={`x: ${point.x.toFixed(2)}, y: ${point.y.toFixed(2)}`}
-      className={className}
-      {...getDataAttributes("envelope", {
-        blocked: isBlocked,
-        disabled,
-        part: "point",
-        removable: value.length > minPoints,
-      })}
-      onDoubleClick={handleDoubleClick}
-      onFocus={handleFocus}
-      onPointerDown={handlePointerDown}
-      onPointerMove={handlePointerMove}
-      onPointerUp={handlePointerUp}
-      ref={pointRef}
-      role="slider"
-      style={{
-        bottom: `${point.y * 100}%`,
-        left: `${point.x * 100}%`,
-        position: "absolute",
-        touchAction: "none",
-        ...style,
-        transform,
-      }}
-      tabIndex={disabled || !isFocusTarget ? -1 : 0}
-      {...keyboardProps}
-      {...props}
-    />
-  );
+  return useRender({
+    defaultTagName: "div",
+    enabled: Boolean(point),
+    props: mergeProps<"div">(
+      {
+        "aria-disabled": state.disabled || undefined,
+        "aria-valuemax": 1,
+        "aria-valuemin": 0,
+        "aria-valuenow": point?.y,
+        "aria-valuetext": point
+          ? (getAriaValueText?.(point, index) ??
+            meta.formatPoint(point.x, point.y))
+          : undefined,
+        onDoubleClick: handleDoubleClick,
+        onFocus: () => actions.setFocusedIndex(index),
+        onKeyDown: handleKeyDown,
+        onPointerCancel: handlePointerEnd,
+        onPointerDown: handlePointerDown,
+        onPointerMove: handlePointerMove,
+        onPointerUp: handlePointerEnd,
+        role: "slider",
+        tabIndex: state.disabled || index !== meta.focusedIndex ? -1 : 0,
+      },
+      {
+        ...elementProps,
+        className: resolved.className,
+        style: {
+          bottom: `${(point?.y ?? 0) * 100}%`,
+          left: `${(point?.x ?? 0) * 100}%`,
+          position: "absolute",
+          touchAction: "none",
+          ...resolved.style,
+          transform: resolved.style?.transform
+            ? `${baseTransform} ${resolved.style.transform}`
+            : baseTransform,
+        },
+      }
+    ),
+    ref: ref ? [ref, registerRef] : registerRef,
+    render,
+    state: pointState,
+    stateAttributesMapping: STATE_ATTRIBUTES_MAPPING,
+  });
+}
+
+export namespace Point {
+  export type State = Root.State & {
+    /** Briefly true after a removal was refused at `minPoints`. */
+    blocked: boolean;
+    index: number;
+    /** Whether the point can currently be removed. */
+    removable: boolean;
+  };
+  export interface Props extends PartProps<"div", State> {
+    /** Returns the point's `aria-valuetext`. Defaults to the formatted `x, y`. */
+    getAriaValueText?: (point: GeomPoint, index: number) => string;
+    /** Index of the point in the (sorted) value. */
+    index: number;
+  }
 }
