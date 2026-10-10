@@ -180,7 +180,168 @@ Every lane sets a `--timeline-unit` CSS variable, the width of one unit. Parts a
 
 ## API reference
 
-### Timeline
+### Root
+
+Groups the parts of a timeline and owns what they share: its length, its zoom, its grid and the playback position. Units are yours: seconds, beats, pulses or steps. `zoom` is how many px one unit takes; leave it unset and the timeline fits the width it is given. The position comes from `position`, or from a live `source` that the playhead follows straight in the DOM without re-rendering React. With a `snapStep`, every gesture lands on the grid unless Cmd/Ctrl is held. Renders a `<div>` element.
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultPosition` | `number` | `0` | Uncontrolled starting position. |
+| `defaultZoom` | `number` |  | Uncontrolled starting zoom, in px per unit. Unset, the timeline fits its width until zoomed. |
+| `disabled` | `boolean` |  |  |
+| `duration` | `number` | `1` | Length of the timeline, in your units. |
+| `largeStep` | `number` |  | Step for Page Up/Page Down and Shift + arrow keys. Defaults to ten `step`s. |
+| `maxZoom` | `number` | `Infinity` |  |
+| `minZoom` | `number` | `0` |  |
+| `onPositionChange` | `( value: number, eventDetails: PositionChangeEventDetails ) => void` |  | Fires while the position is moved: press, drag, keyboard and input changes. |
+| `onPositionCommitted` | `( value: number, eventDetails: PositionCommitEventDetails ) => void` |  | Fires when a gesture that moved the position ends. |
+| `onZoomChange` | `(zoom: number, eventDetails: ZoomChangeEventDetails) => void` |  | Fires when the zoom changes, already clamped. `eventDetails.cancel()` keeps the zoom where it was. |
+| `position` | `number` |  | Playback position, from 0 to `duration`. |
+| `snapOffset` | `number` | `0` | Where the grid's lines start, in your units. |
+| `snapStep` | `number` | `0` | Distance between grid lines, in your units. 0 is no grid. |
+| `source` | `Source` |  | A live position followed outside React; takes precedence over `position`. |
+| `step` | `number` |  | Step for the arrow keys. Defaults to `snapStep`, or a hundredth of `duration`. |
+| `zoom` | `number` |  | Zoom, in px per unit. |
+
+| Data attribute | Description |
+| --- | --- |
+| `data-disabled` | Present when disabled. |
+| `data-fitted` | Whether no zoom is set, so the timeline fits the width it is given. |
+| `data-scrubbing` | Whether a pointer is moving the position. |
+
+### Navigator
+
+The whole timeline as one bar, with the stretch the viewport shows drawn inside it as `Timeline.NavigatorWindow`: drag the window to scroll, drag one of its `Timeline.NavigatorHandle`s to zoom, double-click to show everything. Place it anywhere inside `Timeline.Root`, outside the viewport. Renders a `<div>` element.
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `getAriaValueText` | `DescribePosition` |  | Returns how a position is announced by the window and its handles. Defaults to the number. |
+
+| Data attribute | Description |
+| --- | --- |
+| `data-disabled` | Present when disabled. |
+| `data-fitted` | Whether no zoom is set, so the timeline fits the width it is given. |
+| `data-scrubbing` | Whether a pointer is moving the position. |
+
+### NavigatorWindow
+
+The stretch of the timeline the viewport shows. Dragging it scrolls; its native `<input type="range">` scrolls from the keyboard and carries its accessible name. Renders a `<div>` element.
+
+| Data attribute | Description |
+| --- | --- |
+| `data-disabled` | Present when disabled. |
+| `data-fitted` | Whether no zoom is set, so the timeline fits the width it is given. |
+| `data-scrubbing` | Whether a pointer is moving the position. |
+
+### NavigatorHandle
+
+One edge of the window: dragging it zooms, holding the other edge in place. Its native `<input type="range">` does the same from the keyboard and carries its accessible name. Renders a `<div>` element.
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `edge` | `"end" \| "start"` |  | The edge of the window this handle moves. |
+
+| Data attribute | Description |
+| --- | --- |
+| `data-disabled` | Present when disabled. |
+| `data-fitted` | Whether no zoom is set, so the timeline fits the width it is given. |
+| `data-scrubbing` | Whether a pointer is moving the position. |
+
+### Viewport
+
+The scrolling window onto the timeline. Cmd/Ctrl + wheel (and pinch on a trackpad) zooms around the pointer; a bare wheel scrolls as usual. Whatever changes the zoom, the point it was anchored on stays where it was, or the middle of the view when nothing named one. It reports its scroll offset and width for `Timeline.Navigator`. Renders a `<div>` element.
+
+| Data attribute | Description |
+| --- | --- |
+| `data-disabled` | Present when disabled. |
+| `data-fitted` | Whether no zoom is set, so the timeline fits the width it is given. |
+| `data-scrubbing` | Whether a pointer is moving the position. |
+
+### Lane
+
+A strip along the timeline that its parts are placed on: a track, the ruler's strip, a row of markers. Zoomed, it is as long as the timeline; fitted, it takes the width it is given and the timeline is spread across it. Its `--timeline-unit` CSS variable is the width of one unit. Renders a `<div>` element.
+
+| Data attribute | Description |
+| --- | --- |
+| `data-disabled` | Present when disabled. |
+| `data-fitted` | Whether no zoom is set, so the timeline fits the width it is given. |
+| `data-scrubbing` | Whether a pointer is moving the position. |
+
+### Ruler
+
+The lane that moves the position: a press jumps to the pointer and a drag scrubs, both on the grid unless Cmd/Ctrl is held; with Shift held the drag scrubs four times finer. It holds the native `<input type="range">` that takes focus, handles the keyboard and carries the accessible name (`aria-label` / `aria-labelledby`). Place `Timeline.Mark`s in it for its labels. Renders a `<div>` element.
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `getAriaValueText` | `DescribePosition` |  | Returns how the position is announced, e.g. `"bar 3, beat 2"`. Defaults to the number. |
+
+| Data attribute | Description |
+| --- | --- |
+| `data-disabled` | Present when disabled. |
+| `data-fitted` | Whether no zoom is set, so the timeline fits the width it is given. |
+| `data-scrubbing` | Whether a pointer is moving the position. |
+
+### Range
+
+A stretch of the timeline, such as a loop, a selection or a clip, laid on the lane it sits in from `value[0]` to `value[1]`. Dragging its body moves it, on the grid unless Cmd/Ctrl is held; add a `Timeline.RangeHandle` per edge to resize it. With `drawable`, dragging across empty lane draws a new range. Its own native `<input type="range">` moves it from the keyboard and carries its accessible name (`aria-label` / `aria-labelledby`). Renders a `<div>` element.
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultValue` | `Value` |  | Uncontrolled starting range. Defaults to the whole timeline. |
+| `disabled` | `boolean` |  |  |
+| `drawable` | `boolean` | `false` | Whether dragging across empty lane draws a new range. |
+| `getAriaValueText` | `DescribePosition` |  | Returns how a position is announced, for the range and its handles. Defaults to the number. |
+| `minLength` | `number` |  | The shortest the range can be, in the timeline's units. Defaults to the grid step. |
+| `movable` | `boolean` | `true` | Whether dragging the body, or its keys, moves the range. |
+| `onValueChange` | `(value: Value, eventDetails: ChangeEventDetails) => void` |  | Fires while the range is moved, resized or drawn. |
+| `onValueCommitted` | `(value: Value, eventDetails: CommitEventDetails) => void` |  | Fires when a gesture that changed the range ends. |
+| `value` | `Value` |  | The range, as `[start, end]` in the timeline's units. |
+
+| Data attribute | Description |
+| --- | --- |
+| `data-disabled` | Present when disabled. |
+| `data-dragging` | Whether a pointer is moving, resizing or drawing the range. |
+
+### RangeHandle
+
+Resizes one edge of the range: by dragging, on the grid unless Cmd/Ctrl is held, or from the keyboard through the native `<input type="range">` it holds, which carries the accessible name. Renders a `<div>` element.
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `edge` | `"end" \| "start"` |  | The edge of the range this handle resizes. |
+
+| Data attribute | Description |
+| --- | --- |
+| `data-disabled` | Present when disabled. |
+| `data-dragging` | Whether a pointer is moving, resizing or drawing the range. |
+
+### Playhead
+
+A marker at the playback position, on the lane it sits in. It follows the position straight in the DOM, through its own `--timeline-offset` CSS variable, so a playhead moving every frame never re-renders React. Renders a `<div>` element.
+
+| Data attribute | Description |
+| --- | --- |
+| `data-disabled` | Present when disabled. |
+| `data-fitted` | Whether no zoom is set, so the timeline fits the width it is given. |
+| `data-scrubbing` | Whether a pointer is moving the position. |
+
+### Mark
+
+Something placed at `value` on a lane: a bar number on the ruler, a cue, a grid line. Its children are its label. Renders a `<div>` element.
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value` | `number` |  | Where the mark sits, in the timeline's units. |
+
+| Data attribute | Description |
+| --- | --- |
+| `data-disabled` | Present when disabled. |
+| `data-fitted` | Whether no zoom is set, so the timeline fits the width it is given. |
+| `data-scrubbing` | Whether a pointer is moving the position. |
+
+### Registry component
+
+#### Timeline
 
 | Prop | Type | Default | Description |
 | ---- | ---- | ------- | ----------- |
@@ -199,7 +360,7 @@ Every lane sets a `--timeline-unit` CSS variable, the width of one unit. Parts a
 | `step` / `largeStep` | `number` | `snapStep` / ten steps | Keyboard steps. |
 | `disabled` | `boolean` | `false` | Disables seeking and zooming. |
 
-### Parts
+#### Parts
 
 | Component | Role |
 | --------- | ---- |

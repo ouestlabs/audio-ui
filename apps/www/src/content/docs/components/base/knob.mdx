@@ -148,6 +148,117 @@ Wheel input over the knob steps the value by `step` and reports `eventDetails.re
 
 ## API reference
 
+### Root
+
+Groups all parts of the knob and owns its value. Dragging the `Control`, turning the mouse wheel over it, the keyboard on the `Thumb`'s input, or a double tap (reset) all report through `onValueChange` / `onValueCommitted`. Renders a `<div>` element.
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `anchor` | `number` |  | Value the indicator arc grows from (e.g. `0` on a -1…1 pan knob). Defaults to `min`. |
+| `defaultValue` | `number` |  | Uncontrolled starting value, and the double-tap reset target. Defaults to the middle of the dial's travel. |
+| `disabled` | `boolean` |  |  |
+| `dragMode` | `DragMode` | `"circular"` |  |
+| `form` | `string` |  | Identifies the form that owns the knob's input, when rendered outside it. |
+| `format` | `Intl.NumberFormatOptions` |  | Formats the value for `Knob.Value` and the input's `aria-valuetext`. |
+| `largeStep` | `number` | `10` | Step for Page Up/Page Down and Shift + Arrow keys. |
+| `locale` | `Intl.LocalesArgument` |  |  |
+| `max` | `number` | `100` |  |
+| `min` | `number` | `0` |  |
+| `name` | `string` |  | Identifies the field when a form is submitted. |
+| `onValueChange` | `(value: number, eventDetails: ChangeEventDetails) => void` |  | Fires on every change: drag, keyboard, wheel, reset and input changes. |
+| `onValueCommitted` | `( value: number, eventDetails: CommitEventDetails ) => void` |  | Fires when an interaction ends with a new value. |
+| `scale` | `Scale` | `"linear"` | How the value maps onto the dial's travel: `linear`, `log` for frequency, Q or ratios (needs a positive `min`), or your own `{ toPosition, toValue }`. Away from linear, the keys and the wheel move a share of the travel (1%, or 10% with Shift and Page keys) rather than a `step`. |
+| `step` | `number` | `1` |  |
+| `value` | `number` |  |  |
+
+| Data attribute | Description |
+| --- | --- |
+| `data-disabled` | Present when disabled. |
+| `data-dragging` | Whether a pointer is dragging the knob. |
+
+### Control
+
+The interactive surface: pointer drags (see `dragMode`), mouse-wheel stepping, and double tap to reset. Sets `touch-action: none` so touch drags don't scroll the page. Renders a `<div>` element.
+
+| Data attribute | Description |
+| --- | --- |
+| `data-disabled` | Present when disabled. |
+| `data-dragging` | Whether a pointer is dragging the knob. |
+
+### Track
+
+The full sweep of the dial, as an SVG arc. Renders a `<svg>` element.
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `strokeWidth` | `number` | `3` | Stroke width in the 48×48 viewBox; the arc stays inside the box. |
+
+| Data attribute | Description |
+| --- | --- |
+| `data-disabled` | Present when disabled. |
+| `data-dragging` | Whether a pointer is dragging the knob. |
+
+### Indicator
+
+The arc from `anchor` to the value, drawn over the `Track`. Renders a `<svg>` element.
+
+| Data attribute | Description |
+| --- | --- |
+| `data-disabled` | Present when disabled. |
+| `data-dragging` | Whether a pointer is dragging the knob. |
+
+### Thumb
+
+Rotates with the value (`rotate`, clockwise from 12 o'clock), so a pointer drawn inside it points at the value. Holds the knob's native `<input type="range">`, which takes focus, carries the accessible name (`aria-label` / `aria-labelledby`) and the form value, and handles the keyboard. Renders a `<div>` element.
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `getAriaValueText` | `(formattedValue: string, value: number) => string` |  | Returns the input's `aria-valuetext`, e.g. `"-6 dB"`. Defaults to the formatted value. |
+| `inputRef` | `React.Ref<HTMLInputElement>` |  |  |
+
+| Data attribute | Description |
+| --- | --- |
+| `data-disabled` | Present when disabled. |
+| `data-dragging` | Whether a pointer is dragging the knob. |
+
+### Value
+
+The formatted value (`format`/`locale` on Root). Renders a `<output>` element.
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `children` | `\| React.ReactNode \| ((formattedValue: string, value: number) => React.ReactNode)` |  |  |
+
+| Data attribute | Description |
+| --- | --- |
+| `data-disabled` | Present when disabled. |
+| `data-dragging` | Whether a pointer is dragging the knob. |
+
+### Mark
+
+A graduation on the dial at `value`, placed on the knob's scale: a layer the size of the knob, rotated to where `value` sits, so a tick drawn at its top lands on the sweep. Its `--knob-mark-angle` CSS variable is that rotation, to turn a label back upright. It carries `data-active` while the value has reached it from the anchor. Decorative: the input announces the value. Renders a `<div>` element.
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value` | `number` |  | Where the mark sits, on the knob's scale. |
+
+| Data attribute | Description |
+| --- | --- |
+| `data-disabled` | Present when disabled. |
+| `data-dragging` | Whether a pointer is dragging the knob. |
+| `data-active` | Whether the value has reached this mark from the anchor. |
+
+### Label
+
+Accessible label, associated with the thumb's input. Renders a `<div>` element.
+
+| Data attribute | Description |
+| --- | --- |
+| `data-disabled` | Present when disabled. |
+| `data-dragging` | Whether a pointer is dragging the knob. |
+
+### Registry component
+
 `Knob` accepts **`size`** and **`className`** plus primitive props from `KnobPrimitive.Root.Props`. `aria-label`, `aria-labelledby`, and `aria-describedby` are forwarded to the knob's input.
 
 | Prop | Type | Default | Description |
@@ -173,7 +284,7 @@ Wheel input over the knob steps the value by `step` and reports `eventDetails.re
 | `size` | `"sm" \| "default" \| "lg" \| "xl"` | `"default"` | Diameter variant. |
 | `className` | `string` | - | On the root wrapper. |
 
-### Primitive parts
+
 
 `@audio-ui/react/knob` exposes `Knob.Root`, `Knob.Control` (pointer, wheel, reset), `Knob.Track` and `Knob.Indicator` (SVG arcs; `strokeWidth` in the 48×48 viewBox), `Knob.Thumb` (rotates with the value and holds the input), `Knob.Value` (formatted `<output>`), `Knob.Mark` (a graduation at a `value`, rotated onto the dial's scale, with `data-active` once reached), and `Knob.Label`. Every part accepts a `render` prop, `className` / `style` as functions of state, and exposes `data-disabled` / `data-dragging`.
 

@@ -101,53 +101,64 @@ The steps are one tab stop, and each is a toggle button (`aria-pressed`) named a
 
 ### Root
 
-Groups the parts and owns the pattern. Renders a `<div>`.
+A grid of steps to switch on and off, one row per sound: the pattern of a drum machine. Pressing a cell flips it, and dragging on carries the new state across every cell the pointer crosses. The cells are one tab stop, and the arrow keys move between them. The step being played comes from `source` and is marked on its cells straight in the DOM with `data-current`, so a clock ticking every step never re-renders React. Renders a `<div>` element.
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `value` | `boolean[][]` | | The pattern: a row per sound, each a list of steps. |
-| `defaultValue` | `boolean[][]` | | The starting pattern, when uncontrolled. |
-| `onValueChange` | `(value, eventDetails) => void` | | Fires while steps flip. `eventDetails.reason` is `"press"`, `"paint"` or `"keyboard"`; `eventDetails.cancel()` keeps the pattern as it was. |
-| `onValueCommitted` | `(value, eventDetails) => void` | | Fires when a gesture that changed the pattern ends, and after each key press. |
-| `source` | `{ getSnapshot, subscribe }` | | The step being played. Its cells get `data-current`. |
-| `disabled` | `boolean` | `false` | Stops the pointer and the keyboard. |
-| `className`, `style`, `render` | | | Each can be a function of the state. |
+| `defaultValue` | `Pattern` |  | Uncontrolled starting pattern: a row per sound, each a list of steps. |
+| `disabled` | `boolean` |  |  |
+| `onValueChange` | `( value: boolean[][], eventDetails: ChangeEventDetails ) => void` |  | Fires while cells are flipped. `eventDetails.cancel()` keeps the pattern as it was. |
+| `onValueCommitted` | `( value: boolean[][], eventDetails: CommitEventDetails ) => void` |  | Fires when a press, a paint or a key press that changed the pattern ends. |
+| `source` | `Source<number>` |  | The step being played, a live value followed without re-rendering; its cells get `data-current`. |
+| `value` | `Pattern` |  | The pattern: a row per sound, each a list of steps. |
 
 | Data attribute | Description |
 | --- | --- |
 | `data-disabled` | Present when disabled. |
-| `data-painting` | Present while a pointer paints. |
+| `data-painting` | Whether a pointer is painting cells. |
 
 ### Rows
 
-Calls `children(row)` once per row. Renders nothing of its own.
+Renders `children` once per row: the place to put a `Sequencer.Row`. Renders no element of its own.
 
-### Row
-
-One sound's row of steps. Renders a `<div>` with `role="group"`; name it with `aria-label`.
-
-| Prop | Type | Description |
-| --- | --- | --- |
-| `index` | `number` | Which row this is, from the top. |
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `children` | `(row: number) => React.ReactNode` |  |  |
 
 ### Cells
 
-Calls `children(step)` once per step of the row it is in. Renders nothing of its own.
+Renders `children` once per step of the row it is in: the place to put a `Sequencer.Cell`. Renders no element of its own.
 
-### Cell
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `children` | `(step: number) => React.ReactNode` |  |  |
 
-One step: a toggle button. Renders a `<button>`.
+### Row
 
-| Prop | Type | Description |
-| --- | --- | --- |
-| `step` | `number` | Which step this is, from the left. |
+One sound's row of steps. Name it with `aria-label`, such as "Kick". Renders a `<div>` element.
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `index` | `number` |  | Which row this is, from the top. |
 
 | Data attribute | Description |
 | --- | --- |
-| `data-on` | Present when the step is on (also `aria-pressed`). |
-| `data-current` | Present on the step being played. |
 | `data-disabled` | Present when disabled. |
-| `data-painting` | Present while a pointer paints. |
+| `data-painting` | Whether a pointer is painting cells. |
+
+### Cell
+
+One step of a row: a toggle button, pressed when the step is on. Press it and drag on to paint the same state across the cells you cross; focused, Space or Enter flips it and the arrow keys move to the next cell. Name it with `aria-label`, such as "Kick, step 5". The step being played gets `data-current`. Renders a `<button>` element.
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `step` | `number` |  | Which step this is, from the left. |
+
+| Data attribute | Description |
+| --- | --- |
+| `data-disabled` | Present when disabled. |
+| `data-on` | Whether the step is on: also `aria-pressed`. |
+| `data-painting` | Present when painting. |
 
 ### Registry component
 

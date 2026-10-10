@@ -134,9 +134,85 @@ One tab stop for the whole envelope; focus then roves between points:
 
 ## API reference
 
+### Root
+
+Groups all parts of the breakpoint envelope and owns its points, each normalized to 0…1 on both axes and kept sorted by `x`. Points are dragged and nudged with the keyboard; a double click on the `Graph` adds one and a double click (or Delete) on a `Point` removes it, within `minPoints` / `maxPoints`. Renders a `<div>` element.
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultValue` | `GeomPoint[]` |  | Uncontrolled starting points. Defaults to an ADSR-like shape. |
+| `disabled` | `boolean` |  |  |
+| `format` | `Intl.NumberFormatOptions` |  | Formats point coordinates for each point's `aria-valuetext`. |
+| `locale` | `Intl.LocalesArgument` |  |  |
+| `maxPoints` | `number` |  | Ceiling on the number of points; adding is blocked at this count. Equal to `minPoints`, the shape is fixed. |
+| `minPoints` | `number` | `2` | Floor on the number of points; removal is blocked at this count. |
+| `onValueChange` | `( value: GeomPoint[], eventDetails: ChangeEventDetails ) => void` |  | Fires on every change: drag, keyboard, add and remove. |
+| `onValueCommitted` | `( value: GeomPoint[], eventDetails: CommitEventDetails ) => void` |  | Fires when an interaction that changed the points ends. |
+| `step` | `number` | `0.01` | Keyboard step on both axes, in normalized units. |
+| `value` | `GeomPoint[]` |  |  |
+
+| Data attribute | Description |
+| --- | --- |
+| `data-disabled` | Present when disabled. |
+| `data-dragging` | Whether a point is being dragged. |
+
+### Graph
+
+The drawing surface, a 100×100 stretched viewBox: holds `Line` and `Fill`, and a double click on it adds a point. Carries `data-blocked` briefly when adding is refused at `maxPoints`. Renders a `<svg>` element.
+
+| Data attribute | Description |
+| --- | --- |
+| `data-disabled` | Present when disabled. |
+| `data-dragging` | Whether a point is being dragged. |
+| `data-blocked` | Briefly true after an add was refused at `maxPoints`. |
+
+### Line
+
+The envelope curve through the points. Renders a `<polyline>` element.
+
+| Data attribute | Description |
+| --- | --- |
+| `data-disabled` | Present when disabled. |
+| `data-dragging` | Whether a point is being dragged. |
+
+### Fill
+
+The area under the curve. Renders a `<polyline>` element.
+
+| Data attribute | Description |
+| --- | --- |
+| `data-disabled` | Present when disabled. |
+| `data-dragging` | Whether a point is being dragged. |
+
+### Points
+
+Renders one child per point, in `x` order.
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `children` | `( point: GeomPoint, index: number, points: GeomPoint[] ) => React.ReactNode` |  |  |
+
+### Point
+
+A draggable handle for the point at `index`, positioned with `left`/`bottom` percentages over the `Graph`. It is a `role="slider"` on the point's level (`y`): give it an `aria-label`. One point at a time is the tab stop; arrow keys move it (Shift for larger steps), Delete or a double click removes it. Carries `data-blocked` briefly when removal is refused at `minPoints`. Renders a `<div>` element.
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `getAriaValueText` | `(point: GeomPoint, index: number) => string` |  | Returns the point's `aria-valuetext`. Defaults to the formatted `x, y`. |
+| `index` | `number` |  | Index of the point in the (sorted) value. |
+
+| Data attribute | Description |
+| --- | --- |
+| `data-disabled` | Present when disabled. |
+| `data-dragging` | Whether a point is being dragged. |
+| `data-blocked` | Briefly true after a removal was refused at `minPoints`. |
+| `data-removable` | Whether the point can currently be removed. |
+
+### Registry component
+
 `Envelope` accepts style props (`size`, `className`) plus primitive props from `EnvelopePrimitive.Root.Props`. `aria-label` / `aria-labelledby` name the envelope group.
 
-### Value and state
+#### Value and state
 
 | Prop | Type | Default | Description |
 | ---- | ---- | ------- | ----------- |
@@ -150,14 +226,14 @@ One tab stop for the whole envelope; focus then roves between points:
 | `onValueChange` | `(points, eventDetails) => void` | - | Every change. `eventDetails.reason` is `"drag"`, `"keyboard"`, `"add"`, or `"remove"`, and `eventDetails.index` is the affected point; call `eventDetails.cancel()` to reject it. |
 | `onValueCommitted` | `(points, eventDetails) => void` | - | When an interaction that changed the points ends (release, key press, add, or remove). |
 
-### Layout and display
+#### Layout and display
 
 | Prop | Type | Default | Description |
 | ---- | ---- | ------- | ----------- |
 | `size` | `"sm" \| "default" \| "lg"` | `"default"` | Size variant (sets the envelope height). |
 | `className` | `string` | - | Classes for the graph surface. |
 
-### Primitive parts
+
 
 `@audio-ui/react/envelope` exposes `Envelope.Root`, `Envelope.Graph` (the SVG surface; double-click to add), `Envelope.Line` and `Envelope.Fill` (the curve and the area under it), `Envelope.Points` (renders one child per point) and `Envelope.Point` (the draggable handle). Every part accepts a `render` prop and `className` / `style` as functions of state; points expose `data-dragging`, `data-removable`, `data-blocked`, `data-disabled` and `data-index`.
 

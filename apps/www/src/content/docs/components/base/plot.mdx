@@ -136,76 +136,167 @@ One handle sets the threshold, the other the ratio.
 
 ## API reference
 
-### Plot
+### Root
+
+Groups the parts of a plot and owns its two axes: the range of each and how values spread along it, evenly or logarithmically, the way frequency is drawn. Everything placed on the plot (curves, lines, bands, handles) is placed in the axes' units. Renders a `<div>` element.
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `minX`, `maxX` | `number` | `0`, `1` | Range of the x axis. |
-| `minY`, `maxY` | `number` | `0`, `1` | Range of the y axis. |
-| `scaleX`, `scaleY` | `"linear" \| "log" \| { toPosition, toValue }` | `"linear"` | How values spread along each axis. |
-| `disabled` | `boolean` | `false` | Stops every handle. |
+| `disabled` | `boolean` |  |  |
+| `maxX` | `number` | `1` |  |
+| `maxY` | `number` | `1` |  |
+| `minX` | `number` | `0` |  |
+| `minY` | `number` | `0` |  |
+| `scaleX` | `Scale` | `"linear"` | How x values spread across: `"log"` for frequency, or your own `{ toPosition, toValue }`. |
+| `scaleY` | `Scale` | `"linear"` | How y values spread up. |
 
-`useValueAtPointer()` returns a function from a pointer position (`clientX`, `clientY`) to a value `{ x, y }` in the axes' units, for adding a point where someone double-clicks or reading out what is under the cursor. Call it from inside a plot.
+| Data attribute | Description |
+| --- | --- |
+| `data-disabled` | Present when disabled. |
 
-### PlotCurve, PlotArea
+### Band
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `fn` | `(x: number) => number` | — | The curve: y at each x. |
-| `fillTo` | `number` | — | Closes the curve down to this y, for an area. |
-| `samples` | `number` | `256` | How many points it is drawn through. |
-
-### PlotTrace, PlotTraceArea
-
-| Prop | Type | Description |
-| --- | --- | --- |
-| `source` | `{ getSnapshot, subscribe }` | The live y values, spread evenly across the x axis. The snapshot may be one array updated in place. |
-| `min`, `max` | `number` | The scale the values are on. Defaults to the plot's y axis. |
-| `fillTo` | `number` | Closes the line down to this y, for an area. |
-
-### PlotDot
-
-| Prop | Type | Description |
-| --- | --- | --- |
-| `source` | `{ getSnapshot, subscribe }` | A live `{ x, y }`, followed without re-rendering. |
-| `value` | `{ x: number; y: number }` | A still point. |
-
-### PlotCursor
-
-Crosshair lines that follow the mouse over the plot, with a readout in the corner of what is under it. It is for mouse and pen, not touch, and does its work in the DOM as the pointer moves, so it costs no React render.
-
-| Prop | Type | Description |
-| --- | --- | --- |
-| `format` | `(value: { x, y }) => string` | Turns the value under the pointer, in the axes' units, into the text shown, such as `1.2 kHz · +3.0 dB`. |
-
-On the primitive, `Plot.Cursor` sets `--plot-cursor-x` and `--plot-cursor-y` (the pointer's place across and down the plot) and `data-active` while the pointer is over it, and `Plot.CursorReadout` writes the text; compose your own lines from the two variables.
-
-### PlotGrid
-
-Grid lines and their labels, worked out from the axes: round values spread along each axis you give, by powers of ten on a logarithmic one, so a plot reads without a line and a label placed by hand for each value.
-
-| Prop | Type | Description |
-| --- | --- | --- |
-| `x`, `y` | `{ ticks?, count?, format?, labels? }` | What to draw along each axis; leave one out for none. `ticks` sets the values, otherwise about `count` (5) round ones are chosen. `format` writes a label (default "1k", "0.5"), and `labels: false` draws lines alone. |
-
-The line at zero carries `data-zero`, and the parts `data-part="line"` and `"label"` with `data-axis`, for your own styling.
-
-### PlotLine, PlotMark, PlotBand
-
-| Prop | Type | Description |
-| --- | --- | --- |
-| `axis` | `"x" \| "y"` | `PlotLine`: the line is vertical at an x value, or horizontal at a y value. `PlotBand`: the axis `from` and `to` are on. |
-| `value` | `number` | `PlotLine` and `PlotMark`: where on the axis. `PlotMark` is a label ("1k", "+12") at that value. |
-| `from`, `to` | `number` | `PlotBand` only. |
-
-### PlotHandle
+A stretch of the plot between two values on one axis, across the whole of the other: the frequencies a sweep can reach, the levels over a threshold. Sits in `Plot.Graph`. Renders a `<rect>` element.
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `value` / `defaultValue` | `{ x: number; y: number }` | the middle | The handle's position, in the axes' units. |
-| `axis` | `"both" \| "x" \| "y"` | `"both"` | The axes it moves along. |
-| `onValueChange` | `(value, eventDetails) => void` | — | While it moves: `reason` is `"drag"`, `"keyboard"` or `"input-change"`. `eventDetails.cancel()` keeps it where it was. |
-| `onValueCommitted` | `(value, eventDetails) => void` | — | When a gesture that moved it ends. |
-| `getAriaLabel` | `(axis) => string` | — | Names each axis. Defaults to `aria-label`, followed by X / Y. |
-| `getAriaValueText` | `(value, axis) => string` | — | Announces each axis, such as "1.2 kHz". |
-| `disabled` | `boolean` | `false` | |
+| `axis` | `"x" \| "y"` |  | The axis `from` and `to` are values on. |
+| `from` | `number` |  |  |
+| `to` | `number` |  |  |
+
+| Data attribute | Description |
+| --- | --- |
+| `data-disabled` | Present when disabled. |
+
+### Dot
+
+A point on the plot that nothing drags: where the signal is right now, such as the input level on a compressor's curve. Give it a `source` and it moves straight in the DOM without re-rendering React, or a `value` for a still point. Hidden from assistive technology and from the pointer. Renders a `<div>` element.
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `source` | `DotSource` |  | A live point, followed without re-rendering. Takes precedence over `value`. |
+| `value` | `Point` |  | A still point, in the axes' units. |
+
+| Data attribute | Description |
+| --- | --- |
+| `data-disabled` | Present when disabled. |
+
+### Cursor
+
+Follows the pointer over the plot, for crosshair lines and a readout of what is under it. It covers the plot, lets pointer events through, and sets `--plot-cursor-x` and `--plot-cursor-y` (0% to 100% across and down) and `data-active` while the pointer is over the plot with a mouse or a pen, all in the DOM without re-rendering React. Put lines in it that use the two variables, and a `Plot.CursorReadout`. Renders a `<div>` element.
+
+| Data attribute | Description |
+| --- | --- |
+| `data-disabled` | Present when disabled. |
+
+### CursorReadout
+
+The value under the pointer, as text: `format` turns it into what to show, and the text is written straight into the DOM as the pointer moves. It sits where the pointer is; set its offset and its look with your own classes. Renders a `<div>` element.
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `format` | `(value: Point) => string` |  | Turns the value under the pointer, in the axes' units, into the text shown. |
+
+| Data attribute | Description |
+| --- | --- |
+| `data-disabled` | Present when disabled. |
+
+### Grid
+
+Grid lines and their labels, drawn from the axes: round values along each axis you give, so a plot reads without a rule and a label placed by hand per value. It covers the plot, is hidden from assistive technology and from the pointer, and marks its parts for styling: `data-part="line"` and `data-part="label"`, each with `data-axis`, and `data-zero` on the line at zero. Renders a `<div>` element.
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `x` | `GridAxis` |  | Grid lines across, at values on the x axis. Leave it out for none. |
+| `y` | `GridAxis` |  | Grid lines along, at values on the y axis. Leave it out for none. |
+
+| Data attribute | Description |
+| --- | --- |
+| `data-disabled` | Present when disabled. |
+
+### Handle
+
+A point on the plot that can be moved: an equalizer band at its frequency and gain, a filter's cutoff and resonance, a compressor's threshold. Its value is in the axes' units, and `axis` can hold it to one of them. Dragging moves it from where it is, never jumping to the pointer, four times finer with Shift. It holds a native `<input type="range">` per axis it moves along, carrying the accessible names: the first takes focus, and the arrow keys move it by a hundredth of the axis, a tenth with Shift. Renders a `<div>` element.
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `axis` | `"both" \| Axis` | `"both"` | The axes the handle moves along; the other keeps the value given. |
+| `defaultValue` | `Value` |  | Uncontrolled starting value. Defaults to the middle of the plot. |
+| `disabled` | `boolean` |  |  |
+| `getAriaLabel` | `(axis: Axis) => string` |  | Names each axis input. Defaults to `aria-label`, followed by "X" / "Y" when the handle moves along both. |
+| `getAriaValueText` | `(value: number, axis: Axis) => string` |  | Returns an axis input's `aria-valuetext`, from its value. Defaults to the number. |
+| `onValueChange` | `(value: Value, eventDetails: ChangeEventDetails) => void` |  | Fires while the handle is moved: drag, keyboard and input changes. |
+| `onValueCommitted` | `(value: Value, eventDetails: CommitEventDetails) => void` |  | Fires when a gesture that moved the handle ends, and after each key or input change. |
+| `value` | `Value` |  | The handle's position, in the axes' units. |
+
+| Data attribute | Description |
+| --- | --- |
+| `data-disabled` | Present when disabled. |
+| `data-dragging` | Whether a pointer is dragging the handle. |
+
+### Graph
+
+The drawing surface: an `<svg>` covering the plot, stretched to its size, that `Plot.Curve`, `Plot.Line` and `Plot.Band` draw in. Strokes keep their width however the plot is stretched. Hidden from assistive technology and from the pointer. Renders a `<svg>` element.
+
+| Data attribute | Description |
+| --- | --- |
+| `data-disabled` | Present when disabled. |
+
+### Trace
+
+A live line across the plot: the list of y values a `source` holds, such as the spectrum of the sound, spread evenly across the x axis. It is drawn straight in the DOM each time the source changes, without re-rendering React, so it can follow audio frame by frame. With `fillTo`, it closes down to that y value to be filled as an area. Sits in `Plot.Graph`. Renders a `<path>` element.
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `fillTo` | `number` |  | Closes the line to this y value, so it can be filled as an area. |
+| `max` | `number` |  | Top of the scale the values are on. Defaults to the plot's y axis. |
+| `min` | `number` |  | Bottom of the scale the values are on. Defaults to the plot's y axis. |
+| `source` | `TraceSource` |  | The live y values; the snapshot may be one array updated in place. |
+
+| Data attribute | Description |
+| --- | --- |
+| `data-disabled` | Present when disabled. |
+
+### Curve
+
+A curve across the whole plot: `y = fn(x)` in the axes' units, such as an equalizer's response in dB at each frequency. With `fillTo`, it closes down to that y value, to be filled as an area. Sits in `Plot.Graph`. Renders a `<path>` element.
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `fillTo` | `number` |  | Closes the curve to this y value, so it can be filled as an area. |
+| `fn` | `(x: number) => number` |  | The curve: y, in the y axis' units, at each x. |
+| `samples` | `number` | `256` | How many points the curve is drawn through. |
+
+| Data attribute | Description |
+| --- | --- |
+| `data-disabled` | Present when disabled. |
+
+### Line
+
+A straight line across the plot at a value: vertical at an x value, such as a filter's cutoff, or horizontal at a y value, such as 0 dB. Sits in `Plot.Graph`. Renders a `<line>` element.
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `axis` | `"x" \| "y"` |  | `"x"` draws a vertical line at an x value, `"y"` a horizontal one at a y value. |
+| `value` | `number` |  |  |
+
+| Data attribute | Description |
+| --- | --- |
+| `data-disabled` | Present when disabled. |
+
+### Mark
+
+A label at a value on one axis, such as "1k" under a frequency or "+12" by a gain: placed at the value along the axis and left to you to set apart from the plot's edge. Hidden from assistive technology, which reads the handles' own values. Renders a `<div>` element.
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `axis` | `"x" \| "y"` |  | The axis `value` is on: `"x"` places it across, `"y"` down. |
+| `value` | `number` |  |  |
+
+| Data attribute | Description |
+| --- | --- |
+| `data-disabled` | Present when disabled. |
+
+### Registry component
+
+`PlotCursor` takes a `format` function, `(value) => string`, for its readout; `PlotTraceArea` is a `Trace` drawn as a filled area. The rest take the primitive's props.

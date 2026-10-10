@@ -136,9 +136,62 @@ Wheel input over the fader nudges the value by `step` and reports `eventDetails.
 
 ## API reference
 
+### Root
+
+Groups all parts of the fader, with audio defaults (vertical, -60…+6) and mouse-wheel stepping. While a pointer drags it, the thumb follows the pointer even if a controlled `value` lags behind (a seek bar driven by playback time, automation) — reject a value with `eventDetails.cancel()` instead. Renders a `<div>` element.
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `anchor` | `number` |  | Value the `Indicator` fills from, such as `0` on a -1…1 pan. Defaults to `min`. |
+| `defaultValue` | `number` |  | Uncontrolled starting value; defaults to the midpoint of `min…max`. |
+| `max` | `number` | `6` |  |
+| `min` | `number` | `-60` |  |
+| `onValueChange` | `(value: number, eventDetails: ChangeEventDetails) => void` |  | Fires on drag, track press, keyboard, wheel and form input changes. |
+| `onValueCommitted` | `( value: number, eventDetails: CommitEventDetails ) => void` |  | Fires when an interaction ends with a new value. |
+| `orientation` | `"horizontal" \| "vertical"` | `"vertical"` |  |
+| `value` | `number` |  |  |
+
+| Data attribute | Description |
+| --- | --- |
+| `data-active` | Whether the value has reached this mark from the anchor. |
+| `data-disabled` | Present when disabled. |
+
+### Control
+
+The interactive area: pointer presses and drags, plus mouse-wheel stepping. Sets `touch-action: none` so touch drags don't scroll the page. Renders a `<div>` element.
+
+| Data attribute | Description |
+| --- | --- |
+| `data-active` | Whether the value has reached this mark from the anchor. |
+| `data-disabled` | Present when disabled. |
+
+### Indicator
+
+The filled part of the track: from `min` up to the value, or between the Root's `anchor` and the value, on whichever side of it the value is. Renders a `<div>` element.
+
+| Data attribute | Description |
+| --- | --- |
+| `data-active` | Whether the value has reached this mark from the anchor. |
+| `data-disabled` | Present when disabled. |
+
+### Mark
+
+A graduation along the track at `value`: placed from the start of the travel in the fader's direction, where the thumb's center would be at that value. It carries `data-active` while the value has reached it from the anchor, and `data-orientation`. Decorative: the thumb's input announces the value. Render your own tick and label inside it. Renders a `<div>` element.
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value` | `number` |  | Where the mark sits, between `min` and `max`. |
+
+| Data attribute | Description |
+| --- | --- |
+| `data-active` | Whether the value has reached this mark from the anchor. |
+| `data-disabled` | Present when disabled. |
+
+### Registry component
+
 `Fader` accepts style props (`size`, `thumbMarks`, `className`) plus primitive props from `FaderPrimitive.Root.Props` (`name`, `form`, `format`, `locale`, `largeStep`, `render`, …). The primitive's `Fader.Mark` places a graduation at a `value` along the track, with `data-active` once the value has reached it, to build your own ruler. `aria-label`, `aria-labelledby`, and `aria-describedby` are forwarded to the thumb's input.
 
-### Value and state
+#### Value and state
 
 | Prop | Type | Default | Description |
 | ---- | ---- | ------- | ----------- |
@@ -157,7 +210,7 @@ Wheel input over the fader nudges the value by `step` and reports `eventDetails.
 | `aria-label` | `string` | - | Accessible name for the slider. |
 | `aria-labelledby` | `string` | - | ID of a labeling element. |
 
-### Layout and visuals
+#### Layout and visuals
 
 | Prop | Type | Default | Description |
 | ---- | ---- | ------- | ----------- |

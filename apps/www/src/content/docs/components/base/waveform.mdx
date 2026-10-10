@@ -246,9 +246,189 @@ The bars of a `BarVisualizer` are plain elements: restyle them with `.cn-bar-vis
 
 ## API reference
 
+### Root
+
+Groups the parts of a waveform and owns what they show: the audio's shape (`peaks`, known upfront, or a live `levels` signal) and, for a seekable one, the playback position in `duration` units. The position comes from `value`, or from a live `source` that the waveform follows straight in the DOM without re-rendering React; it is exposed as the `--waveform-position` CSS variable (a percentage). While a live signal is audible the element carries `data-active`. Renders a `<div>` element.
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultValue` | `number` | `0` | Uncontrolled starting position. |
+| `disabled` | `boolean` |  |  |
+| `duration` | `number` | `1` | Length of the audio, in the unit `value` is in (typically seconds). |
+| `largeStep` | `number` |  | Step for Page Up/Page Down and Shift + arrow keys. Defaults to a tenth of `duration`. |
+| `levels` | `Levels` |  | A live signal drawn outside React, in place of `peaks`: a microphone, an analyser, a stream. |
+| `loading` | `boolean` | `false` | Whether the audio is still on its way. Seeking waits, and the bars sweep. |
+| `onValueChange` | `(value: number, eventDetails: ChangeEventDetails) => void` |  | Fires while seeking: press, drag, keyboard and input changes. |
+| `onValueCommitted` | `( value: number, eventDetails: CommitEventDetails ) => void` |  | Fires when a seek that moved the position ends. |
+| `peaks` | `WaveformPeaks` |  | The audio's shape, at any resolution: a level per slice (0…1), or the lowest and highest sample of each (`{ min, max }`, -1…1), which draws the waveform lopsided where the audio is. The parts fit it to their size. |
+| `range` | `readonly [number, number]` |  | The stretch of the audio to show, `[start, end]` in `duration` units: a clip's window onto its source, a zoomed view. The playhead, seeking, hover, regions and markers all follow it. Defaults to the whole audio. While the position is outside it, the root carries `data-outside`. |
+| `source` | `Source` |  | A live position followed outside React; takes precedence over `value`. |
+| `step` | `number` |  | Step for the arrow keys. Defaults to a hundredth of `duration`. |
+| `value` | `number` |  | Playback position, from 0 to `duration`. |
+
+| Data attribute | Description |
+| --- | --- |
+| `data-disabled` | Present when disabled. |
+| `data-dragging` | Whether a pointer is scrubbing the waveform. |
+| `data-loading` | Whether the audio is still on its way: there is nothing to seek yet. |
+
+### Region
+
+A stretch of the timeline, such as a loop or a selection, laid over the waveform from `value[0]` to `value[1]`. Dragging its body moves it; add a `Waveform.RegionHandle` per edge to resize it. Renders a `<div>` element.
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultValue` | `Value` |  | Uncontrolled starting region. Defaults to the whole timeline. |
+| `disabled` | `boolean` |  |  |
+| `minLength` | `number` |  | The shortest the region can be resized to, in `duration` units. Defaults to the root's `step`. |
+| `movable` | `boolean` | `true` | Whether dragging the region's body moves it. |
+| `onValueChange` | `(value: Value, eventDetails: ChangeEventDetails) => void` |  | Fires while the region is moved or resized. |
+| `onValueCommitted` | `(value: Value, eventDetails: CommitEventDetails) => void` |  | Fires when a move or a resize that changed the region ends. |
+| `value` | `Value` |  | The region, as `[start, end]` in `duration` units. |
+
+| Data attribute | Description |
+| --- | --- |
+| `data-disabled` | Present when disabled. |
+| `data-dragging` | Whether a pointer is moving or resizing the region. |
+
+### RegionHandle
+
+Resizes one edge of the region: by dragging, or from the keyboard through the native `<input type="range">` it holds, which carries the accessible name (`aria-label` / `aria-labelledby`). Renders a `<div>` element.
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `edge` | `"end" \| "start"` |  | The edge of the region this handle resizes. |
+| `getAriaValueText` | `DescribeValue` |  | Returns how the edge's position is announced, e.g. `"0:12"`. Defaults to its share of the timeline, e.g. `"30%"`. |
+
+| Data attribute | Description |
+| --- | --- |
+| `data-disabled` | Present when disabled. |
+| `data-dragging` | Whether a pointer is moving or resizing the region. |
+
+### Control
+
+The seekable surface: a press jumps to the pointer and a drag scrubs. It tracks the hovered position for `Waveform.Hover`, sets `touch-action: none` so touch scrubbing doesn't scroll the page, and holds the native `<input type="range">` that takes focus, handles the keyboard and carries the accessible name (`aria-label` / `aria-labelledby`). Leave it out for a waveform that is only shown. Renders a `<div>` element.
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `getAriaValueText` | `DescribeValue` |  | Returns how the position is announced, e.g. `"0:12 of 1:42"`. Defaults to the played share, e.g. `"30%"`. |
+
+| Data attribute | Description |
+| --- | --- |
+| `data-disabled` | Present when disabled. |
+| `data-dragging` | Whether a pointer is scrubbing the waveform. |
+| `data-loading` | Whether the audio is still on its way: there is nothing to seek yet. |
+
+### Bars
+
+Draws the waveform as a fixed number of elements, one `Waveform.Bar` each, for a visualizer styled in plain CSS. Each bar's level, 0…1, is written to its `--waveform-level` CSS variable outside React: levels rise at once and fall smoothly, and nothing is written while they rest or sit off screen. Bars the playback position has passed carry `data-played`. Its children are a function called once per bar; left out, plain bars are rendered. Renders a `<div>` element.
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `children` | `(index: number, count: number) => React.ReactNode` |  | Called once per bar; returns its `Waveform.Bar`. |
+| `count` | `number` | `24` | How many bars to draw. The levels are fitted to them. |
+| `gain` | `number` | `1` | Visual gain applied to the levels before they are drawn. |
+| `idle` | `WaveformIdle` | `"none"` | What the bars do while there is no signal. |
+| `minLevel` | `number` | `0.08` | Resting level, 0…1: silent bars keep this much of their size. |
+| `mirrored` | `boolean` | `false` | Mirrors the levels around the middle bar, the first one in the center. |
+
+| Data attribute | Description |
+| --- | --- |
+| `data-disabled` | Present when disabled. |
+| `data-dragging` | Whether a pointer is scrubbing the waveform. |
+| `data-loading` | Whether the audio is still on its way: there is nothing to seek yet. |
+
+### Bar
+
+One bar of `Waveform.Bars`. Its level, 0…1, is its `--waveform-level` CSS variable: size it with `height: calc(var(--waveform-level) * 100%)`, or the width for a vertical layout. Renders a `<span>` element.
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `index` | `number` |  | The bar's place in the row, from 0. |
+
+| Data attribute | Description |
+| --- | --- |
+| `data-disabled` | Present when disabled. |
+| `data-dragging` | Whether a pointer is scrubbing the waveform. |
+| `data-loading` | Whether the audio is still on its way: there is nothing to seek yet. |
+
+### Canvas
+
+Draws the waveform on a canvas, laid out on the device pixel grid: as many bars as fit its width, every edge on a physical pixel, so it stays sharp at any pixel density and zoom level. It paints only when something changed, and not at all while it is off screen. With `peaks`, the played part is drawn in one color and the rest in another. With a live `levels` signal, `mode` picks between the current levels across the width and a scrolling record of the loudest one. The `scope` variant takes raw samples instead of levels, and traces them as they are. Colors come from CSS: `--waveform-color` and `--waveform-progress-color` (both default to the text color). The bar corner radius is `barRadius`, or the `--waveform-bar-radius` CSS length. Renders a `<canvas>` element.
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `barGap` | `number` | `1` | Space between bars, in CSS pixels, snapped to whole device pixels. |
+| `barRadius` | `number` |  | Bar corner radius, in CSS pixels. Defaults to the `--waveform-bar-radius` CSS length. |
+| `barWidth` | `number` | `2` | Bar width, in CSS pixels, snapped to whole device pixels. |
+| `gain` | `number` | `1` | Visual gain applied to the levels before they are drawn. |
+| `idle` | `WaveformIdle` | `"none"` | What the bars do while there is no signal, outside the scrolling mode. |
+| `lineWidth` | `number` | `1.5` | Thickness of the `scope` trace, in CSS pixels. |
+| `minBarHeight` | `number` | `2` | Shortest bar, in CSS pixels: silence still draws a sliver, so the timeline stays readable. |
+| `mirrored` | `boolean` | `false` | Makes the drawing symmetric around the middle: the first level sits in the center, or, when scrolling, the newest one, with older ones moving out on both sides. |
+| `mode` | `"scrolling" \| "static"` | `"static"` | How a live `levels` signal is drawn: `static` spreads the current levels across the width; `scrolling` records the loudest one over time, the newest entering from the right. |
+| `scrollSpeed` | `number` | `60` | How fast the scrolling mode moves, in CSS pixels per second. |
+| `variant` | `WaveformVariant` | `"mirror"` | `mirror` centers the bars on the middle line, `bars` stands them on the baseline, and `line` joins the levels into one continuous, centered shape. `scope` traces raw samples, -1…1, as a single line. |
+
+| Data attribute | Description |
+| --- | --- |
+| `data-disabled` | Present when disabled. |
+| `data-dragging` | Whether a pointer is scrubbing the waveform. |
+| `data-loading` | Whether the audio is still on its way: there is nothing to seek yet. |
+
+### Thumb
+
+A handle centered on the playback position. Renders a `<div>` element.
+
+| Data attribute | Description |
+| --- | --- |
+| `data-disabled` | Present when disabled. |
+| `data-dragging` | Whether a pointer is scrubbing the waveform. |
+| `data-loading` | Whether the audio is still on its way: there is nothing to seek yet. |
+
+### Marker
+
+A point of interest on the timeline, such as a cue or a chapter, positioned at `value`. Its children label it. Renders a `<div>` element.
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value` | `number` |  | Where the marker sits, from 0 to `duration`. |
+
+| Data attribute | Description |
+| --- | --- |
+| `data-disabled` | Present when disabled. |
+| `data-dragging` | Whether a pointer is scrubbing the waveform. |
+| `data-loading` | Whether the audio is still on its way: there is nothing to seek yet. |
+
+### Playhead
+
+A marker at the playback position, with no interaction of its own. Renders a `<div>` element.
+
+| Data attribute | Description |
+| --- | --- |
+| `data-disabled` | Present when disabled. |
+| `data-dragging` | Whether a pointer is scrubbing the waveform. |
+| `data-loading` | Whether the audio is still on its way: there is nothing to seek yet. |
+
+### Hover
+
+Shown while the pointer is over the `Control`, positioned at the hovered point. Its children receive the hovered position, to print a time. Renders a `<div>` element.
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `children` | `React.ReactNode \| ((value: number) => React.ReactNode)` |  |  |
+
+| Data attribute | Description |
+| --- | --- |
+| `data-disabled` | Present when disabled. |
+| `data-dragging` | Whether a pointer is scrubbing the waveform. |
+| `data-loading` | Whether the audio is still on its way: there is nothing to seek yet. |
+
+### Registry component
+
 `aria-label`, `aria-labelledby`, and `aria-describedby` are forwarded to the element that needs them: the waveform's input, a region handle's input, or the live waveform itself.
 
-### Waveform
+#### Waveform
 
 | Prop | Type | Default | Description |
 | ---- | ---- | ------- | ----------- |
@@ -269,7 +449,7 @@ The bars of a `BarVisualizer` are plain elements: restyle them with `.cn-bar-vis
 | `variant` | `"default" \| "playhead"` | `"default"` | `playhead` adds a playhead line and a handle. |
 | `className` | `string` | - | Classes for the waveform surface. |
 
-### WaveformRegion
+#### WaveformRegion
 
 | Prop | Type | Default | Description |
 | ---- | ---- | ------- | ----------- |
@@ -283,7 +463,7 @@ The bars of a `BarVisualizer` are plain elements: restyle them with `.cn-bar-vis
 
 `WaveformRegionHandle` takes `edge` (`"start"` or `"end"`) and `getAriaValueText`. `WaveformMarker` takes `value` and shows its children as a label. `WaveformHover` takes `format`, which prints the hovered position; without it only the line shows.
 
-### LiveWaveform
+#### LiveWaveform
 
 | Prop | Type | Default | Description |
 | ---- | ---- | ------- | ----------- |
@@ -296,7 +476,7 @@ The bars of a `BarVisualizer` are plain elements: restyle them with `.cn-bar-vis
 | `idle` | `"none" \| "pulse" \| "wave"` | `"none"` | In `static` mode, what the bars do while there is no signal. |
 | `loading` | `boolean` | `false` | Sweeps across the bars while the signal is on its way. |
 
-### BarVisualizer
+#### BarVisualizer
 
 | Prop | Type | Default | Description |
 | ---- | ---- | ------- | ----------- |
@@ -310,7 +490,7 @@ The bars of a `BarVisualizer` are plain elements: restyle them with `.cn-bar-vis
 | `align` | `"start" \| "center" \| "end"` | `"center"` | Where the bars grow from. |
 | `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` | `vertical` stacks the bars and grows them sideways. |
 
-### Primitive parts
+
 
 `@audio-ui/react/waveform` exposes the parts these components are built from:
 

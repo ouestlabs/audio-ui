@@ -121,9 +121,68 @@ To also read the levels in React (a numeric readout, say), use `useSyncExternalS
 
 ## API reference
 
+### Root
+
+Groups the channels of a level meter. Levels come either from `value` (and `peak`) as React props, or from a live `source`: with a source the meter writes each frame straight to the DOM, so a signal updating 60 times a second never re-renders React. Renders a `<div>` element.
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `clipThreshold` | `number` | `0` | Level at or above which a channel is clipping. |
+| `format` | `Intl.NumberFormatOptions` |  | Formats each level for `Meter.Value` and the channels' `aria-valuetext`. Defaults to one decimal. |
+| `locale` | `Intl.LocalesArgument` |  |  |
+| `max` | `number` | `6` |  |
+| `min` | `number` | `-60` |  |
+| `orientation` | `Orientation` | `"vertical"` |  |
+| `peak` | `readonly number[]` |  | Peak-hold level per channel. Timing and decay live outside the primitive. |
+| `source` | `Source` |  | A live signal painted outside React; takes precedence over `value` and `peak`. |
+| `value` | `readonly number[]` |  | Level per channel; the array length is the channel count. |
+
+### Channels
+
+Renders one child per channel.
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `children` | `(index: number, channelCount: number) => React.ReactNode` |  |  |
+
+### Channel
+
+One channel of the meter, a `role="meter"`: name it with `aria-label` or a `Meter.Label`. Carries `data-clipping` at or above the clip threshold. Renders a `<div>` element.
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `getAriaValueText` | `( formattedValue: string, value: number, index: number ) => string` |  | Returns the channel's `aria-valuetext`, e.g. `"-6 dB"`. Defaults to the formatted level. |
+| `index` | `number` |  | Index of the channel in the levels. |
+
+| Data attribute | Description |
+| --- | --- |
+| `data-clipping` | Whether the level is at or above the clip threshold. |
+
+### Indicator
+
+The lit part of the channel, scaled to the level. Renders a `<div>` element.
+
+| Data attribute | Description |
+| --- | --- |
+| `data-clipping` | Whether the level is at or above the clip threshold. |
+
+### Peak
+
+The peak-hold mark, positioned at the channel's peak level; hidden while the channel has none. Renders a `<div>` element.
+
+| Data attribute | Description |
+| --- | --- |
+| `data-clipping` | Whether the level is at or above the clip threshold. |
+
+### Value
+
+The channel's formatted level (`format`/`locale` on Root). With a live `source` only the default text is kept current, not a `children` function. Renders a `<span>` element.
+
+### Registry component
+
 `Meter` accepts style props (`size`, `peakMarks`, `className`) plus primitive props from `MeterPrimitive.Root.Props`.
 
-### Value and state
+#### Value and state
 
 | Prop | Type | Default | Description |
 | ---- | ---- | ------- | ----------- |
@@ -137,7 +196,7 @@ To also read the levels in React (a numeric readout, say), use `useSyncExternalS
 | `format` | `Intl.NumberFormatOptions` | one decimal | Formats each level for the value text. |
 | `aria-label` | `string` | - | Accessible name for the meter group and its channels. |
 
-### Layout and display
+#### Layout and display
 
 | Prop | Type | Default | Description |
 | ---- | ---- | ------- | ----------- |
@@ -145,7 +204,7 @@ To also read the levels in React (a numeric readout, say), use `useSyncExternalS
 | `peakMarks` | `"visible" \| "hidden"` | `"visible"` | Shows or hides the peak-hold mark per channel. |
 | `className` | `string` | - | Additional CSS classes. |
 
-### Primitive parts
+
 
 `@audio-ui/react/meter` exposes `Meter.Root` (the group), `Meter.Channels` (one child per channel), `Meter.Channel` (a `role="meter"`), `Meter.Track`, `Meter.Indicator` (the lit part), `Meter.Peak` (the peak-hold mark), `Meter.Value` (the formatted level) and `Meter.Label`. Channel parts expose `data-orientation` and `data-clipping`.
 

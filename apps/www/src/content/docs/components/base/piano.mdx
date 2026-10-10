@@ -126,9 +126,60 @@ One tab stop for the whole keyboard; focus then roves between keys:
 
 ## API reference
 
+### Root
+
+A keyboard to play: every key sounds while pressed, by pointer or from the keyboard. Dragging across the keys glides from one to the next, and each pointer holds its own key, so chords can be played on a touch screen. It is laid out like a piano, or with `layout="even"` as one equal share per key, the way a piano roll's rows are; `orientation="vertical"` puts the low end at the bottom. The keys are one tab stop, walked with the arrow keys. Renders a `<div>` element.
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `activeNotes` | `readonly number[]` |  | Pitches lit from elsewhere, such as a MIDI input or a sequencer, on top of the keys pressed here. |
+| `disabled` | `boolean` |  |  |
+| `layout` | `Layout` | `"keyboard"` | How the keys share the length: like a piano, or one equal share each. |
+| `maxPitch` | `number` | `72` | Highest MIDI pitch, inclusive. |
+| `minPitch` | `number` | `48` | Lowest MIDI pitch, inclusive: 60 is middle C. |
+| `onNoteOff` | `(pitch: number, eventDetails: NoteOffEventDetails) => void` |  | Fires when a key is released, the pointer glides off it, or it loses focus while held. |
+| `onNoteOn` | `(pitch: number, eventDetails: NoteOnEventDetails) => void` |  | Fires when a key is pressed or glided onto. `eventDetails.cancel()` keeps it silent. |
+| `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` |  |
+| `pitches` | `readonly number[]` |  | Only these pitches, in place of `minPitch`…`maxPitch`. |
+
+| Data attribute | Description |
+| --- | --- |
+| `data-disabled` | Present when disabled. |
+
+### Keys
+
+Renders `children` once per key, lowest first: the place to put a `Piano.Key` for each pitch. Renders no element of its own.
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `children` | `(pitch: number) => React.ReactNode` |  |  |
+
+### Key
+
+One key, placed along the keyboard for its pitch. It sounds while pressed: by pointer through the keyboard, or with Enter or Space while focused. Its accessible name defaults to the pitch, such as "C4". Renders a `<button>` element.
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `pitch` | `number` |  | The MIDI pitch this key plays. |
+
+| Data attribute | Description |
+| --- | --- |
+| `data-active` | Whether the key is sounding: pressed here, or listed in `activeNotes`. |
+| `data-disabled` | Present when disabled. |
+
+### KeyLabel
+
+The name of the key it sits in, such as "C4". Hidden from assistive technology, which reads the key's own name. Renders a `<span>` element.
+
+| Data attribute | Description |
+| --- | --- |
+| `data-disabled` | Present when disabled. |
+
+### Registry component
+
 `Piano` accepts style props (`size`, `className`) plus primitive props from `PianoPrimitive.Root.Props`.
 
-### Value and state
+#### Value and state
 
 | Prop            | Type                  | Default | Description                                                      |
 | --------------- | ---------------------- | ------- | ------------------------------------------------------------------ |
@@ -142,7 +193,7 @@ One tab stop for the whole keyboard; focus then roves between keys:
 | `aria-label`    | `string`                | -       | Accessible name for the keyboard.                                 |
 | `aria-labelledby` | `string`              | -       | ID of a labeling element.                                         |
 
-### Layout and display
+#### Layout and display
 
 | Prop        | Type                          | Default     | Description                        |
 | ----------- | ------------------------------ | ----------- | ----------------------------------- |
