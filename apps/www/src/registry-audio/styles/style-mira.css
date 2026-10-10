@@ -269,10 +269,11 @@
   }
 
   .cn-envelope-point {
-    @apply rounded-[min(var(--radius-md),5px)] border-ring border bg-card size-3.5 transition-[color,box-shadow] hover:ring-2 hover:ring-ring/30 focus-visible:ring-2 focus-visible:ring-ring/30 active:ring-2 active:ring-ring/30 data-disabled:pointer-events-none motion-reduce:transition-none;
+    @apply rounded-full border-2 border-primary bg-background shadow-xs data-active:bg-primary transition-[box-shadow] duration-150 ease-out hover:ring-4 hover:ring-ring/30 focus-within:ring-4 focus-within:ring-ring/30 data-dragging:ring-4 data-dragging:ring-ring/30 motion-reduce:transition-none;
   }
 
   /* Blocked-action feedback: removing at minPoints or adding with allowAddPoints=false. */
+  .cn-envelope svg[data-blocked],
   .cn-envelope[data-blocked],
   .cn-envelope-point[data-blocked] {
     @apply animate-[cn-envelope-shake_280ms_linear] motion-reduce:animate-none;

@@ -136,11 +136,11 @@ export const components: RegistryItem[] = [
     description: "Controlled envelope with a live point count",
     files: [
       {
-        path: "components/envelope/envelope-controlled-demo.tsx",
+        path: "components/envelope/envelope-adsr-demo.tsx",
         type: "registry:example",
       },
     ],
-    name: "envelope-controlled-demo",
+    name: "envelope-adsr-demo",
     registryDependencies: ["@audio/envelope"],
     type: "registry:example",
   },

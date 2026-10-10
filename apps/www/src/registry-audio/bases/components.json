@@ -46,8 +46,8 @@
   },
   {
     "categories": ["envelope"],
-    "name": "envelope-controlled-demo",
-    "title": "envelope-controlled-demo"
+    "name": "envelope-adsr-demo",
+    "title": "envelope-adsr-demo"
   },
   {
     "categories": ["envelope"],
