@@ -158,5 +158,10 @@
     "categories": ["scrubber"],
     "name": "scrubber-demo",
     "title": "scrubber-demo"
+  },
+  {
+    "categories": ["transport"],
+    "name": "transport-demo",
+    "title": "transport-demo"
   }
 ]

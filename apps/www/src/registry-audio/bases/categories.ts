@@ -111,6 +111,12 @@ export const categories: CategoryDef[] = [
   },
   {
     description:
+      "Transport controls: return to start, play, stop, record and loop, with the position in bars and beats and the tempo.",
+    label: "Transport",
+    name: "transport",
+  },
+  {
+    description:
       "Zoomable, snapping timeline components for arrangements, clip editors and piano rolls.",
     label: "Timeline",
     name: "timeline",

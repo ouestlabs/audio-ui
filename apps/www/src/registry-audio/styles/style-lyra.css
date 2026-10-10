@@ -278,6 +278,19 @@
     @apply animate-[cn-envelope-shake_280ms_linear] motion-reduce:animate-none;
   }
 
+  /* MARK: Transport */
+  .cn-transport-button {
+    @apply aria-pressed:border-primary aria-pressed:bg-primary aria-pressed:text-primary-foreground;
+  }
+
+  .cn-transport-record {
+    @apply text-destructive aria-pressed:border-destructive aria-pressed:bg-destructive aria-pressed:text-white [&_svg]:aria-pressed:fill-current;
+  }
+
+  .cn-transport-position {
+    @apply text-sm;
+  }
+
   /* MARK: Scrubber */
   .cn-scrubber-track {
     @apply rounded-none bg-muted has-focus-visible:ring-2 has-focus-visible:ring-ring/50;

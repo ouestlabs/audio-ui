@@ -61,6 +61,11 @@
     "intro": "Browse {{count}} scrubber components for audio/ui, built on top of shadcn/ui.",
     "title": "Scrubber"
   },
+  "transport": {
+    "description": "Transport controls: return to start, play, stop, record and loop, with the position in bars and beats and the tempo. {{count}} components.",
+    "intro": "Browse {{count}} transport components for audio/ui, built on top of shadcn/ui.",
+    "title": "Transport"
+  },
   "timeline": {
     "description": "Zoomable, snapping timeline components for arrangements, clip editors and piano rolls. {{count}} components.",
     "intro": "Browse {{count}} timeline components for audio/ui, built on top of shadcn/ui.",

@@ -482,4 +482,18 @@ export const components: RegistryItem[] = [
     registryDependencies: ["@audio/scrubber"],
     type: "registry:example",
   },
+  {
+    categories: ["transport"],
+    description:
+      "The transport of a DAW: return to start, play, stop, record and loop, the position in bars and beats, and the tempo. A clock stands in for the engine",
+    files: [
+      {
+        path: "components/transport/transport-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "transport-demo",
+    registryDependencies: ["@audio/transport"],
+    type: "registry:example",
+  },
 ];

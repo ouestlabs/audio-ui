@@ -1,0 +1,88 @@
+---
+title: Transport
+description: The transport of a DAW, with return to start, play, stop, record and loop, the position in bars and beats, and the tempo.
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="transport-demo" />
+
+In a DAW, the transport is the section that commands playback. It is not a bar to scrub on (that is the [Scrubber](/docs/components/base/scrubber)). It holds the buttons that move the engine, the position counted in bars and beats, and the tempo. The position is a live `source`, so the readout follows it straight in the DOM, with no React render per frame.
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">CLI</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash component
+npx shadcn@latest add @audio/transport
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the following dependencies:</Step>
+
+```bash
+npm install @audio-ui/react
+```
+
+<Step>Copy and paste the following code into your project.</Step>
+
+<ComponentSource
+  styleName="base-nova"
+  name="transport"
+  title="components/audio/elements/transport.tsx"
+/>
+
+<Step>Update the import paths to match your project setup.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import { Transport } from "@/components/audio/elements/transport";
+
+<Transport
+  bpm={bpm}
+  looping={looping}
+  onBpmChange={setBpm}
+  onLoopingChange={setLooping}
+  onPlay={() => engine.play()}
+  onRecordingChange={setRecording}
+  onReturn={() => engine.seek(0)}
+  onStop={() => engine.stop()}
+  playing={playing}
+  recording={recording}
+  source={position} // seconds, a live value
+/>;
+```
+
+Play, record and loop are toggle buttons (`aria-pressed`), so they show when they are on; return to start and stop act once. The position reads `bar.beat.sixteenth`, counted from the tempo and the time signature (`tempo`, 4/4 by default).
+
+## API reference
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `source` | `{ getSnapshot, subscribe }` | The playback position in seconds, a live value. |
+| `bpm`, `onBpmChange` | `number`, `(bpm) => void` | The tempo. |
+| `tempo` | `{ beatsPerBar, beatUnit }` | The time signature the position is counted in. Defaults to 4/4. |
+| `playing`, `onPlay` | `boolean`, `() => void` | Play is pressed while it plays. |
+| `onStop` | `() => void` | Stop was pressed. |
+| `onReturn` | `() => void` | Return to start was pressed. |
+| `recording`, `onRecordingChange` | `boolean`, `(recording) => void` | Armed to record. |
+| `looping`, `onLoopingChange` | `boolean`, `(looping) => void` | Whether the loop is on. |

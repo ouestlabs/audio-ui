@@ -12,6 +12,7 @@
     "sequencer",
     "piano",
     "plot",
+    "transport",
     "scrubber"
   ]
 }

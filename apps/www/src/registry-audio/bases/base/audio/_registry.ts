@@ -209,4 +209,25 @@ export const audio: RegistryItem[] = [
     registryDependencies: ["@shadcn/button"],
     type: "registry:ui",
   },
+  {
+    dependencies: ["@audio-ui/react"],
+    files: [
+      {
+        path: "audio/elements/transport.tsx",
+        type: "registry:ui",
+      },
+      {
+        path: "components/transport/transport-demo.tsx",
+        target: "components/audio/transport-default.tsx",
+        type: "registry:component",
+      },
+    ],
+    name: "transport",
+    registryDependencies: [
+      "@audio/bpm-control",
+      "@audio/musical-time",
+      "@shadcn/button",
+    ],
+    type: "registry:ui",
+  },
 ];
