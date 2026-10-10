@@ -8,7 +8,6 @@ import {
   SiteHeaderModeSwitcher,
 } from "@/components/site-header-client";
 import { Separator } from "@/components/ui/separator";
-import { XLink } from "@/components/x-link";
 import { siteConfig } from "@/lib/config";
 import { showMcpDocs } from "@/lib/flags";
 import { getCategories } from "@/lib/registry";
@@ -96,6 +95,11 @@ export function SiteHeader({ sticky = true }: { sticky?: boolean } = {}) {
     >
       <div className="container-wrapper">
         <div className="flex h-[calc(var(--header-height)-1px)] items-center gap-3.5">
+          <SiteHeaderMobileNav
+            componentCategories={componentCategories}
+            navItems={siteConfig.navItems}
+            tree={pageTree}
+          />
           <Button
             className="hidden md:flex"
             nativeButton={false}
@@ -114,27 +118,16 @@ export function SiteHeader({ sticky = true }: { sticky?: boolean } = {}) {
             }
             variant="ghost"
           />
-          <SiteHeaderMobileNav
-            componentCategories={componentCategories}
-            navItems={siteConfig.navItems}
-            tree={pageTree}
-          />
-          <div className="ml-auto flex items-center gap-2 md:flex-1 md:justify-end">
-            <div className="hidden w-full flex-1 md:flex md:w-auto md:flex-none">
-              <SiteHeaderCommandMenu
-                commandGroups={commandGroups}
-                componentCategories={componentCategories}
-                navItems={siteConfig.navItems}
-              />
-            </div>
-
-            <MainNav className="hidden lg:flex" items={siteConfig.navItems} />
-
-            <Separator className="hidden lg:flex" orientation="vertical" />
-
+          <MainNav className="hidden lg:flex" items={siteConfig.navItems} />
+          <div className="ml-auto flex items-center gap-2">
+            <SiteHeaderCommandMenu
+              commandGroups={commandGroups}
+              componentCategories={componentCategories}
+              navItems={siteConfig.navItems}
+            />
+            <Separator className="hidden sm:flex" orientation="vertical" />
             <div className="flex items-center gap-1">
               <GitHubLink />
-              <XLink />
               <SiteHeaderModeSwitcher />
             </div>
           </div>

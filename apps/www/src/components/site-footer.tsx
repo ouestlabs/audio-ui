@@ -1,6 +1,7 @@
 import { RssSimpleIcon } from "@phosphor-icons/react/ssr";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
+import { siteConfig } from "@/lib/config";
 import { cn } from "@/lib/utils";
 
 export function SiteFooter({ docs = false }: { docs?: boolean }) {
@@ -51,6 +52,16 @@ export function SiteFooter({ docs = false }: { docs?: boolean }) {
               <RssSimpleIcon className="size-3" />
               RSS
             </Link>
+            <Separator orientation="vertical" />
+
+            <a
+              className="font-medium text-xs hover:underline"
+              href={siteConfig.links.twitter}
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              X
+            </a>
           </div>
         </div>
       </div>
