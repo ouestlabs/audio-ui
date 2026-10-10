@@ -14,8 +14,12 @@ const POINTS: Envelope.Breakpoint[] = [
 
 let changes = 0;
 
-function ControlledEnvelope() {
-  const [value, setValue] = useState(POINTS);
+function ControlledEnvelope({
+  points = POINTS,
+}: {
+  points?: Envelope.Breakpoint[];
+}) {
+  const [value, setValue] = useState(points);
   return (
     <Envelope.Root
       onValueChange={(next) => {
@@ -91,6 +95,60 @@ describe("Envelope", () => {
       });
     });
     fireEvent.pointerUp(segment, { pointerId: 1 });
+    expectWork(changes);
+  });
+
+  test("dragging a point in a 64-point envelope", () => {
+    const many = Array.from({ length: 64 }, (_, index) => ({
+      x: index / 63,
+      y: 0.5 + 0.4 * Math.sin(index / 4),
+    }));
+    const view = render(<ControlledEnvelope points={many} />);
+    mockRect(view.getByTestId("graph"), {
+      bottom: 100,
+      height: 100,
+      right: 640,
+      width: 640,
+    });
+    const point = view.getByLabelText("Point 32");
+    fireEvent.pointerDown(point, { clientX: 320, clientY: 50, pointerId: 1 });
+    changes = 0;
+    bench("drag one of 64 points, controlled", (index) => {
+      fireEvent.pointerMove(point, {
+        clientX: 320 + sweep(index, 6) - 3,
+        clientY: sweep(index + 7, 100, 43),
+        pointerId: 1,
+      });
+    });
+    fireEvent.pointerUp(point, { pointerId: 1 });
+    expectWork(changes);
+  });
+
+  test("Alt-bending a segment of a 64-point envelope", () => {
+    const many = Array.from({ length: 64 }, (_, index) => ({
+      x: index / 63,
+      y: index % 2 === 0 ? 0.2 : 0.8,
+    }));
+    const view = render(<ControlledEnvelope points={many} />);
+    const graph = view.getByTestId("graph");
+    mockRect(graph, { bottom: 100, height: 100, right: 640, width: 640 });
+    changes = 0;
+    fireEvent.pointerDown(graph, {
+      altKey: true,
+      button: 0,
+      clientX: 5,
+      clientY: 50,
+      pointerId: 1,
+    });
+    bench("alt-bend one of 63 segments", (index) => {
+      fireEvent.pointerMove(graph, {
+        altKey: true,
+        clientX: 5,
+        clientY: 20 + sweep(index, 60),
+        pointerId: 1,
+      });
+    });
+    fireEvent.pointerUp(graph, { pointerId: 1 });
     expectWork(changes);
   });
 });

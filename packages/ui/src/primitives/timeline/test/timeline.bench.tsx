@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
-import { act, fireEvent } from "@testing-library/react";
+import { act, fireEvent, render } from "@testing-library/react";
 import { bench, expectWork, sweep } from "../../../../test/bench";
+import { Timeline } from "../../../entries/timeline";
 import { createSource } from "../../../source";
 import { renderTimeline } from "./helpers";
 
@@ -28,5 +29,27 @@ describe("Timeline", () => {
       playhead.style.getPropertyValue("--timeline-offset") ||
         playhead.style.cssText
     ).not.toBe("");
+  });
+
+  test("following a live position past 200 marks", () => {
+    const source = createSource(0);
+    const view = render(
+      <Timeline.Root duration={1000} source={source}>
+        <Timeline.Ruler aria-label="Position">
+          {Array.from({ length: 200 }, (_, index) => (
+            <Timeline.Mark key={index} value={index * 5}>
+              {index}
+            </Timeline.Mark>
+          ))}
+        </Timeline.Ruler>
+        <Timeline.Lane>
+          <Timeline.Playhead data-testid="playhead" />
+        </Timeline.Lane>
+      </Timeline.Root>
+    );
+    bench("playhead past 200 marks", (index) => {
+      act(() => source.set(sweep(index, 1000, 240)));
+    });
+    expect(view.getByTestId("playhead")).toBeTruthy();
   });
 });

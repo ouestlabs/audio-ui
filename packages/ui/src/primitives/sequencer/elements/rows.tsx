@@ -6,6 +6,7 @@ import {
   RowContext,
   type SequencerState,
   useSequencerContext,
+  useSequencerView,
 } from "../context";
 
 /** Renders `children` once per row: the place to put a `Sequencer.Row`. Renders no element of its own. */
@@ -50,7 +51,12 @@ export namespace Cells {
 export function Row(componentProps: Row.Props) {
   const { className, index, ref, render, style, ...elementProps } =
     componentProps;
-  const { state } = useSequencerContext("Row");
+  const { state: shared } = useSequencerContext("Row");
+  const painting = useSequencerView("Row", (view) => view.painting);
+  const state = React.useMemo(
+    () => ({ disabled: shared.disabled, painting }),
+    [painting, shared.disabled]
+  );
   const element = useRender({
     defaultTagName: "div",
     props: mergeProps<"div">(

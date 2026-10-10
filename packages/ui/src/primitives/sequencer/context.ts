@@ -3,6 +3,7 @@ import type {
   ChangeEventDetails as ExtraChangeEventDetails,
   CommitEventDetails as ExtraCommitEventDetails,
 } from "../internal/event-details";
+import type { Store } from "../internal/store";
 import type { CellAddress, Pattern } from "./internal/grid";
 
 export type SequencerState = {
@@ -33,10 +34,21 @@ export interface SequencerContextValue {
   meta: {
     steps: number;
     rows: number;
-    tabStop: CellAddress;
-    value: Pattern;
+    /**
+     * What changes while the sequencer is used, outside the context: a cell
+     * follows only its own piece of it, so pressing one step does not render
+     * every other step.
+     */
+    view: Store<SequencerView>;
   };
-  state: SequencerState;
+  /** What changes rarely: the cells read it, so it stays out of `view`. */
+  state: Pick<SequencerState, "disabled">;
+}
+
+export interface SequencerView {
+  painting: boolean;
+  tabStop: CellAddress;
+  value: Pattern;
 }
 
 export const SequencerContext =
@@ -48,6 +60,19 @@ export function useSequencerContext(part: string): SequencerContextValue {
     throw new Error(`Sequencer.${part} must be used within Sequencer.Root`);
   }
   return context;
+}
+
+/** A piece of the sequencer's changing state, re-rendering only when that piece changes. */
+export function useSequencerView<T>(
+  part: string,
+  select: (view: SequencerView) => T
+): T {
+  const { meta } = useSequencerContext(part);
+  return React.useSyncExternalStore(
+    meta.view.subscribe,
+    () => select(meta.view.get()),
+    () => select(meta.view.get())
+  );
 }
 
 /** The row a part sits in. */

@@ -5,10 +5,12 @@ import type { Source } from "../../../source";
 import { createChangeEventDetails } from "../../internal/event-details";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { isReleased } from "../../internal/pointer";
+import { createStore } from "../../internal/store";
 import {
   SequencerContext,
   type SequencerContextValue,
   type SequencerState,
+  type SequencerView,
   type ValueChangeEventDetails,
   type ValueCommitEventDetails,
 } from "../context";
@@ -249,31 +251,46 @@ export function Root(componentProps: Root.Props) {
     () => ({ disabled, painting }),
     [disabled, painting]
   );
-  const context = React.useMemo<SequencerContextValue>(
+  // What each cell follows lives in a store, so a press renders the cell it
+  // changes and not the whole grid.
+  const [view] = React.useState(() =>
+    createStore<SequencerView>({ painting, tabStop: stop, value })
+  );
+  React.useLayoutEffect(() => {
+    view.set({ painting, tabStop: stop, value });
+  }, [painting, stop, value, view]);
+  // The cells carry `data-painting` too, written straight to them: reading it
+  // in each cell would render the whole grid at every press and release.
+  React.useLayoutEffect(() => {
+    for (const node of nodesRef.current.values()) {
+      node.toggleAttribute("data-painting", painting);
+    }
+  }, [painting]);
+
+  // The actions never change identity, so the cells reading them are not
+  // rendered when a new `onValueChange` is passed on every render.
+  const latest = React.useRef({
+    focusCell,
+    moveFocusFrom,
+    pressCell,
+    toggleCell,
+  });
+  latest.current = { focusCell, moveFocusFrom, pressCell, toggleCell };
+  const actions = React.useMemo<SequencerContextValue["actions"]>(
     () => ({
-      actions: {
-        focusCell,
-        moveFocusFrom,
-        pressCell,
-        registerCell,
-        setTabStop: setTabStopState,
-        toggleCell,
-      },
-      meta: { rows, steps, tabStop: stop, value },
-      state,
-    }),
-    [
-      focusCell,
-      moveFocusFrom,
-      pressCell,
+      focusCell: (cell) => latest.current.focusCell(cell),
+      moveFocusFrom: (from, event) => latest.current.moveFocusFrom(from, event),
+      pressCell: (cell, event) => latest.current.pressCell(cell, event),
       registerCell,
-      rows,
-      state,
-      steps,
-      stop,
-      toggleCell,
-      value,
-    ]
+      setTabStop: setTabStopState,
+      toggleCell: (cell, event) => latest.current.toggleCell(cell, event),
+    }),
+    [registerCell]
+  );
+  const shared = React.useMemo(() => ({ disabled }), [disabled]);
+  const context = React.useMemo<SequencerContextValue>(
+    () => ({ actions, meta: { rows, steps, view }, state: shared }),
+    [actions, rows, shared, steps, view]
   );
 
   const element = useRender({

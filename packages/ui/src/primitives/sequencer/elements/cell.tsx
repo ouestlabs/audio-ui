@@ -2,7 +2,7 @@ import { mergeProps } from "@base-ui/react/merge-props";
 import { useRender } from "@base-ui/react/use-render";
 import * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part";
-import { RowContext, useSequencerContext } from "../context";
+import { RowContext, useSequencerContext, useSequencerView } from "../context";
 import { isOn } from "../internal/grid";
 
 /**
@@ -15,13 +15,17 @@ import { isOn } from "../internal/grid";
 export function Cell(componentProps: Cell.Props) {
   const { className, ref, render, step, style, ...elementProps } =
     componentProps;
-  const { actions, meta, state: rootState } = useSequencerContext("Cell");
+  const { actions, state: rootState } = useSequencerContext("Cell");
   const row = React.use(RowContext);
   if (row === null) {
     throw new Error("Sequencer.Cell must be used within Sequencer.Row");
   }
   const cell = { row, step };
-  const on = isOn(meta.value, cell);
+  const on = useSequencerView("Cell", (view) => isOn(view.value, cell));
+  const isTabStop = useSequencerView(
+    "Cell",
+    (view) => view.tabStop.row === row && view.tabStop.step === step
+  );
   const { disabled } = rootState;
 
   const cellRef = React.useCallback(
@@ -56,10 +60,9 @@ export function Cell(componentProps: Cell.Props) {
   };
 
   const state = React.useMemo<Cell.State>(
-    () => ({ disabled, on, painting: rootState.painting }),
-    [disabled, on, rootState.painting]
+    () => ({ disabled, on }),
+    [disabled, on]
   );
-  const isTabStop = meta.tabStop.row === row && meta.tabStop.step === step;
 
   return useRender({
     defaultTagName: "button",
@@ -86,7 +89,6 @@ export namespace Cell {
     disabled: boolean;
     /** Whether the step is on: also `aria-pressed`. */
     on: boolean;
-    painting: boolean;
   };
   export interface Props extends PartProps<"button", State> {
     /** Which step this is, from the left. */

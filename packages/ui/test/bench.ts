@@ -67,8 +67,17 @@ export function bench(
   );
   // biome-ignore lint/suspicious/noMisplacedAssertion: called from inside the bench files' tests.
   expect(stats.p95).toBeLessThan(budget);
+  // The slowest one in a hundred still has to fit a whole frame, not half of it.
+  // biome-ignore lint/suspicious/noMisplacedAssertion: called from inside the bench files' tests.
+  expect(stats.p99).toBeLessThan(FRAME_MS);
   return stats;
 }
+
+/**
+ * Counts how many times a component renders: put `<Counter />` inside what a
+ * live source feeds, and a gesture that goes through React shows up as renders.
+ */
+export const renderCount = { current: 0 };
 
 /** A point travelling back and forth over a span, so a long run stays in range. */
 export const sweep = (index: number, span: number, period = 60) => {

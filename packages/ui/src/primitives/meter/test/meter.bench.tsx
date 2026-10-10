@@ -13,7 +13,7 @@ const frame = (channels: number, index: number) => ({
 });
 
 describe("Meter", () => {
-  for (const channels of [2, 8, 32]) {
+  for (const channels of [2, 8, 32, 64]) {
     test(`${channels} channels painted from a live source`, () => {
       const source = createSource({ levels: new Array(channels).fill(-60) });
       render(
