@@ -1,5 +1,8 @@
 import { describe, expect, test } from "bun:test";
-import { fireEvent } from "@testing-library/react";
+import { fireEvent, render } from "@testing-library/react";
+import { useCallback, useState } from "react";
+import { mockRect } from "../../../../../test/helpers";
+import { Plot } from "../../../../plot";
 import { lastCall, renderPlot } from "../helpers";
 
 function drag(
@@ -257,5 +260,44 @@ describe("Plot.Handle", () => {
     expect(handle.hasAttribute("data-dragging")).toBe(true);
     fireEvent.pointerUp(handle, { clientX: 100, clientY: 50, pointerId: 1 });
     expect(handle.hasAttribute("data-dragging")).toBe(false);
+  });
+
+  test("a one-axis handle keeps the other axis from its controlled value while dragging", () => {
+    // y is derived from x, as a point riding a curve is: y = x / 10.
+    function OnTheCurve() {
+      const [x, setX] = useState(50);
+      const move = useCallback((next: Plot.Handle.Value) => setX(next.x), []);
+      return (
+        <Plot.Root data-testid="root" maxX={100} maxY={10} minX={0} minY={0}>
+          <Plot.Handle
+            aria-label="Riding"
+            axis="x"
+            data-testid="riding"
+            onValueChange={move}
+            value={{ x, y: x / 10 }}
+          />
+        </Plot.Root>
+      );
+    }
+    const view = render(<OnTheCurve />);
+    mockRect(view.getByTestId("root"), {
+      bottom: 100,
+      height: 100,
+      right: 200,
+      width: 200,
+    });
+    const handle = view.getByTestId("riding");
+    fireEvent.pointerDown(handle, {
+      button: 0,
+      clientX: 100,
+      clientY: 50,
+      pointerId: 1,
+    });
+    fireEvent.pointerMove(handle, { clientX: 140, clientY: 90, pointerId: 1 });
+    // Moved 20 units across, and 4 down by the pointer: the value says y = 7.
+    expect(handle.style.left).toBe("70%");
+    expect(Number.parseFloat(handle.style.top)).toBeCloseTo(30);
+    fireEvent.pointerUp(handle, { clientX: 140, clientY: 90, pointerId: 1 });
+    expect(Number.parseFloat(handle.style.top)).toBeCloseTo(30);
   });
 });

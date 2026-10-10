@@ -91,7 +91,17 @@ export function Handle(componentProps: Handle.Props) {
   const [dragging, setDraggingState] = React.useState(false);
   const [dragValue, setDragValue] = React.useState<Point | null>(null);
   const draggingRef = React.useRef(false);
-  const value = clampPoint(dragValue ?? rawValue, x, y);
+  // While dragging, only the axes the handle moves along follow the pointer:
+  // the other one is the value's to say, so a point that sits on a curve
+  // keeps sitting on it as the curve moves under it.
+  const value = clampPoint(
+    {
+      x: moves("x") ? (dragValue ?? rawValue).x : rawValue.x,
+      y: moves("y") ? (dragValue ?? rawValue).y : rawValue.y,
+    },
+    x,
+    y
+  );
   const valueRef = React.useRef(value);
   valueRef.current = value;
   const inputRef = React.useRef<HTMLInputElement>(null);
