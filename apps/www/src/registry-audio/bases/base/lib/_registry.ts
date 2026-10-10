@@ -208,4 +208,19 @@ export const lib: RegistryItem[] = [
     registryDependencies: [],
     type: "registry:lib",
   },
+  {
+    categories: ["lib", "audio", "plot"],
+    dependencies: [],
+    description:
+      "What a filter, an equalizer and a compressor do to a signal, as curves for a plot: biquad and EQ responses in dB per frequency, a compressor's transfer curve, and Hz/dB formatting",
+    files: [
+      {
+        path: "lib/filter-response.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "filter-response",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
 ];

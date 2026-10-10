@@ -41,6 +41,11 @@
     "intro": "Browse {{count}} meter components for audio/ui, built on top of shadcn/ui.",
     "title": "Meter"
   },
+  "plot": {
+    "description": "Plots for drawing curves and dragging points on them: equalizers, filters and compressors. {{count}} components.",
+    "intro": "Browse {{count}} plot components for audio/ui, built on top of shadcn/ui.",
+    "title": "Plot"
+  },
   "piano": {
     "description": "Virtual piano keyboard components with MIDI note ranges and glissando. {{count}} components.",
     "intro": "Browse {{count}} piano components for audio/ui, built on top of shadcn/ui.",

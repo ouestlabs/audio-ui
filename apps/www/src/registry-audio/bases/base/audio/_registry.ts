@@ -115,6 +115,17 @@ export const audio: RegistryItem[] = [
     dependencies: ["@audio-ui/react"],
     files: [
       {
+        path: "audio/elements/plot.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "plot",
+    type: "registry:ui",
+  },
+  {
+    dependencies: ["@audio-ui/react"],
+    files: [
+      {
         path: "audio/elements/meter.tsx",
         type: "registry:ui",
       },

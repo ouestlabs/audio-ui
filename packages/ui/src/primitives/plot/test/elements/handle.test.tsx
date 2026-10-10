@@ -1,0 +1,161 @@
+import { describe, expect, test } from "bun:test";
+import { fireEvent } from "@testing-library/react";
+import { lastCall, renderPlot } from "../helpers";
+
+function drag(
+  element: Element,
+  from: readonly [number, number],
+  to: readonly [number, number],
+  init: { shiftKey?: boolean } = {}
+) {
+  fireEvent.pointerDown(element, {
+    button: 0,
+    clientX: from[0],
+    clientY: from[1],
+    pointerId: 1,
+    ...init,
+  });
+  fireEvent.pointerMove(element, {
+    clientX: to[0],
+    clientY: to[1],
+    pointerId: 1,
+    ...init,
+  });
+  fireEvent.pointerUp(element, {
+    clientX: to[0],
+    clientY: to[1],
+    pointerId: 1,
+    ...init,
+  });
+}
+
+describe("Plot.Handle", () => {
+  test("sits at its value, in the axes' units", () => {
+    const { handle } = renderPlot();
+    expect(handle.style.left).toBe("50%");
+    expect(handle.style.top).toBe("50%");
+  });
+
+  test("moves from where it is, never jumping to the pointer", () => {
+    const { handle, onValueChange, onValueCommitted } = renderPlot();
+    // 40px right is 20 units; 20px up is 2 units.
+    drag(handle, [100, 50], [140, 30]);
+    expect(lastCall(onValueChange)[0]).toEqual({ x: 70, y: 7 });
+    expect(lastCall(onValueChange)[1].reason).toBe("drag");
+    expect(lastCall(onValueCommitted)[0]).toEqual({ x: 70, y: 7 });
+    expect(handle.style.left).toBe("70%");
+  });
+
+  test("is four times finer with Shift", () => {
+    const { onValueChange, handle } = renderPlot();
+    drag(handle, [100, 50], [140, 50], { shiftKey: true });
+    expect(lastCall(onValueChange)[0].x).toBeCloseTo(55);
+  });
+
+  test("stays within the axes", () => {
+    const { handle, onValueCommitted } = renderPlot();
+    drag(handle, [100, 50], [900, -900]);
+    expect(lastCall(onValueCommitted)[0]).toEqual({ x: 100, y: 10 });
+  });
+
+  test("holds to one axis when asked", () => {
+    const { handle, inputs, onValueCommitted } = renderPlot({}, { axis: "x" });
+    expect(inputs).toHaveLength(1);
+    drag(handle, [100, 50], [140, 10]);
+    expect(lastCall(onValueCommitted)[0]).toEqual({ x: 70, y: 5 });
+  });
+
+  test("moves along a logarithmic axis by even ratios", () => {
+    const { handle, onValueCommitted } = renderPlot(
+      { minX: 10, scaleX: "log" },
+      { defaultValue: { x: 100, y: 5 } }
+    );
+    // 10…100 spans 200px at 100px per decade: 100 is at the right edge.
+    expect(handle.style.left).toBe("100%");
+    drag(handle, [200, 50], [100, 50]);
+    expect(lastCall(onValueCommitted)[0].x).toBeCloseTo(31.62, 1);
+  });
+
+  test("commits nothing for a press that moves nothing", () => {
+    const { handle, onValueChange, onValueCommitted } = renderPlot();
+    drag(handle, [100, 50], [100, 50]);
+    expect(onValueChange).not.toHaveBeenCalled();
+    expect(onValueCommitted).not.toHaveBeenCalled();
+  });
+
+  test("can be cancelled", () => {
+    const { handle } = renderPlot(
+      {},
+      { onValueChange: (_value, details) => details.cancel() }
+    );
+    drag(handle, [100, 50], [140, 50]);
+    expect(handle.style.left).toBe("50%");
+  });
+
+  test("follows the pointer while a controlled value lags, then shows the value again", () => {
+    const { handle, onValueCommitted } = renderPlot(
+      {},
+      { defaultValue: undefined, value: { x: 50, y: 5 } }
+    );
+    drag(handle, [100, 50], [140, 50]);
+    expect(lastCall(onValueCommitted)[0].x).toBe(70);
+    expect(handle.style.left).toBe("50%");
+  });
+
+  test("holds a slider per axis, named after the handle", () => {
+    const { inputs } = renderPlot();
+    expect(inputs).toHaveLength(2);
+    expect(inputs.map((input) => input.getAttribute("aria-label"))).toEqual([
+      "Band X",
+      "Band Y",
+    ]);
+    expect(inputs[0]?.tabIndex).not.toBe(-1);
+    expect(inputs[1]?.tabIndex).toBe(-1);
+    expect(inputs[0]?.getAttribute("aria-valuetext")).toBe("50");
+  });
+
+  test("announces values through getAriaValueText", () => {
+    const { inputs } = renderPlot(
+      {},
+      { getAriaValueText: (value, axis) => `${axis}=${value}` }
+    );
+    expect(inputs[1]?.getAttribute("aria-valuetext")).toBe("y=5");
+  });
+
+  test("moves a hundredth of the axis with the arrow keys, a tenth with Shift", () => {
+    const { inputs, onValueCommitted } = renderPlot();
+    fireEvent.keyDown(inputs[0] as HTMLInputElement, { key: "ArrowRight" });
+    expect(lastCall(onValueCommitted)[0].x).toBeCloseTo(51);
+    expect(lastCall(onValueCommitted)[1].reason).toBe("keyboard");
+    fireEvent.keyDown(inputs[0] as HTMLInputElement, {
+      key: "ArrowUp",
+      shiftKey: true,
+    });
+    expect(lastCall(onValueCommitted)[0].y).toBeCloseTo(6);
+  });
+
+  test("jumps to the ends of its axis with Home and End", () => {
+    const { inputs, onValueCommitted } = renderPlot();
+    fireEvent.keyDown(inputs[0] as HTMLInputElement, { key: "End" });
+    expect(lastCall(onValueCommitted)[0].x).toBe(100);
+    fireEvent.keyDown(inputs[0] as HTMLInputElement, { key: "Home" });
+    expect(lastCall(onValueCommitted)[0].x).toBe(0);
+  });
+
+  test("takes changes made through an input", () => {
+    const { inputs, onValueCommitted } = renderPlot();
+    fireEvent.change(inputs[1] as HTMLInputElement, {
+      target: { value: "0.8" },
+    });
+    expect(lastCall(onValueCommitted)[0].y).toBeCloseTo(8);
+    expect(lastCall(onValueCommitted)[1].reason).toBe("input-change");
+  });
+
+  test("ignores everything when disabled", () => {
+    const { handle, inputs, onValueChange } = renderPlot({ disabled: true });
+    drag(handle, [100, 50], [140, 50]);
+    fireEvent.keyDown(inputs[0] as HTMLInputElement, { key: "ArrowRight" });
+    expect(onValueChange).not.toHaveBeenCalled();
+    expect(handle.hasAttribute("data-disabled")).toBe(true);
+  });
+});

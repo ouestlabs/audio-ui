@@ -1469,4 +1469,43 @@ export const components: RegistryItem[] = [
     registryDependencies: ["@audio/waveform"],
     type: "registry:example",
   },
+  {
+    categories: ["plot"],
+    description: "An equalizer: drag each band to set its frequency and gain, and the curve is the response of all three",
+    files: [
+      {
+        path: "components/plot/plot-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "plot-demo",
+    registryDependencies: ["@audio/plot", "@audio/filter-response"],
+    type: "registry:example",
+  },
+  {
+    categories: ["plot"],
+    description: "A low-pass filter: one handle on the resonance peak sets the cutoff and how much it rings",
+    files: [
+      {
+        path: "components/plot/plot-filter-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "plot-filter-demo",
+    registryDependencies: ["@audio/plot", "@audio/filter-response"],
+    type: "registry:example",
+  },
+  {
+    categories: ["plot"],
+    description: "A compressor transfer curve: one handle sets the threshold, the other the ratio",
+    files: [
+      {
+        path: "components/plot/plot-compressor-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "plot-compressor-demo",
+    registryDependencies: ["@audio/plot", "@audio/filter-response"],
+    type: "registry:example",
+  },
 ];

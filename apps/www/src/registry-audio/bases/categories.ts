@@ -88,6 +88,12 @@ export const categories: CategoryDef[] = [
   },
   {
     description:
+      "Plots for drawing curves and dragging points on them: equalizers, filters and compressors.",
+    label: "Plot",
+    name: "plot",
+  },
+  {
+    description:
       "Virtual piano keyboard components with MIDI note ranges and glissando.",
     label: "Piano",
     name: "piano",

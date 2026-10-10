@@ -31,6 +31,12 @@
       "name": "meter"
     },
     {
+      "count": 3,
+      "description": "Plots for drawing curves and dragging points on them: equalizers, filters and compressors.",
+      "label": "Plot",
+      "name": "plot"
+    },
+    {
       "count": 8,
       "description": "Virtual piano keyboard components with MIDI note ranges and glissando.",
       "label": "Piano",
@@ -109,5 +115,5 @@
       "name": "xypad"
     }
   ],
-  "totalComponents": 106
+  "totalComponents": 109
 }

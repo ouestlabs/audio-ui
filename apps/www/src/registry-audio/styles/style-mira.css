@@ -368,6 +368,35 @@
     @apply animate-[cn-envelope-shake_280ms_linear] motion-reduce:animate-none;
   }
 
+  /* MARK: Plot */
+  .cn-plot {
+    @apply rounded-lg border bg-card;
+  }
+
+  .cn-plot-graph {
+    @apply text-primary;
+  }
+
+  .cn-plot-curve {
+    @apply stroke-primary stroke-[1.5px];
+  }
+
+  .cn-plot-area {
+    @apply fill-primary/15;
+  }
+
+  .cn-plot-line {
+    @apply stroke-border;
+  }
+
+  .cn-plot-band {
+    @apply fill-foreground/5;
+  }
+
+  .cn-plot-handle {
+    @apply rounded-full border-2 border-primary bg-background shadow-xs transition-[box-shadow] duration-150 ease-out hover:ring-4 hover:ring-ring/30 focus-within:ring-4 focus-within:ring-ring/30 data-dragging:ring-4 data-dragging:ring-ring/30 motion-reduce:transition-none;
+  }
+
   /* MARK: Piano Roll */
   .cn-piano-roll {
     @apply rounded-lg border bg-background;

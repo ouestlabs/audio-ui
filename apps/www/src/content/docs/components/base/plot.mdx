@@ -1,0 +1,137 @@
+---
+title: Plot
+description: Draw a curve and drag points on it — equalizers, filters and compressors.
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="plot-demo" />
+
+A plot is two axes and what you draw on them: a curve, a rule, a shaded band, and handles to drag. Everything is placed in your own units (Hz, dB, anything), and an axis can be logarithmic, the way frequency is drawn.
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">CLI</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash component
+npx shadcn@latest add @audio/plot @audio/filter-response
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the following dependencies:</Step>
+
+```bash
+npm install @audio-ui/react
+```
+
+<Step>Copy and paste the following code into your project.</Step>
+
+<ComponentSource
+  styleName="base-nova"
+  name="plot"
+  title="components/audio/elements/plot.tsx"
+/>
+
+<Step>Update the import paths to match your project setup.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import {
+  Plot,
+  PlotArea,
+  PlotCurve,
+  PlotGraph,
+  PlotHandle,
+} from "@/components/audio/elements/plot";
+import { eqResponse } from "@/lib/filter-response";
+
+<Plot minX={20} maxX={20000} minY={-18} maxY={18} scaleX="log">
+  <PlotGraph>
+    <PlotArea fillTo={0} fn={response} />
+    <PlotCurve fn={response} />
+  </PlotGraph>
+  <PlotHandle
+    aria-label="Band 1"
+    onValueChange={({ x, y }) => setBand({ frequency: x, gainDb: y })}
+    value={{ x: band.frequency, y: band.gainDb }}
+  />
+</Plot>;
+```
+
+`fn` is `y = fn(x)` in the axes' units. The `filter-response` lib gives you the functions for the usual curves: `eqResponse`, `biquadResponse` and `compressorOutput`.
+
+## Handles
+
+A handle holds a native `<input type="range">` per axis, so it works from the keyboard: the arrow keys move it by a hundredth of the axis, a tenth with <kbd>Shift</kbd>, and <kbd>Home</kbd> / <kbd>End</kbd> go to the ends. Dragging moves it from where it is rather than jumping to the pointer, and four times finer with <kbd>Shift</kbd>. `axis="x"` or `axis="y"` holds it to one axis.
+
+## Examples
+
+### Filter
+
+One handle on the resonance peak sets the cutoff and how much it rings.
+
+<ComponentPreview styleName="base-nova" name="plot-filter-demo" />
+
+### Compressor
+
+One handle sets the threshold, the other the ratio.
+
+<ComponentPreview styleName="base-nova" name="plot-compressor-demo" />
+
+## API reference
+
+### Plot
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `minX`, `maxX` | `number` | `0`, `1` | Range of the x axis. |
+| `minY`, `maxY` | `number` | `0`, `1` | Range of the y axis. |
+| `scaleX`, `scaleY` | `"linear" \| "log" \| { toPosition, toValue }` | `"linear"` | How values spread along each axis. |
+| `disabled` | `boolean` | `false` | Stops every handle. |
+
+### PlotCurve, PlotArea
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `fn` | `(x: number) => number` | — | The curve: y at each x. |
+| `fillTo` | `number` | — | Closes the curve down to this y, for an area. |
+| `samples` | `number` | `256` | How many points it is drawn through. |
+
+### PlotLine, PlotBand
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `axis` | `"x" \| "y"` | `PlotLine`: the line is vertical at an x value, or horizontal at a y value. `PlotBand`: the axis `from` and `to` are on. |
+| `value` | `number` | `PlotLine` only. |
+| `from`, `to` | `number` | `PlotBand` only. |
+
+### PlotHandle
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value` / `defaultValue` | `{ x: number; y: number }` | the middle | The handle's position, in the axes' units. |
+| `axis` | `"both" \| "x" \| "y"` | `"both"` | The axes it moves along. |
+| `onValueChange` | `(value, eventDetails) => void` | — | While it moves: `reason` is `"drag"`, `"keyboard"` or `"input-change"`. `eventDetails.cancel()` keeps it where it was. |
+| `onValueCommitted` | `(value, eventDetails) => void` | — | When a gesture that moved it ends. |
+| `getAriaLabel` | `(axis) => string` | — | Names each axis. Defaults to `aria-label`, followed by X / Y. |
+| `getAriaValueText` | `(value, axis) => string` | — | Announces each axis, such as "1.2 kHz". |
+| `disabled` | `boolean` | `false` | |
