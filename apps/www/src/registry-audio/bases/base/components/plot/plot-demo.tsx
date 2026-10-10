@@ -1,8 +1,25 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder";
 import { Button } from "@/registry/bases/base/ui/button";
+import {
+  NativeSelect,
+  NativeSelectOption,
+} from "@/registry/bases/base/ui/native-select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/registry/bases/base/ui/popover";
+import { Slider } from "@/registry/bases/base/ui/slider";
 import {
   Plot,
   PlotArea,
@@ -17,6 +34,7 @@ import {
 import { useNoiseThroughEq } from "@/registry-audio/bases/base/hooks/use-noise-through-eq";
 import { useSpectrum } from "@/registry-audio/bases/base/hooks/use-spectrum";
 import {
+  type BiquadType,
   bandGainForHandle,
   bandHandleDb,
   biquadResponse,
@@ -46,6 +64,22 @@ const WHEEL_Q_SENSITIVITY = 0.002;
 const SPECTRUM_MIN_DB = -100;
 const SPECTRUM_MAX_DB = -10;
 const DB_TICKS = [-12, 0, 12];
+/** What a band can be, from the bottom of the spectrum up. */
+const BAND_TYPES: { label: string; value: BiquadType }[] = [
+  { label: "Low cut", value: "lowcut" },
+  { label: "Low shelf", value: "lowshelf" },
+  { label: "Bell", value: "peak" },
+  { label: "Notch", value: "notch" },
+  { label: "High shelf", value: "highshelf" },
+  { label: "High cut", value: "highcut" },
+];
+/** The width a band has when it was never given one. */
+const DEFAULT_Q = Math.SQRT1_2;
+const Q_RATIO = MAX_Q / MIN_Q;
+
+/** Where a width sits on the slider: Q is felt in ratios, so the slider is logarithmic. */
+const qToPosition = (q: number) => Math.log(q / MIN_Q) / Math.log(Q_RATIO);
+const positionToQ = (position: number) => MIN_Q * Q_RATIO ** position;
 
 const formatDbMark = (db: number) => (db > 0 ? `+${db}` : String(db));
 const describePointer = (point: { x: number; y: number }) =>
@@ -58,8 +92,10 @@ const clampGain = (gainDb: number) =>
 interface BandHandleProps {
   active: boolean;
   bands: readonly EqBand[];
+  editing: boolean;
   index: number;
   onChange: (index: number, patch: Partial<EqBand>) => void;
+  onEdit: (index: number | null) => void;
   onRemove: (index: number) => void;
   onSelect: (index: number) => void;
 }
@@ -92,6 +128,65 @@ function BandAdder({ bands, onAdd }: BandAdderProps) {
   );
 }
 
+interface BandEditorProps {
+  band: EqBand;
+  index: number;
+  onChange: (index: number, patch: Partial<EqBand>) => void;
+}
+
+/** What a band is and how wide: its type, and its Q on a logarithmic slider. */
+function BandEditor({ band, index, onChange }: BandEditorProps) {
+  const widthLabelId = useId();
+  const handleTypeChange = useCallback(
+    (event: React.ChangeEvent<HTMLSelectElement>) =>
+      onChange(index, { type: event.target.value as BiquadType }),
+    [index, onChange]
+  );
+  const handleWidthChange = useCallback(
+    (next: number | readonly number[]) => {
+      const [position = 0] = Array.isArray(next) ? next : [next];
+      onChange(index, { q: positionToQ(position) });
+    },
+    [index, onChange]
+  );
+
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center justify-between gap-2">
+        <span className="font-medium text-xs">Band {index + 1}</span>
+        <NativeSelect
+          aria-label={`Band ${index + 1} type`}
+          onChange={handleTypeChange}
+          size="sm"
+          value={band.type}
+        >
+          {BAND_TYPES.map((item) => (
+            <NativeSelectOption key={item.value} value={item.value}>
+              {item.label}
+            </NativeSelectOption>
+          ))}
+        </NativeSelect>
+      </div>
+      <div className="flex items-center gap-3">
+        <span className="text-muted-foreground text-xs" id={widthLabelId}>
+          Width
+        </span>
+        <Slider
+          aria-labelledby={widthLabelId}
+          max={1}
+          min={0}
+          onValueChange={handleWidthChange}
+          step={0.01}
+          value={[qToPosition(band.q ?? DEFAULT_Q)]}
+        />
+        <output className="w-14 shrink-0 whitespace-nowrap text-right font-mono text-xs tabular-nums">
+          Q {(band.q ?? DEFAULT_Q).toFixed(1)}
+        </output>
+      </div>
+    </div>
+  );
+}
+
 /**
  * One band's handle. It sits on the equalizer's curve, so it follows the
  * pointer one to one; the wheel widens or narrows the band, and a
@@ -100,8 +195,10 @@ function BandAdder({ bands, onAdd }: BandAdderProps) {
 function BandHandle({
   active,
   bands,
+  editing,
   index,
   onChange,
+  onEdit,
   onRemove,
   onSelect,
 }: BandHandleProps) {
@@ -145,25 +242,71 @@ function BandHandle({
       if (event.key === "Delete" || event.key === "Backspace") {
         event.preventDefault();
         onRemove(index);
+      } else if (event.key === "Enter") {
+        event.preventDefault();
+        onSelect(index);
+        onEdit(index);
       }
     },
-    [index, onRemove]
+    [index, onEdit, onRemove, onSelect]
+  );
+  // A right-click, or a long press on a touch screen, opens the band's settings.
+  const handleContextMenu = useCallback(
+    (event: React.MouseEvent) => {
+      event.preventDefault();
+      onSelect(index);
+      onEdit(index);
+    },
+    [index, onEdit, onSelect]
+  );
+  const handleOpenChange = useCallback(
+    (open: boolean) => {
+      onEdit(open ? index : null);
+      if (!open) {
+        // The popover took the focus: hand it back to the handle.
+        ref.current?.querySelector("input")?.focus();
+      }
+    },
+    [index, onEdit]
   );
 
   return (
-    <PlotHandle
-      aria-label={`Band ${index + 1}`}
-      data-active={active || undefined}
-      getAriaValueText={describeValue}
-      onDoubleClick={reset}
-      onKeyDown={handleKeyDown}
-      onValueChange={handleChange}
-      ref={ref}
-      value={{
-        x: band?.frequency ?? MIN_HZ,
-        y: bandHandleDb(bands, index),
-      }}
-    />
+    <Popover onOpenChange={handleOpenChange} open={editing}>
+      <PlotHandle
+        aria-label={`Band ${index + 1}`}
+        data-active={active || undefined}
+        getAriaValueText={describeValue}
+        onContextMenu={handleContextMenu}
+        onDoubleClick={reset}
+        onKeyDown={handleKeyDown}
+        onValueChange={handleChange}
+        ref={ref}
+        value={{
+          x: band?.frequency ?? MIN_HZ,
+          y: bandHandleDb(bands, index),
+        }}
+      >
+        <PopoverTrigger
+          nativeButton={false}
+          render={
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0"
+            />
+          }
+        />
+      </PlotHandle>
+      <PopoverContent
+        align="center"
+        className="w-60 p-3"
+        side="top"
+        sideOffset={12}
+      >
+        {band ? (
+          <BandEditor band={band} index={index} onChange={onChange} />
+        ) : null}
+      </PopoverContent>
+    </Popover>
   );
 }
 
@@ -177,6 +320,7 @@ export default function PlotDemo() {
   const [bands, setBands] = useState<Band[]>(BANDS);
   const nextId = useRef(BANDS.length + 1);
   const [selectedRaw, setSelected] = useState(1);
+  const [editing, setEditing] = useState<number | null>(null);
   const selected = Math.min(selectedRaw, Math.max(0, bands.length - 1));
   const response = useMemo(() => eqResponse(bands), [bands]);
   const bandCurves = useMemo(
@@ -262,9 +406,11 @@ export default function PlotDemo() {
           <BandHandle
             active={index === selected}
             bands={bands}
+            editing={index === editing}
             index={index}
             key={item.id}
             onChange={changeBand}
+            onEdit={setEditing}
             onRemove={removeBand}
             onSelect={setSelected}
           />
@@ -272,7 +418,7 @@ export default function PlotDemo() {
       </Plot>
       <p className="text-center text-muted-foreground text-xs">
         Double-click to add a band, Delete to remove one, scroll over it to
-        change its width.
+        change its width, right-click or press Enter for its type.
       </p>
       <div className="flex items-center justify-between gap-2">
         <Button
