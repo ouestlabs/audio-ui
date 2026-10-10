@@ -370,32 +370,35 @@
 
   /* MARK: Piano Roll */
   .cn-piano-roll {
-    @apply rounded-4xl border border-transparent bg-card shadow-md ring-1 ring-foreground/10 transition-[color,border-color,box-shadow,opacity] duration-150 ease-out hover:ring-4 hover:ring-ring/30 has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-ring/30 active:ring-4 active:ring-ring/30 has-[:focus-visible]:border-ring active:border-ring motion-reduce:transition-none focus-visible:ring-4 focus-visible:ring-ring/30 focus-visible:border-ring;
+    @apply rounded-4xl border bg-background;
   }
 
-  /* Static container shape for the key strip — no interactive ring escalation, unlike .cn-piano-roll: it's a row of many individually-highlighted keys, not one interactive surface. */
+  .cn-piano-roll-grid {
+    @apply focus-visible:outline-2 focus-visible:outline-ring/60 focus-visible:-outline-offset-2;
+  }
+
   .cn-piano-roll-keys {
-    @apply rounded-4xl border border-transparent bg-card shadow-md ring-1 ring-foreground/10;
+    @apply bg-background;
   }
 
   .cn-piano-roll-size-sm {
-    @apply min-h-32 h-[calc(var(--piano-roll-rows)*0.5rem)];
+    @apply min-h-[calc(var(--piano-roll-rows)*0.5rem)];
   }
 
   .cn-piano-roll-size-default {
-    @apply min-h-48 h-[calc(var(--piano-roll-rows)*0.625rem)];
+    @apply min-h-[calc(var(--piano-roll-rows)*0.75rem)];
   }
 
   .cn-piano-roll-size-lg {
-    @apply min-h-64 h-[calc(var(--piano-roll-rows)*0.75rem)];
+    @apply min-h-[calc(var(--piano-roll-rows)*1rem)];
   }
 
   .cn-piano-roll-row {
-    @apply border-border/50 data-folded:border-b data-octave:border-b data-octave:border-border data-[color=black]:bg-foreground/6 data-active:bg-primary/10;
+    @apply data-[color=black]:bg-foreground/13 data-folded:border-t data-folded:border-foreground/25 data-octave:border-t data-octave:border-foreground/25 data-active:bg-primary/10;
   }
 
   .cn-piano-roll-velocity {
-    @apply rounded-4xl border border-transparent bg-card shadow-md ring-1 ring-foreground/10;
+    @apply bg-background;
   }
 
   .cn-piano-roll-velocity-bar {
@@ -407,32 +410,28 @@
   }
 
   .cn-piano-roll-note {
-    @apply rounded-[min(var(--radius-sm),6px)] bg-primary transition-[background-color,box-shadow] duration-150 ease-out hover:ring-4 hover:ring-ring/30 focus-visible:ring-4 focus-visible:ring-ring/30 active:ring-4 active:ring-ring/30 data-disabled:pointer-events-none motion-reduce:transition-none;
-  }
-
-  .cn-piano-roll-note[data-selected] {
-    @apply ring-2 ring-ring;
+    @apply rounded-[min(var(--radius-sm),3px)] transition-[border-color,background-color] duration-100 ease-out focus-visible:ring-2 focus-visible:ring-ring/50 data-disabled:pointer-events-none motion-reduce:transition-none;
   }
 
   .cn-piano-roll-note-handle {
-    @apply bg-foreground/20 transition-colors hover:bg-foreground/40 motion-reduce:transition-none;
+    @apply transition-colors hover:bg-foreground/30 motion-reduce:transition-none;
   }
 
   .cn-piano-roll-key {
-    @apply border-border/40 border-b bg-card transition-colors duration-150 ease-out last:border-b-0 motion-reduce:transition-none;
+    @apply border-border/60 border-b bg-background text-muted-foreground transition-colors duration-100 ease-out last:border-b-0 hover:bg-muted focus-visible:z-10 focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-inset motion-reduce:transition-none;
   }
 
   .cn-piano-roll-key[data-color="black"] {
-    @apply bg-muted-foreground/70;
+    @apply bg-foreground/85 text-background hover:bg-foreground/70;
   }
 
   .cn-piano-roll-key[data-active] {
-    @apply bg-primary;
+    @apply bg-primary text-primary-foreground;
   }
 
   /* MARK: Timeline */
   .cn-timeline {
-    @apply [--timeline-grid-color:color-mix(in_oklab,var(--border)_70%,transparent)];
+    @apply [--timeline-grid-color:color-mix(in_oklab,var(--border)_70%,transparent)] [--timeline-grid-accent-color:color-mix(in_oklab,var(--foreground)_16%,transparent)];
   }
 
   .cn-timeline-viewport {

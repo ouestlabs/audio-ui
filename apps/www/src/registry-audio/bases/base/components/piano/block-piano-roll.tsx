@@ -19,12 +19,16 @@ import {
   PianoRoll,
   PianoRollGrid,
   PianoRollKeys,
+  PianoRollStrip,
   PianoRollVelocity,
+  PianoRollVelocityScale,
+  PianoRollViewport,
 } from "@/registry-audio/bases/base/audio/elements/piano-roll";
 import {
   Timeline,
   TimelineLane,
   TimelineMark,
+  TimelineNavigator,
   TimelinePlayhead,
   TimelineRange,
   TimelineRangeHandle,
@@ -46,16 +50,18 @@ import {
 } from "@/registry-audio/bases/base/lib/midi";
 import type { EnvelopePoint } from "@/registry-audio/bases/base/lib/synth-voice";
 
-const MIN_PITCH = 48;
-const MAX_PITCH = 72;
+/** C2 to C6: more than fits, so the roll scrolls and opens on middle C. */
+const MIN_PITCH = 36;
+const MAX_PITCH = 84;
 const DEFAULT_VOLUME = 0.7;
-const TOTAL_STEPS = 16;
 const BEATS_PER_BAR = 4;
-/** The ruler's labels: the first step of each beat. */
-const BEAT_STEPS = Array.from(
-  { length: BEATS_PER_BAR },
-  (_, beat) => (beat * TOTAL_STEPS) / BEATS_PER_BAR
-);
+/** Sixteenth notes: four steps to a beat. */
+const STEPS_PER_BEAT = 4;
+const STEPS_PER_BAR = STEPS_PER_BEAT * BEATS_PER_BAR;
+const BARS = 4;
+const TOTAL_STEPS = STEPS_PER_BAR * BARS;
+/** The ruler's labels: the first step of each bar. */
+const BAR_STEPS = Array.from({ length: BARS }, (_, bar) => bar * STEPS_PER_BAR);
 
 const describeStep = (step: number) => `Step ${Math.floor(step) + 1}`;
 const PITCH_NAMES = [
@@ -102,7 +108,7 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
 }
 
-/** Quantizes a parsed MIDI file's tick-based notes onto the grid's fixed `TOTAL_STEPS` window, adopting the file's own tempo (clamped to the BPM control's range) rather than the grid's current one — notes starting at or past the last step are dropped, matching this block's fixed one-bar-loop model. */
+/** Quantizes a parsed MIDI file's tick-based notes onto the grid's fixed `TOTAL_STEPS` window, adopting the file's own tempo (clamped to the BPM control's range) rather than the grid's current one — notes starting at or past the last step are dropped, matching this block's fixed-length loop. */
 function notesFromMidiFile(parsed: {
   microsecondsPerQuarterNote: number;
   notes: MidiFileNote[];
@@ -115,7 +121,7 @@ function notesFromMidiFile(parsed: {
   );
   const secondsPerTick =
     parsed.microsecondsPerQuarterNote / 1_000_000 / parsed.ticksPerQuarterNote;
-  const stepDuration = ((60 / bpm) * BEATS_PER_BAR) / TOTAL_STEPS;
+  const stepDuration = 60 / bpm / STEPS_PER_BEAT;
 
   const notes: Note[] = [];
   for (const midiNote of parsed.notes) {
@@ -143,8 +149,7 @@ function notesFromMidiFile(parsed: {
 
 /** The grid's own step/BPM timing converted to MIDI ticks at a fixed, common resolution — the inverse of `notesFromMidiFile`. */
 function notesToMidiFile(notes: Note[], bpm: number): Uint8Array {
-  const ticksPerStep =
-    (MIDI_TICKS_PER_QUARTER_NOTE * BEATS_PER_BAR) / TOTAL_STEPS;
+  const ticksPerStep = MIDI_TICKS_PER_QUARTER_NOTE / STEPS_PER_BEAT;
   const midiNotes: MidiFileNote[] = notes.map((note) => ({
     channel: 0,
     durationTicks: Math.round(note.length * ticksPerStep),
@@ -253,7 +258,7 @@ function usePianoRoll({
       onReset: releaseAll,
       onStep: scheduleStep,
       region: loopRegion,
-      stepsPerBeat: TOTAL_STEPS / BEATS_PER_BAR,
+      stepsPerBeat: STEPS_PER_BEAT,
       totalSteps: TOTAL_STEPS,
     });
   secondsPerStepRef.current = secondsPerStep;
@@ -355,6 +360,7 @@ export default function BlockPianoRoll() {
   const volumeId = useId();
   const volumeLabelId = useId();
   const volumeValueId = useId();
+  const helpId = useId();
 
   const [volume, setVolume] = useState(DEFAULT_VOLUME);
   /** Drawing, a press on empty grid adds a note; otherwise it drags a selection rectangle and a double-click adds. */
@@ -363,6 +369,17 @@ export default function BlockPianoRoll() {
     () => setDrawing((current) => !current),
     []
   );
+  /** Folded, only the pitches carrying notes get a row. */
+  const [folded, setFolded] = useState(false);
+  const toggleFolded = useCallback(() => setFolded((current) => !current), []);
+  const viewportRef = useRef<HTMLDivElement>(null);
+  // Opens on middle C, halfway down the range.
+  useEffect(() => {
+    const viewport = viewportRef.current;
+    if (viewport) {
+      viewport.scrollTop = (viewport.scrollHeight - viewport.clientHeight) / 2;
+    }
+  }, []);
   const [bpm, setBpm] = useState(DEFAULT_BPM);
   const [loopRegion, setLoopRegion] = useState<LoopRegion | null>(null);
   const loopRange: readonly [number, number] = loopRegion
@@ -411,7 +428,8 @@ export default function BlockPianoRoll() {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.code !== "Space") {
+      // A note takes Space for itself, to select it.
+      if (e.code !== "Space" || e.defaultPrevented) {
         return;
       }
       const tag = (e.target as HTMLElement | null)?.tagName;
@@ -525,57 +543,7 @@ export default function BlockPianoRoll() {
           Drop a MIDI file to import
         </div>
       ) : null}
-      <Timeline
-        duration={TOTAL_STEPS}
-        onPositionChange={seekTo}
-        snapStep={1}
-        source={position}
-      >
-        <PianoRoll
-          activePitches={playingPitches}
-          getNoteLabel={describeNote}
-          maxPitch={MAX_PITCH}
-          minPitch={MIN_PITCH}
-          mode={drawing ? "draw" : "select"}
-          onNoteOff={handleNoteOff}
-          onNoteOn={handleNoteOn}
-          onValueChange={setNotes}
-          value={notes}
-        >
-          <TimelineRuler
-            aria-label="Playhead"
-            className="col-start-2"
-            getAriaValueText={describeStep}
-          >
-            {BEAT_STEPS.map((step, beat) => (
-              <TimelineMark key={step} value={step}>
-                {beat + 1}
-              </TimelineMark>
-            ))}
-            {isPlaying ? <TimelinePlayhead /> : null}
-          </TimelineRuler>
-          <TimelineLane className="col-start-2 mb-2 h-4 cursor-cell">
-            <TimelineRange
-              aria-label="Loop region"
-              drawable
-              getAriaValueText={describeStep}
-              onDoubleClick={clearLoopRegion}
-              onValueChange={changeLoopRegion}
-              onValueCommitted={commitLoopRegion}
-              value={loopRange}
-            >
-              <TimelineRangeHandle aria-label="Loop start" edge="start" />
-              <TimelineRangeHandle aria-label="Loop end" edge="end" />
-            </TimelineRange>
-          </TimelineLane>
-          <PianoRollKeys />
-          <PianoRollGrid aria-label="Notes" gridStep={1}>
-            {isPlaying ? <TimelinePlayhead /> : null}
-          </PianoRollGrid>
-          <PianoRollVelocity />
-        </PianoRoll>
-      </Timeline>
-      <div className="flex flex-wrap items-center justify-between gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-2">
           <Button
             disabled={notes.length === 0}
@@ -624,6 +592,111 @@ export default function BlockPianoRoll() {
         </div>
         <BpmControl onValueChange={setBpm} value={bpm} />
       </div>
+      <Timeline
+        duration={TOTAL_STEPS}
+        onPositionChange={seekTo}
+        snapStep={1}
+        source={position}
+      >
+        <PianoRoll
+          activePitches={playingPitches}
+          className="h-[26rem]"
+          folded={folded}
+          getNoteLabel={describeNote}
+          maxPitch={MAX_PITCH}
+          minPitch={MIN_PITCH}
+          mode={drawing ? "draw" : "select"}
+          onNoteOff={handleNoteOff}
+          onNoteOn={handleNoteOn}
+          onValueChange={setNotes}
+          value={notes}
+        >
+          <PianoRollStrip className="border-b">
+            <TimelineNavigator className="mx-2 my-1.5" />
+          </PianoRollStrip>
+          <PianoRollViewport ref={viewportRef}>
+            <PianoRollStrip
+              className="border-b"
+              lead={
+                <Button
+                  aria-pressed={folded}
+                  className="h-full w-full rounded-none text-[10px] uppercase tracking-wide"
+                  onClick={toggleFolded}
+                  size="sm"
+                  type="button"
+                  variant={folded ? "default" : "ghost"}
+                >
+                  Fold
+                </Button>
+              }
+              sticky="top"
+            >
+              <TimelineLane className="h-5.5 cursor-cell bg-muted/40">
+                <TimelineRange
+                  aria-label="Loop region"
+                  className="rounded-none bg-primary/70 ring-0"
+                  drawable
+                  getAriaValueText={describeStep}
+                  onDoubleClick={clearLoopRegion}
+                  onValueChange={changeLoopRegion}
+                  onValueCommitted={commitLoopRegion}
+                  value={loopRange}
+                >
+                  <TimelineRangeHandle
+                    aria-label="Loop start"
+                    className="rounded-none bg-foreground/20 hover:bg-foreground/40"
+                    edge="start"
+                  />
+                  <TimelineRangeHandle
+                    aria-label="Loop end"
+                    className="rounded-none bg-foreground/20 hover:bg-foreground/40"
+                    edge="end"
+                  />
+                </TimelineRange>
+              </TimelineLane>
+              <TimelineRuler
+                aria-label="Playhead"
+                className="h-4.5 border-b-0 text-[10px]"
+                getAriaValueText={describeStep}
+              >
+                {BAR_STEPS.map((step, bar) => (
+                  <TimelineMark className="ps-1" key={step} value={step}>
+                    {bar + 1}
+                  </TimelineMark>
+                ))}
+                {isPlaying ? <TimelinePlayhead /> : null}
+              </TimelineRuler>
+            </PianoRollStrip>
+            <PianoRollStrip className="flex-1" lead={<PianoRollKeys />}>
+              <PianoRollGrid
+                accentStep={STEPS_PER_BEAT}
+                aria-describedby={helpId}
+                aria-label="Notes"
+                gridStep={1}
+              >
+                {isPlaying ? <TimelinePlayhead /> : null}
+              </PianoRollGrid>
+            </PianoRollStrip>
+            <PianoRollStrip
+              className="border-t"
+              lead={<PianoRollVelocityScale />}
+              sticky="bottom"
+            >
+              <PianoRollVelocity />
+            </PianoRollStrip>
+          </PianoRollViewport>
+        </PianoRoll>
+      </Timeline>
+      <p className="sr-only" id={helpId}>
+        Click the grid to add a note, or turn Draw off to drag a selection
+        rectangle and double-click to add one. Drag a note to move it, with Alt
+        to copy it, and drag its edges to change its length. Shift and a click
+        adds a note to the selection; Shift and a key selects every note on its
+        row. The arrow keys move the focused note, Shift with Left or Right
+        changes its length, Shift with Up or Down moves it an octave, and Delete
+        removes it. Enter on the grid adds a note at the playhead, and Escape
+        clears the selection.
+      </p>
       <div className="flex flex-wrap items-center justify-between gap-4">
         <ChannelStrip
           aria-label="Volume"
