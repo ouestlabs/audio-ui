@@ -62,6 +62,10 @@
       "types": "./dist/sequencer.d.ts",
       "import": "./dist/sequencer.js"
     },
+    "./source": {
+      "types": "./dist/source.d.ts",
+      "import": "./dist/source.js"
+    },
     "./waveform": {
       "types": "./dist/waveform.d.ts",
       "import": "./dist/waveform.js"

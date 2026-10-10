@@ -85,6 +85,18 @@ export const hooks: RegistryItem[] = [
     type: "registry:hook",
   },
   {
+    categories: ["audio", "waveform"],
+    files: [
+      {
+        path: "hooks/use-audio-signal.ts",
+        type: "registry:hook",
+      },
+    ],
+    name: "use-audio-signal",
+    registryDependencies: ["@audio/waveform-dsp"],
+    type: "registry:hook",
+  },
+  {
     categories: ["audio", "synth", "sequencer"],
     files: [
       {

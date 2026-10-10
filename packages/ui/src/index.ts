@@ -6,5 +6,6 @@ export { Piano } from "./piano";
 export { PianoRoll } from "./piano-roll";
 export { Ruler } from "./ruler";
 export { Sequencer } from "./sequencer";
+export { createSource, type Source, type WritableSource } from "./source";
 export { Waveform } from "./waveform";
 export { XYPad } from "./xypad";

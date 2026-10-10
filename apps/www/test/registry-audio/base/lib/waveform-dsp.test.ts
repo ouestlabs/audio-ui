@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import {
   downsampleWaveform,
   normalizeWaveform,
+  spectrumBands,
 } from "@/registry-audio/bases/base/lib/waveform-dsp";
 
 describe("downsampleWaveform", () => {
@@ -28,5 +29,62 @@ describe("normalizeWaveform", () => {
 
   test("maps all-zero input to zeros (no divide-by-zero)", () => {
     expect(normalizeWaveform([0, 0, 0])).toEqual([0, 0, 0]);
+  });
+});
+
+describe("spectrumBands", () => {
+  // 1024 bins at 48 kHz: 23.4375 Hz per bin
+  const sampleRate = 48_000;
+  const silence = () => new Float32Array(1024).fill(-100);
+  const rounded = (bands: Float32Array) =>
+    Array.from(bands, (band) => Math.round(band * 100) / 100);
+
+  test("maps decibels onto 0-1 between minDb and maxDb", () => {
+    const spectrum = new Float32Array(1024).fill(-65);
+    expect(
+      rounded(spectrumBands(spectrum, new Float32Array(3), { sampleRate }))
+    ).toEqual([0.5, 0.5, 0.5]);
+  });
+
+  test("clamps levels to 0-1", () => {
+    const loud = new Float32Array(1024).fill(0);
+    const quiet = new Float32Array(1024).fill(-140);
+    expect(
+      rounded(spectrumBands(loud, new Float32Array(2), { sampleRate }))
+    ).toEqual([1, 1]);
+    expect(
+      rounded(spectrumBands(quiet, new Float32Array(2), { sampleRate }))
+    ).toEqual([0, 0]);
+  });
+
+  test("a tone lights the band its frequency falls in, low to high", () => {
+    const options = { maxHz: 8000, minHz: 125, sampleRate };
+    // 6 octaves from 125 Hz to 8 kHz, one per band: 125-250, 250-500, …
+    const low = silence();
+    low[Math.round(180 / 23.4375)] = -30;
+    expect(rounded(spectrumBands(low, new Float32Array(6), options))).toEqual([
+      1, 0, 0, 0, 0, 0,
+    ]);
+
+    const high = silence();
+    high[Math.round(3000 / 23.4375)] = -30;
+    expect(rounded(spectrumBands(high, new Float32Array(6), options))).toEqual([
+      0, 0, 0, 0, 1, 0,
+    ]);
+  });
+
+  test("a narrow low band still reads at least one bin", () => {
+    const spectrum = silence();
+    spectrum[2] = -30;
+    const bands = spectrumBands(spectrum, new Float32Array(64), {
+      sampleRate,
+    });
+    expect(Math.max(...bands)).toBe(1);
+  });
+
+  test("returns silence for an empty spectrum", () => {
+    expect(
+      rounded(spectrumBands([], new Float32Array([0.5, 0.5]), { sampleRate }))
+    ).toEqual([0, 0]);
   });
 });

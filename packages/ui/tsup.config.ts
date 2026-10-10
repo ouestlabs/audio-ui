@@ -20,7 +20,11 @@ const primitives = [
 // rejects.
 export default defineConfig({
   clean: true,
-  entry: ["src/index.ts", ...primitives.map((name) => `src/${name}.ts`)],
+  entry: [
+    "src/index.ts",
+    "src/source.ts",
+    ...primitives.map((name) => `src/${name}.ts`),
+  ],
   format: ["esm"],
   sourcemap: true,
   splitting: true,

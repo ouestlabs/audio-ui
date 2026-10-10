@@ -1,21 +1,23 @@
 ---
 title: Waveform
-description: Seekable bar-chart waveform — click, drag, or use a real handle to scrub through a track built from real decoded audio samples.
+description: Audio as a shape — a seekable waveform with regions and markers, a live one that scrolls with the signal, and a bar visualizer, all from one primitive.
 component: true
 base: base
 ---
 
 <ComponentPreview styleName="base-nova" name="waveform-demo" />
 
-Waveform for scrubbing through audio: bars drawn on a canvas that fill in as the position advances. The registry component wraps the `Waveform` primitive from `@audio-ui/react`; the primitive has no opinion on where the amplitudes came from (real decoded PCM samples, a placeholder curve, anything), the same way `PianoRoll` has no opinion on where its notes came from.
+One family for drawing audio. `Waveform` shows a whole file and lets you scrub through it; `LiveWaveform` follows a signal as it happens; `BarVisualizer` turns that signal into a handful of bars you style in CSS. All three wrap the `Waveform` primitive from `@audio-ui/react`, which has no opinion on where the audio came from: decoded PCM samples, a microphone, a stream from your server.
 
 ## Overview
 
+- **Two kinds of data:** a file's shape is known upfront, so `Waveform` takes `values` (raw `0–1` amplitudes, at any resolution). A live signal isn't, so `LiveWaveform` and `BarVisualizer` take a [`source`](#live-signals) they follow outside React.
 - **Value model:** `value` is the playback position, from `0` to `duration` (default `1`, so a plain `0–1` fraction; pass the track's length in seconds to work in seconds). The primitive only owns the seek position, never the audio itself: wire `onValueChange` to your own `<audio>` element.
-- **Bar data:** pass `values` (raw `0–1` amplitudes) at any resolution. The canvas draws as many fixed-width bars as fit its real width and keeps the loudest amplitude in each bar's slice, so the waveform keeps its detail from a chat bubble to a full-width editor. Bars are laid out on the screen's physical pixels, so their edges stay sharp at any pixel density or zoom level. See [Feeding real audio](#feeding-real-audio).
-- **Live position:** for a playhead that moves every frame, pass a [`source`](#following-playback) instead of `value`: the waveform follows it straight in the DOM, with no React render.
-- **Variants:** `variant="default"` renders just the recolored bars. `variant="playhead"` additionally renders a playhead line and a handle at the current position.
-- **Accessibility:** the waveform holds a native `<input type="range">` in both variants: it takes focus, carries `aria-label`, announces the played share (or whatever `getAriaValueText` returns, e.g. a time), and supports arrow keys / <kbd>Home</kbd> / <kbd>End</kbd> / <kbd>Page Up</kbd> / <kbd>Page Down</kbd>.
+- **Sharp at any size:** the canvas draws as many bars as fit its real width and keeps the loudest amplitude in each bar's slice, so the waveform keeps its detail from a chat bubble to a full-width editor. Bars are laid out on the screen's physical pixels, so their edges stay sharp at any pixel density or zoom level. See [Feeding real audio](#feeding-real-audio).
+- **Shapes:** `shape="mirror"` (the default) centers the bars, `"bars"` stands them on the baseline and `"line"` joins the levels into one continuous shape.
+- **On the timeline:** [`WaveformRegion`](#regions-and-markers) is a stretch you can move and resize, such as a loop; `WaveformMarker` is a labelled point; `WaveformHover` follows the pointer and prints the hovered time.
+- **Nothing wasted:** every moving part is painted outside React and only when something changed. A waveform that is off screen, or has come to rest, costs no frames. With reduced motion requested, live waveforms repaint a few times a second, without smoothing or idle animation.
+- **Accessibility:** the seekable waveform holds a native `<input type="range">`: it takes focus, carries `aria-label`, announces the played share (or whatever `getAriaValueText` returns, e.g. a time), and supports arrow keys / <kbd>Home</kbd> / <kbd>End</kbd> / <kbd>Page Up</kbd> / <kbd>Page Down</kbd>. Each region handle holds one too. Live waveforms are images: give them an `aria-label`.
 
 ## Installation
 
@@ -63,16 +65,18 @@ npm install @audio-ui/react
 ## Usage
 
 ```tsx
-import { Waveform } from "@/components/audio/elements/waveform";
+import {
+  BarVisualizer,
+  LiveWaveform,
+  Waveform,
+  WaveformHover,
+  WaveformMarker,
+  WaveformRegion,
+  WaveformRegionHandle,
+} from "@/components/audio/elements/waveform";
 ```
 
-**Bars only:**
-
-```tsx
-<Waveform aria-label="Track progress" value={progress} values={values} />
-```
-
-**With a playhead line and handle, in seconds:**
+**A file, in seconds, with a playhead line and handle:**
 
 ```tsx
 <Waveform
@@ -85,6 +89,22 @@ import { Waveform } from "@/components/audio/elements/waveform";
   values={values}
   variant="playhead"
 />
+```
+
+**A microphone, scrolling as it comes in:**
+
+```tsx
+const { level } = useAudioSignal(analyser);
+
+<LiveWaveform aria-label="Microphone input" mode="scrolling" source={level} />;
+```
+
+**A voice, as bars:**
+
+```tsx
+const { bands } = useAudioSignal(analyser);
+
+<BarVisualizer aria-label="Agent speaking" mirrored source={bands} />;
 ```
 
 ## Feeding real audio
@@ -120,23 +140,76 @@ interface WaveformSource {
 
 The waveform subscribes to it and moves the playhead, repaints the canvas and updates the input itself. While the pointer scrubs, the waveform follows the pointer and ignores the source until release; the same holds for a controlled `value` that updates late.
 
+## Regions and markers
+
+Anything inside `Waveform` is laid over the canvas, on the same timeline. A region is `[start, end]` in `duration` units; drag its body to move it, and give it a handle per edge to resize it:
+
+```tsx
+const [loop, setLoop] = useState<readonly [number, number]>([48, 96]);
+
+<Waveform aria-label="Track progress" duration={180} values={values}>
+  <WaveformRegion onValueChange={setLoop} value={loop}>
+    <WaveformRegionHandle aria-label="Loop start" edge="start" />
+    <WaveformRegionHandle aria-label="Loop end" edge="end" />
+  </WaveformRegion>
+  <WaveformMarker value={124}>Chorus</WaveformMarker>
+  <WaveformHover format={formatTime} />
+</Waveform>
+```
+
+A press on a region never seeks the waveform underneath. Each handle is a slider of its own: it takes focus, and the arrow keys, <kbd>Page Up</kbd> / <kbd>Page Down</kbd>, <kbd>Home</kbd> and <kbd>End</kbd> move its edge, which stops `minLength` short of the other one. Leave the handles out for a region that only moves, or pass `movable={false}` for one that only resizes.
+
+## Live signals
+
+A live waveform reads from a `source`, an object in the shape of an external store whose snapshot is the current levels, `0–1` each:
+
+```ts
+interface LevelsSource {
+  getSnapshot: () => ArrayLike<number>;
+  subscribe: (listener: () => void) => () => void;
+}
+```
+
+The `use-audio-signal` hook (`npx shadcn@latest add @audio/use-audio-signal`) reads two of them from an `AnalyserNode`, every animation frame and only while something is drawing them:
+
+```tsx
+const { level, bands } = useAudioSignal(analyser, { bandCount: 32 });
+```
+
+- `level` is the loudest sample of the moment, as a single level. Draw it with `mode="scrolling"`: the waveform records it over time, the newest entering from the right. When the signal stops (pass `null` as the analyser to pause), the trace holds still.
+- `bands` is the spectrum as log-spaced frequency bands, low to high. Draw it with a `BarVisualizer`, or a `LiveWaveform` in its default `mode="static"`: the bars stay in place and follow the bands, rising at once and falling smoothly.
+
+Any signal will do. `createSource` from `@audio-ui/react` makes a source you push to yourself, from a WebSocket, a worklet or a test:
+
+```tsx
+import { createSource } from "@audio-ui/react";
+
+const levels = createSource(new Float32Array(16));
+
+socket.onmessage = (event) => levels.set(event.data);
+```
+
+While its signal is audible, a live waveform carries `data-active`. `idle` picks what the bars do meanwhile (`"pulse"` breathes, `"wave"` ripples), and `loading` sweeps across them while a connection is on its way.
+
 ## Theming
 
-The canvas reads its colors from CSS, and repaints when the theme changes:
+Colors come from CSS, and the canvas repaints when the theme changes:
 
 | Variable | Default | Purpose |
 | -------- | ------- | ------- |
-| `--waveform-color` | text color | Bars ahead of the position. |
+| `--waveform-color` | text color | Bars ahead of the position, and every bar of a live waveform. |
 | `--waveform-progress-color` | `--waveform-color` | Bars behind the position. |
-| `--waveform-bar-radius` | `0px` | Bar corner radius (any CSS length). |
+| `--waveform-bar-radius` | `0px` | Bar corner radius on the canvas (any CSS length). |
+| `--waveform-position` | - | Set on the root: the playback position, as a percentage. |
+| `--waveform-level` | - | Set on each bar of a `BarVisualizer`: its level, `0–1`. |
 
-The position itself is exposed as `--waveform-position` (a percentage) on the root.
+The bars of a `BarVisualizer` are plain elements: restyle them with `.cn-bar-visualizer-bar`. Those the playback position has passed carry `data-played`.
 
 ## API reference
 
-`Waveform` accepts `values`, `variant`, `getAriaValueText` and `className`, plus primitive props from `WaveformPrimitive.Root.Props`. `aria-label`, `aria-labelledby`, and `aria-describedby` are forwarded to the waveform's input.
+`aria-label`, `aria-labelledby`, and `aria-describedby` are forwarded to the element that needs them: the waveform's input, a region handle's input, or the live waveform itself.
 
-### Value and state
+### Waveform
 
 | Prop | Type | Default | Description |
 | ---- | ---- | ------- | ----------- |
@@ -148,20 +221,71 @@ The position itself is exposed as `--waveform-position` (a percentage) on the ro
 | `step` | `number` | `duration / 100` | Arrow key step. |
 | `largeStep` | `number` | `duration / 10` | Step for `PageUp` / `PageDown` and `Shift` + arrows. |
 | `disabled` | `boolean` | `false` | Disables pointer and keyboard interaction. |
+| `loading` | `boolean` | `false` | The audio is on its way: seeking waits and the bars sweep. |
 | `onValueChange` | `(value: number, eventDetails) => void` | - | Fires while seeking. `eventDetails.reason` is `"press"`, `"drag"`, `"keyboard"`, or `"input-change"`; call `eventDetails.cancel()` to reject it. |
 | `onValueCommitted` | `(value: number, eventDetails) => void` | - | Fires when a seek that moved the position ends. |
 | `getAriaValueText` | `(value: number, duration: number) => string` | played share | How the position is announced, e.g. `"0:12 of 1:42"`. |
-
-### Layout and display
-
-| Prop | Type | Default | Description |
-| ---- | ---- | ------- | ----------- |
+| `shape` | `"mirror" \| "bars" \| "line"` | `"mirror"` | How the amplitudes are drawn. |
 | `variant` | `"default" \| "playhead"` | `"default"` | `playhead` adds a playhead line and a handle. |
 | `className` | `string` | - | Classes for the waveform surface. |
 
+### WaveformRegion
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `value` | `readonly [number, number]` | - | Controlled region, as `[start, end]` in `duration` units. |
+| `defaultValue` | `readonly [number, number]` | whole timeline | Uncontrolled starting region. |
+| `minLength` | `number` | the waveform's `step` | The shortest the region can be resized to. |
+| `movable` | `boolean` | `true` | Whether dragging the body moves the region. |
+| `disabled` | `boolean` | `false` | Also disabled when the waveform is. |
+| `onValueChange` | `(value, eventDetails) => void` | - | Fires while moving or resizing. `eventDetails.edge` is `"start"`, `"end"` or `"both"`; `eventDetails.reason` is `"drag"`, `"keyboard"` or `"input-change"`. |
+| `onValueCommitted` | `(value, eventDetails) => void` | - | Fires when a move or resize that changed the region ends. |
+
+`WaveformRegionHandle` takes `edge` (`"start"` or `"end"`) and `getAriaValueText`. `WaveformMarker` takes `value` and shows its children as a label. `WaveformHover` takes `format`, which prints the hovered position; without it only the line shows.
+
+### LiveWaveform
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `source` | `LevelsSource \| null` | - | The live signal. |
+| `mode` | `"static" \| "scrolling"` | `"static"` | `static` spreads the current levels across the width; `scrolling` records the loudest one over time. |
+| `scrollSpeed` | `number` | `60` | How fast `scrolling` moves, in pixels per second. |
+| `shape` | `"mirror" \| "bars" \| "line"` | `"mirror"` | How the levels are drawn. |
+| `gain` | `number` | `1` | Visual gain applied to the levels. |
+| `mirrored` | `boolean` | `false` | In `static` mode, mirrors the levels around the middle bar. |
+| `idle` | `"none" \| "pulse" \| "wave"` | `"none"` | In `static` mode, what the bars do while there is no signal. |
+| `loading` | `boolean` | `false` | Sweeps across the bars while the signal is on its way. |
+
+### BarVisualizer
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `source` | `LevelsSource \| null` | - | The live signal. |
+| `count` | `number` | `24` | How many bars; the levels are fitted to them. |
+| `mirrored` | `boolean` | `false` | Mirrors the levels around the middle bar, the lowest band in the center. |
+| `minLevel` | `number` | `0.08` | Resting level: silent bars keep this much of their size. |
+| `gain` | `number` | `1` | Visual gain applied to the levels. |
+| `idle` | `"none" \| "pulse" \| "wave"` | `"none"` | What the bars do while there is no signal. |
+| `loading` | `boolean` | `false` | Sweeps across the bars while the signal is on its way. |
+| `align` | `"start" \| "center" \| "end"` | `"center"` | Where the bars grow from. |
+| `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` | `vertical` stacks the bars and grows them sideways. |
+
 ### Primitive parts
 
-`@audio-ui/react/waveform` exposes `Waveform.Root`, `Waveform.Control` (the seekable surface, holds the input), `Waveform.Canvas` (`barWidth`, `barGap`, `barRadius`, `variant: "mirror" | "bars"`), `Waveform.Playhead`, `Waveform.Thumb` and `Waveform.Hover` (shown at the hovered position; its children receive that position, to print a time). Every part accepts a `render` prop and `className` / `style` as functions of state, and exposes `data-disabled` / `data-dragging`.
+`@audio-ui/react/waveform` exposes the parts these components are built from:
+
+| Part | Role |
+| ---- | ---- |
+| `Waveform.Root` | Owns the data (`peaks`, or a live `levels` source) and the position (`value`, `source`, `duration`). Carries `data-active` while a live signal is audible. |
+| `Waveform.Control` | The seekable surface; holds the input. Leave it out for a waveform that is only shown. |
+| `Waveform.Canvas` | Draws on a canvas: `variant`, `mode`, `scrollSpeed`, `barWidth`, `barGap`, `barRadius`, `minBarHeight`, `gain`, `mirrored`, `idle`. |
+| `Waveform.Bars`, `Waveform.Bar` | Draws as elements: `count`, `minLevel`, `gain`, `mirrored`, `idle`. Each bar gets `--waveform-level`, `data-index` and `data-played`. |
+| `Waveform.Region`, `Waveform.RegionHandle` | A stretch of the timeline, and the handle of one of its edges. |
+| `Waveform.Marker` | A point on the timeline. |
+| `Waveform.Playhead`, `Waveform.Thumb` | Follow the playback position. |
+| `Waveform.Hover` | Shown at the hovered position; its children receive that position. |
+
+Every part accepts a `render` prop and `className` / `style` as functions of state, and exposes that state as data attributes such as `data-disabled`, `data-dragging` and `data-loading`.
 
 ## Examples
 
@@ -172,6 +296,22 @@ The position itself is exposed as `--waveform-position` (a percentage) on the ro
 ### Playhead
 
 <ComponentPreview styleName="base-nova" name="waveform-playhead-demo" />
+
+### Line
+
+<ComponentPreview styleName="base-nova" name="waveform-line-demo" />
+
+### Region, markers and hover time
+
+<ComponentPreview styleName="base-nova" name="waveform-region-demo" />
+
+### Live
+
+<ComponentPreview styleName="base-nova" name="waveform-live-demo" />
+
+### Bar visualizer
+
+<ComponentPreview styleName="base-nova" name="waveform-bars-demo" />
 
 ### Player, wired to a real uploaded file
 

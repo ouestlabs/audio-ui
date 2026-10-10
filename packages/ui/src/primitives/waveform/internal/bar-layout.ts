@@ -1,7 +1,8 @@
-/** Bars smaller than this would vanish on silence; a sliver keeps the timeline readable. */
-const MIN_BAR_HEIGHT_PX = 2;
-
-export type WaveformVariant = "bars" | "mirror";
+/**
+ * `bars` stands the bars on the baseline, `mirror` centers them on the middle
+ * line, and `line` joins the levels into one continuous, centered shape.
+ */
+export type WaveformVariant = "bars" | "line" | "mirror";
 
 /** Where the bars go on the canvas bitmap. Every length is in device pixels. */
 export interface BarLayout {
@@ -12,6 +13,7 @@ export interface BarLayout {
   /** Distance between the left edges of two neighbouring bars. */
   pitch: number;
   variant: WaveformVariant;
+  width: number;
 }
 
 export interface BarLayoutOptions {
@@ -21,6 +23,8 @@ export interface BarLayoutOptions {
   barWidth: number;
   /** Bitmap height, in device pixels. */
   height: number;
+  /** Shortest bar, in CSS pixels: silence still draws a sliver, so the timeline stays readable. */
+  minBarHeight: number;
   /** Device pixels per CSS pixel. */
   pixelRatio: number;
   variant: WaveformVariant;
@@ -82,77 +86,23 @@ export function barLayout(options: BarLayoutOptions): BarLayout {
     barWidth,
     count: barCount(width, barWidth, barGap),
     height,
-    minBarHeight: snap(MIN_BAR_HEIGHT_PX, pixelRatio),
+    minBarHeight: snap(options.minBarHeight, pixelRatio),
     pitch: barWidth + barGap,
     variant,
+    width,
   };
 }
 
-const magnitude = (peaks: ArrayLike<number>, index: number): number =>
-  Math.min(1, Math.abs(peaks[index] ?? 0));
-
-/** More peaks than bars: each bar keeps the loudest peak in its slice of the data. */
-function reducePeaks(peaks: ArrayLike<number>, levels: Float32Array) {
-  const { length } = peaks;
-  for (let bar = 0; bar < levels.length; bar += 1) {
-    const start = Math.floor((bar * length) / levels.length);
-    const end = Math.max(
-      start + 1,
-      Math.floor(((bar + 1) * length) / levels.length)
-    );
-    let loudest = 0;
-    for (let i = start; i < end && i < length; i += 1) {
-      loudest = Math.max(loudest, magnitude(peaks, i));
-    }
-    levels[bar] = loudest;
-  }
-}
-
-/** Fewer peaks than bars: each bar blends its two nearest peaks, aligned on their centers. */
-function stretchPeaks(peaks: ArrayLike<number>, levels: Float32Array) {
-  const last = peaks.length - 1;
-  for (let bar = 0; bar < levels.length; bar += 1) {
-    const at = Math.min(
-      last,
-      Math.max(0, ((bar + 0.5) * peaks.length) / levels.length - 0.5)
-    );
-    const before = Math.floor(at);
-    const from = magnitude(peaks, before);
-    const to = magnitude(peaks, Math.min(last, before + 1));
-    levels[bar] = from + (to - from) * (at - before);
-  }
-}
-
 /**
- * Fit `peaks` to one level per bar. With more peaks than bars, each bar takes
- * the loudest peak in its slice, so a short transient never disappears between
- * bars; with fewer, neighbouring peaks are blended so the shape stays smooth
- * instead of stepping.
- */
-export function resamplePeaks(
-  peaks: ArrayLike<number>,
-  count: number
-): Float32Array {
-  const levels = new Float32Array(Math.max(0, count));
-  if (peaks.length === 0) {
-    return levels;
-  }
-  if (peaks.length < levels.length) {
-    stretchPeaks(peaks, levels);
-  } else {
-    reducePeaks(peaks, levels);
-  }
-  return levels;
-}
-
-/**
- * Where bar `index` goes for a level of 0…1, in whole device pixels. `mirror`
- * centers it; `bars` stands it on the baseline.
+ * Where bar `index` goes for a level of 0…1, in whole device pixels. `bars`
+ * stands it on the baseline; the other variants center it. `shift` moves the
+ * whole row, for a waveform that scrolls.
  */
 export function barRect(
   level: number,
   index: number,
-  layout: BarLayout
+  layout: BarLayout,
+  shift = 0
 ): BarRect {
   const { barWidth, height, minBarHeight, pitch, variant } = layout;
   const barHeight = Math.min(
@@ -162,10 +112,25 @@ export function barRect(
   return {
     height: barHeight,
     width: barWidth,
-    x: index * pitch,
+    x: index * pitch + shift,
     y:
-      variant === "mirror"
-        ? Math.round((height - barHeight) / 2)
-        : height - barHeight,
+      variant === "bars"
+        ? height - barHeight
+        : Math.round((height - barHeight) / 2),
   };
+}
+
+/**
+ * How far to shift a row of `count` bars so the last one sits flush with the
+ * right edge once it has fully slid in. `progress` is how far it has, 0…1; the
+ * slide moves in whole device pixels, so bars stay sharp while they scroll.
+ */
+export function scrollShift(
+  count: number,
+  progress: number,
+  layout: BarLayout
+): number {
+  const { barWidth, pitch, width } = layout;
+  const settled = width - barWidth - (count - 1) * pitch;
+  return settled + Math.round((1 - Math.min(1, Math.max(0, progress))) * pitch);
 }

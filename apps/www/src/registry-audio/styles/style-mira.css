@@ -440,6 +440,52 @@
     @apply inset-y-0 my-auto size-3.5 rounded-sm border-2 border-background bg-primary shadow-md;
   }
 
+  .cn-waveform-region {
+    @apply rounded-[min(var(--radius-sm),6px)] bg-primary/15 ring-1 ring-primary/40 ring-inset;
+  }
+
+  .cn-waveform-region-handle {
+    @apply rounded-[min(var(--radius-sm),6px)] bg-primary/60 has-focus-visible:bg-primary has-focus-visible:ring-3 has-focus-visible:ring-ring/50;
+  }
+
+  .cn-waveform-marker {
+    @apply bg-foreground/50;
+  }
+
+  .cn-waveform-marker-label {
+    @apply rounded-[min(var(--radius-sm),6px)] bg-muted px-1 font-medium text-[0.625rem] text-foreground;
+  }
+
+  .cn-waveform-hover {
+    @apply bg-foreground/40;
+  }
+
+  .cn-waveform-hover-label {
+    @apply rounded-[min(var(--radius-sm),6px)] bg-foreground px-1.5 py-0.5 font-mono text-[0.625rem] text-background tabular-nums;
+  }
+
+  /* MARK: Live Waveform */
+  .cn-live-waveform {
+    @apply h-16;
+  }
+
+  .cn-live-waveform-canvas {
+    @apply pointer-events-none [--waveform-bar-radius:max(0px,min(var(--radius-sm),3px))] [--waveform-color:var(--primary)];
+  }
+
+  /* MARK: Bar Visualizer */
+  .cn-bar-visualizer {
+    @apply text-primary data-[orientation=horizontal]:h-16 data-[orientation=vertical]:w-16;
+  }
+
+  .cn-bar-visualizer-bars {
+    @apply gap-0.75;
+  }
+
+  .cn-bar-visualizer-bar {
+    @apply rounded-md bg-current;
+  }
+
   /* MARK: Channel Strip */
   .cn-channel-strip {
     @apply text-card-foreground;

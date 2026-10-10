@@ -1310,4 +1310,58 @@ export const components: RegistryItem[] = [
     registryDependencies: ["@audio/waveform"],
     type: "registry:example",
   },
+  {
+    categories: ["waveform"],
+    description: "Waveform drawn as one continuous shape",
+    files: [
+      {
+        path: "components/waveform/waveform-line-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "waveform-line-demo",
+    registryDependencies: ["@audio/waveform"],
+    type: "registry:example",
+  },
+  {
+    categories: ["waveform"],
+    description:
+      "Waveform with a resizable loop region, markers and a hover time",
+    files: [
+      {
+        path: "components/waveform/waveform-region-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "waveform-region-demo",
+    registryDependencies: ["@audio/waveform"],
+    type: "registry:example",
+  },
+  {
+    categories: ["waveform"],
+    description: "Live waveform scrolling with the incoming signal",
+    files: [
+      {
+        path: "components/waveform/waveform-live-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "waveform-live-demo",
+    registryDependencies: ["@audio/waveform"],
+    type: "registry:example",
+  },
+  {
+    categories: ["waveform"],
+    description:
+      "Bar visualizer following a voice, idling and waiting for a connection",
+    files: [
+      {
+        path: "components/waveform/waveform-bars-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "waveform-bars-demo",
+    registryDependencies: ["@audio/waveform"],
+    type: "registry:example",
+  },
 ];

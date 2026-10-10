@@ -473,5 +473,25 @@
     "categories": ["waveform"],
     "name": "waveform-playhead-demo",
     "title": "waveform-playhead-demo"
+  },
+  {
+    "categories": ["waveform"],
+    "name": "waveform-line-demo",
+    "title": "waveform-line-demo"
+  },
+  {
+    "categories": ["waveform"],
+    "name": "waveform-region-demo",
+    "title": "waveform-region-demo"
+  },
+  {
+    "categories": ["waveform"],
+    "name": "waveform-live-demo",
+    "title": "waveform-live-demo"
+  },
+  {
+    "categories": ["waveform"],
+    "name": "waveform-bars-demo",
+    "title": "waveform-bars-demo"
   }
 ]

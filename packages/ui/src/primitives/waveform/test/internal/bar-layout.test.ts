@@ -4,8 +4,8 @@ import {
   barLayout,
   barRect,
   bitmapLength,
-  resamplePeaks,
-} from "./waveform-bars";
+  scrollShift,
+} from "../../internal/bar-layout";
 
 describe("barCount", () => {
   test("fits bars and gaps into the width, without a trailing gap", () => {
@@ -41,6 +41,7 @@ describe("barLayout", () => {
       barGap,
       barWidth,
       height: 100,
+      minBarHeight: 2,
       pixelRatio,
       variant: "mirror",
       width: 300,
@@ -72,32 +73,6 @@ describe("barLayout", () => {
   });
 });
 
-describe("resamplePeaks", () => {
-  test("keeps the loudest peak of each bar's slice, so transients survive", () => {
-    const peaks = [0.1, 0.9, 0.2, 0.2, 0.5, 0.4];
-    expect(Array.from(resamplePeaks(peaks, 3))).toEqual([
-      Math.fround(0.9),
-      Math.fround(0.2),
-      Math.fround(0.5),
-    ]);
-  });
-
-  test("blends neighbouring peaks when there are fewer peaks than bars", () => {
-    expect(Array.from(resamplePeaks([0.25, 0.75], 4))).toEqual([
-      0.25, 0.375, 0.625, 0.75,
-    ]);
-  });
-
-  test("reads negative samples as magnitudes and caps levels at 1", () => {
-    expect(Array.from(resamplePeaks([-0.5, 3], 2))).toEqual([0.5, 1]);
-    expect(Array.from(resamplePeaks([-0.5], 2))).toEqual([0.5, 0.5]);
-  });
-
-  test("returns silence for empty data", () => {
-    expect(Array.from(resamplePeaks([], 3))).toEqual([0, 0, 0]);
-  });
-});
-
 describe("barRect", () => {
   const layout = {
     barWidth: 3,
@@ -105,6 +80,7 @@ describe("barRect", () => {
     height: 100,
     minBarHeight: 2,
     pitch: 5,
+    width: 98,
   };
 
   test("mirror centers the bar; bars stands it on the baseline", () => {
@@ -112,6 +88,14 @@ describe("barRect", () => {
     expect(mirrored).toEqual({ height: 50, width: 3, x: 10, y: 25 });
     const standing = barRect(0.5, 2, { ...layout, variant: "bars" });
     expect(standing).toEqual({ height: 50, width: 3, x: 10, y: 50 });
+  });
+
+  test("line centers its points like mirror", () => {
+    expect(barRect(0.5, 2, { ...layout, variant: "line" }).y).toBe(25);
+  });
+
+  test("shift moves the whole row", () => {
+    expect(barRect(0.5, 2, { ...layout, variant: "mirror" }, -4).x).toBe(6);
   });
 
   test("lands every edge on a whole pixel, whatever the level", () => {
@@ -129,5 +113,33 @@ describe("barRect", () => {
   test("a full-scale bar fills the height", () => {
     const rect = barRect(1, 0, { ...layout, variant: "mirror" });
     expect(rect).toMatchObject({ height: 100, y: 0 });
+  });
+});
+
+describe("scrollShift", () => {
+  const layout = {
+    barWidth: 4,
+    count: 10,
+    height: 100,
+    minBarHeight: 2,
+    pitch: 6,
+    variant: "mirror" as const,
+    width: 61,
+  };
+
+  test("a settled row ends flush with the right edge", () => {
+    // 11 bars: the last one starts at 61 - 4 = 57, so the first at 57 - 60 = -3
+    expect(scrollShift(11, 1, layout)).toBe(-3);
+    expect(barRect(1, 10, layout, scrollShift(11, 1, layout)).x).toBe(57);
+  });
+
+  test("the newest bar starts one pitch further right, off the edge", () => {
+    expect(barRect(1, 10, layout, scrollShift(11, 0, layout)).x).toBe(63);
+  });
+
+  test("slides in whole pixels", () => {
+    for (const progress of [0.1, 0.33, 0.5, 0.71, 0.99]) {
+      expect(Number.isInteger(scrollShift(11, progress, layout))).toBe(true);
+    }
   });
 });
