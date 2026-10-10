@@ -20,7 +20,7 @@ export default function DocsLayout({
             <div className="size-full">{children}</div>
           </SidebarProvider>
         </div>
-        <SiteFooter />
+        <SiteFooter docs />
       </DocsDesignSystemSync>
     </>
   );

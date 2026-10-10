@@ -3,11 +3,21 @@ import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 
-export function SiteFooter() {
+export function SiteFooter({ docs = false }: { docs?: boolean }) {
   return (
-    <footer className="3xl:fixed:bg-transparent font-site-sans group-has-[[data-variant=sidebar][data-state=expanded]]/body:ml-64 group-has-[.section-soft]/body:bg-site-surface/40 group-has-[.docs-nav]/body:pb-20 group-has-[.docs-nav]/body:sm:pb-0 dark:bg-transparent">
+    <footer
+      className={cn(
+        "3xl:fixed:bg-transparent font-site-sans dark:bg-transparent",
+        docs && "pb-20 sm:pb-0"
+      )}
+    >
       <div className={cn("container-wrapper")}>
-        <div className="container flex flex-col items-center justify-center gap-2 py-4 group-has-[.docs-nav]/body:max-w-none group-has-[.docs-nav]/body:px-0 md:h-16 md:flex-row md:gap-4">
+        <div
+          className={cn(
+            "container flex flex-col items-center justify-center gap-2 py-4 md:h-16 md:flex-row md:gap-4",
+            docs && "max-w-none px-0"
+          )}
+        >
           <div className="order-1 flex items-center gap-2.5 text-balance text-xs md:order-2">
             <div>
               <span className="text-site-muted-foreground">Built by</span>{" "}
