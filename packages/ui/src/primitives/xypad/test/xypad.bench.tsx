@@ -1,9 +1,9 @@
 import { describe, test } from "bun:test";
 import { fireEvent, render } from "@testing-library/react";
 import { useState } from "react";
-import { XYPad } from "../src/entries/xypad";
-import { mockRect } from "../test/helpers";
-import { bench, expectWork, sweep } from "./harness";
+import { bench, expectWork, sweep } from "../../../../test/bench";
+import { mockRect } from "../../../../test/helpers";
+import { XYPad } from "../../../entries/xypad";
 
 let changes = 0;
 

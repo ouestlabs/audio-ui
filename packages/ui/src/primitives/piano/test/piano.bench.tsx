@@ -1,7 +1,7 @@
 import { describe, test } from "bun:test";
 import { fireEvent } from "@testing-library/react";
-import { renderPiano } from "../src/primitives/piano/test/helpers";
-import { bench, expectWork, sweep } from "./harness";
+import { bench, expectWork, sweep } from "../../../../test/bench";
+import { renderPiano } from "./helpers";
 
 describe("Piano", () => {
   test("gliding across the keys", () => {

@@ -1,8 +1,8 @@
 import { describe, expect, test } from "bun:test";
 import { act, fireEvent } from "@testing-library/react";
-import { renderTimeline } from "../src/primitives/timeline/test/helpers";
-import { createSource } from "../src/source";
-import { bench, expectWork, sweep } from "./harness";
+import { bench, expectWork, sweep } from "../../../../test/bench";
+import { createSource } from "../../../source";
+import { renderTimeline } from "./helpers";
 
 describe("Timeline", () => {
   test("scrubbing the ruler", () => {

@@ -55,7 +55,10 @@
   },
   "overrides": [
     {
-      "includes": ["packages/ui/bench/**"],
+      "includes": [
+        "packages/ui/src/primitives/*/test/*.bench.tsx",
+        "packages/ui/test/bench.ts"
+      ],
       "linter": {
         "rules": {
           "performance": {

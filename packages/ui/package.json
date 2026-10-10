@@ -89,7 +89,7 @@
     "lint:fix": "biome check --write --unsafe .",
     "test": "bun test",
     "clean": "rm -rf dist node_modules .turbo",
-    "bench": "bun test ./bench/*.bench.tsx"
+    "bench": "bun test ./src/primitives/*/test/*.bench.tsx"
   },
   "devDependencies": {
     "@audio-ui/typescript": "latest",

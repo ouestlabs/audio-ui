@@ -1,8 +1,8 @@
 import { describe, expect, test } from "bun:test";
 import { act, fireEvent } from "@testing-library/react";
-import { renderWaveform } from "../src/primitives/waveform/test/helpers";
-import { createSource } from "../src/source";
-import { bench, expectWork, sweep } from "./harness";
+import { bench, expectWork, sweep } from "../../../../test/bench";
+import { createSource } from "../../../source";
+import { renderWaveform } from "./helpers";
 
 const PEAKS = Array.from(
   { length: 2048 },

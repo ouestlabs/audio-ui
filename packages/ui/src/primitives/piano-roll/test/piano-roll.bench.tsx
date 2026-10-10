@@ -1,7 +1,7 @@
 import { describe, test } from "bun:test";
 import { fireEvent } from "@testing-library/react";
-import { renderRoll } from "../src/primitives/piano-roll/test/helpers";
-import { bench, expectWork, sweep } from "./harness";
+import { bench, expectWork, sweep } from "../../../../test/bench";
+import { renderRoll } from "./helpers";
 
 describe("Piano roll", () => {
   test("dragging a note", () => {

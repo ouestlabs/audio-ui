@@ -1,8 +1,8 @@
 import { describe, test } from "bun:test";
 import { act, render } from "@testing-library/react";
-import { Meter } from "../src/entries/meter";
-import { createSource } from "../src/source";
-import { bench, sweep } from "./harness";
+import { bench, sweep } from "../../../../test/bench";
+import { Meter } from "../../../entries/meter";
+import { createSource } from "../../../source";
 
 const frame = (channels: number, index: number) => ({
   levels: Array.from(

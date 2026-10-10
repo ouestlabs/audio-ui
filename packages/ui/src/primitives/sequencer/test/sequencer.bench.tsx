@@ -1,7 +1,7 @@
 import { describe, test } from "bun:test";
 import { fireEvent } from "@testing-library/react";
-import { renderSequencer } from "../src/primitives/sequencer/test/helpers";
-import { bench, expectWork } from "./harness";
+import { bench, expectWork } from "../../../../test/bench";
+import { renderSequencer } from "./helpers";
 
 describe("Sequencer", () => {
   test("toggling steps", () => {
