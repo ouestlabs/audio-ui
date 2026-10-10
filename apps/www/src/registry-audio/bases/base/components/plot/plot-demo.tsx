@@ -12,6 +12,7 @@ import {
   PlotLine,
   PlotMark,
   PlotTraceArea,
+  useValueAtPointer,
 } from "@/registry-audio/bases/base/audio/elements/plot";
 import { useNoiseThroughEq } from "@/registry-audio/bases/base/hooks/use-noise-through-eq";
 import { useSpectrum } from "@/registry-audio/bases/base/hooks/use-spectrum";
@@ -25,11 +26,15 @@ import {
   formatHz,
 } from "@/registry-audio/bases/base/lib/filter-response";
 
-const BANDS: EqBand[] = [
-  { frequency: 90, gainDb: 3, type: "lowshelf" },
-  { frequency: 1200, gainDb: -4, q: 1.2, type: "peak" },
-  { frequency: 7000, gainDb: 5, type: "highshelf" },
+type Band = EqBand & { id: number };
+
+const BANDS: Band[] = [
+  { frequency: 90, gainDb: 3, id: 1, type: "lowshelf" },
+  { frequency: 1200, gainDb: -4, id: 2, q: 1.2, type: "peak" },
+  { frequency: 7000, gainDb: 5, id: 3, type: "highshelf" },
 ];
+const MAX_BANDS = 8;
+const NEW_BAND_Q = 1;
 const MIN_HZ = 20;
 const MAX_HZ = 20_000;
 const MAX_DB = 18;
@@ -58,7 +63,36 @@ interface BandHandleProps {
   bands: readonly EqBand[];
   index: number;
   onChange: (index: number, patch: Partial<EqBand>) => void;
+  onRemove: (index: number) => void;
   onSelect: (index: number) => void;
+}
+
+interface BandAdderProps {
+  bands: readonly EqBand[];
+  onAdd: (frequency: number, gainDb: number) => void;
+}
+
+/** The plot's empty space: double-click it to add a band there, so its handle lands under the pointer. */
+function BandAdder({ bands, onAdd }: BandAdderProps) {
+  const valueAt = useValueAtPointer();
+  const handleDoubleClick = useCallback(
+    (event: React.MouseEvent) => {
+      const point = valueAt(event.clientX, event.clientY);
+      if (!point) {
+        return;
+      }
+      // The gain that puts a new bell's handle at the pointer, on top of what is already there.
+      const gainDb = point.y - eqResponse(bands)(point.x);
+      onAdd(point.x, clampGain(gainDb));
+    },
+    [bands, onAdd, valueAt]
+  );
+  // A mouse gesture with a keyboard equivalent: the handles' own Enter-free
+  // path is the keyboard add below the plot.
+  return (
+    // biome-ignore lint/a11y/noStaticElementInteractions: a pointer shortcut; adding a band has its own button.
+    <div className="absolute inset-0" onDoubleClick={handleDoubleClick} />
+  );
 }
 
 /**
@@ -71,6 +105,7 @@ function BandHandle({
   bands,
   index,
   onChange,
+  onRemove,
   onSelect,
 }: BandHandleProps) {
   const ref = useRef<HTMLDivElement>(null);
@@ -108,6 +143,15 @@ function BandHandle({
     () => onChange(index, { gainDb: 0 }),
     [index, onChange]
   );
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent) => {
+      if (event.key === "Delete" || event.key === "Backspace") {
+        event.preventDefault();
+        onRemove(index);
+      }
+    },
+    [index, onRemove]
+  );
 
   return (
     <PlotHandle
@@ -115,6 +159,7 @@ function BandHandle({
       data-active={active || undefined}
       getAriaValueText={describeValue}
       onDoubleClick={reset}
+      onKeyDown={handleKeyDown}
       onValueChange={handleChange}
       ref={ref}
       value={{
@@ -132,13 +177,40 @@ function BandHandle({
  * the foreground, the others faintly.
  */
 export default function PlotDemo() {
-  const [bands, setBands] = useState(BANDS);
-  const [selected, setSelected] = useState(1);
+  const [bands, setBands] = useState<Band[]>(BANDS);
+  const nextId = useRef(BANDS.length + 1);
+  const [selectedRaw, setSelected] = useState(1);
+  const selected = Math.min(selectedRaw, Math.max(0, bands.length - 1));
   const response = useMemo(() => eqResponse(bands), [bands]);
   const bandCurves = useMemo(
     () => bands.map((item) => biquadResponse(item)),
     [bands]
   );
+  const addBand = useCallback((frequency: number, gainDb: number) => {
+    setBands((current) => {
+      if (current.length >= MAX_BANDS) {
+        return current;
+      }
+      nextId.current += 1;
+      setSelected(current.length);
+      return [
+        ...current,
+        {
+          frequency,
+          gainDb,
+          id: nextId.current,
+          q: NEW_BAND_Q,
+          type: "peak",
+        },
+      ];
+    });
+  }, []);
+  const removeBand = useCallback((index: number) => {
+    setBands((current) => current.filter((_, at) => at !== index));
+    setSelected((current) =>
+      Math.max(0, current > index ? current - 1 : current)
+    );
+  }, []);
   const changeBand = useCallback((index: number, patch: Partial<EqBand>) => {
     setBands((current) =>
       current.map((other, at) =>
@@ -160,6 +232,7 @@ export default function PlotDemo() {
         minY={-MAX_DB}
         scaleX="log"
       >
+        <BandAdder bands={bands} onAdd={addBand} />
         <PlotGraph>
           {HZ_LABELS.map(({ hz }) => (
             <PlotLine axis="x" key={hz} value={hz} />
@@ -204,18 +277,22 @@ export default function PlotDemo() {
             {formatDbMark(db)}
           </PlotMark>
         ))}
-        {bands.map((_, index) => (
+        {bands.map((item, index) => (
           <BandHandle
             active={index === selected}
             bands={bands}
             index={index}
-            // biome-ignore lint/suspicious/noArrayIndexKey: fixed list.
-            key={index}
+            key={item.id}
             onChange={changeBand}
+            onRemove={removeBand}
             onSelect={setSelected}
           />
         ))}
       </Plot>
+      <p className="text-center text-muted-foreground text-xs">
+        Double-click to add a band, Delete to remove one, scroll over it to
+        change its width.
+      </p>
       <div className="flex items-center justify-between gap-2">
         <Button
           aria-label={

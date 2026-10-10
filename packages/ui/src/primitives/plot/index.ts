@@ -1,3 +1,4 @@
+export { useValueAtPointer } from "./context";
 export { Band } from "./elements/band";
 export { Curve } from "./elements/curve";
 export { Dot } from "./elements/dot";

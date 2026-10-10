@@ -41,3 +41,35 @@ export function positionOn(axis: PlotAxis, value: number): number {
 export function valueOn(axis: PlotAxis, position: number): number {
   return axis.scale.toValue(position, axis.min, axis.max);
 }
+
+/**
+ * Turns a pointer position into a value on the plot: for adding a point where
+ * someone double-clicks, or reading out what is under the cursor. Returns a
+ * function from `clientX` / `clientY` to `{ x, y }` in the axes' units, or
+ * `null` while the plot has no size.
+ */
+export function useValueAtPointer(): (
+  clientX: number,
+  clientY: number
+) => { x: number; y: number } | null {
+  const { meta } = usePlotContext("useValueAtPointer");
+  const { elementRef, x, y } = meta;
+  return React.useCallback(
+    (clientX: number, clientY: number) => {
+      const rect = elementRef.current?.getBoundingClientRect();
+      if (!(rect && rect.width > 0 && rect.height > 0)) {
+        return null;
+      }
+      const across = Math.min(
+        1,
+        Math.max(0, (clientX - rect.left) / rect.width)
+      );
+      const up = Math.min(
+        1,
+        Math.max(0, 1 - (clientY - rect.top) / rect.height)
+      );
+      return { x: valueOn(x, across), y: valueOn(y, up) };
+    },
+    [elementRef, x, y]
+  );
+}

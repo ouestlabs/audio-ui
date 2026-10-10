@@ -136,6 +136,9 @@ function PlotHandle({ className, ...props }: PlotPrimitive.Handle.Props) {
   );
 }
 
+/** Turns a pointer position into a value on the plot, for adding a point where someone double-clicks. */
+const { useValueAtPointer } = PlotPrimitive;
+
 export {
   Plot,
   PlotArea,
@@ -148,4 +151,5 @@ export {
   PlotMark,
   PlotTrace,
   PlotTraceArea,
+  useValueAtPointer,
 };

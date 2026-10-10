@@ -48,9 +48,12 @@ export function useNoiseThroughEq(bands: readonly EqBand[]) {
   const filtersRef = useRef<BiquadFilterNode[]>([]);
   const bandsRef = useRef(bands);
   bandsRef.current = bands;
+  // The chain is rebuilt when a band comes or goes, or changes type.
+  const bandTypes = bands.map((band) => band.type).join();
 
   const toggle = useCallback(() => setPlaying((on) => !on), []);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: rebuilds the chain when the band types change.
   useEffect(() => {
     if (!playing) {
       return;
@@ -73,8 +76,8 @@ export function useNoiseThroughEq(bands: readonly EqBand[]) {
     tap.smoothingTimeConstant = ANALYSER_SMOOTHING;
     const output = ctx.createGain();
     output.gain.value = OUTPUT_GAIN;
-    const chain = [source, ...filters, tap, output];
-    chain.reduce((from, to) => {
+    const nodes = [source, ...filters, tap, output];
+    nodes.reduce((from, to) => {
       from.connect(to);
       return to;
     });
@@ -84,13 +87,13 @@ export function useNoiseThroughEq(bands: readonly EqBand[]) {
     setAnalyser(tap);
     return () => {
       source.stop();
-      for (const node of chain) {
+      for (const node of nodes) {
         node.disconnect();
       }
       filtersRef.current = [];
       setAnalyser(null);
     };
-  }, [playing, webAudio]);
+  }, [bandTypes, playing, webAudio]);
 
   // The bands move the filters while the noise plays.
   useEffect(() => {

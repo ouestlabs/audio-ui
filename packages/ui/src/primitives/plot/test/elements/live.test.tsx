@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { act, render } from "@testing-library/react";
+import { mockRect } from "../../../../../test/helpers";
 import { Plot } from "../../../../plot";
 import { createSource } from "../../../../source";
 import { LINEAR_SCALE } from "../../../internal/parameter-scale";
@@ -119,5 +120,34 @@ describe("Plot.Dot", () => {
     const element = view.getByTestId("still");
     expect(element.style.left).toBe("25%");
     expect(element.style.top).toBe("0%");
+  });
+});
+
+describe("Plot.useValueAtPointer", () => {
+  test("turns a pointer position into a value, kept within the axes", () => {
+    const reader: { read?: ReturnType<typeof Plot.useValueAtPointer> } = {};
+    function Reader() {
+      reader.read = Plot.useValueAtPointer();
+      return null;
+    }
+    const view = render(
+      <Plot.Root data-testid="root" maxX={100} maxY={10} minX={0} minY={0}>
+        <Reader />
+      </Plot.Root>
+    );
+    expect(reader.read?.(50, 50)).toBeNull();
+    mockRect(view.getByTestId("root"), {
+      bottom: 100,
+      height: 100,
+      right: 200,
+      width: 200,
+    });
+    view.rerender(
+      <Plot.Root data-testid="root" maxX={100} maxY={10} minX={0} minY={0}>
+        <Reader />
+      </Plot.Root>
+    );
+    expect(reader.read?.(100, 25)).toEqual({ x: 50, y: 7.5 });
+    expect(reader.read?.(-40, 900)).toEqual({ x: 0, y: 0 });
   });
 });

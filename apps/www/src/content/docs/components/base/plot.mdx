@@ -7,7 +7,7 @@ base: base
 
 <ComponentPreview styleName="base-nova" name="plot-demo" />
 
-The default example is an equalizer built the way studio equalizers are: each band's handle sits on the curve, so it follows the pointer one to one; scroll over a band to widen or narrow it, double-click to flatten it, and the selected band's own curve is drawn over the others.
+The default example is an equalizer built the way studio equalizers are: each band's handle sits on the curve, so it follows the pointer one to one; scroll over a band to widen or narrow it, double-click it to flatten it, double-click empty space to add a band there (up to eight) and press Delete on a band to remove it, and the selected band's own curve is drawn over the others.
 
 A plot is two axes and what you draw on them: a curve, a rule, a shaded band, and handles to drag. Everything is placed in your own units (Hz, dB, anything), and an axis can be logarithmic, the way frequency is drawn.
 
@@ -122,6 +122,8 @@ One handle sets the threshold, the other the ratio.
 | `minY`, `maxY` | `number` | `0`, `1` | Range of the y axis. |
 | `scaleX`, `scaleY` | `"linear" \| "log" \| { toPosition, toValue }` | `"linear"` | How values spread along each axis. |
 | `disabled` | `boolean` | `false` | Stops every handle. |
+
+`useValueAtPointer()` returns a function from a pointer position (`clientX`, `clientY`) to a value `{ x, y }` in the axes' units, for adding a point where someone double-clicks or reading out what is under the cursor. Call it from inside a plot.
 
 ### PlotCurve, PlotArea
 
