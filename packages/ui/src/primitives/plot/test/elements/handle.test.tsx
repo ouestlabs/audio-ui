@@ -95,12 +95,20 @@ describe("Plot.Handle", () => {
     expect(handle.style.left).toBe("50%");
   });
 
-  test("follows the pointer while a controlled value lags, then shows the value again", () => {
+  test("shows a controlled value as given, even mid-drag", () => {
     const { handle, onValueCommitted } = renderPlot(
       {},
       { defaultValue: undefined, value: { x: 50, y: 5 } }
     );
-    drag(handle, [100, 50], [140, 50]);
+    fireEvent.pointerDown(handle, {
+      button: 0,
+      clientX: 100,
+      clientY: 50,
+      pointerId: 1,
+    });
+    fireEvent.pointerMove(handle, { clientX: 140, clientY: 50, pointerId: 1 });
+    expect(handle.style.left).toBe("50%");
+    fireEvent.pointerUp(handle, { clientX: 140, clientY: 50, pointerId: 1 });
     expect(lastCall(onValueCommitted)[0].x).toBe(70);
     expect(handle.style.left).toBe("50%");
   });

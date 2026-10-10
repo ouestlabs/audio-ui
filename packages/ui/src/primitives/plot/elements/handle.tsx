@@ -86,34 +86,17 @@ export function Handle(componentProps: Handle.Props) {
   );
   const rawValue = isControlled ? valueProp : uncontrolledValue;
 
-  // While dragging, the handle follows the pointer even if a controlled value
-  // lags; on release the controlled value rules again.
+  // A controlled value is the last word, even mid-drag: a consumer that holds
+  // the point to a curve or a limit sees the handle held there, not wherever
+  // the pointer has gone.
   const [dragging, setDraggingState] = React.useState(false);
-  const [dragValue, setDragValue] = React.useState<Point | null>(null);
-  const draggingRef = React.useRef(false);
-  // While dragging, only the axes the handle moves along follow the pointer:
-  // the other one is the value's to say, so a point that sits on a curve
-  // keeps sitting on it as the curve moves under it.
-  const value = clampPoint(
-    {
-      x: moves("x") ? (dragValue ?? rawValue).x : rawValue.x,
-      y: moves("y") ? (dragValue ?? rawValue).y : rawValue.y,
-    },
-    x,
-    y
-  );
+  const value = clampPoint(rawValue, x, y);
   const valueRef = React.useRef(value);
   valueRef.current = value;
   const inputRef = React.useRef<HTMLInputElement>(null);
   const gestureRef = React.useRef<DragGesture | null>(null);
 
-  const setDragging = (next: boolean) => {
-    draggingRef.current = next;
-    setDraggingState(next);
-    if (!next) {
-      setDragValue(null);
-    }
-  };
+  const setDragging = setDraggingState;
 
   /** Clamps and proposes a value; returns whether it was applied. */
   const change = (next: Point, eventDetails: Handle.ChangeEventDetails) => {
@@ -129,9 +112,6 @@ export function Handle(componentProps: Handle.Props) {
     valueRef.current = clamped;
     if (!isControlled) {
       setUncontrolledValue(clamped);
-    }
-    if (isControlled && draggingRef.current) {
-      setDragValue(clamped);
     }
     return true;
   };
