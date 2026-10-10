@@ -176,15 +176,6 @@ export const components: RegistryItem[] = [
     description: "Piano with onNoteOn/onNoteOff events",
     files: [
       {
-        path: "components/piano/piano-note-events-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "piano-note-events-demo",
-    registryDependencies: ["@audio/piano"],
-    type: "registry:example",
-  },
-  {
     categories: ["piano"],
     description: "Piano lit from an external source via activeNotes",
     files: [
