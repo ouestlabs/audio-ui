@@ -1,7 +1,11 @@
 import { mergeProps } from "@base-ui/react/merge-props";
 import { useRender } from "@base-ui/react/use-render";
 import { type PartProps, resolveStyling } from "../../internal/part";
-import { type PianoRollState, usePianoRollContext } from "../context";
+import {
+  type PianoRollState,
+  usePianoRollContext,
+  useRollView,
+} from "../context";
 
 /**
  * The selection rectangle being dragged across the grid; renders nothing the
@@ -10,8 +14,8 @@ import { type PianoRollState, usePianoRollContext } from "../context";
  */
 export function Marquee(componentProps: Marquee.Props) {
   const { className, ref, render, style, ...elementProps } = componentProps;
-  const { meta, state } = usePianoRollContext("Marquee");
-  const { band } = meta;
+  const { state } = usePianoRollContext("Marquee");
+  const band = useRollView("Marquee", (view) => view.band);
   return useRender({
     defaultTagName: "div",
     enabled: band !== null,

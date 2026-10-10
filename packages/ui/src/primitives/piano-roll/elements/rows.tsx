@@ -3,7 +3,7 @@ import { useRender } from "@base-ui/react/use-render";
 import * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { isBlackKey } from "../../internal/pitch";
-import { placedOnRow, usePianoRollContext } from "../context";
+import { placedOnRow, usePianoRollContext, useRollView } from "../context";
 
 /**
  * Renders `children` once per row, highest pitch first: the place to put a
@@ -30,15 +30,16 @@ export function Row(componentProps: Row.Props) {
   const { className, pitch, ref, render, style, ...elementProps } =
     componentProps;
   const { meta, state: rollState } = usePianoRollContext("Row");
+  const active = useRollView("Row", (view) => view.active.has(pitch));
   const state = React.useMemo<Row.State>(
     () => ({
-      active: meta.active.has(pitch),
+      active,
       color: isBlackKey(pitch) ? "black" : "white",
       disabled: rollState.disabled,
       folded: rollState.folded,
       octave: pitch % 12 === 0,
     }),
-    [meta.active, pitch, rollState.disabled, rollState.folded]
+    [active, pitch, rollState.disabled, rollState.folded]
   );
   return useRender({
     defaultTagName: "div",

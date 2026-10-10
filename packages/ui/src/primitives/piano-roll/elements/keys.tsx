@@ -4,6 +4,7 @@ import { Root as PianoRoot } from "../../piano/elements/root";
 import {
   type SelectionChangeEventDetails,
   usePianoRollContext,
+  useRollView,
 } from "../context";
 
 /**
@@ -17,7 +18,8 @@ export function Keys(componentProps: Keys.Props) {
   const { disabled = false, ...elementProps } = componentProps;
   const { actions, meta, state } = usePianoRollContext("Keys");
   const { noteOff, noteOn, select } = actions;
-  const { active, rows, selectionRef, valueRef } = meta;
+  const { rows, selectionRef, valueRef } = meta;
+  const active = useRollView("Keys", (view) => view.active);
 
   const handleNoteOn = React.useCallback(
     (pitch: number, eventDetails: PianoRoot.NoteOnEventDetails) => {

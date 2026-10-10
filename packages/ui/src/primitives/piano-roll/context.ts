@@ -3,6 +3,7 @@ import type {
   ChangeEventDetails as ExtraChangeEventDetails,
   CommitEventDetails as ExtraCommitEventDetails,
 } from "../internal/event-details";
+import type { Store } from "../internal/store";
 import type { Note, NoteId, RollBounds } from "./internal/edits";
 import type { Rows } from "./internal/rows";
 
@@ -121,9 +122,6 @@ export interface PianoRollContextValue {
     unitsPerPixel: () => number;
   };
   meta: {
-    /** Pitches sounding: auditioned here, or listed in `activePitches`. */
-    active: ReadonlySet<number>;
-    band: Band | null;
     bounds: RollBounds;
     /** The length and velocity a drawn note gets: those last drawn or resized. */
     drawTemplateRef: React.RefObject<{ length: number; velocity: number }>;
@@ -131,17 +129,26 @@ export interface PianoRollContextValue {
     gridRef: React.RefObject<HTMLElement | null>;
     /** The pitch last auditioned: where a note added from the keyboard goes. */
     lastPitchRef: React.RefObject<number | null>;
-    noteById: ReadonlyMap<NoteId, Note>;
-    /** The notes as displayed. */
-    notes: readonly Note[];
     rows: Rows;
-    selection: ReadonlySet<NoteId>;
+    /** What changes as the roll is used, outside the context: a part follows only its own piece, so editing one note does not render every other. */
+    view: Store<RollView>;
     /** Latest selection, readable from event handlers. */
     selectionRef: React.RefObject<ReadonlySet<NoteId>>;
     /** Latest displayed notes, readable from event handlers. */
     valueRef: React.RefObject<readonly Note[]>;
   };
   state: PianoRollState;
+}
+
+/** What changes as the roll is used. */
+export interface RollView {
+  /** Pitches sounding: auditioned here, or listed in `activePitches`. */
+  active: ReadonlySet<number>;
+  band: Band | null;
+  noteById: ReadonlyMap<NoteId, Note>;
+  /** The notes as displayed. */
+  notes: readonly Note[];
+  selection: ReadonlySet<NoteId>;
 }
 
 export const PianoRollContext =
@@ -153,4 +160,14 @@ export function usePianoRollContext(part: string): PianoRollContextValue {
     throw new Error(`PianoRoll.${part} must be used within PianoRoll.Root`);
   }
   return context;
+}
+
+/** A piece of the roll's changing state, re-rendering only when that piece changes. */
+export function useRollView<T>(part: string, select: (view: RollView) => T): T {
+  const { meta } = usePianoRollContext(part);
+  return React.useSyncExternalStore(
+    meta.view.subscribe,
+    () => select(meta.view.get()),
+    () => select(meta.view.get())
+  );
 }

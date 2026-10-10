@@ -10,6 +10,7 @@ import { LaneContext, useLaneProps } from "../../timeline/elements/lane";
 import {
   type PianoRollState,
   usePianoRollContext,
+  useRollView,
   type ValueChangeEventDetails,
   type ValueCommitEventDetails,
   VELOCITY_PROPERTY,
@@ -96,10 +97,15 @@ export function Velocity(componentProps: Velocity.Props) {
       "PianoRoll.Velocity must be used within PianoRoll.VelocityLane"
     );
   }
-  const note = meta.noteById.get(noteProp.id) ?? noteProp;
+  const shown = useRollView("Velocity", (view) =>
+    view.noteById.get(noteProp.id)
+  );
+  const note = shown ?? noteProp;
   const velocity = note.velocity ?? 1;
   const { disabled } = rollState;
-  const selected = meta.selection.has(note.id);
+  const selected = useRollView("Velocity", (view) =>
+    view.selection.has(note.id)
+  );
   const inputRef = React.useRef<HTMLInputElement>(null);
   const gestureRef = React.useRef<VelocityGesture | null>(null);
 

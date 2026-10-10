@@ -3,6 +3,7 @@ import { useRender } from "@base-ui/react/use-render";
 import * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { pitchName } from "../../internal/pitch";
+import { createStore } from "../../internal/store";
 import { TimelineContext } from "../../timeline/context";
 import {
   type Band,
@@ -12,6 +13,7 @@ import {
   type PianoRollContextValue,
   type PianoRollState,
   ROWS_PROPERTY,
+  type RollView,
   type SelectionChangeEventDetails,
   type ValueChangeEventDetails,
   type ValueCommitEventDetails,
@@ -87,9 +89,22 @@ export function Root(componentProps: Root.Props) {
     readonly Note[]
   >(() => defaultValue ?? EMPTY);
   const rawValue = isControlled ? valueProp : uncontrolledValue;
+  // A note keeps its sanitized object while it is the same note, so an edit
+  // renders the notes it touches and not all of them.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: new bounds sanitize every note again.
+  const sanitized = React.useMemo(() => new WeakMap<Note, Note>(), [bounds]);
   const value = React.useMemo(
-    () => rawValue.map((note) => sanitizeNote(note, bounds)),
-    [bounds, rawValue]
+    () =>
+      rawValue.map((note) => {
+        const known = sanitized.get(note);
+        if (known) {
+          return known;
+        }
+        const next = sanitizeNote(note, bounds);
+        sanitized.set(note, next);
+        return next;
+      }),
+    [bounds, rawValue, sanitized]
   );
 
   // While a gesture edits the notes, they follow the pointer even if a
@@ -238,17 +253,23 @@ export function Root(componentProps: Root.Props) {
   // Focus that has to wait for the notes to render: a note just added, or
   // where focus goes once the focused note is removed.
   const noteElementsRef = React.useRef(new Map<NoteId, HTMLElement>());
+  const pendingFocusRef = React.useRef<{ target: NoteId | null } | null>(null);
   const registerNote = React.useCallback(
     (id: NoteId, node: HTMLElement | null) => {
       if (node) {
         noteElementsRef.current.set(id, node);
+        // A note added by the edit that asked for focus mounts after the
+        // roll's own render.
+        if (pendingFocusRef.current?.target === id) {
+          pendingFocusRef.current = null;
+          node.focus({ preventScroll: true });
+        }
       } else {
         noteElementsRef.current.delete(id);
       }
     },
     []
   );
-  const pendingFocusRef = React.useRef<{ target: NoteId | null } | null>(null);
   const [, setFocusRequest] = React.useState(0);
   const focusAfterRender = React.useCallback((target: NoteId | null) => {
     pendingFocusRef.current = { target };
@@ -260,20 +281,30 @@ export function Root(componentProps: Root.Props) {
     if (!pending) {
       return;
     }
-    pendingFocusRef.current = null;
     const element =
       pending.target === null
         ? gridRef.current
         : noteElementsRef.current.get(pending.target);
-    element?.focus({ preventScroll: true });
+    // A note not mounted yet takes the focus as it registers.
+    if (element) {
+      pendingFocusRef.current = null;
+      element.focus({ preventScroll: true });
+    }
   });
 
   const [band, setBand] = React.useState<Band | null>(null);
   const drawTemplateRef = React.useRef({ length: minLength, velocity: 1 });
 
+  // The rows change when the pitches carrying notes do, not at every edit.
+  const pitchKey = folded
+    ? [...new Set(notes.map((note) => note.pitch))]
+        .sort((a, b) => a - b)
+        .join(",")
+    : "";
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `pitchKey` stands for the pitches of `notes`.
   const rows = React.useMemo(
     () => rollRows(notes, minPitch, maxPitch, folded),
-    [folded, maxPitch, minPitch, notes]
+    [folded, maxPitch, minPitch, pitchKey]
   );
   const noteById = React.useMemo(
     () => new Map(notes.map((note) => [note.id, note])),
@@ -285,59 +316,75 @@ export function Root(componentProps: Root.Props) {
     [disabled, editing, mode, rows.folded]
   );
 
+  // What each part follows lives in a store, so editing one note renders it
+  // and not the whole roll.
+  const [view] = React.useState(() =>
+    createStore<RollView>({ active, band, noteById, notes, selection })
+  );
+  React.useLayoutEffect(() => {
+    view.set({ active, band, noteById, notes, selection });
+  }, [active, band, noteById, notes, selection, view]);
+
+  // The actions never change identity, so the parts reading them are not
+  // rendered when a new callback is passed on every render.
+  const latest = React.useRef({
+    change,
+    commit,
+    createId,
+    focusAfterRender,
+    noteOff,
+    noteOn,
+    registerNote,
+    select,
+    setEditing,
+    unitsPerPixel,
+  });
+  latest.current = {
+    change,
+    commit,
+    createId,
+    focusAfterRender,
+    noteOff,
+    noteOn,
+    registerNote,
+    select,
+    setEditing,
+    unitsPerPixel,
+  };
+  const actions = React.useMemo<PianoRollContextValue["actions"]>(
+    () => ({
+      change: (next, details) => latest.current.change(next, details),
+      commit: (committed, details) => latest.current.commit(committed, details),
+      createId: () => latest.current.createId(),
+      focusAfterRender: (target) => latest.current.focusAfterRender(target),
+      noteOff: (pitch, details) => latest.current.noteOff(pitch, details),
+      noteOn: (pitch, details) => latest.current.noteOn(pitch, details),
+      registerNote: (id, node) => latest.current.registerNote(id, node),
+      select: (ids, details) => latest.current.select(ids, details),
+      setBand,
+      setEditing: (next) => latest.current.setEditing(next),
+      unitsPerPixel: () => latest.current.unitsPerPixel(),
+    }),
+    []
+  );
+
   const context = React.useMemo<PianoRollContextValue>(
     () => ({
-      actions: {
-        change,
-        commit,
-        createId,
-        focusAfterRender,
-        noteOff,
-        noteOn,
-        registerNote,
-        select,
-        setBand,
-        setEditing,
-        unitsPerPixel,
-      },
+      actions,
       meta: {
-        active,
-        band,
         bounds,
         drawTemplateRef,
         getNoteLabel,
         gridRef,
         lastPitchRef,
-        noteById,
-        notes,
         rows,
-        selection,
         selectionRef,
         valueRef,
+        view,
       },
       state,
     }),
-    [
-      active,
-      band,
-      bounds,
-      change,
-      commit,
-      createId,
-      focusAfterRender,
-      getNoteLabel,
-      noteById,
-      noteOff,
-      noteOn,
-      notes,
-      registerNote,
-      rows,
-      select,
-      selection,
-      setEditing,
-      state,
-      unitsPerPixel,
-    ]
+    [actions, bounds, getNoteLabel, rows, state, view]
   );
 
   const element = useRender({

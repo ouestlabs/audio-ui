@@ -15,6 +15,7 @@ import {
   type PianoRollContextValue,
   placedOnRow,
   usePianoRollContext,
+  useRollView,
   type ValueChangeEventDetails,
   type ValueCommitEventDetails,
   VELOCITY_PROPERTY,
@@ -327,11 +328,12 @@ export function Note(componentProps: Note.Props) {
   const { actions, meta, state: rollState } = roll;
   const { meta: timeline } = useTimelineContext("Lane");
   // The displayed note: it moves while a gesture edits it.
-  const note = meta.noteById.get(noteProp.id) ?? noteProp;
+  const shown = useRollView("Note", (view) => view.noteById.get(noteProp.id));
+  const note = shown ?? noteProp;
   const elementRef = React.useRef<HTMLElement | null>(null);
   const soundingRef = React.useRef<number | null>(null);
   const { disabled } = rollState;
-  const selected = meta.selection.has(note.id);
+  const selected = useRollView("Note", (view) => view.selection.has(note.id));
   const gesture = useNoteGesture(roll, note, "move", elementRef);
 
   const noteRef = React.useCallback(
@@ -551,13 +553,12 @@ export function NoteHandle(componentProps: NoteHandle.Props) {
     throw new Error("PianoRoll.NoteHandle must be used within PianoRoll.Note");
   }
   const gesture = useNoteGesture(roll, context.note, edge, context.elementRef);
+  const selected = useRollView("NoteHandle", (view) =>
+    view.selection.has(context.note.id)
+  );
   const state = React.useMemo<NoteHandle.State>(
-    () => ({
-      disabled: roll.state.disabled,
-      edge,
-      selected: roll.meta.selection.has(context.note.id),
-    }),
-    [context.note.id, edge, roll.meta.selection, roll.state.disabled]
+    () => ({ disabled: roll.state.disabled, edge, selected }),
+    [edge, roll.state.disabled, selected]
   );
   return useRender({
     defaultTagName: "div",

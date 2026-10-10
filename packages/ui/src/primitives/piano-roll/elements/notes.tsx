@@ -1,5 +1,5 @@
-import type * as React from "react";
-import { usePianoRollContext } from "../context";
+import * as React from "react";
+import { useRollView } from "../context";
 import { type Note, spatialOrder } from "../internal/edits";
 
 /**
@@ -8,9 +8,26 @@ import { type Note, spatialOrder } from "../internal/edits";
  * Renders no element of its own.
  */
 export function Notes({ children }: Notes.Props) {
-  const { meta } = usePianoRollContext("Notes");
-  return <>{spatialOrder(meta.notes).map((note) => children(note))}</>;
+  const notes = useRollView("Notes", (view) => view.notes);
+  return (
+    <>
+      {spatialOrder(notes).map((note) => (
+        <Slot key={note.id} note={note} render={children} />
+      ))}
+    </>
+  );
 }
+
+/** One note's place: it renders again only when its note, or `children`, changes. */
+const Slot = React.memo(function NoteSlot({
+  render,
+  note,
+}: {
+  note: Note;
+  render: Notes.Props["children"];
+}) {
+  return <>{render(note)}</>;
+});
 
 export namespace Notes {
   export interface Props {
