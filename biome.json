@@ -55,6 +55,24 @@
   },
   "overrides": [
     {
+      "includes": ["packages/ui/bench/*"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noUndeclaredVariables": "off",
+            "noUnusedFunctionParameters": "off"
+          },
+          "performance": {
+            "noAwaitInLoops": "off",
+            "noJsxPropsBind": "off"
+          },
+          "suspicious": {
+            "noShadow": "off"
+          }
+        }
+      }
+    },
+    {
       "includes": [
         "packages/ui/src/primitives/*/test/*.bench.tsx",
         "packages/ui/test/bench.ts"
