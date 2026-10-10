@@ -75,7 +75,7 @@ function WaveformRegion({
   return (
     <WaveformPrimitive.Region
       className={cn(
-        "cn-waveform-region inset-y-0 cursor-grab data-dragging:cursor-grabbing data-disabled:cursor-not-allowed",
+        "cn-waveform-region pointer-events-none inset-y-0",
         className
       )}
       data-slot="waveform-region"
@@ -91,7 +91,7 @@ function WaveformRegionHandle({
   return (
     <WaveformPrimitive.RegionHandle
       className={cn(
-        "cn-waveform-region-handle absolute inset-y-0 w-1.5 cursor-ew-resize data-[edge=end]:right-0 data-[edge=start]:left-0",
+        "cn-waveform-region-handle pointer-events-auto absolute inset-y-0 w-1.5 cursor-ew-resize data-[edge=end]:right-0 data-[edge=start]:left-0",
         "after:absolute after:-inset-x-1.5 after:inset-y-0 pointer-coarse:after:-inset-x-3",
         className
       )}
@@ -140,7 +140,7 @@ function WaveformHover({ className, format, ...props }: WaveformHoverProps) {
   return (
     <WaveformPrimitive.Hover
       className={cn(
-        "cn-waveform-hover pointer-events-none inset-y-0 w-px",
+        "cn-waveform-hover pointer-events-none inset-y-0 z-10 w-px",
         className
       )}
       data-slot="waveform-hover"

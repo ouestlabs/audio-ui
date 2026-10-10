@@ -311,7 +311,7 @@ export const components: RegistryItem[] = [
   {
     categories: ["waveform"],
     description:
-      "A seekable waveform player driven by a user-uploaded audio file — pick a file to decode its real PCM samples into a bar-chart waveform, then switch tabs to compare a plain recolored bar chart against an AudioScrubber-style playhead and handle",
+      "A waveform player that shows what the waveform does: seek and hover, a loop region with handles, markers and zoom that follows the playhead. It starts on a synthesized phrase and takes any audio file",
     files: [
       {
         path: "components/waveform/block-waveform-player.tsx",
@@ -321,11 +321,11 @@ export const components: RegistryItem[] = [
     name: "block-waveform-player",
     registryDependencies: [
       "@audio/scrubber",
+      "@audio/timeline",
       "@audio/waveform",
       "@audio/waveform-dsp",
       "@shadcn/button",
-      "@shadcn/empty",
-      "@shadcn/tabs",
+      "@shadcn/toggle",
     ],
     type: "registry:block",
   },

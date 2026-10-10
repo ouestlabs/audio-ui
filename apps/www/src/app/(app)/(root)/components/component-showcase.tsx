@@ -69,19 +69,19 @@ export function ComponentShowcase({
       <React.Suspense fallback={<div className="flex-1" />}>
         <LocksProvider>
           <DesignSystemProvider>
-              <CustomizerContext value={customizerValue}>
-                <div className="flex min-h-0 flex-1 gap-2">
-                  <Frame className="flex min-h-0 flex-1 flex-col">
-                    <ShowcaseHeader />
-                    <FrameContent className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
-                      <div className="no-scrollbar scroll-fade-y min-h-0 flex-1 overflow-y-auto">
-                        <ComponentGrid catalogItems={catalogItems} />
-                      </div>
-                    </FrameContent>
-                  </Frame>
-                  <CustomizerPanel variant="frame" />
-                </div>
-              </CustomizerContext>
+            <CustomizerContext value={customizerValue}>
+              <div className="flex min-h-0 flex-1 gap-2">
+                <Frame className="flex min-h-0 flex-1 flex-col">
+                  <ShowcaseHeader />
+                  <FrameContent className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
+                    <div className="no-scrollbar scroll-fade-y min-h-0 flex-1 overflow-y-auto">
+                      <ComponentGrid catalogItems={catalogItems} />
+                    </div>
+                  </FrameContent>
+                </Frame>
+                <CustomizerPanel variant="frame" />
+              </div>
+            </CustomizerContext>
           </DesignSystemProvider>
         </LocksProvider>
       </React.Suspense>

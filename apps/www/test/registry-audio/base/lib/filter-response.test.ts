@@ -45,7 +45,11 @@ describe("biquadResponse", () => {
     const low = biquadResponse({ frequency: 200, gainDb: 6, type: "lowshelf" });
     expect(low(30)).toBeCloseTo(6, 0);
     expect(Math.abs(low(10_000))).toBeLessThan(0.1);
-    const high = biquadResponse({ frequency: 5000, gainDb: -6, type: "highshelf" });
+    const high = biquadResponse({
+      frequency: 5000,
+      gainDb: -6,
+      type: "highshelf",
+    });
     expect(high(18_000)).toBeCloseTo(-6, 0);
     expect(Math.abs(high(100))).toBeLessThan(0.1);
   });
@@ -57,7 +61,11 @@ describe("biquadResponse", () => {
   });
 
   test("a band-pass passes its centre at unity", () => {
-    const response = biquadResponse({ frequency: 1000, q: 2, type: "bandpass" });
+    const response = biquadResponse({
+      frequency: 1000,
+      q: 2,
+      type: "bandpass",
+    });
     expect(response(1000)).toBeCloseTo(0, 0);
     expect(response(60)).toBeLessThan(-20);
   });
@@ -99,7 +107,12 @@ describe("band handles", () => {
     for (const index of [0, 1]) {
       const band = bands[index];
       const target = 5;
-      const gain = bandGainForHandle(bands, index, band?.frequency ?? 0, target);
+      const gain = bandGainForHandle(
+        bands,
+        index,
+        band?.frequency ?? 0,
+        target
+      );
       const next = bands.map((other, at) =>
         at === index ? { ...other, gainDb: gain } : other
       );
