@@ -79,6 +79,11 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
+    cssVars: {
+      dark: { success: "oklch(0.696 0.17 162.48)" },
+      light: { success: "oklch(0.696 0.17 162.48)" },
+      theme: { "color-success": "var(--success)" },
+    },
     dependencies: ["@audio-ui/react"],
     files: [
       {

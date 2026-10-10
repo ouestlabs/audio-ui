@@ -199,15 +199,15 @@
   }
 
   .cn-meter-size-sm {
-    @apply h-32;
+    @apply data-[orientation=vertical]:h-32 data-[orientation=horizontal]:[--meter-thickness:--spacing(2)];
   }
 
   .cn-meter-size-default {
-    @apply h-48;
+    @apply data-[orientation=vertical]:h-48 data-[orientation=horizontal]:[--meter-thickness:--spacing(3)];
   }
 
   .cn-meter-size-lg {
-    @apply h-64;
+    @apply data-[orientation=vertical]:h-64 data-[orientation=horizontal]:[--meter-thickness:--spacing(4)];
   }
 
   .cn-meter-channel {

@@ -52,7 +52,7 @@ export function Meter({
                 ? `${ariaLabel} ${index + 1}`
                 : ariaLabel
             }
-            className="cn-meter-channel relative flex-1 overflow-hidden"
+            className="cn-meter-channel relative flex-1 overflow-hidden data-[orientation=horizontal]:h-(--meter-thickness,auto) data-[orientation=horizontal]:flex-none"
             getAriaValueText={decibels}
             index={index}
             key={`meter-channel-${index}`}
