@@ -48,7 +48,7 @@ export function CodeCollapsibleWrapper({
       />
       <CollapsibleContent
         className={cn(
-          "mt-6 h-full p-px data-closed:max-h-64 [&>figure]:mt-0 [&>figure]:md:mx-0!",
+          "mt-6 h-full p-px data-closed:max-h-64 data-closed:overflow-hidden [&>figure]:mt-0 [&>figure]:md:mx-0!",
           "data-closed:[-webkit-mask-image:linear-gradient(to_bottom,black_0%,black_72%,transparent_100%)]",
           "data-closed:mask-[linear-gradient(to_bottom,black_0%,black_72%,transparent_100%)]"
         )}
