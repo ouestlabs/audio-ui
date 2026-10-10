@@ -50,6 +50,26 @@ npm install @audio-ui/react
 
 </CodeTabs>
 
+## Anatomy
+
+Import the registry component for the ready-made look, or compose the primitive's parts yourself.
+
+```tsx
+import { Sequencer } from "@audio-ui/react";
+
+<Sequencer.Root>
+  <Sequencer.Rows>
+    {(row) => (
+      <Sequencer.Row index={row}>
+        <Sequencer.Cells>
+          {(step) => <Sequencer.Cell step={step} />}
+        </Sequencer.Cells>
+      </Sequencer.Row>
+    )}
+  </Sequencer.Rows>
+</Sequencer.Root>;
+```
+
 ## Usage
 
 ```tsx
@@ -64,7 +84,7 @@ import { Sequencer } from "@/components/audio/elements/sequencer";
 />;
 ```
 
-`value` is a row per sound, each a list of steps: `boolean[][]`. `source` is the step being played, a live `{ getSnapshot, subscribe }` such as one made with `createSource`: its cells get `data-current`, painted straight in the DOM, so a clock ticking every step never re-renders React.
+`value` is a row per sound, each a list of steps: `boolean[][]`. `source` is the step being played, a live `{ getSnapshot, subscribe }` such as one made with `createSource`: a clock ticking every step never re-renders React.
 
 ## Interaction
 
@@ -79,12 +99,61 @@ The steps are one tab stop, and each is a toggle button (`aria-pressed`) named a
 
 ## API reference
 
+### Root
+
+Groups the parts and owns the pattern. Renders a `<div>`.
+
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `value` / `defaultValue` | `boolean[][]` | — | The pattern. |
-| `onValueChange` | `(value, eventDetails) => void` | — | While steps flip: `reason` is `"press"`, `"paint"` or `"keyboard"`. `eventDetails.cancel()` keeps the pattern as it was. |
-| `onValueCommitted` | `(value, eventDetails) => void` | — | When a gesture that changed the pattern ends, and after each key press. |
-| `source` | `{ getSnapshot, subscribe }` | — | The step being played. |
-| `rowLabels` | `string[]` | — | Names written beside each row, and its accessible name. |
+| `value` | `boolean[][]` | | The pattern: a row per sound, each a list of steps. |
+| `defaultValue` | `boolean[][]` | | The starting pattern, when uncontrolled. |
+| `onValueChange` | `(value, eventDetails) => void` | | Fires while steps flip. `eventDetails.reason` is `"press"`, `"paint"` or `"keyboard"`; `eventDetails.cancel()` keeps the pattern as it was. |
+| `onValueCommitted` | `(value, eventDetails) => void` | | Fires when a gesture that changed the pattern ends, and after each key press. |
+| `source` | `{ getSnapshot, subscribe }` | | The step being played. Its cells get `data-current`. |
+| `disabled` | `boolean` | `false` | Stops the pointer and the keyboard. |
+| `className`, `style`, `render` | | | Each can be a function of the state. |
+
+| Data attribute | Description |
+| --- | --- |
+| `data-disabled` | Present when disabled. |
+| `data-painting` | Present while a pointer paints. |
+
+### Rows
+
+Calls `children(row)` once per row. Renders nothing of its own.
+
+### Row
+
+One sound's row of steps. Renders a `<div>` with `role="group"`; name it with `aria-label`.
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `index` | `number` | Which row this is, from the top. |
+
+### Cells
+
+Calls `children(step)` once per step of the row it is in. Renders nothing of its own.
+
+### Cell
+
+One step: a toggle button. Renders a `<button>`.
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `step` | `number` | Which step this is, from the left. |
+
+| Data attribute | Description |
+| --- | --- |
+| `data-on` | Present when the step is on (also `aria-pressed`). |
+| `data-current` | Present on the step being played. |
+| `data-disabled` | Present when disabled. |
+| `data-painting` | Present while a pointer paints. |
+
+### Registry component
+
+`Sequencer` takes the `Root` props, plus:
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `rowLabels` | `string[]` | | Names written beside each row, and its accessible name. |
 | `beatEvery` | `number` | `4` | Highlights every nth step. |
-| `disabled` | `boolean` | `false` | |
