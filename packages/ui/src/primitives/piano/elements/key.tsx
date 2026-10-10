@@ -4,7 +4,12 @@ import * as React from "react";
 import { createChangeEventDetails } from "../../internal/event-details";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { pitchName } from "../../internal/pitch";
-import { KeyContext, type PianoState, usePianoContext } from "../context";
+import {
+  KEYBOARD_VELOCITY,
+  KeyContext,
+  type PianoState,
+  usePianoContext,
+} from "../context";
 
 /** One octave: what Shift + an arrow key, Page Up and Page Down move by. */
 const OCTAVE = 12;
@@ -64,7 +69,12 @@ export function Key(componentProps: Key.Props) {
       if (!(event.repeat || heldRef.current)) {
         heldRef.current = actions.noteOn(
           pitch,
-          createChangeEventDetails("keyboard", event.nativeEvent)
+          Object.assign(
+            createChangeEventDetails("keyboard", event.nativeEvent),
+            {
+              velocity: KEYBOARD_VELOCITY,
+            }
+          )
         );
       }
       return;

@@ -11,10 +11,18 @@ export type PianoState = {
   orientation: "horizontal" | "vertical";
 };
 
-export type NoteOnEventDetails =
-  | ExtraChangeEventDetails<"press", PointerEvent>
-  | ExtraChangeEventDetails<"glide", PointerEvent>
-  | ExtraChangeEventDetails<"keyboard", KeyboardEvent>;
+/** What a key played from the keyboard sounds at. */
+export const KEYBOARD_VELOCITY = 0.8;
+
+/** How hard a note is played, 0…1: where along the key a pointer pressed it, lower being harder, or a fixed middling force from the keyboard. */
+export type NoteVelocity = { velocity: number };
+
+export type NoteOnEventDetails = NoteVelocity &
+  (
+    | ExtraChangeEventDetails<"press", PointerEvent>
+    | ExtraChangeEventDetails<"glide", PointerEvent>
+    | ExtraChangeEventDetails<"keyboard", KeyboardEvent>
+  );
 
 export type NoteOffEventDetails =
   | ExtraCommitEventDetails<"press", PointerEvent>

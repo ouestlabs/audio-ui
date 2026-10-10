@@ -32,6 +32,34 @@ describe("Piano.Root", () => {
     expect(lastCall(onNoteOn)[0]).toBe(49);
   });
 
+  test("a press near the free end of a key plays harder than one near the top", () => {
+    const { onNoteOn, root } = renderPiano();
+    fireEvent.pointerDown(root, {
+      ...C3,
+      button: 0,
+      clientY: 95,
+      pointerId: 1,
+    });
+    const hard = lastCall(onNoteOn)[1].velocity;
+    fireEvent.pointerUp(root, { clientY: 95, pointerId: 1 });
+    fireEvent.pointerDown(root, {
+      ...C3,
+      button: 0,
+      clientY: 70,
+      pointerId: 2,
+    });
+    const soft = lastCall(onNoteOn)[1].velocity;
+    expect(hard).toBeGreaterThan(soft);
+    expect(hard).toBeLessThanOrEqual(1);
+    expect(soft).toBeGreaterThanOrEqual(0.25);
+  });
+
+  test("a key played from the keyboard has a fixed middling velocity", () => {
+    const { key, onNoteOn } = renderPiano();
+    fireEvent.keyDown(key(48), { key: "Enter" });
+    expect(lastCall(onNoteOn)[1].velocity).toBe(0.8);
+  });
+
   test("glides from key to key while the pointer is down", () => {
     const { onNoteOff, onNoteOn, root } = renderPiano();
     fireEvent.pointerDown(root, { ...C3, button: 0, pointerId: 1 });

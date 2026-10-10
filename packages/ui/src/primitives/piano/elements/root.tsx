@@ -13,6 +13,8 @@ import {
 } from "../context";
 import { type KeyLayout, keyAt, placeKeys } from "../internal/layout";
 
+/** The softest a pointer press plays: the very top of a key, not silence. */
+const MIN_VELOCITY = 0.25;
 /** Middle C: where the tab stop starts when the keyboard has it. */
 const MIDDLE_C = 60;
 
@@ -134,8 +136,8 @@ export function Root(componentProps: Root.Props) {
   const elementRef = React.useRef<HTMLDivElement>(null);
   const pointersRef = React.useRef(new Map<number, HeldPointer>());
 
-  /** The key under the pointer, if any. */
-  const pitchAt = (event: React.PointerEvent) => {
+  /** The key under the pointer and how hard it was struck, if there is a key. */
+  const strikeAt = (event: React.PointerEvent) => {
     const rect = elementRef.current?.getBoundingClientRect();
     if (!(rect && rect.width > 0 && rect.height > 0)) {
       return null;
@@ -148,23 +150,34 @@ export function Root(componentProps: Root.Props) {
       ? (event.clientX - rect.left) / rect.width
       : (event.clientY - rect.top) / rect.height;
     const key = keyAt(keys, along, across, layout);
-    return key ? key.pitch : null;
+    if (!key) {
+      return null;
+    }
+    // Pressed near the free end of the key is harder, as on a real keyboard.
+    const velocity = Math.min(
+      1,
+      Math.max(MIN_VELOCITY, MIN_VELOCITY + (1 - MIN_VELOCITY) * across)
+    );
+    return { pitch: key.pitch, velocity };
   };
 
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
     if (disabled || event.button !== 0) {
       return;
     }
-    const pitch = pitchAt(event);
-    if (pitch === null) {
+    const strike = strikeAt(event);
+    if (strike === null) {
       return;
     }
+    const { pitch, velocity } = strike;
     event.preventDefault();
     event.currentTarget.setPointerCapture?.(event.pointerId);
     focusKey(pitch, false);
     const sounding = noteOn(
       pitch,
-      createChangeEventDetails("press", event.nativeEvent)
+      Object.assign(createChangeEventDetails("press", event.nativeEvent), {
+        velocity,
+      })
     );
     pointersRef.current.set(event.pointerId, { pitch, sounding });
   };
@@ -175,17 +188,20 @@ export function Root(componentProps: Root.Props) {
       handlePointerEnd(event);
       return;
     }
-    const pitch = held ? pitchAt(event) : null;
-    if (!held || pitch === null || pitch === held.pitch) {
+    const strike = held ? strikeAt(event) : null;
+    if (!held || strike === null || strike.pitch === held.pitch) {
       return;
     }
+    const { pitch, velocity } = strike;
     if (held.sounding) {
       noteOff(held.pitch, { event: event.nativeEvent, reason: "glide" });
     }
     focusKey(pitch, false);
     const sounding = noteOn(
       pitch,
-      createChangeEventDetails("glide", event.nativeEvent)
+      Object.assign(createChangeEventDetails("glide", event.nativeEvent), {
+        velocity,
+      })
     );
     pointersRef.current.set(event.pointerId, { pitch, sounding });
   };
