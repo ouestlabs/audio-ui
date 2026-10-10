@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  useCallback,
-  useEffect,
-  useId,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder";
 import { Button } from "@/registry/bases/base/ui/button";
 import {
@@ -19,7 +12,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/registry/bases/base/ui/popover";
-import { Slider } from "@/registry/bases/base/ui/slider";
+import { Knob } from "@/registry-audio/bases/base/audio/elements/knob";
 import {
   Plot,
   PlotArea,
@@ -75,11 +68,6 @@ const BAND_TYPES: { label: string; value: BiquadType }[] = [
 ];
 /** The width a band has when it was never given one. */
 const DEFAULT_Q = Math.SQRT1_2;
-const Q_RATIO = MAX_Q / MIN_Q;
-
-/** Where a width sits on the slider: Q is felt in ratios, so the slider is logarithmic. */
-const qToPosition = (q: number) => Math.log(q / MIN_Q) / Math.log(Q_RATIO);
-const positionToQ = (position: number) => MIN_Q * Q_RATIO ** position;
 
 const formatDbMark = (db: number) => (db > 0 ? `+${db}` : String(db));
 const describePointer = (point: { x: number; y: number }) =>
@@ -134,25 +122,23 @@ interface BandEditorProps {
   onChange: (index: number, patch: Partial<EqBand>) => void;
 }
 
-/** What a band is and how wide: its type, and its Q on a logarithmic slider. */
+const formatQ = (q: number) => `Q ${q.toFixed(1)}`;
+
+/** What a band is and how wide: its type, and its Q on a logarithmic knob. */
 function BandEditor({ band, index, onChange }: BandEditorProps) {
-  const widthLabelId = useId();
   const handleTypeChange = useCallback(
     (event: React.ChangeEvent<HTMLSelectElement>) =>
       onChange(index, { type: event.target.value as BiquadType }),
     [index, onChange]
   );
   const handleWidthChange = useCallback(
-    (next: number | readonly number[]) => {
-      const [position = 0] = Array.isArray(next) ? next : [next];
-      onChange(index, { q: positionToQ(position) });
-    },
+    (q: number) => onChange(index, { q }),
     [index, onChange]
   );
 
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex items-center justify-between gap-2">
+    <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-col gap-2">
         <span className="font-medium text-xs">Band {index + 1}</span>
         <NativeSelect
           aria-label={`Band ${index + 1} type`}
@@ -167,22 +153,19 @@ function BandEditor({ band, index, onChange }: BandEditorProps) {
           ))}
         </NativeSelect>
       </div>
-      <div className="flex items-center gap-3">
-        <span className="text-muted-foreground text-xs" id={widthLabelId}>
-          Width
-        </span>
-        <Slider
-          aria-labelledby={widthLabelId}
-          max={1}
-          min={0}
-          onValueChange={handleWidthChange}
-          step={0.01}
-          value={[qToPosition(band.q ?? DEFAULT_Q)]}
-        />
-        <output className="w-14 shrink-0 whitespace-nowrap text-right font-mono text-xs tabular-nums">
-          Q {(band.q ?? DEFAULT_Q).toFixed(1)}
-        </output>
-      </div>
+      <Knob
+        aria-label={`Band ${index + 1} width`}
+        className="mb-5"
+        formatValue={formatQ}
+        max={MAX_Q}
+        min={MIN_Q}
+        onValueChange={handleWidthChange}
+        scale="log"
+        size="sm"
+        step={0.01}
+        value={band.q ?? DEFAULT_Q}
+        valueLabel="always"
+      />
     </div>
   );
 }

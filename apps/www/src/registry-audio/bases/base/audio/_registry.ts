@@ -83,12 +83,12 @@ export const audio: RegistryItem[] = [
     name: "plot",
     registryDependencies: [
       "@audio/filter-response",
+      "@audio/knob",
       "@audio/use-noise-through-eq",
       "@audio/use-spectrum",
       "@shadcn/button",
       "@shadcn/native-select",
       "@shadcn/popover",
-      "@shadcn/slider",
     ],
     type: "registry:ui",
   },
