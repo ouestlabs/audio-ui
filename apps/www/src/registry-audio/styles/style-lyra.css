@@ -211,11 +211,11 @@
   }
 
   .cn-meter-channel {
-    @apply rounded-none bg-input/70 transition-shadow duration-150 ease-out data-clipping:ring-2 data-clipping:ring-destructive;
+    @apply rounded-none bg-input/70 transition-shadow duration-150 ease-out data-clipping:ring-2 data-clipped:ring-2 data-clipping:ring-destructive data-clipped:ring-destructive;
   }
 
   .cn-meter-fill {
-    @apply bg-success data-clipping:bg-destructive;
+    @apply bg-success data-clipping:bg-destructive data-clipped:bg-destructive;
   }
 
   .cn-meter-peak {

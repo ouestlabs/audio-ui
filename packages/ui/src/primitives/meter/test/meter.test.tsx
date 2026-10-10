@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { act, render } from "@testing-library/react";
+import { act, fireEvent, render } from "@testing-library/react";
 import { Meter } from "../../../entries/meter";
 
 const decibels = (formatted: string) => `${formatted} dB`;
@@ -150,6 +150,30 @@ describe("Meter orientation", () => {
     expect(group.getAttribute("data-orientation")).toBe("horizontal");
     expect(view.getByTestId("indicator-0").style.transform).toBe("scaleX(0.5)");
     expect(view.getByTestId("peak-0").style.left).toBe("75%");
+  });
+});
+
+describe("Meter clip latch", () => {
+  test("a live clip stays lit as data-clipped until a click on the meter clears it", () => {
+    const source = createSource({ levels: [-60, -60] });
+    const { channels, group, view } = renderMeter({ max: 0, source });
+    act(() => source.emit({ levels: [-6, 0] }));
+    expect(channels()[1]?.hasAttribute("data-clipped")).toBe(true);
+    expect(view.getByTestId("indicator-1").hasAttribute("data-clipped")).toBe(
+      true
+    );
+    expect(channels()[0]?.hasAttribute("data-clipped")).toBe(false);
+
+    // The level falls back: the clip is still shown.
+    act(() => source.emit({ levels: [-30, -30] }));
+    expect(channels()[1]?.hasAttribute("data-clipping")).toBe(false);
+    expect(channels()[1]?.hasAttribute("data-clipped")).toBe(true);
+
+    fireEvent.click(group);
+    expect(channels()[1]?.hasAttribute("data-clipped")).toBe(false);
+    expect(view.getByTestId("indicator-1").hasAttribute("data-clipped")).toBe(
+      false
+    );
   });
 });
 

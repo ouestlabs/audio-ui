@@ -108,6 +108,10 @@ export function paintChannel(
         ? `scaleX(${view.percent})`
         : `scaleY(${view.percent})`;
     setPresence(indicator, "data-clipping", view.clipping);
+    // Latched: it stays until a click on the meter clears it.
+    if (view.clipping) {
+      setPresence(indicator, "data-clipped", true);
+    }
   }
   if (peak) {
     peak.hidden = view.peakPercent === undefined;
@@ -126,6 +130,9 @@ export function paintChannel(
       );
     }
     setPresence(channel, "data-clipping", view.clipping);
+    if (view.clipping) {
+      setPresence(channel, "data-clipped", true);
+    }
   }
   // Update React's own text node in place rather than replacing it.
   const text = value?.firstChild;

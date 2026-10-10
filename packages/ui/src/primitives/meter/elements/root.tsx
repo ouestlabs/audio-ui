@@ -116,10 +116,17 @@ export function Root(componentProps: Root.Props) {
     [channelCount, config, frame, registerNode, setAriaValueTextGetter, state]
   );
 
+  // A click anywhere on the meter clears what the live source latched, as in a DAW.
+  const clearClipped = (event: React.MouseEvent<HTMLElement>) => {
+    for (const node of event.currentTarget.querySelectorAll("[data-clipped]")) {
+      node.removeAttribute("data-clipped");
+    }
+  };
+
   const element = useRender({
     defaultTagName: "div",
     props: mergeProps<"div">(
-      { role: "group" },
+      { onClick: clearClipped, role: "group" },
       { ...elementProps, ...resolveStyling(className, style, state) }
     ),
     ref,

@@ -11,7 +11,7 @@ import type { Root } from "./root";
 
 /**
  * One channel of the meter, a `role="meter"`: name it with `aria-label` or a
- * `Meter.Label`. Carries `data-clipping` at or above the clip threshold.
+ * `Meter.Label`. Carries `data-clipping` at or above the clip threshold. Fed by a live `source`, it also carries `data-clipped` from the first clip until a click on the meter clears it.
  * Renders a `<div>` element.
  */
 export function Channel(componentProps: Channel.Props) {
