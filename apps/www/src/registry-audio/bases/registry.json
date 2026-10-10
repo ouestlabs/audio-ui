@@ -31,7 +31,7 @@
       "name": "plot"
     },
     {
-      "count": 5,
+      "count": 4,
       "description": "Virtual piano keyboard components with MIDI note ranges and glissando.",
       "label": "Piano",
       "name": "piano"
@@ -79,5 +79,5 @@
       "name": "xypad"
     }
   ],
-  "totalComponents": 32
+  "totalComponents": 31
 }

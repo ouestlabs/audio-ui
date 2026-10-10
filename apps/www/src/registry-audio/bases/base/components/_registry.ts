@@ -173,10 +173,6 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["piano"],
-    description: "Piano with onNoteOn/onNoteOff events",
-    files: [
-      {
-    categories: ["piano"],
     description: "Piano lit from an external source via activeNotes",
     files: [
       {
