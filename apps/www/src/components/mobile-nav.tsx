@@ -21,7 +21,7 @@ import { showMcpDocs } from "@/lib/flags";
 import {
   getAllPagesFromFolder,
   getCurrentBase,
-  getPagesFromFolder,
+  getSectionsFromFolder,
 } from "@/lib/page-tree";
 import type { CategoryInfo } from "@/lib/registry";
 import type { source } from "@/lib/source";
@@ -257,16 +257,16 @@ function MobileDocsNav({
                   return null;
                 }
 
-                const pages = getPagesFromFolder(folder, currentBase).filter(
-                  (page) => {
-                    if (!showMcpDocs && page.url?.includes("/mcp")) {
-                      return false;
-                    }
-                    return true;
-                  }
-                );
+                const sections = getSectionsFromFolder(folder, currentBase)
+                  .map((section) => ({
+                    ...section,
+                    pages: section.pages.filter(
+                      (page) => showMcpDocs || !page.url?.includes("/mcp")
+                    ),
+                  }))
+                  .filter((section) => section.pages.length > 0);
 
-                if (pages.length === 0) {
+                if (sections.length === 0) {
                   return null;
                 }
 
@@ -280,36 +280,48 @@ function MobileDocsNav({
                       {folder.name}
                     </AccordionTrigger>
                     <AccordionContent className="pb-2">
-                      <div className="flex flex-col gap-2 pt-1 pl-4">
-                        {pages.map((page) => {
-                          const docsUpdateHint = getDocsPageUpdateHint(
-                            page.url
-                          );
+                      <div className="flex flex-col gap-3 pt-1 pl-4">
+                        {sections.map((section) => (
+                          <div
+                            className="flex flex-col gap-2"
+                            key={section.title ?? "untitled"}
+                          >
+                            {section.title ? (
+                              <p className="text-site-muted-foreground/70 text-xs">
+                                {section.title}
+                              </p>
+                            ) : null}
+                            {section.pages.map((page) => {
+                              const docsUpdateHint = getDocsPageUpdateHint(
+                                page.url
+                              );
 
-                          return (
-                            <MobileLink
-                              active={page.url === pathname}
-                              className="flex items-center justify-between gap-3 font-normal text-sm"
-                              href={page.url}
-                              key={page.url}
-                              onOpenChange={onOpenChange}
-                            >
-                              <span>{page.name}</span>
-                              {docsUpdateHint ? (
-                                <span className="inline-flex shrink-0 cursor-help items-center">
-                                  <span className="sr-only">
-                                    {docsUpdateHint}
-                                  </span>
-                                  <span
-                                    aria-hidden="true"
-                                    className="site-rounded-full flex size-1.5 bg-blue-500"
-                                    title={docsUpdateHint}
-                                  />
-                                </span>
-                              ) : null}
-                            </MobileLink>
-                          );
-                        })}
+                              return (
+                                <MobileLink
+                                  active={page.url === pathname}
+                                  className="flex items-center justify-between gap-3 font-normal text-sm"
+                                  href={page.url}
+                                  key={page.url}
+                                  onOpenChange={onOpenChange}
+                                >
+                                  <span>{page.name}</span>
+                                  {docsUpdateHint ? (
+                                    <span className="inline-flex shrink-0 cursor-help items-center">
+                                      <span className="sr-only">
+                                        {docsUpdateHint}
+                                      </span>
+                                      <span
+                                        aria-hidden="true"
+                                        className="site-rounded-full flex size-1.5 bg-blue-500"
+                                        title={docsUpdateHint}
+                                      />
+                                    </span>
+                                  ) : null}
+                                </MobileLink>
+                              );
+                            })}
+                          </div>
+                        ))}
                       </div>
                     </AccordionContent>
                   </AccordionItem>
