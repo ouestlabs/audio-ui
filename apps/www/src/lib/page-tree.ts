@@ -23,11 +23,11 @@ export function getAllPagesFromFolder(folder: PageTreeFolder): PageTreePage[] {
   return pages;
 }
 
-// Find the pages inside the base subfolder (radix/base) matching currentBase.
-function findBaseSubfolderPages(
+// Find the children inside the base subfolder (radix/base) matching currentBase.
+function findBaseSubfolderChildren(
   folder: PageTreeFolder,
   currentBase: string
-): PageTreePage[] | null {
+): PageTreeFolder["children"] | null {
   for (const child of folder.children) {
     if (child.type !== "folder") {
       continue;
@@ -41,11 +41,20 @@ function findBaseSubfolderPages(
       (currentBase === "radix" && isRadix) ||
       (currentBase === "base" && isBase)
     ) {
-      return child.children.filter((c): c is PageTreePage => c.type === "page");
+      return child.children;
     }
   }
 
   return null;
+}
+
+// Find the pages inside the base subfolder (radix/base) matching currentBase.
+function findBaseSubfolderPages(
+  folder: PageTreeFolder,
+  currentBase: string
+): PageTreePage[] | null {
+  const children = findBaseSubfolderChildren(folder, currentBase);
+  return children?.filter((c): c is PageTreePage => c.type === "page") ?? null;
 }
 
 // Get the pages from a folder, handling nested base folders (radix/base).
@@ -70,6 +79,38 @@ export function getPagesFromFolder(
   return folder.children.filter(
     (child): child is PageTreePage => child.type === "page"
   );
+}
+
+export type PageTreeSection = { pages: PageTreePage[]; title?: string };
+
+// Get a folder's pages grouped under the separators of its meta.json: pages
+// before the first separator come first, with no title.
+export function getSectionsFromFolder(
+  folder: PageTreeFolder,
+  currentBase: string
+): PageTreeSection[] {
+  const isComponents =
+    folder.$id === "components" || folder.name === "Components";
+  const children = isComponents
+    ? findBaseSubfolderChildren(folder, currentBase)
+    : folder.children;
+
+  if (!children) {
+    return [{ pages: getPagesFromFolder(folder, currentBase) }];
+  }
+
+  const sections: PageTreeSection[] = [];
+  for (const child of children) {
+    if (child.type === "separator") {
+      sections.push({ pages: [], title: child.name?.toString() });
+    } else if (child.type === "page") {
+      if (sections.length === 0) {
+        sections.push({ pages: [] });
+      }
+      sections.at(-1)?.pages.push(child);
+    }
+  }
+  return sections.filter((section) => section.pages.length > 0);
 }
 
 // Get current base (radix or base) from pathname.
