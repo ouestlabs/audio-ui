@@ -22,11 +22,14 @@ import { getThemesForBaseColor, STYLES } from "@/registry/config";
 interface CustomizerSidebarContentProps {
   anchorRef: React.RefObject<HTMLDivElement | null>;
   isMobile: boolean;
+  /** `list` stacks the choices down a column; `strip` lays them in one row to swipe along, for a short panel. */
+  layout?: "list" | "strip";
 }
 
 export function CustomizerSidebarContent({
   isMobile,
   anchorRef,
+  layout = "list",
 }: CustomizerSidebarContentProps) {
   const [params] = useDesignSystemSearchParams();
   const [config] = useConfig();
@@ -38,11 +41,23 @@ export function CustomizerSidebarContent({
     [effectiveBaseColor]
   );
 
+  const strip = layout === "strip";
+
   return (
     <>
-      <div className="scroll-fade-y no-scrollbar min-h-0 flex-1 overflow-y-auto">
+      <div
+        className={
+          strip
+            ? "no-scrollbar scroll-fade-x snap-x overflow-x-auto overscroll-x-contain"
+            : "scroll-fade-y no-scrollbar min-h-0 flex-1 overflow-y-auto"
+        }
+      >
         <div className="p-2">
-          <FieldGroup className="flex flex-col gap-0">
+          <FieldGroup
+            className={
+              strip ? "flex w-max flex-row gap-2" : "flex flex-col gap-0"
+            }
+          >
             <BasePicker anchorRef={anchorRef} isMobile={isMobile} />
             <StylePicker
               anchorRef={anchorRef}
@@ -74,13 +89,21 @@ export function CustomizerSidebarContent({
             <RadiusPicker anchorRef={anchorRef} isMobile={isMobile} />
             <MenuColorPicker anchorRef={anchorRef} isMobile={isMobile} />
             <MenuAccentPicker anchorRef={anchorRef} isMobile={isMobile} />
+            {strip && (
+              <>
+                <RandomButton />
+                <ResetButton />
+              </>
+            )}
           </FieldGroup>
         </div>
       </div>
-      <div className="mt-auto flex shrink-0 flex-col gap-0 border-site-border/80 border-t p-3">
-        <RandomButton />
-        <ResetButton />
-      </div>
+      {!strip && (
+        <div className="mt-auto flex shrink-0 flex-col gap-0 border-site-border/80 border-t p-3">
+          <RandomButton />
+          <ResetButton />
+        </div>
+      )}
     </>
   );
 }

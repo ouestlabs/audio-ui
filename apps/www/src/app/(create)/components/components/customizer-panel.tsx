@@ -16,7 +16,10 @@ import { cn } from "@/lib/utils";
 
 import { useCustomizer } from "./components-context";
 import { CustomizerSidebarHeader } from "./customizer-sidebar-header";
-import { useIsDesktopCustomizer } from "./use-is-desktop-customizer";
+import {
+  useIsDesktopCustomizer,
+  useIsMediumScreen,
+} from "./use-is-desktop-customizer";
 
 /** Client-only: nuqs + jotai + theme pickers diverge from SSR; avoids hydration errors. */
 const CustomizerSidebarContent = dynamic(
@@ -90,7 +93,7 @@ const FLOATING_PADDING = { bottom: 12, left: 12, right: 12, top: 64 };
  * Renders inside a `Popover.Root` whose trigger it is anchored to.
  */
 function CustomizerPanelFloating({ animate }: { animate: boolean }) {
-  const isDesktop = useIsDesktopCustomizer();
+  const isMedium = useIsMediumScreen();
   const anchorRef = React.useRef<HTMLDivElement | null>(null);
 
   return (
@@ -107,7 +110,7 @@ function CustomizerPanelFloating({ animate }: { animate: boolean }) {
         <PopoverPrimitive.Popup
           aria-label="Customize"
           className={cn(
-            "site-rounded-xl flex max-h-[min(50dvh,var(--available-height))] w-[calc(100vw-1.5rem)] origin-(--transform-origin) flex-col overflow-hidden bg-site-background shadow-xl outline-none ring-1 ring-site-foreground/10 sm:w-64 md:h-[calc(100dvh-8rem)] md:max-h-none [&_[data-slot=dropdown-menu-trigger]]:w-full",
+            "site-rounded-xl flex w-[calc(100vw-1.5rem)] origin-(--transform-origin) flex-col overflow-hidden bg-site-background shadow-xl outline-none ring-1 ring-site-foreground/10 sm:w-64 md:h-[calc(100dvh-8rem)] md:max-h-none",
             animate &&
               "data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 data-closed:animate-out data-open:animate-in data-closed:duration-100 data-open:duration-150 motion-reduce:animate-none"
           )}
@@ -118,7 +121,8 @@ function CustomizerPanelFloating({ animate }: { animate: boolean }) {
             <CustomizerSidebarHeader />
             <CustomizerSidebarContent
               anchorRef={anchorRef}
-              isMobile={!isDesktop}
+              isMobile={!isMedium}
+              layout={isMedium ? "list" : "strip"}
             />
           </PickerSideProvider>
         </PopoverPrimitive.Popup>
