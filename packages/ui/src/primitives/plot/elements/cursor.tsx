@@ -116,12 +116,18 @@ export function CursorReadout(componentProps: CursorReadout.Props) {
     if (!node) {
       return;
     }
+    // One text node, rewritten in place: replacing the node's children on every update makes the browser recheck every :has() and :empty rule on the page.
+    const text = node.appendChild(document.createTextNode(""));
     const paint = () => {
       const value = store.get();
-      node.textContent = value ? format(value) : "";
+      text.data = value ? format(value) : "";
     };
     paint();
-    return store.subscribe(paint);
+    const unsubscribe = store.subscribe(paint);
+    return () => {
+      unsubscribe();
+      text.remove();
+    };
   }, [format, store]);
 
   return useRender({

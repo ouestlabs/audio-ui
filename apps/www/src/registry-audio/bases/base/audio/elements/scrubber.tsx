@@ -34,11 +34,17 @@ function ScrubberTime({
     if (!node) {
       return;
     }
+    // One text node, rewritten in place: replacing the node's children on every update makes the browser recheck every :has() and :empty rule on the page.
+    const text = node.appendChild(document.createTextNode(""));
     const paint = () => {
-      node.textContent = formatClock(source.getSnapshot());
+      text.data = formatClock(source.getSnapshot());
     };
     paint();
-    return source.subscribe(paint);
+    const unsubscribe = source.subscribe(paint);
+    return () => {
+      unsubscribe();
+      text.remove();
+    };
   }, [source]);
   return (
     <span
