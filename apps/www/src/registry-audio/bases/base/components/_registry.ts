@@ -454,4 +454,18 @@ export const components: RegistryItem[] = [
     ],
     type: "registry:example",
   },
+  {
+    categories: ["sequencer"],
+    description:
+      "A drum machine: draw a pattern and hear it. Press a step or drag across several; the playing column lights up",
+    files: [
+      {
+        path: "components/sequencer/sequencer-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "sequencer-demo",
+    registryDependencies: ["@audio/sequencer"],
+    type: "registry:example",
+  },
 ];

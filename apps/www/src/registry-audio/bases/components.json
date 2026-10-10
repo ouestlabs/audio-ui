@@ -148,5 +148,10 @@
     "categories": ["plot"],
     "name": "plot-compressor-demo",
     "title": "plot-compressor-demo"
+  },
+  {
+    "categories": ["sequencer"],
+    "name": "sequencer-demo",
+    "title": "sequencer-demo"
   }
 ]

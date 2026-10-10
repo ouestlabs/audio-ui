@@ -100,6 +100,12 @@ export const categories: CategoryDef[] = [
   },
   {
     description:
+      "Step sequencer components: grids of steps to draw a pattern on, that you can hear.",
+    label: "Sequencer",
+    name: "sequencer",
+  },
+  {
+    description:
       "Zoomable, snapping timeline components for arrangements, clip editors and piano rolls.",
     label: "Timeline",
     name: "timeline",

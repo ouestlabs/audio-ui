@@ -2,4 +2,11 @@
 "@audio-ui/react": minor
 ---
 
-Add the Sequencer primitive: a boolean matrix (`boolean[][]`) grid of buttons painted with a single drag (the first touched cell's inverse state is painted across every cell the drag crosses, matching hardware step sequencers). Compound parts (`Root`, `Track`, `Cells`, `Cell`) follow the WAI-ARIA grid pattern with 2D roving-tabindex keyboard navigation (arrow keys move focus, Space/Enter toggles). The primitive is display/interaction only — an optional controlled `activeStep` prop highlights the playing column, with timing left to the consumer (a registry hook, Tone.js, or any other clock).
+Rebuild the Sequencer primitive: a grid of steps, a row per sound (`value: boolean[][]`). Parts: `Root`, `Rows`, `Row` (named with `aria-label`), `Cells` and `Cell`, each step a toggle button with `aria-pressed`.
+
+- **Pointer:** a press flips a step and dragging on paints the new state across every step the pointer crosses, found from the cells' own boxes.
+- **Keyboard:** the steps are one tab stop; the arrow keys, Home and End (with Ctrl or Cmd, the corners of the grid) move between them, and Space or Enter flips one.
+- **Events:** `onValueChange(value, eventDetails)` with `reason` `"press"`, `"paint"` or `"keyboard"`, cancellable; `onValueCommitted` when a gesture that changed the pattern ends.
+- **Playhead:** `source`, the step being played as a live value, sets `data-current` on its cells straight in the DOM without re-rendering React; this replaces the `activeStep` prop.
+
+Also exported from `@audio-ui/react/sequencer`.

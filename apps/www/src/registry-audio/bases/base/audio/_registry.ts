@@ -169,4 +169,27 @@ export const audio: RegistryItem[] = [
     ],
     type: "registry:ui",
   },
+  {
+    dependencies: ["@audio-ui/react"],
+    files: [
+      {
+        path: "audio/elements/sequencer.tsx",
+        type: "registry:ui",
+      },
+      {
+        path: "components/sequencer/sequencer-demo.tsx",
+        target: "components/audio/sequencer-default.tsx",
+        type: "registry:component",
+      },
+    ],
+    name: "sequencer",
+    registryDependencies: [
+      "@audio/use-master-bus",
+      "@audio/use-transport-clock",
+      "@audio/use-web-audio",
+      "@audio/drum-synthesis",
+      "@shadcn/button",
+    ],
+    type: "registry:ui",
+  },
 ];

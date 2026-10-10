@@ -135,4 +135,19 @@ export const lib: RegistryItem[] = [
     registryDependencies: [],
     type: "registry:lib",
   },
+  {
+    categories: ["lib", "audio", "synth", "sequencer"],
+    dependencies: [],
+    description:
+      "One-shot percussion synthesis (kick, snare, hihat) built from oscillators and noise bursts",
+    files: [
+      {
+        path: "lib/drum-synthesis.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "drum-synthesis",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
 ];

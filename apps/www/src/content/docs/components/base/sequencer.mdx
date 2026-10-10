@@ -1,0 +1,92 @@
+---
+title: Sequencer
+description: A grid of steps to draw a pattern on — press a step or drag across several, and hear it.
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="sequencer-demo" />
+
+A row of steps per sound: the pattern of a drum machine. The default example is a drum machine you can hear: draw a pattern, press play, and the column being played lights up. The registry component wraps the `Sequencer` primitive from `@audio-ui/react`.
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">CLI</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash component
+npx shadcn@latest add @audio/sequencer
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the following dependencies:</Step>
+
+```bash
+npm install @audio-ui/react
+```
+
+<Step>Copy and paste the following code into your project.</Step>
+
+<ComponentSource
+  styleName="base-nova"
+  name="sequencer"
+  title="components/audio/elements/sequencer.tsx"
+/>
+
+<Step>Update the import paths to match your project setup.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import { Sequencer } from "@/components/audio/elements/sequencer";
+
+<Sequencer
+  aria-label="Drum pattern"
+  onValueChange={setPattern}
+  rowLabels={["Kick", "Snare", "Hihat"]}
+  source={step}
+  value={pattern}
+/>;
+```
+
+`value` is a row per sound, each a list of steps: `boolean[][]`. `source` is the step being played, a live `{ getSnapshot, subscribe }` such as one made with `createSource`: its cells get `data-current`, painted straight in the DOM, so a clock ticking every step never re-renders React.
+
+## Interaction
+
+| Gesture | What it does |
+| --- | --- |
+| Press a step | Flips it. |
+| Drag on | Paints the new state across every step the pointer crosses. |
+| Arrow keys, `Home`, `End` | Move between steps; with `Ctrl` or `Cmd`, `Home` and `End` go to the corners. |
+| `Space`, `Enter` | Flip the focused step. |
+
+The steps are one tab stop, and each is a toggle button (`aria-pressed`) named after its row and step.
+
+## API reference
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value` / `defaultValue` | `boolean[][]` | — | The pattern. |
+| `onValueChange` | `(value, eventDetails) => void` | — | While steps flip: `reason` is `"press"`, `"paint"` or `"keyboard"`. `eventDetails.cancel()` keeps the pattern as it was. |
+| `onValueCommitted` | `(value, eventDetails) => void` | — | When a gesture that changed the pattern ends, and after each key press. |
+| `source` | `{ getSnapshot, subscribe }` | — | The step being played. |
+| `rowLabels` | `string[]` | — | Names written beside each row, and its accessible name. |
+| `beatEvery` | `number` | `4` | Highlights every nth step. |
+| `disabled` | `boolean` | `false` | |

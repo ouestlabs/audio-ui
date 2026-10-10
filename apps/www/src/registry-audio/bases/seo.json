@@ -51,6 +51,11 @@
     "intro": "Browse {{count}} synth components for audio/ui, built on top of shadcn/ui.",
     "title": "Synth"
   },
+  "sequencer": {
+    "description": "Step sequencer components: grids of steps to draw a pattern on, that you can hear. {{count}} components.",
+    "intro": "Browse {{count}} sequencer components for audio/ui, built on top of shadcn/ui.",
+    "title": "Sequencer"
+  },
   "timeline": {
     "description": "Zoomable, snapping timeline components for arrangements, clip editors and piano rolls. {{count}} components.",
     "intro": "Browse {{count}} timeline components for audio/ui, built on top of shadcn/ui.",

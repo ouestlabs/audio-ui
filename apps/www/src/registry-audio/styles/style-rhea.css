@@ -278,6 +278,19 @@
     @apply animate-[cn-envelope-shake_280ms_linear] motion-reduce:animate-none;
   }
 
+  /* MARK: Sequencer */
+  .cn-sequencer {
+    @apply [--sequencer-off:var(--muted)];
+  }
+
+  .cn-sequencer-cell {
+    @apply rounded-[min(var(--radius-sm),6px)] border bg-muted/60 transition-[background-color,box-shadow,transform] duration-100 ease-out hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring/50 active:scale-95 aria-pressed:border-primary aria-pressed:bg-primary data-current:ring-2 data-current:ring-foreground/40 data-disabled:pointer-events-none motion-reduce:transition-none motion-reduce:active:scale-100;
+  }
+
+  .cn-sequencer-cell-beat {
+    @apply bg-muted;
+  }
+
   /* MARK: Plot */
   .cn-plot {
     @apply rounded-4xl border bg-card;
