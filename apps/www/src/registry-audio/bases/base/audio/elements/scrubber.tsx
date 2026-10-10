@@ -6,6 +6,9 @@ import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder";
 import { cn } from "@/registry/bases/base/lib/utils";
 import { Button } from "@/registry/bases/base/ui/button";
 
+/** The thumb stays inside the bar, as a slider's does: at either end its edge meets the bar's. */
+const THUMB_SIZE = "0.875rem";
+
 /** 75 as "1:15", 3725 as "1:02:05". */
 function formatClock(seconds: number): string {
   const total = Math.max(0, Math.floor(seconds));
@@ -120,10 +123,17 @@ function Scrubber({
             className="cn-scrubber-fill pointer-events-none absolute inset-y-0"
             style={{
               left: 0,
-              width: "calc(var(--timeline-unit) * var(--timeline-offset))",
+              width: `calc(var(--timeline-unit) * var(--timeline-offset) - ${THUMB_SIZE} * var(--timeline-offset) / ${duration} + ${THUMB_SIZE} / 2)`,
             }}
           />
-          <TimelinePrimitive.Playhead className="cn-scrubber-thumb pointer-events-none absolute top-1/2 size-3.5 -translate-x-1/2 -translate-y-1/2" />
+          <TimelinePrimitive.Playhead
+            className="cn-scrubber-thumb pointer-events-none absolute top-1/2 -translate-y-1/2"
+            style={{
+              height: THUMB_SIZE,
+              left: `calc(var(--timeline-unit) * var(--timeline-offset) - ${THUMB_SIZE} * var(--timeline-offset) / ${duration})`,
+              width: THUMB_SIZE,
+            }}
+          />
         </TimelinePrimitive.Ruler>
       </TimelinePrimitive.Root>
       <span className="min-w-10 text-muted-foreground text-xs tabular-nums">
