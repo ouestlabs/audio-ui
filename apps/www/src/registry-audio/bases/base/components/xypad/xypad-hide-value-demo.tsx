@@ -4,6 +4,7 @@ import { XYPad } from "@/registry-audio/bases/base/audio/elements/xypad";
 export default function XypadHideValueDemo() {
   return (
     <XYPad
+      aria-label="Position"
       className="aspect-square"
       defaultValue={{ x: 50, y: 50 }}
       maxX={100}

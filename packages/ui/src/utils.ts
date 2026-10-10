@@ -53,3 +53,7 @@ export function roundToStep(value: number, step: number, min: number): number {
     (Math.round((value - min) / step) * step + min).toFixed(decimals)
   );
 }
+
+/** Clamp into `min…max`; a non-finite value (NaN from a 0/0, ±Infinity) falls back to `min`. */
+export const clampFinite = (value: number, min: number, max: number): number =>
+  Number.isFinite(value) ? clamp(value, min, max) : min;

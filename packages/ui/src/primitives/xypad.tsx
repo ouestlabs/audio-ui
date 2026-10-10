@@ -1,19 +1,27 @@
+import { mergeProps } from "@base-ui/react/merge-props";
+import { useRender } from "@base-ui/react/use-render";
 import * as React from "react";
-import { useFocus } from "../hooks/interactions/use-focus";
-import { useKeyboardNavigation } from "../hooks/interactions/use-keyboard-navigation";
-import { usePointerDrag } from "../hooks/interactions/use-pointer-drag";
 import { useWheel } from "../hooks/interactions/use-wheel";
-import type { Nullable, Procedure } from "../utils";
-import { clamp, clampUnit, type Point, panic, quantizeRound } from "../utils";
-import { getDataAttributes } from "./internal/data-attributes";
 import {
-  type UseParameterCoreDragCallbacks,
-  useParameterCore,
-} from "./internal/use-parameter-core";
+  clamp,
+  clampFinite,
+  type Nullable,
+  type Point,
+  roundToStep,
+} from "../utils";
+import {
+  createChangeEventDetails,
+  type ChangeEventDetails as ExtraChangeEventDetails,
+  type CommitEventDetails as ExtraCommitEventDetails,
+} from "./internal/event-details";
+import { type PartProps, resolveStyling } from "./internal/part";
 
-const VISUALLY_HIDDEN_STYLE: React.CSSProperties = {
+/** Shift + arrows and Page Up/Down move this many steps at once. */
+const LARGE_STEP_MULTIPLIER = 10;
+
+const VISUALLY_HIDDEN: React.CSSProperties = {
   border: 0,
-  clip: "rect(0, 0, 0, 0)",
+  clipPath: "inset(50%)",
   height: 1,
   margin: -1,
   overflow: "hidden",
@@ -23,558 +31,650 @@ const VISUALLY_HIDDEN_STYLE: React.CSSProperties = {
   width: 1,
 };
 
-interface ConfigContextValue {
-  ariaLabel?: string;
-  ariaLabelledBy?: string;
-  containerRef: React.RefObject<Nullable<HTMLDivElement>>;
-  disabled: boolean;
-  dragCallbacks: UseParameterCoreDragCallbacks;
-  elementId: string;
-  keyboardProps: { onKeyDown: Procedure<React.KeyboardEvent> };
-  shouldPreventFocusRef: React.RefObject<boolean>;
-  wheelRef: Procedure<Nullable<HTMLDivElement>>;
+/** Only `disabled` and `dragging` become data attributes; the numbers stay in `state`. */
+const STATE_ATTRIBUTES_MAPPING = {
+  maxX: () => null,
+  maxY: () => null,
+  minX: () => null,
+  minY: () => null,
+  value: () => null,
+};
+
+type Axis = "x" | "y";
+
+function toPercent(value: number, min: number, max: number): number {
+  return clamp((value - min) / (max - min || 1), 0, 1);
 }
 
-/** Split from config: changes every drag frame, so only components that render live position subscribe to it. */
-interface ValueContextValue {
-  percentageX: number;
-  percentageY: number;
-  thumbX: number;
-  thumbY: number;
-  value: Point;
+interface XYPadContextValue {
+  actions: {
+    /** Snap, clamp and propose a value; returns whether it was applied. */
+    change: (next: Point, eventDetails: Root.ChangeEventDetails) => boolean;
+    commit: (value: Point, eventDetails: Root.CommitEventDetails) => void;
+    setDragging: (dragging: boolean) => void;
+  };
+  meta: {
+    formatter: Intl.NumberFormat;
+    inputRef: React.RefObject<HTMLInputElement | null>;
+    labelId: string | undefined;
+    /** Value position, 0…1 from the left. */
+    percentX: number;
+    /** Value position, 0…1 from the bottom. */
+    percentY: number;
+    setLabelId: (id: string | undefined) => void;
+    stepX: number;
+    stepY: number;
+    /** Latest displayed value, readable from event handlers. */
+    valueRef: React.RefObject<Point>;
+    wheelRef: (node: Nullable<HTMLElement>) => void;
+  };
+  state: Root.State;
 }
 
-const ConfigContext = React.createContext<ConfigContextValue | null>(null);
-const ValueContext = React.createContext<ValueContextValue | null>(null);
+const XYPadContext = React.createContext<XYPadContextValue | null>(null);
 
-function useConfigContext() {
-  const context = React.useContext(ConfigContext);
+function useXYPadContext(part: string): XYPadContextValue {
+  const context = React.use(XYPadContext);
   if (!context) {
-    panic("XYPad components must be used within XYPad.Root");
+    throw new Error(`XYPad.${part} must be used within XYPad.Root`);
   }
   return context;
 }
 
-function useValueContext() {
-  const context = React.useContext(ValueContext);
-  if (!context) {
-    panic("XYPad components must be used within XYPad.Root");
-  }
-  return context;
-}
+/**
+ * Groups all parts of the pad and owns its two-dimensional value. Exposes the
+ * value position as CSS variables for crosshairs and guides:
+ * `--xy-pad-x` (from the left) and `--xy-pad-y` (from the top), as percentages.
+ * Renders a `<div>` element.
+ */
+export function Root(componentProps: Root.Props) {
+  const {
+    className,
+    defaultValue,
+    disabled = false,
+    format,
+    locale,
+    maxX = 100,
+    maxY = 100,
+    minX = 0,
+    minY = 0,
+    onValueChange,
+    onValueCommitted,
+    ref,
+    render,
+    stepX = 1,
+    stepY = 1,
+    style,
+    value: valueProp,
+    ...elementProps
+  } = componentProps;
 
-function useContext() {
-  return { ...useConfigContext(), ...useValueContext() };
-}
-export interface RootProps
-  extends Omit<
-    React.ComponentProps<"div">,
-    "onChange" | "onInput" | "type" | "value" | "defaultValue"
-  > {
-  "aria-label"?: string;
-  "aria-labelledby"?: string;
-  defaultValue?: Point;
-  disabled?: boolean;
-  maxX?: number;
-  maxY?: number;
-  minX?: number;
-  minY?: number;
-  onValueChange?: Procedure<Point>;
-  onValueCommit?: Procedure<Point>;
-  stepX?: number;
-  stepY?: number;
-  value?: Point;
-}
-
-export function Root({
-  value: controlledValue,
-  defaultValue = { x: 0, y: 0 },
-  minX = 0,
-  maxX = 100,
-  minY = 0,
-  maxY = 100,
-  stepX = 1,
-  stepY = 1,
-  disabled = false,
-  "aria-label": ariaLabel,
-  "aria-labelledby": ariaLabelledBy,
-  onValueChange,
-  onValueCommit,
-  id,
-  className,
-  children,
-  ...props
-}: RootProps) {
-  const xypadId = React.useId();
-  const containerRef = React.useRef<HTMLDivElement>(null);
-
-  const transformValue = React.useCallback(
-    (val: Point) => {
-      const numX = Number(val.x);
-      const numY = Number(val.y);
-      const clampedX =
-        Number.isNaN(numX) || !Number.isFinite(numX)
-          ? minX
-          : clamp(numX, minX, maxX);
-      const clampedY =
-        Number.isNaN(numY) || !Number.isFinite(numY)
-          ? minY
-          : clamp(numY, minY, maxY);
-      return { x: clampedX, y: clampedY };
-    },
-    [minX, maxX, minY, maxY]
+  const isControlled = valueProp !== undefined;
+  const [uncontrolledValue, setUncontrolledValue] = React.useState<Point>(
+    () =>
+      defaultValue ?? {
+        x: minX + (maxX - minX) / 2,
+        y: minY + (maxY - minY) / 2,
+      }
   );
-
-  const clampStep = React.useCallback(
-    (next: Point) => ({
-      x: quantizeRound(clamp(next.x, minX, maxX), stepX),
-      y: quantizeRound(clamp(next.y, minY, maxY), stepY),
+  const rawValue = isControlled ? valueProp : uncontrolledValue;
+  const value = React.useMemo(
+    () => ({
+      x: clampFinite(rawValue.x, minX, maxX),
+      y: clampFinite(rawValue.y, minY, maxY),
     }),
-    [minX, maxX, stepX, minY, maxY, stepY]
+    [maxX, maxY, minX, minY, rawValue.x, rawValue.y]
   );
 
-  const calculateValueFromPoint = React.useCallback(
-    (point: Point): Nullable<Point> => {
-      const container = containerRef.current;
-      if (!container) {
-        return null;
-      }
+  // While dragging, the pad follows the pointer even if a controlled value
+  // lags behind; on release the controlled value rules again.
+  const [dragging, setDraggingState] = React.useState(false);
+  const [dragValue, setDragValue] = React.useState<Point | null>(null);
+  const draggingRef = React.useRef(false);
+  const displayedValue = dragValue ?? value;
+  const valueRef = React.useRef(displayedValue);
+  valueRef.current = displayedValue;
 
-      const rect = container.getBoundingClientRect();
-      if (rect.width <= 0 || rect.height <= 0) {
-        return null;
-      }
-      const normalizedX = clampUnit((point.x - rect.left) / rect.width);
-      const normalizedY = clampUnit((point.y - rect.top) / rect.height);
+  const setDragging = React.useCallback((next: boolean) => {
+    draggingRef.current = next;
+    setDraggingState(next);
+    if (!next) {
+      setDragValue(null);
+    }
+  }, []);
 
-      return {
-        x: minX + normalizedX * (maxX - minX),
-        y: maxY - normalizedY * (maxY - minY),
+  const change = React.useCallback(
+    (raw: Point, eventDetails: Root.ChangeEventDetails) => {
+      const next = {
+        x: clamp(roundToStep(raw.x, stepX, minX), minX, maxX),
+        y: clamp(roundToStep(raw.y, stepY, minY), minY, maxY),
       };
-    },
-    [minX, maxX, minY, maxY]
-  );
-
-  const calculateValueFromDelta = React.useCallback(
-    (delta: Point, initialValue: Point) => {
-      const container = containerRef.current;
-      if (!container) {
-        return initialValue;
+      const { current } = valueRef;
+      if (next.x === current.x && next.y === current.y) {
+        return false;
       }
-
-      const rect = container.getBoundingClientRect();
-      const sensitivityX = (maxX - minX) / Math.max(rect.width, 1);
-      const sensitivityY = (maxY - minY) / Math.max(rect.height, 1);
-
-      return {
-        x: initialValue.x + delta.x * sensitivityX,
-        y: initialValue.y + delta.y * sensitivityY,
-      };
+      onValueChange?.(next, eventDetails);
+      if (eventDetails.isCanceled) {
+        return false;
+      }
+      valueRef.current = next;
+      if (!isControlled) {
+        setUncontrolledValue(next);
+      }
+      if (isControlled && draggingRef.current) {
+        setDragValue(next);
+      }
+      return true;
     },
-    [minX, maxX, minY, maxY]
+    [isControlled, maxX, maxY, minX, minY, onValueChange, stepX, stepY]
   );
 
-  const { commitValue, dragCallbacks, shouldPreventFocusRef, value, valueRef } =
-    useParameterCore<Point>({
-      clampStep,
-      defaultValue,
-      deltaToValue: calculateValueFromDelta,
-      disabled,
-      fallbackValue: { x: minX, y: minY },
-      focusRef: containerRef,
-      onValueChange,
-      onValueCommit,
-      pointToValue: calculateValueFromPoint,
-      transform: transformValue,
-      value: controlledValue,
-    });
-
-  const { keyboardProps } = useKeyboardNavigation({
-    disabled,
-    handlers: {
-      onArrowDown: () => {
-        commitValue({
-          x: valueRef.current.x,
-          y: valueRef.current.y - stepY,
-        });
-        return true;
-      },
-      onArrowLeft: () => {
-        commitValue({
-          x: valueRef.current.x - stepX,
-          y: valueRef.current.y,
-        });
-        return true;
-      },
-      onArrowRight: () => {
-        commitValue({
-          x: valueRef.current.x + stepX,
-          y: valueRef.current.y,
-        });
-        return true;
-      },
-      onArrowUp: () => {
-        commitValue({
-          x: valueRef.current.x,
-          y: valueRef.current.y + stepY,
-        });
-        return true;
-      },
-      onEnd: () => {
-        commitValue({ x: maxX, y: minY });
-        return true;
-      },
-      onHome: () => {
-        commitValue({ x: minX, y: maxY });
-        return true;
-      },
-      onPageDown: () => {
-        commitValue({
-          x: valueRef.current.x,
-          y: valueRef.current.y - stepY * 10,
-        });
-        return true;
-      },
-      onPageUp: () => {
-        commitValue({
-          x: valueRef.current.x,
-          y: valueRef.current.y + stepY * 10,
-        });
-        return true;
-      },
+  const commit = React.useCallback(
+    (committed: Point, eventDetails: Root.CommitEventDetails) => {
+      onValueCommitted?.(committed, eventDetails);
     },
-  });
+    [onValueCommitted]
+  );
 
+  // Trackpads scroll in two dimensions: the wheel moves the point by the same
+  // distance a drag would.
   const { wheelRef } = useWheel({
     disabled,
-    onWheel: (delta: Point) => {
-      const container = containerRef.current;
-      if (!container) {
+    onWheel: (event: WheelEvent, delta: Point) => {
+      const element = event.currentTarget;
+      if (!(element instanceof Element)) {
         return;
       }
-
-      const rect = container.getBoundingClientRect();
-      const sensitivityX = (maxX - minX) / Math.max(rect.width, 1);
-      const sensitivityY = (maxY - minY) / Math.max(rect.height, 1);
-
-      commitValue({
-        x: valueRef.current.x - delta.x * sensitivityX,
-        y: valueRef.current.y + delta.y * sensitivityY,
-      });
+      const rect = element.getBoundingClientRect();
+      const { current } = valueRef;
+      const next = {
+        x: current.x + (delta.x * (maxX - minX)) / Math.max(rect.width, 1),
+        y: current.y - (delta.y * (maxY - minY)) / Math.max(rect.height, 1),
+      };
+      if (change(next, createChangeEventDetails("wheel", event))) {
+        commit(valueRef.current, { event, reason: "wheel" });
+      }
     },
   });
 
-  const percentageX = clampUnit((value.x - minX) / (maxX - minX || 1));
-  const percentageY = clampUnit((value.y - minY) / (maxY - minY || 1));
-  const thumbX = percentageX * 100;
-  const thumbY = (1 - percentageY) * 100;
-  const elementId = id || xypadId;
+  const inputRef = React.useRef<HTMLInputElement>(null);
+  const [labelId, setLabelId] = React.useState<string>();
+  const formatter = React.useMemo(
+    () => new Intl.NumberFormat(locale, format),
+    [format, locale]
+  );
 
-  const configValue = React.useMemo<ConfigContextValue>(
+  const state = React.useMemo<Root.State>(
     () => ({
-      ariaLabel,
-      ariaLabelledBy,
-      containerRef,
       disabled,
-      dragCallbacks,
-      elementId,
-      keyboardProps,
-      shouldPreventFocusRef,
-      wheelRef,
+      dragging,
+      maxX,
+      maxY,
+      minX,
+      minY,
+      value: displayedValue,
+    }),
+    [disabled, dragging, displayedValue, maxX, maxY, minX, minY]
+  );
+
+  const percentX = toPercent(displayedValue.x, minX, maxX);
+  const percentY = toPercent(displayedValue.y, minY, maxY);
+
+  const context = React.useMemo<XYPadContextValue>(
+    () => ({
+      actions: { change, commit, setDragging },
+      meta: {
+        formatter,
+        inputRef,
+        labelId,
+        percentX,
+        percentY,
+        setLabelId,
+        stepX,
+        stepY,
+        valueRef,
+        wheelRef,
+      },
+      state,
     }),
     [
-      ariaLabel,
-      ariaLabelledBy,
-      disabled,
-      dragCallbacks,
-      elementId,
-      keyboardProps,
-      shouldPreventFocusRef,
+      change,
+      commit,
+      formatter,
+      labelId,
+      percentX,
+      percentY,
+      setDragging,
+      state,
+      stepX,
+      stepY,
       wheelRef,
     ]
   );
 
-  const valueContextValue = React.useMemo<ValueContextValue>(
-    () => ({ percentageX, percentageY, thumbX, thumbY, value }),
-    [percentageX, percentageY, thumbX, thumbY, value]
-  );
-
-  return (
-    <ConfigContext.Provider value={configValue}>
-      <ValueContext.Provider value={valueContextValue}>
-        <div
-          className={className}
-          {...getDataAttributes("xypad", {
-            disabled,
-            part: "xypad-wrapper",
-          })}
-          {...props}
-        >
-          {ariaLabel || ariaLabelledBy ? null : (
-            <span className="sr-only" id={`${elementId}-label`}>
-              XY Pad
-            </span>
-          )}
-          <span className="sr-only" id={`${elementId}-instructions`}>
-            Use arrow keys to adjust X and Y values.
-          </span>
-          {children}
-        </div>
-      </ValueContext.Provider>
-    </ConfigContext.Provider>
-  );
-}
-
-export function Slider({
-  className,
-  "aria-describedby": ariaDescribedBy,
-  style,
-  ...props
-}: React.ComponentProps<"div">) {
-  const context = useConfigContext();
-  const {
-    disabled,
-    elementId,
-    ariaLabel,
-    ariaLabelledBy,
-    containerRef,
-    wheelRef,
-    dragCallbacks,
-    shouldPreventFocusRef,
-    keyboardProps,
-  } = context;
-
-  const { pointerProps } = usePointerDrag({
-    capturePointer: true,
-    disabled,
-    elementRef: containerRef,
-    releaseOnOutsideClick: true,
-    ...dragCallbacks,
+  const element = useRender({
+    defaultTagName: "div",
+    props: mergeProps<"div">(
+      {
+        style: {
+          "--xy-pad-x": `${percentX * 100}%`,
+          "--xy-pad-y": `${100 - percentY * 100}%`,
+        } as React.CSSProperties,
+      },
+      { ...elementProps, ...resolveStyling(className, style, state) }
+    ),
+    ref,
+    render,
+    state,
+    stateAttributesMapping: STATE_ATTRIBUTES_MAPPING,
   });
 
-  const { focusProps } = useFocus({
-    disabled,
-    onFocus: () => {
-      if (shouldPreventFocusRef.current) {
-        shouldPreventFocusRef.current = false;
+  return <XYPadContext value={context}>{element}</XYPadContext>;
+}
+
+export namespace Root {
+  export type State = {
+    disabled: boolean;
+    /** Whether a pointer is dragging on the pad. */
+    dragging: boolean;
+    maxX: number;
+    maxY: number;
+    minX: number;
+    minY: number;
+    value: Point;
+  };
+
+  export type ChangeEventReason = ChangeEventDetails["reason"];
+  export type ChangeEventDetails =
+    | ExtraChangeEventDetails<"press", PointerEvent>
+    | ExtraChangeEventDetails<"drag", PointerEvent>
+    | ExtraChangeEventDetails<"keyboard", KeyboardEvent>
+    | ExtraChangeEventDetails<"wheel", WheelEvent>
+    | ExtraChangeEventDetails<"input-change", Event>;
+  export type CommitEventReason = CommitEventDetails["reason"];
+  export type CommitEventDetails =
+    | ExtraCommitEventDetails<"press", PointerEvent>
+    | ExtraCommitEventDetails<"drag", PointerEvent>
+    | ExtraCommitEventDetails<"keyboard", KeyboardEvent>
+    | ExtraCommitEventDetails<"wheel", WheelEvent>
+    | ExtraCommitEventDetails<"input-change", Event>;
+
+  export interface Props extends Omit<PartProps<"div", State>, "defaultValue"> {
+    /** Uncontrolled starting value. Defaults to the center of the pad. */
+    defaultValue?: Point;
+    disabled?: boolean;
+    /** Formats each axis for `XYPad.Value` and the inputs' `aria-valuetext`. */
+    format?: Intl.NumberFormatOptions;
+    locale?: Intl.LocalesArgument;
+    /** @default 100 */
+    maxX?: number;
+    /** @default 100 */
+    maxY?: number;
+    /** @default 0 */
+    minX?: number;
+    /** @default 0 */
+    minY?: number;
+    /** Fires on every change: press, drag, keyboard, wheel and input changes. */
+    onValueChange?: (value: Point, eventDetails: ChangeEventDetails) => void;
+    /** Fires when an interaction ends with a new value. */
+    onValueCommitted?: (value: Point, eventDetails: CommitEventDetails) => void;
+    /** @default 1 */
+    stepX?: number;
+    /** @default 1 */
+    stepY?: number;
+    value?: Point;
+  }
+}
+
+interface DragGesture {
+  /** Whether the gesture changed the value at least once; if so its end commits, even back on the start value. */
+  changed: boolean;
+  /** Whether the pointer moved after the press: the commit reason is "drag", else "press". */
+  moved: boolean;
+  pointerId: number;
+  rect: DOMRect;
+}
+
+/**
+ * The pad surface: a press jumps the value to the pointer and a drag follows
+ * it; the mouse wheel / trackpad moves it too. Sets `touch-action: none` so
+ * touch drags don't scroll the page. Renders a `<div>` element.
+ */
+export function Control(componentProps: Control.Props) {
+  const { className, ref, render, style, ...elementProps } = componentProps;
+  const { actions, meta, state } = useXYPadContext("Control");
+  const gestureRef = React.useRef<DragGesture | null>(null);
+
+  const valueAt = (gesture: DragGesture, event: React.PointerEvent): Point => {
+    const { rect } = gesture;
+    const fromLeft = clamp(
+      (event.clientX - rect.left) / Math.max(rect.width, 1),
+      0,
+      1
+    );
+    const fromBottom = clamp(
+      (rect.bottom - event.clientY) / Math.max(rect.height, 1),
+      0,
+      1
+    );
+    return {
+      x: state.minX + fromLeft * (state.maxX - state.minX),
+      y: state.minY + fromBottom * (state.maxY - state.minY),
+    };
+  };
+
+  const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (state.disabled || event.button !== 0) {
+      return;
+    }
+    event.preventDefault();
+    const control = event.currentTarget;
+    control.setPointerCapture?.(event.pointerId);
+    meta.inputRef.current?.focus({ preventScroll: true });
+    const gesture: DragGesture = {
+      changed: false,
+      moved: false,
+      pointerId: event.pointerId,
+      rect: control.getBoundingClientRect(),
+    };
+    gestureRef.current = gesture;
+    actions.setDragging(true);
+    gesture.changed = actions.change(
+      valueAt(gesture, event),
+      createChangeEventDetails("press", event.nativeEvent)
+    );
+  };
+
+  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    const gesture = gestureRef.current;
+    if (!gesture || gesture.pointerId !== event.pointerId) {
+      return;
+    }
+    gesture.moved = true;
+    if (
+      actions.change(
+        valueAt(gesture, event),
+        createChangeEventDetails("drag", event.nativeEvent)
+      )
+    ) {
+      gesture.changed = true;
+    }
+  };
+
+  const handlePointerEnd = (event: React.PointerEvent<HTMLDivElement>) => {
+    const gesture = gestureRef.current;
+    if (!gesture || gesture.pointerId !== event.pointerId) {
+      return;
+    }
+    gestureRef.current = null;
+    actions.setDragging(false);
+    if (gesture.changed) {
+      actions.commit(meta.valueRef.current, {
+        event: event.nativeEvent,
+        reason: gesture.moved ? "drag" : "press",
+      });
+    }
+  };
+
+  return useRender({
+    defaultTagName: "div",
+    props: mergeProps<"div">(
+      {
+        onPointerCancel: handlePointerEnd,
+        onPointerDown: handlePointerDown,
+        onPointerMove: handlePointerMove,
+        onPointerUp: handlePointerEnd,
+        style: { touchAction: "none" },
+      },
+      { ...elementProps, ...resolveStyling(className, style, state) }
+    ),
+    ref: ref ? [ref, meta.wheelRef] : meta.wheelRef,
+    render,
+    state,
+    stateAttributesMapping: STATE_ATTRIBUTES_MAPPING,
+  });
+}
+
+export namespace Control {
+  export type State = Root.State;
+  export type Props = PartProps<"div", State>;
+}
+
+/**
+ * Marks the value on the pad (`left`/`top` as percentages, centered with
+ * `translate`). Holds two native `<input type="range">`s, one per axis: the X
+ * input takes focus, both carry the accessible name, and the arrow keys move
+ * both axes. Renders a `<div>` element.
+ */
+export function Thumb(componentProps: Thumb.Props) {
+  const {
+    "aria-describedby": ariaDescribedBy,
+    "aria-label": ariaLabel,
+    "aria-labelledby": ariaLabelledBy,
+    children,
+    className,
+    getAriaLabel,
+    getAriaValueText,
+    ref,
+    render,
+    style,
+    ...elementProps
+  } = componentProps;
+  const { actions, meta, state } = useXYPadContext("Thumb");
+
+  const handleKeyDown = React.useCallback(
+    (event: React.KeyboardEvent<HTMLInputElement>) => {
+      if (state.disabled) {
+        return;
+      }
+      const { current } = meta.valueRef;
+      const multiplier = event.shiftKey ? LARGE_STEP_MULTIPLIER : 1;
+      const dx = meta.stepX * multiplier;
+      const dy = meta.stepY * multiplier;
+      const largeDy = meta.stepY * LARGE_STEP_MULTIPLIER;
+      const targets: Record<string, Point> = {
+        ArrowDown: { x: current.x, y: current.y - dy },
+        ArrowLeft: { x: current.x - dx, y: current.y },
+        ArrowRight: { x: current.x + dx, y: current.y },
+        ArrowUp: { x: current.x, y: current.y + dy },
+        End: { x: state.maxX, y: current.y },
+        Home: { x: state.minX, y: current.y },
+        PageDown: { x: current.x, y: current.y - largeDy },
+        PageUp: { x: current.x, y: current.y + largeDy },
+      };
+      const next = targets[event.key];
+      if (!next) {
+        return;
+      }
+      event.preventDefault();
+      const native = event.nativeEvent;
+      if (actions.change(next, createChangeEventDetails("keyboard", native))) {
+        actions.commit(meta.valueRef.current, {
+          event: native,
+          reason: "keyboard",
+        });
       }
     },
+    [actions, meta, state.disabled, state.maxX, state.minX]
+  );
+
+  const handleChange = React.useCallback(
+    (axis: Axis, event: React.ChangeEvent<HTMLInputElement>) => {
+      const native = event.nativeEvent;
+      const next = {
+        ...meta.valueRef.current,
+        [axis]: Number(event.currentTarget.value),
+      };
+      if (
+        actions.change(next, createChangeEventDetails("input-change", native))
+      ) {
+        actions.commit(meta.valueRef.current, {
+          event: native,
+          reason: "input-change",
+        });
+      }
+    },
+    [actions, meta]
+  );
+  const handleChangeX = React.useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => handleChange("x", event),
+    [handleChange]
+  );
+  const handleChangeY = React.useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => handleChange("y", event),
+    [handleChange]
+  );
+
+  const inputProps = (axis: Axis) => {
+    const value = state.value[axis];
+    const formattedValue = meta.formatter.format(value);
+    let label = getAriaLabel?.(axis);
+    if (label === undefined && ariaLabel) {
+      label = `${ariaLabel} ${axis.toUpperCase()}`;
+    }
+    return {
+      "aria-describedby": ariaDescribedBy,
+      "aria-label": label,
+      "aria-labelledby":
+        ariaLabelledBy ?? (label === undefined ? meta.labelId : undefined),
+      "aria-orientation":
+        axis === "x" ? ("horizontal" as const) : ("vertical" as const),
+      "aria-valuetext": getAriaValueText
+        ? getAriaValueText(formattedValue, value, axis)
+        : formattedValue,
+      disabled: state.disabled,
+      max: axis === "x" ? state.maxX : state.maxY,
+      min: axis === "x" ? state.minX : state.minY,
+      onKeyDown: handleKeyDown,
+      step: axis === "x" ? meta.stepX : meta.stepY,
+      style: VISUALLY_HIDDEN,
+      type: "range",
+      value,
+    };
+  };
+
+  return useRender({
+    defaultTagName: "div",
+    props: mergeProps<"div">(
+      {
+        children: (
+          <>
+            {children}
+            <input
+              {...inputProps("x")}
+              onChange={handleChangeX}
+              ref={meta.inputRef}
+            />
+            <input
+              {...inputProps("y")}
+              onChange={handleChangeY}
+              tabIndex={-1}
+            />
+          </>
+        ),
+        style: {
+          left: `${meta.percentX * 100}%`,
+          top: `${100 - meta.percentY * 100}%`,
+          translate: "-50% -50%",
+        },
+      },
+      { ...elementProps, ...resolveStyling(className, style, state) }
+    ),
+    ref,
+    render,
+    state,
+    stateAttributesMapping: STATE_ATTRIBUTES_MAPPING,
   });
-
-  return (
-    <div
-      aria-describedby={ariaDescribedBy || `${elementId}-instructions`}
-      aria-disabled={disabled}
-      aria-label={ariaLabel || "XY Pad"}
-      aria-labelledby={
-        ariaLabelledBy || (ariaLabel ? undefined : `${elementId}-label`)
-      }
-      className={className}
-      {...getDataAttributes("xypad", { disabled })}
-      ref={(node) => {
-        containerRef.current = node;
-        wheelRef(node);
-      }}
-      role="group"
-      {...focusProps}
-      {...keyboardProps}
-      {...pointerProps}
-      onFocus={(e) => {
-        if (shouldPreventFocusRef.current) {
-          shouldPreventFocusRef.current = false;
-        }
-        focusProps.onFocus(e);
-      }}
-      style={{ touchAction: "none", ...style }}
-      tabIndex={disabled ? -1 : focusProps.tabIndex}
-      {...props}
-    />
-  );
 }
 
-export interface GridProps extends React.ComponentProps<"div"> {}
-
-export function Grid({ className, ...props }: GridProps) {
-  return (
-    <div
-      aria-hidden="true"
-      className={className}
-      {...getDataAttributes("xypad", { part: "grid" })}
-      {...props}
-    />
-  );
+export namespace Thumb {
+  export type State = Root.State;
+  export interface Props extends PartProps<"div", State> {
+    /** Names each axis input. Defaults to `aria-label` followed by "X" / "Y". */
+    getAriaLabel?: (axis: Axis) => string;
+    /** Returns an axis input's `aria-valuetext`. Defaults to the formatted value. */
+    getAriaValueText?: (
+      formattedValue: string,
+      value: number,
+      axis: Axis
+    ) => string;
+  }
 }
 
-export interface GridLineProps extends React.ComponentProps<"div"> {
-  orientation: "vertical" | "horizontal";
-  position: number;
+/**
+ * The formatted value (`format`/`locale` on Root), `"x, y"` by default.
+ * Renders an `<output>` element.
+ */
+export function Value(componentProps: Value.Props) {
+  const { children, className, ref, render, style, ...elementProps } =
+    componentProps;
+  const { meta, state } = useXYPadContext("Value");
+  const formattedX = meta.formatter.format(state.value.x);
+  const formattedY = meta.formatter.format(state.value.y);
+  return useRender({
+    defaultTagName: "output",
+    props: mergeProps<"output">(
+      {
+        "aria-live": "off",
+        children:
+          typeof children === "function"
+            ? children(formattedX, formattedY, state.value)
+            : (children ?? `${formattedX}, ${formattedY}`),
+      },
+      { ...elementProps, ...resolveStyling(className, style, state) }
+    ),
+    ref,
+    render,
+    state,
+    stateAttributesMapping: STATE_ATTRIBUTES_MAPPING,
+  });
 }
 
-export function GridLine({
-  className,
-  orientation,
-  position,
-  ...props
-}: GridLineProps) {
-  return (
-    <div
-      aria-hidden="true"
-      className={className}
-      {...getDataAttributes("xypad", {
-        "grid-horizontal-line": orientation === "horizontal",
-        "grid-vertical-line": orientation === "vertical",
-        part: "grid-line",
-      })}
-      style={
-        orientation === "vertical"
-          ? { left: `${position}%` }
-          : { top: `${position}%` }
-      }
-      {...props}
-    />
-  );
+export namespace Value {
+  export type State = Root.State;
+  export interface Props extends Omit<PartProps<"output", State>, "children"> {
+    children?:
+      | React.ReactNode
+      | ((
+          formattedX: string,
+          formattedY: string,
+          value: Point
+        ) => React.ReactNode);
+  }
 }
 
-export interface CrosshairProps extends React.ComponentProps<"div"> {
-  orientation: "vertical" | "horizontal";
+/** Accessible label, associated with both axis inputs. Renders a `<div>` element. */
+export function Label(componentProps: Label.Props) {
+  const {
+    className,
+    id: idProp,
+    ref,
+    render,
+    style,
+    ...elementProps
+  } = componentProps;
+  const { meta, state } = useXYPadContext("Label");
+  const generatedId = React.useId();
+  const id = idProp ?? generatedId;
+  const { setLabelId } = meta;
+  React.useEffect(() => {
+    setLabelId(id);
+    return () => setLabelId(undefined);
+  }, [id, setLabelId]);
+  return useRender({
+    defaultTagName: "div",
+    props: mergeProps<"div">(
+      { id },
+      { ...elementProps, ...resolveStyling(className, style, state) }
+    ),
+    ref,
+    render,
+    state,
+    stateAttributesMapping: STATE_ATTRIBUTES_MAPPING,
+  });
 }
 
-export function Crosshair({
-  className,
-  orientation,
-  ...props
-}: CrosshairProps) {
-  const { thumbX, thumbY } = useValueContext();
-  return (
-    <div
-      aria-hidden="true"
-      className={className}
-      {...getDataAttributes("xypad", {
-        "crosshair-horizontal": orientation === "horizontal",
-        "crosshair-vertical": orientation === "vertical",
-        part: "crosshair",
-      })}
-      style={
-        orientation === "vertical"
-          ? { left: `${thumbX}%` }
-          : { top: `${thumbY}%` }
-      }
-      {...props}
-    />
-  );
-}
-
-export interface CursorProps extends React.ComponentProps<"div"> {}
-
-export function Cursor({ className, ...props }: CursorProps) {
-  const { thumbX, thumbY } = useValueContext();
-  return (
-    <div
-      aria-hidden="true"
-      className={className}
-      {...getDataAttributes("xypad", { part: "cursor" })}
-      style={{
-        left: `${thumbX}%`,
-        top: `${thumbY}%`,
-      }}
-      {...props}
-    />
-  );
-}
-
-export interface CursorGlowProps extends React.ComponentProps<"div"> {}
-
-export function CursorGlow({ className, ...props }: CursorGlowProps) {
-  return (
-    <div
-      aria-hidden="true"
-      className={className}
-      {...getDataAttributes("xypad", { part: "cursor-glow" })}
-      {...props}
-    />
-  );
-}
-
-export interface CursorDotProps extends React.ComponentProps<"div"> {}
-
-export function CursorDot({ className, ...props }: CursorDotProps) {
-  return (
-    <div
-      aria-hidden="true"
-      className={className}
-      {...getDataAttributes("xypad", { part: "cursor-dot" })}
-      {...props}
-    />
-  );
-}
-
-export interface CursorHighlightProps extends React.ComponentProps<"div"> {}
-
-export function CursorHighlight({ className, ...props }: CursorHighlightProps) {
-  return (
-    <div
-      aria-hidden="true"
-      className={className}
-      {...getDataAttributes("xypad", { part: "cursor-highlight" })}
-      {...props}
-    />
-  );
-}
-
-export interface ValueDisplayProps
-  extends Omit<React.ComponentProps<"div">, "children"> {
-  formatValue?: (value: Point) => React.ReactNode;
-}
-
-export function ValueDisplay({
-  className,
-  formatValue,
-  ...props
-}: ValueDisplayProps) {
-  const { value } = useValueContext();
-
-  const content = formatValue ? (
-    formatValue(value)
-  ) : (
-    <>
-      <span {...getDataAttributes("xypad", { part: "value-x" })}>
-        {value.x.toFixed(0)}
-      </span>
-      <span {...getDataAttributes("xypad", { part: "value-separator" })}>
-        ,{" "}
-      </span>
-      <span {...getDataAttributes("xypad", { part: "value-y" })}>
-        {value.y.toFixed(0)}
-      </span>
-    </>
-  );
-
-  return (
-    <div
-      aria-live="polite"
-      className={className}
-      {...getDataAttributes("xypad", { part: "value-display" })}
-      {...props}
-    >
-      {content}
-    </div>
-  );
-}
-
-export interface LabelProps extends React.ComponentProps<"span"> {}
-
-export function Label({ className, ...props }: LabelProps) {
-  const { elementId, value } = useContext();
-  return (
-    <span
-      aria-live="polite"
-      className={className}
-      id={`${elementId}-label`}
-      role="status"
-      style={VISUALLY_HIDDEN_STYLE}
-      {...props}
-    >
-      {`X: ${value.x.toFixed(1)}, Y: ${value.y.toFixed(1)}`}
-    </span>
-  );
+export namespace Label {
+  export type State = Root.State;
+  export type Props = PartProps<"div", State>;
 }

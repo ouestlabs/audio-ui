@@ -250,6 +250,7 @@ export default function BlockPocketSynth() {
   return (
     <div className="cn-audio-panel flex w-full min-w-0 flex-col gap-4 border bg-card p-4">
       <XYPad
+        aria-label="Tone"
         formatValue={formatValue}
         maxX={100}
         maxY={100}
@@ -265,7 +266,7 @@ export default function BlockPocketSynth() {
             startSound(normalizedX, normalizedY);
           }
         }}
-        onValueCommit={() => stopSound()}
+        onValueCommitted={() => stopSound()}
         value={{ x: position.x * 100, y: position.y * 100 }}
       />
       <ToggleGroup

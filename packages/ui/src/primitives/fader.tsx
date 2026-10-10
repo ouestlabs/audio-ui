@@ -1,7 +1,13 @@
 import { Slider } from "@base-ui/react/slider";
 import * as React from "react";
 import { useWheel } from "../hooks/interactions/use-wheel";
-import { clamp, type Nullable, type Point, roundToStep } from "../utils";
+import {
+  clamp,
+  clampFinite,
+  type Nullable,
+  type Point,
+  roundToStep,
+} from "../utils";
 import {
   createChangeEventDetails,
   type ChangeEventDetails as ExtraChangeEventDetails,
@@ -49,7 +55,11 @@ export function Root({
   const [uncontrolledValue, setUncontrolledValue] = React.useState(
     () => defaultValue ?? min + (max - min) / 2
   );
-  const value = isControlled ? valueProp : uncontrolledValue;
+  const value = clampFinite(
+    isControlled ? valueProp : uncontrolledValue,
+    min,
+    max
+  );
 
   // Holds the dragged value until the pointer is released, so a controlled
   // value that lags behind can't pull the thumb back mid-drag.

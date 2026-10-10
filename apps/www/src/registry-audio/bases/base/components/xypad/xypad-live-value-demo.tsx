@@ -9,6 +9,7 @@ export default function XYPadLiveValueDemo() {
   return (
     <div className="flex flex-col items-center gap-2">
       <XYPad
+        aria-label="Position"
         className="aspect-square"
         maxX={100}
         maxY={100}

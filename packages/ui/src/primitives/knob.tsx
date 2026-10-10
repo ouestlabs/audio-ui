@@ -4,6 +4,7 @@ import * as React from "react";
 import { useWheel } from "../hooks/interactions/use-wheel";
 import {
   clamp,
+  clampFinite,
   degToRad,
   type Nullable,
   PI_HALF,
@@ -160,7 +161,11 @@ export function Root(componentProps: Root.Props) {
   const resetValue = defaultValue ?? min + (max - min) / 2;
   const isControlled = valueProp !== undefined;
   const [uncontrolledValue, setUncontrolledValue] = React.useState(resetValue);
-  const value = clamp(isControlled ? valueProp : uncontrolledValue, min, max);
+  const value = clampFinite(
+    isControlled ? valueProp : uncontrolledValue,
+    min,
+    max
+  );
 
   // While dragging, the knob follows the pointer even if a controlled value
   // lags behind; on release the controlled value rules again.
@@ -362,6 +367,8 @@ export namespace Root {
 interface DragGesture {
   /** Rotation accumulated since the press, in radians. */
   accumulatedAngle: number;
+  /** Whether the gesture changed the value at least once; if so its end commits, even back on the start value. */
+  changed: boolean;
   lastAngle: number;
   /** Farthest distance from the press point, in px. */
   maxDistance: number;
@@ -430,6 +437,7 @@ export function Control(componentProps: Control.Props) {
     const rect = control.getBoundingClientRect();
     gestureRef.current = {
       accumulatedAngle: 0,
+      changed: false,
       lastAngle: pointerAngle(event.clientX, event.clientY, rect),
       maxDistance: 0,
       pointerId: event.pointerId,
@@ -450,10 +458,14 @@ export function Control(componentProps: Control.Props) {
       gesture.maxDistance,
       Math.hypot(event.clientX - gesture.startX, event.clientY - gesture.startY)
     );
-    actions.change(
-      valueFromGesture(gesture, event),
-      createChangeEventDetails("drag", event.nativeEvent)
-    );
+    if (
+      actions.change(
+        valueFromGesture(gesture, event),
+        createChangeEventDetails("drag", event.nativeEvent)
+      )
+    ) {
+      gesture.changed = true;
+    }
   };
 
   const endGesture = (
@@ -487,7 +499,7 @@ export function Control(componentProps: Control.Props) {
       return;
     }
     lastTapAtRef.current = 0;
-    if (meta.valueRef.current !== gesture.startValue) {
+    if (gesture.changed) {
       actions.commit(meta.valueRef.current, { event: native, reason: "drag" });
     }
   };

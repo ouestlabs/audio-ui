@@ -22,6 +22,7 @@ export default function BlockChannelStripXypadFilter() {
         <ChannelStripSection>
           <ChannelStripLabel>Filter</ChannelStripLabel>
           <XYPad
+            aria-label="Filter"
             className="aspect-square"
             defaultValue={pad}
             formatValue={(next) => `Cut ${next.x} | Res ${next.y}`}

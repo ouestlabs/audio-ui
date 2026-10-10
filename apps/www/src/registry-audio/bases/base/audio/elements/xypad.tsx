@@ -20,94 +20,89 @@ const xypadVariants = cva("", {
 });
 
 interface XYPadProps
-  extends XYPadPrimitive.RootProps,
+  extends XYPadPrimitive.Root.Props,
     VariantProps<typeof xypadVariants> {
   formatValue?: (value: { x: number; y: number }) => React.ReactNode;
   valueDisplay?: "visible" | "hidden";
 }
 
+const GRID_LINE_POSITIONS = [20, 40, 60, 80];
+
 export function XYPad({
+  "aria-describedby": ariaDescribedBy,
+  "aria-label": ariaLabel,
+  "aria-labelledby": ariaLabelledBy,
   className,
   size,
   formatValue,
   valueDisplay = "visible",
   ...props
 }: XYPadProps) {
+  const valueChildren: XYPadPrimitive.Value.Props["children"] = formatValue
+    ? (_formattedX, _formattedY, value) => formatValue(value)
+    : undefined;
+
   return (
     <XYPadPrimitive.Root
-      className="data-[disabled=true]:cursor-not-allowed"
+      className="data-disabled:cursor-not-allowed"
       {...props}
     >
-      <XYPadPrimitive.Label />
-      <XYPadPrimitive.Slider
+      <XYPadPrimitive.Control
         className={cn(
           "cn-xypad relative block w-full cursor-crosshair touch-none select-none overflow-hidden",
-          "focus-visible:outline-none",
-          "data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50",
+          "data-disabled:pointer-events-none data-disabled:opacity-50",
           xypadVariants({ size }),
           className
         )}
         data-slot="xypad"
       >
-        <XYPadPrimitive.Grid className="pointer-events-none absolute inset-0">
-          {Array.from({ length: 4 }, (_, i) => {
-            const position = ((i + 1) * 100) / 5;
-            return (
-              <XYPadPrimitive.GridLine
-                className={cn(
-                  "cn-xypad-grid-line absolute",
-                  "data-grid-vertical-line:top-0 data-grid-vertical-line:bottom-0 data-grid-vertical-line:w-px"
-                )}
-                key={`xypad-grid-v-${position}`}
-                orientation="vertical"
-                position={position}
-              />
-            );
-          })}
-          {Array.from({ length: 4 }, (_, i) => {
-            const position = ((i + 1) * 100) / 5;
-            return (
-              <XYPadPrimitive.GridLine
-                className={cn(
-                  "cn-xypad-grid-line absolute",
-                  "data-grid-horizontal-line:right-0 data-grid-horizontal-line:left-0 data-grid-horizontal-line:h-px"
-                )}
-                key={`xypad-grid-h-${position}`}
-                orientation="horizontal"
-                position={position}
-              />
-            );
-          })}
-        </XYPadPrimitive.Grid>
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0"
+        >
+          {GRID_LINE_POSITIONS.map((position) => (
+            <div
+              className="cn-xypad-grid-line absolute top-0 bottom-0 w-px"
+              key={`xypad-grid-v-${position}`}
+              style={{ left: `${position}%` }}
+            />
+          ))}
+          {GRID_LINE_POSITIONS.map((position) => (
+            <div
+              className="cn-xypad-grid-line absolute right-0 left-0 h-px"
+              key={`xypad-grid-h-${position}`}
+              style={{ top: `${position}%` }}
+            />
+          ))}
+        </div>
 
-        <XYPadPrimitive.Crosshair
-          className={cn(
-            "cn-xypad-crosshair pointer-events-none absolute",
-            "data-crosshair-vertical:top-0 data-crosshair-vertical:bottom-0 data-crosshair-vertical:w-px"
-          )}
-          orientation="vertical"
+        <div
+          aria-hidden="true"
+          className="cn-xypad-crosshair pointer-events-none absolute top-0 bottom-0 left-(--xy-pad-x) w-px"
         />
-        <XYPadPrimitive.Crosshair
-          className={cn(
-            "cn-xypad-crosshair pointer-events-none absolute",
-            "data-crosshair-horizontal:right-0 data-crosshair-horizontal:left-0 data-crosshair-horizontal:h-px"
-          )}
-          orientation="horizontal"
+        <div
+          aria-hidden="true"
+          className="cn-xypad-crosshair pointer-events-none absolute top-(--xy-pad-y) right-0 left-0 h-px"
         />
 
-        <XYPadPrimitive.Cursor className="-translate-x-1/2 -translate-y-1/2 pointer-events-none absolute size-5 transition-none">
-          <XYPadPrimitive.CursorGlow className="cn-xypad-cursor-glow absolute inset-0 transition-opacity duration-200 motion-reduce:transition-none" />
-          <XYPadPrimitive.CursorDot className="cn-xypad-cursor-dot absolute inset-1" />
-          <XYPadPrimitive.CursorHighlight className="cn-xypad-cursor-highlight absolute inset-2" />
-        </XYPadPrimitive.Cursor>
+        <XYPadPrimitive.Thumb
+          aria-describedby={ariaDescribedBy}
+          aria-label={ariaLabel}
+          aria-labelledby={ariaLabelledBy}
+          className="pointer-events-none absolute size-5"
+          data-slot="xypad-thumb"
+        >
+          <div className="cn-xypad-cursor-glow absolute inset-0 transition-opacity duration-200 motion-reduce:transition-none" />
+          <div className="cn-xypad-cursor-dot absolute inset-1" />
+          <div className="cn-xypad-cursor-highlight absolute inset-2" />
+        </XYPadPrimitive.Thumb>
 
-        {valueDisplay === "visible" && (
-          <XYPadPrimitive.ValueDisplay
-            className="cn-xypad-value absolute top-2.5 right-2.5 z-10"
-            formatValue={formatValue}
-          />
-        )}
-      </XYPadPrimitive.Slider>
+        {valueDisplay === "visible" ? (
+          <XYPadPrimitive.Value className="cn-xypad-value absolute top-2.5 right-2.5 z-10">
+            {valueChildren}
+          </XYPadPrimitive.Value>
+        ) : null}
+      </XYPadPrimitive.Control>
     </XYPadPrimitive.Root>
   );
 }

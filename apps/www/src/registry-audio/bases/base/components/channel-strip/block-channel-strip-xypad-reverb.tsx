@@ -25,6 +25,7 @@ export default function BlockChannelStripXypadReverb() {
       <ChannelStripContent>
         <ChannelStripSection>
           <XYPad
+            aria-label="Reverb"
             className="aspect-square"
             defaultValue={morph}
             formatValue={(next) => `Color ${next.x} | Space ${next.y}`}

@@ -10,13 +10,14 @@ export default function XYPadChangeVsCommitDemo() {
   return (
     <div className="flex flex-col items-center gap-2">
       <XYPad
+        aria-label="Position"
         className="aspect-square"
         maxX={100}
         maxY={100}
         minX={0}
         minY={0}
         onValueChange={setLive}
-        onValueCommit={setCommitted}
+        onValueCommitted={setCommitted}
         value={live}
       />
       <div className="text-center font-mono text-foreground text-sm tabular-nums">

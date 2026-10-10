@@ -4,6 +4,7 @@ import { XYPad } from "@/registry-audio/bases/base/audio/elements/xypad";
 export default function XypadFormatValueDemo() {
   return (
     <XYPad
+      aria-label="Position"
       className="aspect-square"
       defaultValue={{ x: 50, y: 50 }}
       formatValue={(val) => `X: ${val.x}, Y: ${val.y}`}
