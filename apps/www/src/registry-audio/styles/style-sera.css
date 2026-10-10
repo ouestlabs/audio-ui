@@ -299,6 +299,10 @@
     @apply stroke-border;
   }
 
+  .cn-plot-mark {
+    @apply bg-card/80 px-0.5 text-muted-foreground;
+  }
+
   .cn-plot-band {
     @apply fill-foreground/5;
   }

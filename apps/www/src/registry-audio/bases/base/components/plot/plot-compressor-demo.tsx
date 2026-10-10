@@ -7,14 +7,18 @@ import {
   PlotGraph,
   PlotHandle,
   PlotLine,
+  PlotMark,
 } from "@/registry-audio/bases/base/audio/elements/plot";
 import { compressorOutput } from "@/registry-audio/bases/base/lib/filter-response";
 
 const MIN_DB = -60;
 const MAX_DB = 0;
+/** Headroom past 0 dB, so the handle on the loudest level is not cut by the frame. */
+const PLOT_MAX_DB = 6;
 const MAX_RATIO = 20;
 /** The least the loudest level can rise above the threshold, so the ratio stays finite. */
 const MIN_RISE_DB = 0.5;
+const DB_LABELS = [-48, -24, 0];
 const UNITY = (inputDb: number) => inputDb;
 
 /** A compressor's transfer curve: one handle sets the threshold, the other how hard the loudest level is held down (the ratio). */
@@ -47,8 +51,8 @@ export default function PlotCompressorDemo() {
     <div className="flex w-full max-w-xs flex-col gap-2">
       <Plot
         className="aspect-square h-auto"
-        maxX={MAX_DB}
-        maxY={MAX_DB}
+        maxX={PLOT_MAX_DB}
+        maxY={PLOT_MAX_DB}
         minX={MIN_DB}
         minY={MIN_DB}
       >
@@ -57,9 +61,29 @@ export default function PlotCompressorDemo() {
             className="stroke-border [stroke-dasharray:4_4]"
             fn={UNITY}
           />
-          <PlotLine axis="x" value={compressor.thresholdDb} />
+          {DB_LABELS.map((db) => (
+            <PlotLine axis="x" key={`x${db}`} value={db} />
+          ))}
+          {DB_LABELS.map((db) => (
+            <PlotLine axis="y" key={`y${db}`} value={db} />
+          ))}
+          <PlotLine
+            axis="x"
+            className="stroke-foreground/40"
+            value={compressor.thresholdDb}
+          />
           <PlotCurve fn={output} />
         </PlotGraph>
+        {DB_LABELS.map((db) => (
+          <PlotMark axis="x" key={`x${db}`} value={db}>
+            {db}
+          </PlotMark>
+        ))}
+        {DB_LABELS.slice(0, 2).map((db) => (
+          <PlotMark axis="y" key={`y${db}`} value={db}>
+            {db}
+          </PlotMark>
+        ))}
         <PlotHandle
           aria-label="Threshold"
           axis="x"

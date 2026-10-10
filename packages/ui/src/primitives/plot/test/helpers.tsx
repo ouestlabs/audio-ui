@@ -37,6 +37,12 @@ export function renderPlot(
         <Plot.Line axis="y" data-testid="hline" value={5} />
         <Plot.Band axis="x" data-testid="band" from={20} to={60} />
       </Plot.Graph>
+      <Plot.Mark axis="x" data-testid="xmark" value={25}>
+        25
+      </Plot.Mark>
+      <Plot.Mark axis="y" data-testid="ymark" value={5}>
+        5
+      </Plot.Mark>
       <Plot.Handle
         aria-label="Band"
         data-testid="handle"

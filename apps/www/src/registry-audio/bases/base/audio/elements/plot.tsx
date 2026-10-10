@@ -60,6 +60,24 @@ function PlotLine({ className, ...props }: PlotPrimitive.Line.Props) {
   );
 }
 
+/** A label at a value on an axis: "1k" under a frequency, "+12" by a gain. */
+function PlotMark({ axis, className, ...props }: PlotPrimitive.Mark.Props) {
+  return (
+    <PlotPrimitive.Mark
+      axis={axis}
+      className={cn(
+        "cn-plot-mark text-[10px] tabular-nums leading-none",
+        axis === "x"
+          ? "bottom-1.5 -translate-x-1/2"
+          : "left-2 -translate-y-1/2",
+        className
+      )}
+      data-slot="plot-mark"
+      {...props}
+    />
+  );
+}
+
 /** A shaded stretch of one axis. */
 function PlotBand({ className, ...props }: PlotPrimitive.Band.Props) {
   return (
@@ -85,4 +103,13 @@ function PlotHandle({ className, ...props }: PlotPrimitive.Handle.Props) {
   );
 }
 
-export { Plot, PlotArea, PlotBand, PlotCurve, PlotGraph, PlotHandle, PlotLine };
+export {
+  Plot,
+  PlotArea,
+  PlotBand,
+  PlotCurve,
+  PlotGraph,
+  PlotHandle,
+  PlotLine,
+  PlotMark,
+};

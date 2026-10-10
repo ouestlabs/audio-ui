@@ -8,6 +8,7 @@ import {
   PlotGraph,
   PlotHandle,
   PlotLine,
+  PlotMark,
 } from "@/registry-audio/bases/base/audio/elements/plot";
 import {
   type EqBand,
@@ -25,6 +26,12 @@ const MIN_HZ = 20;
 const MAX_HZ = 20_000;
 const MAX_DB = 18;
 const DB_LABELS = [-12, 0, 12];
+const formatDbMark = (db: number) => (db > 0 ? `+${db}` : String(db));
+const HZ_LABELS = [
+  { hz: 100, label: "100" },
+  { hz: 1000, label: "1k" },
+  { hz: 10_000, label: "10k" },
+];
 
 const describeValue = (value: number, axis: "x" | "y") =>
   axis === "x" ? formatHz(value) : formatDb(value);
@@ -79,12 +86,30 @@ export default function PlotDemo() {
         scaleX="log"
       >
         <PlotGraph>
+          {HZ_LABELS.map(({ hz }) => (
+            <PlotLine axis="x" key={hz} value={hz} />
+          ))}
           {DB_LABELS.map((db) => (
-            <PlotLine axis="y" key={db} value={db} />
+            <PlotLine
+              axis="y"
+              className={db === 0 ? "stroke-foreground/30" : undefined}
+              key={db}
+              value={db}
+            />
           ))}
           <PlotArea fillTo={0} fn={response} />
           <PlotCurve fn={response} />
         </PlotGraph>
+        {HZ_LABELS.map(({ hz, label }) => (
+          <PlotMark axis="x" key={hz} value={hz}>
+            {label}
+          </PlotMark>
+        ))}
+        {DB_LABELS.map((db) => (
+          <PlotMark axis="y" key={db} value={db}>
+            {formatDbMark(db)}
+          </PlotMark>
+        ))}
         {bands.map((item, index) => (
           <BandHandle
             band={item}

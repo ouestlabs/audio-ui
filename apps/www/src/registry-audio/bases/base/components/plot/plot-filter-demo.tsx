@@ -9,6 +9,7 @@ import {
   PlotGraph,
   PlotHandle,
   PlotLine,
+  PlotMark,
 } from "@/registry-audio/bases/base/audio/elements/plot";
 import {
   biquadResponse,
@@ -20,6 +21,13 @@ const MAX_HZ = 20_000;
 const MIN_DB = -36;
 const MAX_DB = 24;
 const BASE_Q = Math.SQRT1_2;
+const formatDbMark = (db: number) => (db > 0 ? `+${db}` : String(db));
+const HZ_LABELS = [
+  { hz: 100, label: "100" },
+  { hz: 1000, label: "1k" },
+  { hz: 10_000, label: "10k" },
+];
+const DB_LABELS = [-24, 0, 12];
 const AUDIBLE_HZ: readonly [number, number] = [100, 10_000];
 
 const getAriaLabel = (axis: "x" | "y") =>
@@ -56,11 +64,24 @@ export default function PlotFilterDemo() {
       >
         <PlotGraph>
           <PlotBand axis="x" from={AUDIBLE_HZ[0]} to={AUDIBLE_HZ[1]} />
-          <PlotLine axis="y" value={0} />
+          {HZ_LABELS.map(({ hz }) => (
+            <PlotLine axis="x" key={hz} value={hz} />
+          ))}
+          <PlotLine axis="y" className="stroke-foreground/30" value={0} />
           <PlotLine axis="x" value={filter.cutoff} />
           <PlotArea fillTo={MIN_DB} fn={response} />
           <PlotCurve fn={response} />
         </PlotGraph>
+        {HZ_LABELS.map(({ hz, label }) => (
+          <PlotMark axis="x" key={hz} value={hz}>
+            {label}
+          </PlotMark>
+        ))}
+        {DB_LABELS.map((db) => (
+          <PlotMark axis="y" key={db} value={db}>
+            {formatDbMark(db)}
+          </PlotMark>
+        ))}
         <PlotHandle
           aria-label="Cutoff and resonance"
           getAriaLabel={getAriaLabel}

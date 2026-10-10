@@ -56,3 +56,15 @@ describe("Plot.Band", () => {
     expect(band.getAttribute("height")).toBe("1");
   });
 });
+
+describe("Plot.Mark", () => {
+  test("is placed at a value along its axis and hidden from assistive technology", () => {
+    const { view } = renderPlot();
+    const across = view.getByTestId("xmark");
+    expect(across.style.left).toBe("25%");
+    expect(across.getAttribute("aria-hidden")).toBe("true");
+    expect(across.getAttribute("data-axis")).toBe("x");
+    const down = view.getByTestId("ymark");
+    expect(down.style.top).toBe("50%");
+  });
+});

@@ -116,12 +116,12 @@ One handle sets the threshold, the other the ratio.
 | `fillTo` | `number` | — | Closes the curve down to this y, for an area. |
 | `samples` | `number` | `256` | How many points it is drawn through. |
 
-### PlotLine, PlotBand
+### PlotLine, PlotMark, PlotBand
 
 | Prop | Type | Description |
 | --- | --- | --- |
 | `axis` | `"x" \| "y"` | `PlotLine`: the line is vertical at an x value, or horizontal at a y value. `PlotBand`: the axis `from` and `to` are on. |
-| `value` | `number` | `PlotLine` only. |
+| `value` | `number` | `PlotLine` and `PlotMark`: where on the axis. `PlotMark` is a label ("1k", "+12") at that value. |
 | `from`, `to` | `number` | `PlotBand` only. |
 
 ### PlotHandle
