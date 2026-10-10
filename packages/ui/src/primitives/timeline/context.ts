@@ -22,10 +22,31 @@ export type TimelineState = {
 /** A live position, in the timeline's units. */
 export type PositionSource = Source<number>;
 
-/** Scroll offset and visible width of the viewport, in px. */
+/** How the viewport is scrolled and zoomed, as last laid out. */
 export interface ViewportMetrics {
+  /** Where value 0 sits in the scrolled content, in px: past a column of headers, for instance. */
+  origin: number;
   scrollStart: number;
+  /** Visible width, in px. */
   width: number;
+  /** px per unit as drawn: the zoom, or what fitting the width gives. */
+  zoom: number;
+}
+
+/** The stretch of the timeline the viewport shows, in units. */
+export function visibleRange(
+  metrics: ViewportMetrics,
+  duration: number
+): readonly [start: number, end: number] {
+  if (!(metrics.zoom > 0 && metrics.width > 0)) {
+    return [0, duration];
+  }
+  const start = Math.min(
+    duration,
+    Math.max(0, metrics.scrollStart / metrics.zoom)
+  );
+  const span = Math.max(0, metrics.width - metrics.origin) / metrics.zoom;
+  return [start, Math.min(duration, start + span)];
 }
 
 export type PositionChangeEventDetails =
@@ -40,10 +61,12 @@ export type PositionCommitEventDetails =
   | ExtraCommitEventDetails<"keyboard", KeyboardEvent>
   | ExtraCommitEventDetails<"input-change", Event>;
 
-export type ZoomChangeEventDetails = ExtraChangeEventDetails<
-  "wheel",
-  WheelEvent
->;
+export type ZoomChangeEventDetails =
+  | ExtraChangeEventDetails<"wheel", WheelEvent>
+  | ExtraChangeEventDetails<"drag", PointerEvent>
+  | ExtraChangeEventDetails<"keyboard", KeyboardEvent>
+  | ExtraChangeEventDetails<"input-change", Event>
+  | ExtraChangeEventDetails<"double-click", MouseEvent>;
 
 /** Returns how a position is announced. */
 export type DescribePosition = (value: number, duration: number) => string;
@@ -56,6 +79,8 @@ export interface TimelineContextValue {
     ) => void;
     /** Registers a lane; the first one mounted is where value 0 is measured from. */
     registerLane: (node: HTMLElement) => () => void;
+    /** Scrolls the viewport to `left` px and reports where it landed. */
+    scrollTo: (left: number) => void;
     /** Clamp and propose a position; returns whether it was applied. */
     seek: (next: number, eventDetails: PositionChangeEventDetails) => boolean;
     setScrubbing: (scrubbing: boolean) => void;
@@ -78,6 +103,8 @@ export interface TimelineContextValue {
     originLaneRef: React.RefObject<HTMLElement | null>;
     /** The position, observable outside React. */
     position: Store<number>;
+    /** Set by the viewport: scrolls it and reports at once. */
+    scrollerRef: React.RefObject<((left: number) => void) | null>;
     step: number;
     viewport: Store<ViewportMetrics>;
     viewportRef: React.RefObject<HTMLElement | null>;

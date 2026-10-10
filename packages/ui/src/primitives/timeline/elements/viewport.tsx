@@ -19,8 +19,15 @@ const WHEEL_ZOOM_SENSITIVITY = 0.0015;
 export function Viewport(componentProps: Viewport.Props) {
   const { className, ref, render, style, ...elementProps } = componentProps;
   const { actions, meta, state } = useTimelineContext("Viewport");
-  const { anchorRef, duration, originLaneRef, viewport, viewportRef, zoom } =
-    meta;
+  const {
+    anchorRef,
+    duration,
+    originLaneRef,
+    scrollerRef,
+    viewport,
+    viewportRef,
+    zoom,
+  } = meta;
   const elementRef = React.useRef<HTMLDivElement>(null);
   // The zoom and scroll the last layout was at: holding a point still
   // through a zoom needs where it was before.
@@ -57,17 +64,22 @@ export function Viewport(componentProps: Viewport.Props) {
     if (!element) {
       return;
     }
+    const next = {
+      origin: origin(),
+      scrollStart: element.scrollLeft,
+      width: element.clientWidth,
+      zoom: drawnZoom(),
+    };
     const current = viewport.get();
     if (
-      current.scrollStart !== element.scrollLeft ||
-      current.width !== element.clientWidth
+      current.origin !== next.origin ||
+      current.scrollStart !== next.scrollStart ||
+      current.width !== next.width ||
+      current.zoom !== next.zoom
     ) {
-      viewport.set({
-        scrollStart: element.scrollLeft,
-        width: element.clientWidth,
-      });
+      viewport.set(next);
     }
-  }, [viewport]);
+  }, [drawnZoom, origin, viewport]);
 
   React.useEffect(() => {
     const element = elementRef.current;
@@ -75,6 +87,13 @@ export function Viewport(componentProps: Viewport.Props) {
     if (!element) {
       return;
     }
+    scrollerRef.current = (left: number) => {
+      element.scrollLeft = left;
+      if (previousRef.current) {
+        previousRef.current.scrollStart = element.scrollLeft;
+      }
+      report();
+    };
     report();
     const observer =
       typeof ResizeObserver === "undefined" ? null : new ResizeObserver(report);
@@ -82,8 +101,9 @@ export function Viewport(componentProps: Viewport.Props) {
     return () => {
       observer?.disconnect();
       viewportRef.current = null;
+      scrollerRef.current = null;
     };
-  }, [report, viewportRef]);
+  }, [report, scrollerRef, viewportRef]);
 
   // The one place that reacts to the zoom changing, whatever changed it.
   React.useLayoutEffect(() => {

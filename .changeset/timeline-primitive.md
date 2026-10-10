@@ -9,6 +9,7 @@ Add the Timeline primitive: the ground an arrangement, a clip editor or a piano 
 - **Lane** is a strip parts are placed on, as long as the timeline when zoomed. It sets `--timeline-unit`, the width of one unit, so anything placed with it follows the zoom.
 - **Ruler** seeks: a press jumps to the pointer and a drag scrubs, on the grid unless Cmd/Ctrl is held, four times finer with Shift. It holds a native `<input type="range">` for focus, the keyboard and the accessible name, announced through `getAriaValueText`.
 - **Range** is a stretch of the timeline (`[start, end]`): a loop, a selection, a clip. Dragging its body moves it and a **RangeHandle** per edge resizes it, both on the grid unless Cmd/Ctrl is held and never shorter than `minLength`; with `drawable`, dragging across empty lane draws a new one. The range and each handle hold a native `<input type="range">`, so all of it works from the keyboard. Events carry `eventDetails.edge` and `reason` (`"drag"`, `"draw"`, `"keyboard"`, `"input-change"`).
+- **Navigator** is the whole timeline as one bar with the visible stretch inside it: dragging its **NavigatorWindow** scrolls, dragging a **NavigatorHandle** zooms while holding the other edge, a double-click fits everything. Window and handles hold native range inputs too.
 - **Mark** places something at a value; **Playhead** follows the position through its own `--timeline-offset` variable, without re-rendering React.
 
 Also exported from `@audio-ui/react/timeline`.

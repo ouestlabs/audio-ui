@@ -17,14 +17,22 @@ function Timeline({ className, ...props }: TimelinePrimitive.Root.Props) {
   );
 }
 
+type TimelineViewportProps = TimelinePrimitive.Viewport.Props & {
+  /** `hidden` drops the native scrollbar, for a `TimelineNavigator` to scroll with instead. */
+  scrollbar?: "hidden" | "native";
+};
+
 function TimelineViewport({
   className,
+  scrollbar = "native",
   ...props
-}: TimelinePrimitive.Viewport.Props) {
+}: TimelineViewportProps) {
   return (
     <TimelinePrimitive.Viewport
       className={cn(
         "cn-timeline-viewport relative min-h-0 min-w-0 overscroll-x-contain",
+        scrollbar === "hidden" &&
+          "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
         className
       )}
       data-slot="timeline-viewport"
@@ -110,11 +118,73 @@ function TimelinePlayhead({
   );
 }
 
+function TimelineRange({ className, ...props }: TimelinePrimitive.Range.Props) {
+  return (
+    <TimelinePrimitive.Range
+      className={cn(
+        "cn-timeline-range inset-y-0 cursor-grab touch-none data-dragging:cursor-grabbing data-disabled:cursor-not-allowed",
+        className
+      )}
+      data-slot="timeline-range"
+      {...props}
+    />
+  );
+}
+
+function TimelineRangeHandle({
+  className,
+  ...props
+}: TimelinePrimitive.RangeHandle.Props) {
+  return (
+    <TimelinePrimitive.RangeHandle
+      className={cn(
+        "cn-timeline-range-handle absolute inset-y-0 w-1.5 cursor-ew-resize data-[edge=end]:right-0 data-[edge=start]:left-0",
+        "after:absolute after:-inset-x-1.5 after:inset-y-0 pointer-coarse:after:-inset-x-3",
+        className
+      )}
+      data-slot="timeline-range-handle"
+      {...props}
+    />
+  );
+}
+
+/** The whole timeline as one bar: drag the window to scroll, an edge to zoom, double-click to show everything. */
+function TimelineNavigator({
+  className,
+  ...props
+}: TimelinePrimitive.Navigator.Props) {
+  return (
+    <TimelinePrimitive.Navigator
+      className={cn("cn-timeline-navigator shrink-0 select-none", className)}
+      data-slot="timeline-navigator"
+      {...props}
+    >
+      <TimelinePrimitive.NavigatorWindow
+        aria-label="Visible range"
+        className="cn-timeline-navigator-window inset-y-0 cursor-grab active:cursor-grabbing"
+      />
+      <TimelinePrimitive.NavigatorHandle
+        aria-label="Start of the visible range"
+        className="cn-timeline-navigator-handle inset-y-0 w-2 cursor-ew-resize data-[edge=end]:-translate-x-full after:absolute after:-inset-x-1.5 after:inset-y-0"
+        edge="start"
+      />
+      <TimelinePrimitive.NavigatorHandle
+        aria-label="End of the visible range"
+        className="cn-timeline-navigator-handle inset-y-0 w-2 cursor-ew-resize data-[edge=end]:-translate-x-full after:absolute after:-inset-x-1.5 after:inset-y-0"
+        edge="end"
+      />
+    </TimelinePrimitive.Navigator>
+  );
+}
+
 export {
   Timeline,
   TimelineLane,
   TimelineMark,
+  TimelineNavigator,
   TimelinePlayhead,
+  TimelineRange,
+  TimelineRangeHandle,
   TimelineRuler,
   TimelineViewport,
 };

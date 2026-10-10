@@ -177,8 +177,17 @@ export function Root(componentProps: Root.Props) {
   }, []);
 
   const viewportRef = React.useRef<HTMLElement | null>(null);
+  const scrollerRef = React.useRef<((left: number) => void) | null>(null);
+  const scrollTo = React.useCallback((left: number) => {
+    scrollerRef.current?.(left);
+  }, []);
   const [viewport] = React.useState(() =>
-    createStore<ViewportMetrics>({ scrollStart: 0, width: 0 })
+    createStore<ViewportMetrics>({
+      origin: 0,
+      scrollStart: 0,
+      width: 0,
+      zoom: 0,
+    })
   );
 
   const state = React.useMemo<Root.State>(
@@ -188,7 +197,14 @@ export function Root(componentProps: Root.Props) {
 
   const context = React.useMemo<TimelineContextValue>(
     () => ({
-      actions: { commitSeek, registerLane, seek, setScrubbing, zoomTo },
+      actions: {
+        commitSeek,
+        registerLane,
+        scrollTo,
+        seek,
+        setScrubbing,
+        zoomTo,
+      },
       meta: {
         anchorRef,
         duration,
@@ -198,6 +214,7 @@ export function Root(componentProps: Root.Props) {
         minZoom,
         originLaneRef,
         position,
+        scrollerRef,
         step,
         viewport,
         viewportRef,
@@ -213,6 +230,7 @@ export function Root(componentProps: Root.Props) {
       minZoom,
       position,
       registerLane,
+      scrollTo,
       seek,
       setScrubbing,
       snapOffset,

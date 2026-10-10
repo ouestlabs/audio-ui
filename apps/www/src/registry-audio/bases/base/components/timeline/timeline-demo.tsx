@@ -9,7 +9,10 @@ import {
   Timeline,
   TimelineLane,
   TimelineMark,
+  TimelineNavigator,
   TimelinePlayhead,
+  TimelineRange,
+  TimelineRangeHandle,
   TimelineRuler,
   TimelineViewport,
 } from "@/registry-audio/bases/base/audio/elements/timeline";
@@ -70,6 +73,7 @@ export default function TimelineDemo() {
     []
   );
   const seek = useCallback((seconds: number) => clock.set(seconds), [clock]);
+  const [loop, setLoop] = useState<readonly [number, number]>([8, 16]);
   // The grid the lanes draw is the grid everything snaps to.
   const snapStep = gridInterval("adaptive", zoom, DEFAULT_TEMPO);
   const labelEvery = barLabelInterval(zoom, DEFAULT_TEMPO);
@@ -129,7 +133,7 @@ export default function TimelineDemo() {
         </ButtonGroup>
       </div>
       <Timeline
-        className="overflow-hidden rounded-lg border"
+        className="gap-2"
         duration={DURATION}
         maxZoom={MAX_ZOOM}
         minZoom={MIN_ZOOM}
@@ -139,7 +143,7 @@ export default function TimelineDemo() {
         source={clock}
         zoom={zoom}
       >
-        <TimelineViewport>
+        <TimelineViewport className="rounded-lg border" scrollbar="hidden">
           <TimelineRuler
             aria-label="Playhead"
             getAriaValueText={describePosition}
@@ -151,16 +155,31 @@ export default function TimelineDemo() {
             ))}
             <TimelinePlayhead />
           </TimelineRuler>
+          <TimelineLane className="h-4 cursor-cell">
+            <TimelineRange
+              aria-label="Loop"
+              drawable
+              getAriaValueText={describePosition}
+              onValueChange={setLoop}
+              value={loop}
+            >
+              <TimelineRangeHandle aria-label="Loop start" edge="start" />
+              <TimelineRangeHandle aria-label="Loop end" edge="end" />
+            </TimelineRange>
+            <TimelinePlayhead />
+          </TimelineLane>
           {LANES.map((name) => (
             <TimelineLane gridStep={snapStep} key={name}>
               <TimelinePlayhead />
             </TimelineLane>
           ))}
         </TimelineViewport>
+        <TimelineNavigator getAriaValueText={describePosition} />
       </Timeline>
       <p className="text-muted-foreground text-xs">
-        Cmd/Ctrl + scroll to zoom around the pointer. Hold Cmd/Ctrl to place the
-        playhead off the grid, Shift to scrub finely.
+        Cmd/Ctrl + scroll to zoom around the pointer, or drag the bar below.
+        Drag across the strip under the ruler to set a loop. Hold Cmd/Ctrl to
+        leave the grid, Shift to scrub finely.
       </p>
     </div>
   );

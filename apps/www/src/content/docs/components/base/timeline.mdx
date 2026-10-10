@@ -15,7 +15,9 @@ The ground an arrangement, a clip editor or a piano roll is drawn on. The regist
 - **Zooming:** Cmd/Ctrl + scroll (or pinch on a trackpad) zooms around the pointer. Whatever changes the zoom, the point it was anchored on stays where it was, or the middle of the view when nothing named one.
 - **Grid:** with a `snapStep`, the ruler lands on the grid. Hold Cmd/Ctrl to place the playhead off it, and Shift to scrub four times finer.
 - **Playback:** pass a live `source` and every playhead follows it straight in the DOM, with no React render per frame.
-- **Accessibility:** the ruler holds a native `<input type="range">` over the timeline. It takes focus, carries `aria-label`, announces the position (or whatever `getAriaValueText` returns, such as "Bar 3, beat 2"), and moves by `step` with the arrow keys, `largeStep` with <kbd>Page Up</kbd> / <kbd>Page Down</kbd> and Shift, and to the ends with <kbd>Home</kbd> / <kbd>End</kbd>.
+- **Ranges:** a `TimelineRange` is a stretch of the timeline (a loop, a selection, a clip): drag it to move it, drag a handle to resize it, or with `drawable` drag across empty lane to draw a new one. It snaps like everything else.
+- **Navigator:** `TimelineNavigator` shows the whole timeline as one bar with the visible stretch inside it. Drag the window to scroll, an edge to zoom, double-click to show everything. Pair it with `scrollbar="hidden"` on the viewport and it takes the scrollbar's place.
+- **Accessibility:** the ruler, each range, each range handle and the navigator's window and edges hold a native `<input type="range">`, so everything the pointer does works from the keyboard. The ruler's input spans the timeline. It takes focus, carries `aria-label`, announces the position (or whatever `getAriaValueText` returns, such as "Bar 3, beat 2"), and moves by `step` with the arrow keys, `largeStep` with <kbd>Page Up</kbd> / <kbd>Page Down</kbd> and Shift, and to the ends with <kbd>Home</kbd> / <kbd>End</kbd>.
 
 ## Installation
 
@@ -105,6 +107,32 @@ const snapStep = gridInterval("adaptive", zoom, DEFAULT_TEMPO);
 </Timeline>
 ```
 
+## Ranges
+
+```tsx
+const [loop, setLoop] = useState<readonly [number, number]>([8, 16]);
+
+<TimelineLane>
+  <TimelineRange aria-label="Loop" drawable onValueChange={setLoop} value={loop}>
+    <TimelineRangeHandle aria-label="Loop start" edge="start" />
+    <TimelineRangeHandle aria-label="Loop end" edge="end" />
+  </TimelineRange>
+</TimelineLane>
+```
+
+The range's own input moves it with the arrow keys, by the timeline's `step`; each handle's input moves its edge, which stops `minLength` short of the other one (the grid step by default). `onValueChange` receives `[start, end]` and `eventDetails` with the `edge` that moved (`"start"`, `"end"` or `"both"`) and the `reason` (`"drag"`, `"draw"`, `"keyboard"` or `"input-change"`). Leave the handles out for a range that only moves, or pass `movable={false}` for one that only resizes.
+
+## Navigator
+
+```tsx
+<Timeline zoom={zoom} onZoomChange={setZoom} duration={32}>
+  <TimelineViewport scrollbar="hidden">…</TimelineViewport>
+  <TimelineNavigator />
+</Timeline>
+```
+
+Place it anywhere inside the timeline, outside the viewport. Dragging an edge zooms while holding the other edge in place, through `onZoomChange` with `reason: "drag"`; a double-click fits the whole timeline with `reason: "double-click"`.
+
 ## Musical time
 
 The `musical-time` lib (`npx shadcn@latest add @audio/musical-time`) turns a tempo into what a timeline needs, in seconds:
@@ -131,7 +159,7 @@ Every lane sets a `--timeline-unit` CSS variable, the width of one unit. Parts a
 | `zoom` | `number` | - | Controlled zoom, in px per unit. Unset, the timeline fits its width. |
 | `defaultZoom` | `number` | - | Uncontrolled starting zoom. |
 | `minZoom` / `maxZoom` | `number` | `0` / `Infinity` | Bounds the zoom is clamped to. |
-| `onZoomChange` | `(zoom, eventDetails) => void` | - | Fires when the wheel changes the zoom. `eventDetails.cancel()` keeps it. |
+| `onZoomChange` | `(zoom, eventDetails) => void` | - | Fires when the wheel or the navigator changes the zoom. `eventDetails.reason` is `"wheel"`, `"drag"`, `"keyboard"`, `"input-change"` or `"double-click"`; `eventDetails.cancel()` keeps the zoom. |
 | `position` | `number` | - | Controlled playback position. |
 | `defaultPosition` | `number` | `0` | Uncontrolled starting position. |
 | `source` | `{ getSnapshot, subscribe }` | - | A live position followed outside React; takes precedence over `position`. |
@@ -146,10 +174,13 @@ Every lane sets a `--timeline-unit` CSS variable, the width of one unit. Parts a
 
 | Component | Role |
 | --------- | ---- |
-| `TimelineViewport` | The scrolling window. Zooms around the pointer with Cmd/Ctrl + scroll. |
+| `TimelineViewport` | The scrolling window. Zooms around the pointer with Cmd/Ctrl + scroll. `scrollbar="hidden"` drops the native scrollbar. |
 | `TimelineRuler` | The lane that seeks. Holds the input; takes `aria-label` and `getAriaValueText`. |
 | `TimelineLane` | A strip the timeline's parts are placed on. `gridStep` draws a line every that many units. |
 | `TimelineMark` | Something placed at `value`: a bar number, a cue. |
 | `TimelinePlayhead` | Follows the position on the lane it sits in. |
+| `TimelineRange` | A stretch of the timeline: `value`, `defaultValue`, `minLength`, `movable`, `drawable`, `onValueChange`, `onValueCommitted`. |
+| `TimelineRangeHandle` | Resizes one `edge` of the range. |
+| `TimelineNavigator` | The whole timeline as one bar, scrolling and zooming the viewport. |
 
-`@audio-ui/react/timeline` exposes the same parts as `Timeline.Root`, `Timeline.Viewport`, `Timeline.Ruler`, `Timeline.Lane`, `Timeline.Mark` and `Timeline.Playhead`. Every part accepts a `render` prop and `className` / `style` as functions of state, and exposes `data-disabled`, `data-fitted` and `data-scrubbing`.
+`@audio-ui/react/timeline` exposes the same parts as `Timeline.Root`, `Timeline.Viewport`, `Timeline.Ruler`, `Timeline.Lane`, `Timeline.Mark`, `Timeline.Playhead`, `Timeline.Range`, `Timeline.RangeHandle`, and `Timeline.Navigator` with its `Timeline.NavigatorWindow` and `Timeline.NavigatorHandle`. Every part accepts a `render` prop and `className` / `style` as functions of state, and exposes `data-disabled`, `data-fitted` and `data-scrubbing`.

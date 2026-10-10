@@ -448,6 +448,26 @@
     @apply bg-primary;
   }
 
+  .cn-timeline-range {
+    @apply rounded-none bg-primary/20 ring-1 ring-primary/50 ring-inset has-focus-visible:ring-2 has-focus-visible:ring-ring;
+  }
+
+  .cn-timeline-range-handle {
+    @apply rounded-none bg-primary/60 hover:bg-primary has-focus-visible:bg-primary;
+  }
+
+  .cn-timeline-navigator {
+    @apply h-5 rounded-none bg-muted;
+  }
+
+  .cn-timeline-navigator-window {
+    @apply min-w-6 rounded-none bg-primary/25 hover:bg-primary/35 has-focus-visible:ring-2 has-focus-visible:ring-ring/50;
+  }
+
+  .cn-timeline-navigator-handle {
+    @apply rounded-none border border-ring bg-background has-focus-visible:ring-2 has-focus-visible:ring-ring/50;
+  }
+
   /* MARK: Waveform */
   .cn-waveform {
     @apply relative h-20 rounded-none border bg-card shadow-sm;
