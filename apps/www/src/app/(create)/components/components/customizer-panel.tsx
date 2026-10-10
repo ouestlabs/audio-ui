@@ -1,5 +1,6 @@
 "use client";
 
+import { Popover as PopoverPrimitive } from "@base-ui/react/popover";
 import dynamic from "next/dynamic";
 import * as React from "react";
 
@@ -75,50 +76,53 @@ function CustomizerPanelFrame() {
   );
 }
 
+/** Room kept between the popup and the viewport's edges: the header above, a margin elsewhere. */
+/** Always above the trigger: it never flips to its side, however tall it is. */
+const FLOATING_AVOIDANCE = { align: "shift", side: "none" } as const;
+
+const FLOATING_PADDING = { bottom: 12, left: 12, right: 12, top: 64 };
+
 /**
- * Floats over the page's corner, above the global trigger, so the page stays
- * where it is and shows each change as it is made. Its menus open leftwards,
- * into the page, since it sits against the right edge.
+ * A popover opened from the global trigger, which it sits above. It stays
+ * where it is while the page behind keeps being used, so each choice shows as
+ * it is made, and it takes the height the viewport leaves it from `md` up. Its
+ * menus open leftwards, into the page, as it sits against the right edge.
+ * Renders inside a `Popover.Root` whose trigger it is anchored to.
  */
-function CustomizerPanelFloating({
-  animate,
-  className,
-}: {
-  animate: boolean;
-  className?: string;
-}) {
-  const { customizerOpen } = useCustomizer();
+function CustomizerPanelFloating({ animate }: { animate: boolean }) {
   const isDesktop = useIsDesktopCustomizer();
   const anchorRef = React.useRef<HTMLDivElement | null>(null);
 
-  // Focus moves into the panel as it opens, so the keyboard carries on there.
-  React.useEffect(() => {
-    if (customizerOpen) {
-      anchorRef.current?.focus({ preventScroll: true });
-    }
-  }, [customizerOpen]);
-
-  if (!customizerOpen) {
-    return null;
-  }
-
   return (
-    <section
-      aria-label="Customize"
-      className={cn(
-        "site-rounded-xl fixed inset-x-3 z-40 flex max-h-[min(50dvh,36rem)] origin-bottom-right flex-col overflow-hidden bg-site-background shadow-xl outline-none ring-1 ring-site-foreground/10 sm:inset-x-auto sm:right-4 sm:w-64 md:top-[calc(var(--header-height)+0.5rem)] md:right-3 md:bottom-16 md:max-h-none [&_[data-slot=dropdown-menu-trigger]]:w-full",
-        animate &&
-          "fade-in-0 zoom-in-95 animate-in duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:animate-none",
-        className
-      )}
-      ref={anchorRef}
-      tabIndex={-1}
-    >
-      <PickerSideProvider value="left">
-        <CustomizerSidebarHeader />
-        <CustomizerSidebarContent anchorRef={anchorRef} isMobile={!isDesktop} />
-      </PickerSideProvider>
-    </section>
+    <PopoverPrimitive.Portal>
+      <PopoverPrimitive.Positioner
+        align="end"
+        className="isolate z-40"
+        collisionAvoidance={FLOATING_AVOIDANCE}
+        collisionPadding={FLOATING_PADDING}
+        side="top"
+        sideOffset={8}
+      >
+        <PopoverPrimitive.Popup
+          aria-label="Customize"
+          className={cn(
+            "site-rounded-xl flex max-h-[min(50dvh,var(--available-height))] w-[calc(100vw-1.5rem)] origin-(--transform-origin) flex-col overflow-hidden bg-site-background shadow-xl outline-none ring-1 ring-site-foreground/10 sm:w-64 md:h-[calc(100dvh-8rem)] md:max-h-none [&_[data-slot=dropdown-menu-trigger]]:w-full",
+            animate &&
+              "data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 data-closed:animate-out data-open:animate-in data-closed:duration-100 data-open:duration-150 motion-reduce:animate-none"
+          )}
+          data-slot="customizer-popover"
+          ref={anchorRef}
+        >
+          <PickerSideProvider value="left">
+            <CustomizerSidebarHeader />
+            <CustomizerSidebarContent
+              anchorRef={anchorRef}
+              isMobile={!isDesktop}
+            />
+          </PickerSideProvider>
+        </PopoverPrimitive.Popup>
+      </PopoverPrimitive.Positioner>
+    </PopoverPrimitive.Portal>
   );
 }
 
@@ -152,19 +156,16 @@ function CustomizerPanelSheet() {
  */
 export function CustomizerPanel({
   animate = true,
-  className,
   variant = "sidebar",
 }: {
   /** Whether the floating panel eases in; off when a key opened it. */
   animate?: boolean;
-  /** For the floating panel: where it sits. */
-  className?: string;
   variant?: CustomizerPanelVariant;
 }) {
   const isDesktop = useIsDesktopCustomizer();
 
   if (variant === "floating") {
-    return <CustomizerPanelFloating animate={animate} className={className} />;
+    return <CustomizerPanelFloating animate={animate} />;
   }
 
   if (!isDesktop) {

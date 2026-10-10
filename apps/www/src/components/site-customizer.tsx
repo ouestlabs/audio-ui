@@ -1,5 +1,6 @@
 "use client";
 
+import { Popover as PopoverPrimitive } from "@base-ui/react/popover";
 import { SlidersHorizontalIcon } from "@phosphor-icons/react/ssr";
 import { usePathname } from "next/navigation";
 import * as React from "react";
@@ -34,7 +35,6 @@ export function SiteCustomizer() {
   const [open, setOpen] = React.useState(false);
   // A key opens it without the easing-in: what is done often should not wait.
   const [animate, setAnimate] = React.useState(true);
-  const triggerRef = React.useRef<HTMLButtonElement>(null);
   const standalone = !hasOwnCustomizer(pathname);
 
   const toggle = React.useCallback(() => {
@@ -46,10 +46,6 @@ export function SiteCustomizer() {
       return;
     }
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && open && !event.defaultPrevented) {
-        setOpen(false);
-        return;
-      }
       if (
         event.key.toLowerCase() !== "c" ||
         event.metaKey ||
@@ -65,20 +61,25 @@ export function SiteCustomizer() {
     };
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
-  }, [open, standalone, toggle]);
+  }, [standalone, toggle]);
 
-  const wasOpen = React.useRef(false);
-  React.useEffect(() => {
-    if (wasOpen.current && !open) {
-      triggerRef.current?.focus({ preventScroll: true });
-    }
-    wasOpen.current = open;
-  }, [open]);
-
-  const handleTriggerClick = React.useCallback(() => {
-    setAnimate(true);
-    toggle();
-  }, [toggle]);
+  // The page is meant to be used while this is open, so only the trigger, a
+  // close button or Escape close it: not a press or the focus going elsewhere.
+  const handleOpenChange = React.useCallback(
+    (next: boolean, details: PopoverPrimitive.Root.ChangeEventDetails) => {
+      if (
+        details.reason === "outside-press" ||
+        details.reason === "focus-out"
+      ) {
+        return;
+      }
+      if (details.reason === "trigger-press") {
+        setAnimate(true);
+      }
+      setOpen(next);
+    },
+    []
+  );
 
   const value = React.useMemo(
     () => ({
@@ -99,26 +100,33 @@ export function SiteCustomizer() {
   return (
     <LocksProvider>
       <CustomizerContext value={value}>
-        <CustomizerPanel
-          animate={animate}
-          className={lifted ? "bottom-32" : "bottom-16"}
-          variant="floating"
-        />
-        <Button
-          aria-expanded={open}
-          aria-label="Customize"
-          className={cn(
-            "fixed right-4 z-40 h-10 gap-2 bg-site-background px-3.5 shadow-lg transition-transform duration-150 ease-out active:scale-[0.97] motion-reduce:transition-none",
-            lifted ? "bottom-20 md:bottom-4" : "bottom-4"
-          )}
-          onClick={handleTriggerClick}
-          ref={triggerRef}
-          variant="outline"
+        <PopoverPrimitive.Root
+          modal={false}
+          onOpenChange={handleOpenChange}
+          open={open}
         >
-          <SlidersHorizontalIcon aria-hidden className="size-4" weight="bold" />
-          <span className="hidden md:inline">Customize</span>
-          <Kbd className="hidden md:inline-flex">C</Kbd>
-        </Button>
+          <PopoverPrimitive.Trigger
+            render={
+              <Button
+                aria-label="Customize"
+                className={cn(
+                  "fixed right-4 z-40 h-10 gap-2 bg-site-background px-3.5 shadow-lg transition-transform duration-150 ease-out active:scale-[0.97] motion-reduce:transition-none",
+                  lifted ? "bottom-20 md:bottom-4" : "bottom-4"
+                )}
+                variant="outline"
+              />
+            }
+          >
+            <SlidersHorizontalIcon
+              aria-hidden
+              className="size-4"
+              weight="bold"
+            />
+            <span className="hidden md:inline">Customize</span>
+            <Kbd className="hidden md:inline-flex">C</Kbd>
+          </PopoverPrimitive.Trigger>
+          <CustomizerPanel animate={animate} variant="floating" />
+        </PopoverPrimitive.Root>
       </CustomizerContext>
     </LocksProvider>
   );
