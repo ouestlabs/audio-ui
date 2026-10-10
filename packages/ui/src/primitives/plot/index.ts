@@ -1,7 +1,9 @@
 export { Band } from "./elements/band";
 export { Curve } from "./elements/curve";
+export { Dot } from "./elements/dot";
 export { Graph } from "./elements/graph";
 export { Handle } from "./elements/handle";
 export { Line } from "./elements/line";
 export { Mark } from "./elements/mark";
 export { Root } from "./elements/root";
+export { Trace } from "./elements/trace";

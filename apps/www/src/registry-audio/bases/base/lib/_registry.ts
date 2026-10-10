@@ -120,4 +120,19 @@ export const lib: RegistryItem[] = [
     registryDependencies: [],
     type: "registry:lib",
   },
+  {
+    categories: ["lib", "audio", "plot"],
+    dependencies: [],
+    description:
+      "Resamples an analyser's linear frequency bins onto a logarithmic axis, taking the loudest bin each point covers",
+    files: [
+      {
+        path: "lib/spectrum.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "spectrum",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
 ];

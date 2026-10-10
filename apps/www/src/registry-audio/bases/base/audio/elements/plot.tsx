@@ -49,6 +49,39 @@ function PlotArea({ className, ...props }: PlotPrimitive.Curve.Props) {
   );
 }
 
+/** A live line from a `source`, such as a spectrum: it follows the signal without re-rendering. */
+function PlotTrace({ className, ...props }: PlotPrimitive.Trace.Props) {
+  return (
+    <PlotPrimitive.Trace
+      className={cn("cn-plot-trace fill-none", className)}
+      data-slot="plot-trace"
+      {...props}
+    />
+  );
+}
+
+/** The same, filled down to `fillTo`. */
+function PlotTraceArea({ className, ...props }: PlotPrimitive.Trace.Props) {
+  return (
+    <PlotPrimitive.Trace
+      className={cn("cn-plot-trace-area stroke-none", className)}
+      data-slot="plot-trace-area"
+      {...props}
+    />
+  );
+}
+
+/** Where the signal is right now: the input level on a compressor's curve. */
+function PlotDot({ className, ...props }: PlotPrimitive.Dot.Props) {
+  return (
+    <PlotPrimitive.Dot
+      className={cn("cn-plot-dot size-2.5 rounded-full", className)}
+      data-slot="plot-dot"
+      {...props}
+    />
+  );
+}
+
 /** A rule at a value: 0 dB, a cutoff, a threshold. */
 function PlotLine({ className, ...props }: PlotPrimitive.Line.Props) {
   return (
@@ -108,8 +141,11 @@ export {
   PlotArea,
   PlotBand,
   PlotCurve,
+  PlotDot,
   PlotGraph,
   PlotHandle,
   PlotLine,
   PlotMark,
+  PlotTrace,
+  PlotTraceArea,
 };

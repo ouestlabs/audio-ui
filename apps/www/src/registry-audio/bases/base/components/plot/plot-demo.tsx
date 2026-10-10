@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder";
+import { Button } from "@/registry/bases/base/ui/button";
 import {
   Plot,
   PlotArea,
@@ -9,7 +11,10 @@ import {
   PlotHandle,
   PlotLine,
   PlotMark,
+  PlotTraceArea,
 } from "@/registry-audio/bases/base/audio/elements/plot";
+import { useNoiseThroughEq } from "@/registry-audio/bases/base/hooks/use-noise-through-eq";
+import { useSpectrum } from "@/registry-audio/bases/base/hooks/use-spectrum";
 import {
   bandGainForHandle,
   bandHandleDb,
@@ -32,6 +37,9 @@ const MIN_Q = 0.3;
 const MAX_Q = 12;
 /** How far one unit of wheel delta widens or narrows a band, as an exponent. */
 const WHEEL_Q_SENSITIVITY = 0.002;
+/** The scale the spectrum is drawn on, in dB of level: its own, behind the gain axis. */
+const SPECTRUM_MIN_DB = -100;
+const SPECTRUM_MAX_DB = -10;
 const DB_LABELS = [-12, 0, 12];
 const HZ_LABELS = [
   { hz: 100, label: "100" },
@@ -139,6 +147,8 @@ export default function PlotDemo() {
     );
   }, []);
   const band = bands[selected];
+  const { analyser, playing, toggle } = useNoiseThroughEq(bands);
+  const spectrum = useSpectrum(analyser, { maxHz: MAX_HZ, minHz: MIN_HZ });
 
   return (
     <div className="flex w-full max-w-xl flex-col gap-2">
@@ -162,6 +172,12 @@ export default function PlotDemo() {
               value={db}
             />
           ))}
+          <PlotTraceArea
+            fillTo={SPECTRUM_MIN_DB}
+            max={SPECTRUM_MAX_DB}
+            min={SPECTRUM_MIN_DB}
+            source={spectrum}
+          />
           {bandCurves.map((curve, index) => (
             <PlotCurve
               className={
@@ -200,11 +216,29 @@ export default function PlotDemo() {
           />
         ))}
       </Plot>
-      <output className="text-center font-mono text-muted-foreground text-xs">
-        Band {selected + 1}: {formatHz(band?.frequency ?? 0)},{" "}
-        {formatDb(band?.gainDb ?? 0)}
-        {band?.q === undefined ? "" : `, Q ${band.q.toFixed(1)}`}
-      </output>
+      <div className="flex items-center justify-between gap-2">
+        <Button
+          aria-label={
+            playing ? "Stop the noise" : "Play pink noise through the equalizer"
+          }
+          onClick={toggle}
+          size="icon-sm"
+          variant="outline"
+        >
+          <IconPlaceholder
+            hugeicons={playing ? "PauseIcon" : "PlayIcon"}
+            lucide={playing ? "PauseIcon" : "PlayIcon"}
+            phosphor={playing ? "PauseIcon" : "PlayIcon"}
+            remixicon={playing ? "RiPauseLine" : "RiPlayLine"}
+            tabler={playing ? "IconPlayerPause" : "IconPlayerPlay"}
+          />
+        </Button>
+        <output className="font-mono text-muted-foreground text-xs">
+          Band {selected + 1}: {formatHz(band?.frequency ?? 0)},{" "}
+          {formatDb(band?.gainDb ?? 0)}
+          {band?.q === undefined ? "" : `, Q ${band.q.toFixed(1)}`}
+        </output>
+      </div>
     </div>
   );
 }

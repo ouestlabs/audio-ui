@@ -295,6 +295,18 @@
     @apply fill-primary/15;
   }
 
+  .cn-plot-trace {
+    @apply stroke-primary/40 stroke-1;
+  }
+
+  .cn-plot-trace-area {
+    @apply fill-primary/10;
+  }
+
+  .cn-plot-dot {
+    @apply rounded-full bg-primary ring-4 ring-primary/25;
+  }
+
   .cn-plot-line {
     @apply stroke-border;
   }

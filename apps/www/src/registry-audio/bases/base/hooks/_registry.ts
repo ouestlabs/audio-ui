@@ -64,4 +64,49 @@ export const hooks: RegistryItem[] = [
     registryDependencies: ["@audio/midi"],
     type: "registry:hook",
   },
+  {
+    categories: ["hooks", "audio", "plot"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "The spectrum of an AnalyserNode as a live source for Plot.Trace: dB per point on a logarithmic frequency axis, refreshed every frame without re-rendering",
+    files: [
+      {
+        path: "hooks/use-spectrum.ts",
+        type: "registry:hook",
+      },
+    ],
+    name: "use-spectrum",
+    registryDependencies: ["@audio/spectrum"],
+    type: "registry:hook",
+  },
+  {
+    categories: ["hooks", "audio", "plot"],
+    dependencies: [],
+    description:
+      "Pink noise played through an equalizer that follows your bands, with the analyser after it: what a plot draws is what is heard",
+    files: [
+      {
+        path: "hooks/use-noise-through-eq.ts",
+        type: "registry:hook",
+      },
+    ],
+    name: "use-noise-through-eq",
+    registryDependencies: ["@audio/use-web-audio", "@audio/filter-response"],
+    type: "registry:hook",
+  },
+  {
+    categories: ["hooks", "audio", "plot"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "A looping pulse played through a compressor that follows your controls, with the level going in as a live source in dB: pair it with a transfer curve's Plot.Dot",
+    files: [
+      {
+        path: "hooks/use-pulses-through-compressor.ts",
+        type: "registry:hook",
+      },
+    ],
+    name: "use-pulses-through-compressor",
+    registryDependencies: ["@audio/use-web-audio"],
+    type: "registry:hook",
+  },
 ];

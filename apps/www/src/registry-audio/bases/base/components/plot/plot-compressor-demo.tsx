@@ -1,14 +1,18 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
+import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder";
+import { Button } from "@/registry/bases/base/ui/button";
 import {
   Plot,
   PlotCurve,
+  PlotDot,
   PlotGraph,
   PlotHandle,
   PlotLine,
   PlotMark,
 } from "@/registry-audio/bases/base/audio/elements/plot";
+import { usePulsesThroughCompressor } from "@/registry-audio/bases/base/hooks/use-pulses-through-compressor";
 import { compressorOutput } from "@/registry-audio/bases/base/lib/filter-response";
 
 const MIN_DB = -60;
@@ -26,6 +30,18 @@ export default function PlotCompressorDemo() {
   const [compressor, setCompressor] = useState({ ratio: 4, thresholdDb: -24 });
   const output = useMemo(() => compressorOutput(compressor), [compressor]);
   const loudest = output(MAX_DB);
+  const { level, playing, toggle } = usePulsesThroughCompressor(compressor);
+  // The input level, riding the curve: where the signal is right now.
+  const dot = useMemo(
+    () => ({
+      getSnapshot: () => {
+        const x = level.getSnapshot();
+        return { x, y: output(x) };
+      },
+      subscribe: level.subscribe,
+    }),
+    [level, output]
+  );
   const changeThreshold = useCallback(
     ({ x }: { x: number }) =>
       setCompressor((current) => ({ ...current, thresholdDb: x })),
@@ -74,6 +90,7 @@ export default function PlotCompressorDemo() {
           />
           <PlotCurve fn={output} />
         </PlotGraph>
+        <PlotDot source={dot} />
         {DB_LABELS.map((db) => (
           <PlotMark axis="x" key={`x${db}`} value={db}>
             {db}
@@ -100,10 +117,30 @@ export default function PlotCompressorDemo() {
           value={{ x: MAX_DB, y: loudest }}
         />
       </Plot>
-      <output className="text-center font-mono text-muted-foreground text-xs">
-        Threshold {compressor.thresholdDb.toFixed(0)} dB,{" "}
-        {compressor.ratio.toFixed(1)}:1
-      </output>
+      <div className="flex items-center justify-between gap-2">
+        <Button
+          aria-label={
+            playing
+              ? "Stop the signal"
+              : "Play a pulsing signal through the compressor"
+          }
+          onClick={toggle}
+          size="icon-sm"
+          variant="outline"
+        >
+          <IconPlaceholder
+            hugeicons={playing ? "PauseIcon" : "PlayIcon"}
+            lucide={playing ? "PauseIcon" : "PlayIcon"}
+            phosphor={playing ? "PauseIcon" : "PlayIcon"}
+            remixicon={playing ? "RiPauseLine" : "RiPlayLine"}
+            tabler={playing ? "IconPlayerPause" : "IconPlayerPlay"}
+          />
+        </Button>
+        <output className="font-mono text-muted-foreground text-xs">
+          Threshold {compressor.thresholdDb.toFixed(0)} dB,{" "}
+          {compressor.ratio.toFixed(1)}:1
+        </output>
+      </div>
     </div>
   );
 }

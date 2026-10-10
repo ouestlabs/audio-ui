@@ -22,6 +22,17 @@ export type BiquadType =
   | "notch"
   | "peak";
 
+/** The Web Audio `BiquadFilterNode` type that does what each band type draws. */
+export const WEB_AUDIO_FILTER_TYPES: Record<BiquadType, BiquadFilterType> = {
+  bandpass: "bandpass",
+  highcut: "lowpass",
+  highshelf: "highshelf",
+  lowcut: "highpass",
+  lowshelf: "lowshelf",
+  notch: "notch",
+  peak: "peaking",
+};
+
 export interface BiquadSettings {
   frequency: number;
   /** Gain in dB: used by peaks and shelves, ignored by the rest. */

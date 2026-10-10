@@ -23,7 +23,7 @@ A plot is two axes and what you draw on them: a curve, a rule, a shaded band, an
 <TabsContent value="cli">
 
 ```bash component
-npx shadcn@latest add @audio/plot @audio/filter-response
+npx shadcn@latest add @audio/plot
 ```
 
 </TabsContent>
@@ -85,6 +85,19 @@ import { eqResponse } from "@/lib/filter-response";
 
 A handle holds a native `<input type="range">` per axis, so it works from the keyboard: the arrow keys move it by a hundredth of the axis, a tenth with <kbd>Shift</kbd>, and <kbd>Home</kbd> / <kbd>End</kbd> go to the ends. Dragging moves it from where it is rather than jumping to the pointer, and four times finer with <kbd>Shift</kbd>. `axis="x"` or `axis="y"` holds it to one axis.
 
+## Live signals
+
+`PlotTrace` draws a list of y values from a `source` straight in the DOM, with no React render per frame: the spectrum of the sound behind an equalizer, on a scale of its own (`min`, `max`). `PlotDot` is a point that follows a live `{ x, y }`, such as the input level riding a compressor's curve. The `use-spectrum` hook turns an `AnalyserNode` into the source a trace wants, resampled onto a logarithmic frequency axis, and the default example plays pink noise through the equalizer so you hear what you draw.
+
+```tsx
+const spectrum = useSpectrum(analyser, { minHz: 20, maxHz: 20000 });
+
+<PlotGraph>
+  <PlotTraceArea fillTo={-100} min={-100} max={-10} source={spectrum} />
+  <PlotCurve fn={response} />
+</PlotGraph>;
+```
+
 ## Examples
 
 ### Filter
@@ -117,6 +130,21 @@ One handle sets the threshold, the other the ratio.
 | `fn` | `(x: number) => number` | — | The curve: y at each x. |
 | `fillTo` | `number` | — | Closes the curve down to this y, for an area. |
 | `samples` | `number` | `256` | How many points it is drawn through. |
+
+### PlotTrace, PlotTraceArea
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `source` | `{ getSnapshot, subscribe }` | The live y values, spread evenly across the x axis. The snapshot may be one array updated in place. |
+| `min`, `max` | `number` | The scale the values are on. Defaults to the plot's y axis. |
+| `fillTo` | `number` | Closes the line down to this y, for an area. |
+
+### PlotDot
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `source` | `{ getSnapshot, subscribe }` | A live `{ x, y }`, followed without re-rendering. |
+| `value` | `{ x: number; y: number }` | A still point. |
 
 ### PlotLine, PlotMark, PlotBand
 

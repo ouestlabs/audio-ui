@@ -403,7 +403,8 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["plot"],
-    description: "An equalizer: drag each band to set its frequency and gain, and the curve is the response of all three",
+    description:
+      "An equalizer: drag each band to set its frequency and gain, and the curve is the response of all three",
     files: [
       {
         path: "components/plot/plot-demo.tsx",
@@ -411,12 +412,19 @@ export const components: RegistryItem[] = [
       },
     ],
     name: "plot-demo",
-    registryDependencies: ["@audio/plot", "@audio/filter-response"],
+    registryDependencies: [
+      "@audio/plot",
+      "@audio/filter-response",
+      "@audio/use-noise-through-eq",
+      "@audio/use-spectrum",
+      "@shadcn/button",
+    ],
     type: "registry:example",
   },
   {
     categories: ["plot"],
-    description: "A low-pass filter: one handle on the resonance peak sets the cutoff and how much it rings",
+    description:
+      "A low-pass filter: one handle on the resonance peak sets the cutoff and how much it rings",
     files: [
       {
         path: "components/plot/plot-filter-demo.tsx",
@@ -429,7 +437,8 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["plot"],
-    description: "A compressor transfer curve: one handle sets the threshold, the other the ratio",
+    description:
+      "A compressor transfer curve: one handle sets the threshold, the other the ratio",
     files: [
       {
         path: "components/plot/plot-compressor-demo.tsx",
@@ -437,7 +446,12 @@ export const components: RegistryItem[] = [
       },
     ],
     name: "plot-compressor-demo",
-    registryDependencies: ["@audio/plot", "@audio/filter-response"],
+    registryDependencies: [
+      "@audio/plot",
+      "@audio/filter-response",
+      "@audio/use-pulses-through-compressor",
+      "@shadcn/button",
+    ],
     type: "registry:example",
   },
 ];
