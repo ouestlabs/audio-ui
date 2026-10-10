@@ -58,6 +58,25 @@ npm install @audio-ui/react class-variance-authority
 
 </CodeTabs>
 
+## Anatomy
+
+Import the primitive and assemble its parts.
+
+```tsx
+import { Knob } from "@audio-ui/react";
+
+<Knob.Root>
+  <Knob.Control>
+    <Knob.Track />
+    <Knob.Indicator />
+    <Knob.Thumb />
+    <Knob.Mark value={50} />
+  </Knob.Control>
+  <Knob.Value />
+  <Knob.Label />
+</Knob.Root>
+```
+
 ## Usage
 
 ```tsx

@@ -59,6 +59,22 @@ npm install @audio-ui/react class-variance-authority
 
 </CodeTabs>
 
+## Anatomy
+
+Import the primitive and assemble its parts.
+
+```tsx
+import { XYPad } from "@audio-ui/react";
+
+<XYPad.Root>
+  <XYPad.Label />
+  <XYPad.Control>
+    <XYPad.Thumb />
+  </XYPad.Control>
+  <XYPad.Value />
+</XYPad.Root>
+```
+
 ## Usage
 
 ```tsx

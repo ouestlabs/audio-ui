@@ -50,6 +50,30 @@ npm install @audio-ui/react
 
 </CodeTabs>
 
+## Anatomy
+
+Import the primitive and assemble its parts.
+
+```tsx
+import { Plot } from "@audio-ui/react";
+
+<Plot.Root>
+  <Plot.Grid />
+  <Plot.Graph>
+    <Plot.Curve />
+    <Plot.Trace />
+    <Plot.Line />
+    <Plot.Band />
+  </Plot.Graph>
+  <Plot.Mark />
+  <Plot.Dot />
+  <Plot.Cursor>
+    <Plot.CursorReadout />
+  </Plot.Cursor>
+  <Plot.Handle />
+</Plot.Root>
+```
+
 ## Usage
 
 ```tsx

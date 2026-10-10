@@ -64,6 +64,28 @@ npm install @audio-ui/react
 
 </CodeTabs>
 
+## Anatomy
+
+Import the primitive and assemble its parts.
+
+```tsx
+import { Waveform } from "@audio-ui/react";
+
+<Waveform.Root>
+  <Waveform.Control>
+    <Waveform.Canvas />
+    <Waveform.Playhead />
+    <Waveform.Region>
+      <Waveform.RegionHandle edge="start" />
+      <Waveform.RegionHandle edge="end" />
+    </Waveform.Region>
+    <Waveform.Marker />
+    <Waveform.Hover />
+    <Waveform.Thumb />
+  </Waveform.Control>
+</Waveform.Root>
+```
+
 ## Usage
 
 ```tsx

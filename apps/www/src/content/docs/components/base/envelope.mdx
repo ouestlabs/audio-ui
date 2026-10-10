@@ -59,6 +59,24 @@ npm install @audio-ui/react class-variance-authority
 
 </CodeTabs>
 
+## Anatomy
+
+Import the primitive and assemble its parts.
+
+```tsx
+import { Envelope } from "@audio-ui/react";
+
+<Envelope.Root>
+  <Envelope.Graph>
+    <Envelope.Fill />
+    <Envelope.Line />
+  </Envelope.Graph>
+  <Envelope.Points>
+    <Envelope.Point />
+  </Envelope.Points>
+</Envelope.Root>
+```
+
 ## Usage
 
 ```tsx

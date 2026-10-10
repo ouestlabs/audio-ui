@@ -61,6 +61,24 @@ npm install @audio-ui/react class-variance-authority
 
 </CodeTabs>
 
+## Anatomy
+
+Import the primitive and assemble its parts.
+
+```tsx
+import { Piano } from "@audio-ui/react";
+
+<Piano.Root>
+  <Piano.Keys>
+    {(pitch) => (
+      <Piano.Key pitch={pitch}>
+        <Piano.KeyLabel />
+      </Piano.Key>
+    )}
+  </Piano.Keys>
+</Piano.Root>
+```
+
 ## Usage
 
 ```tsx

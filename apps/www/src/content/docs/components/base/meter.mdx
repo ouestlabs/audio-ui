@@ -59,6 +59,25 @@ npm install @audio-ui/react class-variance-authority
 
 </CodeTabs>
 
+## Anatomy
+
+Import the primitive and assemble its parts.
+
+```tsx
+import { Meter } from "@audio-ui/react";
+
+<Meter.Root>
+  <Meter.Channels>
+    {(index) => (
+      <Meter.Channel index={index}>
+        <Meter.Indicator />
+        <Meter.Peak />
+      </Meter.Channel>
+    )}
+  </Meter.Channels>
+</Meter.Root>
+```
+
 ## Usage
 
 ```tsx

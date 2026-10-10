@@ -59,6 +59,26 @@ npm install @audio-ui/react class-variance-authority
 
 </CodeTabs>
 
+## Anatomy
+
+Import the primitive and assemble its parts.
+
+```tsx
+import { Fader } from "@audio-ui/react";
+
+<Fader.Root>
+  <Fader.Label />
+  <Fader.Control>
+    <Fader.Track>
+      <Fader.Indicator />
+    </Fader.Track>
+    <Fader.Mark value={50} />
+    <Fader.Thumb />
+  </Fader.Control>
+  <Fader.Value />
+</Fader.Root>
+```
+
 ## Usage
 
 ```tsx

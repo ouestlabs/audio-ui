@@ -50,6 +50,21 @@ npm install @audio-ui/react
 
 </CodeTabs>
 
+## Anatomy
+
+The scrubber is a Timeline: its bar is the ruler, with a playhead for the fill and one for the thumb.
+
+```tsx
+import { Timeline } from "@audio-ui/react";
+
+<Timeline.Root>
+  <Timeline.Ruler>
+    <Timeline.Playhead /> {/* the fill */}
+    <Timeline.Playhead /> {/* the thumb */}
+  </Timeline.Ruler>
+</Timeline.Root>
+```
+
 ## Usage
 
 ```tsx

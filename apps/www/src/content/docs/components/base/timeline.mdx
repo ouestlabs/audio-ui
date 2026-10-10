@@ -62,6 +62,35 @@ npm install @audio-ui/react
 
 </CodeTabs>
 
+## Anatomy
+
+Import the primitive and assemble its parts.
+
+```tsx
+import { Timeline } from "@audio-ui/react";
+
+<Timeline.Root>
+  <Timeline.Viewport>
+    <Timeline.Ruler>
+      <Timeline.Mark value={0} />
+      <Timeline.Playhead />
+    </Timeline.Ruler>
+    <Timeline.Lane>
+      <Timeline.Range>
+        <Timeline.RangeHandle edge="start" />
+        <Timeline.RangeHandle edge="end" />
+      </Timeline.Range>
+      <Timeline.Playhead />
+    </Timeline.Lane>
+  </Timeline.Viewport>
+  <Timeline.Navigator>
+    <Timeline.NavigatorWindow />
+    <Timeline.NavigatorHandle edge="start" />
+    <Timeline.NavigatorHandle edge="end" />
+  </Timeline.Navigator>
+</Timeline.Root>
+```
+
 ## Usage
 
 ```tsx
