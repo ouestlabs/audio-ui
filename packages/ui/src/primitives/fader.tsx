@@ -35,8 +35,8 @@ function roundToStep(value: number, step: number, min: number): number {
 }
 
 /**
- * Groups all parts of the fader: a Base UI `Slider.Root` with audio defaults
- * (vertical, -60…+6) and mouse-wheel stepping. While a pointer drags it, the
+ * Groups all parts of the fader, with audio defaults (vertical, -60…+6) and
+ * mouse-wheel stepping. While a pointer drags it, the
  * thumb follows the pointer even if a controlled `value` lags behind (a seek
  * bar driven by playback time, automation) — reject a value with
  * `eventDetails.cancel()` instead. Renders a `<div>` element.

@@ -7,7 +7,7 @@ base: base
 
 <ComponentPreview styleName="base-nova" name="fader-vertical-demo" />
 
-Linear fader for continuous parameters (volume, gain, send level, etc.). The registry component wraps the `Fader` primitive from `@audio-ui/react` — built on Base UI's `Slider` — with size variants and thumb mark styling.
+Linear fader for continuous parameters (volume, gain, send level, etc.). The registry component wraps the `Fader` primitive from `@audio-ui/react` with size variants and thumb mark styling.
 
 ## Overview
 
@@ -116,7 +116,7 @@ Wheel input over the fader nudges the value by `step` and reports `eventDetails.
 
 ## API reference
 
-`Fader` accepts style props (`size`, `thumbMarks`, `className`) plus primitive props from `FaderPrimitive.Root.Props` (Base UI `Slider.Root` props: `name`, `format`, `locale`, `largeStep`, `render`, …). `aria-label`, `aria-labelledby`, and `aria-describedby` are forwarded to the thumb's input.
+`Fader` accepts style props (`size`, `thumbMarks`, `className`) plus primitive props from `FaderPrimitive.Root.Props` (`name`, `form`, `format`, `locale`, `largeStep`, `render`, …). `aria-label`, `aria-labelledby`, and `aria-describedby` are forwarded to the thumb's input.
 
 ### Value and state
 

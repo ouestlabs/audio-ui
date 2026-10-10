@@ -1,7 +1,7 @@
 /**
- * Change/commit event details shaped like Base UI's, for interactions Base UI
- * doesn't handle itself (e.g. wheel) — so a primitive built on Base UI hands
- * consumers one `eventDetails` contract whatever the input was.
+ * Change/commit event details for interactions the underlying controls don't
+ * handle themselves (e.g. wheel), so every input reaches consumers through the
+ * same `eventDetails` contract: `reason`, `event`, `cancel()`.
  */
 export interface ChangeEventDetails<Reason extends string, E extends Event> {
   allowPropagation: () => void;
