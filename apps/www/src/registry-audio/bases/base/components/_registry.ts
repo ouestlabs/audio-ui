@@ -469,17 +469,17 @@ export const components: RegistryItem[] = [
     type: "registry:example",
   },
   {
-    categories: ["transport"],
+    categories: ["scrubber"],
     description:
-      "Play or pause, the position, a bar to seek on and the length: a clock stands in for a player, and the bar and the time follow it",
+      "A bar to seek on, with play or pause, the position and the length: a clock stands in for a player, and the bar and the time follow it",
     files: [
       {
-        path: "components/transport/transport-demo.tsx",
+        path: "components/scrubber/scrubber-demo.tsx",
         type: "registry:example",
       },
     ],
-    name: "transport-demo",
-    registryDependencies: ["@audio/transport"],
+    name: "scrubber-demo",
+    registryDependencies: ["@audio/scrubber"],
     type: "registry:example",
   },
 ];

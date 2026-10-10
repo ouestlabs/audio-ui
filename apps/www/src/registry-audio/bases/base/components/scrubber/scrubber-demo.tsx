@@ -2,12 +2,12 @@
 
 import { createSource } from "@audio-ui/react";
 import { useCallback, useEffect, useState } from "react";
-import { Transport } from "@/registry-audio/bases/base/audio/elements/transport";
+import { Scrubber } from "@/registry-audio/bases/base/audio/elements/scrubber";
 
 const DURATION = 215;
 
 /** A clock standing in for a player: it plays, you seek, and the bar and the time follow it. */
-export default function TransportDemo() {
+export default function ScrubberDemo() {
   const [position] = useState(() => createSource(42));
   const [playing, setPlaying] = useState(false);
 
@@ -39,7 +39,7 @@ export default function TransportDemo() {
 
   return (
     <div className="w-full max-w-xl">
-      <Transport
+      <Scrubber
         duration={DURATION}
         onPlayingChange={setPlaying}
         onSeek={seek}

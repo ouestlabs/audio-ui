@@ -1,11 +1,11 @@
 ---
-title: Transport
+title: Scrubber
 description: Play or pause, the position, a bar to seek on and the length.
 component: true
 base: base
 ---
 
-<ComponentPreview styleName="base-nova" name="transport-demo" />
+<ComponentPreview styleName="base-nova" name="scrubber-demo" />
 
 The controls under a player or an editor. The bar is a `Timeline` ruler, so a press jumps to the pointer, a drag scrubs (four times finer with Shift), and the keyboard moves it. The position is a live `source`: the bar and the clock follow it straight in the DOM, with no React render per frame.
 
@@ -21,7 +21,7 @@ The controls under a player or an editor. The bar is a `Timeline` ruler, so a pr
 <TabsContent value="cli">
 
 ```bash component
-npx shadcn@latest add @audio/transport
+npx shadcn@latest add @audio/scrubber
 ```
 
 </TabsContent>
@@ -40,8 +40,8 @@ npm install @audio-ui/react
 
 <ComponentSource
   styleName="base-nova"
-  name="transport"
-  title="components/audio/elements/transport.tsx"
+  name="scrubber"
+  title="components/audio/elements/scrubber.tsx"
 />
 
 <Step>Update the import paths to match your project setup.</Step>
@@ -56,11 +56,11 @@ npm install @audio-ui/react
 
 ```tsx
 import { createSource } from "@audio-ui/react";
-import { Transport } from "@/components/audio/elements/transport";
+import { Scrubber } from "@/components/audio/elements/scrubber";
 
 const position = createSource(0); // seconds; set it from your player's clock
 
-<Transport
+<Scrubber
   duration={215}
   onPlayingChange={(playing) => (playing ? player.play() : player.pause())}
   onSeek={(seconds) => player.seek(seconds)}

@@ -18,7 +18,7 @@ function formatClock(seconds: number): string {
 }
 
 /** The position as a clock, written straight into the DOM as the source moves. */
-function TransportTime({
+function ScrubberTime({
   className,
   source,
 }: {
@@ -40,13 +40,13 @@ function TransportTime({
   return (
     <span
       className={cn("min-w-10 tabular-nums", className)}
-      data-slot="transport-time"
+      data-slot="scrubber-time"
       ref={ref}
     />
   );
 }
 
-interface TransportProps {
+interface ScrubberProps {
   "aria-label"?: string;
   className?: string;
   /** Length of the track, in seconds. */
@@ -67,7 +67,7 @@ interface TransportProps {
  * to the pointer, a drag scrubs (four times finer with Shift), and the arrow
  * keys, Page Up/Down, Home and End move it.
  */
-function Transport({
+function Scrubber({
   "aria-label": ariaLabel = "Playback position",
   className,
   duration,
@@ -75,7 +75,7 @@ function Transport({
   onSeek,
   playing,
   source,
-}: TransportProps) {
+}: ScrubberProps) {
   const toggle = useCallback(
     () => onPlayingChange(!playing),
     [onPlayingChange, playing]
@@ -83,7 +83,7 @@ function Transport({
   return (
     <div
       className={cn("flex w-full min-w-0 items-center gap-3", className)}
-      data-slot="transport"
+      data-slot="scrubber"
       role="group"
     >
       <Button
@@ -100,7 +100,7 @@ function Transport({
           tabler={playing ? "IconPlayerPause" : "IconPlayerPlay"}
         />
       </Button>
-      <TransportTime
+      <ScrubberTime
         className="text-right text-muted-foreground text-xs"
         source={source}
       />
@@ -113,17 +113,17 @@ function Transport({
       >
         <TimelinePrimitive.Ruler
           aria-label={ariaLabel}
-          className="cn-transport-track relative h-1.5 cursor-pointer touch-none"
+          className="cn-scrubber-track relative h-1.5 cursor-pointer touch-none"
           getAriaValueText={formatClock}
         >
           <TimelinePrimitive.Playhead
-            className="cn-transport-fill pointer-events-none absolute inset-y-0"
+            className="cn-scrubber-fill pointer-events-none absolute inset-y-0"
             style={{
               left: 0,
               width: "calc(var(--timeline-unit) * var(--timeline-offset))",
             }}
           />
-          <TimelinePrimitive.Playhead className="cn-transport-thumb pointer-events-none absolute top-1/2 size-3.5 -translate-x-1/2 -translate-y-1/2" />
+          <TimelinePrimitive.Playhead className="cn-scrubber-thumb pointer-events-none absolute top-1/2 size-3.5 -translate-x-1/2 -translate-y-1/2" />
         </TimelinePrimitive.Ruler>
       </TimelinePrimitive.Root>
       <span className="min-w-10 text-muted-foreground text-xs tabular-nums">
@@ -133,4 +133,4 @@ function Transport({
   );
 }
 
-export { formatClock, Transport };
+export { formatClock, Scrubber };

@@ -105,9 +105,9 @@ export const categories: CategoryDef[] = [
     name: "sequencer",
   },
   {
-    description: "Transport controls: play or pause, position and a bar to seek on.",
-    label: "Transport",
-    name: "transport",
+    description: "Seek bars: play or pause, position and a bar to scrub on.",
+    label: "Scrubber",
+    name: "scrubber",
   },
   {
     description:

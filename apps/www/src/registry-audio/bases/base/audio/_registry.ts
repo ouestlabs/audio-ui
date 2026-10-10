@@ -196,16 +196,16 @@ export const audio: RegistryItem[] = [
     dependencies: ["@audio-ui/react"],
     files: [
       {
-        path: "audio/elements/transport.tsx",
+        path: "audio/elements/scrubber.tsx",
         type: "registry:ui",
       },
       {
-        path: "components/transport/transport-demo.tsx",
-        target: "components/audio/transport-default.tsx",
+        path: "components/scrubber/scrubber-demo.tsx",
+        target: "components/audio/scrubber-default.tsx",
         type: "registry:component",
       },
     ],
-    name: "transport",
+    name: "scrubber",
     registryDependencies: ["@shadcn/button"],
     type: "registry:ui",
   },
