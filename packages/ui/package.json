@@ -54,6 +54,10 @@
       "types": "./dist/piano-roll.d.ts",
       "import": "./dist/piano-roll.js"
     },
+    "./plot": {
+      "types": "./dist/plot.d.ts",
+      "import": "./dist/plot.js"
+    },
     "./sequencer": {
       "types": "./dist/sequencer.d.ts",
       "import": "./dist/sequencer.js"
@@ -92,10 +96,10 @@
     "@happy-dom/global-registrator": "^20.10.6",
     "@testing-library/react": "^16.3.2",
     "@types/bun": "^1.3.5",
-    "@types/react": "^19.2.7",
-    "@types/react-dom": "^19.2.3",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
     "tsup": "^8.5.0",
-    "typescript": "^6.0.3"
+    "typescript": "^7.0.2"
   },
   "peerDependencies": {
     "@base-ui/react": "^1.9.0",
