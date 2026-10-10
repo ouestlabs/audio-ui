@@ -122,7 +122,9 @@ export function SiteCustomizer() {
               weight="bold"
             />
             <span className="hidden md:inline">Customize</span>
-            <Kbd className="hidden md:inline-flex">C</Kbd>
+            <Kbd className="hidden border border-primary-foreground/40 bg-transparent text-primary-foreground md:inline-flex">
+              C
+            </Kbd>
           </PopoverPrimitive.Trigger>
           <CustomizerPanel animate={animate} variant="floating" />
         </PopoverPrimitive.Root>
