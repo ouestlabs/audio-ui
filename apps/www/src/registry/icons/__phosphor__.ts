@@ -18,6 +18,8 @@ export {
   GaugeIcon,
   InfoIcon,
   MagnifyingGlassIcon,
+  MagnifyingGlassMinusIcon,
+  MagnifyingGlassPlusIcon,
   MicrophoneIcon,
   MicrophoneSlashIcon,
   MinusIcon,

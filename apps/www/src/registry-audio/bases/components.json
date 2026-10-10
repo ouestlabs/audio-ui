@@ -465,6 +465,11 @@
     "title": "block-voice-recorder"
   },
   {
+    "categories": ["timeline"],
+    "name": "timeline-demo",
+    "title": "timeline-demo"
+  },
+  {
     "categories": ["waveform"],
     "name": "waveform-demo",
     "title": "waveform-demo"

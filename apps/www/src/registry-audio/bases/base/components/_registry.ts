@@ -1287,6 +1287,25 @@ export const components: RegistryItem[] = [
     type: "registry:block",
   },
   {
+    categories: ["timeline"],
+    description:
+      "A zoomable arrangement timeline: a bar ruler that seeks on the grid, lanes whose grid follows the zoom, and a playhead following a transport clock",
+    files: [
+      {
+        path: "components/timeline/timeline-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "timeline-demo",
+    registryDependencies: [
+      "@audio/timeline",
+      "@audio/musical-time",
+      "@shadcn/button",
+      "@shadcn/button-group",
+    ],
+    type: "registry:example",
+  },
+  {
     categories: ["waveform"],
     description: "Waveform default example",
     files: [

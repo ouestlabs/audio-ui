@@ -1,0 +1,155 @@
+---
+title: Timeline
+description: A zoomable timeline for arrangements and editors — a ruler that seeks on the grid, lanes that follow the zoom, and a playhead that moves without re-rendering.
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="timeline-demo" />
+
+The ground an arrangement, a clip editor or a piano roll is drawn on. The registry component wraps the `Timeline` primitive from `@audio-ui/react`, which knows nothing about tempo: its units are whatever you count in (seconds, beats, pulses, steps), and musical time comes from the `musical-time` lib.
+
+## Overview
+
+- **Units and zoom:** `duration` is the timeline's length in your units, and `zoom` is how many pixels one unit takes. Leave `zoom` unset and the timeline fits the width it is given; zoom it, and every lane is as long as the timeline and the viewport scrolls.
+- **Zooming:** Cmd/Ctrl + scroll (or pinch on a trackpad) zooms around the pointer. Whatever changes the zoom, the point it was anchored on stays where it was, or the middle of the view when nothing named one.
+- **Grid:** with a `snapStep`, the ruler lands on the grid. Hold Cmd/Ctrl to place the playhead off it, and Shift to scrub four times finer.
+- **Playback:** pass a live `source` and every playhead follows it straight in the DOM, with no React render per frame.
+- **Accessibility:** the ruler holds a native `<input type="range">` over the timeline. It takes focus, carries `aria-label`, announces the position (or whatever `getAriaValueText` returns, such as "Bar 3, beat 2"), and moves by `step` with the arrow keys, `largeStep` with <kbd>Page Up</kbd> / <kbd>Page Down</kbd> and Shift, and to the ends with <kbd>Home</kbd> / <kbd>End</kbd>.
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">CLI</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash component
+npx shadcn@latest add @audio/timeline @audio/musical-time
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the following dependencies:</Step>
+
+```bash
+npm install @audio-ui/react
+```
+
+<Step>Copy and paste the following code into your project.</Step>
+
+<ComponentSource
+  styleName="base-nova"
+  name="timeline"
+  title="components/audio/elements/timeline.tsx"
+/>
+
+<Step>Update the import paths to match your project setup.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import {
+  Timeline,
+  TimelineLane,
+  TimelineMark,
+  TimelinePlayhead,
+  TimelineRuler,
+  TimelineViewport,
+} from "@/components/audio/elements/timeline";
+import {
+  DEFAULT_TEMPO,
+  describeBarsBeats,
+  gridInterval,
+} from "@/lib/musical-time";
+```
+
+```tsx
+const snapStep = gridInterval("adaptive", zoom, DEFAULT_TEMPO);
+
+<Timeline
+  duration={32}
+  onPositionChange={(seconds) => transport.seek(seconds)}
+  onZoomChange={setZoom}
+  snapStep={snapStep}
+  source={transport.position}
+  zoom={zoom}
+>
+  <TimelineViewport>
+    <TimelineRuler
+      aria-label="Playhead"
+      getAriaValueText={(seconds) => describeBarsBeats(seconds, DEFAULT_TEMPO)}
+    >
+      <TimelineMark value={0}>1</TimelineMark>
+      <TimelineMark value={2}>2</TimelineMark>
+      <TimelinePlayhead />
+    </TimelineRuler>
+    <TimelineLane gridStep={snapStep}>
+      <TimelinePlayhead />
+    </TimelineLane>
+  </TimelineViewport>
+</Timeline>
+```
+
+## Musical time
+
+The `musical-time` lib (`npx shadcn@latest add @audio/musical-time`) turns a tempo into what a timeline needs, in seconds:
+
+- `gridInterval(division, zoom, tempo)` is the grid's step: a fixed division (`"1-bar"`, `"1/8"`, …), or `"adaptive"` for the finest division still 24px apart at this zoom. Pass `{ triplet: true }` for three in the space of two. Give the same number to `snapStep` and to the lanes' `gridStep`, so the lines you see are the places you land.
+- `barLabelInterval(zoom, tempo)` is how far apart the ruler's bar numbers go: whole bars, spread out until they no longer collide.
+- `barsBeatsAt(seconds, tempo)` and `describeBarsBeats` read a position as bars, beats and sixteenths.
+
+## Placing your own parts
+
+Every lane sets a `--timeline-unit` CSS variable, the width of one unit. Parts are placed with it, so anything you draw follows the zoom the same way:
+
+```tsx
+<div style={{ left: "calc(var(--timeline-unit) * 12)", position: "absolute" }} />
+```
+
+## API reference
+
+### Timeline
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `duration` | `number` | `1` | Length of the timeline, in your units. |
+| `zoom` | `number` | - | Controlled zoom, in px per unit. Unset, the timeline fits its width. |
+| `defaultZoom` | `number` | - | Uncontrolled starting zoom. |
+| `minZoom` / `maxZoom` | `number` | `0` / `Infinity` | Bounds the zoom is clamped to. |
+| `onZoomChange` | `(zoom, eventDetails) => void` | - | Fires when the wheel changes the zoom. `eventDetails.cancel()` keeps it. |
+| `position` | `number` | - | Controlled playback position. |
+| `defaultPosition` | `number` | `0` | Uncontrolled starting position. |
+| `source` | `{ getSnapshot, subscribe }` | - | A live position followed outside React; takes precedence over `position`. |
+| `onPositionChange` | `(value, eventDetails) => void` | - | Fires while the position is moved. `eventDetails.reason` is `"press"`, `"drag"`, `"keyboard"` or `"input-change"`. |
+| `onPositionCommitted` | `(value, eventDetails) => void` | - | Fires when a gesture that moved the position ends. |
+| `snapStep` | `number` | `0` | Distance between grid lines. `0` is no grid. |
+| `snapOffset` | `number` | `0` | Where the grid's lines start. |
+| `step` / `largeStep` | `number` | `snapStep` / ten steps | Keyboard steps. |
+| `disabled` | `boolean` | `false` | Disables seeking and zooming. |
+
+### Parts
+
+| Component | Role |
+| --------- | ---- |
+| `TimelineViewport` | The scrolling window. Zooms around the pointer with Cmd/Ctrl + scroll. |
+| `TimelineRuler` | The lane that seeks. Holds the input; takes `aria-label` and `getAriaValueText`. |
+| `TimelineLane` | A strip the timeline's parts are placed on. `gridStep` draws a line every that many units. |
+| `TimelineMark` | Something placed at `value`: a bar number, a cue. |
+| `TimelinePlayhead` | Follows the position on the lane it sits in. |
+
+`@audio-ui/react/timeline` exposes the same parts as `Timeline.Root`, `Timeline.Viewport`, `Timeline.Ruler`, `Timeline.Lane`, `Timeline.Mark` and `Timeline.Playhead`. Every part accepts a `render` prop and `className` / `style` as functions of state, and exposes `data-disabled`, `data-fitted` and `data-scrubbing`.

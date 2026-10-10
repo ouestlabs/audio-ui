@@ -52,4 +52,6 @@ export {
   VolumeLowIcon,
   VolumeMute02Icon,
   VolumeOffIcon,
+  ZoomInAreaIcon,
+  ZoomOutAreaIcon,
 } from "@hugeicons/core-free-icons";

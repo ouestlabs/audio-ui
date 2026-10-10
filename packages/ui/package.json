@@ -62,6 +62,10 @@
       "types": "./dist/sequencer.d.ts",
       "import": "./dist/sequencer.js"
     },
+    "./timeline": {
+      "types": "./dist/timeline.d.ts",
+      "import": "./dist/timeline.js"
+    },
     "./source": {
       "types": "./dist/source.d.ts",
       "import": "./dist/source.js"

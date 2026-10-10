@@ -423,6 +423,31 @@
     @apply bg-foreground;
   }
 
+  /* MARK: Timeline */
+  .cn-timeline {
+    @apply [--timeline-grid-color:color-mix(in_oklab,var(--border)_70%,transparent)];
+  }
+
+  .cn-timeline-viewport {
+    @apply bg-background;
+  }
+
+  .cn-timeline-ruler {
+    @apply h-7 border-b bg-background text-muted-foreground text-xs has-focus-visible:bg-muted;
+  }
+
+  .cn-timeline-lane {
+    @apply h-14 border-b bg-muted/30;
+  }
+
+  .cn-timeline-mark {
+    @apply border-s ps-1.5 tabular-nums;
+  }
+
+  .cn-timeline-playhead {
+    @apply bg-primary;
+  }
+
   /* MARK: Waveform */
   .cn-waveform {
     @apply relative h-20 rounded-xl border bg-card shadow-xs;

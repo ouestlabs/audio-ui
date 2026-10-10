@@ -48,4 +48,6 @@ export {
   IconVolume3,
   IconVolumeOff,
   IconX,
+  IconZoomIn,
+  IconZoomOut,
 } from "@tabler/icons-react";

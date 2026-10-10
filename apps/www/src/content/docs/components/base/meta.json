@@ -13,6 +13,7 @@
     "transport",
     "channel-strip",
     "sortable-list",
-    "waveform"
+    "waveform",
+    "timeline"
   ]
 }

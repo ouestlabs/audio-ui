@@ -11,6 +11,7 @@ const primitives = [
   "piano-roll",
   "ruler",
   "sequencer",
+  "timeline",
   "waveform",
   "xypad",
 ];

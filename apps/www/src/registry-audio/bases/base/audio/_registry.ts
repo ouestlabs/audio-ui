@@ -146,6 +146,17 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
+    dependencies: ["@audio-ui/react"],
+    files: [
+      {
+        path: "audio/elements/timeline.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "timeline",
+    type: "registry:ui",
+  },
+  {
     files: [
       {
         path: "audio/elements/bpm-control.tsx",

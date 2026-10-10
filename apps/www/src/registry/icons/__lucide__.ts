@@ -96,4 +96,8 @@ export {
   VolumeXIcon,
   X,
   XIcon,
+  ZoomIn,
+  ZoomInIcon,
+  ZoomOut,
+  ZoomOutIcon,
 } from "lucide-react";

@@ -91,6 +91,11 @@
     "intro": "Browse {{count}} transport components for audio/ui, built on top of shadcn/ui.",
     "title": "Transport"
   },
+  "timeline": {
+    "description": "Zoomable, snapping timeline components for arrangements, clip editors and piano rolls. {{count}} components.",
+    "intro": "Browse {{count}} timeline components for audio/ui, built on top of shadcn/ui.",
+    "title": "Timeline"
+  },
   "waveform": {
     "description": "Seekable waveform components for scrubbing and visualizing audio playback. {{count}} components.",
     "intro": "Browse {{count}} waveform components for audio/ui, built on top of shadcn/ui.",

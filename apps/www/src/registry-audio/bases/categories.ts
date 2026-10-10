@@ -145,6 +145,12 @@ export const categories: CategoryDef[] = [
   },
   {
     description:
+      "Zoomable, snapping timeline components for arrangements, clip editors and piano rolls.",
+    label: "Timeline",
+    name: "timeline",
+  },
+  {
+    description:
       "Seekable waveform components for scrubbing and visualizing audio playback.",
     label: "Waveform",
     name: "waveform",

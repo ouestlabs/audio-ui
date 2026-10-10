@@ -134,6 +134,21 @@ export const lib: RegistryItem[] = [
     type: "registry:lib",
   },
   {
+    categories: ["lib", "audio", "timeline"],
+    dependencies: [],
+    description:
+      "Framework-free musical time — bars and beats against seconds, fixed and zoom-adaptive grid divisions with triplets, ruler label spacing, and bar/beat readouts",
+    files: [
+      {
+        path: "lib/musical-time.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "musical-time",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
     categories: ["lib", "audio", "sequencer", "ai"],
     dependencies: ["zod"],
     description:

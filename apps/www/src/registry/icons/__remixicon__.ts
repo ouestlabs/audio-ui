@@ -47,4 +47,6 @@ export {
   RiVolumeMuteFill,
   RiVolumeMuteLine,
   RiVolumeUpLine,
+  RiZoomInLine,
+  RiZoomOutLine,
 } from "@remixicon/react";
