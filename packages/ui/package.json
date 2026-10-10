@@ -88,7 +88,8 @@
     "lint": "biome check --write .",
     "lint:fix": "biome check --write --unsafe .",
     "test": "bun test",
-    "clean": "rm -rf dist node_modules .turbo"
+    "clean": "rm -rf dist node_modules .turbo",
+    "bench": "bun test ./bench/*.bench.tsx"
   },
   "devDependencies": {
     "@audio-ui/typescript": "latest",
