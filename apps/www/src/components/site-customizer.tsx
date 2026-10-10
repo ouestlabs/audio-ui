@@ -109,9 +109,7 @@ export function SiteCustomizer() {
           aria-label="Customize"
           className={cn(
             "fixed right-4 z-40 h-10 gap-2 bg-site-background px-3.5 shadow-lg transition-transform duration-150 ease-out active:scale-[0.97] motion-reduce:transition-none",
-            lifted ? "bottom-20 md:bottom-4" : "bottom-4",
-            // From md up the panel takes the whole height and covers it.
-            open && "md:invisible"
+            lifted ? "bottom-20 md:bottom-4" : "bottom-4"
           )}
           onClick={handleTriggerClick}
           ref={triggerRef}

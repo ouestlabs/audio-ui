@@ -106,7 +106,7 @@ function CustomizerPanelFloating({
     <section
       aria-label="Customize"
       className={cn(
-        "site-rounded-xl fixed inset-x-3 z-40 flex max-h-[min(50dvh,36rem)] origin-bottom-right flex-col overflow-hidden bg-site-background shadow-xl outline-none ring-1 ring-site-foreground/10 sm:inset-x-auto sm:right-4 sm:w-64 md:top-[calc(var(--header-height)+0.5rem)] md:right-3 md:bottom-3 md:max-h-none [&_[data-slot=dropdown-menu-trigger]]:w-full",
+        "site-rounded-xl fixed inset-x-3 z-40 flex max-h-[min(50dvh,36rem)] origin-bottom-right flex-col overflow-hidden bg-site-background shadow-xl outline-none ring-1 ring-site-foreground/10 sm:inset-x-auto sm:right-4 sm:w-64 md:top-[calc(var(--header-height)+0.5rem)] md:right-3 md:bottom-16 md:max-h-none [&_[data-slot=dropdown-menu-trigger]]:w-full",
         animate &&
           "fade-in-0 zoom-in-95 animate-in duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:animate-none",
         className
