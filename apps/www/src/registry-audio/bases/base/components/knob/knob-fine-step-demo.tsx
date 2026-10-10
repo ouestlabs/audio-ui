@@ -9,6 +9,7 @@ export default function KnobFineStepDemo() {
   return (
     <div className="flex flex-col items-center gap-2">
       <Knob
+        aria-label="Mix"
         defaultValue={0.5}
         max={1}
         min={0}

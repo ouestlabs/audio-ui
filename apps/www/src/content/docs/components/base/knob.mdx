@@ -7,13 +7,13 @@ base: base
 
 <ComponentPreview styleName="base-nova" name="knob-demo" />
 
-Rotary knob for continuous parameters (level, cutoff, pan, etc.). The registry component wraps `Knob` primitives from `@audio-ui/react` with size variants and theme styles; behavior and geometry are documented below.
+Rotary knob for continuous parameters (level, cutoff, pan, etc.). The registry component wraps the `Knob` primitive from `@audio-ui/react` with size variants and theme styles.
 
 ## Overview
 
-- **Interaction model:** Circular drag by default, optional vertical "fader" pan, mouse wheel, keyboard nudging, and **double-tap / double-click** to snap back to `defaultValue`.
-- **Feedback:** Track rail, highlighted arc between `anchor` and value when useful, and a needle aligned to the current value.
-- **Accessibility:** The draggable surface is a `role="slider"` with `aria-valuenow` / `min` / `max`; label via `aria-label` or `aria-labelledby`.
+- **Interaction model:** Circular drag by default (or `dragMode="vertical"` / `"revolution"`), mouse wheel, keyboard, and **double-tap / double-click** to snap back to `defaultValue`.
+- **Feedback:** Track rail, highlighted arc between `anchor` and the value, and a needle that rotates with the value. The needle follows the pointer directly, with no easing, so it never lags behind the arc.
+- **Accessibility:** The knob holds a native `<input type="range">` that takes focus, carries the accessible name (`aria-label` / `aria-labelledby`), the value text (formatted with `format`, or `getAriaValueText` on the primitive's `Thumb`), and the form value (`name`).
 
 ## Installation
 
@@ -92,82 +92,56 @@ Pass **`defaultValue`** even when controlled if you use **double-tap reset**; it
 
 | Behavior | Details |
 | -------- | ------- |
-| **Circular drag (default)** | Value tracks accumulated rotation around the center from the value at **pointer down**. Uses `dragSensitivity` to choose the angular reference (see [Pointer mapping](#pointer-mapping)). |
-| **Vertical fader drag** | Set `dragOptions={{ verticalPanEnabled: true }}`. After a small movement threshold, a mostly-vertical drag nudges the value like a fader; circular drag still works when the gesture is more rotational. |
-| **Double-tap / double-click** | Two quick releases with **≤ ~12px** movement from each **pointer down**, within **~320ms**, resets to `defaultValue`, or to the midpoint of `min…max` if `defaultValue` is omitted. Fires `onValueCommit` like a normal commit. |
+| **Circular drag (default)** | The value follows the rotation around the center, from the value at pointer down. The dial's 288° sweep spans `min…max`. |
+| **Vertical drag** | `dragMode="vertical"`: drag up to increase, like a fader; 150px of travel spans `min…max`. |
+| **Revolution drag** | `dragMode="revolution"`: one full 360° turn spans `min…max`. |
+| **Double-tap / double-click** | Two quick taps (each moving ≤ ~12px, within ~320ms) reset to `defaultValue`, or to the midpoint of `min…max` without one. Reports `eventDetails.reason === "reset"`. |
 
-Default geometry uses a large sweep (~288° from `angleGapRad`), so **`arc` and `revolution` can feel similar**; use a smaller `angleRange` if you want `arc` to span the full range in less than one physical turn. Values always **clamp** to `min…max` (no wrap).
+Values always **clamp** to `min…max` (no wrap). While dragging, the knob follows the pointer even if a controlled `value` updates late.
 
 ### Keyboard
 
-Focused knob:
+On the focused knob:
 
 | Key | Action |
 | --- | ------ |
 | `ArrowUp` / `ArrowRight` | Increase by `step` |
 | `ArrowDown` / `ArrowLeft` | Decrease by `step` |
-| `PageUp` | Increase by `step × 10` |
-| `PageDown` | Decrease by `step × 10` |
+| `PageUp` / `Shift` + `ArrowUp` | Increase by `largeStep` (default `10`) |
+| `PageDown` / `Shift` + `ArrowDown` | Decrease by `largeStep` (default `10`) |
 | `Home` | `min` |
 | `End` | `max` |
 
 ### Wheel
 
-When the knob is focused, vertical wheel deltas step the value (same idea as key nudging).
+Wheel input over the knob steps the value by `step` and reports `eventDetails.reason === "wheel"`.
 
 ## API reference
 
-`Knob` accepts **`size`** and **`className`** plus primitive props from `KnobPrimitive.RootProps`.
-
-### Value and state
+`Knob` accepts **`size`** and **`className`** plus primitive props from `KnobPrimitive.Root.Props`. `aria-label`, `aria-labelledby`, and `aria-describedby` are forwarded to the knob's input.
 
 | Prop | Type | Default | Description |
 | ---- | ---- | ------- | ----------- |
 | `value` | `number` | - | Controlled value. |
-| `defaultValue` | `number` | - | Uncontrolled starting value; also the **double-tap reset** target when provided. |
+| `defaultValue` | `number` | midpoint | Uncontrolled starting value, and the double-tap reset target. |
 | `min` | `number` | `0` | Minimum. |
 | `max` | `number` | `100` | Maximum. |
 | `step` | `number` | `1` | Quantization step (drag, wheel, keyboard, reset). |
+| `largeStep` | `number` | `10` | Step for `PageUp` / `PageDown` and `Shift` + arrows. |
+| `anchor` | `number` | `min` | Where the highlighted arc starts, e.g. `0` on a bipolar pan knob. |
+| `dragMode` | `"circular" \| "vertical" \| "revolution"` | `"circular"` | How pointer travel turns into value. |
 | `disabled` | `boolean` | `false` | Disables pointer, wheel, and keyboard. |
-| `onValueChange` | `(value: number) => void` | - | Live updates while dragging or adjusting. |
-| `onValueCommit` | `(value: number) => void` | - | When the gesture ends (pointer up, wheel tick, reset, etc.). |
-| `aria-label` | `string` | - | Accessible name for the slider. |
-| `aria-labelledby` | `string` | - | ID of a labeling element. |
-
-### Size and rail
-
-| Prop | Type | Default | Description |
-| ---- | ---- | ------- | ----------- |
+| `format` | `Intl.NumberFormatOptions` | - | Formats the value text announced to screen readers (and `Knob.Value` on the primitive). |
+| `locale` | `Intl.LocalesArgument` | runtime | Locale used by `format`. |
+| `name` | `string` | - | Submits the value with a form. |
+| `onValueChange` | `(value: number, eventDetails) => void` | - | Every change. `eventDetails.reason` is `"drag"`, `"keyboard"`, `"wheel"`, `"reset"`, or `"input-change"`; call `eventDetails.cancel()` to reject it. |
+| `onValueCommitted` | `(value: number, eventDetails) => void` | - | When an interaction ends with a new value (pointer up, key press, wheel tick, reset). |
 | `size` | `"sm" \| "default" \| "lg" \| "xl"` | `"default"` | Diameter variant. |
 | `className` | `string` | - | On the root wrapper. |
-| `arcRadius` | `number` | `23` | Arc radius in the 48×48 viewBox. |
-| `arcStrokeWidth` | `number` | `3` | Track / arc stroke width. |
-| `angleGapRad` | `number` | `π/5` | Bottom gap in radians; drives default `angleOffset` / `angleRange`. |
-| `angleOffset` | `number` | from gap | Dial start angle in **degrees** (optional override). |
-| `angleRange` | `number` | from gap | Total sweep in **degrees** (optional override). |
-| `anchor` | `number` | - | Secondary value for the highlighted arc segment. |
-| `indicatorSpan` | `[number, number]` | `[0.24, 0.58]` | Needle inner / outer radius as fractions of track radius. |
-| `indicatorWidth` | `number` | `2.75` | Needle stroke width. |
 
-### Pointer and drag
+### Primitive parts
 
-| Prop | Type | Default | Description |
-| ---- | ---- | ------- | ----------- |
-| `dragSensitivity` | `"arc" \| "revolution"` | `"arc"` | `arc`: one full span matches **`angleRange`** (as radians). `revolution`: one full span matches **360°** of pointer travel. Both are relative to the value at pointer down and clamp to `min…max`. |
-| `dragOptions` | see below | - | Pan vs rotate, dead zone, vertical sensitivity. |
-
-#### `dragOptions` (`Knob.DragOptions`)
-
-| Field | Default | Purpose |
-| ----- | ------- | ------- |
-| `verticalPanEnabled` | `false` | Allow vertical fader-style drag when `true`. |
-| `panSensitivityDivisor` | `150` | Vertical pan scale: `(max - min) / divisor` per unit delta. |
-| `centerDeadZoneRel` / `centerDeadZoneMinPx` | `0.08` / `2` | Hub radius where angle follows pointer without accumulating huge jumps. |
-| `modeLockMinPx` / `modeLockRel` | `6` / `0.055` | Movement before locking rotate vs pan mode. |
-| `panMinVerticalPx` | `10` | Minimum vertical movement to consider pan. |
-| `panDominanceRatio` | `2.5` | Pan wins when `movedY > movedX × ratio`. |
-
-Additional HTML attributes on the root are forwarded where valid.
+`@audio-ui/react/knob` exposes `Knob.Root`, `Knob.Control` (pointer, wheel, reset), `Knob.Track` and `Knob.Indicator` (SVG arcs; `strokeWidth` in the 48×48 viewBox), `Knob.Thumb` (rotates with the value and holds the input), `Knob.Value` (formatted `<output>`), and `Knob.Label`. Every part accepts a `render` prop, `className` / `style` as functions of state, and exposes `data-disabled` / `data-dragging`.
 
 ## Examples
 

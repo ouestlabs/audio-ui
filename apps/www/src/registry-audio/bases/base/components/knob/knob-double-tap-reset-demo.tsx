@@ -9,6 +9,7 @@ export default function KnobDoubleTapResetDemo() {
   return (
     <div className="flex max-w-xs flex-col items-center gap-2">
       <Knob
+        aria-label="Level"
         defaultValue={30}
         max={100}
         min={0}

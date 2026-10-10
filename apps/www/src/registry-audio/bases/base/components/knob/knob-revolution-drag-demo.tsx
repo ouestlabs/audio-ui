@@ -9,7 +9,8 @@ export default function KnobRevolutionDragDemo() {
   return (
     <div className="flex flex-col items-center gap-2">
       <Knob
-        dragSensitivity="revolution"
+        aria-label="Revolution drag knob"
+        dragMode="revolution"
         max={100}
         min={0}
         onValueChange={setValue}

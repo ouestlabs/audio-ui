@@ -1,7 +1,7 @@
 import { Slider } from "@base-ui/react/slider";
 import * as React from "react";
 import { useWheel } from "../hooks/interactions/use-wheel";
-import { clamp, type Nullable, type Point } from "../utils";
+import { clamp, type Nullable, type Point, roundToStep } from "../utils";
 import {
   createChangeEventDetails,
   type ChangeEventDetails as ExtraChangeEventDetails,
@@ -24,14 +24,6 @@ function useFaderContext(part: string): FaderContextValue {
     throw new Error(`Fader.${part} must be used within Fader.Root`);
   }
   return context;
-}
-
-/** Snap to `step` with `min` as the origin, without float noise (0.1 + 0.2). */
-function roundToStep(value: number, step: number, min: number): number {
-  const decimals = (String(step).split(".")[1] ?? "").length;
-  return Number(
-    (Math.round((value - min) / step) * step + min).toFixed(decimals)
-  );
 }
 
 /**

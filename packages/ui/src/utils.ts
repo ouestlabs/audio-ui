@@ -45,3 +45,11 @@ export const quantizeRound = (value: number, interval: number): number =>
 export const radToDeg = (rad: number): number => (rad * 180.0) / Math.PI;
 
 export const degToRad = (deg: number): number => (deg / 180.0) * Math.PI;
+
+/** Snap to `step` with `min` as the origin, without float noise (0.1 + 0.2). */
+export function roundToStep(value: number, step: number, min: number): number {
+  const decimals = (String(step).split(".")[1] ?? "").length;
+  return Number(
+    (Math.round((value - min) / step) * step + min).toFixed(decimals)
+  );
+}

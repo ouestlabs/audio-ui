@@ -8,6 +8,7 @@ export default function KnobFilterControlDemo() {
   return (
     <div className="flex flex-col items-center gap-2">
       <Knob
+        aria-label="Cutoff"
         max={20_000}
         min={20}
         onValueChange={setCutoff}

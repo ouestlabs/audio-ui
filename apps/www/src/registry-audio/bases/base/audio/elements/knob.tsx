@@ -5,7 +5,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/registry/bases/base/lib/utils";
 
 const knobVariants = cva(
-  "cn-knob relative inline-flex outline-none data-[disabled=true]:cursor-not-allowed",
+  "cn-knob relative inline-flex outline-none data-disabled:cursor-not-allowed",
   {
     defaultVariants: {
       size: "default",
@@ -22,7 +22,7 @@ const knobVariants = cva(
 );
 
 const knobControlClassName =
-  "cn-knob-control transform-[translateZ(0)] relative isolate flex size-full cursor-grab touch-none select-none outline-none [clip-path:circle(50%_at_50%_50%)] focus-visible:outline-none active:cursor-grabbing data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50";
+  "cn-knob-control transform-[translateZ(0)] relative isolate flex size-full cursor-grab touch-none select-none outline-none [clip-path:circle(50%_at_50%_50%)] focus-visible:outline-none active:cursor-grabbing data-disabled:pointer-events-none data-disabled:opacity-50";
 
 const knobBodyVariants = cva("cn-knob-body absolute z-0", {
   defaultVariants: {
@@ -38,33 +38,60 @@ const knobBodyVariants = cva("cn-knob-body absolute z-0", {
   },
 });
 
-export type KnobProps = KnobPrimitive.RootProps &
+export type KnobProps = KnobPrimitive.Root.Props &
   VariantProps<typeof knobVariants>;
 
-function Knob({ className, size, ...props }: KnobProps) {
+function Knob({
+  "aria-describedby": ariaDescribedBy,
+  "aria-label": ariaLabel,
+  "aria-labelledby": ariaLabelledBy,
+  className,
+  size,
+  ...props
+}: KnobProps) {
   return (
     <KnobPrimitive.Root
       className={cn(knobVariants({ size }), className)}
       data-slot="knob"
       {...props}
     >
-      <KnobPrimitive.Slider
+      <KnobPrimitive.Control
         className={knobControlClassName}
         data-slot="knob-control"
       >
-        <KnobPrimitive.Body
-          className={knobBodyVariants({ size })}
-          data-slot="knob-body"
+        <div className={knobBodyVariants({ size })} data-slot="knob-body" />
+        <KnobPrimitive.Track
+          className="cn-knob-arc pointer-events-none absolute inset-0 z-1 block size-full opacity-22"
+          data-slot="knob-track"
         />
-        <KnobPrimitive.Arc
+        <KnobPrimitive.Indicator
           className="cn-knob-arc pointer-events-none absolute inset-0 z-1 block size-full"
           data-slot="knob-arc"
         />
-        <KnobPrimitive.Indicator
-          className="cn-knob-indicator pointer-events-none absolute inset-0 z-2 block size-full"
-          data-slot="knob-indicator"
-        />
-      </KnobPrimitive.Slider>
+        <KnobPrimitive.Thumb
+          aria-describedby={ariaDescribedBy}
+          aria-label={ariaLabel}
+          aria-labelledby={ariaLabelledBy}
+          className="pointer-events-none absolute inset-0 z-2"
+          data-slot="knob-thumb"
+        >
+          <svg
+            aria-hidden="true"
+            className="cn-knob-indicator block size-full"
+            viewBox="0 0 48 48"
+          >
+            <line
+              stroke="currentColor"
+              strokeLinecap="round"
+              strokeWidth={2.75}
+              x1={24}
+              x2={24}
+              y1={11.53}
+              y2={18.84}
+            />
+          </svg>
+        </KnobPrimitive.Thumb>
+      </KnobPrimitive.Control>
     </KnobPrimitive.Root>
   );
 }

@@ -9,8 +9,8 @@ export default function KnobVerticalDragDemo() {
   return (
     <div className="flex flex-col items-center gap-2">
       <Knob
-        dragOptions={{ verticalPanEnabled: true }}
-        dragSensitivity="arc"
+        aria-label="Vertical drag knob"
+        dragMode="vertical"
         max={100}
         min={0}
         onValueChange={setValue}

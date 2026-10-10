@@ -10,10 +10,11 @@ export default function KnobChangeVsCommitDemo() {
   return (
     <div className="flex flex-col items-center gap-2">
       <Knob
+        aria-label="Level"
         max={100}
         min={0}
         onValueChange={setLiveValue}
-        onValueCommit={setCommittedValue}
+        onValueCommitted={setCommittedValue}
         step={1}
         value={liveValue}
       />
