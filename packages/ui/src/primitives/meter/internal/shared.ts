@@ -19,6 +19,8 @@ export interface ChannelView {
   percent: number;
   text: string;
   valueNow: number;
+  /** At or above the warning level, and not yet clipping. */
+  warning: boolean;
 }
 
 export interface MeterConfig {
@@ -28,6 +30,7 @@ export interface MeterConfig {
   locale: Intl.LocalesArgument | undefined;
   max: number;
   min: number;
+  warnThreshold: number;
 }
 
 export function channelView(
@@ -35,7 +38,7 @@ export function channelView(
   index: number,
   config: MeterConfig
 ): ChannelView {
-  const { clipThreshold, formatter, max, min } = config;
+  const { clipThreshold, formatter, max, min, warnThreshold } = config;
   const level = frame.levels[index] ?? min;
   const peak = frame.peaks?.[index];
   const toPercent = (db: number) => clampUnit((db - min) / (max - min || 1));
@@ -47,6 +50,7 @@ export function channelView(
     percent: toPercent(level),
     text: formatter.format(valueNow),
     valueNow,
+    warning: level >= warnThreshold && level < clipThreshold,
   };
 }
 
@@ -108,6 +112,7 @@ export function paintChannel(
         ? `scaleX(${view.percent})`
         : `scaleY(${view.percent})`;
     setPresence(indicator, "data-clipping", view.clipping);
+    setPresence(indicator, "data-warning", view.warning);
     // Latched: it stays until a click on the meter clears it.
     if (view.clipping) {
       setPresence(indicator, "data-clipped", true);
@@ -130,6 +135,7 @@ export function paintChannel(
       );
     }
     setPresence(channel, "data-clipping", view.clipping);
+    setPresence(channel, "data-warning", view.warning);
     if (view.clipping) {
       setPresence(channel, "data-clipped", true);
     }

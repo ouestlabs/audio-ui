@@ -65,6 +65,20 @@ export const hooks: RegistryItem[] = [
     type: "registry:hook",
   },
   {
+    categories: ["hooks", "audio", "meter"],
+    dependencies: [],
+    description:
+      "Levels that move on their own, with a peak that holds and falls, in the shape a Meter paints from: a demo meter that is never at rest",
+    files: [
+      {
+        path: "hooks/use-simulated-levels.ts",
+        type: "registry:hook",
+      },
+    ],
+    name: "use-simulated-levels",
+    type: "registry:hook",
+  },
+  {
     categories: ["hooks", "audio", "plot"],
     dependencies: ["@audio-ui/react"],
     description:

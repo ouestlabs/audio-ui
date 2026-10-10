@@ -134,6 +134,7 @@ Groups the channels of a level meter. Levels come either from `value` (and `peak
 | `min` | `number` | `-60` |  |
 | `orientation` | `Orientation` | `"vertical"` |  |
 | `peak` | `readonly number[]` |  | Peak-hold level per channel. Timing and decay live outside the primitive. |
+| `warnThreshold` | `number` |  | Level at or above which a channel is in its warning zone, below the clip threshold: `data-warning`. Unset, there is no warning zone. |
 | `source` | `Source` |  | A live signal painted outside React; takes precedence over `value` and `peak`. |
 | `value` | `readonly number[]` |  | Level per channel; the array length is the channel count. |
 
@@ -178,6 +179,14 @@ The peak-hold mark, positioned at the channel's peak level; hidden while the cha
 
 The channel's formatted level (`format`/`locale` on Root). With a live `source` only the default text is kept current, not a `children` function. Renders a `<span>` element.
 
+### Mark
+
+A graduation of the level scale at `value`, such as -18 dB: placed along the meter's length from its minimum, upward for a vertical meter and rightward for a horizontal one. Sits directly in `Root`, beside the channels. Decorative: each channel announces its own level. Renders a `<div>` element.
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value` | `number` |  | Where the mark sits, between `min` and `max`. |
+
 ### Registry component
 
 `Meter` accepts style props (`size`, `peakMarks`, `className`) plus primitive props from `MeterPrimitive.Root.Props`.
@@ -209,10 +218,6 @@ The channel's formatted level (`format`/`locale` on Root). With a live `source` 
 `@audio-ui/react/meter` exposes `Meter.Root` (the group), `Meter.Channels` (one child per channel), `Meter.Channel` (a `role="meter"`), `Meter.Track`, `Meter.Indicator` (the lit part), `Meter.Peak` (the peak-hold mark), `Meter.Value` (the formatted level) and `Meter.Label`. Channel parts expose `data-orientation` and `data-clipping`.
 
 ## Examples
-
-### Live levels with peak-hold decay
-
-<ComponentPreview styleName="base-nova" name="meter-live-demo" />
 
 ### Horizontal orientation
 

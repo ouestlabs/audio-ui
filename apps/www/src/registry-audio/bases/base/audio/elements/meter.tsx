@@ -20,6 +20,8 @@ const meterVariants = cva("", {
 interface MeterProps
   extends MeterPrimitive.Root.Props,
     VariantProps<typeof meterVariants> {
+  /** Levels graduated along the meter's length, such as `[-48, -24, -12, -6, 0]`, each with its label. */
+  marks?: readonly number[];
   peakMarks?: "visible" | "hidden";
 }
 
@@ -28,6 +30,7 @@ const decibels = (formattedValue: string) => `${formattedValue} dB`;
 export function Meter({
   "aria-label": ariaLabel,
   className,
+  marks,
   size,
   peakMarks = "visible",
   ...props
@@ -36,8 +39,11 @@ export function Meter({
     <MeterPrimitive.Root
       aria-label={ariaLabel}
       className={cn(
-        "cn-meter flex w-full select-none",
+        "cn-meter flex select-none data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-fit",
         "gap-1 data-[orientation=horizontal]:flex-col",
+        // Room for the scale's labels beside the channels.
+        marks &&
+          "data-[orientation=vertical]:me-7 data-[orientation=horizontal]:mb-5",
         meterVariants({ size }),
         className
       )}
@@ -52,7 +58,7 @@ export function Meter({
                 ? `${ariaLabel} ${index + 1}`
                 : ariaLabel
             }
-            className="cn-meter-channel relative flex-1 overflow-hidden data-[orientation=horizontal]:h-(--meter-thickness,auto) data-[orientation=horizontal]:flex-none"
+            className="cn-meter-channel relative flex-1 overflow-hidden data-[orientation=horizontal]:h-(--meter-thickness,auto) data-[orientation=horizontal]:flex-none data-[orientation=vertical]:w-(--meter-thickness,auto) data-[orientation=vertical]:flex-none"
             getAriaValueText={decibels}
             index={index}
             key={`meter-channel-${index}`}
@@ -64,6 +70,15 @@ export function Meter({
           </MeterPrimitive.Channel>
         )}
       </MeterPrimitive.Channels>
+      {marks?.map((level) => (
+        <MeterPrimitive.Mark
+          className="cn-meter-mark flex items-center text-muted-foreground text-[10px] tabular-nums data-[orientation=horizontal]:top-full data-[orientation=horizontal]:mt-1 data-[orientation=horizontal]:-translate-x-1/2 data-[orientation=vertical]:left-full data-[orientation=vertical]:ms-1.5 data-[orientation=vertical]:translate-y-1/2"
+          key={level}
+          value={level}
+        >
+          {level}
+        </MeterPrimitive.Mark>
+      ))}
     </MeterPrimitive.Root>
   );
 }

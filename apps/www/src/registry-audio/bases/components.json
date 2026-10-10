@@ -76,11 +76,6 @@
   },
   {
     "categories": ["meter"],
-    "name": "meter-live-demo",
-    "title": "meter-live-demo"
-  },
-  {
-    "categories": ["meter"],
     "name": "meter-horizontal-demo",
     "title": "meter-horizontal-demo"
   },

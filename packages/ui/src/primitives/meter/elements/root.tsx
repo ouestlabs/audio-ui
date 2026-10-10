@@ -35,6 +35,7 @@ export function Root(componentProps: Root.Props) {
     source,
     style,
     value,
+    warnThreshold = Number.POSITIVE_INFINITY,
     ...elementProps
   } = componentProps;
 
@@ -43,8 +44,16 @@ export function Root(componentProps: Root.Props) {
     [format, locale]
   );
   const config = React.useMemo<MeterConfig>(
-    () => ({ clipThreshold, format, formatter, locale, max, min }),
-    [clipThreshold, format, formatter, locale, max, min]
+    () => ({
+      clipThreshold,
+      format,
+      formatter,
+      locale,
+      max,
+      min,
+      warnThreshold,
+    }),
+    [clipThreshold, format, formatter, locale, max, min, warnThreshold]
   );
 
   const frame = React.useMemo<Root.Frame>(
@@ -175,5 +184,7 @@ export namespace Root {
     source?: Source;
     /** Level per channel; the array length is the channel count. */
     value?: readonly number[];
+    /** Level at or above which a channel is in its warning zone, below the clip threshold: `data-warning`. Unset, there is no warning zone. */
+    warnThreshold?: number;
   }
 }

@@ -218,20 +218,7 @@ export const components: RegistryItem[] = [
       },
     ],
     name: "meter-size-default-demo",
-    registryDependencies: ["@audio/meter"],
-    type: "registry:example",
-  },
-  {
-    categories: ["meter"],
-    description: "Meter with simulated live levels and peak-hold decay",
-    files: [
-      {
-        path: "components/meter/meter-live-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "meter-live-demo",
-    registryDependencies: ["@audio/meter"],
+    registryDependencies: ["@audio/meter", "@audio/use-simulated-levels"],
     type: "registry:example",
   },
   {
@@ -244,7 +231,7 @@ export const components: RegistryItem[] = [
       },
     ],
     name: "meter-horizontal-demo",
-    registryDependencies: ["@audio/meter"],
+    registryDependencies: ["@audio/meter", "@audio/use-simulated-levels"],
     type: "registry:example",
   },
   {

@@ -12,8 +12,13 @@ export function useChannelPart(
   const { actions, meta, state } = useMeterContext(part);
   const view = channelView(meta.frame, index, meta.config);
   const partState = React.useMemo<Channel.State>(
-    () => ({ clipping: view.clipping, index, orientation: state.orientation }),
-    [index, state.orientation, view.clipping]
+    () => ({
+      clipping: view.clipping,
+      index,
+      orientation: state.orientation,
+      warning: view.warning,
+    }),
+    [index, state.orientation, view.clipping, view.warning]
   );
   const { registerNode } = actions;
   const registerRef = React.useCallback(
@@ -53,5 +58,6 @@ export function channelDataAttributes(state: Channel.State) {
   return {
     "data-clipping": state.clipping ? "" : undefined,
     "data-orientation": state.orientation,
+    "data-warning": state.warning ? "" : undefined,
   };
 }

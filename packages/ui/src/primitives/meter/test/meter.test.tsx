@@ -153,6 +153,64 @@ describe("Meter orientation", () => {
   });
 });
 
+describe("Meter scale and warning zone", () => {
+  test("a mark sits along the length at its level, upward for a vertical meter", () => {
+    const view = render(
+      <Meter.Root aria-label="Out" max={0} min={-60} value={[-30]}>
+        <Meter.Channels>
+          {(index) => (
+            <Meter.Channel aria-label="Out" index={index} key={index}>
+              <Meter.Indicator />
+            </Meter.Channel>
+          )}
+        </Meter.Channels>
+        <Meter.Mark data-testid="mark" value={-15}>
+          -15
+        </Meter.Mark>
+      </Meter.Root>
+    );
+    expect(view.getByTestId("mark").style.bottom).toBe("75%");
+    expect(view.getByTestId("mark").getAttribute("data-orientation")).toBe(
+      "vertical"
+    );
+  });
+
+  test("a horizontal meter's marks run from the start", () => {
+    const view = render(
+      <Meter.Root
+        aria-label="Out"
+        max={0}
+        min={-60}
+        orientation="horizontal"
+        value={[-30]}
+      >
+        <Meter.Mark data-testid="mark" value={-45}>
+          -45
+        </Meter.Mark>
+      </Meter.Root>
+    );
+    expect(view.getByTestId("mark").style.insetInlineStart).toBe("25%");
+  });
+
+  test("a level in the warning zone carries data-warning, until it clips", () => {
+    const source = createSource({ levels: [-60] });
+    const { channels } = renderMeter({ max: 0, source, warnThreshold: -12 });
+    act(() => source.emit({ levels: [-20] }));
+    expect(channels()[0]?.hasAttribute("data-warning")).toBe(false);
+    act(() => source.emit({ levels: [-6] }));
+    expect(channels()[0]?.hasAttribute("data-warning")).toBe(true);
+    expect(channels()[0]?.hasAttribute("data-clipping")).toBe(false);
+    act(() => source.emit({ levels: [0] }));
+    expect(channels()[0]?.hasAttribute("data-warning")).toBe(false);
+    expect(channels()[0]?.hasAttribute("data-clipping")).toBe(true);
+  });
+
+  test("with no warning level there is no warning zone", () => {
+    const { channels } = renderMeter({ max: 0, value: [-3] });
+    expect(channels()[0]?.hasAttribute("data-warning")).toBe(false);
+  });
+});
+
 describe("Meter clip latch", () => {
   test("a live clip stays lit as data-clipped until a click on the meter clears it", () => {
     const source = createSource({ levels: [-60, -60] });

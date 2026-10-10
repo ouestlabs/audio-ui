@@ -199,15 +199,15 @@
   }
 
   .cn-meter-size-sm {
-    @apply data-[orientation=vertical]:h-32 data-[orientation=horizontal]:[--meter-thickness:--spacing(2)];
+    @apply data-[orientation=vertical]:h-32 data-[orientation=vertical]:[--meter-thickness:--spacing(2.5)] data-[orientation=horizontal]:[--meter-thickness:--spacing(2)];
   }
 
   .cn-meter-size-default {
-    @apply data-[orientation=vertical]:h-48 data-[orientation=horizontal]:[--meter-thickness:--spacing(3)];
+    @apply data-[orientation=vertical]:h-48 data-[orientation=vertical]:[--meter-thickness:--spacing(3.5)] data-[orientation=horizontal]:[--meter-thickness:--spacing(3)];
   }
 
   .cn-meter-size-lg {
-    @apply data-[orientation=vertical]:h-64 data-[orientation=horizontal]:[--meter-thickness:--spacing(4)];
+    @apply data-[orientation=vertical]:h-64 data-[orientation=vertical]:[--meter-thickness:--spacing(4.5)] data-[orientation=horizontal]:[--meter-thickness:--spacing(4)];
   }
 
   .cn-meter-channel {
@@ -215,11 +215,15 @@
   }
 
   .cn-meter-fill {
-    @apply bg-success data-clipping:bg-destructive data-clipped:bg-destructive;
+    @apply bg-success data-warning:bg-warning data-clipping:bg-destructive data-clipped:bg-destructive;
   }
 
   .cn-meter-peak {
     @apply bg-foreground;
+  }
+
+  .cn-meter-mark {
+    @apply text-muted-foreground;
   }
 
   /* MARK: Piano (container ← cn-xypad, white/black keys ← cn-fader-track/cn-knob-body) */

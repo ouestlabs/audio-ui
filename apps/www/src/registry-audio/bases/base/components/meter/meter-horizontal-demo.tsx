@@ -1,13 +1,20 @@
+"use client";
+
 import { Meter } from "@/registry-audio/bases/base/audio/elements/meter";
+import { useSimulatedLevels } from "@/registry-audio/bases/base/hooks/use-simulated-levels";
+
+const SCALE = [-48, -24, -12, -6, 0];
 
 export default function MeterHorizontalDemo() {
+  const source = useSimulatedLevels(2);
   return (
     <Meter
       aria-label="Stereo output"
+      marks={SCALE}
       orientation="horizontal"
-      peak={[-4, -8]}
       size="sm"
-      value={[-9, -14]}
+      source={source}
+      warnThreshold={-12}
     />
   );
 }
