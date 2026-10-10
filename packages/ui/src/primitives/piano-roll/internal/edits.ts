@@ -231,3 +231,23 @@ export function keyboardEdit(
   }
   return null;
 }
+
+/**
+ * Changes the velocity of every note in `ids` by `delta`, each kept within
+ * 0…1: a phrase keeps its dynamics, where setting them all to one value
+ * would flatten it.
+ */
+export function changeVelocity(
+  notes: readonly Note[],
+  ids: ReadonlySet<NoteId>,
+  delta: number
+): Note[] {
+  return notes.map((note) =>
+    ids.has(note.id)
+      ? {
+          ...note,
+          velocity: Math.min(1, Math.max(0, (note.velocity ?? 1) + delta)),
+        }
+      : note
+  );
+}

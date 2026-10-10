@@ -7,3 +7,4 @@ export { Note, NoteHandle } from "./elements/note";
 export { Notes } from "./elements/notes";
 export { Root } from "./elements/root";
 export { Row, Rows } from "./elements/rows";
+export { Velocity, VelocityLane } from "./elements/velocity";

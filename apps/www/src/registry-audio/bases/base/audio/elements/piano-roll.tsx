@@ -147,4 +147,34 @@ function PianoRollGrid({
   );
 }
 
-export { PianoRoll, PianoRollGrid, PianoRollKeys };
+type PianoRollVelocityProps = Omit<
+  PianoRollPrimitive.VelocityLane.Props,
+  "className"
+> & { className?: string };
+
+/** Each note's velocity as a bar under the grid: drag one up or down, or use the arrow keys. */
+function PianoRollVelocity({ className, ...props }: PianoRollVelocityProps) {
+  return (
+    <PianoRollPrimitive.VelocityLane
+      aria-label="Velocity"
+      className={cn(
+        "cn-piano-roll-velocity col-start-2 mt-2 h-16 touch-none select-none overflow-hidden",
+        className
+      )}
+      data-slot="piano-roll-velocity"
+      {...props}
+    >
+      <PianoRollPrimitive.Notes>
+        {(note) => (
+          <PianoRollPrimitive.Velocity
+            className="cn-piano-roll-velocity-bar w-1.5 cursor-ns-resize after:absolute after:-inset-x-1 after:inset-y-0"
+            key={note.id}
+            note={note}
+          />
+        )}
+      </PianoRollPrimitive.Notes>
+    </PianoRollPrimitive.VelocityLane>
+  );
+}
+
+export { PianoRoll, PianoRollGrid, PianoRollKeys, PianoRollVelocity };

@@ -19,6 +19,7 @@ import {
   PianoRoll,
   PianoRollGrid,
   PianoRollKeys,
+  PianoRollVelocity,
 } from "@/registry-audio/bases/base/audio/elements/piano-roll";
 import {
   Timeline,
@@ -571,6 +572,7 @@ export default function BlockPianoRoll() {
           <PianoRollGrid aria-label="Notes" gridStep={1}>
             {isPlaying ? <TimelinePlayhead /> : null}
           </PianoRollGrid>
+          <PianoRollVelocity />
         </PianoRoll>
       </Timeline>
       <div className="flex flex-wrap items-center justify-between gap-4">

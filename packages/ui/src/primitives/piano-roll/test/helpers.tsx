@@ -94,11 +94,29 @@ export function renderRoll(
           </PianoRoll.Notes>
           <PianoRoll.Marquee data-testid="marquee" />
         </PianoRoll.Grid>
+        <PianoRoll.VelocityLane aria-label="Velocity" data-testid="velocities">
+          <PianoRoll.Notes>
+            {(note) => (
+              <PianoRoll.Velocity
+                data-testid={`velocity-${note.id}`}
+                key={note.id}
+                note={note}
+              />
+            )}
+          </PianoRoll.Notes>
+        </PianoRoll.VelocityLane>
       </PianoRoll.Root>
     </Timeline.Root>
   );
   const grid = view.getByTestId("grid");
   mockRect(grid, { bottom: 40, height: 40, right: 160, width: 160 });
+  mockRect(view.getByTestId("velocities"), {
+    bottom: 100,
+    height: 50,
+    right: 160,
+    top: 50,
+    width: 160,
+  });
   const keys = view.getByTestId("keys");
   mockRect(keys, { bottom: 40, height: 40, right: 40, width: 40 });
   return {
@@ -111,6 +129,7 @@ export function renderRoll(
     onValueChange,
     onValueCommitted,
     root: view.getByTestId("root"),
+    velocity: (id: string) => view.getByTestId(`velocity-${id}`),
     view,
   };
 }

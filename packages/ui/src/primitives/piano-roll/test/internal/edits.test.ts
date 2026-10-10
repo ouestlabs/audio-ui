@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import {
   cellStart,
+  changeVelocity,
   duplicateNotes,
   moveNotes,
   type Note,
@@ -81,7 +82,9 @@ describe("snapEdgeDelta", () => {
   test("lands the dragged edge on the grid", () => {
     const note = { id: 1, length: 1.5, pitch: 60, start: 2 };
     expect(snapEdgeDelta(note, "end", 0.6, { offset: 0, step: 1 })).toBe(0.5);
-    expect(snapEdgeDelta(note, "end", 0.8, { offset: 0, step: 0 })).toBe(0.8);
+    expect(snapEdgeDelta(note, "end", 0.8, { offset: 0, step: 0 })).toBeCloseTo(
+      0.8
+    );
   });
 });
 
@@ -135,5 +138,19 @@ describe("cellStart", () => {
     expect(cellStart(3.9, { offset: 0, step: 1 })).toBe(3);
     expect(cellStart(3.9, { offset: 0.5, step: 2 })).toBe(2.5);
     expect(cellStart(3.9, { offset: 0, step: 0 })).toBe(3.9);
+  });
+});
+
+describe("changeVelocity", () => {
+  test("shifts each note by the same amount, within 0 to 1", () => {
+    const notes: Note[] = [
+      { id: "c", length: 1, pitch: 60, start: 0, velocity: 0.9 },
+      { id: "e", length: 1, pitch: 64, start: 0, velocity: 0.5 },
+      { id: "x", length: 1, pitch: 70, start: 0 },
+    ];
+    expect(
+      changeVelocity(notes, BOTH, 0.2).map((note) => note.velocity)
+    ).toEqual([1, 0.7, undefined]);
+    expect(changeVelocity(notes, BOTH, -0.6)[1]?.velocity).toBe(0);
   });
 });

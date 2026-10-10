@@ -34,7 +34,13 @@ export type PianoRollState = {
 };
 
 /** What a change did to the notes. */
-export type Edit = "add" | "duplicate" | "move" | "remove" | "resize";
+export type Edit =
+  | "add"
+  | "duplicate"
+  | "move"
+  | "remove"
+  | "resize"
+  | "velocity";
 
 type WithEdit<Details> = Details & {
   /** What the change did: one gesture keeps one `edit` throughout. */
@@ -45,13 +51,15 @@ export type ValueChangeEventDetails =
   | WithEdit<ExtraChangeEventDetails<"draw", PointerEvent>>
   | WithEdit<ExtraChangeEventDetails<"drag", PointerEvent>>
   | WithEdit<ExtraChangeEventDetails<"keyboard", KeyboardEvent>>
-  | WithEdit<ExtraChangeEventDetails<"double-click", MouseEvent>>;
+  | WithEdit<ExtraChangeEventDetails<"double-click", MouseEvent>>
+  | WithEdit<ExtraChangeEventDetails<"input-change", Event>>;
 
 export type ValueCommitEventDetails =
   | WithEdit<ExtraCommitEventDetails<"draw", PointerEvent>>
   | WithEdit<ExtraCommitEventDetails<"drag", PointerEvent>>
   | WithEdit<ExtraCommitEventDetails<"keyboard", KeyboardEvent>>
-  | WithEdit<ExtraCommitEventDetails<"double-click", MouseEvent>>;
+  | WithEdit<ExtraCommitEventDetails<"double-click", MouseEvent>>
+  | WithEdit<ExtraCommitEventDetails<"input-change", Event>>;
 
 export type SelectionChangeEventDetails =
   | ExtraChangeEventDetails<"press", PointerEvent>
