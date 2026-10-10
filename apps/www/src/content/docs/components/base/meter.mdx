@@ -134,6 +134,7 @@ Groups the channels of a level meter. Levels come either from `value` (and `peak
 | `min` | `number` | `-60` |  |
 | `orientation` | `Orientation` | `"vertical"` |  |
 | `peak` | `readonly number[]` |  | Peak-hold level per channel. Timing and decay live outside the primitive. |
+| `scale` | `"linear" \| "iec" \| (level: number) => number` | `"linear"` | How levels are spread along the length: evenly, as digital peak meters do with more room at the top (`"iec"`), or by your own increasing curve. |
 | `warnThreshold` | `number` |  | Level at or above which a channel is in its warning zone, below the clip threshold: `data-warning`. Unset, there is no warning zone. |
 | `source` | `Source` |  | A live signal painted outside React; takes precedence over `value` and `peak`. |
 | `value` | `readonly number[]` |  | Level per channel; the array length is the channel count. |

@@ -1,5 +1,4 @@
 import type * as React from "react";
-import { clampUnit } from "../../../utils";
 import type { Channel } from "../elements/channel";
 import type { Root } from "../elements/root";
 
@@ -30,6 +29,8 @@ export interface MeterConfig {
   locale: Intl.LocalesArgument | undefined;
   max: number;
   min: number;
+  /** A level's position along the length, 0…1. */
+  position: (level: number) => number;
   warnThreshold: number;
 }
 
@@ -38,10 +39,10 @@ export function channelView(
   index: number,
   config: MeterConfig
 ): ChannelView {
-  const { clipThreshold, formatter, max, min, warnThreshold } = config;
+  const { clipThreshold, formatter, min, position, warnThreshold } = config;
   const level = frame.levels[index] ?? min;
   const peak = frame.peaks?.[index];
-  const toPercent = (db: number) => clampUnit((db - min) / (max - min || 1));
+  const toPercent = position;
   // One decimal keeps a live signal from rewriting the attribute every frame.
   const valueNow = Math.round(level * 10) / 10;
   return {

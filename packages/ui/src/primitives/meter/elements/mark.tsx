@@ -1,7 +1,6 @@
 import { mergeProps } from "@base-ui/react/merge-props";
 import { useRender } from "@base-ui/react/use-render";
 import * as React from "react";
-import { clampUnit } from "../../../utils";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { useMeterContext } from "../context";
 
@@ -16,8 +15,7 @@ export function Mark(componentProps: Mark.Props) {
   const { className, ref, render, style, value, ...elementProps } =
     componentProps;
   const { meta, state } = useMeterContext("Mark");
-  const { max, min } = meta.config;
-  const share = clampUnit((value - min) / (max - min || 1)) * 100;
+  const share = meta.config.position(value) * 100;
   const markState = React.useMemo<Mark.State>(
     () => ({ orientation: state.orientation }),
     [state.orientation]

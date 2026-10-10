@@ -31,6 +31,8 @@ export function Meter({
   "aria-label": ariaLabel,
   className,
   marks,
+  orientation = "vertical",
+  scale = "iec",
   size,
   peakMarks = "visible",
   ...props
@@ -43,11 +45,13 @@ export function Meter({
         "gap-1 data-[orientation=horizontal]:flex-col",
         // Room for the scale's labels beside the channels.
         marks &&
-          "data-[orientation=vertical]:me-7 data-[orientation=horizontal]:mb-5",
+          "data-[orientation=vertical]:me-8 data-[orientation=horizontal]:mb-6",
         meterVariants({ size }),
         className
       )}
       data-slot="meter"
+      orientation={orientation}
+      scale={scale}
       {...props}
     >
       <MeterPrimitive.Channels>
@@ -72,11 +76,18 @@ export function Meter({
       </MeterPrimitive.Channels>
       {marks?.map((level) => (
         <MeterPrimitive.Mark
-          className="cn-meter-mark flex items-center text-muted-foreground text-[10px] tabular-nums data-[orientation=horizontal]:top-full data-[orientation=horizontal]:mt-1 data-[orientation=horizontal]:-translate-x-1/2 data-[orientation=vertical]:left-full data-[orientation=vertical]:ms-1.5 data-[orientation=vertical]:translate-y-1/2"
+          className="cn-meter-mark flex items-center gap-1 text-[10px] tabular-nums data-[orientation=vertical]:left-full data-[orientation=vertical]:ms-1 data-[orientation=horizontal]:top-full data-[orientation=horizontal]:mt-1 data-[orientation=horizontal]:-translate-x-1/2 data-[orientation=vertical]:translate-y-1/2 data-[orientation=horizontal]:flex-col"
           key={level}
           value={level}
         >
-          {level}
+          <span
+            aria-hidden="true"
+            className="bg-current opacity-40 data-[orientation=horizontal]:h-1 data-[orientation=horizontal]:w-px data-[orientation=vertical]:h-px data-[orientation=vertical]:w-1.5"
+            data-orientation={orientation}
+          />
+          <span className="min-w-4 text-end data-[orientation=horizontal]:text-center">
+            {level}
+          </span>
         </MeterPrimitive.Mark>
       ))}
     </MeterPrimitive.Root>

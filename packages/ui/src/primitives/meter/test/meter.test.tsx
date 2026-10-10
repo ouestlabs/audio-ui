@@ -211,6 +211,64 @@ describe("Meter scale and warning zone", () => {
   });
 });
 
+const cubed = (level: number) => level ** 3;
+
+describe("Meter level scale", () => {
+  test("the IEC scale gives the top of the range more room than the bottom", () => {
+    const view = render(
+      <Meter.Root aria-label="Out" max={0} min={-60} scale="iec" value={[-20]}>
+        <Meter.Channels>
+          {(index) => (
+            <Meter.Channel aria-label="Out" index={index} key={index}>
+              <Meter.Indicator data-testid="indicator" />
+            </Meter.Channel>
+          )}
+        </Meter.Channels>
+        <Meter.Mark data-testid="mark-20" value={-20} />
+        <Meter.Mark data-testid="mark-60" value={-60} />
+        <Meter.Mark data-testid="mark-0" value={0} />
+        <Meter.Mark data-testid="mark-40" value={-40} />
+      </Meter.Root>
+    );
+    // 0 dB is the top, -60 the bottom, and -20 sits about halfway, not a third of the way up.
+    expect(view.getByTestId("mark-0").style.bottom).toBe("100%");
+    expect(view.getByTestId("mark-60").style.bottom).toBe("0%");
+    const half = Number.parseFloat(view.getByTestId("mark-20").style.bottom);
+    expect(half).toBeGreaterThan(45);
+    expect(half).toBeLessThan(55);
+    const lower = Number.parseFloat(view.getByTestId("mark-40").style.bottom);
+    expect(lower).toBeLessThan(20);
+    // The indicator uses the same curve as the marks.
+    expect(view.getByTestId("indicator").style.transform).toContain(
+      "scaleY(0.487"
+    );
+  });
+
+  test("a custom curve and the linear default", () => {
+    const linear = render(
+      <Meter.Root aria-label="Out" max={0} min={-60} value={[-30]}>
+        <Meter.Mark data-testid="mark" value={-30} />
+      </Meter.Root>
+    );
+    expect(linear.getByTestId("mark").style.bottom).toBe("50%");
+    linear.unmount();
+    const squared = render(
+      <Meter.Root
+        aria-label="Out"
+        max={0}
+        min={-60}
+        scale={cubed}
+        value={[-30]}
+      >
+        <Meter.Mark data-testid="mark" value={-30} />
+      </Meter.Root>
+    );
+    expect(
+      Number.parseFloat(squared.getByTestId("mark").style.bottom)
+    ).toBeGreaterThan(80);
+  });
+});
+
 describe("Meter clip latch", () => {
   test("a live clip stays lit as data-clipped until a click on the meter clears it", () => {
     const source = createSource({ levels: [-60, -60] });

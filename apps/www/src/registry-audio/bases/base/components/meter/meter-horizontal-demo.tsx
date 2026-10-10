@@ -3,7 +3,8 @@
 import { Meter } from "@/registry-audio/bases/base/audio/elements/meter";
 import { useSimulatedLevels } from "@/registry-audio/bases/base/hooks/use-simulated-levels";
 
-const SCALE = [-48, -24, -12, -6, 0];
+// The marks of a dBFS scale, down to the floor.
+const SCALE = [6, 0, -6, -12, -20, -30, -40, -60];
 
 export default function MeterHorizontalDemo() {
   const source = useSimulatedLevels(2);

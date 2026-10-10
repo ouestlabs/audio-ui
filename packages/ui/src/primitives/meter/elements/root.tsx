@@ -3,6 +3,7 @@ import { useRender } from "@base-ui/react/use-render";
 import * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { MeterContext, type MeterContextValue } from "../context";
+import { type LevelScale, levelPosition } from "../internal/scale";
 import {
   type ChannelNodes,
   type ChannelPart,
@@ -32,6 +33,7 @@ export function Root(componentProps: Root.Props) {
     peak,
     ref,
     render,
+    scale = "linear",
     source,
     style,
     value,
@@ -43,6 +45,10 @@ export function Root(componentProps: Root.Props) {
     () => new Intl.NumberFormat(locale, format),
     [format, locale]
   );
+  const position = React.useMemo(
+    () => levelPosition(scale, min, max),
+    [max, min, scale]
+  );
   const config = React.useMemo<MeterConfig>(
     () => ({
       clipThreshold,
@@ -51,9 +57,19 @@ export function Root(componentProps: Root.Props) {
       locale,
       max,
       min,
+      position,
       warnThreshold,
     }),
-    [clipThreshold, format, formatter, locale, max, min, warnThreshold]
+    [
+      clipThreshold,
+      format,
+      formatter,
+      locale,
+      max,
+      min,
+      position,
+      warnThreshold,
+    ]
   );
 
   const frame = React.useMemo<Root.Frame>(
@@ -180,6 +196,8 @@ export namespace Root {
     orientation?: Orientation;
     /** Peak-hold level per channel. Timing and decay live outside the primitive. */
     peak?: readonly number[];
+    /** How levels are spread along the length: evenly (`"linear"`), as digital peak meters do with more room at the top (`"iec"`), or by your own increasing curve. @default "linear" */
+    scale?: LevelScale;
     /** A live signal painted outside React; takes precedence over `value` and `peak`. */
     source?: Source;
     /** Level per channel; the array length is the channel count. */
