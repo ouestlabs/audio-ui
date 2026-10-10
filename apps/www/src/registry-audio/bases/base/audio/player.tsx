@@ -624,6 +624,7 @@ const AudioPlayerVolume = ({
                 size="sm"
                 step={1}
                 value={effectiveVolumePercent}
+                valueLabel="hidden"
                 {...props}
               />
               <AudioPlayerButton

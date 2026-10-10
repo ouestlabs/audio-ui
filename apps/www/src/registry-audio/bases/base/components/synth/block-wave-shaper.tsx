@@ -428,6 +428,7 @@ export default function BlockWaveShaper() {
               onValueChange={setDrive}
               size="sm"
               step={1}
+              valueLabel="hidden"
             />
             <ChannelStripValue id={driveValueId}>{drive}</ChannelStripValue>
           </ChannelStripSection>
@@ -443,6 +444,7 @@ export default function BlockWaveShaper() {
               onValueChange={setTone}
               size="sm"
               step={1}
+              valueLabel="hidden"
             />
             <ChannelStripValue id={toneValueId}>{tone}</ChannelStripValue>
           </ChannelStripSection>
@@ -459,6 +461,7 @@ export default function BlockWaveShaper() {
               onValueChange={setDetune}
               size="sm"
               step={1}
+              valueLabel="hidden"
             />
             <ChannelStripValue id={detuneValueId}>
               {detune > 0 ? "+" : ""}
@@ -477,6 +480,7 @@ export default function BlockWaveShaper() {
               onValueChange={setMix}
               size="sm"
               step={1}
+              valueLabel="hidden"
             />
             <ChannelStripValue id={mixValueId}>{mix}%</ChannelStripValue>
           </ChannelStripSection>
@@ -496,6 +500,7 @@ export default function BlockWaveShaper() {
               orientation="horizontal"
               step={0.01}
               value={volume}
+              valueLabel="hidden"
             />
             <ChannelStripValue id={faderValueId}>
               {Math.round(volume * 100)}%

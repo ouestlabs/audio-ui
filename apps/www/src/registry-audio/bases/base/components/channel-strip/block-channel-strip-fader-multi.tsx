@@ -33,6 +33,7 @@ function ChannelFaderStrip({ label }: { label: string }) {
             onValueChange={setValue}
             step={1}
             value={value}
+            valueLabel="hidden"
           />
           <ChannelStripValue id={valueId}>{value}%</ChannelStripValue>
         </ChannelStripSection>

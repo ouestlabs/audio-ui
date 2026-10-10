@@ -2,6 +2,7 @@
 
 import { Knob as KnobPrimitive } from "@audio-ui/react";
 import { cva, type VariantProps } from "class-variance-authority";
+import type { ReactNode } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 
 const knobVariants = cva(
@@ -38,20 +39,45 @@ const knobBodyVariants = cva("cn-knob-body absolute z-0", {
   },
 });
 
+/** A graduation around the dial: a value, or a value and its label. */
+export type KnobMark = number | { label?: ReactNode; value: number };
+
 export type KnobProps = KnobPrimitive.Root.Props &
-  VariantProps<typeof knobVariants>;
+  VariantProps<typeof knobVariants> & {
+    /** Prints the value in the readout, e.g. as `"8.7 kHz"`. Defaults to `format`/`locale`. */
+    formatValue?: (value: number) => string;
+    /** Graduations drawn around the dial, on its scale. */
+    marks?: readonly KnobMark[];
+    /** When the value shows under the dial: while hovered, turned or focused (`auto`), `always`, or `hidden`. */
+    valueLabel?: "always" | "auto" | "hidden";
+  };
+
+const markValue = (mark: KnobMark) =>
+  typeof mark === "number" ? mark : mark.value;
+const markLabel = (mark: KnobMark) =>
+  typeof mark === "number" ? undefined : mark.label;
 
 function Knob({
   "aria-describedby": ariaDescribedBy,
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledBy,
   className,
+  formatValue,
+  marks,
   size,
+  valueLabel = "auto",
   ...props
 }: KnobProps) {
+  const hasLabels = marks?.some((mark) => markLabel(mark) !== undefined);
   return (
     <KnobPrimitive.Root
-      className={cn(knobVariants({ size }), className)}
+      className={cn(
+        knobVariants({ size }),
+        "group/knob",
+        marks && "m-2",
+        hasLabels && "m-5",
+        className
+      )}
       data-slot="knob"
       {...props}
     >
@@ -92,6 +118,30 @@ function Knob({
           </svg>
         </KnobPrimitive.Thumb>
       </KnobPrimitive.Control>
+      {marks?.map((mark) => (
+        <KnobPrimitive.Mark key={markValue(mark)} value={markValue(mark)}>
+          <span className="cn-knob-mark-tick -top-2.5 absolute left-1/2 h-1.5 w-px -translate-x-1/2" />
+          {markLabel(mark) === undefined ? null : (
+            <span className="cn-knob-mark-label -top-6 absolute left-1/2 -translate-x-1/2 [rotate:calc(var(--knob-mark-angle)*-1)]">
+              {markLabel(mark)}
+            </span>
+          )}
+        </KnobPrimitive.Mark>
+      ))}
+      {valueLabel === "hidden" ? null : (
+        <KnobPrimitive.Value
+          className={cn(
+            "cn-knob-value pointer-events-none absolute top-full left-1/2 z-10 mt-1 -translate-x-1/2 whitespace-nowrap",
+            // Below the labels at the ends of the sweep, not over them.
+            hasLabels && "mt-6",
+            valueLabel === "auto" &&
+              "opacity-0 transition-opacity duration-150 ease-out group-hover/knob:opacity-100 group-has-focus-visible/knob:opacity-100 group-data-dragging/knob:opacity-100 motion-reduce:transition-none"
+          )}
+          data-slot="knob-value"
+        >
+          {(formatted, value) => (formatValue ? formatValue(value) : formatted)}
+        </KnobPrimitive.Value>
+      )}
     </KnobPrimitive.Root>
   );
 }

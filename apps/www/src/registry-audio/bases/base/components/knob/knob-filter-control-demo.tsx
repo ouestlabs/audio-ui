@@ -18,6 +18,7 @@ export default function KnobFilterControlDemo() {
         scale="log"
         step={1}
         value={cutoff}
+        valueLabel="hidden"
       />
       <output className="text-sm tabular-nums">{formatHertz(cutoff)}</output>
     </div>

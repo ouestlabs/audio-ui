@@ -386,3 +386,55 @@ describe("Knob scale", () => {
     expect(thumb.style.rotate).toBe("360deg");
   });
 });
+
+describe("Knob.Mark", () => {
+  function renderMarks(props: Knob.Root.Props, values: number[]) {
+    return render(
+      <Knob.Root {...props}>
+        <Knob.Control>
+          <Knob.Thumb aria-label="Cutoff" />
+        </Knob.Control>
+        {values.map((value) => (
+          <Knob.Mark data-testid={`mark-${value}`} key={value} value={value} />
+        ))}
+      </Knob.Root>
+    );
+  }
+
+  test("turns to where its value sits on the 288° sweep from 216°", () => {
+    const view = renderMarks({ value: 50 }, [0, 50, 100]);
+    const angles = [0, 50, 100].map(
+      (value) => view.getByTestId(`mark-${value}`).style.rotate
+    );
+    expect(angles).toEqual(["216deg", "360deg", "504deg"]);
+    expect(
+      view.getByTestId("mark-50").style.getPropertyValue("--knob-mark-angle")
+    ).toBe("360deg");
+  });
+
+  test("follows the scale: on a log dial, 632 Hz sits at the top", () => {
+    const view = renderMarks(
+      { max: 20_000, min: 20, scale: "log", value: 1000 },
+      [20, 632.4555, 20_000]
+    );
+    expect(
+      Number.parseFloat(view.getByTestId("mark-632.4555").style.rotate)
+    ).toBeCloseTo(360, 1);
+  });
+
+  test("is active while the value has reached it from the anchor", () => {
+    const view = renderMarks(
+      { anchor: 0, max: 1, min: -1, step: 0.1, value: 0.5 },
+      [-1, 0, 0.5, 1]
+    );
+    const active = [-1, 0, 0.5, 1].map((value) =>
+      view.getByTestId(`mark-${value}`).hasAttribute("data-active")
+    );
+    expect(active).toEqual([false, true, true, false]);
+  });
+
+  test("is decorative", () => {
+    const view = renderMarks({ value: 50 }, [0]);
+    expect(view.getByTestId("mark-0").getAttribute("aria-hidden")).toBe("true");
+  });
+});

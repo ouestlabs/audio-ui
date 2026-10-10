@@ -17,6 +17,7 @@ export default function KnobChangeVsCommitDemo() {
         onValueCommitted={setCommittedValue}
         step={1}
         value={liveValue}
+        valueLabel="hidden"
       />
       <div className="text-center font-mono text-foreground text-sm tabular-nums">
         <div>Live: {liveValue}</div>

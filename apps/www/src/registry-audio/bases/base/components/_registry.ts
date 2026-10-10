@@ -555,6 +555,20 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["fader"],
+    description:
+      "Gain fader with a decibel ruler beside the track and its value shown while hovered, dragged or focused",
+    files: [
+      {
+        path: "components/fader/fader-scale-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "fader-scale-demo",
+    registryDependencies: ["@audio/fader"],
+    type: "registry:example",
+  },
+  {
+    categories: ["fader"],
     description: "Fader size variants (sm, default, lg)",
     files: [
       {
@@ -628,6 +642,20 @@ export const components: RegistryItem[] = [
       },
     ],
     name: "knob-fine-step-demo",
+    registryDependencies: ["@audio/knob"],
+    type: "registry:example",
+  },
+  {
+    categories: ["knob"],
+    description:
+      "Cutoff knob on a log scale with decade marks around the dial and its value shown while hovered, turned or focused",
+    files: [
+      {
+        path: "components/knob/knob-scale-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "knob-scale-demo",
     registryDependencies: ["@audio/knob"],
     type: "registry:example",
   },

@@ -206,6 +206,11 @@
   },
   {
     "categories": ["fader"],
+    "name": "fader-scale-demo",
+    "title": "fader-scale-demo"
+  },
+  {
+    "categories": ["fader"],
     "name": "fader-size-variants-demo",
     "title": "fader-size-variants-demo"
   },
@@ -233,6 +238,11 @@
     "categories": ["knob"],
     "name": "knob-fine-step-demo",
     "title": "knob-fine-step-demo"
+  },
+  {
+    "categories": ["knob"],
+    "name": "knob-scale-demo",
+    "title": "knob-scale-demo"
   },
   {
     "categories": ["knob"],

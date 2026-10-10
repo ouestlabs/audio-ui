@@ -11,3 +11,4 @@ Rework the `Fader` API. Requires the `@base-ui/react` ^1.9.0 peer dependency. **
 
 New: the `render` prop and state-aware `className`/`style` on every part, handler merging, `name`/`form` integration, `format`/`locale` with a formatted `Fader.Value` and `aria-valuetext`, `largeStep` (Shift+Arrow), RTL. Kept: vertical -60…+6 defaults, mouse-wheel stepping, and `touch-action: none` on `Control`. While dragged, the thumb always follows the pointer even if a controlled `value` lags behind (reject values with `eventDetails.cancel()`).
 - New `anchor`: the value `Indicator` fills from, such as `0` on a -1…1 pan, on whichever side of it the value is.
+- New `Mark`: a graduation along the track at a value, with `data-active` once the value has reached it from the anchor, and `data-orientation`.

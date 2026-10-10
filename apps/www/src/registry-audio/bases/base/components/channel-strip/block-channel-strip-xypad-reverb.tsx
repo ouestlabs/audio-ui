@@ -50,6 +50,7 @@ export default function BlockChannelStripXypadReverb() {
             onValueChange={setWet}
             size="sm"
             value={wet}
+            valueLabel="hidden"
           />
           <ChannelStripValue id={knobValueId}>{wet}%</ChannelStripValue>
         </ChannelStripSection>

@@ -7,7 +7,7 @@
 .style-lyra {
   /* MARK: Knob (circular — always rounded-full; ring + shadow follow the style) */
   .cn-knob {
-    @apply rounded-full border border-transparent ring-1 ring-foreground/10 transition-[border-color,box-shadow] duration-150 ease-out focus-within:border-ring focus-within:ring-1 focus-within:ring-ring/50 hover:ring-1 hover:ring-ring/50 has-[[data-slot=knob-control]:active]:border-ring has-[[data-slot=knob-control]:active]:ring-1 has-[[data-slot=knob-control]:active]:ring-ring motion-reduce:transition-none;
+    @apply rounded-full border border-transparent ring-1 ring-foreground/10 transition-[border-color,box-shadow] duration-150 ease-out focus-within:border-ring focus-within:ring-1 focus-within:ring-ring/50 hover:ring-1 hover:ring-ring/40 has-[[data-slot=knob-control]:active]:border-ring has-[[data-slot=knob-control]:active]:ring-1 has-[[data-slot=knob-control]:active]:ring-ring motion-reduce:transition-none;
   }
 
   .cn-knob-size-sm {
@@ -54,6 +54,18 @@
     @apply text-primary [&_path]:stroke-current;
   }
 
+  .cn-knob-mark-tick {
+    @apply bg-muted-foreground/40 transition-colors duration-150 ease-out in-data-[active]:bg-primary motion-reduce:transition-none;
+  }
+
+  .cn-knob-mark-label {
+    @apply text-[10px] leading-none text-muted-foreground tabular-nums in-data-[active]:text-foreground;
+  }
+
+  .cn-knob-value {
+    @apply rounded-none bg-foreground px-1.5 py-0.5 font-medium text-[10px] text-background tabular-nums leading-none shadow-sm;
+  }
+
   .cn-knob-indicator {
     @apply text-primary;
   }
@@ -79,8 +91,20 @@
     @apply bg-primary;
   }
 
+  .cn-fader-mark-tick {
+    @apply bg-muted-foreground/40 transition-colors duration-150 ease-out in-data-[active]:bg-primary motion-reduce:transition-none;
+  }
+
+  .cn-fader-mark-label {
+    @apply text-[10px] leading-none text-muted-foreground tabular-nums in-data-[active]:text-foreground;
+  }
+
+  .cn-fader-value {
+    @apply rounded-none bg-foreground px-1.5 py-0.5 font-medium text-[10px] text-background tabular-nums leading-none shadow-sm;
+  }
+
   .cn-fader-thumb {
-    @apply rounded-none border-ring border bg-card transition-[color,box-shadow] hover:ring-1 hover:ring-ring/50 has-focus-visible:ring-1 has-focus-visible:ring-ring/50 active:ring-1 active:ring-ring/50 motion-reduce:transition-none;
+    @apply rounded-none border-ring border bg-card transition-[color,box-shadow] hover:ring-1 hover:ring-ring/40 has-focus-visible:ring-1 has-focus-visible:ring-ring/50 active:ring-1 active:ring-ring/50 motion-reduce:transition-none;
   }
 
   .cn-fader-thumb-size-sm {

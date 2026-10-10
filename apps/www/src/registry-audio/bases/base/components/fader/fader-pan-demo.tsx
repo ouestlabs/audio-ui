@@ -25,6 +25,7 @@ export default function FaderPanDemo() {
         orientation="horizontal"
         step={0.01}
         value={pan}
+        valueLabel="hidden"
       />
       <output className="font-mono text-sm tabular-nums">
         {formatPan(pan)}

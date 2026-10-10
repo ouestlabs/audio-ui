@@ -730,6 +730,7 @@ export default function BlockPianoRoll() {
                 orientation="horizontal"
                 step={0.01}
                 value={volume}
+                valueLabel="hidden"
               />
               <ChannelStripValue id={volumeValueId}>
                 {Math.round(volume * 100)}%

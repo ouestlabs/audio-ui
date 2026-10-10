@@ -54,6 +54,18 @@
     @apply text-primary [&_path]:stroke-current;
   }
 
+  .cn-knob-mark-tick {
+    @apply bg-muted-foreground/40 transition-colors duration-150 ease-out in-data-[active]:bg-primary motion-reduce:transition-none;
+  }
+
+  .cn-knob-mark-label {
+    @apply text-[10px] leading-none text-muted-foreground tabular-nums in-data-[active]:text-foreground;
+  }
+
+  .cn-knob-value {
+    @apply rounded-none bg-foreground px-1.5 py-0.5 font-medium text-[10px] text-background tabular-nums leading-none shadow-sm;
+  }
+
   .cn-knob-indicator {
     @apply text-primary;
   }
@@ -77,6 +89,18 @@
 
   .cn-fader-range {
     @apply bg-primary;
+  }
+
+  .cn-fader-mark-tick {
+    @apply bg-muted-foreground/40 transition-colors duration-150 ease-out in-data-[active]:bg-primary motion-reduce:transition-none;
+  }
+
+  .cn-fader-mark-label {
+    @apply text-[10px] leading-none text-muted-foreground tabular-nums in-data-[active]:text-foreground;
+  }
+
+  .cn-fader-value {
+    @apply rounded-none bg-foreground px-1.5 py-0.5 font-medium text-[10px] text-background tabular-nums leading-none shadow-sm;
   }
 
   .cn-fader-thumb {

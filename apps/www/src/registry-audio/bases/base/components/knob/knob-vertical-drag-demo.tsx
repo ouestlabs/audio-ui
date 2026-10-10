@@ -16,6 +16,7 @@ export default function KnobVerticalDragDemo() {
         onValueChange={setValue}
         step={1}
         value={value}
+        valueLabel="hidden"
       />
       <output
         aria-live="polite"

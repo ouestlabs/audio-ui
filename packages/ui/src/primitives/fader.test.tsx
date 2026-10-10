@@ -278,3 +278,53 @@ describe("Fader anchor", () => {
     expect(indicator.style.width).toBe("25%");
   });
 });
+
+describe("Fader.Mark", () => {
+  function renderMarks(props: Fader.Root.Props) {
+    return render(
+      <Fader.Root {...props}>
+        <Fader.Control>
+          <Fader.Track />
+          <Fader.Thumb aria-label="Volume" />
+        </Fader.Control>
+        {[-60, -24, 0, 6].map((value) => (
+          <Fader.Mark data-testid={`mark-${value}`} key={value} value={value}>
+            {value}
+          </Fader.Mark>
+        ))}
+      </Fader.Root>
+    );
+  }
+
+  test("sits along the travel at its value, from the bottom when vertical", () => {
+    const view = renderMarks({ value: -12 });
+    const mark = view.getByTestId("mark-0");
+    expect(Number.parseFloat(mark.style.bottom)).toBeCloseTo((60 / 66) * 100);
+    expect(mark.style.position).toBe("absolute");
+    expect(mark.getAttribute("aria-hidden")).toBe("true");
+    expect(mark.textContent).toBe("0");
+  });
+
+  test("sits from the start when horizontal", () => {
+    const view = renderMarks({ orientation: "horizontal", value: -12 });
+    const mark = view.getByTestId("mark--60");
+    expect(mark.style.insetInlineStart).toBe("0%");
+    expect(mark.getAttribute("data-orientation")).toBe("horizontal");
+  });
+
+  test("is active while the value has reached it", () => {
+    const view = renderMarks({ value: -12 });
+    const active = [-60, -24, 0, 6].map((value) =>
+      view.getByTestId(`mark-${value}`).hasAttribute("data-active")
+    );
+    expect(active).toEqual([true, true, false, false]);
+  });
+
+  test("counts from the anchor, on either side of it", () => {
+    const view = renderMarks({ anchor: 0, value: -30 });
+    const active = [-60, -24, 0, 6].map((value) =>
+      view.getByTestId(`mark-${value}`).hasAttribute("data-active")
+    );
+    expect(active).toEqual([false, true, true, false]);
+  });
+});

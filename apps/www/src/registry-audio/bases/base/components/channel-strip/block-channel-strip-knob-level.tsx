@@ -33,6 +33,7 @@ export default function BlockChannelStripKnobLevel() {
             onValueChange={setValue}
             size="lg"
             value={value}
+            valueLabel="hidden"
           />
           <ChannelStripValue id={valueId} title={`${value}%`}>
             {value}%

@@ -34,6 +34,7 @@ function EffectStrip({ label }: { label: string }) {
             size="lg"
             step={1}
             value={value}
+            valueLabel="hidden"
           />
           <ChannelStripValue id={valueId}>{value}%</ChannelStripValue>
         </ChannelStripSection>

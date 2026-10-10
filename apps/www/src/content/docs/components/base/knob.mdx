@@ -142,6 +142,9 @@ Wheel input over the knob steps the value by `step` and reports `eventDetails.re
 | `anchor` | `number` | `min` | Where the highlighted arc starts, e.g. `0` on a bipolar pan knob. |
 | `dragMode` | `"circular" \| "vertical" \| "revolution"` | `"circular"` | How pointer travel turns into value. |
 | `scale` | `"linear" \| "log" \| { toPosition, toValue }` | `"linear"` | How the value maps onto the dial's travel. |
+| `marks` | `(number \| { value, label? })[]` | - | Graduations drawn around the dial, on its scale. Those the value has reached from `anchor` light up. |
+| `valueLabel` | `"auto" \| "always" \| "hidden"` | `"auto"` | When the value shows under the dial: `auto` while hovered, turned or focused from the keyboard. |
+| `formatValue` | `(value: number) => string` | `format` | How the value prints in that readout, e.g. `"8.7 kHz"`. |
 | `disabled` | `boolean` | `false` | Disables pointer, wheel, and keyboard. |
 | `format` | `Intl.NumberFormatOptions` | - | Formats the value text announced to screen readers (and `Knob.Value` on the primitive). |
 | `locale` | `Intl.LocalesArgument` | runtime | Locale used by `format`. |
@@ -153,7 +156,7 @@ Wheel input over the knob steps the value by `step` and reports `eventDetails.re
 
 ### Primitive parts
 
-`@audio-ui/react/knob` exposes `Knob.Root`, `Knob.Control` (pointer, wheel, reset), `Knob.Track` and `Knob.Indicator` (SVG arcs; `strokeWidth` in the 48×48 viewBox), `Knob.Thumb` (rotates with the value and holds the input), `Knob.Value` (formatted `<output>`), and `Knob.Label`. Every part accepts a `render` prop, `className` / `style` as functions of state, and exposes `data-disabled` / `data-dragging`.
+`@audio-ui/react/knob` exposes `Knob.Root`, `Knob.Control` (pointer, wheel, reset), `Knob.Track` and `Knob.Indicator` (SVG arcs; `strokeWidth` in the 48×48 viewBox), `Knob.Thumb` (rotates with the value and holds the input), `Knob.Value` (formatted `<output>`), `Knob.Mark` (a graduation at a `value`, rotated onto the dial's scale, with `data-active` once reached), and `Knob.Label`. Every part accepts a `render` prop, `className` / `style` as functions of state, and exposes `data-disabled` / `data-dragging`.
 
 ## Examples
 
@@ -198,6 +201,12 @@ Each preview shows one mapping in isolation (live value under the control).
 ### Live value vs committed value callbacks
 
 <ComponentPreview styleName="base-nova" name="knob-change-vs-commit-demo" />
+
+### Scale marks and value readout
+
+`marks` draws a ruler around the dial, on its scale: on a log cutoff the decades are evenly spaced. The value shows under the dial while you hover, turn or focus it.
+
+<ComponentPreview styleName="base-nova" name="knob-scale-demo" />
 
 ### Filter cutoff, on a log scale
 

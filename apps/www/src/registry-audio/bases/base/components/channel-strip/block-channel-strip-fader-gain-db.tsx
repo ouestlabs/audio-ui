@@ -29,6 +29,7 @@ export default function BlockChannelStripFaderGainDb() {
             min={-60}
             onValueChange={setGain}
             value={gain}
+            valueLabel="hidden"
           />
           <ChannelStripValue id={valueId}>
             {gain > 0 ? `+${gain}` : gain} dB

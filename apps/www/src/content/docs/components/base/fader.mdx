@@ -116,7 +116,7 @@ Wheel input over the fader nudges the value by `step` and reports `eventDetails.
 
 ## API reference
 
-`Fader` accepts style props (`size`, `thumbMarks`, `className`) plus primitive props from `FaderPrimitive.Root.Props` (`name`, `form`, `format`, `locale`, `largeStep`, `render`, …). `aria-label`, `aria-labelledby`, and `aria-describedby` are forwarded to the thumb's input.
+`Fader` accepts style props (`size`, `thumbMarks`, `className`) plus primitive props from `FaderPrimitive.Root.Props` (`name`, `form`, `format`, `locale`, `largeStep`, `render`, …). The primitive's `Fader.Mark` places a graduation at a `value` along the track, with `data-active` once the value has reached it, to build your own ruler. `aria-label`, `aria-labelledby`, and `aria-describedby` are forwarded to the thumb's input.
 
 ### Value and state
 
@@ -127,6 +127,9 @@ Wheel input over the fader nudges the value by `step` and reports `eventDetails.
 | `min` | `number` | `-60` | Minimum value. |
 | `max` | `number` | `6` | Maximum value. |
 | `step` | `number` | `1` | Quantization step for drag, wheel, and keyboard. |
+| `marks` | `(number \| { value, label? })[]` | - | Graduations drawn beside the track: a ruler for the value. Those the value has reached from `anchor` light up. |
+| `valueLabel` | `"auto" \| "always" \| "hidden"` | `"auto"` | When the value shows beside the thumb: `auto` while hovered, dragged or focused from the keyboard. |
+| `formatValue` | `(value: number) => string` | `format` | How the value prints in that readout, e.g. `"-6.0 dB"`. |
 | `anchor` | `number` | `min` | Value the fill grows from, such as `0` on a -1…1 pan: the fill runs from the anchor to the value, on whichever side it is. |
 | `disabled` | `boolean` | `false` | Disables interaction. |
 | `onValueChange` | `(value: number, eventDetails) => void` | - | Live updates while adjusting. `eventDetails.reason` is `"drag"`, `"track-press"`, `"keyboard"`, `"wheel"`, `"input-change"`, or `"none"`; call `eventDetails.cancel()` to reject the change. |
@@ -154,6 +157,12 @@ Additional valid HTML attributes passed to `Fader.Root` are forwarded.
 ### Horizontal
 
 <ComponentPreview styleName="base-nova" name="fader-horizontal-demo" />
+
+### Decibel ruler and value readout
+
+`marks` draws a ruler beside the track, and the value shows beside the thumb while you hover, drag or focus it.
+
+<ComponentPreview styleName="base-nova" name="fader-scale-demo" />
 
 ### Pan, filled from the center
 

@@ -29,6 +29,7 @@ export default function BlockChannelStripFader() {
             min={0}
             onValueChange={setValue}
             value={value}
+            valueLabel="hidden"
           />
           <ChannelStripValue id={valueId} title={`${value}%`}>
             {value}%

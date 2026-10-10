@@ -30,6 +30,7 @@ export default function BlockChannelStripFaderHorizontal() {
             onValueChange={setValue}
             orientation="horizontal"
             value={value}
+            valueLabel="hidden"
           />
           <ChannelStripValue id={valueId} title={`${value}%`}>
             {value}%

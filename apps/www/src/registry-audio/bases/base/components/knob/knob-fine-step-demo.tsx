@@ -16,6 +16,7 @@ export default function KnobFineStepDemo() {
         onValueChange={setValue}
         step={0.01}
         value={value}
+        valueLabel="hidden"
       />
       <output
         aria-live="polite"

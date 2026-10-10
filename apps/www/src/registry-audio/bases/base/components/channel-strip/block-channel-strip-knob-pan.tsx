@@ -41,6 +41,7 @@ export default function BlockChannelStripKnobPan() {
             onValueChange={setValue}
             size="lg"
             value={value}
+            valueLabel="hidden"
           />
           <ChannelStripValue id={valueId}>{formatPan(value)}</ChannelStripValue>
         </ChannelStripSection>

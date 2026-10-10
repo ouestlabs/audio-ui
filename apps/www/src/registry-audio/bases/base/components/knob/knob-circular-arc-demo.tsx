@@ -15,6 +15,7 @@ export default function KnobCircularArcDemo() {
         onValueChange={setValue}
         step={1}
         value={value}
+        valueLabel="hidden"
       />
       <output
         aria-live="polite"

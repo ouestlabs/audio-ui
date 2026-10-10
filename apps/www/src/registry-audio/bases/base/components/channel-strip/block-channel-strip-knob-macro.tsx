@@ -33,6 +33,7 @@ export default function BlockChannelStripKnobMacro() {
             onValueChange={setValue}
             size="xl"
             value={value}
+            valueLabel="hidden"
           />
           <ChannelStripValue id={valueId} title={`${value}%`}>
             {value}%

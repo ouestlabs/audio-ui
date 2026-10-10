@@ -49,6 +49,7 @@ export default function BlockChannelStripKnobPanWidth() {
             onValueChange={setPan}
             size="lg"
             value={pan}
+            valueLabel="hidden"
           />
           <ChannelStripValue id={panValueId}>
             {formatPan(pan)}
@@ -66,6 +67,7 @@ export default function BlockChannelStripKnobPanWidth() {
             onValueChange={setWidth}
             size="lg"
             value={width}
+            valueLabel="hidden"
           />
           <ChannelStripValue id={widthValueId}>
             {formatSigned(width)}

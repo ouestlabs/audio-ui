@@ -319,6 +319,7 @@ export default function BlockPocketSynth() {
               orientation="horizontal"
               step={0.01}
               value={volume}
+              valueLabel="hidden"
             />
             <ChannelStripValue id={faderValueId}>
               {Math.round(volume * 100)}%

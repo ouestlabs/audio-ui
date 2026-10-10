@@ -29,6 +29,7 @@ export default function BlockChannelStrip() {
             min={0}
             onValueChange={setVolume}
             value={volume}
+            valueLabel="hidden"
           />
           <ChannelStripValue>{`${volume}%`}</ChannelStripValue>
         </ChannelStripSection>

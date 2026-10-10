@@ -258,6 +258,7 @@ export default function BlockDrumMachine() {
               orientation="horizontal"
               step={0.01}
               value={volume}
+              valueLabel="hidden"
             />
             <ChannelStripValue id={volumeValueId}>
               {Math.round(volume * 100)}%
