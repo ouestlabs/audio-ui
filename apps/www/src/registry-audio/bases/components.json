@@ -101,11 +101,6 @@
   },
   {
     "categories": ["xypad"],
-    "name": "xypad-format-value-demo",
-    "title": "xypad-format-value-demo"
-  },
-  {
-    "categories": ["xypad"],
     "name": "xypad-bipolar-range-demo",
     "title": "xypad-bipolar-range-demo"
   },

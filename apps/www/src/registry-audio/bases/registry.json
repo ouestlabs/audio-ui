@@ -73,11 +73,11 @@
       "name": "waveform"
     },
     {
-      "count": 5,
+      "count": 4,
       "description": "Two-dimensional XY pad components for filter and effect controls.",
       "label": "XY Pad",
       "name": "xypad"
     }
   ],
-  "totalComponents": 33
+  "totalComponents": 32
 }

@@ -297,19 +297,6 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["xypad"],
-    description: "XYPad component example with formatted value",
-    files: [
-      {
-        path: "components/xypad/xypad-format-value-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "xypad-format-value-demo",
-    registryDependencies: ["@audio/xypad"],
-    type: "registry:example",
-  },
-  {
-    categories: ["xypad"],
     description: "XYPad with bipolar pan/mix style ranges",
     files: [
       {
