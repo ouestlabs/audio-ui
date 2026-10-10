@@ -49,6 +49,8 @@ const BANDS: Band[] = [
   { frequency: 7000, gainDb: 5, id: 3, type: "highshelf" },
 ];
 const MAX_BANDS = 8;
+/** How far a press may move and still count as a click, in pixels. */
+const CLICK_TOLERANCE = 4;
 const NEW_BAND_Q = 1;
 const MIN_HZ = 20;
 const MAX_HZ = 20_000;
@@ -250,7 +252,27 @@ function BandHandle({
     },
     [index, onEdit, onRemove, onSelect]
   );
-  // A right-click, or a long press on a touch screen, opens the band's settings.
+  // A press that stays where it started is a click, not a drag: it opens the band's settings.
+  const pressRef = useRef<{ x: number; y: number } | null>(null);
+  const handlePointerDown = useCallback((event: React.PointerEvent) => {
+    pressRef.current = { x: event.clientX, y: event.clientY };
+  }, []);
+  const handlePointerUp = useCallback(
+    (event: React.PointerEvent) => {
+      const start = pressRef.current;
+      pressRef.current = null;
+      if (
+        start &&
+        Math.hypot(event.clientX - start.x, event.clientY - start.y) <
+          CLICK_TOLERANCE
+      ) {
+        onSelect(index);
+        onEdit(index);
+      }
+    },
+    [index, onEdit, onSelect]
+  );
+  // A right-click, or a long press on a touch screen, opens it too.
   const handleContextMenu = useCallback(
     (event: React.MouseEvent) => {
       event.preventDefault();
@@ -279,6 +301,8 @@ function BandHandle({
         onContextMenu={handleContextMenu}
         onDoubleClick={reset}
         onKeyDown={handleKeyDown}
+        onPointerDown={handlePointerDown}
+        onPointerUp={handlePointerUp}
         onValueChange={handleChange}
         ref={ref}
         value={{
@@ -417,8 +441,8 @@ export default function PlotDemo() {
         ))}
       </Plot>
       <p className="text-center text-muted-foreground text-xs">
-        Double-click to add a band, Delete to remove one, scroll over it to
-        change its width, right-click or press Enter for its type.
+        Click a band to set its type and width. Double-click empty space to add
+        one, Delete to remove it.
       </p>
       <div className="flex items-center justify-between gap-2">
         <Button
