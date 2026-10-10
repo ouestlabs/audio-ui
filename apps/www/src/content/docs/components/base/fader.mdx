@@ -95,6 +95,7 @@ const [gain, setGain] = useState(0);
 | **Track click / drag** | Clicking or dragging on the track updates the value from pointer position. |
 | **Thumb drag** | Dragging the thumb adjusts continuously, clamped to `min...max`. |
 | **Commit event** | `onValueCommitted` fires when an interaction ends with a new value. |
+| **Lagging value** | While dragging, the thumb follows the pointer even if a controlled `value` updates late; it returns to `value` on release. Reject a value with `eventDetails.cancel()`. |
 
 ### Keyboard
 
@@ -129,7 +130,6 @@ Wheel input over the fader nudges the value by `step` and reports `eventDetails.
 | `disabled` | `boolean` | `false` | Disables interaction. |
 | `onValueChange` | `(value: number, eventDetails) => void` | - | Live updates while adjusting. `eventDetails.reason` is `"drag"`, `"track-press"`, `"keyboard"`, `"wheel"`, `"input-change"`, or `"none"`; call `eventDetails.cancel()` to reject the change. |
 | `onValueCommitted` | `(value: number, eventDetails) => void` | - | Fires when an interaction ends with a new value. |
-| `freezeWhileDragging` | `boolean` | `false` | Keeps the thumb on the dragged position while a controlled `value` lags behind. |
 | `aria-label` | `string` | - | Accessible name for the slider. |
 | `aria-labelledby` | `string` | - | ID of a labeling element. |
 

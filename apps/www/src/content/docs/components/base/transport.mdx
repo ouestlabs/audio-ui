@@ -13,7 +13,7 @@ Timeline control for playback progress (current value + buffered range). The reg
 
 - **Interaction model:** Pointer drag on track/thumb, wheel stepping, keyboard nudging, and commit callbacks.
 - **Visual model:** Base track + buffered range + played range + thumb.
-- **Playback UX:** Supports `freezeWhileDragging` to avoid jitter/flicker while scrubbing.
+- **Playback UX:** While scrubbing, the thumb follows the pointer even if playback time updates late, so it never jitters back.
 - **Accessibility:** The thumb contains a native `<input type="range">` that carries the accessible name (`aria-label` / `aria-labelledby`) and the value text.
 
 ## Installation
@@ -116,7 +116,6 @@ Wheel input over the bar nudges the value by `step`.
 | `value` | `number` | - | Current transport value (typically `0..100`). |
 | `bufferedValue` | `number` | `0` | Buffered position (same scale as `value`). |
 | `onSeek` | `(nextValue: number) => void` | - | Called when scrubbing or keyboard/wheel changes value. |
-| `freezeWhileDragging` | `boolean` | `false` | Keeps the thumb on the dragged position while the controlled `value` lags behind (e.g. playback time). |
 | `disabled` | `boolean` | `false` | Disables interaction. |
 | `aria-label` | `string` | - | Accessible name for the slider. |
 | `aria-labelledby` | `string` | - | ID of the associated label element. |

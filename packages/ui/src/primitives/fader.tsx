@@ -36,13 +36,14 @@ function roundToStep(value: number, step: number, min: number): number {
 
 /**
  * Groups all parts of the fader: a Base UI `Slider.Root` with audio defaults
- * (vertical, -60…+6), mouse-wheel stepping, and `freezeWhileDragging`.
- * Renders a `<div>` element.
+ * (vertical, -60…+6) and mouse-wheel stepping. While a pointer drags it, the
+ * thumb follows the pointer even if a controlled `value` lags behind (a seek
+ * bar driven by playback time, automation) — reject a value with
+ * `eventDetails.cancel()` instead. Renders a `<div>` element.
  */
 export function Root({
   defaultValue,
   disabled = false,
-  freezeWhileDragging = false,
   max = DEFAULT_MAX,
   min = DEFAULT_MIN,
   onValueChange,
@@ -59,7 +60,7 @@ export function Root({
   const value = isControlled ? valueProp : uncontrolledValue;
 
   // Holds the dragged value until the pointer is released, so a controlled
-  // value that lags behind (playback time) can't pull the thumb back.
+  // value that lags behind can't pull the thumb back mid-drag.
   const [dragValue, setDragValue] = React.useState<number | null>(null);
   const isFrozen = dragValue !== null;
   React.useEffect(() => {
@@ -86,14 +87,14 @@ export function Root({
         setUncontrolledValue(next);
       }
       if (
-        freezeWhileDragging &&
+        isControlled &&
         (eventDetails.reason === "drag" ||
           eventDetails.reason === "track-press")
       ) {
         setDragValue(next);
       }
     },
-    [freezeWhileDragging, isControlled, onValueChange]
+    [isControlled, onValueChange]
   );
 
   const handleValueCommitted = React.useCallback(
@@ -182,12 +183,6 @@ export namespace Root {
     > {
     /** Uncontrolled starting value; defaults to the midpoint of `min…max`. */
     defaultValue?: number;
-    /**
-     * Keep the thumb on the dragged position while a controlled `value` lags
-     * behind (e.g. a seek bar driven by playback time).
-     * @default false
-     */
-    freezeWhileDragging?: boolean;
     /** @default 6 */
     max?: number;
     /** @default -60 */

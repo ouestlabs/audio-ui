@@ -160,7 +160,7 @@ describe("Fader pointer (vertical control 20×200 at origin)", () => {
   });
 });
 
-describe("Fader freezeWhileDragging (horizontal control 200×20 at origin)", () => {
+describe("Fader drag with a lagging controlled value (horizontal control 200×20 at origin)", () => {
   const seekProps: Fader.Root.Props = {
     max: 100,
     min: 0,
@@ -168,11 +168,8 @@ describe("Fader freezeWhileDragging (horizontal control 200×20 at origin)", () 
     value: 10,
   };
 
-  test("keeps the thumb on the dragged position while the controlled value lags", () => {
-    const { control, thumb, onValueChange } = renderFader({
-      ...seekProps,
-      freezeWhileDragging: true,
-    });
+  test("the thumb follows the pointer until release, then the controlled value rules again", () => {
+    const { control, thumb, onValueChange } = renderFader(seekProps);
     mockRect(control, { bottom: 20, height: 20, right: 200, width: 200 });
 
     fireEvent.pointerDown(control, { clientX: 60, clientY: 10, pointerId: 1 });
@@ -181,12 +178,14 @@ describe("Fader freezeWhileDragging (horizontal control 200×20 at origin)", () 
 
     fireEvent.pointerUp(document, { clientX: 60, clientY: 10, pointerId: 1 });
     fireEvent.pointerUp(window, { pointerId: 1 });
-    // the drag is over: the controlled value rules again
     expect(thumb.style.insetInlineStart).toBe("10%");
   });
 
-  test("without freeze, the thumb tracks the controlled value even mid-drag", () => {
-    const { control, thumb } = renderFader(seekProps);
+  test("eventDetails.cancel() keeps the thumb on the controlled value mid-drag", () => {
+    const { control, thumb } = renderFader({
+      ...seekProps,
+      onValueChange: (_value, details) => details.cancel(),
+    });
     mockRect(control, { bottom: 20, height: 20, right: 200, width: 200 });
 
     fireEvent.pointerDown(control, { clientX: 60, clientY: 10, pointerId: 1 });
