@@ -57,6 +57,7 @@ export default function BlockWaveformPlayer() {
   const [duration, setDuration] = useState(0);
   const [progress, setProgress] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isDecoding, setIsDecoding] = useState(false);
 
   useEffect(
     () => () => {
@@ -88,13 +89,18 @@ export default function BlockWaveformPlayer() {
       setFileName(file.name);
       setAudioUrl(url);
 
+      // Decoding a long file takes a moment: the waveform sweeps meanwhile.
+      setIsDecoding(true);
       const context = new AudioContext();
-      const buffer = await file.arrayBuffer();
-      const samples = await decodeAudioSamples(context, buffer);
-      await context.close();
-
-      const downsampled = downsampleWaveform(samples, PEAK_COUNT);
-      setValues(normalizeWaveform(downsampled));
+      try {
+        const buffer = await file.arrayBuffer();
+        const samples = await decodeAudioSamples(context, buffer);
+        const downsampled = downsampleWaveform(samples, PEAK_COUNT);
+        setValues(normalizeWaveform(downsampled));
+      } finally {
+        await context.close();
+        setIsDecoding(false);
+      }
     },
     []
   );
@@ -171,7 +177,7 @@ export default function BlockWaveformPlayer() {
           <track kind="metadata" />
         </audio>
       ) : null}
-      {hasAudio ? (
+      {hasAudio || isDecoding ? (
         <Tabs className="gap-4" defaultValue="default">
           <TabsList>
             <TabsTrigger value="default">Default</TabsTrigger>
@@ -180,6 +186,7 @@ export default function BlockWaveformPlayer() {
           <TabsContent value="default">
             <Waveform
               aria-label="Track progress"
+              loading={isDecoding}
               onValueChange={handleSeek}
               onValueCommitted={handleSeek}
               value={progress}
@@ -189,6 +196,7 @@ export default function BlockWaveformPlayer() {
           <TabsContent value="playhead">
             <Waveform
               aria-label="Track progress"
+              loading={isDecoding}
               onValueChange={handleSeek}
               onValueCommitted={handleSeek}
               value={progress}

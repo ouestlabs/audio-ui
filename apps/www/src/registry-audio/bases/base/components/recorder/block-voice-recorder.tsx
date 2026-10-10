@@ -11,6 +11,7 @@ import {
   EmptyTitle,
 } from "@/registry/bases/base/ui/empty";
 import { Meter } from "@/registry-audio/bases/base/audio/elements/meter";
+import { LiveWaveform } from "@/registry-audio/bases/base/audio/elements/waveform";
 import {
   AudioPlayer,
   AudioPlayerControlBar,
@@ -21,6 +22,7 @@ import {
   AudioPlayerVolume,
 } from "@/registry-audio/bases/base/audio/player";
 import { useAudioLevels } from "@/registry-audio/bases/base/hooks/use-audio-levels";
+import { useAudioSignal } from "@/registry-audio/bases/base/hooks/use-audio-signal";
 import { useMicRecorder } from "@/registry-audio/bases/base/hooks/use-mic-recorder";
 import { HtmlAudioEngine } from "@/registry-audio/bases/base/lib/html-audio";
 import { formatRecordingTime } from "@/registry-audio/bases/base/lib/recording";
@@ -105,7 +107,29 @@ function StatusLine({
   );
 }
 
-/** A voice recorder: capture from the microphone with a live input meter and elapsed time, then play back or download the take. The recorder owns permission, the MediaRecorder, and the blob's object URL — this block only presents them. */
+/** The mic as it comes in, scrolling for as long as there is one to listen to. Paused, its trace holds still. */
+function RecordingWaveform({
+  analyser,
+  isPaused,
+}: {
+  analyser: AnalyserNode | null;
+  isPaused: boolean;
+}) {
+  const { level } = useAudioSignal(isPaused ? null : analyser);
+  if (!analyser) {
+    return null;
+  }
+  return (
+    <LiveWaveform
+      aria-label="Recording"
+      gain={2}
+      mode="scrolling"
+      source={level}
+    />
+  );
+}
+
+/** A voice recorder: capture from the microphone with a scrolling waveform, a live input meter and elapsed time, then play back or download the take. The recorder owns permission, the MediaRecorder, and the blob's object URL — this block only presents them. */
 export default function BlockVoiceRecorder() {
   const {
     analyser: micAnalyser,
@@ -163,6 +187,7 @@ export default function BlockVoiceRecorder() {
     <div className="cn-audio-panel flex w-full min-w-0 flex-col gap-4 border bg-card p-4">
       {isRecording || recording ? (
         <div className="flex flex-col gap-3">
+          <RecordingWaveform analyser={micAnalyser} isPaused={isPaused} />
           <Meter aria-label="Microphone input level" source={levelSource} />
           <StatusLine
             durationMs={durationMs}
