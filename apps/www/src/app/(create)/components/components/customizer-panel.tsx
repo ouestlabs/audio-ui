@@ -100,6 +100,7 @@ function CustomizerPanelFloating({ animate }: { animate: boolean }) {
         className="isolate z-40"
         collisionAvoidance={FLOATING_AVOIDANCE}
         collisionPadding={FLOATING_PADDING}
+        positionMethod="fixed"
         side="top"
         sideOffset={8}
       >
