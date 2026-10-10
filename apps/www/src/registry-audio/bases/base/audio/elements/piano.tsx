@@ -18,35 +18,32 @@ const pianoVariants = cva("", {
 });
 
 interface PianoProps
-  extends PianoPrimitive.RootProps,
-    VariantProps<typeof pianoVariants> {}
+  extends Omit<PianoPrimitive.Root.Props, "className">,
+    VariantProps<typeof pianoVariants> {
+  className?: string;
+}
 
 export function Piano({ className, size, ...props }: PianoProps) {
   return (
     <PianoPrimitive.Root
-      className="w-full data-[disabled=true]:cursor-not-allowed"
+      className={cn(
+        "cn-piano w-full touch-none select-none overflow-hidden",
+        "data-disabled:pointer-events-none data-disabled:opacity-50",
+        pianoVariants({ size }),
+        className
+      )}
+      data-slot="piano"
       {...props}
     >
-      <PianoPrimitive.Track
-        className={cn(
-          "cn-piano w-full touch-none select-none overflow-hidden",
-          "focus-visible:outline-none",
-          "data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50",
-          pianoVariants({ size }),
-          className
+      <PianoPrimitive.Keys>
+        {(pitch) => (
+          <PianoPrimitive.Key
+            className="cn-piano-key cursor-pointer"
+            key={pitch}
+            pitch={pitch}
+          />
         )}
-        data-slot="piano"
-      >
-        <PianoPrimitive.Keys>
-          {(note, _color, index) => (
-            <PianoPrimitive.Key
-              className="cn-piano-key cursor-pointer outline-none"
-              index={index}
-              key={note}
-            />
-          )}
-        </PianoPrimitive.Keys>
-      </PianoPrimitive.Track>
+      </PianoPrimitive.Keys>
     </PianoPrimitive.Root>
   );
 }

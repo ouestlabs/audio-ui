@@ -21,8 +21,8 @@ export default function PianoActiveNotesDemo() {
     <Piano
       activeNotes={chordOn ? CHORD_NOTES : []}
       aria-label="Piano"
-      endNote={72}
-      startNote={48}
+      maxPitch={72}
+      minPitch={48}
     />
   );
 }

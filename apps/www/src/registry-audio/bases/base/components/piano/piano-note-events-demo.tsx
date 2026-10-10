@@ -6,8 +6,8 @@ import { Piano } from "@/registry-audio/bases/base/audio/elements/piano";
 export default function PianoNoteEventsDemo() {
   const [lastNote, setLastNote] = useState<string>("—");
 
-  const handleNoteOn = useCallback((note: number) => {
-    setLastNote(String(note));
+  const handleNoteOn = useCallback((pitch: number) => {
+    setLastNote(String(pitch));
   }, []);
 
   const handleNoteOff = useCallback(() => {
@@ -18,10 +18,10 @@ export default function PianoNoteEventsDemo() {
     <div className="flex w-full flex-col gap-3">
       <Piano
         aria-label="Piano"
-        endNote={72}
+        maxPitch={72}
+        minPitch={48}
         onNoteOff={handleNoteOff}
         onNoteOn={handleNoteOn}
-        startNote={48}
       />
       <output className="text-center font-mono text-muted-foreground text-xs">
         Last note on: {lastNote}

@@ -1,6 +1,6 @@
 ---
 title: Piano
-description: Virtual piano keyboard with a MIDI note range, glissando, multi-touch polyphony, and an activeNotes overlay for external sources.
+description: Virtual piano keyboard with a MIDI pitch range, glissando, multi-touch polyphony, and an activeNotes overlay for external sources.
 component: true
 base: base
 ---
@@ -11,11 +11,12 @@ Piano for playing or displaying notes (a virtual instrument, a MIDI visualizer, 
 
 ## Overview
 
-- **Range:** `startNote` / `endNote` are MIDI note numbers (defaults `48`/`72` — C3 to C5). Key color (white/black) and layout are computed from the chromatic pattern starting at C.
-- **Events:** `onNoteOn` / `onNoteOff` fire the MIDI note number — exactly what an audio engine consumes.
+- **Range:** `minPitch` / `maxPitch` are MIDI pitches (defaults `48`/`72`, C3 to C5), or `pitches` lists exactly the keys to show. Key color (white/black) and layout follow the chromatic pattern.
+- **Events:** `onNoteOn(pitch, eventDetails)` / `onNoteOff(pitch, eventDetails)` fire the MIDI pitch, which is what an audio engine consumes. `eventDetails.reason` says how (`"press"`, `"glide"`, `"keyboard"`), and `eventDetails.cancel()` in `onNoteOn` keeps the key silent.
 - **Interaction model:** Press and hold a key to sustain the note. Drag across keys (mouse) for a glissando — each key retriggers as the pointer crosses it. Multiple simultaneous pointers (multi-touch) each independently hold their own key — true polyphony.
 - **External notes:** An optional controlled `activeNotes` prop lights up keys from outside pointer interaction (a MIDI input device, a sequencer's current chord) without affecting `onNoteOn`/`onNoteOff`.
-- **Accessibility:** One roving tab stop; arrow keys move focus between keys, `Space` or `Enter` triggers a momentary tap (`onNoteOn` immediately followed by `onNoteOff`).
+- **Accessibility:** Every key is a button named after its pitch ("C4"), behind one roving tab stop. Arrow keys move between keys, and `Space` or `Enter` holds the focused key down until released.
+- **Layout:** The primitive also lays keys out vertically (`orientation="vertical"`, low end at the bottom) and evenly (`layout="even"`, one equal share per key). The piano roll's keyboard is built that way.
 
 ## Installation
 
@@ -70,17 +71,17 @@ import { Piano } from "@/components/audio/piano";
 
 ```tsx
 <Piano
-  endNote={72}
-  onNoteOff={(note) => synth.release(note)}
-  onNoteOn={(note) => synth.trigger(note)}
-  startNote={48}
+  maxPitch={72}
+  minPitch={48}
+  onNoteOff={(pitch) => synth.release(pitch)}
+  onNoteOn={(pitch) => synth.trigger(pitch)}
 />
 ```
 
 **External notes (MIDI input, a sequencer's current chord):**
 
 ```tsx
-<Piano activeNotes={midiInputNotes} endNote={72} startNote={48} />
+<Piano activeNotes={midiInputNotes} maxPitch={72} minPitch={48} />
 ```
 
 ## Interaction
@@ -100,25 +101,27 @@ One tab stop for the whole keyboard; focus then roves between keys:
 
 | Key | Action |
 | --- | ------ |
-| `ArrowLeft` / `ArrowRight` | Move focus to the previous / next key (chromatically) |
-| `Space` / `Enter` | Momentary tap: `onNoteOn` immediately followed by `onNoteOff` |
-| `Home` / `End` | Move focus to the first / last key |
+| `ArrowLeft` / `ArrowRight` (or `ArrowDown` / `ArrowUp`) | Move focus to the next lower / higher key |
+| `Shift` + arrow, `PageDown` / `PageUp` | Move focus an octave down / up |
+| `Space` / `Enter` | Hold the focused key: `onNoteOn` on press, `onNoteOff` on release |
+| `Home` / `End` | Move focus to the lowest / highest key |
 
 ## API reference
 
-`Piano` accepts style props (`size`, `className`) plus primitive props from `PianoPrimitive.RootProps`.
+`Piano` accepts style props (`size`, `className`) plus primitive props from `PianoPrimitive.Root.Props`.
 
 ### Value and state
 
 | Prop            | Type                  | Default | Description                                                      |
 | --------------- | ---------------------- | ------- | ------------------------------------------------------------------ |
-| `startNote`     | `number`               | `48`    | Lowest MIDI note on the keyboard.                                 |
-| `endNote`       | `number`               | `72`    | Highest MIDI note on the keyboard.                                |
-| `activeNotes`   | `number[]`              | -       | Notes highlighted from outside pointer interaction. Merged with pointer-pressed notes for display. |
+| `minPitch`      | `number`               | `48`    | Lowest MIDI pitch on the keyboard.                                |
+| `maxPitch`      | `number`               | `72`    | Highest MIDI pitch on the keyboard.                               |
+| `pitches`       | `number[]`             | -       | Exactly these pitches, in place of `minPitch`…`maxPitch`.         |
+| `activeNotes`   | `number[]`              | -       | Pitches lit from outside pointer interaction. Merged with the pressed keys for display. |
 | `disabled`      | `boolean`               | `false` | Whether the keyboard is disabled.                                 |
-| `onNoteOn`      | `(note: number) => void` | -     | Callback when a note starts (pointer press, tap, or glissando).   |
-| `onNoteOff`     | `(note: number) => void` | -     | Callback when a note ends (release or glissando).                 |
-| `aria-label`    | `string`                | `"Piano"` | Accessible name for the keyboard.                                |
+| `onNoteOn`      | `(pitch: number, eventDetails) => void` | -     | Fires when a key is pressed or glided onto. `eventDetails.cancel()` keeps it silent. |
+| `onNoteOff`     | `(pitch: number, eventDetails) => void` | -     | Fires when a key is released, glided off, or loses focus while held. |
+| `aria-label`    | `string`                | -       | Accessible name for the keyboard.                                 |
 | `aria-labelledby` | `string`              | -       | ID of a labeling element.                                         |
 
 ### Layout and display
