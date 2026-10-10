@@ -117,7 +117,7 @@ export function Grid(componentProps: Grid.Props) {
     }
     const element = event.currentTarget;
     event.preventDefault();
-    element.focus({ preventScroll: true });
+    element.focus({ focusVisible: false, preventScroll: true });
     if (state.mode === "select") {
       const rect = element.getBoundingClientRect();
       const selection = meta.selectionRef.current;

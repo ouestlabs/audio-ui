@@ -125,9 +125,9 @@ export function Root(componentProps: Root.Props) {
     },
     []
   );
-  const focusKey = React.useCallback((pitch: number) => {
+  const focusKey = React.useCallback((pitch: number, focusVisible = true) => {
     setFocusedPitch(pitch);
-    keysRef.current.get(pitch)?.focus({ preventScroll: true });
+    keysRef.current.get(pitch)?.focus({ focusVisible, preventScroll: true });
   }, []);
 
   const elementRef = React.useRef<HTMLDivElement>(null);
@@ -160,7 +160,7 @@ export function Root(componentProps: Root.Props) {
     }
     event.preventDefault();
     event.currentTarget.setPointerCapture?.(event.pointerId);
-    focusKey(pitch);
+    focusKey(pitch, false);
     const sounding = noteOn(
       pitch,
       createChangeEventDetails("press", event.nativeEvent)
@@ -177,7 +177,7 @@ export function Root(componentProps: Root.Props) {
     if (held.sounding) {
       noteOff(held.pitch, { event: event.nativeEvent, reason: "glide" });
     }
-    focusKey(pitch);
+    focusKey(pitch, false);
     const sounding = noteOn(
       pitch,
       createChangeEventDetails("glide", event.nativeEvent)

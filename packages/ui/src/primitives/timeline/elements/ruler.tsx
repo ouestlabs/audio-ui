@@ -85,7 +85,7 @@ export function Ruler(componentProps: Ruler.Props) {
     }
     event.preventDefault();
     event.currentTarget.setPointerCapture?.(event.pointerId);
-    inputRef.current?.focus({ preventScroll: true });
+    inputRef.current?.focus({ focusVisible: false, preventScroll: true });
     const raw = valueAt(event);
     const value = bypassesGrid(event) ? raw : snapToGrid(raw, grid);
     const gesture: ScrubGesture = {

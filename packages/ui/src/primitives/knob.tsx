@@ -488,7 +488,7 @@ export function Control(componentProps: Control.Props) {
     event.preventDefault();
     const control = event.currentTarget;
     control.setPointerCapture?.(event.pointerId);
-    meta.inputRef.current?.focus({ preventScroll: true });
+    meta.inputRef.current?.focus({ focusVisible: false, preventScroll: true });
     const rect = control.getBoundingClientRect();
     gestureRef.current = {
       changed: false,

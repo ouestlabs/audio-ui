@@ -138,7 +138,7 @@ export function Velocity(componentProps: Velocity.Props) {
       return;
     }
     event.preventDefault();
-    inputRef.current?.focus({ preventScroll: true });
+    inputRef.current?.focus({ focusVisible: false, preventScroll: true });
     const selection = meta.selectionRef.current;
     if (event.shiftKey) {
       actions.select(

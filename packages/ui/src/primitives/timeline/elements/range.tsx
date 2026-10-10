@@ -567,7 +567,7 @@ export function RangeHandle(componentProps: RangeHandle.Props) {
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
     drag.onPointerDown(event);
     if (!disabled && event.button === 0) {
-      inputRef.current?.focus({ preventScroll: true });
+      inputRef.current?.focus({ focusVisible: false, preventScroll: true });
     }
   };
 

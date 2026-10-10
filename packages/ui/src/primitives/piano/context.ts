@@ -23,8 +23,8 @@ export type NoteOffEventDetails =
 
 export interface PianoContextValue {
   actions: {
-    /** Moves the keyboard's tab stop to `pitch` and focuses its key. */
-    focusKey: (pitch: number) => void;
+    /** Moves the keyboard's tab stop to `pitch` and focuses its key, showing the focus ring unless a pointer moved it. */
+    focusKey: (pitch: number, focusVisible?: boolean) => void;
     /** Proposes a note on; returns whether it sounded. */
     noteOn: (pitch: number, eventDetails: NoteOnEventDetails) => boolean;
     noteOff: (pitch: number, eventDetails: NoteOffEventDetails) => void;

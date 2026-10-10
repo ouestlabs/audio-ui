@@ -642,7 +642,7 @@ export function Point(componentProps: Point.Props) {
     event.preventDefault();
     event.stopPropagation();
     event.currentTarget.setPointerCapture?.(event.pointerId);
-    event.currentTarget.focus({ preventScroll: true });
+    event.currentTarget.focus({ focusVisible: false, preventScroll: true });
     gestureRef.current = { changed: false, pointerId: event.pointerId };
     actions.setFocusedIndex(index);
     actions.setDraggingIndex(index);

@@ -171,7 +171,7 @@ function useNoteGesture(
       return;
     }
     event.preventDefault();
-    elementRef.current?.focus({ preventScroll: true });
+    elementRef.current?.focus({ focusVisible: false, preventScroll: true });
     const selection = meta.selectionRef.current;
     if (kind === "move" && event.shiftKey) {
       const next = selection.has(note.id)

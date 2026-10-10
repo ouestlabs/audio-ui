@@ -210,7 +210,7 @@ function PianoRollGrid({
       <PianoRollPrimitive.Notes>
         {(note) => (
           <PianoRollPrimitive.Note
-            className="cn-piano-roll-note cursor-grab touch-none select-none border border-primary bg-[color-mix(in_oklab,var(--primary)_calc(30%_+_var(--piano-roll-velocity)_*_60%),transparent)] outline-none active:cursor-grabbing data-selected:border-foreground"
+            className="cn-piano-roll-note cursor-grab touch-none select-none border border-primary bg-[color-mix(in_oklab,var(--primary)_calc(30%_+_var(--piano-roll-velocity)_*_60%),transparent)] outline-none active:cursor-grabbing data-[selected]:border-foreground"
             key={note.id}
             note={note}
           >
