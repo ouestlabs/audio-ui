@@ -24,7 +24,8 @@ import {
   normalizeWaveform,
 } from "@/registry-audio/bases/base/lib/waveform-dsp";
 
-const PATH_SAMPLES = 100;
+// More peaks than the waveform has bars at any width; it keeps the loudest per bar.
+const PEAK_COUNT = 1024;
 
 function formatTime(seconds: number): string {
   if (!Number.isFinite(seconds)) {
@@ -92,7 +93,7 @@ export default function BlockWaveformPlayer() {
       const samples = await decodeAudioSamples(context, buffer);
       await context.close();
 
-      const downsampled = downsampleWaveform(samples, PATH_SAMPLES);
+      const downsampled = downsampleWaveform(samples, PEAK_COUNT);
       setValues(normalizeWaveform(downsampled));
     },
     []

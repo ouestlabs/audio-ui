@@ -429,7 +429,7 @@
   }
 
   .cn-waveform-canvas {
-    @apply pointer-events-none [--waveform-bar-radius:max(0px,min(var(--radius-sm),3px))] [--waveform-color:var(--border)] [--waveform-progress-color:var(--primary)];
+    @apply pointer-events-none [--waveform-bar-radius:max(0px,min(var(--radius-sm),3px))] [--waveform-color:color-mix(in_oklab,var(--muted-foreground)_50%,transparent)] [--waveform-progress-color:var(--primary)];
   }
 
   .cn-waveform-playhead {

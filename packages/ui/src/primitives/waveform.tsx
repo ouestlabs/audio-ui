@@ -11,8 +11,9 @@ import { type PartProps, resolveStyling } from "./internal/part";
 import { createStore, type Store } from "./internal/store";
 import { VISUALLY_HIDDEN } from "./internal/visually-hidden";
 import {
-  barCount,
+  barLayout,
   barRect,
+  bitmapLength,
   resamplePeaks,
   type WaveformVariant,
 } from "./internal/waveform-bars";
@@ -538,9 +539,11 @@ export namespace Control {
 }
 
 /**
- * Draws the peaks as bars on a canvas: sharp at any pixel density, as many
- * bars as fit its width, the played part in one color and the rest in another.
- * It repaints only when the position, the size, the peaks or the theme change.
+ * Draws the peaks as bars on a canvas, laid out on the device pixel grid: as
+ * many bars as fit its width, every edge on a physical pixel, so it stays
+ * sharp at any pixel density and zoom level. The played part is drawn in one
+ * color and the rest in another. It repaints only when the position, the size,
+ * the pixel density, the peaks or the theme change.
  *
  * Colors come from CSS: `--waveform-color` and `--waveform-progress-color`
  * (both default to the text color). The bar corner radius is `barRadius`, or
@@ -548,9 +551,9 @@ export namespace Control {
  */
 export function Canvas(componentProps: Canvas.Props) {
   const {
-    barGap = 2,
+    barGap = 1,
     barRadius,
-    barWidth = 3,
+    barWidth = 2,
     className,
     ref,
     render,
@@ -565,42 +568,39 @@ export function Canvas(componentProps: Canvas.Props) {
   React.useEffect(() => {
     const canvas = canvasRef.current;
     const context = canvas?.getContext("2d");
-    if (!(canvas && context)) {
+    if (!(canvas && context) || typeof ResizeObserver === "undefined") {
       return;
     }
     registerBarRadiusProperty();
 
-    let width = 0;
-    let height = 0;
-    let pixelRatio = 1;
-    let levels: Float32Array = new Float32Array(0);
+    let bars = new Path2D();
+    // Whether the bars must be laid out again before the next paint.
+    let stale = true;
     let frame = 0;
 
-    const fillBars = (
-      color: string,
-      from: number,
-      to: number,
-      radius: number
-    ) => {
-      if (to <= from) {
-        return;
-      }
-      context.save();
-      context.beginPath();
-      context.rect(from, 0, to - from, height);
-      context.clip();
-      context.fillStyle = color;
+    const layout = () => {
+      stale = false;
+      const pixelRatio = window.devicePixelRatio || 1;
+      const grid = barLayout({
+        barGap,
+        barWidth,
+        height: canvas.height,
+        pixelRatio,
+        variant,
+        width: canvas.width,
+      });
+      const levels = resamplePeaks(peaks ?? [], grid.count);
+      const radius =
+        (barRadius ??
+          (Number.parseFloat(
+            getComputedStyle(canvas).getPropertyValue(BAR_RADIUS_PROPERTY)
+          ) ||
+            0)) * pixelRatio;
+      bars = new Path2D();
       for (let index = 0; index < levels.length; index += 1) {
-        const bar = barRect(levels[index] ?? 0, index, {
-          barGap,
-          barWidth,
-          height,
-          variant,
-        });
-        context.globalAlpha = bar.alpha;
-        context.beginPath();
-        if (radius > 0 && typeof context.roundRect === "function") {
-          context.roundRect(
+        const bar = barRect(levels[index] ?? 0, index, grid);
+        if (radius > 0 && typeof bars.roundRect === "function") {
+          bars.roundRect(
             bar.x,
             bar.y,
             bar.width,
@@ -608,71 +608,131 @@ export function Canvas(componentProps: Canvas.Props) {
             Math.min(radius, bar.width / 2, bar.height / 2)
           );
         } else {
-          context.rect(bar.x, bar.y, bar.width, bar.height);
+          bars.rect(bar.x, bar.y, bar.width, bar.height);
         }
-        context.fill();
       }
+    };
+
+    const fill = (color: string, from: number, to: number) => {
+      if (to <= from) {
+        return;
+      }
+      context.save();
+      context.beginPath();
+      context.rect(from, 0, to - from, canvas.height);
+      context.clip();
+      context.fillStyle = color;
+      context.fill(bars);
       context.restore();
     };
 
-    const draw = () => {
+    const paint = () => {
       frame = 0;
-      context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
-      context.clearRect(0, 0, width, height);
-      if (width === 0 || height === 0) {
-        return;
+      if (stale) {
+        layout();
       }
+      context.clearRect(0, 0, canvas.width, canvas.height);
       const computed = getComputedStyle(canvas);
       const color =
         computed.getPropertyValue("--waveform-color").trim() || computed.color;
       const progressColor =
         computed.getPropertyValue("--waveform-progress-color").trim() || color;
-      const radius =
-        barRadius ??
-        (Number.parseFloat(computed.getPropertyValue(BAR_RADIUS_PROPERTY)) ||
-          0);
-      // The two passes never overlap, so translucent bars keep their own color.
-      const playedWidth = position.get() * width;
-      fillBars(color, playedWidth, width, radius);
-      fillBars(progressColor, 0, playedWidth, radius);
+      // Split on a whole pixel: no column ever blends the two colors.
+      const played = Math.round(position.get() * canvas.width);
+      fill(progressColor, 0, played);
+      fill(color, played, canvas.width);
     };
 
     const schedule = () => {
       if (frame === 0) {
-        frame = requestAnimationFrame(draw);
+        frame = requestAnimationFrame(paint);
       }
     };
 
-    const measure = () => {
-      ({ height, width } = canvas.getBoundingClientRect());
-      pixelRatio = window.devicePixelRatio || 1;
-      canvas.width = Math.max(1, Math.round(width * pixelRatio));
-      canvas.height = Math.max(1, Math.round(height * pixelRatio));
-      levels = resamplePeaks(peaks ?? [], barCount(width, barWidth, barGap));
+    // Colors and the bar radius are read from CSS: lay out again when they may have changed.
+    const invalidate = () => {
+      stale = true;
       schedule();
     };
 
-    measure();
-    const resizeObserver =
-      typeof ResizeObserver === "undefined"
-        ? null
-        : new ResizeObserver(measure);
-    resizeObserver?.observe(canvas);
-    // Colors are read from CSS at paint time: repaint when the theme flips.
-    const themeObserver =
-      typeof MutationObserver === "undefined"
-        ? null
-        : new MutationObserver(schedule);
-    themeObserver?.observe(document.documentElement, {
+    const resize = (entry: ResizeObserverEntry) => {
+      const pixelRatio = window.devicePixelRatio || 1;
+      const exact = entry.devicePixelContentBoxSize?.[0];
+      const width = bitmapLength(
+        entry.contentRect.width,
+        pixelRatio,
+        exact?.inlineSize
+      );
+      const height = bitmapLength(
+        entry.contentRect.height,
+        pixelRatio,
+        exact?.blockSize
+      );
+      if (canvas.width !== width || canvas.height !== height) {
+        canvas.width = width;
+        canvas.height = height;
+      }
+      // Resizing clears the bitmap: repaint now, before the browser shows it.
+      cancelAnimationFrame(frame);
+      stale = true;
+      paint();
+    };
+
+    const resizeObserver = new ResizeObserver(([entry]) => {
+      if (entry) {
+        resize(entry);
+      }
+    });
+    // Observing again reports the size afresh.
+    const observe = () => {
+      resizeObserver.unobserve(canvas);
+      try {
+        resizeObserver.observe(canvas, { box: "device-pixel-content-box" });
+      } catch {
+        // Device pixel sizes aren't reported here: CSS pixel sizes will do.
+        resizeObserver.observe(canvas);
+      }
+    };
+    observe();
+
+    const themeObserver = new MutationObserver(invalidate);
+    themeObserver.observe(document.documentElement, {
       attributeFilter: THEME_ATTRIBUTES,
       attributes: true,
     });
+
+    const controller = new AbortController();
+    const { signal } = controller;
+    // A zoom, or a move to another screen, changes the pixel density without
+    // resizing the canvas in CSS pixels.
+    const watchPixelRatio = () => {
+      matchMedia(
+        `(resolution: ${window.devicePixelRatio}dppx)`
+      ).addEventListener(
+        "change",
+        () => {
+          watchPixelRatio();
+          observe();
+        },
+        { once: true, signal }
+      );
+    };
+    if (typeof matchMedia === "function") {
+      watchPixelRatio();
+      matchMedia("(prefers-color-scheme: dark)").addEventListener(
+        "change",
+        invalidate,
+        { signal }
+      );
+    }
+
     const unsubscribe = position.subscribe(schedule);
 
     return () => {
       cancelAnimationFrame(frame);
-      resizeObserver?.disconnect();
-      themeObserver?.disconnect();
+      controller.abort();
+      resizeObserver.disconnect();
+      themeObserver.disconnect();
       unsubscribe();
     };
   }, [barGap, barRadius, barWidth, peaks, position, variant]);
@@ -692,11 +752,11 @@ export function Canvas(componentProps: Canvas.Props) {
 export namespace Canvas {
   export type State = Root.State;
   export interface Props extends PartProps<"canvas", State> {
-    /** Space between bars, in CSS pixels. @default 2 */
+    /** Space between bars, in CSS pixels, snapped to whole device pixels. @default 1 */
     barGap?: number;
     /** Bar corner radius, in CSS pixels. Defaults to the `--waveform-bar-radius` CSS length. */
     barRadius?: number;
-    /** Bar width, in CSS pixels. @default 3 */
+    /** Bar width, in CSS pixels, snapped to whole device pixels. @default 2 */
     barWidth?: number;
     /** `mirror` centers the bars on the middle line; `bars` stands them on the baseline. @default "mirror" */
     variant?: WaveformVariant;
