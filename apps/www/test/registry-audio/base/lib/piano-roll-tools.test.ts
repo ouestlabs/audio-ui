@@ -6,24 +6,25 @@ import {
 } from "@/registry-audio/bases/base/lib/piano-roll-tools";
 
 const roll = createPianoRollTools({
-  endNote: 72,
-  startNote: 48,
+  maxPitch: 72,
+  minPitch: 48,
   stepCount: 16,
 });
 const empty: PianoRollState = { bpm: 120, notes: [] };
 
 describe("clampNoteToDomain (mirrors the primitive's normalization)", () => {
-  test("clamps note, startStep, and duration into the domain", () => {
-    const note = clampNoteToDomain(
-      { duration: 0, note: 30, startStep: -5 },
-      "x",
-      { endNote: 72, minDuration: 1, startNote: 48, stepCount: 16 }
-    );
+  test("clamps pitch, start, and length into the domain", () => {
+    const note = clampNoteToDomain({ length: 0, pitch: 30, start: -5 }, "x", {
+      maxPitch: 72,
+      minLength: 1,
+      minPitch: 48,
+      stepCount: 16,
+    });
     expect(note).toMatchObject({
-      duration: 1,
       id: "x",
-      note: 48,
-      startStep: 0,
+      length: 1,
+      pitch: 48,
+      start: 0,
       velocity: 1,
     });
   });
@@ -33,22 +34,22 @@ describe("setNotes", () => {
   test("replaces the roll and grid-snaps out-of-range notes", () => {
     const next = roll.setNotes.apply(empty, {
       notes: [
-        { duration: 2, note: 60, startStep: 0 },
-        { duration: 99, note: 100, startStep: 20 },
+        { length: 2, pitch: 60, start: 0 },
+        { length: 99, pitch: 100, start: 20 },
       ],
     });
     expect(next.notes).toHaveLength(2);
     expect(next.notes[0]).toMatchObject({
-      duration: 2,
       id: 0,
-      note: 60,
-      startStep: 0,
+      length: 2,
+      pitch: 60,
+      start: 0,
     });
-    // note 100 -> 72, duration 99 -> 16, startStep 20 -> (16 - 16) = 0
+    // pitch 100 -> 72, length 99 -> 16, start 20 -> (16 - 16) = 0
     expect(next.notes[1]).toMatchObject({
-      duration: 16,
-      note: 72,
-      startStep: 0,
+      length: 16,
+      pitch: 72,
+      start: 0,
     });
   });
 });
@@ -56,13 +57,13 @@ describe("setNotes", () => {
 describe("addNotes", () => {
   test("appends with a fresh, non-colliding id", () => {
     const seeded = roll.setNotes.apply(empty, {
-      notes: [{ note: 60, startStep: 0 }],
+      notes: [{ pitch: 60, start: 0 }],
     });
     const added = roll.addNotes.apply(seeded, {
-      notes: [{ note: 64, startStep: 4 }],
+      notes: [{ pitch: 64, start: 4 }],
     });
     expect(added.notes).toHaveLength(2);
-    expect(added.notes[1]).toMatchObject({ id: 1, note: 64, startStep: 4 });
+    expect(added.notes[1]).toMatchObject({ id: 1, pitch: 64, start: 4 });
   });
 });
 
@@ -70,8 +71,8 @@ describe("removeNotes", () => {
   test("drops notes by id", () => {
     const two = roll.setNotes.apply(empty, {
       notes: [
-        { note: 60, startStep: 0 },
-        { note: 62, startStep: 2 },
+        { pitch: 60, start: 0 },
+        { pitch: 62, start: 2 },
       ],
     });
     const removed = roll.removeNotes.apply(two, { ids: [0] });
@@ -83,26 +84,26 @@ describe("removeNotes", () => {
 describe("transpose", () => {
   test("shifts all notes and clamps at the range edge", () => {
     const seeded = roll.setNotes.apply(empty, {
-      notes: [{ note: 60, startStep: 0 }],
+      notes: [{ pitch: 60, start: 0 }],
     });
-    expect(roll.transpose.apply(seeded, { semitones: 12 }).notes[0]?.note).toBe(
-      72
-    );
-    expect(roll.transpose.apply(seeded, { semitones: 24 }).notes[0]?.note).toBe(
-      72
-    );
+    expect(
+      roll.transpose.apply(seeded, { semitones: 12 }).notes[0]?.pitch
+    ).toBe(72);
+    expect(
+      roll.transpose.apply(seeded, { semitones: 24 }).notes[0]?.pitch
+    ).toBe(72);
   });
 
   test("shifts only the given ids", () => {
     const two = roll.setNotes.apply(empty, {
       notes: [
-        { note: 60, startStep: 0 },
-        { note: 62, startStep: 2 },
+        { pitch: 60, start: 0 },
+        { pitch: 62, start: 2 },
       ],
     });
     const next = roll.transpose.apply(two, { ids: [0], semitones: 12 });
-    expect(next.notes[0]?.note).toBe(72);
-    expect(next.notes[1]?.note).toBe(62);
+    expect(next.notes[0]?.pitch).toBe(72);
+    expect(next.notes[1]?.pitch).toBe(62);
   });
 });
 
@@ -116,27 +117,27 @@ describe("setTempo", () => {
 describe("createPianoRollTools — the pitch range is parameterized", () => {
   test("a wide 88-key roll accepts a note the default range would clamp", () => {
     const wide = createPianoRollTools({
-      endNote: 108,
-      startNote: 21,
+      maxPitch: 108,
+      minPitch: 21,
       stepCount: 32,
     });
     const next = wide.setNotes.apply(
       { bpm: 120, notes: [] },
-      { notes: [{ duration: 2, note: 100, startStep: 30 }] }
+      { notes: [{ length: 2, pitch: 100, start: 30 }] }
     );
-    expect(next.notes[0]?.note).toBe(100);
-    expect(next.notes[0]?.startStep).toBe(30);
+    expect(next.notes[0]?.pitch).toBe(100);
+    expect(next.notes[0]?.start).toBe(30);
   });
 });
 
 describe("schemas reject malformed AI arguments", () => {
-  test("note out of the roll's range is rejected", () => {
+  test("a pitch out of the roll's range is rejected", () => {
     expect(
-      roll.setNotes.schema.safeParse({ notes: [{ note: 200, startStep: 0 }] })
+      roll.setNotes.schema.safeParse({ notes: [{ pitch: 200, start: 0 }] })
         .success
     ).toBe(false);
     expect(
-      roll.setNotes.schema.safeParse({ notes: [{ note: 60, startStep: 0 }] })
+      roll.setNotes.schema.safeParse({ notes: [{ pitch: 60, start: 0 }] })
         .success
     ).toBe(true);
   });

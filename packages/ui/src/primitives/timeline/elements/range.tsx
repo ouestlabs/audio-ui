@@ -15,15 +15,12 @@ import {
 import { VISUALLY_HIDDEN } from "../../internal/visually-hidden";
 import {
   type DescribePosition,
-  placedAt,
-  UNIT_PROPERTY,
+  placedOver,
   useTimelineContext,
   valueAtPointer,
 } from "../context";
 import { bypassesGrid, snapRangeMove, snapToGrid } from "../internal/snap";
 import { LaneContext } from "./lane";
-
-const LENGTH_PROPERTY = "--timeline-length";
 
 type WithEdge<Details> = Details & {
   /** What moved: one edge, or the whole range with `"both"`. */
@@ -476,12 +473,7 @@ export function Range(componentProps: Range.Props) {
             ) : null}
           </>
         ),
-        style: {
-          ...placedAt(start),
-          [LENGTH_PROPERTY as string]: length,
-          touchAction: "none",
-          width: `calc(var(${UNIT_PROPERTY}) * var(${LENGTH_PROPERTY}))`,
-        },
+        style: { ...placedOver(start, length), touchAction: "none" },
       },
       { ...elementProps, ...resolveStyling(className, style, state) }
     ),

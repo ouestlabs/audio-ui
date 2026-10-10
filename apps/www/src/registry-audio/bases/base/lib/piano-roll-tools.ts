@@ -16,7 +16,7 @@ import { z } from "zod";
  * import { tool } from "ai";
  * import { createPianoRollTools } from "@/lib/piano-roll-tools";
  *
- * const roll = createPianoRollTools({ startNote: 48, endNote: 72, totalSteps: 16 });
+ * const roll = createPianoRollTools({ minPitch: 48, maxPitch: 72, stepCount: 16 });
  * const tools = Object.fromEntries(
  *   Object.entries(roll).map(([name, t]) => [
  *     name,
@@ -33,20 +33,20 @@ import { z } from "zod";
  * ```
  */
 
-/** A grid-snapped, pitched note. Times and durations are integer step counts; real-world timing (BPM, seconds) is the consumer's concern. Structurally matches the PianoRoll primitive's `Note`. */
+/** A grid-snapped, pitched note. Start and length are whole steps; real-world timing (BPM, seconds) is the consumer's concern. Structurally matches the PianoRoll primitive's `Note` on a timeline counted in steps. */
 export interface PianoRollNote {
-  duration: number;
   id: number | string;
-  note: number;
-  startStep: number;
+  length: number;
+  pitch: number;
+  start: number;
   velocity: number;
 }
 
-/** A note as the model supplies it — no id (the tools assign one), duration/velocity optional. */
+/** A note as the model supplies it — no id (the tools assign one), length/velocity optional. */
 export interface NoteInput {
-  duration?: number;
-  note: number;
-  startStep: number;
+  length?: number;
+  pitch: number;
+  start: number;
   velocity?: number;
 }
 
@@ -57,11 +57,11 @@ export interface PianoRollState {
 }
 
 const DEFAULTS = {
-  endNote: 72,
   maxBpm: 200,
+  maxPitch: 72,
   minBpm: 20,
-  minDuration: 1,
-  startNote: 48,
+  minLength: 1,
+  minPitch: 48,
   stepCount: 16,
 };
 
@@ -74,9 +74,9 @@ function clampUnit(value: number): number {
 }
 
 interface Domain {
-  endNote: number;
-  minDuration: number;
-  startNote: number;
+  maxPitch: number;
+  minLength: number;
+  minPitch: number;
   stepCount: number;
 }
 
@@ -86,22 +86,22 @@ export function clampNoteToDomain(
   id: number | string,
   domain: Domain
 ): PianoRollNote {
-  const duration = clamp(
-    Math.round(input.duration ?? domain.minDuration),
-    domain.minDuration,
+  const length = clamp(
+    Math.round(input.length ?? domain.minLength),
+    domain.minLength,
     domain.stepCount
   );
-  const startStep = clamp(
-    Math.round(input.startStep),
-    0,
-    domain.stepCount - duration
+  const start = clamp(Math.round(input.start), 0, domain.stepCount - length);
+  const pitch = clamp(
+    Math.round(input.pitch),
+    domain.minPitch,
+    domain.maxPitch
   );
-  const note = clamp(Math.round(input.note), domain.startNote, domain.endNote);
   return {
-    duration,
     id,
-    note,
-    startStep,
+    length,
+    pitch,
+    start,
     velocity: clampUnit(input.velocity ?? 1),
   };
 }
@@ -119,16 +119,16 @@ function nextId(notes: PianoRollNote[]): number {
 }
 
 export interface PianoRollToolsConfig {
-  /** Highest MIDI note the roll shows (default 72, C5). */
-  endNote?: number;
   /** Upper tempo bound in BPM (default 200). */
   maxBpm?: number;
+  /** Highest MIDI pitch the roll shows (default 72, C5). */
+  maxPitch?: number;
   /** Lower tempo bound in BPM (default 20). */
   minBpm?: number;
   /** Shortest note in steps (default 1). */
-  minDuration?: number;
-  /** Lowest MIDI note the roll shows (default 48, C3). */
-  startNote?: number;
+  minLength?: number;
+  /** Lowest MIDI pitch the roll shows (default 48, C3). */
+  minPitch?: number;
   /** Steps per bar / grid width (default 16). */
   stepCount?: number;
 }
@@ -142,30 +142,30 @@ interface PianoRollTool<Schema extends z.ZodType> {
 /** Builds the tool set for a specific roll. Pitch range and grid are baked into the schemas, and every edit is re-clamped into the domain. */
 export function createPianoRollTools(config: PianoRollToolsConfig = {}) {
   const {
-    startNote = DEFAULTS.startNote,
-    endNote = DEFAULTS.endNote,
+    minPitch = DEFAULTS.minPitch,
+    maxPitch = DEFAULTS.maxPitch,
     stepCount = DEFAULTS.stepCount,
-    minDuration = DEFAULTS.minDuration,
+    minLength = DEFAULTS.minLength,
     minBpm = DEFAULTS.minBpm,
     maxBpm = DEFAULTS.maxBpm,
   } = config;
-  const domain: Domain = { endNote, minDuration, startNote, stepCount };
+  const domain: Domain = { maxPitch, minLength, minPitch, stepCount };
 
   const noteInputSchema = z.object({
-    duration: z
+    length: z
       .number()
       .int()
-      .min(minDuration)
+      .min(minLength)
       .max(stepCount)
       .optional()
-      .describe(`Length in steps (default ${minDuration}).`),
-    note: z
+      .describe(`Length in steps (default ${minLength}).`),
+    pitch: z
       .number()
       .int()
-      .min(startNote)
-      .max(endNote)
-      .describe("MIDI note number (60 = middle C)."),
-    startStep: z
+      .min(minPitch)
+      .max(maxPitch)
+      .describe("MIDI pitch (60 = middle C)."),
+    start: z
       .number()
       .int()
       .min(0)
@@ -270,7 +270,7 @@ export function createPianoRollTools(config: PianoRollToolsConfig = {}) {
             ? note
             : {
                 ...note,
-                note: clamp(note.note + semitones, startNote, endNote),
+                pitch: clamp(note.pitch + semitones, minPitch, maxPitch),
               }
         ),
       }),

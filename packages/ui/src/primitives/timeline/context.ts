@@ -139,9 +139,21 @@ export const OFFSET_PROPERTY = "--timeline-offset";
 /** Places a part at its `--timeline-offset` along the lane. */
 export function placedAt(value: number): React.CSSProperties {
   return {
-    [OFFSET_PROPERTY as string]: value,
+    [String(OFFSET_PROPERTY)]: value,
     left: `calc(var(${UNIT_PROPERTY}) * var(${OFFSET_PROPERTY}))`,
     position: "absolute",
+  };
+}
+
+/** Set on every part that spans a stretch of the lane: how long it is, in units. */
+export const LENGTH_PROPERTY = "--timeline-length";
+
+/** Places a part from `start` along the lane, `length` units long. */
+export function placedOver(start: number, length: number): React.CSSProperties {
+  return {
+    ...placedAt(start),
+    [String(LENGTH_PROPERTY)]: length,
+    width: `calc(var(${UNIT_PROPERTY}) * var(${LENGTH_PROPERTY}))`,
   };
 }
 

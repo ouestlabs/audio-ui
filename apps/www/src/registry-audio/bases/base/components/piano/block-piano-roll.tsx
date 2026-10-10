@@ -15,7 +15,11 @@ import {
   ChannelStripValue,
 } from "@/registry-audio/bases/base/audio/elements/channel-strip";
 import { Fader } from "@/registry-audio/bases/base/audio/elements/fader";
-import { PianoRoll } from "@/registry-audio/bases/base/audio/elements/piano-roll";
+import {
+  PianoRoll,
+  PianoRollGrid,
+  PianoRollKeys,
+} from "@/registry-audio/bases/base/audio/elements/piano-roll";
 import {
   Timeline,
   TimelineLane,
@@ -41,8 +45,8 @@ import {
 } from "@/registry-audio/bases/base/lib/midi";
 import type { EnvelopePoint } from "@/registry-audio/bases/base/lib/synth-voice";
 
-const START_NOTE = 48;
-const END_NOTE = 72;
+const MIN_PITCH = 48;
+const MAX_PITCH = 72;
 const DEFAULT_VOLUME = 0.7;
 const TOTAL_STEPS = 16;
 const BEATS_PER_BAR = 4;
@@ -53,11 +57,26 @@ const BEAT_STEPS = Array.from(
 );
 
 const describeStep = (step: number) => `Step ${Math.floor(step) + 1}`;
+const PITCH_NAMES = [
+  "C",
+  "C#",
+  "D",
+  "D#",
+  "E",
+  "F",
+  "F#",
+  "G",
+  "G#",
+  "A",
+  "A#",
+  "B",
+];
+/** "C4, step 5, 2 steps": where a note is, in the grid's own terms. */
+const describeNote = (note: Note) =>
+  `${PITCH_NAMES[note.pitch % 12]}${Math.floor(note.pitch / 12) - 1}, step ${note.start + 1}, ${note.length} ${note.length === 1 ? "step" : "steps"}`;
 const DEFAULT_BPM = 120;
 const MIN_BPM = 20;
 const MAX_BPM = 200;
-/** How long a discrete (non-drag) grid edit — a click-add, a keyboard nudge — keeps its key-strip highlight lit after the instant audio blip. */
-const BLIP_HIGHLIGHT_MS = 200;
 /** Standard MIDI File resolution — ticks per quarter note, a common round value shared by most DAWs' own exports. */
 const MIDI_TICKS_PER_QUARTER_NOTE = 480;
 const MICROSECONDS_PER_MINUTE = 60_000_000;
@@ -72,7 +91,7 @@ const DEFAULT_ENVELOPE: EnvelopePoint[] = [
   { x: 1, y: 0.05 },
 ];
 
-type Note = PianoRollPrimitive.Note;
+type Note = PianoRollPrimitive.Root.Note;
 type LoopRegion = TransportRegion;
 
 /** No region set — the loop spans the full grid, the original always-loop-everything behavior. */
@@ -99,22 +118,22 @@ function notesFromMidiFile(parsed: {
 
   const notes: Note[] = [];
   for (const midiNote of parsed.notes) {
-    const startStep = Math.round(
+    const start = Math.round(
       (midiNote.startTick * secondsPerTick) / stepDuration
     );
-    if (startStep < 0 || startStep >= TOTAL_STEPS) {
+    if (start < 0 || start >= TOTAL_STEPS) {
       continue;
     }
-    const durationSteps = clamp(
+    const length = clamp(
       Math.round((midiNote.durationTicks * secondsPerTick) / stepDuration),
       1,
-      TOTAL_STEPS - startStep
+      TOTAL_STEPS - start
     );
     notes.push({
-      duration: durationSteps,
       id: `midi-import-${notes.length}`,
-      note: clamp(midiNote.note, START_NOTE, END_NOTE),
-      startStep,
+      length,
+      pitch: clamp(midiNote.note, MIN_PITCH, MAX_PITCH),
+      start,
       velocity: clamp(midiNote.velocity, 0, 1),
     });
   }
@@ -127,9 +146,9 @@ function notesToMidiFile(notes: Note[], bpm: number): Uint8Array {
     (MIDI_TICKS_PER_QUARTER_NOTE * BEATS_PER_BAR) / TOTAL_STEPS;
   const midiNotes: MidiFileNote[] = notes.map((note) => ({
     channel: 0,
-    durationTicks: Math.round(note.duration * ticksPerStep),
-    note: note.note,
-    startTick: Math.round(note.startStep * ticksPerStep),
+    durationTicks: Math.round(note.length * ticksPerStep),
+    note: note.pitch,
+    startTick: Math.round(note.start * ticksPerStep),
     velocity: note.velocity ?? 1,
   }));
   return encodeMidiFile({
@@ -148,14 +167,11 @@ interface UsePianoRollOptions {
 }
 
 /**
- * Owns the note grid's data (fed to the PianoRoll primitive as a controlled
- * value — click/drag/keyboard edits flow back in through `onValueChange`),
- * live-preview triggering for the key strip, a short-lived "which pitch was
- * just edited" highlight for the key strip, and the loop-playback wiring. The
- * drift-free look-ahead timing lives in `useTransportClock`; this hook only
- * schedules note-pairs on its step boundaries and reads its playhead position,
- * so the audio-scheduling and visual highlight derive from one source. Split
- * out of the block component purely to keep its cognitive complexity manageable.
+ * Owns the notes, plays the ones the roll auditions (a key pressed, a note
+ * drawn or dragged), and wires the loop playback. The drift-free look-ahead
+ * timing lives in `useTransportClock`; this hook only schedules notes on its
+ * step boundaries and reads its position, so the audio and the playhead come
+ * from one source. Split out of the block component to keep it readable.
  */
 function usePianoRoll({
   bpm,
@@ -166,159 +182,45 @@ function usePianoRoll({
 }: UsePianoRollOptions) {
   const region = loopRegion ?? FULL_LOOP_REGION;
 
-  const [notes, setNotesState] = useState<Note[]>([]);
-  const [gridHighlightNotes, setGridHighlightNotes] = useState<number[]>([]);
-  const [playingHighlightNotes, setPlayingHighlightNotes] = useState<number[]>(
-    []
-  );
+  const [notes, setNotes] = useState<Note[]>([]);
+  const [playingPitches, setPlayingPitches] = useState<number[]>([]);
 
   const notesRef = useRef(notes);
   notesRef.current = notes;
   const regionRef = useRef(region);
   regionRef.current = region;
 
-  const playheadRef = useRef<HTMLDivElement | null>(null);
   /** The clock's position, in steps, for the timeline's playhead to follow outside React. */
   const [position] = useState(() => createSource(0));
-  /** The pitches currently sounding because of an in-progress grid drag — held (not blipped) for as long as the drag continues, released on pointerup, same as the key strip's own hold semantics. A group move shifts every selected note by the same delta, so whenever any pitch changes they all change together on that frame — the edited set IS the group's complete new pitch set. */
-  const heldGridPitchesRef = useRef<Set<number>>(new Set());
-  const gridPointerUpHandlerRef = useRef<(() => void) | null>(null);
-  /** Real physical pointer state, tracked independently of the primitive's own drag lifecycle: a plain click resolves its `pointerup` *before* the resulting `click`/`onValueChange` fires, so reactively arming a "release on next pointerup" listener from inside `setNotes` would miss that pointerup and hold the note until some unrelated future one. Checking real pointer-down state lets us tell a click (blip) from a drag (hold) apart. */
-  const isPointerDownRef = useRef(false);
-  const blipClearTimeoutRef = useRef<number | null>(null);
   /** The current tempo's step duration, mirrored from the transport clock so note-off offsets use its canonical step↔time mapping instead of a second copy. */
   const secondsPerStepRef = useRef(0);
-  /** Mirrors the clock's `isPlaying` for the voice-steal guard, which runs inside pointer callbacks rather than on render. */
+  /** Mirrors the clock's `isPlaying` for the audition guard, which runs inside pointer callbacks rather than on render. */
   const isPlayingRef = useRef(false);
+  /** The pitches auditioned and not yet released. */
+  const auditionedRef = useRef(new Set<number>());
 
-  const releaseAllHeldGridPitches = useCallback(() => {
-    if (heldGridPitchesRef.current.size > 0) {
-      for (const pitch of heldGridPitchesRef.current) {
-        releaseNote(pitch, DEFAULT_ENVELOPE);
-      }
-      heldGridPitchesRef.current = new Set();
-    }
-    setGridHighlightNotes([]);
-  }, [releaseNote]);
-
-  const armGridReleaseOnPointerUp = useCallback(() => {
-    if (gridPointerUpHandlerRef.current) {
-      return;
-    }
-    const handler = () => {
-      gridPointerUpHandlerRef.current = null;
-      releaseAllHeldGridPitches();
-    };
-    gridPointerUpHandlerRef.current = handler;
-    window.addEventListener("pointerup", handler, { once: true });
-  }, [releaseAllHeldGridPitches]);
-
-  useEffect(() => {
-    const handlePointerDown = () => {
-      isPointerDownRef.current = true;
-    };
-    const handlePointerUp = () => {
-      isPointerDownRef.current = false;
-    };
-    window.addEventListener("pointerdown", handlePointerDown);
-    window.addEventListener("pointerup", handlePointerUp);
-    return () => {
-      window.removeEventListener("pointerdown", handlePointerDown);
-      window.removeEventListener("pointerup", handlePointerUp);
-    };
-  }, []);
-
-  useEffect(
-    () => () => {
-      if (gridPointerUpHandlerRef.current) {
-        window.removeEventListener(
-          "pointerup",
-          gridPointerUpHandlerRef.current
-        );
-      }
-      if (blipClearTimeoutRef.current !== null) {
-        window.clearTimeout(blipClearTimeoutRef.current);
-      }
-    },
-    []
-  );
-
-  /** Actively dragging: swap the held set to match `editedPitches` — release whatever's no longer part of it, trigger whatever's newly in it. Skipped while the loop is playing: the loop schedules its own notes ahead of time through the same voice pool, and a live-preview trigger/release on a pitch the loop already has scheduled would fight over that voice and cut it off or mis-time it. The highlight and bookkeeping still update — only the audio is held back. */
-  const holdEditedPitches = useCallback(
-    (editedPitches: Set<number>) => {
-      if (!isPlayingRef.current) {
-        for (const pitch of heldGridPitchesRef.current) {
-          if (!editedPitches.has(pitch)) {
-            releaseNote(pitch, DEFAULT_ENVELOPE);
-          }
-        }
-        for (const pitch of editedPitches) {
-          if (!heldGridPitchesRef.current.has(pitch)) {
-            triggerNote(pitch, DEFAULT_ENVELOPE, 1);
-          }
-        }
-      }
-      heldGridPitchesRef.current = editedPitches;
-      armGridReleaseOnPointerUp();
-    },
-    [armGridReleaseOnPointerUp, releaseNote, triggerNote]
-  );
-
-  /** A discrete action (click-add, keyboard nudge) — no drag to hold through, so just blip each newly-edited pitch and let the highlight fade shortly after. Consecutive blips (e.g. rapid arrow-key nudges) share one cancelable timer so an earlier blip's clear can never wipe out a highlight a later blip just set. Skipped while playing, for the same voice-stealing reason as `holdEditedPitches`. */
-  const blipEditedPitches = useCallback(
-    (editedPitches: Set<number>) => {
-      if (!isPlayingRef.current) {
-        for (const pitch of editedPitches) {
-          triggerNote(pitch, DEFAULT_ENVELOPE, 1);
-          releaseNote(pitch, DEFAULT_ENVELOPE);
-        }
-      }
-      if (blipClearTimeoutRef.current !== null) {
-        window.clearTimeout(blipClearTimeoutRef.current);
-      }
-      blipClearTimeoutRef.current = window.setTimeout(() => {
-        blipClearTimeoutRef.current = null;
-        setGridHighlightNotes([]);
-      }, BLIP_HIGHLIGHT_MS);
-    },
-    [releaseNote, triggerNote]
-  );
-
-  const setNotes = useCallback(
-    (next: Note[]) => {
-      const previousById = new Map(
-        notesRef.current.map((n) => [n.id, n] as const)
-      );
-      const editedPitches = new Set<number>();
-      for (const n of next) {
-        const before = previousById.get(n.id);
-        if (!before || before.note !== n.note) {
-          editedPitches.add(n.note);
-        }
-      }
-      if (editedPitches.size > 0) {
-        if (isPointerDownRef.current) {
-          holdEditedPitches(editedPitches);
-        } else {
-          blipEditedPitches(editedPitches);
-        }
-        setGridHighlightNotes([...editedPitches]);
-      }
-      setNotesState(next);
-    },
-    [blipEditedPitches, holdEditedPitches]
-  );
-
+  /**
+   * Plays what the roll auditions. While the loop plays, only the keys do:
+   * the loop schedules its own notes ahead through the same voices, and an
+   * edit sounding a pitch it has scheduled would cut it off.
+   */
   const handleNoteOn = useCallback(
-    (note: number) => {
-      triggerNote(note, DEFAULT_ENVELOPE, 1);
+    (pitch: number, details: PianoRollPrimitive.Root.NoteOnEventDetails) => {
+      const fromKeys = details.reason === "press" || details.reason === "glide";
+      if (isPlayingRef.current && !fromKeys) {
+        return;
+      }
+      auditionedRef.current.add(pitch);
+      triggerNote(pitch, DEFAULT_ENVELOPE, details.velocity);
     },
     [triggerNote]
   );
 
   const handleNoteOff = useCallback(
-    (note: number) => {
-      releaseNote(note, DEFAULT_ENVELOPE);
+    (pitch: number) => {
+      if (auditionedRef.current.delete(pitch)) {
+        releaseNote(pitch, DEFAULT_ENVELOPE);
+      }
     },
     [releaseNote]
   );
@@ -328,17 +230,17 @@ function usePianoRoll({
     (step: number, time: number) => {
       const secondsPerStep = secondsPerStepRef.current;
       for (const recordedNote of notesRef.current) {
-        if (recordedNote.startStep !== step) {
+        if (recordedNote.start !== step) {
           continue;
         }
-        const offTime = time + recordedNote.duration * secondsPerStep;
+        const offTime = time + recordedNote.length * secondsPerStep;
         triggerNote(
-          recordedNote.note,
+          recordedNote.pitch,
           DEFAULT_ENVELOPE,
           recordedNote.velocity ?? 1,
           time
         );
-        releaseNote(recordedNote.note, DEFAULT_ENVELOPE, offTime);
+        releaseNote(recordedNote.pitch, DEFAULT_ENVELOPE, offTime);
       }
     },
     [releaseNote, triggerNote]
@@ -381,25 +283,25 @@ function usePianoRoll({
 
   const clearNotes = useCallback(() => {
     stopPlayback();
-    setNotesState([]);
+    setNotes([]);
   }, [stopPlayback]);
 
-  /** Replaces the whole grid at once — e.g. after a MIDI file import — bypassing `setNotes`'s per-edit live-preview bookkeeping, which is meant for interactive clicks/drags, not a bulk load. */
+  /** Replaces the whole grid at once, after a MIDI file import. */
   const importNotes = useCallback(
     (next: Note[]) => {
       stopPlayback();
-      setNotesState(next);
+      setNotes(next);
     },
     [stopPlayback]
   );
 
   // Playhead + "which pitches are sounding" highlight, both derived from the
   // clock's continuous position (fractional grid steps) — one source, so there
-  // is no second note→time formula to keep in sync. Position updates far too
-  // fast for React state, so the playhead is written imperatively.
+  // is no second note→time formula to keep in sync. The playhead follows the
+  // position source outside React.
   useEffect(() => {
     if (!isPlaying) {
-      setPlayingHighlightNotes([]);
+      setPlayingPitches([]);
       return;
     }
     let rafId: number;
@@ -407,28 +309,22 @@ function usePianoRoll({
     const tick = () => {
       const position_ = getPosition();
       const { end, start: regionStart } = regionRef.current;
-      const percent = (position_ / TOTAL_STEPS) * 100;
-      if (playheadRef.current) {
-        playheadRef.current.style.left = `${percent}%`;
-      }
       position.set(position_);
 
       const sounding = notesRef.current
         .filter((n) => {
-          if (n.startStep < regionStart || n.startStep >= end) {
+          if (n.start < regionStart || n.start >= end) {
             return false;
           }
-          return (
-            position_ >= n.startStep && position_ < n.startStep + n.duration
-          );
+          return position_ >= n.start && position_ < n.start + n.length;
         })
-        .map((n) => n.note);
+        .map((n) => n.pitch);
       const changed =
         sounding.length !== lastSounding.length ||
-        sounding.some((note, i) => note !== lastSounding[i]);
+        sounding.some((pitch, i) => pitch !== lastSounding[i]);
       if (changed) {
         lastSounding = sounding;
-        setPlayingHighlightNotes(sounding);
+        setPlayingPitches(sounding);
       }
 
       rafId = requestAnimationFrame(tick);
@@ -440,14 +336,12 @@ function usePianoRoll({
   return {
     clearNotes,
     commitLoopRegion,
-    gridHighlightNotes,
     handleNoteOff,
     handleNoteOn,
     importNotes,
     isPlaying,
     notes,
-    playheadRef,
-    playingHighlightNotes,
+    playingPitches,
     position,
     seekTo,
     setNotes,
@@ -462,6 +356,12 @@ export default function BlockPianoRoll() {
   const volumeValueId = useId();
 
   const [volume, setVolume] = useState(DEFAULT_VOLUME);
+  /** Drawing, a press on empty grid adds a note; otherwise it drags a selection rectangle and a double-click adds. */
+  const [drawing, setDrawing] = useState(true);
+  const toggleDrawing = useCallback(
+    () => setDrawing((current) => !current),
+    []
+  );
   const [bpm, setBpm] = useState(DEFAULT_BPM);
   const [loopRegion, setLoopRegion] = useState<LoopRegion | null>(null);
   const loopRange: readonly [number, number] = loopRegion
@@ -483,14 +383,12 @@ export default function BlockPianoRoll() {
   const {
     clearNotes,
     commitLoopRegion,
-    gridHighlightNotes,
     handleNoteOff,
     handleNoteOn,
     importNotes,
     isPlaying,
     notes,
-    playheadRef,
-    playingHighlightNotes,
+    playingPitches,
     position,
     seekTo,
     setNotes,
@@ -529,8 +427,6 @@ export default function BlockPianoRoll() {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isPlaying, notes.length, startPlayback, stopPlayback]);
-
-  const activeKeyNotes = [...gridHighlightNotes, ...playingHighlightNotes];
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [isDraggingFile, setIsDraggingFile] = useState(false);
@@ -629,48 +525,54 @@ export default function BlockPianoRoll() {
         </div>
       ) : null}
       <Timeline
-        className="overflow-hidden rounded-md border"
         duration={TOTAL_STEPS}
         onPositionChange={seekTo}
+        snapStep={1}
         source={position}
-        step={1}
       >
-        <TimelineRuler aria-label="Playhead" getAriaValueText={describeStep}>
-          {BEAT_STEPS.map((step, beat) => (
-            <TimelineMark key={step} value={step}>
-              {beat + 1}
-            </TimelineMark>
-          ))}
-          {isPlaying ? <TimelinePlayhead /> : null}
-        </TimelineRuler>
-        <TimelineLane className="h-4 cursor-cell">
-          <TimelineRange
-            aria-label="Loop region"
-            drawable
+        <PianoRoll
+          activePitches={playingPitches}
+          getNoteLabel={describeNote}
+          maxPitch={MAX_PITCH}
+          minPitch={MIN_PITCH}
+          mode={drawing ? "draw" : "select"}
+          onNoteOff={handleNoteOff}
+          onNoteOn={handleNoteOn}
+          onValueChange={setNotes}
+          value={notes}
+        >
+          <TimelineRuler
+            aria-label="Playhead"
+            className="col-start-2"
             getAriaValueText={describeStep}
-            onDoubleClick={clearLoopRegion}
-            onValueChange={changeLoopRegion}
-            onValueCommitted={commitLoopRegion}
-            value={loopRange}
           >
-            <TimelineRangeHandle aria-label="Loop start" edge="start" />
-            <TimelineRangeHandle aria-label="Loop end" edge="end" />
-          </TimelineRange>
-        </TimelineLane>
+            {BEAT_STEPS.map((step, beat) => (
+              <TimelineMark key={step} value={step}>
+                {beat + 1}
+              </TimelineMark>
+            ))}
+            {isPlaying ? <TimelinePlayhead /> : null}
+          </TimelineRuler>
+          <TimelineLane className="col-start-2 mb-2 h-4 cursor-cell">
+            <TimelineRange
+              aria-label="Loop region"
+              drawable
+              getAriaValueText={describeStep}
+              onDoubleClick={clearLoopRegion}
+              onValueChange={changeLoopRegion}
+              onValueCommitted={commitLoopRegion}
+              value={loopRange}
+            >
+              <TimelineRangeHandle aria-label="Loop start" edge="start" />
+              <TimelineRangeHandle aria-label="Loop end" edge="end" />
+            </TimelineRange>
+          </TimelineLane>
+          <PianoRollKeys />
+          <PianoRollGrid aria-label="Notes" gridStep={1}>
+            {isPlaying ? <TimelinePlayhead /> : null}
+          </PianoRollGrid>
+        </PianoRoll>
       </Timeline>
-      <PianoRoll
-        activeNotes={activeKeyNotes}
-        aria-label="Piano roll grid"
-        endNote={END_NOTE}
-        isPlaying={isPlaying}
-        onKeyNoteOff={handleNoteOff}
-        onKeyNoteOn={handleNoteOn}
-        onValueChange={setNotes}
-        playheadRef={playheadRef}
-        startNote={START_NOTE}
-        totalSteps={TOTAL_STEPS}
-        value={notes}
-      />
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-2">
           <Button
@@ -681,6 +583,15 @@ export default function BlockPianoRoll() {
             variant="outline"
           >
             {isPlaying ? "Stop" : "Play"}
+          </Button>
+          <Button
+            aria-pressed={drawing}
+            onClick={toggleDrawing}
+            size="sm"
+            type="button"
+            variant={drawing ? "secondary" : "outline"}
+          >
+            Draw
           </Button>
           <Button
             disabled={notes.length === 0}
