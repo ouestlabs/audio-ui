@@ -131,7 +131,11 @@ export const audio: RegistryItem[] = [
       },
     ],
     name: "timeline",
-    registryDependencies: ["@audio/musical-time"],
+    registryDependencies: [
+      "@audio/musical-time",
+      "@shadcn/button",
+      "@shadcn/button-group",
+    ],
     type: "registry:ui",
   },
   {
