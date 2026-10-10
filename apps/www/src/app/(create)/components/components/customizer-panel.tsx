@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import * as React from "react";
 
+import { PickerSideProvider } from "@/app/(create)/customizer/picker";
 import { Frame, FrameContent } from "@/components/custom/frame";
 import {
   Sheet,
@@ -28,7 +29,7 @@ const CustomizerSidebarContent = dynamic(
   }
 );
 
-type CustomizerPanelVariant = "sidebar" | "frame";
+type CustomizerPanelVariant = "sidebar" | "frame" | "floating";
 
 /** Full-height bordered aside for the /components layout. */
 function CustomizerPanelSidebar() {
@@ -74,6 +75,53 @@ function CustomizerPanelFrame() {
   );
 }
 
+/**
+ * Floats over the page's corner, above the global trigger, so the page stays
+ * where it is and shows each change as it is made. Its menus open leftwards,
+ * into the page, since it sits against the right edge.
+ */
+function CustomizerPanelFloating({
+  animate,
+  className,
+}: {
+  animate: boolean;
+  className?: string;
+}) {
+  const { customizerOpen } = useCustomizer();
+  const isDesktop = useIsDesktopCustomizer();
+  const anchorRef = React.useRef<HTMLDivElement | null>(null);
+
+  // Focus moves into the panel as it opens, so the keyboard carries on there.
+  React.useEffect(() => {
+    if (customizerOpen) {
+      anchorRef.current?.focus({ preventScroll: true });
+    }
+  }, [customizerOpen]);
+
+  if (!customizerOpen) {
+    return null;
+  }
+
+  return (
+    <section
+      aria-label="Customize"
+      className={cn(
+        "site-rounded-xl fixed inset-x-3 z-40 flex max-h-[min(50dvh,36rem)] origin-bottom-right flex-col overflow-hidden bg-site-background shadow-xl outline-none ring-1 ring-site-foreground/10 sm:inset-x-auto sm:right-4 sm:w-64 md:top-[calc(var(--header-height)+0.5rem)] md:right-3 md:bottom-3 md:max-h-none [&_[data-slot=dropdown-menu-trigger]]:w-full",
+        animate &&
+          "fade-in-0 zoom-in-95 animate-in duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:animate-none",
+        className
+      )}
+      ref={anchorRef}
+      tabIndex={-1}
+    >
+      <PickerSideProvider value="left">
+        <CustomizerSidebarHeader />
+        <CustomizerSidebarContent anchorRef={anchorRef} isMobile={!isDesktop} />
+      </PickerSideProvider>
+    </section>
+  );
+}
+
 /** Below `lg`: the customizer rides in a right-side sheet. */
 function CustomizerPanelSheet() {
   const { customizerOpen, setCustomizerOpen } = useCustomizer();
@@ -103,11 +151,21 @@ function CustomizerPanelSheet() {
  * driven by the surrounding `CustomizerContext`.
  */
 export function CustomizerPanel({
+  animate = true,
+  className,
   variant = "sidebar",
 }: {
+  /** Whether the floating panel eases in; off when a key opened it. */
+  animate?: boolean;
+  /** For the floating panel: where it sits. */
+  className?: string;
   variant?: CustomizerPanelVariant;
 }) {
   const isDesktop = useIsDesktopCustomizer();
+
+  if (variant === "floating") {
+    return <CustomizerPanelFloating animate={animate} className={className} />;
+  }
 
   if (!isDesktop) {
     return <CustomizerPanelSheet />;

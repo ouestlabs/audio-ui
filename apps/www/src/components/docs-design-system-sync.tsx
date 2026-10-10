@@ -2,8 +2,13 @@
 
 import * as React from "react";
 import { ensurePreviewFontsLoaded, FONTS } from "@/app/(create)/lib/fonts";
+import {
+  getThemeStyleElement,
+  writeThemeVars,
+} from "@/app/(create)/lib/theme-vars";
 import { useConfig } from "@/hooks/use-config";
 import type { FontName } from "@/lib/font-definitions";
+import { buildRegistryTheme, DEFAULT_CONFIG } from "@/registry/config";
 
 function syncBodyStyleClass(styleClass: string) {
   const body = document.body;
@@ -55,6 +60,34 @@ export function DocsDesignSystemSync({
 
     return FONTS.find((fontOption) => fontOption.value === config.fontHeading);
   }, [config.fontHeading, config.font, selectedFont]);
+
+  // The theme's colors and radius, and the base color, so the previews show what the customizer picks.
+  React.useLayoutEffect(() => {
+    const body = document.body;
+    const { element } = getThemeStyleElement();
+    const { cssVars } = buildRegistryTheme({
+      ...DEFAULT_CONFIG,
+      baseColor: config.baseColor,
+      chartColor: config.chartColor ?? DEFAULT_CONFIG.chartColor,
+      menuAccent: config.menuAccent,
+      radius: config.style === "lyra" ? "none" : config.radius,
+      theme: config.theme,
+    });
+    writeThemeVars(element, cssVars);
+    for (const className of Array.from(body.classList)) {
+      if (className.startsWith("base-color-")) {
+        body.classList.remove(className);
+      }
+    }
+    body.classList.add(`base-color-${config.baseColor}`);
+  }, [
+    config.baseColor,
+    config.chartColor,
+    config.menuAccent,
+    config.radius,
+    config.style,
+    config.theme,
+  ]);
 
   React.useLayoutEffect(() => {
     const body = document.body;

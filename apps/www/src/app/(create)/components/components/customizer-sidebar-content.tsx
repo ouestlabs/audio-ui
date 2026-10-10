@@ -77,7 +77,7 @@ export function CustomizerSidebarContent({
           </FieldGroup>
         </div>
       </div>
-      <div className="mt-auto flex flex-col gap-0 border-site-border/80 border-t p-3">
+      <div className="mt-auto flex shrink-0 flex-col gap-0 border-site-border/80 border-t p-3">
         <RandomButton />
         <ResetButton />
       </div>

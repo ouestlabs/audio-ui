@@ -11,6 +11,10 @@ import {
   loadDesignSystemSearchParams,
   useDesignSystemSearchParams,
 } from "@/app/(create)/lib/search-params";
+import {
+  getThemeStyleElement,
+  writeThemeVars,
+} from "@/app/(create)/lib/theme-vars";
 import { useConfig } from "@/hooks/use-config";
 import type { FontName } from "@/lib/font-definitions";
 import {
@@ -354,61 +358,16 @@ export function DesignSystemProvider({
       return;
     }
 
-    const styleId = "design-system-theme-vars";
-    const existingStyleElement = document.getElementById(
-      styleId
-    ) as HTMLStyleElement | null;
-    let styleElement = existingStyleElement;
+    const { element, existed } = getThemeStyleElement();
 
     if (!previousThemeStyleRef.current) {
       previousThemeStyleRef.current = {
-        existed: Boolean(existingStyleElement),
-        textContent: existingStyleElement?.textContent ?? "",
+        existed,
+        textContent: existed ? element.textContent : "",
       };
     }
 
-    if (!styleElement) {
-      styleElement = document.createElement("style");
-      styleElement.id = styleId;
-      document.head.appendChild(styleElement);
-    }
-
-    const {
-      light: lightVars,
-      dark: darkVars,
-      theme: themeVars,
-    } = registryTheme.cssVars;
-
-    let cssText = ":root {\n";
-    // Add theme vars (shared across light/dark).
-    if (themeVars) {
-      Object.entries(themeVars).forEach(([key, value]) => {
-        if (value) {
-          cssText += `  --${key}: ${value};\n`;
-        }
-      });
-    }
-    // Add light mode vars.
-    if (lightVars) {
-      Object.entries(lightVars).forEach(([key, value]) => {
-        if (value) {
-          cssText += `  --${key}: ${value};\n`;
-        }
-      });
-    }
-    cssText += "}\n\n";
-
-    cssText += ".dark {\n";
-    if (darkVars) {
-      Object.entries(darkVars).forEach(([key, value]) => {
-        if (value) {
-          cssText += `  --${key}: ${value};\n`;
-        }
-      });
-    }
-    cssText += "}\n";
-
-    styleElement.textContent = cssText;
+    writeThemeVars(element, registryTheme.cssVars);
   }, [registryTheme]);
 
   // Signal same-origin embed hosts once the preview is fully styled.
