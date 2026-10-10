@@ -19,7 +19,7 @@ interface FaderContextValue {
 const FaderContext = React.createContext<FaderContextValue | null>(null);
 
 function useFaderContext(part: string): FaderContextValue {
-  const context = React.useContext(FaderContext);
+  const context = React.use(FaderContext);
   if (!context) {
     throw new Error(`Fader.${part} must be used within Fader.Root`);
   }
@@ -140,7 +140,7 @@ export function Root({
   const contextValue = React.useMemo(() => ({ wheelRef }), [wheelRef]);
 
   return (
-    <FaderContext.Provider value={contextValue}>
+    <FaderContext value={contextValue}>
       <Slider.Root
         {...props}
         disabled={disabled}
@@ -152,7 +152,7 @@ export function Root({
         step={step}
         value={displayedValue}
       />
-    </FaderContext.Provider>
+    </FaderContext>
   );
 }
 
