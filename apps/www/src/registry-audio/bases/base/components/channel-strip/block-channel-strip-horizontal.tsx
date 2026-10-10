@@ -31,6 +31,7 @@ export default function BlockChannelStripHorizontal() {
             max={100}
             min={0}
             onValueChange={setVolume}
+            orientation="horizontal"
             value={volume}
           />
           <ChannelStripValue>{`${volume}%`}</ChannelStripValue>

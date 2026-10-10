@@ -41,11 +41,6 @@
     "intro": "Browse {{count}} meter components for audio/ui, built on top of shadcn/ui.",
     "title": "Meter"
   },
-  "multislider": {
-    "description": "Multislider components for drawing value arrays like step levels, harmonics, and EQ bands. {{count}} components.",
-    "intro": "Browse {{count}} multislider components for audio/ui, built on top of shadcn/ui.",
-    "title": "Multislider"
-  },
   "piano": {
     "description": "Virtual piano keyboard components with MIDI note ranges and glissando. {{count}} components.",
     "intro": "Browse {{count}} piano components for audio/ui, built on top of shadcn/ui.",

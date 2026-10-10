@@ -1,16 +1,10 @@
-import type { Nullable, Procedure } from "@audio-ui/utils";
-import {
-  clamp,
-  clampUnit,
-  type Point,
-  panic,
-  quantizeRound,
-} from "@audio-ui/utils";
 import * as React from "react";
 import { useFocus } from "../hooks/interactions/use-focus";
 import { useKeyboardNavigation } from "../hooks/interactions/use-keyboard-navigation";
 import { usePointerDrag } from "../hooks/interactions/use-pointer-drag";
 import { useWheel } from "../hooks/interactions/use-wheel";
+import type { Nullable, Procedure } from "../utils";
+import { clamp, clampUnit, type Point, panic, quantizeRound } from "../utils";
 import { getDataAttributes } from "./internal/data-attributes";
 import {
   type UseParameterCoreDragCallbacks,
@@ -340,6 +334,7 @@ export namespace XYPad {
   export function Slider({
     className,
     "aria-describedby": ariaDescribedBy,
+    style,
     ...props
   }: React.ComponentProps<"div">) {
     const context = useConfigContext();
@@ -396,6 +391,7 @@ export namespace XYPad {
           }
           focusProps.onFocus(e);
         }}
+        style={{ touchAction: "none", ...style }}
         tabIndex={disabled ? -1 : focusProps.tabIndex}
         {...props}
       />

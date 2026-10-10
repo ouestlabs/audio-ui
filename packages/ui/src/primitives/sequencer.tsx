@@ -1,8 +1,8 @@
-import type { Nullable, Point, Procedure } from "@audio-ui/utils";
-import { clamp, panic } from "@audio-ui/utils";
 import * as React from "react";
 import { useKeyboardNavigation } from "../hooks/interactions/use-keyboard-navigation";
 import { usePointerDrag } from "../hooks/interactions/use-pointer-drag";
+import type { Nullable, Point, Procedure } from "../utils";
+import { clamp, panic } from "../utils";
 import { getDataAttributes } from "./internal/data-attributes";
 import { useParameterCore } from "./internal/use-parameter-core";
 
@@ -366,7 +366,7 @@ export namespace Sequencer {
 
   export interface TrackProps extends React.ComponentProps<"div"> {}
 
-  export function Track({ className, ...props }: TrackProps) {
+  export function Track({ className, style, ...props }: TrackProps) {
     const {
       ariaLabel,
       ariaLabelledBy,
@@ -394,6 +394,7 @@ export namespace Sequencer {
         {...getDataAttributes("sequencer", { disabled, part: "grid" })}
         ref={trackRef}
         role="grid"
+        style={{ touchAction: "none", ...style }}
         {...pointerProps}
         {...props}
       />

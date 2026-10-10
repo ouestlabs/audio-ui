@@ -7,7 +7,7 @@ base: base
 
 <ComponentPreview styleName="base-nova" name="block-channel-strip" />
 
-Channel strip layout for grouping labels, controls, and value readouts in a mixer-style column. The registry component wraps `ChannelStrip` primitives from `@audio-ui/react` with card chrome, orientation-aware spacing, and header/footer layout presets.
+Channel strip layout for grouping labels, controls, and value readouts in a mixer-style column. The registry component is plain markup with no runtime dependency: card chrome, orientation-aware spacing, and header/footer layout presets. Controls inside a strip do not inherit its orientation; pass `orientation` to each `Fader` or `Meter` explicitly.
 
 ## Overview
 
@@ -36,12 +36,6 @@ npx shadcn@latest add @audio/channel-strip
 <TabsContent value="manual">
 
 <Steps>
-
-<Step>Install the following dependencies:</Step>
-
-```bash
-npm install @audio-ui/react
-```
 
 <Step>Copy and paste the following code into your project.</Step>
 
@@ -137,7 +131,7 @@ Wheel deltas are handled by whatever control currently has focus (if that contro
 
 ## API reference
 
-`ChannelStrip` and its subcomponents accept `className` plus primitive props from the matching `ChannelStripPrimitive.*` typings in `@audio-ui/react`.
+`ChannelStrip` and its subcomponents accept `className` plus the native props of the element they render. `ChannelStrip` adds `orientation`, `ChannelStripContent` adds `layout` (`"stack" | "row"`), and `ChannelStripSection` can override the inherited `orientation`.
 
 ### Subcomponents
 

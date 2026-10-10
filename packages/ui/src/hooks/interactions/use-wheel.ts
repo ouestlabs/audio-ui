@@ -1,10 +1,5 @@
-import {
-  assertType,
-  isDefined,
-  type Nullable,
-  type Point,
-} from "@audio-ui/utils";
 import * as React from "react";
+import { assertType, isDefined, type Nullable, type Point } from "../../utils";
 import { useCallbackRef } from "../use-callback-ref";
 
 export interface UseWheelOptions<T extends HTMLElement = HTMLElement> {

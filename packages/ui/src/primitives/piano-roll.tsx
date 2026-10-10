@@ -1,8 +1,8 @@
-import type { Nullable, Point, Procedure } from "@audio-ui/utils";
-import { clamp, clampUnit, panic } from "@audio-ui/utils";
 import * as React from "react";
 import { useKeyboardNavigation } from "../hooks/interactions/use-keyboard-navigation";
 import { useCallbackRef } from "../hooks/use-callback-ref";
+import type { Nullable, Point, Procedure } from "../utils";
+import { clamp, clampUnit, panic } from "../utils";
 import { getDataAttributes } from "./internal/data-attributes";
 import { useParameterCore } from "./internal/use-parameter-core";
 

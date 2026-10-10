@@ -1,8 +1,8 @@
-import type { Nullable, Point, Procedure } from "@audio-ui/utils";
-import { clampUnit } from "@audio-ui/utils";
 import * as React from "react";
 import { useFocus } from "../hooks/interactions/use-focus";
 import { usePointerDrag } from "../hooks/interactions/use-pointer-drag";
+import type { Nullable, Point, Procedure } from "../utils";
+import { clampUnit } from "../utils";
 import { getDataAttributes } from "./internal/data-attributes";
 import {
   type UseParameterDragCallbacks,

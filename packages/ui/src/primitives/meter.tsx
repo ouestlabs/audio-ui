@@ -1,8 +1,7 @@
-import type { Nullable } from "@audio-ui/utils";
-import { clampUnit, panic } from "@audio-ui/utils";
 import * as React from "react";
+import type { Nullable } from "../utils";
+import { clampUnit, panic } from "../utils";
 import { getDataAttributes } from "./internal/data-attributes";
-import { useInheritedOrientation } from "./internal/orientation-context";
 
 export namespace Meter {
   interface ConfigContextValue {
@@ -69,16 +68,13 @@ export namespace Meter {
     min = -60,
     max = 6,
     clipThreshold = 0,
-    orientation: orientationProp,
+    orientation = "vertical",
     "aria-label": ariaLabel,
     "aria-labelledby": ariaLabelledBy,
     className,
     children,
     ...props
   }: RootProps) {
-    const inheritedOrientation = useInheritedOrientation();
-    const orientation = orientationProp ?? inheritedOrientation ?? "vertical";
-
     const configValue = React.useMemo<ConfigContextValue>(
       () => ({
         ariaLabel,

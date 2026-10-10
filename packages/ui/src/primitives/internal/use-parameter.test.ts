@@ -1,6 +1,6 @@
 import { describe, expect, mock, test } from "bun:test";
-import type { Point } from "@audio-ui/utils";
 import { act, fireEvent, renderHook } from "@testing-library/react";
+import type { Point } from "../../utils";
 import type { UseParameterOptions } from "./use-parameter";
 import { useParameter } from "./use-parameter";
 

@@ -31,12 +31,6 @@
       "name": "meter"
     },
     {
-      "count": 6,
-      "description": "Multislider components for drawing value arrays like step levels, harmonics, and EQ bands.",
-      "label": "Multislider",
-      "name": "multislider"
-    },
-    {
       "count": 8,
       "description": "Virtual piano keyboard components with MIDI note ranges and glissando.",
       "label": "Piano",
@@ -109,5 +103,5 @@
       "name": "xypad"
     }
   ],
-  "totalComponents": 101
+  "totalComponents": 95
 }

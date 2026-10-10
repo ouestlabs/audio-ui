@@ -405,36 +405,6 @@
     "title": "block-drum-machine"
   },
   {
-    "categories": ["multislider"],
-    "name": "multislider-size-default-demo",
-    "title": "multislider-size-default-demo"
-  },
-  {
-    "categories": ["multislider"],
-    "name": "multislider-controlled-demo",
-    "title": "multislider-controlled-demo"
-  },
-  {
-    "categories": ["multislider"],
-    "name": "multislider-stepped-demo",
-    "title": "multislider-stepped-demo"
-  },
-  {
-    "categories": ["multislider"],
-    "name": "multislider-horizontal-demo",
-    "title": "multislider-horizontal-demo"
-  },
-  {
-    "categories": ["multislider"],
-    "name": "multislider-thumbs-demo",
-    "title": "multislider-thumbs-demo"
-  },
-  {
-    "categories": ["multislider"],
-    "name": "multislider-disabled-demo",
-    "title": "multislider-disabled-demo"
-  },
-  {
     "categories": ["xypad"],
     "name": "xypad-live-value-demo",
     "title": "xypad-live-value-demo"

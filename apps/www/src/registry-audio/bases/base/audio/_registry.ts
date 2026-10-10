@@ -82,17 +82,6 @@ export const audio: RegistryItem[] = [
     dependencies: ["@audio-ui/react"],
     files: [
       {
-        path: "audio/elements/multislider.tsx",
-        type: "registry:ui",
-      },
-    ],
-    name: "multislider",
-    type: "registry:ui",
-  },
-  {
-    dependencies: ["@audio-ui/react"],
-    files: [
-      {
         path: "audio/elements/sequencer.tsx",
         type: "registry:ui",
       },
@@ -225,7 +214,6 @@ export const audio: RegistryItem[] = [
     type: "registry:component",
   },
   {
-    dependencies: ["@audio-ui/react"],
     files: [
       {
         path: "audio/elements/channel-strip.tsx",

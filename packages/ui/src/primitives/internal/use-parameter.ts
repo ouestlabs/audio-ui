@@ -1,8 +1,8 @@
-import type { Nullable, Point, Procedure } from "@audio-ui/utils";
-import { clamp, clampUnit, quantizeRound } from "@audio-ui/utils";
 import * as React from "react";
 import { useKeyboardNavigation } from "../../hooks/interactions/use-keyboard-navigation";
 import { useWheel } from "../../hooks/interactions/use-wheel";
+import type { Nullable, Point, Procedure } from "../../utils";
+import { clamp, clampUnit, quantizeRound } from "../../utils";
 import type { UseParameterCoreDragCallbacks } from "./use-parameter-core";
 import { useParameterCore } from "./use-parameter-core";
 
@@ -42,6 +42,8 @@ export interface UseParameterReturn {
   /** Granular op: mark a drag active and seed the start/pending refs. */
   beginDrag: (startValue: number) => void;
   commitValue: (next: number) => void;
+  /** Resolved default: `defaultValue`, or the midpoint of `min…max` when omitted. */
+  defaultValue: number;
   /** Optimistic-aware value for rendering position; equals `value` unless frozen mid-drag. */
   displayValue: number;
   /** Assembled drag lifecycle for the standard point/delta geometry. */
@@ -178,6 +180,7 @@ export function useParameter({
 
   return {
     ...core,
+    defaultValue: computedDefaultValue,
     keyboardProps,
     percentage,
     wheelRef,

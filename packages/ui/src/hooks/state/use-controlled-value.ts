@@ -1,3 +1,4 @@
+import * as React from "react";
 import {
   EmptyProcedure,
   type Func,
@@ -5,8 +6,7 @@ import {
   isUndefined,
   type Optional,
   type Procedure,
-} from "@audio-ui/utils";
-import * as React from "react";
+} from "../../utils";
 import { useCallbackRef } from "../use-callback-ref";
 
 export interface UseControlledValueOptions<T> {

@@ -1,6 +1,6 @@
 "use client";
 
-import { Transport as TransportPrimitive } from "@audio-ui/react";
+import { Fader as FaderPrimitive } from "@audio-ui/react";
 import { cva, type VariantProps } from "class-variance-authority";
 import type React from "react";
 import { cn } from "@/lib/utils";
@@ -84,8 +84,8 @@ const transportThumbMarkVariants = cva("bg-primary opacity-50", {
 });
 
 type TransportProps = Omit<
-  React.ComponentProps<typeof TransportPrimitive.Root>,
-  "value" | "onValueChange" | "bufferedValue"
+  React.ComponentProps<typeof FaderPrimitive.Root>,
+  "value" | "onValueChange"
 > & {
   value: number;
   bufferedValue?: number;
@@ -94,18 +94,22 @@ type TransportProps = Omit<
 
 function Transport({
   value,
-  bufferedValue,
+  bufferedValue = 0,
   onSeek,
   size,
   min = 0,
   max = 100,
   className,
-  orientation,
+  orientation = "horizontal",
   ...props
 }: TransportProps) {
+  const bufferedPercentage = Math.min(
+    Math.max((bufferedValue - min) / (max - min || 1), 0),
+    1
+  );
+
   return (
-    <TransportPrimitive.Root
-      bufferedValue={bufferedValue}
+    <FaderPrimitive.Root
       className={cn(
         "relative data-[orientation=vertical]:h-full data-[orientation=horizontal]:w-full",
         className
@@ -117,7 +121,7 @@ function Transport({
       value={value}
       {...props}
     >
-      <TransportPrimitive.Slider
+      <FaderPrimitive.Slider
         className={cn(
           "relative flex w-full touch-none select-none items-center transition-opacity duration-150 ease-out motion-reduce:transition-none data-disabled:opacity-50",
           "data-[orientation=vertical]:h-full data-[orientation=vertical]:min-h-40 data-[orientation=vertical]:w-auto data-[orientation=vertical]:flex-col",
@@ -125,40 +129,47 @@ function Transport({
           transportSliderVariants({ size })
         )}
       >
-        <TransportPrimitive.Track
+        <FaderPrimitive.Track
           className={transportTrackVariants({ size })}
           data-slot="transport-track"
         >
-          <TransportPrimitive.BufferedRange
+          <div
             className={cn(
-              "bg-primary/40 absolute z-0 select-none",
-              "data-[orientation=horizontal]:inset-y-0 data-[orientation=horizontal]:left-0",
-              "data-[orientation=vertical]:inset-x-0 data-[orientation=vertical]:bottom-0"
+              "bg-primary/40 absolute z-0 h-full w-full select-none will-change-transform",
+              "data-[orientation=horizontal]:inset-y-0 data-[orientation=horizontal]:left-0 data-[orientation=horizontal]:origin-left",
+              "data-[orientation=vertical]:inset-x-0 data-[orientation=vertical]:bottom-0 data-[orientation=vertical]:origin-bottom"
             )}
+            data-orientation={orientation}
+            style={{
+              transform:
+                orientation === "horizontal"
+                  ? `scaleX(${bufferedPercentage})`
+                  : `scaleY(${bufferedPercentage})`,
+            }}
           />
-          <TransportPrimitive.Range
+          <FaderPrimitive.Range
             className={cn(
               "bg-primary absolute select-none",
               "data-[orientation=horizontal]:inset-y-0 data-[orientation=horizontal]:left-0",
               "data-[orientation=vertical]:inset-x-0 data-[orientation=vertical]:bottom-0"
             )}
           />
-        </TransportPrimitive.Track>
-        <TransportPrimitive.Thumb
+        </FaderPrimitive.Track>
+        <FaderPrimitive.Thumb
           className={transportThumbVariants({ size })}
           data-slot="transport-thumb"
         >
-          <TransportPrimitive.ThumbInner
+          <FaderPrimitive.ThumbInner
             className={transportThumbInnerVariants({ size })}
             data-slot="transport-thumb-inner"
           >
-            <TransportPrimitive.ThumbMark
+            <FaderPrimitive.ThumbMark
               className={transportThumbMarkVariants({ size })}
             />
-          </TransportPrimitive.ThumbInner>
-        </TransportPrimitive.Thumb>
-      </TransportPrimitive.Slider>
-    </TransportPrimitive.Root>
+          </FaderPrimitive.ThumbInner>
+        </FaderPrimitive.Thumb>
+      </FaderPrimitive.Slider>
+    </FaderPrimitive.Root>
   );
 }
 

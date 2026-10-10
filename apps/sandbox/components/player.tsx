@@ -429,7 +429,7 @@ const AudioPlayerSeekBar = ({
       className={cn("min-w-20 flex-1", className)}
       data-slot="audio-seek-bar"
       disabled={isLiveStream}
-      freezeValuesWhileDragging
+      freezeWhileDragging
       onSeek={(nextProgress) => {
         if (!isLiveStream && duration > 0) {
           const newTime = (nextProgress / 100) * duration;

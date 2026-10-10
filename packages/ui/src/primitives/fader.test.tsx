@@ -146,3 +146,39 @@ describe("Fader drag (vertical slider 20×200 at origin)", () => {
     expect(onValueCommit).toHaveBeenLastCalledWith(-27);
   });
 });
+
+describe("Fader freezeWhileDragging (horizontal slider 200×20 at origin)", () => {
+  const seekProps: Fader.RootProps = {
+    max: 100,
+    min: 0,
+    orientation: "horizontal",
+    value: 10,
+  };
+
+  test("keeps the thumb at the dragged position while the controlled value lags", () => {
+    const { slider, track, thumb, onValueChange, onValueCommit } = renderFader({
+      ...seekProps,
+      freezeWhileDragging: true,
+    });
+    mockRect(slider, { height: 20, width: 200 });
+
+    fireEvent.pointerDown(track, { clientX: 60, clientY: 10, pointerId: 1 });
+    expect(onValueChange).toHaveBeenLastCalledWith(30);
+    // displayed position follows the drag (optimistic), aria stays on the raw controlled value
+    expect(thumb.style.left).toBe("30%");
+    expect(thumb.getAttribute("aria-valuenow")).toBe("10");
+
+    fireEvent.pointerUp(track, { clientX: 60, clientY: 10, pointerId: 1 });
+    expect(onValueCommit).toHaveBeenLastCalledWith(30);
+    // optimistic value clears after the drag; controlled value still rules
+    expect(thumb.style.left).toBe("10%");
+  });
+
+  test("without freeze, the thumb tracks the controlled value even mid-drag", () => {
+    const { slider, track, thumb } = renderFader(seekProps);
+    mockRect(slider, { height: 20, width: 200 });
+
+    fireEvent.pointerDown(track, { clientX: 60, clientY: 10, pointerId: 1 });
+    expect(thumb.style.left).toBe("10%");
+  });
+});

@@ -492,6 +492,7 @@ export default function BlockWaveShaper() {
               max={1}
               min={0}
               onValueChange={setVolume}
+              orientation="horizontal"
               step={0.01}
               value={volume}
             />

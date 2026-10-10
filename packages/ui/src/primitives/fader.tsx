@@ -1,10 +1,9 @@
-import type { Procedure } from "@audio-ui/utils";
-import { clampUnit, type Nullable, type Point } from "@audio-ui/utils";
 import * as React from "react";
 import { useFocus } from "../hooks/interactions/use-focus";
 import { usePointerDrag } from "../hooks/interactions/use-pointer-drag";
+import type { Procedure } from "../utils";
+import { clampUnit, type Nullable, type Point } from "../utils";
 import { getDataAttributes } from "./internal/data-attributes";
-import { useInheritedOrientation } from "./internal/orientation-context";
 import {
   type UseParameterDragCallbacks,
   useParameter,
@@ -72,6 +71,11 @@ export namespace Fader {
     "aria-labelledby"?: string;
     defaultValue?: number;
     disabled?: boolean;
+    /**
+     * Keep the thumb on the dragged position while a controlled `value` lags
+     * behind (e.g. a seek bar driven by playback time).
+     */
+    freezeWhileDragging?: boolean;
     max?: number;
     min?: number;
     onValueChange?: Procedure<number>;
@@ -87,8 +91,9 @@ export namespace Fader {
     min = -60,
     max = 6,
     step = 1,
-    orientation: orientationProp,
+    orientation = "vertical",
     disabled = false,
+    freezeWhileDragging = false,
     "aria-label": ariaLabel,
     "aria-labelledby": ariaLabelledBy,
     onValueChange,
@@ -98,9 +103,6 @@ export namespace Fader {
     children,
     ...props
   }: RootProps) {
-    const inheritedOrientation = useInheritedOrientation();
-    const orientation = orientationProp ?? inheritedOrientation ?? "vertical";
-
     const faderId = React.useId();
     const trackRef = React.useRef<HTMLDivElement>(null);
     const thumbRef = React.useRef<HTMLDivElement>(null);
@@ -176,6 +178,7 @@ export namespace Fader {
       deltaToValue: calculateValueFromDelta,
       disabled,
       focusRef: thumbRef,
+      freezeWhileDragging,
       max,
       min,
       onValueChange,
@@ -267,7 +270,7 @@ export namespace Fader {
 
   export interface TrackProps extends React.ComponentProps<"div"> {}
 
-  export function Track({ className, ...props }: TrackProps) {
+  export function Track({ className, style, ...props }: TrackProps) {
     const { disabled, orientation, trackRef, dragCallbacks } =
       useFaderConfigContext();
 
@@ -282,6 +285,7 @@ export namespace Fader {
       <div
         className={className}
         {...getDataAttributes("fader", { orientation, part: "track" })}
+        style={{ touchAction: "none", ...style }}
         {...trackPointerProps}
         {...props}
       />
@@ -385,6 +389,7 @@ export namespace Fader {
           ...(orientation === "horizontal"
             ? { left: `${percentage * 100}%` }
             : { bottom: `${percentage * 100}%` }),
+          touchAction: "none",
           ...style,
           transform,
         }}

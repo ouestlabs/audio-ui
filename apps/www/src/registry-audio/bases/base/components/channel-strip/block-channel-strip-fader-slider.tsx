@@ -34,6 +34,7 @@ export default function BlockChannelStripFaderSlider() {
             max={100}
             min={0}
             onValueChange={setValue}
+            orientation="horizontal"
             value={value}
           />
         </ChannelStripSection>

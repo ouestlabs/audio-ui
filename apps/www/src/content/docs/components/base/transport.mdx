@@ -7,13 +7,13 @@ base: base
 
 <ComponentPreview styleName="base-nova" name="transport-demo" />
 
-Timeline control for playback progress (current value + buffered range). The registry component wraps `Transport` primitives from `@audio-ui/react` with audio-focused defaults for player seek bars and scrub interactions.
+Timeline control for playback progress (current value + buffered range). The registry component is built on the `Fader` primitive from `@audio-ui/react`, with audio-focused defaults (horizontal, `0..100`) for player seek bars and scrub interactions.
 
 ## Overview
 
 - **Interaction model:** Pointer drag on track/thumb, wheel stepping, keyboard nudging, and commit callbacks.
 - **Visual model:** Base track + buffered range + played range + thumb.
-- **Playback UX:** Supports `freezeValuesWhileDragging` to avoid jitter/flicker while scrubbing.
+- **Playback UX:** Supports `freezeWhileDragging` to avoid jitter/flicker while scrubbing.
 - **Accessibility:** Thumb is exposed as `role="slider"` with `aria-valuenow`, `aria-valuemin`, and `aria-valuemax`.
 
 ## Installation
@@ -107,7 +107,7 @@ When focused, wheel input nudges the value by `step`.
 
 ## API reference
 
-`Transport` keeps an audio-focused API (`value`, `bufferedValue`, `onSeek`) and forwards remaining root props to `TransportPrimitive.Root`.
+`Transport` keeps an audio-focused API (`value`, `bufferedValue`, `onSeek`) and forwards remaining root props to `FaderPrimitive.Root`.
 
 ### Value and state
 
@@ -116,7 +116,7 @@ When focused, wheel input nudges the value by `step`.
 | `value` | `number` | - | Current transport value (typically `0..100`). |
 | `bufferedValue` | `number` | `0` | Buffered position (same scale as `value`). |
 | `onSeek` | `(nextValue: number) => void` | - | Called when scrubbing or keyboard/wheel changes value. |
-| `freezeValuesWhileDragging` | `boolean` | `false` | Freezes rendered values during active drag for smoother visual feedback. |
+| `freezeWhileDragging` | `boolean` | `false` | Keeps the thumb on the dragged position while the controlled `value` lags behind (e.g. playback time). |
 | `disabled` | `boolean` | `false` | Disables interaction. |
 | `aria-label` | `string` | - | Accessible name for the slider. |
 | `aria-labelledby` | `string` | - | ID of the associated label element. |

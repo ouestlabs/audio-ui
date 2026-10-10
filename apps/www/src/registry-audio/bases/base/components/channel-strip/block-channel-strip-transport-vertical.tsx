@@ -22,6 +22,7 @@ export default function BlockChannelStripTransportVertical() {
             onSeek={() => {
               //
             }}
+            orientation="vertical"
             value={35}
           />
         </ChannelStripSection>

@@ -1,5 +1,5 @@
-import type { Optional, Procedure } from "@audio-ui/utils";
 import * as React from "react";
+import type { Optional, Procedure } from "../../utils";
 import { useCallbackRef } from "../use-callback-ref";
 
 export type KeyboardNavigationHandler = (

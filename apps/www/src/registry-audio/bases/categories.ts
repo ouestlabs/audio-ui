@@ -88,12 +88,6 @@ export const categories: CategoryDef[] = [
   },
   {
     description:
-      "Multislider components for drawing value arrays like step levels, harmonics, and EQ bands.",
-    label: "Multislider",
-    name: "multislider",
-  },
-  {
-    description:
       "Virtual piano keyboard components with MIDI note ranges and glissando.",
     label: "Piano",
     name: "piano",

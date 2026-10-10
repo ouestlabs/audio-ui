@@ -238,39 +238,6 @@
     @apply rounded-[min(var(--radius-2xl),12px)] bg-background/90 px-2 py-1 font-mono text-muted-foreground text-xs ring-1 ring-foreground/10 backdrop-blur-md;
   }
 
-  /* MARK: Multislider (container ← cn-xypad, fill ← cn-fader-range) */
-  .cn-multislider {
-    @apply rounded-4xl border border-transparent bg-card shadow-sm ring-1 ring-foreground/10 transition-[color,border-color,box-shadow,opacity] duration-150 ease-out hover:ring-4 hover:ring-ring/30 has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-ring/30 active:ring-4 active:ring-ring/30 has-[:focus-visible]:border-ring active:border-ring motion-reduce:transition-none;
-  }
-
-  .cn-multislider-size-sm {
-    @apply h-40;
-  }
-
-  .cn-multislider-size-default {
-    @apply h-48;
-  }
-
-  .cn-multislider-size-lg {
-    @apply h-64;
-  }
-
-  .cn-multislider-size-xl {
-    @apply h-96;
-  }
-
-  .cn-multislider-slider {
-    @apply outline-none focus-visible:bg-ring/10 focus-visible:ring-1 focus-visible:ring-ring/60 focus-visible:ring-inset;
-  }
-
-  .cn-multislider-fill {
-    @apply bg-primary;
-  }
-
-  .cn-multislider-thumb {
-    @apply bg-foreground/70;
-  }
-
   /* MARK: Sequencer (container ← cn-xypad, cell off/on ← cn-fader-track/range) */
   .cn-sequencer {
     @apply rounded-4xl border border-transparent bg-card shadow-sm ring-1 ring-foreground/10 transition-[color,border-color,box-shadow,opacity] duration-150 ease-out hover:ring-4 hover:ring-ring/30 has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-ring/30 active:ring-4 active:ring-ring/30 has-[:focus-visible]:border-ring active:border-ring motion-reduce:transition-none;

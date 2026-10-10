@@ -1,3 +1,6 @@
+import * as React from "react";
+import { useFocus } from "../hooks/interactions/use-focus";
+import { usePointerDrag } from "../hooks/interactions/use-pointer-drag";
 import {
   clamp,
   degToRad,
@@ -8,10 +11,7 @@ import {
   panic,
   radToDeg,
   TAU,
-} from "@audio-ui/utils";
-import * as React from "react";
-import { useFocus } from "../hooks/interactions/use-focus";
-import { usePointerDrag } from "../hooks/interactions/use-pointer-drag";
+} from "../utils";
 import { getDataAttributes } from "./internal/data-attributes";
 import { useParameter } from "./internal/use-parameter";
 
@@ -236,7 +236,7 @@ export namespace Knob {
    */
   export function Root({
     value: controlledValue,
-    defaultValue = 0,
+    defaultValue,
     min = 0,
     max = 100,
     step = 1,
@@ -279,6 +279,7 @@ export namespace Knob {
 
     const {
       beginDrag,
+      defaultValue: resetValue,
       dragCallbacks: parameterDragCallbacks,
       dragStartValueRef,
       dragTo,
@@ -460,7 +461,7 @@ export namespace Knob {
           performance.now() - lastTapAtRef.current <= KNOB_DOUBLE_TAP_MAX_MS
         ) {
           lastTapAtRef.current = 0;
-          endDrag(defaultValue);
+          endDrag(resetValue);
           return;
         }
 
@@ -472,7 +473,7 @@ export namespace Knob {
 
         endDrag();
       },
-      [defaultValue, disabled, endDrag]
+      [resetValue, disabled, endDrag]
     );
 
     const anchorPercentage =
@@ -557,7 +558,7 @@ export namespace Knob {
 
   export interface SliderProps extends React.ComponentProps<"div"> {}
 
-  export function Slider({ className, ref, ...props }: SliderProps) {
+  export function Slider({ className, ref, style, ...props }: SliderProps) {
     const {
       disabled,
       elementId,
@@ -610,6 +611,7 @@ export namespace Knob {
           focusProps.onFocus(e);
         }}
         ref={setRefs}
+        style={{ touchAction: "none", ...style }}
         tabIndex={disabled ? -1 : focusProps.tabIndex}
         {...props}
       />
