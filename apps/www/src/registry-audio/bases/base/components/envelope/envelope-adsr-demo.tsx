@@ -34,6 +34,10 @@ export default function EnvelopeAdsrDemo() {
         minPoints={5}
         onValueChange={setPoints}
         value={points}
+        xDomain={[0, SPAN_MS]}
+        xUnit="ms"
+        yDomain={[0, 100]}
+        yUnit="%"
       />
       {peak && decayEnd && releaseStart ? (
         <dl className="grid grid-cols-4 gap-2 text-center font-mono text-xs tabular-nums">

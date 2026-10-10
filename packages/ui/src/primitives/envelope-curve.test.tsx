@@ -229,3 +229,88 @@ describe("Envelope fine drag", () => {
     expect(lastCall(onValueChange)[0][1]?.x).toBeCloseTo(0.25, 5);
   });
 });
+
+describe("Envelope adding inside a bent segment", () => {
+  test("the new point sits on the curve, so the shape is kept", () => {
+    const { view, onValueChange } = renderEnvelope({
+      defaultValue: [
+        { curve: 0.5, x: 0, y: 0 },
+        { x: 1, y: 1 },
+      ],
+    });
+    // The pointer a hair above the curve at x = 0.5: the point still lands on it.
+    fireEvent.doubleClick(view.getByTestId("graph"), {
+      clientX: 100,
+      clientY: 10,
+    });
+    const [value, details] = lastCall(onValueChange);
+    expect(details.reason).toBe("add");
+    const [first, added] = value;
+    const exponent = 2 ** (0.5 * 3);
+    expect(added?.x).toBe(0.5);
+    expect(added?.y).toBeCloseTo(0.5 ** exponent, 5);
+    // Each half is bent to follow the part of the curve it replaces.
+    expect(first?.curve).toBeGreaterThan(0);
+    expect(added?.curve).toBeGreaterThan(0);
+    // The curve through the new point's neighbours matches the original at their midpoints.
+    const original = (t: number) => t ** exponent;
+    const leftMid = (added?.y ?? 0) * 0.5 ** (2 ** ((first?.curve ?? 0) * 3));
+    expect(leftMid).toBeCloseTo(original(0.25), 1);
+  });
+
+  test("added in a straight segment it lands under the pointer, as before", () => {
+    const { view, onValueChange } = renderEnvelope();
+    fireEvent.doubleClick(view.getByTestId("graph"), {
+      clientX: 100,
+      clientY: 20,
+    });
+    expect(lastCall(onValueChange)[0][2]).toEqual({ x: 0.5, y: 0.8 });
+  });
+});
+
+describe("Envelope segment handles' tab stop", () => {
+  test("only one handle is a tab stop, and Left and Right rove between them", () => {
+    const { segment } = renderEnvelope();
+    expect(segment(0).tabIndex).toBe(0);
+    expect(segment(1).tabIndex).toBe(-1);
+    expect(segment(2).tabIndex).toBe(-1);
+
+    segment(0).focus();
+    fireEvent.keyDown(segment(0), { key: "ArrowRight" });
+    expect(document.activeElement).toBe(segment(1));
+    expect(segment(1).tabIndex).toBe(0);
+    expect(segment(0).tabIndex).toBe(-1);
+
+    fireEvent.keyDown(segment(1), { key: "ArrowRight" });
+    fireEvent.keyDown(segment(2), { key: "ArrowRight" });
+    expect(document.activeElement).toBe(segment(2));
+    fireEvent.keyDown(segment(2), { key: "ArrowLeft" });
+    expect(document.activeElement).toBe(segment(1));
+  });
+});
+
+describe("Envelope snap", () => {
+  test("a dragged point snaps to the grid, and Cmd leaves it", () => {
+    const { point, onValueChange } = renderEnvelope({ snap: 0.25 });
+    fireEvent.pointerDown(point(1), { clientX: 40, clientY: 0, pointerId: 1 });
+    // 0.37 across and 0.62 up are nearest the quarter lines 0.25 and 0.5.
+    fireEvent.pointerMove(point(1), { clientX: 74, clientY: 38, pointerId: 1 });
+    expect(lastCall(onValueChange)[0][1]).toEqual({ x: 0.25, y: 0.5 });
+    fireEvent.pointerMove(point(1), {
+      clientX: 74,
+      clientY: 38,
+      metaKey: true,
+      pointerId: 1,
+    });
+    expect(lastCall(onValueChange)[0][1]?.x).toBeCloseTo(0.37, 5);
+  });
+
+  test("a point added by double click snaps too", () => {
+    const { view, onValueChange } = renderEnvelope({ snap: 0.25 });
+    fireEvent.doubleClick(view.getByTestId("graph"), {
+      clientX: 108,
+      clientY: 90,
+    });
+    expect(lastCall(onValueChange)[0][2]).toEqual({ x: 0.5, y: 0 });
+  });
+});

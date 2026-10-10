@@ -124,6 +124,82 @@ function clampToNeighbors(
   };
 }
 
+/**
+ * `point` added to `base`. Added inside a bent segment it sits on the curve,
+ * and each half gets the curve that traces the part of the original it
+ * replaces, so adding a point does not change the shape.
+ */
+function insertPoint(
+  base: Breakpoint[],
+  point: GeomPoint
+): { index: number; value: Breakpoint[] } {
+  const x = clampUnit(point.x);
+  const y = clampUnit(point.y);
+  const leftIndex = base.findLastIndex((existing) => existing.x <= x);
+  const left = base[leftIndex];
+  const right = base[leftIndex + 1];
+  if (left?.curve && right && right.x > left.x) {
+    const t = (x - left.x) / (right.x - left.x);
+    const onCurve = (share: number) =>
+      left.y + (right.y - left.y) * segmentShape(share, left.curve);
+    const added: Breakpoint = { x, y: onCurve(t) };
+    const leftCurve = curveForMidpoint(left, added, onCurve(t / 2));
+    const rightCurve = curveForMidpoint(added, right, onCurve((1 + t) / 2));
+    const { curve: _bent, ...straightLeft } = left;
+    const value = [...base];
+    value[leftIndex] =
+      leftCurve === null || Math.abs(leftCurve) < CURVE_EPSILON
+        ? straightLeft
+        : { ...straightLeft, curve: leftCurve };
+    if (rightCurve !== null && Math.abs(rightCurve) >= CURVE_EPSILON) {
+      added.curve = rightCurve;
+    }
+    value.splice(leftIndex + 1, 0, added);
+    return { index: leftIndex + 1, value };
+  }
+  const added: Breakpoint = { x, y };
+  const value = sortPoints([...base, added]);
+  return { index: value.indexOf(added), value };
+}
+
+/** How far a key bends a segment, or null for a key that does not: up lifts the handle, so a rising segment bends one way and a falling one the other. */
+function curveKeyDelta(
+  event: { key: string; shiftKey: boolean },
+  from: GeomPoint,
+  to: GeomPoint,
+  step: number
+): number | null {
+  const direction = { ArrowDown: -1, ArrowUp: 1 }[event.key];
+  if (direction === undefined) {
+    return null;
+  }
+  const lift = to.y > from.y ? -1 : 1;
+  const distance =
+    step * CURVE_STEP_MULTIPLIER * (event.shiftKey ? LARGE_STEP_MULTIPLIER : 1);
+  return direction * lift * distance;
+}
+
+/** Rounds a normalized coordinate to the nearest multiple of `step`; a step of 0 leaves it. */
+function snapTo(value: number, step: number): number {
+  return step > 0 ? Math.round(value / step) * step : value;
+}
+
+/**
+ * Where along a bent segment to put the vertices of its drawing: evenly in
+ * length, and evenly in height, so a steep stretch is sampled as finely as a
+ * flat one and does not turn into a corner.
+ */
+function curveSamples(curve: number): number[] {
+  const exponent = 2 ** (curve * CURVE_EXPONENT_RANGE);
+  const samples = new Set<number>();
+  for (let sample = 1; sample < CURVE_SAMPLES; sample += 1) {
+    const share = sample / CURVE_SAMPLES;
+    samples.add(share);
+    samples.add(share ** (1 / exponent));
+  }
+  return [...samples].filter((t) => t > 0 && t < 1).sort((a, b) => a - b);
+}
+
 /** Polyline coordinates: flat lead-in from x=0 to the first point, the points themselves with each bent segment sampled between them, flat lead-out from the last point to x=1. */
 function polylinePoints(value: Breakpoint[]): string {
   const [first] = value;
@@ -140,8 +216,7 @@ function polylinePoints(value: Breakpoint[]): string {
     if (!(next && point.curve)) {
       return;
     }
-    for (let sample = 1; sample < CURVE_SAMPLES; sample += 1) {
-      const t = sample / CURVE_SAMPLES;
+    for (const t of curveSamples(point.curve)) {
       coordinates.push(
         coordinate(
           point.x + (next.x - point.x) * t,
@@ -168,7 +243,11 @@ interface EnvelopeContextValue {
       target: GeomPoint,
       eventDetails: Root.ChangeEventDetails
     ) => boolean;
+    /** Move focus to a segment's handle, the roving tab stop among them. */
+    focusSegment: (index: number) => void;
     registerPoint: (index: number, node: Nullable<HTMLElement>) => void;
+    registerSegment: (index: number, node: Nullable<HTMLElement>) => void;
+    setFocusedSegmentIndex: (index: number) => void;
     /** Bend the segment leaving a point; returns whether it changed. */
     setCurve: (
       index: number,
@@ -185,6 +264,8 @@ interface EnvelopeContextValue {
     blockedIndex: number | null;
     draggingIndex: number | null;
     draggingSegmentIndex: number | null;
+    /** The roving tab stop among the segments' handles. */
+    focusedSegmentIndex: number;
     /** The roving tab stop among the points. */
     focusedIndex: number;
     /** Formats a point's `x` and `y` as one string. */
@@ -192,6 +273,8 @@ interface EnvelopeContextValue {
     graphRef: React.RefObject<SVGSVGElement | null>;
     isAddBlocked: boolean;
     minPoints: number;
+    /** Grid the pointer snaps to, in normalized units; 0 is no grid. */
+    snap: number;
     step: number;
     /** Latest displayed value, readable from event handlers. */
     valueRef: React.RefObject<Breakpoint[]>;
@@ -229,6 +312,7 @@ export function Root(componentProps: Root.Props) {
     onValueCommitted,
     ref,
     render,
+    snap = 0,
     step = DEFAULT_STEP,
     style,
     value: valueProp,
@@ -247,6 +331,24 @@ export function Root(componentProps: Root.Props) {
   const [draggingIndex, setDraggingIndexState] = React.useState<number | null>(
     null
   );
+  const [focusedSegmentIndex, setFocusedSegmentIndex] = React.useState(0);
+  const segmentElementsRef = React.useRef(new Map<number, HTMLElement>());
+  const registerSegment = React.useCallback(
+    (index: number, node: Nullable<HTMLElement>) => {
+      if (node) {
+        segmentElementsRef.current.set(index, node);
+      } else {
+        segmentElementsRef.current.delete(index);
+      }
+    },
+    []
+  );
+  const focusSegment = React.useCallback((index: number) => {
+    const last = Math.max(0, valueRef.current.length - 2);
+    const target = Math.min(last, Math.max(0, index));
+    setFocusedSegmentIndex(target);
+    segmentElementsRef.current.get(target)?.focus();
+  }, []);
   const [draggingSegmentIndex, setDraggingSegmentIndexState] = React.useState<
     number | null
   >(null);
@@ -405,9 +507,7 @@ export function Root(componentProps: Root.Props) {
         signalAddBlocked();
         return;
       }
-      const added = { x: clampUnit(point.x), y: clampUnit(point.y) };
-      const next = sortPoints([...base, added]);
-      const index = next.indexOf(added);
+      const { index, value: next } = insertPoint(base, point);
       const eventDetails = Object.assign(
         createChangeEventDetails("add", event),
         { index }
@@ -465,23 +565,28 @@ export function Root(componentProps: Root.Props) {
       actions: {
         addPoint,
         commit,
+        focusSegment,
         movePoint,
         registerPoint,
+        registerSegment,
         removePoint,
         setCurve,
         setDraggingIndex,
         setDraggingSegment,
         setFocusedIndex,
+        setFocusedSegmentIndex,
       },
       meta: {
         blockedIndex,
         draggingIndex,
         draggingSegmentIndex,
         focusedIndex,
+        focusedSegmentIndex,
         formatPoint,
         graphRef,
         isAddBlocked,
         minPoints,
+        snap,
         step,
         valueRef,
       },
@@ -493,16 +598,20 @@ export function Root(componentProps: Root.Props) {
       commit,
       draggingIndex,
       draggingSegmentIndex,
+      focusSegment,
       focusedIndex,
+      focusedSegmentIndex,
       formatPoint,
       isAddBlocked,
       minPoints,
       movePoint,
       registerPoint,
+      registerSegment,
       removePoint,
       setCurve,
       setDraggingIndex,
       setDraggingSegment,
+      snap,
       state,
       step,
     ]
@@ -580,6 +689,8 @@ export namespace Root {
       value: Breakpoint[],
       eventDetails: CommitEventDetails
     ) => void;
+    /** Grid the pointer snaps points to, in normalized units: 0.25 snaps to quarters, 0 is no grid. Holding Cmd/Ctrl leaves the grid, and Shift's fine drag ignores it. Keys move by `step`. @default 0 */
+    snap?: number;
     /** Keyboard step on both axes, in normalized units. @default 0.01 */
     step?: number;
     value?: Breakpoint[];
@@ -604,10 +715,12 @@ export function Graph(componentProps: Graph.Props) {
     if (rect.width <= 0 || rect.height <= 0) {
       return;
     }
+    const free = event.metaKey || event.ctrlKey;
+    const step = free ? 0 : meta.snap;
     actions.addPoint(
       {
-        x: (event.clientX - rect.left) / rect.width,
-        y: 1 - (event.clientY - rect.top) / rect.height,
+        x: snapTo((event.clientX - rect.left) / rect.width, step),
+        y: snapTo(1 - (event.clientY - rect.top) / rect.height, step),
       },
       event.nativeEvent
     );
@@ -739,8 +852,9 @@ interface SegmentGesture {
 /**
  * A handle on the middle of the segment leaving the point at `index`: drag it
  * up or down to bend the segment, so it follows the pointer on the curve's
- * midpoint. A `role="slider"` on the curve (-1…1): the arrow keys bend it
- * (Shift for larger steps), a double click or Delete straightens it. A segment
+ * midpoint. A `role="slider"` on the curve (-1…1): one handle at a time is
+ * the tab stop, Left and Right move between them, Up and Down bend it (Shift
+ * for larger steps), and a double click or Delete straightens it. A segment
  * between two points of the same level has nothing to bend, and `data-flat`
  * says so. Renders a `<div>` element.
  */
@@ -758,6 +872,11 @@ export function Segment(componentProps: Segment.Props) {
   const from = state.value[index];
   const to = state.value[index + 1];
   const gestureRef = React.useRef<SegmentGesture | null>(null);
+  const { registerSegment } = actions;
+  const registerRef = React.useCallback(
+    (node: HTMLDivElement | null) => registerSegment(index, node),
+    [index, registerSegment]
+  );
   const curve = from?.curve ?? 0;
   const flat = from && to ? Math.abs(to.y - from.y) < 1e-6 : true;
 
@@ -861,7 +980,15 @@ export function Segment(componentProps: Segment.Props) {
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     const left = meta.valueRef.current[index];
     const right = meta.valueRef.current[index + 1];
-    if (state.disabled || flat || !(left && right)) {
+    if (state.disabled || !(left && right)) {
+      return;
+    }
+    if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+      event.preventDefault();
+      actions.focusSegment(index + (event.key === "ArrowRight" ? 1 : -1));
+      return;
+    }
+    if (flat) {
       return;
     }
     const native = event.nativeEvent;
@@ -870,20 +997,14 @@ export function Segment(componentProps: Segment.Props) {
       straighten(native);
       return;
     }
-    const direction = { ArrowDown: -1, ArrowUp: 1 }[event.key];
-    if (direction === undefined) {
+    const delta = curveKeyDelta(event, left, right, meta.step);
+    if (delta === null) {
       return;
     }
     event.preventDefault();
-    // Up lifts the handle: toward the segment's far end, a falling one and a rising one bend opposite ways.
-    const lift = right.y > left.y ? -1 : 1;
-    const distance =
-      meta.step *
-      CURVE_STEP_MULTIPLIER *
-      (event.shiftKey ? LARGE_STEP_MULTIPLIER : 1);
     const moved = actions.setCurve(
       index,
-      (left.curve ?? 0) + direction * lift * distance,
+      (left.curve ?? 0) + delta,
       Object.assign(createChangeEventDetails("curve", native), { index })
     );
     if (moved) {
@@ -913,13 +1034,14 @@ export function Segment(componentProps: Segment.Props) {
           ? getAriaValueText(curve, index)
           : String(Math.round(curve * 100) / 100),
         onDoubleClick: handleDoubleClick,
+        onFocus: () => actions.setFocusedSegmentIndex(index),
         onKeyDown: handleKeyDown,
         onPointerCancel: handlePointerEnd,
         onPointerDown: handlePointerDown,
         onPointerMove: handlePointerMove,
         onPointerUp: handlePointerEnd,
         role: "slider",
-        tabIndex: state.disabled || flat ? -1 : 0,
+        tabIndex: state.disabled || index !== meta.focusedSegmentIndex ? -1 : 0,
       },
       {
         ...elementProps,
@@ -934,7 +1056,7 @@ export function Segment(componentProps: Segment.Props) {
         },
       }
     ),
-    ref,
+    ref: ref ? [ref, registerRef] : registerRef,
     render,
     state: segmentState,
     stateAttributesMapping: STATE_ATTRIBUTES_MAPPING,
@@ -1050,6 +1172,12 @@ export function Point(componentProps: Point.Props) {
       };
     } else {
       gesture.fine = null;
+      if (meta.snap > 0 && !(event.metaKey || event.ctrlKey)) {
+        target = {
+          x: snapTo(pointer.x, meta.snap),
+          y: snapTo(pointer.y, meta.snap),
+        };
+      }
     }
     const moved = actions.movePoint(
       index,
