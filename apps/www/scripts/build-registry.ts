@@ -473,7 +473,10 @@ async function buildRegistryItem(
       if (sourceType === "blocks") {
         target = `components/examples/${fileName}`;
       } else if (fileType === "registry:ui") {
-        target = `components/audio/${fileName}`;
+        // Elements keep the folder their demos import them from.
+        target = filePath.includes("/elements/")
+          ? `components/audio/elements/${fileName}`
+          : `components/audio/${fileName}`;
       } else if (fileType === "registry:hook") {
         target = `hooks/${fileName}`;
       } else if (fileType === "registry:lib") {

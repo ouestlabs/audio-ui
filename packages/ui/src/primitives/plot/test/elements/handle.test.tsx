@@ -158,4 +158,104 @@ describe("Plot.Handle", () => {
     expect(onValueChange).not.toHaveBeenCalled();
     expect(handle.hasAttribute("data-disabled")).toBe(true);
   });
+
+  test("starts in the middle of the plot without a value", () => {
+    const { handle } = renderPlot({}, { defaultValue: undefined });
+    expect(handle.style.left).toBe("50%");
+    expect(handle.style.top).toBe("50%");
+  });
+
+  test("keeps a controlled value inside the axes", () => {
+    const { handle } = renderPlot(
+      {},
+      { defaultValue: undefined, value: { x: 500, y: -4 } }
+    );
+    expect(handle.style.left).toBe("100%");
+    expect(handle.style.top).toBe("100%");
+  });
+
+  test("holds one input and moves vertically only along y", () => {
+    const { inputs, onValueCommitted } = renderPlot({}, { axis: "y" });
+    expect(inputs).toHaveLength(1);
+    expect(inputs[0]?.getAttribute("aria-orientation")).toBe("vertical");
+    expect(inputs[0]?.tabIndex).not.toBe(-1);
+    fireEvent.keyDown(inputs[0] as HTMLInputElement, { key: "ArrowRight" });
+    expect(onValueCommitted).not.toHaveBeenCalled();
+    fireEvent.keyDown(inputs[0] as HTMLInputElement, { key: "End" });
+    expect(lastCall(onValueCommitted)[0]).toEqual({ x: 50, y: 10 });
+  });
+
+  test("moves a tenth of the axis with Page Up and Page Down", () => {
+    const { inputs, onValueCommitted } = renderPlot();
+    fireEvent.keyDown(inputs[0] as HTMLInputElement, { key: "PageUp" });
+    expect(lastCall(onValueCommitted)[0].y).toBeCloseTo(6);
+    fireEvent.keyDown(inputs[0] as HTMLInputElement, { key: "PageDown" });
+    fireEvent.keyDown(inputs[0] as HTMLInputElement, { key: "PageDown" });
+    expect(lastCall(onValueCommitted)[0].y).toBeCloseTo(4);
+  });
+
+  test("ignores other keys", () => {
+    const { inputs, onValueChange } = renderPlot();
+    fireEvent.keyDown(inputs[0] as HTMLInputElement, { key: "a" });
+    expect(onValueChange).not.toHaveBeenCalled();
+  });
+
+  test("slows down when Shift is pressed mid-drag, carrying on from where it was", () => {
+    const { handle, onValueCommitted } = renderPlot();
+    const at = (clientX: number, shiftKey = false) => ({
+      clientX,
+      clientY: 50,
+      pointerId: 1,
+      shiftKey,
+    });
+    fireEvent.pointerDown(handle, { ...at(100), button: 0 });
+    fireEvent.pointerMove(handle, at(120));
+    fireEvent.pointerMove(handle, at(140, true));
+    fireEvent.pointerMove(handle, at(180, true));
+    fireEvent.pointerUp(handle, at(180, true));
+    // 20px normally (10 units); Shift rebases at 140, then 40px at a quarter (5 units).
+    expect(lastCall(onValueCommitted)[0].x).toBeCloseTo(65);
+  });
+
+  test("ignores a second pointer while one is dragging, and other buttons", () => {
+    const { handle, onValueChange } = renderPlot();
+    fireEvent.pointerDown(handle, {
+      button: 2,
+      clientX: 100,
+      clientY: 50,
+      pointerId: 1,
+    });
+    fireEvent.pointerMove(handle, { clientX: 140, clientY: 50, pointerId: 1 });
+    expect(onValueChange).not.toHaveBeenCalled();
+    fireEvent.pointerDown(handle, {
+      button: 0,
+      clientX: 100,
+      clientY: 50,
+      pointerId: 1,
+    });
+    fireEvent.pointerMove(handle, { clientX: 140, clientY: 50, pointerId: 2 });
+    expect(onValueChange).not.toHaveBeenCalled();
+  });
+
+  test("a cancelled keyboard move leaves the handle where it was", () => {
+    const { handle, inputs } = renderPlot(
+      {},
+      { onValueChange: (_value, details) => details.cancel() }
+    );
+    fireEvent.keyDown(inputs[0] as HTMLInputElement, { key: "ArrowRight" });
+    expect(handle.style.left).toBe("50%");
+  });
+
+  test("is marked while dragging", () => {
+    const { handle } = renderPlot();
+    fireEvent.pointerDown(handle, {
+      button: 0,
+      clientX: 100,
+      clientY: 50,
+      pointerId: 1,
+    });
+    expect(handle.hasAttribute("data-dragging")).toBe(true);
+    fireEvent.pointerUp(handle, { clientX: 100, clientY: 50, pointerId: 1 });
+    expect(handle.hasAttribute("data-dragging")).toBe(false);
+  });
 });

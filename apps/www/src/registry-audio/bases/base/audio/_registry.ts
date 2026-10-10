@@ -74,8 +74,14 @@ export const audio: RegistryItem[] = [
         path: "audio/elements/plot.tsx",
         type: "registry:ui",
       },
+      {
+        path: "components/plot/plot-demo.tsx",
+        target: "components/audio/plot-default.tsx",
+        type: "registry:component",
+      },
     ],
     name: "plot",
+    registryDependencies: ["@audio/filter-response"],
     type: "registry:ui",
   },
   {
@@ -101,6 +107,11 @@ export const audio: RegistryItem[] = [
         path: "audio/elements/waveform.tsx",
         type: "registry:ui",
       },
+      {
+        path: "components/waveform/waveform-demo.tsx",
+        target: "components/audio/waveform-default.tsx",
+        type: "registry:component",
+      },
     ],
     name: "waveform",
     registryDependencies: ["@audio/waveform-dsp"],
@@ -115,6 +126,7 @@ export const audio: RegistryItem[] = [
       },
     ],
     name: "timeline",
+    registryDependencies: ["@audio/musical-time"],
     type: "registry:ui",
   },
   {
