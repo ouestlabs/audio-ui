@@ -31,13 +31,28 @@ const GRID: CSSProperties = {
 
 interface EnvelopeProps
   extends EnvelopePrimitive.Root.Props,
-    VariantProps<typeof envelopeVariants> {}
+    VariantProps<typeof envelopeVariants> {
+  /** Whether a handle on each segment bends it. @default true */
+  curves?: boolean;
+  /** Prints a point's value in the label that shows while it is dragged or focused. Defaults to percentages. */
+  formatValue?: (point: { x: number; y: number }) => string;
+}
+
+const defaultFormatValue = ({ x, y }: { x: number; y: number }) =>
+  `${Math.round(x * 100)}% · ${Math.round(y * 100)}%`;
 
 /**
  * The frame has room inside it, so the first and last points sit within it
- * instead of on its edge.
+ * instead of on its edge. Drag a point to move it, the small handle on a
+ * segment to bend it, and hold Shift for a fine drag.
  */
-export function Envelope({ className, size, ...props }: EnvelopeProps) {
+export function Envelope({
+  className,
+  curves = true,
+  formatValue = defaultFormatValue,
+  size,
+  ...props
+}: EnvelopeProps) {
   return (
     <div
       className={cn(
@@ -58,14 +73,33 @@ export function Envelope({ className, size, ...props }: EnvelopeProps) {
           <EnvelopePrimitive.Fill className="cn-envelope-fill" />
           <EnvelopePrimitive.Line className="cn-envelope-path" />
         </EnvelopePrimitive.Graph>
+        {curves ? (
+          <EnvelopePrimitive.Segments>
+            {(_point, index) => (
+              <EnvelopePrimitive.Segment
+                aria-label={`Curve ${index + 1}`}
+                className="cn-envelope-curve cursor-ns-resize opacity-0 outline-none group-focus-within/envelope:opacity-100 group-hover/envelope:opacity-100 data-dragging:opacity-100"
+                index={index}
+                key={index}
+              />
+            )}
+          </EnvelopePrimitive.Segments>
+        ) : null}
         <EnvelopePrimitive.Points>
-          {(_point, index, points) => (
+          {(point, index, points) => (
             <EnvelopePrimitive.Point
               aria-label={`Point ${index + 1} of ${points.length}`}
-              className="cn-envelope-point size-4 cursor-grab touch-none select-none outline-none active:cursor-grabbing"
+              className="cn-envelope-point group/point size-4 cursor-grab touch-none select-none outline-none active:cursor-grabbing"
               index={index}
               key={index}
-            />
+            >
+              <span
+                aria-hidden="true"
+                className="cn-envelope-point-value -translate-x-1/2 pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 hidden whitespace-nowrap group-data-dragging/point:block group-focus-visible/point:block"
+              >
+                {formatValue(point)}
+              </span>
+            </EnvelopePrimitive.Point>
           )}
         </EnvelopePrimitive.Points>
       </EnvelopePrimitive.Root>
