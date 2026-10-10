@@ -175,7 +175,7 @@ function PlotHandle({ className, ...props }: PlotPrimitive.Handle.Props) {
   return (
     <PlotPrimitive.Handle
       className={cn(
-        "cn-plot-handle size-4 cursor-grab outline-none after:absolute after:-inset-2 data-dragging:cursor-grabbing data-disabled:pointer-events-none",
+        "cn-plot-handle size-4 cursor-grab outline-none after:absolute after:-inset-2 pointer-coarse:after:-inset-3.5 data-dragging:cursor-grabbing data-disabled:pointer-events-none",
         className
       )}
       data-slot="plot-handle"
