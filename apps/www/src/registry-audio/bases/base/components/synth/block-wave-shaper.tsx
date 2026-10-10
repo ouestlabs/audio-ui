@@ -10,6 +10,11 @@ import { Knob } from "@/registry-audio/bases/base/audio/elements/knob";
 import { XYPad } from "@/registry-audio/bases/base/audio/elements/xypad";
 import { useWebAudio } from "@/registry-audio/bases/base/hooks/use-web-audio";
 
+/** Graduations around the dials and along the fader: ticks only, the readout beneath says the value. */
+const PERCENT_MARKS = [0, 25, 50, 75, 100];
+const DETUNE_MARKS = [-50, -25, 0, 25, 50];
+const VOLUME_MARKS = [0, 0.25, 0.5, 0.75, 1];
+
 type WaveformType = "sine" | "triangle" | "sawtooth" | "square";
 
 export default function BlockWaveShaper() {
@@ -421,6 +426,7 @@ export default function BlockWaveShaper() {
               aria-labelledby={driveLabelId}
               defaultValue={1}
               id={driveId}
+              marks={PERCENT_MARKS}
               max={100}
               min={0}
               onValueChange={setDrive}
@@ -448,6 +454,7 @@ export default function BlockWaveShaper() {
               aria-labelledby={toneLabelId}
               defaultValue={50}
               id={toneId}
+              marks={PERCENT_MARKS}
               max={100}
               min={0}
               onValueChange={setTone}
@@ -476,6 +483,7 @@ export default function BlockWaveShaper() {
               aria-labelledby={detuneLabelId}
               defaultValue={0}
               id={detuneId}
+              marks={DETUNE_MARKS}
               max={50}
               min={-50}
               onValueChange={setDetune}
@@ -504,6 +512,7 @@ export default function BlockWaveShaper() {
               aria-labelledby={mixLabelId}
               defaultValue={50}
               id={mixId}
+              marks={PERCENT_MARKS}
               max={100}
               min={0}
               onValueChange={setMix}
@@ -534,6 +543,7 @@ export default function BlockWaveShaper() {
               aria-describedby={faderValueId}
               aria-labelledby={faderLabelId}
               id={faderId}
+              marks={VOLUME_MARKS}
               max={1}
               min={0}
               onValueChange={setVolume}
