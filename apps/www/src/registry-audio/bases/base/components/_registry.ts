@@ -185,28 +185,6 @@ export const components: RegistryItem[] = [
     type: "registry:example",
   },
   {
-    categories: ["piano", "envelope", "synth"],
-    description:
-      "Polyphonic synth keyboard shaped by a visual ADSR envelope, playable by mouse/touch or a connected MIDI keyboard — hold a key through attack/decay into sustain, release to hear the envelope's tail",
-    files: [
-      {
-        path: "components/piano/block-polysynth.tsx",
-        type: "registry:block",
-      },
-    ],
-    name: "block-polysynth",
-    registryDependencies: [
-      "@audio/piano",
-      "@audio/envelope",
-      "@audio/fader",
-      "@audio/midi-connect-control",
-      "@audio/use-master-bus",
-      "@audio/use-synth-voices",
-      "@audio/use-midi-input",
-    ],
-    type: "registry:block",
-  },
-  {
     categories: ["piano", "synth"],
     description:
       "A DAW-style piano roll, laid out like Sona's note editor — a scrolling roll with a playable keyboard stuck to its side, a loop brace and bar ruler stuck on top, a velocity lane stuck at the bottom and a navigator to zoom across four bars: click to add notes (or turn Draw off to drag a selection rectangle and double-click to add), drag to move or resize either edge, Alt-drag to copy, shift-click to select and move several at once, double-click a note to delete it, Fold to keep only the pitches in use — with a BPM-driven loop that plays back in real time and always-on live preview as you edit. A timeline above the grid lets you click to seek or drag out a loop range to dial in a short phrase instead of always looping the whole grid. Drop a MIDI file onto the panel (or use the Import MIDI button) to load its notes and tempo onto the grid, and Export MIDI to save the current pattern back out as a .mid file",

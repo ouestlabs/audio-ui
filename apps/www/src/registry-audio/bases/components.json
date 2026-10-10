@@ -65,11 +65,6 @@
     "title": "piano-active-notes-demo"
   },
   {
-    "categories": ["piano", "envelope", "synth"],
-    "name": "block-polysynth",
-    "title": "block-polysynth"
-  },
-  {
     "categories": ["piano", "synth"],
     "name": "block-piano-roll",
     "title": "block-piano-roll"

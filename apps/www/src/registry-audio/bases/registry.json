@@ -1,7 +1,7 @@
 {
   "categories": [
     {
-      "count": 4,
+      "count": 3,
       "description": "Interactive envelope components for editing linear ramp breakpoints.",
       "label": "Envelope",
       "name": "envelope"
@@ -31,13 +31,13 @@
       "name": "plot"
     },
     {
-      "count": 4,
+      "count": 3,
       "description": "Virtual piano keyboard components with MIDI note ranges and glissando.",
       "label": "Piano",
       "name": "piano"
     },
     {
-      "count": 4,
+      "count": 3,
       "description": "Synth control patterns combining knobs, XY pads, and toggles.",
       "label": "Synth",
       "name": "synth"
@@ -79,5 +79,5 @@
       "name": "xypad"
     }
   ],
-  "totalComponents": 31
+  "totalComponents": 30
 }
