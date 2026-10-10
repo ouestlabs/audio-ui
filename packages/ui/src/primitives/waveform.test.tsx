@@ -1,153 +1,268 @@
 import { describe, expect, mock, test } from "bun:test";
-import { fireEvent, render } from "@testing-library/react";
+import { act, fireEvent, render } from "@testing-library/react";
 import { mockRect } from "../../test/helpers";
 import { Waveform } from "../waveform";
 
-const SAMPLE_BARS = [{ height: 10, width: 5, x: 0, y: 45 }];
+const PEAKS = [0.2, 0.8, 0.5, 1];
 
-/** Defaults: min 0, max 1, step 0.001 → midpoint default value 0.5. */
-function renderWaveform(props: Waveform.RootProps = {}) {
-  const onValueChange = mock(() => undefined);
-  const onValueCommit = mock(() => undefined);
+const clock = (value: number, duration: number) =>
+  `${Math.round(value)} of ${Math.round(duration)} seconds`;
+const seconds = (value: number) => `${value}s`;
+
+/** A 100-second track on a 200×40 control at the origin: 2px per second. */
+function renderWaveform(
+  props: Waveform.Root.Props = {},
+  onRender?: () => void
+) {
+  const onValueChange = mock(
+    (_value: number, _details: Waveform.Root.ChangeEventDetails) => undefined
+  );
+  const onValueCommitted = mock(
+    (_value: number, _details: Waveform.Root.CommitEventDetails) => undefined
+  );
+  function Parts() {
+    onRender?.();
+    return (
+      <Waveform.Control aria-label="Seek" data-testid="control">
+        <Waveform.Canvas data-testid="canvas" />
+        <Waveform.Playhead data-testid="playhead" />
+        <Waveform.Thumb data-testid="thumb" />
+        <Waveform.Hover data-testid="hover">{seconds}</Waveform.Hover>
+      </Waveform.Control>
+    );
+  }
   const view = render(
     <Waveform.Root
+      data-testid="root"
+      duration={100}
       onValueChange={onValueChange}
-      onValueCommit={onValueCommit}
+      onValueCommitted={onValueCommitted}
+      peaks={PEAKS}
       {...props}
     >
-      <Waveform.Track data-testid="track">
-        <Waveform.Svg viewBox="0 0 100 100">
-          <Waveform.Bars bars={SAMPLE_BARS} />
-        </Waveform.Svg>
-        <Waveform.Thumb data-testid="thumb" />
-      </Waveform.Track>
+      <Parts />
     </Waveform.Root>
   );
+  const control = view.getByTestId("control");
+  mockRect(control, { bottom: 40, height: 40, right: 200, width: 200 });
   return {
+    control,
+    input: view.getByRole("slider") as HTMLInputElement,
     onValueChange,
-    onValueCommit,
-    thumb: view.getByTestId("thumb"),
-    track: view.getByTestId("track"),
+    onValueCommitted,
+    position: () =>
+      view.getByTestId("root").style.getPropertyValue("--waveform-position"),
     view,
   };
 }
 
+/** A hand-cranked playback position. */
+function createSource(initial: number) {
+  let value = initial;
+  const listeners = new Set<() => void>();
+  return {
+    emit(next: number) {
+      value = next;
+      for (const listener of listeners) {
+        listener();
+      }
+    },
+    getSnapshot: () => value,
+    listenerCount: () => listeners.size,
+    subscribe(listener: () => void) {
+      listeners.add(listener);
+      return () => {
+        listeners.delete(listener);
+      };
+    },
+  };
+}
+
+const lastCall = <T extends unknown[]>(fn: { mock: { calls: T[] } }) =>
+  fn.mock.calls.at(-1) as T;
+
 describe("Waveform value semantics", () => {
-  test("defaults to the midpoint of min/max", () => {
-    const { thumb } = renderWaveform();
-    expect(thumb.getAttribute("role")).toBe("slider");
-    expect(thumb.getAttribute("aria-valuemin")).toBe("0");
-    expect(thumb.getAttribute("aria-valuemax")).toBe("1");
-    expect(thumb.getAttribute("aria-valuenow")).toBe("0.5");
+  test("starts at 0, with a named native range input spanning the duration", () => {
+    const { input, position } = renderWaveform();
+    expect(input.type).toBe("range");
+    expect(input.value).toBe("0");
+    expect(input.max).toBe("100");
+    expect(input.getAttribute("aria-label")).toBe("Seek");
+    expect(position()).toBe("0%");
   });
 
-  test("clamps an out-of-range controlled value", () => {
-    const { thumb } = renderWaveform({ value: 5 });
-    expect(thumb.getAttribute("aria-valuenow")).toBe("1");
+  test("exposes the position as a percentage CSS variable the playhead and thumb follow", () => {
+    const { position, view } = renderWaveform({ value: 25 });
+    expect(position()).toBe("25%");
+    expect(view.getByTestId("playhead").style.left).toBe(
+      "var(--waveform-position)"
+    );
+    expect(view.getByTestId("thumb").style.left).toBe(
+      "var(--waveform-position)"
+    );
   });
 
-  test("falls back to min for a NaN controlled value", () => {
-    const { thumb } = renderWaveform({ value: Number.NaN });
-    expect(thumb.getAttribute("aria-valuenow")).toBe("0");
+  test("clamps an out-of-range position", () => {
+    expect(renderWaveform({ value: 400 }).position()).toBe("100%");
   });
 
-  test("respects defaultValue when uncontrolled", () => {
-    const { thumb } = renderWaveform({ defaultValue: 0.2 });
-    expect(thumb.getAttribute("aria-valuenow")).toBe("0.2");
+  test("treats a NaN position as the start", () => {
+    expect(renderWaveform({ value: Number.NaN }).position()).toBe("0%");
   });
 
-  test("respects a consumer-supplied max, e.g. a track duration in seconds", () => {
-    const { thumb } = renderWaveform({ max: 180, min: 0, step: 1 });
-    expect(thumb.getAttribute("aria-valuenow")).toBe("90");
+  test("announces the played share by default", () => {
+    expect(
+      renderWaveform({ value: 30 }).input.getAttribute("aria-valuetext")
+    ).toBe("30%");
+  });
+
+  test("getAriaValueText announces the position in real units", () => {
+    const view = render(
+      <Waveform.Root duration={100} value={12}>
+        <Waveform.Control aria-label="Seek" getAriaValueText={clock} />
+      </Waveform.Root>
+    );
+    expect(view.getByRole("slider").getAttribute("aria-valuetext")).toBe(
+      "12 of 100 seconds"
+    );
   });
 });
 
-describe("Waveform keyboard (step 0.25)", () => {
-  const cases: [string, number][] = [
-    ["ArrowRight", 0.75],
-    ["ArrowUp", 0.75],
-    ["ArrowLeft", 0.25],
-    ["ArrowDown", 0.25],
-    ["Home", 0],
-    ["End", 1],
+describe("Waveform keyboard (from 50 of 100)", () => {
+  const cases: [string, Partial<KeyboardEventInit>, number][] = [
+    ["ArrowRight", {}, 51],
+    ["ArrowLeft", {}, 49],
+    ["ArrowRight", { shiftKey: true }, 60],
+    ["PageUp", {}, 60],
+    ["PageDown", {}, 40],
+    ["Home", {}, 0],
+    ["End", {}, 100],
   ];
 
-  for (const [key, expected] of cases) {
-    test(`${key} commits ${expected} from the default 0.5`, () => {
-      const { thumb, onValueChange, onValueCommit } = renderWaveform({
-        step: 0.25,
-      });
-      fireEvent.keyDown(thumb, { key });
-      expect(onValueChange).toHaveBeenLastCalledWith(expected);
-      expect(onValueCommit).toHaveBeenLastCalledWith(expected);
+  for (const [key, init, expected] of cases) {
+    test(`${init.shiftKey ? "Shift+" : ""}${key} seeks to ${expected} and commits`, () => {
+      const { input, onValueChange, onValueCommitted, position } =
+        renderWaveform({ defaultValue: 50 });
+      fireEvent.keyDown(input, { key, ...init });
+      const [value, details] = lastCall(onValueChange);
+      expect(value).toBe(expected);
+      expect(details.reason).toBe("keyboard");
+      expect(lastCall(onValueCommitted)[0]).toBe(expected);
+      expect(position()).toBe(`${expected}%`);
     });
   }
 
-  test("clamps keyboard steps at max", () => {
-    const { thumb, onValueCommit } = renderWaveform({ step: 0.25, value: 1 });
-    fireEvent.keyDown(thumb, { key: "ArrowRight" });
-    expect(onValueCommit).toHaveBeenLastCalledWith(1);
-  });
-
-  test("ignores keys when disabled", () => {
-    const { thumb, onValueChange, onValueCommit } = renderWaveform({
-      disabled: true,
-    });
-    fireEvent.keyDown(thumb, { key: "ArrowRight" });
+  test("is ignored when disabled", () => {
+    const { input, onValueChange } = renderWaveform({ disabled: true });
+    fireEvent.keyDown(input, { key: "ArrowRight" });
     expect(onValueChange).not.toHaveBeenCalled();
-    expect(onValueCommit).not.toHaveBeenCalled();
-    expect(thumb.tabIndex).toBe(-1);
+    expect(input.disabled).toBe(true);
   });
 });
 
-describe("Waveform pointer drag (track 200×40 at origin)", () => {
-  test("pointer down jumps to the pointed value, drag updates, release commits", () => {
-    const { track, onValueChange, onValueCommit } = renderWaveform();
-    mockRect(track, { height: 40, width: 200 });
+describe("Waveform pointer (control 200×40, 100s)", () => {
+  test("a press jumps to the pointer, a drag scrubs, release commits", () => {
+    const { control, onValueChange, onValueCommitted, position } =
+      renderWaveform();
 
-    fireEvent.pointerDown(track, { clientX: 100, clientY: 20, pointerId: 1 });
-    expect(onValueChange).toHaveBeenLastCalledWith(0.5);
+    fireEvent.pointerDown(control, { clientX: 60, clientY: 20, pointerId: 1 });
+    expect(lastCall(onValueChange)).toEqual([
+      30,
+      expect.objectContaining({ reason: "press" }),
+    ]);
+    expect(control.hasAttribute("data-dragging")).toBe(true);
 
-    fireEvent.pointerMove(track, { clientX: 150, clientY: 20, pointerId: 1 });
-    expect(onValueChange).toHaveBeenLastCalledWith(0.75);
+    fireEvent.pointerMove(control, { clientX: 100, clientY: 20, pointerId: 1 });
+    expect(lastCall(onValueChange)).toEqual([
+      50,
+      expect.objectContaining({ reason: "drag" }),
+    ]);
+    expect(position()).toBe("50%");
 
-    fireEvent.pointerUp(track, { clientX: 150, clientY: 20, pointerId: 1 });
-    expect(onValueCommit).toHaveBeenLastCalledWith(0.75);
+    fireEvent.pointerUp(control, { clientX: 100, clientY: 20, pointerId: 1 });
+    expect(lastCall(onValueCommitted)).toEqual([
+      50,
+      expect.objectContaining({ reason: "drag" }),
+    ]);
+    expect(control.hasAttribute("data-dragging")).toBe(false);
   });
 
-  test("dragging from the thumb itself works the same as dragging from the track", () => {
-    const { thumb, track, onValueChange, onValueCommit } = renderWaveform({
-      value: 0.5,
+  test("a controlled position that lags behind doesn't pull the playhead back mid-scrub", () => {
+    const { control, position } = renderWaveform({ value: 10 });
+    fireEvent.pointerDown(control, { clientX: 100, clientY: 20, pointerId: 1 });
+    expect(position()).toBe("50%");
+    fireEvent.pointerUp(control, { clientX: 100, clientY: 20, pointerId: 1 });
+    expect(position()).toBe("10%");
+  });
+
+  test("eventDetails.cancel() rejects the seek", () => {
+    const { control, position } = renderWaveform({
+      onValueChange: (_value, details) => details.cancel(),
     });
-    mockRect(track, { height: 40, width: 200 });
-
-    fireEvent.pointerDown(thumb, { clientX: 100, clientY: 20, pointerId: 2 });
-    fireEvent.pointerMove(thumb, { clientX: 50, clientY: 20, pointerId: 2 });
-    expect(onValueChange).toHaveBeenLastCalledWith(0.25);
-
-    fireEvent.pointerUp(thumb, { clientX: 50, clientY: 20, pointerId: 2 });
-    expect(onValueCommit).toHaveBeenLastCalledWith(0.25);
-  });
-
-  test("a pointerdown outside the waveform mid-drag commits the pending value", () => {
-    const { thumb, track, onValueCommit } = renderWaveform();
-    mockRect(track, { height: 40, width: 200 });
-
-    fireEvent.pointerDown(thumb, { clientX: 100, clientY: 20, pointerId: 7 });
-    expect(onValueCommit).not.toHaveBeenCalled();
-
-    fireEvent.pointerDown(document.body, { pointerId: 8 });
-    expect(onValueCommit).toHaveBeenLastCalledWith(0.5);
+    fireEvent.pointerDown(control, { clientX: 100, clientY: 20, pointerId: 1 });
+    expect(position()).toBe("0%");
   });
 
   test("ignores pointer input when disabled", () => {
-    const { track, onValueChange, onValueCommit } = renderWaveform({
-      disabled: true,
-    });
-    mockRect(track, { height: 40, width: 200 });
-
-    fireEvent.pointerDown(track, { clientX: 100, clientY: 20, pointerId: 1 });
+    const { control, onValueChange } = renderWaveform({ disabled: true });
+    fireEvent.pointerDown(control, { clientX: 100, clientY: 20, pointerId: 1 });
     expect(onValueChange).not.toHaveBeenCalled();
-    expect(onValueCommit).not.toHaveBeenCalled();
+  });
+
+  test("sets touch-action: none on the control", () => {
+    expect(renderWaveform().control.style.touchAction).toBe("none");
+  });
+});
+
+describe("Waveform.Hover", () => {
+  test("appears at the hovered position while the pointer is over the control", () => {
+    const { control, view } = renderWaveform();
+    expect(view.queryByTestId("hover")).toBeNull();
+
+    fireEvent.pointerMove(control, { clientX: 50, clientY: 20, pointerId: 1 });
+    const hover = view.getByTestId("hover");
+    expect(hover.style.left).toBe("25%");
+    expect(hover.textContent).toBe("25s");
+
+    fireEvent.pointerLeave(control);
+    expect(view.queryByTestId("hover")).toBeNull();
+  });
+});
+
+describe("Waveform live source", () => {
+  test("follows the source in the DOM without re-rendering React", () => {
+    const source = createSource(0);
+    let renders = 0;
+    const { input, position } = renderWaveform({ source }, () => {
+      renders += 1;
+    });
+    const rendersAfterMount = renders;
+
+    act(() => source.emit(42));
+
+    expect(renders).toBe(rendersAfterMount);
+    expect(position()).toBe("42%");
+    expect(input.value).toBe("42");
+    expect(input.getAttribute("aria-valuetext")).toBe("42%");
+  });
+
+  test("a scrub wins over the source until the pointer is released", () => {
+    const source = createSource(10);
+    const { control, position } = renderWaveform({ source });
+
+    fireEvent.pointerDown(control, { clientX: 100, clientY: 20, pointerId: 1 });
+    act(() => source.emit(11));
+    expect(position()).toBe("50%");
+
+    fireEvent.pointerUp(control, { clientX: 100, clientY: 20, pointerId: 1 });
+    expect(position()).toBe("11%");
+  });
+
+  test("unsubscribes on unmount", () => {
+    const source = createSource(0);
+    const { view } = renderWaveform({ source });
+    expect(source.listenerCount()).toBe(1);
+    view.unmount();
+    expect(source.listenerCount()).toBe(0);
   });
 });

@@ -428,12 +428,8 @@
     @apply relative h-20 rounded-2xl border bg-card;
   }
 
-  .cn-waveform-bars {
-    @apply pointer-events-none fill-border [rx:max(0px,min(var(--radius-sm),3px))];
-  }
-
-  .cn-waveform-bars-progress {
-    @apply pointer-events-none fill-primary [rx:max(0px,min(var(--radius-sm),3px))];
+  .cn-waveform-canvas {
+    @apply pointer-events-none [--waveform-bar-radius:max(0px,min(var(--radius-sm),3px))] [--waveform-color:var(--border)] [--waveform-progress-color:var(--primary)];
   }
 
   .cn-waveform-playhead {

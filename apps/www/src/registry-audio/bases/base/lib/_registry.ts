@@ -122,7 +122,7 @@ export const lib: RegistryItem[] = [
     categories: ["lib", "audio", "waveform"],
     dependencies: [],
     description:
-      "Framework-free waveform DSP — decode audio bytes to samples, downsample to peak amplitudes, normalize, and lay out bars for rendering",
+      "Framework-free waveform DSP — decode audio bytes to samples, downsample to peak amplitudes, and normalize",
     files: [
       {
         path: "lib/waveform-dsp.ts",

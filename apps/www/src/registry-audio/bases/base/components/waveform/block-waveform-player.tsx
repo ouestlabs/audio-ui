@@ -180,7 +180,7 @@ export default function BlockWaveformPlayer() {
             <Waveform
               aria-label="Track progress"
               onValueChange={handleSeek}
-              onValueCommit={handleSeek}
+              onValueCommitted={handleSeek}
               value={progress}
               values={values}
             />
@@ -189,7 +189,7 @@ export default function BlockWaveformPlayer() {
             <Waveform
               aria-label="Track progress"
               onValueChange={handleSeek}
-              onValueCommit={handleSeek}
+              onValueCommitted={handleSeek}
               value={progress}
               values={values}
               variant="playhead"

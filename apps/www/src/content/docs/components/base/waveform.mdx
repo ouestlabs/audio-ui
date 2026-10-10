@@ -7,14 +7,15 @@ base: base
 
 <ComponentPreview styleName="base-nova" name="waveform-demo" />
 
-Waveform for scrubbing through audio — a track of recolored bars that fill in as `value` advances. The registry component wraps `Waveform` primitives from `@audio-ui/react`; the primitive itself has no opinion on where the bar data came from (real decoded PCM samples, a placeholder curve, anything), the same way `PianoRoll` has no opinion on where its notes came from.
+Waveform for scrubbing through audio: bars drawn on a canvas that fill in as the position advances. The registry component wraps the `Waveform` primitive from `@audio-ui/react`; the primitive has no opinion on where the amplitudes came from (real decoded PCM samples, a placeholder curve, anything), the same way `PianoRoll` has no opinion on where its notes came from.
 
 ## Overview
 
-- **Value model:** `value` is a plain `0–1` fraction (or pass `min`/`max`, e.g. a track's duration in seconds) — the primitive only owns the seek position, never the audio itself. Wire `onValueChange`/`onValueCommit` to your own `<audio>` element.
-- **Bar data:** pass `values` (raw `0–1` amplitudes) and the component lays out the bars for you, or pass fully-computed `bars: WaveformBar[]` yourself for precomputed/server-side peaks — see [Feeding real audio](#feeding-real-audio) for turning a real audio file into `values`.
-- **Variants:** `variant="default"` renders just the recolored bars. `variant="playhead"` additionally renders a playhead line and a real handle at the current position.
-- **Accessibility:** `variant="playhead"`'s handle is a native `role="slider"` with `aria-valuenow`/`min`/`max` and full arrow key / <kbd>Home</kbd> / <kbd>End</kbd> / <kbd>Page Up</kbd> / <kbd>Page Down</kbd> support. `variant="default"` is click/drag-to-seek only — pick `playhead` when keyboard access matters.
+- **Value model:** `value` is the playback position, from `0` to `duration` (default `1`, so a plain `0–1` fraction; pass the track's length in seconds to work in seconds). The primitive only owns the seek position, never the audio itself: wire `onValueChange` to your own `<audio>` element.
+- **Bar data:** pass `values` (raw `0–1` amplitudes) at any resolution. The canvas draws as many fixed-width bars as fit its real width and keeps the loudest amplitude in each bar's slice, so the waveform stays sharp from a chat bubble to a full-width editor, at any pixel density. See [Feeding real audio](#feeding-real-audio).
+- **Live position:** for a playhead that moves every frame, pass a [`source`](#following-playback) instead of `value`: the waveform follows it straight in the DOM, with no React render.
+- **Variants:** `variant="default"` renders just the recolored bars. `variant="playhead"` additionally renders a playhead line and a handle at the current position.
+- **Accessibility:** the waveform holds a native `<input type="range">` in both variants: it takes focus, carries `aria-label`, announces the played share (or whatever `getAriaValueText` returns, e.g. a time), and supports arrow keys / <kbd>Home</kbd> / <kbd>End</kbd> / <kbd>Page Up</kbd> / <kbd>Page Down</kbd>.
 
 ## Installation
 
@@ -71,14 +72,16 @@ import { Waveform } from "@/components/audio/elements/waveform";
 <Waveform aria-label="Track progress" value={progress} values={values} />
 ```
 
-**With a playhead line and handle:**
+**With a playhead line and handle, in seconds:**
 
 ```tsx
 <Waveform
   aria-label="Track progress"
-  onValueChange={setProgress}
-  onValueCommit={setProgress}
-  value={progress}
+  duration={audio.duration}
+  onValueChange={(seconds) => {
+    audio.currentTime = seconds;
+  }}
+  value={currentTime}
   values={values}
   variant="playhead"
 />
@@ -86,59 +89,79 @@ import { Waveform } from "@/components/audio/elements/waveform";
 
 ## Feeding real audio
 
-`values`/`bars` are plain props — the component doesn't decode anything on its own, but it does ship `decodeAudioSamples`/`downsampleWaveform`/`normalizeWaveform` alongside `Waveform` for turning a real audio file into `values`: `decodeAudioSamples` reads PCM samples out of an `AudioContext`, `downsampleWaveform` reduces them down to a bar count (keeping each block's peak, not its average, so transients stay sharp), and `normalizeWaveform` scales the peak to `1`.
+`values` is a plain prop: the component doesn't decode anything on its own. The `waveform-dsp` lib (`npx shadcn@latest add @audio/waveform-dsp`) turns a real audio file into `values`: `decodeAudioSamples` reads PCM samples out of an `AudioContext`, `downsampleWaveform` reduces them to a manageable number of amplitudes (keeping each block's peak, not its average, so transients stay sharp), and `normalizeWaveform` scales them so the loudest reaches full height.
 
 ```tsx
 import {
   decodeAudioSamples,
   downsampleWaveform,
   normalizeWaveform,
-} from "@/components/audio/elements/waveform";
+} from "@/lib/waveform-dsp";
 
 const context = new AudioContext();
 const buffer = await file.arrayBuffer();
 const samples = await decodeAudioSamples(context, buffer);
 
-const downsampled = downsampleWaveform(samples, 100);
-const values = normalizeWaveform(downsampled);
+const values = normalizeWaveform(downsampleWaveform(samples, 1000));
 ```
 
-<Callout variant="warning">
-  <strong>Sample count vs. rendered width:</strong> the second argument to <code>downsampleWaveform</code> is a bar count, not a duration — it has nothing to do with how long the audio is. Because <code>Waveform.Svg</code> stretches to the container's actual CSS width, too few bars for a wide track reads as a chunky bar chart, and too many bars for a narrow one (e.g. a chat bubble voice message) reads as a thin, barely-visible smear. Pick the count from the width you'll actually render at — roughly one bar every 4-6px — not from the audio's duration.
-</Callout>
+The second argument to `downsampleWaveform` is a resolution, not a bar count: the canvas fits whatever you pass to its own width. Give it more values than the widest bar count you expect (a thousand is plenty) rather than tuning it per layout.
 
-Playback itself is a plain `<audio>` element — `onValueChange`/`onValueCommit` set `audio.currentTime`, and the element's own `timeupdate` event feeds `value` back in. See `block-waveform-player`'s source for the full wiring, including the upload flow and a `requestAnimationFrame`-free `timeupdate` listener.
+## Following playback
+
+`value` re-renders React each time it changes, which is fine for a `timeupdate` event a few times a second. For a playhead that glides every animation frame, pass a `source`, an object in the shape of an external store:
+
+```ts
+interface WaveformSource {
+  getSnapshot: () => number; // the position, in `duration` units
+  subscribe: (listener: () => void) => () => void;
+}
+```
+
+The waveform subscribes to it and moves the playhead, repaints the canvas and updates the input itself. While the pointer scrubs, the waveform follows the pointer and ignores the source until release; the same holds for a controlled `value` that updates late.
+
+## Theming
+
+The canvas reads its colors from CSS, and repaints when the theme changes:
+
+| Variable | Default | Purpose |
+| -------- | ------- | ------- |
+| `--waveform-color` | text color | Bars ahead of the position. |
+| `--waveform-progress-color` | `--waveform-color` | Bars behind the position. |
+| `--waveform-bar-radius` | `0px` | Bar corner radius (any CSS length). |
+
+The position itself is exposed as `--waveform-position` (a percentage) on the root.
 
 ## API reference
 
-`Waveform` accepts style props (`values`, `bars`, `variant`, `viewBox`) plus primitive props from `WaveformPrimitive.RootProps`.
+`Waveform` accepts `values`, `variant`, `getAriaValueText` and `className`, plus primitive props from `WaveformPrimitive.Root.Props`. `aria-label`, `aria-labelledby`, and `aria-describedby` are forwarded to the waveform's input.
 
 ### Value and state
 
-| Prop              | Type                  | Default    | Description                                                             |
-| ----------------- | --------------------- | ---------- | ------------------------------------------------------------------------- |
-| `values`          | `number[]`            | -          | Raw `0–1` amplitudes — the component lays out bars for you. Required unless `bars` is passed. |
-| `bars`            | `WaveformBar[]`       | -          | Precomputed bar geometry, for server-side peaks or custom layouts. Required unless `values` is passed. |
-| `value`           | `number`              | -          | Controlled seek position.                                               |
-| `defaultValue`    | `number`              | -          | Uncontrolled initial seek position.                                     |
-| `min`             | `number`              | `0`        | Lower bound of the seek value.                                          |
-| `max`             | `number`              | `1`        | Upper bound — pass e.g. a track's duration in seconds.                  |
-| `step`            | `number`              | `0.001`    | Keyboard/quantize step.                                                 |
-| `disabled`        | `boolean`             | `false`    | Disables pointer and keyboard interaction.                              |
-| `onValueChange`   | `(value: number) => void` | -      | Fires continuously while dragging or on click.                          |
-| `onValueCommit`   | `(value: number) => void` | -      | Fires once when a drag ends (or immediately for a click/keyboard step). |
-| `aria-label`      | `string`              | -          | Accessible name (falls back to a visually-hidden "Waveform" label).     |
-| `aria-labelledby` | `string`              | -          | ID of a labeling element.                                               |
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `values` | `ArrayLike<number>` | - | Raw `0–1` amplitudes, at any resolution. |
+| `value` | `number` | - | Controlled position, from `0` to `duration`. |
+| `defaultValue` | `number` | `0` | Uncontrolled starting position. |
+| `source` | `WaveformSource` | - | A live position followed outside React; takes precedence over `value`. |
+| `duration` | `number` | `1` | Length of the audio, in the unit `value` is in. |
+| `step` | `number` | `duration / 100` | Arrow key step. |
+| `largeStep` | `number` | `duration / 10` | Step for `PageUp` / `PageDown` and `Shift` + arrows. |
+| `disabled` | `boolean` | `false` | Disables pointer and keyboard interaction. |
+| `onValueChange` | `(value: number, eventDetails) => void` | - | Fires while seeking. `eventDetails.reason` is `"press"`, `"drag"`, `"keyboard"`, or `"input-change"`; call `eventDetails.cancel()` to reject it. |
+| `onValueCommitted` | `(value: number, eventDetails) => void` | - | Fires when a seek that moved the position ends. |
+| `getAriaValueText` | `(value: number, duration: number) => string` | played share | How the position is announced, e.g. `"0:12 of 1:42"`. |
 
 ### Layout and display
 
-| Prop        | Type                       | Default             | Description                                              |
-| ----------- | -------------------------- | -------------------- | ---------------------------------------------------------- |
-| `variant`   | `"default" \| "playhead"`  | `"default"`          | `playhead` adds a playhead line and a real handle.        |
-| `viewBox`   | `string`                   | `"0 0 800 100"`      | Its width/height are used to lay out `values` into bars, and must match what `bars` was generated against if you pass that instead. |
-| `className` | `string`                   | -                     | Additional CSS classes.                                   |
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `variant` | `"default" \| "playhead"` | `"default"` | `playhead` adds a playhead line and a handle. |
+| `className` | `string` | - | Classes for the waveform surface. |
 
-Additional valid HTML attributes passed to `Waveform.Root` are forwarded.
+### Primitive parts
+
+`@audio-ui/react/waveform` exposes `Waveform.Root`, `Waveform.Control` (the seekable surface, holds the input), `Waveform.Canvas` (`barWidth`, `barGap`, `barRadius`, `variant: "mirror" | "bars"`), `Waveform.Playhead`, `Waveform.Thumb` and `Waveform.Hover` (shown at the hovered position; its children receive that position, to print a time). Every part accepts a `render` prop and `className` / `style` as functions of state, and exposes `data-disabled` / `data-dragging`.
 
 ## Examples
 

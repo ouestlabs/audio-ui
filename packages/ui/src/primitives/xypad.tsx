@@ -16,21 +16,10 @@ import {
 } from "./internal/event-details";
 import { createPairFormatter } from "./internal/format-pair";
 import { type PartProps, resolveStyling } from "./internal/part";
+import { VISUALLY_HIDDEN } from "./internal/visually-hidden";
 
 /** Shift + arrows and Page Up/Down move this many steps at once. */
 const LARGE_STEP_MULTIPLIER = 10;
-
-const VISUALLY_HIDDEN: React.CSSProperties = {
-  border: 0,
-  clipPath: "inset(50%)",
-  height: 1,
-  margin: -1,
-  overflow: "hidden",
-  padding: 0,
-  position: "absolute",
-  whiteSpace: "nowrap",
-  width: 1,
-};
 
 /** Only `disabled` and `dragging` become data attributes; the numbers stay in `state`. */
 const STATE_ATTRIBUTES_MAPPING = {

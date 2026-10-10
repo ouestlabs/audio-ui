@@ -19,6 +19,7 @@ import {
   type CommitEventDetails as ExtraCommitEventDetails,
 } from "./internal/event-details";
 import { type PartProps, resolveStyling } from "./internal/part";
+import { VISUALLY_HIDDEN } from "./internal/visually-hidden";
 
 /** Center of the 48×48 viewBox the arcs are drawn in. */
 const VIEWBOX_CENTER = 24;
@@ -40,18 +41,6 @@ const CENTER_DEAD_ZONE_MIN_PX = 2;
 const TAP_MAX_MOVE_PX = 12;
 const DOUBLE_TAP_MAX_MS = 320;
 const WHEEL_DELTA_EPSILON = 0.1;
-
-const VISUALLY_HIDDEN: React.CSSProperties = {
-  border: 0,
-  clipPath: "inset(50%)",
-  height: 1,
-  margin: -1,
-  overflow: "hidden",
-  padding: 0,
-  position: "absolute",
-  whiteSpace: "nowrap",
-  width: 1,
-};
 
 /** Only `disabled` and `dragging` become data attributes; the numbers stay in `state`. */
 const STATE_ATTRIBUTES_MAPPING = {
