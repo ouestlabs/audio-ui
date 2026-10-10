@@ -18,12 +18,15 @@ const meterVariants = cva("", {
 });
 
 interface MeterProps
-  extends MeterPrimitive.RootProps,
+  extends MeterPrimitive.Root.Props,
     VariantProps<typeof meterVariants> {
   peakMarks?: "visible" | "hidden";
 }
 
+const decibels = (formattedValue: string) => `${formattedValue} dB`;
+
 export function Meter({
+  "aria-label": ariaLabel,
   className,
   size,
   peakMarks = "visible",
@@ -31,6 +34,7 @@ export function Meter({
 }: MeterProps) {
   return (
     <MeterPrimitive.Root
+      aria-label={ariaLabel}
       className={cn(
         "cn-meter flex w-full select-none",
         "gap-1 data-[orientation=horizontal]:flex-col",
@@ -41,13 +45,19 @@ export function Meter({
       {...props}
     >
       <MeterPrimitive.Channels>
-        {(_value, index) => (
+        {(index, channelCount) => (
           <MeterPrimitive.Channel
+            aria-label={
+              ariaLabel && channelCount > 1
+                ? `${ariaLabel} ${index + 1}`
+                : ariaLabel
+            }
             className="cn-meter-channel relative flex-1 overflow-hidden"
+            getAriaValueText={decibels}
             index={index}
             key={`meter-channel-${index}`}
           >
-            <MeterPrimitive.Fill className="cn-meter-fill absolute inset-0" />
+            <MeterPrimitive.Indicator className="cn-meter-fill absolute inset-0" />
             {peakMarks === "visible" ? (
               <MeterPrimitive.Peak className="cn-meter-peak absolute data-[orientation=horizontal]:top-0 data-[orientation=horizontal]:bottom-0 data-[orientation=horizontal]:w-0.5 data-[orientation=vertical]:right-0 data-[orientation=vertical]:left-0 data-[orientation=vertical]:h-0.5" />
             ) : null}

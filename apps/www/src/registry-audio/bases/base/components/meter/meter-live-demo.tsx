@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { Meter } from "@/registry-audio/bases/base/audio/elements/meter";
 
 const MIN_DB = -60;
@@ -10,20 +10,26 @@ const PEAK_HOLD_MS = 1200;
 const PEAK_DECAY_DB_PER_SECOND = 18;
 const INITIAL_LEVELS = [-24, -30];
 
-/** Random-walk stand-in for real levels — swap for `useAudioLevels` fed by an AnalyserNode. */
+interface LevelsFrame {
+  levels: readonly number[];
+  peaks: readonly number[];
+}
+
 function nextLevel(current: number, elapsedMs: number) {
   const next =
     current + (Math.random() - 0.5) * WANDER_DB_PER_SECOND * (elapsedMs / 1000);
   return Math.min(MAX_DB, Math.max(MIN_DB, next));
 }
 
-export default function MeterLiveDemo() {
-  const [levels, setLevels] = useState(INITIAL_LEVELS);
-  const [peaks, setPeaks] = useState(INITIAL_LEVELS);
+/** Random-walk stand-in for real levels, in the same shape `useAudioLevels` returns for an AnalyserNode: a stable source the Meter paints from, so each frame costs no React render. */
+function useRandomLevels() {
+  const frameRef = useRef<LevelsFrame>({
+    levels: INITIAL_LEVELS,
+    peaks: INITIAL_LEVELS,
+  });
+  const listenersRef = useRef(new Set<() => void>());
 
   useEffect(() => {
-    let currentLevels = INITIAL_LEVELS;
-    let currentPeaks = INITIAL_LEVELS;
     const peakHoldUntil = [0, 0];
     let lastFrameTime = performance.now();
     let frameId: number;
@@ -31,11 +37,13 @@ export default function MeterLiveDemo() {
     const tick = (now: number) => {
       const elapsedMs = now - lastFrameTime;
       lastFrameTime = now;
+      const previous = frameRef.current;
 
-      currentLevels = currentLevels.map((level) => nextLevel(level, elapsedMs));
-
-      currentPeaks = currentLevels.map((level, index) => {
-        const previousPeak = currentPeaks[index] ?? MIN_DB;
+      const levels = previous.levels.map((level) =>
+        nextLevel(level, elapsedMs)
+      );
+      const peaks = levels.map((level, index) => {
+        const previousPeak = previous.peaks[index] ?? MIN_DB;
         if (level >= previousPeak) {
           peakHoldUntil[index] = now + PEAK_HOLD_MS;
           return level;
@@ -48,8 +56,10 @@ export default function MeterLiveDemo() {
         return Math.max(level, decayed);
       });
 
-      setLevels(currentLevels);
-      setPeaks(currentPeaks);
+      frameRef.current = { levels, peaks };
+      for (const listener of listenersRef.current) {
+        listener();
+      }
       frameId = requestAnimationFrame(tick);
     };
 
@@ -57,5 +67,21 @@ export default function MeterLiveDemo() {
     return () => cancelAnimationFrame(frameId);
   }, []);
 
-  return <Meter aria-label="Stereo output" peak={peaks} value={levels} />;
+  return useMemo(
+    () => ({
+      getSnapshot: () => frameRef.current,
+      subscribe: (listener: () => void) => {
+        listenersRef.current.add(listener);
+        return () => {
+          listenersRef.current.delete(listener);
+        };
+      },
+    }),
+    []
+  );
+}
+
+export default function MeterLiveDemo() {
+  const source = useRandomLevels();
+  return <Meter aria-label="Stereo output" source={source} />;
 }

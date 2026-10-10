@@ -277,11 +277,11 @@
   }
 
   .cn-meter-channel {
-    @apply rounded-[min(var(--radius-sm),6px)] bg-input/70 transition-shadow duration-150 ease-out data-[clip=true]:ring-2 data-[clip=true]:ring-destructive;
+    @apply rounded-[min(var(--radius-sm),6px)] bg-input/70 transition-shadow duration-150 ease-out data-clipping:ring-2 data-clipping:ring-destructive;
   }
 
   .cn-meter-fill {
-    @apply bg-success data-[clip=true]:bg-destructive;
+    @apply bg-success data-clipping:bg-destructive;
   }
 
   .cn-meter-peak {

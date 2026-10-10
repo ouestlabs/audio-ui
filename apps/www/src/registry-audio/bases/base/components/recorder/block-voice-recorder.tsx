@@ -146,7 +146,7 @@ export default function BlockVoiceRecorder() {
     () => [isRecording ? micAnalyser : playbackAnalyser],
     [isRecording, micAnalyser, playbackAnalyser]
   );
-  const { levels, peaks } = useAudioLevels(analysers);
+  const levelSource = useAudioLevels(analysers);
 
   // The finished take as a one-track queue, memoized on the object URL so
   // re-renders never reload it mid-playback. The player session is ephemeral
@@ -163,11 +163,7 @@ export default function BlockVoiceRecorder() {
     <div className="cn-audio-panel flex w-full min-w-0 flex-col gap-4 border bg-card p-4">
       {isRecording || recording ? (
         <div className="flex flex-col gap-3">
-          <Meter
-            aria-label="Microphone input level"
-            peak={peaks}
-            value={levels}
-          />
+          <Meter aria-label="Microphone input level" source={levelSource} />
           <StatusLine
             durationMs={durationMs}
             isPaused={isPaused}
