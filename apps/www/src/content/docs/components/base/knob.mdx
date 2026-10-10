@@ -95,9 +95,20 @@ Pass **`defaultValue`** even when controlled if you use **double-tap reset**; it
 | **Circular drag (default)** | The value follows the rotation around the center, from the value at pointer down. The dial's 288° sweep spans `min…max`. |
 | **Vertical drag** | `dragMode="vertical"`: drag up to increase, like a fader; 150px of travel spans `min…max`. |
 | **Revolution drag** | `dragMode="revolution"`: one full 360° turn spans `min…max`. |
-| **Double-tap / double-click** | Two quick taps (each moving ≤ ~12px, within ~320ms) reset to `defaultValue`, or to the midpoint of `min…max` without one. Reports `eventDetails.reason === "reset"`. |
+| **Fine drag** | Hold `Shift` while dragging, in any mode, to turn four times slower. Only the stretch moved with `Shift` held is slowed, and small moves add up rather than rounding away. |
+| **Double-tap / double-click** | Two quick taps (each moving ≤ ~12px, within ~320ms) reset to `defaultValue`, or to the middle of the dial's travel without one. Reports `eventDetails.reason === "reset"`. |
 
 Values always **clamp** to `min…max` (no wrap). While dragging, the knob follows the pointer even if a controlled `value` updates late.
+
+### Scale
+
+`scale` sets how the value maps onto the dial's travel. `"linear"` (the default) suits levels and times; `"log"` suits frequency, resonance and ratios, which ears hear in proportions: on a 20 Hz–20 kHz cutoff, every decade gets the same share of the dial, and 632 Hz sits at the middle. A log scale needs a positive `min`. For anything else, pass your own `{ toPosition, toValue }`, mapping a value to 0…1 along the travel and back.
+
+```tsx
+<Knob aria-label="Cutoff" max={20_000} min={20} scale="log" />
+```
+
+Away from linear, the keys and the wheel move a share of the travel (1%, or 10% with `Shift` and the Page keys) rather than a `step`, and always by at least one `step`.
 
 ### Keyboard
 
@@ -123,13 +134,14 @@ Wheel input over the knob steps the value by `step` and reports `eventDetails.re
 | Prop | Type | Default | Description |
 | ---- | ---- | ------- | ----------- |
 | `value` | `number` | - | Controlled value. |
-| `defaultValue` | `number` | midpoint | Uncontrolled starting value, and the double-tap reset target. |
+| `defaultValue` | `number` | middle of the travel | Uncontrolled starting value, and the double-tap reset target. |
 | `min` | `number` | `0` | Minimum. |
 | `max` | `number` | `100` | Maximum. |
 | `step` | `number` | `1` | Quantization step (drag, wheel, keyboard, reset). |
 | `largeStep` | `number` | `10` | Step for `PageUp` / `PageDown` and `Shift` + arrows. |
 | `anchor` | `number` | `min` | Where the highlighted arc starts, e.g. `0` on a bipolar pan knob. |
 | `dragMode` | `"circular" \| "vertical" \| "revolution"` | `"circular"` | How pointer travel turns into value. |
+| `scale` | `"linear" \| "log" \| { toPosition, toValue }` | `"linear"` | How the value maps onto the dial's travel. |
 | `disabled` | `boolean` | `false` | Disables pointer, wheel, and keyboard. |
 | `format` | `Intl.NumberFormatOptions` | - | Formats the value text announced to screen readers (and `Knob.Value` on the primitive). |
 | `locale` | `Intl.LocalesArgument` | runtime | Locale used by `format`. |
@@ -187,7 +199,7 @@ Each preview shows one mapping in isolation (live value under the control).
 
 <ComponentPreview styleName="base-nova" name="knob-change-vs-commit-demo" />
 
-### Filter cutoff
+### Filter cutoff, on a log scale
 
 <ComponentPreview styleName="base-nova" name="knob-filter-control-demo" />
 

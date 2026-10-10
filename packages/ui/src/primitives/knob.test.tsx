@@ -271,3 +271,118 @@ describe("Knob double-tap reset", () => {
     expect(input.value).toBe("10010");
   });
 });
+
+describe("Knob fine drag", () => {
+  test("Shift turns the knob four times slower than the pointer moves", () => {
+    const { control, onValueChange } = renderKnob({ dragMode: "vertical" });
+    fireEvent.pointerDown(control, { clientX: 50, clientY: 90, pointerId: 1 });
+    fireEvent.pointerMove(control, {
+      clientX: 50,
+      clientY: 30,
+      pointerId: 1,
+      shiftKey: true,
+    });
+    // 60px is 40 at full speed, 10 when fine
+    expect(lastCall(onValueChange)[0]).toBe(60);
+  });
+
+  test("only the stretch moved with Shift held is fine", () => {
+    const { control, onValueChange } = renderKnob({ dragMode: "vertical" });
+    fireEvent.pointerDown(control, { clientX: 50, clientY: 90, pointerId: 1 });
+    fireEvent.pointerMove(control, { clientX: 50, clientY: 75, pointerId: 1 });
+    fireEvent.pointerMove(control, {
+      clientX: 50,
+      clientY: 15,
+      pointerId: 1,
+      shiftKey: true,
+    });
+    // 15px at full speed is 10, then 60px fine is 10 more
+    expect(lastCall(onValueChange)[0]).toBe(70);
+  });
+
+  test("small fine moves add up rather than rounding away", () => {
+    const { control, onValueChange } = renderKnob({ dragMode: "vertical" });
+    fireEvent.pointerDown(control, { clientX: 50, clientY: 90, pointerId: 1 });
+    for (let y = 89; y >= 84; y -= 1) {
+      fireEvent.pointerMove(control, {
+        clientX: 50,
+        clientY: y,
+        pointerId: 1,
+        shiftKey: true,
+      });
+    }
+    // Six 1px moves, each a sixth of a step when fine: one step in all
+    expect(lastCall(onValueChange)[0]).toBe(51);
+  });
+});
+
+describe("Knob scale", () => {
+  const frequency = { max: 20_000, min: 20, scale: "log" as const };
+
+  test("log puts the geometric middle at the middle of the dial", () => {
+    const { thumb } = renderKnob({ ...frequency, value: 632.4555 });
+    // 216° at min plus half of the 288° sweep
+    expect(Number.parseFloat(thumb.style.rotate)).toBeCloseTo(360, 1);
+  });
+
+  test("without a defaultValue, starts and resets at the middle of the travel", () => {
+    const { input } = renderKnob(frequency);
+    expect(input.value).toBe("632");
+  });
+
+  test("a drag moves along the travel, not the values", () => {
+    const { control, onValueChange } = renderKnob({
+      ...frequency,
+      defaultValue: 20,
+      dragMode: "vertical",
+    });
+    fireEvent.pointerDown(control, { clientX: 50, clientY: 90, pointerId: 1 });
+    fireEvent.pointerMove(control, { clientX: 50, clientY: 40, pointerId: 1 });
+    // A third of the travel: from 20 Hz up a decade
+    expect(lastCall(onValueChange)[0]).toBe(200);
+  });
+
+  test("away from linear, keys move a share of the travel", () => {
+    const { input, onValueChange } = renderKnob({
+      ...frequency,
+      defaultValue: 1000,
+    });
+    fireEvent.keyDown(input, { key: "ArrowUp" });
+    // 1% of three decades is a factor of 10^0.03
+    expect(lastCall(onValueChange)[0]).toBe(Math.round(1000 * 10 ** 0.03));
+    fireEvent.keyDown(input, { key: "PageDown" });
+    expect(lastCall(onValueChange)[0]).toBe(
+      Math.round(Math.round(1000 * 10 ** 0.03) * 10 ** -0.3)
+    );
+  });
+
+  test("a key always moves at least one step", () => {
+    const { input, onValueChange } = renderKnob({
+      ...frequency,
+      defaultValue: 20,
+      step: 5,
+    });
+    fireEvent.keyDown(input, { key: "ArrowUp" });
+    expect(lastCall(onValueChange)[0]).toBe(25);
+  });
+
+  test("the indicator grows from an anchor placed on the scale", () => {
+    const { indicator } = renderKnob({
+      ...frequency,
+      anchor: 632.4555,
+      value: 632.4555,
+    });
+    expect(indicator.querySelector("path")).toBeNull();
+  });
+
+  test("takes a scale of your own", () => {
+    const squared = {
+      toPosition: (value: number, min: number, max: number) =>
+        Math.sqrt((value - min) / (max - min)),
+      toValue: (position: number, min: number, max: number) =>
+        min + position ** 2 * (max - min),
+    };
+    const { thumb } = renderKnob({ scale: squared, value: 25 });
+    expect(thumb.style.rotate).toBe("360deg");
+  });
+});

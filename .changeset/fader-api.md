@@ -10,3 +10,4 @@ Rework the `Fader` API. Requires the `@base-ui/react` ^1.9.0 peer dependency. **
 - The accessible name goes on `Thumb` (`aria-label` / `aria-labelledby`), which now renders a native `<input type="range">`. Disabled state is the presence attribute `data-disabled`.
 
 New: the `render` prop and state-aware `className`/`style` on every part, handler merging, `name`/`form` integration, `format`/`locale` with a formatted `Fader.Value` and `aria-valuetext`, `largeStep` (Shift+Arrow), RTL. Kept: vertical -60…+6 defaults, mouse-wheel stepping, and `touch-action: none` on `Control`. While dragged, the thumb always follows the pointer even if a controlled `value` lags behind (reject values with `eventDetails.cancel()`).
+- New `anchor`: the value `Indicator` fills from, such as `0` on a -1…1 pan, on whichever side of it the value is.

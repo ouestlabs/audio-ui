@@ -127,6 +127,7 @@ Wheel input over the fader nudges the value by `step` and reports `eventDetails.
 | `min` | `number` | `-60` | Minimum value. |
 | `max` | `number` | `6` | Maximum value. |
 | `step` | `number` | `1` | Quantization step for drag, wheel, and keyboard. |
+| `anchor` | `number` | `min` | Value the fill grows from, such as `0` on a -1…1 pan: the fill runs from the anchor to the value, on whichever side it is. |
 | `disabled` | `boolean` | `false` | Disables interaction. |
 | `onValueChange` | `(value: number, eventDetails) => void` | - | Live updates while adjusting. `eventDetails.reason` is `"drag"`, `"track-press"`, `"keyboard"`, `"wheel"`, `"input-change"`, or `"none"`; call `eventDetails.cancel()` to reject the change. |
 | `onValueCommitted` | `(value: number, eventDetails) => void` | - | Fires when an interaction ends with a new value. |
@@ -153,6 +154,12 @@ Additional valid HTML attributes passed to `Fader.Root` are forwarded.
 ### Horizontal
 
 <ComponentPreview styleName="base-nova" name="fader-horizontal-demo" />
+
+### Pan, filled from the center
+
+`anchor={0}` makes the fill grow from the center of a -1…1 range, left or right of it.
+
+<ComponentPreview styleName="base-nova" name="fader-pan-demo" />
 
 ### Size variants
 

@@ -18,6 +18,11 @@ import {
   type ChangeEventDetails as ExtraChangeEventDetails,
   type CommitEventDetails as ExtraCommitEventDetails,
 } from "./internal/event-details";
+import {
+  type ParameterScale,
+  type ParameterScaleProp,
+  resolveScale,
+} from "./internal/parameter-scale";
 import { type PartProps, resolveStyling } from "./internal/part";
 import { VISUALLY_HIDDEN } from "./internal/visually-hidden";
 
@@ -41,6 +46,11 @@ const CENTER_DEAD_ZONE_MIN_PX = 2;
 const TAP_MAX_MOVE_PX = 12;
 const DOUBLE_TAP_MAX_MS = 320;
 const WHEEL_DELTA_EPSILON = 0.1;
+/** Holding Shift turns the knob this much slower than the pointer moves. */
+const FINE_DRAG = 0.25;
+/** With a scale that isn't linear, a key or wheel notch moves this share of the travel. */
+const POSITION_STEP = 0.01;
+const LARGE_POSITION_STEP = 0.1;
 
 /** Only `disabled` and `dragging` become data attributes; the numbers stay in `state`. */
 const STATE_ATTRIBUTES_MAPPING = {
@@ -49,9 +59,35 @@ const STATE_ATTRIBUTES_MAPPING = {
   value: () => null,
 };
 
-function toPercent(value: number, min: number, max: number): number {
-  return clamp((value - min) / (max - min || 1), 0, 1);
+/**
+ * The value `direction` steps away from `current`: by `step` (or `largeStep`)
+ * on a linear scale, by a share of the travel on any other, and always by at
+ * least one `step`.
+ */
+function steppedValue(
+  current: number,
+  direction: -1 | 1,
+  large: boolean,
+  options: {
+    largeStep: number;
+    max: number;
+    min: number;
+    scale: ParameterScale;
+    step: number;
+  }
+): number {
+  const { largeStep, max, min, scale, step } = options;
+  if (scale === LINEAR) {
+    return current + direction * (large ? largeStep : step);
+  }
+  const position =
+    scale.toPosition(current, min, max) +
+    direction * (large ? LARGE_POSITION_STEP : POSITION_STEP);
+  const next = scale.toValue(position, min, max);
+  return Math.abs(next - current) < step ? current + direction * step : next;
 }
+
+const LINEAR = resolveScale("linear");
 
 /** SVG arc along the dial between two normalized positions (0…1). */
 function arcPath(radius: number, from: number, to: number): string {
@@ -98,6 +134,8 @@ interface KnobContextValue {
     /** Value position, 0…1 along the sweep. */
     percent: number;
     resetValue: number;
+    /** How the value maps onto the dial's travel. */
+    scale: ParameterScale;
     setLabelId: (id: string | undefined) => void;
     step: number;
     /** Latest displayed value, readable from event handlers. */
@@ -141,13 +179,16 @@ export function Root(componentProps: Root.Props) {
     onValueCommitted,
     ref,
     render,
+    scale: scaleProp = "linear",
     step = 1,
     style,
     value: valueProp,
     ...elementProps
   } = componentProps;
+  const scale = resolveScale(scaleProp);
 
-  const resetValue = defaultValue ?? min + (max - min) / 2;
+  const resetValue =
+    defaultValue ?? roundToStep(scale.toValue(0.5, min, max), step, min);
   const isControlled = valueProp !== undefined;
   const [uncontrolledValue, setUncontrolledValue] = React.useState(resetValue);
   const value = clampFinite(
@@ -208,7 +249,13 @@ export function Root(componentProps: Root.Props) {
       if (Math.abs(delta.y) < WHEEL_DELTA_EPSILON) {
         return;
       }
-      const next = valueRef.current + (delta.y < 0 ? step : -step);
+      const next = steppedValue(valueRef.current, delta.y < 0 ? 1 : -1, false, {
+        largeStep,
+        max,
+        min,
+        scale,
+        step,
+      });
       if (change(next, createChangeEventDetails("wheel", event))) {
         commit(valueRef.current, { event, reason: "wheel" });
       }
@@ -228,8 +275,9 @@ export function Root(componentProps: Root.Props) {
     [disabled, dragging, displayedValue, max, min]
   );
 
-  const percent = toPercent(displayedValue, min, max);
-  const anchorPercent = anchor === undefined ? 0 : toPercent(anchor, min, max);
+  const percent = scale.toPosition(displayedValue, min, max);
+  const anchorPercent =
+    anchor === undefined ? 0 : scale.toPosition(anchor, min, max);
 
   const context = React.useMemo<KnobContextValue>(
     () => ({
@@ -247,6 +295,7 @@ export function Root(componentProps: Root.Props) {
         name,
         percent,
         resetValue,
+        scale,
         setLabelId,
         step,
         valueRef,
@@ -267,6 +316,7 @@ export function Root(componentProps: Root.Props) {
       name,
       percent,
       resetValue,
+      scale,
       setDragging,
       state,
       step,
@@ -322,7 +372,7 @@ export namespace Root {
   export interface Props extends Omit<PartProps<"div", State>, "defaultValue"> {
     /** Value the indicator arc grows from (e.g. `0` on a -1…1 pan knob). Defaults to `min`. */
     anchor?: number;
-    /** Uncontrolled starting value, and the double-tap reset target. Defaults to the midpoint of `min…max`. */
+    /** Uncontrolled starting value, and the double-tap reset target. Defaults to the middle of the dial's travel. */
     defaultValue?: number;
     disabled?: boolean;
     /** @default "circular" */
@@ -347,23 +397,39 @@ export namespace Root {
       value: number,
       eventDetails: CommitEventDetails
     ) => void;
+    /**
+     * How the value maps onto the dial's travel: `linear`, `log` for
+     * frequency, Q or ratios (needs a positive `min`), or your own
+     * `{ toPosition, toValue }`. Away from linear, the keys and the wheel move
+     * a share of the travel (1%, or 10% with Shift and Page keys) rather
+     * than a `step`.
+     * @default "linear"
+     */
+    scale?: Scale;
     /** @default 1 */
     step?: number;
     value?: number;
   }
+
+  /** Maps a value onto the dial's travel, 0…1, and back. */
+  export type Scale = ParameterScaleProp;
 }
 
 interface DragGesture {
-  /** Rotation accumulated since the press, in radians. */
-  accumulatedAngle: number;
   /** Whether the gesture changed the value at least once; if so its end commits, even back on the start value. */
   changed: boolean;
   lastAngle: number;
+  lastY: number;
   /** Farthest distance from the press point, in px. */
   maxDistance: number;
   pointerId: number;
+  /**
+   * Where the drag has taken the dial along its travel, 0…1 and beyond:
+   * accumulated move by move, so Shift can make any stretch of it finer,
+   * and kept apart from the rounded value so small moves add up.
+   */
+  position: number;
   rect: DOMRect;
-  startValue: number;
   startX: number;
   startY: number;
 }
@@ -383,36 +449,36 @@ export function Control(componentProps: Control.Props) {
     gesture: DragGesture,
     event: React.PointerEvent
   ): number => {
-    const range = state.max - state.min;
+    const speed = event.shiftKey ? FINE_DRAG : 1;
     if (meta.dragMode === "vertical") {
-      return (
-        gesture.startValue +
-        ((gesture.startY - event.clientY) * range) / VERTICAL_DRAG_RANGE_PX
+      gesture.position +=
+        ((gesture.lastY - event.clientY) / VERTICAL_DRAG_RANGE_PX) * speed;
+    } else {
+      const { rect } = gesture;
+      const angle = pointerAngle(event.clientX, event.clientY, rect);
+      const distance = Math.hypot(
+        event.clientX - (rect.left + rect.width / 2),
+        event.clientY - (rect.top + rect.height / 2)
       );
-    }
-    const { rect } = gesture;
-    const angle = pointerAngle(event.clientX, event.clientY, rect);
-    const distance = Math.hypot(
-      event.clientX - (rect.left + rect.width / 2),
-      event.clientY - (rect.top + rect.height / 2)
-    );
-    const deadZone = Math.max(
-      CENTER_DEAD_ZONE_MIN_PX,
-      Math.min(rect.width, rect.height) * CENTER_DEAD_ZONE_REL
-    );
-    if (distance > deadZone) {
-      let delta = angle - gesture.lastAngle;
-      if (delta > Math.PI) {
-        delta -= TAU;
-      } else if (delta < -Math.PI) {
-        delta += TAU;
+      const deadZone = Math.max(
+        CENTER_DEAD_ZONE_MIN_PX,
+        Math.min(rect.width, rect.height) * CENTER_DEAD_ZONE_REL
+      );
+      if (distance > deadZone) {
+        let delta = angle - gesture.lastAngle;
+        if (delta > Math.PI) {
+          delta -= TAU;
+        } else if (delta < -Math.PI) {
+          delta += TAU;
+        }
+        const fullTurn =
+          meta.dragMode === "revolution" ? TAU : degToRad(SWEEP_ANGLE);
+        gesture.position += (delta / fullTurn) * speed;
       }
-      gesture.accumulatedAngle += delta;
+      gesture.lastAngle = angle;
     }
-    gesture.lastAngle = angle;
-    const fullTurn =
-      meta.dragMode === "revolution" ? TAU : degToRad(SWEEP_ANGLE);
-    return gesture.startValue + (gesture.accumulatedAngle / fullTurn) * range;
+    gesture.lastY = event.clientY;
+    return meta.scale.toValue(gesture.position, state.min, state.max);
   };
 
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
@@ -425,13 +491,17 @@ export function Control(componentProps: Control.Props) {
     meta.inputRef.current?.focus({ preventScroll: true });
     const rect = control.getBoundingClientRect();
     gestureRef.current = {
-      accumulatedAngle: 0,
       changed: false,
       lastAngle: pointerAngle(event.clientX, event.clientY, rect),
+      lastY: event.clientY,
       maxDistance: 0,
       pointerId: event.pointerId,
+      position: meta.scale.toPosition(
+        meta.valueRef.current,
+        state.min,
+        state.max
+      ),
       rect,
-      startValue: meta.valueRef.current,
       startX: event.clientX,
       startY: event.clientY,
     };
@@ -646,16 +716,22 @@ export function Thumb(componentProps: Thumb.Props) {
         return;
       }
       const { current } = meta.valueRef;
-      const arrowStep = event.shiftKey ? meta.largeStep : meta.step;
+      const options = {
+        largeStep: meta.largeStep,
+        max: state.max,
+        min: state.min,
+        scale: meta.scale,
+        step: meta.step,
+      };
       const targets: Record<string, number> = {
-        ArrowDown: current - arrowStep,
-        ArrowLeft: current - arrowStep,
-        ArrowRight: current + arrowStep,
-        ArrowUp: current + arrowStep,
+        ArrowDown: steppedValue(current, -1, event.shiftKey, options),
+        ArrowLeft: steppedValue(current, -1, event.shiftKey, options),
+        ArrowRight: steppedValue(current, 1, event.shiftKey, options),
+        ArrowUp: steppedValue(current, 1, event.shiftKey, options),
         End: state.max,
         Home: state.min,
-        PageDown: current - meta.largeStep,
-        PageUp: current + meta.largeStep,
+        PageDown: steppedValue(current, -1, true, options),
+        PageUp: steppedValue(current, 1, true, options),
       };
       const next = targets[event.key];
       if (next === undefined) {

@@ -541,6 +541,20 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["fader"],
+    description:
+      "Pan fader filling from the center: anchored at 0 on a -1…1 range",
+    files: [
+      {
+        path: "components/fader/fader-pan-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "fader-pan-demo",
+    registryDependencies: ["@audio/fader"],
+    type: "registry:example",
+  },
+  {
+    categories: ["fader"],
     description: "Fader size variants (sm, default, lg)",
     files: [
       {
@@ -619,7 +633,8 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["knob"],
-    description: "Knob component example with filter control",
+    description:
+      "Filter cutoff knob on a logarithmic scale, 20 Hz to 20 kHz, every decade the same share of the dial",
     files: [
       {
         path: "components/knob/knob-filter-control-demo.tsx",

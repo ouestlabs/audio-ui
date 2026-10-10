@@ -13,7 +13,7 @@
       "name": "envelope"
     },
     {
-      "count": 11,
+      "count": 12,
       "description": "Fader components for level, gain, and mix controls.",
       "label": "Fader",
       "name": "fader"
@@ -109,5 +109,5 @@
       "name": "xypad"
     }
   ],
-  "totalComponents": 102
+  "totalComponents": 103
 }

@@ -201,6 +201,11 @@
   },
   {
     "categories": ["fader"],
+    "name": "fader-pan-demo",
+    "title": "fader-pan-demo"
+  },
+  {
+    "categories": ["fader"],
     "name": "fader-size-variants-demo",
     "title": "fader-size-variants-demo"
   },

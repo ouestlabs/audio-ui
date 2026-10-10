@@ -23,7 +23,7 @@ function renderFader(
     >
       <Fader.Control data-testid="control">
         <Fader.Track>
-          <Fader.Indicator />
+          <Fader.Indicator data-testid="indicator" />
         </Fader.Track>
         <Fader.Thumb aria-label="Volume" data-testid="thumb" {...thumbProps} />
       </Fader.Control>
@@ -31,6 +31,7 @@ function renderFader(
   );
   return {
     control: view.getByTestId("control"),
+    indicator: view.getByTestId("indicator"),
     input: view.getByRole("slider") as HTMLInputElement,
     onValueChange,
     onValueCommitted,
@@ -207,5 +208,73 @@ describe("Fader.Control", () => {
     expect(control.style.touchAction).toBe("none");
     expect(control.style.opacity).toBe("0.5");
     expect(ref.current).toBe(control as HTMLDivElement);
+  });
+});
+
+describe("Fader anchor", () => {
+  const pan = {
+    anchor: 0,
+    max: 1,
+    min: -1,
+    orientation: "horizontal" as const,
+    step: 0.01,
+  };
+
+  test("fills from the anchor towards a value above it", () => {
+    const { indicator } = renderFader({ ...pan, value: 0.5 });
+    expect(indicator.style.insetInlineStart).toBe("50%");
+    expect(indicator.style.width).toBe("25%");
+  });
+
+  test("fills from the anchor towards a value below it", () => {
+    const { indicator } = renderFader({ ...pan, value: -0.5 });
+    expect(indicator.style.insetInlineStart).toBe("25%");
+    expect(indicator.style.width).toBe("25%");
+  });
+
+  test("draws nothing on the anchor", () => {
+    expect(renderFader({ ...pan, value: 0 }).indicator.style.width).toBe("0%");
+  });
+
+  test("fills upwards from the anchor when vertical", () => {
+    const { indicator } = renderFader({
+      anchor: 0,
+      max: 6,
+      min: -60,
+      value: 6,
+    });
+    expect(Number.parseFloat(indicator.style.bottom)).toBeCloseTo(
+      (60 / 66) * 100
+    );
+    expect(Number.parseFloat(indicator.style.height)).toBeCloseTo(
+      (6 / 66) * 100
+    );
+  });
+
+  test("keeps the consumer's own render and style", () => {
+    const view = render(
+      <Fader.Root
+        anchor={0}
+        max={1}
+        min={-1}
+        orientation="horizontal"
+        value={0.5}
+      >
+        <Fader.Control>
+          <Fader.Track>
+            <Fader.Indicator
+              data-testid="indicator"
+              render={<span />}
+              style={{ opacity: 0.5 }}
+            />
+          </Fader.Track>
+          <Fader.Thumb aria-label="Pan" />
+        </Fader.Control>
+      </Fader.Root>
+    );
+    const indicator = view.getByTestId("indicator");
+    expect(indicator.tagName).toBe("SPAN");
+    expect(indicator.style.opacity).toBe("0.5");
+    expect(indicator.style.width).toBe("25%");
   });
 });

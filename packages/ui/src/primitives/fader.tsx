@@ -19,6 +19,12 @@ const DEFAULT_MAX = 6;
 const WHEEL_DELTA_EPSILON = 0.1;
 
 interface FaderContextValue {
+  anchor: number | undefined;
+  max: number;
+  min: number;
+  orientation: "horizontal" | "vertical";
+  /** The value as displayed. */
+  value: number;
   wheelRef: (node: Nullable<HTMLElement>) => void;
 }
 
@@ -40,6 +46,7 @@ function useFaderContext(part: string): FaderContextValue {
  * `eventDetails.cancel()` instead. Renders a `<div>` element.
  */
 export function Root({
+  anchor,
   defaultValue,
   disabled = false,
   max = DEFAULT_MAX,
@@ -140,7 +147,17 @@ export function Root({
     },
   });
 
-  const contextValue = React.useMemo(() => ({ wheelRef }), [wheelRef]);
+  const contextValue = React.useMemo<FaderContextValue>(
+    () => ({
+      anchor,
+      max,
+      min,
+      orientation,
+      value: displayedValue,
+      wheelRef,
+    }),
+    [anchor, displayedValue, max, min, orientation, wheelRef]
+  );
 
   return (
     <FaderContext value={contextValue}>
@@ -183,6 +200,8 @@ export namespace Root {
       | "orientation"
       | "value"
     > {
+    /** Value the `Indicator` fills from, such as `0` on a -1…1 pan. Defaults to `min`. */
+    anchor?: number;
     /** Uncontrolled starting value; defaults to the midpoint of `min…max`. */
     defaultValue?: number;
     /** @default 6 */
@@ -256,8 +275,48 @@ export namespace Track {
   export type State = Slider.Track.State;
 }
 
-/** The filled part of the track, up to the value. Renders a `<div>` element. */
-export const { Indicator } = Slider;
+/**
+ * The filled part of the track: from `min` up to the value, or between the
+ * Root's `anchor` and the value, on whichever side of it the value is.
+ * Renders a `<div>` element.
+ */
+export function Indicator({ render, ...props }: Indicator.Props) {
+  const { anchor, max, min, orientation, value } = useFaderContext("Indicator");
+  const renderAnchored = React.useCallback<
+    Exclude<Indicator.Props["render"], React.ReactElement | undefined>
+  >(
+    (renderProps, state) => {
+      const share = (at: number) =>
+        clamp(((at - min) / (max - min || 1)) * 100, 0, 100);
+      const from = share(Math.min(anchor ?? min, value));
+      const to = share(Math.max(anchor ?? min, value));
+      const placed: React.CSSProperties =
+        orientation === "vertical"
+          ? { bottom: `${from}%`, height: `${to - from}%` }
+          : { insetInlineStart: `${from}%`, width: `${to - from}%` };
+      const anchored = {
+        ...renderProps,
+        style: { ...renderProps.style, ...placed },
+      };
+      if (typeof render === "function") {
+        return render(anchored, state);
+      }
+      return render ? (
+        React.cloneElement(render, anchored)
+      ) : (
+        <div {...anchored} />
+      );
+    },
+    [anchor, max, min, orientation, render, value]
+  );
+  return (
+    <Slider.Indicator
+      render={anchor === undefined ? render : renderAnchored}
+      {...props}
+    />
+  );
+}
+
 export namespace Indicator {
   export type Props = Slider.Indicator.Props;
   export type State = Slider.Indicator.State;
