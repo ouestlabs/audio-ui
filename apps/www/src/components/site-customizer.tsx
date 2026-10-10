@@ -110,10 +110,9 @@ export function SiteCustomizer() {
               <Button
                 aria-label="Customize"
                 className={cn(
-                  "fixed right-4 z-40 h-10 gap-2 bg-site-background px-3.5 shadow-lg transition-transform duration-150 ease-out active:scale-[0.97] motion-reduce:transition-none",
+                  "fixed right-4 z-40 h-10 gap-2 px-3.5 shadow-lg transition-transform duration-150 ease-out active:scale-[0.97] motion-reduce:transition-none",
                   lifted ? "bottom-20 md:bottom-4" : "bottom-4"
                 )}
-                variant="outline"
               />
             }
           >
