@@ -10,6 +10,7 @@ import {
 } from "@audio-ui/react";
 import {
   type KeyboardEvent,
+  memo,
   type PointerEvent,
   type ReactNode,
   useCallback,
@@ -485,7 +486,7 @@ function TrackHeader({
 }
 
 /** One clip: move it, trim either edge into its recording, fade it in and out. */
-function ClipView({
+const ClipView = memo(function ArrangedClip({
   clip,
   onChange,
   describe,
@@ -555,7 +556,7 @@ function ClipView({
       <TimelineClipFadeHandle aria-label={`${clip.name} fade out`} edge="out" />
     </TimelineClip>
   );
-}
+});
 
 /**
  * An arrangement: a bar ruler that seeks on the grid, a loop strip, a lane per

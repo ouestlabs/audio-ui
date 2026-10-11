@@ -20,9 +20,10 @@ function ramp(shape: FadeShape, edge: "in" | "out") {
 
 /**
  * Draws a fade over the clip's content, as a DAW does: the ramp as a line from
- * the clip's edge, as long as the fade, with what it attenuates lightly
- * shaded. It is hidden while its fade is empty, and ignores the pointer.
- * Its color is the `color` it is given.
+ * the clip's edge, as long as the fade, with what it attenuates shaded by
+ * `--clip-fade-shade` (the line's own color if it is not set). It spans the
+ * clip's whole height, is hidden while its fade is empty, and ignores the
+ * pointer. The line's color is the `color` it is given.
  * Renders an `<svg>` element.
  */
 export function ClipFade(componentProps: ClipFade.Props) {
@@ -46,8 +47,7 @@ export function ClipFade(componentProps: ClipFade.Props) {
           <>
             <path
               d={`M0 0H1L${[...points].reverse().join("L")}Z`}
-              fill="currentColor"
-              fillOpacity={0.2}
+              style={{ fill: "var(--clip-fade-shade, currentColor)" }}
             />
             <path
               d={`M${points.join("L")}`}
@@ -61,8 +61,11 @@ export function ClipFade(componentProps: ClipFade.Props) {
         focusable: "false",
         preserveAspectRatio: "none",
         style: {
+          // A positioned svg does not stretch between top and bottom: it keeps its
+          // viewBox's ratio unless it is given a height.
           bottom: 0,
           display: length > 0 ? undefined : "none",
+          height: "100%",
           pointerEvents: "none",
           position: "absolute",
           top: 0,

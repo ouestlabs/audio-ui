@@ -493,11 +493,11 @@
   }
 
   .cn-timeline-clip-fade {
-    @apply text-foreground/70;
+    @apply text-foreground/80 [--clip-fade-shade:color-mix(in_oklab,var(--background)_55%,transparent)];
   }
 
   .cn-timeline-clip-fade-handle {
-    @apply rounded-[min(var(--radius-sm),6px)] bg-foreground/70 hover:bg-foreground has-focus-visible:bg-foreground;
+    @apply rounded-[1px] border border-foreground/80 bg-background hover:bg-foreground has-focus-visible:bg-foreground;
   }
 
   .cn-timeline-navigator {

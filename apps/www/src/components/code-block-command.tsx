@@ -56,7 +56,7 @@ export function CodeBlockCommand({
             <TerminalIcon
               aria-hidden="true"
               className="size-4 text-site-muted-foreground"
-              weight="duotone"
+              weight="fill"
             />
             <TabsList>
               {Object.entries(tabs).map(([key]) => (
