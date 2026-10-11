@@ -449,12 +449,12 @@ function Row({
   /** A height set by hand: the row keeps it instead of sharing what is left. */
   height?: number;
   lead?: ReactNode;
-  onResize?: (trackId: string, height: number) => void;
+  onResize?: (trackId: string, height: number | undefined) => void;
   selected?: boolean;
   trackId?: string;
 }) {
   const handleHeight = useCallback(
-    (next: number) => {
+    (next: number | undefined) => {
       if (trackId !== undefined) {
         onResize?.(trackId, next);
       }
@@ -1146,8 +1146,12 @@ export default function BlockTimeline() {
   const anySolo = TRACKS.some((track) => mixOf(track.id).soloed);
   const [heights, setHeights] = useState<Record<string, number>>({});
   const resizeTrack = useCallback(
-    (trackId: string, height: number) =>
-      setHeights((all) => ({ ...all, [trackId]: height })),
+    (trackId: string, height: number | undefined) =>
+      setHeights((all) => {
+        // Giving the height up (a double-click) lets the track share the room again.
+        const { [trackId]: _given, ...rest } = all;
+        return height === undefined ? rest : { ...rest, [trackId]: height };
+      }),
     []
   );
 

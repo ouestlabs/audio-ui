@@ -1,6 +1,7 @@
 import { mergeProps } from "@base-ui/react/merge-props";
 import { useRender } from "@base-ui/react/use-render";
 import * as React from "react";
+import { createChangeEventDetails } from "../../internal/event-details";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { useTimelineContext } from "../context";
 import {
@@ -50,9 +51,22 @@ export function Track(componentProps: Track.Props) {
     [height, maxHeight, minHeight, onHeightChange]
   );
   const commit = React.useCallback(
-    (next: number, eventDetails: TrackCommitEventDetails) =>
+    (next: number | undefined, eventDetails: TrackCommitEventDetails) =>
       onHeightCommitted?.(next, eventDetails),
     [onHeightCommitted]
+  );
+  const reset = React.useCallback(
+    (event: MouseEvent) => {
+      if (height === undefined) {
+        return;
+      }
+      const details = createChangeEventDetails("double-click", event);
+      onHeightChange?.(undefined, details);
+      if (!details.isCanceled) {
+        onHeightCommitted?.(undefined, { event, reason: "double-click" });
+      }
+    },
+    [height, onHeightChange, onHeightCommitted]
   );
 
   const state = React.useMemo<TrackState>(
@@ -61,11 +75,21 @@ export function Track(componentProps: Track.Props) {
   );
   const context = React.useMemo<TrackContextValue>(
     () => ({
-      actions: { commit, resize, setResizing },
+      actions: { commit, reset, resize, setResizing },
       meta: { height, largeStep, max: maxHeight, min: minHeight, rowRef, step },
       state,
     }),
-    [commit, height, largeStep, maxHeight, minHeight, resize, state, step]
+    [
+      commit,
+      height,
+      largeStep,
+      maxHeight,
+      minHeight,
+      reset,
+      resize,
+      state,
+      step,
+    ]
   );
 
   const element = useRender({
@@ -100,11 +124,18 @@ export namespace Track {
     maxHeight?: number;
     /** @default 32 */
     minHeight?: number;
-    /** A new height is asked for, by a drag or a key; `eventDetails.cancel()` refuses it. */
-    onHeightChange?: (height: number, eventDetails: ChangeEventDetails) => void;
+    /**
+     * A new height is asked for, by a drag or a key; a double-click on the
+     * handle gives the height up, which is `undefined`.
+     * `eventDetails.cancel()` refuses it.
+     */
+    onHeightChange?: (
+      height: number | undefined,
+      eventDetails: ChangeEventDetails
+    ) => void;
     /** A resize ended having changed the height. */
     onHeightCommitted?: (
-      height: number,
+      height: number | undefined,
       eventDetails: CommitEventDetails
     ) => void;
     /** Whether the track is the one picked: only styling, `data-selected`. @default false */

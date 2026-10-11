@@ -28,7 +28,8 @@ interface ResizeGesture {
  * native `<input type="range">` it holds, which carries the accessible name:
  * the arrows move by a step (Down is taller), Page Up and Down by a large
  * one, Home and End to the least and the most. Place it along the track's
- * lower edge. Renders a `<div>` element.
+ * lower edge. A double-click gives the height up, so the track shares the room
+ * again. Renders a `<div>` element.
  */
 export function TrackResizeHandle(componentProps: TrackResizeHandle.Props) {
   const {
@@ -148,6 +149,12 @@ export function TrackResizeHandle(componentProps: TrackResizeHandle.Props) {
     [meta, setHeight]
   );
 
+  const handleDoubleClick = React.useCallback(
+    (event: React.MouseEvent<HTMLDivElement>) =>
+      actions.reset(event.nativeEvent),
+    [actions]
+  );
+
   const handleChange = React.useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) =>
       setHeight(
@@ -182,6 +189,7 @@ export function TrackResizeHandle(componentProps: TrackResizeHandle.Props) {
             />
           </>
         ),
+        onDoubleClick: handleDoubleClick,
         onLostPointerCapture: handlePointerEnd,
         onPointerCancel: handlePointerEnd,
         onPointerDown: handlePointerDown,

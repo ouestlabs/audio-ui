@@ -7,12 +7,14 @@ import type {
 export type TrackChangeEventDetails =
   | ExtraChangeEventDetails<"drag", PointerEvent>
   | ExtraChangeEventDetails<"keyboard", KeyboardEvent>
-  | ExtraChangeEventDetails<"input-change", Event>;
+  | ExtraChangeEventDetails<"input-change", Event>
+  | ExtraChangeEventDetails<"double-click", MouseEvent>;
 
 export type TrackCommitEventDetails =
   | ExtraCommitEventDetails<"drag", PointerEvent>
   | ExtraCommitEventDetails<"keyboard", KeyboardEvent>
-  | ExtraCommitEventDetails<"input-change", Event>;
+  | ExtraCommitEventDetails<"input-change", Event>
+  | ExtraCommitEventDetails<"double-click", MouseEvent>;
 
 export type TrackState = {
   /** Whether a pointer is resizing the track. */
@@ -24,7 +26,12 @@ export interface TrackContextValue {
   actions: {
     /** Propose a height; returns whether it was applied. */
     resize: (height: number, eventDetails: TrackChangeEventDetails) => boolean;
-    commit: (height: number, eventDetails: TrackCommitEventDetails) => void;
+    commit: (
+      height: number | undefined,
+      eventDetails: TrackCommitEventDetails
+    ) => void;
+    /** Gives the height up, so the row shares the room again. */
+    reset: (event: MouseEvent) => void;
     setResizing: (resizing: boolean) => void;
   };
   meta: {

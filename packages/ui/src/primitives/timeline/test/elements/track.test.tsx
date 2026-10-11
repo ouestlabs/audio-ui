@@ -5,10 +5,16 @@ import { Timeline } from "../../../../entries/timeline";
 
 function renderTrack(props: Timeline.Track.Props = {}) {
   const onHeightChange = mock(
-    (_height: number, _details: Timeline.Track.ChangeEventDetails) => undefined
+    (
+      _height: number | undefined,
+      _details: Timeline.Track.ChangeEventDetails
+    ) => undefined
   );
   const onHeightCommitted = mock(
-    (_height: number, _details: Timeline.Track.CommitEventDetails) => undefined
+    (
+      _height: number | undefined,
+      _details: Timeline.Track.CommitEventDetails
+    ) => undefined
   );
   const view = render(
     <Timeline.Root duration={100}>
@@ -198,5 +204,33 @@ describe("Timeline.TrackResizeHandle drag", () => {
     expect(track.hasAttribute("data-resizing")).toBe(true);
     fireEvent.pointerUp(handle, { clientY: 10, pointerId: 1 });
     expect(track.hasAttribute("data-resizing")).toBe(false);
+  });
+});
+
+describe("Timeline.TrackResizeHandle double-click", () => {
+  test("gives the height up, and commits it", () => {
+    const { handle, onHeightChange, onHeightCommitted } = renderTrack({
+      height: 100,
+    });
+    fireEvent.doubleClick(handle);
+    expect(onHeightChange.mock.calls[0]?.[0]).toBeUndefined();
+    expect(onHeightChange.mock.calls[0]?.[1].reason).toBe("double-click");
+    expect(onHeightCommitted).toHaveBeenCalledTimes(1);
+    expect(onHeightCommitted.mock.calls[0]?.[0]).toBeUndefined();
+  });
+
+  test("has nothing to give up while the track has no height", () => {
+    const { handle, onHeightChange } = renderTrack();
+    fireEvent.doubleClick(handle);
+    expect(onHeightChange).not.toHaveBeenCalled();
+  });
+
+  test("cancel() keeps the height", () => {
+    const { handle, onHeightCommitted } = renderTrack({
+      height: 100,
+      onHeightChange: (_height, details) => details.cancel(),
+    });
+    fireEvent.doubleClick(handle);
+    expect(onHeightCommitted).not.toHaveBeenCalled();
   });
 });

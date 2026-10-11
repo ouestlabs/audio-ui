@@ -370,8 +370,8 @@ One track of the arrangement: a row holding a header beside a lane. Renders a `<
 <TypeRow name={"minHeight / maxHeight"} type={"number"} default={"32 / 480"}>Bounds the height is clamped to.</TypeRow>
 <TypeRow name={"step / largeStep"} type={"number"} default={"8 / 32"}>How far the arrows, and Page Up and Page Down, move the height.</TypeRow>
 <TypeRow name={"selected"} type={"boolean"} default={"false"}>Whether the track is the one picked. Only styling.</TypeRow>
-<TypeRow name={"onHeightChange"} type={"(height, eventDetails) => void"}>Fires when a new height is asked for. `eventDetails.reason` is `"drag"`, `"keyboard"` or `"input-change"`; `eventDetails.cancel()` keeps the height.</TypeRow>
-<TypeRow name={"onHeightCommitted"} type={"(height, eventDetails) => void"}>Fires when a resize that changed the height ends.</TypeRow>
+<TypeRow name={"onHeightChange"} type={"(height | undefined, eventDetails) => void"}>Fires when a new height is asked for. `eventDetails.reason` is `"drag"`, `"keyboard"`, `"input-change"` or `"double-click"`, which gives the height up (`undefined`); `eventDetails.cancel()` keeps the height.</TypeRow>
+<TypeRow name={"onHeightCommitted"} type={"(height | undefined, eventDetails) => void"}>Fires when a resize that changed the height ends, or when it is given up.</TypeRow>
 </TypeTable>
 
 <TypeTable title="Data attributes">
@@ -385,7 +385,7 @@ The strip beside a track's lane that names it and holds what sets it. It stays a
 
 ### TrackResizeHandle
 
-Sets the track's height: by dragging, or from the keyboard through the native `<input type="range">` it holds, which carries the accessible name. The arrows move by a step (Down is taller), Page Up and Page Down by a large one, Home and End to the least and the most. Place it along the track's lower edge. Renders a `<div>` element.
+Sets the track's height: by dragging, or from the keyboard through the native `<input type="range">` it holds, which carries the accessible name. The arrows move by a step (Down is taller), Page Up and Page Down by a large one, Home and End to the least and the most. Place it along the track's lower edge. A double-click gives the height up, so the track shares the room again. Renders a `<div>` element.
 
 ### Ruler
 
