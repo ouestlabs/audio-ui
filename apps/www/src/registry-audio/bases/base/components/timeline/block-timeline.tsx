@@ -152,11 +152,36 @@ const TRACKS = [
 
 /** The colors a track can take: the theme's chart tokens, written out for the stylesheet to find. */
 const SWATCHES = [
-  { dot: "bg-chart-1", edge: "border-s-chart-1", name: "Color 1" },
-  { dot: "bg-chart-2", edge: "border-s-chart-2", name: "Color 2" },
-  { dot: "bg-chart-3", edge: "border-s-chart-3", name: "Color 3" },
-  { dot: "bg-chart-4", edge: "border-s-chart-4", name: "Color 4" },
-  { dot: "bg-chart-5", edge: "border-s-chart-5", name: "Color 5" },
+  {
+    dot: "bg-chart-1",
+    clip: "[--primary:var(--chart-1)]",
+    edge: "border-s-chart-1",
+    name: "Color 1",
+  },
+  {
+    dot: "bg-chart-2",
+    clip: "[--primary:var(--chart-2)]",
+    edge: "border-s-chart-2",
+    name: "Color 2",
+  },
+  {
+    dot: "bg-chart-3",
+    clip: "[--primary:var(--chart-3)]",
+    edge: "border-s-chart-3",
+    name: "Color 3",
+  },
+  {
+    dot: "bg-chart-4",
+    clip: "[--primary:var(--chart-4)]",
+    edge: "border-s-chart-4",
+    name: "Color 4",
+  },
+  {
+    dot: "bg-chart-5",
+    clip: "[--primary:var(--chart-5)]",
+    edge: "border-s-chart-5",
+    name: "Color 5",
+  },
 ] as const;
 
 const formatPan = (pan: number) => {
@@ -914,9 +939,12 @@ const ClipView = memo(function ArrangedClip({
   onLift,
   onAction,
   onRename,
+  swatch,
   trackName,
 }: {
   clip: Arranged;
+  /** The clip's color, an index into `SWATCHES`: the track's. */
+  swatch: number;
   /** Something chosen from the clip's menu (renaming is the clip's own). */
   onAction: (action: ClipAction, id: string) => void;
   onRename: (id: string, name: string) => void;
@@ -1021,6 +1049,7 @@ const ClipView = memo(function ArrangedClip({
           aria-label={`${trackName}, ${clip.name}`}
           className={cn(
             "inset-y-1.5",
+            SWATCHES[swatch]?.clip,
             copying && "opacity-90 shadow-lg ring-2 ring-primary",
             clip.disabled && "opacity-40"
           )}
@@ -1948,6 +1977,7 @@ export default function BlockTimeline() {
                         onRename={renameClip}
                         onSelect={selectClip}
                         selected={selectedIds.includes(clip.id)}
+                        swatch={mixOf(track.id).color}
                         trackName={track.name}
                       />
                     ))}
