@@ -13,6 +13,7 @@ export default function FaderVerticalDemo() {
     <Fader
       aria-label="Volume"
       defaultValue={50}
+      editableValue
       marks={MARKS}
       max={100}
       min={0}

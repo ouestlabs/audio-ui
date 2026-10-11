@@ -223,11 +223,12 @@ Rotates with the value (`rotate`, clockwise from 12 o'clock), so a pointer drawn
 
 ### Value
 
-The formatted value (`format`/`locale` on Root). Renders a `<output>` element.
+The formatted value (`format`/`locale` on Root). With `editable`, a double click, or Enter while it has focus, lets you type a value: Enter commits it (a unit or a decimal comma is fine, and it is clamped), Escape drops it, and it reports `reason: "input-change"`. Renders a `<output>` element.
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `children` | `\| React.ReactNode \| ((formattedValue: string, value: number) => React.ReactNode)` |  |  |
+| `editable` | `boolean` | `false` | Lets you type the value: a double click on the readout, or Enter while it has focus. |
 
 | Data attribute | Description |
 | --- | --- |
@@ -275,6 +276,7 @@ Accessible label, associated with the thumb's input. Renders a `<div>` element.
 | `marks` | `(number \| { value, label? })[]` | - | Graduations drawn around the dial, on its scale. Those the value has reached from `anchor` light up. |
 | `valueLabel` | `"auto" \| "always" \| "hidden"` | `"auto"` | When the value shows under the dial: `auto` while hovered, turned or focused from the keyboard. |
 | `formatValue` | `(value: number) => string` | `format` | How the value prints in that readout, e.g. `"8.7 kHz"`. |
+| `editableValue` | `boolean` | `false` | Lets you type the value in the readout: a double click, or Enter while it has focus. |
 | `disabled` | `boolean` | `false` | Disables pointer, wheel, and keyboard. |
 | `format` | `Intl.NumberFormatOptions` | - | Formats the value text announced to screen readers (and `Knob.Value` on the primitive). |
 | `locale` | `Intl.LocalesArgument` | runtime | Locale used by `format`. |

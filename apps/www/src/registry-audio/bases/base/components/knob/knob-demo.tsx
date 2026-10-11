@@ -13,6 +13,7 @@ export default function KnobDemo() {
     <Knob
       aria-label="Level"
       defaultValue={50}
+      editableValue
       marks={MARKS}
       max={100}
       min={0}

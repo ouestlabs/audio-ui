@@ -85,6 +85,8 @@ export type FaderMark = number | { label?: ReactNode; value: number };
 interface FaderProps
   extends FaderPrimitive.Root.Props,
     VariantProps<typeof faderVariants> {
+  /** Lets you type the value: a double click on the readout, or Enter while it has focus. */
+  editableValue?: boolean;
   /** Prints the value in the readout, e.g. as `"-6 dB"`. Defaults to `format`/`locale`. */
   formatValue?: (value: number) => string;
   /** Graduations drawn beside the track: a ruler for the value. */
@@ -104,6 +106,7 @@ export function Fader({
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledBy,
   className,
+  editableValue = false,
   formatValue,
   marks,
   size,
@@ -218,14 +221,16 @@ export function Fader({
           {valueLabel === "hidden" ? null : (
             <FaderPrimitive.Value
               className={cn(
-                "cn-fader-value pointer-events-none absolute z-20 whitespace-nowrap",
+                "cn-fader-value absolute z-20 whitespace-nowrap",
+                editableValue ? "cursor-text" : "pointer-events-none",
                 orientation === "vertical"
                   ? "start-full top-1/2 ms-2 -translate-y-1/2"
                   : "bottom-full left-1/2 mb-2 -translate-x-1/2",
                 valueLabel === "auto" &&
-                  "opacity-0 transition-opacity duration-150 ease-out group-hover/fader:opacity-100 group-has-focus-visible/fader:opacity-100 group-has-data-dragging/fader:opacity-100 motion-reduce:transition-none"
+                  "opacity-0 transition-opacity duration-150 ease-out group-hover/fader:opacity-100 group-has-focus-visible/fader:opacity-100 group-has-data-dragging/fader:opacity-100 data-editing:opacity-100 motion-reduce:transition-none"
               )}
               data-slot="fader-value"
+              editable={editableValue}
             >
               {(formatted, values) =>
                 formatValue && values[0] !== undefined

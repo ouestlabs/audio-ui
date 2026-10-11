@@ -203,6 +203,7 @@ A graduation along the track at `value`: placed from the start of the travel in 
 | `marks` | `(number \| { value, label? })[]` | - | Graduations drawn beside the track: a ruler for the value. Those the value has reached from `anchor` light up. |
 | `valueLabel` | `"auto" \| "always" \| "hidden"` | `"auto"` | When the value shows beside the thumb: `auto` while hovered, dragged or focused from the keyboard. |
 | `formatValue` | `(value: number) => string` | `format` | How the value prints in that readout, e.g. `"-6.0 dB"`. |
+| `editableValue` | `boolean` | `false` | Lets you type the value in the readout: a double click, or Enter while it has focus. Enter commits it, Escape drops it (`reason: "input-change"`). |
 | `anchor` | `number` | `min` | Value the fill grows from, such as `0` on a -1…1 pan: the fill runs from the anchor to the value, on whichever side it is. |
 | `disabled` | `boolean` | `false` | Disables interaction. |
 | `onValueChange` | `(value: number, eventDetails) => void` | - | Live updates while adjusting. `eventDetails.reason` is `"drag"`, `"track-press"`, `"keyboard"`, `"wheel"`, `"input-change"`, or `"none"`; call `eventDetails.cancel()` to reject the change. |

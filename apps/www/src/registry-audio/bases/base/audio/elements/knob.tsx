@@ -48,6 +48,8 @@ export type KnobProps = KnobPrimitive.Root.Props &
     formatValue?: (value: number) => string;
     /** Graduations drawn around the dial, on its scale. */
     marks?: readonly KnobMark[];
+    /** Lets you type the value: a double click on the readout, or Enter while it has focus. */
+    editableValue?: boolean;
     /** When the value shows under the dial: while hovered, turned or focused (`auto`), `always`, or `hidden`. */
     valueLabel?: "always" | "auto" | "hidden";
   };
@@ -62,6 +64,7 @@ function Knob({
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledBy,
   className,
+  editableValue = false,
   formatValue,
   marks,
   size,
@@ -131,13 +134,15 @@ function Knob({
       {valueLabel === "hidden" ? null : (
         <KnobPrimitive.Value
           className={cn(
-            "cn-knob-value pointer-events-none absolute top-full left-1/2 z-10 mt-1 -translate-x-1/2 whitespace-nowrap",
+            "cn-knob-value absolute top-full left-1/2 z-10 mt-1 -translate-x-1/2 whitespace-nowrap",
+            editableValue ? "cursor-text" : "pointer-events-none",
             // Below the labels at the ends of the sweep, not over them.
             hasLabels && "mt-6",
             valueLabel === "auto" &&
-              "opacity-0 transition-opacity duration-150 ease-out group-hover/knob:opacity-100 group-has-focus-visible/knob:opacity-100 group-data-dragging/knob:opacity-100 motion-reduce:transition-none"
+              "opacity-0 transition-opacity duration-150 ease-out group-hover/knob:opacity-100 group-has-focus-visible/knob:opacity-100 group-data-dragging/knob:opacity-100 data-editing:opacity-100 motion-reduce:transition-none"
           )}
           data-slot="knob-value"
+          editable={editableValue}
         >
           {(formatted, value) => (formatValue ? formatValue(value) : formatted)}
         </KnobPrimitive.Value>

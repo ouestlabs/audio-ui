@@ -113,6 +113,31 @@ export function Root({
     [isControlled, max, min, onValueChange, onValueCommitted, resetValue]
   );
 
+  const type = React.useCallback(
+    (typed: number, event: Event) => {
+      const next = clamp(roundToStep(typed, step, min), min, max);
+      if (next === valueRef.current) {
+        return;
+      }
+      const details = Object.assign(
+        createChangeEventDetails("input-change", event),
+        { activeThumbIndex: 0 }
+      ) as Root.ChangeEventDetails;
+      onValueChange?.(next, details);
+      if (details.isCanceled) {
+        return;
+      }
+      if (!isControlled) {
+        setUncontrolledValue(next);
+      }
+      onValueCommitted?.(next, {
+        event,
+        reason: "input-change",
+      } as Root.CommitEventDetails);
+    },
+    [isControlled, max, min, onValueChange, onValueCommitted, step]
+  );
+
   const { wheelRef } = useWheel({
     disabled,
     onWheel: (event: WheelEvent, delta: Point) => {
@@ -151,10 +176,21 @@ export function Root({
       min,
       orientation,
       reset,
+      type,
       value: displayedValue,
       wheelRef,
     }),
-    [anchor, disabled, displayedValue, max, min, orientation, reset, wheelRef]
+    [
+      anchor,
+      disabled,
+      displayedValue,
+      max,
+      min,
+      orientation,
+      reset,
+      type,
+      wheelRef,
+    ]
   );
 
   return (
