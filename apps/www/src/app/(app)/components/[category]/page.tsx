@@ -1,6 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { ComponentCategoryPager } from "@/app/(create)/components/components/component-category-pager";
+import {
+  ComponentCategoryHeroIntro,
+  ComponentCategorySeoContent,
+} from "@/app/(create)/components/components/component-category-seo-content";
+import { ComponentDocsLink } from "@/app/(create)/components/components/component-docs-link";
 import { GridSkeleton } from "@/components/grid-skeleton";
 import { JsonLd } from "@/components/json-ld";
 import { siteConfig } from "@/lib/config";
@@ -12,13 +18,6 @@ import {
 import { getComponentCategorySeo } from "@/lib/registry-seo-cache";
 import { buildBreadcrumbJsonLd, buildPageMetadata } from "@/lib/seo";
 import { normalizeSlug } from "@/lib/utils";
-
-import { ComponentCategoryPager } from "@/app/(create)/components/components/component-category-pager";
-import {
-  ComponentCategoryHeroIntro,
-  ComponentCategorySeoContent,
-} from "@/app/(create)/components/components/component-category-seo-content";
-import { ComponentDocsLink } from "@/app/(create)/components/components/component-docs-link";
 import { CategoryPageContent } from "./category-page-content";
 
 // Fully static, search filtering happens client-side in ComponentGrid

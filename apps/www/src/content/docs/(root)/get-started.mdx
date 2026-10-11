@@ -3,7 +3,7 @@ title: Get Started
 description: A quick guide to adding audio/ui components to your application.
 ---
 
-This guide walks you through the essential steps to add audio/ui to your shadcn project.
+This guide walks you through the essential steps to add audio/ui to your shadcn project. If you do not use shadcn/ui, install the headless primitives with `npm install @audio-ui/react` instead, see the [Introduction](/docs).
 
 ## Prerequisites
 
@@ -29,12 +29,14 @@ You can install audio/ui using the [**shadcn CLI**](https://ui.shadcn.com/docs/c
 
 Components are styled with a design token system defined by CSS variables and implemented with Tailwind CSS, following the same conventions as shadcn/ui so they're fully customizable. See the [Styling guide](/docs/styling) for details.
 
-## AI-Enhanced Workflow
+## Work with an AI agent
 
-audio/ui is designed from the ground up to be **AI-friendly**, making it easier for language models to understand and modify your UI.
+audio/ui is designed to be used by AI coding agents.
 
-- **llms.txt**: Access our [llms.txt](/llms.txt) file for a structured map of our documentation and architecture optimized for AI agents.
-- **Copy Markdown**: Every page includes a **Copy Markdown** feature, allowing you to instantly feed documentation or code into your AI-driven development workflows.
+- **[Agent skill](/docs/agents):** `npx skills add ouestlabs/audio-ui` teaches your agent which layer to pick and how to install and wire each component.
+- **[MCP server](/docs/mcp):** connect `https://audio-ui.xyz/mcp` so your agent can list components, read their docs and search the catalog.
+- **[llms.txt](/llms.txt):** a structured map of the documentation. Every docs page is also served as markdown.
+- **Copy Markdown:** every page has a button to feed its content to your agent.
 
 ## Next Steps
 

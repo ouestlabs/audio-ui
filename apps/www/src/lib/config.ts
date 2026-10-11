@@ -6,11 +6,18 @@ export const baseUrl =
     : new URL(`https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`);
 
 export const siteConfig = {
+  author: Object.freeze({
+    github: "https://github.com/lucien-loua",
+    name: "Cécé Lucien Loua",
+    twitter: "https://x.com/luu_loua",
+    url: "https://loua.tech",
+  }),
   description:
-    "A set of accessible and composable Audio UI components. Built on top of shadcn/ui, it's designed for you to copy, paste, and own.",
+    "Accessible, composable audio controls for React: headless primitives on npm and styled components for shadcn/ui. Knobs, faders, XY pads, meters, waveforms, timelines, sequencers and piano rolls, ready for AI agents through an MCP server and an agent skill.",
 
   links: Object.freeze({
     github: "https://github.com/ouestlabs/audio-ui",
+    npm: "https://www.npmjs.com/package/@audio-ui/react",
     twitter: "https://x.com/ouestlabs",
   }),
   metadata: {

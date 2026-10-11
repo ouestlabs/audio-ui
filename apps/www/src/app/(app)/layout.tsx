@@ -7,7 +7,11 @@ import {
   SiteSidebarHeader,
 } from "@/components/site-header";
 import { SiteShell } from "@/components/site-shell";
-import { getCategories, getTotalComponentCount, searchCatalog } from "@/lib/registry";
+import {
+  getCategories,
+  getTotalComponentCount,
+  searchCatalog,
+} from "@/lib/registry";
 import { source } from "@/lib/source";
 import { cn } from "@/lib/utils";
 

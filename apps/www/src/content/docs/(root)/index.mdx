@@ -1,38 +1,66 @@
 ---
 title: Introduction
-description: A set of accessible and composable Audio UI components. Built on top of shadcn/ui, designed to be copied, pasted, and owned.
+description: Accessible audio controls for React, as headless primitives on npm and as styled components you copy into your shadcn/ui project. Built to be used by people and by AI agents.
 ---
 
-**audio/ui** is a set of accessible and composable Audio UI components. Built on top of [shadcn/ui](https://ui.shadcn.com/), it's designed for you to copy, paste, and own.
+**audio/ui** is a set of accessible, composable audio controls for React: knobs, faders, XY pads, envelopes, meters, waveforms, timelines, sequencers, piano keyboards and piano rolls.
 
-**This is not a component library. It is how you build your audio component library.**
+**It is not a component library. It is how you build your audio interface.**
 
-You know how most traditional component libraries work: you install a package from NPM, import the components, and use them in your app. This works well until you need to customize a component to fit your design system, or need one that isn't included. Often you end up wrapping library components, overriding styles, or mixing components from different libraries with incompatible APIs.
+Audio interfaces are hard to get right. A knob that drags well, answers the wheel and the keyboard, resets on double click and is announced correctly by a screen reader takes real work, and most of it is invisible. audio/ui does that work once, so you can spend your time on the sound.
 
-## Open Code
+## Two layers
 
-audio/ui hands you the actual component code. You have full control to customize and extend the components to your needs:
+Use the layer that fits your project. They share the same behavior.
 
-- **Full Transparency:** You see exactly how each component is built.
-- **Easy Customization:** Modify any part of a component to fit your design and functionality requirements.
-- **AI Integration:** Access to the code makes it straightforward for LLMs to read, understand, and even improve your components.
+**`@audio-ui/react`** are headless primitives from npm: behavior and accessibility, no styles. Pick them when you have your own design system.
 
-## Composition
+```bash
+npm install @audio-ui/react
+```
 
-Every component in audio/ui shares a common, composable interface. Browse the [component catalog](/components) for composed examples by category, or install primitives and blocks straight from the registry, copy-ready layouts and lower-level pieces so you can pick the right level of abstraction for each screen.
+**The `@audio` registry** holds styled components and ready blocks that you copy into your code and own. Pick it when you use shadcn/ui and Tailwind CSS v4.
 
-## Beautiful Defaults
+```bash
+npx shadcn@latest add @audio/knob
+```
 
-audio/ui comes with a collection of components that have carefully chosen default styles, designed to look good on their own and to work well together as a consistent system.
+Both are open source. With the registry you receive the actual code, so you can read it, change it and learn from it.
 
-## AI-Ready
+## Top components
 
-The design of audio/ui makes it easy for AI tools to work with your code. Its open code and consistent API allow AI models to read, understand, and even generate new components.
+Each links to its docs, with a live preview, the API and the source. Install any of them with `npx shadcn@latest add @audio/<name>`.
 
-## Open Source
+| Component | What it does |
+| --- | --- |
+| [Knob](/docs/components/base/knob) | Rotary parameter with drag, wheel, keyboard and reset |
+| [Fader](/docs/components/base/fader) | Linear gain or parameter slider |
+| [XY Pad](/docs/components/base/xypad) | Two parameters on one surface |
+| [Envelope](/docs/components/base/envelope) | Breakpoint editor for ADSR and other ramps |
+| [Meter](/docs/components/base/meter) | Stereo and multi-channel level with peak hold |
+| [Waveform](/docs/components/base/waveform) | Seekable, live or bar-style waveform with regions |
+| [Plot](/docs/components/base/plot) | Draggable curves for EQs, filters and compressors |
+| [Timeline](/docs/components/base/timeline) | Zoomable arrangement view with a smooth playhead |
+| [Sequencer](/docs/components/base/sequencer) | Step grid to draw a pattern |
+| [Piano Roll](/docs/components/base/piano-roll) | DAW-style note editor with a velocity lane |
 
-This project is open source. We welcome contributions, feedback, or improvements. Check out our [repository](https://github.com/ouestlabs/audio-ui) on GitHub.
+Looking for a whole screen? The [component catalog](/components) has composed blocks (a pocket synth, a wave shaper, a waveform player) you can install the same way.
 
-## Next Steps
+## Built for agents
 
-Ready to get started? Head over to the [Get started](/docs/get-started) guide to add audio/ui to your project.
+audio/ui is made to be used by AI coding agents as much as by people. Open code, one consistent API and plain markdown docs mean an agent can find the right component, read how it works and wire it up without guessing.
+
+- **[Agent skill](/docs/agents):** teaches your agent which layer to pick, how to install and the mistakes to avoid.
+- **[MCP server](/docs/mcp):** `https://audio-ui.xyz/mcp` lets your agent list components, read their docs and search the catalog.
+- **[llms.txt](/llms.txt):** a structured map of every docs page, each also served as markdown.
+
+## Principles
+
+- **Accessible by default:** native inputs where it matters, labelled controls, full keyboard support.
+- **Composable:** small parts that fit together, so you pick the level of abstraction for each screen.
+- **Open code:** read it, change it, own it.
+- **No lag:** values that change every frame, like playheads and meters, move without re-rendering your page.
+
+## Next steps
+
+Head over to [Get started](/docs/get-started) to add audio/ui to your project, or open [Knob](/docs/components/base/knob) to install your first component.

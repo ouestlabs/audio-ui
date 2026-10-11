@@ -1,24 +1,76 @@
 ---
 title: MCP
-description: Learn how to use the shadcn/ui MCP (Model Context Protocol) with audio/ui.
+description: Connect your AI agent to audio/ui with the MCP server, to list components, read their docs and search the catalog.
 ---
 
-MCP is an open protocol that standardizes how applications provide context to LLMs.
+MCP is an open protocol that lets AI agents use tools. The audio/ui MCP server gives your agent live access to every component, so it reads the real docs instead of guessing.
 
-## Configure MCP
+The server is remote, needs no account and no install:
 
-Run the following command to configure the mcp server:
-
-```bash
-npx shadcn@latest mcp init
+```
+https://audio-ui.xyz/mcp
 ```
 
-Select your MCP client as prompted, then enable the MCP server in your client to finish setup.
+## Connect your client
+
+<Tabs defaultValue="claude">
+
+<TabsList>
+  <TabsTrigger value="claude">Claude Code</TabsTrigger>
+  <TabsTrigger value="cursor">Cursor</TabsTrigger>
+  <TabsTrigger value="other">Other</TabsTrigger>
+</TabsList>
+
+<TabsContent value="claude">
+
+```bash
+claude mcp add --transport http audio-ui https://audio-ui.xyz/mcp
+```
+
+</TabsContent>
+
+<TabsContent value="cursor">
+
+Add this to `.cursor/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "audio-ui": {
+      "url": "https://audio-ui.xyz/mcp"
+    }
+  }
+}
+```
+
+</TabsContent>
+
+<TabsContent value="other">
+
+Any client that supports remote servers over Streamable HTTP works. Add a server of type `http` with the URL above.
+
+</TabsContent>
+
+</Tabs>
+
+## Tools
+
+| Tool | What it does |
+| --- | --- |
+| `list_components` | All components with docs URL and install command |
+| `get_component_docs` | One component's full docs as markdown |
+| `search_catalog` | Find ready-made blocks by words like `synth` |
 
 ## Usage
 
-You can now ask your IDE to use any audio/ui component. Here are some prompt examples:
+Ask your agent in plain words:
 
 - Build a synth control panel with Knob, XY Pad and Fader.
 - Add an equalizer with a Plot and draggable band handles.
 - Make a piano roll with a keyboard, a velocity lane and a loop range.
+
+## With shadcn
+
+Because audio/ui is also a shadcn registry, the shadcn MCP server can install components too. Run `npx shadcn@latest mcp init` and add the `@audio` registry from the [Registry guide](/docs/registry).
+
+For the best results, also install the [agent skill](/docs/agents).

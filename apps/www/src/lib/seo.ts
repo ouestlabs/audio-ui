@@ -78,6 +78,10 @@ function getAbsoluteMetadataUrl(path: string) {
 export function getSiteAuthors(): NonNullable<Metadata["authors"]> {
   return [
     {
+      name: siteConfig.author.name,
+      url: siteConfig.author.url,
+    },
+    {
       name: siteConfig.name,
       url: siteConfig.url,
     },
@@ -139,6 +143,12 @@ export function buildPageMetadata({
         "application/rss+xml": [
           { title: `${siteConfig.name} Docs`, url: "/rss.xml" },
         ],
+        // Every docs page is also served as markdown, which agents read better than HTML.
+        ...(path === "/docs" || path.startsWith("/docs/")
+          ? {
+              "text/markdown": [{ url: path.replace("/docs", "/llm") }],
+            }
+          : {}),
       },
     },
     description,
@@ -243,9 +253,37 @@ export function buildOrganizationJsonLd() {
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
+    founder: buildAuthorJsonLd(),
     logo: absoluteUrl("/icon"),
     name: siteConfig.name,
     sameAs: [siteConfig.links.github, siteConfig.links.twitter],
+    url: getSiteUrl(),
+  };
+}
+
+export function buildAuthorJsonLd() {
+  return {
+    "@type": "Person",
+    jobTitle: "UX/UI developer",
+    name: siteConfig.author.name,
+    sameAs: [siteConfig.author.github, siteConfig.author.twitter],
+    url: siteConfig.author.url,
+  };
+}
+
+/** The npm package as software, so engines and agents can tie it to the repo, license and author. */
+export function buildSoftwareJsonLd() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "SoftwareSourceCode",
+    author: buildAuthorJsonLd(),
+    codeRepository: siteConfig.links.github,
+    description: siteConfig.description,
+    license: "https://opensource.org/licenses/MIT",
+    name: "@audio-ui/react",
+    programmingLanguage: "TypeScript",
+    runtimePlatform: "React 19",
+    sameAs: [siteConfig.links.npm],
     url: getSiteUrl(),
   };
 }
