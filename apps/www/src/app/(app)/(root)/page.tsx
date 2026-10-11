@@ -36,11 +36,11 @@ export const metadata: Metadata = buildPageMetadata({
 
 export default function IndexPage() {
   return (
-    <div className="homepage flex flex-1 flex-col justify-center px-3 py-10 sm:px-8 xl:px-10">
-      <div className="mx-auto flex w-full max-w-md flex-col items-center gap-10">
-        <HomeHero />
-        {/* One component stands for the project: a synth built from the primitives, bare, as a thing to play with rather than a catalog card. */}
-        <ComponentRenderer name="block-pocket-synth" />
+    <div className="homepage flex min-h-0 flex-1 flex-col">
+      <HomeHero />
+      {/* The product fills the panel: the piano roll, playable at once. */}
+      <div className="flex min-h-0 flex-1 flex-col p-4 font-sans sm:p-6 [&_.cn-audio-panel]:h-full [&_.cn-audio-panel]:overflow-hidden [&_[data-slot=piano-roll]]:h-auto [&_[data-slot=piano-roll]]:min-h-0 [&_[data-slot=piano-roll]]:flex-1">
+        <ComponentRenderer name="block-piano-roll" />
       </div>
     </div>
   );
