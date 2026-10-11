@@ -1573,21 +1573,33 @@ export default function BlockTimeline() {
       tabIndex={-1}
     >
       <div className="flex flex-wrap items-center justify-between gap-2 p-1">
-        <Transport
-          className="w-auto"
-          looping={looping}
-          metronome={metronome}
-          onLoopingChange={setLooping}
-          onMetronomeChange={setMetronome}
-          onPlayPause={playPause}
-          onRhythmChange={setRhythm}
-          onStop={stop}
-          onTempoChange={changeTempo}
-          playing={playing}
-          rhythm={rhythm}
-          source={clock}
-          tempo={tempo}
-        />
+        <div className="flex flex-wrap items-center gap-2">
+          <Transport
+            className="w-auto"
+            looping={looping}
+            metronome={metronome}
+            onLoopingChange={setLooping}
+            onMetronomeChange={setMetronome}
+            onPlayPause={playPause}
+            onRhythmChange={setRhythm}
+            onStop={stop}
+            onTempoChange={changeTempo}
+            playing={playing}
+            rhythm={rhythm}
+            source={clock}
+            tempo={tempo}
+          />
+          <div className="w-24 shrink-0">
+            <Meter
+              aria-label="Master output level"
+              orientation="horizontal"
+              peakMarks="hidden"
+              size="sm"
+              source={playing ? simulated : SILENCE}
+              warnThreshold={-12}
+            />
+          </div>
+        </div>
         <div className="flex min-w-0 flex-wrap items-center gap-2">
           <ButtonGroup>
             <Button
@@ -1696,15 +1708,6 @@ export default function BlockTimeline() {
           >
             Snap {snap ? gridLabel(gridSeconds, tempo) : "off"}
           </Toggle>
-          <Meter
-            aria-label="Master output level"
-            className="w-20"
-            orientation="horizontal"
-            peakMarks="hidden"
-            size="sm"
-            source={playing ? simulated : SILENCE}
-            warnThreshold={-12}
-          />
           <NumberControl
             format={PERCENT}
             label="Zoom"
