@@ -4,11 +4,20 @@
  * `"../primitives/knob/index.js"`. Without it a project using
  * `moduleResolution: "node16"` or `"nodenext"` cannot resolve the package's types.
  */
-import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  readdirSync,
+  readFileSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
 import { dirname, join, resolve } from "node:path";
 
 const DIST = resolve(import.meta.dirname, "../dist");
-const RELATIVE = /(\bfrom\s+|\bimport\s*\(\s*|\bimport\s+)(["'])(\.{1,2}\/[^"']*)\2/g;
+const HAS_EXTENSION = /\.(js|json|css)$/;
+const TRAILING_SLASH = /\/$/;
+const RELATIVE =
+  /(\bfrom\s+|\bimport\s*\(\s*|\bimport\s+)(["'])(\.{1,2}\/[^"']*)\2/g;
 
 function declarationFiles(dir: string): string[] {
   return readdirSync(dir).flatMap((name) => {
@@ -21,7 +30,7 @@ function declarationFiles(dir: string): string[] {
 }
 
 function withExtension(from: string, specifier: string): string {
-  if (/\.(js|json|css)$/.test(specifier)) {
+  if (HAS_EXTENSION.test(specifier)) {
     return specifier;
   }
   const target = resolve(dirname(from), specifier);
@@ -29,7 +38,7 @@ function withExtension(from: string, specifier: string): string {
     return `${specifier}.js`;
   }
   if (existsSync(join(target, "index.d.ts"))) {
-    return `${specifier.replace(/\/$/, "")}/index.js`;
+    return `${specifier.replace(TRAILING_SLASH, "")}/index.js`;
   }
   return specifier;
 }

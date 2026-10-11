@@ -2,29 +2,24 @@
   "name": "@audio-ui/react",
   "version": "0.1.2",
   "description": "A collection of React UI primitives for Audio UI.",
-  "license": "MIT",
-  "module": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "type": "module",
-  "sideEffects": false,
-  "publishConfig": {
-    "access": "public"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/ouestlabs/audio-ui.git",
-    "directory": "packages/ui"
-  },
-  "homepage": "https://github.com/ouestlabs/audio-ui/tree/main/packages/ui",
-  "bugs": {
-    "url": "https://github.com/ouestlabs/audio-ui/issues"
-  },
   "keywords": [
     "audio-ui",
     "react",
     "ui",
     "primitives"
   ],
+  "homepage": "https://github.com/ouestlabs/audio-ui/tree/main/packages/ui",
+  "bugs": {
+    "url": "https://github.com/ouestlabs/audio-ui/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ouestlabs/audio-ui.git",
+    "directory": "packages/ui"
+  },
+  "license": "MIT",
+  "sideEffects": false,
+  "type": "module",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -79,18 +74,21 @@
       "import": "./dist/xypad.js"
     }
   },
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
   "files": [
     "dist"
   ],
   "scripts": {
+    "bench": "bun test ./src/primitives/*/test/*.bench.tsx",
+    "bench:browsers": "bun bench/browsers.ts",
     "build:pkg": "bunx --bun tsup && tsc -p tsconfig.build.json && bun scripts/fix-declaration-imports.ts",
+    "clean": "rm -rf dist node_modules .turbo",
     "dev": "bunx --bun tsup --watch",
     "lint": "biome check --write .",
     "lint:fix": "biome check --write --unsafe .",
-    "test": "bun test",
-    "clean": "rm -rf dist node_modules .turbo",
-    "bench": "bun test ./src/primitives/*/test/*.bench.tsx",
-    "bench:browsers": "bun bench/browsers.ts"
+    "size": "bun scripts/size.ts",
+    "test": "bun test"
   },
   "devDependencies": {
     "@audio-ui/typescript": "latest",
@@ -114,5 +112,8 @@
     "@types/react": {
       "optional": true
     }
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

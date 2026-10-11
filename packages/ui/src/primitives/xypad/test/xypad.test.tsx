@@ -276,3 +276,90 @@ describe("XYPad commit", () => {
     expect(lastCall(onValueCommitted)[0]).toEqual({ x: 50, y: 50 });
   });
 });
+
+describe("XYPad state attributes", () => {
+  test("data-dragging is on the root and the pad only while a pointer drags", () => {
+    const { pad, root } = renderXYPad();
+    expect(root.hasAttribute("data-dragging")).toBe(false);
+    fireEvent.pointerDown(pad, { clientX: 100, clientY: 100, pointerId: 1 });
+    expect(root.hasAttribute("data-dragging")).toBe(true);
+    expect(pad.hasAttribute("data-dragging")).toBe(true);
+    fireEvent.pointerUp(pad, { clientX: 100, clientY: 100, pointerId: 1 });
+    expect(root.hasAttribute("data-dragging")).toBe(false);
+  });
+
+  test("data-disabled is present on every part when disabled", () => {
+    const { pad, root, thumb } = renderXYPad({ disabled: true });
+    expect(root.hasAttribute("data-disabled")).toBe(true);
+    expect(pad.hasAttribute("data-disabled")).toBe(true);
+    expect(thumb.hasAttribute("data-disabled")).toBe(true);
+  });
+
+  test("a disabled pad ignores the pointer", () => {
+    const { onValueChange, pad } = renderXYPad({ disabled: true });
+    fireEvent.pointerDown(pad, { clientX: 20, clientY: 20, pointerId: 1 });
+    fireEvent.pointerMove(pad, { clientX: 60, clientY: 60, pointerId: 1 });
+    expect(onValueChange).not.toHaveBeenCalled();
+  });
+});
+
+describe("XYPad axes", () => {
+  test("each axis has its own range and step", () => {
+    const { onValueChange, pad } = renderXYPad({
+      defaultValue: { x: 0, y: 0 },
+      maxX: 1,
+      maxY: 1000,
+      minX: -1,
+      minY: 0,
+      stepX: 0.5,
+      stepY: 100,
+    });
+    // The right edge is x = 1, a quarter of the way up is y = 250, which steps to 300
+    fireEvent.pointerDown(pad, { clientX: 200, clientY: 150, pointerId: 1 });
+    expect(onValueChange.mock.calls.at(-1)?.[0]).toEqual({ x: 1, y: 300 });
+  });
+
+  test("the native inputs carry each axis's bounds", () => {
+    const { inputX, inputY } = renderXYPad({
+      maxX: 1,
+      maxY: 1000,
+      minX: -1,
+      minY: 10,
+      stepX: 0.5,
+      stepY: 100,
+    });
+    expect([inputX.min, inputX.max, inputX.step]).toEqual(["-1", "1", "0.5"]);
+    expect([inputY.min, inputY.max, inputY.step]).toEqual([
+      "10",
+      "1000",
+      "100",
+    ]);
+  });
+
+  test("typing into an axis's native input moves that axis and says it came from the input", () => {
+    const { inputX, onValueChange, onValueCommitted } = renderXYPad();
+    fireEvent.change(inputX, { target: { value: "80" } });
+    expect(onValueChange.mock.calls.at(-1)).toEqual([
+      { x: 80, y: 50 },
+      expect.objectContaining({ reason: "input-change" }),
+    ]);
+    expect(onValueCommitted.mock.calls.at(-1)?.[0]).toEqual({ x: 80, y: 50 });
+  });
+});
+
+describe("XYPad.Label", () => {
+  test("names the pad's inputs through aria-labelledby", () => {
+    const view = render(
+      <XYPad.Root locale="en-US">
+        <XYPad.Label data-testid="label">Filter</XYPad.Label>
+        <XYPad.Control>
+          <XYPad.Thumb />
+        </XYPad.Control>
+      </XYPad.Root>
+    );
+    const label = view.getByTestId("label");
+    const [inputX] = view.getAllByRole("slider");
+    expect(label.id).not.toBe("");
+    expect(inputX?.getAttribute("aria-labelledby")).toContain(label.id);
+  });
+});
