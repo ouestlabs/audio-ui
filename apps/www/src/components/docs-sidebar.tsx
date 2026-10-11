@@ -63,7 +63,7 @@ export function DocsSidebar({
 
   return (
     <Sidebar
-      className="docs-sidebar top-(--header-height) z-30 h-[calc(100svh-var(--header-height))] bg-transparent group-data-[side=left]:border-r-0"
+      className="docs-sidebar top-(--header-height) z-30 h-[calc(100svh-var(--header-height))] bg-transparent group-data-[side=left]:border-r-0 **:data-[slot=sidebar-inner]:bg-site-background"
       {...props}
     >
       <SidebarContent className="no-scrollbar scroll-fade-y overflow-x-hidden px-2 pb-12">
