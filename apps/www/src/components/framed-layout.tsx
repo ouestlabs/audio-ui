@@ -8,6 +8,7 @@ import {
   useCustomizer,
 } from "@/app/(create)/components/components/components-context";
 import { CustomizerPanel } from "@/app/(create)/components/components/customizer-panel";
+import { useIsDesktopCustomizer } from "@/app/(create)/components/components/use-is-desktop-customizer";
 import { Frame, FrameContent, FrameHeader } from "@/components/custom/frame";
 import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
@@ -152,7 +153,11 @@ export function FramedLayout({
   const [layout, setLayout] = useComponentsLayoutState();
   const [config, setConfig] = useConfig();
   const navigationOpen = mounted ? layout.sidebarOpen : true;
-  const customizerOpen = mounted ? config.customizerOpen : true;
+  // Below `lg` the customizer is a sheet: it starts shut, whatever the sidebar's remembered state.
+  const isDesktop = useIsDesktopCustomizer();
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const desktopOpen = mounted ? config.customizerOpen : true;
+  const customizerOpen = isDesktop ? desktopOpen : sheetOpen;
 
   // Once the stored choice is applied, wait two frames before letting the
   // sidebars animate: they would otherwise slide shut on load.
@@ -166,13 +171,21 @@ export function FramedLayout({
     [setLayout]
   );
   const setCustomizerOpen = useCallback(
-    (open: boolean) => setConfig((prev) => ({ ...prev, customizerOpen: open })),
-    [setConfig]
+    (open: boolean) =>
+      isDesktop
+        ? setConfig((prev) => ({ ...prev, customizerOpen: open }))
+        : setSheetOpen(open),
+    [isDesktop, setConfig]
   );
   const toggleCustomizer = useCallback(
     () =>
-      setConfig((prev) => ({ ...prev, customizerOpen: !prev.customizerOpen })),
-    [setConfig]
+      isDesktop
+        ? setConfig((prev) => ({
+            ...prev,
+            customizerOpen: !prev.customizerOpen,
+          }))
+        : setSheetOpen((open) => !open),
+    [isDesktop, setConfig]
   );
   const customizer = useMemo<CustomizerContextValue>(
     () => ({ customizerOpen, setCustomizerOpen, toggleCustomizer }),
