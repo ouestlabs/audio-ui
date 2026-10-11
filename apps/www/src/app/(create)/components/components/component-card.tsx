@@ -25,10 +25,10 @@ export function ComponentCard({
   className?: string;
   base?: string;
 }) {
-  // Get the current base preference (base or radix)
+  // Get the current base preference
   const configBase = useConfigBase();
   const hosted = usePreviewHost(isExpandable(name));
-  const base = propBase || configBase || "radix";
+  const base = propBase || configBase || "base";
 
   // Get item from the base-specific metadata (lightweight, no React)
   const item = getRegistryItemMetadata(name, base);

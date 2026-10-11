@@ -304,13 +304,9 @@ export function getRegistryMetadata(base?: string) {
   }
 
   const allMetadata: Record<string, Record<string, RegistryItem>> = {};
-  const bases = ["base", "radix"];
-
-  for (const b of bases) {
-    const { Metadata } = getMetadata(b);
-    if (Metadata[b]) {
-      allMetadata[b] = Metadata[b];
-    }
+  const { Metadata } = getMetadata("base");
+  if (Metadata.base) {
+    allMetadata.base = Metadata.base;
   }
   return allMetadata;
 }
@@ -821,7 +817,7 @@ export function searchCatalog(query: string): ComponentCatalogItem[] {
 /**
  * Get a lazy-loaded component by name
  */
-export function getRegistryComponent(name: string, styleName = "radix") {
+export function getRegistryComponent(name: string, styleName = "base-nova") {
   const base = getRegistryKey(styleName);
   return getComponent(base, name);
 }
@@ -836,9 +832,6 @@ function getRegistryKey(styleName: string): string {
   if (styleName.startsWith("base-")) {
     return "base";
   }
-  if (styleName.startsWith("radix-")) {
-    return "radix";
-  }
   return styleName;
 }
 
@@ -847,9 +840,6 @@ function transformAudioPath(filePath: string, _styleName: string): string {
     return filePath.replace(GENERATED_BASE_PATH_REGEX, (match) => {
       if (match.includes("base-")) {
         return "src/registry-audio/bases/base/";
-      }
-      if (match.includes("radix-")) {
-        return "src/registry-audio/bases/radix/";
       }
       return match;
     });

@@ -16,16 +16,12 @@ export function processMdxForLLMs(content: string) {
   return content.replace(tagRegex, (match, tag, attributes) => {
     try {
       const name = attributes.match(NAME_ATTR_REGEX)?.[1];
-      const styleName =
-        attributes.match(STYLE_NAME_ATTR_REGEX)?.[1] || "base-nova";
 
       if (!name) {
         return match;
       }
 
-      const registryKey = styleName.startsWith("radix-") ? "radix" : "base";
-
-      const item = getRegistryItemMetadata(name, registryKey);
+      const item = getRegistryItemMetadata(name, "base");
 
       if (!item?.files?.length) {
         return match;
@@ -40,7 +36,7 @@ export function processMdxForLLMs(content: string) {
 
       let source = fs.readFileSync(absolutePath, "utf8");
       source = source.replaceAll(
-        `@/registry-audio/bases/${registryKey}/`,
+        "@/registry-audio/bases/base/",
         "@/components/"
       );
       source = source.replaceAll("export default", "export");
