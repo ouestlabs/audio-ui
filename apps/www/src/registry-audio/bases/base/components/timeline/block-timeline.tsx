@@ -220,6 +220,28 @@ function lay(all: Arranged[], placed: Arranged, duration: number): Arranged[] {
   return [...elsewhere, ...covered, placed];
 }
 
+const trackIndex = (track: Arranged["track"]) =>
+  TRACKS.findIndex((item) => item.id === track);
+
+/** The track `shift` tracks away, kept on the arrangement. */
+function shiftTrack(
+  track: Arranged["track"],
+  shift: number
+): Arranged["track"] {
+  const target = Math.min(
+    TRACKS.length - 1,
+    Math.max(0, trackIndex(track) + shift)
+  );
+  return TRACKS[target]?.id ?? track;
+}
+
+/** The rest of a selection that holds `id`: what a drop with no sideways move has no change event to have noted. */
+function otherSelected(selected: string[], id: string): string[] {
+  return selected.length > 1 && selected.includes(id)
+    ? selected.filter((other) => other !== id)
+    : [];
+}
+
 interface Landing {
   /** The ids the copies of the originals take. */
   copyIds: string[];
@@ -247,7 +269,13 @@ function land(all: Arranged[], landing: Landing): Arranged[] {
   }
   const placed = track ? { ...current, track } : current;
   const movedIds = new Set([id, ...group]);
-  const moved = all.filter((clip) => movedIds.has(clip.id));
+  // A group dropped on another track moves by as many tracks as the dragged clip did.
+  const shift = track ? trackIndex(track) - trackIndex(current.track) : 0;
+  const moved = all
+    .filter((clip) => movedIds.has(clip.id))
+    .map((clip) =>
+      clip.id === id ? clip : { ...clip, track: shiftTrack(clip.track, shift) }
+    );
   let laid = origins.length
     ? all.filter((clip) => !movedIds.has(clip.id))
     : all;
@@ -262,7 +290,7 @@ function land(all: Arranged[], landing: Landing): Arranged[] {
   // The rest of a dragged group lands too, covering what it lies over.
   if (!origins.length) {
     for (const other of group) {
-      const grouped = laid.find((clip) => clip.id === other);
+      const grouped = moved.find((clip) => clip.id === other);
       if (grouped) {
         laid = lay(laid, grouped, duration);
       }
@@ -822,14 +850,14 @@ export default function BlockTimeline() {
         land(all, {
           copyIds,
           duration,
-          group: group ? [...group.keys()] : [],
+          group: group ? [...group.keys()] : otherSelected(selectedIds, id),
           id,
           origins,
           track: track as Arranged["track"] | undefined,
         })
       );
     },
-    [duration]
+    [duration, selectedIds]
   );
   // A press selects the clip; with Shift or Cmd/Ctrl it is added to the selection, or taken from it.
   // A press on a clip that is already in a selection keeps the selection, so the group can be dragged.
