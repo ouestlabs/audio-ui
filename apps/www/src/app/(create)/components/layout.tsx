@@ -68,7 +68,7 @@ export default function ComponentsLayout({
       className={cn(
         createPreviewSans.variable,
         createPreviewMono.variable,
-        "overscroll-behavior- relative flex min-h-svh flex-col bg-site-background font-site-sans has-[.bordered-sidebar]:bg-site-muted/60! dark:has-[.bordered-sidebar]:bg-site-background! has-[.bordered-sidebar]:[&_header]:bg-[color-mix(in_oklab,var(--site-muted)_60%,var(--site-background))] dark:has-[.bordered-sidebar]:[&_header]:bg-site-background"
+        "overscroll-behavior- relative flex min-h-svh flex-col bg-site-muted/60 font-site-sans dark:bg-site-background [&_header]:bg-[color-mix(in_oklab,var(--site-muted)_60%,var(--site-background))] dark:[&_header]:bg-site-background"
       )}
     >
       <SiteHeader />

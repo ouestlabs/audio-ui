@@ -192,7 +192,7 @@ export function FramedLayout({
       )}
       {/* The inset stays in the viewport: the page scrolls inside it, under the bar. */}
       <SidebarProvider
-        className="bordered-sidebar h-[calc(100svh-var(--header-height))] min-h-0 flex-none items-stretch gap-0 px-0 [--sidebar-width:15rem] [--top-spacing:0]"
+        className="bordered-sidebar h-[calc(100svh-var(--header-height))] min-h-0 flex-none items-stretch gap-0 px-0 [--sidebar-width:15rem] [--top-spacing:0] **:data-[slot=sidebar-gap]:transition-none"
         data-framed-layout=""
         onOpenChange={setNavigationOpen}
         open={navigationOpen}

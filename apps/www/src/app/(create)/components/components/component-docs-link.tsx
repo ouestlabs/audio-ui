@@ -4,21 +4,21 @@ import { BookOpenTextIcon } from "@phosphor-icons/react/ssr";
 import Link from "next/link";
 import { useDesignSystemSearchParams } from "@/app/(create)/lib/search-params";
 import { Button } from "@/components/ui/button";
-import { useConfig } from "@/hooks/use-config";
+import { useConfigBase } from "@/hooks/use-config";
 import { useMounted } from "@/hooks/use-mounted";
 import { isCanonicalComponentDoc } from "@/lib/seo";
 
 export function ComponentDocsLink({ slug }: { slug: string }) {
   const mounted = useMounted();
   const [params] = useDesignSystemSearchParams();
-  const [config] = useConfig();
+  const configBase = useConfigBase();
 
   if (!isCanonicalComponentDoc(slug)) {
     return null;
   }
 
   const base = mounted
-    ? (params.base ?? config.base ?? "base")
+    ? (params.base ?? configBase ?? "base")
     : (params.base ?? "base");
   const docsHref = `/docs/components/${base === "radix" ? "radix" : "base"}/${slug}`;
 

@@ -1,5 +1,5 @@
-import { useAtom } from "jotai";
-import { atomWithStorage } from "jotai/utils";
+import { useAtom, useAtomValue } from "jotai";
+import { atomWithStorage, selectAtom } from "jotai/utils";
 
 import type {
   BaseColorName,
@@ -72,6 +72,19 @@ export const configAtom = atomWithStorage<Config>(
   undefined,
   { getOnInit: true }
 );
+
+const gridColumnsAtom = selectAtom(configAtom, (config) => config?.gridColumns);
+const baseAtom = selectAtom(configAtom, (config) => config?.base);
+
+/** Only the grid's columns: a change to anything else in the config leaves the reader alone. */
+export function useGridColumns() {
+  return useAtomValue(gridColumnsAtom);
+}
+
+/** Only the component library: a change to anything else in the config leaves the reader alone. */
+export function useConfigBase() {
+  return useAtomValue(baseAtom);
+}
 
 export function useConfig() {
   return useAtom(configAtom);

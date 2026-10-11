@@ -4,7 +4,7 @@ import { useQueryStates } from "nuqs";
 import { Suspense, useMemo } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
-import { useConfig } from "@/hooks/use-config";
+import { useGridColumns } from "@/hooks/use-config";
 import {
   filterCatalogBySearchQuery,
   hasActiveCatalogSearch,
@@ -51,8 +51,7 @@ function ComponentGridContent({
 }: {
   catalogItems: CatalogItem[];
 }) {
-  const [config] = useConfig();
-  const gridColumns = (config?.gridColumns ?? 2) as CatalogGridMode;
+  const gridColumns = (useGridColumns() ?? 2) as CatalogGridMode;
 
   const [filters] = useQueryStates({
     search: parseAsSearchStringClient,

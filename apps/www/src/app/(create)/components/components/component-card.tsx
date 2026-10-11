@@ -4,7 +4,7 @@ import { PreviewBar } from "@/components/preview-frame";
 import { HostedPreview, usePreviewHost } from "@/components/preview-host";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
-import { useConfig } from "@/hooks/use-config";
+import { useConfigBase } from "@/hooks/use-config";
 import { isBlock, isExpandable } from "@/lib/is-block";
 import { getPreviewHint } from "@/lib/preview-hint";
 import { getRegistryItemMetadata } from "@/lib/registry";
@@ -26,9 +26,9 @@ export function ComponentCard({
   base?: string;
 }) {
   // Get the current base preference (base or radix)
-  const [config] = useConfig();
+  const configBase = useConfigBase();
   const hosted = usePreviewHost(isExpandable(name));
-  const base = propBase || config?.base || "radix";
+  const base = propBase || configBase || "radix";
 
   // Get item from the base-specific metadata (lightweight, no React)
   const item = getRegistryItemMetadata(name, base);
