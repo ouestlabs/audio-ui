@@ -39,6 +39,7 @@ export function SiteNavTabs({
                 <Icon
                   aria-hidden
                   className="size-4 in-data-active:text-primary"
+                  weight={item.href === active ? "fill" : "regular"}
                 />
               ) : null}
               {item.label}
