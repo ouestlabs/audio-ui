@@ -110,25 +110,25 @@ const [gain, setGain] = useState(0);
 
 ### Pointer
 
-| Behavior | Details |
-| -------- | ------- |
-| **Track click / drag** | Clicking or dragging on the track updates the value from pointer position. |
-| **Thumb drag** | Dragging the thumb adjusts continuously, clamped to `min...max`. |
-| **Commit event** | `onValueCommitted` fires when an interaction ends with a new value. |
-| **Lagging value** | While dragging, the thumb follows the pointer even if a controlled `value` updates late; it returns to `value` on release. Reject a value with `eventDetails.cancel()`. |
+<KeyTable title="Behavior">
+<KeyRow gesture={"Track click / drag"}>Clicking or dragging on the track updates the value from pointer position.</KeyRow>
+<KeyRow gesture={"Thumb drag"}>Dragging the thumb adjusts continuously, clamped to `min...max`.</KeyRow>
+<KeyRow gesture={"Commit event"}>`onValueCommitted` fires when an interaction ends with a new value.</KeyRow>
+<KeyRow gesture={"Lagging value"}>While dragging, the thumb follows the pointer even if a controlled `value` updates late; it returns to `value` on release. Reject a value with `eventDetails.cancel()`.</KeyRow>
+</KeyTable>
 
 ### Keyboard
 
 Focused thumb supports:
 
-| Key | Action |
-| --- | ------ |
-| `ArrowUp` / `ArrowRight` | Increase by `step` |
-| `ArrowDown` / `ArrowLeft` | Decrease by `step` |
-| `PageUp` / `Shift` + `ArrowUp` | Increase by `largeStep` (default `10`) |
-| `PageDown` / `Shift` + `ArrowDown` | Decrease by `largeStep` (default `10`) |
-| `Home` | Set to `min` |
-| `End` | Set to `max` |
+<KeyTable title="Keys">
+<KeyRow gesture={"`ArrowUp` / `ArrowRight`"}>Increase by `step`</KeyRow>
+<KeyRow gesture={"`ArrowDown` / `ArrowLeft`"}>Decrease by `step`</KeyRow>
+<KeyRow gesture={"`PageUp` / `Shift` + `ArrowUp`"}>Increase by `largeStep` (default `10`)</KeyRow>
+<KeyRow gesture={"`PageDown` / `Shift` + `ArrowDown`"}>Decrease by `largeStep` (default `10`)</KeyRow>
+<KeyRow gesture={"`Home`"}>Set to `min`</KeyRow>
+<KeyRow gesture={"`End`"}>Set to `max`</KeyRow>
+</KeyTable>
 
 ### Wheel
 

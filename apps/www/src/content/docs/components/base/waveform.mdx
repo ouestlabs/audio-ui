@@ -234,13 +234,13 @@ While its signal is audible, a live waveform carries `data-active`. `idle` picks
 
 Colors come from CSS, and the canvas repaints when the theme changes:
 
-| Variable | Default | Purpose |
-| -------- | ------- | ------- |
-| `--waveform-color` | text color | Bars ahead of the position, and every bar of a live waveform. |
-| `--waveform-progress-color` | `--waveform-color` | Bars behind the position. |
-| `--waveform-bar-radius` | `0px` | Bar corner radius on the canvas (any CSS length). |
-| `--waveform-position` | - | Set on the root: the playback position, as a percentage. |
-| `--waveform-level` | - | Set on each bar of a `BarVisualizer`: its level, `0–1`. |
+<TypeTable title="CSS variables">
+<TypeRow name={"--waveform-color"} default={"text color"}>Bars ahead of the position, and every bar of a live waveform.</TypeRow>
+<TypeRow name={"--waveform-progress-color"} default={"--waveform-color"}>Bars behind the position.</TypeRow>
+<TypeRow name={"--waveform-bar-radius"} default={"0px"}>Bar corner radius on the canvas (any CSS length).</TypeRow>
+<TypeRow name={"--waveform-position"}>Set on the root: the playback position, as a percentage.</TypeRow>
+<TypeRow name={"--waveform-level"}>Set on each bar of a `BarVisualizer`: its level, `0–1`.</TypeRow>
+</TypeTable>
 
 The bars of a `BarVisualizer` are plain elements: restyle them with `.cn-bar-visualizer-bar`. Those the playback position has passed carry `data-played`.
 
@@ -498,16 +498,16 @@ Shown while the pointer is over the `Control`, positioned at the hovered point. 
 
 `@audio-ui/react/waveform` exposes the parts these components are built from:
 
-| Part | Role |
-| ---- | ---- |
-| `Waveform.Root` | Owns the data (`peaks`, or a live `levels` source) and the position (`value`, `source`, `duration`). Carries `data-active` while a live signal is audible. |
-| `Waveform.Control` | The seekable surface; holds the input. Leave it out for a waveform that is only shown. |
-| `Waveform.Canvas` | Draws on a canvas: `variant`, `mode`, `scrollSpeed`, `barWidth`, `barGap`, `barRadius`, `minBarHeight`, `lineWidth`, `gain`, `mirrored`, `idle`. |
-| `Waveform.Bars`, `Waveform.Bar` | Draws as elements: `count`, `minLevel`, `gain`, `mirrored`, `idle`. Each bar gets `--waveform-level`, `data-index` and `data-played`. |
-| `Waveform.Region`, `Waveform.RegionHandle` | A stretch of the timeline, and the handle of one of its edges. |
-| `Waveform.Marker` | A point on the timeline. |
-| `Waveform.Playhead`, `Waveform.Thumb` | Follow the playback position. |
-| `Waveform.Hover` | Shown at the hovered position; its children receive that position. |
+<TypeTable title="Parts">
+<TypeRow name={"Waveform.Root"}>Owns the data (`peaks`, or a live `levels` source) and the position (`value`, `source`, `duration`). Carries `data-active` while a live signal is audible.</TypeRow>
+<TypeRow name={"Waveform.Control"}>The seekable surface; holds the input. Leave it out for a waveform that is only shown.</TypeRow>
+<TypeRow name={"Waveform.Canvas"}>Draws on a canvas: `variant`, `mode`, `scrollSpeed`, `barWidth`, `barGap`, `barRadius`, `minBarHeight`, `lineWidth`, `gain`, `mirrored`, `idle`.</TypeRow>
+<TypeRow name={"Waveform.Bars, Waveform.Bar"}>Draws as elements: `count`, `minLevel`, `gain`, `mirrored`, `idle`. Each bar gets `--waveform-level`, `data-index` and `data-played`.</TypeRow>
+<TypeRow name={"Waveform.Region, Waveform.RegionHandle"}>A stretch of the timeline, and the handle of one of its edges.</TypeRow>
+<TypeRow name={"Waveform.Marker"}>A point on the timeline.</TypeRow>
+<TypeRow name={"Waveform.Playhead, Waveform.Thumb"}>Follow the playback position.</TypeRow>
+<TypeRow name={"Waveform.Hover"}>Shown at the hovered position; its children receive that position.</TypeRow>
+</TypeTable>
 
 Every part accepts a `render` prop and `className` / `style` as functions of state, and exposes that state as data attributes such as `data-disabled`, `data-dragging` and `data-loading`.
 

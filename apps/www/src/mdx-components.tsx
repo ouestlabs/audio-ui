@@ -13,7 +13,7 @@ import { DocsComponentPreview } from "@/components/docs-component-preview";
 import { DocsComponentSource } from "@/components/docs-component-source";
 import { getIconForLanguageExtension } from "@/components/icons";
 import { Mermaid } from "@/components/mermaid";
-import { TypeRow, TypeTable } from "@/components/type-table";
+import { KeyRow, KeyTable, TypeRow, TypeTable } from "@/components/type-table";
 import {
   Accordion,
   AccordionContent,
@@ -163,6 +163,8 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
       <img alt={alt} className={cn("site-rounded-md", className)} {...props} />
     ),
     Kbd,
+    KeyRow,
+    KeyTable,
     Link,
     LinkedCard: ({
       className,

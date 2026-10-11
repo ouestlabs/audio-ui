@@ -109,13 +109,13 @@ Pass **`defaultValue`** even when controlled if you use **double-tap reset**; it
 
 ### Pointer
 
-| Behavior | Details |
-| -------- | ------- |
-| **Circular drag (default)** | The value follows the rotation around the center, from the value at pointer down. The dial's 288° sweep spans `min…max`. |
-| **Vertical drag** | `dragMode="vertical"`: drag up to increase, like a fader; 150px of travel spans `min…max`. |
-| **Revolution drag** | `dragMode="revolution"`: one full 360° turn spans `min…max`. |
-| **Fine drag** | Hold `Shift` while dragging, in any mode, to turn four times slower. Only the stretch moved with `Shift` held is slowed, and small moves add up rather than rounding away. |
-| **Double-tap / double-click** | Two quick taps (each moving ≤ ~12px, within ~320ms) reset to `defaultValue`, or to the middle of the dial's travel without one. Reports `eventDetails.reason === "reset"`. |
+<KeyTable title="Behavior">
+<KeyRow gesture={"Circular drag (default)"}>The value follows the rotation around the center, from the value at pointer down. The dial's 288° sweep spans `min…max`.</KeyRow>
+<KeyRow gesture={"Vertical drag"}>`dragMode="vertical"`: drag up to increase, like a fader; 150px of travel spans `min…max`.</KeyRow>
+<KeyRow gesture={"Revolution drag"}>`dragMode="revolution"`: one full 360° turn spans `min…max`.</KeyRow>
+<KeyRow gesture={"Fine drag"}>Hold `Shift` while dragging, in any mode, to turn four times slower. Only the stretch moved with `Shift` held is slowed, and small moves add up rather than rounding away.</KeyRow>
+<KeyRow gesture={"Double-tap / double-click"}>Two quick taps (each moving ≤ ~12px, within ~320ms) reset to `defaultValue`, or to the middle of the dial's travel without one. Reports `eventDetails.reason === "reset"`.</KeyRow>
+</KeyTable>
 
 Values always **clamp** to `min…max` (no wrap). While dragging, the knob follows the pointer even if a controlled `value` updates late.
 
@@ -133,14 +133,14 @@ Away from linear, the keys and the wheel move a share of the travel (1%, or 10% 
 
 On the focused knob:
 
-| Key | Action |
-| --- | ------ |
-| `ArrowUp` / `ArrowRight` | Increase by `step` |
-| `ArrowDown` / `ArrowLeft` | Decrease by `step` |
-| `PageUp` / `Shift` + `ArrowUp` | Increase by `largeStep` (default `10`) |
-| `PageDown` / `Shift` + `ArrowDown` | Decrease by `largeStep` (default `10`) |
-| `Home` | `min` |
-| `End` | `max` |
+<KeyTable title="Keys">
+<KeyRow gesture={"`ArrowUp` / `ArrowRight`"}>Increase by `step`</KeyRow>
+<KeyRow gesture={"`ArrowDown` / `ArrowLeft`"}>Decrease by `step`</KeyRow>
+<KeyRow gesture={"`PageUp` / `Shift` + `ArrowUp`"}>Increase by `largeStep` (default `10`)</KeyRow>
+<KeyRow gesture={"`PageDown` / `Shift` + `ArrowDown`"}>Decrease by `largeStep` (default `10`)</KeyRow>
+<KeyRow gesture={"`Home`"}>`min`</KeyRow>
+<KeyRow gesture={"`End`"}>`max`</KeyRow>
+</KeyTable>
 
 ### Wheel
 

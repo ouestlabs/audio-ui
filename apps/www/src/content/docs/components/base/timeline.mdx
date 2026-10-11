@@ -364,15 +364,15 @@ Something placed at `value` on a lane: a bar number on the ruler, a cue, a grid 
 
 #### Parts
 
-| Component | Role |
-| --------- | ---- |
-| `TimelineViewport` | The scrolling window. Zooms around the pointer with Cmd/Ctrl + scroll. `scrollbar="hidden"` drops the native scrollbar. |
-| `TimelineRuler` | The lane that seeks. Holds the input; takes `aria-label` and `getAriaValueText`. |
-| `TimelineLane` | A strip the timeline's parts are placed on. `gridStep` draws a line every that many units. |
-| `TimelineMark` | Something placed at `value`: a bar number, a cue. |
-| `TimelinePlayhead` | Follows the position on the lane it sits in. |
-| `TimelineRange` | A stretch of the timeline: `value`, `defaultValue`, `minLength`, `movable`, `drawable`, `onValueChange`, `onValueCommitted`. |
-| `TimelineRangeHandle` | Resizes one `edge` of the range. |
-| `TimelineNavigator` | The whole timeline as one bar, scrolling and zooming the viewport. |
+<TypeTable title="Components">
+<TypeRow name={"TimelineViewport"}>The scrolling window. Zooms around the pointer with Cmd/Ctrl + scroll. `scrollbar="hidden"` drops the native scrollbar.</TypeRow>
+<TypeRow name={"TimelineRuler"}>The lane that seeks. Holds the input; takes `aria-label` and `getAriaValueText`.</TypeRow>
+<TypeRow name={"TimelineLane"}>A strip the timeline's parts are placed on. `gridStep` draws a line every that many units.</TypeRow>
+<TypeRow name={"TimelineMark"}>Something placed at `value`: a bar number, a cue.</TypeRow>
+<TypeRow name={"TimelinePlayhead"}>Follows the position on the lane it sits in.</TypeRow>
+<TypeRow name={"TimelineRange"}>A stretch of the timeline: `value`, `defaultValue`, `minLength`, `movable`, `drawable`, `onValueChange`, `onValueCommitted`.</TypeRow>
+<TypeRow name={"TimelineRangeHandle"}>Resizes one `edge` of the range.</TypeRow>
+<TypeRow name={"TimelineNavigator"}>The whole timeline as one bar, scrolling and zooming the viewport.</TypeRow>
+</TypeTable>
 
 `@audio-ui/react/timeline` exposes the same parts as `Timeline.Root`, `Timeline.Viewport`, `Timeline.Ruler`, `Timeline.Lane`, `Timeline.Mark`, `Timeline.Playhead`, `Timeline.Range`, `Timeline.RangeHandle`, and `Timeline.Navigator` with its `Timeline.NavigatorWindow` and `Timeline.NavigatorHandle`. Every part accepts a `render` prop and `className` / `style` as functions of state, and exposes `data-disabled`, `data-fitted` and `data-scrubbing`.

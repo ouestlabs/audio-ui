@@ -115,24 +115,24 @@ const [position, setPosition] = useState({ x: 50, y: 50 });
 
 ### Pointer
 
-| Behavior | Details |
-| -------- | ------- |
-| **Press / drag on pad** | A press jumps the value to the pointer; a drag follows it. Reported as `eventDetails.reason` `"press"` then `"drag"`. |
-| **Clamping** | Values always clamp to the configured axis ranges and snap to `stepX` / `stepY`. |
-| **Commit event** | `onValueCommitted` fires when a gesture that changed the value ends. |
-| **Lagging value** | While dragging, the cursor follows the pointer even if a controlled `value` updates late. Reject a value with `eventDetails.cancel()`. |
+<KeyTable title="Behavior">
+<KeyRow gesture={"Press / drag on pad"}>A press jumps the value to the pointer; a drag follows it. Reported as `eventDetails.reason` `"press"` then `"drag"`.</KeyRow>
+<KeyRow gesture={"Clamping"}>Values always clamp to the configured axis ranges and snap to `stepX` / `stepY`.</KeyRow>
+<KeyRow gesture={"Commit event"}>`onValueCommitted` fires when a gesture that changed the value ends.</KeyRow>
+<KeyRow gesture={"Lagging value"}>While dragging, the cursor follows the pointer even if a controlled `value` updates late. Reject a value with `eventDetails.cancel()`.</KeyRow>
+</KeyTable>
 
 ### Keyboard
 
 On the focused pad:
 
-| Key | Action |
-| --- | ------ |
-| `ArrowLeft` / `ArrowRight` | Decrease / increase X by `stepX` |
-| `ArrowUp` / `ArrowDown` | Increase / decrease Y by `stepY` |
-| `Shift` + arrow | Move by 10 steps |
-| `PageUp` / `PageDown` | Increase / decrease Y by `stepY × 10` |
-| `Home` / `End` | X to `minX` / `maxX` |
+<KeyTable title="Keys">
+<KeyRow gesture={"`ArrowLeft` / `ArrowRight`"}>Decrease / increase X by `stepX`</KeyRow>
+<KeyRow gesture={"`ArrowUp` / `ArrowDown`"}>Increase / decrease Y by `stepY`</KeyRow>
+<KeyRow gesture={"`Shift` + arrow"}>Move by 10 steps</KeyRow>
+<KeyRow gesture={"`PageUp` / `PageDown`"}>Increase / decrease Y by `stepY × 10`</KeyRow>
+<KeyRow gesture={"`Home` / `End`"}>X to `minX` / `maxX`</KeyRow>
+</KeyTable>
 
 ### Wheel
 

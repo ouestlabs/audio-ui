@@ -88,15 +88,15 @@ import { Sequencer } from "@/components/audio/elements/sequencer";
 
 ## Interaction
 
-| Gesture | What it does |
-| --- | --- |
-| Press a step | Flips it. |
-| Drag on | Paints the new state across every step the pointer crosses. |
-| Arrow keys, `Home`, `End` | Move between steps; with `Ctrl` or `Cmd`, `Home` and `End` go to the corners. |
-| `Space`, `Enter` | Flip the focused step. |
-| Press or drag on a velocity bar | Sets the velocity where the pointer is, and draws across the steps of the row. |
-| `Alt` + click, `Delete` on a velocity bar | Bring the step back to full. |
-| Arrow keys, `Page Up`/`Down`, `Home`/`End` on a velocity bar | Change the velocity by 5%, by 25%, or to silent or full. |
+<KeyTable title="Gestures">
+<KeyRow gesture={"Press a step"}>Flips it.</KeyRow>
+<KeyRow gesture={"Drag on"}>Paints the new state across every step the pointer crosses.</KeyRow>
+<KeyRow gesture={"Arrow keys, `Home`, `End`"}>Move between steps; with `Ctrl` or `Cmd`, `Home` and `End` go to the corners.</KeyRow>
+<KeyRow gesture={"`Space`, `Enter`"}>Flip the focused step.</KeyRow>
+<KeyRow gesture={"Press or drag on a velocity bar"}>Sets the velocity where the pointer is, and draws across the steps of the row.</KeyRow>
+<KeyRow gesture={"`Alt` + click, `Delete` on a velocity bar"}>Bring the step back to full.</KeyRow>
+<KeyRow gesture={"Arrow keys, `Page Up`/`Down`, `Home`/`End` on a velocity bar"}>Change the velocity by 5%, by 25%, or to silent or full.</KeyRow>
+</KeyTable>
 
 The steps are one tab stop, and each is a toggle button (`aria-pressed`) named after its row and step.
 

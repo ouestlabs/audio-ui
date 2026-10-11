@@ -118,18 +118,18 @@ const [points, setPoints] = useState(initialPoints);
 
 ### Pointer
 
-| Behavior | Details |
-| -------- | ------- |
-| **Drag a point** | Moves it; `x` clamps between its neighbors, `y` clamps to [0,1]. Never deletes. While dragging, the point follows the pointer even if a controlled `value` updates late. |
-| **Double-click empty space** | Adds a point at that location, unless at `maxPoints`. Added on a bent segment it sits on the curve, and each half is bent to keep its shape. |
-| **Double-click a point** | Removes it, unless at `minPoints`. |
-| **Hold Shift while dragging a point** | Moves it a quarter of the pointer's distance, for fine adjustments. The point does not jump when Shift is pressed or released mid-drag. |
-| **Alt + drag a segment** | Bends it, like a DAW's automation lane: the segment's midpoint follows the pointer. A flat segment, or a press away from any segment, does nothing. |
-| **Alt + double-click a segment** | Straightens it, instead of adding a point. |
-| **Alt + click a point** | Removes it, unless at `minPoints`. |
-| **Drag a segment's handle** | Bends the segment: its midpoint follows the pointer up or down. A segment between two points of the same level has nothing to bend. |
-| **Double-click a segment's handle** | Straightens the segment. |
-| **Commit event** | `onValueCommitted` fires when a drag that moved a point ends, or immediately for add/remove. |
+<KeyTable title="Behavior">
+<KeyRow gesture={"Drag a point"}>Moves it; `x` clamps between its neighbors, `y` clamps to [0,1]. Never deletes. While dragging, the point follows the pointer even if a controlled `value` updates late.</KeyRow>
+<KeyRow gesture={"Double-click empty space"}>Adds a point at that location, unless at `maxPoints`. Added on a bent segment it sits on the curve, and each half is bent to keep its shape.</KeyRow>
+<KeyRow gesture={"Double-click a point"}>Removes it, unless at `minPoints`.</KeyRow>
+<KeyRow gesture={"Hold Shift while dragging a point"}>Moves it a quarter of the pointer's distance, for fine adjustments. The point does not jump when Shift is pressed or released mid-drag.</KeyRow>
+<KeyRow gesture={"Alt + drag a segment"}>Bends it, like a DAW's automation lane: the segment's midpoint follows the pointer. A flat segment, or a press away from any segment, does nothing.</KeyRow>
+<KeyRow gesture={"Alt + double-click a segment"}>Straightens it, instead of adding a point.</KeyRow>
+<KeyRow gesture={"Alt + click a point"}>Removes it, unless at `minPoints`.</KeyRow>
+<KeyRow gesture={"Drag a segment's handle"}>Bends the segment: its midpoint follows the pointer up or down. A segment between two points of the same level has nothing to bend.</KeyRow>
+<KeyRow gesture={"Double-click a segment's handle"}>Straightens the segment.</KeyRow>
+<KeyRow gesture={"Commit event"}>`onValueCommitted` fires when a drag that moved a point ends, or immediately for add/remove.</KeyRow>
+</KeyTable>
 
 A refused add or remove sets `data-blocked` for a moment on the graph or the point, which the registry styles turn into a short shake.
 
@@ -137,21 +137,21 @@ A refused add or remove sets `data-blocked` for a moment on the graph or the poi
 
 One tab stop for the whole envelope; focus then roves between points:
 
-| Key | Action |
-| --- | ------ |
-| `ArrowUp` / `ArrowDown` | Nudge the focused point's `y` by `step` |
-| `ArrowLeft` / `ArrowRight` | Nudge the focused point's `x` by `step` (clamped between neighbors) |
-| `Shift` + arrow | Nudge by 10 steps |
-| `Delete` / `Backspace` | Remove the focused point, unless at `minPoints` |
+<KeyTable title="Keys">
+<KeyRow gesture={"`ArrowUp` / `ArrowDown`"}>Nudge the focused point's `y` by `step`</KeyRow>
+<KeyRow gesture={"`ArrowLeft` / `ArrowRight`"}>Nudge the focused point's `x` by `step` (clamped between neighbors)</KeyRow>
+<KeyRow gesture={"`Shift` + arrow"}>Nudge by 10 steps</KeyRow>
+<KeyRow gesture={"`Delete` / `Backspace`"}>Remove the focused point, unless at `minPoints`</KeyRow>
+</KeyTable>
 
 A segment's handles are sliders on their curves, with one tab stop among them:
 
-| Key | Action |
-| --- | ------ |
-| `ArrowLeft` / `ArrowRight` | Move to the previous or next segment's handle |
-| `ArrowUp` / `ArrowDown` | Lift or lower the handle, bending the segment by 5 steps |
-| `Shift` + arrow | Bend by 50 steps |
-| `Delete` / `Backspace` | Straighten the segment |
+<KeyTable title="Keys">
+<KeyRow gesture={"`ArrowLeft` / `ArrowRight`"}>Move to the previous or next segment's handle</KeyRow>
+<KeyRow gesture={"`ArrowUp` / `ArrowDown`"}>Lift or lower the handle, bending the segment by 5 steps</KeyRow>
+<KeyRow gesture={"`Shift` + arrow"}>Bend by 50 steps</KeyRow>
+<KeyRow gesture={"`Delete` / `Backspace`"}>Straighten the segment</KeyRow>
+</KeyTable>
 
 ## API reference
 

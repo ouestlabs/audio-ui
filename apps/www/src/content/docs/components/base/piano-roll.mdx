@@ -146,30 +146,30 @@ A note is `{ id, pitch, start, length, velocity? }`: `pitch` is a MIDI number (6
 
 ### Pointer
 
-| Gesture | What it does |
-| --- | --- |
-| Press on empty grid | With `mode="draw"`, draws a note whose end follows the pointer. With `mode="select"`, starts a selection rectangle (a double-click draws). `Shift` adds to the selection. |
-| Drag a note | Moves it, with the selection when it is part of it. On the grid unless <kbd>Cmd</kbd> / <kbd>Ctrl</kbd> is held. |
-| `Alt` + drag a note | Moves a copy. |
-| Drag a note's edge | Resizes it: the end changes the length, the start trims it from the front. |
-| `Shift` + click a note | Toggles it in the selection. |
-| Double-click a note | Deletes it. |
-| Drag a velocity bar | Changes the velocity of the selection by the same amount. |
-| Press a key | Plays it; with `Shift`, selects every note on its row. |
+<KeyTable title="Gestures">
+<KeyRow gesture={"Press on empty grid"}>With `mode="draw"`, draws a note whose end follows the pointer. With `mode="select"`, starts a selection rectangle (a double-click draws). `Shift` adds to the selection.</KeyRow>
+<KeyRow gesture={"Drag a note"}>Moves it, with the selection when it is part of it. On the grid unless <kbd>Cmd</kbd> / <kbd>Ctrl</kbd> is held.</KeyRow>
+<KeyRow gesture={"`Alt` + drag a note"}>Moves a copy.</KeyRow>
+<KeyRow gesture={"Drag a note's edge"}>Resizes it: the end changes the length, the start trims it from the front.</KeyRow>
+<KeyRow gesture={"`Shift` + click a note"}>Toggles it in the selection.</KeyRow>
+<KeyRow gesture={"Double-click a note"}>Deletes it.</KeyRow>
+<KeyRow gesture={"Drag a velocity bar"}>Changes the velocity of the selection by the same amount.</KeyRow>
+<KeyRow gesture={"Press a key"}>Plays it; with `Shift`, selects every note on its row.</KeyRow>
+</KeyTable>
 
 ### Keyboard
 
-| Key | What it does |
-| --- | --- |
-| Arrow keys on a note | `Left` / `Right` move it by a grid step, `Up` / `Down` by a semitone. With `Shift`: resize it, or move an octave. |
-| `Enter`, `Space` on a note | Toggle it in the selection. |
-| `Delete`, `Backspace` | Remove the selected notes. |
-| `Enter` on the grid | Adds a note at the playback position. |
-| `Escape`, <kbd>Cmd</kbd> / <kbd>Ctrl</kbd> + `A` | Clear the selection, select every note. |
-| <kbd>Cmd</kbd> / <kbd>Ctrl</kbd> + `D` | Repeat the selection right after itself and select the copies. |
-| <kbd>Cmd</kbd> / <kbd>Ctrl</kbd> + `C`, `X`, `V` | Copy, cut, and paste at the playback position. |
-| `Q` | Snap the starts of the selection (every note, with none selected) to the grid. |
-| Arrow keys, `Page Up` / `Down`, `Home` / `End` on a velocity bar | Change the velocity by 5%, by 25%, or to silent or full. |
+<KeyTable title="Keys">
+<KeyRow gesture={"Arrow keys on a note"}>`Left` / `Right` move it by a grid step, `Up` / `Down` by a semitone. With `Shift`: resize it, or move an octave.</KeyRow>
+<KeyRow gesture={"`Enter`, `Space` on a note"}>Toggle it in the selection.</KeyRow>
+<KeyRow gesture={"`Delete`, `Backspace`"}>Remove the selected notes.</KeyRow>
+<KeyRow gesture={"`Enter` on the grid"}>Adds a note at the playback position.</KeyRow>
+<KeyRow gesture={"`Escape`, `Cmd` / `Ctrl` + `A`"}>Clear the selection, select every note.</KeyRow>
+<KeyRow gesture={"`Cmd` / `Ctrl` + `D`"}>Repeat the selection right after itself and select the copies.</KeyRow>
+<KeyRow gesture={"`Cmd` / `Ctrl` + `C`, `X`, `V`"}>Copy, cut, and paste at the playback position.</KeyRow>
+<KeyRow gesture={"`Q`"}>Snap the starts of the selection (every note, with none selected) to the grid.</KeyRow>
+<KeyRow gesture={"Arrow keys, `Page Up` / `Down`, `Home` / `End` on a velocity bar"}>Change the velocity by 5%, by 25%, or to silent or full.</KeyRow>
+</KeyTable>
 
 ## API reference
 
@@ -290,11 +290,11 @@ One note's velocity, as a bar from the bottom of the lane: its height is the vel
 
 `PianoRoll` takes the `Root` props. The rest lay the editor out on two columns, the keys' and the timeline's:
 
-| Component | Description |
-| --- | --- |
-| `PianoRollViewport` | Scrolls the roll both ways, without scrollbars: put a `TimelineNavigator` above it to scroll and zoom across. |
-| `PianoRollStrip` | A row of the editor: `lead` in the keys' column, stuck to the left edge, the lanes in `children` beside it. `sticky` keeps it at the `"top"` or `"bottom"` of the viewport. |
-| `PianoRollKeys` | The keyboard down the side, one key per row. `size` is `"sm"`, `"default"` or `"lg"`. |
-| `PianoRollGrid` | The notes, on their rows. `gridStep` draws a line every step, `accentStep` a firmer one, such as each beat; anything placed on the timeline, such as a `TimelinePlayhead`, goes in `children`. |
-| `PianoRollVelocity` | Each note's velocity as a bar. |
-| `PianoRollVelocityScale` | The scale beside the velocity lane, for the `lead` of its strip. |
+<TypeTable title="Components">
+<TypeRow name={"PianoRollViewport"}>Scrolls the roll both ways, without scrollbars: put a `TimelineNavigator` above it to scroll and zoom across.</TypeRow>
+<TypeRow name={"PianoRollStrip"}>A row of the editor: `lead` in the keys' column, stuck to the left edge, the lanes in `children` beside it. `sticky` keeps it at the `"top"` or `"bottom"` of the viewport.</TypeRow>
+<TypeRow name={"PianoRollKeys"}>The keyboard down the side, one key per row. `size` is `"sm"`, `"default"` or `"lg"`.</TypeRow>
+<TypeRow name={"PianoRollGrid"}>The notes, on their rows. `gridStep` draws a line every step, `accentStep` a firmer one, such as each beat; anything placed on the timeline, such as a `TimelinePlayhead`, goes in `children`.</TypeRow>
+<TypeRow name={"PianoRollVelocity"}>Each note's velocity as a bar.</TypeRow>
+<TypeRow name={"PianoRollVelocityScale"}>The scale beside the velocity lane, for the `lead` of its strip.</TypeRow>
+</TypeTable>

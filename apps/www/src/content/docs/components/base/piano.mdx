@@ -106,23 +106,23 @@ import { Piano } from "@/components/audio/piano";
 
 ### Pointer
 
-| Behavior | Details |
-| -------- | ------- |
-| **Press a key** | Fires `onNoteOn`; the key stays pressed while held. |
-| **Release** | Fires `onNoteOff`. |
-| **Drag across keys** | Glissando — the previous key releases (`onNoteOff`) and the new one triggers (`onNoteOn`) as the pointer crosses it. |
-| **Multiple pointers** | Each pointer (finger) independently holds its own key — true polyphony on touch devices. |
+<KeyTable title="Behavior">
+<KeyRow gesture={"Press a key"}>Fires `onNoteOn`; the key stays pressed while held.</KeyRow>
+<KeyRow gesture={"Release"}>Fires `onNoteOff`.</KeyRow>
+<KeyRow gesture={"Drag across keys"}>Glissando — the previous key releases (`onNoteOff`) and the new one triggers (`onNoteOn`) as the pointer crosses it.</KeyRow>
+<KeyRow gesture={"Multiple pointers"}>Each pointer (finger) independently holds its own key — true polyphony on touch devices.</KeyRow>
+</KeyTable>
 
 ### Keyboard
 
 One tab stop for the whole keyboard; focus then roves between keys:
 
-| Key | Action |
-| --- | ------ |
-| `ArrowLeft` / `ArrowRight` (or `ArrowDown` / `ArrowUp`) | Move focus to the next lower / higher key |
-| `Shift` + arrow, `PageDown` / `PageUp` | Move focus an octave down / up |
-| `Space` / `Enter` | Hold the focused key: `onNoteOn` on press, `onNoteOff` on release |
-| `Home` / `End` | Move focus to the lowest / highest key |
+<KeyTable title="Keys">
+<KeyRow gesture={"`ArrowLeft` / `ArrowRight` (or `ArrowDown` / `ArrowUp`)"}>Move focus to the next lower / higher key</KeyRow>
+<KeyRow gesture={"`Shift` + arrow, `PageDown` / `PageUp`"}>Move focus an octave down / up</KeyRow>
+<KeyRow gesture={"`Space` / `Enter`"}>Hold the focused key: `onNoteOn` on press, `onNoteOff` on release</KeyRow>
+<KeyRow gesture={"`Home` / `End`"}>Move focus to the lowest / highest key</KeyRow>
+</KeyTable>
 
 ## API reference
 
