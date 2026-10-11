@@ -278,6 +278,7 @@ const SHORTCUTS: { action: string; keys: string[] }[] = [
   { action: "Duplicate the clip", keys: ["Cmd/Ctrl", "D"] },
   { action: "Remove the clip", keys: ["Delete"] },
   { action: "Add a locator at the cursor", keys: ["M"] },
+  { action: "Loop the selection", keys: ["Cmd/Ctrl", "L"] },
   { action: "Rename a locator", keys: ["Enter"] },
   {
     action: "Jump to the previous or next locator",
@@ -762,6 +763,21 @@ export default function BlockTimeline() {
     []
   );
 
+  /** Puts the loop around the selected clip, or around the clips of the selected track. */
+  const loopSelection = useCallback(() => {
+    const chosen = clipsRef.current.filter(
+      (clip) => clip.id === selectedId || clip.track === selectedTrack
+    );
+    if (chosen.length === 0) {
+      return;
+    }
+    setLoop([
+      Math.min(...chosen.map((clip) => clip.value.start)),
+      Math.max(...chosen.map((clip) => clip.value.start + clip.value.length)),
+    ]);
+    setLooping(true);
+  }, [selectedId, selectedTrack]);
+
   /** M adds a locator, Alt + arrows jump between them; returns whether the key was one of these. */
   const handleLocatorKey = useCallback(
     (event: KeyboardEvent<HTMLDivElement>) => {
@@ -803,6 +819,11 @@ export default function BlockTimeline() {
       if (handleLocatorKey(event)) {
         return;
       }
+      if (key === "l" && (event.metaKey || event.ctrlKey) && selection) {
+        event.preventDefault();
+        loopSelection();
+        return;
+      }
       const clip = clipsRef.current.find((item) => item.id === selectedId);
       if (key === "d" && (event.metaKey || event.ctrlKey) && clip) {
         event.preventDefault();
@@ -833,7 +854,14 @@ export default function BlockTimeline() {
         splitAtCursor();
       }
     },
-    [duration, handleLocatorKey, selectedId, selection, splitAtCursor]
+    [
+      duration,
+      handleLocatorKey,
+      loopSelection,
+      selectedId,
+      selection,
+      splitAtCursor,
+    ]
   );
 
   // The grid the lanes draw is the grid everything snaps to.

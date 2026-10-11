@@ -292,7 +292,7 @@ export const components: RegistryItem[] = [
       },
     ],
     meta: {
-      hint: "Press a track, or a clip's body, to put the cursor there, its header to select the whole track, then S (or Cmd/Ctrl + E) to split at the cursor and Cmd/Ctrl + D to duplicate. Drag a clip's title bar to move it, with Alt held to copy it, even onto another track, its edges to trim it and the corner squares to fade it (double-click one for another curve), on the grid unless Cmd/Ctrl is held, which the menu sets from adaptive to a fixed division. Drag a track's lower edge to resize it. Delete removes it. Drag across the loop strip to set a loop. Cmd/Ctrl + scroll zooms around the pointer.",
+      hint: "Press a track, or a clip's body, to put the cursor there, its header to select the whole track, then S (or Cmd/Ctrl + E) to split at the cursor and Cmd/Ctrl + D to duplicate. Drag a clip's title bar to move it, with Alt held to copy it, even onto another track, its edges to trim it and the corner squares to fade it (double-click one for another curve), on the grid unless Cmd/Ctrl is held, which the menu sets from adaptive to a fixed division. Drag a track's lower edge to resize it. Delete removes it. Drag across the loop strip to set a loop, or press Cmd/Ctrl + L to loop the selection. M adds a locator at the cursor, and Alt + arrows jump between locators. Cmd/Ctrl + scroll zooms around the pointer.",
     },
     name: "block-timeline",
     registryDependencies: [
