@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
+import { ComponentGrid } from "@/app/(create)/components/components/component-grid";
 import { searchCatalog } from "@/lib/registry";
 import { buildPageMetadata } from "@/lib/seo";
-
-import { ComponentShowcase } from "./components/component-showcase";
 
 const SHOWCASE_NAMES = [
   "block-player-widget",
@@ -62,7 +61,7 @@ export default function IndexPage() {
 
   return (
     <div className="homepage relative flex flex-1 flex-col">
-      <ComponentShowcase catalogItems={catalogItems} />
+      <ComponentGrid catalogItems={catalogItems} />
     </div>
   );
 }
