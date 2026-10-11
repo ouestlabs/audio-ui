@@ -259,6 +259,28 @@ The `musical-time` lib (`npx shadcn@latest add @audio/musical-time`) turns a tem
 - `gridInterval(division, zoom, tempo)` is the grid's step: a fixed division (`"1-bar"`, `"1/8"`, …), or `"adaptive"` for the finest division still 24px apart at this zoom. Pass `{ triplet: true }` for three in the space of two. Give the same number to `snapStep` and to the lanes' `gridStep`, so the lines you see are the places you land.
 - `barLabelInterval(zoom, tempo)` is how far apart the ruler's bar numbers go: whole bars, spread out until they no longer collide.
 - `barsBeatsAt(seconds, tempo)` and `describeBarsBeats` read a position as bars, beats and sixteenths.
+- `gridLabel(seconds, tempo)` names an interval the way a grid readout does (`"1 bar"`, `"1/16"`, `"1/8T"`), so the adaptive grid reads out the division it landed on, and a menu and a readout cannot name one grid two ways.
+- `metronomeRhythmSeconds(rhythm, tempo)` is the interval of a click rhythm (`"1/8"`, `"1/8t"`, …), or `null` for `"auto"`, which follows the beat.
+
+## Undo and redo
+
+The `history` lib (`npx shadcn@latest add @audio/history`) is undo and redo as a value: every function takes the present and hands back the present, and holds no state of its own. Keep the history in a ref and the document in state, so two undos in one tick are fed the first one's result instead of reading the same stack twice.
+
+```ts
+let history = emptyHistory<Clip[]>();
+
+// A change made in one go: delete, split, duplicate.
+history = recordChange(history, clips);
+
+// A drag reports every tick: open a burst on the first, close it on commit,
+// and the whole drag is one entry.
+history = beginChange(history, clips);
+history = settleChange(history);
+
+const step = undo(history, clips); // { history, present } or null
+```
+
+Redo goes when a new change is made, since the branch it was holding no longer follows from the present, and the depth is bounded by `HISTORY_LIMIT`. The arrangement block uses it for its undo and redo buttons and for Cmd/Ctrl + Z, with Shift (or Y) to redo.
 
 ## Placing your own parts
 

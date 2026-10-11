@@ -71,6 +71,12 @@ import { Transport } from "@/components/audio/elements/transport";
 
 The bar is three clusters joined at their seams, with gaps between clusters and never inside one: play or pause (the one filled button), stop and the position; the loop and the metronome; the tempo and the time signature. The position is three labelled figures, bar, beat and 16th, counted from `tempo` and written to the page as `source` moves, so a playing transport does not re-render. Loop and metronome are filled when on and outlined when off (`aria-pressed`), so the state is not carried by color alone; the metronome's two dots take the beat in turn. The tempo is a number field: type it and press Enter, step it with the arrow keys and the Page keys, or drag the `BPM` unit sideways to scrub it; the wheel never changes it. The loop, the metronome and the tempo clusters show only when you give their handlers.
 
+The bar is a toolbar: it takes one tab stop, and the arrow keys move between its buttons, the metronome's menu and the time signature.
+
+### The metronome's rhythm
+
+Give `onRhythmChange` and a caret beside the metronome opens a menu of how often it clicks: with the beat (`"auto"`), or a bar, a half, a quarter, an eighth, a sixteenth, each straight or as a triplet. Rhythms are named from the interval they work out to, through the same `gridLabel` the timeline's grid uses, so `1/8T` means one thing in both. The metronome's dots follow the rhythm, so they and the click are one pulse. Give `onSoundChange` with `sounds` (`{ value, label }[]`) and `sound` to list sounds in the same menu.
+
 ## API reference
 
 <TypeTable>
@@ -81,4 +87,6 @@ The bar is three clusters joined at their seams, with gaps between clusters and 
 <TypeRow name={"onStop"} type={"() => void"}>Stop was pressed.</TypeRow>
 <TypeRow name={"looping, onLoopingChange"} type={"boolean, (looping) => void"}>Whether the loop is on.</TypeRow>
 <TypeRow name={"metronome, onMetronomeChange"} type={"boolean, (metronome) => void"}>Whether the metronome is on.</TypeRow>
+<TypeRow name={"rhythm, onRhythmChange"} type={"MetronomeRhythm, (rhythm) => void"} default={"\"auto\""}>How often the click sounds, and what the metronome's dots follow. Giving the handler adds the menu.</TypeRow>
+<TypeRow name={"sound, sounds, onSoundChange"} type={"string, { value, label }[], (sound) => void"}>The click's sounds, listed in the menu when `onSoundChange` is given.</TypeRow>
 </TypeTable>
