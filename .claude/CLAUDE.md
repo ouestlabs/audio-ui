@@ -53,7 +53,7 @@ This package is **published to npm**. Don't break its public API without a chang
 
 ### Two registry trees in `apps/www/src/`
 
-- `registry/`, fork of shadcn/ui (bases, styles, icons, fonts, themes). **Synced from upstream** via `bun run registry:sync`, never hand-edit.
+- `registry/`, started as a fork of shadcn/ui (bases, styles, icons, fonts, themes) and now **belongs to audio/ui**: edit it freely so the site reflects audio/ui only (Base UI is the single base). `bun run registry:sync` pulls shadcn upstream and would bring back what was removed, so only run it on purpose.
 - `registry-audio/`, audio/ui's own registry, **the actual contribution surface**:
 
 ```

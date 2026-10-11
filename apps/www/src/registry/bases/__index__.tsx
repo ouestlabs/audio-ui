@@ -18,5 +18,4 @@ export type RegistryIndexEntry = {
 
 export const Index: Record<string, Record<string, RegistryIndexEntry>> = {
   base: {},
-  radix: {},
 };

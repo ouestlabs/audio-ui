@@ -108,16 +108,13 @@ export default function RootLayout({
           // biome-ignore lint/security/noDangerouslySetInnerHtml: puts the saved design system back before the first paint
           dangerouslySetInnerHTML={{ __html: DESIGN_SYSTEM_BOOT_SCRIPT }}
         />
-        <style
-          // biome-ignore lint/security/noDangerouslySetInnerHtml: the code theme's CSS, made by TanStack Highlight
-          dangerouslySetInnerHTML={{
-            __html: createThemeCss({
-              dark: githubDarkTheme,
-              darkSelector: ".dark",
-              light: githubLightTheme,
-            }),
-          }}
-        />
+        <style href="highlight-theme" precedence="default">
+          {createThemeCss({
+            dark: githubDarkTheme,
+            darkSelector: ".dark",
+            light: githubLightTheme,
+          })}
+        </style>
         <meta content={META_THEME_COLORS.light} name="theme-color" />
       </head>
 

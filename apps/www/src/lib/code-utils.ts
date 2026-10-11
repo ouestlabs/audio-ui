@@ -32,7 +32,7 @@ export function transformStyleClassNames(
   code: string,
   styleName: string
 ): string {
-  // Extract the visual style name (e.g., "nova" from "radix-nova")
+  // Extract the visual style name (e.g., "nova" from "base-nova")
   const style = styleName.split("-").pop() || styleName;
   const stylePrefix = `style-${style}:`;
 

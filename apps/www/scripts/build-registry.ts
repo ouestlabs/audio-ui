@@ -317,7 +317,7 @@ function parseStyleName(styleName: string): { base: string; style: string } {
       return { base, style };
     }
   }
-  return { base: "radix", style: "nova" };
+  return { base: "base", style: "nova" };
 }
 
 // ---------------------------------------------------------------------------
@@ -327,23 +327,23 @@ function parseStyleName(styleName: string): { base: string; style: string } {
 function transformImportPaths(code: string, base: string): string {
   return code
     .replace(
-      /@\/registry-audio\/bases\/__generated\/(?:base|radix)-(?:vega|nova|maia|lyra|mira|luma|rhea|sera)\/audio\//g,
+      /@\/registry-audio\/bases\/__generated\/base-(?:vega|nova|maia|lyra|mira|luma|rhea|sera)\/audio\//g,
       "@/components/audio/"
     )
     .replace(
-      /@\/registry-audio\/bases\/__generated\/(?:base|radix)-(?:vega|nova|maia|lyra|mira|luma|rhea|sera)\/ui\//g,
+      /@\/registry-audio\/bases\/__generated\/base-(?:vega|nova|maia|lyra|mira|luma|rhea|sera)\/ui\//g,
       "@/components/ui/"
     )
     .replace(
-      /@\/registry-audio\/bases\/__generated\/(?:base|radix)-(?:vega|nova|maia|lyra|mira|luma|rhea|sera)\/hooks\//g,
+      /@\/registry-audio\/bases\/__generated\/base-(?:vega|nova|maia|lyra|mira|luma|rhea|sera)\/hooks\//g,
       "@/hooks/"
     )
     .replace(
-      /@\/registry-audio\/bases\/__generated\/(?:base|radix)-(?:vega|nova|maia|lyra|mira|luma|rhea|sera)\/lib\//g,
+      /@\/registry-audio\/bases\/__generated\/base-(?:vega|nova|maia|lyra|mira|luma|rhea|sera)\/lib\//g,
       "@/lib/"
     )
     .replace(
-      /@\/registry-audio\/bases\/__generated\/(?:base|radix)-(?:vega|nova|maia|lyra|mira|luma|rhea|sera)\/components\//g,
+      /@\/registry-audio\/bases\/__generated\/base-(?:vega|nova|maia|lyra|mira|luma|rhea|sera)\/components\//g,
       "@/components/examples/"
     )
     .replace(
@@ -364,29 +364,29 @@ function transformImportPaths(code: string, base: string): string {
       "@/components/examples/"
     )
     .replace(
-      /@\/registry(?:-audio)?\/bases\/(?:base|radix)\/audio\//g,
+      /@\/registry(?:-audio)?\/bases\/base\/audio\//g,
       "@/components/audio/"
     )
     .replace(
-      /@\/registry(?:-audio)?\/bases\/(?:base|radix)\/ui\//g,
+      /@\/registry(?:-audio)?\/bases\/base\/ui\//g,
       "@/components/ui/"
     )
     .replace(
-      /@\/registry(?:-audio)?\/bases\/(?:base|radix)\/hooks\//g,
+      /@\/registry(?:-audio)?\/bases\/base\/hooks\//g,
       "@/hooks/"
     )
-    .replace(/@\/registry(?:-audio)?\/bases\/(?:base|radix)\/lib\//g, "@/lib/")
+    .replace(/@\/registry(?:-audio)?\/bases\/base\/lib\//g, "@/lib/")
     .replace(
-      /@\/registry(?:-audio)?\/bases\/(?:base|radix)\/components\//g,
+      /@\/registry(?:-audio)?\/bases\/base\/components\//g,
       "@/components/examples/"
     )
-    .replace(/@\/registry\/bases\/(?:base|radix)\/ui\//g, "@/components/ui/")
+    .replace(/@\/registry\/bases\/base\/ui\//g, "@/components/ui/")
     .replace(
-      /@\/registry\/bases\/(?:base|radix)\/audio\//g,
+      /@\/registry\/bases\/base\/audio\//g,
       "@/components/audio/"
     )
-    .replace(/@\/registry\/bases\/(?:base|radix)\/hooks\//g, "@/hooks/")
-    .replace(/@\/registry\/bases\/(?:base|radix)\/lib\//g, "@/lib/")
+    .replace(/@\/registry\/bases\/base\/hooks\//g, "@/hooks/")
+    .replace(/@\/registry\/bases\/base\/lib\//g, "@/lib/")
     .replace(
       /^\s*\/\/\s*(?:Description|Order|GridSize|PreviewHeight):.*$\n?/gm,
       ""
@@ -633,7 +633,7 @@ async function main() {
     console.log(`  ${styleName}: ${styleFiles} files`);
   }
 
-  // Note: "default" style is handled via edge redirect → radix-nova (no file duplication)
+  // Note: "default" style is handled via edge redirect → base-nova (no file duplication)
 
   // Write styles/index.json
   const stylesIndex = [

@@ -16,7 +16,7 @@ import {
 import { useDesignSystemSearchParams } from "@/app/(create)/lib/search-params";
 import { useConfig } from "@/hooks/use-config";
 import { useMounted } from "@/hooks/use-mounted";
-import { Item, ItemContent, ItemTitle } from "@/registry/bases/radix/ui/item";
+import { Item, ItemContent, ItemTitle } from "@/registry/bases/base/ui/item";
 import {
   type IconLibrary,
   type IconLibraryName,

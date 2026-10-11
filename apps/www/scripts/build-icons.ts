@@ -33,7 +33,7 @@ function scanIconUsage(): IconUsage {
   }, {} as IconUsage);
 
   // ── 1. Scan <IconPlaceholder> in registry bases ──
-  // Catalog blocks: registry-audio/bases/base/components. Only scan base, radix mirrors base.
+  // Catalog blocks: registry-audio/bases/base/components. Only scan base.
   const scanDirs = [
     path.join(process.cwd(), "src/registry/bases"),
     path.join(process.cwd(), "src/registry-audio/bases/base/components"),
@@ -189,7 +189,7 @@ async function main() {
 const isWatchMode = process.argv.includes("--watch");
 
 if (isWatchMode) {
-  // Only watch base folder - radix is a mirror created by migrate-radix.mts
+  // Only watch base folder
   const SCAN_DIRS = [
     path.join(process.cwd(), "src/registry/bases"),
     path.join(process.cwd(), "src/registry-audio/bases/base/components"),
