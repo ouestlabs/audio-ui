@@ -387,6 +387,23 @@ function stopPress(event: PointerEvent<HTMLElement>) {
 
 const NONE: string[] = [];
 
+/** The original of a clip being copied, left in its place while the copy is dragged away. */
+function CopyGhost({ clip }: { clip: Arranged }) {
+  const { length, start } = clip.value;
+  return (
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-y-1.5 overflow-hidden rounded-[inherit] border border-primary border-dashed bg-primary/10 px-2 text-primary text-xs"
+      style={{
+        left: `calc(var(--timeline-unit) * ${start})`,
+        width: `calc(var(--timeline-unit) * ${length})`,
+      }}
+    >
+      {clip.name}
+    </div>
+  );
+}
+
 const MIN_TRACK_HEIGHT = 40;
 const MAX_TRACK_HEIGHT = 240;
 const TRACK_HEIGHT_STEP = 8;
@@ -499,9 +516,12 @@ const ClipView = memo(function ArrangedClip({
   onRemove,
   onSelect,
   selected,
+  copying,
   trackName,
 }: {
   clip: Arranged;
+  /** Whether this clip is being dragged with Alt held: it is the copy, and the original stays behind. */
+  copying: boolean;
   describe: (seconds: number) => string;
   onChange: (
     id: string,
@@ -548,7 +568,11 @@ const ClipView = memo(function ArrangedClip({
   return (
     <TimelineClip
       aria-label={`${trackName}, ${clip.name}`}
-      className="inset-y-1.5"
+      className={
+        copying
+          ? "inset-y-1.5 opacity-90 shadow-lg ring-2 ring-primary"
+          : "inset-y-1.5"
+      }
       data-clip-id={clip.id}
       getAriaValueText={describe}
       onRemove={handleRemove}
@@ -559,7 +583,9 @@ const ClipView = memo(function ArrangedClip({
       sourceLength={clip.sourceLength}
       value={clip.value}
     >
-      <TimelineClipHeader>{clip.name}</TimelineClipHeader>
+      <TimelineClipHeader className={copying ? "cursor-copy" : undefined}>
+        {copying ? `+ ${clip.name}` : clip.name}
+      </TimelineClipHeader>
       <TimelineClipFade edge="in" />
       <TimelineClipFade edge="out" />
       <TimelineClipHandle aria-label={`${clip.name} start`} edge="start" />
@@ -630,6 +656,8 @@ export default function BlockTimeline() {
   clipsRef.current = clips;
   // Where a clip dragged with Alt held started: the copy stays there.
   const copyOrigin = useRef<Arranged | null>(null);
+  // The clip being dragged as a copy, shown while it is: its original stays behind as a ghost.
+  const [copying, setCopying] = useState<Arranged | null>(null);
   const [division, setDivision] = useState<GridDivision>("adaptive");
   const handleDivision = useCallback(
     (next: GridDivision | null) => setDivision(next ?? "adaptive"),
@@ -686,6 +714,7 @@ export default function BlockTimeline() {
           details.copy && details.target === "move"
             ? (clipsRef.current.find((clip) => clip.id === id) ?? null)
             : null;
+        setCopying(copyOrigin.current);
       }
       const grouped =
         details.target === "move" &&
@@ -728,6 +757,7 @@ export default function BlockTimeline() {
       const track = details.lane?.dataset.track;
       const origin = details.copy ? copyOrigin.current : null;
       copyOrigin.current = null;
+      setCopying(null);
       const group = groupOrigin.current;
       groupOrigin.current = null;
       pieces.current += 1;
@@ -1174,11 +1204,15 @@ export default function BlockTimeline() {
                   onPointerDown={focusPanel}
                   seekable
                 >
+                  {copying?.track === track.id ? (
+                    <CopyGhost clip={copying} />
+                  ) : null}
                   {clips
                     .filter((clip) => clip.track === track.id)
                     .map((clip) => (
                       <ClipView
                         clip={clip}
+                        copying={copying?.id === clip.id}
                         describe={describe}
                         key={clip.id}
                         onChange={changeClip}
