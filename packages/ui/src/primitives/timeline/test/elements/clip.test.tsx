@@ -319,6 +319,36 @@ describe("Timeline.Clip", () => {
     );
   });
 
+  test("a move says how far the clip is from where the drag began, for moving a group by as much", () => {
+    const { header, onValueChange, onValueCommitted } = renderClip();
+    fireEvent.pointerDown(header, { clientX: 80, pointerId: 1 });
+    fireEvent.pointerMove(header, { clientX: 100, pointerId: 1 });
+    expect(lastCall(onValueChange)[1]).toEqual(
+      expect.objectContaining({ delta: 10, target: "move" })
+    );
+    fireEvent.pointerMove(header, { clientX: 90, pointerId: 1 });
+    expect(lastCall(onValueChange)[1]).toEqual(
+      expect.objectContaining({ delta: 5 })
+    );
+    fireEvent.pointerUp(header, { clientX: 90, pointerId: 1 });
+    expect(lastCall(onValueCommitted)[1]).toEqual(
+      expect.objectContaining({ delta: 5 })
+    );
+  });
+
+  test("a press with Shift or Cmd held reaches onSelectedChange, for adding to a selection", () => {
+    const { header, onSelectedChange } = renderClip({ selected: false });
+    fireEvent.pointerDown(header, {
+      clientX: 80,
+      pointerId: 1,
+      shiftKey: true,
+    });
+    const details = lastCall(onSelectedChange)[1] as unknown as {
+      event: PointerEvent;
+    };
+    expect(details.event.shiftKey).toBe(true);
+  });
+
   test("a move with Alt held says it is a copy", () => {
     const { header, onValueChange, onValueCommitted } = renderClip();
     fireEvent.pointerDown(header, { altKey: true, clientX: 80, pointerId: 1 });

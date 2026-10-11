@@ -205,6 +205,10 @@ Cutting, copying and the like are plain functions on the clip, for the model beh
 
 The primitive keeps up with a large arrangement: dragging one clip among 1 000 costs about a millisecond of script, and the playhead costs nothing since it moves outside React. What costs is rendering every clip again whenever one moves, which is what happens when the clip component is not memoized. Put one clip in a `React.memo` component with stable props (the clip's own `value`, callbacks that take its id), so React skips every clip a drag did not touch.
 
+### Selecting several clips
+
+The primitive keeps no selection: `selected` and `onSelectedChange` are yours, so a selection is any set of ids you keep. `onSelectedChange` fires when a press selects a clip, and again on a press with Shift, Cmd or Ctrl held (read `eventDetails.event`), which is how you add to a selection or take from it. To move a group, read `eventDetails.delta` on a move, how far the dragged clip is from where the drag began, and move each other selected clip by the same amount from where it was when the drag began; `moveClip` keeps each on the timeline. The registry's arrangement block does all of this, with Cmd/Ctrl + A to select every clip.
+
 ### The cursor
 
 A `Timeline.Lane` with `seekable` puts the position where a press lands on its bare area, as the ruler does, and a drag scrubs it. Presses on the clips in it go to the clips. So the cursor can be put anywhere along a track, and the track's header, which is yours, is what selects the whole track. A split is then `splitClip(clip, position)` on the selected clip, or on each clip of the selected track that the cursor is over.

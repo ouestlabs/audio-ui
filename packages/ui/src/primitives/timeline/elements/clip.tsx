@@ -181,7 +181,9 @@ export function Clip(componentProps: Clip.Props) {
 
   const select = React.useCallback(
     (event: PointerEvent) => {
-      if (selected) {
+      // A selected clip is not reported again, unless the press carries Shift,
+      // Cmd or Ctrl: that is how a selection is added to or taken from.
+      if (selected && !(event.shiftKey || event.metaKey || event.ctrlKey)) {
         return;
       }
       const eventDetails = createChangeEventDetails("press", event);
@@ -414,7 +416,7 @@ export namespace Clip {
     movable?: boolean;
     /** Fires when Delete or Backspace is pressed on the clip: removing it is up to you. */
     onRemove?: (eventDetails: RemoveEventDetails) => void;
-    /** Fires when a press on the clip selects it. */
+    /** Fires when a press on the clip selects it, and again on a press with Shift, Cmd or Ctrl held, which `eventDetails.event` carries. */
     onSelectedChange?: (
       selected: boolean,
       eventDetails: SelectEventDetails

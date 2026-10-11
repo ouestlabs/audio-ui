@@ -5,6 +5,7 @@ import {
   coverClips,
   createSource,
   duplicateClip,
+  moveClip,
   splitClip,
   type Timeline as TimelinePrimitive,
 } from "@audio-ui/react";
@@ -291,6 +292,8 @@ const SHORTCUTS: { action: string; keys: string[] }[] = [
   { action: "Move or trim off the grid", keys: ["Cmd/Ctrl", "Drag"] },
   { action: "Zoom around the pointer", keys: ["Cmd/Ctrl", "Scroll"] },
   { action: "Resize a track", keys: ["Up", "Down"] },
+  { action: "Add a clip to the selection", keys: ["Shift", "Click"] },
+  { action: "Select every clip", keys: ["Cmd/Ctrl", "A"] },
   { action: "Clear the selection", keys: ["Esc"] },
 ];
 
@@ -381,6 +384,8 @@ function LocatorButton({
 function stopPress(event: PointerEvent<HTMLElement>) {
   event.stopPropagation();
 }
+
+const NONE: string[] = [];
 
 const MIN_TRACK_HEIGHT = 40;
 const MAX_TRACK_HEIGHT = 240;
@@ -508,7 +513,7 @@ const ClipView = memo(function ArrangedClip({
     details: TimelinePrimitive.Clip.CommitEventDetails
   ) => void;
   onRemove: (id: string) => void;
-  onSelect: (id: string) => void;
+  onSelect: (id: string, additive: boolean) => void;
   selected: boolean;
   trackName: string;
 }) {
@@ -517,7 +522,13 @@ const ClipView = memo(function ArrangedClip({
     [clip.id, onRemove]
   );
   const handleSelected = useCallback(
-    () => onSelect(clip.id),
+    (
+      _selected: boolean,
+      details: TimelinePrimitive.Clip.SelectEventDetails
+    ) => {
+      const { event } = details;
+      onSelect(clip.id, event.shiftKey || event.metaKey || event.ctrlKey);
+    },
     [clip.id, onSelect]
   );
   const handleChange = useCallback(
@@ -538,6 +549,7 @@ const ClipView = memo(function ArrangedClip({
     <TimelineClip
       aria-label={`${trackName}, ${clip.name}`}
       className="inset-y-1.5"
+      data-clip-id={clip.id}
       getAriaValueText={describe}
       onRemove={handleRemove}
       onSelectedChange={handleSelected}
@@ -604,13 +616,15 @@ export default function BlockTimeline() {
   const [zoomed, setZoom] = useState<number | null>(null);
   const zoom = Math.max(zoomed ?? fitPx, fitPx) || 8;
   const [clips, setClips] = useState(CLIPS);
-  // One thing is selected at a time: a clip, or a whole track by its header.
+  // The selection: some clips, added to with Shift or Cmd/Ctrl, or one whole track by its header.
   const [selection, setSelection] = useState<{
-    id: string;
-    kind: "clip" | "track";
+    clips: string[];
+    track: string | null;
   } | null>(null);
-  const selectedId = selection?.kind === "clip" ? selection.id : null;
-  const selectedTrack = selection?.kind === "track" ? selection.id : null;
+  const selectedIds = selection?.clips ?? NONE;
+  const selectedTrack = selection?.track ?? null;
+  // Where the selected clips were when a group drag began, so each moves by the same distance.
+  const groupOrigin = useRef<Map<string, Arranged> | null>(null);
   const pieces = useRef(0);
   const clipsRef = useRef(clips);
   clipsRef.current = clips;
@@ -673,11 +687,40 @@ export default function BlockTimeline() {
             ? (clipsRef.current.find((clip) => clip.id === id) ?? null)
             : null;
       }
+      const grouped =
+        details.target === "move" &&
+        details.delta !== undefined &&
+        !details.copy &&
+        selectedIds.length > 1 &&
+        selectedIds.includes(id);
+      if (grouped && !groupOrigin.current) {
+        groupOrigin.current = new Map(
+          clipsRef.current
+            .filter((clip) => selectedIds.includes(clip.id))
+            .map((clip) => [clip.id, clip])
+        );
+      }
+      const origins = grouped ? groupOrigin.current : null;
       setClips((all) =>
-        all.map((clip) => (clip.id === id ? { ...clip, value } : clip))
+        all.map((clip) => {
+          if (clip.id === id) {
+            return { ...clip, value };
+          }
+          const origin = origins?.get(clip.id);
+          return origin && details.delta !== undefined
+            ? {
+                ...clip,
+                value: moveClip(
+                  origin.value,
+                  origin.value.start + details.delta,
+                  { duration }
+                ),
+              }
+            : clip;
+        })
       );
     },
-    []
+    [duration, selectedIds]
   );
   // A clip dropped on another track moves to it.
   const commitClip = useCallback(
@@ -685,6 +728,8 @@ export default function BlockTimeline() {
       const track = details.lane?.dataset.track;
       const origin = details.copy ? copyOrigin.current : null;
       copyOrigin.current = null;
+      const group = groupOrigin.current;
+      groupOrigin.current = null;
       pieces.current += 1;
       const copyId = `${id}-${pieces.current}`;
       setClips((all) => {
@@ -695,18 +740,37 @@ export default function BlockTimeline() {
         const placed = track
           ? { ...current, track: track as Arranged["track"] }
           : current;
-        const laid = lay(all, placed, duration);
+        let laid = lay(all, placed, duration);
+        // The rest of a dragged group lands too, covering what it lies over.
+        for (const other of group?.keys() ?? []) {
+          const moved = laid.find((clip) => clip.id === other);
+          if (other !== id && moved) {
+            laid = lay(laid, moved, duration);
+          }
+        }
         return origin ? lay(laid, { ...origin, id: copyId }, duration) : laid;
       });
     },
     [duration]
   );
-  const selectClip = useCallback(
-    (id: string) => setSelection({ id, kind: "clip" }),
-    []
-  );
+  // A press selects the clip; with Shift or Cmd/Ctrl it is added to the selection, or taken from it.
+  // A press on a clip that is already in a selection keeps the selection, so the group can be dragged.
+  const selectClip = useCallback((id: string, additive: boolean) => {
+    setSelection((current) => {
+      const chosen = current?.clips ?? [];
+      if (additive) {
+        return {
+          clips: chosen.includes(id)
+            ? chosen.filter((other) => other !== id)
+            : [...chosen, id],
+          track: null,
+        };
+      }
+      return chosen.includes(id) ? current : { clips: [id], track: null };
+    });
+  }, []);
   const selectTrack = useCallback(
-    (id: string) => setSelection({ id, kind: "track" }),
+    (id: string) => setSelection({ clips: [], track: id }),
     []
   );
   // A press on empty lane puts the cursor there (the lane does it) and leaves the selection alone.
@@ -717,17 +781,23 @@ export default function BlockTimeline() {
       panelRef.current?.focus({ focusVisible: false, preventScroll: true });
     }
   }, []);
-  const removeClip = useCallback((id: string) => {
-    setClips((all) => all.filter((clip) => clip.id !== id));
-    setSelection((current) => (current?.id === id ? null : current));
-  }, []);
+  // Delete takes away the whole selection when the clip is in it.
+  const removeClip = useCallback(
+    (id: string) => {
+      const gone = selectedIds.includes(id) ? selectedIds : [id];
+      setClips((all) => all.filter((clip) => !gone.includes(clip.id)));
+      setSelection(null);
+    },
+    [selectedIds]
+  );
   // Cuts at the cursor: the selected clip, or every clip of the selected
   // track that the cursor is over.
   const splitAtCursor = useCallback(() => {
     const at = clock.getSnapshot();
     setClips((all) =>
       all.flatMap((clip) => {
-        const targeted = clip.id === selectedId || clip.track === selectedTrack;
+        const targeted =
+          selectedIds.includes(clip.id) || clip.track === selectedTrack;
         const cut = targeted ? splitClip(clip.value, at, bar / 4) : null;
         if (!cut) {
           return [clip];
@@ -739,7 +809,7 @@ export default function BlockTimeline() {
         ];
       })
     );
-  }, [bar, clock, selectedId, selectedTrack]);
+  }, [bar, clock, selectedIds, selectedTrack]);
   const addLocator = useCallback(() => {
     const at = clock.getSnapshot();
     setLocators((all) =>
@@ -767,7 +837,7 @@ export default function BlockTimeline() {
   /** Puts the loop around the selected clip, or around the clips of the selected track. */
   const loopSelection = useCallback(() => {
     const chosen = clipsRef.current.filter(
-      (clip) => clip.id === selectedId || clip.track === selectedTrack
+      (clip) => selectedIds.includes(clip.id) || clip.track === selectedTrack
     );
     if (chosen.length === 0) {
       return;
@@ -777,7 +847,7 @@ export default function BlockTimeline() {
       Math.max(...chosen.map((clip) => clip.value.start + clip.value.length)),
     ]);
     setLooping(true);
-  }, [selectedId, selectedTrack]);
+  }, [selectedIds, selectedTrack]);
 
   /** M adds a locator, Alt + arrows jump between them; returns whether the key was one of these. */
   const handleLocatorKey = useCallback(
@@ -809,6 +879,60 @@ export default function BlockTimeline() {
     },
     [addLocator, clock, locators]
   );
+  // Copies each clip of the selection right after itself, and selects the copies.
+  const duplicateSelection = useCallback(
+    (chosen: Arranged[]) => {
+      const copies = chosen.map((clip) => {
+        pieces.current += 1;
+        return {
+          ...clip,
+          id: `${clip.id}-${pieces.current}`,
+          value: duplicateClip(clip.value, {
+            duration,
+            sourceLength: clip.sourceLength,
+          }),
+        };
+      });
+      setClips((all) =>
+        copies.reduce((laid, copy) => lay(laid, copy, duration), all)
+      );
+      setSelection({ clips: copies.map((copy) => copy.id), track: null });
+      // The copies are what the user asked to see: bring them into view once they are drawn.
+      requestAnimationFrame(() => {
+        document
+          .querySelector(`[data-clip-id="${copies[0]?.id}"]`)
+          ?.scrollIntoView({ block: "nearest", inline: "nearest" });
+      });
+    },
+    [duration]
+  );
+  /** Cmd/Ctrl + A selects every clip, Cmd/Ctrl + D duplicates the selection; returns whether the key was one of these. */
+  const handleSelectionKey = useCallback(
+    (event: KeyboardEvent<HTMLDivElement>) => {
+      const key = event.key.toLowerCase();
+      if (!(event.metaKey || event.ctrlKey)) {
+        return false;
+      }
+      if (key === "a") {
+        event.preventDefault();
+        setSelection({
+          clips: clipsRef.current.map((clip) => clip.id),
+          track: null,
+        });
+        return true;
+      }
+      const chosen = clipsRef.current.filter((item) =>
+        selectedIds.includes(item.id)
+      );
+      if (key === "d" && chosen.length > 0) {
+        event.preventDefault();
+        duplicateSelection(chosen);
+        return true;
+      }
+      return false;
+    },
+    [duplicateSelection, selectedIds]
+  );
   // S, or Cmd/Ctrl + E, splits at the cursor, Cmd/Ctrl + D duplicates the clip; Escape drops the selection.
   const handleKeyDown = useCallback(
     (event: KeyboardEvent<HTMLDivElement>) => {
@@ -825,26 +949,7 @@ export default function BlockTimeline() {
         loopSelection();
         return;
       }
-      const clip = clipsRef.current.find((item) => item.id === selectedId);
-      if (key === "d" && (event.metaKey || event.ctrlKey) && clip) {
-        event.preventDefault();
-        pieces.current += 1;
-        const copyId = `${clip.id}-${pieces.current}`;
-        setClips((all) =>
-          lay(
-            all,
-            {
-              ...clip,
-              id: copyId,
-              value: duplicateClip(clip.value, {
-                duration,
-                sourceLength: clip.sourceLength,
-              }),
-            },
-            duration
-          )
-        );
-        setSelection({ id: copyId, kind: "clip" });
+      if (handleSelectionKey(event)) {
         return;
       }
       const split =
@@ -856,10 +961,9 @@ export default function BlockTimeline() {
       }
     },
     [
-      duration,
       handleLocatorKey,
+      handleSelectionKey,
       loopSelection,
-      selectedId,
       selection,
       splitAtCursor,
     ]
@@ -1081,7 +1185,7 @@ export default function BlockTimeline() {
                         onCommit={commitClip}
                         onRemove={removeClip}
                         onSelect={selectClip}
-                        selected={clip.id === selectedId}
+                        selected={selectedIds.includes(clip.id)}
                         trackName={track.name}
                       />
                     ))}

@@ -18,6 +18,11 @@ export type ClipTarget =
   | "trim-start";
 
 type WithTarget<Details> = Details & {
+  /**
+   * For a move: how far the clip is from where it was when the drag began, in
+   * the timeline's units, so a group can be moved by the same amount.
+   */
+  delta?: number;
   /** Whether Alt was held when the drag began: the clip is meant to be copied to where it lands, not moved. */
   copy?: boolean;
   /** The lane under the pointer while the clip is dragged, or null when it is over none. */
@@ -169,6 +174,7 @@ export function useClipDrag(
       createChangeEventDetails("drag", event.nativeEvent),
       {
         copy: gesture.copy,
+        delta: target === "move" ? value.start - gesture.origin.start : undefined,
         lane: target === "move" ? laneUnder(event.nativeEvent) : undefined,
         target,
       }
@@ -194,6 +200,8 @@ export function useClipDrag(
     if (gesture.changed || (lane && lane !== gesture.originLane)) {
       actions.commit(committed, {
         copy: gesture.copy,
+        delta:
+          target === "move" ? committed.start - gesture.origin.start : undefined,
         event: event.nativeEvent,
         lane,
         reason: "drag",
