@@ -681,7 +681,11 @@ const overlaps = (a: DOMRect, b: Marquee) =>
  * and the clips it touches join the selection. It is told of the selection
  * when the drag began, to add to it, and of the clips it touches as it grows.
  */
-function useMarquee(initial: string[], onSelect: (clips: string[]) => void) {
+function useMarquee(
+  initial: string[],
+  onSelect: (clips: string[]) => void,
+  multi: boolean
+) {
   const [rect, setRect] = useState<Marquee | null>(null);
   const start = useRef<{ x: number; y: number; chosen: string[] } | null>(null);
 
@@ -690,7 +694,7 @@ function useMarquee(initial: string[], onSelect: (clips: string[]) => void) {
       const bare =
         event.target instanceof Element &&
         event.target.hasAttribute("data-timeline-lane");
-      if (!(event.shiftKey && event.button === 0 && bare)) {
+      if (!((event.shiftKey || multi) && event.button === 0 && bare)) {
         return;
       }
       // The lane would take this press for the cursor: it is a marquee instead.
@@ -700,7 +704,7 @@ function useMarquee(initial: string[], onSelect: (clips: string[]) => void) {
       event.currentTarget.setPointerCapture(event.pointerId);
       start.current = { chosen: initial, x: event.clientX, y: event.clientY };
     },
-    [initial]
+    [initial, multi]
   );
   const onPointerMove = useCallback(
     (event: PointerEvent<HTMLDivElement>) => {
@@ -937,12 +941,15 @@ const ClipView = memo(function ArrangedClip({
   copying,
   lift,
   onLift,
+  multi,
   onAction,
   onRename,
   swatch,
   trackName,
 }: {
   clip: Arranged;
+  /** Whether a press adds the clip to the selection, as Shift does: a touch screen has no Shift. */
+  multi: boolean;
   /** The clip's color, an index into `SWATCHES`: the track's. */
   swatch: number;
   /** Something chosen from the clip's menu (renaming is the clip's own). */
@@ -1017,9 +1024,12 @@ const ClipView = memo(function ArrangedClip({
       details: TimelinePrimitive.Clip.SelectEventDetails
     ) => {
       const { event } = details;
-      onSelect(clip.id, event.shiftKey || event.metaKey || event.ctrlKey);
+      onSelect(
+        clip.id,
+        multi || event.shiftKey || event.metaKey || event.ctrlKey
+      );
     },
-    [clip.id, onSelect]
+    [clip.id, multi, onSelect]
   );
   const handleChange = useCallback(
     (
@@ -1046,6 +1056,7 @@ const ClipView = memo(function ArrangedClip({
     >
       <ContextMenuTrigger render={<div className="contents" />}>
         <TimelineClip
+          additive={multi}
           aria-label={`${trackName}, ${clip.name}`}
           className={cn(
             "inset-y-1.5",
@@ -1163,6 +1174,8 @@ export default function BlockTimeline() {
   const zoom = Math.max(zoomed ?? fitPx, fitPx) || 8;
   const [clips, setClips] = useState(CLIPS);
   // The selection: some clips, added to with Shift or Cmd/Ctrl, or one whole track by its header.
+  // Multi-select: a press on a clip adds it to the selection, and a drag on bare lane draws a rectangle. For touch, which has no Shift.
+  const [multi, setMulti] = useState(false);
   const [selection, setSelection] = useState<{
     clips: string[];
     track: string | null;
@@ -1172,7 +1185,7 @@ export default function BlockTimeline() {
     (chosen: string[]) => setSelection({ clips: chosen, track: null }),
     []
   );
-  const marquee = useMarquee(selectedIds, selectClips);
+  const marquee = useMarquee(selectedIds, selectClips, multi);
   const selectedTrack = selection?.track ?? null;
   // Where the selected clips were when a group drag began, so each moves by the same distance.
   const groupOrigin = useRef<Map<string, Arranged> | null>(null);
@@ -1407,12 +1420,15 @@ export default function BlockTimeline() {
   // A press on empty lane puts the cursor there (the lane does it) and lets go of the clips; a track picked by its header stays picked, to split at the cursor just put.
   // The shortcuts are caught on the panel, so a press on the lane, which takes no focus, hands it over.
   const panelRef = useRef<HTMLDivElement>(null);
-  const focusPanel = useCallback((event: PointerEvent<HTMLDivElement>) => {
-    if (event.target === event.currentTarget && !event.shiftKey) {
-      setSelection((current) => (current?.track ? current : null));
-      panelRef.current?.focus({ focusVisible: false, preventScroll: true });
-    }
-  }, []);
+  const focusPanel = useCallback(
+    (event: PointerEvent<HTMLDivElement>) => {
+      if (event.target === event.currentTarget && !event.shiftKey && !multi) {
+        setSelection((current) => (current?.track ? current : null));
+        panelRef.current?.focus({ focusVisible: false, preventScroll: true });
+      }
+    },
+    [multi]
+  );
   // Delete takes away the whole selection when the clip is in it.
   const removeClip = useCallback(
     (id: string) => {
@@ -1802,6 +1818,14 @@ export default function BlockTimeline() {
               </SelectGroup>
             </SelectContent>
           </Select>
+          <Toggle
+            aria-label="Select several clips"
+            onPressedChange={setMulti}
+            pressed={multi}
+            variant="outline"
+          >
+            Multi-select
+          </Toggle>
           <Toggle aria-label="Triplet grid" onPressedChange={setTriplet}>
             Triplet
           </Toggle>
@@ -1969,6 +1993,7 @@ export default function BlockTimeline() {
                             ? lifting.offset
                             : 0
                         }
+                        multi={multi}
                         onAction={clipAction}
                         onChange={changeClip}
                         onCommit={commitClip}

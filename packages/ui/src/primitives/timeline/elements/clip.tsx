@@ -74,6 +74,7 @@ export function Clip(componentProps: Clip.Props) {
     "aria-describedby": ariaDescribedBy,
     "aria-label": ariaLabel,
     "aria-labelledby": ariaLabelledBy,
+    additive = false,
     children,
     className,
     defaultSelected = false,
@@ -194,8 +195,12 @@ export function Clip(componentProps: Clip.Props) {
   const select = React.useCallback(
     (event: PointerEvent) => {
       // A selected clip is not reported again, unless the press carries Shift,
-      // Cmd or Ctrl: that is how a selection is added to or taken from.
-      if (selected && !(event.shiftKey || event.metaKey || event.ctrlKey)) {
+      // Cmd or Ctrl, or the clip is `additive`: that is how a selection is
+      // added to or taken from.
+      if (
+        selected &&
+        !(additive || event.shiftKey || event.metaKey || event.ctrlKey)
+      ) {
         return;
       }
       const eventDetails = createChangeEventDetails("press", event);
@@ -204,7 +209,7 @@ export function Clip(componentProps: Clip.Props) {
         setUncontrolledSelected(true);
       }
     },
-    [isSelectionControlled, onSelectedChange, selected]
+    [additive, isSelectionControlled, onSelectedChange, selected]
   );
 
   const unitsPerPixel = React.useCallback(() => {
@@ -416,6 +421,12 @@ export namespace Clip {
   >;
 
   export interface Props extends Omit<PartProps<"div", State>, "defaultValue"> {
+    /**
+     * Whether every press is reported, as one with Shift, Cmd or Ctrl held is:
+     * for building a selection where there are no modifier keys, such as a
+     * touch screen. @default false
+     */
+    additive?: boolean;
     /** Whether the clip starts selected, when `selected` is not set. @default false */
     defaultSelected?: boolean;
     /** Uncontrolled starting clip. Defaults to the whole timeline. */
@@ -431,7 +442,7 @@ export namespace Clip {
     onDragOffsetChange?: (offset: number) => void;
     /** Fires when Delete or Backspace is pressed on the clip: removing it is up to you. */
     onRemove?: (eventDetails: RemoveEventDetails) => void;
-    /** Fires when a press on the clip selects it, and again on a press with Shift, Cmd or Ctrl held, which `eventDetails.event` carries. */
+    /** Fires when a press on the clip selects it, and again on a press with Shift, Cmd or Ctrl held (or any, when `additive`), which `eventDetails.event` carries. */
     onSelectedChange?: (
       selected: boolean,
       eventDetails: SelectEventDetails

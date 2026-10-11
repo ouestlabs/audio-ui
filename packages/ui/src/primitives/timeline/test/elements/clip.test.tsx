@@ -359,6 +359,21 @@ describe("Timeline.Clip", () => {
     expect(details.event.shiftKey).toBe(true);
   });
 
+  test("a press on a selected clip is reported again when it is additive", () => {
+    const { header, onSelectedChange } = renderClip({
+      additive: true,
+      selected: true,
+    });
+    fireEvent.pointerDown(header, { clientX: 80, pointerId: 1 });
+    expect(onSelectedChange).toHaveBeenCalledTimes(1);
+  });
+
+  test("a press on a selected clip is not reported again otherwise", () => {
+    const { header, onSelectedChange } = renderClip({ selected: true });
+    fireEvent.pointerDown(header, { clientX: 80, pointerId: 1 });
+    expect(onSelectedChange).not.toHaveBeenCalled();
+  });
+
   test("a move with Alt held says it is a copy", () => {
     const { header, onValueChange, onValueCommitted } = renderClip();
     fireEvent.pointerDown(header, { altKey: true, clientX: 80, pointerId: 1 });
