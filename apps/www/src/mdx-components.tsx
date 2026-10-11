@@ -183,7 +183,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     pre: ({ className, children, ...props }: React.ComponentProps<"pre">) => (
       <pre
         className={cn(
-          "no-scrollbar min-w-0 overflow-x-auto px-4 py-3.5 outline-none has-data-[slot=tabs]:p-0",
+          "scrollbar-y min-w-0 overflow-x-auto px-4 py-3.5 outline-none has-data-[slot=tabs]:p-0",
           className
         )}
         {...props}

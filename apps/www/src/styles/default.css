@@ -272,6 +272,28 @@
   }
 }
 
+/* A vertical scrollbar only: code scrolls sideways under a fade, and down under this. */
+@utility scrollbar-y {
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 0;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--site-input);
+    border-radius: 6px;
+  }
+
+  @supports not selector(::-webkit-scrollbar) {
+    scrollbar-color: var(--site-input) transparent;
+    scrollbar-width: thin;
+  }
+}
+
 @utility border-ghost {
   @apply after:border-site-border relative after:absolute after:inset-0 after:border after:mix-blend-darken dark:after:mix-blend-lighten;
 }
@@ -409,8 +431,8 @@
     overflow-x: auto;
     color: var(--site-code-foreground);
     outline: none;
-    scrollbar-width: none;
     background: transparent;
+    @apply scrollbar-y;
   }
 
   .th-code code {
