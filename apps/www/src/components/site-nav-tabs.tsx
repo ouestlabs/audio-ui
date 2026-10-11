@@ -4,7 +4,7 @@ import { BookOpenTextIcon, CubeIcon } from "@phosphor-icons/react/ssr";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { isActive } from "@/lib/utils";
+import { cn, isActive } from "@/lib/utils";
 
 const ICONS: Record<string, typeof CubeIcon> = {
   "/components": CubeIcon,
@@ -25,7 +25,13 @@ export function SiteNavTabs({
 
   return (
     <Tabs value={active ?? null}>
-      <TabsList aria-label="Sections" className="w-full">
+      <TabsList
+        aria-label="Sections"
+        className={cn(
+          "w-full",
+          !active && "**:data-[slot=tabs-indicator]:hidden"
+        )}
+      >
         {pages.map((item) => {
           const Icon = ICONS[item.href];
           return (
