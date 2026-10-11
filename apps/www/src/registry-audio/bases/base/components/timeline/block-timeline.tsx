@@ -741,7 +741,6 @@ export default function BlockTimeline() {
     toggleFold,
     mixOf,
     redo,
-    releaseClips,
     removeClip,
     removeTrack,
     renameClip,
@@ -823,17 +822,22 @@ export default function BlockTimeline() {
     [fitPx]
   );
   const seek = useCallback((seconds: number) => clock.set(seconds), [clock]);
-  // A press on empty lane puts the cursor there (the lane does it) and lets go of the clips; a track picked by its header stays picked, to split at the cursor just put.
+  // A press on a track's empty lane puts the cursor there (the lane does it) and picks the track, letting go of the clips; on the surface under the last track it lets go of everything, as nothing is there.
   // The shortcuts are caught on the panel, so a press on the lane, which takes no focus, hands it over.
   const panelRef = useRef<HTMLDivElement>(null);
   const focusPanel = useCallback(
     (event: PointerEvent<HTMLDivElement>) => {
       if (event.target === event.currentTarget && !event.shiftKey && !multi) {
-        releaseClips();
+        const { track } = event.currentTarget.dataset;
+        if (track) {
+          selectTrack(track);
+        } else {
+          clearSelection();
+        }
         panelRef.current?.focus({ focusVisible: false, preventScroll: true });
       }
     },
-    [multi, releaseClips]
+    [clearSelection, multi, selectTrack]
   );
   const addLocator = useCallback(() => {
     const at = clock.getSnapshot();
