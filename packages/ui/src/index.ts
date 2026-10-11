@@ -6,7 +6,19 @@ export { Piano } from "./entries/piano";
 export { PianoRoll } from "./entries/piano-roll";
 export { Plot } from "./entries/plot";
 export { Sequencer } from "./entries/sequencer";
-export { Timeline } from "./entries/timeline";
+export {
+  type ClipLimits,
+  type ClipValue,
+  clipEnd,
+  duplicateClip,
+  moveClip,
+  setClipFadeIn,
+  setClipFadeOut,
+  splitClip,
+  Timeline,
+  trimClipEnd,
+  trimClipStart,
+} from "./entries/timeline";
 export { Waveform } from "./entries/waveform";
 export { XYPad } from "./entries/xypad";
 export { createSource, type Source, type WritableSource } from "./source";
