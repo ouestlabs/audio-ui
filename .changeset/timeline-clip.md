@@ -13,5 +13,6 @@ Add the clip to Timeline: a stretch of a source (a recording, a pattern) laid on
 - `coverClips` lays a clip on a lane the way a DAW does: it covers what was under it, so a clip it lies over goes, one it overlaps by an edge is trimmed (its content staying in place), and one it lies inside is cut in two around it.
 - `adjacentPoint(points, from, direction)` finds the next or previous point (a locator, a cue) from a position, for jumping between them.
 - A move reports `eventDetails.delta`, how far the clip is from where the drag began, so an app can move a whole selection by the same amount, and `onSelectedChange` reports again a press that carries Shift, Cmd or Ctrl (`eventDetails.event`) so a selection can be added to or taken from.
+- `onDragOffsetChange(offset)` follows a clip dragged up or down (in px from where the press began, and 0 when the drag ends), even when nothing moves along the lane, so the rest of a selection can follow it.
 - Events carry `eventDetails.target` (`"move"`, `"trim-start"`, `"trim-end"`, `"fade-in"`, `"fade-out"`) and `reason` (`"drag"`, `"keyboard"`, `"input-change"`).
 - The edits are plain functions too, for the model behind the clips: `moveClip`, `trimClipStart`, `trimClipEnd`, `setClipFadeIn`, `setClipFadeOut`, `splitClip`, `duplicateClip` and `clipEnd`, exported from `@audio-ui/react` and `@audio-ui/react/timeline`.

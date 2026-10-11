@@ -82,6 +82,7 @@ export function Clip(componentProps: Clip.Props) {
     getAriaValueText = describeNumber,
     minLength: minLengthProp,
     movable = true,
+    onDragOffsetChange,
     onRemove,
     onSelectedChange,
     onValueChange,
@@ -133,14 +134,25 @@ export function Clip(componentProps: Clip.Props) {
   const valueRef = React.useRef(displayedValue);
   valueRef.current = displayedValue;
 
-  const setDragging = React.useCallback((next: boolean) => {
-    draggingRef.current = next;
-    setDraggingState(next);
-    if (!next) {
-      setDragValue(null);
-      setDragOffset(0);
-    }
+  // Read at call time, so the actions below stay the same as the callback changes.
+  const offsetCallbackRef = React.useRef(onDragOffsetChange);
+  offsetCallbackRef.current = onDragOffsetChange;
+  const reportOffset = React.useCallback((pixels: number) => {
+    setDragOffset(pixels);
+    offsetCallbackRef.current?.(pixels);
   }, []);
+
+  const setDragging = React.useCallback(
+    (next: boolean) => {
+      draggingRef.current = next;
+      setDraggingState(next);
+      if (!next) {
+        setDragValue(null);
+        reportOffset(0);
+      }
+    },
+    [reportOffset]
+  );
 
   const change = React.useCallback(
     (next: ClipValue, eventDetails: ClipChangeEventDetails) => {
@@ -220,7 +232,7 @@ export function Clip(componentProps: Clip.Props) {
         commit,
         focus,
         select,
-        setDragOffset,
+        setDragOffset: reportOffset,
         setDragging,
         unitsPerPixel,
       },
@@ -249,6 +261,7 @@ export function Clip(componentProps: Clip.Props) {
       largeStep,
       limits,
       movable,
+      reportOffset,
       select,
       setDragging,
       state,
@@ -414,6 +427,8 @@ export namespace Clip {
     minLength?: number;
     /** Whether dragging the header, or the keys, moves the clip. @default true */
     movable?: boolean;
+    /** Fires as a move drags the clip up or down, in px from where the press began, and with 0 when the drag ends: what a group follows. */
+    onDragOffsetChange?: (offset: number) => void;
     /** Fires when Delete or Backspace is pressed on the clip: removing it is up to you. */
     onRemove?: (eventDetails: RemoveEventDetails) => void;
     /** Fires when a press on the clip selects it, and again on a press with Shift, Cmd or Ctrl held, which `eventDetails.event` carries. */

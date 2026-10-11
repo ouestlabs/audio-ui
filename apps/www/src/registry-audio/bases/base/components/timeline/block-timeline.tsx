@@ -596,9 +596,15 @@ const ClipView = memo(function ArrangedClip({
   onSelect,
   selected,
   copying,
+  lift,
+  onLift,
   trackName,
 }: {
   clip: Arranged;
+  /** How far, in px, the clip is held up or down by a group drag that is not its own. */
+  lift: number;
+  /** Tells the arrangement how far this clip is dragged up or down, for the rest of its group to follow. */
+  onLift: (id: string, offset: number) => void;
   /** Whether this clip is being dragged with Alt held: it is the copy, and the original stays behind. */
   copying: boolean;
   describe: (seconds: number) => string;
@@ -637,6 +643,10 @@ const ClipView = memo(function ArrangedClip({
     ) => onChange(clip.id, value, details),
     [clip.id, onChange]
   );
+  const handleDragOffset = useCallback(
+    (offset: number) => onLift(clip.id, offset),
+    [clip.id, onLift]
+  );
   const handleCommitted = useCallback(
     (
       _value: TimelinePrimitive.Clip.Value,
@@ -654,12 +664,16 @@ const ClipView = memo(function ArrangedClip({
       }
       data-clip-id={clip.id}
       getAriaValueText={describe}
+      onDragOffsetChange={handleDragOffset}
       onRemove={handleRemove}
       onSelectedChange={handleSelected}
       onValueChange={handleChange}
       onValueCommitted={handleCommitted}
       selected={selected}
       sourceLength={clip.sourceLength}
+      style={
+        lift ? { transform: `translateY(${lift}px)`, zIndex: 10 } : undefined
+      }
       value={clip.value}
     >
       <TimelineClipHeader className={copying ? "cursor-copy" : undefined}>
@@ -737,6 +751,15 @@ export default function BlockTimeline() {
   const copyOrigins = useRef<Arranged[] | null>(null);
   // The clip being dragged as a copy, shown while it is: its original stays behind as a ghost.
   const [copying, setCopying] = useState<Arranged[]>([]);
+  // A clip of a selection being dragged up or down, and how far: the rest of the selection follows it.
+  const [lifting, setLifting] = useState<{ id: string; offset: number } | null>(
+    null
+  );
+  const lift = useCallback(
+    (id: string, offset: number) =>
+      setLifting(offset === 0 ? null : { id, offset }),
+    []
+  );
   const [division, setDivision] = useState<GridDivision>("adaptive");
   const handleDivision = useCallback(
     (next: GridDivision | null) => setDivision(next ?? "adaptive"),
@@ -1295,8 +1318,17 @@ export default function BlockTimeline() {
                         )}
                         describe={describe}
                         key={clip.id}
+                        lift={
+                          lifting &&
+                          lifting.id !== clip.id &&
+                          selectedIds.includes(clip.id) &&
+                          selectedIds.includes(lifting.id)
+                            ? lifting.offset
+                            : 0
+                        }
                         onChange={changeClip}
                         onCommit={commitClip}
+                        onLift={lift}
                         onRemove={removeClip}
                         onSelect={selectClip}
                         selected={selectedIds.includes(clip.id)}

@@ -207,7 +207,7 @@ The primitive keeps up with a large arrangement: dragging one clip among 1 000 c
 
 ### Selecting several clips
 
-The primitive keeps no selection: `selected` and `onSelectedChange` are yours, so a selection is any set of ids you keep. `onSelectedChange` fires when a press selects a clip, and again on a press with Shift, Cmd or Ctrl held (read `eventDetails.event`), which is how you add to a selection or take from it. To move a group, read `eventDetails.delta` on a move, how far the dragged clip is from where the drag began, and move each other selected clip by the same amount from where it was when the drag began; `moveClip` keeps each on the timeline. The registry's arrangement block does all of this, with Cmd/Ctrl + A to select every clip.
+The primitive keeps no selection: `selected` and `onSelectedChange` are yours, so a selection is any set of ids you keep. `onSelectedChange` fires when a press selects a clip, and again on a press with Shift, Cmd or Ctrl held (read `eventDetails.event`), which is how you add to a selection or take from it. To move a group, read `eventDetails.delta` on a move, how far the dragged clip is from where the drag began, and move each other selected clip by the same amount from where it was when the drag began; `moveClip` keeps each on the timeline. For the group to follow the clip up and down too, `onDragOffsetChange` reports how far it is dragged vertically, in px, and 0 when the drag ends: shift the other selected clips by that much. A drop on another lane then moves each by as many lanes as the dragged one did. The registry's arrangement block does all of this, with Cmd/Ctrl + A to select every clip.
 
 ### The cursor
 

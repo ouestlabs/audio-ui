@@ -174,7 +174,8 @@ export function useClipDrag(
       createChangeEventDetails("drag", event.nativeEvent),
       {
         copy: gesture.copy,
-        delta: target === "move" ? value.start - gesture.origin.start : undefined,
+        delta:
+          target === "move" ? value.start - gesture.origin.start : undefined,
         lane: target === "move" ? laneUnder(event.nativeEvent) : undefined,
         target,
       }
@@ -201,7 +202,9 @@ export function useClipDrag(
       actions.commit(committed, {
         copy: gesture.copy,
         delta:
-          target === "move" ? committed.start - gesture.origin.start : undefined,
+          target === "move"
+            ? committed.start - gesture.origin.start
+            : undefined,
         event: event.nativeEvent,
         lane,
         reason: "drag",

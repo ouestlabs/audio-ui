@@ -336,6 +336,16 @@ describe("Timeline.Clip", () => {
     );
   });
 
+  test("onDragOffsetChange follows the clip's vertical drag, even when nothing moves along the lane, and returns to 0 at the end", () => {
+    const onDragOffsetChange = mock((_offset: number) => undefined);
+    const { header } = renderClip({ onDragOffsetChange });
+    fireEvent.pointerDown(header, { clientX: 80, clientY: 10, pointerId: 1 });
+    fireEvent.pointerMove(header, { clientX: 80, clientY: 55, pointerId: 1 });
+    expect(lastCall(onDragOffsetChange)[0]).toBe(45);
+    fireEvent.pointerUp(header, { clientX: 80, clientY: 55, pointerId: 1 });
+    expect(lastCall(onDragOffsetChange)[0]).toBe(0);
+  });
+
   test("a press with Shift or Cmd held reaches onSelectedChange, for adding to a selection", () => {
     const { header, onSelectedChange } = renderClip({ selected: false });
     fireEvent.pointerDown(header, {
