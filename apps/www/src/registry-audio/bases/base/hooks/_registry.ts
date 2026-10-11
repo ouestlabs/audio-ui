@@ -14,6 +14,21 @@ export const hooks: RegistryItem[] = [
     type: "registry:hook",
   },
   {
+    categories: ["audio", "timeline"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "The state of an arrangement of clips on tracks, with its operations: selection, group moves and copies, split, duplicate, delete, adding and removing tracks, per-track mix and height, and undo and redo over tracks and clips",
+    files: [
+      {
+        path: "hooks/use-arrangement.ts",
+        type: "registry:hook",
+      },
+    ],
+    name: "use-arrangement",
+    registryDependencies: ["@audio/arrangement", "@audio/history"],
+    type: "registry:hook",
+  },
+  {
     categories: ["audio", "sequencer", "piano"],
     files: [
       {

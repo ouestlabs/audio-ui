@@ -9,10 +9,12 @@ import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
+  ContextMenuSeparator,
   ContextMenuTrigger,
 } from "@/registry/bases/base/ui/context-menu";
 import { Fader } from "@/registry-audio/bases/base/audio/elements/fader";
 import { Knob } from "@/registry-audio/bases/base/audio/elements/knob";
+import type { Mix } from "@/registry-audio/bases/base/lib/arrangement";
 
 function Timeline({ className, ...props }: TimelinePrimitive.Root.Props) {
   return (
@@ -356,24 +358,6 @@ const formatPan = (pan: number) => {
   return `${pan < 0 ? "L" : "R"}${amount}`;
 };
 
-/** What a track's header sets: how loud it is, and whether it is silenced or soloed. */
-export interface Mix {
-  /** An index into `TRACK_COLORS`. */
-  color: number;
-  gain: number;
-  muted: boolean;
-  pan: number;
-  soloed: boolean;
-}
-
-export const UNITY_MIX: Mix = {
-  color: 0,
-  gain: 1,
-  muted: false,
-  pan: 0,
-  soloed: false,
-};
-
 /**
  * What a track's header holds: its name, which selects the track (its content
  * is where the cursor goes), solo, mute and gain. The lower edge resizes it.
@@ -383,6 +367,7 @@ function TimelineTrackControls({
   mix,
   name,
   onMix,
+  onRemove,
   onSelect,
   selected,
   trackId,
@@ -392,6 +377,8 @@ function TimelineTrackControls({
   mix: Mix;
   name: string;
   onMix: (trackId: string, patch: Partial<Mix>) => void;
+  /** Gives the menu a "Delete track" entry. Leave it out for tracks that cannot be removed. */
+  onRemove?: (trackId: string) => void;
   onSelect: (trackId: string) => void;
   selected: boolean;
   trackId: string;
@@ -418,6 +405,10 @@ function TimelineTrackControls({
     (event: MouseEvent<HTMLElement>) =>
       onMix(trackId, { color: Number(event.currentTarget.dataset.color) }),
     [onMix, trackId]
+  );
+  const handleRemove = useCallback(
+    () => onRemove?.(trackId),
+    [onRemove, trackId]
   );
   const handleClick = useCallback(() => onSelect(trackId), [onSelect, trackId]);
   return (
@@ -530,6 +521,14 @@ function TimelineTrackControls({
             {swatch.name}
           </ContextMenuItem>
         ))}
+        {onRemove ? (
+          <>
+            <ContextMenuSeparator />
+            <ContextMenuItem onClick={handleRemove} variant="destructive">
+              Delete track
+            </ContextMenuItem>
+          </>
+        ) : null}
       </ContextMenuContent>
     </ContextMenu>
   );

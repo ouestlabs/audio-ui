@@ -303,7 +303,7 @@ export const components: RegistryItem[] = [
       "@audio/use-simulated-levels",
       "@audio/musical-time",
       "@audio/arrangement",
-      "@audio/history",
+      "@audio/use-arrangement",
       "@shadcn/button",
       "@shadcn/button-group",
       "@shadcn/context-menu",

@@ -14,6 +14,33 @@ export interface Arranged {
   value: ClipValue;
 }
 
+/** A track of an arrangement. */
+export interface ArrangementTrack {
+  /** An index into the colors a track can take. */
+  color: number;
+  id: string;
+  name: string;
+}
+
+/** What a track's header sets: how loud it is, where it sits in the stereo field, and whether it is silenced or soloed. */
+export interface Mix {
+  /** An index into the colors a track can take. */
+  color: number;
+  gain: number;
+  muted: boolean;
+  /** From -1 (left) to 1 (right). */
+  pan: number;
+  soloed: boolean;
+}
+
+export const UNITY_MIX: Mix = {
+  color: 0,
+  gain: 1,
+  muted: false,
+  pan: 0,
+  soloed: false,
+};
+
 let pieceCount = 0;
 
 /**

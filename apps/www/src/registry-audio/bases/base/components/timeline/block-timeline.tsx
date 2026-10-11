@@ -3,9 +3,6 @@
 import {
   adjacentPoint,
   createSource,
-  duplicateClip,
-  moveClip,
-  splitClip,
   type Timeline as TimelinePrimitive,
 } from "@audio-ui/react";
 import {
@@ -59,7 +56,6 @@ import {
   COMPACT_TRACK_HEIGHT,
   MAX_TRACK_HEIGHT,
   MIN_TRACK_HEIGHT,
-  type Mix,
   Timeline,
   TimelineClip,
   TimelineClipFade,
@@ -79,28 +75,17 @@ import {
   TimelineViewport,
   TRACK_COLORS,
   TRACK_HEIGHT_STEP,
-  UNITY_MIX,
 } from "@/registry-audio/bases/base/audio/elements/timeline";
 import { Transport } from "@/registry-audio/bases/base/audio/elements/transport";
+import {
+  type ClipAction,
+  useArrangement,
+} from "@/registry-audio/bases/base/hooks/use-arrangement";
 import { useSimulatedLevels } from "@/registry-audio/bases/base/hooks/use-simulated-levels";
-import {
-  type Arranged,
-  land,
-  lay,
-  otherSelected,
-  scaleValue,
+import type {
+  Arranged,
+  ArrangementTrack,
 } from "@/registry-audio/bases/base/lib/arrangement";
-import {
-  beginChange,
-  canRedo,
-  canUndo,
-  emptyHistory,
-  type History,
-  recordChange,
-  redo,
-  settleChange,
-  undo,
-} from "@/registry-audio/bases/base/lib/history";
 import {
   barLabelInterval,
   DEFAULT_TEMPO,
@@ -154,16 +139,12 @@ const PERCENT: Intl.NumberFormatOptions = {
 
 const bars = (count: number) => count * BAR;
 
-const TRACKS = [
+const TRACKS: ArrangementTrack[] = [
   { color: 0, id: "drums", name: "Drums" },
   { color: 1, id: "bass", name: "Bass" },
   { color: 2, id: "keys", name: "Keys" },
   { color: 3, id: "vocals", name: "Vocals" },
 ] as const;
-
-const TRACK_ORDER = TRACKS.map((track) => track.id);
-
-type ClipAction = "duplicate" | "remove" | "rename" | "split" | "toggle";
 
 /** A clip's menu: what is done to it, then what is done away with. */
 function clipMenuEntries(disabled: boolean): {
@@ -489,8 +470,6 @@ function LocatorButton({
 function stopPress(event: PointerEvent<HTMLElement>) {
   event.stopPropagation();
 }
-
-const NONE: string[] = [];
 
 interface Marquee {
   height: number;
@@ -835,65 +814,49 @@ export default function BlockTimeline() {
   }, [duration]);
   const [zoomed, setZoom] = useState<number | null>(null);
   const zoom = Math.max(zoomed ?? fitPx, fitPx) || 8;
-  const [clips, setClips] = useState(CLIPS);
-  // The selection: some clips, added to with Shift or Cmd/Ctrl, or one whole track by its header.
+  const getPosition = useCallback(() => clock.getSnapshot(), [clock]);
+  const {
+    addTrack,
+    canRedo,
+    canUndo,
+    changeClip,
+    changeMix,
+    clearSelection,
+    clipAction,
+    clips,
+    commitClip,
+    copying,
+    duplicateSelection,
+    heights,
+    mixOf,
+    redo,
+    releaseClips,
+    removeClip,
+    removeTrack,
+    renameClip,
+    rescale,
+    resizeTrack,
+    selectAll,
+    selectClip,
+    selectClips,
+    selectedIds,
+    selectedTrack,
+    selection,
+    selectTrack,
+    splitAtCursor,
+    tracks,
+    undo,
+  } = useArrangement({
+    colors: TRACK_COLORS.length,
+    duration,
+    getPosition,
+    initialClips: CLIPS,
+    initialTracks: TRACKS,
+    splitStep: bar / 4,
+  });
   // Multi-select: a press on a clip adds it to the selection, and a drag on bare lane draws a rectangle. For touch, which has no Shift.
   const [multi, setMulti] = useState(false);
-  const [selection, setSelection] = useState<{
-    clips: string[];
-    track: string | null;
-  } | null>(null);
-  const selectedIds = selection?.clips ?? NONE;
-  const selectClips = useCallback(
-    (chosen: string[]) => setSelection({ clips: chosen, track: null }),
-    []
-  );
   const marquee = useMarquee(selectedIds, selectClips, multi);
-  const selectedTrack = selection?.track ?? null;
-  // Where the selected clips were when a group drag began, so each moves by the same distance.
-  const groupOrigin = useRef<Map<string, Arranged> | null>(null);
-  const pieces = useRef(0);
-  const clipsRef = useRef(clips);
-  clipsRef.current = clips;
-  // The history lives in a ref, so two undos in one tick see each other; the flags are what the buttons read.
-  const historyRef = useRef<History<Arranged[]>>(emptyHistory());
-  const [historyFlags, setHistoryFlags] = useState({
-    redo: false,
-    undo: false,
-  });
-  const setHistory = useCallback((next: History<Arranged[]>) => {
-    historyRef.current = next;
-    setHistoryFlags({ redo: canRedo(next), undo: canUndo(next) });
-  }, []);
-  // A change made in one go (delete, split, duplicate): call before it.
-  const recordEdit = useCallback(
-    () => setHistory(recordChange(historyRef.current, clipsRef.current)),
-    [setHistory]
-  );
-  const undoEdit = useCallback(() => {
-    const step = undo(historyRef.current, clipsRef.current);
-    if (!step) {
-      return;
-    }
-    setHistory(step.history);
-    clipsRef.current = step.present;
-    setClips(step.present);
-    setSelection(null);
-  }, [setHistory]);
-  const redoEdit = useCallback(() => {
-    const step = redo(historyRef.current, clipsRef.current);
-    if (!step) {
-      return;
-    }
-    setHistory(step.history);
-    clipsRef.current = step.present;
-    setClips(step.present);
-    setSelection(null);
-  }, [setHistory]);
-  // Where a clip dragged with Alt held started: the copy stays there.
-  const copyOrigins = useRef<Arranged[] | null>(null);
-  // The clip being dragged as a copy, shown while it is: its original stays behind as a ghost.
-  const [copying, setCopying] = useState<Arranged[]>([]);
   // A clip of a selection being dragged up or down, and how far: the rest of the selection follows it.
   const [lifting, setLifting] = useState<{ id: string; offset: number } | null>(
     null
@@ -912,38 +875,8 @@ export default function BlockTimeline() {
   );
   // A stand-in for the mix's levels: the block plays nothing, so they move while it runs.
   const simulated = useSimulatedLevels(2);
-  const [mixes, setMixes] = useState<Record<string, Mix>>({});
-  const mixOf = (trackId: string): Mix =>
-    mixes[trackId] ?? {
-      ...UNITY_MIX,
-      color: TRACKS.find((track) => track.id === trackId)?.color ?? 0,
-    };
-  const changeMix = useCallback(
-    (trackId: string, patch: Partial<Mix>) =>
-      setMixes((all) => ({
-        ...all,
-        [trackId]: {
-          ...(all[trackId] ?? {
-            ...UNITY_MIX,
-            color: TRACKS.find((track) => track.id === trackId)?.color ?? 0,
-          }),
-          ...patch,
-        },
-      })),
-    []
-  );
   // What is heard: a muted track is silent, and while any track is soloed so is every other.
-  const anySolo = TRACKS.some((track) => mixOf(track.id).soloed);
-  const [heights, setHeights] = useState<Record<string, number>>({});
-  const resizeTrack = useCallback(
-    (trackId: string, height: number | undefined) =>
-      setHeights((all) => {
-        // Giving the height up (a double-click) lets the track share the room again.
-        const { [trackId]: _given, ...rest } = all;
-        return height === undefined ? rest : { ...rest, [trackId]: height };
-      }),
-    []
-  );
+  const anySolo = tracks.some((track) => mixOf(track).soloed);
 
   const playPause = useCallback(() => setPlaying((on) => !on), [setPlaying]);
   // Stop goes back to the top, as a DAW's does.
@@ -956,21 +889,13 @@ export default function BlockTimeline() {
     (next: Tempo) => {
       // New bar over old: a clip three bars long stays three bars long.
       const ratio = secondsPerBar(next) / secondsPerBar(tempo);
-      setClips((all) =>
-        all.map((clip) => ({
-          ...clip,
-          sourceLength: clip.sourceLength * ratio,
-          value: scaleValue(clip.value, ratio),
-        }))
-      );
-      // The tempo is not in the history, so what came before it no longer fits.
-      setHistory(emptyHistory());
+      rescale(ratio);
       setLoop(([start, end]) => [start * ratio, end * ratio]);
       setZoom((current) => (current === null ? null : current / ratio));
       clock.set(clock.getSnapshot() * ratio);
       setTempo(next);
     },
-    [clock, setHistory, tempo]
+    [clock, rescale, tempo]
   );
   // The zoom as a share of the fitted view: 100% shows everything.
   const zoomRatio = fitPx > 0 ? zoom / fitPx : 1;
@@ -980,170 +905,17 @@ export default function BlockTimeline() {
     [fitPx]
   );
   const seek = useCallback((seconds: number) => clock.set(seconds), [clock]);
-  const changeClip = useCallback(
-    (
-      id: string,
-      value: TimelinePrimitive.Clip.Value,
-      details: TimelinePrimitive.Clip.ChangeEventDetails
-    ) => {
-      if (!(details.copy && copyOrigins.current)) {
-        // A copy of a clip in a selection copies the whole selection.
-        const dragged = clipsRef.current.filter((clip) =>
-          selectedIds.length > 1 && selectedIds.includes(id)
-            ? selectedIds.includes(clip.id)
-            : clip.id === id
-        );
-        copyOrigins.current =
-          details.copy && details.target === "move" ? dragged : null;
-        setCopying(copyOrigins.current ?? []);
-      }
-      const grouped =
-        details.target === "move" &&
-        details.delta !== undefined &&
-        selectedIds.length > 1 &&
-        selectedIds.includes(id);
-      if (grouped && !groupOrigin.current) {
-        groupOrigin.current = new Map(
-          clipsRef.current
-            .filter((clip) => selectedIds.includes(clip.id))
-            .map((clip) => [clip.id, clip])
-        );
-      }
-      const origins = grouped ? groupOrigin.current : null;
-      // The first tick of a gesture keeps what it started from; the commit closes it.
-      setHistory(beginChange(historyRef.current, clipsRef.current));
-      setClips((all) =>
-        all.map((clip) => {
-          if (clip.id === id) {
-            return { ...clip, value };
-          }
-          const origin = origins?.get(clip.id);
-          return origin && details.delta !== undefined
-            ? {
-                ...clip,
-                value: moveClip(
-                  origin.value,
-                  origin.value.start + details.delta,
-                  { duration }
-                ),
-              }
-            : clip;
-        })
-      );
-    },
-    [duration, selectedIds, setHistory]
-  );
-  // A clip dropped on another track moves to it.
-  const commitClip = useCallback(
-    (id: string, details: TimelinePrimitive.Clip.CommitEventDetails) => {
-      const track = details.lane?.dataset.track;
-      const origins = details.copy ? (copyOrigins.current ?? []) : [];
-      copyOrigins.current = null;
-      setCopying([]);
-      const group = groupOrigin.current;
-      groupOrigin.current = null;
-      setHistory(settleChange(historyRef.current));
-      const copyIds = origins.map((origin) => {
-        pieces.current += 1;
-        return `${origin.id}-${pieces.current}`;
-      });
-      setClips((all) =>
-        land(all, {
-          copyIds,
-          duration,
-          group: group ? [...group.keys()] : otherSelected(selectedIds, id),
-          id,
-          order: TRACK_ORDER,
-          origins,
-          track,
-        })
-      );
-    },
-    [duration, selectedIds, setHistory]
-  );
-  // A press selects the clip; with Shift or Cmd/Ctrl it is added to the selection, or taken from it.
-  // A press on a clip that is already in a selection keeps the selection, so the group can be dragged.
-  const selectClip = useCallback((id: string, additive: boolean) => {
-    setSelection((current) => {
-      const chosen = current?.clips ?? [];
-      if (additive) {
-        return {
-          clips: chosen.includes(id)
-            ? chosen.filter((other) => other !== id)
-            : [...chosen, id],
-          track: null,
-        };
-      }
-      return chosen.includes(id) ? current : { clips: [id], track: null };
-    });
-  }, []);
-  const selectTrack = useCallback(
-    (id: string) => setSelection({ clips: [], track: id }),
-    []
-  );
   // A press on empty lane puts the cursor there (the lane does it) and lets go of the clips; a track picked by its header stays picked, to split at the cursor just put.
   // The shortcuts are caught on the panel, so a press on the lane, which takes no focus, hands it over.
   const panelRef = useRef<HTMLDivElement>(null);
   const focusPanel = useCallback(
     (event: PointerEvent<HTMLDivElement>) => {
       if (event.target === event.currentTarget && !event.shiftKey && !multi) {
-        setSelection((current) => (current?.track ? current : null));
+        releaseClips();
         panelRef.current?.focus({ focusVisible: false, preventScroll: true });
       }
     },
-    [multi]
-  );
-  // Delete takes away the whole selection when the clip is in it.
-  const removeClip = useCallback(
-    (id: string) => {
-      const gone = selectedIds.includes(id) ? selectedIds : [id];
-      recordEdit();
-      setClips((all) => all.filter((clip) => !gone.includes(clip.id)));
-      setSelection(null);
-    },
-    [recordEdit, selectedIds]
-  );
-  // Cuts at the cursor: the selected clip, or every clip of the selected
-  // track that the cursor is over.
-  const splitWhere = useCallback(
-    (targets: (clip: Arranged) => boolean) => {
-      const at = clock.getSnapshot();
-      recordEdit();
-      setClips((all) =>
-        all.flatMap((clip) => {
-          const cut = targets(clip) ? splitClip(clip.value, at, bar / 4) : null;
-          if (!cut) {
-            return [clip];
-          }
-          pieces.current += 1;
-          return [
-            { ...clip, value: cut[0] },
-            { ...clip, id: `${clip.id}-${pieces.current}`, value: cut[1] },
-          ];
-        })
-      );
-    },
-    [bar, clock, recordEdit]
-  );
-  const splitAtCursor = useCallback(
-    () =>
-      splitWhere(
-        (clip) => selectedIds.includes(clip.id) || clip.track === selectedTrack
-      ),
-    [selectedIds, selectedTrack, splitWhere]
-  );
-  const renameClip = useCallback(
-    (id: string, name: string) => {
-      const next = name.trim();
-      if (!next || next === clipsRef.current.find((c) => c.id === id)?.name) {
-        return;
-      }
-      recordEdit();
-      setClips((all) =>
-        all.map((clip) => (clip.id === id ? { ...clip, name: next } : clip))
-      );
-    },
-    [recordEdit]
+    [multi, releaseClips]
   );
   const addLocator = useCallback(() => {
     const at = clock.getSnapshot();
@@ -1171,7 +943,7 @@ export default function BlockTimeline() {
 
   /** Puts the loop around the selected clip, or around the clips of the selected track. */
   const loopSelection = useCallback(() => {
-    const chosen = clipsRef.current.filter(
+    const chosen = clips.filter(
       (clip) => selectedIds.includes(clip.id) || clip.track === selectedTrack
     );
     if (chosen.length === 0) {
@@ -1182,7 +954,7 @@ export default function BlockTimeline() {
       Math.max(...chosen.map((clip) => clip.value.start + clip.value.length)),
     ]);
     setLooping(true);
-  }, [selectedIds, selectedTrack]);
+  }, [clips, selectedIds, selectedTrack]);
 
   /** M adds a locator, Alt + arrows jump between them; returns whether the key was one of these. */
   const handleLocatorKey = useCallback(
@@ -1214,56 +986,15 @@ export default function BlockTimeline() {
     },
     [addLocator, clock, locators]
   );
-  // Copies each clip of the selection right after itself, and selects the copies.
-  const duplicateSelection = useCallback(
-    (chosen: Arranged[]) => {
-      const copies = chosen.map((clip) => {
-        pieces.current += 1;
-        return {
-          ...clip,
-          id: `${clip.id}-${pieces.current}`,
-          value: duplicateClip(clip.value, {
-            duration,
-            sourceLength: clip.sourceLength,
-          }),
-        };
-      });
-      recordEdit();
-      setClips((all) =>
-        copies.reduce((laid, copy) => lay(laid, copy, duration), all)
-      );
-      setSelection({ clips: copies.map((copy) => copy.id), track: null });
-      // The copies are what the user asked to see: bring them into view once they are drawn.
-      requestAnimationFrame(() => {
-        document
-          .querySelector(`[data-clip-id="${copies[0]?.id}"]`)
-          ?.scrollIntoView({ block: "nearest", inline: "nearest" });
-      });
-    },
-    [duration, recordEdit]
-  );
-  // What the clip's menu does: to the whole selection when the clip is in it, else to the clip alone.
-  const clipAction = useCallback(
-    (action: ClipAction, id: string) => {
-      const ids = selectedIds.includes(id) ? selectedIds : [id];
-      if (action === "remove") {
-        removeClip(id);
-      } else if (action === "duplicate") {
-        duplicateSelection(clipsRef.current.filter((c) => ids.includes(c.id)));
-      } else if (action === "split") {
-        splitWhere((clip) => ids.includes(clip.id));
-      } else if (action === "toggle") {
-        const off = !clipsRef.current.find((c) => c.id === id)?.disabled;
-        recordEdit();
-        setClips((all) =>
-          all.map((clip) =>
-            ids.includes(clip.id) ? { ...clip, disabled: off } : clip
-          )
-        );
-      }
-    },
-    [duplicateSelection, recordEdit, removeClip, selectedIds, splitWhere]
-  );
+  // The copies are what the user asked to see: bring them into view once they are drawn.
+  const duplicateAndShow = useCallback(() => {
+    const copies = duplicateSelection();
+    requestAnimationFrame(() => {
+      document
+        .querySelector(`[data-clip-id="${copies[0]?.id}"]`)
+        ?.scrollIntoView({ block: "nearest", inline: "nearest" });
+    });
+  }, [duplicateSelection]);
   /** Cmd/Ctrl + A selects every clip, Cmd/Ctrl + D duplicates the selection; returns whether the key was one of these. */
   const handleSelectionKey = useCallback(
     (event: KeyboardEvent<HTMLDivElement>) => {
@@ -1274,37 +1005,31 @@ export default function BlockTimeline() {
       if (key === "z" || key === "y") {
         event.preventDefault();
         if (key === "y" || event.shiftKey) {
-          redoEdit();
+          redo();
         } else {
-          undoEdit();
+          undo();
         }
         return true;
       }
       if (key === "a") {
         event.preventDefault();
-        setSelection({
-          clips: clipsRef.current.map((clip) => clip.id),
-          track: null,
-        });
+        selectAll();
         return true;
       }
-      const chosen = clipsRef.current.filter((item) =>
-        selectedIds.includes(item.id)
-      );
-      if (key === "d" && chosen.length > 0) {
+      if (key === "d" && selectedIds.length > 0) {
         event.preventDefault();
-        duplicateSelection(chosen);
+        duplicateAndShow();
         return true;
       }
       return false;
     },
-    [duplicateSelection, redoEdit, selectedIds, undoEdit]
+    [duplicateAndShow, redo, selectAll, selectedIds, undo]
   );
   // S, or Cmd/Ctrl + E, splits at the cursor, Cmd/Ctrl + D duplicates the clip; Escape drops the selection.
   const handleKeyDown = useCallback(
     (event: KeyboardEvent<HTMLDivElement>) => {
       if (event.key === "Escape") {
-        setSelection(null);
+        clearSelection();
         return;
       }
       const key = event.key.toLowerCase();
@@ -1388,8 +1113,8 @@ export default function BlockTimeline() {
           <ButtonGroup>
             <Button
               aria-label="Undo"
-              disabled={!historyFlags.undo}
-              onClick={undoEdit}
+              disabled={!canUndo}
+              onClick={undo}
               size="icon"
               variant="outline"
             >
@@ -1403,8 +1128,8 @@ export default function BlockTimeline() {
             </Button>
             <Button
               aria-label="Redo"
-              disabled={!historyFlags.redo}
-              onClick={redoEdit}
+              disabled={!canRedo}
+              onClick={redo}
               size="icon"
               variant="outline"
             >
@@ -1482,6 +1207,16 @@ export default function BlockTimeline() {
               </SelectGroup>
             </SelectContent>
           </Select>
+          <Button onClick={addTrack} size="sm" variant="outline">
+            <IconPlaceholder
+              hugeicons="PlusSignIcon"
+              lucide="PlusIcon"
+              phosphor="PlusIcon"
+              remixicon="RiAddLine"
+              tabler="IconPlus"
+            />
+            Add track
+          </Button>
           <Toggle
             aria-label="Select several clips"
             onPressedChange={setMulti}
@@ -1589,7 +1324,7 @@ export default function BlockTimeline() {
                 <TimelinePlayhead />
               </TimelineLane>
             </Row>
-            {TRACKS.map((track) => (
+            {tracks.map((track) => (
               <Row
                 className={cn(
                   "border-foreground/25 border-b",
@@ -1603,9 +1338,10 @@ export default function BlockTimeline() {
                       heights[track.id] !== undefined &&
                       heights[track.id] < COMPACT_TRACK_HEIGHT
                     }
-                    mix={mixOf(track.id)}
+                    mix={mixOf(track)}
                     name={track.name}
                     onMix={changeMix}
+                    onRemove={tracks.length > 1 ? removeTrack : undefined}
                     onSelect={selectTrack}
                     selected={track.id === selectedTrack}
                     trackId={track.id}
@@ -1625,8 +1361,7 @@ export default function BlockTimeline() {
                       "**:data-clip-id:inset-y-0.5",
                     track.id === selectedTrack && "bg-muted/40",
                     // A silent track keeps its clips on the page, drained.
-                    (mixOf(track.id).muted ||
-                      (anySolo && !mixOf(track.id).soloed)) &&
+                    (mixOf(track).muted || (anySolo && !mixOf(track).soloed)) &&
                       "**:data-clip-id:opacity-40"
                   )}
                   data-track={track.id}
@@ -1666,7 +1401,7 @@ export default function BlockTimeline() {
                         onRename={renameClip}
                         onSelect={selectClip}
                         selected={selectedIds.includes(clip.id)}
-                        swatch={mixOf(track.id).color}
+                        swatch={mixOf(track).color}
                         trackName={track.name}
                       />
                     ))}
