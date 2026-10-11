@@ -193,11 +193,11 @@ export function TypeRow(props: TypeRowProps) {
       </CollapsibleTrigger>
       {/* Closed, what it does is hidden until the page's own search finds it: Cmd/Ctrl + F opens the row that has the text. */}
       {children ? (
-        <CollapsibleContent
-          className={cn("px-3 pb-3 ps-[2.125rem]", textClassName)}
-          hiddenUntilFound
-        >
-          {children}
+        <CollapsibleContent hiddenUntilFound>
+          {/* The padding is inside: a closed panel hidden until found still takes its own. */}
+          <div className={cn("px-3 pb-3 ps-[2.125rem]", textClassName)}>
+            {children}
+          </div>
         </CollapsibleContent>
       ) : null}
     </Collapsible>
