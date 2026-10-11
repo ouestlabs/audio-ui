@@ -115,7 +115,10 @@ function TimelineTrackHeader({
 }: TimelinePrimitive.TrackHeader.Props) {
   return (
     <TimelinePrimitive.TrackHeader
-      className={cn("cn-timeline-track-header", className)}
+      className={cn(
+        "cn-timeline-track-header hover:[--timeline-track-header-z:30] focus-within:[--timeline-track-header-z:30]",
+        className
+      )}
       data-slot="timeline-track-header"
       {...props}
     />

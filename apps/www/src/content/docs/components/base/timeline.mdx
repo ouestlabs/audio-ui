@@ -403,7 +403,7 @@ One track of the arrangement: a row holding a header beside a lane. Renders a `<
 
 ### TrackHeader
 
-The strip beside a track's lane that names it and holds what sets it. It stays at the left edge while the lane scrolls under it, and carries the track's `data-selected` and `data-resizing`. Renders a `<div>` element.
+The strip beside a track's lane that names it and holds what sets it. It stays at the left edge while the lane scrolls under it, at the stacking level of the `--timeline-track-header-z` CSS variable (20): raise it while the header is hovered or focused if it shows something that reaches into the next row, such as a value readout. It carries the track's `data-selected` and `data-resizing`. Renders a `<div>` element.
 
 ### TrackResizeHandle
 

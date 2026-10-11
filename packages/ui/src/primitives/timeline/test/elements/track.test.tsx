@@ -87,6 +87,12 @@ describe("Timeline.TrackHeader", () => {
     expect(header.style.left).toBe("0px");
   });
 
+  test("sits above the lane's parts, at a level a header can raise", () => {
+    expect(renderTrack().header.style.zIndex).toBe(
+      "var(--timeline-track-header-z, 20)"
+    );
+  });
+
   test("carries the track's selection", () => {
     expect(
       renderTrack({ selected: true }).header.hasAttribute("data-selected")
