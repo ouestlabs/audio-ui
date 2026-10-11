@@ -509,12 +509,9 @@ export function useArrangement({
     },
     [edit]
   );
-  /** Removes a track with the clips on it; one track always stays. */
+  /** Removes a track with the clips on it; the last one can go too. */
   const removeTrack = useCallback(
     (id: string) => {
-      if (docRef.current.tracks.length <= 1) {
-        return;
-      }
       edit((current) => ({
         clips: current.clips.filter((clip) => clip.track !== id),
         tracks: current.tracks.filter((track) => track.id !== id),

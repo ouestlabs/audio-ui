@@ -1210,7 +1210,7 @@ export default function BlockTimeline() {
                     onDuplicate={duplicateTrack}
                     onInsert={addTrack}
                     onMix={changeMix}
-                    onRemove={tracks.length > 1 ? removeTrack : undefined}
+                    onRemove={removeTrack}
                     onRename={renameTrack}
                     onSelect={selectTrack}
                     onToggleFold={toggleFold}

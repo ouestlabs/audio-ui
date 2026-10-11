@@ -302,7 +302,7 @@ const arrangement = useArrangement({
 arrangement.changeClip; // Timeline.Clip's onValueChange, by id
 arrangement.commitClip; // its onValueCommitted: lands a drag, on another track too
 arrangement.addTrack();
-arrangement.removeTrack(id); // with its clips; one track always stays
+arrangement.removeTrack(id); // with its clips; any track can go, the last included
 arrangement.undo();
 ```
 
