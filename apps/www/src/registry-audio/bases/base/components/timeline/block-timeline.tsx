@@ -56,6 +56,7 @@ import {
 import { Toggle } from "@/registry/bases/base/ui/toggle";
 import { NumberControl } from "@/registry-audio/bases/base/audio/elements/bpm-control";
 import { Fader } from "@/registry-audio/bases/base/audio/elements/fader";
+import { Meter } from "@/registry-audio/bases/base/audio/elements/meter";
 import {
   Timeline,
   TimelineClip,
@@ -76,6 +77,7 @@ import {
   TimelineViewport,
 } from "@/registry-audio/bases/base/audio/elements/timeline";
 import { Transport } from "@/registry-audio/bases/base/audio/elements/transport";
+import { useSimulatedLevels } from "@/registry-audio/bases/base/hooks/use-simulated-levels";
 import {
   beginChange,
   canRedo,
@@ -230,6 +232,12 @@ interface Mix {
   muted: boolean;
   soloed: boolean;
 }
+
+/** What the master meter shows while nothing plays. */
+const SILENCE = {
+  getSnapshot: () => ({ levels: [-60, -60], peaks: [-60, -60] }),
+  subscribe: () => () => undefined,
+};
 
 const UNITY: Mix = { gain: 1, muted: false, soloed: false };
 
@@ -1132,6 +1140,14 @@ export default function BlockTimeline() {
     (next: GridDivision | null) => setDivision(next ?? "adaptive"),
     []
   );
+  // A stand-in for the mix's levels: the block plays nothing, so they move while it runs.
+  const simulated = useSimulatedLevels(2);
+  const [master, setMaster] = useState(1);
+  const handleMaster = useCallback(
+    (value: number | readonly number[]) =>
+      setMaster(Array.isArray(value) ? value[0] : Number(value)),
+    []
+  );
   const [mixes, setMixes] = useState<Record<string, Mix>>({});
   const mixOf = (trackId: string) => mixes[trackId] ?? UNITY;
   const changeMix = useCallback(
@@ -1686,6 +1702,30 @@ export default function BlockTimeline() {
           >
             Snap {snap ? gridLabel(gridSeconds, tempo) : "off"}
           </Toggle>
+          <div className="flex items-center gap-2">
+            <Meter
+              aria-label="Master output level"
+              className="w-20"
+              orientation="horizontal"
+              peakMarks="hidden"
+              size="sm"
+              source={playing ? simulated : SILENCE}
+              warnThreshold={-12}
+            />
+            <Fader
+              aria-label="Master gain"
+              className="w-20"
+              max={1}
+              min={0}
+              onValueChange={handleMaster}
+              orientation="horizontal"
+              size="sm"
+              step={0.01}
+              thumbMarks={false}
+              value={master}
+              valueLabel="hidden"
+            />
+          </div>
           <NumberControl
             format={PERCENT}
             label="Zoom"
