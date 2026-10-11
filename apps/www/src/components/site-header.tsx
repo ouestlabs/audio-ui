@@ -121,7 +121,7 @@ export function SiteSidebarHeader() {
         <SiteHeaderModeSwitcher />
       </div>
       <SiteNavTabs items={siteConfig.navItems} />
-      <div className="[&>*]:w-full [&>*>button:last-child]:flex-1 [&>*>button:last-child]:justify-start">
+      <div className="[&>*]:w-full [&>*>button:last-child]:flex-1 [&>*>button:last-child]:justify-end [&>*>button:last-child]:px-2">
         <SiteHeaderCommandMenu
           commandGroups={commandGroups}
           componentCategories={componentCategories}
