@@ -132,6 +132,7 @@ export function Thumb(componentProps: Thumb.Props) {
         ? getAriaValueText(formattedValue, value, axis)
         : formattedValue,
       disabled: state.disabled,
+      name: meta.name === undefined ? undefined : `${meta.name}.${axis}`,
       max: axis === "x" ? state.maxX : state.maxY,
       min: axis === "x" ? state.minX : state.minY,
       onKeyDown: handleKeyDown,

@@ -15,6 +15,8 @@ export interface XYPadContextValue {
     formatter: Intl.NumberFormat;
     inputRef: React.RefObject<HTMLInputElement | null>;
     labelId: string | undefined;
+    /** Names the two native inputs for a form: `name.x` and `name.y`. */
+    name: string | undefined;
     /** Value position, 0…1 from the left. */
     percentX: number;
     /** Value position, 0…1 from the bottom. */

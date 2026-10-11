@@ -363,3 +363,37 @@ describe("XYPad.Label", () => {
     expect(inputX?.getAttribute("aria-labelledby")).toContain(label.id);
   });
 });
+
+describe("XYPad in a form", () => {
+  test("submits both axes as name.x and name.y", () => {
+    const view = render(
+      <form data-testid="form">
+        <XYPad.Root defaultValue={{ x: 10, y: 20 }} name="pad">
+          <XYPad.Control>
+            <XYPad.Thumb aria-label="Pad" />
+          </XYPad.Control>
+        </XYPad.Root>
+      </form>
+    );
+    const data = new FormData(view.getByTestId("form") as HTMLFormElement);
+    expect([...data.entries()]).toEqual([
+      ["pad.x", "10"],
+      ["pad.y", "20"],
+    ]);
+  });
+
+  test("submits nothing without a name", () => {
+    const view = render(
+      <form data-testid="form">
+        <XYPad.Root>
+          <XYPad.Control>
+            <XYPad.Thumb aria-label="Pad" />
+          </XYPad.Control>
+        </XYPad.Root>
+      </form>
+    );
+    expect([
+      ...new FormData(view.getByTestId("form") as HTMLFormElement).entries(),
+    ]).toEqual([]);
+  });
+});

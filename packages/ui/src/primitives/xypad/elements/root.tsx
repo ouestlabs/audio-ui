@@ -31,6 +31,7 @@ export function Root(componentProps: Root.Props) {
     maxY = 100,
     minX = 0,
     minY = 0,
+    name,
     onValueChange,
     onValueCommitted,
     ref,
@@ -169,6 +170,7 @@ export function Root(componentProps: Root.Props) {
         formatter,
         inputRef,
         labelId,
+        name,
         percentX,
         percentY,
         resetValue,
@@ -186,6 +188,7 @@ export function Root(componentProps: Root.Props) {
       formatPair,
       formatter,
       labelId,
+      name,
       percentX,
       percentY,
       resetValue,
@@ -267,6 +270,8 @@ export namespace Root {
     minX?: number;
     /** @default 0 */
     minY?: number;
+    /** Names the pad for a form: its two inputs submit as `name.x` and `name.y`. */
+    name?: string;
     /** Fires on every change: press, drag, keyboard, wheel and input changes. */
     onValueChange?: (value: Point, eventDetails: ChangeEventDetails) => void;
     /** Fires when an interaction ends with a new value. */
