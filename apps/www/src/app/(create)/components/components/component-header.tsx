@@ -1,6 +1,7 @@
 "use client";
 
 import { SidebarIcon, SlidersHorizontalIcon } from "@phosphor-icons/react/ssr";
+import { FrameHeader } from "@/components/custom/frame";
 import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
 import { useSidebar } from "@/components/ui/sidebar";
@@ -21,7 +22,7 @@ export function ComponentHeader() {
   const { toggleCustomizer } = useCustomizer();
 
   return (
-    <div className="sticky top-0 z-20 flex items-center gap-2 border-site-border/80 border-b bg-site-background p-2">
+    <FrameHeader className="min-h-11 shrink-0 flex-row items-center gap-2 px-2 py-1.5">
       {!open && (
         <Tooltip>
           <TooltipTrigger
@@ -69,6 +70,6 @@ export function ComponentHeader() {
           </TooltipContent>
         </Tooltip>
       </div>
-    </div>
+    </FrameHeader>
   );
 }

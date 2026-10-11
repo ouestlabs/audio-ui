@@ -159,11 +159,9 @@ export function ComponentsProvider({
                 "m-2 mt-0 h-[calc(100svh-var(--header-height)-0.5rem)] min-h-0 flex-1 bg-site-muted/50 shadow-none"
               )}
             >
-              <FrameContent className="flex min-h-0 flex-1 flex-col">
-                <ComponentHeader />
-                <div className="scroll-fade-y no-scrollbar flex min-h-0 flex-1 flex-col overflow-y-auto">
-                  {children}
-                </div>
+              <ComponentHeader />
+              <FrameContent className="scroll-fade-y no-scrollbar flex min-h-0 flex-1 flex-col overflow-y-auto">
+                {children}
               </FrameContent>
             </SidebarInset>
             <CustomizerPanel />

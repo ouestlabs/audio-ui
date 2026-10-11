@@ -8,7 +8,7 @@ import {
 } from "@/app/(create)/components/components/components-context";
 import { CustomizerPanel } from "@/app/(create)/components/components/customizer-panel";
 import { LocksProvider } from "@/app/(create)/hooks/use-locks";
-import { Frame, FrameContent } from "@/components/custom/frame";
+import { Frame, FrameContent, FrameHeader } from "@/components/custom/frame";
 import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
 import { SidebarProvider, useSidebar } from "@/components/ui/sidebar";
@@ -128,29 +128,28 @@ export function DocsShell({
           <div className="hidden lg:contents">{nav}</div>
           <InsetPane>
             <Frame className="h-full">
-              <FrameContent className="flex min-h-0 flex-1 flex-col">
-                {/* The bar of the inset: the customizer's button sits here, in the page, not over it. */}
-                <div className="flex shrink-0 items-center justify-between gap-2 border-site-border/80 border-b p-2">
-                  <NavigationToggle />
-                  <Button
-                    aria-expanded={customizerOpen}
-                    aria-label="Customize"
-                    onClick={toggleCustomizer}
-                    size="sm"
-                    variant="outline"
-                  >
-                    <SlidersHorizontalIcon aria-hidden weight="bold" />
-                    <span className="hidden sm:inline">Customize</span>
-                    <Kbd className="hidden sm:inline-flex">C</Kbd>
-                  </Button>
-                </div>
-                <div
-                  className="scroll-fade-y no-scrollbar flex min-h-0 flex-1 flex-col overflow-y-auto"
-                  data-docs-scroll=""
+              {/* The bar of the inset: the customizer's button sits here, in the page, not over it. */}
+              <FrameHeader className="min-h-11 shrink-0 flex-row items-center justify-between gap-2 px-2 py-1.5">
+                <NavigationToggle />
+                <Button
+                  aria-expanded={customizerOpen}
+                  aria-label="Customize"
+                  onClick={toggleCustomizer}
+                  size="sm"
+                  variant="outline"
                 >
-                  <div className="flex-1 px-4 sm:px-8">{children}</div>
-                  {footer}
-                </div>
+                  <SlidersHorizontalIcon aria-hidden weight="bold" />
+                  <span className="hidden sm:inline">Customize</span>
+                  <Kbd className="hidden sm:inline-flex">C</Kbd>
+                </Button>
+              </FrameHeader>
+              {/* The panel: the page, scrolling under the header. */}
+              <FrameContent
+                className="scroll-fade-y no-scrollbar flex min-h-0 flex-1 flex-col overflow-y-auto"
+                data-docs-scroll=""
+              >
+                <div className="flex-1 px-4 sm:px-8">{children}</div>
+                {footer}
               </FrameContent>
             </Frame>
           </InsetPane>
