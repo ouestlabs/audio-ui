@@ -364,16 +364,22 @@ const formatPan = (pan: number) => {
  */
 function TimelineTrackControls({
   compact,
+  folded,
   mix,
   name,
   onMix,
   onRemove,
   onSelect,
+  onToggleFold,
   selected,
   trackId,
 }: {
   /** Whether the track is short: one row, with no gain. */
   compact: boolean;
+  /** Whether the track is folded to a strip: the caret opens it. */
+  folded?: boolean;
+  /** Gives the header a caret that folds the track. */
+  onToggleFold?: (trackId: string) => void;
   mix: Mix;
   name: string;
   onMix: (trackId: string, patch: Partial<Mix>) => void;
@@ -410,6 +416,10 @@ function TimelineTrackControls({
     () => onRemove?.(trackId),
     [onRemove, trackId]
   );
+  const handleFold = useCallback(
+    () => onToggleFold?.(trackId),
+    [onToggleFold, trackId]
+  );
   const handleClick = useCallback(() => onSelect(trackId), [onSelect, trackId]);
   return (
     <ContextMenu>
@@ -425,6 +435,24 @@ function TimelineTrackControls({
         }
       >
         <div className="flex items-center gap-1">
+          {onToggleFold ? (
+            <Button
+              aria-expanded={!folded}
+              aria-label={`${folded ? "Unfold" : "Fold"} ${name}`}
+              onClick={handleFold}
+              size="icon-xs"
+              variant="ghost"
+            >
+              <IconPlaceholder
+                className={cn(!folded && "rotate-90")}
+                hugeicons="ArrowRight01Icon"
+                lucide="ChevronRightIcon"
+                phosphor="CaretRightIcon"
+                remixicon="RiArrowRightSLine"
+                tabler="IconChevronRight"
+              />
+            </Button>
+          ) : null}
           <button
             aria-pressed={selected}
             className="min-w-0 flex-1 truncate text-left font-medium outline-none hover:underline focus-visible:underline"

@@ -50,6 +50,8 @@ export interface UseArrangementOptions {
   /** How many colors a track can take: new tracks cycle through them. @default 5 */
   colors?: number;
   duration: number;
+  /** The height of a folded track, in px. @default 28 */
+  foldedHeight?: number;
   /** The playback position, in the timeline's units: where a split cuts. */
   getPosition: () => number;
   initialClips?: Arranged[];
@@ -69,6 +71,7 @@ export interface UseArrangementOptions {
 export function useArrangement({
   colors = 5,
   duration,
+  foldedHeight = 28,
   getPosition,
   initialClips = [],
   initialTracks,
@@ -483,15 +486,31 @@ export function useArrangement({
     []
   );
   const [heights, setHeights] = useState<Record<string, number>>({});
+  // Folded tracks are strips: they keep the height set by hand for when they open again.
+  const [folded, setFolded] = useState<Record<string, boolean>>({});
+  const toggleFold = useCallback(
+    (trackId: string) =>
+      setFolded((all) => ({ ...all, [trackId]: !all[trackId] })),
+    []
+  );
   const resizeTrack = useCallback(
-    (trackId: string, height: number | undefined) =>
+    (trackId: string, height: number | undefined) => {
+      // Resizing a folded track opens it.
+      setFolded((all) => ({ ...all, [trackId]: false }));
       setHeights((all) => {
         // Giving the height up lets the track share the room again.
         const { [trackId]: _given, ...rest } = all;
         return height === undefined ? rest : { ...rest, [trackId]: height };
-      }),
+      });
+    },
     []
   );
+  const shownHeights = { ...heights };
+  for (const id of Object.keys(folded)) {
+    if (folded[id]) {
+      shownHeights[id] = foldedHeight;
+    }
+  }
 
   return {
     addTrack,
@@ -505,7 +524,8 @@ export function useArrangement({
     commitClip,
     copying,
     duplicateSelection,
-    heights,
+    folded,
+    heights: shownHeights,
     mixOf,
     redo: redoEdit,
     releaseClips,
@@ -523,6 +543,7 @@ export function useArrangement({
     selectTrack,
     splitAtCursor,
     tracks,
+    toggleFold,
     undo: undoEdit,
   };
 }

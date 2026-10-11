@@ -708,7 +708,9 @@ export default function BlockTimeline() {
     commitClip,
     copying,
     duplicateSelection,
+    folded,
     heights,
+    toggleFold,
     mixOf,
     redo,
     releaseClips,
@@ -1222,11 +1224,13 @@ export default function BlockTimeline() {
                       heights[track.id] !== undefined &&
                       heights[track.id] < COMPACT_TRACK_HEIGHT
                     }
+                    folded={folded[track.id]}
                     mix={mixOf(track)}
                     name={track.name}
                     onMix={changeMix}
                     onRemove={tracks.length > 1 ? removeTrack : undefined}
                     onSelect={selectTrack}
+                    onToggleFold={toggleFold}
                     selected={track.id === selectedTrack}
                     trackId={track.id}
                   />
