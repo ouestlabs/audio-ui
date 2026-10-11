@@ -306,7 +306,7 @@ arrangement.removeTrack(id); // with its clips; one track always stays
 arrangement.undo();
 ```
 
-It also gives `selectClip`, `selectClips`, `selectAll`, `selectTrack`, `splitAtCursor`, `duplicateSelection`, `removeClip`, `renameClip`, `clipAction` (a clip's menu: duplicate, split, switch off, delete), `mixOf` and `changeMix` (gain, pan, mute, solo, color), `heights` and `resizeTrack`, and `rescale(ratio)` for a tempo change, which also clears the history since it is not part of it.
+It also gives `selectClip`, `selectClips`, `selectAll`, `selectTrack`, `splitAtCursor`, `duplicateSelection`, `removeClip`, `renameClip`, `clipAction` (a clip's menu: duplicate, split, switch off, delete), `mixOf` and `changeMix` (gain, pan, mute, solo, color), `heights` and `resizeTrack`, `folded` and `toggleFold` (a folded track is a strip of `foldedHeight` px that keeps its own height for when it opens), and `rescale(ratio)` for a tempo change, which also clears the history since it is not part of it.
 
 ## Placing your own parts
 
