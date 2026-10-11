@@ -12,7 +12,6 @@ import { useIsDesktopCustomizer } from "@/app/(create)/components/components/use
 import { Frame, FrameContent, FrameHeader } from "@/components/custom/frame";
 import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
-import { Separator } from "@/components/ui/separator";
 import { SidebarProvider, useSidebar } from "@/components/ui/sidebar";
 import {
   Tooltip,
@@ -231,9 +230,8 @@ export function FramedLayout({
                 {actions}
                 {navigationOpen ? null : (
                   <div className="hidden items-center gap-2 lg:flex">
-                    <Separator className="h-5" orientation="vertical" />
+                    <span aria-hidden className="h-5 w-px bg-site-border" />
                     {closedEnd}
-                    <Separator className="h-5" orientation="vertical" />
                   </div>
                 )}
                 <CustomizeToggle />

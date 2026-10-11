@@ -129,7 +129,6 @@ export function SiteSidebarHeader() {
             navItems={siteConfig.navItems}
           />
         </div>
-        <Separator className="h-5" orientation="vertical" />
         <GitHubLink />
       </div>
     </div>
@@ -160,7 +159,6 @@ export function SiteBarContent({ part }: { part: "end" | "start" }) {
           navItems={siteConfig.navItems}
         />
       </div>
-      <Separator className="h-5" orientation="vertical" />
       <GitHubLink />
       <SiteHeaderModeSwitcher />
     </div>
