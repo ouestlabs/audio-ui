@@ -66,11 +66,8 @@ export function ComponentPreviewTabs({
         <div
           className={cn(
             "preview flex h-72 w-full justify-center p-10 font-sans data-[chromeless=true]:h-auto data-[align=start]:items-start data-[align=end]:items-end data-[align=center]:items-center data-[chromeless=true]:p-0",
-            // A block is the page, not a thing in a frame: as tall as it is, edge to edge.
-            fitContent &&
-              "h-auto p-0 [&>.cn-audio-panel]:rounded-none [&>.cn-audio-panel]:border-0",
-            // The expand button sits over the block's corner: leave it room.
-            expandLabel && "[&>.cn-audio-panel]:pt-12",
+            // A block is as tall as it is: a fixed height would cut it.
+            fitContent && "h-auto",
             previewClassName
           )}
           data-align={align}
