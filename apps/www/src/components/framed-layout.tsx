@@ -55,14 +55,16 @@ function useShortcut(key: string, action: () => void) {
   }, [key, action]);
 }
 
-/** The inset's place: an even margin all round, except where the navigation sidebar already leaves one. */
+/** The inset's place: an even margin all round, except where a sidebar already leaves one: both sides keep the same distance. */
 function InsetPane({ children }: { children: React.ReactNode }) {
   const { state } = useSidebar();
+  const { customizerOpen } = useCustomizer();
   return (
     <div
       className={cn(
         "min-h-0 min-w-0 flex-1 p-2 pt-0 lg:pt-2",
-        state === "expanded" && "lg:pl-0"
+        state === "expanded" && "lg:pl-0",
+        customizerOpen && "lg:pr-0"
       )}
     >
       {children}
