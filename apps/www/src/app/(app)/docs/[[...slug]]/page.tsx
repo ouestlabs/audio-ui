@@ -149,7 +149,7 @@ export default async function Page(props: {
                   <h1 className="scroll-m-20 font-semibold text-4xl tracking-tight sm:text-3xl xl:text-4xl">
                     {docHeadingTitle}
                   </h1>
-                  <div className="docs-nav fixed inset-x-0 bottom-0 isolate z-50 flex items-center gap-2 border-site-border/50 border-t bg-site-background/80 px-6 py-4 backdrop-blur-sm sm:static sm:z-0 sm:border-t-0 sm:bg-transparent sm:px-0 sm:pt-1.5 sm:backdrop-blur-none">
+                  <div className="docs-nav flex items-center gap-2 pt-1.5">
                     <DocsCopyPage page={raw} url={absoluteUrl(page.url)} />
 
                     {neighbours.previous && (
