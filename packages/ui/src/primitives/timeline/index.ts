@@ -14,4 +14,7 @@ export { Playhead } from "./elements/playhead";
 export { Range, RangeHandle } from "./elements/range";
 export { Root } from "./elements/root";
 export { Ruler } from "./elements/ruler";
+export { Track } from "./elements/track";
+export { TrackHeader } from "./elements/track-header";
+export { TrackResizeHandle } from "./elements/track-resize-handle";
 export { Viewport } from "./elements/viewport";

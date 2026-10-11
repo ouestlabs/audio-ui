@@ -70,6 +70,9 @@ import {
   TimelineRange,
   TimelineRangeHandle,
   TimelineRuler,
+  TimelineTrack,
+  TimelineTrackHeader,
+  TimelineTrackResizeHandle,
   TimelineViewport,
 } from "@/registry-audio/bases/base/audio/elements/timeline";
 import { Transport } from "@/registry-audio/bases/base/audio/elements/transport";
@@ -101,7 +104,7 @@ const BARS = 32;
 /** The arrangement is laid out at the first tempo; a tempo change keeps its musical positions. */
 const BAR = secondsPerBar(DEFAULT_TEMPO);
 /** The width of a track header, which the lanes start after. */
-const LEAD_PX = 112;
+const LEAD_PX = 160;
 const MAX_ZOOM = 240;
 /** The zoom's steps are loupes, not a minus and a plus. */
 const ZOOM_STEPPERS = {
@@ -437,23 +440,42 @@ function Row({
   className,
   height,
   lead,
+  onResize,
+  selected,
+  trackId,
 }: {
   children: ReactNode;
   className?: string;
   /** A height set by hand: the row keeps it instead of sharing what is left. */
   height?: number;
   lead?: ReactNode;
+  onResize?: (trackId: string, height: number) => void;
+  selected?: boolean;
+  trackId?: string;
 }) {
+  const handleHeight = useCallback(
+    (next: number) => {
+      if (trackId !== undefined) {
+        onResize?.(trackId, next);
+      }
+    },
+    [onResize, trackId]
+  );
   return (
-    <div
-      className={`flex min-w-full ${className ?? ""}`}
-      style={height === undefined ? undefined : { height }}
+    <TimelineTrack
+      className={className}
+      height={height}
+      maxHeight={MAX_TRACK_HEIGHT}
+      minHeight={MIN_TRACK_HEIGHT}
+      onHeightChange={handleHeight}
+      selected={selected}
+      step={TRACK_HEIGHT_STEP}
     >
-      <div className="sticky left-0 z-20 flex w-40 shrink-0 items-stretch border-e bg-background text-sm">
+      <TimelineTrackHeader className="relative flex items-stretch">
         {lead}
-      </div>
+      </TimelineTrackHeader>
       <div className="flex flex-1 flex-col">{children}</div>
-    </div>
+    </TimelineTrack>
   );
 }
 
@@ -686,31 +708,22 @@ const MIN_TRACK_HEIGHT = 40;
 const MAX_TRACK_HEIGHT = 240;
 const TRACK_HEIGHT_STEP = 8;
 
-const clampHeight = (value: number) =>
-  Math.min(MAX_TRACK_HEIGHT, Math.max(MIN_TRACK_HEIGHT, value));
-
 /**
- * A track's header: pressing it selects the whole track, its content is where
- * the cursor goes. Its lower edge resizes the track, by dragging or with the
- * arrow keys.
+ * What a track's header holds: its name, which selects the track (its content
+ * is where the cursor goes), solo, mute and gain. The lower edge resizes it.
  */
 function TrackHeader({
-  height,
   mix,
   name,
   onMix,
-  onResize,
   onSelect,
   selected,
   swatch,
   trackId,
 }: {
-  /** The height set by hand, or none while the track shares what is left. */
-  height: number | undefined;
   mix: Mix;
   name: string;
   onMix: (trackId: Arranged["track"], patch: Partial<Mix>) => void;
-  onResize: (trackId: Arranged["track"], height: number) => void;
   onSelect: (trackId: Arranged["track"]) => void;
   selected: boolean;
   /** The border class that colors the track's leading edge. */
@@ -731,57 +744,11 @@ function TrackHeader({
     [onMix, trackId]
   );
   const handleClick = useCallback(() => onSelect(trackId), [onSelect, trackId]);
-  const resize = useRef<{ height: number; y: number } | null>(null);
-  const handlePointerDown = useCallback(
-    (event: PointerEvent<HTMLDivElement>) => {
-      event.currentTarget.setPointerCapture(event.pointerId);
-      // From what the track measures now, which is what it shares out while unset.
-      const measured = event.currentTarget.parentElement?.offsetHeight ?? 0;
-      resize.current = { height: height ?? measured, y: event.clientY };
-    },
-    [height]
-  );
-  const handlePointerMove = useCallback(
-    (event: PointerEvent<HTMLDivElement>) => {
-      if (resize.current) {
-        onResize(
-          trackId,
-          clampHeight(resize.current.height + event.clientY - resize.current.y)
-        );
-      }
-    },
-    [onResize, trackId]
-  );
-  const handlePointerEnd = useCallback(() => {
-    resize.current = null;
-  }, []);
-  const handleKeyDown = useCallback(
-    (event: KeyboardEvent<HTMLDivElement>) => {
-      const delta =
-        { ArrowDown: TRACK_HEIGHT_STEP, ArrowUp: -TRACK_HEIGHT_STEP }[
-          event.key
-        ] ?? 0;
-      if (delta) {
-        event.preventDefault();
-        event.stopPropagation();
-        onResize(
-          trackId,
-          clampHeight(
-            (height ?? event.currentTarget.parentElement?.offsetHeight ?? 0) +
-              delta
-          )
-        );
-      }
-    },
-    [height, onResize, trackId]
-  );
-
   return (
     <div
       className={cn(
         "relative flex w-full flex-col justify-center gap-1 border-s-4 px-2 py-1",
-        swatch,
-        selected && "bg-muted"
+        swatch
       )}
     >
       <div className="flex items-center gap-1">
@@ -847,21 +814,7 @@ function TrackHeader({
         value={mix.gain}
         valueLabel="hidden"
       />
-      <div
-        aria-label={`${name} height`}
-        aria-orientation="horizontal"
-        aria-valuemax={MAX_TRACK_HEIGHT}
-        aria-valuemin={MIN_TRACK_HEIGHT}
-        aria-valuenow={height === undefined ? undefined : Math.round(height)}
-        className="absolute inset-x-0 bottom-0 z-10 h-1.5 cursor-row-resize touch-none outline-none hover:bg-primary/40 focus-visible:bg-primary/60"
-        onKeyDown={handleKeyDown}
-        onPointerCancel={handlePointerEnd}
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerEnd}
-        role="separator"
-        tabIndex={0}
-      />
+      <TimelineTrackResizeHandle aria-label={`${name} height`} />
     </div>
   );
 }
@@ -1817,17 +1770,18 @@ export default function BlockTimeline() {
                 key={track.id}
                 lead={
                   <TrackHeader
-                    height={heights[track.id]}
                     mix={mixOf(track.id)}
                     name={track.name}
                     onMix={changeMix}
-                    onResize={resizeTrack}
                     onSelect={selectTrack}
                     selected={track.id === selectedTrack}
                     swatch={track.swatch}
                     trackId={track.id}
                   />
                 }
+                onResize={resizeTrack}
+                selected={track.id === selectedTrack}
+                trackId={track.id}
               >
                 <TimelineLane
                   className={cn(

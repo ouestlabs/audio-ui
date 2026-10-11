@@ -464,6 +464,14 @@
     @apply h-14 border-b bg-muted/30;
   }
 
+  .cn-timeline-track-header {
+    @apply w-40 border-e bg-background text-sm data-[selected]:bg-muted;
+  }
+
+  .cn-timeline-track-resize-handle {
+    @apply inset-x-0 bottom-0 z-10 h-1.5 cursor-row-resize bg-primary/0 hover:bg-primary/40 has-focus-visible:bg-primary/60 data-[resizing]:bg-primary/60;
+  }
+
   .cn-timeline-mark {
     @apply border-s ps-1.5 tabular-nums;
   }

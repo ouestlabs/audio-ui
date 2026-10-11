@@ -89,6 +89,45 @@ function TimelineLane({
   );
 }
 
+function TimelineTrack({ className, ...props }: TimelinePrimitive.Track.Props) {
+  return (
+    <TimelinePrimitive.Track
+      className={cn("cn-timeline-track", className)}
+      data-slot="timeline-track"
+      {...props}
+    />
+  );
+}
+
+function TimelineTrackHeader({
+  className,
+  ...props
+}: TimelinePrimitive.TrackHeader.Props) {
+  return (
+    <TimelinePrimitive.TrackHeader
+      className={cn("cn-timeline-track-header", className)}
+      data-slot="timeline-track-header"
+      {...props}
+    />
+  );
+}
+
+function TimelineTrackResizeHandle({
+  className,
+  ...props
+}: TimelinePrimitive.TrackResizeHandle.Props) {
+  return (
+    <TimelinePrimitive.TrackResizeHandle
+      className={cn(
+        "cn-timeline-track-resize-handle absolute touch-none outline-none",
+        className
+      )}
+      data-slot="timeline-track-resize-handle"
+      {...props}
+    />
+  );
+}
+
 function TimelineMark({ className, ...props }: TimelinePrimitive.Mark.Props) {
   return (
     <TimelinePrimitive.Mark
@@ -270,5 +309,8 @@ export {
   TimelineRange,
   TimelineRangeHandle,
   TimelineRuler,
+  TimelineTrack,
+  TimelineTrackHeader,
+  TimelineTrackResizeHandle,
   TimelineViewport,
 };
