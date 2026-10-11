@@ -17,6 +17,36 @@ export const hooks: RegistryItem[] = [
     categories: ["audio", "timeline"],
     dependencies: ["@audio-ui/react"],
     description:
+      "A transport clock as a live source for a timeline: it runs while playing, loops between two points, and the playhead follows it without re-rendering React",
+    files: [
+      {
+        path: "hooks/use-playback-clock.ts",
+        type: "registry:hook",
+      },
+    ],
+    name: "use-playback-clock",
+    registryDependencies: [],
+    type: "registry:hook",
+  },
+  {
+    categories: ["audio", "timeline"],
+    dependencies: [],
+    description:
+      "A selection rectangle for the clips of a timeline: drag across bare lane (with Shift, or in a multi-select mode) and the clips it touches join the selection",
+    files: [
+      {
+        path: "hooks/use-marquee-selection.ts",
+        type: "registry:hook",
+      },
+    ],
+    name: "use-marquee-selection",
+    registryDependencies: [],
+    type: "registry:hook",
+  },
+  {
+    categories: ["audio", "timeline"],
+    dependencies: ["@audio-ui/react"],
+    description:
       "The state of an arrangement of clips on tracks, with its operations: selection, group moves and copies, split, duplicate, delete, adding and removing tracks, per-track mix and height, and undo and redo over tracks and clips",
     files: [
       {

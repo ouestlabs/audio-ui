@@ -2,7 +2,6 @@
 
 import {
   adjacentPoint,
-  createSource,
   type Timeline as TimelinePrimitive,
 } from "@audio-ui/react";
 import {
@@ -15,7 +14,6 @@ import {
   type ReactNode,
   type SyntheticEvent,
   useCallback,
-  useEffect,
   useLayoutEffect,
   useRef,
   useState,
@@ -81,6 +79,8 @@ import {
   type ClipAction,
   useArrangement,
 } from "@/registry-audio/bases/base/hooks/use-arrangement";
+import { useMarquee } from "@/registry-audio/bases/base/hooks/use-marquee-selection";
+import { usePlaybackClock } from "@/registry-audio/bases/base/hooks/use-playback-clock";
 import { useSimulatedLevels } from "@/registry-audio/bases/base/hooks/use-simulated-levels";
 import type {
   Arranged,
@@ -263,42 +263,6 @@ const CLIPS: Arranged[] = [
   arranged("v2", "Hook", "vocals", 16, 24),
 ];
 
-/** A transport clock as a source: the playhead follows it without re-rendering React. */
-function usePlaybackClock(limits: {
-  duration: number;
-  loop: Span;
-  looping: boolean;
-}) {
-  const [clock] = useState(() => createSource(0));
-  const [playing, setPlaying] = useState(false);
-  // Read each frame, so a tempo or a loop edit does not restart the clock.
-  const limitsRef = useRef(limits);
-  limitsRef.current = limits;
-
-  useEffect(() => {
-    if (!playing) {
-      return;
-    }
-    let frame = 0;
-    let last = performance.now();
-    const tick = (now: number) => {
-      const { duration, loop, looping } = limitsRef.current;
-      const before = clock.getSnapshot();
-      let next = before + (now - last) / 1000;
-      if (looping && before < loop[1] && next >= loop[1]) {
-        next = loop[0] + (next - loop[1]);
-      }
-      clock.set(next % duration);
-      last = now;
-      frame = requestAnimationFrame(tick);
-    };
-    frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
-  }, [clock, playing]);
-
-  return { clock, playing, setPlaying };
-}
-
 /** A row of the arrangement: the track's header stuck to the left edge as it scrolls, its lane beside it. */
 function Row({
   children,
@@ -469,89 +433,6 @@ function LocatorButton({
 /** Keeps a press inside a field from reaching the lane under it. */
 function stopPress(event: PointerEvent<HTMLElement>) {
   event.stopPropagation();
-}
-
-interface Marquee {
-  height: number;
-  left: number;
-  top: number;
-  width: number;
-}
-
-/** Whether two rectangles overlap. */
-const overlaps = (a: DOMRect, b: Marquee) =>
-  a.left < b.left + b.width &&
-  a.right > b.left &&
-  a.top < b.top + b.height &&
-  a.bottom > b.top;
-
-/**
- * A marquee for the clips: Shift and drag across bare lane draws a rectangle,
- * and the clips it touches join the selection. It is told of the selection
- * when the drag began, to add to it, and of the clips it touches as it grows.
- */
-function useMarquee(
-  initial: string[],
-  onSelect: (clips: string[]) => void,
-  multi: boolean
-) {
-  const [rect, setRect] = useState<Marquee | null>(null);
-  const start = useRef<{ x: number; y: number; chosen: string[] } | null>(null);
-
-  const onPointerDownCapture = useCallback(
-    (event: PointerEvent<HTMLDivElement>) => {
-      const bare =
-        event.target instanceof Element &&
-        event.target.hasAttribute("data-timeline-lane");
-      if (!((event.shiftKey || multi) && event.button === 0 && bare)) {
-        return;
-      }
-      // The lane would take this press for the cursor: it is a marquee instead.
-      event.stopPropagation();
-      // And no text should be selected as it is dragged over.
-      event.preventDefault();
-      event.currentTarget.setPointerCapture(event.pointerId);
-      start.current = { chosen: initial, x: event.clientX, y: event.clientY };
-    },
-    [initial, multi]
-  );
-  const onPointerMove = useCallback(
-    (event: PointerEvent<HTMLDivElement>) => {
-      const origin = start.current;
-      if (!origin) {
-        return;
-      }
-      const next = {
-        height: Math.abs(event.clientY - origin.y),
-        left: Math.min(event.clientX, origin.x),
-        top: Math.min(event.clientY, origin.y),
-        width: Math.abs(event.clientX - origin.x),
-      };
-      setRect(next);
-      const touched = [
-        ...event.currentTarget.querySelectorAll<HTMLElement>("[data-clip-id]"),
-      ]
-        .filter((clip) => overlaps(clip.getBoundingClientRect(), next))
-        .map((clip) => clip.getAttribute("data-clip-id") ?? "");
-      onSelect([...new Set([...origin.chosen, ...touched])]);
-    },
-    [onSelect]
-  );
-  const onPointerEnd = useCallback(() => {
-    start.current = null;
-    setRect(null);
-  }, []);
-
-  return {
-    handlers: {
-      onLostPointerCapture: onPointerEnd,
-      onPointerCancel: onPointerEnd,
-      onPointerDownCapture,
-      onPointerMove,
-      onPointerUp: onPointerEnd,
-    },
-    rect,
-  };
 }
 
 /** The original of a clip being copied, left in its place while the copy is dragged away. */
