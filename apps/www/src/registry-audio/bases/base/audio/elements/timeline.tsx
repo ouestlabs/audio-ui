@@ -485,16 +485,33 @@ function TimelineTrackControls({
       onSelect(trackId, event.shiftKey || event.metaKey || event.ctrlKey),
     [onSelect, trackId]
   );
+  // The whole header picks the track, but not through a control that has its own job.
+  const handleHeaderClick = useCallback(
+    (event: MouseEvent<HTMLElement>) => {
+      const target = event.target as Element;
+      if (
+        !target.closest(
+          "button, input, [data-slot^=fader], [data-slot=knob], [data-slot=timeline-track-resize-handle]"
+        )
+      ) {
+        handleClick(event);
+      }
+    },
+    [handleClick]
+  );
   return (
     <ContextMenu onOpenChangeComplete={handleMenuClosed}>
       <ContextMenuTrigger
         render={
+          // biome-ignore lint/a11y/noStaticElementInteractions lint/a11y/useKeyWithClickEvents: a larger target for the name button, which carries the keyboard and the accessible name
           <div
             className={cn(
-              "relative flex w-full flex-col justify-center border-s-4 px-2",
-              compact ? "py-0" : "gap-1.5 py-2.5",
+              "relative flex w-full cursor-default flex-col justify-center border-s-4",
+              // A strip is as tall as its buttons plus an equal margin all round, so they sit concentric with its corners.
+              compact ? "px-[1.5px] py-0" : "gap-1.5 px-2 py-2.5",
               TRACK_COLORS[mix.color]?.edge
             )}
+            onClick={handleHeaderClick}
           />
         }
       >
@@ -530,7 +547,10 @@ function TimelineTrackControls({
           ) : (
             <button
               aria-pressed={selected}
-              className="min-w-0 flex-1 truncate text-left font-medium outline-none hover:underline focus-visible:underline"
+              className={cn(
+                "min-w-0 flex-1 truncate text-left font-medium outline-none hover:underline focus-visible:underline",
+                compact && "ps-1.5"
+              )}
               onClick={handleClick}
               onDoubleClick={onRename ? startRenaming : undefined}
               type="button"
