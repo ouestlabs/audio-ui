@@ -195,18 +195,32 @@ export function CommandMenu({
           <DialogTitle>Search...</DialogTitle>
           <DialogDescription>Search for a command to run...</DialogDescription>
         </DialogHeader>
-        <FrameContent className="flex min-h-0 flex-1 flex-col rounded-[14px]">
-          <Command
-            className="min-h-0 flex-1"
-            filter={(value, search, keywords) => {
-              const extendValue = `${value} ${keywords?.join(" ") || ""}`;
-              if (extendValue.toLowerCase().includes(search.toLowerCase())) {
-                return 1;
-              }
-              return 0;
-            }}
-          >
+        <Command
+          className="min-h-0 flex-1 gap-0 rounded-none! p-0"
+          filter={(value, search, keywords) => {
+            const extendValue = `${value} ${keywords?.join(" ") || ""}`;
+            if (extendValue.toLowerCase().includes(search.toLowerCase())) {
+              return 1;
+            }
+            return 0;
+          }}
+        >
+          <FrameHeader className="shrink-0 flex-row items-center gap-1 p-0.5 **:data-[slot=command-input-wrapper]:flex-1 **:data-[slot=command-input-wrapper]:p-0.5">
             <CommandInput placeholder="Search..." />
+            <DialogClose
+              render={
+                <Button
+                  aria-label="Close search"
+                  className="sm:hidden"
+                  size="icon-sm"
+                  variant="ghost"
+                >
+                  <XIcon aria-hidden weight="bold" />
+                </Button>
+              }
+            />
+          </FrameHeader>
+          <FrameContent className="flex min-h-0 flex-1 flex-col rounded-[14px]">
             <CommandList className="no-scrollbar scroll-fade min-h-0 flex-1 scroll-pt-2 scroll-pb-1.5 max-sm:max-h-none sm:min-h-80 sm:flex-none">
               <CommandEmpty className="py-12 text-center text-site-muted-foreground text-sm">
                 No results found.
@@ -313,8 +327,8 @@ export function CommandMenu({
                 </CommandGroup>
               )}
             </CommandList>
-          </Command>
-        </FrameContent>
+          </FrameContent>
+        </Command>
         <FrameFooter className="h-10 shrink-0 flex-row items-center gap-2 px-3 py-0 font-medium text-site-muted-foreground text-xs">
           <div className="flex shrink-0 items-center gap-2">
             <CommandMenuKbd>
@@ -339,17 +353,6 @@ export function CommandMenu({
             </>
           )}
         </FrameFooter>
-        {/* On a phone the dialog covers the screen, with no backdrop to tap: a header with a way out, after the field in the tab order. */}
-        <FrameHeader className="order-first h-10 shrink-0 flex-row items-center justify-between py-0 pr-1 pl-3 font-medium text-site-muted-foreground text-xs sm:hidden">
-          Search
-          <DialogClose
-            render={
-              <Button aria-label="Close search" size="icon-sm" variant="ghost">
-                <XIcon aria-hidden weight="bold" />
-              </Button>
-            }
-          />
-        </FrameHeader>
       </DialogContent>
     </Dialog>
   );
