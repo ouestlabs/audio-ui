@@ -356,12 +356,6 @@ export default function BlockPianoRoll() {
   const helpId = useId();
 
   const [volume, setVolume] = useState(DEFAULT_VOLUME);
-  /** Drawing, a press on empty grid adds a note; otherwise it drags a selection rectangle and a double-click adds. */
-  const [drawing, setDrawing] = useState(true);
-  const toggleDrawing = useCallback(
-    () => setDrawing((current) => !current),
-    []
-  );
   /** Folded, only the pitches carrying notes get a row. */
   const [folded, setFolded] = useState(false);
   const toggleFolded = useCallback(() => setFolded((current) => !current), []);
@@ -548,15 +542,6 @@ export default function BlockPianoRoll() {
             {isPlaying ? "Stop" : "Play"}
           </Button>
           <Button
-            aria-pressed={drawing}
-            onClick={toggleDrawing}
-            size="sm"
-            type="button"
-            variant={drawing ? "secondary" : "outline"}
-          >
-            Draw
-          </Button>
-          <Button
             disabled={notes.length === 0}
             onClick={clearNotes}
             size="sm"
@@ -598,7 +583,7 @@ export default function BlockPianoRoll() {
           getNoteLabel={describeNote}
           maxPitch={MAX_PITCH}
           minPitch={MIN_PITCH}
-          mode={drawing ? "draw" : "select"}
+          mode="draw"
           onNoteOff={handleNoteOff}
           onNoteOn={handleNoteOn}
           onValueChange={setNotes}
@@ -681,14 +666,13 @@ export default function BlockPianoRoll() {
         </PianoRoll>
       </Timeline>
       <p className="sr-only" id={helpId}>
-        Click the grid to add a note, or turn Draw off to drag a selection
-        rectangle and double-click to add one. Drag a note to move it, with Alt
-        to copy it, and drag its edges to change its length. Shift and a click
-        adds a note to the selection; Shift and a key selects every note on its
-        row. The arrow keys move the focused note, Shift with Left or Right
-        changes its length, Shift with Up or Down moves it an octave, and Delete
-        removes it. Enter on the grid adds a note at the playhead, and Escape
-        clears the selection.
+        Click the grid to add a note. Drag a note to move it, with Alt to copy
+        it, and drag its edges to change its length. Shift and a click adds a
+        note to the selection; Shift and a key selects every note on its row.
+        The arrow keys move the focused note, Shift with Left or Right changes
+        its length, Shift with Up or Down moves it an octave, and Delete removes
+        it. Enter on the grid adds a note at the playhead, and Escape clears the
+        selection.
       </p>
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div aria-label="Volume" className="flex-1" role="group">
