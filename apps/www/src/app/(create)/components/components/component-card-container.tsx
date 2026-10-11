@@ -12,6 +12,8 @@ interface ComponentCardContainerProps {
   className?: string;
   footer: React.ReactNode;
   isFullWidth?: boolean;
+  /** Caps what a block's editor takes, so its card is not far taller than the others: the editor scrolls inside. */
+  limitHeight?: boolean;
 }
 
 export function ComponentRenderer({
@@ -77,12 +79,14 @@ export function ComponentCardContainer({
   footer,
   className,
   isFullWidth,
+  limitHeight = false,
 }: ComponentCardContainerProps) {
   return (
     <Frame className={cn(isFullWidth && "md:col-span-2", className)}>
       <FrameContent
         className={cn(
-          "flex min-h-50 min-w-0 flex-1 flex-col flex-wrap items-center justify-center overflow-x-auto bg-site-background p-3 font-sans **:data-[slot=preview]:w-full sm:p-6 sm:**:data-[slot=preview]:max-w-[80%] lg:px-8 lg:py-12"
+          "flex min-h-50 min-w-0 flex-1 flex-col flex-wrap items-center justify-center overflow-x-auto bg-site-background p-3 font-sans **:data-[slot=preview]:w-full sm:p-6 sm:**:data-[slot=preview]:max-w-[80%] lg:px-8 lg:py-12",
+          limitHeight && "[&_[data-slot=piano-roll]]:max-h-72"
         )}
       >
         <React.Suspense

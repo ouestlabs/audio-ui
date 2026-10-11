@@ -57,7 +57,7 @@ export function ComponentPreviewTabs({
       <div className="relative" data-slot="preview">
         {expandLabel ? (
           <ExpandPreview
-            className="absolute end-3 top-3 z-10"
+            className="absolute end-2 top-2 z-10 size-7 rounded-md"
             label={expandLabel}
           >
             {component}

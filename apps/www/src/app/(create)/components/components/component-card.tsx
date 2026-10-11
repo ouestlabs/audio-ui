@@ -5,7 +5,7 @@ import { ExpandPreview } from "@/components/expand-preview";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 import { useConfig } from "@/hooks/use-config";
-import { isExpandable } from "@/lib/is-block";
+import { isBlock, isExpandable } from "@/lib/is-block";
 import { getRegistryItemMetadata } from "@/lib/registry";
 
 import {
@@ -65,6 +65,7 @@ export function ComponentCard({
         </>
       }
       isFullWidth={isFullWidth}
+      limitHeight={isBlock(name)}
     >
       <ComponentRenderer base={base} name={name} />
     </ComponentCardContainer>
