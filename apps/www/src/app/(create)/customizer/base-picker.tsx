@@ -49,7 +49,11 @@ export function BasePicker({
 
   return (
     <Picker>
-      <PickerTrigger>
+      <PickerTrigger
+        className="disabled:cursor-not-allowed"
+        disabled
+        title="Only Base UI is available for now"
+      >
         <div className="flex flex-col justify-start text-left">
           <div className="text-site-muted-foreground text-xs">
             Component Library

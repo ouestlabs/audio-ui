@@ -10,7 +10,6 @@ import nextDynamic from "next/dynamic";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import z from "zod";
-import { DocsBaseSwitcher } from "@/components/docs-base-switcher";
 import { DocsComponentCatalogSection } from "@/components/docs-component-catalog-section";
 import { DocsCopyPage } from "@/components/docs-copy-page";
 import { JsonLd } from "@/components/json-ld";
@@ -188,13 +187,6 @@ export default async function Page(props: {
                   </p>
                 ) : null}
               </div>
-              {isComponentDoc && base && componentName && (
-                <DocsBaseSwitcher
-                  base={base}
-                  className="mt-4"
-                  component={componentName}
-                />
-              )}
               {links ? (
                 <div className="flex items-center gap-2 pt-4">
                   {links?.doc && (

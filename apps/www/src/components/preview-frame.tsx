@@ -11,6 +11,7 @@ import { ExpandPreview } from "@/components/expand-preview";
 import type { PreviewHost } from "@/components/preview-host";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
+import { BASES } from "@/registry/bases";
 
 /**
  * The inset of every preview's panel, on a page, in a card and at full size:
@@ -43,6 +44,24 @@ export function PreviewLoading() {
     <div className="flex min-h-40 w-full flex-1 items-center justify-center">
       <Spinner className="size-5 text-site-muted-foreground/40" />
     </div>
+  );
+}
+
+/** The library a preview is built on: the only one there is for now. */
+function BuiltOn() {
+  const base = BASES.find((item) => item.name === "base");
+  const logo = base?.meta?.logo;
+  return (
+    <>
+      {typeof logo === "string" ? (
+        <span
+          aria-hidden
+          className="size-3.5 shrink-0 [&_svg]:size-3.5"
+          dangerouslySetInnerHTML={{ __html: logo }}
+        />
+      ) : null}
+      <span className="truncate">{base?.title}</span>
+    </>
   );
 }
 
@@ -92,9 +111,13 @@ export function PreviewBar({
   const Bar = position === "header" ? FrameHeader : FrameFooter;
   return (
     <Bar className="flex-row items-center gap-3 px-2 py-1.5">
-      {/* What it is, when it has a description; its registry name is not shown. */}
-      <p className="flex flex-1 items-center truncate ps-1 text-site-muted-foreground text-xs">
-        <span className="truncate">{description}</span>
+      {/* What it is, when it has a description; else the library it is built on. */}
+      <p className="flex flex-1 items-center gap-1.5 truncate ps-1 text-site-muted-foreground text-xs">
+        {description ? (
+          <span className="truncate">{description}</span>
+        ) : (
+          <BuiltOn />
+        )}
       </p>
       <div className="flex items-center gap-1.5">
         {badge}
