@@ -183,7 +183,7 @@ export function CommandMenu({
         }
       />
       <DialogContent
-        className="site-rounded-xl max-h-[calc(100dvh-1.5rem)] border-none bg-clip-padding bg-site-background p-2 pb-11 shadow-2xl ring-4 ring-site-border/60 max-sm:top-3 max-sm:max-w-[calc(100%-1.5rem)] max-sm:translate-y-0 sm:max-w-xl **:data-[slot=command-item]:data-selected:bg-site-muted **:data-[slot=command-item]:max-sm:py-2.5 **:data-[slot=command-input]:max-sm:text-base **:data-[slot=command]:bg-transparent **:data-[slot=input-group]:max-sm:h-11!"
+        className="site-rounded-xl max-h-[calc(100dvh-1.5rem)] border-none max-sm:pt-12 bg-clip-padding bg-site-background p-2 pb-11 shadow-2xl ring-4 ring-site-border/60 max-sm:top-3 max-sm:max-w-[calc(100%-1.5rem)] max-sm:translate-y-0 sm:max-w-xl **:data-[slot=command-item]:data-selected:bg-site-muted **:data-[slot=command-item]:max-sm:py-2.5 **:data-[slot=command-input]:max-sm:text-base **:data-[slot=command]:bg-transparent **:data-[slot=input-group]:max-sm:h-11!"
         showCloseButton={false}
       >
         <DialogHeader className="sr-only">
@@ -191,10 +191,8 @@ export function CommandMenu({
           <DialogDescription>Search for a command to run...</DialogDescription>
         </DialogHeader>
         {/* On a phone the dialog covers the screen, with no backdrop to tap: a title bar, and a way out after the field in the tab order. */}
-        <div className="flex h-9 items-center ps-2 sm:hidden">
-          <span aria-hidden className="font-medium text-sm">
-            Search
-          </span>
+        <div className="absolute inset-x-0 top-0 z-20 flex h-10 items-center rounded-t-[12px] border-b border-b-site-border bg-site-muted px-4 font-medium text-site-muted-foreground text-xs sm:hidden">
+          Search
         </div>
         <Command
           filter={(value, search, keywords) => {
@@ -315,7 +313,7 @@ export function CommandMenu({
           render={
             <Button
               aria-label="Close search"
-              className="absolute top-2 right-2 sm:hidden"
+              className="absolute top-1 right-2 z-30 sm:hidden"
               size="icon"
               variant="ghost"
             >
