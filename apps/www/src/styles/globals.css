@@ -236,5 +236,29 @@
 
 /* Anchor offset under the sticky header (was scroll-m-28 on heading overrides). */
 .typeset-changelog :where(h1, h2, h3, h4, h5, h6) {
-  scroll-margin-block-start: 7rem;
+  scroll-margin-block-start: 5rem;
+}
+
+/* Headings even out their lines; underlines skip the tails of letters like g and y. */
+@layer base {
+  :where(h1, h2, h3, h4, h5, h6) {
+    text-wrap: balance;
+  }
+
+  :where(a, .underline) {
+    text-decoration-skip-ink: auto;
+    text-underline-position: from-font;
+  }
+}
+
+/* People who ask for less motion get none: transitions and animations end at once. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
 }

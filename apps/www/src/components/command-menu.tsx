@@ -192,8 +192,8 @@ export function CommandMenu({
         showCloseButton={false}
       >
         <DialogHeader className="sr-only">
-          <DialogTitle>Search...</DialogTitle>
-          <DialogDescription>Search for a command to run...</DialogDescription>
+          <DialogTitle>Search…</DialogTitle>
+          <DialogDescription>Search for a command to run…</DialogDescription>
         </DialogHeader>
         <Command
           className="min-h-0 flex-1 gap-0 rounded-none! p-0"
@@ -206,7 +206,7 @@ export function CommandMenu({
           }}
         >
           <FrameHeader className="shrink-0 flex-row items-center gap-1 p-1 **:data-[slot=command-input-wrapper]:flex-1 **:data-[slot=command-input-wrapper]:p-0">
-            <CommandInput placeholder="Search..." />
+            <CommandInput placeholder="Search…" />
             <DialogClose
               render={
                 <Button

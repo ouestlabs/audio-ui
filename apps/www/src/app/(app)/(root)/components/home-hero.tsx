@@ -26,7 +26,7 @@ export function HomeHero() {
         />
         <Button
           nativeButton={false}
-          render={<Link href="/components">Components</Link>}
+          render={<Link href="/components">Browse components</Link>}
           variant="outline"
         />
       </div>

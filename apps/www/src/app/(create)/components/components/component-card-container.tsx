@@ -61,7 +61,7 @@ export function ComponentRenderer({
 export function ComponentName({ name }: { name: string }) {
   return (
     <div
-      className="rounded-lg flex h-8 select-all ring ring-border items-center gap-1.5 bg-site-background/50 px-2 font-medium text-[10px] text-site-muted-foreground transition-all hover:bg-site-muted hover:text-site-foreground"
+      className="rounded-lg flex h-8 select-all ring ring-border items-center gap-1.5 bg-site-background/50 px-2 font-medium text-[10px] text-site-muted-foreground transition-colors hover:bg-site-muted hover:text-site-foreground"
       title="Component name"
     >
       {name}
