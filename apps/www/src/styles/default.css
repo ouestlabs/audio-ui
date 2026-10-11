@@ -356,9 +356,9 @@
     > div > pre {
       margin: 0;
       overflow: auto;
-      background-color: var(--site-code);
+      background-color: var(--site-code) !important;
       border: 1px solid var(--site-border);
-      border-radius: 14px;
+      border-radius: 13px;
     }
 
     [data-slot="copy-button"] {
