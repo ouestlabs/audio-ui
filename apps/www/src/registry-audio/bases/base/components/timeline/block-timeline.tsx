@@ -849,7 +849,7 @@ function TrackHeader({
           </Button>
         </div>
         {compact ? null : (
-          <div className="flex h-6 items-center gap-3 pe-1">
+          <div className="flex h-7 items-center gap-5 pe-1">
             <Fader
               aria-label={`${name} gain`}
               className="min-w-0 flex-1 **:data-[orientation=horizontal]:min-w-0"
@@ -866,7 +866,7 @@ function TrackHeader({
             <Knob
               anchor={0}
               aria-label={`${name} pan`}
-              className="mb-0 size-6 shrink-0"
+              className="mb-0 size-7 shrink-0"
               formatValue={formatPan}
               max={1}
               min={-1}
