@@ -31,7 +31,7 @@ export function SiteNavTabs({
       <TabsList
         aria-label="Sections"
         className={cn(
-          "w-full bg-[color-mix(in_oklab,var(--site-foreground)_8%,var(--site-background))] **:data-[slot=tabs-indicator]:bg-site-background **:data-[slot=tabs-indicator]:shadow-sm **:data-[slot=tabs-indicator]:ring-1 **:data-[slot=tabs-indicator]:ring-site-foreground/10",
+          "w-full bg-site-foreground/8 **:data-[slot=tabs-indicator]:bg-site-background **:data-[slot=tabs-indicator]:shadow-sm **:data-[slot=tabs-indicator]:ring-1 **:data-[slot=tabs-indicator]:ring-site-foreground/10",
           !active && "**:data-[slot=tabs-indicator]:hidden"
         )}
       >

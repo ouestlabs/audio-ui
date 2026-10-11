@@ -175,7 +175,7 @@ export function CommandMenu({
         render={
           <Button
             aria-label="Search"
-            className="justify-between gap-2 pr-1.5"
+            className="justify-between gap-2 bg-site-foreground/8 pr-1.5 hover:bg-site-foreground/12"
             onClick={() => setOpen(true)}
             variant="secondary"
           >
