@@ -10,10 +10,14 @@ import {
   type Timeline as TimelinePrimitive,
 } from "@audio-ui/react";
 import {
+  type FocusEvent,
+  Fragment,
   type KeyboardEvent,
+  type MouseEvent,
   memo,
   type PointerEvent,
   type ReactNode,
+  type SyntheticEvent,
   useCallback,
   useEffect,
   useLayoutEffect,
@@ -25,6 +29,13 @@ import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder";
 import { cn } from "@/registry/bases/base/lib/utils";
 import { Button } from "@/registry/bases/base/ui/button";
 import { ButtonGroup } from "@/registry/bases/base/ui/button-group";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from "@/registry/bases/base/ui/context-menu";
 import { Kbd, KbdGroup } from "@/registry/bases/base/ui/kbd";
 import {
   Popover,
@@ -133,6 +144,83 @@ const TRACKS = [
   { id: "vocals", name: "Vocals", swatch: "border-s-chart-4" },
 ] as const;
 
+type ClipAction = "duplicate" | "remove" | "rename" | "split" | "toggle";
+
+/** A clip's menu: what is done to it, then what is done away with. */
+function clipMenuEntries(disabled: boolean): {
+  action: ClipAction;
+  destructive?: boolean;
+  label: string;
+  separatorBefore?: boolean;
+}[] {
+  return [
+    { action: "rename", label: "Rename" },
+    { action: "duplicate", label: "Duplicate" },
+    { action: "split", label: "Split at the cursor", separatorBefore: true },
+    {
+      action: "toggle",
+      label: disabled ? "Switch clip on" : "Switch clip off",
+    },
+    {
+      action: "remove",
+      destructive: true,
+      label: "Delete",
+      separatorBefore: true,
+    },
+  ];
+}
+
+const selectText = (element: HTMLInputElement | null) => element?.select();
+
+/** A clip's name edited where it is written: Enter keeps it, Escape gives it back. */
+function ClipNameField({
+  name,
+  onCommit,
+  onDone,
+}: {
+  name: string;
+  onCommit: (name: string) => void;
+  onDone: () => void;
+}) {
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLInputElement>) => {
+      // The clip drags, deletes and splits on its own keys, and so does the panel: a name must not.
+      event.stopPropagation();
+      if (event.key === "Enter") {
+        onCommit(event.currentTarget.value);
+        onDone();
+      } else if (event.key === "Escape") {
+        onDone();
+      }
+    },
+    [onCommit, onDone]
+  );
+  const handleBlur = useCallback(
+    (event: FocusEvent<HTMLInputElement>) => {
+      onCommit(event.currentTarget.value);
+      onDone();
+    },
+    [onCommit, onDone]
+  );
+  const stop = useCallback(
+    (event: SyntheticEvent) => event.stopPropagation(),
+    []
+  );
+  return (
+    <input
+      aria-label="Clip name"
+      className="min-w-0 flex-1 bg-transparent outline-none"
+      defaultValue={name}
+      onBlur={handleBlur}
+      onClick={stop}
+      onDoubleClick={stop}
+      onKeyDown={handleKeyDown}
+      onPointerDown={stop}
+      ref={selectText}
+    />
+  );
+}
+
 /** What a track's header sets: how loud it is, and whether it is silenced or soloed. */
 interface Mix {
   gain: number;
@@ -145,6 +233,8 @@ const UNITY: Mix = { gain: 1, muted: false, soloed: false };
 type Span = readonly [number, number];
 
 interface Arranged {
+  /** A clip switched off stays on the page, drained, and is not heard. */
+  disabled?: boolean;
   id: string;
   name: string;
   /** How long the recording behind the clip is: trimming stops where it runs out. */
@@ -788,9 +878,14 @@ const ClipView = memo(function ArrangedClip({
   copying,
   lift,
   onLift,
+  onAction,
+  onRename,
   trackName,
 }: {
   clip: Arranged;
+  /** Something chosen from the clip's menu (renaming is the clip's own). */
+  onAction: (action: ClipAction, id: string) => void;
+  onRename: (id: string, name: string) => void;
   /** How far, in px, the clip is held up or down by a group drag that is not its own. */
   lift: number;
   /** Tells the arrangement how far this clip is dragged up or down, for the rest of its group to follow. */
@@ -815,6 +910,44 @@ const ClipView = memo(function ArrangedClip({
   const handleRemove = useCallback(
     () => onRemove(clip.id),
     [clip.id, onRemove]
+  );
+  const [renaming, setRenaming] = useState(false);
+  const stopRenaming = useCallback(() => setRenaming(false), []);
+  const startRenaming = useCallback(() => setRenaming(true), []);
+  // The name field takes focus once the menu has closed: closing hands focus back to the clip, which would end the edit.
+  const renameWhenClosed = useRef(false);
+  const handleMenuClosed = useCallback(
+    (open: boolean) => {
+      if (!open && renameWhenClosed.current) {
+        renameWhenClosed.current = false;
+        startRenaming();
+      }
+    },
+    [startRenaming]
+  );
+  const handleMenuItem = useCallback(
+    (event: MouseEvent<HTMLElement>) => {
+      const action = event.currentTarget.dataset.action as ClipAction;
+      if (action === "rename") {
+        renameWhenClosed.current = true;
+      } else {
+        onAction(action, clip.id);
+      }
+    },
+    [clip.id, onAction]
+  );
+  const handleRename = useCallback(
+    (name: string) => onRename(clip.id, name),
+    [clip.id, onRename]
+  );
+  // Right-clicking a clip selects it first, so the menu acts on what was pressed.
+  const handleMenuOpen = useCallback(
+    (open: boolean) => {
+      if (open) {
+        onSelect(clip.id, false);
+      }
+    },
+    [clip.id, onSelect]
   );
   const handleSelected = useCallback(
     (
@@ -845,37 +978,77 @@ const ClipView = memo(function ArrangedClip({
     [clip.id, onCommit]
   );
   return (
-    <TimelineClip
-      aria-label={`${trackName}, ${clip.name}`}
-      className={
-        copying
-          ? "inset-y-1.5 opacity-90 shadow-lg ring-2 ring-primary"
-          : "inset-y-1.5"
-      }
-      data-clip-id={clip.id}
-      getAriaValueText={describe}
-      onDragOffsetChange={handleDragOffset}
-      onRemove={handleRemove}
-      onSelectedChange={handleSelected}
-      onValueChange={handleChange}
-      onValueCommitted={handleCommitted}
-      selected={selected}
-      sourceLength={clip.sourceLength}
-      style={
-        lift ? { transform: `translateY(${lift}px)`, zIndex: 10 } : undefined
-      }
-      value={clip.value}
+    <ContextMenu
+      onOpenChange={handleMenuOpen}
+      onOpenChangeComplete={handleMenuClosed}
     >
-      <TimelineClipHeader className={copying ? "cursor-copy" : undefined}>
-        {copying ? `+ ${clip.name}` : clip.name}
-      </TimelineClipHeader>
-      <TimelineClipFade edge="in" />
-      <TimelineClipFade edge="out" />
-      <TimelineClipHandle aria-label={`${clip.name} start`} edge="start" />
-      <TimelineClipHandle aria-label={`${clip.name} end`} edge="end" />
-      <TimelineClipFadeHandle aria-label={`${clip.name} fade in`} edge="in" />
-      <TimelineClipFadeHandle aria-label={`${clip.name} fade out`} edge="out" />
-    </TimelineClip>
+      <ContextMenuTrigger render={<div className="contents" />}>
+        <TimelineClip
+          aria-label={`${trackName}, ${clip.name}`}
+          className={cn(
+            "inset-y-1.5",
+            copying && "opacity-90 shadow-lg ring-2 ring-primary",
+            clip.disabled && "opacity-40"
+          )}
+          data-clip-id={clip.id}
+          getAriaValueText={describe}
+          onDragOffsetChange={handleDragOffset}
+          onRemove={handleRemove}
+          onSelectedChange={handleSelected}
+          onValueChange={handleChange}
+          onValueCommitted={handleCommitted}
+          selected={selected}
+          sourceLength={clip.sourceLength}
+          style={
+            lift
+              ? { transform: `translateY(${lift}px)`, zIndex: 10 }
+              : undefined
+          }
+          value={clip.value}
+        >
+          <TimelineClipHeader
+            className={copying ? "cursor-copy" : undefined}
+            onDoubleClick={startRenaming}
+          >
+            {renaming ? (
+              <ClipNameField
+                name={clip.name}
+                onCommit={handleRename}
+                onDone={stopRenaming}
+              />
+            ) : (
+              <span>{copying ? `+ ${clip.name}` : clip.name}</span>
+            )}
+          </TimelineClipHeader>
+          <TimelineClipFade edge="in" />
+          <TimelineClipFade edge="out" />
+          <TimelineClipHandle aria-label={`${clip.name} start`} edge="start" />
+          <TimelineClipHandle aria-label={`${clip.name} end`} edge="end" />
+          <TimelineClipFadeHandle
+            aria-label={`${clip.name} fade in`}
+            edge="in"
+          />
+          <TimelineClipFadeHandle
+            aria-label={`${clip.name} fade out`}
+            edge="out"
+          />
+        </TimelineClip>
+      </ContextMenuTrigger>
+      <ContextMenuContent className="w-auto min-w-44">
+        {clipMenuEntries(Boolean(clip.disabled)).map((entry) => (
+          <Fragment key={entry.action}>
+            {entry.separatorBefore ? <ContextMenuSeparator /> : null}
+            <ContextMenuItem
+              data-action={entry.action}
+              onClick={handleMenuItem}
+              variant={entry.destructive ? "destructive" : "default"}
+            >
+              {entry.label}
+            </ContextMenuItem>
+          </Fragment>
+        ))}
+      </ContextMenuContent>
+    </ContextMenu>
   );
 });
 
@@ -1173,25 +1346,46 @@ export default function BlockTimeline() {
   );
   // Cuts at the cursor: the selected clip, or every clip of the selected
   // track that the cursor is over.
-  const splitAtCursor = useCallback(() => {
-    const at = clock.getSnapshot();
-    recordEdit();
-    setClips((all) =>
-      all.flatMap((clip) => {
-        const targeted =
-          selectedIds.includes(clip.id) || clip.track === selectedTrack;
-        const cut = targeted ? splitClip(clip.value, at, bar / 4) : null;
-        if (!cut) {
-          return [clip];
-        }
-        pieces.current += 1;
-        return [
-          { ...clip, value: cut[0] },
-          { ...clip, id: `${clip.id}-${pieces.current}`, value: cut[1] },
-        ];
-      })
-    );
-  }, [bar, clock, recordEdit, selectedIds, selectedTrack]);
+  const splitWhere = useCallback(
+    (targets: (clip: Arranged) => boolean) => {
+      const at = clock.getSnapshot();
+      recordEdit();
+      setClips((all) =>
+        all.flatMap((clip) => {
+          const cut = targets(clip) ? splitClip(clip.value, at, bar / 4) : null;
+          if (!cut) {
+            return [clip];
+          }
+          pieces.current += 1;
+          return [
+            { ...clip, value: cut[0] },
+            { ...clip, id: `${clip.id}-${pieces.current}`, value: cut[1] },
+          ];
+        })
+      );
+    },
+    [bar, clock, recordEdit]
+  );
+  const splitAtCursor = useCallback(
+    () =>
+      splitWhere(
+        (clip) => selectedIds.includes(clip.id) || clip.track === selectedTrack
+      ),
+    [selectedIds, selectedTrack, splitWhere]
+  );
+  const renameClip = useCallback(
+    (id: string, name: string) => {
+      const next = name.trim();
+      if (!next || next === clipsRef.current.find((c) => c.id === id)?.name) {
+        return;
+      }
+      recordEdit();
+      setClips((all) =>
+        all.map((clip) => (clip.id === id ? { ...clip, name: next } : clip))
+      );
+    },
+    [recordEdit]
+  );
   const addLocator = useCallback(() => {
     const at = clock.getSnapshot();
     setLocators((all) =>
@@ -1288,6 +1482,28 @@ export default function BlockTimeline() {
       });
     },
     [duration, recordEdit]
+  );
+  // What the clip's menu does: to the whole selection when the clip is in it, else to the clip alone.
+  const clipAction = useCallback(
+    (action: ClipAction, id: string) => {
+      const ids = selectedIds.includes(id) ? selectedIds : [id];
+      if (action === "remove") {
+        removeClip(id);
+      } else if (action === "duplicate") {
+        duplicateSelection(clipsRef.current.filter((c) => ids.includes(c.id)));
+      } else if (action === "split") {
+        splitWhere((clip) => ids.includes(clip.id));
+      } else if (action === "toggle") {
+        const off = !clipsRef.current.find((c) => c.id === id)?.disabled;
+        recordEdit();
+        setClips((all) =>
+          all.map((clip) =>
+            ids.includes(clip.id) ? { ...clip, disabled: off } : clip
+          )
+        );
+      }
+    },
+    [duplicateSelection, recordEdit, removeClip, selectedIds, splitWhere]
   );
   /** Cmd/Ctrl + A selects every clip, Cmd/Ctrl + D duplicates the selection; returns whether the key was one of these. */
   const handleSelectionKey = useCallback(
@@ -1650,10 +1866,12 @@ export default function BlockTimeline() {
                             ? lifting.offset
                             : 0
                         }
+                        onAction={clipAction}
                         onChange={changeClip}
                         onCommit={commitClip}
                         onLift={lift}
                         onRemove={removeClip}
+                        onRename={renameClip}
                         onSelect={selectClip}
                         selected={selectedIds.includes(clip.id)}
                         trackName={track.name}
