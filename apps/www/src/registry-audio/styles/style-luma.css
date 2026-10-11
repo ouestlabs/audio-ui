@@ -469,7 +469,7 @@
   }
 
   .cn-timeline-track-resize-handle {
-    @apply inset-x-0 bottom-0 z-10 h-0.5 cursor-row-resize bg-primary/0 hover:bg-primary/40 has-focus-visible:bg-primary/60 data-[resizing]:bg-primary/60;
+    @apply -bottom-px inset-x-0 z-10 h-0.5 cursor-row-resize bg-primary/0 hover:bg-primary/40 has-focus-visible:bg-primary/60 data-[resizing]:bg-primary/60;
   }
 
   .cn-timeline-mark {
