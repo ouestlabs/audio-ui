@@ -18,9 +18,12 @@ export function SiteNavTabs({
   items: { href: string; label: string; soon?: boolean }[];
 }) {
   const pathname = usePathname();
-  const pages = items.filter(
-    (item) => !(item.soon || item.href.startsWith("https://"))
-  );
+  // Docs first: it is where one starts.
+  const pages = items
+    .filter((item) => !(item.soon || item.href.startsWith("https://")))
+    .toSorted(
+      (a, b) => Number(b.href === "/docs") - Number(a.href === "/docs")
+    );
   const active = pages.find((item) => isActive(pathname, item.href))?.href;
 
   return (
