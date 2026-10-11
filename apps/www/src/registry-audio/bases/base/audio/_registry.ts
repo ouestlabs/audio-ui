@@ -218,6 +218,24 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
+    dependencies: [],
+    files: [
+      {
+        path: "audio/elements/track-controls.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "track-controls",
+    registryDependencies: [
+      "@audio/timeline",
+      "@audio/fader",
+      "@audio/knob",
+      "@shadcn/button",
+      "@shadcn/context-menu",
+    ],
+    type: "registry:ui",
+  },
+  {
     dependencies: ["@audio-ui/react", "@base-ui/react"],
     files: [
       {
