@@ -145,7 +145,7 @@ export function ComponentsProvider({
             />
           )}
           <SidebarProvider
-            className="bordered-sidebar min-h-0 flex-1 [--top-spacing:0] **:data-[sidebar=sidebar]:bg-transparent"
+            className="bordered-sidebar min-h-0 flex-1 bg-site-background [--top-spacing:0] **:data-[sidebar=sidebar]:bg-transparent"
             data-components-layout=""
             onOpenChange={handleOpenChange}
             open={sidebarOpen}

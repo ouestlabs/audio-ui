@@ -123,7 +123,7 @@ export function DocsShell({
     <LocksProvider>
       <CustomizerContext value={value}>
         {/* The inset stays in the viewport: the page scrolls inside it, under the header. */}
-        <SidebarProvider className="bordered-sidebar h-[calc(100svh-var(--header-height))] min-h-0 flex-none items-stretch gap-0 px-0 [--sidebar-width:15rem] [--top-spacing:0]">
+        <SidebarProvider className="bordered-sidebar bg-site-background h-[calc(100svh-var(--header-height))] min-h-0 flex-none items-stretch gap-0 px-0 [--sidebar-width:15rem] [--top-spacing:0]">
           {/* Below lg the navigation is the header's menu. */}
           <div className="hidden lg:contents">{nav}</div>
           <InsetPane>
