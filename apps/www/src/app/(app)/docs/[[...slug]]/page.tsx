@@ -3,13 +3,11 @@ import {
   ArrowRightIcon,
   ArrowUpRightIcon,
 } from "@phosphor-icons/react/ssr";
-import fm from "front-matter";
 import { findNeighbour } from "fumadocs-core/page-tree";
 import { createRelativeLink } from "fumadocs-ui/mdx";
 import nextDynamic from "next/dynamic";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import z from "zod";
 import { DocsComponentCatalogSection } from "@/components/docs-component-catalog-section";
 import { DocsCopyPage } from "@/components/docs-copy-page";
 import { JsonLd } from "@/components/json-ld";
@@ -101,19 +99,7 @@ export default async function Page(props: {
   const neighbours = findNeighbour(source.getPageTree(), page.url);
 
   const raw = await page.data.getText("raw");
-  const { attributes } = fm(raw);
-  const { links, base, component } = z
-    .object({
-      base: z.enum(["base", "radix"]).optional(),
-      component: z.boolean().optional(),
-      links: z
-        .object({
-          api: z.string().optional(),
-          doc: z.string().optional(),
-        })
-        .optional(),
-    })
-    .parse(attributes);
+  const { links, base, component } = doc;
 
   const isComponentDoc = component === true && base !== undefined;
   const componentName =
