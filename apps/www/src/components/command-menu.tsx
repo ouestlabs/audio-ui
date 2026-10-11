@@ -180,7 +180,7 @@ export function CommandMenu({
         }
       />
       <DialogContent
-        className="site-rounded-xl border-none bg-clip-padding p-2 pb-11 shadow-2xl ring-4 ring-neutral-200/80 sm:max-w-xl dark:bg-neutral-900 dark:ring-neutral-800"
+        className="site-rounded-xl max-h-[calc(100dvh-1.5rem)] border-none bg-clip-padding bg-site-background p-2 pb-11 shadow-2xl ring-4 ring-site-border/60 max-sm:top-3 max-sm:max-w-[calc(100%-1.5rem)] max-sm:translate-y-0 sm:max-w-xl **:data-[slot=command-item]:data-selected:bg-site-muted **:data-[slot=command-item]:max-sm:py-2.5 **:data-[slot=command-input]:max-sm:text-base **:data-[slot=command]:bg-transparent **:data-[slot=input-group]:max-sm:h-11!"
         showCloseButton={false}
       >
         <DialogHeader className="sr-only">
@@ -197,7 +197,7 @@ export function CommandMenu({
           }}
         >
           <CommandInput placeholder="Search..." />
-          <CommandList className="no-scrollbar scroll-fade min-h-80 scroll-pt-2 scroll-pb-1.5">
+          <CommandList className="no-scrollbar scroll-fade min-h-0 scroll-pt-2 scroll-pb-1.5 max-sm:max-h-[calc(100dvh-9rem)] sm:min-h-80">
             <CommandEmpty className="py-12 text-center text-site-muted-foreground text-sm">
               No results found.
             </CommandEmpty>
@@ -302,7 +302,7 @@ export function CommandMenu({
             )}
           </CommandList>
         </Command>
-        <div className="absolute inset-x-0 bottom-0 z-20 flex h-10 items-center gap-2 rounded-b-[12px] border-t border-t-neutral-100 bg-neutral-50 px-4 font-medium text-site-muted-foreground text-xs dark:border-t-neutral-700 dark:bg-neutral-800">
+        <div className="absolute inset-x-0 bottom-0 z-20 flex h-10 items-center gap-2 rounded-b-[12px] border-t border-t-site-border bg-site-muted px-4 font-medium text-site-muted-foreground text-xs">
           <div className="flex shrink-0 items-center gap-2">
             <CommandMenuKbd>
               <ArrowBendDownLeftIcon weight="duotone" />
