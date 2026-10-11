@@ -84,7 +84,7 @@ import { Sequencer } from "@/components/audio/elements/sequencer";
 />;
 ```
 
-`value` is a row per sound, each a list of steps: `boolean[][]`. `source` is the step being played, a live `{ getSnapshot, subscribe }` such as one made with `createSource`: a clock ticking every step never re-renders React.
+`value` is a row per sound, each a list of steps: `boolean[][]`. `velocities` is how loud each step plays, from 0 to 1, in the same shape; a step it does not list plays at full. Add `showVelocity` for a bar under each row to draw them. `source` is the step being played, a live `{ getSnapshot, subscribe }` such as one made with `createSource`: a clock ticking every step never re-renders React.
 
 ## Interaction
 
@@ -94,6 +94,9 @@ import { Sequencer } from "@/components/audio/elements/sequencer";
 | Drag on | Paints the new state across every step the pointer crosses. |
 | Arrow keys, `Home`, `End` | Move between steps; with `Ctrl` or `Cmd`, `Home` and `End` go to the corners. |
 | `Space`, `Enter` | Flip the focused step. |
+| Press or drag on a velocity bar | Sets the velocity where the pointer is, and draws across the steps of the row. |
+| `Alt` + click, `Delete` on a velocity bar | Bring the step back to full. |
+| Arrow keys, `Page Up`/`Down`, `Home`/`End` on a velocity bar | Change the velocity by 5%, by 25%, or to silent or full. |
 
 The steps are one tab stop, and each is a toggle button (`aria-pressed`) named after its row and step.
 
@@ -106,11 +109,15 @@ A grid of steps to switch on and off, one row per sound: the pattern of a drum m
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `defaultValue` | `Pattern` |  | Uncontrolled starting pattern: a row per sound, each a list of steps. |
+| `defaultVelocities` | `Velocities` |  | Uncontrolled starting velocities. |
 | `disabled` | `boolean` |  |  |
 | `onValueChange` | `( value: boolean[][], eventDetails: ChangeEventDetails ) => void` |  | Fires while cells are flipped. `eventDetails.cancel()` keeps the pattern as it was. |
 | `onValueCommitted` | `( value: boolean[][], eventDetails: CommitEventDetails ) => void` |  | Fires when a press, a paint or a key press that changed the pattern ends. |
+| `onVelocityChange` | `( velocities: number[][], eventDetails: VelocityChangeEventDetails ) => void` |  | Fires while a velocity is drawn or nudged. `eventDetails.cancel()` keeps the velocities as they were. |
+| `onVelocityCommitted` | `( velocities: number[][], eventDetails: VelocityCommitEventDetails ) => void` |  | Fires when a drag, a key press or a reset that changed a velocity ends. |
 | `source` | `Source<number>` |  | The step being played, a live value followed without re-rendering; its cells get `data-current`. |
 | `value` | `Pattern` |  | The pattern: a row per sound, each a list of steps. |
+| `velocities` | `Velocities` |  | How loud each step plays, 0…1, a row per sound like the pattern; a step it does not list plays at full. |
 
 | Data attribute | Description |
 | --- | --- |
@@ -160,6 +167,20 @@ One step of a row: a toggle button, pressed when the step is on. Press it and dr
 | `data-on` | Whether the step is on: also `aria-pressed`. |
 | `data-painting` | Present when painting. |
 
+### Velocity
+
+How loud one step plays, as a bar from the bottom of its box: the height is the velocity, through the `--sequencer-velocity` CSS variable. Pressing it sets the velocity where the pointer is, and dragging on draws across the steps of the row. Alt + click or Delete brings it back to full. A native `<input type="range">` inside takes the arrow keys and carries the accessible name. Put one per step of a `Sequencer.Row`, in a row of its own under the cells. Renders a `<div>` element.
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `step` | `number` |  | Which step this is, from the left. |
+| `getAriaValueText` | `(velocity: number) => string` |  | Returns how a velocity, 0…1, is announced. Defaults to a percentage. |
+
+| Data attribute | Description |
+| --- | --- |
+| `data-disabled` | Present when disabled. |
+| `data-on` | Whether the step is on. |
+
 ### Registry component
 
 `Sequencer` takes the `Root` props, plus:
@@ -168,3 +189,4 @@ One step of a row: a toggle button, pressed when the step is on. Press it and dr
 | --- | --- | --- | --- |
 | `rowLabels` | `string[]` | | Names written beside each row, and its accessible name. |
 | `beatEvery` | `number` | `4` | Highlights every nth step. |
+| `showVelocity` | `boolean` | `false` | Draws a bar under each row to set how loud every step plays. |

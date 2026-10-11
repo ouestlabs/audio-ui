@@ -4,7 +4,7 @@ import type {
   CommitEventDetails as ExtraCommitEventDetails,
 } from "../internal/event-details";
 import type { Store } from "../internal/store";
-import type { CellAddress, Pattern } from "./internal/grid";
+import type { CellAddress, Pattern, Velocities } from "./internal/grid";
 
 export type SequencerState = {
   disabled: boolean;
@@ -22,8 +22,28 @@ export type ValueCommitEventDetails =
   | ExtraCommitEventDetails<"paint", PointerEvent>
   | ExtraCommitEventDetails<"keyboard", KeyboardEvent>;
 
+export type VelocityChangeEventDetails =
+  | ExtraChangeEventDetails<"drag", PointerEvent>
+  | ExtraChangeEventDetails<"keyboard", KeyboardEvent>
+  | ExtraChangeEventDetails<"input-change", Event>
+  | ExtraChangeEventDetails<"reset", Event>;
+
+export type VelocityCommitEventDetails =
+  | ExtraCommitEventDetails<"drag", PointerEvent>
+  | ExtraCommitEventDetails<"keyboard", KeyboardEvent>
+  | ExtraCommitEventDetails<"input-change", Event>
+  | ExtraCommitEventDetails<"reset", Event>;
+
 export interface SequencerContextValue {
   actions: {
+    /** Sets one step's velocity and commits it at once: for a key, the input or a reset. */
+    nudgeVelocity: (
+      cell: CellAddress,
+      velocity: number,
+      eventDetails: VelocityChangeEventDetails
+    ) => void;
+    pressVelocity: (cell: CellAddress, event: PointerEvent) => void;
+    registerVelocity: (cell: CellAddress, node: HTMLElement | null) => void;
     focusCell: (cell: CellAddress) => void;
     moveFocusFrom: (from: CellAddress, event: KeyboardEvent) => boolean;
     pressCell: (cell: CellAddress, event: PointerEvent) => void;
@@ -49,6 +69,7 @@ export interface SequencerView {
   painting: boolean;
   tabStop: CellAddress;
   value: Pattern;
+  velocities: Velocities;
 }
 
 export const SequencerContext =

@@ -153,7 +153,7 @@ const probe = () => {
     removeEventListener.call(
       this,
       type,
-      (listener && listeners.get(listener)) || listener,
+      (listener && listeners.get(listener)) || (listener as EventListener),
       options
     );
   };
@@ -170,7 +170,9 @@ const probe = () => {
     ...rest: unknown[]
   ) =>
     timeout(
-      typeof callback === "function" ? timed(callback) : callback,
+      typeof callback === "function"
+        ? timed(callback as (...args: unknown[]) => unknown)
+        : callback,
       delay,
       ...rest
     )) as typeof window.setTimeout;

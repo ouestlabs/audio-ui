@@ -330,6 +330,18 @@
     @apply bg-muted;
   }
 
+  .cn-sequencer-velocity {
+    @apply overflow-hidden rounded-[min(var(--radius-sm),6px)] bg-muted/40 focus-within:ring-2 focus-within:ring-ring/50 data-disabled:pointer-events-none;
+  }
+
+  .cn-sequencer-velocity-fill {
+    @apply bg-primary/30 transition-[background-color] duration-100 ease-out motion-reduce:transition-none;
+  }
+
+  .cn-sequencer-velocity[data-on] .cn-sequencer-velocity-fill {
+    @apply bg-primary;
+  }
+
   /* MARK: Plot */
   .cn-plot {
     @apply rounded-lg border bg-card;

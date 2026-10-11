@@ -21,6 +21,15 @@ const VOLUME = 0.7;
 const ROWS = ["Kick", "Snare", "Hihat"];
 const TRIGGERS = [triggerKick, triggerSnare, triggerHihat];
 
+const VELOCITIES = [
+  [1, 0.5, 0.7, 0.5, 0.9, 0.5, 0.7, 0.5, 1, 0.5, 0.7, 0.5, 0.9, 0.5, 0.7, 0.6],
+  [1, 1, 1, 1, 0.8, 1, 1, 1, 1, 1, 1, 1, 0.85, 1, 1, 0.4],
+  [
+    0.55, 0.6, 0.9, 0.6, 0.55, 0.6, 0.9, 0.6, 0.55, 0.6, 0.9, 0.6, 0.55, 0.6,
+    0.9, 0.6,
+  ],
+];
+
 const x = (steps: number[]) =>
   Array.from({ length: STEPS }, (_, step) => steps.includes(step));
 const BEAT = [x([0, 4, 8, 12]), x([4, 12]), x([2, 6, 10, 14])];
@@ -30,6 +39,9 @@ export default function SequencerDemo() {
   const [pattern, setPattern] = useState(BEAT);
   const patternRef = useRef(pattern);
   patternRef.current = pattern;
+  const [velocities, setVelocities] = useState(VELOCITIES);
+  const velocitiesRef = useRef(velocities);
+  velocitiesRef.current = velocities;
   const [step] = useState(() => createSource(-1));
   const webAudio = useWebAudio();
   const master = useMasterBus(VOLUME);
@@ -41,9 +53,14 @@ export default function SequencerDemo() {
         return;
       }
       patternRef.current.forEach((row, at) => {
-        if (row[index]) {
-          TRIGGERS[at]?.(ctx, master, time);
+        if (!row[index]) {
+          return;
         }
+        // Each hit goes through a gain of its own: the step's velocity.
+        const hit = ctx.createGain();
+        hit.gain.value = velocitiesRef.current[at]?.[index] ?? 1;
+        hit.connect(master);
+        TRIGGERS[at]?.(ctx, hit, time);
       });
     },
     [master, webAudio]
@@ -84,9 +101,12 @@ export default function SequencerDemo() {
       <Sequencer
         aria-label="Drum pattern"
         onValueChange={setPattern}
+        onVelocityChange={setVelocities}
         rowLabels={ROWS}
+        showVelocity
         source={step}
         value={pattern}
+        velocities={velocities}
       />
       <div className="flex items-center justify-between gap-2">
         <Button

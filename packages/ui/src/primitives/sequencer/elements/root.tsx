@@ -13,6 +13,8 @@ import {
   type SequencerView,
   type ValueChangeEventDetails,
   type ValueCommitEventDetails,
+  type VelocityChangeEventDetails,
+  type VelocityCommitEventDetails,
 } from "../context";
 import {
   type CellAddress,
@@ -21,9 +23,13 @@ import {
   isOn,
   moveFocus,
   setCell,
+  setVelocity,
+  type Velocities,
+  velocityAtY,
 } from "../internal/grid";
 
 const EMPTY: boolean[][] = [];
+const NO_VELOCITIES: number[][] = [];
 
 interface Paint {
   changed: boolean;
@@ -44,14 +50,18 @@ export function Root(componentProps: Root.Props) {
   const {
     className,
     defaultValue,
+    defaultVelocities,
     disabled = false,
     onValueChange,
     onValueCommitted,
+    onVelocityChange,
+    onVelocityCommitted,
     ref,
     render,
     source,
     style,
     value: valueProp,
+    velocities: velocitiesProp,
     ...elementProps
   } = componentProps;
 
@@ -64,6 +74,15 @@ export function Root(componentProps: Root.Props) {
   valueRef.current = value;
   const rows = value.length;
   const steps = value[0]?.length ?? 0;
+
+  const isVelocityControlled = velocitiesProp !== undefined;
+  const [uncontrolledVelocities, setUncontrolledVelocities] =
+    React.useState<Velocities>(() => defaultVelocities ?? NO_VELOCITIES);
+  const velocities = isVelocityControlled
+    ? velocitiesProp
+    : uncontrolledVelocities;
+  const velocitiesRef = React.useRef(velocities);
+  velocitiesRef.current = velocities;
 
   const [painting, setPainting] = React.useState(false);
   const paintRef = React.useRef<Paint | null>(null);
@@ -88,6 +107,116 @@ export function Root(componentProps: Root.Props) {
       }
     },
     []
+  );
+
+  const velocityNodesRef = React.useRef(new Map<string, HTMLElement>());
+  const registerVelocity = React.useCallback(
+    (cell: CellAddress, node: HTMLElement | null) => {
+      if (node) {
+        velocityNodesRef.current.set(cellKey(cell), node);
+      } else {
+        velocityNodesRef.current.delete(cellKey(cell));
+      }
+    },
+    []
+  );
+
+  /** Proposes a velocity for one step; returns whether it was applied. */
+  const changeVelocity = React.useCallback(
+    (
+      cell: CellAddress,
+      velocity: number,
+      eventDetails: VelocityChangeEventDetails
+    ) => {
+      const next = setVelocity(
+        velocitiesRef.current,
+        cell,
+        Math.min(1, Math.max(0, velocity)),
+        valueRef.current.length,
+        valueRef.current[0]?.length ?? 0
+      );
+      if (
+        next[cell.row]?.[cell.step] ===
+        (velocitiesRef.current[cell.row]?.[cell.step] ?? 1)
+      ) {
+        return false;
+      }
+      onVelocityChange?.(next, eventDetails);
+      if (eventDetails.isCanceled) {
+        return false;
+      }
+      velocitiesRef.current = next;
+      if (!isVelocityControlled) {
+        setUncontrolledVelocities(next);
+      }
+      return true;
+    },
+    [isVelocityControlled, onVelocityChange]
+  );
+
+  const nudgeVelocity = React.useCallback(
+    (
+      cell: CellAddress,
+      velocity: number,
+      eventDetails: VelocityChangeEventDetails
+    ) => {
+      if (changeVelocity(cell, velocity, eventDetails)) {
+        onVelocityCommitted?.(
+          velocitiesRef.current as number[][],
+          {
+            event: eventDetails.event,
+            reason: eventDetails.reason,
+          } as VelocityCommitEventDetails
+        );
+      }
+    },
+    [changeVelocity, onVelocityCommitted]
+  );
+
+  const velocityRef = React.useRef<{
+    changed: boolean;
+    cell: CellAddress;
+    pointerId: number;
+  } | null>(null);
+
+  /** Sets the velocity of the step under the pointer in the row being drawn. */
+  const drawVelocity = React.useCallback(
+    (event: PointerEvent, row: number) => {
+      for (const [key, node] of velocityNodesRef.current) {
+        const [nodeRow, nodeStep] = key.split(":").map(Number);
+        if (nodeRow !== row) {
+          continue;
+        }
+        const box = node.getBoundingClientRect();
+        if (event.clientX >= box.left && event.clientX < box.right) {
+          const cell = { row, step: nodeStep as number };
+          if (
+            changeVelocity(
+              cell,
+              velocityAtY(box, event.clientY),
+              createChangeEventDetails("drag", event)
+            ) &&
+            velocityRef.current
+          ) {
+            velocityRef.current.changed = true;
+          }
+          return;
+        }
+      }
+    },
+    [changeVelocity]
+  );
+
+  const pressVelocity = React.useCallback(
+    (cell: CellAddress, event: PointerEvent) => {
+      velocityRef.current = {
+        cell,
+        changed: false,
+        pointerId: event.pointerId,
+      };
+      drawVelocity(event, cell.row);
+    },
+    [drawVelocity]
   );
 
   /** Proposes a pattern; returns whether it was applied. */
@@ -170,6 +299,15 @@ export function Root(componentProps: Root.Props) {
   );
 
   const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    const drawing = velocityRef.current;
+    if (drawing && drawing.pointerId === event.pointerId) {
+      if (isReleased(event)) {
+        handlePointerEnd(event);
+        return;
+      }
+      drawVelocity(event.nativeEvent, drawing.cell.row);
+      return;
+    }
     const paint = paintRef.current;
     if (!paint || paint.pointerId !== event.pointerId) {
       return;
@@ -195,6 +333,17 @@ export function Root(componentProps: Root.Props) {
   };
 
   const handlePointerEnd = (event: React.PointerEvent<HTMLDivElement>) => {
+    const drawing = velocityRef.current;
+    if (drawing && drawing.pointerId === event.pointerId) {
+      velocityRef.current = null;
+      if (drawing.changed) {
+        onVelocityCommitted?.(velocitiesRef.current as number[][], {
+          event: event.nativeEvent,
+          reason: "drag",
+        });
+      }
+      return;
+    }
     const paint = paintRef.current;
     if (!paint || paint.pointerId !== event.pointerId) {
       return;
@@ -254,11 +403,16 @@ export function Root(componentProps: Root.Props) {
   // What each cell follows lives in a store, so a press renders the cell it
   // changes and not the whole grid.
   const [view] = React.useState(() =>
-    createStore<SequencerView>({ painting, tabStop: stop, value })
+    createStore<SequencerView>({
+      painting,
+      tabStop: stop,
+      value,
+      velocities,
+    })
   );
   React.useLayoutEffect(() => {
-    view.set({ painting, tabStop: stop, value });
-  }, [painting, stop, value, view]);
+    view.set({ painting, tabStop: stop, value, velocities });
+  }, [painting, stop, value, velocities, view]);
   // The cells carry `data-painting` too, written straight to them: reading it
   // in each cell would render the whole grid at every press and release.
   React.useLayoutEffect(() => {
@@ -272,20 +426,33 @@ export function Root(componentProps: Root.Props) {
   const latest = React.useRef({
     focusCell,
     moveFocusFrom,
+    nudgeVelocity,
     pressCell,
+    pressVelocity,
     toggleCell,
   });
-  latest.current = { focusCell, moveFocusFrom, pressCell, toggleCell };
+  latest.current = {
+    focusCell,
+    moveFocusFrom,
+    nudgeVelocity,
+    pressCell,
+    pressVelocity,
+    toggleCell,
+  };
   const actions = React.useMemo<SequencerContextValue["actions"]>(
     () => ({
       focusCell: (cell) => latest.current.focusCell(cell),
       moveFocusFrom: (from, event) => latest.current.moveFocusFrom(from, event),
+      nudgeVelocity: (cell, velocity, details) =>
+        latest.current.nudgeVelocity(cell, velocity, details),
       pressCell: (cell, event) => latest.current.pressCell(cell, event),
+      pressVelocity: (cell, event) => latest.current.pressVelocity(cell, event),
       registerCell,
+      registerVelocity,
       setTabStop: setTabStopState,
       toggleCell: (cell, event) => latest.current.toggleCell(cell, event),
     }),
-    [registerCell]
+    [registerCell, registerVelocity]
   );
   const shared = React.useMemo(() => ({ disabled }), [disabled]);
   const context = React.useMemo<SequencerContextValue>(
@@ -319,10 +486,14 @@ export namespace Root {
   export type ChangeEventReason = ChangeEventDetails["reason"];
   export type ChangeEventDetails = ValueChangeEventDetails;
   export type CommitEventDetails = ValueCommitEventDetails;
+  export type VelocityChangeDetails = VelocityChangeEventDetails;
+  export type VelocityCommitDetails = VelocityCommitEventDetails;
 
   export interface Props extends Omit<PartProps<"div", State>, "defaultValue"> {
     /** Uncontrolled starting pattern: a row per sound, each a list of steps. */
     defaultValue?: Pattern;
+    /** Uncontrolled starting velocities. */
+    defaultVelocities?: Velocities;
     disabled?: boolean;
     /** Fires while cells are flipped. `eventDetails.cancel()` keeps the pattern as it was. */
     onValueChange?: (
@@ -334,9 +505,21 @@ export namespace Root {
       value: boolean[][],
       eventDetails: CommitEventDetails
     ) => void;
+    /** Fires while a velocity is drawn or nudged. `eventDetails.cancel()` keeps the velocities as they were. */
+    onVelocityChange?: (
+      velocities: number[][],
+      eventDetails: VelocityChangeEventDetails
+    ) => void;
+    /** Fires when a drag, a key press or a reset that changed a velocity ends. */
+    onVelocityCommitted?: (
+      velocities: number[][],
+      eventDetails: VelocityCommitEventDetails
+    ) => void;
     /** The step being played, a live value followed without re-rendering; its cells get `data-current`. */
     source?: Source<number>;
     /** The pattern: a row per sound, each a list of steps. */
     value?: Pattern;
+    /** How loud each step plays, 0…1, a row per sound like the pattern; a step it does not list plays at full. */
+    velocities?: Velocities;
   }
 }

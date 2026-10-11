@@ -1,6 +1,7 @@
 import { describe, test } from "bun:test";
 import { fireEvent, render } from "@testing-library/react";
-import { bench, expectWork } from "../../../../test/bench";
+import { bench, expectWork, sweep } from "../../../../test/bench";
+import { mockRect } from "../../../../test/helpers";
 import { Sequencer } from "../../../entries/sequencer";
 import { renderSequencer } from "./helpers";
 
@@ -65,5 +66,60 @@ describe("Sequencer", () => {
       { runs: 200 }
     );
     expectWork(changes, 200);
+  });
+
+  test("drawing velocities across a row", () => {
+    let changes = 0;
+    const view = render(
+      <Sequencer.Root
+        defaultValue={[new Array(64).fill(true)]}
+        onVelocityChange={() => {
+          changes += 1;
+        }}
+      >
+        <Sequencer.Rows>
+          {(row) => (
+            <Sequencer.Row index={row}>
+              <Sequencer.Cells>
+                {(step) => (
+                  <Sequencer.Velocity
+                    aria-label={`Step ${step + 1}`}
+                    data-testid={`bar-${step}`}
+                    step={step}
+                  />
+                )}
+              </Sequencer.Cells>
+            </Sequencer.Row>
+          )}
+        </Sequencer.Rows>
+      </Sequencer.Root>
+    );
+    for (let step = 0; step < 64; step += 1) {
+      mockRect(view.getByTestId(`bar-${step}`), {
+        bottom: 100,
+        height: 100,
+        left: step * 10,
+        right: step * 10 + 10,
+        top: 0,
+        width: 10,
+      });
+    }
+    const first = view.getByTestId("bar-0");
+    fireEvent.pointerDown(first, {
+      button: 0,
+      clientX: 5,
+      clientY: 50,
+      pointerId: 1,
+    });
+    bench("draw across 64 velocity bars", (index) => {
+      fireEvent.pointerMove(first, {
+        buttons: 1,
+        clientX: 5 + sweep(index, 630),
+        clientY: sweep(index + 3, 100, 41),
+        pointerId: 1,
+      });
+    });
+    fireEvent.pointerUp(first, { pointerId: 1 });
+    expectWork(changes);
   });
 });

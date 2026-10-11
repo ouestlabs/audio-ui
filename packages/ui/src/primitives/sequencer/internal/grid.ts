@@ -1,5 +1,44 @@
 export type Pattern = readonly (readonly boolean[])[];
 
+/** Loudness per step, 0…1: a row per sound, like the pattern. A step it does not list is at full. */
+export type Velocities = readonly (readonly number[])[];
+
+/** What a step plays at until it is set. */
+export const DEFAULT_VELOCITY = 1;
+
+/** The velocity of one step. */
+export function velocityAt(
+  velocities: Velocities,
+  { row, step }: CellAddress
+): number {
+  return velocities[row]?.[step] ?? DEFAULT_VELOCITY;
+}
+
+/** `velocities` with one step set, grown to `rows` × `steps`; the same values when it already is. */
+export function setVelocity(
+  velocities: Velocities,
+  { row, step }: CellAddress,
+  velocity: number,
+  rows: number,
+  steps: number
+): number[][] {
+  return Array.from({ length: rows }, (_, rowAt) =>
+    Array.from({ length: steps }, (_step, stepAt) =>
+      rowAt === row && stepAt === step
+        ? velocity
+        : velocityAt(velocities, { row: rowAt, step: stepAt })
+    )
+  );
+}
+
+/** The velocity a press at `clientY` sets on a bar: its bottom is silent, its top full. */
+export function velocityAtY(box: DOMRect, clientY: number): number {
+  if (box.height <= 0) {
+    return DEFAULT_VELOCITY;
+  }
+  return Math.min(1, Math.max(0, (box.bottom - clientY) / box.height));
+}
+
 export interface CellAddress {
   row: number;
   step: number;
