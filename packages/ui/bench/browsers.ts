@@ -18,68 +18,93 @@ const sweep = (index: number, span: number, period = 60) => {
   return span * (phase < 0.5 ? phase * 2 : 2 - phase * 2);
 };
 
-const gestures: Record<string, { click?: boolean; label: string; path: Path }> =
-  {
-    envelope64: {
-      label: "drag one of 64 points",
-      path: (i) => ({ x: sweep(i, 6) - 3, y: sweep(i + 7, 120, 43) - 60 }),
+const gestures: Record<
+  string,
+  { click?: boolean; label: string; live?: boolean; path: Path }
+> = {
+  envelope64: {
+    label: "drag one of 64 points",
+    path: (i) => ({ x: sweep(i, 6) - 3, y: sweep(i + 7, 120, 43) - 60 }),
+  },
+  fader: {
+    label: "drag, controlled",
+    path: (i) => ({ x: 0, y: sweep(i, 250) - 125 }),
+  },
+  // Nothing mounted: what the harness itself costs per move.
+  idle: {
+    label: "the harness alone",
+    path: (i) => ({ x: sweep(i, 300), y: 0 }),
+  },
+  knob: {
+    label: "turn, controlled",
+    path: (i) => {
+      // Round the centre, as a hand turning the knob does.
+      const angle = (sweep(i, 120) * Math.PI) / 180;
+      return { x: 60 * Math.sin(angle), y: 60 - 60 * Math.cos(angle) - 60 };
     },
-    fader: {
-      label: "drag, controlled",
-      path: (i) => ({ x: 0, y: sweep(i, 250) - 125 }),
-    },
-    // Nothing mounted: what the harness itself costs per move.
-    idle: {
-      label: "the harness alone",
-      path: (i) => ({ x: sweep(i, 300), y: 0 }),
-    },
-    knob: {
-      label: "turn, controlled",
-      path: (i) => {
-        // Round the centre, as a hand turning the knob does.
-        const angle = (sweep(i, 120) * Math.PI) / 180;
-        return { x: 60 * Math.sin(angle), y: 60 - 60 * Math.cos(angle) - 60 };
-      },
-    },
-    "piano-roll-500": {
-      label: "drag one of 500 notes, snapped",
-      path: (i) => ({ x: sweep(i, 600), y: sweep(i + 5, 100, 37) }),
-    },
-    plot: {
-      label: "drag a handle",
-      path: (i) => ({
-        x: sweep(i, 500) - 250,
-        y: sweep(i + 11, 200, 53) - 100,
-      }),
-    },
-    "sequencer-1024": {
-      click: true,
-      label: "press a cell of 1024",
-      path: (i) => ({
-        x: ((i * 37) % 64) * 18,
-        y: (((i * 37) >> 6) % 16) * 18,
-      }),
-    },
-    "sequencer-velocities": {
-      label: "draw across 64 velocity bars",
-      path: (i) => ({ x: sweep(i, 900), y: sweep(i + 3, 100, 41) - 50 }),
-    },
-    timeline: {
-      label: "scrub past 200 marks",
-      path: (i) => ({ x: sweep(i, 900), y: 0 }),
-    },
-    waveform: {
-      label: "scrub a 2048-peak waveform",
-      path: (i) => ({ x: sweep(i, 900) - 450, y: 0 }),
-    },
-    xypad: {
-      label: "drag over both axes",
-      path: (i) => ({
-        x: sweep(i, 280) - 140,
-        y: sweep(i + 13, 280, 47) - 140,
-      }),
-    },
-  };
+  },
+  // No pointer: a source is fed once per frame, as a clock or an audio
+  // worklet would, and the frame's cost is what the page's script, style and
+  // layout take to follow it.
+  "live-meter-32": {
+    label: "32 channels, one frame each",
+    live: true,
+    path: () => ({ x: 0, y: 0 }),
+  },
+  "live-sequencer-step": {
+    label: "the playing step of 1024 cells",
+    live: true,
+    path: () => ({ x: 0, y: 0 }),
+  },
+  "live-timeline-playhead": {
+    label: "a playhead past 200 marks",
+    live: true,
+    path: () => ({ x: 0, y: 0 }),
+  },
+  "live-waveform-playhead": {
+    label: "a playhead on a 2048-peak waveform",
+    live: true,
+    path: () => ({ x: 0, y: 0 }),
+  },
+  "piano-roll-500": {
+    label: "drag one of 500 notes, snapped",
+    path: (i) => ({ x: sweep(i, 600), y: sweep(i + 5, 100, 37) }),
+  },
+  plot: {
+    label: "drag a handle",
+    path: (i) => ({
+      x: sweep(i, 500) - 250,
+      y: sweep(i + 11, 200, 53) - 100,
+    }),
+  },
+  "sequencer-1024": {
+    click: true,
+    label: "press a cell of 1024",
+    path: (i) => ({
+      x: ((i * 37) % 64) * 18,
+      y: (((i * 37) >> 6) % 16) * 18,
+    }),
+  },
+  "sequencer-velocities": {
+    label: "draw across 64 velocity bars",
+    path: (i) => ({ x: sweep(i, 900), y: sweep(i + 3, 100, 41) - 50 }),
+  },
+  timeline: {
+    label: "scrub past 200 marks",
+    path: (i) => ({ x: sweep(i, 900), y: 0 }),
+  },
+  waveform: {
+    label: "scrub a 2048-peak waveform",
+    path: (i) => ({ x: sweep(i, 900) - 450, y: 0 }),
+  },
+  xypad: {
+    label: "drag over both axes",
+    path: (i) => ({
+      x: sweep(i, 280) - 140,
+      y: sweep(i + 13, 280, 47) - 140,
+    }),
+  },
+};
 
 const percentile = (sorted: number[], share: number) =>
   sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * share))] ?? 0;
@@ -242,7 +267,7 @@ for (const engine of names) {
     executablePath: engine === "chromium" ? process.env.CHROME_PATH : undefined,
   });
   console.log(`\n${engine} ${browser.version()}`);
-  for (const [name, { click, label, path }] of Object.entries(gestures)) {
+  for (const [name, { click, label, live, path }] of Object.entries(gestures)) {
     const page = await browser.newPage({
       viewport: { height: 900, width: 1400 },
     });
@@ -250,7 +275,7 @@ for (const engine of names) {
     await page.addInitScript(probe);
     await page.goto(`http://localhost:${server.port}/#${name}`);
     const target =
-      name === "idle"
+      name === "idle" || live
         ? page.locator("body")
         : page
             .locator('[data-bench="target"], [aria-label="Row 1, step 1"]')
@@ -262,8 +287,10 @@ for (const engine of names) {
     }
     const cx = box.x + box.width / 2;
     const cy = box.y + box.height / 2;
-    await page.mouse.move(cx, cy);
-    if (!click) {
+    if (!live) {
+      await page.mouse.move(cx, cy);
+    }
+    if (!(click || live)) {
       await page.mouse.down();
     }
     // Chromium also reports what its main thread did, a check on the probe.
@@ -285,16 +312,20 @@ for (const engine of names) {
     for (let index = 0; index < total; index += 1) {
       const before = await busy();
       const { x, y } = path(index);
-      await page.mouse.move(cx + x, cy + y);
+      if (!live) {
+        await page.mouse.move(cx + x, cy + y);
+      }
       if (click) {
         await page.mouse.down();
         await page.mouse.up();
       }
-      // One frame, so each move is rendered before the next.
+      // One frame, so each move is rendered before the next. A live scene is
+      // fed its next value inside the frame, as a clock would.
       const { layout, script } = await page.evaluate(
-        () =>
+        (frame) =>
           new Promise<{ layout: number; script: number }>((resolve) =>
-            requestAnimationFrame(() =>
+            requestAnimationFrame(() => {
+              window.__tick?.(frame);
               requestAnimationFrame(() =>
                 setTimeout(
                   () =>
@@ -307,14 +338,15 @@ for (const engine of names) {
                     ),
                   0
                 )
-              )
-            )
-          )
+              );
+            })
+          ),
+        index
       );
       costs.push({ layout, script });
       references.push((await busy()) - before);
     }
-    if (!click) {
+    if (!(click || live)) {
       await page.mouse.up();
     }
     const changes = await page.evaluate(() => window.__changes);

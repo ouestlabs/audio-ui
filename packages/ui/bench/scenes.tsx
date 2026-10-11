@@ -3,16 +3,20 @@ import { createRoot } from "react-dom/client";
 import { Envelope } from "../src/entries/envelope";
 import { Fader } from "../src/entries/fader";
 import { Knob } from "../src/entries/knob";
+import { Meter } from "../src/entries/meter";
 import { PianoRoll } from "../src/entries/piano-roll";
 import { Plot } from "../src/entries/plot";
 import { Sequencer } from "../src/entries/sequencer";
 import { Timeline } from "../src/entries/timeline";
 import { Waveform } from "../src/entries/waveform";
 import { XYPad } from "../src/entries/xypad";
+import { createSource } from "../src/source";
 
 declare global {
   interface Window {
     __changes: number;
+    /** What a live scene does on one frame: emit the next value of its sources. */
+    __tick?: (frame: number) => void;
   }
 }
 
@@ -316,10 +320,125 @@ function SequencerVelocities() {
   );
 }
 
+const sweepTo = (index: number, span: number, period = 90) => {
+  const phase = (index % period) / period;
+  return span * (phase < 0.5 ? phase * 2 : 2 - phase * 2);
+};
+
+/** Live scenes: sources a clock would feed once per frame. */
+const meterSource = createSource({ levels: new Array(32).fill(-60) });
+const positionSource = createSource(0);
+const stepSource = createSource(-1);
+
+const ticks: Record<string, (frame: number) => void> = {
+  "live-meter-32": (frame) =>
+    meterSource.set({
+      levels: Array.from(
+        { length: 32 },
+        (_, channel) => -60 + sweepTo(frame + channel * 7, 60)
+      ),
+    }),
+  "live-sequencer-step": (frame) => stepSource.set(Math.floor(frame / 4) % 64),
+  "live-timeline-playhead": (frame) =>
+    positionSource.set(sweepTo(frame, 1000, 240)),
+  "live-waveform-playhead": (frame) =>
+    positionSource.set(sweepTo(frame, 100, 240)),
+};
+
+function LiveMeter() {
+  return (
+    <Meter.Root
+      aria-label="Out"
+      max={0}
+      min={-60}
+      source={meterSource}
+      style={{ display: "flex", gap: 2, height: 160 }}
+    >
+      <Meter.Channels>
+        {(index) => (
+          <Meter.Channel
+            aria-label={`Ch ${index}`}
+            index={index}
+            key={index}
+            style={{ background: "#8883", height: 160, width: 12 }}
+          >
+            <Meter.Indicator style={{ background: "#5c8" }} />
+            <Meter.Peak />
+            <Meter.Value />
+          </Meter.Channel>
+        )}
+      </Meter.Channels>
+    </Meter.Root>
+  );
+}
+
+function LiveSequencerStep() {
+  return (
+    <Sequencer.Root defaultValue={PATTERN} source={stepSource}>
+      <Sequencer.Rows>
+        {(row) => (
+          <Sequencer.Row index={row} style={{ display: "flex" }}>
+            <Sequencer.Cells>
+              {(step) => (
+                <Sequencer.Cell
+                  aria-label={`Row ${row + 1}, step ${step + 1}`}
+                  step={step}
+                  style={{
+                    background: "#8883",
+                    height: 16,
+                    margin: 1,
+                    width: 16,
+                  }}
+                />
+              )}
+            </Sequencer.Cells>
+          </Sequencer.Row>
+        )}
+      </Sequencer.Rows>
+    </Sequencer.Root>
+  );
+}
+
+function LiveTimelinePlayhead() {
+  return (
+    <Timeline.Root duration={1000} source={positionSource}>
+      <Timeline.Ruler aria-label="Position" style={{ height: 32, width: 1000 }}>
+        {Array.from({ length: 200 }, (_, index) => (
+          <Timeline.Mark key={`mark-${index * 5}`} value={index * 5}>
+            {index}
+          </Timeline.Mark>
+        ))}
+      </Timeline.Ruler>
+      <Timeline.Lane style={{ height: 32 }}>
+        <Timeline.Playhead />
+      </Timeline.Lane>
+    </Timeline.Root>
+  );
+}
+
+function LiveWaveformPlayhead() {
+  return (
+    <Waveform.Root duration={100} peaks={PEAKS} source={positionSource}>
+      <Waveform.Control
+        aria-label="Position"
+        style={{ height: 96, position: "relative", width: 1000 }}
+      >
+        <Waveform.Canvas style={{ height: "100%", width: "100%" }} />
+        <Waveform.Playhead />
+        <Waveform.Thumb />
+      </Waveform.Control>
+    </Waveform.Root>
+  );
+}
+
 const scenes: Record<string, ReactNode> = {
   envelope64: <Envelope64 />,
   fader: <FaderControlled />,
   knob: <KnobControlled />,
+  "live-meter-32": <LiveMeter />,
+  "live-sequencer-step": <LiveSequencerStep />,
+  "live-timeline-playhead": <LiveTimelinePlayhead />,
+  "live-waveform-playhead": <LiveWaveformPlayhead />,
   "piano-roll-500": <PianoRoll500 />,
   plot: <PlotHandle />,
   "sequencer-1024": <Sequencer1024 />,
@@ -331,6 +450,13 @@ const scenes: Record<string, ReactNode> = {
 
 window.__changes = 0;
 const name = location.hash.slice(1);
+const tick = ticks[name];
+if (tick) {
+  window.__tick = (frame) => {
+    count();
+    tick(frame);
+  };
+}
 const container = document.getElementById("root");
 if (container) {
   createRoot(container).render(
