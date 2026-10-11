@@ -143,11 +143,28 @@ const PERCENT: Intl.NumberFormatOptions = {
 const bars = (count: number) => count * BAR;
 
 const TRACKS = [
-  { id: "drums", name: "Drums", swatch: "border-s-chart-1" },
-  { id: "bass", name: "Bass", swatch: "border-s-chart-2" },
-  { id: "keys", name: "Keys", swatch: "border-s-chart-3" },
-  { id: "vocals", name: "Vocals", swatch: "border-s-chart-4" },
+  { color: 0, id: "drums", name: "Drums" },
+  { color: 1, id: "bass", name: "Bass" },
+  { color: 2, id: "keys", name: "Keys" },
+  { color: 3, id: "vocals", name: "Vocals" },
 ] as const;
+
+/** The colors a track can take: the theme's chart tokens, written out for the stylesheet to find. */
+const SWATCHES = [
+  { dot: "bg-chart-1", edge: "border-s-chart-1", name: "Color 1" },
+  { dot: "bg-chart-2", edge: "border-s-chart-2", name: "Color 2" },
+  { dot: "bg-chart-3", edge: "border-s-chart-3", name: "Color 3" },
+  { dot: "bg-chart-4", edge: "border-s-chart-4", name: "Color 4" },
+  { dot: "bg-chart-5", edge: "border-s-chart-5", name: "Color 5" },
+] as const;
+
+const formatPan = (pan: number) => {
+  const amount = Math.round(Math.abs(pan) * 100);
+  if (amount === 0) {
+    return "C";
+  }
+  return `${pan < 0 ? "L" : "R"}${amount}`;
+};
 
 type ClipAction = "duplicate" | "remove" | "rename" | "split" | "toggle";
 
@@ -228,8 +245,11 @@ function ClipNameField({
 
 /** What a track's header sets: how loud it is, and whether it is silenced or soloed. */
 interface Mix {
+  /** An index into `SWATCHES`. */
+  color: number;
   gain: number;
   muted: boolean;
+  pan: number;
   soloed: boolean;
 }
 
@@ -239,7 +259,7 @@ const SILENCE = {
   subscribe: () => () => undefined,
 };
 
-const UNITY: Mix = { gain: 1, muted: false, soloed: false };
+const UNITY: Mix = { color: 0, gain: 1, muted: false, pan: 0, soloed: false };
 
 type Span = readonly [number, number];
 
@@ -729,7 +749,6 @@ function TrackHeader({
   onMix,
   onSelect,
   selected,
-  swatch,
   trackId,
 }: {
   /** Whether the track is short: one row, with no gain. */
@@ -739,8 +758,6 @@ function TrackHeader({
   onMix: (trackId: Arranged["track"], patch: Partial<Mix>) => void;
   onSelect: (trackId: Arranged["track"]) => void;
   selected: boolean;
-  /** The border class that colors the track's leading edge. */
-  swatch: string;
   trackId: Arranged["track"];
 }) {
   const handleMute = useCallback(
@@ -756,82 +773,130 @@ function TrackHeader({
       onMix(trackId, { gain: Array.isArray(value) ? value[0] : Number(value) }),
     [onMix, trackId]
   );
+  const handlePan = useCallback(
+    (value: number | readonly number[]) =>
+      onMix(trackId, { pan: Array.isArray(value) ? value[0] : Number(value) }),
+    [onMix, trackId]
+  );
+  const handleColor = useCallback(
+    (event: MouseEvent<HTMLElement>) =>
+      onMix(trackId, { color: Number(event.currentTarget.dataset.color) }),
+    [onMix, trackId]
+  );
   const handleClick = useCallback(() => onSelect(trackId), [onSelect, trackId]);
   return (
-    <div
-      className={cn(
-        "relative flex w-full flex-col justify-center border-s-4 px-2",
-        compact ? "py-0" : "gap-2 py-2",
-        swatch
-      )}
-    >
-      <div className="flex items-center gap-1">
-        <button
-          aria-pressed={selected}
-          className="min-w-0 flex-1 truncate text-left font-medium outline-none hover:underline focus-visible:underline"
-          onClick={handleClick}
-          type="button"
-        >
-          {name}
-        </button>
-        <Button
-          aria-label={`Solo ${name}`}
-          aria-pressed={mix.soloed}
-          onClick={handleSolo}
-          size="icon-xs"
-          variant={mix.soloed ? "default" : "ghost"}
-        >
-          <IconPlaceholder
-            hugeicons="HeadphonesIcon"
-            lucide="HeadphonesIcon"
-            phosphor="HeadphonesIcon"
-            remixicon="RiHeadphoneLine"
-            tabler="IconHeadphones"
+    <ContextMenu>
+      <ContextMenuTrigger
+        render={
+          <div
+            className={cn(
+              "relative flex w-full flex-col justify-center border-s-4 px-2",
+              compact ? "py-0" : "gap-2 py-2",
+              SWATCHES[mix.color]?.edge
+            )}
           />
-        </Button>
-        <Button
-          aria-label={`Mute ${name}`}
-          aria-pressed={mix.muted}
-          onClick={handleMute}
-          size="icon-xs"
-          variant={mix.muted ? "default" : "ghost"}
-        >
-          {mix.muted ? (
+        }
+      >
+        <div className="flex items-center gap-1">
+          <button
+            aria-pressed={selected}
+            className="min-w-0 flex-1 truncate text-left font-medium outline-none hover:underline focus-visible:underline"
+            onClick={handleClick}
+            type="button"
+          >
+            {name}
+          </button>
+          <Button
+            aria-label={`Solo ${name}`}
+            aria-pressed={mix.soloed}
+            onClick={handleSolo}
+            size="icon-xs"
+            variant={mix.soloed ? "default" : "ghost"}
+          >
             <IconPlaceholder
-              hugeicons="VolumeMute01Icon"
-              lucide="VolumeXIcon"
-              phosphor="SpeakerSimpleSlashIcon"
-              remixicon="RiVolumeMuteLine"
-              tabler="IconVolumeOff"
+              hugeicons="HeadphonesIcon"
+              lucide="HeadphonesIcon"
+              phosphor="HeadphonesIcon"
+              remixicon="RiHeadphoneLine"
+              tabler="IconHeadphones"
             />
-          ) : (
-            <IconPlaceholder
-              hugeicons="VolumeHighIcon"
-              lucide="Volume2Icon"
-              phosphor="SpeakerSimpleHighIcon"
-              remixicon="RiVolumeUpLine"
-              tabler="IconVolume"
+          </Button>
+          <Button
+            aria-label={`Mute ${name}`}
+            aria-pressed={mix.muted}
+            onClick={handleMute}
+            size="icon-xs"
+            variant={mix.muted ? "default" : "ghost"}
+          >
+            {mix.muted ? (
+              <IconPlaceholder
+                hugeicons="VolumeMute01Icon"
+                lucide="VolumeXIcon"
+                phosphor="SpeakerSimpleSlashIcon"
+                remixicon="RiVolumeMuteLine"
+                tabler="IconVolumeOff"
+              />
+            ) : (
+              <IconPlaceholder
+                hugeicons="VolumeHighIcon"
+                lucide="Volume2Icon"
+                phosphor="SpeakerSimpleHighIcon"
+                remixicon="RiVolumeUpLine"
+                tabler="IconVolume"
+              />
+            )}
+          </Button>
+        </div>
+        {compact ? null : (
+          <div className="flex items-center gap-3 pe-2">
+            <Fader
+              aria-label={`${name} gain`}
+              className="min-w-0 flex-1"
+              max={1}
+              min={0}
+              onValueChange={handleGain}
+              orientation="horizontal"
+              size="sm"
+              step={0.01}
+              thumbMarks={false}
+              value={mix.gain}
+              valueLabel="hidden"
             />
-          )}
-        </Button>
-      </div>
-      {compact ? null : (
-        <Fader
-          aria-label={`${name} gain`}
-          className="min-w-0 pe-2"
-          max={1}
-          min={0}
-          onValueChange={handleGain}
-          orientation="horizontal"
-          size="sm"
-          step={0.01}
-          thumbMarks={false}
-          value={mix.gain}
-          valueLabel="hidden"
-        />
-      )}
-      <TimelineTrackResizeHandle aria-label={`${name} height`} />
-    </div>
+            <Fader
+              anchor={0}
+              aria-label={`${name} pan`}
+              className="w-12 shrink-0"
+              formatValue={formatPan}
+              max={1}
+              min={-1}
+              onValueChange={handlePan}
+              orientation="horizontal"
+              size="sm"
+              step={0.01}
+              thumbMarks={false}
+              value={mix.pan}
+              valueLabel="auto"
+            />
+          </div>
+        )}
+        <TimelineTrackResizeHandle aria-label={`${name} height`} />
+      </ContextMenuTrigger>
+      <ContextMenuContent className="w-auto min-w-36">
+        {SWATCHES.map((swatch, index) => (
+          <ContextMenuItem
+            data-color={index}
+            key={swatch.name}
+            onClick={handleColor}
+          >
+            <span
+              aria-hidden="true"
+              className={cn("size-2.5 rounded-full", swatch.dot)}
+            />
+            {swatch.name}
+          </ContextMenuItem>
+        ))}
+      </ContextMenuContent>
+    </ContextMenu>
   );
 }
 
@@ -1143,12 +1208,22 @@ export default function BlockTimeline() {
   // A stand-in for the mix's levels: the block plays nothing, so they move while it runs.
   const simulated = useSimulatedLevels(2);
   const [mixes, setMixes] = useState<Record<string, Mix>>({});
-  const mixOf = (trackId: string) => mixes[trackId] ?? UNITY;
+  const mixOf = (trackId: string): Mix =>
+    mixes[trackId] ?? {
+      ...UNITY,
+      color: TRACKS.find((track) => track.id === trackId)?.color ?? 0,
+    };
   const changeMix = useCallback(
     (trackId: string, patch: Partial<Mix>) =>
       setMixes((all) => ({
         ...all,
-        [trackId]: { ...(all[trackId] ?? UNITY), ...patch },
+        [trackId]: {
+          ...(all[trackId] ?? {
+            ...UNITY,
+            color: TRACKS.find((track) => track.id === trackId)?.color ?? 0,
+          }),
+          ...patch,
+        },
       })),
     []
   );
@@ -1816,7 +1891,6 @@ export default function BlockTimeline() {
                     onMix={changeMix}
                     onSelect={selectTrack}
                     selected={track.id === selectedTrack}
-                    swatch={track.swatch}
                     trackId={track.id}
                   />
                 }
