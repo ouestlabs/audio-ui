@@ -181,7 +181,7 @@ export function SiteHeader({
       className={cn(
         "w-full overscroll-none bg-site-background font-site-sans",
         framed && "lg:hidden",
-        sticky && "sticky top-0 z-50"
+        sticky && "sticky top-0 z-40"
       )}
     >
       <div className="container-wrapper">
