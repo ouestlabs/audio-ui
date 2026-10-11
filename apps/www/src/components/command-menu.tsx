@@ -164,7 +164,6 @@ export function CommandMenu({
   return (
     <Dialog onOpenChange={setOpen} open={open}>
       <DialogTrigger
-        nativeButton={false}
         render={
           <Button
             aria-label="Search"
