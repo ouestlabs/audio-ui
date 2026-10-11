@@ -603,7 +603,7 @@ function TimelineTrackControls({
           <div className="flex h-7 items-center gap-5 pe-1">
             <Fader
               aria-label={`${name} gain`}
-              className="min-w-0 flex-1 **:data-[orientation=horizontal]:min-w-0"
+              className="ms-2.5 min-w-0 flex-1 **:data-[orientation=horizontal]:min-w-0 **:data-[slot=fader-value]:top-full **:data-[slot=fader-value]:bottom-auto **:data-[slot=fader-value]:mt-1 **:data-[slot=fader-value]:mb-0"
               editableValue
               max={1}
               min={0}
