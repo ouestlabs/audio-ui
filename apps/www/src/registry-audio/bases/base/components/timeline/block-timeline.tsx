@@ -1151,7 +1151,7 @@ export default function BlockTimeline() {
             )}
             {...marquee.handlers}
           >
-            <Row className="sticky top-0 z-30 bg-background">
+            <Row className="sticky top-0 z-40 bg-background">
               <TimelineLane className="h-4 cursor-cell">
                 <TimelineRange
                   aria-label="Loop"
@@ -1166,7 +1166,7 @@ export default function BlockTimeline() {
                 <TimelinePlayhead />
               </TimelineLane>
             </Row>
-            <Row className="sticky top-4 z-30 bg-background">
+            <Row className="sticky top-4 z-40 bg-background">
               <TimelineRuler aria-label="Playhead" getAriaValueText={describe}>
                 {labels.map((count) => (
                   <TimelineMark key={count} value={count * bar}>
@@ -1176,7 +1176,7 @@ export default function BlockTimeline() {
                 <TimelinePlayhead />
               </TimelineRuler>
             </Row>
-            <Row className="sticky top-11 z-30 bg-background">
+            <Row className="sticky top-11 z-40 bg-background">
               <TimelineLane className="h-6">
                 {locators.map((locator) => (
                   <TimelineMark key={locator.at} value={locator.at}>
@@ -1281,7 +1281,7 @@ export default function BlockTimeline() {
               </Row>
             ))}
             <Row
-              className="sticky bottom-0 z-30 border-foreground/25 border-y bg-background"
+              className="sticky bottom-0 z-30 border-foreground/25 border-b bg-background"
               lead={
                 <Button
                   className="m-1 w-full justify-start gap-1.5"
