@@ -39,6 +39,17 @@ export type SeekCommitEventDetails =
   | ExtraCommitEventDetails<"keyboard", KeyboardEvent>
   | ExtraCommitEventDetails<"input-change", Event>;
 
+/** A stretch selected by dragging across the waveform with Shift held. */
+export type SelectionChangeEventDetails = ExtraChangeEventDetails<
+  "drag",
+  PointerEvent
+>;
+
+export type SelectionCommitEventDetails = ExtraCommitEventDetails<
+  "drag",
+  PointerEvent
+>;
+
 /** Returns how a position on the timeline is announced. */
 export type DescribeValue = (value: number, duration: number) => string;
 

@@ -10,7 +10,8 @@ export const seconds = (value: number) => `${value}s`;
 /** A 100-second track on a 200×40 control at the origin: 2px per second. */
 export function renderWaveform(
   props: Waveform.Root.Props = {},
-  onRender?: () => void
+  onRender?: () => void,
+  controlProps: Waveform.Control.Props = {}
 ) {
   const onValueChange = mock(
     (_value: number, _details: Waveform.Root.ChangeEventDetails) => undefined
@@ -21,7 +22,11 @@ export function renderWaveform(
   function Parts() {
     onRender?.();
     return (
-      <Waveform.Control aria-label="Seek" data-testid="control">
+      <Waveform.Control
+        aria-label="Seek"
+        data-testid="control"
+        {...controlProps}
+      >
         <Waveform.Canvas data-testid="canvas" />
         <Waveform.Playhead data-testid="playhead" />
         <Waveform.Thumb data-testid="thumb" />

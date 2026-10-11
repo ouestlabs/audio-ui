@@ -102,8 +102,8 @@ const formatTime = (seconds: number) => {
 
 /**
  * A player that shows what a seekable waveform does: a press or a drag seeks,
- * hovering names the time under the pointer, a loop region has handles to drag
- * and plays on repeat, markers sit on the timeline, and zooming shows a stretch
+ * hovering names the time under the pointer, Shift + drag selects the loop, a
+ * loop region has handles to drag and plays on repeat, markers sit on the timeline, and zooming shows a stretch
  * of the audio while the view follows the playhead. It starts on a synthesized
  * phrase and takes any audio file you pick; its shape is decoded once with
  * `decodeAudioChannels`, `computePeaks` and `normalizePeaks`.
@@ -358,6 +358,7 @@ export default function BlockWaveformPlayer() {
                 duration={duration || 1}
                 getAriaValueText={formatTime}
                 loading={decoding || !ready}
+                onSelectionChange={setLoop}
                 onValueChange={handleSeek}
                 source={position}
                 values={peaks ?? EMPTY_PEAKS}

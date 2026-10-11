@@ -134,3 +134,80 @@ describe("Waveform without a Control", () => {
     );
   });
 });
+
+describe("Waveform.Control selection (control 200×40, 100s)", () => {
+  test("Shift + drag selects a stretch instead of seeking, and release commits it", () => {
+    const onSelectionChange = mock(
+      (_range: readonly [number, number], _details: unknown) => undefined
+    );
+    const onSelectionCommitted = mock(
+      (_range: readonly [number, number], _details: unknown) => undefined
+    );
+    const { control, onValueChange } = renderWaveform({}, undefined, {
+      onSelectionChange,
+      onSelectionCommitted,
+    });
+    fireEvent.pointerDown(control, {
+      clientX: 100,
+      clientY: 20,
+      pointerId: 1,
+      shiftKey: true,
+    });
+    fireEvent.pointerMove(control, { clientX: 40, clientY: 20, pointerId: 1 });
+    expect(lastCall(onSelectionChange)).toEqual([
+      [20, 50],
+      expect.objectContaining({ reason: "drag" }),
+    ]);
+    fireEvent.pointerUp(control, { clientX: 40, clientY: 20, pointerId: 1 });
+    expect(lastCall(onSelectionCommitted)).toEqual([
+      [20, 50],
+      expect.objectContaining({ reason: "drag" }),
+    ]);
+    expect(onValueChange).not.toHaveBeenCalled();
+  });
+
+  test("a press without Shift still seeks, and Shift without a handler seeks too", () => {
+    const onSelectionChange = mock(
+      (_range: readonly [number, number], _details: unknown) => undefined
+    );
+    const withHandler = renderWaveform({}, undefined, {
+      onSelectionChange,
+    });
+    fireEvent.pointerDown(withHandler.control, {
+      clientX: 60,
+      clientY: 20,
+      pointerId: 1,
+    });
+    expect(lastCall(withHandler.onValueChange)[0]).toBe(30);
+    expect(onSelectionChange).not.toHaveBeenCalled();
+    withHandler.view.unmount();
+
+    const without = renderWaveform();
+    fireEvent.pointerDown(without.control, {
+      clientX: 60,
+      clientY: 20,
+      pointerId: 1,
+      shiftKey: true,
+    });
+    expect(lastCall(without.onValueChange)[0]).toBe(30);
+  });
+
+  test("a selection that is never moved is not committed, and cancel() keeps it", () => {
+    const onSelectionCommitted = mock(
+      (_range: readonly [number, number], _details: unknown) => undefined
+    );
+    const { control } = renderWaveform({}, undefined, {
+      onSelectionChange: (_range, details) => details.cancel(),
+      onSelectionCommitted,
+    });
+    fireEvent.pointerDown(control, {
+      clientX: 100,
+      clientY: 20,
+      pointerId: 1,
+      shiftKey: true,
+    });
+    fireEvent.pointerMove(control, { clientX: 40, clientY: 20, pointerId: 1 });
+    fireEvent.pointerUp(control, { clientX: 40, clientY: 20, pointerId: 1 });
+    expect(onSelectionCommitted).not.toHaveBeenCalled();
+  });
+});

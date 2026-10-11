@@ -312,6 +312,8 @@ The seekable surface: a press jumps to the pointer and a drag scrubs. It tracks 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `getAriaValueText` | `DescribeValue` |  | Returns how the position is announced, e.g. `"0:12 of 1:42"`. Defaults to the played share, e.g. `"30%"`. |
+| `onSelectionChange` | `( range: readonly [number, number], eventDetails ) => void` |  | Fires while a stretch is selected by dragging with Shift held, as `[start, end]` in `duration` units: feed it to a `Waveform.Region`. A plain press and drag still seek. `eventDetails.cancel()` keeps the selection as it was. |
+| `onSelectionCommitted` | `( range: readonly [number, number], eventDetails ) => void` |  | Fires when a selection that changed ends. |
 
 | Data attribute | Description |
 | --- | --- |
@@ -445,6 +447,8 @@ Shown while the pointer is over the `Control`, positioned at the hovered point. 
 | `onValueChange` | `(value: number, eventDetails) => void` | - | Fires while seeking. `eventDetails.reason` is `"press"`, `"drag"`, `"keyboard"`, or `"input-change"`; call `eventDetails.cancel()` to reject it. |
 | `onValueCommitted` | `(value: number, eventDetails) => void` | - | Fires when a seek that moved the position ends. |
 | `getAriaValueText` | `(value: number, duration: number) => string` | played share | How the position is announced, e.g. `"0:12 of 1:42"`. |
+| `onSelectionChange` | `(range: readonly [number, number], eventDetails) => void` | - | Fires while a stretch is selected with Shift + drag: set a loop region from it. |
+| `onSelectionCommitted` | `(range: readonly [number, number], eventDetails) => void` | - | Fires when that selection ends. |
 | `shape` | `"mirror" \| "bars" \| "line"` | `"mirror"` | How the amplitudes are drawn. |
 | `variant` | `"default" \| "playhead"` | `"default"` | `playhead` adds a playhead line and a handle. |
 | `className` | `string` | - | Classes for the waveform surface. |

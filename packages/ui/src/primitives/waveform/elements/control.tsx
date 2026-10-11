@@ -9,9 +9,17 @@ import { VISUALLY_HIDDEN } from "../../internal/visually-hidden";
 import {
   type DescribeValue,
   describeAsPercent,
+  type SelectionChangeEventDetails,
+  type SelectionCommitEventDetails,
   useWaveformContext,
   type WaveformState,
 } from "../context";
+
+interface SelectGesture {
+  anchor: number;
+  changed: boolean;
+  pointerId: number;
+}
 
 interface SeekGesture {
   /** Whether the gesture moved the position at least once; if so its end commits. */
@@ -37,6 +45,8 @@ export function Control(componentProps: Control.Props) {
     children,
     className,
     getAriaValueText,
+    onSelectionChange,
+    onSelectionCommitted,
     ref,
     render,
     style,
@@ -47,6 +57,8 @@ export function Control(componentProps: Control.Props) {
   // Nothing to seek while disabled, or before the audio is there.
   const inert = state.disabled || state.loading;
   const gestureRef = React.useRef<SeekGesture | null>(null);
+  const selectRef = React.useRef<SelectGesture | null>(null);
+  const selectedRef = React.useRef<readonly [number, number] | null>(null);
   const describe = getAriaValueText ?? describeAsPercent;
   // Kept current for the paints that happen outside React.
   meta.describeRef.current = describe;
@@ -65,6 +77,17 @@ export function Control(componentProps: Control.Props) {
     event.preventDefault();
     event.currentTarget.setPointerCapture?.(event.pointerId);
     meta.inputRef.current?.focus({ focusVisible: false, preventScroll: true });
+    if (event.shiftKey && onSelectionChange) {
+      // Shift selects a stretch, as in an audio editor; a plain press seeks.
+      selectRef.current = {
+        anchor: valueAt(event),
+        changed: false,
+        pointerId: event.pointerId,
+      };
+      selectedRef.current = null;
+      actions.setDragging(true);
+      return;
+    }
     const gesture: SeekGesture = {
       changed: false,
       moved: false,
@@ -84,6 +107,24 @@ export function Control(componentProps: Control.Props) {
     }
     const at = valueAt(event);
     meta.hover.set(at);
+    const selecting = selectRef.current;
+    if (selecting && selecting.pointerId === event.pointerId) {
+      if (isReleased(event)) {
+        handlePointerEnd(event);
+        return;
+      }
+      const range = [
+        Math.min(selecting.anchor, at),
+        Math.max(selecting.anchor, at),
+      ] as const;
+      const eventDetails = createChangeEventDetails("drag", event.nativeEvent);
+      onSelectionChange?.(range, eventDetails);
+      if (!eventDetails.isCanceled) {
+        selecting.changed = true;
+        selectedRef.current = range;
+      }
+      return;
+    }
     const gesture = gestureRef.current;
     if (!gesture || gesture.pointerId !== event.pointerId) {
       return;
@@ -101,6 +142,18 @@ export function Control(componentProps: Control.Props) {
   };
 
   const handlePointerEnd = (event: React.PointerEvent<HTMLDivElement>) => {
+    const selecting = selectRef.current;
+    if (selecting && selecting.pointerId === event.pointerId) {
+      selectRef.current = null;
+      actions.setDragging(false);
+      if (selecting.changed && selectedRef.current) {
+        onSelectionCommitted?.(selectedRef.current, {
+          event: event.nativeEvent,
+          reason: "drag",
+        });
+      }
+      return;
+    }
     const gesture = gestureRef.current;
     if (!gesture || gesture.pointerId !== event.pointerId) {
       return;
@@ -221,5 +274,20 @@ export namespace Control {
   export interface Props extends PartProps<"div", State> {
     /** Returns how the position is announced, e.g. `"0:12 of 1:42"`. Defaults to the played share, e.g. `"30%"`. */
     getAriaValueText?: DescribeValue;
+    /**
+     * Fires while a stretch is selected by dragging with Shift held, as
+     * `[start, end]` in `duration` units; feed it to a `Waveform.Region`. A
+     * plain press and drag still seek. `eventDetails.cancel()` keeps the
+     * selection as it was.
+     */
+    onSelectionChange?: (
+      range: readonly [number, number],
+      eventDetails: SelectionChangeEventDetails
+    ) => void;
+    /** Fires when a selection that changed ends. */
+    onSelectionCommitted?: (
+      range: readonly [number, number],
+      eventDetails: SelectionCommitEventDetails
+    ) => void;
   }
 }

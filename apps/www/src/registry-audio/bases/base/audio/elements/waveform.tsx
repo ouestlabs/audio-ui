@@ -13,7 +13,10 @@ type LiveWaveformShape = NonNullable<WaveformPrimitive.Canvas.Props["variant"]>;
 type WaveformShape = Exclude<LiveWaveformShape, "scope">;
 
 type WaveformProps = Omit<WaveformPrimitive.Root.Props, "levels" | "peaks"> &
-  Pick<WaveformPrimitive.Control.Props, "getAriaValueText"> & {
+  Pick<
+    WaveformPrimitive.Control.Props,
+    "getAriaValueText" | "onSelectionChange" | "onSelectionCommitted"
+  > & {
     /** How the amplitudes are drawn. */
     shape?: WaveformShape;
     /** The audio's shape, at any resolution: amplitudes (0-1), or `{ min, max }` samples (-1-1) per slice. */
@@ -28,6 +31,8 @@ function Waveform({
   children,
   className,
   getAriaValueText,
+  onSelectionChange,
+  onSelectionCommitted,
   shape,
   values,
   variant = "default",
@@ -51,6 +56,8 @@ function Waveform({
         )}
         data-slot="waveform"
         getAriaValueText={getAriaValueText}
+        onSelectionChange={onSelectionChange}
+        onSelectionCommitted={onSelectionCommitted}
       >
         <WaveformPrimitive.Canvas
           className={cn("cn-waveform-canvas block size-full", EDGE_FADE)}
