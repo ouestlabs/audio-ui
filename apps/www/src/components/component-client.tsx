@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useMemo } from "react";
-import { Spinner } from "@/components/ui/spinner";
+import { PreviewLoading } from "@/components/preview-frame";
 import { getRegistryComponent } from "@/lib/registry";
 
 export function ComponentClient({
@@ -21,13 +21,7 @@ export function ComponentClient({
   }
 
   return (
-    <Suspense
-      fallback={
-        <div className="flex items-center justify-center p-4">
-          <Spinner className="size-4 opacity-60" />
-        </div>
-      }
-    >
+    <Suspense fallback={<PreviewLoading />}>
       <Component />
     </Suspense>
   );

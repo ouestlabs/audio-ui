@@ -2,10 +2,13 @@
 
 import * as React from "react";
 import { Frame, FrameContent } from "@/components/custom/frame";
-import { PreviewBar, PreviewPanel } from "@/components/preview-frame";
+import {
+  PreviewBar,
+  PreviewLoading,
+  PreviewPanel,
+} from "@/components/preview-frame";
 import { HostedPreview, usePreviewHost } from "@/components/preview-host";
 import { Button } from "@/components/ui/button";
-import { Spinner } from "@/components/ui/spinner";
 import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
 import { cn } from "@/lib/utils";
 
@@ -76,11 +79,7 @@ export function ComponentPreviewTabs({
         data-slot="preview"
         ref={previewRef}
       >
-        {hasBeenVisible ? (
-          shown
-        ) : (
-          <Spinner className="text-site-muted-foreground/40" />
-        )}
+        {hasBeenVisible ? shown : <PreviewLoading />}
       </PreviewPanel>
       {hideCode ? null : (
         <FrameContent

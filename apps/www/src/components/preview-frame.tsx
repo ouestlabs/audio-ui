@@ -9,6 +9,7 @@ import {
 } from "@/components/custom/frame";
 import { ExpandPreview } from "@/components/expand-preview";
 import type { PreviewHost } from "@/components/preview-host";
+import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 
 /**
@@ -31,6 +32,19 @@ export const blockPanelClassName =
 
 /** What a preview's panel looks like, on a page and in a card alike. */
 const panelClassName = `flex min-w-0 flex-1 flex-col flex-wrap items-center justify-center overflow-x-auto font-sans **:data-[slot=preview]:w-full sm:**:data-[slot=preview]:max-w-[80%] ${PANEL_INSET}`;
+
+/**
+ * What a panel shows while its preview is on its way: a spinner in the middle
+ * of the room the preview will take, so the frame does not collapse around it
+ * and jump when the preview arrives.
+ */
+export function PreviewLoading() {
+  return (
+    <div className="flex min-h-40 w-full flex-1 items-center justify-center">
+      <Spinner className="size-5 text-site-muted-foreground/40" />
+    </div>
+  );
+}
 
 /**
  * The panel of a preview's frame, the one container of what is shown: the

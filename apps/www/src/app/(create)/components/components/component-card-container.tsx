@@ -1,10 +1,8 @@
 "use client";
 
-import { CircleNotchIcon } from "@phosphor-icons/react/ssr";
 import * as React from "react";
 import { Frame } from "@/components/custom/frame";
-import { PreviewPanel } from "@/components/preview-frame";
-import { Spinner } from "@/components/ui/spinner";
+import { PreviewLoading, PreviewPanel } from "@/components/preview-frame";
 import { getComponent } from "@/lib/registry";
 import { cn } from "@/lib/utils";
 
@@ -43,11 +41,7 @@ export function ComponentRenderer({
   }, [name]);
 
   if (isReloading) {
-    return (
-      <div className="flex h-full min-h-20 items-center justify-center">
-        <Spinner className="text-site-muted-foreground/40" />
-      </div>
-    );
+    return <PreviewLoading />;
   }
 
   // Get component using lazy loader (component created on-demand)
@@ -85,13 +79,7 @@ export function ComponentCardContainer({
   return (
     <Frame className={cn(isFullWidth && "md:col-span-2", className)}>
       <PreviewPanel block={block}>
-        <React.Suspense
-          fallback={
-            <div className="flex items-center justify-center py-10">
-              <CircleNotchIcon className="size-6 animate-spin text-site-muted-foreground/40" />
-            </div>
-          }
-        >
+        <React.Suspense fallback={<PreviewLoading />}>
           {children}
         </React.Suspense>
       </PreviewPanel>
