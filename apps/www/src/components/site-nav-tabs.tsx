@@ -35,7 +35,12 @@ export function SiteNavTabs({
               render={<Link href={item.href} />}
               value={item.href}
             >
-              {Icon ? <Icon aria-hidden className="size-4" /> : null}
+              {Icon ? (
+                <Icon
+                  aria-hidden
+                  className="size-4 in-data-active:text-primary"
+                />
+              ) : null}
               {item.label}
             </TabsTrigger>
           );
