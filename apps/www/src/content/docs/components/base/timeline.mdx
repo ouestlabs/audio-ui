@@ -282,6 +282,32 @@ const step = undo(history, clips); // { history, present } or null
 
 Redo goes when a new change is made, since the branch it was holding no longer follows from the present, and the depth is bounded by `HISTORY_LIMIT`. The arrangement block uses it for its undo and redo buttons and for Cmd/Ctrl + Z, with Shift (or Y) to redo.
 
+## An arrangement
+
+The arrangement block is built from pieces you can install on their own, each a file you own:
+
+- `arrangement` (`npx shadcn@latest add @audio/arrangement`) is the pure side: `lay` puts a clip on a track so it covers what is under it, `land` drops a dragged group (or its copies) on another track, `shiftTrack` and `otherSelected` are what a group drop needs, and `scaleValue` rescales a clip when the tempo changes. Tracks are passed as an order of ids, so nothing assumes how many there are.
+- `use-arrangement` is the state: tracks, clips, selection, each track's mix and height, and every operation on them. It keeps undo and redo over tracks and clips together.
+- `use-playback-clock` is a transport clock as a live source that loops between two points, and `use-marquee-selection` is the rectangle that selects the clips it touches.
+
+```tsx
+const arrangement = useArrangement({
+  duration,
+  getPosition: () => clock.getSnapshot(), // where a split cuts
+  initialClips,
+  initialTracks, // { id, name, color }[]
+  splitStep: bar / 4, // the shortest a split piece may be
+});
+
+arrangement.changeClip; // Timeline.Clip's onValueChange, by id
+arrangement.commitClip; // its onValueCommitted: lands a drag, on another track too
+arrangement.addTrack();
+arrangement.removeTrack(id); // with its clips; one track always stays
+arrangement.undo();
+```
+
+It also gives `selectClip`, `selectClips`, `selectAll`, `selectTrack`, `splitAtCursor`, `duplicateSelection`, `removeClip`, `renameClip`, `clipAction` (a clip's menu: duplicate, split, switch off, delete), `mixOf` and `changeMix` (gain, pan, mute, solo, color), `heights` and `resizeTrack`, and `rescale(ratio)` for a tempo change, which also clears the history since it is not part of it.
+
 ## Placing your own parts
 
 Every lane sets a `--timeline-unit` CSS variable, the width of one unit. Parts are placed with it, so anything you draw follows the zoom the same way:
