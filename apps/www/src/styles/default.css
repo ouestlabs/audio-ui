@@ -477,3 +477,35 @@
     border-radius: var(--site-radius-sm);
   }
 }
+
+/* A menu the customizer can invert (its `.dark` class is toggled on `.cn-menu-target`): the site's tokens are read again inside it. */
+.dark {
+  --site-background: var(--background);
+  --site-foreground: var(--foreground);
+  --site-card: var(--card);
+  --site-card-foreground: var(--card-foreground);
+  --site-popover: var(--popover);
+  --site-popover-foreground: var(--popover-foreground);
+  --site-primary: var(--primary);
+  --site-primary-foreground: var(--primary-foreground);
+  --site-secondary: var(--secondary);
+  --site-secondary-foreground: var(--secondary-foreground);
+  --site-muted: var(--muted);
+  --site-muted-foreground: color-mix(in oklab, var(--muted-foreground) 82%, var(--foreground));
+  --site-accent: var(--accent);
+  --site-accent-foreground: var(--accent-foreground);
+  --site-destructive: var(--destructive);
+  --site-border: var(--border);
+  --site-input: var(--input);
+  --site-ring: var(--ring);
+}
+
+/* The mobile menu follows the customizer's Menu choices: its ground is the popover's, and translucent when asked. */
+.site-menu {
+  background-color: var(--popover);
+  color: var(--popover-foreground);
+}
+
+.site-menu.cn-menu-translucent {
+  background-color: color-mix(in oklab, var(--popover) 70%, transparent);
+}

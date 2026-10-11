@@ -23,6 +23,7 @@ import {
   type DesignSystemConfig,
   type IconLibraryName,
 } from "@/registry/config";
+import { useMenuColor } from "./use-menu-color";
 
 interface DesignSystemContextValue {
   baseColor: string | null;
@@ -464,90 +465,7 @@ export function DesignSystemProvider({
     };
   }, [isReady]);
 
-  // Handle menu color inversion and translucency by updating cn-menu-target elements.
-  React.useEffect(() => {
-    if (!menuColor) {
-      return;
-    }
-
-    const isInvertedMenu =
-      menuColor === "inverted" || menuColor === "inverted-translucent";
-    const isTranslucentMenu =
-      menuColor === "default-translucent" ||
-      menuColor === "inverted-translucent";
-    let frameId = 0;
-
-    const updateMenuElements = () => {
-      const allElements = document.querySelectorAll<HTMLElement>(
-        ".cn-menu-target, [data-menu-translucent]"
-      );
-
-      if (allElements.length === 0) {
-        return;
-      }
-
-      // Disable transitions while toggling classes.
-      allElements.forEach((element) => {
-        element.style.transition = "none";
-      });
-
-      allElements.forEach((element) => {
-        if (element.classList.contains("cn-menu-target")) {
-          if (isInvertedMenu) {
-            element.classList.add("dark");
-          } else {
-            element.classList.remove("dark");
-          }
-        }
-
-        // Toggle translucent class: use class when active, data-attr when inactive
-        // so the element stays queryable for future toggles.
-        if (isTranslucentMenu) {
-          element.classList.add("cn-menu-translucent");
-          element.removeAttribute("data-menu-translucent");
-        } else if (element.classList.contains("cn-menu-translucent")) {
-          element.classList.remove("cn-menu-translucent");
-          element.setAttribute("data-menu-translucent", "");
-        }
-      });
-
-      // Force reflow, then re-enable transitions.
-      void document.body.offsetHeight;
-      allElements.forEach((element) => {
-        element.style.transition = "";
-      });
-    };
-
-    const scheduleMenuUpdate = () => {
-      if (frameId) {
-        return;
-      }
-      frameId = window.requestAnimationFrame(() => {
-        frameId = 0;
-        updateMenuElements();
-      });
-    };
-
-    // Update existing menu elements.
-    scheduleMenuUpdate();
-
-    // Watch for new menu elements being added to the DOM.
-    const observer = new MutationObserver(() => {
-      scheduleMenuUpdate();
-    });
-
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true,
-    });
-
-    return () => {
-      observer.disconnect();
-      if (frameId) {
-        window.cancelAnimationFrame(frameId);
-      }
-    };
-  }, [menuColor]);
+  useMenuColor(menuColor);
 
   const contextValue = React.useMemo(
     () => ({

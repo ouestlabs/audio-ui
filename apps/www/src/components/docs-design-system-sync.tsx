@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useMenuColor } from "@/app/(create)/customizer/use-menu-color";
 import { ensurePreviewFontsLoaded, FONTS } from "@/app/(create)/lib/fonts";
 import {
   getThemeStyleElement,
@@ -39,6 +40,7 @@ export function DocsDesignSystemSync({
   children: React.ReactNode;
 }) {
   const [config] = useConfig();
+  useMenuColor(config.menuColor);
   const [ready, setReady] = React.useState(false);
   const previousStyleClassesRef = React.useRef<string[] | null>(null);
   const previousFontStateRef = React.useRef<{
