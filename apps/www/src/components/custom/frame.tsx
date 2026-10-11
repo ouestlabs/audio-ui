@@ -10,7 +10,7 @@ interface FrameProps extends React.HTMLAttributes<HTMLDivElement> {
 
 /** What a frame looks like, for a surface that cannot be a `Frame` itself, such as a popup. */
 export const frameClassName =
-  "relative flex flex-col overflow-hidden rounded-[16px] border border-site-border/80 bg-site-muted/50 p-0.5 shadow-black/5 shadow-none";
+  "relative flex flex-col overflow-hidden rounded-(--frame-radius) border border-site-border/80 bg-site-muted/50 p-0.5 shadow-black/5 shadow-none";
 
 export const Frame = ({
   children,
@@ -55,7 +55,7 @@ export function FrameContent({
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-[14px] border border-site-border bg-site-background",
+        "relative overflow-hidden rounded-(--frame-radius-inner) border border-site-border bg-site-background",
         className
       )}
       ref={ref}
