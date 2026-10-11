@@ -78,12 +78,12 @@ const describeNote = (note: Note) =>
 const DEFAULT_BPM = 120;
 const MIN_BPM = 20;
 const MAX_BPM = 200;
-/** Standard MIDI File resolution — ticks per quarter note, a common round value shared by most DAWs' own exports. */
+/** Standard MIDI File resolution, ticks per quarter note, a common round value shared by most DAWs' own exports. */
 const MIDI_TICKS_PER_QUARTER_NOTE = 480;
 const MICROSECONDS_PER_MINUTE = 60_000_000;
 const MIDI_FILE_ACCEPT = ".mid,.midi,audio/midi,audio/x-midi";
 
-/** ADSR-shaped, matching the Envelope primitive's own default — this block doesn't expose an editable envelope, keeping it focused on the note grid. */
+/** ADSR-shaped, matching the Envelope primitive's own default, this block doesn't expose an editable envelope, keeping it focused on the note grid. */
 const DEFAULT_ENVELOPE: EnvelopePoint[] = [
   { x: 0, y: 0.05 },
   { x: 0.15, y: 1 },
@@ -95,14 +95,14 @@ const DEFAULT_ENVELOPE: EnvelopePoint[] = [
 type Note = PianoRollPrimitive.Root.Note;
 type LoopRegion = TransportRegion;
 
-/** No region set — the loop spans the full grid, the original always-loop-everything behavior. */
+/** No region set, the loop spans the full grid, the original always-loop-everything behavior. */
 const FULL_LOOP_REGION: LoopRegion = { end: TOTAL_STEPS, start: 0 };
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
 }
 
-/** Quantizes a parsed MIDI file's tick-based notes onto the grid's fixed `TOTAL_STEPS` window, adopting the file's own tempo (clamped to the BPM control's range) rather than the grid's current one — notes starting at or past the last step are dropped, matching this block's fixed-length loop. */
+/** Quantizes a parsed MIDI file's tick-based notes onto the grid's fixed `TOTAL_STEPS` window, adopting the file's own tempo (clamped to the BPM control's range) rather than the grid's current one, notes starting at or past the last step are dropped, matching this block's fixed-length loop. */
 function notesFromMidiFile(parsed: {
   microsecondsPerQuarterNote: number;
   notes: MidiFileNote[];
@@ -141,7 +141,7 @@ function notesFromMidiFile(parsed: {
   return { bpm, notes };
 }
 
-/** The grid's own step/BPM timing converted to MIDI ticks at a fixed, common resolution — the inverse of `notesFromMidiFile`. */
+/** The grid's own step/BPM timing converted to MIDI ticks at a fixed, common resolution, the inverse of `notesFromMidiFile`. */
 function notesToMidiFile(notes: Note[], bpm: number): Uint8Array {
   const ticksPerStep = MIDI_TICKS_PER_QUARTER_NOTE / STEPS_PER_BEAT;
   const midiNotes: MidiFileNote[] = notes.map((note) => ({
@@ -225,7 +225,7 @@ function usePianoRoll({
     [releaseNote]
   );
 
-  /** Fired on each step boundary the clock emits: schedules every note that starts on `step` as an absolute-time on/off pair, sample-accurate regardless of when the poll ran. Notes outside the loop region never match a step the clock emits, so they never sound — the region filter is the clock's, not ours. */
+  /** Fired on each step boundary the clock emits: schedules every note that starts on `step` as an absolute-time on/off pair, sample-accurate regardless of when the poll ran. Notes outside the loop region never match a step the clock emits, so they never sound, the region filter is the clock's, not ours. */
   const scheduleStep = useCallback(
     (step: number, time: number) => {
       const secondsPerStep = secondsPerStepRef.current;
@@ -267,7 +267,7 @@ function usePianoRoll({
     start();
   }, [start]);
 
-  /** Fired when a change to the loop range ends — re-anchors the loop so a region change is audible immediately instead of waiting for a stale iteration to finish. No-op while stopped. */
+  /** Fired when a change to the loop range ends, re-anchors the loop so a region change is audible immediately instead of waiting for a stale iteration to finish. No-op while stopped. */
   const commitLoopRegion = useCallback(() => {
     reanchor();
   }, [reanchor]);
@@ -296,7 +296,7 @@ function usePianoRoll({
   );
 
   // Playhead + "which pitches are sounding" highlight, both derived from the
-  // clock's continuous position (fractional grid steps) — one source, so there
+  // clock's continuous position (fractional grid steps), one source, so there
   // is no second note→time formula to keep in sync. The playhead follows the
   // position source outside React.
   useEffect(() => {
@@ -495,7 +495,7 @@ export default function BlockPianoRoll() {
   const handleExportMidiFile = useCallback(() => {
     const bytes = notesToMidiFile(notes, bpm);
     // `Uint8Array`'s `.buffer` types as `ArrayBufferLike` (which also covers
-    // `SharedArrayBuffer`) while `BlobPart` wants a concrete `ArrayBuffer` —
+    // `SharedArrayBuffer`) while `BlobPart` wants a concrete `ArrayBuffer`,
     // safe here since `encodeMidiFile` always builds a fresh, non-shared one.
     const blob = new Blob([bytes.buffer as ArrayBuffer], {
       type: "audio/midi",

@@ -29,7 +29,7 @@ export interface UseParameterCoreOptions<T> {
   onValueCommit?: Procedure<T>;
   /** Maps a viewport point to a value; return null when geometry cannot answer. */
   pointToValue?: (point: Point) => Nullable<T>;
-  /** Normalizes incoming (controlled) values — NaN guards, per-axis clamping. */
+  /** Normalizes incoming (controlled) values, NaN guards, per-axis clamping. */
   transform: (val: T) => T;
   value?: T;
 }

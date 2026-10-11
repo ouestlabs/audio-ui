@@ -5,7 +5,7 @@ import { z } from "zod";
  * agent-agnostic tools an LLM calls to compose from natural-language
  * instructions ("write a walking bassline in C minor", "transpose up an
  * octave", "make it staccato"). Unlike a drum grid, the state is a list of
- * pitched notes — so this proves the AI-native pattern scales past boolean
+ * pitched notes, so this proves the AI-native pattern scales past boolean
  * cells to real musical data. It is parameterized by the roll's pitch range
  * and grid, and every tool re-clamps the model's output into that domain (the
  * same normalization the PianoRoll primitive applies), so an agent can only
@@ -42,7 +42,7 @@ export interface PianoRollNote {
   velocity: number;
 }
 
-/** A note as the model supplies it — no id (the tools assign one), length/velocity optional. */
+/** A note as the model supplies it, no id (the tools assign one), length/velocity optional. */
 export interface NoteInput {
   length?: number;
   pitch: number;
@@ -50,7 +50,7 @@ export interface NoteInput {
   velocity?: number;
 }
 
-/** What the tools read and write — the notes plus the tempo. */
+/** What the tools read and write, the notes plus the tempo. */
 export interface PianoRollState {
   bpm: number;
   notes: PianoRollNote[];
@@ -80,7 +80,7 @@ interface Domain {
   stepCount: number;
 }
 
-/** Normalizes a model-supplied note into the roll's domain — the same clamping the primitive does on its controlled value. */
+/** Normalizes a model-supplied note into the roll's domain, the same clamping the primitive does on its controlled value. */
 export function clampNoteToDomain(
   input: NoteInput,
   id: number | string,
@@ -178,7 +178,7 @@ export function createPianoRollTools(config: PianoRollToolsConfig = {}) {
   const setNotesSchema = z.object({
     notes: z
       .array(noteInputSchema)
-      .describe("The complete set of notes — replaces everything on the roll."),
+      .describe("The complete set of notes, replaces everything on the roll."),
   });
   const addNotesSchema = z.object({
     notes: z.array(noteInputSchema).describe("Notes to add to the roll."),
@@ -226,7 +226,7 @@ export function createPianoRollTools(config: PianoRollToolsConfig = {}) {
         };
       },
       description:
-        "Add notes to what's already on the roll — for 'layer a harmony on top' style edits.",
+        "Add notes to what's already on the roll, for 'layer a harmony on top' style edits.",
       schema: addNotesSchema,
     }),
     clear: defineTool({
@@ -251,7 +251,7 @@ export function createPianoRollTools(config: PianoRollToolsConfig = {}) {
         ),
       }),
       description:
-        "Replace the entire roll — the primary way to write a melody, bassline, or chord progression.",
+        "Replace the entire roll, the primary way to write a melody, bassline, or chord progression.",
       schema: setNotesSchema,
     }),
     setTempo: defineTool({
@@ -275,7 +275,7 @@ export function createPianoRollTools(config: PianoRollToolsConfig = {}) {
         ),
       }),
       description:
-        "Shift note pitches by a number of semitones — all notes, or only the given ids.",
+        "Shift note pitches by a number of semitones, all notes, or only the given ids.",
       schema: transposeSchema,
     }),
   };

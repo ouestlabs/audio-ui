@@ -6,7 +6,7 @@ import {
   SyntaxKind,
 } from "ts-morph";
 
-// Only scan base folder — radix mirrors base. Catalog blocks: bases/base/components (c-*).
+// Only scan base folder, radix mirrors base. Catalog blocks: bases/base/components (c-*).
 const TARGET_DIR = "src/registry-audio/bases/base";
 const OUTPUT_FILE = "src/registry/icons/scanned-icons.json";
 const UNMAPPED_OUTPUT_FILE = "src/registry/icons/unmapped-icons.json";

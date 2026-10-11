@@ -34,7 +34,7 @@ export const lib: RegistryItem[] = [
     categories: ["lib", "audio", "piano", "synth"],
     dependencies: [],
     description:
-      "Web MIDI message parsing (note-on/note-off/velocity from raw MIDI bytes) plus Standard MIDI File (.mid) import/export — parseMidiFile/encodeMidiFile",
+      "Web MIDI message parsing (note-on/note-off/velocity from raw MIDI bytes) plus Standard MIDI File (.mid) import/export, parseMidiFile/encodeMidiFile",
     files: [
       {
         path: "lib/midi.ts",
@@ -49,7 +49,7 @@ export const lib: RegistryItem[] = [
     categories: ["lib", "audio", "sequencer", "piano"],
     dependencies: [],
     description:
-      "Framework-free core of the look-ahead scheduler — the drift-free stepping cursor and self-correcting catch-up loop behind use-step-clock and use-transport-clock",
+      "Framework-free core of the look-ahead scheduler, the drift-free stepping cursor and self-correcting catch-up loop behind use-step-clock and use-transport-clock",
     files: [
       {
         path: "lib/lookahead-scheduler.ts",
@@ -64,7 +64,7 @@ export const lib: RegistryItem[] = [
     categories: ["lib", "audio", "waveform"],
     dependencies: [],
     description:
-      "Framework-free waveform DSP — decode audio bytes to samples, downsample to peak amplitudes, normalize, and reduce a live spectrum to frequency bands",
+      "Framework-free waveform DSP, decode audio bytes to samples, downsample to peak amplitudes, normalize, and reduce a live spectrum to frequency bands",
     files: [
       {
         path: "lib/waveform-dsp.ts",
@@ -79,7 +79,7 @@ export const lib: RegistryItem[] = [
     categories: ["lib", "audio", "timeline"],
     dependencies: [],
     description:
-      "Framework-free musical time — bars and beats against seconds, fixed and zoom-adaptive grid divisions with triplets, ruler label spacing, and bar/beat readouts",
+      "Framework-free musical time, bars and beats against seconds, fixed and zoom-adaptive grid divisions with triplets, ruler label spacing, and bar/beat readouts",
     files: [
       {
         path: "lib/musical-time.ts",
@@ -94,7 +94,7 @@ export const lib: RegistryItem[] = [
     categories: ["lib", "audio", "piano", "ai"],
     dependencies: ["zod"],
     description:
-      "AI-native tool surface for a piano roll — createPianoRollTools builds typed, agent-agnostic tools (setNotes/addNotes/removeNotes/transpose/clear/setTempo) an LLM calls to compose melodies and basslines from natural language, parameterized by the roll's pitch range and grid",
+      "AI-native tool surface for a piano roll, createPianoRollTools builds typed, agent-agnostic tools (setNotes/addNotes/removeNotes/transpose/clear/setTempo) an LLM calls to compose melodies and basslines from natural language, parameterized by the roll's pitch range and grid",
     files: [
       {
         path: "lib/piano-roll-tools.ts",

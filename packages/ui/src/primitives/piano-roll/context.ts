@@ -110,8 +110,8 @@ export interface PianoRollContextValue {
     /** Focuses this note, or the grid with `null`, once the next render is done. */
     focusAfterRender: (target: NoteId | null) => void;
     /**
-     * Runs the editing command a key press stands for — Cmd/Ctrl+D duplicate,
-     * C copy, X cut, V paste, and Q quantize — and returns whether it was one.
+     * Runs the editing command a key press stands for, Cmd/Ctrl+D duplicate,
+     * C copy, X cut, V paste, and Q quantize, and returns whether it was one.
      */
     shortcut: (event: KeyboardEvent) => boolean;
     noteOff: (pitch: number, eventDetails: NoteOffEventDetails) => void;

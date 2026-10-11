@@ -69,7 +69,7 @@ export interface UseParameterReturn {
 
 /**
  * A parameter: a bounded, stepped, continuously controllable value.
- * The number instantiation of `useParameterCore` — adds the 1D policies:
+ * The number instantiation of `useParameterCore`, adds the 1D policies:
  * midpoint default, NaN→min coercion, the 8-key keyboard map, ±step wheel,
  * and the guarded percentage. Geometry (point→value, delta→value) is
  * injected; primitives with non-linear gestures (Knob) skip the assembled

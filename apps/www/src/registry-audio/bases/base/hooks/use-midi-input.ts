@@ -14,15 +14,15 @@ export interface UseMidiInputOptions {
 }
 
 export interface UseMidiInputReturn {
-  /** Notes currently held on the connected MIDI device — pass straight to Piano's `activeNotes`. */
+  /** Notes currently held on the connected MIDI device, pass straight to Piano's `activeNotes`. */
   activeNotes: number[];
-  /** Detaches all input listeners and resets connection state. Any notes already sounding keep sounding — release them yourself (e.g. a synth's `releaseAll`) if that's not what you want. */
+  /** Detaches all input listeners and resets connection state. Any notes already sounding keep sounding, release them yourself (e.g. a synth's `releaseAll`) if that's not what you want. */
   disconnect: () => void;
   error: string | null;
   inputNames: string[];
   isConnected: boolean;
   isSupported: boolean;
-  /** Must be called from a user gesture (e.g. a button click) — browsers may prompt for permission. */
+  /** Must be called from a user gesture (e.g. a button click), browsers may prompt for permission. */
   requestAccess: () => void;
 }
 

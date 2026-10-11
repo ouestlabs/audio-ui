@@ -13,7 +13,7 @@ Piano for playing or displaying notes (a virtual instrument, a MIDI visualizer, 
 
 - **Range:** `minPitch` / `maxPitch` are MIDI pitches (defaults `48`/`72`, C3 to C5), or `pitches` lists exactly the keys to show. Key color (white/black) and layout follow the chromatic pattern.
 - **Events:** `onNoteOn(pitch, eventDetails)` / `onNoteOff(pitch, eventDetails)` fire the MIDI pitch, which is what an audio engine consumes. `eventDetails.reason` says how (`"press"`, `"glide"`, `"keyboard"`), and `eventDetails.cancel()` in `onNoteOn` keeps the key silent.
-- **Interaction model:** Press and hold a key to sustain the note. Drag across keys (mouse) for a glissando — each key retriggers as the pointer crosses it. Multiple simultaneous pointers (multi-touch) each independently hold their own key — true polyphony.
+- **Interaction model:** Press and hold a key to sustain the note. Drag across keys (mouse) for a glissando, each key retriggers as the pointer crosses it. Multiple simultaneous pointers (multi-touch) each independently hold their own key, true polyphony.
 - **External notes:** An optional controlled `activeNotes` prop lights up keys from outside pointer interaction (a MIDI input device, a sequencer's current chord) without affecting `onNoteOn`/`onNoteOff`.
 - **Accessibility:** Every key is a button named after its pitch ("C4"), behind one roving tab stop. Arrow keys move between keys, and `Space` or `Enter` holds the focused key down until released.
 - **Layout:** The primitive also lays keys out vertically (`orientation="vertical"`, low end at the bottom) and evenly (`layout="even"`, one equal share per key). The piano roll's keyboard is built that way.
@@ -109,8 +109,8 @@ import { Piano } from "@/components/audio/piano";
 <KeyTable title="Behavior">
 <KeyRow gesture={"Press a key"}>Fires `onNoteOn`; the key stays pressed while held.</KeyRow>
 <KeyRow gesture={"Release"}>Fires `onNoteOff`.</KeyRow>
-<KeyRow gesture={"Drag across keys"}>Glissando — the previous key releases (`onNoteOff`) and the new one triggers (`onNoteOn`) as the pointer crosses it.</KeyRow>
-<KeyRow gesture={"Multiple pointers"}>Each pointer (finger) independently holds its own key — true polyphony on touch devices.</KeyRow>
+<KeyRow gesture={"Drag across keys"}>Glissando, the previous key releases (`onNoteOff`) and the new one triggers (`onNoteOn`) as the pointer crosses it.</KeyRow>
+<KeyRow gesture={"Multiple pointers"}>Each pointer (finger) independently holds its own key, true polyphony on touch devices.</KeyRow>
 </KeyTable>
 
 ### Keyboard

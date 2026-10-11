@@ -7,14 +7,14 @@ base: base
 
 <ComponentPreview styleName="base-nova" name="meter-size-default-demo" />
 
-Meter for monitoring audio levels (stereo output, individual channel strips, or any multi-channel source). The registry component wraps `Meter` primitives from `@audio-ui/react` and renders one bar per channel, switching from success to destructive when a channel clips, with an optional peak-hold mark. The primitive is display only — there is no pointer, keyboard, or focus handling, since there is nothing to control.
+Meter for monitoring audio levels (stereo output, individual channel strips, or any multi-channel source). The registry component wraps `Meter` primitives from `@audio-ui/react` and renders one bar per channel, switching from success to destructive when a channel clips, with an optional peak-hold mark. The primitive is display only, there is no pointer, keyboard, or focus handling, since there is nothing to control.
 
 ## Overview
 
 - **Value model:** a dB reading per channel (stereo = `[left, right]`), given either as the `value` prop or as a live [`source`](#feeding-real-levels); the number of readings is the channel count.
-- **Peak hold:** An optional peak level per channel positions a peak-hold mark. The primitive has no clock — the [`use-audio-levels`](#feeding-real-levels) hook (or Tone.js, or any other source) computes and decays it.
+- **Peak hold:** An optional peak level per channel positions a peak-hold mark. The primitive has no clock, the [`use-audio-levels`](#feeding-real-levels) hook (or Tone.js, or any other source) computes and decays it.
 - **Clipping:** Channels at or above `clipThreshold` (default `0` dB) get a `data-clipping` attribute for styling a clip indicator.
-- **Accessibility:** Each channel is a `role="meter"` with `aria-valuenow`/`min`/`max` and a value text in dB ("-6 dB") — a static, query-able value, not an `aria-live` region, so a fast-changing meter doesn't spam screen readers with every update. `aria-label` names the group; with several channels each one is named "… 1", "… 2".
+- **Accessibility:** Each channel is a `role="meter"` with `aria-valuenow`/`min`/`max` and a value text in dB ("-6 dB"), a static, query-able value, not an `aria-live` region, so a fast-changing meter doesn't spam screen readers with every update. `aria-label` names the group; with several channels each one is named "… 1", "… 2".
 
 ## Installation
 
@@ -98,7 +98,7 @@ import { Meter } from "@/components/audio/meter";
 
 ## Feeding real levels
 
-`value` and `peak` are plain props: fine for static or slowly changing levels, but a signal sampled 60 times a second would re-render React on every frame. For live audio, pass a `source` instead — the meter subscribes to it and writes each frame straight to the DOM, with no React render at all.
+`value` and `peak` are plain props: fine for static or slowly changing levels, but a signal sampled 60 times a second would re-render React on every frame. For live audio, pass a `source` instead, the meter subscribes to it and writes each frame straight to the DOM, with no React render at all.
 
 The `use-audio-levels` hook (`npx shadcn@latest add @audio/use-audio-levels`) returns such a source. It samples RMS level (in dB) from one `AnalyserNode` per channel every animation frame, with a peak-hold level that holds the loudest recent level for 1.5s before decaying:
 

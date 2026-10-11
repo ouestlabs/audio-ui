@@ -114,7 +114,7 @@ describe("setTempo", () => {
   });
 });
 
-describe("createPianoRollTools — the pitch range is parameterized", () => {
+describe("createPianoRollTools, the pitch range is parameterized", () => {
   test("a wide 88-key roll accepts a note the default range would clamp", () => {
     const wide = createPianoRollTools({
       maxPitch: 108,

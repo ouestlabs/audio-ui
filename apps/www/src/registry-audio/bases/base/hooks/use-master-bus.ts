@@ -8,7 +8,7 @@ const VOLUME_RAMP_SECONDS = 0.01;
 /**
  * A master output bus: one persistent GainNode wired to the shared
  * AudioContext's destination and kept in sync with a volume control. Every
- * sound source a block produces — synth voices, drum hits — connects into the
+ * sound source a block produces, synth voices, drum hits, connects into the
  * returned node instead of reaching `ctx.destination` directly, so a single
  * Fader governs the whole block's level. Returns `null` until the shared
  * AudioContext exists (SSR, or before the first client render).
@@ -18,7 +18,7 @@ export function useMasterBus(volume: number): GainNode | null {
   const [masterGain, setMasterGain] = useState<GainNode | null>(null);
 
   // Seeds the node's initial gain from the volume at mount without recreating
-  // the node on every volume change — the sync effect below owns changes.
+  // the node on every volume change, the sync effect below owns changes.
   const volumeRef = useRef(volume);
   volumeRef.current = volume;
 

@@ -138,7 +138,7 @@ Wheel input over the fader nudges the value by `step` and reports `eventDetails.
 
 ### Root
 
-Groups all parts of the fader, with audio defaults (vertical, -60…+6) and mouse-wheel stepping. While a pointer drags it, the thumb follows the pointer even if a controlled `value` lags behind (a seek bar driven by playback time, automation) — reject a value with `eventDetails.cancel()` instead. Renders a `<div>` element.
+Groups all parts of the fader, with audio defaults (vertical, -60…+6) and mouse-wheel stepping. While a pointer drags it, the thumb follows the pointer even if a controlled `value` lags behind (a seek bar driven by playback time, automation), reject a value with `eventDetails.cancel()` instead. Renders a `<div>` element.
 
 <TypeTable>
 <TypeRow name={"anchor"} type={"number"}>Value the `Indicator` fills from, such as `0` on a -1…1 pan. Defaults to `min`.</TypeRow>

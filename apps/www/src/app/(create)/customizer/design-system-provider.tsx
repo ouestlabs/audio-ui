@@ -267,7 +267,7 @@ export function DesignSystemProvider({
       // Only restore the host page's original styling when embedded as an
       // iframe preview. For the app's own top-level navigation, a different
       // DesignSystemProvider instance is about to (or already did) apply its
-      // own classes/vars on mount — undoing them here would just race it and
+      // own classes/vars on mount, undoing them here would just race it and
       // can leave body with no style-<name> class at all.
       if (!isInIframe()) {
         return;

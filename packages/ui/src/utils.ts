@@ -1,4 +1,4 @@
-// Internal helpers — bundled into the package so it ships with zero runtime
+// Internal helpers, bundled into the package so it ships with zero runtime
 // dependencies. Not part of the public API.
 
 export type Optional<T> = T | undefined;

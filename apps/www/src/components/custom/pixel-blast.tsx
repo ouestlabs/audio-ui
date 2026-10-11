@@ -1,4 +1,4 @@
-/** biome-ignore-all lint/complexity/noExcessiveCognitiveComplexity: shader logic — complexity intentional */
+/** biome-ignore-all lint/complexity/noExcessiveCognitiveComplexity: shader logic, complexity intentional */
 "use client";
 import { Effect, EffectComposer, EffectPass, RenderPass } from "postprocessing";
 import type React from "react";

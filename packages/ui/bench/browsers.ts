@@ -377,7 +377,7 @@ for (const engine of names) {
               )
             )})`
           : ""
-      }${worked ? "" : "  — the gesture did nothing"}`
+      }${worked ? "" : " , the gesture did nothing"}`
     );
     await page.close();
   }

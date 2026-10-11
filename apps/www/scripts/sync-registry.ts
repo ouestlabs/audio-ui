@@ -4,7 +4,7 @@
  * Syncs upstream shadcn registry sources from a fresh shallow clone of
  * shadcn-ui/ui (`apps/v4/registry`) → `src/registry/` (shared primitives,
  * hooks, UI, styles). Audio catalog items (`block-*` / `*-demo` under
- * `registry-audio/bases/* /components`) are **not** copied from here — they
+ * `registry-audio/bases/* /components`) are **not** copied from here, they
  * are ported from apps/www's registry, see plans/002.
  *
  * Also syncs `app/(create)/components/icon-placeholder.tsx` from the v4 app (thin re-export).
@@ -170,7 +170,7 @@ function syncAppIconPlaceholder(stats: Stats) {
   const display = path.relative(REPO_ROOT, OSS_APP_ICON_PLACEHOLDER_DEST);
 
   if (!fs.existsSync(SHADCN_APP_ICON_PLACEHOLDER_SRC)) {
-    console.warn(`  ! ${display} (source not found — skipping)`);
+    console.warn(`  ! ${display} (source not found, skipping)`);
     stats.skipped++;
     return;
   }
@@ -285,7 +285,7 @@ async function sync() {
       const destPath = path.join(DEST_DIR, item);
 
       if (!fs.existsSync(srcPath)) {
-        console.warn(`  ! ${item} (source not found — skipping)`);
+        console.warn(`  ! ${item} (source not found, skipping)`);
         totals.skipped++;
         continue;
       }
@@ -337,7 +337,7 @@ async function sync() {
         console.log(`  ! ${totals.skipped} skipped`);
       }
       if (DRY) {
-        console.log("\n  (dry run — no files written)");
+        console.log("\n  (dry run, no files written)");
       }
     }
     console.log("──────────────────────────────────────────────\n");

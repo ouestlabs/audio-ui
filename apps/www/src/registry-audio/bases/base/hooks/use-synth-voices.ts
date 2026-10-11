@@ -18,7 +18,7 @@ const PITCH_BEND_SMOOTHING_SECONDS = 0.02;
 
 export interface UseSynthVoicesOptions {
   attackDecaySeconds?: number;
-  /** The node every voice's gain connects to — typically a master gain the block also drives with a Volume fader. */
+  /** The node every voice's gain connects to, typically a master gain the block also drives with a Volume fader. */
   destination: AudioNode | null;
   oscillatorType?: OscillatorType;
   peakGain?: number;
@@ -26,7 +26,7 @@ export interface UseSynthVoicesOptions {
 }
 
 export interface UseSynthVoicesReturn {
-  /** Immediately releases and stops every currently-sounding voice — call on unmount or when disabling. */
+  /** Immediately releases and stops every currently-sounding voice, call on unmount or when disabling. */
   releaseAll: () => void;
   /** Runs the release phase for `note` and schedules the voice to stop. No-op if the note isn't sounding. `time` schedules a future release (e.g. loop playback); omit for an immediate live release. */
   releaseNote: (
@@ -34,7 +34,7 @@ export interface UseSynthVoicesReturn {
     envelopePoints: EnvelopePoint[],
     time?: number
   ) => void;
-  /** Retunes every currently-sounding voice by `semitones` (e.g. from a MIDI pitch bend wheel) — a channel-wide shift, not per-note, matching how real synths respond to pitch bend. Pass 0 to return to pitch. */
+  /** Retunes every currently-sounding voice by `semitones` (e.g. from a MIDI pitch bend wheel), a channel-wide shift, not per-note, matching how real synths respond to pitch bend. Pass 0 to return to pitch. */
   setPitchBend: (semitones: number) => void;
   /** Starts a voice for `note` and runs its attack/decay up to the sustain level. No-op if the note is already sounding. `velocityScale` (0-1) scales peak gain, e.g. from MIDI velocity/127. `time` schedules a future trigger (e.g. loop playback); omit to trigger immediately. */
   triggerNote: (
@@ -48,7 +48,7 @@ export interface UseSynthVoicesReturn {
 interface ActiveVoice {
   gain: GainNode;
   oscillator: OscillatorNode;
-  /** The gain value the attack/decay ramp settles at — used as the release ramp's starting point for scheduled-future releases, where the live AudioParam hasn't actually run the ramp yet at the moment `releaseNote` is called. */
+  /** The gain value the attack/decay ramp settles at, used as the release ramp's starting point for scheduled-future releases, where the live AudioParam hasn't actually run the ramp yet at the moment `releaseNote` is called. */
   sustainValue: number;
   velocityScale: number;
 }
@@ -141,8 +141,8 @@ export function useSynthVoices({
       voicesRef.current.delete(note);
       const releaseTime = time ?? ctx.currentTime;
       // A live release reads the AudioParam's real current value (correct
-      // mid-ramp too); a scheduled-future release can't — the attack/decay
-      // ramp hasn't actually run yet at call time — so it falls back to the
+      // mid-ramp too); a scheduled-future release can't, the attack/decay
+      // ramp hasn't actually run yet at call time, so it falls back to the
       // analytically-computed sustain value instead.
       const fromValue =
         time === undefined ? voice.gain.gain.value : voice.sustainValue;

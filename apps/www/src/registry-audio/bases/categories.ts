@@ -1,15 +1,15 @@
 /**
- * Curated category list for the component catalog — the single hand-edited
+ * Curated category list for the component catalog, the single hand-edited
  * source for category editorial content.
  *
  * `components.json`, `registry.json`, and `seo.json` are GENERATED from this
- * file and the `_registry.ts` modules by `bun run registry:build` — never
+ * file and the `_registry.ts` modules by `bun run registry:build`, never
  * edit those JSONs by hand.
  *
  * A category listed here must have at least one catalog item carrying its
  * name (the build fails otherwise). Item tags that are not listed here
  * (e.g. `ui`, `grid`, `widget`, `sortable`) are free-form search tags, not
- * categories — they get no page, no count, no SEO.
+ * categories, they get no page, no count, no SEO.
  */
 
 export interface CategorySeoOverrides {

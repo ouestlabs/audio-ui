@@ -12,7 +12,7 @@ const STATUS_CHANNEL_MASK = 0x0f;
 const PITCH_BEND_DATA_BITS = 7;
 /** 14-bit pitch bend is centered at 8192 (0-16383 range); dividing by this on both sides of center is the standard MIDI convention, accepting the slight asymmetry at the very top of the range. */
 const PITCH_BEND_CENTER = 8192;
-/** How many semitones a full bend (wheel at either extreme) shifts pitch by — ±2 semitones is the most common default across MIDI keyboards/synths. */
+/** How many semitones a full bend (wheel at either extreme) shifts pitch by, ±2 semitones is the most common default across MIDI keyboards/synths. */
 const PITCH_BEND_RANGE_SEMITONES = 2;
 
 /** Parses a raw MIDI message into a note-on/note-off/pitch-bend event, or null for anything else (control change, clock, ...). A note-on with velocity 0 is a note-off, per the MIDI spec convention many keyboards use. */
@@ -48,13 +48,13 @@ export function parseMidiMessage(data: Uint8Array | null): MidiEvent | null {
 }
 
 // ---------------------------------------------------------------------------
-// Standard MIDI File (.mid) import/export — a different layer from the
+// Standard MIDI File (.mid) import/export, a different layer from the
 // real-time message parsing above (whole binary files instead of live 1-3
 // byte messages), but sharing the same status-byte vocabulary, hence the
 // same module.
 // ---------------------------------------------------------------------------
 
-/** A note-on/note-off pair already resolved into a single duration-bearing event, in ticks — the unit both `parseMidiFile` and `encodeMidiFile` trade in, leaving tick↔second/step conversion to the caller (who knows the target BPM/grid). */
+/** A note-on/note-off pair already resolved into a single duration-bearing event, in ticks, the unit both `parseMidiFile` and `encodeMidiFile` trade in, leaving tick↔second/step conversion to the caller (who knows the target BPM/grid). */
 export interface MidiFileNote {
   channel: number;
   durationTicks: number;
@@ -65,7 +65,7 @@ export interface MidiFileNote {
 }
 
 export interface ParsedMidiFile {
-  /** Microseconds per quarter note — from the file's first Set Tempo meta event, or the MIDI default (500000, i.e. 120 BPM) when none is present. */
+  /** Microseconds per quarter note, from the file's first Set Tempo meta event, or the MIDI default (500000, i.e. 120 BPM) when none is present. */
   microsecondsPerQuarterNote: number;
   notes: MidiFileNote[];
   ticksPerQuarterNote: number;
@@ -205,7 +205,7 @@ function readMetaEvent(reader: ByteReader, hasTempo: boolean): MetaEventResult {
   return { isEndOfTrack: metaType === END_OF_TRACK_META_TYPE, tempo };
 }
 
-/** Reads a note-on/note-off's two data bytes and, if this closes out a previously-opened note, returns the resolved duration-bearing note — null while a note is still pending (just opened, or an unmatched close). */
+/** Reads a note-on/note-off's two data bytes and, if this closes out a previously-opened note, returns the resolved duration-bearing note, null while a note is still pending (just opened, or an unmatched close). */
 function readNoteEvent(
   reader: ByteReader,
   command: number,
@@ -241,7 +241,7 @@ interface TrackWalkState {
   tick: number;
 }
 
-/** Reads and dispatches exactly one event at the reader's current position, mutating `state` (tick, running status, pending tempo) in place. Returns a resolved note when this event closed one, `"end"` when it was the track's End of Track meta event, otherwise null. Split out of `parseTrackChunk` purely to keep that function's own cognitive complexity manageable — it's just a `while` loop around this. */
+/** Reads and dispatches exactly one event at the reader's current position, mutating `state` (tick, running status, pending tempo) in place. Returns a resolved note when this event closed one, `"end"` when it was the track's End of Track meta event, otherwise null. Split out of `parseTrackChunk` purely to keep that function's own cognitive complexity manageable, it's just a `while` loop around this. */
 function readTrackEvent(
   reader: ByteReader,
   state: TrackWalkState
@@ -283,7 +283,7 @@ function readTrackEvent(
   }
 
   // Any other channel message (control change, program change, pitch
-  // bend, aftertouch, ...) — consume its data bytes and move on, this
+  // bend, aftertouch, ...), consume its data bytes and move on, this
   // codec only cares about notes and tempo.
   reader.skip(command === 0xc0 || command === 0xd0 ? 1 : 2);
   return null;
@@ -318,7 +318,7 @@ function parseTrackChunk(
   };
 }
 
-/** Parses a Standard MIDI File (format 0, 1, or 2) into flat, duration-bearing notes merged across every track — this codebase has no notion of separate MIDI tracks/channels, just one polyphonic note list, so multi-track files are collapsed on import. */
+/** Parses a Standard MIDI File (format 0, 1, or 2) into flat, duration-bearing notes merged across every track, this codebase has no notion of separate MIDI tracks/channels, just one polyphonic note list, so multi-track files are collapsed on import. */
 export function parseMidiFile(buffer: ArrayBuffer): ParsedMidiFile {
   const reader = new ByteReader(buffer);
 
@@ -326,7 +326,7 @@ export function parseMidiFile(buffer: ArrayBuffer): ParsedMidiFile {
     throw new Error("Not a Standard MIDI File (missing MThd header)");
   }
   reader.readUint32(); // header length, always 6
-  reader.readUint16(); // format — unused, tracks are merged regardless
+  reader.readUint16(); // format, unused, tracks are merged regardless
   const trackCount = reader.readUint16();
   const division = reader.readUint16();
   // Top bit set means SMPTE time code division, a frames/ticks-per-frame
@@ -366,7 +366,7 @@ export function parseMidiFile(buffer: ArrayBuffer): ParsedMidiFile {
 }
 
 export interface EncodeMidiFileOptions {
-  /** Beats per minute — converted internally to the Set Tempo meta event's microseconds-per-quarter-note. */
+  /** Beats per minute, converted internally to the Set Tempo meta event's microseconds-per-quarter-note. */
   bpm: number;
   notes: MidiFileNote[];
   ticksPerQuarterNote?: number;

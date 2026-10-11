@@ -23,7 +23,7 @@ function createNoiseBuffer(ctx: AudioContext, duration: number): AudioBuffer {
   return buffer;
 }
 
-/** Sine oscillator with a fast pitch sweep (150Hz→40Hz) and exponential amplitude decay — a classic 808-style kick. */
+/** Sine oscillator with a fast pitch sweep (150Hz→40Hz) and exponential amplitude decay, a classic 808-style kick. */
 export function triggerKick(
   ctx: AudioContext,
   destination: AudioNode,
@@ -96,7 +96,7 @@ export function triggerSnare(
   oscillator.stop(time + SNARE_TONE_DECAY);
 }
 
-/** High-passed noise burst, very short — a closed-hihat-style tick. */
+/** High-passed noise burst, very short, a closed-hihat-style tick. */
 export function triggerHihat(
   ctx: AudioContext,
   destination: AudioNode,

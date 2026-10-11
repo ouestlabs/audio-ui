@@ -18,7 +18,7 @@ import {
  * Groups all parts of the fader, with audio defaults (vertical, -60…+6) and
  * mouse-wheel stepping. While a pointer drags it, the
  * thumb follows the pointer even if a controlled `value` lags behind (a seek
- * bar driven by playback time, automation) — reject a value with
+ * bar driven by playback time, automation), reject a value with
  * `eventDetails.cancel()` instead. Renders a `<div>` element.
  */
 export function Root({

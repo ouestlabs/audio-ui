@@ -4,13 +4,13 @@
  * Pre-compiles all registry items (audio library items, hooks, lib, and
  * catalog blocks/demos from `registry-audio/bases/{base}/components`) into
  * static JSON files in `public/r/styles/`.
- * This eliminates serverless function invocations for registry serving —
+ * This eliminates serverless function invocations for registry serving,
  * files are served directly from the CDN edge.
  *
  * Output structure:
- *   public/r/styles/index.json          — list of available styles
- *   public/r/styles/{style}/{name}.json — one file per item per style
- *   public/r/styles/default/            — alias for base-nova (the default)
+ *   public/r/styles/index.json         , list of available styles
+ *   public/r/styles/{style}/{name}.json, one file per item per style
+ *   public/r/styles/default/           , alias for base-nova (the default)
  *
  * Run: bun run registry:build
  */
@@ -35,7 +35,7 @@ let transformStyleClassNames: (code: string, styleName: string) => string;
 
 // Style names only (`registry/styles.tsx` also holds inline JSX icon SVGs,
 // which can't be evaluated under this Bun-hoisted toolchain; only `.name`
-// is needed here — see registry/styles/style-*.css for the set).
+// is needed here, see registry/styles/style-*.css for the set).
 const STYLES = [
   { name: "vega" },
   { name: "nova" },
@@ -79,10 +79,10 @@ const DEFAULT_STYLE = "base-nova";
 const AUDIO_REGISTRY_NAMESPACE = "@audio";
 
 // ---------------------------------------------------------------------------
-// cn-* class expansion — mirrors how ui.shadcn.com serves its own registry:
+// cn-* class expansion, mirrors how ui.shadcn.com serves its own registry:
 // components reference placeholder classes like `cn-fader-track`, defined in
 // registry-audio/styles/style-{style}.css (a `.style-{name} { .cn-x { @apply
-// ...; } }` block). The official registry never ships that placeholder text —
+// ...; } }` block). The official registry never ships that placeholder text,
 // it's resolved to real utility classes before the JSON is served, so the
 // shadcn CLI's own `add` never sees a `cn-*` token to deal with. We mirror
 // that here instead of sending unresolved `cn-*` tokens down the wire, which
@@ -202,7 +202,7 @@ async function getMetadata(base: string): Promise<MetadataData> {
 }
 
 // ---------------------------------------------------------------------------
-// Manifest generation — components.json, registry.json, and seo.json are
+// Manifest generation, components.json, registry.json, and seo.json are
 // DERIVED from components/_registry.ts (items) and categories.ts (curated
 // editorial). Category counts are computed, never hand-summed. Item tags not
 // listed in categories.ts are free-form search tags and are left alone; a
@@ -234,7 +234,7 @@ async function buildManifests(): Promise<void> {
     ).length;
     if (count === 0) {
       throw new Error(
-        `Category "${def.name}" in categories.ts has no catalog items — remove it from categories.ts or tag items with it.`
+        `Category "${def.name}" in categories.ts has no catalog items, remove it from categories.ts or tag items with it.`
       );
     }
     return {
@@ -494,7 +494,7 @@ async function buildRegistryItem(
     });
   }
 
-  // A "barrel" item (e.g. @audio/ui, @audio/hooks) has no files of its own —
+  // A "barrel" item (e.g. @audio/ui, @audio/hooks) has no files of its own,
   // it only aggregates registryDependencies for a one-shot install. Still
   // emit it; only skip when there's truly nothing to serve at all.
   if (files.length === 0 && !itemMetadata.registryDependencies?.length) {
@@ -653,7 +653,7 @@ async function main() {
   );
 
   // ---------------------------------------------------------------------------
-  // Verification pass — read back every generated JSON and check integrity
+  // Verification pass, read back every generated JSON and check integrity
   // ---------------------------------------------------------------------------
   console.log();
   console.log("Verifying generated files...");
@@ -684,7 +684,7 @@ async function main() {
           verifyErrors++;
           corruptedFiles.push(`${styleName}/${entry}`);
           console.error(
-            `  INVALID SCHEMA: ${styleName}/${entry} — missing name, type, or files`
+            `  INVALID SCHEMA: ${styleName}/${entry}, missing name, type, or files`
           );
           continue;
         }
@@ -695,7 +695,7 @@ async function main() {
             verifyErrors++;
             corruptedFiles.push(`${styleName}/${entry}`);
             console.error(
-              `  EMPTY CONTENT: ${styleName}/${entry} — file "${file.path}" has no content`
+              `  EMPTY CONTENT: ${styleName}/${entry}, file "${file.path}" has no content`
             );
             break;
           }
@@ -715,7 +715,7 @@ async function main() {
               verifyErrors++;
               corruptedFiles.push(`${styleName}/${entry}`);
               console.error(
-                `  COLLAPSED CODE: ${styleName}/${entry} — line ${i + 1} is ${line.length} chars (file "${file.path}")`
+                `  COLLAPSED CODE: ${styleName}/${entry}, line ${i + 1} is ${line.length} chars (file "${file.path}")`
               );
               break;
             }
@@ -730,7 +730,7 @@ async function main() {
             verifyErrors++;
             corruptedFiles.push(`${styleName}/${entry}`);
             console.error(
-              `  UNTRANSFORMED STYLE: ${styleName}/${entry} — still contains style-*: tokens`
+              `  UNTRANSFORMED STYLE: ${styleName}/${entry}, still contains style-*: tokens`
             );
           }
 
@@ -740,7 +740,7 @@ async function main() {
             verifyErrors++;
             corruptedFiles.push(`${styleName}/${entry}`);
             console.error(
-              `  UNEXPANDED CN CLASS: ${styleName}/${entry} — still contains cn-* tokens`
+              `  UNEXPANDED CN CLASS: ${styleName}/${entry}, still contains cn-* tokens`
             );
           }
           CN_TOKEN_REGEX.lastIndex = 0;
@@ -753,7 +753,7 @@ async function main() {
             verifyErrors++;
             corruptedFiles.push(`${styleName}/${entry}`);
             console.error(
-              `  UNTRANSFORMED IMPORT: ${styleName}/${entry} — still contains registry import paths`
+              `  UNTRANSFORMED IMPORT: ${styleName}/${entry}, still contains registry import paths`
             );
           }
         }

@@ -27,7 +27,7 @@ const DEFAULT_MIN_POINTS = 2;
 const DEFAULT_STEP = 0.01;
 /** How long a blocked-action signal (data-blocked) stays on before it clears, long enough for a feedback animation to play. */
 const BLOCKED_DURATION_MS = 320;
-/** ADSR-shaped: attack to peak, decay to a sustain plateau, release — reads as an envelope rather than a bare triangle. */
+/** ADSR-shaped: attack to peak, decay to a sustain plateau, release, reads as an envelope rather than a bare triangle. */
 const DEFAULT_VALUE: Breakpoint[] = [
   { x: 0, y: 0.05 },
   { x: 0.15, y: 1 },

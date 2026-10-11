@@ -4,7 +4,7 @@
 
 Rework the `Fader` API. Requires the `@base-ui/react` ^1.9.0 peer dependency. **Breaking (pre-1.0):**
 
-- Parts: `Root`, `Label`, `Value`, `Control` (was `Slider`), `Track`, `Indicator` (was `Range`), `Thumb`. The decorative `ThumbInner`/`ThumbMark` parts are gone — render your own elements inside `Thumb`.
+- Parts: `Root`, `Label`, `Value`, `Control` (was `Slider`), `Track`, `Indicator` (was `Range`), `Thumb`. The decorative `ThumbInner`/`ThumbMark` parts are gone, render your own elements inside `Thumb`.
 - Types live on each part: `Fader.Root.Props`, `Fader.Root.State`, `Fader.Root.ChangeEventDetails`, … (was `Fader.RootProps`).
 - `onValueChange(value, eventDetails)` / `onValueCommitted(value, eventDetails)` (was `onValueCommit(value)`), with `eventDetails.reason` (`"drag"`, `"track-press"`, `"keyboard"`, `"wheel"`, …) and `eventDetails.cancel()`.
 - The accessible name goes on `Thumb` (`aria-label` / `aria-labelledby`), which now renders a native `<input type="range">`. Disabled state is the presence attribute `data-disabled`.

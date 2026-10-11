@@ -269,7 +269,7 @@ function AudioPlayer({
     !React.use(AudioProviderContext)
   ) {
     console.warn(
-      "AudioPlayer: no `tracks` prop and no ambient <AudioProvider> — playback controls will not function. Pass `tracks` or wrap this player in <AudioProvider tracks={...}>."
+      "AudioPlayer: no `tracks` prop and no ambient <AudioProvider>, playback controls will not function. Pass `tracks` or wrap this player in <AudioProvider tracks={...}>."
     );
   }
 

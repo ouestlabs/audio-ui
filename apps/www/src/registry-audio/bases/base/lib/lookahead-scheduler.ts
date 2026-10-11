@@ -2,7 +2,7 @@
  * Framework-free core of the look-ahead scheduler shared by `use-step-clock`
  * and `use-transport-clock`. It owns the drift-free stepping cursor and the
  * self-correcting catch-up loop, and knows nothing about React, AudioContext,
- * or what gets played — the hooks bind it to `ctx.currentTime` + `setInterval`.
+ * or what gets played, the hooks bind it to `ctx.currentTime` + `setInterval`.
  * Being pure, it is the whole test surface: drive `advance` across a fake
  * timeline and assert the emitted `(step, time)` boundaries, no audio needed.
  */
@@ -18,7 +18,7 @@ export interface SchedulerConfig {
   /** First step of the looping window, inclusive. `0` for a full-grid clock. */
   regionStart: number;
   /**
-   * Seconds between two consecutive steps — `60 / bpm / stepsPerBeat`. Read
+   * Seconds between two consecutive steps, `60 / bpm / stepsPerBeat`. Read
    * fresh on every `advance` so a tempo change takes effect at the next
    * boundary, not on the next stop/start.
    */
@@ -34,7 +34,7 @@ export interface SchedulerCursor {
 
 export interface StepBoundary {
   step: number;
-  /** Absolute audio time — pass straight to node `.start()`/`.stop()` for sample-accurate scheduling. */
+  /** Absolute audio time, pass straight to node `.start()`/`.stop()` for sample-accurate scheduling. */
   time: number;
 }
 
@@ -57,7 +57,7 @@ function wrapStep(step: number, config: SchedulerConfig): number {
   );
 }
 
-/** A cursor that emits `step` at `now` — the seed for `start()` and for every re-anchor (seek, region commit). */
+/** A cursor that emits `step` at `now`, the seed for `start()` and for every re-anchor (seek, region commit). */
 export function anchoredCursor(now: number, step: number): SchedulerCursor {
   return { nextStep: step, nextStepTime: now };
 }
@@ -65,8 +65,8 @@ export function anchoredCursor(now: number, step: number): SchedulerCursor {
 /**
  * Advances `cursor`, emitting every step boundary now within
  * `SCHEDULE_AHEAD_SECONDS` of `now`. The `while` (not `if`) is what makes this
- * self-correcting: a poll delayed past a whole step — a stalled main thread, a
- * throttled background tab — catches up by emitting the missed boundaries
+ * self-correcting: a poll delayed past a whole step, a stalled main thread, a
+ * throttled background tab, catches up by emitting the missed boundaries
  * rather than letting one slip past unscheduled.
  */
 export function advance(

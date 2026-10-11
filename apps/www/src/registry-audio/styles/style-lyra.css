@@ -1,11 +1,11 @@
 /*
- * audio/ui style hooks — companion to registry/styles/style-lyra.css.
+ * audio/ui style hooks, companion to registry/styles/style-lyra.css.
  * Radius / ring / shadow are sourced from this style's shadcn primitives:
  * slider (track + thumb), button (control chips), card (surfaces), popover
  * (floating). Regenerate via scripts, do not hand-edit.
  */
 .style-lyra {
-  /* MARK: Knob (circular — always rounded-full; ring + shadow follow the style) */
+  /* MARK: Knob (circular, always rounded-full; ring + shadow follow the style) */
   .cn-knob {
     @apply rounded-full border border-transparent ring-1 ring-foreground/10 transition-[border-color,box-shadow] duration-150 ease-out focus-within:border-ring focus-within:ring-1 focus-within:ring-ring/50 hover:ring-1 hover:ring-ring/40 has-[[data-slot=knob-control]:active]:border-ring has-[[data-slot=knob-control]:active]:ring-1 has-[[data-slot=knob-control]:active]:ring-ring motion-reduce:transition-none;
   }
@@ -176,7 +176,7 @@
     @apply bg-primary opacity-50;
   }
 
-  /* Cursor puck is the xypad's draggable handle — radius ← cn-slider-thumb */
+  /* Cursor puck is the xypad's draggable handle, radius ← cn-slider-thumb */
   .cn-xypad-cursor-glow {
     @apply rounded-none bg-primary opacity-20 blur-sm;
   }
@@ -568,13 +568,13 @@
     @apply rounded-none bg-current;
   }
 
-  /* MARK: Panel — block surface radius ← cn-card (synth, device-style blocks) */
+  /* MARK: Panel, block surface radius ← cn-card (synth, device-style blocks) */
   .cn-audio-panel {
     @apply rounded-none;
   }
 }
 
-/* Envelope blocked-action shake — per-segment easing so each leg follows its own curve. Animates the standalone `translate` property (not `transform`) so it composites with Point's inline positioning transform instead of fighting it. */
+/* Envelope blocked-action shake, per-segment easing so each leg follows its own curve. Animates the standalone `translate` property (not `transform`) so it composites with Point's inline positioning transform instead of fighting it. */
 @keyframes cn-envelope-shake {
   0% {
     animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);

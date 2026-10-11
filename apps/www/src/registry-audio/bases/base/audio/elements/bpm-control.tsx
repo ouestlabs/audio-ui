@@ -23,7 +23,7 @@ interface BpmControlProps {
   value: number;
 }
 
-/** A labeled BPM stepper — a decrement/increment `InputGroup` around a numeric field, synced to an external controlled `value`. Typed input is held in a local draft until blur/Enter so mid-typing states (an empty field, a partial number) never get clamped away on every keystroke. */
+/** A labeled BPM stepper, a decrement/increment `InputGroup` around a numeric field, synced to an external controlled `value`. Typed input is held in a local draft until blur/Enter so mid-typing states (an empty field, a partial number) never get clamped away on every keystroke. */
 export function BpmControl({
   max = DEFAULT_MAX_BPM,
   min = DEFAULT_MIN_BPM,

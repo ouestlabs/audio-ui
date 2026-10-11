@@ -653,7 +653,7 @@ export function categories<T extends Category[]>(...cats: T): T {
 }
 
 // ============================================================================
-// Catalog (c-*) — lazy index from components.json
+// Catalog (c-*), lazy index from components.json
 // ============================================================================
 
 // Load the catalog manifest into a name-keyed map of catalog items.
@@ -749,7 +749,7 @@ function ensureCatalogIndexes() {
 }
 
 /**
- * All catalog items (c-* blocks) — loads full metadata from `components.json`.
+ * All catalog items (c-* blocks), loads full metadata from `components.json`.
  */
 export function getAllCatalogItems(): ComponentCatalogItem[] {
   ensureCatalogIndexes();

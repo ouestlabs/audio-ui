@@ -10,7 +10,7 @@ import { buildBreadcrumbJsonLd, buildPageMetadata } from "@/lib/seo";
 import { ComponentCategorySeoContent } from "./components/component-category-seo-content";
 import { ComponentPreviewView } from "./components/component-preview-view";
 
-// Fully static — ?search= filtering happens client-side
+// Fully static, ?search= filtering happens client-side
 export const dynamic = "force-static";
 export const revalidate = false;
 
@@ -55,7 +55,7 @@ export default function ComponentsPage() {
           <p className="mt-4 text-pretty text-base text-site-muted-foreground leading-7">
             Browse {totalComponentCount}+ free open-source audio/ui components
             for React and Tailwind CSS. audio/ui helps you move from headless
-            primitives to polished audio product UI — players, mixers, synths,
+            primitives to polished audio product UI, players, mixers, synths,
             and channel strips.
           </p>
         </div>

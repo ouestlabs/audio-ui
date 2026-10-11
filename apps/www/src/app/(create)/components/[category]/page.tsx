@@ -29,7 +29,7 @@ function ComponentPreviewSkeleton() {
   );
 }
 
-// Fully static — search filtering happens client-side in ComponentGrid
+// Fully static, search filtering happens client-side in ComponentGrid
 export const dynamic = "force-static";
 export const revalidate = false;
 

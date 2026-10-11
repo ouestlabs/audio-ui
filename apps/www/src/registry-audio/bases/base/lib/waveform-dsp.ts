@@ -1,13 +1,13 @@
 /**
  * Framework-free waveform DSP: decode raw audio bytes into samples, then
- * reduce them to the Waveform's `values` — the lowest and highest sample of
+ * reduce them to the Waveform's `values`, the lowest and highest sample of
  * each slice (`computePeaks`), or one amplitude per slice
  * (`downsampleWaveform`); and reduce a live analyser's spectrum to frequency
  * bands. Pure and audio-only, so it stays off any `"use client"`
  * surface; the Waveform itself fits the values to its width.
  */
 
-/** Decodes raw audio bytes (e.g. from `file.arrayBuffer()`) into one channel's PCM samples, ready for `downsampleWaveform`. Takes an existing `AudioContext`/`OfflineAudioContext` rather than creating its own — decoding is the caller's concern, this is just the audio-specific step. `decodeAudioData` can detach the buffer it's given in some browsers, hence the defensive copy. */
+/** Decodes raw audio bytes (e.g. from `file.arrayBuffer()`) into one channel's PCM samples, ready for `downsampleWaveform`. Takes an existing `AudioContext`/`OfflineAudioContext` rather than creating its own, decoding is the caller's concern, this is just the audio-specific step. `decodeAudioData` can detach the buffer it's given in some browsers, hence the defensive copy. */
 export async function decodeAudioSamples(
   context: BaseAudioContext,
   buffer: ArrayBuffer,
@@ -35,7 +35,7 @@ export interface AudioPeaks {
   min: Float32Array;
 }
 
-/** Reduces PCM samples to `bucketCount` slices, keeping each slice's lowest and highest sample across every channel — a take panned hard to one side still draws, rather than reading as a flat line on the channel it isn't on. Compute it once per file, at a resolution above the widest waveform you expect (a few thousand slices); the Waveform fits it to its width and to any `range`. */
+/** Reduces PCM samples to `bucketCount` slices, keeping each slice's lowest and highest sample across every channel, a take panned hard to one side still draws, rather than reading as a flat line on the channel it isn't on. Compute it once per file, at a resolution above the widest waveform you expect (a few thousand slices); the Waveform fits it to its width and to any `range`. */
 export function computePeaks(
   channels: readonly ArrayLike<number>[],
   bucketCount: number
@@ -90,7 +90,7 @@ export function normalizePeaks(peaks: AudioPeaks): AudioPeaks {
   };
 }
 
-/** Downsamples raw PCM samples into `targetLength` blocks, each block's value the peak (max) absolute amplitude within it — the reduction wavesurfer.js/audiowaveform-style waveform visualizers use, since a block average flattens short transients into a softer-looking curve than the audio actually has. */
+/** Downsamples raw PCM samples into `targetLength` blocks, each block's value the peak (max) absolute amplitude within it, the reduction wavesurfer.js/audiowaveform-style waveform visualizers use, since a block average flattens short transients into a softer-looking curve than the audio actually has. */
 export function downsampleWaveform(
   samples: ArrayLike<number>,
   targetLength: number
@@ -114,7 +114,7 @@ export function downsampleWaveform(
   return blocks;
 }
 
-/** Scales `values` so the largest entry becomes 1 — keeps a waveform's peak reaching full height regardless of the source audio's own loudness. */
+/** Scales `values` so the largest entry becomes 1, keeps a waveform's peak reaching full height regardless of the source audio's own loudness. */
 export function normalizeWaveform(values: number[]): number[] {
   const peak = Math.max(0, ...values);
   if (peak === 0) {
@@ -136,7 +136,7 @@ export interface SpectrumBandsOptions {
   sampleRate: number;
 }
 
-/** Reduces an analyser's spectrum (`getFloatFrequencyData`: decibels per frequency bin) to `bands.length` levels of 0-1, low to high, written into `bands`. Bands are spaced evenly on a log scale between `minHz` and `maxHz` — the way pitch is heard, so the low end isn't crammed into one bar — and each takes its loudest bin, so a single note still lights its band. */
+/** Reduces an analyser's spectrum (`getFloatFrequencyData`: decibels per frequency bin) to `bands.length` levels of 0-1, low to high, written into `bands`. Bands are spaced evenly on a log scale between `minHz` and `maxHz`, the way pitch is heard, so the low end isn't crammed into one bar, and each takes its loudest bin, so a single note still lights its band. */
 export function spectrumBands(
   spectrum: ArrayLike<number>,
   bands: Float32Array,

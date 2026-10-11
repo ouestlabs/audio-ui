@@ -25,13 +25,13 @@ export interface TransportRegion {
 export interface UseTransportClockOptions {
   bpm?: number;
   /**
-   * Fired on every re-anchor (start, stop, seek, region commit) — flush any
+   * Fired on every re-anchor (start, stop, seek, region commit), flush any
    * sound already scheduled ahead of the new anchor, e.g. `releaseAll()`.
    */
   onReset?: () => void;
   /**
    * Fired at poll time with the absolute AudioContext time of each step
-   * boundary — schedule synthesis here (pass `time` to node `.start()`/`.stop()`)
+   * boundary, schedule synthesis here (pass `time` to node `.start()`/`.stop()`)
    * for sample-accurate playback that stays in sync under tab throttling.
    */
   onStep?: (step: number, time: number) => void;
@@ -49,11 +49,11 @@ export interface UseTransportClockReturn {
   getPosition: () => number;
   isPlaying: boolean;
   /**
-   * Re-anchors playback so `step` (default: the region start) plays now — the
+   * Re-anchors playback so `step` (default: the region start) plays now, the
    * seek / region-commit primitive. No-op while stopped.
    */
   reanchor: (step?: number) => void;
-  /** Seconds between two steps at the current tempo — the canonical step↔time mapping, e.g. for note-off offsets. */
+  /** Seconds between two steps at the current tempo, the canonical step↔time mapping, e.g. for note-off offsets. */
   secondsPerStep: number;
   start: () => void;
   stop: () => void;
@@ -61,7 +61,7 @@ export interface UseTransportClockReturn {
 
 /**
  * The region-aware {@link https://web.dev/audio-scheduling | look-ahead}
- * transport clock — the seam between musical time (tempo, steps, loop region,
+ * transport clock, the seam between musical time (tempo, steps, loop region,
  * seek) and Web Audio scheduling. It advances a drift-free stepping cursor
  * against the shared AudioContext clock and calls `onStep(step, audioTime)` so
  * callers schedule synthesis sample-accurately; it exposes a continuous

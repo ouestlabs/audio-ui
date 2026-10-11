@@ -17,7 +17,7 @@ const PLAYBACK_RATE_MAX = 2;
 
 /**
  * Valid playback-rate range is a product decision (acceptable listening
- * speeds), not a device constraint — the audio-store is the only place
+ * speeds), not a device constraint, the audio-store is the only place
  * this clamps. See docs/adr/0002-store-owns-playback-rate-clamp.md.
  */
 export function clampPlaybackRate(rate: number): number {
@@ -26,7 +26,7 @@ export function clampPlaybackRate(rate: number): number {
 
 /**
  * Whether a duration value indicates a live stream. Should only be trusted
- * once metadata has loaded (`readyState >= HAVE_METADATA`) — `duration === 0`
+ * once metadata has loaded (`readyState >= HAVE_METADATA`), `duration === 0`
  * just means duration isn't loaded yet, not that the stream is live.
  */
 export function isLive(duration: number): boolean {
@@ -66,7 +66,7 @@ export type SetEngineVolumeParams = {
   fadeTime?: number;
 };
 
-/** Detail payload of the `"error"` event — the engine has already inspected
+/** Detail payload of the `"error"` event, the engine has already inspected
  * its native error object; callers never need to. */
 export type PlaybackEngineErrorDetail = {
   message: string;
@@ -77,7 +77,7 @@ export type PlaybackEngineErrorDetail = {
 /**
  * The seam between the audio-store (domain: queue, playback intent) and a
  * concrete audio backend. Commands flow in, events flow out through this one
- * interface — no caller reaches past it into a raw `HTMLAudioElement` (there
+ * interface, no caller reaches past it into a raw `HTMLAudioElement` (there
  * is deliberately no `getAudioElement()` here). `HtmlAudioEngine` is the
  * production adapter; `FakeEngine` is the in-memory test adapter.
  */
