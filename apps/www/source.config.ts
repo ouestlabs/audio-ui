@@ -10,7 +10,7 @@ export const docs = defineDocs({
   dir: "src/content/docs",
   docs: {
     schema: pageSchema.extend({
-      base: z.enum(["base", "radix"]).optional(),
+      base: z.literal("base").optional(),
       component: z.boolean().optional(),
       links: z
         .object({

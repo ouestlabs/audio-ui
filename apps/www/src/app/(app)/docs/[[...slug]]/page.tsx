@@ -105,10 +105,7 @@ export default async function Page(props: {
   const componentName =
     isComponentDoc && params.slug?.length >= 3 ? params.slug[2] : undefined;
   const componentSeo =
-    isComponentDoc &&
-    componentName &&
-    isCanonicalComponentDoc(componentName) &&
-    (base === "base" || base === "radix")
+    isComponentDoc && componentName && isCanonicalComponentDoc(componentName)
       ? getComponentDocSeo(componentName, doc.title, base, doc.description)
       : null;
   const breadcrumbPath = componentSeo?.canonicalPath ?? page.url;
