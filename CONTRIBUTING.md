@@ -331,7 +331,7 @@ bun run lint:fix
 
 `registry:build` pre-compiles every item for every style into `public/r/styles/`, which is what `https://audio-ui.xyz/r/...` serves from the CDN.
 
-> **Maintainers only:** `bun run registry:sync` re-syncs `src/registry/` from upstream shadcn-ui/ui and rebuilds icons. Never hand-edit `src/registry/`, changes there are overwritten by the next sync.
+> **Maintainers only:** `bun run registry:sync` re-syncs `src/registry/` from upstream shadcn-ui/ui and rebuilds icons. `src/registry/` is edited by hand now, so a sync overwrites those edits and brings back what was removed (such as Radix). Run it on purpose only.
 
 ---
 
