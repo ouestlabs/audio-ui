@@ -35,7 +35,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/registry/bases/base/ui/select";
-import { NumberStepper } from "@/registry-audio/bases/base/audio/elements/bpm-control";
+import { NumberControl } from "@/registry-audio/bases/base/audio/elements/bpm-control";
 import {
   Timeline,
   TimelineClip,
@@ -70,6 +70,8 @@ const BAR = secondsPerBar(DEFAULT_TEMPO);
 /** The width of a track header, which the lanes start after. */
 const LEAD_PX = 112;
 const MAX_ZOOM = 240;
+const ZOOM_STEPPERS = { decrement: "Zoom out", increment: "Zoom in" };
+
 /** How the zoom is shown: as a share of the fitted view. */
 const PERCENT: Intl.NumberFormatOptions = {
   maximumFractionDigits: 0,
@@ -720,16 +722,16 @@ export default function BlockTimeline() {
               </SelectGroup>
             </SelectContent>
           </Select>
-          <NumberStepper
-            decrementLabel="Zoom out"
+          <NumberControl
             format={PERCENT}
-            incrementLabel="Zoom in"
             label="Zoom"
             largeStep={1}
             max={maxRatio}
             min={1}
             onValueChange={changeZoom}
             step={0.25}
+            steppers={ZOOM_STEPPERS}
+            unit="Zoom"
             value={zoomRatio}
           />
         </div>
