@@ -1142,12 +1142,6 @@ export default function BlockTimeline() {
   );
   // A stand-in for the mix's levels: the block plays nothing, so they move while it runs.
   const simulated = useSimulatedLevels(2);
-  const [master, setMaster] = useState(1);
-  const handleMaster = useCallback(
-    (value: number | readonly number[]) =>
-      setMaster(Array.isArray(value) ? value[0] : Number(value)),
-    []
-  );
   const [mixes, setMixes] = useState<Record<string, Mix>>({});
   const mixOf = (trackId: string) => mixes[trackId] ?? UNITY;
   const changeMix = useCallback(
@@ -1702,30 +1696,15 @@ export default function BlockTimeline() {
           >
             Snap {snap ? gridLabel(gridSeconds, tempo) : "off"}
           </Toggle>
-          <div className="flex items-center gap-2">
-            <Meter
-              aria-label="Master output level"
-              className="w-20"
-              orientation="horizontal"
-              peakMarks="hidden"
-              size="sm"
-              source={playing ? simulated : SILENCE}
-              warnThreshold={-12}
-            />
-            <Fader
-              aria-label="Master gain"
-              className="w-20"
-              max={1}
-              min={0}
-              onValueChange={handleMaster}
-              orientation="horizontal"
-              size="sm"
-              step={0.01}
-              thumbMarks={false}
-              value={master}
-              valueLabel="hidden"
-            />
-          </div>
+          <Meter
+            aria-label="Master output level"
+            className="w-20"
+            orientation="horizontal"
+            peakMarks="hidden"
+            size="sm"
+            source={playing ? simulated : SILENCE}
+            warnThreshold={-12}
+          />
           <NumberControl
             format={PERCENT}
             label="Zoom"
