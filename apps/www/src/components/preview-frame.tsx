@@ -9,10 +9,12 @@ import { cn } from "@/lib/utils";
 /**
  * What the panel of a block's preview looks like, in the docs and in the
  * catalog alike: a block is the page, so the panel is its frame and it brings
- * none of its own, and it is never shorter than a preview.
+ * none of its own, it is never shorter than a preview, and an editor that
+ * takes a screen is capped so the preview is not far taller than the others:
+ * it scrolls inside, and opens at full size with the expand button.
  */
 export const blockPanelClassName =
-  "min-h-72 flex-nowrap items-stretch justify-start p-0 sm:p-0 lg:p-0 sm:**:data-[slot=preview]:max-w-none [&>.cn-audio-panel]:w-full [&>.cn-audio-panel]:flex-1 [&>.cn-audio-panel]:rounded-none [&>.cn-audio-panel]:border-0";
+  "min-h-72 flex-nowrap items-stretch justify-start p-0 sm:p-0 lg:p-0 sm:**:data-[slot=preview]:max-w-none [&>.cn-audio-panel]:w-full [&>.cn-audio-panel]:flex-1 [&>.cn-audio-panel]:rounded-none [&>.cn-audio-panel]:border-0 [&_[data-slot=piano-roll]]:max-h-56";
 
 /**
  * The bar of a preview's frame, the same wherever a preview is shown: what it
