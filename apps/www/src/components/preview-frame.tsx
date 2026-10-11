@@ -53,6 +53,7 @@ export function PreviewBar({
   badge,
   description,
   expand,
+  hint,
   name,
   position = "footer",
 }: {
@@ -62,6 +63,8 @@ export function PreviewBar({
   badge?: React.ReactNode;
   description?: string;
   expand?: React.ReactNode;
+  /** How to use the preview, shown in the footer of the full-size view. */
+  hint?: string;
   name: string;
   position?: "footer" | "header";
 }) {
@@ -78,7 +81,11 @@ export function PreviewBar({
       </p>
       <div className="flex items-center gap-1.5">
         {badge}
-        {expand ? <ExpandPreview label={name}>{expand}</ExpandPreview> : null}
+        {expand ? (
+          <ExpandPreview hint={hint} label={name}>
+            {expand}
+          </ExpandPreview>
+        ) : null}
         <CopyRegistry value={`@audio/${name}`} />
         {actions}
       </div>

@@ -3,6 +3,7 @@ import { ComponentClient } from "@/components/component-client";
 import { ComponentPreviewTabs } from "@/components/component-preview-tabs";
 import { ComponentSource } from "@/components/component-source";
 import { isBlock, isExpandable } from "@/lib/is-block";
+import { getPreviewHint } from "@/lib/preview-hint";
 import { getRegistryComponent } from "@/lib/registry";
 import type { IconLibraryName } from "@/registry/config";
 
@@ -56,6 +57,7 @@ export function ComponentPreview({
       expand={isExpandable(name)}
       fitContent={isBlock(name)}
       hideCode={hideCode}
+      hint={getPreviewHint(name)}
       name={name}
       previewClassName={previewClassName}
       source={

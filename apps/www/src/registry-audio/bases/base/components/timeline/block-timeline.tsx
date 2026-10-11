@@ -336,11 +336,6 @@ export default function BlockTimeline() {
         </TimelineViewport>
         <TimelineNavigator getAriaValueText={describePosition} />
       </Timeline>
-      <p className="text-muted-foreground text-xs">
-        Drag a clip to move it and its edges to trim it, on the grid unless
-        Cmd/Ctrl is held. Drag across the loop strip to set a loop. Cmd/Ctrl +
-        scroll zooms around the pointer, or drag the bar below.
-      </p>
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 import { useConfig } from "@/hooks/use-config";
 import { isBlock, isExpandable } from "@/lib/is-block";
+import { getPreviewHint } from "@/lib/preview-hint";
 import { getRegistryItemMetadata } from "@/lib/registry";
 
 import {
@@ -34,6 +35,7 @@ export function ComponentCard({
     return null;
   }
 
+  const hint = getPreviewHint(name, base);
   const isFullWidth = item.meta?.gridSize === 1;
 
   return (
@@ -61,6 +63,7 @@ export function ComponentCard({
               <ComponentRenderer base={base} name={name} />
             ) : undefined
           }
+          hint={hint}
           name={name}
         />
       }

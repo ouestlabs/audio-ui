@@ -440,10 +440,6 @@ export default function PlotDemo() {
           />
         ))}
       </Plot>
-      <p className="text-center text-muted-foreground text-xs">
-        Click a band to set its type and width. Double-click empty space to add
-        one, Delete to remove it.
-      </p>
       <div className="flex items-center justify-between gap-2">
         <Button
           aria-label={

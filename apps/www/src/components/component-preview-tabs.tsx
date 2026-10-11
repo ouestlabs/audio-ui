@@ -16,6 +16,7 @@ export function ComponentPreviewTabs({
   chromeLessOnMobile: _chromeLessOnMobile,
   component,
   expand = false,
+  hint,
   fitContent = false,
   name,
   source,
@@ -31,6 +32,8 @@ export function ComponentPreviewTabs({
   expand?: boolean;
   /** Lets the preview be as tall as what it shows, rather than a fixed height: for blocks. */
   fitContent?: boolean;
+  /** How to use what is shown: said in the footer of the full-size view. */
+  hint?: string;
   /** The registry name of what is shown. */
   name: string;
   source: React.ReactNode;
@@ -57,6 +60,7 @@ export function ComponentPreviewTabs({
     >
       <PreviewBar
         expand={expand ? component : undefined}
+        hint={hint}
         name={name}
         position="header"
       />

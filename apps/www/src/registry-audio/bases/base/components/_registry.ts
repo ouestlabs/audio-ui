@@ -291,6 +291,9 @@ export const components: RegistryItem[] = [
         type: "registry:block",
       },
     ],
+    meta: {
+      hint: "Drag a clip to move it and its edges to trim it, on the grid unless Cmd/Ctrl is held. Drag across the loop strip to set a loop. Cmd/Ctrl + scroll zooms around the pointer, or drag the bar below.",
+    },
     name: "block-timeline",
     registryDependencies: [
       "@audio/timeline",
@@ -350,6 +353,9 @@ export const components: RegistryItem[] = [
         type: "registry:example",
       },
     ],
+    meta: {
+      hint: "Click a band to set its type and width. Double-click empty space to add one, Delete to remove it.",
+    },
     name: "plot-demo",
     registryDependencies: [
       "@audio/plot",

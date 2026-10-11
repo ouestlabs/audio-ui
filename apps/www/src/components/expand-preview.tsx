@@ -1,9 +1,18 @@
 "use client";
 
-import { ArrowsOutSimpleIcon, XIcon } from "@phosphor-icons/react/ssr";
+import {
+  ArrowsOutSimpleIcon,
+  InfoIcon,
+  XIcon,
+} from "@phosphor-icons/react/ssr";
 import type * as React from "react";
 import { CopyRegistry } from "@/components/copy-registry";
-import { Frame, FrameContent, FrameHeader } from "@/components/custom/frame";
+import {
+  Frame,
+  FrameContent,
+  FrameFooter,
+  FrameHeader,
+} from "@/components/custom/frame";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -23,10 +32,13 @@ import { cn } from "@/lib/utils";
 export function ExpandPreview({
   children,
   className,
+  hint,
   label,
 }: {
   children: React.ReactNode;
   className?: string;
+  /** How to use the preview, in a footer under it. */
+  hint?: string;
   /** Names the preview for assistive technology, such as the block's name. */
   label: string;
 }) {
@@ -75,6 +87,15 @@ export function ExpandPreview({
           >
             {children}
           </FrameContent>
+          {hint ? (
+            <FrameFooter className="shrink-0 flex-row items-center gap-2 px-3 py-2">
+              <InfoIcon
+                aria-hidden="true"
+                className="size-4 shrink-0 text-site-muted-foreground"
+              />
+              <p className="text-site-muted-foreground text-xs">{hint}</p>
+            </FrameFooter>
+          ) : null}
         </Frame>
       </DialogContent>
     </Dialog>
