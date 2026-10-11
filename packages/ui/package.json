@@ -83,7 +83,7 @@
     "dist"
   ],
   "scripts": {
-    "build:pkg": "bunx --bun tsup && tsc -p tsconfig.build.json",
+    "build:pkg": "bunx --bun tsup && tsc -p tsconfig.build.json && bun scripts/fix-declaration-imports.ts",
     "dev": "bunx --bun tsup --watch",
     "lint": "biome check --write .",
     "lint:fix": "biome check --write --unsafe .",
