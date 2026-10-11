@@ -704,7 +704,9 @@ function CopyGhost({ clip }: { clip: Arranged }) {
   );
 }
 
-const MIN_TRACK_HEIGHT = 40;
+const MIN_TRACK_HEIGHT = 28;
+/** Below this a track is a strip: its header keeps the name, solo and mute, and the gain goes. */
+const COMPACT_TRACK_HEIGHT = 52;
 const MAX_TRACK_HEIGHT = 240;
 const TRACK_HEIGHT_STEP = 8;
 
@@ -713,6 +715,7 @@ const TRACK_HEIGHT_STEP = 8;
  * is where the cursor goes), solo, mute and gain. The lower edge resizes it.
  */
 function TrackHeader({
+  compact,
   mix,
   name,
   onMix,
@@ -721,6 +724,8 @@ function TrackHeader({
   swatch,
   trackId,
 }: {
+  /** Whether the track is short: one row, with no gain. */
+  compact: boolean;
   mix: Mix;
   name: string;
   onMix: (trackId: Arranged["track"], patch: Partial<Mix>) => void;
@@ -747,7 +752,8 @@ function TrackHeader({
   return (
     <div
       className={cn(
-        "relative flex w-full flex-col justify-center gap-1 border-s-4 px-2 py-1",
+        "relative flex w-full flex-col justify-center border-s-4 px-2",
+        compact ? "py-0" : "gap-2 py-2",
         swatch
       )}
     >
@@ -801,19 +807,21 @@ function TrackHeader({
           )}
         </Button>
       </div>
-      <Fader
-        aria-label={`${name} gain`}
-        className="min-w-0 pe-2"
-        max={1}
-        min={0}
-        onValueChange={handleGain}
-        orientation="horizontal"
-        size="sm"
-        step={0.01}
-        thumbMarks={false}
-        value={mix.gain}
-        valueLabel="hidden"
-      />
+      {compact ? null : (
+        <Fader
+          aria-label={`${name} gain`}
+          className="min-w-0 pe-2"
+          max={1}
+          min={0}
+          onValueChange={handleGain}
+          orientation="horizontal"
+          size="sm"
+          step={0.01}
+          thumbMarks={false}
+          value={mix.gain}
+          valueLabel="hidden"
+        />
+      )}
       <TimelineTrackResizeHandle aria-label={`${name} height`} />
     </div>
   );
@@ -1765,11 +1773,18 @@ export default function BlockTimeline() {
             </Row>
             {TRACKS.map((track) => (
               <Row
-                className={heights[track.id] === undefined ? "flex-1" : ""}
+                className={cn(
+                  "border-foreground/25 border-b",
+                  heights[track.id] === undefined && "flex-1"
+                )}
                 height={heights[track.id]}
                 key={track.id}
                 lead={
                   <TrackHeader
+                    compact={
+                      heights[track.id] !== undefined &&
+                      heights[track.id] < COMPACT_TRACK_HEIGHT
+                    }
                     mix={mixOf(track.id)}
                     name={track.name}
                     onMix={changeMix}
@@ -1785,7 +1800,12 @@ export default function BlockTimeline() {
               >
                 <TimelineLane
                   className={cn(
-                    "h-auto min-h-14 flex-1",
+                    "h-auto flex-1 border-b-0",
+                    heights[track.id] === undefined ? "min-h-14" : "min-h-0",
+                    // A short track keeps its clips thin, so they fit.
+                    heights[track.id] !== undefined &&
+                      heights[track.id] < COMPACT_TRACK_HEIGHT &&
+                      "**:data-clip-id:inset-y-0.5",
                     track.id === selectedTrack && "bg-muted/40",
                     // A silent track keeps its clips on the page, drained.
                     (mixOf(track.id).muted ||

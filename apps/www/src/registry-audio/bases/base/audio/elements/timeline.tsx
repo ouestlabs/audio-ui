@@ -191,7 +191,7 @@ function TimelineClip({ className, ...props }: TimelinePrimitive.Clip.Props) {
   return (
     <TimelinePrimitive.Clip
       className={cn(
-        "cn-timeline-clip group/clip inset-y-0 touch-none data-dragging:z-10 data-disabled:cursor-not-allowed",
+        "cn-timeline-clip group/clip isolate inset-y-0 touch-none data-dragging:z-10 data-disabled:cursor-not-allowed",
         className
       )}
       data-slot="timeline-clip"
