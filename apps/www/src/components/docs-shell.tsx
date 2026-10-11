@@ -19,6 +19,22 @@ import {
 } from "@/components/ui/tooltip";
 import { useConfig } from "@/hooks/use-config";
 import { useMounted } from "@/hooks/use-mounted";
+import { cn } from "@/lib/utils";
+
+/** The inset's place: an even margin all round, except where the navigation sidebar already leaves one. */
+function InsetPane({ children }: { children: React.ReactNode }) {
+  const { state } = useSidebar();
+  return (
+    <div
+      className={cn(
+        "min-h-0 min-w-0 flex-1 p-2 pt-0",
+        state === "expanded" && "lg:pl-0"
+      )}
+    >
+      {children}
+    </div>
+  );
+}
 
 /** At the start of the inset's bar: shows and hides the navigation sidebar. */
 function NavigationToggle() {
@@ -110,7 +126,7 @@ export function DocsShell({
         <SidebarProvider className="bordered-sidebar h-[calc(100svh-var(--header-height))] min-h-0 flex-none items-stretch gap-0 px-0 [--sidebar-width:15rem] [--top-spacing:0]">
           {/* Below lg the navigation is the header's menu. */}
           <div className="hidden lg:contents">{nav}</div>
-          <div className="min-h-0 min-w-0 flex-1 p-2 pt-0 lg:pl-0">
+          <InsetPane>
             <Frame className="h-full">
               <FrameContent className="flex min-h-0 flex-1 flex-col">
                 {/* The bar of the inset: the customizer's button sits here, in the page, not over it. */}
@@ -137,7 +153,7 @@ export function DocsShell({
                 </div>
               </FrameContent>
             </Frame>
-          </div>
+          </InsetPane>
           <CustomizerPanel variant="sidebar" />
         </SidebarProvider>
       </CustomizerContext>
