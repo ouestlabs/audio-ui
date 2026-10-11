@@ -507,5 +507,7 @@
 }
 
 .site-menu.cn-menu-translucent {
-  background-color: color-mix(in oklab, var(--popover) 70%, transparent);
+  background-color: color-mix(in oklab, var(--popover) 72%, transparent);
+  -webkit-backdrop-filter: blur(24px) saturate(1.5);
+  backdrop-filter: blur(24px) saturate(1.5);
 }
