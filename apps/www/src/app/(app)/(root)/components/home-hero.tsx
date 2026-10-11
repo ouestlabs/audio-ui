@@ -1,6 +1,5 @@
 import { ArrowRightIcon } from "@phosphor-icons/react/ssr";
 import Link from "next/link";
-import { CopyRegistry } from "@/components/copy-registry";
 import { Button } from "@/components/ui/button";
 
 /** The top of the landing page: what audio/ui is, where to go, how to start. */
@@ -30,10 +29,6 @@ export function HomeHero() {
           render={<Link href="/components">Browse components</Link>}
           variant="outline"
         />
-        <div className="flex h-8 items-center gap-1 rounded-lg border bg-site-muted/50 ps-3 pe-0.5 font-mono text-site-muted-foreground text-xs">
-          <span className="truncate">shadcn add @audio/knob</span>
-          <CopyRegistry size="icon-sm" value="@audio/knob" variant="ghost" />
-        </div>
       </div>
     </div>
   );

@@ -9,10 +9,16 @@ const SHOWCASE_NAMES = [
   "block-player-widget",
   "block-pocket-synth",
   "block-wave-shaper",
+  "plot-demo",
+  "block-piano-roll",
   "block-player",
 ] as const;
 
-const SHOWCASE_FULL_WIDTH = new Set(["block-player", "block-player-widget"]);
+const SHOWCASE_FULL_WIDTH = new Set([
+  "block-player",
+  "block-player-widget",
+  "block-piano-roll",
+]);
 
 function getShowcaseCatalogItems() {
   const catalog = searchCatalog("");
