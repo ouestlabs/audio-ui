@@ -1,34 +1,65 @@
 "use client";
 
-import Link, { type LinkProps } from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { BookOpenIcon, CubeIcon } from "@phosphor-icons/react/ssr";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import * as React from "react";
 import { ComponentUpdateIndicator } from "@/components/component-update-indicator";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getDocsPageUpdateHint } from "@/lib/docs";
 import { showMcpDocs } from "@/lib/flags";
-import {
-  getAllPagesFromFolder,
-  getCurrentBase,
-  getSectionsFromFolder,
-} from "@/lib/page-tree";
+import { getCurrentBase, getSectionsFromFolder } from "@/lib/page-tree";
 import type { CategoryInfo } from "@/lib/registry";
 import type { source } from "@/lib/source";
 import { cn, isActive, normalizeSlug } from "@/lib/utils";
 
+type Section = "components" | "docs";
+
+const rowClassName =
+  "flex h-9 items-center justify-between gap-3 rounded-md px-2 font-medium text-[0.8rem] text-site-foreground no-underline transition-colors hover:bg-site-muted";
+
+const activeRowClassName = "bg-site-accent";
+
+function NavRow({
+  active,
+  children,
+  href,
+  onNavigate,
+}: {
+  active: boolean;
+  children: React.ReactNode;
+  href: string;
+  onNavigate: () => void;
+}) {
+  return (
+    <Link
+      aria-current={active ? "page" : undefined}
+      className={cn(rowClassName, active && activeRowClassName)}
+      href={href}
+      onClick={onNavigate}
+      prefetch={false}
+    >
+      {children}
+    </Link>
+  );
+}
+
+function Count({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="text-site-muted-foreground text-xs tabular-nums">
+      {children}
+    </span>
+  );
+}
+
 export function MobileNav({
-  items,
+  items: _items,
   tree,
   componentCategories,
   className,
@@ -41,43 +72,22 @@ export function MobileNav({
   const [open, setOpen] = React.useState(false);
   const pathname = usePathname();
   const currentBase = getCurrentBase(pathname);
-  const mobileComponentCategories = React.useMemo(
-    () => componentCategories ?? [],
-    [componentCategories]
-  );
-  const componentCategoryLinks = React.useMemo(
+  const [chosen, setChosen] = React.useState<Section | null>(null);
+  const section: Section =
+    chosen ?? (isActive(pathname, "/components") ? "components" : "docs");
+  const close = React.useCallback(() => setOpen(false), []);
+
+  const categoryLinks = React.useMemo(
     () =>
-      mobileComponentCategories
+      (componentCategories ?? [])
         .toSorted((a, b) => a.label.localeCompare(b.label))
         .map((category) => ({
           ...category,
           href: `/components/${normalizeSlug(category.name)}`,
         })),
-    [mobileComponentCategories]
+    [componentCategories]
   );
-  const totalComponentCount = React.useMemo(
-    () =>
-      mobileComponentCategories.reduce(
-        (total, category) => total + category.count,
-        0
-      ),
-    [mobileComponentCategories]
-  );
-
-  const activeFolders = React.useMemo(() => {
-    const folders: string[] = [];
-    for (const item of tree.children) {
-      if (item.type === "folder") {
-        const hasActiveChild = getAllPagesFromFolder(item).some(
-          (page) => page.url === pathname
-        );
-        if (hasActiveChild && item.$id) {
-          folders.push(item.$id);
-        }
-      }
-    }
-    return folders;
-  }, [tree.children, pathname]);
+  const totalCount = categoryLinks.reduce((sum, c) => sum + c.count, 0);
 
   return (
     <Popover modal onOpenChange={setOpen} open={open}>
@@ -112,324 +122,123 @@ export function MobileNav({
       />
       <PopoverContent
         align="start"
-        className="scroll-fade-y no-scrollbar h-(--available-height) w-(--available-width) overflow-y-auto overscroll-contain rounded-2xl!"
+        className="scroll-fade-y no-scrollbar h-(--available-height) w-(--available-width) overflow-y-auto overscroll-contain rounded-(--frame-radius) p-2"
         side="bottom"
         sideOffset={16}
       >
-        <div className="flex flex-col gap-8 px-6 py-6">
-          <div className="flex flex-col gap-4">
-            <div className="flex flex-col gap-3">
-              <MobileLink
-                active={pathname === "/"}
-                href="/"
-                onOpenChange={setOpen}
-              >
-                Home
-              </MobileLink>
-              {items.map((item) => (
-                <div className="flex flex-col gap-3" key={item.href}>
-                  <MobileNavEntry
-                    activeFolders={activeFolders}
-                    componentCategoryLinks={componentCategoryLinks}
-                    currentBase={currentBase}
-                    item={item}
-                    onOpenChange={setOpen}
-                    pathname={pathname}
-                    totalComponentCount={totalComponentCount}
-                    tree={tree}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </PopoverContent>
-    </Popover>
-  );
-}
-
-type MobileNavItem = { href: string; label: string; soon?: boolean };
-type MobileNavTree = ReturnType<typeof source.getPageTree>;
-type MobileNavCategoryLink = CategoryInfo & { href: string };
-
-function MobileComponentsNav({
-  item,
-  pathname,
-  totalComponentCount,
-  componentCategoryLinks,
-  onOpenChange,
-}: {
-  item: MobileNavItem;
-  pathname: string;
-  totalComponentCount: number;
-  componentCategoryLinks: MobileNavCategoryLink[];
-  onOpenChange: (open: boolean) => void;
-}) {
-  return (
-    <Accordion
-      className="w-full"
-      defaultValue={
-        isActive(pathname, "/components") ? ["components"] : undefined
-      }
-    >
-      <AccordionItem className="border-none" value="components">
-        <AccordionTrigger className="py-0 font-medium text-site-foreground/70 text-sm hover:no-underline data-[state=open]:text-site-primary">
-          {item.label}
-        </AccordionTrigger>
-        <AccordionContent className="pt-4 pb-0">
-          <div className="flex flex-col gap-3 pl-4">
-            <MobileLink
-              active={pathname === item.href}
-              className="flex items-center justify-between gap-3 font-normal text-sm"
-              href={item.href}
-              onOpenChange={onOpenChange}
+        <div className="flex flex-col gap-2">
+          <Tabs
+            onValueChange={(value) => setChosen(value as Section)}
+            value={section}
+          >
+            <TabsList
+              aria-label="Sections"
+              className="w-full bg-site-foreground/8"
             >
-              <span>All Components</span>
-              <span className="text-site-muted-foreground text-xs">
-                {totalComponentCount}
-              </span>
-            </MobileLink>
-            {componentCategoryLinks.length > 0 ? (
-              <div className="flex flex-col gap-2">
-                {componentCategoryLinks.map((category) => (
-                  <MobileLink
+              <TabsTrigger value="docs">
+                <BookOpenIcon
+                  aria-hidden
+                  className="size-4"
+                  weight={section === "docs" ? "fill" : "regular"}
+                />
+                Docs
+              </TabsTrigger>
+              <TabsTrigger value="components">
+                <CubeIcon
+                  aria-hidden
+                  className="size-4"
+                  weight={section === "components" ? "fill" : "regular"}
+                />
+                Components
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+          <nav aria-label={section} className="flex flex-col gap-0.5">
+            <NavRow active={pathname === "/"} href="/" onNavigate={close}>
+              Home
+            </NavRow>
+            {section === "components" ? (
+              <>
+                <NavRow
+                  active={pathname === "/components"}
+                  href="/components"
+                  onNavigate={close}
+                >
+                  All components
+                  <Count>{totalCount}</Count>
+                </NavRow>
+                {categoryLinks.map((category) => (
+                  <NavRow
                     active={pathname === category.href}
-                    className="flex items-center justify-between gap-3 font-normal text-sm"
                     href={category.href}
                     key={category.name}
-                    onOpenChange={onOpenChange}
+                    onNavigate={close}
                   >
-                    <span>{category.label}</span>
-                    <span className="flex shrink-0 items-center gap-2">
+                    {category.label}
+                    <span className="flex items-center gap-2">
                       <ComponentUpdateIndicator category={category.name} />
-                      <span className="text-site-muted-foreground text-xs">
-                        {category.count}
-                      </span>
+                      <Count>{category.count}</Count>
                     </span>
-                  </MobileLink>
+                  </NavRow>
                 ))}
-              </div>
-            ) : null}
-          </div>
-        </AccordionContent>
-      </AccordionItem>
-    </Accordion>
-  );
-}
-
-function MobileDocsNav({
-  item,
-  pathname,
-  tree,
-  currentBase,
-  activeFolders,
-  onOpenChange,
-}: {
-  item: MobileNavItem;
-  pathname: string;
-  tree: MobileNavTree;
-  currentBase: string;
-  activeFolders: string[];
-  onOpenChange: (open: boolean) => void;
-}) {
-  return (
-    <Accordion
-      className="w-full"
-      defaultValue={isActive(pathname, "/docs") ? ["docs"] : undefined}
-    >
-      <AccordionItem className="border-none" value="docs">
-        <AccordionTrigger className="py-0 font-medium text-site-foreground/70 text-sm hover:no-underline data-[state=open]:text-site-primary">
-          {item.label}
-        </AccordionTrigger>
-        <AccordionContent className="pt-4 pb-0">
-          <div className="flex flex-col gap-4">
-            <MobileLink
-              active={pathname === item.href}
-              className="pl-4"
-              href={item.href}
-              onOpenChange={onOpenChange}
-            >
-              Introduction
-            </MobileLink>
-            <Accordion className="w-full pl-4" defaultValue={activeFolders}>
-              {tree.children.map((folder) => {
+              </>
+            ) : (
+              tree.children.map((folder) => {
                 if (folder.type !== "folder") {
                   return null;
                 }
-
                 const sections = getSectionsFromFolder(folder, currentBase)
-                  .map((section) => ({
-                    ...section,
-                    pages: section.pages.filter(
+                  .map((part) => ({
+                    ...part,
+                    pages: part.pages.filter(
                       (page) => showMcpDocs || !page.url?.includes("/mcp")
                     ),
                   }))
-                  .filter((section) => section.pages.length > 0);
-
+                  .filter((part) => part.pages.length > 0);
                 if (sections.length === 0) {
                   return null;
                 }
-
                 return (
-                  <AccordionItem
-                    className="border-none"
-                    key={folder.$id}
-                    value={folder.$id ?? ""}
-                  >
-                    <AccordionTrigger className="py-2 font-medium text-site-foreground/70 text-sm hover:no-underline">
+                  <div className="flex flex-col gap-0.5" key={folder.$id}>
+                    <p className="px-2 pt-3 pb-1 font-medium text-site-muted-foreground text-xs">
                       {folder.name}
-                    </AccordionTrigger>
-                    <AccordionContent className="pb-2">
-                      <div className="flex flex-col gap-3 pt-1 pl-4">
-                        {sections.map((section) => (
-                          <div
-                            className="flex flex-col gap-2"
-                            key={section.title ?? "untitled"}
-                          >
-                            {section.title ? (
-                              <p className="text-site-muted-foreground text-xs">
-                                {section.title}
-                              </p>
-                            ) : null}
-                            {section.pages.map((page) => {
-                              const docsUpdateHint = getDocsPageUpdateHint(
-                                page.url
-                              );
-
-                              return (
-                                <MobileLink
-                                  active={page.url === pathname}
-                                  className="flex items-center justify-between gap-3 font-normal text-sm"
-                                  href={page.url}
-                                  key={page.url}
-                                  onOpenChange={onOpenChange}
-                                >
-                                  <span>{page.name}</span>
-                                  {docsUpdateHint ? (
-                                    <span className="inline-flex shrink-0 cursor-help items-center">
-                                      <span className="sr-only">
-                                        {docsUpdateHint}
-                                      </span>
-                                      <span
-                                        aria-hidden="true"
-                                        className="site-rounded-full flex size-1.5 bg-blue-500"
-                                        title={docsUpdateHint}
-                                      />
-                                    </span>
-                                  ) : null}
-                                </MobileLink>
-                              );
-                            })}
-                          </div>
-                        ))}
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
+                    </p>
+                    {sections.map((part) => (
+                      <React.Fragment key={part.title ?? "untitled"}>
+                        {part.title ? (
+                          <p className="px-2 pt-1 pb-1 text-site-muted-foreground text-xs">
+                            {part.title}
+                          </p>
+                        ) : null}
+                        {part.pages.map((page) => {
+                          const hint = getDocsPageUpdateHint(page.url);
+                          return (
+                            <NavRow
+                              active={page.url === pathname}
+                              href={page.url}
+                              key={page.url}
+                              onNavigate={close}
+                            >
+                              {page.name}
+                              {hint ? (
+                                <span
+                                  aria-hidden="true"
+                                  className="site-rounded-full size-1.5 bg-blue-500"
+                                  title={hint}
+                                />
+                              ) : null}
+                            </NavRow>
+                          );
+                        })}
+                      </React.Fragment>
+                    ))}
+                  </div>
                 );
-              })}
-            </Accordion>
-          </div>
-        </AccordionContent>
-      </AccordionItem>
-    </Accordion>
-  );
-}
-
-function MobileNavEntry({
-  item,
-  pathname,
-  tree,
-  currentBase,
-  activeFolders,
-  totalComponentCount,
-  componentCategoryLinks,
-  onOpenChange,
-}: {
-  item: MobileNavItem;
-  pathname: string;
-  tree: MobileNavTree;
-  currentBase: string;
-  activeFolders: string[];
-  totalComponentCount: number;
-  componentCategoryLinks: MobileNavCategoryLink[];
-  onOpenChange: (open: boolean) => void;
-}) {
-  if (item.href === "/components") {
-    return (
-      <MobileComponentsNav
-        componentCategoryLinks={componentCategoryLinks}
-        item={item}
-        onOpenChange={onOpenChange}
-        pathname={pathname}
-        totalComponentCount={totalComponentCount}
-      />
-    );
-  }
-
-  if (item.href === "/docs") {
-    return (
-      <MobileDocsNav
-        activeFolders={activeFolders}
-        currentBase={currentBase}
-        item={item}
-        onOpenChange={onOpenChange}
-        pathname={pathname}
-        tree={tree}
-      />
-    );
-  }
-
-  if (item.soon) {
-    return (
-      <span className="flex items-center gap-2 font-medium text-site-foreground/40 text-sm">
-        {item.label}
-        <span className="site-rounded-sm bg-site-muted px-1.5 py-0.5 font-medium text-[10px] text-site-muted-foreground leading-none">
-          Soon
-        </span>
-      </span>
-    );
-  }
-
-  return (
-    <MobileLink
-      active={isActive(pathname, item.href)}
-      href={item.href}
-      onOpenChange={onOpenChange}
-    >
-      {item.label}
-    </MobileLink>
-  );
-}
-
-function MobileLink({
-  href,
-  onOpenChange,
-  className,
-  children,
-  active,
-  ...props
-}: LinkProps & {
-  onOpenChange?: (open: boolean) => void;
-  children: React.ReactNode;
-  className?: string;
-  active?: boolean;
-}) {
-  const router = useRouter();
-  return (
-    <Link
-      className={cn(
-        "font-medium text-sm transition-colors hover:text-site-primary",
-        active ? "text-site-primary" : "text-site-foreground/70",
-        className
-      )}
-      href={href}
-      onClick={() => {
-        router.push(href.toString());
-        onOpenChange?.(false);
-      }}
-      {...props}
-    >
-      {children}
-    </Link>
+              })
+            )}
+          </nav>
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 }
