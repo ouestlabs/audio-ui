@@ -17,11 +17,14 @@ interface ComponentsProviderProps {
   catalogItems: ComponentCatalogItem[];
   categoryCounts: Record<string, number>;
   children: React.ReactNode;
+  /** At the top of the navigation sidebar. */
+  header?: React.ReactNode;
   totalCount: number;
 }
 
 export function ComponentsProvider({
   children,
+  header,
   totalCount,
   categoryCounts,
   catalogItems,
@@ -35,7 +38,7 @@ export function ComponentsProvider({
     <ComponentsContext.Provider value={value}>
       <FramedLayout
         actions={<ComponentHeaderGridToggle />}
-        nav={<ComponentSidebar />}
+        nav={<ComponentSidebar header={header} />}
         start={
           <>
             <ComponentHeaderMobileDrawer />

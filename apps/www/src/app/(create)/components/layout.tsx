@@ -5,7 +5,7 @@ import { DesignSystemProvider } from "@/app/(create)/customizer/design-system-pr
 import { LocksProvider } from "@/app/(create)/hooks/use-locks";
 import { CREATE_PREVIEW_FONTS_ATTR } from "@/app/(create)/lib/fonts";
 import { GridSkeleton } from "@/components/grid-skeleton";
-import { SiteHeader } from "@/components/site-header";
+import { SiteHeader, SiteSidebarHeader } from "@/components/site-header";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   getCategories,
@@ -68,10 +68,10 @@ export default function ComponentsLayout({
       className={cn(
         createPreviewSans.variable,
         createPreviewMono.variable,
-        "overscroll-behavior- relative flex min-h-svh flex-col bg-site-muted/60 font-site-sans dark:bg-site-background [&_header]:bg-[color-mix(in_oklab,var(--site-muted)_60%,var(--site-background))] dark:[&_header]:bg-site-background"
+        "overscroll-behavior- relative flex min-h-svh flex-col lg:[--header-height:0px] bg-site-muted/60 font-site-sans dark:bg-site-background [&_header]:bg-[color-mix(in_oklab,var(--site-muted)_60%,var(--site-background))] dark:[&_header]:bg-site-background"
       )}
     >
-      <SiteHeader />
+      <SiteHeader framed />
       <main className="flex min-h-0 flex-1 flex-col">
         <Suspense fallback={<ComponentsLayoutFallback />}>
           <LocksProvider>
@@ -79,6 +79,7 @@ export default function ComponentsLayout({
               <ComponentsProvider
                 catalogItems={catalogItems}
                 categoryCounts={categoryCounts}
+                header={<SiteSidebarHeader />}
                 totalCount={totalCount}
               >
                 {children}

@@ -53,9 +53,12 @@ function DocsUpdateIndicator({ path }: { path: string }) {
 }
 
 export function DocsSidebar({
+  header,
   tree,
   ...props
 }: React.ComponentProps<typeof Sidebar> & {
+  /** At the top of the sidebar, above what scrolls. */
+  header?: React.ReactNode;
   tree: ReturnType<typeof source.getPageTree>;
 }) {
   const pathname = usePathname();
@@ -66,6 +69,7 @@ export function DocsSidebar({
       className="docs-sidebar top-(--header-height) z-30 h-[calc(100svh-var(--header-height))] bg-transparent group-data-[side=left]:border-r-0 **:data-[slot=sidebar-inner]:bg-transparent"
       {...props}
     >
+      {header}
       <SidebarContent className="no-scrollbar scroll-fade-y overflow-x-hidden px-2 pb-12">
         <div className="h-(--top-spacing) shrink-0" />
         {tree.children.map((item) => {

@@ -7,6 +7,7 @@ import {
   SiteHeaderMobileNav,
   SiteHeaderModeSwitcher,
 } from "@/components/site-header-client";
+import { SiteNavTabs } from "@/components/site-nav-tabs";
 import { Separator } from "@/components/ui/separator";
 import { siteConfig } from "@/lib/config";
 import { showMcpDocs } from "@/lib/flags";
@@ -81,7 +82,65 @@ function buildCommandMenuGroups(nodes: PageTreeNode[]) {
   });
 }
 
-export function SiteHeader({ sticky = true }: { sticky?: boolean } = {}) {
+function SiteLogo() {
+  return (
+    <Button
+      nativeButton={false}
+      render={
+        <Link aria-label="Home" className="flex items-center" href="/">
+          <div
+            aria-hidden
+            className="flex shrink-0 select-none items-center justify-center gap-1 text-muted-foreground"
+          >
+            <Icons.audioUi className="pointer-events-none size-5 text-foreground" />
+            <p className="mt-[-2.3px] text-balance font-medium font-serif text-xl leading-snug">
+              {siteConfig.name}
+            </p>
+          </div>
+        </Link>
+      }
+      variant="ghost"
+    />
+  );
+}
+
+/**
+ * From `lg`, the framed layouts have no header: this is what it held, at the
+ * top of the navigation sidebar: the logo, the sections as tabs, the search,
+ * GitHub and the theme.
+ */
+export function SiteSidebarHeader() {
+  const pageTree = source.getPageTree();
+  const componentCategories = getCategories();
+  const commandGroups = buildCommandMenuGroups(pageTree.children);
+
+  return (
+    <div className="flex shrink-0 flex-col gap-2 p-2 font-site-sans">
+      <div className="flex items-center justify-between gap-2">
+        <SiteLogo />
+        <SiteHeaderModeSwitcher />
+      </div>
+      <SiteNavTabs items={siteConfig.navItems} />
+      <div className="flex items-center gap-2">
+        <SiteHeaderCommandMenu
+          commandGroups={commandGroups}
+          componentCategories={componentCategories}
+          navItems={siteConfig.navItems}
+        />
+        <GitHubLink />
+      </div>
+    </div>
+  );
+}
+
+export function SiteHeader({
+  framed = false,
+  sticky = true,
+}: {
+  /** The page has a framed layout: from `lg` its navigation sidebar holds the header's content, so there is no header. */
+  framed?: boolean;
+  sticky?: boolean;
+} = {}) {
   const pageTree = source.getPageTree();
   const componentCategories = getCategories();
   const commandGroups = buildCommandMenuGroups(pageTree.children);
@@ -90,6 +149,7 @@ export function SiteHeader({ sticky = true }: { sticky?: boolean } = {}) {
     <header
       className={cn(
         "w-full overscroll-none bg-site-background font-site-sans",
+        framed && "lg:hidden",
         sticky && "sticky top-0 z-50"
       )}
     >

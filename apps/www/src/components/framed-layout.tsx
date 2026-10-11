@@ -60,7 +60,7 @@ function InsetPane({ children }: { children: React.ReactNode }) {
   return (
     <div
       className={cn(
-        "min-h-0 min-w-0 flex-1 p-2 pt-0",
+        "min-h-0 min-w-0 flex-1 p-2 pt-0 lg:pt-2",
         state === "expanded" && "lg:pl-0"
       )}
     >
