@@ -77,6 +77,18 @@ export function MobileNav({
     chosen ?? (isActive(pathname, "/components") ? "components" : "docs");
   const close = React.useCallback(() => setOpen(false), []);
 
+  // The menu is for below `lg`: from there up the sidebar is the navigation.
+  React.useEffect(() => {
+    const query = window.matchMedia("(min-width: 1024px)");
+    const onChange = () => {
+      if (query.matches) {
+        setOpen(false);
+      }
+    };
+    query.addEventListener("change", onChange);
+    return () => query.removeEventListener("change", onChange);
+  }, []);
+
   const categoryLinks = React.useMemo(
     () =>
       (componentCategories ?? [])
@@ -122,13 +134,13 @@ export function MobileNav({
       />
       <PopoverContent
         align="start"
-        className="site-menu cn-menu-target scroll-fade-y no-scrollbar h-(--available-height) w-(--available-width) overflow-y-auto overscroll-contain rounded-(--frame-radius) p-2 pt-0"
+        className="site-menu cn-menu-target flex lg:hidden h-(--available-height) w-(--available-width) flex-col gap-2 overflow-hidden rounded-(--frame-radius) p-2"
         side="bottom"
         sideOffset={16}
       >
-        <div className="flex flex-col gap-2">
+        <>
           <Tabs
-            className="sticky top-0 z-10 -mx-2 bg-site-popover px-2 pt-2 pb-1"
+            className="shrink-0"
             onValueChange={(value) => setChosen(value as Section)}
             value={section}
           >
@@ -154,7 +166,10 @@ export function MobileNav({
               </TabsTrigger>
             </TabsList>
           </Tabs>
-          <nav aria-label={section} className="flex flex-col gap-0.5">
+          <nav
+            aria-label={section}
+            className="scroll-fade-y no-scrollbar -mx-2 flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto overscroll-contain px-2"
+          >
             <NavRow active={pathname === "/"} href="/" onNavigate={close}>
               Home
             </NavRow>
@@ -238,7 +253,7 @@ export function MobileNav({
               })
             )}
           </nav>
-        </div>
+        </>
       </PopoverContent>
     </Popover>
   );
