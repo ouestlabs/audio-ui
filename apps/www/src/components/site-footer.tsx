@@ -2,7 +2,6 @@ import { RssSimpleIcon } from "@phosphor-icons/react/ssr";
 import Link from "next/link";
 import { FrameFooter } from "@/components/custom/frame";
 import { Separator } from "@/components/ui/separator";
-import { siteConfig } from "@/lib/config";
 
 function FooterLinks() {
   return (
@@ -39,16 +38,6 @@ function FooterLinks() {
         <RssSimpleIcon className="size-3" />
         RSS
       </Link>
-      <Separator orientation="vertical" />
-
-      <a
-        className="font-medium text-xs hover:underline"
-        href={siteConfig.links.twitter}
-        rel="noopener noreferrer"
-        target="_blank"
-      >
-        X
-      </a>
     </div>
   );
 }
