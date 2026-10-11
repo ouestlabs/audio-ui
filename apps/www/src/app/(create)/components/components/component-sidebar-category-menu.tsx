@@ -55,7 +55,7 @@ export const ComponentSidebarCategoryMenu = React.memo(
             prefetch={false}
           >
             <span>All components</span>
-            <span className="text-site-muted-foreground/80 text-xs">
+            <span className="text-site-muted-foreground text-xs">
               {totalCount}
             </span>
           </Link>
@@ -76,7 +76,7 @@ export const ComponentSidebarCategoryMenu = React.memo(
                 <span>{formatLabel(category)}</span>
                 <span className="flex shrink-0 items-center gap-2">
                   <ComponentUpdateIndicator category={category} />
-                  <span className="text-site-muted-foreground/80 text-xs">
+                  <span className="text-site-muted-foreground text-xs">
                     {categoryCounts[category] || 0}
                   </span>
                 </span>

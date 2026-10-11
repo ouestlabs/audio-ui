@@ -91,7 +91,8 @@
   --site-secondary: var(--secondary);
   --site-secondary-foreground: var(--secondary-foreground);
   --site-muted: var(--muted);
-  --site-muted-foreground: var(--muted-foreground);
+  /* A touch toward the text color: small muted text on a muted ground stays above 4.5:1. */
+  --site-muted-foreground: color-mix(in oklab, var(--muted-foreground) 82%, var(--foreground));
   --site-accent: var(--accent);
   --site-accent-foreground: var(--accent-foreground);
   --site-destructive: var(--destructive);

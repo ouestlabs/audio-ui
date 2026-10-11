@@ -287,7 +287,7 @@ function MobileDocsNav({
                             key={section.title ?? "untitled"}
                           >
                             {section.title ? (
-                              <p className="text-site-muted-foreground/70 text-xs">
+                              <p className="text-site-muted-foreground text-xs">
                                 {section.title}
                               </p>
                             ) : null}

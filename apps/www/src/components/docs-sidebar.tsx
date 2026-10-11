@@ -90,7 +90,7 @@ export function DocsSidebar({
                       key={section.title ?? "untitled"}
                     >
                       {section.title ? (
-                        <p className="px-2 pb-1 text-site-muted-foreground/70 text-xs">
+                        <p className="px-2 pb-1 text-site-muted-foreground text-xs">
                           {section.title}
                         </p>
                       ) : null}

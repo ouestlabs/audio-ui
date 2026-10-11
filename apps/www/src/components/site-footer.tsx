@@ -30,7 +30,7 @@ function FooterLinks() {
       <Separator orientation="vertical" />
 
       <Link
-        className="ont-medium inline-flex items-center gap-1 text-orange-600 text-xs hover:text-orange-700 hover:underline dark:text-orange-500 dark:hover:text-orange-400"
+        className="ont-medium inline-flex items-center gap-1 text-orange-700 text-xs hover:text-orange-800 hover:underline dark:text-orange-400 dark:hover:text-orange-300"
         href="/rss.xml"
         rel="noopener noreferrer"
         target="_blank"
