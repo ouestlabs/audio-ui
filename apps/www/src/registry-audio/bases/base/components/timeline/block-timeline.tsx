@@ -325,7 +325,9 @@ const SHORTCUTS: { action: string; keys: string[] }[] = [
   { action: "Split at the cursor", keys: ["S"] },
   { action: "Split at the cursor", keys: ["Cmd/Ctrl", "E"] },
   { action: "Duplicate the clip", keys: ["Cmd/Ctrl", "D"] },
-  { action: "Remove the clip", keys: ["Delete"] },
+  { action: "Remove the clip, or the tracks picked", keys: ["Delete"] },
+  { action: "Add a track to the tracks picked", keys: ["Shift", "Click"] },
+  { action: "Duplicate the tracks picked", keys: ["Cmd/Ctrl", "D"] },
   { action: "Add a locator at the cursor", keys: ["M"] },
   { action: "Loop the selection", keys: ["Cmd/Ctrl", "L"] },
   { action: "Rename a locator", keys: ["Enter"] },
@@ -402,6 +404,18 @@ function LocatorButton({
     [at, onRename]
   );
   const handleBlur = useCallback(() => setEditing(false), []);
+  const handleRemove = useCallback(() => onRemove(at), [at, onRemove]);
+  // The menu hands focus back as it closes, which would end the edit: open the field after it.
+  const renameLater = useRef(false);
+  const renameWhenClosed = useCallback(() => {
+    renameLater.current = true;
+  }, []);
+  const handleMenuClosed = useCallback((open: boolean) => {
+    if (!open && renameLater.current) {
+      renameLater.current = false;
+      setEditing(true);
+    }
+  }, []);
 
   if (editing) {
     return (
@@ -417,16 +431,29 @@ function LocatorButton({
     );
   }
   return (
-    <button
-      aria-label={`Locator ${name}`}
-      className="pointer-events-auto flex h-full items-center whitespace-nowrap border-primary border-s-2 ps-1 pe-2 text-primary text-xs outline-none hover:bg-primary/10 focus-visible:ring-2 focus-visible:ring-ring"
-      onClick={handleClick}
-      onDoubleClick={startEditing}
-      onKeyDown={handleKeyDown}
-      type="button"
-    >
-      {name}
-    </button>
+    <ContextMenu onOpenChangeComplete={handleMenuClosed}>
+      <ContextMenuTrigger
+        render={
+          <button
+            aria-label={`Locator ${name}`}
+            className="pointer-events-auto flex h-full items-center whitespace-nowrap border-primary border-s-2 ps-1 pe-2 text-primary text-xs outline-none hover:bg-primary/10 focus-visible:ring-2 focus-visible:ring-ring"
+            onClick={handleClick}
+            onDoubleClick={startEditing}
+            onKeyDown={handleKeyDown}
+            type="button"
+          />
+        }
+      >
+        {name}
+      </ContextMenuTrigger>
+      <ContextMenuContent className="w-auto min-w-32">
+        <ContextMenuItem onClick={renameWhenClosed}>Rename</ContextMenuItem>
+        <ContextMenuSeparator />
+        <ContextMenuItem onClick={handleRemove} variant="destructive">
+          Delete
+        </ContextMenuItem>
+      </ContextMenuContent>
+    </ContextMenu>
   );
 }
 
@@ -725,7 +752,7 @@ export default function BlockTimeline() {
     selectClip,
     selectClips,
     selectedIds,
-    selectedTrack,
+    selectedTracks,
     selection,
     selectTrack,
     splitAtCursor,
@@ -742,6 +769,11 @@ export default function BlockTimeline() {
   const handleAddTrack = useCallback(() => addTrack(), [addTrack]);
   // Multi-select: a press on a clip adds it to the selection, and a drag on bare lane draws a rectangle. For touch, which has no Shift.
   const [multi, setMulti] = useState(false);
+  // A touch screen has no Shift: in multi-select mode every press on a header adds to the tracks picked.
+  const pickTrack = useCallback(
+    (id: string, additive: boolean) => selectTrack(id, additive || multi),
+    [multi, selectTrack]
+  );
   const marquee = useMarquee(selectedIds, selectClips, multi);
   // A clip of a selection being dragged up or down, and how far: the rest of the selection follows it.
   const [lifting, setLifting] = useState<{ id: string; offset: number } | null>(
@@ -830,7 +862,8 @@ export default function BlockTimeline() {
   /** Puts the loop around the selected clip, or around the clips of the selected track. */
   const loopSelection = useCallback(() => {
     const chosen = clips.filter(
-      (clip) => selectedIds.includes(clip.id) || clip.track === selectedTrack
+      (clip) =>
+        selectedIds.includes(clip.id) || selectedTracks.includes(clip.track)
     );
     if (chosen.length === 0) {
       return;
@@ -840,7 +873,7 @@ export default function BlockTimeline() {
       Math.max(...chosen.map((clip) => clip.value.start + clip.value.length)),
     ]);
     setLooping(true);
-  }, [clips, selectedIds, selectedTrack]);
+  }, [clips, selectedIds, selectedTracks]);
 
   /** M adds a locator, Alt + arrows jump between them; returns whether the key was one of these. */
   const handleLocatorKey = useCallback(
@@ -907,9 +940,37 @@ export default function BlockTimeline() {
         duplicateAndShow();
         return true;
       }
+      if (key === "d" && selectedTracks.length > 0) {
+        event.preventDefault();
+        for (const id of selectedTracks) {
+          duplicateTrack(id);
+        }
+        return true;
+      }
       return false;
     },
-    [duplicateAndShow, redo, selectAll, selectedIds, undo]
+    [
+      duplicateAndShow,
+      duplicateTrack,
+      redo,
+      selectAll,
+      selectedIds,
+      selectedTracks,
+      undo,
+    ]
+  );
+  /** Delete takes away the tracks picked by their headers (a clip handles its own Delete); returns whether the key was it. */
+  const handleTrackKey = useCallback(
+    (event: KeyboardEvent<HTMLDivElement>) => {
+      const del = event.key === "Delete" || event.key === "Backspace";
+      if (!(del && selectedTracks.length > 0 && selectedIds.length === 0)) {
+        return false;
+      }
+      event.preventDefault();
+      removeTrack(selectedTracks[0] ?? "");
+      return true;
+    },
+    [removeTrack, selectedIds.length, selectedTracks]
   );
   // S, or Cmd/Ctrl + E, splits at the cursor, Cmd/Ctrl + D duplicates the clip; Escape drops the selection.
   const handleKeyDown = useCallback(
@@ -919,6 +980,9 @@ export default function BlockTimeline() {
         return;
       }
       const key = event.key.toLowerCase();
+      if (handleTrackKey(event)) {
+        return;
+      }
       if (handleLocatorKey(event)) {
         return;
       }
@@ -940,6 +1004,7 @@ export default function BlockTimeline() {
     },
     [
       clearSelection,
+      handleTrackKey,
       handleLocatorKey,
       handleSelectionKey,
       loopSelection,
@@ -1212,14 +1277,14 @@ export default function BlockTimeline() {
                     onMix={changeMix}
                     onRemove={removeTrack}
                     onRename={renameTrack}
-                    onSelect={selectTrack}
+                    onSelect={pickTrack}
                     onToggleFold={toggleFold}
-                    selected={track.id === selectedTrack}
+                    selected={selectedTracks.includes(track.id)}
                     trackId={track.id}
                   />
                 }
                 onResize={resizeTrack}
-                selected={track.id === selectedTrack}
+                selected={selectedTracks.includes(track.id)}
                 trackId={track.id}
               >
                 <TimelineLane
@@ -1230,7 +1295,7 @@ export default function BlockTimeline() {
                     heights[track.id] !== undefined &&
                       heights[track.id] < COMPACT_TRACK_HEIGHT &&
                       "**:data-clip-id:inset-y-0.5",
-                    track.id === selectedTrack && "bg-muted/40",
+                    selectedTracks.includes(track.id) && "bg-muted/40",
                     // A silent track keeps its clips on the page, drained.
                     (mixOf(track).muted || (anySolo && !mixOf(track).soloed)) &&
                       "**:data-clip-id:opacity-40"

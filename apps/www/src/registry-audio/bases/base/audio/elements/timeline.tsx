@@ -404,7 +404,8 @@ function TimelineTrackControls({
   onRename?: (trackId: string, name: string) => void;
   /** Gives the menu a "Delete track" entry. Leave it out for tracks that cannot be removed. */
   onRemove?: (trackId: string) => void;
-  onSelect: (trackId: string) => void;
+  /** `additive` when Shift, Cmd or Ctrl is held: add the track to the tracks picked. */
+  onSelect: (trackId: string, additive: boolean) => void;
   selected: boolean;
   trackId: string;
 }) {
@@ -479,7 +480,11 @@ function TimelineTrackControls({
     () => onToggleFold?.(trackId),
     [onToggleFold, trackId]
   );
-  const handleClick = useCallback(() => onSelect(trackId), [onSelect, trackId]);
+  const handleClick = useCallback(
+    (event: MouseEvent<HTMLElement>) =>
+      onSelect(trackId, event.shiftKey || event.metaKey || event.ctrlKey),
+    [onSelect, trackId]
+  );
   return (
     <ContextMenu onOpenChangeComplete={handleMenuClosed}>
       <ContextMenuTrigger

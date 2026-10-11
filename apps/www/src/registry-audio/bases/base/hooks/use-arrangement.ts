@@ -41,7 +41,8 @@ interface Doc {
 /** What is selected: some clips, or one whole track by its header. */
 export interface ArrangementSelection {
   clips: string[];
-  track: string | null;
+  /** The tracks picked by their headers. */
+  tracks: string[];
 }
 
 const NONE: string[] = [];
@@ -88,7 +89,9 @@ export function useArrangement({
 
   const [selection, setSelection] = useState<ArrangementSelection | null>(null);
   const selectedIds = selection?.clips ?? NONE;
-  const selectedTrack = selection?.track ?? null;
+  const selectedTracks = selection?.tracks ?? NONE;
+  const selectedTracksRef = useRef(selectedTracks);
+  selectedTracksRef.current = selectedTracks;
   const selectedRef = useRef(selectedIds);
   selectedRef.current = selectedIds;
 
@@ -170,7 +173,7 @@ export function useArrangement({
   // --- Selection
 
   const selectClips = useCallback(
-    (chosen: string[]) => setSelection({ clips: chosen, track: null }),
+    (chosen: string[]) => setSelection({ clips: chosen, tracks: [] }),
     []
   );
   // A press selects the clip; added to the selection, or taken from it, when `additive`.
@@ -183,28 +186,41 @@ export function useArrangement({
           clips: chosen.includes(id)
             ? chosen.filter((other) => other !== id)
             : [...chosen, id],
-          track: null,
+          tracks: [],
         };
       }
-      return chosen.includes(id) ? current : { clips: [id], track: null };
+      return chosen.includes(id) ? current : { clips: [id], tracks: [] };
     });
   }, []);
-  const selectTrack = useCallback(
-    (id: string) => setSelection({ clips: [], track: id }),
-    []
-  );
+  /** Picks a track by its header; `additive` adds it to the tracks picked, or takes it from them. */
+  const selectTrack = useCallback((id: string, additive = false) => {
+    setSelection((current) => {
+      const picked = current?.tracks ?? [];
+      if (!additive) {
+        return picked.length === 1 && picked[0] === id
+          ? current
+          : { clips: [], tracks: [id] };
+      }
+      return {
+        clips: [],
+        tracks: picked.includes(id)
+          ? picked.filter((other) => other !== id)
+          : [...picked, id],
+      };
+    });
+  }, []);
   const selectAll = useCallback(
     () =>
       setSelection({
         clips: docRef.current.clips.map((clip) => clip.id),
-        track: null,
+        tracks: [],
       }),
     []
   );
   const clearSelection = useCallback(() => setSelection(null), []);
   /** Lets go of the clips; a track picked by its header stays picked. */
   const releaseClips = useCallback(
-    () => setSelection((current) => (current?.track ? current : null)),
+    () => setSelection((current) => (current?.tracks.length ? current : null)),
     []
   );
 
@@ -351,9 +367,10 @@ export function useArrangement({
     () =>
       splitWhere(
         (clip) =>
-          selectedRef.current.includes(clip.id) || clip.track === selectedTrack
+          selectedRef.current.includes(clip.id) ||
+          selectedTracksRef.current.includes(clip.track)
       ),
-    [selectedTrack, splitWhere]
+    [splitWhere]
   );
 
   const renameClip = useCallback(
@@ -396,7 +413,7 @@ export function useArrangement({
           current.clips
         ),
       }));
-      setSelection({ clips: copies.map((copy) => copy.id), track: null });
+      setSelection({ clips: copies.map((copy) => copy.id), tracks: [] });
       return copies;
     },
     [duration, edit]
@@ -512,9 +529,13 @@ export function useArrangement({
   /** Removes a track with the clips on it; the last one can go too. */
   const removeTrack = useCallback(
     (id: string) => {
+      // A track among the tracks picked takes the others with it.
+      const gone = selectedTracksRef.current.includes(id)
+        ? selectedTracksRef.current
+        : [id];
       edit((current) => ({
-        clips: current.clips.filter((clip) => clip.track !== id),
-        tracks: current.tracks.filter((track) => track.id !== id),
+        clips: current.clips.filter((clip) => !gone.includes(clip.track)),
+        tracks: current.tracks.filter((track) => !gone.includes(track.id)),
       }));
       setSelection(null);
     },
@@ -596,7 +617,7 @@ export function useArrangement({
     selectClip,
     selectClips,
     selectedIds,
-    selectedTrack,
+    selectedTracks,
     selection,
     selectTrack,
     splitAtCursor,
