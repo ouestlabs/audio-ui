@@ -262,10 +262,3 @@
     transition-duration: 0.01ms !important;
   }
 }
-
-/* The light code theme's red keywords sit a hair under 4.5:1 on the code ground: a deeper red. */
-:root:not(.dark)
-  [data-rehype-pretty-code-figure]
-  span[style*="color:#D73A49" i] {
-  color: #b31d28 !important;
-}

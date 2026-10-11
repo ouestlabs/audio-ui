@@ -1,3 +1,6 @@
+import { createThemeCss } from "@tanstack/highlight/theme";
+import { githubDarkTheme } from "@tanstack/highlight/themes/github-dark";
+import { githubLightTheme } from "@tanstack/highlight/themes/github-light";
 import { Provider as JotaiProvider } from "jotai";
 import type { Metadata } from "next";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
@@ -104,6 +107,16 @@ export default function RootLayout({
         <script
           // biome-ignore lint/security/noDangerouslySetInnerHtml: puts the saved design system back before the first paint
           dangerouslySetInnerHTML={{ __html: DESIGN_SYSTEM_BOOT_SCRIPT }}
+        />
+        <style
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: the code theme's CSS, made by TanStack Highlight
+          dangerouslySetInnerHTML={{
+            __html: createThemeCss({
+              dark: githubDarkTheme,
+              darkSelector: ".dark",
+              light: githubLightTheme,
+            }),
+          }}
         />
         <meta content={META_THEME_COLORS.light} name="theme-color" />
       </head>

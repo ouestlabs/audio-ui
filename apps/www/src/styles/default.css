@@ -401,36 +401,29 @@
     color: var(--site-muted-foreground);
   }
 
-  [data-line-numbers] {
+  /* The highlighted code: one line per row, numbered from the left when asked, in the colors of `highlight.css`. */
+  pre.th-code {
+    min-width: 0;
+    margin: 0;
+    padding: calc(var(--spacing) * 3.5) calc(var(--spacing) * 4);
+    overflow-x: auto;
+    color: var(--site-code-foreground);
+    outline: none;
+    background: transparent;
+    scrollbar-width: none;
+  }
+
+  .th-code code {
     display: grid;
     min-width: 100%;
-    white-space: pre;
-    border: 0;
-    background: transparent;
     padding: 0;
-    counter-reset: line;
+    white-space: pre;
+    background: transparent;
+    border: 0;
     box-decoration-break: clone;
   }
 
-  [data-line-numbers] [data-line]::before {
-    position: sticky;
-    left: 0;
-    display: inline-block;
-    width: calc(var(--spacing) * 16);
-    padding-right: calc(var(--spacing) * 6);
-    font-size: var(--text-sm);
-    color: var(--site-code-number);
-    text-align: right;
-    content: counter(line);
-    counter-increment: line;
-    background-color: var(--site-code);
-  }
-
-  [data-line-numbers] [data-highlighted-line][data-line]::before {
-    background-color: var(--site-code-highlight);
-  }
-
-  [data-line] {
+  .th-line {
     display: inline-block;
     width: max-content;
     min-width: 100%;
@@ -439,42 +432,21 @@
     padding-bottom: calc(var(--spacing) * 0.5);
   }
 
-  [data-line] span {
-    color: var(--shiki-light);
-
-    @variant dark {
-      color: var(--shiki-dark) !important;
-    }
+  .th-code--line-numbers .th-line::before {
+    position: sticky;
+    left: 0;
+    display: inline-block;
+    width: calc(var(--spacing) * 16);
+    padding-right: calc(var(--spacing) * 6);
+    font-size: var(--text-sm);
+    color: var(--site-code-number);
+    text-align: right;
+    content: attr(data-line);
+    background-color: var(--site-code);
   }
 
-  [data-highlighted-line],
-  [data-highlighted-chars] {
-    position: relative;
-    background-color: var(--site-code-highlight);
-  }
-
-  [data-highlighted-line] {
-    &:after {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 2px;
-      height: 100%;
-      content: "";
-      background-color: color-mix(
-        in oklab,
-        var(--site-muted-foreground) 50%,
-        transparent
-      );
-    }
-  }
-
-  [data-highlighted-chars] {
-    padding-block: 0.1rem;
-    padding-inline: 0.3rem;
-    font-family: var(--site-font-mono);
-    font-size: 0.8rem;
-    border-radius: var(--site-radius-sm);
+  .th-code--line-numbers {
+    padding-inline: 0;
   }
 }
 
