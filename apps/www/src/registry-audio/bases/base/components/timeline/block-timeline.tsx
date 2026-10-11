@@ -13,6 +13,7 @@ import {
   useCallback,
   useEffect,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -43,6 +44,7 @@ import {
   TimelineRuler,
   TimelineViewport,
 } from "@/registry-audio/bases/base/audio/elements/timeline";
+import { Transport } from "@/registry-audio/bases/base/audio/elements/transport";
 import {
   barLabelInterval,
   DEFAULT_TEMPO,
@@ -54,8 +56,8 @@ import {
 } from "@/registry-audio/bases/base/lib/musical-time";
 
 const BARS = 32;
+/** The arrangement is laid out at the first tempo; a tempo change keeps its musical positions. */
 const BAR = secondsPerBar(DEFAULT_TEMPO);
-const DURATION = BARS * BAR;
 /** The width of a track header, which the lanes start after. */
 const LEAD_PX = 112;
 const MAX_ZOOM = 240;
@@ -117,9 +119,16 @@ const CLIPS: Arranged[] = [
 ];
 
 /** A transport clock as a source: the playhead follows it without re-rendering React. */
-function usePlaybackClock() {
+function usePlaybackClock(limits: {
+  duration: number;
+  loop: Span;
+  looping: boolean;
+}) {
   const [clock] = useState(() => createSource(0));
   const [playing, setPlaying] = useState(false);
+  // Read each frame, so a tempo or a loop edit does not restart the clock.
+  const limitsRef = useRef(limits);
+  limitsRef.current = limits;
 
   useEffect(() => {
     if (!playing) {
@@ -128,7 +137,13 @@ function usePlaybackClock() {
     let frame = 0;
     let last = performance.now();
     const tick = (now: number) => {
-      clock.set((clock.getSnapshot() + (now - last) / 1000) % DURATION);
+      const { duration, loop, looping } = limitsRef.current;
+      const before = clock.getSnapshot();
+      let next = before + (now - last) / 1000;
+      if (looping && before < loop[1] && next >= loop[1]) {
+        next = loop[0] + (next - loop[1]);
+      }
+      clock.set(next % duration);
       last = now;
       frame = requestAnimationFrame(tick);
     };
@@ -139,8 +154,20 @@ function usePlaybackClock() {
   return { clock, playing, setPlaying };
 }
 
-const describePosition = (seconds: number) =>
-  describeBarsBeats(seconds, DEFAULT_TEMPO);
+/** A clip's positions and lengths, all in seconds, scaled when the tempo changes. */
+function scaleValue(
+  value: TimelinePrimitive.Clip.Value,
+  ratio: number
+): TimelinePrimitive.Clip.Value {
+  return {
+    ...value,
+    fadeIn: value.fadeIn * ratio,
+    fadeOut: value.fadeOut * ratio,
+    length: value.length * ratio,
+    offset: value.offset * ratio,
+    start: value.start * ratio,
+  };
+}
 
 /** A row of the arrangement: the track's header stuck to the left edge as it scrolls, its lane beside it. */
 function Row({
@@ -287,6 +314,7 @@ function TrackHeader({
 function ClipView({
   clip,
   onChange,
+  describe,
   onCommit,
   onRemove,
   onSelect,
@@ -294,6 +322,7 @@ function ClipView({
   trackName,
 }: {
   clip: Arranged;
+  describe: (seconds: number) => string;
   onChange: (
     id: string,
     value: TimelinePrimitive.Clip.Value,
@@ -334,7 +363,7 @@ function ClipView({
     <TimelineClip
       aria-label={`${trackName}, ${clip.name}`}
       className="inset-y-1.5"
-      getAriaValueText={describePosition}
+      getAriaValueText={describe}
       onRemove={handleRemove}
       onSelectedChange={handleSelected}
       onValueChange={handleChange}
@@ -362,7 +391,22 @@ function ClipView({
  * and zooms. Made to be opened at full size, where the tracks take the screen.
  */
 export default function BlockTimeline() {
-  const { clock, playing, setPlaying } = usePlaybackClock();
+  const [bpm, setBpm] = useState(DEFAULT_TEMPO.bpm);
+  const tempo = useMemo(() => ({ ...DEFAULT_TEMPO, bpm }), [bpm]);
+  const bar = secondsPerBar(tempo);
+  const duration = BARS * bar;
+  const describe = useCallback(
+    (seconds: number) => describeBarsBeats(seconds, tempo),
+    [tempo]
+  );
+  const [loop, setLoop] = useState<Span>([bars(8), bars(16)]);
+  const [looping, setLooping] = useState(true);
+  const [recording, setRecording] = useState(false);
+  const { clock, playing, setPlaying } = usePlaybackClock({
+    duration,
+    loop,
+    looping,
+  });
   // The timeline fits the width it is given until it is zoomed.
   const viewportRef = useRef<HTMLDivElement>(null);
   const [fitPx, setFitPx] = useState(0);
@@ -372,15 +416,14 @@ export default function BlockTimeline() {
       return;
     }
     const measure = () =>
-      setFitPx(Math.max(0, (element.clientWidth - LEAD_PX) / DURATION));
+      setFitPx(Math.max(0, (element.clientWidth - LEAD_PX) / duration));
     measure();
     const observer = new ResizeObserver(measure);
     observer.observe(element);
     return () => observer.disconnect();
-  }, []);
+  }, [duration]);
   const [zoomed, setZoom] = useState<number | null>(null);
   const zoom = Math.max(zoomed ?? fitPx, fitPx) || 8;
-  const [loop, setLoop] = useState<Span>([bars(8), bars(16)]);
   const [clips, setClips] = useState(CLIPS);
   // One thing is selected at a time: a clip, or a whole track by its header.
   const [selection, setSelection] = useState<{
@@ -406,9 +449,26 @@ export default function BlockTimeline() {
     []
   );
 
-  const togglePlaying = useCallback(
-    () => setPlaying((on) => !on),
-    [setPlaying]
+  const play = useCallback(() => setPlaying(true), [setPlaying]);
+  const stop = useCallback(() => setPlaying(false), [setPlaying]);
+  const returnToStart = useCallback(() => clock.set(0), [clock]);
+  // A tempo change keeps the musical positions: everything is rescaled to the new bar.
+  const changeBpm = useCallback(
+    (next: number) => {
+      const ratio = bpm / next;
+      setClips((all) =>
+        all.map((clip) => ({
+          ...clip,
+          sourceLength: clip.sourceLength * ratio,
+          value: scaleValue(clip.value, ratio),
+        }))
+      );
+      setLoop(([start, end]) => [start * ratio, end * ratio]);
+      setZoom((current) => (current === null ? null : current / ratio));
+      clock.set(clock.getSnapshot() * ratio);
+      setBpm(next);
+    },
+    [bpm, clock]
   );
   const zoomOut = useCallback(
     () =>
@@ -490,7 +550,7 @@ export default function BlockTimeline() {
     setClips((all) =>
       all.flatMap((clip) => {
         const targeted = clip.id === selectedId || clip.track === selectedTrack;
-        const cut = targeted ? splitClip(clip.value, at, BAR / 4) : null;
+        const cut = targeted ? splitClip(clip.value, at, bar / 4) : null;
         if (!cut) {
           return [clip];
         }
@@ -501,7 +561,7 @@ export default function BlockTimeline() {
         ];
       })
     );
-  }, [clock, selectedId, selectedTrack]);
+  }, [bar, clock, selectedId, selectedTrack]);
   // S, or Cmd/Ctrl + E, splits at the cursor, Cmd/Ctrl + D duplicates the clip; Escape drops the selection.
   const handleKeyDown = useCallback(
     (event: KeyboardEvent<HTMLDivElement>) => {
@@ -521,7 +581,7 @@ export default function BlockTimeline() {
             ...clip,
             id: copyId,
             value: duplicateClip(clip.value, {
-              duration: DURATION,
+              duration,
               sourceLength: clip.sourceLength,
             }),
           },
@@ -537,14 +597,14 @@ export default function BlockTimeline() {
         splitAtCursor();
       }
     },
-    [selectedId, selection, splitAtCursor]
+    [duration, selectedId, selection, splitAtCursor]
   );
 
   // The grid the lanes draw is the grid everything snaps to.
-  const snapStep = gridInterval(division, zoom, DEFAULT_TEMPO);
-  const labelEvery = barLabelInterval(zoom, DEFAULT_TEMPO);
+  const snapStep = gridInterval(division, zoom, tempo);
+  const labelEvery = barLabelInterval(zoom, tempo);
   const labels = Array.from(
-    { length: Math.floor(DURATION / labelEvery) },
+    { length: Math.floor(duration / labelEvery) },
     (_, index) => index * labelEvery
   );
 
@@ -556,75 +616,78 @@ export default function BlockTimeline() {
       ref={panelRef}
       tabIndex={-1}
     >
-      <div className="flex items-center justify-between gap-2">
-        <Button
-          aria-label={playing ? "Pause" : "Play"}
-          onClick={togglePlaying}
-          size="icon"
-          variant="outline"
-        >
-          <IconPlaceholder
-            hugeicons={playing ? "PauseIcon" : "PlayIcon"}
-            lucide={playing ? "PauseIcon" : "PlayIcon"}
-            phosphor={playing ? "PauseIcon" : "PlayIcon"}
-            remixicon={playing ? "RiPauseLine" : "RiPlayLine"}
-            tabler={playing ? "IconPlayerPause" : "IconPlayerPlay"}
-          />
-        </Button>
-        <Select
-          items={DIVISIONS}
-          onValueChange={handleDivision}
-          value={division}
-        >
-          <SelectTrigger aria-label="Grid" className="w-32" size="sm">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              {DIVISIONS.map((item) => (
-                <SelectItem key={item.value} value={item.value}>
-                  {item.label}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
-        <ButtonGroup>
-          <Button
-            aria-label="Zoom out"
-            disabled={zoomed === null}
-            onClick={zoomOut}
-            size="icon"
-            variant="outline"
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <Transport
+          bpm={bpm}
+          className="w-auto"
+          looping={looping}
+          onBpmChange={changeBpm}
+          onLoopingChange={setLooping}
+          onPlay={play}
+          onRecordingChange={setRecording}
+          onReturn={returnToStart}
+          onStop={stop}
+          playing={playing}
+          recording={recording}
+          source={clock}
+          tempo={DEFAULT_TEMPO}
+        />
+        <div className="flex items-center gap-2">
+          <Select
+            items={DIVISIONS}
+            onValueChange={handleDivision}
+            value={division}
           >
-            <IconPlaceholder
-              hugeicons="ZoomOutAreaIcon"
-              lucide="ZoomOutIcon"
-              phosphor="MagnifyingGlassMinusIcon"
-              remixicon="RiZoomOutLine"
-              tabler="IconZoomOut"
-            />
-          </Button>
-          <Button
-            aria-label="Zoom in"
-            disabled={zoom >= MAX_ZOOM}
-            onClick={zoomIn}
-            size="icon"
-            variant="outline"
-          >
-            <IconPlaceholder
-              hugeicons="ZoomInAreaIcon"
-              lucide="ZoomInIcon"
-              phosphor="MagnifyingGlassPlusIcon"
-              remixicon="RiZoomInLine"
-              tabler="IconZoomIn"
-            />
-          </Button>
-        </ButtonGroup>
+            <SelectTrigger aria-label="Grid" className="w-40" size="sm">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                {DIVISIONS.map((item) => (
+                  <SelectItem key={item.value} value={item.value}>
+                    {item.label}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+          <ButtonGroup>
+            <Button
+              aria-label="Zoom out"
+              disabled={zoomed === null}
+              onClick={zoomOut}
+              size="icon"
+              variant="outline"
+            >
+              <IconPlaceholder
+                hugeicons="ZoomOutAreaIcon"
+                lucide="ZoomOutIcon"
+                phosphor="MagnifyingGlassMinusIcon"
+                remixicon="RiZoomOutLine"
+                tabler="IconZoomOut"
+              />
+            </Button>
+            <Button
+              aria-label="Zoom in"
+              disabled={zoom >= MAX_ZOOM}
+              onClick={zoomIn}
+              size="icon"
+              variant="outline"
+            >
+              <IconPlaceholder
+                hugeicons="ZoomInAreaIcon"
+                lucide="ZoomInIcon"
+                phosphor="MagnifyingGlassPlusIcon"
+                remixicon="RiZoomInLine"
+                tabler="IconZoomIn"
+              />
+            </Button>
+          </ButtonGroup>
+        </div>
       </div>
       <Timeline
         className="min-h-0 flex-1 gap-2"
-        duration={DURATION}
+        duration={duration}
         maxZoom={MAX_ZOOM}
         minZoom={fitPx || undefined}
         onPositionChange={seek}
@@ -641,13 +704,10 @@ export default function BlockTimeline() {
           {/* As wide as the lanes, so the stuck headers stay put however far it scrolls. */}
           <div className="flex min-h-full w-max min-w-full flex-1 flex-col">
             <Row className="sticky top-0 z-30 bg-background">
-              <TimelineRuler
-                aria-label="Playhead"
-                getAriaValueText={describePosition}
-              >
+              <TimelineRuler aria-label="Playhead" getAriaValueText={describe}>
                 {labels.map((seconds) => (
                   <TimelineMark key={seconds} value={seconds}>
-                    {seconds / BAR + 1}
+                    {seconds / bar + 1}
                   </TimelineMark>
                 ))}
                 <TimelinePlayhead />
@@ -664,7 +724,7 @@ export default function BlockTimeline() {
                 <TimelineRange
                   aria-label="Loop"
                   drawable
-                  getAriaValueText={describePosition}
+                  getAriaValueText={describe}
                   onValueChange={setLoop}
                   value={loop}
                 >
@@ -706,6 +766,7 @@ export default function BlockTimeline() {
                     .map((clip) => (
                       <ClipView
                         clip={clip}
+                        describe={describe}
                         key={clip.id}
                         onChange={changeClip}
                         onCommit={commitClip}
@@ -721,7 +782,7 @@ export default function BlockTimeline() {
             ))}
           </div>
         </TimelineViewport>
-        <TimelineNavigator getAriaValueText={describePosition} />
+        <TimelineNavigator getAriaValueText={describe} />
       </Timeline>
     </div>
   );

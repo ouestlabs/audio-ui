@@ -284,7 +284,7 @@ export const components: RegistryItem[] = [
   {
     categories: ["timeline"],
     description:
-      "An arrangement timeline made for a whole screen: a bar ruler that seeks on the grid, a loop strip, a lane per track with clips to move between tracks, trim and fade on the grid, a cursor to put anywhere on a track, and a split at the cursor, a playhead following a transport clock, and a navigator to zoom and scroll, open it at full size and the tracks take the screen",
+      "An arrangement timeline made for a whole screen: a bar ruler that seeks on the grid, a loop strip, a lane per track with clips to move between tracks, trim and fade on the grid, a cursor to put anywhere on a track, and a split at the cursor, a transport with play, stop, record, loop and a tempo that keeps the arrangement's musical positions, a playhead following its clock, and a navigator to zoom and scroll, open it at full size and the tracks take the screen",
     files: [
       {
         path: "components/timeline/block-timeline.tsx",
@@ -297,6 +297,7 @@ export const components: RegistryItem[] = [
     name: "block-timeline",
     registryDependencies: [
       "@audio/timeline",
+      "@audio/transport",
       "@audio/musical-time",
       "@shadcn/button",
       "@shadcn/button-group",
