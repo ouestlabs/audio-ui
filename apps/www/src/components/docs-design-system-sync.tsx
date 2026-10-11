@@ -41,7 +41,6 @@ export function DocsDesignSystemSync({
 }) {
   const [config] = useConfig();
   useMenuColor(config.menuColor);
-  const [ready, setReady] = React.useState(false);
   const previousStyleClassesRef = React.useRef<string[] | null>(null);
   const previousFontStateRef = React.useRef<{
     fontSans: string;
@@ -129,8 +128,6 @@ export function DocsDesignSystemSync({
       );
     }
 
-    setReady(true);
-
     const frameId = window.requestAnimationFrame(() => {
       syncBodyStyleClass(styleClass);
     });
@@ -196,14 +193,7 @@ export function DocsDesignSystemSync({
   );
 
   return (
-    <div
-      className={
-        ready
-          ? "flex flex-1 flex-col opacity-100"
-          : "flex flex-1 flex-col opacity-0"
-      }
-      suppressHydrationWarning
-    >
+    <div className="flex flex-1 flex-col" suppressHydrationWarning>
       {children}
     </div>
   );
