@@ -70,14 +70,12 @@ export function ExpandPreview({
           <DialogDescription className="sr-only">
             The preview at full size.
           </DialogDescription>
-          {/* The block is the page: the whole panel, a panel without a frame of its own, and what has a height of its own gives it back to the editor. */}
-          <FrameContent className="min-h-0 flex-1 font-sans">
-            <div
-              className="size-full overflow-hidden [&>.cn-audio-panel]:h-full [&>.cn-audio-panel]:overflow-auto [&>.cn-audio-panel]:rounded-none [&>.cn-audio-panel]:border-0 [&_[data-slot=piano-roll]]:h-auto [&_[data-slot=piano-roll]]:min-h-0 [&_[data-slot=piano-roll]]:flex-1 [&_[data-slot=timeline]]:flex [&_[data-slot=timeline]]:min-h-0 [&_[data-slot=timeline]]:flex-1 [&_[data-slot=timeline]]:flex-col"
-              data-expanded-preview
-            >
-              {children}
-            </div>
+          {/* The block is the page: it fills the panel, which is its only container, and what has a height of its own gives it back to the editor. */}
+          <FrameContent
+            className="min-h-0 flex-1 font-sans [&>.cn-audio-panel]:h-full [&>.cn-audio-panel]:overflow-auto [&>.cn-audio-panel]:rounded-none [&>.cn-audio-panel]:border-0 [&_[data-slot=piano-roll]]:h-auto [&_[data-slot=piano-roll]]:min-h-0 [&_[data-slot=piano-roll]]:flex-1 [&_[data-slot=timeline]]:flex [&_[data-slot=timeline]]:min-h-0 [&_[data-slot=timeline]]:flex-1 [&_[data-slot=timeline]]:flex-col"
+            data-expanded-preview
+          >
+            {children}
           </FrameContent>
           <FrameFooter className="shrink-0 flex-row items-center justify-between gap-3 px-2 py-1.5">
             <span className="truncate ps-1 text-site-muted-foreground text-xs">

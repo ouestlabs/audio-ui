@@ -46,14 +46,18 @@ Frame.displayName = "Frame";
 export function FrameContent({
   children,
   className,
+  ref,
   ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
+}: React.HTMLAttributes<HTMLDivElement> & {
+  ref?: React.Ref<HTMLDivElement>;
+}) {
   return (
     <div
       className={cn(
         "relative overflow-hidden rounded-[14px] border border-site-border bg-site-background",
         className
       )}
+      ref={ref}
       {...props}
     >
       {children}
