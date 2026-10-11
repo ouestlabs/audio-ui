@@ -30,6 +30,7 @@ export default function DocsLayout({
                 tree={source.getPageTree()}
               />
             }
+            siteEnd={<SiteBarContent part="github" />}
           >
             <div className="flex-1 px-4 sm:px-8">{children}</div>
           </FramedLayout>

@@ -86,6 +86,7 @@ export default function ComponentsLayout({
                 closedEnd={<SiteBarContent part="end" />}
                 closedStart={<SiteBarContent part="start" />}
                 header={<SiteSidebarHeader />}
+                siteEnd={<SiteBarContent part="github" />}
                 totalCount={totalCount}
               >
                 {children}

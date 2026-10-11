@@ -135,6 +135,7 @@ export function FramedLayout({
   actions,
   closedEnd,
   closedStart,
+  siteEnd,
   children,
   footer,
   nav,
@@ -145,6 +146,8 @@ export function FramedLayout({
   /** In the bar, from `lg`, while the navigation is shut: what its header held. */
   closedEnd?: React.ReactNode;
   closedStart?: React.ReactNode;
+  /** In the bar, from `lg`, always: after the page's tools, set apart from them. */
+  siteEnd?: React.ReactNode;
   children: React.ReactNode;
   /** Under the page, on the frame. */
   footer?: React.ReactNode;
@@ -228,12 +231,11 @@ export function FramedLayout({
               {start}
               <div className="ml-auto flex items-center gap-2">
                 {actions}
-                {navigationOpen ? null : (
-                  <div className="hidden items-center gap-2 lg:flex">
-                    <span aria-hidden className="h-5 w-px bg-site-border" />
-                    {closedEnd}
-                  </div>
-                )}
+                <div className="hidden items-center gap-2 lg:flex">
+                  <span aria-hidden className="h-5 w-px bg-site-border" />
+                  {navigationOpen ? null : closedEnd}
+                  {siteEnd}
+                </div>
                 <CustomizeToggle />
               </div>
             </FrameHeader>

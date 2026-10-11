@@ -22,6 +22,8 @@ interface ComponentsProviderProps {
   closedStart?: React.ReactNode;
   /** At the top of the navigation sidebar. */
   header?: React.ReactNode;
+  /** In the bar, from `lg`, always. */
+  siteEnd?: React.ReactNode;
   totalCount: number;
 }
 
@@ -30,6 +32,7 @@ export function ComponentsProvider({
   closedEnd,
   closedStart,
   header,
+  siteEnd,
   totalCount,
   categoryCounts,
   catalogItems,
@@ -46,6 +49,7 @@ export function ComponentsProvider({
         closedEnd={closedEnd}
         closedStart={closedStart}
         nav={<ComponentSidebar header={header} />}
+        siteEnd={siteEnd}
         start={
           <>
             <ComponentHeaderMobileDrawer />

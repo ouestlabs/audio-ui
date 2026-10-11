@@ -106,8 +106,8 @@ function SiteLogo() {
 
 /**
  * From `lg`, the framed layouts have no header: this is what it held, at the
- * top of the navigation sidebar: the logo, the sections as tabs, the search,
- * GitHub and the theme.
+ * top of the navigation sidebar: the logo, the sections as tabs, the search
+ * and the theme. GitHub stays in the inset's bar.
  */
 export function SiteSidebarHeader() {
   const pageTree = source.getPageTree();
@@ -121,15 +121,12 @@ export function SiteSidebarHeader() {
         <SiteHeaderModeSwitcher />
       </div>
       <SiteNavTabs items={siteConfig.navItems} />
-      <div className="flex items-center gap-2">
-        <div className="min-w-0 flex-1 [&>*]:w-full [&>*>button:last-child]:flex-1 [&>*>button:last-child]:justify-start">
-          <SiteHeaderCommandMenu
-            commandGroups={commandGroups}
-            componentCategories={componentCategories}
-            navItems={siteConfig.navItems}
-          />
-        </div>
-        <GitHubLink />
+      <div className="[&>*]:w-full [&>*>button:last-child]:flex-1 [&>*>button:last-child]:justify-start">
+        <SiteHeaderCommandMenu
+          commandGroups={commandGroups}
+          componentCategories={componentCategories}
+          navItems={siteConfig.navItems}
+        />
       </div>
     </div>
   );
@@ -140,7 +137,10 @@ export function SiteSidebarHeader() {
  * that sidebar is shut: the sections as tabs at the start, the search, GitHub
  * and the theme at the end.
  */
-export function SiteBarContent({ part }: { part: "end" | "start" }) {
+export function SiteBarContent({ part }: { part: "end" | "github" | "start" }) {
+  if (part === "github") {
+    return <GitHubLink />;
+  }
   if (part === "start") {
     return (
       <div className="w-48">
@@ -159,7 +159,6 @@ export function SiteBarContent({ part }: { part: "end" | "start" }) {
           navItems={siteConfig.navItems}
         />
       </div>
-      <GitHubLink />
       <SiteHeaderModeSwitcher />
     </div>
   );
