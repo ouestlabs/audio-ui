@@ -92,7 +92,11 @@
   --site-secondary-foreground: var(--secondary-foreground);
   --site-muted: var(--muted);
   /* A touch toward the text color: small muted text on a muted ground stays above 4.5:1. */
-  --site-muted-foreground: color-mix(in oklab, var(--muted-foreground) 82%, var(--foreground));
+  --site-muted-foreground: color-mix(
+    in oklab,
+    var(--muted-foreground) 82%,
+    var(--foreground)
+  );
   --site-accent: var(--accent);
   --site-accent-foreground: var(--accent-foreground);
   --site-destructive: var(--destructive);
@@ -134,7 +138,6 @@
 }
 
 .dark {
-
   --site-destructive-foreground: var(--color-red-600);
   --site-success: var(--color-emerald-500);
   --site-success-foreground: var(--color-emerald-600);
@@ -310,9 +313,9 @@
   /* Code, in the site's frame: a muted ring (the frame), a header for the title, and the code in a panel of its own. */
   [data-rehype-pretty-code-figure] {
     position: relative;
+    padding: 2px;
     margin-top: calc(var(--spacing) * 6);
     overflow: hidden;
-    padding: 2px;
     font-size: var(--text-sm);
     color: var(--site-code-foreground);
     outline: none;
@@ -364,10 +367,10 @@
 
   /* The code scrolls sideways in its panel, fading at the edges it runs past, and keeps its inset at the far end. */
   [data-rehype-pretty-code-figure]:not(:has([data-code-command])) pre code {
-    @apply no-scrollbar scroll-fade-x;
     display: block;
-    overflow-x: auto;
     padding-inline-end: calc(var(--spacing) * 4);
+    overflow-x: auto;
+    @apply no-scrollbar scroll-fade-x;
   }
 
   /* Inside another frame (a preview's code, a sheet), the figure gives its own up. */
@@ -389,8 +392,8 @@
 
   [data-rehype-pretty-code-title] {
     display: flex;
-    min-height: calc(var(--spacing) * 10);
     align-items: center;
+    min-height: calc(var(--spacing) * 10);
     padding-block: calc(var(--spacing) * 1.5);
     padding-inline: calc(var(--spacing) * 3);
     font-family: var(--site-font-mono);

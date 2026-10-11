@@ -92,13 +92,9 @@ export function PreviewBar({
   const Bar = position === "header" ? FrameHeader : FrameFooter;
   return (
     <Bar className="flex-row items-center gap-3 px-2 py-1.5">
-      <p
-        className={cn(
-          "flex flex-1 items-center gap-1.5 truncate ps-1 text-site-muted-foreground text-xs",
-          !description && "font-mono"
-        )}
-      >
-        <span className="truncate">{description || name}</span>
+      {/* What it is, when it has a description; its registry name is not shown. */}
+      <p className="flex flex-1 items-center truncate ps-1 text-site-muted-foreground text-xs">
+        <span className="truncate">{description}</span>
       </p>
       <div className="flex items-center gap-1.5">
         {badge}
