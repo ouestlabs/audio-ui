@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 /** The top of the landing page: what audio/ui is, where to go, how to start. */
 export function HomeHero() {
   return (
-    <div className="flex flex-col items-start gap-6 px-3 pt-10 pb-6 sm:px-8 sm:pt-14 xl:px-10">
+    <div className="flex flex-col items-start gap-6">
       <div className="flex max-w-2xl flex-col gap-3">
         <h1 className="text-balance font-medium font-serif text-4xl leading-tight sm:text-5xl">
           Audio UI for React
