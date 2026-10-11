@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { Frame, FrameContent } from "@/components/custom/frame";
-import { blockPanelClassName, PreviewFooter } from "@/components/preview-frame";
+import { blockPanelClassName, PreviewBar } from "@/components/preview-frame";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
@@ -55,6 +55,11 @@ export function ComponentPreviewTabs({
       data-slot="component-preview"
       {...props}
     >
+      <PreviewBar
+        expand={expand ? component : undefined}
+        name={name}
+        position="header"
+      />
       {/* The panel is the preview: no container inside it. */}
       <FrameContent
         className={cn(
@@ -109,7 +114,6 @@ export function ComponentPreviewTabs({
           )}
         </FrameContent>
       )}
-      <PreviewFooter expand={expand ? component : undefined} name={name} />
     </Frame>
   );
 }

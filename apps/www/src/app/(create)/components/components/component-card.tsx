@@ -1,6 +1,6 @@
 "use client";
 
-import { PreviewFooter } from "@/components/preview-frame";
+import { PreviewBar } from "@/components/preview-frame";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 import { useConfig } from "@/hooks/use-config";
@@ -41,7 +41,7 @@ export function ComponentCard({
       block={isBlock(name)}
       className={className}
       footer={
-        <PreviewFooter
+        <PreviewBar
           actions={
             <Sheet>
               <SheetTrigger
