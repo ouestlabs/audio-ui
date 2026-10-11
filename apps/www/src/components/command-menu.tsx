@@ -188,7 +188,7 @@ export function CommandMenu({
         }
       />
       <DialogContent
-        className="flex max-h-[calc(100dvh-1.5rem)] flex-col max-sm:h-[calc(100dvh-1.5rem)] gap-0 overflow-hidden rounded-[16px] border border-site-border/80 bg-[color-mix(in_oklab,var(--site-muted)_50%,var(--site-background))] p-0.5 shadow-2xl ring-0 max-sm:top-3 max-sm:max-w-[calc(100%-1.5rem)] max-sm:translate-y-0 sm:max-w-xl **:data-[slot=command-item]:data-selected:bg-site-muted **:data-[slot=command-item]:max-sm:py-2.5 **:data-[slot=command-input]:max-sm:text-base **:data-[slot=command]:bg-transparent **:data-[slot=input-group]:max-sm:h-11!"
+        className="flex max-h-[calc(100dvh-1.5rem)] flex-col max-sm:h-[calc(100dvh-1.5rem)] gap-0 overflow-hidden rounded-[16px] border border-site-border/80 bg-[color-mix(in_oklab,var(--site-muted)_50%,var(--site-background))] p-0.5 shadow-2xl ring-0 max-sm:top-3 max-sm:max-w-[calc(100%-1.5rem)] max-sm:translate-y-0 sm:max-w-xl **:data-[slot=command-item]:data-selected:bg-site-muted **:data-[slot=command-item]:max-sm:py-2.5 **:data-[slot=command]:bg-transparent"
         showCloseButton={false}
       >
         <DialogHeader className="sr-only">
@@ -220,7 +220,7 @@ export function CommandMenu({
               }
             />
           </FrameHeader>
-          <FrameContent className="flex min-h-0 flex-1 flex-col rounded-[14px]">
+          <FrameContent className="flex min-h-0 flex-1 flex-col rounded-[14px] p-1">
             <CommandList className="no-scrollbar scroll-fade min-h-0 flex-1 scroll-pt-2 scroll-pb-1.5 max-sm:max-h-none sm:min-h-80 sm:flex-none">
               <CommandEmpty className="py-12 text-center text-site-muted-foreground text-sm">
                 No results found.
