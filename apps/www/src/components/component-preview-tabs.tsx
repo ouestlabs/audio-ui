@@ -15,6 +15,7 @@ export function ComponentPreviewTabs({
   chromeLessOnMobile = false,
   component,
   expandLabel,
+  fitContent = false,
   source,
   sourcePreview,
   ...props
@@ -26,6 +27,8 @@ export function ComponentPreviewTabs({
   component: React.ReactNode;
   /** Names the preview and adds a button that opens it at full size: for blocks. */
   expandLabel?: string;
+  /** Lets the preview be as tall as what it shows, rather than a fixed height: for blocks. */
+  fitContent?: boolean;
   source: React.ReactNode;
   sourcePreview?: React.ReactNode;
 }) {
@@ -64,7 +67,7 @@ export function ComponentPreviewTabs({
           className={cn(
             "preview flex h-72 w-full justify-center p-10 font-sans data-[chromeless=true]:h-auto data-[align=start]:items-start data-[align=end]:items-end data-[align=center]:items-center data-[chromeless=true]:p-0",
             // A block is as tall as it is: a fixed height would cut it.
-            expandLabel && "h-auto",
+            fitContent && "h-auto",
             previewClassName
           )}
           data-align={align}
