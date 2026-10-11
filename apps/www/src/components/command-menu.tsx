@@ -12,6 +12,11 @@ import {
 import { useRouter } from "next/navigation";
 import * as React from "react";
 import { copyToClipboardWithMeta } from "@/components/copy-button";
+import {
+  FrameContent,
+  FrameFooter,
+  FrameHeader,
+} from "@/components/custom/frame";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -183,145 +188,133 @@ export function CommandMenu({
         }
       />
       <DialogContent
-        className="site-rounded-xl max-h-[calc(100dvh-1.5rem)] border-none max-sm:pt-12 bg-clip-padding bg-site-background p-2 pb-11 shadow-2xl ring-4 ring-site-border/60 max-sm:top-3 max-sm:max-w-[calc(100%-1.5rem)] max-sm:translate-y-0 sm:max-w-xl **:data-[slot=command-item]:data-selected:bg-site-muted **:data-[slot=command-item]:max-sm:py-2.5 **:data-[slot=command-input]:max-sm:text-base **:data-[slot=command]:bg-transparent **:data-[slot=input-group]:max-sm:h-11!"
+        className="flex max-h-[calc(100dvh-1.5rem)] flex-col gap-0 overflow-hidden rounded-[16px] border border-site-border/80 bg-[color-mix(in_oklab,var(--site-muted)_50%,var(--site-background))] p-0.5 shadow-2xl ring-0 max-sm:top-3 max-sm:max-w-[calc(100%-1.5rem)] max-sm:translate-y-0 sm:max-w-xl **:data-[slot=command-item]:data-selected:bg-site-muted **:data-[slot=command-item]:max-sm:py-2.5 **:data-[slot=command-input]:max-sm:text-base **:data-[slot=command]:bg-transparent **:data-[slot=input-group]:max-sm:h-11!"
         showCloseButton={false}
       >
         <DialogHeader className="sr-only">
           <DialogTitle>Search...</DialogTitle>
           <DialogDescription>Search for a command to run...</DialogDescription>
         </DialogHeader>
-        {/* On a phone the dialog covers the screen, with no backdrop to tap: a title bar, and a way out after the field in the tab order. */}
-        <div className="absolute inset-x-0 top-0 z-20 flex h-10 items-center rounded-t-[12px] border-b border-b-site-border bg-site-muted px-4 font-medium text-site-muted-foreground text-xs sm:hidden">
-          Search
-        </div>
-        <Command
-          filter={(value, search, keywords) => {
-            const extendValue = `${value} ${keywords?.join(" ") || ""}`;
-            if (extendValue.toLowerCase().includes(search.toLowerCase())) {
-              return 1;
-            }
-            return 0;
-          }}
-        >
-          <CommandInput placeholder="Search..." />
-          <CommandList className="no-scrollbar scroll-fade min-h-0 scroll-pt-2 scroll-pb-1.5 max-sm:max-h-[calc(100dvh-9rem)] sm:min-h-80">
-            <CommandEmpty className="py-12 text-center text-site-muted-foreground text-sm">
-              No results found.
-            </CommandEmpty>
-            {navItems && navItems.length > 0 && (
-              <CommandGroup
-                className="p-0! **:[[cmdk-group-heading]]:scroll-mt-16 **:[[cmdk-group-heading]]:p-3! **:[[cmdk-group-heading]]:pb-1!"
-                heading="Pages"
-              >
-                {navItems.map((item) => (
-                  <CommandMenuItem
-                    disabled={item.soon}
-                    key={item.href}
-                    keywords={["nav", "navigation", item.label.toLowerCase()]}
-                    onHighlight={() => {
-                      setSelectedType("page");
-                      setCopyPayload("");
-                    }}
-                    onSelect={() => {
-                      if (!item.soon) {
-                        runCommand(() => router.push(item.href));
-                      }
-                    }}
-                    value={`Navigation ${item.label}`}
-                  >
-                    <BookOpenIcon weight="fill" />
-                    <span
-                      className={cn(
-                        "min-w-0 flex-1 truncate",
-                        item.soon && "opacity-50"
-                      )}
+        <FrameContent className="flex min-h-0 flex-1 flex-col rounded-[14px]">
+          <Command
+            filter={(value, search, keywords) => {
+              const extendValue = `${value} ${keywords?.join(" ") || ""}`;
+              if (extendValue.toLowerCase().includes(search.toLowerCase())) {
+                return 1;
+              }
+              return 0;
+            }}
+          >
+            <CommandInput placeholder="Search..." />
+            <CommandList className="no-scrollbar scroll-fade min-h-0 scroll-pt-2 scroll-pb-1.5 max-sm:max-h-[calc(100dvh-13rem)] sm:min-h-80">
+              <CommandEmpty className="py-12 text-center text-site-muted-foreground text-sm">
+                No results found.
+              </CommandEmpty>
+              {navItems && navItems.length > 0 && (
+                <CommandGroup
+                  className="p-0! **:[[cmdk-group-heading]]:scroll-mt-16 **:[[cmdk-group-heading]]:p-3! **:[[cmdk-group-heading]]:pb-1!"
+                  heading="Pages"
+                >
+                  {navItems.map((item) => (
+                    <CommandMenuItem
+                      disabled={item.soon}
+                      key={item.href}
+                      keywords={["nav", "navigation", item.label.toLowerCase()]}
+                      onHighlight={() => {
+                        setSelectedType("page");
+                        setCopyPayload("");
+                      }}
+                      onSelect={() => {
+                        if (!item.soon) {
+                          runCommand(() => router.push(item.href));
+                        }
+                      }}
+                      value={`Navigation ${item.label}`}
                     >
-                      {item.label}
-                    </span>
-                    {item.soon && (
-                      <span className="site-rounded-sm ml-auto bg-site-muted px-1.5 py-0.5 font-medium text-[10px] text-site-muted-foreground leading-none">
-                        Soon
+                      <BookOpenIcon weight="fill" />
+                      <span
+                        className={cn(
+                          "min-w-0 flex-1 truncate",
+                          item.soon && "opacity-50"
+                        )}
+                      >
+                        {item.label}
                       </span>
-                    )}
-                  </CommandMenuItem>
-                ))}
-              </CommandGroup>
-            )}
-            {groups.map((group) => (
-              <CommandGroup
-                className="p-0! **:[[cmdk-group-heading]]:scroll-mt-16 **:[[cmdk-group-heading]]:p-3! **:[[cmdk-group-heading]]:pb-1!"
-                heading={group.name}
-                key={group.id}
-              >
-                {group.pages.map((item) => (
-                  <CommandMenuItem
-                    key={item.url}
-                    keywords={item.isComponent ? ["component"] : undefined}
-                    onHighlight={() =>
-                      handlePageHighlight(item.isComponent, item)
-                    }
-                    onSelect={() => {
-                      runCommand(() => router.push(item.url));
-                    }}
-                    value={item.name ? `${group.name} ${item.name}` : ""}
-                  >
-                    {item.isComponent ? (
-                      <DiamondsFourIcon weight="fill" />
-                    ) : (
-                      <BookIcon weight="fill" />
-                    )}
-                    <span className="min-w-0 flex-1 truncate">{item.name}</span>
-                  </CommandMenuItem>
-                ))}
-              </CommandGroup>
-            ))}
-            {componentCategories.length > 0 && (
-              <CommandGroup
-                className="p-0! **:[[cmdk-group-heading]]:p-3!"
-                heading="Components"
-              >
-                {componentCategories.map((category) => (
-                  <CommandMenuItem
-                    key={`component-cat-${category.name}`}
-                    keywords={[
-                      "component",
-                      "category",
-                      category.name,
-                      category.label,
-                    ]}
-                    onHighlight={handleCategoryHighlight}
-                    onSelect={() => {
-                      runCommand(() =>
-                        router.push(
-                          `/components/${normalizeSlug(category.name)}`
-                        )
-                      );
-                    }}
-                    value={`Component category ${category.label}`}
-                  >
-                    <SquaresFourIcon weight="fill" />
-                    <span className="min-w-0 flex-1 truncate">
-                      {category.label}
-                    </span>
-                  </CommandMenuItem>
-                ))}
-              </CommandGroup>
-            )}
-          </CommandList>
-        </Command>
-        <DialogClose
-          render={
-            <Button
-              aria-label="Close search"
-              className="absolute top-1 right-2 z-30 sm:hidden"
-              size="icon"
-              variant="ghost"
-            >
-              <XIcon aria-hidden weight="bold" />
-            </Button>
-          }
-        />
-        <div className="absolute inset-x-0 bottom-0 z-20 flex h-10 items-center gap-2 rounded-b-[12px] border-t border-t-site-border bg-site-muted px-4 font-medium text-site-muted-foreground text-xs">
+                      {item.soon && (
+                        <span className="site-rounded-sm ml-auto bg-site-muted px-1.5 py-0.5 font-medium text-[10px] text-site-muted-foreground leading-none">
+                          Soon
+                        </span>
+                      )}
+                    </CommandMenuItem>
+                  ))}
+                </CommandGroup>
+              )}
+              {groups.map((group) => (
+                <CommandGroup
+                  className="p-0! **:[[cmdk-group-heading]]:scroll-mt-16 **:[[cmdk-group-heading]]:p-3! **:[[cmdk-group-heading]]:pb-1!"
+                  heading={group.name}
+                  key={group.id}
+                >
+                  {group.pages.map((item) => (
+                    <CommandMenuItem
+                      key={item.url}
+                      keywords={item.isComponent ? ["component"] : undefined}
+                      onHighlight={() =>
+                        handlePageHighlight(item.isComponent, item)
+                      }
+                      onSelect={() => {
+                        runCommand(() => router.push(item.url));
+                      }}
+                      value={item.name ? `${group.name} ${item.name}` : ""}
+                    >
+                      {item.isComponent ? (
+                        <DiamondsFourIcon weight="fill" />
+                      ) : (
+                        <BookIcon weight="fill" />
+                      )}
+                      <span className="min-w-0 flex-1 truncate">
+                        {item.name}
+                      </span>
+                    </CommandMenuItem>
+                  ))}
+                </CommandGroup>
+              ))}
+              {componentCategories.length > 0 && (
+                <CommandGroup
+                  className="p-0! **:[[cmdk-group-heading]]:p-3!"
+                  heading="Components"
+                >
+                  {componentCategories.map((category) => (
+                    <CommandMenuItem
+                      key={`component-cat-${category.name}`}
+                      keywords={[
+                        "component",
+                        "category",
+                        category.name,
+                        category.label,
+                      ]}
+                      onHighlight={handleCategoryHighlight}
+                      onSelect={() => {
+                        runCommand(() =>
+                          router.push(
+                            `/components/${normalizeSlug(category.name)}`
+                          )
+                        );
+                      }}
+                      value={`Component category ${category.label}`}
+                    >
+                      <SquaresFourIcon weight="fill" />
+                      <span className="min-w-0 flex-1 truncate">
+                        {category.label}
+                      </span>
+                    </CommandMenuItem>
+                  ))}
+                </CommandGroup>
+              )}
+            </CommandList>
+          </Command>
+        </FrameContent>
+        <FrameFooter className="h-10 shrink-0 flex-row items-center gap-2 px-3 py-0 font-medium text-site-muted-foreground text-xs">
           <div className="flex shrink-0 items-center gap-2">
             <CommandMenuKbd>
               <ArrowBendDownLeftIcon weight="fill" />
@@ -344,7 +337,18 @@ export function CommandMenu({
               </div>
             </>
           )}
-        </div>
+        </FrameFooter>
+        {/* On a phone the dialog covers the screen, with no backdrop to tap: a header with a way out, after the field in the tab order. */}
+        <FrameHeader className="order-first h-10 shrink-0 flex-row items-center justify-between py-0 pr-1 pl-3 font-medium text-site-muted-foreground text-xs sm:hidden">
+          Search
+          <DialogClose
+            render={
+              <Button aria-label="Close search" size="icon-sm" variant="ghost">
+                <XIcon aria-hidden weight="bold" />
+              </Button>
+            }
+          />
+        </FrameHeader>
       </DialogContent>
     </Dialog>
   );
