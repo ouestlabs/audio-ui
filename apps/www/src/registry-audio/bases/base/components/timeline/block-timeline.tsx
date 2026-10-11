@@ -1137,8 +1137,9 @@ export default function BlockTimeline() {
         source={clock}
         zoom={zoomed === null ? undefined : zoom}
       >
+        <TimelineNavigator getAriaValueText={describe} />
         <TimelineViewport
-          className="flex min-h-0 flex-1 flex-col overflow-y-auto rounded-lg border"
+          className="flex min-h-0 flex-1 flex-col overflow-y-auto bg-muted/40"
           ref={viewportRef}
           scrollbar="hidden"
         >
@@ -1151,45 +1152,7 @@ export default function BlockTimeline() {
             {...marquee.handlers}
           >
             <Row className="sticky top-0 z-30 bg-background">
-              <TimelineRuler aria-label="Playhead" getAriaValueText={describe}>
-                {labels.map((count) => (
-                  <TimelineMark key={count} value={count * bar}>
-                    {count + 1}
-                  </TimelineMark>
-                ))}
-                <TimelinePlayhead />
-              </TimelineRuler>
-            </Row>
-            <Row
-              className="sticky top-7 z-30 bg-background"
-              lead={
-                <span className="flex items-center px-3 text-muted-foreground text-xs">
-                  Locators
-                </span>
-              }
-            >
-              <TimelineLane className="h-6">
-                {locators.map((locator) => (
-                  <TimelineMark key={locator.at} value={locator.at}>
-                    <LocatorButton
-                      locator={locator}
-                      onJump={jumpToLocator}
-                      onRemove={removeLocator}
-                      onRename={renameLocator}
-                    />
-                  </TimelineMark>
-                ))}
-              </TimelineLane>
-            </Row>
-            <Row
-              className="sticky top-13 z-30 bg-background"
-              lead={
-                <span className="flex items-center px-3 text-muted-foreground text-xs">
-                  Loop
-                </span>
-              }
-            >
-              <TimelineLane className="h-6 cursor-cell">
+              <TimelineLane className="h-4 cursor-cell">
                 <TimelineRange
                   aria-label="Loop"
                   drawable
@@ -1201,6 +1164,30 @@ export default function BlockTimeline() {
                   <TimelineRangeHandle aria-label="Loop end" edge="end" />
                 </TimelineRange>
                 <TimelinePlayhead />
+              </TimelineLane>
+            </Row>
+            <Row className="sticky top-4 z-30 bg-background">
+              <TimelineRuler aria-label="Playhead" getAriaValueText={describe}>
+                {labels.map((count) => (
+                  <TimelineMark key={count} value={count * bar}>
+                    {count + 1}
+                  </TimelineMark>
+                ))}
+                <TimelinePlayhead />
+              </TimelineRuler>
+            </Row>
+            <Row className="sticky top-11 z-30 bg-background">
+              <TimelineLane className="h-6">
+                {locators.map((locator) => (
+                  <TimelineMark key={locator.at} value={locator.at}>
+                    <LocatorButton
+                      locator={locator}
+                      onJump={jumpToLocator}
+                      onRemove={removeLocator}
+                      onRename={renameLocator}
+                    />
+                  </TimelineMark>
+                ))}
               </TimelineLane>
             </Row>
             {tracks.map((track) => (
@@ -1258,28 +1245,6 @@ export default function BlockTimeline() {
                     .map((original) => (
                       <CopyGhost clip={original} key={original.id} />
                     ))}
-                  <Row
-                    className="border-foreground/25 border-b"
-                    lead={
-                      <Button
-                        className="m-1 w-full justify-start gap-1.5"
-                        onClick={handleAddTrack}
-                        size="sm"
-                        variant="ghost"
-                      >
-                        <IconPlaceholder
-                          hugeicons="PlusSignIcon"
-                          lucide="PlusIcon"
-                          phosphor="PlusIcon"
-                          remixicon="RiAddLine"
-                          tabler="IconPlus"
-                        />
-                        Add track
-                      </Button>
-                    }
-                  >
-                    <div className="h-10" />
-                  </Row>
                   {clips
                     .filter((clip) => clip.track === track.id)
                     .map((clip) => (
@@ -1315,9 +1280,44 @@ export default function BlockTimeline() {
                 </TimelineLane>
               </Row>
             ))}
+            <Row
+              className="border-foreground/25 border-b"
+              lead={
+                <Button
+                  className="m-1 w-full justify-start gap-1.5"
+                  onClick={handleAddTrack}
+                  size="sm"
+                  variant="ghost"
+                >
+                  <IconPlaceholder
+                    hugeicons="PlusSignIcon"
+                    lucide="PlusIcon"
+                    phosphor="PlusIcon"
+                    remixicon="RiAddLine"
+                    tabler="IconPlus"
+                  />
+                  Add track
+                </Button>
+              }
+            >
+              <TimelineLane
+                className="h-10 border-b-0 bg-background"
+                gridStep={snapStep}
+              />
+            </Row>
+            {/* The surface carries on to the bottom of the view, so the arrangement does not stop at the last track. */}
+            <Row className="flex-1" lead={<div className="h-full" />}>
+              <TimelineLane
+                className="h-auto flex-1 border-b-0 bg-background"
+                gridStep={snapStep}
+                onPointerDown={focusPanel}
+                seekable
+              >
+                <TimelinePlayhead />
+              </TimelineLane>
+            </Row>
           </div>
         </TimelineViewport>
-        <TimelineNavigator getAriaValueText={describe} />
         {marquee.rect
           ? // In the page's body: a dialog is transformed, which would make a fixed rectangle its own.
             createPortal(
