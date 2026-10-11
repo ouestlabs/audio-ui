@@ -220,6 +220,57 @@ function lay(all: Arranged[], placed: Arranged, duration: number): Arranged[] {
   return [...elsewhere, ...covered, placed];
 }
 
+interface Landing {
+  /** The ids the copies of the originals take. */
+  copyIds: string[];
+  duration: number;
+  /** The other clips of a dragged group. */
+  group: string[];
+  /** The clip that was dragged. */
+  id: string;
+  /** The originals of a copy drag, which stay where they were. */
+  origins: Arranged[];
+  /** The track the clip was dropped on, if it left its own. */
+  track: Arranged["track"] | undefined;
+}
+
+/**
+ * Lays down what a drag moved: the dragged clip and its group land where they
+ * were put, covering what they lie over; in a copy drag the originals stay
+ * where they were, as copies of their own, under what was moved.
+ */
+function land(all: Arranged[], landing: Landing): Arranged[] {
+  const { copyIds, duration, group, id, origins, track } = landing;
+  const current = all.find((clip) => clip.id === id);
+  if (!current) {
+    return all;
+  }
+  const placed = track ? { ...current, track } : current;
+  const movedIds = new Set([id, ...group]);
+  const moved = all.filter((clip) => movedIds.has(clip.id));
+  let laid = origins.length
+    ? all.filter((clip) => !movedIds.has(clip.id))
+    : all;
+  laid = origins.reduce(
+    (kept, origin, index) =>
+      lay(kept, { ...origin, id: copyIds[index] ?? origin.id }, duration),
+    laid
+  );
+  for (const clip of origins.length ? moved : [placed]) {
+    laid = lay(laid, clip.id === id ? placed : clip, duration);
+  }
+  // The rest of a dragged group lands too, covering what it lies over.
+  if (!origins.length) {
+    for (const other of group) {
+      const grouped = laid.find((clip) => clip.id === other);
+      if (grouped) {
+        laid = lay(laid, grouped, duration);
+      }
+    }
+  }
+  return laid;
+}
+
 /** A clip's positions and lengths, all in seconds, scaled when the tempo changes. */
 function scaleValue(
   value: TimelinePrimitive.Clip.Value,
@@ -655,9 +706,9 @@ export default function BlockTimeline() {
   const clipsRef = useRef(clips);
   clipsRef.current = clips;
   // Where a clip dragged with Alt held started: the copy stays there.
-  const copyOrigin = useRef<Arranged | null>(null);
+  const copyOrigins = useRef<Arranged[] | null>(null);
   // The clip being dragged as a copy, shown while it is: its original stays behind as a ghost.
-  const [copying, setCopying] = useState<Arranged | null>(null);
+  const [copying, setCopying] = useState<Arranged[]>([]);
   const [division, setDivision] = useState<GridDivision>("adaptive");
   const handleDivision = useCallback(
     (next: GridDivision | null) => setDivision(next ?? "adaptive"),
@@ -709,17 +760,20 @@ export default function BlockTimeline() {
       value: TimelinePrimitive.Clip.Value,
       details: TimelinePrimitive.Clip.ChangeEventDetails
     ) => {
-      if (!(details.copy && copyOrigin.current)) {
-        copyOrigin.current =
-          details.copy && details.target === "move"
-            ? (clipsRef.current.find((clip) => clip.id === id) ?? null)
-            : null;
-        setCopying(copyOrigin.current);
+      if (!(details.copy && copyOrigins.current)) {
+        // A copy of a clip in a selection copies the whole selection.
+        const dragged = clipsRef.current.filter((clip) =>
+          selectedIds.length > 1 && selectedIds.includes(id)
+            ? selectedIds.includes(clip.id)
+            : clip.id === id
+        );
+        copyOrigins.current =
+          details.copy && details.target === "move" ? dragged : null;
+        setCopying(copyOrigins.current ?? []);
       }
       const grouped =
         details.target === "move" &&
         details.delta !== undefined &&
-        !details.copy &&
         selectedIds.length > 1 &&
         selectedIds.includes(id);
       if (grouped && !groupOrigin.current) {
@@ -755,31 +809,25 @@ export default function BlockTimeline() {
   const commitClip = useCallback(
     (id: string, details: TimelinePrimitive.Clip.CommitEventDetails) => {
       const track = details.lane?.dataset.track;
-      const origin = details.copy ? copyOrigin.current : null;
-      copyOrigin.current = null;
-      setCopying(null);
+      const origins = details.copy ? (copyOrigins.current ?? []) : [];
+      copyOrigins.current = null;
+      setCopying([]);
       const group = groupOrigin.current;
       groupOrigin.current = null;
-      pieces.current += 1;
-      const copyId = `${id}-${pieces.current}`;
-      setClips((all) => {
-        const current = all.find((clip) => clip.id === id);
-        if (!current) {
-          return all;
-        }
-        const placed = track
-          ? { ...current, track: track as Arranged["track"] }
-          : current;
-        let laid = lay(all, placed, duration);
-        // The rest of a dragged group lands too, covering what it lies over.
-        for (const other of group?.keys() ?? []) {
-          const moved = laid.find((clip) => clip.id === other);
-          if (other !== id && moved) {
-            laid = lay(laid, moved, duration);
-          }
-        }
-        return origin ? lay(laid, { ...origin, id: copyId }, duration) : laid;
+      const copyIds = origins.map((origin) => {
+        pieces.current += 1;
+        return `${origin.id}-${pieces.current}`;
       });
+      setClips((all) =>
+        land(all, {
+          copyIds,
+          duration,
+          group: group ? [...group.keys()] : [],
+          id,
+          origins,
+          track: track as Arranged["track"] | undefined,
+        })
+      );
     },
     [duration]
   );
@@ -1204,15 +1252,19 @@ export default function BlockTimeline() {
                   onPointerDown={focusPanel}
                   seekable
                 >
-                  {copying?.track === track.id ? (
-                    <CopyGhost clip={copying} />
-                  ) : null}
+                  {copying
+                    .filter((original) => original.track === track.id)
+                    .map((original) => (
+                      <CopyGhost clip={original} key={original.id} />
+                    ))}
                   {clips
                     .filter((clip) => clip.track === track.id)
                     .map((clip) => (
                       <ClipView
                         clip={clip}
-                        copying={copying?.id === clip.id}
+                        copying={copying.some(
+                          (original) => original.id === clip.id
+                        )}
                         describe={describe}
                         key={clip.id}
                         onChange={changeClip}
