@@ -178,12 +178,11 @@ export interface ComponentDocSeo {
 
 /**
  * SEO + on-page copy for canonical component docs (`/docs/components/base/...`).
- * audio/ui ships Base UI only today; `base` is kept for a future Radix variant.
  */
 export function getComponentDocSeo(
   slug: CanonicalComponentDocSlug,
   label: string,
-  base: "base" | "radix",
+  base: "base",
   docDescription?: string | null
 ): ComponentDocSeo {
   const canonicalPath = `/docs/components/${base}/${slug}`;
@@ -204,28 +203,22 @@ export function getComponentDocSeo(
     description: description.replace(/\s+/g, " ").trim(),
     displayTitle,
     leadDescription,
-    shouldIndex: base === "base",
+    shouldIndex: true,
     title,
   };
 }
 
 /**
  * Docs catalog CTA intro shown at the bottom of a component doc page.
- * audio/ui ships Base UI only today; `base` is kept for a future Radix variant.
  */
 export function getDocsComponentCatalogIntro(
   _slug: CanonicalComponentDocSlug,
   label: string,
-  count: number,
-  base: "base" | "radix"
+  count: number
 ): string {
   const p = count;
-  const variantLine =
-    base === "radix"
-      ? "These examples follow the Radix UI implementation with accessible primitives from the Radix stack"
-      : "These examples use Base UI primitives from @base-ui/react";
 
-  return `Browse ${p} production-ready audio/ui ${label} components for players, mixers, and synth interfaces. ${variantLine} and stay fully compatible with Shadcn Create so radius, color, and typography match your configured theme.`;
+  return `Browse ${p} production-ready audio/ui ${label} components for players, mixers, and synth interfaces. These examples use Base UI primitives from @base-ui/react and stay fully compatible with Shadcn Create so radius, color, and typography match your configured theme.`;
 }
 
 type BreadcrumbItem = {

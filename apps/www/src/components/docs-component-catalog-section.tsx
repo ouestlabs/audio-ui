@@ -10,15 +10,13 @@ import { DocsComponentCatalogCta } from "./docs-component-catalog-cta";
 
 interface DocsComponentCatalogSectionProps {
   componentSlug: string;
-  docBase: "base" | "radix";
 }
 
 /**
- * Resolves catalog count and Radix vs Base UI intro for the docs catalog CTA.
+ * Resolves the catalog count and intro for the docs catalog CTA.
  */
 export function DocsComponentCatalogSection({
   componentSlug,
-  docBase,
 }: DocsComponentCatalogSectionProps) {
   const normalized = normalizeSlug(componentSlug);
   const info = getCategoryInfo(normalized);
@@ -33,8 +31,7 @@ export function DocsComponentCatalogSection({
   const intro = getDocsComponentCatalogIntro(
     normalized as CanonicalComponentDocSlug,
     info.label,
-    info.count,
-    docBase
+    info.count
   );
 
   return (

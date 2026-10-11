@@ -48,8 +48,7 @@ export async function generateMetadata(props: {
 
   const doc = page.data;
   const docBase =
-    params.slug?.[0] === "components" &&
-    (params.slug?.[1] === "base" || params.slug?.[1] === "radix")
+    params.slug?.[0] === "components" && params.slug?.[1] === "base"
       ? params.slug[1]
       : null;
   const componentSlug =
@@ -207,11 +206,8 @@ export default async function Page(props: {
                 })}
               />
             </div>
-            {isComponentDoc && componentName && base ? (
-              <DocsComponentCatalogSection
-                componentSlug={componentName}
-                docBase={base}
-              />
+            {isComponentDoc && componentName ? (
+              <DocsComponentCatalogSection componentSlug={componentName} />
             ) : null}
           </div>
           <div className="mx-auto flex h-16 w-full max-w-2xl items-center gap-2 px-4 md:px-0">

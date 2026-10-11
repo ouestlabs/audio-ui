@@ -5,8 +5,8 @@ export type PageTreeNode = (typeof source.pageTree)["children"][number];
 export type PageTreeFolder = Extract<PageTreeNode, { type: "folder" }>;
 export type PageTreePage = Extract<PageTreeNode, { type: "page" }>;
 
-const COMPONENTS_BASE_PATH_REGEX = /\/docs\/components\/(radix|base)(?:\/|$)/;
-const DOCS_BASE_PATH_REGEX = /\/docs\/(radix|base)(?:\/|$)/;
+const COMPONENTS_BASE_PATH_REGEX = /\/docs\/components\/(base)(?:\/|$)/;
+const DOCS_BASE_PATH_REGEX = /\/docs\/(base)(?:\/|$)/;
 
 // Recursively find all pages in a folder tree.
 export function getAllPagesFromFolder(folder: PageTreeFolder): PageTreePage[] {
@@ -23,7 +23,7 @@ export function getAllPagesFromFolder(folder: PageTreeFolder): PageTreePage[] {
   return pages;
 }
 
-// Find the children inside the base subfolder (radix/base) matching currentBase.
+// Find the children inside the base subfolder (base) matching currentBase.
 function findBaseSubfolderChildren(
   folder: PageTreeFolder,
   currentBase: string
@@ -34,13 +34,9 @@ function findBaseSubfolderChildren(
     }
 
     // Match by $id or by name.
-    const isRadix = child.$id === "radix" || child.name === "Radix UI";
     const isBase = child.$id === "base" || child.name === "Base UI";
 
-    if (
-      (currentBase === "radix" && isRadix) ||
-      (currentBase === "base" && isBase)
-    ) {
+    if (currentBase === "base" && isBase) {
       return child.children;
     }
   }
@@ -48,7 +44,7 @@ function findBaseSubfolderChildren(
   return null;
 }
 
-// Find the pages inside the base subfolder (radix/base) matching currentBase.
+// Find the pages inside the base subfolder (base) matching currentBase.
 function findBaseSubfolderPages(
   folder: PageTreeFolder,
   currentBase: string
@@ -57,7 +53,7 @@ function findBaseSubfolderPages(
   return children?.filter((c): c is PageTreePage => c.type === "page") ?? null;
 }
 
-// Get the pages from a folder, handling nested base folders (radix/base).
+// Get the pages from a folder, handling nested base folders (base).
 export function getPagesFromFolder(
   folder: PageTreeFolder,
   currentBase: string
@@ -113,8 +109,8 @@ export function getSectionsFromFolder(
   return sections.filter((section) => section.pages.length > 0);
 }
 
-// Get current base (radix or base) from pathname.
-// Component docs: /docs/components/radix/alert | /docs/components/base/alert
+// Get the current base from pathname.
+// Component docs: /docs/components/base/alert
 export function getCurrentBase(pathname: string): string {
   const baseMatch =
     pathname.match(COMPONENTS_BASE_PATH_REGEX) ??
