@@ -9,6 +9,7 @@ import {
   InputGroupAddon,
   InputGroupButton,
   InputGroupInput,
+  InputGroupText,
 } from "@/registry/bases/base/ui/input-group";
 
 const DEFAULT_MIN_BPM = 20;
@@ -156,28 +157,78 @@ export function NumberStepper({
 }
 
 interface BpmControlProps {
+  className?: string;
   max?: number;
   min?: number;
   onValueChange: (bpm: number) => void;
   value: number;
 }
 
-/** A BPM stepper: whole beats per minute, from 20 to 200 unless told otherwise. */
+/**
+ * The tempo as a number field with its unit: whole beats per minute, from 20
+ * to 200 unless told otherwise. Type it and press Enter, step it with the
+ * arrow keys and the Page keys, or drag the `BPM` unit sideways to scrub it;
+ * the wheel never changes it. It is one cell, so it joins a `ButtonGroup`.
+ */
 export function BpmControl({
+  className,
   max = DEFAULT_MAX_BPM,
   min = DEFAULT_MIN_BPM,
   onValueChange,
   value,
 }: BpmControlProps) {
+  const handleValueChange = useCallback(
+    (bpm: number | null, eventDetails: NumberField.Root.ChangeEventDetails) => {
+      // While it is being typed the field keeps its own text.
+      if (
+        bpm === null ||
+        eventDetails.reason === "input-change" ||
+        eventDetails.reason === "input-clear"
+      ) {
+        return;
+      }
+      if (bpm !== value) {
+        onValueChange(bpm);
+      }
+    },
+    [onValueChange, value]
+  );
+
   return (
-    <NumberStepper
-      decrementLabel="Decrease BPM"
-      incrementLabel="Increase BPM"
-      label="BPM"
+    <NumberField.Root
+      format={WHOLE}
+      largeStep={10}
       max={max}
       min={min}
-      onValueChange={onValueChange}
+      onValueChange={handleValueChange}
+      render={<InputGroup className={cn("w-24", className)} />}
+      step={1}
       value={value}
-    />
+    >
+      <NumberField.Input
+        render={
+          <InputGroupInput
+            aria-label={`Tempo in beats per minute, ${min} to ${max}`}
+            className="tabular-nums"
+            onKeyDown={commitOnEnter}
+          />
+        }
+      />
+      <InputGroupAddon align="inline-end">
+        <NumberField.ScrubArea className="cursor-ew-resize select-none">
+          <InputGroupText>BPM</InputGroupText>
+          <NumberField.ScrubAreaCursor className="drop-shadow-sm">
+            <IconPlaceholder
+              className="size-5"
+              hugeicons="ArrowLeftRightIcon"
+              lucide="MoveHorizontalIcon"
+              phosphor="ArrowsHorizontalIcon"
+              remixicon="RiArrowLeftRightLine"
+              tabler="IconArrowsHorizontal"
+            />
+          </NumberField.ScrubAreaCursor>
+        </NumberField.ScrubArea>
+      </InputGroupAddon>
+    </NumberField.Root>
   );
 }

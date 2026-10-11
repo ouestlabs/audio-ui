@@ -1,7 +1,6 @@
 "use client";
 
 import type { Source } from "@audio-ui/react";
-import { NumberField } from "@base-ui/react/number-field";
 import { useCallback, useEffect, useRef } from "react";
 import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder";
 import { cn } from "@/registry/bases/base/lib/utils";
@@ -11,12 +10,6 @@ import {
   ButtonGroupText,
 } from "@/registry/bases/base/ui/button-group";
 import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-  InputGroupText,
-} from "@/registry/bases/base/ui/input-group";
-import {
   Select,
   SelectContent,
   SelectGroup,
@@ -24,23 +17,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/registry/bases/base/ui/select";
+import { BpmControl } from "@/registry-audio/bases/base/audio/elements/bpm-control";
 import {
   barsBeatsAt,
   secondsPerBeat,
   type Tempo,
 } from "@/registry-audio/bases/base/lib/musical-time";
 
-const MIN_BPM = 20;
-const MAX_BPM = 200;
 const SIGNATURES = ["4/4", "3/4", "6/8", "5/4", "7/8", "2/4"] as const;
-const WHOLE: Intl.NumberFormatOptions = { maximumFractionDigits: 0 };
-
-/** Enter commits what is typed: the field commits when it loses focus. */
-function commitOnEnter(event: React.KeyboardEvent<HTMLInputElement>) {
-  if (event.key === "Enter") {
-    event.currentTarget.blur();
-  }
-}
 
 /** One figure of the position, with its name under it. */
 function PositionField({
@@ -187,19 +171,7 @@ function TransportTempo({
   tempo: Tempo;
 }) {
   const handleBpm = useCallback(
-    (bpm: number | null, eventDetails: NumberField.Root.ChangeEventDetails) => {
-      // While it is being typed the field keeps its own text.
-      if (
-        bpm === null ||
-        eventDetails.reason === "input-change" ||
-        eventDetails.reason === "input-clear"
-      ) {
-        return;
-      }
-      if (bpm !== tempo.bpm) {
-        onTempoChange({ ...tempo, bpm });
-      }
-    },
+    (bpm: number) => onTempoChange({ ...tempo, bpm }),
     [onTempoChange, tempo]
   );
   const handleSignature = useCallback(
@@ -216,42 +188,7 @@ function TransportTempo({
 
   return (
     <ButtonGroup className="shrink-0">
-      <NumberField.Root
-        format={WHOLE}
-        largeStep={10}
-        max={MAX_BPM}
-        min={MIN_BPM}
-        onValueChange={handleBpm}
-        render={<InputGroup className="w-24" />}
-        step={1}
-        value={tempo.bpm}
-      >
-        <NumberField.Input
-          render={
-            <InputGroupInput
-              aria-label={`Tempo in beats per minute, ${MIN_BPM} to ${MAX_BPM}`}
-              className="tabular-nums"
-              onKeyDown={commitOnEnter}
-            />
-          }
-        />
-        <InputGroupAddon align="inline-end">
-          {/* Dragging the unit scrubs the tempo. */}
-          <NumberField.ScrubArea className="cursor-ew-resize select-none">
-            <InputGroupText>BPM</InputGroupText>
-            <NumberField.ScrubAreaCursor className="drop-shadow-sm">
-              <IconPlaceholder
-                className="size-5"
-                hugeicons="ArrowLeftRightIcon"
-                lucide="MoveHorizontalIcon"
-                phosphor="ArrowsHorizontalIcon"
-                remixicon="RiArrowLeftRightLine"
-                tabler="IconArrowsHorizontal"
-              />
-            </NumberField.ScrubAreaCursor>
-          </NumberField.ScrubArea>
-        </InputGroupAddon>
-      </NumberField.Root>
+      <BpmControl onValueChange={handleBpm} value={tempo.bpm} />
       <Select
         onValueChange={handleSignature}
         value={`${tempo.beatsPerBar}/${tempo.beatUnit}`}
