@@ -20,7 +20,9 @@ import {
   useRef,
   useState,
 } from "react";
+import { createPortal } from "react-dom";
 import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder";
+import { cn } from "@/registry/bases/base/lib/utils";
 import { Button } from "@/registry/bases/base/ui/button";
 import { Kbd, KbdGroup } from "@/registry/bases/base/ui/kbd";
 import {
@@ -373,6 +375,7 @@ const SHORTCUTS: { action: string; keys: string[] }[] = [
   { action: "Resize a track", keys: ["Up", "Down"] },
   { action: "Add a clip to the selection", keys: ["Shift", "Click"] },
   { action: "Select every clip", keys: ["Cmd/Ctrl", "A"] },
+  { action: "Select by dragging a rectangle", keys: ["Shift", "Drag"] },
   { action: "Clear the selection", keys: ["Esc"] },
 ];
 
@@ -465,6 +468,85 @@ function stopPress(event: PointerEvent<HTMLElement>) {
 }
 
 const NONE: string[] = [];
+
+interface Marquee {
+  height: number;
+  left: number;
+  top: number;
+  width: number;
+}
+
+/** Whether two rectangles overlap. */
+const overlaps = (a: DOMRect, b: Marquee) =>
+  a.left < b.left + b.width &&
+  a.right > b.left &&
+  a.top < b.top + b.height &&
+  a.bottom > b.top;
+
+/**
+ * A marquee for the clips: Shift and drag across bare lane draws a rectangle,
+ * and the clips it touches join the selection. It is told of the selection
+ * when the drag began, to add to it, and of the clips it touches as it grows.
+ */
+function useMarquee(initial: string[], onSelect: (clips: string[]) => void) {
+  const [rect, setRect] = useState<Marquee | null>(null);
+  const start = useRef<{ x: number; y: number; chosen: string[] } | null>(null);
+
+  const onPointerDownCapture = useCallback(
+    (event: PointerEvent<HTMLDivElement>) => {
+      const bare =
+        event.target instanceof Element &&
+        event.target.hasAttribute("data-timeline-lane");
+      if (!(event.shiftKey && event.button === 0 && bare)) {
+        return;
+      }
+      // The lane would take this press for the cursor: it is a marquee instead.
+      event.stopPropagation();
+      // And no text should be selected as it is dragged over.
+      event.preventDefault();
+      event.currentTarget.setPointerCapture(event.pointerId);
+      start.current = { chosen: initial, x: event.clientX, y: event.clientY };
+    },
+    [initial]
+  );
+  const onPointerMove = useCallback(
+    (event: PointerEvent<HTMLDivElement>) => {
+      const origin = start.current;
+      if (!origin) {
+        return;
+      }
+      const next = {
+        height: Math.abs(event.clientY - origin.y),
+        left: Math.min(event.clientX, origin.x),
+        top: Math.min(event.clientY, origin.y),
+        width: Math.abs(event.clientX - origin.x),
+      };
+      setRect(next);
+      const touched = [
+        ...event.currentTarget.querySelectorAll<HTMLElement>("[data-clip-id]"),
+      ]
+        .filter((clip) => overlaps(clip.getBoundingClientRect(), next))
+        .map((clip) => clip.getAttribute("data-clip-id") ?? "");
+      onSelect([...new Set([...origin.chosen, ...touched])]);
+    },
+    [onSelect]
+  );
+  const onPointerEnd = useCallback(() => {
+    start.current = null;
+    setRect(null);
+  }, []);
+
+  return {
+    handlers: {
+      onLostPointerCapture: onPointerEnd,
+      onPointerCancel: onPointerEnd,
+      onPointerDownCapture,
+      onPointerMove,
+      onPointerUp: onPointerEnd,
+    },
+    rect,
+  };
+}
 
 /** The original of a clip being copied, left in its place while the copy is dragged away. */
 function CopyGhost({ clip }: { clip: Arranged }) {
@@ -741,6 +823,11 @@ export default function BlockTimeline() {
     track: string | null;
   } | null>(null);
   const selectedIds = selection?.clips ?? NONE;
+  const selectClips = useCallback(
+    (chosen: string[]) => setSelection({ clips: chosen, track: null }),
+    []
+  );
+  const marquee = useMarquee(selectedIds, selectClips);
   const selectedTrack = selection?.track ?? null;
   // Where the selected clips were when a group drag began, so each moves by the same distance.
   const groupOrigin = useRef<Map<string, Arranged> | null>(null);
@@ -1224,7 +1311,13 @@ export default function BlockTimeline() {
           scrollbar="hidden"
         >
           {/* As wide as the lanes, so the stuck headers stay put however far it scrolls. */}
-          <div className="flex min-h-full w-max min-w-full flex-1 flex-col">
+          <div
+            className={cn(
+              "flex min-h-full w-max min-w-full flex-1 flex-col",
+              marquee.rect && "select-none"
+            )}
+            {...marquee.handlers}
+          >
             <Row className="sticky top-0 z-30 bg-background">
               <TimelineRuler aria-label="Playhead" getAriaValueText={describe}>
                 {labels.map((count) => (
@@ -1342,6 +1435,17 @@ export default function BlockTimeline() {
           </div>
         </TimelineViewport>
         <TimelineNavigator getAriaValueText={describe} />
+        {marquee.rect
+          ? // In the page's body: a dialog is transformed, which would make a fixed rectangle its own.
+            createPortal(
+              <div
+                aria-hidden="true"
+                className="pointer-events-none fixed z-50 border border-primary bg-primary/10"
+                style={marquee.rect}
+              />,
+              document.body
+            )
+          : null}
       </Timeline>
     </div>
   );
