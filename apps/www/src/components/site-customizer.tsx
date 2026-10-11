@@ -11,9 +11,13 @@ import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
 import { cn } from "@/lib/utils";
 
-/** Pages that carry their own customizer: the home showcase and the catalog. */
+/** Pages that carry their own customizer: the home showcase, the catalog and the docs, which put it in a sidebar. */
 function hasOwnCustomizer(pathname: string) {
-  return pathname === "/" || pathname.startsWith("/components");
+  return (
+    pathname === "/" ||
+    pathname.startsWith("/components") ||
+    pathname.startsWith("/docs")
+  );
 }
 
 function isTyping(target: EventTarget | null) {

@@ -1,10 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { FrameContent, frameClassName } from "@/components/custom/frame";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { useComponentsLayoutState, useConfig } from "@/hooks/use-config";
 import { useMounted } from "@/hooks/use-mounted";
 import type { ComponentCatalogItem } from "@/lib/registry";
+import { cn } from "@/lib/utils";
 
 import { ComponentHeader } from "./component-header";
 import { ComponentSidebar } from "./component-sidebar";
@@ -150,11 +152,19 @@ export function ComponentsProvider({
             suppressHydrationWarning
           >
             <ComponentSidebar />
-            <SidebarInset className="h-[calc(100svh-var(--header-height))] min-h-0 bg-transparent">
-              <ComponentHeader />
-              <div className="scroll-fade-y no-scrollbar flex min-h-0 flex-1 flex-col overflow-y-auto">
-                {children}
-              </div>
+            {/* The inset: the content in a frame of its own, between the two sidebars. */}
+            <SidebarInset
+              className={cn(
+                frameClassName,
+                "m-2 mt-0 h-[calc(100svh-var(--header-height)-0.5rem)] min-h-0 flex-1 bg-site-muted/50 shadow-none"
+              )}
+            >
+              <FrameContent className="flex min-h-0 flex-1 flex-col">
+                <ComponentHeader />
+                <div className="scroll-fade-y no-scrollbar flex min-h-0 flex-1 flex-col overflow-y-auto">
+                  {children}
+                </div>
+              </FrameContent>
             </SidebarInset>
             <CustomizerPanel />
           </SidebarProvider>

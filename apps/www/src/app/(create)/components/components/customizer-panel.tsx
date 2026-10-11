@@ -43,8 +43,8 @@ function CustomizerPanelSidebar() {
   return (
     <aside
       className={cn(
-        "sticky top-(--header-height) hidden h-[calc(100svh-var(--header-height))] w-64 shrink-0 flex-col overflow-hidden border-site-border/80 border-l bg-site-background transition-[width] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none lg:flex",
-        !customizerOpen && "w-0 border-l-0"
+        "sticky top-(--header-height) hidden h-[calc(100svh-var(--header-height))] w-64 shrink-0 flex-col overflow-hidden transition-[width] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none lg:flex",
+        !customizerOpen && "w-0"
       )}
       ref={anchorRef}
     >

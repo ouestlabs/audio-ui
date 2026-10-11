@@ -89,7 +89,7 @@ export function SiteHeader({ sticky = true }: { sticky?: boolean } = {}) {
   return (
     <header
       className={cn(
-        "w-full overscroll-none border-transparent border-b bg-site-background font-site-sans",
+        "w-full overscroll-none bg-site-background font-site-sans",
         sticky && "sticky top-0 z-50"
       )}
     >

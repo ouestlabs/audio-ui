@@ -21,7 +21,7 @@ export function ComponentHeader() {
   const { toggleCustomizer } = useCustomizer();
 
   return (
-    <div className="sticky top-(--header-height) z-20 flex items-center gap-2 border-site-border/80 border-b bg-site-background p-2">
+    <div className="sticky top-0 z-20 flex items-center gap-2 border-site-border/80 border-b bg-site-background p-2">
       {!open && (
         <Tooltip>
           <TooltipTrigger

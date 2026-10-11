@@ -41,7 +41,7 @@ export function ComponentSidebar() {
   }
 
   return (
-    <Sidebar className="top-(--header-height) h-[calc(100svh-var(--header-height))] border-site-border/80 border-r bg-site-background">
+    <Sidebar className="top-(--header-height) h-[calc(100svh-var(--header-height))] group-data-[side=left]:border-r-0 bg-transparent">
       <ComponentSidebarHeader />
       <SidebarContent className="p-0">
         <ComponentSidebarContent

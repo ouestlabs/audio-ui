@@ -1,8 +1,8 @@
 import { DocsDesignSystemSync } from "@/components/docs-design-system-sync";
+import { DocsShell } from "@/components/docs-shell";
 import { DocsSidebar } from "@/components/docs-sidebar";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
-import { SidebarProvider } from "@/components/ui/sidebar";
 import { source } from "@/lib/source";
 
 export default function DocsLayout({
@@ -14,13 +14,12 @@ export default function DocsLayout({
     <>
       <SiteHeader />
       <DocsDesignSystemSync>
-        <div className="container-wrapper flex flex-1 flex-col px-2">
-          <SidebarProvider className="3xl:fixed:container min-h-min flex-1 items-start 3xl:fixed:px-3 px-0 [--sidebar-width:220px] [--top-spacing:0] lg:grid lg:grid-cols-[var(--sidebar-width)_minmax(0,1fr)] lg:[--sidebar-width:240px] lg:[--top-spacing:--spacing(4)]">
-            <DocsSidebar tree={source.getPageTree()} />
-            <div className="size-full">{children}</div>
-          </SidebarProvider>
-        </div>
-        <SiteFooter docs />
+        <DocsShell
+          footer={<SiteFooter docs />}
+          nav={<DocsSidebar tree={source.getPageTree()} />}
+        >
+          {children}
+        </DocsShell>
       </DocsDesignSystemSync>
     </>
   );
