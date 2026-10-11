@@ -1,12 +1,15 @@
 import { mergeProps } from "@base-ui/react/merge-props";
 import { useRender } from "@base-ui/react/use-render";
 import * as React from "react";
+import { createChangeEventDetails } from "../../internal/event-details";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { pitchName } from "../../internal/pitch";
 import { createStore } from "../../internal/store";
 import { TimelineContext } from "../../timeline/context";
+import { snapToGrid } from "../../timeline/internal/snap";
 import {
   type Band,
+  type Edit,
   type NoteOffEventDetails,
   type NoteOnEventDetails,
   PianoRollContext,
@@ -19,8 +22,12 @@ import {
   type ValueCommitEventDetails,
 } from "../context";
 import {
+  cellStart,
+  duplicateAfter,
   type Note,
   type NoteId,
+  pasteNotes,
+  quantizeNotes,
   type RollBounds,
   sameNotes,
   sanitizeNote,
@@ -316,6 +323,111 @@ export function Root(componentProps: Root.Props) {
     [disabled, editing, mode, rows.folded]
   );
 
+  // Copied notes: kept on the roll, so a paste works from any note or the grid.
+  const clipboardRef = React.useRef<readonly Note[]>([]);
+  const { position } = timeline.meta;
+
+  /** Applies an edit made from the keyboard and commits it at once; returns whether it was applied. */
+  const applyKeyboardEdit = (
+    next: Note[],
+    edit: Edit,
+    event: KeyboardEvent
+  ): boolean => {
+    const eventDetails = Object.assign(
+      createChangeEventDetails("keyboard", event),
+      { edit }
+    ) as ValueChangeEventDetails;
+    if (!change(next, eventDetails)) {
+      return false;
+    }
+    commit([...valueRef.current], { edit, event, reason: "keyboard" });
+    return true;
+  };
+
+  const selectIds = (ids: readonly NoteId[], event: KeyboardEvent) =>
+    select(
+      ids,
+      createChangeEventDetails("keyboard", event) as SelectionChangeEventDetails
+    );
+
+  const duplicateSelection = (event: KeyboardEvent) => {
+    const result = duplicateAfter(
+      valueRef.current,
+      selectionRef.current,
+      createId,
+      bounds
+    );
+    if (result && applyKeyboardEdit(result.notes, "duplicate", event)) {
+      selectIds(result.copies, event);
+    }
+  };
+
+  /** As in a DAW: with nothing selected, everything is quantized. */
+  const quantizeSelection = (event: KeyboardEvent) => {
+    const { current } = valueRef;
+    const ids =
+      selectionRef.current.size > 0
+        ? selectionRef.current
+        : new Set(current.map((note) => note.id));
+    applyKeyboardEdit(
+      quantizeNotes(current, ids, (start) => snapToGrid(start, grid), bounds),
+      "quantize",
+      event
+    );
+  };
+
+  const copySelection = (event: KeyboardEvent, cut: boolean) => {
+    const { current } = valueRef;
+    const chosen = selectionRef.current;
+    if (chosen.size === 0) {
+      return;
+    }
+    clipboardRef.current = current.filter((note) => chosen.has(note.id));
+    if (cut) {
+      applyKeyboardEdit(
+        current.filter((note) => !chosen.has(note.id)),
+        "remove",
+        event
+      );
+      selectIds([], event);
+    }
+  };
+
+  const pasteClipboard = (event: KeyboardEvent) => {
+    const result = pasteNotes(
+      valueRef.current,
+      clipboardRef.current,
+      cellStart(position.get(), grid),
+      createId,
+      bounds
+    );
+    if (result && applyKeyboardEdit(result.notes, "paste", event)) {
+      selectIds(result.pasted, event);
+    }
+  };
+
+  const shortcut = (event: KeyboardEvent): boolean => {
+    if (event.altKey) {
+      return false;
+    }
+    const key = event.key.toLowerCase();
+    const commands: Record<
+      string,
+      ((event: KeyboardEvent) => void) | undefined
+    > =
+      event.metaKey || event.ctrlKey
+        ? {
+            c: (copied) => copySelection(copied, false),
+            d: duplicateSelection,
+            v: pasteClipboard,
+            x: (cut) => copySelection(cut, true),
+          }
+        : { q: quantizeSelection };
+    const run = commands[key];
+    run?.(event);
+    return run !== undefined;
+  };
+
   // What each part follows lives in a store, so editing one note renders it
   // and not the whole roll.
   const [view] = React.useState(() =>
@@ -337,6 +449,7 @@ export function Root(componentProps: Root.Props) {
     registerNote,
     select,
     setEditing,
+    shortcut,
     unitsPerPixel,
   });
   latest.current = {
@@ -349,6 +462,7 @@ export function Root(componentProps: Root.Props) {
     registerNote,
     select,
     setEditing,
+    shortcut,
     unitsPerPixel,
   };
   const actions = React.useMemo<PianoRollContextValue["actions"]>(
@@ -363,6 +477,7 @@ export function Root(componentProps: Root.Props) {
       select: (ids, details) => latest.current.select(ids, details),
       setBand,
       setEditing: (next) => latest.current.setEditing(next),
+      shortcut: (event) => latest.current.shortcut(event),
       unitsPerPixel: () => latest.current.unitsPerPixel(),
     }),
     []

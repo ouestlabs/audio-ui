@@ -44,7 +44,10 @@ type GridGesture =
  * end then follows the pointer, or starts a selection rectangle, Shift adding
  * to what is selected; in that mode a double-click draws. Focused, Enter adds
  * a note at the playback position, Escape clears the selection and Cmd/Ctrl+A
- * selects every note. Renders a `<div>` element.
+ * selects every note. From the grid or a note, Cmd/Ctrl+D repeats the
+ * selection right after itself, Cmd/Ctrl+C, X and V copy, cut and paste at the
+ * playback position, and Q snaps the starts of the selection (every note, with
+ * none selected) to the grid. Renders a `<div>` element.
  */
 export function Grid(componentProps: Grid.Props) {
   const { className, ref, render, style, ...elementProps } = componentProps;
@@ -287,6 +290,10 @@ export function Grid(componentProps: Grid.Props) {
       return;
     }
     const native = event.nativeEvent;
+    if (actions.shortcut(native)) {
+      event.preventDefault();
+      return;
+    }
     if (event.key === "Escape") {
       actions.select([], createChangeEventDetails("keyboard", native));
       return;

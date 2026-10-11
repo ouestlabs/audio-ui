@@ -145,6 +145,90 @@ export function duplicateNotes(
   return { copyOf, notes: [...notes, ...copies] };
 }
 
+/**
+ * Copies of the notes in `ids` placed right after them, one selection's
+ * length on, so a phrase repeats itself the way it is played. They stop where
+ * the roll ends; with no room for even a step, nothing is copied.
+ */
+export function duplicateAfter(
+  notes: readonly Note[],
+  ids: ReadonlySet<NoteId>,
+  nextId: () => NoteId,
+  bounds: RollBounds
+): { copies: NoteId[]; notes: Note[] } | null {
+  const source = notes.filter((note) => ids.has(note.id));
+  if (source.length === 0) {
+    return null;
+  }
+  const earliest = Math.min(...source.map((note) => note.start));
+  const latestEnd = Math.max(...source.map((note) => note.start + note.length));
+  const shift = Math.min(latestEnd - earliest, bounds.duration - latestEnd);
+  if (shift < bounds.minLength) {
+    return null;
+  }
+  const copies = source.map((note) => ({
+    ...note,
+    id: nextId(),
+    start: note.start + shift,
+  }));
+  return {
+    copies: copies.map((note) => note.id),
+    notes: [...notes, ...copies],
+  };
+}
+
+/** The notes in `ids` with their start on the nearest grid line: their length, and the rest, stay. */
+export function quantizeNotes(
+  notes: readonly Note[],
+  ids: ReadonlySet<NoteId>,
+  snap: (value: number) => number,
+  bounds: RollBounds
+): Note[] {
+  return notes.map((note) => {
+    if (!ids.has(note.id)) {
+      return note;
+    }
+    const start = Math.min(
+      bounds.duration - note.length,
+      Math.max(0, snap(note.start))
+    );
+    return start === note.start ? note : { ...note, start };
+  });
+}
+
+/**
+ * Copies of `clipboard` under new ids, the earliest starting at `at`: a phrase
+ * keeps its spacing wherever it lands, and stops where the roll ends.
+ */
+export function pasteNotes(
+  notes: readonly Note[],
+  clipboard: readonly Note[],
+  at: number,
+  nextId: () => NoteId,
+  bounds: RollBounds
+): { pasted: NoteId[]; notes: Note[] } | null {
+  if (clipboard.length === 0) {
+    return null;
+  }
+  const earliest = Math.min(...clipboard.map((note) => note.start));
+  const latestEnd = Math.max(
+    ...clipboard.map((note) => note.start + note.length)
+  );
+  const shift = Math.max(
+    -earliest,
+    Math.min(at - earliest, bounds.duration - latestEnd)
+  );
+  const pasted = clipboard.map((note) => ({
+    ...note,
+    id: nextId(),
+    start: note.start + shift,
+  }));
+  return {
+    notes: [...notes, ...pasted],
+    pasted: pasted.map((note) => note.id),
+  };
+}
+
 /** The ids of the notes overlapping a stretch of time and a band of rows. */
 export function notesWithin(
   notes: readonly Note[],

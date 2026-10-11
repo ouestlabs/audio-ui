@@ -2,10 +2,13 @@ import { describe, expect, test } from "bun:test";
 import {
   cellStart,
   changeVelocity,
+  duplicateAfter,
   duplicateNotes,
   moveNotes,
   type Note,
   notesWithin,
+  pasteNotes,
+  quantizeNotes,
   resizeNotes,
   sameNotes,
   sanitizeNote,
@@ -152,5 +155,85 @@ describe("changeVelocity", () => {
       changeVelocity(notes, BOTH, 0.2).map((note) => note.velocity)
     ).toEqual([1, 0.7, undefined]);
     expect(changeVelocity(notes, BOTH, -0.6)[1]?.velocity).toBe(0);
+  });
+});
+
+describe("duplicateAfter", () => {
+  const ids = () => {
+    let next = 0;
+    return () => {
+      next += 1;
+      return `copy-${next}`;
+    };
+  };
+
+  test("places copies right after the selection, one length on", () => {
+    const result = duplicateAfter(CHORD, BOTH, ids(), BOUNDS) as NonNullable<
+      ReturnType<typeof duplicateAfter>
+    >;
+    expect(result.copies).toEqual(["copy-1", "copy-2"]);
+    expect(result.notes.slice(3)).toEqual([
+      { id: "copy-1", length: 2, pitch: 60, start: 6 },
+      { id: "copy-2", length: 4, pitch: 64, start: 6 },
+    ]);
+  });
+
+  test("stops where the roll ends, and does nothing without room", () => {
+    expect(
+      duplicateAfter(CHORD, new Set(["x"]), ids(), BOUNDS)?.notes[3]
+    ).toMatchObject({
+      start: 11,
+    });
+    const edge: Note[] = [{ id: "z", length: 2, pitch: 60, start: 14 }];
+    expect(duplicateAfter(edge, new Set(["z"]), ids(), BOUNDS)).toBeNull();
+    expect(duplicateAfter(CHORD, new Set(), ids(), BOUNDS)).toBeNull();
+  });
+});
+
+describe("quantizeNotes", () => {
+  const snap = (value: number) => Math.round(value / 4) * 4;
+
+  test("snaps the starts of the notes in ids and leaves lengths and others alone", () => {
+    const loose: Note[] = [
+      { id: "a", length: 1.5, pitch: 60, start: 2.2 },
+      { id: "b", length: 1, pitch: 61, start: 5.7 },
+    ];
+    expect(quantizeNotes(loose, new Set(["a"]), snap, BOUNDS)).toEqual([
+      { id: "a", length: 1.5, pitch: 60, start: 4 },
+      loose[1] as Note,
+    ]);
+  });
+
+  test("keeps a snapped note inside the roll", () => {
+    const edge: Note[] = [{ id: "a", length: 6, pitch: 60, start: 11.2 }];
+    expect(quantizeNotes(edge, new Set(["a"]), snap, BOUNDS)[0]).toMatchObject({
+      start: 10,
+    });
+  });
+});
+
+describe("pasteNotes", () => {
+  const counter = () => {
+    let next = 0;
+    return () => {
+      next += 1;
+      return `p${next}`;
+    };
+  };
+
+  test("puts the earliest note at the position and keeps the spacing", () => {
+    const result = pasteNotes([], CHORD, 4, counter(), BOUNDS) as NonNullable<
+      ReturnType<typeof pasteNotes>
+    >;
+    expect(result.notes.map((note) => note.start)).toEqual([4, 4, 12]);
+    expect(result.pasted).toEqual(["p1", "p2", "p3"]);
+  });
+
+  test("stops where the roll ends, and does nothing for an empty clipboard", () => {
+    const result = pasteNotes([], CHORD, 15, counter(), BOUNDS) as NonNullable<
+      ReturnType<typeof pasteNotes>
+    >;
+    expect(result.notes.map((note) => note.start)).toEqual([7, 7, 15]);
+    expect(pasteNotes([], [], 0, counter(), BOUNDS)).toBeNull();
   });
 });

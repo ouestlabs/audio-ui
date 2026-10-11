@@ -440,6 +440,12 @@ export function Note(componentProps: Note.Props) {
       return;
     }
     const native = event.nativeEvent;
+    if (actions.shortcut(native)) {
+      event.preventDefault();
+      // Handled: the grid around the note would run it again.
+      event.stopPropagation();
+      return;
+    }
     if (event.key === "Delete" || event.key === "Backspace") {
       event.preventDefault();
       remove(targets(), "keyboard", native);
