@@ -24,6 +24,12 @@ import { useComponentsLayoutState, useConfig } from "@/hooks/use-config";
 import { useMounted } from "@/hooks/use-mounted";
 import { cn } from "@/lib/utils";
 
+/** What the bar adds while the navigation is shut: shown from what is stored before the page is hydrated, from its state after. */
+const CLOSED_BLOCK =
+  "hidden lg:group-data-[nav=closed]/framed:block lg:[html[data-nav-closed]_&]:block";
+const CLOSED_FLEX =
+  "hidden lg:group-data-[nav=closed]/framed:flex lg:[html[data-nav-closed]_&]:flex";
+
 /** Whether a key press is for a field: the shortcuts leave it alone. */
 function isTyping(event: KeyboardEvent) {
   const { target } = event;
@@ -56,18 +62,15 @@ function useShortcut(key: string, action: () => void) {
   }, [key, action]);
 }
 
-/** The inset's place: an even margin all round, except where a sidebar already leaves one: both sides keep the same distance. */
+/**
+ * The inset's place: an even margin all round, except where a sidebar already
+ * leaves one, so both sides keep the same distance. Which sides is told by the
+ * stylesheet (see `.inset-pane`), from what is stored, so it is right on the
+ * first paint.
+ */
 function InsetPane({ children }: { children: React.ReactNode }) {
-  const { state } = useSidebar();
-  const { customizerOpen } = useCustomizer();
   return (
-    <div
-      className={cn(
-        "min-h-0 min-w-0 flex-1 p-2 pt-0 lg:pt-2",
-        state === "expanded" && "lg:pl-0",
-        customizerOpen && "lg:pr-0"
-      )}
-    >
+    <div className="inset-pane min-h-0 min-w-0 flex-1 p-2 pt-0 lg:pt-2">
       {children}
     </div>
   );
@@ -171,6 +174,14 @@ export function FramedLayout({
   const desktopOpen = mounted ? config.customizerOpen : true;
   const customizerOpen = isDesktop ? desktopOpen : sheetOpen;
 
+  // From here the state tells which sidebars are shut: the stored note the page started with is done.
+  useEffect(() => {
+    if (mounted) {
+      document.documentElement.removeAttribute("data-customizer-closed");
+      document.documentElement.removeAttribute("data-nav-closed");
+    }
+  }, [mounted]);
+
   // Once the stored choice is applied, wait two frames before letting the
   // sidebars animate: they would otherwise slide shut on load.
   const [settled, setSettled] = useState(false);
@@ -217,8 +228,10 @@ export function FramedLayout({
       )}
       {/* The inset stays in the viewport: the page scrolls inside it, under the bar. */}
       <SidebarProvider
-        className="bordered-sidebar h-[calc(100svh-var(--header-height))] min-h-0 flex-none items-stretch gap-0 px-0 [--sidebar-width:15rem] [--top-spacing:0] **:data-[slot=sidebar-gap]:transition-none **:data-[slot=sidebar-container]:transition-none [&_[data-state=expanded]_[data-slot=sidebar-inner]]:animate-in [&_[data-state=expanded]_[data-slot=sidebar-inner]]:fade-in-0 [&_[data-state=expanded]_[data-slot=sidebar-inner]]:slide-in-from-left-4 [&_[data-state=expanded]_[data-slot=sidebar-inner]]:duration-200 [&_[data-state=expanded]_[data-slot=sidebar-inner]]:ease-[cubic-bezier(0.22,1,0.36,1)] [&_[data-state=expanded]_[data-slot=sidebar-inner]]:motion-reduce:animate-none"
+        className="group/framed bordered-sidebar h-[calc(100svh-var(--header-height))] min-h-0 flex-none items-stretch gap-0 px-0 [--sidebar-width:15rem] [--top-spacing:0] **:data-[slot=sidebar-gap]:transition-none **:data-[slot=sidebar-container]:transition-none [&_[data-state=expanded]_[data-slot=sidebar-inner]]:animate-in [&_[data-state=expanded]_[data-slot=sidebar-inner]]:fade-in-0 [&_[data-state=expanded]_[data-slot=sidebar-inner]]:slide-in-from-left-4 [&_[data-state=expanded]_[data-slot=sidebar-inner]]:duration-200 [&_[data-state=expanded]_[data-slot=sidebar-inner]]:ease-[cubic-bezier(0.22,1,0.36,1)] [&_[data-state=expanded]_[data-slot=sidebar-inner]]:motion-reduce:animate-none"
+        data-customizer={desktopOpen ? "open" : "closed"}
         data-framed-layout=""
+        data-nav={navigationOpen ? "open" : "closed"}
         onOpenChange={setNavigationOpen}
         open={navigationOpen}
         suppressHydrationWarning
@@ -229,15 +242,8 @@ export function FramedLayout({
           <Frame className="h-full">
             <FrameHeader className="min-h-11 shrink-0 flex-row items-center gap-2 px-2 py-1.5">
               <NavigationToggle />
-              {navigationOpen ? null : (
-                <>
-                  <Separator
-                    className="hidden lg:block"
-                    orientation="vertical"
-                  />
-                  <div className="hidden lg:block">{closedStart}</div>
-                </>
-              )}
+              <Separator className={CLOSED_BLOCK} orientation="vertical" />
+              <div className={CLOSED_BLOCK}>{closedStart}</div>
               {start}
               <div className="ml-auto flex items-center gap-2">
                 {actions}
@@ -248,12 +254,10 @@ export function FramedLayout({
                   />
                 ) : null}
                 <div className="hidden items-center gap-2 lg:flex">
-                  {navigationOpen ? null : (
-                    <>
-                      {closedEnd}
-                      <Separator orientation="vertical" />
-                    </>
-                  )}
+                  <div className={cn("items-center gap-2", CLOSED_FLEX)}>
+                    {closedEnd}
+                    <Separator orientation="vertical" />
+                  </div>
                   {siteEnd}
                 </div>
                 <Separator

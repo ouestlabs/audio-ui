@@ -18,7 +18,7 @@ const CUSTOMIZER_CHOICES = [
 /** The customizer while its choices read the URL: each has its name, only its value is awaited. */
 export function CustomizerSkeleton() {
   return (
-    <aside className="hidden w-64 shrink-0 flex-col gap-1 p-2 lg:flex">
+    <aside className="customizer-aside hidden w-64 shrink-0 flex-col gap-1 p-2 lg:flex">
       {CUSTOMIZER_CHOICES.map((name) => (
         <div className="flex items-center justify-between p-2" key={name}>
           <div className="flex flex-col gap-1.5">

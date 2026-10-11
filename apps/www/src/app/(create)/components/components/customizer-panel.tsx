@@ -43,7 +43,7 @@ function CustomizerPanelSidebar() {
   return (
     <aside
       className={cn(
-        "sticky top-(--header-height) hidden h-[calc(100svh-var(--header-height))] w-64 shrink-0 flex-col overflow-hidden lg:flex",
+        "customizer-aside sticky top-(--header-height) hidden h-[calc(100svh-var(--header-height))] w-64 shrink-0 flex-col overflow-hidden lg:flex",
         !customizerOpen && "w-0"
       )}
       ref={anchorRef}

@@ -511,3 +511,42 @@
   -webkit-backdrop-filter: blur(16px) saturate(1.5);
   backdrop-filter: blur(16px) saturate(1.5);
 }
+
+/*
+ * The framed layout's sidebars, as they were left: the page is served open,
+ * and a small script notes before the first paint which ones are shut (the
+ * `data-nav-closed` and `data-customizer-closed` marks on the page), so nothing
+ * opens then closes while the page loads. Once the page is hydrated the layout's
+ * own state (`data-nav`, `data-customizer`) tells it, and the marks go.
+ */
+@media (min-width: 1024px) {
+  .inset-pane {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  [data-framed-layout][data-nav="closed"] .inset-pane,
+  html[data-nav-closed] .inset-pane {
+    padding-left: 0.5rem;
+  }
+
+  [data-framed-layout][data-customizer="closed"] .inset-pane,
+  html[data-customizer-closed] .inset-pane {
+    padding-right: 0.5rem;
+  }
+
+  [data-framed-layout][data-nav="closed"] [data-slot="sidebar-gap"],
+  html[data-nav-closed] [data-slot="sidebar-gap"] {
+    width: 0;
+  }
+
+  [data-framed-layout][data-nav="closed"] [data-slot="sidebar-container"],
+  html[data-nav-closed] [data-slot="sidebar-container"] {
+    left: calc(var(--sidebar-width) * -1);
+  }
+
+  [data-framed-layout][data-customizer="closed"] .customizer-aside,
+  html[data-customizer-closed] .customizer-aside {
+    width: 0;
+  }
+}
