@@ -396,11 +396,10 @@
 
   /* The code scrolls sideways in its panel, fading at the edges it runs past, and keeps its inset at the far end. */
   [data-rehype-pretty-code-figure]:not(:has([data-code-command])) pre code {
-    @apply scroll-fade-x;
+    @apply no-scrollbar scroll-fade-x;
     display: block;
     overflow-x: auto;
     padding-inline-end: calc(var(--spacing) * 4);
-    scrollbar-width: thin;
   }
 
   /* Inside another frame (a preview's code, a sheet), the figure gives its own up. */
