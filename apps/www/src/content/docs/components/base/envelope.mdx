@@ -159,76 +159,76 @@ A segment's handles are sliders on their curves, with one tab stop among them:
 
 Groups all parts of the breakpoint envelope and owns its points, each normalized to 0…1 on both axes and kept sorted by `x`. Points are dragged and nudged with the keyboard; a double click on the `Graph` adds one and a double click (or Delete) on a `Point` removes it, within `minPoints` / `maxPoints`. Renders a `<div>` element.
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `defaultValue` | `GeomPoint[]` |  | Uncontrolled starting points. Defaults to an ADSR-like shape. |
-| `disabled` | `boolean` |  |  |
-| `format` | `Intl.NumberFormatOptions` |  | Formats point coordinates for each point's `aria-valuetext`. |
-| `locale` | `Intl.LocalesArgument` |  |  |
-| `maxPoints` | `number` |  | Ceiling on the number of points; adding is blocked at this count. Equal to `minPoints`, the shape is fixed. |
-| `minPoints` | `number` | `2` | Floor on the number of points; removal is blocked at this count. |
-| `onValueChange` | `( value: GeomPoint[], eventDetails: ChangeEventDetails ) => void` |  | Fires on every change: drag, keyboard, add and remove. |
-| `onValueCommitted` | `( value: GeomPoint[], eventDetails: CommitEventDetails ) => void` |  | Fires when an interaction that changed the points ends. |
-| `step` | `number` | `0.01` | Keyboard step on both axes, in normalized units. |
-| `snap` | `number` | `0` | Grid the pointer snaps points to, in normalized units: `0.25` snaps to quarters, `0` is no grid. Cmd/Ctrl leaves the grid and Shift's fine drag ignores it. |
-| `value` | `GeomPoint[]` |  |  |
+<TypeTable>
+<TypeRow name={"defaultValue"} type={"GeomPoint[]"}>Uncontrolled starting points. Defaults to an ADSR-like shape.</TypeRow>
+<TypeRow name={"disabled"} type={"boolean"}></TypeRow>
+<TypeRow name={"format"} type={"Intl.NumberFormatOptions"}>Formats point coordinates for each point's `aria-valuetext`.</TypeRow>
+<TypeRow name={"locale"} type={"Intl.LocalesArgument"}></TypeRow>
+<TypeRow name={"maxPoints"} type={"number"}>Ceiling on the number of points; adding is blocked at this count. Equal to `minPoints`, the shape is fixed.</TypeRow>
+<TypeRow name={"minPoints"} type={"number"} default={"2"}>Floor on the number of points; removal is blocked at this count.</TypeRow>
+<TypeRow name={"onValueChange"} type={"( value: GeomPoint[], eventDetails: ChangeEventDetails ) => void"}>Fires on every change: drag, keyboard, add and remove.</TypeRow>
+<TypeRow name={"onValueCommitted"} type={"( value: GeomPoint[], eventDetails: CommitEventDetails ) => void"}>Fires when an interaction that changed the points ends.</TypeRow>
+<TypeRow name={"step"} type={"number"} default={"0.01"}>Keyboard step on both axes, in normalized units.</TypeRow>
+<TypeRow name={"snap"} type={"number"} default={"0"}>Grid the pointer snaps points to, in normalized units: `0.25` snaps to quarters, `0` is no grid. Cmd/Ctrl leaves the grid and Shift's fine drag ignores it.</TypeRow>
+<TypeRow name={"value"} type={"GeomPoint[]"}></TypeRow>
+</TypeTable>
 
-| Data attribute | Description |
-| --- | --- |
-| `data-disabled` | Present when disabled. |
-| `data-dragging` | Whether a point is being dragged. |
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+<TypeRow name={"data-dragging"}>Whether a point is being dragged.</TypeRow>
+</TypeTable>
 
 ### Graph
 
 The drawing surface, a 100×100 stretched viewBox: holds `Line` and `Fill`, and a double click on it adds a point. Carries `data-blocked` briefly when adding is refused at `maxPoints`. Renders a `<svg>` element.
 
-| Data attribute | Description |
-| --- | --- |
-| `data-disabled` | Present when disabled. |
-| `data-dragging` | Whether a point is being dragged. |
-| `data-blocked` | Briefly true after an add was refused at `maxPoints`. |
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+<TypeRow name={"data-dragging"}>Whether a point is being dragged.</TypeRow>
+<TypeRow name={"data-blocked"}>Briefly true after an add was refused at `maxPoints`.</TypeRow>
+</TypeTable>
 
 ### Line
 
 The envelope curve through the points. Renders a `<polyline>` element.
 
-| Data attribute | Description |
-| --- | --- |
-| `data-disabled` | Present when disabled. |
-| `data-dragging` | Whether a point is being dragged. |
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+<TypeRow name={"data-dragging"}>Whether a point is being dragged.</TypeRow>
+</TypeTable>
 
 ### Fill
 
 The area under the curve. Renders a `<polyline>` element.
 
-| Data attribute | Description |
-| --- | --- |
-| `data-disabled` | Present when disabled. |
-| `data-dragging` | Whether a point is being dragged. |
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+<TypeRow name={"data-dragging"}>Whether a point is being dragged.</TypeRow>
+</TypeTable>
 
 ### Points
 
 Renders one child per point, in `x` order.
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `children` | `( point: GeomPoint, index: number, points: GeomPoint[] ) => React.ReactNode` |  |  |
+<TypeTable>
+<TypeRow name={"children"} type={"( point: GeomPoint, index: number, points: GeomPoint[] ) => React.ReactNode"}></TypeRow>
+</TypeTable>
 
 ### Point
 
 A draggable handle for the point at `index`, positioned with `left`/`bottom` percentages over the `Graph`. It is a `role="slider"` on the point's level (`y`): give it an `aria-label`. One point at a time is the tab stop; arrow keys move it (Shift for larger steps), Delete or a double click removes it. Carries `data-blocked` briefly when removal is refused at `minPoints`. Renders a `<div>` element.
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `getAriaValueText` | `(point: GeomPoint, index: number) => string` |  | Returns the point's `aria-valuetext`. Defaults to the formatted `x, y`. |
-| `index` | `number` |  | Index of the point in the (sorted) value. |
+<TypeTable>
+<TypeRow name={"getAriaValueText"} type={"(point: GeomPoint, index: number) => string"}>Returns the point's `aria-valuetext`. Defaults to the formatted `x, y`.</TypeRow>
+<TypeRow name={"index"} type={"number"}>Index of the point in the (sorted) value.</TypeRow>
+</TypeTable>
 
-| Data attribute | Description |
-| --- | --- |
-| `data-disabled` | Present when disabled. |
-| `data-dragging` | Whether a point is being dragged. |
-| `data-blocked` | Briefly true after a removal was refused at `minPoints`. |
-| `data-removable` | Whether the point can currently be removed. |
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+<TypeRow name={"data-dragging"}>Whether a point is being dragged.</TypeRow>
+<TypeRow name={"data-blocked"}>Briefly true after a removal was refused at `minPoints`.</TypeRow>
+<TypeRow name={"data-removable"}>Whether the point can currently be removed.</TypeRow>
+</TypeTable>
 
 ### Registry component
 
@@ -236,28 +236,28 @@ A draggable handle for the point at `index`, positioned with `left`/`bottom` per
 
 #### Value and state
 
-| Prop | Type | Default | Description |
-| ---- | ---- | ------- | ----------- |
-| `value` | `{ x: number; y: number; curve?: number }[]` | - | Controlled points, normalized 0-1, sorted by `x`. `curve`, -1 to 1, bends the segment leaving the point. |
-| `defaultValue` | `{ x: number; y: number; curve?: number }[]` | ADSR-like 5-point shape | Uncontrolled starting points. |
-| `minPoints` | `number` | `2` | Floor on the number of points; removal is blocked at this count. |
-| `maxPoints` | `number` | - | Ceiling on the number of points; adding is blocked at this count. |
-| `step` | `number` | `0.01` | Keyboard step on both axes, in normalized units. |
-| `disabled` | `boolean` | `false` | Whether the envelope is disabled. |
-| `format` | `Intl.NumberFormatOptions` | - | Formats point coordinates for each point's value text. |
-| `onValueChange` | `(points, eventDetails) => void` | - | Every change. `eventDetails.reason` is `"drag"`, `"keyboard"`, `"add"`, `"remove"` or `"curve"`, and `eventDetails.index` is the affected point; call `eventDetails.cancel()` to reject it. |
-| `onValueCommitted` | `(points, eventDetails) => void` | - | When an interaction that changed the points ends (release, key press, add, or remove). |
+<TypeTable>
+<TypeRow name={"value"} type={"{ x: number; y: number; curve?: number }[]"}>Controlled points, normalized 0-1, sorted by `x`. `curve`, -1 to 1, bends the segment leaving the point.</TypeRow>
+<TypeRow name={"defaultValue"} type={"{ x: number; y: number; curve?: number }[]"} default={"ADSR-like 5-point shape"}>Uncontrolled starting points.</TypeRow>
+<TypeRow name={"minPoints"} type={"number"} default={"2"}>Floor on the number of points; removal is blocked at this count.</TypeRow>
+<TypeRow name={"maxPoints"} type={"number"}>Ceiling on the number of points; adding is blocked at this count.</TypeRow>
+<TypeRow name={"step"} type={"number"} default={"0.01"}>Keyboard step on both axes, in normalized units.</TypeRow>
+<TypeRow name={"disabled"} type={"boolean"} default={"false"}>Whether the envelope is disabled.</TypeRow>
+<TypeRow name={"format"} type={"Intl.NumberFormatOptions"}>Formats point coordinates for each point's value text.</TypeRow>
+<TypeRow name={"onValueChange"} type={"(points, eventDetails) => void"}>Every change. `eventDetails.reason` is `"drag"`, `"keyboard"`, `"add"`, `"remove"` or `"curve"`, and `eventDetails.index` is the affected point; call `eventDetails.cancel()` to reject it.</TypeRow>
+<TypeRow name={"onValueCommitted"} type={"(points, eventDetails) => void"}>When an interaction that changed the points ends (release, key press, add, or remove).</TypeRow>
+</TypeTable>
 
 #### Layout and display
 
-| Prop | Type | Default | Description |
-| ---- | ---- | ------- | ----------- |
-| `size` | `"sm" \| "default" \| "lg"` | `"default"` | Size variant (sets the envelope height). |
-| `curves` | `boolean` | `true` | Whether a handle on each segment bends it. |
-| `formatValue` | `(point: { x: number; y: number }) => string` | from the domains | Prints a point's value in its label and its accessible value text. |
-| `xDomain` / `yDomain` | `[number, number]` | percent | The values each axis runs from and to, so the labels read in real units: `xDomain={[0, 2000]}`. |
-| `xUnit` / `yUnit` | `string` | - | The unit written after the value, such as `"ms"` or `"dB"`. |
-| `className` | `string` | - | Classes for the graph surface. |
+<TypeTable>
+<TypeRow name={"size"} type={"\"sm\" | \"default\" | \"lg\""} default={"\"default\""}>Size variant (sets the envelope height).</TypeRow>
+<TypeRow name={"curves"} type={"boolean"} default={"true"}>Whether a handle on each segment bends it.</TypeRow>
+<TypeRow name={"formatValue"} type={"(point: { x: number; y: number }) => string"} default={"from the domains"}>Prints a point's value in its label and its accessible value text.</TypeRow>
+<TypeRow name={"xDomain / yDomain"} type={"[number, number]"} default={"percent"}>The values each axis runs from and to, so the labels read in real units: `xDomain={[0, 2000]}`.</TypeRow>
+<TypeRow name={"xUnit / yUnit"} type={"string"}>The unit written after the value, such as `"ms"` or `"dB"`.</TypeRow>
+<TypeRow name={"className"} type={"string"}>Classes for the graph surface.</TypeRow>
+</TypeTable>
 
 
 

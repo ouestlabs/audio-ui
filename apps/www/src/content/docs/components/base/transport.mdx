@@ -74,13 +74,13 @@ Play, record and loop are toggle buttons (`aria-pressed`), so they show when the
 
 ## API reference
 
-| Prop | Type | Description |
-| --- | --- | --- |
-| `source` | `{ getSnapshot, subscribe }` | The playback position in seconds, a live value. |
-| `bpm`, `onBpmChange` | `number`, `(bpm) => void` | The tempo. |
-| `tempo` | `{ beatsPerBar, beatUnit }` | The time signature the position is counted in. Defaults to 4/4. |
-| `playing`, `onPlay` | `boolean`, `() => void` | Play is pressed while it plays. |
-| `onStop` | `() => void` | Stop was pressed. |
-| `onReturn` | `() => void` | Return to start was pressed. |
-| `recording`, `onRecordingChange` | `boolean`, `(recording) => void` | Armed to record. |
-| `looping`, `onLoopingChange` | `boolean`, `(looping) => void` | Whether the loop is on. |
+<TypeTable>
+<TypeRow name={"source"} type={"{ getSnapshot, subscribe }"}>The playback position in seconds, a live value.</TypeRow>
+<TypeRow name={"bpm, onBpmChange"} type={"number, (bpm) => void"}>The tempo.</TypeRow>
+<TypeRow name={"tempo"} type={"{ beatsPerBar, beatUnit }"}>The time signature the position is counted in. Defaults to 4/4.</TypeRow>
+<TypeRow name={"playing, onPlay"} type={"boolean, () => void"}>Play is pressed while it plays.</TypeRow>
+<TypeRow name={"onStop"} type={"() => void"}>Stop was pressed.</TypeRow>
+<TypeRow name={"onReturn"} type={"() => void"}>Return to start was pressed.</TypeRow>
+<TypeRow name={"recording, onRecordingChange"} type={"boolean, (recording) => void"}>Armed to record.</TypeRow>
+<TypeRow name={"looping, onLoopingChange"} type={"boolean, (looping) => void"}>Whether the loop is on.</TypeRow>
+</TypeTable>

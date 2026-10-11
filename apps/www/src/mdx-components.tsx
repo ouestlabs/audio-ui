@@ -8,10 +8,12 @@ import { CodeBlockCommand } from "@/components/code-block-command";
 import { CodeCollapsibleWrapper } from "@/components/code-collapsible-wrapper";
 import { CodeTabs } from "@/components/code-tabs";
 import { CopyButton } from "@/components/copy-button";
+import { Frame, FrameContent } from "@/components/custom/frame";
 import { DocsComponentPreview } from "@/components/docs-component-preview";
 import { DocsComponentSource } from "@/components/docs-component-source";
 import { getIconForLanguageExtension } from "@/components/icons";
 import { Mermaid } from "@/components/mermaid";
+import { TypeRow, TypeTable } from "@/components/type-table";
 import {
   Accordion,
   AccordionContent,
@@ -230,10 +232,14 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
       className,
       ...props
     }: React.ComponentProps<typeof TabsTrigger>) => <TabsTrigger {...props} />,
+    TypeRow,
+    TypeTable,
     table: ({ className, ...props }: React.ComponentProps<"table">) => (
-      <div className="typeset-scroll no-scrollbar">
-        <table className={className} {...props} />
-      </div>
+      <Frame className="my-6">
+        <FrameContent className="typeset-scroll no-scrollbar">
+          <table className={className} {...props} />
+        </FrameContent>
+      </Frame>
     ),
     ...components,
     a: (props: any) => {

@@ -125,56 +125,56 @@ To also read the levels in React (a numeric readout, say), use `useSyncExternalS
 
 Groups the channels of a level meter. Levels come either from `value` (and `peak`) as React props, or from a live `source`: with a source the meter writes each frame straight to the DOM, so a signal updating 60 times a second never re-renders React. Renders a `<div>` element.
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `clipThreshold` | `number` | `0` | Level at or above which a channel is clipping. |
-| `format` | `Intl.NumberFormatOptions` |  | Formats each level for `Meter.Value` and the channels' `aria-valuetext`. Defaults to one decimal. |
-| `locale` | `Intl.LocalesArgument` |  |  |
-| `max` | `number` | `6` |  |
-| `min` | `number` | `-60` |  |
-| `orientation` | `Orientation` | `"vertical"` |  |
-| `peak` | `readonly number[]` |  | Peak-hold level per channel. Timing and decay live outside the primitive. |
-| `scale` | `"linear" \| "iec" \| (level: number) => number` | `"linear"` | How levels are spread along the length: evenly, as digital peak meters do with more room at the top (`"iec"`), or by your own increasing curve. |
-| `warnThreshold` | `number` |  | Level at or above which a channel is in its warning zone, below the clip threshold: `data-warning`. Unset, there is no warning zone. |
-| `source` | `Source` |  | A live signal painted outside React; takes precedence over `value` and `peak`. |
-| `value` | `readonly number[]` |  | Level per channel; the array length is the channel count. |
+<TypeTable>
+<TypeRow name={"clipThreshold"} type={"number"} default={"0"}>Level at or above which a channel is clipping.</TypeRow>
+<TypeRow name={"format"} type={"Intl.NumberFormatOptions"}>Formats each level for `Meter.Value` and the channels' `aria-valuetext`. Defaults to one decimal.</TypeRow>
+<TypeRow name={"locale"} type={"Intl.LocalesArgument"}></TypeRow>
+<TypeRow name={"max"} type={"number"} default={"6"}></TypeRow>
+<TypeRow name={"min"} type={"number"} default={"-60"}></TypeRow>
+<TypeRow name={"orientation"} type={"Orientation"} default={"\"vertical\""}></TypeRow>
+<TypeRow name={"peak"} type={"readonly number[]"}>Peak-hold level per channel. Timing and decay live outside the primitive.</TypeRow>
+<TypeRow name={"scale"} type={"\"linear\" | \"iec\" | (level: number) => number"} default={"\"linear\""}>How levels are spread along the length: evenly, as digital peak meters do with more room at the top (`"iec"`), or by your own increasing curve.</TypeRow>
+<TypeRow name={"warnThreshold"} type={"number"}>Level at or above which a channel is in its warning zone, below the clip threshold: `data-warning`. Unset, there is no warning zone.</TypeRow>
+<TypeRow name={"source"} type={"Source"}>A live signal painted outside React; takes precedence over `value` and `peak`.</TypeRow>
+<TypeRow name={"value"} type={"readonly number[]"}>Level per channel; the array length is the channel count.</TypeRow>
+</TypeTable>
 
 ### Channels
 
 Renders one child per channel.
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `children` | `(index: number, channelCount: number) => React.ReactNode` |  |  |
+<TypeTable>
+<TypeRow name={"children"} type={"(index: number, channelCount: number) => React.ReactNode"}></TypeRow>
+</TypeTable>
 
 ### Channel
 
 One channel of the meter, a `role="meter"`: name it with `aria-label` or a `Meter.Label`. Carries `data-clipping` at or above the clip threshold. Renders a `<div>` element.
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `getAriaValueText` | `( formattedValue: string, value: number, index: number ) => string` |  | Returns the channel's `aria-valuetext`, e.g. `"-6 dB"`. Defaults to the formatted level. |
-| `index` | `number` |  | Index of the channel in the levels. |
+<TypeTable>
+<TypeRow name={"getAriaValueText"} type={"( formattedValue: string, value: number, index: number ) => string"}>Returns the channel's `aria-valuetext`, e.g. `"-6 dB"`. Defaults to the formatted level.</TypeRow>
+<TypeRow name={"index"} type={"number"}>Index of the channel in the levels.</TypeRow>
+</TypeTable>
 
-| Data attribute | Description |
-| --- | --- |
-| `data-clipping` | Whether the level is at or above the clip threshold. |
+<TypeTable title="Data attributes">
+<TypeRow name={"data-clipping"}>Whether the level is at or above the clip threshold.</TypeRow>
+</TypeTable>
 
 ### Indicator
 
 The lit part of the channel, scaled to the level. Renders a `<div>` element.
 
-| Data attribute | Description |
-| --- | --- |
-| `data-clipping` | Whether the level is at or above the clip threshold. |
+<TypeTable title="Data attributes">
+<TypeRow name={"data-clipping"}>Whether the level is at or above the clip threshold.</TypeRow>
+</TypeTable>
 
 ### Peak
 
 The peak-hold mark, positioned at the channel's peak level; hidden while the channel has none. Renders a `<div>` element.
 
-| Data attribute | Description |
-| --- | --- |
-| `data-clipping` | Whether the level is at or above the clip threshold. |
+<TypeTable title="Data attributes">
+<TypeRow name={"data-clipping"}>Whether the level is at or above the clip threshold.</TypeRow>
+</TypeTable>
 
 ### Value
 
@@ -184,9 +184,9 @@ The channel's formatted level (`format`/`locale` on Root). With a live `source` 
 
 A graduation of the level scale at `value`, such as -18 dB: placed along the meter's length from its minimum, upward for a vertical meter and rightward for a horizontal one. Sits directly in `Root`, beside the channels. Decorative: each channel announces its own level. Renders a `<div>` element.
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `value` | `number` |  | Where the mark sits, between `min` and `max`. |
+<TypeTable>
+<TypeRow name={"value"} type={"number"}>Where the mark sits, between `min` and `max`.</TypeRow>
+</TypeTable>
 
 ### Registry component
 
@@ -194,27 +194,27 @@ A graduation of the level scale at `value`, such as -18 dB: placed along the met
 
 #### Value and state
 
-| Prop | Type | Default | Description |
-| ---- | ---- | ------- | ----------- |
-| `value` | `number[]` | - | Level (dB) per channel; array length is the channel count. |
-| `peak` | `number[]` | - | Peak-hold level (dB) per channel. Omit to hide peak marks. |
-| `source` | `MeterSource` | - | A live signal painted outside React; takes precedence over `value` and `peak`. |
-| `min` | `number` | `-60` | Minimum of the dB range. |
-| `max` | `number` | `6` | Maximum of the dB range. |
-| `clipThreshold` | `number` | `0` | Level (dB) at or above which a channel is marked as clipping. |
-| `orientation` | `"vertical" \| "horizontal"` | `"vertical"` | Bar direction. |
-| `format` | `Intl.NumberFormatOptions` | one decimal | Formats each level for the value text. |
-| `aria-label` | `string` | - | Accessible name for the meter group and its channels. |
+<TypeTable>
+<TypeRow name={"value"} type={"number[]"}>Level (dB) per channel; array length is the channel count.</TypeRow>
+<TypeRow name={"peak"} type={"number[]"}>Peak-hold level (dB) per channel. Omit to hide peak marks.</TypeRow>
+<TypeRow name={"source"} type={"MeterSource"}>A live signal painted outside React; takes precedence over `value` and `peak`.</TypeRow>
+<TypeRow name={"min"} type={"number"} default={"-60"}>Minimum of the dB range.</TypeRow>
+<TypeRow name={"max"} type={"number"} default={"6"}>Maximum of the dB range.</TypeRow>
+<TypeRow name={"clipThreshold"} type={"number"} default={"0"}>Level (dB) at or above which a channel is marked as clipping.</TypeRow>
+<TypeRow name={"orientation"} type={"\"vertical\" | \"horizontal\""} default={"\"vertical\""}>Bar direction.</TypeRow>
+<TypeRow name={"format"} type={"Intl.NumberFormatOptions"} default={"one decimal"}>Formats each level for the value text.</TypeRow>
+<TypeRow name={"aria-label"} type={"string"}>Accessible name for the meter group and its channels.</TypeRow>
+</TypeTable>
 
 #### Layout and display
 
-| Prop | Type | Default | Description |
-| ---- | ---- | ------- | ----------- |
-| `size` | `"sm" \| "default" \| "lg"` | `"default"` | Size variant (sets the meter height). |
-| `peakMarks` | `"visible" \| "hidden"` | `"visible"` | Shows or hides the peak-hold mark per channel. |
-| `marks` | `number[]` |  | Levels graduated along the meter, each with a tick and its label, such as `[6, 0, -6, -12, -20, -30, -40, -60]`. |
-| `scale` | `"linear" \| "iec" \| (level) => number` | `"iec"` | How levels are spread along the length: the registry element starts on the IEC scale of digital peak meters. |
-| `className` | `string` | - | Additional CSS classes. |
+<TypeTable>
+<TypeRow name={"size"} type={"\"sm\" | \"default\" | \"lg\""} default={"\"default\""}>Size variant (sets the meter height).</TypeRow>
+<TypeRow name={"peakMarks"} type={"\"visible\" | \"hidden\""} default={"\"visible\""}>Shows or hides the peak-hold mark per channel.</TypeRow>
+<TypeRow name={"marks"} type={"number[]"}>Levels graduated along the meter, each with a tick and its label, such as `[6, 0, -6, -12, -20, -30, -40, -60]`.</TypeRow>
+<TypeRow name={"scale"} type={"\"linear\" | \"iec\" | (level) => number"} default={"\"iec\""}>How levels are spread along the length: the registry element starts on the IEC scale of digital peak meters.</TypeRow>
+<TypeRow name={"className"} type={"string"}>Additional CSS classes.</TypeRow>
+</TypeTable>
 
 
 

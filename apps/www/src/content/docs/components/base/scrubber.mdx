@@ -88,11 +88,11 @@ The bar holds a native `<input type="range">`: the arrow keys move it by a secon
 
 ## API reference
 
-| Prop | Type | Description |
-| --- | --- | --- |
-| `source` | `{ getSnapshot, subscribe }` | The playback position in seconds, a live value. |
-| `duration` | `number` | Length of the track, in seconds. |
-| `playing` | `boolean` | Whether it is playing: the button shows pause. |
-| `onPlayingChange` | `(playing: boolean) => void` | The play button was pressed. |
-| `onSeek` | `(seconds: number) => void` | The bar was pressed, dragged or moved by key. |
-| `aria-label` | `string` | Names the bar. Defaults to "Playback position". |
+<TypeTable>
+<TypeRow name={"source"} type={"{ getSnapshot, subscribe }"}>The playback position in seconds, a live value.</TypeRow>
+<TypeRow name={"duration"} type={"number"}>Length of the track, in seconds.</TypeRow>
+<TypeRow name={"playing"} type={"boolean"}>Whether it is playing: the button shows pause.</TypeRow>
+<TypeRow name={"onPlayingChange"} type={"(playing: boolean) => void"}>The play button was pressed.</TypeRow>
+<TypeRow name={"onSeek"} type={"(seconds: number) => void"}>The bar was pressed, dragged or moved by key.</TypeRow>
+<TypeRow name={"aria-label"} type={"string"}>Names the bar. Defaults to "Playback position".</TypeRow>
+</TypeTable>

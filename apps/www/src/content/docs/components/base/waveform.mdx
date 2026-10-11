@@ -250,181 +250,181 @@ The bars of a `BarVisualizer` are plain elements: restyle them with `.cn-bar-vis
 
 Groups the parts of a waveform and owns what they show: the audio's shape (`peaks`, known upfront, or a live `levels` signal) and, for a seekable one, the playback position in `duration` units. The position comes from `value`, or from a live `source` that the waveform follows straight in the DOM without re-rendering React; it is exposed as the `--waveform-position` CSS variable (a percentage). While a live signal is audible the element carries `data-active`. Renders a `<div>` element.
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `defaultValue` | `number` | `0` | Uncontrolled starting position. |
-| `disabled` | `boolean` |  |  |
-| `duration` | `number` | `1` | Length of the audio, in the unit `value` is in (typically seconds). |
-| `largeStep` | `number` |  | Step for Page Up/Page Down and Shift + arrow keys. Defaults to a tenth of `duration`. |
-| `levels` | `Levels` |  | A live signal drawn outside React, in place of `peaks`: a microphone, an analyser, a stream. |
-| `loading` | `boolean` | `false` | Whether the audio is still on its way. Seeking waits, and the bars sweep. |
-| `onValueChange` | `(value: number, eventDetails: ChangeEventDetails) => void` |  | Fires while seeking: press, drag, keyboard and input changes. |
-| `onValueCommitted` | `( value: number, eventDetails: CommitEventDetails ) => void` |  | Fires when a seek that moved the position ends. |
-| `peaks` | `WaveformPeaks` |  | The audio's shape, at any resolution: a level per slice (0…1), or the lowest and highest sample of each (`{ min, max }`, -1…1), which draws the waveform lopsided where the audio is. The parts fit it to their size. |
-| `range` | `readonly [number, number]` |  | The stretch of the audio to show, `[start, end]` in `duration` units: a clip's window onto its source, a zoomed view. The playhead, seeking, hover, regions and markers all follow it. Defaults to the whole audio. While the position is outside it, the root carries `data-outside`. |
-| `source` | `Source` |  | A live position followed outside React; takes precedence over `value`. |
-| `step` | `number` |  | Step for the arrow keys. Defaults to a hundredth of `duration`. |
-| `value` | `number` |  | Playback position, from 0 to `duration`. |
+<TypeTable>
+<TypeRow name={"defaultValue"} type={"number"} default={"0"}>Uncontrolled starting position.</TypeRow>
+<TypeRow name={"disabled"} type={"boolean"}></TypeRow>
+<TypeRow name={"duration"} type={"number"} default={"1"}>Length of the audio, in the unit `value` is in (typically seconds).</TypeRow>
+<TypeRow name={"largeStep"} type={"number"}>Step for Page Up/Page Down and Shift + arrow keys. Defaults to a tenth of `duration`.</TypeRow>
+<TypeRow name={"levels"} type={"Levels"}>A live signal drawn outside React, in place of `peaks`: a microphone, an analyser, a stream.</TypeRow>
+<TypeRow name={"loading"} type={"boolean"} default={"false"}>Whether the audio is still on its way. Seeking waits, and the bars sweep.</TypeRow>
+<TypeRow name={"onValueChange"} type={"(value: number, eventDetails: ChangeEventDetails) => void"}>Fires while seeking: press, drag, keyboard and input changes.</TypeRow>
+<TypeRow name={"onValueCommitted"} type={"( value: number, eventDetails: CommitEventDetails ) => void"}>Fires when a seek that moved the position ends.</TypeRow>
+<TypeRow name={"peaks"} type={"WaveformPeaks"}>The audio's shape, at any resolution: a level per slice (0…1), or the lowest and highest sample of each (`{ min, max }`, -1…1), which draws the waveform lopsided where the audio is. The parts fit it to their size.</TypeRow>
+<TypeRow name={"range"} type={"readonly [number, number]"}>The stretch of the audio to show, `[start, end]` in `duration` units: a clip's window onto its source, a zoomed view. The playhead, seeking, hover, regions and markers all follow it. Defaults to the whole audio. While the position is outside it, the root carries `data-outside`.</TypeRow>
+<TypeRow name={"source"} type={"Source"}>A live position followed outside React; takes precedence over `value`.</TypeRow>
+<TypeRow name={"step"} type={"number"}>Step for the arrow keys. Defaults to a hundredth of `duration`.</TypeRow>
+<TypeRow name={"value"} type={"number"}>Playback position, from 0 to `duration`.</TypeRow>
+</TypeTable>
 
-| Data attribute | Description |
-| --- | --- |
-| `data-disabled` | Present when disabled. |
-| `data-dragging` | Whether a pointer is scrubbing the waveform. |
-| `data-loading` | Whether the audio is still on its way: there is nothing to seek yet. |
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+<TypeRow name={"data-dragging"}>Whether a pointer is scrubbing the waveform.</TypeRow>
+<TypeRow name={"data-loading"}>Whether the audio is still on its way: there is nothing to seek yet.</TypeRow>
+</TypeTable>
 
 ### Region
 
 A stretch of the timeline, such as a loop or a selection, laid over the waveform from `value[0]` to `value[1]`. Dragging its body moves it; add a `Waveform.RegionHandle` per edge to resize it. Renders a `<div>` element.
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `defaultValue` | `Value` |  | Uncontrolled starting region. Defaults to the whole timeline. |
-| `disabled` | `boolean` |  |  |
-| `minLength` | `number` |  | The shortest the region can be resized to, in `duration` units. Defaults to the root's `step`. |
-| `movable` | `boolean` | `true` | Whether dragging the region's body moves it. |
-| `onValueChange` | `(value: Value, eventDetails: ChangeEventDetails) => void` |  | Fires while the region is moved or resized. |
-| `onValueCommitted` | `(value: Value, eventDetails: CommitEventDetails) => void` |  | Fires when a move or a resize that changed the region ends. |
-| `value` | `Value` |  | The region, as `[start, end]` in `duration` units. |
+<TypeTable>
+<TypeRow name={"defaultValue"} type={"Value"}>Uncontrolled starting region. Defaults to the whole timeline.</TypeRow>
+<TypeRow name={"disabled"} type={"boolean"}></TypeRow>
+<TypeRow name={"minLength"} type={"number"}>The shortest the region can be resized to, in `duration` units. Defaults to the root's `step`.</TypeRow>
+<TypeRow name={"movable"} type={"boolean"} default={"true"}>Whether dragging the region's body moves it.</TypeRow>
+<TypeRow name={"onValueChange"} type={"(value: Value, eventDetails: ChangeEventDetails) => void"}>Fires while the region is moved or resized.</TypeRow>
+<TypeRow name={"onValueCommitted"} type={"(value: Value, eventDetails: CommitEventDetails) => void"}>Fires when a move or a resize that changed the region ends.</TypeRow>
+<TypeRow name={"value"} type={"Value"}>The region, as `[start, end]` in `duration` units.</TypeRow>
+</TypeTable>
 
-| Data attribute | Description |
-| --- | --- |
-| `data-disabled` | Present when disabled. |
-| `data-dragging` | Whether a pointer is moving or resizing the region. |
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+<TypeRow name={"data-dragging"}>Whether a pointer is moving or resizing the region.</TypeRow>
+</TypeTable>
 
 ### RegionHandle
 
 Resizes one edge of the region: by dragging, or from the keyboard through the native `<input type="range">` it holds, which carries the accessible name (`aria-label` / `aria-labelledby`). Renders a `<div>` element.
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `edge` | `"end" \| "start"` |  | The edge of the region this handle resizes. |
-| `getAriaValueText` | `DescribeValue` |  | Returns how the edge's position is announced, e.g. `"0:12"`. Defaults to its share of the timeline, e.g. `"30%"`. |
+<TypeTable>
+<TypeRow name={"edge"} type={"\"end\" | \"start\""}>The edge of the region this handle resizes.</TypeRow>
+<TypeRow name={"getAriaValueText"} type={"DescribeValue"}>Returns how the edge's position is announced, e.g. `"0:12"`. Defaults to its share of the timeline, e.g. `"30%"`.</TypeRow>
+</TypeTable>
 
-| Data attribute | Description |
-| --- | --- |
-| `data-disabled` | Present when disabled. |
-| `data-dragging` | Whether a pointer is moving or resizing the region. |
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+<TypeRow name={"data-dragging"}>Whether a pointer is moving or resizing the region.</TypeRow>
+</TypeTable>
 
 ### Control
 
 The seekable surface: a press jumps to the pointer and a drag scrubs. It tracks the hovered position for `Waveform.Hover`, sets `touch-action: none` so touch scrubbing doesn't scroll the page, and holds the native `<input type="range">` that takes focus, handles the keyboard and carries the accessible name (`aria-label` / `aria-labelledby`). Leave it out for a waveform that is only shown. Renders a `<div>` element.
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `getAriaValueText` | `DescribeValue` |  | Returns how the position is announced, e.g. `"0:12 of 1:42"`. Defaults to the played share, e.g. `"30%"`. |
-| `onSelectionChange` | `( range: readonly [number, number], eventDetails ) => void` |  | Fires while a stretch is selected by dragging with Shift held, as `[start, end]` in `duration` units: feed it to a `Waveform.Region`. A plain press and drag still seek. `eventDetails.cancel()` keeps the selection as it was. |
-| `onSelectionCommitted` | `( range: readonly [number, number], eventDetails ) => void` |  | Fires when a selection that changed ends. |
+<TypeTable>
+<TypeRow name={"getAriaValueText"} type={"DescribeValue"}>Returns how the position is announced, e.g. `"0:12 of 1:42"`. Defaults to the played share, e.g. `"30%"`.</TypeRow>
+<TypeRow name={"onSelectionChange"} type={"( range: readonly [number, number], eventDetails ) => void"}>Fires while a stretch is selected by dragging with Shift held, as `[start, end]` in `duration` units: feed it to a `Waveform.Region`. A plain press and drag still seek. `eventDetails.cancel()` keeps the selection as it was.</TypeRow>
+<TypeRow name={"onSelectionCommitted"} type={"( range: readonly [number, number], eventDetails ) => void"}>Fires when a selection that changed ends.</TypeRow>
+</TypeTable>
 
-| Data attribute | Description |
-| --- | --- |
-| `data-disabled` | Present when disabled. |
-| `data-dragging` | Whether a pointer is scrubbing the waveform. |
-| `data-loading` | Whether the audio is still on its way: there is nothing to seek yet. |
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+<TypeRow name={"data-dragging"}>Whether a pointer is scrubbing the waveform.</TypeRow>
+<TypeRow name={"data-loading"}>Whether the audio is still on its way: there is nothing to seek yet.</TypeRow>
+</TypeTable>
 
 ### Bars
 
 Draws the waveform as a fixed number of elements, one `Waveform.Bar` each, for a visualizer styled in plain CSS. Each bar's level, 0…1, is written to its `--waveform-level` CSS variable outside React: levels rise at once and fall smoothly, and nothing is written while they rest or sit off screen. Bars the playback position has passed carry `data-played`. Its children are a function called once per bar; left out, plain bars are rendered. Renders a `<div>` element.
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `children` | `(index: number, count: number) => React.ReactNode` |  | Called once per bar; returns its `Waveform.Bar`. |
-| `count` | `number` | `24` | How many bars to draw. The levels are fitted to them. |
-| `gain` | `number` | `1` | Visual gain applied to the levels before they are drawn. |
-| `idle` | `WaveformIdle` | `"none"` | What the bars do while there is no signal. |
-| `minLevel` | `number` | `0.08` | Resting level, 0…1: silent bars keep this much of their size. |
-| `mirrored` | `boolean` | `false` | Mirrors the levels around the middle bar, the first one in the center. |
+<TypeTable>
+<TypeRow name={"children"} type={"(index: number, count: number) => React.ReactNode"}>Called once per bar; returns its `Waveform.Bar`.</TypeRow>
+<TypeRow name={"count"} type={"number"} default={"24"}>How many bars to draw. The levels are fitted to them.</TypeRow>
+<TypeRow name={"gain"} type={"number"} default={"1"}>Visual gain applied to the levels before they are drawn.</TypeRow>
+<TypeRow name={"idle"} type={"WaveformIdle"} default={"\"none\""}>What the bars do while there is no signal.</TypeRow>
+<TypeRow name={"minLevel"} type={"number"} default={"0.08"}>Resting level, 0…1: silent bars keep this much of their size.</TypeRow>
+<TypeRow name={"mirrored"} type={"boolean"} default={"false"}>Mirrors the levels around the middle bar, the first one in the center.</TypeRow>
+</TypeTable>
 
-| Data attribute | Description |
-| --- | --- |
-| `data-disabled` | Present when disabled. |
-| `data-dragging` | Whether a pointer is scrubbing the waveform. |
-| `data-loading` | Whether the audio is still on its way: there is nothing to seek yet. |
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+<TypeRow name={"data-dragging"}>Whether a pointer is scrubbing the waveform.</TypeRow>
+<TypeRow name={"data-loading"}>Whether the audio is still on its way: there is nothing to seek yet.</TypeRow>
+</TypeTable>
 
 ### Bar
 
 One bar of `Waveform.Bars`. Its level, 0…1, is its `--waveform-level` CSS variable: size it with `height: calc(var(--waveform-level) * 100%)`, or the width for a vertical layout. Renders a `<span>` element.
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `index` | `number` |  | The bar's place in the row, from 0. |
+<TypeTable>
+<TypeRow name={"index"} type={"number"}>The bar's place in the row, from 0.</TypeRow>
+</TypeTable>
 
-| Data attribute | Description |
-| --- | --- |
-| `data-disabled` | Present when disabled. |
-| `data-dragging` | Whether a pointer is scrubbing the waveform. |
-| `data-loading` | Whether the audio is still on its way: there is nothing to seek yet. |
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+<TypeRow name={"data-dragging"}>Whether a pointer is scrubbing the waveform.</TypeRow>
+<TypeRow name={"data-loading"}>Whether the audio is still on its way: there is nothing to seek yet.</TypeRow>
+</TypeTable>
 
 ### Canvas
 
 Draws the waveform on a canvas, laid out on the device pixel grid: as many bars as fit its width, every edge on a physical pixel, so it stays sharp at any pixel density and zoom level. It paints only when something changed, and not at all while it is off screen. With `peaks`, the played part is drawn in one color and the rest in another. With a live `levels` signal, `mode` picks between the current levels across the width and a scrolling record of the loudest one. The `scope` variant takes raw samples instead of levels, and traces them as they are. Colors come from CSS: `--waveform-color` and `--waveform-progress-color` (both default to the text color). The bar corner radius is `barRadius`, or the `--waveform-bar-radius` CSS length. Renders a `<canvas>` element.
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `barGap` | `number` | `1` | Space between bars, in CSS pixels, snapped to whole device pixels. |
-| `barRadius` | `number` |  | Bar corner radius, in CSS pixels. Defaults to the `--waveform-bar-radius` CSS length. |
-| `barWidth` | `number` | `2` | Bar width, in CSS pixels, snapped to whole device pixels. |
-| `gain` | `number` | `1` | Visual gain applied to the levels before they are drawn. |
-| `idle` | `WaveformIdle` | `"none"` | What the bars do while there is no signal, outside the scrolling mode. |
-| `lineWidth` | `number` | `1.5` | Thickness of the `scope` trace, in CSS pixels. |
-| `minBarHeight` | `number` | `2` | Shortest bar, in CSS pixels: silence still draws a sliver, so the timeline stays readable. |
-| `mirrored` | `boolean` | `false` | Makes the drawing symmetric around the middle: the first level sits in the center, or, when scrolling, the newest one, with older ones moving out on both sides. |
-| `mode` | `"scrolling" \| "static"` | `"static"` | How a live `levels` signal is drawn: `static` spreads the current levels across the width; `scrolling` records the loudest one over time, the newest entering from the right. |
-| `scrollSpeed` | `number` | `60` | How fast the scrolling mode moves, in CSS pixels per second. |
-| `variant` | `WaveformVariant` | `"mirror"` | `mirror` centers the bars on the middle line, `bars` stands them on the baseline, and `line` joins the levels into one continuous, centered shape. `scope` traces raw samples, -1…1, as a single line. |
+<TypeTable>
+<TypeRow name={"barGap"} type={"number"} default={"1"}>Space between bars, in CSS pixels, snapped to whole device pixels.</TypeRow>
+<TypeRow name={"barRadius"} type={"number"}>Bar corner radius, in CSS pixels. Defaults to the `--waveform-bar-radius` CSS length.</TypeRow>
+<TypeRow name={"barWidth"} type={"number"} default={"2"}>Bar width, in CSS pixels, snapped to whole device pixels.</TypeRow>
+<TypeRow name={"gain"} type={"number"} default={"1"}>Visual gain applied to the levels before they are drawn.</TypeRow>
+<TypeRow name={"idle"} type={"WaveformIdle"} default={"\"none\""}>What the bars do while there is no signal, outside the scrolling mode.</TypeRow>
+<TypeRow name={"lineWidth"} type={"number"} default={"1.5"}>Thickness of the `scope` trace, in CSS pixels.</TypeRow>
+<TypeRow name={"minBarHeight"} type={"number"} default={"2"}>Shortest bar, in CSS pixels: silence still draws a sliver, so the timeline stays readable.</TypeRow>
+<TypeRow name={"mirrored"} type={"boolean"} default={"false"}>Makes the drawing symmetric around the middle: the first level sits in the center, or, when scrolling, the newest one, with older ones moving out on both sides.</TypeRow>
+<TypeRow name={"mode"} type={"\"scrolling\" | \"static\""} default={"\"static\""}>How a live `levels` signal is drawn: `static` spreads the current levels across the width; `scrolling` records the loudest one over time, the newest entering from the right.</TypeRow>
+<TypeRow name={"scrollSpeed"} type={"number"} default={"60"}>How fast the scrolling mode moves, in CSS pixels per second.</TypeRow>
+<TypeRow name={"variant"} type={"WaveformVariant"} default={"\"mirror\""}>`mirror` centers the bars on the middle line, `bars` stands them on the baseline, and `line` joins the levels into one continuous, centered shape. `scope` traces raw samples, -1…1, as a single line.</TypeRow>
+</TypeTable>
 
-| Data attribute | Description |
-| --- | --- |
-| `data-disabled` | Present when disabled. |
-| `data-dragging` | Whether a pointer is scrubbing the waveform. |
-| `data-loading` | Whether the audio is still on its way: there is nothing to seek yet. |
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+<TypeRow name={"data-dragging"}>Whether a pointer is scrubbing the waveform.</TypeRow>
+<TypeRow name={"data-loading"}>Whether the audio is still on its way: there is nothing to seek yet.</TypeRow>
+</TypeTable>
 
 ### Thumb
 
 A handle centered on the playback position. Renders a `<div>` element.
 
-| Data attribute | Description |
-| --- | --- |
-| `data-disabled` | Present when disabled. |
-| `data-dragging` | Whether a pointer is scrubbing the waveform. |
-| `data-loading` | Whether the audio is still on its way: there is nothing to seek yet. |
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+<TypeRow name={"data-dragging"}>Whether a pointer is scrubbing the waveform.</TypeRow>
+<TypeRow name={"data-loading"}>Whether the audio is still on its way: there is nothing to seek yet.</TypeRow>
+</TypeTable>
 
 ### Marker
 
 A point of interest on the timeline, such as a cue or a chapter, positioned at `value`. Its children label it. Renders a `<div>` element.
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `value` | `number` |  | Where the marker sits, from 0 to `duration`. |
+<TypeTable>
+<TypeRow name={"value"} type={"number"}>Where the marker sits, from 0 to `duration`.</TypeRow>
+</TypeTable>
 
-| Data attribute | Description |
-| --- | --- |
-| `data-disabled` | Present when disabled. |
-| `data-dragging` | Whether a pointer is scrubbing the waveform. |
-| `data-loading` | Whether the audio is still on its way: there is nothing to seek yet. |
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+<TypeRow name={"data-dragging"}>Whether a pointer is scrubbing the waveform.</TypeRow>
+<TypeRow name={"data-loading"}>Whether the audio is still on its way: there is nothing to seek yet.</TypeRow>
+</TypeTable>
 
 ### Playhead
 
 A marker at the playback position, with no interaction of its own. Renders a `<div>` element.
 
-| Data attribute | Description |
-| --- | --- |
-| `data-disabled` | Present when disabled. |
-| `data-dragging` | Whether a pointer is scrubbing the waveform. |
-| `data-loading` | Whether the audio is still on its way: there is nothing to seek yet. |
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+<TypeRow name={"data-dragging"}>Whether a pointer is scrubbing the waveform.</TypeRow>
+<TypeRow name={"data-loading"}>Whether the audio is still on its way: there is nothing to seek yet.</TypeRow>
+</TypeTable>
 
 ### Hover
 
 Shown while the pointer is over the `Control`, positioned at the hovered point. Its children receive the hovered position, to print a time. Renders a `<div>` element.
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `children` | `React.ReactNode \| ((value: number) => React.ReactNode)` |  |  |
+<TypeTable>
+<TypeRow name={"children"} type={"React.ReactNode | ((value: number) => React.ReactNode)"}></TypeRow>
+</TypeTable>
 
-| Data attribute | Description |
-| --- | --- |
-| `data-disabled` | Present when disabled. |
-| `data-dragging` | Whether a pointer is scrubbing the waveform. |
-| `data-loading` | Whether the audio is still on its way: there is nothing to seek yet. |
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+<TypeRow name={"data-dragging"}>Whether a pointer is scrubbing the waveform.</TypeRow>
+<TypeRow name={"data-loading"}>Whether the audio is still on its way: there is nothing to seek yet.</TypeRow>
+</TypeTable>
 
 ### Registry component
 
@@ -432,67 +432,67 @@ Shown while the pointer is over the `Control`, positioned at the hovered point. 
 
 #### Waveform
 
-| Prop | Type | Default | Description |
-| ---- | ---- | ------- | ----------- |
-| `values` | `ArrayLike<number> \| { min, max }` | - | The audio's shape at any resolution: `0–1` amplitudes, or each slice's lowest and highest sample, `-1–1`. |
-| `range` | `readonly [number, number]` | whole audio | The stretch shown, in `duration` units. |
-| `value` | `number` | - | Controlled position, from `0` to `duration`. |
-| `defaultValue` | `number` | `0` | Uncontrolled starting position. |
-| `source` | `WaveformSource` | - | A live position followed outside React; takes precedence over `value`. |
-| `duration` | `number` | `1` | Length of the audio, in the unit `value` is in. |
-| `step` | `number` | `duration / 100` | Arrow key step. |
-| `largeStep` | `number` | `duration / 10` | Step for `PageUp` / `PageDown` and `Shift` + arrows. |
-| `disabled` | `boolean` | `false` | Disables pointer and keyboard interaction. |
-| `loading` | `boolean` | `false` | The audio is on its way: seeking waits and the bars sweep. |
-| `onValueChange` | `(value: number, eventDetails) => void` | - | Fires while seeking. `eventDetails.reason` is `"press"`, `"drag"`, `"keyboard"`, or `"input-change"`; call `eventDetails.cancel()` to reject it. |
-| `onValueCommitted` | `(value: number, eventDetails) => void` | - | Fires when a seek that moved the position ends. |
-| `getAriaValueText` | `(value: number, duration: number) => string` | played share | How the position is announced, e.g. `"0:12 of 1:42"`. |
-| `onSelectionChange` | `(range: readonly [number, number], eventDetails) => void` | - | Fires while a stretch is selected with Shift + drag: set a loop region from it. |
-| `onSelectionCommitted` | `(range: readonly [number, number], eventDetails) => void` | - | Fires when that selection ends. |
-| `shape` | `"mirror" \| "bars" \| "line"` | `"mirror"` | How the amplitudes are drawn. |
-| `variant` | `"default" \| "playhead"` | `"default"` | `playhead` adds a playhead line and a handle. |
-| `className` | `string` | - | Classes for the waveform surface. |
+<TypeTable>
+<TypeRow name={"values"} type={"ArrayLike<number> | { min, max }"}>The audio's shape at any resolution: `0–1` amplitudes, or each slice's lowest and highest sample, `-1–1`.</TypeRow>
+<TypeRow name={"range"} type={"readonly [number, number]"} default={"whole audio"}>The stretch shown, in `duration` units.</TypeRow>
+<TypeRow name={"value"} type={"number"}>Controlled position, from `0` to `duration`.</TypeRow>
+<TypeRow name={"defaultValue"} type={"number"} default={"0"}>Uncontrolled starting position.</TypeRow>
+<TypeRow name={"source"} type={"WaveformSource"}>A live position followed outside React; takes precedence over `value`.</TypeRow>
+<TypeRow name={"duration"} type={"number"} default={"1"}>Length of the audio, in the unit `value` is in.</TypeRow>
+<TypeRow name={"step"} type={"number"} default={"duration / 100"}>Arrow key step.</TypeRow>
+<TypeRow name={"largeStep"} type={"number"} default={"duration / 10"}>Step for `PageUp` / `PageDown` and `Shift` + arrows.</TypeRow>
+<TypeRow name={"disabled"} type={"boolean"} default={"false"}>Disables pointer and keyboard interaction.</TypeRow>
+<TypeRow name={"loading"} type={"boolean"} default={"false"}>The audio is on its way: seeking waits and the bars sweep.</TypeRow>
+<TypeRow name={"onValueChange"} type={"(value: number, eventDetails) => void"}>Fires while seeking. `eventDetails.reason` is `"press"`, `"drag"`, `"keyboard"`, or `"input-change"`; call `eventDetails.cancel()` to reject it.</TypeRow>
+<TypeRow name={"onValueCommitted"} type={"(value: number, eventDetails) => void"}>Fires when a seek that moved the position ends.</TypeRow>
+<TypeRow name={"getAriaValueText"} type={"(value: number, duration: number) => string"} default={"played share"}>How the position is announced, e.g. `"0:12 of 1:42"`.</TypeRow>
+<TypeRow name={"onSelectionChange"} type={"(range: readonly [number, number], eventDetails) => void"}>Fires while a stretch is selected with Shift + drag: set a loop region from it.</TypeRow>
+<TypeRow name={"onSelectionCommitted"} type={"(range: readonly [number, number], eventDetails) => void"}>Fires when that selection ends.</TypeRow>
+<TypeRow name={"shape"} type={"\"mirror\" | \"bars\" | \"line\""} default={"\"mirror\""}>How the amplitudes are drawn.</TypeRow>
+<TypeRow name={"variant"} type={"\"default\" | \"playhead\""} default={"\"default\""}>`playhead` adds a playhead line and a handle.</TypeRow>
+<TypeRow name={"className"} type={"string"}>Classes for the waveform surface.</TypeRow>
+</TypeTable>
 
 #### WaveformRegion
 
-| Prop | Type | Default | Description |
-| ---- | ---- | ------- | ----------- |
-| `value` | `readonly [number, number]` | - | Controlled region, as `[start, end]` in `duration` units. |
-| `defaultValue` | `readonly [number, number]` | whole timeline | Uncontrolled starting region. |
-| `minLength` | `number` | the waveform's `step` | The shortest the region can be resized to. |
-| `movable` | `boolean` | `true` | Whether dragging the body moves the region. |
-| `disabled` | `boolean` | `false` | Also disabled when the waveform is. |
-| `onValueChange` | `(value, eventDetails) => void` | - | Fires while moving or resizing. `eventDetails.edge` is `"start"`, `"end"` or `"both"`; `eventDetails.reason` is `"drag"`, `"keyboard"` or `"input-change"`. |
-| `onValueCommitted` | `(value, eventDetails) => void` | - | Fires when a move or resize that changed the region ends. |
+<TypeTable>
+<TypeRow name={"value"} type={"readonly [number, number]"}>Controlled region, as `[start, end]` in `duration` units.</TypeRow>
+<TypeRow name={"defaultValue"} type={"readonly [number, number]"} default={"whole timeline"}>Uncontrolled starting region.</TypeRow>
+<TypeRow name={"minLength"} type={"number"} default={"the waveform's step"}>The shortest the region can be resized to.</TypeRow>
+<TypeRow name={"movable"} type={"boolean"} default={"true"}>Whether dragging the body moves the region.</TypeRow>
+<TypeRow name={"disabled"} type={"boolean"} default={"false"}>Also disabled when the waveform is.</TypeRow>
+<TypeRow name={"onValueChange"} type={"(value, eventDetails) => void"}>Fires while moving or resizing. `eventDetails.edge` is `"start"`, `"end"` or `"both"`; `eventDetails.reason` is `"drag"`, `"keyboard"` or `"input-change"`.</TypeRow>
+<TypeRow name={"onValueCommitted"} type={"(value, eventDetails) => void"}>Fires when a move or resize that changed the region ends.</TypeRow>
+</TypeTable>
 
 `WaveformRegionHandle` takes `edge` (`"start"` or `"end"`) and `getAriaValueText`. `WaveformMarker` takes `value` and shows its children as a label. `WaveformHover` takes `format`, which prints the hovered position; without it only the line shows.
 
 #### LiveWaveform
 
-| Prop | Type | Default | Description |
-| ---- | ---- | ------- | ----------- |
-| `source` | `LevelsSource \| null` | - | The live signal. |
-| `mode` | `"static" \| "scrolling"` | `"static"` | `static` spreads the current levels across the width; `scrolling` records the loudest one over time. |
-| `scrollSpeed` | `number` | `60` | How fast `scrolling` moves, in pixels per second. |
-| `shape` | `"mirror" \| "bars" \| "line" \| "scope"` | `"mirror"` | How the signal is drawn. `scope` traces raw samples instead of levels. |
-| `gain` | `number` | `1` | Visual gain applied to the levels. |
-| `mirrored` | `boolean` | `false` | Makes the drawing symmetric: the first level in the center, or, when scrolling, the newest one, with older ones moving out on both sides. |
-| `idle` | `"none" \| "pulse" \| "wave"` | `"none"` | In `static` mode, what the bars do while there is no signal. |
-| `loading` | `boolean` | `false` | Sweeps across the bars while the signal is on its way. |
+<TypeTable>
+<TypeRow name={"source"} type={"LevelsSource | null"}>The live signal.</TypeRow>
+<TypeRow name={"mode"} type={"\"static\" | \"scrolling\""} default={"\"static\""}>`static` spreads the current levels across the width; `scrolling` records the loudest one over time.</TypeRow>
+<TypeRow name={"scrollSpeed"} type={"number"} default={"60"}>How fast `scrolling` moves, in pixels per second.</TypeRow>
+<TypeRow name={"shape"} type={"\"mirror\" | \"bars\" | \"line\" | \"scope\""} default={"\"mirror\""}>How the signal is drawn. `scope` traces raw samples instead of levels.</TypeRow>
+<TypeRow name={"gain"} type={"number"} default={"1"}>Visual gain applied to the levels.</TypeRow>
+<TypeRow name={"mirrored"} type={"boolean"} default={"false"}>Makes the drawing symmetric: the first level in the center, or, when scrolling, the newest one, with older ones moving out on both sides.</TypeRow>
+<TypeRow name={"idle"} type={"\"none\" | \"pulse\" | \"wave\""} default={"\"none\""}>In `static` mode, what the bars do while there is no signal.</TypeRow>
+<TypeRow name={"loading"} type={"boolean"} default={"false"}>Sweeps across the bars while the signal is on its way.</TypeRow>
+</TypeTable>
 
 #### BarVisualizer
 
-| Prop | Type | Default | Description |
-| ---- | ---- | ------- | ----------- |
-| `source` | `LevelsSource \| null` | - | The live signal. |
-| `count` | `number` | `24` | How many bars; the levels are fitted to them. |
-| `mirrored` | `boolean` | `false` | Mirrors the levels around the middle bar, the lowest band in the center. |
-| `minLevel` | `number` | `0.08` | Resting level: silent bars keep this much of their size. |
-| `gain` | `number` | `1` | Visual gain applied to the levels. |
-| `idle` | `"none" \| "pulse" \| "wave"` | `"none"` | What the bars do while there is no signal. |
-| `loading` | `boolean` | `false` | Sweeps across the bars while the signal is on its way. |
-| `align` | `"start" \| "center" \| "end"` | `"center"` | Where the bars grow from. |
-| `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` | `vertical` stacks the bars and grows them sideways. |
+<TypeTable>
+<TypeRow name={"source"} type={"LevelsSource | null"}>The live signal.</TypeRow>
+<TypeRow name={"count"} type={"number"} default={"24"}>How many bars; the levels are fitted to them.</TypeRow>
+<TypeRow name={"mirrored"} type={"boolean"} default={"false"}>Mirrors the levels around the middle bar, the lowest band in the center.</TypeRow>
+<TypeRow name={"minLevel"} type={"number"} default={"0.08"}>Resting level: silent bars keep this much of their size.</TypeRow>
+<TypeRow name={"gain"} type={"number"} default={"1"}>Visual gain applied to the levels.</TypeRow>
+<TypeRow name={"idle"} type={"\"none\" | \"pulse\" | \"wave\""} default={"\"none\""}>What the bars do while there is no signal.</TypeRow>
+<TypeRow name={"loading"} type={"boolean"} default={"false"}>Sweeps across the bars while the signal is on its way.</TypeRow>
+<TypeRow name={"align"} type={"\"start\" | \"center\" | \"end\""} default={"\"center\""}>Where the bars grow from.</TypeRow>
+<TypeRow name={"orientation"} type={"\"horizontal\" | \"vertical\""} default={"\"horizontal\""}>`vertical` stacks the bars and grows them sideways.</TypeRow>
+</TypeTable>
 
 
 

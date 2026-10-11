@@ -140,162 +140,162 @@ One handle sets the threshold, the other the ratio.
 
 Groups the parts of a plot and owns its two axes: the range of each and how values spread along it, evenly or logarithmically, the way frequency is drawn. Everything placed on the plot (curves, lines, bands, handles) is placed in the axes' units. Renders a `<div>` element.
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `disabled` | `boolean` |  |  |
-| `maxX` | `number` | `1` |  |
-| `maxY` | `number` | `1` |  |
-| `minX` | `number` | `0` |  |
-| `minY` | `number` | `0` |  |
-| `scaleX` | `Scale` | `"linear"` | How x values spread across: `"log"` for frequency, or your own `{ toPosition, toValue }`. |
-| `scaleY` | `Scale` | `"linear"` | How y values spread up. |
+<TypeTable>
+<TypeRow name={"disabled"} type={"boolean"}></TypeRow>
+<TypeRow name={"maxX"} type={"number"} default={"1"}></TypeRow>
+<TypeRow name={"maxY"} type={"number"} default={"1"}></TypeRow>
+<TypeRow name={"minX"} type={"number"} default={"0"}></TypeRow>
+<TypeRow name={"minY"} type={"number"} default={"0"}></TypeRow>
+<TypeRow name={"scaleX"} type={"Scale"} default={"\"linear\""}>How x values spread across: `"log"` for frequency, or your own `{ toPosition, toValue }`.</TypeRow>
+<TypeRow name={"scaleY"} type={"Scale"} default={"\"linear\""}>How y values spread up.</TypeRow>
+</TypeTable>
 
-| Data attribute | Description |
-| --- | --- |
-| `data-disabled` | Present when disabled. |
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+</TypeTable>
 
 ### Band
 
 A stretch of the plot between two values on one axis, across the whole of the other: the frequencies a sweep can reach, the levels over a threshold. Sits in `Plot.Graph`. Renders a `<rect>` element.
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `axis` | `"x" \| "y"` |  | The axis `from` and `to` are values on. |
-| `from` | `number` |  |  |
-| `to` | `number` |  |  |
+<TypeTable>
+<TypeRow name={"axis"} type={"\"x\" | \"y\""}>The axis `from` and `to` are values on.</TypeRow>
+<TypeRow name={"from"} type={"number"}></TypeRow>
+<TypeRow name={"to"} type={"number"}></TypeRow>
+</TypeTable>
 
-| Data attribute | Description |
-| --- | --- |
-| `data-disabled` | Present when disabled. |
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+</TypeTable>
 
 ### Dot
 
 A point on the plot that nothing drags: where the signal is right now, such as the input level on a compressor's curve. Give it a `source` and it moves straight in the DOM without re-rendering React, or a `value` for a still point. Hidden from assistive technology and from the pointer. Renders a `<div>` element.
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `source` | `DotSource` |  | A live point, followed without re-rendering. Takes precedence over `value`. |
-| `value` | `Point` |  | A still point, in the axes' units. |
+<TypeTable>
+<TypeRow name={"source"} type={"DotSource"}>A live point, followed without re-rendering. Takes precedence over `value`.</TypeRow>
+<TypeRow name={"value"} type={"Point"}>A still point, in the axes' units.</TypeRow>
+</TypeTable>
 
-| Data attribute | Description |
-| --- | --- |
-| `data-disabled` | Present when disabled. |
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+</TypeTable>
 
 ### Cursor
 
 Follows the pointer over the plot, for crosshair lines and a readout of what is under it. It covers the plot, lets pointer events through, and sets `--plot-cursor-x` and `--plot-cursor-y` (0% to 100% across and down) and `data-active` while the pointer is over the plot with a mouse or a pen, all in the DOM without re-rendering React. Put lines in it that use the two variables, and a `Plot.CursorReadout`. Renders a `<div>` element.
 
-| Data attribute | Description |
-| --- | --- |
-| `data-disabled` | Present when disabled. |
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+</TypeTable>
 
 ### CursorReadout
 
 The value under the pointer, as text: `format` turns it into what to show, and the text is written straight into the DOM as the pointer moves. It sits where the pointer is; set its offset and its look with your own classes. Renders a `<div>` element.
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `format` | `(value: Point) => string` |  | Turns the value under the pointer, in the axes' units, into the text shown. |
+<TypeTable>
+<TypeRow name={"format"} type={"(value: Point) => string"}>Turns the value under the pointer, in the axes' units, into the text shown.</TypeRow>
+</TypeTable>
 
-| Data attribute | Description |
-| --- | --- |
-| `data-disabled` | Present when disabled. |
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+</TypeTable>
 
 ### Grid
 
 Grid lines and their labels, drawn from the axes: round values along each axis you give, so a plot reads without a rule and a label placed by hand per value. It covers the plot, is hidden from assistive technology and from the pointer, and marks its parts for styling: `data-part="line"` and `data-part="label"`, each with `data-axis`, and `data-zero` on the line at zero. Renders a `<div>` element.
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `x` | `GridAxis` |  | Grid lines across, at values on the x axis. Leave it out for none. |
-| `y` | `GridAxis` |  | Grid lines along, at values on the y axis. Leave it out for none. |
+<TypeTable>
+<TypeRow name={"x"} type={"GridAxis"}>Grid lines across, at values on the x axis. Leave it out for none.</TypeRow>
+<TypeRow name={"y"} type={"GridAxis"}>Grid lines along, at values on the y axis. Leave it out for none.</TypeRow>
+</TypeTable>
 
-| Data attribute | Description |
-| --- | --- |
-| `data-disabled` | Present when disabled. |
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+</TypeTable>
 
 ### Handle
 
 A point on the plot that can be moved: an equalizer band at its frequency and gain, a filter's cutoff and resonance, a compressor's threshold. Its value is in the axes' units, and `axis` can hold it to one of them. Dragging moves it from where it is, never jumping to the pointer, four times finer with Shift. A double click, an Alt + click or the Delete key return it to `defaultValue`, or the middle of the plot. It holds a native `<input type="range">` per axis it moves along, carrying the accessible names: the first takes focus, and the arrow keys move it by a hundredth of the axis, a tenth with Shift. Renders a `<div>` element.
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `axis` | `"both" \| Axis` | `"both"` | The axes the handle moves along; the other keeps the value given. |
-| `defaultValue` | `Value` |  | Uncontrolled starting value. Defaults to the middle of the plot. |
-| `disabled` | `boolean` |  |  |
-| `getAriaLabel` | `(axis: Axis) => string` |  | Names each axis input. Defaults to `aria-label`, followed by "X" / "Y" when the handle moves along both. |
-| `getAriaValueText` | `(value: number, axis: Axis) => string` |  | Returns an axis input's `aria-valuetext`, from its value. Defaults to the number. |
-| `onValueChange` | `(value: Value, eventDetails: ChangeEventDetails) => void` |  | Fires while the handle is moved: drag, keyboard and input changes. |
-| `onValueCommitted` | `(value: Value, eventDetails: CommitEventDetails) => void` |  | Fires when a gesture that moved the handle ends, and after each key or input change. |
-| `value` | `Value` |  | The handle's position, in the axes' units. |
+<TypeTable>
+<TypeRow name={"axis"} type={"\"both\" | Axis"} default={"\"both\""}>The axes the handle moves along; the other keeps the value given.</TypeRow>
+<TypeRow name={"defaultValue"} type={"Value"}>Uncontrolled starting value. Defaults to the middle of the plot.</TypeRow>
+<TypeRow name={"disabled"} type={"boolean"}></TypeRow>
+<TypeRow name={"getAriaLabel"} type={"(axis: Axis) => string"}>Names each axis input. Defaults to `aria-label`, followed by "X" / "Y" when the handle moves along both.</TypeRow>
+<TypeRow name={"getAriaValueText"} type={"(value: number, axis: Axis) => string"}>Returns an axis input's `aria-valuetext`, from its value. Defaults to the number.</TypeRow>
+<TypeRow name={"onValueChange"} type={"(value: Value, eventDetails: ChangeEventDetails) => void"}>Fires while the handle is moved: drag, keyboard and input changes.</TypeRow>
+<TypeRow name={"onValueCommitted"} type={"(value: Value, eventDetails: CommitEventDetails) => void"}>Fires when a gesture that moved the handle ends, and after each key or input change.</TypeRow>
+<TypeRow name={"value"} type={"Value"}>The handle's position, in the axes' units.</TypeRow>
+</TypeTable>
 
-| Data attribute | Description |
-| --- | --- |
-| `data-disabled` | Present when disabled. |
-| `data-dragging` | Whether a pointer is dragging the handle. |
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+<TypeRow name={"data-dragging"}>Whether a pointer is dragging the handle.</TypeRow>
+</TypeTable>
 
 ### Graph
 
 The drawing surface: an `<svg>` covering the plot, stretched to its size, that `Plot.Curve`, `Plot.Line` and `Plot.Band` draw in. Strokes keep their width however the plot is stretched. Hidden from assistive technology and from the pointer. Renders a `<svg>` element.
 
-| Data attribute | Description |
-| --- | --- |
-| `data-disabled` | Present when disabled. |
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+</TypeTable>
 
 ### Trace
 
 A live line across the plot: the list of y values a `source` holds, such as the spectrum of the sound, spread evenly across the x axis. It is drawn straight in the DOM each time the source changes, without re-rendering React, so it can follow audio frame by frame. With `fillTo`, it closes down to that y value to be filled as an area. Sits in `Plot.Graph`. Renders a `<path>` element.
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `fillTo` | `number` |  | Closes the line to this y value, so it can be filled as an area. |
-| `max` | `number` |  | Top of the scale the values are on. Defaults to the plot's y axis. |
-| `min` | `number` |  | Bottom of the scale the values are on. Defaults to the plot's y axis. |
-| `source` | `TraceSource` |  | The live y values; the snapshot may be one array updated in place. |
+<TypeTable>
+<TypeRow name={"fillTo"} type={"number"}>Closes the line to this y value, so it can be filled as an area.</TypeRow>
+<TypeRow name={"max"} type={"number"}>Top of the scale the values are on. Defaults to the plot's y axis.</TypeRow>
+<TypeRow name={"min"} type={"number"}>Bottom of the scale the values are on. Defaults to the plot's y axis.</TypeRow>
+<TypeRow name={"source"} type={"TraceSource"}>The live y values; the snapshot may be one array updated in place.</TypeRow>
+</TypeTable>
 
-| Data attribute | Description |
-| --- | --- |
-| `data-disabled` | Present when disabled. |
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+</TypeTable>
 
 ### Curve
 
 A curve across the whole plot: `y = fn(x)` in the axes' units, such as an equalizer's response in dB at each frequency. With `fillTo`, it closes down to that y value, to be filled as an area. Sits in `Plot.Graph`. Renders a `<path>` element.
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `fillTo` | `number` |  | Closes the curve to this y value, so it can be filled as an area. |
-| `fn` | `(x: number) => number` |  | The curve: y, in the y axis' units, at each x. |
-| `samples` | `number` | `256` | How many points the curve is drawn through. |
+<TypeTable>
+<TypeRow name={"fillTo"} type={"number"}>Closes the curve to this y value, so it can be filled as an area.</TypeRow>
+<TypeRow name={"fn"} type={"(x: number) => number"}>The curve: y, in the y axis' units, at each x.</TypeRow>
+<TypeRow name={"samples"} type={"number"} default={"256"}>How many points the curve is drawn through.</TypeRow>
+</TypeTable>
 
-| Data attribute | Description |
-| --- | --- |
-| `data-disabled` | Present when disabled. |
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+</TypeTable>
 
 ### Line
 
 A straight line across the plot at a value: vertical at an x value, such as a filter's cutoff, or horizontal at a y value, such as 0 dB. Sits in `Plot.Graph`. Renders a `<line>` element.
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `axis` | `"x" \| "y"` |  | `"x"` draws a vertical line at an x value, `"y"` a horizontal one at a y value. |
-| `value` | `number` |  |  |
+<TypeTable>
+<TypeRow name={"axis"} type={"\"x\" | \"y\""}>`"x"` draws a vertical line at an x value, `"y"` a horizontal one at a y value.</TypeRow>
+<TypeRow name={"value"} type={"number"}></TypeRow>
+</TypeTable>
 
-| Data attribute | Description |
-| --- | --- |
-| `data-disabled` | Present when disabled. |
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+</TypeTable>
 
 ### Mark
 
 A label at a value on one axis, such as "1k" under a frequency or "+12" by a gain: placed at the value along the axis and left to you to set apart from the plot's edge. Hidden from assistive technology, which reads the handles' own values. Renders a `<div>` element.
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `axis` | `"x" \| "y"` |  | The axis `value` is on: `"x"` places it across, `"y"` down. |
-| `value` | `number` |  |  |
+<TypeTable>
+<TypeRow name={"axis"} type={"\"x\" | \"y\""}>The axis `value` is on: `"x"` places it across, `"y"` down.</TypeRow>
+<TypeRow name={"value"} type={"number"}></TypeRow>
+</TypeTable>
 
-| Data attribute | Description |
-| --- | --- |
-| `data-disabled` | Present when disabled. |
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+</TypeTable>
 
 ### Registry component
 

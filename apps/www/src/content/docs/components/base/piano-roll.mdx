@@ -177,33 +177,33 @@ A note is `{ id, pitch, start, length, velocity? }`: `pitch` is a MIDI number (6
 
 Groups the parts of a piano roll and owns its notes and selection. Must be used within a `Timeline`. Renders a `<div>` element.
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `value` | `Note[]` |  | The notes. |
-| `defaultValue` | `Note[]` |  | Uncontrolled starting notes. |
-| `selection` | `NoteId[]` |  | The ids of the selected notes. |
-| `defaultSelection` | `NoteId[]` |  | Uncontrolled starting selection. |
-| `minPitch` | `number` | `48` | Lowest MIDI pitch, inclusive: 60 is middle C. |
-| `maxPitch` | `number` | `72` | Highest MIDI pitch, inclusive. |
-| `minLength` | `number` |  | The shortest a note can be, in the timeline's units. Defaults to the timeline's grid step. |
-| `mode` | `"draw" \| "select"` | `"select"` | What a press on empty grid does: draw a note, or start a selection rectangle (a double-click draws). |
-| `folded` | `boolean` | `false` | Whether only the pitches carrying notes get a row. A roll without notes keeps them all. |
-| `activePitches` | `number[]` |  | Pitches lit from elsewhere, such as a MIDI input or the notes playing, on the keys and rows. |
-| `disabled` | `boolean` |  |  |
-| `createNoteId` | `() => NoteId` |  | Returns the id of a note drawn, added or duplicated. Defaults to `"note-<n>"`, skipping ids in use. |
-| `getNoteLabel` | `(note: Note) => string` |  | Returns a note's accessible name. Defaults to its pitch and where it starts and ends, such as "C4, 4 to 6". |
-| `onValueChange` | `( value: Note[], eventDetails ) => void` |  | Fires while notes are drawn, moved, resized, duplicated or removed. |
-| `onValueCommitted` | `( value: Note[], eventDetails ) => void` |  | Fires when a gesture that changed the notes ends, and after each edit from the keyboard. |
-| `onSelectionChange` | `( selection: NoteId[], eventDetails ) => void` |  | Fires when notes are selected or deselected. |
-| `onNoteOn` | `( pitch: number, eventDetails ) => void` |  | Fires when a pitch should sound: a key pressed, a note drawn, picked up or moved to a new pitch. `eventDetails.velocity` is 0 to 1; `eventDetails.cancel()` keeps it silent. |
-| `onNoteOff` | `( pitch: number, eventDetails ) => void` |  | Fires when a pitch stops sounding. |
+<TypeTable>
+<TypeRow name={"value"} type={"Note[]"}>The notes.</TypeRow>
+<TypeRow name={"defaultValue"} type={"Note[]"}>Uncontrolled starting notes.</TypeRow>
+<TypeRow name={"selection"} type={"NoteId[]"}>The ids of the selected notes.</TypeRow>
+<TypeRow name={"defaultSelection"} type={"NoteId[]"}>Uncontrolled starting selection.</TypeRow>
+<TypeRow name={"minPitch"} type={"number"} default={"48"}>Lowest MIDI pitch, inclusive: 60 is middle C.</TypeRow>
+<TypeRow name={"maxPitch"} type={"number"} default={"72"}>Highest MIDI pitch, inclusive.</TypeRow>
+<TypeRow name={"minLength"} type={"number"}>The shortest a note can be, in the timeline's units. Defaults to the timeline's grid step.</TypeRow>
+<TypeRow name={"mode"} type={"\"draw\" | \"select\""} default={"\"select\""}>What a press on empty grid does: draw a note, or start a selection rectangle (a double-click draws).</TypeRow>
+<TypeRow name={"folded"} type={"boolean"} default={"false"}>Whether only the pitches carrying notes get a row. A roll without notes keeps them all.</TypeRow>
+<TypeRow name={"activePitches"} type={"number[]"}>Pitches lit from elsewhere, such as a MIDI input or the notes playing, on the keys and rows.</TypeRow>
+<TypeRow name={"disabled"} type={"boolean"}></TypeRow>
+<TypeRow name={"createNoteId"} type={"() => NoteId"}>Returns the id of a note drawn, added or duplicated. Defaults to `"note-<n>"`, skipping ids in use.</TypeRow>
+<TypeRow name={"getNoteLabel"} type={"(note: Note) => string"}>Returns a note's accessible name. Defaults to its pitch and where it starts and ends, such as "C4, 4 to 6".</TypeRow>
+<TypeRow name={"onValueChange"} type={"( value: Note[], eventDetails ) => void"}>Fires while notes are drawn, moved, resized, duplicated or removed.</TypeRow>
+<TypeRow name={"onValueCommitted"} type={"( value: Note[], eventDetails ) => void"}>Fires when a gesture that changed the notes ends, and after each edit from the keyboard.</TypeRow>
+<TypeRow name={"onSelectionChange"} type={"( selection: NoteId[], eventDetails ) => void"}>Fires when notes are selected or deselected.</TypeRow>
+<TypeRow name={"onNoteOn"} type={"( pitch: number, eventDetails ) => void"}>Fires when a pitch should sound: a key pressed, a note drawn, picked up or moved to a new pitch. `eventDetails.velocity` is 0 to 1; `eventDetails.cancel()` keeps it silent.</TypeRow>
+<TypeRow name={"onNoteOff"} type={"( pitch: number, eventDetails ) => void"}>Fires when a pitch stops sounding.</TypeRow>
+</TypeTable>
 
-| Data attribute | Description |
-| --- | --- |
-| `data-disabled` | Present when disabled. |
-| `data-editing` | Present while a gesture edits the notes. |
-| `data-folded` | Present when folded. |
-| `data-mode` | `"draw"` or `"select"`. |
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+<TypeRow name={"data-editing"}>Present while a gesture edits the notes.</TypeRow>
+<TypeRow name={"data-folded"}>Present when folded.</TypeRow>
+<TypeRow name={"data-mode"}>`"draw"` or `"select"`.</TypeRow>
+</TypeTable>
 
 ### Keys
 
@@ -213,9 +213,9 @@ The keyboard down the side: a `Piano` laid out on the roll's rows, low end at th
 
 Renders `children` once per row, from the highest pitch down: the place to put a `PianoRoll.Key` or a `PianoRoll.Row`. Renders no element of its own.
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `children` | `(pitch: number) => React.ReactNode` |  |  |
+<TypeTable>
+<TypeRow name={"children"} type={"(pitch: number) => React.ReactNode"}></TypeRow>
+</TypeTable>
 
 ### Key and KeyLabel
 
@@ -229,45 +229,45 @@ The surface notes are drawn on: a timeline lane, with the roll's rows stacked do
 
 The band a pitch takes across the grid, for shading black-key rows or ruling where an octave starts. It lets presses through to the grid and is hidden from assistive technology. Renders a `<div>` element.
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `pitch` | `number` |  | The MIDI pitch of the row. |
+<TypeTable>
+<TypeRow name={"pitch"} type={"number"}>The MIDI pitch of the row.</TypeRow>
+</TypeTable>
 
-| Data attribute | Description |
-| --- | --- |
-| `data-active` | Whether the pitch is sounding. |
-| `data-color` | `"black"` or `"white"`. |
-| `data-folded` | Whether the roll is folded. |
-| `data-octave` | Whether the row is a C, where an octave starts. |
+<TypeTable title="Data attributes">
+<TypeRow name={"data-active"}>Whether the pitch is sounding.</TypeRow>
+<TypeRow name={"data-color"}>`"black"` or `"white"`.</TypeRow>
+<TypeRow name={"data-folded"}>Whether the roll is folded.</TypeRow>
+<TypeRow name={"data-octave"}>Whether the row is a C, where an octave starts.</TypeRow>
+</TypeTable>
 
 ### Notes
 
 Renders `children` once per note, in the order they are read: by start, then from the highest pitch down. That order is also the tab order. Renders no element of its own.
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `children` | `(note: Note) => React.ReactNode` |  |  |
+<TypeTable>
+<TypeRow name={"children"} type={"(note: Note) => React.ReactNode"}></TypeRow>
+</TypeTable>
 
 ### Note
 
 One note, placed on its row from its start, as long as its length. A toggle button named after its pitch and span (`getNoteLabel` on `Root`). Renders a `<div>` element.
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `note` | `Note` |  | The note to show; while it is being edited, the roll shows it where the edit has it. |
+<TypeTable>
+<TypeRow name={"note"} type={"Note"}>The note to show; while it is being edited, the roll shows it where the edit has it.</TypeRow>
+</TypeTable>
 
-| Data attribute | Description |
-| --- | --- |
-| `data-selected` | Whether the note is in the selection: also `aria-pressed`. |
-| `data-disabled` | Present when disabled. |
+<TypeTable title="Data attributes">
+<TypeRow name={"data-selected"}>Whether the note is in the selection: also `aria-pressed`.</TypeRow>
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+</TypeTable>
 
 ### NoteHandle
 
 One edge of the note it sits in, dragged to change the note's length: the end makes it longer or shorter, the start trims it from the front while its end stays put. On the grid unless Cmd/Ctrl is held, and for the whole selection when the note is part of it. Shift + Left and Right on the note do the same from the keyboard, so the handle is hidden from assistive technology. Renders a `<div>` element.
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `edge` | `"start" \| "end"` |  | The edge of the note this handle drags. |
+<TypeTable>
+<TypeRow name={"edge"} type={"\"start\" | \"end\""}>The edge of the note this handle drags.</TypeRow>
+</TypeTable>
 
 ### Marquee
 
@@ -281,10 +281,10 @@ A strip under the grid where each note's velocity stands as a bar, placed at the
 
 One note's velocity, as a bar from the bottom of the lane: its height is the velocity, through the `--piano-roll-velocity` CSS variable. Dragging it up or down changes the velocity of the selection by the same amount when the note is part of it, so a phrase keeps its dynamics; Shift + click toggles the note in the selection. A native `<input type="range">` inside takes the arrow keys and carries the accessible name, which defaults to the note's. The velocity set last is what the next drawn note gets. Renders a `<div>` element.
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `note` | `Note` |  | The note whose velocity this is. |
-| `getAriaValueText` | `(velocity: number) => string` |  | Returns how a velocity, 0…1, is announced. Defaults to a percentage. |
+<TypeTable>
+<TypeRow name={"note"} type={"Note"}>The note whose velocity this is.</TypeRow>
+<TypeRow name={"getAriaValueText"} type={"(velocity: number) => string"}>Returns how a velocity, 0…1, is announced. Defaults to a percentage.</TypeRow>
+</TypeTable>
 
 ### Registry components
 

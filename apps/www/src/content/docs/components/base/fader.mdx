@@ -140,52 +140,52 @@ Wheel input over the fader nudges the value by `step` and reports `eventDetails.
 
 Groups all parts of the fader, with audio defaults (vertical, -60…+6) and mouse-wheel stepping. While a pointer drags it, the thumb follows the pointer even if a controlled `value` lags behind (a seek bar driven by playback time, automation) — reject a value with `eventDetails.cancel()` instead. Renders a `<div>` element.
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `anchor` | `number` |  | Value the `Indicator` fills from, such as `0` on a -1…1 pan. Defaults to `min`. |
-| `defaultValue` | `number` |  | Uncontrolled starting value; defaults to the midpoint of `min…max`. |
-| `max` | `number` | `6` |  |
-| `min` | `number` | `-60` |  |
-| `onValueChange` | `(value: number, eventDetails: ChangeEventDetails) => void` |  | Fires on drag, track press, keyboard, wheel and form input changes. |
-| `onValueCommitted` | `( value: number, eventDetails: CommitEventDetails ) => void` |  | Fires when an interaction ends with a new value. |
-| `orientation` | `"horizontal" \| "vertical"` | `"vertical"` |  |
-| `value` | `number` |  |  |
+<TypeTable>
+<TypeRow name={"anchor"} type={"number"}>Value the `Indicator` fills from, such as `0` on a -1…1 pan. Defaults to `min`.</TypeRow>
+<TypeRow name={"defaultValue"} type={"number"}>Uncontrolled starting value; defaults to the midpoint of `min…max`.</TypeRow>
+<TypeRow name={"max"} type={"number"} default={"6"}></TypeRow>
+<TypeRow name={"min"} type={"number"} default={"-60"}></TypeRow>
+<TypeRow name={"onValueChange"} type={"(value: number, eventDetails: ChangeEventDetails) => void"}>Fires on drag, track press, keyboard, wheel and form input changes.</TypeRow>
+<TypeRow name={"onValueCommitted"} type={"( value: number, eventDetails: CommitEventDetails ) => void"}>Fires when an interaction ends with a new value.</TypeRow>
+<TypeRow name={"orientation"} type={"\"horizontal\" | \"vertical\""} default={"\"vertical\""}></TypeRow>
+<TypeRow name={"value"} type={"number"}></TypeRow>
+</TypeTable>
 
-| Data attribute | Description |
-| --- | --- |
-| `data-active` | Whether the value has reached this mark from the anchor. |
-| `data-disabled` | Present when disabled. |
+<TypeTable title="Data attributes">
+<TypeRow name={"data-active"}>Whether the value has reached this mark from the anchor.</TypeRow>
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+</TypeTable>
 
 ### Control
 
 The interactive area: pointer presses and drags, plus mouse-wheel stepping. Sets `touch-action: none` so touch drags don't scroll the page. Renders a `<div>` element.
 
-| Data attribute | Description |
-| --- | --- |
-| `data-active` | Whether the value has reached this mark from the anchor. |
-| `data-disabled` | Present when disabled. |
+<TypeTable title="Data attributes">
+<TypeRow name={"data-active"}>Whether the value has reached this mark from the anchor.</TypeRow>
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+</TypeTable>
 
 ### Indicator
 
 The filled part of the track: from `min` up to the value, or between the Root's `anchor` and the value, on whichever side of it the value is. Renders a `<div>` element.
 
-| Data attribute | Description |
-| --- | --- |
-| `data-active` | Whether the value has reached this mark from the anchor. |
-| `data-disabled` | Present when disabled. |
+<TypeTable title="Data attributes">
+<TypeRow name={"data-active"}>Whether the value has reached this mark from the anchor.</TypeRow>
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+</TypeTable>
 
 ### Mark
 
 A graduation along the track at `value`: placed from the start of the travel in the fader's direction, where the thumb's center would be at that value. It carries `data-active` while the value has reached it from the anchor, and `data-orientation`. Decorative: the thumb's input announces the value. Render your own tick and label inside it. Renders a `<div>` element.
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `value` | `number` |  | Where the mark sits, between `min` and `max`. |
+<TypeTable>
+<TypeRow name={"value"} type={"number"}>Where the mark sits, between `min` and `max`.</TypeRow>
+</TypeTable>
 
-| Data attribute | Description |
-| --- | --- |
-| `data-active` | Whether the value has reached this mark from the anchor. |
-| `data-disabled` | Present when disabled. |
+<TypeTable title="Data attributes">
+<TypeRow name={"data-active"}>Whether the value has reached this mark from the anchor.</TypeRow>
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+</TypeTable>
 
 ### Registry component
 
@@ -193,32 +193,32 @@ A graduation along the track at `value`: placed from the start of the travel in 
 
 #### Value and state
 
-| Prop | Type | Default | Description |
-| ---- | ---- | ------- | ----------- |
-| `value` | `number` | - | Controlled value. |
-| `defaultValue` | `number` | midpoint | Uncontrolled initial value. Midpoint is `(min + max) / 2`. |
-| `min` | `number` | `-60` | Minimum value. |
-| `max` | `number` | `6` | Maximum value. |
-| `step` | `number` | `1` | Quantization step for drag, wheel, and keyboard. |
-| `marks` | `(number \| { value, label? })[]` | - | Graduations drawn beside the track: a ruler for the value. Those the value has reached from `anchor` light up. |
-| `valueLabel` | `"auto" \| "always" \| "hidden"` | `"auto"` | When the value shows beside the thumb: `auto` while hovered, dragged or focused from the keyboard. |
-| `formatValue` | `(value: number) => string` | `format` | How the value prints in that readout, e.g. `"-6.0 dB"`. |
-| `editableValue` | `boolean` | `false` | Lets you type the value in the readout: a double click, or Enter while it has focus. Enter commits it, Escape drops it (`reason: "input-change"`). |
-| `anchor` | `number` | `min` | Value the fill grows from, such as `0` on a -1…1 pan: the fill runs from the anchor to the value, on whichever side it is. |
-| `disabled` | `boolean` | `false` | Disables interaction. |
-| `onValueChange` | `(value: number, eventDetails) => void` | - | Live updates while adjusting. `eventDetails.reason` is `"drag"`, `"track-press"`, `"keyboard"`, `"wheel"`, `"input-change"`, or `"none"`; call `eventDetails.cancel()` to reject the change. |
-| `onValueCommitted` | `(value: number, eventDetails) => void` | - | Fires when an interaction ends with a new value. |
-| `aria-label` | `string` | - | Accessible name for the slider. |
-| `aria-labelledby` | `string` | - | ID of a labeling element. |
+<TypeTable>
+<TypeRow name={"value"} type={"number"}>Controlled value.</TypeRow>
+<TypeRow name={"defaultValue"} type={"number"} default={"midpoint"}>Uncontrolled initial value. Midpoint is `(min + max) / 2`.</TypeRow>
+<TypeRow name={"min"} type={"number"} default={"-60"}>Minimum value.</TypeRow>
+<TypeRow name={"max"} type={"number"} default={"6"}>Maximum value.</TypeRow>
+<TypeRow name={"step"} type={"number"} default={"1"}>Quantization step for drag, wheel, and keyboard.</TypeRow>
+<TypeRow name={"marks"} type={"(number | { value, label? })[]"}>Graduations drawn beside the track: a ruler for the value. Those the value has reached from `anchor` light up.</TypeRow>
+<TypeRow name={"valueLabel"} type={"\"auto\" | \"always\" | \"hidden\""} default={"\"auto\""}>When the value shows beside the thumb: `auto` while hovered, dragged or focused from the keyboard.</TypeRow>
+<TypeRow name={"formatValue"} type={"(value: number) => string"} default={"format"}>How the value prints in that readout, e.g. `"-6.0 dB"`.</TypeRow>
+<TypeRow name={"editableValue"} type={"boolean"} default={"false"}>Lets you type the value in the readout: a double click, or Enter while it has focus. Enter commits it, Escape drops it (`reason: "input-change"`).</TypeRow>
+<TypeRow name={"anchor"} type={"number"} default={"min"}>Value the fill grows from, such as `0` on a -1…1 pan: the fill runs from the anchor to the value, on whichever side it is.</TypeRow>
+<TypeRow name={"disabled"} type={"boolean"} default={"false"}>Disables interaction.</TypeRow>
+<TypeRow name={"onValueChange"} type={"(value: number, eventDetails) => void"}>Live updates while adjusting. `eventDetails.reason` is `"drag"`, `"track-press"`, `"keyboard"`, `"wheel"`, `"input-change"`, or `"none"`; call `eventDetails.cancel()` to reject the change.</TypeRow>
+<TypeRow name={"onValueCommitted"} type={"(value: number, eventDetails) => void"}>Fires when an interaction ends with a new value.</TypeRow>
+<TypeRow name={"aria-label"} type={"string"}>Accessible name for the slider.</TypeRow>
+<TypeRow name={"aria-labelledby"} type={"string"}>ID of a labeling element.</TypeRow>
+</TypeTable>
 
 #### Layout and visuals
 
-| Prop | Type | Default | Description |
-| ---- | ---- | ------- | ----------- |
-| `orientation` | `"horizontal" \| "vertical"` | `"vertical"` | Direction of travel. |
-| `size` | `"sm" \| "default" \| "lg"` | `"default"` | Track and thumb size preset. |
-| `thumbMarks` | `number \| false` | `3` | Number of marks in the thumb or `false` to hide them. |
-| `className` | `string` | - | Root wrapper class name. |
+<TypeTable>
+<TypeRow name={"orientation"} type={"\"horizontal\" | \"vertical\""} default={"\"vertical\""}>Direction of travel.</TypeRow>
+<TypeRow name={"size"} type={"\"sm\" | \"default\" | \"lg\""} default={"\"default\""}>Track and thumb size preset.</TypeRow>
+<TypeRow name={"thumbMarks"} type={"number | false"} default={"3"}>Number of marks in the thumb or `false` to hide them.</TypeRow>
+<TypeRow name={"className"} type={"string"}>Root wrapper class name.</TypeRow>
+</TypeTable>
 
 Additional valid HTML attributes passed to `Fader.Root` are forwarded.
 

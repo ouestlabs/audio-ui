@@ -130,50 +130,50 @@ One tab stop for the whole keyboard; focus then roves between keys:
 
 A keyboard to play: every key sounds while pressed, by pointer or from the keyboard. Dragging across the keys glides from one to the next, and each pointer holds its own key, so chords can be played on a touch screen. It is laid out like a piano, or with `layout="even"` as one equal share per key, the way a piano roll's rows are; `orientation="vertical"` puts the low end at the bottom. The keys are one tab stop, walked with the arrow keys. Renders a `<div>` element.
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `activeNotes` | `readonly number[]` |  | Pitches lit from elsewhere, such as a MIDI input or a sequencer, on top of the keys pressed here. |
-| `disabled` | `boolean` |  |  |
-| `layout` | `Layout` | `"keyboard"` | How the keys share the length: like a piano, or one equal share each. |
-| `maxPitch` | `number` | `72` | Highest MIDI pitch, inclusive. |
-| `minPitch` | `number` | `48` | Lowest MIDI pitch, inclusive: 60 is middle C. |
-| `onNoteOff` | `(pitch: number, eventDetails: NoteOffEventDetails) => void` |  | Fires when a key is released, the pointer glides off it, or it loses focus while held. |
-| `onNoteOn` | `(pitch: number, eventDetails: NoteOnEventDetails) => void` |  | Fires when a key is pressed or glided onto. `eventDetails.cancel()` keeps it silent. |
-| `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` |  |
-| `pitches` | `readonly number[]` |  | Only these pitches, in place of `minPitch`…`maxPitch`. |
+<TypeTable>
+<TypeRow name={"activeNotes"} type={"readonly number[]"}>Pitches lit from elsewhere, such as a MIDI input or a sequencer, on top of the keys pressed here.</TypeRow>
+<TypeRow name={"disabled"} type={"boolean"}></TypeRow>
+<TypeRow name={"layout"} type={"Layout"} default={"\"keyboard\""}>How the keys share the length: like a piano, or one equal share each.</TypeRow>
+<TypeRow name={"maxPitch"} type={"number"} default={"72"}>Highest MIDI pitch, inclusive.</TypeRow>
+<TypeRow name={"minPitch"} type={"number"} default={"48"}>Lowest MIDI pitch, inclusive: 60 is middle C.</TypeRow>
+<TypeRow name={"onNoteOff"} type={"(pitch: number, eventDetails: NoteOffEventDetails) => void"}>Fires when a key is released, the pointer glides off it, or it loses focus while held.</TypeRow>
+<TypeRow name={"onNoteOn"} type={"(pitch: number, eventDetails: NoteOnEventDetails) => void"}>Fires when a key is pressed or glided onto. `eventDetails.cancel()` keeps it silent.</TypeRow>
+<TypeRow name={"orientation"} type={"\"horizontal\" | \"vertical\""} default={"\"horizontal\""}></TypeRow>
+<TypeRow name={"pitches"} type={"readonly number[]"}>Only these pitches, in place of `minPitch`…`maxPitch`.</TypeRow>
+</TypeTable>
 
-| Data attribute | Description |
-| --- | --- |
-| `data-disabled` | Present when disabled. |
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+</TypeTable>
 
 ### Keys
 
 Renders `children` once per key, lowest first: the place to put a `Piano.Key` for each pitch. Renders no element of its own.
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `children` | `(pitch: number) => React.ReactNode` |  |  |
+<TypeTable>
+<TypeRow name={"children"} type={"(pitch: number) => React.ReactNode"}></TypeRow>
+</TypeTable>
 
 ### Key
 
 One key, placed along the keyboard for its pitch. It sounds while pressed: by pointer through the keyboard, or with Enter or Space while focused. Its accessible name defaults to the pitch, such as "C4". Renders a `<button>` element.
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `pitch` | `number` |  | The MIDI pitch this key plays. |
+<TypeTable>
+<TypeRow name={"pitch"} type={"number"}>The MIDI pitch this key plays.</TypeRow>
+</TypeTable>
 
-| Data attribute | Description |
-| --- | --- |
-| `data-active` | Whether the key is sounding: pressed here, or listed in `activeNotes`. |
-| `data-disabled` | Present when disabled. |
+<TypeTable title="Data attributes">
+<TypeRow name={"data-active"}>Whether the key is sounding: pressed here, or listed in `activeNotes`.</TypeRow>
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+</TypeTable>
 
 ### KeyLabel
 
 The name of the key it sits in, such as "C4". Hidden from assistive technology, which reads the key's own name. Renders a `<span>` element.
 
-| Data attribute | Description |
-| --- | --- |
-| `data-disabled` | Present when disabled. |
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+</TypeTable>
 
 ### Registry component
 
@@ -181,24 +181,24 @@ The name of the key it sits in, such as "C4". Hidden from assistive technology, 
 
 #### Value and state
 
-| Prop            | Type                  | Default | Description                                                      |
-| --------------- | ---------------------- | ------- | ------------------------------------------------------------------ |
-| `minPitch`      | `number`               | `48`    | Lowest MIDI pitch on the keyboard.                                |
-| `maxPitch`      | `number`               | `72`    | Highest MIDI pitch on the keyboard.                               |
-| `pitches`       | `number[]`             | -       | Exactly these pitches, in place of `minPitch`…`maxPitch`.         |
-| `activeNotes`   | `number[]`              | -       | Pitches lit from outside pointer interaction. Merged with the pressed keys for display. |
-| `disabled`      | `boolean`               | `false` | Whether the keyboard is disabled.                                 |
-| `onNoteOn`      | `(pitch: number, eventDetails) => void` | -     | Fires when a key is pressed or glided onto. `eventDetails.cancel()` keeps it silent. |
-| `onNoteOff`     | `(pitch: number, eventDetails) => void` | -     | Fires when a key is released, glided off, or loses focus while held. |
-| `aria-label`    | `string`                | -       | Accessible name for the keyboard.                                 |
-| `aria-labelledby` | `string`              | -       | ID of a labeling element.                                         |
+<TypeTable>
+<TypeRow name={"minPitch"} type={"number"} default={"48"}>Lowest MIDI pitch on the keyboard.</TypeRow>
+<TypeRow name={"maxPitch"} type={"number"} default={"72"}>Highest MIDI pitch on the keyboard.</TypeRow>
+<TypeRow name={"pitches"} type={"number[]"}>Exactly these pitches, in place of `minPitch`…`maxPitch`.</TypeRow>
+<TypeRow name={"activeNotes"} type={"number[]"}>Pitches lit from outside pointer interaction. Merged with the pressed keys for display.</TypeRow>
+<TypeRow name={"disabled"} type={"boolean"} default={"false"}>Whether the keyboard is disabled.</TypeRow>
+<TypeRow name={"onNoteOn"} type={"(pitch: number, eventDetails) => void"}>Fires when a key is pressed or glided onto. `eventDetails.cancel()` keeps it silent.</TypeRow>
+<TypeRow name={"onNoteOff"} type={"(pitch: number, eventDetails) => void"}>Fires when a key is released, glided off, or loses focus while held.</TypeRow>
+<TypeRow name={"aria-label"} type={"string"}>Accessible name for the keyboard.</TypeRow>
+<TypeRow name={"aria-labelledby"} type={"string"}>ID of a labeling element.</TypeRow>
+</TypeTable>
 
 #### Layout and display
 
-| Prop        | Type                          | Default     | Description                        |
-| ----------- | ------------------------------ | ----------- | ----------------------------------- |
-| `size`      | `"sm" \| "default" \| "lg"`   | `"default"` | Size variant (sets the keyboard height). |
-| `className` | `string`                      | -           | Additional CSS classes.            |
+<TypeTable>
+<TypeRow name={"size"} type={"\"sm\" | \"default\" | \"lg\""} default={"\"default\""}>Size variant (sets the keyboard height).</TypeRow>
+<TypeRow name={"className"} type={"string"}>Additional CSS classes.</TypeRow>
+</TypeTable>
 
 Additional valid HTML attributes passed to `Piano.Root` are forwarded.
 

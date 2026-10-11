@@ -144,71 +144,71 @@ Wheel and trackpad input over the pad moves the point by the scrolled distance: 
 
 Groups all parts of the pad and owns its two-dimensional value. Exposes the value position as CSS variables for crosshairs and guides: `--xy-pad-x` (from the left) and `--xy-pad-y` (from the top), as percentages. Renders a `<div>` element.
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `defaultValue` | `Point` |  | Uncontrolled starting value. Defaults to the center of the pad. |
-| `disabled` | `boolean` |  |  |
-| `format` | `Intl.NumberFormatOptions` |  | Formats each axis for `XYPad.Value` and the inputs' `aria-valuetext`. |
-| `locale` | `Intl.LocalesArgument` |  |  |
-| `maxX` | `number` | `100` |  |
-| `maxY` | `number` | `100` |  |
-| `minX` | `number` | `0` |  |
-| `minY` | `number` | `0` |  |
-| `onValueChange` | `(value: Point, eventDetails: ChangeEventDetails) => void` |  | Fires on every change: press, drag, keyboard, wheel and input changes. |
-| `onValueCommitted` | `(value: Point, eventDetails: CommitEventDetails) => void` |  | Fires when an interaction ends with a new value. |
-| `stepX` | `number` | `1` |  |
-| `stepY` | `number` | `1` |  |
-| `value` | `Point` |  |  |
+<TypeTable>
+<TypeRow name={"defaultValue"} type={"Point"}>Uncontrolled starting value. Defaults to the center of the pad.</TypeRow>
+<TypeRow name={"disabled"} type={"boolean"}></TypeRow>
+<TypeRow name={"format"} type={"Intl.NumberFormatOptions"}>Formats each axis for `XYPad.Value` and the inputs' `aria-valuetext`.</TypeRow>
+<TypeRow name={"locale"} type={"Intl.LocalesArgument"}></TypeRow>
+<TypeRow name={"maxX"} type={"number"} default={"100"}></TypeRow>
+<TypeRow name={"maxY"} type={"number"} default={"100"}></TypeRow>
+<TypeRow name={"minX"} type={"number"} default={"0"}></TypeRow>
+<TypeRow name={"minY"} type={"number"} default={"0"}></TypeRow>
+<TypeRow name={"onValueChange"} type={"(value: Point, eventDetails: ChangeEventDetails) => void"}>Fires on every change: press, drag, keyboard, wheel and input changes.</TypeRow>
+<TypeRow name={"onValueCommitted"} type={"(value: Point, eventDetails: CommitEventDetails) => void"}>Fires when an interaction ends with a new value.</TypeRow>
+<TypeRow name={"stepX"} type={"number"} default={"1"}></TypeRow>
+<TypeRow name={"stepY"} type={"number"} default={"1"}></TypeRow>
+<TypeRow name={"value"} type={"Point"}></TypeRow>
+</TypeTable>
 
-| Data attribute | Description |
-| --- | --- |
-| `data-disabled` | Present when disabled. |
-| `data-dragging` | Whether a pointer is dragging on the pad. |
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+<TypeRow name={"data-dragging"}>Whether a pointer is dragging on the pad.</TypeRow>
+</TypeTable>
 
 ### Control
 
 The pad surface: a press jumps the value to the pointer and a drag follows it; the mouse wheel / trackpad moves it too. Sets `touch-action: none` so touch drags don't scroll the page. Renders a `<div>` element.
 
-| Data attribute | Description |
-| --- | --- |
-| `data-disabled` | Present when disabled. |
-| `data-dragging` | Whether a pointer is dragging on the pad. |
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+<TypeRow name={"data-dragging"}>Whether a pointer is dragging on the pad.</TypeRow>
+</TypeTable>
 
 ### Thumb
 
 Marks the value on the pad (`left`/`top` as percentages, centered with `translate`). Holds two native `<input type="range">`s, one per axis: the X input takes focus, both carry the accessible name, and the arrow keys move both axes. Renders a `<div>` element.
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `getAriaLabel` | `(axis: Axis) => string` |  | Names each axis input. Defaults to `aria-label` followed by "X" / "Y". |
-| `getAriaValueText` | `( formattedValue: string, value: number, axis: Axis ) => string` |  | Returns an axis input's `aria-valuetext`. Defaults to the formatted value. |
+<TypeTable>
+<TypeRow name={"getAriaLabel"} type={"(axis: Axis) => string"}>Names each axis input. Defaults to `aria-label` followed by "X" / "Y".</TypeRow>
+<TypeRow name={"getAriaValueText"} type={"( formattedValue: string, value: number, axis: Axis ) => string"}>Returns an axis input's `aria-valuetext`. Defaults to the formatted value.</TypeRow>
+</TypeTable>
 
-| Data attribute | Description |
-| --- | --- |
-| `data-disabled` | Present when disabled. |
-| `data-dragging` | Whether a pointer is dragging on the pad. |
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+<TypeRow name={"data-dragging"}>Whether a pointer is dragging on the pad.</TypeRow>
+</TypeTable>
 
 ### Value
 
 The formatted value (`format`/`locale` on Root), `"x, y"` by default. Renders a `<output>` element.
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `children` | `\| React.ReactNode \| (( formattedX: string, formattedY: string, value: Point ) => React.ReactNode)` |  |  |
+<TypeTable>
+<TypeRow name={"children"} type={"| React.ReactNode | (( formattedX: string, formattedY: string, value: Point ) => React.ReactNode)"}></TypeRow>
+</TypeTable>
 
-| Data attribute | Description |
-| --- | --- |
-| `data-disabled` | Present when disabled. |
-| `data-dragging` | Whether a pointer is dragging on the pad. |
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+<TypeRow name={"data-dragging"}>Whether a pointer is dragging on the pad.</TypeRow>
+</TypeTable>
 
 ### Label
 
 Accessible label, associated with both axis inputs. Renders a `<div>` element.
 
-| Data attribute | Description |
-| --- | --- |
-| `data-disabled` | Present when disabled. |
-| `data-dragging` | Whether a pointer is dragging on the pad. |
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+<TypeRow name={"data-dragging"}>Whether a pointer is dragging on the pad.</TypeRow>
+</TypeTable>
 
 ### Registry component
 
@@ -216,29 +216,29 @@ Accessible label, associated with both axis inputs. Renders a `<div>` element.
 
 #### Value and state
 
-| Prop | Type | Default | Description |
-| ---- | ---- | ------- | ----------- |
-| `value` | `{ x: number; y: number }` | - | Controlled value. |
-| `defaultValue` | `{ x: number; y: number }` | center | Uncontrolled starting value. |
-| `minX` / `maxX` | `number` | `0` / `100` | X range. |
-| `minY` / `maxY` | `number` | `0` / `100` | Y range. |
-| `stepX` / `stepY` | `number` | `1` | Step per axis. |
-| `disabled` | `boolean` | `false` | Disables pointer, wheel, and keyboard. |
-| `format` | `Intl.NumberFormatOptions` | - | Formats each axis for the value display and the inputs' value text. |
-| `locale` | `Intl.LocalesArgument` | runtime | Locale used by `format`. |
-| `onValueChange` | `(value, eventDetails) => void` | - | Every change. `eventDetails.reason` is `"press"`, `"drag"`, `"keyboard"`, `"wheel"`, or `"input-change"`; call `eventDetails.cancel()` to reject it. |
-| `onValueCommitted` | `(value, eventDetails) => void` | - | When an interaction that changed the value ends. |
-| `aria-label` | `string` | - | Accessible name for the pad's inputs. |
-| `aria-labelledby` | `string` | - | ID of a labeling element. |
+<TypeTable>
+<TypeRow name={"value"} type={"{ x: number; y: number }"}>Controlled value.</TypeRow>
+<TypeRow name={"defaultValue"} type={"{ x: number; y: number }"} default={"center"}>Uncontrolled starting value.</TypeRow>
+<TypeRow name={"minX / maxX"} type={"number"} default={"0 / 100"}>X range.</TypeRow>
+<TypeRow name={"minY / maxY"} type={"number"} default={"0 / 100"}>Y range.</TypeRow>
+<TypeRow name={"stepX / stepY"} type={"number"} default={"1"}>Step per axis.</TypeRow>
+<TypeRow name={"disabled"} type={"boolean"} default={"false"}>Disables pointer, wheel, and keyboard.</TypeRow>
+<TypeRow name={"format"} type={"Intl.NumberFormatOptions"}>Formats each axis for the value display and the inputs' value text.</TypeRow>
+<TypeRow name={"locale"} type={"Intl.LocalesArgument"} default={"runtime"}>Locale used by `format`.</TypeRow>
+<TypeRow name={"onValueChange"} type={"(value, eventDetails) => void"}>Every change. `eventDetails.reason` is `"press"`, `"drag"`, `"keyboard"`, `"wheel"`, or `"input-change"`; call `eventDetails.cancel()` to reject it.</TypeRow>
+<TypeRow name={"onValueCommitted"} type={"(value, eventDetails) => void"}>When an interaction that changed the value ends.</TypeRow>
+<TypeRow name={"aria-label"} type={"string"}>Accessible name for the pad's inputs.</TypeRow>
+<TypeRow name={"aria-labelledby"} type={"string"}>ID of a labeling element.</TypeRow>
+</TypeTable>
 
 #### Layout and display
 
-| Prop | Type | Default | Description |
-| ---- | ---- | ------- | ----------- |
-| `size` | `"sm" \| "default" \| "lg" \| "xl"` | `"default"` | Size variant (affects height). |
-| `formatValue` | `(value: { x: number; y: number }) => React.ReactNode` | - | Custom formatter for the value display. |
-| `valueDisplay` | `"visible" \| "hidden"` | `"visible"` | Use `"hidden"` to hide the overlay. |
-| `className` | `string` | - | Classes for the pad surface. |
+<TypeTable>
+<TypeRow name={"size"} type={"\"sm\" | \"default\" | \"lg\" | \"xl\""} default={"\"default\""}>Size variant (affects height).</TypeRow>
+<TypeRow name={"formatValue"} type={"(value: { x: number; y: number }) => React.ReactNode"}>Custom formatter for the value display.</TypeRow>
+<TypeRow name={"valueDisplay"} type={"\"visible\" | \"hidden\""} default={"\"visible\""}>Use `"hidden"` to hide the overlay.</TypeRow>
+<TypeRow name={"className"} type={"string"}>Classes for the pad surface.</TypeRow>
+</TypeTable>
 
 
 
