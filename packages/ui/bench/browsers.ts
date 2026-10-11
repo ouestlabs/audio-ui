@@ -57,7 +57,10 @@ const gestures: Record<string, { click?: boolean; label: string; path: Path }> =
 const percentile = (sorted: number[], share: number) =>
   sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * share))] ?? 0;
 
+// React's production build: the development one checks every render and
+// costs several times more, which is not what users get.
 const build = await Bun.build({
+  define: { "process.env.NODE_ENV": '"production"' },
   entrypoints: [`${import.meta.dir}/scenes.tsx`],
   minify: true,
   target: "browser",
