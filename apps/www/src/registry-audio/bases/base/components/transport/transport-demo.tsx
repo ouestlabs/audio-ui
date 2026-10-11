@@ -5,18 +5,20 @@ import { useCallback, useEffect, useState } from "react";
 import { Transport } from "@/registry-audio/bases/base/audio/elements/transport";
 import {
   DEFAULT_TEMPO,
+  type MetronomeRhythm,
   secondsPerBar,
   type Tempo,
 } from "@/registry-audio/bases/base/lib/musical-time";
 
 const LOOP_BARS = 4;
 
-/** The transport of a DAW, with a clock standing in for the engine: play or pause, stop, loop four bars, tick the metronome, and change the tempo or the signature. */
+/** The transport of a DAW, with a clock standing in for the engine: play or pause, stop, loop four bars, tick the metronome (and pick how often it clicks), and change the tempo or the signature. */
 export default function TransportDemo() {
   const [position] = useState(() => createSource(0));
   const [playing, setPlaying] = useState(false);
   const [looping, setLooping] = useState(true);
   const [metronome, setMetronome] = useState(true);
+  const [rhythm, setRhythm] = useState<MetronomeRhythm>("auto");
   const [tempo, setTempo] = useState<Tempo>(DEFAULT_TEMPO);
 
   useEffect(() => {
@@ -54,9 +56,11 @@ export default function TransportDemo() {
         onLoopingChange={setLooping}
         onMetronomeChange={setMetronome}
         onPlayPause={playPause}
+        onRhythmChange={setRhythm}
         onStop={stop}
         onTempoChange={setTempo}
         playing={playing}
+        rhythm={rhythm}
         source={position}
         tempo={tempo}
       />

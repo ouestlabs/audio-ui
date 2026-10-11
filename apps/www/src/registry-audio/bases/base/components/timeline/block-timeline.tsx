@@ -68,6 +68,7 @@ import {
   type GridDivision,
   gridInterval,
   gridLabel,
+  type MetronomeRhythm,
   secondsPerBar,
   type Tempo,
 } from "@/registry-audio/bases/base/lib/musical-time";
@@ -796,6 +797,7 @@ export default function BlockTimeline() {
     { at: bars(20), name: "Chorus" },
   ]);
   const [metronome, setMetronome] = useState(false);
+  const [rhythm, setRhythm] = useState<MetronomeRhythm>("auto");
   const { clock, playing, setPlaying } = usePlaybackClock({
     duration,
     loop,
@@ -1218,9 +1220,11 @@ export default function BlockTimeline() {
           onLoopingChange={setLooping}
           onMetronomeChange={setMetronome}
           onPlayPause={playPause}
+          onRhythmChange={setRhythm}
           onStop={stop}
           onTempoChange={changeTempo}
           playing={playing}
+          rhythm={rhythm}
           source={clock}
           tempo={tempo}
         />

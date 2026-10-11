@@ -152,6 +152,44 @@ export function gridLabel(seconds: number, tempo: Tempo): string {
 }
 
 /**
+ * How often a metronome clicks: with the beat, or a note value, straight or
+ * triplet. `denominator` is the note value (1 is a bar), `0` follows the beat.
+ */
+export const METRONOME_RHYTHMS = [
+  { denominator: 0, id: "auto", triplet: false },
+  { denominator: 1, id: "1-bar", triplet: false },
+  { denominator: 2, id: "1/2", triplet: false },
+  { denominator: 2, id: "1/2t", triplet: true },
+  { denominator: 4, id: "1/4", triplet: false },
+  { denominator: 4, id: "1/4t", triplet: true },
+  { denominator: 8, id: "1/8", triplet: false },
+  { denominator: 8, id: "1/8t", triplet: true },
+  { denominator: 16, id: "1/16", triplet: false },
+  { denominator: 16, id: "1/16t", triplet: true },
+] as const;
+
+export type MetronomeRhythm = (typeof METRONOME_RHYTHMS)[number]["id"];
+
+/**
+ * Seconds between clicks for a rhythm, or `null` for `auto`, which has no
+ * interval of its own: it is the beat, whatever the signature makes one.
+ */
+export function metronomeRhythmSeconds(
+  rhythm: MetronomeRhythm,
+  tempo: Tempo
+): number | null {
+  const found = METRONOME_RHYTHMS.find((entry) => entry.id === rhythm);
+  if (!found || found.denominator === 0) {
+    return null;
+  }
+  const straight =
+    found.denominator === 1
+      ? secondsPerBar(tempo)
+      : (4 / found.denominator) * secondsPerQuarter(tempo);
+  return found.triplet ? straight * TRIPLET_FACTOR : straight;
+}
+
+/**
  * Seconds between labelled bars on a ruler at `zoom` px per second: always a
  * whole number of bars, doubled until labels are at least `minSpacing` px
  * apart, so they never collide or fall mid-bar.

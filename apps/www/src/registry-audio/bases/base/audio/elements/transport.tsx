@@ -10,6 +10,16 @@ import {
   ButtonGroupText,
 } from "@/registry/bases/base/ui/button-group";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/registry/bases/base/ui/dropdown-menu";
+import {
   Select,
   SelectContent,
   SelectGroup,
@@ -20,6 +30,10 @@ import {
 import { BpmControl } from "@/registry-audio/bases/base/audio/elements/bpm-control";
 import {
   barsBeatsAt,
+  gridLabel,
+  METRONOME_RHYTHMS,
+  type MetronomeRhythm,
+  metronomeRhythmSeconds,
   secondsPerBeat,
   type Tempo,
 } from "@/registry-audio/bases/base/lib/musical-time";
@@ -114,10 +128,12 @@ function TransportPosition({
  */
 function MetronomeBeat({
   playing,
+  rhythm,
   source,
   tempo,
 }: {
   playing: boolean;
+  rhythm: MetronomeRhythm;
   source: Source<number>;
   tempo: Tempo;
 }) {
@@ -126,7 +142,9 @@ function MetronomeBeat({
 
   useEffect(() => {
     const dots = [first.current, second.current];
-    const interval = secondsPerBeat(tempo);
+    // The dots swap on the click's rhythm, so they and the sound are one pulse.
+    const interval =
+      metronomeRhythmSeconds(rhythm, tempo) ?? secondsPerBeat(tempo);
     let lit = -1;
     const paint = () => {
       const next = playing
@@ -146,7 +164,7 @@ function MetronomeBeat({
     };
     paint();
     return source.subscribe(paint);
-  }, [playing, source, tempo]);
+  }, [playing, rhythm, source, tempo]);
 
   return (
     <span aria-hidden="true" className="flex items-center gap-0.75">
@@ -159,6 +177,100 @@ function MetronomeBeat({
         ref={second}
       />
     </span>
+  );
+}
+
+interface MetronomeSound {
+  label: string;
+  value: string;
+}
+
+/**
+ * The click's settings behind a caret beside the metronome toggle, never in
+ * the way of it. Rhythm names come from the interval each one works out to,
+ * through the same `gridLabel` the timeline's grid uses, so "1/8T" means one
+ * thing everywhere.
+ */
+function MetronomeMenu({
+  onRhythmChange,
+  onSoundChange,
+  rhythm,
+  sound,
+  sounds,
+  tempo,
+}: {
+  onRhythmChange?: (rhythm: MetronomeRhythm) => void;
+  onSoundChange?: (sound: string) => void;
+  rhythm: MetronomeRhythm;
+  sound?: string;
+  sounds?: readonly MetronomeSound[];
+  tempo: Tempo;
+}) {
+  const handleRhythm = useCallback(
+    (value: string) => onRhythmChange?.(value as MetronomeRhythm),
+    [onRhythmChange]
+  );
+  const handleSound = useCallback(
+    (value: string) => onSoundChange?.(value),
+    [onSoundChange]
+  );
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        render={
+          <Button
+            aria-label="Metronome settings"
+            size="icon"
+            variant="outline"
+          />
+        }
+      >
+        <IconPlaceholder
+          hugeicons="ArrowDown01Icon"
+          lucide="ChevronDownIcon"
+          phosphor="CaretDownIcon"
+          remixicon="RiArrowDownSLine"
+          tabler="IconChevronDown"
+        />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-auto min-w-48">
+        {sounds && onSoundChange ? (
+          <>
+            <DropdownMenuGroup>
+              <DropdownMenuLabel>Sound</DropdownMenuLabel>
+              <DropdownMenuRadioGroup onValueChange={handleSound} value={sound}>
+                {sounds.map((item) => (
+                  <DropdownMenuRadioItem key={item.value} value={item.value}>
+                    {item.label}
+                  </DropdownMenuRadioItem>
+                ))}
+              </DropdownMenuRadioGroup>
+            </DropdownMenuGroup>
+            {onRhythmChange ? <DropdownMenuSeparator /> : null}
+          </>
+        ) : null}
+        {onRhythmChange ? (
+          <DropdownMenuGroup>
+            <DropdownMenuLabel>Rhythm</DropdownMenuLabel>
+            <DropdownMenuRadioGroup onValueChange={handleRhythm} value={rhythm}>
+              {METRONOME_RHYTHMS.map((item) => {
+                const seconds = metronomeRhythmSeconds(item.id, tempo);
+                return (
+                  <DropdownMenuRadioItem
+                    className="tabular-nums"
+                    key={item.id}
+                    value={item.id}
+                  >
+                    {seconds === null ? "Auto" : gridLabel(seconds, tempo)}
+                  </DropdownMenuRadioItem>
+                );
+              })}
+            </DropdownMenuRadioGroup>
+          </DropdownMenuGroup>
+        ) : null}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 
@@ -220,12 +332,22 @@ interface TransportProps {
   onMetronomeChange?: (metronome: boolean) => void;
   /** Play or pause was pressed. */
   onPlayPause: () => void;
+  /** The click's rhythm was picked. Leave it out, with `onSoundChange`, for a metronome without settings. */
+  onRhythmChange?: (rhythm: MetronomeRhythm) => void;
+  /** The click's sound was picked, one of `sounds`. */
+  onSoundChange?: (sound: string) => void;
   /** Stop was pressed. */
   onStop: () => void;
   /** The tempo or the time signature was changed. Leave it out for a fixed tempo. */
   onTempoChange?: (tempo: Tempo) => void;
   /** Whether it is playing. */
   playing: boolean;
+  /** How often the click sounds, and what the metronome's dots follow. @default "auto" */
+  rhythm?: MetronomeRhythm;
+  /** The picked sound, one of `sounds`'s values. */
+  sound?: string;
+  /** The sounds the click can have: the menu lists them when `onSoundChange` is given. */
+  sounds?: readonly MetronomeSound[];
   /** The playback position in seconds, a live value the readout follows without re-rendering. */
   source: Source<number>;
   /** The tempo and the time signature the position is counted in. */
@@ -247,9 +369,14 @@ function Transport({
   onLoopingChange,
   onMetronomeChange,
   onPlayPause,
+  onRhythmChange,
+  onSoundChange,
   onStop,
   onTempoChange,
   playing,
+  rhythm = "auto",
+  sound,
+  sounds,
   source,
   tempo,
 }: TransportProps) {
@@ -346,10 +473,21 @@ function Transport({
             >
               <MetronomeBeat
                 playing={playing && Boolean(metronome)}
+                rhythm={rhythm}
                 source={source}
                 tempo={tempo}
               />
             </Button>
+          ) : null}
+          {onMetronomeChange && (onRhythmChange || onSoundChange) ? (
+            <MetronomeMenu
+              onRhythmChange={onRhythmChange}
+              onSoundChange={onSoundChange}
+              rhythm={rhythm}
+              sound={sound}
+              sounds={sounds}
+              tempo={tempo}
+            />
           ) : null}
         </ButtonGroup>
       ) : null}

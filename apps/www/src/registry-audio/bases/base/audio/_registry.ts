@@ -241,6 +241,7 @@ export const audio: RegistryItem[] = [
       "@audio/musical-time",
       "@shadcn/button",
       "@shadcn/button-group",
+      "@shadcn/dropdown-menu",
       "@shadcn/select",
     ],
     type: "registry:ui",

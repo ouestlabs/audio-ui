@@ -7,6 +7,7 @@ import {
   divisionSeconds,
   gridInterval,
   gridLabel,
+  metronomeRhythmSeconds,
   secondsPerBar,
   secondsPerBeat,
 } from "@/registry-audio/bases/base/lib/musical-time";
@@ -116,5 +117,22 @@ describe("gridLabel", () => {
 
   test("falls back to beats when nothing named fits", () => {
     expect(gridLabel(0.7, DEFAULT_TEMPO)).toBe("1.4 beats");
+  });
+});
+
+describe("metronomeRhythmSeconds", () => {
+  test("auto has no interval: it is the beat", () => {
+    expect(metronomeRhythmSeconds("auto", DEFAULT_TEMPO)).toBeNull();
+  });
+
+  test("a note value is a share of a whole note, a bar follows the signature", () => {
+    expect(metronomeRhythmSeconds("1/8", DEFAULT_TEMPO)).toBe(0.25);
+    expect(metronomeRhythmSeconds("1-bar", sixEight)).toBe(1.5);
+  });
+
+  test("a triplet is two thirds of its straight rhythm, and names itself as one", () => {
+    const seconds = metronomeRhythmSeconds("1/8t", DEFAULT_TEMPO);
+    expect(seconds).toBeCloseTo(0.25 * (2 / 3));
+    expect(gridLabel(seconds ?? 0, DEFAULT_TEMPO)).toBe("1/8T");
   });
 });
