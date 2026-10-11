@@ -1,10 +1,12 @@
 "use client";
 
+import type { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
 import {
   ArrowsOutSimpleIcon,
   InfoIcon,
   XIcon,
 } from "@phosphor-icons/react/ssr";
+import { useCallback } from "react";
 import { CopyRegistry } from "@/components/copy-registry";
 import {
   Frame,
@@ -23,6 +25,27 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+
+/** The floating menus a block opens: they sit outside the dialog's DOM, though the block is inside it. */
+const FLOATING =
+  "[data-slot=select-content],[data-slot=popover-content],[data-slot=dropdown-menu-content],[data-slot=tooltip-content]";
+
+/**
+ * A press on one of the block's own menus, or one that lands on the page
+ * itself while such a menu is open, is not a press outside the dialog: the
+ * block is moved into the dialog, so the dialog cannot tell its menus from
+ * the rest of the page.
+ */
+function isOwnMenuPress(event: Event) {
+  const { target } = event;
+  if (!(target instanceof Element)) {
+    return false;
+  }
+  return (
+    target.closest(FLOATING) !== null ||
+    (target === document.body && document.querySelector(FLOATING) !== null)
+  );
+}
 
 /**
  * A button that opens `children`, a live preview, in a dialog that takes most
@@ -43,8 +66,23 @@ export function ExpandPreview({
   /** What the page and this view share: the component is in the host, whichever of them has it. */
   preview: PreviewHost;
 }) {
+  const { onOpenChange } = preview;
+  const handleOpenChange = useCallback(
+    (open: boolean, eventDetails: DialogPrimitive.Root.ChangeEventDetails) => {
+      if (
+        !open &&
+        eventDetails.reason === "outside-press" &&
+        isOwnMenuPress(eventDetails.event)
+      ) {
+        eventDetails.cancel();
+        return;
+      }
+      onOpenChange(open);
+    },
+    [onOpenChange]
+  );
   return (
-    <Dialog onOpenChange={preview.onOpenChange} open={preview.open}>
+    <Dialog onOpenChange={handleOpenChange} open={preview.open}>
       <DialogTrigger
         render={
           <Button
