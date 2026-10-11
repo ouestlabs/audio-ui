@@ -1,38 +1,8 @@
 import type { Metadata } from "next";
-import { ComponentGrid } from "@/app/(create)/components/components/component-grid";
-import { searchCatalog } from "@/lib/registry";
+import { ComponentCard } from "@/app/(create)/components/components/component-card";
 import { buildPageMetadata } from "@/lib/seo";
 
 import { HomeHero } from "./components/home-hero";
-
-const SHOWCASE_NAMES = [
-  "block-player-widget",
-  "block-pocket-synth",
-  "block-wave-shaper",
-  "plot-demo",
-  "block-piano-roll",
-  "block-player",
-] as const;
-
-const SHOWCASE_FULL_WIDTH = new Set([
-  "block-player",
-  "block-player-widget",
-  "block-piano-roll",
-]);
-
-function getShowcaseCatalogItems() {
-  const catalog = searchCatalog("");
-  const byName = new Map(catalog.map((item) => [item.name, item]));
-
-  return SHOWCASE_NAMES.map((name) => byName.get(name))
-    .filter((item): item is NonNullable<typeof item> => item !== undefined)
-    .map((item) => ({
-      ...item,
-      meta: SHOWCASE_FULL_WIDTH.has(item.name)
-        ? { ...item.meta, gridSize: 1 as const }
-        : item.meta,
-    }));
-}
 
 const title = "audio/ui – Audio UI Components for React";
 const description =
@@ -65,12 +35,13 @@ export const metadata: Metadata = buildPageMetadata({
 });
 
 export default function IndexPage() {
-  const catalogItems = getShowcaseCatalogItems();
-
   return (
     <div className="homepage relative flex flex-1 flex-col">
       <HomeHero />
-      <ComponentGrid catalogItems={catalogItems} />
+      {/* One component stands for the project: the piano roll, the most complete of the primitives. */}
+      <div className="px-3 pb-6 sm:px-8 xl:px-10">
+        <ComponentCard name="block-piano-roll" />
+      </div>
     </div>
   );
 }
