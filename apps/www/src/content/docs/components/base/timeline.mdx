@@ -170,6 +170,7 @@ const [clip, setClip] = useState<Timeline.Clip.Value>({
   length: 16, // how long it plays
   offset: 4, // where in the source it begins
   fadeIn: 0,
+  fadeInShape: "linear", // or "fast", "slow", "smooth"
   fadeOut: 0,
 });
 
@@ -194,7 +195,9 @@ const [clip, setClip] = useState<Timeline.Clip.Value>({
 
 All of it is in the timeline's units, the source's too. Dragging the clip's header, its title bar, moves it on the grid, and over other lanes: `eventDetails.lane` is the `Timeline.Lane` under the pointer, so put your own attribute on each lane (`data-track` above) and read it in `onValueCommitted`, which also fires for a drop on another lane that left the position as it was. The clip follows the pointer vertically through `--clip-drag-y`. A press on the clip's body selects it and puts the cursor there, and a drag scrubs, so the body never moves the clip by accident. Its content is yours: it sets `--clip-offset` and `--clip-source-length` so a `Waveform` can show the stretch that is played.
 
-Cutting, copying and the like are plain functions on the clip, for the model behind your clips: `splitClip(clip, at)` returns the two pieces (or `null` when `at` leaves one too short), and `moveClip`, `trimClipStart`, `trimClipEnd`, `setClipFadeIn`, `setClipFadeOut` and `duplicateClip` return the clip as it would end up, within the limits you give them.
+Holding Alt when a drag begins marks it as a copy (`eventDetails.copy`): the clip you were dragging is the copy, so leave the original where it was and add the dragged one. A fade's shape is stepped by double-clicking its handle, or Enter on its input (`reason` is `"double-click"` or `"keyboard"`), and `ClipFade` draws the real ramp.
+
+Cutting, copying and the like are plain functions on the clip, for the model behind your clips: `splitClip(clip, at)` returns the two pieces (or `null` when `at` leaves one too short), and `moveClip`, `trimClipStart`, `trimClipEnd`, `setClipFadeIn`, `setClipFadeOut`, `setClipFadeShape` and `duplicateClip` return the clip as it would end up, within the limits you give them.
 
 ### The cursor
 
@@ -419,7 +422,7 @@ Trims one edge of the clip: by dragging, on the grid unless Cmd/Ctrl is held, or
 Sets how long one of the clip's fades lasts: by dragging, or from the keyboard through the native `<input type="range">` it holds, which carries the accessible name. It sits where its fade ends, at the clip's top edge. The two fades cannot overlap. Renders a `<div>` element.
 
 <TypeTable>
-<TypeRow name={"edge"} type={"\"in\" | \"out\""}>The fade of the clip this handle sets: the one at its start or at its end.</TypeRow>
+<TypeRow name={"edge"} type={"\"in\" | \"out\""}>The fade of the clip this handle sets: the one at its start or at its end. Double-click it, or press Enter on its input, to step the fade through its shapes.</TypeRow>
 </TypeTable>
 
 ### ClipFade

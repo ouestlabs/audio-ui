@@ -2,6 +2,7 @@
 
 import {
   createSource,
+  duplicateClip,
   splitClip,
   type Timeline as TimelinePrimitive,
 } from "@audio-ui/react";
@@ -18,6 +19,14 @@ import {
 import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder";
 import { Button } from "@/registry/bases/base/ui/button";
 import { ButtonGroup } from "@/registry/bases/base/ui/button-group";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/registry/bases/base/ui/select";
 import {
   Timeline,
   TimelineClip,
@@ -38,6 +47,8 @@ import {
   barLabelInterval,
   DEFAULT_TEMPO,
   describeBarsBeats,
+  GRID_DIVISIONS,
+  type GridDivision,
   gridInterval,
   secondsPerBar,
 } from "@/registry-audio/bases/base/lib/musical-time";
@@ -135,14 +146,20 @@ const describePosition = (seconds: number) =>
 function Row({
   children,
   className,
+  height,
   lead,
 }: {
   children: ReactNode;
   className?: string;
+  /** A height set by hand: the row keeps it instead of sharing what is left. */
+  height?: number;
   lead?: ReactNode;
 }) {
   return (
-    <div className={`flex min-w-full ${className ?? ""}`}>
+    <div
+      className={`flex min-w-full ${className ?? ""}`}
+      style={height === undefined ? undefined : { height }}
+    >
       <div className="sticky left-0 z-20 flex w-28 shrink-0 items-stretch border-e bg-background text-sm">
         {lead}
       </div>
@@ -151,28 +168,118 @@ function Row({
   );
 }
 
-/** A track's header: pressing it selects the whole track, its content is where the cursor goes. */
+/** Adaptive follows the zoom; the others stay put however far you zoom. */
+const DIVISIONS: { label: string; value: GridDivision }[] = [
+  { label: "Grid: Adaptive", value: "adaptive" },
+  ...GRID_DIVISIONS.map((entry) => ({
+    label:
+      "bars" in entry
+        ? `Grid: ${entry.bars} ${entry.bars === 1 ? "bar" : "bars"}`
+        : `Grid: ${entry.id}`,
+    value: entry.id as GridDivision,
+  })),
+];
+
+const MIN_TRACK_HEIGHT = 40;
+const MAX_TRACK_HEIGHT = 240;
+const TRACK_HEIGHT_STEP = 8;
+
+const clampHeight = (value: number) =>
+  Math.min(MAX_TRACK_HEIGHT, Math.max(MIN_TRACK_HEIGHT, value));
+
+/**
+ * A track's header: pressing it selects the whole track, its content is where
+ * the cursor goes. Its lower edge resizes the track, by dragging or with the
+ * arrow keys.
+ */
 function TrackHeader({
+  height,
   name,
+  onResize,
   onSelect,
   selected,
   trackId,
 }: {
+  /** The height set by hand, or none while the track shares what is left. */
+  height: number | undefined;
   name: string;
+  onResize: (trackId: Arranged["track"], height: number) => void;
   onSelect: (trackId: Arranged["track"]) => void;
   selected: boolean;
   trackId: Arranged["track"];
 }) {
   const handleClick = useCallback(() => onSelect(trackId), [onSelect, trackId]);
+  const resize = useRef<{ height: number; y: number } | null>(null);
+  const handlePointerDown = useCallback(
+    (event: PointerEvent<HTMLDivElement>) => {
+      event.currentTarget.setPointerCapture(event.pointerId);
+      // From what the track measures now, which is what it shares out while unset.
+      const measured = event.currentTarget.parentElement?.offsetHeight ?? 0;
+      resize.current = { height: height ?? measured, y: event.clientY };
+    },
+    [height]
+  );
+  const handlePointerMove = useCallback(
+    (event: PointerEvent<HTMLDivElement>) => {
+      if (resize.current) {
+        onResize(
+          trackId,
+          clampHeight(resize.current.height + event.clientY - resize.current.y)
+        );
+      }
+    },
+    [onResize, trackId]
+  );
+  const handlePointerEnd = useCallback(() => {
+    resize.current = null;
+  }, []);
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLDivElement>) => {
+      const delta =
+        { ArrowDown: TRACK_HEIGHT_STEP, ArrowUp: -TRACK_HEIGHT_STEP }[
+          event.key
+        ] ?? 0;
+      if (delta) {
+        event.preventDefault();
+        event.stopPropagation();
+        onResize(
+          trackId,
+          clampHeight(
+            (height ?? event.currentTarget.parentElement?.offsetHeight ?? 0) +
+              delta
+          )
+        );
+      }
+    },
+    [height, onResize, trackId]
+  );
+
   return (
-    <button
-      aria-pressed={selected}
-      className="flex w-full items-center px-3 text-left font-medium outline-none hover:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset aria-pressed:bg-muted"
-      onClick={handleClick}
-      type="button"
-    >
-      {name}
-    </button>
+    <div className="relative flex w-full">
+      <button
+        aria-pressed={selected}
+        className="flex w-full items-center px-3 text-left font-medium outline-none hover:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset aria-pressed:bg-muted"
+        onClick={handleClick}
+        type="button"
+      >
+        {name}
+      </button>
+      <div
+        aria-label={`${name} height`}
+        aria-orientation="horizontal"
+        aria-valuemax={MAX_TRACK_HEIGHT}
+        aria-valuemin={MIN_TRACK_HEIGHT}
+        aria-valuenow={height === undefined ? undefined : Math.round(height)}
+        className="absolute inset-x-0 bottom-0 z-10 h-1.5 cursor-row-resize touch-none outline-none hover:bg-primary/40 focus-visible:bg-primary/60"
+        onKeyDown={handleKeyDown}
+        onPointerCancel={handlePointerEnd}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerEnd}
+        role="separator"
+        tabIndex={0}
+      />
+    </div>
   );
 }
 
@@ -187,7 +294,11 @@ function ClipView({
   trackName,
 }: {
   clip: Arranged;
-  onChange: (id: string, value: TimelinePrimitive.Clip.Value) => void;
+  onChange: (
+    id: string,
+    value: TimelinePrimitive.Clip.Value,
+    details: TimelinePrimitive.Clip.ChangeEventDetails
+  ) => void;
   onCommit: (
     id: string,
     details: TimelinePrimitive.Clip.CommitEventDetails
@@ -206,7 +317,10 @@ function ClipView({
     [clip.id, onSelect]
   );
   const handleChange = useCallback(
-    (value: TimelinePrimitive.Clip.Value) => onChange(clip.id, value),
+    (
+      value: TimelinePrimitive.Clip.Value,
+      details: TimelinePrimitive.Clip.ChangeEventDetails
+    ) => onChange(clip.id, value, details),
     [clip.id, onChange]
   );
   const handleCommitted = useCallback(
@@ -276,6 +390,21 @@ export default function BlockTimeline() {
   const selectedId = selection?.kind === "clip" ? selection.id : null;
   const selectedTrack = selection?.kind === "track" ? selection.id : null;
   const pieces = useRef(0);
+  const clipsRef = useRef(clips);
+  clipsRef.current = clips;
+  // Where a clip dragged with Alt held started: the copy stays there.
+  const copyOrigin = useRef<Arranged | null>(null);
+  const [division, setDivision] = useState<GridDivision>("adaptive");
+  const handleDivision = useCallback(
+    (next: GridDivision | null) => setDivision(next ?? "adaptive"),
+    []
+  );
+  const [heights, setHeights] = useState<Record<string, number>>({});
+  const resizeTrack = useCallback(
+    (trackId: string, height: number) =>
+      setHeights((all) => ({ ...all, [trackId]: height })),
+    []
+  );
 
   const togglePlaying = useCallback(
     () => setPlaying((on) => !on),
@@ -296,24 +425,41 @@ export default function BlockTimeline() {
   );
   const seek = useCallback((seconds: number) => clock.set(seconds), [clock]);
   const changeClip = useCallback(
-    (id: string, value: TimelinePrimitive.Clip.Value) =>
+    (
+      id: string,
+      value: TimelinePrimitive.Clip.Value,
+      details: TimelinePrimitive.Clip.ChangeEventDetails
+    ) => {
+      if (!(details.copy && copyOrigin.current)) {
+        copyOrigin.current =
+          details.copy && details.target === "move"
+            ? (clipsRef.current.find((clip) => clip.id === id) ?? null)
+            : null;
+      }
       setClips((all) =>
         all.map((clip) => (clip.id === id ? { ...clip, value } : clip))
-      ),
+      );
+    },
     []
   );
   // A clip dropped on another track moves to it.
   const commitClip = useCallback(
     (id: string, details: TimelinePrimitive.Clip.CommitEventDetails) => {
       const track = details.lane?.dataset.track;
-      if (!track) {
-        return;
-      }
-      setClips((all) =>
-        all.map((clip) =>
-          clip.id === id ? { ...clip, track: track as Arranged["track"] } : clip
-        )
-      );
+      const origin = details.copy ? copyOrigin.current : null;
+      copyOrigin.current = null;
+      pieces.current += 1;
+      const copyId = `${id}-${pieces.current}`;
+      setClips((all) => {
+        const moved = track
+          ? all.map((clip) =>
+              clip.id === id
+                ? { ...clip, track: track as Arranged["track"] }
+                : clip
+            )
+          : all;
+        return origin ? [...moved, { ...origin, id: copyId }] : moved;
+      });
     },
     []
   );
@@ -356,7 +502,7 @@ export default function BlockTimeline() {
       })
     );
   }, [clock, selectedId, selectedTrack]);
-  // S, or Cmd/Ctrl + E, splits at the cursor; Escape drops the selection.
+  // S, or Cmd/Ctrl + E, splits at the cursor, Cmd/Ctrl + D duplicates the clip; Escape drops the selection.
   const handleKeyDown = useCallback(
     (event: KeyboardEvent<HTMLDivElement>) => {
       if (event.key === "Escape") {
@@ -364,6 +510,25 @@ export default function BlockTimeline() {
         return;
       }
       const key = event.key.toLowerCase();
+      const clip = clipsRef.current.find((item) => item.id === selectedId);
+      if (key === "d" && (event.metaKey || event.ctrlKey) && clip) {
+        event.preventDefault();
+        pieces.current += 1;
+        const copyId = `${clip.id}-${pieces.current}`;
+        setClips((all) => [
+          ...all,
+          {
+            ...clip,
+            id: copyId,
+            value: duplicateClip(clip.value, {
+              duration: DURATION,
+              sourceLength: clip.sourceLength,
+            }),
+          },
+        ]);
+        setSelection({ id: copyId, kind: "clip" });
+        return;
+      }
       const split =
         (key === "s" && !(event.metaKey || event.ctrlKey || event.altKey)) ||
         (key === "e" && (event.metaKey || event.ctrlKey));
@@ -372,11 +537,11 @@ export default function BlockTimeline() {
         splitAtCursor();
       }
     },
-    [selection, splitAtCursor]
+    [selectedId, selection, splitAtCursor]
   );
 
   // The grid the lanes draw is the grid everything snaps to.
-  const snapStep = gridInterval("adaptive", zoom, DEFAULT_TEMPO);
+  const snapStep = gridInterval(division, zoom, DEFAULT_TEMPO);
   const labelEvery = barLabelInterval(zoom, DEFAULT_TEMPO);
   const labels = Array.from(
     { length: Math.floor(DURATION / labelEvery) },
@@ -406,6 +571,24 @@ export default function BlockTimeline() {
             tabler={playing ? "IconPlayerPause" : "IconPlayerPlay"}
           />
         </Button>
+        <Select
+          items={DIVISIONS}
+          onValueChange={handleDivision}
+          value={division}
+        >
+          <SelectTrigger aria-label="Grid" className="w-32" size="sm">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              {DIVISIONS.map((item) => (
+                <SelectItem key={item.value} value={item.value}>
+                  {item.label}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
         <ButtonGroup>
           <Button
             aria-label="Zoom out"
@@ -493,11 +676,14 @@ export default function BlockTimeline() {
             </Row>
             {TRACKS.map((track) => (
               <Row
-                className="flex-1"
+                className={heights[track.id] === undefined ? "flex-1" : ""}
+                height={heights[track.id]}
                 key={track.id}
                 lead={
                   <TrackHeader
+                    height={heights[track.id]}
                     name={track.name}
+                    onResize={resizeTrack}
                     onSelect={selectTrack}
                     selected={track.id === selectedTrack}
                     trackId={track.id}

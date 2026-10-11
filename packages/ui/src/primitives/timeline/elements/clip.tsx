@@ -206,11 +206,17 @@ export function Clip(componentProps: Clip.Props) {
     [disabled, dragging, selected]
   );
 
+  const inputRef = React.useRef<HTMLInputElement>(null);
+  const focus = React.useCallback(() => {
+    inputRef.current?.focus({ focusVisible: false, preventScroll: true });
+  }, []);
+
   const context = React.useMemo<ClipContextValue>(
     () => ({
       actions: {
         change,
         commit,
+        focus,
         select,
         setDragOffset,
         setDragging,
@@ -235,6 +241,7 @@ export function Clip(componentProps: Clip.Props) {
       disabled,
       displayedValue,
       duration,
+      focus,
       getAriaValueText,
       grid,
       largeStep,
@@ -256,13 +263,12 @@ export function Clip(componentProps: Clip.Props) {
     measure: () => lane.elementRef.current,
     onPress: select,
   });
-  const inputRef = React.useRef<HTMLInputElement>(null);
   const { fadeIn, fadeOut, length, offset, start } = displayedValue;
 
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
     seek.onPointerDown(event);
     if (!disabled && event.button === 0) {
-      inputRef.current?.focus({ focusVisible: false, preventScroll: true });
+      focus();
     }
   };
 

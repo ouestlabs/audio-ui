@@ -50,6 +50,8 @@ export interface ClipContextValue {
     /** Propose a clip; returns whether it was applied. */
     change: (next: ClipValue, eventDetails: ClipChangeEventDetails) => boolean;
     commit: (value: ClipValue, eventDetails: ClipCommitEventDetails) => void;
+    /** Gives the clip's input the focus, so the keyboard follows a press on a part of it. */
+    focus: () => void;
     /** Marks the clip selected, from a press on it. */
     select: (event: PointerEvent) => void;
     setDragging: (dragging: boolean) => void;

@@ -1,5 +1,6 @@
 import { mergeProps } from "@base-ui/react/merge-props";
 import { useRender } from "@base-ui/react/use-render";
+import type * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { moveClip } from "../clip";
 import { snapMove } from "../internal/snap";
@@ -31,7 +32,16 @@ export function ClipHeader(componentProps: ClipHeader.Props) {
   return useRender({
     defaultTagName: "div",
     props: mergeProps<"div">(
-      { ...drag, style: { touchAction: "none" } },
+      {
+        ...drag,
+        onPointerDown: (event: React.PointerEvent<HTMLElement>) => {
+          drag.onPointerDown(event);
+          if (meta.movable && event.button === 0) {
+            context.actions.focus();
+          }
+        },
+        style: { touchAction: "none" },
+      },
       { ...elementProps, ...resolveStyling(className, style, state) }
     ),
     ref,
