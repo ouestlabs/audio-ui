@@ -5,7 +5,7 @@ import { ExpandPreview } from "@/components/expand-preview";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 import { useConfig } from "@/hooks/use-config";
-import { isExpandable } from "@/lib/is-block";
+import { isBlock, isExpandable } from "@/lib/is-block";
 import { getRegistryItemMetadata } from "@/lib/registry";
 
 import {
@@ -35,10 +35,13 @@ export function ComponentCard({
     return null;
   }
 
-  const isFullWidth = item.meta?.gridSize === 1;
+  // A block is laid out for a page: the card gives it the whole row, edge to edge.
+  const block = isBlock(name);
+  const isFullWidth = item.meta?.gridSize === 1 || block;
 
   return (
     <ComponentCardContainer
+      bleed={block}
       className={className}
       footer={
         <>
