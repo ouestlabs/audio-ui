@@ -1,10 +1,15 @@
 "use client";
 
-import { CaretRightIcon } from "@phosphor-icons/react/ssr";
+import { CaretRightIcon, MagnifyingGlassIcon } from "@phosphor-icons/react/ssr";
 import * as React from "react";
 import { Frame, FrameContent, FrameHeader } from "@/components/custom/frame";
 import { Button } from "@/components/ui/button";
-import { Collapsible, CollapsibleTrigger } from "@/components/ui/collapsible";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { Input } from "@/components/ui/input";
 import { Kbd } from "@/components/ui/kbd";
 import { cn } from "@/lib/utils";
 
@@ -21,30 +26,91 @@ const textClassName =
 const codeClassName =
   "rounded-md bg-site-muted px-1.5 py-0.5 font-mono text-[0.8125rem]";
 
+/** The text a node shows: what a search looks through in a description. */
+function nodeText(node: React.ReactNode): string {
+  if (typeof node === "string" || typeof node === "number") {
+    return String(node);
+  }
+  if (Array.isArray(node)) {
+    return node.map(nodeText).join("");
+  }
+  if (React.isValidElement(node)) {
+    return nodeText((node.props as { children?: React.ReactNode }).children);
+  }
+  return "";
+}
+
+/** Tables this long get a field to filter their rows. */
+const SEARCHABLE_FROM = 6;
+
 function ReferenceFrame({
   action,
   children,
   className,
-  count,
+  describe,
   title,
 }: {
   /** Something to do with the whole table, at the end of its header. */
   action?: React.ReactNode;
   children: React.ReactNode;
   className?: string;
-  count: number;
+  /** What a row says, for the search to look through. */
+  describe: (row: React.ReactElement) => string;
   title: string;
 }) {
+  const rows = React.Children.toArray(children);
+  const [query, setQuery] = React.useState("");
+  const handleQuery = React.useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) =>
+      setQuery(event.target.value),
+    []
+  );
+  const searchable = rows.length >= SEARCHABLE_FROM;
+  const needle = query.trim().toLowerCase();
+  const visible = needle
+    ? rows.filter(
+        (row) =>
+          React.isValidElement(row) &&
+          describe(row).toLowerCase().includes(needle)
+      )
+    : rows;
   return (
     <Frame className={cn("not-typeset my-6", className)} data-slot="type-table">
       <FrameHeader className="min-h-11 flex-row items-center justify-between gap-3 px-2 py-1.5">
         <p className="ps-1 font-mono text-site-muted-foreground text-xs">
-          {title} <span className="opacity-60">· {count}</span>
+          {title}{" "}
+          <span className="opacity-60">
+            · {needle ? `${visible.length}/${rows.length}` : rows.length}
+          </span>
         </p>
-        {action}
+        <div className="flex items-center gap-2">
+          {searchable ? (
+            <div className="relative">
+              <MagnifyingGlassIcon
+                aria-hidden="true"
+                className="pointer-events-none absolute start-2.5 top-1/2 size-3.5 -translate-y-1/2 text-site-muted-foreground"
+              />
+              <Input
+                aria-label={`Filter ${title.toLowerCase()}`}
+                className="h-8 w-36 ps-8 sm:w-48"
+                onChange={handleQuery}
+                placeholder="Filter…"
+                type="search"
+                value={query}
+              />
+            </div>
+          ) : null}
+          {action}
+        </div>
       </FrameHeader>
       <FrameContent className="divide-y divide-site-border">
-        {children}
+        {visible.length > 0 ? (
+          visible
+        ) : (
+          <p className="px-3 py-6 text-center text-site-muted-foreground text-sm">
+            Nothing matches “{query.trim()}”.
+          </p>
+        )}
       </FrameContent>
     </Frame>
   );
@@ -73,6 +139,16 @@ interface TypeRowProps {
   type?: string;
 }
 
+const describeTypeRow = (row: React.ReactElement) => {
+  const {
+    children,
+    default: defaultValue,
+    name,
+    type,
+  } = row.props as TypeRowProps;
+  return [name, type, defaultValue, nodeText(children)].join(" ");
+};
+
 const hasDetails = ({ default: defaultValue, type }: TypeRowProps) =>
   Boolean(type || defaultValue);
 
@@ -90,8 +166,7 @@ export function TypeTable({
   className?: string;
   title?: string;
 }) {
-  const rows = React.Children.toArray(children);
-  const collapsible = rows.some(
+  const collapsible = React.Children.toArray(children).some(
     (row) => React.isValidElement(row) && hasDetails(row.props as TypeRowProps)
   );
   const [state, setState] = React.useState<TypeTableState>({
@@ -107,20 +182,27 @@ export function TypeTable({
     []
   );
   return (
-    <ReferenceFrame
-      action={
-        collapsible ? (
-          <Button onClick={toggleAll} size="sm" type="button" variant="outline">
-            {state.open ? "Collapse all" : "Expand all"}
-          </Button>
-        ) : null
-      }
-      className={className}
-      count={rows.length}
-      title={title}
-    >
-      <TypeTableContext value={state}>{children}</TypeTableContext>
-    </ReferenceFrame>
+    <TypeTableContext value={state}>
+      <ReferenceFrame
+        action={
+          collapsible ? (
+            <Button
+              onClick={toggleAll}
+              size="sm"
+              type="button"
+              variant="outline"
+            >
+              {state.open ? "Collapse all" : "Expand all"}
+            </Button>
+          ) : null
+        }
+        className={className}
+        describe={describeTypeRow}
+        title={title}
+      >
+        {children}
+      </ReferenceFrame>
+    </TypeTableContext>
   );
 }
 
@@ -183,17 +265,20 @@ export function TypeRow(props: TypeRowProps) {
           </span>
         ) : null}
       </CollapsibleTrigger>
-      {/* What it does: a line of it when closed, all of it when open. */}
-      {children ? (
+      {/* What it does: a line of it when closed, all of it in the panel when open. */}
+      {children && !open ? (
         <div
-          className={cn(
-            "px-3 pb-2.5 ps-[2.125rem]",
-            textClassName,
-            !open && "truncate"
-          )}
+          className={cn("truncate px-3 pb-2.5 ps-[2.125rem]", textClassName)}
         >
           {children}
         </div>
+      ) : null}
+      {children ? (
+        <CollapsibleContent
+          className={cn("px-3 pb-3 ps-[2.125rem]", textClassName)}
+        >
+          {children}
+        </CollapsibleContent>
       ) : null}
     </Collapsible>
   );
@@ -219,6 +304,14 @@ function Gesture({ value }: { value: string }) {
   );
 }
 
+const describeKeyRow = (row: React.ReactElement) => {
+  const { children, gesture } = row.props as {
+    children?: React.ReactNode;
+    gesture: string;
+  };
+  return `${gesture.replaceAll("`", "")} ${nodeText(children)}`;
+};
+
 /** A table of what a pointer or a keyboard does: a row per gesture, the keys drawn as keys. */
 export function KeyTable({
   children,
@@ -232,7 +325,7 @@ export function KeyTable({
   return (
     <ReferenceFrame
       className={className}
-      count={React.Children.count(children)}
+      describe={describeKeyRow}
       title={title}
     >
       {children}
