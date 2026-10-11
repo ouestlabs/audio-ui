@@ -35,7 +35,7 @@ export function useComponents() {
 export function useCustomizer() {
   const context = use(CustomizerContext);
   if (!context) {
-    throw new Error("useCustomizer must be used within a ComponentsProvider");
+    throw new Error("useCustomizer must be used within a FramedLayout");
   }
   return context;
 }

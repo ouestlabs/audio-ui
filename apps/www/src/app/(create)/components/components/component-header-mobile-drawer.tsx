@@ -19,7 +19,7 @@ export function ComponentHeaderMobileDrawer() {
   const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
 
   return (
-    <div className="flex items-center gap-2 md:hidden">
+    <div className="flex items-center gap-2 lg:hidden">
       <Drawer
         onOpenChange={setIsDrawerOpen}
         open={isDrawerOpen}
@@ -32,7 +32,7 @@ export function ComponentHeaderMobileDrawer() {
               size="icon"
               variant="outline"
             >
-              <FunnelIcon />
+              <FunnelIcon weight="fill" />
             </Button>
           }
         />

@@ -1,34 +1,11 @@
 "use client";
 
-import * as React from "react";
-
 import { Sidebar, SidebarContent, useSidebar } from "@/components/ui/sidebar";
 
 import { ComponentSidebarContent } from "./component-sidebar-content";
 
 export function ComponentSidebar() {
-  const { toggleSidebar, isMobile } = useSidebar();
-
-  React.useEffect(() => {
-    const down = (e: KeyboardEvent) => {
-      if ((e.key === "p" || e.key === "P") && !e.metaKey && !e.ctrlKey) {
-        if (
-          (e.target instanceof HTMLElement && e.target.isContentEditable) ||
-          e.target instanceof HTMLInputElement ||
-          e.target instanceof HTMLTextAreaElement ||
-          e.target instanceof HTMLSelectElement
-        ) {
-          return;
-        }
-
-        e.preventDefault();
-        toggleSidebar();
-      }
-    };
-
-    document.addEventListener("keydown", down);
-    return () => document.removeEventListener("keydown", down);
-  }, [toggleSidebar]);
+  const { isMobile } = useSidebar();
 
   if (isMobile) {
     return null;
