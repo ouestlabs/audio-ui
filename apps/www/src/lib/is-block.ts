@@ -3,8 +3,15 @@ export const isBlock = (name: string) => name.startsWith("block-");
 
 /**
  * The previews that can be opened at full size: the editors made to take a
- * whole screen. A block that fits a card does not need it.
+ * whole screen, and the plots, which are all the better for the room. A block
+ * that fits a card does not need it.
  */
-const EXPANDABLE = new Set(["block-piano-roll", "block-timeline"]);
+const EXPANDABLE = new Set([
+  "block-piano-roll",
+  "block-timeline",
+  "plot-compressor-demo",
+  "plot-demo",
+  "plot-filter-demo",
+]);
 
 export const isExpandable = (name: string) => EXPANDABLE.has(name);
