@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import * as React from "react";
 
 import { PickerSideProvider } from "@/app/(create)/customizer/picker";
-import { Frame, FrameContent, frameClassName } from "@/components/custom/frame";
+import { FrameContent, frameClassName } from "@/components/custom/frame";
 import {
   Sheet,
   SheetContent,
@@ -33,7 +33,7 @@ const CustomizerSidebarContent = dynamic(
   }
 );
 
-type CustomizerPanelVariant = "sidebar" | "frame" | "floating";
+type CustomizerPanelVariant = "sidebar" | "floating";
 
 /** Full-height bordered aside for the /components layout. */
 function CustomizerPanelSidebar() {
@@ -59,29 +59,6 @@ function CustomizerPanelSidebar() {
         <CustomizerSidebarContent anchorRef={anchorRef} isMobile={false} />
       </div>
     </aside>
-  );
-}
-
-/** Frame-styled aside for embedded showcases (e.g. the home page). */
-function CustomizerPanelFrame() {
-  const { customizerOpen } = useCustomizer();
-  const anchorRef = React.useRef<HTMLDivElement | null>(null);
-
-  return (
-    <div
-      className={cn(
-        "shrink-0 overflow-hidden transition-[width] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
-        customizerOpen ? "w-64" : "w-0"
-      )}
-      ref={anchorRef}
-    >
-      <Frame className="flex h-full w-64 flex-col">
-        <CustomizerSidebarHeader className="border-b-0" />
-        <FrameContent className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
-          <CustomizerSidebarContent anchorRef={anchorRef} isMobile={false} />
-        </FrameContent>
-      </Frame>
-    </div>
   );
 }
 
@@ -186,9 +163,5 @@ export function CustomizerPanel({
     return <CustomizerPanelSheet />;
   }
 
-  return variant === "frame" ? (
-    <CustomizerPanelFrame />
-  ) : (
-    <CustomizerPanelSidebar />
-  );
+  return <CustomizerPanelSidebar />;
 }

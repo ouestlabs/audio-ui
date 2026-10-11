@@ -26,7 +26,7 @@ export const Frame = ({
       <Link
         className={cn(
           outerClasses,
-          "transition-shadow duration-200 ease-out hover:shadow-lg hover:ring-site-foreground/10"
+          "transition-[filter] duration-200 ease-out hover:drop-shadow-lg hover:ring-site-foreground/10"
         )}
         href={url}
         ref={ref as any}
