@@ -22,6 +22,8 @@ const xypadVariants = cva("", {
 interface XYPadProps
   extends XYPadPrimitive.Root.Props,
     VariantProps<typeof xypadVariants> {
+  /** Takes the height left in a column, from its size up: the pad gives back space a taller neighbour leaves. */
+  fill?: boolean;
   formatValue?: (value: { x: number; y: number }) => React.ReactNode;
   valueDisplay?: "visible" | "hidden";
 }
@@ -33,6 +35,7 @@ export function XYPad({
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledBy,
   className,
+  fill = false,
   size,
   formatValue,
   valueDisplay = "visible",
@@ -44,7 +47,10 @@ export function XYPad({
 
   return (
     <XYPadPrimitive.Root
-      className="data-disabled:cursor-not-allowed"
+      className={cn(
+        "data-disabled:cursor-not-allowed",
+        fill && "flex grow flex-col"
+      )}
       {...props}
     >
       <XYPadPrimitive.Control
@@ -52,6 +58,7 @@ export function XYPad({
           "cn-xypad relative block w-full cursor-crosshair touch-none select-none overflow-hidden",
           "data-disabled:pointer-events-none data-disabled:opacity-50",
           xypadVariants({ size }),
+          fill && "grow",
           className
         )}
         data-slot="xypad"

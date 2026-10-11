@@ -8,6 +8,7 @@ import {
   FrameHeader,
 } from "@/components/custom/frame";
 import { ExpandPreview } from "@/components/expand-preview";
+import type { PreviewHost } from "@/components/preview-host";
 import { cn } from "@/lib/utils";
 
 /**
@@ -26,7 +27,7 @@ export const PANEL_INSET = "p-4";
  * expand button.
  */
 export const blockPanelClassName =
-  "min-h-72 flex-nowrap items-stretch justify-start sm:**:data-[slot=preview]:max-w-none [&>.cn-audio-panel]:w-full [&>.cn-audio-panel]:flex-1 [&>.cn-audio-panel]:rounded-none [&>.cn-audio-panel]:border-0 [&>.cn-audio-panel]:bg-transparent [&>.cn-audio-panel]:p-0 [&_[data-slot=piano-roll]]:max-h-56";
+  "min-h-60 flex-nowrap items-stretch justify-start sm:**:data-[slot=preview]:max-w-none [&_.cn-audio-panel]:w-full [&_.cn-audio-panel]:flex-1 [&_.cn-audio-panel]:rounded-none [&_.cn-audio-panel]:border-0 [&_.cn-audio-panel]:bg-transparent [&_.cn-audio-panel]:p-0 [&_[data-slot=piano-roll]]:max-h-56";
 
 /** What a preview's panel looks like, on a page and in a card alike. */
 const panelClassName = `flex min-w-0 flex-1 flex-col flex-wrap items-center justify-center overflow-x-auto font-sans **:data-[slot=preview]:w-full sm:**:data-[slot=preview]:max-w-[80%] ${PANEL_INSET}`;
@@ -68,7 +69,7 @@ export function PreviewBar({
   /** Something about the preview that is not for everyone, such as its name in development. */
   badge?: React.ReactNode;
   description?: string;
-  expand?: React.ReactNode;
+  expand?: PreviewHost;
   /** How to use the preview, shown in the footer of the full-size view. */
   hint?: string;
   name: string;
@@ -87,10 +88,8 @@ export function PreviewBar({
       </p>
       <div className="flex items-center gap-1.5">
         {badge}
-        {expand ? (
-          <ExpandPreview hint={hint} label={name}>
-            {expand}
-          </ExpandPreview>
+        {expand?.host ? (
+          <ExpandPreview hint={hint} label={name} preview={expand} />
         ) : null}
         <CopyRegistry value={`@audio/${name}`} />
         {actions}

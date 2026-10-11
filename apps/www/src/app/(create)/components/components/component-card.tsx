@@ -1,6 +1,7 @@
 "use client";
 
 import { PreviewBar } from "@/components/preview-frame";
+import { HostedPreview, usePreviewHost } from "@/components/preview-host";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 import { useConfig } from "@/hooks/use-config";
@@ -26,6 +27,7 @@ export function ComponentCard({
 }) {
   // Get the current base preference (base or radix)
   const [config] = useConfig();
+  const hosted = usePreviewHost(isExpandable(name));
   const base = propBase || config?.base || "radix";
 
   // Get item from the base-specific metadata (lightweight, no React)
@@ -58,18 +60,20 @@ export function ComponentCard({
             ) : null
           }
           description={item.description}
-          expand={
-            isExpandable(name) ? (
-              <ComponentRenderer base={base} name={name} />
-            ) : undefined
-          }
+          expand={hosted}
           hint={hint}
           name={name}
         />
       }
       isFullWidth={isFullWidth}
     >
-      <ComponentRenderer base={base} name={name} />
+      {isExpandable(name) ? (
+        <HostedPreview host={hosted.host} open={hosted.open}>
+          <ComponentRenderer base={base} name={name} />
+        </HostedPreview>
+      ) : (
+        <ComponentRenderer base={base} name={name} />
+      )}
     </ComponentCardContainer>
   );
 }

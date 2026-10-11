@@ -5,7 +5,6 @@ import {
   InfoIcon,
   XIcon,
 } from "@phosphor-icons/react/ssr";
-import type * as React from "react";
 import { CopyRegistry } from "@/components/copy-registry";
 import {
   Frame,
@@ -13,6 +12,7 @@ import {
   FrameFooter,
   FrameHeader,
 } from "@/components/custom/frame";
+import { HostSlot, type PreviewHost } from "@/components/preview-host";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -30,20 +30,21 @@ import { cn } from "@/lib/utils";
  * What it holds mounts only while it is open.
  */
 export function ExpandPreview({
-  children,
   className,
   hint,
   label,
+  preview,
 }: {
-  children: React.ReactNode;
   className?: string;
   /** How to use the preview, in a footer under it. */
   hint?: string;
   /** Names the preview for assistive technology, such as the block's name. */
   label: string;
+  /** What the page and this view share: the component is in the host, whichever of them has it. */
+  preview: PreviewHost;
 }) {
   return (
-    <Dialog>
+    <Dialog onOpenChange={preview.onOpenChange} open={preview.open}>
       <DialogTrigger
         render={
           <Button
@@ -82,10 +83,10 @@ export function ExpandPreview({
           </DialogDescription>
           {/* The block is the page: it fills the panel, which is its only container, and what has a height of its own gives it back to the editor. */}
           <FrameContent
-            className="min-h-0 flex-1 p-4 font-sans [&>div]:h-full [&_[data-slot=plot]]:h-auto [&_[data-slot=plot]]:min-h-0 [&_[data-slot=plot]]:flex-1 [&>.cn-audio-panel]:h-full [&>.cn-audio-panel]:overflow-auto [&>.cn-audio-panel]:rounded-none [&>.cn-audio-panel]:border-0 [&>.cn-audio-panel]:bg-transparent [&>.cn-audio-panel]:p-0 [&_[data-slot=piano-roll]]:h-auto [&_[data-slot=piano-roll]]:min-h-0 [&_[data-slot=piano-roll]]:flex-1 [&_[data-slot=timeline]]:flex [&_[data-slot=timeline]]:min-h-0 [&_[data-slot=timeline]]:flex-1 [&_[data-slot=timeline]]:flex-col"
+            className="min-h-0 flex-1 p-4 font-sans [&>[data-preview-slot]>[data-preview-host]>div]:h-full [&_[data-slot=plot]]:h-auto [&_[data-slot=plot]]:min-h-0 [&_[data-slot=plot]]:flex-1 [&_.cn-audio-panel]:h-full [&_.cn-audio-panel]:overflow-hidden [&_.cn-audio-panel]:rounded-none [&_.cn-audio-panel]:border-0 [&_.cn-audio-panel]:bg-transparent [&_.cn-audio-panel]:p-0 [&_[data-slot=piano-roll]]:h-auto [&_[data-slot=piano-roll]]:min-h-0 [&_[data-slot=piano-roll]]:flex-1 [&_[data-slot=timeline]]:flex [&_[data-slot=timeline]]:min-h-0 [&_[data-slot=timeline]]:flex-1 [&_[data-slot=timeline]]:flex-col"
             data-expanded-preview
           >
-            {children}
+            <HostSlot host={preview.host} />
           </FrameContent>
           {hint ? (
             <FrameFooter className="shrink-0 flex-row items-start gap-2 px-3 py-2">

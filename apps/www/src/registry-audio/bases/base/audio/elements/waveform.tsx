@@ -50,7 +50,7 @@ function Waveform({
         aria-labelledby={ariaLabelledBy}
         className={cn(
           "cn-waveform relative w-full min-w-0 cursor-pointer touch-none select-none overflow-hidden py-1",
-          "has-focus-visible:border-ring has-focus-visible:ring-3 has-focus-visible:ring-ring/50",
+          "has-focus-visible:ring-3 has-focus-visible:ring-ring/50",
           "data-disabled:pointer-events-none data-disabled:opacity-50 data-loading:cursor-progress",
           className
         )}

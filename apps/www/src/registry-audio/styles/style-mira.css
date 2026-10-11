@@ -507,7 +507,7 @@
 
   /* MARK: Waveform */
   .cn-waveform {
-    @apply relative h-20 rounded-lg border bg-card;
+    @apply relative h-20 rounded-lg;
   }
 
   .cn-waveform-canvas {

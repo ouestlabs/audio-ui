@@ -353,7 +353,7 @@ export default function BlockWaveformPlayer() {
               <Waveform
                 aria-label="Track position"
                 // The viewport is the frame: the waveform fills the lane without a box of its own.
-                className="h-20 rounded-none border-0 bg-transparent"
+                className="h-20 rounded-none"
                 disabled={!ready}
                 duration={duration || 1}
                 getAriaValueText={formatTime}

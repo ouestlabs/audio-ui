@@ -3,6 +3,7 @@
 import * as React from "react";
 import { Frame, FrameContent } from "@/components/custom/frame";
 import { PreviewBar, PreviewPanel } from "@/components/preview-frame";
+import { HostedPreview, usePreviewHost } from "@/components/preview-host";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
@@ -52,18 +53,22 @@ export function ComponentPreviewTabs({
     threshold: 0,
   });
 
+  const hosted = usePreviewHost(expand);
+  const shown = expand ? (
+    <HostedPreview host={hosted.host} open={hosted.open}>
+      {component}
+    </HostedPreview>
+  ) : (
+    component
+  );
+
   return (
     <Frame
       className={cn("group mt-4 mb-12", className)}
       data-slot="component-preview"
       {...props}
     >
-      <PreviewBar
-        expand={expand ? component : undefined}
-        hint={hint}
-        name={name}
-        position="header"
-      />
+      <PreviewBar expand={hosted} hint={hint} name={name} position="header" />
       {/* The panel is the preview: no container inside it. */}
       <PreviewPanel
         block={fitContent}
@@ -72,7 +77,7 @@ export function ComponentPreviewTabs({
         ref={previewRef}
       >
         {hasBeenVisible ? (
-          component
+          shown
         ) : (
           <Spinner className="text-site-muted-foreground/40" />
         )}

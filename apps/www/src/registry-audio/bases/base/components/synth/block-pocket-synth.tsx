@@ -247,6 +247,7 @@ export default function BlockPocketSynth() {
     <div className="cn-audio-panel flex w-full min-w-0 flex-col gap-4 border bg-card p-4">
       <XYPad
         aria-label="Tone"
+        fill
         formatValue={formatValue}
         maxX={100}
         maxY={100}
