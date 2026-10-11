@@ -36,7 +36,7 @@ export function CodeCollapsibleWrapper({
             )}
           >
             <Button
-              className="text-site-muted-foreground"
+              className="h-8 text-site-muted-foreground"
               size="sm"
               variant="outline"
             >

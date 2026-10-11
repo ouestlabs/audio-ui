@@ -368,9 +368,12 @@
       border: 1px solid var(--site-border);
     }
 
+    /* In a header: the same size and the same line as the buttons beside it. */
     &:has([data-rehype-pretty-code-title]) [data-slot="copy-button"] {
-      top: calc(2px + var(--spacing) * 1.5) !important;
+      top: calc(1px + var(--spacing) * 1.25) !important;
       right: calc(var(--spacing) * 2) !important;
+      width: calc(var(--spacing) * 8);
+      height: calc(var(--spacing) * 8);
     }
   }
 
