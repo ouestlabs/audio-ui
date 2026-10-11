@@ -6,6 +6,7 @@ import { LocksProvider } from "@/app/(create)/hooks/use-locks";
 import { CREATE_PREVIEW_FONTS_ATTR } from "@/app/(create)/lib/fonts";
 import { FramedLayoutSkeleton } from "@/components/framed-skeleton";
 import { GridSkeleton } from "@/components/grid-skeleton";
+import { SiteFooter } from "@/components/site-footer";
 import {
   SiteBarContent,
   SiteHeader,
@@ -35,7 +36,10 @@ const createPreviewFontAttrs = {
 
 function ComponentsLayoutFallback() {
   return (
-    <FramedLayoutSkeleton>
+    <FramedLayoutSkeleton
+      footer={<SiteFooter docs />}
+      header={<SiteSidebarHeader />}
+    >
       <GridSkeleton count={4} />
     </FramedLayoutSkeleton>
   );

@@ -12,6 +12,15 @@ import {
 } from "@/components/site-header";
 import { source } from "@/lib/source";
 
+function RootFallback() {
+  return (
+    <FramedLayoutSkeleton
+      footer={<SiteFooter docs />}
+      header={<SiteSidebarHeader />}
+    />
+  );
+}
+
 export default function RootAppLayout({
   children,
 }: {
@@ -20,9 +29,9 @@ export default function RootAppLayout({
   return (
     <div className="lg:[--header-height:0px]">
       <SiteHeader framed />
-      <Suspense fallback={<FramedLayoutSkeleton />}>
+      <Suspense fallback={<RootFallback />}>
         <LocksProvider>
-          <DesignSystemProvider fallback={<FramedLayoutSkeleton />}>
+          <DesignSystemProvider fallback={<RootFallback />}>
             <FramedLayout
               closedEnd={<SiteBarContent part="end" />}
               closedStart={<SiteBarContent part="start" />}
