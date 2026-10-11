@@ -92,7 +92,7 @@ export function ComponentPreviewTabs({
           ) : (
             <div className="relative">
               {sourcePreview}
-              <div className="absolute inset-0 flex items-center justify-center pb-4">
+              <div className="absolute inset-0 flex items-end justify-center pb-3">
                 <div
                   className="absolute inset-0"
                   style={{
