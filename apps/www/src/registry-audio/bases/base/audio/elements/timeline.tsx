@@ -152,10 +152,27 @@ function TimelineClip({ className, ...props }: TimelinePrimitive.Clip.Props) {
   return (
     <TimelinePrimitive.Clip
       className={cn(
-        "cn-timeline-clip group/clip inset-y-0 cursor-grab touch-none data-dragging:z-10 data-dragging:cursor-grabbing data-disabled:cursor-not-allowed",
+        "cn-timeline-clip group/clip inset-y-0 touch-none data-dragging:z-10 data-disabled:cursor-not-allowed",
         className
       )}
       data-slot="timeline-clip"
+      {...props}
+    />
+  );
+}
+
+/** The clip's title bar: drag it to move the clip. Put the clip's name in it. */
+function TimelineClipHeader({
+  className,
+  ...props
+}: TimelinePrimitive.ClipHeader.Props) {
+  return (
+    <TimelinePrimitive.ClipHeader
+      className={cn(
+        "cn-timeline-clip-header flex h-5 cursor-grab items-center truncate px-2 text-xs data-dragging:cursor-grabbing data-disabled:cursor-not-allowed",
+        className
+      )}
+      data-slot="timeline-clip-header"
       {...props}
     />
   );
@@ -245,6 +262,7 @@ export {
   TimelineClipFade,
   TimelineClipFadeHandle,
   TimelineClipHandle,
+  TimelineClipHeader,
   TimelineLane,
   TimelineMark,
   TimelineNavigator,

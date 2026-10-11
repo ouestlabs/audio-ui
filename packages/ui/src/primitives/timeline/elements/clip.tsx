@@ -13,7 +13,6 @@ import {
   placedOver,
   useTimelineContext,
 } from "../context";
-import { snapMove } from "../internal/snap";
 import {
   type ClipChangeEventDetails,
   type ClipCommitEventDetails,
@@ -22,9 +21,9 @@ import {
   type ClipState,
   type ClipTarget,
   keyTargets,
-  useClipDrag,
 } from "./clip-context";
 import { LaneContext } from "./lane";
+import { useSeekGesture } from "./seek-gesture";
 
 const describeNumber: DescribePosition = (value) =>
   String(Math.round(value * 100) / 100);
@@ -57,8 +56,9 @@ function normalizeClip(clip: ClipValue, duration: number): ClipValue {
 
 /**
  * A stretch of a source laid on a lane: a recording, a pattern. Dragging its
- * body moves it, on the grid unless Cmd/Ctrl is held, and over other lanes
- * too (the change says which one is under the pointer). Add a
+ * `Timeline.ClipHeader` moves it, on the grid unless Cmd/Ctrl is held, and
+ * over other lanes too (the change says which one is under the pointer);
+ * pressing its body selects it and puts the cursor there. Add a
  * `Timeline.ClipHandle` per edge to trim it, which moves where in the source
  * it begins instead of stretching it, and a `Timeline.ClipFadeHandle` per
  * fade. Its content is up to you: it sets `--clip-offset` and
@@ -92,7 +92,8 @@ export function Clip(componentProps: Clip.Props) {
     value: valueProp,
     ...elementProps
   } = componentProps;
-  const { meta: root, state: rootState } = useTimelineContext("Clip");
+  const timeline = useTimelineContext("Clip");
+  const { meta: root, state: rootState } = timeline;
   const lane = React.use(LaneContext);
   if (!lane) {
     throw new Error("Timeline.Clip must be used within a Timeline lane");
@@ -217,6 +218,7 @@ export function Clip(componentProps: Clip.Props) {
         grid,
         largeStep,
         limits,
+        movable: movable && !disabled,
         step,
         value: displayedValue,
         valueRef,
@@ -226,12 +228,14 @@ export function Clip(componentProps: Clip.Props) {
     [
       change,
       commit,
+      disabled,
       displayedValue,
       duration,
       getAriaValueText,
       grid,
       largeStep,
       limits,
+      movable,
       select,
       setDragging,
       state,
@@ -240,22 +244,19 @@ export function Clip(componentProps: Clip.Props) {
     ]
   );
 
-  const drag = useClipDrag(
-    context,
-    "move",
-    movable && !disabled,
-    (origin, delta, gridNow, limitsNow) =>
-      moveClip(
-        origin,
-        snapMove(origin.start + delta, origin.start, gridNow),
-        limitsNow
-      )
-  );
+  // A press on the body selects the clip and puts the cursor there, and a
+  // drag scrubs it: it is the header that moves the clip.
+  const seek = useSeekGesture(timeline, {
+    accepts: () => true,
+    enabled: !disabled,
+    measure: () => lane.elementRef.current,
+    onPress: select,
+  });
   const inputRef = React.useRef<HTMLInputElement>(null);
   const { fadeIn, fadeOut, length, offset, start } = displayedValue;
 
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
-    drag.onPointerDown(event);
+    seek.onPointerDown(event);
     if (!disabled && event.button === 0) {
       inputRef.current?.focus({ focusVisible: false, preventScroll: true });
     }
@@ -323,7 +324,7 @@ export function Clip(componentProps: Clip.Props) {
     defaultTagName: "div",
     props: mergeProps<"div">(
       {
-        ...drag,
+        ...seek,
         children: (
           <>
             {children}
@@ -399,7 +400,7 @@ export namespace Clip {
     getAriaValueText?: DescribePosition;
     /** The shortest the clip can be trimmed to, in the timeline's units. Defaults to the grid step. */
     minLength?: number;
-    /** Whether dragging the body, or its keys, moves the clip. @default true */
+    /** Whether dragging the header, or the keys, moves the clip. @default true */
     movable?: boolean;
     /** Fires when Delete or Backspace is pressed on the clip: removing it is up to you. */
     onRemove?: (eventDetails: RemoveEventDetails) => void;

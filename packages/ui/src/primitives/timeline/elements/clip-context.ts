@@ -59,6 +59,8 @@ export interface ClipContextValue {
     grid: Grid;
     largeStep: number;
     limits: ClipLimits;
+    /** Whether the header, or the keys, can move the clip. */
+    movable: boolean;
     step: number;
     /** The clip as displayed. */
     value: ClipValue;

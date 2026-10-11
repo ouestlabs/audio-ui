@@ -24,6 +24,7 @@ import {
   TimelineClipFade,
   TimelineClipFadeHandle,
   TimelineClipHandle,
+  TimelineClipHeader,
   TimelineLane,
   TimelineMark,
   TimelineNavigator,
@@ -228,11 +229,9 @@ function ClipView({
       sourceLength={clip.sourceLength}
       value={clip.value}
     >
+      <TimelineClipHeader>{clip.name}</TimelineClipHeader>
       <TimelineClipFade edge="in" />
       <TimelineClipFade edge="out" />
-      <span className="pointer-events-none absolute inset-x-2 top-1 truncate text-xs">
-        {clip.name}
-      </span>
       <TimelineClipHandle aria-label={`${clip.name} start`} edge="start" />
       <TimelineClipHandle aria-label={`${clip.name} end`} edge="end" />
       <TimelineClipFadeHandle aria-label={`${clip.name} fade in`} edge="in" />
@@ -357,7 +356,7 @@ export default function BlockTimeline() {
       })
     );
   }, [clock, selectedId, selectedTrack]);
-  // S, or Cmd/Ctrl + E as in Ableton, splits at the cursor; Escape drops the selection.
+  // S, or Cmd/Ctrl + E, splits at the cursor; Escape drops the selection.
   const handleKeyDown = useCallback(
     (event: KeyboardEvent<HTMLDivElement>) => {
       if (event.key === "Escape") {

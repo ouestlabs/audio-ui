@@ -1,0 +1,46 @@
+import { mergeProps } from "@base-ui/react/merge-props";
+import { useRender } from "@base-ui/react/use-render";
+import { type PartProps, resolveStyling } from "../../internal/part";
+import { moveClip } from "../clip";
+import { snapMove } from "../internal/snap";
+import { type ClipState, useClipContext, useClipDrag } from "./clip-context";
+
+/**
+ * The clip's title bar: dragging it moves the clip, on the grid unless
+ * Cmd/Ctrl is held, and over other lanes too. The rest of the clip is its
+ * body, where a press puts the cursor. Place it along the clip's top and put
+ * the clip's name in it. Renders a `<div>` element.
+ */
+export function ClipHeader(componentProps: ClipHeader.Props) {
+  const { className, ref, render, style, ...elementProps } = componentProps;
+  const context = useClipContext("ClipHeader");
+  const { meta, state } = context;
+
+  const drag = useClipDrag(
+    context,
+    "move",
+    meta.movable,
+    (origin, delta, grid, limits) =>
+      moveClip(
+        origin,
+        snapMove(origin.start + delta, origin.start, grid),
+        limits
+      )
+  );
+
+  return useRender({
+    defaultTagName: "div",
+    props: mergeProps<"div">(
+      { ...drag, style: { touchAction: "none" } },
+      { ...elementProps, ...resolveStyling(className, style, state) }
+    ),
+    ref,
+    render,
+    state,
+  });
+}
+
+export namespace ClipHeader {
+  export type State = ClipState;
+  export type Props = PartProps<"div", State>;
+}

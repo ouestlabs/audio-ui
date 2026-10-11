@@ -52,6 +52,7 @@ function renderClip(
           sourceLength={60}
           {...props}
         >
+          <Timeline.ClipHeader data-testid="header" />
           <Timeline.ClipFade data-testid="fade-in" edge="in" />
           <Timeline.ClipFade data-testid="fade-out" edge="out" />
           <Timeline.ClipHandle
@@ -85,6 +86,7 @@ function renderClip(
     clip,
     fadeInHandle: view.getByTestId("fade-in-handle"),
     fadeOutHandle: view.getByTestId("fade-out-handle"),
+    header: view.getByTestId("header"),
     input: view.getByLabelText("Take") as HTMLInputElement,
     lane,
     onRemove,
@@ -119,15 +121,16 @@ describe("Timeline.Clip", () => {
   });
 
   test("dragging the body moves it, keeping its length and source, and commits on release", () => {
-    const { clip, onValueChange, onValueCommitted, place } = renderClip();
-    fireEvent.pointerDown(clip, { clientX: 80, pointerId: 1 });
+    const { clip, header, onValueChange, onValueCommitted, place } =
+      renderClip();
+    fireEvent.pointerDown(header, { clientX: 80, pointerId: 1 });
     expect(clip.hasAttribute("data-dragging")).toBe(true);
-    fireEvent.pointerMove(clip, { clientX: 100, pointerId: 1 });
+    fireEvent.pointerMove(header, { clientX: 100, pointerId: 1 });
     expect(lastCall(onValueChange)).toEqual([
       { ...start, start: 30 },
       expect.objectContaining({ reason: "drag", target: "move" }),
     ]);
-    fireEvent.pointerUp(clip, { clientX: 100, pointerId: 1 });
+    fireEvent.pointerUp(header, { clientX: 100, pointerId: 1 });
     expect(lastCall(onValueCommitted)).toEqual([
       { ...start, start: 30 },
       expect.objectContaining({ reason: "drag", target: "move" }),
@@ -138,38 +141,54 @@ describe("Timeline.Clip", () => {
   test("moves on the grid, unless Cmd/Ctrl is held", () => {
     const grid = { snapStep: 8 };
     const snapped = renderClip({}, grid);
-    drag(snapped.clip, 80, 91);
+    drag(snapped.header, 80, 91);
     expect(snapped.place()[0]).toBe("24");
     snapped.view.unmount();
 
     const free = renderClip({}, grid);
-    drag(free.clip, 80, 91, { metaKey: true });
+    drag(free.header, 80, 91, { metaKey: true });
     expect(free.place()[0]).toBe("25.5");
   });
 
+  test("pressing the body selects the clip and puts the cursor there, and a drag scrubs it without moving the clip", () => {
+    const onPositionChange = mock(
+      (_value: number, _details: Timeline.Root.PositionChangeEventDetails) =>
+        undefined
+    );
+    const { clip, onValueChange, place } = renderClip({}, { onPositionChange });
+    fireEvent.pointerDown(clip, { clientX: 80, pointerId: 1 });
+    expect(clip.hasAttribute("data-selected")).toBe(true);
+    expect(lastCall(onPositionChange)[0]).toBe(40);
+    fireEvent.pointerMove(clip, { clientX: 100, pointerId: 1 });
+    expect(lastCall(onPositionChange)[0]).toBe(50);
+    fireEvent.pointerUp(clip, { clientX: 100, pointerId: 1 });
+    expect(onValueChange).not.toHaveBeenCalled();
+    expect(place()[0]).toBe("20");
+  });
+
   test("a click that moves nothing commits nothing", () => {
-    const { clip, onValueChange, onValueCommitted } = renderClip();
-    drag(clip, 80, 80);
+    const { header, onValueChange, onValueCommitted } = renderClip();
+    drag(header, 80, 80);
     expect(onValueChange).not.toHaveBeenCalled();
     expect(onValueCommitted).not.toHaveBeenCalled();
   });
 
   test("a press selects it, once", () => {
-    const { clip, onSelectedChange } = renderClip();
+    const { clip, header, onSelectedChange } = renderClip();
     expect(clip.hasAttribute("data-selected")).toBe(false);
-    drag(clip, 80, 80);
+    drag(header, 80, 80);
     expect(clip.hasAttribute("data-selected")).toBe(true);
     expect(lastCall(onSelectedChange)).toEqual([
       true,
       expect.objectContaining({ reason: "press" }),
     ]);
-    drag(clip, 80, 80);
+    drag(header, 80, 80);
     expect(onSelectedChange).toHaveBeenCalledTimes(1);
   });
 
   test("a controlled selection follows the prop", () => {
-    const { clip, onSelectedChange } = renderClip({ selected: false });
-    drag(clip, 80, 80);
+    const { clip, header, onSelectedChange } = renderClip({ selected: false });
+    drag(header, 80, 80);
     expect(onSelectedChange).toHaveBeenCalledTimes(1);
     expect(clip.hasAttribute("data-selected")).toBe(false);
   });
@@ -177,14 +196,14 @@ describe("Timeline.Clip", () => {
   test("reports the lane the pointer is over, and commits a drop on another one", () => {
     const other = document.createElement("div");
     other.setAttribute("data-timeline-lane", "");
-    const { clip, lane, onValueCommitted } = renderClip();
+    const { clip, header, lane, onValueCommitted } = renderClip();
     const elementsFromPoint = mock(() => [lane] as Element[]);
     document.elementsFromPoint = elementsFromPoint as never;
-    fireEvent.pointerDown(clip, { clientX: 80, clientY: 10, pointerId: 1 });
+    fireEvent.pointerDown(header, { clientX: 80, clientY: 10, pointerId: 1 });
     elementsFromPoint.mockImplementation(() => [other]);
-    fireEvent.pointerMove(clip, { clientX: 80, clientY: 50, pointerId: 1 });
+    fireEvent.pointerMove(header, { clientX: 80, clientY: 50, pointerId: 1 });
     expect(clip.style.getPropertyValue("--clip-drag-y")).toBe("40px");
-    fireEvent.pointerUp(clip, { clientX: 80, clientY: 50, pointerId: 1 });
+    fireEvent.pointerUp(header, { clientX: 80, clientY: 50, pointerId: 1 });
     // Nothing moved along the lane, but the clip was dropped on another one
     expect(lastCall(onValueCommitted)[1]).toEqual(
       expect.objectContaining({ lane: other, target: "move" })
@@ -194,8 +213,8 @@ describe("Timeline.Clip", () => {
   });
 
   test("cannot be dragged when disabled", () => {
-    const { clip, onValueChange } = renderClip({ disabled: true });
-    drag(clip, 80, 120);
+    const { header, onValueChange } = renderClip({ disabled: true });
+    drag(header, 80, 120);
     expect(onValueChange).not.toHaveBeenCalled();
   });
 
@@ -300,19 +319,19 @@ describe("Timeline.Clip", () => {
   });
 
   test("a controlled clip is followed during a drag even if the parent lags", () => {
-    const { clip, place } = renderClip({ value: start });
-    fireEvent.pointerDown(clip, { clientX: 80, pointerId: 1 });
-    fireEvent.pointerMove(clip, { clientX: 100, pointerId: 1 });
+    const { header, place } = renderClip({ value: start });
+    fireEvent.pointerDown(header, { clientX: 80, pointerId: 1 });
+    fireEvent.pointerMove(header, { clientX: 100, pointerId: 1 });
     expect(place()[0]).toBe("30");
-    fireEvent.pointerUp(clip, { clientX: 100, pointerId: 1 });
+    fireEvent.pointerUp(header, { clientX: 100, pointerId: 1 });
     expect(place()[0]).toBe("20");
   });
 
   test("a change that is cancelled is not applied", () => {
-    const { clip, place } = renderClip({
+    const { header, place } = renderClip({
       onValueChange: (_value, details) => details.cancel(),
     });
-    drag(clip, 80, 100);
+    drag(header, 80, 100);
     expect(place()[0]).toBe("20");
   });
 

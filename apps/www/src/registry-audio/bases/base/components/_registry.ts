@@ -292,7 +292,7 @@ export const components: RegistryItem[] = [
       },
     ],
     meta: {
-      hint: "Press a track's content to put the cursor there, its header to select the whole track, then S (or Cmd/Ctrl + E) to split at the cursor. Drag a clip to move it, even onto another track, its edges to trim it and the corner squares to fade it, on the grid unless Cmd/Ctrl is held. Delete removes it. Drag across the loop strip to set a loop. Cmd/Ctrl + scroll zooms around the pointer.",
+      hint: "Press a track, or a clip's body, to put the cursor there, its header to select the whole track, then S (or Cmd/Ctrl + E) to split at the cursor. Drag a clip's title bar to move it, even onto another track, its edges to trim it and the corner squares to fade it, on the grid unless Cmd/Ctrl is held. Delete removes it. Drag across the loop strip to set a loop. Cmd/Ctrl + scroll zooms around the pointer.",
     },
     name: "block-timeline",
     registryDependencies: [
