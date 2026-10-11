@@ -148,6 +148,68 @@ function TimelineRangeHandle({
   );
 }
 
+function TimelineClip({ className, ...props }: TimelinePrimitive.Clip.Props) {
+  return (
+    <TimelinePrimitive.Clip
+      className={cn(
+        "cn-timeline-clip group/clip inset-y-0 cursor-grab touch-none data-dragging:z-10 data-dragging:cursor-grabbing data-disabled:cursor-not-allowed",
+        className
+      )}
+      data-slot="timeline-clip"
+      {...props}
+    />
+  );
+}
+
+function TimelineClipHandle({
+  className,
+  ...props
+}: TimelinePrimitive.ClipHandle.Props) {
+  return (
+    <TimelinePrimitive.ClipHandle
+      className={cn(
+        "cn-timeline-clip-handle absolute inset-y-0 z-10 w-1.5 cursor-ew-resize data-[edge=end]:right-0 data-[edge=start]:left-0",
+        "after:absolute after:-inset-x-1.5 after:inset-y-0 pointer-coarse:after:-inset-x-3",
+        className
+      )}
+      data-slot="timeline-clip-handle"
+      {...props}
+    />
+  );
+}
+
+/** Shades what a fade attenuates, over the clip's content. */
+function TimelineClipFade({
+  className,
+  ...props
+}: TimelinePrimitive.ClipFade.Props) {
+  return (
+    <TimelinePrimitive.ClipFade
+      className={cn("cn-timeline-clip-fade", className)}
+      data-slot="timeline-clip-fade"
+      {...props}
+    />
+  );
+}
+
+function TimelineClipFadeHandle({
+  className,
+  ...props
+}: TimelinePrimitive.ClipFadeHandle.Props) {
+  return (
+    <TimelinePrimitive.ClipFadeHandle
+      className={cn(
+        "cn-timeline-clip-fade-handle top-0 z-20 size-2 cursor-ew-resize opacity-0 transition-opacity",
+        "group-hover/clip:opacity-100 group-data-[selected]/clip:opacity-100 data-dragging:opacity-100 has-focus-visible:opacity-100",
+        "after:absolute after:-inset-1 pointer-coarse:opacity-100 pointer-coarse:after:-inset-2",
+        className
+      )}
+      data-slot="timeline-clip-fade-handle"
+      {...props}
+    />
+  );
+}
+
 /** The whole timeline as one bar: drag the window to scroll, an edge to zoom, double-click to show everything. */
 function TimelineNavigator({
   className,
@@ -179,6 +241,10 @@ function TimelineNavigator({
 
 export {
   Timeline,
+  TimelineClip,
+  TimelineClipFade,
+  TimelineClipFadeHandle,
+  TimelineClipHandle,
   TimelineLane,
   TimelineMark,
   TimelineNavigator,

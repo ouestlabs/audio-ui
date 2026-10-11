@@ -493,6 +493,22 @@
     @apply rounded-[min(var(--radius-sm),6px)] bg-primary/60 hover:bg-primary has-focus-visible:bg-primary;
   }
 
+  .cn-timeline-clip {
+    @apply rounded-[min(var(--radius-sm),6px)] overflow-hidden bg-primary/25 ring-1 ring-primary/60 ring-inset data-[selected]:bg-primary/40 data-[selected]:ring-2 data-[selected]:ring-primary has-focus-visible:ring-2 has-focus-visible:ring-ring;
+  }
+
+  .cn-timeline-clip-handle {
+    @apply bg-primary/0 hover:bg-primary/60 has-focus-visible:bg-primary;
+  }
+
+  .cn-timeline-clip-fade {
+    @apply text-foreground/70;
+  }
+
+  .cn-timeline-clip-fade-handle {
+    @apply rounded-[min(var(--radius-sm),6px)] bg-foreground/70 hover:bg-foreground has-focus-visible:bg-foreground;
+  }
+
   .cn-timeline-navigator {
     @apply h-5 rounded-2xl bg-muted;
   }

@@ -5,9 +5,10 @@ import { UNIT_PROPERTY } from "../context";
 import { type ClipState, useClipContext } from "./clip-context";
 
 /**
- * Shades the part of the clip a fade attenuates, a triangle from the clip's
- * edge as long as the fade, so the ramp reads over the content. It is empty
- * while its fade is, and ignores the pointer. Style its `fill`.
+ * Draws a fade over the clip's content, as a DAW does: the ramp as a line from
+ * the clip's edge, as long as the fade, with what it attenuates lightly
+ * shaded. It is hidden while its fade is empty, and ignores the pointer.
+ * Its color is the `color` it is given.
  * Renders an `<svg>` element.
  */
 export function ClipFade(componentProps: ClipFade.Props) {
@@ -24,10 +25,20 @@ export function ClipFade(componentProps: ClipFade.Props) {
       {
         "aria-hidden": true,
         children: (
-          <path
-            d={edge === "in" ? "M0 0H1L0 1Z" : "M0 0H1V1Z"}
-            fill="currentColor"
-          />
+          <>
+            <path
+              d={edge === "in" ? "M0 0H1L0 1Z" : "M0 0H1V1Z"}
+              fill="currentColor"
+              fillOpacity={0.2}
+            />
+            <path
+              d={edge === "in" ? "M0 1L1 0" : "M0 0L1 1"}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={1.5}
+              vectorEffect="non-scaling-stroke"
+            />
+          </>
         ),
         focusable: "false",
         preserveAspectRatio: "none",

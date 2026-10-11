@@ -284,7 +284,7 @@ export const components: RegistryItem[] = [
   {
     categories: ["timeline"],
     description:
-      "An arrangement timeline made for a whole screen: a bar ruler that seeks on the grid, a loop strip, a lane per track with clips to move and trim on the grid, a playhead following a transport clock, and a navigator to zoom and scroll, open it at full size and the tracks take the screen",
+      "An arrangement timeline made for a whole screen: a bar ruler that seeks on the grid, a loop strip, a lane per track with clips to move between tracks, trim and fade on the grid, a cursor to put anywhere on a track, and a split at the cursor, a playhead following a transport clock, and a navigator to zoom and scroll, open it at full size and the tracks take the screen",
     files: [
       {
         path: "components/timeline/block-timeline.tsx",
@@ -292,7 +292,7 @@ export const components: RegistryItem[] = [
       },
     ],
     meta: {
-      hint: "Drag a clip to move it and its edges to trim it, on the grid unless Cmd/Ctrl is held. Drag across the loop strip to set a loop. Cmd/Ctrl + scroll zooms around the pointer, or drag the bar below.",
+      hint: "Press a track's content to put the cursor there, its header to select the whole track, then S (or Cmd/Ctrl + E) to split at the cursor. Drag a clip to move it, even onto another track, its edges to trim it and the corner squares to fade it, on the grid unless Cmd/Ctrl is held. Delete removes it. Drag across the loop strip to set a loop. Cmd/Ctrl + scroll zooms around the pointer.",
     },
     name: "block-timeline",
     registryDependencies: [

@@ -1,7 +1,13 @@
 "use client";
 
-import { createSource } from "@audio-ui/react";
 import {
+  createSource,
+  splitClip,
+  type Timeline as TimelinePrimitive,
+} from "@audio-ui/react";
+import {
+  type KeyboardEvent,
+  type PointerEvent,
   type ReactNode,
   useCallback,
   useEffect,
@@ -14,6 +20,10 @@ import { Button } from "@/registry/bases/base/ui/button";
 import { ButtonGroup } from "@/registry/bases/base/ui/button-group";
 import {
   Timeline,
+  TimelineClip,
+  TimelineClipFade,
+  TimelineClipFadeHandle,
+  TimelineClipHandle,
   TimelineLane,
   TimelineMark,
   TimelineNavigator,
@@ -50,25 +60,48 @@ const TRACKS = [
 
 type Span = readonly [number, number];
 
-interface Clip {
+interface Arranged {
   id: string;
   name: string;
-  range: Span;
+  /** How long the recording behind the clip is: trimming stops where it runs out. */
+  sourceLength: number;
   track: (typeof TRACKS)[number]["id"];
+  /** Where the clip sits, how much of its source it plays, and its fades. */
+  value: TimelinePrimitive.Clip.Value;
 }
 
-const CLIPS: Clip[] = [
-  { id: "d1", name: "Intro", range: [bars(0), bars(4)], track: "drums" },
-  { id: "d2", name: "Groove", range: [bars(4), bars(16)], track: "drums" },
-  { id: "d3", name: "Groove", range: [bars(16), bars(28)], track: "drums" },
-  { id: "d4", name: "Fill", range: [bars(28), bars(32)], track: "drums" },
-  { id: "b1", name: "Sub", range: [bars(4), bars(12)], track: "bass" },
-  { id: "b2", name: "Sub", range: [bars(16), bars(28)], track: "bass" },
-  { id: "k1", name: "Pad", range: [bars(0), bars(8)], track: "keys" },
-  { id: "k2", name: "Chords", range: [bars(8), bars(16)], track: "keys" },
-  { id: "k3", name: "Pad", range: [bars(20), bars(32)], track: "keys" },
-  { id: "v1", name: "Verse", range: [bars(8), bars(16)], track: "vocals" },
-  { id: "v2", name: "Hook", range: [bars(16), bars(24)], track: "vocals" },
+const arranged = (
+  id: string,
+  name: string,
+  track: Arranged["track"],
+  from: number,
+  to: number
+): Arranged => ({
+  id,
+  name,
+  sourceLength: bars(to - from + 2),
+  track,
+  value: {
+    fadeIn: 0,
+    fadeOut: 0,
+    length: bars(to - from),
+    offset: 0,
+    start: bars(from),
+  },
+});
+
+const CLIPS: Arranged[] = [
+  arranged("d1", "Intro", "drums", 0, 4),
+  arranged("d2", "Groove", "drums", 4, 16),
+  arranged("d3", "Groove", "drums", 16, 28),
+  arranged("d4", "Fill", "drums", 28, 32),
+  arranged("b1", "Sub", "bass", 4, 12),
+  arranged("b2", "Sub", "bass", 16, 28),
+  arranged("k1", "Pad", "keys", 0, 8),
+  arranged("k2", "Chords", "keys", 8, 16),
+  arranged("k3", "Pad", "keys", 20, 32),
+  arranged("v1", "Verse", "vocals", 8, 16),
+  arranged("v2", "Hook", "vocals", 16, 24),
 ];
 
 /** A transport clock as a source: the playhead follows it without re-rendering React. */
@@ -109,7 +142,7 @@ function Row({
 }) {
   return (
     <div className={`flex min-w-full ${className ?? ""}`}>
-      <div className="sticky left-0 z-20 flex w-28 shrink-0 items-center border-e bg-background px-3 text-sm">
+      <div className="sticky left-0 z-20 flex w-28 shrink-0 items-stretch border-e bg-background text-sm">
         {lead}
       </div>
       <div className="flex flex-1 flex-col">{children}</div>
@@ -117,40 +150,101 @@ function Row({
   );
 }
 
-/** One clip: a range to move and trim. */
-function ClipRange({
+/** A track's header: pressing it selects the whole track, its content is where the cursor goes. */
+function TrackHeader({
+  name,
+  onSelect,
+  selected,
+  trackId,
+}: {
+  name: string;
+  onSelect: (trackId: Arranged["track"]) => void;
+  selected: boolean;
+  trackId: Arranged["track"];
+}) {
+  const handleClick = useCallback(() => onSelect(trackId), [onSelect, trackId]);
+  return (
+    <button
+      aria-pressed={selected}
+      className="flex w-full items-center px-3 text-left font-medium outline-none hover:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset aria-pressed:bg-muted"
+      onClick={handleClick}
+      type="button"
+    >
+      {name}
+    </button>
+  );
+}
+
+/** One clip: move it, trim either edge into its recording, fade it in and out. */
+function ClipView({
   clip,
-  onMove,
+  onChange,
+  onCommit,
+  onRemove,
+  onSelect,
+  selected,
   trackName,
 }: {
-  clip: Clip;
-  onMove: (id: string, range: Span) => void;
+  clip: Arranged;
+  onChange: (id: string, value: TimelinePrimitive.Clip.Value) => void;
+  onCommit: (
+    id: string,
+    details: TimelinePrimitive.Clip.CommitEventDetails
+  ) => void;
+  onRemove: (id: string) => void;
+  onSelect: (id: string) => void;
+  selected: boolean;
   trackName: string;
 }) {
+  const handleRemove = useCallback(
+    () => onRemove(clip.id),
+    [clip.id, onRemove]
+  );
+  const handleSelected = useCallback(
+    () => onSelect(clip.id),
+    [clip.id, onSelect]
+  );
   const handleChange = useCallback(
-    (range: Span) => onMove(clip.id, range),
-    [clip.id, onMove]
+    (value: TimelinePrimitive.Clip.Value) => onChange(clip.id, value),
+    [clip.id, onChange]
+  );
+  const handleCommitted = useCallback(
+    (
+      _value: TimelinePrimitive.Clip.Value,
+      details: TimelinePrimitive.Clip.CommitEventDetails
+    ) => onCommit(clip.id, details),
+    [clip.id, onCommit]
   );
   return (
-    <TimelineRange
+    <TimelineClip
       aria-label={`${trackName}, ${clip.name}`}
       className="inset-y-1.5"
       getAriaValueText={describePosition}
+      onRemove={handleRemove}
+      onSelectedChange={handleSelected}
       onValueChange={handleChange}
-      value={clip.range}
+      onValueCommitted={handleCommitted}
+      selected={selected}
+      sourceLength={clip.sourceLength}
+      value={clip.value}
     >
-      <TimelineRangeHandle aria-label={`${clip.name} start`} edge="start" />
-      <TimelineRangeHandle aria-label={`${clip.name} end`} edge="end" />
+      <TimelineClipFade edge="in" />
+      <TimelineClipFade edge="out" />
       <span className="pointer-events-none absolute inset-x-2 top-1 truncate text-xs">
         {clip.name}
       </span>
-    </TimelineRange>
+      <TimelineClipHandle aria-label={`${clip.name} start`} edge="start" />
+      <TimelineClipHandle aria-label={`${clip.name} end`} edge="end" />
+      <TimelineClipFadeHandle aria-label={`${clip.name} fade in`} edge="in" />
+      <TimelineClipFadeHandle aria-label={`${clip.name} fade out`} edge="out" />
+    </TimelineClip>
   );
 }
 
 /**
  * An arrangement: a bar ruler that seeks on the grid, a loop strip, a lane per
- * track with clips to move and trim, and a playhead following a transport
+ * track with clips to move between tracks, trim and fade, a cursor to put
+ * anywhere on a track and split at, and a playhead following a transport
  * clock. Cmd/Ctrl + scroll zooms around the pointer, and the bar below scrolls
  * and zooms. Made to be opened at full size, where the tracks take the screen.
  */
@@ -175,6 +269,14 @@ export default function BlockTimeline() {
   const zoom = Math.max(zoomed ?? fitPx, fitPx) || 8;
   const [loop, setLoop] = useState<Span>([bars(8), bars(16)]);
   const [clips, setClips] = useState(CLIPS);
+  // One thing is selected at a time: a clip, or a whole track by its header.
+  const [selection, setSelection] = useState<{
+    id: string;
+    kind: "clip" | "track";
+  } | null>(null);
+  const selectedId = selection?.kind === "clip" ? selection.id : null;
+  const selectedTrack = selection?.kind === "track" ? selection.id : null;
+  const pieces = useRef(0);
 
   const togglePlaying = useCallback(
     () => setPlaying((on) => !on),
@@ -194,12 +296,84 @@ export default function BlockTimeline() {
     [fitPx]
   );
   const seek = useCallback((seconds: number) => clock.set(seconds), [clock]);
-  const moveClip = useCallback(
-    (id: string, range: Span) =>
+  const changeClip = useCallback(
+    (id: string, value: TimelinePrimitive.Clip.Value) =>
       setClips((all) =>
-        all.map((clip) => (clip.id === id ? { ...clip, range } : clip))
+        all.map((clip) => (clip.id === id ? { ...clip, value } : clip))
       ),
     []
+  );
+  // A clip dropped on another track moves to it.
+  const commitClip = useCallback(
+    (id: string, details: TimelinePrimitive.Clip.CommitEventDetails) => {
+      const track = details.lane?.dataset.track;
+      if (!track) {
+        return;
+      }
+      setClips((all) =>
+        all.map((clip) =>
+          clip.id === id ? { ...clip, track: track as Arranged["track"] } : clip
+        )
+      );
+    },
+    []
+  );
+  const selectClip = useCallback(
+    (id: string) => setSelection({ id, kind: "clip" }),
+    []
+  );
+  const selectTrack = useCallback(
+    (id: string) => setSelection({ id, kind: "track" }),
+    []
+  );
+  // A press on empty lane puts the cursor there (the lane does it) and leaves the selection alone.
+  // The shortcuts are caught on the panel, so a press on the lane, which takes no focus, hands it over.
+  const panelRef = useRef<HTMLDivElement>(null);
+  const focusPanel = useCallback((event: PointerEvent<HTMLDivElement>) => {
+    if (event.target === event.currentTarget) {
+      panelRef.current?.focus({ focusVisible: false, preventScroll: true });
+    }
+  }, []);
+  const removeClip = useCallback((id: string) => {
+    setClips((all) => all.filter((clip) => clip.id !== id));
+    setSelection((current) => (current?.id === id ? null : current));
+  }, []);
+  // Cuts at the cursor: the selected clip, or every clip of the selected
+  // track that the cursor is over.
+  const splitAtCursor = useCallback(() => {
+    const at = clock.getSnapshot();
+    setClips((all) =>
+      all.flatMap((clip) => {
+        const targeted = clip.id === selectedId || clip.track === selectedTrack;
+        const cut = targeted ? splitClip(clip.value, at, BAR / 4) : null;
+        if (!cut) {
+          return [clip];
+        }
+        pieces.current += 1;
+        return [
+          { ...clip, value: cut[0] },
+          { ...clip, id: `${clip.id}-${pieces.current}`, value: cut[1] },
+        ];
+      })
+    );
+  }, [clock, selectedId, selectedTrack]);
+  // S, or Cmd/Ctrl + E as in Ableton, splits at the cursor; Escape drops the selection.
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLDivElement>) => {
+      if (event.key === "Escape") {
+        setSelection(null);
+        return;
+      }
+      const key = event.key.toLowerCase();
+      const split =
+        (key === "s" && !(event.metaKey || event.ctrlKey || event.altKey)) ||
+        (key === "e" && (event.metaKey || event.ctrlKey));
+      if (split && selection) {
+        event.preventDefault();
+        splitAtCursor();
+      }
+    },
+    [selection, splitAtCursor]
   );
 
   // The grid the lanes draw is the grid everything snaps to.
@@ -211,7 +385,13 @@ export default function BlockTimeline() {
   );
 
   return (
-    <div className="cn-audio-panel flex w-full min-w-0 flex-col gap-4 border bg-card p-4">
+    // biome-ignore lint/a11y/noStaticElementInteractions: the editor's shortcuts, caught from the controls inside it
+    <div
+      className="cn-audio-panel flex w-full min-w-0 flex-col gap-4 border bg-card p-4 outline-none"
+      onKeyDown={handleKeyDown}
+      ref={panelRef}
+      tabIndex={-1}
+    >
       <div className="flex items-center justify-between gap-2">
         <Button
           aria-label={playing ? "Pause" : "Play"}
@@ -226,6 +406,15 @@ export default function BlockTimeline() {
             remixicon={playing ? "RiPauseLine" : "RiPlayLine"}
             tabler={playing ? "IconPlayerPause" : "IconPlayerPlay"}
           />
+        </Button>
+        <Button
+          aria-keyshortcuts="S"
+          disabled={!selection}
+          onClick={splitAtCursor}
+          size="sm"
+          variant="outline"
+        >
+          Split at cursor
         </Button>
         <ButtonGroup>
           <Button
@@ -292,7 +481,11 @@ export default function BlockTimeline() {
               </TimelineRuler>
             </Row>
             <Row
-              lead={<span className="text-muted-foreground text-xs">Loop</span>}
+              lead={
+                <span className="flex items-center px-3 text-muted-foreground text-xs">
+                  Loop
+                </span>
+              }
             >
               <TimelineLane className="h-6 cursor-cell">
                 <TimelineRange
@@ -312,19 +505,37 @@ export default function BlockTimeline() {
               <Row
                 className="flex-1"
                 key={track.id}
-                lead={<span className="font-medium">{track.name}</span>}
+                lead={
+                  <TrackHeader
+                    name={track.name}
+                    onSelect={selectTrack}
+                    selected={track.id === selectedTrack}
+                    trackId={track.id}
+                  />
+                }
               >
                 <TimelineLane
-                  className="h-auto min-h-14 flex-1"
+                  className={
+                    track.id === selectedTrack
+                      ? "h-auto min-h-14 flex-1 bg-muted/40"
+                      : "h-auto min-h-14 flex-1"
+                  }
+                  data-track={track.id}
                   gridStep={snapStep}
+                  onPointerDown={focusPanel}
+                  seekable
                 >
                   {clips
                     .filter((clip) => clip.track === track.id)
                     .map((clip) => (
-                      <ClipRange
+                      <ClipView
                         clip={clip}
                         key={clip.id}
-                        onMove={moveClip}
+                        onChange={changeClip}
+                        onCommit={commitClip}
+                        onRemove={removeClip}
+                        onSelect={selectClip}
+                        selected={clip.id === selectedId}
                         trackName={track.name}
                       />
                     ))}
