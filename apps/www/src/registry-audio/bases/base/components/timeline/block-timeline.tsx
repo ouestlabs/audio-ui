@@ -24,6 +24,7 @@ import { createPortal } from "react-dom";
 import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder";
 import { cn } from "@/registry/bases/base/lib/utils";
 import { Button } from "@/registry/bases/base/ui/button";
+import { ButtonGroup } from "@/registry/bases/base/ui/button-group";
 import { Kbd, KbdGroup } from "@/registry/bases/base/ui/kbd";
 import {
   Popover,
@@ -60,6 +61,17 @@ import {
   TimelineViewport,
 } from "@/registry-audio/bases/base/audio/elements/timeline";
 import { Transport } from "@/registry-audio/bases/base/audio/elements/transport";
+import {
+  beginChange,
+  canRedo,
+  canUndo,
+  emptyHistory,
+  type History,
+  recordChange,
+  redo,
+  settleChange,
+  undo,
+} from "@/registry-audio/bases/base/lib/history";
 import {
   barLabelInterval,
   DEFAULT_TEMPO,
@@ -377,6 +389,8 @@ const SHORTCUTS: { action: string; keys: string[] }[] = [
   { action: "Zoom around the pointer", keys: ["Cmd/Ctrl", "Scroll"] },
   { action: "Resize a track", keys: ["Up", "Down"] },
   { action: "Add a clip to the selection", keys: ["Shift", "Click"] },
+  { action: "Undo", keys: ["Cmd/Ctrl", "Z"] },
+  { action: "Redo", keys: ["Cmd/Ctrl", "Shift", "Z"] },
   { action: "Select every clip", keys: ["Cmd/Ctrl", "A"] },
   { action: "Select by dragging a rectangle", keys: ["Shift", "Drag"] },
   { action: "Clear the selection", keys: ["Esc"] },
@@ -838,6 +852,41 @@ export default function BlockTimeline() {
   const pieces = useRef(0);
   const clipsRef = useRef(clips);
   clipsRef.current = clips;
+  // The history lives in a ref, so two undos in one tick see each other; the flags are what the buttons read.
+  const historyRef = useRef<History<Arranged[]>>(emptyHistory());
+  const [historyFlags, setHistoryFlags] = useState({
+    redo: false,
+    undo: false,
+  });
+  const setHistory = useCallback((next: History<Arranged[]>) => {
+    historyRef.current = next;
+    setHistoryFlags({ redo: canRedo(next), undo: canUndo(next) });
+  }, []);
+  // A change made in one go (delete, split, duplicate): call before it.
+  const recordEdit = useCallback(
+    () => setHistory(recordChange(historyRef.current, clipsRef.current)),
+    [setHistory]
+  );
+  const undoEdit = useCallback(() => {
+    const step = undo(historyRef.current, clipsRef.current);
+    if (!step) {
+      return;
+    }
+    setHistory(step.history);
+    clipsRef.current = step.present;
+    setClips(step.present);
+    setSelection(null);
+  }, [setHistory]);
+  const redoEdit = useCallback(() => {
+    const step = redo(historyRef.current, clipsRef.current);
+    if (!step) {
+      return;
+    }
+    setHistory(step.history);
+    clipsRef.current = step.present;
+    setClips(step.present);
+    setSelection(null);
+  }, [setHistory]);
   // Where a clip dragged with Alt held started: the copy stays there.
   const copyOrigins = useRef<Arranged[] | null>(null);
   // The clip being dragged as a copy, shown while it is: its original stays behind as a ghost.
@@ -883,12 +932,14 @@ export default function BlockTimeline() {
           value: scaleValue(clip.value, ratio),
         }))
       );
+      // The tempo is not in the history, so what came before it no longer fits.
+      setHistory(emptyHistory());
       setLoop(([start, end]) => [start * ratio, end * ratio]);
       setZoom((current) => (current === null ? null : current / ratio));
       clock.set(clock.getSnapshot() * ratio);
       setTempo(next);
     },
-    [clock, tempo]
+    [clock, setHistory, tempo]
   );
   // The zoom as a share of the fitted view: 100% shows everything.
   const zoomRatio = fitPx > 0 ? zoom / fitPx : 1;
@@ -928,6 +979,8 @@ export default function BlockTimeline() {
         );
       }
       const origins = grouped ? groupOrigin.current : null;
+      // The first tick of a gesture keeps what it started from; the commit closes it.
+      setHistory(beginChange(historyRef.current, clipsRef.current));
       setClips((all) =>
         all.map((clip) => {
           if (clip.id === id) {
@@ -947,7 +1000,7 @@ export default function BlockTimeline() {
         })
       );
     },
-    [duration, selectedIds]
+    [duration, selectedIds, setHistory]
   );
   // A clip dropped on another track moves to it.
   const commitClip = useCallback(
@@ -958,6 +1011,7 @@ export default function BlockTimeline() {
       setCopying([]);
       const group = groupOrigin.current;
       groupOrigin.current = null;
+      setHistory(settleChange(historyRef.current));
       const copyIds = origins.map((origin) => {
         pieces.current += 1;
         return `${origin.id}-${pieces.current}`;
@@ -973,7 +1027,7 @@ export default function BlockTimeline() {
         })
       );
     },
-    [duration, selectedIds]
+    [duration, selectedIds, setHistory]
   );
   // A press selects the clip; with Shift or Cmd/Ctrl it is added to the selection, or taken from it.
   // A press on a clip that is already in a selection keeps the selection, so the group can be dragged.
@@ -1008,15 +1062,17 @@ export default function BlockTimeline() {
   const removeClip = useCallback(
     (id: string) => {
       const gone = selectedIds.includes(id) ? selectedIds : [id];
+      recordEdit();
       setClips((all) => all.filter((clip) => !gone.includes(clip.id)));
       setSelection(null);
     },
-    [selectedIds]
+    [recordEdit, selectedIds]
   );
   // Cuts at the cursor: the selected clip, or every clip of the selected
   // track that the cursor is over.
   const splitAtCursor = useCallback(() => {
     const at = clock.getSnapshot();
+    recordEdit();
     setClips((all) =>
       all.flatMap((clip) => {
         const targeted =
@@ -1032,7 +1088,7 @@ export default function BlockTimeline() {
         ];
       })
     );
-  }, [bar, clock, selectedIds, selectedTrack]);
+  }, [bar, clock, recordEdit, selectedIds, selectedTrack]);
   const addLocator = useCallback(() => {
     const at = clock.getSnapshot();
     setLocators((all) =>
@@ -1116,6 +1172,7 @@ export default function BlockTimeline() {
           }),
         };
       });
+      recordEdit();
       setClips((all) =>
         copies.reduce((laid, copy) => lay(laid, copy, duration), all)
       );
@@ -1127,7 +1184,7 @@ export default function BlockTimeline() {
           ?.scrollIntoView({ block: "nearest", inline: "nearest" });
       });
     },
-    [duration]
+    [duration, recordEdit]
   );
   /** Cmd/Ctrl + A selects every clip, Cmd/Ctrl + D duplicates the selection; returns whether the key was one of these. */
   const handleSelectionKey = useCallback(
@@ -1135,6 +1192,15 @@ export default function BlockTimeline() {
       const key = event.key.toLowerCase();
       if (!(event.metaKey || event.ctrlKey)) {
         return false;
+      }
+      if (key === "z" || key === "y") {
+        event.preventDefault();
+        if (key === "y" || event.shiftKey) {
+          redoEdit();
+        } else {
+          undoEdit();
+        }
+        return true;
       }
       if (key === "a") {
         event.preventDefault();
@@ -1154,7 +1220,7 @@ export default function BlockTimeline() {
       }
       return false;
     },
-    [duplicateSelection, selectedIds]
+    [duplicateSelection, redoEdit, selectedIds, undoEdit]
   );
   // S, or Cmd/Ctrl + E, splits at the cursor, Cmd/Ctrl + D duplicates the clip; Escape drops the selection.
   const handleKeyDown = useCallback(
@@ -1229,6 +1295,38 @@ export default function BlockTimeline() {
           tempo={tempo}
         />
         <div className="flex items-center gap-2">
+          <ButtonGroup>
+            <Button
+              aria-label="Undo"
+              disabled={!historyFlags.undo}
+              onClick={undoEdit}
+              size="icon"
+              variant="outline"
+            >
+              <IconPlaceholder
+                hugeicons="Undo02Icon"
+                lucide="Undo2Icon"
+                phosphor="ArrowUUpLeftIcon"
+                remixicon="RiArrowGoBackLine"
+                tabler="IconArrowBackUp"
+              />
+            </Button>
+            <Button
+              aria-label="Redo"
+              disabled={!historyFlags.redo}
+              onClick={redoEdit}
+              size="icon"
+              variant="outline"
+            >
+              <IconPlaceholder
+                hugeicons="Redo02Icon"
+                lucide="Redo2Icon"
+                phosphor="ArrowUUpRightIcon"
+                remixicon="RiArrowGoForwardLine"
+                tabler="IconArrowForwardUp"
+              />
+            </Button>
+          </ButtonGroup>
           <Popover>
             <PopoverTrigger
               render={

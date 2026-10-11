@@ -79,6 +79,21 @@ export const lib: RegistryItem[] = [
     categories: ["lib", "audio", "timeline"],
     dependencies: [],
     description:
+      "Undo and redo as a value: a pure history of any document, with bursts (a drag is one entry), redo that drops on a new change, and a depth limit",
+    files: [
+      {
+        path: "lib/history.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "history",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "timeline"],
+    dependencies: [],
+    description:
       "Framework-free musical time, bars and beats against seconds, fixed and zoom-adaptive grid divisions with triplets, ruler label spacing, and bar/beat readouts",
     files: [
       {
