@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  adjacentPoint,
   coverClips,
   createSource,
   duplicateClip,
@@ -276,6 +277,11 @@ const SHORTCUTS: { action: string; keys: string[] }[] = [
   { action: "Split at the cursor", keys: ["Cmd/Ctrl", "E"] },
   { action: "Duplicate the clip", keys: ["Cmd/Ctrl", "D"] },
   { action: "Remove the clip", keys: ["Delete"] },
+  { action: "Add a locator at the cursor", keys: ["M"] },
+  {
+    action: "Jump to the previous or next locator",
+    keys: ["Alt", "Left", "Right"],
+  },
   { action: "Nudge a clip or an edge", keys: ["Left", "Right"] },
   { action: "Nudge further", keys: ["Shift", "Left", "Right"] },
   { action: "Copy a clip while dragging", keys: ["Alt", "Drag"] },
@@ -284,6 +290,42 @@ const SHORTCUTS: { action: string; keys: string[] }[] = [
   { action: "Resize a track", keys: ["Up", "Down"] },
   { action: "Clear the selection", keys: ["Esc"] },
 ];
+
+/** A locator: press it to put the cursor there, Delete takes it away. */
+function LocatorButton({
+  at,
+  index,
+  onJump,
+  onRemove,
+}: {
+  at: number;
+  index: number;
+  onJump: (at: number) => void;
+  onRemove: (at: number) => void;
+}) {
+  const handleClick = useCallback(() => onJump(at), [at, onJump]);
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLButtonElement>) => {
+      if (event.key === "Delete" || event.key === "Backspace") {
+        event.preventDefault();
+        event.stopPropagation();
+        onRemove(at);
+      }
+    },
+    [at, onRemove]
+  );
+  return (
+    <button
+      aria-label={`Locator ${index + 1}`}
+      className="pointer-events-auto flex h-full items-center gap-1 border-primary border-s-2 ps-1 pe-2 text-primary text-xs outline-none hover:bg-primary/10 focus-visible:ring-2 focus-visible:ring-ring"
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
+      type="button"
+    >
+      {index + 1}
+    </button>
+  );
+}
 
 const MIN_TRACK_HEIGHT = 40;
 const MAX_TRACK_HEIGHT = 240;
@@ -478,6 +520,8 @@ export default function BlockTimeline() {
   );
   const [loop, setLoop] = useState<Span>([bars(8), bars(16)]);
   const [looping, setLooping] = useState(true);
+  // Locators: named points to jump to, kept in seconds at the tempo they were set.
+  const [locators, setLocators] = useState<number[]>([bars(4), bars(20)]);
   const [metronome, setMetronome] = useState(false);
   const { clock, playing, setPlaying } = usePlaybackClock({
     duration,
@@ -638,6 +682,46 @@ export default function BlockTimeline() {
       })
     );
   }, [bar, clock, selectedId, selectedTrack]);
+  const addLocator = useCallback(() => {
+    const at = clock.getSnapshot();
+    setLocators((all) => (all.includes(at) ? all : [...all, at]));
+  }, [clock]);
+  const jumpToLocator = useCallback((at: number) => clock.set(at), [clock]);
+  const removeLocator = useCallback(
+    (at: number) => setLocators((all) => all.filter((point) => point !== at)),
+    []
+  );
+
+  /** M adds a locator, Alt + arrows jump between them; returns whether the key was one of these. */
+  const handleLocatorKey = useCallback(
+    (event: KeyboardEvent<HTMLDivElement>) => {
+      if (
+        event.key.toLowerCase() === "m" &&
+        !(event.metaKey || event.ctrlKey || event.altKey)
+      ) {
+        event.preventDefault();
+        addLocator();
+        return true;
+      }
+      const direction = { ArrowLeft: -1, ArrowRight: 1 }[event.key];
+      if (!(event.altKey && direction)) {
+        return false;
+      }
+      const target = adjacentPoint(
+        locators,
+        clock.getSnapshot(),
+        direction === 1 ? 1 : -1
+      );
+      if (target === null) {
+        return false;
+      }
+      event.preventDefault();
+      event.stopPropagation();
+      clock.set(target);
+      return true;
+    },
+    [addLocator, clock, locators]
+  );
   // S, or Cmd/Ctrl + E, splits at the cursor, Cmd/Ctrl + D duplicates the clip; Escape drops the selection.
   const handleKeyDown = useCallback(
     (event: KeyboardEvent<HTMLDivElement>) => {
@@ -646,6 +730,9 @@ export default function BlockTimeline() {
         return;
       }
       const key = event.key.toLowerCase();
+      if (handleLocatorKey(event)) {
+        return;
+      }
       const clip = clipsRef.current.find((item) => item.id === selectedId);
       if (key === "d" && (event.metaKey || event.ctrlKey) && clip) {
         event.preventDefault();
@@ -676,7 +763,7 @@ export default function BlockTimeline() {
         splitAtCursor();
       }
     },
-    [duration, selectedId, selection, splitAtCursor]
+    [duration, handleLocatorKey, selectedId, selection, splitAtCursor]
   );
 
   // The grid the lanes draw is the grid everything snaps to.
@@ -815,6 +902,26 @@ export default function BlockTimeline() {
                 ))}
                 <TimelinePlayhead />
               </TimelineRuler>
+            </Row>
+            <Row
+              lead={
+                <span className="flex items-center px-3 text-muted-foreground text-xs">
+                  Locators
+                </span>
+              }
+            >
+              <TimelineLane className="h-6">
+                {locators.map((at, index) => (
+                  <TimelineMark key={at} value={at}>
+                    <LocatorButton
+                      at={at}
+                      index={index}
+                      onJump={jumpToLocator}
+                      onRemove={removeLocator}
+                    />
+                  </TimelineMark>
+                ))}
+              </TimelineLane>
             </Row>
             <Row
               lead={

@@ -17,3 +17,4 @@ export {
   trimClipEnd,
   trimClipStart,
 } from "../primitives/timeline/clip";
+export { adjacentPoint } from "../primitives/timeline/locators";

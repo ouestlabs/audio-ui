@@ -27,4 +27,5 @@ export {
 } from "./entries/timeline";
 export { Waveform } from "./entries/waveform";
 export { XYPad } from "./entries/xypad";
+export { adjacentPoint } from "./primitives/timeline/locators";
 export { createSource, type Source, type WritableSource } from "./source";
