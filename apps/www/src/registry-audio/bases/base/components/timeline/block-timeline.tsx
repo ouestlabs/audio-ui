@@ -1284,7 +1284,7 @@ export default function BlockTimeline() {
               className="sticky bottom-0 z-30 border-foreground/25 border-b bg-background"
               lead={
                 <Button
-                  className="m-1 w-full justify-start gap-1.5"
+                  className="m-1 min-w-0 flex-1 justify-start gap-1.5"
                   onClick={handleAddTrack}
                   size="sm"
                   variant="ghost"
