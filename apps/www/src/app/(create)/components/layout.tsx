@@ -4,13 +4,13 @@ import { ComponentsProvider } from "@/app/(create)/components/components/compone
 import { DesignSystemProvider } from "@/app/(create)/customizer/design-system-provider";
 import { LocksProvider } from "@/app/(create)/hooks/use-locks";
 import { CREATE_PREVIEW_FONTS_ATTR } from "@/app/(create)/lib/fonts";
+import { FramedLayoutSkeleton } from "@/components/framed-skeleton";
 import { GridSkeleton } from "@/components/grid-skeleton";
 import {
   SiteBarContent,
   SiteHeader,
   SiteSidebarHeader,
 } from "@/components/site-header";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   getCategories,
   getTotalComponentCount,
@@ -35,18 +35,9 @@ const createPreviewFontAttrs = {
 
 function ComponentsLayoutFallback() {
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
-      <div className="sticky top-(--header-height) z-20 flex h-12 items-center gap-2 border-site-border/80 border-b bg-site-background px-6 sm:px-8 xl:px-10">
-        <Skeleton className="h-9 flex-1" />
-        <Skeleton className="size-8 shrink-0" />
-        <Skeleton className="size-8 shrink-0" />
-      </div>
-      <GridSkeleton
-        className="px-6 py-6 sm:px-8 xl:px-10"
-        count={8}
-        showHeader={false}
-      />
-    </div>
+    <FramedLayoutSkeleton>
+      <GridSkeleton count={4} />
+    </FramedLayoutSkeleton>
   );
 }
 

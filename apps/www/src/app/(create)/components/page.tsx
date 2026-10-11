@@ -60,15 +60,7 @@ export default function ComponentsPage() {
           </p>
         </div>
       </section>
-      <Suspense
-        fallback={
-          <GridSkeleton
-            className="px-6 py-6 sm:px-8 xl:px-10"
-            count={allCatalogItems.length}
-            showHeader={false}
-          />
-        }
-      >
+      <Suspense fallback={<GridSkeleton count={allCatalogItems.length} />}>
         <ComponentPreviewView catalogItems={allCatalogItems} />
       </Suspense>
       <ComponentCategorySeoContent seo={indexSeo} />

@@ -3,6 +3,7 @@ import { DesignSystemProvider } from "@/app/(create)/customizer/design-system-pr
 import { LocksProvider } from "@/app/(create)/hooks/use-locks";
 import { DocsSidebar } from "@/components/docs-sidebar";
 import { FramedLayout } from "@/components/framed-layout";
+import { FramedLayoutSkeleton } from "@/components/framed-skeleton";
 import { SiteFooter } from "@/components/site-footer";
 import {
   SiteBarContent,
@@ -19,7 +20,7 @@ export default function RootAppLayout({
   return (
     <div className="lg:[--header-height:0px]">
       <SiteHeader framed />
-      <Suspense fallback={<div className="h-svh" />}>
+      <Suspense fallback={<FramedLayoutSkeleton />}>
         <LocksProvider>
           <DesignSystemProvider>
             <FramedLayout

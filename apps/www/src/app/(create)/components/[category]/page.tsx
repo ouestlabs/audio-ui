@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { GridSkeleton } from "@/components/grid-skeleton";
 import { JsonLd } from "@/components/json-ld";
-import { Spinner } from "@/components/ui/spinner";
 import { siteConfig } from "@/lib/config";
 import {
   getCategoryInfo,
@@ -20,14 +20,6 @@ import {
 } from "../components/component-category-seo-content";
 import { ComponentDocsLink } from "../components/component-docs-link";
 import { CategoryPageContent } from "./category-page-content";
-
-function ComponentPreviewSkeleton() {
-  return (
-    <div className="flex min-h-[60svh] items-center justify-center">
-      <Spinner className="size-5 opacity-60" />
-    </div>
-  );
-}
 
 // Fully static, search filtering happens client-side in ComponentGrid
 export const dynamic = "force-static";
@@ -135,7 +127,7 @@ export default async function CategoryComponentsPage({
           {seo.intro ? <ComponentCategoryHeroIntro intro={seo.intro} /> : null}
         </div>
       </section>
-      <Suspense fallback={<ComponentPreviewSkeleton />}>
+      <Suspense fallback={<GridSkeleton count={4} />}>
         <CategoryPageContent catalogItems={catalogItems} />
       </Suspense>
       <ComponentCategorySeoContent seo={seo} />
