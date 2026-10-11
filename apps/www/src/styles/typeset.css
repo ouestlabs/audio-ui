@@ -396,6 +396,7 @@
     }
     &:where(.typeset-scroll table) {
       width: max-content;
+      min-width: 100%;
       max-width: none;
     }
     &:where(thead th) {
