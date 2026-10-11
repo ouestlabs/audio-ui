@@ -55,14 +55,14 @@ function PianoRollViewport({
   return (
     <TimelinePrimitive.Viewport
       className={cn(
-        "relative min-h-0 flex-1 overflow-y-auto overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+        "relative flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
         className
       )}
       data-slot="piano-roll-viewport"
       {...props}
     >
       {/* As wide as the lanes, so the sticky keys stay put however far it scrolls. */}
-      <div className="flex min-h-full w-max min-w-full flex-col">
+      <div className="flex min-h-full w-max min-w-full flex-1 flex-col">
         {children}
       </div>
     </TimelinePrimitive.Viewport>

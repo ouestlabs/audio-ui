@@ -1,10 +1,11 @@
 "use client";
 
-import { ArrowsOutSimpleIcon } from "@phosphor-icons/react/ssr";
+import { ArrowsOutSimpleIcon, XIcon } from "@phosphor-icons/react/ssr";
 import type * as React from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogTitle,
@@ -42,14 +43,29 @@ export function ExpandPreview({
         }
       />
       <DialogContent
-        className="h-[94vh] w-[96vw] max-w-[96vw] overflow-hidden p-0 sm:max-w-[96vw]"
-        showCloseButton
+        className="top-0 left-0 h-dvh w-screen max-w-none translate-x-0 translate-y-0 gap-0 overflow-hidden rounded-none p-0 ring-0 sm:max-w-none"
+        showCloseButton={false}
       >
-        <DialogTitle className="sr-only">{label}</DialogTitle>
+        <div className="flex h-10 shrink-0 items-center justify-between border-b ps-4 pe-2">
+          <DialogTitle className="font-mono text-muted-foreground text-xs">
+            {label}
+          </DialogTitle>
+          <DialogClose
+            render={
+              <Button aria-label="Close" size="icon-sm" variant="ghost" />
+            }
+          >
+            <XIcon aria-hidden="true" />
+          </DialogClose>
+        </div>
         <DialogDescription className="sr-only">
           The preview at full size.
         </DialogDescription>
-        <div className="flex size-full items-center justify-center overflow-auto p-8 font-sans">
+        {/* The block takes the whole of what is left, as if it were the page: a panel fills it, and what has a height of its own gives it back to the editor. */}
+        <div
+          className="h-[calc(100dvh-2.5rem)] overflow-auto font-sans [&>.cn-audio-panel]:min-h-full [&>.cn-audio-panel]:rounded-none [&>.cn-audio-panel]:border-0 [&_[data-slot=piano-roll]]:h-auto [&_[data-slot=piano-roll]]:min-h-0 [&_[data-slot=piano-roll]]:flex-1 [&_[data-slot=timeline]]:flex [&_[data-slot=timeline]]:min-h-0 [&_[data-slot=timeline]]:flex-1 [&_[data-slot=timeline]]:flex-col"
+          data-expanded-preview
+        >
           {children}
         </div>
       </DialogContent>
