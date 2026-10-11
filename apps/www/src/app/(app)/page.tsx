@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { ComponentRenderer } from "@/app/(create)/components/components/component-card-container";
 import { buildPageMetadata } from "@/lib/seo";
 
-import { HomeHero } from "./components/home-hero";
+import { HomeHero } from "@/components/home-hero";
 
 const title = "audio/ui – Audio UI Components for React";
 const description =

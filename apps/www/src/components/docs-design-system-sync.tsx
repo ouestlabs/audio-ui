@@ -34,11 +34,12 @@ function syncBodyStyleClass(styleClass: string) {
   }
 }
 
-export function DocsDesignSystemSync({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+/**
+ * Applies the stored design system (style, theme, fonts, radius, menu) to the
+ * pages that do not read the URL. It renders nothing and wraps nothing, so the
+ * page around it is rendered on the server as it is.
+ */
+export function DocsDesignSystemEffects() {
   const [config] = useConfig();
   useMenuColor(config.menuColor);
   const previousStyleClassesRef = React.useRef<string[] | null>(null);
@@ -192,9 +193,5 @@ export function DocsDesignSystemSync({
     []
   );
 
-  return (
-    <div className="flex flex-1 flex-col" suppressHydrationWarning>
-      {children}
-    </div>
-  );
+  return null;
 }

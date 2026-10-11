@@ -9,6 +9,7 @@ import {
 } from "../../internal/event-details";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { isReleased } from "../../internal/pointer";
+import { useLocale } from "../../internal/use-locale";
 import { VISUALLY_HIDDEN } from "../../internal/visually-hidden";
 import { type PlotAxis, positionOn, usePlotContext, valueOn } from "../context";
 
@@ -20,9 +21,9 @@ const LARGE_KEY_STEP = 0.1;
 /** Shift slows a drag down to this share of the pointer's travel. */
 const FINE_DRAG = 0.25;
 
-const defaultFormat = new Intl.NumberFormat(undefined, {
+const DEFAULT_FORMAT_OPTIONS: Intl.NumberFormatOptions = {
   maximumFractionDigits: 2,
-});
+};
 
 interface DragGesture {
   changed: boolean;
@@ -56,6 +57,11 @@ function clampPoint(value: Point, x: PlotAxis, y: PlotAxis): Point {
  * Renders a `<div>` element.
  */
 export function Handle(componentProps: Handle.Props) {
+  const locale = useLocale();
+  const defaultFormat = React.useMemo(
+    () => new Intl.NumberFormat(locale, DEFAULT_FORMAT_OPTIONS),
+    [locale]
+  );
   const {
     "aria-describedby": ariaDescribedBy,
     "aria-label": ariaLabel,

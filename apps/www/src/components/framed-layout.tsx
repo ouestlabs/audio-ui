@@ -1,7 +1,7 @@
 "use client";
 
 import { SidebarIcon, SlidersHorizontalIcon } from "@phosphor-icons/react/ssr";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import {
   CustomizerContext,
   type CustomizerContextValue,
@@ -10,6 +10,7 @@ import {
 import { CustomizerPanel } from "@/app/(create)/components/components/customizer-panel";
 import { useIsDesktopCustomizer } from "@/app/(create)/components/components/use-is-desktop-customizer";
 import { Frame, FrameContent, FrameHeader } from "@/components/custom/frame";
+import { CustomizerSkeleton } from "@/components/framed-skeleton";
 import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
 import { Separator } from "@/components/ui/separator";
@@ -270,7 +271,10 @@ export function FramedLayout({
             {footer}
           </Frame>
         </InsetPane>
-        <CustomizerPanel variant="sidebar" />
+        {/* The choices read the URL: their own boundary keeps the page around them rendered. */}
+        <Suspense fallback={<CustomizerSkeleton />}>
+          <CustomizerPanel variant="sidebar" />
+        </Suspense>
       </SidebarProvider>
     </CustomizerContext>
   );

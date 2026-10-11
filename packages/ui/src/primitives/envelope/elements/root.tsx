@@ -9,6 +9,7 @@ import {
 } from "../../internal/event-details";
 import { createPairFormatter } from "../../internal/format-pair";
 import { type PartProps, resolveStyling } from "../../internal/part";
+import { useLocale } from "../../internal/use-locale";
 import {
   EnvelopeContext,
   type EnvelopeContextValue,
@@ -290,9 +291,10 @@ export function Root(componentProps: Root.Props) {
   );
 
   const graphRef = React.useRef<SVGSVGElement>(null);
+  const resolvedLocale = useLocale(locale);
   const formatPoint = React.useMemo(
-    () => createPairFormatter(new Intl.NumberFormat(locale, format)),
-    [format, locale]
+    () => createPairFormatter(new Intl.NumberFormat(resolvedLocale, format)),
+    [format, resolvedLocale]
   );
 
   const state = React.useMemo<Root.State>(

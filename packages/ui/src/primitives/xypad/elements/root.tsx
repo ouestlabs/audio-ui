@@ -10,6 +10,7 @@ import {
 } from "../../internal/event-details";
 import { createPairFormatter } from "../../internal/format-pair";
 import { type PartProps, resolveStyling } from "../../internal/part";
+import { useLocale } from "../../internal/use-locale";
 import { XYPadContext, type XYPadContextValue } from "../context";
 import { STATE_ATTRIBUTES_MAPPING, toPercent } from "../internal/shared";
 
@@ -134,9 +135,10 @@ export function Root(componentProps: Root.Props) {
 
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [labelId, setLabelId] = React.useState<string>();
+  const resolvedLocale = useLocale(locale);
   const formatter = React.useMemo(
-    () => new Intl.NumberFormat(locale, format),
-    [format, locale]
+    () => new Intl.NumberFormat(resolvedLocale, format),
+    [format, resolvedLocale]
   );
   const formatPair = React.useMemo(
     () => createPairFormatter(formatter),

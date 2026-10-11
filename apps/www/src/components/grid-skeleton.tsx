@@ -1,6 +1,7 @@
 "use client";
 
 import { Frame, FrameContent, FrameFooter } from "@/components/custom/frame";
+import { PreviewLoading } from "@/components/preview-frame";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
@@ -17,7 +18,7 @@ export function GridSkeleton({ count = 6, className }: GridSkeletonProps) {
         {Array.from({ length: count }).map((_, index) => (
           <Frame key={index}>
             <FrameContent className="flex min-h-60 items-center justify-center p-4">
-              <Skeleton className="h-6 w-3/4" />
+              <PreviewLoading />
             </FrameContent>
             <FrameFooter className="flex-row items-center gap-3 px-2 py-1.5">
               <Skeleton className="h-4 w-32" />

@@ -125,14 +125,13 @@ export function DesignSystemSyncProvider({
  * Applies design system styles (CSS classes, CSS variables, fonts) to the page.
  * Same-origin embed messaging remains supported for legacy preview hosts.
  */
-export function DesignSystemProvider({
-  children,
-  fallback = null,
-}: {
-  children: React.ReactNode;
-  /** What stands in until the design system is applied: never a blank page. */
-  fallback?: React.ReactNode;
-}) {
+/**
+ * Applies the design system (style, theme, fonts, radius, menu) to the page,
+ * from the URL first and the stored choices after. It renders nothing and
+ * wraps nothing: it sits beside the page, in a boundary of its own, because
+ * reading the URL must not take the page's content with it.
+ */
+export function DesignSystemEffects() {
   const [params, setParams] = useDesignSystemSearchParams({
     history: "replace",
     shallow: true,
@@ -470,40 +469,5 @@ export function DesignSystemProvider({
 
   useMenuColor(menuColor);
 
-  const contextValue = React.useMemo(
-    () => ({
-      baseColor,
-      chartColor,
-      font,
-      fontHeading,
-      iconLibrary,
-      menuAccent,
-      menuColor,
-      radius,
-      style,
-      theme,
-    }),
-    [
-      style,
-      theme,
-      font,
-      fontHeading,
-      chartColor,
-      baseColor,
-      menuAccent,
-      menuColor,
-      radius,
-      iconLibrary,
-    ]
-  );
-
-  if (!isReady) {
-    return fallback;
-  }
-
-  return (
-    <DesignSystemContext.Provider value={contextValue}>
-      {children}
-    </DesignSystemContext.Provider>
-  );
+  return null;
 }

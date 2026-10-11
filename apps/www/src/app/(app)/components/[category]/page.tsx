@@ -13,12 +13,12 @@ import { getComponentCategorySeo } from "@/lib/registry-seo-cache";
 import { buildBreadcrumbJsonLd, buildPageMetadata } from "@/lib/seo";
 import { normalizeSlug } from "@/lib/utils";
 
-import { ComponentCategoryPager } from "../components/component-category-pager";
+import { ComponentCategoryPager } from "@/app/(create)/components/components/component-category-pager";
 import {
   ComponentCategoryHeroIntro,
   ComponentCategorySeoContent,
-} from "../components/component-category-seo-content";
-import { ComponentDocsLink } from "../components/component-docs-link";
+} from "@/app/(create)/components/components/component-category-seo-content";
+import { ComponentDocsLink } from "@/app/(create)/components/components/component-docs-link";
 import { CategoryPageContent } from "./category-page-content";
 
 // Fully static, search filtering happens client-side in ComponentGrid

@@ -2,6 +2,7 @@ import { mergeProps } from "@base-ui/react/merge-props";
 import { useRender } from "@base-ui/react/use-render";
 import * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part";
+import { useLocale } from "../../internal/use-locale";
 import { MeterContext, type MeterContextValue } from "../context";
 import { type LevelScale, levelPosition } from "../internal/scale";
 import {
@@ -41,9 +42,10 @@ export function Root(componentProps: Root.Props) {
     ...elementProps
   } = componentProps;
 
+  const resolvedLocale = useLocale(locale);
   const formatter = React.useMemo(
-    () => new Intl.NumberFormat(locale, format),
-    [format, locale]
+    () => new Intl.NumberFormat(resolvedLocale, format),
+    [format, resolvedLocale]
   );
   const position = React.useMemo(
     () => levelPosition(scale, min, max),

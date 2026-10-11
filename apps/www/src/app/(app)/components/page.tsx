@@ -7,8 +7,8 @@ import { getTotalComponentCount, searchCatalog } from "@/lib/registry";
 import { getComponentIndexSeo } from "@/lib/registry-seo-cache";
 import { buildBreadcrumbJsonLd, buildPageMetadata } from "@/lib/seo";
 
-import { ComponentCategorySeoContent } from "./components/component-category-seo-content";
-import { ComponentPreviewView } from "./components/component-preview-view";
+import { ComponentCategorySeoContent } from "@/app/(create)/components/components/component-category-seo-content";
+import { ComponentPreviewView } from "@/app/(create)/components/components/component-preview-view";
 
 // Fully static, ?search= filtering happens client-side
 export const dynamic = "force-static";

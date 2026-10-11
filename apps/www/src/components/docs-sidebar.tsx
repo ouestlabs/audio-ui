@@ -3,8 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  Sidebar,
-  SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -52,25 +50,17 @@ function DocsUpdateIndicator({ path }: { path: string }) {
   );
 }
 
-export function DocsSidebar({
-  header,
+/** The docs' links, by section: the list a sidebar shows on the docs and on the home. */
+export function DocsNavigation({
   tree,
-  ...props
-}: React.ComponentProps<typeof Sidebar> & {
-  /** At the top of the sidebar, above what scrolls. */
-  header?: React.ReactNode;
+}: {
   tree: ReturnType<typeof source.getPageTree>;
 }) {
   const pathname = usePathname();
   const currentBase = getCurrentBase(pathname);
 
   return (
-    <Sidebar
-      className="docs-sidebar top-(--header-height) z-30 h-[calc(100svh-var(--header-height))] bg-transparent group-data-[side=left]:border-r-0 **:data-[slot=sidebar-inner]:bg-transparent"
-      {...props}
-    >
-      {header}
-      <SidebarContent className="no-scrollbar scroll-fade-y overflow-x-hidden px-2 pb-12">
+    <div className="no-scrollbar scroll-fade-y min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-2 pb-12">
         <div className="h-(--top-spacing) shrink-0" />
         {tree.children.map((item) => {
           if (EXCLUDED_SECTIONS.includes(item.$id ?? "")) {
@@ -129,7 +119,6 @@ export function DocsSidebar({
             </SidebarGroup>
           );
         })}
-      </SidebarContent>
-    </Sidebar>
+    </div>
   );
 }

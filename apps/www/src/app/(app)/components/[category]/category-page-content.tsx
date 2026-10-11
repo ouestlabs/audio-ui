@@ -1,7 +1,7 @@
 "use client";
 
-import { ComponentPreviewView } from "../components/component-preview-view";
-import type { CatalogItem } from "../types";
+import { ComponentPreviewView } from "@/app/(create)/components/components/component-preview-view";
+import type { CatalogItem } from "@/app/(create)/components/types";
 
 interface CategoryPageContentProps {
   catalogItems: CatalogItem[];

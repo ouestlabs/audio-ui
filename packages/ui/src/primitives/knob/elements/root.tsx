@@ -12,6 +12,7 @@ import {
   resolveScale,
 } from "../../internal/parameter-scale";
 import { type PartProps, resolveStyling } from "../../internal/part";
+import { useLocale } from "../../internal/use-locale";
 import { KnobContext, type KnobContextValue } from "../context";
 import {
   START_ANGLE,
@@ -131,9 +132,10 @@ export function Root(componentProps: Root.Props) {
   const inputRef = React.useRef<HTMLInputElement>(null);
   const inputId = React.useId();
   const [labelId, setLabelId] = React.useState<string>();
+  const resolvedLocale = useLocale(locale);
   const formatter = React.useMemo(
-    () => new Intl.NumberFormat(locale, format),
-    [format, locale]
+    () => new Intl.NumberFormat(resolvedLocale, format),
+    [format, resolvedLocale]
   );
 
   const state = React.useMemo<Root.State>(
