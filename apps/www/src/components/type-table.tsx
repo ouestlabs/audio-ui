@@ -182,7 +182,7 @@ export function TypeRow(props: TypeRowProps) {
       >
         <CaretRightIcon
           aria-hidden="true"
-          className="mt-1 size-3.5 shrink-0 text-site-muted-foreground transition-transform duration-150 group-data-[panel-open]:rotate-90 motion-reduce:transition-none"
+          className="mt-1 size-3.5 shrink-0 text-site-muted-foreground transition-transform duration-150 ease-out group-data-[panel-open]:rotate-90 motion-reduce:transition-none"
         />
         {label}
         {defaultValue ? (

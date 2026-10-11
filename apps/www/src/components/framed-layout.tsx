@@ -186,13 +186,13 @@ export function FramedLayout({
           // biome-ignore lint/security/noDangerouslySetInnerHtml: no animation until the stored layout is applied.
           dangerouslySetInnerHTML={{
             __html:
-              "[data-framed-layout] * { transition-duration: 0s !important; }",
+              "[data-framed-layout] * { transition-duration: 0s !important; animation-duration: 0s !important; }",
           }}
         />
       )}
       {/* The inset stays in the viewport: the page scrolls inside it, under the bar. */}
       <SidebarProvider
-        className="bordered-sidebar h-[calc(100svh-var(--header-height))] min-h-0 flex-none items-stretch gap-0 px-0 [--sidebar-width:15rem] [--top-spacing:0] **:data-[slot=sidebar-gap]:transition-none"
+        className="bordered-sidebar h-[calc(100svh-var(--header-height))] min-h-0 flex-none items-stretch gap-0 px-0 [--sidebar-width:15rem] [--top-spacing:0] **:data-[slot=sidebar-gap]:transition-none **:data-[slot=sidebar-container]:duration-250"
         data-framed-layout=""
         onOpenChange={setNavigationOpen}
         open={navigationOpen}

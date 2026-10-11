@@ -48,7 +48,14 @@ function CustomizerPanelSidebar() {
       )}
       ref={anchorRef}
     >
-      <div className="flex h-full w-64 flex-col">
+      {/* The width changes at once, so the page is laid out once; what is shown eases in. */}
+      <div
+        className={cn(
+          "flex h-full w-64 flex-col",
+          customizerOpen &&
+            "fade-in-0 slide-in-from-right-4 animate-in duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:animate-none"
+        )}
+      >
         <CustomizerSidebarContent anchorRef={anchorRef} isMobile={false} />
       </div>
     </aside>
