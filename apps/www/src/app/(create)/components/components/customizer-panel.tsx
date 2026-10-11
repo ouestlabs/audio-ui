@@ -49,7 +49,6 @@ function CustomizerPanelSidebar() {
       ref={anchorRef}
     >
       <div className="flex h-full w-64 flex-col">
-        <CustomizerSidebarHeader />
         <CustomizerSidebarContent anchorRef={anchorRef} isMobile={false} />
       </div>
     </aside>

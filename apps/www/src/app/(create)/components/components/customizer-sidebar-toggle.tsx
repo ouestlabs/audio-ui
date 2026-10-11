@@ -13,7 +13,7 @@ import {
 import { useCustomizer } from "./components-context";
 
 export function CustomizerSidebarToggle() {
-  const { customizerOpen, toggleCustomizer } = useCustomizer();
+  const { toggleCustomizer } = useCustomizer();
 
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -36,26 +36,23 @@ export function CustomizerSidebarToggle() {
     return () => document.removeEventListener("keydown", down);
   }, [toggleCustomizer]);
 
-  if (customizerOpen) {
-    return null;
-  }
-
   return (
     <Tooltip>
       <TooltipTrigger
         render={
           <Button
-            className="hidden lg:inline-flex"
+            aria-label="Customize"
+            className="hidden text-site-muted-foreground lg:inline-flex"
             onClick={toggleCustomizer}
+            size="icon"
             variant="outline"
           >
-            <SlidersHorizontalIcon className="size-4" weight="bold" />
-            Customize
+            <SlidersHorizontalIcon aria-hidden />
           </Button>
         }
       />
-      <TooltipContent className="flex items-center gap-2" side="right">
-        Open customizer
+      <TooltipContent className="flex items-center gap-2" side="bottom">
+        Customize
         <Kbd>C</Kbd>
       </TooltipContent>
     </Tooltip>

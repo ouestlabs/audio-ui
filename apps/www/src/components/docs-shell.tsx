@@ -123,7 +123,7 @@ export function DocsShell({
     <LocksProvider>
       <CustomizerContext value={value}>
         {/* The inset stays in the viewport: the page scrolls inside it, under the header. */}
-        <SidebarProvider className="bordered-sidebar bg-site-background h-[calc(100svh-var(--header-height))] min-h-0 flex-none items-stretch gap-0 px-0 [--sidebar-width:15rem] [--top-spacing:0]">
+        <SidebarProvider className="bordered-sidebar h-[calc(100svh-var(--header-height))] min-h-0 flex-none items-stretch gap-0 px-0 [--sidebar-width:15rem] [--top-spacing:0]">
           {/* Below lg the navigation is the header's menu. */}
           <div className="hidden lg:contents">{nav}</div>
           <InsetPane>
@@ -131,17 +131,28 @@ export function DocsShell({
               {/* The bar of the inset: the customizer's button sits here, in the page, not over it. */}
               <FrameHeader className="min-h-11 shrink-0 flex-row items-center justify-between gap-2 px-2 py-1.5">
                 <NavigationToggle />
-                <Button
-                  aria-expanded={customizerOpen}
-                  aria-label="Customize"
-                  onClick={toggleCustomizer}
-                  size="sm"
-                  variant="outline"
-                >
-                  <SlidersHorizontalIcon aria-hidden weight="bold" />
-                  <span className="hidden sm:inline">Customize</span>
-                  <Kbd className="hidden sm:inline-flex">C</Kbd>
-                </Button>
+                <Tooltip>
+                  <TooltipTrigger
+                    render={
+                      <Button
+                        aria-expanded={customizerOpen}
+                        aria-label="Customize"
+                        className="text-site-muted-foreground"
+                        onClick={toggleCustomizer}
+                        size="icon"
+                        variant="outline"
+                      >
+                        <SlidersHorizontalIcon aria-hidden />
+                      </Button>
+                    }
+                  />
+                  <TooltipContent
+                    className="flex items-center gap-2"
+                    side="bottom"
+                  >
+                    Customize <Kbd>C</Kbd>
+                  </TooltipContent>
+                </Tooltip>
               </FrameHeader>
               {/* The panel: the page, scrolling under the header. */}
               <FrameContent className="flex min-h-0 flex-1 flex-col">
