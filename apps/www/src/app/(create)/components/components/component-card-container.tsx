@@ -13,7 +13,8 @@ interface ComponentCardContainerProps {
   block?: boolean;
   children: React.ReactNode;
   className?: string;
-  footer: React.ReactNode;
+  /** The bar above the panel: what it is and what to do with it. */
+  header: React.ReactNode;
   isFullWidth?: boolean;
 }
 
@@ -77,13 +78,14 @@ export function ComponentName({ name }: { name: string }) {
 
 export function ComponentCardContainer({
   children,
-  footer,
+  header,
   className,
   isFullWidth,
   block = false,
 }: ComponentCardContainerProps) {
   return (
     <Frame className={cn(isFullWidth && "md:col-span-2", className)}>
+      {header}
       <PreviewPanel block={block}>
         <React.Suspense
           fallback={
@@ -95,7 +97,6 @@ export function ComponentCardContainer({
           {children}
         </React.Suspense>
       </PreviewPanel>
-      {footer}
     </Frame>
   );
 }
