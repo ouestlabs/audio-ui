@@ -8,7 +8,7 @@ MCP is an open protocol that lets AI agents use tools. The audio/ui MCP server g
 The server is remote, needs no account and no install:
 
 ```
-https://audio-ui.xyz/mcp
+https://audio-ui.dev/mcp
 ```
 
 ## Connect your client
@@ -16,15 +16,16 @@ https://audio-ui.xyz/mcp
 <Tabs defaultValue="claude">
 
 <TabsList>
-  <TabsTrigger value="claude">Claude Code</TabsTrigger>
-  <TabsTrigger value="cursor">Cursor</TabsTrigger>
+  <TabsTrigger value="claude"><Icons.claude /> Claude Code</TabsTrigger>
+  <TabsTrigger value="cursor"><Icons.cursor /> Cursor</TabsTrigger>
+  <TabsTrigger value="vscode"><Icons.vscode /> VS Code</TabsTrigger>
   <TabsTrigger value="other">Other</TabsTrigger>
 </TabsList>
 
 <TabsContent value="claude">
 
 ```bash
-claude mcp add --transport http audio-ui https://audio-ui.xyz/mcp
+claude mcp add --transport http audio-ui https://audio-ui.dev/mcp
 ```
 
 </TabsContent>
@@ -37,7 +38,24 @@ Add this to `.cursor/mcp.json`:
 {
   "mcpServers": {
     "audio-ui": {
-      "url": "https://audio-ui.xyz/mcp"
+      "url": "https://audio-ui.dev/mcp"
+    }
+  }
+}
+```
+
+</TabsContent>
+
+<TabsContent value="vscode">
+
+Add this to `.vscode/mcp.json`:
+
+```json
+{
+  "servers": {
+    "audio-ui": {
+      "type": "http",
+      "url": "https://audio-ui.dev/mcp"
     }
   }
 }

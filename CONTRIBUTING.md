@@ -329,7 +329,7 @@ bun run icons:build
 bun run lint:fix
 ```
 
-`registry:build` pre-compiles every item for every style into `public/r/styles/`, which is what `https://audio-ui.xyz/r/...` serves from the CDN.
+`registry:build` pre-compiles every item for every style into `public/r/styles/`, which is what `https://audio-ui.dev/r/...` serves from the CDN.
 
 > **Maintainers only:** `bun run registry:sync` re-syncs `src/registry/` from upstream shadcn-ui/ui and rebuilds icons. `src/registry/` is edited by hand now, so a sync overwrites those edits and brings back what was removed (such as Radix). Run it on purpose only.
 
@@ -372,7 +372,7 @@ This project uses **Biome via Ultracite**. Run `npx ultracite fix` before commit
 ## Getting Help
 
 - Browse existing blocks and demos in `apps/www/src/registry-audio/bases/base/components/` for patterns
-- Read docs at [https://audio-ui.xyz](https://audio-ui.xyz/docs)
+- Read docs at [https://audio-ui.dev](https://audio-ui.dev/docs)
 - Open an issue on [GitHub](https://github.com/ouestlabs/audio-ui/issues)
 
 Thank you for contributing to `audio/ui`!

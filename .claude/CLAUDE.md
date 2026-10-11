@@ -2,8 +2,8 @@
 
 **audio/ui** is an open-source library of accessible, composable Audio UI components for React, built on top of [shadcn/ui](https://ui.shadcn.com/), designed to be copied, pasted, and owned.
 
-- Site: https://audio-ui.xyz · Repo: https://github.com/ouestlabs/audio-ui
-- Registry endpoint: `https://audio-ui.xyz/r/{style}/{name}.json`
+- Site: https://audio-ui.dev · Repo: https://github.com/ouestlabs/audio-ui
+- Registry endpoint: `https://audio-ui.dev/r/{style}/{name}.json`
 
 ---
 

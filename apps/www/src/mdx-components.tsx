@@ -11,7 +11,7 @@ import { CopyButton } from "@/components/copy-button";
 import { Frame, FrameContent } from "@/components/custom/frame";
 import { DocsComponentPreview } from "@/components/docs-component-preview";
 import { DocsComponentSource } from "@/components/docs-component-source";
-import { getIconForLanguageExtension } from "@/components/icons";
+import { getIconForLanguageExtension, Icons } from "@/components/icons";
 import { Mermaid } from "@/components/mermaid";
 import { KeyRow, KeyTable, TypeRow, TypeTable } from "@/components/type-table";
 import {
@@ -137,6 +137,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     h4: (props: React.ComponentProps<"h4">) => <h4 {...props} />,
     h5: (props: React.ComponentProps<"h5">) => <h5 {...props} />,
     h6: (props: React.ComponentProps<"h6">) => <h6 {...props} />,
+    Icons,
     Image: ({
       src,
       className,

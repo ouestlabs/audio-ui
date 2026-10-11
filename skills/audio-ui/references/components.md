@@ -1,6 +1,6 @@
 # Components
 
-Install any of these with `npx shadcn@latest add @audio/<name>` (registry) or import the primitive from `@audio-ui/react`. Docs: `https://audio-ui.xyz/docs/components/base/<name>`.
+Install any of these with `npx shadcn@latest add @audio/<name>` (registry) or import the primitive from `@audio-ui/react`. Docs: `https://audio-ui.dev/docs/components/base/<name>`.
 
 ## Controls
 
@@ -32,4 +32,4 @@ Install any of these with `npx shadcn@latest add @audio/<name>` (registry) or im
 
 ## Ready blocks
 
-`npx shadcn@latest add @audio/block-<name>` installs a composed screen. Available today: `block-pocket-synth`, `block-wave-shaper`, `block-waveform-player`, `block-piano-roll`, `block-timeline`. The full catalog (with demos) is at https://audio-ui.xyz/components, or ask the MCP `search_catalog` tool.
+`npx shadcn@latest add @audio/block-<name>` installs a composed screen. Available today: `block-pocket-synth`, `block-wave-shaper`, `block-waveform-player`, `block-piano-roll`, `block-timeline`. The full catalog (with demos) is at https://audio-ui.dev/components, or ask the MCP `search_catalog` tool.

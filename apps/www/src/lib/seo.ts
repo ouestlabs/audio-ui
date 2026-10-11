@@ -14,7 +14,7 @@ const CANONICAL_COMPONENT_DOC_SLUGS = [
 ] as const;
 
 const TRAILING_SLASH_REGEX = /\/$/;
-// Accidental env concat (e.g. https://audio-ui.xyzhttps://other.example)
+// Accidental env concat (e.g. https://audio-ui.devhttps://other.example)
 const DOUBLE_ORIGIN_REGEX = /^(https?:\/\/[^/]+)(https?:\/\/)/i;
 
 function normalizeSiteUrl(url: string) {
@@ -24,7 +24,7 @@ function normalizeSiteUrl(url: string) {
       ? trimmed
       : `https://${trimmed}`;
 
-  // Accidental env concat (e.g. https://audio-ui.xyzhttps://other.example) → first origin only
+  // Accidental env concat (e.g. https://audio-ui.devhttps://other.example) → first origin only
   const m = withProtocol.match(DOUBLE_ORIGIN_REGEX);
   if (m) {
     return m[1].replace(TRAILING_SLASH_REGEX, "");
