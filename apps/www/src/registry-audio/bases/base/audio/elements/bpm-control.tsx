@@ -1,7 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useId, useState } from "react";
+import { NumberField } from "@base-ui/react/number-field";
+import { useCallback, useId } from "react";
 import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder";
+import { cn } from "@/registry/bases/base/lib/utils";
 import {
   InputGroup,
   InputGroupAddon,
@@ -12,8 +14,145 @@ import {
 const DEFAULT_MIN_BPM = 20;
 const DEFAULT_MAX_BPM = 200;
 
-function clamp(value: number, min: number, max: number): number {
-  return Math.min(max, Math.max(min, value));
+/** Whole beats per minute, whatever the field is typed or stepped to. */
+const WHOLE: Intl.NumberFormatOptions = { maximumFractionDigits: 0 };
+
+/** Enter commits what is typed: the field commits when it loses focus. */
+function commitOnEnter(event: React.KeyboardEvent<HTMLInputElement>) {
+  if (event.key === "Enter") {
+    event.currentTarget.blur();
+  }
+}
+
+interface NumberStepperProps {
+  className?: string;
+  /** Names the step-down button. */
+  decrementLabel: string;
+  /** How the value is shown and parsed. */
+  format?: Intl.NumberFormatOptions;
+  /** Names the step-up button. */
+  incrementLabel: string;
+  /** The text the field is dragged by: drag it sideways to scrub the value. */
+  label: string;
+  /** Step of the Page keys and Shift + arrows. */
+  largeStep?: number;
+  max: number;
+  min: number;
+  onValueChange: (value: number) => void;
+  step?: number;
+  value: number;
+}
+
+/**
+ * A labeled stepper: a number field between a decrement and an increment
+ * button, controlled by `value`. Dragging the label scrubs the value. Typing
+ * is held in the field until it is committed (Enter or leaving it), so a
+ * half-typed number never reaches `onValueChange`; the buttons, the arrow keys
+ * and the Page keys step it, and the wheel never does.
+ */
+export function NumberStepper({
+  className,
+  decrementLabel,
+  format = WHOLE,
+  incrementLabel,
+  label,
+  largeStep = 10,
+  max,
+  min,
+  onValueChange,
+  step = 1,
+  value,
+}: NumberStepperProps) {
+  const labelId = useId();
+  const handleValueChange = useCallback(
+    (
+      next: number | null,
+      eventDetails: NumberField.Root.ChangeEventDetails
+    ) => {
+      // While it is being typed the field keeps its own text.
+      if (
+        next === null ||
+        eventDetails.reason === "input-change" ||
+        eventDetails.reason === "input-clear"
+      ) {
+        return;
+      }
+      if (next !== value) {
+        onValueChange(next);
+      }
+    },
+    [onValueChange, value]
+  );
+
+  return (
+    <NumberField.Root
+      className={cn("flex items-center gap-4", className)}
+      format={format}
+      largeStep={largeStep}
+      max={max}
+      min={min}
+      onValueChange={handleValueChange}
+      step={step}
+      value={value}
+    >
+      <NumberField.ScrubArea className="cursor-ew-resize select-none">
+        <span className="text-muted-foreground text-xs" id={labelId}>
+          {label}
+        </span>
+        <NumberField.ScrubAreaCursor className="drop-shadow-sm">
+          <IconPlaceholder
+            className="size-5"
+            hugeicons="ArrowLeftRightIcon"
+            lucide="MoveHorizontalIcon"
+            phosphor="ArrowsHorizontalIcon"
+            remixicon="RiArrowLeftRightLine"
+            tabler="IconArrowsHorizontal"
+          />
+        </NumberField.ScrubAreaCursor>
+      </NumberField.ScrubArea>
+      <NumberField.Group render={<InputGroup className="w-32" />}>
+        <InputGroupAddon align="inline-start">
+          <NumberField.Decrement
+            render={
+              <InputGroupButton aria-label={decrementLabel} size="icon-xs" />
+            }
+          >
+            <IconPlaceholder
+              hugeicons="MinusSignIcon"
+              lucide="Minus"
+              phosphor="MinusIcon"
+              remixicon="RiSubtractLine"
+              tabler="IconMinus"
+            />
+          </NumberField.Decrement>
+        </InputGroupAddon>
+        <NumberField.Input
+          render={
+            <InputGroupInput
+              aria-labelledby={labelId}
+              className="text-center"
+              onKeyDown={commitOnEnter}
+            />
+          }
+        />
+        <InputGroupAddon align="inline-end">
+          <NumberField.Increment
+            render={
+              <InputGroupButton aria-label={incrementLabel} size="icon-xs" />
+            }
+          >
+            <IconPlaceholder
+              hugeicons="PlusSignIcon"
+              lucide="Plus"
+              phosphor="PlusIcon"
+              remixicon="RiAddLine"
+              tabler="IconPlus"
+            />
+          </NumberField.Increment>
+        </InputGroupAddon>
+      </NumberField.Group>
+    </NumberField.Root>
+  );
 }
 
 interface BpmControlProps {
@@ -23,117 +162,22 @@ interface BpmControlProps {
   value: number;
 }
 
-/** A labeled BPM stepper, a decrement/increment `InputGroup` around a numeric field, synced to an external controlled `value`. Typed input is held in a local draft until blur/Enter so mid-typing states (an empty field, a partial number) never get clamped away on every keystroke. */
+/** A BPM stepper: whole beats per minute, from 20 to 200 unless told otherwise. */
 export function BpmControl({
   max = DEFAULT_MAX_BPM,
   min = DEFAULT_MIN_BPM,
   onValueChange,
   value,
 }: BpmControlProps) {
-  const inputId = useId();
-  const labelId = useId();
-  const [draft, setDraft] = useState(String(value));
-
-  useEffect(() => {
-    setDraft(String(value));
-  }, [value]);
-
-  const handleInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setDraft(e.target.value);
-    },
-    []
-  );
-
-  const commitDraft = useCallback(() => {
-    const parsed = Number(draft);
-    // Leaving the field with what it already shows changes nothing.
-    if (draft.trim() === "" || Number.isNaN(parsed)) {
-      setDraft(String(value));
-      return;
-    }
-    const next = clamp(parsed, min, max);
-    if (next !== value) {
-      onValueChange(next);
-    }
-    setDraft(String(next));
-  }, [draft, max, min, onValueChange, value]);
-
-  // The wheel over a focused number field would step it: a scroll must never change the tempo.
-  const handleWheel = useCallback(
-    (e: React.WheelEvent<HTMLInputElement>) => e.currentTarget.blur(),
-    []
-  );
-
-  const handleInputKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === "Enter") {
-        e.currentTarget.blur();
-      }
-    },
-    []
-  );
-
-  const handleDecrement = useCallback(() => {
-    onValueChange(clamp(value - 1, min, max));
-  }, [max, min, onValueChange, value]);
-
-  const handleIncrement = useCallback(() => {
-    onValueChange(clamp(value + 1, min, max));
-  }, [max, min, onValueChange, value]);
-
   return (
-    <div aria-label="BPM" className="flex items-center gap-4" role="group">
-      <span className="text-muted-foreground text-xs" id={labelId}>
-        BPM
-      </span>
-      <InputGroup>
-        <InputGroupAddon align="inline-start">
-          <InputGroupButton
-            aria-label="Decrease BPM"
-            onClick={handleDecrement}
-            size="icon-xs"
-          >
-            <IconPlaceholder
-              hugeicons="MinusSignIcon"
-              lucide="Minus"
-              phosphor="MinusIcon"
-              remixicon="RiSubtractLine"
-              tabler="IconMinus"
-            />
-          </InputGroupButton>
-        </InputGroupAddon>
-        <InputGroupInput
-          aria-labelledby={labelId}
-          className="[appearance:textfield] text-center [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-          id={inputId}
-          inputMode="numeric"
-          max={max}
-          min={min}
-          onBlur={commitDraft}
-          onChange={handleInputChange}
-          onKeyDown={handleInputKeyDown}
-          onWheel={handleWheel}
-          step={1}
-          type="number"
-          value={draft}
-        />
-        <InputGroupAddon align="inline-end">
-          <InputGroupButton
-            aria-label="Increase BPM"
-            onClick={handleIncrement}
-            size="icon-xs"
-          >
-            <IconPlaceholder
-              hugeicons="PlusSignIcon"
-              lucide="Plus"
-              phosphor="PlusIcon"
-              remixicon="RiAddLine"
-              tabler="IconPlus"
-            />
-          </InputGroupButton>
-        </InputGroupAddon>
-      </InputGroup>
-    </div>
+    <NumberStepper
+      decrementLabel="Decrease BPM"
+      incrementLabel="Increase BPM"
+      label="BPM"
+      max={max}
+      min={min}
+      onValueChange={onValueChange}
+      value={value}
+    />
   );
 }

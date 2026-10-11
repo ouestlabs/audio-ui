@@ -13,13 +13,11 @@ import {
   useCallback,
   useEffect,
   useLayoutEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
 import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder";
 import { Button } from "@/registry/bases/base/ui/button";
-import { ButtonGroup } from "@/registry/bases/base/ui/button-group";
 import { Kbd, KbdGroup } from "@/registry/bases/base/ui/kbd";
 import {
   Popover,
@@ -37,6 +35,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/registry/bases/base/ui/select";
+import { NumberStepper } from "@/registry-audio/bases/base/audio/elements/bpm-control";
 import {
   Timeline,
   TimelineClip,
@@ -62,6 +61,7 @@ import {
   type GridDivision,
   gridInterval,
   secondsPerBar,
+  type Tempo,
 } from "@/registry-audio/bases/base/lib/musical-time";
 
 const BARS = 32;
@@ -70,7 +70,11 @@ const BAR = secondsPerBar(DEFAULT_TEMPO);
 /** The width of a track header, which the lanes start after. */
 const LEAD_PX = 112;
 const MAX_ZOOM = 240;
-const ZOOM_STEP = 1.5;
+/** How the zoom is shown: as a share of the fitted view. */
+const PERCENT: Intl.NumberFormatOptions = {
+  maximumFractionDigits: 0,
+  style: "percent",
+};
 
 const bars = (count: number) => count * BAR;
 
@@ -415,8 +419,7 @@ function ClipView({
  * and zooms. Made to be opened at full size, where the tracks take the screen.
  */
 export default function BlockTimeline() {
-  const [bpm, setBpm] = useState(DEFAULT_TEMPO.bpm);
-  const tempo = useMemo(() => ({ ...DEFAULT_TEMPO, bpm }), [bpm]);
+  const [tempo, setTempo] = useState<Tempo>(DEFAULT_TEMPO);
   const bar = secondsPerBar(tempo);
   const duration = BARS * bar;
   const describe = useCallback(
@@ -425,7 +428,7 @@ export default function BlockTimeline() {
   );
   const [loop, setLoop] = useState<Span>([bars(8), bars(16)]);
   const [looping, setLooping] = useState(true);
-  const [recording, setRecording] = useState(false);
+  const [metronome, setMetronome] = useState(false);
   const { clock, playing, setPlaying } = usePlaybackClock({
     duration,
     loop,
@@ -473,13 +476,17 @@ export default function BlockTimeline() {
     []
   );
 
-  const play = useCallback(() => setPlaying(true), [setPlaying]);
-  const stop = useCallback(() => setPlaying(false), [setPlaying]);
-  const returnToStart = useCallback(() => clock.set(0), [clock]);
+  const playPause = useCallback(() => setPlaying((on) => !on), [setPlaying]);
+  // Stop goes back to the top, as a DAW's does.
+  const stop = useCallback(() => {
+    setPlaying(false);
+    clock.set(0);
+  }, [clock, setPlaying]);
   // A tempo change keeps the musical positions: everything is rescaled to the new bar.
-  const changeBpm = useCallback(
-    (next: number) => {
-      const ratio = bpm / next;
+  const changeTempo = useCallback(
+    (next: Tempo) => {
+      // New bar over old: a clip three bars long stays three bars long.
+      const ratio = secondsPerBar(next) / secondsPerBar(tempo);
       setClips((all) =>
         all.map((clip) => ({
           ...clip,
@@ -490,21 +497,15 @@ export default function BlockTimeline() {
       setLoop(([start, end]) => [start * ratio, end * ratio]);
       setZoom((current) => (current === null ? null : current / ratio));
       clock.set(clock.getSnapshot() * ratio);
-      setBpm(next);
+      setTempo(next);
     },
-    [bpm, clock]
+    [clock, tempo]
   );
-  const zoomOut = useCallback(
-    () =>
-      setZoom((current) => {
-        const next = (current ?? fitPx) / ZOOM_STEP;
-        return next <= fitPx ? null : next;
-      }),
-    [fitPx]
-  );
-  const zoomIn = useCallback(
-    () =>
-      setZoom((current) => Math.min(MAX_ZOOM, (current ?? fitPx) * ZOOM_STEP)),
+  // The zoom as a share of the fitted view: 100% shows everything.
+  const zoomRatio = fitPx > 0 ? zoom / fitPx : 1;
+  const maxRatio = fitPx > 0 ? MAX_ZOOM / fitPx : 1;
+  const changeZoom = useCallback(
+    (ratio: number) => setZoom(ratio <= 1 ? null : ratio * fitPx),
     [fitPx]
   );
   const seek = useCallback((seconds: number) => clock.set(seconds), [clock]);
@@ -642,21 +643,19 @@ export default function BlockTimeline() {
       ref={panelRef}
       tabIndex={-1}
     >
-      <div className="flex flex-wrap items-center justify-between gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-2 p-1">
         <Transport
-          bpm={bpm}
           className="w-auto"
           looping={looping}
-          onBpmChange={changeBpm}
+          metronome={metronome}
           onLoopingChange={setLooping}
-          onPlay={play}
-          onRecordingChange={setRecording}
-          onReturn={returnToStart}
+          onMetronomeChange={setMetronome}
+          onPlayPause={playPause}
           onStop={stop}
+          onTempoChange={changeTempo}
           playing={playing}
-          recording={recording}
           source={clock}
-          tempo={DEFAULT_TEMPO}
+          tempo={tempo}
         />
         <div className="flex items-center gap-2">
           <Popover>
@@ -708,7 +707,7 @@ export default function BlockTimeline() {
             onValueChange={handleDivision}
             value={division}
           >
-            <SelectTrigger aria-label="Grid" className="w-40" size="sm">
+            <SelectTrigger aria-label="Grid" className="w-40">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -721,38 +720,18 @@ export default function BlockTimeline() {
               </SelectGroup>
             </SelectContent>
           </Select>
-          <ButtonGroup>
-            <Button
-              aria-label="Zoom out"
-              disabled={zoomed === null}
-              onClick={zoomOut}
-              size="icon"
-              variant="outline"
-            >
-              <IconPlaceholder
-                hugeicons="ZoomOutAreaIcon"
-                lucide="ZoomOutIcon"
-                phosphor="MagnifyingGlassMinusIcon"
-                remixicon="RiZoomOutLine"
-                tabler="IconZoomOut"
-              />
-            </Button>
-            <Button
-              aria-label="Zoom in"
-              disabled={zoom >= MAX_ZOOM}
-              onClick={zoomIn}
-              size="icon"
-              variant="outline"
-            >
-              <IconPlaceholder
-                hugeicons="ZoomInAreaIcon"
-                lucide="ZoomInIcon"
-                phosphor="MagnifyingGlassPlusIcon"
-                remixicon="RiZoomInLine"
-                tabler="IconZoomIn"
-              />
-            </Button>
-          </ButtonGroup>
+          <NumberStepper
+            decrementLabel="Zoom out"
+            format={PERCENT}
+            incrementLabel="Zoom in"
+            label="Zoom"
+            largeStep={1}
+            max={maxRatio}
+            min={1}
+            onValueChange={changeZoom}
+            step={0.25}
+            value={zoomRatio}
+          />
         </div>
       </div>
       <Timeline

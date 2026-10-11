@@ -3,24 +3,27 @@
 import { createSource } from "@audio-ui/react";
 import { useCallback, useEffect, useState } from "react";
 import { Transport } from "@/registry-audio/bases/base/audio/elements/transport";
-import { secondsPerBar } from "@/registry-audio/bases/base/lib/musical-time";
+import {
+  DEFAULT_TEMPO,
+  secondsPerBar,
+  type Tempo,
+} from "@/registry-audio/bases/base/lib/musical-time";
 
-const TIME_SIGNATURE = { beatsPerBar: 4, beatUnit: 4 };
 const LOOP_BARS = 4;
 
-/** The transport of a DAW, with a clock standing in for the engine: play, stop, return, loop four bars, and change the tempo. */
+/** The transport of a DAW, with a clock standing in for the engine: play or pause, stop, loop four bars, tick the metronome, and change the tempo or the signature. */
 export default function TransportDemo() {
   const [position] = useState(() => createSource(0));
   const [playing, setPlaying] = useState(false);
-  const [recording, setRecording] = useState(false);
   const [looping, setLooping] = useState(true);
-  const [bpm, setBpm] = useState(120);
+  const [metronome, setMetronome] = useState(true);
+  const [tempo, setTempo] = useState<Tempo>(DEFAULT_TEMPO);
 
   useEffect(() => {
     if (!playing) {
       return;
     }
-    const loopEnd = LOOP_BARS * secondsPerBar({ ...TIME_SIGNATURE, bpm });
+    const loopEnd = LOOP_BARS * secondsPerBar(tempo);
     let frame = 0;
     let last = performance.now();
     const tick = (now: number) => {
@@ -34,27 +37,28 @@ export default function TransportDemo() {
     };
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
-  }, [bpm, looping, playing, position]);
+  }, [looping, playing, position, tempo]);
 
-  const play = useCallback(() => setPlaying(true), []);
-  const stop = useCallback(() => setPlaying(false), []);
-  const returnToStart = useCallback(() => position.set(0), [position]);
+  const playPause = useCallback(() => setPlaying((on) => !on), []);
+  // Stop goes back to the top, as a DAW's does.
+  const stop = useCallback(() => {
+    setPlaying(false);
+    position.set(0);
+  }, [position]);
 
   return (
     <div className="w-full">
       <Transport
-        bpm={bpm}
         looping={looping}
-        onBpmChange={setBpm}
+        metronome={metronome}
         onLoopingChange={setLooping}
-        onPlay={play}
-        onRecordingChange={setRecording}
-        onReturn={returnToStart}
+        onMetronomeChange={setMetronome}
+        onPlayPause={playPause}
         onStop={stop}
+        onTempoChange={setTempo}
         playing={playing}
-        recording={recording}
         source={position}
-        tempo={TIME_SIGNATURE}
+        tempo={tempo}
       />
     </div>
   );

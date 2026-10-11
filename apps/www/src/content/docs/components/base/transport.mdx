@@ -1,6 +1,6 @@
 ---
 title: Transport
-description: The transport of a DAW, with return to start, play, stop, record and loop, the position in bars and beats, and the tempo.
+description: The transport of a DAW as joined clusters, play or pause and stop with the position in bars, beats and sixteenths, loop and metronome toggles, and the tempo with the time signature.
 component: true
 base: base
 ---
@@ -56,31 +56,29 @@ npm install @audio-ui/react
 import { Transport } from "@/components/audio/elements/transport";
 
 <Transport
-  bpm={bpm}
   looping={looping}
-  onBpmChange={setBpm}
+  metronome={metronome}
   onLoopingChange={setLooping}
-  onPlay={() => engine.play()}
-  onRecordingChange={setRecording}
-  onReturn={() => engine.seek(0)}
+  onMetronomeChange={setMetronome}
+  onPlayPause={() => (playing ? engine.pause() : engine.play())}
   onStop={() => engine.stop()}
+  onTempoChange={setTempo}
   playing={playing}
-  recording={recording}
   source={position} // seconds, a live value
+  tempo={tempo} // { bpm, beatsPerBar, beatUnit }
 />;
 ```
 
-Play, record and loop are toggle buttons (`aria-pressed`), so they show when they are on; return to start and stop act once. The position reads `bar.beat.sixteenth`, counted from the tempo and the time signature (`tempo`, 4/4 by default).
+The bar is three clusters joined at their seams, with gaps between clusters and never inside one: play or pause (the one filled button), stop and the position; the loop and the metronome; the tempo and the time signature. The position is three labelled figures, bar, beat and 16th, counted from `tempo` and written to the page as `source` moves, so a playing transport does not re-render. Loop and metronome are filled when on and outlined when off (`aria-pressed`), so the state is not carried by color alone; the metronome's two dots take the beat in turn. The tempo is a number field: type it and press Enter, step it with the arrow keys and the Page keys, or drag the `BPM` unit sideways to scrub it; the wheel never changes it. The loop, the metronome and the tempo clusters show only when you give their handlers.
 
 ## API reference
 
 <TypeTable>
 <TypeRow name={"source"} type={"{ getSnapshot, subscribe }"}>The playback position in seconds, a live value.</TypeRow>
-<TypeRow name={"bpm, onBpmChange"} type={"number, (bpm) => void"}>The tempo.</TypeRow>
-<TypeRow name={"tempo"} type={"{ beatsPerBar, beatUnit }"}>The time signature the position is counted in. Defaults to 4/4.</TypeRow>
-<TypeRow name={"playing, onPlay"} type={"boolean, () => void"}>Play is pressed while it plays.</TypeRow>
+<TypeRow name={"tempo"} type={"{ bpm, beatsPerBar, beatUnit }"}>The tempo and the time signature the position is counted in.</TypeRow>
+<TypeRow name={"onTempoChange"} type={"(tempo) => void"}>The tempo or the signature was changed. Leave it out for a fixed tempo.</TypeRow>
+<TypeRow name={"playing, onPlayPause"} type={"boolean, () => void"}>Whether it plays, and play or pause was pressed.</TypeRow>
 <TypeRow name={"onStop"} type={"() => void"}>Stop was pressed.</TypeRow>
-<TypeRow name={"onReturn"} type={"() => void"}>Return to start was pressed.</TypeRow>
-<TypeRow name={"recording, onRecordingChange"} type={"boolean, (recording) => void"}>Armed to record.</TypeRow>
 <TypeRow name={"looping, onLoopingChange"} type={"boolean, (looping) => void"}>Whether the loop is on.</TypeRow>
+<TypeRow name={"metronome, onMetronomeChange"} type={"boolean, (metronome) => void"}>Whether the metronome is on.</TypeRow>
 </TypeTable>

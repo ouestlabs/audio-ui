@@ -284,7 +284,7 @@ export const components: RegistryItem[] = [
   {
     categories: ["timeline"],
     description:
-      "An arrangement timeline made for a whole screen: a bar ruler that seeks on the grid, a loop strip, a lane per track with clips to move between tracks, trim and fade on the grid, a cursor to put anywhere on a track, and a split at the cursor, a transport with play, stop, record, loop and a tempo that keeps the arrangement's musical positions, a playhead following its clock, and a navigator to zoom and scroll, open it at full size and the tracks take the screen",
+      "An arrangement timeline made for a whole screen: a bar ruler that seeks on the grid, a loop strip, a lane per track with clips to move between tracks, trim and fade on the grid, a cursor to put anywhere on a track, and a split at the cursor, a transport with play or pause, stop, loop, a metronome and a tempo and signature that keep the arrangement's musical positions, a playhead following its clock, and a navigator to zoom and scroll, open it at full size and the tracks take the screen",
     files: [
       {
         path: "components/timeline/block-timeline.tsx",
@@ -298,9 +298,9 @@ export const components: RegistryItem[] = [
     registryDependencies: [
       "@audio/timeline",
       "@audio/transport",
+      "@audio/bpm-control",
       "@audio/musical-time",
       "@shadcn/button",
-      "@shadcn/button-group",
       "@shadcn/kbd",
       "@shadcn/popover",
       "@shadcn/select",
@@ -434,7 +434,7 @@ export const components: RegistryItem[] = [
   {
     categories: ["transport"],
     description:
-      "The transport of a DAW: return to start, play, stop, record and loop, the position in bars and beats, and the tempo. A clock stands in for the engine",
+      "The transport of a DAW as joined clusters: play or pause, stop and the position in bars, beats and sixteenths; loop and metronome toggles; the tempo and the time signature. A clock stands in for the engine",
     files: [
       {
         path: "components/transport/transport-demo.tsx",
