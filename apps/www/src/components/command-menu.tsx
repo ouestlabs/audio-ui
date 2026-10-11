@@ -1,6 +1,5 @@
 "use client";
 
-import type { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
 import {
   ArrowBendDownLeftIcon,
   BookIcon,
@@ -13,7 +12,6 @@ import { useRouter } from "next/navigation";
 import * as React from "react";
 import { copyToClipboardWithMeta } from "@/components/copy-button";
 import { Button } from "@/components/ui/button";
-import { ButtonGroup } from "@/components/ui/button-group";
 import {
   Command,
   CommandEmpty,
@@ -65,8 +63,7 @@ export function CommandMenu({
   groups,
   navItems,
   componentCategories = NO_COMPONENT_CATEGORIES,
-  ...props
-}: DialogPrimitive.Root.Props & {
+}: {
   groups: CommandMenuGroup[];
   navItems?: { href: string; label: string; soon?: boolean }[];
   componentCategories?: CategoryInfo[];
@@ -169,17 +166,18 @@ export function CommandMenu({
       <DialogTrigger
         nativeButton={false}
         render={
-          <ButtonGroup onClick={() => setOpen(true)} {...props}>
-            <Button size="icon" variant="secondary">
-              <MagnifyingGlassIcon className="shrink-0 opacity-60" />
-            </Button>
-            <Button className="px-1" variant="secondary">
-              <KbdGroup>
-                <Kbd className="border">{isMac ? "⌘" : "Ctrl"}</Kbd>
-                <Kbd className="border">K</Kbd>
-              </KbdGroup>
-            </Button>
-          </ButtonGroup>
+          <Button
+            aria-label="Search"
+            className="justify-between gap-2 pr-1.5"
+            onClick={() => setOpen(true)}
+            variant="secondary"
+          >
+            <MagnifyingGlassIcon aria-hidden className="shrink-0 opacity-60" />
+            <KbdGroup>
+              <Kbd className="border">{isMac ? "⌘" : "Ctrl"}</Kbd>
+              <Kbd className="border">K</Kbd>
+            </KbdGroup>
+          </Button>
         }
       />
       <DialogContent

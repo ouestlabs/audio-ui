@@ -1,6 +1,6 @@
 "use client";
 
-import { BookOpenIcon, CubeIcon } from "@phosphor-icons/react/ssr";
+import { BookOpenTextIcon, CubeIcon } from "@phosphor-icons/react/ssr";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -8,7 +8,7 @@ import { isActive } from "@/lib/utils";
 
 const ICONS: Record<string, typeof CubeIcon> = {
   "/components": CubeIcon,
-  "/docs": BookOpenIcon,
+  "/docs": BookOpenTextIcon,
 };
 
 /** The site's sections as tabs: the active one follows the page. */
