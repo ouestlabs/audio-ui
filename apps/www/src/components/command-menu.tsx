@@ -7,6 +7,7 @@ import {
   DiamondsFourIcon,
   MagnifyingGlassIcon,
   SquaresFourIcon,
+  XIcon,
 } from "@phosphor-icons/react/ssr";
 import { useRouter } from "next/navigation";
 import * as React from "react";
@@ -22,6 +23,7 @@ import {
 } from "@/components/ui/command";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogHeader,
@@ -144,7 +146,8 @@ export function CommandMenu({
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if ((e.key === "k" && (e.metaKey || e.ctrlKey)) || e.key === "/") {
-        if (isEditableTarget(e.target)) {
+        // The menu is mounted in several places (header, sidebar, bar): the first to hear the key opens its own, the others leave it.
+        if (e.defaultPrevented || isEditableTarget(e.target)) {
           return;
         }
 
@@ -187,6 +190,12 @@ export function CommandMenu({
           <DialogTitle>Search...</DialogTitle>
           <DialogDescription>Search for a command to run...</DialogDescription>
         </DialogHeader>
+        {/* On a phone the dialog covers the screen, with no backdrop to tap: a title bar, and a way out after the field in the tab order. */}
+        <div className="flex h-9 items-center ps-2 sm:hidden">
+          <span aria-hidden className="font-medium text-sm">
+            Search
+          </span>
+        </div>
         <Command
           filter={(value, search, keywords) => {
             const extendValue = `${value} ${keywords?.join(" ") || ""}`;
@@ -222,7 +231,7 @@ export function CommandMenu({
                     }}
                     value={`Navigation ${item.label}`}
                   >
-                    <BookOpenIcon weight="duotone" />
+                    <BookOpenIcon weight="fill" />
                     <span
                       className={cn(
                         "min-w-0 flex-1 truncate",
@@ -259,9 +268,9 @@ export function CommandMenu({
                     value={item.name ? `${group.name} ${item.name}` : ""}
                   >
                     {item.isComponent ? (
-                      <DiamondsFourIcon weight="duotone" />
+                      <DiamondsFourIcon weight="fill" />
                     ) : (
-                      <BookIcon weight="duotone" />
+                      <BookIcon weight="fill" />
                     )}
                     <span className="min-w-0 flex-1 truncate">{item.name}</span>
                   </CommandMenuItem>
@@ -292,7 +301,7 @@ export function CommandMenu({
                     }}
                     value={`Component category ${category.label}`}
                   >
-                    <SquaresFourIcon />
+                    <SquaresFourIcon weight="fill" />
                     <span className="min-w-0 flex-1 truncate">
                       {category.label}
                     </span>
@@ -302,10 +311,22 @@ export function CommandMenu({
             )}
           </CommandList>
         </Command>
+        <DialogClose
+          render={
+            <Button
+              aria-label="Close search"
+              className="absolute top-2 right-2 sm:hidden"
+              size="icon"
+              variant="ghost"
+            >
+              <XIcon aria-hidden weight="bold" />
+            </Button>
+          }
+        />
         <div className="absolute inset-x-0 bottom-0 z-20 flex h-10 items-center gap-2 rounded-b-[12px] border-t border-t-site-border bg-site-muted px-4 font-medium text-site-muted-foreground text-xs">
           <div className="flex shrink-0 items-center gap-2">
             <CommandMenuKbd>
-              <ArrowBendDownLeftIcon weight="duotone" />
+              <ArrowBendDownLeftIcon weight="fill" />
             </CommandMenuKbd>{" "}
             {selectedType === "page" || selectedType === "component"
               ? "Go to Page"
