@@ -427,7 +427,7 @@ function TimelineTrackControls({
           <div
             className={cn(
               "relative flex w-full flex-col justify-center border-s-4 px-2",
-              compact ? "py-0" : "gap-1 py-1.5",
+              compact ? "py-0" : "gap-1.5 py-2.5",
               TRACK_COLORS[mix.color]?.edge
             )}
           />
