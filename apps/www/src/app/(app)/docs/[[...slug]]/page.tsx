@@ -266,9 +266,9 @@ export default async function Page(props: {
             )}
           </div>
         </div>
-        <div className="sticky top-0 z-30 ml-auto hidden h-[calc(100svh-var(--header-height)-4rem)] w-72 xl:block">
+        <div className="sticky top-0 z-30 ml-auto hidden h-[calc(100svh-var(--header-height)-4rem)] w-0 xl:block">
           {toc.length ? (
-            <DocsTableOfContents className="absolute" toc={toc} />
+            <DocsTableOfContents className="absolute right-0" toc={toc} />
           ) : null}
         </div>
       </div>

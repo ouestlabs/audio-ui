@@ -147,9 +147,9 @@ export function DocsShell({
               <FrameContent className="flex min-h-0 flex-1 flex-col">
                 <div className="scroll-fade-y no-scrollbar flex min-h-0 flex-1 flex-col overflow-y-auto">
                   <div className="flex-1 px-4 sm:px-8">{children}</div>
-                  {footer}
                 </div>
               </FrameContent>
+              {footer}
             </Frame>
           </InsetPane>
           <CustomizerPanel variant="sidebar" />
