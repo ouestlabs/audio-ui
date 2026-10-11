@@ -11,19 +11,25 @@ import { ExpandPreview } from "@/components/expand-preview";
 import { cn } from "@/lib/utils";
 
 /**
- * What the panel of a block's preview looks like, in the docs and in the
- * catalog alike: a block is the page, so the panel is its frame and it brings
- * none of its own (no border, no corners, no tint over the frame's own
- * background), it is never shorter than a preview, and an editor that
- * takes a screen is capped so the preview is not far taller than the others:
- * it scrolls inside, and opens at full size with the expand button.
+ * The inset of every preview's panel, on a page, in a card and at full size:
+ * one value, so what is shown sits the same distance from the frame wherever
+ * it is. The `p-4` of a block's own panel is that same inset, so a block
+ * gives its own up and takes the panel's.
+ */
+export const PANEL_INSET = "p-4";
+
+/**
+ * What a block's panel adds: a block is the page, so the panel is its frame
+ * and it brings none of its own (no border, no corners, no tint, no inset),
+ * and an editor that takes a screen is capped so the preview is not far
+ * taller than the others: it scrolls inside, and opens at full size with the
+ * expand button.
  */
 export const blockPanelClassName =
-  "min-h-72 flex-nowrap items-stretch justify-start p-0 sm:p-0 lg:p-0 sm:**:data-[slot=preview]:max-w-none [&>.cn-audio-panel]:w-full [&>.cn-audio-panel]:flex-1 [&>.cn-audio-panel]:rounded-none [&>.cn-audio-panel]:border-0 [&>.cn-audio-panel]:bg-transparent [&_[data-slot=piano-roll]]:max-h-56";
+  "flex-nowrap items-stretch justify-start sm:**:data-[slot=preview]:max-w-none [&>.cn-audio-panel]:w-full [&>.cn-audio-panel]:flex-1 [&>.cn-audio-panel]:rounded-none [&>.cn-audio-panel]:border-0 [&>.cn-audio-panel]:bg-transparent [&>.cn-audio-panel]:p-0 [&_[data-slot=piano-roll]]:max-h-56";
 
 /** What a preview's panel looks like, on a page and in a card alike. */
-const panelClassName =
-  "flex min-h-50 min-w-0 flex-1 flex-col flex-wrap items-center justify-center overflow-x-auto p-3 font-sans **:data-[slot=preview]:w-full sm:p-6 sm:**:data-[slot=preview]:max-w-[80%] lg:px-8 lg:py-12";
+const panelClassName = `flex min-h-72 min-w-0 flex-1 flex-col flex-wrap items-center justify-center overflow-x-auto font-sans **:data-[slot=preview]:w-full sm:**:data-[slot=preview]:max-w-[80%] ${PANEL_INSET}`;
 
 /**
  * The panel of a preview's frame, the one container of what is shown: the
