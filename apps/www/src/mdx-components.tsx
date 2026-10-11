@@ -239,7 +239,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     TypeTable,
     table: ({ className, ...props }: React.ComponentProps<"table">) => (
       <Frame className="my-6">
-        <FrameContent className="typeset-scroll no-scrollbar">
+        <FrameContent className="typeset-scroll no-scrollbar mt-0">
           <table
             className={cn(
               "[&_:is(th,td):first-child]:ps-4 [&_:is(th,td):last-child]:pe-4",
