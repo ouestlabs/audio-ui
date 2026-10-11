@@ -8,8 +8,6 @@ import { getComponent } from "@/lib/registry";
 import { cn } from "@/lib/utils";
 
 interface ComponentCardContainerProps {
-  /** The preview runs to the card's edges, with no frame of its own: for blocks, which are the page. */
-  bleed?: boolean;
   children: React.ReactNode;
   className?: string;
   footer: React.ReactNode;
@@ -78,17 +76,13 @@ export function ComponentCardContainer({
   children,
   footer,
   className,
-  bleed = false,
   isFullWidth,
 }: ComponentCardContainerProps) {
   return (
     <Frame className={cn(isFullWidth && "md:col-span-2", className)}>
       <FrameContent
         className={cn(
-          "flex min-h-50 min-w-0 flex-1 flex-col flex-wrap items-center justify-center overflow-x-auto bg-site-background p-3 font-sans **:data-[slot=preview]:w-full sm:p-6 sm:**:data-[slot=preview]:max-w-[80%] lg:px-8 lg:py-12",
-          // No frame inside the frame: the block's own border and corners give way to the card's.
-          bleed &&
-            "flex-nowrap p-0 sm:p-0 lg:p-0 sm:**:data-[slot=preview]:max-w-none [&_.cn-audio-panel]:w-full [&_.cn-audio-panel]:rounded-none [&_.cn-audio-panel]:border-0"
+          "flex min-h-50 min-w-0 flex-1 flex-col flex-wrap items-center justify-center overflow-x-auto bg-site-background p-3 font-sans **:data-[slot=preview]:w-full sm:p-6 sm:**:data-[slot=preview]:max-w-[80%] lg:px-8 lg:py-12"
         )}
       >
         <React.Suspense
