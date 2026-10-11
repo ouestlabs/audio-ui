@@ -1237,7 +1237,10 @@ export default function BlockTimeline() {
                 tabler="IconKeyboard"
               />
             </PopoverTrigger>
-            <PopoverContent align="center" className="w-80">
+            <PopoverContent
+              align="center"
+              className="max-h-(--available-height) w-80 overflow-y-auto"
+            >
               <PopoverHeader>
                 <PopoverTitle>Keyboard shortcuts</PopoverTitle>
                 <PopoverDescription>
