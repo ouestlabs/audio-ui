@@ -388,10 +388,19 @@
     > pre,
     > div > pre {
       overflow: visible;
-      background: transparent;
+      background: transparent !important;
       border: 0;
       border-radius: 0;
     }
+  }
+
+  /* The code scrolls sideways in its panel, fading at the edges it runs past, and keeps its inset at the far end. */
+  [data-rehype-pretty-code-figure]:not(:has([data-code-command])) pre code {
+    @apply scroll-fade-x;
+    display: block;
+    overflow-x: auto;
+    padding-inline-end: calc(var(--spacing) * 4);
+    scrollbar-width: thin;
   }
 
   /* Inside another frame (a preview's code, a sheet), the figure gives its own up. */
@@ -405,7 +414,7 @@
 
     > pre,
     > div > pre {
-      background: transparent;
+      background: transparent !important;
       border: 0;
       border-radius: 0;
     }
@@ -453,7 +462,8 @@
 
   [data-line] {
     display: inline-block;
-    width: 100%;
+    width: max-content;
+    min-width: 100%;
     min-height: calc(var(--spacing) * 1);
     padding-top: calc(var(--spacing) * 0.5);
     padding-bottom: calc(var(--spacing) * 0.5);
