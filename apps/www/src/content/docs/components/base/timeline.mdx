@@ -269,11 +269,13 @@ A strip along the timeline that its parts are placed on: a track, the ruler's st
 
 ### Ruler
 
-The lane that moves the position: a press jumps to the pointer and a drag scrubs, both on the grid unless Cmd/Ctrl is held; with Shift held the drag scrubs four times finer. It holds the native `<input type="range">` that takes focus, handles the keyboard and carries the accessible name (`aria-label` / `aria-labelledby`). Place `Timeline.Mark`s in it for its labels. Renders a `<div>` element.
+The lane that moves the position: a press jumps to the pointer and a drag scrubs, both on the grid unless Cmd/Ctrl is held; with Shift held the drag scrubs four times finer. With `onSelectionChange`, a drag that starts with Shift held selects a stretch instead, to loop. It holds the native `<input type="range">` that takes focus, handles the keyboard and carries the accessible name (`aria-label` / `aria-labelledby`). Place `Timeline.Mark`s in it for its labels. Renders a `<div>` element.
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `getAriaValueText` | `DescribePosition` |  | Returns how the position is announced, e.g. `"bar 3, beat 2"`. Defaults to the number. |
+| `onSelectionChange` | `( range: readonly [number, number], eventDetails ) => void` |  | Fires while a stretch is selected by dragging with Shift held, as `[start, end]` in timeline units, on the grid unless Cmd/Ctrl is held: feed it to a `Timeline.Range` as a loop. A plain press and drag still move the position. `eventDetails.cancel()` keeps the selection as it was. |
+| `onSelectionCommitted` | `( range: readonly [number, number], eventDetails ) => void` |  | Fires when a selection that changed ends. |
 
 | Data attribute | Description |
 | --- | --- |

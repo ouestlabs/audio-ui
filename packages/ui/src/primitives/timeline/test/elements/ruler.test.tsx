@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, mock, test } from "bun:test";
 import { act, fireEvent } from "@testing-library/react";
 import { createTestSource, lastCall, renderTimeline } from "../helpers";
 
@@ -150,5 +150,73 @@ describe("Timeline.Root position source", () => {
     expect(source.listenerCount()).toBe(1);
     view.unmount();
     expect(source.listenerCount()).toBe(0);
+  });
+});
+
+describe("Timeline.Ruler selection (100 units over 200px)", () => {
+  const handlers = () => ({
+    onSelectionChange: mock(
+      (_range: readonly [number, number], _details: unknown) => undefined
+    ),
+    onSelectionCommitted: mock(
+      (_range: readonly [number, number], _details: unknown) => undefined
+    ),
+  });
+
+  test("Shift + drag selects a stretch, on the grid, without moving the position", () => {
+    const { onSelectionChange, onSelectionCommitted } = handlers();
+    const { onPositionChange, ruler } = renderTimeline(
+      { snapStep: 4 },
+      { onSelectionChange, onSelectionCommitted }
+    );
+    fireEvent.pointerDown(ruler, {
+      clientX: 100,
+      pointerId: 1,
+      shiftKey: true,
+    });
+    fireEvent.pointerMove(ruler, { clientX: 41, pointerId: 1 });
+    expect(lastCall(onSelectionChange)).toEqual([
+      [20, 52],
+      expect.objectContaining({ reason: "drag" }),
+    ]);
+    fireEvent.pointerUp(ruler, { clientX: 41, pointerId: 1 });
+    expect(lastCall(onSelectionCommitted)[0]).toEqual([20, 52]);
+    expect(onPositionChange).not.toHaveBeenCalled();
+  });
+
+  test("a plain press still seeks, and Shift without a handler seeks too", () => {
+    const { onSelectionChange } = handlers();
+    const withHandler = renderTimeline({}, { onSelectionChange });
+    fireEvent.pointerDown(withHandler.ruler, { clientX: 60, pointerId: 1 });
+    expect(lastCall(withHandler.onPositionChange)[0]).toBe(30);
+    expect(onSelectionChange).not.toHaveBeenCalled();
+    withHandler.view.unmount();
+
+    const without = renderTimeline();
+    fireEvent.pointerDown(without.ruler, {
+      clientX: 60,
+      pointerId: 1,
+      shiftKey: true,
+    });
+    expect(lastCall(without.onPositionChange)[0]).toBe(30);
+  });
+
+  test("cancel() keeps the selection, and an unmoved press selects nothing", () => {
+    const { onSelectionCommitted } = handlers();
+    const { ruler } = renderTimeline(
+      {},
+      {
+        onSelectionChange: (_range, details) => details.cancel(),
+        onSelectionCommitted,
+      }
+    );
+    fireEvent.pointerDown(ruler, {
+      clientX: 100,
+      pointerId: 1,
+      shiftKey: true,
+    });
+    fireEvent.pointerMove(ruler, { clientX: 40, pointerId: 1 });
+    fireEvent.pointerUp(ruler, { clientX: 40, pointerId: 1 });
+    expect(onSelectionCommitted).not.toHaveBeenCalled();
   });
 });

@@ -37,6 +37,7 @@ describe("Timeline", () => {
       <Timeline.Root duration={1000} source={source}>
         <Timeline.Ruler aria-label="Position">
           {Array.from({ length: 200 }, (_, index) => (
+            // biome-ignore lint/suspicious/noArrayIndexKey: marks are generated, in order.
             <Timeline.Mark key={index} value={index * 5}>
               {index}
             </Timeline.Mark>

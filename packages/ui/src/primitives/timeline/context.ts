@@ -61,6 +61,17 @@ export type PositionCommitEventDetails =
   | ExtraCommitEventDetails<"keyboard", KeyboardEvent>
   | ExtraCommitEventDetails<"input-change", Event>;
 
+/** A stretch selected by dragging on the ruler with Shift held. */
+export type SelectionChangeEventDetails = ExtraChangeEventDetails<
+  "drag",
+  PointerEvent
+>;
+
+export type SelectionCommitEventDetails = ExtraCommitEventDetails<
+  "drag",
+  PointerEvent
+>;
+
 export type ZoomChangeEventDetails =
   | ExtraChangeEventDetails<"wheel", WheelEvent>
   | ExtraChangeEventDetails<"drag", PointerEvent>

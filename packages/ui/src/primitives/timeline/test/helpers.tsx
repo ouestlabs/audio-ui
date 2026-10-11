@@ -7,7 +7,10 @@ import { Timeline } from "../../../entries/timeline";
  * A 100-unit timeline whose ruler is 200px wide at the origin: 2px per unit
  * when fitted. Extra props go to the root.
  */
-export function renderTimeline(props: Timeline.Root.Props = {}) {
+export function renderTimeline(
+  props: Timeline.Root.Props = {},
+  rulerProps: Timeline.Ruler.Props = {}
+) {
   const onPositionChange = mock(
     (_value: number, _details: Timeline.Root.PositionChangeEventDetails) =>
       undefined
@@ -24,7 +27,7 @@ export function renderTimeline(props: Timeline.Root.Props = {}) {
       onPositionCommitted={onPositionCommitted}
       {...props}
     >
-      <Timeline.Ruler aria-label="Position" data-testid="ruler">
+      <Timeline.Ruler aria-label="Position" data-testid="ruler" {...rulerProps}>
         <Timeline.Mark data-testid="mark" value={25}>
           2
         </Timeline.Mark>

@@ -7,6 +7,8 @@ import { isReleased } from "../../internal/pointer";
 import { VISUALLY_HIDDEN } from "../../internal/visually-hidden";
 import {
   type DescribePosition,
+  type SelectionChangeEventDetails,
+  type SelectionCommitEventDetails,
   type TimelineState,
   valueAtPointer,
 } from "../context";
@@ -18,6 +20,12 @@ const FINE_SCRUB = 0.25;
 
 const describeAsNumber: DescribePosition = (value) =>
   String(Math.round(value * 100) / 100);
+
+interface SelectGesture {
+  anchor: number;
+  changed: boolean;
+  pointerId: number;
+}
 
 interface ScrubGesture {
   /** Where a fine scrub is measured from: the last point the pointer moved the position at full speed. */
@@ -32,7 +40,8 @@ interface ScrubGesture {
 /**
  * The lane that moves the position: a press jumps to the pointer and a drag
  * scrubs, both on the grid unless Cmd/Ctrl is held; with Shift held the drag
- * scrubs four times finer. It holds the native `<input type="range">` that
+ * scrubs four times finer. With `onSelectionChange`, a drag that starts with
+ * Shift held selects a stretch instead, to loop. It holds the native `<input type="range">` that
  * takes focus, handles the keyboard and carries the accessible name
  * (`aria-label` / `aria-labelledby`). Place `Timeline.Mark`s in it for its
  * labels. Renders a `<div>` element.
@@ -45,6 +54,8 @@ export function Ruler(componentProps: Ruler.Props) {
     children,
     className,
     getAriaValueText = describeAsNumber,
+    onSelectionChange,
+    onSelectionCommitted,
     ref,
     render,
     style,
@@ -56,6 +67,8 @@ export function Ruler(componentProps: Ruler.Props) {
   const elementRef = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
   const gestureRef = React.useRef<ScrubGesture | null>(null);
+  const selectRef = React.useRef<SelectGesture | null>(null);
+  const selectedRef = React.useRef<readonly [number, number] | null>(null);
   const describeRef = React.useRef(getAriaValueText);
   describeRef.current = getAriaValueText;
 
@@ -80,6 +93,12 @@ export function Ruler(componentProps: Ruler.Props) {
   const valueAt = (event: React.PointerEvent<HTMLDivElement>) =>
     valueAtPointer(event.currentTarget, event.clientX, zoom, duration);
 
+  /** Where a pointer lands: on the grid, unless Cmd/Ctrl is held. */
+  const landingAt = (event: React.PointerEvent<HTMLDivElement>) => {
+    const raw = valueAt(event);
+    return bypassesGrid(event) ? raw : snapToGrid(raw, grid);
+  };
+
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
     if (state.disabled || event.button !== 0) {
       return;
@@ -87,6 +106,17 @@ export function Ruler(componentProps: Ruler.Props) {
     event.preventDefault();
     event.currentTarget.setPointerCapture?.(event.pointerId);
     inputRef.current?.focus({ focusVisible: false, preventScroll: true });
+    if (event.shiftKey && onSelectionChange) {
+      // Shift selects a stretch, as on a DAW's ruler; a plain press seeks.
+      selectRef.current = {
+        anchor: landingAt(event),
+        changed: false,
+        pointerId: event.pointerId,
+      };
+      selectedRef.current = null;
+      actions.setScrubbing(true);
+      return;
+    }
     const raw = valueAt(event);
     const value = bypassesGrid(event) ? raw : snapToGrid(raw, grid);
     const gesture: ScrubGesture = {
@@ -103,7 +133,34 @@ export function Ruler(componentProps: Ruler.Props) {
     );
   };
 
+  /** Extends the selection being dragged; returns whether one is. */
+  const moveSelection = (event: React.PointerEvent<HTMLDivElement>) => {
+    const selecting = selectRef.current;
+    if (!selecting || selecting.pointerId !== event.pointerId) {
+      return false;
+    }
+    if (isReleased(event)) {
+      handlePointerEnd(event);
+      return true;
+    }
+    const at = landingAt(event);
+    const range = [
+      Math.min(selecting.anchor, at),
+      Math.max(selecting.anchor, at),
+    ] as const;
+    const eventDetails = createChangeEventDetails("drag", event.nativeEvent);
+    onSelectionChange?.(range, eventDetails);
+    if (!eventDetails.isCanceled) {
+      selecting.changed = true;
+      selectedRef.current = range;
+    }
+    return true;
+  };
+
   const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (moveSelection(event)) {
+      return;
+    }
     const gesture = gestureRef.current;
     if (!gesture || gesture.pointerId !== event.pointerId) {
       return;
@@ -133,6 +190,18 @@ export function Ruler(componentProps: Ruler.Props) {
   };
 
   const handlePointerEnd = (event: React.PointerEvent<HTMLDivElement>) => {
+    const selecting = selectRef.current;
+    if (selecting && selecting.pointerId === event.pointerId) {
+      selectRef.current = null;
+      actions.setScrubbing(false);
+      if (selecting.changed && selectedRef.current) {
+        onSelectionCommitted?.(selectedRef.current, {
+          event: event.nativeEvent,
+          reason: "drag",
+        });
+      }
+      return;
+    }
     const gesture = gestureRef.current;
     if (!gesture || gesture.pointerId !== event.pointerId) {
       return;
@@ -248,5 +317,20 @@ export namespace Ruler {
   export interface Props extends PartProps<"div", State> {
     /** Returns how the position is announced, e.g. `"bar 3, beat 2"`. Defaults to the number. */
     getAriaValueText?: DescribePosition;
+    /**
+     * Fires while a stretch is selected by dragging with Shift held, as
+     * `[start, end]` in timeline units on the grid unless Cmd/Ctrl is held:
+     * feed it to a `Timeline.Range` as a loop. A plain press and drag still
+     * move the position. `eventDetails.cancel()` keeps the selection as it was.
+     */
+    onSelectionChange?: (
+      range: readonly [number, number],
+      eventDetails: SelectionChangeEventDetails
+    ) => void;
+    /** Fires when a selection that changed ends. */
+    onSelectionCommitted?: (
+      range: readonly [number, number],
+      eventDetails: SelectionCommitEventDetails
+    ) => void;
   }
 }
