@@ -3,6 +3,7 @@
 import { TerminalIcon } from "@phosphor-icons/react/ssr";
 import * as React from "react";
 import { CopyButton } from "@/components/copy-button";
+import { Frame, FrameContent, FrameHeader } from "@/components/custom/frame";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DEFAULT_CONFIG, useConfig } from "@/hooks/use-config";
 import { useMounted } from "@/hooks/use-mounted";
@@ -38,22 +39,25 @@ export function CodeBlockCommand({
   const command = tabs[packageManager] ?? "";
 
   return (
-    <div className="overflow-x-auto">
-      <Tabs
-        className="gap-0"
-        onValueChange={(value) => {
-          setConfig({
-            ...config,
-            packageManager: value as "pnpm" | "npm" | "yarn" | "bun",
-          });
-        }}
-        value={packageManager}
-      >
-        <div className="flex items-center justify-between gap-2 border-site-border/50 border-b px-3 py-1">
-          <div className="flex items-center gap-2">
-            <div className="flex size-4 items-center justify-center rounded-[1px] opacity-70">
-              <TerminalIcon className="text-site-foreground" weight="duotone" />
-            </div>
+    <Tabs
+      className="gap-0"
+      onValueChange={(value) => {
+        setConfig({
+          ...config,
+          packageManager: value as "pnpm" | "npm" | "yarn" | "bun",
+        });
+      }}
+      value={packageManager}
+    >
+      {/* The frame of the site: the package managers in its header, the command in its panel. */}
+      <Frame className="not-typeset" data-code-command="">
+        <FrameHeader className="min-h-11 flex-row items-center justify-between gap-3 px-2 py-1.5">
+          <div className="flex items-center gap-2 ps-1">
+            <TerminalIcon
+              aria-hidden="true"
+              className="size-4 text-site-muted-foreground"
+              weight="duotone"
+            />
             <TabsList>
               {Object.entries(tabs).map(([key]) => (
                 <TabsTrigger key={key} value={key}>
@@ -62,8 +66,22 @@ export function CodeBlockCommand({
               ))}
             </TabsList>
           </div>
-        </div>
-        <div className="no-scrollbar scroll-fade-x overflow-x-auto">
+          <CopyButton
+            className="relative"
+            event="copy_command"
+            properties={{
+              base: config.base,
+              command,
+              iconLibrary: config.iconLibrary,
+              pm: packageManager,
+              style: config.style,
+            }}
+            style={{ right: "auto", top: "auto" }}
+            value={command}
+            variant="outline"
+          />
+        </FrameHeader>
+        <FrameContent className="no-scrollbar scroll-fade-x overflow-x-auto">
           {Object.entries(tabs).map(([key, value]) => (
             <TabsContent className="mt-0 px-4 py-3.5" key={key} value={key}>
               <pre>
@@ -76,20 +94,8 @@ export function CodeBlockCommand({
               </pre>
             </TabsContent>
           ))}
-        </div>
-      </Tabs>
-      <CopyButton
-        className="top-1 right-1 bg-transparent opacity-70"
-        event="copy_command"
-        properties={{
-          base: config.base,
-          command,
-          iconLibrary: config.iconLibrary,
-          pm: packageManager,
-          style: config.style,
-        }}
-        value={command}
-      />
-    </div>
+        </FrameContent>
+      </Frame>
+    </Tabs>
   );
 }

@@ -374,6 +374,23 @@
     }
   }
 
+  /* An install command is a frame of its own: the figure around it steps aside. */
+  [data-rehype-pretty-code-figure]:has([data-code-command]) {
+    padding: 0;
+    overflow: visible;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+
+    > pre,
+    > div > pre {
+      overflow: visible;
+      background: transparent;
+      border: 0;
+      border-radius: 0;
+    }
+  }
+
   /* Inside another frame (a preview's code, a sheet), the figure gives its own up. */
   [data-slot="code"] [data-rehype-pretty-code-figure],
   [data-slot="sheet-content"] [data-rehype-pretty-code-figure] {
