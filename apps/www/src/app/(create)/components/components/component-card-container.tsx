@@ -3,6 +3,7 @@
 import * as React from "react";
 import { Frame } from "@/components/custom/frame";
 import { PreviewLoading, PreviewPanel } from "@/components/preview-frame";
+import { useMounted } from "@/hooks/use-mounted";
 import { getComponent } from "@/lib/registry";
 import { cn } from "@/lib/utils";
 
@@ -24,6 +25,7 @@ export function ComponentRenderer({
 }) {
   const [key, setKey] = React.useState(0);
   const [isReloading, setIsReloading] = React.useState(false);
+  const mounted = useMounted();
 
   React.useEffect(() => {
     const handleReload = (e: Event) => {
@@ -40,7 +42,8 @@ export function ComponentRenderer({
       window.removeEventListener("component-preview-reload", handleReload);
   }, [name]);
 
-  if (isReloading) {
+  // Until the page is hydrated its styles are not applied: a preview drawn on the server would show unstyled.
+  if (isReloading || !mounted) {
     return <PreviewLoading />;
   }
 
