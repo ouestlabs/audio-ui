@@ -2,7 +2,11 @@
 
 import type * as React from "react";
 import { CopyRegistry } from "@/components/copy-registry";
-import { FrameFooter, FrameHeader } from "@/components/custom/frame";
+import {
+  FrameContent,
+  FrameFooter,
+  FrameHeader,
+} from "@/components/custom/frame";
 import { ExpandPreview } from "@/components/expand-preview";
 import { cn } from "@/lib/utils";
 
@@ -15,6 +19,27 @@ import { cn } from "@/lib/utils";
  */
 export const blockPanelClassName =
   "min-h-72 flex-nowrap items-stretch justify-start p-0 sm:p-0 lg:p-0 sm:**:data-[slot=preview]:max-w-none [&>.cn-audio-panel]:w-full [&>.cn-audio-panel]:flex-1 [&>.cn-audio-panel]:rounded-none [&>.cn-audio-panel]:border-0 [&_[data-slot=piano-roll]]:max-h-56";
+
+/** What a preview's panel looks like, on a page and in a card alike. */
+const panelClassName =
+  "flex min-h-50 min-w-0 flex-1 flex-col flex-wrap items-center justify-center overflow-x-auto p-3 font-sans **:data-[slot=preview]:w-full sm:p-6 sm:**:data-[slot=preview]:max-w-[80%] lg:px-8 lg:py-12";
+
+/**
+ * The panel of a preview's frame, the one container of what is shown: the
+ * same wherever a preview is, a block or not.
+ */
+export function PreviewPanel({
+  block = false,
+  className,
+  ...props
+}: React.ComponentProps<typeof FrameContent> & { block?: boolean }) {
+  return (
+    <FrameContent
+      className={cn(panelClassName, block && blockPanelClassName, className)}
+      {...props}
+    />
+  );
+}
 
 /**
  * The bar of a preview's frame, the same wherever a preview is shown: what it

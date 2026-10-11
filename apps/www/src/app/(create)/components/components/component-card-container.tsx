@@ -2,8 +2,8 @@
 
 import { CircleNotchIcon } from "@phosphor-icons/react/ssr";
 import * as React from "react";
-import { Frame, FrameContent } from "@/components/custom/frame";
-import { blockPanelClassName } from "@/components/preview-frame";
+import { Frame } from "@/components/custom/frame";
+import { PreviewPanel } from "@/components/preview-frame";
 import { Spinner } from "@/components/ui/spinner";
 import { getComponent } from "@/lib/registry";
 import { cn } from "@/lib/utils";
@@ -84,12 +84,7 @@ export function ComponentCardContainer({
 }: ComponentCardContainerProps) {
   return (
     <Frame className={cn(isFullWidth && "md:col-span-2", className)}>
-      <FrameContent
-        className={cn(
-          "flex min-h-50 min-w-0 flex-1 flex-col flex-wrap items-center justify-center overflow-x-auto bg-site-background p-3 font-sans **:data-[slot=preview]:w-full sm:p-6 sm:**:data-[slot=preview]:max-w-[80%] lg:px-8 lg:py-12",
-          block && blockPanelClassName
-        )}
-      >
+      <PreviewPanel block={block}>
         <React.Suspense
           fallback={
             <div className="flex items-center justify-center py-10">
@@ -99,7 +94,7 @@ export function ComponentCardContainer({
         >
           {children}
         </React.Suspense>
-      </FrameContent>
+      </PreviewPanel>
       {footer}
     </Frame>
   );

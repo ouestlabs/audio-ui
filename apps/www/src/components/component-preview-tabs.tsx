@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { Frame, FrameContent } from "@/components/custom/frame";
-import { blockPanelClassName, PreviewBar } from "@/components/preview-frame";
+import { PreviewBar, PreviewPanel } from "@/components/preview-frame";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
@@ -11,9 +11,9 @@ import { cn } from "@/lib/utils";
 export function ComponentPreviewTabs({
   className,
   previewClassName,
-  align = "center",
+  align: _align,
   hideCode = false,
-  chromeLessOnMobile = false,
+  chromeLessOnMobile: _chromeLessOnMobile,
   component,
   expand = false,
   fitContent = false,
@@ -61,15 +61,9 @@ export function ComponentPreviewTabs({
         position="header"
       />
       {/* The panel is the preview: no container inside it. */}
-      <FrameContent
-        className={cn(
-          "preview flex h-72 w-full justify-center p-10 font-sans data-[chromeless=true]:h-auto data-[align=start]:items-start data-[align=end]:items-end data-[align=center]:items-center data-[chromeless=true]:p-0",
-          // A block is the page: as tall as it is, and the same panel in the catalog.
-          fitContent && cn("h-auto", blockPanelClassName),
-          previewClassName
-        )}
-        data-align={align}
-        data-chromeless={chromeLessOnMobile}
+      <PreviewPanel
+        block={fitContent}
+        className={previewClassName}
         data-slot="preview"
         ref={previewRef}
       >
@@ -78,7 +72,7 @@ export function ComponentPreviewTabs({
         ) : (
           <Spinner className="text-site-muted-foreground/40" />
         )}
-      </FrameContent>
+      </PreviewPanel>
       {hideCode ? null : (
         <FrameContent
           className="**:data-rehype-pretty-code-figure:site-rounded-none mt-0.5 **:data-rehype-pretty-code-figure:m-0! [&_pre]:max-h-72"
