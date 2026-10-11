@@ -2,6 +2,7 @@ import type * as React from "react";
 import { ComponentClient } from "@/components/component-client";
 import { ComponentPreviewTabs } from "@/components/component-preview-tabs";
 import { ComponentSource } from "@/components/component-source";
+import { isBlock } from "@/lib/is-block";
 import { getRegistryComponent } from "@/lib/registry";
 import type { IconLibraryName } from "@/registry/config";
 
@@ -52,6 +53,7 @@ export function ComponentPreview({
       chromeLessOnMobile={chromeLessOnMobile}
       className={className}
       component={<ComponentClient name={name} styleName={styleName} />}
+      expandLabel={isBlock(name) ? name : undefined}
       hideCode={hideCode}
       previewClassName={previewClassName}
       source={

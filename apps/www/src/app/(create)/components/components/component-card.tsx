@@ -1,9 +1,11 @@
 "use client";
 
 import { CopyRegistry } from "@/components/copy-registry";
+import { ExpandPreview } from "@/components/expand-preview";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 import { useConfig } from "@/hooks/use-config";
+import { isBlock } from "@/lib/is-block";
 import { getRegistryItemMetadata } from "@/lib/registry";
 
 import {
@@ -47,6 +49,11 @@ export function ComponentCard({
             {process.env.NODE_ENV === "development" && (
               <ComponentName name={name} />
             )}
+            {isBlock(name) ? (
+              <ExpandPreview label={name}>
+                <ComponentRenderer base={base} name={name} />
+              </ExpandPreview>
+            ) : null}
             <CopyRegistry value={`@audio/${name}`} />
             <Sheet>
               <SheetTrigger

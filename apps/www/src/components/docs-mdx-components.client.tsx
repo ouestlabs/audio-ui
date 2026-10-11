@@ -12,6 +12,7 @@ import {
   getSelectedRegistryStyleName,
   resolveRegistryIconLibrary,
 } from "@/lib/docs-registry-options";
+import { isBlock } from "@/lib/is-block";
 import { getRegistryComponent } from "@/lib/registry";
 import type { IconLibraryName } from "@/registry/config";
 
@@ -153,6 +154,7 @@ export function DocsComponentPreviewSwitch({
       chromeLessOnMobile={chromeLessOnMobile}
       className={className}
       component={<ComponentClient name={name} styleName={resolvedStyleName} />}
+      expandLabel={isBlock(name) ? name : undefined}
       hideCode={hideCode}
       previewClassName={previewClassName}
       source={

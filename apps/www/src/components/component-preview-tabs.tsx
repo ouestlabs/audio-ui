@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { ExpandPreview } from "@/components/expand-preview";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
@@ -13,6 +14,7 @@ export function ComponentPreviewTabs({
   hideCode = false,
   chromeLessOnMobile = false,
   component,
+  expandLabel,
   source,
   sourcePreview,
   ...props
@@ -22,6 +24,8 @@ export function ComponentPreviewTabs({
   hideCode?: boolean;
   chromeLessOnMobile?: boolean;
   component: React.ReactNode;
+  /** Names the preview and adds a button that opens it at full size: for blocks. */
+  expandLabel?: string;
   source: React.ReactNode;
   sourcePreview?: React.ReactNode;
 }) {
@@ -47,10 +51,20 @@ export function ComponentPreviewTabs({
       data-slot="component-preview"
       {...props}
     >
-      <div data-slot="preview">
+      <div className="relative" data-slot="preview">
+        {expandLabel ? (
+          <ExpandPreview
+            className="absolute end-3 top-3 z-10"
+            label={expandLabel}
+          >
+            {component}
+          </ExpandPreview>
+        ) : null}
         <div
           className={cn(
             "preview flex h-72 w-full justify-center p-10 font-sans data-[chromeless=true]:h-auto data-[align=start]:items-start data-[align=end]:items-end data-[align=center]:items-center data-[chromeless=true]:p-0",
+            // A block is as tall as it is: a fixed height would cut it.
+            expandLabel && "h-auto",
             previewClassName
           )}
           data-align={align}
