@@ -191,11 +191,11 @@ Groups the parts of a piano roll and owns its notes and selection. Must be used 
 <TypeRow name={"disabled"} type={"boolean"}></TypeRow>
 <TypeRow name={"createNoteId"} type={"() => NoteId"}>Returns the id of a note drawn, added or duplicated. Defaults to `"note-<n>"`, skipping ids in use.</TypeRow>
 <TypeRow name={"getNoteLabel"} type={"(note: Note) => string"}>Returns a note's accessible name. Defaults to its pitch and where it starts and ends, such as "C4, 4 to 6".</TypeRow>
-<TypeRow name={"onValueChange"} type={"( value: Note[], eventDetails ) => void"}>Fires while notes are drawn, moved, resized, duplicated or removed.</TypeRow>
-<TypeRow name={"onValueCommitted"} type={"( value: Note[], eventDetails ) => void"}>Fires when a gesture that changed the notes ends, and after each edit from the keyboard.</TypeRow>
-<TypeRow name={"onSelectionChange"} type={"( selection: NoteId[], eventDetails ) => void"}>Fires when notes are selected or deselected.</TypeRow>
-<TypeRow name={"onNoteOn"} type={"( pitch: number, eventDetails ) => void"}>Fires when a pitch should sound: a key pressed, a note drawn, picked up or moved to a new pitch. `eventDetails.velocity` is 0 to 1; `eventDetails.cancel()` keeps it silent.</TypeRow>
-<TypeRow name={"onNoteOff"} type={"( pitch: number, eventDetails ) => void"}>Fires when a pitch stops sounding.</TypeRow>
+<TypeRow name={"onValueChange"} type={"(value: Note[], eventDetails) => void"}>Fires while notes are drawn, moved, resized, duplicated or removed.</TypeRow>
+<TypeRow name={"onValueCommitted"} type={"(value: Note[], eventDetails) => void"}>Fires when a gesture that changed the notes ends, and after each edit from the keyboard.</TypeRow>
+<TypeRow name={"onSelectionChange"} type={"(selection: NoteId[], eventDetails) => void"}>Fires when notes are selected or deselected.</TypeRow>
+<TypeRow name={"onNoteOn"} type={"(pitch: number, eventDetails) => void"}>Fires when a pitch should sound: a key pressed, a note drawn, picked up or moved to a new pitch. `eventDetails.velocity` is 0 to 1; `eventDetails.cancel()` keeps it silent.</TypeRow>
+<TypeRow name={"onNoteOff"} type={"(pitch: number, eventDetails) => void"}>Fires when a pitch stops sounding.</TypeRow>
 </TypeTable>
 
 <TypeTable title="Data attributes">

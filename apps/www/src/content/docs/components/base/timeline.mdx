@@ -192,8 +192,8 @@ Groups the parts of a timeline and owns what they share: its length, its zoom, i
 <TypeRow name={"largeStep"} type={"number"}>Step for Page Up/Page Down and Shift + arrow keys. Defaults to ten `step`s.</TypeRow>
 <TypeRow name={"maxZoom"} type={"number"} default={"Infinity"}></TypeRow>
 <TypeRow name={"minZoom"} type={"number"} default={"0"}></TypeRow>
-<TypeRow name={"onPositionChange"} type={"( value: number, eventDetails: PositionChangeEventDetails ) => void"}>Fires while the position is moved: press, drag, keyboard and input changes.</TypeRow>
-<TypeRow name={"onPositionCommitted"} type={"( value: number, eventDetails: PositionCommitEventDetails ) => void"}>Fires when a gesture that moved the position ends.</TypeRow>
+<TypeRow name={"onPositionChange"} type={"(value: number, eventDetails: PositionChangeEventDetails) => void"}>Fires while the position is moved: press, drag, keyboard and input changes.</TypeRow>
+<TypeRow name={"onPositionCommitted"} type={"(value: number, eventDetails: PositionCommitEventDetails) => void"}>Fires when a gesture that moved the position ends.</TypeRow>
 <TypeRow name={"onZoomChange"} type={"(zoom: number, eventDetails: ZoomChangeEventDetails) => void"}>Fires when the zoom changes, already clamped. `eventDetails.cancel()` keeps the zoom where it was.</TypeRow>
 <TypeRow name={"position"} type={"number"}>Playback position, from 0 to `duration`.</TypeRow>
 <TypeRow name={"snapOffset"} type={"number"} default={"0"}>Where the grid's lines start, in your units.</TypeRow>
@@ -273,8 +273,8 @@ The lane that moves the position: a press jumps to the pointer and a drag scrubs
 
 <TypeTable>
 <TypeRow name={"getAriaValueText"} type={"DescribePosition"}>Returns how the position is announced, e.g. `"bar 3, beat 2"`. Defaults to the number.</TypeRow>
-<TypeRow name={"onSelectionChange"} type={"( range: readonly [number, number], eventDetails ) => void"}>Fires while a stretch is selected by dragging with Shift held, as `[start, end]` in timeline units, on the grid unless Cmd/Ctrl is held: feed it to a `Timeline.Range` as a loop. A plain press and drag still move the position. `eventDetails.cancel()` keeps the selection as it was.</TypeRow>
-<TypeRow name={"onSelectionCommitted"} type={"( range: readonly [number, number], eventDetails ) => void"}>Fires when a selection that changed ends.</TypeRow>
+<TypeRow name={"onSelectionChange"} type={"(range: readonly [number, number], eventDetails) => void"}>Fires while a stretch is selected by dragging with Shift held, as `[start, end]` in timeline units, on the grid unless Cmd/Ctrl is held: feed it to a `Timeline.Range` as a loop. A plain press and drag still move the position. `eventDetails.cancel()` keeps the selection as it was.</TypeRow>
+<TypeRow name={"onSelectionCommitted"} type={"(range: readonly [number, number], eventDetails) => void"}>Fires when a selection that changed ends.</TypeRow>
 </TypeTable>
 
 <TypeTable title="Data attributes">

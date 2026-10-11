@@ -4,11 +4,7 @@ import { CaretRightIcon } from "@phosphor-icons/react/ssr";
 import * as React from "react";
 import { Frame, FrameContent, FrameHeader } from "@/components/custom/frame";
 import { Button } from "@/components/ui/button";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+import { Collapsible, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Kbd } from "@/components/ui/kbd";
 import { cn } from "@/lib/utils";
 
@@ -170,7 +166,12 @@ export function TypeRow(props: TypeRowProps) {
 
   return (
     <Collapsible onOpenChange={setOpen} open={open}>
-      <CollapsibleTrigger className="group flex w-full items-start gap-2 px-3 py-2.5 text-left outline-none transition-colors hover:bg-site-muted/50 focus-visible:bg-site-muted/50">
+      <CollapsibleTrigger
+        className={cn(
+          "group flex w-full items-start gap-2 px-3 pt-2.5 text-left outline-none transition-colors hover:bg-site-muted/50 focus-visible:bg-site-muted/50",
+          children ? "pb-1" : "pb-2.5"
+        )}
+      >
         <CaretRightIcon
           aria-hidden="true"
           className="mt-1 size-3.5 shrink-0 text-site-muted-foreground transition-transform duration-150 group-data-[panel-open]:rotate-90 motion-reduce:transition-none"
@@ -182,12 +183,17 @@ export function TypeRow(props: TypeRowProps) {
           </span>
         ) : null}
       </CollapsibleTrigger>
+      {/* What it does: a line of it when closed, all of it when open. */}
       {children ? (
-        <CollapsibleContent
-          className={cn("px-3 pb-3 ps-[2.125rem]", textClassName)}
+        <div
+          className={cn(
+            "px-3 pb-2.5 ps-[2.125rem]",
+            textClassName,
+            !open && "truncate"
+          )}
         >
           {children}
-        </CollapsibleContent>
+        </div>
       ) : null}
     </Collapsible>
   );

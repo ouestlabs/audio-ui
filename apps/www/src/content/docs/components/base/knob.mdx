@@ -165,7 +165,7 @@ Groups all parts of the knob and owns its value. Dragging the `Control`, turning
 <TypeRow name={"min"} type={"number"} default={"0"}></TypeRow>
 <TypeRow name={"name"} type={"string"}>Identifies the field when a form is submitted.</TypeRow>
 <TypeRow name={"onValueChange"} type={"(value: number, eventDetails: ChangeEventDetails) => void"}>Fires on every change: drag, keyboard, wheel, reset and input changes.</TypeRow>
-<TypeRow name={"onValueCommitted"} type={"( value: number, eventDetails: CommitEventDetails ) => void"}>Fires when an interaction ends with a new value.</TypeRow>
+<TypeRow name={"onValueCommitted"} type={"(value: number, eventDetails: CommitEventDetails) => void"}>Fires when an interaction ends with a new value.</TypeRow>
 <TypeRow name={"scale"} type={"Scale"} default={"\"linear\""}>How the value maps onto the dial's travel: `linear`, `log` for frequency, Q or ratios (needs a positive `min`), or your own `{ toPosition, toValue }`. Away from linear, the keys and the wheel move a share of the travel (1%, or 10% with Shift and Page keys) rather than a `step`.</TypeRow>
 <TypeRow name={"step"} type={"number"} default={"1"}></TypeRow>
 <TypeRow name={"value"} type={"number"}></TypeRow>

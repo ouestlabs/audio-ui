@@ -258,7 +258,7 @@ Groups the parts of a waveform and owns what they show: the audio's shape (`peak
 <TypeRow name={"levels"} type={"Levels"}>A live signal drawn outside React, in place of `peaks`: a microphone, an analyser, a stream.</TypeRow>
 <TypeRow name={"loading"} type={"boolean"} default={"false"}>Whether the audio is still on its way. Seeking waits, and the bars sweep.</TypeRow>
 <TypeRow name={"onValueChange"} type={"(value: number, eventDetails: ChangeEventDetails) => void"}>Fires while seeking: press, drag, keyboard and input changes.</TypeRow>
-<TypeRow name={"onValueCommitted"} type={"( value: number, eventDetails: CommitEventDetails ) => void"}>Fires when a seek that moved the position ends.</TypeRow>
+<TypeRow name={"onValueCommitted"} type={"(value: number, eventDetails: CommitEventDetails) => void"}>Fires when a seek that moved the position ends.</TypeRow>
 <TypeRow name={"peaks"} type={"WaveformPeaks"}>The audio's shape, at any resolution: a level per slice (0…1), or the lowest and highest sample of each (`{ min, max }`, -1…1), which draws the waveform lopsided where the audio is. The parts fit it to their size.</TypeRow>
 <TypeRow name={"range"} type={"readonly [number, number]"}>The stretch of the audio to show, `[start, end]` in `duration` units: a clip's window onto its source, a zoomed view. The playhead, seeking, hover, regions and markers all follow it. Defaults to the whole audio. While the position is outside it, the root carries `data-outside`.</TypeRow>
 <TypeRow name={"source"} type={"Source"}>A live position followed outside React; takes precedence over `value`.</TypeRow>
@@ -311,8 +311,8 @@ The seekable surface: a press jumps to the pointer and a drag scrubs. It tracks 
 
 <TypeTable>
 <TypeRow name={"getAriaValueText"} type={"DescribeValue"}>Returns how the position is announced, e.g. `"0:12 of 1:42"`. Defaults to the played share, e.g. `"30%"`.</TypeRow>
-<TypeRow name={"onSelectionChange"} type={"( range: readonly [number, number], eventDetails ) => void"}>Fires while a stretch is selected by dragging with Shift held, as `[start, end]` in `duration` units: feed it to a `Waveform.Region`. A plain press and drag still seek. `eventDetails.cancel()` keeps the selection as it was.</TypeRow>
-<TypeRow name={"onSelectionCommitted"} type={"( range: readonly [number, number], eventDetails ) => void"}>Fires when a selection that changed ends.</TypeRow>
+<TypeRow name={"onSelectionChange"} type={"(range: readonly [number, number], eventDetails) => void"}>Fires while a stretch is selected by dragging with Shift held, as `[start, end]` in `duration` units: feed it to a `Waveform.Region`. A plain press and drag still seek. `eventDetails.cancel()` keeps the selection as it was.</TypeRow>
+<TypeRow name={"onSelectionCommitted"} type={"(range: readonly [number, number], eventDetails) => void"}>Fires when a selection that changed ends.</TypeRow>
 </TypeTable>
 
 <TypeTable title="Data attributes">

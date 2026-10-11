@@ -180,7 +180,7 @@ Marks the value on the pad (`left`/`top` as percentages, centered with `translat
 
 <TypeTable>
 <TypeRow name={"getAriaLabel"} type={"(axis: Axis) => string"}>Names each axis input. Defaults to `aria-label` followed by "X" / "Y".</TypeRow>
-<TypeRow name={"getAriaValueText"} type={"( formattedValue: string, value: number, axis: Axis ) => string"}>Returns an axis input's `aria-valuetext`. Defaults to the formatted value.</TypeRow>
+<TypeRow name={"getAriaValueText"} type={"(formattedValue: string, value: number, axis: Axis) => string"}>Returns an axis input's `aria-valuetext`. Defaults to the formatted value.</TypeRow>
 </TypeTable>
 
 <TypeTable title="Data attributes">
@@ -193,7 +193,7 @@ Marks the value on the pad (`left`/`top` as percentages, centered with `translat
 The formatted value (`format`/`locale` on Root), `"x, y"` by default. Renders a `<output>` element.
 
 <TypeTable>
-<TypeRow name={"children"} type={"| React.ReactNode | (( formattedX: string, formattedY: string, value: Point ) => React.ReactNode)"}></TypeRow>
+<TypeRow name={"children"} type={"| React.ReactNode | ((formattedX: string, formattedY: string, value: Point) => React.ReactNode)"}></TypeRow>
 </TypeTable>
 
 <TypeTable title="Data attributes">

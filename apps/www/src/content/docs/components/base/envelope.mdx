@@ -166,8 +166,8 @@ Groups all parts of the breakpoint envelope and owns its points, each normalized
 <TypeRow name={"locale"} type={"Intl.LocalesArgument"}></TypeRow>
 <TypeRow name={"maxPoints"} type={"number"}>Ceiling on the number of points; adding is blocked at this count. Equal to `minPoints`, the shape is fixed.</TypeRow>
 <TypeRow name={"minPoints"} type={"number"} default={"2"}>Floor on the number of points; removal is blocked at this count.</TypeRow>
-<TypeRow name={"onValueChange"} type={"( value: GeomPoint[], eventDetails: ChangeEventDetails ) => void"}>Fires on every change: drag, keyboard, add and remove.</TypeRow>
-<TypeRow name={"onValueCommitted"} type={"( value: GeomPoint[], eventDetails: CommitEventDetails ) => void"}>Fires when an interaction that changed the points ends.</TypeRow>
+<TypeRow name={"onValueChange"} type={"(value: GeomPoint[], eventDetails: ChangeEventDetails) => void"}>Fires on every change: drag, keyboard, add and remove.</TypeRow>
+<TypeRow name={"onValueCommitted"} type={"(value: GeomPoint[], eventDetails: CommitEventDetails) => void"}>Fires when an interaction that changed the points ends.</TypeRow>
 <TypeRow name={"step"} type={"number"} default={"0.01"}>Keyboard step on both axes, in normalized units.</TypeRow>
 <TypeRow name={"snap"} type={"number"} default={"0"}>Grid the pointer snaps points to, in normalized units: `0.25` snaps to quarters, `0` is no grid. Cmd/Ctrl leaves the grid and Shift's fine drag ignores it.</TypeRow>
 <TypeRow name={"value"} type={"GeomPoint[]"}></TypeRow>
@@ -211,7 +211,7 @@ The area under the curve. Renders a `<polyline>` element.
 Renders one child per point, in `x` order.
 
 <TypeTable>
-<TypeRow name={"children"} type={"( point: GeomPoint, index: number, points: GeomPoint[] ) => React.ReactNode"}></TypeRow>
+<TypeRow name={"children"} type={"(point: GeomPoint, index: number, points: GeomPoint[]) => React.ReactNode"}></TypeRow>
 </TypeTable>
 
 ### Point
