@@ -916,7 +916,7 @@ export default function BlockTimeline() {
                 tabler="IconKeyboard"
               />
             </PopoverTrigger>
-            <PopoverContent align="end" className="w-80">
+            <PopoverContent align="center" className="w-80">
               <PopoverHeader>
                 <PopoverTitle>Keyboard shortcuts</PopoverTitle>
                 <PopoverDescription>
