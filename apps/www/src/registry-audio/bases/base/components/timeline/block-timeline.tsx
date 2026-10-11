@@ -278,6 +278,7 @@ const SHORTCUTS: { action: string; keys: string[] }[] = [
   { action: "Duplicate the clip", keys: ["Cmd/Ctrl", "D"] },
   { action: "Remove the clip", keys: ["Delete"] },
   { action: "Add a locator at the cursor", keys: ["M"] },
+  { action: "Rename a locator", keys: ["Enter"] },
   {
     action: "Jump to the previous or next locator",
     keys: ["Alt", "Left", "Right"],
@@ -291,40 +292,92 @@ const SHORTCUTS: { action: string; keys: string[] }[] = [
   { action: "Clear the selection", keys: ["Esc"] },
 ];
 
-/** A locator: press it to put the cursor there, Delete takes it away. */
+interface Locator {
+  at: number;
+  name: string;
+}
+
+/**
+ * A locator: press it to put the cursor there, double-click it or press
+ * Enter to rename it (Enter keeps the name, Escape drops the change), Delete
+ * takes it away.
+ */
 function LocatorButton({
-  at,
-  index,
+  locator,
   onJump,
   onRemove,
+  onRename,
 }: {
-  at: number;
-  index: number;
+  locator: Locator;
   onJump: (at: number) => void;
   onRemove: (at: number) => void;
+  onRename: (at: number, name: string) => void;
 }) {
+  const { at, name } = locator;
+  const [editing, setEditing] = useState(false);
   const handleClick = useCallback(() => onJump(at), [at, onJump]);
+  const startEditing = useCallback(() => setEditing(true), []);
   const handleKeyDown = useCallback(
     (event: KeyboardEvent<HTMLButtonElement>) => {
       if (event.key === "Delete" || event.key === "Backspace") {
         event.preventDefault();
         event.stopPropagation();
         onRemove(at);
+      } else if (event.key === "Enter") {
+        event.preventDefault();
+        event.stopPropagation();
+        setEditing(true);
       }
     },
     [at, onRemove]
   );
+  const handleEditKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLInputElement>) => {
+      event.stopPropagation();
+      if (event.key === "Enter") {
+        const next = event.currentTarget.value.trim();
+        if (next) {
+          onRename(at, next);
+        }
+        setEditing(false);
+      } else if (event.key === "Escape") {
+        setEditing(false);
+      }
+    },
+    [at, onRename]
+  );
+  const handleBlur = useCallback(() => setEditing(false), []);
+
+  if (editing) {
+    return (
+      <input
+        aria-label="Locator name"
+        autoFocus
+        className="h-full w-24 border-primary border-s-2 bg-background px-1 text-primary text-xs outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        defaultValue={name}
+        onBlur={handleBlur}
+        onKeyDown={handleEditKeyDown}
+        onPointerDown={stopPress}
+      />
+    );
+  }
   return (
     <button
-      aria-label={`Locator ${index + 1}`}
-      className="pointer-events-auto flex h-full items-center gap-1 border-primary border-s-2 ps-1 pe-2 text-primary text-xs outline-none hover:bg-primary/10 focus-visible:ring-2 focus-visible:ring-ring"
+      aria-label={`Locator ${name}`}
+      className="pointer-events-auto flex h-full items-center whitespace-nowrap border-primary border-s-2 ps-1 pe-2 text-primary text-xs outline-none hover:bg-primary/10 focus-visible:ring-2 focus-visible:ring-ring"
       onClick={handleClick}
+      onDoubleClick={startEditing}
       onKeyDown={handleKeyDown}
       type="button"
     >
-      {index + 1}
+      {name}
     </button>
   );
+}
+
+/** Keeps a press inside a field from reaching the lane under it. */
+function stopPress(event: PointerEvent<HTMLElement>) {
+  event.stopPropagation();
 }
 
 const MIN_TRACK_HEIGHT = 40;
@@ -521,7 +574,10 @@ export default function BlockTimeline() {
   const [loop, setLoop] = useState<Span>([bars(8), bars(16)]);
   const [looping, setLooping] = useState(true);
   // Locators: named points to jump to, kept in seconds at the tempo they were set.
-  const [locators, setLocators] = useState<number[]>([bars(4), bars(20)]);
+  const [locators, setLocators] = useState<Locator[]>([
+    { at: bars(4), name: "Verse" },
+    { at: bars(20), name: "Chorus" },
+  ]);
   const [metronome, setMetronome] = useState(false);
   const { clock, playing, setPlaying } = usePlaybackClock({
     duration,
@@ -684,11 +740,25 @@ export default function BlockTimeline() {
   }, [bar, clock, selectedId, selectedTrack]);
   const addLocator = useCallback(() => {
     const at = clock.getSnapshot();
-    setLocators((all) => (all.includes(at) ? all : [...all, at]));
+    setLocators((all) =>
+      all.some((locator) => locator.at === at)
+        ? all
+        : [...all, { at, name: `Locator ${all.length + 1}` }]
+    );
   }, [clock]);
   const jumpToLocator = useCallback((at: number) => clock.set(at), [clock]);
   const removeLocator = useCallback(
-    (at: number) => setLocators((all) => all.filter((point) => point !== at)),
+    (at: number) =>
+      setLocators((all) => all.filter((locator) => locator.at !== at)),
+    []
+  );
+  const renameLocator = useCallback(
+    (at: number, name: string) =>
+      setLocators((all) =>
+        all.map((locator) =>
+          locator.at === at ? { ...locator, name } : locator
+        )
+      ),
     []
   );
 
@@ -708,7 +778,7 @@ export default function BlockTimeline() {
         return false;
       }
       const target = adjacentPoint(
-        locators,
+        locators.map((locator) => locator.at),
         clock.getSnapshot(),
         direction === 1 ? 1 : -1
       );
@@ -911,13 +981,13 @@ export default function BlockTimeline() {
               }
             >
               <TimelineLane className="h-6">
-                {locators.map((at, index) => (
-                  <TimelineMark key={at} value={at}>
+                {locators.map((locator) => (
+                  <TimelineMark key={locator.at} value={locator.at}>
                     <LocatorButton
-                      at={at}
-                      index={index}
+                      locator={locator}
                       onJump={jumpToLocator}
                       onRemove={removeLocator}
+                      onRename={renameLocator}
                     />
                   </TimelineMark>
                 ))}
