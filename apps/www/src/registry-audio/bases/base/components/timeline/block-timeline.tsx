@@ -70,7 +70,31 @@ const BAR = secondsPerBar(DEFAULT_TEMPO);
 /** The width of a track header, which the lanes start after. */
 const LEAD_PX = 112;
 const MAX_ZOOM = 240;
-const ZOOM_STEPPERS = { decrement: "Zoom out", increment: "Zoom in" };
+/** The zoom's steps are loupes, not a minus and a plus. */
+const ZOOM_STEPPERS = {
+  decrement: "Zoom out",
+  icons: {
+    decrement: (
+      <IconPlaceholder
+        hugeicons="ZoomOutAreaIcon"
+        lucide="ZoomOutIcon"
+        phosphor="MagnifyingGlassMinusIcon"
+        remixicon="RiZoomOutLine"
+        tabler="IconZoomOut"
+      />
+    ),
+    increment: (
+      <IconPlaceholder
+        hugeicons="ZoomInAreaIcon"
+        lucide="ZoomInIcon"
+        phosphor="MagnifyingGlassPlusIcon"
+        remixicon="RiZoomInLine"
+        tabler="IconZoomIn"
+      />
+    ),
+  },
+  increment: "Zoom in",
+};
 
 /** How the zoom is shown: as a share of the fitted view. */
 const PERCENT: Intl.NumberFormatOptions = {
