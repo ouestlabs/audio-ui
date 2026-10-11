@@ -40,7 +40,7 @@ export function ComponentCard({
     <ComponentCardContainer
       block={isBlock(name)}
       className={className}
-      header={
+      footer={
         <PreviewBar
           actions={
             <Sheet>
@@ -62,7 +62,6 @@ export function ComponentCard({
             ) : undefined
           }
           name={name}
-          position="header"
         />
       }
       isFullWidth={isFullWidth}
