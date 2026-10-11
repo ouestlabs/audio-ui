@@ -67,6 +67,7 @@
             "noJsxPropsBind": "off"
           },
           "suspicious": {
+            "noArrayIndexKey": "off",
             "noShadow": "off"
           }
         }

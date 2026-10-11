@@ -33,6 +33,14 @@ const gestures: Record<string, { click?: boolean; label: string; path: Path }> =
       label: "the harness alone",
       path: (i) => ({ x: sweep(i, 300), y: 0 }),
     },
+    knob: {
+      label: "turn, controlled",
+      path: (i) => {
+        // Round the centre, as a hand turning the knob does.
+        const angle = (sweep(i, 120) * Math.PI) / 180;
+        return { x: 60 * Math.sin(angle), y: 60 - 60 * Math.cos(angle) - 60 };
+      },
+    },
     "piano-roll-500": {
       label: "drag one of 500 notes, snapped",
       path: (i) => ({ x: sweep(i, 600), y: sweep(i + 5, 100, 37) }),
@@ -50,6 +58,25 @@ const gestures: Record<string, { click?: boolean; label: string; path: Path }> =
       path: (i) => ({
         x: ((i * 37) % 64) * 18,
         y: (((i * 37) >> 6) % 16) * 18,
+      }),
+    },
+    "sequencer-velocities": {
+      label: "draw across 64 velocity bars",
+      path: (i) => ({ x: sweep(i, 900), y: sweep(i + 3, 100, 41) - 50 }),
+    },
+    timeline: {
+      label: "scrub past 200 marks",
+      path: (i) => ({ x: sweep(i, 900), y: 0 }),
+    },
+    waveform: {
+      label: "scrub a 2048-peak waveform",
+      path: (i) => ({ x: sweep(i, 900) - 450, y: 0 }),
+    },
+    xypad: {
+      label: "drag over both axes",
+      path: (i) => ({
+        x: sweep(i, 280) - 140,
+        y: sweep(i + 13, 280, 47) - 140,
       }),
     },
   };
