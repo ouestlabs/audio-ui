@@ -79,6 +79,8 @@ function Knob({
         "group/knob",
         marks && "m-2",
         hasLabels && "m-5",
+        // The readout hangs under the dial: leave it room, or a panel clips it.
+        valueLabel !== "hidden" && (hasLabels ? "mb-12" : "mb-8"),
         className
       )}
       data-slot="knob"
