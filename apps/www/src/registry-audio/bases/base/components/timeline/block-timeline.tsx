@@ -1281,7 +1281,7 @@ export default function BlockTimeline() {
               </Row>
             ))}
             <Row
-              className="border-foreground/25 border-b"
+              className="sticky bottom-0 z-30 border-foreground/25 border-y bg-background"
               lead={
                 <Button
                   className="m-1 w-full justify-start gap-1.5"
