@@ -7,6 +7,7 @@ import {
   XIcon,
 } from "@phosphor-icons/react/ssr";
 import { useCallback } from "react";
+import { BuiltOn } from "@/components/built-on";
 import { CopyRegistry } from "@/components/copy-registry";
 import {
   Frame,
@@ -102,8 +103,9 @@ export function ExpandPreview({
         {/* The same frame as a card: a header with the name and what to do with it, and the panel. */}
         <Frame className="size-full rounded-(--frame-radius)">
           <FrameHeader className="shrink-0 flex-row items-center justify-between gap-3 px-2 py-1.5">
-            <DialogTitle className="truncate ps-1 font-mono font-normal text-site-muted-foreground text-xs">
-              {label}
+            <DialogTitle className="flex flex-1 items-center gap-1.5 truncate ps-1 font-normal text-site-muted-foreground text-xs">
+              <BuiltOn />
+              <span className="sr-only">{label}</span>
             </DialogTitle>
             <div className="flex items-center gap-1.5">
               <CopyRegistry value={`@audio/${label}`} />

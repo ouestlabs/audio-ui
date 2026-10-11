@@ -989,11 +989,12 @@ export default function BlockTimeline() {
     (id: string) => setSelection({ clips: [], track: id }),
     []
   );
-  // A press on empty lane puts the cursor there (the lane does it) and leaves the selection alone.
+  // A press on empty lane puts the cursor there (the lane does it) and lets go of the clips; a track picked by its header stays picked, to split at the cursor just put.
   // The shortcuts are caught on the panel, so a press on the lane, which takes no focus, hands it over.
   const panelRef = useRef<HTMLDivElement>(null);
   const focusPanel = useCallback((event: PointerEvent<HTMLDivElement>) => {
-    if (event.target === event.currentTarget) {
+    if (event.target === event.currentTarget && !event.shiftKey) {
+      setSelection((current) => (current?.track ? current : null));
       panelRef.current?.focus({ focusVisible: false, preventScroll: true });
     }
   }, []);

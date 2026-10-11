@@ -1,6 +1,7 @@
 "use client";
 
 import type * as React from "react";
+import { BuiltOn } from "@/components/built-on";
 import { CopyRegistry } from "@/components/copy-registry";
 import {
   FrameContent,
@@ -11,7 +12,6 @@ import { ExpandPreview } from "@/components/expand-preview";
 import type { PreviewHost } from "@/components/preview-host";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
-import { BASES } from "@/registry/bases";
 
 /**
  * The inset of every preview's panel, on a page, in a card and at full size:
@@ -44,24 +44,6 @@ export function PreviewLoading() {
     <div className="flex min-h-40 w-full flex-1 items-center justify-center">
       <Spinner className="size-5 text-site-muted-foreground/40" />
     </div>
-  );
-}
-
-/** The library a preview is built on: the only one there is for now. */
-function BuiltOn() {
-  const base = BASES.find((item) => item.name === "base");
-  const logo = base?.meta?.logo;
-  return (
-    <>
-      {typeof logo === "string" ? (
-        <span
-          aria-hidden
-          className="size-3.5 shrink-0 [&_svg]:size-3.5"
-          dangerouslySetInnerHTML={{ __html: logo }}
-        />
-      ) : null}
-      <span className="truncate">{base?.title}</span>
-    </>
   );
 }
 
