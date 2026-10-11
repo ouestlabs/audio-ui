@@ -4,6 +4,7 @@
   "pages": [
     "index",
     "get-started",
+    "primitives",
     "styling",
     "agents",
     "mcp",

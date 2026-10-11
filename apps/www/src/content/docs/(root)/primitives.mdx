@@ -1,0 +1,108 @@
+---
+title: Primitives
+description: How the headless primitives of @audio-ui/react are put together, styled, controlled and read, the same way for every one of them.
+---
+
+Every primitive in `@audio-ui/react` works the same way. Learn it once with the Knob and the rest follows.
+
+## Parts
+
+A primitive is a set of parts you assemble. Each part renders one element and does one job: the root owns the value, the control takes the pointer, the thumb takes the focus.
+
+```tsx
+import { Knob } from "@audio-ui/react";
+
+<Knob.Root defaultValue={50}>
+  <Knob.Label>Cutoff</Knob.Label>
+  <Knob.Control>
+    <Knob.Track />
+    <Knob.Indicator />
+    <Knob.Thumb aria-label="Cutoff" />
+  </Knob.Control>
+  <Knob.Value />
+</Knob.Root>
+```
+
+Nothing is styled. Parts you leave out are not rendered, so a knob with no value readout is a knob without `Knob.Value`.
+
+## Style from state
+
+State is on the element, never behind a prop you have to read. Style it with the attribute selectors of your CSS or the variants of your framework:
+
+```tsx
+<Knob.Thumb className="cursor-grab data-[dragging]:cursor-grabbing" />
+```
+
+- **Attributes.** A part has `data-disabled`, `data-dragging` and the like when they are true, and no attribute when they are not. Each part's page lists its own.
+- **CSS variables.** What changes too often to be an attribute is a variable: a knob mark's angle (`--knob-mark-angle`), a pad's position (`--xy-pad-x`, `--xy-pad-y`), a clip's source offset (`--clip-offset`), a waveform's position (`--waveform-position`), a timeline's unit (`--timeline-unit`). Position with `calc()`, and the browser follows without React re-rendering.
+- **State functions.** `className` and `style` can be functions of the part's state:
+
+```tsx
+<Knob.Thumb className={(state) => (state.dragging ? "ring-2" : "ring-0")} />
+```
+
+## Render another element
+
+Every part takes a `render` prop to change the element it renders or to compose it with your own component. Its props, ref and handlers are merged with yours, not replaced:
+
+```tsx
+<Knob.Control render={<MyDial />} />
+<Timeline.Clip render={(props, state) => <article {...props} />} />
+```
+
+A handler you pass runs alongside the part's own. A consumer's `onPointerDown` does not switch the drag off.
+
+## Control the value
+
+A primitive is uncontrolled with `defaultValue`, or controlled with `value`. Either way it tells you what changed and why:
+
+```tsx
+<Knob.Root
+  onValueChange={(value, eventDetails) => {
+    if (eventDetails.reason === "wheel") {
+      eventDetails.cancel(); // refuse this one
+    }
+  }}
+  onValueCommitted={(value, eventDetails) => save(value)}
+  value={cutoff}
+/>
+```
+
+- `onValueChange` fires on every change, with `eventDetails.reason` (`"drag"`, `"wheel"`, `"keyboard"`, `"reset"`, `"input-change"`...) and `eventDetails.event`, the event behind it. `eventDetails.cancel()` refuses the change: a controlled value stays put, an uncontrolled one does not move.
+- `onValueCommitted` fires once, when a gesture that changed the value ends. That is the time to start a note, push to an undo stack or save, not on every move of a drag.
+- While a pointer drags, the part follows it even if your controlled value is late, and takes the value back when the pointer is released.
+
+## Live values
+
+A playhead, a meter or a waveform that follows a signal changes sixty times a second, too often to go through React state. Give it a `source` instead, an object with `getSnapshot` and `subscribe`, and the part writes each value straight to the DOM:
+
+```tsx
+import { createSource } from "@audio-ui/react";
+
+const position = createSource(0);
+
+// in your audio loop
+position.set(audioContext.currentTime);
+
+<Timeline.Root source={position}>
+  <Timeline.Lane>
+    <Timeline.Playhead />
+  </Timeline.Lane>
+</Timeline.Root>
+```
+
+Your page does not re-render while it plays.
+
+## Accessibility
+
+Each control holds a native `<input type="range">`, visually hidden. It takes the focus, answers the arrow, Page, Home and End keys, announces its value and carries the accessible name, so a screen reader and the keyboard treat it as the slider it is. Give the thumb an `aria-label`, or a `Label` part, and format what is read out with `getAriaValueText` or `format`. Pointer presses do not draw the keyboard focus ring; keyboard focus does.
+
+## Import only what you use
+
+Import from the root, or from a subpath to keep the rest out of your bundle:
+
+```tsx
+import { Knob } from "@audio-ui/react/knob";
+```
+
+A single primitive weighs a few kilobytes gzipped (a knob about 5 KB, a fader about 3 KB).
