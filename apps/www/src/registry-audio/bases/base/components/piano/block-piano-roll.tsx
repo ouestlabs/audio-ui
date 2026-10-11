@@ -5,6 +5,7 @@ import {
   type PianoRoll as PianoRollPrimitive,
 } from "@audio-ui/react";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder";
 import { Button } from "@/registry/bases/base/ui/button";
 import { BpmControl } from "@/registry-audio/bases/base/audio/elements/bpm-control";
 import { Fader } from "@/registry-audio/bases/base/audio/elements/fader";
@@ -551,21 +552,37 @@ export default function BlockPianoRoll() {
             Clear
           </Button>
           <Button
+            aria-label="Import a MIDI file"
             onClick={handleImportButtonClick}
-            size="sm"
+            size="icon-sm"
+            title="Import a MIDI file"
             type="button"
-            variant="outline"
+            variant="ghost"
           >
-            Import MIDI
+            <IconPlaceholder
+              hugeicons="Upload01Icon"
+              lucide="UploadIcon"
+              phosphor="UploadIcon"
+              remixicon="RiUploadLine"
+              tabler="IconUpload"
+            />
           </Button>
           <Button
+            aria-label="Export as a MIDI file"
             disabled={notes.length === 0}
             onClick={handleExportMidiFile}
-            size="sm"
+            size="icon-sm"
+            title="Export as a MIDI file"
             type="button"
-            variant="outline"
+            variant="ghost"
           >
-            Export MIDI
+            <IconPlaceholder
+              hugeicons="Download01Icon"
+              lucide="DownloadIcon"
+              phosphor="DownloadIcon"
+              remixicon="RiDownloadLine"
+              tabler="IconDownload"
+            />
           </Button>
         </div>
         <BpmControl onValueChange={setBpm} value={bpm} />
