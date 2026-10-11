@@ -4,7 +4,6 @@ import path from "node:path";
 import { getRegistryItemMetadata } from "@/lib/registry";
 
 const NAME_ATTR_REGEX = /name="([^"]+)"/;
-const STYLE_NAME_ATTR_REGEX = /styleName="([^"]+)"/;
 
 export function processMdxForLLMs(content: string) {
   if (!content || typeof content !== "string") {
