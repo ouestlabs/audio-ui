@@ -2,6 +2,13 @@
 
 import { ArrowsOutSimpleIcon, XIcon } from "@phosphor-icons/react/ssr";
 import type * as React from "react";
+import { CopyRegistry } from "@/components/copy-registry";
+import {
+  Frame,
+  FrameContent,
+  FrameFooter,
+  FrameHeader,
+} from "@/components/custom/frame";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -43,33 +50,42 @@ export function ExpandPreview({
         }
       />
       <DialogContent
-        className="top-3 left-3 h-[calc(100dvh-1.5rem)] w-[calc(100vw-1.5rem)] max-w-none translate-x-0 translate-y-0 gap-0 overflow-hidden p-0 sm:max-w-none"
+        className="top-3 left-3 h-[calc(100dvh-1.5rem)] w-[calc(100vw-1.5rem)] max-w-none translate-x-0 translate-y-0 gap-0 overflow-hidden rounded-[16px] bg-site-background p-0 ring-0 sm:max-w-none"
         showCloseButton={false}
       >
-        <DialogTitle className="sr-only">{label}</DialogTitle>
-        <DialogDescription className="sr-only">
-          The preview at full size.
-        </DialogDescription>
-        {/* In the corner, above the block, which leaves it room. */}
-        <DialogClose
-          render={
-            <Button
-              aria-label="Close"
-              className="absolute end-2 top-2 z-50 size-7 bg-background/80 text-muted-foreground backdrop-blur-sm hover:text-foreground"
-              size="icon-sm"
-              variant="ghost"
-            />
-          }
-        >
-          <XIcon aria-hidden="true" className="size-4" />
-        </DialogClose>
-        {/* The block is the page: the whole dialog, inset from the screen, a panel without a frame, and what has a height of its own gives it back to the editor. */}
-        <div
-          className="h-full overflow-hidden font-sans [&>.cn-audio-panel]:h-full [&>.cn-audio-panel]:overflow-auto [&>.cn-audio-panel]:pt-11 [&>.cn-audio-panel]:rounded-none [&>.cn-audio-panel]:border-0 [&_[data-slot=piano-roll]]:h-auto [&_[data-slot=piano-roll]]:min-h-0 [&_[data-slot=piano-roll]]:flex-1 [&_[data-slot=timeline]]:flex [&_[data-slot=timeline]]:min-h-0 [&_[data-slot=timeline]]:flex-1 [&_[data-slot=timeline]]:flex-col"
-          data-expanded-preview
-        >
-          {children}
-        </div>
+        {/* The same frame as a card: a header, the panel, a footer. */}
+        <Frame className="size-full rounded-[16px]">
+          <FrameHeader className="shrink-0 flex-row items-center justify-between gap-3 px-2 py-1.5">
+            <DialogTitle className="truncate ps-1 font-mono font-normal text-site-muted-foreground text-xs">
+              {label}
+            </DialogTitle>
+            <DialogClose
+              render={
+                <Button aria-label="Close" size="icon-sm" variant="outline" />
+              }
+            >
+              <XIcon aria-hidden="true" />
+            </DialogClose>
+          </FrameHeader>
+          <DialogDescription className="sr-only">
+            The preview at full size.
+          </DialogDescription>
+          {/* The block is the page: the whole panel, a panel without a frame of its own, and what has a height of its own gives it back to the editor. */}
+          <FrameContent className="min-h-0 flex-1 font-sans">
+            <div
+              className="size-full overflow-hidden [&>.cn-audio-panel]:h-full [&>.cn-audio-panel]:overflow-auto [&>.cn-audio-panel]:rounded-none [&>.cn-audio-panel]:border-0 [&_[data-slot=piano-roll]]:h-auto [&_[data-slot=piano-roll]]:min-h-0 [&_[data-slot=piano-roll]]:flex-1 [&_[data-slot=timeline]]:flex [&_[data-slot=timeline]]:min-h-0 [&_[data-slot=timeline]]:flex-1 [&_[data-slot=timeline]]:flex-col"
+              data-expanded-preview
+            >
+              {children}
+            </div>
+          </FrameContent>
+          <FrameFooter className="shrink-0 flex-row items-center justify-between gap-3 px-2 py-1.5">
+            <span className="truncate ps-1 text-site-muted-foreground text-xs">
+              Install with <code className="font-mono">@audio/{label}</code>
+            </span>
+            <CopyRegistry value={`@audio/${label}`} />
+          </FrameFooter>
+        </Frame>
       </DialogContent>
     </Dialog>
   );

@@ -1,6 +1,8 @@
 "use client";
 
 import * as React from "react";
+import { CopyRegistry } from "@/components/copy-registry";
+import { Frame, FrameContent, FrameFooter } from "@/components/custom/frame";
 import { ExpandPreview } from "@/components/expand-preview";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
@@ -19,7 +21,7 @@ export function ComponentPreviewTabs({
   source,
   sourcePreview,
   ...props
-}: React.ComponentProps<"div"> & {
+}: Omit<React.ComponentProps<"div">, "ref"> & {
   previewClassName?: string;
   align?: "center" | "start" | "end";
   hideCode?: boolean;
@@ -46,23 +48,12 @@ export function ComponentPreviewTabs({
   });
 
   return (
-    <div
-      className={cn(
-        "group site-rounded-xl relative mt-4 mb-12 flex flex-col gap-2 overflow-hidden border border-site-border",
-        className
-      )}
+    <Frame
+      className={cn("group mt-4 mb-12", className)}
       data-slot="component-preview"
       {...props}
     >
-      <div className="relative" data-slot="preview">
-        {expandLabel ? (
-          <ExpandPreview
-            className="absolute end-2 top-2 z-10 size-7 rounded-md"
-            label={expandLabel}
-          >
-            {component}
-          </ExpandPreview>
-        ) : null}
+      <FrameContent data-slot="preview">
         <div
           className={cn(
             "preview flex h-72 w-full justify-center p-10 font-sans data-[chromeless=true]:h-auto data-[align=start]:items-start data-[align=end]:items-end data-[align=center]:items-center data-[chromeless=true]:p-0",
@@ -115,7 +106,18 @@ export function ComponentPreviewTabs({
             )}
           </div>
         )}
-      </div>
-    </div>
+      </FrameContent>
+      {expandLabel ? (
+        <FrameFooter className="flex-row items-center justify-between gap-3 px-2 py-1.5">
+          <span className="truncate ps-1 font-mono text-site-muted-foreground text-xs">
+            {expandLabel}
+          </span>
+          <div className="flex items-center gap-1.5">
+            <CopyRegistry value={`@audio/${expandLabel}`} />
+            <ExpandPreview label={expandLabel}>{component}</ExpandPreview>
+          </div>
+        </FrameFooter>
+      ) : null}
+    </Frame>
   );
 }

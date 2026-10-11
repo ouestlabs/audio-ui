@@ -61,6 +61,21 @@ export function FrameContent({
   );
 }
 
+export function FrameHeader({
+  children,
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div
+      className={cn("flex flex-col gap-1 p-3 font-site-sans", className)}
+      {...props}
+    >
+      {children}
+    </div>
+  );
+}
+
 export function FrameFooter({
   children,
   className,
