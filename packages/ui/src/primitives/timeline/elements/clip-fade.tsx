@@ -1,8 +1,22 @@
 import { mergeProps } from "@base-ui/react/merge-props";
 import { useRender } from "@base-ui/react/use-render";
 import { type PartProps, resolveStyling } from "../../internal/part";
+import { type FadeShape, fadeGain } from "../clip";
 import { UNIT_PROPERTY } from "../context";
 import { type ClipState, useClipContext } from "./clip-context";
+
+const SAMPLES = 16;
+
+/** The fade's ramp as points in a unit square, from the clip's edge: a fade-in climbs, a fade-out falls. */
+function ramp(shape: FadeShape, edge: "in" | "out") {
+  const points: string[] = [];
+  for (let index = 0; index <= SAMPLES; index += 1) {
+    const x = index / SAMPLES;
+    const gain = fadeGain(shape, edge === "in" ? x : 1 - x);
+    points.push(`${x} ${1 - gain}`);
+  }
+  return points;
+}
 
 /**
  * Draws a fade over the clip's content, as a DAW does: the ramp as a line from
@@ -16,6 +30,10 @@ export function ClipFade(componentProps: ClipFade.Props) {
     componentProps;
   const { meta, state: clipState } = useClipContext("ClipFade");
   const length = edge === "in" ? meta.value.fadeIn : meta.value.fadeOut;
+  const shape =
+    (edge === "in" ? meta.value.fadeInShape : meta.value.fadeOutShape) ??
+    "linear";
+  const points = ramp(shape, edge);
   const state = { ...clipState, edge };
   const property = edge === "in" ? "--clip-fade-in" : "--clip-fade-out";
 
@@ -27,12 +45,12 @@ export function ClipFade(componentProps: ClipFade.Props) {
         children: (
           <>
             <path
-              d={edge === "in" ? "M0 0H1L0 1Z" : "M0 0H1V1Z"}
+              d={`M0 0H1L${[...points].reverse().join("L")}Z`}
               fill="currentColor"
               fillOpacity={0.2}
             />
             <path
-              d={edge === "in" ? "M0 1L1 0" : "M0 0L1 1"}
+              d={`M${points.join("L")}`}
               fill="none"
               stroke="currentColor"
               strokeWidth={1.5}

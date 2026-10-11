@@ -3,9 +3,13 @@ import {
   type ClipValue,
   clipEnd,
   duplicateClip,
+  FADE_SHAPES,
+  fadeGain,
   moveClip,
+  nextFadeShape,
   setClipFadeIn,
   setClipFadeOut,
+  setClipFadeShape,
   splitClip,
   trimClipEnd,
   trimClipStart,
@@ -140,5 +144,50 @@ describe("duplicateClip", () => {
   test("keeps the copy on the timeline when there is no room", () => {
     const tight = { ...limits, duration: 24 };
     expect(duplicateClip(clip, tight).start).toBe(16);
+  });
+});
+
+describe("fade shapes", () => {
+  test("every shape runs from silence to full gain", () => {
+    for (const shape of FADE_SHAPES) {
+      expect(fadeGain(shape, 0)).toBe(0);
+      expect(fadeGain(shape, 1)).toBe(1);
+    }
+  });
+
+  test("fast rises early, slow late, and linear evenly", () => {
+    expect(fadeGain("fast", 0.5)).toBeGreaterThan(0.5);
+    expect(fadeGain("slow", 0.5)).toBeLessThan(0.5);
+    expect(fadeGain("linear", 0.5)).toBe(0.5);
+    expect(fadeGain("smooth", 0.5)).toBe(0.5);
+  });
+
+  test("progress outside the fade is held at its ends", () => {
+    expect(fadeGain("slow", -1)).toBe(0);
+    expect(fadeGain("slow", 2)).toBe(1);
+  });
+
+  test("steps through the shapes and round again", () => {
+    expect(nextFadeShape()).toBe("fast");
+    expect(nextFadeShape("smooth")).toBe("linear");
+  });
+
+  test("sets one fade's shape and leaves the other", () => {
+    const next = setClipFadeShape(clip, "out", "slow");
+    expect(next.fadeOutShape).toBe("slow");
+    expect(next.fadeInShape).toBeUndefined();
+  });
+
+  test("a split keeps each outer shape and the cut has none", () => {
+    const shaped = {
+      ...clip,
+      fadeInShape: "fast",
+      fadeOutShape: "slow",
+    } as const;
+    const [left, right] = splitClip(shaped, 14) as [ClipValue, ClipValue];
+    expect(left.fadeInShape).toBe("fast");
+    expect(left.fadeOutShape).toBeUndefined();
+    expect(right.fadeOutShape).toBe("slow");
+    expect(right.fadeInShape).toBeUndefined();
   });
 });

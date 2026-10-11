@@ -7,14 +7,54 @@ import { clamp, clampFinite } from "../../utils";
 export interface ClipValue {
   /** How long the clip's fade-in lasts, from its start. */
   fadeIn: number;
+  /** How the fade-in rises. @default "linear" */
+  fadeInShape?: FadeShape;
   /** How long the clip's fade-out lasts, up to its end. */
   fadeOut: number;
+  /** How the fade-out falls. @default "linear" */
+  fadeOutShape?: FadeShape;
   /** How long the clip is on the timeline. */
   length: number;
   /** Where in the source the clip begins: what trimming its start moves. */
   offset: number;
   /** Where the clip begins on the timeline. */
   start: number;
+}
+
+/** How a fade rises or falls: evenly, quick then slow, slow then quick, or eased at both ends. */
+export type FadeShape = "fast" | "linear" | "slow" | "smooth";
+
+export const FADE_SHAPES: readonly FadeShape[] = [
+  "linear",
+  "fast",
+  "slow",
+  "smooth",
+];
+
+/** The shape after `shape`, going round, for a control that steps through them. */
+export function nextFadeShape(shape: FadeShape = "linear"): FadeShape {
+  return (
+    FADE_SHAPES[(FADE_SHAPES.indexOf(shape) + 1) % FADE_SHAPES.length] ??
+    "linear"
+  );
+}
+
+/**
+ * The gain a fade of `shape` has `progress` of the way through it, from 0
+ * (silent) to 1 (full): the curve of a fade-in; a fade-out plays it backwards.
+ */
+export function fadeGain(shape: FadeShape, progress: number): number {
+  const t = clamp(progress, 0, 1);
+  switch (shape) {
+    case "fast":
+      return 1 - (1 - t) * (1 - t);
+    case "slow":
+      return t * t;
+    case "smooth":
+      return t * t * (3 - 2 * t);
+    default:
+      return t;
+  }
 }
 
 export interface ClipLimits {
@@ -92,6 +132,17 @@ export function trimClipEnd(
   return fitFades({ ...clip, length: next - clip.start });
 }
 
+/** Gives the fade at `edge` the shape `shape`. */
+export function setClipFadeShape(
+  clip: ClipValue,
+  edge: "in" | "out",
+  shape: FadeShape
+): ClipValue {
+  return edge === "in"
+    ? { ...clip, fadeInShape: shape }
+    : { ...clip, fadeOutShape: shape };
+}
+
 /** Sets the fade-in's length, which cannot run into the fade-out. */
 export function setClipFadeIn(clip: ClipValue, fadeIn: number): ClipValue {
   return {
@@ -124,13 +175,15 @@ export function splitClip(
   if (!(at - clip.start >= floor && end - at >= floor)) {
     return null;
   }
+  const { fadeOutShape: _cutOut, ...leftBase } = clip;
   const left = fitFades({
-    ...clip,
+    ...leftBase,
     fadeOut: 0,
     length: at - clip.start,
   });
+  const { fadeInShape: _cutIn, ...rightBase } = clip;
   const right = fitFades({
-    ...clip,
+    ...rightBase,
     fadeIn: 0,
     length: end - at,
     offset: clip.offset + (at - clip.start),

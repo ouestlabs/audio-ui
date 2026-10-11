@@ -47,7 +47,9 @@ function normalizeClip(clip: ClipValue, duration: number): ClipValue {
   const fadeOut = Math.min(length - fadeIn, Math.max(0, finite(clip.fadeOut)));
   return {
     fadeIn,
+    fadeInShape: clip.fadeInShape,
     fadeOut,
+    fadeOutShape: clip.fadeOutShape,
     length,
     offset: Math.max(0, finite(clip.offset)),
     start,
@@ -148,7 +150,9 @@ export function Clip(componentProps: Clip.Props) {
         next.length === current.length &&
         next.offset === current.offset &&
         next.fadeIn === current.fadeIn &&
-        next.fadeOut === current.fadeOut
+        next.fadeOut === current.fadeOut &&
+        next.fadeInShape === current.fadeInShape &&
+        next.fadeOutShape === current.fadeOutShape
       ) {
         return false;
       }

@@ -304,6 +304,34 @@ describe("Timeline.Clip", () => {
     );
   });
 
+  test("double-clicking a fade handle, or Enter on its input, steps its shape", () => {
+    const { fadeInHandle, onValueCommitted, view } = renderClip();
+    fireEvent.doubleClick(fadeInHandle);
+    expect(lastCall(onValueCommitted)).toEqual([
+      { ...start, fadeInShape: "fast" },
+      expect.objectContaining({ reason: "double-click", target: "fade-in" }),
+    ]);
+    const input = view.getByLabelText("Fade in") as HTMLInputElement;
+    fireEvent.keyDown(input, { key: "Enter" });
+    expect(lastCall(onValueCommitted)[0].fadeInShape).toBe("slow");
+    expect(lastCall(onValueCommitted)[1]).toEqual(
+      expect.objectContaining({ reason: "keyboard" })
+    );
+  });
+
+  test("a move with Alt held says it is a copy", () => {
+    const { header, onValueChange, onValueCommitted } = renderClip();
+    fireEvent.pointerDown(header, { altKey: true, clientX: 80, pointerId: 1 });
+    fireEvent.pointerMove(header, { altKey: true, clientX: 100, pointerId: 1 });
+    expect(lastCall(onValueChange)[1]).toEqual(
+      expect.objectContaining({ copy: true, target: "move" })
+    );
+    fireEvent.pointerUp(header, { altKey: true, clientX: 100, pointerId: 1 });
+    expect(lastCall(onValueCommitted)[1]).toEqual(
+      expect.objectContaining({ copy: true })
+    );
+  });
+
   test("the fades cannot overlap", () => {
     const { fadeInHandle, onValueChange } = renderClip({
       defaultValue: { ...start, fadeOut: 30 },

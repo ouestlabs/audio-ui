@@ -18,6 +18,8 @@ export type ClipTarget =
   | "trim-start";
 
 type WithTarget<Details> = Details & {
+  /** Whether Alt was held when the drag began: the clip is meant to be copied to where it lands, not moved. */
+  copy?: boolean;
   /** The lane under the pointer while the clip is dragged, or null when it is over none. */
   lane?: HTMLElement | null;
   /** What moved. */
@@ -27,12 +29,14 @@ type WithTarget<Details> = Details & {
 export type ClipChangeEventDetails =
   | WithTarget<ExtraChangeEventDetails<"drag", PointerEvent>>
   | WithTarget<ExtraChangeEventDetails<"keyboard", KeyboardEvent>>
-  | WithTarget<ExtraChangeEventDetails<"input-change", Event>>;
+  | WithTarget<ExtraChangeEventDetails<"input-change", Event>>
+  | WithTarget<ExtraChangeEventDetails<"double-click", MouseEvent>>;
 
 export type ClipCommitEventDetails =
   | WithTarget<ExtraCommitEventDetails<"drag", PointerEvent>>
   | WithTarget<ExtraCommitEventDetails<"keyboard", KeyboardEvent>>
-  | WithTarget<ExtraCommitEventDetails<"input-change", Event>>;
+  | WithTarget<ExtraCommitEventDetails<"input-change", Event>>
+  | WithTarget<ExtraCommitEventDetails<"double-click", MouseEvent>>;
 
 export type ClipState = {
   disabled: boolean;
@@ -83,6 +87,8 @@ export function useClipContext(part: string): ClipContextValue {
 interface DragGesture {
   /** Whether the gesture changed the clip at least once; if so its end commits. */
   changed: boolean;
+  /** Whether Alt was held at the press. */
+  copy: boolean;
   /** The clip when the pointer went down: the drag is measured from it. */
   origin: ClipValue;
   /** The lane the press began in, so a drop onto another one counts as a change. */
@@ -133,6 +139,7 @@ export function useClipDrag(
     event.currentTarget.setPointerCapture?.(event.pointerId);
     gestureRef.current = {
       changed: false,
+      copy: target === "move" && event.altKey,
       origin: meta.valueRef.current,
       originLane: target === "move" ? laneUnder(event.nativeEvent) : null,
       pointerId: event.pointerId,
@@ -159,6 +166,7 @@ export function useClipDrag(
     const eventDetails = Object.assign(
       createChangeEventDetails("drag", event.nativeEvent),
       {
+        copy: gesture.copy,
         lane: target === "move" ? laneUnder(event.nativeEvent) : undefined,
         target,
       }
@@ -183,6 +191,7 @@ export function useClipDrag(
     actions.setDragging(false);
     if (gesture.changed || (lane && lane !== gesture.originLane)) {
       actions.commit(committed, {
+        copy: gesture.copy,
         event: event.nativeEvent,
         lane,
         reason: "drag",

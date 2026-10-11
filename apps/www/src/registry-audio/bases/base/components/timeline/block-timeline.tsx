@@ -406,15 +406,6 @@ export default function BlockTimeline() {
             tabler={playing ? "IconPlayerPause" : "IconPlayerPlay"}
           />
         </Button>
-        <Button
-          aria-keyshortcuts="S"
-          disabled={!selection}
-          onClick={splitAtCursor}
-          size="sm"
-          variant="outline"
-        >
-          Split at cursor
-        </Button>
         <ButtonGroup>
           <Button
             aria-label="Zoom out"
