@@ -24,6 +24,7 @@ export {
   Loading03Icon,
   MinusSignIcon,
   MoreHorizontalCircle01Icon,
+  MoreHorizontalIcon,
   MultiplicationSignCircleIcon,
   PauseIcon,
   PlayIcon,

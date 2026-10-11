@@ -30,6 +30,19 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from "@/registry/bases/base/ui/context-menu";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from "@/registry/bases/base/ui/dropdown-menu";
 import { Kbd, KbdGroup } from "@/registry/bases/base/ui/kbd";
 import {
   Popover,
@@ -821,6 +834,18 @@ export default function BlockTimeline() {
     (ratio: number) => setZoom(ratio <= 1 ? null : ratio * fitPx),
     [fitPx]
   );
+  const handleDivisionValue = useCallback(
+    (value: string) => setDivision(value as GridDivision),
+    []
+  );
+  const zoomIn = useCallback(
+    () => changeZoom(zoomRatio + 0.25),
+    [changeZoom, zoomRatio]
+  );
+  const zoomOut = useCallback(
+    () => changeZoom(Math.max(1, zoomRatio - 0.25)),
+    [changeZoom, zoomRatio]
+  );
   const seek = useCallback((seconds: number) => clock.set(seconds), [clock]);
   // A press on a track's empty lane puts the cursor there (the lane does it) and picks the track, letting go of the clips; on the surface under the last track it lets go of everything, as nothing is there.
   // The shortcuts are caught on the panel, so a press on the lane, which takes no focus, hands it over.
@@ -1032,7 +1057,7 @@ export default function BlockTimeline() {
   return (
     // biome-ignore lint/a11y/noStaticElementInteractions: the editor's shortcuts, caught from the controls inside it
     <div
-      className="cn-audio-panel flex w-full min-w-0 flex-col gap-4 border bg-card p-4 outline-none"
+      className="cn-audio-panel @container/panel flex w-full min-w-0 flex-col gap-4 border bg-card p-4 outline-none"
       onKeyDown={handleKeyDown}
       ref={panelRef}
       tabIndex={-1}
@@ -1145,54 +1170,118 @@ export default function BlockTimeline() {
               </dl>
             </PopoverContent>
           </Popover>
-          <Select
-            items={DIVISIONS}
-            onValueChange={handleDivision}
-            value={division}
-          >
-            <SelectTrigger aria-label="Grid" className="w-40">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                {DIVISIONS.map((item) => (
-                  <SelectItem key={item.value} value={item.value}>
-                    {item.label}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-          <Toggle
-            aria-label="Select several clips"
-            onPressedChange={setMulti}
-            pressed={multi}
-            variant="outline"
-          >
-            Multi-select
-          </Toggle>
-          <Toggle aria-label="Triplet grid" onPressedChange={setTriplet}>
-            Triplet
-          </Toggle>
-          <Toggle
-            aria-label="Snap to grid"
-            onPressedChange={setSnap}
-            variant="outline"
-          >
-            Snap {snap ? gridLabel(gridSeconds, tempo) : "off"}
-          </Toggle>
-          <NumberControl
-            format={PERCENT}
-            label="Zoom"
-            largeStep={1}
-            max={maxRatio}
-            min={1}
-            onValueChange={changeZoom}
-            step={0.25}
-            steppers={ZOOM_STEPPERS}
-            unit="Zoom"
-            value={zoomRatio}
-          />
+          <div className="hidden items-center gap-2 @3xl/panel:flex">
+            <Select
+              items={DIVISIONS}
+              onValueChange={handleDivision}
+              value={division}
+            >
+              <SelectTrigger aria-label="Grid" className="w-40">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {DIVISIONS.map((item) => (
+                    <SelectItem key={item.value} value={item.value}>
+                      {item.label}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+            <Toggle
+              aria-label="Select several clips"
+              onPressedChange={setMulti}
+              pressed={multi}
+              variant="outline"
+            >
+              Multi-select
+            </Toggle>
+            <Toggle aria-label="Triplet grid" onPressedChange={setTriplet}>
+              Triplet
+            </Toggle>
+            <Toggle
+              aria-label="Snap to grid"
+              onPressedChange={setSnap}
+              variant="outline"
+            >
+              Snap {snap ? gridLabel(gridSeconds, tempo) : "off"}
+            </Toggle>
+            <NumberControl
+              format={PERCENT}
+              label="Zoom"
+              largeStep={1}
+              max={maxRatio}
+              min={1}
+              onValueChange={changeZoom}
+              step={0.25}
+              steppers={ZOOM_STEPPERS}
+              unit="Zoom"
+              value={zoomRatio}
+            />
+          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              render={
+                <Button
+                  aria-label="More controls"
+                  className="@3xl/panel:hidden"
+                  size="icon"
+                  variant="outline"
+                />
+              }
+            >
+              <IconPlaceholder
+                hugeicons="MoreHorizontalIcon"
+                lucide="EllipsisIcon"
+                phosphor="DotsThreeIcon"
+                remixicon="RiMoreLine"
+                tabler="IconDots"
+              />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-auto min-w-48">
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>Grid</DropdownMenuSubTrigger>
+                <DropdownMenuSubContent>
+                  <DropdownMenuRadioGroup
+                    onValueChange={handleDivisionValue}
+                    value={division}
+                  >
+                    {DIVISIONS.map((item) => (
+                      <DropdownMenuRadioItem
+                        key={item.value}
+                        value={item.value}
+                      >
+                        {item.label.replace("Grid: ", "")}
+                      </DropdownMenuRadioItem>
+                    ))}
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
+              <DropdownMenuSeparator />
+              <DropdownMenuCheckboxItem
+                checked={multi}
+                onCheckedChange={setMulti}
+              >
+                Multi-select
+              </DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem
+                checked={triplet}
+                onCheckedChange={setTriplet}
+              >
+                Triplet grid
+              </DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem
+                checked={snap}
+                onCheckedChange={setSnap}
+              >
+                Snap to grid
+              </DropdownMenuCheckboxItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={zoomIn}>Zoom in</DropdownMenuItem>
+              <DropdownMenuItem onClick={zoomOut}>Zoom out</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
       <Timeline

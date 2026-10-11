@@ -24,6 +24,8 @@ export {
   CopyIcon,
   Download,
   DownloadIcon,
+  Ellipsis,
+  EllipsisIcon,
   Headphones,
   HeadphonesIcon,
   Info,
