@@ -49,7 +49,8 @@ function clampPoint(value: Point, x: PlotAxis, y: PlotAxis): Point {
  * value is in the axes' units, and `axis` can hold it to one of them.
  *
  * Dragging moves it from where it is, never jumping to the pointer, four
- * times finer with Shift. It holds a native `<input type="range">` per axis
+ * times finer with Shift. A double click, an Alt + click or the Delete key
+ * return it to `defaultValue`, or the middle of the plot. It holds a native `<input type="range">` per axis
  * it moves along, carrying the accessible names: the first takes focus, and
  * the arrow keys move it by a hundredth of the axis, a tenth with Shift.
  * Renders a `<div>` element.
@@ -136,11 +137,36 @@ export function Handle(componentProps: Handle.Props) {
     y: positionOn(y, point.y),
   });
 
+  /** Back to the default value, along the axes the handle moves along. */
+  const reset = (event: KeyboardEvent | MouseEvent | PointerEvent) => {
+    const target = positionOf(
+      clampPoint(
+        defaultValue ?? { x: valueOn(x, 0.5), y: valueOn(y, 0.5) },
+        x,
+        y
+      )
+    );
+    if (moveTo(target, createChangeEventDetails("reset", event))) {
+      onValueCommitted?.(valueRef.current, { event, reason: "reset" });
+    }
+  };
+
+  const handleDoubleClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (!disabled) {
+      reset(event.nativeEvent);
+    }
+  };
+
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
     if (event.button !== 0 || disabled) {
       return;
     }
     event.preventDefault();
+    // An Alt + click returns to the default, as in a DAW.
+    if (event.altKey) {
+      reset(event.nativeEvent);
+      return;
+    }
     event.currentTarget.setPointerCapture?.(event.pointerId);
     inputRef.current?.focus({ focusVisible: false, preventScroll: true });
     gestureRef.current = {
@@ -204,6 +230,11 @@ export function Handle(componentProps: Handle.Props) {
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (disabled) {
+      return;
+    }
+    if (event.key === "Delete" || event.key === "Backspace") {
+      event.preventDefault();
+      reset(event.nativeEvent);
       return;
     }
     const step = event.shiftKey ? LARGE_KEY_STEP : KEY_STEP;
@@ -303,6 +334,7 @@ export function Handle(componentProps: Handle.Props) {
             {moves("y") ? inputFor("y", !moves("x")) : null}
           </>
         ),
+        onDoubleClick: handleDoubleClick,
         onLostPointerCapture: handlePointerEnd,
         onPointerCancel: handlePointerEnd,
         onPointerDown: handlePointerDown,
@@ -337,11 +369,13 @@ export namespace Handle {
   export type ChangeEventDetails =
     | ExtraChangeEventDetails<"drag", PointerEvent>
     | ExtraChangeEventDetails<"keyboard", KeyboardEvent>
-    | ExtraChangeEventDetails<"input-change", Event>;
+    | ExtraChangeEventDetails<"input-change", Event>
+    | ExtraChangeEventDetails<"reset", Event>;
   export type CommitEventDetails =
     | ExtraCommitEventDetails<"drag", PointerEvent>
     | ExtraCommitEventDetails<"keyboard", KeyboardEvent>
-    | ExtraCommitEventDetails<"input-change", Event>;
+    | ExtraCommitEventDetails<"input-change", Event>
+    | ExtraCommitEventDetails<"reset", Event>;
 
   export interface Props extends Omit<PartProps<"div", State>, "defaultValue"> {
     /** The axes the handle moves along; the other keeps the value given. @default "both" */

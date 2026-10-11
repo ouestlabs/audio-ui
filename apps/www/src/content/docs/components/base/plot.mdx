@@ -105,7 +105,7 @@ import { eqResponse } from "@/lib/filter-response";
 
 ## Handles
 
-A handle holds a native `<input type="range">` per axis, so it works from the keyboard: the arrow keys move it by a hundredth of the axis, a tenth with <kbd>Shift</kbd>, and <kbd>Home</kbd> / <kbd>End</kbd> go to the ends. Dragging moves it from where it is rather than jumping to the pointer, and four times finer with <kbd>Shift</kbd>. `axis="x"` or `axis="y"` holds it to one axis.
+A handle holds a native `<input type="range">` per axis, so it works from the keyboard: the arrow keys move it by a hundredth of the axis, a tenth with <kbd>Shift</kbd>, and <kbd>Home</kbd> / <kbd>End</kbd> go to the ends. Dragging moves it from where it is rather than jumping to the pointer, and four times finer with <kbd>Shift</kbd>. A double click, an <kbd>Alt</kbd> + click or <kbd>Delete</kbd> return it to `defaultValue`, or the middle of the plot (`reason: "reset"`). `axis="x"` or `axis="y"` holds it to one axis.
 
 ## Live signals
 
@@ -216,7 +216,7 @@ Grid lines and their labels, drawn from the axes: round values along each axis y
 
 ### Handle
 
-A point on the plot that can be moved: an equalizer band at its frequency and gain, a filter's cutoff and resonance, a compressor's threshold. Its value is in the axes' units, and `axis` can hold it to one of them. Dragging moves it from where it is, never jumping to the pointer, four times finer with Shift. It holds a native `<input type="range">` per axis it moves along, carrying the accessible names: the first takes focus, and the arrow keys move it by a hundredth of the axis, a tenth with Shift. Renders a `<div>` element.
+A point on the plot that can be moved: an equalizer band at its frequency and gain, a filter's cutoff and resonance, a compressor's threshold. Its value is in the axes' units, and `axis` can hold it to one of them. Dragging moves it from where it is, never jumping to the pointer, four times finer with Shift. A double click, an Alt + click or the Delete key return it to `defaultValue`, or the middle of the plot. It holds a native `<input type="range">` per axis it moves along, carrying the accessible names: the first takes focus, and the arrow keys move it by a hundredth of the axis, a tenth with Shift. Renders a `<div>` element.
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |

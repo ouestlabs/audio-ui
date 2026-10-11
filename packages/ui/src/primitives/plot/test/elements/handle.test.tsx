@@ -308,4 +308,52 @@ describe("Plot.Handle", () => {
     fireEvent.pointerUp(handle, { clientX: 140, clientY: 90, pointerId: 1 });
     expect(Number.parseFloat(handle.style.top)).toBeCloseTo(30);
   });
+
+  describe("reset", () => {
+    test("a double click returns to the default and commits it", () => {
+      const { handle, onValueChange, onValueCommitted } = renderPlot();
+      drag(handle, [100, 50], [160, 20]);
+      expect(lastCall(onValueChange)[0]).not.toEqual({ x: 50, y: 5 });
+      fireEvent.doubleClick(handle);
+      expect(lastCall(onValueChange)).toEqual([
+        { x: 50, y: 5 },
+        expect.objectContaining({ reason: "reset" }),
+      ]);
+      expect(lastCall(onValueCommitted)).toEqual([
+        { x: 50, y: 5 },
+        expect.objectContaining({ reason: "reset" }),
+      ]);
+    });
+
+    test("goes back to defaultValue when there is one, an Alt + click or Delete too", () => {
+      const { handle, inputs, onValueChange } = renderPlot(
+        {},
+        { defaultValue: { x: 80, y: 8 } }
+      );
+      drag(handle, [160, 20], [100, 60]);
+      expect(lastCall(onValueChange)[0]).not.toEqual({ x: 80, y: 8 });
+      fireEvent.pointerDown(handle, {
+        altKey: true,
+        button: 0,
+        clientX: 100,
+        clientY: 60,
+        pointerId: 1,
+      });
+      expect(lastCall(onValueChange)[0]).toEqual({ x: 80, y: 8 });
+      expect(handle.hasAttribute("data-dragging")).toBe(false);
+      drag(handle, [160, 20], [100, 60]);
+      fireEvent.keyDown(inputs[0] as HTMLInputElement, { key: "Delete" });
+      expect(lastCall(onValueChange)[0]).toEqual({ x: 80, y: 8 });
+    });
+
+    test("only resets the axis the handle moves along", () => {
+      const { handle, onValueChange } = renderPlot(
+        {},
+        { axis: "x", defaultValue: { x: 20, y: 7 } }
+      );
+      drag(handle, [40, 30], [120, 30]);
+      fireEvent.doubleClick(handle);
+      expect(lastCall(onValueChange)[0]).toEqual({ x: 20, y: 7 });
+    });
+  });
 });
