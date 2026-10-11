@@ -1,7 +1,15 @@
 "use client";
 
 import { Timeline as TimelinePrimitive } from "@audio-ui/react";
-import { type CSSProperties, type MouseEvent, useCallback } from "react";
+import {
+  type CSSProperties,
+  type FocusEvent,
+  type KeyboardEvent,
+  type MouseEvent,
+  useCallback,
+  useRef,
+  useState,
+} from "react";
 import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder";
 import { cn } from "@/registry/bases/base/lib/utils";
 import { Button } from "@/registry/bases/base/ui/button";
@@ -310,6 +318,8 @@ function TimelineNavigator({
   );
 }
 
+const selectText = (element: HTMLInputElement | null) => element?.select();
+
 export const MIN_TRACK_HEIGHT = 28;
 /** Below this a track is a strip: the full header (name, solo, mute, gain, pan) needs this much room, so a shorter track keeps the name, solo and mute and drops the rest. */
 export const COMPACT_TRACK_HEIGHT = 79;
@@ -368,7 +378,10 @@ function TimelineTrackControls({
   mix,
   name,
   onMix,
+  onDuplicate,
+  onInsert,
   onRemove,
+  onRename,
   onSelect,
   onToggleFold,
   selected,
@@ -383,6 +396,12 @@ function TimelineTrackControls({
   mix: Mix;
   name: string;
   onMix: (trackId: string, patch: Partial<Mix>) => void;
+  /** Gives the menu a "Duplicate" entry. */
+  onDuplicate?: (trackId: string) => void;
+  /** Gives the menu an "Insert track" entry: a new track after this one. */
+  onInsert?: (trackId: string) => void;
+  /** Lets the name be edited in place: a double-click, or "Rename" in the menu. */
+  onRename?: (trackId: string, name: string) => void;
   /** Gives the menu a "Delete track" entry. Leave it out for tracks that cannot be removed. */
   onRemove?: (trackId: string) => void;
   onSelect: (trackId: string) => void;
@@ -416,13 +435,53 @@ function TimelineTrackControls({
     () => onRemove?.(trackId),
     [onRemove, trackId]
   );
+  const [renaming, setRenaming] = useState(false);
+  const startRenaming = useCallback(() => setRenaming(true), []);
+  // The menu hands focus back as it closes, which would end the edit: open the field after it.
+  const renameWhenClosed = useRef(false);
+  const handleMenuClosed = useCallback((open: boolean) => {
+    if (!open && renameWhenClosed.current) {
+      renameWhenClosed.current = false;
+      setRenaming(true);
+    }
+  }, []);
+  const handleRenameItem = useCallback(() => {
+    renameWhenClosed.current = true;
+  }, []);
+  const handleNameKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLInputElement>) => {
+      event.stopPropagation();
+      if (event.key === "Enter") {
+        onRename?.(trackId, event.currentTarget.value);
+        setRenaming(false);
+      } else if (event.key === "Escape") {
+        setRenaming(false);
+      }
+    },
+    [onRename, trackId]
+  );
+  const handleNameBlur = useCallback(
+    (event: FocusEvent<HTMLInputElement>) => {
+      onRename?.(trackId, event.currentTarget.value);
+      setRenaming(false);
+    },
+    [onRename, trackId]
+  );
+  const handleDuplicate = useCallback(
+    () => onDuplicate?.(trackId),
+    [onDuplicate, trackId]
+  );
+  const handleInsert = useCallback(
+    () => onInsert?.(trackId),
+    [onInsert, trackId]
+  );
   const handleFold = useCallback(
     () => onToggleFold?.(trackId),
     [onToggleFold, trackId]
   );
   const handleClick = useCallback(() => onSelect(trackId), [onSelect, trackId]);
   return (
-    <ContextMenu>
+    <ContextMenu onOpenChangeComplete={handleMenuClosed}>
       <ContextMenuTrigger
         render={
           <div
@@ -453,14 +512,27 @@ function TimelineTrackControls({
               />
             </Button>
           ) : null}
-          <button
-            aria-pressed={selected}
-            className="min-w-0 flex-1 truncate text-left font-medium outline-none hover:underline focus-visible:underline"
-            onClick={handleClick}
-            type="button"
-          >
-            {name}
-          </button>
+          {renaming ? (
+            <input
+              aria-label="Track name"
+              autoFocus
+              className="min-w-0 flex-1 bg-transparent font-medium outline-none"
+              defaultValue={name}
+              onBlur={handleNameBlur}
+              onKeyDown={handleNameKeyDown}
+              ref={selectText}
+            />
+          ) : (
+            <button
+              aria-pressed={selected}
+              className="min-w-0 flex-1 truncate text-left font-medium outline-none hover:underline focus-visible:underline"
+              onClick={handleClick}
+              onDoubleClick={onRename ? startRenaming : undefined}
+              type="button"
+            >
+              {name}
+            </button>
+          )}
           <Button
             aria-label={`Solo ${name}`}
             aria-pressed={mix.soloed}
@@ -536,6 +608,29 @@ function TimelineTrackControls({
         <TimelineTrackResizeHandle aria-label={`${name} height`} />
       </ContextMenuTrigger>
       <ContextMenuContent className="w-auto min-w-36">
+        {onRename ? (
+          <ContextMenuItem onClick={handleRenameItem}>Rename</ContextMenuItem>
+        ) : null}
+        {onDuplicate ? (
+          <ContextMenuItem onClick={handleDuplicate}>Duplicate</ContextMenuItem>
+        ) : null}
+        {onRemove ? (
+          <>
+            <ContextMenuSeparator />
+            <ContextMenuItem onClick={handleRemove} variant="destructive">
+              Delete
+            </ContextMenuItem>
+          </>
+        ) : null}
+        {onInsert ? (
+          <>
+            <ContextMenuSeparator />
+            <ContextMenuItem onClick={handleInsert}>
+              Insert track
+            </ContextMenuItem>
+          </>
+        ) : null}
+        <ContextMenuSeparator />
         {TRACK_COLORS.map((swatch, index) => (
           <ContextMenuItem
             data-color={index}
@@ -549,14 +644,6 @@ function TimelineTrackControls({
             {swatch.name}
           </ContextMenuItem>
         ))}
-        {onRemove ? (
-          <>
-            <ContextMenuSeparator />
-            <ContextMenuItem onClick={handleRemove} variant="destructive">
-              Delete track
-            </ContextMenuItem>
-          </>
-        ) : null}
       </ContextMenuContent>
     </ContextMenu>
   );

@@ -439,17 +439,76 @@ export function useArrangement({
   // --- Tracks
 
   const trackCount = useRef(initialTracks.length);
-  /** Adds a track below the others, in the next color; returns it. */
-  const addTrack = useCallback(() => {
-    trackCount.current += 1;
-    const track: ArrangementTrack = {
-      color: (trackCount.current - 1) % colors,
-      id: `track-${trackCount.current}`,
-      name: `Track ${trackCount.current}`,
-    };
-    edit((current) => ({ ...current, tracks: [...current.tracks, track] }));
-    return track;
-  }, [colors, edit]);
+  /** Adds a track in the next color: after the track `afterId`, or below the others; returns it. */
+  const addTrack = useCallback(
+    (afterId?: string) => {
+      trackCount.current += 1;
+      const track: ArrangementTrack = {
+        color: (trackCount.current - 1) % colors,
+        id: `track-${trackCount.current}`,
+        name: `Track ${trackCount.current}`,
+      };
+      edit((current) => {
+        const at = afterId
+          ? current.tracks.findIndex((item) => item.id === afterId) + 1
+          : current.tracks.length;
+        const tracks = [...current.tracks];
+        tracks.splice(at || current.tracks.length, 0, track);
+        return { ...current, tracks };
+      });
+      return track;
+    },
+    [colors, edit]
+  );
+  /** Copies a track, with its clips, right below it. */
+  const duplicateTrack = useCallback(
+    (id: string) => {
+      const source = docRef.current.tracks.find((item) => item.id === id);
+      if (!source) {
+        return;
+      }
+      trackCount.current += 1;
+      const copy: ArrangementTrack = {
+        ...source,
+        id: `track-${trackCount.current}`,
+        name: `${source.name} copy`,
+      };
+      edit((current) => {
+        const tracks = [...current.tracks];
+        tracks.splice(tracks.findIndex((item) => item.id === id) + 1, 0, copy);
+        const copies = current.clips
+          .filter((clip) => clip.track === id)
+          .map((clip) => {
+            pieces.current += 1;
+            return {
+              ...clip,
+              id: `${clip.id}-${pieces.current}`,
+              track: copy.id,
+            };
+          });
+        return { clips: [...current.clips, ...copies], tracks };
+      });
+    },
+    [edit]
+  );
+  const renameTrack = useCallback(
+    (id: string, name: string) => {
+      const next = name.trim();
+      if (
+        !next ||
+        next === docRef.current.tracks.find((item) => item.id === id)?.name
+      ) {
+        return;
+      }
+      edit((current) => ({
+        ...current,
+        tracks: current.tracks.map((item) =>
+          item.id === id ? { ...item, name: next } : item
+        ),
+      }));
+    },
+    [edit]
+  );
   /** Removes a track with the clips on it; one track always stays. */
   const removeTrack = useCallback(
     (id: string) => {
@@ -524,6 +583,7 @@ export function useArrangement({
     commitClip,
     copying,
     duplicateSelection,
+    duplicateTrack,
     folded,
     heights: shownHeights,
     mixOf,
@@ -532,6 +592,7 @@ export function useArrangement({
     removeClip,
     removeTrack,
     renameClip,
+    renameTrack,
     rescale,
     resizeTrack,
     selectAll,

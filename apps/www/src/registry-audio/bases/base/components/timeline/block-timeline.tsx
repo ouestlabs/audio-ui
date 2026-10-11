@@ -708,6 +708,7 @@ export default function BlockTimeline() {
     commitClip,
     copying,
     duplicateSelection,
+    duplicateTrack,
     folded,
     heights,
     toggleFold,
@@ -717,6 +718,7 @@ export default function BlockTimeline() {
     removeClip,
     removeTrack,
     renameClip,
+    renameTrack,
     rescale,
     resizeTrack,
     selectAll,
@@ -737,6 +739,7 @@ export default function BlockTimeline() {
     initialTracks: TRACKS,
     splitStep: bar / 4,
   });
+  const handleAddTrack = useCallback(() => addTrack(), [addTrack]);
   // Multi-select: a press on a clip adds it to the selection, and a drag on bare lane draws a rectangle. For touch, which has no Shift.
   const [multi, setMulti] = useState(false);
   const marquee = useMarquee(selectedIds, selectClips, multi);
@@ -1091,16 +1094,6 @@ export default function BlockTimeline() {
               </SelectGroup>
             </SelectContent>
           </Select>
-          <Button onClick={addTrack} size="sm" variant="outline">
-            <IconPlaceholder
-              hugeicons="PlusSignIcon"
-              lucide="PlusIcon"
-              phosphor="PlusIcon"
-              remixicon="RiAddLine"
-              tabler="IconPlus"
-            />
-            Add track
-          </Button>
           <Toggle
             aria-label="Select several clips"
             onPressedChange={setMulti}
@@ -1227,8 +1220,11 @@ export default function BlockTimeline() {
                     folded={folded[track.id]}
                     mix={mixOf(track)}
                     name={track.name}
+                    onDuplicate={duplicateTrack}
+                    onInsert={addTrack}
                     onMix={changeMix}
                     onRemove={tracks.length > 1 ? removeTrack : undefined}
+                    onRename={renameTrack}
                     onSelect={selectTrack}
                     onToggleFold={toggleFold}
                     selected={track.id === selectedTrack}
@@ -1262,6 +1258,28 @@ export default function BlockTimeline() {
                     .map((original) => (
                       <CopyGhost clip={original} key={original.id} />
                     ))}
+                  <Row
+                    className="border-foreground/25 border-b"
+                    lead={
+                      <Button
+                        className="m-1 w-full justify-start gap-1.5"
+                        onClick={handleAddTrack}
+                        size="sm"
+                        variant="ghost"
+                      >
+                        <IconPlaceholder
+                          hugeicons="PlusSignIcon"
+                          lucide="PlusIcon"
+                          phosphor="PlusIcon"
+                          remixicon="RiAddLine"
+                          tabler="IconPlus"
+                        />
+                        Add track
+                      </Button>
+                    }
+                  >
+                    <div className="h-10" />
+                  </Row>
                   {clips
                     .filter((clip) => clip.track === track.id)
                     .map((clip) => (
