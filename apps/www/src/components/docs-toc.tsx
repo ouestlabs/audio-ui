@@ -2,6 +2,7 @@
 
 import { PushPinIcon } from "@phosphor-icons/react/ssr";
 import * as React from "react";
+import { Frame, FrameContent, FrameHeader } from "@/components/custom/frame";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -140,74 +141,78 @@ export function DocsTableOfContents({
           />
         ))}
       </div>
-      <nav className="-translate-y-1/2 site-rounded-2xl pointer-events-none absolute top-1/2 right-0 flex max-h-[60vh] w-60 origin-right scale-[0.97] flex-col border border-site-border bg-site-popover p-2 opacity-0 shadow-lg transition-[opacity,scale] duration-150 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/toc:pointer-events-auto group-hover/toc:scale-100 group-hover/toc:opacity-100 group-hover/toc:duration-250 group-focus-within/toc:pointer-events-auto group-focus-within/toc:scale-100 group-focus-within/toc:opacity-100 group-focus-within/toc:duration-250 group-data-[pinned=true]/toc:pointer-events-auto group-data-[pinned=true]/toc:scale-100 group-data-[pinned=true]/toc:opacity-100 group-data-[pinned=true]/toc:duration-250 motion-reduce:scale-100 motion-reduce:transition-opacity">
-        <div className="flex items-center justify-between gap-2 pb-1 pl-2">
-          <span className="font-medium text-site-muted-foreground text-xs">
-            On This Page
-          </span>
-          <Button
-            aria-label={pinned ? "Unpin outline" : "Pin outline"}
-            aria-pressed={pinned}
-            className={cn(
-              "before:-inset-1.5 relative before:absolute before:content-['']",
-              pinned ? "text-site-foreground" : "text-site-muted-foreground"
-            )}
-            onClick={() => setPinned((prev) => !prev)}
-            size="icon-sm"
-            variant="ghost"
-          >
-            <span className="relative inline-flex size-4">
-              <PushPinIcon
-                className={cn(
-                  "absolute inset-0 size-4 transition-[opacity,transform,filter] duration-250 ease-in-out motion-reduce:scale-100 motion-reduce:blur-none motion-reduce:transition-opacity",
-                  pinned
-                    ? "scale-[0.25] opacity-0 blur-[2px]"
-                    : "scale-100 opacity-100 blur-none"
-                )}
-              />
-              <PushPinIcon
-                className={cn(
-                  "absolute inset-0 size-4 transition-[opacity,transform,filter] duration-250 ease-in-out motion-reduce:scale-100 motion-reduce:blur-none motion-reduce:transition-opacity",
-                  pinned
-                    ? "scale-100 opacity-100 blur-none"
-                    : "scale-[0.25] opacity-0 blur-[2px]"
-                )}
-                weight="fill"
-              />
+      <nav className="-translate-y-1/2 pointer-events-none absolute top-1/2 right-0 w-60 origin-right scale-[0.97] opacity-0 transition-[opacity,scale] duration-150 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/toc:pointer-events-auto group-hover/toc:scale-100 group-hover/toc:opacity-100 group-hover/toc:duration-250 group-focus-within/toc:pointer-events-auto group-focus-within/toc:scale-100 group-focus-within/toc:opacity-100 group-focus-within/toc:duration-250 group-data-[pinned=true]/toc:pointer-events-auto group-data-[pinned=true]/toc:scale-100 group-data-[pinned=true]/toc:opacity-100 group-data-[pinned=true]/toc:duration-250 motion-reduce:scale-100 motion-reduce:transition-opacity">
+        <Frame className="max-h-[60vh] bg-[color-mix(in_oklab,var(--site-muted)_50%,var(--site-background))] shadow-lg">
+          <FrameHeader className="shrink-0 flex-row items-center justify-between gap-2 py-1 pr-1 pl-2">
+            <span className="font-medium text-site-muted-foreground text-xs">
+              On This Page
             </span>
-          </Button>
-        </div>
-        <ul className="no-scrollbar scroll-fade-y overflow-y-auto">
-          {toc.map((item, index) => (
-            <li
-              key={item.url}
-              ref={(el) => {
-                if (el) {
-                  itemRefs.current ??= new Map();
-                  itemRefs.current.set(item.url, el);
-                } else {
-                  itemRefs.current?.delete(item.url);
-                }
-              }}
+            <Button
+              aria-label={pinned ? "Unpin outline" : "Pin outline"}
+              aria-pressed={pinned}
+              className={cn(
+                "before:-inset-1.5 relative before:absolute before:content-['']",
+                pinned ? "text-site-foreground" : "text-site-muted-foreground"
+              )}
+              onClick={() => setPinned((prev) => !prev)}
+              size="icon-sm"
+              variant="ghost"
             >
-              <Button
-                className={cn(
-                  "w-full justify-start",
-                  index === activeIndex && "underline"
-                )}
-                nativeButton={false}
-                render={
-                  <a href={item.url}>
-                    <span className="truncate">{item.title}</span>
-                  </a>
-                }
-                size="sm"
-                style={{ paddingLeft: `${(item.depth - 1) * 12 + 8}px` }}
-                variant={index === activeIndex ? "link" : "ghost"}
-              />
-            </li>
-          ))}
-        </ul>
+              <span className="relative inline-flex size-4">
+                <PushPinIcon
+                  className={cn(
+                    "absolute inset-0 size-4 transition-[opacity,transform,filter] duration-250 ease-in-out motion-reduce:scale-100 motion-reduce:blur-none motion-reduce:transition-opacity",
+                    pinned
+                      ? "scale-[0.25] opacity-0 blur-[2px]"
+                      : "scale-100 opacity-100 blur-none"
+                  )}
+                />
+                <PushPinIcon
+                  className={cn(
+                    "absolute inset-0 size-4 transition-[opacity,transform,filter] duration-250 ease-in-out motion-reduce:scale-100 motion-reduce:blur-none motion-reduce:transition-opacity",
+                    pinned
+                      ? "scale-100 opacity-100 blur-none"
+                      : "scale-[0.25] opacity-0 blur-[2px]"
+                  )}
+                  weight="fill"
+                />
+              </span>
+            </Button>
+          </FrameHeader>
+          <FrameContent className="flex min-h-0 flex-col">
+            <ul className="no-scrollbar scroll-fade-y overflow-y-auto p-1">
+              {toc.map((item, index) => (
+                <li
+                  key={item.url}
+                  ref={(el) => {
+                    if (el) {
+                      itemRefs.current ??= new Map();
+                      itemRefs.current.set(item.url, el);
+                    } else {
+                      itemRefs.current?.delete(item.url);
+                    }
+                  }}
+                >
+                  <Button
+                    className={cn(
+                      "w-full justify-start",
+                      index === activeIndex && "underline"
+                    )}
+                    nativeButton={false}
+                    render={
+                      <a href={item.url}>
+                        <span className="truncate">{item.title}</span>
+                      </a>
+                    }
+                    size="sm"
+                    style={{ paddingLeft: `${(item.depth - 1) * 12 + 8}px` }}
+                    variant={index === activeIndex ? "link" : "ghost"}
+                  />
+                </li>
+              ))}
+            </ul>
+          </FrameContent>
+        </Frame>
       </nav>
     </div>
   );
