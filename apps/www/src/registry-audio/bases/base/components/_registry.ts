@@ -301,6 +301,8 @@ export const components: RegistryItem[] = [
       "@audio/musical-time",
       "@shadcn/button",
       "@shadcn/button-group",
+      "@shadcn/kbd",
+      "@shadcn/popover",
       "@shadcn/select",
     ],
     type: "registry:block",

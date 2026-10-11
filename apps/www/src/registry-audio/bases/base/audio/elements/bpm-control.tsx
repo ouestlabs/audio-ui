@@ -47,10 +47,23 @@ export function BpmControl({
 
   const commitDraft = useCallback(() => {
     const parsed = Number(draft);
-    if (!Number.isNaN(parsed)) {
-      onValueChange(clamp(parsed, min, max));
+    // Leaving the field with what it already shows changes nothing.
+    if (draft.trim() === "" || Number.isNaN(parsed)) {
+      setDraft(String(value));
+      return;
     }
-  }, [draft, max, min, onValueChange]);
+    const next = clamp(parsed, min, max);
+    if (next !== value) {
+      onValueChange(next);
+    }
+    setDraft(String(next));
+  }, [draft, max, min, onValueChange, value]);
+
+  // The wheel over a focused number field would step it: a scroll must never change the tempo.
+  const handleWheel = useCallback(
+    (e: React.WheelEvent<HTMLInputElement>) => e.currentTarget.blur(),
+    []
+  );
 
   const handleInputKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -100,6 +113,7 @@ export function BpmControl({
           onBlur={commitDraft}
           onChange={handleInputChange}
           onKeyDown={handleInputKeyDown}
+          onWheel={handleWheel}
           step={1}
           type="number"
           value={draft}

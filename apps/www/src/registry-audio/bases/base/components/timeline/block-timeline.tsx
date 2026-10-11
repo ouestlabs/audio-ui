@@ -20,6 +20,15 @@ import {
 import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder";
 import { Button } from "@/registry/bases/base/ui/button";
 import { ButtonGroup } from "@/registry/bases/base/ui/button-group";
+import { Kbd, KbdGroup } from "@/registry/bases/base/ui/kbd";
+import {
+  Popover,
+  PopoverContent,
+  PopoverDescription,
+  PopoverHeader,
+  PopoverTitle,
+  PopoverTrigger,
+} from "@/registry/bases/base/ui/popover";
 import {
   Select,
   SelectContent,
@@ -205,6 +214,21 @@ const DIVISIONS: { label: string; value: GridDivision }[] = [
         : `Grid: ${entry.id}`,
     value: entry.id as GridDivision,
   })),
+];
+
+/** What the keyboard does, for the shortcuts popover: the keys, then what they do. */
+const SHORTCUTS: { action: string; keys: string[] }[] = [
+  { action: "Split at the cursor", keys: ["S"] },
+  { action: "Split at the cursor", keys: ["Cmd/Ctrl", "E"] },
+  { action: "Duplicate the clip", keys: ["Cmd/Ctrl", "D"] },
+  { action: "Remove the clip", keys: ["Delete"] },
+  { action: "Nudge a clip or an edge", keys: ["Left", "Right"] },
+  { action: "Nudge further", keys: ["Shift", "Left", "Right"] },
+  { action: "Copy a clip while dragging", keys: ["Alt", "Drag"] },
+  { action: "Move or trim off the grid", keys: ["Cmd/Ctrl", "Drag"] },
+  { action: "Zoom around the pointer", keys: ["Cmd/Ctrl", "Scroll"] },
+  { action: "Resize a track", keys: ["Up", "Down"] },
+  { action: "Clear the selection", keys: ["Esc"] },
 ];
 
 const MIN_TRACK_HEIGHT = 40;
@@ -603,9 +627,11 @@ export default function BlockTimeline() {
   // The grid the lanes draw is the grid everything snaps to.
   const snapStep = gridInterval(division, zoom, tempo);
   const labelEvery = barLabelInterval(zoom, tempo);
+  // Whole bars, counted rather than divided, so no tempo leaves a label like 6.9999.
+  const labelBars = Math.max(1, Math.round(labelEvery / bar));
   const labels = Array.from(
-    { length: Math.floor(duration / labelEvery) },
-    (_, index) => index * labelEvery
+    { length: Math.ceil(BARS / labelBars) },
+    (_, index) => index * labelBars
   );
 
   return (
@@ -633,6 +659,50 @@ export default function BlockTimeline() {
           tempo={DEFAULT_TEMPO}
         />
         <div className="flex items-center gap-2">
+          <Popover>
+            <PopoverTrigger
+              render={
+                <Button
+                  aria-label="Keyboard shortcuts"
+                  size="icon"
+                  variant="outline"
+                />
+              }
+            >
+              <IconPlaceholder
+                hugeicons="KeyboardIcon"
+                lucide="KeyboardIcon"
+                phosphor="KeyboardIcon"
+                remixicon="RiKeyboardLine"
+                tabler="IconKeyboard"
+              />
+            </PopoverTrigger>
+            <PopoverContent align="end" className="w-80">
+              <PopoverHeader>
+                <PopoverTitle>Keyboard shortcuts</PopoverTitle>
+                <PopoverDescription>
+                  Select a clip or a track first.
+                </PopoverDescription>
+              </PopoverHeader>
+              <dl className="flex flex-col gap-2 text-sm">
+                {SHORTCUTS.map((shortcut) => (
+                  <div
+                    className="flex items-center justify-between gap-3"
+                    key={`${shortcut.action}-${shortcut.keys.join("+")}`}
+                  >
+                    <dt>{shortcut.action}</dt>
+                    <dd>
+                      <KbdGroup>
+                        {shortcut.keys.map((key) => (
+                          <Kbd key={key}>{key}</Kbd>
+                        ))}
+                      </KbdGroup>
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            </PopoverContent>
+          </Popover>
           <Select
             items={DIVISIONS}
             onValueChange={handleDivision}
@@ -705,9 +775,9 @@ export default function BlockTimeline() {
           <div className="flex min-h-full w-max min-w-full flex-1 flex-col">
             <Row className="sticky top-0 z-30 bg-background">
               <TimelineRuler aria-label="Playhead" getAriaValueText={describe}>
-                {labels.map((seconds) => (
-                  <TimelineMark key={seconds} value={seconds}>
-                    {seconds / bar + 1}
+                {labels.map((count) => (
+                  <TimelineMark key={count} value={count * bar}>
+                    {count + 1}
                   </TimelineMark>
                 ))}
                 <TimelinePlayhead />
