@@ -934,6 +934,7 @@ export default function BlockTimeline() {
       }
     },
     [
+      clearSelection,
       handleLocatorKey,
       handleSelectionKey,
       loopSelection,
@@ -1165,6 +1166,7 @@ export default function BlockTimeline() {
               </TimelineRuler>
             </Row>
             <Row
+              className="sticky top-7 z-30 bg-background"
               lead={
                 <span className="flex items-center px-3 text-muted-foreground text-xs">
                   Locators
@@ -1185,6 +1187,7 @@ export default function BlockTimeline() {
               </TimelineLane>
             </Row>
             <Row
+              className="sticky top-13 z-30 bg-background"
               lead={
                 <span className="flex items-center px-3 text-muted-foreground text-xs">
                   Loop
