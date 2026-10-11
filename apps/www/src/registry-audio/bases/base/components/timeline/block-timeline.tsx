@@ -56,6 +56,7 @@ import {
 import { Toggle } from "@/registry/bases/base/ui/toggle";
 import { NumberControl } from "@/registry-audio/bases/base/audio/elements/bpm-control";
 import { Fader } from "@/registry-audio/bases/base/audio/elements/fader";
+import { Knob } from "@/registry-audio/bases/base/audio/elements/knob";
 import { Meter } from "@/registry-audio/bases/base/audio/elements/meter";
 import {
   Timeline,
@@ -791,7 +792,7 @@ function TrackHeader({
           <div
             className={cn(
               "relative flex w-full flex-col justify-center border-s-4 px-2",
-              compact ? "py-0" : "gap-2 py-2",
+              compact ? "py-0" : "gap-1 py-1.5",
               SWATCHES[mix.color]?.edge
             )}
           />
@@ -848,10 +849,10 @@ function TrackHeader({
           </Button>
         </div>
         {compact ? null : (
-          <div className="flex items-center gap-3 pe-2">
+          <div className="flex h-6 items-center gap-3 pe-1">
             <Fader
               aria-label={`${name} gain`}
-              className="min-w-0 flex-1"
+              className="min-w-0 flex-1 **:data-[orientation=horizontal]:min-w-0"
               max={1}
               min={0}
               onValueChange={handleGain}
@@ -862,20 +863,17 @@ function TrackHeader({
               value={mix.gain}
               valueLabel="hidden"
             />
-            <Fader
+            <Knob
               anchor={0}
               aria-label={`${name} pan`}
-              className="w-12 shrink-0"
+              className="mb-0 size-6 shrink-0"
               formatValue={formatPan}
               max={1}
               min={-1}
               onValueChange={handlePan}
-              orientation="horizontal"
               size="sm"
               step={0.01}
-              thumbMarks={false}
               value={mix.pan}
-              valueLabel="auto"
             />
           </div>
         )}
