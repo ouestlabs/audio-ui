@@ -299,7 +299,6 @@ export const components: RegistryItem[] = [
       "@audio/timeline",
       "@audio/transport",
       "@audio/bpm-control",
-      "@audio/track-controls",
       "@audio/meter",
       "@audio/use-simulated-levels",
       "@audio/musical-time",

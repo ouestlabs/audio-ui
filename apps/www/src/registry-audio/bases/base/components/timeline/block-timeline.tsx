@@ -56,6 +56,10 @@ import { Toggle } from "@/registry/bases/base/ui/toggle";
 import { NumberControl } from "@/registry-audio/bases/base/audio/elements/bpm-control";
 import { Meter } from "@/registry-audio/bases/base/audio/elements/meter";
 import {
+  COMPACT_TRACK_HEIGHT,
+  MAX_TRACK_HEIGHT,
+  MIN_TRACK_HEIGHT,
+  type Mix,
   Timeline,
   TimelineClip,
   TimelineClipFade,
@@ -70,19 +74,13 @@ import {
   TimelineRangeHandle,
   TimelineRuler,
   TimelineTrack,
+  TimelineTrackControls,
   TimelineTrackHeader,
   TimelineViewport,
-} from "@/registry-audio/bases/base/audio/elements/timeline";
-import {
-  COMPACT_TRACK_HEIGHT,
-  MAX_TRACK_HEIGHT,
-  MIN_TRACK_HEIGHT,
-  type Mix,
-  TimelineTrackControls,
   TRACK_COLORS,
   TRACK_HEIGHT_STEP,
   UNITY_MIX,
-} from "@/registry-audio/bases/base/audio/elements/track-controls";
+} from "@/registry-audio/bases/base/audio/elements/timeline";
 import { Transport } from "@/registry-audio/bases/base/audio/elements/transport";
 import { useSimulatedLevels } from "@/registry-audio/bases/base/hooks/use-simulated-levels";
 import {

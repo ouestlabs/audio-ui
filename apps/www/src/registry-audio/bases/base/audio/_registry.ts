@@ -145,8 +145,11 @@ export const audio: RegistryItem[] = [
     name: "timeline",
     registryDependencies: [
       "@audio/musical-time",
+      "@audio/fader",
+      "@audio/knob",
       "@shadcn/button",
       "@shadcn/button-group",
+      "@shadcn/context-menu",
     ],
     type: "registry:ui",
   },
@@ -215,24 +218,6 @@ export const audio: RegistryItem[] = [
     ],
     name: "scrubber",
     registryDependencies: ["@shadcn/button"],
-    type: "registry:ui",
-  },
-  {
-    dependencies: [],
-    files: [
-      {
-        path: "audio/elements/track-controls.tsx",
-        type: "registry:ui",
-      },
-    ],
-    name: "track-controls",
-    registryDependencies: [
-      "@audio/timeline",
-      "@audio/fader",
-      "@audio/knob",
-      "@shadcn/button",
-      "@shadcn/context-menu",
-    ],
     type: "registry:ui",
   },
   {
