@@ -100,6 +100,57 @@ export function gridInterval(
   return (finestFirst.at(-1) ?? secondsPerBar(tempo)) * factor;
 }
 
+const LABEL_TOLERANCE = 1e-6;
+
+/** `value` as a whole number of at least one, or null if it is not one. */
+function whole(value: number): number | null {
+  const rounded = Math.round(value);
+  return rounded >= 1 && Math.abs(value - rounded) < LABEL_TOLERANCE
+    ? rounded
+    : null;
+}
+
+/** The note value a count of quarters is, when it is a halving of a whole note. */
+function noteDenominator(quarters: number): number | null {
+  const denominator = whole(4 / quarters);
+  return denominator !== null && (denominator & (denominator - 1)) === 0
+    ? denominator
+    : null;
+}
+
+function barsName(bars: number): string {
+  return bars === 1 ? "1 bar" : `${bars} bars`;
+}
+
+/**
+ * Names an interval the way a grid readout does: "1 bar", "4 bars", "1/16",
+ * "1/8T". It works from the interval rather than from a setting, so the
+ * adaptive grid, which has no name of its own, reads out the division it has
+ * landed on, and a menu and a readout cannot name one grid two ways.
+ */
+export function gridLabel(seconds: number, tempo: Tempo): string {
+  const bars = seconds / secondsPerBar(tempo);
+  const straightBars = whole(bars);
+  if (straightBars !== null) {
+    return barsName(straightBars);
+  }
+  const quarters = seconds / secondsPerQuarter(tempo);
+  const note = noteDenominator(quarters);
+  if (note !== null) {
+    return `1/${note}`;
+  }
+  const tripletBars = whole(bars / TRIPLET_FACTOR);
+  if (tripletBars !== null) {
+    return `${barsName(tripletBars)} T`;
+  }
+  const tripletNote = noteDenominator(quarters / TRIPLET_FACTOR);
+  if (tripletNote !== null) {
+    return `1/${tripletNote}T`;
+  }
+  const beats = Number((seconds / secondsPerBeat(tempo)).toFixed(2));
+  return `${beats} beats`;
+}
+
 /**
  * Seconds between labelled bars on a ruler at `zoom` px per second: always a
  * whole number of bars, doubled until labels are at least `minSpacing` px

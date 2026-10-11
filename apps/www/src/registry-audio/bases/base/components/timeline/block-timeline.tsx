@@ -41,6 +41,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/registry/bases/base/ui/select";
+import { Toggle } from "@/registry/bases/base/ui/toggle";
 import { NumberControl } from "@/registry-audio/bases/base/audio/elements/bpm-control";
 import {
   Timeline,
@@ -66,6 +67,7 @@ import {
   GRID_DIVISIONS,
   type GridDivision,
   gridInterval,
+  gridLabel,
   secondsPerBar,
   type Tempo,
 } from "@/registry-audio/bases/base/lib/musical-time";
@@ -848,6 +850,8 @@ export default function BlockTimeline() {
     []
   );
   const [division, setDivision] = useState<GridDivision>("adaptive");
+  const [triplet, setTriplet] = useState(false);
+  const [snap, setSnap] = useState(true);
   const handleDivision = useCallback(
     (next: GridDivision | null) => setDivision(next ?? "adaptive"),
     []
@@ -1187,7 +1191,9 @@ export default function BlockTimeline() {
   );
 
   // The grid the lanes draw is the grid everything snaps to.
-  const snapStep = gridInterval(division, zoom, tempo);
+  // Snap off draws no lines and snaps nothing: a step of 0 is no grid.
+  const gridSeconds = gridInterval(division, zoom, tempo, { triplet });
+  const snapStep = snap ? gridSeconds : 0;
   const labelEvery = barLabelInterval(zoom, tempo);
   // Whole bars, counted rather than divided, so no tempo leaves a label like 6.9999.
   const labelBars = Math.max(1, Math.round(labelEvery / bar));
@@ -1284,6 +1290,16 @@ export default function BlockTimeline() {
               </SelectGroup>
             </SelectContent>
           </Select>
+          <Toggle aria-label="Triplet grid" onPressedChange={setTriplet}>
+            Triplet
+          </Toggle>
+          <Toggle
+            aria-label="Snap to grid"
+            onPressedChange={setSnap}
+            variant="outline"
+          >
+            Snap {snap ? gridLabel(gridSeconds, tempo) : "off"}
+          </Toggle>
           <NumberControl
             format={PERCENT}
             label="Zoom"

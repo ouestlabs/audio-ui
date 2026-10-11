@@ -6,6 +6,7 @@ import {
   describeBarsBeats,
   divisionSeconds,
   gridInterval,
+  gridLabel,
   secondsPerBar,
   secondsPerBeat,
 } from "@/registry-audio/bases/base/lib/musical-time";
@@ -93,5 +94,27 @@ describe("barsBeatsAt", () => {
 
   test("reads out for a screen reader", () => {
     expect(describeBarsBeats(4.875, DEFAULT_TEMPO)).toBe("Bar 3, beat 2");
+  });
+});
+
+describe("gridLabel", () => {
+  test("names bars and note values", () => {
+    expect(gridLabel(2, DEFAULT_TEMPO)).toBe("1 bar");
+    expect(gridLabel(8, DEFAULT_TEMPO)).toBe("4 bars");
+    expect(gridLabel(0.125, DEFAULT_TEMPO)).toBe("1/16");
+  });
+
+  test("names a triplet as two thirds of its straight division", () => {
+    expect(gridLabel(0.25 * (2 / 3), DEFAULT_TEMPO)).toBe("1/8T");
+    expect(gridLabel(2 * (2 / 3), DEFAULT_TEMPO)).toBe("1 bar T");
+  });
+
+  test("reads out the division the adaptive grid landed on", () => {
+    const seconds = gridInterval("adaptive", 100, DEFAULT_TEMPO);
+    expect(gridLabel(seconds, DEFAULT_TEMPO)).toBe("1/8");
+  });
+
+  test("falls back to beats when nothing named fits", () => {
+    expect(gridLabel(0.7, DEFAULT_TEMPO)).toBe("1.4 beats");
   });
 });
