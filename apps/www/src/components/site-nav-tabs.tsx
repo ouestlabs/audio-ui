@@ -1,9 +1,15 @@
 "use client";
 
+import { BookOpenIcon, CubeIcon } from "@phosphor-icons/react/ssr";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { isActive } from "@/lib/utils";
+
+const ICONS: Record<string, typeof CubeIcon> = {
+  "/components": CubeIcon,
+  "/docs": BookOpenIcon,
+};
 
 /** The site's sections as tabs: the active one follows the page. */
 export function SiteNavTabs({
@@ -20,16 +26,20 @@ export function SiteNavTabs({
   return (
     <Tabs value={active ?? null}>
       <TabsList aria-label="Sections" className="w-full">
-        {pages.map((item) => (
-          <TabsTrigger
-            key={item.href}
-            nativeButton={false}
-            render={<Link href={item.href} />}
-            value={item.href}
-          >
-            {item.label}
-          </TabsTrigger>
-        ))}
+        {pages.map((item) => {
+          const Icon = ICONS[item.href];
+          return (
+            <TabsTrigger
+              key={item.href}
+              nativeButton={false}
+              render={<Link href={item.href} />}
+              value={item.href}
+            >
+              {Icon ? <Icon aria-hidden className="size-4" /> : null}
+              {item.label}
+            </TabsTrigger>
+          );
+        })}
       </TabsList>
     </Tabs>
   );
