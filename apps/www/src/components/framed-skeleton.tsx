@@ -15,10 +15,10 @@ const CUSTOMIZER_CHOICES = [
   "Menu Accent",
 ] as const;
 
-/** The customizer while its choices read the URL: each has its name, only its value is awaited. */
-export function CustomizerSkeleton() {
+/** The customizer's choices before they are known: each has its name, only its value is awaited. */
+export function CustomizerChoicesSkeleton() {
   return (
-    <aside className="customizer-aside hidden w-64 shrink-0 flex-col gap-1 p-2 lg:flex">
+    <div aria-hidden className="flex flex-col gap-1 p-2">
       {CUSTOMIZER_CHOICES.map((name) => (
         <div className="flex items-center justify-between p-2" key={name}>
           <div className="flex flex-col gap-1.5">
@@ -28,6 +28,15 @@ export function CustomizerSkeleton() {
           <Skeleton className="size-4 rounded-full" />
         </div>
       ))}
+    </div>
+  );
+}
+
+/** The customizer while its choices read the URL. */
+export function CustomizerSkeleton() {
+  return (
+    <aside className="customizer-aside hidden w-64 shrink-0 flex-col lg:flex">
+      <CustomizerChoicesSkeleton />
     </aside>
   );
 }

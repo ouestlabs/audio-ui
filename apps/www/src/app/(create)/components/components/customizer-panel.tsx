@@ -6,6 +6,7 @@ import * as React from "react";
 
 import { PickerSideProvider } from "@/app/(create)/customizer/picker";
 import { FrameContent, frameClassName } from "@/components/custom/frame";
+import { CustomizerChoicesSkeleton } from "@/components/framed-skeleton";
 import {
   Sheet,
   SheetContent,
@@ -13,7 +14,6 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
-
 import { useCustomizer } from "./components-context";
 import { CustomizerSidebarHeader } from "./customizer-sidebar-header";
 import {
@@ -28,7 +28,7 @@ const CustomizerSidebarContent = dynamic(
       (m) => m.CustomizerSidebarContent
     ),
   {
-    loading: () => <div aria-hidden className="flex-1" />,
+    loading: () => <CustomizerChoicesSkeleton />,
     ssr: false,
   }
 );
