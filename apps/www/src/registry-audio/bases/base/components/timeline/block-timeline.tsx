@@ -853,6 +853,7 @@ function TrackHeader({
             <Fader
               aria-label={`${name} gain`}
               className="min-w-0 flex-1 **:data-[orientation=horizontal]:min-w-0"
+              editableValue
               max={1}
               min={0}
               onValueChange={handleGain}
@@ -861,12 +862,13 @@ function TrackHeader({
               step={0.01}
               thumbMarks={false}
               value={mix.gain}
-              valueLabel="hidden"
+              valueLabel="auto"
             />
             <Knob
               anchor={0}
               aria-label={`${name} pan`}
               className="mb-0 size-7 shrink-0"
+              editableValue
               formatValue={formatPan}
               max={1}
               min={-1}
