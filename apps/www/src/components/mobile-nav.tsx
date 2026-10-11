@@ -122,12 +122,13 @@ export function MobileNav({
       />
       <PopoverContent
         align="start"
-        className="scroll-fade-y no-scrollbar h-(--available-height) w-(--available-width) overflow-y-auto overscroll-contain rounded-(--frame-radius) p-2"
+        className="scroll-fade-y no-scrollbar h-(--available-height) w-(--available-width) overflow-y-auto overscroll-contain rounded-(--frame-radius) p-2 pt-0"
         side="bottom"
         sideOffset={16}
       >
         <div className="flex flex-col gap-2">
           <Tabs
+            className="sticky top-0 z-10 -mx-2 bg-site-popover px-2 pt-2 pb-1"
             onValueChange={(value) => setChosen(value as Section)}
             value={section}
           >
@@ -138,7 +139,7 @@ export function MobileNav({
               <TabsTrigger value="docs">
                 <BookOpenIcon
                   aria-hidden
-                  className="size-4"
+                  className="size-4 in-data-active:text-primary"
                   weight={section === "docs" ? "fill" : "regular"}
                 />
                 Docs
@@ -146,7 +147,7 @@ export function MobileNav({
               <TabsTrigger value="components">
                 <CubeIcon
                   aria-hidden
-                  className="size-4"
+                  className="size-4 in-data-active:text-primary"
                   weight={section === "components" ? "fill" : "regular"}
                 />
                 Components
