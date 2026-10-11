@@ -122,7 +122,7 @@ export function SiteSidebarHeader() {
       </div>
       <SiteNavTabs items={siteConfig.navItems} />
       <div className="flex items-center gap-2">
-        <div className="shrink-0">
+        <div className="min-w-0 flex-1 [&>*]:w-full [&>*>button:last-child]:flex-1 [&>*>button:last-child]:justify-start">
           <SiteHeaderCommandMenu
             commandGroups={commandGroups}
             componentCategories={componentCategories}
