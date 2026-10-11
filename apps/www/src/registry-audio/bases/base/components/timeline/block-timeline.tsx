@@ -44,6 +44,7 @@ import {
 } from "@/registry/bases/base/ui/select";
 import { Toggle } from "@/registry/bases/base/ui/toggle";
 import { NumberControl } from "@/registry-audio/bases/base/audio/elements/bpm-control";
+import { Fader } from "@/registry-audio/bases/base/audio/elements/fader";
 import {
   Timeline,
   TimelineClip,
@@ -126,11 +127,20 @@ const PERCENT: Intl.NumberFormatOptions = {
 const bars = (count: number) => count * BAR;
 
 const TRACKS = [
-  { id: "drums", name: "Drums" },
-  { id: "bass", name: "Bass" },
-  { id: "keys", name: "Keys" },
-  { id: "vocals", name: "Vocals" },
+  { id: "drums", name: "Drums", swatch: "border-s-chart-1" },
+  { id: "bass", name: "Bass", swatch: "border-s-chart-2" },
+  { id: "keys", name: "Keys", swatch: "border-s-chart-3" },
+  { id: "vocals", name: "Vocals", swatch: "border-s-chart-4" },
 ] as const;
+
+/** What a track's header sets: how loud it is, and whether it is silenced or soloed. */
+interface Mix {
+  gain: number;
+  muted: boolean;
+  soloed: boolean;
+}
+
+const UNITY: Mix = { gain: 1, muted: false, soloed: false };
 
 type Span = readonly [number, number];
 
@@ -349,7 +359,7 @@ function Row({
       className={`flex min-w-full ${className ?? ""}`}
       style={height === undefined ? undefined : { height }}
     >
-      <div className="sticky left-0 z-20 flex w-28 shrink-0 items-stretch border-e bg-background text-sm">
+      <div className="sticky left-0 z-20 flex w-40 shrink-0 items-stretch border-e bg-background text-sm">
         {lead}
       </div>
       <div className="flex flex-1 flex-col">{children}</div>
@@ -596,20 +606,40 @@ const clampHeight = (value: number) =>
  */
 function TrackHeader({
   height,
+  mix,
   name,
+  onMix,
   onResize,
   onSelect,
   selected,
+  swatch,
   trackId,
 }: {
   /** The height set by hand, or none while the track shares what is left. */
   height: number | undefined;
+  mix: Mix;
   name: string;
+  onMix: (trackId: Arranged["track"], patch: Partial<Mix>) => void;
   onResize: (trackId: Arranged["track"], height: number) => void;
   onSelect: (trackId: Arranged["track"]) => void;
   selected: boolean;
+  /** The border class that colors the track's leading edge. */
+  swatch: string;
   trackId: Arranged["track"];
 }) {
+  const handleMute = useCallback(
+    () => onMix(trackId, { muted: !mix.muted }),
+    [mix.muted, onMix, trackId]
+  );
+  const handleSolo = useCallback(
+    () => onMix(trackId, { soloed: !mix.soloed }),
+    [mix.soloed, onMix, trackId]
+  );
+  const handleGain = useCallback(
+    (value: number | readonly number[]) =>
+      onMix(trackId, { gain: Array.isArray(value) ? value[0] : Number(value) }),
+    [onMix, trackId]
+  );
   const handleClick = useCallback(() => onSelect(trackId), [onSelect, trackId]);
   const resize = useRef<{ height: number; y: number } | null>(null);
   const handlePointerDown = useCallback(
@@ -657,15 +687,76 @@ function TrackHeader({
   );
 
   return (
-    <div className="relative flex w-full">
-      <button
-        aria-pressed={selected}
-        className="flex w-full items-center px-3 text-left font-medium outline-none hover:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset aria-pressed:bg-muted"
-        onClick={handleClick}
-        type="button"
-      >
-        {name}
-      </button>
+    <div
+      className={cn(
+        "relative flex w-full flex-col justify-center gap-1 border-s-4 px-2 py-1",
+        swatch,
+        selected && "bg-muted"
+      )}
+    >
+      <div className="flex items-center gap-1">
+        <button
+          aria-pressed={selected}
+          className="min-w-0 flex-1 truncate text-left font-medium outline-none hover:underline focus-visible:underline"
+          onClick={handleClick}
+          type="button"
+        >
+          {name}
+        </button>
+        <Button
+          aria-label={`Solo ${name}`}
+          aria-pressed={mix.soloed}
+          onClick={handleSolo}
+          size="icon-xs"
+          variant={mix.soloed ? "default" : "ghost"}
+        >
+          <IconPlaceholder
+            hugeicons="HeadphonesIcon"
+            lucide="HeadphonesIcon"
+            phosphor="HeadphonesIcon"
+            remixicon="RiHeadphoneLine"
+            tabler="IconHeadphones"
+          />
+        </Button>
+        <Button
+          aria-label={`Mute ${name}`}
+          aria-pressed={mix.muted}
+          onClick={handleMute}
+          size="icon-xs"
+          variant={mix.muted ? "default" : "ghost"}
+        >
+          {mix.muted ? (
+            <IconPlaceholder
+              hugeicons="VolumeMute01Icon"
+              lucide="VolumeXIcon"
+              phosphor="SpeakerSimpleSlashIcon"
+              remixicon="RiVolumeMuteLine"
+              tabler="IconVolumeOff"
+            />
+          ) : (
+            <IconPlaceholder
+              hugeicons="VolumeHighIcon"
+              lucide="Volume2Icon"
+              phosphor="SpeakerSimpleHighIcon"
+              remixicon="RiVolumeUpLine"
+              tabler="IconVolume"
+            />
+          )}
+        </Button>
+      </div>
+      <Fader
+        aria-label={`${name} gain`}
+        className="min-w-0 pe-2"
+        max={1}
+        min={0}
+        onValueChange={handleGain}
+        orientation="horizontal"
+        size="sm"
+        step={0.01}
+        thumbMarks={false}
+        value={mix.gain}
+        valueLabel="hidden"
+      />
       <div
         aria-label={`${name} height`}
         aria-orientation="horizontal"
@@ -907,6 +998,18 @@ export default function BlockTimeline() {
     (next: GridDivision | null) => setDivision(next ?? "adaptive"),
     []
   );
+  const [mixes, setMixes] = useState<Record<string, Mix>>({});
+  const mixOf = (trackId: string) => mixes[trackId] ?? UNITY;
+  const changeMix = useCallback(
+    (trackId: string, patch: Partial<Mix>) =>
+      setMixes((all) => ({
+        ...all,
+        [trackId]: { ...(all[trackId] ?? UNITY), ...patch },
+      })),
+    []
+  );
+  // What is heard: a muted track is silent, and while any track is soloed so is every other.
+  const anySolo = TRACKS.some((track) => mixOf(track.id).soloed);
   const [heights, setHeights] = useState<Record<string, number>>({});
   const resizeTrack = useCallback(
     (trackId: string, height: number) =>
@@ -1499,20 +1602,26 @@ export default function BlockTimeline() {
                 lead={
                   <TrackHeader
                     height={heights[track.id]}
+                    mix={mixOf(track.id)}
                     name={track.name}
+                    onMix={changeMix}
                     onResize={resizeTrack}
                     onSelect={selectTrack}
                     selected={track.id === selectedTrack}
+                    swatch={track.swatch}
                     trackId={track.id}
                   />
                 }
               >
                 <TimelineLane
-                  className={
-                    track.id === selectedTrack
-                      ? "h-auto min-h-14 flex-1 bg-muted/40"
-                      : "h-auto min-h-14 flex-1"
-                  }
+                  className={cn(
+                    "h-auto min-h-14 flex-1",
+                    track.id === selectedTrack && "bg-muted/40",
+                    // A silent track keeps its clips on the page, drained.
+                    (mixOf(track.id).muted ||
+                      (anySolo && !mixOf(track.id).soloed)) &&
+                      "**:data-clip-id:opacity-40"
+                  )}
                   data-track={track.id}
                   gridStep={snapStep}
                   onPointerDown={focusPanel}
