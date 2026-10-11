@@ -26,10 +26,10 @@ export const PANEL_INSET = "p-4";
  * expand button.
  */
 export const blockPanelClassName =
-  "flex-nowrap items-stretch justify-start sm:**:data-[slot=preview]:max-w-none [&>.cn-audio-panel]:w-full [&>.cn-audio-panel]:flex-1 [&>.cn-audio-panel]:rounded-none [&>.cn-audio-panel]:border-0 [&>.cn-audio-panel]:bg-transparent [&>.cn-audio-panel]:p-0 [&_[data-slot=piano-roll]]:max-h-56";
+  "min-h-72 flex-nowrap items-stretch justify-start sm:**:data-[slot=preview]:max-w-none [&>.cn-audio-panel]:w-full [&>.cn-audio-panel]:flex-1 [&>.cn-audio-panel]:rounded-none [&>.cn-audio-panel]:border-0 [&>.cn-audio-panel]:bg-transparent [&>.cn-audio-panel]:p-0 [&_[data-slot=piano-roll]]:max-h-56";
 
 /** What a preview's panel looks like, on a page and in a card alike. */
-const panelClassName = `flex min-h-72 min-w-0 flex-1 flex-col flex-wrap items-center justify-center overflow-x-auto font-sans **:data-[slot=preview]:w-full sm:**:data-[slot=preview]:max-w-[80%] ${PANEL_INSET}`;
+const panelClassName = `flex min-w-0 flex-1 flex-col flex-wrap items-center justify-center overflow-x-auto font-sans **:data-[slot=preview]:w-full sm:**:data-[slot=preview]:max-w-[80%] ${PANEL_INSET}`;
 
 /**
  * The panel of a preview's frame, the one container of what is shown: the
