@@ -5,6 +5,7 @@ import {
   isInIframe,
   useIframeMessageListener,
 } from "@/app/(create)/hooks/use-iframe-sync";
+import { saveDesignSystemBoot } from "@/app/(create)/lib/boot-cache";
 import { ensurePreviewFontsLoaded, FONTS } from "@/app/(create)/lib/fonts";
 import {
   type DesignSystemSearchParams,
@@ -468,6 +469,11 @@ export function DesignSystemEffects() {
   }, [isReady]);
 
   useMenuColor(menuColor);
+
+  // What is applied is kept for the next load, which puts it back before the first paint.
+  React.useEffect(() => {
+    saveDesignSystemBoot();
+  });
 
   return null;
 }

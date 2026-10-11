@@ -2,6 +2,7 @@ import { Provider as JotaiProvider } from "jotai";
 import type { Metadata } from "next";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { Suspense } from "react";
+import { DESIGN_SYSTEM_BOOT_SCRIPT } from "@/app/(create)/lib/boot-cache";
 import { JsonLd } from "@/components/json-ld";
 import { QueryProvider } from "@/components/query-provider";
 import { SiteCustomizer } from "@/components/site-customizer";
@@ -99,6 +100,10 @@ export default function RootLayout({
               } catch (_) {}
             `,
           }}
+        />
+        <script
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: puts the saved design system back before the first paint
+          dangerouslySetInnerHTML={{ __html: DESIGN_SYSTEM_BOOT_SCRIPT }}
         />
         <meta content={META_THEME_COLORS.light} name="theme-color" />
       </head>
