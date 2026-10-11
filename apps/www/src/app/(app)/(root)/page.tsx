@@ -3,6 +3,8 @@ import { ComponentGrid } from "@/app/(create)/components/components/component-gr
 import { searchCatalog } from "@/lib/registry";
 import { buildPageMetadata } from "@/lib/seo";
 
+import { HomeHero } from "./components/home-hero";
+
 const SHOWCASE_NAMES = [
   "block-player-widget",
   "block-pocket-synth",
@@ -61,6 +63,7 @@ export default function IndexPage() {
 
   return (
     <div className="homepage relative flex flex-1 flex-col">
+      <HomeHero />
       <ComponentGrid catalogItems={catalogItems} />
     </div>
   );
