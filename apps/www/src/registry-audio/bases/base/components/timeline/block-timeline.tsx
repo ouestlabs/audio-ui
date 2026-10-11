@@ -2,7 +2,6 @@
 
 import {
   adjacentPoint,
-  coverClips,
   createSource,
   duplicateClip,
   moveClip,
@@ -80,6 +79,13 @@ import {
 import { Transport } from "@/registry-audio/bases/base/audio/elements/transport";
 import { useSimulatedLevels } from "@/registry-audio/bases/base/hooks/use-simulated-levels";
 import {
+  type Arranged,
+  land,
+  lay,
+  otherSelected,
+  scaleValue,
+} from "@/registry-audio/bases/base/lib/arrangement";
+import {
   beginChange,
   canRedo,
   canUndo,
@@ -149,6 +155,8 @@ const TRACKS = [
   { color: 2, id: "keys", name: "Keys" },
   { color: 3, id: "vocals", name: "Vocals" },
 ] as const;
+
+const TRACK_ORDER = TRACKS.map((track) => track.id);
 
 /** The colors a track can take: the theme's chart tokens, written out for the stylesheet to find. */
 const SWATCHES = [
@@ -289,22 +297,10 @@ const UNITY: Mix = { color: 0, gain: 1, muted: false, pan: 0, soloed: false };
 
 type Span = readonly [number, number];
 
-interface Arranged {
-  /** A clip switched off stays on the page, drained, and is not heard. */
-  disabled?: boolean;
-  id: string;
-  name: string;
-  /** How long the recording behind the clip is: trimming stops where it runs out. */
-  sourceLength: number;
-  track: (typeof TRACKS)[number]["id"];
-  /** Where the clip sits, how much of its source it plays, and its fades. */
-  value: TimelinePrimitive.Clip.Value;
-}
-
 const arranged = (
   id: string,
   name: string,
-  track: Arranged["track"],
+  track: string,
   from: number,
   to: number
 ): Arranged => ({
@@ -369,123 +365,6 @@ function usePlaybackClock(limits: {
   }, [clock, playing]);
 
   return { clock, playing, setPlaying };
-}
-
-let pieceCount = 0;
-
-/**
- * Lays `placed` on its track: it covers what was under it, as a DAW's does,
- * rather than stacking on it. Pieces cut from a clip it lies inside get ids of
- * their own.
- */
-function lay(all: Arranged[], placed: Arranged, duration: number): Arranged[] {
-  const others = all.filter((clip) => clip.id !== placed.id);
-  const onTrack = others.filter((clip) => clip.track === placed.track);
-  const elsewhere = others.filter((clip) => clip.track !== placed.track);
-  const covered = coverClips(
-    onTrack,
-    placed.value,
-    { duration, sourceLength: placed.sourceLength },
-    (item, value) => {
-      pieceCount += 1;
-      return { ...item, id: `${item.id}-c${pieceCount}`, value };
-    }
-  );
-  return [...elsewhere, ...covered, placed];
-}
-
-const trackIndex = (track: Arranged["track"]) =>
-  TRACKS.findIndex((item) => item.id === track);
-
-/** The track `shift` tracks away, kept on the arrangement. */
-function shiftTrack(
-  track: Arranged["track"],
-  shift: number
-): Arranged["track"] {
-  const target = Math.min(
-    TRACKS.length - 1,
-    Math.max(0, trackIndex(track) + shift)
-  );
-  return TRACKS[target]?.id ?? track;
-}
-
-/** The rest of a selection that holds `id`: what a drop with no sideways move has no change event to have noted. */
-function otherSelected(selected: string[], id: string): string[] {
-  return selected.length > 1 && selected.includes(id)
-    ? selected.filter((other) => other !== id)
-    : [];
-}
-
-interface Landing {
-  /** The ids the copies of the originals take. */
-  copyIds: string[];
-  duration: number;
-  /** The other clips of a dragged group. */
-  group: string[];
-  /** The clip that was dragged. */
-  id: string;
-  /** The originals of a copy drag, which stay where they were. */
-  origins: Arranged[];
-  /** The track the clip was dropped on, if it left its own. */
-  track: Arranged["track"] | undefined;
-}
-
-/**
- * Lays down what a drag moved: the dragged clip and its group land where they
- * were put, covering what they lie over; in a copy drag the originals stay
- * where they were, as copies of their own, under what was moved.
- */
-function land(all: Arranged[], landing: Landing): Arranged[] {
-  const { copyIds, duration, group, id, origins, track } = landing;
-  const current = all.find((clip) => clip.id === id);
-  if (!current) {
-    return all;
-  }
-  const placed = track ? { ...current, track } : current;
-  const movedIds = new Set([id, ...group]);
-  // A group dropped on another track moves by as many tracks as the dragged clip did.
-  const shift = track ? trackIndex(track) - trackIndex(current.track) : 0;
-  const moved = all
-    .filter((clip) => movedIds.has(clip.id))
-    .map((clip) =>
-      clip.id === id ? clip : { ...clip, track: shiftTrack(clip.track, shift) }
-    );
-  let laid = origins.length
-    ? all.filter((clip) => !movedIds.has(clip.id))
-    : all;
-  laid = origins.reduce(
-    (kept, origin, index) =>
-      lay(kept, { ...origin, id: copyIds[index] ?? origin.id }, duration),
-    laid
-  );
-  for (const clip of origins.length ? moved : [placed]) {
-    laid = lay(laid, clip.id === id ? placed : clip, duration);
-  }
-  // The rest of a dragged group lands too, covering what it lies over.
-  if (!origins.length) {
-    for (const other of group) {
-      const grouped = moved.find((clip) => clip.id === other);
-      if (grouped) {
-        laid = lay(laid, grouped, duration);
-      }
-    }
-  }
-  return laid;
-}
-
-/** A clip's positions and lengths, all in seconds, scaled when the tempo changes. */
-function scaleValue(
-  value: TimelinePrimitive.Clip.Value,
-  ratio: number
-): TimelinePrimitive.Clip.Value {
-  return {
-    ...value,
-    fadeIn: value.fadeIn * ratio,
-    fadeOut: value.fadeOut * ratio,
-    length: value.length * ratio,
-    offset: value.offset * ratio,
-    start: value.start * ratio,
-  };
 }
 
 /** A row of the arrangement: the track's header stuck to the left edge as it scrolls, its lane beside it. */
@@ -1390,8 +1269,9 @@ export default function BlockTimeline() {
           duration,
           group: group ? [...group.keys()] : otherSelected(selectedIds, id),
           id,
+          order: TRACK_ORDER,
           origins,
-          track: track as Arranged["track"] | undefined,
+          track,
         })
       );
     },

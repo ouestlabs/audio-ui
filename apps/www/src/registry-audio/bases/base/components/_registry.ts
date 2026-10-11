@@ -304,6 +304,7 @@ export const components: RegistryItem[] = [
       "@audio/meter",
       "@audio/use-simulated-levels",
       "@audio/musical-time",
+      "@audio/arrangement",
       "@audio/history",
       "@shadcn/button",
       "@shadcn/button-group",

@@ -92,7 +92,7 @@ function TimelineLane({
 function TimelineTrack({ className, ...props }: TimelinePrimitive.Track.Props) {
   return (
     <TimelinePrimitive.Track
-      className={cn("cn-timeline-track", className)}
+      className={className}
       data-slot="timeline-track"
       {...props}
     />
