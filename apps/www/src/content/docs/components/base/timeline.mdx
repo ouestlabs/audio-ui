@@ -197,6 +197,8 @@ All of it is in the timeline's units, the source's too. Dragging the clip's head
 
 Holding Alt when a drag begins marks it as a copy (`eventDetails.copy`): the clip you were dragging is the copy, so leave the original where it was and add the dragged one. A fade's shape is stepped by double-clicking its handle, or Enter on its input (`reason` is `"double-click"` or `"keyboard"`), and `ClipFade` draws the real ramp.
 
+Laying a clip where others already are is `coverClips(clips, placed, limits, split)`: the clips under it are covered rather than stacked (removed, trimmed or cut in two around it), and `split` makes the second piece of a cut clip from the first, so what your app keeps about a clip travels with each piece.
+
 Cutting, copying and the like are plain functions on the clip, for the model behind your clips: `splitClip(clip, at)` returns the two pieces (or `null` when `at` leaves one too short), and `moveClip`, `trimClipStart`, `trimClipEnd`, `setClipFadeIn`, `setClipFadeOut`, `setClipFadeShape` and `duplicateClip` return the clip as it would end up, within the limits you give them.
 
 ### The cursor

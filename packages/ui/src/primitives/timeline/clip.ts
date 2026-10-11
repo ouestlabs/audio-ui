@@ -199,3 +199,43 @@ export function splitClip(
 export function duplicateClip(clip: ClipValue, limits: ClipLimits): ClipValue {
   return moveClip(clip, clipEnd(clip), limits);
 }
+
+/**
+ * What a clip laid on a lane leaves of the clips already there: they are
+ * covered, not stacked. A clip the new one lies wholly over goes; one it
+ * overlaps by an edge is trimmed to what is left; one it lies inside is cut
+ * in two around it. Items are anything with a `value`, so the rest of what
+ * the app keeps about a clip travels with each piece. `split` makes the
+ * second piece's item from the first's.
+ */
+export function coverClips<Item extends { value: ClipValue }>(
+  items: readonly Item[],
+  placed: ClipValue,
+  limits: ClipLimits,
+  split: (item: Item, value: ClipValue) => Item
+): Item[] {
+  const from = placed.start;
+  const to = clipEnd(placed);
+  const result: Item[] = [];
+  for (const item of items) {
+    const { value } = item;
+    const end = clipEnd(value);
+    if (end <= from || value.start >= to) {
+      result.push(item);
+      continue;
+    }
+    const keepsLeft = value.start < from;
+    const keepsRight = end > to;
+    if (keepsLeft) {
+      result.push({
+        ...item,
+        value: trimClipEnd(value, from, { ...limits, minLength: 0 }),
+      });
+    }
+    if (keepsRight) {
+      const right = trimClipStart(value, to, { ...limits, minLength: 0 });
+      result.push(keepsLeft ? split(item, right) : { ...item, value: right });
+    }
+  }
+  return result;
+}

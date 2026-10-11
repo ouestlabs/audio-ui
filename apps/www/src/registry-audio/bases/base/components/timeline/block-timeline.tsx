@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  coverClips,
   createSource,
   duplicateClip,
   splitClip,
@@ -191,6 +192,29 @@ function usePlaybackClock(limits: {
   }, [clock, playing]);
 
   return { clock, playing, setPlaying };
+}
+
+let pieceCount = 0;
+
+/**
+ * Lays `placed` on its track: it covers what was under it, as a DAW's does,
+ * rather than stacking on it. Pieces cut from a clip it lies inside get ids of
+ * their own.
+ */
+function lay(all: Arranged[], placed: Arranged, duration: number): Arranged[] {
+  const others = all.filter((clip) => clip.id !== placed.id);
+  const onTrack = others.filter((clip) => clip.track === placed.track);
+  const elsewhere = others.filter((clip) => clip.track !== placed.track);
+  const covered = coverClips(
+    onTrack,
+    placed.value,
+    { duration, sourceLength: placed.sourceLength },
+    (item, value) => {
+      pieceCount += 1;
+      return { ...item, id: `${item.id}-c${pieceCount}`, value };
+    }
+  );
+  return [...elsewhere, ...covered, placed];
 }
 
 /** A clip's positions and lengths, all in seconds, scaled when the tempo changes. */
@@ -562,17 +586,18 @@ export default function BlockTimeline() {
       pieces.current += 1;
       const copyId = `${id}-${pieces.current}`;
       setClips((all) => {
-        const moved = track
-          ? all.map((clip) =>
-              clip.id === id
-                ? { ...clip, track: track as Arranged["track"] }
-                : clip
-            )
-          : all;
-        return origin ? [...moved, { ...origin, id: copyId }] : moved;
+        const current = all.find((clip) => clip.id === id);
+        if (!current) {
+          return all;
+        }
+        const placed = track
+          ? { ...current, track: track as Arranged["track"] }
+          : current;
+        const laid = lay(all, placed, duration);
+        return origin ? lay(laid, { ...origin, id: copyId }, duration) : laid;
       });
     },
-    []
+    [duration]
   );
   const selectClip = useCallback(
     (id: string) => setSelection({ id, kind: "clip" }),
@@ -626,17 +651,20 @@ export default function BlockTimeline() {
         event.preventDefault();
         pieces.current += 1;
         const copyId = `${clip.id}-${pieces.current}`;
-        setClips((all) => [
-          ...all,
-          {
-            ...clip,
-            id: copyId,
-            value: duplicateClip(clip.value, {
-              duration,
-              sourceLength: clip.sourceLength,
-            }),
-          },
-        ]);
+        setClips((all) =>
+          lay(
+            all,
+            {
+              ...clip,
+              id: copyId,
+              value: duplicateClip(clip.value, {
+                duration,
+                sourceLength: clip.sourceLength,
+              }),
+            },
+            duration
+          )
+        );
         setSelection({ id: copyId, kind: "clip" });
         return;
       }

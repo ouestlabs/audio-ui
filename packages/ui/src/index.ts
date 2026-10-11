@@ -10,6 +10,7 @@ export {
   type ClipLimits,
   type ClipValue,
   clipEnd,
+  coverClips,
   duplicateClip,
   FADE_SHAPES,
   type FadeShape,

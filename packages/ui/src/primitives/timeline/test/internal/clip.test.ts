@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import {
   type ClipValue,
   clipEnd,
+  coverClips,
   duplicateClip,
   FADE_SHAPES,
   fadeGain,
@@ -189,5 +190,50 @@ describe("fade shapes", () => {
     expect(left.fadeOutShape).toBeUndefined();
     expect(right.fadeOutShape).toBe("slow");
     expect(right.fadeInShape).toBeUndefined();
+  });
+});
+
+describe("coverClips", () => {
+  type Item = { id: string; value: ClipValue };
+  const at = (id: string, start: number, length: number, offset = 0): Item => ({
+    id,
+    value: { fadeIn: 0, fadeOut: 0, length, offset, start },
+  });
+  const split = (item: Item, value: ClipValue): Item => ({
+    id: `${item.id}b`,
+    value,
+  });
+  const cover = (items: Item[], placed: Item) =>
+    coverClips(items, placed.value, { duration: 100 }, split).map(
+      (item) =>
+        `${item.id}:${item.value.start}+${item.value.length}@${item.value.offset}`
+    );
+
+  test("leaves clips the new one does not touch", () => {
+    expect(cover([at("a", 0, 10), at("b", 30, 10)], at("n", 10, 20))).toEqual([
+      "a:0+10@0",
+      "b:30+10@0",
+    ]);
+  });
+
+  test("removes a clip it lies wholly over", () => {
+    expect(cover([at("a", 12, 5)], at("n", 10, 20))).toEqual([]);
+  });
+
+  test("trims the end of a clip it overlaps from the right", () => {
+    expect(cover([at("a", 0, 15)], at("n", 10, 20))).toEqual(["a:0+10@0"]);
+  });
+
+  test("trims the start of a clip it overlaps from the left, keeping its content in place", () => {
+    expect(cover([at("a", 25, 15, 5)], at("n", 10, 20))).toEqual([
+      "a:30+10@10",
+    ]);
+  });
+
+  test("cuts a clip it lies inside in two, around itself", () => {
+    expect(cover([at("a", 0, 50)], at("n", 10, 20))).toEqual([
+      "a:0+10@0",
+      "ab:30+20@30",
+    ]);
   });
 });
