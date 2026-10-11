@@ -36,8 +36,8 @@ export const metadata: Metadata = buildPageMetadata({
 
 export default function IndexPage() {
   return (
-    <div className="homepage @container flex flex-1 flex-col">
-      <div className="grid flex-1 content-center items-center gap-10 px-3 py-10 sm:px-8 xl:px-10 @2xl:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] @2xl:gap-16">
+    <div className="homepage flex flex-1 flex-col justify-center px-3 py-10 sm:px-8 xl:px-10">
+      <div className="mx-auto flex w-full max-w-md flex-col items-center gap-10">
         <HomeHero />
         {/* One component stands for the project: a synth built from the primitives, bare, as a thing to play with rather than a catalog card. */}
         <ComponentRenderer name="block-pocket-synth" />
