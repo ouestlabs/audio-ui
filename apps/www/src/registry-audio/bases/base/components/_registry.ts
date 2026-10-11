@@ -284,21 +284,21 @@ export const components: RegistryItem[] = [
   {
     categories: ["timeline"],
     description:
-      "A zoomable arrangement timeline: a bar ruler that seeks on the grid, lanes whose grid follows the zoom, and a playhead following a transport clock",
+      "An arrangement timeline made for a whole screen: a bar ruler that seeks on the grid, a loop strip, a lane per track with clips to move and trim on the grid, a playhead following a transport clock, and a navigator to zoom and scroll — open it at full size and the tracks take the screen",
     files: [
       {
-        path: "components/timeline/timeline-demo.tsx",
-        type: "registry:example",
+        path: "components/timeline/block-timeline.tsx",
+        type: "registry:block",
       },
     ],
-    name: "timeline-demo",
+    name: "block-timeline",
     registryDependencies: [
       "@audio/timeline",
       "@audio/musical-time",
       "@shadcn/button",
       "@shadcn/button-group",
     ],
-    type: "registry:example",
+    type: "registry:block",
   },
   {
     categories: ["waveform"],

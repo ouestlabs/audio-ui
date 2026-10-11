@@ -96,8 +96,8 @@
   },
   {
     "categories": ["timeline"],
-    "name": "timeline-demo",
-    "title": "timeline-demo"
+    "name": "block-timeline",
+    "title": "block-timeline"
   },
   {
     "categories": ["waveform"],

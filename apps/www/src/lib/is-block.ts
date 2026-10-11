@@ -5,6 +5,6 @@ export const isBlock = (name: string) => name.startsWith("block-");
  * The previews that can be opened at full size: the editors made to take a
  * whole screen. A block that fits a card does not need it.
  */
-const EXPANDABLE = new Set(["block-piano-roll"]);
+const EXPANDABLE = new Set(["block-piano-roll", "block-timeline"]);
 
 export const isExpandable = (name: string) => EXPANDABLE.has(name);
