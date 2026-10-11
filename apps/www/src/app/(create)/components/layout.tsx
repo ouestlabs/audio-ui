@@ -5,7 +5,11 @@ import { DesignSystemProvider } from "@/app/(create)/customizer/design-system-pr
 import { LocksProvider } from "@/app/(create)/hooks/use-locks";
 import { CREATE_PREVIEW_FONTS_ATTR } from "@/app/(create)/lib/fonts";
 import { GridSkeleton } from "@/components/grid-skeleton";
-import { SiteHeader, SiteSidebarHeader } from "@/components/site-header";
+import {
+  SiteBarContent,
+  SiteHeader,
+  SiteSidebarHeader,
+} from "@/components/site-header";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   getCategories,
@@ -79,6 +83,8 @@ export default function ComponentsLayout({
               <ComponentsProvider
                 catalogItems={catalogItems}
                 categoryCounts={categoryCounts}
+                closedEnd={<SiteBarContent part="end" />}
+                closedStart={<SiteBarContent part="start" />}
                 header={<SiteSidebarHeader />}
                 totalCount={totalCount}
               >

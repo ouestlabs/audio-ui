@@ -3,7 +3,11 @@ import { DocsDesignSystemSync } from "@/components/docs-design-system-sync";
 import { DocsSidebar } from "@/components/docs-sidebar";
 import { FramedLayout } from "@/components/framed-layout";
 import { SiteFooter } from "@/components/site-footer";
-import { SiteHeader, SiteSidebarHeader } from "@/components/site-header";
+import {
+  SiteBarContent,
+  SiteHeader,
+  SiteSidebarHeader,
+} from "@/components/site-header";
 import { source } from "@/lib/source";
 
 export default function DocsLayout({
@@ -17,6 +21,8 @@ export default function DocsLayout({
       <DocsDesignSystemSync>
         <LocksProvider>
           <FramedLayout
+            closedEnd={<SiteBarContent part="end" />}
+            closedStart={<SiteBarContent part="start" />}
             footer={<SiteFooter docs />}
             nav={
               <DocsSidebar

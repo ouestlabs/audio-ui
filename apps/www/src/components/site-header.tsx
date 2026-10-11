@@ -122,13 +122,47 @@ export function SiteSidebarHeader() {
       </div>
       <SiteNavTabs items={siteConfig.navItems} />
       <div className="flex items-center gap-2">
+        <div className="shrink-0">
+          <SiteHeaderCommandMenu
+            commandGroups={commandGroups}
+            componentCategories={componentCategories}
+            navItems={siteConfig.navItems}
+          />
+        </div>
+        <Separator className="h-5" orientation="vertical" />
+        <GitHubLink />
+      </div>
+    </div>
+  );
+}
+
+/**
+ * What the navigation sidebar's header holds, for the bar of the inset while
+ * that sidebar is shut: the sections as tabs at the start, the search, GitHub
+ * and the theme at the end.
+ */
+export function SiteBarContent({ part }: { part: "end" | "start" }) {
+  if (part === "start") {
+    return (
+      <div className="w-48">
+        <SiteNavTabs items={siteConfig.navItems} />
+      </div>
+    );
+  }
+  const pageTree = source.getPageTree();
+  const componentCategories = getCategories();
+  return (
+    <div className="flex items-center gap-2">
+      <div className="shrink-0">
         <SiteHeaderCommandMenu
-          commandGroups={commandGroups}
+          commandGroups={buildCommandMenuGroups(pageTree.children)}
           componentCategories={componentCategories}
           navItems={siteConfig.navItems}
         />
-        <GitHubLink />
       </div>
+      <Separator className="h-5" orientation="vertical" />
+      <GitHubLink />
+      <SiteHeaderModeSwitcher />
     </div>
   );
 }

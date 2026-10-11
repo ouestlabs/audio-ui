@@ -12,6 +12,7 @@ import { useIsDesktopCustomizer } from "@/app/(create)/components/components/use
 import { Frame, FrameContent, FrameHeader } from "@/components/custom/frame";
 import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
+import { Separator } from "@/components/ui/separator";
 import { SidebarProvider, useSidebar } from "@/components/ui/sidebar";
 import {
   Tooltip,
@@ -133,6 +134,8 @@ function CustomizeToggle() {
  */
 export function FramedLayout({
   actions,
+  closedEnd,
+  closedStart,
   children,
   footer,
   nav,
@@ -140,6 +143,9 @@ export function FramedLayout({
 }: {
   /** In the bar, before the customizer's button. */
   actions?: React.ReactNode;
+  /** In the bar, from `lg`, while the navigation is shut: what its header held. */
+  closedEnd?: React.ReactNode;
+  closedStart?: React.ReactNode;
   children: React.ReactNode;
   /** Under the page, on the frame. */
   footer?: React.ReactNode;
@@ -217,9 +223,19 @@ export function FramedLayout({
           <Frame className="h-full">
             <FrameHeader className="min-h-11 shrink-0 flex-row items-center gap-2 px-2 py-1.5">
               <NavigationToggle />
+              {navigationOpen ? null : (
+                <div className="hidden lg:block">{closedStart}</div>
+              )}
               {start}
               <div className="ml-auto flex items-center gap-2">
                 {actions}
+                {navigationOpen ? null : (
+                  <div className="hidden items-center gap-2 lg:flex">
+                    <Separator className="h-5" orientation="vertical" />
+                    {closedEnd}
+                    <Separator className="h-5" orientation="vertical" />
+                  </div>
+                )}
                 <CustomizeToggle />
               </div>
             </FrameHeader>

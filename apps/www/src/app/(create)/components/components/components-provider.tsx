@@ -17,6 +17,9 @@ interface ComponentsProviderProps {
   catalogItems: ComponentCatalogItem[];
   categoryCounts: Record<string, number>;
   children: React.ReactNode;
+  /** In the bar, while the navigation is shut. */
+  closedEnd?: React.ReactNode;
+  closedStart?: React.ReactNode;
   /** At the top of the navigation sidebar. */
   header?: React.ReactNode;
   totalCount: number;
@@ -24,6 +27,8 @@ interface ComponentsProviderProps {
 
 export function ComponentsProvider({
   children,
+  closedEnd,
+  closedStart,
   header,
   totalCount,
   categoryCounts,
@@ -38,6 +43,8 @@ export function ComponentsProvider({
     <ComponentsContext.Provider value={value}>
       <FramedLayout
         actions={<ComponentHeaderGridToggle />}
+        closedEnd={closedEnd}
+        closedStart={closedStart}
         nav={<ComponentSidebar header={header} />}
         start={
           <>
