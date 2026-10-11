@@ -127,8 +127,11 @@ export function DesignSystemSyncProvider({
  */
 export function DesignSystemProvider({
   children,
+  fallback = null,
 }: {
   children: React.ReactNode;
+  /** What stands in until the design system is applied: never a blank page. */
+  fallback?: React.ReactNode;
 }) {
   const [params, setParams] = useDesignSystemSearchParams({
     history: "replace",
@@ -495,7 +498,7 @@ export function DesignSystemProvider({
   );
 
   if (!isReady) {
-    return null;
+    return fallback;
   }
 
   return (

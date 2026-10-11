@@ -22,7 +22,7 @@ export default function RootAppLayout({
       <SiteHeader framed />
       <Suspense fallback={<FramedLayoutSkeleton />}>
         <LocksProvider>
-          <DesignSystemProvider>
+          <DesignSystemProvider fallback={<FramedLayoutSkeleton />}>
             <FramedLayout
               closedEnd={<SiteBarContent part="end" />}
               closedStart={<SiteBarContent part="start" />}

@@ -70,7 +70,7 @@ export default function ComponentsLayout({
       <main className="flex min-h-0 flex-1 flex-col">
         <Suspense fallback={<ComponentsLayoutFallback />}>
           <LocksProvider>
-            <DesignSystemProvider>
+            <DesignSystemProvider fallback={<ComponentsLayoutFallback />}>
               <ComponentsProvider
                 catalogItems={catalogItems}
                 categoryCounts={categoryCounts}
