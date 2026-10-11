@@ -223,7 +223,7 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
-    dependencies: ["@audio-ui/react"],
+    dependencies: ["@audio-ui/react", "@base-ui/react"],
     files: [
       {
         path: "audio/elements/transport.tsx",

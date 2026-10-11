@@ -1,6 +1,7 @@
 "use client";
 
 import type { Source } from "@audio-ui/react";
+import { Toolbar } from "@base-ui/react/toolbar";
 import { useCallback, useEffect, useRef } from "react";
 import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder";
 import { cn } from "@/registry/bases/base/lib/utils";
@@ -219,10 +220,9 @@ function MetronomeMenu({
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
-          <Button
+          <Toolbar.Button
             aria-label="Metronome settings"
-            size="icon"
-            variant="outline"
+            render={<Button size="icon" variant="outline" />}
           />
         }
       >
@@ -299,13 +299,17 @@ function TransportTempo({
   );
 
   return (
-    <ButtonGroup className="shrink-0">
+    <Toolbar.Group render={<ButtonGroup className="shrink-0" />}>
       <BpmControl onValueChange={handleBpm} value={tempo.bpm} />
       <Select
         onValueChange={handleSignature}
         value={`${tempo.beatsPerBar}/${tempo.beatUnit}`}
       >
-        <SelectTrigger aria-label="Time signature" className="w-20">
+        <SelectTrigger
+          aria-label="Time signature"
+          className="w-20"
+          render={<Toolbar.Button />}
+        >
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
@@ -318,7 +322,7 @@ function TransportTempo({
           </SelectGroup>
         </SelectContent>
       </Select>
-    </ButtonGroup>
+    </Toolbar.Group>
   );
 }
 
@@ -391,20 +395,19 @@ function Transport({
   const hasClusterTwo = Boolean(onLoopingChange || onMetronomeChange);
 
   return (
-    <div
+    <Toolbar.Root
       aria-label="Transport"
       className={cn(
         "flex w-full min-w-0 flex-wrap items-center gap-2",
         className
       )}
       data-slot="transport"
-      role="group"
     >
-      <ButtonGroup className="shrink-0">
-        <Button
+      <Toolbar.Group render={<ButtonGroup className="shrink-0" />}>
+        <Toolbar.Button
           aria-label={playing ? "Pause" : "Play"}
           onClick={onPlayPause}
-          size="icon"
+          render={<Button size="icon" />}
         >
           {playing ? (
             <IconPlaceholder
@@ -423,12 +426,11 @@ function Transport({
               tabler="IconPlayerPlayFilled"
             />
           )}
-        </Button>
-        <Button
+        </Toolbar.Button>
+        <Toolbar.Button
           aria-label="Stop"
           onClick={onStop}
-          size="icon"
-          variant="outline"
+          render={<Button size="icon" variant="outline" />}
         >
           <IconPlaceholder
             hugeicons="StopIcon"
@@ -437,21 +439,22 @@ function Transport({
             remixicon="RiStopFill"
             tabler="IconPlayerStopFilled"
           />
-        </Button>
+        </Toolbar.Button>
         <ButtonGroupText>
           <TransportPosition source={source} tempo={tempo} />
         </ButtonGroupText>
-      </ButtonGroup>
+      </Toolbar.Group>
       {hasClusterTwo ? (
-        <ButtonGroup className="shrink-0">
+        <Toolbar.Group render={<ButtonGroup className="shrink-0" />}>
           {onLoopingChange ? (
-            <Button
+            <Toolbar.Button
               aria-label="Loop"
               aria-pressed={looping}
               onClick={toggleLooping}
-              size="icon"
+              render={
+                <Button size="icon" variant={looping ? "default" : "outline"} />
+              }
               title="Loop"
-              variant={looping ? "default" : "outline"}
             >
               <IconPlaceholder
                 hugeicons="RepeatIcon"
@@ -460,16 +463,20 @@ function Transport({
                 remixicon="RiRepeatLine"
                 tabler="IconRepeat"
               />
-            </Button>
+            </Toolbar.Button>
           ) : null}
           {onMetronomeChange ? (
-            <Button
+            <Toolbar.Button
               aria-label="Metronome"
               aria-pressed={metronome}
               onClick={toggleMetronome}
-              size="icon"
+              render={
+                <Button
+                  size="icon"
+                  variant={metronome ? "default" : "outline"}
+                />
+              }
               title="Metronome"
-              variant={metronome ? "default" : "outline"}
             >
               <MetronomeBeat
                 playing={playing && Boolean(metronome)}
@@ -477,7 +484,7 @@ function Transport({
                 source={source}
                 tempo={tempo}
               />
-            </Button>
+            </Toolbar.Button>
           ) : null}
           {onMetronomeChange && (onRhythmChange || onSoundChange) ? (
             <MetronomeMenu
@@ -489,12 +496,12 @@ function Transport({
               tempo={tempo}
             />
           ) : null}
-        </ButtonGroup>
+        </Toolbar.Group>
       ) : null}
       {onTempoChange ? (
         <TransportTempo onTempoChange={onTempoChange} tempo={tempo} />
       ) : null}
-    </div>
+    </Toolbar.Root>
   );
 }
 
