@@ -144,12 +144,11 @@ export function DocsShell({
                 </Button>
               </FrameHeader>
               {/* The panel: the page, scrolling under the header. */}
-              <FrameContent
-                className="scroll-fade-y no-scrollbar flex min-h-0 flex-1 flex-col overflow-y-auto"
-                data-docs-scroll=""
-              >
-                <div className="flex-1 px-4 sm:px-8">{children}</div>
-                {footer}
+              <FrameContent className="flex min-h-0 flex-1 flex-col">
+                <div className="scroll-fade-y no-scrollbar flex min-h-0 flex-1 flex-col overflow-y-auto">
+                  <div className="flex-1 px-4 sm:px-8">{children}</div>
+                  {footer}
+                </div>
               </FrameContent>
             </Frame>
           </InsetPane>

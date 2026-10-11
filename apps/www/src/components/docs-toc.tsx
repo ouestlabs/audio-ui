@@ -68,7 +68,12 @@ function useActiveItem(itemIds: string[]) {
 
     const controller = new AbortController();
     const { signal } = controller;
-    window.addEventListener("scroll", onScroll, { passive: true, signal });
+    // The page scrolls inside the inset, not the window: capture reaches it.
+    window.addEventListener("scroll", onScroll, {
+      capture: true,
+      passive: true,
+      signal,
+    });
     window.addEventListener("resize", onScroll, { signal });
     window.addEventListener("hashchange", syncFromHash, { signal });
 

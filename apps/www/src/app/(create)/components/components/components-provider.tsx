@@ -160,8 +160,10 @@ export function ComponentsProvider({
               )}
             >
               <ComponentHeader />
-              <FrameContent className="scroll-fade-y no-scrollbar flex min-h-0 flex-1 flex-col overflow-y-auto">
-                {children}
+              <FrameContent className="flex min-h-0 flex-1 flex-col">
+                <div className="scroll-fade-y no-scrollbar flex min-h-0 flex-1 flex-col overflow-y-auto">
+                  {children}
+                </div>
               </FrameContent>
             </SidebarInset>
             <CustomizerPanel />
