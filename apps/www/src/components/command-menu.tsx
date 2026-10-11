@@ -205,7 +205,7 @@ export function CommandMenu({
             return 0;
           }}
         >
-          <FrameHeader className="shrink-0 flex-row items-center gap-1 p-0.5 **:data-[slot=command-input-wrapper]:flex-1 **:data-[slot=command-input-wrapper]:p-0.5">
+          <FrameHeader className="shrink-0 flex-row items-center gap-1 p-1 **:data-[slot=command-input-wrapper]:flex-1 **:data-[slot=command-input-wrapper]:p-0">
             <CommandInput placeholder="Search..." />
             <DialogClose
               render={
