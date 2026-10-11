@@ -83,7 +83,7 @@ export function ComponentPreviewTabs({
       </PreviewPanel>
       {hideCode ? null : (
         <FrameContent
-          className="**:data-rehype-pretty-code-figure:site-rounded-none mt-0.5 **:data-rehype-pretty-code-figure:m-0! [&_pre]:max-h-72"
+          className="mt-0.5 bg-site-code [&_pre]:max-h-72"
           data-mobile-code-visible={isCodeExpanded}
           data-slot="code"
         >

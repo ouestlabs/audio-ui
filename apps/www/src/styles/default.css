@@ -339,33 +339,67 @@
     }
   }
 
+  /* Code, in the site's frame: a muted ring (the frame), a header for the title, and the code in a panel of its own. */
   [data-rehype-pretty-code-figure] {
     position: relative;
     margin-top: calc(var(--spacing) * 6);
     overflow: hidden;
+    padding: 2px;
     font-size: var(--text-sm);
     color: var(--site-code-foreground);
     outline: none;
-    background-color: var(--site-code);
-    border-color: var(--site-border);
-    border-width: 0;
-    border-radius: var(--site-radius-lg);
-    @apply -mx-1 md:-mx-1;
+    background-color: color-mix(in oklab, var(--site-muted) 50%, transparent);
+    border: 1px solid color-mix(in oklab, var(--site-border) 80%, transparent);
+    border-radius: 16px;
+
+    > pre,
+    > div > pre {
+      margin: 0;
+      overflow: auto;
+      background-color: var(--site-code);
+      border: 1px solid var(--site-border);
+      border-radius: 14px;
+    }
+
+    [data-slot="copy-button"] {
+      top: calc(2px + var(--spacing) * 2);
+      right: calc(2px + var(--spacing) * 2);
+      background-color: var(--site-background);
+      border: 1px solid var(--site-border);
+    }
 
     &:has([data-rehype-pretty-code-title]) [data-slot="copy-button"] {
-      top: calc(var(--spacing) * 1.5) !important;
+      top: calc(2px + var(--spacing) * 1.5) !important;
+      right: calc(var(--spacing) * 2) !important;
+    }
+  }
+
+  /* Inside another frame (a preview's code, a sheet), the figure gives its own up. */
+  [data-slot="code"] [data-rehype-pretty-code-figure],
+  [data-slot="sheet-content"] [data-rehype-pretty-code-figure] {
+    padding: 0;
+    margin: 0;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+
+    > pre,
+    > div > pre {
+      background: transparent;
+      border: 0;
+      border-radius: 0;
     }
   }
 
   [data-rehype-pretty-code-title] {
-    padding-block: calc(var(--spacing) * 2.5);
-    padding-inline: calc(var(--spacing) * 4);
+    display: flex;
+    min-height: calc(var(--spacing) * 10);
+    align-items: center;
+    padding-block: calc(var(--spacing) * 1.5);
+    padding-inline: calc(var(--spacing) * 3);
     font-family: var(--site-font-mono);
-    font-size: var(--text-sm);
-    color: var(--site-code-foreground);
-    border-bottom: color-mix(in oklab, var(--site-border) 30%, transparent);
-    border-bottom-style: solid;
-    border-bottom-width: 1px;
+    font-size: var(--text-xs);
+    color: var(--site-muted-foreground);
   }
 
   [data-line-numbers] {
