@@ -227,7 +227,13 @@ export function FramedLayout({
             <FrameHeader className="min-h-11 shrink-0 flex-row items-center gap-2 px-2 py-1.5">
               <NavigationToggle />
               {navigationOpen ? null : (
-                <div className="hidden lg:block">{closedStart}</div>
+                <>
+                  <Separator
+                    className="hidden lg:block"
+                    orientation="vertical"
+                  />
+                  <div className="hidden lg:block">{closedStart}</div>
+                </>
               )}
               {start}
               <div className="ml-auto flex items-center gap-2">
@@ -239,9 +245,18 @@ export function FramedLayout({
                   />
                 ) : null}
                 <div className="hidden items-center gap-2 lg:flex">
-                  {navigationOpen ? null : closedEnd}
+                  {navigationOpen ? null : (
+                    <>
+                      {closedEnd}
+                      <Separator orientation="vertical" />
+                    </>
+                  )}
                   {siteEnd}
                 </div>
+                <Separator
+                  className={actions ? undefined : "hidden lg:block"}
+                  orientation="vertical"
+                />
                 <CustomizeToggle />
               </div>
             </FrameHeader>
