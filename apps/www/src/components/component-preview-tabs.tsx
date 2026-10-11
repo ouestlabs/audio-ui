@@ -57,8 +57,9 @@ export function ComponentPreviewTabs({
       <FrameContent
         className={cn(
           "preview flex h-72 w-full justify-center p-10 font-sans data-[chromeless=true]:h-auto data-[align=start]:items-start data-[align=end]:items-end data-[align=center]:items-center data-[chromeless=true]:p-0",
-          // A block is as tall as it is: a fixed height would cut it.
-          fitContent && "h-auto",
+          // A block is the page: as tall as it is, and the panel is its frame, so it brings none of its own.
+          fitContent &&
+            "h-auto p-0 [&>.cn-audio-panel]:rounded-none [&>.cn-audio-panel]:border-0",
           previewClassName
         )}
         data-align={align}
