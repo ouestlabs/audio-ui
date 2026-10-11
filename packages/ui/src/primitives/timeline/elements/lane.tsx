@@ -66,7 +66,11 @@ export function Lane(componentProps: Lane.Props) {
   const element = useRender({
     defaultTagName: "div",
     props: mergeProps<"div">(
-      { style: laneStyle },
+      // What a clip dragged over it finds it by.
+      {
+        "data-timeline-lane": "",
+        style: laneStyle,
+      } as React.ComponentProps<"div">,
       { ...elementProps, ...resolveStyling(className, style, state) }
     ),
     ref: ref ? [ref, laneRef] : laneRef,

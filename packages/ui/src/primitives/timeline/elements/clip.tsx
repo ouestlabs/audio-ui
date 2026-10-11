@@ -1,0 +1,420 @@
+import { mergeProps } from "@base-ui/react/merge-props";
+import { useRender } from "@base-ui/react/use-render";
+import * as React from "react";
+import {
+  createChangeEventDetails,
+  type ChangeEventDetails as ExtraChangeEventDetails,
+} from "../../internal/event-details";
+import { type PartProps, resolveStyling } from "../../internal/part";
+import { VISUALLY_HIDDEN } from "../../internal/visually-hidden";
+import { type ClipLimits, type ClipValue, moveClip } from "../clip";
+import {
+  type DescribePosition,
+  placedOver,
+  useTimelineContext,
+} from "../context";
+import { snapMove } from "../internal/snap";
+import {
+  type ClipChangeEventDetails,
+  type ClipCommitEventDetails,
+  ClipContext,
+  type ClipContextValue,
+  type ClipState,
+  type ClipTarget,
+  keyTargets,
+  useClipDrag,
+} from "./clip-context";
+import { LaneContext } from "./lane";
+
+const describeNumber: DescribePosition = (value) =>
+  String(Math.round(value * 100) / 100);
+
+/** Fallback for a clip's `value` when none is given: the whole timeline, from the source's start. */
+const whole = (duration: number): ClipValue => ({
+  fadeIn: 0,
+  fadeOut: 0,
+  length: duration,
+  offset: 0,
+  start: 0,
+});
+
+/** Keeps a given clip well-formed: finite, on the timeline, fades within its length. */
+function normalizeClip(clip: ClipValue, duration: number): ClipValue {
+  const finite = (value: number, fallback = 0) =>
+    Number.isFinite(value) ? value : fallback;
+  const start = Math.min(duration, Math.max(0, finite(clip.start)));
+  const length = Math.min(duration - start, Math.max(0, finite(clip.length)));
+  const fadeIn = Math.min(length, Math.max(0, finite(clip.fadeIn)));
+  const fadeOut = Math.min(length - fadeIn, Math.max(0, finite(clip.fadeOut)));
+  return {
+    fadeIn,
+    fadeOut,
+    length,
+    offset: Math.max(0, finite(clip.offset)),
+    start,
+  };
+}
+
+/**
+ * A stretch of a source laid on a lane: a recording, a pattern. Dragging its
+ * body moves it, on the grid unless Cmd/Ctrl is held, and over other lanes
+ * too (the change says which one is under the pointer). Add a
+ * `Timeline.ClipHandle` per edge to trim it, which moves where in the source
+ * it begins instead of stretching it, and a `Timeline.ClipFadeHandle` per
+ * fade. Its content is up to you: it sets `--clip-offset` and
+ * `--clip-source-length` so a waveform can show the stretch that is played.
+ * Its own native `<input type="range">` moves it from the keyboard and
+ * carries its accessible name (`aria-label` / `aria-labelledby`); Delete and
+ * Backspace on it call `onRemove`. Renders a `<div>` element.
+ */
+export function Clip(componentProps: Clip.Props) {
+  const {
+    "aria-describedby": ariaDescribedBy,
+    "aria-label": ariaLabel,
+    "aria-labelledby": ariaLabelledBy,
+    children,
+    className,
+    defaultSelected = false,
+    defaultValue,
+    disabled: disabledProp = false,
+    getAriaValueText = describeNumber,
+    minLength: minLengthProp,
+    movable = true,
+    onRemove,
+    onSelectedChange,
+    onValueChange,
+    onValueCommitted,
+    ref,
+    render,
+    selected: selectedProp,
+    sourceLength,
+    style,
+    value: valueProp,
+    ...elementProps
+  } = componentProps;
+  const { meta: root, state: rootState } = useTimelineContext("Clip");
+  const lane = React.use(LaneContext);
+  if (!lane) {
+    throw new Error("Timeline.Clip must be used within a Timeline lane");
+  }
+  const { duration, grid, largeStep, step, zoom } = root;
+  const disabled = disabledProp || rootState.disabled;
+  const minLength = minLengthProp ?? (grid.step > 0 ? grid.step : step);
+  const limits = React.useMemo<ClipLimits>(
+    () => ({ duration, minLength, sourceLength }),
+    [duration, minLength, sourceLength]
+  );
+
+  const isControlled = valueProp !== undefined;
+  const [uncontrolledValue, setUncontrolledValue] = React.useState<ClipValue>(
+    () => defaultValue ?? whole(duration)
+  );
+  const given = isControlled ? valueProp : uncontrolledValue;
+  const value = React.useMemo(
+    () => normalizeClip(given, duration),
+    [duration, given]
+  );
+
+  const isSelectionControlled = selectedProp !== undefined;
+  const [uncontrolledSelected, setUncontrolledSelected] =
+    React.useState(defaultSelected);
+  const selected = isSelectionControlled ? selectedProp : uncontrolledSelected;
+
+  // While dragging, the clip follows the pointer even if a controlled value
+  // lags behind; on release the controlled value rules again.
+  const [dragging, setDraggingState] = React.useState(false);
+  const [dragValue, setDragValue] = React.useState<ClipValue | null>(null);
+  const [dragOffset, setDragOffset] = React.useState(0);
+  const draggingRef = React.useRef(false);
+  const displayedValue = dragValue ?? value;
+  const valueRef = React.useRef(displayedValue);
+  valueRef.current = displayedValue;
+
+  const setDragging = React.useCallback((next: boolean) => {
+    draggingRef.current = next;
+    setDraggingState(next);
+    if (!next) {
+      setDragValue(null);
+      setDragOffset(0);
+    }
+  }, []);
+
+  const change = React.useCallback(
+    (next: ClipValue, eventDetails: ClipChangeEventDetails) => {
+      const { current } = valueRef;
+      if (
+        next.start === current.start &&
+        next.length === current.length &&
+        next.offset === current.offset &&
+        next.fadeIn === current.fadeIn &&
+        next.fadeOut === current.fadeOut
+      ) {
+        return false;
+      }
+      onValueChange?.(next, eventDetails);
+      if (eventDetails.isCanceled) {
+        return false;
+      }
+      valueRef.current = next;
+      if (!isControlled) {
+        setUncontrolledValue(next);
+      }
+      if (isControlled && draggingRef.current) {
+        setDragValue(next);
+      }
+      return true;
+    },
+    [isControlled, onValueChange]
+  );
+
+  const commit = React.useCallback(
+    (committed: ClipValue, eventDetails: ClipCommitEventDetails) => {
+      onValueCommitted?.(committed, eventDetails);
+    },
+    [onValueCommitted]
+  );
+
+  const select = React.useCallback(
+    (event: PointerEvent) => {
+      if (selected) {
+        return;
+      }
+      const eventDetails = createChangeEventDetails("press", event);
+      onSelectedChange?.(true, eventDetails);
+      if (!(eventDetails.isCanceled || isSelectionControlled)) {
+        setUncontrolledSelected(true);
+      }
+    },
+    [isSelectionControlled, onSelectedChange, selected]
+  );
+
+  const unitsPerPixel = React.useCallback(() => {
+    if (zoom !== null) {
+      return 1 / zoom;
+    }
+    const width = lane.elementRef.current?.getBoundingClientRect().width ?? 0;
+    return duration / Math.max(width, 1);
+  }, [duration, lane.elementRef, zoom]);
+
+  const state = React.useMemo<ClipState>(
+    () => ({ disabled, dragging, selected }),
+    [disabled, dragging, selected]
+  );
+
+  const context = React.useMemo<ClipContextValue>(
+    () => ({
+      actions: {
+        change,
+        commit,
+        select,
+        setDragOffset,
+        setDragging,
+        unitsPerPixel,
+      },
+      meta: {
+        describe: getAriaValueText,
+        duration,
+        grid,
+        largeStep,
+        limits,
+        step,
+        value: displayedValue,
+        valueRef,
+      },
+      state,
+    }),
+    [
+      change,
+      commit,
+      displayedValue,
+      duration,
+      getAriaValueText,
+      grid,
+      largeStep,
+      limits,
+      select,
+      setDragging,
+      state,
+      step,
+      unitsPerPixel,
+    ]
+  );
+
+  const drag = useClipDrag(
+    context,
+    "move",
+    movable && !disabled,
+    (origin, delta, gridNow, limitsNow) =>
+      moveClip(
+        origin,
+        snapMove(origin.start + delta, origin.start, gridNow),
+        limitsNow
+      )
+  );
+  const inputRef = React.useRef<HTMLInputElement>(null);
+  const { fadeIn, fadeOut, length, offset, start } = displayedValue;
+
+  const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    drag.onPointerDown(event);
+    if (!disabled && event.button === 0) {
+      inputRef.current?.focus({ focusVisible: false, preventScroll: true });
+    }
+  };
+
+  /** Moves the whole clip so it starts at `target`. */
+  const moveTo = React.useCallback(
+    (target: number, reason: "input-change" | "keyboard", native: Event) => {
+      const next = moveClip(valueRef.current, target, limits);
+      const eventDetails = Object.assign(
+        createChangeEventDetails(reason, native),
+        { target: "move" as const }
+      ) as ClipChangeEventDetails;
+      if (change(next, eventDetails)) {
+        commit(valueRef.current, {
+          event: native,
+          reason,
+          target: "move",
+        } as ClipCommitEventDetails);
+      }
+    },
+    [change, commit, limits]
+  );
+
+  const handleKeyDown = React.useCallback(
+    (event: React.KeyboardEvent<HTMLInputElement>) => {
+      if (disabled) {
+        return;
+      }
+      if (event.key === "Delete" || event.key === "Backspace") {
+        event.preventDefault();
+        onRemove?.(createChangeEventDetails("keyboard", event.nativeEvent));
+        return;
+      }
+      const latest = valueRef.current;
+      const targets = keyTargets(
+        latest.start,
+        step,
+        largeStep,
+        event.shiftKey,
+        [0, Math.max(0, duration - latest.length)]
+      );
+      const target = targets[event.key];
+      if (target === undefined) {
+        return;
+      }
+      event.preventDefault();
+      moveTo(target, "keyboard", event.nativeEvent);
+    },
+    [disabled, duration, largeStep, moveTo, onRemove, step]
+  );
+
+  const handleChange = React.useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      moveTo(
+        Number(event.currentTarget.value),
+        "input-change",
+        event.nativeEvent
+      );
+    },
+    [moveTo]
+  );
+
+  const element = useRender({
+    defaultTagName: "div",
+    props: mergeProps<"div">(
+      {
+        ...drag,
+        children: (
+          <>
+            {children}
+            {movable ? (
+              <input
+                aria-describedby={ariaDescribedBy}
+                aria-label={ariaLabel}
+                aria-labelledby={ariaLabelledBy}
+                aria-valuetext={`${getAriaValueText(start, duration)} to ${getAriaValueText(start + length, duration)}`}
+                disabled={disabled}
+                max={Math.max(0, duration - length)}
+                min={0}
+                onChange={handleChange}
+                onKeyDown={handleKeyDown}
+                ref={inputRef}
+                step="any"
+                style={VISUALLY_HIDDEN}
+                type="range"
+                value={start}
+              />
+            ) : null}
+          </>
+        ),
+        onPointerDown: handlePointerDown,
+        style: {
+          ...placedOver(start, length),
+          "--clip-drag-y": `${dragOffset}px`,
+          "--clip-fade-in": fadeIn,
+          "--clip-fade-out": fadeOut,
+          "--clip-offset": offset,
+          ...(sourceLength === undefined
+            ? {}
+            : { "--clip-source-length": sourceLength }),
+          touchAction: "none",
+          transform: dragging ? "translateY(var(--clip-drag-y))" : undefined,
+        } as React.CSSProperties,
+      },
+      { ...elementProps, ...resolveStyling(className, style, state) }
+    ),
+    ref,
+    render,
+    state,
+  });
+
+  return <ClipContext value={context}>{element}</ClipContext>;
+}
+
+export namespace Clip {
+  export type State = ClipState;
+  /** The clip, in the timeline's units: where it is, how long, where in the source it begins, and its fades. */
+  export type Value = ClipValue;
+  export type Target = ClipTarget;
+  export type ChangeEventReason = ClipChangeEventDetails["reason"];
+  export type ChangeEventDetails = ClipChangeEventDetails;
+  export type CommitEventReason = ClipCommitEventDetails["reason"];
+  export type CommitEventDetails = ClipCommitEventDetails;
+  export type SelectEventDetails = ExtraChangeEventDetails<
+    "press",
+    PointerEvent
+  >;
+  export type RemoveEventDetails = ExtraChangeEventDetails<
+    "keyboard",
+    KeyboardEvent
+  >;
+
+  export interface Props extends Omit<PartProps<"div", State>, "defaultValue"> {
+    /** Whether the clip starts selected, when `selected` is not set. @default false */
+    defaultSelected?: boolean;
+    /** Uncontrolled starting clip. Defaults to the whole timeline. */
+    defaultValue?: Value;
+    disabled?: boolean;
+    /** Returns how a position is announced. Defaults to the number. */
+    getAriaValueText?: DescribePosition;
+    /** The shortest the clip can be trimmed to, in the timeline's units. Defaults to the grid step. */
+    minLength?: number;
+    /** Whether dragging the body, or its keys, moves the clip. @default true */
+    movable?: boolean;
+    /** Fires when Delete or Backspace is pressed on the clip: removing it is up to you. */
+    onRemove?: (eventDetails: RemoveEventDetails) => void;
+    /** Fires when a press on the clip selects it. */
+    onSelectedChange?: (
+      selected: boolean,
+      eventDetails: SelectEventDetails
+    ) => void;
+    /** Fires while the clip is moved, trimmed or faded. */
+    onValueChange?: (value: Value, eventDetails: ChangeEventDetails) => void;
+    /** Fires when a gesture that changed the clip ends, or one that dropped it on another lane. */
+    onValueCommitted?: (value: Value, eventDetails: CommitEventDetails) => void;
+    selected?: boolean;
+    /** How long the source is, in the timeline's units: trimming stops where it runs out. Defaults to no limit. */
+    sourceLength?: number;
+    value?: Value;
+  }
+}
