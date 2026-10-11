@@ -22,7 +22,7 @@ import { cn, isActive, normalizeSlug } from "@/lib/utils";
 type Section = "components" | "docs";
 
 const rowClassName =
-  "flex h-9 shrink-0 items-center justify-between gap-3 rounded-md px-2 font-medium text-[0.8rem] text-site-foreground no-underline transition-colors hover:bg-site-muted";
+  "flex h-9 shrink-0 items-center justify-between gap-3 rounded-(--menu-inner-radius) px-2 font-medium text-[0.8rem] text-site-foreground no-underline transition-colors hover:bg-site-muted";
 
 const activeRowClassName = "bg-site-accent";
 
@@ -134,7 +134,7 @@ export function MobileNav({
       />
       <PopoverContent
         align="start"
-        className="site-menu cn-menu-target flex lg:hidden h-(--available-height) w-(--available-width) flex-col gap-2 overflow-hidden rounded-(--frame-radius) p-2"
+        className="site-menu cn-menu-target flex lg:hidden h-(--available-height) w-(--available-width) flex-col gap-2 overflow-hidden rounded-(--frame-radius)! p-2 [--menu-inner-radius:max(calc(var(--frame-radius)-0.5rem),0px)]"
         side="bottom"
         sideOffset={16}
       >
@@ -146,9 +146,12 @@ export function MobileNav({
           >
             <TabsList
               aria-label="Sections"
-              className="w-full bg-site-foreground/8"
+              className="w-full rounded-(--menu-inner-radius) bg-site-foreground/8 **:data-[slot=tabs-indicator]:rounded-[max(calc(var(--menu-inner-radius)-3px),0px)]"
             >
-              <TabsTrigger value="docs">
+              <TabsTrigger
+                className="rounded-[max(calc(var(--menu-inner-radius)-3px),0px)]"
+                value="docs"
+              >
                 <BookOpenIcon
                   aria-hidden
                   className="size-4 in-data-active:text-primary"
@@ -156,7 +159,10 @@ export function MobileNav({
                 />
                 Docs
               </TabsTrigger>
-              <TabsTrigger value="components">
+              <TabsTrigger
+                className="rounded-[max(calc(var(--menu-inner-radius)-3px),0px)]"
+                value="components"
+              >
                 <CubeIcon
                   aria-hidden
                   className="size-4 in-data-active:text-primary"
