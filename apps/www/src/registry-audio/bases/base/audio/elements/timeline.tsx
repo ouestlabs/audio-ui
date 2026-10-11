@@ -309,8 +309,8 @@ function TimelineNavigator({
 }
 
 export const MIN_TRACK_HEIGHT = 28;
-/** Below this a track is a strip: its header keeps the name, solo and mute, and the gain goes. */
-export const COMPACT_TRACK_HEIGHT = 52;
+/** Below this a track is a strip: the full header (name, solo, mute, gain, pan) needs this much room, so a shorter track keeps the name, solo and mute and drops the rest. */
+export const COMPACT_TRACK_HEIGHT = 79;
 export const MAX_TRACK_HEIGHT = 240;
 export const TRACK_HEIGHT_STEP = 8;
 
