@@ -23,25 +23,23 @@ export function ComponentHeader() {
 
   return (
     <FrameHeader className="min-h-11 shrink-0 flex-row items-center gap-2 px-2 py-1.5">
-      {!open && (
-        <Tooltip>
-          <TooltipTrigger
-            render={
-              <Button
-                className="hidden text-site-muted-foreground md:flex"
-                onClick={toggleSidebar}
-                size="icon"
-                variant="outline"
-              >
-                <SidebarIcon />
-              </Button>
-            }
-          />
-          <TooltipContent className="flex items-center gap-2" side="right">
-            Show sidebar <Kbd>P</Kbd>
-          </TooltipContent>
-        </Tooltip>
-      )}
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <Button
+              className="hidden text-site-muted-foreground md:flex"
+              onClick={toggleSidebar}
+              size="icon"
+              variant="outline"
+            >
+              <SidebarIcon />
+            </Button>
+          }
+        />
+        <TooltipContent className="flex items-center gap-2" side="right">
+          {open ? "Hide" : "Show"} sidebar <Kbd>P</Kbd>
+        </TooltipContent>
+      </Tooltip>
 
       <ComponentHeaderMobileDrawer />
 

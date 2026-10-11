@@ -7,10 +7,6 @@ export interface ComponentsContextValue {
   /** Full catalog list for search result counts in the header */
   catalogItems: ComponentCatalogItem[];
   categoryCounts: Record<string, number>;
-  setSidebarCategoryFilter: (filter: string) => void;
-  setSidebarMenuView: (view: "menu" | "inline") => void;
-  sidebarCategoryFilter: string;
-  sidebarMenuView: "menu" | "inline";
   totalCount: number;
 }
 

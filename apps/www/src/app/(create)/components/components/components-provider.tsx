@@ -20,7 +20,6 @@ import { CustomizerPanel } from "./customizer-panel";
 
 // SSR-safe defaults — must match server render to avoid hydration mismatch
 const DEFAULT_SIDEBAR_OPEN = true;
-const DEFAULT_SIDEBAR_MENU_VIEW: "menu" | "inline" = "menu";
 const DEFAULT_CUSTOMIZER_OPEN = true;
 
 interface ComponentsProviderProps {
@@ -55,9 +54,6 @@ export function ComponentsProvider({
     });
   }, []);
 
-  // Ephemeral state (not persisted)
-  const [sidebarCategoryFilter, setSidebarCategoryFilter] = useState("");
-
   // Single source of truth: Jotai atoms from use-config.ts
   const [layoutState, setLayoutState] = useComponentsLayoutState();
   const [config, setConfig] = useConfig();
@@ -65,21 +61,11 @@ export function ComponentsProvider({
   // Gate values: use SSR defaults until mounted, then use stored values.
   // This ensures server HTML and initial client render produce identical output.
   const sidebarOpen = mounted ? layoutState.sidebarOpen : DEFAULT_SIDEBAR_OPEN;
-  const sidebarMenuView = mounted
-    ? (layoutState.sidebarMenuView ?? DEFAULT_SIDEBAR_MENU_VIEW)
-    : DEFAULT_SIDEBAR_MENU_VIEW;
   const customizerOpen = mounted
     ? (config.customizerOpen ?? DEFAULT_CUSTOMIZER_OPEN)
     : DEFAULT_CUSTOMIZER_OPEN;
 
   // Stable callbacks that write directly to atoms
-  const setSidebarMenuView = useCallback(
-    (view: "menu" | "inline") => {
-      setLayoutState((prev) => ({ ...prev, sidebarMenuView: view }));
-    },
-    [setLayoutState]
-  );
-
   const handleOpenChange = useCallback(
     (open: boolean) => {
       setLayoutState((prev) => ({ ...prev, sidebarOpen: open }));
@@ -103,20 +89,9 @@ export function ComponentsProvider({
     () => ({
       catalogItems,
       categoryCounts,
-      setSidebarCategoryFilter,
-      setSidebarMenuView,
-      sidebarCategoryFilter,
-      sidebarMenuView,
       totalCount,
     }),
-    [
-      totalCount,
-      categoryCounts,
-      catalogItems,
-      sidebarCategoryFilter,
-      sidebarMenuView,
-      setSidebarMenuView,
-    ]
+    [totalCount, categoryCounts, catalogItems]
   );
 
   const customizerValue = useMemo<CustomizerContextValue>(

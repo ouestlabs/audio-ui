@@ -5,15 +5,9 @@ import * as React from "react";
 import { Sidebar, SidebarContent, useSidebar } from "@/components/ui/sidebar";
 
 import { ComponentSidebarContent } from "./component-sidebar-content";
-import { ComponentSidebarHeader } from "./component-sidebar-header";
-import { useComponents } from "./components-context";
 
 export function ComponentSidebar() {
   const { toggleSidebar, isMobile } = useSidebar();
-  const { sidebarCategoryFilter, sidebarMenuView } = useComponents();
-
-  const internalView: "list" | "compact" =
-    sidebarMenuView === "menu" ? "list" : "compact";
 
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -42,12 +36,8 @@ export function ComponentSidebar() {
 
   return (
     <Sidebar className="top-(--header-height) h-[calc(100svh-var(--header-height))] group-data-[side=left]:border-r-0 bg-transparent **:data-[slot=sidebar-inner]:bg-site-background">
-      <ComponentSidebarHeader />
       <SidebarContent className="p-0">
-        <ComponentSidebarContent
-          filter={sidebarCategoryFilter}
-          view={internalView}
-        />
+        <ComponentSidebarContent />
       </SidebarContent>
     </Sidebar>
   );

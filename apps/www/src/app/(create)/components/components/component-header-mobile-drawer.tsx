@@ -44,10 +44,7 @@ export function ComponentHeaderMobileDrawer() {
             </DrawerDescription>
           </DrawerHeader>
           <div className="h-full py-4">
-            <ComponentSidebarContent
-              onSelect={() => setIsDrawerOpen(false)}
-              view="list"
-            />
+            <ComponentSidebarContent onSelect={() => setIsDrawerOpen(false)} />
           </div>
         </DrawerContent>
       </Drawer>

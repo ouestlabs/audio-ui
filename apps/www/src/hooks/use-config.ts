@@ -79,14 +79,12 @@ export function useConfig() {
 
 export interface ComponentsLayoutState {
   activeCategory?: string;
-  sidebarMenuView?: "menu" | "inline";
   sidebarOpen: boolean;
 }
 
 const componentsLayoutStateAtom = atomWithStorage<ComponentsLayoutState>(
   "components-layout",
   {
-    sidebarMenuView: "menu",
     sidebarOpen: true,
   }
 );
