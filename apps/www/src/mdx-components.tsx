@@ -78,8 +78,8 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
       __pnpm__?: string;
       __bun__?: string;
     }) => {
-      // Inline Code.
-      if (typeof props.children === "string") {
+      // Inline code: a fence always carries its source in `__raw__`.
+      if (typeof props.children === "string" && !__raw__) {
         return <code className={className} {...props} />;
       }
 

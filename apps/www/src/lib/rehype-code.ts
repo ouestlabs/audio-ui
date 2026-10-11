@@ -45,13 +45,19 @@ function toFigure(pre: HastNode): HastNode | null {
 
   const commands = packageManagerCommands(raw);
   const inner = block.children?.[0];
-  if (commands && inner) {
+  if (inner) {
+    // The copy button reads the source from `__raw__`.
     inner.properties = {
       ...inner.properties,
-      __bun__: commands.bun,
-      __npm__: commands.npm,
-      __pnpm__: commands.pnpm,
-      __yarn__: commands.yarn,
+      __raw__: raw,
+      ...(commands
+        ? {
+            __bun__: commands.bun,
+            __npm__: commands.npm,
+            __pnpm__: commands.pnpm,
+            __yarn__: commands.yarn,
+          }
+        : {}),
     };
   }
 
