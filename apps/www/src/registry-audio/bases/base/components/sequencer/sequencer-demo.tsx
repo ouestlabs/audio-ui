@@ -97,7 +97,7 @@ export default function SequencerDemo() {
   );
 
   return (
-    <div className="flex w-full max-w-xl flex-col gap-3">
+    <div className="flex w-full flex-col gap-3">
       <Sequencer
         aria-label="Drum pattern"
         onValueChange={setPattern}

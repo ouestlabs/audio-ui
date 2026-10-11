@@ -38,7 +38,7 @@ export default function ScrubberDemo() {
   );
 
   return (
-    <div className="w-full max-w-xl">
+    <div className="w-full">
       <Scrubber
         duration={DURATION}
         onPlayingChange={setPlaying}

@@ -41,7 +41,7 @@ export default function TransportDemo() {
   const returnToStart = useCallback(() => position.set(0), [position]);
 
   return (
-    <div className="w-full max-w-2xl">
+    <div className="w-full">
       <Transport
         bpm={bpm}
         looping={looping}

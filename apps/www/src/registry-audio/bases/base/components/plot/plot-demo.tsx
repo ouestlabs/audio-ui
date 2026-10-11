@@ -388,7 +388,7 @@ export default function PlotDemo() {
   const spectrum = useSpectrum(analyser, { maxHz: MAX_HZ, minHz: MIN_HZ });
 
   return (
-    <div className="flex w-full max-w-xl flex-col gap-2">
+    <div className="flex w-full flex-col gap-2">
       <Plot
         className="h-40"
         maxX={MAX_HZ}

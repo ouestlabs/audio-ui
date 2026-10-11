@@ -67,7 +67,7 @@ export default function PlotCompressorDemo() {
   );
 
   return (
-    <div className="flex w-full max-w-xl flex-col gap-2">
+    <div className="flex w-full flex-col gap-2">
       <Plot
         className="h-40"
         maxX={PLOT_MAX_DB}
