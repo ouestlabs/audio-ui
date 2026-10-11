@@ -29,7 +29,7 @@ Changes to `packages/ui` (`@audio-ui/react`) are published to npm and require a 
 
 | Tree                 | Contents                                                                                  | Editable?                                     |
 | -------------------- | ----------------------------------------------------------------------------------------- | --------------------------------------------- |
-| `src/registry/`      | Design-system fork of shadcn/ui: bases (`base` = Base UI, `radix` = Radix), styles, icons, fonts, themes | **No**, synced from upstream via `bun run registry:sync`; hand edits get overwritten |
+| `src/registry/`      | Design system started from shadcn/ui and now audio/ui's own: the Base UI base, styles, icons, fonts, themes | **Yes**, edit it directly; `bun run registry:sync` pulls shadcn upstream and would bring back what was removed, so run it on purpose only |
 | `src/registry-audio/`| audio/ui's own registry: audio components, blocks, demos, hooks, lib                       | **Yes**, this is where contributions go      |
 
 ### `src/registry-audio/` layout
