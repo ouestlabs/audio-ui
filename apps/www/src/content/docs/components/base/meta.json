@@ -15,6 +15,7 @@
     "timeline",
     "sequencer",
     "piano",
+    "piano-roll",
     "transport",
     "scrubber"
   ]
