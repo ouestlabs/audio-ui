@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import * as React from "react";
 
 import { PickerSideProvider } from "@/app/(create)/customizer/picker";
-import { Frame, FrameContent } from "@/components/custom/frame";
+import { Frame, FrameContent, frameClassName } from "@/components/custom/frame";
 import {
   Sheet,
   SheetContent,
@@ -110,7 +110,8 @@ function CustomizerPanelFloating({ animate }: { animate: boolean }) {
         <PopoverPrimitive.Popup
           aria-label="Customize"
           className={cn(
-            "site-rounded-xl flex w-[calc(100vw-1.5rem)] origin-(--transform-origin) flex-col overflow-hidden bg-site-background shadow-xl outline-none ring-1 ring-site-foreground/10 md:w-64 md:h-[calc(100dvh-8rem)] md:max-h-none",
+            frameClassName,
+            "w-[calc(100vw-1.5rem)] origin-(--transform-origin) shadow-xl outline-none md:w-64 md:h-[calc(100dvh-8rem)] md:max-h-none",
             animate &&
               "data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 data-closed:animate-out data-open:animate-in data-closed:duration-100 data-open:duration-150 motion-reduce:data-closed:animate-none motion-reduce:data-open:animate-none"
           )}
@@ -118,12 +119,14 @@ function CustomizerPanelFloating({ animate }: { animate: boolean }) {
           ref={anchorRef}
         >
           <PickerSideProvider value="left">
-            <CustomizerSidebarHeader />
-            <CustomizerSidebarContent
-              anchorRef={anchorRef}
-              isMobile={!isMedium}
-              layout={isMedium ? "list" : "strip"}
-            />
+            <CustomizerSidebarHeader className="border-b-0" />
+            <FrameContent className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
+              <CustomizerSidebarContent
+                anchorRef={anchorRef}
+                isMobile={!isMedium}
+                layout={isMedium ? "list" : "strip"}
+              />
+            </FrameContent>
           </PickerSideProvider>
         </PopoverPrimitive.Popup>
       </PopoverPrimitive.Positioner>
