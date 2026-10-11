@@ -50,22 +50,22 @@ export function ExpandPreview({
         <DialogDescription className="sr-only">
           The preview at full size.
         </DialogDescription>
-        {/* Out of the way, in the corner the block pads for itself. */}
+        {/* In the corner, above the block, which leaves it room. */}
         <DialogClose
           render={
             <Button
               aria-label="Close"
-              className="absolute end-0 top-0 z-50 size-5 rounded-none rounded-es-md bg-background/80 text-muted-foreground backdrop-blur-sm hover:text-foreground"
-              size="icon-xs"
+              className="absolute end-2 top-2 z-50 size-7 bg-background/80 text-muted-foreground backdrop-blur-sm hover:text-foreground"
+              size="icon-sm"
               variant="ghost"
             />
           }
         >
-          <XIcon aria-hidden="true" className="size-3" />
+          <XIcon aria-hidden="true" className="size-4" />
         </DialogClose>
         {/* The block is the page: the whole dialog, inset from the screen, a panel without a frame, and what has a height of its own gives it back to the editor. */}
         <div
-          className="h-full overflow-hidden font-sans [&>.cn-audio-panel]:h-full [&>.cn-audio-panel]:overflow-auto [&>.cn-audio-panel]:rounded-none [&>.cn-audio-panel]:border-0 [&_[data-slot=piano-roll]]:h-auto [&_[data-slot=piano-roll]]:min-h-0 [&_[data-slot=piano-roll]]:flex-1 [&_[data-slot=timeline]]:flex [&_[data-slot=timeline]]:min-h-0 [&_[data-slot=timeline]]:flex-1 [&_[data-slot=timeline]]:flex-col"
+          className="h-full overflow-hidden font-sans [&>.cn-audio-panel]:h-full [&>.cn-audio-panel]:overflow-auto [&>.cn-audio-panel]:pt-11 [&>.cn-audio-panel]:rounded-none [&>.cn-audio-panel]:border-0 [&_[data-slot=piano-roll]]:h-auto [&_[data-slot=piano-roll]]:min-h-0 [&_[data-slot=piano-roll]]:flex-1 [&_[data-slot=timeline]]:flex [&_[data-slot=timeline]]:min-h-0 [&_[data-slot=timeline]]:flex-1 [&_[data-slot=timeline]]:flex-col"
           data-expanded-preview
         >
           {children}
