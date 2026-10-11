@@ -1079,7 +1079,7 @@ export default function BlockTimeline() {
             source={clock}
             tempo={tempo}
           />
-          <div className="w-24 shrink-0">
+          <div className="hidden w-24 shrink-0 @xl/panel:block">
             <Meter
               aria-label="Master output level"
               orientation="horizontal"
