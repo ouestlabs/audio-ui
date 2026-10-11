@@ -1,7 +1,6 @@
 "use client";
 
-import { CopyRegistry } from "@/components/copy-registry";
-import { ExpandPreview } from "@/components/expand-preview";
+import { PreviewFooter } from "@/components/preview-frame";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 import { useConfig } from "@/hooks/use-config";
@@ -39,33 +38,33 @@ export function ComponentCard({
 
   return (
     <ComponentCardContainer
+      block={isBlock(name)}
       className={className}
       footer={
-        <>
-          <p className="flex flex-1 items-center gap-1.5 truncate text-site-muted-foreground text-xs">
-            <span className="truncate">{item.description || name}</span>
-          </p>
-          <div className="flex items-center gap-1.5">
-            {process.env.NODE_ENV === "development" && (
-              <ComponentName name={name} />
-            )}
-            {isExpandable(name) ? (
-              <ExpandPreview label={name}>
-                <ComponentRenderer base={base} name={name} />
-              </ExpandPreview>
-            ) : null}
-            <CopyRegistry value={`@audio/${name}`} />
+        <PreviewFooter
+          actions={
             <Sheet>
               <SheetTrigger
                 render={<Button variant="outline">View code</Button>}
               />
               <ComponentSourceSheetContent base={base} name={name} />
             </Sheet>
-          </div>
-        </>
+          }
+          badge={
+            process.env.NODE_ENV === "development" ? (
+              <ComponentName name={name} />
+            ) : null
+          }
+          description={item.description}
+          expand={
+            isExpandable(name) ? (
+              <ComponentRenderer base={base} name={name} />
+            ) : undefined
+          }
+          name={name}
+        />
       }
       isFullWidth={isFullWidth}
-      limitHeight={isBlock(name)}
     >
       <ComponentRenderer base={base} name={name} />
     </ComponentCardContainer>

@@ -154,9 +154,10 @@ export function DocsComponentPreviewSwitch({
       chromeLessOnMobile={chromeLessOnMobile}
       className={className}
       component={<ComponentClient name={name} styleName={resolvedStyleName} />}
-      expandLabel={isExpandable(name) ? name : undefined}
+      expand={isExpandable(name)}
       fitContent={isBlock(name)}
       hideCode={hideCode}
+      name={name}
       previewClassName={previewClassName}
       source={
         <ComponentSourceClient

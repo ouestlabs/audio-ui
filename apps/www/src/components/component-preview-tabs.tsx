@@ -1,9 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { CopyRegistry } from "@/components/copy-registry";
-import { Frame, FrameContent, FrameFooter } from "@/components/custom/frame";
-import { ExpandPreview } from "@/components/expand-preview";
+import { Frame, FrameContent } from "@/components/custom/frame";
+import { blockPanelClassName, PreviewFooter } from "@/components/preview-frame";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
@@ -16,8 +15,9 @@ export function ComponentPreviewTabs({
   hideCode = false,
   chromeLessOnMobile = false,
   component,
-  expandLabel,
+  expand = false,
   fitContent = false,
+  name,
   source,
   sourcePreview,
   ...props
@@ -27,10 +27,12 @@ export function ComponentPreviewTabs({
   hideCode?: boolean;
   chromeLessOnMobile?: boolean;
   component: React.ReactNode;
-  /** Names the preview and adds a button that opens it at full size: for blocks. */
-  expandLabel?: string;
+  /** Adds a button that opens the preview at full size: for the editors made to take a screen. */
+  expand?: boolean;
   /** Lets the preview be as tall as what it shows, rather than a fixed height: for blocks. */
   fitContent?: boolean;
+  /** The registry name of what is shown. */
+  name: string;
   source: React.ReactNode;
   sourcePreview?: React.ReactNode;
 }) {
@@ -57,9 +59,8 @@ export function ComponentPreviewTabs({
       <FrameContent
         className={cn(
           "preview flex h-72 w-full justify-center p-10 font-sans data-[chromeless=true]:h-auto data-[align=start]:items-start data-[align=end]:items-end data-[align=center]:items-center data-[chromeless=true]:p-0",
-          // A block is the page: at least as tall as a preview and as tall as it is beyond that, and the panel is its frame, so it brings none of its own.
-          fitContent &&
-            "h-auto min-h-72 p-0 [&>.cn-audio-panel]:rounded-none [&>.cn-audio-panel]:border-0",
+          // A block is the page: as tall as it is, and the same panel in the catalog.
+          fitContent && cn("h-auto", blockPanelClassName),
           previewClassName
         )}
         data-align={align}
@@ -108,17 +109,7 @@ export function ComponentPreviewTabs({
           )}
         </FrameContent>
       )}
-      {expandLabel ? (
-        <FrameFooter className="flex-row items-center justify-between gap-3 px-2 py-1.5">
-          <span className="truncate ps-1 font-mono text-site-muted-foreground text-xs">
-            {expandLabel}
-          </span>
-          <div className="flex items-center gap-1.5">
-            <CopyRegistry value={`@audio/${expandLabel}`} />
-            <ExpandPreview label={expandLabel}>{component}</ExpandPreview>
-          </div>
-        </FrameFooter>
-      ) : null}
+      <PreviewFooter expand={expand ? component : undefined} name={name} />
     </Frame>
   );
 }

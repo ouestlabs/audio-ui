@@ -2,18 +2,19 @@
 
 import { CircleNotchIcon } from "@phosphor-icons/react/ssr";
 import * as React from "react";
-import { Frame, FrameContent, FrameFooter } from "@/components/custom/frame";
+import { Frame, FrameContent } from "@/components/custom/frame";
+import { blockPanelClassName } from "@/components/preview-frame";
 import { Spinner } from "@/components/ui/spinner";
 import { getComponent } from "@/lib/registry";
 import { cn } from "@/lib/utils";
 
 interface ComponentCardContainerProps {
+  /** A block: the panel is its frame, and the editor is capped so its card is not far taller than the others, scrolling inside. */
+  block?: boolean;
   children: React.ReactNode;
   className?: string;
   footer: React.ReactNode;
   isFullWidth?: boolean;
-  /** Caps what a block's editor takes, so its card is not far taller than the others: the editor scrolls inside. */
-  limitHeight?: boolean;
 }
 
 export function ComponentRenderer({
@@ -79,16 +80,15 @@ export function ComponentCardContainer({
   footer,
   className,
   isFullWidth,
-  limitHeight = false,
+  block = false,
 }: ComponentCardContainerProps) {
   return (
     <Frame className={cn(isFullWidth && "md:col-span-2", className)}>
       <FrameContent
         className={cn(
           "flex min-h-50 min-w-0 flex-1 flex-col flex-wrap items-center justify-center overflow-x-auto bg-site-background p-3 font-sans **:data-[slot=preview]:w-full sm:p-6 sm:**:data-[slot=preview]:max-w-[80%] lg:px-8 lg:py-12",
-          limitHeight &&
-            // A block is the page: the panel is its frame, so it brings none of its own, and it is never shorter than a preview.
-            "min-h-72 flex-nowrap items-stretch justify-start p-0 sm:p-0 lg:p-0 sm:**:data-[slot=preview]:max-w-none [&>.cn-audio-panel]:w-full [&>.cn-audio-panel]:flex-1 [&>.cn-audio-panel]:rounded-none [&>.cn-audio-panel]:border-0 [&_[data-slot=piano-roll]]:max-h-72"
+          block &&
+            cn(blockPanelClassName, "[&_[data-slot=piano-roll]]:max-h-72")
         )}
       >
         <React.Suspense
@@ -101,9 +101,7 @@ export function ComponentCardContainer({
           {children}
         </React.Suspense>
       </FrameContent>
-      <FrameFooter className="flex-row items-center gap-3 px-2 py-1.5">
-        {footer}
-      </FrameFooter>
+      {footer}
     </Frame>
   );
 }

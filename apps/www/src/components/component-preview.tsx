@@ -53,9 +53,10 @@ export function ComponentPreview({
       chromeLessOnMobile={chromeLessOnMobile}
       className={className}
       component={<ComponentClient name={name} styleName={styleName} />}
-      expandLabel={isExpandable(name) ? name : undefined}
+      expand={isExpandable(name)}
       fitContent={isBlock(name)}
       hideCode={hideCode}
+      name={name}
       previewClassName={previewClassName}
       source={
         <ComponentSource
