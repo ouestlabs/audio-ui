@@ -367,24 +367,15 @@ function transformImportPaths(code: string, base: string): string {
       /@\/registry(?:-audio)?\/bases\/base\/audio\//g,
       "@/components/audio/"
     )
-    .replace(
-      /@\/registry(?:-audio)?\/bases\/base\/ui\//g,
-      "@/components/ui/"
-    )
-    .replace(
-      /@\/registry(?:-audio)?\/bases\/base\/hooks\//g,
-      "@/hooks/"
-    )
+    .replace(/@\/registry(?:-audio)?\/bases\/base\/ui\//g, "@/components/ui/")
+    .replace(/@\/registry(?:-audio)?\/bases\/base\/hooks\//g, "@/hooks/")
     .replace(/@\/registry(?:-audio)?\/bases\/base\/lib\//g, "@/lib/")
     .replace(
       /@\/registry(?:-audio)?\/bases\/base\/components\//g,
       "@/components/examples/"
     )
     .replace(/@\/registry\/bases\/base\/ui\//g, "@/components/ui/")
-    .replace(
-      /@\/registry\/bases\/base\/audio\//g,
-      "@/components/audio/"
-    )
+    .replace(/@\/registry\/bases\/base\/audio\//g, "@/components/audio/")
     .replace(/@\/registry\/bases\/base\/hooks\//g, "@/hooks/")
     .replace(/@\/registry\/bases\/base\/lib\//g, "@/lib/")
     .replace(

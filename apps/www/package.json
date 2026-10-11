@@ -3,18 +3,18 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --port 4000",
     "build": "next build",
-    "start": "next start --port 4000",
-    "lint": "biome check --write .",
-    "lint:fix": "biome check --write --unsafe .",
-    "typecheck": "tsc --noEmit",
-    "test": "bun test",
-    "registry:build": "bun ./scripts/build-registry.ts",
-    "registry:sync": "bun ./scripts/sync-registry.ts && bun ./scripts/build-icons.ts",
+    "dev": "next dev --port 4000",
     "icons:build": "bun ./scripts/build-icons.ts",
     "icons:scan": "bun ./scripts/scan-icons.ts",
-    "postinstall": "fumadocs-mdx"
+    "postinstall": "fumadocs-mdx",
+    "lint": "biome check --write .",
+    "lint:fix": "biome check --write --unsafe .",
+    "registry:build": "bun ./scripts/build-registry.ts",
+    "registry:sync": "bun ./scripts/sync-registry.ts && bun ./scripts/build-icons.ts",
+    "start": "next start --port 4000",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@audio-ui/react": "latest",

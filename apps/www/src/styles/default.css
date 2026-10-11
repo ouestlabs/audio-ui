@@ -404,13 +404,13 @@
   /* The highlighted code: one line per row, numbered from the left when asked, in the colors of `highlight.css`. */
   pre.th-code {
     min-width: 0;
-    margin: 0;
     padding: calc(var(--spacing) * 3.5) calc(var(--spacing) * 4);
+    margin: 0;
     overflow-x: auto;
     color: var(--site-code-foreground);
     outline: none;
-    background: transparent;
     scrollbar-width: none;
+    background: transparent;
   }
 
   .th-code code {
@@ -463,7 +463,11 @@
   --site-secondary: var(--secondary);
   --site-secondary-foreground: var(--secondary-foreground);
   --site-muted: var(--muted);
-  --site-muted-foreground: color-mix(in oklab, var(--muted-foreground) 82%, var(--foreground));
+  --site-muted-foreground: color-mix(
+    in oklab,
+    var(--muted-foreground) 82%,
+    var(--foreground)
+  );
   --site-accent: var(--accent);
   --site-accent-foreground: var(--accent-foreground);
   --site-destructive: var(--destructive);
@@ -474,8 +478,8 @@
 
 /* The mobile menu follows the customizer's Menu choices: its ground is the popover's, and translucent when asked. */
 .site-menu {
-  background-color: var(--popover);
   color: var(--popover-foreground);
+  background-color: var(--popover);
 }
 
 .site-menu.cn-menu-translucent {
@@ -493,8 +497,8 @@
  */
 @media (min-width: 1024px) {
   .inset-pane {
-    padding-left: 0;
     padding-right: 0;
+    padding-left: 0;
   }
 
   [data-framed-layout][data-nav="closed"] .inset-pane,

@@ -47,7 +47,8 @@ export function SiteShell({
   tree: ReturnType<typeof source.getPageTree>;
 }) {
   const pathname = usePathname();
-  const inCatalog = pathname === "/components" || pathname.startsWith("/components/");
+  const inCatalog =
+    pathname === "/components" || pathname.startsWith("/components/");
   const value = useMemo(() => catalog, [catalog]);
 
   return (

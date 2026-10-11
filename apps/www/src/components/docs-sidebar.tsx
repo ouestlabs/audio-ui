@@ -61,64 +61,64 @@ export function DocsNavigation({
 
   return (
     <div className="no-scrollbar scroll-fade-y min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-2 pb-12">
-        <div className="h-(--top-spacing) shrink-0" />
-        {tree.children.map((item) => {
-          if (EXCLUDED_SECTIONS.includes(item.$id ?? "")) {
-            return null;
-          }
+      <div className="h-(--top-spacing) shrink-0" />
+      {tree.children.map((item) => {
+        if (EXCLUDED_SECTIONS.includes(item.$id ?? "")) {
+          return null;
+        }
 
-          return (
-            <SidebarGroup key={item.$id}>
-              <SidebarGroupLabel className="font-medium text-site-muted-foreground">
-                {item.name}
-              </SidebarGroupLabel>
-              <SidebarGroupContent>
-                {item.type === "folder" &&
-                  getSectionsFromFolder(item, currentBase).map((section) => (
-                    <div
-                      className="not-first:mt-3"
-                      key={section.title ?? "untitled"}
-                    >
-                      {section.title ? (
-                        <p className="px-2 pb-1 text-site-muted-foreground text-xs">
-                          {section.title}
-                        </p>
-                      ) : null}
-                      <SidebarMenu className="gap-0.5">
-                        {section.pages.map((page) => {
-                          if (!showMcpDocs && page.url.includes("/mcp")) {
-                            return null;
-                          }
+        return (
+          <SidebarGroup key={item.$id}>
+            <SidebarGroupLabel className="font-medium text-site-muted-foreground">
+              {item.name}
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              {item.type === "folder" &&
+                getSectionsFromFolder(item, currentBase).map((section) => (
+                  <div
+                    className="not-first:mt-3"
+                    key={section.title ?? "untitled"}
+                  >
+                    {section.title ? (
+                      <p className="px-2 pb-1 text-site-muted-foreground text-xs">
+                        {section.title}
+                      </p>
+                    ) : null}
+                    <SidebarMenu className="gap-0.5">
+                      {section.pages.map((page) => {
+                        if (!showMcpDocs && page.url.includes("/mcp")) {
+                          return null;
+                        }
 
-                          if (EXCLUDED_PAGES.includes(page.url)) {
-                            return null;
-                          }
+                        if (EXCLUDED_PAGES.includes(page.url)) {
+                          return null;
+                        }
 
-                          return (
-                            <SidebarMenuItem key={page.url}>
-                              <SidebarMenuButton
-                                className="after:site-rounded-md after:-inset-y-1 relative h-[30px] 3xl:fixed:w-full w-fit 3xl:fixed:max-w-48 overflow-visible border border-transparent font-medium text-[0.8rem] after:absolute after:inset-x-0 after:z-0 data-[active=true]:border-site-accent data-[active=true]:bg-site-accent"
-                                isActive={page.url === pathname}
-                                render={
-                                  <Link href={page.url} prefetch={false}>
-                                    <span className="pointer-events-none absolute inset-0 flex w-(--sidebar-width) bg-transparent" />
-                                    <span className="relative z-10 inline-flex items-center gap-2">
-                                      <span>{page.name}</span>
-                                      <DocsUpdateIndicator path={page.url} />
-                                    </span>
-                                  </Link>
-                                }
-                              />
-                            </SidebarMenuItem>
-                          );
-                        })}
-                      </SidebarMenu>
-                    </div>
-                  ))}
-              </SidebarGroupContent>
-            </SidebarGroup>
-          );
-        })}
+                        return (
+                          <SidebarMenuItem key={page.url}>
+                            <SidebarMenuButton
+                              className="after:site-rounded-md after:-inset-y-1 relative h-[30px] 3xl:fixed:w-full w-fit 3xl:fixed:max-w-48 overflow-visible border border-transparent font-medium text-[0.8rem] after:absolute after:inset-x-0 after:z-0 data-[active=true]:border-site-accent data-[active=true]:bg-site-accent"
+                              isActive={page.url === pathname}
+                              render={
+                                <Link href={page.url} prefetch={false}>
+                                  <span className="pointer-events-none absolute inset-0 flex w-(--sidebar-width) bg-transparent" />
+                                  <span className="relative z-10 inline-flex items-center gap-2">
+                                    <span>{page.name}</span>
+                                    <DocsUpdateIndicator path={page.url} />
+                                  </span>
+                                </Link>
+                              }
+                            />
+                          </SidebarMenuItem>
+                        );
+                      })}
+                    </SidebarMenu>
+                  </div>
+                ))}
+            </SidebarGroupContent>
+          </SidebarGroup>
+        );
+      })}
     </div>
   );
 }

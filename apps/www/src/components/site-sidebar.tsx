@@ -3,8 +3,8 @@
 import { Suspense } from "react";
 import { ComponentSidebarContent } from "@/app/(create)/components/components/component-sidebar-content";
 import { DocsNavigation } from "@/components/docs-sidebar";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Sidebar, SidebarContent, useSidebar } from "@/components/ui/sidebar";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { source } from "@/lib/source";
 
 export type SiteSection = "components" | "docs";
