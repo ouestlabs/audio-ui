@@ -18,3 +18,22 @@ export {
   spatialOrder,
 } from "./edits";
 export { type Rows, rollRows } from "./rows";
+export {
+  createPianoRollController,
+  DRAG_THRESHOLD,
+  type PianoRollBand,
+  type PianoRollChangeEventDetails,
+  type PianoRollChangeEventReason,
+  type PianoRollCommitEventDetails,
+  type PianoRollCommitEventReason,
+  type PianoRollController,
+  type PianoRollEdit,
+  type PianoRollKeyDetails,
+  type PianoRollNoteHandle,
+  type PianoRollNoteOffEventDetails,
+  type PianoRollNoteOnEventDetails,
+  type PianoRollOptions,
+  type PianoRollSelectionEventDetails,
+  type PianoRollSnapshot,
+  type PianoRollTimeline,
+} from "./controller";
