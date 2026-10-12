@@ -11,7 +11,9 @@ describe("Knob controller value", () => {
   });
 
   test("a controlled value is shown as given and only the change tells the caller", () => {
-    const onValueChange = mock(() => undefined);
+    const onValueChange = mock(
+      (_value: number, _details: unknown) => undefined
+    );
     const knob = createKnobController({ onValueChange, value: 20 });
     knob.type(30, new Event("input"));
     expect(knob.getSnapshot().value).toBe(20);
@@ -38,8 +40,12 @@ describe("Knob controller value", () => {
 
 describe("Knob controller keys", () => {
   test("arrows move by one step and report a keyboard change, committed at once", () => {
-    const onValueChange = mock(() => undefined);
-    const onValueCommitted = mock(() => undefined);
+    const onValueChange = mock(
+      (_value: number, _details: unknown) => undefined
+    );
+    const onValueCommitted = mock(
+      (_value: number, _details: unknown) => undefined
+    );
     const knob = createKnobController({
       defaultValue: 20,
       onValueChange,
@@ -81,7 +87,9 @@ describe("Knob controller keys", () => {
 
 describe("Knob controller reset and typed values", () => {
   test("reset returns to the default and commits with a reset reason", () => {
-    const onValueCommitted = mock(() => undefined);
+    const onValueCommitted = mock(
+      (_value: number, _details: unknown) => undefined
+    );
     const knob = createKnobController({
       defaultValue: 40,
       onValueCommitted,
@@ -102,7 +110,9 @@ describe("Knob controller reset and typed values", () => {
 
 describe("Knob controller wheel", () => {
   test("a wheel step moves one step up or down, and small deltas are ignored", () => {
-    const onValueChange = mock(() => undefined);
+    const onValueChange = mock(
+      (_value: number, _details: unknown) => undefined
+    );
     const knob = createKnobController({ defaultValue: 50, onValueChange });
     const element = document.createElement("div");
     const detach = knob.attachWheel(element);
