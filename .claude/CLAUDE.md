@@ -18,9 +18,7 @@ audio-ui/
 │   └── sandbox/    # Dev sandbox
 └── packages/
     ├── core/       # @audio-ui/core, published npm package (framework-agnostic logic)
-    ├── ui/         # @audio-ui/react, published npm package (headless primitives)
-    ├── utils/      # Shared utilities
-    └── configs/    # Shared tsconfig, etc.
+    └── ui/         # @audio-ui/react, published npm package (headless primitives)
 ```
 
 ## Key Commands
