@@ -2,26 +2,21 @@
   "name": "@audio-ui/utils",
   "version": "0.0.5",
   "description": "A collection of utility functions for Audio UI.",
-  "license": "MIT",
-  "module": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "type": "module",
-  "publishConfig": {
-    "access": "public"
+  "keywords": [
+    "audio-ui",
+    "utils"
+  ],
+  "homepage": "https://github.com/ouestlabs/audio-ui/tree/main/packages/utils",
+  "bugs": {
+    "url": "https://github.com/ouestlabs/audio-ui/issues"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ouestlabs/audio-ui.git",
     "directory": "packages/utils"
   },
-  "homepage": "https://github.com/ouestlabs/audio-ui/tree/main/packages/utils",
-  "bugs": {
-    "url": "https://github.com/ouestlabs/audio-ui/issues"
-  },
-  "keywords": [
-    "audio-ui",
-    "utils"
-  ],
+  "license": "MIT",
+  "type": "module",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -32,20 +27,25 @@
       "import": "./dist/dom/index.js"
     }
   },
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
   "files": [
     "dist"
   ],
   "scripts": {
     "build:pkg": "tsup && tsc -p tsconfig.build.json",
+    "clean": "rm -rf dist node_modules .turbo",
     "dev": "tsup --watch",
     "lint": "biome check --write .",
-    "lint:fix": "biome check --write --unsafe .",
-    "clean": "rm -rf dist node_modules .turbo"
+    "lint:fix": "biome check --write --unsafe ."
   },
   "devDependencies": {
     "@audio-ui/typescript": "latest",
     "@types/bun": "1.4.2",
     "tsup": "^8.5.0",
     "typescript": "^7.0.2"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

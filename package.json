@@ -1,4 +1,26 @@
 {
+  "name": "audio-ui",
+  "private": true,
+  "license": "MIT",
+  "workspaces": {
+    "packages": [
+      "apps/*",
+      "packages/**/*"
+    ]
+  },
+  "scripts": {
+    "build": "turbo build",
+    "build:pkg": "turbo build:pkg",
+    "changeset": "changeset",
+    "check": "ultracite check",
+    "clean": "turbo clean && rm -rf node_modules bun.lock",
+    "dev": "turbo dev",
+    "fix": "ultracite fix",
+    "lint": "turbo lint",
+    "lint:fix": "turbo lint:fix",
+    "release": "turbo build:pkg && changeset publish",
+    "version-packages": "changeset version"
+  },
   "devDependencies": {
     "@biomejs/biome": "2.5.15",
     "@changesets/cli": "3.0.3",
@@ -6,28 +28,6 @@
     "turbo": "2.11.7",
     "ultracite": "8.0.0"
   },
-  "name": "audio-ui",
-  "scripts": {
-    "dev": "turbo dev",
-    "build": "turbo build",
-    "build:pkg": "turbo build:pkg",
-    "lint": "turbo lint",
-    "lint:fix": "turbo lint:fix",
-    "clean": "turbo clean && rm -rf node_modules bun.lock",
-    "changeset": "changeset",
-    "version-packages": "changeset version",
-    "release": "turbo build:pkg && changeset publish",
-    "check": "ultracite check",
-    "fix": "ultracite fix"
-  },
-  "workspaces": {
-    "packages": [
-      "apps/*",
-      "packages/**/*"
-    ]
-  },
-  "license": "MIT",
-  "private": true,
   "packageManager": "bun@1.4.3",
   "engines": {
     "bun": ">=1.3.0"

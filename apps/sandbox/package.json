@@ -3,12 +3,12 @@
   "version": "0.1.5",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack --port 4100",
     "build": "next build",
-    "start": "next start",
+    "dev": "next dev --turbopack --port 4100",
     "lint": "biome check --write .",
     "lint:fix": "biome check --write --unsafe .",
-    "reset": "bun scripts/reset.ts"
+    "reset": "bun scripts/reset.ts",
+    "start": "next start"
   },
   "dependencies": {
     "@audio-ui/react": "workspace:*",
