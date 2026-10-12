@@ -1,10 +1,4 @@
-import { createChangeEventDetails, isReleased } from "@audio-ui/core";
-import {
-  type Breakpoint,
-  curveForMidpoint,
-  curveKeyDelta,
-  segmentShape,
-} from "@audio-ui/core/envelope";
+import { type Breakpoint, segmentShape } from "@audio-ui/core/envelope";
 import * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
@@ -34,11 +28,6 @@ export namespace Segments {
   }
 }
 
-interface SegmentGesture {
-  changed: boolean;
-  pointerId: number;
-}
-
 /**
  * A handle on the middle of the segment leaving the point at `index`: drag it
  * up or down to bend the segment, so it follows the pointer on the curve's
@@ -58,28 +47,41 @@ export function Segment(componentProps: Segment.Props) {
     style,
     ...elementProps
   } = componentProps;
-  const { actions, meta, state } = useEnvelopeContext("Segment");
+  const {
+    controller,
+    focusSegment,
+    focusedSegmentIndex,
+    graphRef,
+    registerSegment,
+    setFocusedSegmentIndex,
+    snapshot,
+    state,
+  } = useEnvelopeContext("Segment");
   const from = state.value[index];
   const to = state.value[index + 1];
-  const gestureRef = React.useRef<SegmentGesture | null>(null);
-  const { registerSegment } = actions;
   const registerRef = React.useCallback(
     (node: HTMLDivElement | null) => registerSegment(index, node),
     [index, registerSegment]
   );
   const curve = from?.curve ?? 0;
   const flat = from && to ? Math.abs(to.y - from.y) < 1e-6 : true;
-
   const segmentState = React.useMemo<Segment.State>(
     () => ({
       curve,
       disabled: state.disabled,
-      dragging: meta.draggingSegmentIndex === index,
+      dragging: snapshot.draggingSegmentIndex === index,
       flat,
       index,
       value: state.value,
     }),
-    [curve, flat, index, meta.draggingSegmentIndex, state.disabled, state.value]
+    [
+      curve,
+      flat,
+      index,
+      snapshot.draggingSegmentIndex,
+      state.disabled,
+      state.value,
+    ]
   );
 
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
@@ -88,125 +90,36 @@ export function Segment(componentProps: Segment.Props) {
     }
     event.preventDefault();
     event.stopPropagation();
-    event.currentTarget.setPointerCapture?.(event.pointerId);
+    const graph = graphRef.current;
+    if (!graph) {
+      return;
+    }
     event.currentTarget.focus({ focusVisible: false, preventScroll: true });
-    gestureRef.current = { changed: false, pointerId: event.pointerId };
-    actions.setDraggingSegment(index);
-  };
-
-  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
-    const gesture = gestureRef.current;
-    const graph = meta.graphRef.current;
-    const left = meta.valueRef.current[index];
-    const right = meta.valueRef.current[index + 1];
-    if (!(gesture && graph && left && right)) {
-      return;
-    }
-    if (gesture.pointerId !== event.pointerId) {
-      return;
-    }
-    if (isReleased(event)) {
-      handlePointerEnd(event);
-      return;
-    }
-    const rect = graph.getBoundingClientRect();
-    if (rect.height <= 0) {
-      return;
-    }
-    const next = curveForMidpoint(
-      left,
-      right,
-      1 - (event.clientY - rect.top) / rect.height
-    );
-    if (next === null) {
-      return;
-    }
-    const moved = actions.setCurve(
+    setFocusedSegmentIndex(index);
+    controller.pressSegment(
       index,
-      next,
-      Object.assign(createChangeEventDetails("curve", event.nativeEvent), {
-        index,
-      })
+      event.nativeEvent,
+      event.currentTarget,
+      graph
     );
-    if (moved) {
-      gesture.changed = true;
-    }
-  };
-
-  const handlePointerEnd = (event: React.PointerEvent<HTMLDivElement>) => {
-    const gesture = gestureRef.current;
-    if (!gesture || gesture.pointerId !== event.pointerId) {
-      return;
-    }
-    gestureRef.current = null;
-    actions.setDraggingSegment(null);
-    if (gesture.changed) {
-      actions.commit(meta.valueRef.current, {
-        event: event.nativeEvent,
-        index,
-        reason: "curve",
-      });
-    }
-  };
-
-  const straighten = (native: MouseEvent | KeyboardEvent) => {
-    const moved = actions.setCurve(
-      index,
-      0,
-      Object.assign(createChangeEventDetails("curve", native), { index })
-    );
-    if (moved) {
-      actions.commit(meta.valueRef.current, {
-        event: native,
-        index,
-        reason: "curve",
-      });
-    }
   };
 
   const handleDoubleClick = (event: React.MouseEvent<HTMLDivElement>) => {
     event.stopPropagation();
-    if (!state.disabled) {
-      straighten(event.nativeEvent);
-    }
+    controller.straightenSegment(index, event.nativeEvent);
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
-    const left = meta.valueRef.current[index];
-    const right = meta.valueRef.current[index + 1];
-    if (state.disabled || !(left && right)) {
+    if (state.disabled || !(from && to)) {
       return;
     }
     if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
       event.preventDefault();
-      actions.focusSegment(index + (event.key === "ArrowRight" ? 1 : -1));
+      focusSegment(index + (event.key === "ArrowRight" ? 1 : -1));
       return;
     }
-    if (flat) {
-      return;
-    }
-    const native = event.nativeEvent;
-    if (event.key === "Delete" || event.key === "Backspace") {
+    if (controller.keySegment(index, event.nativeEvent)) {
       event.preventDefault();
-      straighten(native);
-      return;
-    }
-    const delta = curveKeyDelta(event, left, right, meta.step);
-    if (delta === null) {
-      return;
-    }
-    event.preventDefault();
-    const moved = actions.setCurve(
-      index,
-      (left.curve ?? 0) + delta,
-      Object.assign(createChangeEventDetails("curve", native), { index })
-    );
-    if (moved) {
-      actions.commit(meta.valueRef.current, {
-        event: native,
-        index,
-        reason: "curve",
-      });
     }
   };
 
@@ -228,15 +141,11 @@ export function Segment(componentProps: Segment.Props) {
           ? getAriaValueText(curve, index)
           : String(Math.round(curve * 100) / 100),
         onDoubleClick: handleDoubleClick,
-        onFocus: () => actions.setFocusedSegmentIndex(index),
+        onFocus: () => setFocusedSegmentIndex(index),
         onKeyDown: handleKeyDown,
-        onLostPointerCapture: handlePointerEnd,
-        onPointerCancel: handlePointerEnd,
         onPointerDown: handlePointerDown,
-        onPointerMove: handlePointerMove,
-        onPointerUp: handlePointerEnd,
         role: "slider",
-        tabIndex: state.disabled || index !== meta.focusedSegmentIndex ? -1 : 0,
+        tabIndex: state.disabled || index !== focusedSegmentIndex ? -1 : 0,
       },
       {
         ...elementProps,

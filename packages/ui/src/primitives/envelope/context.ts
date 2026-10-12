@@ -1,5 +1,7 @@
-import type { Point as GeomPoint } from "@audio-ui/core";
-import type { Breakpoint } from "@audio-ui/core/envelope";
+import type {
+  EnvelopeController,
+  EnvelopeSnapshot,
+} from "@audio-ui/core/envelope";
 import type { Nullable } from "@audio-ui/core/internal";
 import * as React from "react";
 import type { Root } from "./elements/root";
@@ -10,55 +12,25 @@ export const STATE_ATTRIBUTES_MAPPING = {
 };
 
 export interface EnvelopeContextValue {
-  actions: {
-    /** Add a point (normalized 0…1); blocked at `maxPoints`. */
-    addPoint: (point: GeomPoint, event: MouseEvent) => void;
-    commit: (
-      value: Breakpoint[],
-      eventDetails: Root.CommitEventDetails
-    ) => void;
-    /** Move one point, clamped between its neighbors; returns whether it changed. */
-    movePoint: (
-      index: number,
-      target: GeomPoint,
-      eventDetails: Root.ChangeEventDetails
-    ) => boolean;
-    /** Move focus to a segment's handle, the roving tab stop among them. */
-    focusSegment: (index: number) => void;
-    registerPoint: (index: number, node: Nullable<HTMLElement>) => void;
-    registerSegment: (index: number, node: Nullable<HTMLElement>) => void;
-    setFocusedSegmentIndex: (index: number) => void;
-    /** Bend the segment leaving a point; returns whether it changed. */
-    setCurve: (
-      index: number,
-      curve: number,
-      eventDetails: Root.ChangeEventDetails
-    ) => boolean;
-    setDraggingSegment: (index: number | null) => void;
-    /** Remove a point; blocked at `minPoints`. */
-    removePoint: (index: number, event: MouseEvent | KeyboardEvent) => void;
-    setDraggingIndex: (index: number | null) => void;
-    setFocusedIndex: (index: number) => void;
-  };
-  meta: {
-    blockedIndex: number | null;
-    draggingIndex: number | null;
-    draggingSegmentIndex: number | null;
-    /** The roving tab stop among the segments' handles. */
-    focusedSegmentIndex: number;
-    /** The roving tab stop among the points. */
-    focusedIndex: number;
-    /** Formats a point's `x` and `y` as one string. */
-    formatPoint: (x: number, y: number) => string;
-    graphRef: React.RefObject<SVGSVGElement | null>;
-    isAddBlocked: boolean;
-    minPoints: number;
-    /** Grid the pointer snaps to, in normalized units; 0 is no grid. */
-    snap: number;
-    step: number;
-    /** Latest displayed value, readable from event handlers. */
-    valueRef: React.RefObject<Breakpoint[]>;
-  };
+  /** Adds a point at `at` (normalized 0…1) and moves the roving tab stop to it. */
+  addPoint: (at: { x: number; y: number }, event: MouseEvent) => void;
+  /** The framework-free envelope behind every part: gestures, keys, adds, removes, bends. */
+  controller: EnvelopeController;
+  /** Roving tab stop among the points. */
+  focusedIndex: number;
+  /** Roving tab stop among the segments' handles. */
+  focusedSegmentIndex: number;
+  focusPoint: (index: number) => void;
+  focusSegment: (index: number) => void;
+  graphRef: React.RefObject<SVGSVGElement | null>;
+  registerPoint: (index: number, node: Nullable<HTMLElement>) => void;
+  registerSegment: (index: number, node: Nullable<HTMLElement>) => void;
+  /** Removes a point and moves the roving tab stop to the one that takes its place. */
+  removePoint: (index: number, event: MouseEvent | KeyboardEvent) => void;
+  setFocusedIndex: (index: number) => void;
+  setFocusedSegmentIndex: (index: number) => void;
+  /** Everything a view draws the envelope from: points, drags, feedback signals. */
+  snapshot: EnvelopeSnapshot;
   state: Root.State;
 }
 
