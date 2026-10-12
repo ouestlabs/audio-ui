@@ -10,7 +10,7 @@ import { useCallbackRef } from "../use-callback-ref";
 const MAX_POINTER_ID = 10;
 
 function releaseAllPointerCaptures(element: HTMLElement) {
-  for (let pointerId = 0; pointerId < MAX_POINTER_ID; pointerId++) {
+  for (let pointerId = 0; pointerId < MAX_POINTER_ID; pointerId += 1) {
     if (element.hasPointerCapture(pointerId)) {
       element.releasePointerCapture(pointerId);
     }
@@ -116,10 +116,6 @@ export function usePointerDrag<T extends HTMLElement = HTMLElement>({
         y: startPos.current.y - e.clientY,
       };
 
-      if (!onDragRef) {
-        return;
-      }
-
       if (onDragTakesEvent) {
         assertType<(evt: React.PointerEvent<T>, d: Point) => void>(onDragRef);
         onDragRef(e, deltaValue);
@@ -173,7 +169,7 @@ export function usePointerDrag<T extends HTMLElement = HTMLElement>({
 
   const composedPointerDown = React.useMemo(
     () => (e: React.PointerEvent<T>) => {
-      externalOnPointerDownRef?.(e);
+      externalOnPointerDownRef(e);
       handlePointerDown(e);
     },
     [externalOnPointerDownRef, handlePointerDown]
@@ -181,7 +177,7 @@ export function usePointerDrag<T extends HTMLElement = HTMLElement>({
 
   const composedPointerMove = React.useMemo(
     () => (e: React.PointerEvent<T>) => {
-      externalOnPointerMoveRef?.(e);
+      externalOnPointerMoveRef(e);
       handlePointerMove(e);
     },
     [externalOnPointerMoveRef, handlePointerMove]
@@ -189,7 +185,7 @@ export function usePointerDrag<T extends HTMLElement = HTMLElement>({
 
   const composedPointerUp = React.useMemo(
     () => (e: React.PointerEvent<T>) => {
-      externalOnPointerUpRef?.(e);
+      externalOnPointerUpRef(e);
       handlePointerUp(e);
     },
     [externalOnPointerUpRef, handlePointerUp]
@@ -197,7 +193,7 @@ export function usePointerDrag<T extends HTMLElement = HTMLElement>({
 
   const composedPointerCancel = React.useMemo(
     () => (e: React.PointerEvent<T>) => {
-      externalOnPointerCancelRef?.(e);
+      externalOnPointerCancelRef(e);
       handlePointerCancel(e);
     },
     [externalOnPointerCancelRef, handlePointerCancel]
@@ -237,7 +233,7 @@ export function usePointerDrag<T extends HTMLElement = HTMLElement>({
         return;
       }
 
-      const target = e.target;
+      const { target } = e;
       if (!(target instanceof Node)) {
         return;
       }

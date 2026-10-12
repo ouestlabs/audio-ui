@@ -77,7 +77,7 @@ export function useKeyboardNavigation({
   const keyboardProps = React.useMemo(
     () => ({
       onKeyDown: (e: React.KeyboardEvent) => {
-        externalOnKeyDownRef?.(e);
+        externalOnKeyDownRef(e);
         handleKeyDown(e);
       },
     }),

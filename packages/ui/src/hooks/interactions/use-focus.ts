@@ -29,7 +29,7 @@ export function useFocus<T extends HTMLElement = HTMLElement>({
   const handleFocus = React.useCallback(
     (e: React.FocusEvent<T>) => {
       if (!disabled) {
-        onFocusRef?.(e);
+        onFocusRef(e);
       }
     },
     [disabled, onFocusRef]
@@ -37,7 +37,7 @@ export function useFocus<T extends HTMLElement = HTMLElement>({
 
   const handleBlur = React.useCallback(
     (e: React.FocusEvent<T>) => {
-      onBlurRef?.(e);
+      onBlurRef(e);
     },
     [onBlurRef]
   );

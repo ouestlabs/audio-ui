@@ -121,7 +121,7 @@ export function useParameterCore<T>({
   );
 
   const dragStartValueRef = React.useRef(value);
-  const isDragActiveRef = React.useRef(false);
+  const isDragActiveRef = React.useRef<boolean>(false);
   const pendingValueRef = React.useRef(value);
   const shouldPreventFocusRef = React.useRef(false);
 
