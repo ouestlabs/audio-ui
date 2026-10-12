@@ -3,6 +3,7 @@
 import {
   FADE_SHAPES,
   type FadeShape,
+  fadeGain,
   Timeline as TimelinePrimitive,
 } from "@audio-ui/react";
 import {
@@ -284,6 +285,18 @@ const FADE_SHAPE_LABELS: Record<FadeShape, string> = {
   smooth: "Smooth",
 };
 
+const CURVE_STEPS = 12;
+
+/** A fade-in's curve as an SVG path, silent at the bottom left to full at the top right. */
+function curvePath(shape: FadeShape): string {
+  return Array.from({ length: CURVE_STEPS + 1 }, (_, step) => {
+    const progress = step / CURVE_STEPS;
+    const x = 2 + progress * 20;
+    const y = 14 - fadeGain(shape, progress) * 12;
+    return `${step === 0 ? "M" : "L"}${x.toFixed(1)} ${y.toFixed(1)}`;
+  }).join(" ");
+}
+
 type TimelineClipFadeHandleProps = TimelinePrimitive.ClipFadeHandle.Props & {
   /** The fade's curve. With `onShapeChange`, a right-click on the handle lists the curves. */
   shape?: FadeShape;
@@ -322,6 +335,18 @@ function TimelineClipFadeHandle({
         <ContextMenuRadioGroup onValueChange={handleShape} value={shape}>
           {FADE_SHAPES.map((item) => (
             <ContextMenuRadioItem key={item} value={item}>
+              <svg
+                aria-hidden="true"
+                className="h-4 w-6 shrink-0 text-muted-foreground"
+                fill="none"
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="1.5"
+                viewBox="0 0 24 16"
+              >
+                <path d={curvePath(item)} />
+              </svg>
               {FADE_SHAPE_LABELS[item]}
             </ContextMenuRadioItem>
           ))}
