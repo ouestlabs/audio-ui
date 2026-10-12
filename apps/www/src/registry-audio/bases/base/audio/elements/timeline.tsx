@@ -521,7 +521,6 @@ function TimelineTrackControls({
             <Button
               aria-expanded={!folded}
               aria-label={`${folded ? "Unfold" : "Fold"} ${name}`}
-              className="@max-[8rem]/header:hidden"
               onClick={handleFold}
               size="icon-xs"
               variant="ghost"
