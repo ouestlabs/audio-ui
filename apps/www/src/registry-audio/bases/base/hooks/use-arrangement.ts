@@ -542,6 +542,21 @@ export function useArrangement({
     },
     [edit]
   );
+  /** Moves a track to a position in the order the tracks are listed in, its clips with it. */
+  const moveTrack = useCallback(
+    (id: string, index: number) =>
+      edit((current) => {
+        const from = current.tracks.findIndex((item) => item.id === id);
+        if (from === -1 || from === index) {
+          return current;
+        }
+        const ordered = [...current.tracks];
+        const [moved] = ordered.splice(from, 1);
+        ordered.splice(Math.min(Math.max(index, 0), ordered.length), 0, moved);
+        return { ...current, tracks: ordered };
+      }),
+    [edit]
+  );
   /** Removes a track with the clips on it; the last one can go too. */
   const removeTrack = useCallback(
     (id: string) => {
@@ -624,6 +639,7 @@ export function useArrangement({
     redo: redoEdit,
     releaseClips,
     removeClip,
+    moveTrack,
     removeTrack,
     renameClip,
     renameTrack,

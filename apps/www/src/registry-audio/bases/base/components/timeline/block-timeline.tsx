@@ -799,6 +799,7 @@ export default function BlockTimeline() {
     toggleFold,
     mixOf,
     redo,
+    moveTrack,
     removeClip,
     removeTrack,
     renameClip,
@@ -893,6 +894,89 @@ export default function BlockTimeline() {
   const changeZoom = useCallback(
     (ratio: number) => setZoom(ratio <= 1 ? null : ratio * fitPx),
     [fitPx]
+  );
+  // The track being dragged by its grip, and the gap it would land in: above or below the track under the pointer.
+  const [dragId, setDragId] = useState<string | null>(null);
+  const [drop, setDrop] = useState<{
+    id: string;
+    edge: "bottom" | "top";
+  } | null>(null);
+  const startTrackDrag = useCallback(
+    (event: React.DragEvent<HTMLButtonElement>) => {
+      const id = event.currentTarget.dataset.trackId ?? "";
+      // The whole track is the drag image: the clone is the track, not the grip.
+      const row = event.currentTarget.closest<HTMLElement>(
+        '[data-slot="timeline-track"]'
+      );
+      if (row) {
+        const box = row.getBoundingClientRect();
+        event.dataTransfer.setDragImage(
+          row,
+          event.clientX - box.left,
+          event.clientY - box.top
+        );
+      }
+      setDragId(id);
+      event.dataTransfer.effectAllowed = "move";
+      event.dataTransfer.setData("text/plain", id);
+    },
+    []
+  );
+  const endTrackDrag = useCallback(() => {
+    setDragId(null);
+    setDrop(null);
+  }, []);
+  const allowTrackDrop = useCallback(
+    (event: React.DragEvent<HTMLDivElement>) => {
+      if (dragId === null) {
+        return;
+      }
+      event.preventDefault();
+      const id = event.currentTarget.dataset.trackId ?? "";
+      const box = event.currentTarget
+        .querySelector<HTMLElement>('[data-slot="timeline-track"]')
+        ?.getBoundingClientRect();
+      const edge =
+        box && event.clientY > box.top + box.height / 2 ? "bottom" : "top";
+      setDrop((current) =>
+        current?.id === id && current.edge === edge ? current : { id, edge }
+      );
+    },
+    [dragId]
+  );
+  const dropTrack = useCallback(
+    (event: React.DragEvent<HTMLDivElement>) => {
+      event.preventDefault();
+      const over = tracks.findIndex(
+        (track) => track.id === event.currentTarget.dataset.trackId
+      );
+      const from = tracks.findIndex((track) => track.id === dragId);
+      if (dragId !== null && drop !== null && over !== -1 && from !== -1) {
+        // The gap the track lands in; one less once the track has left a place above it.
+        const gap = drop.edge === "bottom" ? over + 1 : over;
+        moveTrack(dragId, gap > from ? gap - 1 : gap);
+      }
+      setDragId(null);
+      setDrop(null);
+    },
+    [dragId, drop, moveTrack, tracks]
+  );
+  const nudgeTrack = useCallback(
+    (event: React.KeyboardEvent<HTMLButtonElement>) => {
+      const id = event.currentTarget.dataset.trackId ?? "";
+      const from = tracks.findIndex((track) => track.id === id);
+      if (from === -1) {
+        return;
+      }
+      if (event.key === "ArrowUp") {
+        event.preventDefault();
+        moveTrack(id, from - 1);
+      } else if (event.key === "ArrowDown") {
+        event.preventDefault();
+        moveTrack(id, from + 1);
+      }
+    },
+    [moveTrack, tracks]
   );
   const changeZoomPreset = useCallback(
     (value: string) => changeZoom(Number(value)),
@@ -1448,123 +1532,160 @@ export default function BlockTimeline() {
               </Row>
             </div>
             {tracks.map((track) => (
-              <Row
-                className={cn(
-                  "border-foreground/25 border-b",
-                  heights[track.id] === undefined && "flex-1"
-                )}
-                height={heights[track.id]}
+              <div
+                aria-label={track.name}
+                className="contents"
+                data-track-id={track.id}
                 key={track.id}
-                lead={
-                  <TimelineTrackControls
-                    compact={
-                      heights[track.id] !== undefined &&
-                      heights[track.id] < COMPACT_TRACK_HEIGHT
-                    }
-                    folded={folded[track.id]}
-                    meter={
-                      <TrackLevel
-                        active={
-                          playing &&
-                          !mixOf(track).muted &&
-                          (!anySolo || mixOf(track).soloed)
-                        }
-                        name={track.name}
-                      />
-                    }
-                    mix={mixOf(track)}
-                    name={track.name}
-                    onDuplicate={duplicateTrack}
-                    onInsert={addTrack}
-                    onMix={changeMix}
-                    onRemove={removeTrack}
-                    onRename={renameTrack}
-                    onSelect={pickTrack}
-                    onToggleFold={toggleFold}
-                    selected={selectedTracks.includes(track.id)}
-                    trackId={track.id}
-                  />
-                }
-                onResize={resizeTrack}
-                selected={selectedTracks.includes(track.id)}
-                trackId={track.id}
+                onDragOver={allowTrackDrop}
+                onDrop={dropTrack}
+                role="group"
               >
-                <ContextMenu>
-                  <ContextMenuTrigger render={<div className="contents" />}>
-                    <TimelineLane
-                      className={cn(
-                        "h-auto flex-1 border-b-0",
-                        heights[track.id] === undefined
-                          ? "min-h-14"
-                          : "min-h-0",
-                        // A short track keeps its clips thin, so they fit.
-                        heights[track.id] !== undefined &&
-                          heights[track.id] < COMPACT_TRACK_HEIGHT &&
-                          "**:data-clip-id:inset-y-0.5",
-                        selectedTracks.includes(track.id) && "bg-muted/40",
-                        // A silent track keeps its clips on the page, drained.
-                        (mixOf(track).muted ||
-                          (anySolo && !mixOf(track).soloed)) &&
-                          "**:data-clip-id:opacity-40"
-                      )}
-                      data-track={track.id}
-                      gridStep={snapStep}
-                      onPointerDown={focusPanel}
-                      seekable
-                    >
-                      {copying
-                        .filter((original) => original.track === track.id)
-                        .map((original) => (
-                          <CopyGhost clip={original} key={original.id} />
-                        ))}
-                      {clips
-                        .filter((clip) => clip.track === track.id)
-                        .map((clip) => (
-                          <ClipView
-                            clip={clip}
-                            copying={copying.some(
-                              (original) => original.id === clip.id
-                            )}
-                            describe={describe}
-                            key={clip.id}
-                            lift={
-                              lifting &&
-                              lifting.id !== clip.id &&
-                              selectedIds.includes(clip.id) &&
-                              selectedIds.includes(lifting.id)
-                                ? lifting.offset
-                                : 0
+                <Row
+                  className={cn(
+                    "border-foreground/25 border-b",
+                    heights[track.id] === undefined && "flex-1",
+                    // The track being moved stays in place, faded; the line marks the gap it would land in.
+                    dragId === track.id && "opacity-50",
+                    drop?.id === track.id &&
+                      drop.edge === "top" &&
+                      "shadow-[inset_0_2px_0_0_var(--primary)]",
+                    drop?.id === track.id &&
+                      drop.edge === "bottom" &&
+                      "shadow-[inset_0_-2px_0_0_var(--primary)]"
+                  )}
+                  height={heights[track.id]}
+                  lead={
+                    <div className="contents">
+                      <button
+                        aria-label={`Move ${track.name}`}
+                        className="absolute inset-y-0 start-0 z-10 flex w-4 cursor-grab items-center justify-center text-muted-foreground"
+                        data-track-id={track.id}
+                        draggable
+                        onDragEnd={endTrackDrag}
+                        onDragStart={startTrackDrag}
+                        onKeyDown={nudgeTrack}
+                        type="button"
+                      >
+                        <IconPlaceholder
+                          hugeicons="DragDropVerticalIcon"
+                          lucide="GripVerticalIcon"
+                          phosphor="DotsSixVerticalIcon"
+                          remixicon="RiDraggable"
+                          tabler="IconGripVertical"
+                        />
+                      </button>
+                      <TimelineTrackControls
+                        compact={
+                          heights[track.id] !== undefined &&
+                          heights[track.id] < COMPACT_TRACK_HEIGHT
+                        }
+                        folded={folded[track.id]}
+                        meter={
+                          <TrackLevel
+                            active={
+                              playing &&
+                              !mixOf(track).muted &&
+                              (!anySolo || mixOf(track).soloed)
                             }
-                            multi={multi}
-                            onAction={clipAction}
-                            onChange={changeClip}
-                            onCommit={commitClip}
-                            onFadeShape={setFadeShape}
-                            onLift={lift}
-                            onRemove={removeClip}
-                            onRename={renameClip}
-                            onSelect={selectClip}
-                            selected={selectedIds.includes(clip.id)}
-                            swatch={mixOf(track).color}
-                            trackName={track.name}
+                            name={track.name}
                           />
-                        ))}
-                      <TimelinePlayhead />
-                    </TimelineLane>
-                  </ContextMenuTrigger>
-                  <ContextMenuContent className="w-auto min-w-48">
-                    <TimelineGridMenuItems
-                      division={division}
-                      divisions={DIVISIONS}
-                      onDivisionChange={handleDivisionValue}
-                      onSnapChange={setSnap}
-                      onTripletChange={setTriplet}
-                      snap={snap}
-                      triplet={triplet}
-                    />
-                  </ContextMenuContent>
-                </ContextMenu>
-              </Row>
+                        }
+                        mix={mixOf(track)}
+                        name={track.name}
+                        onDuplicate={duplicateTrack}
+                        onInsert={addTrack}
+                        onMix={changeMix}
+                        onRemove={removeTrack}
+                        onRename={renameTrack}
+                        onSelect={pickTrack}
+                        onToggleFold={toggleFold}
+                        selected={selectedTracks.includes(track.id)}
+                        trackId={track.id}
+                      />
+                    </div>
+                  }
+                  onResize={resizeTrack}
+                  selected={selectedTracks.includes(track.id)}
+                  trackId={track.id}
+                >
+                  <ContextMenu>
+                    <ContextMenuTrigger render={<div className="contents" />}>
+                      <TimelineLane
+                        className={cn(
+                          "h-auto flex-1 border-b-0",
+                          heights[track.id] === undefined
+                            ? "min-h-14"
+                            : "min-h-0",
+                          // A short track keeps its clips thin, so they fit.
+                          heights[track.id] !== undefined &&
+                            heights[track.id] < COMPACT_TRACK_HEIGHT &&
+                            "**:data-clip-id:inset-y-0.5",
+                          selectedTracks.includes(track.id) && "bg-muted/40",
+                          // A silent track keeps its clips on the page, drained.
+                          (mixOf(track).muted ||
+                            (anySolo && !mixOf(track).soloed)) &&
+                            "**:data-clip-id:opacity-40"
+                        )}
+                        data-track={track.id}
+                        gridStep={snapStep}
+                        onPointerDown={focusPanel}
+                        seekable
+                      >
+                        {copying
+                          .filter((original) => original.track === track.id)
+                          .map((original) => (
+                            <CopyGhost clip={original} key={original.id} />
+                          ))}
+                        {clips
+                          .filter((clip) => clip.track === track.id)
+                          .map((clip) => (
+                            <ClipView
+                              clip={clip}
+                              copying={copying.some(
+                                (original) => original.id === clip.id
+                              )}
+                              describe={describe}
+                              key={clip.id}
+                              lift={
+                                lifting &&
+                                lifting.id !== clip.id &&
+                                selectedIds.includes(clip.id) &&
+                                selectedIds.includes(lifting.id)
+                                  ? lifting.offset
+                                  : 0
+                              }
+                              multi={multi}
+                              onAction={clipAction}
+                              onChange={changeClip}
+                              onCommit={commitClip}
+                              onFadeShape={setFadeShape}
+                              onLift={lift}
+                              onRemove={removeClip}
+                              onRename={renameClip}
+                              onSelect={selectClip}
+                              selected={selectedIds.includes(clip.id)}
+                              swatch={mixOf(track).color}
+                              trackName={track.name}
+                            />
+                          ))}
+                        <TimelinePlayhead />
+                      </TimelineLane>
+                    </ContextMenuTrigger>
+                    <ContextMenuContent className="w-auto min-w-48">
+                      <TimelineGridMenuItems
+                        division={division}
+                        divisions={DIVISIONS}
+                        onDivisionChange={handleDivisionValue}
+                        onSnapChange={setSnap}
+                        onTripletChange={setTriplet}
+                        snap={snap}
+                        triplet={triplet}
+                      />
+                    </ContextMenuContent>
+                  </ContextMenu>
+                </Row>
+              </div>
             ))}
             <Row
               className="sticky bottom-0 z-30 border-foreground/25 border-b bg-background"
