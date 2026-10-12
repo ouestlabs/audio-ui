@@ -1,9 +1,10 @@
 const siteName = "audio/ui";
+// The canonical origin is fixed, so no deployment setting can point canonical
+// and Open Graph URLs at another domain.
 export const baseUrl =
-  process.env.NODE_ENV === "development" ||
-  !process.env.VERCEL_PROJECT_PRODUCTION_URL
+  process.env.NODE_ENV === "development"
     ? new URL("http://localhost:4000")
-    : new URL(`https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`);
+    : new URL("https://www.audio-ui.dev");
 
 export const siteConfig = {
   author: Object.freeze({
@@ -13,7 +14,7 @@ export const siteConfig = {
     url: "https://loua.tech",
   }),
   description:
-    "Accessible, composable audio controls for React: headless primitives on npm and styled components for shadcn/ui. Knobs, faders, XY pads, meters, waveforms, timelines, sequencers and piano rolls, ready for AI agents through an MCP server and an agent skill.",
+    "Audio controls for React: knobs, faders, meters, waveforms, timelines, sequencers and piano rolls, as headless primitives on npm or shadcn/ui components.",
 
   links: Object.freeze({
     github: "https://github.com/ouestlabs/audio-ui",

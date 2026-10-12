@@ -1,0 +1,4 @@
+Contact: https://github.com/ouestlabs/audio-ui/security
+Expires: 2027-10-12T00:00:00.000Z
+Preferred-Languages: en, fr
+Canonical: https://www.audio-ui.dev/.well-known/security.txt
