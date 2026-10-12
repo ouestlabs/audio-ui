@@ -1,10 +1,10 @@
-import { type PartProps, resolveStyling } from "../../internal/part.js";
-import { mergeProps, useRender } from "../../internal/render.js";
+import { type PartProps, resolveStyling } from "../../internal/part.ts";
+import { mergeProps, useRender } from "../../internal/render.ts";
 import {
   POSITION_PROPERTY,
   useWaveformContext,
   type WaveformState,
-} from "../context.js";
+} from "../context.ts";
 
 /**
  * A handle centered on the playback position. Renders a `<div>` element.

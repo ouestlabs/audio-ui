@@ -1,10 +1,10 @@
 import type { Point } from "@audio-ui/core";
 import { STATE_ATTRIBUTES_MAPPING } from "@audio-ui/core/xypad";
 import type * as React from "react";
-import { type PartProps, resolveStyling } from "../../internal/part.js";
-import { mergeProps, useRender } from "../../internal/render.js";
-import { useXYPadContext } from "../context.js";
-import type { Root } from "./root.js";
+import { type PartProps, resolveStyling } from "../../internal/part.ts";
+import { mergeProps, useRender } from "../../internal/render.ts";
+import { useXYPadContext } from "../context.ts";
+import type { Root } from "./root.tsx";
 
 /**
  * The formatted value (`format`/`locale` on Root), `"x, y"` by default.

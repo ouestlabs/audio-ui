@@ -4,7 +4,7 @@ import {
   spatialOrder,
 } from "@audio-ui/core/piano-roll";
 import * as React from "react";
-import { usePianoRollContext, useRollView } from "../context.js";
+import { usePianoRollContext, useRollView } from "../context.ts";
 
 /**
  * Renders `children` once per note, in the order they are read: by start,

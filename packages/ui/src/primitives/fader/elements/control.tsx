@@ -1,8 +1,8 @@
 import * as React from "react";
-import { type PartProps, resolveStyling } from "../../internal/part.js";
-import { mergeProps, useRender } from "../../internal/render.js";
-import { FADER_STATE_ATTRIBUTES, useFaderContext } from "../context.js";
-import type { Root } from "./root.js";
+import { type PartProps, resolveStyling } from "../../internal/part.ts";
+import { mergeProps, useRender } from "../../internal/render.ts";
+import { FADER_STATE_ATTRIBUTES, useFaderContext } from "../context.ts";
+import type { Root } from "./root.tsx";
 
 /**
  * The interactive area: a press on the track jumps to the value under it, a

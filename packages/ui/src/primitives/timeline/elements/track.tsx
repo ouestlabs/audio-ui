@@ -5,14 +5,14 @@ import {
   type TrackOptions,
 } from "@audio-ui/core/timeline";
 import * as React from "react";
-import { type PartProps, resolveStyling } from "../../internal/part.js";
-import { mergeProps, useRender } from "../../internal/render.js";
-import { useTimelineContext } from "../context.js";
+import { type PartProps, resolveStyling } from "../../internal/part.ts";
+import { mergeProps, useRender } from "../../internal/render.ts";
+import { useTimelineContext } from "../context.ts";
 import {
   TrackContext,
   type TrackContextValue,
   type TrackState,
-} from "./track-context.js";
+} from "./track-context.ts";
 
 /**
  * One track of the arrangement: a row holding a header beside a lane. Its

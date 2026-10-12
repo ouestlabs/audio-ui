@@ -1,6 +1,6 @@
-import { type PartProps, resolveStyling } from "../../internal/part.js";
-import { mergeProps, useRender } from "../../internal/render.js";
-import { type PlotState, positionOn, usePlotContext } from "../context.js";
+import { type PartProps, resolveStyling } from "../../internal/part.ts";
+import { mergeProps, useRender } from "../../internal/render.ts";
+import { type PlotState, positionOn, usePlotContext } from "../context.ts";
 
 /**
  * A stretch of the plot between two values on one axis, across the whole of

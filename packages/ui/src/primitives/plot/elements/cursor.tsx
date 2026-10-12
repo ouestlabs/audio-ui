@@ -1,9 +1,9 @@
 import type { Point } from "@audio-ui/core";
 import { createStore, type Store } from "@audio-ui/core";
 import * as React from "react";
-import { type PartProps, resolveStyling } from "../../internal/part.js";
-import { mergeProps, useRender } from "../../internal/render.js";
-import { type PlotState, usePlotContext, valueOn } from "../context.js";
+import { type PartProps, resolveStyling } from "../../internal/part.ts";
+import { mergeProps, useRender } from "../../internal/render.ts";
+import { type PlotState, usePlotContext, valueOn } from "../context.ts";
 
 /** Set on the cursor: where the pointer is across the plot, as a share of its width. */
 export const CURSOR_X_PROPERTY = "--plot-cursor-x";

@@ -1,9 +1,9 @@
 import { describe, test } from "bun:test";
 import { fireEvent, render } from "@testing-library/react";
 import { useState } from "react";
-import { bench, expectWork, sweep } from "../../../../test/bench.js";
-import { mockRect } from "../../../../test/helpers.js";
-import { Knob } from "../../../entries/knob.js";
+import { bench, expectWork, sweep } from "../../../../test/bench.ts";
+import { mockRect } from "../../../../test/helpers.ts";
+import { Knob } from "../../../entries/knob.ts";
 
 let changes = 0;
 

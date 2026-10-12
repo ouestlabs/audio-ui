@@ -1,9 +1,9 @@
 import { describe, test } from "bun:test";
 import { fireEvent, render } from "@testing-library/react";
-import { bench, expectWork, sweep } from "../../../../test/bench.js";
-import { mockRect } from "../../../../test/helpers.js";
-import { Sequencer } from "../../../entries/sequencer.js";
-import { renderSequencer } from "./helpers.js";
+import { bench, expectWork, sweep } from "../../../../test/bench.ts";
+import { mockRect } from "../../../../test/helpers.ts";
+import { Sequencer } from "../../../entries/sequencer.ts";
+import { renderSequencer } from "./helpers.tsx";
 
 describe("Sequencer", () => {
   test("toggling steps", () => {

@@ -2,9 +2,9 @@ import { describe, expect, test } from "bun:test";
 import { createSource, type WritableSource } from "@audio-ui/core";
 import { act, fireEvent, render } from "@testing-library/react";
 import * as React from "react";
-import { bench, SCRIPT_BUDGET_MS, sweep } from "../../../../test/bench.js";
-import { mockRect } from "../../../../test/helpers.js";
-import { Timeline } from "../../../entries/timeline.js";
+import { bench, SCRIPT_BUDGET_MS, sweep } from "../../../../test/bench.ts";
+import { mockRect } from "../../../../test/helpers.ts";
+import { Timeline } from "../../../entries/timeline.ts";
 
 const TRACKS = 20;
 const LANES = Array.from({ length: TRACKS }, (_, track) => track);

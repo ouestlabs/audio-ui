@@ -1,8 +1,8 @@
 import { mock } from "bun:test";
 import { fireEvent, type RenderResult, render } from "@testing-library/react";
-import { mockRect } from "../../../../test/helpers.js";
-import { PianoRoll } from "../../../entries/piano-roll.js";
-import { Timeline } from "../../../entries/timeline.js";
+import { mockRect } from "../../../../test/helpers.ts";
+import { PianoRoll } from "../../../entries/piano-roll.ts";
+import { Timeline } from "../../../entries/timeline.ts";
 
 type Note = PianoRoll.Root.Note;
 

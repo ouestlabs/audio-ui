@@ -22,10 +22,10 @@ import {
   type WaveformVariant,
 } from "@audio-ui/core/waveform";
 import * as React from "react";
-import { type PartProps, resolveStyling } from "../../internal/part.js";
-import { mergeProps, useRender } from "../../internal/render.js";
-import { useReducedMotion } from "../../internal/use-reduced-motion.js";
-import { useWaveformContext, type WaveformState } from "../context.js";
+import { type PartProps, resolveStyling } from "../../internal/part.ts";
+import { mergeProps, useRender } from "../../internal/render.ts";
+import { useReducedMotion } from "../../internal/use-reduced-motion.ts";
+import { useWaveformContext, type WaveformState } from "../context.ts";
 
 const BAR_RADIUS_PROPERTY = "--waveform-bar-radius";
 const THEME_ATTRIBUTES = ["class", "style", "data-theme"];

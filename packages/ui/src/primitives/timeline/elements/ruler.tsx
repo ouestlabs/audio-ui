@@ -1,14 +1,14 @@
 import * as React from "react";
-import { type PartProps, resolveStyling } from "../../internal/part.js";
-import { mergeProps, useRender } from "../../internal/render.js";
-import { VISUALLY_HIDDEN } from "../../internal/visually-hidden.js";
+import { type PartProps, resolveStyling } from "../../internal/part.ts";
+import { mergeProps, useRender } from "../../internal/render.ts";
+import { VISUALLY_HIDDEN } from "../../internal/visually-hidden.ts";
 import type {
   DescribePosition,
   SelectionChangeEventDetails,
   SelectionCommitEventDetails,
   TimelineState,
-} from "../context.js";
-import { LaneContext, useLaneProps } from "./lane.js";
+} from "../context.ts";
+import { LaneContext, useLaneProps } from "./lane.tsx";
 
 const describeAsNumber: DescribePosition = (value) =>
   String(Math.round(value * 100) / 100);

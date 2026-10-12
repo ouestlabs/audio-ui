@@ -1,13 +1,13 @@
 import { DEFAULT_VELOCITY, isOn } from "@audio-ui/core/sequencer";
 import * as React from "react";
-import { type PartProps, resolveStyling } from "../../internal/part.js";
-import { mergeProps, useRender } from "../../internal/render.js";
-import { VISUALLY_HIDDEN } from "../../internal/visually-hidden.js";
+import { type PartProps, resolveStyling } from "../../internal/part.ts";
+import { mergeProps, useRender } from "../../internal/render.ts";
+import { VISUALLY_HIDDEN } from "../../internal/visually-hidden.ts";
 import {
   RowContext,
   useSequencerContext,
   useSequencerView,
-} from "../context.js";
+} from "../context.ts";
 
 /** What the arrow keys change a velocity by; Page Up/Down move five times as far. */
 const VELOCITY_STEP = 0.05;

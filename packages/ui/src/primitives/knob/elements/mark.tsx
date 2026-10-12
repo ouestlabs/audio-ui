@@ -4,10 +4,10 @@ import {
   SWEEP_ANGLE,
 } from "@audio-ui/core/knob";
 import * as React from "react";
-import { type PartProps, resolveStyling } from "../../internal/part.js";
-import { mergeProps, useRender } from "../../internal/render.js";
-import { useKnobContext } from "../context.js";
-import type { Root } from "./root.js";
+import { type PartProps, resolveStyling } from "../../internal/part.ts";
+import { mergeProps, useRender } from "../../internal/render.ts";
+import { useKnobContext } from "../context.ts";
+import type { Root } from "./root.tsx";
 
 /**
  * A graduation on the dial at `value`, placed on the knob's scale: a layer

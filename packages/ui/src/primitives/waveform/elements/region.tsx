@@ -10,14 +10,14 @@ import {
   type WaveformRegionValue,
 } from "@audio-ui/core/waveform";
 import * as React from "react";
-import { type PartProps, resolveStyling } from "../../internal/part.js";
-import { mergeProps, useRender } from "../../internal/render.js";
-import { VISUALLY_HIDDEN } from "../../internal/visually-hidden.js";
+import { type PartProps, resolveStyling } from "../../internal/part.ts";
+import { mergeProps, useRender } from "../../internal/render.ts";
+import { VISUALLY_HIDDEN } from "../../internal/visually-hidden.ts";
 import {
   type DescribeValue,
   describeAsPercent,
   useWaveformContext,
-} from "../context.js";
+} from "../context.ts";
 
 type WithEdge<Details> = Details & {
   /** What moved: one edge, or the whole region with `"both"`. */

@@ -1,1 +1,1 @@
-export * as XYPad from "../primitives/xypad/index.js";
+export * as XYPad from "../primitives/xypad/index.ts";

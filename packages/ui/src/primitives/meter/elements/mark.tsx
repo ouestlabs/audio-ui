@@ -1,7 +1,7 @@
 import * as React from "react";
-import { type PartProps, resolveStyling } from "../../internal/part.js";
-import { mergeProps, useRender } from "../../internal/render.js";
-import { useMeterContext } from "../context.js";
+import { type PartProps, resolveStyling } from "../../internal/part.ts";
+import { mergeProps, useRender } from "../../internal/render.ts";
+import { useMeterContext } from "../context.ts";
 
 /**
  * A graduation of the level scale at `value`, such as -18 dB: placed along

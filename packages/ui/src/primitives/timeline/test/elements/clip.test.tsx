@@ -1,8 +1,8 @@
 import { describe, expect, mock, test } from "bun:test";
 import { fireEvent, render } from "@testing-library/react";
-import { mockRect } from "../../../../../test/helpers.js";
-import { Timeline } from "../../../../entries/timeline.js";
-import { lastCall } from "../helpers.js";
+import { mockRect } from "../../../../../test/helpers.ts";
+import { Timeline } from "../../../../entries/timeline.ts";
+import { lastCall } from "../helpers.tsx";
 
 const seconds = (value: number) => `${value}s`;
 

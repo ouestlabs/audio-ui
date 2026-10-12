@@ -1,8 +1,8 @@
 import { pitchName } from "@audio-ui/core";
 import * as React from "react";
-import { type PartProps, resolveStyling } from "../../internal/part.js";
-import { mergeProps, useRender } from "../../internal/render.js";
-import { KeyContext, usePianoContext } from "../context.js";
+import { type PartProps, resolveStyling } from "../../internal/part.ts";
+import { mergeProps, useRender } from "../../internal/render.ts";
+import { KeyContext, usePianoContext } from "../context.ts";
 
 /**
  * The name of the key it sits in, such as "C4". Hidden from assistive
@@ -28,6 +28,6 @@ export function KeyLabel(componentProps: KeyLabel.Props) {
 }
 
 export namespace KeyLabel {
-  export type State = import("../context.js").PianoState;
+  export type State = import("../context.ts").PianoState;
   export type Props = PartProps<"span", State>;
 }

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { fireEvent } from "@testing-library/react";
-import { lastCall, renderPiano } from "../helpers.js";
+import { lastCall, renderPiano } from "../helpers.tsx";
 
 describe("Piano.Key", () => {
   test("is a button named after its pitch, placed along the keyboard", () => {

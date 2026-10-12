@@ -1,7 +1,7 @@
 import * as React from "react";
-import { type PartProps, resolveStyling } from "../../internal/part.js";
-import { mergeProps, useRender } from "../../internal/render.js";
-import { useWaveformContext, type WaveformState } from "../context.js";
+import { type PartProps, resolveStyling } from "../../internal/part.ts";
+import { mergeProps, useRender } from "../../internal/render.ts";
+import { useWaveformContext, type WaveformState } from "../context.ts";
 
 /**
  * Shown while the pointer is over the `Control`, positioned at the hovered

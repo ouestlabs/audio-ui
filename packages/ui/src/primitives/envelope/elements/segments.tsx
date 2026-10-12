@@ -1,9 +1,9 @@
 import { type Breakpoint, segmentShape } from "@audio-ui/core/envelope";
 import * as React from "react";
-import { type PartProps, resolveStyling } from "../../internal/part.js";
-import { mergeProps, useRender } from "../../internal/render.js";
-import { STATE_ATTRIBUTES_MAPPING, useEnvelopeContext } from "../context.js";
-import type { Root } from "./root.js";
+import { type PartProps, resolveStyling } from "../../internal/part.ts";
+import { mergeProps, useRender } from "../../internal/render.ts";
+import { STATE_ATTRIBUTES_MAPPING, useEnvelopeContext } from "../context.ts";
+import type { Root } from "./root.tsx";
 
 /** Renders one child per segment between two points, in `x` order. */
 export function Segments({ children }: Segments.Props) {

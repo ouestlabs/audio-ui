@@ -7,9 +7,9 @@ import {
   type Velocities,
 } from "@audio-ui/core/sequencer";
 import * as React from "react";
-import { shallowEqual } from "../../internal/equal.js";
-import { type PartProps, resolveStyling } from "../../internal/part.js";
-import { mergeProps, useRender } from "../../internal/render.js";
+import { shallowEqual } from "../../internal/equal.ts";
+import { type PartProps, resolveStyling } from "../../internal/part.ts";
+import { mergeProps, useRender } from "../../internal/render.ts";
 import {
   SequencerContext,
   type SequencerContextValue,
@@ -18,7 +18,7 @@ import {
   type ValueCommitEventDetails,
   type VelocityChangeEventDetails,
   type VelocityCommitEventDetails,
-} from "../context.js";
+} from "../context.ts";
 
 /**
  * A grid of steps to switch on and off, one row per sound: the pattern of a

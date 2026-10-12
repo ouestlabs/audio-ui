@@ -1,6 +1,6 @@
 import { describe, expect, mock, test } from "bun:test";
 import { fireEvent, render } from "@testing-library/react";
-import { Knob } from "../../../entries/knob.js";
+import { Knob } from "../../../entries/knob.ts";
 
 function renderValue(props: Knob.Root.Props = {}, editable = true) {
   const onValueChange = mock(

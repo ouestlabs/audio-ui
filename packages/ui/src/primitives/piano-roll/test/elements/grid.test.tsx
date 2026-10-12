@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { act, fireEvent } from "@testing-library/react";
-import { drag, lastCall, notesById, renderRoll } from "../helpers.js";
+import { drag, lastCall, notesById, renderRoll } from "../helpers.tsx";
 
 describe("PianoRoll.Grid", () => {
   test("is a focusable group placed as a timeline lane", () => {

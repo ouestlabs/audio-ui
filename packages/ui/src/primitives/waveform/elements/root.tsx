@@ -6,8 +6,8 @@ import {
   type WaveformSeekOptions,
 } from "@audio-ui/core/waveform";
 import * as React from "react";
-import { type PartProps, resolveStyling } from "../../internal/part.js";
-import { mergeProps, useRender } from "../../internal/render.js";
+import { type PartProps, resolveStyling } from "../../internal/part.ts";
+import { mergeProps, useRender } from "../../internal/render.ts";
 import {
   describeAsPercent,
   type LevelsSource,
@@ -18,7 +18,7 @@ import {
   WaveformContext,
   type WaveformContextValue,
   type WaveformState,
-} from "../context.js";
+} from "../context.ts";
 
 /**
  * Groups the parts of a waveform and owns what they show: the audio's shape

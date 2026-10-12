@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { act, fireEvent } from "@testing-library/react";
-import { drag, lastCall, notesById, renderRoll } from "../helpers.js";
+import { drag, lastCall, notesById, renderRoll } from "../helpers.tsx";
 
 // Note a: C4 (row 3, y 30-40), 0 to 2 (x 0-20). Note b: D4 (row 1), 4 to 8.
 

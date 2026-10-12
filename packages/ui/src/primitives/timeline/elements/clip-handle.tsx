@@ -1,14 +1,14 @@
 import { clipEnd } from "@audio-ui/core/timeline";
 import * as React from "react";
-import { type PartProps, resolveStyling } from "../../internal/part.js";
-import { mergeProps, useRender } from "../../internal/render.js";
-import { VISUALLY_HIDDEN } from "../../internal/visually-hidden.js";
+import { type PartProps, resolveStyling } from "../../internal/part.ts";
+import { mergeProps, useRender } from "../../internal/render.ts";
+import { VISUALLY_HIDDEN } from "../../internal/visually-hidden.ts";
 import {
   type ClipState,
   type ClipTarget,
   useClipContext,
   useClipDrag,
-} from "./clip-context.js";
+} from "./clip-context.ts";
 
 /**
  * Trims one edge of the clip: by dragging, on the grid unless Cmd/Ctrl is

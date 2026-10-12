@@ -1,1 +1,1 @@
-export * as PianoRoll from "../primitives/piano-roll/index.js";
+export * as PianoRoll from "../primitives/piano-roll/index.ts";

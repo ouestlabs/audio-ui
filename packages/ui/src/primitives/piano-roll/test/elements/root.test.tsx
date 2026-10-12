@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { render } from "@testing-library/react";
-import { PianoRoll } from "../../../../entries/piano-roll.js";
-import { drag, lastCall, NOTES, notesById, renderRoll } from "../helpers.js";
+import { PianoRoll } from "../../../../entries/piano-roll.ts";
+import { drag, lastCall, NOTES, notesById, renderRoll } from "../helpers.tsx";
 
 const NOTE_NAME = /to/;
 

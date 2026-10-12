@@ -1,10 +1,10 @@
-import { type PartProps, resolveStyling } from "../../internal/part.js";
-import { mergeProps, useRender } from "../../internal/render.js";
+import { type PartProps, resolveStyling } from "../../internal/part.ts";
+import { mergeProps, useRender } from "../../internal/render.ts";
 import {
   type PianoRollState,
   usePianoRollContext,
   useRollView,
-} from "../context.js";
+} from "../context.ts";
 
 /**
  * The selection rectangle being dragged across the grid; renders nothing the

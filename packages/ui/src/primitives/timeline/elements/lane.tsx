@@ -1,13 +1,13 @@
 import * as React from "react";
-import { type PartProps, resolveStyling } from "../../internal/part.js";
-import { mergeProps, useRender } from "../../internal/render.js";
+import { type PartProps, resolveStyling } from "../../internal/part.ts";
+import { mergeProps, useRender } from "../../internal/render.ts";
 import {
   type TimelineState,
   UNIT_PROPERTY,
   unitLength,
   useTimelineContext,
-} from "../context.js";
-import { useSeekGesture } from "./seek-gesture.js";
+} from "../context.ts";
+import { useSeekGesture } from "./seek-gesture.ts";
 
 export interface LaneContextValue {
   elementRef: React.RefObject<HTMLElement | null>;

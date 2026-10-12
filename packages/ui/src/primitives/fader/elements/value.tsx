@@ -1,9 +1,12 @@
 import type * as React from "react";
-import { useEditableValue, ValueInput } from "../../internal/editable-value.js";
-import { type PartProps, resolveStyling } from "../../internal/part.js";
-import { mergeProps, useRender } from "../../internal/render.js";
-import { FADER_STATE_ATTRIBUTES, useFaderContext } from "../context.js";
-import type { Root } from "./root.js";
+import {
+  useEditableValue,
+  ValueInput,
+} from "../../internal/editable-value.tsx";
+import { type PartProps, resolveStyling } from "../../internal/part.ts";
+import { mergeProps, useRender } from "../../internal/render.ts";
+import { FADER_STATE_ATTRIBUTES, useFaderContext } from "../context.ts";
+import type { Root } from "./root.tsx";
 
 /**
  * The formatted value (`format`/`locale` on Root). With `editable`, a double

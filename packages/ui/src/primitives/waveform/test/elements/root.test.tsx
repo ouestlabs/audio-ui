@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { act, fireEvent, render } from "@testing-library/react";
-import { Waveform } from "../../../../entries/waveform.js";
-import { createTestSource, renderWaveform } from "../helpers.js";
+import { Waveform } from "../../../../entries/waveform.ts";
+import { createTestSource, renderWaveform } from "../helpers.tsx";
 
 const clock = (value: number, duration: number) =>
   `${Math.round(value)} of ${Math.round(duration)} seconds`;

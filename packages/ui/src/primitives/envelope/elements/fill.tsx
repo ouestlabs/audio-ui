@@ -1,8 +1,8 @@
 import { polylinePoints } from "@audio-ui/core/envelope";
-import { type PartProps, resolveStyling } from "../../internal/part.js";
-import { mergeProps, useRender } from "../../internal/render.js";
-import { STATE_ATTRIBUTES_MAPPING, useEnvelopeContext } from "../context.js";
-import type { Root } from "./root.js";
+import { type PartProps, resolveStyling } from "../../internal/part.ts";
+import { mergeProps, useRender } from "../../internal/render.ts";
+import { STATE_ATTRIBUTES_MAPPING, useEnvelopeContext } from "../context.ts";
+import type { Root } from "./root.tsx";
 
 /** The area under the curve. Renders a `<polyline>` element. */
 export function Fill(componentProps: Fill.Props) {

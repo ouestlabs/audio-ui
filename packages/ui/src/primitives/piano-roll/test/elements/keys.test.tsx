@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { fireEvent } from "@testing-library/react";
-import { lastCall, renderRoll } from "../helpers.js";
+import { lastCall, renderRoll } from "../helpers.tsx";
 
 // The keys are 40px tall, four rows of 10px: C4 at the bottom.
 const C4 = { clientX: 20, clientY: 35 };

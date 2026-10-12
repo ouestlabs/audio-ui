@@ -1,1 +1,1 @@
-export * as Fader from "../primitives/fader/index.js";
+export * as Fader from "../primitives/fader/index.ts";

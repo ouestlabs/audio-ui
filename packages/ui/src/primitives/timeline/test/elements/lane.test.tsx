@@ -1,8 +1,8 @@
 import { describe, expect, mock, test } from "bun:test";
 import { fireEvent, render } from "@testing-library/react";
-import { mockRect } from "../../../../../test/helpers.js";
-import { Timeline } from "../../../../entries/timeline.js";
-import { renderTimeline } from "../helpers.js";
+import { mockRect } from "../../../../../test/helpers.ts";
+import { Timeline } from "../../../../entries/timeline.ts";
+import { renderTimeline } from "../helpers.tsx";
 
 describe("Timeline.Lane", () => {
   test("fitted, spreads the timeline across its width", () => {

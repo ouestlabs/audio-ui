@@ -1,8 +1,8 @@
 import * as React from "react";
-import { type PartProps, resolveStyling } from "../../internal/part.js";
-import { mergeProps, useRender } from "../../internal/render.js";
-import { LaneContext, useLaneProps } from "../../timeline/elements/lane.js";
-import { type PianoRollState, usePianoRollContext } from "../context.js";
+import { type PartProps, resolveStyling } from "../../internal/part.ts";
+import { mergeProps, useRender } from "../../internal/render.ts";
+import { LaneContext, useLaneProps } from "../../timeline/elements/lane.tsx";
+import { type PianoRollState, usePianoRollContext } from "../context.ts";
 
 /**
  * The surface notes are drawn on: a timeline lane, with the roll's rows
@@ -83,7 +83,7 @@ export namespace Grid {
   export type State = PianoRollState;
   export type Props = PartProps<"div", State>;
   export type ChangeEventDetails =
-    import("../context.js").ValueChangeEventDetails;
+    import("../context.ts").ValueChangeEventDetails;
   export type SelectionChangeEventDetails =
-    import("../context.js").SelectionChangeEventDetails;
+    import("../context.ts").SelectionChangeEventDetails;
 }

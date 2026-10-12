@@ -1,7 +1,7 @@
 import { describe, test } from "bun:test";
 import { fireEvent } from "@testing-library/react";
-import { bench, expectWork, sweep } from "../../../../test/bench.js";
-import { renderPlot } from "./helpers.js";
+import { bench, expectWork, sweep } from "../../../../test/bench.ts";
+import { renderPlot } from "./helpers.tsx";
 
 describe("Plot", () => {
   test("dragging a handle", () => {

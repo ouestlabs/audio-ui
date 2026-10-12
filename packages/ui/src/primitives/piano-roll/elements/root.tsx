@@ -7,10 +7,10 @@ import {
   type Rows,
 } from "@audio-ui/core/piano-roll";
 import * as React from "react";
-import { shallowEqual } from "../../internal/equal.js";
-import { type PartProps, resolveStyling } from "../../internal/part.js";
-import { mergeProps, useRender } from "../../internal/render.js";
-import { TimelineContext } from "../../timeline/context.js";
+import { shallowEqual } from "../../internal/equal.ts";
+import { type PartProps, resolveStyling } from "../../internal/part.ts";
+import { mergeProps, useRender } from "../../internal/render.ts";
+import { TimelineContext } from "../../timeline/context.ts";
 import {
   PianoRollContext,
   type PianoRollContextValue,
@@ -18,7 +18,7 @@ import {
   ROWS_PROPERTY,
   type ValueChangeEventDetails,
   type ValueCommitEventDetails,
-} from "../context.js";
+} from "../context.ts";
 
 const formatPosition = (value: number) => String(Math.round(value * 100) / 100);
 
@@ -208,15 +208,15 @@ export namespace Root {
   export type State = PianoRollState;
   export type Note = import("@audio-ui/core/piano-roll").Note;
   export type NoteId = import("@audio-ui/core/piano-roll").NoteId;
-  export type Edit = import("../context.js").Edit;
-  export type Band = import("../context.js").Band;
+  export type Edit = import("../context.ts").Edit;
+  export type Band = import("../context.ts").Band;
   export type ChangeEventReason = ChangeEventDetails["reason"];
   export type ChangeEventDetails = ValueChangeEventDetails;
   export type CommitEventDetails = ValueCommitEventDetails;
   export type SelectionChangeEventDetails =
-    import("../context.js").SelectionChangeEventDetails;
-  export type NoteOnEventDetails = import("../context.js").NoteOnEventDetails;
-  export type NoteOffEventDetails = import("../context.js").NoteOffEventDetails;
+    import("../context.ts").SelectionChangeEventDetails;
+  export type NoteOnEventDetails = import("../context.ts").NoteOnEventDetails;
+  export type NoteOffEventDetails = import("../context.ts").NoteOffEventDetails;
 
   export interface Props extends Omit<PartProps<"div", State>, "defaultValue"> {
     /** Pitches lit from elsewhere, such as a MIDI input or the notes playing, on the keys and rows. */

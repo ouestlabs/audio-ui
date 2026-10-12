@@ -1,8 +1,8 @@
 import { describe, expect, mock, test } from "bun:test";
 import { fireEvent, render } from "@testing-library/react";
-import { mockRect } from "../../../../../test/helpers.js";
-import { Waveform } from "../../../../entries/waveform.js";
-import { lastCall, renderWaveform } from "../helpers.js";
+import { mockRect } from "../../../../../test/helpers.ts";
+import { Waveform } from "../../../../entries/waveform.ts";
+import { lastCall, renderWaveform } from "../helpers.tsx";
 
 describe("Waveform.Control keyboard (from 50 of 100)", () => {
   const cases: [string, Partial<KeyboardEventInit>, number][] = [

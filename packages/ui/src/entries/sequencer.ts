@@ -1,1 +1,1 @@
-export * as Sequencer from "../primitives/sequencer/index.js";
+export * as Sequencer from "../primitives/sequencer/index.ts";

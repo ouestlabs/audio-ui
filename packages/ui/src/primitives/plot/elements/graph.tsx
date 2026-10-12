@@ -1,6 +1,6 @@
-import { type PartProps, resolveStyling } from "../../internal/part.js";
-import { mergeProps, useRender } from "../../internal/render.js";
-import { type PlotState, usePlotContext } from "../context.js";
+import { type PartProps, resolveStyling } from "../../internal/part.ts";
+import { mergeProps, useRender } from "../../internal/render.ts";
+import { type PlotState, usePlotContext } from "../context.ts";
 
 /**
  * The drawing surface: an `<svg>` covering the plot, stretched to its size,

@@ -1,12 +1,12 @@
 import type * as React from "react";
-import type { PartProps } from "../../internal/part.js";
-import { resolveStyling } from "../../internal/part.js";
-import { mergeProps, useRender } from "../../internal/render.js";
+import type { PartProps } from "../../internal/part.ts";
+import { resolveStyling } from "../../internal/part.ts";
+import { mergeProps, useRender } from "../../internal/render.ts";
 import {
   useChannelIndex,
   useChannelPart,
   useMergedRef,
-} from "../internal/channel.js";
+} from "../internal/channel.ts";
 
 const NO_STATE: Value.State = {};
 

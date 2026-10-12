@@ -1,6 +1,6 @@
 import * as React from "react";
-import { Root as PianoRoot } from "../../piano/elements/root.js";
-import { usePianoRollContext, useRollView } from "../context.js";
+import { Root as PianoRoot } from "../../piano/elements/root.tsx";
+import { usePianoRollContext, useRollView } from "../context.ts";
 
 /**
  * The keyboard down the side of the roll: a `Piano` laid out on the roll's

@@ -1,7 +1,7 @@
 import { mock } from "bun:test";
 import { type RenderResult, render } from "@testing-library/react";
-import { mockRect } from "../../../../test/helpers.js";
-import { Plot } from "../../../entries/plot.js";
+import { mockRect } from "../../../../test/helpers.ts";
+import { Plot } from "../../../entries/plot.ts";
 
 const diagonal = (x: number) => x / 10;
 

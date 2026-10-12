@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { fireEvent } from "@testing-library/react";
-import { lastCall, renderRoll } from "../helpers.js";
+import { lastCall, renderRoll } from "../helpers.tsx";
 
 // Note a: C4, 0 to 2. Note b: D4, 4 to 8. The timeline is 16 long, grid every unit.
 

@@ -1,7 +1,7 @@
 import type { FaderController } from "@audio-ui/core/fader";
 import type { Nullable } from "@audio-ui/core/internal";
 import * as React from "react";
-import type { Root } from "./elements/root.js";
+import type { Root } from "./elements/root.tsx";
 
 export interface FaderContextValue {
   anchor: number | undefined;

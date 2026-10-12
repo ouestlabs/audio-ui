@@ -1,7 +1,7 @@
 import type * as React from "react";
-import { type PartProps, resolveStyling } from "../../internal/part.js";
-import { mergeProps, useRender } from "../../internal/render.js";
-import { type ClipState, useClipContext, useClipDrag } from "./clip-context.js";
+import { type PartProps, resolveStyling } from "../../internal/part.ts";
+import { mergeProps, useRender } from "../../internal/render.ts";
+import { type ClipState, useClipContext, useClipDrag } from "./clip-context.ts";
 
 /**
  * The clip's title bar: dragging it moves the clip, on the grid unless

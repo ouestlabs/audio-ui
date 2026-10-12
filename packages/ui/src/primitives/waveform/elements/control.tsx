@@ -1,7 +1,7 @@
 import * as React from "react";
-import { type PartProps, resolveStyling } from "../../internal/part.js";
-import { mergeProps, useRender } from "../../internal/render.js";
-import { VISUALLY_HIDDEN } from "../../internal/visually-hidden.js";
+import { type PartProps, resolveStyling } from "../../internal/part.ts";
+import { mergeProps, useRender } from "../../internal/render.ts";
+import { VISUALLY_HIDDEN } from "../../internal/visually-hidden.ts";
 import {
   type DescribeValue,
   describeAsPercent,
@@ -9,7 +9,7 @@ import {
   type SelectionCommitEventDetails,
   useWaveformContext,
   type WaveformState,
-} from "../context.js";
+} from "../context.ts";
 
 /**
  * The seekable surface: a press jumps to the pointer and a drag scrubs. It

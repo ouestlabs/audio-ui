@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { renderPlot } from "../helpers.js";
+import { renderPlot } from "../helpers.tsx";
 
 describe("Plot.Graph", () => {
   test("is a decorative svg stretched over the plot", () => {

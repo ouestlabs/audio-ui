@@ -1,5 +1,5 @@
 import type * as React from "react";
-import { useMeterContext } from "../context.js";
+import { useMeterContext } from "../context.ts";
 
 /** Renders one child per channel. */
 export function Channels({ children }: Channels.Props) {

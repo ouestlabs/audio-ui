@@ -1,10 +1,10 @@
 import { clamp } from "@audio-ui/core";
 import * as React from "react";
-import { type PartProps, resolveStyling } from "../../internal/part.js";
-import { mergeProps, useRender } from "../../internal/render.js";
-import { VISUALLY_HIDDEN } from "../../internal/visually-hidden.js";
-import { FADER_STATE_ATTRIBUTES, useFaderContext } from "../context.js";
-import type { Root } from "./root.js";
+import { type PartProps, resolveStyling } from "../../internal/part.ts";
+import { mergeProps, useRender } from "../../internal/render.ts";
+import { VISUALLY_HIDDEN } from "../../internal/visually-hidden.ts";
+import { FADER_STATE_ATTRIBUTES, useFaderContext } from "../context.ts";
+import type { Root } from "./root.tsx";
 
 /**
  * The draggable thumb, with a nested `<input type="range">` that carries the

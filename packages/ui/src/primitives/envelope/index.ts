@@ -1,8 +1,8 @@
 export type { Breakpoint } from "@audio-ui/core/envelope";
-export { Fill } from "./elements/fill.js";
-export { Graph } from "./elements/graph.js";
-export { Line } from "./elements/line.js";
-export { Point } from "./elements/point.js";
-export { Points } from "./elements/points.js";
-export { Root } from "./elements/root.js";
-export { Segment, Segments } from "./elements/segments.js";
+export { Fill } from "./elements/fill.tsx";
+export { Graph } from "./elements/graph.tsx";
+export { Line } from "./elements/line.tsx";
+export { Point } from "./elements/point.tsx";
+export { Points } from "./elements/points.tsx";
+export { Root } from "./elements/root.tsx";
+export { Segment, Segments } from "./elements/segments.tsx";

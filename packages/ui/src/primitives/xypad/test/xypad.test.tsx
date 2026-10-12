@@ -1,8 +1,8 @@
 import { describe, expect, mock, test } from "bun:test";
 import type { Point } from "@audio-ui/core";
 import { fireEvent, render } from "@testing-library/react";
-import { mockRect } from "../../../../test/helpers.js";
-import { XYPad } from "../../../entries/xypad.js";
+import { mockRect } from "../../../../test/helpers.ts";
+import { XYPad } from "../../../entries/xypad.ts";
 
 /** Defaults: 0-100 on both axes, step 1 → default value at the center {50,50}. */
 function renderXYPad(

@@ -17,4 +17,4 @@ export {
   trimClipEnd,
   trimClipStart,
 } from "@audio-ui/core/timeline";
-export * as Timeline from "../primitives/timeline/index.js";
+export * as Timeline from "../primitives/timeline/index.ts";

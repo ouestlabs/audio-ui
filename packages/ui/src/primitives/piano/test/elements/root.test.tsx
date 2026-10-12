@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { fireEvent } from "@testing-library/react";
-import { lastCall, renderPiano } from "../helpers.js";
+import { lastCall, renderPiano } from "../helpers.tsx";
 
 // White keys are 100px wide; black keys take the top 60px.
 const C3 = { clientX: 50, clientY: 80 };

@@ -1,14 +1,14 @@
 import type { Note as NoteValue } from "@audio-ui/core/piano-roll";
 import * as React from "react";
-import { type PartProps, resolveStyling } from "../../internal/part.js";
-import { mergeProps, useRender } from "../../internal/render.js";
-import { placedOver } from "../../timeline/context.js";
+import { type PartProps, resolveStyling } from "../../internal/part.ts";
+import { mergeProps, useRender } from "../../internal/render.ts";
+import { placedOver } from "../../timeline/context.ts";
 import {
   placedOnRow,
   usePianoRollContext,
   useRollView,
   VELOCITY_PROPERTY,
-} from "../context.js";
+} from "../context.ts";
 
 interface NoteContextValue {
   elementRef: React.RefObject<HTMLElement | null>;

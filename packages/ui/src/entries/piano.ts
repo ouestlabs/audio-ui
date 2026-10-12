@@ -1,1 +1,1 @@
-export * as Piano from "../primitives/piano/index.js";
+export * as Piano from "../primitives/piano/index.ts";

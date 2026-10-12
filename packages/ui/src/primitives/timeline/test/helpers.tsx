@@ -1,7 +1,7 @@
 import { mock } from "bun:test";
 import { type RenderResult, render } from "@testing-library/react";
-import { mockRect } from "../../../../test/helpers.js";
-import { Timeline } from "../../../entries/timeline.js";
+import { mockRect } from "../../../../test/helpers.ts";
+import { Timeline } from "../../../entries/timeline.ts";
 
 /**
  * A 100-unit timeline whose ruler is 200px wide at the origin: 2px per unit

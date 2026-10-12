@@ -7,10 +7,10 @@ import {
   STATE_ATTRIBUTES_MAPPING,
 } from "@audio-ui/core/knob";
 import * as React from "react";
-import { type PartProps, resolveStyling } from "../../internal/part.js";
-import { useRender } from "../../internal/render.js";
-import { useLocale } from "../../internal/use-locale.js";
-import { KnobContext, type KnobContextValue } from "../context.js";
+import { type PartProps, resolveStyling } from "../../internal/part.ts";
+import { useRender } from "../../internal/render.ts";
+import { useLocale } from "../../internal/use-locale.ts";
+import { KnobContext, type KnobContextValue } from "../context.ts";
 
 /**
  * Groups all parts of the knob and owns its value. Dragging the `Control`,

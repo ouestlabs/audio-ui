@@ -1,5 +1,5 @@
-export { Control } from "./elements/control.js";
-export { Label } from "./elements/label.js";
-export { Root } from "./elements/root.js";
-export { Thumb } from "./elements/thumb.js";
-export { Value } from "./elements/value.js";
+export { Control } from "./elements/control.tsx";
+export { Label } from "./elements/label.tsx";
+export { Root } from "./elements/root.tsx";
+export { Thumb } from "./elements/thumb.tsx";
+export { Value } from "./elements/value.tsx";

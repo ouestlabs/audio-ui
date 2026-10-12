@@ -1,8 +1,8 @@
 import { describe, expect, mock, test } from "bun:test";
 import type { Point } from "@audio-ui/core";
 import { act, fireEvent, renderHook } from "@testing-library/react";
-import type { UseParameterOptions } from "./use-parameter.js";
-import { useParameter } from "./use-parameter.js";
+import type { UseParameterOptions } from "./use-parameter.ts";
+import { useParameter } from "./use-parameter.ts";
 
 function keyEvent(key: string) {
   return { key, preventDefault: () => undefined } as React.KeyboardEvent;

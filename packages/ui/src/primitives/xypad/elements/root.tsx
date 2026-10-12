@@ -6,10 +6,10 @@ import {
   type XYPadCommitEventDetails,
 } from "@audio-ui/core/xypad";
 import * as React from "react";
-import { type PartProps, resolveStyling } from "../../internal/part.js";
-import { mergeProps, useRender } from "../../internal/render.js";
-import { useLocale } from "../../internal/use-locale.js";
-import { XYPadContext, type XYPadContextValue } from "../context.js";
+import { type PartProps, resolveStyling } from "../../internal/part.ts";
+import { mergeProps, useRender } from "../../internal/render.ts";
+import { useLocale } from "../../internal/use-locale.ts";
+import { XYPadContext, type XYPadContextValue } from "../context.ts";
 
 /**
  * Groups all parts of the pad and owns its two-dimensional value. Exposes the

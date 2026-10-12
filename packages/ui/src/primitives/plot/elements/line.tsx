@@ -1,6 +1,6 @@
-import { type PartProps, resolveStyling } from "../../internal/part.js";
-import { mergeProps, useRender } from "../../internal/render.js";
-import { type PlotState, positionOn, usePlotContext } from "../context.js";
+import { type PartProps, resolveStyling } from "../../internal/part.ts";
+import { mergeProps, useRender } from "../../internal/render.ts";
+import { type PlotState, positionOn, usePlotContext } from "../context.ts";
 
 /**
  * A straight line across the plot at a value: vertical at an x value, such as

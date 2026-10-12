@@ -1,10 +1,10 @@
 import { type Axis, STATE_ATTRIBUTES_MAPPING } from "@audio-ui/core/xypad";
 import * as React from "react";
-import { type PartProps, resolveStyling } from "../../internal/part.js";
-import { mergeProps, useRender } from "../../internal/render.js";
-import { VISUALLY_HIDDEN } from "../../internal/visually-hidden.js";
-import { useXYPadContext } from "../context.js";
-import type { Root } from "./root.js";
+import { type PartProps, resolveStyling } from "../../internal/part.ts";
+import { mergeProps, useRender } from "../../internal/render.ts";
+import { VISUALLY_HIDDEN } from "../../internal/visually-hidden.ts";
+import { useXYPadContext } from "../context.ts";
+import type { Root } from "./root.tsx";
 
 /**
  * Marks the value on the pad (`left`/`top` as percentages, centered with

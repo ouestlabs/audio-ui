@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { act, fireEvent, render } from "@testing-library/react";
-import { Meter } from "../../../entries/meter.js";
+import { Meter } from "../../../entries/meter.ts";
 
 const decibels = (formatted: string) => `${formatted} dB`;
 

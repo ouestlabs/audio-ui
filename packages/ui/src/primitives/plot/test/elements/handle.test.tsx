@@ -1,9 +1,9 @@
 import { describe, expect, test } from "bun:test";
 import { fireEvent, render } from "@testing-library/react";
 import { useCallback, useState } from "react";
-import { mockRect } from "../../../../../test/helpers.js";
-import { Plot } from "../../../../entries/plot.js";
-import { lastCall, renderPlot } from "../helpers.js";
+import { mockRect } from "../../../../../test/helpers.ts";
+import { Plot } from "../../../../entries/plot.ts";
+import { lastCall, renderPlot } from "../helpers.tsx";
 
 function drag(
   element: Element,

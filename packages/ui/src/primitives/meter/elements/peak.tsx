@@ -1,11 +1,11 @@
-import { type PartProps, resolveStyling } from "../../internal/part.js";
-import { mergeProps, useRender } from "../../internal/render.js";
+import { type PartProps, resolveStyling } from "../../internal/part.ts";
+import { mergeProps, useRender } from "../../internal/render.ts";
 import {
   channelDataAttributes,
   useChannelIndex,
   useChannelPart,
-} from "../internal/channel.js";
-import type { Channel } from "./channel.js";
+} from "../internal/channel.ts";
+import type { Channel } from "./channel.tsx";
 
 /**
  * The peak-hold mark, positioned at the channel's peak level; hidden while

@@ -1,5 +1,5 @@
 import type * as React from "react";
-import { KeyContext, usePianoContext } from "../context.js";
+import { KeyContext, usePianoContext } from "../context.ts";
 
 /**
  * Renders `children` once per key, lowest first: the place to put a

@@ -1,12 +1,12 @@
 import { isOn } from "@audio-ui/core/sequencer";
 import * as React from "react";
-import { type PartProps, resolveStyling } from "../../internal/part.js";
-import { mergeProps, useRender } from "../../internal/render.js";
+import { type PartProps, resolveStyling } from "../../internal/part.ts";
+import { mergeProps, useRender } from "../../internal/render.ts";
 import {
   RowContext,
   useSequencerContext,
   useSequencerView,
-} from "../context.js";
+} from "../context.ts";
 
 /**
  * One step of a row: a toggle button, pressed when the step is on. Press it
