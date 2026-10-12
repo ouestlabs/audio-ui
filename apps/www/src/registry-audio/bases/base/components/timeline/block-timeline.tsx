@@ -1068,8 +1068,8 @@ export default function BlockTimeline() {
       ref={panelRef}
       tabIndex={-1}
     >
-      <div className="flex flex-wrap items-center justify-between gap-2 p-1">
-        <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-2 p-1 @3xl/panel:flex-nowrap">
+        <div className="flex flex-wrap items-center gap-2 @3xl/panel:flex-nowrap">
           <Transport
             className="w-auto"
             looping={looping}
@@ -1085,7 +1085,7 @@ export default function BlockTimeline() {
             source={clock}
             tempo={tempo}
           />
-          <div className="hidden w-24 shrink-0 @xl/panel:block">
+          <div className="hidden w-24 shrink-0 @3xl/panel:block">
             <Meter
               aria-label="Master output level"
               orientation="horizontal"
@@ -1096,7 +1096,7 @@ export default function BlockTimeline() {
             />
           </div>
         </div>
-        <div className="flex min-w-0 flex-wrap items-center gap-2">
+        <div className="flex min-w-0 flex-wrap items-center gap-2 @3xl/panel:flex-nowrap">
           <ButtonGroup>
             <Button
               aria-label="Undo"
@@ -1176,7 +1176,7 @@ export default function BlockTimeline() {
               </dl>
             </PopoverContent>
           </Popover>
-          <div className="hidden items-center gap-2 @3xl/panel:flex">
+          <div className="hidden items-center gap-2 @7xl/panel:flex">
             <Select
               items={DIVISIONS}
               onValueChange={handleDivision}
@@ -1231,7 +1231,7 @@ export default function BlockTimeline() {
               render={
                 <Button
                   aria-label="More controls"
-                  className="@3xl/panel:hidden"
+                  className="@7xl/panel:hidden"
                   size="icon"
                   variant="outline"
                 />
