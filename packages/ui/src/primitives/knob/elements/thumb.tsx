@@ -1,5 +1,4 @@
-import { createChangeEventDetails } from "@audio-ui/core";
-import { STATE_ATTRIBUTES_MAPPING, steppedValue } from "@audio-ui/core/knob";
+import { STATE_ATTRIBUTES_MAPPING } from "@audio-ui/core/knob";
 import * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
@@ -28,8 +27,16 @@ export function Thumb(componentProps: Thumb.Props) {
     style,
     ...elementProps
   } = componentProps;
-  const { actions, meta, state } = useKnobContext("Thumb");
-  const { inputRef } = meta;
+  const {
+    controller,
+    form,
+    inputId,
+    inputRef,
+    labelId,
+    name,
+    snapshot,
+    state,
+  } = useKnobContext("Thumb");
 
   const setInputRef = React.useCallback(
     (node: HTMLInputElement | null) => {
@@ -45,78 +52,21 @@ export function Thumb(componentProps: Thumb.Props) {
 
   const handleKeyDown = React.useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
-      if (state.disabled) {
-        return;
-      }
-      const { current } = meta.valueRef;
-      const options = {
-        largeStep: meta.largeStep,
-        max: state.max,
-        min: state.min,
-        scale: meta.scale,
-        step: meta.step,
-      };
-      const targets: Record<string, number> = {
-        ArrowDown: steppedValue(current, -1, event.shiftKey, options),
-        ArrowLeft: steppedValue(current, -1, event.shiftKey, options),
-        ArrowRight: steppedValue(current, 1, event.shiftKey, options),
-        ArrowUp: steppedValue(current, 1, event.shiftKey, options),
-        End: state.max,
-        Home: state.min,
-        PageDown: steppedValue(current, -1, true, options),
-        PageUp: steppedValue(current, 1, true, options),
-      };
-      const native = event.nativeEvent;
-      // Delete returns to the default, as in a DAW.
-      if (event.key === "Delete" || event.key === "Backspace") {
+      if (controller.keyDown(event.nativeEvent)) {
         event.preventDefault();
-        if (
-          actions.change(
-            meta.resetValue,
-            createChangeEventDetails("reset", native)
-          )
-        ) {
-          actions.commit(meta.valueRef.current, {
-            event: native,
-            reason: "reset",
-          });
-        }
-        return;
-      }
-      const next = targets[event.key];
-      if (next === undefined) {
-        return;
-      }
-      event.preventDefault();
-      if (actions.change(next, createChangeEventDetails("keyboard", native))) {
-        actions.commit(meta.valueRef.current, {
-          event: native,
-          reason: "keyboard",
-        });
       }
     },
-    [actions, meta, state.disabled, state.max, state.min]
+    [controller]
   );
 
+  // Assistive technology may set the input's value directly.
   const handleChange = React.useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      const native = event.nativeEvent;
-      if (
-        actions.change(
-          Number(event.currentTarget.value),
-          createChangeEventDetails("input-change", native)
-        )
-      ) {
-        actions.commit(meta.valueRef.current, {
-          event: native,
-          reason: "input-change",
-        });
-      }
-    },
-    [actions, meta]
+    (event: React.ChangeEvent<HTMLInputElement>) =>
+      controller.type(Number(event.currentTarget.value), event.nativeEvent),
+    [controller]
   );
 
-  const formattedValue = meta.formatter.format(state.value);
+  const formattedValue = snapshot.formatted;
 
   return useRender({
     defaultTagName: "div",
@@ -129,7 +79,7 @@ export function Thumb(componentProps: Thumb.Props) {
               aria-describedby={ariaDescribedBy}
               aria-label={ariaLabel}
               aria-labelledby={
-                ariaLabelledBy ?? (ariaLabel ? undefined : meta.labelId)
+                ariaLabelledBy ?? (ariaLabel ? undefined : labelId)
               }
               aria-valuetext={
                 getAriaValueText
@@ -137,22 +87,22 @@ export function Thumb(componentProps: Thumb.Props) {
                   : formattedValue
               }
               disabled={state.disabled}
-              form={meta.form}
-              id={meta.inputId}
+              form={form}
+              id={inputId}
               max={state.max}
               min={state.min}
-              name={meta.name}
+              name={name}
               onChange={handleChange}
               onKeyDown={handleKeyDown}
               ref={setInputRef}
-              step={meta.step}
+              step={snapshot.step}
               style={VISUALLY_HIDDEN}
               type="range"
               value={state.value}
             />
           </>
         ),
-        style: { rotate: `${meta.angle}deg` },
+        style: { rotate: `${snapshot.angle}deg` },
       },
       { ...elementProps, ...resolveStyling(className, style, state) }
     ),

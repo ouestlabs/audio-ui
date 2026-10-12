@@ -22,9 +22,9 @@ export function Indicator(componentProps: Indicator.Props) {
     style,
     ...elementProps
   } = componentProps;
-  const { meta, state } = useKnobContext("Indicator");
-  const from = Math.min(meta.anchorPercent, meta.percent);
-  const to = Math.max(meta.anchorPercent, meta.percent);
+  const { snapshot, state } = useKnobContext("Indicator");
+  const from = Math.min(snapshot.anchorPercent, snapshot.percent);
+  const to = Math.max(snapshot.anchorPercent, snapshot.percent);
   return useRender({
     defaultTagName: "svg",
     props: mergeProps<"svg">(useArcProps(strokeWidth, from, to), {

@@ -1,39 +1,18 @@
-import type { ParameterScale } from "@audio-ui/core";
-import type { Nullable } from "@audio-ui/core/internal";
+import type { KnobController, KnobSnapshot } from "@audio-ui/core/knob";
 import * as React from "react";
 import type { Root } from "./elements/root";
 
 export interface KnobContextValue {
-  actions: {
-    /** Snap, clamp and propose a value; returns whether it was applied. */
-    change: (next: number, eventDetails: Root.ChangeEventDetails) => boolean;
-    commit: (value: number, eventDetails: Root.CommitEventDetails) => void;
-    setDragging: (dragging: boolean) => void;
-  };
-  meta: {
-    /** Indicator arc origin, 0…1 along the sweep. */
-    anchorPercent: number;
-    /** Rotation in degrees, clockwise from 12 o'clock. */
-    angle: number;
-    dragMode: Root.DragMode;
-    form: string | undefined;
-    formatter: Intl.NumberFormat;
-    inputId: string;
-    inputRef: React.RefObject<HTMLInputElement | null>;
-    labelId: string | undefined;
-    largeStep: number;
-    name: string | undefined;
-    /** Value position, 0…1 along the sweep. */
-    percent: number;
-    resetValue: number;
-    /** How the value maps onto the dial's travel. */
-    scale: ParameterScale;
-    setLabelId: (id: string | undefined) => void;
-    step: number;
-    /** Latest displayed value, readable from event handlers. */
-    valueRef: React.RefObject<number>;
-    wheelRef: (node: Nullable<HTMLElement>) => void;
-  };
+  /** The framework-free knob behind every part: gestures, keys, the wheel, typed values. */
+  controller: KnobController;
+  form: string | undefined;
+  inputId: string;
+  inputRef: React.RefObject<HTMLInputElement | null>;
+  labelId: string | undefined;
+  name: string | undefined;
+  setLabelId: (id: string | undefined) => void;
+  /** Everything a view draws the knob from: value, angle, arc origin, formatting. */
+  snapshot: KnobSnapshot;
   state: Root.State;
 }
 

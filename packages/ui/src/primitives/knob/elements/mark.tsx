@@ -20,11 +20,15 @@ import type { Root } from "./root";
 export function Mark(componentProps: Mark.Props) {
   const { className, ref, render, style, value, ...elementProps } =
     componentProps;
-  const { meta, state: rootState } = useKnobContext("Mark");
-  const position = meta.scale.toPosition(value, rootState.min, rootState.max);
+  const { snapshot, state: rootState } = useKnobContext("Mark");
+  const position = snapshot.scale.toPosition(
+    value,
+    rootState.min,
+    rootState.max
+  );
   const angle = START_ANGLE + position * SWEEP_ANGLE;
-  const lower = Math.min(meta.anchorPercent, meta.percent);
-  const upper = Math.max(meta.anchorPercent, meta.percent);
+  const lower = Math.min(snapshot.anchorPercent, snapshot.percent);
+  const upper = Math.max(snapshot.anchorPercent, snapshot.percent);
   const active = position >= lower - 1e-9 && position <= upper + 1e-9;
   const state = React.useMemo<Mark.State>(
     () => ({ ...rootState, active }),

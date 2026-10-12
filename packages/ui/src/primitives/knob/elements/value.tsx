@@ -1,4 +1,3 @@
-import { createChangeEventDetails } from "@audio-ui/core";
 import { STATE_ATTRIBUTES_MAPPING } from "@audio-ui/core/knob";
 import type * as React from "react";
 import { useEditableValue, ValueInput } from "../../internal/editable-value";
@@ -22,19 +21,10 @@ export function Value(componentProps: Value.Props) {
     style,
     ...elementProps
   } = componentProps;
-  const { actions, meta, state } = useKnobContext("Value");
-  const formattedValue = meta.formatter.format(state.value);
+  const { controller, inputId, snapshot, state } = useKnobContext("Value");
+  const formattedValue = snapshot.formatted;
   const { editing, finish, readoutProps, readoutRef } = useEditableValue({
-    commit: (typed, event) => {
-      if (
-        actions.change(typed, createChangeEventDetails("input-change", event))
-      ) {
-        actions.commit(meta.valueRef.current, {
-          event,
-          reason: "input-change",
-        });
-      }
-    },
+    commit: (typed, event) => controller.type(typed, event),
     disabled: state.disabled,
     editable,
   });
@@ -57,7 +47,7 @@ export function Value(componentProps: Value.Props) {
       {
         "aria-live": "off",
         children: content,
-        htmlFor: meta.inputId,
+        htmlFor: inputId,
         ...readoutProps,
       },
       { ...elementProps, ...resolveStyling(className, style, state) }

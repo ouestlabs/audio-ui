@@ -1,23 +1,12 @@
+import type { ParameterScaleProp } from "@audio-ui/core";
 import {
-  clamp,
-  clampFinite,
-  createChangeEventDetails,
-  type ChangeEventDetails as ExtraChangeEventDetails,
-  type CommitEventDetails as ExtraCommitEventDetails,
-  type ParameterScaleProp,
-  type Point,
-  resolveScale,
-  roundToStep,
-} from "@audio-ui/core";
-import {
-  START_ANGLE,
+  createKnobController,
+  type KnobChangeEventDetails,
+  type KnobCommitEventDetails,
+  type KnobDragMode,
   STATE_ATTRIBUTES_MAPPING,
-  SWEEP_ANGLE,
-  steppedValue,
-  WHEEL_DELTA_EPSILON,
 } from "@audio-ui/core/knob";
 import * as React from "react";
-import { useWheel } from "../../../hooks/interactions/use-wheel";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { useRender } from "../../internal/render";
 import { useLocale } from "../../internal/use-locale";
@@ -47,150 +36,65 @@ export function Root(componentProps: Root.Props) {
     onValueCommitted,
     ref,
     render,
-    scale: scaleProp = "linear",
+    scale = "linear",
     step = 1,
     style,
-    value: valueProp,
+    value,
     ...elementProps
   } = componentProps;
-  const scale = resolveScale(scaleProp);
+  const resolvedLocale = useLocale(locale);
 
-  const resetValue =
-    defaultValue ?? roundToStep(scale.toValue(0.5, min, max), step, min);
-  const isControlled = valueProp !== undefined;
-  const [uncontrolledValue, setUncontrolledValue] = React.useState(resetValue);
-  const value = clampFinite(
-    isControlled ? valueProp : uncontrolledValue,
-    min,
-    max
-  );
-
-  // While dragging, the knob follows the pointer even if a controlled value
-  // lags behind; on release the controlled value rules again.
-  const [dragging, setDraggingState] = React.useState(false);
-  const [dragValue, setDragValue] = React.useState<number | null>(null);
-  const draggingRef = React.useRef(false);
-  const displayedValue = dragValue ?? value;
-  const valueRef = React.useRef(displayedValue);
-  valueRef.current = displayedValue;
-
-  const setDragging = React.useCallback((next: boolean) => {
-    draggingRef.current = next;
-    setDraggingState(next);
-    if (!next) {
-      setDragValue(null);
-    }
-  }, []);
-
-  const change = React.useCallback(
-    (raw: number, eventDetails: Root.ChangeEventDetails) => {
-      const next = clamp(roundToStep(raw, step, min), min, max);
-      if (next === valueRef.current) {
-        return false;
-      }
-      onValueChange?.(next, eventDetails);
-      if (eventDetails.isCanceled) {
-        return false;
-      }
-      valueRef.current = next;
-      if (!isControlled) {
-        setUncontrolledValue(next);
-      }
-      if (isControlled && draggingRef.current) {
-        setDragValue(next);
-      }
-      return true;
-    },
-    [isControlled, max, min, onValueChange, step]
-  );
-
-  const commit = React.useCallback(
-    (committed: number, eventDetails: Root.CommitEventDetails) => {
-      onValueCommitted?.(committed, eventDetails);
-    },
-    [onValueCommitted]
-  );
-
-  const { wheelRef } = useWheel({
+  const [controller] = React.useState(() => createKnobController());
+  // Set on every render, before the snapshot is read, so it always shows the latest props.
+  controller.setOptions({
+    anchor,
+    defaultValue,
     disabled,
-    onWheel: (event: WheelEvent, delta: Point) => {
-      if (Math.abs(delta.y) < WHEEL_DELTA_EPSILON) {
-        return;
-      }
-      const next = steppedValue(valueRef.current, delta.y < 0 ? 1 : -1, false, {
-        largeStep,
-        max,
-        min,
-        scale,
-        step,
-      });
-      if (change(next, createChangeEventDetails("wheel", event))) {
-        commit(valueRef.current, { event, reason: "wheel" });
-      }
-    },
+    dragMode,
+    format,
+    largeStep,
+    locale: resolvedLocale,
+    max,
+    min,
+    onValueChange,
+    onValueCommitted,
+    scale,
+    step,
+    value,
   });
+  const snapshot = React.useSyncExternalStore(
+    controller.subscribe,
+    controller.getSnapshot
+  );
 
-  const inputRef = React.useRef<HTMLInputElement>(null);
+  const inputRef = React.useRef<HTMLInputElement | null>(null);
   const inputId = React.useId();
   const [labelId, setLabelId] = React.useState<string>();
-  const resolvedLocale = useLocale(locale);
-  const formatter = React.useMemo(
-    () => new Intl.NumberFormat(resolvedLocale, format),
-    [format, resolvedLocale]
-  );
 
   const state = React.useMemo<Root.State>(
-    () => ({ disabled, dragging, max, min, value: displayedValue }),
-    [disabled, dragging, displayedValue, max, min]
+    () => ({
+      disabled: snapshot.disabled,
+      dragging: snapshot.dragging,
+      max: snapshot.max,
+      min: snapshot.min,
+      value: snapshot.value,
+    }),
+    [snapshot]
   );
-
-  const percent = scale.toPosition(displayedValue, min, max);
-  const anchorPercent =
-    anchor === undefined ? 0 : scale.toPosition(anchor, min, max);
 
   const context = React.useMemo<KnobContextValue>(
     () => ({
-      actions: { change, commit, setDragging },
-      meta: {
-        anchorPercent,
-        angle: START_ANGLE + percent * SWEEP_ANGLE,
-        dragMode,
-        form,
-        formatter,
-        inputId,
-        inputRef,
-        labelId,
-        largeStep,
-        name,
-        percent,
-        resetValue,
-        scale,
-        setLabelId,
-        step,
-        valueRef,
-        wheelRef,
-      },
+      controller,
+      form,
+      inputId,
+      inputRef,
+      labelId,
+      name,
+      setLabelId,
+      snapshot,
       state,
     }),
-    [
-      anchorPercent,
-      change,
-      commit,
-      dragMode,
-      form,
-      formatter,
-      inputId,
-      labelId,
-      largeStep,
-      name,
-      percent,
-      resetValue,
-      scale,
-      setDragging,
-      state,
-      step,
-      wheelRef,
-    ]
+    [controller, form, inputId, labelId, name, snapshot, state]
   );
 
   const element = useRender({
@@ -221,22 +125,12 @@ export namespace Root {
    * - `revolution`: rotate around the center; one full turn spans `min…max`.
    * - `vertical`: drag up/down like a fader.
    */
-  export type DragMode = "circular" | "revolution" | "vertical";
+  export type DragMode = KnobDragMode;
 
   export type ChangeEventReason = ChangeEventDetails["reason"];
-  export type ChangeEventDetails =
-    | ExtraChangeEventDetails<"drag", PointerEvent>
-    | ExtraChangeEventDetails<"keyboard", KeyboardEvent>
-    | ExtraChangeEventDetails<"wheel", WheelEvent>
-    | ExtraChangeEventDetails<"reset", KeyboardEvent | PointerEvent>
-    | ExtraChangeEventDetails<"input-change", Event>;
+  export type ChangeEventDetails = KnobChangeEventDetails;
   export type CommitEventReason = CommitEventDetails["reason"];
-  export type CommitEventDetails =
-    | ExtraCommitEventDetails<"drag", PointerEvent>
-    | ExtraCommitEventDetails<"keyboard", KeyboardEvent>
-    | ExtraCommitEventDetails<"wheel", WheelEvent>
-    | ExtraCommitEventDetails<"reset", KeyboardEvent | PointerEvent>
-    | ExtraCommitEventDetails<"input-change", Event>;
+  export type CommitEventDetails = KnobCommitEventDetails;
 
   export interface Props extends Omit<PartProps<"div", State>, "defaultValue"> {
     /** Value the indicator arc grows from (e.g. `0` on a -1…1 pan knob). Defaults to `min`. */
