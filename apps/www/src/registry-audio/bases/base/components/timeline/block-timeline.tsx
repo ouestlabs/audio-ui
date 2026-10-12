@@ -1365,7 +1365,7 @@ export default function BlockTimeline() {
                   </span>
                 }
               >
-                <TimelineLane className="h-6 cursor-cell">
+                <TimelineLane className="h-6 cursor-cell border-b-0">
                   <TimelineRange
                     aria-label="Loop"
                     drawable
@@ -1414,6 +1414,7 @@ export default function BlockTimeline() {
               >
                 <TimelineRuler
                   aria-label="Playhead"
+                  className="border-b-0"
                   getAriaValueText={describe}
                 >
                   {labels.map((count) => (
@@ -1432,7 +1433,7 @@ export default function BlockTimeline() {
                   </span>
                 }
               >
-                <TimelineLane className="h-6">
+                <TimelineLane className="h-6 border-b-0">
                   {locators.map((locator) => (
                     <TimelineMark key={locator.at} value={locator.at}>
                       <LocatorButton
