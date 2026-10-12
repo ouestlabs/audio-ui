@@ -29,3 +29,14 @@ export {
   type WaveformPeaks,
 } from "./peaks";
 export { type ScopeOptions, type ScopePoint, scopePoints } from "./scope";
+export {
+  createWaveformController,
+  type WaveformSeekChangeEventDetails,
+  type WaveformSeekCommitEventDetails,
+  type WaveformSeekController,
+  type WaveformSeekOptions,
+  type WaveformSeekSnapshot,
+  type WaveformSelectionChangeEventDetails,
+  type WaveformSelectionCommitEventDetails,
+  type WaveformSelectionHandlers,
+} from "./seek";
