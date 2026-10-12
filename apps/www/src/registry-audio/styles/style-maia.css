@@ -485,7 +485,7 @@
   }
 
   .cn-timeline-range-handle {
-    @apply bg-primary/45 hover:bg-primary/70 has-focus-visible:bg-primary/80;
+    @apply rounded-4xl border-primary border bg-card shadow-sm transition-[color,box-shadow] hover:ring-2 hover:ring-ring/40 has-focus-visible:ring-4 has-focus-visible:ring-ring/50 active:ring-4 active:ring-ring/50 motion-reduce:transition-none;
   }
 
   .cn-timeline-clip {
@@ -505,7 +505,7 @@
   }
 
   .cn-timeline-clip-fade-handle {
-    @apply rounded-full border border-foreground/80 bg-background shadow-xs hover:bg-foreground has-focus-visible:bg-foreground;
+    @apply rounded-4xl border-primary border bg-card shadow-sm transition-[color,box-shadow] hover:ring-2 hover:ring-ring/40 has-focus-visible:ring-4 has-focus-visible:ring-ring/50 active:ring-4 active:ring-ring/50 motion-reduce:transition-none;
   }
 
   .cn-timeline-navigator {
@@ -517,7 +517,7 @@
   }
 
   .cn-timeline-navigator-handle {
-    @apply bg-primary/40 hover:bg-primary/60 has-focus-visible:bg-primary/70;
+    @apply rounded-4xl border-primary border bg-card shadow-sm transition-[color,box-shadow] hover:ring-2 hover:ring-ring/40 has-focus-visible:ring-4 has-focus-visible:ring-ring/50 active:ring-4 active:ring-ring/50 motion-reduce:transition-none;
   }
 
   /* MARK: Waveform */
