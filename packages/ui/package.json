@@ -94,7 +94,6 @@
     "@audio-ui/core": "^0.0.0"
   },
   "devDependencies": {
-    "@audio-ui/typescript": "latest",
     "@happy-dom/global-registrator": "^20.10.6",
     "@testing-library/react": "^16.3.2",
     "@types/bun": "1.4.2",

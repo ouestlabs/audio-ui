@@ -1,8 +1,20 @@
 {
-  "extends": "@audio-ui/typescript/base.json",
   "compilerOptions": {
+    "declaration": true,
+    "declarationMap": true,
+    "esModuleInterop": true,
+    "incremental": false,
+    "isolatedModules": true,
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleDetection": "force",
+    "moduleResolution": "Bundler",
+    "noUncheckedIndexedAccess": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "strict": true,
     "strictNullChecks": true,
+    "target": "ES2022",
     "types": ["bun"]
   },
   "exclude": ["dist", "node_modules"]

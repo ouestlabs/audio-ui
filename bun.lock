@@ -100,15 +100,10 @@
         "typescript": "^7.0.2",
       },
     },
-    "packages/configs/typescript": {
-      "name": "@audio-ui/typescript",
-      "version": "0.0.3",
-    },
     "packages/core": {
       "name": "@audio-ui/core",
       "version": "0.0.0",
       "devDependencies": {
-        "@audio-ui/typescript": "latest",
         "@happy-dom/global-registrator": "^20.10.6",
         "@types/bun": "1.4.2",
         "tsup": "^8.5.0",
@@ -122,7 +117,6 @@
         "@audio-ui/core": "^0.0.0",
       },
       "devDependencies": {
-        "@audio-ui/typescript": "latest",
         "@happy-dom/global-registrator": "^20.10.6",
         "@testing-library/react": "^16.3.2",
         "@types/bun": "1.4.2",
@@ -150,8 +144,6 @@
     "@audio-ui/core": ["@audio-ui/core@workspace:packages/core"],
 
     "@audio-ui/react": ["@audio-ui/react@workspace:packages/ui"],
-
-    "@audio-ui/typescript": ["@audio-ui/typescript@workspace:packages/configs/typescript"],
 
     "@babel/code-frame": ["@babel/code-frame@7.29.7", "", { "dependencies": { "@babel/helper-validator-identifier": "^7.29.7", "js-tokens": "^4.0.0", "picocolors": "^1.1.1" } }, "sha512-Aup7aUOfpbAUg2ROOJN6Iw5f9DMBlzu0mIkm/malLQFN/YQgO48wCj0Kxa3sEHJvPVFg7siR+qRInwXd2qhQKw=="],
 
@@ -2068,10 +2060,6 @@
     "zwitch": ["zwitch@2.0.4", "", {}, "sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A=="],
 
     "@antfu/install-pkg/tinyexec": ["tinyexec@1.2.4", "", {}, "sha512-SHf/r48b7vOrjve9PxJo3MN5v5yuyjHvdUcrQffT3WXMUfnGmHDVbC4k3sHJaJTgZCwpUplIaAo5ANtMyp3YHg=="],
-
-    "@audio-ui/core/@audio-ui/typescript": ["@audio-ui/typescript@0.0.3", "", {}, "sha512-bC/xGk/Lh/vIFw9zZz7I9PG2Af+hAijBLevyfmvQqyzhv3gcej7/fTfSWqCRi6LIQiscqBPjmqMltoMHpKvMQA=="],
-
-    "@audio-ui/react/@audio-ui/typescript": ["@audio-ui/typescript@0.0.3", "", {}, "sha512-bC/xGk/Lh/vIFw9zZz7I9PG2Af+hAijBLevyfmvQqyzhv3gcej7/fTfSWqCRi6LIQiscqBPjmqMltoMHpKvMQA=="],
 
     "@babel/core/semver": ["semver@6.3.1", "", { "bin": { "semver": "bin/semver.js" } }, "sha512-BR7VvDCVHO+q2xBEWskxS6DJE1qRnb7DxzUrogb71CWoSficBxYsiAGd+Kl0mmq/MprG9yArRkyrQxTO6XjMzA=="],
 
