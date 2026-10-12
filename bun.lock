@@ -141,16 +141,6 @@
         "@types/react",
       ],
     },
-    "packages/utils": {
-      "name": "@audio-ui/utils",
-      "version": "0.0.5",
-      "devDependencies": {
-        "@audio-ui/typescript": "latest",
-        "@types/bun": "1.4.2",
-        "tsup": "^8.5.0",
-        "typescript": "^7.0.2",
-      },
-    },
   },
   "packages": {
     "@alloc/quick-lru": ["@alloc/quick-lru@5.2.0", "", {}, "sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw=="],
@@ -162,8 +152,6 @@
     "@audio-ui/react": ["@audio-ui/react@workspace:packages/ui"],
 
     "@audio-ui/typescript": ["@audio-ui/typescript@workspace:packages/configs/typescript"],
-
-    "@audio-ui/utils": ["@audio-ui/utils@workspace:packages/utils"],
 
     "@babel/code-frame": ["@babel/code-frame@7.29.7", "", { "dependencies": { "@babel/helper-validator-identifier": "^7.29.7", "js-tokens": "^4.0.0", "picocolors": "^1.1.1" } }, "sha512-Aup7aUOfpbAUg2ROOJN6Iw5f9DMBlzu0mIkm/malLQFN/YQgO48wCj0Kxa3sEHJvPVFg7siR+qRInwXd2qhQKw=="],
 
@@ -2084,8 +2072,6 @@
     "@audio-ui/core/@audio-ui/typescript": ["@audio-ui/typescript@0.0.3", "", {}, "sha512-bC/xGk/Lh/vIFw9zZz7I9PG2Af+hAijBLevyfmvQqyzhv3gcej7/fTfSWqCRi6LIQiscqBPjmqMltoMHpKvMQA=="],
 
     "@audio-ui/react/@audio-ui/typescript": ["@audio-ui/typescript@0.0.3", "", {}, "sha512-bC/xGk/Lh/vIFw9zZz7I9PG2Af+hAijBLevyfmvQqyzhv3gcej7/fTfSWqCRi6LIQiscqBPjmqMltoMHpKvMQA=="],
-
-    "@audio-ui/utils/@audio-ui/typescript": ["@audio-ui/typescript@0.0.3", "", {}, "sha512-bC/xGk/Lh/vIFw9zZz7I9PG2Af+hAijBLevyfmvQqyzhv3gcej7/fTfSWqCRi6LIQiscqBPjmqMltoMHpKvMQA=="],
 
     "@babel/core/semver": ["semver@6.3.1", "", { "bin": { "semver": "bin/semver.js" } }, "sha512-BR7VvDCVHO+q2xBEWskxS6DJE1qRnb7DxzUrogb71CWoSficBxYsiAGd+Kl0mmq/MprG9yArRkyrQxTO6XjMzA=="],
 
