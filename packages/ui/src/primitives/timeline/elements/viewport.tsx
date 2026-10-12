@@ -138,16 +138,22 @@ export function Viewport(componentProps: Viewport.Props) {
     if (!element) {
       return;
     }
-    const handleWheel = (event: WheelEvent) => {
-      if (!(event.ctrlKey || event.metaKey) || state.disabled) {
+    // A trackpad sends wheel events faster than frames, and each zoom lays the
+    // whole timeline out again: they are added up and applied once per frame.
+    let pending: { delta: number; event: WheelEvent } | null = null;
+    let frame = 0;
+    const flush = () => {
+      frame = 0;
+      const batch = pending;
+      pending = null;
+      if (!batch) {
         return;
       }
-      event.preventDefault();
       const current = drawnZoom();
       if (!(current > 0)) {
         return;
       }
-      const offset = event.clientX - element.getBoundingClientRect().left;
+      const offset = batch.event.clientX - element.getBoundingClientRect().left;
       const value = valueAtOffset(
         offset,
         element.scrollLeft,
@@ -155,13 +161,26 @@ export function Viewport(componentProps: Viewport.Props) {
         origin()
       );
       actions.zoomTo(
-        current * Math.exp(-event.deltaY * WHEEL_ZOOM_SENSITIVITY),
-        createChangeEventDetails("wheel", event),
+        current * Math.exp(-batch.delta * WHEEL_ZOOM_SENSITIVITY),
+        createChangeEventDetails("wheel", batch.event),
         { offset, value: Math.min(duration, Math.max(0, value)) }
       );
     };
+    const handleWheel = (event: WheelEvent) => {
+      if (!(event.ctrlKey || event.metaKey) || state.disabled) {
+        return;
+      }
+      event.preventDefault();
+      pending = { delta: (pending?.delta ?? 0) + event.deltaY, event };
+      if (!frame) {
+        frame = requestAnimationFrame(flush);
+      }
+    };
     element.addEventListener("wheel", handleWheel, { passive: false });
-    return () => element.removeEventListener("wheel", handleWheel);
+    return () => {
+      element.removeEventListener("wheel", handleWheel);
+      cancelAnimationFrame(frame);
+    };
   }, [actions, drawnZoom, duration, origin, state.disabled]);
 
   const handleScroll = () => {
