@@ -278,7 +278,7 @@ function TimelineClipFadeHandle({
   return (
     <TimelinePrimitive.ClipFadeHandle
       className={cn(
-        "cn-timeline-clip-fade-handle top-1 z-20 size-2.5 cursor-ew-resize opacity-0 transition-opacity",
+        "cn-timeline-clip-fade-handle top-1 z-20 size-3 cursor-ew-resize data-[edge=in]:ms-1 data-[edge=out]:me-1 opacity-0 transition-opacity",
         "group-hover/clip:opacity-100 group-data-[selected]/clip:opacity-100 data-dragging:opacity-100 has-focus-visible:opacity-100",
         "after:absolute after:-inset-1 pointer-coarse:opacity-100 pointer-coarse:after:-inset-2",
         className

@@ -505,7 +505,7 @@
   }
 
   .cn-timeline-clip-fade-handle {
-    @apply rounded-full border-primary border bg-card shadow-sm transition-[color,box-shadow] hover:ring-2 hover:ring-ring/40 has-focus-visible:ring-4 has-focus-visible:ring-ring/50 active:ring-4 active:ring-ring/50 motion-reduce:transition-none;
+    @apply rounded-[min(var(--radius-sm),6px)] border-primary border bg-card shadow-sm transition-[color,box-shadow] hover:ring-2 hover:ring-ring/40 has-focus-visible:ring-4 has-focus-visible:ring-ring/50 active:ring-4 active:ring-ring/50 motion-reduce:transition-none;
   }
 
   .cn-timeline-navigator {
