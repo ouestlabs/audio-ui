@@ -4,7 +4,12 @@ import type {
   Source,
   Store,
 } from "@audio-ui/core";
-import type { Grid, ZoomAnchor } from "@audio-ui/core/timeline";
+import {
+  type Grid,
+  type TimelineController,
+  valueAtLane,
+  type ZoomAnchor,
+} from "@audio-ui/core/timeline";
 import * as React from "react";
 
 /** Set on every lane: the width of one unit of time, so parts place themselves with `calc()`. */
@@ -101,6 +106,8 @@ export interface TimelineContextValue {
       anchor?: ZoomAnchor
     ) => boolean;
   };
+  /** The framework-free position and zoom behind every part: scrubbing, keys, zoom. */
+  controller: TimelineController;
   meta: {
     /** Where the next zoom should hold still; the viewport applies it once laid out. */
     anchorRef: React.RefObject<ZoomAnchor | null>;
@@ -174,8 +181,5 @@ export function valueAtPointer(
   zoom: number | null,
   duration: number
 ): number {
-  const rect = lane.getBoundingClientRect();
-  const unit = zoom ?? rect.width / Math.max(duration, Number.MIN_VALUE);
-  const value = (clientX - rect.left) / Math.max(unit, Number.MIN_VALUE);
-  return Math.min(duration, Math.max(0, value));
+  return valueAtLane(lane, clientX, zoom, duration);
 }

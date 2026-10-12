@@ -1,11 +1,14 @@
 import { clampFinite, createStore } from "@audio-ui/core";
-import { clampZoom, type ZoomAnchor } from "@audio-ui/core/timeline";
+import {
+  createTimelineController,
+  type TimelineOptions,
+  type ZoomAnchor,
+} from "@audio-ui/core/timeline";
 import * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
 import {
   type PositionChangeEventDetails,
-  type PositionCommitEventDetails,
   type PositionSource,
   TimelineContext,
   type TimelineContextValue,
@@ -52,115 +55,81 @@ export function Root(componentProps: Root.Props) {
   const step = stepProp ?? (snapStep > 0 ? snapStep : duration / 100);
   const largeStep = largeStepProp ?? step * 10;
 
-  // Position: the source's snapshot, or props/state.
-  const isControlled = positionProp !== undefined;
-  const [uncontrolledPosition, setUncontrolledPosition] =
-    React.useState(defaultPosition);
-  let knownValue = isControlled ? positionProp : uncontrolledPosition;
-  if (source) {
-    knownValue = source.getSnapshot();
-  }
-  knownValue = clampFinite(knownValue, 0, duration);
-  const knownValueRef = React.useRef(knownValue);
-  knownValueRef.current = knownValue;
+  const options: TimelineOptions = {
+    defaultPosition,
+    defaultZoom: defaultZoom ?? null,
+    disabled,
+    duration,
+    grid: { offset: snapOffset, step: snapStep },
+    largeStep,
+    maxZoom,
+    minZoom,
+    onPositionChange,
+    onPositionCommitted,
+    onZoomChange,
+    position: positionProp,
+    source,
+    step,
+    zoom: zoomProp,
+  };
+  const [controller] = React.useState(() => createTimelineController(options));
+  // Set on every render, so the timeline always reads the latest props.
+  controller.setOptions(options);
+  const snapshot = React.useSyncExternalStore(
+    controller.subscribe,
+    controller.getSnapshot
+  );
 
-  const [scrubbing, setScrubbingState] = React.useState(false);
-  const scrubbingRef = React.useRef<boolean>(false);
-  const [position] = React.useState(() => createStore(knownValue));
+  const rootRef = React.useRef<HTMLDivElement>(null);
+  const [position] = React.useState(() =>
+    createStore(clampFinite(controller.getSnapshot().position, 0, duration))
+  );
 
+  // The position reaches the DOM outside React: a live source paints it every
+  // frame without a render, and a drag paints it as it moves.
   const paint = React.useCallback(
     (value: number) => position.set(clampFinite(value, 0, duration)),
     [duration, position]
   );
-
-  // While the pointer scrubs, the position follows it: neither a lagging
-  // controlled value nor the live source may pull it back.
-  React.useEffect(() => {
-    if (!scrubbingRef.current) {
-      paint(knownValue);
-    }
-  }, [knownValue, paint]);
+  React.useLayoutEffect(() => {
+    paint(snapshot.position);
+  }, [paint, snapshot.position]);
+  // A seek paints at once, so a reader right after it (a commit, the input)
+  // sees the position it just reached, not the one rendered before.
+  React.useLayoutEffect(
+    () =>
+      controller.subscribe(() => {
+        paint(controller.getSnapshot().position);
+      }),
+    [controller, paint]
+  );
 
   React.useEffect(() => {
     if (!source) {
       return;
     }
     const follow = () => {
-      if (!scrubbingRef.current) {
-        paint(source.getSnapshot());
-      }
+      paint(controller.getSnapshot().position);
     };
     follow();
     return source.subscribe(follow);
-  }, [paint, source]);
+  }, [controller, paint, source]);
 
-  const setScrubbing = React.useCallback(
-    (next: boolean) => {
-      scrubbingRef.current = next;
-      setScrubbingState(next);
-      if (!next) {
-        paint(knownValueRef.current);
-      }
-    },
-    [paint]
-  );
-
-  const seek = React.useCallback(
-    (raw: number, eventDetails: PositionChangeEventDetails) => {
-      const next = clampFinite(raw, 0, duration);
-      if (next === position.get()) {
-        return false;
-      }
-      onPositionChange?.(next, eventDetails);
-      if (eventDetails.isCanceled) {
-        return false;
-      }
-      paint(next);
-      if (!(isControlled || source)) {
-        knownValueRef.current = next;
-        setUncontrolledPosition(next);
-      }
-      return true;
-    },
-    [duration, isControlled, onPositionChange, paint, position, source]
-  );
-
-  const commitSeek = React.useCallback(
-    (value: number, eventDetails: PositionCommitEventDetails) => {
-      onPositionCommitted?.(value, eventDetails);
-    },
-    [onPositionCommitted]
-  );
-
-  // Zoom: px per unit, or null while fitted.
-  const isZoomControlled = zoomProp !== undefined;
-  const [uncontrolledZoom, setUncontrolledZoom] = React.useState<number | null>(
-    defaultZoom ?? null
-  );
-  const zoom = isZoomControlled ? zoomProp : uncontrolledZoom;
+  // Zoom: where the next zoom should hold still, applied once laid out.
   const anchorRef = React.useRef<ZoomAnchor | null>(null);
-
   const zoomTo = React.useCallback(
     (
       next: number,
       eventDetails: ZoomChangeEventDetails,
       anchor?: ZoomAnchor
     ) => {
-      const clamped = clampZoom(next, minZoom, maxZoom);
-      if (clamped === null || clamped === zoom) {
-        return false;
-      }
-      onZoomChange?.(clamped, eventDetails);
-      if (eventDetails.isCanceled) {
+      if (!controller.zoomTo(next, eventDetails)) {
         return false;
       }
       anchorRef.current = anchor ?? null;
-      if (!isZoomControlled) {
-        setUncontrolledZoom(clamped);
-      }
       return true;
     },
-    [isZoomControlled, maxZoom, minZoom, onZoomChange, zoom]
+    [controller]
   );
 
   const originLaneRef = React.useRef<HTMLElement | null>(null);
@@ -189,20 +158,25 @@ export function Root(componentProps: Root.Props) {
   );
 
   const state = React.useMemo<Root.State>(
-    () => ({ disabled, fitted: zoom === null, scrubbing }),
-    [disabled, scrubbing, zoom]
+    () => ({
+      disabled: snapshot.disabled,
+      fitted: snapshot.fitted,
+      scrubbing: snapshot.scrubbing,
+    }),
+    [snapshot.disabled, snapshot.fitted, snapshot.scrubbing]
   );
 
   const context = React.useMemo<TimelineContextValue>(
     () => ({
       actions: {
-        commitSeek,
+        commitSeek: controller.commitSeek,
         registerLane,
         scrollTo,
-        seek,
-        setScrubbing,
+        seek: controller.seek,
+        setScrubbing: controller.setScrubbing,
         zoomTo,
       },
+      controller,
       meta: {
         anchorRef,
         duration,
@@ -216,12 +190,12 @@ export function Root(componentProps: Root.Props) {
         step,
         viewport,
         viewportRef,
-        zoom,
+        zoom: snapshot.zoom,
       },
       state,
     }),
     [
-      commitSeek,
+      controller,
       duration,
       largeStep,
       maxZoom,
@@ -229,14 +203,12 @@ export function Root(componentProps: Root.Props) {
       position,
       registerLane,
       scrollTo,
-      seek,
-      setScrubbing,
       snapOffset,
       snapStep,
+      snapshot.zoom,
       state,
       step,
       viewport,
-      zoom,
       zoomTo,
     ]
   );
@@ -247,7 +219,7 @@ export function Root(componentProps: Root.Props) {
       {},
       { ...elementProps, ...resolveStyling(className, style, state) }
     ),
-    ref,
+    ref: ref ? [ref, rootRef] : rootRef,
     render,
     state,
   });
