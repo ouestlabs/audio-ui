@@ -17,7 +17,7 @@ audio-ui/
 │   ├── www/        # Next.js docs site + registry (Fumadocs + MDX) → localhost:4000
 │   └── sandbox/    # Dev sandbox
 └── packages/
-    ├── core/       # @audio-ui/core, published npm package (framework-free logic)
+    ├── core/       # @audio-ui/core, published npm package (framework-agnostic logic)
     ├── ui/         # @audio-ui/react, published npm package (headless primitives)
     ├── utils/      # Shared utilities
     └── configs/    # Shared tsconfig, etc.
@@ -44,7 +44,7 @@ Next.js App Router · Fumadocs + MDX · Tailwind CSS v4 · shadcn/ui + Base UI �
 
 ## Where Things Live
 
-### `@audio-ui/core`, framework-free logic (`packages/core/src/`)
+### `@audio-ui/core`, framework-agnostic logic (`packages/core/src/`)
 
 - `shared/`, lang (types, guards), math, pitch
 - `value/`, scales, ranges, formatting, change/commit event details, live sources and stores

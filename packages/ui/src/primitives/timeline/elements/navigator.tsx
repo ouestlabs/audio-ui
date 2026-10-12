@@ -18,7 +18,7 @@ const describeNumber: DescribePosition = (value) =>
   String(Math.round(value * 100) / 100);
 
 interface NavigatorContextValue {
-  /** The framework-free navigator behind the bar, its window and its handles. */
+  /** The framework-agnostic navigator behind the bar, its window and its handles. */
   controller: NavigatorController;
   describe: DescribePosition;
   duration: number;

@@ -49,7 +49,7 @@ export const lib: RegistryItem[] = [
     categories: ["lib", "audio", "sequencer", "piano"],
     dependencies: [],
     description:
-      "Framework-free core of the look-ahead scheduler, the drift-free stepping cursor and self-correcting catch-up loop behind use-step-clock and use-transport-clock",
+      "Framework-agnostic core of the look-ahead scheduler, the drift-free stepping cursor and self-correcting catch-up loop behind use-step-clock and use-transport-clock",
     files: [
       {
         path: "lib/lookahead-scheduler.ts",
@@ -64,7 +64,7 @@ export const lib: RegistryItem[] = [
     categories: ["lib", "audio", "waveform"],
     dependencies: [],
     description:
-      "Framework-free waveform DSP, decode audio bytes to samples, downsample to peak amplitudes, normalize, and reduce a live spectrum to frequency bands",
+      "Framework-agnostic waveform DSP, decode audio bytes to samples, downsample to peak amplitudes, normalize, and reduce a live spectrum to frequency bands",
     files: [
       {
         path: "lib/waveform-dsp.ts",
@@ -109,7 +109,7 @@ export const lib: RegistryItem[] = [
     categories: ["lib", "audio", "timeline"],
     dependencies: [],
     description:
-      "Framework-free musical time, bars and beats against seconds, fixed and zoom-adaptive grid divisions with triplets, ruler label spacing, and bar/beat readouts",
+      "Framework-agnostic musical time, bars and beats against seconds, fixed and zoom-adaptive grid divisions with triplets, ruler label spacing, and bar/beat readouts",
     files: [
       {
         path: "lib/musical-time.ts",

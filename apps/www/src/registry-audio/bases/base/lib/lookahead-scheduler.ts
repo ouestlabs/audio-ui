@@ -1,5 +1,5 @@
 /**
- * Framework-free core of the look-ahead scheduler shared by `use-step-clock`
+ * Framework-agnostic core of the look-ahead scheduler shared by `use-step-clock`
  * and `use-transport-clock`. It owns the drift-free stepping cursor and the
  * self-correcting catch-up loop, and knows nothing about React, AudioContext,
  * or what gets played, the hooks bind it to `ctx.currentTime` + `setInterval`.

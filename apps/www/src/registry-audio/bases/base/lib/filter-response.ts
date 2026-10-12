@@ -1,7 +1,7 @@
 /**
  * What a filter, an equalizer and a compressor do to a signal, as the curves a
  * plot draws: a gain in dB at each frequency, an output level at each input
- * level. Framework-free and drawn from the same textbook formulas an audio
+ * level. Framework-agnostic and drawn from the same textbook formulas an audio
  * engine runs (the RBJ "Audio EQ Cookbook" biquads), so the curve on screen
  * is the response you hear. The sample rate only decides where the top of the
  * curve bends toward Nyquist; 48 kHz is close enough for a picture.

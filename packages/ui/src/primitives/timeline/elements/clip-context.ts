@@ -19,7 +19,7 @@ export type ClipState = {
 };
 
 export interface ClipContextValue {
-  /** The framework-free clip behind every part: its span, selection, drags and keys. */
+  /** The framework-agnostic clip behind every part: its span, selection, drags and keys. */
   controller: ClipController;
   /** Gives the clip's input the focus, so the keyboard follows a press on a part of it. */
   focus: () => void;

@@ -18,7 +18,7 @@ export type NoteOnEventDetails = PianoNoteOnEventDetails;
 export type NoteOffEventDetails = PianoNoteOffEventDetails;
 
 export interface PianoContextValue {
-  /** The framework-free keyboard behind its keys: which sound, how hard, and the tab stop. */
+  /** The framework-agnostic keyboard behind its keys: which sound, how hard, and the tab stop. */
   controller: PianoController;
   /** Focuses the key at `pitch`, and moves the tab stop to it: the focus ring shows unless a pointer moved it. */
   focusKey: (pitch: number, focusVisible?: boolean) => void;

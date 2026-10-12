@@ -5,7 +5,7 @@ import type { Root } from "./elements/root.js";
 
 export interface FaderContextValue {
   anchor: number | undefined;
-  /** The framework-free fader behind every part: gestures, keys, the wheel. */
+  /** The framework-agnostic fader behind every part: gestures, keys, the wheel. */
   controller: FaderController;
   disabled: boolean;
   /** The value as text, with Root's `format` and `locale`. */

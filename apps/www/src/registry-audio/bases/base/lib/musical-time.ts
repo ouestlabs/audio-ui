@@ -1,6 +1,6 @@
 /**
  * Musical time for a timeline: bars and beats against the seconds audio runs
- * in, and the grid a timeline draws and snaps to. Framework-free, so the
+ * in, and the grid a timeline draws and snaps to. Framework-agnostic, so the
  * ruler, the grid and a piano roll can all ask it per frame.
  */
 

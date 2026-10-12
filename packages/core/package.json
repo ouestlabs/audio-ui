@@ -1,7 +1,7 @@
 {
   "name": "@audio-ui/core",
   "version": "0.0.0",
-  "description": "The framework-free logic of audio/ui's primitives: values and scales, geometry, live sources, frame scheduling.",
+  "description": "The framework-agnostic logic of audio/ui's primitives: values and scales, geometry, live sources, frame scheduling.",
   "keywords": [
     "audio-ui",
     "audio",

@@ -57,7 +57,7 @@ export type NoteOffEventDetails = PianoRollNoteOffEventDetails;
 export type RollView = PianoRollSnapshot;
 
 export interface PianoRollContextValue {
-  /** The framework-free roll behind every part: notes, selection, gestures, keys. */
+  /** The framework-agnostic roll behind every part: notes, selection, gestures, keys. */
   controller: PianoRollController;
   /** Focuses this note, or the grid with `null`, once the next render is done. */
   focusAfterRender: (target: NoteId | null) => void;

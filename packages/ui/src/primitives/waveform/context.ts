@@ -46,7 +46,7 @@ export const describeAsPercent: DescribeValue = (value, duration) =>
   `${Math.round((duration > 0 ? value / duration : 0) * 100)}%`;
 
 export interface WaveformContextValue {
-  /** The framework-free seek behind the waveform: the position, scrubbing, keys, selection. */
+  /** The framework-agnostic seek behind the waveform: the position, scrubbing, keys, selection. */
   controller: WaveformSeekController;
   meta: {
     /** How the position is announced; set by `Control`, used on every paint. */

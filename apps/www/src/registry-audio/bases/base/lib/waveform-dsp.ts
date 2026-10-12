@@ -1,5 +1,5 @@
 /**
- * Framework-free waveform DSP: decode raw audio bytes into samples, then
+ * Framework-agnostic waveform DSP: decode raw audio bytes into samples, then
  * reduce them to the Waveform's `values`, the lowest and highest sample of
  * each slice (`computePeaks`), or one amplitude per slice
  * (`downsampleWaveform`); and reduce a live analyser's spectrum to frequency

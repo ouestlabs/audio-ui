@@ -14,7 +14,7 @@ export const STATE_ATTRIBUTES_MAPPING = {
 export interface EnvelopeContextValue {
   /** Adds a point at `at` (normalized 0…1) and moves the roving tab stop to it. */
   addPoint: (at: { x: number; y: number }, event: MouseEvent) => void;
-  /** The framework-free envelope behind every part: gestures, keys, adds, removes, bends. */
+  /** The framework-agnostic envelope behind every part: gestures, keys, adds, removes, bends. */
   controller: EnvelopeController;
   /** Roving tab stop among the points. */
   focusedIndex: number;

@@ -26,7 +26,7 @@ export type SequencerView = SequencerSnapshot;
 export interface SequencerContextValue {
   /** The cells' elements by `row:step`, which a paint reads to find the cell under the pointer. */
   cellNodes: Map<string, HTMLElement>;
-  /** The framework-free sequencer behind every part: painting, keys, velocities. */
+  /** The framework-agnostic sequencer behind every part: painting, keys, velocities. */
   controller: SequencerController;
   /** Moves focus to a cell's element, once it is the tab stop. */
   focusCell: (cell: CellAddress) => void;

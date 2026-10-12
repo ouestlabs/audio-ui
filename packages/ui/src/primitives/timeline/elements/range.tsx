@@ -29,7 +29,7 @@ const describeNumber: DescribePosition = (value) =>
   String(Math.round(value * 100) / 100);
 
 interface RangeContextValue {
-  /** The framework-free range behind every part: its span, drags, drawing and keys. */
+  /** The framework-agnostic range behind every part: its span, drags, drawing and keys. */
   controller: RangeController;
   /** The lane the range sits on: what a pointer's px are measured along. */
   laneRef: React.RefObject<HTMLElement | null>;

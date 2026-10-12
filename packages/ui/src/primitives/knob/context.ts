@@ -3,7 +3,7 @@ import * as React from "react";
 import type { Root } from "./elements/root.js";
 
 export interface KnobContextValue {
-  /** The framework-free knob behind every part: gestures, keys, the wheel, typed values. */
+  /** The framework-agnostic knob behind every part: gestures, keys, the wheel, typed values. */
   controller: KnobController;
   form: string | undefined;
   inputId: string;

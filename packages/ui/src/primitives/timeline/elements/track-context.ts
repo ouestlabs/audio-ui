@@ -8,7 +8,7 @@ export type TrackState = {
 };
 
 export interface TrackContextValue {
-  /** The framework-free track behind its height: what a drag, a key or a double click asks of it. */
+  /** The framework-agnostic track behind its height: what a drag, a key or a double click asks of it. */
   controller: TrackController;
   meta: {
     /** The height as set, or undefined while the track shares what is left. */

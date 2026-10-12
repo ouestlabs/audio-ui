@@ -106,7 +106,7 @@ export interface TimelineContextValue {
       anchor?: ZoomAnchor
     ) => boolean;
   };
-  /** The framework-free position and zoom behind every part: scrubbing, keys, zoom. */
+  /** The framework-agnostic position and zoom behind every part: scrubbing, keys, zoom. */
   controller: TimelineController;
   meta: {
     /** Where the next zoom should hold still; the viewport applies it once laid out. */
