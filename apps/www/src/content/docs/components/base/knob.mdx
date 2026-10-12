@@ -1,19 +1,19 @@
 ---
 title: Knob
-description: Rotary control for parameters - drag, wheel, keyboard, optional fader-style vertical pan, and reset via double-tap.
+description: A rotary control for continuous parameters, with pointer, wheel and keyboard input.
 component: true
 base: base
 ---
 
 <ComponentPreview styleName="base-nova" name="knob-demo" />
 
-Rotary knob for continuous parameters (level, cutoff, pan, etc.). The registry component wraps the `Knob` primitive from `@audio-ui/react` with size variants and theme styles.
+A rotary control for continuous parameters such as level, cutoff or pan. The registry component wraps the `Knob` primitive from `@audio-ui/react` and adds size variants and theme styles.
 
 ## Overview
 
-- **Interaction model:** Circular drag by default (or `dragMode="vertical"` / `"revolution"`), mouse wheel, keyboard, and **double-tap / double-click** to snap back to `defaultValue`.
-- **Feedback:** Track rail, highlighted arc between `anchor` and the value, and a needle that rotates with the value. The needle follows the pointer directly, with no easing, so it never lags behind the arc.
-- **Accessibility:** The knob holds a native `<input type="range">` that takes focus, carries the accessible name (`aria-label` / `aria-labelledby`), the value text (formatted with `format`, or `getAriaValueText` on the primitive's `Thumb`), and the form value (`name`).
+- **Input:** drag around the knob (`dragMode="circular"`, the default), up and down (`"vertical"`), or by full turns (`"revolution"`). The mouse wheel and the keyboard also work. A double-click or a double-tap returns to `defaultValue`.
+- **Display:** a track, an arc from `anchor` to the value, and a needle that turns with the value. The needle follows the pointer without easing, so it stays in line with the arc.
+- **Accessibility:** the knob holds a native `<input type="range">` that takes focus and carries the accessible name (`aria-label` or `aria-labelledby`), the value text (formatted with `format`, or set with `getAriaValueText` on the primitive's `Thumb`) and the form value (`name`).
 
 ## Installation
 

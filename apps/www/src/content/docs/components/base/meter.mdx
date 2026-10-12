@@ -1,20 +1,20 @@
 ---
 title: Meter
-description: Display-only stereo and multi-channel decibel meter with peak-hold, driven by whatever level data you feed it.
+description: A level meter in decibels for one or more channels, with peak hold.
 component: true
 base: base
 ---
 
 <ComponentPreview styleName="base-nova" name="meter-size-default-demo" />
 
-Meter for monitoring audio levels (stereo output, individual channel strips, or any multi-channel source). The registry component wraps `Meter` primitives from `@audio-ui/react` and renders one bar per channel, switching from success to destructive when a channel clips, with an optional peak-hold mark. The primitive is display only, there is no pointer, keyboard, or focus handling, since there is nothing to control.
+Shows audio levels for a stereo output, a channel strip or any multi-channel source. The registry component wraps the `Meter` primitive from `@audio-ui/react`: one bar per channel, a destructive color when a channel clips, and an optional peak-hold mark. The meter only displays levels: it takes no pointer or keyboard input, and no focus.
 
 ## Overview
 
-- **Value model:** a dB reading per channel (stereo = `[left, right]`), given either as the `value` prop or as a live [`source`](#feeding-real-levels); the number of readings is the channel count.
-- **Peak hold:** An optional peak level per channel positions a peak-hold mark. The primitive has no clock, the [`use-audio-levels`](#feeding-real-levels) hook (or Tone.js, or any other source) computes and decays it.
-- **Clipping:** Channels at or above `clipThreshold` (default `0` dB) get a `data-clipping` attribute for styling a clip indicator.
-- **Accessibility:** Each channel is a `role="meter"` with `aria-valuenow`/`min`/`max` and a value text in dB ("-6 dB"), a static, query-able value, not an `aria-live` region, so a fast-changing meter doesn't spam screen readers with every update. `aria-label` names the group; with several channels each one is named "… 1", "… 2".
+- **Value:** one dB reading per channel (stereo is `[left, right]`), from the `value` prop or a live [`source`](#feeding-real-levels). The number of readings sets the number of channels.
+- **Peak hold:** an optional peak level per channel places a peak-hold mark. The primitive has no clock: the [`use-audio-levels`](#feeding-real-levels) hook, Tone.js or another source computes the peak and its decay.
+- **Clipping:** channels at or above `clipThreshold` (default `0` dB) get `data-clipping`, to style a clip indicator.
+- **Accessibility:** each channel is a `role="meter"` with `aria-valuenow`, `aria-valuemin`, `aria-valuemax` and a value text in dB ("-6 dB"). It is not an `aria-live` region, so screen readers read the level when asked instead of announcing every update. `aria-label` names the group; with several channels, each is named "… 1", "… 2".
 
 ## Installation
 

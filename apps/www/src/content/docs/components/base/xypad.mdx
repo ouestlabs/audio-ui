@@ -1,20 +1,20 @@
 ---
 title: XY Pad
-description: Two-dimensional control surface for mapping and automating X/Y parameters with pointer, wheel, and keyboard input.
+description: A two-dimensional control for two parameters at once, with pointer, wheel and keyboard input.
 component: true
 base: base
 ---
 
 <ComponentPreview styleName="base-nova" name="xypad-live-value-demo" />
 
-XY pad for simultaneous control of two values (for example filter cutoff/resonance, pan/mix, or macro controls). The registry component wraps `XYPad` primitives from `@audio-ui/react` and provides ready-to-use visuals (grid, crosshair, cursor, value display).
+Controls two values at once, such as filter cutoff and resonance, pan and mix, or two macros. The registry component wraps the `XYPad` primitive from `@audio-ui/react` and adds a grid, a crosshair, a cursor and a value display.
 
 ## Overview
 
-- **Interaction model:** Press or drag on the pad, wheel / trackpad, and keyboard over both axes.
-- **Axes:** Independent ranges and steps for X (`minX`, `maxX`, `stepX`) and Y (`minY`, `maxY`, `stepY`).
-- **Feedback:** Grid lines, crosshair, cursor, and optional value display overlay. The value position is exposed as the CSS variables `--xy-pad-x` (from the left) and `--xy-pad-y` (from the top).
-- **Accessibility:** The cursor holds one native `<input type="range">` per axis. Both carry the accessible name (`aria-label` becomes "… X" / "… Y", or name each axis with `getAriaLabel` on the primitive's `Thumb`); the X input takes focus and the arrow keys move both axes.
+- **Input:** press or drag on the pad, or use the mouse wheel, a trackpad or the keyboard, on both axes.
+- **Axes:** X and Y have their own range and step (`minX`, `maxX`, `stepX`; `minY`, `maxY`, `stepY`).
+- **Display:** grid lines, a crosshair, a cursor and an optional value display. The position is exposed as the CSS variables `--xy-pad-x` (from the left) and `--xy-pad-y` (from the top).
+- **Accessibility:** the cursor holds one native `<input type="range">` per axis. Both carry the accessible name (`aria-label` becomes "… X" and "… Y", or set each with `getAriaLabel` on the primitive's `Thumb`). The X input takes focus, and the arrow keys move both axes.
 
 ## Installation
 

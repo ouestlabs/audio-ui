@@ -1,23 +1,23 @@
 ---
 title: Envelope
-description: A ramp edited by its breakpoints, drag points, bend the segments between them, double-click to add or remove.
+description: An editor for a breakpoint ramp, such as an ADSR shape or an automation curve.
 component: true
 base: base
 ---
 
 <ComponentPreview styleName="base-nova" name="envelope-size-default-demo" />
 
-Envelope for editing a ramp (an ADSR shape, an automation curve, any breakpoint-based ramp). The registry component wraps `Envelope` primitives from `@audio-ui/react` and draws the points joined by segments you can bend, over a grid.
+Edits a ramp made of breakpoints, such as an ADSR shape or an automation curve. The registry component wraps the `Envelope` primitive from `@audio-ui/react` and draws the points, the segments between them and a grid.
 
 ## Overview
 
-- **Value model:** `value: { x: number; y: number; curve?: number }[]`, both axes normalized 0-1 and sorted by `x`. The consumer maps the normalized range to its own domain (time, level, frequency, whatever the ramp represents).
-- **Curved segments:** a point's `curve`, from -1 to 1, bends the segment that leaves it; 0 or unset is a straight line. A positive curve holds the start of the segment and rushes its end, a negative one the opposite. The last point has no segment to bend.
-- **Interaction model:** Drag a point to move it, dragging never deletes a point. Double-click empty space to add a point there; double-click an existing point to remove it. A point's `x` is clamped between its neighbors, so points can never cross or reorder mid-drag.
-- **Point count:** Dynamic, points are added and removed via interaction, between `minPoints` (default `2`, since a ramp needs at least a start and an end) and `maxPoints`. Set both to the same count to fix the shape.
-- **Grid:** `snap` sets the grid the pointer snaps points to (0.25 for quarters); the registry component draws it, and holding Cmd/Ctrl leaves it. Without `snap`, points move freely.
-- **Fine control:** hold Shift while dragging a point to move it a quarter of the pointer's distance; the registry component prints the point's value above it while it is dragged or focused.
-- **Accessibility:** One roving tab stop; arrow keys nudge the focused point's `x`/`y`, `Delete` or `Backspace` removes it, the same outcome as double-clicking, reachable from the keyboard. Each point is a `role="slider"` on its level, named "Point n of N" by the registry component; the primitive leaves naming (`aria-label`) and value text (`getAriaValueText`) to you.
+- **Value:** `value` is a list of `{ x, y, curve? }` points. Both axes are normalized to 0…1, and the points are sorted by `x`. Map that range to your own unit, such as time or level.
+- **Curves:** a point's `curve`, from -1 to 1, bends the segment that leaves it. 0, or no value, draws a straight line. A positive curve holds the start of the segment and steepens its end; a negative curve does the opposite. The last point has no segment.
+- **Pointer:** drag a point to move it. Double-click empty space to add a point, or double-click a point to remove it. A point stays between its neighbors, so points never cross.
+- **Point count:** points are added and removed between `minPoints` (default `2`, a start and an end) and `maxPoints`. Set both to the same number to fix the shape.
+- **Grid:** `snap` sets the grid that points snap to, for example `0.25` for quarters. Hold Cmd/Ctrl to move off the grid. Without `snap`, points move freely. The registry component draws the grid.
+- **Fine control:** hold Shift while dragging to move a point at a quarter of the pointer's speed. The registry component shows the point's value above it while it is dragged or focused.
+- **Accessibility:** the points share one tab stop. The arrow keys move the focused point, and Delete or Backspace removes it. Each point is a `role="slider"`. The registry component names the points "Point n of N". With the primitive, set `aria-label` and `getAriaValueText` yourself.
 
 ## Installation
 

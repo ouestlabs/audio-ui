@@ -1,25 +1,25 @@
 ---
 title: Waveform
-description: Audio as a shape, a seekable waveform with regions and markers, a live one that scrolls with the signal, and a bar visualizer, all from one primitive.
+description: "Draws audio: a seekable waveform with regions and markers, a live waveform that scrolls with the signal, and a bar visualizer."
 component: true
 base: base
 ---
 
 <ComponentPreview styleName="base-nova" name="waveform-demo" />
 
-One family for drawing audio. `Waveform` shows a whole file and lets you scrub through it; `LiveWaveform` follows a signal as it happens; `BarVisualizer` turns that signal into a handful of bars you style in CSS. All three wrap the `Waveform` primitive from `@audio-ui/react`, which has no opinion on where the audio came from: decoded PCM samples, a microphone, a stream from your server.
+Components for drawing audio. `Waveform` shows a whole file and lets you scrub through it. `LiveWaveform` follows a signal as it plays. `BarVisualizer` turns that signal into a few bars you style in CSS. All three wrap the `Waveform` primitive from `@audio-ui/react`, which works with any audio: decoded PCM samples, a microphone or a stream from your server.
 
 ## Overview
 
-- **Two kinds of data:** a file's shape is known upfront, so `Waveform` takes `values` (raw `0–1` amplitudes, at any resolution). A live signal isn't, so `LiveWaveform` and `BarVisualizer` take a [`source`](#live-signals) they follow outside React.
-- **Value model:** `value` is the playback position, from `0` to `duration` (default `1`, so a plain `0–1` fraction; pass the track's length in seconds to work in seconds). The primitive only owns the seek position, never the audio itself: wire `onValueChange` to your own `<audio>` element.
-- **The real shape:** give `values` each slice's lowest and highest sample (`{ min, max }`) and the waveform is drawn lopsided where the audio is, as a DAW draws it; plain amplitudes (`0–1`) draw it the same above and below the middle.
-- **Part of the audio:** `range` shows just a stretch of it (a clip's window onto its source, a zoomed view), and the playhead, seeking, hover, regions and markers all follow that stretch. See [Showing part of the audio](#showing-part-of-the-audio).
-- **Sharp at any size:** the canvas draws as many bars as fit its real width and keeps the loudest of each bar's slice, so the waveform keeps its detail from a chat bubble to a full-width editor. Bars are laid out on the screen's physical pixels, so their edges stay sharp at any pixel density or zoom level. See [Feeding real audio](#feeding-real-audio).
-- **Shapes:** `shape="mirror"` (the default) centers the bars, `"bars"` stands them on the baseline and `"line"` joins the levels into one continuous shape. A live waveform can also be a `"scope"`: raw samples traced as a single line, like an oscilloscope.
-- **On the timeline:** [`WaveformRegion`](#regions-and-markers) is a stretch you can move and resize, such as a loop; `WaveformMarker` is a labelled point; `WaveformHover` follows the pointer and prints the hovered time.
-- **Nothing wasted:** every moving part is painted outside React and only when something changed. A waveform that is off screen, or has come to rest, costs no frames. With reduced motion requested, live waveforms repaint a few times a second, without smoothing or idle animation.
-- **Accessibility:** the seekable waveform holds a native `<input type="range">`: it takes focus, carries `aria-label`, announces the played share (or whatever `getAriaValueText` returns, e.g. a time), and supports arrow keys / <kbd>Home</kbd> / <kbd>End</kbd> / <kbd>Page Up</kbd> / <kbd>Page Down</kbd>. Each region handle holds one too. Live waveforms are images: give them an `aria-label`.
+- **Two kinds of data:** a file's shape is known in advance, so `Waveform` takes `values` (amplitudes from `0` to `1`, at any resolution). A live signal is not, so `LiveWaveform` and `BarVisualizer` take a [`source`](#live-signals) and follow it outside React.
+- **Value:** `value` is the playback position, from `0` to `duration` (default `1`, a fraction; pass the track length in seconds to work in seconds). The primitive owns the seek position, not the audio: connect `onValueChange` to your own `<audio>` element.
+- **Asymmetric shape:** give `values` the lowest and highest sample of each slice (`{ min, max }`) and the waveform is drawn asymmetric, as in a DAW. Plain amplitudes draw the same shape above and below the middle.
+- **Part of the audio:** `range` shows only a stretch of the audio, such as a clip's window onto its source or a zoomed view. The playhead, seeking, hover, regions and markers follow that stretch. See [Showing part of the audio](#showing-part-of-the-audio).
+- **Resolution:** the canvas draws as many bars as fit its width and keeps the loudest sample of each bar's slice, so detail holds at any size. Bars align to physical pixels, so their edges stay sharp at any pixel density or zoom. See [Feeding real audio](#feeding-real-audio).
+- **Shapes:** `shape="mirror"` (the default) centers the bars, `"bars"` stands them on the baseline, and `"line"` joins the levels into one shape. A live waveform can also be a `"scope"`: raw samples traced as one line, like an oscilloscope.
+- **On the timeline:** [`WaveformRegion`](#regions-and-markers) is a stretch you can move and resize, such as a loop. `WaveformMarker` is a labelled point. `WaveformHover` follows the pointer and shows the time under it.
+- **Performance:** moving parts are painted outside React, and only when something changes. A waveform that is off screen or at rest uses no frames. When reduced motion is requested, live waveforms repaint a few times per second, without smoothing or idle animation.
+- **Accessibility:** the seekable waveform holds a native `<input type="range">`: it takes focus, carries `aria-label`, announces the played share (or the text from `getAriaValueText`, such as a time), and supports the arrow keys, <kbd>Home</kbd>, <kbd>End</kbd>, <kbd>Page Up</kbd> and <kbd>Page Down</kbd>. Each region handle holds one too. Live waveforms are images: give them an `aria-label`.
 
 ## Installation
 

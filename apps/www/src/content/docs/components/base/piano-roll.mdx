@@ -1,6 +1,6 @@
 ---
 title: Piano roll
-description: A DAW-style note editor, draw, move, resize and select notes on a grid, with a playable keyboard, a velocity lane and keyboard editing.
+description: "A note editor on a grid: draw, move, resize and select notes, with a playable keyboard and a velocity lane."
 component: true
 base: base
 ---
@@ -11,15 +11,15 @@ base: base
   styleName="base-nova"
 />
 
-A piano roll for writing a phrase: a keyboard down the side, notes on a grid, a velocity bar under each note. It sits inside a [Timeline](/docs/components/base/timeline), so notes start and last in the timeline's units, snap to its grid and follow its zoom.
+A piano roll for writing a phrase: a keyboard down the side, notes on a grid, and a velocity bar under each note. It sits inside a [Timeline](/docs/components/base/timeline), so notes use the timeline's units, snap to its grid and follow its zoom.
 
 ## Overview
 
-- **Notes:** press on the grid to draw one (or start a selection rectangle), drag to move it, drag an edge to resize, double-click to delete. Whatever is selected moves and resizes together.
-- **Keys:** the keyboard on the side plays a note when pressed; the rows light up for the pitches playing.
-- **Velocity:** a bar per note in its own lane, drawn from the bottom.
-- **Keyboard:** every edit works without a pointer, and copy, paste, duplicate and quantize are one key away.
-- **Accessibility:** each note is a toggle button named after its pitch and span; each velocity bar holds a native `<input type="range">`.
+- **Notes:** press on the grid to draw a note or to start a selection rectangle, depending on the mode. Drag a note to move it, drag an edge to resize it, and double-click to delete it. Selected notes move and resize together.
+- **Keys:** pressing a key on the side plays its note. The rows light up for the pitches playing.
+- **Velocity:** each note has a bar in its own lane, drawn from the bottom.
+- **Keyboard:** every edit works without a pointer, including copy, paste, duplicate and quantize.
+- **Accessibility:** each note is a toggle button named after its pitch and span. Each velocity bar holds a native `<input type="range">`.
 
 ## Installation
 

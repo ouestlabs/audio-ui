@@ -1,23 +1,23 @@
 ---
 title: Timeline
-description: A zoomable timeline for arrangements and editors, a ruler that seeks on the grid, lanes that follow the zoom, and a playhead that moves without re-rendering.
+description: A zoomable timeline for arrangement views and editors, with a ruler that seeks, lanes and a playhead.
 component: true
 base: base
 ---
 
 <ComponentPreview styleName="base-nova" name="block-timeline" />
 
-The ground an arrangement, a clip editor or a piano roll is drawn on. The registry component wraps the `Timeline` primitive from `@audio-ui/react`, which knows nothing about tempo: its units are whatever you count in (seconds, beats, pulses, steps), and musical time comes from the `musical-time` lib.
+The base for an arrangement view, a clip editor or a piano roll. The registry component wraps the `Timeline` primitive from `@audio-ui/react`. The timeline has no notion of tempo: its units are whatever you count in (seconds, beats, pulses or steps). Musical time comes from the `musical-time` lib.
 
 ## Overview
 
-- **Units and zoom:** `duration` is the timeline's length in your units, and `zoom` is how many pixels one unit takes. Leave `zoom` unset and the timeline fits the width it is given; zoom it, and every lane is as long as the timeline and the viewport scrolls.
-- **Zooming:** Cmd/Ctrl + scroll (or pinch on a trackpad) zooms around the pointer. Whatever changes the zoom, the point it was anchored on stays where it was, or the middle of the view when nothing named one.
-- **Grid:** with a `snapStep`, the ruler lands on the grid. Hold Cmd/Ctrl to place the playhead off it, and Shift to scrub four times finer.
-- **Playback:** pass a live `source` and every playhead follows it straight in the DOM, with no React render per frame.
-- **Ranges:** a `TimelineRange` is a stretch of the timeline (a loop, a selection, a clip): drag it to move it, drag a handle to resize it, or with `drawable` drag across empty lane to draw a new one. It snaps like everything else.
-- **Navigator:** `TimelineNavigator` shows the whole timeline as one bar with the visible stretch inside it. Drag the window to scroll, an edge to zoom, double-click to show everything. Pair it with `scrollbar="hidden"` on the viewport and it takes the scrollbar's place.
-- **Accessibility:** the ruler, each range, each range handle and the navigator's window and edges hold a native `<input type="range">`, so everything the pointer does works from the keyboard. The ruler's input spans the timeline. It takes focus, carries `aria-label`, announces the position (or whatever `getAriaValueText` returns, such as "Bar 3, beat 2"), and moves by `step` with the arrow keys, `largeStep` with <kbd>Page Up</kbd> / <kbd>Page Down</kbd> and Shift, and to the ends with <kbd>Home</kbd> / <kbd>End</kbd>.
+- **Units and zoom:** `duration` is the length in your units, and `zoom` is the number of pixels per unit. Without `zoom`, the timeline fits its width. With it, every lane is as long as the timeline and the viewport scrolls.
+- **Zooming:** Cmd/Ctrl + scroll, or a trackpad pinch, zooms around the pointer. Every zoom change keeps its anchor point in place, or the middle of the view when there is none.
+- **Grid:** with a `snapStep`, the ruler snaps to the grid. Hold Cmd/Ctrl to place the playhead off the grid, and Shift to scrub four times finer.
+- **Playback:** pass a live `source` and every playhead follows it in the DOM, without a React render per frame.
+- **Ranges:** a `TimelineRange` is a stretch of the timeline, such as a loop, a selection or a clip. Drag it to move it, drag a handle to resize it, or, with `drawable`, drag across an empty lane to draw a new one. Ranges snap to the grid.
+- **Navigator:** `TimelineNavigator` shows the whole timeline as one bar, with the visible part inside it. Drag the window to scroll, drag an edge to zoom, and double-click to show everything. With `scrollbar="hidden"` on the viewport, it replaces the scrollbar.
+- **Accessibility:** the ruler, each range and range handle, and the navigator's window and edges hold a native `<input type="range">`, so every pointer action has a keyboard equivalent. The ruler's input spans the timeline: it takes focus, carries `aria-label` and announces the position (or the text from `getAriaValueText`, such as "Bar 3, beat 2"). The arrow keys move by `step`, <kbd>Page Up</kbd> / <kbd>Page Down</kbd> and Shift by `largeStep`, and <kbd>Home</kbd> / <kbd>End</kbd> go to the ends.
 
 ## Installation
 
