@@ -1,4 +1,14 @@
 export {
+  createEnvelopeController,
+  type EnvelopeChangeEventDetails,
+  type EnvelopeChangeEventReason,
+  type EnvelopeCommitEventDetails,
+  type EnvelopeCommitEventReason,
+  type EnvelopeController,
+  type EnvelopeOptions,
+  type EnvelopeSnapshot,
+} from "./controller";
+export {
   type Breakpoint,
   CURVE_EPSILON,
   CURVE_EXPONENT_RANGE,
