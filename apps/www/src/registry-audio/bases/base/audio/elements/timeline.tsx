@@ -320,10 +320,11 @@ function TimelineNavigator({
 
 const selectText = (element: HTMLInputElement | null) => element?.select();
 
-export const MIN_TRACK_HEIGHT = 28;
+/** A track is never shorter than its full header needs: to go smaller, fold it. */
+export const MIN_TRACK_HEIGHT = 79;
 /** Below this a track is a strip: the full header (name, solo, mute, gain, pan) needs this much room, so a shorter track keeps the name, solo and mute and drops the rest. */
 export const COMPACT_TRACK_HEIGHT = 79;
-export const MAX_TRACK_HEIGHT = 240;
+export const MAX_TRACK_HEIGHT = 320;
 export const TRACK_HEIGHT_STEP = 8;
 
 /** The colors a track can take: the theme's chart tokens, written out for the stylesheet to find. */
