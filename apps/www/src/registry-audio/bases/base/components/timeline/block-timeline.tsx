@@ -1232,8 +1232,8 @@ export default function BlockTimeline() {
                 <DropdownMenuSubTrigger>
                   Keyboard shortcuts
                 </DropdownMenuSubTrigger>
-                <DropdownMenuSubContent className="scrollbar max-h-(--available-height) w-auto overflow-y-auto">
-                  <div className="flex flex-col gap-2 p-2 text-sm whitespace-nowrap">
+                <DropdownMenuSubContent className="flex max-h-(--available-height) w-auto flex-col">
+                  <div className="scrollbar flex min-h-0 flex-col gap-2 overflow-y-auto p-2 text-sm whitespace-nowrap">
                     {SHORTCUTS.map((shortcut) => (
                       <div
                         className="flex items-center justify-between gap-3"
