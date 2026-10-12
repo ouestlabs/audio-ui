@@ -1315,45 +1315,51 @@ export default function BlockTimeline() {
             )}
             {...marquee.handlers}
           >
-            <Row className="sticky top-0 z-40 bg-background">
-              <TimelineLane className="h-4 cursor-cell">
-                <TimelineRange
-                  aria-label="Loop"
-                  drawable
+            {/* One sticky block, so what is stuck stays stacked whatever each row measures. */}
+            <div className="sticky top-0 z-40 flex min-w-full flex-col bg-background">
+              <Row>
+                <TimelineLane className="h-4 cursor-cell">
+                  <TimelineRange
+                    aria-label="Loop"
+                    drawable
+                    getAriaValueText={describe}
+                    onValueChange={setLoop}
+                    value={loop}
+                  >
+                    <TimelineRangeHandle aria-label="Loop start" edge="start" />
+                    <TimelineRangeHandle aria-label="Loop end" edge="end" />
+                  </TimelineRange>
+                  <TimelinePlayhead />
+                </TimelineLane>
+              </Row>
+              <Row className="bg-background">
+                <TimelineRuler
+                  aria-label="Playhead"
                   getAriaValueText={describe}
-                  onValueChange={setLoop}
-                  value={loop}
                 >
-                  <TimelineRangeHandle aria-label="Loop start" edge="start" />
-                  <TimelineRangeHandle aria-label="Loop end" edge="end" />
-                </TimelineRange>
-                <TimelinePlayhead />
-              </TimelineLane>
-            </Row>
-            <Row className="sticky top-4 z-40 bg-background">
-              <TimelineRuler aria-label="Playhead" getAriaValueText={describe}>
-                {labels.map((count) => (
-                  <TimelineMark key={count} value={count * bar}>
-                    {count + 1}
-                  </TimelineMark>
-                ))}
-                <TimelinePlayhead />
-              </TimelineRuler>
-            </Row>
-            <Row className="sticky top-11 z-40 bg-background">
-              <TimelineLane className="h-6">
-                {locators.map((locator) => (
-                  <TimelineMark key={locator.at} value={locator.at}>
-                    <LocatorButton
-                      locator={locator}
-                      onJump={jumpToLocator}
-                      onRemove={removeLocator}
-                      onRename={renameLocator}
-                    />
-                  </TimelineMark>
-                ))}
-              </TimelineLane>
-            </Row>
+                  {labels.map((count) => (
+                    <TimelineMark key={count} value={count * bar}>
+                      {count + 1}
+                    </TimelineMark>
+                  ))}
+                  <TimelinePlayhead />
+                </TimelineRuler>
+              </Row>
+              <Row className="bg-background">
+                <TimelineLane className="h-6">
+                  {locators.map((locator) => (
+                    <TimelineMark key={locator.at} value={locator.at}>
+                      <LocatorButton
+                        locator={locator}
+                        onJump={jumpToLocator}
+                        onRemove={removeLocator}
+                        onRename={renameLocator}
+                      />
+                    </TimelineMark>
+                  ))}
+                </TimelineLane>
+              </Row>
+            </div>
             {tracks.map((track) => (
               <Row
                 className={cn(
