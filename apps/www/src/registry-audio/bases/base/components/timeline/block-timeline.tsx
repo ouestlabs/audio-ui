@@ -1310,7 +1310,7 @@ export default function BlockTimeline() {
           {/* As wide as the lanes, so the stuck headers stay put however far it scrolls. */}
           <div
             className={cn(
-              "flex min-h-full w-max min-w-full flex-1 flex-col",
+              "flex min-h-full w-max min-w-full shrink-0 flex-col",
               marquee.rect && "select-none"
             )}
             {...marquee.handlers}
