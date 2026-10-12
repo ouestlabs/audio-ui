@@ -32,13 +32,6 @@ import {
   ContextMenuTrigger,
 } from "@/registry/bases/base/ui/context-menu";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/registry/bases/base/ui/dialog";
-import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
@@ -840,8 +833,6 @@ export default function BlockTimeline() {
   const [division, setDivision] = useState<GridDivision>("adaptive");
   const [triplet, setTriplet] = useState(false);
   const [snap, setSnap] = useState(true);
-  const [shortcutsOpen, setShortcutsOpen] = useState(false);
-  const openShortcuts = useCallback(() => setShortcutsOpen(true), []);
   // A stand-in for the mix's levels: the block plays nothing, so they move while it runs.
   const simulated = useSimulatedLevels(2);
   // What is heard: a muted track is silent, and while any track is soloed so is every other.
@@ -1163,33 +1154,6 @@ export default function BlockTimeline() {
               />
             </Button>
           </ButtonGroup>
-          <Dialog onOpenChange={setShortcutsOpen} open={shortcutsOpen}>
-            <DialogContent className="max-h-(--available-height) w-80 overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>Keyboard shortcuts</DialogTitle>
-                <DialogDescription>
-                  Select a clip or a track first.
-                </DialogDescription>
-              </DialogHeader>
-              <dl className="flex flex-col gap-2 text-sm">
-                {SHORTCUTS.map((shortcut) => (
-                  <div
-                    className="flex items-center justify-between gap-3"
-                    key={`${shortcut.action}-${shortcut.keys.join("+")}`}
-                  >
-                    <dt>{shortcut.action}</dt>
-                    <dd>
-                      <KbdGroup>
-                        {shortcut.keys.map((key) => (
-                          <Kbd key={key}>{key}</Kbd>
-                        ))}
-                      </KbdGroup>
-                    </dd>
-                  </div>
-                ))}
-              </dl>
-            </DialogContent>
-          </Dialog>
           <div
             className="hidden items-center gap-2 @7xl/panel:flex"
             ref={zoomSlotRef}
@@ -1264,9 +1228,28 @@ export default function BlockTimeline() {
                 Snap to grid
               </DropdownMenuCheckboxItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={openShortcuts}>
-                Keyboard shortcuts
-              </DropdownMenuItem>
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>
+                  Keyboard shortcuts
+                </DropdownMenuSubTrigger>
+                <DropdownMenuSubContent>
+                  <div className="flex w-80 flex-col gap-2 p-2 text-sm">
+                    {SHORTCUTS.map((shortcut) => (
+                      <div
+                        className="flex items-center justify-between gap-3"
+                        key={`${shortcut.action}-${shortcut.keys.join("+")}`}
+                      >
+                        <span>{shortcut.action}</span>
+                        <KbdGroup>
+                          {shortcut.keys.map((key) => (
+                            <Kbd key={key}>{key}</Kbd>
+                          ))}
+                        </KbdGroup>
+                      </div>
+                    ))}
+                  </div>
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
               {zoomInBar ? null : (
                 <>
                   <DropdownMenuSeparator />
