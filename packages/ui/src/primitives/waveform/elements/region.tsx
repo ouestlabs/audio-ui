@@ -1,13 +1,13 @@
 import type {
   ChangeEventDetails as ExtraChangeEventDetails,
   CommitEventDetails as ExtraCommitEventDetails,
-  RangeEdge as RegionEdge,
-  RangeValue as RegionValue,
 } from "@audio-ui/core";
 import {
   createWaveformRegionController,
   type WaveformRegionController,
+  type WaveformRegionEdge,
   type WaveformRegionOptions,
+  type WaveformRegionValue,
 } from "@audio-ui/core/waveform";
 import * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part";
@@ -21,7 +21,7 @@ import {
 
 type WithEdge<Details> = Details & {
   /** What moved: one edge, or the whole region with `"both"`. */
-  edge: RegionEdge;
+  edge: WaveformRegionEdge;
 };
 
 interface RegionContextValue {
@@ -32,7 +32,7 @@ interface RegionContextValue {
   shownRange: readonly [number, number];
   state: Region.State;
   /** The region as displayed. */
-  value: RegionValue;
+  value: WaveformRegionValue;
 }
 
 const RegionContext = React.createContext<RegionContextValue | null>(null);
@@ -51,7 +51,7 @@ function trackOf(region: Element | null): Element | null {
  */
 function useRegionDrag(
   context: RegionContextValue,
-  edge: RegionEdge,
+  edge: WaveformRegionEdge,
   enabled: boolean
 ) {
   const { controller, regionRef, shownRange } = context;
@@ -176,8 +176,8 @@ export namespace Region {
   };
 
   /** The region, as `[start, end]` in `duration` units. */
-  export type Value = RegionValue;
-  export type Edge = RegionEdge;
+  export type Value = WaveformRegionValue;
+  export type Edge = WaveformRegionEdge;
 
   export type ChangeEventReason = ChangeEventDetails["reason"];
   export type ChangeEventDetails =
