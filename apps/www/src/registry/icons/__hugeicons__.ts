@@ -18,6 +18,7 @@ export {
   Copy01Icon,
   Delete02Icon,
   Download01Icon,
+  DragDropVerticalIcon,
   HeadphonesIcon,
   InformationCircleIcon,
   KeyboardIcon,

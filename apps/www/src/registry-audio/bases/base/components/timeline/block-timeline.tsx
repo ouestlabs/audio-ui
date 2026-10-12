@@ -1559,7 +1559,11 @@ export default function BlockTimeline() {
                     <div className="contents">
                       <button
                         aria-label={`Move ${track.name}`}
-                        className="absolute inset-y-0 start-0 z-10 flex w-4 cursor-grab items-center justify-center text-muted-foreground"
+                        className={cn(
+                          "absolute inset-s-1 top-1/2 z-10 flex h-8 w-3.5 -translate-y-1/2 cursor-grab items-center justify-center rounded-sm text-muted-foreground/60 transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none active:cursor-grabbing",
+                          dragId === track.id &&
+                            "cursor-grabbing bg-muted text-foreground"
+                        )}
                         data-track-id={track.id}
                         draggable
                         onDragEnd={endTrackDrag}
@@ -1568,6 +1572,8 @@ export default function BlockTimeline() {
                         type="button"
                       >
                         <IconPlaceholder
+                          aria-hidden="true"
+                          className="size-3.5"
                           hugeicons="DragDropVerticalIcon"
                           lucide="GripVerticalIcon"
                           phosphor="DotsSixVerticalIcon"

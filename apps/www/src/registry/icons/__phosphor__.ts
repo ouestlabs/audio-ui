@@ -14,6 +14,7 @@ export {
   CheckCircleIcon,
   CheckIcon,
   CopyIcon,
+  DotsSixVerticalIcon,
   DotsThreeIcon,
   DownloadIcon,
   HeadphonesIcon,

@@ -18,6 +18,7 @@ export {
   IconDots,
   IconDownload,
   IconExclamationCircle,
+  IconGripVertical,
   IconHeadphones,
   IconInfoCircle,
   IconKeyboard,
