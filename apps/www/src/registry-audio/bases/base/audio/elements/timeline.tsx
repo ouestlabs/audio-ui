@@ -587,7 +587,7 @@ function TimelineTrackControls({
             className={cn(
               "@container/header relative flex w-full cursor-default flex-col justify-center border-s-4",
               // A strip is as tall as its buttons plus an equal margin all round, so they sit concentric with its corners.
-              compact ? "ps-[1.5px] pe-4 py-0" : "gap-1.5 ps-2 pe-5 py-2.5",
+              compact ? "ps-4 pe-4 py-0" : "gap-1.5 ps-4 pe-5 py-2.5",
               TRACK_COLORS[mix.color]?.edge
             )}
             onClick={handleHeaderClick}
