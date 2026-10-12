@@ -32,6 +32,15 @@ export {
 } from "./clip-controller";
 export { adjacentPoint } from "./locators";
 export {
+  createNavigatorController,
+  movedRange,
+  type NavigatorController,
+  type NavigatorMetrics,
+  type NavigatorOptions,
+  type NavigatorPart,
+  visibleRange,
+} from "./navigator";
+export {
   createTimelineController,
   type TimelineController,
   type TimelineOptions,
