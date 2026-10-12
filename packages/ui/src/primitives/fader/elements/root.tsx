@@ -1,19 +1,11 @@
 import {
-  clamp,
-  clampFinite,
-  createChangeEventDetails,
-  type ChangeEventDetails as ExtraChangeEventDetails,
-  type CommitEventDetails as ExtraCommitEventDetails,
-  type Point,
-  roundToStep,
-} from "@audio-ui/core";
-import {
+  createFaderController,
   DEFAULT_MAX,
   DEFAULT_MIN,
-  WHEEL_DELTA_EPSILON,
+  type FaderChangeEventDetails,
+  type FaderCommitEventDetails,
 } from "@audio-ui/core/fader";
 import * as React from "react";
-import { useWheel } from "../../../hooks/interactions/use-wheel";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
 import { useLocale } from "../../internal/use-locale";
@@ -22,16 +14,6 @@ import {
   FaderContext,
   type FaderContextValue,
 } from "../context";
-
-/** One thumb: the index a change is reported for. */
-export function faderChangeDetails<Reason extends Root.ChangeEventReason>(
-  reason: Reason,
-  event: Event
-) {
-  return Object.assign(createChangeEventDetails(reason, event), {
-    activeThumbIndex: 0,
-  }) as Root.ChangeEventDetails;
-}
 
 /**
  * Groups all parts of the fader, with audio defaults (vertical, -60…+6) and
@@ -59,177 +41,70 @@ export function Root(componentProps: Root.Props) {
     render,
     step = 1,
     style,
-    value: valueProp,
+    value,
     ...elementProps
   } = componentProps;
-  const isControlled = valueProp !== undefined;
-  const resetValue = defaultValue ?? min + (max - min) / 2;
-  const [uncontrolledValue, setUncontrolledValue] = React.useState(resetValue);
-  const value = clampFinite(
-    isControlled ? valueProp : uncontrolledValue,
-    min,
-    max
-  );
-
-  // Holds the dragged value until the pointer is released, so a controlled
-  // value that lags behind can't pull the thumb back mid-drag.
-  const [dragValue, setDragValue] = React.useState<number | null>(null);
-  const isFrozen = dragValue !== null;
-  React.useEffect(() => {
-    if (!isFrozen) {
-      return;
-    }
-    const release = () => setDragValue(null);
-    window.addEventListener("pointerup", release);
-    window.addEventListener("pointercancel", release);
-    return () => {
-      window.removeEventListener("pointerup", release);
-      window.removeEventListener("pointercancel", release);
-    };
-  }, [isFrozen]);
-  const displayedValue = dragValue ?? value;
-  const valueRef = React.useRef(displayedValue);
-  valueRef.current = displayedValue;
-
-  const change = React.useCallback(
-    (next: number, details: Root.ChangeEventDetails) => {
-      onValueChange?.(next, details);
-      if (details.isCanceled) {
-        return false;
-      }
-      if (!isControlled) {
-        setUncontrolledValue(next);
-      }
-      if (
-        isControlled &&
-        (details.reason === "drag" || details.reason === "track-press")
-      ) {
-        setDragValue(next);
-      }
-      return true;
-    },
-    [isControlled, onValueChange]
-  );
-
-  const commit = React.useCallback(
-    (next: number, details: Root.CommitEventDetails) => {
-      setDragValue(null);
-      onValueCommitted?.(next, details);
-    },
-    [onValueCommitted]
-  );
-
-  /** A change that is over as soon as it is made: reset, typed, wheel, keys. */
-  const setAtOnce = React.useCallback(
-    (
-      next: number,
-      reason: Exclude<Root.ChangeEventReason, "drag" | "track-press">,
-      event: Event
-    ) => {
-      if (next === valueRef.current) {
-        return;
-      }
-      if (change(next, faderChangeDetails(reason, event))) {
-        commit(next, { event, reason } as Root.CommitEventDetails);
-      }
-    },
-    [change, commit]
-  );
-
-  const reset = React.useCallback(
-    (event: KeyboardEvent | MouseEvent | PointerEvent) =>
-      setAtOnce(clamp(resetValue, min, max), "reset", event),
-    [max, min, resetValue, setAtOnce]
-  );
-
-  const type = React.useCallback(
-    (typed: number, event: Event) =>
-      setAtOnce(
-        clamp(roundToStep(typed, step, min), min, max),
-        "input-change",
-        event
-      ),
-    [max, min, setAtOnce, step]
-  );
-
-  const { wheelRef } = useWheel({
-    disabled,
-    onWheel: (event: WheelEvent, delta: Point) => {
-      if (Math.abs(delta.y) < WHEEL_DELTA_EPSILON) {
-        return;
-      }
-      const next = clamp(
-        roundToStep(valueRef.current + (delta.y < 0 ? step : -step), step, min),
-        min,
-        max
-      );
-      setAtOnce(next, "wheel", event);
-    },
-  });
-
   const resolvedLocale = useLocale(locale);
-  const formatter = React.useMemo(
-    () => new Intl.NumberFormat(resolvedLocale, format),
-    [format, resolvedLocale]
+
+  const [controller] = React.useState(() => createFaderController());
+  // Set on every render, before the snapshot is read, so it always shows the latest props.
+  controller.setOptions({
+    anchor,
+    defaultValue,
+    disabled,
+    format,
+    largeStep,
+    locale: resolvedLocale,
+    max,
+    min,
+    onValueChange,
+    onValueCommitted,
+    orientation,
+    step,
+    value,
+  });
+  const snapshot = React.useSyncExternalStore(
+    controller.subscribe,
+    controller.getSnapshot
   );
-  const [dragging, setDragging] = React.useState(false);
+
   const [labelId, setLabelId] = React.useState<string | undefined>();
   const inputId = React.useId();
   const inputRef = React.useRef<HTMLInputElement | null>(null);
   const thumbRef = React.useRef<HTMLElement | null>(null);
 
   const state = React.useMemo<Root.State>(
-    () => ({ disabled, dragging, orientation, value: displayedValue }),
-    [disabled, displayedValue, dragging, orientation]
+    () => ({
+      disabled: snapshot.disabled,
+      dragging: snapshot.dragging,
+      orientation: snapshot.orientation,
+      value: snapshot.value,
+    }),
+    [snapshot]
   );
 
   const contextValue = React.useMemo<FaderContextValue>(
     () => ({
-      anchor,
-      change,
-      commit,
-      disabled,
-      formatted: formatter.format(displayedValue),
+      anchor: snapshot.anchor,
+      controller,
+      disabled: snapshot.disabled,
+      formatted: snapshot.formatted,
       inputId,
       inputRef,
       labelId,
-      largeStep,
-      max,
-      min,
+      largeStep: snapshot.largeStep,
+      max: snapshot.max,
+      min: snapshot.min,
       name,
-      orientation,
-      reset,
-      set: setAtOnce,
-      setDragging,
+      orientation: snapshot.orientation,
       setLabelId,
       state,
-      step,
+      step: snapshot.step,
       thumbRef,
-      type,
-      value: displayedValue,
-      wheelRef,
+      type: controller.type,
+      value: snapshot.value,
     }),
-    [
-      anchor,
-      change,
-      commit,
-      disabled,
-      displayedValue,
-      formatter,
-      inputId,
-      labelId,
-      largeStep,
-      max,
-      min,
-      name,
-      orientation,
-      reset,
-      setAtOnce,
-      state,
-      step,
-      type,
-      wheelRef,
-    ]
+    [controller, inputId, labelId, name, snapshot, state]
   );
 
   const element = useRender({
@@ -248,14 +123,6 @@ export function Root(componentProps: Root.Props) {
   return <FaderContext value={contextValue}>{element}</FaderContext>;
 }
 
-type Details<Reason extends string, E extends Event> = ExtraChangeEventDetails<
-  Reason,
-  E
-> & {
-  /** Always `0`: a fader has one thumb. */
-  activeThumbIndex: number;
-};
-
 export namespace Root {
   export interface State {
     disabled: boolean;
@@ -265,22 +132,9 @@ export namespace Root {
     /** The value as displayed. */
     value: number;
   }
-  export type ChangeEventDetails =
-    | Details<"drag" | "track-press", PointerEvent>
-    | Details<"keyboard", KeyboardEvent>
-    | Details<"input-change", Event>
-    | Details<"wheel", WheelEvent>
-    | Details<"reset", KeyboardEvent | MouseEvent | PointerEvent>;
+  export type ChangeEventDetails = FaderChangeEventDetails;
   export type ChangeEventReason = ChangeEventDetails["reason"];
-  export type CommitEventDetails =
-    | ExtraCommitEventDetails<"drag" | "track-press", PointerEvent>
-    | ExtraCommitEventDetails<"keyboard", KeyboardEvent>
-    | ExtraCommitEventDetails<"input-change", Event>
-    | ExtraCommitEventDetails<"wheel", WheelEvent>
-    | ExtraCommitEventDetails<
-        "reset",
-        KeyboardEvent | MouseEvent | PointerEvent
-      >;
+  export type CommitEventDetails = FaderCommitEventDetails;
   export type CommitEventReason = CommitEventDetails["reason"];
 
   export interface Props

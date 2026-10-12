@@ -1,4 +1,4 @@
-import { clamp, roundToStep } from "@audio-ui/core";
+import { clamp } from "@audio-ui/core";
 import * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
@@ -27,17 +27,16 @@ export function Thumb(componentProps: Thumb.Props) {
     ...elementProps
   } = componentProps;
   const {
+    controller,
     disabled,
     formatted,
     inputId,
     inputRef,
     labelId,
-    largeStep,
     max,
     min,
     name,
     orientation,
-    set,
     state,
     step,
     thumbRef,
@@ -57,30 +56,11 @@ export function Thumb(componentProps: Thumb.Props) {
 
   const handleKeyDown = React.useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
-      const amount = event.shiftKey ? largeStep : step;
-      const forward = rtl && !vertical ? -amount : amount;
-      const targets: Record<string, number> = {
-        ArrowDown: value - amount,
-        ArrowLeft: value - forward,
-        ArrowRight: value + forward,
-        ArrowUp: value + amount,
-        End: max,
-        Home: min,
-        PageDown: value - largeStep,
-        PageUp: value + largeStep,
-      };
-      const target = targets[event.key];
-      if (target === undefined || disabled) {
-        return;
+      if (controller.keyDown(event.nativeEvent, event.currentTarget)) {
+        event.preventDefault();
       }
-      event.preventDefault();
-      set(
-        clamp(roundToStep(target, step, min), min, max),
-        "keyboard",
-        event.nativeEvent
-      );
     },
-    [disabled, largeStep, max, min, rtl, set, step, value, vertical]
+    [controller]
   );
   const setInput = React.useCallback(
     (node: HTMLInputElement | null) => {
