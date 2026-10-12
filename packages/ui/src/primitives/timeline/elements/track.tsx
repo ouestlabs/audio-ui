@@ -1,5 +1,7 @@
 import {
   createTrackController,
+  type TrackHeightChangeEventDetails,
+  type TrackHeightCommitEventDetails,
   type TrackOptions,
 } from "@audio-ui/core/timeline";
 import * as React from "react";
@@ -7,8 +9,6 @@ import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
 import { useTimelineContext } from "../context";
 import {
-  type TrackChangeEventDetails,
-  type TrackCommitEventDetails,
   TrackContext,
   type TrackContextValue,
   type TrackState,
@@ -91,8 +91,8 @@ export function Track(componentProps: Track.Props) {
 
 export namespace Track {
   export type State = TrackState;
-  export type ChangeEventDetails = TrackChangeEventDetails;
-  export type CommitEventDetails = TrackCommitEventDetails;
+  export type ChangeEventDetails = TrackHeightChangeEventDetails;
+  export type CommitEventDetails = TrackHeightCommitEventDetails;
   export interface Props extends PartProps<"div", State> {
     /** The height in px, or leave it out for the row to share what room there is. */
     height?: number | undefined;

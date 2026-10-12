@@ -1,11 +1,6 @@
 import type { TrackController } from "@audio-ui/core/timeline";
 import * as React from "react";
 
-export type {
-  TrackHeightChangeEventDetails as TrackChangeEventDetails,
-  TrackHeightCommitEventDetails as TrackCommitEventDetails,
-} from "@audio-ui/core/timeline";
-
 export type TrackState = {
   /** Whether a pointer is resizing the track. */
   resizing: boolean;
