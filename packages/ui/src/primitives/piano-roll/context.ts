@@ -1,9 +1,17 @@
 import type {
-  ChangeEventDetails as ExtraChangeEventDetails,
-  CommitEventDetails as ExtraCommitEventDetails,
-  Store,
-} from "@audio-ui/core";
-import type { Note, NoteId, RollBounds, Rows } from "@audio-ui/core/piano-roll";
+  Note,
+  NoteId,
+  PianoRollBand,
+  PianoRollChangeEventDetails,
+  PianoRollCommitEventDetails,
+  PianoRollController,
+  PianoRollEdit,
+  PianoRollNoteOffEventDetails,
+  PianoRollNoteOnEventDetails,
+  PianoRollSelectionEventDetails,
+  PianoRollSnapshot,
+  Rows,
+} from "@audio-ui/core/piano-roll";
 import * as React from "react";
 
 /** Set on the root: how many rows the roll draws. */
@@ -34,127 +42,32 @@ export type PianoRollState = {
 };
 
 /** What a change did to the notes. */
-export type Edit =
-  | "add"
-  | "duplicate"
-  | "move"
-  | "paste"
-  | "quantize"
-  | "remove"
-  | "resize"
-  | "velocity";
-
-type WithEdit<Details> = Details & {
-  /** What the change did: one gesture keeps one `edit` throughout. */
-  edit: Edit;
-};
-
-export type ValueChangeEventDetails =
-  | WithEdit<ExtraChangeEventDetails<"draw", PointerEvent>>
-  | WithEdit<ExtraChangeEventDetails<"drag", PointerEvent>>
-  | WithEdit<ExtraChangeEventDetails<"keyboard", KeyboardEvent>>
-  | WithEdit<ExtraChangeEventDetails<"double-click", MouseEvent>>
-  | WithEdit<ExtraChangeEventDetails<"input-change", Event>>;
-
-export type ValueCommitEventDetails =
-  | WithEdit<ExtraCommitEventDetails<"draw", PointerEvent>>
-  | WithEdit<ExtraCommitEventDetails<"drag", PointerEvent>>
-  | WithEdit<ExtraCommitEventDetails<"keyboard", KeyboardEvent>>
-  | WithEdit<ExtraCommitEventDetails<"double-click", MouseEvent>>
-  | WithEdit<ExtraCommitEventDetails<"input-change", Event>>;
-
-export type SelectionChangeEventDetails =
-  | ExtraChangeEventDetails<"press", PointerEvent>
-  | ExtraChangeEventDetails<"marquee", PointerEvent>
-  | ExtraChangeEventDetails<"keyboard", KeyboardEvent>
-  | ExtraChangeEventDetails<"draw", PointerEvent>
-  | ExtraChangeEventDetails<"drag", PointerEvent>
-  | ExtraChangeEventDetails<"double-click", MouseEvent>;
-
-type WithVelocity<Details> = Details & {
-  /** How hard the note is played, 0…1. */
-  velocity: number;
-};
-
-/** Why a pitch sounds: a key pressed, glided onto or played from the keyboard, or a note drawn, picked up or moved. */
-export type NoteOnEventDetails =
-  | WithVelocity<ExtraChangeEventDetails<"press", PointerEvent>>
-  | WithVelocity<ExtraChangeEventDetails<"glide", PointerEvent>>
-  | WithVelocity<ExtraChangeEventDetails<"keyboard", KeyboardEvent>>
-  | WithVelocity<ExtraChangeEventDetails<"draw", PointerEvent>>
-  | WithVelocity<ExtraChangeEventDetails<"drag", PointerEvent>>;
-
-export type NoteOffEventDetails =
-  | ExtraCommitEventDetails<"press", PointerEvent>
-  | ExtraCommitEventDetails<"glide", PointerEvent>
-  | ExtraCommitEventDetails<"keyboard", FocusEvent | KeyboardEvent>
-  | ExtraCommitEventDetails<"draw", PointerEvent>
-  | ExtraCommitEventDetails<"drag", PointerEvent>;
+export type Edit = PianoRollEdit;
 
 /** A selection rectangle, in px from the grid's top left corner. */
-export interface Band {
-  height: number;
-  left: number;
-  top: number;
-  width: number;
-}
+export type Band = PianoRollBand;
+
+export type ValueChangeEventDetails = PianoRollChangeEventDetails;
+export type ValueCommitEventDetails = PianoRollCommitEventDetails;
+export type SelectionChangeEventDetails = PianoRollSelectionEventDetails;
+export type NoteOnEventDetails = PianoRollNoteOnEventDetails;
+export type NoteOffEventDetails = PianoRollNoteOffEventDetails;
+
+/** What a view draws the roll from; a part reads only the piece it shows. */
+export type RollView = PianoRollSnapshot;
 
 export interface PianoRollContextValue {
-  actions: {
-    /** Proposes new notes; returns whether they were applied. */
-    change: (next: Note[], eventDetails: ValueChangeEventDetails) => boolean;
-    commit: (value: Note[], eventDetails: ValueCommitEventDetails) => void;
-    /** A new note id, unused by any note. */
-    createId: () => NoteId;
-    /** Focuses this note, or the grid with `null`, once the next render is done. */
-    focusAfterRender: (target: NoteId | null) => void;
-    /**
-     * Runs the editing command a key press stands for, Cmd/Ctrl+D duplicate,
-     * C copy, X cut, V paste, and Q quantize, and returns whether it was one.
-     */
-    shortcut: (event: KeyboardEvent) => boolean;
-    noteOff: (pitch: number, eventDetails: NoteOffEventDetails) => void;
-    /** Sounds a pitch; returns whether it sounded. */
-    noteOn: (pitch: number, eventDetails: NoteOnEventDetails) => boolean;
-    registerNote: (id: NoteId, node: HTMLElement | null) => void;
-    /** Proposes a selection; returns whether it was applied. */
-    select: (
-      ids: readonly NoteId[],
-      eventDetails: SelectionChangeEventDetails
-    ) => boolean;
-    setBand: (band: Band | null) => void;
-    setEditing: (editing: boolean) => void;
-    /** The timeline's units covered by one px of the grid. */
-    unitsPerPixel: () => number;
-  };
-  meta: {
-    bounds: RollBounds;
-    /** The length and velocity a drawn note gets: those last drawn or resized. */
-    drawTemplateRef: React.RefObject<{ length: number; velocity: number }>;
-    getNoteLabel: (note: Note) => string;
-    gridRef: React.RefObject<HTMLElement | null>;
-    /** The pitch last auditioned: where a note added from the keyboard goes. */
-    lastPitchRef: React.RefObject<number | null>;
-    rows: Rows;
-    /** What changes as the roll is used, outside the context: a part follows only its own piece, so editing one note does not render every other. */
-    view: Store<RollView>;
-    /** Latest selection, readable from event handlers. */
-    selectionRef: React.RefObject<ReadonlySet<NoteId>>;
-    /** Latest displayed notes, readable from event handlers. */
-    valueRef: React.RefObject<readonly Note[]>;
-  };
+  /** The framework-free roll behind every part: notes, selection, gestures, keys. */
+  controller: PianoRollController;
+  /** Focuses this note, or the grid with `null`, once the next render is done. */
+  focusAfterRender: (target: NoteId | null) => void;
+  getNoteLabel: (note: Note) => string;
+  gridRef: React.RefObject<HTMLElement | null>;
+  /** Records a note's element, and takes the focus when it was asked for. */
+  registerNote: (id: NoteId, node: HTMLElement | null) => void;
+  /** The roll's rows: what the pitches it draws, and where a note sits. */
+  rows: Rows;
   state: PianoRollState;
-}
-
-/** What changes as the roll is used. */
-export interface RollView {
-  /** Pitches sounding: auditioned here, or listed in `activePitches`. */
-  active: ReadonlySet<number>;
-  band: Band | null;
-  noteById: ReadonlyMap<NoteId, Note>;
-  /** The notes as displayed. */
-  notes: readonly Note[];
-  selection: ReadonlySet<NoteId>;
 }
 
 export const PianoRollContext =
@@ -168,12 +81,38 @@ export function usePianoRollContext(part: string): PianoRollContextValue {
   return context;
 }
 
-/** A piece of the roll's changing state, re-rendering only when that piece changes. */
-export function useRollView<T>(part: string, select: (view: RollView) => T): T {
-  const { meta } = usePianoRollContext(part);
+/**
+ * A piece of the roll's changing state, re-rendering only when that piece
+ * changes: `select` runs on every change, and `equal` says whether the piece
+ * it returned is the same as before.
+ */
+export function useRollView<T>(
+  part: string,
+  select: (view: RollView) => T,
+  equal: (a: T, b: T) => boolean = Object.is
+): T {
+  const { controller } = usePianoRollContext(part);
+  const last = React.useRef<{ value: T } | null>(null);
+  const getSnapshot = React.useCallback(() => {
+    const next = select(controller.getSnapshot());
+    if (last.current && equal(last.current.value, next)) {
+      return last.current.value;
+    }
+    last.current = { value: next };
+    return next;
+  }, [controller, equal, select]);
   return React.useSyncExternalStore(
-    meta.view.subscribe,
-    () => select(meta.view.get()),
-    () => select(meta.view.get())
+    controller.subscribe,
+    getSnapshot,
+    getSnapshot
+  );
+}
+
+/** Whether two objects have the same fields, each compared with `Object.is`. */
+export function shallowEqual<T extends object>(a: T, b: T): boolean {
+  const keys = Object.keys(a) as (keyof T)[];
+  return (
+    keys.length === Object.keys(b).length &&
+    keys.every((key) => Object.is(a[key], b[key]))
   );
 }

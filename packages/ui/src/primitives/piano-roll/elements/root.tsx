@@ -1,41 +1,24 @@
+import { pitchName } from "@audio-ui/core";
 import {
-  createChangeEventDetails,
-  createStore,
-  pitchName,
-} from "@audio-ui/core";
-import {
-  cellStart,
-  duplicateAfter,
+  createPianoRollController,
   type Note,
   type NoteId,
-  pasteNotes,
-  quantizeNotes,
-  type RollBounds,
-  rollRows,
-  sameNotes,
-  sanitizeNote,
+  type PianoRollOptions,
+  type Rows,
 } from "@audio-ui/core/piano-roll";
-import { snapToGrid } from "@audio-ui/core/timeline";
 import * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
 import { TimelineContext } from "../../timeline/context";
 import {
-  type Band,
-  type Edit,
-  type NoteOffEventDetails,
-  type NoteOnEventDetails,
   PianoRollContext,
   type PianoRollContextValue,
   type PianoRollState,
   ROWS_PROPERTY,
-  type RollView,
-  type SelectionChangeEventDetails,
+  shallowEqual,
   type ValueChangeEventDetails,
   type ValueCommitEventDetails,
 } from "../context";
-
-const EMPTY: readonly Note[] = [];
 
 const formatPosition = (value: number) => String(Math.round(value * 100) / 100);
 
@@ -64,7 +47,7 @@ export function Root(componentProps: Root.Props) {
     folded = false,
     getNoteLabel = describeNote,
     maxPitch = 72,
-    minLength: minLengthProp,
+    minLength,
     minPitch = 48,
     mode = "select",
     onNoteOff,
@@ -74,215 +57,92 @@ export function Root(componentProps: Root.Props) {
     onValueCommitted,
     ref,
     render,
-    selection: selectionProp,
+    selection,
     style,
-    value: valueProp,
+    value,
     ...elementProps
   } = componentProps;
   const timeline = React.use(TimelineContext);
   if (!timeline) {
     throw new Error("PianoRoll.Root must be used within Timeline.Root");
   }
-  const { duration, grid, step, zoom } = timeline.meta;
+  const { duration, grid, position, step, zoom } = timeline.meta;
   const disabled = disabledProp || timeline.state.disabled;
-  const minLength = minLengthProp ?? (grid.step > 0 ? grid.step : step);
-  const bounds = React.useMemo<RollBounds>(
-    () => ({ duration, maxPitch, minLength, minPitch }),
-    [duration, maxPitch, minLength, minPitch]
-  );
-
-  // Notes: props or state, kept on the roll.
-  const isControlled = valueProp !== undefined;
-  const [uncontrolledValue, setUncontrolledValue] = React.useState<
-    readonly Note[]
-  >(() => defaultValue ?? EMPTY);
-  const rawValue = isControlled ? valueProp : uncontrolledValue;
-  // A note keeps its sanitized object while it is the same note, so an edit
-  // renders the notes it touches and not all of them.
-  // biome-ignore lint/correctness/useExhaustiveDependencies: new bounds sanitize every note again.
-  const sanitized = React.useMemo(() => new WeakMap<Note, Note>(), [bounds]);
-  const value = React.useMemo(
-    () =>
-      rawValue.map((note) => {
-        const known = sanitized.get(note);
-        if (known) {
-          return known;
-        }
-        const next = sanitizeNote(note, bounds);
-        sanitized.set(note, next);
-        return next;
-      }),
-    [bounds, rawValue, sanitized]
-  );
-
-  // While a gesture edits the notes, they follow the pointer even if a
-  // controlled value lags behind; when it ends the controlled value rules.
-  const [editing, setEditingState] = React.useState(false);
-  const [dragValue, setDragValue] = React.useState<readonly Note[] | null>(
-    null
-  );
-  const editingRef = React.useRef(false);
-  const notes = dragValue ?? value;
-  const valueRef = React.useRef(notes);
-  valueRef.current = notes;
-
-  const setEditing = React.useCallback((next: boolean) => {
-    editingRef.current = next;
-    setEditingState(next);
-    if (!next) {
-      setDragValue(null);
-    }
-  }, []);
-
-  const change = React.useCallback(
-    (next: Note[], eventDetails: ValueChangeEventDetails) => {
-      if (sameNotes(next, valueRef.current)) {
-        return false;
-      }
-      onValueChange?.(next, eventDetails);
-      if (eventDetails.isCanceled) {
-        return false;
-      }
-      valueRef.current = next;
-      if (!isControlled) {
-        setUncontrolledValue(next);
-      }
-      if (isControlled && editingRef.current) {
-        setDragValue(next);
-      }
-      return true;
-    },
-    [isControlled, onValueChange]
-  );
-
-  const commit = React.useCallback(
-    (committed: Note[], eventDetails: ValueCommitEventDetails) => {
-      onValueCommitted?.(committed, eventDetails);
-    },
-    [onValueCommitted]
-  );
-
-  // Selection: props or state.
-  const isSelectionControlled = selectionProp !== undefined;
-  const [uncontrolledSelection, setUncontrolledSelection] = React.useState<
-    readonly NoteId[]
-  >(() => defaultSelection ?? []);
-  const selectionList = isSelectionControlled
-    ? selectionProp
-    : uncontrolledSelection;
-  const selection = React.useMemo(
-    () => new Set(selectionList),
-    [selectionList]
-  );
-  const selectionRef = React.useRef<ReadonlySet<NoteId>>(selection);
-  selectionRef.current = selection;
-
-  const select = React.useCallback(
-    (ids: readonly NoteId[], eventDetails: SelectionChangeEventDetails) => {
-      const { current } = selectionRef;
-      if (ids.length === current.size && ids.every((id) => current.has(id))) {
-        return false;
-      }
-      onSelectionChange?.(ids, eventDetails);
-      if (eventDetails.isCanceled) {
-        return false;
-      }
-      selectionRef.current = new Set(ids);
-      if (!isSelectionControlled) {
-        setUncontrolledSelection(ids);
-      }
-      return true;
-    },
-    [isSelectionControlled, onSelectionChange]
-  );
-
-  // Auditioning: what sounds, and what lights the keys and rows.
-  const [sounding, setSounding] = React.useState<ReadonlySet<number>>(
-    () => new Set()
-  );
-  const active = React.useMemo(
-    () => new Set([...sounding, ...(activePitches ?? [])]),
-    [activePitches, sounding]
-  );
-  const lastPitchRef = React.useRef<number | null>(null);
-
-  const noteOn = React.useCallback(
-    (pitch: number, eventDetails: NoteOnEventDetails) => {
-      if (disabled) {
-        return false;
-      }
-      onNoteOn?.(pitch, eventDetails);
-      if (eventDetails.isCanceled) {
-        return false;
-      }
-      lastPitchRef.current = pitch;
-      setSounding((current) => new Set(current).add(pitch));
-      return true;
-    },
-    [disabled, onNoteOn]
-  );
-
-  const noteOff = React.useCallback(
-    (pitch: number, eventDetails: NoteOffEventDetails) => {
-      setSounding((current) => {
-        const next = new Set(current);
-        next.delete(pitch);
-        return next;
-      });
-      onNoteOff?.(pitch, eventDetails);
-    },
-    [onNoteOff]
-  );
-
-  const nextIdRef = React.useRef(0);
-  const createId = React.useCallback(() => {
-    if (createNoteId) {
-      return createNoteId();
-    }
-    const taken = new Set(valueRef.current.map((note) => note.id));
-    let id = `note-${nextIdRef.current}`;
-    while (taken.has(id)) {
-      nextIdRef.current += 1;
-      id = `note-${nextIdRef.current}`;
-    }
-    nextIdRef.current += 1;
-    return id;
-  }, [createNoteId]);
-
-  const gridRef = React.useRef<HTMLElement | null>(null);
-  const unitsPerPixel = React.useCallback(() => {
-    if (zoom !== null) {
-      return 1 / zoom;
-    }
-    const width = gridRef.current?.getBoundingClientRect().width ?? 0;
-    return duration / Math.max(width, 1);
-  }, [duration, zoom]);
 
   // Focus that has to wait for the notes to render: a note just added, or
   // where focus goes once the focused note is removed.
   const noteElementsRef = React.useRef(new Map<NoteId, HTMLElement>());
   const pendingFocusRef = React.useRef<{ target: NoteId | null } | null>(null);
-  const registerNote = React.useCallback(
-    (id: NoteId, node: HTMLElement | null) => {
-      if (node) {
-        noteElementsRef.current.set(id, node);
-        // A note added by the edit that asked for focus mounts after the
-        // roll's own render.
-        if (pendingFocusRef.current?.target === id) {
-          pendingFocusRef.current = null;
-          node.focus({ preventScroll: true });
-        }
-      } else {
-        noteElementsRef.current.delete(id);
-      }
-    },
-    []
-  );
   const [, setFocusRequest] = React.useState(0);
   const focusAfterRender = React.useCallback((target: NoteId | null) => {
     pendingFocusRef.current = { target };
     setFocusRequest((count) => count + 1);
   }, []);
+  const gridRef = React.useRef<HTMLElement | null>(null);
+
+  const options: PianoRollOptions = {
+    activePitches,
+    createNoteId,
+    defaultSelection,
+    defaultValue,
+    disabled,
+    folded,
+    maxPitch,
+    minLength,
+    minPitch,
+    mode,
+    onNoteOff,
+    onNoteOn,
+    onSelectionChange,
+    onValueChange,
+    onValueCommitted,
+    requestFocus: focusAfterRender,
+    selection,
+    timeline: {
+      duration,
+      grid,
+      position: () => position.get(),
+      step,
+      zoom,
+    },
+    value,
+  };
+  const [controller] = React.useState(() => createPianoRollController(options));
+  // Set on every render, so the roll always reads the latest props.
+  controller.setOptions(options);
+
+  // The roll's own state and rows: Root re-renders on these, and not on each
+  // edit, which only the parts showing the edited notes render for.
+  const lastState = React.useRef<PianoRollState | null>(null);
+  const readState = React.useCallback(() => {
+    const view = controller.getSnapshot();
+    const next: PianoRollState = {
+      disabled: view.disabled,
+      editing: view.editing,
+      folded: view.folded,
+      mode: view.mode,
+    };
+    if (lastState.current && shallowEqual(lastState.current, next)) {
+      return lastState.current;
+    }
+    lastState.current = next;
+    return next;
+  }, [controller]);
+  const rollState = React.useSyncExternalStore(
+    controller.subscribe,
+    readState,
+    readState
+  );
+  const readRows = React.useCallback(
+    () => controller.getSnapshot().rows,
+    [controller]
+  );
+  const rows: Rows = React.useSyncExternalStore(
+    controller.subscribe,
+    readRows,
+    readRows
+  );
+
   // After every render: cheap, and whatever rendered the note is done.
   React.useEffect(() => {
     const pending = pendingFocusRef.current;
@@ -300,218 +160,45 @@ export function Root(componentProps: Root.Props) {
     }
   });
 
-  const [band, setBand] = React.useState<Band | null>(null);
-  const drawTemplateRef = React.useRef({ length: minLength, velocity: 1 });
-
-  // The rows change when the pitches carrying notes do, not at every edit.
-  const pitchKey = folded
-    ? [...new Set(notes.map((note) => note.pitch))]
-        .sort((a, b) => a - b)
-        .join(",")
-    : "";
-  // biome-ignore lint/correctness/useExhaustiveDependencies: `pitchKey` stands for the pitches of `notes`.
-  const rows = React.useMemo(
-    () => rollRows(notes, minPitch, maxPitch, folded),
-    [folded, maxPitch, minPitch, pitchKey]
-  );
-  const noteById = React.useMemo(
-    () => new Map(notes.map((note) => [note.id, note])),
-    [notes]
-  );
-
-  const state = React.useMemo<Root.State>(
-    () => ({ disabled, editing, folded: rows.folded, mode }),
-    [disabled, editing, mode, rows.folded]
-  );
-
-  // Copied notes: kept on the roll, so a paste works from any note or the grid.
-  const clipboardRef = React.useRef<readonly Note[]>([]);
-  const { position } = timeline.meta;
-
-  /** Applies an edit made from the keyboard and commits it at once; returns whether it was applied. */
-  const applyKeyboardEdit = (
-    next: Note[],
-    edit: Edit,
-    event: KeyboardEvent
-  ): boolean => {
-    const eventDetails = Object.assign(
-      createChangeEventDetails("keyboard", event),
-      { edit }
-    ) as ValueChangeEventDetails;
-    if (!change(next, eventDetails)) {
-      return false;
-    }
-    commit([...valueRef.current], { edit, event, reason: "keyboard" });
-    return true;
-  };
-
-  const selectIds = (ids: readonly NoteId[], event: KeyboardEvent) =>
-    select(
-      ids,
-      createChangeEventDetails("keyboard", event) as SelectionChangeEventDetails
-    );
-
-  const duplicateSelection = (event: KeyboardEvent) => {
-    const result = duplicateAfter(
-      valueRef.current,
-      selectionRef.current,
-      createId,
-      bounds
-    );
-    if (result && applyKeyboardEdit(result.notes, "duplicate", event)) {
-      selectIds(result.copies, event);
-    }
-  };
-
-  /** As in a DAW: with nothing selected, everything is quantized. */
-  const quantizeSelection = (event: KeyboardEvent) => {
-    const { current } = valueRef;
-    const ids =
-      selectionRef.current.size > 0
-        ? selectionRef.current
-        : new Set(current.map((note) => note.id));
-    applyKeyboardEdit(
-      quantizeNotes(current, ids, (start) => snapToGrid(start, grid), bounds),
-      "quantize",
-      event
-    );
-  };
-
-  const copySelection = (event: KeyboardEvent, cut: boolean) => {
-    const { current } = valueRef;
-    const chosen = selectionRef.current;
-    if (chosen.size === 0) {
-      return;
-    }
-    clipboardRef.current = current.filter((note) => chosen.has(note.id));
-    if (cut) {
-      applyKeyboardEdit(
-        current.filter((note) => !chosen.has(note.id)),
-        "remove",
-        event
-      );
-      selectIds([], event);
-    }
-  };
-
-  const pasteClipboard = (event: KeyboardEvent) => {
-    const result = pasteNotes(
-      valueRef.current,
-      clipboardRef.current,
-      cellStart(position.get(), grid),
-      createId,
-      bounds
-    );
-    if (result && applyKeyboardEdit(result.notes, "paste", event)) {
-      selectIds(result.pasted, event);
-    }
-  };
-
-  const shortcut = (event: KeyboardEvent): boolean => {
-    if (event.altKey) {
-      return false;
-    }
-    const key = event.key.toLowerCase();
-    const commands: Record<
-      string,
-      ((event: KeyboardEvent) => void) | undefined
-    > =
-      event.metaKey || event.ctrlKey
-        ? {
-            c: (copied) => copySelection(copied, false),
-            d: duplicateSelection,
-            v: pasteClipboard,
-            x: (cut) => copySelection(cut, true),
-          }
-        : { q: quantizeSelection };
-    const run = commands[key];
-    run?.(event);
-    return run !== undefined;
-  };
-
-  // What each part follows lives in a store, so editing one note renders it
-  // and not the whole roll.
-  const [view] = React.useState(() =>
-    createStore<RollView>({ active, band, noteById, notes, selection })
-  );
-  React.useLayoutEffect(() => {
-    view.set({ active, band, noteById, notes, selection });
-  }, [active, band, noteById, notes, selection, view]);
-
-  // The actions never change identity, so the parts reading them are not
-  // rendered when a new callback is passed on every render.
-  const latest = React.useRef({
-    change,
-    commit,
-    createId,
-    focusAfterRender,
-    noteOff,
-    noteOn,
-    registerNote,
-    select,
-    setEditing,
-    shortcut,
-    unitsPerPixel,
-  });
-  latest.current = {
-    change,
-    commit,
-    createId,
-    focusAfterRender,
-    noteOff,
-    noteOn,
-    registerNote,
-    select,
-    setEditing,
-    shortcut,
-    unitsPerPixel,
-  };
-  const actions = React.useMemo<PianoRollContextValue["actions"]>(
-    () => ({
-      change: (next, details) => latest.current.change(next, details),
-      commit: (committed, details) => latest.current.commit(committed, details),
-      createId: () => latest.current.createId(),
-      focusAfterRender: (target) => latest.current.focusAfterRender(target),
-      noteOff: (pitch, details) => latest.current.noteOff(pitch, details),
-      noteOn: (pitch, details) => latest.current.noteOn(pitch, details),
-      registerNote: (id, node) => latest.current.registerNote(id, node),
-      select: (ids, details) => latest.current.select(ids, details),
-      setBand,
-      setEditing: (next) => latest.current.setEditing(next),
-      shortcut: (event) => latest.current.shortcut(event),
-      unitsPerPixel: () => latest.current.unitsPerPixel(),
-    }),
+  const registerNote = React.useCallback(
+    (id: NoteId, node: HTMLElement | null) => {
+      if (node) {
+        noteElementsRef.current.set(id, node);
+        // A note added by the edit that asked for focus mounts after the
+        // roll's own render.
+        if (pendingFocusRef.current?.target === id) {
+          pendingFocusRef.current = null;
+          node.focus({ preventScroll: true });
+        }
+      } else {
+        noteElementsRef.current.delete(id);
+      }
+    },
     []
   );
 
   const context = React.useMemo<PianoRollContextValue>(
     () => ({
-      actions,
-      meta: {
-        bounds,
-        drawTemplateRef,
-        getNoteLabel,
-        gridRef,
-        lastPitchRef,
-        rows,
-        selectionRef,
-        valueRef,
-        view,
-      },
-      state,
+      controller,
+      focusAfterRender,
+      getNoteLabel,
+      gridRef,
+      registerNote,
+      rows,
+      state: rollState,
     }),
-    [actions, bounds, getNoteLabel, rows, state, view]
+    [controller, focusAfterRender, getNoteLabel, registerNote, rollState, rows]
   );
 
   const element = useRender({
     defaultTagName: "div",
     props: mergeProps<"div">(
       { style: { [ROWS_PROPERTY as string]: rows.pitches.length } },
-      { ...elementProps, ...resolveStyling(className, style, state) }
+      { ...elementProps, ...resolveStyling(className, style, rollState) }
     ),
     ref,
     render,
-    state,
+    state: rollState,
   });
 
   return <PianoRollContext value={context}>{element}</PianoRollContext>;
@@ -522,6 +209,7 @@ export namespace Root {
   export type Note = import("@audio-ui/core/piano-roll").Note;
   export type NoteId = import("@audio-ui/core/piano-roll").NoteId;
   export type Edit = import("../context").Edit;
+  export type Band = import("../context").Band;
   export type ChangeEventReason = ChangeEventDetails["reason"];
   export type ChangeEventDetails = ValueChangeEventDetails;
   export type CommitEventDetails = ValueCommitEventDetails;

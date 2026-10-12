@@ -1,9 +1,4 @@
-import { createChangeEventDetails, isReleased } from "@audio-ui/core";
-import {
-  changeVelocity,
-  type NoteId,
-  type Note as NoteValue,
-} from "@audio-ui/core/piano-roll";
+import type { Note as NoteValue } from "@audio-ui/core/piano-roll";
 import * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
@@ -14,14 +9,8 @@ import {
   type PianoRollState,
   usePianoRollContext,
   useRollView,
-  type ValueChangeEventDetails,
-  type ValueCommitEventDetails,
   VELOCITY_PROPERTY,
 } from "../context";
-
-/** What the arrow keys change a velocity by; Page Up/Down move five times as far. */
-const VELOCITY_STEP = 0.05;
-const VELOCITY_LARGE_STEP = 0.25;
 
 const describeVelocity = (velocity: number) => `${Math.round(velocity * 100)}%`;
 
@@ -53,16 +42,6 @@ export namespace VelocityLane {
   export type Props = PartProps<"div", State>;
 }
 
-interface VelocityGesture {
-  changed: boolean;
-  /** The lane's height: a drag across all of it goes from silent to full. */
-  height: number;
-  ids: ReadonlySet<NoteId>;
-  origin: NoteValue[];
-  pointerId: number;
-  startY: number;
-}
-
 /**
  * One note's velocity, as a bar from the bottom of the lane: its height is
  * the velocity, through the `--piano-roll-velocity` CSS variable. Dragging it
@@ -88,7 +67,8 @@ export function Velocity(componentProps: Velocity.Props) {
     style,
     ...elementProps
   } = componentProps;
-  const { actions, meta, state: rollState } = usePianoRollContext("Velocity");
+  const roll = usePianoRollContext("Velocity");
+  const { controller, getNoteLabel, state: rollState } = roll;
   const lane = React.use(LaneContext);
   if (!lane) {
     throw new Error(
@@ -98,45 +78,13 @@ export function Velocity(componentProps: Velocity.Props) {
   const shown = useRollView("Velocity", (view) =>
     view.noteById.get(noteProp.id)
   );
-  const note = shown ?? noteProp;
+  const note: NoteValue = shown ?? noteProp;
   const velocity = note.velocity ?? 1;
   const { disabled } = rollState;
   const selected = useRollView("Velocity", (view) =>
     view.selection.has(note.id)
   );
   const inputRef = React.useRef<HTMLInputElement>(null);
-  const gestureRef = React.useRef<VelocityGesture | null>(null);
-
-  /** The notes an edit acts on: the selection, when this note is part of it. */
-  const targets = React.useCallback(() => {
-    const selection = meta.selectionRef.current;
-    return selection.has(note.id) ? selection : new Set([note.id]);
-  }, [meta.selectionRef, note.id]);
-
-  const remember = React.useCallback(() => {
-    const latest = meta.valueRef.current.find((other) => other.id === note.id);
-    meta.drawTemplateRef.current.velocity = latest?.velocity ?? 1;
-  }, [meta.drawTemplateRef, meta.valueRef, note.id]);
-
-  /** Moves the velocity by `delta` from the keyboard or the input, committing at once. */
-  const nudge = React.useCallback(
-    (delta: number, reason: "input-change" | "keyboard", event: Event) => {
-      const next = changeVelocity(meta.valueRef.current, targets(), delta);
-      const eventDetails = Object.assign(
-        createChangeEventDetails(reason, event),
-        { edit: "velocity" as const }
-      ) as ValueChangeEventDetails;
-      if (actions.change(next, eventDetails)) {
-        actions.commit([...meta.valueRef.current], {
-          edit: "velocity",
-          event,
-          reason,
-        } as ValueCommitEventDetails);
-        remember();
-      }
-    },
-    [actions, meta.valueRef, remember, targets]
-  );
 
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
     if (event.button !== 0 || disabled) {
@@ -144,74 +92,12 @@ export function Velocity(componentProps: Velocity.Props) {
     }
     event.preventDefault();
     inputRef.current?.focus({ focusVisible: false, preventScroll: true });
-    const selection = meta.selectionRef.current;
-    if (event.shiftKey) {
-      actions.select(
-        selection.has(note.id)
-          ? [...selection].filter((id) => id !== note.id)
-          : [...selection, note.id],
-        createChangeEventDetails("press", event.nativeEvent)
-      );
-      return;
-    }
-    let ids = selection;
-    if (!selection.has(note.id)) {
-      ids = new Set([note.id]);
-      actions.select(
-        [note.id],
-        createChangeEventDetails("press", event.nativeEvent)
-      );
-    }
-    event.currentTarget.setPointerCapture?.(event.pointerId);
-    actions.setEditing(true);
-    gestureRef.current = {
-      changed: false,
-      height: lane.elementRef.current?.getBoundingClientRect().height ?? 0,
-      ids,
-      origin: [...meta.valueRef.current],
-      pointerId: event.pointerId,
-      startY: event.clientY,
-    };
-  };
-
-  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
-    const gesture = gestureRef.current;
-    if (!gesture || gesture.pointerId !== event.pointerId || !gesture.height) {
-      return;
-    }
-    if (isReleased(event)) {
-      handlePointerEnd(event);
-      return;
-    }
-    // Up is louder: the bar follows the pointer.
-    const delta = (gesture.startY - event.clientY) / gesture.height;
-    const next = changeVelocity(gesture.origin, gesture.ids, delta);
-    const eventDetails = Object.assign(
-      createChangeEventDetails("drag", event.nativeEvent),
-      { edit: "velocity" as const }
+    controller.pressVelocity(
+      note.id,
+      event.nativeEvent,
+      event.currentTarget,
+      lane.elementRef.current
     );
-    if (actions.change(next, eventDetails)) {
-      gesture.changed = true;
-    }
-  };
-
-  const handlePointerEnd = (event: React.PointerEvent<HTMLDivElement>) => {
-    const gesture = gestureRef.current;
-    if (!gesture || gesture.pointerId !== event.pointerId) {
-      return;
-    }
-    gestureRef.current = null;
-    // Read before settling: the notes fall back to the known value after.
-    const committed = [...meta.valueRef.current];
-    actions.setEditing(false);
-    if (gesture.changed) {
-      actions.commit(committed, {
-        edit: "velocity",
-        event: event.nativeEvent,
-        reason: "drag",
-      });
-      remember();
-    }
   };
 
   const handleKeyDown = React.useCallback(
@@ -219,34 +105,22 @@ export function Velocity(componentProps: Velocity.Props) {
       if (disabled) {
         return;
       }
-      const target = {
-        ArrowDown: velocity - VELOCITY_STEP,
-        ArrowLeft: velocity - VELOCITY_STEP,
-        ArrowRight: velocity + VELOCITY_STEP,
-        ArrowUp: velocity + VELOCITY_STEP,
-        End: 1,
-        Home: 0,
-        PageDown: velocity - VELOCITY_LARGE_STEP,
-        PageUp: velocity + VELOCITY_LARGE_STEP,
-      }[event.key];
-      if (target === undefined) {
-        return;
+      if (controller.keyVelocity(note.id, event.nativeEvent)) {
+        event.preventDefault();
       }
-      event.preventDefault();
-      nudge(target - velocity, "keyboard", event.nativeEvent);
     },
-    [disabled, nudge, velocity]
+    [controller, disabled, note.id]
   );
 
   const handleChange = React.useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      nudge(
-        Number(event.currentTarget.value) - velocity,
-        "input-change",
+      controller.setVelocity(
+        note.id,
+        Number(event.currentTarget.value),
         event.nativeEvent
       );
     },
-    [nudge, velocity]
+    [controller, note.id]
   );
 
   const state = React.useMemo<Velocity.State>(
@@ -264,8 +138,7 @@ export function Velocity(componentProps: Velocity.Props) {
             <input
               aria-describedby={ariaDescribedBy}
               aria-label={
-                ariaLabel ??
-                (ariaLabelledBy ? undefined : meta.getNoteLabel(note))
+                ariaLabel ?? (ariaLabelledBy ? undefined : getNoteLabel(note))
               }
               aria-labelledby={ariaLabelledBy}
               aria-valuetext={getAriaValueText(velocity)}
@@ -282,11 +155,7 @@ export function Velocity(componentProps: Velocity.Props) {
             />
           </>
         ),
-        onLostPointerCapture: handlePointerEnd,
-        onPointerCancel: handlePointerEnd,
         onPointerDown: handlePointerDown,
-        onPointerMove: handlePointerMove,
-        onPointerUp: handlePointerEnd,
         style: {
           ...placedAt(note.start),
           [VELOCITY_PROPERTY as string]: velocity,

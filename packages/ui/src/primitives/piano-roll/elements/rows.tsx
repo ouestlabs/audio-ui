@@ -10,8 +10,8 @@ import { placedOnRow, usePianoRollContext, useRollView } from "../context";
  * element of its own.
  */
 export function Rows({ children }: Rows.Props) {
-  const { meta } = usePianoRollContext("Rows");
-  return <>{meta.rows.pitches.map((pitch) => children(pitch))}</>;
+  const { rows } = usePianoRollContext("Rows");
+  return <>{rows.pitches.map((pitch) => children(pitch))}</>;
 }
 
 export namespace Rows {
@@ -28,7 +28,7 @@ export namespace Rows {
 export function Row(componentProps: Row.Props) {
   const { className, pitch, ref, render, style, ...elementProps } =
     componentProps;
-  const { meta, state: rollState } = usePianoRollContext("Row");
+  const { rows, state: rollState } = usePianoRollContext("Row");
   const active = useRollView("Row", (view) => view.active.has(pitch));
   const state = React.useMemo<Row.State>(
     () => ({
@@ -46,7 +46,7 @@ export function Row(componentProps: Row.Props) {
       {
         "aria-hidden": true,
         style: {
-          ...placedOnRow(meta.rows.rowOf(pitch)),
+          ...placedOnRow(rows.rowOf(pitch)),
           left: 0,
           pointerEvents: "none",
           right: 0,

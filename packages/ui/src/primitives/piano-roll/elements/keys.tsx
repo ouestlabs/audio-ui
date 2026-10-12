@@ -1,11 +1,6 @@
-import { createChangeEventDetails } from "@audio-ui/core";
 import * as React from "react";
 import { Root as PianoRoot } from "../../piano/elements/root";
-import {
-  type SelectionChangeEventDetails,
-  usePianoRollContext,
-  useRollView,
-} from "../context";
+import { usePianoRollContext, useRollView } from "../context";
 
 /**
  * The keyboard down the side of the roll: a `Piano` laid out on the roll's
@@ -16,52 +11,21 @@ import {
  */
 export function Keys(componentProps: Keys.Props) {
   const { disabled = false, ...elementProps } = componentProps;
-  const { actions, meta, state } = usePianoRollContext("Keys");
-  const { noteOff, noteOn, select } = actions;
-  const { rows, selectionRef, valueRef } = meta;
+  const { controller, rows, state } = usePianoRollContext("Keys");
   const active = useRollView("Keys", (view) => view.active);
-
-  const handleNoteOn = React.useCallback(
-    (pitch: number, eventDetails: PianoRoot.NoteOnEventDetails) => {
-      if (!eventDetails.event.shiftKey) {
-        noteOn(pitch, Object.assign(eventDetails, { velocity: 1 }));
-        return;
-      }
-      eventDetails.cancel();
-      if (eventDetails.reason === "glide") {
-        return;
-      }
-      // Takes every note on the row, or gives them all back.
-      const row = valueRef.current
-        .filter((note) => note.pitch === pitch)
-        .map((note) => note.id);
-      if (row.length === 0) {
-        return;
-      }
-      const selection = selectionRef.current;
-      const all = row.every((id) => selection.has(id));
-      select(
-        all
-          ? [...selection].filter((id) => !row.includes(id))
-          : [...new Set([...selection, ...row])],
-        createChangeEventDetails(
-          eventDetails.reason,
-          eventDetails.event
-        ) as SelectionChangeEventDetails
-      );
-    },
-    [noteOn, select, selectionRef, valueRef]
-  );
-
   const activeNotes = React.useMemo(() => [...active], [active]);
-
+  const handleNoteOn = React.useCallback(
+    (pitch: number, eventDetails: PianoRoot.NoteOnEventDetails) =>
+      controller.keyOn(pitch, eventDetails),
+    [controller]
+  );
   return (
     <PianoRoot
       {...elementProps}
       activeNotes={activeNotes}
       disabled={disabled || state.disabled}
       layout="even"
-      onNoteOff={noteOff}
+      onNoteOff={controller.keyOff}
       onNoteOn={handleNoteOn}
       orientation="vertical"
       pitches={rows.pitches}
