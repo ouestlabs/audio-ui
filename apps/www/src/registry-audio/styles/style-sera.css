@@ -485,7 +485,7 @@
   }
 
   .cn-timeline-range-handle {
-    @apply rounded-none bg-primary/60 hover:bg-primary has-focus-visible:bg-primary;
+    @apply bg-primary/45 hover:bg-primary/70 has-focus-visible:bg-primary/80;
   }
 
   .cn-timeline-clip {
@@ -505,7 +505,7 @@
   }
 
   .cn-timeline-clip-fade-handle {
-    @apply rounded-[1px] border border-foreground/80 bg-background hover:bg-foreground has-focus-visible:bg-foreground;
+    @apply rounded-full border border-foreground/80 bg-background shadow-xs hover:bg-foreground has-focus-visible:bg-foreground;
   }
 
   .cn-timeline-navigator {

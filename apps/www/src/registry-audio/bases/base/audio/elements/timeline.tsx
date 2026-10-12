@@ -200,7 +200,8 @@ function TimelineRangeHandle({
   return (
     <TimelinePrimitive.RangeHandle
       className={cn(
-        "cn-timeline-range-handle absolute inset-y-0 w-1.5 cursor-ew-resize data-[edge=end]:right-0 data-[edge=start]:left-0",
+        "cn-timeline-range-handle absolute inset-y-0 w-2 cursor-ew-resize data-[edge=end]:right-0 data-[edge=end]:rounded-e-[inherit] data-[edge=start]:left-0 data-[edge=start]:rounded-s-[inherit]",
+        "before:absolute before:inset-y-1 before:left-1/2 before:w-px before:-translate-x-1/2 before:bg-foreground/60 before:content-['']",
         "after:absolute after:-inset-x-1.5 after:inset-y-0 pointer-coarse:after:-inset-x-3",
         className
       )}
@@ -247,7 +248,8 @@ function TimelineClipHandle({
   return (
     <TimelinePrimitive.ClipHandle
       className={cn(
-        "cn-timeline-clip-handle absolute inset-y-0 z-10 w-1.5 cursor-ew-resize data-[edge=end]:right-0 data-[edge=start]:left-0",
+        "cn-timeline-clip-handle absolute inset-y-0 z-10 w-2 cursor-ew-resize data-[edge=end]:right-0 data-[edge=start]:left-0",
+        "before:absolute before:inset-y-[30%] before:left-1/2 before:w-px before:-translate-x-1/2 before:bg-foreground/60 before:opacity-0 before:transition-opacity before:content-[''] hover:before:opacity-100 has-focus-visible:before:opacity-100",
         "after:absolute after:-inset-x-1.5 after:inset-y-0 pointer-coarse:after:-inset-x-3",
         className
       )}
