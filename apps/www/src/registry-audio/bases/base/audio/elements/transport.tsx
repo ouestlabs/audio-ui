@@ -359,7 +359,7 @@ function TransportTempo({
         >
           {tempo.bpm}
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-auto min-w-36">
+        <DropdownMenuContent align="start">
           <div className="p-2">
             <BpmControl
               className="w-full"
