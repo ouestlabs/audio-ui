@@ -85,6 +85,8 @@ function buildCommandMenuGroups(nodes: PageTreeNode[]) {
 function SiteLogo() {
   return (
     <Button
+      // pl-2: the icon's built-in margin plus its round edge make 10px read wider than the right side
+      className="pl-2"
       nativeButton={false}
       render={
         <Link aria-label="Home" className="flex items-center" href="/">
@@ -192,7 +194,7 @@ export function SiteHeader({
             tree={pageTree}
           />
           <Button
-            className="hidden md:flex"
+            className="hidden pl-2 md:flex"
             nativeButton={false}
             render={
               <Link aria-label="Home" className="flex items-center" href={"/"}>
