@@ -28,7 +28,7 @@ export type PositionSource = Source<number>;
 
 /** How the viewport is scrolled and zoomed, as last laid out. */
 export interface ViewportMetrics {
-  /** Where value 0 sits in the scrolled content, in px: past a column of headers, for instance. */
+  /** Where value 0 sits in the scrolled content, in px: for example, past a column of headers. */
   origin: number;
   scrollStart: number;
   /** Visible width, in px. */

@@ -278,7 +278,7 @@ export namespace Clip {
     minLength?: number;
     /** Whether dragging the header, or the keys, moves the clip. @default true */
     movable?: boolean;
-    /** Fires as a move drags the clip up or down, in px from where the press began, and with 0 when the drag ends: what a group follows. */
+    /** Fires as a move drags the clip up or down, in px from where the press began. It reports 0 when the drag ends, so a group can follow the clip. */
     onDragOffsetChange?: (offset: number) => void;
     /** Fires when Delete or Backspace is pressed on the clip: removing it is up to you. */
     onRemove?: (eventDetails: RemoveEventDetails) => void;
