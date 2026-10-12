@@ -105,6 +105,8 @@ const BAR = secondsPerBar(DEFAULT_TEMPO);
 /** The width of a track header, which the lanes start after. */
 const LEAD_PX = 160;
 const MAX_ZOOM = 240;
+/** The zoom presets, as shares of the fitted view: Fit shows everything. */
+const ZOOM_PRESETS = [1, 2, 4, 8];
 /** The zoom's steps are loupes, not a minus and a plus. */
 const ZOOM_STEPPERS = {
   decrement: "Zoom out",
@@ -884,21 +886,20 @@ export default function BlockTimeline() {
   // The zoom as a share of the fitted view: 100% shows everything.
   const zoomRatio = fitPx > 0 ? zoom / fitPx : 1;
   const maxRatio = fitPx > 0 ? MAX_ZOOM / fitPx : 1;
+  const zoomPreset = ZOOM_PRESETS.find(
+    (ratio) => Math.abs(ratio - zoomRatio) < 0.01
+  );
   const changeZoom = useCallback(
     (ratio: number) => setZoom(ratio <= 1 ? null : ratio * fitPx),
     [fitPx]
   );
+  const changeZoomPreset = useCallback(
+    (value: string) => changeZoom(Number(value)),
+    [changeZoom]
+  );
   const handleDivisionValue = useCallback(
     (value: string) => setDivision(value as GridDivision),
     []
-  );
-  const zoomIn = useCallback(
-    () => changeZoom(zoomRatio + 0.25),
-    [changeZoom, zoomRatio]
-  );
-  const zoomOut = useCallback(
-    () => changeZoom(Math.max(1, zoomRatio - 0.25)),
-    [changeZoom, zoomRatio]
   );
   const seek = useCallback((seconds: number) => clock.set(seconds), [clock]);
   // A press on a track's empty lane puts the cursor there (the lane does it) and picks the track, letting go of the clips; on the surface under the last track it lets go of everything, as nothing is there.
@@ -1317,10 +1318,42 @@ export default function BlockTimeline() {
               {zoomInBar ? null : (
                 <>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={zoomIn}>Zoom in</DropdownMenuItem>
-                  <DropdownMenuItem onClick={zoomOut}>
-                    Zoom out
-                  </DropdownMenuItem>
+                  <DropdownMenuSub>
+                    <DropdownMenuSubTrigger>Zoom</DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent className="w-auto">
+                      <div className="p-2">
+                        <NumberControl
+                          format={PERCENT}
+                          label="Zoom"
+                          largeStep={1}
+                          max={maxRatio}
+                          min={1}
+                          onValueChange={changeZoom}
+                          step={0.25}
+                          steppers={ZOOM_STEPPERS}
+                          unit="Zoom"
+                          value={zoomRatio}
+                        />
+                      </div>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuRadioGroup
+                        onValueChange={changeZoomPreset}
+                        value={
+                          zoomPreset === undefined ? "" : String(zoomPreset)
+                        }
+                      >
+                        {ZOOM_PRESETS.map((ratio) => (
+                          <DropdownMenuRadioItem
+                            disabled={ratio > maxRatio}
+                            key={ratio}
+                            value={String(ratio)}
+                          >
+                            {ratio === 1 ? "Fit" : `${ratio * 100} %`}
+                          </DropdownMenuRadioItem>
+                        ))}
+                      </DropdownMenuRadioGroup>
+                    </DropdownMenuSubContent>
+                  </DropdownMenuSub>
                 </>
               )}
             </DropdownMenuContent>
