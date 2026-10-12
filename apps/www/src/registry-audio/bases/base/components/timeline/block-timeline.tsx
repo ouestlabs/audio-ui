@@ -74,6 +74,7 @@ import {
   TimelineClipFadeHandle,
   TimelineClipHandle,
   TimelineClipHeader,
+  TimelineGridMenuItems,
   TimelineLane,
   TimelineMark,
   TimelineNavigator,
@@ -1442,63 +1443,81 @@ export default function BlockTimeline() {
                 selected={selectedTracks.includes(track.id)}
                 trackId={track.id}
               >
-                <TimelineLane
-                  className={cn(
-                    "h-auto flex-1 border-b-0",
-                    heights[track.id] === undefined ? "min-h-14" : "min-h-0",
-                    // A short track keeps its clips thin, so they fit.
-                    heights[track.id] !== undefined &&
-                      heights[track.id] < COMPACT_TRACK_HEIGHT &&
-                      "**:data-clip-id:inset-y-0.5",
-                    selectedTracks.includes(track.id) && "bg-muted/40",
-                    // A silent track keeps its clips on the page, drained.
-                    (mixOf(track).muted || (anySolo && !mixOf(track).soloed)) &&
-                      "**:data-clip-id:opacity-40"
-                  )}
-                  data-track={track.id}
-                  gridStep={snapStep}
-                  onPointerDown={focusPanel}
-                  seekable
-                >
-                  {copying
-                    .filter((original) => original.track === track.id)
-                    .map((original) => (
-                      <CopyGhost clip={original} key={original.id} />
-                    ))}
-                  {clips
-                    .filter((clip) => clip.track === track.id)
-                    .map((clip) => (
-                      <ClipView
-                        clip={clip}
-                        copying={copying.some(
-                          (original) => original.id === clip.id
-                        )}
-                        describe={describe}
-                        key={clip.id}
-                        lift={
-                          lifting &&
-                          lifting.id !== clip.id &&
-                          selectedIds.includes(clip.id) &&
-                          selectedIds.includes(lifting.id)
-                            ? lifting.offset
-                            : 0
-                        }
-                        multi={multi}
-                        onAction={clipAction}
-                        onChange={changeClip}
-                        onCommit={commitClip}
-                        onFadeShape={setFadeShape}
-                        onLift={lift}
-                        onRemove={removeClip}
-                        onRename={renameClip}
-                        onSelect={selectClip}
-                        selected={selectedIds.includes(clip.id)}
-                        swatch={mixOf(track).color}
-                        trackName={track.name}
-                      />
-                    ))}
-                  <TimelinePlayhead />
-                </TimelineLane>
+                <ContextMenu>
+                  <ContextMenuTrigger render={<div className="contents" />}>
+                    <TimelineLane
+                      className={cn(
+                        "h-auto flex-1 border-b-0",
+                        heights[track.id] === undefined
+                          ? "min-h-14"
+                          : "min-h-0",
+                        // A short track keeps its clips thin, so they fit.
+                        heights[track.id] !== undefined &&
+                          heights[track.id] < COMPACT_TRACK_HEIGHT &&
+                          "**:data-clip-id:inset-y-0.5",
+                        selectedTracks.includes(track.id) && "bg-muted/40",
+                        // A silent track keeps its clips on the page, drained.
+                        (mixOf(track).muted ||
+                          (anySolo && !mixOf(track).soloed)) &&
+                          "**:data-clip-id:opacity-40"
+                      )}
+                      data-track={track.id}
+                      gridStep={snapStep}
+                      onPointerDown={focusPanel}
+                      seekable
+                    >
+                      {copying
+                        .filter((original) => original.track === track.id)
+                        .map((original) => (
+                          <CopyGhost clip={original} key={original.id} />
+                        ))}
+                      {clips
+                        .filter((clip) => clip.track === track.id)
+                        .map((clip) => (
+                          <ClipView
+                            clip={clip}
+                            copying={copying.some(
+                              (original) => original.id === clip.id
+                            )}
+                            describe={describe}
+                            key={clip.id}
+                            lift={
+                              lifting &&
+                              lifting.id !== clip.id &&
+                              selectedIds.includes(clip.id) &&
+                              selectedIds.includes(lifting.id)
+                                ? lifting.offset
+                                : 0
+                            }
+                            multi={multi}
+                            onAction={clipAction}
+                            onChange={changeClip}
+                            onCommit={commitClip}
+                            onFadeShape={setFadeShape}
+                            onLift={lift}
+                            onRemove={removeClip}
+                            onRename={renameClip}
+                            onSelect={selectClip}
+                            selected={selectedIds.includes(clip.id)}
+                            swatch={mixOf(track).color}
+                            trackName={track.name}
+                          />
+                        ))}
+                      <TimelinePlayhead />
+                    </TimelineLane>
+                  </ContextMenuTrigger>
+                  <ContextMenuContent className="w-auto min-w-48">
+                    <TimelineGridMenuItems
+                      division={division}
+                      divisions={DIVISIONS}
+                      onDivisionChange={handleDivisionValue}
+                      onSnapChange={setSnap}
+                      onTripletChange={setTriplet}
+                      snap={snap}
+                      triplet={triplet}
+                    />
+                  </ContextMenuContent>
+                </ContextMenu>
               </Row>
             ))}
             <Row

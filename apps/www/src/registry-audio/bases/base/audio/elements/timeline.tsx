@@ -21,6 +21,7 @@ import { cn } from "@/registry/bases/base/lib/utils";
 import { Button } from "@/registry/bases/base/ui/button";
 import {
   ContextMenu,
+  ContextMenuCheckboxItem,
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuRadioGroup,
@@ -756,6 +757,47 @@ function TimelineTrackControls({
   );
 }
 
+/** The grid's divisions and its two flags, as the menu a right-click on a lane opens. */
+function TimelineGridMenuItems({
+  division,
+  divisions,
+  onDivisionChange,
+  onSnapChange,
+  onTripletChange,
+  snap,
+  triplet,
+}: {
+  division: string;
+  divisions: { label: string; value: string }[];
+  onDivisionChange: (value: string) => void;
+  onSnapChange: (checked: boolean) => void;
+  onTripletChange: (checked: boolean) => void;
+  snap: boolean;
+  triplet: boolean;
+}) {
+  return (
+    <>
+      <ContextMenuRadioGroup onValueChange={onDivisionChange} value={division}>
+        {divisions.map((item) => (
+          <ContextMenuRadioItem key={item.value} value={item.value}>
+            {item.label.replace("Grid: ", "")}
+          </ContextMenuRadioItem>
+        ))}
+      </ContextMenuRadioGroup>
+      <ContextMenuSeparator />
+      <ContextMenuCheckboxItem
+        checked={triplet}
+        onCheckedChange={onTripletChange}
+      >
+        Triplet grid
+      </ContextMenuCheckboxItem>
+      <ContextMenuCheckboxItem checked={snap} onCheckedChange={onSnapChange}>
+        Snap to grid
+      </ContextMenuCheckboxItem>
+    </>
+  );
+}
+
 export {
   Timeline,
   TimelineClip,
@@ -763,6 +805,7 @@ export {
   TimelineClipFadeHandle,
   TimelineClipHandle,
   TimelineClipHeader,
+  TimelineGridMenuItems,
   TimelineLane,
   TimelineMark,
   TimelineNavigator,
