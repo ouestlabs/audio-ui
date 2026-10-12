@@ -1124,10 +1124,10 @@ export default function BlockTimeline() {
             source={clock}
             tempo={tempo}
           />
-          <div className="hidden h-8 w-10 shrink-0 items-center @3xl/panel:flex">
+          <div className="hidden h-7 w-10 shrink-0 items-center @3xl/panel:flex">
             <Meter
               aria-label="Master output level"
-              className="data-[orientation=horizontal]:[--meter-thickness:--spacing(3.5)]"
+              className="data-[orientation=horizontal]:[--meter-thickness:--spacing(3)]"
               orientation="horizontal"
               peakMarks="hidden"
               size="sm"
