@@ -222,6 +222,12 @@ const nextConfig: NextConfig = {
         permanent: false,
         source: "/r/styles/:path*",
       },
+      // A style we don't build (new-york-v4, radix-*, default...) gets base-nova
+      // instead of a 404, so any shadcn project can install.
+      ...createVersionedRegistryRedirects(
+        "/r/:style((?!base-(?:vega|nova|maia|lyra|mira|luma|rhea|sera)/)[^/]+)/:name.json",
+        "/r/styles/base-nova/:name.json"
+      ),
       ...createVersionedRegistryRedirects(
         "/r/:style/:name.json",
         "/r/styles/:style/:name.json"
