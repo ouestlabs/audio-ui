@@ -1358,7 +1358,7 @@ export default function BlockTimeline() {
             {/* One sticky block, so what is stuck stays stacked whatever each row measures. */}
             <div className="sticky top-0 z-40 flex min-w-full shrink-0 flex-col bg-background">
               <Row
-                className="shrink-0"
+                className="shrink-0 border-foreground/25 border-b"
                 lead={
                   <span className="flex h-full items-center px-3 text-xs text-muted-foreground">
                     Loop
@@ -1380,7 +1380,7 @@ export default function BlockTimeline() {
                 </TimelineLane>
               </Row>
               <Row
-                className="shrink-0 bg-background"
+                className="shrink-0 border-foreground/25 border-b bg-background"
                 lead={
                   <DropdownMenu>
                     <DropdownMenuTrigger
@@ -1425,7 +1425,7 @@ export default function BlockTimeline() {
                 </TimelineRuler>
               </Row>
               <Row
-                className="shrink-0 bg-background"
+                className="shrink-0 border-foreground/25 border-b bg-background"
                 lead={
                   <span className="flex h-full items-center px-3 text-xs text-muted-foreground">
                     Markers
