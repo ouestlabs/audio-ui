@@ -17,8 +17,8 @@ const PLAYBACK_RATE_MAX = 2;
 
 /**
  * Valid playback-rate range is a product decision (acceptable listening
- * speeds), not a device constraint, the audio-store is the only place
- * this clamps. See docs/adr/0002-store-owns-playback-rate-clamp.md.
+ * speeds), not a device constraint, so the audio-store is the only place
+ * this clamps.
  */
 export function clampPlaybackRate(rate: number): number {
   return Math.max(PLAYBACK_RATE_MIN, Math.min(PLAYBACK_RATE_MAX, rate));
