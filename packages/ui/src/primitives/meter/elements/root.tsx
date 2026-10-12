@@ -1,18 +1,18 @@
-import { type LevelScale, levelPosition } from "@audio-ui/core/meter";
+import {
+  type MeterChannelNodes as ChannelNodes,
+  type MeterChannelPart as ChannelPart,
+  channelView,
+  createMeterConfig,
+  type LevelScale,
+  type MeterFrame,
+  type MeterOrientation as Orientation,
+  paintChannel,
+} from "@audio-ui/core/meter";
 import * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
 import { useLocale } from "../../internal/use-locale";
 import { MeterContext, type MeterContextValue } from "../context";
-import {
-  type ChannelNodes,
-  type ChannelPart,
-  channelView,
-  DEFAULT_FORMAT,
-  type MeterConfig,
-  type Orientation,
-  paintChannel,
-} from "../internal/shared";
 import type { Channel } from "./channel";
 
 /**
@@ -25,7 +25,7 @@ export function Root(componentProps: Root.Props) {
   const {
     className,
     clipThreshold = 0,
-    format = DEFAULT_FORMAT,
+    format,
     locale,
     max = 6,
     min = -60,
@@ -42,38 +42,21 @@ export function Root(componentProps: Root.Props) {
   } = componentProps;
 
   const resolvedLocale = useLocale(locale);
-  const formatter = React.useMemo(
-    () => new Intl.NumberFormat(resolvedLocale, format),
-    [format, resolvedLocale]
-  );
-  const position = React.useMemo(
-    () => levelPosition(scale, min, max),
-    [max, min, scale]
-  );
-  const config = React.useMemo<MeterConfig>(
-    () => ({
-      clipThreshold,
-      format,
-      formatter,
-      locale,
-      max,
-      min,
-      position,
-      warnThreshold,
-    }),
-    [
-      clipThreshold,
-      format,
-      formatter,
-      locale,
-      max,
-      min,
-      position,
-      warnThreshold,
-    ]
+  const config = React.useMemo(
+    () =>
+      createMeterConfig({
+        clipThreshold,
+        format,
+        locale: resolvedLocale,
+        max,
+        min,
+        scale,
+        warnThreshold,
+      }),
+    [clipThreshold, format, max, min, resolvedLocale, scale, warnThreshold]
   );
 
-  const frame = React.useMemo<Root.Frame>(
+  const frame = React.useMemo<MeterFrame>(
     () =>
       source ? source.getSnapshot() : { levels: value ?? [], peaks: peak },
     [peak, source, value]
@@ -169,10 +152,7 @@ export namespace Root {
   };
 
   /** One reading of the meter: a level per channel, and optionally a peak-hold level per channel. */
-  export interface Frame {
-    levels: readonly number[];
-    peaks?: readonly number[] | undefined;
-  }
+  export type Frame = MeterFrame;
 
   /**
    * A live signal, in the shape of an external store: `subscribe` registers a

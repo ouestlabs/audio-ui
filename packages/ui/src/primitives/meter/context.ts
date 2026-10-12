@@ -1,13 +1,13 @@
+import type { MeterChannelPart, MeterConfig } from "@audio-ui/core/meter";
 import * as React from "react";
 import type { Channel } from "./elements/channel";
 import type { Root } from "./elements/root";
-import type { ChannelPart, MeterConfig } from "./internal/shared";
 
 export interface MeterContextValue {
   actions: {
     registerNode: (
       index: number,
-      part: ChannelPart,
+      part: MeterChannelPart,
       node: HTMLElement | null
     ) => void;
     setAriaValueTextGetter: (

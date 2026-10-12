@@ -1,13 +1,13 @@
+import { channelView, type MeterChannelPart } from "@audio-ui/core/meter";
 import * as React from "react";
 import { ChannelIndexContext, useMeterContext } from "../context";
 import type { Channel } from "../elements/channel";
-import { type ChannelPart, channelView } from "./shared";
 
 /** Shared by a channel and the parts inside it: the channel's view, state, and a ref that registers the node for live painting. */
 export function useChannelPart(
   part: string,
   index: number,
-  nodeKey: ChannelPart
+  nodeKey: MeterChannelPart
 ) {
   const { actions, meta, state } = useMeterContext(part);
   const view = channelView(meta.frame, index, meta.config);
