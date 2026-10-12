@@ -18,9 +18,9 @@ import {
 /**
  * Groups all parts of the fader, with audio defaults (vertical, -60…+6) and
  * mouse-wheel stepping. While a pointer drags it, the
- * thumb follows the pointer even if a controlled `value` lags behind (a seek
- * bar driven by playback time, automation), reject a value with
- * `eventDetails.cancel()` instead. Renders a `<div>` element.
+ * thumb follows the pointer even if a controlled `value` lags behind, as with
+ * a seek bar driven by playback time or automation. To reject a value, call
+ * `eventDetails.cancel()`. Renders a `<div>` element.
  */
 export function Root(componentProps: Root.Props) {
   const {

@@ -8,8 +8,8 @@ import { type TrackState, useTrackContext } from "./track-context.ts";
  * Sets the track's height: by dragging, or from the keyboard through the
  * native `<input type="range">` it holds, which carries the accessible name:
  * the arrows move by a step (Down is taller), Page Up and Down by a large
- * one, Home and End to the least and the most. Place it along the track's
- * lower edge. A double-click gives the height up, so the track shares the room
+ * one, Home and End to the minimum and the maximum. Place it along the track's
+ * lower edge. A double-click clears the height, so the track shares the room
  * again. Renders a `<div>` element.
  */
 export function TrackResizeHandle(componentProps: TrackResizeHandle.Props) {

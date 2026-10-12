@@ -17,8 +17,7 @@ export interface GridAxis {
 
 /**
  * Grid lines and their labels, drawn from the axes: round values along each
- * axis you give, so a plot reads without a rule and a label placed by hand per
- * value. It covers the plot, is hidden from assistive technology and from the
+ * axis you give, so you do not place each line and label by hand. It covers the plot, is hidden from assistive technology and from the
  * pointer, and marks its parts for styling: `data-part="line"` and
  * `data-part="label"`, each with `data-axis`, and `data-zero` on the line at
  * zero. Renders a `<div>` element.

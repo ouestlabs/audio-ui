@@ -10,9 +10,9 @@ import { type TimelineState, useTimelineContext } from "../context.ts";
 
 /**
  * The scrolling window onto the timeline. Cmd/Ctrl + wheel (and pinch on a
- * trackpad) zooms around the pointer; a bare wheel scrolls as usual. Whatever
- * changes the zoom, the point it was anchored on stays where it was, or the
- * middle of the view when nothing named one. It reports its scroll offset and
+ * trackpad) zooms around the pointer; a bare wheel scrolls as usual. Every
+ * zoom change keeps its anchor point in place, or the middle of the view when
+ * there is none. It reports its scroll offset and
  * width for `Timeline.Navigator`. Renders a `<div>` element.
  */
 export function Viewport(componentProps: Viewport.Props) {
