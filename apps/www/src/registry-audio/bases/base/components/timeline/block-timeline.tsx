@@ -896,69 +896,112 @@ export default function BlockTimeline() {
     [fitPx]
   );
   // The track being dragged by its grip, and the gap it would land in: above or below the track under the pointer.
+  // The drag runs on pointer events, not the browser's drag and drop. The copy follows the pointer through a transform
+  // written straight onto its element, and the rows are measured once, so a move costs no render: React only hears
+  // about the drop gap when it changes.
   const [dragId, setDragId] = useState<string | null>(null);
-  // The copy the browser takes its drag image from: it stays in the page until the drag ends.
   const [drop, setDrop] = useState<{
     id: string;
     edge: "bottom" | "top";
   } | null>(null);
+  const [copy, setCopy] = useState<{
+    name: string;
+    top: number;
+    left: number;
+    width: number;
+    height: number;
+  } | null>(null);
+  const copyRef = useRef<HTMLDivElement>(null);
   const startTrackDrag = useCallback(
-    (event: React.DragEvent<HTMLButtonElement>) => {
-      const id = event.currentTarget.dataset.trackId ?? "";
-      // The grip is the drag image, placed under the pointer where it grabbed it. Some browsers report no pointer
-      // position on dragstart (0, 0): then the grip's centre stands in for it.
-      const grip = event.currentTarget.getBoundingClientRect();
-      const pointerX = event.clientX || grip.left + grip.width / 2;
-      const pointerY = event.clientY || grip.top + grip.height / 2;
-      event.dataTransfer.setDragImage(
-        event.currentTarget,
-        pointerX - grip.left,
-        pointerY - grip.top
-      );
-      setDragId(id);
-      event.dataTransfer.effectAllowed = "move";
-      event.dataTransfer.setData("text/plain", id);
-    },
-    []
-  );
-  const endTrackDrag = useCallback(() => {
-    setDragId(null);
-    setDrop(null);
-  }, []);
-  const allowTrackDrop = useCallback(
-    (event: React.DragEvent<HTMLDivElement>) => {
-      if (dragId === null) {
+    (event: React.PointerEvent<HTMLButtonElement>) => {
+      if (event.button !== 0) {
         return;
       }
       event.preventDefault();
       const id = event.currentTarget.dataset.trackId ?? "";
-      const box = event.currentTarget
-        .querySelector<HTMLElement>('[data-slot="timeline-track"]')
-        ?.getBoundingClientRect();
-      const edge =
-        box && event.clientY > box.top + box.height / 2 ? "bottom" : "top";
-      setDrop((current) =>
-        current?.id === id && current.edge === edge ? current : { id, edge }
+      const row = event.currentTarget.closest<HTMLElement>(
+        '[data-slot="timeline-track"]'
       );
-    },
-    [dragId]
-  );
-  const dropTrack = useCallback(
-    (event: React.DragEvent<HTMLDivElement>) => {
-      event.preventDefault();
-      const over = tracks.findIndex(
-        (track) => track.id === event.currentTarget.dataset.trackId
-      );
-      const from = tracks.findIndex((track) => track.id === dragId);
-      if (dragId !== null && drop !== null && over !== -1 && from !== -1) {
-        // The gap the track lands in; one less once the track has left a place above it.
-        const gap = drop.edge === "bottom" ? over + 1 : over;
-        moveTrack(dragId, gap > from ? gap - 1 : gap);
+      const panel = event.currentTarget.closest<HTMLElement>(".cn-audio-panel");
+      if (!(row && panel)) {
+        return;
       }
-      setDragId(null);
-      setDrop(null);
+      // Each grip spans its row's height, so its box gives the row's top and bottom.
+      const rows = Array.from(
+        panel.querySelectorAll<HTMLElement>("button[data-track-id]")
+      ).map((grip) => {
+        const box = grip.getBoundingClientRect();
+        return {
+          id: grip.dataset.trackId ?? "",
+          top: box.top,
+          bottom: box.bottom,
+        };
+      });
+      const from = rows.findIndex((item) => item.id === id);
+      const box = row.getBoundingClientRect();
+      const startY = event.clientY;
+      let gap = from;
+      let lastY = startY;
+      let frame = 0;
+
+      const update = () => {
+        frame = 0;
+        if (copyRef.current) {
+          copyRef.current.style.transform = `translateY(${lastY - startY}px)`;
+        }
+        const index = rows.findIndex(
+          (item) => lastY < (item.top + item.bottom) / 2
+        );
+        const next = index === -1 ? rows.length : index;
+        if (next === gap) {
+          return;
+        }
+        gap = next;
+        // Dropping right where it is, or one place below, moves nothing: no line then.
+        if (gap === from || gap === from + 1) {
+          setDrop(null);
+        } else if (gap < rows.length) {
+          setDrop({ id: rows[gap].id, edge: "top" });
+        } else {
+          setDrop({ id: rows.at(-1)?.id ?? "", edge: "bottom" });
+        }
+      };
+      const move = (moveEvent: PointerEvent) => {
+        lastY = moveEvent.clientY;
+        if (frame === 0) {
+          frame = requestAnimationFrame(update);
+        }
+      };
+      const finish = (commit: boolean) => {
+        window.removeEventListener("pointermove", move);
+        window.removeEventListener("pointerup", release);
+        window.removeEventListener("pointercancel", cancel);
+        cancelAnimationFrame(frame);
+        // The gap the track lands in; one less once the track has left a place above it.
+        const landed = gap > from ? gap - 1 : gap;
+        if (commit && from !== -1 && landed !== from) {
+          moveTrack(id, landed);
+        }
+        setCopy(null);
+        setDragId(null);
+        setDrop(null);
+      };
+      const release = () => finish(true);
+      const cancel = () => finish(false);
+
+      setCopy({
+        name: tracks.find((track) => track.id === id)?.name ?? "",
+        top: box.top,
+        left: box.left,
+        width: box.width,
+        height: box.height,
+      });
+      setDragId(id);
+      window.addEventListener("pointermove", move);
+      window.addEventListener("pointerup", release);
+      window.addEventListener("pointercancel", cancel);
     },
-    [dragId, drop, moveTrack, tracks]
+    [moveTrack, tracks]
   );
   const nudgeTrack = useCallback(
     (event: React.KeyboardEvent<HTMLButtonElement>) => {
@@ -1536,8 +1579,6 @@ export default function BlockTimeline() {
                 className="contents"
                 data-track-id={track.id}
                 key={track.id}
-                onDragOver={allowTrackDrop}
-                onDrop={dropTrack}
                 role="group"
               >
                 <Row
@@ -1564,10 +1605,8 @@ export default function BlockTimeline() {
                             "cursor-grabbing bg-muted text-foreground"
                         )}
                         data-track-id={track.id}
-                        draggable
-                        onDragEnd={endTrackDrag}
-                        onDragStart={startTrackDrag}
                         onKeyDown={nudgeTrack}
+                        onPointerDown={startTrackDrag}
                         type="button"
                       >
                         <svg
@@ -1747,6 +1786,24 @@ export default function BlockTimeline() {
             )
           : null}
       </Timeline>
+      {copy
+        ? createPortal(
+            <div
+              aria-hidden="true"
+              className="pointer-events-none fixed z-50 flex items-center rounded-md border border-foreground/25 bg-card/90 px-3 text-sm shadow-lg"
+              ref={copyRef}
+              style={{
+                height: copy.height,
+                left: copy.left,
+                top: copy.top,
+                width: copy.width,
+              }}
+            >
+              {copy.name}
+            </div>,
+            document.body
+          )
+        : null}
     </div>
   );
 }
