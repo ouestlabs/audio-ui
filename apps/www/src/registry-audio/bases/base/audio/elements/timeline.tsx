@@ -1,6 +1,10 @@
 "use client";
 
-import { Timeline as TimelinePrimitive } from "@audio-ui/react";
+import {
+  FADE_SHAPES,
+  type FadeShape,
+  Timeline as TimelinePrimitive,
+} from "@audio-ui/react";
 import {
   type CSSProperties,
   type FocusEvent,
@@ -17,6 +21,8 @@ import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
+  ContextMenuRadioGroup,
+  ContextMenuRadioItem,
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from "@/registry/bases/base/ui/context-menu";
@@ -271,11 +277,30 @@ function TimelineClipFade({
   );
 }
 
+const FADE_SHAPE_LABELS: Record<FadeShape, string> = {
+  fast: "Fast",
+  linear: "Linear",
+  slow: "Slow",
+  smooth: "Smooth",
+};
+
+type TimelineClipFadeHandleProps = TimelinePrimitive.ClipFadeHandle.Props & {
+  /** The fade's curve. With `onShapeChange`, a right-click on the handle lists the curves. */
+  shape?: FadeShape;
+  onShapeChange?: (shape: FadeShape) => void;
+};
+
 function TimelineClipFadeHandle({
   className,
+  onShapeChange,
+  shape = "linear",
   ...props
-}: TimelinePrimitive.ClipFadeHandle.Props) {
-  return (
+}: TimelineClipFadeHandleProps) {
+  const handleShape = useCallback(
+    (value: string) => onShapeChange?.(value as FadeShape),
+    [onShapeChange]
+  );
+  const handle = (
     <TimelinePrimitive.ClipFadeHandle
       className={cn(
         "cn-timeline-clip-fade-handle top-1 z-20 size-3 cursor-ew-resize data-[edge=in]:ms-1 data-[edge=out]:me-1 opacity-0 transition-opacity",
@@ -286,6 +311,23 @@ function TimelineClipFadeHandle({
       data-slot="timeline-clip-fade-handle"
       {...props}
     />
+  );
+  if (!onShapeChange) {
+    return handle;
+  }
+  return (
+    <ContextMenu>
+      <ContextMenuTrigger render={handle} />
+      <ContextMenuContent className="w-auto min-w-32">
+        <ContextMenuRadioGroup onValueChange={handleShape} value={shape}>
+          {FADE_SHAPES.map((item) => (
+            <ContextMenuRadioItem key={item} value={item}>
+              {FADE_SHAPE_LABELS[item]}
+            </ContextMenuRadioItem>
+          ))}
+        </ContextMenuRadioGroup>
+      </ContextMenuContent>
+    </ContextMenu>
   );
 }
 

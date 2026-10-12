@@ -2,6 +2,7 @@
 
 import {
   adjacentPoint,
+  type FadeShape,
   type Timeline as TimelinePrimitive,
 } from "@audio-ui/react";
 import {
@@ -506,6 +507,7 @@ const ClipView = memo(function ArrangedClip({
   onLift,
   multi,
   onAction,
+  onFadeShape,
   onRename,
   swatch,
   trackName,
@@ -513,6 +515,8 @@ const ClipView = memo(function ArrangedClip({
   clip: Arranged;
   /** Whether a press adds the clip to the selection, as Shift does: a touch screen has no Shift. */
   multi: boolean;
+  /** A fade's curve was picked from the menu of its handle. */
+  onFadeShape: (id: string, edge: "in" | "out", shape: FadeShape) => void;
   /** The clip's color, an index into `TRACK_COLORS`: the track's. */
   swatch: number;
   /** Something chosen from the clip's menu (renaming is the clip's own). */
@@ -542,6 +546,14 @@ const ClipView = memo(function ArrangedClip({
   const handleRemove = useCallback(
     () => onRemove(clip.id),
     [clip.id, onRemove]
+  );
+  const handleFadeInShape = useCallback(
+    (shape: FadeShape) => onFadeShape(clip.id, "in", shape),
+    [clip.id, onFadeShape]
+  );
+  const handleFadeOutShape = useCallback(
+    (shape: FadeShape) => onFadeShape(clip.id, "out", shape),
+    [clip.id, onFadeShape]
   );
   const [renaming, setRenaming] = useState(false);
   const stopRenaming = useCallback(() => setRenaming(false), []);
@@ -664,10 +676,14 @@ const ClipView = memo(function ArrangedClip({
           <TimelineClipFadeHandle
             aria-label={`${clip.name} fade in`}
             edge="in"
+            onShapeChange={handleFadeInShape}
+            shape={clip.value.fadeInShape}
           />
           <TimelineClipFadeHandle
             aria-label={`${clip.name} fade out`}
             edge="out"
+            onShapeChange={handleFadeOutShape}
+            shape={clip.value.fadeOutShape}
           />
         </TimelineClip>
       </ContextMenuTrigger>
@@ -764,6 +780,7 @@ export default function BlockTimeline() {
     removeTrack,
     renameClip,
     renameTrack,
+    setFadeShape,
     rescale,
     resizeTrack,
     selectAll,
@@ -1437,6 +1454,7 @@ export default function BlockTimeline() {
                         onAction={clipAction}
                         onChange={changeClip}
                         onCommit={commitClip}
+                        onFadeShape={setFadeShape}
                         onLift={lift}
                         onRemove={removeClip}
                         onRename={renameClip}

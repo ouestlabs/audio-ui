@@ -2,7 +2,9 @@
 
 import {
   duplicateClip,
+  type FadeShape,
   moveClip,
+  setClipFadeShape,
   splitClip,
   type Timeline as TimelinePrimitive,
 } from "@audio-ui/react";
@@ -373,6 +375,20 @@ export function useArrangement({
     [splitWhere]
   );
 
+  /** Sets the curve of one of a clip's fades. */
+  const setFadeShape = useCallback(
+    (id: string, edge: "in" | "out", shape: FadeShape) =>
+      edit((current) => ({
+        ...current,
+        clips: current.clips.map((clip) =>
+          clip.id === id
+            ? { ...clip, value: setClipFadeShape(clip.value, edge, shape) }
+            : clip
+        ),
+      })),
+    [edit]
+  );
+
   const renameClip = useCallback(
     (id: string, name: string) => {
       const next = name.trim();
@@ -612,6 +628,7 @@ export function useArrangement({
     renameClip,
     renameTrack,
     rescale,
+    setFadeShape,
     resizeTrack,
     selectAll,
     selectClip,
