@@ -1,9 +1,9 @@
 import { describe, test } from "bun:test";
 import { fireEvent, render } from "@testing-library/react";
 import { useState } from "react";
-import { bench, expectWork, sweep } from "../../../../test/bench";
-import { mockRect } from "../../../../test/helpers";
-import { Fader } from "../../../entries/fader";
+import { bench, expectWork, sweep } from "../../../../test/bench.js";
+import { mockRect } from "../../../../test/helpers.js";
+import { Fader } from "../../../entries/fader.js";
 
 let changes = 0;
 

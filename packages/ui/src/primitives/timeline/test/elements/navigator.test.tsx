@@ -1,7 +1,7 @@
 import { describe, expect, mock, test } from "bun:test";
 import { act, fireEvent, render } from "@testing-library/react";
-import { mockRect } from "../../../../../test/helpers";
-import { Timeline } from "../../../../entries/timeline";
+import { mockRect } from "../../../../../test/helpers.js";
+import { Timeline } from "../../../../entries/timeline.js";
 
 /**
  * A 100-unit timeline at 10px per unit in a 300px viewport whose lanes start

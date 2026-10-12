@@ -1,13 +1,13 @@
 import type { Point, Source } from "@audio-ui/core";
 import * as React from "react";
-import { type PartProps, resolveStyling } from "../../internal/part";
-import { mergeProps, useRender } from "../../internal/render";
+import { type PartProps, resolveStyling } from "../../internal/part.js";
+import { mergeProps, useRender } from "../../internal/render.js";
 import {
   type PlotAxis,
   type PlotState,
   positionOn,
   usePlotContext,
-} from "../context";
+} from "../context.js";
 
 /** A live point, in the axes' units. */
 export type DotSource = Source<Point>;

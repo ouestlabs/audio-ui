@@ -1,7 +1,7 @@
 import type { MeterChannelPart, MeterConfig } from "@audio-ui/core/meter";
 import * as React from "react";
-import type { Channel } from "./elements/channel";
-import type { Root } from "./elements/root";
+import type { Channel } from "./elements/channel.js";
+import type { Root } from "./elements/root.js";
 
 export interface MeterContextValue {
   actions: {

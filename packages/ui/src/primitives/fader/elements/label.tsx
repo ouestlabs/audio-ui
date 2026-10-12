@@ -1,8 +1,8 @@
 import * as React from "react";
-import { type PartProps, resolveStyling } from "../../internal/part";
-import { mergeProps, useRender } from "../../internal/render";
-import { FADER_STATE_ATTRIBUTES, useFaderContext } from "../context";
-import type { Root } from "./root";
+import { type PartProps, resolveStyling } from "../../internal/part.js";
+import { mergeProps, useRender } from "../../internal/render.js";
+import { FADER_STATE_ATTRIBUTES, useFaderContext } from "../context.js";
+import type { Root } from "./root.js";
 
 /** Accessible label, associated with the thumb. Renders a `<div>` element. */
 export function Label(componentProps: Label.Props) {

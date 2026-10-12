@@ -1,5 +1,5 @@
 import type * as React from "react";
-import type { TimelineContextValue } from "../context";
+import type { TimelineContextValue } from "../context.js";
 
 /**
  * Pointer handlers that move the position from a press on the lane's own bare

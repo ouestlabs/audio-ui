@@ -1,12 +1,12 @@
 import * as React from "react";
-import { type PartProps, resolveStyling } from "../../internal/part";
-import { mergeProps, useRender } from "../../internal/render";
+import { type PartProps, resolveStyling } from "../../internal/part.js";
+import { mergeProps, useRender } from "../../internal/render.js";
 import {
   OFFSET_PROPERTY,
   placedAt,
   type TimelineState,
   useTimelineContext,
-} from "../context";
+} from "../context.js";
 
 /**
  * A marker at the playback position, on the lane it sits in. It follows the

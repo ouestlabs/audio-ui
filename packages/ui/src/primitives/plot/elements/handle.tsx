@@ -8,11 +8,11 @@ import {
   type PlotHandleOptions,
 } from "@audio-ui/core/plot";
 import * as React from "react";
-import { type PartProps, resolveStyling } from "../../internal/part";
-import { mergeProps, useRender } from "../../internal/render";
-import { useLocale } from "../../internal/use-locale";
-import { VISUALLY_HIDDEN } from "../../internal/visually-hidden";
-import { usePlotContext } from "../context";
+import { type PartProps, resolveStyling } from "../../internal/part.js";
+import { mergeProps, useRender } from "../../internal/render.js";
+import { useLocale } from "../../internal/use-locale.js";
+import { VISUALLY_HIDDEN } from "../../internal/visually-hidden.js";
+import { usePlotContext } from "../context.js";
 
 type Axis = "x" | "y";
 

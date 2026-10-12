@@ -1,7 +1,7 @@
 import { describe, expect, mock, test } from "bun:test";
 import { fireEvent, render } from "@testing-library/react";
-import { mockRect } from "../../../../../test/helpers";
-import { Sequencer } from "../../../../entries/sequencer";
+import { mockRect } from "../../../../../test/helpers.js";
+import { Sequencer } from "../../../../entries/sequencer.js";
 
 type Details = Sequencer.Root.VelocityChangeDetails;
 type Committed = Sequencer.Root.VelocityCommitDetails;

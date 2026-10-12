@@ -1,14 +1,14 @@
 import * as React from "react";
-import { type PartProps, resolveStyling } from "../../internal/part";
-import { mergeProps, useRender } from "../../internal/render";
-import { VISUALLY_HIDDEN } from "../../internal/visually-hidden";
-import { UNIT_PROPERTY } from "../context";
+import { type PartProps, resolveStyling } from "../../internal/part.js";
+import { mergeProps, useRender } from "../../internal/render.js";
+import { VISUALLY_HIDDEN } from "../../internal/visually-hidden.js";
+import { UNIT_PROPERTY } from "../context.js";
 import {
   type ClipState,
   type ClipTarget,
   useClipContext,
   useClipDrag,
-} from "./clip-context";
+} from "./clip-context.js";
 
 /**
  * Sets how long one of the clip's fades lasts: by dragging, which is not on

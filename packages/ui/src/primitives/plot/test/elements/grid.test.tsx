@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { render } from "@testing-library/react";
-import { Plot } from "../../../../entries/plot";
+import { Plot } from "../../../../entries/plot.js";
 
 function renderGrid(
   props: Plot.Grid.Props = {},

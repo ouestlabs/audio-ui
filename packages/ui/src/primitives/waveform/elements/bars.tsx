@@ -7,10 +7,10 @@ import {
   type WaveformIdle,
 } from "@audio-ui/core/waveform";
 import * as React from "react";
-import { type PartProps, resolveStyling } from "../../internal/part";
-import { mergeProps, useRender } from "../../internal/render";
-import { useReducedMotion } from "../../internal/use-reduced-motion";
-import { useWaveformContext, type WaveformState } from "../context";
+import { type PartProps, resolveStyling } from "../../internal/part.js";
+import { mergeProps, useRender } from "../../internal/render.js";
+import { useReducedMotion } from "../../internal/use-reduced-motion.js";
+import { useWaveformContext, type WaveformState } from "../context.js";
 
 const LEVEL_PROPERTY = "--waveform-level";
 /** A level has to move this much before its bar is written to again. */

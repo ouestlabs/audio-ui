@@ -1,4 +1,4 @@
-export { Cell } from "./elements/cell";
-export { Root } from "./elements/root";
-export { Cells, Row, Rows } from "./elements/rows";
-export { Velocity } from "./elements/velocity";
+export { Cell } from "./elements/cell.js";
+export { Root } from "./elements/root.js";
+export { Cells, Row, Rows } from "./elements/rows.js";
+export { Velocity } from "./elements/velocity.js";

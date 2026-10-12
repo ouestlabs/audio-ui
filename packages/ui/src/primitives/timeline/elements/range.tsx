@@ -10,15 +10,15 @@ import {
   type RangeOptions,
 } from "@audio-ui/core/timeline";
 import * as React from "react";
-import { type PartProps, resolveStyling } from "../../internal/part";
-import { mergeProps, useRender } from "../../internal/render";
-import { VISUALLY_HIDDEN } from "../../internal/visually-hidden";
+import { type PartProps, resolveStyling } from "../../internal/part.js";
+import { mergeProps, useRender } from "../../internal/render.js";
+import { VISUALLY_HIDDEN } from "../../internal/visually-hidden.js";
 import {
   type DescribePosition,
   placedOver,
   useTimelineContext,
-} from "../context";
-import { LaneContext } from "./lane";
+} from "../context.js";
+import { LaneContext } from "./lane.js";
 
 type WithEdge<Details> = Details & {
   /** What moved: one edge, or the whole range with `"both"`. */

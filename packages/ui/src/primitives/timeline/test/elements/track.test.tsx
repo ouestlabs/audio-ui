@@ -1,7 +1,7 @@
 import { describe, expect, mock, test } from "bun:test";
 import { fireEvent, render } from "@testing-library/react";
-import { mockRect } from "../../../../../test/helpers";
-import { Timeline } from "../../../../entries/timeline";
+import { mockRect } from "../../../../../test/helpers.js";
+import { Timeline } from "../../../../entries/timeline.js";
 
 function renderTrack(props: Timeline.Track.Props = {}) {
   const onHeightChange = mock(

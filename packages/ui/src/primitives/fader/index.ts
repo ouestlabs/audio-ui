@@ -1,8 +1,8 @@
-export { Control } from "./elements/control";
-export { Indicator } from "./elements/indicator";
-export { Label } from "./elements/label";
-export { Mark } from "./elements/mark";
-export { Root } from "./elements/root";
-export { Thumb } from "./elements/thumb";
-export { Track } from "./elements/track";
-export { Value } from "./elements/value";
+export { Control } from "./elements/control.js";
+export { Indicator } from "./elements/indicator.js";
+export { Label } from "./elements/label.js";
+export { Mark } from "./elements/mark.js";
+export { Root } from "./elements/root.js";
+export { Thumb } from "./elements/thumb.js";
+export { Track } from "./elements/track.js";
+export { Value } from "./elements/value.js";

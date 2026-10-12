@@ -1,6 +1,6 @@
 import type { XYPadController, XYPadSnapshot } from "@audio-ui/core/xypad";
 import * as React from "react";
-import type { Root } from "./elements/root";
+import type { Root } from "./elements/root.js";
 
 export interface XYPadContextValue {
   /** The framework-free pad behind every part: gestures, keys, the wheel, typed values. */

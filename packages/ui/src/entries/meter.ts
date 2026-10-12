@@ -1,1 +1,1 @@
-export * as Meter from "../primitives/meter";
+export * as Meter from "../primitives/meter/index.js";

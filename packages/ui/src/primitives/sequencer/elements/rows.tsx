@@ -1,12 +1,12 @@
 import * as React from "react";
-import { type PartProps, resolveStyling } from "../../internal/part";
-import { mergeProps, useRender } from "../../internal/render";
+import { type PartProps, resolveStyling } from "../../internal/part.js";
+import { mergeProps, useRender } from "../../internal/render.js";
 import {
   RowContext,
   type SequencerState,
   useSequencerContext,
   useSequencerView,
-} from "../context";
+} from "../context.js";
 
 /** Renders `children` once per row: the place to put a `Sequencer.Row`. Renders no element of its own. */
 export function Rows({ children }: Rows.Props) {

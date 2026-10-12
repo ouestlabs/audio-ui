@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { fireEvent } from "@testing-library/react";
-import { renderWaveform } from "../helpers";
+import { renderWaveform } from "../helpers.js";
 
 describe("Waveform.Hover", () => {
   test("appears at the hovered position while the pointer is over the control", () => {

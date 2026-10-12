@@ -1,8 +1,8 @@
 import { describe, expect, test } from "bun:test";
 import { createSource } from "@audio-ui/core";
 import { act, fireEvent } from "@testing-library/react";
-import { bench, expectWork, sweep } from "../../../../test/bench";
-import { renderWaveform } from "./helpers";
+import { bench, expectWork, sweep } from "../../../../test/bench.js";
+import { renderWaveform } from "./helpers.js";
 
 const PEAKS = Array.from(
   { length: 2048 },

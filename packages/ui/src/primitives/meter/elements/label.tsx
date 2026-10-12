@@ -1,8 +1,8 @@
 import * as React from "react";
-import type { PartProps } from "../../internal/part";
-import { resolveStyling } from "../../internal/part";
-import { mergeProps, useRender } from "../../internal/render";
-import { ChannelLabelContext } from "../context";
+import type { PartProps } from "../../internal/part.js";
+import { resolveStyling } from "../../internal/part.js";
+import { mergeProps, useRender } from "../../internal/render.js";
+import { ChannelLabelContext } from "../context.js";
 
 const NO_STATE: Label.State = {};
 

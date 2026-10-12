@@ -1,13 +1,13 @@
-import type { PartProps } from "../../internal/part";
-import { resolveStyling } from "../../internal/part";
-import { mergeProps, useRender } from "../../internal/render";
+import type { PartProps } from "../../internal/part.js";
+import { resolveStyling } from "../../internal/part.js";
+import { mergeProps, useRender } from "../../internal/render.js";
 import {
   useChannelIndex,
   useChannelPart,
   useMergedRef,
-} from "../internal/channel";
-import { indicatorStyle } from "../internal/shared";
-import { CHANNEL_STATE_ATTRIBUTES, type Channel } from "./channel";
+} from "../internal/channel.js";
+import { indicatorStyle } from "../internal/shared.js";
+import { CHANNEL_STATE_ATTRIBUTES, type Channel } from "./channel.js";
 
 /** The lit part of the channel, scaled to the level. Renders a `<div>` element. */
 export function Indicator(componentProps: Indicator.Props) {

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { render } from "@testing-library/react";
-import { Waveform } from "../../../../entries/waveform";
+import { Waveform } from "../../../../entries/waveform.js";
 
 describe("Waveform.Marker", () => {
   test("sits at its position on the timeline and shows its label", () => {

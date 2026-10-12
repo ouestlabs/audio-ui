@@ -1,6 +1,10 @@
-import { type PartProps, resolveStyling } from "../../internal/part";
-import { mergeProps, useRender } from "../../internal/render";
-import { placedAt, type TimelineState, useTimelineContext } from "../context";
+import { type PartProps, resolveStyling } from "../../internal/part.js";
+import { mergeProps, useRender } from "../../internal/render.js";
+import {
+  placedAt,
+  type TimelineState,
+  useTimelineContext,
+} from "../context.js";
 
 /**
  * Something placed at `value` on a lane: a bar number on the ruler, a cue, a

@@ -7,7 +7,7 @@ import {
   type Procedure,
 } from "@audio-ui/core/internal";
 import * as React from "react";
-import { useCallbackRef } from "../use-callback-ref";
+import { useCallbackRef } from "../use-callback-ref.js";
 
 export interface UseControlledValueOptions<T> {
   defaultValue?: T;

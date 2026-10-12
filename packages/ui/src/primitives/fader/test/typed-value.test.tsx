@@ -1,6 +1,6 @@
 import { describe, expect, mock, test } from "bun:test";
 import { fireEvent, render } from "@testing-library/react";
-import { Fader } from "../../../entries/fader";
+import { Fader } from "../../../entries/fader.js";
 
 function renderValue(props: Fader.Root.Props = {}, editable = true) {
   const onValueChange = mock(

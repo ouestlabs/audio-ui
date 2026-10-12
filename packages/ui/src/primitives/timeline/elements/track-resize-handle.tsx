@@ -1,8 +1,8 @@
 import * as React from "react";
-import { type PartProps, resolveStyling } from "../../internal/part";
-import { mergeProps, useRender } from "../../internal/render";
-import { VISUALLY_HIDDEN } from "../../internal/visually-hidden";
-import { type TrackState, useTrackContext } from "./track-context";
+import { type PartProps, resolveStyling } from "../../internal/part.js";
+import { mergeProps, useRender } from "../../internal/render.js";
+import { VISUALLY_HIDDEN } from "../../internal/visually-hidden.js";
+import { type TrackState, useTrackContext } from "./track-context.js";
 
 /**
  * Sets the track's height: by dragging, or from the keyboard through the

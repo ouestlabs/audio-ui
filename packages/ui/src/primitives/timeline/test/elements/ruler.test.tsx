@@ -1,6 +1,6 @@
 import { describe, expect, mock, test } from "bun:test";
 import { act, fireEvent } from "@testing-library/react";
-import { createTestSource, lastCall, renderTimeline } from "../helpers";
+import { createTestSource, lastCall, renderTimeline } from "../helpers.js";
 
 const position = (playhead: HTMLElement) =>
   playhead.style.getPropertyValue("--timeline-offset");

@@ -82,7 +82,7 @@
   "scripts": {
     "bench": "bun test ./src/primitives/*/test/*.bench.tsx",
     "bench:browsers": "bun bench/browsers.ts",
-    "build:pkg": "bunx --bun tsup && tsc -p tsconfig.build.json && bun ../core/scripts/fix-declaration-imports.ts",
+    "build:pkg": "bunx --bun tsup && tsc -p tsconfig.build.json",
     "clean": "rm -rf dist node_modules .turbo",
     "dev": "bunx --bun tsup --watch",
     "lint": "biome check --write .",

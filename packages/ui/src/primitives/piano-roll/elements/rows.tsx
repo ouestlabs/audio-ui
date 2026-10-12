@@ -1,8 +1,8 @@
 import { isBlackKey } from "@audio-ui/core";
 import * as React from "react";
-import { type PartProps, resolveStyling } from "../../internal/part";
-import { mergeProps, useRender } from "../../internal/render";
-import { placedOnRow, usePianoRollContext, useRollView } from "../context";
+import { type PartProps, resolveStyling } from "../../internal/part.js";
+import { mergeProps, useRender } from "../../internal/render.js";
+import { placedOnRow, usePianoRollContext, useRollView } from "../context.js";
 
 /**
  * Renders `children` once per row, highest pitch first: the place to put a

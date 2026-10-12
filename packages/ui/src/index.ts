@@ -1,13 +1,13 @@
 export { createSource, type Source, type WritableSource } from "@audio-ui/core";
 export { adjacentPoint } from "@audio-ui/core/timeline";
-export { Envelope } from "./entries/envelope";
-export { Fader } from "./entries/fader";
-export { Knob } from "./entries/knob";
-export { Meter } from "./entries/meter";
-export { Piano } from "./entries/piano";
-export { PianoRoll } from "./entries/piano-roll";
-export { Plot } from "./entries/plot";
-export { Sequencer } from "./entries/sequencer";
+export { Envelope } from "./entries/envelope.js";
+export { Fader } from "./entries/fader.js";
+export { Knob } from "./entries/knob.js";
+export { Meter } from "./entries/meter.js";
+export { Piano } from "./entries/piano.js";
+export { PianoRoll } from "./entries/piano-roll.js";
+export { Plot } from "./entries/plot.js";
+export { Sequencer } from "./entries/sequencer.js";
 export {
   type ClipLimits,
   type ClipValue,
@@ -26,6 +26,6 @@ export {
   Timeline,
   trimClipEnd,
   trimClipStart,
-} from "./entries/timeline";
-export { Waveform } from "./entries/waveform";
-export { XYPad } from "./entries/xypad";
+} from "./entries/timeline.js";
+export { Waveform } from "./entries/waveform.js";
+export { XYPad } from "./entries/xypad.js";

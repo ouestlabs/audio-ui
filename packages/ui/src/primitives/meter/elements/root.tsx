@@ -9,11 +9,11 @@ import {
   paintChannel,
 } from "@audio-ui/core/meter";
 import * as React from "react";
-import { type PartProps, resolveStyling } from "../../internal/part";
-import { mergeProps, useRender } from "../../internal/render";
-import { useLocale } from "../../internal/use-locale";
-import { MeterContext, type MeterContextValue } from "../context";
-import type { Channel } from "./channel";
+import { type PartProps, resolveStyling } from "../../internal/part.js";
+import { mergeProps, useRender } from "../../internal/render.js";
+import { useLocale } from "../../internal/use-locale.js";
+import { MeterContext, type MeterContextValue } from "../context.js";
+import type { Channel } from "./channel.js";
 
 /**
  * Groups the channels of a level meter. Levels come either from `value` (and

@@ -1,7 +1,7 @@
 import { mock } from "bun:test";
 import { type RenderResult, render } from "@testing-library/react";
-import { mockRect } from "../../../../test/helpers";
-import { Piano } from "../../../entries/piano";
+import { mockRect } from "../../../../test/helpers.js";
+import { Piano } from "../../../entries/piano.js";
 
 /**
  * C3 (48) to C4 (60) on an 800×100 keyboard at the origin: eight white keys

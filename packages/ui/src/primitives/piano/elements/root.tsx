@@ -4,14 +4,14 @@ import {
   type PianoOptions,
 } from "@audio-ui/core/piano";
 import * as React from "react";
-import { type PartProps, resolveStyling } from "../../internal/part";
-import { mergeProps, useRender } from "../../internal/render";
+import { type PartProps, resolveStyling } from "../../internal/part.js";
+import { mergeProps, useRender } from "../../internal/render.js";
 import {
   type NoteOnEventDetails,
   PianoContext,
   type PianoContextValue,
   type PianoState,
-} from "../context";
+} from "../context.js";
 
 /**
  * A keyboard to play: every key sounds while pressed, by pointer or from the
@@ -131,8 +131,8 @@ export namespace Root {
   export type State = PianoState;
   export type Layout = KeyLayout;
   export type NoteOnEventReason = NoteOnEventDetails["reason"];
-  export type NoteOnEventDetails = import("../context").NoteOnEventDetails;
-  export type NoteOffEventDetails = import("../context").NoteOffEventDetails;
+  export type NoteOnEventDetails = import("../context.js").NoteOnEventDetails;
+  export type NoteOffEventDetails = import("../context.js").NoteOffEventDetails;
 
   export interface Props extends PartProps<"div", State> {
     /** Pitches lit from elsewhere, such as a MIDI input or a sequencer, on top of the keys pressed here. */

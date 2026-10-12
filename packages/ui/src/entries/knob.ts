@@ -1,1 +1,1 @@
-export * as Knob from "../primitives/knob";
+export * as Knob from "../primitives/knob/index.js";

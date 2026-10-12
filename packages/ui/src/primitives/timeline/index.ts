@@ -1,20 +1,20 @@
-export { Clip } from "./elements/clip";
-export { ClipFade } from "./elements/clip-fade";
-export { ClipFadeHandle } from "./elements/clip-fade-handle";
-export { ClipHandle } from "./elements/clip-handle";
-export { ClipHeader } from "./elements/clip-header";
-export { Lane } from "./elements/lane";
-export { Mark } from "./elements/mark";
+export { Clip } from "./elements/clip.js";
+export { ClipFade } from "./elements/clip-fade.js";
+export { ClipFadeHandle } from "./elements/clip-fade-handle.js";
+export { ClipHandle } from "./elements/clip-handle.js";
+export { ClipHeader } from "./elements/clip-header.js";
+export { Lane } from "./elements/lane.js";
+export { Mark } from "./elements/mark.js";
 export {
   Navigator,
   NavigatorHandle,
   NavigatorWindow,
-} from "./elements/navigator";
-export { Playhead } from "./elements/playhead";
-export { Range, RangeHandle } from "./elements/range";
-export { Root } from "./elements/root";
-export { Ruler } from "./elements/ruler";
-export { Track } from "./elements/track";
-export { TrackHeader } from "./elements/track-header";
-export { TrackResizeHandle } from "./elements/track-resize-handle";
-export { Viewport } from "./elements/viewport";
+} from "./elements/navigator.js";
+export { Playhead } from "./elements/playhead.js";
+export { Range, RangeHandle } from "./elements/range.js";
+export { Root } from "./elements/root.js";
+export { Ruler } from "./elements/ruler.js";
+export { Track } from "./elements/track.js";
+export { TrackHeader } from "./elements/track-header.js";
+export { TrackResizeHandle } from "./elements/track-resize-handle.js";
+export { Viewport } from "./elements/viewport.js";

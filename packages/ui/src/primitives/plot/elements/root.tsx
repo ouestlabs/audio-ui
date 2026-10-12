@@ -1,8 +1,12 @@
 import { type ParameterScaleProp, resolveScale } from "@audio-ui/core";
 import * as React from "react";
-import { type PartProps, resolveStyling } from "../../internal/part";
-import { mergeProps, useRender } from "../../internal/render";
-import { PlotContext, type PlotContextValue, type PlotState } from "../context";
+import { type PartProps, resolveStyling } from "../../internal/part.js";
+import { mergeProps, useRender } from "../../internal/render.js";
+import {
+  PlotContext,
+  type PlotContextValue,
+  type PlotState,
+} from "../context.js";
 
 /**
  * Groups the parts of a plot and owns its two axes: the range of each and how

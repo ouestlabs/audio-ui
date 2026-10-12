@@ -1,8 +1,8 @@
 import type { Point } from "@audio-ui/core";
 import type { Nullable, Procedure } from "@audio-ui/core/internal";
 import * as React from "react";
-import { useControlledValue } from "../../hooks/state/use-controlled-value";
-import { useValueAsRef } from "../../hooks/state/use-value-as-ref";
+import { useControlledValue } from "../../hooks/state/use-controlled-value.js";
+import { useValueAsRef } from "../../hooks/state/use-value-as-ref.js";
 
 export interface UseParameterCoreOptions<T> {
   /** Clamp + quantize a candidate value into the parameter's domain. */

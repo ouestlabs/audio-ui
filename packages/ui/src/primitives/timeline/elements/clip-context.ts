@@ -1,6 +1,6 @@
 import type { ClipController, ClipTarget } from "@audio-ui/core/timeline";
 import * as React from "react";
-import type { DescribePosition } from "../context";
+import type { DescribePosition } from "../context.js";
 
 export type {
   ClipChangeEventDetails,

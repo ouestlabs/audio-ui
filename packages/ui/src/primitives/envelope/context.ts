@@ -4,7 +4,7 @@ import type {
 } from "@audio-ui/core/envelope";
 import type { Nullable } from "@audio-ui/core/internal";
 import * as React from "react";
-import type { Root } from "./elements/root";
+import type { Root } from "./elements/root.js";
 
 /** The points array and its indices stay in `state`; they don't become data attributes. */
 export const STATE_ATTRIBUTES_MAPPING = {

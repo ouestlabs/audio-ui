@@ -1,8 +1,8 @@
 import { pitchName } from "@audio-ui/core";
 import * as React from "react";
-import { type PartProps, resolveStyling } from "../../internal/part";
-import { mergeProps, useRender } from "../../internal/render";
-import { KeyContext, type PianoState, usePianoContext } from "../context";
+import { type PartProps, resolveStyling } from "../../internal/part.js";
+import { mergeProps, useRender } from "../../internal/render.js";
+import { KeyContext, type PianoState, usePianoContext } from "../context.js";
 
 /**
  * One key, placed along the keyboard for its pitch. It sounds while pressed:

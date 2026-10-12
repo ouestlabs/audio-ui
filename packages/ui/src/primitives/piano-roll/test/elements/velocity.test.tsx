@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { fireEvent } from "@testing-library/react";
-import { drag, lastCall, notesById, renderRoll } from "../helpers";
+import { drag, lastCall, notesById, renderRoll } from "../helpers.js";
 
 // The lane is 50px tall, from y 50 to 100. Note a is at full velocity, b at half.
 

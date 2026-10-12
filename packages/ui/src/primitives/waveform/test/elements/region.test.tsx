@@ -1,8 +1,8 @@
 import { describe, expect, mock, test } from "bun:test";
 import { fireEvent, render } from "@testing-library/react";
-import { mockRect } from "../../../../../test/helpers";
-import { Waveform } from "../../../../entries/waveform";
-import { lastCall, seconds } from "../helpers";
+import { mockRect } from "../../../../../test/helpers.js";
+import { Waveform } from "../../../../entries/waveform.js";
+import { lastCall, seconds } from "../helpers.js";
 
 /** A region on a 100-second track, over a 200px control: 2px per second. */
 function renderRegion(props: Waveform.Region.Props = {}) {

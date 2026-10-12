@@ -1,11 +1,11 @@
 import * as React from "react";
-import type { PartProps } from "../../internal/part";
-import { resolveStyling } from "../../internal/part";
-import { mergeProps, useRender } from "../../internal/render";
-import { VISUALLY_HIDDEN } from "../../internal/visually-hidden";
-import { ChannelIndexContext, ChannelLabelContext } from "../context";
-import { useChannelPart, useMergedRef } from "../internal/channel";
-import type { Root } from "./root";
+import type { PartProps } from "../../internal/part.js";
+import { resolveStyling } from "../../internal/part.js";
+import { mergeProps, useRender } from "../../internal/render.js";
+import { VISUALLY_HIDDEN } from "../../internal/visually-hidden.js";
+import { ChannelIndexContext, ChannelLabelContext } from "../context.js";
+import { useChannelPart, useMergedRef } from "../internal/channel.js";
+import type { Root } from "./root.js";
 
 /** The index is the channel's identity, not a presence to style by. */
 export const CHANNEL_STATE_ATTRIBUTES = { index: () => null };

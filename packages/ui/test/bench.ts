@@ -65,10 +65,8 @@ export function bench(
   console.log(
     `  ${label.padEnd(44)} p50 ${fmt(stats.p50)}  p95 ${fmt(stats.p95)}  p99 ${fmt(stats.p99)}  max ${fmt(stats.max)} ms  (budget ${budget.toFixed(2)})`
   );
-  // biome-ignore lint/suspicious/noMisplacedAssertion: called from inside the bench files' tests.
   expect(stats.p95).toBeLessThan(budget);
   // The slowest one in a hundred still has to fit a whole frame, not half of it.
-  // biome-ignore lint/suspicious/noMisplacedAssertion: called from inside the bench files' tests.
   expect(stats.p99).toBeLessThan(FRAME_MS);
   return stats;
 }

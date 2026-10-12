@@ -10,22 +10,22 @@ import {
   createClipController,
 } from "@audio-ui/core/timeline";
 import * as React from "react";
-import { type PartProps, resolveStyling } from "../../internal/part";
-import { mergeProps, useRender } from "../../internal/render";
-import { VISUALLY_HIDDEN } from "../../internal/visually-hidden";
+import { type PartProps, resolveStyling } from "../../internal/part.js";
+import { mergeProps, useRender } from "../../internal/render.js";
+import { VISUALLY_HIDDEN } from "../../internal/visually-hidden.js";
 import {
   type DescribePosition,
   placedOver,
   useTimelineContext,
-} from "../context";
+} from "../context.js";
 import {
   ClipContext,
   type ClipContextValue,
   type ClipState,
   type ClipTarget,
-} from "./clip-context";
-import { LaneContext } from "./lane";
-import { useSeekGesture } from "./seek-gesture";
+} from "./clip-context.js";
+import { LaneContext } from "./lane.js";
+import { useSeekGesture } from "./seek-gesture.js";
 
 const describeNumber: DescribePosition = (value) =>
   String(Math.round(value * 100) / 100);

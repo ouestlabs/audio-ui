@@ -1,1 +1,1 @@
-export * as Waveform from "../primitives/waveform";
+export * as Waveform from "../primitives/waveform/index.js";

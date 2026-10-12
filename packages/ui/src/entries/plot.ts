@@ -1,1 +1,1 @@
-export * as Plot from "../primitives/plot";
+export * as Plot from "../primitives/plot/index.js";

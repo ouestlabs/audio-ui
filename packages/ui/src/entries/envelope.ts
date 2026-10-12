@@ -1,1 +1,1 @@
-export * as Envelope from "../primitives/envelope";
+export * as Envelope from "../primitives/envelope/index.js";

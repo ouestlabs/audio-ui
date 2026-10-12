@@ -1,8 +1,8 @@
 import { describe, expect, mock, test } from "bun:test";
 import { fireEvent, render } from "@testing-library/react";
-import { mockRect } from "../../../../../test/helpers";
-import { Waveform } from "../../../../entries/waveform";
-import { lastCall } from "../helpers";
+import { mockRect } from "../../../../../test/helpers.js";
+import { Waveform } from "../../../../entries/waveform.js";
+import { lastCall } from "../helpers.js";
 
 /**
  * A 100-second source shown from 20 to 60 over a 200px control: 5px per

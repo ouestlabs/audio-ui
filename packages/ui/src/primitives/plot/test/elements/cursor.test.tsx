@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { fireEvent, render } from "@testing-library/react";
-import { mockRect } from "../../../../../test/helpers";
-import { Plot } from "../../../../entries/plot";
+import { mockRect } from "../../../../../test/helpers.js";
+import { Plot } from "../../../../entries/plot.js";
 
 const format = (value: { x: number; y: number }) =>
   `${value.x.toFixed(0)}, ${value.y.toFixed(1)}`;

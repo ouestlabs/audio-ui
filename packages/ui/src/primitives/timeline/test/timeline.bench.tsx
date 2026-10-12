@@ -1,9 +1,9 @@
 import { describe, expect, test } from "bun:test";
 import { createSource } from "@audio-ui/core";
 import { act, fireEvent, render } from "@testing-library/react";
-import { bench, expectWork, sweep } from "../../../../test/bench";
-import { Timeline } from "../../../entries/timeline";
-import { renderTimeline } from "./helpers";
+import { bench, expectWork, sweep } from "../../../../test/bench.js";
+import { Timeline } from "../../../entries/timeline.js";
+import { renderTimeline } from "./helpers.js";
 
 describe("Timeline", () => {
   test("scrubbing the ruler", () => {

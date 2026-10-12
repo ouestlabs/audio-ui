@@ -1,6 +1,6 @@
-import type { PartProps } from "../../internal/part";
-import { resolveStyling } from "../../internal/part";
-import { mergeProps, useRender } from "../../internal/render";
+import type { PartProps } from "../../internal/part.js";
+import { resolveStyling } from "../../internal/part.js";
+import { mergeProps, useRender } from "../../internal/render.js";
 
 const NO_STATE: Track.State = {};
 

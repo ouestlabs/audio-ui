@@ -2,12 +2,12 @@ import {
   DEFAULT_ARC_STROKE_WIDTH,
   STATE_ATTRIBUTES_MAPPING,
 } from "@audio-ui/core/knob";
-import { resolveStyling } from "../../internal/part";
-import { mergeProps, useRender } from "../../internal/render";
-import { useKnobContext } from "../context";
-import { useArcProps } from "../internal/arc-props";
-import type { Root } from "./root";
-import type { Track } from "./track";
+import { resolveStyling } from "../../internal/part.js";
+import { mergeProps, useRender } from "../../internal/render.js";
+import { useKnobContext } from "../context.js";
+import { useArcProps } from "../internal/arc-props.js";
+import type { Root } from "./root.js";
+import type { Track } from "./track.js";
 
 /**
  * The arc from `anchor` to the value, drawn over the `Track`.

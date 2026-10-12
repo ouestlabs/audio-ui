@@ -1,10 +1,10 @@
-import { type PartProps, resolveStyling } from "../../internal/part";
-import { mergeProps, useRender } from "../../internal/render";
+import { type PartProps, resolveStyling } from "../../internal/part.js";
+import { mergeProps, useRender } from "../../internal/render.js";
 import {
   POSITION_PROPERTY,
   useWaveformContext,
   type WaveformState,
-} from "../context";
+} from "../context.js";
 
 /**
  * A marker at the playback position, with no interaction of its own.

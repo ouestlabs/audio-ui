@@ -1,16 +1,16 @@
 import type { Note } from "@audio-ui/core/piano-roll";
 import * as React from "react";
-import { type PartProps, resolveStyling } from "../../internal/part";
-import { mergeProps, useRender } from "../../internal/render";
-import { VISUALLY_HIDDEN } from "../../internal/visually-hidden";
-import { placedAt } from "../../timeline/context";
-import { LaneContext, useLaneProps } from "../../timeline/elements/lane";
+import { type PartProps, resolveStyling } from "../../internal/part.js";
+import { mergeProps, useRender } from "../../internal/render.js";
+import { VISUALLY_HIDDEN } from "../../internal/visually-hidden.js";
+import { placedAt } from "../../timeline/context.js";
+import { LaneContext, useLaneProps } from "../../timeline/elements/lane.js";
 import {
   type PianoRollState,
   usePianoRollContext,
   useRollView,
   VELOCITY_PROPERTY,
-} from "../context";
+} from "../context.js";
 
 const describeVelocity = (velocity: number) => `${Math.round(velocity * 100)}%`;
 

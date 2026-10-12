@@ -2,10 +2,10 @@ import type { Point } from "@audio-ui/core";
 import { clamp, clampUnit, quantizeRound } from "@audio-ui/core";
 import type { Nullable, Procedure } from "@audio-ui/core/internal";
 import * as React from "react";
-import { useKeyboardNavigation } from "../../hooks/interactions/use-keyboard-navigation";
-import { useWheel } from "../../hooks/interactions/use-wheel";
-import type { UseParameterCoreDragCallbacks } from "./use-parameter-core";
-import { useParameterCore } from "./use-parameter-core";
+import { useKeyboardNavigation } from "../../hooks/interactions/use-keyboard-navigation.js";
+import { useWheel } from "../../hooks/interactions/use-wheel.js";
+import type { UseParameterCoreDragCallbacks } from "./use-parameter-core.js";
+import { useParameterCore } from "./use-parameter-core.js";
 
 const PAGE_STEP_MULTIPLIER = 10;
 const WHEEL_DELTA_EPSILON = 0.1;

@@ -1,8 +1,8 @@
 import { describe, expect, mock, test } from "bun:test";
 import type { Point } from "@audio-ui/core";
 import { fireEvent, render } from "@testing-library/react";
-import { mockRect } from "../../../../test/helpers";
-import { Envelope } from "../../../entries/envelope";
+import { mockRect } from "../../../../test/helpers.js";
+import { Envelope } from "../../../entries/envelope.js";
 
 /** 4 points: {0,0} {0.2,1} {0.6,0.5} {1,0}, so paint/keyboard assertions stay exact. Passed explicitly rather than relying on Root's own default, which is chosen for how it looks in a demo, not for round test numbers. */
 const TEST_POINTS = [

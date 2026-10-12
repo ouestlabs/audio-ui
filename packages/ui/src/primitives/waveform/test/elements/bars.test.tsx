@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { render } from "@testing-library/react";
-import { installFrames } from "../../../../../test/helpers";
-import { Waveform } from "../../../../entries/waveform";
-import { createTestSource } from "../helpers";
+import { installFrames } from "../../../../../test/helpers.js";
+import { Waveform } from "../../../../entries/waveform.js";
+import { createTestSource } from "../helpers.js";
 
 const levelOf = (bar: Element) =>
   Number((bar as HTMLElement).style.getPropertyValue("--waveform-level"));

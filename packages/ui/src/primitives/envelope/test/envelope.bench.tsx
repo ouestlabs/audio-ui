@@ -1,9 +1,9 @@
 import { describe, test } from "bun:test";
 import { fireEvent, render } from "@testing-library/react";
 import { useState } from "react";
-import { bench, expectWork, sweep } from "../../../../test/bench";
-import { mockRect } from "../../../../test/helpers";
-import { Envelope } from "../../../entries/envelope";
+import { bench, expectWork, sweep } from "../../../../test/bench.js";
+import { mockRect } from "../../../../test/helpers.js";
+import { Envelope } from "../../../entries/envelope.js";
 
 const POINTS: Envelope.Breakpoint[] = [
   { x: 0, y: 0 },

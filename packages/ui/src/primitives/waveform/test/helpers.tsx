@@ -1,7 +1,7 @@
 import { mock } from "bun:test";
 import { type RenderResult, render } from "@testing-library/react";
-import { mockRect } from "../../../../test/helpers";
-import { Waveform } from "../../../entries/waveform";
+import { mockRect } from "../../../../test/helpers.js";
+import { Waveform } from "../../../entries/waveform.js";
 
 const PEAKS = [0.2, 0.8, 0.5, 1];
 

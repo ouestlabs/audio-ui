@@ -5,8 +5,8 @@ import {
   type ZoomAnchor,
 } from "@audio-ui/core/timeline";
 import * as React from "react";
-import { type PartProps, resolveStyling } from "../../internal/part";
-import { mergeProps, useRender } from "../../internal/render";
+import { type PartProps, resolveStyling } from "../../internal/part.js";
+import { mergeProps, useRender } from "../../internal/render.js";
 import {
   type PositionChangeEventDetails,
   type PositionSource,
@@ -15,7 +15,7 @@ import {
   type TimelineState,
   type ViewportMetrics,
   type ZoomChangeEventDetails,
-} from "../context";
+} from "../context.js";
 
 /**
  * Groups the parts of a timeline and owns what they share: its length, its
@@ -232,11 +232,11 @@ export namespace Root {
   export type Source = PositionSource;
   export type ChangeEventReason = PositionChangeEventDetails["reason"];
   export type PositionChangeEventDetails =
-    import("../context").PositionChangeEventDetails;
+    import("../context.js").PositionChangeEventDetails;
   export type PositionCommitEventDetails =
-    import("../context").PositionCommitEventDetails;
+    import("../context.js").PositionCommitEventDetails;
   export type ZoomChangeEventDetails =
-    import("../context").ZoomChangeEventDetails;
+    import("../context.js").ZoomChangeEventDetails;
 
   export interface Props extends Omit<PartProps<"div", State>, "defaultValue"> {
     /** Uncontrolled starting position. @default 0 */

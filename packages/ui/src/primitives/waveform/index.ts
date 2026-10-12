@@ -1,9 +1,9 @@
-export { Bar, Bars } from "./elements/bars";
-export { Canvas } from "./elements/canvas";
-export { Control } from "./elements/control";
-export { Hover } from "./elements/hover";
-export { Marker } from "./elements/marker";
-export { Playhead } from "./elements/playhead";
-export { Region, RegionHandle } from "./elements/region";
-export { Root } from "./elements/root";
-export { Thumb } from "./elements/thumb";
+export { Bar, Bars } from "./elements/bars.js";
+export { Canvas } from "./elements/canvas.js";
+export { Control } from "./elements/control.js";
+export { Hover } from "./elements/hover.js";
+export { Marker } from "./elements/marker.js";
+export { Playhead } from "./elements/playhead.js";
+export { Region, RegionHandle } from "./elements/region.js";
+export { Root } from "./elements/root.js";
+export { Thumb } from "./elements/thumb.js";

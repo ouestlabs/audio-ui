@@ -5,7 +5,7 @@ import {
   type Procedure,
 } from "@audio-ui/core/internal";
 import * as React from "react";
-import { useCallbackRef } from "../use-callback-ref";
+import { useCallbackRef } from "../use-callback-ref.js";
 
 const MAX_POINTER_ID = 10;
 

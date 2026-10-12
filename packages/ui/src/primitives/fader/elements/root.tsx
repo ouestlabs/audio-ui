@@ -6,14 +6,14 @@ import {
   type FaderCommitEventDetails,
 } from "@audio-ui/core/fader";
 import * as React from "react";
-import { type PartProps, resolveStyling } from "../../internal/part";
-import { mergeProps, useRender } from "../../internal/render";
-import { useLocale } from "../../internal/use-locale";
+import { type PartProps, resolveStyling } from "../../internal/part.js";
+import { mergeProps, useRender } from "../../internal/render.js";
+import { useLocale } from "../../internal/use-locale.js";
 import {
   FADER_STATE_ATTRIBUTES,
   FaderContext,
   type FaderContextValue,
-} from "../context";
+} from "../context.js";
 
 /**
  * Groups all parts of the fader, with audio defaults (vertical, -60…+6) and

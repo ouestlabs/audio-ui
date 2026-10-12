@@ -1,6 +1,6 @@
-import { type PartProps, resolveStyling } from "../../internal/part";
-import { mergeProps, useRender } from "../../internal/render";
-import { type TrackState, useTrackContext } from "./track-context";
+import { type PartProps, resolveStyling } from "../../internal/part.js";
+import { mergeProps, useRender } from "../../internal/render.js";
+import { type TrackState, useTrackContext } from "./track-context.js";
 
 /**
  * The strip beside a track's lane that names it and holds what sets it. It

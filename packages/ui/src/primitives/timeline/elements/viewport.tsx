@@ -4,9 +4,9 @@ import {
   valueAtOffset,
 } from "@audio-ui/core/timeline";
 import * as React from "react";
-import { type PartProps, resolveStyling } from "../../internal/part";
-import { mergeProps, useRender } from "../../internal/render";
-import { type TimelineState, useTimelineContext } from "../context";
+import { type PartProps, resolveStyling } from "../../internal/part.js";
+import { mergeProps, useRender } from "../../internal/render.js";
+import { type TimelineState, useTimelineContext } from "../context.js";
 
 /**
  * The scrolling window onto the timeline. Cmd/Ctrl + wheel (and pinch on a

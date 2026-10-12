@@ -1,8 +1,8 @@
 import { describe, expect, test } from "bun:test";
 import { createSource } from "@audio-ui/core";
 import { act, fireEvent, render } from "@testing-library/react";
-import { Sequencer } from "../../../../entries/sequencer";
-import { lastCall, renderSequencer } from "../helpers";
+import { Sequencer } from "../../../../entries/sequencer.js";
+import { lastCall, renderSequencer } from "../helpers.js";
 
 const ROW_NAME = /^Row/;
 const press = (cell: Element, x: number, y: number) =>

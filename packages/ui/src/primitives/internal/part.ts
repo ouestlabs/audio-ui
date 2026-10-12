@@ -1,5 +1,5 @@
 import type * as React from "react";
-import type { RenderProp } from "./render";
+import type { RenderProp } from "./render.js";
 
 type StateClassName<State> =
   | string
