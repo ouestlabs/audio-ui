@@ -8,11 +8,19 @@ import { source } from "@/lib/source";
  * All published doc routes (same set as `source.generateParams()`), including
  * every `/docs/components/base/...` page. Using `getPages()` avoids
  * dropping URLs when two pages share the same `name` in the page tree.
+ * `lastModified` comes from the last git commit that touched the page.
  */
-function collectDocUrls(): string[] {
-  const pages = source.getPages();
-  const urls = [...new Set(pages.map((p) => p.url))];
-  return urls.filter((url) => url !== "/docs" && !url.startsWith("http"));
+function collectDocEntries(baseUrl: string): MetadataRoute.Sitemap {
+  const entries = new Map<string, Date | undefined>();
+  for (const page of source.getPages()) {
+    if (page.url !== "/docs" && !page.url.startsWith("http")) {
+      entries.set(page.url, page.data.lastModified);
+    }
+  }
+  return [...entries].map(([path, lastModified]) => ({
+    lastModified,
+    url: `${baseUrl}${path}`,
+  }));
 }
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -20,13 +28,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const staticPaths = [baseUrl, `${baseUrl}/docs`, `${baseUrl}/components`];
 
-  const docPaths = collectDocUrls().map((path) => `${baseUrl}${path}`);
-
   const componentCategoryPaths = getCategories().map(
     (category) => `${baseUrl}/components/${category.name}`
   );
 
-  const allUrls = [...staticPaths, ...docPaths, ...componentCategoryPaths];
-
-  return allUrls.map((url) => ({ url }));
+  return [
+    ...staticPaths.map((url) => ({ url })),
+    ...collectDocEntries(baseUrl),
+    ...componentCategoryPaths.map((url) => ({ url })),
+  ];
 }
