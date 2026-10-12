@@ -24,6 +24,7 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: 22
+          registry-url: https://registry.npmjs.org
 
       - name: Setup bun
         uses: oven-sh/setup-bun@v2
@@ -34,10 +35,9 @@ jobs:
         run: bun install
 
       - name: Create Release Pull Request or Publish to npm
-        uses: changesets/action@v1
+        uses: changesets/action@v2
         with:
-          version: bun version-packages
-          publish: bun release
+          version-script: bun version-packages
+          publish-script: bun release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
