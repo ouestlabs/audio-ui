@@ -15,10 +15,9 @@ export function Label(componentProps: Label.Props) {
     style,
     ...elementProps
   } = componentProps;
-  const { meta, state } = useXYPadContext("Label");
+  const { setLabelId, state } = useXYPadContext("Label");
   const generatedId = React.useId();
   const id = idProp ?? generatedId;
-  const { setLabelId } = meta;
   React.useEffect(() => {
     setLabelId(id);
     return () => setLabelId(undefined);

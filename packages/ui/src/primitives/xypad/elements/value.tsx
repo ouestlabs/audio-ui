@@ -13,9 +13,9 @@ import type { Root } from "./root";
 export function Value(componentProps: Value.Props) {
   const { children, className, ref, render, style, ...elementProps } =
     componentProps;
-  const { meta, state } = useXYPadContext("Value");
-  const formattedX = meta.formatter.format(state.value.x);
-  const formattedY = meta.formatter.format(state.value.y);
+  const { snapshot, state } = useXYPadContext("Value");
+  const formattedX = snapshot.formatted.x;
+  const formattedY = snapshot.formatted.y;
   return useRender({
     defaultTagName: "output",
     props: mergeProps<"output">(
@@ -24,7 +24,7 @@ export function Value(componentProps: Value.Props) {
         children:
           typeof children === "function"
             ? children(formattedX, formattedY, state.value)
-            : (children ?? meta.formatPair(state.value.x, state.value.y)),
+            : (children ?? snapshot.formattedPair),
       },
       { ...elementProps, ...resolveStyling(className, style, state) }
     ),

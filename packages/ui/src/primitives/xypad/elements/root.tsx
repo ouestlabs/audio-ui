@@ -1,16 +1,11 @@
+import type { Point } from "@audio-ui/core";
 import {
-  clamp,
-  clampFinite,
-  createChangeEventDetails,
-  createPairFormatter,
-  type ChangeEventDetails as ExtraChangeEventDetails,
-  type CommitEventDetails as ExtraCommitEventDetails,
-  type Point,
-  roundToStep,
-} from "@audio-ui/core";
-import { STATE_ATTRIBUTES_MAPPING, toPercent } from "@audio-ui/core/xypad";
+  createXYPadController,
+  STATE_ATTRIBUTES_MAPPING,
+  type XYPadChangeEventDetails,
+  type XYPadCommitEventDetails,
+} from "@audio-ui/core/xypad";
 import * as React from "react";
-import { useWheel } from "../../../hooks/interactions/use-wheel";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
 import { useLocale } from "../../internal/use-locale";
@@ -41,165 +36,60 @@ export function Root(componentProps: Root.Props) {
     stepX = 1,
     stepY = 1,
     style,
-    value: valueProp,
+    value,
     ...elementProps
   } = componentProps;
+  const resolvedLocale = useLocale(locale);
 
-  const isControlled = valueProp !== undefined;
-  const resetValue = React.useMemo<Point>(
-    () =>
-      defaultValue ?? {
-        x: minX + (maxX - minX) / 2,
-        y: minY + (maxY - minY) / 2,
-      },
-    [defaultValue, maxX, maxY, minX, minY]
-  );
-  const [uncontrolledValue, setUncontrolledValue] =
-    React.useState<Point>(resetValue);
-  const rawValue = isControlled ? valueProp : uncontrolledValue;
-  const value = React.useMemo(
-    () => ({
-      x: clampFinite(rawValue.x, minX, maxX),
-      y: clampFinite(rawValue.y, minY, maxY),
-    }),
-    [maxX, maxY, minX, minY, rawValue.x, rawValue.y]
-  );
-
-  // While dragging, the pad follows the pointer even if a controlled value
-  // lags behind; on release the controlled value rules again.
-  const [dragging, setDraggingState] = React.useState(false);
-  const [dragValue, setDragValue] = React.useState<Point | null>(null);
-  const draggingRef = React.useRef(false);
-  const displayedValue = dragValue ?? value;
-  const valueRef = React.useRef(displayedValue);
-  valueRef.current = displayedValue;
-
-  const setDragging = React.useCallback((next: boolean) => {
-    draggingRef.current = next;
-    setDraggingState(next);
-    if (!next) {
-      setDragValue(null);
-    }
-  }, []);
-
-  const change = React.useCallback(
-    (raw: Point, eventDetails: Root.ChangeEventDetails) => {
-      const next = {
-        x: clamp(roundToStep(raw.x, stepX, minX), minX, maxX),
-        y: clamp(roundToStep(raw.y, stepY, minY), minY, maxY),
-      };
-      const { current } = valueRef;
-      if (next.x === current.x && next.y === current.y) {
-        return false;
-      }
-      onValueChange?.(next, eventDetails);
-      if (eventDetails.isCanceled) {
-        return false;
-      }
-      valueRef.current = next;
-      if (!isControlled) {
-        setUncontrolledValue(next);
-      }
-      if (isControlled && draggingRef.current) {
-        setDragValue(next);
-      }
-      return true;
-    },
-    [isControlled, maxX, maxY, minX, minY, onValueChange, stepX, stepY]
-  );
-
-  const commit = React.useCallback(
-    (committed: Point, eventDetails: Root.CommitEventDetails) => {
-      onValueCommitted?.(committed, eventDetails);
-    },
-    [onValueCommitted]
-  );
-
-  // Trackpads scroll in two dimensions: the wheel moves the point by the same
-  // distance a drag would.
-  const { wheelRef } = useWheel({
+  const [controller] = React.useState(() => createXYPadController());
+  // Set on every render, before the snapshot is read, so it always shows the latest props.
+  controller.setOptions({
+    defaultValue,
     disabled,
-    onWheel: (event: WheelEvent, delta: Point) => {
-      const element = event.currentTarget;
-      if (!(element instanceof Element)) {
-        return;
-      }
-      const rect = element.getBoundingClientRect();
-      const { current } = valueRef;
-      const next = {
-        x: current.x + (delta.x * (maxX - minX)) / Math.max(rect.width, 1),
-        y: current.y - (delta.y * (maxY - minY)) / Math.max(rect.height, 1),
-      };
-      if (change(next, createChangeEventDetails("wheel", event))) {
-        commit(valueRef.current, { event, reason: "wheel" });
-      }
-    },
+    format,
+    locale: resolvedLocale,
+    maxX,
+    maxY,
+    minX,
+    minY,
+    onValueChange,
+    onValueCommitted,
+    stepX,
+    stepY,
+    value,
   });
+  const snapshot = React.useSyncExternalStore(
+    controller.subscribe,
+    controller.getSnapshot
+  );
 
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [labelId, setLabelId] = React.useState<string>();
-  const resolvedLocale = useLocale(locale);
-  const formatter = React.useMemo(
-    () => new Intl.NumberFormat(resolvedLocale, format),
-    [format, resolvedLocale]
-  );
-  const formatPair = React.useMemo(
-    () => createPairFormatter(formatter),
-    [formatter]
-  );
 
   const state = React.useMemo<Root.State>(
     () => ({
-      disabled,
-      dragging,
-      maxX,
-      maxY,
-      minX,
-      minY,
-      value: displayedValue,
+      disabled: snapshot.disabled,
+      dragging: snapshot.dragging,
+      maxX: snapshot.maxX,
+      maxY: snapshot.maxY,
+      minX: snapshot.minX,
+      minY: snapshot.minY,
+      value: snapshot.value,
     }),
-    [disabled, dragging, displayedValue, maxX, maxY, minX, minY]
+    [snapshot]
   );
-
-  const percentX = toPercent(displayedValue.x, minX, maxX);
-  const percentY = toPercent(displayedValue.y, minY, maxY);
 
   const context = React.useMemo<XYPadContextValue>(
     () => ({
-      actions: { change, commit, setDragging },
-      meta: {
-        formatPair,
-        formatter,
-        inputRef,
-        labelId,
-        name,
-        percentX,
-        percentY,
-        resetValue,
-        setLabelId,
-        stepX,
-        stepY,
-        valueRef,
-        wheelRef,
-      },
-      state,
-    }),
-    [
-      change,
-      commit,
-      formatPair,
-      formatter,
+      controller,
+      inputRef,
       labelId,
       name,
-      percentX,
-      percentY,
-      resetValue,
-      setDragging,
+      setLabelId,
+      snapshot,
       state,
-      stepX,
-      stepY,
-      wheelRef,
-    ]
+    }),
+    [controller, labelId, name, snapshot, state]
   );
 
   const element = useRender({
@@ -207,8 +97,8 @@ export function Root(componentProps: Root.Props) {
     props: mergeProps<"div">(
       {
         style: {
-          "--xy-pad-x": `${percentX * 100}%`,
-          "--xy-pad-y": `${100 - percentY * 100}%`,
+          "--xy-pad-x": `${snapshot.percentX * 100}%`,
+          "--xy-pad-y": `${100 - snapshot.percentY * 100}%`,
         } as React.CSSProperties,
       },
       { ...elementProps, ...resolveStyling(className, style, state) }
@@ -235,27 +125,9 @@ export namespace Root {
   };
 
   export type ChangeEventReason = ChangeEventDetails["reason"];
-  export type ChangeEventDetails =
-    | ExtraChangeEventDetails<"press", PointerEvent>
-    | ExtraChangeEventDetails<"drag", PointerEvent>
-    | ExtraChangeEventDetails<"keyboard", KeyboardEvent>
-    | ExtraChangeEventDetails<"wheel", WheelEvent>
-    | ExtraChangeEventDetails<
-        "reset",
-        KeyboardEvent | MouseEvent | PointerEvent
-      >
-    | ExtraChangeEventDetails<"input-change", Event>;
+  export type ChangeEventDetails = XYPadChangeEventDetails;
   export type CommitEventReason = CommitEventDetails["reason"];
-  export type CommitEventDetails =
-    | ExtraCommitEventDetails<"press", PointerEvent>
-    | ExtraCommitEventDetails<"drag", PointerEvent>
-    | ExtraCommitEventDetails<"keyboard", KeyboardEvent>
-    | ExtraCommitEventDetails<"wheel", WheelEvent>
-    | ExtraCommitEventDetails<
-        "reset",
-        KeyboardEvent | MouseEvent | PointerEvent
-      >
-    | ExtraCommitEventDetails<"input-change", Event>;
+  export type CommitEventDetails = XYPadCommitEventDetails;
 
   export interface Props extends Omit<PartProps<"div", State>, "defaultValue"> {
     /** Uncontrolled starting value. Defaults to the center of the pad. */
