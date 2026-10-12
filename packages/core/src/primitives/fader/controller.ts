@@ -135,7 +135,8 @@ export function createFaderController(
     return options.defaultValue ?? min + (max - min) / 2;
   };
 
-  let uncontrolled = resetValue();
+  // Read on first use, so the `defaultValue` a view passes after creation counts.
+  let uncontrolled: number | undefined;
   // Holds the dragged value until the pointer is released, so a controlled
   // value that lags behind can't pull the thumb back mid-drag.
   let dragValue: number | null = null;
@@ -163,7 +164,10 @@ export function createFaderController(
 
   const displayed = () => {
     const { max, min } = bounds();
-    const held = options.value === undefined ? uncontrolled : options.value;
+    const held =
+      options.value === undefined
+        ? (uncontrolled ?? resetValue())
+        : options.value;
     return dragValue ?? clampFinite(held, min, max);
   };
 
