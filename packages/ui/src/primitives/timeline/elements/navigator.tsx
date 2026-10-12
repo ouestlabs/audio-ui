@@ -1,39 +1,31 @@
-import { createChangeEventDetails, isReleased } from "@audio-ui/core";
+import {
+  createNavigatorController,
+  type NavigatorController,
+  type NavigatorPart,
+  visibleRange,
+} from "@audio-ui/core/timeline";
 import * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
 import { VISUALLY_HIDDEN } from "../../internal/visually-hidden";
 import {
   type DescribePosition,
-  type TimelineContextValue,
   type TimelineState,
   useTimelineContext,
-  type ViewportMetrics,
-  visibleRange,
-  type ZoomChangeEventDetails,
 } from "../context";
-
-/** A keypress moves the window or an edge by this share of the timeline. */
-const NUDGE_SHARE = 0.02;
 
 const describeNumber: DescribePosition = (value) =>
   String(Math.round(value * 100) / 100);
 
-type NavigatorPart = "end" | "start" | "window";
-
 interface NavigatorContextValue {
-  /** Moves the window, or one of its edges, so it starts and ends at `next`. */
-  apply: (
-    part: NavigatorPart,
-    next: readonly [number, number],
-    eventDetails: ZoomChangeEventDetails
-  ) => void;
+  /** The framework-free navigator behind the bar, its window and its handles. */
+  controller: NavigatorController;
   describe: DescribePosition;
   duration: number;
   /** The visible stretch, in units. */
   range: readonly [number, number];
-  /** Units per px of the navigator's track. */
-  unitsPerPixel: () => number;
+  /** The navigator's bar: what a drag's px are measured along. */
+  trackRef: React.RefObject<HTMLDivElement | null>;
 }
 
 const NavigatorContext = React.createContext<NavigatorContextValue | null>(
@@ -46,33 +38,6 @@ function useNavigatorContext(part: string): NavigatorContextValue {
     throw new Error(`Timeline.${part} must be used within Timeline.Navigator`);
   }
   return context;
-}
-
-/** Scrolls or zooms the viewport so it shows `next`. */
-function showRange(
-  timeline: TimelineContextValue,
-  metrics: ViewportMetrics,
-  part: NavigatorPart,
-  next: readonly [number, number],
-  eventDetails: ZoomChangeEventDetails
-) {
-  const { actions } = timeline;
-  const laneWidth = Math.max(1, metrics.width - metrics.origin);
-  const [start, end] = next;
-  if (part === "window" || !(end > start)) {
-    if (metrics.zoom > 0) {
-      actions.scrollTo(start * metrics.zoom);
-    }
-    return;
-  }
-  // Resizing the window is zooming: its start is held at the lane's start.
-  const zoomed = actions.zoomTo(laneWidth / (end - start), eventDetails, {
-    offset: metrics.origin,
-    value: start,
-  });
-  if (!zoomed && metrics.zoom > 0) {
-    actions.scrollTo(start * metrics.zoom);
-  }
 }
 
 /**
@@ -92,7 +57,7 @@ export function Navigator(componentProps: Navigator.Props) {
     ...elementProps
   } = componentProps;
   const timeline = useTimelineContext("Navigator");
-  const { meta, state } = timeline;
+  const { actions, meta, state } = timeline;
   const { duration, viewport } = meta;
   const metrics = React.useSyncExternalStore(
     viewport.subscribe,
@@ -101,45 +66,32 @@ export function Navigator(componentProps: Navigator.Props) {
   );
   const range = visibleRange(metrics, duration);
   const trackRef = React.useRef<HTMLDivElement>(null);
-  const metricsRef = React.useRef(metrics);
-  metricsRef.current = metrics;
 
-  const unitsPerPixel = React.useCallback(() => {
-    const width = trackRef.current?.getBoundingClientRect().width ?? 0;
-    return duration / Math.max(width, 1);
-  }, [duration]);
-
-  const apply = React.useCallback(
-    (
-      part: NavigatorPart,
-      next: readonly [number, number],
-      eventDetails: ZoomChangeEventDetails
-    ) => {
-      showRange(timeline, metricsRef.current, part, next, eventDetails);
-    },
-    [timeline]
+  const controller = React.useMemo(
+    () =>
+      createNavigatorController({
+        disabled: state.disabled,
+        duration,
+        metrics: () => viewport.get(),
+        scrollTo: actions.scrollTo,
+        zoomTo: actions.zoomTo,
+      }),
+    [actions.scrollTo, actions.zoomTo, duration, state.disabled, viewport]
   );
 
   const handleDoubleClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    if (state.disabled) {
-      return;
-    }
-    apply(
-      "end",
-      [0, duration],
-      createChangeEventDetails("double-click", event.nativeEvent)
-    );
+    controller.doubleClick(event.nativeEvent);
   };
 
   const context = React.useMemo<NavigatorContextValue>(
     () => ({
-      apply,
+      controller,
       describe: getAriaValueText,
       duration,
       range,
-      unitsPerPixel,
+      trackRef,
     }),
-    [apply, duration, getAriaValueText, range, unitsPerPixel]
+    [controller, duration, getAriaValueText, range]
   );
 
   const element = useRender({
@@ -159,48 +111,12 @@ export function Navigator(componentProps: Navigator.Props) {
   return <NavigatorContext value={context}>{element}</NavigatorContext>;
 }
 
-export namespace Navigator {
-  export type State = TimelineState;
-  export interface Props extends PartProps<"div", State> {
-    /** Returns how a position is announced by the window and its handles. Defaults to the number. */
-    getAriaValueText?: DescribePosition;
-  }
-}
-
-interface NavigatorGesture {
-  pointerId: number;
-  range: readonly [number, number];
-  startX: number;
-}
-
 /** Drag and keyboard handling shared by the window and its handles. */
 function useNavigatorPart(part: NavigatorPart, disabled: boolean) {
   const navigator = useNavigatorContext(
     part === "window" ? "NavigatorWindow" : "NavigatorHandle"
   );
-  const { apply, duration, range } = navigator;
-  const gestureRef = React.useRef<NavigatorGesture | null>(null);
-  const minSpan = duration / 1000;
-
-  /** Where `part` lands when moved by `delta` units from `from`. */
-  const moved = React.useCallback(
-    (from: readonly [number, number], delta: number): [number, number] => {
-      const [start, end] = from;
-      if (part === "window") {
-        const span = end - start;
-        const next = Math.min(Math.max(0, start + delta), duration - span);
-        return [next, next + span];
-      }
-      if (part === "start") {
-        return [Math.min(Math.max(0, start + delta), end - minSpan), end];
-      }
-      return [
-        start,
-        Math.min(Math.max(start + minSpan, end + delta), duration),
-      ];
-    },
-    [duration, minSpan, part]
-  );
+  const { controller, duration, range, trackRef } = navigator;
 
   const onPointerDown = (event: React.PointerEvent<HTMLElement>) => {
     if (event.button !== 0) {
@@ -211,86 +127,41 @@ function useNavigatorPart(part: NavigatorPart, disabled: boolean) {
       return;
     }
     event.preventDefault();
-    event.currentTarget.setPointerCapture?.(event.pointerId);
-    gestureRef.current = {
-      pointerId: event.pointerId,
-      range,
-      startX: event.clientX,
-    };
-  };
-
-  const onPointerMove = (event: React.PointerEvent<HTMLElement>) => {
-    const gesture = gestureRef.current;
-    if (!gesture || gesture.pointerId !== event.pointerId) {
-      return;
-    }
-    if (isReleased(event)) {
-      onPointerEnd(event);
-      return;
-    }
-    event.stopPropagation();
-    const delta = (event.clientX - gesture.startX) * navigator.unitsPerPixel();
-    apply(
+    controller.press(
       part,
-      moved(gesture.range, delta),
-      createChangeEventDetails("drag", event.nativeEvent)
+      event.nativeEvent,
+      event.currentTarget,
+      trackRef.current
     );
-  };
-
-  const onPointerEnd = (event: React.PointerEvent<HTMLElement>) => {
-    if (gestureRef.current?.pointerId === event.pointerId) {
-      gestureRef.current = null;
-    }
   };
 
   const onKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (disabled) {
-      return;
+    if (controller.keyDown(part, event.nativeEvent)) {
+      event.preventDefault();
     }
-    const nudge = duration * NUDGE_SHARE;
-    const deltas: Record<string, number> = {
-      ArrowDown: -nudge,
-      ArrowLeft: -nudge,
-      ArrowRight: nudge,
-      ArrowUp: nudge,
-      End: duration,
-      Home: -duration,
-      PageDown: -nudge * 5,
-      PageUp: nudge * 5,
-    };
-    const delta = deltas[event.key];
-    if (delta === undefined) {
-      return;
-    }
-    event.preventDefault();
-    apply(
-      part,
-      moved(range, delta),
-      createChangeEventDetails("keyboard", event.nativeEvent)
-    );
   };
 
   const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = Number(event.currentTarget.value);
-    const from = part === "end" ? range[1] : range[0];
-    apply(
+    controller.typeAt(
       part,
-      moved(range, value - from),
-      createChangeEventDetails("input-change", event.nativeEvent)
+      Number(event.currentTarget.value),
+      event.nativeEvent
     );
   };
 
   return {
     input: { onChange, onKeyDown },
-    navigator,
-    pointer: {
-      onLostPointerCapture: onPointerEnd,
-      onPointerCancel: onPointerEnd,
-      onPointerDown,
-      onPointerMove,
-      onPointerUp: onPointerEnd,
-    },
+    navigator: { ...navigator, duration, range },
+    pointer: { onPointerDown },
   };
+}
+
+export namespace Navigator {
+  export type State = TimelineState;
+  export interface Props extends PartProps<"div", State> {
+    /** Returns how a position is announced by the window and its handles. Defaults to the number. */
+    getAriaValueText?: DescribePosition;
+  }
 }
 
 /**
