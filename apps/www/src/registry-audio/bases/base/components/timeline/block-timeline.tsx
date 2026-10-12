@@ -897,6 +897,8 @@ export default function BlockTimeline() {
   );
   // The track being dragged by its grip, and the gap it would land in: above or below the track under the pointer.
   const [dragId, setDragId] = useState<string | null>(null);
+  // The copy the browser takes its drag image from: it stays in the page until the drag ends.
+  const ghostRef = useRef<HTMLElement | null>(null);
   const [drop, setDrop] = useState<{
     id: string;
     edge: "bottom" | "top";
@@ -920,12 +922,17 @@ export default function BlockTimeline() {
         ghost.style.pointerEvents = "none";
         ghost.style.zIndex = "9999";
         document.body.append(ghost);
+        // Some browsers report no pointer position on dragstart (0, 0): then the grip's centre stands in for it, or the copy lands low.
+        const grip = event.currentTarget.getBoundingClientRect();
+        const pointerX = event.clientX || grip.left + grip.width / 2;
+        const pointerY = event.clientY || grip.top + grip.height / 2;
         event.dataTransfer.setDragImage(
           ghost,
-          event.clientX - box.left,
-          event.clientY - box.top
+          pointerX - box.left,
+          pointerY - box.top
         );
-        requestAnimationFrame(() => ghost.remove());
+        ghostRef.current?.remove();
+        ghostRef.current = ghost;
       }
       setDragId(id);
       event.dataTransfer.effectAllowed = "move";
@@ -934,6 +941,8 @@ export default function BlockTimeline() {
     []
   );
   const endTrackDrag = useCallback(() => {
+    ghostRef.current?.remove();
+    ghostRef.current = null;
     setDragId(null);
     setDrop(null);
   }, []);
