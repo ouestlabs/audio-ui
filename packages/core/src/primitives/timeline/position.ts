@@ -71,6 +71,28 @@ export interface TimelineSnapshot {
   zoom: number | null;
 }
 
+/** A stretch selected by dragging on the ruler with Shift held. */
+export type TimelineSelectionChangeEventDetails = ChangeEventDetails<
+  "drag",
+  PointerEvent
+>;
+export type TimelineSelectionCommitEventDetails = CommitEventDetails<
+  "drag",
+  PointerEvent
+>;
+
+/** Listens to the stretch a Shift + drag on the ruler selects: set by the ruler. */
+export interface TimelineSelectionHandlers {
+  onSelectionChange?: (
+    range: readonly [number, number],
+    details: TimelineSelectionChangeEventDetails
+  ) => void;
+  onSelectionCommitted?: (
+    range: readonly [number, number],
+    details: TimelineSelectionCommitEventDetails
+  ) => void;
+}
+
 export interface TimelineController {
   /** Reports the end of a gesture that moved the position. */
   commitSeek: (
@@ -81,6 +103,12 @@ export interface TimelineController {
   /** Handles a key on the ruler: arrows, Page keys, Home and End. Returns whether the key was the timeline's. */
   keyDown: (event: KeyboardEvent) => boolean;
   /**
+   * Starts a press on the ruler: a press seeks, a drag scrubs, Shift scrubs
+   * four times finer; with a selection listener, a drag with Shift held selects
+   * a stretch instead. `handle` takes the pointer, `lane` is what it is measured along.
+   */
+  pressRuler: (event: PointerEvent, handle: Element, lane: Element) => void;
+  /**
    * Starts a press that seeks: `lane` is what the position is measured along,
    * `handle` takes the pointer. A drag scrubs, on the grid unless Cmd/Ctrl is held.
    */
@@ -89,12 +117,19 @@ export interface TimelineController {
   seek: (next: number, details: TimelinePositionChangeEventDetails) => boolean;
   setOptions: (options: TimelineOptions) => void;
   setScrubbing: (scrubbing: boolean) => void;
+  /** Takes the selection listeners of the ruler; call it whenever they may have changed. */
+  setSelection: (handlers: TimelineSelectionHandlers) => void;
   subscribe: (listener: () => void) => () => void;
+  /** Sets the position from an input, reporting an `"input-change"` change and commit. */
+  typeAt: (value: number, event: Event) => void;
   /** The position of a point at `clientX` on `lane`, in units, clamped to the timeline. */
   valueAt: (lane: Element, clientX: number) => number;
   /** Clamps and proposes a zoom; returns whether it was applied. */
   zoomTo: (next: number, details: TimelineZoomChangeEventDetails) => boolean;
 }
+
+/** Holding Shift scrubs this much slower than the pointer moves. */
+const FINE_SCRUB = 0.25;
 
 /** The timeline's units under a point of `lane`, clamped to the timeline. */
 export function valueAtLane(
@@ -293,12 +328,126 @@ export function createTimelineController(
     return true;
   };
 
+  let selection: TimelineSelectionHandlers = {};
+
+  const pressRuler: TimelineController["pressRuler"] = (
+    event,
+    handle,
+    lane
+  ) => {
+    if (options.disabled || event.button !== 0) {
+      return;
+    }
+    handle.setPointerCapture?.(event.pointerId);
+    const landing = (pointer: PointerEvent) => {
+      const raw = valueAtLane(
+        lane,
+        pointer.clientX,
+        heldZoom(),
+        options.duration
+      );
+      return bypassesGrid(pointer) ? raw : snapToGrid(raw, options.grid);
+    };
+    if (event.shiftKey && selection.onSelectionChange) {
+      // Shift selects a stretch, as on a DAW's ruler; a plain press seeks.
+      const anchor = landing(event);
+      const selecting: { range: readonly [number, number] | null } = {
+        range: null,
+      };
+      setScrubbing(true);
+      followPointer(
+        handle,
+        event.pointerId,
+        (move) => {
+          const at = landing(move);
+          const range = [Math.min(anchor, at), Math.max(anchor, at)] as const;
+          const details = createChangeEventDetails("drag", move);
+          selection.onSelectionChange?.(range, details);
+          if (!details.isCanceled) {
+            selecting.range = range;
+          }
+        },
+        (end) => {
+          setScrubbing(false);
+          if (selecting.range) {
+            selection.onSelectionCommitted?.(selecting.range, {
+              event: end,
+              reason: "drag",
+            });
+          }
+        }
+      );
+      return;
+    }
+    // Shift scrubs four times finer, measured from where the pointer last moved at full speed.
+    const unitOf = () => {
+      const rect = handle.getBoundingClientRect();
+      return (
+        heldZoom() ?? rect.width / Math.max(options.duration, Number.MIN_VALUE)
+      );
+    };
+    let anchor = { clientX: event.clientX, value: landing(event) };
+    const gesture: { changed: boolean; moved: boolean } = {
+      changed: false,
+      moved: false,
+    };
+    setScrubbing(true);
+    gesture.changed = seek(
+      anchor.value,
+      createChangeEventDetails("press", event)
+    );
+    followPointer(
+      handle,
+      event.pointerId,
+      (move) => {
+        gesture.moved = true;
+        let value: number;
+        if (move.shiftKey) {
+          value =
+            anchor.value +
+            ((move.clientX - anchor.clientX) / unitOf()) * FINE_SCRUB;
+        } else {
+          value = landing(move);
+          anchor = { clientX: move.clientX, value };
+        }
+        if (seek(value, createChangeEventDetails("drag", move))) {
+          gesture.changed = true;
+        }
+      },
+      (end) => {
+        const committed = current();
+        setScrubbing(false);
+        if (gesture.changed) {
+          commitSeek(committed, {
+            event: end,
+            reason: gesture.moved ? "drag" : "press",
+          } as TimelinePositionCommitEventDetails);
+        }
+      }
+    );
+  };
+
   return {
     commitSeek,
     getSnapshot,
     keyDown,
     pressSeek,
     seek,
+    pressRuler,
+    setSelection: (handlers) => {
+      selection = handlers;
+    },
+    typeAt: (value, event) => {
+      if (options.disabled) {
+        return;
+      }
+      if (seek(value, createChangeEventDetails("input-change", event))) {
+        commitSeek(current(), {
+          event,
+          reason: "input-change",
+        } as TimelinePositionCommitEventDetails);
+      }
+    },
     setOptions: (next) => {
       options = next;
       // The props take over again on every render, unless a scrub is under way.

@@ -71,3 +71,17 @@ export {
   snapRangeMove,
   snapToGrid,
 } from "./snap";
+export {
+  createTrackController,
+  type TrackController,
+  type TrackHeightChangeEventDetails,
+  type TrackHeightCommitEventDetails,
+  type TrackOptions,
+  type TrackSnapshot,
+} from "./track-controller";
+export {
+  createWheelZoom,
+  WHEEL_ZOOM_SENSITIVITY,
+  type WheelZoomController,
+  type WheelZoomOptions,
+} from "./wheel-zoom";
