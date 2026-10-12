@@ -294,27 +294,30 @@ function TimelineNavigator({
   className,
   ...props
 }: TimelinePrimitive.Navigator.Props) {
+  // The track is the outer box; its padding leaves room for the grips, which sit just outside the window.
   return (
-    <TimelinePrimitive.Navigator
-      className={cn("cn-timeline-navigator shrink-0 select-none", className)}
-      data-slot="timeline-navigator"
-      {...props}
-    >
-      <TimelinePrimitive.NavigatorWindow
-        aria-label="Visible range"
-        className="cn-timeline-navigator-window inset-y-0 cursor-grab active:cursor-grabbing"
-      />
-      <TimelinePrimitive.NavigatorHandle
-        aria-label="Start of the visible range"
-        className="cn-timeline-navigator-handle inset-y-0 w-2 -translate-x-full cursor-ew-resize after:absolute after:-inset-x-1.5 after:inset-y-0"
-        edge="start"
-      />
-      <TimelinePrimitive.NavigatorHandle
-        aria-label="End of the visible range"
-        className="cn-timeline-navigator-handle inset-y-0 w-2 cursor-ew-resize after:absolute after:-inset-x-1.5 after:inset-y-0"
-        edge="end"
-      />
-    </TimelinePrimitive.Navigator>
+    <div className="cn-timeline-navigator shrink-0 select-none px-2">
+      <TimelinePrimitive.Navigator
+        className={cn("relative h-full w-full rounded-[inherit]", className)}
+        data-slot="timeline-navigator"
+        {...props}
+      >
+        <TimelinePrimitive.NavigatorWindow
+          aria-label="Visible range"
+          className="cn-timeline-navigator-window inset-y-0 cursor-grab active:cursor-grabbing"
+        />
+        <TimelinePrimitive.NavigatorHandle
+          aria-label="Start of the visible range"
+          className="cn-timeline-navigator-handle inset-y-0 w-2 -translate-x-full cursor-ew-resize rounded-s-[inherit] before:absolute before:inset-y-1.5 before:left-1/2 before:w-px before:-translate-x-1/2 before:bg-foreground/60 before:content-[''] after:absolute after:-inset-x-1.5 after:inset-y-0"
+          edge="start"
+        />
+        <TimelinePrimitive.NavigatorHandle
+          aria-label="End of the visible range"
+          className="cn-timeline-navigator-handle inset-y-0 w-2 cursor-ew-resize rounded-e-[inherit] before:absolute before:inset-y-1.5 before:left-1/2 before:w-px before:-translate-x-1/2 before:bg-foreground/60 before:content-[''] after:absolute after:-inset-x-1.5 after:inset-y-0"
+          edge="end"
+        />
+      </TimelinePrimitive.Navigator>
+    </div>
   );
 }
 
