@@ -96,10 +96,10 @@ export interface TimelineContextValue {
     registerLane: (node: HTMLElement) => () => void;
     /** Scrolls the viewport to `left` px and reports where it landed. */
     scrollTo: (left: number) => void;
-    /** Clamp and propose a position; returns whether it was applied. */
+    /** Clamp and propose a position; returns `true` when it is applied. */
     seek: (next: number, eventDetails: PositionChangeEventDetails) => boolean;
     setScrubbing: (scrubbing: boolean) => void;
-    /** Clamp and propose a zoom, held still around `anchor`; returns whether it was applied. */
+    /** Clamp and propose a zoom, held still around `anchor`; returns `true` when it is applied. */
     zoomTo: (
       next: number,
       eventDetails: ZoomChangeEventDetails,

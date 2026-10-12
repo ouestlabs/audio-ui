@@ -65,7 +65,7 @@ export namespace Value {
     children?:
       | React.ReactNode
       | ((formattedValue: string, value: number) => React.ReactNode);
-    /** Lets you type a value: a double click, or Enter while it has focus. @default false */
+    /** Allows typing a value: double-click, or press Enter while it has focus. @default false */
     editable?: boolean;
   }
 }

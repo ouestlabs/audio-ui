@@ -50,7 +50,7 @@ export namespace VelocityLane {
  * toggles the note in the selection. A native `<input type="range">` inside
  * takes the arrow keys (Page Up/Down for larger steps, Home/End for silent
  * and full) and carries the accessible name, which defaults to the note's.
- * The velocity set last is what the next drawn note gets.
+ * The next drawn note gets the velocity set last.
  * Renders a `<div>` element.
  */
 export function Velocity(componentProps: Velocity.Props) {
