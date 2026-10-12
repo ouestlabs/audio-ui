@@ -109,6 +109,7 @@
       "version": "0.0.0",
       "devDependencies": {
         "@audio-ui/typescript": "latest",
+        "@happy-dom/global-registrator": "^20.10.6",
         "@types/bun": "1.4.2",
         "tsup": "^8.5.0",
         "typescript": "^7.0.2",
