@@ -1,11 +1,11 @@
 import {
-  type MeterChannelNodes as ChannelNodes,
-  type MeterChannelPart as ChannelPart,
   channelView,
   createMeterConfig,
   type LevelScale,
+  type MeterChannelNodes,
+  type MeterChannelPart,
   type MeterFrame,
-  type MeterOrientation as Orientation,
+  type MeterOrientation,
   paintChannel,
 } from "@audio-ui/core/meter";
 import * as React from "react";
@@ -67,7 +67,7 @@ export function Root(componentProps: Root.Props) {
   );
   const channelCount = source ? sourceChannelCount : frame.levels.length;
 
-  const nodesRef = React.useRef(new Map<number, ChannelNodes>());
+  const nodesRef = React.useRef(new Map<number, MeterChannelNodes>());
   const channelNodes = React.useCallback((index: number) => {
     let nodes = nodesRef.current.get(index);
     if (!nodes) {
@@ -77,7 +77,7 @@ export function Root(componentProps: Root.Props) {
     return nodes;
   }, []);
   const registerNode = React.useCallback(
-    (index: number, part: ChannelPart, node: HTMLElement | null) => {
+    (index: number, part: MeterChannelPart, node: HTMLElement | null) => {
       channelNodes(index)[part] = node ?? undefined;
     },
     [channelNodes]
@@ -148,7 +148,7 @@ export function Root(componentProps: Root.Props) {
 
 export namespace Root {
   export type State = {
-    orientation: Orientation;
+    orientation: MeterOrientation;
   };
 
   /** One reading of the meter: a level per channel, and optionally a peak-hold level per channel. */
@@ -174,7 +174,7 @@ export namespace Root {
     /** @default -60 */
     min?: number;
     /** @default "vertical" */
-    orientation?: Orientation;
+    orientation?: MeterOrientation;
     /** Peak-hold level per channel. Timing and decay live outside the primitive. */
     peak?: readonly number[];
     /** How levels are spread along the length: evenly (`"linear"`), as digital peak meters do with more room at the top (`"iec"`), or by your own increasing curve. @default "linear" */
