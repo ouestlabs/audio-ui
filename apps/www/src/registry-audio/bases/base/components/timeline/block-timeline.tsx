@@ -1357,7 +1357,14 @@ export default function BlockTimeline() {
           >
             {/* One sticky block, so what is stuck stays stacked whatever each row measures. */}
             <div className="sticky top-0 z-40 flex min-w-full shrink-0 flex-col bg-background">
-              <Row className="shrink-0">
+              <Row
+                className="shrink-0"
+                lead={
+                  <span className="flex h-full items-center px-3 text-xs text-muted-foreground">
+                    Loop
+                  </span>
+                }
+              >
                 <TimelineLane className="h-6 cursor-cell">
                   <TimelineRange
                     aria-label="Loop"
@@ -1417,7 +1424,14 @@ export default function BlockTimeline() {
                   <TimelinePlayhead />
                 </TimelineRuler>
               </Row>
-              <Row className="shrink-0 bg-background">
+              <Row
+                className="shrink-0 bg-background"
+                lead={
+                  <span className="flex h-full items-center px-3 text-xs text-muted-foreground">
+                    Markers
+                  </span>
+                }
+              >
                 <TimelineLane className="h-6">
                   {locators.map((locator) => (
                     <TimelineMark key={locator.at} value={locator.at}>
