@@ -19,6 +19,9 @@ import {
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/registry/bases/base/ui/dropdown-menu";
 import {
@@ -357,41 +360,47 @@ function TransportTempo({
             <BpmControl onValueChange={handleBpm} value={tempo.bpm} />
           </div>
           {onMetronomeChange ? (
-            <>
-              <DropdownMenuCheckboxItem
-                checked={Boolean(metronome)}
-                onCheckedChange={onMetronomeChange}
-              >
-                Metronome
-              </DropdownMenuCheckboxItem>
-              {onRhythmChange ? (
-                <>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuGroup>
-                    <DropdownMenuLabel>Rhythm</DropdownMenuLabel>
-                    <DropdownMenuRadioGroup
-                      onValueChange={handleRhythm}
-                      value={rhythm}
-                    >
-                      {METRONOME_RHYTHMS.map((item) => {
-                        const seconds = metronomeRhythmSeconds(item.id, tempo);
-                        return (
-                          <DropdownMenuRadioItem
-                            className="tabular-nums"
-                            key={item.id}
-                            value={item.id}
-                          >
-                            {seconds === null
-                              ? "Auto"
-                              : gridLabel(seconds, tempo)}
-                          </DropdownMenuRadioItem>
-                        );
-                      })}
-                    </DropdownMenuRadioGroup>
-                  </DropdownMenuGroup>
-                </>
-              ) : null}
-            </>
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>Metronome</DropdownMenuSubTrigger>
+              <DropdownMenuSubContent className="w-auto min-w-48">
+                <DropdownMenuCheckboxItem
+                  checked={Boolean(metronome)}
+                  onCheckedChange={onMetronomeChange}
+                >
+                  On
+                </DropdownMenuCheckboxItem>
+                {onRhythmChange ? (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuGroup>
+                      <DropdownMenuLabel>Rhythm</DropdownMenuLabel>
+                      <DropdownMenuRadioGroup
+                        onValueChange={handleRhythm}
+                        value={rhythm}
+                      >
+                        {METRONOME_RHYTHMS.map((item) => {
+                          const seconds = metronomeRhythmSeconds(
+                            item.id,
+                            tempo
+                          );
+                          return (
+                            <DropdownMenuRadioItem
+                              className="tabular-nums"
+                              key={item.id}
+                              value={item.id}
+                            >
+                              {seconds === null
+                                ? "Auto"
+                                : gridLabel(seconds, tempo)}
+                            </DropdownMenuRadioItem>
+                          );
+                        })}
+                      </DropdownMenuRadioGroup>
+                    </DropdownMenuGroup>
+                  </>
+                ) : null}
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
           ) : null}
           <DropdownMenuSeparator />
           <DropdownMenuRadioGroup
