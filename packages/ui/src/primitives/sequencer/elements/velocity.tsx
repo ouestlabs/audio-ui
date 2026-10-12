@@ -1,5 +1,4 @@
-import { createChangeEventDetails } from "@audio-ui/core";
-import { DEFAULT_VELOCITY, isOn, velocityAt } from "@audio-ui/core/sequencer";
+import { DEFAULT_VELOCITY, isOn } from "@audio-ui/core/sequencer";
 import * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
@@ -39,42 +38,48 @@ export function Velocity(componentProps: Velocity.Props) {
     style,
     ...elementProps
   } = componentProps;
-  const { actions, state: rootState } = useSequencerContext("Velocity");
+  const {
+    controller,
+    registerVelocity,
+    rootRef,
+    velocityNodes,
+    state: rootState,
+  } = useSequencerContext("Velocity");
   const row = React.use(RowContext);
   if (row === null) {
     throw new Error("Sequencer.Velocity must be used within Sequencer.Row");
   }
   const cell = React.useMemo(() => ({ row, step }), [row, step]);
-  const velocity = useSequencerView("Velocity", (view) =>
-    velocityAt(view.velocities, cell)
+  const velocity = useSequencerView(
+    "Velocity",
+    (view) => view.velocities[row]?.[step] ?? DEFAULT_VELOCITY
   );
   const on = useSequencerView("Velocity", (view) => isOn(view.value, cell));
   const { disabled } = rootState;
   const inputRef = React.useRef<HTMLInputElement>(null);
-
   const nodeRef = React.useCallback(
-    (node: HTMLElement | null) => actions.registerVelocity({ row, step }, node),
-    [actions, row, step]
+    (node: HTMLElement | null) => registerVelocity(cell, node),
+    [cell, registerVelocity]
   );
 
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (disabled || event.button !== 0) {
+    const root = rootRef.current;
+    if (disabled || event.button !== 0 || !root) {
       return;
     }
     event.preventDefault();
     inputRef.current?.focus({ focusVisible: false, preventScroll: true });
     if (event.altKey) {
-      actions.nudgeVelocity(
+      controller.setVelocity(
         cell,
         DEFAULT_VELOCITY,
-        createChangeEventDetails("reset", event.nativeEvent)
+        "reset",
+        event.nativeEvent
       );
       return;
     }
-    event.currentTarget.parentElement
-      ?.closest("[role=group]")
-      ?.setPointerCapture?.(event.pointerId);
-    actions.pressVelocity(cell, event.nativeEvent);
+    root.setPointerCapture?.(event.pointerId);
+    controller.pressVelocity(cell, event.nativeEvent, root, velocityNodes);
   };
 
   const handleKeyDown = React.useCallback(
@@ -84,10 +89,11 @@ export function Velocity(componentProps: Velocity.Props) {
       }
       if (event.key === "Delete" || event.key === "Backspace") {
         event.preventDefault();
-        actions.nudgeVelocity(
+        controller.setVelocity(
           cell,
           DEFAULT_VELOCITY,
-          createChangeEventDetails("reset", event.nativeEvent)
+          "reset",
+          event.nativeEvent
         );
         return;
       }
@@ -105,24 +111,21 @@ export function Velocity(componentProps: Velocity.Props) {
         return;
       }
       event.preventDefault();
-      actions.nudgeVelocity(
-        cell,
-        target,
-        createChangeEventDetails("keyboard", event.nativeEvent)
-      );
+      controller.setVelocity(cell, target, "keyboard", event.nativeEvent);
     },
-    [actions, cell, disabled, velocity]
+    [cell, controller, disabled, velocity]
   );
 
   const handleChange = React.useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      actions.nudgeVelocity(
+      controller.setVelocity(
         cell,
         Number(event.currentTarget.value),
-        createChangeEventDetails("input-change", event.nativeEvent)
+        "input-change",
+        event.nativeEvent
       );
     },
-    [actions, cell]
+    [cell, controller]
   );
 
   const state = React.useMemo<Velocity.State>(

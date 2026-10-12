@@ -7,6 +7,7 @@ import {
   type Rows,
 } from "@audio-ui/core/piano-roll";
 import * as React from "react";
+import { shallowEqual } from "../../internal/equal";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
 import { TimelineContext } from "../../timeline/context";
@@ -15,7 +16,6 @@ import {
   type PianoRollContextValue,
   type PianoRollState,
   ROWS_PROPERTY,
-  shallowEqual,
   type ValueChangeEventDetails,
   type ValueCommitEventDetails,
 } from "../context";

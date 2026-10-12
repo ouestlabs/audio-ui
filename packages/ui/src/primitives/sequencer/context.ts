@@ -1,12 +1,11 @@
 import type {
-  ChangeEventDetails as ExtraChangeEventDetails,
-  CommitEventDetails as ExtraCommitEventDetails,
-  Store,
-} from "@audio-ui/core";
-import type {
   CellAddress,
-  Pattern,
-  Velocities,
+  SequencerController,
+  SequencerSnapshot,
+  SequencerValueChangeEventDetails,
+  SequencerValueCommitEventDetails,
+  SequencerVelocityChangeEventDetails,
+  SequencerVelocityCommitEventDetails,
 } from "@audio-ui/core/sequencer";
 import * as React from "react";
 
@@ -16,64 +15,33 @@ export type SequencerState = {
   painting: boolean;
 };
 
-export type ValueChangeEventDetails =
-  | ExtraChangeEventDetails<"press", PointerEvent>
-  | ExtraChangeEventDetails<"paint", PointerEvent>
-  | ExtraChangeEventDetails<"keyboard", KeyboardEvent>;
+export type ValueChangeEventDetails = SequencerValueChangeEventDetails;
+export type ValueCommitEventDetails = SequencerValueCommitEventDetails;
+export type VelocityChangeEventDetails = SequencerVelocityChangeEventDetails;
+export type VelocityCommitEventDetails = SequencerVelocityCommitEventDetails;
 
-export type ValueCommitEventDetails =
-  | ExtraCommitEventDetails<"press", PointerEvent>
-  | ExtraCommitEventDetails<"paint", PointerEvent>
-  | ExtraCommitEventDetails<"keyboard", KeyboardEvent>;
-
-export type VelocityChangeEventDetails =
-  | ExtraChangeEventDetails<"drag", PointerEvent>
-  | ExtraChangeEventDetails<"keyboard", KeyboardEvent>
-  | ExtraChangeEventDetails<"input-change", Event>
-  | ExtraChangeEventDetails<"reset", Event>;
-
-export type VelocityCommitEventDetails =
-  | ExtraCommitEventDetails<"drag", PointerEvent>
-  | ExtraCommitEventDetails<"keyboard", KeyboardEvent>
-  | ExtraCommitEventDetails<"input-change", Event>
-  | ExtraCommitEventDetails<"reset", Event>;
+/** What a view draws the sequencer from. */
+export type SequencerView = SequencerSnapshot;
 
 export interface SequencerContextValue {
-  actions: {
-    /** Sets one step's velocity and commits it at once: for a key, the input or a reset. */
-    nudgeVelocity: (
-      cell: CellAddress,
-      velocity: number,
-      eventDetails: VelocityChangeEventDetails
-    ) => void;
-    pressVelocity: (cell: CellAddress, event: PointerEvent) => void;
-    registerVelocity: (cell: CellAddress, node: HTMLElement | null) => void;
-    focusCell: (cell: CellAddress) => void;
-    moveFocusFrom: (from: CellAddress, event: KeyboardEvent) => boolean;
-    pressCell: (cell: CellAddress, event: PointerEvent) => void;
-    registerCell: (cell: CellAddress, node: HTMLElement | null) => void;
-    setTabStop: (cell: CellAddress) => void;
-    toggleCell: (cell: CellAddress, event: KeyboardEvent) => void;
-  };
+  /** The cells' elements by `row:step`, which a paint reads to find the cell under the pointer. */
+  cellNodes: Map<string, HTMLElement>;
+  /** The framework-free sequencer behind every part: painting, keys, velocities. */
+  controller: SequencerController;
+  /** Moves focus to a cell's element, once it is the tab stop. */
+  focusCell: (cell: CellAddress) => void;
   meta: {
-    steps: number;
     rows: number;
-    /**
-     * What changes while the sequencer is used, outside the context: a cell
-     * follows only its own piece of it, so pressing one step does not render
-     * every other step.
-     */
-    view: Store<SequencerView>;
+    steps: number;
   };
-  /** What changes rarely: the cells read it, so it stays out of `view`. */
+  registerCell: (cell: CellAddress, node: HTMLElement | null) => void;
+  registerVelocity: (cell: CellAddress, node: HTMLElement | null) => void;
+  /** The root element, which a press's gesture follows. */
+  rootRef: React.RefObject<HTMLElement | null>;
+  /** What changes rarely: the cells read it, so it stays out of the view. */
   state: Pick<SequencerState, "disabled">;
-}
-
-export interface SequencerView {
-  painting: boolean;
-  tabStop: CellAddress;
-  value: Pattern;
-  velocities: Velocities;
+  /** The velocity bars' elements by `row:step`. */
+  velocityNodes: Map<string, HTMLElement>;
 }
 
 export const SequencerContext =
@@ -87,16 +55,30 @@ export function useSequencerContext(part: string): SequencerContextValue {
   return context;
 }
 
-/** A piece of the sequencer's changing state, re-rendering only when that piece changes. */
+/**
+ * A piece of the sequencer's changing state, re-rendering only when that piece
+ * changes: `select` runs on every change, and `equal` says whether the piece
+ * it returned is the same as before.
+ */
 export function useSequencerView<T>(
   part: string,
-  select: (view: SequencerView) => T
+  select: (view: SequencerView) => T,
+  equal: (a: T, b: T) => boolean = Object.is
 ): T {
-  const { meta } = useSequencerContext(part);
+  const { controller } = useSequencerContext(part);
+  const last = React.useRef<{ value: T } | null>(null);
+  const getSnapshot = React.useCallback(() => {
+    const next = select(controller.getSnapshot());
+    if (last.current && equal(last.current.value, next)) {
+      return last.current.value;
+    }
+    last.current = { value: next };
+    return next;
+  }, [controller, equal, select]);
   return React.useSyncExternalStore(
-    meta.view.subscribe,
-    () => select(meta.view.get()),
-    () => select(meta.view.get())
+    controller.subscribe,
+    getSnapshot,
+    getSnapshot
   );
 }
 

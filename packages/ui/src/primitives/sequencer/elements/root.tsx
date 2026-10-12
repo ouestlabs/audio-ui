@@ -1,43 +1,24 @@
 import type { Source } from "@audio-ui/core";
 import {
-  createChangeEventDetails,
-  createStore,
-  isReleased,
-} from "@audio-ui/core";
-import {
   type CellAddress,
-  cellAtPoint,
   cellKey,
-  isOn,
-  moveFocus,
-  setCell,
-  setVelocity,
+  createSequencerController,
+  type SequencerOptions,
   type Velocities,
-  velocityAtY,
 } from "@audio-ui/core/sequencer";
 import * as React from "react";
+import { shallowEqual } from "../../internal/equal";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
 import {
   SequencerContext,
   type SequencerContextValue,
   type SequencerState,
-  type SequencerView,
   type ValueChangeEventDetails,
   type ValueCommitEventDetails,
   type VelocityChangeEventDetails,
   type VelocityCommitEventDetails,
 } from "../context";
-
-const EMPTY: boolean[][] = [];
-const NO_VELOCITIES: number[][] = [];
-
-interface Paint {
-  changed: boolean;
-  /** What every cell the pointer crosses is set to: the opposite of the cell it began on. */
-  on: boolean;
-  pointerId: number;
-}
 
 /**
  * A grid of steps to switch on and off, one row per sound: the pattern of a
@@ -61,303 +42,87 @@ export function Root(componentProps: Root.Props) {
     render,
     source,
     style,
-    value: valueProp,
-    velocities: velocitiesProp,
+    value,
+    velocities,
     ...elementProps
   } = componentProps;
 
-  const isControlled = valueProp !== undefined;
-  const [uncontrolledValue, setUncontrolledValue] = React.useState<
-    readonly (readonly boolean[])[]
-  >(() => defaultValue ?? EMPTY);
-  const value = isControlled ? valueProp : uncontrolledValue;
-  const valueRef = React.useRef(value);
-  valueRef.current = value;
-  const rows = value.length;
-  const steps = value[0]?.length ?? 0;
+  const options: SequencerOptions = {
+    defaultValue,
+    defaultVelocities,
+    disabled,
+    onValueChange,
+    onValueCommitted,
+    onVelocityChange,
+    onVelocityCommitted,
+    value,
+    velocities,
+  };
+  const [controller] = React.useState(() => createSequencerController(options));
+  // Set on every render, so the sequencer always reads the latest props.
+  controller.setOptions(options);
 
-  const isVelocityControlled = velocitiesProp !== undefined;
-  const [uncontrolledVelocities, setUncontrolledVelocities] =
-    React.useState<Velocities>(() => defaultVelocities ?? NO_VELOCITIES);
-  const velocities = isVelocityControlled
-    ? velocitiesProp
-    : uncontrolledVelocities;
-  const velocitiesRef = React.useRef(velocities);
-  velocitiesRef.current = velocities;
+  const rootRef = React.useRef<HTMLElement | null>(null);
+  const cellNodes = React.useRef(new Map<string, HTMLElement>()).current;
+  const velocityNodes = React.useRef(new Map<string, HTMLElement>()).current;
 
-  const [painting, setPainting] = React.useState(false);
-  const paintRef = React.useRef<Paint | null>(null);
-  const [tabStop, setTabStopState] = React.useState<CellAddress>({
-    row: 0,
-    step: 0,
-  });
-  const stopRow = Math.min(tabStop.row, Math.max(0, rows - 1));
-  const stopStep = Math.min(tabStop.step, Math.max(0, steps - 1));
-  const stop = React.useMemo(
-    () => ({ row: stopRow, step: stopStep }),
-    [stopRow, stopStep]
+  // The shape and the state of the grid: Root re-renders on these, and not on
+  // each cell pressed, which only the cells showing it render for.
+  const lastShape = React.useRef<{
+    disabled: boolean;
+    painting: boolean;
+    rows: number;
+    steps: number;
+  } | null>(null);
+  const readShape = React.useCallback(() => {
+    const view = controller.getSnapshot();
+    const next = {
+      disabled: view.disabled,
+      painting: view.painting,
+      rows: view.rows,
+      steps: view.steps,
+    };
+    if (lastShape.current && shallowEqual(lastShape.current, next)) {
+      return lastShape.current;
+    }
+    lastShape.current = next;
+    return next;
+  }, [controller]);
+  const shape = React.useSyncExternalStore(
+    controller.subscribe,
+    readShape,
+    readShape
   );
+  const { painting, rows, steps } = shape;
 
-  const nodesRef = React.useRef(new Map<string, HTMLElement>());
   const registerCell = React.useCallback(
     (cell: CellAddress, node: HTMLElement | null) => {
       if (node) {
-        nodesRef.current.set(cellKey(cell), node);
+        cellNodes.set(cellKey(cell), node);
       } else {
-        nodesRef.current.delete(cellKey(cell));
+        cellNodes.delete(cellKey(cell));
       }
     },
-    []
+    [cellNodes]
   );
 
-  const velocityNodesRef = React.useRef(new Map<string, HTMLElement>());
   const registerVelocity = React.useCallback(
     (cell: CellAddress, node: HTMLElement | null) => {
       if (node) {
-        velocityNodesRef.current.set(cellKey(cell), node);
+        velocityNodes.set(cellKey(cell), node);
       } else {
-        velocityNodesRef.current.delete(cellKey(cell));
+        velocityNodes.delete(cellKey(cell));
       }
     },
-    []
+    [velocityNodes]
   );
 
-  /** Proposes a velocity for one step; returns whether it was applied. */
-  const changeVelocity = React.useCallback(
-    (
-      cell: CellAddress,
-      velocity: number,
-      eventDetails: VelocityChangeEventDetails
-    ) => {
-      const next = setVelocity(
-        velocitiesRef.current,
-        cell,
-        Math.min(1, Math.max(0, velocity)),
-        valueRef.current.length,
-        valueRef.current[0]?.length ?? 0
-      );
-      if (
-        next[cell.row]?.[cell.step] ===
-        (velocitiesRef.current[cell.row]?.[cell.step] ?? 1)
-      ) {
-        return false;
-      }
-      onVelocityChange?.(next, eventDetails);
-      if (eventDetails.isCanceled) {
-        return false;
-      }
-      velocitiesRef.current = next;
-      if (!isVelocityControlled) {
-        setUncontrolledVelocities(next);
-      }
-      return true;
+  const focusCell = React.useCallback(
+    (cell: CellAddress) => {
+      cellNodes.get(cellKey(cell))?.focus({ preventScroll: true });
     },
-    [isVelocityControlled, onVelocityChange]
+    [cellNodes]
   );
-
-  const nudgeVelocity = React.useCallback(
-    (
-      cell: CellAddress,
-      velocity: number,
-      eventDetails: VelocityChangeEventDetails
-    ) => {
-      if (changeVelocity(cell, velocity, eventDetails)) {
-        onVelocityCommitted?.(
-          velocitiesRef.current as number[][],
-          {
-            event: eventDetails.event,
-            reason: eventDetails.reason,
-          } as VelocityCommitEventDetails
-        );
-      }
-    },
-    [changeVelocity, onVelocityCommitted]
-  );
-
-  const velocityRef = React.useRef<{
-    changed: boolean;
-    cell: CellAddress;
-    pointerId: number;
-  } | null>(null);
-
-  /** Sets the velocity of the step under the pointer in the row being drawn. */
-  const drawVelocity = React.useCallback(
-    (event: PointerEvent, row: number) => {
-      for (const [key, node] of velocityNodesRef.current) {
-        const [nodeRow, nodeStep] = key.split(":").map(Number);
-        if (nodeRow !== row) {
-          continue;
-        }
-        const box = node.getBoundingClientRect();
-        if (event.clientX >= box.left && event.clientX < box.right) {
-          const cell = { row, step: nodeStep as number };
-          if (
-            changeVelocity(
-              cell,
-              velocityAtY(box, event.clientY),
-              createChangeEventDetails("drag", event)
-            ) &&
-            velocityRef.current
-          ) {
-            velocityRef.current.changed = true;
-          }
-          return;
-        }
-      }
-    },
-    [changeVelocity]
-  );
-
-  const pressVelocity = React.useCallback(
-    (cell: CellAddress, event: PointerEvent) => {
-      velocityRef.current = {
-        cell,
-        changed: false,
-        pointerId: event.pointerId,
-      };
-      drawVelocity(event, cell.row);
-    },
-    [drawVelocity]
-  );
-
-  /** Proposes a pattern; returns whether it was applied. */
-  const change = React.useCallback(
-    (next: boolean[][], eventDetails: ValueChangeEventDetails) => {
-      onValueChange?.(next, eventDetails);
-      if (eventDetails.isCanceled) {
-        return false;
-      }
-      valueRef.current = next;
-      if (!isControlled) {
-        setUncontrolledValue(next);
-      }
-      return true;
-    },
-    [isControlled, onValueChange]
-  );
-
-  const setCellTo = React.useCallback(
-    (cell: CellAddress, on: boolean, eventDetails: ValueChangeEventDetails) => {
-      if (isOn(valueRef.current, cell) === on) {
-        return false;
-      }
-      return change(setCell(valueRef.current, cell, on), eventDetails);
-    },
-    [change]
-  );
-
-  const focusCell = React.useCallback((cell: CellAddress) => {
-    setTabStopState(cell);
-    nodesRef.current.get(cellKey(cell))?.focus({ preventScroll: true });
-  }, []);
-
-  const toggleCell = React.useCallback(
-    (cell: CellAddress, event: KeyboardEvent) => {
-      if (
-        setCellTo(
-          cell,
-          !isOn(valueRef.current, cell),
-          createChangeEventDetails("keyboard", event)
-        )
-      ) {
-        onValueCommitted?.(valueRef.current as boolean[][], {
-          event,
-          reason: "keyboard",
-        });
-      }
-    },
-    [onValueCommitted, setCellTo]
-  );
-
-  const moveFocusFrom = React.useCallback(
-    (from: CellAddress, event: KeyboardEvent) => {
-      const next = moveFocus(
-        from,
-        event.key,
-        valueRef.current.length,
-        valueRef.current[0]?.length ?? 0,
-        event.ctrlKey || event.metaKey
-      );
-      if (!next) {
-        return false;
-      }
-      focusCell(next);
-      return true;
-    },
-    [focusCell]
-  );
-
-  const pressCell = React.useCallback(
-    (cell: CellAddress, event: PointerEvent) => {
-      const on = !isOn(valueRef.current, cell);
-      paintRef.current = { changed: false, on, pointerId: event.pointerId };
-      setPainting(true);
-      if (setCellTo(cell, on, createChangeEventDetails("press", event))) {
-        paintRef.current.changed = true;
-      }
-    },
-    [setCellTo]
-  );
-
-  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
-    const drawing = velocityRef.current;
-    if (drawing && drawing.pointerId === event.pointerId) {
-      if (isReleased(event)) {
-        handlePointerEnd(event);
-        return;
-      }
-      drawVelocity(event.nativeEvent, drawing.cell.row);
-      return;
-    }
-    const paint = paintRef.current;
-    if (!paint || paint.pointerId !== event.pointerId) {
-      return;
-    }
-    if (isReleased(event)) {
-      handlePointerEnd(event);
-      return;
-    }
-    const boxes = [...nodesRef.current].map(
-      ([key, node]) => [key, node.getBoundingClientRect()] as const
-    );
-    const cell = cellAtPoint(boxes, event.clientX, event.clientY);
-    if (
-      cell &&
-      setCellTo(
-        cell,
-        paint.on,
-        createChangeEventDetails("paint", event.nativeEvent)
-      )
-    ) {
-      paint.changed = true;
-    }
-  };
-
-  const handlePointerEnd = (event: React.PointerEvent<HTMLDivElement>) => {
-    const drawing = velocityRef.current;
-    if (drawing && drawing.pointerId === event.pointerId) {
-      velocityRef.current = null;
-      if (drawing.changed) {
-        onVelocityCommitted?.(velocitiesRef.current as number[][], {
-          event: event.nativeEvent,
-          reason: "drag",
-        });
-      }
-      return;
-    }
-    const paint = paintRef.current;
-    if (!paint || paint.pointerId !== event.pointerId) {
-      return;
-    }
-    paintRef.current = null;
-    setPainting(false);
-    if (paint.changed) {
-      onValueCommitted?.(valueRef.current as boolean[][], {
-        event: event.nativeEvent,
-        reason: "paint",
-      });
-    }
-  };
 
   // The step being played is painted on its cells without a render.
   const currentRef = React.useRef<number | null>(null);
@@ -369,7 +134,7 @@ export function Root(componentProps: Root.Props) {
       if (step === null) {
         return;
       }
-      for (const [key, node] of nodesRef.current) {
+      for (const [key, node] of cellNodes) {
         if (key.endsWith(`:${step}`)) {
           if (on) {
             node.setAttribute("data-current", "");
@@ -395,86 +160,56 @@ export function Root(componentProps: Root.Props) {
       mark(currentRef.current, false);
       currentRef.current = null;
     };
-  }, [source, steps]);
+  }, [cellNodes, source, steps]);
 
   const state = React.useMemo<Root.State>(
-    () => ({ disabled, painting }),
-    [disabled, painting]
+    () => ({ disabled: shape.disabled, painting }),
+    [painting, shape.disabled]
   );
-  // What each cell follows lives in a store, so a press renders the cell it
-  // changes and not the whole grid.
-  const [view] = React.useState(() =>
-    createStore<SequencerView>({
-      painting,
-      tabStop: stop,
-      value,
-      velocities,
-    })
-  );
-  React.useLayoutEffect(() => {
-    view.set({ painting, tabStop: stop, value, velocities });
-  }, [painting, stop, value, velocities, view]);
+
   // The cells carry `data-painting` too, written straight to them: reading it
   // in each cell would render the whole grid at every press and release.
   React.useLayoutEffect(() => {
-    for (const node of nodesRef.current.values()) {
+    for (const node of cellNodes.values()) {
       node.toggleAttribute("data-painting", painting);
     }
-  }, [painting]);
+  }, [cellNodes, painting]);
 
-  // The actions never change identity, so the cells reading them are not
-  // rendered when a new `onValueChange` is passed on every render.
-  const latest = React.useRef({
-    focusCell,
-    moveFocusFrom,
-    nudgeVelocity,
-    pressCell,
-    pressVelocity,
-    toggleCell,
-  });
-  latest.current = {
-    focusCell,
-    moveFocusFrom,
-    nudgeVelocity,
-    pressCell,
-    pressVelocity,
-    toggleCell,
-  };
-  const actions = React.useMemo<SequencerContextValue["actions"]>(
+  const context = React.useMemo<SequencerContextValue>(
     () => ({
-      focusCell: (cell) => latest.current.focusCell(cell),
-      moveFocusFrom: (from, event) => latest.current.moveFocusFrom(from, event),
-      nudgeVelocity: (cell, velocity, details) =>
-        latest.current.nudgeVelocity(cell, velocity, details),
-      pressCell: (cell, event) => latest.current.pressCell(cell, event),
-      pressVelocity: (cell, event) => latest.current.pressVelocity(cell, event),
+      cellNodes,
+      controller,
+      focusCell,
+      meta: { rows, steps },
       registerCell,
       registerVelocity,
-      setTabStop: setTabStopState,
-      toggleCell: (cell, event) => latest.current.toggleCell(cell, event),
+      rootRef,
+      state: { disabled: shape.disabled },
+      velocityNodes,
     }),
-    [registerCell, registerVelocity]
-  );
-  const shared = React.useMemo(() => ({ disabled }), [disabled]);
-  const context = React.useMemo<SequencerContextValue>(
-    () => ({ actions, meta: { rows, steps, view }, state: shared }),
-    [actions, rows, shared, steps, view]
+    [
+      cellNodes,
+      controller,
+      focusCell,
+      registerCell,
+      registerVelocity,
+      rows,
+      shape.disabled,
+      steps,
+      velocityNodes,
+    ]
   );
 
   const element = useRender({
     defaultTagName: "div",
     props: mergeProps<"div">(
       {
-        onLostPointerCapture: handlePointerEnd,
-        onPointerCancel: handlePointerEnd,
-        onPointerMove: handlePointerMove,
-        onPointerUp: handlePointerEnd,
         role: "group",
         style: { touchAction: "none" },
       },
       { ...elementProps, ...resolveStyling(className, style, state) }
     ),
-    ref,
+    ref: ref ? [ref, rootRef] : rootRef,
     render,
     state,
   });

@@ -14,12 +14,19 @@ import { RowContext, useSequencerContext, useSequencerView } from "../context";
 export function Cell(componentProps: Cell.Props) {
   const { className, ref, render, step, style, ...elementProps } =
     componentProps;
-  const { actions, state: rootState } = useSequencerContext("Cell");
+  const {
+    controller,
+    focusCell,
+    registerCell,
+    rootRef,
+    cellNodes,
+    state: rootState,
+  } = useSequencerContext("Cell");
   const row = React.use(RowContext);
   if (row === null) {
     throw new Error("Sequencer.Cell must be used within Sequencer.Row");
   }
-  const cell = { row, step };
+  const cell = React.useMemo(() => ({ row, step }), [row, step]);
   const on = useSequencerView("Cell", (view) => isOn(view.value, cell));
   const isTabStop = useSequencerView(
     "Cell",
@@ -28,20 +35,20 @@ export function Cell(componentProps: Cell.Props) {
   const { disabled } = rootState;
 
   const cellRef = React.useCallback(
-    (node: HTMLElement | null) => actions.registerCell({ row, step }, node),
-    [actions, row, step]
+    (node: HTMLElement | null) => registerCell(cell, node),
+    [cell, registerCell]
   );
 
   const handlePointerDown = (event: React.PointerEvent<HTMLButtonElement>) => {
-    if (disabled || event.button !== 0) {
+    const root = rootRef.current;
+    if (disabled || event.button !== 0 || !root) {
       return;
     }
     event.preventDefault();
-    event.currentTarget.parentElement
-      ?.closest("[role=group]")
-      ?.setPointerCapture?.(event.pointerId);
-    actions.focusCell(cell);
-    actions.pressCell(cell, event.nativeEvent);
+    root.setPointerCapture?.(event.pointerId);
+    controller.setTabStop(cell);
+    focusCell(cell);
+    controller.pressCell(cell, event.nativeEvent, root, cellNodes);
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
@@ -50,11 +57,13 @@ export function Cell(componentProps: Cell.Props) {
     }
     if (event.key === " " || event.key === "Enter") {
       event.preventDefault();
-      actions.toggleCell(cell, event.nativeEvent);
+      controller.toggleCell(cell, event.nativeEvent);
       return;
     }
-    if (actions.moveFocusFrom(cell, event.nativeEvent)) {
+    const next = controller.moveFocusFrom(cell, event.nativeEvent);
+    if (next) {
       event.preventDefault();
+      focusCell(next);
     }
   };
 
@@ -69,7 +78,7 @@ export function Cell(componentProps: Cell.Props) {
       {
         "aria-pressed": on,
         disabled,
-        onFocus: () => actions.setTabStop(cell),
+        onFocus: () => controller.setTabStop(cell),
         onKeyDown: handleKeyDown,
         onPointerDown: handlePointerDown,
         tabIndex: isTabStop ? 0 : -1,
