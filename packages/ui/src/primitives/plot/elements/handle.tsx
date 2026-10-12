@@ -1,47 +1,24 @@
-import type { Point } from "@audio-ui/core";
-import {
-  createChangeEventDetails,
-  type ChangeEventDetails as ExtraChangeEventDetails,
-  type CommitEventDetails as ExtraCommitEventDetails,
-  isReleased,
+import type {
+  ChangeEventDetails as ExtraChangeEventDetails,
+  CommitEventDetails as ExtraCommitEventDetails,
+  Point,
 } from "@audio-ui/core";
+import {
+  createPlotHandleController,
+  type PlotHandleOptions,
+} from "@audio-ui/core/plot";
 import * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
 import { useLocale } from "../../internal/use-locale";
 import { VISUALLY_HIDDEN } from "../../internal/visually-hidden";
-import { type PlotAxis, positionOn, usePlotContext, valueOn } from "../context";
+import { usePlotContext } from "../context";
 
 type Axis = "x" | "y";
-
-/** What an arrow key moves the handle by, as a share of the axis; Shift and Page Up/Down move ten times as far. */
-const KEY_STEP = 0.01;
-const LARGE_KEY_STEP = 0.1;
-/** Shift slows a drag down to this share of the pointer's travel. */
-const FINE_DRAG = 0.25;
 
 const DEFAULT_FORMAT_OPTIONS: Intl.NumberFormatOptions = {
   maximumFractionDigits: 2,
 };
-
-interface DragGesture {
-  changed: boolean;
-  fine: boolean;
-  /** Where the handle was, as positions along each axis, when the drag began or Shift last changed. */
-  origin: Point;
-  pointerId: number;
-  /** The plot's box when the press began: it does not move under a drag. */
-  rect: DOMRect | null;
-  start: Point;
-}
-
-/** `value` kept within both axes. */
-function clampPoint(value: Point, x: PlotAxis, y: PlotAxis): Point {
-  return {
-    x: valueOn(x, positionOn(x, value.x)),
-    y: valueOn(y, positionOn(y, value.y)),
-  };
-}
 
 /**
  * A point on the plot that can be moved: an equalizer band at its frequency
@@ -81,215 +58,78 @@ export function Handle(componentProps: Handle.Props) {
     ...elementProps
   } = componentProps;
   const { meta, state: plotState } = usePlotContext("Handle");
-  const { x, y } = meta;
+  const { measure, x, y } = meta;
   const disabled = disabledProp || plotState.disabled;
-  const moves = (along: Axis) => axis === "both" || axis === along;
 
-  const isControlled = valueProp !== undefined;
-  const [uncontrolledValue, setUncontrolledValue] = React.useState<Point>(
-    () =>
-      defaultValue ?? {
-        x: valueOn(x, 0.5),
-        y: valueOn(y, 0.5),
-      }
+  const options: PlotHandleOptions = {
+    axis,
+    defaultValue,
+    disabled,
+    measure,
+    onValueChange,
+    onValueCommitted,
+    value: valueProp,
+    x,
+    y,
+  };
+  const [controller] = React.useState(() =>
+    createPlotHandleController(options)
   );
-  const rawValue = isControlled ? valueProp : uncontrolledValue;
-
-  // A controlled value is the last word, even mid-drag: a consumer that holds
-  // the point to a curve or a limit sees the handle held there, not wherever
-  // the pointer has gone.
-  const [dragging, setDraggingState] = React.useState(false);
-  const value = clampPoint(rawValue, x, y);
-  const valueRef = React.useRef(value);
-  valueRef.current = value;
+  // Set on every render, so the handle always reads the latest props.
+  controller.setOptions(options);
+  const snapshot = React.useSyncExternalStore(
+    controller.subscribe,
+    controller.getSnapshot
+  );
+  const { dragging, position: at, value } = snapshot;
   const inputRef = React.useRef<HTMLInputElement>(null);
-  const gestureRef = React.useRef<DragGesture | null>(null);
-
-  const setDragging = setDraggingState;
-
-  /** Clamps and proposes a value; returns whether it was applied. */
-  const change = (next: Point, eventDetails: Handle.ChangeEventDetails) => {
-    const clamped = clampPoint(next, x, y);
-    const { current } = valueRef;
-    if (clamped.x === current.x && clamped.y === current.y) {
-      return false;
-    }
-    onValueChange?.(clamped, eventDetails);
-    if (eventDetails.isCanceled) {
-      return false;
-    }
-    valueRef.current = clamped;
-    if (!isControlled) {
-      setUncontrolledValue(clamped);
-    }
-    return true;
-  };
-
-  /** Moves the handle to positions along each axis, 0…1, for the axes it moves along. */
-  const moveTo = (position: Point, eventDetails: Handle.ChangeEventDetails) => {
-    const { current } = valueRef;
-    return change(
-      {
-        x: moves("x") ? valueOn(x, position.x) : current.x,
-        y: moves("y") ? valueOn(y, position.y) : current.y,
-      },
-      eventDetails
-    );
-  };
-
-  const positionOf = (point: Point): Point => ({
-    x: positionOn(x, point.x),
-    y: positionOn(y, point.y),
-  });
-
-  /** Back to the default value, along the axes the handle moves along. */
-  const reset = (event: KeyboardEvent | MouseEvent | PointerEvent) => {
-    const target = positionOf(
-      clampPoint(
-        defaultValue ?? { x: valueOn(x, 0.5), y: valueOn(y, 0.5) },
-        x,
-        y
-      )
-    );
-    if (moveTo(target, createChangeEventDetails("reset", event))) {
-      onValueCommitted?.(valueRef.current, { event, reason: "reset" });
-    }
-  };
-
-  const handleDoubleClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    if (!disabled) {
-      reset(event.nativeEvent);
-    }
-  };
+  const moves = (along: Axis) => axis === "both" || axis === along;
 
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
     if (event.button !== 0 || disabled) {
       return;
     }
     event.preventDefault();
-    // An Alt + click returns to the default, as in a DAW.
-    if (event.altKey) {
-      reset(event.nativeEvent);
-      return;
+    if (!event.altKey) {
+      inputRef.current?.focus({ focusVisible: false, preventScroll: true });
     }
-    event.currentTarget.setPointerCapture?.(event.pointerId);
-    inputRef.current?.focus({ focusVisible: false, preventScroll: true });
-    gestureRef.current = {
-      changed: false,
-      fine: event.shiftKey,
-      origin: positionOf(valueRef.current),
-      pointerId: event.pointerId,
-      rect: meta.measure(true),
-      start: { x: event.clientX, y: event.clientY },
-    };
-    setDragging(true);
+    controller.press(event.nativeEvent, event.currentTarget);
   };
 
-  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
-    const gesture = gestureRef.current;
-    // Measured when the press began: the plot does not move under a drag.
-    const rect = gesture?.rect;
-    if (!(gesture && rect) || gesture.pointerId !== event.pointerId) {
-      return;
-    }
-    if (isReleased(event)) {
-      handlePointerEnd(event);
-      return;
-    }
-    // Shift pressed or let go mid-drag: carry on from here at the new speed.
-    if (event.shiftKey !== gesture.fine) {
-      gesture.fine = event.shiftKey;
-      gesture.origin = positionOf(valueRef.current);
-      gesture.start = { x: event.clientX, y: event.clientY };
-    }
-    const speed = gesture.fine ? FINE_DRAG : 1;
-    const along = {
-      x:
-        gesture.origin.x +
-        ((event.clientX - gesture.start.x) / Math.max(rect.width, 1)) * speed,
-      y:
-        gesture.origin.y -
-        ((event.clientY - gesture.start.y) / Math.max(rect.height, 1)) * speed,
-    };
-    if (moveTo(along, createChangeEventDetails("drag", event.nativeEvent))) {
-      gesture.changed = true;
+  const handleDoubleClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (!disabled) {
+      controller.reset(event.nativeEvent);
     }
   };
 
-  const handlePointerEnd = (event: React.PointerEvent<HTMLDivElement>) => {
-    const gesture = gestureRef.current;
-    if (!gesture || gesture.pointerId !== event.pointerId) {
-      return;
-    }
-    gestureRef.current = null;
-    // Read before settling: the value falls back to the known one after.
-    const committed = valueRef.current;
-    setDragging(false);
-    if (gesture.changed) {
-      onValueCommitted?.(committed, {
-        event: event.nativeEvent,
-        reason: "drag",
-      });
-    }
-  };
+  const handleKeyDown = React.useCallback(
+    (event: React.KeyboardEvent<HTMLInputElement>) => {
+      if (controller.keyDown(event.nativeEvent)) {
+        event.preventDefault();
+      }
+    },
+    [controller]
+  );
 
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (disabled) {
-      return;
-    }
-    if (event.key === "Delete" || event.key === "Backspace") {
-      event.preventDefault();
-      reset(event.nativeEvent);
-      return;
-    }
-    const step = event.shiftKey ? LARGE_KEY_STEP : KEY_STEP;
-    const at = positionOf(valueRef.current);
-    // Home and End go to the ends of the axis the handle moves along first.
-    const ends: Axis = moves("x") ? "x" : "y";
-    const targets: Record<string, Point> = {
-      ArrowDown: { x: at.x, y: at.y - step },
-      ArrowLeft: { x: at.x - step, y: at.y },
-      ArrowRight: { x: at.x + step, y: at.y },
-      ArrowUp: { x: at.x, y: at.y + step },
-      End: { ...at, [ends]: 1 },
-      Home: { ...at, [ends]: 0 },
-      PageDown: { x: at.x, y: at.y - LARGE_KEY_STEP },
-      PageUp: { x: at.x, y: at.y + LARGE_KEY_STEP },
-    };
-    const target = targets[event.key];
-    if (!target) {
-      return;
-    }
-    event.preventDefault();
-    const native = event.nativeEvent;
-    if (moveTo(target, createChangeEventDetails("keyboard", native))) {
-      onValueCommitted?.(valueRef.current, {
-        event: native,
-        reason: "keyboard",
-      });
-    }
-  };
+  const handleChange = React.useCallback(
+    (along: Axis, event: React.ChangeEvent<HTMLInputElement>) => {
+      controller.typeAt(
+        along,
+        Number(event.currentTarget.value),
+        event.nativeEvent
+      );
+    },
+    [controller]
+  );
+  const handleChangeX = React.useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => handleChange("x", event),
+    [handleChange]
+  );
+  const handleChangeY = React.useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => handleChange("y", event),
+    [handleChange]
+  );
 
-  const handleChange = (
-    along: Axis,
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const native = event.nativeEvent;
-    const at = positionOf(valueRef.current);
-    const position = { ...at, [along]: Number(event.currentTarget.value) };
-    if (moveTo(position, createChangeEventDetails("input-change", native))) {
-      onValueCommitted?.(valueRef.current, {
-        event: native,
-        reason: "input-change",
-      });
-    }
-  };
-
-  const at = positionOf(value);
-  const handleChangeX = (event: React.ChangeEvent<HTMLInputElement>) =>
-    handleChange("x", event);
-  const handleChangeY = (event: React.ChangeEvent<HTMLInputElement>) =>
-    handleChange("y", event);
   const inputFor = (along: Axis, first: boolean) => {
     let label = getAriaLabel?.(along);
     if (label === undefined && ariaLabel) {
@@ -311,7 +151,6 @@ export function Handle(componentProps: Handle.Props) {
         max={1}
         min={0}
         onChange={along === "x" ? handleChangeX : handleChangeY}
-        // biome-ignore lint/performance/noJsxPropsBind: the handler reads the latest value and callbacks, so it is made each render.
         onKeyDown={handleKeyDown}
         ref={first ? inputRef : undefined}
         step="any"
@@ -340,11 +179,7 @@ export function Handle(componentProps: Handle.Props) {
           </>
         ),
         onDoubleClick: handleDoubleClick,
-        onLostPointerCapture: handlePointerEnd,
-        onPointerCancel: handlePointerEnd,
         onPointerDown: handlePointerDown,
-        onPointerMove: handlePointerMove,
-        onPointerUp: handlePointerEnd,
         style: {
           left: `${at.x * 100}%`,
           position: "absolute",
