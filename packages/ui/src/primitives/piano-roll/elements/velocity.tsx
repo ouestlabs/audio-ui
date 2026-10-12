@@ -1,4 +1,4 @@
-import type { Note as NoteValue } from "@audio-ui/core/piano-roll";
+import type { Note } from "@audio-ui/core/piano-roll";
 import * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
@@ -78,7 +78,7 @@ export function Velocity(componentProps: Velocity.Props) {
   const shown = useRollView("Velocity", (view) =>
     view.noteById.get(noteProp.id)
   );
-  const note: NoteValue = shown ?? noteProp;
+  const note: Note = shown ?? noteProp;
   const velocity = note.velocity ?? 1;
   const { disabled } = rollState;
   const selected = useRollView("Velocity", (view) =>
@@ -183,6 +183,6 @@ export namespace Velocity {
     /** Returns how a velocity, 0…1, is announced. Defaults to a percentage. */
     getAriaValueText?: (velocity: number) => string;
     /** The note whose velocity this is. */
-    note: NoteValue;
+    note: Note;
   }
 }
