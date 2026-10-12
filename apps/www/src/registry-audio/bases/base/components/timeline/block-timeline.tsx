@@ -32,6 +32,13 @@ import {
   ContextMenuTrigger,
 } from "@/registry/bases/base/ui/context-menu";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/registry/bases/base/ui/dialog";
+import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
@@ -45,14 +52,6 @@ import {
   DropdownMenuTrigger,
 } from "@/registry/bases/base/ui/dropdown-menu";
 import { Kbd, KbdGroup } from "@/registry/bases/base/ui/kbd";
-import {
-  Popover,
-  PopoverContent,
-  PopoverDescription,
-  PopoverHeader,
-  PopoverTitle,
-  PopoverTrigger,
-} from "@/registry/bases/base/ui/popover";
 import { NumberControl } from "@/registry-audio/bases/base/audio/elements/bpm-control";
 import { Meter } from "@/registry-audio/bases/base/audio/elements/meter";
 import {
@@ -841,6 +840,8 @@ export default function BlockTimeline() {
   const [division, setDivision] = useState<GridDivision>("adaptive");
   const [triplet, setTriplet] = useState(false);
   const [snap, setSnap] = useState(true);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const openShortcuts = useCallback(() => setShortcutsOpen(true), []);
   // A stand-in for the mix's levels: the block plays nothing, so they move while it runs.
   const simulated = useSimulatedLevels(2);
   // What is heard: a muted track is silent, and while any track is soloed so is every other.
@@ -1162,34 +1163,14 @@ export default function BlockTimeline() {
               />
             </Button>
           </ButtonGroup>
-          <Popover>
-            <PopoverTrigger
-              render={
-                <Button
-                  aria-label="Keyboard shortcuts"
-                  size="icon"
-                  variant="outline"
-                />
-              }
-            >
-              <IconPlaceholder
-                hugeicons="KeyboardIcon"
-                lucide="KeyboardIcon"
-                phosphor="KeyboardIcon"
-                remixicon="RiKeyboardLine"
-                tabler="IconKeyboard"
-              />
-            </PopoverTrigger>
-            <PopoverContent
-              align="center"
-              className="max-h-(--available-height) w-80 overflow-y-auto"
-            >
-              <PopoverHeader>
-                <PopoverTitle>Keyboard shortcuts</PopoverTitle>
-                <PopoverDescription>
+          <Dialog onOpenChange={setShortcutsOpen} open={shortcutsOpen}>
+            <DialogContent className="max-h-(--available-height) w-80 overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Keyboard shortcuts</DialogTitle>
+                <DialogDescription>
                   Select a clip or a track first.
-                </PopoverDescription>
-              </PopoverHeader>
+                </DialogDescription>
+              </DialogHeader>
               <dl className="flex flex-col gap-2 text-sm">
                 {SHORTCUTS.map((shortcut) => (
                   <div
@@ -1207,8 +1188,8 @@ export default function BlockTimeline() {
                   </div>
                 ))}
               </dl>
-            </PopoverContent>
-          </Popover>
+            </DialogContent>
+          </Dialog>
           <div
             className="hidden items-center gap-2 @7xl/panel:flex"
             ref={zoomSlotRef}
@@ -1282,6 +1263,10 @@ export default function BlockTimeline() {
               >
                 Snap to grid
               </DropdownMenuCheckboxItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={openShortcuts}>
+                Keyboard shortcuts
+              </DropdownMenuItem>
               {zoomInBar ? null : (
                 <>
                   <DropdownMenuSeparator />
