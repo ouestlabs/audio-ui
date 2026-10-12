@@ -64,7 +64,7 @@ export interface WaveformRegionController {
   /** How far an edge can go: the limits of its position, which stop short of the other edge. */
   edgeRange: (edge: WaveformRegionEdge) => readonly [number, number];
   getSnapshot: () => WaveformRegionSnapshot;
-  /** Handles a key on an edge's input: arrows and Page keys move it, Home and End go to its ends. Returns whether the key was the edge's. */
+  /** Handles a key on an edge's input: arrows and Page keys move it, Home and End go to its ends. Returns `true` when the edge takes the key. */
   keyDown: (edge: WaveformRegionEdge, event: KeyboardEvent) => boolean;
   /**
    * Starts a drag of `edge` (or of the whole region, `"both"`) from `handle`.
@@ -159,7 +159,7 @@ export function createWaveformRegionController(
     return snapshot;
   };
 
-  /** Proposes a region; keeps it unless canceled. Returns whether it was applied. */
+  /** Proposes a region; keeps it unless canceled. Returns `true` when the region is applied. */
   const change = (
     next: WaveformRegionValue,
     details: WaveformRegionChangeEventDetails

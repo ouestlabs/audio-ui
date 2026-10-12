@@ -63,14 +63,14 @@ export interface RangeSnapshot {
 }
 
 export interface RangeController {
-  /** Keys on a handle's input: arrows and Page keys move the edge, Home and End go to its limits. Returns whether the key was the handle's. */
+  /** Keys on a handle's input: arrows and Page keys move the edge, Home and End go to its limits. Returns `true` when the handle takes the key. */
   edgeKeyDown: (edge: "end" | "start", event: KeyboardEvent) => boolean;
   /** How far an edge can go, before it meets the other one. */
   edgeRange: (edge: "end" | "start") => readonly [number, number];
   /** An input moves an edge to a position. */
   edgeTypeAt: (edge: "end" | "start", position: number, event: Event) => void;
   getSnapshot: () => RangeSnapshot;
-  /** Keys on the range's own input: arrows and Page keys move it, Home and End go to the ends of the timeline. Returns whether the key was the range's. */
+  /** Keys on the range's own input: arrows and Page keys move it, Home and End go to the ends of the timeline. Returns `true` when the range takes the key. */
   keyDown: (event: KeyboardEvent) => boolean;
   /** An input moves the range to a start, keeping its length. */
   moveTypeAt: (start: number, event: Event) => void;

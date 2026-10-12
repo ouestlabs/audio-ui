@@ -8,7 +8,7 @@ export interface LevelHistory {
   readonly levels: Float32Array;
   /** How far the newest entry has slid in, 0…1. */
   readonly progress: number;
-  /** Bring the history up to `nowMs`. Returns whether it is still moving. */
+  /** Bring the history up to `nowMs`. Returns `true` while it is still moving. */
   step: (nowMs: number) => boolean;
 }
 

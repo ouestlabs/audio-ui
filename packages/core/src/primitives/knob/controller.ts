@@ -106,8 +106,8 @@ export interface KnobController {
   getSnapshot: () => KnobSnapshot;
   /**
    * Handles a key on the knob's input: arrows, Page Up/Down, Home and End,
-   * Shift for the large step, Delete or Backspace to reset. Returns whether
-   * the key was the knob's, so the caller can prevent its default.
+   * Shift for the large step, Delete or Backspace to reset. Returns `true`
+   * when the knob takes the key, so the caller can prevent its default.
    */
   keyDown: (event: KeyboardEvent) => boolean;
   /**

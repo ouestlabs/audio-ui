@@ -24,7 +24,7 @@ export interface WheelZoomController {
   /** Drops the zoom that waits for the next frame. */
   dispose: () => void;
   setOptions: (options: WheelZoomOptions) => void;
-  /** Takes a wheel event over the viewport: Cmd/Ctrl zooms, a bare wheel is left to scroll. Returns whether it zoomed. */
+  /** Takes a wheel event over the viewport: Cmd/Ctrl zooms, a bare wheel is left to scroll. Returns `true` when it zooms. */
   wheel: (event: WheelEvent, element: HTMLElement) => boolean;
 }
 

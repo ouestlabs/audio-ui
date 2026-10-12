@@ -113,9 +113,9 @@ export interface EnvelopeController {
   /** Formats a point's `x` and `y` as one string. */
   formatPoint: (x: number, y: number) => string;
   getSnapshot: () => EnvelopeSnapshot;
-  /** Handles a key on a point's handle: arrows move it, Delete or Backspace removes it. Returns whether the key was the point's. */
+  /** Handles a key on a point's handle: arrows move it, Delete or Backspace removes it. Returns `true` when the point takes the key. */
   keyPoint: (index: number, event: KeyboardEvent) => boolean;
-  /** Handles a key on a segment's handle: Up and Down bend it, Delete or Backspace straightens it. Returns whether the key was the segment's. */
+  /** Handles a key on a segment's handle: Up and Down bend it, Delete or Backspace straightens it. Returns `true` when the segment takes the key. */
   keySegment: (index: number, event: KeyboardEvent) => boolean;
   /** Starts an Alt + press on the graph: a drag bends the segment under the pointer. */
   pressBend: (event: PointerEvent, graph: Element) => void;
@@ -133,7 +133,7 @@ export interface EnvelopeController {
     handle: Element,
     graph: Element
   ) => void;
-  /** Removes a point; blocked at `minPoints`. Returns whether it was removed. */
+  /** Removes a point; blocked at `minPoints`. Returns `true` when the point is removed. */
   removePoint: (index: number, event: MouseEvent | KeyboardEvent) => boolean;
   setOptions: (options: EnvelopeOptions) => void;
   /** Straightens the segment under `at`, if there is one. */

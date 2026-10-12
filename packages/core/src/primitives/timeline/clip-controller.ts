@@ -273,7 +273,7 @@ export interface ClipController {
     reason: "double-click" | "keyboard",
     event: Event
   ) => void;
-  /** Keys on a fade or trim handle: arrows and Page keys move the edge, Home and End go to its limits. Returns whether the key was the handle's. */
+  /** Keys on a fade or trim handle: arrows and Page keys move the edge, Home and End go to its limits. Returns `true` when the handle takes the key. */
   edgeKeyDown: (
     target: "fade-in" | "fade-out" | "trim-start" | "trim-end",
     event: KeyboardEvent
@@ -287,7 +287,7 @@ export interface ClipController {
     event: Event
   ) => void;
   getSnapshot: () => ClipSnapshot;
-  /** Keys on the clip itself: Delete removes, arrows move it. Returns whether the key was the clip's. */
+  /** Keys on the clip itself: Delete removes, arrows move it. Returns `true` when the clip takes the key. */
   keyDown: (event: KeyboardEvent) => boolean;
   /** An input moves the clip to a start. */
   moveTypeAt: (start: number, event: Event) => void;

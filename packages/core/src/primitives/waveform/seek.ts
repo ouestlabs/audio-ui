@@ -89,7 +89,7 @@ export interface WaveformSeekController {
   hover: Store<number | null>;
   /** Sets the hover from a pointer over `element`. */
   hoverAt: (clientX: number, element: Element) => void;
-  /** Handles a key on the seekable surface's input. Returns whether the key was the seek's. */
+  /** Handles a key on the seekable surface's input. Returns `true` when the seek takes the key. */
   keyDown: (event: KeyboardEvent) => boolean;
   /** The pointer left the surface: the hover goes. */
   leave: () => void;
@@ -208,7 +208,7 @@ export function createWaveformController(
     return snapshot;
   };
 
-  /** Clamps and proposes a position; keeps it unless canceled. Returns whether it was applied. */
+  /** Clamps and proposes a position; keeps it unless canceled. Returns `true` when the position is applied. */
   const change = (
     raw: number,
     details: WaveformSeekChangeEventDetails

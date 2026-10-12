@@ -100,7 +100,7 @@ export interface TimelineController {
     details: TimelinePositionCommitEventDetails
   ) => void;
   getSnapshot: () => TimelineSnapshot;
-  /** Handles a key on the ruler: arrows, Page keys, Home and End. Returns whether the key was the timeline's. */
+  /** Handles a key on the ruler: arrows, Page keys, Home and End. Returns `true` when the timeline takes the key. */
   keyDown: (event: KeyboardEvent) => boolean;
   /**
    * Starts a press on the ruler: a press seeks, a drag scrubs, Shift scrubs

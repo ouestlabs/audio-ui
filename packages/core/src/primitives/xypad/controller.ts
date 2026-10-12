@@ -86,8 +86,8 @@ export interface XYPadController {
   /**
    * Handles a key on one of the pad's inputs: arrows move by a step (Shift
    * for ten), Page Up/Down move the y axis by ten steps, Home and End go to
-   * the ends of x, Delete or Backspace reset. Returns whether the key was the
-   * pad's, so the caller can prevent its default.
+   * the ends of x, Delete or Backspace reset. Returns `true` when the pad
+   * takes the key, so the caller can prevent its default.
    */
   keyDown: (event: KeyboardEvent) => boolean;
   /**

@@ -39,7 +39,7 @@ export interface PianoOptions {
   onNoteOff?: (pitch: number, details: PianoNoteOffEventDetails) => void;
   onNoteOn?: (pitch: number, details: PianoNoteOnEventDetails) => void;
   orientation: "horizontal" | "vertical";
-  /** Only these pitches, in place of `minPitch`…`maxPitch`. */
+  /** Only these pitches get keys, instead of `minPitch`…`maxPitch`. */
   pitches?: readonly number[];
 }
 

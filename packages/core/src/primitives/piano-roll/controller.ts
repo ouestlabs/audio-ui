@@ -53,7 +53,7 @@ export type PianoRollEdit =
   | "velocity";
 
 type Edited<Details> = Details & {
-  /** What the change did: one gesture keeps one `edit` throughout. */
+  /** A gesture reuses one `edit` for all of its changes. */
   edit: PianoRollEdit;
 };
 
@@ -171,19 +171,19 @@ export interface PianoRollSnapshot {
 export type PianoRollNoteHandle = "end" | "move" | "start";
 
 export interface PianoRollController {
-  /** Adds a note at the playback position, from the keyboard. Returns whether it was added. */
+  /** Adds a note at the playback position, from the keyboard. Returns `true` when the note is added. */
   addAtPlayback: (event: KeyboardEvent) => boolean;
   doubleClickGrid: (event: MouseEvent, grid: Element) => void;
   doubleClickNote: (id: NoteId, event: MouseEvent) => void;
   getSnapshot: () => PianoRollSnapshot;
-  /** Handles a key on the grid: a command, Escape clears the selection, Cmd/Ctrl+A selects all. Returns whether it was the grid's. */
+  /** Handles a key on the grid: a command, Escape clears the selection, Cmd/Ctrl+A selects all. Returns `true` when the grid takes the key. */
   keyGrid: (event: KeyboardEvent) => boolean;
-  /** Handles a key on a note: Delete removes, Enter and Space toggle its selection, arrows move it, Shift + arrows resize it. Returns whether it was the note's. */
+  /** Handles a key on a note: Delete removes, Enter and Space toggle its selection, arrows move it, Shift + arrows resize it. Returns `true` when the note takes the key. */
   keyNote: (id: NoteId, event: KeyboardEvent) => boolean;
   keyOff: (pitch: number, details: PianoRollNoteOffEventDetails) => void;
   /** A key on the keyboard beside the roll: sounds it, or with Shift selects the notes on its row. */
   keyOn: (pitch: number, details: PianoRollKeyDetails) => void;
-  /** Handles a key on a velocity's input. Returns whether it was the velocity's. */
+  /** Handles a key on a velocity's input. Returns `true` when the velocity takes the key. */
   keyVelocity: (id: NoteId, event: KeyboardEvent) => boolean;
   /** Starts a press on the grid: a draw in draw mode, or a selection rectangle. */
   pressGrid: (event: PointerEvent, grid: Element) => void;
@@ -207,7 +207,7 @@ export interface PianoRollController {
   setOptions: (options: PianoRollOptions) => void;
   /** Sets a velocity from an input, reporting an `"input-change"` change and commit. */
   setVelocity: (id: NoteId, velocity: number, event: Event) => void;
-  /** Handles a Cmd/Ctrl command: copy, cut, paste, duplicate, quantize. Returns whether it was one. */
+  /** Handles a Cmd/Ctrl command: copy, cut, paste, duplicate, quantize. Returns `true` when the key is one of them. */
   shortcut: (event: KeyboardEvent) => boolean;
   subscribe: (listener: () => void) => () => void;
 }
@@ -711,7 +711,7 @@ export function createPianoRollController(
     );
   };
 
-  /** Sounds `pitch` in place of what the gesture was sounding. */
+  /** Sounds `pitch` instead of the pitch the gesture was sounding. */
   const audition = (
     current: NoteGesture,
     pitch: number,

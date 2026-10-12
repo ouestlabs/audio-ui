@@ -72,7 +72,7 @@ export interface PlotHandleSnapshot {
 
 export interface PlotHandleController {
   getSnapshot: () => PlotHandleSnapshot;
-  /** Handles a key on an axis input: arrows move a hundredth of the axis, Shift or Page Up/Down a tenth, Delete or Backspace reset. Returns whether the key was the handle's. */
+  /** Handles a key on an axis input: arrows move a hundredth of the axis, Shift or Page Up/Down a tenth, Delete or Backspace reset. Returns `true` when the handle takes the key. */
   keyDown: (event: KeyboardEvent) => boolean;
   /**
    * Starts a pointer gesture on `element`: a drag moves the handle from where
@@ -176,7 +176,7 @@ export function createPlotHandleController(
     return snapshot;
   };
 
-  /** Clamps and proposes a value; keeps it unless canceled. Returns whether it was applied. */
+  /** Clamps and proposes a value; keeps it unless canceled. Returns `true` when the value is applied. */
   const change = (next: PlotPoint, details: PlotHandleChangeEventDetails) => {
     const clamped = clampPoint(next, options.x, options.y);
     const now = current();

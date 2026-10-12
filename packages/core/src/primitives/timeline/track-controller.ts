@@ -43,13 +43,13 @@ export interface TrackSnapshot {
 
 export interface TrackController {
   getSnapshot: () => TrackSnapshot;
-  /** Handles a key on the handle's input: the arrows move by a step (Down is taller), Page keys by a large one, Home and End go to the limits. Returns whether the key was the handle's. */
+  /** Handles a key on the handle's input: the arrows move by a step (Down is taller), Page keys by a large one, Home and End go to the limits. Returns `true` when the handle takes the key. */
   keyDown: (event: KeyboardEvent) => boolean;
   /** Starts a drag from `handle`: the height moves with the pointer, measured from where it was taken. */
   press: (event: PointerEvent, handle: Element) => void;
   /** Gives the height up, so the row shares the room again. */
   reset: (event: MouseEvent) => void;
-  /** Asks for a new height: a drag, a key or an input. Returns whether the request was applied. */
+  /** Asks for a new height: a drag, a key or an input. Returns `true` when the height is applied. */
   resize: (height: number, details: TrackHeightChangeEventDetails) => boolean;
   setOptions: (options: TrackOptions) => void;
   subscribe: (listener: () => void) => () => void;

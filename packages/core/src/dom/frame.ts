@@ -2,7 +2,7 @@
 const MAX_STEP_MS = 100;
 
 export interface FrameTask {
-  /** Run a step right now, in place of the pending frame. */
+  /** Run a step now, without waiting for the pending frame. */
   flush: () => void;
   /** Stop for good: a stopped task ignores `wake` and `flush`. */
   stop: () => void;
