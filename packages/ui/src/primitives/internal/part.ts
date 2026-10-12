@@ -1,5 +1,5 @@
-import type { useRender } from "@base-ui/react/use-render";
 import type * as React from "react";
+import type { RenderProp } from "./render";
 
 type StateClassName<State> =
   | string
@@ -20,7 +20,7 @@ export type PartProps<
   State extends object,
 > = Omit<React.ComponentPropsWithRef<Tag>, "className" | "style"> & {
   className?: StateClassName<State>;
-  render?: useRender.RenderProp<State>;
+  render?: RenderProp<State>;
   style?: StateStyle<State>;
 };
 

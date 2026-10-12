@@ -1,4 +1,3 @@
-import { useRender } from "@base-ui/react/use-render";
 import * as React from "react";
 import { useWheel } from "../../../hooks/interactions/use-wheel";
 import { clamp, clampFinite, type Point, roundToStep } from "../../../utils";
@@ -12,6 +11,7 @@ import {
   resolveScale,
 } from "../../internal/parameter-scale";
 import { type PartProps, resolveStyling } from "../../internal/part";
+import { useRender } from "../../internal/render";
 import { useLocale } from "../../internal/use-locale";
 import { KnobContext, type KnobContextValue } from "../context";
 import {

@@ -1,6 +1,5 @@
-import { mergeProps } from "@base-ui/react/merge-props";
-import { useRender } from "@base-ui/react/use-render";
 import { type PartProps, resolveStyling } from "../../internal/part";
+import { mergeProps, useRender } from "../../internal/render";
 import { STATE_ATTRIBUTES_MAPPING, useEnvelopeContext } from "../context";
 import { polylinePoints } from "../internal/geometry";
 import type { Root } from "./root";

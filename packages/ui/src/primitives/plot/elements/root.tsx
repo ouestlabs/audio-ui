@@ -1,11 +1,10 @@
-import { mergeProps } from "@base-ui/react/merge-props";
-import { useRender } from "@base-ui/react/use-render";
 import * as React from "react";
 import {
   type ParameterScaleProp,
   resolveScale,
 } from "../../internal/parameter-scale";
 import { type PartProps, resolveStyling } from "../../internal/part";
+import { mergeProps, useRender } from "../../internal/render";
 import { PlotContext, type PlotContextValue, type PlotState } from "../context";
 
 /**

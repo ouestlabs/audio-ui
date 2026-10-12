@@ -1,5 +1,3 @@
-import { mergeProps } from "@base-ui/react/merge-props";
-import { useRender } from "@base-ui/react/use-render";
 import * as React from "react";
 import {
   createChangeEventDetails,
@@ -13,6 +11,7 @@ import {
   type RangeEdge,
   type RangeValue,
 } from "../../internal/range-geometry";
+import { mergeProps, useRender } from "../../internal/render";
 import { VISUALLY_HIDDEN } from "../../internal/visually-hidden";
 import {
   type DescribePosition,

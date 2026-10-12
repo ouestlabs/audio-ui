@@ -1,9 +1,8 @@
-import { mergeProps } from "@base-ui/react/merge-props";
-import { useRender } from "@base-ui/react/use-render";
 import type * as React from "react";
 import { useEditableValue, ValueInput } from "../../internal/editable-value";
 import { createChangeEventDetails } from "../../internal/event-details";
 import { type PartProps, resolveStyling } from "../../internal/part";
+import { mergeProps, useRender } from "../../internal/render";
 import { useKnobContext } from "../context";
 import { STATE_ATTRIBUTES_MAPPING } from "../internal/shared";
 import type { Root } from "./root";

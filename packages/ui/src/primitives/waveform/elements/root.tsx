@@ -1,9 +1,8 @@
-import { mergeProps } from "@base-ui/react/merge-props";
-import { useRender } from "@base-ui/react/use-render";
 import * as React from "react";
 import { clampFinite } from "../../../utils";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { normalizeRange } from "../../internal/range-geometry";
+import { mergeProps, useRender } from "../../internal/render";
 import { createStore } from "../../internal/store";
 import {
   describeAsPercent,

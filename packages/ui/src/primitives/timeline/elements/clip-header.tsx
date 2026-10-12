@@ -1,7 +1,6 @@
-import { mergeProps } from "@base-ui/react/merge-props";
-import { useRender } from "@base-ui/react/use-render";
 import type * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part";
+import { mergeProps, useRender } from "../../internal/render";
 import { moveClip } from "../clip";
 import { snapMove } from "../internal/snap";
 import { type ClipState, useClipContext, useClipDrag } from "./clip-context";

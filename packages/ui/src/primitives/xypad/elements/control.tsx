@@ -1,10 +1,9 @@
-import { mergeProps } from "@base-ui/react/merge-props";
-import { useRender } from "@base-ui/react/use-render";
 import * as React from "react";
 import { clamp, type Point } from "../../../utils";
 import { createChangeEventDetails } from "../../internal/event-details";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { isReleased } from "../../internal/pointer";
+import { mergeProps, useRender } from "../../internal/render";
 import { useXYPadContext } from "../context";
 import { STATE_ATTRIBUTES_MAPPING } from "../internal/shared";
 import type { Root } from "./root";

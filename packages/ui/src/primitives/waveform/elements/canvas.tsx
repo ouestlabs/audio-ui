@@ -1,9 +1,8 @@
-import { mergeProps } from "@base-ui/react/merge-props";
-import { useRender } from "@base-ui/react/use-render";
 import * as React from "react";
 import { clampUnit } from "../../../utils";
 import { createFrameTask } from "../../internal/frame-task";
 import { type PartProps, resolveStyling } from "../../internal/part";
+import { mergeProps, useRender } from "../../internal/render";
 import { useReducedMotion } from "../../internal/use-reduced-motion";
 import { observeVisibility } from "../../internal/visibility";
 import { useWaveformContext, type WaveformState } from "../context";

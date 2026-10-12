@@ -6,19 +6,19 @@
  */
 import { resolve } from "node:path";
 
-/** Gzipped bytes. About 15% above what each weighs today. */
+/** Gzipped bytes. About 15% above what each weighs today, rendering and props merging included since they are ours. */
 const BUDGETS: Record<string, number> = {
-  envelope: 6500,
-  fader: 3500,
-  knob: 5800,
-  meter: 3300,
-  piano: 3300,
-  "piano-roll": 13_000,
-  plot: 6500,
-  sequencer: 4700,
-  timeline: 13_500,
-  waveform: 11_000,
-  xypad: 4300,
+  envelope: 7200,
+  fader: 4200,
+  knob: 6400,
+  meter: 4000,
+  piano: 4000,
+  "piano-roll": 13_600,
+  plot: 7100,
+  sequencer: 5300,
+  timeline: 15_400,
+  waveform: 11_600,
+  xypad: 4900,
 };
 
 const dist = resolve(import.meta.dirname, "../dist");

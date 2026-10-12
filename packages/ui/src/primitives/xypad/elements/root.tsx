@@ -1,5 +1,3 @@
-import { mergeProps } from "@base-ui/react/merge-props";
-import { useRender } from "@base-ui/react/use-render";
 import * as React from "react";
 import { useWheel } from "../../../hooks/interactions/use-wheel";
 import { clamp, clampFinite, type Point, roundToStep } from "../../../utils";
@@ -10,6 +8,7 @@ import {
 } from "../../internal/event-details";
 import { createPairFormatter } from "../../internal/format-pair";
 import { type PartProps, resolveStyling } from "../../internal/part";
+import { mergeProps, useRender } from "../../internal/render";
 import { useLocale } from "../../internal/use-locale";
 import { XYPadContext, type XYPadContextValue } from "../context";
 import { STATE_ATTRIBUTES_MAPPING, toPercent } from "../internal/shared";

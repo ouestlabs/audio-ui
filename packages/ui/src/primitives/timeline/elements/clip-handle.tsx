@@ -1,8 +1,7 @@
-import { mergeProps } from "@base-ui/react/merge-props";
-import { useRender } from "@base-ui/react/use-render";
 import * as React from "react";
 import { createChangeEventDetails } from "../../internal/event-details";
 import { type PartProps, resolveStyling } from "../../internal/part";
+import { mergeProps, useRender } from "../../internal/render";
 import { VISUALLY_HIDDEN } from "../../internal/visually-hidden";
 import { clipEnd, trimClipEnd, trimClipStart } from "../clip";
 import { snapMove } from "../internal/snap";

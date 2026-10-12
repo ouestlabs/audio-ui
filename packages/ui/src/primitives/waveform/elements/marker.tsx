@@ -1,7 +1,6 @@
-import { mergeProps } from "@base-ui/react/merge-props";
-import { useRender } from "@base-ui/react/use-render";
 import { clampFinite } from "../../../utils";
 import { type PartProps, resolveStyling } from "../../internal/part";
+import { mergeProps, useRender } from "../../internal/render";
 import { useWaveformContext, type WaveformState } from "../context";
 
 /**

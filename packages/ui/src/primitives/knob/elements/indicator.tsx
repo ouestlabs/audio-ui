@@ -1,6 +1,5 @@
-import { mergeProps } from "@base-ui/react/merge-props";
-import { useRender } from "@base-ui/react/use-render";
 import { resolveStyling } from "../../internal/part";
+import { mergeProps, useRender } from "../../internal/render";
 import { useKnobContext } from "../context";
 import { useArcProps } from "../internal/arc-props";
 import {

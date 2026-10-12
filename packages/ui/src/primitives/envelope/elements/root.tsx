@@ -1,5 +1,3 @@
-import { mergeProps } from "@base-ui/react/merge-props";
-import { useRender } from "@base-ui/react/use-render";
 import * as React from "react";
 import { clamp, type Point as GeomPoint, type Nullable } from "../../../utils";
 import {
@@ -9,6 +7,7 @@ import {
 } from "../../internal/event-details";
 import { createPairFormatter } from "../../internal/format-pair";
 import { type PartProps, resolveStyling } from "../../internal/part";
+import { mergeProps, useRender } from "../../internal/render";
 import { useLocale } from "../../internal/use-locale";
 import {
   EnvelopeContext,

@@ -1,8 +1,7 @@
-import { mergeProps } from "@base-ui/react/merge-props";
-import { useRender } from "@base-ui/react/use-render";
 import * as React from "react";
 import type { Source } from "../../../source";
 import { type PartProps, resolveStyling } from "../../internal/part";
+import { mergeProps, useRender } from "../../internal/render";
 import { type PlotAxis, type PlotState, usePlotContext } from "../context";
 import { tracePath } from "../internal/path";
 

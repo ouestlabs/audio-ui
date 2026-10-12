@@ -1,9 +1,8 @@
-import { mergeProps } from "@base-ui/react/merge-props";
-import { useRender } from "@base-ui/react/use-render";
 import * as React from "react";
 import { createChangeEventDetails } from "../../internal/event-details";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { pitchName } from "../../internal/pitch";
+import { mergeProps, useRender } from "../../internal/render";
 import { createStore } from "../../internal/store";
 import { TimelineContext } from "../../timeline/context";
 import { snapToGrid } from "../../timeline/internal/snap";
