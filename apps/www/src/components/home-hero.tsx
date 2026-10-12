@@ -11,8 +11,9 @@ export function HomeHero() {
           Audio UI for React
         </h1>
         <p className="text-balance text-site-muted-foreground text-sm">
-          Accessible, composable audio components built on shadcn/ui. Copy them,
-          paste them, own them.
+          Knobs, faders, meters, waveforms, timelines and piano rolls, as
+          headless React primitives on npm or as components you install with the
+          shadcn CLI.
         </p>
       </div>
       <div className="flex items-center gap-2">

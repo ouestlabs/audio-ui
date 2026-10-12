@@ -31,11 +31,7 @@ export function ComponentSourceSheetContent({
 
   const v0Url = React.useMemo(() => {
     const registryUrl = new URL(
-      getRegistryJsonAbsoluteUrl(
-        process.env.NEXT_PUBLIC_APP_URL || siteConfig.url,
-        styleName,
-        name
-      )
+      getRegistryJsonAbsoluteUrl(siteConfig.url, styleName, name)
     );
     const paramsString = serializeDesignSystemSearchParams("", params);
 

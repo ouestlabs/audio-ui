@@ -13,35 +13,11 @@ const CANONICAL_COMPONENT_DOC_SLUGS = [
   "sortable-list",
 ] as const;
 
-const TRAILING_SLASH_REGEX = /\/$/;
-// Accidental env concat (e.g. https://audio-ui.devhttps://other.example)
-const DOUBLE_ORIGIN_REGEX = /^(https?:\/\/[^/]+)(https?:\/\/)/i;
-
-function normalizeSiteUrl(url: string) {
-  const trimmed = url.trim();
-  const withProtocol =
-    trimmed.startsWith("http://") || trimmed.startsWith("https://")
-      ? trimmed
-      : `https://${trimmed}`;
-
-  // Accidental env concat (e.g. https://audio-ui.devhttps://other.example) → first origin only
-  const m = withProtocol.match(DOUBLE_ORIGIN_REGEX);
-  if (m) {
-    return m[1].replace(TRAILING_SLASH_REGEX, "");
-  }
-
-  return withProtocol.replace(TRAILING_SLASH_REGEX, "");
-}
-
 export type CanonicalComponentDocSlug =
   (typeof CANONICAL_COMPONENT_DOC_SLUGS)[number];
 
 export function getSiteUrl() {
-  return normalizeSiteUrl(
-    process.env.NEXT_PUBLIC_APP_URL ||
-      process.env.VERCEL_PROJECT_PRODUCTION_URL ||
-      siteConfig.url
-  );
+  return siteConfig.url;
 }
 
 export function absoluteUrl(path: string) {
@@ -103,11 +79,13 @@ export function buildPageSocialMetadata({
   // works), so relying on inheritance ships pages without any og:image.
   const imageUrl = getAbsoluteMetadataUrl(image ?? "/opengraph-image");
   const twitterCreator = getSocialHandle(siteConfig.links.twitter);
+  // The generated image is 1200×630 (`size` in app/opengraph-image.tsx); a page's own image has no known size.
+  const imageSize = image ? {} : { height: 630, width: 1200 };
 
   return {
     openGraph: {
       description,
-      images: [{ url: imageUrl }],
+      images: [{ url: imageUrl, ...imageSize }],
       locale: siteConfig.metadata.locale,
       siteName: siteConfig.name,
       title,
@@ -143,6 +121,7 @@ export function buildPageMetadata({
         "application/rss+xml": [
           { title: `${siteConfig.name} Docs`, url: "/rss.xml" },
         ],
+        "text/plain": [{ title: "llms.txt", url: "/llms.txt" }],
         // Every docs page is also served as markdown, which agents read better than HTML.
         ...(path === "/docs" || path.startsWith("/docs/")
           ? {
@@ -253,6 +232,7 @@ export function buildOrganizationJsonLd() {
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
+    "@id": `${getSiteUrl()}/#organization`,
     founder: buildAuthorJsonLd(),
     logo: absoluteUrl("/icon"),
     name: siteConfig.name,
@@ -276,6 +256,7 @@ export function buildSoftwareJsonLd() {
   return {
     "@context": "https://schema.org",
     "@type": "SoftwareSourceCode",
+    "@id": `${getSiteUrl()}/#software`,
     author: buildAuthorJsonLd(),
     codeRepository: siteConfig.links.github,
     description: siteConfig.description,
@@ -292,18 +273,16 @@ export function buildWebSiteJsonLd() {
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
+    "@id": `${getSiteUrl()}/#website`,
     description: siteConfig.description,
+    inLanguage: "en",
     name: siteConfig.name,
     potentialAction: {
       "@type": "SearchAction",
       "query-input": "required name=search_term_string",
       target: absoluteUrl("/components?search={search_term_string}"),
     },
-    publisher: {
-      "@type": "Organization",
-      name: siteConfig.name,
-      url: getSiteUrl(),
-    },
+    publisher: { "@id": `${getSiteUrl()}/#organization` },
     url: getSiteUrl(),
   };
 }
