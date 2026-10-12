@@ -26,7 +26,6 @@ export {
   DownloadIcon,
   Ellipsis,
   EllipsisIcon,
-  GripVerticalIcon,
   Headphones,
   HeadphonesIcon,
   Info,

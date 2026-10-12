@@ -1571,15 +1571,20 @@ export default function BlockTimeline() {
                         onKeyDown={nudgeTrack}
                         type="button"
                       >
-                        <IconPlaceholder
+                        <svg
                           aria-hidden="true"
                           className="size-3.5"
-                          hugeicons="DragDropVerticalIcon"
-                          lucide="GripVerticalIcon"
-                          phosphor="DotsSixVerticalIcon"
-                          remixicon="RiDraggable"
-                          tabler="IconGripVertical"
-                        />
+                          fill="currentColor"
+                          focusable="false"
+                          viewBox="0 0 16 16"
+                        >
+                          <circle cx="5.5" cy="3.5" r="1.25" />
+                          <circle cx="10.5" cy="3.5" r="1.25" />
+                          <circle cx="5.5" cy="8" r="1.25" />
+                          <circle cx="10.5" cy="8" r="1.25" />
+                          <circle cx="5.5" cy="12.5" r="1.25" />
+                          <circle cx="10.5" cy="12.5" r="1.25" />
+                        </svg>
                       </button>
                       <TimelineTrackControls
                         compact={

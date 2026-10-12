@@ -17,7 +17,6 @@ export {
   RiCloseLine,
   RiDeleteBinLine,
   RiDownloadLine,
-  RiDraggable,
   RiErrorWarningLine,
   RiFileCopyLine,
   RiHeadphoneLine,
