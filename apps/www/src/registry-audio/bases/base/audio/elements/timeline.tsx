@@ -520,7 +520,7 @@ function TimelineTrackControls({
             <Button
               aria-expanded={!folded}
               aria-label={`${folded ? "Unfold" : "Fold"} ${name}`}
-              className="@max-[10rem]/header:hidden"
+              className="@max-[8rem]/header:hidden"
               onClick={handleFold}
               size="icon-xs"
               variant="ghost"
@@ -619,7 +619,7 @@ function TimelineTrackControls({
             <Knob
               anchor={0}
               aria-label={`${name} pan`}
-              className="mb-0 size-7 shrink-0 @max-[10rem]/header:hidden"
+              className="mb-0 size-7 shrink-0 @max-[8rem]/header:hidden"
               editableValue
               formatValue={formatPan}
               max={1}
