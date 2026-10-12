@@ -493,6 +493,22 @@ function CopyGhost({ clip }: { clip: Arranged }) {
   );
 }
 
+/** A track's level, from a stand-in source: the block plays nothing, so it moves while the track would be heard. */
+function TrackLevel({ active, name }: { active: boolean; name: string }) {
+  const simulated = useSimulatedLevels(2);
+  return (
+    <Meter
+      aria-label={`${name} level`}
+      className="data-[orientation=vertical]:h-full [--meter-thickness:--spacing(2)]"
+      orientation="vertical"
+      peakMarks="hidden"
+      size="sm"
+      source={active ? simulated : SILENCE}
+      warnThreshold={-12}
+    />
+  );
+}
+
 /** One clip: move it, trim either edge into its recording, fade it in and out. */
 const ClipView = memo(function ArrangedClip({
   clip,
@@ -1392,6 +1408,16 @@ export default function BlockTimeline() {
                       heights[track.id] < COMPACT_TRACK_HEIGHT
                     }
                     folded={folded[track.id]}
+                    meter={
+                      <TrackLevel
+                        active={
+                          playing &&
+                          !mixOf(track).muted &&
+                          (!anySolo || mixOf(track).soloed)
+                        }
+                        name={track.name}
+                      />
+                    }
                     mix={mixOf(track)}
                     name={track.name}
                     onDuplicate={duplicateTrack}

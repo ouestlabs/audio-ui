@@ -11,6 +11,7 @@ import {
   type FocusEvent,
   type KeyboardEvent,
   type MouseEvent,
+  type ReactNode,
   useCallback,
   useRef,
   useState,
@@ -452,9 +453,12 @@ function TimelineTrackControls({
   onRename,
   onSelect,
   onToggleFold,
+  meter,
   selected,
   trackId,
 }: {
+  /** A level meter drawn down the header's right edge, such as a vertical `Meter` sized to fill it. */
+  meter?: ReactNode;
   /** Whether the track is short: one row, with no gain. */
   compact: boolean;
   /** Whether the track is folded to a strip: the caret opens it. */
@@ -576,7 +580,7 @@ function TimelineTrackControls({
             className={cn(
               "@container/header relative flex w-full cursor-default flex-col justify-center border-s-4",
               // A strip is as tall as its buttons plus an equal margin all round, so they sit concentric with its corners.
-              compact ? "px-[1.5px] py-0" : "gap-1.5 px-2 py-2.5",
+              compact ? "ps-[1.5px] pe-4 py-0" : "gap-1.5 ps-2 pe-5 py-2.5",
               TRACK_COLORS[mix.color]?.edge
             )}
             onClick={handleHeaderClick}
@@ -698,6 +702,11 @@ function TimelineTrackControls({
             />
           </div>
         )}
+        {meter ? (
+          <div className="pointer-events-none absolute inset-y-1.5 end-1.5 w-2">
+            {meter}
+          </div>
+        ) : null}
         <TimelineTrackResizeHandle aria-label={`${name} height`} />
       </ContextMenuTrigger>
       <ContextMenuContent className="w-auto min-w-36">

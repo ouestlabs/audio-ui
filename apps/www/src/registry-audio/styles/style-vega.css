@@ -465,7 +465,7 @@
   }
 
   .cn-timeline-track-header {
-    @apply w-40 border-e bg-background text-sm data-[selected]:bg-muted;
+    @apply w-44 border-e bg-background text-sm data-[selected]:bg-muted;
   }
 
   .cn-timeline-track-resize-handle {
