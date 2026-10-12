@@ -83,6 +83,8 @@ The site manifests (`registry-audio/bases/{components,registry,seo}.json`) are *
 
 MDX files under `(root)/`, `components/base/`, `lib/`. Use existing custom components (`<ComponentPreview>`, `<ComponentSource>`, `<CodeTabs>`, `<Steps>`), not raw HTML.
 
+The "API reference" paragraphs of `components/base/*.mdx` are hand-kept copies of the JSDoc of the matching part in `packages/ui/src/primitives/<name>/elements/`. Nothing syncs them: when you change one, change the other in the same commit.
+
 ## Registry Rules
 
 > [CONTRIBUTING.md](../CONTRIBUTING.md)
