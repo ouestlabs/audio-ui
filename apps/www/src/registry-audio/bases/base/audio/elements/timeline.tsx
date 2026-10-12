@@ -294,30 +294,27 @@ function TimelineNavigator({
   className,
   ...props
 }: TimelinePrimitive.Navigator.Props) {
-  // The track is the outer box; its padding leaves room for the grips, which sit just outside the window.
   return (
-    <div className="cn-timeline-navigator shrink-0 select-none px-2">
-      <TimelinePrimitive.Navigator
-        className={cn("relative h-full w-full rounded-[inherit]", className)}
-        data-slot="timeline-navigator"
-        {...props}
-      >
-        <TimelinePrimitive.NavigatorWindow
-          aria-label="Visible range"
-          className="cn-timeline-navigator-window inset-y-0 cursor-grab active:cursor-grabbing"
-        />
-        <TimelinePrimitive.NavigatorHandle
-          aria-label="Start of the visible range"
-          className="cn-timeline-navigator-handle inset-y-0 w-2 -translate-x-full cursor-ew-resize after:absolute after:-inset-x-1.5 after:inset-y-0"
-          edge="start"
-        />
-        <TimelinePrimitive.NavigatorHandle
-          aria-label="End of the visible range"
-          className="cn-timeline-navigator-handle inset-y-0 w-2 cursor-ew-resize after:absolute after:-inset-x-1.5 after:inset-y-0"
-          edge="end"
-        />
-      </TimelinePrimitive.Navigator>
-    </div>
+    <TimelinePrimitive.Navigator
+      className={cn("cn-timeline-navigator shrink-0 select-none", className)}
+      data-slot="timeline-navigator"
+      {...props}
+    >
+      <TimelinePrimitive.NavigatorWindow
+        aria-label="Visible range"
+        className="cn-timeline-navigator-window inset-y-0 min-w-4 cursor-grab active:cursor-grabbing"
+      />
+      <TimelinePrimitive.NavigatorHandle
+        aria-label="Start of the visible range"
+        className="cn-timeline-navigator-handle inset-y-0 w-1.5 cursor-ew-resize after:absolute after:-inset-x-1.5 after:inset-y-0"
+        edge="start"
+      />
+      <TimelinePrimitive.NavigatorHandle
+        aria-label="End of the visible range"
+        className="cn-timeline-navigator-handle inset-y-0 w-1.5 cursor-ew-resize data-[edge=end]:-translate-x-full after:absolute after:-inset-x-1.5 after:inset-y-0"
+        edge="end"
+      />
+    </TimelinePrimitive.Navigator>
   );
 }
 
