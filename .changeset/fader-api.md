@@ -2,7 +2,7 @@
 "@audio-ui/react": minor
 ---
 
-Rework the `Fader` API. Requires the `@base-ui/react` ^1.9.0 peer dependency. **Breaking (pre-1.0):**
+Rework the `Fader` API. **Breaking (pre-1.0):**
 
 - Parts: `Root`, `Label`, `Value`, `Control` (was `Slider`), `Track`, `Indicator` (was `Range`), `Thumb`. The decorative `ThumbInner`/`ThumbMark` parts are gone, render your own elements inside `Thumb`.
 - Types live on each part: `Fader.Root.Props`, `Fader.Root.State`, `Fader.Root.ChangeEventDetails`, … (was `Fader.RootProps`).
