@@ -3,9 +3,11 @@ import {
   type ChangeEventDetails as ExtraChangeEventDetails,
 } from "@audio-ui/core";
 import {
-  type ClipLimits,
+  type ClipChangeEventDetails,
+  type ClipCommitEventDetails,
+  type ClipOptions,
   type ClipValue,
-  moveClip,
+  createClipController,
 } from "@audio-ui/core/timeline";
 import * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part";
@@ -17,47 +19,16 @@ import {
   useTimelineContext,
 } from "../context";
 import {
-  type ClipChangeEventDetails,
-  type ClipCommitEventDetails,
   ClipContext,
   type ClipContextValue,
   type ClipState,
   type ClipTarget,
-  keyTargets,
 } from "./clip-context";
 import { LaneContext } from "./lane";
 import { useSeekGesture } from "./seek-gesture";
 
 const describeNumber: DescribePosition = (value) =>
   String(Math.round(value * 100) / 100);
-
-/** Fallback for a clip's `value` when none is given: the whole timeline, from the source's start. */
-const whole = (duration: number): ClipValue => ({
-  fadeIn: 0,
-  fadeOut: 0,
-  length: duration,
-  offset: 0,
-  start: 0,
-});
-
-/** Keeps a given clip well-formed: finite, on the timeline, fades within its length. */
-function normalizeClip(clip: ClipValue, duration: number): ClipValue {
-  const finite = (value: number, fallback = 0) =>
-    Number.isFinite(value) ? value : fallback;
-  const start = Math.min(duration, Math.max(0, finite(clip.start)));
-  const length = Math.min(duration - start, Math.max(0, finite(clip.length)));
-  const fadeIn = Math.min(length, Math.max(0, finite(clip.fadeIn)));
-  const fadeOut = Math.min(length - fadeIn, Math.max(0, finite(clip.fadeOut)));
-  return {
-    fadeIn,
-    fadeInShape: clip.fadeInShape,
-    fadeOut,
-    fadeOutShape: clip.fadeOutShape,
-    length,
-    offset: Math.max(0, finite(clip.offset)),
-    start,
-  };
-}
 
 /**
  * A stretch of a source laid on a lane: a recording, a pattern. Dragging its
@@ -108,124 +79,42 @@ export function Clip(componentProps: Clip.Props) {
   const { duration, grid, largeStep, step, zoom } = root;
   const disabled = disabledProp || rootState.disabled;
   const minLength = minLengthProp ?? (grid.step > 0 ? grid.step : step);
-  const limits = React.useMemo<ClipLimits>(
-    () => ({ duration, minLength, sourceLength }),
-    [duration, minLength, sourceLength]
+
+  const options: ClipOptions = {
+    additive,
+    defaultSelected,
+    defaultValue,
+    disabled,
+    duration,
+    grid,
+    largeStep,
+    minLength,
+    movable,
+    onDragOffsetChange,
+    onRemove: onRemove
+      ? (event) => onRemove(createChangeEventDetails("keyboard", event))
+      : undefined,
+    onSelectedChange,
+    onValueChange,
+    onValueCommitted,
+    selected: selectedProp,
+    sourceLength,
+    step,
+    value: valueProp,
+    zoom,
+  };
+  const [controller] = React.useState(() => createClipController(options));
+  // Set on every render, so the clip always reads the latest props.
+  controller.setOptions(options);
+  const snapshot = React.useSyncExternalStore(
+    controller.subscribe,
+    controller.getSnapshot
   );
-
-  const isControlled = valueProp !== undefined;
-  const [uncontrolledValue, setUncontrolledValue] = React.useState<ClipValue>(
-    () => defaultValue ?? whole(duration)
-  );
-  const given = isControlled ? valueProp : uncontrolledValue;
-  const value = React.useMemo(
-    () => normalizeClip(given, duration),
-    [duration, given]
-  );
-
-  const isSelectionControlled = selectedProp !== undefined;
-  const [uncontrolledSelected, setUncontrolledSelected] =
-    React.useState(defaultSelected);
-  const selected = isSelectionControlled ? selectedProp : uncontrolledSelected;
-
-  // While dragging, the clip follows the pointer even if a controlled value
-  // lags behind; on release the controlled value rules again.
-  const [dragging, setDraggingState] = React.useState(false);
-  const [dragValue, setDragValue] = React.useState<ClipValue | null>(null);
-  const [dragOffset, setDragOffset] = React.useState(0);
-  const draggingRef = React.useRef(false);
-  const displayedValue = dragValue ?? value;
-  const valueRef = React.useRef(displayedValue);
-  valueRef.current = displayedValue;
-
-  // Read at call time, so the actions below stay the same as the callback changes.
-  const offsetCallbackRef = React.useRef(onDragOffsetChange);
-  offsetCallbackRef.current = onDragOffsetChange;
-  const reportOffset = React.useCallback((pixels: number) => {
-    setDragOffset(pixels);
-    offsetCallbackRef.current?.(pixels);
-  }, []);
-
-  const setDragging = React.useCallback(
-    (next: boolean) => {
-      draggingRef.current = next;
-      setDraggingState(next);
-      if (!next) {
-        setDragValue(null);
-        reportOffset(0);
-      }
-    },
-    [reportOffset]
-  );
-
-  const change = React.useCallback(
-    (next: ClipValue, eventDetails: ClipChangeEventDetails) => {
-      const { current } = valueRef;
-      if (
-        next.start === current.start &&
-        next.length === current.length &&
-        next.offset === current.offset &&
-        next.fadeIn === current.fadeIn &&
-        next.fadeOut === current.fadeOut &&
-        next.fadeInShape === current.fadeInShape &&
-        next.fadeOutShape === current.fadeOutShape
-      ) {
-        return false;
-      }
-      onValueChange?.(next, eventDetails);
-      if (eventDetails.isCanceled) {
-        return false;
-      }
-      valueRef.current = next;
-      if (!isControlled) {
-        setUncontrolledValue(next);
-      }
-      if (isControlled && draggingRef.current) {
-        setDragValue(next);
-      }
-      return true;
-    },
-    [isControlled, onValueChange]
-  );
-
-  const commit = React.useCallback(
-    (committed: ClipValue, eventDetails: ClipCommitEventDetails) => {
-      onValueCommitted?.(committed, eventDetails);
-    },
-    [onValueCommitted]
-  );
-
-  const select = React.useCallback(
-    (event: PointerEvent) => {
-      // A selected clip is not reported again, unless the press carries Shift,
-      // Cmd or Ctrl, or the clip is `additive`: that is how a selection is
-      // added to or taken from.
-      if (
-        selected &&
-        !(additive || event.shiftKey || event.metaKey || event.ctrlKey)
-      ) {
-        return;
-      }
-      const eventDetails = createChangeEventDetails("press", event);
-      onSelectedChange?.(true, eventDetails);
-      if (!(eventDetails.isCanceled || isSelectionControlled)) {
-        setUncontrolledSelected(true);
-      }
-    },
-    [additive, isSelectionControlled, onSelectedChange, selected]
-  );
-
-  const unitsPerPixel = React.useCallback(() => {
-    if (zoom !== null) {
-      return 1 / zoom;
-    }
-    const width = lane.elementRef.current?.getBoundingClientRect().width ?? 0;
-    return duration / Math.max(width, 1);
-  }, [duration, lane.elementRef, zoom]);
+  const { dragOffset, value, selected } = snapshot;
 
   const state = React.useMemo<ClipState>(
-    () => ({ disabled, dragging, selected }),
-    [disabled, dragging, selected]
+    () => ({ disabled, dragging: snapshot.dragging, selected }),
+    [disabled, selected, snapshot.dragging]
   );
 
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -235,46 +124,31 @@ export function Clip(componentProps: Clip.Props) {
 
   const context = React.useMemo<ClipContextValue>(
     () => ({
-      actions: {
-        change,
-        commit,
-        focus,
-        select,
-        setDragOffset: reportOffset,
-        setDragging,
-        unitsPerPixel,
-      },
+      controller,
+      focus,
+      laneRef: lane.elementRef,
       meta: {
         describe: getAriaValueText,
         duration,
-        grid,
         largeStep,
-        limits,
         movable: movable && !disabled,
         step,
-        value: displayedValue,
-        valueRef,
+        value,
       },
       state,
     }),
     [
-      change,
-      commit,
+      controller,
       disabled,
-      displayedValue,
       duration,
       focus,
       getAriaValueText,
-      grid,
       largeStep,
-      limits,
+      lane.elementRef,
       movable,
-      reportOffset,
-      select,
-      setDragging,
       state,
       step,
-      unitsPerPixel,
+      value,
     ]
   );
 
@@ -284,9 +158,9 @@ export function Clip(componentProps: Clip.Props) {
     accepts: () => true,
     enabled: !disabled,
     measure: () => lane.elementRef.current,
-    onPress: select,
+    onPress: (event) => controller.select(event),
   });
-  const { fadeIn, fadeOut, length, offset, start } = displayedValue;
+  const { fadeIn, fadeOut, length, offset, start } = value;
 
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
     seek.onPointerDown(event);
@@ -295,62 +169,23 @@ export function Clip(componentProps: Clip.Props) {
     }
   };
 
-  /** Moves the whole clip so it starts at `target`. */
-  const moveTo = React.useCallback(
-    (target: number, reason: "input-change" | "keyboard", native: Event) => {
-      const next = moveClip(valueRef.current, target, limits);
-      const eventDetails = Object.assign(
-        createChangeEventDetails(reason, native),
-        { target: "move" as const }
-      ) as ClipChangeEventDetails;
-      if (change(next, eventDetails)) {
-        commit(valueRef.current, {
-          event: native,
-          reason,
-          target: "move",
-        } as ClipCommitEventDetails);
-      }
-    },
-    [change, commit, limits]
-  );
-
   const handleKeyDown = React.useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
-      if (disabled) {
-        return;
-      }
-      if (event.key === "Delete" || event.key === "Backspace") {
+      if (controller.keyDown(event.nativeEvent)) {
         event.preventDefault();
-        onRemove?.(createChangeEventDetails("keyboard", event.nativeEvent));
-        return;
       }
-      const latest = valueRef.current;
-      const targets = keyTargets(
-        latest.start,
-        step,
-        largeStep,
-        event.shiftKey,
-        [0, Math.max(0, duration - latest.length)]
-      );
-      const target = targets[event.key];
-      if (target === undefined) {
-        return;
-      }
-      event.preventDefault();
-      moveTo(target, "keyboard", event.nativeEvent);
     },
-    [disabled, duration, largeStep, moveTo, onRemove, step]
+    [controller]
   );
 
   const handleChange = React.useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      moveTo(
+      controller.moveTypeAt(
         Number(event.currentTarget.value),
-        "input-change",
         event.nativeEvent
       );
     },
-    [moveTo]
+    [controller]
   );
 
   const element = useRender({
@@ -392,7 +227,9 @@ export function Clip(componentProps: Clip.Props) {
             ? {}
             : { "--clip-source-length": sourceLength }),
           touchAction: "none",
-          transform: dragging ? "translateY(var(--clip-drag-y))" : undefined,
+          transform: snapshot.dragging
+            ? "translateY(var(--clip-drag-y))"
+            : undefined,
         } as React.CSSProperties,
       },
       { ...elementProps, ...resolveStyling(className, style, state) }

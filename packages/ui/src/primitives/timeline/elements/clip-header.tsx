@@ -1,4 +1,3 @@
-import { moveClip, snapMove } from "@audio-ui/core/timeline";
 import type * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
@@ -15,17 +14,7 @@ export function ClipHeader(componentProps: ClipHeader.Props) {
   const context = useClipContext("ClipHeader");
   const { meta, state } = context;
 
-  const drag = useClipDrag(
-    context,
-    "move",
-    meta.movable,
-    (origin, delta, grid, limits) =>
-      moveClip(
-        origin,
-        snapMove(origin.start + delta, origin.start, grid),
-        limits
-      )
-  );
+  const drag = useClipDrag(context, "move", meta.movable);
 
   return useRender({
     defaultTagName: "div",
@@ -35,7 +24,7 @@ export function ClipHeader(componentProps: ClipHeader.Props) {
         onPointerDown: (event: React.PointerEvent<HTMLElement>) => {
           drag.onPointerDown(event);
           if (meta.movable && event.button === 0) {
-            context.actions.focus();
+            context.focus();
           }
         },
         style: { touchAction: "none" },

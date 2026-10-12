@@ -1,20 +1,11 @@
-import { createChangeEventDetails } from "@audio-ui/core";
-import {
-  nextFadeShape,
-  setClipFadeIn,
-  setClipFadeOut,
-  setClipFadeShape,
-} from "@audio-ui/core/timeline";
 import * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
 import { VISUALLY_HIDDEN } from "../../internal/visually-hidden";
 import { UNIT_PROPERTY } from "../context";
 import {
-  type ClipChangeEventDetails,
-  type ClipCommitEventDetails,
   type ClipState,
-  keyTargets,
+  type ClipTarget,
   useClipContext,
   useClipDrag,
 } from "./clip-context";
@@ -23,8 +14,8 @@ import {
  * Sets how long one of the clip's fades lasts: by dragging, which is not on
  * the grid, or from the keyboard through the native `<input type="range">` it
  * holds, which carries the accessible name. Double-clicking it, or pressing
- * Enter on its input, steps the fade through its shapes. It sits where its fade ends, from
- * the clip's edge. Renders a `<div>` element.
+ * Enter on its input, steps the fade through its shapes. It sits where its
+ * fade ends, from the clip's edge. Renders a `<div>` element.
  */
 export function ClipFadeHandle(componentProps: ClipFadeHandle.Props) {
   const {
@@ -40,16 +31,12 @@ export function ClipFadeHandle(componentProps: ClipFadeHandle.Props) {
     ...elementProps
   } = componentProps;
   const context = useClipContext("ClipFadeHandle");
-  const { actions, meta, state: clipState } = context;
+  const { controller, meta, state: clipState } = context;
   const { disabled } = clipState;
   const inputRef = React.useRef<HTMLInputElement>(null);
-  const target = edge === "in" ? "fade-in" : "fade-out";
+  const target: ClipTarget = edge === "in" ? "fade-in" : "fade-out";
 
-  const drag = useClipDrag(context, target, !disabled, (origin, delta) =>
-    edge === "in"
-      ? setClipFadeIn(origin, origin.fadeIn + delta)
-      : setClipFadeOut(origin, origin.fadeOut - delta)
-  );
+  const drag = useClipDrag(context, target, !disabled);
 
   const { value } = meta;
   const current = edge === "in" ? value.fadeIn : value.fadeOut;
@@ -65,89 +52,38 @@ export function ClipFadeHandle(componentProps: ClipFadeHandle.Props) {
     }
   };
 
-  const setFade = React.useCallback(
-    (to: number, reason: "input-change" | "keyboard", native: Event) => {
-      const latest = meta.valueRef.current;
-      const next =
-        edge === "in" ? setClipFadeIn(latest, to) : setClipFadeOut(latest, to);
-      const eventDetails = Object.assign(
-        createChangeEventDetails(reason, native),
-        { target }
-      ) as ClipChangeEventDetails;
-      if (actions.change(next, eventDetails)) {
-        actions.commit(meta.valueRef.current, {
-          event: native,
-          reason,
-          target,
-        } as ClipCommitEventDetails);
-      }
-    },
-    [actions, edge, meta.valueRef, target]
-  );
-
-  /** Steps the fade to its next shape. */
-  const cycleShape = React.useCallback(
-    (reason: "double-click" | "keyboard", native: Event) => {
-      const latest = meta.valueRef.current;
-      const shape = nextFadeShape(
-        edge === "in" ? latest.fadeInShape : latest.fadeOutShape
-      );
-      const next = setClipFadeShape(latest, edge, shape);
-      const eventDetails = Object.assign(
-        createChangeEventDetails(reason, native),
-        { target }
-      ) as ClipChangeEventDetails;
-      if (actions.change(next, eventDetails)) {
-        actions.commit(meta.valueRef.current, {
-          event: native,
-          reason,
-          target,
-        } as ClipCommitEventDetails);
-      }
-    },
-    [actions, edge, meta.valueRef, target]
-  );
-
   const handleKeyDown = React.useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
       if (disabled) {
         return;
       }
+      // Enter steps the shape, as it does on the handle's double click.
       if (event.key === "Enter") {
         event.preventDefault();
-        cycleShape("keyboard", event.nativeEvent);
+        controller.cycleFadeShape(edge, "keyboard", event.nativeEvent);
         return;
       }
-      const to = keyTargets(
-        current,
-        meta.step,
-        meta.largeStep,
-        event.shiftKey,
-        [0, max]
-      )[event.key];
-      if (to === undefined) {
-        return;
+      if (controller.edgeKeyDown(target, event.nativeEvent)) {
+        event.preventDefault();
       }
-      event.preventDefault();
-      setFade(to, "keyboard", event.nativeEvent);
     },
-    [current, cycleShape, disabled, max, meta.largeStep, meta.step, setFade]
+    [controller, disabled, edge, target]
   );
 
   const handleChange = React.useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      setFade(
+      controller.edgeTypeAt(
+        target,
         Number(event.currentTarget.value),
-        "input-change",
         event.nativeEvent
       );
     },
-    [setFade]
+    [controller, target]
   );
 
   const handleDoubleClick = (event: React.MouseEvent<HTMLDivElement>) => {
     if (!disabled) {
-      cycleShape("double-click", event.nativeEvent);
+      controller.cycleFadeShape(edge, "double-click", event.nativeEvent);
     }
   };
 

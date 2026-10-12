@@ -1,25 +1,14 @@
-import { createChangeEventDetails } from "@audio-ui/core";
-import {
-  clipEnd,
-  snapMove,
-  trimClipEnd,
-  trimClipStart,
-} from "@audio-ui/core/timeline";
+import { clipEnd } from "@audio-ui/core/timeline";
 import * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
 import { VISUALLY_HIDDEN } from "../../internal/visually-hidden";
 import {
-  type ClipChangeEventDetails,
-  type ClipCommitEventDetails,
   type ClipState,
-  keyTargets,
+  type ClipTarget,
   useClipContext,
   useClipDrag,
 } from "./clip-context";
-
-/** Further than any timeline reaches: what an edge is trimmed to to find how far it can go. */
-const FAR = Number.MAX_SAFE_INTEGER;
 
 /**
  * Trims one edge of the clip: by dragging, on the grid unless Cmd/Ctrl is
@@ -42,40 +31,17 @@ export function ClipHandle(componentProps: ClipHandle.Props) {
     ...elementProps
   } = componentProps;
   const context = useClipContext("ClipHandle");
-  const { actions, meta, state: clipState } = context;
+  const { controller, meta, state: clipState } = context;
   const { disabled } = clipState;
   const inputRef = React.useRef<HTMLInputElement>(null);
-  const target = edge === "start" ? "trim-start" : "trim-end";
+  const target: ClipTarget = edge === "start" ? "trim-start" : "trim-end";
 
-  const drag = useClipDrag(
-    context,
-    target,
-    !disabled,
-    (origin, delta, grid, bounds) => {
-      if (edge === "start") {
-        return trimClipStart(
-          origin,
-          snapMove(origin.start + delta, origin.start, grid),
-          bounds
-        );
-      }
-      const end = clipEnd(origin);
-      return trimClipEnd(origin, snapMove(end + delta, end, grid), bounds);
-    }
-  );
+  const drag = useClipDrag(context, target, !disabled);
 
-  const { value, limits } = meta;
+  const { value } = meta;
   const current = edge === "start" ? value.start : clipEnd(value);
   // How far this edge can go, found by trimming it as far as it goes.
-  const min =
-    edge === "start"
-      ? trimClipStart(value, -FAR, limits).start
-      : trimClipEnd(value, -FAR, limits).start +
-        trimClipEnd(value, -FAR, limits).length;
-  const max =
-    edge === "start"
-      ? trimClipStart(value, FAR, limits).start
-      : clipEnd(trimClipEnd(value, FAR, limits));
+  const [min, max] = controller.edgeRange(target);
 
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
     drag.onPointerDown(event);
@@ -84,59 +50,24 @@ export function ClipHandle(componentProps: ClipHandle.Props) {
     }
   };
 
-  /** Puts this edge at `to`, within its limits. */
-  const setEdge = React.useCallback(
-    (to: number, reason: "input-change" | "keyboard", native: Event) => {
-      const latest = meta.valueRef.current;
-      const next =
-        edge === "start"
-          ? trimClipStart(latest, to, meta.limits)
-          : trimClipEnd(latest, to, meta.limits);
-      const eventDetails = Object.assign(
-        createChangeEventDetails(reason, native),
-        { target }
-      ) as ClipChangeEventDetails;
-      if (actions.change(next, eventDetails)) {
-        actions.commit(meta.valueRef.current, {
-          event: native,
-          reason,
-          target,
-        } as ClipCommitEventDetails);
-      }
-    },
-    [actions, edge, meta.limits, meta.valueRef, target]
-  );
-
   const handleKeyDown = React.useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
-      if (disabled) {
-        return;
+      if (controller.edgeKeyDown(target, event.nativeEvent)) {
+        event.preventDefault();
       }
-      const to = keyTargets(
-        current,
-        meta.step,
-        meta.largeStep,
-        event.shiftKey,
-        [min, max]
-      )[event.key];
-      if (to === undefined) {
-        return;
-      }
-      event.preventDefault();
-      setEdge(to, "keyboard", event.nativeEvent);
     },
-    [current, disabled, max, meta.largeStep, meta.step, min, setEdge]
+    [controller, target]
   );
 
   const handleChange = React.useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      setEdge(
+      controller.edgeTypeAt(
+        target,
         Number(event.currentTarget.value),
-        "input-change",
         event.nativeEvent
       );
     },
-    [setEdge]
+    [controller, target]
   );
 
   const state = React.useMemo<ClipHandle.State>(
