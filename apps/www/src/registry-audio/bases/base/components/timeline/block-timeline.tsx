@@ -1316,8 +1316,8 @@ export default function BlockTimeline() {
             {...marquee.handlers}
           >
             {/* One sticky block, so what is stuck stays stacked whatever each row measures. */}
-            <div className="sticky top-0 z-40 flex min-w-full flex-col bg-background">
-              <Row>
+            <div className="sticky top-0 z-40 flex min-w-full shrink-0 flex-col bg-background">
+              <Row className="shrink-0">
                 <TimelineLane className="h-4 cursor-cell">
                   <TimelineRange
                     aria-label="Loop"
@@ -1332,7 +1332,7 @@ export default function BlockTimeline() {
                   <TimelinePlayhead />
                 </TimelineLane>
               </Row>
-              <Row className="bg-background">
+              <Row className="shrink-0 bg-background">
                 <TimelineRuler
                   aria-label="Playhead"
                   getAriaValueText={describe}
@@ -1345,7 +1345,7 @@ export default function BlockTimeline() {
                   <TimelinePlayhead />
                 </TimelineRuler>
               </Row>
-              <Row className="bg-background">
+              <Row className="shrink-0 bg-background">
                 <TimelineLane className="h-6">
                   {locators.map((locator) => (
                     <TimelineMark key={locator.at} value={locator.at}>
