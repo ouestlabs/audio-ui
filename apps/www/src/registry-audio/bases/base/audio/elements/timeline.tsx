@@ -302,7 +302,7 @@ function TimelineNavigator({
     >
       <TimelinePrimitive.NavigatorWindow
         aria-label="Visible range"
-        className="cn-timeline-navigator-window inset-y-0 min-w-6 cursor-grab active:cursor-grabbing"
+        className="cn-timeline-navigator-window inset-y-0 min-w-6 cursor-grab rounded-[inherit] active:cursor-grabbing"
       />
       <TimelinePrimitive.NavigatorHandle
         aria-label="Start of the visible range"
