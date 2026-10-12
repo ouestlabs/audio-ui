@@ -53,6 +53,9 @@
       }
     }
   },
+  "javascript": {
+    "globals": ["Bun"]
+  },
   "overrides": [
     {
       "includes": ["packages/ui/bench/*"],
