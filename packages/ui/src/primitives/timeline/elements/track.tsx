@@ -1,4 +1,7 @@
-import { createChangeEventDetails } from "@audio-ui/core";
+import {
+  createTrackController,
+  type TrackOptions,
+} from "@audio-ui/core/timeline";
 import * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
@@ -36,59 +39,35 @@ export function Track(componentProps: Track.Props) {
   // Part of the timeline: it has to be inside one, as the lane it holds is.
   useTimelineContext("Track");
   const rowRef = React.useRef<HTMLElement | null>(null);
-  const [resizing, setResizing] = React.useState(false);
-
-  const resize = React.useCallback(
-    (next: number, eventDetails: TrackChangeEventDetails) => {
-      const clamped = Math.min(maxHeight, Math.max(minHeight, next));
-      if (clamped === height) {
-        return false;
-      }
-      onHeightChange?.(clamped, eventDetails);
-      return !eventDetails.isCanceled;
-    },
-    [height, maxHeight, minHeight, onHeightChange]
-  );
-  const commit = React.useCallback(
-    (next: number | undefined, eventDetails: TrackCommitEventDetails) =>
-      onHeightCommitted?.(next, eventDetails),
-    [onHeightCommitted]
-  );
-  const reset = React.useCallback(
-    (event: MouseEvent) => {
-      if (height === undefined) {
-        return;
-      }
-      const details = createChangeEventDetails("double-click", event);
-      onHeightChange?.(undefined, details);
-      if (!details.isCanceled) {
-        onHeightCommitted?.(undefined, { event, reason: "double-click" });
-      }
-    },
-    [height, onHeightChange, onHeightCommitted]
+  const options: TrackOptions = {
+    height,
+    largeStep,
+    max: maxHeight,
+    measure: () => rowRef.current?.getBoundingClientRect().height ?? 0,
+    min: minHeight,
+    onHeightChange,
+    onHeightCommitted,
+    step,
+  };
+  const [controller] = React.useState(() => createTrackController(options));
+  // Set on every render, so the track always reads the latest props.
+  controller.setOptions(options);
+  const snapshot = React.useSyncExternalStore(
+    controller.subscribe,
+    controller.getSnapshot
   );
 
   const state = React.useMemo<TrackState>(
-    () => ({ resizing, selected }),
-    [resizing, selected]
+    () => ({ resizing: snapshot.resizing, selected }),
+    [snapshot.resizing, selected]
   );
   const context = React.useMemo<TrackContextValue>(
     () => ({
-      actions: { commit, reset, resize, setResizing },
-      meta: { height, largeStep, max: maxHeight, min: minHeight, rowRef, step },
+      controller,
+      meta: { height, largeStep, max: maxHeight, min: minHeight, step },
       state,
     }),
-    [
-      commit,
-      height,
-      largeStep,
-      maxHeight,
-      minHeight,
-      reset,
-      resize,
-      state,
-      step,
-    ]
+    [controller, height, largeStep, maxHeight, minHeight, state, step]
   );
 
   const element = useRender({

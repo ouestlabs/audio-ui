@@ -1,20 +1,10 @@
-import type {
-  ChangeEventDetails as ExtraChangeEventDetails,
-  CommitEventDetails as ExtraCommitEventDetails,
-} from "@audio-ui/core";
+import type { TrackController } from "@audio-ui/core/timeline";
 import * as React from "react";
 
-export type TrackChangeEventDetails =
-  | ExtraChangeEventDetails<"drag", PointerEvent>
-  | ExtraChangeEventDetails<"keyboard", KeyboardEvent>
-  | ExtraChangeEventDetails<"input-change", Event>
-  | ExtraChangeEventDetails<"double-click", MouseEvent>;
-
-export type TrackCommitEventDetails =
-  | ExtraCommitEventDetails<"drag", PointerEvent>
-  | ExtraCommitEventDetails<"keyboard", KeyboardEvent>
-  | ExtraCommitEventDetails<"input-change", Event>
-  | ExtraCommitEventDetails<"double-click", MouseEvent>;
+export type {
+  TrackHeightChangeEventDetails as TrackChangeEventDetails,
+  TrackHeightCommitEventDetails as TrackCommitEventDetails,
+} from "@audio-ui/core/timeline";
 
 export type TrackState = {
   /** Whether a pointer is resizing the track. */
@@ -23,25 +13,14 @@ export type TrackState = {
 };
 
 export interface TrackContextValue {
-  actions: {
-    /** Propose a height; returns whether it was applied. */
-    resize: (height: number, eventDetails: TrackChangeEventDetails) => boolean;
-    commit: (
-      height: number | undefined,
-      eventDetails: TrackCommitEventDetails
-    ) => void;
-    /** Gives the height up, so the row shares the room again. */
-    reset: (event: MouseEvent) => void;
-    setResizing: (resizing: boolean) => void;
-  };
+  /** The framework-free track behind its height: what a drag, a key or a double click asks of it. */
+  controller: TrackController;
   meta: {
     /** The height as set, or undefined while the track shares what is left. */
     height: number | undefined;
     largeStep: number;
     max: number;
     min: number;
-    /** The track as drawn, to measure while its height is not set. */
-    rowRef: React.RefObject<HTMLElement | null>;
     step: number;
   };
   state: TrackState;

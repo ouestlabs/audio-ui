@@ -1,12 +1,12 @@
-import { createChangeEventDetails } from "@audio-ui/core";
-import { anchoredScroll, valueAtOffset } from "@audio-ui/core/timeline";
+import {
+  anchoredScroll,
+  createWheelZoom,
+  valueAtOffset,
+} from "@audio-ui/core/timeline";
 import * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
 import { type TimelineState, useTimelineContext } from "../context";
-
-/** How far one unit of wheel delta zooms, as an exponent. */
-const WHEEL_ZOOM_SENSITIVITY = 0.0015;
 
 /**
  * The scrolling window onto the timeline. Cmd/Ctrl + wheel (and pinch on a
@@ -57,6 +57,24 @@ export function Viewport(componentProps: Viewport.Props) {
     const width = originLaneRef.current?.getBoundingClientRect().width ?? 0;
     return width / Math.max(duration, Number.MIN_VALUE);
   }, [duration, originLaneRef, zoom]);
+
+  // The wheel zoom is the controller's; the viewport measures what it needs.
+  const [wheelZoom] = React.useState(() =>
+    createWheelZoom({
+      disabled: state.disabled,
+      drawnZoom,
+      duration,
+      origin,
+      zoomTo: actions.zoomTo,
+    })
+  );
+  wheelZoom.setOptions({
+    disabled: state.disabled,
+    drawnZoom,
+    duration,
+    origin,
+    zoomTo: actions.zoomTo,
+  });
 
   const report = React.useCallback(() => {
     const element = elementRef.current;
@@ -137,50 +155,15 @@ export function Viewport(componentProps: Viewport.Props) {
     if (!element) {
       return;
     }
-    // A trackpad sends wheel events faster than frames, and each zoom lays the
-    // whole timeline out again: they are added up and applied once per frame.
-    let pending: { delta: number; event: WheelEvent } | null = null;
-    let frame = 0;
-    const flush = () => {
-      frame = 0;
-      const batch = pending;
-      pending = null;
-      if (!batch) {
-        return;
-      }
-      const current = drawnZoom();
-      if (!(current > 0)) {
-        return;
-      }
-      const offset = batch.event.clientX - element.getBoundingClientRect().left;
-      const value = valueAtOffset(
-        offset,
-        element.scrollLeft,
-        current,
-        origin()
-      );
-      actions.zoomTo(
-        current * Math.exp(-batch.delta * WHEEL_ZOOM_SENSITIVITY),
-        createChangeEventDetails("wheel", batch.event),
-        { offset, value: Math.min(duration, Math.max(0, value)) }
-      );
-    };
     const handleWheel = (event: WheelEvent) => {
-      if (!(event.ctrlKey || event.metaKey) || state.disabled) {
-        return;
-      }
-      event.preventDefault();
-      pending = { delta: (pending?.delta ?? 0) + event.deltaY, event };
-      if (!frame) {
-        frame = requestAnimationFrame(flush);
-      }
+      wheelZoom.wheel(event, element);
     };
     element.addEventListener("wheel", handleWheel, { passive: false });
     return () => {
       element.removeEventListener("wheel", handleWheel);
-      cancelAnimationFrame(frame);
+      wheelZoom.dispose();
     };
-  }, [actions, drawnZoom, duration, origin, state.disabled]);
+  }, [wheelZoom]);
 
   const handleScroll = () => {
     const element = elementRef.current;

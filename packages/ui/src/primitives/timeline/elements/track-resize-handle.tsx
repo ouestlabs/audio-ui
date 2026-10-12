@@ -1,25 +1,8 @@
-import { createChangeEventDetails, isReleased } from "@audio-ui/core";
 import * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
 import { VISUALLY_HIDDEN } from "../../internal/visually-hidden";
-import {
-  type TrackChangeEventDetails,
-  type TrackCommitEventDetails,
-  type TrackState,
-  useTrackContext,
-} from "./track-context";
-
-interface ResizeGesture {
-  /** Whether the gesture changed the height at least once; if so its end commits. */
-  changed: boolean;
-  /** The height when the pointer went down: the drag is measured from it. */
-  from: number;
-  /** The latest height the track took. */
-  latest: number;
-  pointerId: number;
-  startY: number;
-}
+import { type TrackState, useTrackContext } from "./track-context";
 
 /**
  * Sets the track's height: by dragging, or from the keyboard through the
@@ -41,126 +24,38 @@ export function TrackResizeHandle(componentProps: TrackResizeHandle.Props) {
     style,
     ...elementProps
   } = componentProps;
-  const { actions, meta, state } = useTrackContext("TrackResizeHandle");
-  const gestureRef = React.useRef<ResizeGesture | null>(null);
+  const { controller, meta, state } = useTrackContext("TrackResizeHandle");
   const inputRef = React.useRef<HTMLInputElement>(null);
 
-  /** What the track is now: the height it was given, or what it measures. */
-  const current = () =>
-    meta.height ?? meta.rowRef.current?.getBoundingClientRect().height ?? 0;
-
-  const finish = React.useCallback(
-    (event: PointerEvent) => {
-      const gesture = gestureRef.current;
-      gestureRef.current = null;
-      actions.setResizing(false);
-      if (gesture?.changed) {
-        actions.commit(gesture.latest, { event, reason: "drag" });
-      }
-    },
-    [actions]
-  );
-
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    // The track's own press (to pick it) is not this one.
+    event.stopPropagation();
     if (event.button !== 0) {
       return;
     }
-    // The track's own press (to pick it) is not this one.
-    event.stopPropagation();
-    event.currentTarget.setPointerCapture?.(event.pointerId);
-    const from = current();
-    gestureRef.current = {
-      changed: false,
-      from,
-      latest: from,
-      pointerId: event.pointerId,
-      startY: event.clientY,
-    };
-    actions.setResizing(true);
     inputRef.current?.focus({ focusVisible: false, preventScroll: true });
+    controller.press(event.nativeEvent, event.currentTarget);
   };
-
-  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
-    const gesture = gestureRef.current;
-    if (!gesture || gesture.pointerId !== event.pointerId) {
-      return;
-    }
-    if (isReleased(event)) {
-      finish(event.nativeEvent);
-      return;
-    }
-    const details = createChangeEventDetails("drag", event.nativeEvent);
-    if (
-      actions.resize(gesture.from + event.clientY - gesture.startY, details)
-    ) {
-      gesture.changed = true;
-      gesture.latest = Math.min(
-        meta.max,
-        Math.max(meta.min, gesture.from + event.clientY - gesture.startY)
-      );
-    }
-  };
-
-  const handlePointerEnd = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (gestureRef.current?.pointerId === event.pointerId) {
-      finish(event.nativeEvent);
-    }
-  };
-
-  const setHeight = React.useCallback(
-    (to: number, reason: "input-change" | "keyboard", native: Event) => {
-      const details = createChangeEventDetails(
-        reason,
-        native
-      ) as TrackChangeEventDetails;
-      if (actions.resize(to, details)) {
-        actions.commit(Math.min(meta.max, Math.max(meta.min, to)), {
-          event: native,
-          reason,
-        } as TrackCommitEventDetails);
-      }
-    },
-    [actions, meta.max, meta.min]
-  );
 
   const handleKeyDown = React.useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
-      const now =
-        meta.height ?? meta.rowRef.current?.getBoundingClientRect().height ?? 0;
-      const targets: Record<string, number> = {
-        ArrowDown: now + meta.step,
-        ArrowLeft: now - meta.step,
-        ArrowRight: now + meta.step,
-        ArrowUp: now - meta.step,
-        End: meta.max,
-        Home: meta.min,
-        PageDown: now + meta.largeStep,
-        PageUp: now - meta.largeStep,
-      };
-      const to = targets[event.key];
-      if (to === undefined) {
-        return;
+      if (controller.keyDown(event.nativeEvent)) {
+        event.preventDefault();
       }
-      event.preventDefault();
-      setHeight(to, "keyboard", event.nativeEvent);
     },
-    [meta, setHeight]
+    [controller]
   );
 
   const handleDoubleClick = React.useCallback(
     (event: React.MouseEvent<HTMLDivElement>) =>
-      actions.reset(event.nativeEvent),
-    [actions]
+      controller.reset(event.nativeEvent),
+    [controller]
   );
 
   const handleChange = React.useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) =>
-      setHeight(
-        Number(event.currentTarget.value),
-        "input-change",
-        event.nativeEvent
-      ),
-    [setHeight]
+      controller.typeAt(Number(event.currentTarget.value), event.nativeEvent),
+    [controller]
   );
 
   return useRender({
@@ -188,11 +83,7 @@ export function TrackResizeHandle(componentProps: TrackResizeHandle.Props) {
           </>
         ),
         onDoubleClick: handleDoubleClick,
-        onLostPointerCapture: handlePointerEnd,
-        onPointerCancel: handlePointerEnd,
         onPointerDown: handlePointerDown,
-        onPointerMove: handlePointerMove,
-        onPointerUp: handlePointerEnd,
         style: { touchAction: "none" },
       },
       { ...elementProps, ...resolveStyling(className, style, state) }
