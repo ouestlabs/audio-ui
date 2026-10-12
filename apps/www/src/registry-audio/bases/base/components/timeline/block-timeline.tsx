@@ -910,11 +910,22 @@ export default function BlockTimeline() {
       );
       if (row) {
         const box = row.getBoundingClientRect();
+        // A copy placed exactly over the row, so the image is taken where the pointer is, not where the browser would scroll to.
+        const ghost = row.cloneNode(true) as HTMLElement;
+        ghost.style.position = "fixed";
+        ghost.style.left = `${box.left}px`;
+        ghost.style.top = `${box.top}px`;
+        ghost.style.width = `${box.width}px`;
+        ghost.style.height = `${box.height}px`;
+        ghost.style.pointerEvents = "none";
+        ghost.style.zIndex = "9999";
+        document.body.append(ghost);
         event.dataTransfer.setDragImage(
-          row,
+          ghost,
           event.clientX - box.left,
           event.clientY - box.top
         );
+        requestAnimationFrame(() => ghost.remove());
       }
       setDragId(id);
       event.dataTransfer.effectAllowed = "move";
