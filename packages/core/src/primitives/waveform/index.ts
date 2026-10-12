@@ -28,6 +28,16 @@ export {
   rangeShares,
   type WaveformPeaks,
 } from "./peaks";
+export {
+  createWaveformRegionController,
+  type WaveformRegionChangeEventDetails,
+  type WaveformRegionCommitEventDetails,
+  type WaveformRegionController,
+  type WaveformRegionEdge,
+  type WaveformRegionOptions,
+  type WaveformRegionSnapshot,
+  type WaveformRegionValue,
+} from "./region";
 export { type ScopeOptions, type ScopePoint, scopePoints } from "./scope";
 export {
   createWaveformController,
