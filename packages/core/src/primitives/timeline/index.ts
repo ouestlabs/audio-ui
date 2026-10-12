@@ -18,6 +18,16 @@ export {
 } from "./clip";
 export { adjacentPoint } from "./locators";
 export {
+  createTimelineController,
+  type TimelineController,
+  type TimelineOptions,
+  type TimelinePositionChangeEventDetails,
+  type TimelinePositionCommitEventDetails,
+  type TimelineSnapshot,
+  type TimelineZoomChangeEventDetails,
+  valueAtLane,
+} from "./position";
+export {
   anchoredScroll,
   clampZoom,
   valueAtOffset,
