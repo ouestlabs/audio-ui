@@ -273,6 +273,46 @@ const CLIPS: Arranged[] = [
 ];
 
 /** A row of the arrangement: the track's header stuck to the left edge as it scrolls, its lane beside it. */
+/** The nearest ancestor that scrolls vertically, or null for the page. */
+function verticalScroller(node: HTMLElement): HTMLElement | null {
+  for (let parent = node.parentElement; parent; parent = parent.parentElement) {
+    const { overflowY } = getComputedStyle(parent);
+    if (
+      (overflowY === "auto" || overflowY === "scroll") &&
+      parent.scrollHeight > parent.clientHeight
+    ) {
+      return parent;
+    }
+  }
+  return null;
+}
+
+/** How far to scroll so a pointer held near the top or bottom edge of a view keeps it going; 0 away from the edges. */
+function edgeScrollStep(y: number, top: number, bottom: number): number {
+  if (y < top + 48) {
+    return -Math.min(24, Math.ceil((top + 48 - y) / 3));
+  }
+  if (y > bottom - 48) {
+    return Math.min(24, Math.ceil((y - bottom + 48) / 3));
+  }
+  return 0;
+}
+
+/** The line a track would land on: none when it stays where it is or one place below. */
+function dropLine(
+  gap: number,
+  from: number,
+  rows: { id: string }[]
+): { id: string; edge: "bottom" | "top" } | null {
+  if (gap === from || gap === from + 1) {
+    return null;
+  }
+  if (gap < rows.length) {
+    return { id: rows[gap].id, edge: "top" };
+  }
+  return { id: rows.at(-1)?.id ?? "", edge: "bottom" };
+}
+
 function Row({
   children,
   className,
@@ -945,38 +985,42 @@ export default function BlockTimeline() {
         row.querySelector<HTMLElement>('[data-slot="timeline-track-header"]') ??
         row
       ).getBoundingClientRect();
+      const scroller = verticalScroller(row);
+      const scrollTop = () => (scroller ? scroller.scrollTop : window.scrollY);
+      const startScroll = scrollTop();
       const startY = event.clientY;
       let gap = from;
       let lastY = startY;
       let frame = 0;
 
-      const update = () => {
-        frame = 0;
+      // Once a frame while the track is dragged, whether or not the pointer moved: near an edge of the scroller, it
+      // scrolls; the rows are where they were at the press, moved by how far the scroller has gone since.
+      const tick = () => {
+        const view = scroller
+          ? scroller.getBoundingClientRect()
+          : { top: 0, bottom: window.innerHeight };
+        const step = edgeScrollStep(lastY, view.top, view.bottom);
+        if (scroller) {
+          scroller.scrollTop += step;
+        } else {
+          window.scrollBy(0, step);
+        }
         if (copyRef.current) {
           copyRef.current.style.transform = `translateY(${lastY - startY}px)`;
         }
+        const shift = scrollTop() - startScroll;
         const index = rows.findIndex(
-          (item) => lastY < (item.top + item.bottom) / 2
+          (item) => lastY < (item.top + item.bottom) / 2 - shift
         );
         const next = index === -1 ? rows.length : index;
-        if (next === gap) {
-          return;
+        if (next !== gap) {
+          gap = next;
+          setDrop(dropLine(gap, from, rows));
         }
-        gap = next;
-        // Dropping right where it is, or one place below, moves nothing: no line then.
-        if (gap === from || gap === from + 1) {
-          setDrop(null);
-        } else if (gap < rows.length) {
-          setDrop({ id: rows[gap].id, edge: "top" });
-        } else {
-          setDrop({ id: rows.at(-1)?.id ?? "", edge: "bottom" });
-        }
+        frame = requestAnimationFrame(tick);
       };
-      const move = (moveEvent: PointerEvent) => {
+      const move = (moveEvent: globalThis.PointerEvent) => {
         lastY = moveEvent.clientY;
-        if (frame === 0) {
-          frame = requestAnimationFrame(update);
-        }
       };
       const finish = (commit: boolean) => {
         window.removeEventListener("pointermove", move);
@@ -1010,6 +1054,7 @@ export default function BlockTimeline() {
       window.addEventListener("pointermove", move);
       window.addEventListener("pointerup", release);
       window.addEventListener("pointercancel", cancel);
+      frame = requestAnimationFrame(tick);
     },
     [mixOf, moveTrack, tracks]
   );
