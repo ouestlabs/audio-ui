@@ -1,4 +1,15 @@
 export {
+  createSequencerController,
+  type SequencerCellNodes,
+  type SequencerController,
+  type SequencerOptions,
+  type SequencerSnapshot,
+  type SequencerValueChangeEventDetails,
+  type SequencerValueCommitEventDetails,
+  type SequencerVelocityChangeEventDetails,
+  type SequencerVelocityCommitEventDetails,
+} from "./controller";
+export {
   type CellAddress,
   cellAtPoint,
   cellKey,
