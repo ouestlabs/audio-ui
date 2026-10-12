@@ -905,6 +905,7 @@ export default function BlockTimeline() {
     edge: "bottom" | "top";
   } | null>(null);
   const [copy, setCopy] = useState<{
+    edge: string;
     name: string;
     top: number;
     left: number;
@@ -939,6 +940,11 @@ export default function BlockTimeline() {
       });
       const from = rows.findIndex((item) => item.id === id);
       const box = row.getBoundingClientRect();
+      // The copy is the track's header, the column the name and the controls sit in.
+      const header = (
+        row.querySelector<HTMLElement>('[data-slot="timeline-track-header"]') ??
+        row
+      ).getBoundingClientRect();
       const startY = event.clientY;
       let gap = from;
       let lastY = startY;
@@ -989,11 +995,15 @@ export default function BlockTimeline() {
       const release = () => finish(true);
       const cancel = () => finish(false);
 
+      const dragged = tracks.find((track) => track.id === id);
       setCopy({
-        name: tracks.find((track) => track.id === id)?.name ?? "",
+        edge:
+          TRACK_COLORS[mixOf(dragged ?? tracks[from] ?? tracks[0]).color]
+            ?.edge ?? "",
+        name: dragged?.name ?? "",
         top: box.top,
-        left: box.left,
-        width: box.width,
+        left: header.left,
+        width: header.width,
         height: box.height,
       });
       setDragId(id);
@@ -1001,7 +1011,7 @@ export default function BlockTimeline() {
       window.addEventListener("pointerup", release);
       window.addEventListener("pointercancel", cancel);
     },
-    [moveTrack, tracks]
+    [mixOf, moveTrack, tracks]
   );
   const nudgeTrack = useCallback(
     (event: React.KeyboardEvent<HTMLButtonElement>) => {
@@ -1790,7 +1800,10 @@ export default function BlockTimeline() {
         ? createPortal(
             <div
               aria-hidden="true"
-              className="pointer-events-none fixed z-50 flex items-center rounded-md border border-foreground/25 bg-card/90 px-3 text-sm shadow-lg"
+              className={cn(
+                "pointer-events-none fixed z-50 flex items-center border border-s-4 bg-card px-3 text-sm shadow-lg",
+                copy.edge
+              )}
               ref={copyRef}
               style={{
                 height: copy.height,
