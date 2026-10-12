@@ -15,7 +15,6 @@ import {
   type ReactNode,
   type SyntheticEvent,
   useCallback,
-  useEffect,
   useLayoutEffect,
   useRef,
   useState,
@@ -903,67 +902,26 @@ export default function BlockTimeline() {
     id: string;
     edge: "bottom" | "top";
   } | null>(null);
-  // The track's copy that follows the pointer while it is dragged. The browser's own drag image is a blank one,
-  // since its position is not reliable across browsers; the copy is moved from each dragover instead.
-  const [preview, setPreview] = useState<{
-    name: string;
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  } | null>(null);
-  const dragOffset = useRef({ x: 0, y: 0 });
-  useEffect(() => {
-    if (dragId === null) {
-      return;
-    }
-    const follow = (event: DragEvent) => {
-      setPreview((current) =>
-        current
-          ? {
-              ...current,
-              x: event.clientX - dragOffset.current.x,
-              y: event.clientY - dragOffset.current.y,
-            }
-          : current
-      );
-    };
-    document.addEventListener("dragover", follow);
-    return () => document.removeEventListener("dragover", follow);
-  }, [dragId]);
   const startTrackDrag = useCallback(
     (event: React.DragEvent<HTMLButtonElement>) => {
       const id = event.currentTarget.dataset.trackId ?? "";
-      const row = event.currentTarget.closest<HTMLElement>(
-        '[data-slot="timeline-track"]'
+      // The grip is the drag image, placed under the pointer where it grabbed it. Some browsers report no pointer
+      // position on dragstart (0, 0): then the grip's centre stands in for it.
+      const grip = event.currentTarget.getBoundingClientRect();
+      const pointerX = event.clientX || grip.left + grip.width / 2;
+      const pointerY = event.clientY || grip.top + grip.height / 2;
+      event.dataTransfer.setDragImage(
+        event.currentTarget,
+        pointerX - grip.left,
+        pointerY - grip.top
       );
-      if (row) {
-        const box = row.getBoundingClientRect();
-        // Some browsers report no pointer position on dragstart (0, 0): then the grip's centre stands in for it.
-        const grip = event.currentTarget.getBoundingClientRect();
-        const pointerX = event.clientX || grip.left + grip.width / 2;
-        const pointerY = event.clientY || grip.top + grip.height / 2;
-        dragOffset.current = { x: pointerX - box.left, y: pointerY - box.top };
-        const blank = new Image();
-        blank.src =
-          "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
-        event.dataTransfer.setDragImage(blank, 0, 0);
-        setPreview({
-          name: tracks.find((track) => track.id === id)?.name ?? "",
-          x: box.left,
-          y: box.top,
-          width: box.width,
-          height: box.height,
-        });
-      }
       setDragId(id);
       event.dataTransfer.effectAllowed = "move";
       event.dataTransfer.setData("text/plain", id);
     },
-    [tracks]
+    []
   );
   const endTrackDrag = useCallback(() => {
-    setPreview(null);
     setDragId(null);
     setDrop(null);
   }, []);
@@ -999,7 +957,6 @@ export default function BlockTimeline() {
       }
       setDragId(null);
       setDrop(null);
-      setPreview(null);
     },
     [dragId, drop, moveTrack, tracks]
   );
@@ -1790,23 +1747,6 @@ export default function BlockTimeline() {
             )
           : null}
       </Timeline>
-      {preview
-        ? createPortal(
-            <div
-              aria-hidden="true"
-              className="pointer-events-none fixed z-50 flex items-center truncate rounded-md border border-foreground/25 bg-card/90 px-3 text-sm shadow-lg"
-              style={{
-                height: preview.height,
-                left: preview.x,
-                top: preview.y,
-                width: preview.width,
-              }}
-            >
-              {preview.name}
-            </div>,
-            document.body
-          )
-        : null}
     </div>
   );
 }
