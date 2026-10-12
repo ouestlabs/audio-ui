@@ -12,6 +12,7 @@ import {
 } from "@/registry/bases/base/ui/button-group";
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuLabel,
@@ -222,6 +223,7 @@ function MetronomeMenu({
         render={
           <Toolbar.Button
             aria-label="Metronome settings"
+            className="hidden @2xl/transport:flex"
             render={<Button size="icon" variant="outline" />}
           />
         }
@@ -276,10 +278,18 @@ function MetronomeMenu({
 
 /** The tempo and the time signature, joined: the pair you change together. */
 function TransportTempo({
+  metronome,
+  onMetronomeChange,
+  onRhythmChange,
   onTempoChange,
+  rhythm,
   tempo,
 }: {
+  metronome?: boolean;
+  onMetronomeChange?: (on: boolean) => void;
+  onRhythmChange?: (rhythm: MetronomeRhythm) => void;
   onTempoChange: (tempo: Tempo) => void;
+  rhythm: MetronomeRhythm;
   tempo: Tempo;
 }) {
   const handleBpm = useCallback(
@@ -298,31 +308,105 @@ function TransportTempo({
     [onTempoChange, tempo]
   );
 
+  const signature = `${tempo.beatsPerBar}/${tempo.beatUnit}`;
+  const handleRhythm = useCallback(
+    (value: string) => onRhythmChange?.(value as MetronomeRhythm),
+    [onRhythmChange]
+  );
+  // Wide, the tempo sits in the bar. Narrow, only the BPM shows, and a click opens the full setting.
   return (
-    <Toolbar.Group render={<ButtonGroup className="shrink-0" />}>
-      <BpmControl onValueChange={handleBpm} value={tempo.bpm} />
-      <Select
-        onValueChange={handleSignature}
-        value={`${tempo.beatsPerBar}/${tempo.beatUnit}`}
+    <>
+      <Toolbar.Group
+        className="hidden @2xl/transport:flex"
+        render={<ButtonGroup className="shrink-0" />}
       >
-        <SelectTrigger
-          aria-label="Time signature"
-          className="w-20"
-          render={<Toolbar.Button />}
+        <BpmControl onValueChange={handleBpm} value={tempo.bpm} />
+        <Select onValueChange={handleSignature} value={signature}>
+          <SelectTrigger
+            aria-label="Time signature"
+            className="w-20"
+            render={<Toolbar.Button />}
+          >
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              {SIGNATURES.map((item) => (
+                <SelectItem key={item} value={item}>
+                  {item}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+      </Toolbar.Group>
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          render={
+            <Button
+              aria-label={`Tempo: ${tempo.bpm} BPM, ${signature}`}
+              className="@2xl/transport:hidden tabular-nums"
+              variant="outline"
+            />
+          }
         >
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectGroup>
-            {SIGNATURES.map((signature) => (
-              <SelectItem key={signature} value={signature}>
-                {signature}
-              </SelectItem>
+          {tempo.bpm}
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className="w-auto min-w-48">
+          <div className="p-2">
+            <BpmControl onValueChange={handleBpm} value={tempo.bpm} />
+          </div>
+          {onMetronomeChange ? (
+            <>
+              <DropdownMenuCheckboxItem
+                checked={Boolean(metronome)}
+                onCheckedChange={onMetronomeChange}
+              >
+                Metronome
+              </DropdownMenuCheckboxItem>
+              {onRhythmChange ? (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuGroup>
+                    <DropdownMenuLabel>Rhythm</DropdownMenuLabel>
+                    <DropdownMenuRadioGroup
+                      onValueChange={handleRhythm}
+                      value={rhythm}
+                    >
+                      {METRONOME_RHYTHMS.map((item) => {
+                        const seconds = metronomeRhythmSeconds(item.id, tempo);
+                        return (
+                          <DropdownMenuRadioItem
+                            className="tabular-nums"
+                            key={item.id}
+                            value={item.id}
+                          >
+                            {seconds === null
+                              ? "Auto"
+                              : gridLabel(seconds, tempo)}
+                          </DropdownMenuRadioItem>
+                        );
+                      })}
+                    </DropdownMenuRadioGroup>
+                  </DropdownMenuGroup>
+                </>
+              ) : null}
+            </>
+          ) : null}
+          <DropdownMenuSeparator />
+          <DropdownMenuRadioGroup
+            onValueChange={handleSignature}
+            value={signature}
+          >
+            {SIGNATURES.map((item) => (
+              <DropdownMenuRadioItem key={item} value={item}>
+                {item}
+              </DropdownMenuRadioItem>
             ))}
-          </SelectGroup>
-        </SelectContent>
-      </Select>
-    </Toolbar.Group>
+          </DropdownMenuRadioGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </>
   );
 }
 
@@ -398,7 +482,7 @@ function Transport({
     <Toolbar.Root
       aria-label="Transport"
       className={cn(
-        "flex w-full min-w-0 flex-wrap items-center gap-2",
+        "@container/transport flex w-full min-w-0 flex-wrap items-center gap-2",
         className
       )}
       data-slot="transport"
@@ -469,6 +553,7 @@ function Transport({
             <Toolbar.Button
               aria-label="Metronome"
               aria-pressed={metronome}
+              className="hidden @2xl/transport:flex"
               onClick={toggleMetronome}
               render={
                 <Button
@@ -499,7 +584,14 @@ function Transport({
         </Toolbar.Group>
       ) : null}
       {onTempoChange ? (
-        <TransportTempo onTempoChange={onTempoChange} tempo={tempo} />
+        <TransportTempo
+          metronome={metronome}
+          onMetronomeChange={onMetronomeChange}
+          onRhythmChange={onRhythmChange}
+          onTempoChange={onTempoChange}
+          rhythm={rhythm}
+          tempo={tempo}
+        />
       ) : null}
     </Toolbar.Root>
   );

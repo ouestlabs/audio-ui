@@ -45,10 +45,7 @@ import {
   DropdownMenuTrigger,
 } from "@/registry/bases/base/ui/dropdown-menu";
 import { Kbd, KbdGroup } from "@/registry/bases/base/ui/kbd";
-import {
-  BpmControl,
-  NumberControl,
-} from "@/registry-audio/bases/base/audio/elements/bpm-control";
+import { NumberControl } from "@/registry-audio/bases/base/audio/elements/bpm-control";
 import { Meter } from "@/registry-audio/bases/base/audio/elements/meter";
 import {
   COMPACT_TRACK_HEIGHT,
@@ -910,21 +907,6 @@ export default function BlockTimeline() {
     },
     [clock, rescale, tempo]
   );
-  const changeBpm = useCallback(
-    (bpm: number) => changeTempo({ ...tempo, bpm }),
-    [changeTempo, tempo]
-  );
-  const changeSignature = useCallback(
-    (value: string) => {
-      const [beats, unit] = value.split("/");
-      changeTempo({
-        ...tempo,
-        beatsPerBar: Number(beats),
-        beatUnit: Number(unit),
-      });
-    },
-    [changeTempo, tempo]
-  );
   // The zoom as a share of the fitted view: 100% shows everything.
   const zoomRatio = fitPx > 0 ? zoom / fitPx : 1;
   const maxRatio = fitPx > 0 ? MAX_ZOOM / fitPx : 1;
@@ -1300,10 +1282,10 @@ export default function BlockTimeline() {
       tabIndex={-1}
     >
       <div className="flex items-center justify-between gap-2 p-1">
-        <div className="flex items-center gap-2">
+        <div className="flex min-w-0 flex-1 items-center gap-2">
           <div className="@3xl/panel:hidden" ref={narrowProbeRef} />
           <Transport
-            className="w-auto flex-nowrap"
+            className="min-w-0 flex-1 flex-nowrap"
             looping={looping}
             metronome={metronome}
             onLoopingChange={setLooping}
@@ -1311,7 +1293,7 @@ export default function BlockTimeline() {
             onPlayPause={playPause}
             onRhythmChange={setRhythm}
             onStop={stop}
-            onTempoChange={narrow ? undefined : changeTempo}
+            onTempoChange={changeTempo}
             playing={playing}
             rhythm={rhythm}
             source={clock}
@@ -1406,34 +1388,6 @@ export default function BlockTimeline() {
                   <DropdownMenuItem disabled={!canRedo} onClick={redo}>
                     Redo
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuSub>
-                    <DropdownMenuSubTrigger>Tempo</DropdownMenuSubTrigger>
-                    <DropdownMenuSubContent className="w-auto">
-                      <div className="p-2">
-                        <BpmControl
-                          onValueChange={changeBpm}
-                          value={tempo.bpm}
-                        />
-                      </div>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuRadioGroup
-                        onValueChange={changeSignature}
-                        value={`${tempo.beatsPerBar}/${tempo.beatUnit}`}
-                      >
-                        {["4/4", "3/4", "6/8", "5/4", "7/8", "2/4"].map(
-                          (signature) => (
-                            <DropdownMenuRadioItem
-                              key={signature}
-                              value={signature}
-                            >
-                              {signature}
-                            </DropdownMenuRadioItem>
-                          )
-                        )}
-                      </DropdownMenuRadioGroup>
-                    </DropdownMenuSubContent>
-                  </DropdownMenuSub>
                   <DropdownMenuSeparator />
                 </>
               ) : null}
