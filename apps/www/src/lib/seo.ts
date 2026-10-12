@@ -4,13 +4,19 @@ import { siteConfig } from "@/lib/config";
 import { getCategoryDocsDescription } from "@/lib/registry";
 
 const CANONICAL_COMPONENT_DOC_SLUGS = [
-  "player",
-  "knob",
+  "envelope",
   "fader",
-  "xypad",
+  "knob",
+  "meter",
+  "piano",
+  "piano-roll",
+  "plot",
+  "scrubber",
+  "sequencer",
+  "timeline",
   "transport",
-  "channel-strip",
-  "sortable-list",
+  "waveform",
+  "xypad",
 ] as const;
 
 export type CanonicalComponentDocSlug =
@@ -181,7 +187,7 @@ export function getComponentDocSeo(
   const leadDescription = docHook || `${label} component for audio/ui.`;
 
   const registryDesc = getCategoryDocsDescription(slug);
-  const title = label;
+  const title = `${label} component for React`;
 
   const description = registryDesc
     ? `${label} for React and Tailwind CSS, built on top of shadcn/ui. ${registryDesc}`
@@ -207,7 +213,7 @@ export function getDocsComponentCatalogIntro(
 ): string {
   const p = count;
 
-  return `Browse ${p} production-ready audio/ui ${label} components for players, mixers, and synth interfaces. These examples use Base UI primitives from @base-ui/react and stay fully compatible with Shadcn Create so radius, color, and typography match your configured theme.`;
+  return `Browse ${p} production-ready audio/ui ${label} components for players, mixers, and synth interfaces. These examples use the headless primitives from @audio-ui/react and stay fully compatible with Shadcn Create so radius, color, and typography match your configured theme.`;
 }
 
 type BreadcrumbItem = {
