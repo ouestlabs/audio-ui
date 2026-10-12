@@ -133,7 +133,7 @@ const { bands } = useAudioSignal(analyser);
 
 ## Feeding real audio
 
-`values` is a plain prop: the component doesn't decode anything on its own. The `waveform-dsp` lib (`npx shadcn@latest add @audio/waveform-dsp`) turns a real audio file into `values`: `decodeAudioChannels` reads every channel's PCM samples out of an `AudioContext`, `computePeaks` reduces them to each slice's lowest and highest sample across all channels (so a take panned hard to one side still draws), and `normalizePeaks` scales them so the loudest sample reaches full height.
+`values` is a plain prop: the component does not decode audio. The `waveform-dsp` lib (`npx shadcn@latest add @audio/waveform-dsp`) turns a real audio file into `values`: `decodeAudioChannels` reads every channel's PCM samples out of an `AudioContext`, `computePeaks` reduces them to each slice's lowest and highest sample across all channels (so a take panned hard to one side still draws), and `normalizePeaks` scales them so the loudest sample reaches full height.
 
 ```tsx
 import {
@@ -218,7 +218,7 @@ const { level, bands, samples } = useAudioSignal(analyser, { bandCount: 32 });
 - `bands` is the spectrum as log-spaced frequency bands, low to high. Draw it with a `BarVisualizer`, or a `LiveWaveform` in its default `mode="static"`: the bars stay in place and follow the bands, rising at once and falling smoothly.
 - `samples` is the raw waveform of the moment, `-1` to `1`. Draw it with `shape="scope"`.
 
-Any signal will do. `createSource` from `@audio-ui/react` makes a source you push to yourself, from a WebSocket, a worklet or a test:
+Any signal works. `createSource` from `@audio-ui/react` makes a source you push to yourself, from a WebSocket, a worklet or a test:
 
 ```tsx
 import { createSource } from "@audio-ui/react";

@@ -279,7 +279,7 @@ A strip under the grid where each note's velocity stands as a bar, placed at the
 
 ### Velocity
 
-One note's velocity, as a bar from the bottom of the lane: its height is the velocity, through the `--piano-roll-velocity` CSS variable. Dragging it up or down changes the velocity of the selection by the same amount when the note is part of it, so a phrase keeps its dynamics; Shift + click toggles the note in the selection. A native `<input type="range">` inside takes the arrow keys and carries the accessible name, which defaults to the note's. The velocity set last is what the next drawn note gets. Renders a `<div>` element.
+One note's velocity, as a bar from the bottom of the lane: its height is the velocity, through the `--piano-roll-velocity` CSS variable. Dragging it up or down changes the velocity of the selection by the same amount when the note is part of it, so a phrase keeps its dynamics; Shift + click toggles the note in the selection. A native `<input type="range">` inside takes the arrow keys and carries the accessible name, which defaults to the note's. The next drawn note gets the velocity set last. Renders a `<div>` element.
 
 <TypeTable>
 <TypeRow name={"note"} type={"Note"}>The note whose velocity this is.</TypeRow>

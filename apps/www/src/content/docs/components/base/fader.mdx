@@ -85,13 +85,13 @@ import { Fader } from "@audio-ui/react";
 import { Fader } from "@/components/audio/fader";
 ```
 
-**Uncontrolled** - initial value only:
+**Uncontrolled:** set only the initial value.
 
 ```tsx
 <Fader defaultValue={0} max={6} min={-60} step={1} />
 ```
 
-**Controlled** - drive value from state:
+**Controlled:** drive the value from state.
 
 ```tsx
 const [gain, setGain] = useState(0);
@@ -111,15 +111,15 @@ const [gain, setGain] = useState(0);
 ### Pointer
 
 <KeyTable title="Behavior">
-<KeyRow gesture={"Track click / drag"}>Clicking or dragging on the track updates the value from pointer position.</KeyRow>
-<KeyRow gesture={"Thumb drag"}>Dragging the thumb adjusts continuously, clamped to `min...max`.</KeyRow>
+<KeyRow gesture={"Track click / drag"}>Click or drag on the track to set the value from the pointer position.</KeyRow>
+<KeyRow gesture={"Thumb drag"}>Dragging the thumb changes the value continuously, within `min…max`.</KeyRow>
 <KeyRow gesture={"Commit event"}>`onValueCommitted` fires when an interaction ends with a new value.</KeyRow>
 <KeyRow gesture={"Lagging value"}>While dragging, the thumb follows the pointer even if a controlled `value` updates late; it returns to `value` on release. Reject a value with `eventDetails.cancel()`.</KeyRow>
 </KeyTable>
 
 ### Keyboard
 
-Focused thumb supports:
+On the focused thumb:
 
 <KeyTable title="Keys">
 <KeyRow gesture={"`ArrowUp` / `ArrowRight`"}>Increase by `step`</KeyRow>
@@ -132,13 +132,13 @@ Focused thumb supports:
 
 ### Wheel
 
-Wheel input over the fader nudges the value by `step` and reports `eventDetails.reason === "wheel"`.
+The mouse wheel over the fader moves the value by `step` and reports `eventDetails.reason === "wheel"`.
 
 ## API reference
 
 ### Root
 
-Groups all parts of the fader, with audio defaults (vertical, -60…+6) and mouse-wheel stepping. While a pointer drags it, the thumb follows the pointer even if a controlled `value` lags behind (a seek bar driven by playback time, automation), reject a value with `eventDetails.cancel()` instead. Renders a `<div>` element.
+Groups all parts of the fader, with audio defaults (vertical, -60…+6) and mouse-wheel stepping. While a pointer drags it, the thumb follows the pointer even if a controlled `value` lags behind, as with a seek bar driven by playback time or automation. To reject a value, call `eventDetails.cancel()`. Renders a `<div>` element.
 
 <TypeTable>
 <TypeRow name={"anchor"} type={"number"}>Value the `Indicator` fills from, such as `0` on a -1…1 pan. Defaults to `min`.</TypeRow>

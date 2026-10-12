@@ -168,7 +168,7 @@ The range's own input moves it with the arrow keys, by the timeline's `step`; ea
 
 ## Tracks
 
-A track is a row: a header beside a lane. `Timeline.Track` holds the row, `Timeline.TrackHeader` is the strip that names it and stays at the left edge while the lane scrolls, and `Timeline.TrackResizeHandle` sets its height. The height is yours to hold: leave it out and the row shares the room it is given, set it and the row keeps it.
+A track is a row: a header beside a lane. `Timeline.Track` holds the row, `Timeline.TrackHeader` is the strip that names it and stays at the left edge while the lane scrolls, and `Timeline.TrackResizeHandle` sets its height. You hold the height: leave it out and the row shares the room it is given; set it and the row keeps it.
 
 ```tsx
 const [height, setHeight] = useState<number | undefined>();
@@ -186,9 +186,9 @@ const [height, setHeight] = useState<number | undefined>();
 </Timeline.Track>;
 ```
 
-What a header holds, such as solo, mute and gain, is yours to put in it: they are your controls, and the track does not know about them.
+You put the header's controls in it, such as solo, mute and gain. The track does not know about them.
 
-The block reorders tracks by their grip, the bar at the track's left edge: press it and drag. A copy of the track's header follows the pointer, the dragged track stays in place faded, and a line marks the place it would land in. Near the top or bottom of a view that scrolls, the view scrolls on its own while the track is held. The arrow keys move a focused grip one place up or down, and every move is one undo step with its clips. The move is `moveTrack(id, index)` in `useArrangement`; it is a pointer drag, not the browser's drag and drop, so it does not depend on what the browser does with a drag.
+The block reorders tracks by their grip, the bar at the track's left edge: press it and drag. A copy of the track's header follows the pointer, the dragged track stays in place faded, and a line marks the place it would land in. Near the top or bottom of a view that scrolls, the view scrolls on its own while the track is held. The arrow keys move a focused grip one place up or down, and every move is one undo step with its clips. The move is `moveTrack(id, index)` in `useArrangement`; it uses a pointer drag rather than the browser's drag and drop, so it does not depend on how the browser handles a drag.
 
 ## Clips
 
@@ -233,7 +233,7 @@ Cutting, copying and the like are plain functions on the clip, for the model beh
 
 ### Many clips
 
-The primitive keeps up with a large arrangement: dragging one clip among 1 000 costs about a millisecond of script, and the playhead costs nothing since it moves outside React. What costs is rendering every clip again whenever one moves, which is what happens when the clip component is not memoized. Put one clip in a `React.memo` component with stable props (the clip's own `value`, callbacks that take its id), so React skips every clip a drag did not touch.
+Dragging one clip among 1 000 takes about a millisecond of script, and the playhead moves outside React, so it costs no render. The real cost is rendering every clip again whenever one moves, which happens when the clip component is not memoized. Put one clip in a `React.memo` component with stable props (the clip's own `value`, callbacks that take its id), so React skips every clip a drag did not touch.
 
 ### Selecting several clips
 
@@ -241,7 +241,7 @@ The primitive keeps no selection: `selected` and `onSelectedChange` are yours, s
 
 ### The cursor
 
-A `Timeline.Lane` with `seekable` puts the position where a press lands on its bare area, as the ruler does, and a drag scrubs it. Presses on the clips in it go to the clips. So the cursor can be put anywhere along a track, and the track's header, which is yours, is what selects the whole track. A split is then `splitClip(clip, position)` on the selected clip, or on each clip of the selected track that the cursor is over.
+A `Timeline.Lane` with `seekable` puts the position where a press lands on its bare area, as the ruler does, and a drag scrubs it. Presses on the clips in it go to the clips. The cursor can then go anywhere along a track, and your track header selects the whole track. A split is then `splitClip(clip, position)` on the selected clip, or on each clip of the selected track that the cursor is over.
 
 ## Navigator
 
@@ -258,15 +258,15 @@ Place it anywhere inside the timeline, outside the viewport. Dragging an edge zo
 
 The `musical-time` lib (`npx shadcn@latest add @audio/musical-time`) turns a tempo into what a timeline needs, in seconds:
 
-- `gridInterval(division, zoom, tempo)` is the grid's step: a fixed division (`"1-bar"`, `"1/8"`, …), or `"adaptive"` for the finest division still 24px apart at this zoom. Pass `{ triplet: true }` for three in the space of two. Give the same number to `snapStep` and to the lanes' `gridStep`, so the lines you see are the places you land.
+- `gridInterval(division, zoom, tempo)` is the grid's step: a fixed division (`"1-bar"`, `"1/8"`, …), or `"adaptive"` for the finest division still 24px apart at this zoom. Pass `{ triplet: true }` for three in the space of two. Give the same number to `snapStep` and to the lanes' `gridStep`, so gestures land on the lines you see.
 - `barLabelInterval(zoom, tempo)` is how far apart the ruler's bar numbers go: whole bars, spread out until they no longer collide.
 - `barsBeatsAt(seconds, tempo)` and `describeBarsBeats` read a position as bars, beats and sixteenths.
-- `gridLabel(seconds, tempo)` names an interval the way a grid readout does (`"1 bar"`, `"1/16"`, `"1/8T"`), so the adaptive grid reads out the division it landed on, and a menu and a readout cannot name one grid two ways.
+- `gridLabel(seconds, tempo)` names an interval the way a grid readout does (`"1 bar"`, `"1/16"`, `"1/8T"`), so the adaptive grid reads out the division it uses, and a menu and a readout always name a grid the same way.
 - `metronomeRhythmSeconds(rhythm, tempo)` is the interval of a click rhythm (`"1/8"`, `"1/8t"`, …), or `null` for `"auto"`, which follows the beat.
 
 ## Undo and redo
 
-The `history` lib (`npx shadcn@latest add @audio/history`) is undo and redo as a value: every function takes the present and hands back the present, and holds no state of its own. Keep the history in a ref and the document in state, so two undos in one tick are fed the first one's result instead of reading the same stack twice.
+The `history` lib (`npx shadcn@latest add @audio/history`) implements undo and redo as values: every function takes the present and returns the new present, and keeps no state of its own. Keep the history in a ref and the document in state, so two undos in one tick are fed the first one's result instead of reading the same stack twice.
 
 ```ts
 let history = emptyHistory<Clip[]>();
@@ -282,7 +282,7 @@ history = settleChange(history);
 const step = undo(history, clips); // { history, present } or null
 ```
 
-Redo goes when a new change is made, since the branch it was holding no longer follows from the present, and the depth is bounded by `HISTORY_LIMIT`. The arrangement block uses it for its undo and redo buttons and for Cmd/Ctrl + Z, with Shift (or Y) to redo.
+A new change clears redo, since the redo branch no longer follows from the present. `HISTORY_LIMIT` bounds the depth. The arrangement block uses it for its undo and redo buttons and for Cmd/Ctrl + Z, with Shift (or Y) to redo.
 
 ## An arrangement
 
@@ -389,7 +389,7 @@ One edge of the window: dragging it zooms, holding the other edge in place. Its 
 
 ### Viewport
 
-The scrolling window onto the timeline. Cmd/Ctrl + wheel (and pinch on a trackpad) zooms around the pointer; a bare wheel scrolls as usual. Whatever changes the zoom, the point it was anchored on stays where it was, or the middle of the view when nothing named one. It reports its scroll offset and width for `Timeline.Navigator`. Renders a `<div>` element.
+The scrolling window onto the timeline. Cmd/Ctrl + wheel (and pinch on a trackpad) zooms around the pointer; a bare wheel scrolls as usual. Every zoom change keeps its anchor point in place, or the middle of the view when there is none. It reports its scroll offset and width for `Timeline.Navigator`. Renders a `<div>` element.
 
 <TypeTable title="Data attributes">
 <TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
@@ -435,7 +435,7 @@ The strip beside a track's lane that names it and holds what sets it. It stays a
 
 ### TrackResizeHandle
 
-Sets the track's height: by dragging, or from the keyboard through the native `<input type="range">` it holds, which carries the accessible name. The arrows move by a step (Down is taller), Page Up and Page Down by a large one, Home and End to the least and the most. Place it along the track's lower edge. A double-click gives the height up, so the track shares the room again. Renders a `<div>` element.
+Sets the track's height: by dragging, or from the keyboard through the native `<input type="range">` it holds, which carries the accessible name. The arrows move by a step (Down is taller), Page Up and Page Down by a large one, Home and End to the minimum and the maximum. Place it along the track's lower edge. A double-click clears the height, so the track shares the room again. Renders a `<div>` element.
 
 ### Ruler
 

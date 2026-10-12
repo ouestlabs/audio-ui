@@ -109,13 +109,13 @@ import { Piano } from "@/components/audio/piano";
 <KeyTable title="Behavior">
 <KeyRow gesture={"Press a key"}>Fires `onNoteOn`; the key stays pressed while held.</KeyRow>
 <KeyRow gesture={"Release"}>Fires `onNoteOff`.</KeyRow>
-<KeyRow gesture={"Drag across keys"}>Glissando, the previous key releases (`onNoteOff`) and the new one triggers (`onNoteOn`) as the pointer crosses it.</KeyRow>
+<KeyRow gesture={"Drag across keys"}>Glissando: the previous key releases (`onNoteOff`) and the next one sounds (`onNoteOn`) as the pointer crosses it.</KeyRow>
 <KeyRow gesture={"Multiple pointers"}>Each pointer (finger) holds its own key, so chords work on touch devices.</KeyRow>
 </KeyTable>
 
 ### Keyboard
 
-One tab stop for the whole keyboard; focus then roves between keys:
+The keys share one tab stop. On the focused key:
 
 <KeyTable title="Keys">
 <KeyRow gesture={"`ArrowLeft` / `ArrowRight` (or `ArrowDown` / `ArrowUp`)"}>Move focus to the next lower / higher key</KeyRow>

@@ -98,7 +98,7 @@ import { Meter } from "@/components/audio/meter";
 
 ## Feeding real levels
 
-`value` and `peak` are plain props: fine for static or slowly changing levels, but a signal sampled 60 times a second would re-render React on every frame. For live audio, pass a `source` instead, the meter subscribes to it and writes each frame straight to the DOM, with no React render at all.
+`value` and `peak` are plain props: fine for static or slowly changing levels, but a signal sampled 60 times a second would re-render React on every frame. For live audio, pass a `source` instead: the meter subscribes to it and writes each frame to the DOM, without a React render.
 
 The `use-audio-levels` hook (`npx shadcn@latest add @audio/use-audio-levels`) returns such a source. It samples RMS level (in dB) from one `AnalyserNode` per channel every animation frame, with a peak-hold level that holds the loudest recent level for 1.5s before decaying:
 
@@ -117,7 +117,7 @@ interface MeterSource {
 }
 ```
 
-To also read the levels in React (a numeric readout, say), use `useSyncExternalStore(levels.subscribe, levels.getSnapshot)`.
+To read the levels in React as well, for a numeric readout for example, use `useSyncExternalStore(levels.subscribe, levels.getSnapshot)`.
 
 ## API reference
 
