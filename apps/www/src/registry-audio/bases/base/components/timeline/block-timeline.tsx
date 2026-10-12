@@ -1153,7 +1153,7 @@ export default function BlockTimeline() {
     },
     [addLocator, clock, locators]
   );
-  // The copies are what the user asked to see: bring them into view once they are drawn.
+  // The copies are there to be seen: bring them into view once they are drawn.
   const duplicateAndShow = useCallback(() => {
     const copies = duplicateSelection();
     requestAnimationFrame(() => {

@@ -17,7 +17,7 @@ function subscribe(onChange: () => void): () => void {
 const getSnapshot = () => canMatchMedia() && window.matchMedia(QUERY).matches;
 const getServerSnapshot = () => false;
 
-/** Whether the user asked the system to reduce motion. */
+/** Whether the operating system asks for reduced motion. */
 export function useReducedMotion(): boolean {
   return React.useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }

@@ -753,7 +753,7 @@ async function main() {
       } catch (error) {
         verifyErrors++;
         corruptedFiles.push(`${styleName}/${entry}`);
-        console.error(`  INVALID JSON: ${styleName}/${entry} —`, error);
+        console.error(`  INVALID JSON: ${styleName}/${entry}:`, error);
       }
     }
   }

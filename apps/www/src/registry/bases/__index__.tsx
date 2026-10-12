@@ -1,7 +1,7 @@
 import type * as React from "react";
 
 /**
- * Generated registry index — placeholder.
+ * Generated registry index: placeholder.
  *
  * The fork copy shipped without this generated artifact. It is consumed by
  * `app/(create)/lib/api.ts` (per-base item lookup for the customizer).
