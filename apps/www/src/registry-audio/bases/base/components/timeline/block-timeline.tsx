@@ -750,6 +750,9 @@ export default function BlockTimeline() {
   // The timeline fits the width it is given until it is zoomed.
   const viewportRef = useRef<HTMLDivElement>(null);
   const [fitPx, setFitPx] = useState(0);
+  // Whether the bar has room for the zoom control; the menu lists the zoom steps only when it does not.
+  const zoomSlotRef = useRef<HTMLDivElement>(null);
+  const [zoomInBar, setZoomInBar] = useState(true);
   useLayoutEffect(() => {
     const element = viewportRef.current;
     if (!element) {
@@ -762,6 +765,9 @@ export default function BlockTimeline() {
           '[data-slot="timeline-track-header"]'
         )?.offsetWidth ?? LEAD_PX;
       setFitPx(Math.max(0, (element.clientWidth - lead) / duration));
+      if (zoomSlotRef.current) {
+        setZoomInBar(getComputedStyle(zoomSlotRef.current).display !== "none");
+      }
     };
     measure();
     const observer = new ResizeObserver(measure);
@@ -1203,7 +1209,10 @@ export default function BlockTimeline() {
               </dl>
             </PopoverContent>
           </Popover>
-          <div className="hidden items-center gap-2 @7xl/panel:flex">
+          <div
+            className="hidden items-center gap-2 @7xl/panel:flex"
+            ref={zoomSlotRef}
+          >
             <NumberControl
               format={PERCENT}
               label="Zoom"
@@ -1222,7 +1231,6 @@ export default function BlockTimeline() {
               render={
                 <Button
                   aria-label="More controls"
-                  className="@7xl/panel:hidden"
                   size="icon"
                   variant="outline"
                 />
@@ -1274,9 +1282,15 @@ export default function BlockTimeline() {
               >
                 Snap to grid
               </DropdownMenuCheckboxItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={zoomIn}>Zoom in</DropdownMenuItem>
-              <DropdownMenuItem onClick={zoomOut}>Zoom out</DropdownMenuItem>
+              {zoomInBar ? null : (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={zoomIn}>Zoom in</DropdownMenuItem>
+                  <DropdownMenuItem onClick={zoomOut}>
+                    Zoom out
+                  </DropdownMenuItem>
+                </>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
