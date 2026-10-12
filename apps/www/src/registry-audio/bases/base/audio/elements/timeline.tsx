@@ -506,7 +506,7 @@ function TimelineTrackControls({
           // biome-ignore lint/a11y/noStaticElementInteractions lint/a11y/useKeyWithClickEvents: a larger target for the name button, which carries the keyboard and the accessible name
           <div
             className={cn(
-              "relative flex w-full cursor-default flex-col justify-center border-s-4",
+              "@container/header relative flex w-full cursor-default flex-col justify-center border-s-4",
               // A strip is as tall as its buttons plus an equal margin all round, so they sit concentric with its corners.
               compact ? "px-[1.5px] py-0" : "gap-1.5 px-2 py-2.5",
               TRACK_COLORS[mix.color]?.edge
@@ -520,6 +520,7 @@ function TimelineTrackControls({
             <Button
               aria-expanded={!folded}
               aria-label={`${folded ? "Unfold" : "Fold"} ${name}`}
+              className="@max-[10rem]/header:hidden"
               onClick={handleFold}
               size="icon-xs"
               variant="ghost"
@@ -618,7 +619,7 @@ function TimelineTrackControls({
             <Knob
               anchor={0}
               aria-label={`${name} pan`}
-              className="mb-0 size-7 shrink-0"
+              className="mb-0 size-7 shrink-0 @max-[10rem]/header:hidden"
               editableValue
               formatValue={formatPan}
               max={1}
@@ -638,6 +639,11 @@ function TimelineTrackControls({
         ) : null}
         {onDuplicate ? (
           <ContextMenuItem onClick={handleDuplicate}>Duplicate</ContextMenuItem>
+        ) : null}
+        {onToggleFold ? (
+          <ContextMenuItem onClick={handleFold}>
+            {folded ? "Unfold" : "Fold"}
+          </ContextMenuItem>
         ) : null}
         {onRemove ? (
           <>

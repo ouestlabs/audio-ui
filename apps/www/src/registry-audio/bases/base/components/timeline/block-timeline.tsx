@@ -313,7 +313,7 @@ function Row({
       selected={selected}
       step={TRACK_HEIGHT_STEP}
     >
-      <TimelineTrackHeader className="relative flex items-stretch">
+      <TimelineTrackHeader className="relative flex items-stretch @max-xl/panel:w-32">
         {lead}
       </TimelineTrackHeader>
       <div className="flex flex-1 flex-col">{children}</div>
@@ -726,8 +726,14 @@ export default function BlockTimeline() {
     if (!element) {
       return;
     }
-    const measure = () =>
-      setFitPx(Math.max(0, (element.clientWidth - LEAD_PX) / duration));
+    // The header column is narrower in a narrow panel: fit what is left beside it.
+    const measure = () => {
+      const lead =
+        element.querySelector<HTMLElement>(
+          '[data-slot="timeline-track-header"]'
+        )?.offsetWidth ?? LEAD_PX;
+      setFitPx(Math.max(0, (element.clientWidth - lead) / duration));
+    };
     measure();
     const observer = new ResizeObserver(measure);
     observer.observe(element);
