@@ -1,6 +1,6 @@
 # @audio-ui/react
 
-Headless, accessible primitives for audio interfaces in React: the controls and editors of a DAW or a synth, with the behavior done and the look left to you.
+Headless, accessible primitives for audio interfaces in React: the controls and editors of a DAW or a synth, with the behavior built in and the styling left to you.
 
 - **Headless.** Parts render the elements you give them, with state in `data-*` attributes and CSS variables to style from. No styles ship.
 - **Accessible.** Every control holds a native input, so focus, the keyboard, screen readers and forms work as they do for a slider.
