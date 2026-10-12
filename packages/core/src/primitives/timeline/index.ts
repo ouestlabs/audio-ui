@@ -16,6 +16,20 @@ export {
   trimClipEnd,
   trimClipStart,
 } from "./clip";
+export {
+  type ClipChangeEventDetails,
+  type ClipCommitEventDetails,
+  type ClipController,
+  type ClipOptions,
+  type ClipSnapshot,
+  type ClipTarget,
+  createClipController,
+  keyTargets,
+  laneUnder,
+  normalizeClip,
+  sameClip,
+  wholeClip,
+} from "./clip-controller";
 export { adjacentPoint } from "./locators";
 export {
   createTimelineController,
