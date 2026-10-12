@@ -1081,10 +1081,8 @@ export function fixImport(content: string) {
 
   return content
     .replaceAll("@/registry/shadcn/base/", "@/components/ui/")
-    .replaceAll("@/registry/shadcn/radix/", "@/components/ui/")
     .replaceAll("@/registry/default/", "@/components/")
     .replaceAll("@/registry/bases/base/", "@/components/")
-    .replaceAll("@/registry/bases/radix/", "@/components/")
     .replaceAll("/* eslint-disable react/no-children-prop */\n", "")
     .replace(regex, replacement);
 }
