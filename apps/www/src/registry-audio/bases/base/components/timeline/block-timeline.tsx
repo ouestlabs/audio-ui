@@ -1556,11 +1556,11 @@ export default function BlockTimeline() {
                   )}
                   height={heights[track.id]}
                   lead={
-                    <div className="contents">
+                    <div className="flex min-w-0 flex-1">
                       <button
                         aria-label={`Move ${track.name}`}
                         className={cn(
-                          "absolute inset-s-1 top-1/2 z-10 flex h-8 w-3.5 -translate-y-1/2 cursor-grab items-center justify-center rounded-sm text-muted-foreground/60 transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none active:cursor-grabbing",
+                          "absolute inset-y-0 inset-s-1 z-10 flex w-2.5 cursor-grab items-center justify-center text-muted-foreground/60 transition-colors hover:bg-muted/60 hover:text-foreground focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring focus-visible:outline-none active:cursor-grabbing",
                           dragId === track.id &&
                             "cursor-grabbing bg-muted text-foreground"
                         )}
