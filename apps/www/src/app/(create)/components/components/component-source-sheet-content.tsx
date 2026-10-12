@@ -54,10 +54,10 @@ export function ComponentSourceSheetContent({
       <div className="flex flex-1 flex-col overflow-hidden px-6 pb-6">
         <div className="site-rounded-lg relative border border-site-border">
           <CodeBlockCommand
-            __bun__={`bunx --bun shadcn@latest add @audio/${name}`}
-            __npm__={`npx shadcn@latest add @audio/${name}`}
-            __pnpm__={`pnpm dlx shadcn@latest add @audio/${name}`}
-            __yarn__={`yarn dlx shadcn@latest add @audio/${name}`}
+            __bun__={`bunx --bun shadcn@latest add @audio-ui/${name}`}
+            __npm__={`npx shadcn@latest add @audio-ui/${name}`}
+            __pnpm__={`pnpm dlx shadcn@latest add @audio-ui/${name}`}
+            __yarn__={`yarn dlx shadcn@latest add @audio-ui/${name}`}
           />
         </div>
         <div className="flex h-full flex-1 flex-col overflow-hidden">

@@ -17,7 +17,7 @@ const readOnly = Object.freeze({
 });
 
 function installCommand(name: string) {
-  return `npx shadcn@latest add @audio/${name}`;
+  return `npx shadcn@latest add @audio-ui/${name}`;
 }
 
 function componentPages() {

@@ -76,7 +76,7 @@ interface MetadataData {
 
 // Constants
 const DEFAULT_STYLE = "base-nova";
-const AUDIO_REGISTRY_NAMESPACE = "@audio";
+const AUDIO_REGISTRY_NAMESPACE = "@audio-ui";
 
 // ---------------------------------------------------------------------------
 // cn-* class expansion, mirrors how ui.shadcn.com serves its own registry:
@@ -485,7 +485,7 @@ async function buildRegistryItem(
     });
   }
 
-  // A "barrel" item (e.g. @audio/ui, @audio/hooks) has no files of its own,
+  // A "barrel" item (e.g. @audio-ui/ui, @audio-ui/hooks) has no files of its own,
   // it only aggregates registryDependencies for a one-shot install. Still
   // emit it; only skip when there's truly nothing to serve at all.
   if (files.length === 0 && !itemMetadata.registryDependencies?.length) {
@@ -523,7 +523,7 @@ async function getAllItemNames(): Promise<string[]> {
 }
 
 // ---------------------------------------------------------------------------
-// Resolve internal registryDependencies → @audio namespace
+// Resolve internal registryDependencies → @audio-ui namespace
 // ---------------------------------------------------------------------------
 
 function resolveRegistryDeps(

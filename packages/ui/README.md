@@ -58,13 +58,13 @@ Live values (a playhead, a meter) take a `source`, `{ getSnapshot, subscribe }`,
 
 ## Documentation
 
-Guides, the API of every part and live examples: <https://audio-ui.dev>. Styled components built on these primitives are copied into your project with the shadcn CLI:
+Guides, the API of every part and live examples: <https://www.audio-ui.dev>. Styled components built on these primitives are copied into your project with the shadcn CLI:
 
 ```bash
-npx shadcn@latest add @audio/knob
+npx shadcn@latest add @audio-ui/knob
 ```
 
-For AI agents there is an MCP server (`https://audio-ui.dev/mcp`) and a skill: `npx skills add ouestlabs/audio-ui`.
+For AI agents there is an MCP server (`https://www.audio-ui.dev/mcp`) and a skill: `npx skills add ouestlabs/audio-ui`.
 
 ## License
 

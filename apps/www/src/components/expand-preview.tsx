@@ -108,7 +108,7 @@ export function ExpandPreview({
               <span className="sr-only">{label}</span>
             </DialogTitle>
             <div className="flex items-center gap-1.5">
-              <CopyRegistry value={`@audio/${label}`} />
+              <CopyRegistry value={`@audio-ui/${label}`} />
               <DialogClose
                 render={
                   <Button aria-label="Close" size="icon" variant="outline" />

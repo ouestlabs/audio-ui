@@ -26,9 +26,9 @@ export function GET() {
     "# audio/ui",
     `> ${siteConfig.description}`,
     [
-      "audio/ui has two layers. `@audio-ui/react` (npm) holds headless, accessible primitives. The `@audio` shadcn registry holds styled components and ready blocks that you copy into your project and own. Requires React 19; the registry also needs Tailwind CSS v4.",
+      "audio/ui has two layers. `@audio-ui/react` (npm) holds headless, accessible primitives. The `@audio-ui` shadcn registry holds styled components and ready blocks that you copy into your project and own. Requires React 19; the registry also needs Tailwind CSS v4.",
       "",
-      "- Install a component: `npx shadcn@latest add @audio/knob`",
+      "- Install a component: `npx shadcn@latest add @audio-ui/knob`",
       "- Install the primitives: `npm install @audio-ui/react`",
       "- Every docs page is also served as markdown: replace `/docs` with `/llm` in its URL.",
       `- Created by [${siteConfig.author.name}](${siteConfig.author.url}). Source: ${siteConfig.links.github}`,

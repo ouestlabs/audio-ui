@@ -72,7 +72,7 @@ Currently only the `base` base (Base UI) ships audio items; file paths inside ea
 | `registry:hook`      | Hooks (`use-audio`, `use-sound`)                | `bases/base/hooks/`            |
 | `registry:lib`       | Utilities and stores (`store`, `html`, `web`)   | `bases/base/lib/`              |
 
-Users install items with `npx shadcn@latest add @audio/{name}`. The item `name` in `_registry.ts` is the install name and doesn't have to match the file name (e.g. `store` → `lib/audio-store.ts`, `html` → `lib/html-audio.ts`).
+Users install items with `npx shadcn@latest add @audio-ui/{name}`. The item `name` in `_registry.ts` is the install name and doesn't have to match the file name (e.g. `store` → `lib/audio-store.ts`, `html` → `lib/html-audio.ts`).
 
 ---
 
@@ -249,7 +249,7 @@ Every registry item is declared in the `_registry.ts` of its folder. Blocks and 
   name: "block-{component}-{variant}",
   description: "Short description of what this block does",
   type: "registry:block",              // or "registry:example" for demos
-  registryDependencies: ["@audio/{dep}", "@shadcn/{dep}"],
+  registryDependencies: ["@audio-ui/{dep}", "@shadcn/{dep}"],
   files: [
     {
       path: "components/{category}/block-{component}-{variant}.tsx",
@@ -272,7 +272,7 @@ Every registry item is declared in the `_registry.ts` of its folder. Blocks and 
 
 ```ts
 registryDependencies: [
-  "@audio/{name}",  // audio/ui item (component, hook, or lib) → @audio/name
+  "@audio-ui/{name}",  // audio/ui item (component, hook, or lib) → @audio-ui/name
   "@shadcn/{name}", // official shadcn/ui component            → @shadcn/name
 ]
 ```
@@ -328,7 +328,7 @@ bun run icons:build
 bun run lint:fix
 ```
 
-`registry:build` pre-compiles every item for every style into `public/r/styles/`, which is what `https://audio-ui.dev/r/...` serves from the CDN.
+`registry:build` pre-compiles every item for every style into `public/r/styles/`, which is what `https://www.audio-ui.dev/r/...` serves from the CDN.
 
 > **Maintainers only:** `bun run registry:sync` re-syncs `src/registry/` from upstream shadcn-ui/ui and rebuilds icons. `src/registry/` is edited by hand now, so a sync overwrites those edits and brings back what was removed (such as Radix). Run it on purpose only.
 
@@ -346,7 +346,7 @@ bun run lint:fix
 - `aria-hidden="true"` on all decorative icons
 - Semantic color tokens used (no raw Tailwind colors)
 - Static data defined outside the component function
-- Entry added to `components/_registry.ts` with correct `@audio/` / `@shadcn/` dependencies
+- Entry added to `components/_registry.ts` with correct `@audio-ui/` / `@shadcn/` dependencies
 - New category (if any) added to `bases/categories.ts`, the JSON manifests are generated, don't edit them
 - `bun run registry:build` succeeds (regenerates `components.json`/`registry.json`/`seo.json`)
 - `bun run lint:fix` passes
@@ -371,7 +371,7 @@ This project uses **Biome via Ultracite**. Run `npx ultracite fix` before commit
 ## Getting Help
 
 - Browse existing blocks and demos in `apps/www/src/registry-audio/bases/base/components/` for patterns
-- Read docs at [https://audio-ui.dev](https://audio-ui.dev/docs)
+- Read docs at [https://www.audio-ui.dev](https://www.audio-ui.dev/docs)
 - Open an issue on [GitHub](https://github.com/ouestlabs/audio-ui/issues)
 
 Thank you for contributing to `audio/ui`!

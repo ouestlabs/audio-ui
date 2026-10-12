@@ -52,5 +52,5 @@ console.log(`
 ✓ Sandbox reset to clean state.
 
   Install a component:
-  bunx shadcn add @audio/player
+  bunx shadcn add @audio-ui/player
 `);

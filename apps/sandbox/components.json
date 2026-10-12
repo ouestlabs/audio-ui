@@ -22,6 +22,6 @@
   "menuAccent": "subtle",
   "rtl": false,
   "registries": {
-    "@audio": "http://localhost:4000/r/{style}/{name}.json"
+    "@audio-ui": "http://localhost:4000/r/{style}/{name}.json"
   }
 }
