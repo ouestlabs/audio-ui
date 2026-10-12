@@ -1,4 +1,15 @@
 export {
+  createKnobController,
+  type KnobChangeEventDetails,
+  type KnobChangeEventReason,
+  type KnobCommitEventDetails,
+  type KnobCommitEventReason,
+  type KnobController,
+  type KnobDragMode,
+  type KnobOptions,
+  type KnobSnapshot,
+} from "./controller";
+export {
   ANGLE_GAP_RAD,
   ARC_OUTER_RADIUS,
   arcPath,
