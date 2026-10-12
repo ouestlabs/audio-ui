@@ -269,7 +269,7 @@ export function Canvas(componentProps: Canvas.Props) {
       return [];
     };
 
-    /** Move the levels on by `elapsedMs` and rebuild the shape. Returns whether they are still moving. */
+    /** Move the levels on by `elapsedMs` and rebuild the shape. Returns `true` while they are still moving. */
     const advance = (elapsedMs: number): boolean => {
       if (!layout) {
         return false;

@@ -150,7 +150,7 @@ export namespace Root {
     onNoteOn?: (pitch: number, eventDetails: NoteOnEventDetails) => void;
     /** @default "horizontal" */
     orientation?: "horizontal" | "vertical";
-    /** Only these pitches, in place of `minPitch`…`maxPitch`. */
+    /** Only these pitches get keys, instead of `minPitch`…`maxPitch`. */
     pitches?: readonly number[];
   }
 }

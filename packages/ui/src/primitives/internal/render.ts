@@ -11,7 +11,7 @@ export type RenderProp<State> =
       state: State
     ) => React.ReactElement<unknown>);
 
-/** Data attributes for a state field, in place of the default `data-<field>`. */
+/** Data attributes for a state field, instead of the default `data-<field>`. */
 export type StateAttributesMapping<State> = {
   [Key in keyof State]?: (
     value: State[Key]

@@ -233,7 +233,7 @@ export namespace Root {
     duration?: number;
     /** Step for Page Up/Page Down and Shift + arrow keys. Defaults to a tenth of `duration`. */
     largeStep?: number;
-    /** A live signal drawn outside React, in place of `peaks`: a microphone, an analyser, a stream. */
+    /** A live signal drawn outside React, instead of `peaks`: a microphone, an analyser, a stream. */
     levels?: Levels;
     /** Whether the audio is still on its way. Seeking waits, and the bars sweep. @default false */
     loading?: boolean;
