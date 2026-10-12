@@ -235,6 +235,12 @@ function ClipNameField({
   );
 }
 
+/** What a track meter shows while nothing plays: one channel. */
+const SILENCE_MONO = {
+  getSnapshot: () => ({ levels: [-60], peaks: [-60] }),
+  subscribe: () => () => undefined,
+};
+
 /** What the master meter shows while nothing plays. */
 const SILENCE = {
   getSnapshot: () => ({ levels: [-60, -60], peaks: [-60, -60] }),
@@ -495,7 +501,7 @@ function CopyGhost({ clip }: { clip: Arranged }) {
 
 /** A track's level, from a stand-in source: the block plays nothing, so it moves while the track would be heard. */
 function TrackLevel({ active, name }: { active: boolean; name: string }) {
-  const simulated = useSimulatedLevels(2);
+  const simulated = useSimulatedLevels(1);
   return (
     <Meter
       aria-label={`${name} level`}
@@ -503,7 +509,7 @@ function TrackLevel({ active, name }: { active: boolean; name: string }) {
       orientation="vertical"
       peakMarks="hidden"
       size="sm"
-      source={active ? simulated : SILENCE}
+      source={active ? simulated : SILENCE_MONO}
       warnThreshold={-12}
     />
   );
@@ -1118,7 +1124,7 @@ export default function BlockTimeline() {
             source={clock}
             tempo={tempo}
           />
-          <div className="hidden w-24 shrink-0 @3xl/panel:block">
+          <div className="hidden w-10 shrink-0 @3xl/panel:block">
             <Meter
               aria-label="Master output level"
               orientation="horizontal"
