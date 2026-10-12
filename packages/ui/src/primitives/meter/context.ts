@@ -28,6 +28,11 @@ export const MeterContext = React.createContext<MeterContextValue | null>(null);
 
 export const ChannelIndexContext = React.createContext<number | null>(null);
 
+/** Lets a channel's `Label` name it: the label hands its id to `aria-labelledby`. */
+export const ChannelLabelContext = React.createContext<
+  ((id: string | undefined) => void) | null
+>(null);
+
 export function useMeterContext(part: string): MeterContextValue {
   const context = React.use(MeterContext);
   if (!context) {

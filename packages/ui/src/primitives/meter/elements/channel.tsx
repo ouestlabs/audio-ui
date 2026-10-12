@@ -1,13 +1,14 @@
-import { Meter as BaseMeter } from "@base-ui/react/meter";
 import * as React from "react";
+import type { PartProps } from "../../internal/part";
 import { resolveStyling } from "../../internal/part";
-import { ChannelIndexContext } from "../context";
-import {
-  channelDataAttributes,
-  useChannelPart,
-  useMergedRef,
-} from "../internal/channel";
+import { mergeProps, useRender } from "../../internal/render";
+import { VISUALLY_HIDDEN } from "../../internal/visually-hidden";
+import { ChannelIndexContext, ChannelLabelContext } from "../context";
+import { useChannelPart, useMergedRef } from "../internal/channel";
 import type { Root } from "./root";
+
+/** The index is the channel's identity, not a presence to style by. */
+export const CHANNEL_STATE_ATTRIBUTES = { index: () => null };
 
 /**
  * One channel of the meter, a `role="meter"`: name it with `aria-label` or a
@@ -15,8 +16,16 @@ import type { Root } from "./root";
  * Renders a `<div>` element.
  */
 export function Channel(componentProps: Channel.Props) {
-  const { className, getAriaValueText, index, ref, style, ...props } =
-    componentProps;
+  const {
+    children,
+    className,
+    getAriaValueText,
+    index,
+    ref,
+    render,
+    style,
+    ...elementProps
+  } = componentProps;
   const { actions, config, partState, registerRef, view } = useChannelPart(
     "Channel",
     index,
@@ -25,26 +34,42 @@ export function Channel(componentProps: Channel.Props) {
   // Kept current for the live source, which builds the value text outside React.
   actions.setAriaValueTextGetter(index, getAriaValueText);
   const mergedRef = useMergedRef(ref, registerRef);
-  const baseGetAriaValueText = React.useCallback(
-    (formattedValue: string, value: number) =>
-      getAriaValueText?.(formattedValue, value, index) ?? formattedValue,
-    [getAriaValueText, index]
-  );
+  const [labelId, setLabelId] = React.useState<string | undefined>();
+  const valueNow = Math.min(config.max, Math.max(config.min, view.valueNow));
+
+  const element = useRender({
+    defaultTagName: "div",
+    props: mergeProps<"div">(
+      {
+        "aria-labelledby": labelId,
+        "aria-valuemax": config.max,
+        "aria-valuemin": config.min,
+        "aria-valuenow": valueNow,
+        "aria-valuetext":
+          getAriaValueText?.(view.text, view.valueNow, index) ?? view.text,
+        children: (
+          <>
+            {children}
+            {/* A meter with no text inside is skipped by some screen readers. */}
+            <span role="presentation" style={VISUALLY_HIDDEN}>
+              x
+            </span>
+          </>
+        ),
+        role: "meter",
+      },
+      elementProps,
+      resolveStyling(className, style, partState)
+    ),
+    ref: mergedRef,
+    render,
+    state: partState,
+    stateAttributesMapping: CHANNEL_STATE_ATTRIBUTES,
+  });
 
   return (
     <ChannelIndexContext value={index}>
-      <BaseMeter.Root
-        {...channelDataAttributes(partState)}
-        format={config.format}
-        getAriaValueText={baseGetAriaValueText}
-        locale={config.locale}
-        max={config.max}
-        min={config.min}
-        value={view.valueNow}
-        {...props}
-        {...resolveStyling(className, style, partState)}
-        ref={mergedRef}
-      />
+      <ChannelLabelContext value={setLabelId}>{element}</ChannelLabelContext>
     </ChannelIndexContext>
   );
 }
@@ -57,19 +82,7 @@ export namespace Channel {
     /** Whether the level is at or above the warning level, below the clip threshold. */
     warning: boolean;
   };
-  export interface Props
-    extends Omit<
-      BaseMeter.Root.Props,
-      | "className"
-      | "format"
-      | "getAriaValueText"
-      | "locale"
-      | "max"
-      | "min"
-      | "style"
-      | "value"
-    > {
-    className?: string | ((state: State) => string | undefined);
+  export interface Props extends PartProps<"div", State> {
     /** Returns the channel's `aria-valuetext`, e.g. `"-6 dB"`. Defaults to the formatted level. */
     getAriaValueText?: (
       formattedValue: string,
@@ -78,9 +91,5 @@ export namespace Channel {
     ) => string;
     /** Index of the channel in the levels. */
     index: number;
-    ref?: React.Ref<HTMLDivElement>;
-    style?:
-      | React.CSSProperties
-      | ((state: State) => React.CSSProperties | undefined);
   }
 }

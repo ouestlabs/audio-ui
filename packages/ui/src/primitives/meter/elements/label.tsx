@@ -1,9 +1,45 @@
-import { Meter as BaseMeter } from "@base-ui/react/meter";
+import * as React from "react";
+import type { PartProps } from "../../internal/part";
+import { resolveStyling } from "../../internal/part";
+import { mergeProps, useRender } from "../../internal/render";
+import { ChannelLabelContext } from "../context";
+
+const NO_STATE: Label.State = {};
 
 /** Accessible label of the channel it is in. Renders a `<span>` element. */
-export const { Label } = BaseMeter;
+export function Label(componentProps: Label.Props) {
+  const {
+    className,
+    id: idProp,
+    ref,
+    render,
+    style,
+    ...elementProps
+  } = componentProps;
+  const setLabelId = React.use(ChannelLabelContext);
+  if (!setLabelId) {
+    throw new Error("Meter.Label must be used within Meter.Channel");
+  }
+  const generatedId = React.useId();
+  const id = idProp ?? generatedId;
+  React.useLayoutEffect(() => {
+    setLabelId(id);
+    return () => setLabelId(undefined);
+  }, [id, setLabelId]);
+  return useRender({
+    defaultTagName: "span",
+    props: mergeProps<"span">(
+      { id, role: "presentation" },
+      elementProps,
+      resolveStyling(className, style, NO_STATE)
+    ),
+    ref,
+    render,
+    state: NO_STATE,
+  });
+}
 
 export namespace Label {
-  export type Props = BaseMeter.Label.Props;
-  export type State = BaseMeter.Label.State;
+  export type State = Record<string, never>;
+  export type Props = PartProps<"span", State>;
 }

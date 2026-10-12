@@ -333,3 +333,42 @@ describe("Meter live source", () => {
     expect(source.listenerCount()).toBe(0);
   });
 });
+
+const renderAsSection: Meter.Channel.Props["render"] = (props, state) => (
+  <section {...props} data-state-clipping={String(state.clipping)} />
+);
+
+describe("Meter label and render", () => {
+  test("a Label names its channel through aria-labelledby", () => {
+    const view = render(
+      <Meter.Root locale="en-US" value={[-12]}>
+        <Meter.Channel index={0}>
+          <Meter.Label>Left</Meter.Label>
+          <Meter.Indicator />
+        </Meter.Channel>
+      </Meter.Root>
+    );
+    const channel = view.container.querySelector('[role="meter"]');
+    const label = view.getByText("Left");
+    expect(label.id).not.toBe("");
+    expect(channel?.getAttribute("aria-labelledby")).toBe(label.id);
+    view.unmount();
+  });
+
+  test("render swaps a part's element and hands it the part's state", () => {
+    const view = render(
+      <Meter.Root clipThreshold={0} locale="en-US" value={[3]}>
+        <Meter.Channel aria-label="Out" index={0} render={renderAsSection}>
+          <Meter.Track render={<p data-testid="track" />} />
+        </Meter.Channel>
+      </Meter.Root>
+    );
+    const channel = view.container.querySelector('[role="meter"]');
+    expect(channel?.tagName).toBe("SECTION");
+    expect(channel?.getAttribute("data-state-clipping")).toBe("true");
+    expect(channel?.hasAttribute("data-clipping")).toBe(true);
+    expect(channel?.hasAttribute("data-index")).toBe(false);
+    expect(view.getByTestId("track").tagName).toBe("P");
+    view.unmount();
+  });
+});
