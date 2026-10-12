@@ -45,7 +45,10 @@ import {
   DropdownMenuTrigger,
 } from "@/registry/bases/base/ui/dropdown-menu";
 import { Kbd, KbdGroup } from "@/registry/bases/base/ui/kbd";
-import { NumberControl } from "@/registry-audio/bases/base/audio/elements/bpm-control";
+import {
+  BpmControl,
+  NumberControl,
+} from "@/registry-audio/bases/base/audio/elements/bpm-control";
 import { Meter } from "@/registry-audio/bases/base/audio/elements/meter";
 import {
   COMPACT_TRACK_HEIGHT,
@@ -745,6 +748,9 @@ export default function BlockTimeline() {
   // Whether the bar has room for the zoom control; the menu lists the zoom steps only when it does not.
   const zoomSlotRef = useRef<HTMLDivElement>(null);
   const [zoomInBar, setZoomInBar] = useState(true);
+  // Below the bar's room, the tempo and the undo and redo move into the more-controls menu.
+  const narrowProbeRef = useRef<HTMLDivElement>(null);
+  const [narrow, setNarrow] = useState(false);
   useLayoutEffect(() => {
     const element = viewportRef.current;
     if (!element) {
@@ -759,6 +765,9 @@ export default function BlockTimeline() {
       setFitPx(Math.max(0, (element.clientWidth - lead) / duration));
       if (zoomSlotRef.current) {
         setZoomInBar(getComputedStyle(zoomSlotRef.current).display !== "none");
+      }
+      if (narrowProbeRef.current) {
+        setNarrow(getComputedStyle(narrowProbeRef.current).display !== "none");
       }
     };
     measure();
@@ -856,6 +865,21 @@ export default function BlockTimeline() {
       setTempo(next);
     },
     [clock, rescale, tempo]
+  );
+  const changeBpm = useCallback(
+    (bpm: number) => changeTempo({ ...tempo, bpm }),
+    [changeTempo, tempo]
+  );
+  const changeSignature = useCallback(
+    (value: string) => {
+      const [beats, unit] = value.split("/");
+      changeTempo({
+        ...tempo,
+        beatsPerBar: Number(beats),
+        beatUnit: Number(unit),
+      });
+    },
+    [changeTempo, tempo]
   );
   // The zoom as a share of the fitted view: 100% shows everything.
   const zoomRatio = fitPx > 0 ? zoom / fitPx : 1;
@@ -1092,10 +1116,11 @@ export default function BlockTimeline() {
       ref={panelRef}
       tabIndex={-1}
     >
-      <div className="flex flex-wrap items-center justify-between gap-2 p-1 @3xl/panel:flex-nowrap">
-        <div className="flex flex-wrap items-center gap-2 @3xl/panel:flex-nowrap">
+      <div className="flex items-center justify-between gap-2 p-1">
+        <div className="flex items-center gap-2">
+          <div className="@3xl/panel:hidden" ref={narrowProbeRef} />
           <Transport
-            className="w-auto"
+            className="w-auto flex-nowrap"
             looping={looping}
             metronome={metronome}
             onLoopingChange={setLooping}
@@ -1103,7 +1128,7 @@ export default function BlockTimeline() {
             onPlayPause={playPause}
             onRhythmChange={setRhythm}
             onStop={stop}
-            onTempoChange={changeTempo}
+            onTempoChange={narrow ? undefined : changeTempo}
             playing={playing}
             rhythm={rhythm}
             source={clock}
@@ -1121,8 +1146,8 @@ export default function BlockTimeline() {
             />
           </div>
         </div>
-        <div className="flex min-w-0 flex-wrap items-center gap-2 @3xl/panel:flex-nowrap">
-          <ButtonGroup>
+        <div className="flex min-w-0 items-center gap-2">
+          <ButtonGroup className="hidden @3xl/panel:flex">
             <Button
               aria-label="Undo"
               disabled={!canUndo}
@@ -1190,6 +1215,45 @@ export default function BlockTimeline() {
               />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-auto min-w-48">
+              {narrow ? (
+                <>
+                  <DropdownMenuItem disabled={!canUndo} onClick={undo}>
+                    Undo
+                  </DropdownMenuItem>
+                  <DropdownMenuItem disabled={!canRedo} onClick={redo}>
+                    Redo
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuSub>
+                    <DropdownMenuSubTrigger>Tempo</DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent className="w-auto">
+                      <div className="p-2">
+                        <BpmControl
+                          onValueChange={changeBpm}
+                          value={tempo.bpm}
+                        />
+                      </div>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuRadioGroup
+                        onValueChange={changeSignature}
+                        value={`${tempo.beatsPerBar}/${tempo.beatUnit}`}
+                      >
+                        {["4/4", "3/4", "6/8", "5/4", "7/8", "2/4"].map(
+                          (signature) => (
+                            <DropdownMenuRadioItem
+                              key={signature}
+                              value={signature}
+                            >
+                              {signature}
+                            </DropdownMenuRadioItem>
+                          )
+                        )}
+                      </DropdownMenuRadioGroup>
+                    </DropdownMenuSubContent>
+                  </DropdownMenuSub>
+                  <DropdownMenuSeparator />
+                </>
+              ) : null}
               <DropdownMenuSub>
                 <DropdownMenuSubTrigger>Grid</DropdownMenuSubTrigger>
                 <DropdownMenuSubContent>
