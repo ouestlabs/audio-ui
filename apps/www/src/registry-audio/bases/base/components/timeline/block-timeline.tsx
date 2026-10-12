@@ -1232,7 +1232,7 @@ export default function BlockTimeline() {
                 <DropdownMenuSubTrigger>
                   Keyboard shortcuts
                 </DropdownMenuSubTrigger>
-                <DropdownMenuSubContent className="scrollbar max-h-(--available-height) w-auto overflow-y-auto mask-[linear-gradient(to_bottom,transparent,black_12px,black_calc(100%-12px),transparent)]">
+                <DropdownMenuSubContent className="scrollbar max-h-(--available-height) w-auto overflow-y-auto">
                   <div className="flex flex-col gap-2 p-2 text-sm whitespace-nowrap">
                     {SHORTCUTS.map((shortcut) => (
                       <div
