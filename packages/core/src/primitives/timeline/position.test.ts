@@ -1,5 +1,5 @@
 import { describe, expect, mock, test } from "bun:test";
-import { createTimelineController, type TimelineOptions } from "./position.js";
+import { createTimelineController, type TimelineOptions } from "./position.ts";
 
 const key = (name: string, extra: Partial<KeyboardEventInit> = {}) =>
   new KeyboardEvent("keydown", { key: name, ...extra });

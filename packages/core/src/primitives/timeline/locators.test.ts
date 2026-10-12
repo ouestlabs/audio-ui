@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { adjacentPoint } from "./locators.js";
+import { adjacentPoint } from "./locators.ts";
 
 const points = [30, 10, 20];
 

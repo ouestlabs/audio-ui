@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { fitPeaks, isAudible, loudest } from "./levels.js";
+import { fitPeaks, isAudible, loudest } from "./levels.ts";
 
 const fitTo = (peaks: ArrayLike<number>, count: number) =>
   fitPeaks(peaks, new Float32Array(count));

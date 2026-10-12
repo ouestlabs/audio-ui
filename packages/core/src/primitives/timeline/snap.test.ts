@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { bypassesGrid, snapMove, snapRangeMove, snapToGrid } from "./snap.js";
+import { bypassesGrid, snapMove, snapRangeMove, snapToGrid } from "./snap.ts";
 
 const grid = { offset: 0, step: 4 };
 

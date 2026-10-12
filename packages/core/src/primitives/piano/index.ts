@@ -7,11 +7,11 @@ export {
   type PianoNoteOnEventDetails,
   type PianoOptions,
   type PianoSnapshot,
-} from "./controller.js";
+} from "./controller.ts";
 export {
   BLACK_KEY_DEPTH,
   type KeyLayout,
   type KeyPlacement,
   keyAt,
   placeKeys,
-} from "./layout.js";
+} from "./layout.ts";

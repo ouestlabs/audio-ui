@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { rollRows } from "./rows.js";
+import { rollRows } from "./rows.ts";
 
 describe("rollRows", () => {
   test("draws every pitch, highest first, unfolded", () => {

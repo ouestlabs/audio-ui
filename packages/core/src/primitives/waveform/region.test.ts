@@ -2,7 +2,7 @@ import { describe, expect, mock, test } from "bun:test";
 import {
   createWaveformRegionController,
   type WaveformRegionOptions,
-} from "./region.js";
+} from "./region.ts";
 
 const key = (name: string, extra: Partial<KeyboardEventInit> = {}) =>
   new KeyboardEvent("keydown", { key: name, ...extra });

@@ -14,7 +14,7 @@ import {
   sanitizeNote,
   snapEdgeDelta,
   spatialOrder,
-} from "./edits.js";
+} from "./edits.ts";
 
 const BOUNDS = { duration: 16, maxPitch: 72, minLength: 1, minPitch: 48 };
 const CHORD: Note[] = [

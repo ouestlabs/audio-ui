@@ -1,11 +1,11 @@
-import { followPointer } from "../../dom/gesture.js";
-import { clamp } from "../../shared/math.js";
+import { followPointer } from "../../dom/gesture.ts";
+import { clamp } from "../../shared/math.ts";
 import {
   type ChangeEventDetails,
   type CommitEventDetails,
   createChangeEventDetails,
-} from "../../value/events.js";
-import { createPairFormatter } from "../../value/format.js";
+} from "../../value/events.ts";
+import { createPairFormatter } from "../../value/format.ts";
 import {
   type Breakpoint,
   CURVE_EPSILON,
@@ -19,7 +19,7 @@ import {
   sanitizePoints,
   segmentNear,
   snapTo,
-} from "./geometry.js";
+} from "./geometry.ts";
 
 /** With Shift held a drag moves this share of the pointer's distance. */
 const FINE_RATIO = 0.25;

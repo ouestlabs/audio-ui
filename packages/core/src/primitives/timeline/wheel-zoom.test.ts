@@ -1,5 +1,5 @@
 import { describe, expect, mock, test } from "bun:test";
-import { createWheelZoom, WHEEL_ZOOM_SENSITIVITY } from "./wheel-zoom.js";
+import { createWheelZoom, WHEEL_ZOOM_SENSITIVITY } from "./wheel-zoom.ts";
 
 // happy-dom drops the modifier keys of a WheelEvent init: a plain event carries what the zoom reads.
 const wheel = (init: { ctrlKey?: boolean; deltaY: number; clientX?: number }) =>

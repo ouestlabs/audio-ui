@@ -3,7 +3,7 @@ import {
   createPianoController,
   KEYBOARD_VELOCITY,
   type PianoOptions,
-} from "./controller.js";
+} from "./controller.ts";
 
 const key = (name: string, extra: Partial<KeyboardEventInit> = {}) =>
   new KeyboardEvent("keydown", { key: name, ...extra });

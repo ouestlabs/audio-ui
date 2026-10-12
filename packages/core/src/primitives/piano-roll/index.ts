@@ -16,7 +16,7 @@ export {
   type PianoRollSelectionEventDetails,
   type PianoRollSnapshot,
   type PianoRollTimeline,
-} from "./controller.js";
+} from "./controller.ts";
 export {
   cellStart,
   changeVelocity,
@@ -35,5 +35,5 @@ export {
   sanitizeNote,
   snapEdgeDelta,
   spatialOrder,
-} from "./edits.js";
-export { type Rows, rollRows } from "./rows.js";
+} from "./edits.ts";
+export { type Rows, rollRows } from "./rows.ts";

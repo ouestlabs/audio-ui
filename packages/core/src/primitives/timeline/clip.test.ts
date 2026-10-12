@@ -14,7 +14,7 @@ import {
   splitClip,
   trimClipEnd,
   trimClipStart,
-} from "./clip.js";
+} from "./clip.ts";
 
 const clip: ClipValue = {
   fadeIn: 1,

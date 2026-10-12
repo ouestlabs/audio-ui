@@ -1,4 +1,4 @@
-import { type LevelScale, levelPosition } from "./scale.js";
+import { type LevelScale, levelPosition } from "./scale.ts";
 
 export type MeterOrientation = "horizontal" | "vertical";
 

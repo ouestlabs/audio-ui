@@ -1,4 +1,4 @@
-import { clamp, clampFinite } from "../../shared/math.js";
+import { clamp, clampFinite } from "../../shared/math.ts";
 
 /**
  * A clip: a stretch of a source (a recording, a pattern) placed on the

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { isReleased } from "./pointer.js";
+import { isReleased } from "./pointer.ts";
 
 describe("isReleased", () => {
   test("a mouse or pen move with no button down means the release was missed", () => {

@@ -8,7 +8,7 @@ export {
   type KnobDragMode,
   type KnobOptions,
   type KnobSnapshot,
-} from "./controller.js";
+} from "./controller.ts";
 export {
   ANGLE_GAP_RAD,
   ARC_OUTER_RADIUS,
@@ -30,4 +30,4 @@ export {
   VERTICAL_DRAG_RANGE_PX,
   VIEWBOX_CENTER,
   WHEEL_DELTA_EPSILON,
-} from "./shared.js";
+} from "./shared.ts";

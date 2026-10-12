@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { isBlackKey, pitchName } from "./pitch.js";
+import { isBlackKey, pitchName } from "./pitch.ts";
 
 describe("pitchName", () => {
   test("names middle C C4 and counts octaves from C", () => {

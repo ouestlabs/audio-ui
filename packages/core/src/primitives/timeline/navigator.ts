@@ -1,7 +1,7 @@
-import { followPointer } from "../../dom/gesture.js";
-import { createChangeEventDetails } from "../../value/events.js";
-import type { TimelineZoomChangeEventDetails } from "./position.js";
-import type { ZoomAnchor } from "./scale.js";
+import { followPointer } from "../../dom/gesture.ts";
+import { createChangeEventDetails } from "../../value/events.ts";
+import type { TimelineZoomChangeEventDetails } from "./position.ts";
+import type { ZoomAnchor } from "./scale.ts";
 
 /** How the viewport is scrolled and zoomed, as last laid out. */
 export interface NavigatorMetrics {

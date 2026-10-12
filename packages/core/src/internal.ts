@@ -9,7 +9,7 @@ export type {
   Nullable,
   Optional,
   Procedure,
-} from "./shared/lang.js";
+} from "./shared/lang.ts";
 export {
   assertType,
   EmptyProcedure,
@@ -17,4 +17,4 @@ export {
   isNotUndefined,
   isUndefined,
   panic,
-} from "./shared/lang.js";
+} from "./shared/lang.ts";

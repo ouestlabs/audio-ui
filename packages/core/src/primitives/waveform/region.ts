@@ -1,15 +1,15 @@
-import { followPointer } from "../../dom/gesture.js";
+import { followPointer } from "../../dom/gesture.ts";
 import {
   type ChangeEventDetails,
   type CommitEventDetails,
   createChangeEventDetails,
-} from "../../value/events.js";
+} from "../../value/events.ts";
 import {
   moveRange,
   normalizeRange,
   type RangeEdge,
   type RangeValue,
-} from "../../value/range.js";
+} from "../../value/range.ts";
 
 export type WaveformRegionEdge = RangeEdge;
 export type WaveformRegionValue = RangeValue;

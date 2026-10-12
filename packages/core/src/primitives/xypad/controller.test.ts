@@ -1,5 +1,5 @@
 import { describe, expect, mock, test } from "bun:test";
-import { createXYPadController } from "./controller.js";
+import { createXYPadController } from "./controller.ts";
 
 const key = (name: string, extra: Partial<KeyboardEventInit> = {}) =>
   new KeyboardEvent("keydown", { key: name, ...extra });

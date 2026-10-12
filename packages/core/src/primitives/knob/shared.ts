@@ -1,5 +1,5 @@
-import { degToRad, PI_HALF, radToDeg, TAU } from "../../shared/math.js";
-import { type ParameterScale, resolveScale } from "../../value/scale.js";
+import { degToRad, PI_HALF, radToDeg, TAU } from "../../shared/math.ts";
+import { type ParameterScale, resolveScale } from "../../value/scale.ts";
 
 /** Center of the 48×48 viewBox the arcs are drawn in. */
 export const VIEWBOX_CENTER = 24;

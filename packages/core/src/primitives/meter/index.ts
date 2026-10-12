@@ -3,7 +3,7 @@ export {
   type LevelScale,
   type LevelScaleFunction,
   levelPosition,
-} from "./scale.js";
+} from "./scale.ts";
 export {
   channelView,
   createMeterConfig,
@@ -16,4 +16,4 @@ export {
   type MeterOrientation,
   paintChannel,
   setPresence,
-} from "./view.js";
+} from "./view.ts";

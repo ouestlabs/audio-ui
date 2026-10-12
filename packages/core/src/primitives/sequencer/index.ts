@@ -8,7 +8,7 @@ export {
   type SequencerValueCommitEventDetails,
   type SequencerVelocityChangeEventDetails,
   type SequencerVelocityCommitEventDetails,
-} from "./controller.js";
+} from "./controller.ts";
 export {
   type CellAddress,
   cellAtPoint,
@@ -22,4 +22,4 @@ export {
   type Velocities,
   velocityAt,
   velocityAtY,
-} from "./grid.js";
+} from "./grid.ts";

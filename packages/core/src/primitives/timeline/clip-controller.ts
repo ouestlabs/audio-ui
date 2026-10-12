@@ -1,9 +1,9 @@
-import { followPointer } from "../../dom/gesture.js";
+import { followPointer } from "../../dom/gesture.ts";
 import {
   type ChangeEventDetails,
   type CommitEventDetails,
   createChangeEventDetails,
-} from "../../value/events.js";
+} from "../../value/events.ts";
 import {
   type ClipLimits,
   type ClipValue,
@@ -16,8 +16,8 @@ import {
   setClipFadeShape,
   trimClipEnd,
   trimClipStart,
-} from "./clip.js";
-import { bypassesGrid, type Grid, snapMove } from "./snap.js";
+} from "./clip.ts";
+import { bypassesGrid, type Grid, snapMove } from "./snap.ts";
 
 /** What a change to the clip moves. */
 export type ClipTarget =

@@ -2,7 +2,7 @@ import { describe, expect, mock, test } from "bun:test";
 import {
   createRangeController,
   type RangeOptions,
-} from "./range-controller.js";
+} from "./range-controller.ts";
 
 const key = (name: string, extra: Partial<KeyboardEventInit> = {}) =>
   new KeyboardEvent("keydown", { key: name, ...extra });

@@ -2,7 +2,7 @@ import { describe, expect, mock, test } from "bun:test";
 import {
   createTrackController,
   type TrackOptions,
-} from "./track-controller.js";
+} from "./track-controller.ts";
 
 const key = (name: string, extra: Partial<KeyboardEventInit> = {}) =>
   new KeyboardEvent("keydown", { key: name, ...extra });

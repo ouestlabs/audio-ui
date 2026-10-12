@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { createLevelHistory } from "./level-history.js";
+import { createLevelHistory } from "./level-history.ts";
 
 const rounded = (levels: Float32Array) =>
   Array.from(levels, (level) => Math.round(level * 100) / 100);

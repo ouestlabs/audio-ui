@@ -1,10 +1,10 @@
-import { followPointer } from "../../dom/gesture.js";
-import { clamp } from "../../shared/math.js";
+import { followPointer } from "../../dom/gesture.ts";
+import { clamp } from "../../shared/math.ts";
 import {
   type ChangeEventDetails,
   type CommitEventDetails,
   createChangeEventDetails,
-} from "../../value/events.js";
+} from "../../value/events.ts";
 
 export type TrackHeightChangeEventDetails =
   | ChangeEventDetails<"drag", PointerEvent>

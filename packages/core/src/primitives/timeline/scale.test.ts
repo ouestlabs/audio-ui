@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { anchoredScroll, clampZoom, valueAtOffset } from "./scale.js";
+import { anchoredScroll, clampZoom, valueAtOffset } from "./scale.ts";
 
 describe("clampZoom", () => {
   test("keeps the zoom within its bounds", () => {

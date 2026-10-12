@@ -1,13 +1,13 @@
-import { followPointer } from "../../dom/gesture.js";
-import { clampFinite } from "../../shared/math.js";
+import { followPointer } from "../../dom/gesture.ts";
+import { clampFinite } from "../../shared/math.ts";
 import {
   type ChangeEventDetails,
   type CommitEventDetails,
   createChangeEventDetails,
-} from "../../value/events.js";
-import type { Source } from "../../value/source.js";
-import { clampZoom } from "./scale.js";
-import { bypassesGrid, type Grid, snapToGrid } from "./snap.js";
+} from "../../value/events.ts";
+import type { Source } from "../../value/source.ts";
+import { clampZoom } from "./scale.ts";
+import { bypassesGrid, type Grid, snapToGrid } from "./snap.ts";
 
 export type TimelinePositionChangeEventDetails =
   | ChangeEventDetails<"press" | "drag", PointerEvent>

@@ -1,5 +1,5 @@
 import { describe, expect, mock, test } from "bun:test";
-import { createFaderController } from "./controller.js";
+import { createFaderController } from "./controller.ts";
 
 const key = (name: string, extra: Partial<KeyboardEventInit> = {}) =>
   new KeyboardEvent("keydown", { key: name, ...extra });

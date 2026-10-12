@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import {
   createLevelsEngine,
   type LevelsEngineOptions,
-} from "./levels-engine.js";
+} from "./levels-engine.ts";
 
 const engineWith = (options: Partial<LevelsEngineOptions> = {}) =>
   createLevelsEngine({

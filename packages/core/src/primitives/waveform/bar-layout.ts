@@ -6,7 +6,7 @@
  */
 export type WaveformVariant = "bars" | "line" | "mirror" | "scope";
 
-import type { PeakEnvelope } from "./peaks.js";
+import type { PeakEnvelope } from "./peaks.ts";
 
 /** Where the bars go on the canvas bitmap. Every length is in device pixels. */
 export interface BarLayout {

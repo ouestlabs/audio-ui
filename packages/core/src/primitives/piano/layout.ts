@@ -1,4 +1,4 @@
-import { isBlackKey } from "../../shared/pitch.js";
+import { isBlackKey } from "../../shared/pitch.ts";
 
 /**
  * How the keys share the keyboard's length: `"keyboard"` like a piano, white

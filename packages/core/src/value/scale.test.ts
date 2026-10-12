@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { LINEAR_SCALE, LOGARITHMIC_SCALE, resolveScale } from "./scale.js";
+import { LINEAR_SCALE, LOGARITHMIC_SCALE, resolveScale } from "./scale.ts";
 
 describe("LINEAR_SCALE", () => {
   test("maps the range evenly onto 0…1 and back", () => {

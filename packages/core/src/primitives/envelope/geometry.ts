@@ -1,9 +1,9 @@
-import type { Nullable } from "../../shared/lang.js";
+import type { Nullable } from "../../shared/lang.ts";
 import {
   clamp,
   clampUnit,
   type Point as GeomPoint,
-} from "../../shared/math.js";
+} from "../../shared/math.ts";
 
 /** How far a segment can bend: its curve exponent runs from 1/8 to 8 at the ends of -1…1. */
 export const CURVE_EXPONENT_RANGE = 3;

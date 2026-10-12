@@ -11,15 +11,15 @@ export {
   mirroredScrollRects,
   scrollShift,
   type WaveformVariant,
-} from "./bar-layout.js";
-export { createLevelHistory, type LevelHistory } from "./level-history.js";
-export { isAudible, loudest, SILENCE_THRESHOLD } from "./levels.js";
+} from "./bar-layout.ts";
+export { createLevelHistory, type LevelHistory } from "./level-history.ts";
+export { isAudible, loudest, SILENCE_THRESHOLD } from "./levels.ts";
 export {
   createLevelsEngine,
   type LevelsEngine,
   type LevelsEngineOptions,
   type WaveformIdle,
-} from "./levels-engine.js";
+} from "./levels-engine.ts";
 export {
   fitPeaks,
   type PeakEnvelope,
@@ -27,7 +27,7 @@ export {
   peakMagnitudes,
   rangeShares,
   type WaveformPeaks,
-} from "./peaks.js";
+} from "./peaks.ts";
 export {
   createWaveformRegionController,
   type WaveformRegionChangeEventDetails,
@@ -37,8 +37,8 @@ export {
   type WaveformRegionOptions,
   type WaveformRegionSnapshot,
   type WaveformRegionValue,
-} from "./region.js";
-export { type ScopeOptions, type ScopePoint, scopePoints } from "./scope.js";
+} from "./region.ts";
+export { type ScopeOptions, type ScopePoint, scopePoints } from "./scope.ts";
 export {
   createWaveformController,
   type WaveformSeekChangeEventDetails,
@@ -49,4 +49,4 @@ export {
   type WaveformSelectionChangeEventDetails,
   type WaveformSelectionCommitEventDetails,
   type WaveformSelectionHandlers,
-} from "./seek.js";
+} from "./seek.ts";

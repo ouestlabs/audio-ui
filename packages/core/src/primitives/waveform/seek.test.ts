@@ -1,5 +1,5 @@
 import { describe, expect, mock, test } from "bun:test";
-import { createWaveformController, type WaveformSeekOptions } from "./seek.js";
+import { createWaveformController, type WaveformSeekOptions } from "./seek.ts";
 
 const key = (name: string, extra: Partial<KeyboardEventInit> = {}) =>
   new KeyboardEvent("keydown", { key: name, ...extra });

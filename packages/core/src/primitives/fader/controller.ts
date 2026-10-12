@@ -1,11 +1,11 @@
-import { isReleased } from "../../dom/pointer.js";
-import { clamp, clampFinite, roundToStep } from "../../shared/math.js";
+import { isReleased } from "../../dom/pointer.ts";
+import { clamp, clampFinite, roundToStep } from "../../shared/math.ts";
 import {
   type ChangeEventDetails,
   type CommitEventDetails,
   createChangeEventDetails,
-} from "../../value/events.js";
-import { DEFAULT_MAX, DEFAULT_MIN, WHEEL_DELTA_EPSILON } from "./defaults.js";
+} from "../../value/events.ts";
+import { DEFAULT_MAX, DEFAULT_MIN, WHEEL_DELTA_EPSILON } from "./defaults.ts";
 
 type Details<Reason extends string, E extends Event> = ChangeEventDetails<
   Reason,
