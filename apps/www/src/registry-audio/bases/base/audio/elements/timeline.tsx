@@ -200,7 +200,7 @@ function TimelineRangeHandle({
   return (
     <TimelinePrimitive.RangeHandle
       className={cn(
-        "cn-timeline-range-handle absolute inset-y-0.5 w-2 cursor-ew-resize data-[edge=end]:right-0.5 data-[edge=start]:left-0.5",
+        "cn-timeline-range-handle absolute inset-y-1 w-2 cursor-ew-resize data-[edge=end]:right-1 data-[edge=start]:left-1",
         "after:absolute after:-inset-x-1.5 after:inset-y-0 pointer-coarse:after:-inset-x-3",
         className
       )}
@@ -278,7 +278,7 @@ function TimelineClipFadeHandle({
   return (
     <TimelinePrimitive.ClipFadeHandle
       className={cn(
-        "cn-timeline-clip-fade-handle top-0 z-20 size-2.5 cursor-ew-resize opacity-0 transition-opacity",
+        "cn-timeline-clip-fade-handle top-1 z-20 size-2.5 cursor-ew-resize opacity-0 transition-opacity",
         "group-hover/clip:opacity-100 group-data-[selected]/clip:opacity-100 data-dragging:opacity-100 has-focus-visible:opacity-100",
         "after:absolute after:-inset-1 pointer-coarse:opacity-100 pointer-coarse:after:-inset-2",
         className
@@ -302,16 +302,16 @@ function TimelineNavigator({
     >
       <TimelinePrimitive.NavigatorWindow
         aria-label="Visible range"
-        className="cn-timeline-navigator-window inset-y-0 min-w-4 cursor-grab active:cursor-grabbing"
+        className="cn-timeline-navigator-window inset-y-0 min-w-6 cursor-grab active:cursor-grabbing"
       />
       <TimelinePrimitive.NavigatorHandle
         aria-label="Start of the visible range"
-        className="cn-timeline-navigator-handle inset-y-0 w-1.5 cursor-ew-resize after:absolute after:-inset-x-1.5 after:inset-y-0"
+        className="cn-timeline-navigator-handle inset-y-1 ms-1 w-2 cursor-ew-resize after:absolute after:-inset-x-1.5 after:inset-y-0"
         edge="start"
       />
       <TimelinePrimitive.NavigatorHandle
         aria-label="End of the visible range"
-        className="cn-timeline-navigator-handle inset-y-0 w-1.5 cursor-ew-resize data-[edge=end]:-translate-x-full after:absolute after:-inset-x-1.5 after:inset-y-0"
+        className="cn-timeline-navigator-handle inset-y-1 w-2 cursor-ew-resize data-[edge=end]:-translate-x-[calc(100%+0.25rem)] after:absolute after:-inset-x-1.5 after:inset-y-0"
         edge="end"
       />
     </TimelinePrimitive.Navigator>

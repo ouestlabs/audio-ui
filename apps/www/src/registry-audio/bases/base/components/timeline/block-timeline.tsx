@@ -1318,7 +1318,7 @@ export default function BlockTimeline() {
             {/* One sticky block, so what is stuck stays stacked whatever each row measures. */}
             <div className="sticky top-0 z-40 flex min-w-full shrink-0 flex-col bg-background">
               <Row className="shrink-0">
-                <TimelineLane className="h-4 cursor-cell">
+                <TimelineLane className="h-6 cursor-cell">
                   <TimelineRange
                     aria-label="Loop"
                     drawable

@@ -509,7 +509,7 @@
   }
 
   .cn-timeline-navigator {
-    @apply h-5 rounded-none bg-muted;
+    @apply h-6 rounded-none bg-muted;
   }
 
   .cn-timeline-navigator-window {
