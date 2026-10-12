@@ -357,7 +357,8 @@ function TransportTempo({
             />
           }
         >
-          {tempo.bpm}
+          {" "}
+          BPM
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start">
           <div className="p-2">
