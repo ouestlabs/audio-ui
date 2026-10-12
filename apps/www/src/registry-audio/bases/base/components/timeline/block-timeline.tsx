@@ -53,15 +53,6 @@ import {
   PopoverTitle,
   PopoverTrigger,
 } from "@/registry/bases/base/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/registry/bases/base/ui/select";
-import { Toggle } from "@/registry/bases/base/ui/toggle";
 import { NumberControl } from "@/registry-audio/bases/base/audio/elements/bpm-control";
 import { Meter } from "@/registry-audio/bases/base/audio/elements/meter";
 import {
@@ -108,7 +99,6 @@ import {
   GRID_DIVISIONS,
   type GridDivision,
   gridInterval,
-  gridLabel,
   type MetronomeRhythm,
   secondsPerBar,
   type Tempo,
@@ -845,10 +835,6 @@ export default function BlockTimeline() {
   const [division, setDivision] = useState<GridDivision>("adaptive");
   const [triplet, setTriplet] = useState(false);
   const [snap, setSnap] = useState(true);
-  const handleDivision = useCallback(
-    (next: GridDivision | null) => setDivision(next ?? "adaptive"),
-    []
-  );
   // A stand-in for the mix's levels: the block plays nothing, so they move while it runs.
   const simulated = useSimulatedLevels(2);
   // What is heard: a muted track is silent, and while any track is soloed so is every other.
@@ -1218,42 +1204,6 @@ export default function BlockTimeline() {
             </PopoverContent>
           </Popover>
           <div className="hidden items-center gap-2 @7xl/panel:flex">
-            <Select
-              items={DIVISIONS}
-              onValueChange={handleDivision}
-              value={division}
-            >
-              <SelectTrigger aria-label="Grid" className="w-40">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  {DIVISIONS.map((item) => (
-                    <SelectItem key={item.value} value={item.value}>
-                      {item.label}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-            <Toggle
-              aria-label="Select several clips"
-              onPressedChange={setMulti}
-              pressed={multi}
-              variant="outline"
-            >
-              Multi-select
-            </Toggle>
-            <Toggle aria-label="Triplet grid" onPressedChange={setTriplet}>
-              Triplet
-            </Toggle>
-            <Toggle
-              aria-label="Snap to grid"
-              onPressedChange={setSnap}
-              variant="outline"
-            >
-              Snap {snap ? gridLabel(gridSeconds, tempo) : "off"}
-            </Toggle>
             <NumberControl
               format={PERCENT}
               label="Zoom"
