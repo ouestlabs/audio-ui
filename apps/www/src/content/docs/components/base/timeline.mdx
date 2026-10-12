@@ -31,7 +31,7 @@ The base for an arrangement view, a clip editor or a piano roll. The registry co
 <TabsContent value="cli">
 
 ```bash component
-npx shadcn@latest add @audio/timeline @audio/musical-time
+npx shadcn@latest add @audio-ui/timeline @audio-ui/musical-time
 ```
 
 </TabsContent>
@@ -256,7 +256,7 @@ Place it anywhere inside the timeline, outside the viewport. Dragging an edge zo
 
 ## Musical time
 
-The `musical-time` lib (`npx shadcn@latest add @audio/musical-time`) turns a tempo into what a timeline needs, in seconds:
+The `musical-time` lib (`npx shadcn@latest add @audio-ui/musical-time`) turns a tempo into what a timeline needs, in seconds:
 
 - `gridInterval(division, zoom, tempo)` is the grid's step: a fixed division (`"1-bar"`, `"1/8"`, …), or `"adaptive"` for the finest division still 24px apart at this zoom. Pass `{ triplet: true }` for three in the space of two. Give the same number to `snapStep` and to the lanes' `gridStep`, so gestures land on the lines you see.
 - `barLabelInterval(zoom, tempo)` is how far apart the ruler's bar numbers go: whole bars, spread out until they no longer collide.
@@ -266,7 +266,7 @@ The `musical-time` lib (`npx shadcn@latest add @audio/musical-time`) turns a tem
 
 ## Undo and redo
 
-The `history` lib (`npx shadcn@latest add @audio/history`) implements undo and redo as values: every function takes the present and returns the new present, and keeps no state of its own. Keep the history in a ref and the document in state, so two undos in one tick are fed the first one's result instead of reading the same stack twice.
+The `history` lib (`npx shadcn@latest add @audio-ui/history`) implements undo and redo as values: every function takes the present and returns the new present, and keeps no state of its own. Keep the history in a ref and the document in state, so two undos in one tick are fed the first one's result instead of reading the same stack twice.
 
 ```ts
 let history = emptyHistory<Clip[]>();
@@ -288,7 +288,7 @@ A new change clears redo, since the redo branch no longer follows from the prese
 
 The arrangement block is built from pieces you can install on their own, each a file you own:
 
-- `arrangement` (`npx shadcn@latest add @audio/arrangement`) is the pure side: `lay` puts a clip on a track so it covers what is under it, `land` drops a dragged group (or its copies) on another track, `shiftTrack` and `otherSelected` are what a group drop needs, and `scaleValue` rescales a clip when the tempo changes. Tracks are passed as an order of ids, so nothing assumes how many there are.
+- `arrangement` (`npx shadcn@latest add @audio-ui/arrangement`) is the pure side: `lay` puts a clip on a track so it covers what is under it, `land` drops a dragged group (or its copies) on another track, `shiftTrack` and `otherSelected` are what a group drop needs, and `scaleValue` rescales a clip when the tempo changes. Tracks are passed as an order of ids, so nothing assumes how many there are.
 - `use-arrangement` is the state: tracks, clips, selection, each track's mix and height, and every operation on them. It keeps undo and redo over tracks and clips together.
 - `use-playback-clock` is a transport clock as a live source that loops between two points, and `use-marquee-selection` is the rectangle that selects the clips it touches.
 

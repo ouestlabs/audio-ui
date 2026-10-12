@@ -28,7 +28,7 @@ Shows audio levels for a stereo output, a channel strip or any multi-channel sou
 <TabsContent value="cli">
 
 ```bash component
-npx shadcn@latest add @audio/meter
+npx shadcn@latest add @audio-ui/meter
 ```
 
 </TabsContent>
@@ -100,7 +100,7 @@ import { Meter } from "@/components/audio/meter";
 
 `value` and `peak` are plain props: fine for static or slowly changing levels, but a signal sampled 60 times a second would re-render React on every frame. For live audio, pass a `source` instead: the meter subscribes to it and writes each frame to the DOM, without a React render.
 
-The `use-audio-levels` hook (`npx shadcn@latest add @audio/use-audio-levels`) returns such a source. It samples RMS level (in dB) from one `AnalyserNode` per channel every animation frame, with a peak-hold level that holds the loudest recent level for 1.5s before decaying:
+The `use-audio-levels` hook (`npx shadcn@latest add @audio-ui/use-audio-levels`) returns such a source. It samples RMS level (in dB) from one `AnalyserNode` per channel every animation frame, with a peak-hold level that holds the loudest recent level for 1.5s before decaying:
 
 ```tsx
 const levels = useAudioLevels([leftAnalyser, rightAnalyser]);

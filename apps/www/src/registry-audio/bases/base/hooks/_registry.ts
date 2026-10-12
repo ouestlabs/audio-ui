@@ -10,7 +10,7 @@ export const hooks: RegistryItem[] = [
       },
     ],
     name: "use-web-audio",
-    registryDependencies: ["@audio/web"],
+    registryDependencies: ["@audio-ui/web"],
     type: "registry:hook",
   },
   {
@@ -55,7 +55,7 @@ export const hooks: RegistryItem[] = [
       },
     ],
     name: "use-arrangement",
-    registryDependencies: ["@audio/arrangement", "@audio/history"],
+    registryDependencies: ["@audio-ui/arrangement", "@audio-ui/history"],
     type: "registry:hook",
   },
   {
@@ -68,8 +68,8 @@ export const hooks: RegistryItem[] = [
     ],
     name: "use-transport-clock",
     registryDependencies: [
-      "@audio/use-web-audio",
-      "@audio/lookahead-scheduler",
+      "@audio-ui/use-web-audio",
+      "@audio-ui/lookahead-scheduler",
     ],
     type: "registry:hook",
   },
@@ -82,7 +82,7 @@ export const hooks: RegistryItem[] = [
       },
     ],
     name: "use-master-bus",
-    registryDependencies: ["@audio/use-web-audio"],
+    registryDependencies: ["@audio-ui/use-web-audio"],
     type: "registry:hook",
   },
   {
@@ -94,7 +94,7 @@ export const hooks: RegistryItem[] = [
       },
     ],
     name: "use-synth-voices",
-    registryDependencies: ["@audio/synth-voice"],
+    registryDependencies: ["@audio-ui/synth-voice"],
     type: "registry:hook",
   },
   {
@@ -106,7 +106,7 @@ export const hooks: RegistryItem[] = [
       },
     ],
     name: "use-midi-input",
-    registryDependencies: ["@audio/midi"],
+    registryDependencies: ["@audio-ui/midi"],
     type: "registry:hook",
   },
   {
@@ -135,7 +135,7 @@ export const hooks: RegistryItem[] = [
       },
     ],
     name: "use-spectrum",
-    registryDependencies: ["@audio/spectrum"],
+    registryDependencies: ["@audio-ui/spectrum"],
     type: "registry:hook",
   },
   {
@@ -150,7 +150,7 @@ export const hooks: RegistryItem[] = [
       },
     ],
     name: "use-noise-through-eq",
-    registryDependencies: ["@audio/use-web-audio", "@audio/filter-response"],
+    registryDependencies: ["@audio-ui/use-web-audio", "@audio-ui/filter-response"],
     type: "registry:hook",
   },
   {
@@ -165,7 +165,7 @@ export const hooks: RegistryItem[] = [
       },
     ],
     name: "use-pulses-through-compressor",
-    registryDependencies: ["@audio/use-web-audio"],
+    registryDependencies: ["@audio-ui/use-web-audio"],
     type: "registry:hook",
   },
 ];

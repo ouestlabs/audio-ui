@@ -33,7 +33,7 @@ Components for drawing audio. `Waveform` shows a whole file and lets you scrub t
 <TabsContent value="cli">
 
 ```bash component
-npx shadcn@latest add @audio/waveform
+npx shadcn@latest add @audio-ui/waveform
 ```
 
 </TabsContent>
@@ -133,7 +133,7 @@ const { bands } = useAudioSignal(analyser);
 
 ## Feeding real audio
 
-`values` is a plain prop: the component does not decode audio. The `waveform-dsp` lib (`npx shadcn@latest add @audio/waveform-dsp`) turns a real audio file into `values`: `decodeAudioChannels` reads every channel's PCM samples out of an `AudioContext`, `computePeaks` reduces them to each slice's lowest and highest sample across all channels (so a take panned hard to one side still draws), and `normalizePeaks` scales them so the loudest sample reaches full height.
+`values` is a plain prop: the component does not decode audio. The `waveform-dsp` lib (`npx shadcn@latest add @audio-ui/waveform-dsp`) turns a real audio file into `values`: `decodeAudioChannels` reads every channel's PCM samples out of an `AudioContext`, `computePeaks` reduces them to each slice's lowest and highest sample across all channels (so a take panned hard to one side still draws), and `normalizePeaks` scales them so the loudest sample reaches full height.
 
 ```tsx
 import {
@@ -208,7 +208,7 @@ interface LevelsSource {
 }
 ```
 
-The `use-audio-signal` hook (`npx shadcn@latest add @audio/use-audio-signal`) reads two of them from an `AnalyserNode`, every animation frame and only while something is drawing them:
+The `use-audio-signal` hook (`npx shadcn@latest add @audio-ui/use-audio-signal`) reads two of them from an `AnalyserNode`, every animation frame and only while something is drawing them:
 
 ```tsx
 const { level, bands, samples } = useAudioSignal(analyser, { bandCount: 32 });

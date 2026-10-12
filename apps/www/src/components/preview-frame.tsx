@@ -106,7 +106,7 @@ export function PreviewBar({
         {expand?.host ? (
           <ExpandPreview hint={hint} label={name} preview={expand} />
         ) : null}
-        <CopyRegistry value={`@audio/${name}`} />
+        <CopyRegistry value={`@audio-ui/${name}`} />
         {actions}
       </div>
     </Bar>

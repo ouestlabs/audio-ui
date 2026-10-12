@@ -2,8 +2,8 @@
 
 **audio/ui** is an open-source library of accessible, composable Audio UI components for React, built on top of [shadcn/ui](https://ui.shadcn.com/), designed to be copied, pasted, and owned.
 
-- Site: https://audio-ui.dev · Repo: https://github.com/ouestlabs/audio-ui
-- Registry endpoint: `https://audio-ui.dev/r/{style}/{name}.json`
+- Site: https://www.audio-ui.dev · Repo: https://github.com/ouestlabs/audio-ui
+- Registry endpoint: `https://www.audio-ui.dev/r/{style}/{name}.json`
 
 ---
 
@@ -90,7 +90,7 @@ The "API reference" paragraphs of `components/base/*.mdx` are hand-kept copies o
 **After any registry change:** run `bun run registry:build` from `apps/www/`, then `bun run lint:fix`.
 
 **Registry dependency format:**
-- audio/ui items (component, hook, or lib) → `"@audio/{name}"`
+- audio/ui items (component, hook, or lib) → `"@audio-ui/{name}"`
 - official shadcn/ui → `"@shadcn/{name}"`
 
 **Block/demo rules** (`registry-audio/bases/base/components/{category}/`):

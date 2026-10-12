@@ -8,7 +8,7 @@ MCP is an open protocol that lets AI agents use tools. The audio/ui MCP server g
 The server is remote, needs no account and no install:
 
 ```
-https://audio-ui.dev/mcp
+https://www.audio-ui.dev/mcp
 ```
 
 ## Connect your client
@@ -25,7 +25,7 @@ https://audio-ui.dev/mcp
 <TabsContent value="claude">
 
 ```bash
-claude mcp add --transport http audio-ui https://audio-ui.dev/mcp
+claude mcp add --transport http audio-ui https://www.audio-ui.dev/mcp
 ```
 
 </TabsContent>
@@ -38,7 +38,7 @@ Add this to `.cursor/mcp.json`:
 {
   "mcpServers": {
     "audio-ui": {
-      "url": "https://audio-ui.dev/mcp"
+      "url": "https://www.audio-ui.dev/mcp"
     }
   }
 }
@@ -55,7 +55,7 @@ Add this to `.vscode/mcp.json`:
   "servers": {
     "audio-ui": {
       "type": "http",
-      "url": "https://audio-ui.dev/mcp"
+      "url": "https://www.audio-ui.dev/mcp"
     }
   }
 }
@@ -89,6 +89,6 @@ Ask your agent in plain words:
 
 ## With shadcn
 
-Because audio/ui is also a shadcn registry, the shadcn MCP server can install components too. Run `npx shadcn@latest mcp init` and add the `@audio` registry from the [Registry guide](/docs/registry).
+Because audio/ui is also a shadcn registry, the shadcn MCP server can install components too. Run `npx shadcn@latest mcp init` and add the `@audio-ui` registry from the [Registry guide](/docs/registry).
 
 For the best results, also install the [agent skill](/docs/agents).

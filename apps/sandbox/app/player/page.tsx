@@ -25,7 +25,7 @@ export default function Player() {
   return (
     <div className="mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center gap-4 p-8">
       <p className="text-muted-foreground text-xs">
-        registry · @audio/player · full composite
+        registry · @audio-ui/player · full composite
       </p>
       <AudioPlayer className="p-2" tracks={demoTracks}>
         <AudioPlayerControlBar>

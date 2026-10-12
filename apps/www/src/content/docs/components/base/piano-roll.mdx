@@ -33,7 +33,7 @@ A piano roll for writing a phrase: a keyboard down the side, notes on a grid, an
 <TabsContent value="cli">
 
 ```bash component
-npx shadcn@latest add @audio/piano-roll
+npx shadcn@latest add @audio-ui/piano-roll
 ```
 
 </TabsContent>
@@ -140,7 +140,7 @@ import {
 
 A note is `{ id, pitch, start, length, velocity? }`: `pitch` is a MIDI number (60 is middle C), `start` and `length` are in the timeline's units, and `velocity` is 0 to 1 (full when left out). `value` and `selection` are controlled; `defaultValue` and `defaultSelection` leave them to the roll. The roll reports every edit through `onValueChange` and, when a gesture or a key press ends, `onValueCommitted`; `eventDetails.edit` tells what happened (`"add"`, `"move"`, `"resize"`, `"remove"`, `"duplicate"`, `"paste"`, `"quantize"` or `"velocity"`) and `eventDetails.cancel()` keeps the notes as they were.
 
-`onNoteOn` and `onNoteOff` say when a pitch should sound or stop: a key pressed, a note drawn, picked up or moved to a new pitch. A MIDI file can be read and written with the `midi` library (`@audio/midi`); the preview above imports and exports `.mid` files with it.
+`onNoteOn` and `onNoteOff` say when a pitch should sound or stop: a key pressed, a note drawn, picked up or moved to a new pitch. A MIDI file can be read and written with the `midi` library (`@audio-ui/midi`); the preview above imports and exports `.mid` files with it.
 
 ## Interaction
 
