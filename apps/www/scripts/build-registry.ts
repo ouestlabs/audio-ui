@@ -595,6 +595,7 @@ async function main() {
     await fs.mkdir(styleDir, { recursive: true });
 
     let styleFiles = 0;
+    const indexItems: object[] = [];
 
     for (const itemName of allItemNames) {
       try {
@@ -614,11 +615,30 @@ async function main() {
         );
         styleFiles++;
         totalBytes += json.length;
+
+        // The shadcn registry index wants items without file contents.
+        const { $schema: _schema, ...indexItem } = item;
+        indexItems.push({
+          ...indexItem,
+          files: item.files.map(({ content: _content, ...file }) => file),
+        });
       } catch (error) {
         errors++;
         console.error(`  Error building ${styleName}/${itemName}:`, error);
       }
     }
+
+    // registry.json lists the style's items for `shadcn search` / `list`.
+    await fs.writeFile(
+      path.join(styleDir, "registry.json"),
+      JSON.stringify({
+        $schema: "https://ui.shadcn.com/schema/registry.json",
+        homepage: "https://www.audio-ui.dev",
+        items: indexItems,
+        name: "audio-ui",
+      }),
+      "utf-8"
+    );
 
     totalFiles += styleFiles;
     console.log(`  ${styleName}: ${styleFiles} files`);
@@ -659,7 +679,7 @@ async function main() {
     const entries = await fs.readdir(styleDir);
 
     for (const entry of entries) {
-      if (!entry.endsWith(".json")) {
+      if (!entry.endsWith(".json") || entry === "registry.json") {
         continue;
       }
       const filePath = path.join(styleDir, entry);
