@@ -313,7 +313,7 @@ function Row({
       selected={selected}
       step={TRACK_HEIGHT_STEP}
     >
-      <TimelineTrackHeader className="relative flex items-stretch @max-xl/panel:w-32">
+      <TimelineTrackHeader className="relative flex items-stretch @max-xl/panel:w-36">
         {lead}
       </TimelineTrackHeader>
       <div className="flex flex-1 flex-col">{children}</div>

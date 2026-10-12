@@ -602,7 +602,7 @@ function TimelineTrackControls({
           </Button>
         </div>
         {compact ? null : (
-          <div className="flex h-7 items-center gap-5 pe-1">
+          <div className="flex h-7 items-center gap-5 pe-1 @max-[9rem]/header:gap-3">
             <Fader
               aria-label={`${name} gain`}
               className="ms-2.5 min-w-0 flex-1 **:data-[orientation=horizontal]:min-w-0 **:data-[slot=fader-value]:top-full **:data-[slot=fader-value]:bottom-auto **:data-[slot=fader-value]:mt-1 **:data-[slot=fader-value]:mb-0"
@@ -620,7 +620,7 @@ function TimelineTrackControls({
             <Knob
               anchor={0}
               aria-label={`${name} pan`}
-              className="mb-0 size-7 shrink-0 @max-[8rem]/header:hidden"
+              className="mb-0 size-7 shrink-0"
               editableValue
               formatValue={formatPan}
               max={1}
