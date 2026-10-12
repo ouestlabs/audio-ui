@@ -9,6 +9,7 @@ export default function XYPadBipolarRangeDemo() {
   return (
     <div className="flex flex-col items-center gap-2">
       <XYPad
+        aria-label="Pan and mix"
         className="aspect-square"
         defaultValue={{ x: 0, y: 0 }}
         formatValue={(next) => `Pan ${next.x} | Mix ${next.y.toFixed(2)}`}

@@ -194,6 +194,13 @@ const nextConfig: NextConfig = {
   },
   redirects() {
     return [
+      // The former domain keeps working, registry URLs included, so installed `components.json` files do not break.
+      {
+        destination: "https://audio-ui.dev/:path*",
+        has: [{ type: "host", value: "(www\\.)?audio-ui\\.xyz" }],
+        permanent: true,
+        source: "/:path*",
+      },
       {
         destination: "/docs/:path*.md",
         permanent: true,

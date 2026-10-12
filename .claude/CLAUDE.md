@@ -1,9 +1,9 @@
 # audio/ui
 
-**audio/ui** is an open-source library of accessible, composable Audio UI components for React — built on top of [shadcn/ui](https://ui.shadcn.com/), designed to be copied, pasted, and owned.
+**audio/ui** is an open-source library of accessible, composable Audio UI components for React, built on top of [shadcn/ui](https://ui.shadcn.com/), designed to be copied, pasted, and owned.
 
-- Site: https://audio-ui.xyz · Repo: https://github.com/ouestlabs/audio-ui
-- Registry endpoint: `https://audio-ui.xyz/r/{style}/{name}.json`
+- Site: https://audio-ui.dev · Repo: https://github.com/ouestlabs/audio-ui
+- Registry endpoint: `https://audio-ui.dev/r/{style}/{name}.json`
 
 ---
 
@@ -17,9 +17,8 @@ audio-ui/
 │   ├── www/        # Next.js docs site + registry (Fumadocs + MDX) → localhost:4000
 │   └── sandbox/    # Dev sandbox
 └── packages/
-    ├── ui/         # @audio-ui/react — published npm package (headless primitives)
-    ├── utils/      # Shared utilities
-    └── configs/    # Shared tsconfig, etc.
+    ├── core/       # @audio-ui/core, published npm package (framework-agnostic logic)
+    └── ui/         # @audio-ui/react, published npm package (headless primitives)
 ```
 
 ## Key Commands
@@ -33,8 +32,8 @@ bun run changeset       # Create a changeset before versioning
 
 From `apps/www/`:
 ```sh
-bun run registry:build  # Regenerate static registry JSON (public/r/styles/) — run after adding any item
-bun run icons:build     # Regenerate icon mappings — run after adding icons
+bun run registry:build  # Regenerate static registry JSON (public/r/styles/), run after adding any item
+bun run icons:build     # Regenerate icon mappings, run after adding icons
 ```
 
 ## Stack
@@ -43,18 +42,28 @@ Next.js App Router · Fumadocs + MDX · Tailwind CSS v4 · shadcn/ui + Base UI �
 
 ## Where Things Live
 
-### `@audio-ui/react` — headless primitives (`packages/ui/src/`)
+### `@audio-ui/core`, framework-agnostic logic (`packages/core/src/`)
 
-- `primitives/` — Fader, Knob, Transport, XYPad, ChannelStrip (unstyled, accessible)
-- `hooks/interactions/` — usePointerDrag, useWheel, useKeyboardNavigation, useFocus
-- `hooks/state/` — useControlledValue, useValueAsRef
+- `shared/`, lang (types, guards), math, pitch
+- `value/`, scales, ranges, formatting, change/commit event details, live sources and stores
+- `dom/`, frame scheduling, pointer release, visibility, data attributes
+- `index.ts` is the public API; `internal.ts` (`@audio-ui/core/internal`) is for adapters only
+- `primitives/<name>/`, each primitive's own logic (timeline clips, waveform peaks, envelope geometry…), published as `@audio-ui/core/<name>`
+
+`@audio-ui/react` depends on it. In development it resolves to `packages/core/src` through tsconfig `paths` (Bun honours them in tests); its build reads `dist`.
+
+### `@audio-ui/react`, headless primitives (`packages/ui/src/`)
+
+- `primitives/`, Fader, Knob, Transport, XYPad, ChannelStrip (unstyled, accessible)
+- `hooks/interactions/`, usePointerDrag, useWheel, useKeyboardNavigation, useFocus
+- `hooks/state/`, useControlledValue, useValueAsRef
 
 This package is **published to npm**. Don't break its public API without a changeset.
 
 ### Two registry trees in `apps/www/src/`
 
-- `registry/` — fork of shadcn/ui (bases, styles, icons, fonts, themes). **Synced from upstream** via `bun run registry:sync` — never hand-edit.
-- `registry-audio/` — audio/ui's own registry, **the actual contribution surface**:
+- `registry/`, started as a fork of shadcn/ui (bases, styles, icons, fonts, themes) and now **belongs to audio/ui**: edit it freely so the site reflects audio/ui only (Base UI is the single base). `bun run registry:sync` pulls shadcn upstream and would bring back what was removed, so only run it on purpose.
+- `registry-audio/`, audio/ui's own registry, **the actual contribution surface**:
 
 ```
 registry-audio/bases/base/
@@ -64,13 +73,15 @@ registry-audio/bases/base/
 └── lib/            # audio-store.ts, html-audio.ts, web-audio.ts
 ```
 
-Each of `audio/`, `components/`, `hooks/`, `lib/` has an `_registry.ts` (`export const {audio,components,hooks,lib}: RegistryItem[]`) — **update the matching one when adding anything**. File paths inside are relative to `bases/base/`.
+Each of `audio/`, `components/`, `hooks/`, `lib/` has an `_registry.ts` (`export const {audio,components,hooks,lib}: RegistryItem[]`), **update the matching one when adding anything**. File paths inside are relative to `bases/base/`.
 
-The site manifests (`registry-audio/bases/{components,registry,seo}.json`) are **generated** by `bun run registry:build` from the `_registry.ts` files and `registry-audio/bases/categories.ts` — never edit them by hand. New category → add it to `categories.ts` (label + description; SEO copy is templated from those, with optional overrides). A category listed there with zero items fails the build; item tags not listed there (e.g. `ui`, `grid`) are free-form search tags, not categories.
+The site manifests (`registry-audio/bases/{components,registry,seo}.json`) are **generated** by `bun run registry:build` from the `_registry.ts` files and `registry-audio/bases/categories.ts`, never edit them by hand. New category → add it to `categories.ts` (label + description; SEO copy is templated from those, with optional overrides). A category listed there with zero items fails the build; item tags not listed there (e.g. `ui`, `grid`) are free-form search tags, not categories.
 
 ### Docs (`apps/www/src/content/docs/`)
 
-MDX files under `(root)/`, `components/base/`, `lib/`. Use existing custom components (`<ComponentPreview>`, `<ComponentSource>`, `<CodeTabs>`, `<Steps>`) — not raw HTML.
+MDX files under `(root)/`, `components/base/`, `lib/`. Use existing custom components (`<ComponentPreview>`, `<ComponentSource>`, `<CodeTabs>`, `<Steps>`), not raw HTML.
+
+The "API reference" paragraphs of `components/base/*.mdx` are hand-kept copies of the JSDoc of the matching part in `packages/ui/src/primitives/<name>/elements/`. Nothing syncs them: when you change one, change the other in the same commit.
 
 ## Registry Rules
 
@@ -84,13 +95,13 @@ MDX files under `(root)/`, `components/base/`, `lib/`. Use existing custom compo
 
 **Block/demo rules** (`registry-audio/bases/base/components/{category}/`):
 - Filename: `block-{component}-{variant}.tsx` (blocks) or `{component}-{feature}-demo.tsx` (demos)
-- Export: `export default function Block{Component}{Variant}()` / `{Component}{Feature}Demo()` — PascalCase of filename, no params
+- Export: `export default function Block{Component}{Variant}()` / `{Component}{Feature}Demo()`, PascalCase of filename, no params
 - `"use client"` only if the file uses hooks, state, or browser APIs
-- Icons: via `IconPlaceholder` (`@/app/(create)/components/icon-placeholder`) with a name for every library — `lucide`, `phosphor`, `tabler`, `hugeicons`, `remixicon`; no numeric `size` prop — use `className="size-4"`
+- Icons: via `IconPlaceholder` (`@/app/(create)/components/icon-placeholder`) with a name for every library, `lucide`, `phosphor`, `tabler`, `hugeicons`, `remixicon`; no numeric `size` prop, use `className="size-4"`
 - Icon-only interactive elements must have `aria-label`; decorative icons get `aria-hidden="true"`
 - Static data defined outside the component function
-- Semantic color tokens only — never raw Tailwind colors (`text-gray-500`, `bg-red-500`, etc.)
-- Don't add `border-border` — it's the default
+- Semantic color tokens only, never raw Tailwind colors (`text-gray-500`, `bg-red-500`, etc.)
+- Don't add `border-border`, it's the default
 - React imports: named only, never the namespace (`import * as React`)
 
 ---

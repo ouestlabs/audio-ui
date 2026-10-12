@@ -1,11 +1,11 @@
 /*
- * audio/ui style hooks — companion to registry/styles/style-sera.css.
+ * audio/ui style hooks, companion to registry/styles/style-sera.css.
  * Radius / ring / shadow are sourced from this style's shadcn primitives:
  * slider (track + thumb), button (control chips), card (surfaces), popover
  * (floating). Regenerate via scripts, do not hand-edit.
  */
 .style-sera {
-  /* MARK: Knob (circular — always rounded-full; ring + shadow follow the style) */
+  /* MARK: Knob (circular, always rounded-full; ring + shadow follow the style) */
   .cn-knob {
     @apply rounded-full border border-transparent ring-1 ring-foreground/10 transition-[border-color,box-shadow] duration-150 ease-out focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/30 hover:ring-2 hover:ring-ring/30 has-[[data-slot=knob-control]:active]:border-ring has-[[data-slot=knob-control]:active]:ring-2 has-[[data-slot=knob-control]:active]:ring-ring motion-reduce:transition-none;
   }
@@ -54,6 +54,18 @@
     @apply text-primary [&_path]:stroke-current;
   }
 
+  .cn-knob-mark-tick {
+    @apply bg-muted-foreground/40 transition-colors duration-150 ease-out in-data-[active]:data-[color]:bg-primary motion-reduce:transition-none;
+  }
+
+  .cn-knob-mark-label {
+    @apply text-[10px] leading-none text-muted-foreground tabular-nums in-data-[active]:text-foreground;
+  }
+
+  .cn-knob-value {
+    @apply rounded-none bg-foreground px-1.5 py-0.5 font-medium text-[10px] text-background tabular-nums leading-none shadow-sm;
+  }
+
   .cn-knob-indicator {
     @apply text-primary;
   }
@@ -79,8 +91,20 @@
     @apply bg-primary;
   }
 
+  .cn-fader-mark-tick {
+    @apply bg-muted-foreground/40 transition-colors duration-150 ease-out in-data-[active]:data-[color]:bg-primary motion-reduce:transition-none;
+  }
+
+  .cn-fader-mark-label {
+    @apply text-[10px] leading-none text-muted-foreground tabular-nums in-data-[active]:text-foreground;
+  }
+
+  .cn-fader-value {
+    @apply rounded-none bg-foreground px-1.5 py-0.5 font-medium text-[10px] text-background tabular-nums leading-none shadow-sm;
+  }
+
   .cn-fader-thumb {
-    @apply rounded-none border-none bg-primary transition-colors hover:ring-2 hover:ring-ring/30 focus-visible:ring-2 focus-visible:ring-ring/30 active:ring-2 active:ring-ring/30 motion-reduce:transition-none;
+    @apply rounded-none border-none bg-primary transition-colors hover:ring-2 hover:ring-ring/30 has-focus-visible:ring-2 has-focus-visible:ring-ring/30 active:ring-2 active:ring-ring/30 motion-reduce:transition-none;
   }
 
   .cn-fader-thumb-size-sm {
@@ -123,78 +147,9 @@
     @apply data-[orientation=horizontal]:h-3 data-[orientation=vertical]:h-px data-[orientation=horizontal]:w-px data-[orientation=vertical]:w-3;
   }
 
-  /* MARK: Transport (track ← cn-slider-track, thumb ← cn-slider-thumb) */
-  .cn-transport-track {
-    @apply rounded-none bg-input/90;
-  }
-
-  .cn-transport-track-size-sm {
-    @apply data-[orientation=horizontal]:h-1.5 data-[orientation=vertical]:h-full data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-1.5;
-  }
-
-  .cn-transport-track-size-default {
-    @apply data-[orientation=horizontal]:h-2 data-[orientation=vertical]:h-full data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-2;
-  }
-
-  .cn-transport-track-size-lg {
-    @apply data-[orientation=horizontal]:h-2.5 data-[orientation=vertical]:h-full data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-2.5;
-  }
-
-  .cn-transport-buffered-range {
-    @apply bg-primary/40;
-  }
-
-  .cn-transport-range {
-    @apply bg-primary;
-  }
-
-  .cn-transport-thumb {
-    @apply rounded-none border-none bg-primary transition-colors hover:ring-2 hover:ring-ring/30 focus-visible:ring-2 focus-visible:ring-ring/30 active:ring-2 active:ring-ring/30 motion-reduce:transition-none;
-  }
-
-  .cn-transport-thumb-size-sm {
-    @apply data-[orientation=horizontal]:h-3.5 data-[orientation=vertical]:h-5 data-[orientation=horizontal]:w-5 data-[orientation=vertical]:w-3.5;
-  }
-
-  .cn-transport-thumb-size-default {
-    @apply data-[orientation=horizontal]:h-4 data-[orientation=vertical]:h-6 data-[orientation=horizontal]:w-6 data-[orientation=vertical]:w-4;
-  }
-
-  .cn-transport-thumb-size-lg {
-    @apply data-[orientation=horizontal]:h-5 data-[orientation=vertical]:h-7 data-[orientation=horizontal]:w-7 data-[orientation=vertical]:w-5;
-  }
-
-  .cn-transport-thumb-inner-size-sm {
-    @apply data-[orientation=horizontal]:px-1 data-[orientation=horizontal]:py-0.5 data-[orientation=vertical]:px-0.5 data-[orientation=vertical]:py-1;
-  }
-
-  .cn-transport-thumb-inner-size-default {
-    @apply data-[orientation=horizontal]:px-1.5 data-[orientation=horizontal]:py-1 data-[orientation=vertical]:px-1 data-[orientation=vertical]:py-1.5;
-  }
-
-  .cn-transport-thumb-inner-size-lg {
-    @apply data-[orientation=horizontal]:px-2 data-[orientation=horizontal]:py-1 data-[orientation=vertical]:px-1 data-[orientation=vertical]:py-2;
-  }
-
-  .cn-transport-thumb-mark {
-    @apply bg-primary opacity-50;
-  }
-
-  .cn-transport-thumb-mark-size-sm {
-    @apply data-[orientation=horizontal]:h-2.5 data-[orientation=vertical]:h-px data-[orientation=horizontal]:w-px data-[orientation=vertical]:w-2.5;
-  }
-
-  .cn-transport-thumb-mark-size-default {
-    @apply data-[orientation=horizontal]:h-2.5 data-[orientation=vertical]:h-px data-[orientation=horizontal]:w-px data-[orientation=vertical]:w-2.5;
-  }
-
-  .cn-transport-thumb-mark-size-lg {
-    @apply data-[orientation=horizontal]:h-3 data-[orientation=vertical]:h-px data-[orientation=horizontal]:w-px data-[orientation=vertical]:w-3;
-  }
-
   /* MARK: XY Pad (pad ← cn-card, value chip ← cn-button) */
   .cn-xypad {
-    @apply rounded-none border border-transparent bg-card shadow-sm ring-1 ring-foreground/10 transition-[color,border-color,box-shadow,opacity] duration-150 ease-out hover:ring-2 hover:ring-ring/30 focus-visible:ring-2 focus-visible:ring-ring/30 active:ring-2 active:ring-ring/30 focus-visible:border-ring active:border-ring motion-reduce:transition-none;
+    @apply rounded-none border border-transparent bg-card shadow-sm ring-1 ring-foreground/10 transition-[color,border-color,box-shadow,opacity] duration-150 ease-out hover:ring-2 hover:ring-ring/30 has-focus-visible:ring-2 has-focus-visible:ring-ring/30 active:ring-2 active:ring-ring/30 has-focus-visible:border-ring active:border-ring motion-reduce:transition-none;
   }
 
   .cn-xypad-size-sm {
@@ -221,7 +176,7 @@
     @apply bg-primary opacity-50;
   }
 
-  /* Cursor puck is the xypad's draggable handle — radius ← cn-slider-thumb */
+  /* Cursor puck is the xypad's draggable handle, radius ← cn-slider-thumb */
   .cn-xypad-cursor-glow {
     @apply rounded-none bg-primary opacity-20 blur-sm;
   }
@@ -238,75 +193,421 @@
     @apply rounded-none bg-background/90 px-2 py-1 font-mono text-muted-foreground text-xs ring-1 ring-foreground/10 backdrop-blur-md;
   }
 
-  /* MARK: Channel Strip */
-  .cn-channel-strip {
-    @apply text-card-foreground;
+  /* MARK: Meter (channel ← cn-fader-track, fill ← success/destructive on clip) */
+  .cn-meter {
+    @apply relative;
   }
 
-  .cn-channel-strip-header {
-    @apply font-heading font-medium text-sm;
+  .cn-meter-size-sm {
+    @apply data-[orientation=vertical]:h-32 data-[orientation=vertical]:[--meter-thickness:--spacing(2.5)] data-[orientation=horizontal]:[--meter-thickness:--spacing(2)];
   }
 
-  .cn-channel-strip-footer {
-    @apply text-muted-foreground text-xs;
+  .cn-meter-size-default {
+    @apply data-[orientation=vertical]:h-48 data-[orientation=vertical]:[--meter-thickness:--spacing(3.5)] data-[orientation=horizontal]:[--meter-thickness:--spacing(3)];
   }
 
-  .cn-channel-strip-label {
-    @apply text-muted-foreground text-xs uppercase;
+  .cn-meter-size-lg {
+    @apply data-[orientation=vertical]:h-64 data-[orientation=vertical]:[--meter-thickness:--spacing(4.5)] data-[orientation=horizontal]:[--meter-thickness:--spacing(4)];
   }
 
-  .cn-channel-strip-value {
-    @apply font-medium text-muted-foreground text-sm tabular-nums;
+  .cn-meter-channel {
+    @apply rounded-none bg-input/70 transition-shadow duration-150 ease-out data-clipping:ring-2 data-clipped:ring-2 data-clipping:ring-destructive data-clipped:ring-destructive;
   }
 
-  /* MARK: Audio Player (surface ← cn-card) */
-  .cn-audio-player {
-    @apply before:backdrop-blur-xl before:backdrop-saturate-150;
+  .cn-meter-fill {
+    @apply bg-success data-warning:bg-warning data-clipping:bg-destructive data-clipped:bg-destructive;
   }
 
-  .cn-audio-player-size-sm {
-    @apply rounded-none py-3;
+  .cn-meter-peak {
+    @apply bg-foreground;
   }
 
-  .cn-audio-player-size-default {
-    @apply rounded-none py-4;
+  .cn-meter-mark {
+    @apply text-muted-foreground;
   }
 
-  .cn-audio-player-variant-default {
-    @apply bg-card/70 shadow-sm ring-1 ring-foreground/10;
+  /* MARK: Piano (container ← cn-xypad, white/black keys ← cn-fader-track/cn-knob-body) */
+  .cn-piano {
+    @apply rounded-none border border-transparent bg-card shadow-sm ring-1 ring-foreground/10 transition-[color,border-color,box-shadow,opacity] duration-150 ease-out hover:ring-2 hover:ring-ring/30 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring/30 active:ring-2 active:ring-ring/30 has-[:focus-visible]:border-ring active:border-ring motion-reduce:transition-none;
   }
 
-  .cn-audio-player-variant-ghost {
-    @apply bg-transparent hover:bg-muted/30;
+  .cn-piano-size-sm {
+    @apply h-24;
   }
 
-  .cn-audio-player-variant-widget {
-    @apply bg-card/70 shadow-sm ring-1 ring-foreground/10;
+  .cn-piano-size-default {
+    @apply h-32;
   }
 
-  .cn-audio-player-button {
-    @apply [&_svg]:text-primary;
+  .cn-piano-size-lg {
+    @apply h-40;
   }
 
-  .cn-audio-time-display {
-    @apply font-mono text-sm tabular-nums;
+  .cn-piano-key {
+    @apply top-0 outline-none transition-colors duration-100 ease-out focus-visible:z-20 focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-inset data-[color=white]:z-0 data-[color=white]:h-full data-[color=white]:border-border data-[color=white]:border-x data-[color=white]:bg-background data-[color=black]:z-10 data-[color=black]:h-[60%] data-[color=black]:rounded-none data-[color=black]:bg-foreground data-[active]:data-[color]:bg-primary motion-reduce:transition-none;
   }
 
-  .cn-audio-time-display-live {
-    @apply text-destructive text-xs;
+  /* MARK: Envelope (container ← cn-xypad, path/point ← cn-fader-range/thumb) */
+  .cn-envelope {
+    @apply rounded-none border border-transparent bg-card shadow-sm ring-1 ring-foreground/10 transition-[color,border-color,box-shadow,opacity] duration-150 ease-out hover:ring-2 hover:ring-ring/30 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring/30 active:ring-2 active:ring-ring/30 has-[:focus-visible]:border-ring active:border-ring motion-reduce:transition-none;
   }
 
-  .cn-audio-track {
-    @apply backdrop-blur-sm hover:bg-secondary/50;
+  .cn-envelope-size-sm {
+    @apply h-32;
   }
 
-  /* MARK: Sortable List (floating overlay ← cn-popover-content) */
-  .cn-sortable-list-overlay {
-    @apply rounded-none shadow-lg;
+  .cn-envelope-size-default {
+    @apply h-48;
   }
 
-  /* MARK: Panel — block surface radius ← cn-card (synth, device-style blocks) */
+  .cn-envelope-size-lg {
+    @apply h-64;
+  }
+
+  .cn-envelope-path {
+    @apply stroke-primary stroke-2;
+  }
+
+  .cn-envelope-fill {
+    @apply fill-primary/15 stroke-none;
+  }
+
+  .cn-envelope-point {
+    @apply rounded-none border-2 border-primary bg-background shadow-xs data-active:bg-primary transition-[box-shadow] duration-150 ease-out hover:ring-4 hover:ring-ring/30 focus-within:ring-4 focus-within:ring-ring/30 data-dragging:ring-4 data-dragging:ring-ring/30 motion-reduce:transition-none;
+  }
+
+  .cn-envelope-curve {
+    @apply size-3 rounded-none border border-primary bg-background shadow-xs transition-[box-shadow,opacity] hover:ring-4 hover:ring-ring/30 focus-visible:ring-4 focus-visible:ring-ring/30 data-dragging:ring-4 data-dragging:ring-ring/30 data-flat:hidden motion-reduce:transition-none;
+  }
+
+  .cn-envelope-point-value {
+    @apply rounded-none bg-popover px-1.5 py-0.5 font-mono text-[10px] text-popover-foreground shadow-md ring-1 ring-foreground/10;
+  }
+
+  /* Blocked-action feedback: removing at minPoints or adding with allowAddPoints=false. */
+  .cn-envelope svg[data-blocked],
+  .cn-envelope[data-blocked],
+  .cn-envelope-point[data-blocked] {
+    @apply animate-[cn-envelope-shake_280ms_linear] motion-reduce:animate-none;
+  }
+
+  /* MARK: Scrubber */
+  .cn-scrubber-track {
+    @apply rounded-none bg-muted has-focus-visible:ring-2 has-focus-visible:ring-ring/50;
+  }
+
+  .cn-scrubber-fill {
+    @apply rounded-none bg-primary;
+  }
+
+  .cn-scrubber-thumb {
+    @apply rounded-none border-2 border-primary bg-background shadow-xs;
+  }
+
+  /* MARK: Sequencer */
+  .cn-sequencer {
+    @apply [--sequencer-off:var(--muted)];
+  }
+
+  .cn-sequencer-cell {
+    @apply rounded-none border bg-muted/60 transition-[background-color,box-shadow,transform] duration-100 ease-out hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring/50 active:scale-95 aria-pressed:border-primary aria-pressed:bg-primary data-current:ring-2 data-current:ring-foreground/40 data-disabled:pointer-events-none motion-reduce:transition-none motion-reduce:active:scale-100;
+  }
+
+  .cn-sequencer-cell-beat {
+    @apply bg-muted;
+  }
+
+  .cn-sequencer-velocity {
+    @apply overflow-hidden rounded-[min(var(--radius-sm),6px)] bg-muted/40 focus-within:ring-2 focus-within:ring-ring/50 data-disabled:pointer-events-none;
+  }
+
+  .cn-sequencer-velocity-fill {
+    @apply bg-primary/30 transition-[background-color] duration-100 ease-out motion-reduce:transition-none;
+  }
+
+  .cn-sequencer-velocity[data-on] .cn-sequencer-velocity-fill {
+    @apply bg-primary;
+  }
+
+  /* MARK: Plot */
+  .cn-plot {
+    @apply rounded-none border bg-card;
+  }
+
+  .cn-plot-graph {
+    @apply text-primary;
+  }
+
+  .cn-plot-curve {
+    @apply stroke-primary stroke-[1.5px];
+  }
+
+  .cn-plot-area {
+    @apply fill-primary/15;
+  }
+
+  .cn-plot-trace {
+    @apply stroke-primary/40 stroke-1;
+  }
+
+  .cn-plot-trace-area {
+    @apply fill-primary/10;
+  }
+
+  .cn-plot-dot {
+    @apply rounded-none bg-primary ring-4 ring-primary/25;
+  }
+
+  .cn-plot-line {
+    @apply stroke-border;
+  }
+
+  .cn-plot-cursor-line {
+    @apply bg-foreground/25;
+  }
+
+  .cn-plot-cursor-readout {
+    @apply rounded-sm bg-card/80 px-1 font-mono text-[10px] text-muted-foreground;
+  }
+
+  .cn-plot-grid {
+    @apply text-muted-foreground;
+  }
+
+  .cn-plot-mark {
+    @apply bg-card/80 px-0.5 text-muted-foreground;
+  }
+
+  .cn-plot-band {
+    @apply fill-foreground/5;
+  }
+
+  .cn-plot-handle {
+    @apply rounded-none border-2 border-primary bg-background shadow-xs data-active:bg-primary transition-[box-shadow] duration-150 ease-out hover:ring-4 hover:ring-ring/30 focus-within:ring-4 focus-within:ring-ring/30 data-dragging:ring-4 data-dragging:ring-ring/30 motion-reduce:transition-none;
+  }
+
+  /* MARK: Piano Roll */
+  .cn-piano-roll {
+    @apply rounded-none border bg-background;
+  }
+
+  .cn-piano-roll-grid {
+    @apply focus-visible:outline-2 focus-visible:outline-ring/60 focus-visible:-outline-offset-2;
+  }
+
+  .cn-piano-roll-keys {
+    @apply bg-background;
+  }
+
+  .cn-piano-roll-size-sm {
+    @apply min-h-[calc(var(--piano-roll-rows)*0.5rem)];
+  }
+
+  .cn-piano-roll-size-default {
+    @apply min-h-[calc(var(--piano-roll-rows)*0.75rem)];
+  }
+
+  .cn-piano-roll-size-lg {
+    @apply min-h-[calc(var(--piano-roll-rows)*1rem)];
+  }
+
+  .cn-piano-roll-row {
+    @apply data-[color=black]:bg-foreground/13 data-folded:border-t data-folded:border-foreground/25 data-octave:border-t data-octave:border-foreground/25 data-active:bg-primary/10;
+  }
+
+  .cn-piano-roll-velocity {
+    @apply bg-background;
+  }
+
+  .cn-piano-roll-velocity-bar {
+    @apply rounded-none bg-primary opacity-60 transition-opacity duration-150 ease-out hover:opacity-100 has-focus-visible:opacity-100 has-focus-visible:ring-2 has-focus-visible:ring-ring/50 data-[selected]:opacity-100 motion-reduce:transition-none;
+  }
+
+  .cn-piano-roll-marquee {
+    @apply border border-primary bg-primary/15;
+  }
+
+  .cn-piano-roll-note {
+    @apply rounded-none transition-[border-color,background-color] duration-100 ease-out focus-visible:ring-2 focus-visible:ring-ring/50 data-disabled:pointer-events-none motion-reduce:transition-none;
+  }
+
+  .cn-piano-roll-note-handle {
+    @apply transition-colors hover:bg-foreground/30 motion-reduce:transition-none;
+  }
+
+  .cn-piano-roll-key {
+    @apply border-border/60 border-b bg-background text-muted-foreground transition-colors duration-100 ease-out last:border-b-0 hover:bg-muted focus-visible:z-10 focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-inset motion-reduce:transition-none;
+  }
+
+  .cn-piano-roll-key[data-color="black"] {
+    @apply bg-foreground/85 text-background hover:bg-foreground/70;
+  }
+
+  .cn-piano-roll-key[data-active] {
+    @apply bg-primary text-primary-foreground;
+  }
+
+  /* MARK: Timeline */
+  .cn-timeline {
+    @apply [--timeline-grid-color:color-mix(in_oklab,var(--border)_70%,transparent)] [--timeline-grid-accent-color:color-mix(in_oklab,var(--foreground)_16%,transparent)];
+  }
+
+  .cn-timeline-viewport {
+    @apply bg-background;
+  }
+
+  .cn-timeline-ruler {
+    @apply h-7 border-b bg-background text-muted-foreground text-xs has-focus-visible:bg-muted;
+  }
+
+  .cn-timeline-lane {
+    @apply h-14 border-b bg-muted/30;
+  }
+
+  .cn-timeline-track-header {
+    @apply w-44 border-e bg-background text-sm data-[selected]:bg-muted;
+  }
+
+  .cn-timeline-track-resize-handle {
+    @apply -bottom-px inset-x-0 z-10 h-0.5 cursor-row-resize bg-primary/0 hover:bg-primary/40 has-focus-visible:bg-primary/60 data-[resizing]:bg-primary/60;
+  }
+
+  .cn-timeline-mark {
+    @apply border-s ps-1.5 tabular-nums;
+  }
+
+  .cn-timeline-playhead {
+    @apply bg-primary;
+  }
+
+  .cn-timeline-range {
+    @apply rounded-none bg-primary/20 ring-1 ring-primary/50 ring-inset has-focus-visible:ring-2 has-focus-visible:ring-ring;
+  }
+
+  .cn-timeline-range-handle {
+    @apply rounded-none border-none bg-primary transition-colors hover:ring-2 hover:ring-ring/30 has-focus-visible:ring-2 has-focus-visible:ring-ring/30 active:ring-2 active:ring-ring/30 motion-reduce:transition-none;
+  }
+
+  .cn-timeline-clip {
+    @apply rounded-none overflow-hidden bg-primary/25 ring-1 ring-primary/60 ring-inset data-[selected]:bg-primary/40 data-[selected]:ring-2 data-[selected]:ring-primary has-focus-visible:ring-2 has-focus-visible:ring-ring;
+  }
+
+  .cn-timeline-clip-header {
+    @apply bg-primary/30 data-[selected]:bg-primary/50;
+  }
+
+  .cn-timeline-clip-handle {
+    @apply bg-primary/0 hover:bg-primary/60 has-focus-visible:bg-primary;
+  }
+
+  .cn-timeline-clip-fade {
+    @apply text-foreground/80 [--clip-fade-shade:color-mix(in_oklab,var(--background)_55%,transparent)];
+  }
+
+  .cn-timeline-clip-fade-handle {
+    @apply rounded-none border-none bg-primary transition-colors hover:ring-2 hover:ring-ring/30 has-focus-visible:ring-2 has-focus-visible:ring-ring/30 active:ring-2 active:ring-ring/30 motion-reduce:transition-none;
+  }
+
+  .cn-timeline-navigator {
+    @apply h-6 rounded-none bg-muted;
+  }
+
+  .cn-timeline-navigator-window {
+    @apply bg-primary/25 hover:bg-primary/35 has-focus-visible:ring-2 has-focus-visible:ring-ring/50;
+  }
+
+  .cn-timeline-navigator-handle {
+    @apply rounded-none border-none bg-primary transition-colors hover:ring-2 hover:ring-ring/30 has-focus-visible:ring-2 has-focus-visible:ring-ring/30 active:ring-2 active:ring-ring/30 motion-reduce:transition-none;
+  }
+
+  /* MARK: Waveform */
+  .cn-waveform {
+    @apply relative h-20 rounded-none;
+  }
+
+  .cn-waveform-canvas {
+    @apply pointer-events-none [--waveform-bar-radius:max(0px,min(var(--radius-sm),3px))] [--waveform-color:color-mix(in_oklab,var(--muted-foreground)_50%,transparent)] [--waveform-progress-color:var(--primary)];
+  }
+
+  .cn-waveform-playhead {
+    @apply inset-y-0 w-0.5 -translate-x-1/2 bg-primary;
+  }
+
+  .cn-waveform-thumb {
+    @apply inset-y-0 my-auto size-3.5 rounded-sm border-2 border-background bg-primary shadow-md;
+  }
+
+  .cn-waveform-region {
+    @apply rounded-[min(var(--radius-sm),6px)] bg-primary/15 ring-1 ring-primary/40 ring-inset;
+  }
+
+  .cn-waveform-region-handle {
+    @apply rounded-[min(var(--radius-sm),6px)] bg-primary/60 has-focus-visible:bg-primary has-focus-visible:ring-3 has-focus-visible:ring-ring/50;
+  }
+
+  .cn-waveform-marker {
+    @apply bg-foreground/50;
+  }
+
+  .cn-waveform-marker-label {
+    @apply rounded-[min(var(--radius-sm),6px)] bg-muted px-1 font-medium text-[0.625rem] text-foreground;
+  }
+
+  .cn-waveform-hover {
+    @apply bg-foreground/40;
+  }
+
+  .cn-waveform-hover-label {
+    @apply rounded-[min(var(--radius-sm),6px)] bg-foreground px-1.5 py-0.5 font-mono text-[0.625rem] text-background tabular-nums;
+  }
+
+  /* MARK: Live Waveform */
+  .cn-live-waveform {
+    @apply h-16;
+  }
+
+  .cn-live-waveform-canvas {
+    @apply pointer-events-none [--waveform-bar-radius:max(0px,min(var(--radius-sm),3px))] [--waveform-color:var(--primary)];
+  }
+
+  /* MARK: Bar Visualizer */
+  .cn-bar-visualizer {
+    @apply text-primary data-[orientation=horizontal]:h-16 data-[orientation=vertical]:w-16;
+  }
+
+  .cn-bar-visualizer-bars {
+    @apply gap-0.75;
+  }
+
+  .cn-bar-visualizer-bar {
+    @apply rounded-none bg-current;
+  }
+
+  /* MARK: Panel, block surface radius ← cn-card (synth, device-style blocks) */
   .cn-audio-panel {
     @apply rounded-none;
+  }
+}
+
+/* Envelope blocked-action shake, per-segment easing so each leg follows its own curve. Animates the standalone `translate` property (not `transform`) so it composites with Point's inline positioning transform instead of fighting it. */
+@keyframes cn-envelope-shake {
+  0% {
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    translate: 0 0;
+  }
+  28.57% {
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    translate: 6px 0;
+  }
+  57.14% {
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    translate: -6px 0;
+  }
+  78.57% {
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    translate: 4px 0;
+  }
+  100% {
+    translate: 0 0;
   }
 }

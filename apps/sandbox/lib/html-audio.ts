@@ -103,7 +103,7 @@ class HtmlAudioEngine implements PlaybackEngine {
     }
 
     // Safari can report duration from `loadedmetadata` before `durationchange`
-    // fires — re-dispatch it under the same engine-level event so callers
+    // fires, re-dispatch it under the same engine-level event so callers
     // only ever need to know about one duration-changed event.
     audio.addEventListener("loadedmetadata", () => {
       this.eventTarget.dispatchEvent(new CustomEvent("durationchange"));
@@ -547,7 +547,7 @@ class HtmlAudioEngine implements PlaybackEngine {
     return this.audio.buffered;
   }
 
-  /** `rate` must already be clamped by the caller — see ADR-0002. */
+  /** `rate` must already be clamped by the caller, see ADR-0002. */
   setPlaybackRate(rate: number): void {
     this.ifClient(() => {
       const audio = this.ensureAudio();

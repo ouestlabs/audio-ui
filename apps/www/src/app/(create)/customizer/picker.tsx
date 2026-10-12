@@ -2,8 +2,20 @@
 
 import { Menu as MenuPrimitive } from "@base-ui/react/menu";
 import type * as React from "react";
+import { createContext, use } from "react";
 import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder";
 import { cn } from "@/registry/bases/base/lib/utils";
+
+/** Which side a picker's menu opens on: a panel against the right edge opens them leftwards. */
+const PickerSideContext = createContext<"left" | "right">("right");
+
+const PickerSideProvider = PickerSideContext.Provider;
+
+/** The side for a picker's menu: above its anchor on small screens, else the surrounding panel's. */
+function usePickerSide(isMobile: boolean) {
+  const side = use(PickerSideContext);
+  return isMobile ? "top" : side;
+}
 
 function Picker({ ...props }: MenuPrimitive.Root.Props) {
   return <MenuPrimitive.Root data-slot="dropdown-menu" {...props} />;
@@ -283,8 +295,10 @@ export {
   PickerRadioItem,
   PickerSeparator,
   PickerShortcut,
+  PickerSideProvider,
   PickerSub,
   PickerSubContent,
   PickerSubTrigger,
   PickerTrigger,
+  usePickerSide,
 };

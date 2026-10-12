@@ -16,7 +16,7 @@ function getDocsComponentKey(value: string) {
     segments.shift();
   }
 
-  if (segments[0] === "base" || segments[0] === "radix") {
+  if (segments[0] === "base") {
     segments.shift();
   }
 

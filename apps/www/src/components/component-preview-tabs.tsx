@@ -1,27 +1,45 @@
 "use client";
 
 import * as React from "react";
+import { Frame, FrameContent } from "@/components/custom/frame";
+import {
+  PreviewBar,
+  PreviewLoading,
+  PreviewPanel,
+} from "@/components/preview-frame";
+import { HostedPreview, usePreviewHost } from "@/components/preview-host";
 import { Button } from "@/components/ui/button";
-import { Spinner } from "@/components/ui/spinner";
 import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
 import { cn } from "@/lib/utils";
 
 export function ComponentPreviewTabs({
   className,
   previewClassName,
-  align = "center",
+  align: _align,
   hideCode = false,
-  chromeLessOnMobile = false,
+  chromeLessOnMobile: _chromeLessOnMobile,
   component,
+  expand = false,
+  hint,
+  fitContent = false,
+  name,
   source,
   sourcePreview,
   ...props
-}: React.ComponentProps<"div"> & {
+}: Omit<React.ComponentProps<"div">, "ref"> & {
   previewClassName?: string;
   align?: "center" | "start" | "end";
   hideCode?: boolean;
   chromeLessOnMobile?: boolean;
   component: React.ReactNode;
+  /** Adds a button that opens the preview at full size: for the editors made to take a screen. */
+  expand?: boolean;
+  /** Lets the preview be as tall as what it shows, rather than a fixed height: for blocks. */
+  fitContent?: boolean;
+  /** How to use what is shown: said in the footer of the full-size view. */
+  hint?: string;
+  /** The registry name of what is shown. */
+  name: string;
   source: React.ReactNode;
   sourcePreview?: React.ReactNode;
 }) {
@@ -38,67 +56,66 @@ export function ComponentPreviewTabs({
     threshold: 0,
   });
 
+  const hosted = usePreviewHost(expand);
+  const shown = expand ? (
+    <HostedPreview host={hosted.host} open={hosted.open}>
+      {component}
+    </HostedPreview>
+  ) : (
+    component
+  );
+
   return (
-    <div
-      className={cn(
-        "group site-rounded-xl relative mt-4 mb-12 flex flex-col gap-2 overflow-hidden border border-site-border",
-        className
-      )}
+    <Frame
+      className={cn("group mt-4 mb-12", className)}
       data-slot="component-preview"
       {...props}
     >
-      <div data-slot="preview">
-        <div
-          className={cn(
-            "preview flex h-72 w-full justify-center p-10 font-sans data-[chromeless=true]:h-auto data-[align=start]:items-start data-[align=end]:items-end data-[align=center]:items-center data-[chromeless=true]:p-0",
-            previewClassName
-          )}
-          data-align={align}
-          data-chromeless={chromeLessOnMobile}
-          ref={previewRef}
+      <PreviewBar expand={hosted} hint={hint} name={name} position="header" />
+      {/* The panel is the preview: no container inside it. */}
+      <PreviewPanel
+        block={fitContent}
+        className={previewClassName}
+        data-slot="preview"
+        ref={previewRef}
+      >
+        {hasBeenVisible ? shown : <PreviewLoading />}
+      </PreviewPanel>
+      {hideCode ? null : (
+        <FrameContent
+          className="mt-0.5 bg-site-code [&_pre]:max-h-72"
+          data-mobile-code-visible={isCodeExpanded}
+          data-slot="code"
         >
-          {hasBeenVisible ? (
-            component
+          {isCodeExpanded ? (
+            source
           ) : (
-            <Spinner className="text-site-muted-foreground/40" />
-          )}
-        </div>
-        {!hideCode && (
-          <div
-            className="**:data-rehype-pretty-code-figure:site-rounded-none relative overflow-hidden **:data-rehype-pretty-code-figure:m-0! **:data-rehype-pretty-code-figure:border-t [&_pre]:max-h-72"
-            data-mobile-code-visible={isCodeExpanded}
-            data-slot="code"
-          >
-            {isCodeExpanded ? (
-              source
-            ) : (
-              <div className="relative">
-                {sourcePreview}
-                <div className="absolute inset-0 flex items-center justify-center pb-4">
-                  <div
-                    className="absolute inset-0"
-                    style={{
-                      background:
-                        "linear-gradient(to top, var(--color-site-code), color-mix(in oklab, var(--color-site-code) 60%, transparent), transparent)",
-                    }}
-                  />
-                  <Button
-                    className="relative z-10 bg-site-background text-site-foreground hover:bg-site-muted dark:bg-site-background dark:text-site-foreground dark:hover:bg-site-muted"
-                    onClick={() => {
-                      setIsCodeExpanded(true);
-                    }}
-                    size="sm"
-                    type="button"
-                    variant="outline"
-                  >
-                    View Code
-                  </Button>
-                </div>
+            <div className="relative">
+              {sourcePreview}
+              <div className="absolute inset-0 flex items-end justify-center pb-3">
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    background:
+                      "linear-gradient(to top, var(--color-site-code), color-mix(in oklab, var(--color-site-code) 60%, transparent), transparent)",
+                  }}
+                />
+                <Button
+                  className="relative z-10 bg-site-background text-site-foreground hover:bg-site-muted dark:bg-site-background dark:text-site-foreground dark:hover:bg-site-muted"
+                  onClick={() => {
+                    setIsCodeExpanded(true);
+                  }}
+                  size="sm"
+                  type="button"
+                  variant="outline"
+                >
+                  View Code
+                </Button>
               </div>
-            )}
-          </div>
-        )}
-      </div>
-    </div>
+            </div>
+          )}
+        </FrameContent>
+      )}
+    </Frame>
   );
 }

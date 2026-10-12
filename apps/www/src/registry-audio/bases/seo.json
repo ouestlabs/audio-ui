@@ -16,10 +16,10 @@
     ],
     "title": "Audio UI Components"
   },
-  "channel-strip": {
-    "description": "Channel strip patterns combining faders, knobs, and transport controls. {{count}} components.",
-    "intro": "Browse {{count}} channel strip components for audio/ui, built on top of shadcn/ui.",
-    "title": "Channel Strip"
+  "envelope": {
+    "description": "Interactive envelope components for editing linear ramp breakpoints. {{count}} components.",
+    "intro": "Browse {{count}} envelope components for audio/ui, built on top of shadcn/ui.",
+    "title": "Envelope"
   },
   "fader": {
     "description": "Fader components for level, gain, and mix controls. {{count}} components.",
@@ -31,40 +31,50 @@
     "intro": "Browse {{count}} knob components for audio/ui, built on top of shadcn/ui.",
     "title": "Knob"
   },
-  "playback-speed": {
-    "description": "Playback speed controls for audio and video players. {{count}} components.",
-    "intro": "Browse {{count}} playback speed components for audio/ui, built on top of shadcn/ui.",
-    "title": "Playback Speed"
+  "meter": {
+    "description": "Decibel meter components for monitoring stereo and multi-channel audio levels. {{count}} components.",
+    "intro": "Browse {{count}} meter components for audio/ui, built on top of shadcn/ui.",
+    "title": "Meter"
   },
-  "player": {
-    "description": "Audio player components for track playback, queues, and playback speed control. {{count}} components.",
-    "intro": "Browse {{count}} player components for audio/ui, built on top of shadcn/ui.",
-    "title": "Player"
+  "plot": {
+    "description": "Plots for drawing curves and dragging points on them: equalizers, filters and compressors. {{count}} components.",
+    "intro": "Browse {{count}} plot components for audio/ui, built on top of shadcn/ui.",
+    "title": "Plot"
   },
-  "queue": {
-    "description": "Queue management components for building playlists and up-next lists. {{count}} components.",
-    "intro": "Browse {{count}} queue components for audio/ui, built on top of shadcn/ui.",
-    "title": "Queue"
-  },
-  "sortable-list": {
-    "description": "Drag-and-drop sortable list components for reordering tracks and items. {{count}} components.",
-    "intro": "Browse {{count}} sortable list components for audio/ui, built on top of shadcn/ui.",
-    "title": "Sortable List"
+  "piano": {
+    "description": "Virtual piano keyboard components with MIDI note ranges and glissando. {{count}} components.",
+    "intro": "Browse {{count}} piano components for audio/ui, built on top of shadcn/ui.",
+    "title": "Piano"
   },
   "synth": {
     "description": "Synth control patterns combining knobs, XY pads, and toggles. {{count}} components.",
     "intro": "Browse {{count}} synth components for audio/ui, built on top of shadcn/ui.",
     "title": "Synth"
   },
-  "track": {
-    "description": "Track list and grid components for browsing audio content. {{count}} components.",
-    "intro": "Browse {{count}} track components for audio/ui, built on top of shadcn/ui.",
-    "title": "Track"
+  "sequencer": {
+    "description": "Step sequencer components: grids of steps to draw a pattern on, that you can hear. {{count}} components.",
+    "intro": "Browse {{count}} sequencer components for audio/ui, built on top of shadcn/ui.",
+    "title": "Sequencer"
+  },
+  "scrubber": {
+    "description": "Seek bars: play or pause, position and a bar to scrub on. {{count}} components.",
+    "intro": "Browse {{count}} scrubber components for audio/ui, built on top of shadcn/ui.",
+    "title": "Scrubber"
   },
   "transport": {
-    "description": "Transport controls for play, pause, and seek. {{count}} components.",
+    "description": "Transport controls: return to start, play, stop, record and loop, with the position in bars and beats and the tempo. {{count}} components.",
     "intro": "Browse {{count}} transport components for audio/ui, built on top of shadcn/ui.",
     "title": "Transport"
+  },
+  "timeline": {
+    "description": "Zoomable, snapping timeline components for arrangements, clip editors and piano rolls. {{count}} components.",
+    "intro": "Browse {{count}} timeline components for audio/ui, built on top of shadcn/ui.",
+    "title": "Timeline"
+  },
+  "waveform": {
+    "description": "Seekable waveform components for scrubbing and visualizing audio playback. {{count}} components.",
+    "intro": "Browse {{count}} waveform components for audio/ui, built on top of shadcn/ui.",
+    "title": "Waveform"
   },
   "xypad": {
     "description": "Two-dimensional XY pad components for filter and effect controls. {{count}} components.",

@@ -19,7 +19,6 @@ const CommandMenu = dynamic(
         <MagnifyingGlassIcon className="size-4 shrink-0 opacity-60" />
       </Button>
     ),
-    ssr: false,
   }
 );
 
@@ -27,7 +26,6 @@ const MobileNav = dynamic(
   () => import("@/components/mobile-nav").then((mod) => mod.MobileNav),
   {
     loading: () => <div aria-hidden="true" className="size-8 lg:hidden" />,
-    ssr: false,
   }
 );
 
@@ -35,7 +33,6 @@ const ModeSwitcher = dynamic(
   () => import("@/components/mode-switcher").then((mod) => mod.ModeSwitcher),
   {
     loading: () => <div aria-hidden="true" className="size-8" />,
-    ssr: false,
   }
 );
 

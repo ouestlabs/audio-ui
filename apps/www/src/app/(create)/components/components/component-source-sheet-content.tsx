@@ -80,7 +80,7 @@ export function ComponentSourceSheetContent({
           </div>
           <div className="site-rounded-md relative flex-1 grow overflow-hidden border border-site-border bg-site-code">
             <ComponentSourceClient
-              className="*:data-rehype-pretty-code-figure:no-scrollbar no-scrollbar *:data-rehype-pretty-code-figure:scroll-fade h-full overflow-auto *:data-rehype-pretty-code-figure:mt-0 *:data-rehype-pretty-code-figure:max-h-full *:data-rehype-pretty-code-figure:overflow-y-auto"
+              className="*:data-rehype-pretty-code-figure:scrollbar-y scrollbar-y *:data-rehype-pretty-code-figure:scroll-fade h-full overflow-auto *:data-rehype-pretty-code-figure:mt-0 *:data-rehype-pretty-code-figure:max-h-full *:data-rehype-pretty-code-figure:overflow-y-auto"
               collapsible={false}
               eventName="copy_component_code"
               iconLibrary={config.iconLibrary}

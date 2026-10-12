@@ -1,0 +1,271 @@
+---
+title: Envelope
+description: An editor for a breakpoint ramp, such as an ADSR shape or an automation curve.
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="envelope-size-default-demo" />
+
+Edits a ramp made of breakpoints, such as an ADSR shape or an automation curve. The registry component wraps the `Envelope` primitive from `@audio-ui/react` and draws the points, the segments between them and a grid.
+
+## Overview
+
+- **Value:** `value` is a list of `{ x, y, curve? }` points. Both axes are normalized to 0…1, and the points are sorted by `x`. Map that range to your own unit, such as time or level.
+- **Curves:** a point's `curve`, from -1 to 1, bends the segment that leaves it. 0, or no value, draws a straight line. A positive curve holds the start of the segment and steepens its end; a negative curve does the opposite. The last point has no segment.
+- **Pointer:** drag a point to move it. Double-click empty space to add a point, or double-click a point to remove it. A point stays between its neighbors, so points never cross.
+- **Point count:** points are added and removed between `minPoints` (default `2`, a start and an end) and `maxPoints`. Set both to the same number to fix the shape.
+- **Grid:** `snap` sets the grid that points snap to, for example `0.25` for quarters. Hold Cmd/Ctrl to move off the grid. Without `snap`, points move freely. The registry component draws the grid.
+- **Fine control:** hold Shift while dragging to move a point at a quarter of the pointer's speed. The registry component shows the point's value above it while it is dragged or focused.
+- **Accessibility:** the points share one tab stop. The arrow keys move the focused point, and Delete or Backspace removes it. Each point is a `role="slider"`. The registry component names the points "Point n of N". With the primitive, set `aria-label` and `getAriaValueText` yourself.
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">CLI</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash component
+npx shadcn@latest add @audio/envelope
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the following dependencies:</Step>
+
+```bash
+npm install @audio-ui/react class-variance-authority
+```
+
+<Step>Copy and paste the following code into your project.</Step>
+
+<ComponentSource
+  styleName="base-nova"
+  name="envelope"
+  title="components/audio/envelope.tsx"
+/>
+
+<Step>Update the import paths to match your project setup.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Anatomy
+
+Import the primitive and assemble its parts.
+
+```tsx
+import { Envelope } from "@audio-ui/react";
+
+<Envelope.Root>
+  <Envelope.Graph>
+    <Envelope.Fill />
+    <Envelope.Line />
+  </Envelope.Graph>
+  <Envelope.Segments>
+    <Envelope.Segment />
+  </Envelope.Segments>
+  <Envelope.Points>
+    <Envelope.Point />
+  </Envelope.Points>
+</Envelope.Root>
+```
+
+## Usage
+
+```tsx
+import { Envelope } from "@/components/audio/envelope";
+```
+
+**Uncontrolled:** set only the initial points.
+
+```tsx
+<Envelope
+  defaultValue={[
+    { x: 0, y: 0 },
+    { x: 0.2, y: 1 },
+    { x: 0.6, y: 0.5 },
+    { x: 1, y: 0 },
+  ]}
+/>
+```
+
+**Controlled:** drive the points from state.
+
+```tsx
+const [points, setPoints] = useState(initialPoints);
+
+<Envelope
+  onValueChange={setPoints}
+  onValueCommitted={(next, details) => console.log("Committed:", next, details.reason)}
+  value={points}
+/>
+```
+
+## Interaction
+
+### Pointer
+
+<KeyTable title="Behavior">
+<KeyRow gesture={"Drag a point"}>Moves it; `x` stays between its neighbors and `y` within 0…1. Dragging never deletes a point. While dragging, the point follows the pointer even if a controlled `value` updates late.</KeyRow>
+<KeyRow gesture={"Double-click empty space"}>Adds a point at that location, unless at `maxPoints`. Added on a bent segment it sits on the curve, and each half is bent to keep its shape.</KeyRow>
+<KeyRow gesture={"Double-click a point"}>Removes it, unless at `minPoints`.</KeyRow>
+<KeyRow gesture={"Hold Shift while dragging a point"}>Moves it at a quarter of the pointer's speed, for fine adjustments. The point does not jump when Shift is pressed or released mid-drag.</KeyRow>
+<KeyRow gesture={"Alt + drag a segment"}>Bends it, like a DAW's automation lane: the segment's midpoint follows the pointer. A flat segment, or a press away from any segment, does nothing.</KeyRow>
+<KeyRow gesture={"Alt + double-click a segment"}>Straightens it, instead of adding a point.</KeyRow>
+<KeyRow gesture={"Alt + click a point"}>Removes it, unless at `minPoints`.</KeyRow>
+<KeyRow gesture={"Drag a segment's handle"}>Bends the segment: its midpoint follows the pointer up or down. A segment between two points of the same level has nothing to bend.</KeyRow>
+<KeyRow gesture={"Double-click a segment's handle"}>Straightens the segment.</KeyRow>
+<KeyRow gesture={"Commit event"}>`onValueCommitted` fires when a drag that moved a point ends, and right away for an add or a remove.</KeyRow>
+</KeyTable>
+
+A refused add or remove sets `data-blocked` for a moment on the graph or the point, which the registry styles turn into a short shake.
+
+### Keyboard
+
+The points share one tab stop. On the focused point:
+
+<KeyTable title="Keys">
+<KeyRow gesture={"`ArrowUp` / `ArrowDown`"}>Nudge the focused point's `y` by `step`</KeyRow>
+<KeyRow gesture={"`ArrowLeft` / `ArrowRight`"}>Nudge the focused point's `x` by `step` (clamped between neighbors)</KeyRow>
+<KeyRow gesture={"`Shift` + arrow"}>Nudge by 10 steps</KeyRow>
+<KeyRow gesture={"`Delete` / `Backspace`"}>Remove the focused point, unless at `minPoints`</KeyRow>
+</KeyTable>
+
+Each segment has a handle on its curve. The handles share one tab stop:
+
+<KeyTable title="Keys">
+<KeyRow gesture={"`ArrowLeft` / `ArrowRight`"}>Move to the previous or next segment's handle</KeyRow>
+<KeyRow gesture={"`ArrowUp` / `ArrowDown`"}>Lift or lower the handle, bending the segment by 5 steps</KeyRow>
+<KeyRow gesture={"`Shift` + arrow"}>Bend by 50 steps</KeyRow>
+<KeyRow gesture={"`Delete` / `Backspace`"}>Straighten the segment</KeyRow>
+</KeyTable>
+
+## API reference
+
+### Root
+
+Groups all parts of the breakpoint envelope and owns its points, each normalized to 0…1 on both axes and kept sorted by `x`. Points are dragged and nudged with the keyboard; a double click on the `Graph` adds one and a double click (or Delete) on a `Point` removes it, within `minPoints` / `maxPoints`. Renders a `<div>` element.
+
+<TypeTable>
+<TypeRow name={"defaultValue"} type={"GeomPoint[]"}>Uncontrolled starting points. Defaults to an ADSR-like shape.</TypeRow>
+<TypeRow name={"disabled"} type={"boolean"}></TypeRow>
+<TypeRow name={"format"} type={"Intl.NumberFormatOptions"}>Formats point coordinates for each point's `aria-valuetext`.</TypeRow>
+<TypeRow name={"locale"} type={"Intl.LocalesArgument"}></TypeRow>
+<TypeRow name={"maxPoints"} type={"number"}>Ceiling on the number of points; adding is blocked at this count. Equal to `minPoints`, the shape is fixed.</TypeRow>
+<TypeRow name={"minPoints"} type={"number"} default={"2"}>Floor on the number of points; removal is blocked at this count.</TypeRow>
+<TypeRow name={"onValueChange"} type={"(value: GeomPoint[], eventDetails: ChangeEventDetails) => void"}>Fires on every change: drag, keyboard, add and remove.</TypeRow>
+<TypeRow name={"onValueCommitted"} type={"(value: GeomPoint[], eventDetails: CommitEventDetails) => void"}>Fires when an interaction that changed the points ends.</TypeRow>
+<TypeRow name={"step"} type={"number"} default={"0.01"}>Keyboard step on both axes, in normalized units.</TypeRow>
+<TypeRow name={"snap"} type={"number"} default={"0"}>Grid the pointer snaps points to, in normalized units: `0.25` snaps to quarters, `0` is no grid. Cmd/Ctrl leaves the grid and Shift's fine drag ignores it.</TypeRow>
+<TypeRow name={"value"} type={"GeomPoint[]"}></TypeRow>
+</TypeTable>
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+<TypeRow name={"data-dragging"}>Whether a point is being dragged.</TypeRow>
+</TypeTable>
+
+### Graph
+
+The drawing surface, a 100×100 stretched viewBox: holds `Line` and `Fill`, and a double click on it adds a point. Carries `data-blocked` briefly when adding is refused at `maxPoints`. Renders a `<svg>` element.
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+<TypeRow name={"data-dragging"}>Whether a point is being dragged.</TypeRow>
+<TypeRow name={"data-blocked"}>Briefly true after an add was refused at `maxPoints`.</TypeRow>
+</TypeTable>
+
+### Line
+
+The envelope curve through the points. Renders a `<polyline>` element.
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+<TypeRow name={"data-dragging"}>Whether a point is being dragged.</TypeRow>
+</TypeTable>
+
+### Fill
+
+The area under the curve. Renders a `<polyline>` element.
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+<TypeRow name={"data-dragging"}>Whether a point is being dragged.</TypeRow>
+</TypeTable>
+
+### Points
+
+Renders one child per point, in `x` order.
+
+<TypeTable>
+<TypeRow name={"children"} type={"(point: GeomPoint, index: number, points: GeomPoint[]) => React.ReactNode"}></TypeRow>
+</TypeTable>
+
+### Point
+
+A draggable handle for the point at `index`, positioned with `left`/`bottom` percentages over the `Graph`. It is a `role="slider"` on the point's level (`y`): give it an `aria-label`. One point at a time is the tab stop; arrow keys move it (Shift for larger steps), Delete or a double click removes it. Carries `data-blocked` briefly when removal is refused at `minPoints`. Renders a `<div>` element.
+
+<TypeTable>
+<TypeRow name={"getAriaValueText"} type={"(point: GeomPoint, index: number) => string"}>Returns the point's `aria-valuetext`. Defaults to the formatted `x, y`.</TypeRow>
+<TypeRow name={"index"} type={"number"}>Index of the point in the (sorted) value.</TypeRow>
+</TypeTable>
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+<TypeRow name={"data-dragging"}>Whether a point is being dragged.</TypeRow>
+<TypeRow name={"data-blocked"}>Briefly true after a removal was refused at `minPoints`.</TypeRow>
+<TypeRow name={"data-removable"}>Whether the point can currently be removed.</TypeRow>
+</TypeTable>
+
+### Registry component
+
+`Envelope` accepts style props (`size`, `className`) plus primitive props from `EnvelopePrimitive.Root.Props`. `aria-label` / `aria-labelledby` name the envelope group.
+
+#### Value and state
+
+<TypeTable>
+<TypeRow name={"value"} type={"{ x: number; y: number; curve?: number }[]"}>Controlled points, normalized 0-1, sorted by `x`. `curve`, -1 to 1, bends the segment leaving the point.</TypeRow>
+<TypeRow name={"defaultValue"} type={"{ x: number; y: number; curve?: number }[]"} default={"ADSR-like 5-point shape"}>Uncontrolled starting points.</TypeRow>
+<TypeRow name={"minPoints"} type={"number"} default={"2"}>Floor on the number of points; removal is blocked at this count.</TypeRow>
+<TypeRow name={"maxPoints"} type={"number"}>Ceiling on the number of points; adding is blocked at this count.</TypeRow>
+<TypeRow name={"step"} type={"number"} default={"0.01"}>Keyboard step on both axes, in normalized units.</TypeRow>
+<TypeRow name={"disabled"} type={"boolean"} default={"false"}>Whether the envelope is disabled.</TypeRow>
+<TypeRow name={"format"} type={"Intl.NumberFormatOptions"}>Formats point coordinates for each point's value text.</TypeRow>
+<TypeRow name={"onValueChange"} type={"(points, eventDetails) => void"}>Every change. `eventDetails.reason` is `"drag"`, `"keyboard"`, `"add"`, `"remove"` or `"curve"`, and `eventDetails.index` is the affected point; call `eventDetails.cancel()` to reject it.</TypeRow>
+<TypeRow name={"onValueCommitted"} type={"(points, eventDetails) => void"}>When an interaction that changed the points ends (release, key press, add, or remove).</TypeRow>
+</TypeTable>
+
+#### Layout and display
+
+<TypeTable>
+<TypeRow name={"size"} type={"\"sm\" | \"default\" | \"lg\""} default={"\"default\""}>Size variant (sets the envelope height).</TypeRow>
+<TypeRow name={"curves"} type={"boolean"} default={"true"}>Whether a handle on each segment bends it.</TypeRow>
+<TypeRow name={"formatValue"} type={"(point: { x: number; y: number }) => string"} default={"from the domains"}>Prints a point's value in its label and its accessible value text.</TypeRow>
+<TypeRow name={"xDomain / yDomain"} type={"[number, number]"} default={"percent"}>The values each axis runs from and to, so the labels read in real units: `xDomain={[0, 2000]}`.</TypeRow>
+<TypeRow name={"xUnit / yUnit"} type={"string"}>The unit written after the value, such as `"ms"` or `"dB"`.</TypeRow>
+<TypeRow name={"className"} type={"string"}>Classes for the graph surface.</TypeRow>
+</TypeTable>
+
+
+
+`@audio-ui/react/envelope` exposes `Envelope.Root`, `Envelope.Graph` (the SVG surface; double-click to add), `Envelope.Line` and `Envelope.Fill` (the curve and the area under it), `Envelope.Points` (renders one child per point), `Envelope.Point` (the draggable handle), `Envelope.Segments` (renders one child per segment) and `Envelope.Segment` (the handle on a segment's midpoint, which bends it). Every part accepts a `render` prop and `className` / `style` as functions of state; points expose `data-dragging`, `data-removable`, `data-blocked`, `data-disabled` and `data-index`, and segment handles `data-dragging`, `data-flat` and `data-disabled`.
+
+## Examples
+
+### ADSR with its stages read out
+
+<ComponentPreview styleName="base-nova" name="envelope-adsr-demo" />
+

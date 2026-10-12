@@ -1,0 +1,192 @@
+---
+title: Sequencer
+description: "A step grid: press a step, or drag across several, to draw a pattern."
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="sequencer-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">CLI</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash component
+npx shadcn@latest add @audio/sequencer
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the following dependencies:</Step>
+
+```bash
+npm install @audio-ui/react
+```
+
+<Step>Copy and paste the following code into your project.</Step>
+
+<ComponentSource
+  styleName="base-nova"
+  name="sequencer"
+  title="components/audio/elements/sequencer.tsx"
+/>
+
+<Step>Update the import paths to match your project setup.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Anatomy
+
+Import the registry component for the ready-made look, or compose the primitive's parts yourself.
+
+```tsx
+import { Sequencer } from "@audio-ui/react";
+
+<Sequencer.Root>
+  <Sequencer.Rows>
+    {(row) => (
+      <Sequencer.Row index={row}>
+        <Sequencer.Cells>
+          {(step) => <Sequencer.Cell step={step} />}
+        </Sequencer.Cells>
+      </Sequencer.Row>
+    )}
+  </Sequencer.Rows>
+</Sequencer.Root>;
+```
+
+## Usage
+
+```tsx
+import { Sequencer } from "@/components/audio/elements/sequencer";
+
+<Sequencer
+  aria-label="Drum pattern"
+  onValueChange={setPattern}
+  rowLabels={["Kick", "Snare", "Hihat"]}
+  source={step}
+  value={pattern}
+/>;
+```
+
+`value` is a row per sound, each a list of steps: `boolean[][]`. `velocities` is how loud each step plays, from 0 to 1, in the same shape; a step it does not list plays at full. Add `showVelocity` for a bar under each row to draw them. `source` is the step being played, a live `{ getSnapshot, subscribe }` such as one made with `createSource`: a clock ticking every step never re-renders React.
+
+## Interaction
+
+<KeyTable title="Gestures">
+<KeyRow gesture={"Press a step"}>Flips it.</KeyRow>
+<KeyRow gesture={"Drag on"}>Paints the new state across every step the pointer crosses.</KeyRow>
+<KeyRow gesture={"Arrow keys, `Home`, `End`"}>Move between steps; with `Ctrl` or `Cmd`, `Home` and `End` go to the corners.</KeyRow>
+<KeyRow gesture={"`Space`, `Enter`"}>Flip the focused step.</KeyRow>
+<KeyRow gesture={"Press or drag on a velocity bar"}>Sets the velocity where the pointer is, and draws across the steps of the row.</KeyRow>
+<KeyRow gesture={"`Alt` + click, `Delete` on a velocity bar"}>Bring the step back to full.</KeyRow>
+<KeyRow gesture={"Arrow keys, `Page Up`/`Down`, `Home`/`End` on a velocity bar"}>Change the velocity by 5%, by 25%, or to silent or full.</KeyRow>
+</KeyTable>
+
+The steps share one tab stop, and each is a toggle button (`aria-pressed`) named after its row and step.
+
+## API reference
+
+### Root
+
+A grid of steps to switch on and off, one row per sound: the pattern of a drum machine. Pressing a cell flips it, and dragging on carries the new state across every cell the pointer crosses. The cells are one tab stop, and the arrow keys move between them. The step being played comes from `source` and is marked on its cells straight in the DOM with `data-current`, so a clock ticking every step never re-renders React. Renders a `<div>` element.
+
+<TypeTable>
+<TypeRow name={"defaultValue"} type={"Pattern"}>Uncontrolled starting pattern: a row per sound, each a list of steps.</TypeRow>
+<TypeRow name={"defaultVelocities"} type={"Velocities"}>Uncontrolled starting velocities.</TypeRow>
+<TypeRow name={"disabled"} type={"boolean"}></TypeRow>
+<TypeRow name={"onValueChange"} type={"(value: boolean[][], eventDetails: ChangeEventDetails) => void"}>Fires while cells are flipped. `eventDetails.cancel()` keeps the pattern as it was.</TypeRow>
+<TypeRow name={"onValueCommitted"} type={"(value: boolean[][], eventDetails: CommitEventDetails) => void"}>Fires when a press, a paint or a key press that changed the pattern ends.</TypeRow>
+<TypeRow name={"onVelocityChange"} type={"(velocities: number[][], eventDetails: VelocityChangeEventDetails) => void"}>Fires while a velocity is drawn or nudged. `eventDetails.cancel()` keeps the velocities as they were.</TypeRow>
+<TypeRow name={"onVelocityCommitted"} type={"(velocities: number[][], eventDetails: VelocityCommitEventDetails) => void"}>Fires when a drag, a key press or a reset that changed a velocity ends.</TypeRow>
+<TypeRow name={"source"} type={"Source<number>"}>The step being played, a live value followed without re-rendering; its cells get `data-current`.</TypeRow>
+<TypeRow name={"value"} type={"Pattern"}>The pattern: a row per sound, each a list of steps.</TypeRow>
+<TypeRow name={"velocities"} type={"Velocities"}>How loud each step plays, 0…1, a row per sound like the pattern; a step it does not list plays at full.</TypeRow>
+</TypeTable>
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+<TypeRow name={"data-painting"}>Whether a pointer is painting cells.</TypeRow>
+</TypeTable>
+
+### Rows
+
+Renders `children` once per row: the place to put a `Sequencer.Row`. Renders no element of its own.
+
+<TypeTable>
+<TypeRow name={"children"} type={"(row: number) => React.ReactNode"}></TypeRow>
+</TypeTable>
+
+### Cells
+
+Renders `children` once per step of the row it is in: the place to put a `Sequencer.Cell`. Renders no element of its own.
+
+<TypeTable>
+<TypeRow name={"children"} type={"(step: number) => React.ReactNode"}></TypeRow>
+</TypeTable>
+
+### Row
+
+One sound's row of steps. Name it with `aria-label`, such as "Kick". Renders a `<div>` element.
+
+<TypeTable>
+<TypeRow name={"index"} type={"number"}>Which row this is, from the top.</TypeRow>
+</TypeTable>
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+<TypeRow name={"data-painting"}>Whether a pointer is painting cells.</TypeRow>
+</TypeTable>
+
+### Cell
+
+One step of a row: a toggle button, pressed when the step is on. Press it and drag on to paint the same state across the cells you cross; focused, Space or Enter flips it and the arrow keys move to the next cell. Name it with `aria-label`, such as "Kick, step 5". The step being played gets `data-current`. Renders a `<button>` element.
+
+<TypeTable>
+<TypeRow name={"step"} type={"number"}>Which step this is, from the left.</TypeRow>
+</TypeTable>
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+<TypeRow name={"data-on"}>Whether the step is on: also `aria-pressed`.</TypeRow>
+<TypeRow name={"data-painting"}>Present when painting.</TypeRow>
+</TypeTable>
+
+### Velocity
+
+How loud one step plays, as a bar from the bottom of its box: the height is the velocity, through the `--sequencer-velocity` CSS variable. Pressing it sets the velocity where the pointer is, and dragging on draws across the steps of the row. Alt + click or Delete brings it back to full. A native `<input type="range">` inside takes the arrow keys and carries the accessible name. Put one per step of a `Sequencer.Row`, in a row of its own under the cells. Renders a `<div>` element.
+
+<TypeTable>
+<TypeRow name={"step"} type={"number"}>Which step this is, from the left.</TypeRow>
+<TypeRow name={"getAriaValueText"} type={"(velocity: number) => string"}>Returns how a velocity, 0…1, is announced. Defaults to a percentage.</TypeRow>
+</TypeTable>
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+<TypeRow name={"data-on"}>Whether the step is on.</TypeRow>
+</TypeTable>
+
+### Registry component
+
+`Sequencer` takes the `Root` props, plus:
+
+<TypeTable>
+<TypeRow name={"rowLabels"} type={"string[]"}>Names written beside each row, and its accessible name.</TypeRow>
+<TypeRow name={"beatEvery"} type={"number"} default={"4"}>Highlights every nth step.</TypeRow>
+<TypeRow name={"showVelocity"} type={"boolean"} default={"false"}>Draws a bar under each row to set how loud every step plays.</TypeRow>
+</TypeTable>

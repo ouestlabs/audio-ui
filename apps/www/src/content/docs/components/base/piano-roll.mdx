@@ -1,0 +1,300 @@
+---
+title: Piano roll
+description: "A note editor on a grid: draw, move, resize and select notes, with a playable keyboard and a velocity lane."
+component: true
+base: base
+---
+
+<ComponentPreview
+  hideCode
+  name="block-piano-roll"
+  styleName="base-nova"
+/>
+
+A piano roll for writing a phrase: a keyboard down the side, notes on a grid, and a velocity bar under each note. It sits inside a [Timeline](/docs/components/base/timeline), so notes use the timeline's units, snap to its grid and follow its zoom.
+
+## Overview
+
+- **Notes:** press on the grid to draw a note or to start a selection rectangle, depending on the mode. Drag a note to move it, drag an edge to resize it, and double-click to delete it. Selected notes move and resize together.
+- **Keys:** pressing a key on the side plays its note. The rows light up for the pitches playing.
+- **Velocity:** each note has a bar in its own lane, drawn from the bottom.
+- **Keyboard:** every edit works without a pointer, including copy, paste, duplicate and quantize.
+- **Accessibility:** each note is a toggle button named after its pitch and span. Each velocity bar holds a native `<input type="range">`.
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">CLI</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash component
+npx shadcn@latest add @audio/piano-roll
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the following dependencies:</Step>
+
+```bash
+npm install @audio-ui/react
+```
+
+<Step>Copy and paste the following code into your project.</Step>
+
+<ComponentSource
+  styleName="base-nova"
+  name="piano-roll"
+  title="components/audio/elements/piano-roll.tsx"
+/>
+
+<Step>Update the import paths to match your project setup.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Anatomy
+
+Import the registry components for the ready-made look, or compose the primitive's parts yourself.
+
+```tsx
+import { PianoRoll, Timeline } from "@audio-ui/react";
+
+<Timeline.Root duration={16} snapStep={1}>
+  <PianoRoll.Root>
+    <PianoRoll.Keys>
+      <PianoRoll.Rows>
+        {(pitch) => (
+          <PianoRoll.Key pitch={pitch}>
+            <PianoRoll.KeyLabel />
+          </PianoRoll.Key>
+        )}
+      </PianoRoll.Rows>
+    </PianoRoll.Keys>
+    <PianoRoll.Grid aria-label="Notes">
+      <PianoRoll.Rows>{(pitch) => <PianoRoll.Row pitch={pitch} />}</PianoRoll.Rows>
+      <PianoRoll.Notes>
+        {(note) => (
+          <PianoRoll.Note key={note.id} note={note}>
+            <PianoRoll.NoteHandle edge="start" />
+            <PianoRoll.NoteHandle edge="end" />
+          </PianoRoll.Note>
+        )}
+      </PianoRoll.Notes>
+      <PianoRoll.Marquee />
+    </PianoRoll.Grid>
+    <PianoRoll.VelocityLane aria-label="Velocity">
+      <PianoRoll.Notes>
+        {(note) => <PianoRoll.Velocity key={note.id} note={note} />}
+      </PianoRoll.Notes>
+    </PianoRoll.VelocityLane>
+  </PianoRoll.Root>
+</Timeline.Root>;
+```
+
+## Usage
+
+```tsx
+import { Timeline, TimelineNavigator } from "@/components/audio/elements/timeline";
+import {
+  PianoRoll,
+  PianoRollGrid,
+  PianoRollKeys,
+  PianoRollStrip,
+  PianoRollVelocity,
+  PianoRollVelocityScale,
+  PianoRollViewport,
+} from "@/components/audio/elements/piano-roll";
+
+<Timeline duration={16} snapStep={1}>
+  <PianoRoll
+    className="h-96"
+    maxPitch={72}
+    minPitch={48}
+    onNoteOn={(pitch, details) => play(pitch, details.velocity)}
+    onValueChange={setNotes}
+    value={notes}
+  >
+    <PianoRollViewport>
+      <PianoRollStrip className="flex-1" lead={<PianoRollKeys />}>
+        <PianoRollGrid aria-label="Notes" gridStep={1} />
+      </PianoRollStrip>
+      <PianoRollStrip lead={<PianoRollVelocityScale />} sticky="bottom">
+        <PianoRollVelocity />
+      </PianoRollStrip>
+    </PianoRollViewport>
+  </PianoRoll>
+</Timeline>;
+```
+
+A note is `{ id, pitch, start, length, velocity? }`: `pitch` is a MIDI number (60 is middle C), `start` and `length` are in the timeline's units, and `velocity` is 0 to 1 (full when left out). `value` and `selection` are controlled; `defaultValue` and `defaultSelection` leave them to the roll. The roll reports every edit through `onValueChange` and, when a gesture or a key press ends, `onValueCommitted`; `eventDetails.edit` tells what happened (`"add"`, `"move"`, `"resize"`, `"remove"`, `"duplicate"`, `"paste"`, `"quantize"` or `"velocity"`) and `eventDetails.cancel()` keeps the notes as they were.
+
+`onNoteOn` and `onNoteOff` say when a pitch should sound or stop: a key pressed, a note drawn, picked up or moved to a new pitch. A MIDI file can be read and written with the `midi` library (`@audio/midi`); the preview above imports and exports `.mid` files with it.
+
+## Interaction
+
+### Pointer
+
+<KeyTable title="Gestures">
+<KeyRow gesture={"Press on empty grid"}>With `mode="draw"`, draws a note whose end follows the pointer. With `mode="select"`, starts a selection rectangle (a double-click draws). `Shift` adds to the selection.</KeyRow>
+<KeyRow gesture={"Drag a note"}>Moves it, with the selection when it is part of it. On the grid unless <kbd>Cmd</kbd> / <kbd>Ctrl</kbd> is held.</KeyRow>
+<KeyRow gesture={"`Alt` + drag a note"}>Moves a copy.</KeyRow>
+<KeyRow gesture={"Drag a note's edge"}>Resizes it: the end changes the length, the start trims it from the front.</KeyRow>
+<KeyRow gesture={"`Shift` + click a note"}>Toggles it in the selection.</KeyRow>
+<KeyRow gesture={"Double-click a note"}>Deletes it.</KeyRow>
+<KeyRow gesture={"Drag a velocity bar"}>Changes the velocity of the selection by the same amount.</KeyRow>
+<KeyRow gesture={"Press a key"}>Plays it; with `Shift`, selects every note on its row.</KeyRow>
+</KeyTable>
+
+### Keyboard
+
+<KeyTable title="Keys">
+<KeyRow gesture={"Arrow keys on a note"}>`Left` / `Right` move it by a grid step, `Up` / `Down` by a semitone. With `Shift`: resize it, or move an octave.</KeyRow>
+<KeyRow gesture={"`Enter`, `Space` on a note"}>Toggle it in the selection.</KeyRow>
+<KeyRow gesture={"`Delete`, `Backspace`"}>Remove the selected notes.</KeyRow>
+<KeyRow gesture={"`Enter` on the grid"}>Adds a note at the playback position.</KeyRow>
+<KeyRow gesture={"`Escape`, `Cmd` / `Ctrl` + `A`"}>Clear the selection, select every note.</KeyRow>
+<KeyRow gesture={"`Cmd` / `Ctrl` + `D`"}>Repeat the selection right after itself and select the copies.</KeyRow>
+<KeyRow gesture={"`Cmd` / `Ctrl` + `C`, `X`, `V`"}>Copy, cut, and paste at the playback position.</KeyRow>
+<KeyRow gesture={"`Q`"}>Snap the starts of the selection (every note, with none selected) to the grid.</KeyRow>
+<KeyRow gesture={"Arrow keys, `Page Up` / `Down`, `Home` / `End` on a velocity bar"}>Change the velocity by 5%, by 25%, or to silent or full.</KeyRow>
+</KeyTable>
+
+## API reference
+
+### Root
+
+Groups the parts of a piano roll and owns its notes and selection. Must be used within a `Timeline`. Renders a `<div>` element.
+
+<TypeTable>
+<TypeRow name={"value"} type={"Note[]"}>The notes.</TypeRow>
+<TypeRow name={"defaultValue"} type={"Note[]"}>Uncontrolled starting notes.</TypeRow>
+<TypeRow name={"selection"} type={"NoteId[]"}>The ids of the selected notes.</TypeRow>
+<TypeRow name={"defaultSelection"} type={"NoteId[]"}>Uncontrolled starting selection.</TypeRow>
+<TypeRow name={"minPitch"} type={"number"} default={"48"}>Lowest MIDI pitch, inclusive: 60 is middle C.</TypeRow>
+<TypeRow name={"maxPitch"} type={"number"} default={"72"}>Highest MIDI pitch, inclusive.</TypeRow>
+<TypeRow name={"minLength"} type={"number"}>The shortest a note can be, in the timeline's units. Defaults to the timeline's grid step.</TypeRow>
+<TypeRow name={"mode"} type={"\"draw\" | \"select\""} default={"\"select\""}>What a press on empty grid does: draw a note, or start a selection rectangle (a double-click draws).</TypeRow>
+<TypeRow name={"folded"} type={"boolean"} default={"false"}>Whether only the pitches carrying notes get a row. A roll without notes keeps them all.</TypeRow>
+<TypeRow name={"activePitches"} type={"number[]"}>Pitches lit from elsewhere, such as a MIDI input or the notes playing, on the keys and rows.</TypeRow>
+<TypeRow name={"disabled"} type={"boolean"}></TypeRow>
+<TypeRow name={"createNoteId"} type={"() => NoteId"}>Returns the id of a note drawn, added or duplicated. Defaults to `"note-<n>"`, skipping ids in use.</TypeRow>
+<TypeRow name={"getNoteLabel"} type={"(note: Note) => string"}>Returns a note's accessible name. Defaults to its pitch and where it starts and ends, such as "C4, 4 to 6".</TypeRow>
+<TypeRow name={"onValueChange"} type={"(value: Note[], eventDetails) => void"}>Fires while notes are drawn, moved, resized, duplicated or removed.</TypeRow>
+<TypeRow name={"onValueCommitted"} type={"(value: Note[], eventDetails) => void"}>Fires when a gesture that changed the notes ends, and after each edit from the keyboard.</TypeRow>
+<TypeRow name={"onSelectionChange"} type={"(selection: NoteId[], eventDetails) => void"}>Fires when notes are selected or deselected.</TypeRow>
+<TypeRow name={"onNoteOn"} type={"(pitch: number, eventDetails) => void"}>Fires when a pitch should sound: a key pressed, a note drawn, picked up or moved to a new pitch. `eventDetails.velocity` is 0 to 1; `eventDetails.cancel()` keeps it silent.</TypeRow>
+<TypeRow name={"onNoteOff"} type={"(pitch: number, eventDetails) => void"}>Fires when a pitch stops sounding.</TypeRow>
+</TypeTable>
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+<TypeRow name={"data-editing"}>Present while a gesture edits the notes.</TypeRow>
+<TypeRow name={"data-folded"}>Present when folded.</TypeRow>
+<TypeRow name={"data-mode"}>`"draw"` or `"select"`.</TypeRow>
+</TypeTable>
+
+### Keys
+
+The keyboard down the side: a `Piano` laid out on the roll's rows, low end at the bottom. Pressing a key sounds it through the roll's `onNoteOn`; with Shift, pressing it (or Shift + Enter) selects every note on its row, or deselects them when they all are. Put a `PianoRoll.Key` per row inside, with `PianoRoll.Rows`. Renders a `<div>` element.
+
+### Rows
+
+Renders `children` once per row, from the highest pitch down: the place to put a `PianoRoll.Key` or a `PianoRoll.Row`. Renders no element of its own.
+
+<TypeTable>
+<TypeRow name={"children"} type={"(pitch: number) => React.ReactNode"}></TypeRow>
+</TypeTable>
+
+### Key and KeyLabel
+
+The same parts as [Piano](/docs/components/base/piano): a key of the keyboard, and its label.
+
+### Grid
+
+The surface notes are drawn on: a timeline lane, with the roll's rows stacked down it. A press on empty grid draws a note (`mode="draw"`), whose end then follows the pointer, or starts a selection rectangle, Shift adding to what is selected; in that mode a double-click draws. Focused, Enter adds a note at the playback position, Escape clears the selection and Cmd/Ctrl+A selects every note. From the grid or a note, Cmd/Ctrl+D repeats the selection right after itself, Cmd/Ctrl+C, X and V copy, cut and paste at the playback position, and Q snaps the starts of the selection (every note, with none selected) to the grid. Renders a `<div>` element.
+
+### Row
+
+The band a pitch takes across the grid, for shading black-key rows or ruling where an octave starts. It lets presses through to the grid and is hidden from assistive technology. Renders a `<div>` element.
+
+<TypeTable>
+<TypeRow name={"pitch"} type={"number"}>The MIDI pitch of the row.</TypeRow>
+</TypeTable>
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-active"}>Whether the pitch is sounding.</TypeRow>
+<TypeRow name={"data-color"}>`"black"` or `"white"`.</TypeRow>
+<TypeRow name={"data-folded"}>Whether the roll is folded.</TypeRow>
+<TypeRow name={"data-octave"}>Whether the row is a C, where an octave starts.</TypeRow>
+</TypeTable>
+
+### Notes
+
+Renders `children` once per note, in the order they are read: by start, then from the highest pitch down. That order is also the tab order. Renders no element of its own.
+
+<TypeTable>
+<TypeRow name={"children"} type={"(note: Note) => React.ReactNode"}></TypeRow>
+</TypeTable>
+
+### Note
+
+One note, placed on its row from its start, as long as its length. A toggle button named after its pitch and span (`getNoteLabel` on `Root`). Renders a `<div>` element.
+
+<TypeTable>
+<TypeRow name={"note"} type={"Note"}>The note to show; while it is being edited, the roll shows it where the edit has it.</TypeRow>
+</TypeTable>
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-selected"}>Whether the note is in the selection: also `aria-pressed`.</TypeRow>
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+</TypeTable>
+
+### NoteHandle
+
+One edge of the note it sits in, dragged to change the note's length: the end makes it longer or shorter, the start trims it from the front while its end stays put. On the grid unless Cmd/Ctrl is held, and for the whole selection when the note is part of it. Shift + Left and Right on the note do the same from the keyboard, so the handle is hidden from assistive technology. Renders a `<div>` element.
+
+<TypeTable>
+<TypeRow name={"edge"} type={"\"start\" | \"end\""}>The edge of the note this handle drags.</TypeRow>
+</TypeTable>
+
+### Marquee
+
+The selection rectangle being dragged across the grid; renders nothing the rest of the time. Hidden from assistive technology. Renders a `<div>` element.
+
+### VelocityLane
+
+A strip under the grid where each note's velocity stands as a bar, placed at the note's start: a timeline lane, like the grid. Put a `PianoRoll.Velocity` per note inside, with `PianoRoll.Notes`. Renders a `<div>` element.
+
+### Velocity
+
+One note's velocity, as a bar from the bottom of the lane: its height is the velocity, through the `--piano-roll-velocity` CSS variable. Dragging it up or down changes the velocity of the selection by the same amount when the note is part of it, so a phrase keeps its dynamics; Shift + click toggles the note in the selection. A native `<input type="range">` inside takes the arrow keys and carries the accessible name, which defaults to the note's. The next drawn note gets the velocity set last. Renders a `<div>` element.
+
+<TypeTable>
+<TypeRow name={"note"} type={"Note"}>The note whose velocity this is.</TypeRow>
+<TypeRow name={"getAriaValueText"} type={"(velocity: number) => string"}>Returns how a velocity, 0…1, is announced. Defaults to a percentage.</TypeRow>
+</TypeTable>
+
+### Registry components
+
+`PianoRoll` takes the `Root` props. The rest lay the editor out on two columns, the keys' and the timeline's:
+
+<TypeTable title="Components">
+<TypeRow name={"PianoRollViewport"}>Scrolls the roll both ways, without scrollbars: put a `TimelineNavigator` above it to scroll and zoom across.</TypeRow>
+<TypeRow name={"PianoRollStrip"}>A row of the editor: `lead` in the keys' column, stuck to the left edge, the lanes in `children` beside it. `sticky` keeps it at the `"top"` or `"bottom"` of the viewport.</TypeRow>
+<TypeRow name={"PianoRollKeys"}>The keyboard down the side, one key per row. `size` is `"sm"`, `"default"` or `"lg"`.</TypeRow>
+<TypeRow name={"PianoRollGrid"}>The notes, on their rows. `gridStep` draws a line every step, `accentStep` a firmer one, such as each beat; anything placed on the timeline, such as a `TimelinePlayhead`, goes in `children`.</TypeRow>
+<TypeRow name={"PianoRollVelocity"}>Each note's velocity as a bar.</TypeRow>
+<TypeRow name={"PianoRollVelocityScale"}>The scale beside the velocity lane, for the `lead` of its strip.</TypeRow>
+</TypeTable>

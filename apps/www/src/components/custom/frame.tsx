@@ -8,6 +8,10 @@ interface FrameProps extends React.HTMLAttributes<HTMLDivElement> {
   url?: string;
 }
 
+/** What a frame looks like, for a surface that cannot be a `Frame` itself, such as a popup. */
+export const frameClassName =
+  "relative flex flex-col overflow-hidden rounded-(--frame-radius) border border-site-border/80 bg-site-muted/50 p-0.5 shadow-black/5 shadow-none";
+
 export const Frame = ({
   children,
   url,
@@ -15,17 +19,14 @@ export const Frame = ({
   ref,
   ...props
 }: FrameProps & { ref?: React.RefObject<HTMLDivElement | null> }) => {
-  const outerClasses = cn(
-    "relative flex flex-col overflow-hidden rounded-[16px] border border-site-border/80 bg-site-muted/50 p-0.5 shadow-black/5 shadow-none",
-    className
-  );
+  const outerClasses = cn(frameClassName, className);
 
   if (url) {
     return (
       <Link
         className={cn(
           outerClasses,
-          "transition-shadow duration-200 ease-out hover:shadow-lg hover:ring-site-foreground/10"
+          "transition-[filter] duration-200 ease-out hover:drop-shadow-lg hover:ring-site-foreground/10"
         )}
         href={url}
         ref={ref as any}
@@ -46,14 +47,33 @@ Frame.displayName = "Frame";
 export function FrameContent({
   children,
   className,
+  ref,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement> & {
+  ref?: React.Ref<HTMLDivElement>;
+}) {
+  return (
+    <div
+      className={cn(
+        "relative overflow-hidden rounded-(--frame-radius-inner) border border-site-border bg-site-background",
+        className
+      )}
+      ref={ref}
+      {...props}
+    >
+      {children}
+    </div>
+  );
+}
+
+export function FrameHeader({
+  children,
+  className,
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn(
-        "relative overflow-hidden rounded-[14px] border border-site-border bg-site-background",
-        className
-      )}
+      className={cn("flex flex-col gap-1 p-3 font-site-sans", className)}
       {...props}
     >
       {children}

@@ -13,6 +13,7 @@ import {
   PickerRadioItem,
   PickerSeparator,
   PickerTrigger,
+  usePickerSide,
 } from "@/app/(create)/customizer/picker";
 import {
   isTranslucentMenuColor,
@@ -135,7 +136,7 @@ export function MenuColorPicker({
         <PickerContent
           align={isMobile ? "center" : "start"}
           anchor={isMobile ? anchorRef : undefined}
-          side={isMobile ? "top" : "right"}
+          side={usePickerSide(isMobile)}
         >
           <PickerGroup>
             <PickerLabel>Color</PickerLabel>

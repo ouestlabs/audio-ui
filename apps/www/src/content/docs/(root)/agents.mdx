@@ -1,0 +1,36 @@
+---
+title: Agent Skill
+description: Give your coding agent the audio/ui skill so it picks the right layer, installs the right component and avoids common mistakes.
+---
+
+The audio/ui skill gives a coding agent the library's rules: when to use the npm primitives and when the shadcn registry, which component fits a task, how to install it, and the mistakes that come up most often.
+
+## Install the skill
+
+Works with Claude Code, Cursor, Codex and any agent that supports the open skills format.
+
+```bash
+npx skills add ouestlabs/audio-ui
+```
+
+The skill lives in the [audio-ui repository](https://github.com/ouestlabs/audio-ui/tree/main/skills/audio-ui). To install it by hand, copy the `skills/audio-ui` folder into your agent's skills directory (for Claude Code, `.claude/skills/`).
+
+## What it does
+
+Once installed, the agent uses it whenever you ask for a knob, fader, XY pad, meter, waveform, timeline, sequencer, piano roll or any synth, mixer or DAW interface in React. It will:
+
+1. Read your project to see if it uses shadcn/ui, then choose the registry or the npm package.
+2. Find the right component and read its docs before writing code.
+3. Install it with your package manager.
+4. Connect the control to your audio code the safe way, without clicks while dragging.
+5. Check keyboard access and accessible names.
+
+## Add the MCP server
+
+The skill works best next to the [MCP server](/docs/mcp), which lets the agent look up components and docs live instead of relying on memory.
+
+## Example prompts
+
+- Build a synth control panel with Knob, XY Pad and Fader.
+- Add an equalizer with a Plot and draggable band handles.
+- Make a piano roll with a keyboard, a velocity lane and a loop range.

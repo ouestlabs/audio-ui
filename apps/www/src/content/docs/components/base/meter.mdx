@@ -1,0 +1,227 @@
+---
+title: Meter
+description: A level meter in decibels for one or more channels, with peak hold.
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="meter-size-default-demo" />
+
+Shows audio levels for a stereo output, a channel strip or any multi-channel source. The registry component wraps the `Meter` primitive from `@audio-ui/react`: one bar per channel, a destructive color when a channel clips, and an optional peak-hold mark. The meter only displays levels: it takes no pointer or keyboard input, and no focus.
+
+## Overview
+
+- **Value:** one dB reading per channel (stereo is `[left, right]`), from the `value` prop or a live [`source`](#feeding-real-levels). The number of readings sets the number of channels.
+- **Peak hold:** an optional peak level per channel places a peak-hold mark. The primitive has no clock: the [`use-audio-levels`](#feeding-real-levels) hook, Tone.js or another source computes the peak and its decay.
+- **Clipping:** channels at or above `clipThreshold` (default `0` dB) get `data-clipping`, to style a clip indicator.
+- **Accessibility:** each channel is a `role="meter"` with `aria-valuenow`, `aria-valuemin`, `aria-valuemax` and a value text in dB ("-6 dB"). It is not an `aria-live` region, so screen readers read the level when asked instead of announcing every update. `aria-label` names the group; with several channels, each is named "… 1", "… 2".
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">CLI</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash component
+npx shadcn@latest add @audio/meter
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the following dependencies:</Step>
+
+```bash
+npm install @audio-ui/react class-variance-authority
+```
+
+<Step>Copy and paste the following code into your project.</Step>
+
+<ComponentSource
+  styleName="base-nova"
+  name="meter"
+  title="components/audio/meter.tsx"
+/>
+
+<Step>Update the import paths to match your project setup.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Anatomy
+
+Import the primitive and assemble its parts.
+
+```tsx
+import { Meter } from "@audio-ui/react";
+
+<Meter.Root>
+  <Meter.Channels>
+    {(index) => (
+      <Meter.Channel index={index}>
+        <Meter.Indicator />
+        <Meter.Peak />
+      </Meter.Channel>
+    )}
+  </Meter.Channels>
+</Meter.Root>
+```
+
+## Usage
+
+```tsx
+import { Meter } from "@/components/audio/meter";
+```
+
+**Static levels:**
+
+```tsx
+<Meter value={[-9, -14]} />
+```
+
+**With a peak-hold mark:**
+
+```tsx
+<Meter peak={[-4, -8]} value={[-9, -14]} />
+```
+
+## Feeding real levels
+
+`value` and `peak` are plain props: fine for static or slowly changing levels, but a signal sampled 60 times a second would re-render React on every frame. For live audio, pass a `source` instead: the meter subscribes to it and writes each frame to the DOM, without a React render.
+
+The `use-audio-levels` hook (`npx shadcn@latest add @audio/use-audio-levels`) returns such a source. It samples RMS level (in dB) from one `AnalyserNode` per channel every animation frame, with a peak-hold level that holds the loudest recent level for 1.5s before decaying:
+
+```tsx
+const levels = useAudioLevels([leftAnalyser, rightAnalyser]);
+
+<Meter aria-label="Stereo output" source={levels} />;
+```
+
+A source is any object with the shape of an external store, so you can bring your own (Tone.js, a worklet, a WebSocket):
+
+```ts
+interface MeterSource {
+  getSnapshot: () => { levels: readonly number[]; peaks?: readonly number[] };
+  subscribe: (listener: () => void) => () => void;
+}
+```
+
+To read the levels in React as well, for a numeric readout for example, use `useSyncExternalStore(levels.subscribe, levels.getSnapshot)`.
+
+## API reference
+
+### Root
+
+Groups the channels of a level meter. Levels come either from `value` (and `peak`) as React props, or from a live `source`: with a source the meter writes each frame straight to the DOM, so a signal updating 60 times a second never re-renders React. Renders a `<div>` element.
+
+<TypeTable>
+<TypeRow name={"clipThreshold"} type={"number"} default={"0"}>Level at or above which a channel is clipping.</TypeRow>
+<TypeRow name={"format"} type={"Intl.NumberFormatOptions"}>Formats each level for `Meter.Value` and the channels' `aria-valuetext`. Defaults to one decimal.</TypeRow>
+<TypeRow name={"locale"} type={"Intl.LocalesArgument"}></TypeRow>
+<TypeRow name={"max"} type={"number"} default={"6"}></TypeRow>
+<TypeRow name={"min"} type={"number"} default={"-60"}></TypeRow>
+<TypeRow name={"orientation"} type={"Orientation"} default={"\"vertical\""}></TypeRow>
+<TypeRow name={"peak"} type={"readonly number[]"}>Peak-hold level per channel. Timing and decay live outside the primitive.</TypeRow>
+<TypeRow name={"scale"} type={"\"linear\" | \"iec\" | (level: number) => number"} default={"\"linear\""}>How levels are spread along the length: evenly, as digital peak meters do with more room at the top (`"iec"`), or by your own increasing curve.</TypeRow>
+<TypeRow name={"warnThreshold"} type={"number"}>Level at or above which a channel is in its warning zone, below the clip threshold: `data-warning`. Unset, there is no warning zone.</TypeRow>
+<TypeRow name={"source"} type={"Source"}>A live signal painted outside React; takes precedence over `value` and `peak`.</TypeRow>
+<TypeRow name={"value"} type={"readonly number[]"}>Level per channel; the array length is the channel count.</TypeRow>
+</TypeTable>
+
+### Channels
+
+Renders one child per channel.
+
+<TypeTable>
+<TypeRow name={"children"} type={"(index: number, channelCount: number) => React.ReactNode"}></TypeRow>
+</TypeTable>
+
+### Channel
+
+One channel of the meter, a `role="meter"`: name it with `aria-label` or a `Meter.Label`. Carries `data-clipping` at or above the clip threshold. Renders a `<div>` element.
+
+<TypeTable>
+<TypeRow name={"getAriaValueText"} type={"(formattedValue: string, value: number, index: number) => string"}>Returns the channel's `aria-valuetext`, e.g. `"-6 dB"`. Defaults to the formatted level.</TypeRow>
+<TypeRow name={"index"} type={"number"}>Index of the channel in the levels.</TypeRow>
+</TypeTable>
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-clipping"}>Whether the level is at or above the clip threshold.</TypeRow>
+</TypeTable>
+
+### Indicator
+
+The lit part of the channel, scaled to the level. Renders a `<div>` element.
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-clipping"}>Whether the level is at or above the clip threshold.</TypeRow>
+</TypeTable>
+
+### Peak
+
+The peak-hold mark, positioned at the channel's peak level; hidden while the channel has none. Renders a `<div>` element.
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-clipping"}>Whether the level is at or above the clip threshold.</TypeRow>
+</TypeTable>
+
+### Value
+
+The channel's formatted level (`format`/`locale` on Root). With a live `source` only the default text is kept current, not a `children` function. Renders a `<span>` element.
+
+### Mark
+
+A graduation of the level scale at `value`, such as -18 dB: placed along the meter's length from its minimum, upward for a vertical meter and rightward for a horizontal one. Sits directly in `Root`, beside the channels. Decorative: each channel announces its own level. Renders a `<div>` element.
+
+<TypeTable>
+<TypeRow name={"value"} type={"number"}>Where the mark sits, between `min` and `max`.</TypeRow>
+</TypeTable>
+
+### Registry component
+
+`Meter` accepts style props (`size`, `peakMarks`, `marks`, `className`) plus primitive props from `MeterPrimitive.Root.Props`.
+
+#### Value and state
+
+<TypeTable>
+<TypeRow name={"value"} type={"number[]"}>Level (dB) per channel; array length is the channel count.</TypeRow>
+<TypeRow name={"peak"} type={"number[]"}>Peak-hold level (dB) per channel. Omit to hide peak marks.</TypeRow>
+<TypeRow name={"source"} type={"MeterSource"}>A live signal painted outside React; takes precedence over `value` and `peak`.</TypeRow>
+<TypeRow name={"min"} type={"number"} default={"-60"}>Minimum of the dB range.</TypeRow>
+<TypeRow name={"max"} type={"number"} default={"6"}>Maximum of the dB range.</TypeRow>
+<TypeRow name={"clipThreshold"} type={"number"} default={"0"}>Level (dB) at or above which a channel is marked as clipping.</TypeRow>
+<TypeRow name={"orientation"} type={"\"vertical\" | \"horizontal\""} default={"\"vertical\""}>Bar direction.</TypeRow>
+<TypeRow name={"format"} type={"Intl.NumberFormatOptions"} default={"one decimal"}>Formats each level for the value text.</TypeRow>
+<TypeRow name={"aria-label"} type={"string"}>Accessible name for the meter group and its channels.</TypeRow>
+</TypeTable>
+
+#### Layout and display
+
+<TypeTable>
+<TypeRow name={"size"} type={"\"sm\" | \"default\" | \"lg\""} default={"\"default\""}>Size variant (sets the meter height).</TypeRow>
+<TypeRow name={"peakMarks"} type={"\"visible\" | \"hidden\""} default={"\"visible\""}>Shows or hides the peak-hold mark per channel.</TypeRow>
+<TypeRow name={"marks"} type={"number[]"}>Levels graduated along the meter, each with a tick and its label, such as `[6, 0, -6, -12, -20, -30, -40, -60]`.</TypeRow>
+<TypeRow name={"scale"} type={"\"linear\" | \"iec\" | (level) => number"} default={"\"iec\""}>How levels are spread along the length: the registry element starts on the IEC scale of digital peak meters.</TypeRow>
+<TypeRow name={"className"} type={"string"}>Additional CSS classes.</TypeRow>
+</TypeTable>
+
+
+
+`@audio-ui/react/meter` exposes `Meter.Root` (the group), `Meter.Channels` (one child per channel), `Meter.Channel` (a `role="meter"`), `Meter.Track`, `Meter.Indicator` (the lit part), `Meter.Peak` (the peak-hold mark), `Meter.Value` (the formatted level) and `Meter.Label`. Channel parts expose `data-orientation` and `data-clipping`.
+
+## Examples
+
+### Horizontal orientation
+
+<ComponentPreview styleName="base-nova" name="meter-horizontal-demo" />

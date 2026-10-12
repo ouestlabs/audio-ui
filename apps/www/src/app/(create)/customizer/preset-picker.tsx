@@ -9,6 +9,7 @@ import {
   PickerRadioGroup,
   PickerRadioItem,
   PickerTrigger,
+  usePickerSide,
 } from "@/app/(create)/customizer/picker";
 import { useDesignSystemSearchParams } from "@/app/(create)/lib/search-params";
 import { useConfig } from "@/hooks/use-config";
@@ -119,7 +120,7 @@ export function PresetPicker({
         align={isMobile ? "center" : "start"}
         anchor={isMobile ? anchorRef : undefined}
         className="md:w-72"
-        side={isMobile ? "top" : "right"}
+        side={usePickerSide(isMobile)}
       >
         <PickerRadioGroup
           onValueChange={handlePresetChange}

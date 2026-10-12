@@ -40,10 +40,10 @@ export function ComponentHeaderGridToggle({
           title="1 column (row mode)"
           value="1"
         >
-          <RowsIcon weight="duotone" />
+          <RowsIcon weight="fill" />
         </TabsTrigger>
         <TabsTrigger aria-label="2 columns" title="2 columns" value="2">
-          <ColumnsIcon weight="duotone" />
+          <ColumnsIcon weight="fill" />
         </TabsTrigger>
       </TabsList>
     </Tabs>

@@ -1,19 +1,19 @@
 ---
 title: Knob
-description: Rotary control for parameters - drag, wheel, keyboard, optional fader-style vertical pan, and reset via double-tap.
+description: A rotary control for continuous parameters, with pointer, wheel and keyboard input.
 component: true
 base: base
 ---
 
 <ComponentPreview styleName="base-nova" name="knob-demo" />
 
-Rotary knob for continuous parameters (level, cutoff, pan, etc.). The registry component wraps `Knob` primitives from `@audio-ui/react` with size variants and theme styles; behavior and geometry are documented below.
+A rotary control for continuous parameters such as level, cutoff or pan. The registry component wraps the `Knob` primitive from `@audio-ui/react` and adds size variants and theme styles.
 
 ## Overview
 
-- **Interaction model:** Circular drag by default, optional vertical "fader" pan, mouse wheel, keyboard nudging, and **double-tap / double-click** to snap back to `defaultValue`.
-- **Feedback:** Track rail, highlighted arc between `anchor` and value when useful, and a needle aligned to the current value.
-- **Accessibility:** The draggable surface is a `role="slider"` with `aria-valuenow` / `min` / `max`; label via `aria-label` or `aria-labelledby`.
+- **Input:** drag around the knob (`dragMode="circular"`, the default), up and down (`"vertical"`), or by full turns (`"revolution"`). The mouse wheel and the keyboard also work. A double-click or a double-tap returns to `defaultValue`.
+- **Display:** a track, an arc from `anchor` to the value, and a needle that turns with the value. The needle follows the pointer without easing, so it stays in line with the arc.
+- **Accessibility:** the knob holds a native `<input type="range">` that takes focus and carries the accessible name (`aria-label` or `aria-labelledby`), the value text (formatted with `format`, or set with `getAriaValueText` on the primitive's `Thumb`) and the form value (`name`).
 
 ## Installation
 
@@ -58,19 +58,38 @@ npm install @audio-ui/react class-variance-authority
 
 </CodeTabs>
 
+## Anatomy
+
+Import the primitive and assemble its parts.
+
+```tsx
+import { Knob } from "@audio-ui/react";
+
+<Knob.Root>
+  <Knob.Control>
+    <Knob.Track />
+    <Knob.Indicator />
+    <Knob.Thumb />
+    <Knob.Mark value={50} />
+  </Knob.Control>
+  <Knob.Value />
+  <Knob.Label />
+</Knob.Root>
+```
+
 ## Usage
 
 ```tsx
 import { Knob } from "@/components/audio/knob";
 ```
 
-**Uncontrolled** - initial value only:
+**Uncontrolled:** set only the initial value.
 
 ```tsx
 <Knob defaultValue={50} max={100} min={0} step={1} />
 ```
 
-**Controlled** - drive the value from state (typical in audio UIs):
+**Controlled:** drive the value from state.
 
 ```tsx
 const [cutoff, setCutoff] = useState(1000);
@@ -84,141 +103,203 @@ const [cutoff, setCutoff] = useState(1000);
 />
 ```
 
-Pass **`defaultValue`** even when controlled if you use **double-tap reset**; it defines the value the knob jumps back to (still clamped and stepped).
+Pass `defaultValue` even when the knob is controlled if you use the double-tap reset: it sets the value the knob returns to, clamped and stepped.
 
 ## Interaction
 
 ### Pointer
 
-| Behavior | Details |
-| -------- | ------- |
-| **Circular drag (default)** | Value tracks accumulated rotation around the center from the value at **pointer down**. Uses `dragSensitivity` to choose the angular reference (see [Pointer mapping](#pointer-mapping)). |
-| **Vertical fader drag** | Set `dragOptions={{ verticalPanEnabled: true }}`. After a small movement threshold, a mostly-vertical drag nudges the value like a fader; circular drag still works when the gesture is more rotational. |
-| **Double-tap / double-click** | Two quick releases with **≤ ~12px** movement from each **pointer down**, within **~320ms**, resets to `defaultValue`, or to the midpoint of `min…max` if `defaultValue` is omitted. Fires `onValueCommit` like a normal commit. |
+<KeyTable title="Behavior">
+<KeyRow gesture={"Circular drag (default)"}>The value follows the rotation around the center, from the value at pointer down. The dial's 288° sweep spans `min…max`.</KeyRow>
+<KeyRow gesture={"Vertical drag"}>`dragMode="vertical"`: drag up to increase, like a fader; 150px of travel spans `min…max`.</KeyRow>
+<KeyRow gesture={"Revolution drag"}>`dragMode="revolution"`: one full 360° turn spans `min…max`.</KeyRow>
+<KeyRow gesture={"Fine drag"}>Hold `Shift` while dragging, in any mode, to turn four times slower. Only the stretch moved with `Shift` held is slowed, and small moves add up rather than rounding away.</KeyRow>
+<KeyRow gesture={"Double-tap / double-click"}>Two quick taps (each moving ≤ ~12px, within ~320ms) reset to `defaultValue`, or to the middle of the dial's travel without one. Reports `eventDetails.reason === "reset"`.</KeyRow>
+</KeyTable>
 
-Default geometry uses a large sweep (~288° from `angleGapRad`), so **`arc` and `revolution` can feel similar**; use a smaller `angleRange` if you want `arc` to span the full range in less than one physical turn. Values always **clamp** to `min…max` (no wrap).
+Values stay within `min…max` and do not wrap. While dragging, the knob follows the pointer even if a controlled `value` updates late.
+
+### Scale
+
+`scale` sets how the value maps onto the dial's travel. `"linear"` (the default) suits levels and times; `"log"` suits frequency, resonance and ratios, which are heard as proportions: on a 20 Hz–20 kHz cutoff, every decade gets the same share of the dial, and 632 Hz sits at the middle. A log scale needs a positive `min`. For anything else, pass your own `{ toPosition, toValue }`, mapping a value to 0…1 along the travel and back.
+
+```tsx
+<Knob aria-label="Cutoff" max={20_000} min={20} scale="log" />
+```
+
+Away from linear, the keys and the wheel move a share of the travel (1%, or 10% with `Shift` and the Page keys) rather than a `step`, and always by at least one `step`.
 
 ### Keyboard
 
-Focused knob:
+On the focused knob:
 
-| Key | Action |
-| --- | ------ |
-| `ArrowUp` / `ArrowRight` | Increase by `step` |
-| `ArrowDown` / `ArrowLeft` | Decrease by `step` |
-| `PageUp` | Increase by `step × 10` |
-| `PageDown` | Decrease by `step × 10` |
-| `Home` | `min` |
-| `End` | `max` |
+<KeyTable title="Keys">
+<KeyRow gesture={"`ArrowUp` / `ArrowRight`"}>Increase by `step`</KeyRow>
+<KeyRow gesture={"`ArrowDown` / `ArrowLeft`"}>Decrease by `step`</KeyRow>
+<KeyRow gesture={"`PageUp` / `Shift` + `ArrowUp`"}>Increase by `largeStep` (default `10`)</KeyRow>
+<KeyRow gesture={"`PageDown` / `Shift` + `ArrowDown`"}>Decrease by `largeStep` (default `10`)</KeyRow>
+<KeyRow gesture={"`Home`"}>Set to `min`</KeyRow>
+<KeyRow gesture={"`End`"}>Set to `max`</KeyRow>
+</KeyTable>
 
 ### Wheel
 
-When the knob is focused, vertical wheel deltas step the value (same idea as key nudging).
+The mouse wheel over the knob moves the value by `step` and reports `eventDetails.reason === "wheel"`.
 
 ## API reference
 
-`Knob` accepts **`size`** and **`className`** plus primitive props from `KnobPrimitive.RootProps`.
+### Root
 
-### Value and state
+Groups all parts of the knob and owns its value. Dragging the `Control`, turning the mouse wheel over it, the keyboard on the `Thumb`'s input, or a double tap (reset) all report through `onValueChange` / `onValueCommitted`. Renders a `<div>` element.
 
-| Prop | Type | Default | Description |
-| ---- | ---- | ------- | ----------- |
-| `value` | `number` | - | Controlled value. |
-| `defaultValue` | `number` | - | Uncontrolled starting value; also the **double-tap reset** target when provided. |
-| `min` | `number` | `0` | Minimum. |
-| `max` | `number` | `100` | Maximum. |
-| `step` | `number` | `1` | Quantization step (drag, wheel, keyboard, reset). |
-| `disabled` | `boolean` | `false` | Disables pointer, wheel, and keyboard. |
-| `onValueChange` | `(value: number) => void` | - | Live updates while dragging or adjusting. |
-| `onValueCommit` | `(value: number) => void` | - | When the gesture ends (pointer up, wheel tick, reset, etc.). |
-| `aria-label` | `string` | - | Accessible name for the slider. |
-| `aria-labelledby` | `string` | - | ID of a labeling element. |
+<TypeTable>
+<TypeRow name={"anchor"} type={"number"}>Value the indicator arc grows from (e.g. `0` on a -1…1 pan knob). Defaults to `min`.</TypeRow>
+<TypeRow name={"defaultValue"} type={"number"}>Uncontrolled starting value, and the double-tap reset target. Defaults to the middle of the dial's travel.</TypeRow>
+<TypeRow name={"disabled"} type={"boolean"}></TypeRow>
+<TypeRow name={"dragMode"} type={"DragMode"} default={"\"circular\""}></TypeRow>
+<TypeRow name={"form"} type={"string"}>Identifies the form that owns the knob's input, when rendered outside it.</TypeRow>
+<TypeRow name={"format"} type={"Intl.NumberFormatOptions"}>Formats the value for `Knob.Value` and the input's `aria-valuetext`.</TypeRow>
+<TypeRow name={"largeStep"} type={"number"} default={"10"}>Step for Page Up/Page Down and Shift + Arrow keys.</TypeRow>
+<TypeRow name={"locale"} type={"Intl.LocalesArgument"}></TypeRow>
+<TypeRow name={"max"} type={"number"} default={"100"}></TypeRow>
+<TypeRow name={"min"} type={"number"} default={"0"}></TypeRow>
+<TypeRow name={"name"} type={"string"}>Identifies the field when a form is submitted.</TypeRow>
+<TypeRow name={"onValueChange"} type={"(value: number, eventDetails: ChangeEventDetails) => void"}>Fires on every change: drag, keyboard, wheel, reset and input changes.</TypeRow>
+<TypeRow name={"onValueCommitted"} type={"(value: number, eventDetails: CommitEventDetails) => void"}>Fires when an interaction ends with a new value.</TypeRow>
+<TypeRow name={"scale"} type={"Scale"} default={"\"linear\""}>How the value maps onto the dial's travel: `linear`, `log` for frequency, Q or ratios (needs a positive `min`), or your own `{ toPosition, toValue }`. Away from linear, the keys and the wheel move a share of the travel (1%, or 10% with Shift and Page keys) rather than a `step`.</TypeRow>
+<TypeRow name={"step"} type={"number"} default={"1"}></TypeRow>
+<TypeRow name={"value"} type={"number"}></TypeRow>
+</TypeTable>
 
-### Size and rail
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+<TypeRow name={"data-dragging"}>Whether a pointer is dragging the knob.</TypeRow>
+</TypeTable>
 
-| Prop | Type | Default | Description |
-| ---- | ---- | ------- | ----------- |
-| `size` | `"sm" \| "default" \| "lg" \| "xl"` | `"default"` | Diameter variant. |
-| `className` | `string` | - | On the root wrapper. |
-| `arcRadius` | `number` | `23` | Arc radius in the 48×48 viewBox. |
-| `arcStrokeWidth` | `number` | `3` | Track / arc stroke width. |
-| `angleGapRad` | `number` | `π/5` | Bottom gap in radians; drives default `angleOffset` / `angleRange`. |
-| `angleOffset` | `number` | from gap | Dial start angle in **degrees** (optional override). |
-| `angleRange` | `number` | from gap | Total sweep in **degrees** (optional override). |
-| `anchor` | `number` | - | Secondary value for the highlighted arc segment. |
-| `indicatorSpan` | `[number, number]` | `[0.24, 0.58]` | Needle inner / outer radius as fractions of track radius. |
-| `indicatorWidth` | `number` | `2.75` | Needle stroke width. |
+### Control
 
-### Pointer and drag
+The interactive surface: pointer drags (see `dragMode`), mouse-wheel stepping, and double tap to reset. Sets `touch-action: none` so touch drags don't scroll the page. Renders a `<div>` element.
 
-| Prop | Type | Default | Description |
-| ---- | ---- | ------- | ----------- |
-| `dragSensitivity` | `"arc" \| "revolution"` | `"arc"` | `arc`: one full span matches **`angleRange`** (as radians). `revolution`: one full span matches **360°** of pointer travel. Both are relative to the value at pointer down and clamp to `min…max`. |
-| `dragOptions` | see below | - | Pan vs rotate, dead zone, vertical sensitivity. |
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+<TypeRow name={"data-dragging"}>Whether a pointer is dragging the knob.</TypeRow>
+</TypeTable>
 
-#### `dragOptions` (`Knob.DragOptions`)
+### Track
 
-| Field | Default | Purpose |
-| ----- | ------- | ------- |
-| `verticalPanEnabled` | `false` | Allow vertical fader-style drag when `true`. |
-| `panSensitivityDivisor` | `150` | Vertical pan scale: `(max - min) / divisor` per unit delta. |
-| `centerDeadZoneRel` / `centerDeadZoneMinPx` | `0.08` / `2` | Hub radius where angle follows pointer without accumulating huge jumps. |
-| `modeLockMinPx` / `modeLockRel` | `6` / `0.055` | Movement before locking rotate vs pan mode. |
-| `panMinVerticalPx` | `10` | Minimum vertical movement to consider pan. |
-| `panDominanceRatio` | `2.5` | Pan wins when `movedY > movedX × ratio`. |
+The full sweep of the dial, as an SVG arc. Renders a `<svg>` element.
 
-Additional HTML attributes on the root are forwarded where valid.
+<TypeTable>
+<TypeRow name={"strokeWidth"} type={"number"} default={"3"}>Stroke width in the 48×48 viewBox; the arc stays inside the box.</TypeRow>
+</TypeTable>
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+<TypeRow name={"data-dragging"}>Whether a pointer is dragging the knob.</TypeRow>
+</TypeTable>
+
+### Indicator
+
+The arc from `anchor` to the value, drawn over the `Track`. Renders a `<svg>` element.
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+<TypeRow name={"data-dragging"}>Whether a pointer is dragging the knob.</TypeRow>
+</TypeTable>
+
+### Thumb
+
+Rotates with the value (`rotate`, clockwise from 12 o'clock), so a pointer drawn inside it points at the value. Holds the knob's native `<input type="range">`, which takes focus, carries the accessible name (`aria-label` / `aria-labelledby`) and the form value, and handles the keyboard. Renders a `<div>` element.
+
+<TypeTable>
+<TypeRow name={"getAriaValueText"} type={"(formattedValue: string, value: number) => string"}>Returns the input's `aria-valuetext`, e.g. `"-6 dB"`. Defaults to the formatted value.</TypeRow>
+<TypeRow name={"inputRef"} type={"React.Ref<HTMLInputElement>"}></TypeRow>
+</TypeTable>
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+<TypeRow name={"data-dragging"}>Whether a pointer is dragging the knob.</TypeRow>
+</TypeTable>
+
+### Value
+
+The formatted value (`format`/`locale` on Root). With `editable`, a double click, or Enter while it has focus, lets you type a value: Enter commits it (a unit or a decimal comma is fine, and it is clamped), Escape drops it, and it reports `reason: "input-change"`. Renders a `<output>` element.
+
+<TypeTable>
+<TypeRow name={"children"} type={"| React.ReactNode | ((formattedValue: string, value: number) => React.ReactNode)"}></TypeRow>
+<TypeRow name={"editable"} type={"boolean"} default={"false"}>Lets you type the value: a double click on the readout, or Enter while it has focus.</TypeRow>
+</TypeTable>
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+<TypeRow name={"data-dragging"}>Whether a pointer is dragging the knob.</TypeRow>
+</TypeTable>
+
+### Mark
+
+A graduation on the dial at `value`, placed on the knob's scale: a layer the size of the knob, rotated to where `value` sits, so a tick drawn at its top lands on the sweep. Its `--knob-mark-angle` CSS variable is that rotation, to turn a label back upright. It carries `data-active` while the value has reached it from the anchor. Decorative: the input announces the value. Renders a `<div>` element.
+
+<TypeTable>
+<TypeRow name={"value"} type={"number"}>Where the mark sits, on the knob's scale.</TypeRow>
+</TypeTable>
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+<TypeRow name={"data-dragging"}>Whether a pointer is dragging the knob.</TypeRow>
+<TypeRow name={"data-active"}>Whether the value has reached this mark from the anchor.</TypeRow>
+</TypeTable>
+
+### Label
+
+Accessible label, associated with the thumb's input. Renders a `<div>` element.
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+<TypeRow name={"data-dragging"}>Whether a pointer is dragging the knob.</TypeRow>
+</TypeTable>
+
+### Registry component
+
+`Knob` accepts `size` and `className` plus primitive props from `KnobPrimitive.Root.Props`. `aria-label`, `aria-labelledby`, and `aria-describedby` are forwarded to the knob's input.
+
+<TypeTable>
+<TypeRow name={"value"} type={"number"}>Controlled value.</TypeRow>
+<TypeRow name={"defaultValue"} type={"number"} default={"middle of the travel"}>Uncontrolled starting value, and the double-tap reset target.</TypeRow>
+<TypeRow name={"min"} type={"number"} default={"0"}>Minimum.</TypeRow>
+<TypeRow name={"max"} type={"number"} default={"100"}>Maximum.</TypeRow>
+<TypeRow name={"step"} type={"number"} default={"1"}>Quantization step (drag, wheel, keyboard, reset).</TypeRow>
+<TypeRow name={"largeStep"} type={"number"} default={"10"}>Step for `PageUp` / `PageDown` and `Shift` + arrows.</TypeRow>
+<TypeRow name={"anchor"} type={"number"} default={"min"}>Where the highlighted arc starts, e.g. `0` on a bipolar pan knob.</TypeRow>
+<TypeRow name={"dragMode"} type={"\"circular\" | \"vertical\" | \"revolution\""} default={"\"circular\""}>How pointer travel turns into value.</TypeRow>
+<TypeRow name={"scale"} type={"\"linear\" | \"log\" | { toPosition, toValue }"} default={"\"linear\""}>How the value maps onto the dial's travel.</TypeRow>
+<TypeRow name={"marks"} type={"(number | { value, label? })[]"}>Graduations drawn around the dial, on its scale. Those the value has reached from `anchor` light up.</TypeRow>
+<TypeRow name={"valueLabel"} type={"\"auto\" | \"always\" | \"hidden\""} default={"\"auto\""}>When the value shows under the dial: `auto` while hovered, turned or focused from the keyboard.</TypeRow>
+<TypeRow name={"formatValue"} type={"(value: number) => string"} default={"format"}>How the value prints in that readout, e.g. `"8.7 kHz"`.</TypeRow>
+<TypeRow name={"editableValue"} type={"boolean"} default={"false"}>Lets you type the value in the readout: a double click, or Enter while it has focus.</TypeRow>
+<TypeRow name={"disabled"} type={"boolean"} default={"false"}>Disables pointer, wheel, and keyboard.</TypeRow>
+<TypeRow name={"format"} type={"Intl.NumberFormatOptions"}>Formats the value text announced to screen readers (and `Knob.Value` on the primitive).</TypeRow>
+<TypeRow name={"locale"} type={"Intl.LocalesArgument"} default={"runtime"}>Locale used by `format`.</TypeRow>
+<TypeRow name={"name"} type={"string"}>Submits the value with a form.</TypeRow>
+<TypeRow name={"onValueChange"} type={"(value: number, eventDetails) => void"}>Every change. `eventDetails.reason` is `"drag"`, `"keyboard"`, `"wheel"`, `"reset"`, or `"input-change"`; call `eventDetails.cancel()` to reject it.</TypeRow>
+<TypeRow name={"onValueCommitted"} type={"(value: number, eventDetails) => void"}>When an interaction ends with a new value (pointer up, key press, wheel tick, reset).</TypeRow>
+<TypeRow name={"size"} type={"\"sm\" | \"default\" | \"lg\" | \"xl\""} default={"\"default\""}>Diameter variant.</TypeRow>
+<TypeRow name={"className"} type={"string"}>On the root wrapper.</TypeRow>
+</TypeTable>
+
+
+
+`@audio-ui/react/knob` exposes `Knob.Root`, `Knob.Control` (pointer, wheel, reset), `Knob.Track` and `Knob.Indicator` (SVG arcs; `strokeWidth` in the 48×48 viewBox), `Knob.Thumb` (rotates with the value and holds the input), `Knob.Value` (formatted `<output>`), `Knob.Mark` (a graduation at a `value`, rotated onto the dial's scale, with `data-active` once reached), and `Knob.Label`. Every part accepts a `render` prop, `className` / `style` as functions of state, and exposes `data-disabled` / `data-dragging`.
 
 ## Examples
 
-### Disabled state
-
-<ComponentPreview styleName="base-nova" name="knob-disabled-demo" />
-
-### Size variants
-
-<ComponentPreview styleName="base-nova" name="knob-size-variants-demo" />
-
 ### Rail, anchor, and range highlight
 
-Use `anchor` to show a reference point on the rail (for example **center** on a bipolar control). The arc highlights the interval between `anchor` and the current value.
+Use `anchor` to show a reference point on the rail (for example the center of a bipolar control). The arc highlights the interval between `anchor` and the current value.
 
 <ComponentPreview styleName="base-nova" name="knob-arc-and-anchor-demo" />
 
-### Pointer mapping
+### Logarithmic scale
 
-Each preview shows one mapping in isolation (live value under the control).
-
-#### Default arc (circular)
-
-<ComponentPreview styleName="base-nova" name="knob-circular-arc-demo" />
-
-#### Vertical fader-style drag
-
-<ComponentPreview styleName="base-nova" name="knob-vertical-drag-demo" />
-
-#### Revolution (360° reference)
-
-<ComponentPreview styleName="base-nova" name="knob-revolution-drag-demo" />
-
-### Reset with double-tap
-
-<ComponentPreview styleName="base-nova" name="knob-double-tap-reset-demo" />
-
-### Fine step precision (`step={0.01}`)
-
-<ComponentPreview styleName="base-nova" name="knob-fine-step-demo" />
-
-### Live value vs committed value callbacks
-
-<ComponentPreview styleName="base-nova" name="knob-change-vs-commit-demo" />
-
-### Filter cutoff
+`scale="log"` spreads a frequency evenly by ratio, so a quarter turn goes from 1 kHz to 8.7 kHz instead of packing the useful range into the first few degrees.
 
 <ComponentPreview styleName="base-nova" name="knob-filter-control-demo" />
-
-### Channel strip
-
-<ComponentPreview styleName="base-nova" name="block-channel-strip-knob-pan" />
-
-<ComponentPreview styleName="base-nova" name="block-channel-strip-knob-multi" />

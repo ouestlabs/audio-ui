@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  packages:
+    name: Packages
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v6
+
+      - name: Setup bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Lint
+        run: bunx biome ci packages/core packages/ui
+
+      - name: Build
+        run: bun run build:pkg
+
+      - name: Typecheck core
+        working-directory: packages/core
+        run: bunx tsc --noEmit
+
+      - name: Typecheck ui
+        working-directory: packages/ui
+        run: bunx tsc --noEmit
+
+      - name: Test core
+        working-directory: packages/core
+        run: bun test
+
+      - name: Test ui
+        working-directory: packages/ui
+        run: bun test
+
+      - name: Size budgets
+        working-directory: packages/ui
+        run: bun run size

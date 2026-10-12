@@ -1,0 +1,20 @@
+export {
+  adjacentPoint,
+  type ClipLimits,
+  type ClipValue,
+  clipEnd,
+  coverClips,
+  duplicateClip,
+  FADE_SHAPES,
+  type FadeShape,
+  fadeGain,
+  moveClip,
+  nextFadeShape,
+  setClipFadeIn,
+  setClipFadeOut,
+  setClipFadeShape,
+  splitClip,
+  trimClipEnd,
+  trimClipStart,
+} from "@audio-ui/core/timeline";
+export * as Timeline from "../primitives/timeline/index.ts";

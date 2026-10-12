@@ -63,50 +63,59 @@
 }
 
 :root {
-  --site-font-sans: var(--font-inter);
-  --site-font-heading: var(--font-inter);
+  --site-font-sans: var(--font-sans, var(--font-inter));
+  --site-font-heading: var(--font-heading, var(--font-inter));
   --site-font-mono: var(--font-mono);
 
-  --site-radius-xs: 2px;
-  --site-radius-sm: 4px;
-  --site-radius-md: 6px;
-  --site-radius-lg: 8px;
-  --site-radius-xl: 12px;
-  --site-radius-2xl: 16px;
-  --site-radius-3xl: 24px;
+  --site-radius-xs: calc(var(--radius) * 0.2);
+  --site-radius-sm: calc(var(--radius) * 0.4);
+  --site-radius-md: calc(var(--radius) * 0.6);
+  --site-radius-lg: calc(var(--radius) * 0.8);
+  --site-radius-xl: calc(var(--radius) * 1.2);
+  --site-radius-2xl: calc(var(--radius) * 1.6);
+  --site-radius-3xl: calc(var(--radius) * 2.4);
   --site-radius-full: 9999px;
 
-  --site-background: oklch(1 0 0);
-  --site-foreground: oklch(0.145 0 0);
-  --site-card: oklch(1 0 0);
-  --site-card-foreground: oklch(0.145 0 0);
-  --site-popover: oklch(1 0 0);
-  --site-popover-foreground: oklch(0.145 0 0);
-  --site-primary: oklch(0.205 0 0);
-  --site-primary-foreground: oklch(0.985 0 0);
-  --site-secondary: oklch(0.97 0 0);
-  --site-secondary-foreground: oklch(0.205 0 0);
-  --site-muted: oklch(0.97 0 0);
-  --site-muted-foreground: oklch(0.556 0 0);
-  --site-accent: oklch(0.97 0 0);
-  --site-accent-foreground: oklch(0.205 0 0);
-  --site-destructive: oklch(0.577 0.245 27.325);
-  --site-border: oklch(0.922 0 0);
-  --site-input: oklch(0.922 0 0);
-  --site-ring: oklch(0.708 0 0);
-  --site-chart-1: oklch(0.646 0.222 41.116);
-  --site-chart-2: oklch(0.6 0.118 184.704);
-  --site-chart-3: oklch(0.398 0.07 227.392);
-  --site-chart-4: oklch(0.828 0.189 84.429);
-  --site-chart-5: oklch(0.769 0.188 70.08);
-  --site-sidebar: oklch(0.985 0 0);
-  --site-sidebar-foreground: oklch(0.145 0 0);
-  --site-sidebar-primary: oklch(0.205 0 0);
-  --site-sidebar-primary-foreground: oklch(0.985 0 0);
-  --site-sidebar-accent: oklch(0.97 0 0);
-  --site-sidebar-accent-foreground: oklch(0.205 0 0);
-  --site-sidebar-border: oklch(0.922 0 0);
-  --site-sidebar-ring: oklch(0.708 0 0);
+  /* The frame's rings, concentric: the panel is the ring's radius less its padding. */
+  --frame-radius: var(--site-radius-2xl);
+  --frame-radius-inner: max(calc(var(--frame-radius) - 2px), 0px);
+
+  --site-background: var(--background);
+  --site-foreground: var(--foreground);
+  --site-card: var(--card);
+  --site-card-foreground: var(--card-foreground);
+  --site-popover: var(--popover);
+  --site-popover-foreground: var(--popover-foreground);
+  --site-primary: var(--primary);
+  --site-primary-foreground: var(--primary-foreground);
+  --site-secondary: var(--secondary);
+  --site-secondary-foreground: var(--secondary-foreground);
+  --site-muted: var(--muted);
+  /* A touch toward the text color: small muted text on a muted ground stays above 4.5:1. */
+  --site-muted-foreground: color-mix(
+    in oklab,
+    var(--muted-foreground) 82%,
+    var(--foreground)
+  );
+  --site-accent: var(--accent);
+  --site-accent-foreground: var(--accent-foreground);
+  --site-destructive: var(--destructive);
+  --site-border: var(--border);
+  --site-input: var(--input);
+  --site-ring: var(--ring);
+  --site-chart-1: var(--chart-1);
+  --site-chart-2: var(--chart-2);
+  --site-chart-3: var(--chart-3);
+  --site-chart-4: var(--chart-4);
+  --site-chart-5: var(--chart-5);
+  --site-sidebar: var(--sidebar);
+  --site-sidebar-foreground: var(--sidebar-foreground);
+  --site-sidebar-primary: var(--sidebar-primary);
+  --site-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --site-sidebar-accent: var(--sidebar-accent);
+  --site-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --site-sidebar-border: var(--sidebar-border);
+  --site-sidebar-ring: var(--sidebar-ring);
 
   --site-destructive-foreground: var(--color-red-800);
   --site-success: var(--color-emerald-500);
@@ -118,49 +127,17 @@
   --site-invert: var(--color-zinc-900);
   --site-invert-foreground: var(--color-zinc-50);
 
-  --site-surface: oklch(0.98 0 0);
-  --site-surface-foreground: var(--site-foreground);
+  --site-surface: color-mix(in oklab, var(--muted) 60%, var(--background));
+  --site-surface-foreground: var(--foreground);
   --site-code: var(--site-surface);
   --site-code-foreground: var(--site-surface-foreground);
-  --site-code-highlight: oklch(0.96 0 0);
-  --site-code-number: oklch(0.56 0 0);
-  --site-selection: oklch(0.145 0 0);
-  --site-selection-foreground: oklch(1 0 0);
+  --site-code-highlight: var(--muted);
+  --site-code-number: var(--muted-foreground);
+  --site-selection: var(--foreground);
+  --site-selection-foreground: var(--background);
 }
 
 .dark {
-  --site-background: oklch(0.145 0 0);
-  --site-foreground: oklch(0.985 0 0);
-  --site-card: oklch(0.205 0 0);
-  --site-card-foreground: oklch(0.985 0 0);
-  --site-popover: oklch(0.269 0 0);
-  --site-popover-foreground: oklch(0.985 0 0);
-  --site-primary: oklch(0.922 0 0);
-  --site-primary-foreground: oklch(0.205 0 0);
-  --site-secondary: oklch(0.269 0 0);
-  --site-secondary-foreground: oklch(0.985 0 0);
-  --site-muted: oklch(0.269 0 0);
-  --site-muted-foreground: oklch(0.708 0 0);
-  --site-accent: oklch(0.371 0 0);
-  --site-accent-foreground: oklch(0.985 0 0);
-  --site-destructive: oklch(0.704 0.191 22.216);
-  --site-border: oklch(1 0 0 / 10%);
-  --site-input: oklch(1 0 0 / 15%);
-  --site-ring: oklch(0.556 0 0);
-  --site-chart-1: oklch(0.488 0.243 264.376);
-  --site-chart-2: oklch(0.696 0.17 162.48);
-  --site-chart-3: oklch(0.769 0.188 70.08);
-  --site-chart-4: oklch(0.627 0.265 303.9);
-  --site-chart-5: oklch(0.645 0.246 16.439);
-  --site-sidebar: oklch(0.205 0 0);
-  --site-sidebar-foreground: oklch(0.985 0 0);
-  --site-sidebar-primary: oklch(0.488 0.243 264.376);
-  --site-sidebar-primary-foreground: oklch(0.985 0 0);
-  --site-sidebar-accent: oklch(0.269 0 0);
-  --site-sidebar-accent-foreground: oklch(0.985 0 0);
-  --site-sidebar-border: oklch(1 0 0 / 10%);
-  --site-sidebar-ring: oklch(0.439 0 0);
-
   --site-destructive-foreground: var(--color-red-600);
   --site-success: var(--color-emerald-500);
   --site-success-foreground: var(--color-emerald-600);
@@ -171,14 +148,8 @@
   --site-invert: var(--color-zinc-700);
   --site-invert-foreground: var(--color-zinc-50);
 
-  --site-surface: oklch(0.2 0 0);
-  --site-surface-foreground: oklch(0.708 0 0);
   --site-code: var(--site-surface);
   --site-code-foreground: var(--site-surface-foreground);
-  --site-code-highlight: oklch(0.27 0 0);
-  --site-code-number: oklch(0.72 0 0);
-  --site-selection: oklch(0.922 0 0);
-  --site-selection-foreground: oklch(0.205 0 0);
 }
 
 @utility site-rounded-none {
@@ -301,6 +272,28 @@
   }
 }
 
+/* A vertical scrollbar only: code scrolls sideways under a fade, and down under this. */
+@utility scrollbar-y {
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 0;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--site-input);
+    border-radius: 6px;
+  }
+
+  @supports not selector(::-webkit-scrollbar) {
+    scrollbar-color: var(--site-input) transparent;
+    scrollbar-width: thin;
+  }
+}
+
 @utility border-ghost {
   @apply after:border-site-border relative after:absolute after:inset-0 after:border after:mix-blend-darken dark:after:mix-blend-lighten;
 }
@@ -339,47 +332,129 @@
     }
   }
 
+  /* Code, in the site's frame: a muted ring (the frame), a header for the title, and the code in a panel of its own. */
   [data-rehype-pretty-code-figure] {
     position: relative;
+    padding: 2px;
     margin-top: calc(var(--spacing) * 6);
     overflow: hidden;
     font-size: var(--text-sm);
     color: var(--site-code-foreground);
     outline: none;
-    background-color: var(--site-code);
-    border-color: var(--site-border);
-    border-width: 0;
-    border-radius: var(--site-radius-lg);
-    @apply -mx-1 md:-mx-1;
+    background-color: color-mix(in oklab, var(--site-muted) 50%, transparent);
+    border: 1px solid color-mix(in oklab, var(--site-border) 80%, transparent);
+    border-radius: var(--frame-radius);
 
+    > pre,
+    > div > pre {
+      margin: 0;
+      overflow: auto;
+      background-color: var(--site-code) !important;
+      border: 1px solid var(--site-border);
+      border-radius: max(calc(var(--frame-radius) - 3px), 0px);
+    }
+
+    [data-slot="copy-button"] {
+      top: calc(2px + var(--spacing) * 2);
+      right: calc(2px + var(--spacing) * 2);
+      background-color: var(--site-background);
+      border: 1px solid var(--site-border);
+    }
+
+    /* In a header: the same size and the same line as the buttons beside it. */
     &:has([data-rehype-pretty-code-title]) [data-slot="copy-button"] {
-      top: calc(var(--spacing) * 1.5) !important;
+      top: calc(1px + var(--spacing) * 1.25) !important;
+      right: calc(var(--spacing) * 2) !important;
+      width: calc(var(--spacing) * 8);
+      height: calc(var(--spacing) * 8);
+    }
+  }
+
+  /* An install command is a frame of its own: the figure around it steps aside. */
+  [data-rehype-pretty-code-figure]:has([data-code-command]) {
+    padding: 0;
+    overflow: visible;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+
+    > pre,
+    > div > pre {
+      overflow: visible;
+      background: transparent !important;
+      border: 0;
+      border-radius: 0;
+    }
+  }
+
+  /* The code scrolls sideways in its panel, fading at the edges it runs past, and keeps its inset at the far end. */
+  [data-rehype-pretty-code-figure]:not(:has([data-code-command])) pre code {
+    display: block;
+    padding-inline-end: calc(var(--spacing) * 4);
+    overflow-x: auto;
+    @apply no-scrollbar scroll-fade-x;
+  }
+
+  /* Inside another frame (a preview's code, a sheet), the figure gives its own up. */
+  [data-slot="code"] [data-rehype-pretty-code-figure],
+  [data-slot="sheet-content"] [data-rehype-pretty-code-figure] {
+    padding: 0;
+    margin: 0;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+
+    > pre,
+    > div > pre {
+      background: transparent !important;
+      border: 0;
+      border-radius: 0;
     }
   }
 
   [data-rehype-pretty-code-title] {
-    padding-block: calc(var(--spacing) * 2.5);
-    padding-inline: calc(var(--spacing) * 4);
+    display: flex;
+    align-items: center;
+    min-height: calc(var(--spacing) * 10);
+    padding-block: calc(var(--spacing) * 1.5);
+    padding-inline: calc(var(--spacing) * 3);
     font-family: var(--site-font-mono);
-    font-size: var(--text-sm);
-    color: var(--site-code-foreground);
-    border-bottom: color-mix(in oklab, var(--site-border) 30%, transparent);
-    border-bottom-style: solid;
-    border-bottom-width: 1px;
+    font-size: var(--text-xs);
+    color: var(--site-muted-foreground);
   }
 
-  [data-line-numbers] {
+  /* The highlighted code: one line per row, numbered from the left when asked, in the colors of `highlight.css`. */
+  pre.th-code {
+    min-width: 0;
+    padding: calc(var(--spacing) * 3.5) calc(var(--spacing) * 4);
+    margin: 0;
+    overflow-x: auto;
+    color: var(--site-code-foreground);
+    outline: none;
+    background: transparent;
+    @apply scrollbar-y;
+  }
+
+  .th-code code {
     display: grid;
     min-width: 100%;
-    white-space: pre;
-    border: 0;
-    background: transparent;
     padding: 0;
-    counter-reset: line;
+    white-space: pre;
+    background: transparent;
+    border: 0;
     box-decoration-break: clone;
   }
 
-  [data-line-numbers] [data-line]::before {
+  .th-line {
+    display: inline-block;
+    width: max-content;
+    min-width: 100%;
+    min-height: calc(var(--spacing) * 1);
+    padding-top: calc(var(--spacing) * 0.5);
+    padding-bottom: calc(var(--spacing) * 0.5);
+  }
+
+  .th-code--line-numbers .th-line::before {
     position: sticky;
     left: 0;
     display: inline-block;
@@ -388,58 +463,88 @@
     font-size: var(--text-sm);
     color: var(--site-code-number);
     text-align: right;
-    content: counter(line);
-    counter-increment: line;
+    content: attr(data-line);
     background-color: var(--site-code);
   }
 
-  [data-line-numbers] [data-highlighted-line][data-line]::before {
-    background-color: var(--site-code-highlight);
+  .th-code--line-numbers {
+    padding-inline: 0;
+  }
+}
+
+/* A menu the customizer can invert (its `.dark` class is toggled on `.cn-menu-target`): the site's tokens are read again inside it. */
+.dark {
+  --site-background: var(--background);
+  --site-foreground: var(--foreground);
+  --site-card: var(--card);
+  --site-card-foreground: var(--card-foreground);
+  --site-popover: var(--popover);
+  --site-popover-foreground: var(--popover-foreground);
+  --site-primary: var(--primary);
+  --site-primary-foreground: var(--primary-foreground);
+  --site-secondary: var(--secondary);
+  --site-secondary-foreground: var(--secondary-foreground);
+  --site-muted: var(--muted);
+  --site-muted-foreground: color-mix(
+    in oklab,
+    var(--muted-foreground) 82%,
+    var(--foreground)
+  );
+  --site-accent: var(--accent);
+  --site-accent-foreground: var(--accent-foreground);
+  --site-destructive: var(--destructive);
+  --site-border: var(--border);
+  --site-input: var(--input);
+  --site-ring: var(--ring);
+}
+
+/* The mobile menu follows the customizer's Menu choices: its ground is the popover's, and translucent when asked. */
+.site-menu {
+  color: var(--popover-foreground);
+  background-color: var(--popover);
+}
+
+.site-menu.cn-menu-translucent {
+  background-color: color-mix(in oklab, var(--popover) 72%, transparent);
+  -webkit-backdrop-filter: blur(16px) saturate(1.5);
+  backdrop-filter: blur(16px) saturate(1.5);
+}
+
+/*
+ * The framed layout's sidebars, as they were left: the page is served open,
+ * and a small script notes before the first paint which ones are shut (the
+ * `data-nav-closed` and `data-customizer-closed` marks on the page), so nothing
+ * opens then closes while the page loads. Once the page is hydrated the layout's
+ * own state (`data-nav`, `data-customizer`) tells it, and the marks go.
+ */
+@media (min-width: 1024px) {
+  .inset-pane {
+    padding-right: 0;
+    padding-left: 0;
   }
 
-  [data-line] {
-    display: inline-block;
-    width: 100%;
-    min-height: calc(var(--spacing) * 1);
-    padding-top: calc(var(--spacing) * 0.5);
-    padding-bottom: calc(var(--spacing) * 0.5);
+  [data-framed-layout][data-nav="closed"] .inset-pane,
+  html[data-nav-closed] .inset-pane {
+    padding-left: 0.5rem;
   }
 
-  [data-line] span {
-    color: var(--shiki-light);
-
-    @variant dark {
-      color: var(--shiki-dark) !important;
-    }
+  [data-framed-layout][data-customizer="closed"] .inset-pane,
+  html[data-customizer-closed] .inset-pane {
+    padding-right: 0.5rem;
   }
 
-  [data-highlighted-line],
-  [data-highlighted-chars] {
-    position: relative;
-    background-color: var(--site-code-highlight);
+  [data-framed-layout][data-nav="closed"] [data-slot="sidebar-gap"],
+  html[data-nav-closed] [data-slot="sidebar-gap"] {
+    width: 0;
   }
 
-  [data-highlighted-line] {
-    &:after {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 2px;
-      height: 100%;
-      content: "";
-      background-color: color-mix(
-        in oklab,
-        var(--site-muted-foreground) 50%,
-        transparent
-      );
-    }
+  [data-framed-layout][data-nav="closed"] [data-slot="sidebar-container"],
+  html[data-nav-closed] [data-slot="sidebar-container"] {
+    left: calc(var(--sidebar-width) * -1);
   }
 
-  [data-highlighted-chars] {
-    padding-block: 0.1rem;
-    padding-inline: 0.3rem;
-    font-family: var(--site-font-mono);
-    font-size: 0.8rem;
-    border-radius: var(--site-radius-sm);
+  [data-framed-layout][data-customizer="closed"] .customizer-aside,
+  html[data-customizer-closed] .customizer-aside {
+    width: 0;
   }
 }

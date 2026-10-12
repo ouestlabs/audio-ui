@@ -10,186 +10,6 @@
     "title": "block-wave-shaper"
   },
   {
-    "categories": ["player", "queue"],
-    "name": "block-player",
-    "title": "block-player"
-  },
-  {
-    "categories": ["player", "widget"],
-    "name": "block-player-widget",
-    "title": "block-player-widget"
-  },
-  {
-    "categories": ["queue", "ui"],
-    "name": "block-queue",
-    "title": "block-queue"
-  },
-  {
-    "categories": ["channel-strip", "transport"],
-    "name": "block-channel-strip-transport-vertical",
-    "title": "block-channel-strip-transport-vertical"
-  },
-  {
-    "categories": ["channel-strip", "transport"],
-    "name": "block-channel-strip-transport",
-    "title": "block-channel-strip-transport"
-  },
-  {
-    "categories": ["channel-strip", "fader", "ui"],
-    "name": "block-channel-strip",
-    "title": "block-channel-strip"
-  },
-  {
-    "categories": ["channel-strip", "fader", "ui"],
-    "name": "block-channel-strip-horizontal",
-    "title": "block-channel-strip-horizontal"
-  },
-  {
-    "categories": ["channel-strip", "fader", "ui"],
-    "name": "block-channel-strip-fader",
-    "title": "block-channel-strip-fader"
-  },
-  {
-    "categories": ["channel-strip", "fader", "ui"],
-    "name": "block-channel-strip-fader-gain-db",
-    "title": "block-channel-strip-fader-gain-db"
-  },
-  {
-    "categories": ["channel-strip", "fader"],
-    "name": "block-channel-strip-fader-multi",
-    "title": "block-channel-strip-fader-multi"
-  },
-  {
-    "categories": ["channel-strip", "knob"],
-    "name": "block-channel-strip-knob-multi",
-    "title": "block-channel-strip-knob-multi"
-  },
-  {
-    "categories": ["channel-strip", "fader", "ui"],
-    "name": "block-channel-strip-fader-horizontal",
-    "title": "block-channel-strip-fader-horizontal"
-  },
-  {
-    "categories": ["channel-strip", "fader", "ui"],
-    "name": "block-channel-strip-fader-slider",
-    "title": "block-channel-strip-fader-slider"
-  },
-  {
-    "categories": ["channel-strip", "knob", "ui"],
-    "name": "block-channel-strip-knob-level",
-    "title": "block-channel-strip-knob-level"
-  },
-  {
-    "categories": ["channel-strip", "knob", "ui"],
-    "name": "block-channel-strip-knob-macro",
-    "title": "block-channel-strip-knob-macro"
-  },
-  {
-    "categories": ["channel-strip", "knob", "ui"],
-    "name": "block-channel-strip-knob-pan",
-    "title": "block-channel-strip-knob-pan"
-  },
-  {
-    "categories": ["channel-strip", "knob", "ui"],
-    "name": "block-channel-strip-knob-pan-width",
-    "title": "block-channel-strip-knob-pan-width"
-  },
-  {
-    "categories": ["channel-strip", "xypad", "ui"],
-    "name": "block-channel-strip-xypad-filter",
-    "title": "block-channel-strip-xypad-filter"
-  },
-  {
-    "categories": ["channel-strip", "xypad", "ui"],
-    "name": "block-channel-strip-xypad-reverb",
-    "title": "block-channel-strip-xypad-reverb"
-  },
-  {
-    "categories": ["player"],
-    "name": "player-demo",
-    "title": "player-demo"
-  },
-  {
-    "categories": ["player", "queue"],
-    "name": "player-queue-demo",
-    "title": "player-queue-demo"
-  },
-  {
-    "categories": ["player"],
-    "name": "player-variant-demo",
-    "title": "player-variant-demo"
-  },
-  {
-    "categories": ["player"],
-    "name": "player-size-demo",
-    "title": "player-size-demo"
-  },
-  {
-    "categories": ["player"],
-    "name": "player-stacked-demo",
-    "title": "player-stacked-demo"
-  },
-  {
-    "categories": ["queue"],
-    "name": "player-queue-shuffle-repeat-demo",
-    "title": "player-queue-shuffle-repeat-demo"
-  },
-  {
-    "categories": ["queue"],
-    "name": "player-queue-preferences-demo",
-    "title": "player-queue-preferences-demo"
-  },
-  {
-    "categories": ["queue"],
-    "name": "player-queue-simple-demo",
-    "title": "player-queue-simple-demo"
-  },
-  {
-    "categories": ["queue"],
-    "name": "player-queue-all-controls-demo",
-    "title": "player-queue-all-controls-demo"
-  },
-  {
-    "categories": ["track"],
-    "name": "player-track-demo",
-    "title": "player-track-demo"
-  },
-  {
-    "categories": ["track"],
-    "name": "player-track-list-demo",
-    "title": "player-track-list-demo"
-  },
-  {
-    "categories": ["track", "grid"],
-    "name": "player-track-list-grid-demo",
-    "title": "player-track-list-grid-demo"
-  },
-  {
-    "categories": ["track", "sortable"],
-    "name": "player-track-sortable-list-demo",
-    "title": "player-track-sortable-list-demo"
-  },
-  {
-    "categories": ["track", "sortable", "grid"],
-    "name": "player-track-sortable-list-grid-demo",
-    "title": "player-track-sortable-list-grid-demo"
-  },
-  {
-    "categories": ["transport", "ui"],
-    "name": "transport-demo",
-    "title": "transport-demo"
-  },
-  {
-    "categories": ["sortable-list", "ui"],
-    "name": "sortable-list-demo",
-    "title": "sortable-list-demo"
-  },
-  {
-    "categories": ["playback-speed"],
-    "name": "player-playback-speed-demo",
-    "title": "player-playback-speed-demo"
-  },
-  {
     "categories": ["fader"],
     "name": "fader-vertical-demo",
     "title": "fader-vertical-demo"
@@ -201,13 +21,8 @@
   },
   {
     "categories": ["fader"],
-    "name": "fader-size-variants-demo",
-    "title": "fader-size-variants-demo"
-  },
-  {
-    "categories": ["fader"],
-    "name": "fader-thumb-marks-variants-demo",
-    "title": "fader-thumb-marks-variants-demo"
+    "name": "fader-pan-demo",
+    "title": "fader-pan-demo"
   },
   {
     "categories": ["knob"],
@@ -216,28 +31,8 @@
   },
   {
     "categories": ["knob"],
-    "name": "knob-disabled-demo",
-    "title": "knob-disabled-demo"
-  },
-  {
-    "categories": ["knob"],
-    "name": "knob-size-variants-demo",
-    "title": "knob-size-variants-demo"
-  },
-  {
-    "categories": ["knob"],
-    "name": "knob-fine-step-demo",
-    "title": "knob-fine-step-demo"
-  },
-  {
-    "categories": ["knob"],
     "name": "knob-filter-control-demo",
     "title": "knob-filter-control-demo"
-  },
-  {
-    "categories": ["knob"],
-    "name": "knob-change-vs-commit-demo",
-    "title": "knob-change-vs-commit-demo"
   },
   {
     "categories": ["knob"],
@@ -245,24 +40,39 @@
     "title": "knob-arc-and-anchor-demo"
   },
   {
-    "categories": ["knob"],
-    "name": "knob-circular-arc-demo",
-    "title": "knob-circular-arc-demo"
+    "categories": ["envelope"],
+    "name": "envelope-size-default-demo",
+    "title": "envelope-size-default-demo"
   },
   {
-    "categories": ["knob"],
-    "name": "knob-double-tap-reset-demo",
-    "title": "knob-double-tap-reset-demo"
+    "categories": ["envelope"],
+    "name": "envelope-adsr-demo",
+    "title": "envelope-adsr-demo"
   },
   {
-    "categories": ["knob"],
-    "name": "knob-revolution-drag-demo",
-    "title": "knob-revolution-drag-demo"
+    "categories": ["piano"],
+    "name": "piano-size-default-demo",
+    "title": "piano-size-default-demo"
   },
   {
-    "categories": ["knob"],
-    "name": "knob-vertical-drag-demo",
-    "title": "knob-vertical-drag-demo"
+    "categories": ["piano"],
+    "name": "piano-active-notes-demo",
+    "title": "piano-active-notes-demo"
+  },
+  {
+    "categories": ["piano", "synth"],
+    "name": "block-piano-roll",
+    "title": "block-piano-roll"
+  },
+  {
+    "categories": ["meter"],
+    "name": "meter-size-default-demo",
+    "title": "meter-size-default-demo"
+  },
+  {
+    "categories": ["meter"],
+    "name": "meter-horizontal-demo",
+    "title": "meter-horizontal-demo"
   },
   {
     "categories": ["xypad"],
@@ -271,47 +81,62 @@
   },
   {
     "categories": ["xypad"],
-    "name": "xypad-size-sm-demo",
-    "title": "xypad-size-sm-demo"
-  },
-  {
-    "categories": ["xypad"],
-    "name": "xypad-size-default-demo",
-    "title": "xypad-size-default-demo"
-  },
-  {
-    "categories": ["xypad"],
-    "name": "xypad-size-lg-demo",
-    "title": "xypad-size-lg-demo"
-  },
-  {
-    "categories": ["xypad"],
-    "name": "xypad-size-xl-demo",
-    "title": "xypad-size-xl-demo"
-  },
-  {
-    "categories": ["xypad"],
-    "name": "xypad-disabled-demo",
-    "title": "xypad-disabled-demo"
-  },
-  {
-    "categories": ["xypad"],
-    "name": "xypad-format-value-demo",
-    "title": "xypad-format-value-demo"
-  },
-  {
-    "categories": ["xypad"],
     "name": "xypad-bipolar-range-demo",
     "title": "xypad-bipolar-range-demo"
   },
   {
-    "categories": ["xypad"],
-    "name": "xypad-change-vs-commit-demo",
-    "title": "xypad-change-vs-commit-demo"
+    "categories": ["waveform"],
+    "name": "block-waveform-player",
+    "title": "block-waveform-player"
   },
   {
-    "categories": ["xypad"],
-    "name": "xypad-hide-value-demo",
-    "title": "xypad-hide-value-demo"
+    "categories": ["timeline"],
+    "name": "block-timeline",
+    "title": "block-timeline"
+  },
+  {
+    "categories": ["waveform"],
+    "name": "waveform-demo",
+    "title": "waveform-demo"
+  },
+  {
+    "categories": ["waveform"],
+    "name": "waveform-region-demo",
+    "title": "waveform-region-demo"
+  },
+  {
+    "categories": ["waveform"],
+    "name": "waveform-live-demo",
+    "title": "waveform-live-demo"
+  },
+  {
+    "categories": ["plot"],
+    "name": "plot-demo",
+    "title": "plot-demo"
+  },
+  {
+    "categories": ["plot"],
+    "name": "plot-filter-demo",
+    "title": "plot-filter-demo"
+  },
+  {
+    "categories": ["plot"],
+    "name": "plot-compressor-demo",
+    "title": "plot-compressor-demo"
+  },
+  {
+    "categories": ["sequencer"],
+    "name": "sequencer-demo",
+    "title": "sequencer-demo"
+  },
+  {
+    "categories": ["scrubber"],
+    "name": "scrubber-demo",
+    "title": "scrubber-demo"
+  },
+  {
+    "categories": ["transport"],
+    "name": "transport-demo",
+    "title": "transport-demo"
   }
 ]

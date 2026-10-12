@@ -3,16 +3,11 @@ import {
   ArrowRightIcon,
   ArrowUpRightIcon,
 } from "@phosphor-icons/react/ssr";
-import fm from "front-matter";
 import { findNeighbour } from "fumadocs-core/page-tree";
 import { createRelativeLink } from "fumadocs-ui/mdx";
 import nextDynamic from "next/dynamic";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Fragment } from "react";
-import z from "zod";
-import { AudioDemoProvider } from "@/components/audio-demo-provider";
-import { DocsBaseSwitcher } from "@/components/docs-base-switcher";
 import { DocsComponentCatalogSection } from "@/components/docs-component-catalog-section";
 import { DocsCopyPage } from "@/components/docs-copy-page";
 import { JsonLd } from "@/components/json-ld";
@@ -53,8 +48,7 @@ export async function generateMetadata(props: {
 
   const doc = page.data;
   const docBase =
-    params.slug?.[0] === "components" &&
-    (params.slug?.[1] === "base" || params.slug?.[1] === "radix")
+    params.slug?.[0] === "components" && params.slug?.[1] === "base"
       ? params.slug[1]
       : null;
   const componentSlug =
@@ -104,35 +98,18 @@ export default async function Page(props: {
   const neighbours = findNeighbour(source.getPageTree(), page.url);
 
   const raw = await page.data.getText("raw");
-  const { attributes } = fm(raw);
-  const { links, base, component, audioProvider } = z
-    .object({
-      audioProvider: z.boolean().optional(),
-      base: z.enum(["base", "radix"]).optional(),
-      component: z.boolean().optional(),
-      links: z
-        .object({
-          api: z.string().optional(),
-          doc: z.string().optional(),
-        })
-        .optional(),
-    })
-    .parse(attributes);
+  const { links, base, component } = doc;
 
   const isComponentDoc = component === true && base !== undefined;
   const componentName =
     isComponentDoc && params.slug?.length >= 3 ? params.slug[2] : undefined;
   const componentSeo =
-    isComponentDoc &&
-    componentName &&
-    isCanonicalComponentDoc(componentName) &&
-    (base === "base" || base === "radix")
+    isComponentDoc && componentName && isCanonicalComponentDoc(componentName)
       ? getComponentDocSeo(componentName, doc.title, base, doc.description)
       : null;
   const breadcrumbPath = componentSeo?.canonicalPath ?? page.url;
   const docHeadingTitle = componentSeo?.displayTitle ?? doc.title;
   const docLead = componentSeo?.leadDescription ?? doc.description ?? undefined;
-  const ContentWrapper = audioProvider ? AudioDemoProvider : Fragment;
 
   return (
     <>
@@ -153,7 +130,7 @@ export default async function Page(props: {
                   <h1 className="scroll-m-20 font-semibold text-4xl tracking-tight sm:text-3xl xl:text-4xl">
                     {docHeadingTitle}
                   </h1>
-                  <div className="docs-nav fixed inset-x-0 bottom-0 isolate z-50 flex items-center gap-2 border-site-border/50 border-t bg-site-background/80 px-6 py-4 backdrop-blur-sm sm:static sm:z-0 sm:border-t-0 sm:bg-transparent sm:px-0 sm:pt-1.5 sm:backdrop-blur-none">
+                  <div className="docs-nav flex items-center gap-2 pt-1.5">
                     <DocsCopyPage page={raw} url={absoluteUrl(page.url)} />
 
                     {neighbours.previous && (
@@ -192,13 +169,6 @@ export default async function Page(props: {
                   </p>
                 ) : null}
               </div>
-              {isComponentDoc && base && componentName && (
-                <DocsBaseSwitcher
-                  base={base}
-                  className="mt-4"
-                  component={componentName}
-                />
-              )}
               {links ? (
                 <div className="flex items-center gap-2 pt-4">
                   {links?.doc && (
@@ -230,22 +200,17 @@ export default async function Page(props: {
               {toc.length ? <DocsTableOfContents toc={toc} /> : null}
             </div>
             <div className="typeset typeset-changelog w-full flex-1 *:data-[slot=alert]:first:mt-0">
-              <ContentWrapper>
-                <MDX
-                  components={getMDXComponents({
-                    a: createRelativeLink(source, page),
-                  })}
-                />
-              </ContentWrapper>
-            </div>
-            {isComponentDoc && componentName && base ? (
-              <DocsComponentCatalogSection
-                componentSlug={componentName}
-                docBase={base}
+              <MDX
+                components={getMDXComponents({
+                  a: createRelativeLink(source, page),
+                })}
               />
+            </div>
+            {isComponentDoc && componentName ? (
+              <DocsComponentCatalogSection componentSlug={componentName} />
             ) : null}
           </div>
-          <div className="mx-auto hidden h-16 w-full max-w-2xl items-center gap-2 px-4 sm:flex md:px-0">
+          <div className="mx-auto flex h-16 w-full max-w-2xl items-center gap-2 px-4 md:px-0">
             {neighbours.previous && (
               <Button
                 className="shadow-none"
@@ -272,8 +237,10 @@ export default async function Page(props: {
             )}
           </div>
         </div>
-        <div className="sticky top-[calc(var(--header-height)+1px)] z-30 ml-auto hidden h-[calc(100svh-var(--footer-height)+2rem)] w-72 xl:block">
-          {toc.length ? <DocsTableOfContents toc={toc} /> : null}
+        <div className="sticky top-0 z-30 ml-auto hidden h-[calc(100svh-var(--header-height)-4rem)] w-0 xl:block">
+          {toc.length ? (
+            <DocsTableOfContents className="absolute right-0" toc={toc} />
+          ) : null}
         </div>
       </div>
     </>

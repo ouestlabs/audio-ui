@@ -2,6 +2,8 @@ import type * as React from "react";
 import { ComponentClient } from "@/components/component-client";
 import { ComponentPreviewTabs } from "@/components/component-preview-tabs";
 import { ComponentSource } from "@/components/component-source";
+import { isBlock, isExpandable } from "@/lib/is-block";
+import { getPreviewHint } from "@/lib/preview-hint";
 import { getRegistryComponent } from "@/lib/registry";
 import type { IconLibraryName } from "@/registry/config";
 
@@ -52,7 +54,11 @@ export function ComponentPreview({
       chromeLessOnMobile={chromeLessOnMobile}
       className={className}
       component={<ComponentClient name={name} styleName={styleName} />}
+      expand={isExpandable(name)}
+      fitContent={isBlock(name)}
       hideCode={hideCode}
+      hint={getPreviewHint(name)}
+      name={name}
       previewClassName={previewClassName}
       source={
         <ComponentSource

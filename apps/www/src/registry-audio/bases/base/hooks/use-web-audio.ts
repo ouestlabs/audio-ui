@@ -3,7 +3,7 @@
 import { $webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 /**
- * Access the Web Audio API instance — synthesis, effects, one-shot sounds.
+ * Access the Web Audio API instance, synthesis, effects, one-shot sounds.
  *
  * @example
  * ```tsx

@@ -1,35 +1,34 @@
 ---
 title: Roadmap
-description: Current state of audio/ui and where we're headed next.
+description: What audio/ui ships today, and what comes next.
 ---
 
-**audio/ui** is a component library for building audio interfaces in React applications. Built on top of [shadcn/ui](https://ui.shadcn.com/), we provide accessible, composable components that you can copy, paste, and customize to fit your needs.
+**audio/ui** is a toolkit for building audio interfaces in React: headless primitives on npm (`@audio-ui/react`) and styled components for [shadcn/ui](https://ui.shadcn.com/) that you copy, paste and customize.
 
 ## Current Status
 
-We're actively building and improving `audio/ui`. Here's what's available today:
+Available today:
 
 ### Components
 
-- **Audio Player**: A fully-featured, composable audio player with queue management, shuffle, repeat modes, and volume control
-- **Controls**: Knob, Fader, XY Pad, and Transport primitives for building custom audio interfaces
-- **Channel Strip**: Layout patterns for mixer-style columns combining controls, labels, and readouts
-
-### Library
-
-- **Audio Store**: A Zustand-based state management solution for audio playback with localStorage persistence
-- **HTML Audio**: Core singleton for loading and controlling HTML5 audio with retry logic and event handling
+- **Controls**: Knob, Fader, XY Pad and Envelope, with scales, rulers and fine drag
+- **Metering and visualization**: Meter and Waveform, from peaks, a live signal or a range of the audio
+- **Time**: Timeline, a zoomable ruler with lanes, ranges and a navigator; Piano, Piano Roll, Sequencer, Transport and Scrubber
+- **Plot**: Curves and draggable points, for equalizers, filters and compressors
 
 ### Blocks
 
-- **Pre-assembled Patterns**: Ready-to-use audio player and channel strip patterns that combine multiple components — browse the [component catalog](/components)
+- **Pre-assembled patterns**: a piano roll, a pocket synth, a wave shaper and a waveform player. Browse the [component catalog](/components)
+
+### For agents
+
+- **[MCP server](/docs/mcp)**: list components, read their docs and search the catalog from your agent
+- **[Agent skill](/docs/agents)**: teaches your agent which layer to pick and how to wire each component
 
 ## What's Next
 
 - **More Audio Components**: Additional audio-specific UI patterns and controls
-- **Enhanced Player Features**: Advanced playback controls, playlist management, and audio visualization
 - **Visualization Components**: Waveform displays, spectrum analyzers, and other audio visualizations
-- **Radix UI Support**: A Radix-based variant of the component set, alongside the current Base UI implementation
 
 ## Contributing
 

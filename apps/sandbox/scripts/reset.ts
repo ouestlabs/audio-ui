@@ -1,12 +1,12 @@
 #!/usr/bin/env bun
 /**
- * reset.ts — wipe all shadcn-installed files and restore the sandbox to a clean Next.js state.
+ * reset.ts, wipe all shadcn-installed files and restore the sandbox to a clean Next.js state.
  *
  * Usage:
  *   bun scripts/reset.ts
  *
  * Strategy: read components.json aliases to derive exactly what shadcn manages.
- * No hardcoded paths — safe to run without modification.
+ * No hardcoded paths, safe to run without modification.
  */
 
 import { readFileSync, rmSync, writeFileSync } from "node:fs";

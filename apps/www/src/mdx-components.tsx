@@ -8,10 +8,12 @@ import { CodeBlockCommand } from "@/components/code-block-command";
 import { CodeCollapsibleWrapper } from "@/components/code-collapsible-wrapper";
 import { CodeTabs } from "@/components/code-tabs";
 import { CopyButton } from "@/components/copy-button";
+import { Frame, FrameContent } from "@/components/custom/frame";
 import { DocsComponentPreview } from "@/components/docs-component-preview";
 import { DocsComponentSource } from "@/components/docs-component-source";
-import { getIconForLanguageExtension } from "@/components/icons";
+import { getIconForLanguageExtension, Icons } from "@/components/icons";
 import { Mermaid } from "@/components/mermaid";
+import { KeyRow, KeyTable, TypeRow, TypeTable } from "@/components/type-table";
 import {
   Accordion,
   AccordionContent,
@@ -76,8 +78,8 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
       __pnpm__?: string;
       __bun__?: string;
     }) => {
-      // Inline Code.
-      if (typeof props.children === "string") {
+      // Inline code: a fence always carries its source in `__raw__`.
+      if (typeof props.children === "string" && !__raw__) {
         return <code className={className} {...props} />;
       }
 
@@ -135,6 +137,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     h4: (props: React.ComponentProps<"h4">) => <h4 {...props} />,
     h5: (props: React.ComponentProps<"h5">) => <h5 {...props} />,
     h6: (props: React.ComponentProps<"h6">) => <h6 {...props} />,
+    Icons,
     Image: ({
       src,
       className,
@@ -161,6 +164,8 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
       <img alt={alt} className={cn("site-rounded-md", className)} {...props} />
     ),
     Kbd,
+    KeyRow,
+    KeyTable,
     Link,
     LinkedCard: ({
       className,
@@ -178,7 +183,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     pre: ({ className, children, ...props }: React.ComponentProps<"pre">) => (
       <pre
         className={cn(
-          "no-scrollbar min-w-0 overflow-x-auto px-4 py-3.5 outline-none has-data-[slot=tabs]:p-0 has-data-highlighted-line:px-0 has-data-line-numbers:px-0",
+          "scrollbar-y min-w-0 overflow-x-auto px-4 py-3.5 outline-none has-data-[slot=tabs]:p-0",
           className
         )}
         {...props}
@@ -230,10 +235,20 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
       className,
       ...props
     }: React.ComponentProps<typeof TabsTrigger>) => <TabsTrigger {...props} />,
+    TypeRow,
+    TypeTable,
     table: ({ className, ...props }: React.ComponentProps<"table">) => (
-      <div className="typeset-scroll no-scrollbar">
-        <table className={className} {...props} />
-      </div>
+      <Frame className="my-6">
+        <FrameContent className="typeset-scroll no-scrollbar mt-0">
+          <table
+            className={cn(
+              "[&_:is(th,td):first-child]:ps-4 [&_:is(th,td):last-child]:pe-4",
+              className
+            )}
+            {...props}
+          />
+        </FrameContent>
+      </Frame>
     ),
     ...components,
     a: (props: any) => {

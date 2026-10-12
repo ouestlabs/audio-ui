@@ -1,33 +1,43 @@
 "use client";
 
-import { ChannelStrip as ChannelStripPrimitive } from "@audio-ui/react";
+import { type ComponentProps, createContext, use } from "react";
 import { cn } from "@/lib/utils";
+
+type Orientation = "horizontal" | "vertical";
+
+const ChannelStripOrientationContext = createContext<Orientation>("vertical");
 
 export function ChannelStrip({
   className,
+  orientation = "vertical",
   ...props
-}: ChannelStripPrimitive.RootProps) {
+}: ComponentProps<"section"> & { orientation?: Orientation }) {
   return (
-    <ChannelStripPrimitive.Root
-      className={cn(
-        "inline-flex flex-col items-center justify-center gap-3 rounded-xl border border-zinc-200 bg-white p-4 shadow-sm data-[orientation=horizontal]:w-full data-[orientation=horizontal]:flex-row data-[orientation=horizontal]:items-center data-[orientation=horizontal]:gap-4 dark:border-zinc-800 dark:bg-zinc-900",
-        className
-      )}
-      {...props}
-    />
+    <ChannelStripOrientationContext value={orientation}>
+      <section
+        className={cn(
+          "inline-flex flex-col items-center justify-center gap-3 rounded-xl border border-zinc-200 bg-white p-4 shadow-sm data-[orientation=horizontal]:w-full data-[orientation=horizontal]:flex-row data-[orientation=horizontal]:items-center data-[orientation=horizontal]:gap-4 dark:border-zinc-800 dark:bg-zinc-900",
+          className
+        )}
+        data-orientation={orientation}
+        data-root=""
+        {...props}
+      />
+    </ChannelStripOrientationContext>
   );
 }
 
 export function ChannelStripHeader({
   className,
   ...props
-}: ChannelStripPrimitive.HeaderProps) {
+}: ComponentProps<"header">) {
   return (
-    <ChannelStripPrimitive.Header
+    <header
       className={cn(
         "w-full text-center font-medium text-sm text-zinc-900 data-[orientation=horizontal]:w-auto data-[orientation=horizontal]:text-left dark:text-zinc-100",
         className
       )}
+      data-header=""
       {...props}
     />
   );
@@ -35,14 +45,17 @@ export function ChannelStripHeader({
 
 export function ChannelStripContent({
   className,
+  layout = "stack",
   ...props
-}: ChannelStripPrimitive.ContentProps) {
+}: ComponentProps<"div"> & { layout?: "stack" | "row" }) {
   return (
-    <ChannelStripPrimitive.Content
+    <div
       className={cn(
         "flex w-full flex-col items-center gap-3 data-[orientation=horizontal]:flex-1",
         className
       )}
+      data-content=""
+      data-layout={layout}
       {...props}
     />
   );
@@ -51,13 +64,14 @@ export function ChannelStripContent({
 export function ChannelStripFooter({
   className,
   ...props
-}: ChannelStripPrimitive.FooterProps) {
+}: ComponentProps<"footer">) {
   return (
-    <ChannelStripPrimitive.Footer
+    <footer
       className={cn(
         "w-full text-center text-xs text-zinc-500 data-[orientation=horizontal]:w-auto data-[orientation=horizontal]:text-left dark:text-zinc-400",
         className
       )}
+      data-footer=""
       {...props}
     />
   );
@@ -65,14 +79,18 @@ export function ChannelStripFooter({
 
 export function ChannelStripSection({
   className,
+  orientation,
   ...props
-}: ChannelStripPrimitive.SectionProps) {
+}: ComponentProps<"div"> & { orientation?: Orientation }) {
+  const inheritedOrientation = use(ChannelStripOrientationContext);
   return (
-    <ChannelStripPrimitive.Section
+    <div
       className={cn(
         "flex w-full flex-col items-center justify-center gap-2 data-[orientation=horizontal]:flex-row data-[orientation=horizontal]:gap-4",
         className
       )}
+      data-orientation={orientation ?? inheritedOrientation}
+      data-section=""
       {...props}
     />
   );
@@ -81,13 +99,14 @@ export function ChannelStripSection({
 export function ChannelStripLabel({
   className,
   ...props
-}: ChannelStripPrimitive.LabelProps) {
+}: ComponentProps<"span">) {
   return (
-    <ChannelStripPrimitive.Label
+    <span
       className={cn(
         "text-center text-xs text-zinc-500 uppercase dark:text-zinc-400",
         className
       )}
+      data-label=""
       {...props}
     />
   );
@@ -96,13 +115,15 @@ export function ChannelStripLabel({
 export function ChannelStripValue({
   className,
   ...props
-}: ChannelStripPrimitive.ValueProps) {
+}: ComponentProps<"output">) {
   return (
-    <ChannelStripPrimitive.Value
+    <output
+      aria-live="polite"
       className={cn(
         "min-w-12 text-center font-medium text-sm text-zinc-500 tabular-nums dark:text-zinc-400",
         className
       )}
+      data-value=""
       {...props}
     />
   );

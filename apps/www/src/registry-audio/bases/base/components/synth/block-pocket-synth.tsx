@@ -5,16 +5,12 @@ import {
   ToggleGroup,
   ToggleGroupItem,
 } from "@/registry/bases/base/ui/toggle-group";
-import {
-  ChannelStrip,
-  ChannelStripContent,
-  ChannelStripLabel,
-  ChannelStripSection,
-  ChannelStripValue,
-} from "@/registry-audio/bases/base/audio/elements/channel-strip";
 import { Fader } from "@/registry-audio/bases/base/audio/elements/fader";
 import { XYPad } from "@/registry-audio/bases/base/audio/elements/xypad";
 import { useWebAudio } from "@/registry-audio/bases/base/hooks/use-web-audio";
+
+/** Graduations along the fader: ticks only, the readout beside it says the value. */
+const VOLUME_MARKS = [0, 0.25, 0.5, 0.75, 1];
 
 type WaveformType = "sine" | "triangle" | "sawtooth" | "square";
 type FilterType = "lowpass" | "highpass" | "bandpass" | "allpass";
@@ -250,6 +246,8 @@ export default function BlockPocketSynth() {
   return (
     <div className="cn-audio-panel flex w-full min-w-0 flex-col gap-4 border bg-card p-4">
       <XYPad
+        aria-label="Tone"
+        fill
         formatValue={formatValue}
         maxX={100}
         maxY={100}
@@ -265,7 +263,7 @@ export default function BlockPocketSynth() {
             startSound(normalizedX, normalizedY);
           }
         }}
-        onValueCommit={() => stopSound()}
+        onValueCommitted={() => stopSound()}
         value={{ x: position.x * 100, y: position.y * 100 }}
       />
       <ToggleGroup
@@ -304,26 +302,38 @@ export default function BlockPocketSynth() {
           </ToggleGroupItem>
         ))}
       </ToggleGroup>
-      <ChannelStrip aria-label="Volume" orientation="horizontal">
-        <ChannelStripContent>
-          <ChannelStripSection>
-            <ChannelStripLabel id={faderLabelId}>Volume</ChannelStripLabel>
+      <div aria-label="Volume" role="group">
+        <div className="flex w-full min-w-0 flex-col gap-3">
+          <div className="flex w-full min-w-0 items-center justify-between gap-4 [&>*:not(output):not(span)]:min-w-0 [&>*:not(output):not(span)]:flex-1">
+            <span
+              className="text-center text-muted-foreground text-xs"
+              id={faderLabelId}
+            >
+              Volume
+            </span>
             <Fader
               aria-describedby={faderValueId}
               aria-labelledby={faderLabelId}
               id={faderId}
+              marks={VOLUME_MARKS}
               max={1}
               min={0}
               onValueChange={setVolume}
+              orientation="horizontal"
               step={0.01}
               value={volume}
+              valueLabel="hidden"
             />
-            <ChannelStripValue id={faderValueId}>
+            <output
+              aria-live="polite"
+              className="min-w-12 text-center font-mono text-muted-foreground text-xs tabular-nums"
+              id={faderValueId}
+            >
               {Math.round(volume * 100)}%
-            </ChannelStripValue>
-          </ChannelStripSection>
-        </ChannelStripContent>
-      </ChannelStrip>
+            </output>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

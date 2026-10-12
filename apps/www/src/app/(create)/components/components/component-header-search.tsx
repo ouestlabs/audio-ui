@@ -31,7 +31,7 @@ interface ComponentHeaderSearchProps {
 }
 
 export function ComponentHeaderSearch({
-  placeholder = "Search components...",
+  placeholder = "Search components…",
   className,
 }: ComponentHeaderSearchProps) {
   const inputRef = useRef<HTMLInputElement>(null);

@@ -12,6 +12,7 @@ export function GitHubLink() {
   return (
     <ButtonGroup>
       <Button
+        aria-label="GitHub"
         className="shadow-none"
         nativeButton={false}
         render={

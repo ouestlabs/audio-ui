@@ -1,20 +1,20 @@
 ---
 title: Fader
-description: Linear slider control for gain and parameter adjustment with pointer, wheel, keyboard, orientation, and thumb mark variants.
+description: A linear slider for gain and other continuous parameters.
 component: true
 base: base
 ---
 
 <ComponentPreview styleName="base-nova" name="fader-vertical-demo" />
 
-Linear fader for continuous parameters (volume, gain, send level, etc.). The registry component wraps `Fader` primitives from `@audio-ui/react` with size variants and thumb mark styling.
+A linear control for continuous parameters such as volume, gain or a send level. The registry component wraps the `Fader` primitive from `@audio-ui/react` and adds size variants and thumb marks.
 
 ## Overview
 
-- **Interaction model:** Pointer drag on track or thumb, mouse wheel adjustment, keyboard nudging, and commit callbacks on release.
-- **Layout:** Vertical (default) or horizontal orientation, with `sm`, `default`, and `lg` size presets.
-- **Feedback:** Filled range + thumb with optional internal marks (`thumbMarks`).
-- **Accessibility:** The thumb is exposed as `role="slider"` with `aria-valuenow`, `aria-valuemin`, and `aria-valuemax`.
+- **Input:** drag the thumb or press the track, or use the mouse wheel or the keyboard. `onValueCommitted` fires when the interaction ends.
+- **Layout:** vertical by default, or horizontal, in `sm`, `default` and `lg` sizes.
+- **Display:** a filled range and a thumb, with optional marks inside the thumb (`thumbMarks`).
+- **Accessibility:** the thumb holds a native `<input type="range">` that carries the accessible name (`aria-label` or `aria-labelledby`), the value text (formatted with `format`) and the form value (`name`).
 
 ## Installation
 
@@ -59,19 +59,39 @@ npm install @audio-ui/react class-variance-authority
 
 </CodeTabs>
 
+## Anatomy
+
+Import the primitive and assemble its parts.
+
+```tsx
+import { Fader } from "@audio-ui/react";
+
+<Fader.Root>
+  <Fader.Label />
+  <Fader.Control>
+    <Fader.Track>
+      <Fader.Indicator />
+    </Fader.Track>
+    <Fader.Mark value={50} />
+    <Fader.Thumb />
+  </Fader.Control>
+  <Fader.Value />
+</Fader.Root>
+```
+
 ## Usage
 
 ```tsx
 import { Fader } from "@/components/audio/fader";
 ```
 
-**Uncontrolled** - initial value only:
+**Uncontrolled:** set only the initial value.
 
 ```tsx
 <Fader defaultValue={0} max={6} min={-60} step={1} />
 ```
 
-**Controlled** - drive value from state:
+**Controlled:** drive the value from state.
 
 ```tsx
 const [gain, setGain] = useState(0);
@@ -80,7 +100,7 @@ const [gain, setGain] = useState(0);
   max={6}
   min={-60}
   onValueChange={setGain}
-  onValueCommit={(value) => console.log("Committed:", value)}
+  onValueCommitted={(value, details) => console.log("Committed:", value, details.reason)}
   step={1}
   value={gain}
 />
@@ -90,56 +110,115 @@ const [gain, setGain] = useState(0);
 
 ### Pointer
 
-| Behavior | Details |
-| -------- | ------- |
-| **Track click / drag** | Clicking or dragging on the track updates the value from pointer position. |
-| **Thumb drag** | Dragging the thumb adjusts continuously, clamped to `min...max`. |
-| **Commit event** | `onValueCommit` fires when drag interaction ends. |
+<KeyTable title="Behavior">
+<KeyRow gesture={"Track click / drag"}>Click or drag on the track to set the value from the pointer position.</KeyRow>
+<KeyRow gesture={"Thumb drag"}>Dragging the thumb changes the value continuously, within `min…max`.</KeyRow>
+<KeyRow gesture={"Commit event"}>`onValueCommitted` fires when an interaction ends with a new value.</KeyRow>
+<KeyRow gesture={"Lagging value"}>While dragging, the thumb follows the pointer even if a controlled `value` updates late; it returns to `value` on release. Reject a value with `eventDetails.cancel()`.</KeyRow>
+</KeyTable>
 
 ### Keyboard
 
-Focused thumb supports:
+On the focused thumb:
 
-| Key | Action |
-| --- | ------ |
-| `ArrowUp` / `ArrowRight` | Increase by `step` |
-| `ArrowDown` / `ArrowLeft` | Decrease by `step` |
-| `PageUp` | Increase by `step × 10` |
-| `PageDown` | Decrease by `step × 10` |
-| `Home` | Set to `min` |
-| `End` | Set to `max` |
+<KeyTable title="Keys">
+<KeyRow gesture={"`ArrowUp` / `ArrowRight`"}>Increase by `step`</KeyRow>
+<KeyRow gesture={"`ArrowDown` / `ArrowLeft`"}>Decrease by `step`</KeyRow>
+<KeyRow gesture={"`PageUp` / `Shift` + `ArrowUp`"}>Increase by `largeStep` (default `10`)</KeyRow>
+<KeyRow gesture={"`PageDown` / `Shift` + `ArrowDown`"}>Decrease by `largeStep` (default `10`)</KeyRow>
+<KeyRow gesture={"`Home`"}>Set to `min`</KeyRow>
+<KeyRow gesture={"`End`"}>Set to `max`</KeyRow>
+</KeyTable>
 
 ### Wheel
 
-When focused, wheel input nudges the value by `step`.
+The mouse wheel over the fader moves the value by `step` and reports `eventDetails.reason === "wheel"`.
 
 ## API reference
 
-`Fader` accepts style props (`size`, `thumbMarks`, `className`) plus primitive props from `FaderPrimitive.RootProps`.
+### Root
 
-### Value and state
+Groups all parts of the fader, with audio defaults (vertical, -60…+6) and mouse-wheel stepping. While a pointer drags it, the thumb follows the pointer even if a controlled `value` lags behind, as with a seek bar driven by playback time or automation. To reject a value, call `eventDetails.cancel()`. Renders a `<div>` element.
 
-| Prop | Type | Default | Description |
-| ---- | ---- | ------- | ----------- |
-| `value` | `number` | - | Controlled value. |
-| `defaultValue` | `number` | midpoint | Uncontrolled initial value. Midpoint is `(min + max) / 2`. |
-| `min` | `number` | `-60` | Minimum value. |
-| `max` | `number` | `6` | Maximum value. |
-| `step` | `number` | `1` | Quantization step for drag, wheel, and keyboard. |
-| `disabled` | `boolean` | `false` | Disables interaction. |
-| `onValueChange` | `(value: number) => void` | - | Live updates while adjusting. |
-| `onValueCommit` | `(value: number) => void` | - | Fires when interaction is committed. |
-| `aria-label` | `string` | - | Accessible name for the slider. |
-| `aria-labelledby` | `string` | - | ID of a labeling element. |
+<TypeTable>
+<TypeRow name={"anchor"} type={"number"}>Value the `Indicator` fills from, such as `0` on a -1…1 pan. Defaults to `min`.</TypeRow>
+<TypeRow name={"defaultValue"} type={"number"}>Uncontrolled starting value; defaults to the midpoint of `min…max`.</TypeRow>
+<TypeRow name={"max"} type={"number"} default={"6"}></TypeRow>
+<TypeRow name={"min"} type={"number"} default={"-60"}></TypeRow>
+<TypeRow name={"onValueChange"} type={"(value: number, eventDetails: ChangeEventDetails) => void"}>Fires on drag, track press, keyboard, wheel and form input changes.</TypeRow>
+<TypeRow name={"onValueCommitted"} type={"(value: number, eventDetails: CommitEventDetails) => void"}>Fires when an interaction ends with a new value.</TypeRow>
+<TypeRow name={"orientation"} type={"\"horizontal\" | \"vertical\""} default={"\"vertical\""}></TypeRow>
+<TypeRow name={"value"} type={"number"}></TypeRow>
+</TypeTable>
 
-### Layout and visuals
+<TypeTable title="Data attributes">
+<TypeRow name={"data-active"}>Whether the value has reached this mark from the anchor.</TypeRow>
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+</TypeTable>
 
-| Prop | Type | Default | Description |
-| ---- | ---- | ------- | ----------- |
-| `orientation` | `"horizontal" \| "vertical"` | `"vertical"` | Direction of travel. |
-| `size` | `"sm" \| "default" \| "lg"` | `"default"` | Track and thumb size preset. |
-| `thumbMarks` | `number \| false` | `3` | Number of marks in the thumb or `false` to hide them. |
-| `className` | `string` | - | Root wrapper class name. |
+### Control
+
+The interactive area: pointer presses and drags, plus mouse-wheel stepping. Sets `touch-action: none` so touch drags don't scroll the page. Renders a `<div>` element.
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-active"}>Whether the value has reached this mark from the anchor.</TypeRow>
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+</TypeTable>
+
+### Indicator
+
+The filled part of the track: from `min` up to the value, or between the Root's `anchor` and the value, on whichever side of it the value is. Renders a `<div>` element.
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-active"}>Whether the value has reached this mark from the anchor.</TypeRow>
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+</TypeTable>
+
+### Mark
+
+A graduation along the track at `value`: placed from the start of the travel in the fader's direction, where the thumb's center would be at that value. It carries `data-active` while the value has reached it from the anchor, and `data-orientation`. Decorative: the thumb's input announces the value. Render your own tick and label inside it. Renders a `<div>` element.
+
+<TypeTable>
+<TypeRow name={"value"} type={"number"}>Where the mark sits, between `min` and `max`.</TypeRow>
+</TypeTable>
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-active"}>Whether the value has reached this mark from the anchor.</TypeRow>
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+</TypeTable>
+
+### Registry component
+
+`Fader` accepts style props (`size`, `thumbMarks`, `className`) plus primitive props from `FaderPrimitive.Root.Props` (`name`, `form`, `format`, `locale`, `largeStep`, `render`, …). The primitive's `Fader.Mark` places a graduation at a `value` along the track, with `data-active` once the value has reached it, to build your own ruler. `aria-label`, `aria-labelledby`, and `aria-describedby` are forwarded to the thumb's input.
+
+#### Value and state
+
+<TypeTable>
+<TypeRow name={"value"} type={"number"}>Controlled value.</TypeRow>
+<TypeRow name={"defaultValue"} type={"number"} default={"midpoint"}>Uncontrolled initial value. Midpoint is `(min + max) / 2`.</TypeRow>
+<TypeRow name={"min"} type={"number"} default={"-60"}>Minimum value.</TypeRow>
+<TypeRow name={"max"} type={"number"} default={"6"}>Maximum value.</TypeRow>
+<TypeRow name={"step"} type={"number"} default={"1"}>Quantization step for drag, wheel, and keyboard.</TypeRow>
+<TypeRow name={"marks"} type={"(number | { value, label? })[]"}>Graduations drawn beside the track: a ruler for the value. Those the value has reached from `anchor` light up.</TypeRow>
+<TypeRow name={"valueLabel"} type={"\"auto\" | \"always\" | \"hidden\""} default={"\"auto\""}>When the value shows beside the thumb: `auto` while hovered, dragged or focused from the keyboard.</TypeRow>
+<TypeRow name={"formatValue"} type={"(value: number) => string"} default={"format"}>How the value prints in that readout, e.g. `"-6.0 dB"`.</TypeRow>
+<TypeRow name={"editableValue"} type={"boolean"} default={"false"}>Lets you type the value in the readout: a double click, or Enter while it has focus. Enter commits it, Escape drops it (`reason: "input-change"`).</TypeRow>
+<TypeRow name={"anchor"} type={"number"} default={"min"}>Value the fill grows from, such as `0` on a -1…1 pan: the fill runs from the anchor to the value, on whichever side it is.</TypeRow>
+<TypeRow name={"disabled"} type={"boolean"} default={"false"}>Disables interaction.</TypeRow>
+<TypeRow name={"onValueChange"} type={"(value: number, eventDetails) => void"}>Live updates while adjusting. `eventDetails.reason` is `"drag"`, `"track-press"`, `"keyboard"`, `"wheel"`, `"input-change"`, or `"none"`; call `eventDetails.cancel()` to reject the change.</TypeRow>
+<TypeRow name={"onValueCommitted"} type={"(value: number, eventDetails) => void"}>Fires when an interaction ends with a new value.</TypeRow>
+<TypeRow name={"aria-label"} type={"string"}>Accessible name for the slider.</TypeRow>
+<TypeRow name={"aria-labelledby"} type={"string"}>ID of a labeling element.</TypeRow>
+</TypeTable>
+
+#### Layout and visuals
+
+<TypeTable>
+<TypeRow name={"orientation"} type={"\"horizontal\" | \"vertical\""} default={"\"vertical\""}>Direction of travel.</TypeRow>
+<TypeRow name={"size"} type={"\"sm\" | \"default\" | \"lg\""} default={"\"default\""}>Track and thumb size preset.</TypeRow>
+<TypeRow name={"thumbMarks"} type={"number | false"} default={"3"}>Number of marks in the thumb or `false` to hide them.</TypeRow>
+<TypeRow name={"className"} type={"string"}>Root wrapper class name.</TypeRow>
+</TypeTable>
 
 Additional valid HTML attributes passed to `Fader.Root` are forwarded.
 
@@ -153,24 +232,9 @@ Additional valid HTML attributes passed to `Fader.Root` are forwarded.
 
 <ComponentPreview styleName="base-nova" name="fader-horizontal-demo" />
 
-### Size variants
+### Pan, filled from the center
 
-<ComponentPreview styleName="base-nova" name="fader-size-variants-demo" />
+`anchor={0}` makes the fill grow from the center of a -1…1 range, left or right of it.
 
-### Thumb marks variants
+<ComponentPreview styleName="base-nova" name="fader-pan-demo" />
 
-<ComponentPreview styleName="base-nova" name="fader-thumb-marks-variants-demo" />
-
-### Channel strip
-
-#### Gain range in dB (`-60..+6`)
-
-<ComponentPreview styleName="base-nova" name="block-channel-strip-fader-gain-db" />
-
-#### Normalized range (`0..100`)
-
-<ComponentPreview styleName="base-nova" name="block-channel-strip-fader" />
-
-#### Multi-channel strip
-
-<ComponentPreview styleName="base-nova" name="block-channel-strip-fader-multi" />

@@ -1,0 +1,209 @@
+---
+title: Piano
+description: A piano keyboard for a MIDI pitch range, played with the pointer, touch or the keyboard.
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="piano-size-default-demo" />
+
+Plays or shows notes, for a virtual instrument, a MIDI visualizer or a chord reference. The registry component wraps the `Piano` primitive from `@audio-ui/react` and draws white and black keys for any MIDI range.
+
+## Overview
+
+- **Range:** `minPitch` and `maxPitch` are MIDI pitches (default `48` and `72`, C3 to C5), or `pitches` lists the exact keys to show. Key colors and layout follow the chromatic pattern.
+- **Events:** `onNoteOn(pitch, eventDetails)` and `onNoteOff(pitch, eventDetails)` report MIDI pitches, ready for an audio engine. `eventDetails.reason` says how the note started (`"press"`, `"glide"` or `"keyboard"`), and `eventDetails.cancel()` in `onNoteOn` keeps the key silent.
+- **Pointer:** press and hold a key to hold its note. Drag across keys for a glissando: each key plays as the pointer crosses it. Each touch holds its own key, so chords work on a touch screen.
+- **External notes:** `activeNotes` lights keys from outside, such as a MIDI input or a sequencer's current chord, without calling `onNoteOn` or `onNoteOff`.
+- **Accessibility:** each key is a button named after its pitch ("C4"), behind one tab stop. The arrow keys move between keys, and Space or Enter holds the focused key until it is released.
+- **Layout:** the primitive can also lay keys out vertically (`orientation="vertical"`, lowest key at the bottom) or in equal widths (`layout="even"`). The piano roll's keyboard uses this.
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">CLI</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash component
+npx shadcn@latest add @audio/piano
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the following dependencies:</Step>
+
+```bash
+npm install @audio-ui/react class-variance-authority
+```
+
+<Step>Copy and paste the following code into your project.</Step>
+
+<ComponentSource
+  styleName="base-nova"
+  name="piano"
+  title="components/audio/piano.tsx"
+/>
+
+<Step>Update the import paths to match your project setup.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Anatomy
+
+Import the primitive and assemble its parts.
+
+```tsx
+import { Piano } from "@audio-ui/react";
+
+<Piano.Root>
+  <Piano.Keys>
+    {(pitch) => (
+      <Piano.Key pitch={pitch}>
+        <Piano.KeyLabel />
+      </Piano.Key>
+    )}
+  </Piano.Keys>
+</Piano.Root>
+```
+
+## Usage
+
+```tsx
+import { Piano } from "@/components/audio/piano";
+```
+
+**Note events:**
+
+```tsx
+<Piano
+  maxPitch={72}
+  minPitch={48}
+  onNoteOff={(pitch) => synth.release(pitch)}
+  onNoteOn={(pitch) => synth.trigger(pitch)}
+/>
+```
+
+**External notes (MIDI input, a sequencer's current chord):**
+
+```tsx
+<Piano activeNotes={midiInputNotes} maxPitch={72} minPitch={48} />
+```
+
+## Interaction
+
+### Pointer
+
+<KeyTable title="Behavior">
+<KeyRow gesture={"Press a key"}>Fires `onNoteOn`; the key stays pressed while held.</KeyRow>
+<KeyRow gesture={"Release"}>Fires `onNoteOff`.</KeyRow>
+<KeyRow gesture={"Drag across keys"}>Glissando: the previous key releases (`onNoteOff`) and the next one sounds (`onNoteOn`) as the pointer crosses it.</KeyRow>
+<KeyRow gesture={"Multiple pointers"}>Each pointer (finger) holds its own key, so chords work on touch devices.</KeyRow>
+</KeyTable>
+
+### Keyboard
+
+The keys share one tab stop. On the focused key:
+
+<KeyTable title="Keys">
+<KeyRow gesture={"`ArrowLeft` / `ArrowRight` (or `ArrowDown` / `ArrowUp`)"}>Move focus to the next lower / higher key</KeyRow>
+<KeyRow gesture={"`Shift` + arrow, `PageDown` / `PageUp`"}>Move focus an octave down / up</KeyRow>
+<KeyRow gesture={"`Space` / `Enter`"}>Hold the focused key: `onNoteOn` on press, `onNoteOff` on release</KeyRow>
+<KeyRow gesture={"`Home` / `End`"}>Move focus to the lowest / highest key</KeyRow>
+</KeyTable>
+
+## API reference
+
+### Root
+
+A keyboard to play: every key sounds while pressed, by pointer or from the keyboard. Dragging across the keys glides from one to the next, and each pointer holds its own key, so chords can be played on a touch screen. It is laid out like a piano, or with `layout="even"` as one equal share per key, the way a piano roll's rows are; `orientation="vertical"` puts the low end at the bottom. The keys are one tab stop, walked with the arrow keys. Renders a `<div>` element.
+
+<TypeTable>
+<TypeRow name={"activeNotes"} type={"readonly number[]"}>Pitches lit from elsewhere, such as a MIDI input or a sequencer, on top of the keys pressed here.</TypeRow>
+<TypeRow name={"disabled"} type={"boolean"}></TypeRow>
+<TypeRow name={"layout"} type={"Layout"} default={"\"keyboard\""}>How the keys share the length: like a piano, or one equal share each.</TypeRow>
+<TypeRow name={"maxPitch"} type={"number"} default={"72"}>Highest MIDI pitch, inclusive.</TypeRow>
+<TypeRow name={"minPitch"} type={"number"} default={"48"}>Lowest MIDI pitch, inclusive: 60 is middle C.</TypeRow>
+<TypeRow name={"onNoteOff"} type={"(pitch: number, eventDetails: NoteOffEventDetails) => void"}>Fires when a key is released, the pointer glides off it, or it loses focus while held.</TypeRow>
+<TypeRow name={"onNoteOn"} type={"(pitch: number, eventDetails: NoteOnEventDetails) => void"}>Fires when a key is pressed or glided onto. `eventDetails.cancel()` keeps it silent.</TypeRow>
+<TypeRow name={"orientation"} type={"\"horizontal\" | \"vertical\""} default={"\"horizontal\""}></TypeRow>
+<TypeRow name={"pitches"} type={"readonly number[]"}>Only these pitches, in place of `minPitch`…`maxPitch`.</TypeRow>
+</TypeTable>
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+</TypeTable>
+
+### Keys
+
+Renders `children` once per key, lowest first: the place to put a `Piano.Key` for each pitch. Renders no element of its own.
+
+<TypeTable>
+<TypeRow name={"children"} type={"(pitch: number) => React.ReactNode"}></TypeRow>
+</TypeTable>
+
+### Key
+
+One key, placed along the keyboard for its pitch. It sounds while pressed: by pointer through the keyboard, or with Enter or Space while focused. Its accessible name defaults to the pitch, such as "C4". Renders a `<button>` element.
+
+<TypeTable>
+<TypeRow name={"pitch"} type={"number"}>The MIDI pitch this key plays.</TypeRow>
+</TypeTable>
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-active"}>Whether the key is sounding: pressed here, or listed in `activeNotes`.</TypeRow>
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+</TypeTable>
+
+### KeyLabel
+
+The name of the key it sits in, such as "C4". Hidden from assistive technology, which reads the key's own name. Renders a `<span>` element.
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+</TypeTable>
+
+### Registry component
+
+`Piano` accepts style props (`size`, `className`) plus primitive props from `PianoPrimitive.Root.Props`.
+
+#### Value and state
+
+<TypeTable>
+<TypeRow name={"minPitch"} type={"number"} default={"48"}>Lowest MIDI pitch on the keyboard.</TypeRow>
+<TypeRow name={"maxPitch"} type={"number"} default={"72"}>Highest MIDI pitch on the keyboard.</TypeRow>
+<TypeRow name={"pitches"} type={"number[]"}>Exactly these pitches, in place of `minPitch`…`maxPitch`.</TypeRow>
+<TypeRow name={"activeNotes"} type={"number[]"}>Pitches lit from outside pointer interaction. Merged with the pressed keys for display.</TypeRow>
+<TypeRow name={"disabled"} type={"boolean"} default={"false"}>Whether the keyboard is disabled.</TypeRow>
+<TypeRow name={"onNoteOn"} type={"(pitch: number, eventDetails) => void"}>Fires when a key is pressed or glided onto. `eventDetails.cancel()` keeps it silent.</TypeRow>
+<TypeRow name={"onNoteOff"} type={"(pitch: number, eventDetails) => void"}>Fires when a key is released, glided off, or loses focus while held.</TypeRow>
+<TypeRow name={"aria-label"} type={"string"}>Accessible name for the keyboard.</TypeRow>
+<TypeRow name={"aria-labelledby"} type={"string"}>ID of a labeling element.</TypeRow>
+</TypeTable>
+
+#### Layout and display
+
+<TypeTable>
+<TypeRow name={"size"} type={"\"sm\" | \"default\" | \"lg\""} default={"\"default\""}>Size variant (sets the keyboard height).</TypeRow>
+<TypeRow name={"className"} type={"string"}>Additional CSS classes.</TypeRow>
+</TypeTable>
+
+Additional valid HTML attributes passed to `Piano.Root` are forwarded.
+
+## Examples
+
+### External notes via activeNotes
+
+<ComponentPreview styleName="base-nova" name="piano-active-notes-demo" />

@@ -1,0 +1,617 @@
+---
+title: Timeline
+description: A zoomable timeline for arrangement views and editors, with a ruler that seeks, lanes and a playhead.
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="block-timeline" />
+
+The base for an arrangement view, a clip editor or a piano roll. The registry component wraps the `Timeline` primitive from `@audio-ui/react`. The timeline has no notion of tempo: its units are whatever you count in (seconds, beats, pulses or steps). Musical time comes from the `musical-time` lib.
+
+## Overview
+
+- **Units and zoom:** `duration` is the length in your units, and `zoom` is the number of pixels per unit. Without `zoom`, the timeline fits its width. With it, every lane is as long as the timeline and the viewport scrolls.
+- **Zooming:** Cmd/Ctrl + scroll, or a trackpad pinch, zooms around the pointer. Every zoom change keeps its anchor point in place, or the middle of the view when there is none.
+- **Grid:** with a `snapStep`, the ruler snaps to the grid. Hold Cmd/Ctrl to place the playhead off the grid, and Shift to scrub four times finer.
+- **Playback:** pass a live `source` and every playhead follows it in the DOM, without a React render per frame.
+- **Ranges:** a `TimelineRange` is a stretch of the timeline, such as a loop, a selection or a clip. Drag it to move it, drag a handle to resize it, or, with `drawable`, drag across an empty lane to draw a new one. Ranges snap to the grid.
+- **Navigator:** `TimelineNavigator` shows the whole timeline as one bar, with the visible part inside it. Drag the window to scroll, drag an edge to zoom, and double-click to show everything. With `scrollbar="hidden"` on the viewport, it replaces the scrollbar.
+- **Accessibility:** the ruler, each range and range handle, and the navigator's window and edges hold a native `<input type="range">`, so every pointer action has a keyboard equivalent. The ruler's input spans the timeline: it takes focus, carries `aria-label` and announces the position (or the text from `getAriaValueText`, such as "Bar 3, beat 2"). The arrow keys move by `step`, <kbd>Page Up</kbd> / <kbd>Page Down</kbd> and Shift by `largeStep`, and <kbd>Home</kbd> / <kbd>End</kbd> go to the ends.
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">CLI</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash component
+npx shadcn@latest add @audio/timeline @audio/musical-time
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the following dependencies:</Step>
+
+```bash
+npm install @audio-ui/react
+```
+
+<Step>Copy and paste the following code into your project.</Step>
+
+<ComponentSource
+  styleName="base-nova"
+  name="timeline"
+  title="components/audio/elements/timeline.tsx"
+/>
+
+<Step>Update the import paths to match your project setup.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Anatomy
+
+Import the primitive and assemble its parts.
+
+```tsx
+import { Timeline } from "@audio-ui/react";
+
+<Timeline.Root>
+  <Timeline.Viewport>
+    <Timeline.Ruler>
+      <Timeline.Mark value={0} />
+      <Timeline.Playhead />
+    </Timeline.Ruler>
+    <Timeline.Track>
+      <Timeline.TrackHeader>
+        <Timeline.TrackResizeHandle />
+      </Timeline.TrackHeader>
+      <Timeline.Lane />
+    </Timeline.Track>
+    <Timeline.Lane>
+      <Timeline.Range>
+        <Timeline.RangeHandle edge="start" />
+        <Timeline.RangeHandle edge="end" />
+      </Timeline.Range>
+      <Timeline.Clip>
+        <Timeline.ClipHeader />
+        <Timeline.ClipFade edge="in" />
+        <Timeline.ClipFade edge="out" />
+        <Timeline.ClipHandle edge="start" />
+        <Timeline.ClipHandle edge="end" />
+        <Timeline.ClipFadeHandle edge="in" />
+        <Timeline.ClipFadeHandle edge="out" />
+      </Timeline.Clip>
+      <Timeline.Playhead />
+    </Timeline.Lane>
+  </Timeline.Viewport>
+  <Timeline.Navigator>
+    <Timeline.NavigatorWindow />
+    <Timeline.NavigatorHandle edge="start" />
+    <Timeline.NavigatorHandle edge="end" />
+  </Timeline.Navigator>
+</Timeline.Root>
+```
+
+## Usage
+
+```tsx
+import {
+  Timeline,
+  TimelineLane,
+  TimelineMark,
+  TimelinePlayhead,
+  TimelineRuler,
+  TimelineViewport,
+} from "@/components/audio/elements/timeline";
+import {
+  DEFAULT_TEMPO,
+  describeBarsBeats,
+  gridInterval,
+} from "@/lib/musical-time";
+```
+
+```tsx
+const snapStep = gridInterval("adaptive", zoom, DEFAULT_TEMPO);
+
+<Timeline
+  duration={32}
+  onPositionChange={(seconds) => transport.seek(seconds)}
+  onZoomChange={setZoom}
+  snapStep={snapStep}
+  source={transport.position}
+  zoom={zoom}
+>
+  <TimelineViewport>
+    <TimelineRuler
+      aria-label="Playhead"
+      getAriaValueText={(seconds) => describeBarsBeats(seconds, DEFAULT_TEMPO)}
+    >
+      <TimelineMark value={0}>1</TimelineMark>
+      <TimelineMark value={2}>2</TimelineMark>
+      <TimelinePlayhead />
+    </TimelineRuler>
+    <TimelineLane gridStep={snapStep}>
+      <TimelinePlayhead />
+    </TimelineLane>
+  </TimelineViewport>
+</Timeline>
+```
+
+## Ranges
+
+```tsx
+const [loop, setLoop] = useState<readonly [number, number]>([8, 16]);
+
+<TimelineLane>
+  <TimelineRange aria-label="Loop" drawable onValueChange={setLoop} value={loop}>
+    <TimelineRangeHandle aria-label="Loop start" edge="start" />
+    <TimelineRangeHandle aria-label="Loop end" edge="end" />
+  </TimelineRange>
+</TimelineLane>
+```
+
+The range's own input moves it with the arrow keys, by the timeline's `step`; each handle's input moves its edge, which stops `minLength` short of the other one (the grid step by default). `onValueChange` receives `[start, end]` and `eventDetails` with the `edge` that moved (`"start"`, `"end"` or `"both"`) and the `reason` (`"drag"`, `"draw"`, `"keyboard"` or `"input-change"`). Leave the handles out for a range that only moves, or pass `movable={false}` for one that only resizes.
+
+## Tracks
+
+A track is a row: a header beside a lane. `Timeline.Track` holds the row, `Timeline.TrackHeader` is the strip that names it and stays at the left edge while the lane scrolls, and `Timeline.TrackResizeHandle` sets its height. You hold the height: leave it out and the row shares the room it is given; set it and the row keeps it.
+
+```tsx
+const [height, setHeight] = useState<number | undefined>();
+
+<Timeline.Track
+  height={height}
+  onHeightChange={(next) => setHeight(next)}
+  selected={selected}
+>
+  <Timeline.TrackHeader>
+    Drums
+    <Timeline.TrackResizeHandle aria-label="Height of Drums" />
+  </Timeline.TrackHeader>
+  <Timeline.Lane>{/* clips */}</Timeline.Lane>
+</Timeline.Track>;
+```
+
+You put the header's controls in it, such as solo, mute and gain. The track does not know about them.
+
+The block reorders tracks by their grip, the bar at the track's left edge: press it and drag. A copy of the track's header follows the pointer, the dragged track stays in place faded, and a line marks the place it would land in. Near the top or bottom of a view that scrolls, the view scrolls on its own while the track is held. The arrow keys move a focused grip one place up or down, and every move is one undo step with its clips. The move is `moveTrack(id, index)` in `useArrangement`; it uses a pointer drag rather than the browser's drag and drop, so it does not depend on how the browser handles a drag.
+
+## Clips
+
+A clip is a stretch of a source (a recording, a pattern) laid on a track. It is a range that knows about its source: trimming its start moves where in the source it begins, so its content stays where it is, and it cannot show more than the source holds.
+
+```tsx
+const [clip, setClip] = useState<Timeline.Clip.Value>({
+  start: 8, // where it sits on the timeline
+  length: 16, // how long it plays
+  offset: 4, // where in the source it begins
+  fadeIn: 0,
+  fadeInShape: "linear", // or "fast", "slow", "smooth"
+  fadeOut: 0,
+});
+
+<Timeline.Lane data-track="drums" seekable>
+  <Timeline.Clip
+    aria-label="Drums, Groove"
+    onRemove={() => removeClip()}
+    onValueChange={setClip}
+    sourceLength={48}
+    value={clip}
+  >
+    <Timeline.ClipHeader>Groove</Timeline.ClipHeader>
+    <Timeline.ClipFade edge="in" />
+    <Timeline.ClipFade edge="out" />
+    <Timeline.ClipHandle aria-label="Groove start" edge="start" />
+    <Timeline.ClipHandle aria-label="Groove end" edge="end" />
+    <Timeline.ClipFadeHandle aria-label="Groove fade in" edge="in" />
+    <Timeline.ClipFadeHandle aria-label="Groove fade out" edge="out" />
+  </Timeline.Clip>
+</Timeline.Lane>
+```
+
+All of it is in the timeline's units, the source's too. Dragging the clip's header, its title bar, moves it on the grid, and over other lanes: `eventDetails.lane` is the `Timeline.Lane` under the pointer, so put your own attribute on each lane (`data-track` above) and read it in `onValueCommitted`, which also fires for a drop on another lane that left the position as it was. The clip follows the pointer vertically through `--clip-drag-y`. A press on the clip's body selects it and puts the cursor there, and a drag scrubs, so the body never moves the clip by accident. Its content is yours: it sets `--clip-offset` and `--clip-source-length` so a `Waveform` can show the stretch that is played.
+
+Holding Alt when a drag begins marks it as a copy (`eventDetails.copy`): the clip you were dragging is the copy, so leave the original where it was and add the dragged one. A fade's shape is stepped by double-clicking its handle, or Enter on its input (`reason` is `"double-click"` or `"keyboard"`), and `ClipFade` draws the real ramp. The registry's `TimelineClipFadeHandle` also takes `onShapeChange`: a right-click on the handle lists the four curves, each drawn, and the arrangement's `setFadeShape(id, edge, shape)` sets one as a single undo step.
+
+Laying a clip where others already are is `coverClips(clips, placed, limits, split)`: the clips under it are covered rather than stacked (removed, trimmed or cut in two around it), and `split` makes the second piece of a cut clip from the first, so what your app keeps about a clip travels with each piece.
+
+Cutting, copying and the like are plain functions on the clip, for the model behind your clips: `splitClip(clip, at)` returns the two pieces (or `null` when `at` leaves one too short), and `moveClip`, `trimClipStart`, `trimClipEnd`, `setClipFadeIn`, `setClipFadeOut`, `setClipFadeShape` and `duplicateClip` return the clip as it would end up, within the limits you give them.
+
+### Many clips
+
+Dragging one clip among 1 000 takes about a millisecond of script, and the playhead moves outside React, so it costs no render. The real cost is rendering every clip again whenever one moves, which happens when the clip component is not memoized. Put one clip in a `React.memo` component with stable props (the clip's own `value`, callbacks that take its id), so React skips every clip a drag did not touch.
+
+### Selecting several clips
+
+The primitive keeps no selection: `selected` and `onSelectedChange` are yours, so a selection is any set of ids you keep. `onSelectedChange` fires when a press selects a clip, and again on a press with Shift, Cmd or Ctrl held (read `eventDetails.event`), which is how you add to a selection or take from it. A touch screen has no modifier keys: give the clip `additive` (from a "select several" mode of your own) and every press is reported, so a press adds a clip to the selection or takes it from it. To move a group, read `eventDetails.delta` on a move, how far the dragged clip is from where the drag began, and move each other selected clip by the same amount from where it was when the drag began; `moveClip` keeps each on the timeline. For the group to follow the clip up and down too, `onDragOffsetChange` reports how far it is dragged vertically, in px, and 0 when the drag ends: shift the other selected clips by that much. A drop on another lane then moves each by as many lanes as the dragged one did. The registry's arrangement block does all of this, with Cmd/Ctrl + A to select every clip and Shift + drag across bare lane to select the clips a rectangle touches (it measures each clip's `getBoundingClientRect()`, so it needs nothing from the primitive).
+
+### The cursor
+
+A `Timeline.Lane` with `seekable` puts the position where a press lands on its bare area, as the ruler does, and a drag scrubs it. Presses on the clips in it go to the clips. The cursor can then go anywhere along a track, and your track header selects the whole track. A split is then `splitClip(clip, position)` on the selected clip, or on each clip of the selected track that the cursor is over.
+
+## Navigator
+
+```tsx
+<Timeline zoom={zoom} onZoomChange={setZoom} duration={32}>
+  <TimelineViewport scrollbar="hidden">…</TimelineViewport>
+  <TimelineNavigator />
+</Timeline>
+```
+
+Place it anywhere inside the timeline, outside the viewport. Dragging an edge zooms while holding the other edge in place, through `onZoomChange` with `reason: "drag"`; a double-click fits the whole timeline with `reason: "double-click"`.
+
+## Musical time
+
+The `musical-time` lib (`npx shadcn@latest add @audio/musical-time`) turns a tempo into what a timeline needs, in seconds:
+
+- `gridInterval(division, zoom, tempo)` is the grid's step: a fixed division (`"1-bar"`, `"1/8"`, …), or `"adaptive"` for the finest division still 24px apart at this zoom. Pass `{ triplet: true }` for three in the space of two. Give the same number to `snapStep` and to the lanes' `gridStep`, so gestures land on the lines you see.
+- `barLabelInterval(zoom, tempo)` is how far apart the ruler's bar numbers go: whole bars, spread out until they no longer collide.
+- `barsBeatsAt(seconds, tempo)` and `describeBarsBeats` read a position as bars, beats and sixteenths.
+- `gridLabel(seconds, tempo)` names an interval the way a grid readout does (`"1 bar"`, `"1/16"`, `"1/8T"`), so the adaptive grid reads out the division it uses, and a menu and a readout always name a grid the same way.
+- `metronomeRhythmSeconds(rhythm, tempo)` is the interval of a click rhythm (`"1/8"`, `"1/8t"`, …), or `null` for `"auto"`, which follows the beat.
+
+## Undo and redo
+
+The `history` lib (`npx shadcn@latest add @audio/history`) implements undo and redo as values: every function takes the present and returns the new present, and keeps no state of its own. Keep the history in a ref and the document in state, so two undos in one tick are fed the first one's result instead of reading the same stack twice.
+
+```ts
+let history = emptyHistory<Clip[]>();
+
+// A change made in one go: delete, split, duplicate.
+history = recordChange(history, clips);
+
+// A drag reports every tick: open a burst on the first, close it on commit,
+// and the whole drag is one entry.
+history = beginChange(history, clips);
+history = settleChange(history);
+
+const step = undo(history, clips); // { history, present } or null
+```
+
+A new change clears redo, since the redo branch no longer follows from the present. `HISTORY_LIMIT` bounds the depth. The arrangement block uses it for its undo and redo buttons and for Cmd/Ctrl + Z, with Shift (or Y) to redo.
+
+## An arrangement
+
+The arrangement block is built from pieces you can install on their own, each a file you own:
+
+- `arrangement` (`npx shadcn@latest add @audio/arrangement`) is the pure side: `lay` puts a clip on a track so it covers what is under it, `land` drops a dragged group (or its copies) on another track, `shiftTrack` and `otherSelected` are what a group drop needs, and `scaleValue` rescales a clip when the tempo changes. Tracks are passed as an order of ids, so nothing assumes how many there are.
+- `use-arrangement` is the state: tracks, clips, selection, each track's mix and height, and every operation on them. It keeps undo and redo over tracks and clips together.
+- `use-playback-clock` is a transport clock as a live source that loops between two points, and `use-marquee-selection` is the rectangle that selects the clips it touches.
+
+```tsx
+const arrangement = useArrangement({
+  duration,
+  getPosition: () => clock.getSnapshot(), // where a split cuts
+  initialClips,
+  initialTracks, // { id, name, color }[]
+  splitStep: bar / 4, // the shortest a split piece may be
+});
+
+arrangement.changeClip; // Timeline.Clip's onValueChange, by id
+arrangement.commitClip; // its onValueCommitted: lands a drag, on another track too
+arrangement.addTrack();
+arrangement.removeTrack(id); // with its clips; any track can go, the last included
+arrangement.undo();
+```
+
+It also gives `selectClip`, `selectClips`, `selectAll`, `selectTrack`, `splitAtCursor`, `duplicateSelection`, `removeClip`, `renameClip`, `setFadeShape` (a fade's curve, as one undo step), `clipAction` (a clip's menu: duplicate, split, switch off, delete), `mixOf` and `changeMix` (gain, pan, mute, solo, color), `heights` and `resizeTrack`, `renameTrack`, `duplicateTrack(id)` (the track with its clips, placed after it), `folded` and `toggleFold` (a folded track is a strip of `foldedHeight` px that keeps its own height for when it opens), and `rescale(ratio)` for a tempo change, which also clears the history since it is not part of it.
+
+## Placing your own parts
+
+Every lane sets a `--timeline-unit` CSS variable, the width of one unit. Parts are placed with it, so anything you draw follows the zoom the same way:
+
+```tsx
+<div style={{ left: "calc(var(--timeline-unit) * 12)", position: "absolute" }} />
+```
+
+## API reference
+
+### Root
+
+Groups the parts of a timeline and owns what they share: its length, its zoom, its grid and the playback position. Units are yours: seconds, beats, pulses or steps. `zoom` is how many px one unit takes; leave it unset and the timeline fits the width it is given. The position comes from `position`, or from a live `source` that the playhead follows straight in the DOM without re-rendering React. With a `snapStep`, every gesture lands on the grid unless Cmd/Ctrl is held. Renders a `<div>` element.
+
+<TypeTable>
+<TypeRow name={"defaultPosition"} type={"number"} default={"0"}>Uncontrolled starting position.</TypeRow>
+<TypeRow name={"defaultZoom"} type={"number"}>Uncontrolled starting zoom, in px per unit. Unset, the timeline fits its width until zoomed.</TypeRow>
+<TypeRow name={"disabled"} type={"boolean"}></TypeRow>
+<TypeRow name={"duration"} type={"number"} default={"1"}>Length of the timeline, in your units.</TypeRow>
+<TypeRow name={"largeStep"} type={"number"}>Step for Page Up/Page Down and Shift + arrow keys. Defaults to ten `step`s.</TypeRow>
+<TypeRow name={"maxZoom"} type={"number"} default={"Infinity"}></TypeRow>
+<TypeRow name={"minZoom"} type={"number"} default={"0"}></TypeRow>
+<TypeRow name={"onPositionChange"} type={"(value: number, eventDetails: PositionChangeEventDetails) => void"}>Fires while the position is moved: press, drag, keyboard and input changes.</TypeRow>
+<TypeRow name={"onPositionCommitted"} type={"(value: number, eventDetails: PositionCommitEventDetails) => void"}>Fires when a gesture that moved the position ends.</TypeRow>
+<TypeRow name={"onZoomChange"} type={"(zoom: number, eventDetails: ZoomChangeEventDetails) => void"}>Fires when the zoom changes, already clamped. `eventDetails.cancel()` keeps the zoom where it was.</TypeRow>
+<TypeRow name={"position"} type={"number"}>Playback position, from 0 to `duration`.</TypeRow>
+<TypeRow name={"snapOffset"} type={"number"} default={"0"}>Where the grid's lines start, in your units.</TypeRow>
+<TypeRow name={"snapStep"} type={"number"} default={"0"}>Distance between grid lines, in your units. 0 is no grid.</TypeRow>
+<TypeRow name={"source"} type={"Source"}>A live position followed outside React; takes precedence over `position`.</TypeRow>
+<TypeRow name={"step"} type={"number"}>Step for the arrow keys. Defaults to `snapStep`, or a hundredth of `duration`.</TypeRow>
+<TypeRow name={"zoom"} type={"number"}>Zoom, in px per unit.</TypeRow>
+</TypeTable>
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+<TypeRow name={"data-fitted"}>Whether no zoom is set, so the timeline fits the width it is given.</TypeRow>
+<TypeRow name={"data-scrubbing"}>Whether a pointer is moving the position.</TypeRow>
+</TypeTable>
+
+### Navigator
+
+The whole timeline as one bar, with the stretch the viewport shows drawn inside it as `Timeline.NavigatorWindow`: drag the window to scroll, drag one of its `Timeline.NavigatorHandle`s to zoom, double-click to show everything. Place it anywhere inside `Timeline.Root`, outside the viewport. Renders a `<div>` element.
+
+<TypeTable>
+<TypeRow name={"getAriaValueText"} type={"DescribePosition"}>Returns how a position is announced by the window and its handles. Defaults to the number.</TypeRow>
+</TypeTable>
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+<TypeRow name={"data-fitted"}>Whether no zoom is set, so the timeline fits the width it is given.</TypeRow>
+<TypeRow name={"data-scrubbing"}>Whether a pointer is moving the position.</TypeRow>
+</TypeTable>
+
+### NavigatorWindow
+
+The stretch of the timeline the viewport shows. Dragging it scrolls; its native `<input type="range">` scrolls from the keyboard and carries its accessible name. Renders a `<div>` element.
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+<TypeRow name={"data-fitted"}>Whether no zoom is set, so the timeline fits the width it is given.</TypeRow>
+<TypeRow name={"data-scrubbing"}>Whether a pointer is moving the position.</TypeRow>
+</TypeTable>
+
+### NavigatorHandle
+
+One edge of the window: dragging it zooms, holding the other edge in place. Its native `<input type="range">` does the same from the keyboard and carries its accessible name. Renders a `<div>` element.
+
+<TypeTable>
+<TypeRow name={"edge"} type={"\"end\" | \"start\""}>The edge of the window this handle moves.</TypeRow>
+</TypeTable>
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+<TypeRow name={"data-fitted"}>Whether no zoom is set, so the timeline fits the width it is given.</TypeRow>
+<TypeRow name={"data-scrubbing"}>Whether a pointer is moving the position.</TypeRow>
+</TypeTable>
+
+### Viewport
+
+The scrolling window onto the timeline. Cmd/Ctrl + wheel (and pinch on a trackpad) zooms around the pointer; a bare wheel scrolls as usual. Every zoom change keeps its anchor point in place, or the middle of the view when there is none. It reports its scroll offset and width for `Timeline.Navigator`. Renders a `<div>` element.
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+<TypeRow name={"data-fitted"}>Whether no zoom is set, so the timeline fits the width it is given.</TypeRow>
+<TypeRow name={"data-scrubbing"}>Whether a pointer is moving the position.</TypeRow>
+</TypeTable>
+
+### Lane
+
+A strip along the timeline that its parts are placed on: a track, the ruler's strip, a row of markers. Zoomed, it is as long as the timeline; fitted, it takes the width it is given and the timeline is spread across it. Its `--timeline-unit` CSS variable is the width of one unit. With `seekable`, a press on its bare area moves the position, as on the ruler. Renders a `<div>` element.
+
+<TypeTable>
+<TypeRow name={"seekable"} type={"boolean"} default={"false"}>Whether a press on the lane's bare area moves the position, and a drag scrubs it, on the grid unless Cmd/Ctrl is held.</TypeRow>
+</TypeTable>
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+<TypeRow name={"data-fitted"}>Whether no zoom is set, so the timeline fits the width it is given.</TypeRow>
+<TypeRow name={"data-scrubbing"}>Whether a pointer is moving the position.</TypeRow>
+</TypeTable>
+
+### Track
+
+One track of the arrangement: a row holding a header beside a lane. Renders a `<div>` element.
+
+<TypeTable>
+<TypeRow name={"height"} type={"number"}>The height in px. Leave it out for the row to share what room there is.</TypeRow>
+<TypeRow name={"minHeight / maxHeight"} type={"number"} default={"32 / 480"}>Bounds the height is clamped to.</TypeRow>
+<TypeRow name={"step / largeStep"} type={"number"} default={"8 / 32"}>How far the arrows, and Page Up and Page Down, move the height.</TypeRow>
+<TypeRow name={"selected"} type={"boolean"} default={"false"}>Whether the track is the one picked. Only styling.</TypeRow>
+<TypeRow name={"onHeightChange"} type={"(height | undefined, eventDetails) => void"}>Fires when a new height is asked for. `eventDetails.reason` is `"drag"`, `"keyboard"`, `"input-change"` or `"double-click"`, which gives the height up (`undefined`); `eventDetails.cancel()` keeps the height.</TypeRow>
+<TypeRow name={"onHeightCommitted"} type={"(height | undefined, eventDetails) => void"}>Fires when a resize that changed the height ends, or when it is given up.</TypeRow>
+</TypeTable>
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-selected"}>Present when the track is selected.</TypeRow>
+<TypeRow name={"data-resizing"}>Whether a pointer is resizing the track.</TypeRow>
+</TypeTable>
+
+### TrackHeader
+
+The strip beside a track's lane that names it and holds what sets it. It stays at the left edge while the lane scrolls under it, at the stacking level of the `--timeline-track-header-z` CSS variable (20): raise it while the header is hovered or focused if it shows something that reaches into the next row, such as a value readout. It carries the track's `data-selected` and `data-resizing`. Renders a `<div>` element.
+
+### TrackResizeHandle
+
+Sets the track's height: by dragging, or from the keyboard through the native `<input type="range">` it holds, which carries the accessible name. The arrows move by a step (Down is taller), Page Up and Page Down by a large one, Home and End to the minimum and the maximum. Place it along the track's lower edge. A double-click clears the height, so the track shares the room again. Renders a `<div>` element.
+
+### Ruler
+
+The lane that moves the position: a press jumps to the pointer and a drag scrubs, both on the grid unless Cmd/Ctrl is held; with Shift held the drag scrubs four times finer. With `onSelectionChange`, a drag that starts with Shift held selects a stretch instead, to loop. It holds the native `<input type="range">` that takes focus, handles the keyboard and carries the accessible name (`aria-label` / `aria-labelledby`). Place `Timeline.Mark`s in it for its labels. Renders a `<div>` element.
+
+<TypeTable>
+<TypeRow name={"getAriaValueText"} type={"DescribePosition"}>Returns how the position is announced, e.g. `"bar 3, beat 2"`. Defaults to the number.</TypeRow>
+<TypeRow name={"onSelectionChange"} type={"(range: readonly [number, number], eventDetails) => void"}>Fires while a stretch is selected by dragging with Shift held, as `[start, end]` in timeline units, on the grid unless Cmd/Ctrl is held: feed it to a `Timeline.Range` as a loop. A plain press and drag still move the position. `eventDetails.cancel()` keeps the selection as it was.</TypeRow>
+<TypeRow name={"onSelectionCommitted"} type={"(range: readonly [number, number], eventDetails) => void"}>Fires when a selection that changed ends.</TypeRow>
+</TypeTable>
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+<TypeRow name={"data-fitted"}>Whether no zoom is set, so the timeline fits the width it is given.</TypeRow>
+<TypeRow name={"data-scrubbing"}>Whether a pointer is moving the position.</TypeRow>
+</TypeTable>
+
+### Range
+
+A stretch of the timeline, such as a loop, a selection or a clip, laid on the lane it sits in from `value[0]` to `value[1]`. Dragging its body moves it, on the grid unless Cmd/Ctrl is held; add a `Timeline.RangeHandle` per edge to resize it. With `drawable`, dragging across empty lane draws a new range. Its own native `<input type="range">` moves it from the keyboard and carries its accessible name (`aria-label` / `aria-labelledby`). Renders a `<div>` element.
+
+<TypeTable>
+<TypeRow name={"defaultValue"} type={"Value"}>Uncontrolled starting range. Defaults to the whole timeline.</TypeRow>
+<TypeRow name={"disabled"} type={"boolean"}></TypeRow>
+<TypeRow name={"drawable"} type={"boolean"} default={"false"}>Whether dragging across empty lane draws a new range.</TypeRow>
+<TypeRow name={"getAriaValueText"} type={"DescribePosition"}>Returns how a position is announced, for the range and its handles. Defaults to the number.</TypeRow>
+<TypeRow name={"minLength"} type={"number"}>The shortest the range can be, in the timeline's units. Defaults to the grid step.</TypeRow>
+<TypeRow name={"movable"} type={"boolean"} default={"true"}>Whether dragging the body, or its keys, moves the range.</TypeRow>
+<TypeRow name={"onValueChange"} type={"(value: Value, eventDetails: ChangeEventDetails) => void"}>Fires while the range is moved, resized or drawn.</TypeRow>
+<TypeRow name={"onValueCommitted"} type={"(value: Value, eventDetails: CommitEventDetails) => void"}>Fires when a gesture that changed the range ends.</TypeRow>
+<TypeRow name={"value"} type={"Value"}>The range, as `[start, end]` in the timeline's units.</TypeRow>
+</TypeTable>
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+<TypeRow name={"data-dragging"}>Whether a pointer is moving, resizing or drawing the range.</TypeRow>
+</TypeTable>
+
+### RangeHandle
+
+Resizes one edge of the range: by dragging, on the grid unless Cmd/Ctrl is held, or from the keyboard through the native `<input type="range">` it holds, which carries the accessible name. Renders a `<div>` element.
+
+<TypeTable>
+<TypeRow name={"edge"} type={"\"end\" | \"start\""}>The edge of the range this handle resizes.</TypeRow>
+</TypeTable>
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+<TypeRow name={"data-dragging"}>Whether a pointer is moving, resizing or drawing the range.</TypeRow>
+</TypeTable>
+
+### Clip
+
+A stretch of a source laid on a lane. Dragging its `Timeline.ClipHeader` moves it, on the grid unless Cmd/Ctrl is held, and over other lanes too; pressing its body selects it and puts the cursor there. Add a `Timeline.ClipHandle` per edge to trim it and a `Timeline.ClipFadeHandle` per fade. It sets `--clip-offset`, `--clip-source-length`, `--clip-fade-in` and `--clip-fade-out` for its content. Its own native `<input type="range">` moves it from the keyboard and carries its accessible name (`aria-label` / `aria-labelledby`); Delete and Backspace on it call `onRemove`. Renders a `<div>` element.
+
+<TypeTable>
+<TypeRow name={"value"} type={"Value"}>The clip: `{ start, length, offset, fadeIn, fadeOut }`, all in the timeline's units.</TypeRow>
+<TypeRow name={"defaultValue"} type={"Value"}>Uncontrolled starting clip. Defaults to the whole timeline.</TypeRow>
+<TypeRow name={"sourceLength"} type={"number"}>How long the source is: trimming stops where it runs out. Defaults to no limit.</TypeRow>
+<TypeRow name={"selected"} type={"boolean"}>Whether the clip is selected.</TypeRow>
+<TypeRow name={"defaultSelected"} type={"boolean"} default={"false"}>Whether the clip starts selected, when `selected` is not set.</TypeRow>
+<TypeRow name={"additive"} type={"boolean"} default={"false"}>Whether every press is reported to `onSelectedChange` as one with Shift, Cmd or Ctrl held, so a selection can be built without modifier keys, such as on a touch screen.</TypeRow>
+<TypeRow name={"onSelectedChange"} type={"(selected: boolean, eventDetails) => void"}>Fires when a press on the clip selects it.</TypeRow>
+<TypeRow name={"onValueChange"} type={"(value: Value, eventDetails: ChangeEventDetails) => void"}>Fires while the clip is moved, trimmed or faded. `eventDetails.target` is `"move"`, `"trim-start"`, `"trim-end"`, `"fade-in"` or `"fade-out"` and `reason` is `"drag"`, `"keyboard"` or `"input-change"`; a move by drag also has `lane`.</TypeRow>
+<TypeRow name={"onValueCommitted"} type={"(value: Value, eventDetails: CommitEventDetails) => void"}>Fires when a gesture that changed the clip ends, or one that dropped it on another lane.</TypeRow>
+<TypeRow name={"onRemove"} type={"(eventDetails) => void"}>Fires when Delete or Backspace is pressed on the clip: removing it is up to you.</TypeRow>
+<TypeRow name={"minLength"} type={"number"}>The shortest the clip can be trimmed to. Defaults to the grid step.</TypeRow>
+<TypeRow name={"movable"} type={"boolean"} default={"true"}>Whether dragging the header, or the keys, moves the clip.</TypeRow>
+<TypeRow name={"getAriaValueText"} type={"DescribePosition"}>Returns how a position is announced. Defaults to the number.</TypeRow>
+<TypeRow name={"disabled"} type={"boolean"}></TypeRow>
+</TypeTable>
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+<TypeRow name={"data-dragging"}>Whether a pointer is moving, trimming or fading the clip.</TypeRow>
+<TypeRow name={"data-selected"}>Present when the clip is selected.</TypeRow>
+</TypeTable>
+
+### ClipHeader
+
+The clip's title bar: dragging it moves the clip, on the grid unless Cmd/Ctrl is held, and over other lanes too. The rest of the clip is its body, where a press puts the cursor. Place it along the clip's top and put the clip's name in it. Renders a `<div>` element.
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+<TypeRow name={"data-dragging"}>Whether a pointer is moving, trimming or fading the clip.</TypeRow>
+<TypeRow name={"data-selected"}>Present when the clip is selected.</TypeRow>
+</TypeTable>
+
+### ClipHandle
+
+Trims one edge of the clip: by dragging, on the grid unless Cmd/Ctrl is held, or from the keyboard through the native `<input type="range">` it holds, which carries the accessible name. Trimming the start moves where in the source the clip begins and leaves its content where it is; trimming the end stops where the source or the timeline does. Renders a `<div>` element.
+
+<TypeTable>
+<TypeRow name={"edge"} type={"\"end\" | \"start\""}>The edge of the clip this handle trims.</TypeRow>
+</TypeTable>
+
+### ClipFadeHandle
+
+Sets how long one of the clip's fades lasts: by dragging, or from the keyboard through the native `<input type="range">` it holds, which carries the accessible name. It sits where its fade ends, at the clip's top edge. The two fades cannot overlap. Renders a `<div>` element.
+
+<TypeTable>
+<TypeRow name={"edge"} type={"\"in\" | \"out\""}>The fade of the clip this handle sets: the one at its start or at its end. Double-click it, or press Enter on its input, to step the fade through its shapes.</TypeRow>
+</TypeTable>
+
+### ClipFade
+
+Draws a fade over the clip's content, as a DAW does: the ramp as a line from the clip's edge, as long as the fade, with what it attenuates lightly shaded. It is hidden while its fade is empty and ignores the pointer. Its color is the `color` it is given. Renders an `<svg>` element.
+
+<TypeTable>
+<TypeRow name={"edge"} type={"\"in\" | \"out\""}>The fade of the clip this draws.</TypeRow>
+</TypeTable>
+
+### Playhead
+
+A marker at the playback position, on the lane it sits in. It follows the position straight in the DOM, through its own `--timeline-offset` CSS variable, so a playhead moving every frame never re-renders React. Renders a `<div>` element.
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+<TypeRow name={"data-fitted"}>Whether no zoom is set, so the timeline fits the width it is given.</TypeRow>
+<TypeRow name={"data-scrubbing"}>Whether a pointer is moving the position.</TypeRow>
+</TypeTable>
+
+### Mark
+
+Something placed at `value` on a lane: a bar number on the ruler, a cue, a grid line. Its children are its label. Renders a `<div>` element.
+
+<TypeTable>
+<TypeRow name={"value"} type={"number"}>Where the mark sits, in the timeline's units.</TypeRow>
+</TypeTable>
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+<TypeRow name={"data-fitted"}>Whether no zoom is set, so the timeline fits the width it is given.</TypeRow>
+<TypeRow name={"data-scrubbing"}>Whether a pointer is moving the position.</TypeRow>
+</TypeTable>
+
+### Registry component
+
+#### Timeline
+
+<TypeTable>
+<TypeRow name={"duration"} type={"number"} default={"1"}>Length of the timeline, in your units.</TypeRow>
+<TypeRow name={"zoom"} type={"number"}>Controlled zoom, in px per unit. Unset, the timeline fits its width.</TypeRow>
+<TypeRow name={"defaultZoom"} type={"number"}>Uncontrolled starting zoom.</TypeRow>
+<TypeRow name={"minZoom / maxZoom"} type={"number"} default={"0 / Infinity"}>Bounds the zoom is clamped to.</TypeRow>
+<TypeRow name={"onZoomChange"} type={"(zoom, eventDetails) => void"}>Fires when the wheel or the navigator changes the zoom. `eventDetails.reason` is `"wheel"`, `"drag"`, `"keyboard"`, `"input-change"` or `"double-click"`; `eventDetails.cancel()` keeps the zoom.</TypeRow>
+<TypeRow name={"position"} type={"number"}>Controlled playback position.</TypeRow>
+<TypeRow name={"defaultPosition"} type={"number"} default={"0"}>Uncontrolled starting position.</TypeRow>
+<TypeRow name={"source"} type={"{ getSnapshot, subscribe }"}>A live position followed outside React; takes precedence over `position`.</TypeRow>
+<TypeRow name={"onPositionChange"} type={"(value, eventDetails) => void"}>Fires while the position is moved. `eventDetails.reason` is `"press"`, `"drag"`, `"keyboard"` or `"input-change"`.</TypeRow>
+<TypeRow name={"onPositionCommitted"} type={"(value, eventDetails) => void"}>Fires when a gesture that moved the position ends.</TypeRow>
+<TypeRow name={"snapStep"} type={"number"} default={"0"}>Distance between grid lines. `0` is no grid.</TypeRow>
+<TypeRow name={"snapOffset"} type={"number"} default={"0"}>Where the grid's lines start.</TypeRow>
+<TypeRow name={"step / largeStep"} type={"number"} default={"snapStep / ten steps"}>Keyboard steps.</TypeRow>
+<TypeRow name={"disabled"} type={"boolean"} default={"false"}>Disables seeking and zooming.</TypeRow>
+</TypeTable>
+
+#### Parts
+
+<TypeTable title="Components">
+<TypeRow name={"TimelineViewport"}>The scrolling window. Zooms around the pointer with Cmd/Ctrl + scroll. `scrollbar="hidden"` drops the native scrollbar.</TypeRow>
+<TypeRow name={"TimelineRuler"}>The lane that seeks. Holds the input; takes `aria-label` and `getAriaValueText`.</TypeRow>
+<TypeRow name={"TimelineLane"}>A strip the timeline's parts are placed on. `gridStep` draws a line every that many units.</TypeRow>
+<TypeRow name={"TimelineTrack"}>A row: a header beside a lane. `height`, `selected`, `onHeightChange`.</TypeRow>
+<TypeRow name={"TimelineTrackHeader"}>The strip that names a track, kept at the left edge.</TypeRow>
+<TypeRow name={"TimelineTrackResizeHandle"}>Sets the track's height, by dragging or with the keys.</TypeRow>
+<TypeRow name={"TimelineMark"}>Something placed at `value`: a bar number, a cue.</TypeRow>
+<TypeRow name={"TimelinePlayhead"}>Follows the position on the lane it sits in.</TypeRow>
+<TypeRow name={"TimelineRange"}>A stretch of the timeline: `value`, `defaultValue`, `minLength`, `movable`, `drawable`, `onValueChange`, `onValueCommitted`.</TypeRow>
+<TypeRow name={"TimelineRangeHandle"}>Resizes one `edge` of the range.</TypeRow>
+<TypeRow name={"TimelineClip"}>A stretch of a source: `value`, `sourceLength`, `selected`, `onValueChange`, `onValueCommitted`, `onRemove`. Dragged over other lanes too.</TypeRow>
+<TypeRow name={"TimelineClipHeader"}>The clip's title bar: drag it to move the clip.</TypeRow>
+<TypeRow name={"TimelineClipHandle"}>Trims one `edge` of the clip.</TypeRow>
+<TypeRow name={"TimelineClipFade"}>Draws a fade, as a line with its shading. Takes `edge`.</TypeRow>
+<TypeRow name={"TimelineClipFadeHandle"}>Sets a fade, at the clip's top corner: a square that shows when the clip is hovered or selected. Takes `edge`.</TypeRow>
+<TypeRow name={"TimelineNavigator"}>The whole timeline as one bar, scrolling and zooming the viewport.</TypeRow>
+</TypeTable>
+
+`@audio-ui/react/timeline` exposes the same parts as `Timeline.Root`, `Timeline.Viewport`, `Timeline.Ruler`, `Timeline.Lane`, `Timeline.Mark`, `Timeline.Playhead`, `Timeline.Range`, `Timeline.RangeHandle`, `Timeline.Clip`, `Timeline.ClipHeader`, `Timeline.ClipHandle`, `Timeline.ClipFade`, `Timeline.ClipFadeHandle`, and `Timeline.Navigator` with its `Timeline.NavigatorWindow` and `Timeline.NavigatorHandle`. Every part accepts a `render` prop and `className` / `style` as functions of state, and exposes `data-disabled`, `data-fitted` and `data-scrubbing`.

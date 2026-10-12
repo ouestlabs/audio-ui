@@ -1,0 +1,25 @@
+export {
+  createSequencerController,
+  type SequencerCellNodes,
+  type SequencerController,
+  type SequencerOptions,
+  type SequencerSnapshot,
+  type SequencerValueChangeEventDetails,
+  type SequencerValueCommitEventDetails,
+  type SequencerVelocityChangeEventDetails,
+  type SequencerVelocityCommitEventDetails,
+} from "./controller.ts";
+export {
+  type CellAddress,
+  cellAtPoint,
+  cellKey,
+  DEFAULT_VELOCITY,
+  isOn,
+  moveFocus,
+  type Pattern,
+  setCell,
+  setVelocity,
+  type Velocities,
+  velocityAt,
+  velocityAtY,
+} from "./grid.ts";

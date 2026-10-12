@@ -1,0 +1,98 @@
+---
+title: Scrubber
+description: "A compact player: play and pause, the position, a seek bar and the length."
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="scrubber-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">CLI</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash component
+npx shadcn@latest add @audio/scrubber
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the following dependencies:</Step>
+
+```bash
+npm install @audio-ui/react
+```
+
+<Step>Copy and paste the following code into your project.</Step>
+
+<ComponentSource
+  styleName="base-nova"
+  name="scrubber"
+  title="components/audio/elements/scrubber.tsx"
+/>
+
+<Step>Update the import paths to match your project setup.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Anatomy
+
+The scrubber is a Timeline: its bar is the ruler, with a playhead for the fill and one for the thumb.
+
+```tsx
+import { Timeline } from "@audio-ui/react";
+
+<Timeline.Root>
+  <Timeline.Ruler>
+    <Timeline.Playhead /> {/* the fill */}
+    <Timeline.Playhead /> {/* the thumb */}
+  </Timeline.Ruler>
+</Timeline.Root>
+```
+
+## Usage
+
+```tsx
+import { createSource } from "@audio-ui/react";
+import { Scrubber } from "@/components/audio/elements/scrubber";
+
+const position = createSource(0); // seconds; set it from your player's clock
+
+<Scrubber
+  duration={215}
+  onPlayingChange={(playing) => (playing ? player.play() : player.pause())}
+  onSeek={(seconds) => player.seek(seconds)}
+  playing={isPlaying}
+  source={position}
+/>;
+```
+
+## Keyboard
+
+The bar holds a native `<input type="range">`: the arrow keys move it by a second, `Page Up` and `Page Down` by ten, `Home` and `End` go to the ends. It announces the position as a clock, such as "1:15".
+
+## API reference
+
+<TypeTable>
+<TypeRow name={"source"} type={"{ getSnapshot, subscribe }"}>The playback position in seconds, a live value.</TypeRow>
+<TypeRow name={"duration"} type={"number"}>Length of the track, in seconds.</TypeRow>
+<TypeRow name={"playing"} type={"boolean"}>Whether it is playing: the button shows pause.</TypeRow>
+<TypeRow name={"onPlayingChange"} type={"(playing: boolean) => void"}>The play button was pressed.</TypeRow>
+<TypeRow name={"onSeek"} type={"(seconds: number) => void"}>The bar was pressed, dragged or moved by key.</TypeRow>
+<TypeRow name={"aria-label"} type={"string"}>Names the bar. Defaults to "Playback position".</TypeRow>
+</TypeTable>

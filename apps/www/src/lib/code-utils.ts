@@ -13,7 +13,7 @@ function pickQuote(dq: string | undefined, sq: string | undefined): string {
 
 /**
  * Transforms style-specific class names based on the current style.
- * Finds ALL string literals (in any context — className, cn(), cva(), etc.)
+ * Finds ALL string literals (in any context, className, cn(), cva(), etc.)
  * containing "style-*:" prefixed tokens, keeps only the classes matching
  * the current style (with the prefix stripped), and removes the rest.
  * Empty strings left after stripping are cleaned up.
@@ -32,7 +32,7 @@ export function transformStyleClassNames(
   code: string,
   styleName: string
 ): string {
-  // Extract the visual style name (e.g., "nova" from "radix-nova")
+  // Extract the visual style name (e.g., "nova" from "base-nova")
   const style = styleName.split("-").pop() || styleName;
   const stylePrefix = `style-${style}:`;
 
@@ -66,7 +66,7 @@ export function transformStyleClassNames(
   );
 
   // Step 2: Remove lines that are now just empty string entries ("" or '')
-  // with an optional trailing comma — leftover from fully-stripped style strings.
+  // with an optional trailing comma, leftover from fully-stripped style strings.
   result = result.replace(/^\s*(?:""|'')\s*,?\s*\n/gm, "");
 
   // Step 3: Collapse 3+ consecutive newlines into one blank line.

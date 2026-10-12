@@ -8,6 +8,7 @@ import {
   PickerRadioGroup,
   PickerRadioItem,
   PickerTrigger,
+  usePickerSide,
 } from "@/app/(create)/customizer/picker";
 import { useDesignSystemSearchParams } from "@/app/(create)/lib/search-params";
 import { useConfig } from "@/hooks/use-config";
@@ -48,7 +49,11 @@ export function BasePicker({
 
   return (
     <Picker>
-      <PickerTrigger>
+      <PickerTrigger
+        className="disabled:cursor-not-allowed"
+        disabled
+        title="Only Base UI is available for now"
+      >
         <div className="flex flex-col justify-start text-left">
           <div className="text-site-muted-foreground text-xs">
             Component Library
@@ -69,7 +74,7 @@ export function BasePicker({
       <PickerContent
         align={isMobile ? "center" : "start"}
         anchor={isMobile ? anchorRef : undefined}
-        side={isMobile ? "top" : "right"}
+        side={usePickerSide(isMobile)}
       >
         <PickerRadioGroup
           onValueChange={handleValueChange}

@@ -1,7 +1,8 @@
-import type { Nullable, Point, Procedure } from "@audio-ui/utils";
+import type { Point } from "@audio-ui/core";
+import type { Nullable, Procedure } from "@audio-ui/core/internal";
 import * as React from "react";
-import { useControlledValue } from "../../hooks/state/use-controlled-value";
-import { useValueAsRef } from "../../hooks/state/use-value-as-ref";
+import { useControlledValue } from "../../hooks/state/use-controlled-value.ts";
+import { useValueAsRef } from "../../hooks/state/use-value-as-ref.ts";
 
 export interface UseParameterCoreOptions<T> {
   /** Clamp + quantize a candidate value into the parameter's domain. */
@@ -29,7 +30,7 @@ export interface UseParameterCoreOptions<T> {
   onValueCommit?: Procedure<T>;
   /** Maps a viewport point to a value; return null when geometry cannot answer. */
   pointToValue?: (point: Point) => Nullable<T>;
-  /** Normalizes incoming (controlled) values — NaN guards, per-axis clamping. */
+  /** Normalizes incoming (controlled) values, NaN guards, per-axis clamping. */
   transform: (val: T) => T;
   value?: T;
 }
@@ -121,7 +122,7 @@ export function useParameterCore<T>({
   );
 
   const dragStartValueRef = React.useRef(value);
-  const isDragActiveRef = React.useRef(false);
+  const isDragActiveRef = React.useRef<boolean>(false);
   const pendingValueRef = React.useRef(value);
   const shouldPreventFocusRef = React.useRef(false);
 

@@ -1,13 +1,15 @@
 "use client";
 
-import { CircleNotchIcon } from "@phosphor-icons/react/ssr";
 import * as React from "react";
-import { Frame, FrameContent, FrameFooter } from "@/components/custom/frame";
-import { Spinner } from "@/components/ui/spinner";
+import { Frame } from "@/components/custom/frame";
+import { PreviewLoading, PreviewPanel } from "@/components/preview-frame";
+import { useMounted } from "@/hooks/use-mounted";
 import { getComponent } from "@/lib/registry";
 import { cn } from "@/lib/utils";
 
 interface ComponentCardContainerProps {
+  /** A block: the panel is its frame, and the editor is capped so its card is not far taller than the others, scrolling inside. */
+  block?: boolean;
   children: React.ReactNode;
   className?: string;
   footer: React.ReactNode;
@@ -23,6 +25,7 @@ export function ComponentRenderer({
 }) {
   const [key, setKey] = React.useState(0);
   const [isReloading, setIsReloading] = React.useState(false);
+  const mounted = useMounted();
 
   React.useEffect(() => {
     const handleReload = (e: Event) => {
@@ -39,12 +42,9 @@ export function ComponentRenderer({
       window.removeEventListener("component-preview-reload", handleReload);
   }, [name]);
 
-  if (isReloading) {
-    return (
-      <div className="flex h-full min-h-20 items-center justify-center">
-        <Spinner className="text-site-muted-foreground/40" />
-      </div>
-    );
+  // Until the page is hydrated its styles are not applied: a preview drawn on the server would show unstyled.
+  if (isReloading || !mounted) {
+    return <PreviewLoading />;
   }
 
   // Get component using lazy loader (component created on-demand)
@@ -64,7 +64,7 @@ export function ComponentRenderer({
 export function ComponentName({ name }: { name: string }) {
   return (
     <div
-      className="rounded-lg flex h-8 select-all ring ring-border items-center gap-1.5 bg-site-background/50 px-2 font-medium text-[10px] text-site-muted-foreground transition-all hover:bg-site-muted hover:text-site-foreground"
+      className="rounded-lg flex h-8 select-all ring ring-border items-center gap-1.5 bg-site-background/50 px-2 font-medium text-[10px] text-site-muted-foreground transition-colors hover:bg-site-muted hover:text-site-foreground"
       title="Component name"
     >
       {name}
@@ -77,27 +77,16 @@ export function ComponentCardContainer({
   footer,
   className,
   isFullWidth,
+  block = false,
 }: ComponentCardContainerProps) {
   return (
     <Frame className={cn(isFullWidth && "md:col-span-2", className)}>
-      <FrameContent
-        className={cn(
-          "flex min-h-50 min-w-0 flex-1 flex-col flex-wrap items-center justify-center overflow-x-auto bg-site-background p-3 font-sans **:data-[slot=preview]:w-full sm:p-6 sm:**:data-[slot=preview]:max-w-[80%] lg:px-8 lg:py-12"
-        )}
-      >
-        <React.Suspense
-          fallback={
-            <div className="flex items-center justify-center py-10">
-              <CircleNotchIcon className="size-6 animate-spin text-site-muted-foreground/40" />
-            </div>
-          }
-        >
+      <PreviewPanel block={block}>
+        <React.Suspense fallback={<PreviewLoading />}>
           {children}
         </React.Suspense>
-      </FrameContent>
-      <FrameFooter className="flex-row items-center gap-3 px-2 py-1.5">
-        {footer}
-      </FrameFooter>
+      </PreviewPanel>
+      {footer}
     </Frame>
   );
 }

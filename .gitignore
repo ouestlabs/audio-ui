@@ -43,3 +43,5 @@ test-results
 # Claude Code
 .playwright-mcp/
 plans/
+
+.ref/

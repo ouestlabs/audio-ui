@@ -1,8 +1,28 @@
 {
-  "extends": "@audio-ui/typescript/react-library.json",
   "compilerOptions": {
+    "allowImportingTsExtensions": true,
+    "declaration": true,
+    "declarationMap": true,
+    "esModuleInterop": true,
+    "incremental": false,
+    "isolatedModules": true,
+    "jsx": "react-jsx",
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleDetection": "force",
+    "moduleResolution": "Bundler",
+    "noUncheckedIndexedAccess": true,
+    "paths": {
+      "@audio-ui/core": ["../core/src/index.ts"],
+      "@audio-ui/core/internal": ["../core/src/internal.ts"],
+      "@audio-ui/core/*": ["../core/src/primitives/*/index.ts"]
+    },
+    "resolveJsonModule": true,
+    "rewriteRelativeImportExtensions": true,
+    "skipLibCheck": true,
+    "strict": true,
     "strictNullChecks": true,
+    "target": "ES2022",
     "types": ["bun", "react", "react-dom"]
   },
   "exclude": ["dist", "node_modules"]

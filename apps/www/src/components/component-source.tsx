@@ -155,7 +155,7 @@ export async function ComponentSource({
   }
 
   const lang = language ?? title?.split(".").pop() ?? "tsx";
-  const highlightedCode = await highlightCode(code, lang);
+  const highlightedCode = highlightCode(code, lang);
 
   const effectiveEventName = eventName ?? "copy_component_code";
 

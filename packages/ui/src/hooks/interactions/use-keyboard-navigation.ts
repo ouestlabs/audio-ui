@@ -1,6 +1,6 @@
-import type { Optional, Procedure } from "@audio-ui/utils";
+import type { Optional, Procedure } from "@audio-ui/core/internal";
 import * as React from "react";
-import { useCallbackRef } from "../use-callback-ref";
+import { useCallbackRef } from "../use-callback-ref.ts";
 
 export type KeyboardNavigationHandler = (
   e: React.KeyboardEvent
@@ -77,7 +77,7 @@ export function useKeyboardNavigation({
   const keyboardProps = React.useMemo(
     () => ({
       onKeyDown: (e: React.KeyboardEvent) => {
-        externalOnKeyDownRef?.(e);
+        externalOnKeyDownRef(e);
         handleKeyDown(e);
       },
     }),

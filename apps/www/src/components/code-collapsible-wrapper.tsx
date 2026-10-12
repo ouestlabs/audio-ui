@@ -19,7 +19,7 @@ export function CodeCollapsibleWrapper({
 
   return (
     <Collapsible
-      className={cn("group/collapsible md:-mx-1 relative", className)}
+      className={cn("group/collapsible relative", className)}
       onOpenChange={setIsOpened}
       open={isOpened}
       {...props}
@@ -29,12 +29,14 @@ export function CodeCollapsibleWrapper({
         render={
           <div
             className={cn(
-              "absolute top-2 z-10 flex items-center",
-              isOpened ? "right-9" : "right-2"
+              "absolute top-[7px] z-10 flex items-center",
+              isOpened
+                ? "right-[calc(2.75rem+2px)]"
+                : "right-[calc(0.5rem+2px)]"
             )}
           >
             <Button
-              className="text-site-muted-foreground"
+              className="h-8 text-site-muted-foreground"
               size="sm"
               variant="outline"
             >
@@ -48,9 +50,8 @@ export function CodeCollapsibleWrapper({
       />
       <CollapsibleContent
         className={cn(
-          "mt-6 h-full p-px data-closed:max-h-64 [&>figure]:mt-0 [&>figure]:md:mx-0!",
-          "data-closed:[-webkit-mask-image:linear-gradient(to_bottom,black_0%,black_72%,transparent_100%)]",
-          "data-closed:mask-[linear-gradient(to_bottom,black_0%,black_72%,transparent_100%)]"
+          // Closed, the code is cut in its panel; the frame around it stays whole.
+          "mt-6 h-full data-closed:[&_pre]:max-h-64 data-closed:[&_pre]:overflow-hidden [&>figure]:mt-0 [&>figure]:md:mx-0!"
         )}
         hidden={false}
         keepMounted
@@ -62,7 +63,8 @@ export function CodeCollapsibleWrapper({
         render={
           <div
             className={cn(
-              "site-rounded-b-lg -bottom-2 absolute inset-x-0 flex h-20 items-center justify-center bg-linear-to-b from-site-code/70 to-site-code",
+              // Inside the panel, concentric with it: the frame's ring and border (3px) inward, the panel's own radius.
+              "absolute inset-x-[3px] bottom-[3px] flex h-20 items-end justify-center rounded-b-[13px] bg-linear-to-b from-transparent to-site-code pb-1",
               "group-data-open/collapsible:hidden"
             )}
           >

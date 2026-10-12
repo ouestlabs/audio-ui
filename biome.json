@@ -52,5 +52,45 @@
         "noNoninteractiveElementInteractions": "off"
       }
     }
-  }
+  },
+  "javascript": {
+    "globals": ["Bun"]
+  },
+  "overrides": [
+    {
+      "includes": ["packages/ui/bench/*"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noUndeclaredVariables": "off",
+            "noUnusedFunctionParameters": "off"
+          },
+          "performance": {
+            "noAwaitInLoops": "off",
+            "noJsxPropsBind": "off"
+          },
+          "suspicious": {
+            "noArrayIndexKey": "off",
+            "noShadow": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": [
+        "packages/ui/src/primitives/*/test/*.bench.tsx",
+        "packages/ui/test/bench.ts"
+      ],
+      "linter": {
+        "rules": {
+          "performance": {
+            "noJsxPropsBind": "off"
+          },
+          "suspicious": {
+            "noMisplacedAssertion": "off"
+          }
+        }
+      }
+    }
+  ]
 }

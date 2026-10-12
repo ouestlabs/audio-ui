@@ -22,6 +22,12 @@ function DialogClose({ ...props }: DialogPrimitive.Close.Props) {
   return <DialogPrimitive.Close data-slot="dialog-close" {...props} />;
 }
 
+/*
+ * Below the popups (z-50), not level with them: a menu or a popover opened
+ * from inside a dialog lives in a portal of its own, and between two layers at
+ * the same level the one whose portal was added last wins, which on a second
+ * opening of the dialog is the dialog.
+ */
 function DialogOverlay({
   className,
   ...props
@@ -29,7 +35,7 @@ function DialogOverlay({
   return (
     <DialogPrimitive.Backdrop
       className={cn(
-        "data-open:fade-in-0 data-closed:fade-out-0 fixed inset-0 isolate z-50 bg-black/10 ease-[cubic-bezier(0.22,1,0.36,1)] data-closed:animate-out data-closed:duration-150 data-open:animate-in data-open:duration-250 supports-backdrop-filter:backdrop-blur-xs",
+        "data-open:fade-in-0 data-closed:fade-out-0 fixed inset-0 isolate z-45 bg-black/10 ease-[cubic-bezier(0.22,1,0.36,1)] data-closed:animate-out data-closed:duration-150 data-open:animate-in data-open:duration-250 supports-backdrop-filter:backdrop-blur-xs",
         className
       )}
       data-slot="dialog-overlay"
@@ -51,7 +57,7 @@ function DialogContent({
       <DialogOverlay />
       <DialogPrimitive.Popup
         className={cn(
-          "-translate-x-1/2 -translate-y-1/2 data-open:fade-in-0 data-open:zoom-in-96 data-closed:fade-out-0 data-closed:zoom-out-96 fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] gap-4 rounded-xl bg-popover p-4 text-popover-foreground text-sm outline-none ring-1 ring-foreground/10 ease-[cubic-bezier(0.22,1,0.36,1)] data-closed:animate-out data-closed:duration-150 data-open:animate-in data-open:duration-250 sm:max-w-sm",
+          "-translate-x-1/2 -translate-y-1/2 data-open:fade-in-0 data-open:zoom-in-96 data-closed:fade-out-0 data-closed:zoom-out-96 fixed top-1/2 left-1/2 z-45 grid w-full max-w-[calc(100%-2rem)] gap-4 rounded-xl bg-popover p-4 text-popover-foreground text-sm outline-none ring-1 ring-foreground/10 ease-[cubic-bezier(0.22,1,0.36,1)] data-closed:animate-out data-closed:duration-150 data-open:animate-in data-open:duration-250 sm:max-w-sm",
           className
         )}
         data-slot="dialog-content"

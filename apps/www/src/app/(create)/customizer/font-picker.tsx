@@ -11,6 +11,7 @@ import {
   PickerRadioItem,
   PickerSeparator,
   PickerTrigger,
+  usePickerSide,
 } from "@/app/(create)/customizer/picker";
 import { FONTS } from "@/app/(create)/lib/fonts";
 import { useDesignSystemSearchParams } from "@/app/(create)/lib/search-params";
@@ -142,7 +143,7 @@ export function FontPicker({
           align={isMobile ? "center" : "start"}
           anchor={isMobile ? anchorRef : undefined}
           className="max-h-96"
-          side={isMobile ? "top" : "right"}
+          side={usePickerSide(isMobile)}
         >
           <PickerRadioGroup
             onValueChange={handleFontChange}

@@ -1,6 +1,6 @@
-import type { Procedure } from "@audio-ui/utils";
+import type { Procedure } from "@audio-ui/core/internal";
 import * as React from "react";
-import { useCallbackRef } from "../use-callback-ref";
+import { useCallbackRef } from "../use-callback-ref.ts";
 
 export interface UseFocusOptions<T extends HTMLElement = HTMLElement> {
   disabled?: boolean;
@@ -29,7 +29,7 @@ export function useFocus<T extends HTMLElement = HTMLElement>({
   const handleFocus = React.useCallback(
     (e: React.FocusEvent<T>) => {
       if (!disabled) {
-        onFocusRef?.(e);
+        onFocusRef(e);
       }
     },
     [disabled, onFocusRef]
@@ -37,7 +37,7 @@ export function useFocus<T extends HTMLElement = HTMLElement>({
 
   const handleBlur = React.useCallback(
     (e: React.FocusEvent<T>) => {
-      onBlurRef?.(e);
+      onBlurRef(e);
     },
     [onBlurRef]
   );

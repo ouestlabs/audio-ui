@@ -6,7 +6,7 @@ import { source } from "@/lib/source";
 
 /**
  * All published doc routes (same set as `source.generateParams()`), including
- * every `/docs/components/base/...` and `/docs/components/radix/...` page. Using `getPages()` avoids
+ * every `/docs/components/base/...` page. Using `getPages()` avoids
  * dropping URLs when two pages share the same `name` in the page tree.
  */
 function collectDocUrls(): string[] {

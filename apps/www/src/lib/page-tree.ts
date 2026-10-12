@@ -5,8 +5,8 @@ export type PageTreeNode = (typeof source.pageTree)["children"][number];
 export type PageTreeFolder = Extract<PageTreeNode, { type: "folder" }>;
 export type PageTreePage = Extract<PageTreeNode, { type: "page" }>;
 
-const COMPONENTS_BASE_PATH_REGEX = /\/docs\/components\/(radix|base)(?:\/|$)/;
-const DOCS_BASE_PATH_REGEX = /\/docs\/(radix|base)(?:\/|$)/;
+const COMPONENTS_BASE_PATH_REGEX = /\/docs\/components\/(base)(?:\/|$)/;
+const DOCS_BASE_PATH_REGEX = /\/docs\/(base)(?:\/|$)/;
 
 // Recursively find all pages in a folder tree.
 export function getAllPagesFromFolder(folder: PageTreeFolder): PageTreePage[] {
@@ -23,32 +23,37 @@ export function getAllPagesFromFolder(folder: PageTreeFolder): PageTreePage[] {
   return pages;
 }
 
-// Find the pages inside the base subfolder (radix/base) matching currentBase.
-function findBaseSubfolderPages(
+// Find the children inside the base subfolder (base) matching currentBase.
+function findBaseSubfolderChildren(
   folder: PageTreeFolder,
   currentBase: string
-): PageTreePage[] | null {
+): PageTreeFolder["children"] | null {
   for (const child of folder.children) {
     if (child.type !== "folder") {
       continue;
     }
 
     // Match by $id or by name.
-    const isRadix = child.$id === "radix" || child.name === "Radix UI";
     const isBase = child.$id === "base" || child.name === "Base UI";
 
-    if (
-      (currentBase === "radix" && isRadix) ||
-      (currentBase === "base" && isBase)
-    ) {
-      return child.children.filter((c): c is PageTreePage => c.type === "page");
+    if (currentBase === "base" && isBase) {
+      return child.children;
     }
   }
 
   return null;
 }
 
-// Get the pages from a folder, handling nested base folders (radix/base).
+// Find the pages inside the base subfolder (base) matching currentBase.
+function findBaseSubfolderPages(
+  folder: PageTreeFolder,
+  currentBase: string
+): PageTreePage[] | null {
+  const children = findBaseSubfolderChildren(folder, currentBase);
+  return children?.filter((c): c is PageTreePage => c.type === "page") ?? null;
+}
+
+// Get the pages from a folder, handling nested base folders (base).
 export function getPagesFromFolder(
   folder: PageTreeFolder,
   currentBase: string
@@ -72,8 +77,40 @@ export function getPagesFromFolder(
   );
 }
 
-// Get current base (radix or base) from pathname.
-// Component docs: /docs/components/radix/alert | /docs/components/base/alert
+export type PageTreeSection = { pages: PageTreePage[]; title?: string };
+
+// Get a folder's pages grouped under the separators of its meta.json: pages
+// before the first separator come first, with no title.
+export function getSectionsFromFolder(
+  folder: PageTreeFolder,
+  currentBase: string
+): PageTreeSection[] {
+  const isComponents =
+    folder.$id === "components" || folder.name === "Components";
+  const children = isComponents
+    ? findBaseSubfolderChildren(folder, currentBase)
+    : folder.children;
+
+  if (!children) {
+    return [{ pages: getPagesFromFolder(folder, currentBase) }];
+  }
+
+  const sections: PageTreeSection[] = [];
+  for (const child of children) {
+    if (child.type === "separator") {
+      sections.push({ pages: [], title: child.name?.toString() });
+    } else if (child.type === "page") {
+      if (sections.length === 0) {
+        sections.push({ pages: [] });
+      }
+      sections.at(-1)?.pages.push(child);
+    }
+  }
+  return sections.filter((section) => section.pages.length > 0);
+}
+
+// Get the current base from pathname.
+// Component docs: /docs/components/base/alert
 export function getCurrentBase(pathname: string): string {
   const baseMatch =
     pathname.match(COMPONENTS_BASE_PATH_REGEX) ??

@@ -1,8 +1,14 @@
+import { createThemeCss } from "@tanstack/highlight/theme";
+import { githubDarkTheme } from "@tanstack/highlight/themes/github-dark";
+import { githubLightTheme } from "@tanstack/highlight/themes/github-light";
 import { Provider as JotaiProvider } from "jotai";
 import type { Metadata } from "next";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
+import { Suspense } from "react";
+import { DESIGN_SYSTEM_BOOT_SCRIPT } from "@/app/(create)/lib/boot-cache";
 import { JsonLd } from "@/components/json-ld";
 import { QueryProvider } from "@/components/query-provider";
+import { SiteCustomizer } from "@/components/site-customizer";
 import { TailwindIndicator } from "@/components/tailwind-indicator";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
@@ -98,6 +104,17 @@ export default function RootLayout({
             `,
           }}
         />
+        <script
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: puts the saved design system back before the first paint
+          dangerouslySetInnerHTML={{ __html: DESIGN_SYSTEM_BOOT_SCRIPT }}
+        />
+        <style href="highlight-theme" precedence="default">
+          {createThemeCss({
+            dark: githubDarkTheme,
+            darkSelector: ".dark",
+            light: githubLightTheme,
+          })}
+        </style>
         <meta content={META_THEME_COLORS.light} name="theme-color" />
       </head>
 
@@ -118,6 +135,9 @@ export default function RootLayout({
             <NuqsAdapter>
               <JotaiProvider>
                 {children}
+                <Suspense>
+                  <SiteCustomizer />
+                </Suspense>
                 <TailwindIndicator />
                 <Toaster position="top-center" />
               </JotaiProvider>

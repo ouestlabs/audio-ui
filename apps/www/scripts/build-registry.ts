@@ -4,13 +4,13 @@
  * Pre-compiles all registry items (audio library items, hooks, lib, and
  * catalog blocks/demos from `registry-audio/bases/{base}/components`) into
  * static JSON files in `public/r/styles/`.
- * This eliminates serverless function invocations for registry serving —
+ * This eliminates serverless function invocations for registry serving,
  * files are served directly from the CDN edge.
  *
  * Output structure:
- *   public/r/styles/index.json          — list of available styles
- *   public/r/styles/{style}/{name}.json — one file per item per style
- *   public/r/styles/default/            — alias for base-nova (the default)
+ *   public/r/styles/index.json         , list of available styles
+ *   public/r/styles/{style}/{name}.json, one file per item per style
+ *   public/r/styles/default/           , alias for base-nova (the default)
  *
  * Run: bun run registry:build
  */
@@ -35,7 +35,7 @@ let transformStyleClassNames: (code: string, styleName: string) => string;
 
 // Style names only (`registry/styles.tsx` also holds inline JSX icon SVGs,
 // which can't be evaluated under this Bun-hoisted toolchain; only `.name`
-// is needed here — see registry/styles/style-*.css for the set).
+// is needed here, see registry/styles/style-*.css for the set).
 const STYLES = [
   { name: "vega" },
   { name: "nova" },
@@ -79,10 +79,10 @@ const DEFAULT_STYLE = "base-nova";
 const AUDIO_REGISTRY_NAMESPACE = "@audio";
 
 // ---------------------------------------------------------------------------
-// cn-* class expansion — mirrors how ui.shadcn.com serves its own registry:
+// cn-* class expansion, mirrors how ui.shadcn.com serves its own registry:
 // components reference placeholder classes like `cn-fader-track`, defined in
 // registry-audio/styles/style-{style}.css (a `.style-{name} { .cn-x { @apply
-// ...; } }` block). The official registry never ships that placeholder text —
+// ...; } }` block). The official registry never ships that placeholder text,
 // it's resolved to real utility classes before the JSON is served, so the
 // shadcn CLI's own `add` never sees a `cn-*` token to deal with. We mirror
 // that here instead of sending unresolved `cn-*` tokens down the wire, which
@@ -202,7 +202,7 @@ async function getMetadata(base: string): Promise<MetadataData> {
 }
 
 // ---------------------------------------------------------------------------
-// Manifest generation — components.json, registry.json, and seo.json are
+// Manifest generation, components.json, registry.json, and seo.json are
 // DERIVED from components/_registry.ts (items) and categories.ts (curated
 // editorial). Category counts are computed, never hand-summed. Item tags not
 // listed in categories.ts are free-form search tags and are left alone; a
@@ -234,7 +234,7 @@ async function buildManifests(): Promise<void> {
     ).length;
     if (count === 0) {
       throw new Error(
-        `Category "${def.name}" in categories.ts has no catalog items — remove it from categories.ts or tag items with it.`
+        `Category "${def.name}" in categories.ts has no catalog items, remove it from categories.ts or tag items with it.`
       );
     }
     return {
@@ -317,7 +317,7 @@ function parseStyleName(styleName: string): { base: string; style: string } {
       return { base, style };
     }
   }
-  return { base: "radix", style: "nova" };
+  return { base: "base", style: "nova" };
 }
 
 // ---------------------------------------------------------------------------
@@ -327,23 +327,23 @@ function parseStyleName(styleName: string): { base: string; style: string } {
 function transformImportPaths(code: string, base: string): string {
   return code
     .replace(
-      /@\/registry-audio\/bases\/__generated\/(?:base|radix)-(?:vega|nova|maia|lyra|mira|luma|rhea|sera)\/audio\//g,
+      /@\/registry-audio\/bases\/__generated\/base-(?:vega|nova|maia|lyra|mira|luma|rhea|sera)\/audio\//g,
       "@/components/audio/"
     )
     .replace(
-      /@\/registry-audio\/bases\/__generated\/(?:base|radix)-(?:vega|nova|maia|lyra|mira|luma|rhea|sera)\/ui\//g,
+      /@\/registry-audio\/bases\/__generated\/base-(?:vega|nova|maia|lyra|mira|luma|rhea|sera)\/ui\//g,
       "@/components/ui/"
     )
     .replace(
-      /@\/registry-audio\/bases\/__generated\/(?:base|radix)-(?:vega|nova|maia|lyra|mira|luma|rhea|sera)\/hooks\//g,
+      /@\/registry-audio\/bases\/__generated\/base-(?:vega|nova|maia|lyra|mira|luma|rhea|sera)\/hooks\//g,
       "@/hooks/"
     )
     .replace(
-      /@\/registry-audio\/bases\/__generated\/(?:base|radix)-(?:vega|nova|maia|lyra|mira|luma|rhea|sera)\/lib\//g,
+      /@\/registry-audio\/bases\/__generated\/base-(?:vega|nova|maia|lyra|mira|luma|rhea|sera)\/lib\//g,
       "@/lib/"
     )
     .replace(
-      /@\/registry-audio\/bases\/__generated\/(?:base|radix)-(?:vega|nova|maia|lyra|mira|luma|rhea|sera)\/components\//g,
+      /@\/registry-audio\/bases\/__generated\/base-(?:vega|nova|maia|lyra|mira|luma|rhea|sera)\/components\//g,
       "@/components/examples/"
     )
     .replace(
@@ -364,29 +364,20 @@ function transformImportPaths(code: string, base: string): string {
       "@/components/examples/"
     )
     .replace(
-      /@\/registry(?:-audio)?\/bases\/(?:base|radix)\/audio\//g,
+      /@\/registry(?:-audio)?\/bases\/base\/audio\//g,
       "@/components/audio/"
     )
+    .replace(/@\/registry(?:-audio)?\/bases\/base\/ui\//g, "@/components/ui/")
+    .replace(/@\/registry(?:-audio)?\/bases\/base\/hooks\//g, "@/hooks/")
+    .replace(/@\/registry(?:-audio)?\/bases\/base\/lib\//g, "@/lib/")
     .replace(
-      /@\/registry(?:-audio)?\/bases\/(?:base|radix)\/ui\//g,
-      "@/components/ui/"
-    )
-    .replace(
-      /@\/registry(?:-audio)?\/bases\/(?:base|radix)\/hooks\//g,
-      "@/hooks/"
-    )
-    .replace(/@\/registry(?:-audio)?\/bases\/(?:base|radix)\/lib\//g, "@/lib/")
-    .replace(
-      /@\/registry(?:-audio)?\/bases\/(?:base|radix)\/components\//g,
+      /@\/registry(?:-audio)?\/bases\/base\/components\//g,
       "@/components/examples/"
     )
-    .replace(/@\/registry\/bases\/(?:base|radix)\/ui\//g, "@/components/ui/")
-    .replace(
-      /@\/registry\/bases\/(?:base|radix)\/audio\//g,
-      "@/components/audio/"
-    )
-    .replace(/@\/registry\/bases\/(?:base|radix)\/hooks\//g, "@/hooks/")
-    .replace(/@\/registry\/bases\/(?:base|radix)\/lib\//g, "@/lib/")
+    .replace(/@\/registry\/bases\/base\/ui\//g, "@/components/ui/")
+    .replace(/@\/registry\/bases\/base\/audio\//g, "@/components/audio/")
+    .replace(/@\/registry\/bases\/base\/hooks\//g, "@/hooks/")
+    .replace(/@\/registry\/bases\/base\/lib\//g, "@/lib/")
     .replace(
       /^\s*\/\/\s*(?:Description|Order|GridSize|PreviewHeight):.*$\n?/gm,
       ""
@@ -473,7 +464,10 @@ async function buildRegistryItem(
       if (sourceType === "blocks") {
         target = `components/examples/${fileName}`;
       } else if (fileType === "registry:ui") {
-        target = `components/audio/${fileName}`;
+        // Elements keep the folder their demos import them from.
+        target = filePath.includes("/elements/")
+          ? `components/audio/elements/${fileName}`
+          : `components/audio/${fileName}`;
       } else if (fileType === "registry:hook") {
         target = `hooks/${fileName}`;
       } else if (fileType === "registry:lib") {
@@ -491,7 +485,7 @@ async function buildRegistryItem(
     });
   }
 
-  // A "barrel" item (e.g. @audio/ui, @audio/hooks) has no files of its own —
+  // A "barrel" item (e.g. @audio/ui, @audio/hooks) has no files of its own,
   // it only aggregates registryDependencies for a one-shot install. Still
   // emit it; only skip when there's truly nothing to serve at all.
   if (files.length === 0 && !itemMetadata.registryDependencies?.length) {
@@ -630,7 +624,7 @@ async function main() {
     console.log(`  ${styleName}: ${styleFiles} files`);
   }
 
-  // Note: "default" style is handled via edge redirect → radix-nova (no file duplication)
+  // Note: "default" style is handled via edge redirect → base-nova (no file duplication)
 
   // Write styles/index.json
   const stylesIndex = [
@@ -650,7 +644,7 @@ async function main() {
   );
 
   // ---------------------------------------------------------------------------
-  // Verification pass — read back every generated JSON and check integrity
+  // Verification pass, read back every generated JSON and check integrity
   // ---------------------------------------------------------------------------
   console.log();
   console.log("Verifying generated files...");
@@ -681,7 +675,7 @@ async function main() {
           verifyErrors++;
           corruptedFiles.push(`${styleName}/${entry}`);
           console.error(
-            `  INVALID SCHEMA: ${styleName}/${entry} — missing name, type, or files`
+            `  INVALID SCHEMA: ${styleName}/${entry}, missing name, type, or files`
           );
           continue;
         }
@@ -692,7 +686,7 @@ async function main() {
             verifyErrors++;
             corruptedFiles.push(`${styleName}/${entry}`);
             console.error(
-              `  EMPTY CONTENT: ${styleName}/${entry} — file "${file.path}" has no content`
+              `  EMPTY CONTENT: ${styleName}/${entry}, file "${file.path}" has no content`
             );
             break;
           }
@@ -712,7 +706,7 @@ async function main() {
               verifyErrors++;
               corruptedFiles.push(`${styleName}/${entry}`);
               console.error(
-                `  COLLAPSED CODE: ${styleName}/${entry} — line ${i + 1} is ${line.length} chars (file "${file.path}")`
+                `  COLLAPSED CODE: ${styleName}/${entry}, line ${i + 1} is ${line.length} chars (file "${file.path}")`
               );
               break;
             }
@@ -727,7 +721,7 @@ async function main() {
             verifyErrors++;
             corruptedFiles.push(`${styleName}/${entry}`);
             console.error(
-              `  UNTRANSFORMED STYLE: ${styleName}/${entry} — still contains style-*: tokens`
+              `  UNTRANSFORMED STYLE: ${styleName}/${entry}, still contains style-*: tokens`
             );
           }
 
@@ -737,7 +731,7 @@ async function main() {
             verifyErrors++;
             corruptedFiles.push(`${styleName}/${entry}`);
             console.error(
-              `  UNEXPANDED CN CLASS: ${styleName}/${entry} — still contains cn-* tokens`
+              `  UNEXPANDED CN CLASS: ${styleName}/${entry}, still contains cn-* tokens`
             );
           }
           CN_TOKEN_REGEX.lastIndex = 0;
@@ -750,7 +744,7 @@ async function main() {
             verifyErrors++;
             corruptedFiles.push(`${styleName}/${entry}`);
             console.error(
-              `  UNTRANSFORMED IMPORT: ${styleName}/${entry} — still contains registry import paths`
+              `  UNTRANSFORMED IMPORT: ${styleName}/${entry}, still contains registry import paths`
             );
           }
         }
@@ -759,7 +753,7 @@ async function main() {
       } catch (error) {
         verifyErrors++;
         corruptedFiles.push(`${styleName}/${entry}`);
-        console.error(`  INVALID JSON: ${styleName}/${entry} —`, error);
+        console.error(`  INVALID JSON: ${styleName}/${entry}:`, error);
       }
     }
   }

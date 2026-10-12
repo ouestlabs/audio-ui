@@ -1,3 +1,4 @@
+import { usePathname } from "next/navigation";
 import { useQueryStates } from "nuqs";
 import {
   createLoader,
@@ -72,12 +73,26 @@ export const serializeDesignSystemSearchParams = createSerializer(
   designSystemSearchParams
 );
 
-export const useDesignSystemSearchParams = (options: Options = {}) =>
-  useQueryStates(designSystemSearchParams, {
+/** What the hook returns where the URL carries no design params: none set, and nothing to write. */
+const NO_PARAMS = loadDesignSystemSearchParams(new URLSearchParams());
+const setNoParams = () => Promise.resolve(new URLSearchParams());
+
+/** The home page and the catalog keep the design system in their URL, to share; elsewhere it lives in the saved config only. */
+function carriesDesignParams(pathname: string) {
+  return pathname === "/" || pathname.startsWith("/components");
+}
+
+export const useDesignSystemSearchParams = (options: Options = {}) => {
+  const pathname = usePathname();
+  const [params, setParams] = useQueryStates(designSystemSearchParams, {
     history: "push",
     shallow: true,
     ...options,
   });
+  return carriesDesignParams(pathname)
+    ? ([params, setParams] as const)
+    : ([NO_PARAMS, setNoParams] as const);
+};
 
 export type DesignSystemSearchParams = inferParserType<
   typeof designSystemSearchParams

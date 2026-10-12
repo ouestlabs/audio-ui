@@ -21,6 +21,10 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
+      "@audio-ui/core": ["../../packages/core/src/index.ts"],
+      "@audio-ui/core/internal": ["../../packages/core/src/internal.ts"],
+      "@audio-ui/core/*": ["../../packages/core/src/primitives/*/index.ts"],
+      "@audio-ui/react": ["../../packages/ui/src/index.ts"],
       "fumadocs-mdx:collections/*": ["./.source/*"]
     },
     "types": ["bun", "mdx", "node", "react", "react-dom", "three"]

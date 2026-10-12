@@ -1,10 +1,11 @@
-import type { Nullable, Point, Procedure } from "@audio-ui/utils";
-import { clamp, clampUnit, quantizeRound } from "@audio-ui/utils";
+import type { Point } from "@audio-ui/core";
+import { clamp, clampUnit, quantizeRound } from "@audio-ui/core";
+import type { Nullable, Procedure } from "@audio-ui/core/internal";
 import * as React from "react";
-import { useKeyboardNavigation } from "../../hooks/interactions/use-keyboard-navigation";
-import { useWheel } from "../../hooks/interactions/use-wheel";
-import type { UseParameterCoreDragCallbacks } from "./use-parameter-core";
-import { useParameterCore } from "./use-parameter-core";
+import { useKeyboardNavigation } from "../../hooks/interactions/use-keyboard-navigation.ts";
+import { useWheel } from "../../hooks/interactions/use-wheel.ts";
+import type { UseParameterCoreDragCallbacks } from "./use-parameter-core.ts";
+import { useParameterCore } from "./use-parameter-core.ts";
 
 const PAGE_STEP_MULTIPLIER = 10;
 const WHEEL_DELTA_EPSILON = 0.1;
@@ -42,6 +43,8 @@ export interface UseParameterReturn {
   /** Granular op: mark a drag active and seed the start/pending refs. */
   beginDrag: (startValue: number) => void;
   commitValue: (next: number) => void;
+  /** Resolved default: `defaultValue`, or the midpoint of `min…max` when omitted. */
+  defaultValue: number;
   /** Optimistic-aware value for rendering position; equals `value` unless frozen mid-drag. */
   displayValue: number;
   /** Assembled drag lifecycle for the standard point/delta geometry. */
@@ -67,7 +70,7 @@ export interface UseParameterReturn {
 
 /**
  * A parameter: a bounded, stepped, continuously controllable value.
- * The number instantiation of `useParameterCore` — adds the 1D policies:
+ * The number instantiation of `useParameterCore`, adds the 1D policies:
  * midpoint default, NaN→min coercion, the 8-key keyboard map, ±step wheel,
  * and the guarded percentage. Geometry (point→value, delta→value) is
  * injected; primitives with non-linear gestures (Knob) skip the assembled
@@ -178,6 +181,7 @@ export function useParameter({
 
   return {
     ...core,
+    defaultValue: computedDefaultValue,
     keyboardProps,
     percentage,
     wheelRef,

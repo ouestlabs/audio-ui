@@ -25,7 +25,8 @@ const faderTrackVariants = cva(
     },
     variants: {
       size: {
-        default: "data-[orientation=horizontal]:h-2 data-[orientation=vertical]:h-full data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-2",
+        default:
+          "data-[orientation=horizontal]:h-2 data-[orientation=vertical]:h-full data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-2",
         lg: "data-[orientation=horizontal]:h-2.5 data-[orientation=vertical]:h-full data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-2.5",
         sm: "data-[orientation=horizontal]:h-1.5 data-[orientation=vertical]:h-full data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-1.5",
       },
@@ -34,14 +35,15 @@ const faderTrackVariants = cva(
 );
 
 const faderThumbVariants = cva(
-  "border-ring border bg-card transition-[color,box-shadow] hover:ring-3 hover:ring-ring/50 focus-visible:ring-3 focus-visible:ring-ring/50 active:ring-3 active:ring-ring/50 motion-reduce:transition-none before:-inset-2 absolute z-10 block shrink-0 cursor-grab select-none outline-none before:absolute before:content-[''] active:cursor-grabbing data-[disabled=true]:pointer-events-none data-[disabled=true]:cursor-not-allowed",
+  "border-ring border bg-card transition-[color,box-shadow] hover:ring-3 hover:ring-ring/50 has-focus-visible:ring-3 has-focus-visible:ring-ring/50 active:ring-3 active:ring-ring/50 motion-reduce:transition-none before:-inset-2 absolute z-10 block shrink-0 cursor-grab select-none outline-none before:absolute before:content-[''] active:cursor-grabbing data-disabled:pointer-events-none data-disabled:cursor-not-allowed",
   {
     defaultVariants: {
       size: "default",
     },
     variants: {
       size: {
-        default: "rounded-[min(var(--radius-md),10px)] data-[orientation=horizontal]:h-4 data-[orientation=vertical]:h-6 data-[orientation=horizontal]:w-6 data-[orientation=vertical]:w-4",
+        default:
+          "rounded-[min(var(--radius-md),10px)] data-[orientation=horizontal]:h-4 data-[orientation=vertical]:h-6 data-[orientation=horizontal]:w-6 data-[orientation=vertical]:w-4",
         lg: "rounded-[min(var(--radius-lg),12px)] data-[orientation=horizontal]:h-5 data-[orientation=vertical]:h-7 data-[orientation=horizontal]:w-7 data-[orientation=vertical]:w-5",
         sm: "rounded-[min(var(--radius-sm),8px)] data-[orientation=horizontal]:h-3.5 data-[orientation=vertical]:h-5 data-[orientation=horizontal]:w-5 data-[orientation=vertical]:w-3.5",
       },
@@ -57,7 +59,8 @@ const faderThumbInnerVariants = cva(
     },
     variants: {
       size: {
-        default: "data-[orientation=horizontal]:px-1.5 data-[orientation=horizontal]:py-1 data-[orientation=vertical]:px-1 data-[orientation=vertical]:py-1.5",
+        default:
+          "data-[orientation=horizontal]:px-1.5 data-[orientation=horizontal]:py-1 data-[orientation=vertical]:px-1 data-[orientation=vertical]:py-1.5",
         lg: "data-[orientation=horizontal]:px-2 data-[orientation=horizontal]:py-1 data-[orientation=vertical]:px-1 data-[orientation=vertical]:py-2",
         sm: "data-[orientation=horizontal]:px-1 data-[orientation=horizontal]:py-0.5 data-[orientation=vertical]:px-0.5 data-[orientation=vertical]:py-1",
       },
@@ -71,7 +74,8 @@ const faderThumbMarkVariants = cva("bg-primary opacity-50", {
   },
   variants: {
     size: {
-      default: "data-[orientation=horizontal]:h-2.5 data-[orientation=vertical]:h-px data-[orientation=horizontal]:w-px data-[orientation=vertical]:w-2.5",
+      default:
+        "data-[orientation=horizontal]:h-2.5 data-[orientation=vertical]:h-px data-[orientation=horizontal]:w-px data-[orientation=vertical]:w-2.5",
       lg: "data-[orientation=horizontal]:h-3 data-[orientation=vertical]:h-px data-[orientation=horizontal]:w-px data-[orientation=vertical]:w-3",
       sm: "data-[orientation=horizontal]:h-2.5 data-[orientation=vertical]:h-px data-[orientation=horizontal]:w-px data-[orientation=vertical]:w-2.5",
     },
@@ -79,15 +83,18 @@ const faderThumbMarkVariants = cva("bg-primary opacity-50", {
 });
 
 interface FaderProps
-  extends FaderPrimitive.RootProps,
+  extends FaderPrimitive.Root.Props,
     VariantProps<typeof faderVariants> {
   thumbMarks?: number | false;
 }
 
 export function Fader({
+  "aria-describedby": ariaDescribedBy,
+  "aria-label": ariaLabel,
+  "aria-labelledby": ariaLabelledBy,
   className,
   size,
-  orientation,
+  orientation = "vertical",
   thumbMarks = 3,
   ...props
 }: FaderProps) {
@@ -100,12 +107,12 @@ export function Fader({
       orientation={orientation}
       {...props}
     >
-      <FaderPrimitive.Slider
+      <FaderPrimitive.Control
         className={cn(
           "relative flex w-full touch-none select-none items-center",
           "data-[orientation=vertical]:h-full data-[orientation=vertical]:min-h-40 data-[orientation=vertical]:w-auto data-[orientation=vertical]:flex-col",
           "data-[orientation=horizontal]:w-full data-[orientation=horizontal]:min-w-32",
-          "transition-opacity duration-150 ease-out motion-reduce:transition-none data-[disabled=true]:pointer-events-none data-[disabled=true]:cursor-not-allowed data-[disabled=true]:opacity-50",
+          "transition-opacity duration-150 ease-out motion-reduce:transition-none data-disabled:pointer-events-none data-disabled:cursor-not-allowed data-disabled:opacity-50",
           faderVariants({ size })
         )}
       >
@@ -113,7 +120,7 @@ export function Fader({
           className={faderTrackVariants({ size })}
           data-slot="fader-track"
         >
-          <FaderPrimitive.Range
+          <FaderPrimitive.Indicator
             className={cn(
               "bg-primary absolute select-none",
               "data-[orientation=horizontal]:h-full data-[orientation=vertical]:w-full",
@@ -123,23 +130,28 @@ export function Fader({
         </FaderPrimitive.Track>
 
         <FaderPrimitive.Thumb
+          aria-describedby={ariaDescribedBy}
+          aria-label={ariaLabel}
+          aria-labelledby={ariaLabelledBy}
           className={faderThumbVariants({ size })}
           data-slot="fader-thumb"
         >
-          <FaderPrimitive.ThumbInner
+          <div
             className={faderThumbInnerVariants({ size })}
+            data-orientation={orientation}
             data-slot="fader-thumb-inner"
           >
             {thumbMarks !== false &&
               Array.from({ length: thumbMarks }, (_, i) => (
-                <FaderPrimitive.ThumbMark
+                <div
                   className={faderThumbMarkVariants({ size })}
+                  data-orientation={orientation}
                   key={String(i)}
                 />
               ))}
-          </FaderPrimitive.ThumbInner>
+          </div>
         </FaderPrimitive.Thumb>
-      </FaderPrimitive.Slider>
+      </FaderPrimitive.Control>
     </FaderPrimitive.Root>
   );
 }

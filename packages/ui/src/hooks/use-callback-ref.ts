@@ -1,4 +1,4 @@
-import type { AnyFunc, Optional } from "@audio-ui/utils";
+import type { AnyFunc, Optional } from "@audio-ui/core/internal";
 import * as React from "react";
 
 /**

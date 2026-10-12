@@ -39,481 +39,6 @@ export const components: RegistryItem[] = [
     type: "registry:block",
   },
   {
-    categories: ["player", "queue"],
-    description: "Audio player",
-    files: [
-      {
-        path: "components/player/block-player.tsx",
-        type: "registry:block",
-      },
-    ],
-    name: "block-player",
-    registryDependencies: ["@audio/player", "@audio/store", "@audio/html"],
-    type: "registry:block",
-  },
-  {
-    categories: ["player", "widget"],
-    description: "Audio player with track list",
-    files: [
-      {
-        path: "components/player/block-player-widget.tsx",
-        type: "registry:block",
-      },
-    ],
-    name: "block-player-widget",
-    registryDependencies: ["@audio/player", "@audio/store", "@audio/html"],
-    type: "registry:block",
-  },
-  {
-    categories: ["queue", "ui"],
-    description: "Queue controls",
-    files: [
-      {
-        path: "components/queue/block-queue.tsx",
-        type: "registry:block",
-      },
-    ],
-    name: "block-queue",
-    registryDependencies: ["@audio/player"],
-    type: "registry:block",
-  },
-  {
-    categories: ["channel-strip", "transport"],
-    description:
-      "Channel strip with transport seek bar in vertical orientation",
-    files: [
-      {
-        path: "components/channel-strip/block-channel-strip-transport-vertical.tsx",
-        type: "registry:block",
-      },
-    ],
-    name: "block-channel-strip-transport-vertical",
-    registryDependencies: ["@audio/channel-strip", "@audio/transport"],
-    type: "registry:block",
-  },
-  {
-    categories: ["channel-strip", "transport"],
-    description:
-      "Channel strip with transport seek bar in horizontal orientation",
-    files: [
-      {
-        path: "components/channel-strip/block-channel-strip-transport.tsx",
-        type: "registry:block",
-      },
-    ],
-    name: "block-channel-strip-transport",
-    registryDependencies: ["@audio/channel-strip", "@audio/transport"],
-    type: "registry:block",
-  },
-  {
-    categories: ["channel-strip", "fader", "ui"],
-    description: "Channel strip with fader, header, and footer",
-    files: [
-      {
-        path: "components/channel-strip/block-channel-strip.tsx",
-        type: "registry:block",
-      },
-    ],
-    name: "block-channel-strip",
-    registryDependencies: ["@audio/channel-strip", "@audio/fader"],
-    type: "registry:block",
-  },
-  {
-    categories: ["channel-strip", "fader", "ui"],
-    description: "Channel strip with fader in horizontal orientation",
-    files: [
-      {
-        path: "components/channel-strip/block-channel-strip-horizontal.tsx",
-        type: "registry:block",
-      },
-    ],
-    name: "block-channel-strip-horizontal",
-    registryDependencies: ["@audio/channel-strip", "@audio/fader"],
-    type: "registry:block",
-  },
-  {
-    categories: ["channel-strip", "fader", "ui"],
-    description: "Channel strip with a minimal fader section",
-    files: [
-      {
-        path: "components/channel-strip/block-channel-strip-fader.tsx",
-        type: "registry:block",
-      },
-    ],
-    name: "block-channel-strip-fader",
-    registryDependencies: ["@audio/channel-strip", "@audio/fader"],
-    type: "registry:block",
-  },
-  {
-    categories: ["channel-strip", "fader", "ui"],
-    description: "Channel strip with bipolar gain fader (-60 dB to +6 dB)",
-    files: [
-      {
-        path: "components/channel-strip/block-channel-strip-fader-gain-db.tsx",
-        type: "registry:block",
-      },
-    ],
-    name: "block-channel-strip-fader-gain-db",
-    registryDependencies: ["@audio/channel-strip", "@audio/fader"],
-    type: "registry:block",
-  },
-  {
-    categories: ["channel-strip", "fader"],
-    description: "Multiple fader channel strips in a row",
-    files: [
-      {
-        path: "components/channel-strip/block-channel-strip-fader-multi.tsx",
-        type: "registry:block",
-      },
-    ],
-    name: "block-channel-strip-fader-multi",
-    registryDependencies: ["@audio/channel-strip", "@audio/fader"],
-    type: "registry:block",
-  },
-  {
-    categories: ["channel-strip", "knob"],
-    description: "Multiple knob channel strips in a row",
-    files: [
-      {
-        path: "components/channel-strip/block-channel-strip-knob-multi.tsx",
-        type: "registry:block",
-      },
-    ],
-    name: "block-channel-strip-knob-multi",
-    registryDependencies: ["@audio/channel-strip", "@audio/knob"],
-    type: "registry:block",
-  },
-  {
-    categories: ["channel-strip", "fader", "ui"],
-    description:
-      "Channel strip with a minimal fader section in horizontal orientation",
-    files: [
-      {
-        path: "components/channel-strip/block-channel-strip-fader-horizontal.tsx",
-        type: "registry:block",
-      },
-    ],
-    name: "block-channel-strip-fader-horizontal",
-    registryDependencies: ["@audio/channel-strip", "@audio/fader"],
-    type: "registry:block",
-  },
-  {
-    categories: ["channel-strip", "fader", "ui"],
-    description: "Channel strip with horizontal fader and inline label",
-    files: [
-      {
-        path: "components/channel-strip/block-channel-strip-fader-slider.tsx",
-        type: "registry:block",
-      },
-    ],
-    name: "block-channel-strip-fader-slider",
-    registryDependencies: ["@audio/channel-strip", "@audio/fader"],
-    type: "registry:block",
-  },
-  {
-    categories: ["channel-strip", "knob", "ui"],
-    description: "Channel strip with a level knob",
-    files: [
-      {
-        path: "components/channel-strip/block-channel-strip-knob-level.tsx",
-        type: "registry:block",
-      },
-    ],
-    name: "block-channel-strip-knob-level",
-    registryDependencies: ["@audio/channel-strip", "@audio/knob"],
-    type: "registry:block",
-  },
-  {
-    categories: ["channel-strip", "knob", "ui"],
-    description: "Channel strip with an oversized macro knob",
-    files: [
-      {
-        path: "components/channel-strip/block-channel-strip-knob-macro.tsx",
-        type: "registry:block",
-      },
-    ],
-    name: "block-channel-strip-knob-macro",
-    registryDependencies: ["@audio/channel-strip", "@audio/knob"],
-    type: "registry:block",
-  },
-  {
-    categories: ["channel-strip", "knob", "ui"],
-    description: "Channel strip with a bipolar pan knob",
-    files: [
-      {
-        path: "components/channel-strip/block-channel-strip-knob-pan.tsx",
-        type: "registry:block",
-      },
-    ],
-    name: "block-channel-strip-knob-pan",
-    registryDependencies: ["@audio/channel-strip", "@audio/knob"],
-    type: "registry:block",
-  },
-  {
-    categories: ["channel-strip", "knob", "ui"],
-    description: "Channel strip with pan and width knobs in a row",
-    files: [
-      {
-        path: "components/channel-strip/block-channel-strip-knob-pan-width.tsx",
-        type: "registry:block",
-      },
-    ],
-    name: "block-channel-strip-knob-pan-width",
-    registryDependencies: ["@audio/channel-strip", "@audio/knob"],
-    type: "registry:block",
-  },
-  {
-    categories: ["channel-strip", "xypad", "ui"],
-    description: "Channel strip with an XY filter pad",
-    files: [
-      {
-        path: "components/channel-strip/block-channel-strip-xypad-filter.tsx",
-        type: "registry:block",
-      },
-    ],
-    name: "block-channel-strip-xypad-filter",
-    registryDependencies: ["@audio/channel-strip", "@audio/xypad"],
-    type: "registry:block",
-  },
-  {
-    categories: ["channel-strip", "xypad", "ui"],
-    description: "Channel strip with XY spatial pad and wet knob",
-    files: [
-      {
-        path: "components/channel-strip/block-channel-strip-xypad-reverb.tsx",
-        type: "registry:block",
-      },
-    ],
-    name: "block-channel-strip-xypad-reverb",
-    registryDependencies: [
-      "@audio/channel-strip",
-      "@audio/xypad",
-      "@audio/knob",
-    ],
-    type: "registry:block",
-  },
-  {
-    categories: ["player"],
-    description: "Audio player demo",
-    files: [
-      {
-        path: "components/player/player-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "player-demo",
-    registryDependencies: ["@audio/player"],
-    type: "registry:example",
-  },
-  {
-    categories: ["player", "queue"],
-    description: "Audio player with queue demo",
-    files: [
-      {
-        path: "components/player/player-queue-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "player-queue-demo",
-    registryDependencies: ["@audio/player"],
-    type: "registry:example",
-  },
-  {
-    categories: ["player"],
-    description: "AudioPlayer variant options (default, outline, ghost)",
-    files: [
-      {
-        path: "components/player/player-variant-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "player-variant-demo",
-    registryDependencies: ["@audio/player"],
-    type: "registry:example",
-  },
-  {
-    categories: ["player"],
-    description: "AudioPlayer size options (sm, default, lg)",
-    files: [
-      {
-        path: "components/player/player-size-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "player-size-demo",
-    registryDependencies: ["@audio/player"],
-    type: "registry:example",
-  },
-  {
-    categories: ["player"],
-    description: "Audio player with stacked layout",
-    files: [
-      {
-        path: "components/player/player-stacked-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "player-stacked-demo",
-    registryDependencies: ["@audio/player"],
-    type: "registry:example",
-  },
-  {
-    categories: ["queue"],
-    description: "Minimal queue with shuffle and repeat controls",
-    files: [
-      {
-        path: "components/queue/player-queue-shuffle-repeat-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "player-queue-shuffle-repeat-demo",
-    registryDependencies: ["@audio/player"],
-    type: "registry:example",
-  },
-  {
-    categories: ["queue"],
-    description: "Minimal queue with preferences dropdown",
-    files: [
-      {
-        path: "components/queue/player-queue-preferences-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "player-queue-preferences-demo",
-    registryDependencies: ["@audio/player"],
-    type: "registry:example",
-  },
-  {
-    categories: ["queue"],
-    description: "Stacked player with queue and preferences",
-    files: [
-      {
-        path: "components/queue/player-queue-simple-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "player-queue-simple-demo",
-    registryDependencies: ["@audio/player"],
-    type: "registry:example",
-  },
-  {
-    categories: ["queue"],
-    description: "Queue with all controls (shuffle, repeat, preferences)",
-    files: [
-      {
-        path: "components/queue/player-queue-all-controls-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "player-queue-all-controls-demo",
-    registryDependencies: ["@audio/player"],
-    type: "registry:example",
-  },
-  {
-    categories: ["track"],
-    description: "Minimal track component example",
-    files: [
-      {
-        path: "components/track/player-track-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "player-track-demo",
-    registryDependencies: ["@audio/player"],
-    type: "registry:example",
-  },
-  {
-    categories: ["track"],
-    description: "Track list with selection example",
-    files: [
-      {
-        path: "components/track/player-track-list-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "player-track-list-demo",
-    registryDependencies: ["@audio/player", "@audio/store"],
-    type: "registry:example",
-  },
-  {
-    categories: ["track", "grid"],
-    description: "Track list with grid layout example",
-    files: [
-      {
-        path: "components/track/player-track-list-grid-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "player-track-list-grid-demo",
-    registryDependencies: ["@audio/player", "@audio/store"],
-    type: "registry:example",
-  },
-  {
-    categories: ["track", "sortable"],
-    description: "Track list with sortable selection example",
-    files: [
-      {
-        path: "components/track/player-track-sortable-list-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "player-track-sortable-list-demo",
-    registryDependencies: ["@audio/player", "@audio/store"],
-    type: "registry:example",
-  },
-  {
-    categories: ["track", "sortable", "grid"],
-    description: "Track list with sortable selection and grid layout example",
-    files: [
-      {
-        path: "components/track/player-track-sortable-list-grid-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "player-track-sortable-list-grid-demo",
-    registryDependencies: ["@audio/player", "@audio/store"],
-    type: "registry:example",
-  },
-  {
-    categories: ["transport", "ui"],
-    description: "Transport timeline with buffered range example",
-    files: [
-      {
-        path: "components/transport/transport-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "transport-demo",
-    registryDependencies: ["@audio/transport"],
-    type: "registry:example",
-  },
-  {
-    categories: ["sortable-list", "ui"],
-    description: "Sortable list component examples",
-    files: [
-      {
-        path: "components/sortable-list/sortable-list-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "sortable-list-demo",
-    registryDependencies: ["@audio/sortable-list"],
-    type: "registry:example",
-  },
-  {
-    categories: ["playback-speed"],
-    description: "Playback speed component example",
-    files: [
-      {
-        path: "components/playback-speed/player-playback-speed-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "player-playback-speed-demo",
-    registryDependencies: ["@audio/player"],
-    type: "registry:example",
-  },
-  {
     categories: ["fader"],
     description: "Vertical fader",
     files: [
@@ -541,27 +66,15 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["fader"],
-    description: "Fader size variants (sm, default, lg)",
+    description:
+      "Pan fader filling from the center: anchored at 0 on a -1…1 range",
     files: [
       {
-        path: "components/fader/fader-size-variants-demo.tsx",
+        path: "components/fader/fader-pan-demo.tsx",
         type: "registry:example",
       },
     ],
-    name: "fader-size-variants-demo",
-    registryDependencies: ["@audio/fader"],
-    type: "registry:example",
-  },
-  {
-    categories: ["fader"],
-    description: "Fader thumb marks variants (off, 1, 4)",
-    files: [
-      {
-        path: "components/fader/fader-thumb-marks-variants-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "fader-thumb-marks-variants-demo",
+    name: "fader-pan-demo",
     registryDependencies: ["@audio/fader"],
     type: "registry:example",
   },
@@ -580,46 +93,8 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["knob"],
-    description: "Knob disabled vs enabled comparison",
-    files: [
-      {
-        path: "components/knob/knob-disabled-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "knob-disabled-demo",
-    registryDependencies: ["@audio/knob"],
-    type: "registry:example",
-  },
-  {
-    categories: ["knob"],
-    description: "Knob component example with size variants",
-    files: [
-      {
-        path: "components/knob/knob-size-variants-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "knob-size-variants-demo",
-    registryDependencies: ["@audio/knob"],
-    type: "registry:example",
-  },
-  {
-    categories: ["knob"],
-    description: "Knob with fine-grained step control (0.01)",
-    files: [
-      {
-        path: "components/knob/knob-fine-step-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "knob-fine-step-demo",
-    registryDependencies: ["@audio/knob"],
-    type: "registry:example",
-  },
-  {
-    categories: ["knob"],
-    description: "Knob component example with filter control",
+    description:
+      "Filter cutoff knob on a logarithmic scale, 20 Hz to 20 kHz, every decade the same share of the dial",
     files: [
       {
         path: "components/knob/knob-filter-control-demo.tsx",
@@ -627,19 +102,6 @@ export const components: RegistryItem[] = [
       },
     ],
     name: "knob-filter-control-demo",
-    registryDependencies: ["@audio/knob"],
-    type: "registry:example",
-  },
-  {
-    categories: ["knob"],
-    description: "Knob live value vs committed value callbacks",
-    files: [
-      {
-        path: "components/knob/knob-change-vs-commit-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "knob-change-vs-commit-demo",
     registryDependencies: ["@audio/knob"],
     type: "registry:example",
   },
@@ -657,56 +119,105 @@ export const components: RegistryItem[] = [
     type: "registry:example",
   },
   {
-    categories: ["knob"],
-    description: "Knob with default arc pointer mapping and live value",
+    categories: ["envelope"],
+    description: "Envelope size default example",
     files: [
       {
-        path: "components/knob/knob-circular-arc-demo.tsx",
+        path: "components/envelope/envelope-size-default-demo.tsx",
         type: "registry:example",
       },
     ],
-    name: "knob-circular-arc-demo",
-    registryDependencies: ["@audio/knob"],
+    name: "envelope-size-default-demo",
+    registryDependencies: ["@audio/envelope"],
     type: "registry:example",
   },
   {
-    categories: ["knob"],
-    description: "Knob double-tap / double-click reset to defaultValue",
+    categories: ["envelope"],
+    description: "Controlled envelope with a live point count",
     files: [
       {
-        path: "components/knob/knob-double-tap-reset-demo.tsx",
+        path: "components/envelope/envelope-adsr-demo.tsx",
         type: "registry:example",
       },
     ],
-    name: "knob-double-tap-reset-demo",
-    registryDependencies: ["@audio/knob"],
+    name: "envelope-adsr-demo",
+    registryDependencies: ["@audio/envelope"],
     type: "registry:example",
   },
   {
-    categories: ["knob"],
-    description: "Knob with revolution (360°) drag sensitivity",
+    categories: ["piano"],
+    description: "Piano size default example",
     files: [
       {
-        path: "components/knob/knob-revolution-drag-demo.tsx",
+        path: "components/piano/piano-size-default-demo.tsx",
         type: "registry:example",
       },
     ],
-    name: "knob-revolution-drag-demo",
-    registryDependencies: ["@audio/knob"],
+    name: "piano-size-default-demo",
+    registryDependencies: ["@audio/piano"],
     type: "registry:example",
   },
   {
-    categories: ["knob"],
+    categories: ["piano"],
+    description: "Piano lit from an external source via activeNotes",
+    files: [
+      {
+        path: "components/piano/piano-active-notes-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "piano-active-notes-demo",
+    registryDependencies: ["@audio/piano"],
+    type: "registry:example",
+  },
+  {
+    categories: ["piano", "synth"],
     description:
-      "Knob with vertical fader-style pan via dragOptions.verticalPanEnabled",
+      "A DAW-style piano roll, laid out like Sona's note editor, a scrolling roll with a playable keyboard stuck to its side, a loop brace and bar ruler stuck on top, a velocity lane stuck at the bottom and a navigator to zoom across four bars: click to add notes, drag to move or resize either edge, Alt-drag to copy, shift-click to select and move several at once, double-click a note to delete it, Fold to keep only the pitches in use, with a BPM-driven loop that plays back in real time and always-on live preview as you edit. A timeline above the grid lets you click to seek or drag out a loop range to dial in a short phrase instead of always looping the whole grid. Drop a MIDI file onto the panel (or use the Import MIDI button) to load its notes and tempo onto the grid, and Export MIDI to save the current pattern back out as a .mid file",
     files: [
       {
-        path: "components/knob/knob-vertical-drag-demo.tsx",
+        path: "components/piano/block-piano-roll.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-piano-roll",
+    registryDependencies: [
+      "@audio/piano-roll",
+      "@audio/timeline",
+      "@audio/fader",
+      "@audio/bpm-control",
+      "@audio/midi",
+      "@audio/use-master-bus",
+      "@audio/use-synth-voices",
+      "@audio/use-transport-clock",
+      "@shadcn/button",
+    ],
+    type: "registry:block",
+  },
+  {
+    categories: ["meter"],
+    description: "Meter size default example",
+    files: [
+      {
+        path: "components/meter/meter-size-default-demo.tsx",
         type: "registry:example",
       },
     ],
-    name: "knob-vertical-drag-demo",
-    registryDependencies: ["@audio/knob"],
+    name: "meter-size-default-demo",
+    registryDependencies: ["@audio/meter", "@audio/use-simulated-levels"],
+    type: "registry:example",
+  },
+  {
+    categories: ["meter"],
+    description: "Horizontal meter example",
+    files: [
+      {
+        path: "components/meter/meter-horizontal-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "meter-horizontal-demo",
+    registryDependencies: ["@audio/meter", "@audio/use-simulated-levels"],
     type: "registry:example",
   },
   {
@@ -724,84 +235,6 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["xypad"],
-    description: "XYPad size small example",
-    files: [
-      {
-        path: "components/xypad/xypad-size-sm-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "xypad-size-sm-demo",
-    registryDependencies: ["@audio/xypad"],
-    type: "registry:example",
-  },
-  {
-    categories: ["xypad"],
-    description: "XYPad size default example",
-    files: [
-      {
-        path: "components/xypad/xypad-size-default-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "xypad-size-default-demo",
-    registryDependencies: ["@audio/xypad"],
-    type: "registry:example",
-  },
-  {
-    categories: ["xypad"],
-    description: "XYPad size large example",
-    files: [
-      {
-        path: "components/xypad/xypad-size-lg-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "xypad-size-lg-demo",
-    registryDependencies: ["@audio/xypad"],
-    type: "registry:example",
-  },
-  {
-    categories: ["xypad"],
-    description: "XYPad size extra large example",
-    files: [
-      {
-        path: "components/xypad/xypad-size-xl-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "xypad-size-xl-demo",
-    registryDependencies: ["@audio/xypad"],
-    type: "registry:example",
-  },
-  {
-    categories: ["xypad"],
-    description: "XYPad disabled state example",
-    files: [
-      {
-        path: "components/xypad/xypad-disabled-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "xypad-disabled-demo",
-    registryDependencies: ["@audio/xypad"],
-    type: "registry:example",
-  },
-  {
-    categories: ["xypad"],
-    description: "XYPad component example with formatted value",
-    files: [
-      {
-        path: "components/xypad/xypad-format-value-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "xypad-format-value-demo",
-    registryDependencies: ["@audio/xypad"],
-    type: "registry:example",
-  },
-  {
-    categories: ["xypad"],
     description: "XYPad with bipolar pan/mix style ranges",
     files: [
       {
@@ -814,29 +247,198 @@ export const components: RegistryItem[] = [
     type: "registry:example",
   },
   {
-    categories: ["xypad"],
-    description: "XYPad live value vs committed value callbacks",
+    categories: ["waveform"],
+    description:
+      "A waveform player that shows what the waveform does: seek and hover, a loop region with handles, markers and zoom that follows the playhead. It starts on a synthesized phrase and takes any audio file",
     files: [
       {
-        path: "components/xypad/xypad-change-vs-commit-demo.tsx",
+        path: "components/waveform/block-waveform-player.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-waveform-player",
+    registryDependencies: [
+      "@audio/scrubber",
+      "@audio/timeline",
+      "@audio/waveform",
+      "@audio/waveform-dsp",
+      "@shadcn/button",
+      "@shadcn/toggle",
+    ],
+    type: "registry:block",
+  },
+  {
+    categories: ["timeline"],
+    description:
+      "An arrangement timeline made for a whole screen: a bar ruler that seeks on the grid, a loop strip, a lane per track with clips to move between tracks, trim and fade on the grid, a cursor to put anywhere on a track, and a split at the cursor, a transport with play or pause, stop, loop, a metronome and a tempo and signature that keep the arrangement's musical positions, a playhead following its clock, and a navigator to zoom and scroll, open it at full size and the tracks take the screen",
+    files: [
+      {
+        path: "components/timeline/block-timeline.tsx",
+        type: "registry:block",
+      },
+    ],
+    meta: {
+      hint: "Click a track or clip to place the cursor, S to split, Cmd/Ctrl + D to duplicate. Drag a clip's title bar to move it (Alt to copy), its edges to trim, its corners to fade. Drag the loop strip to set a loop, M to add a locator, Cmd/Ctrl + scroll to zoom.",
+    },
+    name: "block-timeline",
+    registryDependencies: [
+      "@audio/timeline",
+      "@audio/transport",
+      "@audio/bpm-control",
+      "@audio/meter",
+      "@audio/use-simulated-levels",
+      "@audio/musical-time",
+      "@audio/arrangement",
+      "@audio/use-arrangement",
+      "@audio/use-marquee-selection",
+      "@audio/use-playback-clock",
+      "@shadcn/button",
+      "@shadcn/button-group",
+      "@shadcn/context-menu",
+      "@shadcn/dropdown-menu",
+      "@shadcn/kbd",
+      "@shadcn/popover",
+      "@shadcn/select",
+      "@shadcn/toggle",
+    ],
+    type: "registry:block",
+  },
+  {
+    categories: ["waveform"],
+    description: "Waveform default example",
+    files: [
+      {
+        path: "components/waveform/waveform-demo.tsx",
         type: "registry:example",
       },
     ],
-    name: "xypad-change-vs-commit-demo",
-    registryDependencies: ["@audio/xypad"],
+    name: "waveform-demo",
+    registryDependencies: ["@audio/waveform"],
     type: "registry:example",
   },
   {
-    categories: ["xypad"],
-    description: "XYPad component example with hidden value",
+    categories: ["waveform"],
+    description:
+      "Waveform with a resizable loop region, markers and a hover time",
     files: [
       {
-        path: "components/xypad/xypad-hide-value-demo.tsx",
+        path: "components/waveform/waveform-region-demo.tsx",
         type: "registry:example",
       },
     ],
-    name: "xypad-hide-value-demo",
-    registryDependencies: ["@audio/xypad"],
+    name: "waveform-region-demo",
+    registryDependencies: ["@audio/waveform"],
+    type: "registry:example",
+  },
+  {
+    categories: ["waveform"],
+    description: "Live waveform scrolling with the incoming signal",
+    files: [
+      {
+        path: "components/waveform/waveform-live-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "waveform-live-demo",
+    registryDependencies: ["@audio/waveform"],
+    type: "registry:example",
+  },
+  {
+    categories: ["plot"],
+    description:
+      "An equalizer: drag each band to set its frequency and gain, and the curve is the response of all three",
+    files: [
+      {
+        path: "components/plot/plot-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    meta: {
+      hint: "Click a band to set its type and width. Double-click empty space to add one, Delete to remove it.",
+    },
+    name: "plot-demo",
+    registryDependencies: [
+      "@audio/plot",
+      "@audio/filter-response",
+      "@audio/use-noise-through-eq",
+      "@audio/use-spectrum",
+      "@shadcn/button",
+    ],
+    type: "registry:example",
+  },
+  {
+    categories: ["plot"],
+    description:
+      "A low-pass filter: one handle on the resonance peak sets the cutoff and how much it rings",
+    files: [
+      {
+        path: "components/plot/plot-filter-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "plot-filter-demo",
+    registryDependencies: ["@audio/plot", "@audio/filter-response"],
+    type: "registry:example",
+  },
+  {
+    categories: ["plot"],
+    description:
+      "A compressor transfer curve: one handle sets the threshold, the other the ratio",
+    files: [
+      {
+        path: "components/plot/plot-compressor-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "plot-compressor-demo",
+    registryDependencies: [
+      "@audio/plot",
+      "@audio/filter-response",
+      "@audio/use-pulses-through-compressor",
+      "@shadcn/button",
+    ],
+    type: "registry:example",
+  },
+  {
+    categories: ["sequencer"],
+    description:
+      "A drum machine: draw a pattern and hear it. Press a step or drag across several; the playing column lights up",
+    files: [
+      {
+        path: "components/sequencer/sequencer-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "sequencer-demo",
+    registryDependencies: ["@audio/sequencer"],
+    type: "registry:example",
+  },
+  {
+    categories: ["scrubber"],
+    description:
+      "A bar to seek on, with play or pause, the position and the length: a clock stands in for a player, and the bar and the time follow it",
+    files: [
+      {
+        path: "components/scrubber/scrubber-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "scrubber-demo",
+    registryDependencies: ["@audio/scrubber"],
+    type: "registry:example",
+  },
+  {
+    categories: ["transport"],
+    description:
+      "The transport of a DAW as joined clusters: play or pause, stop and the position in bars, beats and sixteenths; loop and metronome toggles; the tempo and the time signature. A clock stands in for the engine",
+    files: [
+      {
+        path: "components/transport/transport-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "transport-demo",
+    registryDependencies: ["@audio/transport"],
     type: "registry:example",
   },
 ];

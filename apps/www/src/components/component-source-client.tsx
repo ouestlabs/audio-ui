@@ -132,7 +132,7 @@ export function ComponentSourceClient({
         }
 
         const lang = language ?? title?.split(".").pop() ?? "tsx";
-        highlighted = await highlightCode(currentCode, lang);
+        highlighted = highlightCode(currentCode, lang);
 
         if (!isMounted) {
           return;

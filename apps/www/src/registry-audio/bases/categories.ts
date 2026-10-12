@@ -1,15 +1,15 @@
 /**
- * Curated category list for the component catalog — the single hand-edited
+ * Curated category list for the component catalog, the single hand-edited
  * source for category editorial content.
  *
  * `components.json`, `registry.json`, and `seo.json` are GENERATED from this
- * file and the `_registry.ts` modules by `bun run registry:build` — never
+ * file and the `_registry.ts` modules by `bun run registry:build`, never
  * edit those JSONs by hand.
  *
  * A category listed here must have at least one catalog item carrying its
  * name (the build fails otherwise). Item tags that are not listed here
  * (e.g. `ui`, `grid`, `widget`, `sortable`) are free-form search tags, not
- * categories — they get no page, no count, no SEO.
+ * categories, they get no page, no count, no SEO.
  */
 
 export interface CategorySeoOverrides {
@@ -59,9 +59,9 @@ export const rootSeo: RootSeo = {
 export const categories: CategoryDef[] = [
   {
     description:
-      "Channel strip patterns combining faders, knobs, and transport controls.",
-    label: "Channel Strip",
-    name: "channel-strip",
+      "Interactive envelope components for editing linear ramp breakpoints.",
+    label: "Envelope",
+    name: "envelope",
   },
   {
     description: "Fader components for level, gain, and mix controls.",
@@ -75,27 +75,22 @@ export const categories: CategoryDef[] = [
     name: "knob",
   },
   {
-    description: "Playback speed controls for audio and video players.",
-    label: "Playback Speed",
-    name: "playback-speed",
+    description:
+      "Decibel meter components for monitoring stereo and multi-channel audio levels.",
+    label: "Meter",
+    name: "meter",
   },
   {
     description:
-      "Audio player components for track playback, queues, and playback speed control.",
-    label: "Player",
-    name: "player",
+      "Plots for drawing curves and dragging points on them: equalizers, filters and compressors.",
+    label: "Plot",
+    name: "plot",
   },
   {
     description:
-      "Queue management components for building playlists and up-next lists.",
-    label: "Queue",
-    name: "queue",
-  },
-  {
-    description:
-      "Drag-and-drop sortable list components for reordering tracks and items.",
-    label: "Sortable List",
-    name: "sortable-list",
+      "Virtual piano keyboard components with MIDI note ranges and glissando.",
+    label: "Piano",
+    name: "piano",
   },
   {
     description:
@@ -104,14 +99,33 @@ export const categories: CategoryDef[] = [
     name: "synth",
   },
   {
-    description: "Track list and grid components for browsing audio content.",
-    label: "Track",
-    name: "track",
+    description:
+      "Step sequencer components: grids of steps to draw a pattern on, that you can hear.",
+    label: "Sequencer",
+    name: "sequencer",
   },
   {
-    description: "Transport controls for play, pause, and seek.",
+    description: "Seek bars: play or pause, position and a bar to scrub on.",
+    label: "Scrubber",
+    name: "scrubber",
+  },
+  {
+    description:
+      "Transport controls: return to start, play, stop, record and loop, with the position in bars and beats and the tempo.",
     label: "Transport",
     name: "transport",
+  },
+  {
+    description:
+      "Zoomable, snapping timeline components for arrangements, clip editors and piano rolls.",
+    label: "Timeline",
+    name: "timeline",
+  },
+  {
+    description:
+      "Seekable waveform components for scrubbing and visualizing audio playback.",
+    label: "Waveform",
+    name: "waveform",
   },
   {
     description:

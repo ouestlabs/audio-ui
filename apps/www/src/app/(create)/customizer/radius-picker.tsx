@@ -10,6 +10,7 @@ import {
   PickerRadioItem,
   PickerSeparator,
   PickerTrigger,
+  usePickerSide,
 } from "@/app/(create)/customizer/picker";
 import { useDesignSystemSearchParams } from "@/app/(create)/lib/search-params";
 import { useConfig } from "@/hooks/use-config";
@@ -62,7 +63,7 @@ export function RadiusPicker({
         <PickerContent
           align={isMobile ? "center" : "start"}
           anchor={isMobile ? anchorRef : undefined}
-          side={isMobile ? "top" : "right"}
+          side={usePickerSide(isMobile)}
         >
           <PickerRadioGroup
             onValueChange={handleValueChange}

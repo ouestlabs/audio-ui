@@ -12,6 +12,8 @@ import {
   getSelectedRegistryStyleName,
   resolveRegistryIconLibrary,
 } from "@/lib/docs-registry-options";
+import { isBlock, isExpandable } from "@/lib/is-block";
+import { getPreviewHint } from "@/lib/preview-hint";
 import { getRegistryComponent } from "@/lib/registry";
 import type { IconLibraryName } from "@/registry/config";
 
@@ -153,7 +155,11 @@ export function DocsComponentPreviewSwitch({
       chromeLessOnMobile={chromeLessOnMobile}
       className={className}
       component={<ComponentClient name={name} styleName={resolvedStyleName} />}
+      expand={isExpandable(name)}
+      fitContent={isBlock(name)}
       hideCode={hideCode}
+      hint={getPreviewHint(name)}
+      name={name}
       previewClassName={previewClassName}
       source={
         <ComponentSourceClient

@@ -19,7 +19,7 @@ export function CustomizerSidebarHeader({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "flex shrink-0 items-center justify-between overflow-hidden border-site-border/80 border-b p-2",
+        "flex shrink-0 items-center justify-between overflow-hidden p-2",
         className
       )}
     >
@@ -31,6 +31,7 @@ export function CustomizerSidebarHeader({ className }: { className?: string }) {
         <TooltipTrigger
           render={
             <Button
+              aria-label="Close customizer"
               className="shrink-0"
               onClick={toggleCustomizer}
               size="icon"

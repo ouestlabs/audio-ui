@@ -1,0 +1,10 @@
+export { Key } from "../piano/elements/key.tsx";
+export { KeyLabel } from "../piano/elements/key-label.tsx";
+export { Grid } from "./elements/grid.tsx";
+export { Keys } from "./elements/keys.tsx";
+export { Marquee } from "./elements/marquee.tsx";
+export { Note, NoteHandle } from "./elements/note.tsx";
+export { Notes } from "./elements/notes.tsx";
+export { Root } from "./elements/root.tsx";
+export { Row, Rows } from "./elements/rows.tsx";
+export { Velocity, VelocityLane } from "./elements/velocity.tsx";

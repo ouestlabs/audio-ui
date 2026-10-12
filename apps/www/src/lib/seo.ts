@@ -14,7 +14,7 @@ const CANONICAL_COMPONENT_DOC_SLUGS = [
 ] as const;
 
 const TRAILING_SLASH_REGEX = /\/$/;
-// Accidental env concat (e.g. https://audio-ui.xyzhttps://other.example)
+// Accidental env concat (e.g. https://audio-ui.devhttps://other.example)
 const DOUBLE_ORIGIN_REGEX = /^(https?:\/\/[^/]+)(https?:\/\/)/i;
 
 function normalizeSiteUrl(url: string) {
@@ -24,7 +24,7 @@ function normalizeSiteUrl(url: string) {
       ? trimmed
       : `https://${trimmed}`;
 
-  // Accidental env concat (e.g. https://audio-ui.xyzhttps://other.example) → first origin only
+  // Accidental env concat (e.g. https://audio-ui.devhttps://other.example) → first origin only
   const m = withProtocol.match(DOUBLE_ORIGIN_REGEX);
   if (m) {
     return m[1].replace(TRAILING_SLASH_REGEX, "");
@@ -77,6 +77,10 @@ function getAbsoluteMetadataUrl(path: string) {
 
 export function getSiteAuthors(): NonNullable<Metadata["authors"]> {
   return [
+    {
+      name: siteConfig.author.name,
+      url: siteConfig.author.url,
+    },
     {
       name: siteConfig.name,
       url: siteConfig.url,
@@ -139,6 +143,12 @@ export function buildPageMetadata({
         "application/rss+xml": [
           { title: `${siteConfig.name} Docs`, url: "/rss.xml" },
         ],
+        // Every docs page is also served as markdown, which agents read better than HTML.
+        ...(path === "/docs" || path.startsWith("/docs/")
+          ? {
+              "text/markdown": [{ url: path.replace("/docs", "/llm") }],
+            }
+          : {}),
       },
     },
     description,
@@ -178,12 +188,11 @@ export interface ComponentDocSeo {
 
 /**
  * SEO + on-page copy for canonical component docs (`/docs/components/base/...`).
- * audio/ui ships Base UI only today; `base` is kept for a future Radix variant.
  */
 export function getComponentDocSeo(
   slug: CanonicalComponentDocSlug,
   label: string,
-  base: "base" | "radix",
+  base: "base",
   docDescription?: string | null
 ): ComponentDocSeo {
   const canonicalPath = `/docs/components/${base}/${slug}`;
@@ -204,28 +213,22 @@ export function getComponentDocSeo(
     description: description.replace(/\s+/g, " ").trim(),
     displayTitle,
     leadDescription,
-    shouldIndex: base === "base",
+    shouldIndex: true,
     title,
   };
 }
 
 /**
  * Docs catalog CTA intro shown at the bottom of a component doc page.
- * audio/ui ships Base UI only today; `base` is kept for a future Radix variant.
  */
 export function getDocsComponentCatalogIntro(
   _slug: CanonicalComponentDocSlug,
   label: string,
-  count: number,
-  base: "base" | "radix"
+  count: number
 ): string {
   const p = count;
-  const variantLine =
-    base === "radix"
-      ? "These examples follow the Radix UI implementation with accessible primitives from the Radix stack"
-      : "These examples use Base UI primitives from @base-ui/react";
 
-  return `Browse ${p} production-ready audio/ui ${label} components for players, mixers, and synth interfaces. ${variantLine} and stay fully compatible with Shadcn Create so radius, color, and typography match your configured theme.`;
+  return `Browse ${p} production-ready audio/ui ${label} components for players, mixers, and synth interfaces. These examples use Base UI primitives from @base-ui/react and stay fully compatible with Shadcn Create so radius, color, and typography match your configured theme.`;
 }
 
 type BreadcrumbItem = {
@@ -250,9 +253,37 @@ export function buildOrganizationJsonLd() {
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
+    founder: buildAuthorJsonLd(),
     logo: absoluteUrl("/icon"),
     name: siteConfig.name,
     sameAs: [siteConfig.links.github, siteConfig.links.twitter],
+    url: getSiteUrl(),
+  };
+}
+
+export function buildAuthorJsonLd() {
+  return {
+    "@type": "Person",
+    jobTitle: "UX/UI developer",
+    name: siteConfig.author.name,
+    sameAs: [siteConfig.author.github, siteConfig.author.twitter],
+    url: siteConfig.author.url,
+  };
+}
+
+/** The npm package as software, so engines and agents can tie it to the repo, license and author. */
+export function buildSoftwareJsonLd() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "SoftwareSourceCode",
+    author: buildAuthorJsonLd(),
+    codeRepository: siteConfig.links.github,
+    description: siteConfig.description,
+    license: "https://opensource.org/licenses/MIT",
+    name: "@audio-ui/react",
+    programmingLanguage: "TypeScript",
+    runtimePlatform: "React 19",
+    sameAs: [siteConfig.links.npm],
     url: getSiteUrl(),
   };
 }

@@ -1,46 +1,56 @@
 "use client";
 
-import { ChannelStrip as ChannelStripPrimitive } from "@audio-ui/react";
+import { type ComponentProps, createContext, use } from "react";
 import { cn } from "@/lib/utils";
+
+type Orientation = "horizontal" | "vertical";
+
+const ChannelStripOrientationContext = createContext<Orientation>("vertical");
 
 export function ChannelStrip({
   className,
+  orientation = "vertical",
   ...props
-}: ChannelStripPrimitive.RootProps) {
+}: ComponentProps<"section"> & { orientation?: Orientation }) {
   return (
-    <ChannelStripPrimitive.Root
-      className={cn(
-        "text-card-foreground group/channel-strip mx-auto inline-flex",
-        "data-[orientation=vertical]:flex-col data-[orientation=vertical]:items-center data-[orientation=vertical]:justify-center data-[orientation=vertical]:gap-4",
-        "data-[orientation=horizontal]:flex data-[orientation=horizontal]:w-full data-[orientation=horizontal]:flex-col data-[orientation=horizontal]:items-stretch data-[orientation=horizontal]:gap-3",
-        "data-[orientation=horizontal]:has-data-footer:grid data-[orientation=horizontal]:has-data-footer:grid-cols-1 data-[orientation=horizontal]:has-data-footer:gap-y-3",
-        "data-[orientation=horizontal]:has-data-footer:grid-rows-[auto_minmax(0,1fr)_auto]",
-        "data-[orientation=horizontal]:has-data-footer:*:data-header:col-start-1 data-[orientation=horizontal]:has-data-footer:*:data-header:row-start-1",
-        "data-[orientation=horizontal]:has-data-footer:*:data-content:row-start-2 data-[orientation=horizontal]:has-data-footer:*:data-content:min-h-0 data-[orientation=horizontal]:has-data-footer:*:data-content:min-w-0",
-        "data-[orientation=horizontal]:has-data-footer:*:data-footer:col-start-1 data-[orientation=horizontal]:has-data-footer:*:data-footer:row-start-3 data-[orientation=horizontal]:has-data-footer:*:data-footer:self-end",
-        "md:data-[orientation=horizontal]:has-data-footer:grid-cols-[minmax(9rem,auto)_minmax(0,1fr)] md:data-[orientation=horizontal]:has-data-footer:grid-rows-[auto_auto] md:data-[orientation=horizontal]:has-data-footer:items-stretch md:data-[orientation=horizontal]:has-data-footer:gap-x-6 md:data-[orientation=horizontal]:has-data-footer:gap-y-3",
-        "md:data-[orientation=horizontal]:has-data-footer:*:data-header:col-start-1 md:data-[orientation=horizontal]:has-data-footer:*:data-header:row-start-1 md:data-[orientation=horizontal]:has-data-footer:*:data-header:self-start",
-        "md:data-[orientation=horizontal]:has-data-footer:*:data-footer:col-start-1 md:data-[orientation=horizontal]:has-data-footer:*:data-footer:row-start-2 md:data-[orientation=horizontal]:has-data-footer:*:data-footer:self-start",
-        "md:data-[orientation=horizontal]:has-data-footer:*:data-content:col-start-2 md:data-[orientation=horizontal]:has-data-footer:*:data-content:row-span-2 md:data-[orientation=horizontal]:has-data-footer:*:data-content:row-start-1 md:data-[orientation=horizontal]:has-data-footer:*:data-content:min-h-0 md:data-[orientation=horizontal]:has-data-footer:*:data-content:min-w-0 md:data-[orientation=horizontal]:has-data-footer:*:data-content:self-stretch",
-        className
-      )}
-      {...props}
-    />
+    <ChannelStripOrientationContext value={orientation}>
+      <section
+        className={cn(
+          "text-card-foreground group/channel-strip mx-auto inline-flex",
+          "data-[orientation=vertical]:flex-col data-[orientation=vertical]:items-center data-[orientation=vertical]:justify-center data-[orientation=vertical]:gap-4",
+          "data-[orientation=horizontal]:flex data-[orientation=horizontal]:w-full data-[orientation=horizontal]:flex-col data-[orientation=horizontal]:items-stretch data-[orientation=horizontal]:gap-3",
+          "data-[orientation=horizontal]:has-data-footer:grid data-[orientation=horizontal]:has-data-footer:grid-cols-1 data-[orientation=horizontal]:has-data-footer:gap-y-3",
+          "data-[orientation=horizontal]:has-data-footer:grid-rows-[auto_minmax(0,1fr)_auto]",
+          "data-[orientation=horizontal]:has-data-footer:*:data-header:col-start-1 data-[orientation=horizontal]:has-data-footer:*:data-header:row-start-1",
+          "data-[orientation=horizontal]:has-data-footer:*:data-content:row-start-2 data-[orientation=horizontal]:has-data-footer:*:data-content:min-h-0 data-[orientation=horizontal]:has-data-footer:*:data-content:min-w-0",
+          "data-[orientation=horizontal]:has-data-footer:*:data-footer:col-start-1 data-[orientation=horizontal]:has-data-footer:*:data-footer:row-start-3 data-[orientation=horizontal]:has-data-footer:*:data-footer:self-end",
+          "md:data-[orientation=horizontal]:has-data-footer:grid-cols-[minmax(9rem,auto)_minmax(0,1fr)] md:data-[orientation=horizontal]:has-data-footer:grid-rows-[auto_auto] md:data-[orientation=horizontal]:has-data-footer:items-stretch md:data-[orientation=horizontal]:has-data-footer:gap-x-6 md:data-[orientation=horizontal]:has-data-footer:gap-y-3",
+          "md:data-[orientation=horizontal]:has-data-footer:*:data-header:col-start-1 md:data-[orientation=horizontal]:has-data-footer:*:data-header:row-start-1 md:data-[orientation=horizontal]:has-data-footer:*:data-header:self-start",
+          "md:data-[orientation=horizontal]:has-data-footer:*:data-footer:col-start-1 md:data-[orientation=horizontal]:has-data-footer:*:data-footer:row-start-2 md:data-[orientation=horizontal]:has-data-footer:*:data-footer:self-start",
+          "md:data-[orientation=horizontal]:has-data-footer:*:data-content:col-start-2 md:data-[orientation=horizontal]:has-data-footer:*:data-content:row-span-2 md:data-[orientation=horizontal]:has-data-footer:*:data-content:row-start-1 md:data-[orientation=horizontal]:has-data-footer:*:data-content:min-h-0 md:data-[orientation=horizontal]:has-data-footer:*:data-content:min-w-0 md:data-[orientation=horizontal]:has-data-footer:*:data-content:self-stretch",
+          className
+        )}
+        data-orientation={orientation}
+        data-root=""
+        {...props}
+      />
+    </ChannelStripOrientationContext>
   );
 }
 
 export function ChannelStripHeader({
   className,
   ...props
-}: ChannelStripPrimitive.HeaderProps) {
+}: ComponentProps<"header">) {
   return (
-    <ChannelStripPrimitive.Header
+    <header
       className={cn(
         "font-heading font-medium text-sm w-full text-center",
         "group-data-[orientation=horizontal]/channel-strip:text-left",
         "group-data-[orientation=horizontal]/channel-strip:flex group-data-[orientation=horizontal]/channel-strip:w-full group-data-[orientation=horizontal]/channel-strip:items-center group-data-[orientation=horizontal]/channel-strip:justify-between",
         className
       )}
+      data-header=""
       {...props}
     />
   );
@@ -50,9 +60,9 @@ export function ChannelStripContent({
   className,
   layout = "stack",
   ...props
-}: ChannelStripPrimitive.ContentProps) {
+}: ComponentProps<"div"> & { layout?: "stack" | "row" }) {
   return (
-    <ChannelStripPrimitive.Content
+    <div
       className={cn(
         "flex w-full flex-col gap-3",
         "group-data-[orientation=vertical]/channel-strip:data-[layout=row]:flex-row",
@@ -68,7 +78,8 @@ export function ChannelStripContent({
         "md:group-data-[orientation=horizontal]/channel-strip:flex-1 md:group-data-[orientation=horizontal]/channel-strip:items-stretch md:group-data-[orientation=horizontal]/channel-strip:justify-center md:group-data-[orientation=horizontal]/channel-strip:gap-4",
         className
       )}
-      layout={layout}
+      data-content=""
+      data-layout={layout}
       {...props}
     />
   );
@@ -77,14 +88,15 @@ export function ChannelStripContent({
 export function ChannelStripFooter({
   className,
   ...props
-}: ChannelStripPrimitive.FooterProps) {
+}: ComponentProps<"footer">) {
   return (
-    <ChannelStripPrimitive.Footer
+    <footer
       className={cn(
         "text-muted-foreground text-xs w-full text-center",
         "group-data-[orientation=horizontal]/channel-strip:text-left",
         className
       )}
+      data-footer=""
       {...props}
     />
   );
@@ -92,16 +104,20 @@ export function ChannelStripFooter({
 
 export function ChannelStripSection({
   className,
+  orientation,
   ...props
-}: ChannelStripPrimitive.SectionProps) {
+}: ComponentProps<"div"> & { orientation?: Orientation }) {
+  const inheritedOrientation = use(ChannelStripOrientationContext);
   return (
-    <ChannelStripPrimitive.Section
+    <div
       className={cn(
         "flex w-full",
         "data-[orientation=vertical]:flex-col data-[orientation=vertical]:items-center data-[orientation=vertical]:justify-center data-[orientation=vertical]:gap-3",
         "data-[orientation=horizontal]:w-full data-[orientation=horizontal]:min-w-0 data-[orientation=horizontal]:items-center data-[orientation=horizontal]:justify-between data-[orientation=horizontal]:gap-4 data-[orientation=horizontal]:[&>*:not(output):not(span)]:min-w-0 data-[orientation=horizontal]:[&>*:not(output):not(span)]:flex-1",
         className
       )}
+      data-orientation={orientation ?? inheritedOrientation}
+      data-section=""
       {...props}
     />
   );
@@ -110,13 +126,14 @@ export function ChannelStripSection({
 export function ChannelStripLabel({
   className,
   ...props
-}: ChannelStripPrimitive.LabelProps) {
+}: ComponentProps<"span">) {
   return (
-    <ChannelStripPrimitive.Label
+    <span
       className={cn(
         "text-muted-foreground text-xs uppercase text-center",
         className
       )}
+      data-label=""
       {...props}
     />
   );
@@ -125,13 +142,15 @@ export function ChannelStripLabel({
 export function ChannelStripValue({
   className,
   ...props
-}: ChannelStripPrimitive.ValueProps) {
+}: ComponentProps<"output">) {
   return (
-    <ChannelStripPrimitive.Value
+    <output
+      aria-live="polite"
       className={cn(
         "font-medium text-muted-foreground text-sm tabular-nums min-w-12 text-center",
         className
       )}
+      data-value=""
       {...props}
     />
   );

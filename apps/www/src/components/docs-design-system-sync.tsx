@@ -1,9 +1,16 @@
 "use client";
 
 import * as React from "react";
+import { useMenuColor } from "@/app/(create)/customizer/use-menu-color";
+import { saveDesignSystemBoot } from "@/app/(create)/lib/boot-cache";
 import { ensurePreviewFontsLoaded, FONTS } from "@/app/(create)/lib/fonts";
+import {
+  getThemeStyleElement,
+  writeThemeVars,
+} from "@/app/(create)/lib/theme-vars";
 import { useConfig } from "@/hooks/use-config";
 import type { FontName } from "@/lib/font-definitions";
+import { buildRegistryTheme, DEFAULT_CONFIG } from "@/registry/config";
 
 function syncBodyStyleClass(styleClass: string) {
   const body = document.body;
@@ -28,13 +35,19 @@ function syncBodyStyleClass(styleClass: string) {
   }
 }
 
-export function DocsDesignSystemSync({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+/**
+ * Applies the stored design system (style, theme, fonts, radius, menu) to the
+ * pages that do not read the URL. It renders nothing and wraps nothing, so the
+ * page around it is rendered on the server as it is.
+ */
+export function DocsDesignSystemEffects() {
   const [config] = useConfig();
-  const [ready, setReady] = React.useState(false);
+  useMenuColor(config.menuColor);
+
+  // What is applied is kept for the next load, which puts it back before the first paint.
+  React.useEffect(() => {
+    saveDesignSystemBoot();
+  });
   const previousStyleClassesRef = React.useRef<string[] | null>(null);
   const previousFontStateRef = React.useRef<{
     fontSans: string;
@@ -55,6 +68,34 @@ export function DocsDesignSystemSync({
 
     return FONTS.find((fontOption) => fontOption.value === config.fontHeading);
   }, [config.fontHeading, config.font, selectedFont]);
+
+  // The theme's colors and radius, and the base color, so the previews show what the customizer picks.
+  React.useLayoutEffect(() => {
+    const body = document.body;
+    const { element } = getThemeStyleElement();
+    const { cssVars } = buildRegistryTheme({
+      ...DEFAULT_CONFIG,
+      baseColor: config.baseColor,
+      chartColor: config.chartColor ?? DEFAULT_CONFIG.chartColor,
+      menuAccent: config.menuAccent,
+      radius: config.style === "lyra" ? "none" : config.radius,
+      theme: config.theme,
+    });
+    writeThemeVars(element, cssVars);
+    for (const className of Array.from(body.classList)) {
+      if (className.startsWith("base-color-")) {
+        body.classList.remove(className);
+      }
+    }
+    body.classList.add(`base-color-${config.baseColor}`);
+  }, [
+    config.baseColor,
+    config.chartColor,
+    config.menuAccent,
+    config.radius,
+    config.style,
+    config.theme,
+  ]);
 
   React.useLayoutEffect(() => {
     const body = document.body;
@@ -93,8 +134,6 @@ export function DocsDesignSystemSync({
         selectedHeadingFont.font.style.fontFamily
       );
     }
-
-    setReady(true);
 
     const frameId = window.requestAnimationFrame(() => {
       syncBodyStyleClass(styleClass);
@@ -160,16 +199,5 @@ export function DocsDesignSystemSync({
     []
   );
 
-  return (
-    <div
-      className={
-        ready
-          ? "flex flex-1 flex-col opacity-100"
-          : "flex flex-1 flex-col opacity-0"
-      }
-      suppressHydrationWarning
-    >
-      {children}
-    </div>
-  );
+  return null;
 }

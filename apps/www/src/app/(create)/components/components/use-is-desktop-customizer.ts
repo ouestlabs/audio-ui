@@ -20,3 +20,20 @@ export function useIsDesktopCustomizer() {
     () => true
   );
 }
+
+const MEDIUM_QUERY = "(min-width: 768px)";
+
+function subscribeMedium(callback: () => void) {
+  const mql = window.matchMedia(MEDIUM_QUERY);
+  mql.addEventListener("change", callback);
+  return () => mql.removeEventListener("change", callback);
+}
+
+/** Matches the `md` breakpoint, from which the floating customizer is a tall column of choices rather than a short strip. */
+export function useIsMediumScreen() {
+  return React.useSyncExternalStore(
+    subscribeMedium,
+    () => window.matchMedia(MEDIUM_QUERY).matches,
+    () => true
+  );
+}

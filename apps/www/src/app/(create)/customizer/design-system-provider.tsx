@@ -5,12 +5,17 @@ import {
   isInIframe,
   useIframeMessageListener,
 } from "@/app/(create)/hooks/use-iframe-sync";
+import { saveDesignSystemBoot } from "@/app/(create)/lib/boot-cache";
 import { ensurePreviewFontsLoaded, FONTS } from "@/app/(create)/lib/fonts";
 import {
   type DesignSystemSearchParams,
   loadDesignSystemSearchParams,
   useDesignSystemSearchParams,
 } from "@/app/(create)/lib/search-params";
+import {
+  getThemeStyleElement,
+  writeThemeVars,
+} from "@/app/(create)/lib/theme-vars";
 import { useConfig } from "@/hooks/use-config";
 import type { FontName } from "@/lib/font-definitions";
 import {
@@ -19,6 +24,7 @@ import {
   type DesignSystemConfig,
   type IconLibraryName,
 } from "@/registry/config";
+import { useMenuColor } from "./use-menu-color";
 
 interface DesignSystemContextValue {
   baseColor: string | null;
@@ -120,11 +126,13 @@ export function DesignSystemSyncProvider({
  * Applies design system styles (CSS classes, CSS variables, fonts) to the page.
  * Same-origin embed messaging remains supported for legacy preview hosts.
  */
-export function DesignSystemProvider({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+/**
+ * Applies the design system (style, theme, fonts, radius, menu) to the page,
+ * from the URL first and the stored choices after. It renders nothing and
+ * wraps nothing: it sits beside the page, in a boundary of its own, because
+ * reading the URL must not take the page's content with it.
+ */
+export function DesignSystemEffects() {
   const [params, setParams] = useDesignSystemSearchParams({
     history: "replace",
     shallow: true,
@@ -263,7 +271,7 @@ export function DesignSystemProvider({
       // Only restore the host page's original styling when embedded as an
       // iframe preview. For the app's own top-level navigation, a different
       // DesignSystemProvider instance is about to (or already did) apply its
-      // own classes/vars on mount — undoing them here would just race it and
+      // own classes/vars on mount, undoing them here would just race it and
       // can leave body with no style-<name> class at all.
       if (!isInIframe()) {
         return;
@@ -354,61 +362,16 @@ export function DesignSystemProvider({
       return;
     }
 
-    const styleId = "design-system-theme-vars";
-    const existingStyleElement = document.getElementById(
-      styleId
-    ) as HTMLStyleElement | null;
-    let styleElement = existingStyleElement;
+    const { element, existed } = getThemeStyleElement();
 
     if (!previousThemeStyleRef.current) {
       previousThemeStyleRef.current = {
-        existed: Boolean(existingStyleElement),
-        textContent: existingStyleElement?.textContent ?? "",
+        existed,
+        textContent: existed ? element.textContent : "",
       };
     }
 
-    if (!styleElement) {
-      styleElement = document.createElement("style");
-      styleElement.id = styleId;
-      document.head.appendChild(styleElement);
-    }
-
-    const {
-      light: lightVars,
-      dark: darkVars,
-      theme: themeVars,
-    } = registryTheme.cssVars;
-
-    let cssText = ":root {\n";
-    // Add theme vars (shared across light/dark).
-    if (themeVars) {
-      Object.entries(themeVars).forEach(([key, value]) => {
-        if (value) {
-          cssText += `  --${key}: ${value};\n`;
-        }
-      });
-    }
-    // Add light mode vars.
-    if (lightVars) {
-      Object.entries(lightVars).forEach(([key, value]) => {
-        if (value) {
-          cssText += `  --${key}: ${value};\n`;
-        }
-      });
-    }
-    cssText += "}\n\n";
-
-    cssText += ".dark {\n";
-    if (darkVars) {
-      Object.entries(darkVars).forEach(([key, value]) => {
-        if (value) {
-          cssText += `  --${key}: ${value};\n`;
-        }
-      });
-    }
-    cssText += "}\n";
-
-    styleElement.textContent = cssText;
+    writeThemeVars(element, registryTheme.cssVars);
   }, [registryTheme]);
 
   // Signal same-origin embed hosts once the preview is fully styled.
@@ -505,125 +468,12 @@ export function DesignSystemProvider({
     };
   }, [isReady]);
 
-  // Handle menu color inversion and translucency by updating cn-menu-target elements.
+  useMenuColor(menuColor);
+
+  // What is applied is kept for the next load, which puts it back before the first paint.
   React.useEffect(() => {
-    if (!menuColor) {
-      return;
-    }
+    saveDesignSystemBoot();
+  });
 
-    const isInvertedMenu =
-      menuColor === "inverted" || menuColor === "inverted-translucent";
-    const isTranslucentMenu =
-      menuColor === "default-translucent" ||
-      menuColor === "inverted-translucent";
-    let frameId = 0;
-
-    const updateMenuElements = () => {
-      const allElements = document.querySelectorAll<HTMLElement>(
-        ".cn-menu-target, [data-menu-translucent]"
-      );
-
-      if (allElements.length === 0) {
-        return;
-      }
-
-      // Disable transitions while toggling classes.
-      allElements.forEach((element) => {
-        element.style.transition = "none";
-      });
-
-      allElements.forEach((element) => {
-        if (element.classList.contains("cn-menu-target")) {
-          if (isInvertedMenu) {
-            element.classList.add("dark");
-          } else {
-            element.classList.remove("dark");
-          }
-        }
-
-        // Toggle translucent class: use class when active, data-attr when inactive
-        // so the element stays queryable for future toggles.
-        if (isTranslucentMenu) {
-          element.classList.add("cn-menu-translucent");
-          element.removeAttribute("data-menu-translucent");
-        } else if (element.classList.contains("cn-menu-translucent")) {
-          element.classList.remove("cn-menu-translucent");
-          element.setAttribute("data-menu-translucent", "");
-        }
-      });
-
-      // Force reflow, then re-enable transitions.
-      void document.body.offsetHeight;
-      allElements.forEach((element) => {
-        element.style.transition = "";
-      });
-    };
-
-    const scheduleMenuUpdate = () => {
-      if (frameId) {
-        return;
-      }
-      frameId = window.requestAnimationFrame(() => {
-        frameId = 0;
-        updateMenuElements();
-      });
-    };
-
-    // Update existing menu elements.
-    scheduleMenuUpdate();
-
-    // Watch for new menu elements being added to the DOM.
-    const observer = new MutationObserver(() => {
-      scheduleMenuUpdate();
-    });
-
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true,
-    });
-
-    return () => {
-      observer.disconnect();
-      if (frameId) {
-        window.cancelAnimationFrame(frameId);
-      }
-    };
-  }, [menuColor]);
-
-  const contextValue = React.useMemo(
-    () => ({
-      baseColor,
-      chartColor,
-      font,
-      fontHeading,
-      iconLibrary,
-      menuAccent,
-      menuColor,
-      radius,
-      style,
-      theme,
-    }),
-    [
-      style,
-      theme,
-      font,
-      fontHeading,
-      chartColor,
-      baseColor,
-      menuAccent,
-      menuColor,
-      radius,
-      iconLibrary,
-    ]
-  );
-
-  if (!isReady) {
-    return null;
-  }
-
-  return (
-    <DesignSystemContext.Provider value={contextValue}>
-      {children}
-    </DesignSystemContext.Provider>
-  );
+  return null;
 }

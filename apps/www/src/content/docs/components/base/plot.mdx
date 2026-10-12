@@ -1,0 +1,302 @@
+---
+title: Plot
+description: Curves and draggable points, for equalizers, filters and compressors.
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="plot-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">CLI</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash component
+npx shadcn@latest add @audio/plot
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the following dependencies:</Step>
+
+```bash
+npm install @audio-ui/react
+```
+
+<Step>Copy and paste the following code into your project.</Step>
+
+<ComponentSource
+  styleName="base-nova"
+  name="plot"
+  title="components/audio/elements/plot.tsx"
+/>
+
+<Step>Update the import paths to match your project setup.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Anatomy
+
+Import the primitive and assemble its parts.
+
+```tsx
+import { Plot } from "@audio-ui/react";
+
+<Plot.Root>
+  <Plot.Grid />
+  <Plot.Graph>
+    <Plot.Curve />
+    <Plot.Trace />
+    <Plot.Line />
+    <Plot.Band />
+  </Plot.Graph>
+  <Plot.Mark />
+  <Plot.Dot />
+  <Plot.Cursor>
+    <Plot.CursorReadout />
+  </Plot.Cursor>
+  <Plot.Handle />
+</Plot.Root>
+```
+
+## Usage
+
+```tsx
+import {
+  Plot,
+  PlotArea,
+  PlotCurve,
+  PlotGraph,
+  PlotGrid,
+  PlotHandle,
+} from "@/components/audio/elements/plot";
+import { eqResponse } from "@/lib/filter-response";
+
+<Plot minX={20} maxX={20000} minY={-18} maxY={18} scaleX="log">
+  <PlotGrid x={{ count: 6 }} y={{ ticks: [-12, 0, 12] }} />
+  <PlotGraph>
+    <PlotArea fillTo={0} fn={response} />
+    <PlotCurve fn={response} />
+  </PlotGraph>
+  <PlotHandle
+    aria-label="Band 1"
+    onValueChange={({ x, y }) => setBand({ frequency: x, gainDb: y })}
+    value={{ x: band.frequency, y: band.gainDb }}
+  />
+</Plot>;
+```
+
+`fn` is `y = fn(x)` in the axes' units. The `filter-response` lib gives you the functions for the usual curves: `eqResponse`, `biquadResponse` and `compressorOutput`, and for keeping a band's handle on the curve, `bandHandleDb` (where it sits) and `bandGainForHandle` (the gain that puts it where the pointer is).
+
+## Handles
+
+A handle holds a native `<input type="range">` per axis, so it works from the keyboard: the arrow keys move it by a hundredth of the axis, a tenth with <kbd>Shift</kbd>, and <kbd>Home</kbd> / <kbd>End</kbd> go to the ends. Dragging moves it from where it is rather than jumping to the pointer, and four times finer with <kbd>Shift</kbd>. A double click, an <kbd>Alt</kbd> + click or <kbd>Delete</kbd> return it to `defaultValue`, or the middle of the plot (`reason: "reset"`). `axis="x"` or `axis="y"` holds it to one axis.
+
+## Live signals
+
+`PlotTrace` draws a list of y values from a `source` straight in the DOM, with no React render per frame: the spectrum of the sound behind an equalizer, on a scale of its own (`min`, `max`). `PlotDot` is a point that follows a live `{ x, y }`, such as the input level riding a compressor's curve. The `use-spectrum` hook turns an `AnalyserNode` into the source a trace wants, resampled onto a logarithmic frequency axis, and the default example plays pink noise through the equalizer so you hear what you draw.
+
+```tsx
+const spectrum = useSpectrum(analyser, { minHz: 20, maxHz: 20000 });
+
+<PlotGraph>
+  <PlotTraceArea fillTo={-100} min={-100} max={-10} source={spectrum} />
+  <PlotCurve fn={response} />
+</PlotGraph>;
+```
+
+## Examples
+
+### Filter
+
+One handle on the resonance peak sets the cutoff and how much it rings.
+
+<ComponentPreview styleName="base-nova" name="plot-filter-demo" />
+
+### Compressor
+
+One handle sets the threshold, the other the ratio.
+
+<ComponentPreview styleName="base-nova" name="plot-compressor-demo" />
+
+## API reference
+
+### Root
+
+Groups the parts of a plot and owns its two axes: the range of each and how values spread along it, evenly or logarithmically, the way frequency is drawn. Everything placed on the plot (curves, lines, bands, handles) is placed in the axes' units. Renders a `<div>` element.
+
+<TypeTable>
+<TypeRow name={"disabled"} type={"boolean"}></TypeRow>
+<TypeRow name={"maxX"} type={"number"} default={"1"}></TypeRow>
+<TypeRow name={"maxY"} type={"number"} default={"1"}></TypeRow>
+<TypeRow name={"minX"} type={"number"} default={"0"}></TypeRow>
+<TypeRow name={"minY"} type={"number"} default={"0"}></TypeRow>
+<TypeRow name={"scaleX"} type={"Scale"} default={"\"linear\""}>How x values spread across: `"log"` for frequency, or your own `{ toPosition, toValue }`.</TypeRow>
+<TypeRow name={"scaleY"} type={"Scale"} default={"\"linear\""}>How y values spread up.</TypeRow>
+</TypeTable>
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+</TypeTable>
+
+### Band
+
+A stretch of the plot between two values on one axis, across the whole of the other: the frequencies a sweep can reach, the levels over a threshold. Sits in `Plot.Graph`. Renders a `<rect>` element.
+
+<TypeTable>
+<TypeRow name={"axis"} type={"\"x\" | \"y\""}>The axis `from` and `to` are values on.</TypeRow>
+<TypeRow name={"from"} type={"number"}></TypeRow>
+<TypeRow name={"to"} type={"number"}></TypeRow>
+</TypeTable>
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+</TypeTable>
+
+### Dot
+
+A point on the plot that nothing drags: where the signal is right now, such as the input level on a compressor's curve. Give it a `source` and it moves straight in the DOM without re-rendering React, or a `value` for a still point. Hidden from assistive technology and from the pointer. Renders a `<div>` element.
+
+<TypeTable>
+<TypeRow name={"source"} type={"DotSource"}>A live point, followed without re-rendering. Takes precedence over `value`.</TypeRow>
+<TypeRow name={"value"} type={"Point"}>A still point, in the axes' units.</TypeRow>
+</TypeTable>
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+</TypeTable>
+
+### Cursor
+
+Follows the pointer over the plot, for crosshair lines and a readout of what is under it. It covers the plot, lets pointer events through, and sets `--plot-cursor-x` and `--plot-cursor-y` (0% to 100% across and down) and `data-active` while the pointer is over the plot with a mouse or a pen, all in the DOM without re-rendering React. Put lines in it that use the two variables, and a `Plot.CursorReadout`. Renders a `<div>` element.
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+</TypeTable>
+
+### CursorReadout
+
+The value under the pointer, as text: `format` turns it into what to show, and the text is written straight into the DOM as the pointer moves. It sits where the pointer is; set its offset and its look with your own classes. Renders a `<div>` element.
+
+<TypeTable>
+<TypeRow name={"format"} type={"(value: Point) => string"}>Turns the value under the pointer, in the axes' units, into the text shown.</TypeRow>
+</TypeTable>
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+</TypeTable>
+
+### Grid
+
+Grid lines and their labels, drawn from the axes: round values along each axis you give, so you do not place each line and label by hand. It covers the plot, is hidden from assistive technology and from the pointer, and marks its parts for styling: `data-part="line"` and `data-part="label"`, each with `data-axis`, and `data-zero` on the line at zero. Renders a `<div>` element.
+
+<TypeTable>
+<TypeRow name={"x"} type={"GridAxis"}>Grid lines across, at values on the x axis. Leave it out for none.</TypeRow>
+<TypeRow name={"y"} type={"GridAxis"}>Grid lines along, at values on the y axis. Leave it out for none.</TypeRow>
+</TypeTable>
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+</TypeTable>
+
+### Handle
+
+A point on the plot that can be moved: an equalizer band at its frequency and gain, a filter's cutoff and resonance, a compressor's threshold. Its value is in the axes' units, and `axis` can hold it to one of them. Dragging moves it from where it is, never jumping to the pointer, four times finer with Shift. A double click, an Alt + click or the Delete key return it to `defaultValue`, or the middle of the plot. It holds a native `<input type="range">` per axis it moves along, carrying the accessible names: the first takes focus, and the arrow keys move it by a hundredth of the axis, a tenth with Shift. Renders a `<div>` element.
+
+<TypeTable>
+<TypeRow name={"axis"} type={"\"both\" | Axis"} default={"\"both\""}>The axes the handle moves along; the other keeps the value given.</TypeRow>
+<TypeRow name={"defaultValue"} type={"Value"}>Uncontrolled starting value. Defaults to the middle of the plot.</TypeRow>
+<TypeRow name={"disabled"} type={"boolean"}></TypeRow>
+<TypeRow name={"getAriaLabel"} type={"(axis: Axis) => string"}>Names each axis input. Defaults to `aria-label`, followed by "X" / "Y" when the handle moves along both.</TypeRow>
+<TypeRow name={"getAriaValueText"} type={"(value: number, axis: Axis) => string"}>Returns an axis input's `aria-valuetext`, from its value. Defaults to the number.</TypeRow>
+<TypeRow name={"onValueChange"} type={"(value: Value, eventDetails: ChangeEventDetails) => void"}>Fires while the handle is moved: drag, keyboard and input changes.</TypeRow>
+<TypeRow name={"onValueCommitted"} type={"(value: Value, eventDetails: CommitEventDetails) => void"}>Fires when a gesture that moved the handle ends, and after each key or input change.</TypeRow>
+<TypeRow name={"value"} type={"Value"}>The handle's position, in the axes' units.</TypeRow>
+</TypeTable>
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+<TypeRow name={"data-dragging"}>Whether a pointer is dragging the handle.</TypeRow>
+</TypeTable>
+
+### Graph
+
+The drawing surface: an `<svg>` covering the plot, stretched to its size, that `Plot.Curve`, `Plot.Line` and `Plot.Band` draw in. Strokes keep their width however the plot is stretched. Hidden from assistive technology and from the pointer. Renders a `<svg>` element.
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+</TypeTable>
+
+### Trace
+
+A live line across the plot: the list of y values a `source` holds, such as the spectrum of the sound, spread evenly across the x axis. It is drawn straight in the DOM each time the source changes, without re-rendering React, so it can follow audio frame by frame. With `fillTo`, it closes down to that y value to be filled as an area. Sits in `Plot.Graph`. Renders a `<path>` element.
+
+<TypeTable>
+<TypeRow name={"fillTo"} type={"number"}>Closes the line to this y value, so it can be filled as an area.</TypeRow>
+<TypeRow name={"max"} type={"number"}>Top of the scale the values are on. Defaults to the plot's y axis.</TypeRow>
+<TypeRow name={"min"} type={"number"}>Bottom of the scale the values are on. Defaults to the plot's y axis.</TypeRow>
+<TypeRow name={"source"} type={"TraceSource"}>The live y values; the snapshot may be one array updated in place.</TypeRow>
+</TypeTable>
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+</TypeTable>
+
+### Curve
+
+A curve across the whole plot: `y = fn(x)` in the axes' units, such as an equalizer's response in dB at each frequency. With `fillTo`, it closes down to that y value, to be filled as an area. Sits in `Plot.Graph`. Renders a `<path>` element.
+
+<TypeTable>
+<TypeRow name={"fillTo"} type={"number"}>Closes the curve to this y value, so it can be filled as an area.</TypeRow>
+<TypeRow name={"fn"} type={"(x: number) => number"}>The curve: y, in the y axis' units, at each x.</TypeRow>
+<TypeRow name={"samples"} type={"number"} default={"256"}>How many points the curve is drawn through.</TypeRow>
+</TypeTable>
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+</TypeTable>
+
+### Line
+
+A straight line across the plot at a value: vertical at an x value, such as a filter's cutoff, or horizontal at a y value, such as 0 dB. Sits in `Plot.Graph`. Renders a `<line>` element.
+
+<TypeTable>
+<TypeRow name={"axis"} type={"\"x\" | \"y\""}>`"x"` draws a vertical line at an x value, `"y"` a horizontal one at a y value.</TypeRow>
+<TypeRow name={"value"} type={"number"}></TypeRow>
+</TypeTable>
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+</TypeTable>
+
+### Mark
+
+A label at a value on one axis, such as "1k" under a frequency or "+12" by a gain: placed at the value along the axis and left to you to set apart from the plot's edge. Hidden from assistive technology, which reads the handles' own values. Renders a `<div>` element.
+
+<TypeTable>
+<TypeRow name={"axis"} type={"\"x\" | \"y\""}>The axis `value` is on: `"x"` places it across, `"y"` down.</TypeRow>
+<TypeRow name={"value"} type={"number"}></TypeRow>
+</TypeTable>
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+</TypeTable>
+
+### Registry component
+
+`PlotCursor` takes a `format` function, `(value) => string`, for its readout; `PlotTraceArea` is a `Trace` drawn as a filled area. The rest take the primitive's props.

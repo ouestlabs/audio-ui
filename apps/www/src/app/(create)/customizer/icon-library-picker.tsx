@@ -11,11 +11,12 @@ import {
   PickerRadioItem,
   PickerSeparator,
   PickerTrigger,
+  usePickerSide,
 } from "@/app/(create)/customizer/picker";
 import { useDesignSystemSearchParams } from "@/app/(create)/lib/search-params";
 import { useConfig } from "@/hooks/use-config";
 import { useMounted } from "@/hooks/use-mounted";
-import { Item, ItemContent, ItemTitle } from "@/registry/bases/radix/ui/item";
+import { Item, ItemContent, ItemTitle } from "@/registry/bases/base/ui/item";
 import {
   type IconLibrary,
   type IconLibraryName,
@@ -277,7 +278,7 @@ export function IconLibraryPicker({
         <PickerContent
           align={isMobile ? "center" : "start"}
           anchor={isMobile ? anchorRef : undefined}
-          side={isMobile ? "top" : "right"}
+          side={usePickerSide(isMobile)}
         >
           <PickerRadioGroup
             onValueChange={handleValueChange}
