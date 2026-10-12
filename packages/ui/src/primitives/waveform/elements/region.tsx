@@ -1,13 +1,14 @@
-import {
-  createChangeEventDetails,
-  type ChangeEventDetails as ExtraChangeEventDetails,
-  type CommitEventDetails as ExtraCommitEventDetails,
-  isReleased,
-  moveRange as moveRegion,
-  normalizeRange as normalizeRegion,
-  type RangeEdge as RegionEdge,
-  type RangeValue as RegionValue,
+import type {
+  ChangeEventDetails as ExtraChangeEventDetails,
+  CommitEventDetails as ExtraCommitEventDetails,
+  RangeEdge as RegionEdge,
+  RangeValue as RegionValue,
 } from "@audio-ui/core";
+import {
+  createWaveformRegionController,
+  type WaveformRegionController,
+  type WaveformRegionOptions,
+} from "@audio-ui/core/waveform";
 import * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
@@ -24,46 +25,28 @@ type WithEdge<Details> = Details & {
 };
 
 interface RegionContextValue {
-  actions: {
-    /** Propose a region; returns whether it was applied. */
-    change: (
-      next: RegionValue,
-      eventDetails: Region.ChangeEventDetails
-    ) => boolean;
-    commit: (
-      value: RegionValue,
-      eventDetails: Region.CommitEventDetails
-    ) => void;
-    setDragging: (dragging: boolean) => void;
-    /** `duration` units covered by one pixel of the track the region sits on. */
-    unitsPerPixel: () => number;
-  };
-  meta: {
-    duration: number;
-    largeStep: number;
-    minLength: number;
-    step: number;
-    /** The region as displayed. */
-    value: RegionValue;
-    /** Latest displayed region, readable from event handlers. */
-    valueRef: React.RefObject<RegionValue>;
-  };
+  controller: WaveformRegionController;
+  /** The region's element: the track it sits on is its offset parent. */
+  regionRef: React.RefObject<HTMLDivElement | null>;
+  /** The stretch of the audio shown, `[start, end]` in `duration` units. */
+  shownRange: readonly [number, number];
   state: Region.State;
+  /** The region as displayed. */
+  value: RegionValue;
 }
 
 const RegionContext = React.createContext<RegionContextValue | null>(null);
 
-interface RegionGesture {
-  /** Whether the gesture changed the region at least once; if so its end commits. */
-  changed: boolean;
-  /** The region when the pointer went down: the drag is measured from it. */
-  origin: RegionValue;
-  pointerId: number;
-  startX: number;
+/** The element a region's pixels are measured on: the track it is positioned in. */
+function trackOf(region: Element | null): Element | null {
+  if (!region) {
+    return null;
+  }
+  return (region as HTMLElement).offsetParent ?? region.parentElement;
 }
 
 /**
- * Pointer handlers that drag `edge` of the region. The press stops here, so
+ * Pointer handler that drags `edge` of the region. The press stops here, so
  * the control underneath doesn't take it for a seek.
  */
 function useRegionDrag(
@@ -71,8 +54,7 @@ function useRegionDrag(
   edge: RegionEdge,
   enabled: boolean
 ) {
-  const { actions, meta } = context;
-  const gestureRef = React.useRef<RegionGesture | null>(null);
+  const { controller, regionRef, shownRange } = context;
 
   const onPointerDown = (event: React.PointerEvent<HTMLElement>) => {
     if (event.button !== 0) {
@@ -83,66 +65,16 @@ function useRegionDrag(
       return;
     }
     event.preventDefault();
-    event.currentTarget.setPointerCapture?.(event.pointerId);
-    gestureRef.current = {
-      changed: false,
-      origin: meta.valueRef.current,
-      pointerId: event.pointerId,
-      startX: event.clientX,
-    };
-    actions.setDragging(true);
-  };
-
-  const onPointerMove = (event: React.PointerEvent<HTMLElement>) => {
-    const gesture = gestureRef.current;
-    if (!gesture || gesture.pointerId !== event.pointerId) {
-      return;
-    }
-    if (isReleased(event)) {
-      onPointerEnd(event);
-      return;
-    }
-    event.stopPropagation();
-    const delta = (event.clientX - gesture.startX) * actions.unitsPerPixel();
-    const eventDetails = Object.assign(
-      createChangeEventDetails("drag", event.nativeEvent),
-      { edge }
+    controller.press(
+      edge,
+      event.nativeEvent,
+      event.currentTarget,
+      trackOf(regionRef.current),
+      shownRange
     );
-    if (
-      actions.change(
-        moveRegion(gesture.origin, edge, delta, meta),
-        eventDetails
-      )
-    ) {
-      gesture.changed = true;
-    }
   };
 
-  const onPointerEnd = (event: React.PointerEvent<HTMLElement>) => {
-    const gesture = gestureRef.current;
-    if (!gesture || gesture.pointerId !== event.pointerId) {
-      return;
-    }
-    gestureRef.current = null;
-    // Read before settling: the region falls back to the known value after.
-    const committed = meta.valueRef.current;
-    actions.setDragging(false);
-    if (gesture.changed) {
-      actions.commit(committed, {
-        edge,
-        event: event.nativeEvent,
-        reason: "drag",
-      });
-    }
-  };
-
-  return {
-    onLostPointerCapture: onPointerEnd,
-    onPointerCancel: onPointerEnd,
-    onPointerDown,
-    onPointerMove,
-    onPointerUp: onPointerEnd,
-  };
+  return { onPointerDown };
 }
 
 /**
@@ -166,113 +98,51 @@ export function Region(componentProps: Region.Props) {
     ...elementProps
   } = componentProps;
   const { meta: root, state: rootState } = useWaveformContext("Region");
-  const { duration, largeStep, step } = root;
+  const { duration, largeStep, range, step } = root;
   const disabled = disabledProp || rootState.disabled;
   const minLength = minLengthProp ?? step;
 
-  const isControlled = valueProp !== undefined;
-  const [uncontrolledValue, setUncontrolledValue] = React.useState<RegionValue>(
-    () => defaultValue ?? [0, duration]
+  const options: WaveformRegionOptions = {
+    defaultValue,
+    disabled,
+    duration,
+    largeStep,
+    minLength,
+    onValueChange,
+    onValueCommitted,
+    step,
+    value: valueProp,
+  };
+  const [controller] = React.useState(() =>
+    createWaveformRegionController(options)
   );
-  const [rawStart, rawEnd] = isControlled ? valueProp : uncontrolledValue;
-  const value = React.useMemo(
-    () => normalizeRegion([rawStart, rawEnd], duration),
-    [duration, rawEnd, rawStart]
+  // Set on every render, so the region always reads the latest props.
+  controller.setOptions(options);
+  const snapshot = React.useSyncExternalStore(
+    controller.subscribe,
+    controller.getSnapshot
   );
 
-  // While dragging, the region follows the pointer even if a controlled value
-  // lags behind; on release the controlled value rules again.
-  const [dragging, setDraggingState] = React.useState(false);
-  const [dragValue, setDragValue] = React.useState<RegionValue | null>(null);
-  const draggingRef = React.useRef(false);
-  const displayedValue = dragValue ?? value;
-  const valueRef = React.useRef(displayedValue);
-  valueRef.current = displayedValue;
   const regionRef = React.useRef<HTMLDivElement>(null);
-
-  const setDragging = React.useCallback((next: boolean) => {
-    draggingRef.current = next;
-    setDraggingState(next);
-    if (!next) {
-      setDragValue(null);
-    }
-  }, []);
-
-  const change = React.useCallback(
-    (next: RegionValue, eventDetails: Region.ChangeEventDetails) => {
-      const [start, end] = valueRef.current;
-      if (next[0] === start && next[1] === end) {
-        return false;
-      }
-      onValueChange?.(next, eventDetails);
-      if (eventDetails.isCanceled) {
-        return false;
-      }
-      valueRef.current = next;
-      if (!isControlled) {
-        setUncontrolledValue(next);
-      }
-      if (isControlled && draggingRef.current) {
-        setDragValue(next);
-      }
-      return true;
-    },
-    [isControlled, onValueChange]
-  );
-
-  const commit = React.useCallback(
-    (committed: RegionValue, eventDetails: Region.CommitEventDetails) => {
-      onValueCommitted?.(committed, eventDetails);
-    },
-    [onValueCommitted]
-  );
-
-  const unitsPerPixel = React.useCallback(() => {
-    const region = regionRef.current;
-    // Its percentages resolve against the element it is positioned in.
-    const track = region?.offsetParent ?? region?.parentElement;
-    const [shownStart, shownEnd] = root.range;
-    return (
-      (shownEnd - shownStart) /
-      Math.max(track?.getBoundingClientRect().width ?? 0, 1)
-    );
-  }, [root.range]);
-
   const state = React.useMemo<Region.State>(
-    () => ({ disabled, dragging }),
-    [disabled, dragging]
+    () => ({ disabled: snapshot.disabled, dragging: snapshot.dragging }),
+    [snapshot.disabled, snapshot.dragging]
   );
 
   const context = React.useMemo<RegionContextValue>(
     () => ({
-      actions: { change, commit, setDragging, unitsPerPixel },
-      meta: {
-        duration,
-        largeStep,
-        minLength,
-        step,
-        value: displayedValue,
-        valueRef,
-      },
+      controller,
+      regionRef,
+      shownRange: range,
       state,
+      value: snapshot.value,
     }),
-    [
-      change,
-      commit,
-      displayedValue,
-      duration,
-      largeStep,
-      minLength,
-      setDragging,
-      state,
-      step,
-      unitsPerPixel,
-    ]
+    [controller, range, snapshot.value, state]
   );
 
   const drag = useRegionDrag(context, "both", movable && !disabled);
-  const [start, end] = displayedValue;
-  const span = root.range[1] - root.range[0];
+  const [start, end] = snapshot.value;
+  const span = range[1] - range[0];
   const toPercent = (length: number) =>
     `${(span > 0 ? length / span : 0) * 100}%`;
 
@@ -282,7 +152,7 @@ export function Region(componentProps: Region.Props) {
       {
         ...drag,
         style: {
-          left: toPercent(start - root.range[0]),
+          left: toPercent(start - range[0]),
           position: "absolute",
           touchAction: "none",
           width: toPercent(end - start),
@@ -362,27 +232,16 @@ export function RegionHandle(componentProps: RegionHandle.Props) {
       "Waveform.RegionHandle must be used within Waveform.Region"
     );
   }
-  const { actions, meta, state: regionState } = context;
-  const { duration, minLength } = meta;
+  const { controller, state: regionState, value } = context;
+  const { duration } = useWaveformContext("RegionHandle").meta;
   const { disabled } = regionState;
   const inputRef = React.useRef<HTMLInputElement>(null);
   const drag = useRegionDrag(context, edge, !disabled);
 
-  const [start, end] = meta.value;
+  const [start, end] = value;
   const current = edge === "start" ? start : end;
   // How far this edge can go before it meets the other one.
-  const min = edge === "start" ? 0 : Math.min(duration, start + minLength);
-  const max = edge === "start" ? Math.max(0, end - minLength) : duration;
-
-  /** The region with this edge at `position`, within its limits. */
-  const withEdgeAt = React.useCallback(
-    (position: number): RegionValue => {
-      const latest = meta.valueRef.current;
-      const from = edge === "start" ? latest[0] : latest[1];
-      return moveRegion(latest, edge, position - from, meta);
-    },
-    [edge, meta]
-  );
+  const [min, max] = controller.edgeRange(edge);
 
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
     drag.onPointerDown(event);
@@ -393,62 +252,22 @@ export function RegionHandle(componentProps: RegionHandle.Props) {
 
   const handleKeyDown = React.useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
-      if (disabled) {
-        return;
-      }
-      const arrowStep = event.shiftKey ? meta.largeStep : meta.step;
-      const targets: Record<string, number> = {
-        ArrowDown: current - arrowStep,
-        ArrowLeft: current - arrowStep,
-        ArrowRight: current + arrowStep,
-        ArrowUp: current + arrowStep,
-        End: max,
-        Home: min,
-        PageDown: current - meta.largeStep,
-        PageUp: current + meta.largeStep,
-      };
-      const next = targets[event.key];
-      if (next === undefined) {
-        return;
-      }
-      event.preventDefault();
-      const native = event.nativeEvent;
-      const eventDetails = Object.assign(
-        createChangeEventDetails("keyboard", native),
-        { edge }
-      );
-      if (actions.change(withEdgeAt(next), eventDetails)) {
-        actions.commit(meta.valueRef.current, {
-          edge,
-          event: native,
-          reason: "keyboard",
-        });
+      if (controller.keyDown(edge, event.nativeEvent)) {
+        event.preventDefault();
       }
     },
-    [actions, current, disabled, edge, max, meta, min, withEdgeAt]
+    [controller, edge]
   );
 
   const handleChange = React.useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      const native = event.nativeEvent;
-      const eventDetails = Object.assign(
-        createChangeEventDetails("input-change", native),
-        { edge }
+      controller.typeAt(
+        edge,
+        Number(event.currentTarget.value),
+        event.nativeEvent
       );
-      if (
-        actions.change(
-          withEdgeAt(Number(event.currentTarget.value)),
-          eventDetails
-        )
-      ) {
-        actions.commit(meta.valueRef.current, {
-          edge,
-          event: native,
-          reason: "input-change",
-        });
-      }
     },
-    [actions, edge, meta, withEdgeAt]
+    [controller, edge]
   );
 
   const state = React.useMemo<RegionHandle.State>(
