@@ -145,20 +145,6 @@ export const components: RegistryItem[] = [
     type: "registry:example",
   },
   {
-    categories: ["envelope"],
-    description:
-      "Envelope with common audio envelope presets, ADSR, Bass, Gate, Pad, Pluck",
-    files: [
-      {
-        path: "components/envelope/envelope-presets-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "envelope-presets-demo",
-    registryDependencies: ["@audio/envelope", "@shadcn/button"],
-    type: "registry:example",
-  },
-  {
     categories: ["piano"],
     description: "Piano size default example",
     files: [

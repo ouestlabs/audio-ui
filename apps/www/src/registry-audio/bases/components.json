@@ -50,11 +50,6 @@
     "title": "envelope-adsr-demo"
   },
   {
-    "categories": ["envelope"],
-    "name": "envelope-presets-demo",
-    "title": "envelope-presets-demo"
-  },
-  {
     "categories": ["piano"],
     "name": "piano-size-default-demo",
     "title": "piano-size-default-demo"

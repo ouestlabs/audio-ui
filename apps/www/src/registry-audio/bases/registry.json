@@ -1,7 +1,7 @@
 {
   "categories": [
     {
-      "count": 3,
+      "count": 2,
       "description": "Interactive envelope components for editing linear ramp breakpoints.",
       "label": "Envelope",
       "name": "envelope"
@@ -79,5 +79,5 @@
       "name": "xypad"
     }
   ],
-  "totalComponents": 29
+  "totalComponents": 28
 }
