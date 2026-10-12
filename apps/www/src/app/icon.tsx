@@ -21,22 +21,13 @@ export default function Icon() {
     >
       <svg
         aria-hidden="true"
-        fill="none"
-        height="24"
-        stroke="white"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="2"
-        viewBox="0 0 24 24"
-        width="24"
+        fill="white"
+        height="20"
+        viewBox="2 2 20 20"
+        width="20"
         xmlns="http://www.w3.org/2000/svg"
       >
-        <path d="M2 10v3" fill="white" />
-        <path d="M6 6v11" fill="white" />
-        <path d="M10 3v18" fill="white" />
-        <path d="M14 8v7" fill="white" />
-        <path d="M18 5v13" fill="white" />
-        <path d="M22 10v3" fill="white" />
+        <path d="M13.799 11.884L18.243 4.188A10 10 0 1 1 15.645 2.688L11.201 10.384Z" />
       </svg>
     </div>,
     { ...size }
