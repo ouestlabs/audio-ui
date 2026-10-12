@@ -15,6 +15,7 @@ import {
   type ReactNode,
   type SyntheticEvent,
   useCallback,
+  useEffect,
   useLayoutEffect,
   useRef,
   useState,
@@ -898,51 +899,71 @@ export default function BlockTimeline() {
   // The track being dragged by its grip, and the gap it would land in: above or below the track under the pointer.
   const [dragId, setDragId] = useState<string | null>(null);
   // The copy the browser takes its drag image from: it stays in the page until the drag ends.
-  const ghostRef = useRef<HTMLElement | null>(null);
   const [drop, setDrop] = useState<{
     id: string;
     edge: "bottom" | "top";
   } | null>(null);
+  // The track's copy that follows the pointer while it is dragged. The browser's own drag image is a blank one,
+  // since its position is not reliable across browsers; the copy is moved from each dragover instead.
+  const [preview, setPreview] = useState<{
+    name: string;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  } | null>(null);
+  const dragOffset = useRef({ x: 0, y: 0 });
+  useEffect(() => {
+    if (dragId === null) {
+      return;
+    }
+    const follow = (event: DragEvent) => {
+      setPreview((current) =>
+        current
+          ? {
+              ...current,
+              x: event.clientX - dragOffset.current.x,
+              y: event.clientY - dragOffset.current.y,
+            }
+          : current
+      );
+    };
+    document.addEventListener("dragover", follow);
+    return () => document.removeEventListener("dragover", follow);
+  }, [dragId]);
   const startTrackDrag = useCallback(
     (event: React.DragEvent<HTMLButtonElement>) => {
       const id = event.currentTarget.dataset.trackId ?? "";
-      // The whole track is the drag image: the clone is the track, not the grip.
       const row = event.currentTarget.closest<HTMLElement>(
         '[data-slot="timeline-track"]'
       );
       if (row) {
         const box = row.getBoundingClientRect();
-        // A copy placed exactly over the row, so the image is taken where the pointer is, not where the browser would scroll to.
-        const ghost = row.cloneNode(true) as HTMLElement;
-        ghost.style.position = "fixed";
-        ghost.style.left = `${box.left}px`;
-        ghost.style.top = `${box.top}px`;
-        ghost.style.width = `${box.width}px`;
-        ghost.style.height = `${box.height}px`;
-        ghost.style.pointerEvents = "none";
-        ghost.style.zIndex = "9999";
-        document.body.append(ghost);
-        // Some browsers report no pointer position on dragstart (0, 0): then the grip's centre stands in for it, or the copy lands low.
+        // Some browsers report no pointer position on dragstart (0, 0): then the grip's centre stands in for it.
         const grip = event.currentTarget.getBoundingClientRect();
         const pointerX = event.clientX || grip.left + grip.width / 2;
         const pointerY = event.clientY || grip.top + grip.height / 2;
-        event.dataTransfer.setDragImage(
-          ghost,
-          pointerX - box.left,
-          pointerY - box.top
-        );
-        ghostRef.current?.remove();
-        ghostRef.current = ghost;
+        dragOffset.current = { x: pointerX - box.left, y: pointerY - box.top };
+        const blank = new Image();
+        blank.src =
+          "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+        event.dataTransfer.setDragImage(blank, 0, 0);
+        setPreview({
+          name: tracks.find((track) => track.id === id)?.name ?? "",
+          x: box.left,
+          y: box.top,
+          width: box.width,
+          height: box.height,
+        });
       }
       setDragId(id);
       event.dataTransfer.effectAllowed = "move";
       event.dataTransfer.setData("text/plain", id);
     },
-    []
+    [tracks]
   );
   const endTrackDrag = useCallback(() => {
-    ghostRef.current?.remove();
-    ghostRef.current = null;
+    setPreview(null);
     setDragId(null);
     setDrop(null);
   }, []);
@@ -978,6 +999,7 @@ export default function BlockTimeline() {
       }
       setDragId(null);
       setDrop(null);
+      setPreview(null);
     },
     [dragId, drop, moveTrack, tracks]
   );
@@ -1768,6 +1790,23 @@ export default function BlockTimeline() {
             )
           : null}
       </Timeline>
+      {preview
+        ? createPortal(
+            <div
+              aria-hidden="true"
+              className="pointer-events-none fixed z-50 flex items-center truncate rounded-md border border-foreground/25 bg-card/90 px-3 text-sm shadow-lg"
+              style={{
+                height: preview.height,
+                left: preview.x,
+                top: preview.y,
+                width: preview.width,
+              }}
+            >
+              {preview.name}
+            </div>,
+            document.body
+          )
+        : null}
     </div>
   );
 }
