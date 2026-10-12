@@ -1,7 +1,7 @@
+import { axisTicks, formatTick } from "@audio-ui/core/plot";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
 import { type PlotState, positionOn, usePlotContext } from "../context";
-import { axisTicks, formatTick } from "../internal/ticks";
 
 /** What a grid draws along one axis. */
 export interface GridAxis {

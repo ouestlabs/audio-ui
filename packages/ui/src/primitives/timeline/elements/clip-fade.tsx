@@ -1,6 +1,6 @@
+import { type FadeShape, fadeGain } from "@audio-ui/core/timeline";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
-import { type FadeShape, fadeGain } from "../clip";
 import { UNIT_PROPERTY } from "../context";
 import { type ClipState, useClipContext } from "./clip-context";
 

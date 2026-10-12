@@ -1,4 +1,5 @@
 import { createChangeEventDetails, isReleased } from "@audio-ui/core";
+import { bypassesGrid, snapToGrid } from "@audio-ui/core/timeline";
 import * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
@@ -10,7 +11,6 @@ import {
   type TimelineState,
   valueAtPointer,
 } from "../context";
-import { bypassesGrid, snapToGrid } from "../internal/snap";
 import { LaneContext, useLaneProps } from "./lane";
 
 /** Holding Shift scrubs this much slower than the pointer moves. */

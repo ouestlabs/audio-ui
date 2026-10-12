@@ -1,4 +1,5 @@
 import { createChangeEventDetails, isReleased } from "@audio-ui/core";
+import { type KeyLayout, keyAt, placeKeys } from "@audio-ui/core/piano";
 import * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
@@ -9,7 +10,6 @@ import {
   type PianoContextValue,
   type PianoState,
 } from "../context";
-import { type KeyLayout, keyAt, placeKeys } from "../internal/layout";
 
 /** The softest a pointer press plays: the very top of a key, not silence. */
 const MIN_VELOCITY = 0.25;

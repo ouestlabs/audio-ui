@@ -7,6 +7,11 @@ import {
   type Point,
   roundToStep,
 } from "@audio-ui/core";
+import {
+  DEFAULT_MAX,
+  DEFAULT_MIN,
+  WHEEL_DELTA_EPSILON,
+} from "@audio-ui/core/fader";
 import * as React from "react";
 import { useWheel } from "../../../hooks/interactions/use-wheel";
 import { type PartProps, resolveStyling } from "../../internal/part";
@@ -17,11 +22,6 @@ import {
   FaderContext,
   type FaderContextValue,
 } from "../context";
-import {
-  DEFAULT_MAX,
-  DEFAULT_MIN,
-  WHEEL_DELTA_EPSILON,
-} from "../internal/shared";
 
 /** One thumb: the index a change is reported for. */
 export function faderChangeDetails<Reason extends Root.ChangeEventReason>(

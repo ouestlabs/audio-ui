@@ -1,8 +1,8 @@
+import { isOn } from "@audio-ui/core/sequencer";
 import * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
 import { RowContext, useSequencerContext, useSequencerView } from "../context";
-import { isOn } from "../internal/grid";
 
 /**
  * One step of a row: a toggle button, pressed when the step is on. Press it

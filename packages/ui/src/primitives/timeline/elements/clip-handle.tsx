@@ -1,10 +1,14 @@
 import { createChangeEventDetails } from "@audio-ui/core";
+import {
+  clipEnd,
+  snapMove,
+  trimClipEnd,
+  trimClipStart,
+} from "@audio-ui/core/timeline";
 import * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
 import { VISUALLY_HIDDEN } from "../../internal/visually-hidden";
-import { clipEnd, trimClipEnd, trimClipStart } from "../clip";
-import { snapMove } from "../internal/snap";
 import {
   type ClipChangeEventDetails,
   type ClipCommitEventDetails,

@@ -1,9 +1,9 @@
 import type { Point } from "@audio-ui/core";
+import { STATE_ATTRIBUTES_MAPPING } from "@audio-ui/core/xypad";
 import type * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
 import { useXYPadContext } from "../context";
-import { STATE_ATTRIBUTES_MAPPING } from "../internal/shared";
 import type { Root } from "./root";
 
 /**

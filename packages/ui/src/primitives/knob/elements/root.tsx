@@ -9,19 +9,19 @@ import {
   resolveScale,
   roundToStep,
 } from "@audio-ui/core";
-import * as React from "react";
-import { useWheel } from "../../../hooks/interactions/use-wheel";
-import { type PartProps, resolveStyling } from "../../internal/part";
-import { useRender } from "../../internal/render";
-import { useLocale } from "../../internal/use-locale";
-import { KnobContext, type KnobContextValue } from "../context";
 import {
   START_ANGLE,
   STATE_ATTRIBUTES_MAPPING,
   SWEEP_ANGLE,
   steppedValue,
   WHEEL_DELTA_EPSILON,
-} from "../internal/shared";
+} from "@audio-ui/core/knob";
+import * as React from "react";
+import { useWheel } from "../../../hooks/interactions/use-wheel";
+import { type PartProps, resolveStyling } from "../../internal/part";
+import { useRender } from "../../internal/render";
+import { useLocale } from "../../internal/use-locale";
+import { KnobContext, type KnobContextValue } from "../context";
 
 /**
  * Groups all parts of the knob and owns its value. Dragging the `Control`,

@@ -4,9 +4,8 @@ import type {
   Source,
   Store,
 } from "@audio-ui/core";
+import type { Grid, ZoomAnchor } from "@audio-ui/core/timeline";
 import * as React from "react";
-import type { ZoomAnchor } from "./internal/scale";
-import type { Grid } from "./internal/snap";
 
 /** Set on every lane: the width of one unit of time, so parts place themselves with `calc()`. */
 export const UNIT_PROPERTY = "--timeline-unit";

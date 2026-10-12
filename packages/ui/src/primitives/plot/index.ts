@@ -1,3 +1,4 @@
+export { formatTick } from "@audio-ui/core/plot";
 export { useValueAtPointer } from "./context";
 export { Band } from "./elements/band";
 export { Cursor, CursorReadout } from "./elements/cursor";
@@ -10,4 +11,3 @@ export { Line } from "./elements/line";
 export { Mark } from "./elements/mark";
 export { Root } from "./elements/root";
 export { Trace } from "./elements/trace";
-export { formatTick } from "./internal/ticks";

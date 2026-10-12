@@ -1,4 +1,5 @@
 import { clampFinite, createStore } from "@audio-ui/core";
+import { clampZoom, type ZoomAnchor } from "@audio-ui/core/timeline";
 import * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
@@ -12,7 +13,6 @@ import {
   type ViewportMetrics,
   type ZoomChangeEventDetails,
 } from "../context";
-import { clampZoom, type ZoomAnchor } from "../internal/scale";
 
 /**
  * Groups the parts of a timeline and owns what they share: its length, its

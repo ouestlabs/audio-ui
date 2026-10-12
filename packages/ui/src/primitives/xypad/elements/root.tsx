@@ -8,13 +8,13 @@ import {
   type Point,
   roundToStep,
 } from "@audio-ui/core";
+import { STATE_ATTRIBUTES_MAPPING, toPercent } from "@audio-ui/core/xypad";
 import * as React from "react";
 import { useWheel } from "../../../hooks/interactions/use-wheel";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
 import { useLocale } from "../../internal/use-locale";
 import { XYPadContext, type XYPadContextValue } from "../context";
-import { STATE_ATTRIBUTES_MAPPING, toPercent } from "../internal/shared";
 
 /**
  * Groups all parts of the pad and owns its two-dimensional value. Exposes the

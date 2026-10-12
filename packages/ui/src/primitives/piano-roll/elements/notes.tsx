@@ -1,6 +1,10 @@
+import {
+  type Note,
+  type NoteId,
+  spatialOrder,
+} from "@audio-ui/core/piano-roll";
 import * as React from "react";
 import { usePianoRollContext, useRollView } from "../context";
-import { type Note, type NoteId, spatialOrder } from "../internal/edits";
 
 /**
  * Renders `children` once per note, in the order they are read: by start,

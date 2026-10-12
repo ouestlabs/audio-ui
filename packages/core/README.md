@@ -15,5 +15,6 @@ It has no dependencies.
 - `shared/`: language helpers, math, pitch
 - `value/`: scales, ranges, formatting, change and commit event details, live sources and stores
 - `dom/`: frame scheduling, pointer release, visibility, data attributes
+- `primitives/<name>/`: each primitive's own logic, such as timeline clips, waveform peaks or envelope geometry, imported as `@audio-ui/core/<name>`
 
-`index.ts` is the public API. `@audio-ui/core/internal` holds helpers for adapters and may change in any release.
+`index.ts` is the public API of what the primitives share. `@audio-ui/core/internal` holds helpers for adapters and may change in any release.

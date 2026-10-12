@@ -1,12 +1,12 @@
-import * as React from "react";
-import { type PartProps, resolveStyling } from "../../internal/part";
-import { mergeProps, useRender } from "../../internal/render";
-import { useKnobContext } from "../context";
 import {
   START_ANGLE,
   STATE_ATTRIBUTES_MAPPING,
   SWEEP_ANGLE,
-} from "../internal/shared";
+} from "@audio-ui/core/knob";
+import * as React from "react";
+import { type PartProps, resolveStyling } from "../../internal/part";
+import { mergeProps, useRender } from "../../internal/render";
+import { useKnobContext } from "../context";
 import type { Root } from "./root";
 
 /**

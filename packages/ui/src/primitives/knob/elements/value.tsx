@@ -1,10 +1,10 @@
 import { createChangeEventDetails } from "@audio-ui/core";
+import { STATE_ATTRIBUTES_MAPPING } from "@audio-ui/core/knob";
 import type * as React from "react";
 import { useEditableValue, ValueInput } from "../../internal/editable-value";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
 import { useKnobContext } from "../context";
-import { STATE_ATTRIBUTES_MAPPING } from "../internal/shared";
 import type { Root } from "./root";
 
 /**

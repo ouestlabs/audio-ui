@@ -1,4 +1,9 @@
 import { createChangeEventDetails, isReleased } from "@audio-ui/core";
+import {
+  changeVelocity,
+  type NoteId,
+  type Note as NoteValue,
+} from "@audio-ui/core/piano-roll";
 import * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
@@ -13,11 +18,6 @@ import {
   type ValueCommitEventDetails,
   VELOCITY_PROPERTY,
 } from "../context";
-import {
-  changeVelocity,
-  type NoteId,
-  type Note as NoteValue,
-} from "../internal/edits";
 
 /** What the arrow keys change a velocity by; Page Up/Down move five times as far. */
 const VELOCITY_STEP = 0.05;

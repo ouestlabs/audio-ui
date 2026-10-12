@@ -1,17 +1,17 @@
 import { createChangeEventDetails, isReleased } from "@audio-ui/core";
-import * as React from "react";
-import { type PartProps, resolveStyling } from "../../internal/part";
-import { mergeProps, useRender } from "../../internal/render";
-import { valueAtPointer } from "../../timeline/context";
-import { LaneContext, useLaneProps } from "../../timeline/elements/lane";
-import { bypassesGrid, snapToGrid } from "../../timeline/internal/snap";
-import { type PianoRollState, usePianoRollContext } from "../context";
 import {
   cellStart,
   type NoteId,
   notesWithin,
   sanitizeNote,
-} from "../internal/edits";
+} from "@audio-ui/core/piano-roll";
+import { bypassesGrid, snapToGrid } from "@audio-ui/core/timeline";
+import * as React from "react";
+import { type PartProps, resolveStyling } from "../../internal/part";
+import { mergeProps, useRender } from "../../internal/render";
+import { valueAtPointer } from "../../timeline/context";
+import { LaneContext, useLaneProps } from "../../timeline/elements/lane";
+import { type PianoRollState, usePianoRollContext } from "../context";
 
 /** How far a pointer moves before a press on the grid becomes a drag. */
 export const DRAG_THRESHOLD = 4;

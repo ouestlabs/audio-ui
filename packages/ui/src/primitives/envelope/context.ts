@@ -1,8 +1,8 @@
 import type { Point as GeomPoint } from "@audio-ui/core";
+import type { Breakpoint } from "@audio-ui/core/envelope";
 import type { Nullable } from "@audio-ui/core/internal";
 import * as React from "react";
 import type { Root } from "./elements/root";
-import type { Breakpoint } from "./internal/geometry";
 
 /** The points array and its indices stay in `state`; they don't become data attributes. */
 export const STATE_ATTRIBUTES_MAPPING = {

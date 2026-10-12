@@ -1,10 +1,10 @@
 import type { Point as GeomPoint } from "@audio-ui/core";
 import { createChangeEventDetails, isReleased } from "@audio-ui/core";
+import { LARGE_STEP_MULTIPLIER, snapTo } from "@audio-ui/core/envelope";
 import * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
 import { STATE_ATTRIBUTES_MAPPING, useEnvelopeContext } from "../context";
-import { LARGE_STEP_MULTIPLIER, snapTo } from "../internal/geometry";
 import type { Root } from "./root";
 
 /** With Shift held a drag moves this share of the pointer's distance. */

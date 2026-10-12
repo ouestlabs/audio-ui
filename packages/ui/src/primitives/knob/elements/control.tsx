@@ -4,10 +4,6 @@ import {
   isReleased,
   TAU,
 } from "@audio-ui/core";
-import * as React from "react";
-import { type PartProps, resolveStyling } from "../../internal/part";
-import { mergeProps, useRender } from "../../internal/render";
-import { useKnobContext } from "../context";
 import {
   CENTER_DEAD_ZONE_MIN_PX,
   CENTER_DEAD_ZONE_REL,
@@ -18,7 +14,11 @@ import {
   SWEEP_ANGLE,
   TAP_MAX_MOVE_PX,
   VERTICAL_DRAG_RANGE_PX,
-} from "../internal/shared";
+} from "@audio-ui/core/knob";
+import * as React from "react";
+import { type PartProps, resolveStyling } from "../../internal/part";
+import { mergeProps, useRender } from "../../internal/render";
+import { useKnobContext } from "../context";
 import type { Root } from "./root";
 
 interface DragGesture {

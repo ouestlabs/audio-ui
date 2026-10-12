@@ -7,6 +7,11 @@ import {
   type RangeEdge,
   type RangeValue,
 } from "@audio-ui/core";
+import {
+  bypassesGrid,
+  snapRangeMove,
+  snapToGrid,
+} from "@audio-ui/core/timeline";
 import * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
@@ -17,7 +22,6 @@ import {
   useTimelineContext,
   valueAtPointer,
 } from "../context";
-import { bypassesGrid, snapRangeMove, snapToGrid } from "../internal/snap";
 import { LaneContext } from "./lane";
 
 type WithEdge<Details> = Details & {

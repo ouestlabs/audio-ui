@@ -4,6 +4,17 @@ import {
   createStore,
   isReleased,
 } from "@audio-ui/core";
+import {
+  type CellAddress,
+  cellAtPoint,
+  cellKey,
+  isOn,
+  moveFocus,
+  setCell,
+  setVelocity,
+  type Velocities,
+  velocityAtY,
+} from "@audio-ui/core/sequencer";
 import * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
@@ -17,17 +28,6 @@ import {
   type VelocityChangeEventDetails,
   type VelocityCommitEventDetails,
 } from "../context";
-import {
-  type CellAddress,
-  cellAtPoint,
-  cellKey,
-  isOn,
-  moveFocus,
-  setCell,
-  setVelocity,
-  type Velocities,
-  velocityAtY,
-} from "../internal/grid";
 
 const EMPTY: boolean[][] = [];
 const NO_VELOCITIES: number[][] = [];

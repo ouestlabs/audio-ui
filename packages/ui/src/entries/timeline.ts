@@ -1,5 +1,5 @@
-export * as Timeline from "../primitives/timeline";
 export {
+  adjacentPoint,
   type ClipLimits,
   type ClipValue,
   clipEnd,
@@ -16,5 +16,5 @@ export {
   splitClip,
   trimClipEnd,
   trimClipStart,
-} from "../primitives/timeline/clip";
-export { adjacentPoint } from "../primitives/timeline/locators";
+} from "@audio-ui/core/timeline";
+export * as Timeline from "../primitives/timeline";

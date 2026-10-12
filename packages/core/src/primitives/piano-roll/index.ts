@@ -1,0 +1,20 @@
+export {
+  cellStart,
+  changeVelocity,
+  duplicateAfter,
+  duplicateNotes,
+  keyboardEdit,
+  moveNotes,
+  type Note,
+  type NoteId,
+  notesWithin,
+  pasteNotes,
+  quantizeNotes,
+  type RollBounds,
+  resizeNotes,
+  sameNotes,
+  sanitizeNote,
+  snapEdgeDelta,
+  spatialOrder,
+} from "./edits";
+export { type Rows, rollRows } from "./rows";

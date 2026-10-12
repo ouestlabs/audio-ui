@@ -2,8 +2,8 @@ import type {
   ChangeEventDetails as ExtraChangeEventDetails,
   CommitEventDetails as ExtraCommitEventDetails,
 } from "@audio-ui/core";
+import type { KeyLayout, KeyPlacement } from "@audio-ui/core/piano";
 import * as React from "react";
-import type { KeyLayout, KeyPlacement } from "./internal/layout";
 
 export type PianoState = {
   disabled: boolean;

@@ -1,5 +1,5 @@
+import type { Breakpoint } from "@audio-ui/core/envelope";
 import { useEnvelopeContext } from "../context";
-import type { Breakpoint } from "../internal/geometry";
 
 /** Renders one child per point, in `x` order. */
 export function Points({ children }: Points.Props) {

@@ -1,32 +1,31 @@
 import { clampUnit, createFrameTask, observeVisibility } from "@audio-ui/core";
-import * as React from "react";
-import { type PartProps, resolveStyling } from "../../internal/part";
-import { mergeProps, useRender } from "../../internal/render";
-import { useReducedMotion } from "../../internal/use-reduced-motion";
-import { useWaveformContext, type WaveformState } from "../context";
 import {
   type BarLayout,
   type BarRect,
   barLayout,
   barRects,
   bitmapLength,
-  envelopeRects,
-  mirroredScrollRects,
-  scrollShift,
-  type WaveformVariant,
-} from "../internal/bar-layout";
-import {
   createLevelHistory,
-  type LevelHistory,
-} from "../internal/level-history";
-import { loudest } from "../internal/levels";
-import {
   createLevelsEngine,
+  envelopeRects,
+  fitPeaks,
+  type LevelHistory,
   type LevelsEngine,
+  loudest,
+  mirroredScrollRects,
+  type PeakEnvelope,
+  rangeShares,
+  type ScopePoint,
+  scopePoints,
+  scrollShift,
   type WaveformIdle,
-} from "../internal/levels-engine";
-import { fitPeaks, type PeakEnvelope, rangeShares } from "../internal/peaks";
-import { type ScopePoint, scopePoints } from "../internal/scope";
+  type WaveformVariant,
+} from "@audio-ui/core/waveform";
+import * as React from "react";
+import { type PartProps, resolveStyling } from "../../internal/part";
+import { mergeProps, useRender } from "../../internal/render";
+import { useReducedMotion } from "../../internal/use-reduced-motion";
+import { useWaveformContext, type WaveformState } from "../context";
 
 const BAR_RADIUS_PROPERTY = "--waveform-bar-radius";
 const THEME_ATTRIBUTES = ["class", "style", "data-theme"];

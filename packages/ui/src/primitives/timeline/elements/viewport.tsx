@@ -1,9 +1,9 @@
 import { createChangeEventDetails } from "@audio-ui/core";
+import { anchoredScroll, valueAtOffset } from "@audio-ui/core/timeline";
 import * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
 import { type TimelineState, useTimelineContext } from "../context";
-import { anchoredScroll, valueAtOffset } from "../internal/scale";
 
 /** How far one unit of wheel delta zooms, as an exponent. */
 const WHEEL_ZOOM_SENSITIVITY = 0.0015;

@@ -1,14 +1,14 @@
 import { createChangeEventDetails } from "@audio-ui/core";
-import * as React from "react";
-import { type PartProps, resolveStyling } from "../../internal/part";
-import { mergeProps, useRender } from "../../internal/render";
-import { VISUALLY_HIDDEN } from "../../internal/visually-hidden";
 import {
   nextFadeShape,
   setClipFadeIn,
   setClipFadeOut,
   setClipFadeShape,
-} from "../clip";
+} from "@audio-ui/core/timeline";
+import * as React from "react";
+import { type PartProps, resolveStyling } from "../../internal/part";
+import { mergeProps, useRender } from "../../internal/render";
+import { VISUALLY_HIDDEN } from "../../internal/visually-hidden";
 import { UNIT_PROPERTY } from "../context";
 import {
   type ClipChangeEventDetails,

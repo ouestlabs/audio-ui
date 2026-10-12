@@ -1,4 +1,5 @@
 export { createSource, type Source, type WritableSource } from "@audio-ui/core";
+export { adjacentPoint } from "@audio-ui/core/timeline";
 export { Envelope } from "./entries/envelope";
 export { Fader } from "./entries/fader";
 export { Knob } from "./entries/knob";
@@ -28,4 +29,3 @@ export {
 } from "./entries/timeline";
 export { Waveform } from "./entries/waveform";
 export { XYPad } from "./entries/xypad";
-export { adjacentPoint } from "./primitives/timeline/locators";

@@ -3,8 +3,12 @@ import type {
   CommitEventDetails as ExtraCommitEventDetails,
   Store,
 } from "@audio-ui/core";
+import type {
+  CellAddress,
+  Pattern,
+  Velocities,
+} from "@audio-ui/core/sequencer";
 import * as React from "react";
-import type { CellAddress, Pattern, Velocities } from "./internal/grid";
 
 export type SequencerState = {
   disabled: boolean;

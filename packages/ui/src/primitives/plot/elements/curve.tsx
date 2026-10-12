@@ -1,7 +1,7 @@
+import { curvePath } from "@audio-ui/core/plot";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
 import { type PlotState, usePlotContext } from "../context";
-import { curvePath } from "../internal/path";
 
 /** Enough points for a smooth curve at any size the plot is drawn. */
 const DEFAULT_SAMPLES = 256;

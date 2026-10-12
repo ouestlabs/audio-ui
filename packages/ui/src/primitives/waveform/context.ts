@@ -4,8 +4,8 @@ import type {
   Source,
   Store,
 } from "@audio-ui/core";
+import type { WaveformPeaks } from "@audio-ui/core/waveform";
 import * as React from "react";
-import type { WaveformPeaks } from "./internal/peaks";
 
 export const POSITION_PROPERTY = "--waveform-position";
 

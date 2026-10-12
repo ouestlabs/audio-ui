@@ -2,11 +2,15 @@ import {
   createChangeEventDetails,
   type ChangeEventDetails as ExtraChangeEventDetails,
 } from "@audio-ui/core";
+import {
+  type ClipLimits,
+  type ClipValue,
+  moveClip,
+} from "@audio-ui/core/timeline";
 import * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
 import { VISUALLY_HIDDEN } from "../../internal/visually-hidden";
-import { type ClipLimits, type ClipValue, moveClip } from "../clip";
 import {
   type DescribePosition,
   placedOver,

@@ -1,11 +1,11 @@
+import {
+  DEFAULT_ARC_STROKE_WIDTH,
+  STATE_ATTRIBUTES_MAPPING,
+} from "@audio-ui/core/knob";
 import { resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
 import { useKnobContext } from "../context";
 import { useArcProps } from "../internal/arc-props";
-import {
-  DEFAULT_ARC_STROKE_WIDTH,
-  STATE_ATTRIBUTES_MAPPING,
-} from "../internal/shared";
 import type { Root } from "./root";
 import type { Track } from "./track";
 

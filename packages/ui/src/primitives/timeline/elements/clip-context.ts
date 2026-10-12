@@ -4,10 +4,10 @@ import {
   type CommitEventDetails as ExtraCommitEventDetails,
   isReleased,
 } from "@audio-ui/core";
+import type { ClipLimits, ClipValue } from "@audio-ui/core/timeline";
+import { bypassesGrid, type Grid } from "@audio-ui/core/timeline";
 import * as React from "react";
-import type { ClipLimits, ClipValue } from "../clip";
 import type { DescribePosition } from "../context";
-import { bypassesGrid, type Grid } from "../internal/snap";
 
 /** What a change to the clip moves. */
 export type ClipTarget =

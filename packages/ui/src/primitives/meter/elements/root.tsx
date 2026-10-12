@@ -1,9 +1,9 @@
+import { type LevelScale, levelPosition } from "@audio-ui/core/meter";
 import * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
 import { useLocale } from "../../internal/use-locale";
 import { MeterContext, type MeterContextValue } from "../context";
-import { type LevelScale, levelPosition } from "../internal/scale";
 import {
   type ChannelNodes,
   type ChannelPart,

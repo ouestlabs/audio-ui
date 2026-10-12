@@ -1,23 +1,5 @@
 import { createChangeEventDetails, isReleased } from "@audio-ui/core";
-import * as React from "react";
-import { type PartProps, resolveStyling } from "../../internal/part";
-import { mergeProps, useRender } from "../../internal/render";
-import { placedOver, useTimelineContext } from "../../timeline/context";
-import {
-  bypassesGrid,
-  type Grid,
-  snapMove,
-} from "../../timeline/internal/snap";
-import {
-  type Edit,
-  type PianoRollContextValue,
-  placedOnRow,
-  usePianoRollContext,
-  useRollView,
-  type ValueChangeEventDetails,
-  type ValueCommitEventDetails,
-  VELOCITY_PROPERTY,
-} from "../context";
+import type { Rows } from "@audio-ui/core/piano-roll";
 import {
   duplicateNotes,
   keyboardEdit,
@@ -28,8 +10,22 @@ import {
   resizeNotes,
   snapEdgeDelta,
   spatialOrder,
-} from "../internal/edits";
-import type { Rows } from "../internal/rows";
+} from "@audio-ui/core/piano-roll";
+import { bypassesGrid, type Grid, snapMove } from "@audio-ui/core/timeline";
+import * as React from "react";
+import { type PartProps, resolveStyling } from "../../internal/part";
+import { mergeProps, useRender } from "../../internal/render";
+import { placedOver, useTimelineContext } from "../../timeline/context";
+import {
+  type Edit,
+  type PianoRollContextValue,
+  placedOnRow,
+  usePianoRollContext,
+  useRollView,
+  type ValueChangeEventDetails,
+  type ValueCommitEventDetails,
+  VELOCITY_PROPERTY,
+} from "../context";
 import { DRAG_THRESHOLD } from "./grid";
 
 const NO_GRID = { offset: 0, step: 0 };

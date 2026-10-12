@@ -1,8 +1,8 @@
+import { STATE_ATTRIBUTES_MAPPING } from "@audio-ui/core/knob";
 import * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
 import { useKnobContext } from "../context";
-import { STATE_ATTRIBUTES_MAPPING } from "../internal/shared";
 import type { Root } from "./root";
 
 /** Accessible label, associated with the thumb's input. Renders a `<div>` element. */

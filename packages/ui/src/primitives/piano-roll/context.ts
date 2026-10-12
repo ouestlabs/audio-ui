@@ -3,9 +3,8 @@ import type {
   CommitEventDetails as ExtraCommitEventDetails,
   Store,
 } from "@audio-ui/core";
+import type { Note, NoteId, RollBounds, Rows } from "@audio-ui/core/piano-roll";
 import * as React from "react";
-import type { Note, NoteId, RollBounds } from "./internal/edits";
-import type { Rows } from "./internal/rows";
 
 /** Set on the root: how many rows the roll draws. */
 export const ROWS_PROPERTY = "--piano-roll-rows";

@@ -1,5 +1,5 @@
+import { ARC_OUTER_RADIUS, arcPath } from "@audio-ui/core/knob";
 import type * as React from "react";
-import { ARC_OUTER_RADIUS, arcPath } from "./shared";
 
 export function useArcProps(
   strokeWidth: number,

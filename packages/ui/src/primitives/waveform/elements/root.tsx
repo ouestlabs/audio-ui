@@ -1,4 +1,6 @@
 import { clampFinite, createStore, normalizeRange } from "@audio-ui/core";
+import type { WaveformPeaks } from "@audio-ui/core/waveform";
+import { isAudible } from "@audio-ui/core/waveform";
 import * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
@@ -13,8 +15,6 @@ import {
   type WaveformContextValue,
   type WaveformState,
 } from "../context";
-import { isAudible } from "../internal/levels";
-import type { WaveformPeaks } from "../internal/peaks";
 
 /**
  * Groups the parts of a waveform and owns what they show: the audio's shape

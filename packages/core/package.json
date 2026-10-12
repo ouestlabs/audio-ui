@@ -28,6 +28,50 @@
     "./internal": {
       "types": "./dist/internal.d.ts",
       "import": "./dist/internal.js"
+    },
+    "./envelope": {
+      "types": "./dist/primitives/envelope/index.d.ts",
+      "import": "./dist/envelope.js"
+    },
+    "./fader": {
+      "types": "./dist/primitives/fader/index.d.ts",
+      "import": "./dist/fader.js"
+    },
+    "./knob": {
+      "types": "./dist/primitives/knob/index.d.ts",
+      "import": "./dist/knob.js"
+    },
+    "./meter": {
+      "types": "./dist/primitives/meter/index.d.ts",
+      "import": "./dist/meter.js"
+    },
+    "./piano": {
+      "types": "./dist/primitives/piano/index.d.ts",
+      "import": "./dist/piano.js"
+    },
+    "./piano-roll": {
+      "types": "./dist/primitives/piano-roll/index.d.ts",
+      "import": "./dist/piano-roll.js"
+    },
+    "./plot": {
+      "types": "./dist/primitives/plot/index.d.ts",
+      "import": "./dist/plot.js"
+    },
+    "./sequencer": {
+      "types": "./dist/primitives/sequencer/index.d.ts",
+      "import": "./dist/sequencer.js"
+    },
+    "./timeline": {
+      "types": "./dist/primitives/timeline/index.d.ts",
+      "import": "./dist/timeline.js"
+    },
+    "./waveform": {
+      "types": "./dist/primitives/waveform/index.d.ts",
+      "import": "./dist/waveform.js"
+    },
+    "./xypad": {
+      "types": "./dist/primitives/xypad/index.d.ts",
+      "import": "./dist/xypad.js"
     }
   },
   "module": "dist/index.js",

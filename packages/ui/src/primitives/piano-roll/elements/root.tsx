@@ -3,11 +3,23 @@ import {
   createStore,
   pitchName,
 } from "@audio-ui/core";
+import {
+  cellStart,
+  duplicateAfter,
+  type Note,
+  type NoteId,
+  pasteNotes,
+  quantizeNotes,
+  type RollBounds,
+  rollRows,
+  sameNotes,
+  sanitizeNote,
+} from "@audio-ui/core/piano-roll";
+import { snapToGrid } from "@audio-ui/core/timeline";
 import * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
 import { TimelineContext } from "../../timeline/context";
-import { snapToGrid } from "../../timeline/internal/snap";
 import {
   type Band,
   type Edit,
@@ -22,18 +34,6 @@ import {
   type ValueChangeEventDetails,
   type ValueCommitEventDetails,
 } from "../context";
-import {
-  cellStart,
-  duplicateAfter,
-  type Note,
-  type NoteId,
-  pasteNotes,
-  quantizeNotes,
-  type RollBounds,
-  sameNotes,
-  sanitizeNote,
-} from "../internal/edits";
-import { rollRows } from "../internal/rows";
 
 const EMPTY: readonly Note[] = [];
 
@@ -519,8 +519,8 @@ export function Root(componentProps: Root.Props) {
 
 export namespace Root {
   export type State = PianoRollState;
-  export type Note = import("../internal/edits").Note;
-  export type NoteId = import("../internal/edits").NoteId;
+  export type Note = import("@audio-ui/core/piano-roll").Note;
+  export type NoteId = import("@audio-ui/core/piano-roll").NoteId;
   export type Edit = import("../context").Edit;
   export type ChangeEventReason = ChangeEventDetails["reason"];
   export type ChangeEventDetails = ValueChangeEventDetails;

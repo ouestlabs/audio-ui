@@ -1,7 +1,7 @@
+import { polylinePoints } from "@audio-ui/core/envelope";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
 import { STATE_ATTRIBUTES_MAPPING, useEnvelopeContext } from "../context";
-import { polylinePoints } from "../internal/geometry";
 import type { Root } from "./root";
 
 /** The envelope curve through the points. Renders a `<polyline>` element. */

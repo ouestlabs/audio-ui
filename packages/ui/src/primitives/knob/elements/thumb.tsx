@@ -1,10 +1,10 @@
 import { createChangeEventDetails } from "@audio-ui/core";
+import { STATE_ATTRIBUTES_MAPPING, steppedValue } from "@audio-ui/core/knob";
 import * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
 import { VISUALLY_HIDDEN } from "../../internal/visually-hidden";
 import { useKnobContext } from "../context";
-import { STATE_ATTRIBUTES_MAPPING, steppedValue } from "../internal/shared";
 import type { Root } from "./root";
 
 /**

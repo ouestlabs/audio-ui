@@ -1,14 +1,14 @@
 import { createChangeEventDetails, isReleased } from "@audio-ui/core";
-import * as React from "react";
-import { type PartProps, resolveStyling } from "../../internal/part";
-import { mergeProps, useRender } from "../../internal/render";
-import { STATE_ATTRIBUTES_MAPPING, useEnvelopeContext } from "../context";
 import {
   curveForMidpoint,
   levelAt,
   segmentNear,
   snapTo,
-} from "../internal/geometry";
+} from "@audio-ui/core/envelope";
+import * as React from "react";
+import { type PartProps, resolveStyling } from "../../internal/part";
+import { mergeProps, useRender } from "../../internal/render";
+import { STATE_ATTRIBUTES_MAPPING, useEnvelopeContext } from "../context";
 import type { Root } from "./root";
 
 interface BendGesture {

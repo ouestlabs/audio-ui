@@ -6,6 +6,14 @@ import {
   type CommitEventDetails as ExtraCommitEventDetails,
   type Point as GeomPoint,
 } from "@audio-ui/core";
+import {
+  type Breakpoint,
+  CURVE_EPSILON,
+  clampToNeighbors,
+  insertPoint,
+  samePoints,
+  sanitizePoints,
+} from "@audio-ui/core/envelope";
 import type { Nullable } from "@audio-ui/core/internal";
 import * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part";
@@ -16,14 +24,6 @@ import {
   type EnvelopeContextValue,
   STATE_ATTRIBUTES_MAPPING,
 } from "../context";
-import {
-  type Breakpoint,
-  CURVE_EPSILON,
-  clampToNeighbors,
-  insertPoint,
-  samePoints,
-  sanitizePoints,
-} from "../internal/geometry";
 
 const DEFAULT_MIN_POINTS = 2;
 const DEFAULT_STEP = 0.01;

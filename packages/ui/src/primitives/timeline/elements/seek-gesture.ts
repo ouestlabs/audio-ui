@@ -1,7 +1,7 @@
 import { createChangeEventDetails, isReleased } from "@audio-ui/core";
+import { bypassesGrid, snapToGrid } from "@audio-ui/core/timeline";
 import * as React from "react";
 import { type TimelineContextValue, valueAtPointer } from "../context";
-import { bypassesGrid, snapToGrid } from "../internal/snap";
 
 interface SeekGesture {
   /** Whether the gesture moved the position at least once; if so its end commits. */

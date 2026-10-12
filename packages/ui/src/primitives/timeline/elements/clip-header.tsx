@@ -1,8 +1,7 @@
+import { moveClip, snapMove } from "@audio-ui/core/timeline";
 import type * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
-import { moveClip } from "../clip";
-import { snapMove } from "../internal/snap";
 import { type ClipState, useClipContext, useClipDrag } from "./clip-context";
 
 /**

@@ -1,9 +1,9 @@
 import type { Source } from "@audio-ui/core";
+import { tracePath } from "@audio-ui/core/plot";
 import * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
 import { type PlotAxis, type PlotState, usePlotContext } from "../context";
-import { tracePath } from "../internal/path";
 
 /** A live list of y values, spread evenly across the x axis. */
 export type TraceSource = Source<ArrayLike<number>>;

@@ -1,10 +1,10 @@
 import { createChangeEventDetails } from "@audio-ui/core";
+import { DEFAULT_VELOCITY, isOn, velocityAt } from "@audio-ui/core/sequencer";
 import * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
 import { VISUALLY_HIDDEN } from "../../internal/visually-hidden";
 import { RowContext, useSequencerContext, useSequencerView } from "../context";
-import { DEFAULT_VELOCITY, isOn, velocityAt } from "../internal/grid";
 
 /** What the arrow keys change a velocity by; Page Up/Down move five times as far. */
 const VELOCITY_STEP = 0.05;

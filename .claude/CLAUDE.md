@@ -50,7 +50,7 @@ Next.js App Router · Fumadocs + MDX · Tailwind CSS v4 · shadcn/ui + Base UI �
 - `value/`, scales, ranges, formatting, change/commit event details, live sources and stores
 - `dom/`, frame scheduling, pointer release, visibility, data attributes
 - `index.ts` is the public API; `internal.ts` (`@audio-ui/core/internal`) is for adapters only
-- A primitive's own logic gets a folder named after it (`timeline/`, `waveform/`…)
+- `primitives/<name>/`, each primitive's own logic (timeline clips, waveform peaks, envelope geometry…), published as `@audio-ui/core/<name>`
 
 `@audio-ui/react` depends on it. In development it resolves to `packages/core/src` through tsconfig `paths` (Bun honours them in tests); its build reads `dist`.
 
