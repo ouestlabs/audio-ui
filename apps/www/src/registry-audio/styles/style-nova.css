@@ -481,11 +481,11 @@
   }
 
   .cn-timeline-range {
-    @apply rounded-full bg-primary/20 ring-1 ring-primary/50 ring-inset has-focus-visible:ring-2 has-focus-visible:ring-ring;
+    @apply rounded-[min(var(--radius-sm),6px)] bg-primary/20 ring-1 ring-primary/50 ring-inset has-focus-visible:ring-2 has-focus-visible:ring-ring;
   }
 
   .cn-timeline-range-handle {
-    @apply rounded-full border-ring border bg-card transition-[color,box-shadow] hover:ring-2 hover:ring-ring/40 has-focus-visible:ring-3 has-focus-visible:ring-ring/50 active:ring-3 active:ring-ring/50 motion-reduce:transition-none;
+    @apply rounded-[min(var(--radius-sm),6px)] border-ring border bg-card transition-[color,box-shadow] hover:ring-2 hover:ring-ring/40 has-focus-visible:ring-3 has-focus-visible:ring-ring/50 active:ring-3 active:ring-ring/50 motion-reduce:transition-none;
   }
 
   .cn-timeline-clip {
@@ -509,7 +509,7 @@
   }
 
   .cn-timeline-navigator {
-    @apply h-6 rounded-full bg-muted;
+    @apply h-6 rounded-[min(var(--radius-sm),6px)] bg-muted;
   }
 
   .cn-timeline-navigator-window {
@@ -517,7 +517,7 @@
   }
 
   .cn-timeline-navigator-handle {
-    @apply rounded-full border-ring border bg-card transition-[color,box-shadow] hover:ring-2 hover:ring-ring/40 has-focus-visible:ring-3 has-focus-visible:ring-ring/50 active:ring-3 active:ring-ring/50 motion-reduce:transition-none;
+    @apply rounded-[min(var(--radius-sm),6px)] border-ring border bg-card transition-[color,box-shadow] hover:ring-2 hover:ring-ring/40 has-focus-visible:ring-3 has-focus-visible:ring-ring/50 active:ring-3 active:ring-ring/50 motion-reduce:transition-none;
   }
 
   /* MARK: Waveform */
