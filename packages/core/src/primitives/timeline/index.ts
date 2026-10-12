@@ -15,7 +15,7 @@ export {
   splitClip,
   trimClipEnd,
   trimClipStart,
-} from "./clip";
+} from "./clip.js";
 export {
   type ClipChangeEventDetails,
   type ClipCommitEventDetails,
@@ -29,8 +29,8 @@ export {
   normalizeClip,
   sameClip,
   wholeClip,
-} from "./clip-controller";
-export { adjacentPoint } from "./locators";
+} from "./clip-controller.js";
+export { adjacentPoint } from "./locators.js";
 export {
   createNavigatorController,
   movedRange,
@@ -39,7 +39,7 @@ export {
   type NavigatorOptions,
   type NavigatorPart,
   visibleRange,
-} from "./navigator";
+} from "./navigator.js";
 export {
   createTimelineController,
   type TimelineController,
@@ -49,7 +49,7 @@ export {
   type TimelineSnapshot,
   type TimelineZoomChangeEventDetails,
   valueAtLane,
-} from "./position";
+} from "./position.js";
 export {
   createRangeController,
   type RangeChangeEventDetails,
@@ -57,20 +57,20 @@ export {
   type RangeController,
   type RangeOptions,
   type RangeSnapshot,
-} from "./range-controller";
+} from "./range-controller.js";
 export {
   anchoredScroll,
   clampZoom,
   valueAtOffset,
   type ZoomAnchor,
-} from "./scale";
+} from "./scale.js";
 export {
   bypassesGrid,
   type Grid,
   snapMove,
   snapRangeMove,
   snapToGrid,
-} from "./snap";
+} from "./snap.js";
 export {
   createTrackController,
   type TrackController,
@@ -78,10 +78,10 @@ export {
   type TrackHeightCommitEventDetails,
   type TrackOptions,
   type TrackSnapshot,
-} from "./track-controller";
+} from "./track-controller.js";
 export {
   createWheelZoom,
   WHEEL_ZOOM_SENSITIVITY,
   type WheelZoomController,
   type WheelZoomOptions,
-} from "./wheel-zoom";
+} from "./wheel-zoom.js";

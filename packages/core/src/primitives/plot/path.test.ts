@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { LINEAR_SCALE, LOGARITHMIC_SCALE } from "../../value/scale";
-import { curvePath } from "./path";
+import { LINEAR_SCALE, LOGARITHMIC_SCALE } from "../../value/scale.js";
+import { curvePath } from "./path.js";
 
 const linear = (min: number, max: number) => ({
   max,

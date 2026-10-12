@@ -1,4 +1,4 @@
-import { type Grid, snapMove } from "../timeline/snap";
+import { type Grid, snapMove } from "../timeline/snap.js";
 
 export type NoteId = number | string;
 

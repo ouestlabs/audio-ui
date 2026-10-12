@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { cellAtPoint, isOn, moveFocus, setCell } from "./grid";
+import { cellAtPoint, isOn, moveFocus, setCell } from "./grid.js";
 
 const PATTERN = [
   [true, false, false],

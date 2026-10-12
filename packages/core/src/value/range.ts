@@ -1,4 +1,4 @@
-import { clamp, clampFinite } from "../shared/math";
+import { clamp, clampFinite } from "../shared/math.js";
 
 /** A stretch of a timeline, `[start, end]` in its units. */
 export type RangeValue = readonly [start: number, end: number];

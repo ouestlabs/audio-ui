@@ -8,10 +8,10 @@ export {
   type XYPadOptions,
   type XYPadPoint,
   type XYPadSnapshot,
-} from "./controller";
+} from "./controller.js";
 export {
   type Axis,
   LARGE_STEP_MULTIPLIER,
   STATE_ATTRIBUTES_MAPPING,
   toPercent,
-} from "./shared";
+} from "./shared.js";

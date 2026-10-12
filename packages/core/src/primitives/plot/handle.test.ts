@@ -1,6 +1,9 @@
 import { describe, expect, mock, test } from "bun:test";
-import { LINEAR_SCALE } from "../../value/scale";
-import { createPlotHandleController, type PlotHandleOptions } from "./handle";
+import { LINEAR_SCALE } from "../../value/scale.js";
+import {
+  createPlotHandleController,
+  type PlotHandleOptions,
+} from "./handle.js";
 
 const key = (name: string, extra: Partial<KeyboardEventInit> = {}) =>
   new KeyboardEvent("keydown", { key: name, ...extra });

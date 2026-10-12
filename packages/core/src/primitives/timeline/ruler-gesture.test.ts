@@ -1,5 +1,5 @@
 import { describe, expect, mock, test } from "bun:test";
-import { createTimelineController, type TimelineOptions } from "./position";
+import { createTimelineController, type TimelineOptions } from "./position.js";
 
 const create = (options: Partial<TimelineOptions> = {}) =>
   createTimelineController({

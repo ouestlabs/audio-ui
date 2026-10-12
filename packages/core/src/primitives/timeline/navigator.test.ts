@@ -5,7 +5,7 @@ import {
   type NavigatorMetrics,
   type NavigatorOptions,
   visibleRange,
-} from "./navigator";
+} from "./navigator.js";
 
 const key = (name: string, extra: Partial<KeyboardEventInit> = {}) =>
   new KeyboardEvent("keydown", { key: name, ...extra });

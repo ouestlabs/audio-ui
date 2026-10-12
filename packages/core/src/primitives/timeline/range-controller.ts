@@ -1,17 +1,17 @@
-import { followPointer } from "../../dom/gesture";
+import { followPointer } from "../../dom/gesture.js";
 import {
   type ChangeEventDetails,
   type CommitEventDetails,
   createChangeEventDetails,
-} from "../../value/events";
+} from "../../value/events.js";
 import {
   normalizeRange,
   type RangeEdge,
   type RangeValue,
-} from "../../value/range";
-import { keyTargets } from "./clip-controller";
-import { valueAtLane } from "./position";
-import { bypassesGrid, type Grid, snapRangeMove, snapToGrid } from "./snap";
+} from "../../value/range.js";
+import { keyTargets } from "./clip-controller.js";
+import { valueAtLane } from "./position.js";
+import { bypassesGrid, type Grid, snapRangeMove, snapToGrid } from "./snap.js";
 
 type Edged<Details> = Details & {
   /** What moved: one edge, or the whole range with `"both"`. */

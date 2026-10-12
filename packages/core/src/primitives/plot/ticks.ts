@@ -1,5 +1,5 @@
-import { LOGARITHMIC_SCALE } from "../../value/scale";
-import type { PlotAxis } from "./axis";
+import { LOGARITHMIC_SCALE } from "../../value/scale.js";
+import type { PlotAxis } from "./axis.js";
 
 /** How many ticks an axis gets unless asked for another number. */
 export const DEFAULT_TICK_COUNT = 5;

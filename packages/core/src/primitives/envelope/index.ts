@@ -7,7 +7,7 @@ export {
   type EnvelopeController,
   type EnvelopeOptions,
   type EnvelopeSnapshot,
-} from "./controller";
+} from "./controller.js";
 export {
   type Breakpoint,
   CURVE_EPSILON,
@@ -30,4 +30,4 @@ export {
   segmentShape,
   snapTo,
   sortPoints,
-} from "./geometry";
+} from "./geometry.js";

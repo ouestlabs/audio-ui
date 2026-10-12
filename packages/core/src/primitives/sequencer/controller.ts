@@ -1,9 +1,9 @@
-import { followPointer } from "../../dom/gesture";
+import { followPointer } from "../../dom/gesture.js";
 import {
   type ChangeEventDetails,
   type CommitEventDetails,
   createChangeEventDetails,
-} from "../../value/events";
+} from "../../value/events.js";
 import {
   type CellAddress,
   cellAtPoint,
@@ -15,7 +15,7 @@ import {
   type Velocities,
   velocityAt,
   velocityAtY,
-} from "./grid";
+} from "./grid.js";
 
 const EMPTY_PATTERN: readonly (readonly boolean[])[] = [];
 const EMPTY_VELOCITIES: readonly (readonly number[])[] = [];

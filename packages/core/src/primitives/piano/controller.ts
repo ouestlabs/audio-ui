@@ -1,10 +1,15 @@
-import { followPointer } from "../../dom/gesture";
+import { followPointer } from "../../dom/gesture.js";
 import {
   type ChangeEventDetails,
   type CommitEventDetails,
   createChangeEventDetails,
-} from "../../value/events";
-import { type KeyLayout, type KeyPlacement, keyAt, placeKeys } from "./layout";
+} from "../../value/events.js";
+import {
+  type KeyLayout,
+  type KeyPlacement,
+  keyAt,
+  placeKeys,
+} from "./layout.js";
 
 /** The softest a pointer press plays: the very top of a key, not silence. */
 export const MIN_VELOCITY = 0.25;

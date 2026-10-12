@@ -1,4 +1,4 @@
-import { clamp } from "../shared/math";
+import { clamp } from "../shared/math.js";
 
 /**
  * How a value maps onto a control's travel, and back. `toPosition` gives

@@ -1,4 +1,4 @@
-export { type PlotAxis, positionOn, valueOn } from "./axis";
+export { type PlotAxis, positionOn, valueOn } from "./axis.js";
 export {
   createPlotHandleController,
   type PlotHandleAxis,
@@ -10,6 +10,6 @@ export {
   type PlotHandleOptions,
   type PlotHandleSnapshot,
   type PlotPoint,
-} from "./handle";
-export { curvePath, tracePath } from "./path";
-export { axisTicks, DEFAULT_TICK_COUNT, formatTick } from "./ticks";
+} from "./handle.js";
+export { curvePath, tracePath } from "./path.js";
+export { axisTicks, DEFAULT_TICK_COUNT, formatTick } from "./ticks.js";

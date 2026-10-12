@@ -1,5 +1,5 @@
 import { describe, expect, mock, test } from "bun:test";
-import { createSource } from "./source";
+import { createSource } from "./source.js";
 
 describe("createSource", () => {
   test("holds its initial value until one is published", () => {

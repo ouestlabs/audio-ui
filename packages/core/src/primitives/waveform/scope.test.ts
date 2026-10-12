@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { scopePoints } from "./scope";
+import { scopePoints } from "./scope.js";
 
 const options = { gain: 1, height: 100, inset: 2, width: 200 };
 

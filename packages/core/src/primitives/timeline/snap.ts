@@ -3,7 +3,7 @@ import {
   type RangeEdge,
   type RangeLimits,
   type RangeValue,
-} from "../../value/range";
+} from "../../value/range.js";
 
 /** Grid lines `step` apart, starting from `offset`. A `step` of 0 or less is no grid. */
 export interface Grid {

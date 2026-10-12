@@ -1,21 +1,21 @@
-import { isReleased } from "../../dom/pointer";
+import { isReleased } from "../../dom/pointer.js";
 import {
   clamp,
   clampFinite,
   degToRad,
   roundToStep,
   TAU,
-} from "../../shared/math";
+} from "../../shared/math.js";
 import {
   type ChangeEventDetails,
   type CommitEventDetails,
   createChangeEventDetails,
-} from "../../value/events";
+} from "../../value/events.js";
 import {
   type ParameterScale,
   type ParameterScaleProp,
   resolveScale,
-} from "../../value/scale";
+} from "../../value/scale.js";
 import {
   CENTER_DEAD_ZONE_MIN_PX,
   CENTER_DEAD_ZONE_REL,
@@ -28,7 +28,7 @@ import {
   TAP_MAX_MOVE_PX,
   VERTICAL_DRAG_RANGE_PX,
   WHEEL_DELTA_EPSILON,
-} from "./shared";
+} from "./shared.js";
 
 export type KnobDragMode = "circular" | "revolution" | "vertical";
 

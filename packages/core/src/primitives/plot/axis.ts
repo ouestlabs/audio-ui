@@ -1,4 +1,4 @@
-import type { ParameterScale } from "../../value/scale";
+import type { ParameterScale } from "../../value/scale.js";
 
 /** One of the plot's two axes: its range and how values spread along it. */
 export interface PlotAxis {

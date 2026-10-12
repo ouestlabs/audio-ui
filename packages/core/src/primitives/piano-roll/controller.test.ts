@@ -1,6 +1,9 @@
 import { describe, expect, mock, test } from "bun:test";
-import { createPianoRollController, type PianoRollOptions } from "./controller";
-import type { Note } from "./edits";
+import {
+  createPianoRollController,
+  type PianoRollOptions,
+} from "./controller.js";
+import type { Note } from "./edits.js";
 
 const key = (name: string, extra: Partial<KeyboardEventInit> = {}) =>
   new KeyboardEvent("keydown", { key: name, ...extra });

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { LINEAR_SCALE, LOGARITHMIC_SCALE } from "../../value/scale";
-import { axisTicks, formatTick } from "./ticks";
+import { LINEAR_SCALE, LOGARITHMIC_SCALE } from "../../value/scale.js";
+import { axisTicks, formatTick } from "./ticks.js";
 
 const linear = (min: number, max: number) => ({
   max,

@@ -4,7 +4,7 @@ import {
   createMeterConfig,
   type MeterChannelNodes,
   paintChannel,
-} from "./view";
+} from "./view.js";
 
 describe("Meter channel view", () => {
   test("reads a level on the scale, with its text and clipping and warning zones", () => {

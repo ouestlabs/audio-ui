@@ -9,5 +9,5 @@ export {
   type FaderOrientation,
   type FaderSnapshot,
   faderShare,
-} from "./controller";
-export { DEFAULT_MAX, DEFAULT_MIN, WHEEL_DELTA_EPSILON } from "./defaults";
+} from "./controller.js";
+export { DEFAULT_MAX, DEFAULT_MIN, WHEEL_DELTA_EPSILON } from "./defaults.js";

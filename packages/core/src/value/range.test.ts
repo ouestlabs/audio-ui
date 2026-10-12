@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { moveRange, normalizeRange } from "./range";
+import { moveRange, normalizeRange } from "./range.js";
 
 const limits = { duration: 100, minLength: 5 };
 

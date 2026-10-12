@@ -1,4 +1,4 @@
-import { clamp } from "../../shared/math";
+import { clamp } from "../../shared/math.js";
 
 /** Shift + arrows and Page Up/Down move this many steps at once. */
 export const LARGE_STEP_MULTIPLIER = 10;

@@ -1,5 +1,8 @@
 import { describe, expect, mock, test } from "bun:test";
-import { createTrackController, type TrackOptions } from "./track-controller";
+import {
+  createTrackController,
+  type TrackOptions,
+} from "./track-controller.js";
 
 const key = (name: string, extra: Partial<KeyboardEventInit> = {}) =>
   new KeyboardEvent("keydown", { key: name, ...extra });

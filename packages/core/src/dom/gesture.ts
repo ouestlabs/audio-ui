@@ -1,4 +1,4 @@
-import { isReleased } from "./pointer";
+import { isReleased } from "./pointer.js";
 
 /**
  * Follows one pointer on its document until it is released or cancelled:

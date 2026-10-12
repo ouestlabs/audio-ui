@@ -1,10 +1,10 @@
-import { followPointer } from "../../dom/gesture";
+import { followPointer } from "../../dom/gesture.js";
 import {
   type ChangeEventDetails,
   type CommitEventDetails,
   createChangeEventDetails,
-} from "../../value/events";
-import { type PlotAxis, positionOn, valueOn } from "./axis";
+} from "../../value/events.js";
+import { type PlotAxis, positionOn, valueOn } from "./axis.js";
 
 /** A point on the plot, in the axes' units. */
 export interface PlotPoint {

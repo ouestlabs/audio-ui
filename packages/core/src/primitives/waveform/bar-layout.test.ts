@@ -8,7 +8,7 @@ import {
   envelopeRects,
   mirroredScrollRects,
   scrollShift,
-} from "./bar-layout";
+} from "./bar-layout.js";
 
 describe("barCount", () => {
   test("fits bars and gaps into the width, without a trailing gap", () => {

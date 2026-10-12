@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { fitPeaks, peakMagnitudes } from "./peaks";
+import { fitPeaks, peakMagnitudes } from "./peaks.js";
 
 const envelopeOf = (bars: number) => ({
   high: new Float32Array(bars),

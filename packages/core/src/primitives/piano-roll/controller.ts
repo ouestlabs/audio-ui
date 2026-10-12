@@ -1,11 +1,16 @@
-import { followPointer } from "../../dom/gesture";
-import { clamp } from "../../shared/math";
+import { followPointer } from "../../dom/gesture.js";
+import { clamp } from "../../shared/math.js";
 import {
   type ChangeEventDetails,
   type CommitEventDetails,
   createChangeEventDetails,
-} from "../../value/events";
-import { bypassesGrid, type Grid, snapMove, snapToGrid } from "../timeline";
+} from "../../value/events.js";
+import {
+  bypassesGrid,
+  type Grid,
+  snapMove,
+  snapToGrid,
+} from "../timeline/index.js";
 import {
   cellStart,
   changeVelocity,
@@ -24,8 +29,8 @@ import {
   sanitizeNote,
   snapEdgeDelta,
   spatialOrder,
-} from "./edits";
-import { type Rows, rollRows } from "./rows";
+} from "./edits.js";
+import { type Rows, rollRows } from "./rows.js";
 
 /** How far a pointer moves before a press on the grid or a note becomes a drag. */
 export const DRAG_THRESHOLD = 4;

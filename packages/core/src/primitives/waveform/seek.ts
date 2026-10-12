@@ -1,12 +1,12 @@
-import { followPointer } from "../../dom/gesture";
-import { clampFinite, clampUnit } from "../../shared/math";
+import { followPointer } from "../../dom/gesture.js";
+import { clampFinite, clampUnit } from "../../shared/math.js";
 import {
   type ChangeEventDetails,
   type CommitEventDetails,
   createChangeEventDetails,
-} from "../../value/events";
-import type { Source } from "../../value/source";
-import { createStore, type Store } from "../../value/store";
+} from "../../value/events.js";
+import type { Source } from "../../value/source.js";
+import { createStore, type Store } from "../../value/store.js";
 
 export type WaveformSeekChangeEventDetails =
   | ChangeEventDetails<"press" | "drag", PointerEvent>

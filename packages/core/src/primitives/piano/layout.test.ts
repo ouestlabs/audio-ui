@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { keyAt, placeKeys } from "./layout";
+import { keyAt, placeKeys } from "./layout.js";
 
 const OCTAVE = [48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60];
 

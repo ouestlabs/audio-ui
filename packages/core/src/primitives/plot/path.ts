@@ -1,4 +1,4 @@
-import { type PlotAxis, positionOn, valueOn } from "./axis";
+import { type PlotAxis, positionOn, valueOn } from "./axis.js";
 
 /**
  * An SVG path drawing `y = fn(x)` across the whole x axis, in a 1 × 1 box

@@ -1,12 +1,12 @@
-import { isReleased } from "../../dom/pointer";
-import { clamp, clampFinite, roundToStep } from "../../shared/math";
+import { isReleased } from "../../dom/pointer.js";
+import { clamp, clampFinite, roundToStep } from "../../shared/math.js";
 import {
   type ChangeEventDetails,
   type CommitEventDetails,
   createChangeEventDetails,
-} from "../../value/events";
-import { createPairFormatter } from "../../value/format";
-import { type Axis, LARGE_STEP_MULTIPLIER, toPercent } from "./shared";
+} from "../../value/events.js";
+import { createPairFormatter } from "../../value/format.js";
+import { type Axis, LARGE_STEP_MULTIPLIER, toPercent } from "./shared.js";
 
 export interface XYPadPoint {
   x: number;

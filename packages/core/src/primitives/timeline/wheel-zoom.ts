@@ -1,6 +1,6 @@
-import { createChangeEventDetails } from "../../value/events";
-import type { TimelineZoomChangeEventDetails } from "./position";
-import { valueAtOffset } from "./scale";
+import { createChangeEventDetails } from "../../value/events.js";
+import type { TimelineZoomChangeEventDetails } from "./position.js";
+import { valueAtOffset } from "./scale.js";
 
 /** How far one unit of wheel delta zooms, as an exponent. */
 export const WHEEL_ZOOM_SENSITIVITY = 0.0015;

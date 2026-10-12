@@ -1,5 +1,5 @@
-import { clampUnit } from "../../shared/math";
-import { fitPeaks, loudest, SILENCE_THRESHOLD } from "./levels";
+import { clampUnit } from "../../shared/math.js";
+import { fitPeaks, loudest, SILENCE_THRESHOLD } from "./levels.js";
 
 /** Time constant of the fall after a peak, in milliseconds: levels rise at once and fall smoothly. */
 const RELEASE_MS = 110;

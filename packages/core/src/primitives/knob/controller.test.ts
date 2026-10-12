@@ -1,5 +1,5 @@
 import { describe, expect, mock, test } from "bun:test";
-import { createKnobController } from "./controller";
+import { createKnobController } from "./controller.js";
 
 const key = (name: string, extra: Partial<KeyboardEventInit> = {}) =>
   new KeyboardEvent("keydown", { key: name, ...extra });
