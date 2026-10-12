@@ -1,8 +1,3 @@
-import {
-  clampUnit,
-  createChangeEventDetails,
-  isReleased,
-} from "@audio-ui/core";
 import * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
@@ -15,20 +10,6 @@ import {
   useWaveformContext,
   type WaveformState,
 } from "../context";
-
-interface SelectGesture {
-  anchor: number;
-  changed: boolean;
-  pointerId: number;
-}
-
-interface SeekGesture {
-  /** Whether the gesture moved the position at least once; if so its end commits. */
-  changed: boolean;
-  /** Whether the pointer moved after the press: the commit reason is "drag", else "press". */
-  moved: boolean;
-  pointerId: number;
-}
 
 /**
  * The seekable surface: a press jumps to the pointer and a drag scrubs. It
@@ -53,181 +34,49 @@ export function Control(componentProps: Control.Props) {
     style,
     ...elementProps
   } = componentProps;
-  const { actions, meta, state } = useWaveformContext("Control");
+  const { controller, meta, state } = useWaveformContext("Control");
   const { duration } = meta;
   // Nothing to seek while disabled, or before the audio is there.
   const inert = state.disabled || state.loading;
-  const gestureRef = React.useRef<SeekGesture | null>(null);
-  const selectRef = React.useRef<SelectGesture | null>(null);
-  const selectedRef = React.useRef<readonly [number, number] | null>(null);
   const describe = getAriaValueText ?? describeAsPercent;
   // Kept current for the paints that happen outside React.
   meta.describeRef.current = describe;
-
-  const valueAt = (event: React.PointerEvent<HTMLDivElement>): number => {
-    const rect = event.currentTarget.getBoundingClientRect();
-    return meta.atShare(
-      clampUnit((event.clientX - rect.left) / Math.max(rect.width, 1))
-    );
-  };
-
+  // A Shift + drag selects a stretch: the listeners go to the controller it drags on.
+  controller.setSelection({ onSelectionChange, onSelectionCommitted });
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
     if (inert || event.button !== 0) {
       return;
     }
     event.preventDefault();
-    event.currentTarget.setPointerCapture?.(event.pointerId);
     meta.inputRef.current?.focus({ focusVisible: false, preventScroll: true });
-    if (event.shiftKey && onSelectionChange) {
-      // Shift selects a stretch, as in an audio editor; a plain press seeks.
-      selectRef.current = {
-        anchor: valueAt(event),
-        changed: false,
-        pointerId: event.pointerId,
-      };
-      selectedRef.current = null;
-      actions.setDragging(true);
-      return;
-    }
-    const gesture: SeekGesture = {
-      changed: false,
-      moved: false,
-      pointerId: event.pointerId,
-    };
-    gestureRef.current = gesture;
-    actions.setDragging(true);
-    gesture.changed = actions.change(
-      valueAt(event),
-      createChangeEventDetails("press", event.nativeEvent)
-    );
+    controller.pressSeek(event.nativeEvent, event.currentTarget);
   };
 
   const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
     if (inert) {
       return;
     }
-    const at = valueAt(event);
-    meta.hover.set(at);
-    const selecting = selectRef.current;
-    if (selecting && selecting.pointerId === event.pointerId) {
-      if (isReleased(event)) {
-        handlePointerEnd(event);
-        return;
-      }
-      const range = [
-        Math.min(selecting.anchor, at),
-        Math.max(selecting.anchor, at),
-      ] as const;
-      const eventDetails = createChangeEventDetails("drag", event.nativeEvent);
-      onSelectionChange?.(range, eventDetails);
-      if (!eventDetails.isCanceled) {
-        selecting.changed = true;
-        selectedRef.current = range;
-      }
-      return;
-    }
-    const gesture = gestureRef.current;
-    if (!gesture || gesture.pointerId !== event.pointerId) {
-      return;
-    }
-    if (isReleased(event)) {
-      handlePointerEnd(event);
-      return;
-    }
-    gesture.moved = true;
-    if (
-      actions.change(at, createChangeEventDetails("drag", event.nativeEvent))
-    ) {
-      gesture.changed = true;
-    }
-  };
-
-  const handlePointerEnd = (event: React.PointerEvent<HTMLDivElement>) => {
-    const selecting = selectRef.current;
-    if (selecting && selecting.pointerId === event.pointerId) {
-      selectRef.current = null;
-      actions.setDragging(false);
-      if (selecting.changed && selectedRef.current) {
-        onSelectionCommitted?.(selectedRef.current, {
-          event: event.nativeEvent,
-          reason: "drag",
-        });
-      }
-      return;
-    }
-    const gesture = gestureRef.current;
-    if (!gesture || gesture.pointerId !== event.pointerId) {
-      return;
-    }
-    gestureRef.current = null;
-    // Read before settling: the position falls back to the known value after.
-    const committed = meta.valueRef.current;
-    actions.setDragging(false);
-    if (gesture.changed) {
-      actions.commit(committed, {
-        event: event.nativeEvent,
-        reason: gesture.moved ? "drag" : "press",
-      });
-    }
+    controller.hoverAt(event.clientX, event.currentTarget);
   };
 
   const handleKeyDown = React.useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
-      if (inert) {
-        return;
-      }
-      const { current } = meta.valueRef;
-      const arrowStep = event.shiftKey ? meta.largeStep : meta.step;
-      const targets: Record<string, number> = {
-        ArrowDown: current - arrowStep,
-        ArrowLeft: current - arrowStep,
-        ArrowRight: current + arrowStep,
-        ArrowUp: current + arrowStep,
-        End: meta.range[1],
-        Home: meta.range[0],
-        PageDown: current - meta.largeStep,
-        PageUp: current + meta.largeStep,
-      };
-      const target = targets[event.key];
-      if (target === undefined) {
-        return;
-      }
-      // The keys move within the stretch shown.
-      const next = Math.min(meta.range[1], Math.max(meta.range[0], target));
-      event.preventDefault();
-      const native = event.nativeEvent;
-      if (actions.change(next, createChangeEventDetails("keyboard", native))) {
-        actions.commit(meta.valueRef.current, {
-          event: native,
-          reason: "keyboard",
-        });
+      if (controller.keyDown(event.nativeEvent)) {
+        event.preventDefault();
       }
     },
-    [actions, inert, meta]
+    [controller]
   );
 
   const handleChange = React.useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      if (inert) {
-        return;
-      }
-      const native = event.nativeEvent;
-      if (
-        actions.change(
-          Number(event.currentTarget.value),
-          createChangeEventDetails("input-change", native)
-        )
-      ) {
-        actions.commit(meta.valueRef.current, {
-          event: native,
-          reason: "input-change",
-        });
-      }
+      controller.typeAt(Number(event.currentTarget.value), event.nativeEvent);
     },
-    [actions, inert, meta]
+    [controller]
   );
 
-  const initialValue = meta.valueRef.current;
+  // Read as it is: the thumb and the input follow the position outside React.
+  const initialValue = controller.getSnapshot().value;
 
   return useRender({
     defaultTagName: "div",
@@ -254,12 +103,9 @@ export function Control(componentProps: Control.Props) {
             />
           </>
         ),
-        onLostPointerCapture: handlePointerEnd,
-        onPointerCancel: handlePointerEnd,
         onPointerDown: handlePointerDown,
-        onPointerLeave: () => meta.hover.set(null),
+        onPointerLeave: () => controller.leave(),
         onPointerMove: handlePointerMove,
-        onPointerUp: handlePointerEnd,
         style: { touchAction: "none" },
       },
       { ...elementProps, ...resolveStyling(className, style, state) }

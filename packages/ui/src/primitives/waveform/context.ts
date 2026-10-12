@@ -1,10 +1,12 @@
+import type { Source, Store } from "@audio-ui/core";
 import type {
-  ChangeEventDetails as ExtraChangeEventDetails,
-  CommitEventDetails as ExtraCommitEventDetails,
-  Source,
-  Store,
-} from "@audio-ui/core";
-import type { WaveformPeaks } from "@audio-ui/core/waveform";
+  WaveformPeaks,
+  WaveformSeekChangeEventDetails,
+  WaveformSeekCommitEventDetails,
+  WaveformSeekController,
+  WaveformSelectionChangeEventDetails,
+  WaveformSelectionCommitEventDetails,
+} from "@audio-ui/core/waveform";
 import * as React from "react";
 
 export const POSITION_PROPERTY = "--waveform-position";
@@ -27,28 +29,14 @@ export type PositionSource = Source<number>;
  */
 export type LevelsSource = Source<ArrayLike<number>>;
 
-export type SeekChangeEventDetails =
-  | ExtraChangeEventDetails<"press", PointerEvent>
-  | ExtraChangeEventDetails<"drag", PointerEvent>
-  | ExtraChangeEventDetails<"keyboard", KeyboardEvent>
-  | ExtraChangeEventDetails<"input-change", Event>;
+export type SeekChangeEventDetails = WaveformSeekChangeEventDetails;
 
-export type SeekCommitEventDetails =
-  | ExtraCommitEventDetails<"press", PointerEvent>
-  | ExtraCommitEventDetails<"drag", PointerEvent>
-  | ExtraCommitEventDetails<"keyboard", KeyboardEvent>
-  | ExtraCommitEventDetails<"input-change", Event>;
+export type SeekCommitEventDetails = WaveformSeekCommitEventDetails;
 
 /** A stretch selected by dragging across the waveform with Shift held. */
-export type SelectionChangeEventDetails = ExtraChangeEventDetails<
-  "drag",
-  PointerEvent
->;
+export type SelectionChangeEventDetails = WaveformSelectionChangeEventDetails;
 
-export type SelectionCommitEventDetails = ExtraCommitEventDetails<
-  "drag",
-  PointerEvent
->;
+export type SelectionCommitEventDetails = WaveformSelectionCommitEventDetails;
 
 /** Returns how a position on the timeline is announced. */
 export type DescribeValue = (value: number, duration: number) => string;
@@ -58,12 +46,8 @@ export const describeAsPercent: DescribeValue = (value, duration) =>
   `${Math.round((duration > 0 ? value / duration : 0) * 100)}%`;
 
 export interface WaveformContextValue {
-  actions: {
-    /** Clamp and propose a position; returns whether it was applied. */
-    change: (next: number, eventDetails: SeekChangeEventDetails) => boolean;
-    commit: (value: number, eventDetails: SeekCommitEventDetails) => void;
-    setDragging: (dragging: boolean) => void;
-  };
+  /** The framework-free seek behind the waveform: the position, scrubbing, keys, selection. */
+  controller: WaveformSeekController;
   meta: {
     /** How the position is announced; set by `Control`, used on every paint. */
     describeRef: React.RefObject<DescribeValue>;
@@ -84,8 +68,6 @@ export interface WaveformContextValue {
     /** The played share, 0…1, observable outside React. */
     position: Store<number>;
     step: number;
-    /** Latest painted position, readable from event handlers. */
-    valueRef: React.RefObject<number>;
   };
   state: WaveformState;
 }

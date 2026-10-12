@@ -1,6 +1,10 @@
 import { clampFinite, createStore, normalizeRange } from "@audio-ui/core";
 import type { WaveformPeaks } from "@audio-ui/core/waveform";
-import { isAudible } from "@audio-ui/core/waveform";
+import {
+  createWaveformController,
+  isAudible,
+  type WaveformSeekOptions,
+} from "@audio-ui/core/waveform";
 import * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
@@ -44,7 +48,7 @@ export function Root(componentProps: Root.Props) {
     source,
     step: stepProp,
     style,
-    value: valueProp,
+    value,
     ...elementProps
   } = componentProps;
   const step = stepProp ?? duration / 100;
@@ -58,45 +62,44 @@ export function Root(componentProps: Root.Props) {
     () => (rangeEnd > rangeStart ? [rangeStart, rangeEnd] : [0, duration]),
     [duration, rangeEnd, rangeStart]
   );
-  const toShare = React.useCallback(
-    (value: number) =>
-      range[1] > range[0] ? (value - range[0]) / (range[1] - range[0]) : 0,
-    [range]
-  );
-  const atShare = React.useCallback(
-    (share: number) => range[0] + share * (range[1] - range[0]),
-    [range]
-  );
 
-  const isControlled = valueProp !== undefined;
-  const [uncontrolledValue, setUncontrolledValue] =
-    React.useState(defaultValue);
-  // The position React knows about: the source's snapshot, or props/state.
-  let knownValue = isControlled ? valueProp : uncontrolledValue;
-  if (source) {
-    knownValue = source.getSnapshot();
-  }
-  knownValue = clampFinite(knownValue, 0, duration);
-  const knownValueRef = React.useRef(knownValue);
-  knownValueRef.current = knownValue;
+  const options: WaveformSeekOptions = {
+    defaultValue,
+    disabled,
+    duration,
+    largeStep,
+    loading,
+    onValueChange,
+    onValueCommitted,
+    range,
+    source,
+    step,
+    value,
+  };
+  const [controller] = React.useState(() => createWaveformController(options));
+  // Set on every render, so the waveform always reads the latest props.
+  controller.setOptions(options);
+  const snapshot = React.useSyncExternalStore(
+    controller.subscribe,
+    controller.getSnapshot
+  );
+  const knownValue = snapshot.value;
 
-  const [dragging, setDraggingState] = React.useState(false);
-  const draggingRef = React.useRef<boolean>(false);
-  const valueRef = React.useRef(knownValue);
   const rootRef = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
   const describeRef = React.useRef(describeAsPercent);
-  const [position] = React.useState(() => createStore(toShare(knownValue)));
-  const [hover] = React.useState(() => createStore<number | null>(null));
+  const [position] = React.useState(() =>
+    createStore(controller.toShare(knownValue))
+  );
 
   // The single place a position reaches the DOM: the CSS variable the
   // playhead and thumb follow, the store the canvas repaints from, and the
-  // input assistive technology reads.
+  // input assistive technology reads. Outside React, so a live source paints
+  // every frame without a render.
   const paint = React.useCallback(
-    (value: number) => {
-      const next = clampFinite(value, 0, duration);
-      valueRef.current = next;
-      const share = toShare(next);
+    (raw: number) => {
+      const next = clampFinite(raw, 0, duration);
+      const share = controller.toShare(next);
       const root = rootRef.current;
       root?.style.setProperty(
         POSITION_PROPERTY,
@@ -114,15 +117,11 @@ export function Root(componentProps: Root.Props) {
         }
       }
     },
-    [duration, position, toShare]
+    [controller, duration, position]
   );
 
-  // While the pointer drags, the waveform follows it: neither a lagging
-  // controlled value nor the live source may pull the position back.
-  React.useEffect(() => {
-    if (!draggingRef.current) {
-      paint(knownValue);
-    }
+  React.useLayoutEffect(() => {
+    paint(knownValue);
   }, [knownValue, paint]);
 
   React.useEffect(() => {
@@ -130,13 +129,11 @@ export function Root(componentProps: Root.Props) {
       return;
     }
     const follow = () => {
-      if (!draggingRef.current) {
-        paint(source.getSnapshot());
-      }
+      paint(controller.getSnapshot().value);
     };
     follow();
     return source.subscribe(follow);
-  }, [paint, source]);
+  }, [controller, paint, source]);
 
   // Whether the live signal is audible, marked outside React like the rest of it.
   React.useEffect(() => {
@@ -155,58 +152,23 @@ export function Root(componentProps: Root.Props) {
     };
   }, [levels]);
 
-  const setDragging = React.useCallback(
-    (next: boolean) => {
-      draggingRef.current = next;
-      setDraggingState(next);
-      if (!next) {
-        // The drag is over: the known position rules again.
-        paint(knownValueRef.current);
-      }
-    },
-    [paint]
-  );
-
-  const change = React.useCallback(
-    (raw: number, eventDetails: Root.ChangeEventDetails) => {
-      const next = clampFinite(raw, 0, duration);
-      if (next === valueRef.current) {
-        return false;
-      }
-      onValueChange?.(next, eventDetails);
-      if (eventDetails.isCanceled) {
-        return false;
-      }
-      paint(next);
-      if (!(isControlled || source)) {
-        knownValueRef.current = next;
-        setUncontrolledValue(next);
-      }
-      return true;
-    },
-    [duration, isControlled, onValueChange, paint, source]
-  );
-
-  const commit = React.useCallback(
-    (committed: number, eventDetails: Root.CommitEventDetails) => {
-      onValueCommitted?.(committed, eventDetails);
-    },
-    [onValueCommitted]
-  );
-
   const state = React.useMemo<Root.State>(
-    () => ({ disabled, dragging, loading }),
-    [disabled, dragging, loading]
+    () => ({
+      disabled: snapshot.disabled,
+      dragging: snapshot.dragging,
+      loading,
+    }),
+    [loading, snapshot.disabled, snapshot.dragging]
   );
 
   const context = React.useMemo<WaveformContextValue>(
     () => ({
-      actions: { change, commit, setDragging },
+      controller,
       meta: {
-        atShare,
+        atShare: controller.atShare,
         describeRef,
         duration,
-        hover,
+        hover: controller.hover,
         inputRef,
         largeStep,
         levels,
@@ -214,37 +176,31 @@ export function Root(componentProps: Root.Props) {
         position,
         range,
         step,
-        toShare,
-        valueRef,
+        toShare: controller.toShare,
       },
       state,
     }),
     [
-      change,
-      commit,
+      controller,
       duration,
-      hover,
       largeStep,
       levels,
       peaks,
       position,
       range,
-      setDragging,
       state,
       step,
-      atShare,
-      toShare,
     ]
   );
 
-  // Mid-drag a re-render must not write a stale position back.
-  const renderedValue = draggingRef.current ? valueRef.current : knownValue;
+  // Mid-drag a re-render must not write a stale position back: the snapshot
+  // holds the position the drag is at.
   const element = useRender({
     defaultTagName: "div",
     props: mergeProps<"div">(
       {
         style: {
-          [POSITION_PROPERTY]: `${Math.min(1, Math.max(0, toShare(renderedValue))) * 100}%`,
+          [POSITION_PROPERTY]: `${Math.min(1, Math.max(0, controller.toShare(knownValue))) * 100}%`,
         } as React.CSSProperties,
       },
       { ...elementProps, ...resolveStyling(className, style, state) }
