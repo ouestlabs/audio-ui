@@ -1,35 +1,8 @@
-import { createChangeEventDetails, pitchName } from "@audio-ui/core";
+import { pitchName } from "@audio-ui/core";
 import * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
-import {
-  KEYBOARD_VELOCITY,
-  KeyContext,
-  type PianoState,
-  usePianoContext,
-} from "../context";
-
-/** One octave: what Shift + an arrow key, Page Up and Page Down move by. */
-const OCTAVE = 12;
-
-/** Where the arrow, Page and Home/End keys take the focus, as an index into the keys. */
-function keyTargets(
-  index: number,
-  last: number,
-  shiftKey: boolean
-): Record<string, number> {
-  const step = shiftKey ? OCTAVE : 1;
-  return {
-    ArrowDown: index - step,
-    ArrowLeft: index - step,
-    ArrowRight: index + step,
-    ArrowUp: index + step,
-    End: last,
-    Home: 0,
-    PageDown: index - OCTAVE,
-    PageUp: index + OCTAVE,
-  };
-}
+import { KeyContext, type PianoState, usePianoContext } from "../context";
 
 /**
  * One key, placed along the keyboard for its pitch. It sounds while pressed:
@@ -40,23 +13,20 @@ function keyTargets(
 export function Key(componentProps: Key.Props) {
   const { className, pitch, ref, render, style, ...elementProps } =
     componentProps;
-  const { actions, meta, state: rootState } = usePianoContext("Key");
+  const {
+    controller,
+    focusKey,
+    meta,
+    registerKey,
+    state: rootState,
+  } = usePianoContext("Key");
   const { disabled, orientation } = rootState;
   const placement = meta.placements.get(pitch);
-  // Whether Enter or Space is holding this key down.
-  const heldRef = React.useRef<boolean>(false);
 
   const keyRef = React.useCallback(
-    (node: HTMLElement | null) => actions.registerKey(pitch, node),
-    [actions, pitch]
+    (node: HTMLElement | null) => registerKey(pitch, node),
+    [pitch, registerKey]
   );
-
-  const release = (event: FocusEvent | KeyboardEvent) => {
-    if (heldRef.current) {
-      heldRef.current = false;
-      actions.noteOff(pitch, { event, reason: "keyboard" });
-    }
-  };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
     if (disabled) {
@@ -64,35 +34,19 @@ export function Key(componentProps: Key.Props) {
     }
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
-      if (!(event.repeat || heldRef.current)) {
-        heldRef.current = actions.noteOn(
-          pitch,
-          Object.assign(
-            createChangeEventDetails("keyboard", event.nativeEvent),
-            {
-              velocity: KEYBOARD_VELOCITY,
-            }
-          )
-        );
-      }
+      controller.keyOn(pitch, event.nativeEvent);
       return;
     }
-    const index = meta.pitches.indexOf(pitch);
-    const last = meta.pitches.length - 1;
-    const target = keyTargets(index, last, event.shiftKey)[event.key];
-    if (target === undefined) {
-      return;
-    }
-    event.preventDefault();
-    const next = meta.pitches[Math.min(last, Math.max(0, target))];
-    if (next !== undefined) {
-      actions.focusKey(next);
+    const next = controller.navigate(pitch, event.nativeEvent);
+    if (next !== null) {
+      event.preventDefault();
+      focusKey(next);
     }
   };
 
   const handleKeyUp = (event: React.KeyboardEvent<HTMLButtonElement>) => {
     if (event.key === "Enter" || event.key === " ") {
-      release(event.nativeEvent);
+      controller.keyOff(pitch, event.nativeEvent);
     }
   };
 
@@ -114,8 +68,8 @@ export function Key(componentProps: Key.Props) {
       {
         "aria-label": pitchName(pitch),
         disabled,
-        onBlur: (event) => release(event.nativeEvent),
-        onFocus: () => actions.setTabStop(pitch),
+        onBlur: (event) => controller.keyOff(pitch, event.nativeEvent),
+        onFocus: () => controller.focusKey(pitch),
         onKeyDown: handleKeyDown,
         onKeyUp: handleKeyUp,
         style:

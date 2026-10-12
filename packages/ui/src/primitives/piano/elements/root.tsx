@@ -1,34 +1,17 @@
-import { createChangeEventDetails, isReleased } from "@audio-ui/core";
-import { type KeyLayout, keyAt, placeKeys } from "@audio-ui/core/piano";
+import {
+  createPianoController,
+  type KeyLayout,
+  type PianoOptions,
+} from "@audio-ui/core/piano";
 import * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
 import {
-  type NoteOffEventDetails,
   type NoteOnEventDetails,
   PianoContext,
   type PianoContextValue,
   type PianoState,
 } from "../context";
-
-/** The softest a pointer press plays: the very top of a key, not silence. */
-const MIN_VELOCITY = 0.25;
-/** Middle C: where the tab stop starts when the keyboard has it. */
-const MIDDLE_C = 60;
-
-function pitchRange(min: number, max: number): number[] {
-  const pitches: number[] = [];
-  for (let pitch = Math.round(min); pitch <= max; pitch += 1) {
-    pitches.push(pitch);
-  }
-  return pitches;
-}
-
-interface HeldPointer {
-  pitch: number;
-  /** Whether its note on went through; a cancelled one has nothing to release. */
-  sounding: boolean;
-}
 
 /**
  * A keyboard to play: every key sounds while pressed, by pointer or from the
@@ -51,69 +34,31 @@ export function Root(componentProps: Root.Props) {
     onNoteOff,
     onNoteOn,
     orientation = "horizontal",
-    pitches: pitchesProp,
+    pitches,
     ref,
     render,
     style,
     ...elementProps
   } = componentProps;
 
-  const pitches = React.useMemo(
-    () =>
-      pitchesProp
-        ? [...new Set(pitchesProp)].sort((a, b) => a - b)
-        : pitchRange(minPitch, maxPitch),
-    [maxPitch, minPitch, pitchesProp]
+  const options: PianoOptions = {
+    activeNotes,
+    disabled,
+    layout,
+    maxPitch,
+    minPitch,
+    onNoteOff,
+    onNoteOn,
+    orientation,
+    pitches,
+  };
+  const [controller] = React.useState(() => createPianoController(options));
+  // Set on every render, so the keyboard always reads the latest props.
+  controller.setOptions(options);
+  const snapshot = React.useSyncExternalStore(
+    controller.subscribe,
+    controller.getSnapshot
   );
-  const keys = React.useMemo(
-    () => placeKeys(pitches, layout),
-    [layout, pitches]
-  );
-  const placements = React.useMemo(
-    () => new Map(keys.map((key) => [key.pitch, key])),
-    [keys]
-  );
-
-  const [pressed, setPressed] = React.useState<ReadonlySet<number>>(
-    () => new Set()
-  );
-  const active = React.useMemo(
-    () => new Set([...pressed, ...(activeNotes ?? [])]),
-    [activeNotes, pressed]
-  );
-
-  const noteOn = React.useCallback(
-    (pitch: number, eventDetails: NoteOnEventDetails) => {
-      if (disabled) {
-        return false;
-      }
-      onNoteOn?.(pitch, eventDetails);
-      if (eventDetails.isCanceled) {
-        return false;
-      }
-      setPressed((current) => new Set(current).add(pitch));
-      return true;
-    },
-    [disabled, onNoteOn]
-  );
-
-  const noteOff = React.useCallback(
-    (pitch: number, eventDetails: NoteOffEventDetails) => {
-      setPressed((current) => {
-        const next = new Set(current);
-        next.delete(pitch);
-        return next;
-      });
-      onNoteOff?.(pitch, eventDetails);
-    },
-    [onNoteOff]
-  );
-
-  const [focusedPitch, setFocusedPitch] = React.useState<number | null>(null);
-  let tabStop = pitches.includes(MIDDLE_C) ? MIDDLE_C : pitches[0];
-  if (focusedPitch !== null && placements.has(focusedPitch)) {
-    tabStop = focusedPitch;
-  }
 
   const keysRef = React.useRef(new Map<number, HTMLElement>());
   const registerKey = React.useCallback(
@@ -126,134 +71,49 @@ export function Root(componentProps: Root.Props) {
     },
     []
   );
-  const focusKey = React.useCallback((pitch: number, focusVisible = true) => {
-    setFocusedPitch(pitch);
-    keysRef.current.get(pitch)?.focus({ focusVisible, preventScroll: true });
-  }, []);
+  const focusKey = React.useCallback(
+    (pitch: number, focusVisible = true) => {
+      controller.focusKey(pitch);
+      keysRef.current.get(pitch)?.focus({ focusVisible, preventScroll: true });
+    },
+    [controller]
+  );
 
   const elementRef = React.useRef<HTMLDivElement>(null);
-  const pointersRef = React.useRef(new Map<number, HeldPointer>());
-
-  /** The key under the pointer and how hard it was struck, if there is a key. */
-  const strikeAt = (event: React.PointerEvent) => {
-    const rect = elementRef.current?.getBoundingClientRect();
-    if (!(rect && rect.width > 0 && rect.height > 0)) {
-      return null;
-    }
-    const vertical = orientation === "vertical";
-    const along = vertical
-      ? (rect.bottom - event.clientY) / rect.height
-      : (event.clientX - rect.left) / rect.width;
-    const across = vertical
-      ? (event.clientX - rect.left) / rect.width
-      : (event.clientY - rect.top) / rect.height;
-    const key = keyAt(keys, along, across, layout);
-    if (!key) {
-      return null;
-    }
-    // Pressed near the free end of the key is harder, as on a real keyboard.
-    const velocity = Math.min(
-      1,
-      Math.max(MIN_VELOCITY, MIN_VELOCITY + (1 - MIN_VELOCITY) * across)
-    );
-    return { pitch: key.pitch, velocity };
-  };
-
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (disabled || event.button !== 0) {
+    if (event.button !== 0) {
       return;
     }
-    const strike = strikeAt(event);
-    if (strike === null) {
-      return;
-    }
-    const { pitch, velocity } = strike;
     event.preventDefault();
-    event.currentTarget.setPointerCapture?.(event.pointerId);
-    focusKey(pitch, false);
-    const sounding = noteOn(
-      pitch,
-      Object.assign(createChangeEventDetails("press", event.nativeEvent), {
-        velocity,
-      })
-    );
-    pointersRef.current.set(event.pointerId, { pitch, sounding });
-  };
-
-  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
-    const held = pointersRef.current.get(event.pointerId);
-    if (held && isReleased(event)) {
-      handlePointerEnd(event);
-      return;
-    }
-    const strike = held ? strikeAt(event) : null;
-    if (!held || strike === null || strike.pitch === held.pitch) {
-      return;
-    }
-    const { pitch, velocity } = strike;
-    if (held.sounding) {
-      noteOff(held.pitch, { event: event.nativeEvent, reason: "glide" });
-    }
-    focusKey(pitch, false);
-    const sounding = noteOn(
-      pitch,
-      Object.assign(createChangeEventDetails("glide", event.nativeEvent), {
-        velocity,
-      })
-    );
-    pointersRef.current.set(event.pointerId, { pitch, sounding });
-  };
-
-  const handlePointerEnd = (event: React.PointerEvent<HTMLDivElement>) => {
-    const held = pointersRef.current.get(event.pointerId);
-    if (!held) {
-      return;
-    }
-    pointersRef.current.delete(event.pointerId);
-    if (held.sounding) {
-      noteOff(held.pitch, { event: event.nativeEvent, reason: "press" });
-    }
+    controller.press(event.nativeEvent, event.currentTarget);
   };
 
   const state = React.useMemo<Root.State>(
-    () => ({ disabled, layout, orientation }),
-    [disabled, layout, orientation]
+    () => ({ disabled: snapshot.disabled, layout, orientation }),
+    [layout, orientation, snapshot.disabled]
   );
 
   const context = React.useMemo<PianoContextValue>(
     () => ({
-      actions: {
-        focusKey,
-        noteOff,
-        noteOn,
-        registerKey,
-        setTabStop: setFocusedPitch,
-      },
-      meta: { active, pitches, placements, tabStop },
-      state,
-    }),
-    [
-      active,
+      controller,
       focusKey,
-      noteOff,
-      noteOn,
-      pitches,
-      placements,
+      meta: {
+        active: snapshot.active,
+        pitches: snapshot.pitches,
+        placements: snapshot.placements,
+        tabStop: snapshot.tabStop,
+      },
       registerKey,
       state,
-      tabStop,
-    ]
+    }),
+    [controller, focusKey, registerKey, snapshot, state]
   );
 
   const element = useRender({
     defaultTagName: "div",
     props: mergeProps<"div">(
       {
-        onLostPointerCapture: handlePointerEnd,
-        onPointerCancel: handlePointerEnd,
         onPointerDown: handlePointerDown,
-        onPointerMove: handlePointerMove,
-        onPointerUp: handlePointerEnd,
         role: "group",
         style: { position: "relative", touchAction: "none" },
       },

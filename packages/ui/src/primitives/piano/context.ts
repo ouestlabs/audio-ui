@@ -1,8 +1,10 @@
 import type {
-  ChangeEventDetails as ExtraChangeEventDetails,
-  CommitEventDetails as ExtraCommitEventDetails,
-} from "@audio-ui/core";
-import type { KeyLayout, KeyPlacement } from "@audio-ui/core/piano";
+  KeyLayout,
+  KeyPlacement,
+  PianoController,
+  PianoNoteOffEventDetails,
+  PianoNoteOnEventDetails,
+} from "@audio-ui/core/piano";
 import * as React from "react";
 
 export type PianoState = {
@@ -11,35 +13,15 @@ export type PianoState = {
   orientation: "horizontal" | "vertical";
 };
 
-/** What a key played from the keyboard sounds at. */
-export const KEYBOARD_VELOCITY = 0.8;
+export type NoteOnEventDetails = PianoNoteOnEventDetails;
 
-/** How hard a note is played, 0…1: where along the key a pointer pressed it, lower being harder, or a fixed middling force from the keyboard. */
-export type NoteVelocity = { velocity: number };
-
-export type NoteOnEventDetails = NoteVelocity &
-  (
-    | ExtraChangeEventDetails<"press", PointerEvent>
-    | ExtraChangeEventDetails<"glide", PointerEvent>
-    | ExtraChangeEventDetails<"keyboard", KeyboardEvent>
-  );
-
-export type NoteOffEventDetails =
-  | ExtraCommitEventDetails<"press", PointerEvent>
-  | ExtraCommitEventDetails<"glide", PointerEvent>
-  | ExtraCommitEventDetails<"keyboard", FocusEvent | KeyboardEvent>;
+export type NoteOffEventDetails = PianoNoteOffEventDetails;
 
 export interface PianoContextValue {
-  actions: {
-    /** Moves the keyboard's tab stop to `pitch` and focuses its key, showing the focus ring unless a pointer moved it. */
-    focusKey: (pitch: number, focusVisible?: boolean) => void;
-    /** Proposes a note on; returns whether it sounded. */
-    noteOn: (pitch: number, eventDetails: NoteOnEventDetails) => boolean;
-    noteOff: (pitch: number, eventDetails: NoteOffEventDetails) => void;
-    registerKey: (pitch: number, node: HTMLElement | null) => void;
-    /** Moves the tab stop to `pitch`, leaving focus where it is. */
-    setTabStop: (pitch: number) => void;
-  };
+  /** The framework-free keyboard behind its keys: which sound, how hard, and the tab stop. */
+  controller: PianoController;
+  /** Focuses the key at `pitch`, and moves the tab stop to it: the focus ring shows unless a pointer moved it. */
+  focusKey: (pitch: number, focusVisible?: boolean) => void;
   meta: {
     /** Pitches sounding: pressed here, or listed in `activeNotes`. */
     active: ReadonlySet<number>;
@@ -49,6 +31,8 @@ export interface PianoContextValue {
     /** The key the keyboard's single tab stop is on. */
     tabStop: number | undefined;
   };
+  /** Records a key's element, so the keyboard can focus it. */
+  registerKey: (pitch: number, node: HTMLElement | null) => void;
   state: PianoState;
 }
 
