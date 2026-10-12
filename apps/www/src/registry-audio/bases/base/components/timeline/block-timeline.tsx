@@ -1560,7 +1560,7 @@ export default function BlockTimeline() {
                       <button
                         aria-label={`Move ${track.name}`}
                         className={cn(
-                          "absolute inset-y-0 inset-s-1 z-10 flex w-2.5 cursor-grab items-center justify-center text-muted-foreground/60 transition-colors hover:bg-muted/60 hover:text-foreground focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring focus-visible:outline-none active:cursor-grabbing",
+                          "absolute inset-y-0 inset-s-1 z-10 flex w-3 cursor-grab items-center justify-center text-muted-foreground/60 transition-colors hover:bg-muted/60 hover:text-foreground focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring focus-visible:outline-none active:cursor-grabbing",
                           dragId === track.id &&
                             "cursor-grabbing bg-muted text-foreground"
                         )}
