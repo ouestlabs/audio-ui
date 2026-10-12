@@ -21,6 +21,10 @@ describe("Timeline.Lane", () => {
     expect(view.getByTestId("root").hasAttribute("data-fitted")).toBe(false);
   });
 
+  test("is laid out and styled apart from the rest of the page", () => {
+    expect(renderTimeline().lane.style.contain).toBe("layout style");
+  });
+
   test("keeps what sticks out of it from lengthening the timeline", () => {
     expect(renderTimeline().lane.style.overflowX).toBe("clip");
   });

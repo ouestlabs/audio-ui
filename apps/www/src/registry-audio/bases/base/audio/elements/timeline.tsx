@@ -306,12 +306,12 @@ function TimelineNavigator({
       />
       <TimelinePrimitive.NavigatorHandle
         aria-label="Start of the visible range"
-        className="cn-timeline-navigator-handle inset-y-0 w-2 cursor-ew-resize data-[edge=end]:-translate-x-full after:absolute after:-inset-x-1.5 after:inset-y-0"
+        className="cn-timeline-navigator-handle inset-y-0 w-2 -translate-x-full cursor-ew-resize after:absolute after:-inset-x-1.5 after:inset-y-0"
         edge="start"
       />
       <TimelinePrimitive.NavigatorHandle
         aria-label="End of the visible range"
-        className="cn-timeline-navigator-handle inset-y-0 w-2 cursor-ew-resize data-[edge=end]:-translate-x-full after:absolute after:-inset-x-1.5 after:inset-y-0"
+        className="cn-timeline-navigator-handle inset-y-0 w-2 cursor-ew-resize after:absolute after:-inset-x-1.5 after:inset-y-0"
         edge="end"
       />
     </TimelinePrimitive.Navigator>

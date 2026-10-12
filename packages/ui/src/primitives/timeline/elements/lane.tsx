@@ -41,6 +41,9 @@ export function useLaneProps(part: string) {
 
   const style: React.CSSProperties = {
     [UNIT_PROPERTY as string]: unitLength(meta.zoom, meta.duration),
+    // What changes inside a lane (every clip moves at each zoom step) is
+    // laid out and styled without the rest of the page: it is a box of its own.
+    contain: "layout style",
     // What sticks out of a lane, such as a handle's widened hit area at the
     // timeline's end, must not make the timeline scroll further than it is long.
     overflowX: "clip",
