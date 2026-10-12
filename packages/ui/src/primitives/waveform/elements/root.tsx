@@ -84,7 +84,7 @@ export function Root(componentProps: Root.Props) {
   knownValueRef.current = knownValue;
 
   const [dragging, setDraggingState] = React.useState(false);
-  const draggingRef = React.useRef(false);
+  const draggingRef = React.useRef<boolean>(false);
   const valueRef = React.useRef(knownValue);
   const rootRef = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);

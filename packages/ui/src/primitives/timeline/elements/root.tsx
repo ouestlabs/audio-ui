@@ -67,7 +67,7 @@ export function Root(componentProps: Root.Props) {
   knownValueRef.current = knownValue;
 
   const [scrubbing, setScrubbingState] = React.useState(false);
-  const scrubbingRef = React.useRef(false);
+  const scrubbingRef = React.useRef<boolean>(false);
   const [position] = React.useState(() => createStore(knownValue));
 
   const paint = React.useCallback(

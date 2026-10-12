@@ -84,7 +84,7 @@ export function ValueInput({
   initial: string;
 }) {
   const inputRef = React.useRef<HTMLInputElement>(null);
-  const done = React.useRef(false);
+  const done = React.useRef<boolean>(false);
   const settle = React.useCallback(
     (text: string | null, event: Event) => {
       if (!done.current) {

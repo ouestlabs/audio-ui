@@ -46,7 +46,7 @@ export function Key(componentProps: Key.Props) {
   const { disabled, orientation } = rootState;
   const placement = meta.placements.get(pitch);
   // Whether Enter or Space is holding this key down.
-  const heldRef = React.useRef(false);
+  const heldRef = React.useRef<boolean>(false);
 
   const keyRef = React.useCallback(
     (node: HTMLElement | null) => actions.registerKey(pitch, node),
