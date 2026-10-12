@@ -1387,7 +1387,7 @@ export default function BlockTimeline() {
                       render={
                         <Button
                           aria-label="Grid"
-                          className="h-full w-full justify-start rounded-none tabular-nums"
+                          className="h-full w-full justify-start rounded-none border-0 tabular-nums"
                           variant="ghost"
                         />
                       }
