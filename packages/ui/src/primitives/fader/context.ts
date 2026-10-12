@@ -1,5 +1,5 @@
+import type { Nullable } from "@audio-ui/core/internal";
 import * as React from "react";
-import type { Nullable } from "../../utils";
 import type { Root } from "./elements/root";
 
 export interface FaderContextValue {

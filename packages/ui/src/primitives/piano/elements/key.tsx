@@ -1,7 +1,6 @@
+import { createChangeEventDetails, pitchName } from "@audio-ui/core";
 import * as React from "react";
-import { createChangeEventDetails } from "../../internal/event-details";
 import { type PartProps, resolveStyling } from "../../internal/part";
-import { pitchName } from "../../internal/pitch";
 import { mergeProps, useRender } from "../../internal/render";
 import {
   KEYBOARD_VELOCITY,

@@ -1,12 +1,12 @@
-import * as React from "react";
-import type { Point } from "../../../utils";
+import type { Point } from "@audio-ui/core";
 import {
   createChangeEventDetails,
   type ChangeEventDetails as ExtraChangeEventDetails,
   type CommitEventDetails as ExtraCommitEventDetails,
-} from "../../internal/event-details";
+  isReleased,
+} from "@audio-ui/core";
+import * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part";
-import { isReleased } from "../../internal/pointer";
 import { mergeProps, useRender } from "../../internal/render";
 import { useLocale } from "../../internal/use-locale";
 import { VISUALLY_HIDDEN } from "../../internal/visually-hidden";

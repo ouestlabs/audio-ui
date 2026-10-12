@@ -1,9 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import {
-  LINEAR_SCALE,
-  LOGARITHMIC_SCALE,
-  resolveScale,
-} from "./parameter-scale";
+import { LINEAR_SCALE, LOGARITHMIC_SCALE, resolveScale } from "./scale";
 
 describe("LINEAR_SCALE", () => {
   test("maps the range evenly onto 0…1 and back", () => {

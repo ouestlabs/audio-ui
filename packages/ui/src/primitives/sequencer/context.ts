@@ -1,9 +1,9 @@
-import * as React from "react";
 import type {
   ChangeEventDetails as ExtraChangeEventDetails,
   CommitEventDetails as ExtraCommitEventDetails,
-} from "../internal/event-details";
-import type { Store } from "../internal/store";
+  Store,
+} from "@audio-ui/core";
+import * as React from "react";
 import type { CellAddress, Pattern, Velocities } from "./internal/grid";
 
 export type SequencerState = {

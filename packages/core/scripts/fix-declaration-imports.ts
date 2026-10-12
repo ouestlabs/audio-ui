@@ -13,7 +13,8 @@ import {
 } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 
-const DIST = resolve(import.meta.dirname, "../dist");
+// The package to fix is the one the script is run from: `bun ../core/scripts/fix-declaration-imports.ts` in `packages/ui` fixes its `dist`.
+const DIST = resolve(process.cwd(), "dist");
 const HAS_EXTENSION = /\.(js|json|css)$/;
 const TRAILING_SLASH = /\/$/;
 const RELATIVE =

@@ -1,8 +1,8 @@
 import { describe, test } from "bun:test";
+import { createSource } from "@audio-ui/core";
 import { act, render } from "@testing-library/react";
 import { bench, sweep } from "../../../../test/bench";
 import { Meter } from "../../../entries/meter";
-import { createSource } from "../../../source";
 
 const frame = (channels: number, index: number) => ({
   levels: Array.from(

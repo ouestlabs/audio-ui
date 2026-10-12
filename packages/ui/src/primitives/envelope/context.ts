@@ -1,5 +1,6 @@
+import type { Point as GeomPoint } from "@audio-ui/core";
+import type { Nullable } from "@audio-ui/core/internal";
 import * as React from "react";
-import type { Point as GeomPoint, Nullable } from "../../utils";
 import type { Root } from "./elements/root";
 import type { Breakpoint } from "./internal/geometry";
 

@@ -1,5 +1,5 @@
+import type { Point } from "@audio-ui/core";
 import type * as React from "react";
-import type { Point } from "../../../utils";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
 import { useXYPadContext } from "../context";

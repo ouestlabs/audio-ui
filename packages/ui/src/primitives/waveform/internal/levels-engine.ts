@@ -1,4 +1,4 @@
-import { clampUnit } from "../../../utils";
+import { clampUnit } from "@audio-ui/core";
 import { fitPeaks, loudest, SILENCE_THRESHOLD } from "./levels";
 
 /** Time constant of the fall after a peak, in milliseconds: levels rise at once and fall smoothly. */

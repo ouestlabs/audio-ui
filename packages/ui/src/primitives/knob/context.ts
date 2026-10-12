@@ -1,6 +1,6 @@
+import type { ParameterScale } from "@audio-ui/core";
+import type { Nullable } from "@audio-ui/core/internal";
 import * as React from "react";
-import type { Nullable } from "../../utils";
-import type { ParameterScale } from "../internal/parameter-scale";
 import type { Root } from "./elements/root";
 
 export interface KnobContextValue {

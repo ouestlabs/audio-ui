@@ -1,3 +1,4 @@
+import { createSource } from "@audio-ui/core";
 import { type ReactNode, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { Envelope } from "../src/entries/envelope";
@@ -10,7 +11,6 @@ import { Sequencer } from "../src/entries/sequencer";
 import { Timeline } from "../src/entries/timeline";
 import { Waveform } from "../src/entries/waveform";
 import { XYPad } from "../src/entries/xypad";
-import { createSource } from "../src/source";
 
 declare global {
   interface Window {

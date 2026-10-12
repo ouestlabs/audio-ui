@@ -1,8 +1,8 @@
+import type { Point } from "@audio-ui/core";
+import { createStore, type Store } from "@audio-ui/core";
 import * as React from "react";
-import type { Point } from "../../../utils";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
-import { createStore, type Store } from "../../internal/store";
 import { type PlotState, usePlotContext, valueOn } from "../context";
 
 /** Set on the cursor: where the pointer is across the plot, as a share of its width. */

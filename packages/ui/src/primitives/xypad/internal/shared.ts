@@ -1,4 +1,4 @@
-import { clamp } from "../../../utils";
+import { clamp } from "@audio-ui/core";
 
 /** Shift + arrows and Page Up/Down move this many steps at once. */
 export const LARGE_STEP_MULTIPLIER = 10;

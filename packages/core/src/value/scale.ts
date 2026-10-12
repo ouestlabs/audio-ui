@@ -1,4 +1,4 @@
-import { clamp } from "../../utils";
+import { clamp } from "../shared/math";
 
 /**
  * How a value maps onto a control's travel, and back. `toPosition` gives

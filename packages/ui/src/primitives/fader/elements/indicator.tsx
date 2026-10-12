@@ -1,5 +1,5 @@
+import { clamp } from "@audio-ui/core";
 import type * as React from "react";
-import { clamp } from "../../../utils";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
 import { FADER_STATE_ATTRIBUTES, useFaderContext } from "../context";

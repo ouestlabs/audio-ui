@@ -2,6 +2,10 @@
   "extends": "@audio-ui/typescript/react-library.json",
   "compilerOptions": {
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "paths": {
+      "@audio-ui/core": ["../core/src/index.ts"],
+      "@audio-ui/core/internal": ["../core/src/internal.ts"]
+    },
     "strictNullChecks": true,
     "types": ["bun", "react", "react-dom"]
   },

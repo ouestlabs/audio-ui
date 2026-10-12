@@ -1,10 +1,10 @@
-import * as React from "react";
 import {
   createChangeEventDetails,
   type ChangeEventDetails as ExtraChangeEventDetails,
   type CommitEventDetails as ExtraCommitEventDetails,
-} from "../../internal/event-details";
-import { isReleased } from "../../internal/pointer";
+  isReleased,
+} from "@audio-ui/core";
+import * as React from "react";
 import type { ClipLimits, ClipValue } from "../clip";
 import type { DescribePosition } from "../context";
 import { bypassesGrid, type Grid } from "../internal/snap";

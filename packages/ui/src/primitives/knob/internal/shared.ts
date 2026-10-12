@@ -1,8 +1,11 @@
-import { degToRad, PI_HALF, radToDeg, TAU } from "../../../utils";
 import {
+  degToRad,
   type ParameterScale,
+  PI_HALF,
+  radToDeg,
   resolveScale,
-} from "../../internal/parameter-scale";
+  TAU,
+} from "@audio-ui/core";
 
 /** Center of the 48×48 viewBox the arcs are drawn in. */
 export const VIEWBOX_CENTER = 24;

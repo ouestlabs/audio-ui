@@ -1,8 +1,11 @@
+import {
+  createChangeEventDetails,
+  degToRad,
+  isReleased,
+  TAU,
+} from "@audio-ui/core";
 import * as React from "react";
-import { degToRad, TAU } from "../../../utils";
-import { createChangeEventDetails } from "../../internal/event-details";
 import { type PartProps, resolveStyling } from "../../internal/part";
-import { isReleased } from "../../internal/pointer";
 import { mergeProps, useRender } from "../../internal/render";
 import { useKnobContext } from "../context";
 import {

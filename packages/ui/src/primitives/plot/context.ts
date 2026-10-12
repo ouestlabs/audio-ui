@@ -1,5 +1,5 @@
+import type { ParameterScale } from "@audio-ui/core";
 import * as React from "react";
-import type { ParameterScale } from "../internal/parameter-scale";
 
 export type PlotState = {
   disabled: boolean;

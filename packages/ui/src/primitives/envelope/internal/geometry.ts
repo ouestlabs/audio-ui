@@ -1,9 +1,5 @@
-import {
-  clamp,
-  clampUnit,
-  type Point as GeomPoint,
-  type Nullable,
-} from "../../../utils";
+import { clamp, clampUnit, type Point as GeomPoint } from "@audio-ui/core";
+import type { Nullable } from "@audio-ui/core/internal";
 
 /** How far a segment can bend: its curve exponent runs from 1/8 to 8 at the ends of -1…1. */
 export const CURVE_EXPONENT_RANGE = 3;

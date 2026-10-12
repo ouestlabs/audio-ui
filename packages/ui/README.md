@@ -14,7 +14,7 @@ Headless, accessible primitives for audio interfaces in React: the controls and 
 npm install @audio-ui/react
 ```
 
-React 19 is required, and it is the only dependency.
+React 19 is required. It is built on `@audio-ui/core`, the framework-free logic of the primitives, which installs with it.
 
 ## Use
 

@@ -1,8 +1,8 @@
-import * as React from "react";
 import type {
   ChangeEventDetails as ExtraChangeEventDetails,
   CommitEventDetails as ExtraCommitEventDetails,
-} from "../../internal/event-details";
+} from "@audio-ui/core";
+import * as React from "react";
 
 export type TrackChangeEventDetails =
   | ExtraChangeEventDetails<"drag", PointerEvent>

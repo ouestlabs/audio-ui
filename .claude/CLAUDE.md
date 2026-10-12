@@ -17,6 +17,7 @@ audio-ui/
 │   ├── www/        # Next.js docs site + registry (Fumadocs + MDX) → localhost:4000
 │   └── sandbox/    # Dev sandbox
 └── packages/
+    ├── core/       # @audio-ui/core, published npm package (framework-free logic)
     ├── ui/         # @audio-ui/react, published npm package (headless primitives)
     ├── utils/      # Shared utilities
     └── configs/    # Shared tsconfig, etc.
@@ -42,6 +43,16 @@ bun run icons:build     # Regenerate icon mappings, run after adding icons
 Next.js App Router · Fumadocs + MDX · Tailwind CSS v4 · shadcn/ui + Base UI · 5 icon libraries (Lucide/Phosphor/Tabler/Hugeicons/Remixicon) via `IconPlaceholder` · Biome/Ultracite
 
 ## Where Things Live
+
+### `@audio-ui/core`, framework-free logic (`packages/core/src/`)
+
+- `shared/`, lang (types, guards), math, pitch
+- `value/`, scales, ranges, formatting, change/commit event details, live sources and stores
+- `dom/`, frame scheduling, pointer release, visibility, data attributes
+- `index.ts` is the public API; `internal.ts` (`@audio-ui/core/internal`) is for adapters only
+- A primitive's own logic gets a folder named after it (`timeline/`, `waveform/`…)
+
+`@audio-ui/react` depends on it. In development it resolves to `packages/core/src` through tsconfig `paths` (Bun honours them in tests); its build reads `dist`.
 
 ### `@audio-ui/react`, headless primitives (`packages/ui/src/`)
 

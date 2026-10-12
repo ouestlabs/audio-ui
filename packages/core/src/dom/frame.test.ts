@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
-import { installFrames } from "../../../test/helpers";
-import { createFrameTask } from "./frame-task";
+import { installFrames } from "../../test/helpers";
+import { createFrameTask } from "./frame";
 
 describe("createFrameTask", () => {
   let frames: ReturnType<typeof installFrames>;

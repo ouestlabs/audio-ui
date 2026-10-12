@@ -1,4 +1,4 @@
-import { isBlackKey } from "../../internal/pitch";
+import { isBlackKey } from "@audio-ui/core";
 
 /**
  * How the keys share the keyboard's length: `"keyboard"` like a piano, white

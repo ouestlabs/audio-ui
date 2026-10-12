@@ -1,8 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import {
-  LINEAR_SCALE,
-  LOGARITHMIC_SCALE,
-} from "../../../internal/parameter-scale";
+import { LINEAR_SCALE, LOGARITHMIC_SCALE } from "@audio-ui/core";
 import { curvePath } from "../../internal/path";
 
 const linear = (min: number, max: number) => ({

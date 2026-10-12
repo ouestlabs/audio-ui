@@ -1,4 +1,4 @@
-import { clamp, clampFinite } from "../../utils";
+import { clamp, clampFinite } from "@audio-ui/core";
 
 /**
  * A clip: a stretch of a source (a recording, a pattern) placed on the

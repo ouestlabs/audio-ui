@@ -1,6 +1,6 @@
+import { isBlackKey } from "@audio-ui/core";
 import * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part";
-import { isBlackKey } from "../../internal/pitch";
 import { mergeProps, useRender } from "../../internal/render";
 import { placedOnRow, usePianoRollContext, useRollView } from "../context";
 

@@ -1,12 +1,15 @@
-import * as React from "react";
-import { useWheel } from "../../../hooks/interactions/use-wheel";
-import { clamp, clampFinite, type Point, roundToStep } from "../../../utils";
 import {
+  clamp,
+  clampFinite,
   createChangeEventDetails,
+  createPairFormatter,
   type ChangeEventDetails as ExtraChangeEventDetails,
   type CommitEventDetails as ExtraCommitEventDetails,
-} from "../../internal/event-details";
-import { createPairFormatter } from "../../internal/format-pair";
+  type Point,
+  roundToStep,
+} from "@audio-ui/core";
+import * as React from "react";
+import { useWheel } from "../../../hooks/interactions/use-wheel";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
 import { useLocale } from "../../internal/use-locale";

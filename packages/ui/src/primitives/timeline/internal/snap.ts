@@ -3,7 +3,7 @@ import {
   type RangeEdge,
   type RangeLimits,
   type RangeValue,
-} from "../../internal/range-geometry";
+} from "@audio-ui/core";
 
 /** Grid lines `step` apart, starting from `offset`. A `step` of 0 or less is no grid. */
 export interface Grid {

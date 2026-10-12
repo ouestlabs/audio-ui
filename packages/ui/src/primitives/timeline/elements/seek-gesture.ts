@@ -1,6 +1,5 @@
+import { createChangeEventDetails, isReleased } from "@audio-ui/core";
 import * as React from "react";
-import { createChangeEventDetails } from "../../internal/event-details";
-import { isReleased } from "../../internal/pointer";
 import { type TimelineContextValue, valueAtPointer } from "../context";
 import { bypassesGrid, snapToGrid } from "../internal/snap";
 

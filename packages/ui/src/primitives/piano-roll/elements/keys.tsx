@@ -1,5 +1,5 @@
+import { createChangeEventDetails } from "@audio-ui/core";
 import * as React from "react";
-import { createChangeEventDetails } from "../../internal/event-details";
 import { Root as PianoRoot } from "../../piano/elements/root";
 import {
   type SelectionChangeEventDetails,

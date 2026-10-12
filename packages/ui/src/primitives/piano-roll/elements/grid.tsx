@@ -1,7 +1,6 @@
+import { createChangeEventDetails, isReleased } from "@audio-ui/core";
 import * as React from "react";
-import { createChangeEventDetails } from "../../internal/event-details";
 import { type PartProps, resolveStyling } from "../../internal/part";
-import { isReleased } from "../../internal/pointer";
 import { mergeProps, useRender } from "../../internal/render";
 import { valueAtPointer } from "../../timeline/context";
 import { LaneContext, useLaneProps } from "../../timeline/elements/lane";

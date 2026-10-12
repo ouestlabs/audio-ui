@@ -1,11 +1,13 @@
-import * as React from "react";
-import { clamp, type Point as GeomPoint, type Nullable } from "../../../utils";
 import {
+  clamp,
   createChangeEventDetails,
+  createPairFormatter,
   type ChangeEventDetails as ExtraChangeEventDetails,
   type CommitEventDetails as ExtraCommitEventDetails,
-} from "../../internal/event-details";
-import { createPairFormatter } from "../../internal/format-pair";
+  type Point as GeomPoint,
+} from "@audio-ui/core";
+import type { Nullable } from "@audio-ui/core/internal";
+import * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
 import { useLocale } from "../../internal/use-locale";

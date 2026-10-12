@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
+import { createSource } from "@audio-ui/core";
 import { act, fireEvent } from "@testing-library/react";
 import { bench, expectWork, sweep } from "../../../../test/bench";
-import { createSource } from "../../../source";
 import { renderWaveform } from "./helpers";
 
 const PEAKS = Array.from(

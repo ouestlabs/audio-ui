@@ -1,8 +1,5 @@
+import { type ParameterScaleProp, resolveScale } from "@audio-ui/core";
 import * as React from "react";
-import {
-  type ParameterScaleProp,
-  resolveScale,
-} from "../../internal/parameter-scale";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
 import { PlotContext, type PlotContextValue, type PlotState } from "../context";

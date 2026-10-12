@@ -1,4 +1,4 @@
-import { LOGARITHMIC_SCALE } from "../../internal/parameter-scale";
+import { LOGARITHMIC_SCALE } from "@audio-ui/core";
 import type { PlotAxis } from "../context";
 
 /** How many ticks an axis gets unless asked for another number. */

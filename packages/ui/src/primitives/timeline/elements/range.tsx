@@ -1,16 +1,14 @@
-import * as React from "react";
 import {
   createChangeEventDetails,
   type ChangeEventDetails as ExtraChangeEventDetails,
   type CommitEventDetails as ExtraCommitEventDetails,
-} from "../../internal/event-details";
-import { type PartProps, resolveStyling } from "../../internal/part";
-import { isReleased } from "../../internal/pointer";
-import {
+  isReleased,
   normalizeRange,
   type RangeEdge,
   type RangeValue,
-} from "../../internal/range-geometry";
+} from "@audio-ui/core";
+import * as React from "react";
+import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
 import { VISUALLY_HIDDEN } from "../../internal/visually-hidden";
 import {

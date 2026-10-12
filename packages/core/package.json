@@ -1,0 +1,55 @@
+{
+  "name": "@audio-ui/core",
+  "version": "0.0.0",
+  "description": "The framework-free logic of audio/ui's primitives: values and scales, geometry, live sources, frame scheduling.",
+  "keywords": [
+    "audio-ui",
+    "audio",
+    "headless",
+    "primitives"
+  ],
+  "homepage": "https://github.com/ouestlabs/audio-ui/tree/main/packages/core",
+  "bugs": {
+    "url": "https://github.com/ouestlabs/audio-ui/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ouestlabs/audio-ui.git",
+    "directory": "packages/core"
+  },
+  "license": "MIT",
+  "sideEffects": false,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./internal": {
+      "types": "./dist/internal.d.ts",
+      "import": "./dist/internal.js"
+    }
+  },
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build:pkg": "bunx --bun tsup && tsc -p tsconfig.build.json && bun scripts/fix-declaration-imports.ts",
+    "clean": "rm -rf dist node_modules .turbo",
+    "dev": "bunx --bun tsup --watch",
+    "lint": "biome check --write .",
+    "lint:fix": "biome check --write --unsafe .",
+    "test": "bun test"
+  },
+  "devDependencies": {
+    "@audio-ui/typescript": "latest",
+    "@types/bun": "1.4.2",
+    "tsup": "^8.5.0",
+    "typescript": "^7.0.2"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

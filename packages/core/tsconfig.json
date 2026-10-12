@@ -1,0 +1,9 @@
+{
+  "extends": "@audio-ui/typescript/base.json",
+  "compilerOptions": {
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "strictNullChecks": true,
+    "types": ["bun"]
+  },
+  "exclude": ["dist", "node_modules"]
+}

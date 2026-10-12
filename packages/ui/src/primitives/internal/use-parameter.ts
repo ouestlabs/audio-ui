@@ -1,8 +1,9 @@
+import type { Point } from "@audio-ui/core";
+import { clamp, clampUnit, quantizeRound } from "@audio-ui/core";
+import type { Nullable, Procedure } from "@audio-ui/core/internal";
 import * as React from "react";
 import { useKeyboardNavigation } from "../../hooks/interactions/use-keyboard-navigation";
 import { useWheel } from "../../hooks/interactions/use-wheel";
-import type { Nullable, Point, Procedure } from "../../utils";
-import { clamp, clampUnit, quantizeRound } from "../../utils";
 import type { UseParameterCoreDragCallbacks } from "./use-parameter-core";
 import { useParameterCore } from "./use-parameter-core";
 

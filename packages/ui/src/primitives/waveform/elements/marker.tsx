@@ -1,4 +1,4 @@
-import { clampFinite } from "../../../utils";
+import { clampFinite } from "@audio-ui/core";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
 import { useWaveformContext, type WaveformState } from "../context";

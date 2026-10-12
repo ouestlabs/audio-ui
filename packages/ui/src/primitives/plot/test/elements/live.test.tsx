@@ -1,9 +1,8 @@
 import { describe, expect, test } from "bun:test";
+import { createSource, LINEAR_SCALE } from "@audio-ui/core";
 import { act, render } from "@testing-library/react";
 import { mockRect } from "../../../../../test/helpers";
 import { Plot } from "../../../../entries/plot";
-import { createSource } from "../../../../source";
-import { LINEAR_SCALE } from "../../../internal/parameter-scale";
 import { tracePath } from "../../internal/path";
 
 const y = { max: 10, min: 0, scale: LINEAR_SCALE };

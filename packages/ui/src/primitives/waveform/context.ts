@@ -1,10 +1,10 @@
-import * as React from "react";
-import type { Source } from "../../source";
 import type {
   ChangeEventDetails as ExtraChangeEventDetails,
   CommitEventDetails as ExtraCommitEventDetails,
-} from "../internal/event-details";
-import type { Store } from "../internal/store";
+  Source,
+  Store,
+} from "@audio-ui/core";
+import * as React from "react";
 import type { WaveformPeaks } from "./internal/peaks";
 
 export const POSITION_PROPERTY = "--waveform-position";

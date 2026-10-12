@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
+import { createSource } from "@audio-ui/core";
 import { act, fireEvent, render } from "@testing-library/react";
 import { Sequencer } from "../../../../entries/sequencer";
-import { createSource } from "../../../../source";
 import { lastCall, renderSequencer } from "../helpers";
 
 const ROW_NAME = /^Row/;

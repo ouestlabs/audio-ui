@@ -1,10 +1,10 @@
-import * as React from "react";
+import type { Point } from "@audio-ui/core";
 import {
   assertType,
   type Nullable,
-  type Point,
   type Procedure,
-} from "../../utils";
+} from "@audio-ui/core/internal";
+import * as React from "react";
 import { useCallbackRef } from "../use-callback-ref";
 
 const MAX_POINTER_ID = 10;

@@ -1,8 +1,8 @@
 import { describe, expect, test } from "bun:test";
+import { createSource } from "@audio-ui/core";
 import { act, fireEvent, render } from "@testing-library/react";
 import { bench, expectWork, sweep } from "../../../../test/bench";
 import { Timeline } from "../../../entries/timeline";
-import { createSource } from "../../../source";
 import { renderTimeline } from "./helpers";
 
 describe("Timeline", () => {

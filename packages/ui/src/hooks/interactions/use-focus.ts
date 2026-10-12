@@ -1,5 +1,5 @@
+import type { Procedure } from "@audio-ui/core/internal";
 import * as React from "react";
-import type { Procedure } from "../../utils";
 import { useCallbackRef } from "../use-callback-ref";
 
 export interface UseFocusOptions<T extends HTMLElement = HTMLElement> {

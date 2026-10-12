@@ -1,10 +1,12 @@
+import type { Source } from "@audio-ui/core";
+import {
+  createChangeEventDetails,
+  createStore,
+  isReleased,
+} from "@audio-ui/core";
 import * as React from "react";
-import type { Source } from "../../../source";
-import { createChangeEventDetails } from "../../internal/event-details";
 import { type PartProps, resolveStyling } from "../../internal/part";
-import { isReleased } from "../../internal/pointer";
 import { mergeProps, useRender } from "../../internal/render";
-import { createStore } from "../../internal/store";
 import {
   SequencerContext,
   type SequencerContextValue,

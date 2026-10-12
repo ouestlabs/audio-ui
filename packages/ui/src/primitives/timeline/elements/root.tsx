@@ -1,8 +1,7 @@
+import { clampFinite, createStore } from "@audio-ui/core";
 import * as React from "react";
-import { clampFinite } from "../../../utils";
 import { type PartProps, resolveStyling } from "../../internal/part";
 import { mergeProps, useRender } from "../../internal/render";
-import { createStore } from "../../internal/store";
 import {
   type PositionChangeEventDetails,
   type PositionCommitEventDetails,
