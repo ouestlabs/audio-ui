@@ -1,4 +1,4 @@
-import { isReleased } from "../../dom/pointer";
+import { followPointer } from "../../dom/gesture";
 import { clamp } from "../../shared/math";
 import {
   type ChangeEventDetails,
@@ -442,41 +442,6 @@ export function createEnvelopeController(
     }
   };
 
-  /** Listens to one pointer on the document until it is released, then ends its gesture. */
-  const listen = (
-    handle: Element,
-    pointerId: number,
-    move: (event: PointerEvent) => void,
-    end: (event: PointerEvent) => void
-  ) => {
-    const drag = new AbortController();
-    const { signal } = drag;
-    const doc = handle.ownerDocument;
-    doc.addEventListener(
-      "pointermove",
-      (event: PointerEvent) => {
-        if (event.pointerId !== pointerId) {
-          return;
-        }
-        if (isReleased(event)) {
-          drag.abort();
-          end(event);
-          return;
-        }
-        move(event);
-      },
-      { signal }
-    );
-    const release = (event: PointerEvent) => {
-      if (event.pointerId === pointerId) {
-        drag.abort();
-        end(event);
-      }
-    };
-    doc.addEventListener("pointerup", release, { signal });
-    doc.addEventListener("pointercancel", release, { signal });
-  };
-
   const pointerAt = (graph: Element, event: PointerEvent) => {
     const rect = graph.getBoundingClientRect();
     return {
@@ -514,7 +479,7 @@ export function createEnvelopeController(
     gesture = started;
     draggingIndex = index;
     notify();
-    listen(
+    followPointer(
       handle,
       event.pointerId,
       (move) => {
@@ -581,7 +546,7 @@ export function createEnvelopeController(
     gesture = started;
     draggingSegmentIndex = index;
     notify();
-    listen(
+    followPointer(
       handle,
       event.pointerId,
       (move) => {
@@ -641,7 +606,7 @@ export function createEnvelopeController(
     gesture = started;
     draggingSegmentIndex = index;
     notify();
-    listen(
+    followPointer(
       graph,
       event.pointerId,
       (move) => {
