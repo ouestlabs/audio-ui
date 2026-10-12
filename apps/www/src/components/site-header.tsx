@@ -90,10 +90,14 @@ function SiteLogo() {
         <Link aria-label="Home" className="flex items-center" href="/">
           <div
             aria-hidden
-            className="flex shrink-0 select-none items-center justify-center gap-1 text-muted-foreground"
+            className="flex shrink-0 select-none items-baseline justify-center gap-[0.25em] text-muted-foreground text-xl"
           >
-            <Icons.audioUi className="pointer-events-none size-5 text-foreground" />
-            <p className="mt-[-2.3px] text-balance font-medium font-serif text-xl leading-snug">
+            {/* Optical alignment: the circle sits on the baseline, as tall as the ascenders, with a round-shape overshoot. */}
+            <Icons.audioUi
+              className="pointer-events-none size-[0.765em] translate-y-[0.0125em] text-foreground"
+              viewBox="2 2 20 20"
+            />
+            <p className="text-balance font-medium font-serif leading-snug">
               {siteConfig.name}
             </p>
           </div>
@@ -198,10 +202,13 @@ export function SiteHeader({
               <Link aria-label="Home" className="flex items-center" href={"/"}>
                 <div
                   aria-hidden
-                  className="flex shrink-0 select-none items-center justify-center gap-1 text-muted-foreground"
+                  className="flex shrink-0 select-none items-baseline justify-center gap-[0.25em] text-muted-foreground text-xl sm:text-2xl"
                 >
-                  <Icons.audioUi className="pointer-events-none size-5 text-foreground" />
-                  <p className="mt-[-2.3px] text-balance font-medium font-serif text-xl leading-snug sm:mt-[-3px] sm:text-2xl">
+                  <Icons.audioUi
+                    className="pointer-events-none size-[0.765em] translate-y-[0.0125em] text-foreground"
+                    viewBox="2 2 20 20"
+                  />
+                  <p className="text-balance font-medium font-serif leading-snug">
                     {siteConfig.name}
                   </p>
                 </div>
