@@ -1,7 +1,9 @@
-import { Slider } from "@base-ui/react/slider";
-import * as React from "react";
+import type * as React from "react";
 import { useEditableValue, ValueInput } from "../../internal/editable-value";
-import { useFaderContext } from "../context";
+import { type PartProps, resolveStyling } from "../../internal/part";
+import { mergeProps, useRender } from "../../internal/render";
+import { FADER_STATE_ATTRIBUTES, useFaderContext } from "../context";
+import type { Root } from "./root";
 
 /**
  * The formatted value (`format`/`locale` on Root). With `editable`, a double
@@ -9,43 +11,65 @@ import { useFaderContext } from "../context";
  * and Escape drops it. Renders an `<output>` element.
  */
 export function Value(componentProps: Value.Props) {
-  const { children, editable = false, ref, ...props } = componentProps;
-  const { disabled, type, value } = useFaderContext("Value");
+  const {
+    children,
+    className,
+    editable = false,
+    ref,
+    render,
+    style,
+    ...elementProps
+  } = componentProps;
+  const { disabled, formatted, inputId, state, type, value } =
+    useFaderContext("Value");
   const { editing, finish, readoutProps, readoutRef } = useEditableValue({
     commit: type,
     disabled,
     editable,
   });
-  const setRef = React.useCallback(
-    (node: HTMLOutputElement | null) => {
-      readoutRef.current = node;
-      if (typeof ref === "function") {
-        ref(node);
-      } else if (ref) {
-        ref.current = node;
-      }
-    },
-    [readoutRef, ref]
-  );
-  const input = (
-    <ValueInput
-      aria-label={props["aria-label"]}
-      finish={finish}
-      initial={String(value)}
-    />
-  );
-  return (
-    <Slider.Value {...props} {...readoutProps} ref={setRef}>
-      {/* biome-ignore lint/suspicious/noLeakedRender: `children` is a node or a function, never a bare number here. */}
-      {editing ? () => input : children}
-    </Slider.Value>
-  );
+  let content: React.ReactNode = formatted;
+  if (editing) {
+    content = (
+      <ValueInput
+        aria-label={elementProps["aria-label"]}
+        finish={finish}
+        initial={String(value)}
+      />
+    );
+  } else if (typeof children === "function") {
+    content = children([formatted], [value]);
+  } else if (children !== undefined && children !== null) {
+    content = children;
+  }
+  return useRender({
+    defaultTagName: "output",
+    props: mergeProps<"output">(
+      { "aria-live": "off", children: content, htmlFor: inputId },
+      elementProps,
+      readoutProps,
+      resolveStyling(className, style, state)
+    ),
+    ref: [ref, readoutRef] as React.Ref<HTMLOutputElement>[],
+    render,
+    state,
+    stateAttributesMapping: FADER_STATE_ATTRIBUTES,
+  });
 }
 
 export namespace Value {
-  export interface Props extends Slider.Value.Props {
+  export type State = Root.State;
+  export interface Props extends Omit<PartProps<"output", State>, "children"> {
+    /**
+     * The readout, or a function of the formatted values and the values
+     * (one each: a fader has one thumb). Defaults to the formatted value.
+     */
+    children?:
+      | React.ReactNode
+      | ((
+          formattedValues: readonly string[],
+          values: readonly number[]
+        ) => React.ReactNode);
     /** Lets you type a value: a double click, or Enter while it has focus. @default false */
     editable?: boolean;
   }
-  export type State = Slider.Value.State;
 }

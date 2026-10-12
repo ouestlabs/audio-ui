@@ -1,6 +1,6 @@
 /**
  * What each entry costs a consumer: its built file bundled and minified, with
- * React and Base UI left out, gzipped. Fails when one grows past its budget,
+ * React left out, gzipped. Fails when one grows past its budget,
  * so a primitive cannot get heavier without somebody deciding it should.
  * Run `bun run build:pkg` first.
  */
@@ -9,7 +9,7 @@ import { resolve } from "node:path";
 /** Gzipped bytes. About 15% above what each weighs today, rendering and props merging included since they are ours. */
 const BUDGETS: Record<string, number> = {
   envelope: 7200,
-  fader: 4200,
+  fader: 6000,
   knob: 6400,
   meter: 4000,
   piano: 4000,
@@ -29,7 +29,7 @@ for (const [entry, budget] of Object.entries(BUDGETS)) {
   // biome-ignore lint/performance/noAwaitInLoops: sequential on purpose
   const result = await Bun.build({
     entrypoints: [`${dist}/${entry}.js`],
-    external: ["react", "react-dom", "react/jsx-runtime", "@base-ui/*"],
+    external: ["react", "react-dom", "react/jsx-runtime"],
     minify: true,
     target: "browser",
   });

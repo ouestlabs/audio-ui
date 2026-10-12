@@ -366,3 +366,51 @@ describe("Fader.Mark", () => {
     expect(active).toEqual([false, true, true, false]);
   });
 });
+
+describe("Fader keys, thumb press and label", () => {
+  test("Page, Home, End and Shift + arrow move by the large step or to the ends", () => {
+    const { input } = renderFader({ largeStep: 5 });
+    fireEvent.keyDown(input, { key: "PageUp" });
+    expect(input.value).toBe("-22");
+    fireEvent.keyDown(input, { key: "ArrowDown", shiftKey: true });
+    expect(input.value).toBe("-27");
+    fireEvent.keyDown(input, { key: "End" });
+    expect(input.value).toBe("6");
+    fireEvent.keyDown(input, { key: "Home" });
+    expect(input.value).toBe("-60");
+  });
+
+  test("a press on the thumb drags from where it was taken, without a jump", () => {
+    const { control, thumb, onValueChange } = renderFader();
+    mockRect(control, { bottom: 200, height: 200, right: 20, width: 20 });
+    // The thumb at -27 sits at the middle of the travel.
+    mockRect(thumb, { bottom: 110, height: 20, right: 20, top: 90, width: 20 });
+
+    fireEvent.pointerDown(thumb, { clientX: 10, clientY: 95, pointerId: 1 });
+    expect(onValueChange).not.toHaveBeenCalled();
+
+    fireEvent.pointerMove(document, {
+      buttons: 1,
+      clientX: 10,
+      clientY: 75,
+      pointerId: 1,
+    });
+    // 20px up from where the thumb was taken: a tenth of the travel, +6.6, on the grid.
+    expect(lastCall(onValueChange)[0]).toBe(-20);
+    fireEvent.pointerUp(document, { pointerId: 1 });
+  });
+
+  test("a Label names the input when the thumb has no name of its own", () => {
+    const view = render(
+      <Fader.Root>
+        <Fader.Label>Gain</Fader.Label>
+        <Fader.Control>
+          <Fader.Thumb />
+        </Fader.Control>
+      </Fader.Root>
+    );
+    const input = view.getByRole("slider");
+    const label = view.getByText("Gain");
+    expect(input.getAttribute("aria-labelledby")).toBe(label.id);
+  });
+});

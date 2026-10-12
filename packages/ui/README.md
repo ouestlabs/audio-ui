@@ -11,10 +11,10 @@ Headless, accessible primitives for audio interfaces in React: the controls and 
 ## Install
 
 ```bash
-npm install @audio-ui/react @base-ui/react
+npm install @audio-ui/react
 ```
 
-React 19 is required. `@base-ui/react` is a peer dependency.
+React 19 is required, and it is the only dependency.
 
 ## Use
 

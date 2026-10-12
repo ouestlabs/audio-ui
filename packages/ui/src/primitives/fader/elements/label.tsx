@@ -1,9 +1,41 @@
-import { Slider } from "@base-ui/react/slider";
+import * as React from "react";
+import { type PartProps, resolveStyling } from "../../internal/part";
+import { mergeProps, useRender } from "../../internal/render";
+import { FADER_STATE_ATTRIBUTES, useFaderContext } from "../context";
+import type { Root } from "./root";
 
 /** Accessible label, associated with the thumb. Renders a `<div>` element. */
-export const { Label } = Slider;
+export function Label(componentProps: Label.Props) {
+  const {
+    className,
+    id: idProp,
+    ref,
+    render,
+    style,
+    ...elementProps
+  } = componentProps;
+  const { setLabelId, state } = useFaderContext("Label");
+  const generatedId = React.useId();
+  const id = idProp ?? generatedId;
+  React.useLayoutEffect(() => {
+    setLabelId(id);
+    return () => setLabelId(undefined);
+  }, [id, setLabelId]);
+  return useRender({
+    defaultTagName: "div",
+    props: mergeProps<"div">(
+      { id },
+      elementProps,
+      resolveStyling(className, style, state)
+    ),
+    ref,
+    render,
+    state,
+    stateAttributesMapping: FADER_STATE_ATTRIBUTES,
+  });
+}
 
 export namespace Label {
-  export type Props = Slider.Label.Props;
-  export type State = Slider.Label.State;
+  export type State = Root.State;
+  export type Props = PartProps<"div", State>;
 }
