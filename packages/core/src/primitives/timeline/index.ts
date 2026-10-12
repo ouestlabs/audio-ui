@@ -42,6 +42,14 @@ export {
   valueAtLane,
 } from "./position";
 export {
+  createRangeController,
+  type RangeChangeEventDetails,
+  type RangeCommitEventDetails,
+  type RangeController,
+  type RangeOptions,
+  type RangeSnapshot,
+} from "./range-controller";
+export {
   anchoredScroll,
   clampZoom,
   valueAtOffset,
