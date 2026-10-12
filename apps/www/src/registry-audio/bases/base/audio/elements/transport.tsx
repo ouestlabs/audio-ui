@@ -281,14 +281,18 @@ function MetronomeMenu({
 
 /** The tempo and the time signature, joined: the pair you change together. */
 function TransportTempo({
+  looping,
   metronome,
+  onLoopingChange,
   onMetronomeChange,
   onRhythmChange,
   onTempoChange,
   rhythm,
   tempo,
 }: {
+  looping?: boolean;
   metronome?: boolean;
+  onLoopingChange?: (on: boolean) => void;
   onMetronomeChange?: (on: boolean) => void;
   onRhythmChange?: (rhythm: MetronomeRhythm) => void;
   onTempoChange: (tempo: Tempo) => void;
@@ -355,10 +359,22 @@ function TransportTempo({
         >
           {tempo.bpm}
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-auto min-w-48">
+        <DropdownMenuContent align="start" className="w-auto min-w-36">
           <div className="p-2">
-            <BpmControl onValueChange={handleBpm} value={tempo.bpm} />
+            <BpmControl
+              className="w-full"
+              onValueChange={handleBpm}
+              value={tempo.bpm}
+            />
           </div>
+          {onLoopingChange ? (
+            <DropdownMenuCheckboxItem
+              checked={Boolean(looping)}
+              onCheckedChange={onLoopingChange}
+            >
+              Loop
+            </DropdownMenuCheckboxItem>
+          ) : null}
           {onMetronomeChange ? (
             <DropdownMenuSub>
               <DropdownMenuSubTrigger>Metronome</DropdownMenuSubTrigger>
@@ -543,6 +559,7 @@ function Transport({
             <Toolbar.Button
               aria-label="Loop"
               aria-pressed={looping}
+              className="hidden @2xl/transport:flex"
               onClick={toggleLooping}
               render={
                 <Button size="icon" variant={looping ? "default" : "outline"} />
@@ -594,7 +611,9 @@ function Transport({
       ) : null}
       {onTempoChange ? (
         <TransportTempo
+          looping={looping}
           metronome={metronome}
+          onLoopingChange={onLoopingChange}
           onMetronomeChange={onMetronomeChange}
           onRhythmChange={onRhythmChange}
           onTempoChange={onTempoChange}
