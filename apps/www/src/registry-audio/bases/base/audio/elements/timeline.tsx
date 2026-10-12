@@ -29,6 +29,12 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from "@/registry/bases/base/ui/context-menu";
+import {
+  DropdownMenuCheckboxItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+} from "@/registry/bases/base/ui/dropdown-menu";
 import { Fader } from "@/registry-audio/bases/base/audio/elements/fader";
 import { Knob } from "@/registry-audio/bases/base/audio/elements/knob";
 import type { Mix } from "@/registry-audio/bases/base/lib/arrangement";
@@ -757,7 +763,29 @@ function TimelineTrackControls({
   );
 }
 
-/** The grid's divisions and its two flags, as the menu a right-click on a lane opens. */
+/** The menu items of the grid, for a context menu or a dropdown menu. */
+type GridMenuKit = {
+  RadioGroup: typeof ContextMenuRadioGroup;
+  RadioItem: typeof ContextMenuRadioItem;
+  CheckboxItem: typeof ContextMenuCheckboxItem;
+  Separator: typeof ContextMenuSeparator;
+};
+
+const CONTEXT_GRID_KIT: GridMenuKit = {
+  RadioGroup: ContextMenuRadioGroup,
+  RadioItem: ContextMenuRadioItem,
+  CheckboxItem: ContextMenuCheckboxItem,
+  Separator: ContextMenuSeparator,
+};
+
+const DROPDOWN_GRID_KIT: GridMenuKit = {
+  RadioGroup: DropdownMenuRadioGroup,
+  RadioItem: DropdownMenuRadioItem,
+  CheckboxItem: DropdownMenuCheckboxItem,
+  Separator: DropdownMenuSeparator,
+};
+
+/** The grid's divisions and its two flags, as the menu a right-click on a lane or a dropdown opens. */
 function TimelineGridMenuItems({
   division,
   divisions,
@@ -766,6 +794,7 @@ function TimelineGridMenuItems({
   onTripletChange,
   snap,
   triplet,
+  variant = "context",
 }: {
   division: string;
   divisions: { label: string; value: string }[];
@@ -774,26 +803,26 @@ function TimelineGridMenuItems({
   onTripletChange: (checked: boolean) => void;
   snap: boolean;
   triplet: boolean;
+  variant?: "context" | "dropdown";
 }) {
+  const { RadioGroup, RadioItem, CheckboxItem, Separator } =
+    variant === "dropdown" ? DROPDOWN_GRID_KIT : CONTEXT_GRID_KIT;
   return (
     <>
-      <ContextMenuRadioGroup onValueChange={onDivisionChange} value={division}>
+      <RadioGroup onValueChange={onDivisionChange} value={division}>
         {divisions.map((item) => (
-          <ContextMenuRadioItem key={item.value} value={item.value}>
+          <RadioItem key={item.value} value={item.value}>
             {item.label.replace("Grid: ", "")}
-          </ContextMenuRadioItem>
+          </RadioItem>
         ))}
-      </ContextMenuRadioGroup>
-      <ContextMenuSeparator />
-      <ContextMenuCheckboxItem
-        checked={triplet}
-        onCheckedChange={onTripletChange}
-      >
+      </RadioGroup>
+      <Separator />
+      <CheckboxItem checked={triplet} onCheckedChange={onTripletChange}>
         Triplet grid
-      </ContextMenuCheckboxItem>
-      <ContextMenuCheckboxItem checked={snap} onCheckedChange={onSnapChange}>
+      </CheckboxItem>
+      <CheckboxItem checked={snap} onCheckedChange={onSnapChange}>
         Snap to grid
-      </ContextMenuCheckboxItem>
+      </CheckboxItem>
     </>
   );
 }

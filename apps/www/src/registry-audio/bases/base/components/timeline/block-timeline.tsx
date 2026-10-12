@@ -94,6 +94,7 @@ import {
   GRID_DIVISIONS,
   type GridDivision,
   gridInterval,
+  gridLabel,
   type MetronomeRhythm,
   secondsPerBar,
   type Tempo,
@@ -1255,42 +1256,11 @@ export default function BlockTimeline() {
                   <DropdownMenuSeparator />
                 </>
               ) : null}
-              <DropdownMenuSub>
-                <DropdownMenuSubTrigger>Grid</DropdownMenuSubTrigger>
-                <DropdownMenuSubContent>
-                  <DropdownMenuRadioGroup
-                    onValueChange={handleDivisionValue}
-                    value={division}
-                  >
-                    {DIVISIONS.map((item) => (
-                      <DropdownMenuRadioItem
-                        key={item.value}
-                        value={item.value}
-                      >
-                        {item.label.replace("Grid: ", "")}
-                      </DropdownMenuRadioItem>
-                    ))}
-                  </DropdownMenuRadioGroup>
-                </DropdownMenuSubContent>
-              </DropdownMenuSub>
-              <DropdownMenuSeparator />
               <DropdownMenuCheckboxItem
                 checked={multi}
                 onCheckedChange={setMulti}
               >
                 Multi-select
-              </DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem
-                checked={triplet}
-                onCheckedChange={setTriplet}
-              >
-                Triplet grid
-              </DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem
-                checked={snap}
-                onCheckedChange={setSnap}
-              >
-                Snap to grid
               </DropdownMenuCheckboxItem>
               <DropdownMenuSeparator />
               <DropdownMenuSub>
@@ -1402,7 +1372,39 @@ export default function BlockTimeline() {
                   <TimelinePlayhead />
                 </TimelineLane>
               </Row>
-              <Row className="shrink-0 bg-background">
+              <Row
+                className="shrink-0 bg-background"
+                lead={
+                  <DropdownMenu>
+                    <DropdownMenuTrigger
+                      render={
+                        <Button
+                          aria-label="Grid"
+                          className="h-full w-full justify-start rounded-none tabular-nums"
+                          variant="ghost"
+                        />
+                      }
+                    >
+                      {snap ? gridLabel(gridSeconds, tempo) : "Snap off"}
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      align="start"
+                      className="w-auto min-w-48"
+                    >
+                      <TimelineGridMenuItems
+                        division={division}
+                        divisions={DIVISIONS}
+                        onDivisionChange={handleDivisionValue}
+                        onSnapChange={setSnap}
+                        onTripletChange={setTriplet}
+                        snap={snap}
+                        triplet={triplet}
+                        variant="dropdown"
+                      />
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                }
+              >
                 <TimelineRuler
                   aria-label="Playhead"
                   getAriaValueText={describe}
