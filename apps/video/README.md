@@ -12,7 +12,7 @@ Run from `apps/video/`. Videos land in `out/` (1920×1080, 60 fps, H.264).
 bun run new <name>            # e.g. bun run new knob
 ```
 
-Badge "New component", the title and description from the component's docs page, the component playing, then its install command typed in.
+The component playing in the site's own frame, as the docs show it: its name and description (from its docs page) in the bar on top, with a "New component" badge at the end of the bar.
 
 Before the first render, give the component a showcase:
 
@@ -26,7 +26,14 @@ Before the first render, give the component a showcase:
 bun run update <name> --note "Marks around the dial, with labels" --note "Type a value in the readout"
 ```
 
-Badge "Updated", the component playing, a "What changed" card (up to 3 notes) and the install command with `-o` to overwrite. Without `--note`, the notes come from the short sentences of the pending changesets that mention the component, and the script prints which it used.
+The same frame, marked "Updated", with what changed (up to 3 notes) in a panel of its own under the component, as the docs put the code under a preview. Without `--note`, the notes come from the short sentences of the pending changesets that mention the component, and the script prints which it used.
+
+### Every component
+
+```sh
+bun run showcase <name>       # one component, with no status
+bun run all                   # every component: "New component" where the docs' menu marks it new, no status otherwise
+```
 
 ### The teaser
 
@@ -34,12 +41,11 @@ Badge "Updated", the component playing, a "What changed" card (up to 3 notes) an
 bun run teaser
 ```
 
-The whole library in 28 seconds: the glyph turns into the first knob, the controls and the editors one by one, then the whole instrument while it turns dark.
+The whole library in 28 seconds: the glyph becomes the first knob, the controls and the editors one by one, then the whole instrument while it turns dark.
 
 ### Options
 
 - `--theme dark`: render on the dark theme (light by default).
-- `--version 0.3.0`: the `@audio-ui/react` version shown in the badge (the current one by default).
 
 ## Studio
 

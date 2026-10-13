@@ -1,12 +1,7 @@
+import { useLayoutEffect, useRef, useState } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
-import {
-  glyphEntrance,
-  Lockup,
-  LockupUrl,
-  MONO_ADVANCE_EM,
-  Rise,
-  Typed,
-} from "../brand.tsx";
+import { Badge } from "@/registry/bases/base/ui/badge";
+import { glyphEntrance, Lockup, LockupUrl } from "../brand.tsx";
 import { lerp, MOTION, ramp, tw, useSeconds } from "../motion.ts";
 import { SHOWCASES } from "../showcases/index.ts";
 
@@ -23,8 +18,6 @@ export interface SpotlightProps {
   notes: string[];
   theme: "dark" | "light";
   title: string;
-  /** The version of `@audio-ui/react` it ships in. */
-  version: string;
   [key: string]: unknown;
 }
 
@@ -40,178 +33,159 @@ export const SPOTLIGHT_DEFAULTS: SpotlightProps = {
   ],
   theme: "light",
   title: "Knob",
-  version: "0.2.0",
 };
 
 const LEAVE_AT = SPOTLIGHT_SECONDS - 2.4;
-/** Width over height from which a component is laid out under the text, across the frame. */
-const WIDE_RATIO = 2.5;
 /** How far everything has left: out faster than in, starting at once. */
 const goneAt = (T: number) => MOTION.enter(ramp(T - LEAVE_AT, 0.35));
 
-/** Fades and lifts in from `start`, and every part leaves together at the end. */
-function useEnter(T: number, start: number) {
-  const shown = tw(T, start, start + 0.6, 0, 1, MOTION.enter);
-  const gone = goneAt(T);
-  return {
-    opacity: shown * (1 - gone),
-    transform: `translateY(${lerp(16, 0, shown) - 24 * gone}px)`,
-  };
-}
+/** The room the frame is scaled into, in px. */
+const AREA = { height: 888, width: 1728 };
+/** How far the frame may be scaled: past it the site's hairlines turn heavy. */
+const MAX_SCALE = 2.4;
+/** The frame's own px, as on the site: the panel's breathing room round the component, its bars, its edges. */
+const PANEL_PADDING = 40;
+const HEADER_HEIGHT = 56;
+const MIN_FRAME_WIDTH = 760;
+/** The frame's `p-0.5` and border, then the panel's border, on both sides. */
+const FRAME_EDGES = 6;
+const PANEL_EDGES = 2;
 
 /**
- * "New component" or "Updated" and the version, after the logo, behind a thin
- * rule. A plain showcase has no status: the logo stands alone.
+ * The component in the site's own frame, as the docs show it: a tinted frame,
+ * one bar on top (audio/ui and its name, its description, its status badge at
+ * the end) and the component alone in the panel. For an update, what changed
+ * gets a panel of its own under the component, as the docs put the code under
+ * a preview. The whole frame is scaled as one, so it keeps the site's
+ * proportions, and nothing in it moves but the component and the notes.
  */
-function Status({
+function Framed({
   T,
+  description,
   kind,
-  version,
-}: {
-  T: number;
-  kind: SpotlightProps["kind"];
-  version: string;
-}) {
-  const entrance = useEnter(T, 0.3);
-  if (kind === "showcase") {
-    return null;
-  }
-  return (
-    <div className="flex items-center gap-5" style={entrance}>
-      {/* A rule, not a slash: the wordmark has one already. */}
-      <span aria-hidden="true" className="h-8 w-px bg-border" />
-      <span className="flex items-baseline gap-3 text-[28px]">
-        <span className="font-medium">
-          {kind === "new" ? "New component" : "Updated"}
-        </span>
-        <span className="font-mono text-2xl text-muted-foreground">
-          {version}
-        </span>
-      </span>
-    </div>
-  );
-}
-
-function Notes({ T, notes }: { T: number; notes: string[] }) {
-  const card = useEnter(T, 1.9);
-  return (
-    <div
-      className="flex flex-col gap-4 rounded-2xl border bg-card p-7 shadow-xs"
-      style={card}
-    >
-      <span className="font-medium text-muted-foreground text-xl">
-        What changed
-      </span>
-      {notes.map((note, index) => {
-        const line = tw(
-          T,
-          2.2 + index * 0.25,
-          2.8 + index * 0.25,
-          0,
-          1,
-          MOTION.enter
-        );
-        return (
-          <div
-            className="flex items-baseline gap-4 text-[28px] leading-snug"
-            key={note}
-            style={{
-              opacity: line,
-              transform: `translateX(${lerp(-12, 0, line)}px)`,
-            }}
-          >
-            <span className="font-mono text-info">+</span>
-            <span>{note}</span>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-/** The text column's width, in px (`w-170`). */
-const COLUMN_WIDTH = 680;
-/** The command box's padding, its prompt, the gap and the caret's room, in px. */
-const INSTALL_CHROME = 56 + 16 + 8;
-const INSTALL_FONT_SIZE = 26;
-
-function Install({
-  T,
-  command,
-  start,
-}: {
-  T: number;
-  command: string;
-  start: number;
-}) {
-  // A long component name shrinks the command until it fits its box.
-  const fontSize = Math.min(
-    INSTALL_FONT_SIZE,
-    (COLUMN_WIDTH - INSTALL_CHROME) / (MONO_ADVANCE_EM * (command.length + 1))
-  );
-  return (
-    <div
-      className="flex items-center gap-4 rounded-2xl bg-foreground px-7 py-5 font-mono text-background"
-      style={{ ...useEnter(T, start), fontSize }}
-    >
-      <span className="opacity-50">$</span>
-      <Typed caretHeight={fontSize * 1.15} t={T - start - 0.3} text={command} />
-    </div>
-  );
-}
-
-/** The real component, scaled up to `width` × `height` and driven from `T`. */
-function Stage({
-  T,
-  height,
   name,
-  width,
+  notes,
+  title,
 }: {
   T: number;
-  height: number;
+  description: string;
+  kind: SpotlightProps["kind"];
   name: string;
-  width: number;
+  notes: string[];
+  title: string;
 }) {
   const showcase = SHOWCASES[name];
-  const shown = tw(T, 0.6, 1.45, 0, 1, MOTION.enter);
+  const shown = tw(T, 0.45, 1.05, 0, 1, MOTION.enter);
   const gone = goneAt(T);
+  // The bar grows with a long description and the notes take a panel: the frame is scaled from its measured height.
+  const frame = useRef<HTMLDivElement>(null);
+  const [measured, setMeasured] = useState(0);
+  useLayoutEffect(() => {
+    setMeasured(frame.current?.offsetHeight ?? 0);
+  });
   if (!showcase) {
     return (
-      <div
-        className="flex items-center justify-center font-mono text-2xl text-destructive"
-        style={{ height, width }}
-      >
+      <div className="font-mono text-2xl text-destructive">
         No showcase for “{name}” in src/showcases/index.ts
       </div>
     );
   }
   const { Demo } = showcase;
-  const scale = Math.min(width / showcase.width, height / showcase.height, 2.2);
-  // A slow push in while it plays.
-  const push = 1 + 0.04 * ramp(T - 1.45, LEAVE_AT - 1.45);
+  const width =
+    Math.max(showcase.width + 2 * PANEL_PADDING, MIN_FRAME_WIDTH) +
+    PANEL_EDGES +
+    FRAME_EDGES;
+  const height =
+    measured ||
+    HEADER_HEIGHT +
+      showcase.height +
+      2 * PANEL_PADDING +
+      PANEL_EDGES +
+      FRAME_EDGES;
+  const scale = Math.min(AREA.width / width, AREA.height / height, MAX_SCALE);
   return (
-    <div className="flex items-center justify-center" style={{ height, width }}>
+    <div
+      style={{
+        height: height * scale,
+        opacity: shown * (1 - gone),
+        transform: `translateY(${lerp(24, 0, shown) - 32 * gone}px)`,
+        width: width * scale,
+      }}
+    >
       <div
-        style={{
-          height: showcase.height * scale,
-          opacity: shown * (1 - gone),
-          transform: `translateY(${lerp(24, 0, shown) - 32 * gone}px) scale(${lerp(0.96, 1, shown) * push})`,
-          width: showcase.width * scale,
-        }}
+        className="flex origin-top-left flex-col overflow-hidden rounded-(--frame-radius) border border-site-border/80 bg-site-muted/50 p-0.5 font-site-sans"
+        ref={frame}
+        style={{ transform: `scale(${scale})`, width }}
       >
         <div
-          className={cn(
-            "box-border origin-top-left rounded-[14px] border bg-card shadow-xs",
-            name === "timeline" ? "overflow-hidden" : "p-4"
-          )}
-          style={{
-            height: showcase.height,
-            transform: `scale(${scale})`,
-            width: showcase.width,
-          }}
+          className="flex shrink-0 items-center justify-between gap-6 px-3 py-2"
+          style={{ minHeight: HEADER_HEIGHT }}
         >
-          <Demo t={T - 1.15} />
+          {/* What it is: the name, then the description under it, kept clear of the status. */}
+          <div className="flex min-w-0 flex-col gap-0.5">
+            <div className="flex items-center gap-2.5 text-site-foreground text-sm">
+              <Lockup size={14} />
+              <span aria-hidden="true" className="text-site-muted-foreground">
+                ·
+              </span>
+              <span className="font-medium">{title}</span>
+            </div>
+            <span className="line-clamp-2 text-pretty text-site-muted-foreground text-xs">
+              {description}
+            </span>
+          </div>
+          {/* Its status, at the end of the bar where the site puts its actions, centred on the name's line: a plain showcase has none. */}
+          {kind === "showcase" ? null : (
+            <div className="flex h-5 shrink-0 items-center self-start">
+              <Badge className="gap-1.5 bg-site-background" variant="outline">
+                <span
+                  aria-hidden="true"
+                  className={cn(
+                    "size-1.5 rounded-full",
+                    kind === "new" ? "bg-success" : "bg-info"
+                  )}
+                />
+                {kind === "new" ? "New component" : "Updated"}
+              </Badge>
+            </div>
+          )}
         </div>
+        <div
+          className="flex items-center justify-center rounded-(--frame-radius-inner) border border-site-border bg-site-background"
+          style={{ padding: PANEL_PADDING }}
+        >
+          <div
+            className={cn("box-border", name === "timeline" ? null : "p-4")}
+            style={{ height: showcase.height, width: showcase.width }}
+          >
+            <Demo t={T - 0.45} />
+          </div>
+        </div>
+        {kind === "update" ? (
+          <ul className="mt-0.5 divide-y divide-site-border rounded-(--frame-radius-inner) border border-site-border bg-site-background text-site-foreground text-xs">
+            {notes.map((note, index) => (
+              <li
+                className="flex items-baseline gap-2 px-4 py-2.5"
+                key={note}
+                style={{
+                  opacity: tw(
+                    T,
+                    1 + index * 0.2,
+                    1.4 + index * 0.2,
+                    0,
+                    1,
+                    MOTION.enter
+                  ),
+                }}
+              >
+                <span aria-hidden="true" className="font-mono text-success">
+                  +
+                </span>
+                {note}
+              </li>
+            ))}
+          </ul>
+        ) : null}
       </div>
     </div>
   );
@@ -233,9 +207,8 @@ function Signoff({ T }: { T: number }) {
 }
 
 /**
- * One component on screen: what it is, the real thing playing, and how to get
- * it. `kind` picks the story: a new component shows its install command, an
- * update lists what changed.
+ * One component on screen, framed as in the docs and taking the screen: its
+ * name, description and status in the frame's bar, the logo kept for the end.
  */
 export function Spotlight({
   description,
@@ -244,48 +217,8 @@ export function Spotlight({
   notes,
   theme,
   title,
-  version,
 }: SpotlightProps) {
   const T = useSeconds();
-  // An update overwrites the files a project already has.
-  const command =
-    kind === "update"
-      ? `npx shadcn@latest add @audio-ui/${name} -o`
-      : `npx shadcn@latest add @audio-ui/${name}`;
-  const header = useEnter(T, 0);
-  const copy = useEnter(T, 0.8);
-  const gone = goneAt(T);
-  const showcase = SHOWCASES[name];
-  // A wide component gets the whole width under the text; a compact one sits beside it.
-  const wide = showcase
-    ? showcase.width / showcase.height >= WIDE_RATIO
-    : false;
-
-  const heading = (
-    <div
-      style={{ opacity: 1 - gone, transform: `translateY(${-24 * gone}px)` }}
-    >
-      <Rise size={wide ? 150 : 168} t={T - 0.45} text={title} />
-    </div>
-  );
-  const about = (
-    <p
-      className="max-w-[18em] text-pretty text-[34px] text-muted-foreground leading-snug"
-      style={copy}
-    >
-      {description}
-    </p>
-  );
-  const install =
-    kind === "update" ? (
-      <div className="flex flex-col gap-5">
-        <Notes notes={notes} T={T} />
-        <Install command={command} start={2.6 + notes.length * 0.2} T={T} />
-      </div>
-    ) : (
-      <Install command={command} start={2.1} T={T} />
-    );
-
   return (
     <div
       className={cn(
@@ -293,36 +226,16 @@ export function Spotlight({
         theme === "dark" && "dark"
       )}
     >
-      <div className="absolute top-18 left-24 flex items-center gap-5">
-        <div style={header}>
-          <Lockup size={36} />
-        </div>
-        <Status kind={kind} T={T} version={version} />
+      <div className="absolute inset-x-24 inset-y-24 flex items-center justify-center">
+        <Framed
+          description={description}
+          kind={kind}
+          name={name}
+          notes={notes}
+          T={T}
+          title={title}
+        />
       </div>
-      {wide ? (
-        <div className="absolute inset-x-24 top-36 bottom-24 flex flex-col justify-center gap-14">
-          {/* What it is on the left, how to get it on the right, the thing itself under both. */}
-          <div className="flex items-end justify-between gap-20">
-            <div className="flex flex-col gap-6">
-              {heading}
-              {about}
-            </div>
-            <div className="w-170 shrink-0">{install}</div>
-          </div>
-          <Stage height={440} name={name} T={T} width={1728} />
-        </div>
-      ) : (
-        <div className="absolute inset-x-24 top-36 bottom-24 flex items-center gap-20">
-          <div className="flex w-170 shrink-0 flex-col gap-12">
-            <div className="flex flex-col gap-8">
-              {heading}
-              {about}
-            </div>
-            {install}
-          </div>
-          <Stage height={840} name={name} T={T} width={968} />
-        </div>
-      )}
       <Signoff T={T} />
     </div>
   );

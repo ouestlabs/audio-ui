@@ -7,7 +7,7 @@
  *   bun run all                               every component: "New" where the docs' menu marks it, no status otherwise
  *   bun run teaser                            the whole library
  *
- * Options: --theme light|dark, --version x.y.z (the @audio-ui/react version it ships in; the current one by default).
+ * Options: --theme light|dark.
  * The videos land in apps/video/out/.
  */
 import path from "node:path";
@@ -32,7 +32,6 @@ const { positionals, values } = parseArgs({
   options: {
     note: { multiple: true, type: "string" },
     theme: { default: "light", type: "string" },
-    version: { type: "string" },
   },
 });
 const [command, name] = positionals;
@@ -96,9 +95,6 @@ async function spotlightProps(
     );
   }
   const docs = await page.text();
-  const ui: { version: string } = await Bun.file(
-    path.join(root, "packages/ui/package.json")
-  ).json();
 
   let notes = values.note ?? [];
   if (kind === "update" && notes.length === 0) {
@@ -122,7 +118,6 @@ async function spotlightProps(
       frontmatterField(docs, "title") ??
       SHOWCASES[component]?.title ??
       component,
-    version: values.version ?? ui.version,
   };
 }
 
