@@ -1,13 +1,8 @@
-import { type ClassValue, clsx } from "clsx";
-import { twMerge } from "tailwind-merge";
-
 import { absoluteUrl as buildAbsoluteUrl } from "@/lib/seo";
 
-const TRAILING_SLASH_REGEX = /\/$/;
+export { cn } from "cn";
 
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
+const TRAILING_SLASH_REGEX = /\/$/;
 
 export function isActive(pathname: string, href: string) {
   const normalizedPathname = pathname.replace(TRAILING_SLASH_REGEX, "");
