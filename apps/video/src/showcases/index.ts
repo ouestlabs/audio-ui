@@ -4,9 +4,12 @@ import { FaderShowcase } from "./fader.tsx";
 import { KnobShowcase } from "./knob.tsx";
 import { MeterShowcase } from "./meter.tsx";
 import { PianoShowcase } from "./piano.tsx";
+import { PianoRollShowcase } from "./piano-roll.tsx";
 import { PlotShowcase } from "./plot.tsx";
+import { ScrubberShowcase } from "./scrubber.tsx";
 import { SequencerShowcase } from "./sequencer.tsx";
 import { TimelineShowcase } from "./timeline.tsx";
+import { TransportShowcase } from "./transport.tsx";
 import { WaveformShowcase } from "./waveform.tsx";
 import { XYPadShowcase } from "./xypad.tsx";
 
@@ -34,7 +37,19 @@ export const SHOWCASES: Record<string, Showcase> = {
   knob: { Demo: KnobShowcase, height: 240, title: "Knob", width: 520 },
   meter: { Demo: MeterShowcase, height: 260, title: "Meter", width: 160 },
   piano: { Demo: PianoShowcase, height: 192, title: "Piano", width: 584 },
+  "piano-roll": {
+    Demo: PianoRollShowcase,
+    height: 300,
+    title: "Piano Roll",
+    width: 760,
+  },
   plot: { Demo: PlotShowcase, height: 280, title: "Plot", width: 584 },
+  scrubber: {
+    Demo: ScrubberShowcase,
+    height: 80,
+    title: "Scrubber",
+    width: 560,
+  },
   sequencer: {
     Demo: SequencerShowcase,
     height: 200,
@@ -46,6 +61,12 @@ export const SHOWCASES: Record<string, Showcase> = {
     height: 240,
     title: "Timeline",
     width: 1000,
+  },
+  transport: {
+    Demo: TransportShowcase,
+    height: 96,
+    title: "Transport",
+    width: 540,
   },
   waveform: {
     Demo: WaveformShowcase,

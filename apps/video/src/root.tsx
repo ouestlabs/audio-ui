@@ -34,7 +34,7 @@ export function Root() {
         component={Showcases}
         durationInFrames={6 * FPS}
         fps={FPS}
-        height={1300}
+        height={1500}
         id="Showcases"
         width={2200}
       />
