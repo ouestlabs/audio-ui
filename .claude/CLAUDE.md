@@ -15,7 +15,8 @@ Turborepo + Bun workspaces. **Always use `bun`, never `npm` or `pnpm`.**
 audio-ui/
 ├── apps/
 │   ├── www/        # Next.js docs site + registry (Fumadocs + MDX) → localhost:4000
-│   └── sandbox/    # Dev sandbox
+│   ├── sandbox/    # Dev sandbox
+│   └── video/      # Remotion videos of the real components: `bun run new|update <name>`, `bun run teaser` (see its README)
 └── packages/
     ├── core/       # @audio-ui/core, published npm package (framework-agnostic logic)
     └── ui/         # @audio-ui/react, published npm package (headless primitives)

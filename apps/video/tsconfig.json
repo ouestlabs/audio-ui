@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "allowImportingTsExtensions": true,
+    "jsx": "react-jsx",
+    "paths": {
+      "@/app/(create)/components/icon-placeholder": [
+        "./src/icon-placeholder.tsx"
+      ],
+      "@/*": ["../www/src/*"],
+      "@audio-ui/core": ["../../packages/core/src/index.ts"],
+      "@audio-ui/core/internal": ["../../packages/core/src/internal.ts"],
+      "@audio-ui/core/*": ["../../packages/core/src/primitives/*/index.ts"],
+      "@audio-ui/react": ["../../packages/ui/src/index.ts"]
+    },
+    "types": ["bun", "react", "react-dom"]
+  },
+  "include": ["src", "scripts", "*.ts"],
+  "exclude": ["node_modules", "out"]
+}
