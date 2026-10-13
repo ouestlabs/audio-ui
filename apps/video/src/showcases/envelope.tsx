@@ -19,7 +19,7 @@ export function EnvelopeShowcase({ t }: { t: number }) {
     <div
       className="h-full"
       style={{
-        clipPath: `inset(-8px ${(1 - MOTION.move(ramp(t, 0.7))) * 100}% -8px -8px)`,
+        clipPath: `inset(-8px ${(1 - MOTION.enter(ramp(t, 0.7))) * 100}% -8px -8px)`,
       }}
     >
       <Envelope

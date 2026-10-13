@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { MOTION, ramp } from "./motion.ts";
+import { lerp, MOTION, ramp } from "./motion.ts";
 
 /** The slot cut through the glyph, in degrees clockwise from 12 o'clock: where its knob points. */
 export const LOGO_NOTCH_ANGLE = 30;
@@ -22,6 +22,19 @@ export function Logo({ size, style }: { size: number; style?: CSSProperties }) {
       <path d={LOGO_PATH} />
     </svg>
   );
+}
+
+/**
+ * How the glyph enters, wherever it appears: it comes into focus, grows from
+ * 94% and settles with a short clockwise turn, like a knob coming to rest.
+ * `progress` is already eased.
+ */
+export function glyphEntrance(progress: number): CSSProperties {
+  return {
+    filter: progress < 1 ? `blur(${6 * (1 - progress)}px)` : undefined,
+    opacity: progress,
+    transform: `rotate(${lerp(-24, 0, progress)}deg) scale(${lerp(0.94, 1, progress)})`,
+  };
 }
 
 /**
@@ -89,6 +102,13 @@ export function Typed({
   const shown = Math.floor(Math.max(t, 0) * CHARACTERS_PER_SECOND);
   const done = shown >= text.length;
   const blinkOn = Math.floor(t * BLINKS_PER_SECOND) % 2 === 0;
+  // Nothing before typing starts; then it blinks once the text is in.
+  let caret = 1;
+  if (t < 0) {
+    caret = 0;
+  } else if (done && !blinkOn) {
+    caret = 0.15;
+  }
   return (
     <span className="relative inline-flex items-center whitespace-pre">
       <span>{text.slice(0, shown)}</span>
@@ -97,7 +117,7 @@ export function Typed({
         className="-translate-y-1/2 absolute top-1/2 left-full ml-1 w-0.5 bg-foreground"
         style={{
           height: caretHeight,
-          opacity: t < 0 || (done && !blinkOn) ? 0.15 : 1,
+          opacity: caret,
         }}
       />
     </span>

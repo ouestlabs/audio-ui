@@ -1,5 +1,11 @@
 import { Knob } from "@/registry-audio/bases/base/audio/elements/knob";
-import { LOGO_PATH, Lockup, LockupUrl, Rise } from "../brand.tsx";
+import {
+  glyphEntrance,
+  LOGO_PATH,
+  Lockup,
+  LockupUrl,
+  Rise,
+} from "../brand.tsx";
 import { lerp, MOTION, ramp, tw, useSeconds } from "../motion.ts";
 import { SHOWCASES } from "../showcases/index.ts";
 import { knobRing, knobValue } from "../showcases/knob.tsx";
@@ -192,7 +198,8 @@ function camera(T: number, format: Format): Camera {
     );
     const shot = SHOTS[index] as Shot;
     const travel = Math.min(0.8, shot.length * 0.45);
-    // It leaves each panel slightly pushed in, from the slow push of the shot.
+    // It leaves each panel slightly pushed in. The push runs the whole shot,
+    // under the travel, so the camera never comes to a stop on a panel.
     const from = on((SHOTS[index - 1] as Shot).name, 1.035);
     const cam = mix(
       from,
@@ -201,9 +208,7 @@ function camera(T: number, format: Format): Camera {
     );
     return {
       ...cam,
-      s:
-        cam.s *
-        (1 + 0.035 * ramp(T - shot.start - travel, shot.length - travel)),
+      s: cam.s * (1 + 0.035 * ramp(T - shot.start, shot.length)),
     };
   }
   if (T < CUES.Outro) {
@@ -411,37 +416,40 @@ function Outro({ T, format }: { T: number; format: Format }) {
     return null;
   }
   const t = T - CUES.Outro;
-  const land = MOTION.pop(ramp(t - 0.6, 0.6));
+  const land = MOTION.enter(ramp(t - 0.6, 0.55));
   return (
     <div
       className="absolute inset-x-0 flex flex-col items-center gap-5"
       style={{ top: format.outro.textY }}
     >
-      <Lockup
-        iconStyle={{
-          transform: `rotate(${lerp(-90, 0, land)}deg) scale(${land})`,
-        }}
-        size={104}
-        t={t - 0.75}
-      />
+      <Lockup iconStyle={glyphEntrance(land)} size={104} t={t - 0.75} />
       <LockupUrl size={104} t={t - 1.5} text="https://audio-ui.dev" />
     </div>
   );
 }
 
-/** The number and name of the panel the camera is on. */
+/**
+ * The number and name of the panel the camera is on. It stays on screen from
+ * the first panel to the last: between two, the number rolls to the next one
+ * and the name crossfades, while the camera travels.
+ */
 function Label({ T, format }: { T: number; format: Format }) {
-  const index = SHOTS.findIndex(
-    (each) => T >= each.start && T < each.start + each.length
-  );
-  const shot = SHOTS[index];
-  if (!shot) {
+  const first = SHOTS[0] as Shot;
+  const last = SHOTS.at(-1) as Shot;
+  const shown =
+    MOTION.enter(ramp(T - first.start - 0.35, 0.35)) *
+    (1 - MOTION.enter(ramp(T - (last.start + last.length - 0.4), 0.3)));
+  if (shown <= 0) {
     return null;
   }
-  const shown = Math.min(
-    ramp(T - shot.start - 0.35, 0.35),
-    ramp(shot.start + shot.length - 0.1 - T, 0.3)
-  );
+  const upcoming = SHOTS.findIndex((each) => T < each.start);
+  const index = Math.max(0, (upcoming === -1 ? SHOTS.length : upcoming) - 1);
+  const shot = SHOTS[index] as Shot;
+  const previous = index > 0 ? index - 1 : null;
+  const swap =
+    previous === null ? 1 : MOTION.move(ramp(T - shot.start - 0.15, 0.4));
+  const number = (at: number) => String(at + 1).padStart(2, "0");
+  const title = (at: number) => SHOWCASES[(SHOTS[at] as Shot).name]?.title;
   return (
     <div
       className="absolute flex items-baseline gap-4.5"
@@ -452,11 +460,40 @@ function Label({ T, format }: { T: number; format: Format }) {
         transform: `translateY(${lerp(8, 0, shown)}px)`,
       }}
     >
-      <span className="font-mono text-muted-foreground text-xl tabular-nums">
-        {String(index + 1).padStart(2, "0")}
+      {/* The number rolls up through a one-line window. */}
+      <span className="relative inline-block overflow-hidden font-mono text-muted-foreground text-xl leading-none tabular-nums">
+        <span className="invisible">{number(index)}</span>
+        {previous === null ? null : (
+          <span
+            className="absolute inset-0"
+            style={{ transform: `translateY(${-100 * swap}%)` }}
+          >
+            {number(previous)}
+          </span>
+        )}
+        <span
+          className="absolute inset-0"
+          style={{ transform: `translateY(${100 * (1 - swap)}%)` }}
+        >
+          {number(index)}
+        </span>
       </span>
-      <span className="font-medium text-[40px] tracking-tight">
-        {SHOWCASES[shot.name]?.title}
+      {/* The names share one cell and crossfade, blurred so the two read as one change. */}
+      <span className="grid font-medium text-[40px] tracking-tight">
+        {previous === null ? null : (
+          <span
+            className="[grid-area:1/1]"
+            style={{ filter: `blur(${2 * swap}px)`, opacity: 1 - swap }}
+          >
+            {title(previous)}
+          </span>
+        )}
+        <span
+          className="[grid-area:1/1]"
+          style={{ filter: `blur(${2 * (1 - swap)}px)`, opacity: swap }}
+        >
+          {title(index)}
+        </span>
       </span>
     </div>
   );

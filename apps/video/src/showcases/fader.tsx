@@ -1,5 +1,5 @@
 import { Fader } from "@/registry-audio/bases/base/audio/elements/fader";
-import { clamp, ramp, tw } from "../motion.ts";
+import { clamp, MOTION, ramp, tw } from "../motion.ts";
 
 const FADERS = [
   { from: 22, label: "Volume", to: 78 },
@@ -19,7 +19,7 @@ export function FaderShowcase({ t }: { t: number }) {
           Math.sin((t - start) * 1.7 + index * 2) *
           ramp(t - start - 0.9, 0.8);
         const value = clamp(
-          tw(t, start, start + 0.9, fader.from, fader.to) + drift,
+          tw(t, start, start + 0.9, fader.from, fader.to, MOTION.enter) + drift,
           0,
           100
         );

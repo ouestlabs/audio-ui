@@ -19,7 +19,7 @@ const clock = (seconds: number) =>
 export function WaveformShowcase({ t }: { t: number }) {
   const position = (Math.max(t, 0) * 1.3) % DURATION;
   const peaks = PEAKS.map(
-    (peak, index) => peak * MOTION.move(ramp(t - index * 0.004, 0.55))
+    (peak, index) => peak * MOTION.enter(ramp(t - index * 0.004, 0.55))
   );
   return (
     <div className="flex h-full flex-col justify-center gap-3">

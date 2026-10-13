@@ -1,14 +1,10 @@
 import type { CSSProperties } from "react";
 import { Easing, useCurrentFrame, useVideoConfig } from "remotion";
 
-const easeOutBack = (t: number) =>
-  1 + 2.701_58 * (t - 1) ** 3 + 1.701_58 * (t - 1) ** 2;
-
-/** The only three curves: things arrive with `enter`, travel with `move`, and land with `pop`. */
+/** The only two curves: things arrive and leave with `enter`, and travel with `move`. Nothing overshoots. */
 export const MOTION = {
   enter: Easing.bezier(0.23, 1, 0.32, 1),
   move: Easing.bezier(0.77, 0, 0.175, 1),
-  pop: easeOutBack,
 };
 
 export const clamp = (value: number, min: number, max: number) =>

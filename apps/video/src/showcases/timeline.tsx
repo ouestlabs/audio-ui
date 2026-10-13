@@ -75,7 +75,7 @@ export function TimelineShowcase({ t }: { t: number }) {
           <Row key={track.name} lead={track.name}>
             <TimelineLane className="h-auto min-h-14 flex-1" gridStep={1}>
               {track.clips.map((clip, clipIndex) => {
-                const grown = MOTION.move(
+                const grown = MOTION.enter(
                   ramp(
                     t -
                       0.1 -

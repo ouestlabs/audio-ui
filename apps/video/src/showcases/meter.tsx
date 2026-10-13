@@ -17,7 +17,7 @@ const signal = (t: number, channel: number) => {
 
 /** A stereo meter on a drum loop, with its peak hold. */
 export function MeterShowcase({ t }: { t: number }) {
-  const on = MOTION.move(ramp(t, 0.8));
+  const on = MOTION.enter(ramp(t, 0.8));
   const levels = [0, 1].map((channel) => lerp(FLOOR, signal(t, channel), on));
   const peaks = [0, 1].map((channel) => {
     let peak = FLOOR;

@@ -1,5 +1,5 @@
 import { cn } from "@/registry/bases/base/lib/utils";
-import { Lockup, LockupUrl, Rise, Typed } from "../brand.tsx";
+import { glyphEntrance, Lockup, LockupUrl, Rise, Typed } from "../brand.tsx";
 import { lerp, MOTION, ramp, tw, useSeconds } from "../motion.ts";
 import { SHOWCASES } from "../showcases/index.ts";
 
@@ -37,11 +37,13 @@ export const SPOTLIGHT_DEFAULTS: SpotlightProps = {
 };
 
 const LEAVE_AT = SPOTLIGHT_SECONDS - 2.4;
+/** How far everything has left: out faster than in, starting at once. */
+const goneAt = (T: number) => MOTION.enter(ramp(T - LEAVE_AT, 0.35));
 
 /** Fades and lifts in from `start`, and every part leaves together at the end. */
 function useEnter(T: number, start: number) {
   const shown = tw(T, start, start + 0.6, 0, 1, MOTION.enter);
-  const gone = MOTION.move(ramp(T - LEAVE_AT, 0.6));
+  const gone = goneAt(T);
   return {
     opacity: shown * (1 - gone),
     transform: `translateY(${lerp(16, 0, shown) - 24 * gone}px)`,
@@ -57,14 +59,14 @@ function Badge({
   kind: SpotlightProps["kind"];
   version: string;
 }) {
-  const pop = MOTION.pop(ramp(T - 0.35, 0.5));
-  const gone = MOTION.move(ramp(T - LEAVE_AT, 0.6));
+  const shown = MOTION.enter(ramp(T - 0.35, 0.5));
+  const gone = goneAt(T);
   return (
     <div
       className="flex items-center gap-3 self-start rounded-full border bg-card py-2 pr-5 pl-3 font-medium text-2xl shadow-xs"
       style={{
-        opacity: ramp(T - 0.35, 0.2) * (1 - gone),
-        transform: `translateY(${-24 * gone}px) scale(${lerp(0.8, 1, pop)})`,
+        opacity: shown * (1 - gone),
+        transform: `translateY(${-24 * gone}px) scale(${lerp(0.95, 1, shown)})`,
       }}
     >
       <span
@@ -152,7 +154,7 @@ function Stage({
 }) {
   const showcase = SHOWCASES[name];
   const shown = tw(T, 0.6, 1.45, 0, 1, MOTION.enter);
-  const gone = MOTION.move(ramp(T - LEAVE_AT, 0.6));
+  const gone = goneAt(T);
   if (!showcase) {
     return (
       <div
@@ -198,19 +200,13 @@ function Stage({
 /** The site, its logo and address, once the rest has left. */
 function Signoff({ T }: { T: number }) {
   const t = T - LEAVE_AT - 0.1;
-  const land = MOTION.pop(ramp(t, 0.6));
+  const land = MOTION.enter(ramp(t, 0.55));
   if (t < 0) {
     return null;
   }
   return (
     <div className="absolute inset-0 flex flex-col items-center justify-center gap-6">
-      <Lockup
-        iconStyle={{
-          transform: `rotate(${lerp(-90, 0, land)}deg) scale(${land})`,
-        }}
-        size={120}
-        t={t - 0.15}
-      />
+      <Lockup iconStyle={glyphEntrance(land)} size={120} t={t - 0.15} />
       <LockupUrl size={120} t={t - 0.35} text="https://audio-ui.dev" />
     </div>
   );
@@ -237,7 +233,7 @@ export function Spotlight({
       : `npx shadcn@latest add @audio-ui/${name} -o`;
   const header = useEnter(T, 0);
   const copy = useEnter(T, 0.8);
-  const gone = MOTION.move(ramp(T - LEAVE_AT, 0.6));
+  const gone = goneAt(T);
 
   return (
     <div

@@ -7,7 +7,7 @@ const describe = ({ x, y }: { x: number; y: number }) =>
 /** A pitch and a cutoff, drawn as a Lissajous figure. */
 export function XYPadShowcase({ t }: { t: number }) {
   const time = Math.max(t, 0);
-  const amplitude = MOTION.move(ramp(t, 0.9));
+  const amplitude = MOTION.enter(ramp(t, 0.9));
   const value = {
     x: 50 + 33 * amplitude * Math.sin(time * 1.25),
     y: 50 + 30 * amplitude * Math.sin(time * 2.05),
@@ -16,7 +16,7 @@ export function XYPadShowcase({ t }: { t: number }) {
   return (
     <div
       className="flex h-full flex-col rounded-xl"
-      style={activeRing(MOTION.move(ramp(t, 0.5)))}
+      style={activeRing(MOTION.enter(ramp(t, 0.5)))}
     >
       <XYPad
         aria-label="Pitch and cutoff"
