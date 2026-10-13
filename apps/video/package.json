@@ -4,10 +4,12 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "all": "bun scripts/render.ts all",
     "lint": "biome check --write .",
     "lint:fix": "biome check --write --unsafe .",
     "new": "bun scripts/render.ts new",
     "render": "bun scripts/render.ts",
+    "showcase": "bun scripts/render.ts showcase",
     "studio": "remotion studio src/index.ts",
     "teaser": "bun scripts/render.ts teaser",
     "update": "bun scripts/render.ts update"

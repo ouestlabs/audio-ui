@@ -15,8 +15,8 @@ export const SPOTLIGHT_SECONDS = 10;
 export interface SpotlightProps {
   /** One line on what it is: the docs page's `description`. */
   description: string;
-  /** A component the library didn't have, or changes to one it has. */
-  kind: "new" | "update";
+  /** A component the library didn't have, changes to one it has, or the component as it is (no status). */
+  kind: "new" | "showcase" | "update";
   /** Its registry name, such as `"knob"`: the key of its showcase and of its install command. */
   name: string;
   /** What changed, one line each: shown for an update. */
@@ -61,7 +61,7 @@ function useEnter(T: number, start: number) {
 
 /**
  * "New component" or "Updated" and the version, after the logo, behind a thin
- * rule.
+ * rule. A plain showcase has no status: the logo stands alone.
  */
 function Status({
   T,
@@ -72,8 +72,12 @@ function Status({
   kind: SpotlightProps["kind"];
   version: string;
 }) {
+  const entrance = useEnter(T, 0.3);
+  if (kind === "showcase") {
+    return null;
+  }
   return (
-    <div className="flex items-center gap-5" style={useEnter(T, 0.3)}>
+    <div className="flex items-center gap-5" style={entrance}>
       {/* A rule, not a slash: the wordmark has one already. */}
       <span aria-hidden="true" className="h-8 w-px bg-border" />
       <span className="flex items-baseline gap-3 text-[28px]">
@@ -243,10 +247,11 @@ export function Spotlight({
   version,
 }: SpotlightProps) {
   const T = useSeconds();
+  // An update overwrites the files a project already has.
   const command =
-    kind === "new"
-      ? `npx shadcn@latest add @audio-ui/${name}`
-      : `npx shadcn@latest add @audio-ui/${name} -o`;
+    kind === "update"
+      ? `npx shadcn@latest add @audio-ui/${name} -o`
+      : `npx shadcn@latest add @audio-ui/${name}`;
   const header = useEnter(T, 0);
   const copy = useEnter(T, 0.8);
   const gone = goneAt(T);

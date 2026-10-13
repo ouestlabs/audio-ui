@@ -3,6 +3,8 @@
  *
  *   bun run new <name>                        a new component: what it is, playing, and its install command
  *   bun run update <name> [--note "…"]…        an updated one: what changed (from --note, or the pending changesets)
+ *   bun run showcase <name>                   one component as it is, with no status
+ *   bun run all                               every component: "New" where the docs' menu marks it, no status otherwise
  *   bun run teaser                            the whole library
  *
  * Options: --theme light|dark, --version x.y.z (the @audio-ui/react version it ships in; the current one by default).
@@ -73,7 +75,10 @@ async function changesetNotes(component: string) {
   return notes.slice(0, MAX_NOTES);
 }
 
-async function spotlightProps(kind: "new" | "update", component: string) {
+async function spotlightProps(
+  kind: "new" | "showcase" | "update",
+  component: string
+) {
   if (!SHOWCASES[component]) {
     fail(
       `No showcase for "${component}": add one to apps/video/src/showcases/ and list it in index.ts.\nKnown: ${Object.keys(SHOWCASES).join(", ")}`
@@ -121,18 +126,43 @@ async function spotlightProps(kind: "new" | "update", component: string) {
   };
 }
 
-let job: { file: string; id: string; props: Record<string, unknown> };
+type Job = { file: string; id: string; props: Record<string, unknown> };
+type Kind = "new" | "showcase" | "update";
+
+const spotlight = async (kind: Kind, component: string): Promise<Job> => ({
+  file: kind === "showcase" ? `${component}.mp4` : `${component}-${kind}.mp4`,
+  id: "Spotlight",
+  props: await spotlightProps(kind, component),
+});
+
+/** Every component with a showcase: "New component" where the docs' menu marks it new, no status otherwise. */
+async function everyComponent(): Promise<Job[]> {
+  const { DOCS_MENU_UPDATES } = await import(
+    path.join(root, "apps/www/src/config/update.ts")
+  );
+  return Promise.all(
+    Object.keys(SHOWCASES).map((component) =>
+      spotlight(
+        DOCS_MENU_UPDATES[component] === "New" ? "new" : "showcase",
+        component
+      )
+    )
+  );
+}
+
+let jobs: Job[];
 if (command === "teaser") {
-  job = { file: "teaser.mp4", id: "Teaser", props: {} };
-} else if ((command === "new" || command === "update") && name) {
-  job = {
-    file: `${name}-${command}.mp4`,
-    id: "Spotlight",
-    props: await spotlightProps(command, name),
-  };
+  jobs = [{ file: "teaser.mp4", id: "Teaser", props: {} }];
+} else if (command === "all") {
+  jobs = await everyComponent();
+} else if (
+  (command === "new" || command === "update" || command === "showcase") &&
+  name
+) {
+  jobs = [await spotlight(command, name)];
 } else {
   fail(
-    "Usage: bun run new <name> | bun run update <name> [--note …] | bun run teaser"
+    "Usage: bun run new|update|showcase <name> [--note …] | bun run all | bun run teaser"
   );
 }
 
@@ -142,26 +172,31 @@ const serveUrl = await bundle({
   webpackOverride,
 });
 
-const composition = await selectComposition({
-  id: job.id,
-  inputProps: job.props,
-  serveUrl,
-});
-const outputLocation = path.join(out, job.file);
-let shown = -1;
-await renderMedia({
-  codec: "h264",
-  composition,
-  crf: 16,
-  inputProps: job.props,
-  onProgress: ({ progress }) => {
-    const percent = Math.floor(progress * 100);
-    if (percent % 10 === 0 && percent !== shown) {
-      shown = percent;
-      console.log(`${job.file} ${percent}%`);
-    }
-  },
-  outputLocation,
-  serveUrl,
-});
-console.log(`→ ${path.relative(process.cwd(), outputLocation)}`);
+// One video at a time: each render already uses every core.
+for (const [index, job] of jobs.entries()) {
+  // biome-ignore lint/performance/noAwaitInLoops: renders run one after the other on purpose
+  const composition = await selectComposition({
+    id: job.id,
+    inputProps: job.props,
+    serveUrl,
+  });
+  const outputLocation = path.join(out, job.file);
+  const counter = jobs.length > 1 ? `[${index + 1}/${jobs.length}] ` : "";
+  let shown = -1;
+  await renderMedia({
+    codec: "h264",
+    composition,
+    crf: 16,
+    inputProps: job.props,
+    onProgress: ({ progress }) => {
+      const percent = Math.floor(progress * 100);
+      if (percent % 10 === 0 && percent !== shown) {
+        shown = percent;
+        console.log(`${counter}${job.file} ${percent}%`);
+      }
+    },
+    outputLocation,
+    serveUrl,
+  });
+  console.log(`→ ${path.relative(process.cwd(), outputLocation)}`);
+}
