@@ -43,9 +43,15 @@ export default function IndexPage() {
       <JsonLd data={buildSoftwareJsonLd()} />
       <HomeHero />
       {/* The product fills the panel: the arrangement, playable at once. */}
-      <div className="flex min-h-0 flex-1 flex-col p-4 font-sans sm:p-6 [&_.cn-audio-panel]:h-full [&_.cn-audio-panel]:overflow-hidden [&_[data-slot=piano-roll]]:h-auto [&_[data-slot=piano-roll]]:min-h-0 [&_[data-slot=piano-roll]]:flex-1 [&_[data-slot=timeline]]:flex [&_[data-slot=timeline]]:min-h-0 [&_[data-slot=timeline]]:flex-1 [&_[data-slot=timeline]]:flex-col [&_[data-slot=piano-roll-viewport]>div]:min-h-[calc(var(--piano-roll-rows)*1.25rem)]">
+      <section
+        aria-labelledby="home-demo-heading"
+        className="flex min-h-0 flex-1 flex-col p-4 font-sans sm:p-6 [&_.cn-audio-panel]:h-full [&_.cn-audio-panel]:overflow-hidden [&_[data-slot=piano-roll]]:h-auto [&_[data-slot=piano-roll]]:min-h-0 [&_[data-slot=piano-roll]]:flex-1 [&_[data-slot=timeline]]:flex [&_[data-slot=timeline]]:min-h-0 [&_[data-slot=timeline]]:flex-1 [&_[data-slot=timeline]]:flex-col [&_[data-slot=piano-roll-viewport]>div]:min-h-[calc(var(--piano-roll-rows)*1.25rem)]"
+      >
+        <h2 className="sr-only" id="home-demo-heading">
+          Live demo: an arrangement timeline built with audio/ui
+        </h2>
         <ComponentRenderer name="block-timeline" />
-      </div>
+      </section>
     </div>
   );
 }
