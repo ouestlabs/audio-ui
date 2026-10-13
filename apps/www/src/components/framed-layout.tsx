@@ -139,7 +139,6 @@ function CustomizeToggle() {
  * to a sheet.
  */
 export function FramedLayout({
-  actions,
   closedEnd,
   closedStart,
   siteEnd,
@@ -148,8 +147,6 @@ export function FramedLayout({
   nav,
   start,
 }: {
-  /** In the bar, before the customizer's button. */
-  actions?: React.ReactNode;
   /** In the bar, from `lg`, while the navigation is shut: what its header held. */
   closedEnd?: React.ReactNode;
   closedStart?: React.ReactNode;
@@ -246,13 +243,6 @@ export function FramedLayout({
               <div className={CLOSED_BLOCK}>{closedStart}</div>
               {start}
               <div className="ml-auto flex items-center gap-2">
-                {actions}
-                {actions ? (
-                  <Separator
-                    className="hidden lg:block"
-                    orientation="vertical"
-                  />
-                ) : null}
                 <div className="hidden items-center gap-2 lg:flex">
                   <div className={cn("items-center gap-2", CLOSED_FLEX)}>
                     {closedEnd}
@@ -260,10 +250,7 @@ export function FramedLayout({
                   </div>
                   {siteEnd}
                 </div>
-                <Separator
-                  className={actions ? undefined : "hidden lg:block"}
-                  orientation="vertical"
-                />
+                <Separator className="hidden lg:block" orientation="vertical" />
                 <CustomizeToggle />
               </div>
             </FrameHeader>

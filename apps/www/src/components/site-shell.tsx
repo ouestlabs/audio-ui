@@ -2,8 +2,6 @@
 
 import { usePathname } from "next/navigation";
 import { Suspense, useMemo } from "react";
-import { ComponentHeaderGridToggle } from "@/app/(create)/components/components/component-header-grid-toggle";
-import { ComponentHeaderMobileDrawer } from "@/app/(create)/components/components/component-header-mobile-drawer";
 import { ComponentHeaderSearch } from "@/app/(create)/components/components/component-header-search";
 import {
   ComponentsContext,
@@ -63,7 +61,6 @@ export function SiteShell({
           <DocsDesignSystemEffects />
         )}
         <FramedLayout
-          actions={inCatalog ? <ComponentHeaderGridToggle /> : undefined}
           closedEnd={closedEnd}
           closedStart={closedStart}
           footer={footer}
@@ -77,12 +74,9 @@ export function SiteShell({
           siteEnd={siteEnd}
           start={
             inCatalog ? (
-              <>
-                <ComponentHeaderMobileDrawer />
-                <Suspense fallback={<SearchSkeleton />}>
-                  <ComponentHeaderSearch />
-                </Suspense>
-              </>
+              <Suspense fallback={<SearchSkeleton />}>
+                <ComponentHeaderSearch />
+              </Suspense>
             ) : undefined
           }
         >
