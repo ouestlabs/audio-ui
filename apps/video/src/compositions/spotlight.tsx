@@ -246,7 +246,7 @@ export function Spotlight({
         <Lockup size={36} />
       </div>
       <div className="absolute inset-x-24 top-36 bottom-24 flex items-center gap-20">
-        <div className="flex w-[680px] shrink-0 flex-col gap-12">
+        <div className="flex w-170 shrink-0 flex-col gap-12">
           <div className="flex flex-col gap-8">
             <Badge kind={kind} T={T} version={version} />
             <div

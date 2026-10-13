@@ -8,7 +8,6 @@
  * Options: --theme light|dark, --version x.y.z (the @audio-ui/react version it ships in; the current one by default).
  * The videos land in apps/video/out/.
  */
-import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { parseArgs } from "node:util";
 import { bundle } from "@remotion/bundler";
@@ -16,8 +15,8 @@ import { renderMedia, selectComposition } from "@remotion/renderer";
 import { SHOWCASES } from "../src/showcases/index.ts";
 import { webpackOverride } from "../webpack-override.ts";
 
-const root = path.resolve(import.meta.dirname, "../../..");
-const out = path.resolve(import.meta.dirname, "../out");
+const root = path.resolve(import.meta.dir, "../../..");
+const out = path.resolve(import.meta.dir, "../out");
 
 const FRONTMATTER = /^---\n([\s\S]*?)\n---/;
 const SENTENCE_END = /(?<=[.!?])\s+/;
@@ -54,13 +53,13 @@ function frontmatterField(source: string, key: string) {
 /** Short sentences about `component` from the changesets waiting to be released. */
 async function changesetNotes(component: string) {
   const directory = path.join(root, ".changeset");
-  const files = (await readdir(directory)).filter(
-    (file) => file.endsWith(".md") && file !== "README.md"
-  );
+  const files = (
+    await Array.fromAsync(new Bun.Glob("*.md").scan({ cwd: directory }))
+  ).filter((file) => file !== "README.md");
   const mentions = new RegExp(`\\b${component}\\b`, "i");
   const bodies = await Promise.all(
     files.map(async (file) =>
-      (await readFile(path.join(directory, file), "utf8"))
+      (await Bun.file(path.join(directory, file)).text())
         .replace(FRONTMATTER, "")
         .replaceAll("`", "")
         .trim()
@@ -80,20 +79,21 @@ async function spotlightProps(kind: "new" | "update", component: string) {
       `No showcase for "${component}": add one to apps/video/src/showcases/ and list it in index.ts.\nKnown: ${Object.keys(SHOWCASES).join(", ")}`
     );
   }
-  const docs = await readFile(
+  const page = Bun.file(
     path.join(
       root,
       `apps/www/src/content/docs/components/base/${component}.mdx`
-    ),
-    "utf8"
-  ).catch(() =>
-    fail(
-      `No docs page for "${component}" in apps/www/src/content/docs/components/base/.`
     )
   );
-  const ui = JSON.parse(
-    await readFile(path.join(root, "packages/ui/package.json"), "utf8")
-  );
+  if (!(await page.exists())) {
+    fail(
+      `No docs page for "${component}" in apps/www/src/content/docs/components/base/.`
+    );
+  }
+  const docs = await page.text();
+  const ui: { version: string } = await Bun.file(
+    path.join(root, "packages/ui/package.json")
+  ).json();
 
   let notes = values.note ?? [];
   if (kind === "update" && notes.length === 0) {
@@ -138,7 +138,7 @@ if (command === "teaser") {
 
 console.log("Bundling…");
 const serveUrl = await bundle({
-  entryPoint: path.resolve(import.meta.dirname, "../src/index.ts"),
+  entryPoint: path.resolve(import.meta.dir, "../src/index.ts"),
   webpackOverride,
 });
 
