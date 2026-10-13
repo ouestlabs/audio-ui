@@ -66,7 +66,7 @@ export const SHOWCASES: Record<string, Showcase> = {
     Demo: TransportShowcase,
     height: 96,
     title: "Transport",
-    width: 540,
+    width: 720,
   },
   waveform: {
     Demo: WaveformShowcase,

@@ -1,5 +1,12 @@
 import { cn } from "@/registry/bases/base/lib/utils";
-import { glyphEntrance, Lockup, LockupUrl, Rise, Typed } from "../brand.tsx";
+import {
+  glyphEntrance,
+  Lockup,
+  LockupUrl,
+  MONO_ADVANCE_EM,
+  Rise,
+  Typed,
+} from "../brand.tsx";
 import { lerp, MOTION, ramp, tw, useSeconds } from "../motion.ts";
 import { SHOWCASES } from "../showcases/index.ts";
 
@@ -37,6 +44,8 @@ export const SPOTLIGHT_DEFAULTS: SpotlightProps = {
 };
 
 const LEAVE_AT = SPOTLIGHT_SECONDS - 2.4;
+/** Width over height from which a component is laid out under the text, across the frame. */
+const WIDE_RATIO = 2.5;
 /** How far everything has left: out faster than in, starting at once. */
 const goneAt = (T: number) => MOTION.enter(ramp(T - LEAVE_AT, 0.35));
 
@@ -50,7 +59,11 @@ function useEnter(T: number, start: number) {
   };
 }
 
-function Badge({
+/**
+ * "New component" or "Updated" and the version, after the logo, behind a thin
+ * rule.
+ */
+function Status({
   T,
   kind,
   version,
@@ -59,25 +72,17 @@ function Badge({
   kind: SpotlightProps["kind"];
   version: string;
 }) {
-  const shown = MOTION.enter(ramp(T - 0.35, 0.5));
-  const gone = goneAt(T);
   return (
-    <div
-      className="flex items-center gap-3 self-start rounded-full border bg-card py-2 pr-5 pl-3 font-medium text-2xl shadow-xs"
-      style={{
-        opacity: shown * (1 - gone),
-        transform: `translateY(${-24 * gone}px) scale(${lerp(0.95, 1, shown)})`,
-      }}
-    >
-      <span
-        className={cn(
-          "size-3 rounded-full",
-          kind === "new" ? "bg-success" : "bg-info"
-        )}
-      />
-      {kind === "new" ? "New component" : "Updated"}
-      <span className="font-mono text-muted-foreground text-xl">
-        v{version}
+    <div className="flex items-center gap-5" style={useEnter(T, 0.3)}>
+      {/* A rule, not a slash: the wordmark has one already. */}
+      <span aria-hidden="true" className="h-8 w-px bg-border" />
+      <span className="flex items-baseline gap-3 text-[28px]">
+        <span className="font-medium">
+          {kind === "new" ? "New component" : "Updated"}
+        </span>
+        <span className="font-mono text-2xl text-muted-foreground">
+          {version}
+        </span>
       </span>
     </div>
   );
@@ -120,6 +125,12 @@ function Notes({ T, notes }: { T: number; notes: string[] }) {
   );
 }
 
+/** The text column's width, in px (`w-170`). */
+const COLUMN_WIDTH = 680;
+/** The command box's padding, its prompt, the gap and the caret's room, in px. */
+const INSTALL_CHROME = 56 + 16 + 8;
+const INSTALL_FONT_SIZE = 26;
+
 function Install({
   T,
   command,
@@ -129,13 +140,18 @@ function Install({
   command: string;
   start: number;
 }) {
+  // A long component name shrinks the command until it fits its box.
+  const fontSize = Math.min(
+    INSTALL_FONT_SIZE,
+    (COLUMN_WIDTH - INSTALL_CHROME) / (MONO_ADVANCE_EM * (command.length + 1))
+  );
   return (
     <div
-      className="flex items-center gap-4 rounded-2xl bg-foreground px-7 py-5 font-mono text-[26px] text-background"
-      style={useEnter(T, start)}
+      className="flex items-center gap-4 rounded-2xl bg-foreground px-7 py-5 font-mono text-background"
+      style={{ ...useEnter(T, start), fontSize }}
     >
       <span className="opacity-50">$</span>
-      <Typed caretHeight={30} t={T - start - 0.3} text={command} />
+      <Typed caretHeight={fontSize * 1.15} t={T - start - 0.3} text={command} />
     </div>
   );
 }
@@ -234,6 +250,36 @@ export function Spotlight({
   const header = useEnter(T, 0);
   const copy = useEnter(T, 0.8);
   const gone = goneAt(T);
+  const showcase = SHOWCASES[name];
+  // A wide component gets the whole width under the text; a compact one sits beside it.
+  const wide = showcase
+    ? showcase.width / showcase.height >= WIDE_RATIO
+    : false;
+
+  const heading = (
+    <div
+      style={{ opacity: 1 - gone, transform: `translateY(${-24 * gone}px)` }}
+    >
+      <Rise size={wide ? 150 : 168} t={T - 0.45} text={title} />
+    </div>
+  );
+  const about = (
+    <p
+      className="max-w-[18em] text-pretty text-[34px] text-muted-foreground leading-snug"
+      style={copy}
+    >
+      {description}
+    </p>
+  );
+  const install =
+    kind === "update" ? (
+      <div className="flex flex-col gap-5">
+        <Notes notes={notes} T={T} />
+        <Install command={command} start={2.6 + notes.length * 0.2} T={T} />
+      </div>
+    ) : (
+      <Install command={command} start={2.1} T={T} />
+    );
 
   return (
     <div
@@ -242,43 +288,36 @@ export function Spotlight({
         theme === "dark" && "dark"
       )}
     >
-      <div className="absolute top-18 left-24" style={header}>
-        <Lockup size={36} />
-      </div>
-      <div className="absolute inset-x-24 top-36 bottom-24 flex items-center gap-20">
-        <div className="flex w-170 shrink-0 flex-col gap-12">
-          <div className="flex flex-col gap-8">
-            <Badge kind={kind} T={T} version={version} />
-            <div
-              style={{
-                opacity: 1 - gone,
-                transform: `translateY(${-24 * gone}px)`,
-              }}
-            >
-              <Rise size={168} t={T - 0.45} text={title} />
-            </div>
-            <p
-              className="max-w-[18em] text-pretty text-[34px] text-muted-foreground leading-snug"
-              style={copy}
-            >
-              {description}
-            </p>
-          </div>
-          {kind === "update" ? (
-            <div className="flex flex-col gap-5">
-              <Notes notes={notes} T={T} />
-              <Install
-                command={command}
-                start={2.6 + notes.length * 0.2}
-                T={T}
-              />
-            </div>
-          ) : (
-            <Install command={command} start={2.1} T={T} />
-          )}
+      <div className="absolute top-18 left-24 flex items-center gap-5">
+        <div style={header}>
+          <Lockup size={36} />
         </div>
-        <Stage height={840} name={name} T={T} width={968} />
+        <Status kind={kind} T={T} version={version} />
       </div>
+      {wide ? (
+        <div className="absolute inset-x-24 top-36 bottom-24 flex flex-col justify-center gap-14">
+          {/* What it is on the left, how to get it on the right, the thing itself under both. */}
+          <div className="flex items-end justify-between gap-20">
+            <div className="flex flex-col gap-6">
+              {heading}
+              {about}
+            </div>
+            <div className="w-170 shrink-0">{install}</div>
+          </div>
+          <Stage height={440} name={name} T={T} width={1728} />
+        </div>
+      ) : (
+        <div className="absolute inset-x-24 top-36 bottom-24 flex items-center gap-20">
+          <div className="flex w-170 shrink-0 flex-col gap-12">
+            <div className="flex flex-col gap-8">
+              {heading}
+              {about}
+            </div>
+            {install}
+          </div>
+          <Stage height={840} name={name} T={T} width={968} />
+        </div>
+      )}
       <Signoff T={T} />
     </div>
   );

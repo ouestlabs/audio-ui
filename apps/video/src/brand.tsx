@@ -78,7 +78,8 @@ export function Rise({
               transform: `translateY(${(1 - rise) * 115}%)`,
             }}
           >
-            {letter}
+            {/* A lone space in an inline block collapses: a non-breaking one keeps the gap between words. */}
+            {letter.replace(" ", "\u00a0")}
           </span>
         );
       })}
@@ -151,7 +152,7 @@ export function Lockup({
 /** "audio/ui" in Instrument Serif, in em. */
 const WORDMARK_EM = 2.916;
 /** Every Geist Mono character, in em. */
-const MONO_ADVANCE_EM = 0.6;
+export const MONO_ADVANCE_EM = 0.6;
 
 /**
  * An address typed under a `Lockup` of the same `size`, set to span exactly
