@@ -9,6 +9,17 @@ import { mergeProps, useRender } from "../../internal/render.ts";
 import { type TimelineState, useTimelineContext } from "../context.ts";
 
 /**
+ * How much the transforms of the element's ancestors scale it, such as a
+ * dialog that zooms in: what `getBoundingClientRect` gives is divided by it to
+ * get back to layout px, which `scrollLeft` and `clientWidth` are in.
+ */
+function layoutScale(element: HTMLElement) {
+  const drawn = element.getBoundingClientRect().width;
+  const laid = element.offsetWidth;
+  return drawn > 0 && laid > 0 ? drawn / laid : 1;
+}
+
+/**
  * The scrolling window onto the timeline. Cmd/Ctrl + wheel (and pinch on a
  * trackpad) zooms around the pointer; a bare wheel scrolls as usual. Every
  * zoom change keeps its anchor point in place, or the middle of the view when
@@ -43,8 +54,9 @@ export function Viewport(componentProps: Viewport.Props) {
       return 0;
     }
     return (
-      lane.getBoundingClientRect().left -
-      element.getBoundingClientRect().left +
+      (lane.getBoundingClientRect().left -
+        element.getBoundingClientRect().left) /
+        layoutScale(element) +
       element.scrollLeft
     );
   }, [originLaneRef]);
@@ -54,7 +66,10 @@ export function Viewport(componentProps: Viewport.Props) {
     if (zoom !== null) {
       return zoom;
     }
-    const width = originLaneRef.current?.getBoundingClientRect().width ?? 0;
+    const element = elementRef.current;
+    const width =
+      (originLaneRef.current?.getBoundingClientRect().width ?? 0) /
+      (element ? layoutScale(element) : 1);
     return width / Math.max(duration, Number.MIN_VALUE);
   }, [duration, originLaneRef, zoom]);
 
