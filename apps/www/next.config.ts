@@ -109,6 +109,15 @@ const nextConfig: NextConfig = {
         key: "X-DNS-Prefetch-Control",
         value: "on",
       },
+      // Clipboard and Web MIDI stay allowed: the copy buttons and the MIDI demos use them.
+      {
+        key: "Permissions-Policy",
+        value: "camera=(), geolocation=(), payment=(), usb=()",
+      },
+      {
+        key: "Cross-Origin-Opener-Policy",
+        value: "same-origin",
+      },
     ];
 
     return [

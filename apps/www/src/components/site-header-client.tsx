@@ -14,6 +14,7 @@ const CommandMenu = dynamic(
         aria-hidden="true"
         className="relative w-full justify-start bg-transparent pl-2! font-medium text-site-foreground shadow-none sm:pr-12 md:w-21"
         disabled
+        tabIndex={-1}
         variant="secondary"
       >
         <MagnifyingGlassIcon className="size-4 shrink-0 opacity-60" />

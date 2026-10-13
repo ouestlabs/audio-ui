@@ -16,6 +16,7 @@ import { META_THEME_COLORS, siteConfig } from "@/lib/config";
 
 import { fontMono, fontSans, fontSerif } from "@/lib/fonts";
 import {
+  buildAuthorJsonLd,
   buildOrganizationJsonLd,
   buildPageSocialMetadata,
   buildWebSiteJsonLd,
@@ -59,6 +60,13 @@ export const metadata: Metadata = {
   ],
   metadataBase: new URL(appUrl),
   publisher: siteConfig.name,
+  robots: {
+    follow: true,
+    index: true,
+    "max-image-preview": "large",
+    "max-snippet": -1,
+    "max-video-preview": -1,
+  },
   title: {
     default: siteConfig.name,
     template: siteConfig.metadata.titleTemplate,
@@ -130,6 +138,7 @@ export default function RootLayout({
       >
         <JsonLd data={buildWebSiteJsonLd()} />
         <JsonLd data={buildOrganizationJsonLd()} />
+        <JsonLd data={buildAuthorJsonLd()} />
         <ThemeProvider>
           <QueryProvider>
             <NuqsAdapter>

@@ -239,7 +239,15 @@ export function buildOrganizationJsonLd() {
     "@context": "https://schema.org",
     "@type": "Organization",
     "@id": `${getSiteUrl()}/#organization`,
-    founder: buildAuthorJsonLd(),
+    founder: { "@id": `${getSiteUrl()}/#author` },
+    knowsAbout: [
+      "React",
+      "Web Audio API",
+      "Audio user interfaces",
+      "Accessibility",
+      "shadcn/ui",
+      "Tailwind CSS",
+    ],
     logo: absoluteUrl("/icon"),
     name: siteConfig.name,
     sameAs: [siteConfig.links.github, siteConfig.links.twitter],
@@ -249,7 +257,9 @@ export function buildOrganizationJsonLd() {
 
 export function buildAuthorJsonLd() {
   return {
+    "@context": "https://schema.org",
     "@type": "Person",
+    "@id": `${getSiteUrl()}/#author`,
     jobTitle: "UX/UI developer",
     name: siteConfig.author.name,
     sameAs: [siteConfig.author.github, siteConfig.author.twitter],
@@ -263,7 +273,7 @@ export function buildSoftwareJsonLd() {
     "@context": "https://schema.org",
     "@type": "SoftwareSourceCode",
     "@id": `${getSiteUrl()}/#software`,
-    author: buildAuthorJsonLd(),
+    author: { "@id": `${getSiteUrl()}/#author` },
     codeRepository: siteConfig.links.github,
     description: siteConfig.description,
     license: "https://opensource.org/licenses/MIT",
