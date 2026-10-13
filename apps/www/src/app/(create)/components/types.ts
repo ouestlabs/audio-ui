@@ -1,6 +1,5 @@
 import type { CategoryInfo } from "@/lib/registry";
 
-export type { CatalogGridMode } from "@/hooks/use-config";
 export type { CategoryInfo };
 export type GridSize = 1 | 2;
 

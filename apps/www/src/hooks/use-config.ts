@@ -15,13 +15,10 @@ import type {
   ThemeName,
 } from "@/registry/config";
 
-export type CatalogGridMode = 1 | 2;
-
 export type Config = {
   // App preferences (not synced with URL)
   packageManager: "npm" | "yarn" | "pnpm" | "bun";
   installationType: "cli" | "manual";
-  gridColumns: CatalogGridMode;
 
   // Design system params (synced with URL)
   base: BaseName;
@@ -51,7 +48,6 @@ export const DEFAULT_CONFIG: Config = {
   customizerOpen: true,
   font: "inter",
   fontHeading: "inherit",
-  gridColumns: 2,
   iconLibrary: "lucide",
   installationType: "cli",
   item: "preview",
@@ -73,13 +69,7 @@ export const configAtom = atomWithStorage<Config>(
   { getOnInit: true }
 );
 
-const gridColumnsAtom = selectAtom(configAtom, (config) => config?.gridColumns);
 const baseAtom = selectAtom(configAtom, (config) => config?.base);
-
-/** Only the grid's columns: a change to anything else in the config leaves the reader alone. */
-export function useGridColumns() {
-  return useAtomValue(gridColumnsAtom);
-}
 
 /** Only the component library: a change to anything else in the config leaves the reader alone. */
 export function useConfigBase() {

@@ -4,16 +4,14 @@ import { useQueryStates } from "nuqs";
 import { Suspense, useMemo } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
-import { useGridColumns } from "@/hooks/use-config";
 import {
   filterCatalogBySearchQuery,
   hasActiveCatalogSearch,
   normalizeCatalogSearchQuery,
 } from "@/lib/catalog-search-filter";
 import { parseAsSearchStringClient } from "@/lib/nuqs";
-import { cn } from "@/lib/utils";
 
-import type { CatalogGridMode, CatalogItem } from "../types";
+import type { CatalogItem } from "../types";
 import { ComponentCard } from "./component-card";
 import { ComponentCardContainer } from "./component-card-container";
 import { ComponentEmptyState } from "./component-empty-state";
@@ -51,8 +49,6 @@ function ComponentGridContent({
 }: {
   catalogItems: CatalogItem[];
 }) {
-  const gridColumns = (useGridColumns() ?? 2) as CatalogGridMode;
-
   const [filters] = useQueryStates({
     search: parseAsSearchStringClient,
   });
@@ -80,14 +76,7 @@ function ComponentGridContent({
 
   return (
     <div className="w-full p-3 sm:px-8 sm:py-6 xl:px-10">
-      <div
-        className={cn(
-          "grid items-stretch gap-4 pb-4 sm:gap-6",
-          gridColumns === 1 && "grid-cols-1",
-          gridColumns === 2 &&
-            "grid-cols-[repeat(auto-fill,minmax(min(100%,max(320px,calc((100%-24px)/2))),1fr))]"
-        )}
-      >
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,max(320px,calc((100%-24px)/2))),1fr))] items-stretch gap-4 pb-4 sm:gap-6">
         {filteredItems.map((item) => (
           <ComponentCard
             className={item.meta?.className}
