@@ -153,7 +153,7 @@ export function createKnobController(
   initial: KnobOptions = {}
 ): KnobController {
   let options = initial;
-  let scale: ParameterScale = resolveScale("linear");
+  let scale: ParameterScale = resolveScale(initial.scale ?? "linear");
   const bounds = () => ({
     max: options.max ?? 100,
     min: options.min ?? 0,
