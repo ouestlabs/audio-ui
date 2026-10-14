@@ -10,15 +10,18 @@
  * Options: --theme light|dark.
  * The videos land in apps/video/out/.
  */
-import path from "node:path";
 import { parseArgs } from "node:util";
 import { bundle } from "@remotion/bundler";
 import { renderMedia, selectComposition } from "@remotion/renderer";
 import { SHOWCASES } from "../src/showcases/index.ts";
 import { webpackOverride } from "../webpack-override.ts";
 
-const root = path.resolve(import.meta.dir, "../../..");
-const out = path.resolve(import.meta.dir, "../out");
+// URLs resolve the `..`, so these are plain absolute paths.
+const root = Bun.fileURLToPath(new URL("../../../", import.meta.url)).slice(
+  0,
+  -1
+);
+const out = Bun.fileURLToPath(new URL("../out", import.meta.url));
 
 const FRONTMATTER = /^---\n([\s\S]*?)\n---/;
 const SENTENCE_END = /(?<=[.!?])\s+/;
@@ -53,14 +56,14 @@ function frontmatterField(source: string, key: string) {
 
 /** Short sentences about `component` from the changesets waiting to be released. */
 async function changesetNotes(component: string) {
-  const directory = path.join(root, ".changeset");
+  const directory = `${root}/.changeset`;
   const files = (
     await Array.fromAsync(new Bun.Glob("*.md").scan({ cwd: directory }))
   ).filter((file) => file !== "README.md");
   const mentions = new RegExp(`\\b${component}\\b`, "i");
   const bodies = await Promise.all(
     files.map(async (file) =>
-      (await Bun.file(path.join(directory, file)).text())
+      (await Bun.file(`${directory}/${file}`).text())
         .replace(FRONTMATTER, "")
         .replaceAll("`", "")
         .trim()
@@ -84,10 +87,7 @@ async function spotlightProps(
     );
   }
   const page = Bun.file(
-    path.join(
-      root,
-      `apps/www/src/content/docs/components/base/${component}.mdx`
-    )
+    `${root}/apps/www/src/content/docs/components/base/${component}.mdx`
   );
   if (!(await page.exists())) {
     fail(
@@ -133,7 +133,7 @@ const spotlight = async (kind: Kind, component: string): Promise<Job> => ({
 /** Every component with a showcase: "New component" where the docs' menu marks it new, no status otherwise. */
 async function everyComponent(): Promise<Job[]> {
   const { DOCS_MENU_UPDATES } = await import(
-    path.join(root, "apps/www/src/config/update.ts")
+    `${root}/apps/www/src/config/update.ts`
   );
   return Promise.all(
     Object.keys(SHOWCASES).map((component) =>
@@ -163,7 +163,7 @@ if (command === "teaser") {
 
 console.log("Bundling…");
 const serveUrl = await bundle({
-  entryPoint: path.resolve(import.meta.dir, "../src/index.ts"),
+  entryPoint: Bun.fileURLToPath(new URL("../src/index.ts", import.meta.url)),
   webpackOverride,
 });
 
@@ -175,7 +175,7 @@ for (const [index, job] of jobs.entries()) {
     inputProps: job.props,
     serveUrl,
   });
-  const outputLocation = path.join(out, job.file);
+  const outputLocation = `${out}/${job.file}`;
   const counter = jobs.length > 1 ? `[${index + 1}/${jobs.length}] ` : "";
   let shown = -1;
   await renderMedia({
@@ -193,5 +193,8 @@ for (const [index, job] of jobs.entries()) {
     outputLocation,
     serveUrl,
   });
-  console.log(`→ ${path.relative(process.cwd(), outputLocation)}`);
+  const cwd = `${process.cwd()}/`;
+  console.log(
+    `→ ${outputLocation.startsWith(cwd) ? outputLocation.slice(cwd.length) : outputLocation}`
+  );
 }
