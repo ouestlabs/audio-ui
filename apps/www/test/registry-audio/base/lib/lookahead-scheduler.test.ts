@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import {
   advance,
   anchoredCursor,
+  anchorForTempoChange,
   positionAt,
   SCHEDULE_AHEAD_SECONDS,
   type SchedulerConfig,
@@ -117,5 +118,41 @@ describe("tempo", () => {
     };
     const { boundaries } = advance(anchoredCursor(0, 0), 0.3, slow);
     expect(boundaries.map((b) => b.time)).toEqual([0, 0.25]);
+  });
+});
+
+describe("a tempo change while playing", () => {
+  const slow: SchedulerConfig = { ...fullGrid(16), secondsPerStep: 0.25 };
+
+  test("rereading the time since the anchor at the new tempo moves the playhead", () => {
+    // 3 s at 120 BPM is 24 steps, so the loop of 16 is at step 8 ...
+    expect(positionAt(3, { step: 0, time: 0 }, fullGrid(16))).toBe(8);
+    // ... which is not what the same anchor says once the spacing doubles.
+    expect(positionAt(3, { step: 0, time: 0 }, slow)).toBe(12);
+  });
+
+  test("the carried anchor keeps the position at the change and counts from there", () => {
+    const anchor = anchorForTempoChange(3, { step: 0, time: 0 }, fullGrid(16));
+    expect(anchor).toEqual({ step: 8, time: 3 });
+    expect(positionAt(3, anchor, slow)).toBe(8);
+    // Half a second later, at one step per 0.25 s: two steps on.
+    expect(positionAt(3.5, anchor, slow)).toBe(10);
+  });
+
+  test("a loop region wraps the same way before and after the change", () => {
+    const region = (secondsPerStep: number): SchedulerConfig => ({
+      regionEnd: 12,
+      regionStart: 8,
+      secondsPerStep,
+    });
+    // Anchored on step 10, 0.375 s (3 steps) later the loop of [8, 12) sits on 9.
+    const anchor = anchorForTempoChange(
+      0.375,
+      { step: 10, time: 0 },
+      region(0.125)
+    );
+    expect(anchor.step).toBe(9);
+    // Then two slow steps (0.5 s): 9 + 2 = 11.
+    expect(positionAt(0.875, anchor, region(0.25))).toBe(11);
   });
 });

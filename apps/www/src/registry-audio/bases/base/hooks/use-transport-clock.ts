@@ -5,6 +5,7 @@ import { useWebAudio } from "@/registry-audio/bases/base/hooks/use-web-audio";
 import {
   advance,
   anchoredCursor,
+  anchorForTempoChange,
   positionAt,
   SCHEDULER_POLL_MS,
   type SchedulerAnchor,
@@ -90,7 +91,6 @@ export function useTransportClock({
     secondsPerStep,
   };
   const configRef = useRef(config);
-  configRef.current = config;
   const onStepRef = useRef(onStep);
   onStepRef.current = onStep;
   const onResetRef = useRef(onReset);
@@ -99,6 +99,24 @@ export function useTransportClock({
   const cursorRef = useRef<SchedulerCursor>({ nextStep: 0, nextStepTime: 0 });
   const anchorRef = useRef<SchedulerAnchor>({ step: 0, time: 0 });
   const intervalRef = useRef<number | null>(null);
+
+  // A tempo change while playing: carry the anchor over at the position the
+  // playhead has now, so `getPosition` does not reread the time since the
+  // anchor at the new spacing and jump.
+  if (
+    intervalRef.current !== null &&
+    configRef.current.secondsPerStep !== config.secondsPerStep
+  ) {
+    const ctx = webAudio.getContext();
+    if (ctx) {
+      anchorRef.current = anchorForTempoChange(
+        ctx.currentTime,
+        anchorRef.current,
+        configRef.current
+      );
+    }
+  }
+  configRef.current = config;
 
   const poll = useCallback(() => {
     const ctx = webAudio.getContext();
