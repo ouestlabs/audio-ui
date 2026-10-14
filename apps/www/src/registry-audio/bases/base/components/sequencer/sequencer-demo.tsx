@@ -115,13 +115,23 @@ export default function SequencerDemo() {
           size="icon-sm"
           variant="outline"
         >
-          <IconPlaceholder
-            hugeicons={isPlaying ? "PauseIcon" : "PlayIcon"}
-            lucide={isPlaying ? "PauseIcon" : "PlayIcon"}
-            phosphor={isPlaying ? "PauseIcon" : "PlayIcon"}
-            remixicon={isPlaying ? "RiPauseLine" : "RiPlayLine"}
-            tabler={isPlaying ? "IconPlayerPause" : "IconPlayerPlay"}
-          />
+          {isPlaying ? (
+            <IconPlaceholder
+              hugeicons="PauseIcon"
+              lucide="PauseIcon"
+              phosphor="PauseIcon"
+              remixicon="RiPauseLine"
+              tabler="IconPlayerPause"
+            />
+          ) : (
+            <IconPlaceholder
+              hugeicons="PlayIcon"
+              lucide="PlayIcon"
+              phosphor="PlayIcon"
+              remixicon="RiPlayLine"
+              tabler="IconPlayerPlay"
+            />
+          )}
         </Button>
         <Button onClick={clear} size="sm" variant="ghost">
           Clear

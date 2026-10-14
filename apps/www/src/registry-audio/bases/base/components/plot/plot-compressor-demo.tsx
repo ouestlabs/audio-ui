@@ -117,13 +117,23 @@ export default function PlotCompressorDemo() {
           size="icon-sm"
           variant="outline"
         >
-          <IconPlaceholder
-            hugeicons={playing ? "PauseIcon" : "PlayIcon"}
-            lucide={playing ? "PauseIcon" : "PlayIcon"}
-            phosphor={playing ? "PauseIcon" : "PlayIcon"}
-            remixicon={playing ? "RiPauseLine" : "RiPlayLine"}
-            tabler={playing ? "IconPlayerPause" : "IconPlayerPlay"}
-          />
+          {playing ? (
+            <IconPlaceholder
+              hugeicons="PauseIcon"
+              lucide="PauseIcon"
+              phosphor="PauseIcon"
+              remixicon="RiPauseLine"
+              tabler="IconPlayerPause"
+            />
+          ) : (
+            <IconPlaceholder
+              hugeicons="PlayIcon"
+              lucide="PlayIcon"
+              phosphor="PlayIcon"
+              remixicon="RiPlayLine"
+              tabler="IconPlayerPlay"
+            />
+          )}
         </Button>
         <output className="font-mono text-muted-foreground text-xs">
           Threshold {compressor.thresholdDb.toFixed(0)} dB,{" "}

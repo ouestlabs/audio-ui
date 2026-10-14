@@ -173,6 +173,7 @@ import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder";
 ```
 
 - Provide the equivalent icon name for **every** library prop.
+- Write each name as a string literal. The shadcn CLI turns `IconPlaceholder` into an import of that icon, so an expression such as `lucide={playing ? "PauseIcon" : "PlayIcon"}` installs as invalid code. Render one element per icon instead: `{playing ? <IconPlaceholder … /> : <IconPlaceholder … />}`. `bun test test/install-paths.test.ts` fails on an expression.
 - Never use a numeric `size` prop, size with Tailwind classes (`size-3` · `size-3.5` · `size-4`, most common).
 - After adding icons, run `bun run icons:build` from `apps/www/` (and `bun run icons:scan` to verify mappings).
 

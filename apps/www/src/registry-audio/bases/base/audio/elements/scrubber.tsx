@@ -101,13 +101,23 @@ function Scrubber({
         size="icon"
         variant="outline"
       >
-        <IconPlaceholder
-          hugeicons={playing ? "PauseIcon" : "PlayIcon"}
-          lucide={playing ? "PauseIcon" : "PlayIcon"}
-          phosphor={playing ? "PauseIcon" : "PlayIcon"}
-          remixicon={playing ? "RiPauseLine" : "RiPlayLine"}
-          tabler={playing ? "IconPlayerPause" : "IconPlayerPlay"}
-        />
+        {playing ? (
+          <IconPlaceholder
+            hugeicons="PauseIcon"
+            lucide="PauseIcon"
+            phosphor="PauseIcon"
+            remixicon="RiPauseLine"
+            tabler="IconPlayerPause"
+          />
+        ) : (
+          <IconPlaceholder
+            hugeicons="PlayIcon"
+            lucide="PlayIcon"
+            phosphor="PlayIcon"
+            remixicon="RiPlayLine"
+            tabler="IconPlayerPlay"
+          />
+        )}
       </Button>
       <ScrubberTime
         className="text-right text-muted-foreground text-xs"
