@@ -13,6 +13,10 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      # npm trusted publishing: lets `npm publish` exchange this job's OIDC token
+      # for a short-lived publish token (a no-op until the trusted publisher is
+      # configured on npmjs.com).
+      id-token: write
       pull-requests: write
     steps:
       - name: Checkout Repo
@@ -23,7 +27,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: 22
+          # Trusted publishing needs npm 11.5.1 or later, which Node 24 bundles.
+          node-version: 24
           registry-url: https://registry.npmjs.org
 
       - name: Setup bun
@@ -45,4 +50,6 @@ jobs:
           # to that branch instead.
           push-with-git-cli: true
         env:
+          # The fallback while no trusted publisher is configured. Once a release
+          # has published through OIDC, remove this line and the NPM_TOKEN secret.
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
