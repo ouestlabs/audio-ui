@@ -104,3 +104,18 @@ export function positionAt(
     length;
   return config.regionStart + within;
 }
+
+/**
+ * The anchor to carry on with when the tempo changes while playing. The
+ * playhead keeps the position it has at `now` and counts from there at the new
+ * spacing. Without it `positionAt` rereads all the time since the old anchor at
+ * the new spacing, and the playhead jumps (a tempo of 60 after 3 s at 120 puts
+ * a 16 step loop on step 12 instead of step 8).
+ */
+export function anchorForTempoChange(
+  now: number,
+  anchor: SchedulerAnchor,
+  previous: SchedulerConfig
+): SchedulerAnchor {
+  return { step: positionAt(now, anchor, previous), time: now };
+}
