@@ -39,5 +39,10 @@ jobs:
         with:
           version-script: bun version-packages
           publish-script: bun release
+          # The default commits through the API on a temporary branch and then
+          # deletes it, which the "Contribution Workflow" ruleset forbids on
+          # every branch but changeset-release/main. The git CLI pushes straight
+          # to that branch instead.
+          push-with-git-cli: true
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -4,7 +4,8 @@ import { expect, test } from "bun:test";
  * A registry component installs to `components/audio-ui/<name>.tsx` and is
  * imported as `@/components/audio-ui/<name>`. These checks fail when an import
  * in the registry's own code, the docs or the shipped skill points at a file
- * the registry doesn't install.
+ * the registry doesn't install, or when an icon is written in a way the shadcn
+ * CLI can't turn into an import.
  */
 
 const ROOT = `${import.meta.dir}/../../..`;
@@ -40,6 +41,10 @@ const EXTENSION = /\.[a-z]+$/;
 const ALIAS = /\s+as\s+/;
 // The folder components were installed to before `audio-ui`.
 const OLD_FOLDER = /components\/audio\/[a-z]/g;
+// `lucide={playing ? "PauseIcon" : "PlayIcon"}` and its siblings: an expression
+// where the CLI needs a string (`lucide={"Check"}` is fine).
+const ICON_EXPRESSION =
+  /\b(?:lucide|tabler|hugeicons|phosphor|remixicon)=\{(?!\s*["'`])/;
 
 interface BuiltItem {
   files?: { content?: string; target?: string }[];
@@ -237,4 +242,15 @@ test("an item's own imports come with it when it is installed", () => {
     }
   }
   expect(problems).toEqual([]);
+});
+
+test("icons are string literals, so the shadcn CLI can turn them into imports", () => {
+  // The CLI rewrites `<IconPlaceholder lucide="Check" />` into an import of
+  // `Check`. Given an expression it writes `import { {playing ? … } }`.
+  const expressions = items.flatMap((item) =>
+    (item.files ?? [])
+      .filter((file) => ICON_EXPRESSION.test(file.content ?? ""))
+      .map((file) => `${item.name}: ${file.target}`)
+  );
+  expect(expressions).toEqual([]);
 });

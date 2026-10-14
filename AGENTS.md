@@ -96,6 +96,7 @@ The "API reference" of each `components/base/*.mdx` is a hand-kept copy of the J
 - Filename `block-{component}-{variant}.tsx` (blocks) or `{component}-{feature}-demo.tsx` (demos); default export `Block{Component}{Variant}` / `{Component}{Feature}Demo`, PascalCase of the filename, no params
 - `"use client"` only if the file uses hooks, state or browser APIs
 - Icons via `IconPlaceholder` (`@/app/(create)/components/icon-placeholder`) with a name for all five libraries (`lucide`, `phosphor`, `tabler`, `hugeicons`, `remixicon`), sized with `className="size-4"`, never a numeric `size`
+- Each icon name is a string literal: the shadcn CLI turns `IconPlaceholder` into an import, so `lucide={playing ? "PauseIcon" : "PlayIcon"}` installs as invalid code. Render one element per icon (`{playing ? <IconPlaceholder … /> : <IconPlaceholder … />}`); `apps/www/test/install-paths.test.ts` fails on an expression
 - Icon-only interactive elements get `aria-label`; decorative icons get `aria-hidden="true"`
 - Static data outside the component function
 - Semantic color tokens only (`text-muted-foreground`, `bg-primary`), never raw palette colors; don't add `border-border`, it's the default
