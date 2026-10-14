@@ -1,40 +1,151 @@
 ---
 name: audio-ui
-description: Build audio interfaces in React with audio/ui (@audio-ui/react, https://www.audio-ui.dev). Use this skill whenever the user wants a knob, fader, XY pad, envelope editor, level meter, waveform, EQ or filter plot, timeline, step sequencer, piano keyboard, piano roll, transport bar or scrubber, or any synth, mixer, DAW, sampler or audio player UI in React or Next.js, even if they do not name audio/ui. Also use it when the project has an `@audio-ui` registry in components.json or imports `@audio-ui/react`.
+description: "Builds audio interfaces with audio/ui: React (@audio-ui/react and the @audio-ui shadcn registry) or any other framework and the plain DOM (@audio-ui/core): knobs, faders, XY pads, envelopes, level meters, waveforms, EQ and filter plots, timelines, step sequencers, piano keyboards, piano rolls, transport bars, and the synths, mixers, DAWs, samplers and players made from them. Covers picking and installing components, wiring them to the Web Audio API, live meters and playheads, styling the headless primitives, building controls for Vue, Svelte, Solid, Angular, web components or vanilla JS on the framework-free controllers, and letting an AI model drive them through tools. Applies whenever the user wants any audio control or display on the web, even without naming audio/ui, and whenever a project imports @audio-ui/react or @audio-ui/core or has an @audio-ui registry in components.json."
+license: MIT
+metadata:
+  author: audio/ui
+  version: "1.0.0"
+allowed-tools: Bash(npx shadcn@latest *), Bash(pnpm dlx shadcn@latest *), Bash(bunx --bun shadcn@latest *), Bash(yarn dlx shadcn@latest *)
 ---
 
 # audio/ui
 
-audio/ui gives React apps accessible, composable audio controls in two layers. Pick the layer first, because it decides every command that follows.
+Accessible, composable audio controls, in three layers:
 
 | Layer | What it is | Pick it when |
 | --- | --- | --- |
-| `@audio-ui/react` (npm) | Headless primitives: behavior, pointer/wheel/keyboard handling and ARIA, no styles | The user has their own design system or wants full control of the look |
-| `@audio-ui` registry (shadcn) | Styled components and ready blocks that wrap the primitives, copied into the project | The project uses shadcn/ui and Tailwind v4, and the user wants something that looks right at once |
+| `@audio-ui` registry (shadcn) | Styled components and blocks copied into the project | The project has a `components.json` (shadcn/ui, Tailwind v4) |
+| `@audio-ui/react` (npm) | Headless React primitives: behavior, input handling and ARIA, no styles | React without shadcn, or the project brings its own design system |
+| `@audio-ui/core` (npm) | Framework-free controllers: value math, scales, pointer, wheel and keyboard handling, live sources | Vue, Svelte, Solid, Angular, web components or the plain DOM → [core.md](./core.md) |
 
-If the project has a `components.json`, default to the registry. Otherwise install the package.
+Run commands with the project's package manager, read from its lockfile: `npx shadcn@latest`, `pnpm dlx shadcn@latest`, `bunx --bun shadcn@latest` or `yarn dlx shadcn@latest`. Examples use `npx`.
+
+## When to Apply
+
+- Adding a knob, fader, XY pad, envelope, meter, waveform, plot, timeline, sequencer, piano or piano roll
+- Building a synth, mixer, DAW, sampler, recorder or player interface
+- Connecting controls to the Web Audio API, or displays to live audio
+- Styling `@audio-ui/react` primitives with your own design system
+- Building audio controls outside React (Vue, Svelte, Solid, Angular, web components, vanilla JS)
+- Letting a chat, voice or agent compose, edit or mix through the interface
+- Reviewing audio UI code for clicks, drift, re-renders or accessibility
+
+## Rule Categories by Priority
+
+| Priority | Category | Impact | Prefix |
+| --- | --- | --- | --- |
+| 1 | Web Audio | CRITICAL | `audio-` |
+| 2 | Live Data | CRITICAL | `live-` |
+| 3 | Values & Events | HIGH | `values-` |
+| 4 | Accessibility | HIGH | `a11y-` |
+| 5 | Without React | HIGH | `core-` |
+| 6 | Styling | MEDIUM | `style-` |
+| 7 | AI Control | MEDIUM | `ai-` |
+
+## Quick Reference
+
+### 1. Web Audio (CRITICAL)
+
+- `audio-resume-in-gesture` - Create the AudioContext lazily on the client, resume it in the click that starts sound
+- `audio-ramp-parameters` - `setTargetAtTime`, never `param.value =` from a drag
+- `audio-schedule-on-audio-clock` - Start notes at an AudioContext time from a look-ahead clock, never from timers
+- `audio-db-to-gain` - dB on the control, `10 ** (db / 20)` on the GainNode
+- `audio-headroom` - Size voices, resonance and master volume so the loudest case stays under full scale
+- `audio-cleanup` - Stop and disconnect nodes, cancel frames on unmount
+
+### 2. Live Data (CRITICAL)
+
+- `live-source-not-state` - Meters, traces, waveforms and playheads take a `source` (`createSource`), never per-frame state
+- `live-meter-levels` - RMS in dB from time-domain samples, peak hold in the loop
+- `live-mic-input` - Raw microphone signal up-mixed to stereo, analysers never connected to the speakers
+- `live-playhead-source` - Playback position through a source updated every frame
+- `live-decode-once` - Decode and reduce waveform peaks once per file
+- `live-leaf-subscription` - Subscribe to a source only in the leaf that prints it
+- `live-spectrum-hook` - `use-spectrum` for a log-axis spectrum on a Plot
+
+### 3. Values & Events (HIGH)
+
+- `values-controlled-or-uncontrolled` - `value` + `onValueChange`, or `defaultValue`, never both
+- `values-commit-for-persistence` - Sound on `onValueChange`, saving and undo on `onValueCommitted`
+- `values-step-fits-range` - Set `step` and `largeStep` to the range; the defaults (1 and 10) assume 0 to 100
+- `values-log-scale-frequency` - `scale="log"` for frequency, Q and ratios
+- `values-cancel-change` - Reject a change with `eventDetails.cancel()`
+- `values-anchor-bipolar` - `anchor={0}` for pan and detune
+
+### 4. Accessibility (HIGH)
+
+- `a11y-accessible-name` - Every control has `aria-label` or its `Label` part
+- `a11y-keep-focusable-part` - Restyle the thumb with `render`, never replace it
+- `a11y-focus-and-hit-area` - Draw `:focus-visible`, widen small hit areas
+
+### 5. Without React (HIGH)
+
+- `core-one-controller` - Create one controller per control, once; never on every option change
+- `core-redraw-after-set-options` - `setOptions` replaces everything and notifies no one: pass all options, then redraw
+- `core-draw-from-snapshot` - Draw angle, percent and text from `getSnapshot()`, never recomputed
+- `core-native-range-input` - A hidden `<input type="range">` wired to `keyDown` and `type`
+- `core-pointer-handler` - Primary button, `preventDefault`, focus the input and `touch-action: none` before `press`
+- `core-cleanup` - Call the removers `subscribe` and `attachWheel` return
+- `core-public-entries` - `@audio-ui/core` and `@audio-ui/core/<name>`, never `/internal`
+
+### 6. Styling (MEDIUM)
+
+- `style-headless-state` - Style primitives by state: `className` functions, `data-*`, CSS variables
+- `style-props-before-classname` - Registry components: `size`, `marks`, `orientation` before classes
+- `style-semantic-tokens` - Theme tokens, never raw palette colors
+- `style-never-edit-package` - Style the parts or copy the registry component, never patch the package
+
+### 7. AI Control (MEDIUM)
+
+- `ai-person-in-charge` - No tool records or plays on its own; bounded levels; undoable edits
+- `ai-schema-from-instance` - Tool schemas built from this component's config
+- `ai-tools-edit-state` - Tools return the next state; they never touch the DOM
+- `ai-pure-reducers` - `apply` is pure and re-clamps the model's output
+- `ai-current-state` - Give the model the state it edits
+- `ai-structured-tool-calls` - Tool calls with validated arguments, never parsed prose
+
+## Component Selection
+
+| Need | Use |
+| --- | --- |
+| One continuous parameter (level, cutoff, pan) | `knob` (rotary) or `fader` (linear) |
+| Two parameters on one surface | `xypad` |
+| ADSR or any breakpoint shape | `envelope` |
+| Level in dB with peak hold | `meter` |
+| Audio file shape, seeking, live scope | `waveform` |
+| EQ, filter or compressor curve with handles | `plot` |
+| Arrangement view, clips, ruler, playhead | `timeline` |
+| Step pattern | `sequencer` |
+| Playable keyboard | `piano` |
+| Note editor | `piano-roll` |
+| Play, stop, record, loop, bars and tempo | `transport` |
+| Play and pause with a seek bar | `scrubber` |
+
+Installed components import from `@/components/audio-ui/<name>`. Every import, install name and ready block: [components.md](./components.md).
 
 ## Workflow
 
-1. **Look at the project.** Read `package.json` and `components.json` (React 19 and Tailwind v4 are required for the registry). Note the package manager from the lockfile and use it for every command.
-2. **Find the right component.** Use the audio/ui MCP server if it is connected (`list_components`, `search_catalog`, `get_component_docs`), otherwise read `references/components.md`. Do not guess prop names: each component's props live in its docs page, and a wrong guess compiles but misbehaves.
-3. **Read the docs page before writing code.** Fetch `https://www.audio-ui.dev/docs/components/base/<name>` with a markdown `Accept` header, or `/llm/components/base/<name>`. It holds the install command, the API and a copyable example.
-4. **Install.** Registry: `npx shadcn@latest add @audio-ui/<name>` (add the namespace once, see `references/setup.md`). Package: `npm install @audio-ui/react`. Use the project's own package manager runner.
-5. **Wire it to audio.** Controls only emit values. The audio side (a Web Audio `AudioParam`, an app store) is the project's job. Set a parameter with `param.setTargetAtTime(value, ctx.currentTime, 0.01)` instead of assigning `.value`, so dragging never clicks.
-6. **Check it.** Run the type check and look at the page. Tab to each control and use arrow keys: if it does not respond, the accessible name or the value binding is missing.
+1. **Read the project.** `package.json` (framework, and React 19 for the React layers), `components.json` if any, the lockfile for the package manager.
+2. **Pick the layer and the component** from the two tables above.
+3. **Read the component's docs before writing code**: `https://www.audio-ui.dev/llm/components/base/<name>` (markdown), or the MCP server ([setup.md](./setup.md)). Props are specific; a guessed prop compiles and misbehaves.
+4. **Install, then import from where it landed.** Registry: `npx shadcn@latest add @audio-ui/<name>` (add the namespace once, [setup.md](./setup.md)) copies it to `components/audio-ui/<name>.tsx`: `import { Meter } from "@/components/audio-ui/meter"` (through the project's `components` alias). The CLI prints every file it writes: import from those paths, not from memory. React package: install `@audio-ui/react`, import from `@audio-ui/react/<name>`. Other frameworks: install `@audio-ui/core` and follow [core.md](./core.md).
+5. **Write the code against the CRITICAL and HIGH rules** first.
+6. **Verify.** Type check. Drag every control fast (no clicks in the sound), Tab to each control and use the arrow keys, background the tab during playback, and check nothing re-renders per frame.
 
-## Things that are easy to get wrong
+## How to Use
 
-- **Controlled vs uncontrolled.** Components accept `value` with `onValueChange`, or `defaultValue` alone. Mixing both makes the control jump or freeze. Choose one.
-- **Accessible names.** Every control needs `aria-label` or a visible label tied to it. A knob without a name is unusable with a screen reader.
-- **Live data stays out of React state.** Playheads, meters and waveforms that follow a signal take a source or ref, not a `setState` per frame, which would re-render the page 60 times a second. See the `Meter` and `Timeline` docs for the source pattern.
-- **Semantic tokens only.** In registry components use `bg-primary`, `text-muted-foreground` and the like, never raw palette colors, so the theme and dark mode keep working.
-- **Client components.** Anything that uses hooks or the browser needs `"use client"` in Next.js.
-- **Do not edit `@audio-ui/react`.** Adapt the copied registry component instead, it belongs to the project.
+Read the rule files for the explanation and the incorrect and correct code:
 
-## Reference files
+```
+rules/audio-ramp-parameters.md
+rules/live-source-not-state.md
+```
 
-- `references/components.md`: every component with its install command, import and when to use it.
-- `references/setup.md`: adding the registry, installing the package, connecting the MCP server.
+- [components.md](./components.md): every component and block with its install name and import
+- [setup.md](./setup.md): registry namespace, npm packages, MCP server
+- [core.md](./core.md): the controllers outside React, with a plain DOM knob and Vue and Svelte bindings
+- Full docs: https://www.audio-ui.dev/llms.txt
 
-When something is not covered here, the full docs are at https://www.audio-ui.dev/llms.txt.
+## Full Compiled Document
+
+Every rule expanded in one file: [AGENTS.md](./AGENTS.md)

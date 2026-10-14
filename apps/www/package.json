@@ -12,6 +12,7 @@
     "lint:fix": "biome check --write --unsafe .",
     "registry:build": "bun ./scripts/build-registry.ts",
     "registry:sync": "bun ./scripts/sync-registry.ts && bun ./scripts/build-icons.ts",
+    "skill:build": "bun ./scripts/build-skill.ts",
     "start": "next start --port 4000",
     "test": "bun test",
     "typecheck": "tsc --noEmit"

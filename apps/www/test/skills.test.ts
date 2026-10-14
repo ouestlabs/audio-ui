@@ -1,0 +1,286 @@
+import { afterEach, describe, expect, test } from "bun:test";
+import { audio } from "@/registry-audio/bases/base/audio/_registry";
+import { components } from "@/registry-audio/bases/base/components/_registry";
+import { hooks } from "@/registry-audio/bases/base/hooks/_registry";
+import { lib } from "@/registry-audio/bases/base/lib/_registry";
+import { compileSkill, readRules, SKILL_DIR } from "../scripts/build-skill";
+
+/**
+ * The skills in `skills/` are installed by people using the library, and
+ * they name install commands, entries, attributes and CSS variables. These
+ * checks fail the moment one of those names stops existing in the code.
+ */
+
+const ROOT = `${import.meta.dir}/../../..`;
+const SKILLS_DIR = `${ROOT}/skills`;
+
+const FRONTMATTER = /^---\n([\s\S]*?)\n---/;
+const SKILL_NAME = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+const MARKDOWN_LINK = /\]\((\.{1,2}\/[^)#\s]+)/g;
+// A whole name: not the start of a template such as `@audio-ui/block-<name>`.
+const REGISTRY_NAME = /@audio-ui\/([a-z0-9-]*[a-z0-9])(?![a-z0-9<-])/g;
+// An import, not a path into an installed package (`node_modules/@audio-ui/react/dist`).
+const REACT_ENTRY = /(?<!node_modules\/)@audio-ui\/react\/([a-z0-9-]+)/g;
+const DATA_ATTRIBUTE = /`(data-[a-z-]+)`/g;
+const CSS_VARIABLE = /`(--[a-z-]+)`/g;
+const ICON_PATH = /icon_(?:small|large): "([^"]+)"/g;
+// An `Intl.NumberFormat` unit the skill suggests, as in `{ style: "unit", unit: "hertz" }`.
+const INTL_UNIT = /unit: "([a-z-]+)"/g;
+const INTL_UNITS = new Set<string>(Intl.supportedValuesOf("unit"));
+const RULE_ID = /`((?:audio|live|values|a11y|core|style|ai)-[a-z0-9-]+)`/g;
+const CORE_ENTRY = /(?<!node_modules\/)@audio-ui\/core\/([a-z0-9-]+)/g;
+// A fenced code block of a markdown file.
+const CODE_FENCE = /```\w*\n([\s\S]*?)```/g;
+// An `@audio-ui/core/<entry>` import specifier in code.
+const CORE_SPECIFIER = /"@audio-ui\/core\/([a-z-]+)"/g;
+// A row of core.md's export table: the entry, then the names it exports.
+const CORE_EXPORT_ROW = /^\| `@audio-ui\/core(?:\/([a-z-]+))?` \| (.+) \|$/gm;
+const IDENTIFIER = /`([A-Za-z_][A-Za-z0-9_]*)`/g;
+
+const PACKAGES = new Set(["react", "core"]);
+
+function matches(text: string, pattern: RegExp): string[] {
+  return [...text.matchAll(pattern)].map((match) => match[1] ?? "");
+}
+
+/** Every file under `cwd` matching `pattern`, as absolute paths with their text. */
+async function read(pattern: string, cwd: string) {
+  const paths = await Array.fromAsync(
+    new Bun.Glob(pattern).scan({ absolute: true, cwd })
+  );
+  return Promise.all(
+    paths.map(async (path) => ({ path, text: await Bun.file(path).text() }))
+  );
+}
+
+const exists = (path: string | URL) => Bun.file(path).exists();
+
+const skills = (
+  await Array.fromAsync(new Bun.Glob("*/SKILL.md").scan({ cwd: SKILLS_DIR }))
+).map((path) => path.split("/")[0] ?? "");
+const markdown = await read("**/*.md", SKILLS_DIR);
+const registryNames = new Set(
+  [...audio, ...components, ...hooks, ...lib].map((item) => item.name)
+);
+const uiExports = Object.keys(
+  (await Bun.file(`${ROOT}/packages/ui/package.json`).json()).exports
+);
+const coreExports = Object.keys(
+  (await Bun.file(`${ROOT}/packages/core/package.json`).json()).exports
+);
+const uiSource = (await read("**/*.{ts,tsx}", `${ROOT}/packages/ui/src`))
+  .map((file) => file.text)
+  .join("\n");
+const { errors, rules } = await readRules();
+const skill = await Bun.file(`${SKILL_DIR}/SKILL.md`).text();
+
+describe.each(skills)("skills/%s", (name) => {
+  const dir = `${SKILLS_DIR}/${name}`;
+
+  test("has a valid name and description", async () => {
+    const source = await Bun.file(`${dir}/SKILL.md`).text();
+    const frontmatter = Bun.YAML.parse(
+      source.match(FRONTMATTER)?.[1] ?? ""
+    ) as Record<string, unknown>;
+    expect(frontmatter.name).toBe(name);
+    expect(name).toMatch(SKILL_NAME);
+    expect(name.length).toBeLessThanOrEqual(64);
+    expect(typeof frontmatter.description).toBe("string");
+    expect(String(frontmatter.description).length).toBeLessThanOrEqual(1024);
+  });
+
+  test("its evals are well formed", async () => {
+    const evals = await Bun.file(`${dir}/evals/evals.json`).json();
+    expect(evals.skill_name).toBe(name);
+    const ids = evals.evals.map((item: { id: number }) => item.id);
+    expect(new Set(ids).size).toBe(ids.length);
+    for (const item of evals.evals) {
+      expect(item.prompt.length).toBeGreaterThan(0);
+      expect(item.expectations.length).toBeGreaterThan(0);
+    }
+  });
+
+  test("its agent metadata points at real icons", async () => {
+    const metadata = await Bun.file(`${dir}/agents/openai.yml`).text();
+    const icons = matches(metadata, ICON_PATH);
+    const found = await Promise.all(
+      icons.map((icon) => exists(`${dir}/${icon}`))
+    );
+    expect(found.every(Boolean)).toBe(true);
+  });
+});
+
+describe.each(markdown)("$path", ({ path, text }) => {
+  test("relative links resolve", async () => {
+    const base = Bun.pathToFileURL(path);
+    const links = matches(text, MARKDOWN_LINK);
+    const broken = (
+      await Promise.all(
+        links.map(async (link) =>
+          (await exists(new URL(link, base))) ? null : link
+        )
+      )
+    ).filter(Boolean);
+    expect(broken).toEqual([]);
+  });
+
+  test("every @audio-ui/<name> is a registry item or a package", () => {
+    const missing = matches(text, REGISTRY_NAME).filter(
+      (name) => !(PACKAGES.has(name) || registryNames.has(name))
+    );
+    expect(missing).toEqual([]);
+  });
+
+  test("every @audio-ui/react/<entry> is exported", () => {
+    const missing = matches(text, REACT_ENTRY).filter(
+      (entry) => !uiExports.includes(`./${entry}`)
+    );
+    expect(missing).toEqual([]);
+  });
+
+  test("every @audio-ui/core/<entry> is exported", () => {
+    const missing = matches(text, CORE_ENTRY).filter(
+      (entry) => !coreExports.includes(`./${entry}`)
+    );
+    expect(missing).toEqual([]);
+  });
+
+  test("every Intl unit it suggests exists", () => {
+    const invalid = matches(text, INTL_UNIT).filter(
+      (unit) => !INTL_UNITS.has(unit)
+    );
+    expect(invalid).toEqual([]);
+  });
+
+  test("every data attribute and CSS variable exists in the primitives", () => {
+    const missing = [
+      ...matches(text, DATA_ATTRIBUTE),
+      ...matches(text, CSS_VARIABLE),
+    ].filter((name) => !uiSource.includes(name.replace("data-", "")));
+    expect(missing).toEqual([]);
+  });
+});
+
+describe("skills/audio-ui rules", () => {
+  test("every rule is well formed", () => {
+    expect(errors).toEqual([]);
+  });
+
+  test("the Quick Reference lists exactly the rules", () => {
+    const listed = new Set(matches(skill, RULE_ID));
+    const ids = new Set(rules.map((rule) => rule.id));
+    expect([...ids].filter((id) => !listed.has(id))).toEqual([]);
+    expect([...listed].filter((id) => !ids.has(id))).toEqual([]);
+  });
+
+  test("AGENTS.md is the output of bun run skill:build", async () => {
+    expect(await Bun.file(`${SKILL_DIR}/AGENTS.md`).text()).toBe(
+      await compileSkill()
+    );
+  });
+
+  test("SKILL.md and metadata.json carry the same version", async () => {
+    const metadata = await Bun.file(`${SKILL_DIR}/metadata.json`).json();
+    const frontmatter = Bun.YAML.parse(skill.match(FRONTMATTER)?.[1] ?? "") as {
+      metadata?: { version?: string };
+    };
+    expect(frontmatter.metadata?.version).toBe(metadata.version);
+  });
+});
+
+test("core.md lists only names its entries export", async () => {
+  const core = await Bun.file(`${SKILL_DIR}/core.md`).text();
+  const rows = await Promise.all(
+    [...core.matchAll(CORE_EXPORT_ROW)].map(async ([, entry, names = ""]) => {
+      const index = entry
+        ? `${ROOT}/packages/core/src/primitives/${entry}/index.ts`
+        : `${ROOT}/packages/core/src/index.ts`;
+      const source = await Bun.file(index).text();
+      return matches(names, IDENTIFIER)
+        .filter((name) => !source.includes(name))
+        .map((name) => `${entry ?? "."}: ${name}`);
+    })
+  );
+  expect(rows.flat()).toEqual([]);
+});
+
+// The plain DOM example writes into the document: leave it as it was found,
+// so the component tests that query the whole body don't see its controls.
+afterEach(() => {
+  document.body.innerHTML = "";
+});
+
+test("core.md's plain DOM knob works", async () => {
+  const core = await Bun.file(`${SKILL_DIR}/core.md`).text();
+  const blocks = [...core.matchAll(CODE_FENCE)].map(([, code = ""]) => code);
+  const html = blocks.find((code) => code.includes('id="cutoff"'));
+  const example = blocks.find((code) =>
+    code.includes("export function mountKnob")
+  );
+  if (!(html && example)) {
+    throw new Error("core.md: the plain DOM knob example is missing");
+  }
+
+  // Run the example as written, with its import pointed at the source.
+  const source = new Bun.Transpiler({ loader: "ts" })
+    .transformSync(example)
+    .replace(
+      CORE_SPECIFIER,
+      (_, entry) => `"${ROOT}/packages/core/src/primitives/${entry}/index.ts"`
+    );
+  const file = Bun.file(
+    `${Bun.env.TMPDIR ?? "/tmp"}/mount-knob-${crypto.randomUUID()}.js`
+  );
+  await Bun.write(file, source);
+  const { mountKnob } = await import(file.name ?? "");
+  await file.delete();
+
+  document.body.innerHTML = html;
+  const root = document.getElementById("cutoff");
+  const input = root?.querySelector("input");
+  if (!(root && input)) {
+    throw new Error("core.md: the example's markup has no knob");
+  }
+  let changes = 0;
+  const knob = mountKnob(root, {
+    max: 20_000,
+    min: 20,
+    onValueChange: () => {
+      changes += 1;
+    },
+    scale: "log",
+  });
+
+  // The middle of a logarithmic travel, not the linear one.
+  expect(input.value).toBe("632");
+
+  // A press: the primary button only, no browser gesture, focus on the input.
+  const control = root.querySelector("[data-part=control]");
+  expect(control?.getAttribute("style")).toContain("touch-action: none");
+  const press = (button: number) => {
+    const event = new PointerEvent("pointerdown", {
+      bubbles: true,
+      button,
+      cancelable: true,
+      pointerId: 1,
+    });
+    control?.dispatchEvent(event);
+    document.dispatchEvent(new PointerEvent("pointerup", { pointerId: 1 }));
+    return event;
+  };
+  expect(press(2).defaultPrevented).toBe(false);
+  expect(document.activeElement).not.toBe(input);
+  expect(press(0).defaultPrevented).toBe(true);
+  expect(document.activeElement).toBe(input);
+  const key = () =>
+    input.dispatchEvent(
+      new KeyboardEvent("keydown", { cancelable: true, key: "ArrowUp" })
+    );
+  key();
+  expect(changes).toBe(1);
+  knob.update({ disabled: true });
+  expect(input.disabled).toBe(true);
+  knob.destroy();
+  key();
+  expect(changes).toBe(1);
+});

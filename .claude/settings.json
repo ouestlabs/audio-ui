@@ -2,11 +2,11 @@
   "hooks": {
     "PostToolUse": [
       {
-        "matcher": "Edit|Write",
+        "matcher": "Edit|MultiEdit|Write",
         "hooks": [
           {
             "type": "command",
-            "command": "npx ultracite fix"
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/format.sh"
           }
         ]
       }

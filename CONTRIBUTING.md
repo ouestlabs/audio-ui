@@ -355,7 +355,7 @@ bun run lint:fix
 
 ## Code Style
 
-This project uses **Biome via Ultracite**. Run `npx ultracite fix` before committing.
+This project uses **Biome via Ultracite**. Run `bun run lint:fix` before committing.
 
 - TypeScript throughout, explicit types where they add clarity
 - `const` by default, `let` only when needed, never `var`

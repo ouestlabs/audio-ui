@@ -58,3 +58,7 @@ jobs:
       - name: Typecheck www
         working-directory: apps/www
         run: bun run typecheck
+
+      - name: Agent skill and docs match the code
+        working-directory: apps/www
+        run: bun test test/skills.test.ts test/install-paths.test.ts

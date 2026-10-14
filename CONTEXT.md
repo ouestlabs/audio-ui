@@ -17,20 +17,16 @@ The moment a gesture ends and the parameter's pending value becomes final. Disti
 _Avoid_: change (for gesture-end), submit
 
 **Primitive**:
-A headless, unstyled, accessible control published in `@audio-ui/react` (Fader, Knob, Transport, XYPad, ChannelStrip).
+A headless, unstyled, accessible control published in `@audio-ui/react` (Envelope, Fader, Knob, Meter, Piano, PianoRoll, Plot, Sequencer, Timeline, Waveform, XYPad), its framework-free logic in `@audio-ui/core`.
 _Avoid_: component (when the headless building block is meant), widget
 
 **Element**:
-A styled registry wrapper over a primitive, copied into user projects via the registry. Adds appearance only — never behavior.
+A styled registry wrapper over a primitive, copied into user projects via the registry. Adds appearance only, never behavior.
 _Avoid_: styled component, wrapper
 
-**PlaybackEngine**:
-The seam between the audio-store (domain: queue, playback intent) and a concrete audio backend. Commands flow in (load, play, pause, seek, setVolume…), events flow out (play, pause, timeupdate, ended, error…) through one interface — no caller reaches past it into a raw `HTMLAudioElement`. `HtmlAudioEngine` is the production adapter; a `FakeEngine` is the in-memory test adapter.
-_Avoid_: audio engine (ambiguous with Web Audio), device, backend
-
 **TransportClock**:
-The seam between musical time (tempo, steps, loop region, seek) and Web Audio scheduling. A drift-free look-ahead clock: it advances a stepping cursor against `AudioContext.currentTime` and emits `(step, audioTime)` boundaries so a caller schedules synthesis sample-accurately, and it exposes a continuous playhead position — but it knows nothing about *what* is played (drum hits, note-pairs). It owns start/stop/seek/region and fires a reset on every re-anchor so the caller can flush its scheduled-ahead sound. `use-step-clock` (simple) and `use-transport-clock` (region-aware) are thin adapters over its pure, framework-agnostic core in `lib/lookahead-scheduler.ts`.
-_Avoid_: scheduler (bare — say the core or the clock), timer, metronome
+The seam between musical time (tempo, steps, loop region, seek) and Web Audio scheduling. A drift-free look-ahead clock: it advances a stepping cursor against `AudioContext.currentTime` and emits `(step, audioTime)` boundaries so a caller schedules synthesis sample-accurately, and it exposes a continuous playhead position, but it knows nothing about *what* is played (drum hits, note-pairs). It owns start/stop/seek/region and fires a reset on every re-anchor so the caller can flush its scheduled-ahead sound. `use-transport-clock` is a thin adapter over its pure, framework-agnostic core in `lib/lookahead-scheduler.ts`.
+_Avoid_: scheduler (bare: say the core or the clock), timer, metronome
 
 **Category**:
 A curated, editorial grouping of catalog items (label, description, SEO, its own page). Declared in `categories.ts`; counts are derived, never hand-written.
