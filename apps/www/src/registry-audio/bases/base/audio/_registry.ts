@@ -65,6 +65,7 @@ export const audio: RegistryItem[] = [
       },
     ],
     name: "piano-roll",
+    registryDependencies: ["@audio-ui/timeline"],
     type: "registry:ui",
   },
   {
@@ -76,7 +77,7 @@ export const audio: RegistryItem[] = [
       },
       {
         path: "components/plot/plot-demo.tsx",
-        target: "components/audio/plot-default.tsx",
+        target: "components/audio-ui/plot-default.tsx",
         type: "registry:component",
       },
     ],
@@ -126,7 +127,7 @@ export const audio: RegistryItem[] = [
       },
       {
         path: "components/waveform/waveform-demo.tsx",
-        target: "components/audio/waveform-default.tsx",
+        target: "components/audio-ui/waveform-default.tsx",
         type: "registry:component",
       },
     ],
@@ -144,12 +145,14 @@ export const audio: RegistryItem[] = [
     ],
     name: "timeline",
     registryDependencies: [
+      "@audio-ui/arrangement",
       "@audio-ui/musical-time",
       "@audio-ui/fader",
       "@audio-ui/knob",
       "@shadcn/button",
       "@shadcn/button-group",
       "@shadcn/context-menu",
+      "@shadcn/dropdown-menu",
     ],
     type: "registry:ui",
   },
@@ -189,7 +192,7 @@ export const audio: RegistryItem[] = [
       },
       {
         path: "components/sequencer/sequencer-demo.tsx",
-        target: "components/audio/sequencer-default.tsx",
+        target: "components/audio-ui/sequencer-default.tsx",
         type: "registry:component",
       },
     ],
@@ -212,7 +215,7 @@ export const audio: RegistryItem[] = [
       },
       {
         path: "components/scrubber/scrubber-demo.tsx",
-        target: "components/audio/scrubber-default.tsx",
+        target: "components/audio-ui/scrubber-default.tsx",
         type: "registry:component",
       },
     ],
@@ -229,7 +232,7 @@ export const audio: RegistryItem[] = [
       },
       {
         path: "components/transport/transport-demo.tsx",
-        target: "components/audio/transport-default.tsx",
+        target: "components/audio-ui/transport-default.tsx",
         type: "registry:component",
       },
     ],

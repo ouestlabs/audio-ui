@@ -1,8 +1,8 @@
 /**
- * Framework-agnostic core of the look-ahead scheduler shared by `use-step-clock`
- * and `use-transport-clock`. It owns the drift-free stepping cursor and the
+ * Framework-agnostic core of the look-ahead scheduler behind
+ * `use-transport-clock`. It owns the drift-free stepping cursor and the
  * self-correcting catch-up loop, and knows nothing about React, AudioContext,
- * or what gets played, the hooks bind it to `ctx.currentTime` + `setInterval`.
+ * or what gets played, the hook binds it to `ctx.currentTime` + `setInterval`.
  * Being pure, it is the whole test surface: drive `advance` across a fake
  * timeline and assert the emitted `(step, time)` boundaries, no audio needed.
  */

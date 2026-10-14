@@ -39,7 +39,7 @@ npm install @audio-ui/react
 <ComponentSource
   styleName="base-nova"
   name="scrubber"
-  title="components/audio/elements/scrubber.tsx"
+  title="components/audio-ui/scrubber.tsx"
 />
 
 <Step>Update the import paths to match your project setup.</Step>
@@ -69,7 +69,7 @@ import { Timeline } from "@audio-ui/react";
 
 ```tsx
 import { createSource } from "@audio-ui/react";
-import { Scrubber } from "@/components/audio/elements/scrubber";
+import { Scrubber } from "@/components/audio-ui/scrubber";
 
 const position = createSource(0); // seconds; set it from your player's clock
 

@@ -49,7 +49,7 @@ export const lib: RegistryItem[] = [
     categories: ["lib", "audio", "sequencer", "piano"],
     dependencies: [],
     description:
-      "Framework-agnostic core of the look-ahead scheduler, the drift-free stepping cursor and self-correcting catch-up loop behind use-step-clock and use-transport-clock",
+      "Framework-agnostic core of the look-ahead scheduler, the drift-free stepping cursor and self-correcting catch-up loop behind use-transport-clock",
     files: [
       {
         path: "lib/lookahead-scheduler.ts",

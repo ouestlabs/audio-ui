@@ -327,8 +327,8 @@ function parseStyleName(styleName: string): { base: string; style: string } {
 function transformImportPaths(code: string, base: string): string {
   return code
     .replace(
-      /@\/registry-audio\/bases\/__generated\/base-(?:vega|nova|maia|lyra|mira|luma|rhea|sera)\/audio\//g,
-      "@/components/audio/"
+      /@\/registry-audio\/bases\/__generated\/base-(?:vega|nova|maia|lyra|mira|luma|rhea|sera)\/audio\/(?:elements\/)?/g,
+      "@/components/audio-ui/"
     )
     .replace(
       /@\/registry-audio\/bases\/__generated\/base-(?:vega|nova|maia|lyra|mira|luma|rhea|sera)\/ui\//g,
@@ -347,8 +347,8 @@ function transformImportPaths(code: string, base: string): string {
       "@/components/examples/"
     )
     .replace(
-      new RegExp(`@/registry-audio/bases/${base}/audio/`, "g"),
-      "@/components/audio/"
+      new RegExp(`@/registry-audio/bases/${base}/audio/(?:elements/)?`, "g"),
+      "@/components/audio-ui/"
     )
     .replace(
       new RegExp(`@/registry-audio/bases/${base}/ui/`, "g"),
@@ -364,8 +364,8 @@ function transformImportPaths(code: string, base: string): string {
       "@/components/examples/"
     )
     .replace(
-      /@\/registry(?:-audio)?\/bases\/base\/audio\//g,
-      "@/components/audio/"
+      /@\/registry(?:-audio)?\/bases\/base\/audio\/(?:elements\/)?/g,
+      "@/components/audio-ui/"
     )
     .replace(/@\/registry(?:-audio)?\/bases\/base\/ui\//g, "@/components/ui/")
     .replace(/@\/registry(?:-audio)?\/bases\/base\/hooks\//g, "@/hooks/")
@@ -375,7 +375,10 @@ function transformImportPaths(code: string, base: string): string {
       "@/components/examples/"
     )
     .replace(/@\/registry\/bases\/base\/ui\//g, "@/components/ui/")
-    .replace(/@\/registry\/bases\/base\/audio\//g, "@/components/audio/")
+    .replace(
+      /@\/registry\/bases\/base\/audio\/(?:elements\/)?/g,
+      "@/components/audio-ui/"
+    )
     .replace(/@\/registry\/bases\/base\/hooks\//g, "@/hooks/")
     .replace(/@\/registry\/bases\/base\/lib\//g, "@/lib/")
     .replace(
@@ -464,10 +467,9 @@ async function buildRegistryItem(
       if (sourceType === "blocks") {
         target = `components/examples/${fileName}`;
       } else if (fileType === "registry:ui") {
-        // Elements keep the folder their demos import them from.
-        target = filePath.includes("/elements/")
-          ? `components/audio/elements/${fileName}`
-          : `components/audio/${fileName}`;
+        // Every audio/ui component lands in one folder named after the library,
+        // imported as `@/components/audio-ui/<name>`.
+        target = `components/audio-ui/${fileName}`;
       } else if (fileType === "registry:hook") {
         target = `hooks/${fileName}`;
       } else if (fileType === "registry:lib") {
