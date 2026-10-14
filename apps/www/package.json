@@ -15,7 +15,7 @@
     "skill:build": "bun ./scripts/build-skill.ts",
     "start": "next start --port 4000",
     "test": "bun test",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "next typegen && tsc --noEmit"
   },
   "dependencies": {
     "@audio-ui/react": "*",
