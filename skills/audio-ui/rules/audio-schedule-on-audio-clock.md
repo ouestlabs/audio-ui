@@ -32,4 +32,4 @@ const clock = useTransportClock({
 });
 ```
 
-The clock looks ahead and hands you the exact `AudioContext` time of each step. Start every node at that `time`. `clock.getPosition()` gives the playhead in steps for the UI; `@audio-ui/musical-time` converts tempo to seconds.
+The clock looks ahead and hands you the exact `AudioContext` time of each step. Start every node at that `time`. `clock.getPosition()` gives the playhead in steps for the UI; `@audio-ui/musical-time` converts tempo to seconds. `start()` does not resume a suspended context: call `ctx.resume()` in the same click first (rule `audio-resume-in-gesture`).

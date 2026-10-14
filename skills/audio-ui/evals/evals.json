@@ -47,7 +47,10 @@
         "Steps are scheduled on the audio clock (use-transport-clock onStep time, or an equivalent look-ahead), not with setInterval/setTimeout triggering sounds immediately",
         "Each sound starts at the scheduled `time` (e.g. osc.start(time))",
         "Stop or seek silences sound already scheduled ahead (onReset or equivalent)",
-        "The moving playhead does not re-render React every frame"
+        "The moving playhead does not re-render React every frame",
+        "The AudioContext is resumed inside the Play click handler, not on mount",
+        "The summed voices have headroom: a master gain below 1, or an equivalent",
+        "The grid and the controls have accessible names"
       ]
     },
     {
