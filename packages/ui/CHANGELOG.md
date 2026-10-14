@@ -1,5 +1,13 @@
 # @audio-ui/react
 
+## 0.2.1
+
+### Patch Changes
+
+- 5ad1c3f: Timeline: the viewport measures in layout px inside a scaled ancestor, such as a dialog that zooms in. The fitted zoom and the lanes' origin were taken from the drawn size, so the navigator's window showed a stretch that did not match the view until the next resize.
+- Updated dependencies [3ad7d58]
+  - @audio-ui/core@0.1.1
+
 ## 0.2.0
 
 ### Minor Changes

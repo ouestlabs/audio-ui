@@ -1,5 +1,11 @@
 # @audio-ui/core
 
+## 0.1.1
+
+### Patch Changes
+
+- 3ad7d58: Knob: `createKnobController` applies the `scale` it is created with at once. It started linear until the first `setOptions`, so a logarithmic knob built outside React rested at, and drew, a linear position until its options were set again.
+
 ## 0.1.0
 
 ### Minor Changes
