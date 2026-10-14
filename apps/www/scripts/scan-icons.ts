@@ -1,36 +1,235 @@
-import fs from "node:fs";
+/**
+ * Scans the audio registry for the icons it uses and writes two reports in
+ * `src/registry/icons` that `build-icons.ts` reads:
+ *
+ * - `scanned-icons.json`: every `<IconPlaceholder>` and the icon it names for
+ *   each library (mapped icons)
+ * - `unmapped-icons.json`: every icon imported straight from `lucide-react`
+ *   (unmapped icons, Lucide only)
+ *
+ * Run: bun run icons:scan
+ */
 import {
+  type ImportDeclaration,
+  type JsxAttribute,
   type JsxOpeningElement,
   type JsxSelfClosingElement,
   Project,
+  type SourceFile,
   SyntaxKind,
+  ts,
 } from "ts-morph";
+
+const PROJECT_ROOT = Bun.fileURLToPath(new URL("..", import.meta.url)).slice(
+  0,
+  -1
+);
 
 // Only scan base folder. Catalog blocks: bases/base/components (c-*).
 const TARGET_DIR = "src/registry-audio/bases/base";
 const OUTPUT_FILE = "src/registry/icons/scanned-icons.json";
 const UNMAPPED_OUTPUT_FILE = "src/registry/icons/unmapped-icons.json";
 
+// Imported from lucide-react but not an icon.
+const LUCIDE_TYPES = new Set(["LucideProps", "LucideIcon"]);
+// Icons are components: capitalized.
+const COMPONENT_NAME = /^[A-Z]/;
+// Where an imported name is a declaration or a type, not a use.
+const NOT_A_USE = new Set([
+  SyntaxKind.ImportSpecifier,
+  SyntaxKind.TypeReference,
+  SyntaxKind.InterfaceDeclaration,
+  SyntaxKind.TypeAliasDeclaration,
+]);
+
+/** An `<IconPlaceholder>` with its string props: `lucide`, `tabler`... */
+interface PlaceholderUsage {
+  _path: string;
+  [prop: string]: string;
+}
+
+interface UnmappedUsage {
+  _path: string;
+  icon: string;
+  localName?: string;
+}
+
+/** The text of a string prop: `lucide="Check"` or `lucide={"Check"}`. */
+function stringValue(attribute: JsxAttribute): string | undefined {
+  const initializer = attribute.getInitializer();
+  if (initializer?.getKind() === SyntaxKind.StringLiteral) {
+    return initializer
+      .asKindOrThrow(SyntaxKind.StringLiteral)
+      .getLiteralValue()
+      .trim();
+  }
+  if (initializer?.getKind() === SyntaxKind.JsxExpression) {
+    const expression = initializer
+      .asKindOrThrow(SyntaxKind.JsxExpression)
+      .getExpression();
+    if (expression?.getKind() === SyntaxKind.StringLiteral) {
+      return expression
+        .asKindOrThrow(SyntaxKind.StringLiteral)
+        .getLiteralValue()
+        .trim();
+    }
+  }
+  return undefined;
+}
+
+/** Every `<IconPlaceholder>` (mapped). */
+function placeholderUsages(
+  sourceFile: SourceFile,
+  path: string
+): PlaceholderUsage[] {
+  const isPlaceholder = (element: JsxOpeningElement | JsxSelfClosingElement) =>
+    element.getTagNameNode().getText() === "IconPlaceholder";
+
+  // Opening elements too, in case it is not self-closing (though it should be).
+  const elements = [
+    ...sourceFile
+      .getDescendantsOfKind(SyntaxKind.JsxSelfClosingElement)
+      .filter(isPlaceholder),
+    ...sourceFile
+      .getDescendantsOfKind(SyntaxKind.JsxOpeningElement)
+      .filter(isPlaceholder),
+  ];
+
+  return elements.map((element) => {
+    const usage: PlaceholderUsage = { _path: path };
+    for (const attribute of element.getAttributes()) {
+      if (attribute.getKind() === SyntaxKind.JsxAttribute) {
+        const jsxAttribute = attribute.asKindOrThrow(SyntaxKind.JsxAttribute);
+        const value = stringValue(jsxAttribute);
+        if (value !== undefined) {
+          usage[jsxAttribute.getNameNode().getText()] = value;
+        }
+      }
+    }
+    return usage;
+  });
+}
+
+/** `import { Check, X as Close } from "lucide-react"`: local name to icon. */
+function importedIcons(declarations: ImportDeclaration[]) {
+  const icons = new Map<string, string>();
+  for (const declaration of declarations) {
+    for (const named of declaration.getNamedImports()) {
+      const originalName = named.getName();
+      if (!LUCIDE_TYPES.has(originalName)) {
+        icons.set(
+          named.getAliasNode()?.getText() || originalName,
+          originalName
+        );
+      }
+    }
+  }
+  return icons;
+}
+
+/** `import * as Lucide from "lucide-react"`, then `<Lucide.Check />`. */
+function namespaceUsages(
+  sourceFile: SourceFile,
+  declarations: ImportDeclaration[],
+  path: string
+): UnmappedUsage[] {
+  const found: UnmappedUsage[] = [];
+  for (const declaration of declarations) {
+    const starName = declaration.getNamespaceImport()?.getText();
+    if (!starName) {
+      continue;
+    }
+    for (const access of sourceFile.getDescendantsOfKind(
+      SyntaxKind.PropertyAccessExpression
+    )) {
+      const icon = access.getName().trim();
+      if (
+        access.getExpression().getText() === starName &&
+        icon &&
+        COMPONENT_NAME.test(icon)
+      ) {
+        found.push({ _path: path, icon });
+      }
+    }
+  }
+  return found;
+}
+
+/** The uses of the names `import { ... }` brought in. */
+function namedUsages(
+  sourceFile: SourceFile,
+  icons: Map<string, string>,
+  path: string
+): UnmappedUsage[] {
+  if (icons.size === 0) {
+    return [];
+  }
+  const found: UnmappedUsage[] = [];
+  for (const identifier of sourceFile.getDescendantsOfKind(
+    SyntaxKind.Identifier
+  )) {
+    const localName = identifier.getText().trim();
+    const icon = icons.get(localName)?.trim();
+    const parent = identifier.getParent();
+    if (
+      icon &&
+      parent &&
+      !NOT_A_USE.has(parent.getKind()) &&
+      COMPONENT_NAME.test(icon)
+    ) {
+      found.push({
+        _path: path,
+        icon,
+        localName: localName === icon ? undefined : localName,
+      });
+    }
+  }
+  return found;
+}
+
+/** Every icon used straight from `lucide-react` (unmapped). */
+function lucideUsages(sourceFile: SourceFile, path: string): UnmappedUsage[] {
+  const declarations = sourceFile
+    .getImportDeclarations()
+    .filter(
+      (declaration) => declaration.getModuleSpecifierValue() === "lucide-react"
+    );
+  return [
+    ...namespaceUsages(sourceFile, declarations, path),
+    ...namedUsages(sourceFile, importedIcons(declarations), path),
+  ];
+}
+
 async function scanIcons() {
   console.log("Scanning for IconPlaceholder and Lucide icons in", TARGET_DIR);
-  const files = fs.globSync(`${TARGET_DIR}/**/*.tsx`);
+
+  // Sorted, so the reports come out the same on every run.
+  const files = (
+    await Array.fromAsync(
+      new Bun.Glob("**/*.tsx").scan({ cwd: `${PROJECT_ROOT}/${TARGET_DIR}` })
+    )
+  )
+    .sort()
+    .map((file) => `${TARGET_DIR}/${file}`);
+
+  const sources = await Promise.all(
+    files.map(async (path) => ({
+      content: await Bun.file(`${PROJECT_ROOT}/${path}`).text(),
+      path,
+    }))
+  );
 
   const project = new Project({
-    compilerOptions: {
-      jsx: 1, // Preserve
-    },
+    compilerOptions: { jsx: ts.JsxEmit.Preserve },
   });
 
-  const matches: any[] = [];
-  const unmappedMatches: any[] = [];
+  const matches: PlaceholderUsage[] = [];
+  const unmappedMatches: UnmappedUsage[] = [];
 
-  for (const file of files) {
-    const content = fs.readFileSync(file, "utf-8");
-
+  for (const { content, path } of sources) {
     // We only process files that actually mention "IconPlaceholder" or "lucide-react" to save time
     const hasPlaceholder = content.includes("IconPlaceholder");
     const hasLucide = content.includes("lucide-react");
-
     if (!(hasPlaceholder || hasLucide)) {
       continue;
     }
@@ -39,132 +238,11 @@ async function scanIcons() {
       overwrite: true,
     });
 
-    // 1. Scan for IconPlaceholder (Mapped)
     if (hasPlaceholder) {
-      const placeholders = sourceFile
-        .getDescendantsOfKind(SyntaxKind.JsxSelfClosingElement)
-        .filter(
-          (el) => el.getTagNameNode().getText() === "IconPlaceholder"
-        ) as JsxSelfClosingElement[];
-
-      // Also check opening elements if it's not self-closing (though it should be)
-      const openingPlaceholders = sourceFile
-        .getDescendantsOfKind(SyntaxKind.JsxOpeningElement)
-        .filter(
-          (el) => el.getTagNameNode().getText() === "IconPlaceholder"
-        ) as JsxOpeningElement[];
-
-      const allPlaceholders = [...placeholders, ...openingPlaceholders];
-
-      for (const placeholder of allPlaceholders) {
-        const attrs: any = { _path: file };
-        placeholder.getAttributes().forEach((attr) => {
-          if (attr.getKind() === SyntaxKind.JsxAttribute) {
-            const jsxAttr = attr.asKindOrThrow(SyntaxKind.JsxAttribute);
-            const name = jsxAttr.getNameNode().getText();
-            const initializer = jsxAttr.getInitializer();
-
-            if (initializer) {
-              if (initializer.getKind() === SyntaxKind.StringLiteral) {
-                attrs[name] = initializer
-                  .asKindOrThrow(SyntaxKind.StringLiteral)
-                  .getLiteralValue()
-                  .trim();
-              } else if (initializer.getKind() === SyntaxKind.JsxExpression) {
-                const expr = initializer
-                  .asKindOrThrow(SyntaxKind.JsxExpression)
-                  .getExpression();
-                if (expr && expr.getKind() === SyntaxKind.StringLiteral) {
-                  attrs[name] = expr
-                    .asKindOrThrow(SyntaxKind.StringLiteral)
-                    .getLiteralValue()
-                    .trim();
-                }
-              }
-            }
-          }
-        });
-        matches.push(attrs);
-      }
+      matches.push(...placeholderUsages(sourceFile, path));
     }
-
-    // 2. Scan for direct Lucide usages (Unmapped) using ts-morph
     if (hasLucide) {
-      const lucideImports = sourceFile
-        .getImportDeclarations()
-        .filter((imp) => imp.getModuleSpecifierValue() === "lucide-react");
-
-      if (lucideImports.length > 0) {
-        const importedNames = new Map<string, string>(); // localName -> originalName
-
-        for (const imp of lucideImports) {
-          // Named imports: import { Check, X as Close } from "lucide-react"
-          imp.getNamedImports().forEach((named) => {
-            const originalName = named.getName();
-            const localName = named.getAliasNode()?.getText() || originalName;
-            if (
-              originalName !== "LucideProps" &&
-              originalName !== "LucideIcon"
-            ) {
-              importedNames.set(localName, originalName);
-            }
-          });
-
-          // Star import: import * as Lucide from "lucide-react"
-          const namespaceImport = imp.getNamespaceImport();
-          if (namespaceImport) {
-            const starName = namespaceImport.getText();
-            sourceFile
-              .getDescendantsOfKind(SyntaxKind.PropertyAccessExpression)
-              .forEach((prop) => {
-                if (prop.getExpression().getText() === starName) {
-                  const iconName = prop.getName().trim();
-                  if (iconName && /^[A-Z]/.test(iconName)) {
-                    unmappedMatches.push({
-                      _path: file,
-                      icon: iconName,
-                    });
-                  }
-                }
-              });
-          }
-        }
-
-        // Find all usages of named imports
-        if (importedNames.size > 0) {
-          sourceFile
-            .getDescendantsOfKind(SyntaxKind.Identifier)
-            .forEach((ident) => {
-              const localName = ident.getText().trim();
-              if (importedNames.has(localName)) {
-                const parent = ident.getParent();
-                if (!parent) {
-                  return;
-                }
-
-                const kind = parent.getKind();
-                // Skip declarations and type references
-                if (
-                  kind === SyntaxKind.ImportSpecifier ||
-                  kind === SyntaxKind.TypeReference ||
-                  kind === SyntaxKind.InterfaceDeclaration ||
-                  kind === SyntaxKind.TypeAliasDeclaration
-                ) {
-                  return;
-                }
-
-                const iconName = importedNames.get(localName)?.trim();
-                if (iconName && /^[A-Z]/.test(iconName)) {
-                  unmappedMatches.push({
-                    _path: file,
-                    icon: iconName,
-                    localName: localName === iconName ? undefined : localName,
-                  });
-                }
-              }
-            });
-        }
-      }
+      unmappedMatches.push(...lucideUsages(sourceFile, path));
     }
 
     // Cleanup to prevent memory leaks
@@ -172,11 +250,16 @@ async function scanIcons() {
   }
 
   // Save results
-  fs.writeFileSync(OUTPUT_FILE, JSON.stringify(matches, null, 2));
-  fs.writeFileSync(
-    UNMAPPED_OUTPUT_FILE,
-    JSON.stringify(unmappedMatches, null, 2)
-  );
+  await Promise.all([
+    Bun.write(
+      `${PROJECT_ROOT}/${OUTPUT_FILE}`,
+      JSON.stringify(matches, null, 2)
+    ),
+    Bun.write(
+      `${PROJECT_ROOT}/${UNMAPPED_OUTPUT_FILE}`,
+      JSON.stringify(unmappedMatches, null, 2)
+    ),
+  ]);
 
   console.log("\nScan Summary:");
   console.log(`- Mapped (IconPlaceholder): ${matches.length}`);
@@ -187,4 +270,4 @@ async function scanIcons() {
   );
 }
 
-scanIcons().catch(console.error);
+await scanIcons();
