@@ -1078,7 +1078,11 @@ export default function BlockTimeline() {
         } else {
           clearSelection();
         }
-        panelRef.current?.focus({ focusVisible: false, preventScroll: true });
+        // `focusVisible` is missing from older DOM typings.
+        panelRef.current?.focus({
+          focusVisible: false,
+          preventScroll: true,
+        } as FocusOptions);
       }
     },
     [clearSelection, multi, selectTrack]
