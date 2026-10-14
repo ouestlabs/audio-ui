@@ -83,7 +83,9 @@ describe("Timeline.Navigator", () => {
 
   test("measures in layout px inside a scaled ancestor", () => {
     // Fitted to its lanes, drawn at twice its size: 200px of lane shows all 100 units.
-    const { shown, viewport, view } = renderNavigator({ defaultZoom: null });
+    const { shown, viewport, view } = renderNavigator({
+      defaultZoom: undefined,
+    });
     Object.defineProperty(viewport, "offsetWidth", { value: 300 });
     mockRect(viewport, { right: 600, width: 600 });
     view.getByTestId("lane").getBoundingClientRect = () =>

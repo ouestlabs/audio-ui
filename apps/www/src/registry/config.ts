@@ -157,26 +157,23 @@ export const designSystemConfigSchema = z
     ...data,
     chartColor: data.chartColor ?? data.theme,
   }))
-  .refine(
-    (data) => {
-      const availableThemes = getThemesForBaseColor(data.baseColor);
-      return availableThemes.some((t) => t.name === data.theme);
-    },
-    (data) => ({
-      message: `Theme "${data.theme}" is not available for base color "${data.baseColor}"`,
-      path: ["theme"],
-    })
-  )
-  .refine(
-    (data) => {
-      const availableThemes = getThemesForBaseColor(data.baseColor);
-      return availableThemes.some((t) => t.name === data.chartColor);
-    },
-    (data) => ({
-      message: `Chart color "${data.chartColor}" is not available for base color "${data.baseColor}"`,
-      path: ["chartColor"],
-    })
-  );
+  .superRefine((data, ctx) => {
+    const availableThemes = getThemesForBaseColor(data.baseColor);
+    if (!availableThemes.some((t) => t.name === data.theme)) {
+      ctx.addIssue({
+        code: "custom",
+        message: `Theme "${data.theme}" is not available for base color "${data.baseColor}"`,
+        path: ["theme"],
+      });
+    }
+    if (!availableThemes.some((t) => t.name === data.chartColor)) {
+      ctx.addIssue({
+        code: "custom",
+        message: `Chart color "${data.chartColor}" is not available for base color "${data.baseColor}"`,
+        path: ["chartColor"],
+      });
+    }
+  });
 
 export type DesignSystemConfig = z.infer<typeof designSystemConfigSchema>;
 

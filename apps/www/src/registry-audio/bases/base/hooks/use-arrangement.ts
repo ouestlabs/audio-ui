@@ -295,7 +295,10 @@ export function useArrangement({
   // A clip dropped on another track moves to it.
   const commitClip = useCallback(
     (id: string, details: TimelinePrimitive.Clip.CommitEventDetails) => {
-      const track = details.lane?.dataset.track;
+      const track =
+        details.lane instanceof HTMLElement
+          ? details.lane.dataset.track
+          : undefined;
       const origins = details.copy ? (copyOrigins.current ?? []) : [];
       copyOrigins.current = null;
       setCopying([]);

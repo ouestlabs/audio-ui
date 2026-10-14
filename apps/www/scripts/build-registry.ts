@@ -620,7 +620,9 @@ async function main() {
         const { $schema: _schema, ...indexItem } = item;
         indexItems.push({
           ...indexItem,
-          files: item.files.map(({ content: _content, ...file }) => file),
+          files: item.files.map(
+            ({ content: _content, ...file }: Record<string, unknown>) => file
+          ),
         });
       } catch (error) {
         errors++;

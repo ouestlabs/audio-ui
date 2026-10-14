@@ -24,6 +24,7 @@
     "@modelcontextprotocol/sdk": "^1.32.1",
     "@phosphor-icons/react": "^2.1.10",
     "@remixicon/react": "^4.9.0",
+    "@shadcn/react": "^0.3.1",
     "@tabler/icons-react": "^3.44.0",
     "@tailwindcss/postcss": "^4.3.2",
     "@tanstack/highlight": "^1.1.0",

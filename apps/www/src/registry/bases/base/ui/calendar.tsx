@@ -187,68 +187,6 @@ function Calendar({
         ),
         ...components,
       }}
-      components={{
-        Chevron: ({ className, orientation, ...props }) => {
-          if (orientation === "left") {
-            return (
-              <IconPlaceholder
-                className={cn("cn-rtl-flip size-4", className)}
-                hugeicons="ArrowLeftIcon"
-                lucide="ChevronLeftIcon"
-                phosphor="CaretLeftIcon"
-                remixicon="RiArrowLeftSLine"
-                tabler="IconChevronLeft"
-                {...props}
-              />
-            );
-          }
-
-          if (orientation === "right") {
-            return (
-              <IconPlaceholder
-                className={cn("cn-rtl-flip size-4", className)}
-                hugeicons="ArrowRightIcon"
-                lucide="ChevronRightIcon"
-                phosphor="CaretRightIcon"
-                remixicon="RiArrowRightSLine"
-                tabler="IconChevronRight"
-                {...props}
-              />
-            );
-          }
-
-          return (
-            <IconPlaceholder
-              className={cn("size-4", className)}
-              hugeicons="ArrowDownIcon"
-              lucide="ChevronDownIcon"
-              phosphor="CaretDownIcon"
-              remixicon="RiArrowDownSLine"
-              tabler="IconChevronDown"
-              {...props}
-            />
-          );
-        },
-        DayButton: ({ ...props }) => (
-          <CalendarDayButton locale={locale} {...props} />
-        ),
-        Root: ({ className, rootRef, ...props }) => (
-          <div
-            className={cn(className)}
-            data-slot="calendar"
-            ref={rootRef}
-            {...props}
-          />
-        ),
-        WeekNumber: ({ children, ...props }) => (
-          <td {...props}>
-            <div className="flex size-(--cell-size) items-center justify-center text-center">
-              {children}
-            </div>
-          </td>
-        ),
-        ...components,
-      }}
       formatters={{
         formatMonthDropdown: (date) =>
           date.toLocaleString(locale?.code, { month: "short" }),

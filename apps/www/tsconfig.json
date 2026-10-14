@@ -27,7 +27,7 @@
       "@audio-ui/react": ["../../packages/ui/src/index.ts"],
       "fumadocs-mdx:collections/*": ["./.source/*"]
     },
-    "types": ["bun", "mdx", "node", "react", "react-dom", "three"]
+    "types": ["bun", "mdx", "node", "react", "react-dom"]
   },
   "include": [
     "next-env.d.ts",
