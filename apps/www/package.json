@@ -12,9 +12,10 @@
     "lint:fix": "biome check --write --unsafe .",
     "registry:build": "bun ./scripts/build-registry.ts",
     "registry:sync": "bun ./scripts/sync-registry.ts && bun ./scripts/build-icons.ts",
+    "skill:build": "bun ./scripts/build-skill.ts",
     "start": "next start --port 4000",
     "test": "bun test",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "next typegen && tsc --noEmit"
   },
   "dependencies": {
     "@audio-ui/react": "*",
@@ -24,6 +25,7 @@
     "@modelcontextprotocol/sdk": "^1.32.1",
     "@phosphor-icons/react": "^2.1.10",
     "@remixicon/react": "^4.9.0",
+    "@shadcn/react": "^0.3.1",
     "@tabler/icons-react": "^3.44.0",
     "@tailwindcss/postcss": "^4.3.2",
     "@tanstack/highlight": "^1.1.0",

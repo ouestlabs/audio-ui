@@ -2,7 +2,13 @@
 
 ## Registry (shadcn)
 
-Add the namespace to `components.json` once:
+Add the namespace to `components.json` once, with the CLI:
+
+```bash
+npx shadcn@latest registry add "@audio-ui=https://www.audio-ui.dev/r/{style}/{name}.json"
+```
+
+or by hand:
 
 ```json
 {
@@ -21,6 +27,14 @@ npm install @audio-ui/react
 ```
 
 Primitives are unstyled and export `Knob`, `Fader`, `XYPad`, `Envelope`, `Meter`, `Plot`, `Waveform`, `Timeline`, `Sequencer`, `Piano` and `PianoRoll`. Peer dependencies: `react` and `react-dom` 19.
+
+## Without React
+
+```bash
+npm install @audio-ui/core
+```
+
+No dependencies. The framework-free controllers of every primitive, for Vue, Svelte, Solid, Angular, web components or the plain DOM: see [core.md](./core.md).
 
 ## MCP server
 

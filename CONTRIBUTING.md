@@ -72,7 +72,7 @@ Currently only the `base` base (Base UI) ships audio items; file paths inside ea
 | `registry:hook`      | Hooks (`use-audio`, `use-sound`)                | `bases/base/hooks/`            |
 | `registry:lib`       | Utilities and stores (`store`, `html`, `web`)   | `bases/base/lib/`              |
 
-Users install items with `npx shadcn@latest add @audio-ui/{name}`. The item `name` in `_registry.ts` is the install name and doesn't have to match the file name (e.g. `store` → `lib/audio-store.ts`, `html` → `lib/html-audio.ts`).
+Users install items with `npx shadcn@latest add @audio-ui/{name}`. The item `name` in `_registry.ts` is the install name and doesn't have to match the file name (e.g. `store` → `lib/audio-store.ts`, `html` → `lib/html-audio.ts`). Components land in the user's `components/audio-ui/` and are imported as `@/components/audio-ui/{name}`; hooks go to `hooks/`, libs to `lib/`, blocks to `components/examples/`.
 
 ---
 
@@ -306,7 +306,7 @@ Use the existing MDX components, not raw HTML:
 ```mdx
 <ComponentPreview styleName="base-nova" name="knob-demo" />
 
-<ComponentSource styleName="base-nova" name="knob" title="components/audio/knob.tsx" />
+<ComponentSource styleName="base-nova" name="knob" title="components/audio-ui/knob.tsx" />
 ```
 
 `<ComponentPreview>` renders the demo referenced by its registry `name` (the first file of the item is lazy-loaded), with `base-nova` as the default style. `<CodeTabs>`, `<Steps>`/`<Step>`, and `<TabsList>`/`<TabsTrigger>`/`<TabsContent>` are available for installation sections, copy the structure of an existing component page.
@@ -355,7 +355,7 @@ bun run lint:fix
 
 ## Code Style
 
-This project uses **Biome via Ultracite**. Run `npx ultracite fix` before committing.
+This project uses **Biome via Ultracite**. Run `bun run lint:fix` before committing.
 
 - TypeScript throughout, explicit types where they add clarity
 - `const` by default, `let` only when needed, never `var`

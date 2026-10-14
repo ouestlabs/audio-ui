@@ -1,0 +1,41 @@
+{
+  "name": "video",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "all": "bun scripts/render.ts all",
+    "lint": "biome check --write .",
+    "lint:fix": "biome check --write --unsafe .",
+    "new": "bun scripts/render.ts new",
+    "render": "bun scripts/render.ts",
+    "showcase": "bun scripts/render.ts showcase",
+    "studio": "remotion studio src/index.ts",
+    "teaser": "bun scripts/render.ts teaser",
+    "update": "bun scripts/render.ts update"
+  },
+  "dependencies": {
+    "@audio-ui/core": "workspace:*",
+    "@audio-ui/react": "workspace:*",
+    "@remotion/bundler": "4.0.535",
+    "@remotion/cli": "4.0.535",
+    "@remotion/google-fonts": "4.0.535",
+    "@remotion/renderer": "4.0.535",
+    "lucide-react": "1.55.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "remotion": "4.0.535"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.2",
+    "@types/bun": "1.4.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "css-loader": "^7.1.4",
+    "postcss": "^8.5.6",
+    "postcss-loader": "^8.2.1",
+    "style-loader": "^4.0.0",
+    "tailwindcss": "^4.3.2",
+    "typescript": "^7.0.2"
+  }
+}

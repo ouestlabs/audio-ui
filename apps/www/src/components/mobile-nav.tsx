@@ -138,131 +138,129 @@ export function MobileNav({
         side="bottom"
         sideOffset={16}
       >
-        <>
-          <Tabs
-            className="shrink-0"
-            onValueChange={(value) => setChosen(value as Section)}
-            value={section}
+        <Tabs
+          className="shrink-0"
+          onValueChange={(value) => setChosen(value as Section)}
+          value={section}
+        >
+          <TabsList
+            aria-label="Sections"
+            className="w-full rounded-(--menu-inner-radius) bg-site-foreground/8 **:data-[slot=tabs-indicator]:rounded-[max(calc(var(--menu-inner-radius)-3px),0px)]"
           >
-            <TabsList
-              aria-label="Sections"
-              className="w-full rounded-(--menu-inner-radius) bg-site-foreground/8 **:data-[slot=tabs-indicator]:rounded-[max(calc(var(--menu-inner-radius)-3px),0px)]"
+            <TabsTrigger
+              className="rounded-[max(calc(var(--menu-inner-radius)-3px),0px)]"
+              value="docs"
             >
-              <TabsTrigger
-                className="rounded-[max(calc(var(--menu-inner-radius)-3px),0px)]"
-                value="docs"
+              <BookOpenIcon
+                aria-hidden
+                className="size-4 in-data-active:text-primary"
+                weight={section === "docs" ? "fill" : "regular"}
+              />
+              Docs
+            </TabsTrigger>
+            <TabsTrigger
+              className="rounded-[max(calc(var(--menu-inner-radius)-3px),0px)]"
+              value="components"
+            >
+              <CubeIcon
+                aria-hidden
+                className="size-4 in-data-active:text-primary"
+                weight={section === "components" ? "fill" : "regular"}
+              />
+              Components
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+        <nav
+          aria-label={section}
+          className="scroll-fade-y no-scrollbar -mx-2 flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto overscroll-contain px-2 *:shrink-0"
+        >
+          <NavRow active={pathname === "/"} href="/" onNavigate={close}>
+            Home
+          </NavRow>
+          {section === "components" ? (
+            <>
+              <NavRow
+                active={pathname === "/components"}
+                href="/components"
+                onNavigate={close}
               >
-                <BookOpenIcon
-                  aria-hidden
-                  className="size-4 in-data-active:text-primary"
-                  weight={section === "docs" ? "fill" : "regular"}
-                />
-                Docs
-              </TabsTrigger>
-              <TabsTrigger
-                className="rounded-[max(calc(var(--menu-inner-radius)-3px),0px)]"
-                value="components"
-              >
-                <CubeIcon
-                  aria-hidden
-                  className="size-4 in-data-active:text-primary"
-                  weight={section === "components" ? "fill" : "regular"}
-                />
-                Components
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
-          <nav
-            aria-label={section}
-            className="scroll-fade-y no-scrollbar -mx-2 flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto overscroll-contain px-2 *:shrink-0"
-          >
-            <NavRow active={pathname === "/"} href="/" onNavigate={close}>
-              Home
-            </NavRow>
-            {section === "components" ? (
-              <>
+                All components
+                <Count>{totalCount}</Count>
+              </NavRow>
+              {categoryLinks.map((category) => (
                 <NavRow
-                  active={pathname === "/components"}
-                  href="/components"
+                  active={pathname === category.href}
+                  href={category.href}
+                  key={category.name}
                   onNavigate={close}
                 >
-                  All components
-                  <Count>{totalCount}</Count>
+                  {category.label}
+                  <span className="flex items-center gap-2">
+                    <ComponentUpdateIndicator category={category.name} />
+                    <Count>{category.count}</Count>
+                  </span>
                 </NavRow>
-                {categoryLinks.map((category) => (
-                  <NavRow
-                    active={pathname === category.href}
-                    href={category.href}
-                    key={category.name}
-                    onNavigate={close}
-                  >
-                    {category.label}
-                    <span className="flex items-center gap-2">
-                      <ComponentUpdateIndicator category={category.name} />
-                      <Count>{category.count}</Count>
-                    </span>
-                  </NavRow>
-                ))}
-              </>
-            ) : (
-              tree.children.map((folder) => {
-                if (folder.type !== "folder") {
-                  return null;
-                }
-                const sections = getSectionsFromFolder(folder, currentBase)
-                  .map((part) => ({
-                    ...part,
-                    pages: part.pages.filter(
-                      (page) => showMcpDocs || !page.url?.includes("/mcp")
-                    ),
-                  }))
-                  .filter((part) => part.pages.length > 0);
-                if (sections.length === 0) {
-                  return null;
-                }
-                return (
-                  <div
-                    className="flex shrink-0 flex-col gap-0.5"
-                    key={folder.$id}
-                  >
-                    <p className="px-2 pt-3 pb-1 font-medium text-site-muted-foreground text-xs">
-                      {folder.name}
-                    </p>
-                    {sections.map((part) => (
-                      <React.Fragment key={part.title ?? "untitled"}>
-                        {part.title ? (
-                          <p className="px-2 pt-1 pb-1 text-site-muted-foreground text-xs">
-                            {part.title}
-                          </p>
-                        ) : null}
-                        {part.pages.map((page) => {
-                          const hint = getDocsPageUpdateHint(page.url);
-                          return (
-                            <NavRow
-                              active={page.url === pathname}
-                              href={page.url}
-                              key={page.url}
-                              onNavigate={close}
-                            >
-                              {page.name}
-                              {hint ? (
-                                <span
-                                  aria-hidden="true"
-                                  className="site-rounded-full size-1.5 bg-blue-500"
-                                  title={hint}
-                                />
-                              ) : null}
-                            </NavRow>
-                          );
-                        })}
-                      </React.Fragment>
-                    ))}
-                  </div>
-                );
-              })
-            )}
-          </nav>
-        </>
+              ))}
+            </>
+          ) : (
+            tree.children.map((folder) => {
+              if (folder.type !== "folder") {
+                return null;
+              }
+              const sections = getSectionsFromFolder(folder, currentBase)
+                .map((part) => ({
+                  ...part,
+                  pages: part.pages.filter(
+                    (page) => showMcpDocs || !page.url?.includes("/mcp")
+                  ),
+                }))
+                .filter((part) => part.pages.length > 0);
+              if (sections.length === 0) {
+                return null;
+              }
+              return (
+                <div
+                  className="flex shrink-0 flex-col gap-0.5"
+                  key={folder.$id}
+                >
+                  <p className="px-2 pt-3 pb-1 font-medium text-site-muted-foreground text-xs">
+                    {folder.name}
+                  </p>
+                  {sections.map((part) => (
+                    <React.Fragment key={part.title ?? "untitled"}>
+                      {part.title ? (
+                        <p className="px-2 pt-1 pb-1 text-site-muted-foreground text-xs">
+                          {part.title}
+                        </p>
+                      ) : null}
+                      {part.pages.map((page) => {
+                        const hint = getDocsPageUpdateHint(page.url);
+                        return (
+                          <NavRow
+                            active={page.url === pathname}
+                            href={page.url}
+                            key={page.url}
+                            onNavigate={close}
+                          >
+                            {page.name}
+                            {hint ? (
+                              <span
+                                aria-hidden="true"
+                                className="site-rounded-full size-1.5 bg-blue-500"
+                                title={hint}
+                              />
+                            ) : null}
+                          </NavRow>
+                        );
+                      })}
+                    </React.Fragment>
+                  ))}
+                </div>
+              );
+            })
+          )}
+        </nav>
       </PopoverContent>
     </Popover>
   );

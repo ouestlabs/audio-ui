@@ -1,0 +1,5 @@
+interface:
+  display_name: "audio/ui"
+  short_description: "Builds accessible audio interfaces in React: knobs, faders, meters, waveforms, timelines, piano rolls, wired to Web Audio."
+  icon_small: "./assets/audio-ui-small.png"
+  icon_large: "./assets/audio-ui.png"

@@ -51,6 +51,6 @@ writeFileSync(
 console.log(`
 ✓ Sandbox reset to clean state.
 
-  Install a component:
-  bunx shadcn add @audio-ui/player
+  Install a component (it lands in ./components/audio-ui/):
+  bunx shadcn add @audio-ui/knob
 `);

@@ -53,7 +53,7 @@ npm install @audio-ui/react
 <ComponentSource
   styleName="base-nova"
   name="piano-roll"
-  title="components/audio/elements/piano-roll.tsx"
+  title="components/audio-ui/piano-roll.tsx"
 />
 
 <Step>Update the import paths to match your project setup.</Step>
@@ -106,7 +106,7 @@ import { PianoRoll, Timeline } from "@audio-ui/react";
 ## Usage
 
 ```tsx
-import { Timeline, TimelineNavigator } from "@/components/audio/elements/timeline";
+import { Timeline, TimelineNavigator } from "@/components/audio-ui/timeline";
 import {
   PianoRoll,
   PianoRollGrid,
@@ -115,7 +115,7 @@ import {
   PianoRollVelocity,
   PianoRollVelocityScale,
   PianoRollViewport,
-} from "@/components/audio/elements/piano-roll";
+} from "@/components/audio-ui/piano-roll";
 
 <Timeline duration={16} snapStep={1}>
   <PianoRoll

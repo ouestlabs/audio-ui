@@ -1,0 +1,112 @@
+{
+  "skill_name": "audio-ui",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I have a Next.js app with shadcn/ui (base-nova). Add a small synth panel: an oscillator I can start and stop, a filter cutoff knob, a resonance knob and an output volume fader in dB.",
+      "expected_output": "Registry Knob and Fader installed with npx shadcn@latest add @audio-ui/..., wired to Web Audio nodes with ramped parameters, a lazily created AudioContext resumed in the start click.",
+      "files": [],
+      "expectations": [
+        "Installs the controls from the registry with `shadcn@latest add @audio-ui/knob` and `@audio-ui/fader` (or the project's package runner), not a hand-written slider",
+        "The cutoff knob uses scale=\"log\" with a positive min (e.g. 20 to 20000)",
+        "Parameters are set with setTargetAtTime (or another ramp), never by assigning .value from onValueChange",
+        "The fader value in dB is converted to linear gain (10 ** (db / 20)) before reaching the GainNode",
+        "The AudioContext is created lazily on the client and resume() is called inside the click handler that starts sound",
+        "Every control has an aria-label or a visible label",
+        "The file that uses hooks or the browser starts with \"use client\"",
+        "Sets step and largeStep to fit the dB, Hz and resonance ranges, not the 0 to 100 defaults",
+        "Prints units with formatValue (or the label), never with an Intl unit such as hertz or decibel",
+        "Imports the installed components from the path the CLI wrote (components/audio-ui/<name>)",
+        "Keeps the loudest case under full scale: voice gain well below 1, resonance capped, and a master volume that stops at 0 dB"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Show the live level of the microphone as a stereo meter with peak hold.",
+      "expected_output": "A Meter fed by a source built with createSource and updated in requestAnimationFrame from AnalyserNodes, with getUserMedia behind a click.",
+      "files": [],
+      "expectations": [
+        "Levels reach the Meter through its `source` prop, built with createSource (or another getSnapshot/subscribe object), not through useState updated every frame",
+        "Levels are computed from AnalyserNode data (RMS in dB) in a requestAnimationFrame loop that is cancelled on cleanup",
+        "Stereo uses one analyser per channel (e.g. via ChannelSplitterNode)",
+        "Peak hold is computed by the app and published as `peaks`",
+        "getUserMedia is started from a user action, not on mount",
+        "Does not install a non-existent `@audio-ui/use-audio-levels` item",
+        "Imports the installed Meter from the path the CLI wrote (components/audio-ui/meter)",
+        "Turns off the browser's voice processing (echoCancellation, noiseSuppression, autoGainControl) so the meter shows the raw signal",
+        "A mono microphone still moves both bars (up-mixed to two channels), and the analysers are never connected to the destination"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Build a 16-step drum sequencer with kick, snare and hat rows, a tempo control and play/stop.",
+      "expected_output": "Sequencer from the registry, sounds scheduled at AudioContext time through use-transport-clock, playhead from getPosition via a source.",
+      "files": [],
+      "expectations": [
+        "Uses the audio/ui Sequencer (registry or @audio-ui/react), not a grid of buttons",
+        "Steps are scheduled on the audio clock (use-transport-clock onStep time, or an equivalent look-ahead), not with setInterval/setTimeout triggering sounds immediately",
+        "Each sound starts at the scheduled `time` (e.g. osc.start(time))",
+        "Stop or seek silences sound already scheduled ahead (onReset or equivalent)",
+        "The moving playhead does not re-render React every frame"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "My app has its own CSS design system and no Tailwind or shadcn. I need a rotary knob for pan that matches our styles.",
+      "expected_output": "Knob primitive from @audio-ui/react/knob assembled from its parts, styled via className functions / data attributes, anchor={0}, focus-visible styles.",
+      "files": [],
+      "expectations": [
+        "Installs @audio-ui/react and imports Knob (ideally from the @audio-ui/react/knob entry), not the shadcn registry",
+        "Assembles the documented parts (Root, Control, Track, Indicator, Thumb...)",
+        "Styles state through className/style functions or data-* attributes (e.g. data-dragging), not by tracking pointer state manually",
+        "Uses anchor={0} with min -1 and max 1 for pan",
+        "Keeps Knob.Thumb (the focusable part) and styles :focus-visible",
+        "Gives the knob an accessible name",
+        "Sets step and largeStep to fit the -1 to 1 range (for example step 0.01 and largeStep 0.1), not the 0 to 100 defaults"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Add a chat box next to my piano roll so I can type things like 'write a walking bassline in C minor' and 'transpose it up an octave'. I use the Vercel AI SDK.",
+      "expected_output": "createPianoRollTools from @audio-ui/piano-roll-tools wired as AI SDK tools that update the same controlled notes state; current notes passed to the model.",
+      "files": [],
+      "expectations": [
+        "Installs or uses @audio-ui/piano-roll-tools (createPianoRollTools) instead of inventing a free-form JSON protocol",
+        "Configures the tools from the roll's own range and grid, not hard-coded values unrelated to the component",
+        "Tool execute functions update the same React state the PianoRoll is controlled by (apply(prev, args)), not the DOM",
+        "Gives the model the current notes (prompt or read tool)",
+        "The person can still edit the roll by hand and undo",
+        "Declares the tools on the server without execute and runs each call in the browser on the roll's state (onToolCall plus addToolOutput), since the model call is server-side",
+        "Records one undo step per model edit, kept outside any setState updater"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Every time I drag the volume fader my app saves the preset to the server and the network tab explodes. Fix it.",
+      "expected_output": "Moves the save to onValueCommitted, keeps audio updates on onValueChange.",
+      "files": [],
+      "expectations": [
+        "Moves the save/network call to onValueCommitted",
+        "Keeps the audio/state update on onValueChange",
+        "Does not add a debounce as the main fix"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "My app is in Vue 3 (no React). I want a rotary knob for filter cutoff, keyboard accessible, with our own CSS.",
+      "expected_output": "A Vue composable over createKnobController from @audio-ui/core/knob: created once, setOptions plus resync on change, drawn from getSnapshot, a hidden range input wired to keyDown and type, listeners removed on dispose.",
+      "files": [],
+      "expectations": [
+        "Uses @audio-ui/core (createKnobController from @audio-ui/core/knob), not @audio-ui/react or the shadcn registry",
+        "Creates the controller once per component, not in a computed or on every option change",
+        "Calls setOptions with the full options when they change and resyncs the snapshot afterwards",
+        "Draws rotation and text from getSnapshot() (angle, formatted), not from its own angle math",
+        "Keeps a visually hidden input type=range with an accessible name, keydown routed to knob.keyDown (preventDefault when it returns true) and input routed to knob.type",
+        "Removes the subscription and the wheel listener on unmount (onScopeDispose or onUnmounted)",
+        "Uses scale: \"log\" with a positive min for the cutoff",
+        "Calls setOptions with all the options before the first draw, so the log scale applies from the start",
+        "Prepares the pointer before press: primary button only, preventDefault, focuses the hidden input, touch-action none"
+      ]
+    }
+  ]
+}

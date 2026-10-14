@@ -20,6 +20,13 @@ describe("Knob controller value", () => {
     expect(onValueChange).toHaveBeenCalledTimes(1);
   });
 
+  test("the scale it is created with applies at once, before any setOptions", () => {
+    const knob = createKnobController({ max: 20_000, min: 20, scale: "log" });
+    // The middle of a logarithmic 20 Hz to 20 kHz travel is about 632 Hz.
+    expect(knob.getSnapshot().value).toBe(632);
+    expect(knob.getSnapshot().percent).toBeCloseTo(0.5, 2);
+  });
+
   test("a snapshot is the same object while nothing it shows has changed", () => {
     const knob = createKnobController({ value: 20 });
     expect(knob.getSnapshot()).toBe(knob.getSnapshot());

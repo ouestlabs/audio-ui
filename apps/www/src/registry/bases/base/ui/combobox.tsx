@@ -47,7 +47,6 @@ function ComboboxClear({ className, ...props }: ComboboxPrimitive.Clear.Props) {
     <ComboboxPrimitive.Clear
       className={cn("cn-combobox-clear", className)}
       render={<InputGroupButton size="icon-xs" variant="ghost" />}
-      render={<InputGroupButton size="icon-xs" variant="ghost" />}
       {...props}
     >
       <IconPlaceholder

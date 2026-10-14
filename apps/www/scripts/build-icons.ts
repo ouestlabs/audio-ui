@@ -1,239 +1,256 @@
 #!/usr/bin/env bun
 /**
- * Collects icon usage from registry sources, including catalog blocks under
- * `registry-audio/bases/base/components` (c-*.tsx).
+ * Writes one barrel of icons per icon library (`src/registry/icons/__lucide__.ts`
+ * and the rest) from the icons the registry uses: the `<IconPlaceholder>`
+ * usages in the shadcn bases and in the audio catalog and elements under
+ * `registry-audio/bases/base`, the icon arrays in `src/app`, and the Lucide
+ * icons `scan-icons.ts` reported as unmapped.
+ *
+ * Run: bun run icons:build [--watch]
  */
-import * as fs from "node:fs";
-import * as path from "node:path";
 import { type IconLibraryName, iconLibraries } from "shadcn/icons";
 
 type IconUsage = Record<IconLibraryName, Set<string>>;
+type IconLibrary = (typeof iconLibraries)[IconLibraryName];
 
-function collectTsxFiles(dir: string): string[] {
-  const files: string[] = [];
-  if (!fs.existsSync(dir)) {
-    return files;
-  }
-  const entries = fs.readdirSync(dir, { withFileTypes: true });
-  for (const entry of entries) {
-    const fullPath = path.join(dir, entry.name);
-    if (entry.isDirectory()) {
-      files.push(...collectTsxFiles(fullPath));
-    } else if (entry.isFile() && entry.name.endsWith(".tsx")) {
-      files.push(fullPath);
-    }
-  }
-  return files;
+const PROJECT_ROOT = Bun.fileURLToPath(new URL("..", import.meta.url)).slice(
+  0,
+  -1
+);
+const ICONS_DIR = `${PROJECT_ROOT}/src/registry/icons`;
+const UNMAPPED_FILE = `${ICONS_DIR}/unmapped-icons.json`;
+
+// Where `<IconPlaceholder>` is used. Only the `base` base is scanned.
+const PLACEHOLDER_DIRS = [
+  "src/registry/bases",
+  "src/registry-audio/bases/base/components",
+  "src/registry-audio/bases/base/audio",
+].map((dir) => `${PROJECT_ROOT}/${dir}`);
+// Where plain icon arrays (`PREVIEW_ICONS`) live.
+const APP_DIR = `${PROJECT_ROOT}/src/app`;
+
+const LIBRARIES = Object.entries(iconLibraries) as [
+  IconLibraryName,
+  IconLibrary,
+][];
+
+// A `<IconPlaceholder ... />` tag that sets at least one library's icon.
+const ICON_PLACEHOLDER = new RegExp(
+  `<IconPlaceholder\\s+([^>]*?)(?:${LIBRARIES.map(([, library]) => library.name).join("|")})=["']([^"']+)["']([^>]*?)\\/?>`,
+  "g"
+);
+// The icon a tag names for each library.
+const PLACEHOLDER_ICON = LIBRARIES.map(
+  ([key, library]) =>
+    [key, new RegExp(`${library.name}=["']([^"']+)["']`)] as const
+);
+// `lucide: ["Check", "X"]` in the app's preview lists, and the names inside.
+const ICON_ARRAY = LIBRARIES.map(
+  ([key, library]) =>
+    [key, new RegExp(`\\b${library.name}:\\s*\\[([\\s\\S]*?)\\]`, "g")] as const
+);
+const QUOTED_NAME = /["']([A-Za-z][A-Za-z0-9_]*)["']/g;
+const ICON_SUFFIX = /Icon$/;
+// Dotfiles and dot folders.
+const IGNORED_PATH = /(^|[/\\])\../;
+
+async function isDirectory(path: string): Promise<boolean> {
+  return await Bun.file(path)
+    .stat()
+    .then(
+      (stat) => stat.isDirectory(),
+      () => false
+    );
 }
 
-function scanIconUsage(): IconUsage {
-  const iconUsage: IconUsage = Object.keys(iconLibraries).reduce((acc, key) => {
-    acc[key as IconLibraryName] = new Set();
-    return acc;
-  }, {} as IconUsage);
-
-  // ── 1. Scan <IconPlaceholder> in registry bases ──
-  // Catalog blocks: registry-audio/bases/base/components. Only scan base.
-  const scanDirs = [
-    path.join(process.cwd(), "src/registry/bases"),
-    path.join(process.cwd(), "src/registry-audio/bases/base/components"),
-    path.join(process.cwd(), "src/registry-audio/bases/base/audio"),
-  ];
-
-  const files: string[] = [];
-  for (const dir of scanDirs) {
-    if (fs.existsSync(dir)) {
-      files.push(...collectTsxFiles(dir));
-    }
-  }
-
-  const libraryNames = Object.values(iconLibraries)
-    .map((lib) => lib.name)
-    .join("|");
-  const iconPlaceholderRegex = new RegExp(
-    `<IconPlaceholder\\s+([^>]*?)(?:${libraryNames})=["']([^"']+)["']([^>]*?)\\/?>`,
-    "g"
+/** The text of every `.tsx` file under the folders that exist. */
+async function readSources(dirs: string[]): Promise<string[]> {
+  const found = await Promise.all(
+    dirs.map(async (dir) =>
+      (await isDirectory(dir))
+        ? await Array.fromAsync(
+            new Bun.Glob("**/*.tsx").scan({
+              absolute: true,
+              cwd: dir,
+              dot: true,
+            })
+          )
+        : []
+    )
   );
+  return await Promise.all(found.flat().map((file) => Bun.file(file).text()));
+}
 
-  for (const file of files) {
-    const content = fs.readFileSync(file, "utf-8");
+async function addUnmappedIcons(usage: IconUsage) {
+  const file = Bun.file(UNMAPPED_FILE);
+  if (!(await file.exists())) {
+    return;
+  }
+  try {
+    const unmapped: unknown = await file.json();
+    if (Array.isArray(unmapped)) {
+      for (const item of unmapped) {
+        if (item.icon) {
+          // Unmapped icons currently only support Lucide in scan-icons.ts
+          usage.lucide.add(item.icon);
+        }
+      }
+    }
+  } catch (error) {
+    console.error("Error reading unmapped-icons.json:", error);
+  }
+}
 
-    let match;
-    while ((match = iconPlaceholderRegex.exec(content)) !== null) {
-      const fullMatch = match[0];
+async function scanIconUsage(): Promise<IconUsage> {
+  const usage = Object.fromEntries(
+    LIBRARIES.map(([key]) => [key, new Set<string>()])
+  ) as IconUsage;
 
-      for (const [libraryName, config] of Object.entries(iconLibraries)) {
-        const attrMatch = fullMatch.match(
-          new RegExp(`${config.name}=["']([^"']+)["']`)
-        );
-        if (attrMatch) {
-          iconUsage[libraryName as IconLibraryName].add(attrMatch[1]);
+  // 1. <IconPlaceholder> in the registry bases and the audio catalog
+  for (const content of await readSources(PLACEHOLDER_DIRS)) {
+    for (const [tag] of content.matchAll(ICON_PLACEHOLDER)) {
+      for (const [key, pattern] of PLACEHOLDER_ICON) {
+        const icon = tag.match(pattern)?.[1];
+        if (icon) {
+          usage[key].add(icon);
         }
       }
     }
   }
 
-  // ── 2. Scan plain icon arrays (e.g. PREVIEW_ICONS) in app ──
-  const appFiles = collectTsxFiles(path.join(process.cwd(), "src/app"));
-
-  for (const file of appFiles) {
-    const content = fs.readFileSync(file, "utf-8");
-    for (const [libraryName, config] of Object.entries(iconLibraries)) {
-      const re = new RegExp(`\\b${config.name}:\\s*\\[([\\s\\S]*?)\\]`, "g");
-      let m: RegExpExecArray | null;
-      while ((m = re.exec(content)) !== null) {
-        const nameRe = /["']([A-Za-z][A-Za-z0-9_]*)["']/g;
-        let nm: RegExpExecArray | null;
-        while ((nm = nameRe.exec(m[1])) !== null) {
-          iconUsage[libraryName as IconLibraryName].add(nm[1]);
+  // 2. Plain icon arrays (e.g. PREVIEW_ICONS) in the app
+  for (const content of await readSources([APP_DIR])) {
+    for (const [key, pattern] of ICON_ARRAY) {
+      for (const [, list] of content.matchAll(pattern)) {
+        for (const [, icon] of list.matchAll(QUOTED_NAME)) {
+          usage[key].add(icon);
         }
       }
     }
   }
 
-  // ── 3. Unmapped icons from scan-icons output ──
-  const unmappedFile = path.join(
-    process.cwd(),
-    "src/registry/icons/unmapped-icons.json"
-  );
-  if (fs.existsSync(unmappedFile)) {
-    try {
-      const unmapped = JSON.parse(fs.readFileSync(unmappedFile, "utf-8"));
-      if (Array.isArray(unmapped)) {
-        unmapped.forEach((item: any) => {
-          if (item.icon) {
-            // Unmapped icons currently only support Lucide in scan-icons.ts
-            iconUsage.lucide.add(item.icon);
-          }
-        });
-      }
-    } catch (e) {
-      console.error("Error reading unmapped-icons.json:", e);
-    }
-  }
+  // 3. Unmapped icons from scan-icons output
+  await addUnmappedIcons(usage);
 
-  return iconUsage;
+  return usage;
 }
 
-async function generateIconFiles(iconUsage: IconUsage) {
-  const outputDir = path.join(process.cwd(), "src/registry/icons");
+/** Writes a library's barrel, and returns the lines to print about it. */
+async function generateLibrary(
+  key: IconLibraryName,
+  config: IconLibrary,
+  used: Set<string>
+): Promise<{ error?: string; summary?: string; warning?: string }> {
+  let icons = [...used].sort();
+  if (icons.length === 0) {
+    return {};
+  }
 
+  let library: Record<string, unknown>;
+  try {
+    library = await import(config.export);
+  } catch {
+    return {
+      error: `  - ${config.title}: Failed to load library "${config.export}"`,
+    };
+  }
+
+  // Lucide exports an icon as `Foo` and as `FooIcon`: look for both.
+  if (key === "lucide") {
+    const variants = new Set(icons);
+    for (const icon of icons) {
+      variants.add(
+        icon.endsWith("Icon") ? icon.replace(ICON_SUFFIX, "") : `${icon}Icon`
+      );
+    }
+    icons = [...variants].sort();
+  }
+
+  // Validate that icons exist in the library
+  const valid = icons.filter((icon) => icon in library);
+  const skipped = icons.filter((icon) => !(icon in library));
+  const warning =
+    skipped.length > 0
+      ? `  - ${config.title}: Skipped ${skipped.length} non-existent icons: ${skipped.join(", ")}`
+      : undefined;
+  if (valid.length === 0) {
+    return { warning };
+  }
+
+  await Bun.write(
+    `${ICONS_DIR}/__${key}__.ts`,
+    `// Auto-generated by scripts/build-icons.mts, do not edit manually
+${valid.map((icon) => `export { ${icon} } from "${config.export}"`).join("\n")}
+`
+  );
+  return { summary: `  - ${config.title}: ${valid.length} icons`, warning };
+}
+
+async function generateIconFiles(usage: IconUsage) {
   console.log("✓ Generating icon files:");
 
-  for (const [libraryName, config] of Object.entries(iconLibraries)) {
-    let icons = Array.from(iconUsage[libraryName as IconLibraryName]).sort();
-
-    if (icons.length === 0) {
-      continue;
+  const results = await Promise.all(
+    LIBRARIES.map(([key, config]) => generateLibrary(key, config, usage[key]))
+  );
+  for (const { error, summary, warning } of results) {
+    if (error) {
+      console.error(error);
     }
-
-    // Validate that icons exist in the library
-    try {
-      const mod = await import(config.export);
-      const validIcons = new Set<string>();
-      const skippedIcons: string[] = [];
-
-      // For Lucide, automatically check for both FooIcon and Foo variants
-      if (libraryName === "lucide") {
-        const tempIcons = new Set(icons);
-        icons.forEach((icon) => {
-          if (icon.endsWith("Icon")) {
-            tempIcons.add(icon.replace(/Icon$/, ""));
-          } else {
-            tempIcons.add(`${icon}Icon`);
-          }
-        });
-        icons = Array.from(tempIcons).sort();
-      }
-
-      icons.forEach((icon) => {
-        if (icon in mod) {
-          validIcons.add(icon);
-        } else {
-          skippedIcons.push(icon);
-        }
-      });
-
-      if (skippedIcons.length > 0) {
-        console.warn(
-          `  - ${config.title}: Skipped ${skippedIcons.length} non-existent icons: ${skippedIcons.join(", ")}`
-        );
-      }
-
-      if (validIcons.size === 0) {
-        continue;
-      }
-
-      const finalIcons = Array.from(validIcons).sort();
-      const content = `// Auto-generated by scripts/build-icons.mts, do not edit manually
-${finalIcons.map((icon) => `export { ${icon} } from "${config.export}"`).join("\n")}
-`;
-
-      const filename = `__${libraryName}__.ts`;
-      fs.writeFileSync(path.join(outputDir, filename), content);
-
-      console.log(`  - ${config.title}: ${finalIcons.length} icons`);
-    } catch {
-      console.error(
-        `  - ${config.title}: Failed to load library "${config.export}"`
-      );
+    if (warning) {
+      console.warn(warning);
+    }
+    if (summary) {
+      console.log(summary);
     }
   }
 }
 
 async function main() {
-  const iconUsage = scanIconUsage();
-  await generateIconFiles(iconUsage);
+  await generateIconFiles(await scanIconUsage());
 }
 
-const isWatchMode = process.argv.includes("--watch");
+async function watch() {
+  const { default: chokidar } = await import("chokidar");
 
-if (isWatchMode) {
-  // Only watch base folder
-  const SCAN_DIRS = [
-    path.join(process.cwd(), "src/registry/bases"),
-    path.join(process.cwd(), "src/registry-audio/bases/base/components"),
-    path.join(process.cwd(), "src/registry-audio/bases/base/audio"),
-    path.join(process.cwd(), "src/app"),
-  ].filter((dir) => fs.existsSync(dir));
+  await main();
 
-  async function startWatcher() {
-    const { default: chokidar } = await import("chokidar");
+  const candidates = [...PLACEHOLDER_DIRS, APP_DIR];
+  const exist = await Promise.all(candidates.map(isDirectory));
+  const dirs = candidates.filter((_, index) => exist[index]);
 
-    await main();
+  const watcher = chokidar.watch(dirs, {
+    ignored: IGNORED_PATH,
+    ignoreInitial: true,
+    persistent: true,
+  });
 
-    const watcher = chokidar.watch(SCAN_DIRS, {
-      ignored: /(^|[/\\])\../,
-      ignoreInitial: true,
-      persistent: true,
-    });
+  const rebuild = async (filename: string) => {
+    if (!filename.endsWith(".tsx")) {
+      return;
+    }
 
-    const rebuild = async (filename: string) => {
-      if (!filename.endsWith(".tsx")) {
-        return;
-      }
+    try {
+      await main();
+    } catch (error) {
+      console.error("❌ Icons build failed:", error);
+    }
+  };
 
-      try {
-        await main();
-      } catch (error) {
-        console.error("❌ Icons build failed:", error);
-      }
-    };
+  watcher.on("error", (error) => {
+    console.error("❌ Watcher error:", error);
+  });
 
-    watcher.on("error", (error) => {
-      console.error("❌ Watcher error:", error);
-    });
+  watcher.on("change", rebuild);
+  watcher.on("add", rebuild);
 
-    watcher.on("change", rebuild);
-    watcher.on("add", rebuild);
+  process.on("SIGINT", async () => {
+    await watcher.close();
+    process.exit(0);
+  });
+}
 
-    process.on("SIGINT", async () => {
-      await watcher.close();
-      process.exit(0);
-    });
-  }
-
-  startWatcher();
+if (Bun.argv.includes("--watch")) {
+  await watch();
 } else {
-  main().catch(console.error);
+  await main();
 }

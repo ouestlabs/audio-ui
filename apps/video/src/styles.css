@@ -1,0 +1,12 @@
+@import "../../www/src/styles/globals.css";
+
+@source "../../www/src/registry-audio/bases/base/audio";
+@source "../../www/src/registry/bases/base/ui";
+
+/* Frames are seeked, not played: a transition would show each value halfway. */
+*,
+*::before,
+*::after {
+  transition: none !important;
+  animation: none !important;
+}

@@ -87,7 +87,7 @@ interface FaderProps
     VariantProps<typeof faderVariants> {
   /** Lets you type the value: a double click on the readout, or Enter while it has focus. */
   editableValue?: boolean;
-  /** Prints the value in the readout, e.g. as `"-6 dB"`. Defaults to `format`/`locale`. */
+  /** Prints the value in the readout and in what screen readers announce, e.g. as `"-6 dB"`. Defaults to `format`/`locale`. */
   formatValue?: (value: number) => string;
   /** Graduations drawn beside the track: a ruler for the value. */
   marks?: readonly FaderMark[];
@@ -203,6 +203,9 @@ export function Fader({
           aria-labelledby={ariaLabelledBy}
           className={faderThumbVariants({ size })}
           data-slot="fader-thumb"
+          getAriaValueText={
+            formatValue ? (_formatted, value) => formatValue(value) : undefined
+          }
         >
           <div
             className={faderThumbInnerVariants({ size })}

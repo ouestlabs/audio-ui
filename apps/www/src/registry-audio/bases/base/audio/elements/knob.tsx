@@ -44,7 +44,7 @@ export type KnobMark = number | { label?: ReactNode; value: number };
 
 export type KnobProps = KnobPrimitive.Root.Props &
   VariantProps<typeof knobVariants> & {
-    /** Prints the value in the readout, e.g. as `"8.7 kHz"`. Defaults to `format`/`locale`. */
+    /** Prints the value in the readout and in what screen readers announce, e.g. as `"8.7 kHz"`. Defaults to `format`/`locale`. */
     formatValue?: (value: number) => string;
     /** Graduations drawn around the dial, on its scale. */
     marks?: readonly KnobMark[];
@@ -105,6 +105,9 @@ function Knob({
           aria-labelledby={ariaLabelledBy}
           className="pointer-events-none absolute inset-0 z-2"
           data-slot="knob-thumb"
+          getAriaValueText={
+            formatValue ? (_formatted, value) => formatValue(value) : undefined
+          }
         >
           <svg
             aria-hidden="true"

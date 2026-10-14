@@ -81,6 +81,21 @@ describe("Timeline.Navigator", () => {
     expect(shown()).toEqual(["30%", "20%"]);
   });
 
+  test("measures in layout px inside a scaled ancestor", () => {
+    // Fitted to its lanes, drawn at twice its size: 200px of lane shows all 100 units.
+    const { shown, viewport, view } = renderNavigator({
+      defaultZoom: undefined,
+    });
+    Object.defineProperty(viewport, "offsetWidth", { value: 300 });
+    mockRect(viewport, { right: 600, width: 600 });
+    view.getByTestId("lane").getBoundingClientRect = () =>
+      ({ left: 200, width: 400 }) as DOMRect;
+    act(() => {
+      viewport.dispatchEvent(new Event("scroll"));
+    });
+    expect(shown()).toEqual(["0%", "100%"]);
+  });
+
   test("dragging the window scrolls the viewport", () => {
     const { shown, viewport, windowPart } = renderNavigator();
     // 50px of navigator is 10 units, 100px of content at 10px per unit

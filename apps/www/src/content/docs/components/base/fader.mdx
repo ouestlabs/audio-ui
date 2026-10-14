@@ -48,7 +48,7 @@ npm install @audio-ui/react class-variance-authority
 <ComponentSource
   styleName="base-nova"
   name="fader"
-  title="components/audio/fader.tsx"
+  title="components/audio-ui/fader.tsx"
 />
 
 <Step>Update the import paths to match your project setup.</Step>
@@ -82,7 +82,7 @@ import { Fader } from "@audio-ui/react";
 ## Usage
 
 ```tsx
-import { Fader } from "@/components/audio/fader";
+import { Fader } from "@/components/audio-ui/fader";
 ```
 
 **Uncontrolled:** set only the initial value.
@@ -201,7 +201,7 @@ A graduation along the track at `value`: placed from the start of the travel in 
 <TypeRow name={"step"} type={"number"} default={"1"}>Quantization step for drag, wheel, and keyboard.</TypeRow>
 <TypeRow name={"marks"} type={"(number | { value, label? })[]"}>Graduations drawn beside the track: a ruler for the value. Those the value has reached from `anchor` light up.</TypeRow>
 <TypeRow name={"valueLabel"} type={"\"auto\" | \"always\" | \"hidden\""} default={"\"auto\""}>When the value shows beside the thumb: `auto` while hovered, dragged or focused from the keyboard.</TypeRow>
-<TypeRow name={"formatValue"} type={"(value: number) => string"} default={"format"}>How the value prints in that readout, e.g. `"-6.0 dB"`.</TypeRow>
+<TypeRow name={"formatValue"} type={"(value: number) => string"} default={"format"}>How the value prints in that readout and in what screen readers announce, e.g. `"-6.0 dB"`.</TypeRow>
 <TypeRow name={"editableValue"} type={"boolean"} default={"false"}>Lets you type the value in the readout: a double click, or Enter while it has focus. Enter commits it, Escape drops it (`reason: "input-change"`).</TypeRow>
 <TypeRow name={"anchor"} type={"number"} default={"min"}>Value the fill grows from, such as `0` on a -1…1 pan: the fill runs from the anchor to the value, on whichever side it is.</TypeRow>
 <TypeRow name={"disabled"} type={"boolean"} default={"false"}>Disables interaction.</TypeRow>

@@ -1,82 +1,146 @@
 /**
  * Build Static Registry
  *
- * Pre-compiles all registry items (audio library items, hooks, lib, and
- * catalog blocks/demos from `registry-audio/bases/{base}/components`) into
- * static JSON files in `public/r/styles/`.
- * This eliminates serverless function invocations for registry serving,
- * files are served directly from the CDN edge.
+ * Pre-compiles every registry item (the audio components, hooks and lib items,
+ * and the catalog blocks and demos under `registry-audio/bases/{base}`) into
+ * static JSON in `public/r/styles/`, so the registry is served from the CDN
+ * edge with no serverless function in between.
  *
- * Output structure:
- *   public/r/styles/index.json         , list of available styles
- *   public/r/styles/{style}/{name}.json, one file per item per style
- *   public/r/styles/default/           , alias for base-nova (the default)
+ * Output:
+ *   public/r/styles/index.json             the styles on offer
+ *   public/r/styles/{style}/{name}.json    one file per item per style
+ *   public/r/styles/{style}/registry.json  the style's items, without file contents
+ *
+ * The `default` style is not written: next.config.ts redirects it to base-nova.
  *
  * Run: bun run registry:build
  */
 
-import { promises as fs } from "node:fs";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const PROJECT_ROOT = path.resolve(__dirname, "..");
+import { $ } from "bun";
+import { isCatalogItemName } from "../src/lib/catalog-name.ts";
+import { transformStyleClassNames } from "../src/lib/code-utils.ts";
+import { BASES as ALL_BASES } from "../src/registry/bases.ts";
+import { categories, rootSeo } from "../src/registry-audio/bases/categories.ts";
 
 // ---------------------------------------------------------------------------
-// We can't use @/ path aliases in scripts, so we require the modules
-// directly. Loaded lazily at the top of main() (instead of top-level await)
-// so this file can stay a plain .ts module.
+// Where things are
 // ---------------------------------------------------------------------------
 
-let BASES: { name: string }[];
-let isCatalogItemName: (name: string) => boolean;
-let transformStyleClassNames: (code: string, styleName: string) => string;
+const PROJECT_ROOT = `${import.meta.dir}/..`;
+const REGISTRY_AUDIO = `${PROJECT_ROOT}/src/registry-audio`;
+const BASES_DIR = `${REGISTRY_AUDIO}/bases`;
+const OUTPUT_ROOT = `${PROJECT_ROOT}/public/r/styles`;
 
-// Style names only (`registry/styles.tsx` also holds inline JSX icon SVGs,
-// which can't be evaluated under this Bun-hoisted toolchain; only `.name`
-// is needed here, see registry/styles/style-*.css for the set).
-const STYLES = [
-  { name: "vega" },
-  { name: "nova" },
-  { name: "maia" },
-  { name: "lyra" },
-  { name: "mira" },
-  { name: "luma" },
-  { name: "rhea" },
-  { name: "sera" },
+const NAMESPACE = "@audio-ui";
+const HOMEPAGE = "https://www.audio-ui.dev";
+const DEFAULT_STYLE = "base-nova";
+
+// Only the `base` base ships audio items, and its catalog drives the manifests.
+const BASES = ALL_BASES.filter((base) => base.name === "base");
+const MANIFEST_BASE = "base";
+
+// Style names only: `registry/styles.tsx` also holds inline JSX icon SVGs that
+// can't be evaluated here, and the set is `registry/styles/style-*.css`.
+const STYLES = ["vega", "nova", "maia", "lyra", "mira", "luma", "rhea", "sera"];
+
+// The folders of a base that hold registry items. Each `_registry.ts` exports
+// an array named after its folder; a later folder wins on a repeated name.
+const REGISTRY_FOLDERS = ["audio", "hooks", "components", "lib"];
+
+// A folder a registry file imports from, and where it lands in a project.
+const INSTALL_FOLDERS: [folder: string, installed: string][] = [
+  ["audio/(?:elements/)?", "@/components/audio-ui/"],
+  ["ui/", "@/components/ui/"],
+  ["hooks/", "@/hooks/"],
+  ["lib/", "@/lib/"],
+  ["components/", "@/components/examples/"],
 ];
 
+// The module roots those folders sit under: the per-style copies the design
+// system generates, and the base itself.
+const SOURCE_ROOTS = [
+  `@/registry-audio/bases/__generated/base-(?:${STYLES.join("|")})/`,
+  "@/registry(?:-audio)?/bases/base/",
+];
+
+const IMPORT_REWRITES = SOURCE_ROOTS.flatMap((root) =>
+  INSTALL_FOLDERS.map(
+    ([folder, installed]) =>
+      [new RegExp(root + folder, "g"), installed] as const
+  )
+);
+
+const CSS_COMMENT = /\/\*[\s\S]*?\*\//g;
+const STYLE_WRAPPER = /\.style-[a-z]+\s*\{([\s\S]*)\}\s*$/;
+const APPLY_RULE = /\.([a-zA-Z0-9_-]+)\s*\{\s*@apply\s+([^;]+);\s*\}/g;
+const CN_CLASS = /\bcn-[a-zA-Z0-9_-]+\b/;
+const CN_CLASSES = new RegExp(CN_CLASS.source, "g");
+const EXPORT_DEFAULT = /export default/g;
+const DEMO_METADATA =
+  /^\s*\/\/\s*(?:Description|Order|GridSize|PreviewHeight):.*$\n?/gm;
+
+// Checks of the verification pass.
+const MAX_LINE_LENGTH = 2000;
+const SVG_PATH_DATA = /^\s*d ?=/;
+const STYLE_TOKEN = new RegExp(`\\bstyle-(?:${STYLES.join("|")}):`);
+const REGISTRY_IMPORT = /@\/registry-audio\/|@\/registry\/bases\//;
+
+// ---------------------------------------------------------------------------
 // Types
-interface RegistryItemFile {
-  content?: string;
+// ---------------------------------------------------------------------------
+
+interface SourceFile {
   path: string;
   target?: string;
   type: string;
 }
 
-interface RegistryItem {
+/** An item as `_registry.ts` declares it. */
+interface SourceItem {
   categories?: string[];
-  css?: Record<string, any>;
-  cssVars?: Record<string, any>;
+  cssVars?: Record<string, unknown>;
   dependencies?: string[];
   description?: string;
   devDependencies?: string[];
-  files?: RegistryItemFile[];
-  meta?: Record<string, unknown>;
+  files?: SourceFile[];
   name: string;
   registryDependencies?: string[];
-  title: string;
+  title?: string;
   type: string;
 }
 
-interface MetadataData {
-  Metadata: Record<string, Record<string, RegistryItem>>;
+interface BuiltFile {
+  content: string;
+  path: string;
+  target: string;
+  type: string;
 }
 
-// Constants
-const DEFAULT_STYLE = "base-nova";
-const AUDIO_REGISTRY_NAMESPACE = "@audio-ui";
+/** An item as the registry serves it, keys in the order they are written. */
+interface BuiltItem {
+  $schema: string;
+  cssVars?: Record<string, unknown>;
+  dependencies?: string[];
+  description?: string;
+  devDependencies?: string[];
+  files: BuiltFile[];
+  name: string;
+  registryDependencies?: string[];
+  title?: string;
+  type: string;
+}
+
+/** One style of one base, with the `cn-*` classes it defines. */
+interface StyleBuild {
+  base: string;
+  cnClasses: Map<string, string>;
+  name: string;
+}
+
+interface Problem {
+  detail: string;
+  kind: string;
+}
 
 // ---------------------------------------------------------------------------
 // cn-* class expansion, mirrors how ui.shadcn.com serves its own registry:
@@ -84,143 +148,65 @@ const AUDIO_REGISTRY_NAMESPACE = "@audio-ui";
 // registry-audio/styles/style-{style}.css (a `.style-{name} { .cn-x { @apply
 // ...; } }` block). The official registry never ships that placeholder text,
 // it's resolved to real utility classes before the JSON is served, so the
-// shadcn CLI's own `add` never sees a `cn-*` token to deal with. We mirror
-// that here instead of sending unresolved `cn-*` tokens down the wire, which
-// the CLI silently strips since it has no definition for them.
+// shadcn CLI never meets a `cn-*` token it has no definition for and would
+// silently strip.
 // ---------------------------------------------------------------------------
 
-const cnClassMapCache: Record<string, Map<string, string>> = {};
-
-async function getCnClassMap(style: string): Promise<Map<string, string>> {
-  if (cnClassMapCache[style]) {
-    return cnClassMapCache[style];
+async function readCnClasses(style: string): Promise<Map<string, string>> {
+  const classes = new Map<string, string>();
+  const css = Bun.file(`${REGISTRY_AUDIO}/styles/style-${style}.css`);
+  if (!(await css.exists())) {
+    return classes;
   }
 
-  const map = new Map<string, string>();
-  const cssPath = path.join(
-    PROJECT_ROOT,
-    "src",
-    "registry-audio",
-    "styles",
-    `style-${style}.css`
-  );
-
-  let raw: string;
-  try {
-    raw = await fs.readFile(cssPath, "utf-8");
-  } catch {
-    cnClassMapCache[style] = map;
-    return map;
+  const source = (await css.text()).replace(CSS_COMMENT, "");
+  const rules = source.match(STYLE_WRAPPER)?.[1] ?? source;
+  for (const [, className, utilities] of rules.matchAll(APPLY_RULE)) {
+    classes.set(className, utilities.trim());
   }
-
-  const withoutComments = raw.replace(/\/\*[\s\S]*?\*\//g, "");
-  const wrapperMatch = withoutComments.match(
-    /\.style-[a-z]+\s*\{([\s\S]*)\}\s*$/
-  );
-  const inner = wrapperMatch ? wrapperMatch[1] : withoutComments;
-
-  const ruleRegex = /\.([a-zA-Z0-9_-]+)\s*\{\s*@apply\s+([^;]+);\s*\}/g;
-  let match: RegExpExecArray | null;
-  match = ruleRegex.exec(inner);
-  while (match !== null) {
-    const [, className, applyValue] = match;
-    map.set(className, applyValue.trim());
-    match = ruleRegex.exec(inner);
-  }
-
-  cnClassMapCache[style] = map;
-  return map;
+  return classes;
 }
 
-const CN_TOKEN_REGEX = /\bcn-[a-zA-Z0-9_-]+\b/g;
-
-function expandCnClasses(content: string, cnMap: Map<string, string>): string {
-  if (cnMap.size === 0) {
+function expandCnClasses(
+  content: string,
+  cnClasses: Map<string, string>
+): string {
+  if (cnClasses.size === 0) {
     return content;
   }
-  return content.replace(CN_TOKEN_REGEX, (token) => {
-    const expansion = cnMap.get(token);
-    return expansion === undefined ? token : expansion;
-  });
+  return content.replace(CN_CLASSES, (token) => cnClasses.get(token) ?? token);
 }
 
 // ---------------------------------------------------------------------------
-// Metadata loading (mirrors registry-server.ts but with absolute paths)
+// Items of a base
 // ---------------------------------------------------------------------------
 
-const metadataCache: Record<string, MetadataData> = {};
-
-async function getMetadata(base: string): Promise<MetadataData> {
-  if (metadataCache[base]) {
-    return metadataCache[base];
+async function loadFolder(base: string, folder: string): Promise<SourceItem[]> {
+  const path = `${BASES_DIR}/${base}/${folder}/_registry.ts`;
+  if (!(await Bun.file(path).exists())) {
+    return [];
   }
+  const registry: Record<string, SourceItem[] | undefined> = await import(path);
+  return registry[folder] ?? [];
+}
 
-  const metadata: Record<string, RegistryItem> = {};
-
-  // Load audio library items (player, elements, sortable-list)
-  try {
-    const mod = await import(
-      `../src/registry-audio/bases/${base}/audio/_registry.ts`
-    );
-    for (const item of mod.audio || []) {
-      metadata[item.name] = item;
-    }
-  } catch {}
-
-  // Load hooks
-  try {
-    const mod = await import(
-      `../src/registry-audio/bases/${base}/hooks/_registry.ts`
-    );
-    for (const item of mod.hooks || []) {
-      metadata[item.name] = item;
-    }
-  } catch {}
-
-  // Load catalog items (block-* blocks and *-demo demos)
-  try {
-    const mod = await import(
-      `../src/registry-audio/bases/${base}/components/_registry.ts`
-    );
-    for (const item of mod.components || []) {
-      metadata[item.name] = item;
-    }
-  } catch {}
-
-  // Load lib items (store, html, web)
-  try {
-    const mod = await import(
-      `../src/registry-audio/bases/${base}/lib/_registry.ts`
-    );
-    for (const item of mod.lib || []) {
-      metadata[item.name] = item;
-    }
-  } catch {}
-
-  metadataCache[base] = { Metadata: { [base]: metadata } };
-  return metadataCache[base];
+async function loadItems(base: string): Promise<Map<string, SourceItem>> {
+  const folders = await Promise.all(
+    REGISTRY_FOLDERS.map((folder) => loadFolder(base, folder))
+  );
+  return new Map(folders.flat().map((item) => [item.name, item]));
 }
 
 // ---------------------------------------------------------------------------
-// Manifest generation, components.json, registry.json, and seo.json are
-// DERIVED from components/_registry.ts (items) and categories.ts (curated
-// editorial). Category counts are computed, never hand-summed. Item tags not
-// listed in categories.ts are free-form search tags and are left alone; a
-// curated category with zero items fails the build.
+// Manifests: components.json, registry.json and seo.json are DERIVED from
+// components/_registry.ts (items) and categories.ts (curated editorial).
+// Category counts are computed, never hand-summed. Item tags not listed in
+// categories.ts are free-form search tags and are left alone; a curated
+// category with zero items fails the build.
 // ---------------------------------------------------------------------------
-
-const MANIFEST_BASE = "base";
 
 async function buildManifests(): Promise<void> {
-  const { components } = (await import(
-    `../src/registry-audio/bases/${MANIFEST_BASE}/components/_registry.ts`
-  )) as { components: RegistryItem[] };
-  const { categories, rootSeo } = await import(
-    "../src/registry-audio/bases/categories.ts"
-  );
-
-  const items = components || [];
-  const basesDir = path.join(PROJECT_ROOT, "src", "registry-audio", "bases");
+  const items = await loadFolder(MANIFEST_BASE, "components");
 
   const catalog = items.map((item) => ({
     categories: item.categories ?? [],
@@ -228,20 +214,20 @@ async function buildManifests(): Promise<void> {
     title: item.title ?? item.name,
   }));
 
-  const categoryEntries = categories.map((def) => {
+  const categoryEntries = categories.map((category) => {
     const count = items.filter((item) =>
-      (item.categories ?? []).includes(def.name)
+      (item.categories ?? []).includes(category.name)
     ).length;
     if (count === 0) {
       throw new Error(
-        `Category "${def.name}" in categories.ts has no catalog items, remove it from categories.ts or tag items with it.`
+        `Category "${category.name}" in categories.ts has no catalog items, remove it from categories.ts or tag items with it.`
       );
     }
     return {
       count,
-      description: def.description,
-      label: def.label,
-      name: def.name,
+      description: category.description,
+      label: category.label,
+      name: category.name,
     };
   });
 
@@ -253,45 +239,37 @@ async function buildManifests(): Promise<void> {
       title: rootSeo.title,
     },
   };
-  for (const def of categories) {
-    seo[def.name] = {
+  for (const category of categories) {
+    seo[category.name] = {
       description:
-        def.seo?.description ?? `${def.description} {{count}} components.`,
+        category.seo?.description ??
+        `${category.description} {{count}} components.`,
       intro:
-        def.seo?.intro ??
-        `Browse {{count}} ${def.label.toLowerCase()} components for audio/ui, built on top of shadcn/ui.`,
-      title: def.seo?.title ?? def.label,
+        category.seo?.intro ??
+        `Browse {{count}} ${category.label.toLowerCase()} components for audio/ui, built on top of shadcn/ui.`,
+      title: category.seo?.title ?? category.label,
     };
   }
 
-  const writeJson = (file: string, data: unknown) =>
-    fs.writeFile(
-      path.join(basesDir, file),
-      `${JSON.stringify(data, null, 2)}\n`
-    );
+  const manifests = {
+    "components.json": catalog,
+    "registry.json": {
+      categories: categoryEntries,
+      totalComponents: items.length,
+    },
+    "seo.json": seo,
+  };
+  await Promise.all(
+    Object.entries(manifests).map(([file, data]) =>
+      Bun.write(`${BASES_DIR}/${file}`, `${JSON.stringify(data, null, 2)}\n`)
+    )
+  );
 
-  await writeJson("components.json", catalog);
-  await writeJson("registry.json", {
-    categories: categoryEntries,
-    totalComponents: items.length,
-  });
-  await writeJson("seo.json", seo);
-
-  // Normalize to the repo's biome formatting so build → lint is idempotent.
+  // Normalize to the repo's Biome formatting so build then lint is idempotent.
   try {
-    const { execFileSync } = await import("node:child_process");
-    execFileSync(
-      "bunx",
-      [
-        "biome",
-        "check",
-        "--write",
-        "src/registry-audio/bases/components.json",
-        "src/registry-audio/bases/registry.json",
-        "src/registry-audio/bases/seo.json",
-      ],
-      { cwd: PROJECT_ROOT, stdio: "ignore" }
-    );
+    await $`bunx biome check --write ${Object.keys(manifests).map((file) => `src/registry-audio/bases/${file}`)}`
+      .cwd(PROJECT_ROOT)
+      .quiet();
   } catch {
     console.warn("  Manifests: biome formatting pass failed (non-fatal)");
   }
@@ -302,507 +280,354 @@ async function buildManifests(): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
-// Parse style name
+// One item, in one style
 // ---------------------------------------------------------------------------
 
-function parseStyleName(styleName: string): { base: string; style: string } {
-  const parts = styleName.split("-");
-  if (parts.length >= 2) {
-    const base = parts[0];
-    const style = parts.slice(1).join("-");
-    if (
-      BASES.some((b) => b.name === base) &&
-      STYLES.some((s) => s.name === style)
-    ) {
-      return { base, style };
-    }
-  }
-  return { base: "base", style: "nova" };
-}
-
-// ---------------------------------------------------------------------------
-// Import path transformation (mirrors registry-server.ts)
-// ---------------------------------------------------------------------------
-
-function transformImportPaths(code: string, base: string): string {
-  return code
-    .replace(
-      /@\/registry-audio\/bases\/__generated\/base-(?:vega|nova|maia|lyra|mira|luma|rhea|sera)\/audio\//g,
-      "@/components/audio/"
-    )
-    .replace(
-      /@\/registry-audio\/bases\/__generated\/base-(?:vega|nova|maia|lyra|mira|luma|rhea|sera)\/ui\//g,
-      "@/components/ui/"
-    )
-    .replace(
-      /@\/registry-audio\/bases\/__generated\/base-(?:vega|nova|maia|lyra|mira|luma|rhea|sera)\/hooks\//g,
-      "@/hooks/"
-    )
-    .replace(
-      /@\/registry-audio\/bases\/__generated\/base-(?:vega|nova|maia|lyra|mira|luma|rhea|sera)\/lib\//g,
-      "@/lib/"
-    )
-    .replace(
-      /@\/registry-audio\/bases\/__generated\/base-(?:vega|nova|maia|lyra|mira|luma|rhea|sera)\/components\//g,
-      "@/components/examples/"
-    )
-    .replace(
-      new RegExp(`@/registry-audio/bases/${base}/audio/`, "g"),
-      "@/components/audio/"
-    )
-    .replace(
-      new RegExp(`@/registry-audio/bases/${base}/ui/`, "g"),
-      "@/components/ui/"
-    )
-    .replace(
-      new RegExp(`@/registry-audio/bases/${base}/hooks/`, "g"),
-      "@/hooks/"
-    )
-    .replace(new RegExp(`@/registry-audio/bases/${base}/lib/`, "g"), "@/lib/")
-    .replace(
-      new RegExp(`@/registry-audio/bases/${base}/components/`, "g"),
-      "@/components/examples/"
-    )
-    .replace(
-      /@\/registry(?:-audio)?\/bases\/base\/audio\//g,
-      "@/components/audio/"
-    )
-    .replace(/@\/registry(?:-audio)?\/bases\/base\/ui\//g, "@/components/ui/")
-    .replace(/@\/registry(?:-audio)?\/bases\/base\/hooks\//g, "@/hooks/")
-    .replace(/@\/registry(?:-audio)?\/bases\/base\/lib\//g, "@/lib/")
-    .replace(
-      /@\/registry(?:-audio)?\/bases\/base\/components\//g,
-      "@/components/examples/"
-    )
-    .replace(/@\/registry\/bases\/base\/ui\//g, "@/components/ui/")
-    .replace(/@\/registry\/bases\/base\/audio\//g, "@/components/audio/")
-    .replace(/@\/registry\/bases\/base\/hooks\//g, "@/hooks/")
-    .replace(/@\/registry\/bases\/base\/lib\//g, "@/lib/")
-    .replace(
-      /^\s*\/\/\s*(?:Description|Order|GridSize|PreviewHeight):.*$\n?/gm,
-      ""
-    )
+function transformImportPaths(code: string): string {
+  return IMPORT_REWRITES.reduce(
+    (text, [pattern, installed]) => text.replace(pattern, installed),
+    code
+  )
+    .replace(DEMO_METADATA, "")
     .trimStart();
 }
 
-// ---------------------------------------------------------------------------
-// Determine registry source type
-// ---------------------------------------------------------------------------
-
-function getRegistrySource(name: string): { type: "blocks" | "audio" } {
-  return { type: isCatalogItemName(name) ? "blocks" : "audio" };
+/** Where a file lands in a project when its item doesn't say. */
+function defaultTarget(item: SourceItem, file: SourceFile, fileName: string) {
+  if (isCatalogItemName(item.name)) {
+    return `components/examples/${fileName}`;
+  }
+  switch (file.type) {
+    // Every audio/ui component lands in one folder named after the library,
+    // imported as `@/components/audio-ui/<name>`.
+    case "registry:ui":
+      return `components/audio-ui/${fileName}`;
+    case "registry:hook":
+      return `hooks/${fileName}`;
+    case "registry:lib":
+      return `lib/${fileName}`;
+    default:
+      return `components/${fileName}`;
+  }
 }
 
-// ---------------------------------------------------------------------------
-// Build a single registry item (mirrors getRegistryItemForApi)
-// ---------------------------------------------------------------------------
-
-async function buildRegistryItem(
-  name: string,
-  styleName: string
-): Promise<Record<string, any> | null> {
-  const { base } = parseStyleName(styleName);
-  const { Metadata } = await getMetadata(base);
-  const itemMetadata = Metadata[base]?.[name];
-
-  if (!itemMetadata) {
+async function buildFile(
+  file: SourceFile,
+  item: SourceItem,
+  build: StyleBuild
+): Promise<BuiltFile | null> {
+  const source = `src/registry-audio/bases/${build.base}/${file.path}`;
+  let content: string;
+  try {
+    content = await Bun.file(`${PROJECT_ROOT}/${source}`).text();
+  } catch {
+    console.error(`  Failed to read: ${source}`);
     return null;
   }
 
-  const { style } = parseStyleName(styleName);
-  const cnMap = await getCnClassMap(style);
-
-  const files: Array<{
-    path: string;
-    type: string;
-    content: string;
-    target?: string;
-  }> = [];
-
-  for (const file of itemMetadata.files || []) {
-    const filePath = typeof file === "string" ? file : file.path;
-    const fileType = typeof file === "string" ? "registry:file" : file.type;
-    const fileTarget = typeof file === "string" ? undefined : file.target;
-
-    const fullPath = path.join(
-      PROJECT_ROOT,
-      "src",
-      "registry-audio",
-      "bases",
-      base,
-      filePath
-    );
-
-    let content = "";
-    try {
-      content = await fs.readFile(fullPath, "utf-8");
-    } catch {
-      console.error(`  Failed to read: ${fullPath}`);
-      continue;
-    }
-
-    // 1. Transform style-specific classNames (style-vega:bg-white → bg-white)
-    content = transformStyleClassNames(content, styleName);
-
-    // 2. Expand cn-* placeholder classes to their real utility classes
-    content = expandCnClasses(content, cnMap);
-
-    // 3. Transform import paths
-    content = transformImportPaths(content, base);
-
-    // 4. Transform export default → export
-    if (fileType !== "registry:page") {
-      content = content.replace(/export default/g, "export");
-    }
-
-    // Determine target path
-    let target = fileTarget;
-    if (!target) {
-      const fileName = filePath.split("/").pop();
-      const { type: sourceType } = getRegistrySource(name);
-
-      if (sourceType === "blocks") {
-        target = `components/examples/${fileName}`;
-      } else if (fileType === "registry:ui") {
-        // Elements keep the folder their demos import them from.
-        target = filePath.includes("/elements/")
-          ? `components/audio/elements/${fileName}`
-          : `components/audio/${fileName}`;
-      } else if (fileType === "registry:hook") {
-        target = `hooks/${fileName}`;
-      } else if (fileType === "registry:lib") {
-        target = `lib/${fileName}`;
-      } else {
-        target = `components/${fileName}`;
-      }
-    }
-
-    files.push({
-      content: content.trim(),
-      path: filePath.split("/").pop() || filePath,
-      target,
-      type: fileType,
-    });
+  // 1. Style-specific classNames (style-vega:bg-white becomes bg-white)
+  content = transformStyleClassNames(content, build.name);
+  // 2. cn-* placeholder classes become their utility classes
+  content = expandCnClasses(content, build.cnClasses);
+  // 3. Import paths become the paths the files land at
+  content = transformImportPaths(content);
+  // 4. export default becomes a named export
+  if (file.type !== "registry:page") {
+    content = content.replace(EXPORT_DEFAULT, "export");
   }
 
-  // A "barrel" item (e.g. @audio-ui/ui, @audio-ui/hooks) has no files of its own,
-  // it only aggregates registryDependencies for a one-shot install. Still
-  // emit it; only skip when there's truly nothing to serve at all.
-  if (files.length === 0 && !itemMetadata.registryDependencies?.length) {
+  const fileName = file.path.slice(file.path.lastIndexOf("/") + 1);
+  return {
+    content: content.trim(),
+    path: fileName,
+    target: file.target || defaultTarget(item, file, fileName),
+    type: file.type,
+  };
+}
+
+async function buildItem(
+  item: SourceItem,
+  build: StyleBuild
+): Promise<BuiltItem | null> {
+  const files = (
+    await Promise.all(
+      (item.files ?? []).map((file) => buildFile(file, item, build))
+    )
+  ).filter((file) => file !== null);
+
+  // A barrel item (`@audio-ui/ui`, `@audio-ui/hooks`) has no files of its own,
+  // it only aggregates registryDependencies for a one-shot install. Still emit
+  // it; skip only when there is nothing to serve at all.
+  if (files.length === 0 && !item.registryDependencies?.length) {
     return null;
   }
 
   return {
     $schema: "https://ui.shadcn.com/schema/registry-item.json",
-    cssVars: itemMetadata.cssVars,
-    dependencies: itemMetadata.dependencies,
-    description: itemMetadata.description,
-    devDependencies: itemMetadata.devDependencies,
+    cssVars: item.cssVars,
+    dependencies: item.dependencies,
+    description: item.description,
+    devDependencies: item.devDependencies,
     files,
-    name: itemMetadata.name,
-    registryDependencies: itemMetadata.registryDependencies,
-    title: itemMetadata.title,
-    type: itemMetadata.type,
+    name: item.name,
+    // Our own items are served under the @audio-ui namespace.
+    registryDependencies: item.registryDependencies?.map((dependency) =>
+      itemNames.has(dependency) ? `${NAMESPACE}/${dependency}` : dependency
+    ),
+    title: item.title,
+    type: item.type,
+  };
+}
+
+/** An item as `registry.json` lists it: no `$schema`, no file contents. */
+function indexEntry(item: BuiltItem) {
+  const { $schema: _schema, ...entry } = item;
+  return {
+    ...entry,
+    files: item.files.map(({ path, target, type }) => ({ path, target, type })),
   };
 }
 
 // ---------------------------------------------------------------------------
-// Collect all unique item names across all bases
+// One style: build every item, write it, list it
 // ---------------------------------------------------------------------------
 
-async function getAllItemNames(): Promise<string[]> {
-  const names = new Set<string>();
-  for (const base of BASES) {
-    const { Metadata } = await getMetadata(base.name);
-    const items = Metadata[base.name] || {};
-    for (const name of Object.keys(items)) {
-      names.add(name);
-    }
+async function emitItem(name: string, build: StyleBuild) {
+  const item = itemsByBase.get(build.base)?.get(name);
+  const built = item ? await buildItem(item, build) : null;
+  if (!built) {
+    return null;
   }
-  return Array.from(names);
+  const bytes = await Bun.write(
+    `${OUTPUT_ROOT}/${build.name}/${name}.json`,
+    JSON.stringify(built)
+  );
+  return { built, bytes };
+}
+
+async function buildStyle(build: StyleBuild) {
+  const names = [...itemNames];
+  const outcomes = await Promise.allSettled(
+    names.map((name) => emitItem(name, build))
+  );
+
+  const emitted = outcomes.flatMap((outcome) =>
+    outcome.status === "fulfilled" && outcome.value ? [outcome.value] : []
+  );
+  const failures = outcomes.flatMap((outcome, index) =>
+    outcome.status === "rejected"
+      ? [{ name: names[index], reason: outcome.reason }]
+      : []
+  );
+  for (const { name, reason } of failures) {
+    console.error(`  Error building ${build.name}/${name}:`, reason);
+  }
+
+  // registry.json lists the style's items for `shadcn search` and `list`.
+  await Bun.write(
+    `${OUTPUT_ROOT}/${build.name}/registry.json`,
+    JSON.stringify({
+      $schema: "https://ui.shadcn.com/schema/registry.json",
+      homepage: HOMEPAGE,
+      items: emitted.map(({ built }) => indexEntry(built)),
+      name: "audio-ui",
+    })
+  );
+
+  return {
+    bytes: emitted.reduce((total, { bytes }) => total + bytes, 0),
+    errors: failures.length,
+    files: emitted.length,
+    name: build.name,
+  };
 }
 
 // ---------------------------------------------------------------------------
-// Resolve internal registryDependencies → @audio-ui namespace
+// Verification pass: read back every generated JSON and check its integrity
 // ---------------------------------------------------------------------------
 
-function resolveRegistryDeps(
-  item: Record<string, any>,
-  allNames: Set<string>
-): void {
-  if (!item.registryDependencies) {
-    return;
+function contentProblems({ content, path }: BuiltFile): Problem[] {
+  const problems: Problem[] = [];
+
+  // Collapsed code: a line this long is a minified or unformatted file. SVG
+  // path data is legitimately long.
+  const lines = content.split("\n");
+  const collapsed = lines.findIndex(
+    (line) => line.length > MAX_LINE_LENGTH && !SVG_PATH_DATA.test(line)
+  );
+  if (collapsed !== -1) {
+    problems.push({
+      detail: `line ${collapsed + 1} is ${lines[collapsed]?.length} chars (file "${path}")`,
+      kind: "COLLAPSED CODE",
+    });
+  }
+  // Everything below must have been resolved while building.
+  if (STYLE_TOKEN.test(content)) {
+    problems.push({
+      detail: "still contains style-*: tokens",
+      kind: "UNTRANSFORMED STYLE",
+    });
+  }
+  if (CN_CLASS.test(content)) {
+    problems.push({
+      detail: "still contains cn-* tokens",
+      kind: "UNEXPANDED CN CLASS",
+    });
+  }
+  if (REGISTRY_IMPORT.test(content)) {
+    problems.push({
+      detail: "still contains registry import paths",
+      kind: "UNTRANSFORMED IMPORT",
+    });
+  }
+  return problems;
+}
+
+function findProblems(data: Partial<BuiltItem>): Problem[] {
+  if (!(data.name && data.type && Array.isArray(data.files))) {
+    return [{ detail: "missing name, type, or files", kind: "INVALID SCHEMA" }];
   }
 
-  item.registryDependencies = item.registryDependencies.map((dep: string) => {
-    if (allNames.has(dep)) {
-      return `${AUDIO_REGISTRY_NAMESPACE}/${dep}`;
-    }
-    return dep;
-  });
+  // The files before an empty one are checked, the ones after are not.
+  const emptyAt = data.files.findIndex(
+    (file) => !file.content || typeof file.content !== "string"
+  );
+  const checked = emptyAt === -1 ? data.files : data.files.slice(0, emptyAt);
+  const problems = checked.flatMap(contentProblems);
+
+  const empty = data.files[emptyAt];
+  if (empty) {
+    problems.push({
+      detail: `file "${empty.path}" has no content`,
+      kind: "EMPTY CONTENT",
+    });
+  }
+  return problems;
+}
+
+/** Reads a style's folder back and returns what it found, printable. */
+async function verifyStyle(styleName: string) {
+  const dir = `${OUTPUT_ROOT}/${styleName}`;
+  const entries = (
+    await Array.fromAsync(new Bun.Glob("*.json").scan({ cwd: dir }))
+  )
+    .filter((entry) => entry !== "registry.json")
+    .sort();
+
+  const problems = await Promise.all(
+    entries.map(async (entry) => {
+      const label = `${styleName}/${entry}`;
+      try {
+        const data = await Bun.file(`${dir}/${entry}`).json();
+        return findProblems(data).map(({ detail, kind }) => ({
+          label,
+          message: `${kind}: ${label}, ${detail}`,
+        }));
+      } catch (error) {
+        return [{ label, message: `INVALID JSON: ${label}: ${error}` }];
+      }
+    })
+  );
+
+  return { checked: entries.length, problems: problems.flat() };
 }
 
 // ---------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------
 
-async function main() {
-  const { BASES: ALL_BASES } = await import("../src/registry/bases.ts");
-  ({ isCatalogItemName } = await import("../src/lib/catalog-name.ts"));
-  ({ transformStyleClassNames } = await import("../src/lib/code-utils.ts"));
-  // Base-only launch: audio components only exist for the Base UI base.
-  BASES = (ALL_BASES as { name: string }[]).filter((b) => b.name === "base");
+const itemsByBase = new Map(
+  await Promise.all(
+    BASES.map(async ({ name }) => [name, await loadItems(name)] as const)
+  )
+);
+// Every item name, once, in the order the registry lists them.
+const itemNames = new Set(
+  [...itemsByBase.values()].flatMap((items) => [...items.keys()])
+);
 
-  const startTime = Date.now();
-  console.log("Building static registry...");
-  await buildManifests();
-  console.log(`  Internal registry namespace: ${AUDIO_REGISTRY_NAMESPACE}`);
+const startedAt = Date.now();
+console.log("Building static registry...");
+await buildManifests();
+console.log(`  Internal registry namespace: ${NAMESPACE}`);
 
-  // Collect all style names (2 bases × 5 styles = 10)
-  const styleNames: string[] = [];
-  for (const base of BASES) {
-    for (const style of STYLES) {
-      styleNames.push(`${base.name}-${style.name}`);
-    }
-  }
+const cnClassesByStyle = new Map(
+  await Promise.all(
+    STYLES.map(async (style) => [style, await readCnClasses(style)] as const)
+  )
+);
+const builds: StyleBuild[] = BASES.flatMap(({ name: base }) =>
+  STYLES.map((style) => ({
+    base,
+    cnClasses: cnClassesByStyle.get(style) ?? new Map(),
+    name: `${base}-${style}`,
+  }))
+);
 
-  // Collect all item names
-  const allItemNames = await getAllItemNames();
-  const allNamesSet = new Set(allItemNames);
+console.log(`  Styles: ${builds.length}`);
+console.log(`  Items: ${itemNames.size}`);
+console.log(`  Total files to generate: ${builds.length * itemNames.size}`);
+console.log(`  Default style: ${DEFAULT_STYLE} (served via redirect)`);
+console.log();
 
-  console.log(`  Styles: ${styleNames.length}`);
-  console.log(`  Items: ${allItemNames.length}`);
-  console.log(
-    `  Total files to generate: ${styleNames.length * allItemNames.length}`
-  );
-  console.log(`  Default style: ${DEFAULT_STYLE} (served via redirect)`);
-  console.log();
+// Start from an empty output folder, so an item that was removed is gone.
+await $`rm -rf ${OUTPUT_ROOT}`.quiet();
 
-  const outputRoot = path.join(PROJECT_ROOT, "public", "r", "styles");
-
-  // Clean existing output
-  try {
-    await fs.rm(outputRoot, { force: true, recursive: true });
-  } catch {}
-
-  let totalFiles = 0;
-  let totalBytes = 0;
-  let errors = 0;
-
-  // Generate files for each style
-  for (const styleName of styleNames) {
-    const styleDir = path.join(outputRoot, styleName);
-    await fs.mkdir(styleDir, { recursive: true });
-
-    let styleFiles = 0;
-    const indexItems: object[] = [];
-
-    for (const itemName of allItemNames) {
-      try {
-        const item = await buildRegistryItem(itemName, styleName);
-        if (!item) {
-          continue;
-        }
-
-        // Resolve registryDependencies to full URLs
-        resolveRegistryDeps(item, allNamesSet);
-
-        const json = JSON.stringify(item);
-        await fs.writeFile(
-          path.join(styleDir, `${itemName}.json`),
-          json,
-          "utf-8"
-        );
-        styleFiles++;
-        totalBytes += json.length;
-
-        // The shadcn registry index wants items without file contents.
-        const { $schema: _schema, ...indexItem } = item;
-        indexItems.push({
-          ...indexItem,
-          files: item.files.map(({ content: _content, ...file }) => file),
-        });
-      } catch (error) {
-        errors++;
-        console.error(`  Error building ${styleName}/${itemName}:`, error);
-      }
-    }
-
-    // registry.json lists the style's items for `shadcn search` / `list`.
-    await fs.writeFile(
-      path.join(styleDir, "registry.json"),
-      JSON.stringify({
-        $schema: "https://ui.shadcn.com/schema/registry.json",
-        homepage: "https://www.audio-ui.dev",
-        items: indexItems,
-        name: "audio-ui",
-      }),
-      "utf-8"
-    );
-
-    totalFiles += styleFiles;
-    console.log(`  ${styleName}: ${styleFiles} files`);
-  }
-
-  // Note: "default" style is handled via edge redirect → base-nova (no file duplication)
-
-  // Write styles/index.json
-  const stylesIndex = [
-    { label: "Default", name: "default" },
-    ...styleNames.map((name) => ({
-      label: name
-        .split("-")
-        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-        .join(" "),
-      name,
-    })),
-  ];
-  await fs.writeFile(
-    path.join(outputRoot, "index.json"),
-    JSON.stringify(stylesIndex, null, 2),
-    "utf-8"
-  );
-
-  // ---------------------------------------------------------------------------
-  // Verification pass, read back every generated JSON and check integrity
-  // ---------------------------------------------------------------------------
-  console.log();
-  console.log("Verifying generated files...");
-
-  let verified = 0;
-  let verifyErrors = 0;
-  const MAX_LINE_LENGTH = 2000; // SVG paths can be long, but code lines shouldn't exceed this
-  const corruptedFiles: string[] = [];
-
-  for (const styleName of styleNames) {
-    const styleDir = path.join(outputRoot, styleName);
-    const entries = await fs.readdir(styleDir);
-
-    for (const entry of entries) {
-      if (!entry.endsWith(".json") || entry === "registry.json") {
-        continue;
-      }
-      const filePath = path.join(styleDir, entry);
-
-      try {
-        const raw = await fs.readFile(filePath, "utf-8");
-
-        // 1. Verify valid JSON
-        const data = JSON.parse(raw);
-
-        // 2. Verify required fields
-        if (!(data.name && data.type && Array.isArray(data.files))) {
-          verifyErrors++;
-          corruptedFiles.push(`${styleName}/${entry}`);
-          console.error(
-            `  INVALID SCHEMA: ${styleName}/${entry}, missing name, type, or files`
-          );
-          continue;
-        }
-
-        // 3. Verify each file entry has content
-        for (const file of data.files) {
-          if (!file.content || typeof file.content !== "string") {
-            verifyErrors++;
-            corruptedFiles.push(`${styleName}/${entry}`);
-            console.error(
-              `  EMPTY CONTENT: ${styleName}/${entry}, file "${file.path}" has no content`
-            );
-            break;
-          }
-
-          // 4. Check for collapsed code (lines shouldn't be excessively long)
-          const lines = file.content.split("\n");
-          for (let i = 0; i < lines.length; i++) {
-            const line = lines[i];
-            // Skip SVG path data lines (legitimately long)
-            if (
-              line.trimStart().startsWith("d=") ||
-              line.trimStart().startsWith("d =")
-            ) {
-              continue;
-            }
-            if (line.length > MAX_LINE_LENGTH) {
-              verifyErrors++;
-              corruptedFiles.push(`${styleName}/${entry}`);
-              console.error(
-                `  COLLAPSED CODE: ${styleName}/${entry}, line ${i + 1} is ${line.length} chars (file "${file.path}")`
-              );
-              break;
-            }
-          }
-
-          // 5. Check for unresolved style-* tokens (should all be transformed)
-          if (
-            /\bstyle-(?:vega|nova|maia|lyra|mira|luma|rhea|sera):/.test(
-              file.content
-            )
-          ) {
-            verifyErrors++;
-            corruptedFiles.push(`${styleName}/${entry}`);
-            console.error(
-              `  UNTRANSFORMED STYLE: ${styleName}/${entry}, still contains style-*: tokens`
-            );
-          }
-
-          // 6. Check for unresolved cn-* placeholder classes (should all be
-          // expanded to real utility classes by getCnClassMap/expandCnClasses)
-          if (CN_TOKEN_REGEX.test(file.content)) {
-            verifyErrors++;
-            corruptedFiles.push(`${styleName}/${entry}`);
-            console.error(
-              `  UNEXPANDED CN CLASS: ${styleName}/${entry}, still contains cn-* tokens`
-            );
-          }
-          CN_TOKEN_REGEX.lastIndex = 0;
-
-          // 7. Check for unresolved internal import paths
-          if (
-            /@\/registry-audio\//.test(file.content) ||
-            /@\/registry\/bases\//.test(file.content)
-          ) {
-            verifyErrors++;
-            corruptedFiles.push(`${styleName}/${entry}`);
-            console.error(
-              `  UNTRANSFORMED IMPORT: ${styleName}/${entry}, still contains registry import paths`
-            );
-          }
-        }
-
-        verified++;
-      } catch (error) {
-        verifyErrors++;
-        corruptedFiles.push(`${styleName}/${entry}`);
-        console.error(`  INVALID JSON: ${styleName}/${entry}:`, error);
-      }
-    }
-  }
-
-  console.log(`  Verified: ${verified} files`);
-  if (verifyErrors > 0) {
-    console.error(
-      `  Verification FAILED: ${verifyErrors} issues in ${[...new Set(corruptedFiles)].length} files`
-    );
-    console.error(`  Affected: ${[...new Set(corruptedFiles)].join(", ")}`);
-    process.exit(1);
-  } else {
-    console.log("  All files passed verification");
-  }
-
-  const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
-  const sizeMB = (totalBytes / 1024 / 1024).toFixed(1);
-
-  console.log();
-  console.log(`Done in ${elapsed}s`);
-  console.log(`  Total files: ${totalFiles}`);
-  console.log(`  Total size: ${sizeMB} MB`);
-  if (errors > 0) {
-    console.log(`  Build errors: ${errors}`);
-    process.exit(1);
-  }
+const styles = await Promise.all(builds.map(buildStyle));
+for (const { files, name } of styles) {
+  console.log(`  ${name}: ${files} files`);
 }
 
-main().catch((error) => {
-  console.error("Fatal error:", error);
+// The `default` style is a redirect to DEFAULT_STYLE, not a copy.
+await Bun.write(
+  `${OUTPUT_ROOT}/index.json`,
+  JSON.stringify(
+    [
+      { label: "Default", name: "default" },
+      ...builds.map(({ name }) => ({
+        label: name
+          .split("-")
+          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(" "),
+        name,
+      })),
+    ],
+    null,
+    2
+  )
+);
+
+console.log();
+console.log("Verifying generated files...");
+const verification = await Promise.all(
+  builds.map(({ name }) => verifyStyle(name))
+);
+const problems = verification.flatMap((style) => style.problems);
+for (const { message } of problems) {
+  console.error(`  ${message}`);
+}
+console.log(
+  `  Verified: ${verification.reduce((total, { checked }) => total + checked, 0)} files`
+);
+if (problems.length > 0) {
+  const affected = [...new Set(problems.map(({ label }) => label))];
+  console.error(
+    `  Verification FAILED: ${problems.length} issues in ${affected.length} files`
+  );
+  console.error(`  Affected: ${affected.join(", ")}`);
   process.exit(1);
-});
+}
+console.log("  All files passed verification");
+
+const totalFiles = styles.reduce((total, { files }) => total + files, 0);
+const totalBytes = styles.reduce((total, { bytes }) => total + bytes, 0);
+const errors = styles.reduce((total, style) => total + style.errors, 0);
+
+console.log();
+console.log(`Done in ${((Date.now() - startedAt) / 1000).toFixed(1)}s`);
+console.log(`  Total files: ${totalFiles}`);
+console.log(`  Total size: ${(totalBytes / 1024 / 1024).toFixed(1)} MB`);
+if (errors > 0) {
+  console.log(`  Build errors: ${errors}`);
+  process.exit(1);
+}

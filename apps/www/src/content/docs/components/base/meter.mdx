@@ -12,7 +12,7 @@ Shows audio levels for a stereo output, a channel strip or any multi-channel sou
 ## Overview
 
 - **Value:** one dB reading per channel (stereo is `[left, right]`), from the `value` prop or a live [`source`](#feeding-real-levels). The number of readings sets the number of channels.
-- **Peak hold:** an optional peak level per channel places a peak-hold mark. The primitive has no clock: the [`use-audio-levels`](#feeding-real-levels) hook, Tone.js or another source computes the peak and its decay.
+- **Peak hold:** an optional peak level per channel places a peak-hold mark. The primitive has no clock: your [source](#feeding-real-levels), Tone.js or another library computes the peak and its decay.
 - **Clipping:** channels at or above `clipThreshold` (default `0` dB) get `data-clipping`, to style a clip indicator.
 - **Accessibility:** each channel is a `role="meter"` with `aria-valuenow`, `aria-valuemin`, `aria-valuemax` and a value text in dB ("-6 dB"). It is not an `aria-live` region, so screen readers read the level when asked instead of announcing every update. `aria-label` names the group; with several channels, each is named "… 1", "… 2".
 
@@ -48,7 +48,7 @@ npm install @audio-ui/react class-variance-authority
 <ComponentSource
   styleName="base-nova"
   name="meter"
-  title="components/audio/meter.tsx"
+  title="components/audio-ui/meter.tsx"
 />
 
 <Step>Update the import paths to match your project setup.</Step>
@@ -81,7 +81,7 @@ import { Meter } from "@audio-ui/react";
 ## Usage
 
 ```tsx
-import { Meter } from "@/components/audio/meter";
+import { Meter } from "@/components/audio-ui/meter";
 ```
 
 **Static levels:**
@@ -100,14 +100,6 @@ import { Meter } from "@/components/audio/meter";
 
 `value` and `peak` are plain props: fine for static or slowly changing levels, but a signal sampled 60 times a second would re-render React on every frame. For live audio, pass a `source` instead: the meter subscribes to it and writes each frame to the DOM, without a React render.
 
-The `use-audio-levels` hook (`npx shadcn@latest add @audio-ui/use-audio-levels`) returns such a source. It samples RMS level (in dB) from one `AnalyserNode` per channel every animation frame, with a peak-hold level that holds the loudest recent level for 1.5s before decaying:
-
-```tsx
-const levels = useAudioLevels([leftAnalyser, rightAnalyser]);
-
-<Meter aria-label="Stereo output" source={levels} />;
-```
-
 A source is any object with the shape of an external store, so you can bring your own (Tone.js, a worklet, a WebSocket):
 
 ```ts
@@ -116,6 +108,57 @@ interface MeterSource {
   subscribe: (listener: () => void) => () => void;
 }
 ```
+
+`createSource` from `@audio-ui/react` makes one you push to. This one samples the RMS level of one `AnalyserNode` per channel every animation frame:
+
+```tsx
+"use client";
+
+import { createSource, type Meter } from "@audio-ui/react";
+import { useEffect, useState } from "react";
+
+const SILENCE_DB = -100;
+
+function rmsDb(analyser: AnalyserNode, buffer: Float32Array<ArrayBuffer>) {
+  analyser.getFloatTimeDomainData(buffer);
+  let sum = 0;
+  for (const sample of buffer) {
+    sum += sample * sample;
+  }
+  const rms = Math.sqrt(sum / buffer.length);
+  return rms > 0 ? 20 * Math.log10(rms) : SILENCE_DB;
+}
+
+export function useLevels(analysers: AnalyserNode[]) {
+  const [source] = useState(() => createSource<Meter.Root.Frame>({ levels: [] }));
+
+  useEffect(() => {
+    const channels = analysers.map((analyser) => ({
+      analyser,
+      buffer: new Float32Array(analyser.fftSize),
+    }));
+    let frame = 0;
+    const tick = () => {
+      source.set({
+        levels: channels.map(({ analyser, buffer }) => rmsDb(analyser, buffer)),
+      });
+      frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [analysers, source]);
+
+  return source;
+}
+```
+
+```tsx
+const levels = useLevels(analysers); // memoize the array: a new one restarts sampling
+
+<Meter aria-label="Stereo output" source={levels} />;
+```
+
+For a peak-hold mark, keep the loudest recent level per channel in the loop (hold it for a second or so, then let it fall) and publish it as `peaks` next to `levels`.
 
 To read the levels in React as well, for a numeric readout for example, use `useSyncExternalStore(levels.subscribe, levels.getSnapshot)`.
 

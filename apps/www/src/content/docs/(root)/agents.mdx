@@ -1,9 +1,9 @@
 ---
 title: Agent Skill
-description: Give your coding agent the audio/ui skill so it picks the right layer, installs the right component and avoids common mistakes.
+description: Give your coding agent the audio/ui skill so it picks the right component, wires it to Web Audio without clicks, keeps live data out of React and styles the primitives.
 ---
 
-The audio/ui skill gives a coding agent the library's rules: when to use the npm primitives and when the shadcn registry, which component fits a task, how to install it, and the mistakes that come up most often.
+The audio/ui skill gives a coding agent the library's rules: which layer and component fit a task, how to install them, how to wire them to the Web Audio API, how to feed meters and playheads without re-rendering React, how to style the headless primitives, and how to let an AI model drive them.
 
 ## Install the skill
 
@@ -13,16 +13,27 @@ Works with Claude Code, Cursor, Codex and any agent that supports the open skill
 npx skills add ouestlabs/audio-ui
 ```
 
-The skill lives in the [audio-ui repository](https://github.com/ouestlabs/audio-ui/tree/main/skills/audio-ui). To install it by hand, copy the `skills/audio-ui` folder into your agent's skills directory (for Claude Code, `.claude/skills/`).
+The agent loads the skill on its own when a task needs it. Its rules come with incorrect and correct code for each case:
+
+| Rules | What they cover |
+| --- | --- |
+| Values and events | Controlled values, change versus commit, log scales, accessible names |
+| Web Audio | Starting the audio context, ramping parameters, dB to gain, scheduling on the audio clock |
+| Live data | Meters, spectra, waveforms and playheads fed by a source, without a render per frame |
+| Without React | Building the controls for Vue, Svelte, web components or the plain DOM on the framework-free controllers of `@audio-ui/core` |
+| Styling | Registry props and tokens, styling the headless primitives by state |
+| AI control | Typed tools a model calls to compose, edit and mix through the components |
+
+The skill lives in the [audio-ui repository](https://github.com/ouestlabs/audio-ui/tree/main/skills/audio-ui), and CI checks that every name it mentions exists in the library. To install it by hand, copy the `skills/audio-ui` folder into your agent's skills directory (for Claude Code, `.claude/skills/`).
 
 ## What it does
 
 Once installed, the agent uses it whenever you ask for a knob, fader, XY pad, meter, waveform, timeline, sequencer, piano roll or any synth, mixer or DAW interface in React. It will:
 
-1. Read your project to see if it uses shadcn/ui, then choose the registry or the npm package.
+1. Read your project to see if it uses shadcn/ui, plain React or another framework, then choose the registry, `@audio-ui/react` or `@audio-ui/core`.
 2. Find the right component and read its docs before writing code.
 3. Install it with your package manager.
-4. Connect the control to your audio code the safe way, without clicks while dragging.
+4. Connect the control to your audio code the safe way, without clicks while dragging, and feed live displays without re-rendering React.
 5. Check keyboard access and accessible names.
 
 ## Add the MCP server
@@ -34,3 +45,6 @@ The skill works best next to the [MCP server](/docs/mcp), which lets the agent l
 - Build a synth control panel with Knob, XY Pad and Fader.
 - Add an equalizer with a Plot and draggable band handles.
 - Make a piano roll with a keyboard, a velocity lane and a loop range.
+- Show the live level of my microphone on a stereo meter.
+- Style a knob with my own CSS, without Tailwind.
+- Let the chat write a bassline into the piano roll.
