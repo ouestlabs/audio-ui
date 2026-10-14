@@ -1,5 +1,13 @@
 # @audio-ui/react
 
+## 0.2.2
+
+### Patch Changes
+
+- 51da2fa: No code change. This version is published through npm trusted publishing, so it carries a provenance attestation that links the package to the commit and the workflow that built it.
+- Updated dependencies [51da2fa]
+  - @audio-ui/core@0.1.2
+
 ## 0.2.1
 
 ### Patch Changes
