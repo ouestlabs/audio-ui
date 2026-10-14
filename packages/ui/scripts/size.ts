@@ -4,8 +4,6 @@
  * so a primitive cannot get heavier without somebody deciding it should.
  * Run `bun run build:pkg` first.
  */
-import { resolve } from "node:path";
-
 /** Gzipped bytes. About 15% above what each weighs today, rendering and props merging included since they are ours. */
 const BUDGETS: Record<string, number> = {
   envelope: 7200,
@@ -21,7 +19,7 @@ const BUDGETS: Record<string, number> = {
   xypad: 4900,
 };
 
-const dist = resolve(import.meta.dirname, "../dist");
+const dist = `${import.meta.dir}/../dist`;
 let failed = false;
 
 for (const [entry, budget] of Object.entries(BUDGETS)) {

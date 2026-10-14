@@ -9,35 +9,35 @@
  * No hardcoded paths, safe to run without modification.
  */
 
-import { readFileSync, rmSync, writeFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { $ } from "bun";
 
-const root = resolve(new URL(".", import.meta.url).pathname, "..");
+// URLs resolve the `..`, so this is a plain absolute path.
+const root = Bun.fileURLToPath(new URL("..", import.meta.url)).slice(0, -1);
 
-const config = JSON.parse(
-  readFileSync(resolve(root, "components.json"), "utf-8")
-);
+const config = await Bun.file(`${root}/components.json`).json();
 const aliases: Record<string, string> = config.aliases ?? {};
 
 const ALIAS_PREFIX = /^@\//;
 
-// Resolve alias values to absolute paths and deduplicate top-level dirs
+// Resolve alias values to their top-level directories and deduplicate them.
+// An alias that names no folder ("@/") would resolve to the sandbox itself:
+// skip it rather than wipe everything.
 const managed = new Set(
-  Object.values(aliases).map((alias) => {
-    const rel = alias.replace(ALIAS_PREFIX, "");
-    return resolve(root, rel.split("/")[0]);
-  })
+  Object.values(aliases)
+    .map((alias) => alias.replace(ALIAS_PREFIX, "").split("/")[0])
+    .filter((folder) => folder)
+    .map((folder) => `${root}/${folder}`)
 );
 
 console.log("→ Removing shadcn-managed directories...");
+await Promise.all([...managed].map((dir) => $`rm -rf ${dir}`.quiet()));
 for (const dir of managed) {
-  rmSync(dir, { force: true, recursive: true });
   console.log(`  removed  ./${dir.replace(`${root}/`, "")}`);
 }
 
 console.log("→ Restoring app/page.tsx...");
-writeFileSync(
-  resolve(root, "app/page.tsx"),
+await Bun.write(
+  `${root}/app/page.tsx`,
   `export default function Home() {
   return (
     <div className="flex min-h-screen items-center justify-center">
