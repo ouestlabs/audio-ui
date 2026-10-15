@@ -52,14 +52,13 @@ export function ComponentSourceSheetContent({
         <SheetTitle>Installation</SheetTitle>
       </SheetHeader>
       <div className="flex flex-1 flex-col overflow-hidden px-6 pb-6">
-        <div className="site-rounded-lg relative border border-site-border">
-          <CodeBlockCommand
-            __bun__={`bunx --bun shadcn@latest add @audio-ui/${name}`}
-            __npm__={`npx shadcn@latest add @audio-ui/${name}`}
-            __pnpm__={`pnpm dlx shadcn@latest add @audio-ui/${name}`}
-            __yarn__={`yarn dlx shadcn@latest add @audio-ui/${name}`}
-          />
-        </div>
+        {/* The command block brings its own frame. */}
+        <CodeBlockCommand
+          __bun__={`bunx --bun shadcn@latest add @audio-ui/${name}`}
+          __npm__={`npx shadcn@latest add @audio-ui/${name}`}
+          __pnpm__={`pnpm dlx shadcn@latest add @audio-ui/${name}`}
+          __yarn__={`yarn dlx shadcn@latest add @audio-ui/${name}`}
+        />
         <div className="flex h-full flex-1 flex-col overflow-hidden">
           <div className="flex items-center justify-between gap-2">
             <h2 className="mt-6 mb-4 font-semibold text-base">Code</h2>
