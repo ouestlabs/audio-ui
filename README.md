@@ -1,53 +1,59 @@
 ![Audio UI Illustration](/apps/www/public/illustration.svg)
 
-## Contributing
+# audio/ui
 
-We're always looking for contributors to help improve our UI components. Whether it's a bug report, a new feature, or a documentation update, we appreciate your help.
+Accessible, composable Audio UI components for React: knobs, faders, meters, pads, waveforms, timelines, piano rolls and the synths, mixers and players made from them.
 
-Please see our [Contributing Guidelines](CONTRIBUTING.md) for more information on how to get involved.
+- **Primitives on npm.** Headless, accessible parts with the behavior built in and the styling left to you: [`@audio-ui/react`](packages/ui), on the framework-agnostic [`@audio-ui/core`](packages/core).
+- **Components you own.** A shadcn registry of styled components, blocks and hooks built on the primitives, copied into your project with the CLI.
+- **Web Audio API first.** Meters, spectrum analyzers and tuners read real signals from `AnalyserNode`s, and live values move without re-rendering React.
 
-## Getting Started
+Docs, demos and the catalog: **https://www.audio-ui.dev**
 
-Run development server:
-
-```sh
-bun run dev
-```
-
-Open http://localhost:3000 with your browser to see the result.
-
-## Development
-
-### Linting
-
-Check for linting errors:
+## Use it
 
 ```sh
-bun run lint
+# the primitives
+npm install @audio-ui/react
+
+# a styled component, and what it needs, from the registry
+npx shadcn@latest add @audio-ui/knob
 ```
 
-Fix linting errors automatically:
+See [Get started](https://www.audio-ui.dev/docs/get-started) for the registry setup.
+
+## Develop
+
+Bun workspaces and Turborepo; use `bun` and `bunx`, not `npm` or `npx`.
+
+```sh
+bun install
+bun run dev    # the docs site on http://localhost:4000, the sandbox on :4100
+```
+
+| Path | What it is |
+| --- | --- |
+| `apps/www` | The docs site and the registry (Next.js, Fumadocs) |
+| `apps/sandbox` | A consumer app that installs from the registry |
+| `apps/video` | Remotion videos of the real components |
+| `packages/core` | `@audio-ui/core`, framework-agnostic logic |
+| `packages/ui` | `@audio-ui/react`, the headless primitives |
+| `skills/audio-ui` | The agent skill we ship to people using the library |
+
+Before opening a pull request:
 
 ```sh
 bun run lint:fix
+bun run build:pkg
 ```
+
+The full list of checks, and how to add a component to the registry, are in [CONTRIBUTING.md](CONTRIBUTING.md). The words the code uses (Parameter, Commit, Primitive, Element) are in [CONTEXT.md](CONTEXT.md). Coding agents read [AGENTS.md](AGENTS.md).
 
 ## Resources
 
-- [Next.JS](https://nextjs.org/)
-- [shadcn/ui](https://ui.shadcn.com/docs/registry)
+- [shadcn/ui registry](https://ui.shadcn.com/docs/registry)
 - [Fumadocs](https://fumadocs.dev/)
-
-### shadcn/ui Registry
-
-Build the shadcn/ui registry:
-
-```sh
-bun run build:registry
-```
-
-This build script compiles all the registry items into a json file that is compatible with both v0 and the shadcn/ui cli. Read the [documentation](https://ui.shadcn.com/docs/registry) for further details.
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+[MIT](LICENSE)
