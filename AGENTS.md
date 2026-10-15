@@ -59,7 +59,7 @@ bun test
 
 ### `@audio-ui/react` (`packages/ui/src/`)
 
-- `primitives/<name>/`: Envelope, Fader, Knob, Meter, Piano, PianoRoll, Plot, Sequencer, Timeline, Waveform, XYPad. Unstyled, accessible, compound parts in `elements/`
+- `primitives/<name>/`: Envelope, Fader, Knob, Meter, Pad, Piano, PianoRoll, Plot, Sequencer, Timeline, Waveform, XYPad. Unstyled, accessible, compound parts in `elements/`
 - `entries/<name>.ts`: one entry per primitive (also a subpath export, `@audio-ui/react/knob`); `index.ts` re-exports them
 
 Published to npm: **don't break its public API without a changeset**.

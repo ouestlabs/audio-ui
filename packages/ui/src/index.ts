@@ -4,6 +4,7 @@ export { Envelope } from "./entries/envelope.ts";
 export { Fader } from "./entries/fader.ts";
 export { Knob } from "./entries/knob.ts";
 export { Meter } from "./entries/meter.ts";
+export { Pad } from "./entries/pad.ts";
 export { Piano } from "./entries/piano.ts";
 export { PianoRoll } from "./entries/piano-roll.ts";
 export { Plot } from "./entries/plot.ts";

@@ -41,6 +41,10 @@
       "types": "./dist/entries/meter.d.ts",
       "import": "./dist/meter.js"
     },
+    "./pad": {
+      "types": "./dist/entries/pad.d.ts",
+      "import": "./dist/pad.js"
+    },
     "./piano": {
       "types": "./dist/entries/piano.d.ts",
       "import": "./dist/piano.js"

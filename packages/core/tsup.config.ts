@@ -6,6 +6,7 @@ const primitives = [
   "fader",
   "knob",
   "meter",
+  "pad",
   "piano",
   "piano-roll",
   "plot",
