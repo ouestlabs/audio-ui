@@ -30,7 +30,8 @@ const spoken = (reading: PitchReading, tolerance: number) => {
  * A chromatic tuner's display: the nearest note, a needle on a scale from 50
  * cents flat to 50 sharp, and the frequency. It follows a live `source`
  * frame by frame, written straight into the DOM with no React render, and
- * turns to the primary color when the sound is within `tolerance`. Exposed as
+ * turns to the primary color, thickens its needle and shows a check when the
+ * sound is within `tolerance`: it is never color alone. Exposed as
  * a meter of cents, with the note and how far off it is as its text value.
  */
 function Tuner({ className, source, tolerance = 5 }: TunerProps) {
@@ -72,10 +73,12 @@ function Tuner({ className, source, tolerance = 5 }: TunerProps) {
       noteNode.data = reading.name.replace("#", "♯");
       octaveNode.data = String(reading.octave);
       hertzNode.data = `${reading.frequency.toFixed(1)} Hz`;
-      centsNode.data = `${offset > 0 ? "+" : ""}${offset}¢`;
+      const inTune = Math.abs(reading.cents) <= tolerance;
+      // In tune is never carried by color alone: the needle thickens and a check precedes the offset.
+      centsNode.data = `${inTune ? "✓ " : ""}${offset > 0 ? "+" : ""}${offset}¢`;
       element.style.setProperty("--tuner-cents", String(reading.cents));
       element.removeAttribute("data-idle");
-      if (Math.abs(reading.cents) <= tolerance) {
+      if (inTune) {
         element.setAttribute("data-in-tune", "");
       } else {
         element.removeAttribute("data-in-tune");
@@ -133,7 +136,7 @@ function Tuner({ className, source, tolerance = 5 }: TunerProps) {
             />
           ))}
           <span
-            className="absolute bottom-0 h-8 w-0.5 -translate-x-1/2 rounded-full bg-foreground transition-[left,background-color] duration-100 ease-out group-data-idle/tuner:bg-muted-foreground/40 group-data-in-tune/tuner:bg-primary motion-reduce:transition-none"
+            className="absolute bottom-0 h-8 w-0.5 -translate-x-1/2 rounded-full bg-foreground transition-[left,background-color] duration-100 ease-out group-data-idle/tuner:bg-muted-foreground/40 group-data-in-tune/tuner:w-1.5 group-data-in-tune/tuner:bg-primary motion-reduce:transition-none"
             style={{ left: "calc(50% + var(--tuner-cents, 0) * 1%)" }}
           />
         </div>
