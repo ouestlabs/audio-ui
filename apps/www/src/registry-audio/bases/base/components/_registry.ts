@@ -181,7 +181,7 @@ export const components: RegistryItem[] = [
       },
     ],
     name: "block-piano-roll",
-    dependencies: ["@audio-ui/core@^0.5.0"],
+    dependencies: ["@audio-ui/core"],
     registryDependencies: [
       "@audio-ui/piano-roll",
       "@audio-ui/timeline",
@@ -259,7 +259,7 @@ export const components: RegistryItem[] = [
       },
     ],
     name: "block-waveform-player",
-    dependencies: ["@audio-ui/core@^0.5.0"],
+    dependencies: ["@audio-ui/core"],
     registryDependencies: [
       "@audio-ui/scrubber",
       "@audio-ui/timeline",
@@ -284,7 +284,7 @@ export const components: RegistryItem[] = [
       hint: "Click a track or clip to place the cursor, S to split, Cmd/Ctrl + D to duplicate. Drag a clip's title bar to move it (Alt to copy), its edges to trim, its corners to fade. Drag the loop strip to set a loop, M to add a locator, Cmd/Ctrl + scroll to zoom.",
     },
     name: "block-timeline",
-    dependencies: ["@audio-ui/core@^0.5.0"],
+    dependencies: ["@audio-ui/core"],
     registryDependencies: [
       "@audio-ui/timeline",
       "@audio-ui/transport",
@@ -360,7 +360,7 @@ export const components: RegistryItem[] = [
       hint: "Click a band to set its type and width. Double-click empty space to add one, Delete to remove it.",
     },
     name: "plot-demo",
-    dependencies: ["@audio-ui/core@^0.5.0"],
+    dependencies: ["@audio-ui/core"],
     registryDependencies: [
       "@audio-ui/plot",
       "@audio-ui/use-noise-through-eq",
@@ -380,7 +380,7 @@ export const components: RegistryItem[] = [
       },
     ],
     name: "plot-filter-demo",
-    dependencies: ["@audio-ui/core@^0.5.0"],
+    dependencies: ["@audio-ui/core"],
     registryDependencies: ["@audio-ui/plot"],
     type: "registry:example",
   },
@@ -395,7 +395,7 @@ export const components: RegistryItem[] = [
       },
     ],
     name: "plot-compressor-demo",
-    dependencies: ["@audio-ui/core@^0.5.0"],
+    dependencies: ["@audio-ui/core"],
     registryDependencies: [
       "@audio-ui/plot",
       "@audio-ui/use-pulses-through-compressor",
@@ -414,7 +414,7 @@ export const components: RegistryItem[] = [
       },
     ],
     name: "block-mixer",
-    dependencies: ["@audio-ui/react", "@audio-ui/core@^0.5.0"],
+    dependencies: ["@audio-ui/react", "@audio-ui/core"],
     registryDependencies: [
       "@audio-ui/fader",
       "@audio-ui/knob",
@@ -549,7 +549,7 @@ export const components: RegistryItem[] = [
       },
     ],
     name: "transport-demo",
-    dependencies: ["@audio-ui/core@^0.5.0"],
+    dependencies: ["@audio-ui/react", "@audio-ui/core"],
     registryDependencies: ["@audio-ui/transport"],
     type: "registry:example",
   },

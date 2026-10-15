@@ -64,6 +64,8 @@ export const hooks: RegistryItem[] = [
   },
   {
     categories: ["audio", "sequencer", "piano"],
+    description:
+      "A look-ahead transport clock on the audio clock: it calls back with the audio time of each step so notes are scheduled sample-accurately, with a loop region, seek and tempo changes.",
     files: [
       {
         path: "hooks/use-transport-clock.ts",
@@ -71,12 +73,14 @@ export const hooks: RegistryItem[] = [
       },
     ],
     name: "use-transport-clock",
-    dependencies: ["@audio-ui/core@^0.5.0"],
+    dependencies: ["@audio-ui/core"],
     registryDependencies: ["@audio-ui/web-audio"],
     type: "registry:hook",
   },
   {
     categories: ["audio", "synth", "sequencer"],
+    description:
+      "A master output bus with a safety limiter: every source connects into one gain node that a single fader governs.",
     files: [
       {
         path: "hooks/use-master-bus.ts",
@@ -89,6 +93,8 @@ export const hooks: RegistryItem[] = [
   },
   {
     categories: ["audio", "synth", "piano", "envelope"],
+    description:
+      "Polyphonic synth voices on the Web Audio API: start and release notes with an envelope, a velocity and a pitch bend.",
     files: [
       {
         path: "hooks/use-synth-voices.ts",
@@ -96,12 +102,15 @@ export const hooks: RegistryItem[] = [
       },
     ],
     name: "use-synth-voices",
+    dependencies: ["@audio-ui/core"],
     registryDependencies: ["@audio-ui/envelope-ramp"],
     type: "registry:hook",
   },
   {
     categories: ["audio", "piano", "synth"],
-    dependencies: ["@audio-ui/core@^0.5.0"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "The notes of the page's MIDI input, with velocity and pitch bend: every component that calls it hears the same devices.",
     files: [
       {
         path: "hooks/use-midi-input.ts",
@@ -128,7 +137,7 @@ export const hooks: RegistryItem[] = [
   },
   {
     categories: ["hooks", "audio", "tuner"],
-    dependencies: ["@audio-ui/react", "@audio-ui/core@^0.5.0"],
+    dependencies: ["@audio-ui/react", "@audio-ui/core"],
     description:
       "The pitch of a signal as a live source: the note nearest the sound and its offset in cents, steadied by a median and held a moment after the sound stops, with no React render per reading",
     files: [
@@ -143,7 +152,7 @@ export const hooks: RegistryItem[] = [
   },
   {
     categories: ["hooks", "audio", "meter"],
-    dependencies: ["@audio-ui/react", "@audio-ui/core@^0.5.0"],
+    dependencies: ["@audio-ui/react", "@audio-ui/core"],
     description:
       "The live levels of a signal from its AnalyserNodes, in the shape a Meter paints from: RMS in dB per channel with a peak that holds and falls, refreshed every frame without re-rendering",
     files: [
@@ -171,7 +180,7 @@ export const hooks: RegistryItem[] = [
   },
   {
     categories: ["hooks", "audio", "plot"],
-    dependencies: ["@audio-ui/react", "@audio-ui/core@^0.5.0"],
+    dependencies: ["@audio-ui/react", "@audio-ui/core"],
     description:
       "The spectrum of an AnalyserNode as a live source for Plot.Trace: dB per point on a logarithmic frequency axis, refreshed every frame without re-rendering, and its held peaks as a second source",
     files: [
@@ -186,7 +195,7 @@ export const hooks: RegistryItem[] = [
   },
   {
     categories: ["hooks", "audio", "plot"],
-    dependencies: ["@audio-ui/core@^0.5.0"],
+    dependencies: ["@audio-ui/core"],
     description:
       "Pink noise played through an equalizer that follows your bands, with the analyser after it: what a plot draws is what is heard",
     files: [

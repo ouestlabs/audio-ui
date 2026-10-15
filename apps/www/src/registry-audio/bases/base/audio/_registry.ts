@@ -3,6 +3,8 @@ import type { RegistryItem } from "shadcn/schema";
 export const audio: RegistryItem[] = [
   {
     dependencies: ["@audio-ui/react"],
+    description:
+      "An editor for a breakpoint ramp, such as an ADSR shape or an automation curve.",
     files: [
       {
         path: "audio/elements/envelope.tsx",
@@ -14,6 +16,8 @@ export const audio: RegistryItem[] = [
   },
   {
     dependencies: ["@audio-ui/react"],
+    description:
+      "A rotary control for continuous parameters, with pointer, wheel and keyboard input.",
     files: [
       {
         path: "audio/elements/knob.tsx",
@@ -25,6 +29,7 @@ export const audio: RegistryItem[] = [
   },
   {
     dependencies: ["@audio-ui/react"],
+    description: "A linear slider for gain and other continuous parameters.",
     files: [
       {
         path: "audio/elements/fader.tsx",
@@ -36,6 +41,8 @@ export const audio: RegistryItem[] = [
   },
   {
     dependencies: ["@audio-ui/react"],
+    description:
+      "A two-dimensional control for two parameters at once, with pointer, wheel and keyboard input.",
     files: [
       {
         path: "audio/elements/xypad.tsx",
@@ -47,6 +54,8 @@ export const audio: RegistryItem[] = [
   },
   {
     dependencies: ["@audio-ui/react"],
+    description:
+      "A grid of drum pads struck by pointer, touch or keyboard, with velocity and choke groups.",
     files: [
       {
         path: "audio/elements/pad.tsx",
@@ -58,6 +67,8 @@ export const audio: RegistryItem[] = [
   },
   {
     dependencies: ["@audio-ui/react"],
+    description:
+      "A piano keyboard for a MIDI pitch range, played with the pointer, touch or the keyboard.",
     files: [
       {
         path: "audio/elements/piano.tsx",
@@ -69,6 +80,8 @@ export const audio: RegistryItem[] = [
   },
   {
     dependencies: ["@audio-ui/react"],
+    description:
+      "A note editor on a grid: draw, move, resize and select notes, with a playable keyboard and a velocity lane.",
     files: [
       {
         path: "audio/elements/piano-roll.tsx",
@@ -81,6 +94,8 @@ export const audio: RegistryItem[] = [
   },
   {
     dependencies: ["@audio-ui/react"],
+    description:
+      "The note and the pitch of a sound, live from the microphone, with a needle on a scale of cents.",
     files: [
       {
         path: "audio/elements/tuner.tsx",
@@ -93,6 +108,8 @@ export const audio: RegistryItem[] = [
   },
   {
     dependencies: ["@audio-ui/react"],
+    description:
+      "The level of a sound across frequencies, live, on a log axis in hertz, with held peaks.",
     files: [
       {
         path: "audio/elements/spectrum-analyzer.tsx",
@@ -104,7 +121,9 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
-    dependencies: ["@audio-ui/react", "@audio-ui/core@^0.5.0"],
+    dependencies: ["@audio-ui/react", "@audio-ui/core"],
+    description:
+      "Curves and draggable points, for equalizers, filters and compressors.",
     files: [
       {
         path: "audio/elements/plot.tsx",
@@ -143,6 +162,8 @@ export const audio: RegistryItem[] = [
       },
     },
     dependencies: ["@audio-ui/react"],
+    description:
+      "A level meter in decibels for one or more channels, with peak hold.",
     files: [
       {
         path: "audio/elements/meter.tsx",
@@ -154,6 +175,8 @@ export const audio: RegistryItem[] = [
   },
   {
     dependencies: ["@audio-ui/react"],
+    description:
+      "Draws audio: a seekable waveform with regions and markers, a live waveform that scrolls with the signal, and a bar visualizer.",
     files: [
       {
         path: "audio/elements/waveform.tsx",
@@ -171,6 +194,8 @@ export const audio: RegistryItem[] = [
   },
   {
     dependencies: ["@audio-ui/react"],
+    description:
+      "A zoomable timeline for arrangement views and editors, with a ruler that seeks, lanes and a playhead.",
     files: [
       {
         path: "audio/elements/timeline.tsx",
@@ -191,6 +216,8 @@ export const audio: RegistryItem[] = [
   },
   {
     dependencies: ["@base-ui/react"],
+    description:
+      "A tempo field on its own: type it, step it with the arrows, or drag its unit to scrub the value.",
     files: [
       {
         path: "audio/elements/bpm-control.tsx",
@@ -202,6 +229,8 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
+    description:
+      "A button that connects the page's MIDI input, with the device's name beside it. Renders nothing when the browser has no Web MIDI.",
     files: [
       {
         path: "audio/elements/midi-connect-control.tsx",
@@ -218,6 +247,8 @@ export const audio: RegistryItem[] = [
   },
   {
     dependencies: ["@audio-ui/react"],
+    description:
+      "A step grid: press a step, or drag across several, to draw a pattern.",
     files: [
       {
         path: "audio/elements/sequencer.tsx",
@@ -241,6 +272,8 @@ export const audio: RegistryItem[] = [
   },
   {
     dependencies: ["@audio-ui/react"],
+    description:
+      "A compact player: play and pause, the position, a seek bar and the length.",
     files: [
       {
         path: "audio/elements/scrubber.tsx",
@@ -257,6 +290,8 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
+    description:
+      "DAW transport controls: play, pause and stop, the position in bars, beats and sixteenths, loop and metronome toggles, tempo and time signature.",
     files: [
       {
         path: "audio/elements/transport.tsx",
@@ -269,7 +304,7 @@ export const audio: RegistryItem[] = [
       },
     ],
     name: "transport",
-    dependencies: ["@audio-ui/core@^0.5.0"],
+    dependencies: ["@audio-ui/react", "@audio-ui/core"],
     registryDependencies: [
       "@audio-ui/bpm-control",
       "@shadcn/button",
