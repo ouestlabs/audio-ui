@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Piano } from "@/registry-audio/bases/base/audio/elements/piano";
 import { SpectrumAnalyzer } from "@/registry-audio/bases/base/audio/elements/spectrum-analyzer";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
+import { useMidiInput } from "@/registry-audio/bases/base/hooks/use-midi-input";
 import { useSpectrum } from "@/registry-audio/bases/base/hooks/use-spectrum";
 import { useSynthVoices } from "@/registry-audio/bases/base/hooks/use-synth-voices";
 import { useWebAudio } from "@/registry-audio/bases/base/hooks/use-web-audio";
@@ -20,7 +21,7 @@ const ENVELOPE: EnvelopePoint[] = [
   { x: 1, y: 0.05 },
 ];
 
-/** Play the keyboard and watch the spectrum: a sawtooth note lights its pitch and every harmonic above it, and the peaks hold a moment after you let go. */
+/** Play the keyboard, or a MIDI one, and watch the spectrum: a sawtooth note lights its pitch and every harmonic above it, and the peaks hold a moment after you let go. */
 export default function SpectrumAnalyzerDemo() {
   const webAudio = useWebAudio();
   const master = useMasterBus(VOLUME);
@@ -50,25 +51,33 @@ export default function SpectrumAnalyzerDemo() {
 
   useEffect(() => releaseAll, [releaseAll]);
 
-  const noteOn = useCallback(
-    (pitch: number, details: PianoPrimitive.Root.NoteOnEventDetails) => {
+  const play = useCallback(
+    (pitch: number, velocity: number) => {
       const ctx = webAudio.getContext();
       if (ctx?.state === "suspended") {
         ctx.resume();
       }
-      triggerNote(pitch, ENVELOPE, details.velocity);
+      triggerNote(pitch, ENVELOPE, velocity);
     },
     [triggerNote, webAudio]
+  );
+  const noteOn = useCallback(
+    (pitch: number, details: PianoPrimitive.Root.NoteOnEventDetails) =>
+      play(pitch, details.velocity),
+    [play]
   );
   const noteOff = useCallback(
     (pitch: number) => releaseNote(pitch, ENVELOPE),
     [releaseNote]
   );
+  // A MIDI keyboard plays the same voices and lights the keys it holds.
+  const midi = useMidiInput({ onNoteOff: noteOff, onNoteOn: play });
 
   return (
     <div className="flex w-full flex-col gap-3">
       <SpectrumAnalyzer aria-label="Spectrum" source={spectrum} />
       <Piano
+        activeNotes={midi.activeNotes}
         aria-label="Keyboard"
         maxPitch={72}
         minPitch={48}

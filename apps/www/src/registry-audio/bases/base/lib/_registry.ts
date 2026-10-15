@@ -46,6 +46,21 @@ export const lib: RegistryItem[] = [
     type: "registry:lib",
   },
   {
+    categories: ["lib", "audio", "piano", "synth"],
+    dependencies: [],
+    description:
+      "The page's one Web MIDI input: connect it from any button, and every component listening hears the same devices",
+    files: [
+      {
+        path: "lib/midi-input.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "midi-input",
+    registryDependencies: ["@audio-ui/midi"],
+    type: "registry:lib",
+  },
+  {
     categories: ["lib", "audio", "sequencer", "piano"],
     dependencies: [],
     description:

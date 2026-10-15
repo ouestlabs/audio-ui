@@ -15,3 +15,12 @@ const EXPANDABLE = new Set([
 ]);
 
 export const isExpandable = (name: string) => EXPANDABLE.has(name);
+
+/** The previews that play from a keyboard: their bar gets a button to connect a MIDI one. */
+const MIDI = new Set([
+  "block-piano-roll",
+  "piano-size-default-demo",
+  "spectrum-analyzer-demo",
+]);
+
+export const takesMidi = (name: string) => MIDI.has(name);

@@ -5,25 +5,27 @@ import {
   ButtonGroup,
   ButtonGroupText,
 } from "@/registry/bases/base/ui/button-group";
-import type { useMidiInput } from "@/registry-audio/bases/base/hooks/use-midi-input";
+import { useMidiInput } from "@/registry-audio/bases/base/hooks/use-midi-input";
 
-interface MidiConnectControlProps {
-  midi: ReturnType<typeof useMidiInput>;
-  onToggle: () => void;
-}
-
-/** The "Connect MIDI Keyboard" button plus its device-name/error text, shared by any block wiring up `useMidiInput`. Renders nothing when the browser doesn't support the Web MIDI API. */
-export function MidiConnectControl({
-  midi,
-  onToggle,
-}: MidiConnectControlProps) {
+/**
+ * Connects the page's MIDI input, with the device's name or the error beside
+ * it. Put it anywhere: every component listening with `useMidiInput` hears
+ * the device it connects. Renders nothing when the browser has no Web MIDI.
+ */
+export function MidiConnectControl() {
+  const midi = useMidiInput();
   if (!midi.isSupported) {
     return null;
   }
   return (
     <ButtonGroup>
-      <Button onClick={onToggle} size="sm" type="button" variant="outline">
-        {midi.isConnected ? "Disconnect MIDI" : "Connect MIDI Keyboard"}
+      <Button
+        onClick={midi.isConnected ? midi.disconnect : midi.requestAccess}
+        size="sm"
+        type="button"
+        variant="outline"
+      >
+        {midi.isConnected ? "Disconnect MIDI" : "Connect MIDI"}
       </Button>
       {midi.isConnected || midi.error ? (
         <ButtonGroupText className="text-muted-foreground">
