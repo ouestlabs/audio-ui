@@ -1,1 +1,1 @@
-{"$schema":"https://ui.shadcn.com/schema/registry-item.json","dependencies":["@audio-ui/core@^0.4.0"],"description":"Moved to @audio-ui/core/pitch: installs the package.","files":[],"name":"pitch-detection","type":"registry:lib"}
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","dependencies":["@audio-ui/core@^0.5.0"],"description":"Moved to @audio-ui/core/pitch: installs the package.","files":[],"name":"pitch-detection","type":"registry:lib"}

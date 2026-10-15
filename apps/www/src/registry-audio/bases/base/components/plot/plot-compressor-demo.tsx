@@ -1,5 +1,6 @@
 "use client";
 
+import { compressorOutput } from "@audio-ui/core/analysis";
 import { useCallback, useMemo, useState } from "react";
 import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder";
 import { Button } from "@/registry/bases/base/ui/button";
@@ -14,7 +15,6 @@ import {
   PlotLine,
 } from "@/registry-audio/bases/base/audio/elements/plot";
 import { usePulsesThroughCompressor } from "@/registry-audio/bases/base/hooks/use-pulses-through-compressor";
-import { compressorOutput } from "@/registry-audio/bases/base/lib/filter-response";
 
 const MIN_DB = -60;
 const MAX_DB = 0;

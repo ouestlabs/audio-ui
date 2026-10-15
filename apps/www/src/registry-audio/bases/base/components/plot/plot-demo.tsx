@@ -1,5 +1,15 @@
 "use client";
 
+import {
+  type BiquadType,
+  bandGainForHandle,
+  bandHandleDb,
+  biquadResponse,
+  type EqBand,
+  eqResponse,
+  formatDb,
+  formatHz,
+} from "@audio-ui/core/analysis";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder";
 import { Button } from "@/registry/bases/base/ui/button";
@@ -30,16 +40,6 @@ import {
 } from "@/registry-audio/bases/base/audio/elements/plot";
 import { useNoiseThroughEq } from "@/registry-audio/bases/base/hooks/use-noise-through-eq";
 import { useSpectrum } from "@/registry-audio/bases/base/hooks/use-spectrum";
-import {
-  type BiquadType,
-  bandGainForHandle,
-  bandHandleDb,
-  biquadResponse,
-  type EqBand,
-  eqResponse,
-  formatDb,
-  formatHz,
-} from "@/registry-audio/bases/base/lib/filter-response";
 
 type Band = EqBand & { id: number };
 

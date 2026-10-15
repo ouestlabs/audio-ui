@@ -1,5 +1,6 @@
 "use client";
 
+import { rmsDb } from "@audio-ui/core/analysis";
 import { createSource, type Meter } from "@audio-ui/react";
 import { useEffect, useState } from "react";
 
@@ -10,15 +11,10 @@ const RELEASE_DB_PER_SECOND = 30;
 const PEAK_HOLD_MS = 1500;
 const PEAK_FALL_DB_PER_SECOND = 12;
 
-/** The RMS level of the analyser's latest samples, in dB. */
-function rmsDb(analyser: AnalyserNode, buffer: Float32Array<ArrayBuffer>) {
+/** The RMS level of the analyser's latest samples, in dB, `SILENCE_DB` at the quietest. */
+function levelDb(analyser: AnalyserNode, buffer: Float32Array<ArrayBuffer>) {
   analyser.getFloatTimeDomainData(buffer);
-  let sum = 0;
-  for (const sample of buffer) {
-    sum += sample * sample;
-  }
-  const rms = Math.sqrt(sum / buffer.length);
-  return rms > 0 ? 20 * Math.log10(rms) : SILENCE_DB;
+  return Math.max(SILENCE_DB, rmsDb(buffer));
 }
 
 const silence = (channels: number): Meter.Root.Frame => ({
@@ -58,7 +54,7 @@ export function useAudioLevels(analysers: readonly AnalyserNode[]) {
       for (const channel of channels) {
         // It rises at once and falls at the release rate.
         const db = Math.max(
-          rmsDb(channel.analyser, channel.buffer),
+          levelDb(channel.analyser, channel.buffer),
           channel.level - RELEASE_DB_PER_SECOND * elapsed,
           SILENCE_DB
         );

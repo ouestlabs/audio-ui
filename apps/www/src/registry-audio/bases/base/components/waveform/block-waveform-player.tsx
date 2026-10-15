@@ -1,5 +1,10 @@
 "use client";
 
+import {
+  type AudioPeaks,
+  computePeaks,
+  normalizePeaks,
+} from "@audio-ui/core/analysis";
 import { createSource } from "@audio-ui/react";
 import type { ChangeEvent } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -22,12 +27,7 @@ import {
   WaveformRegion,
   WaveformRegionHandle,
 } from "@/registry-audio/bases/base/audio/elements/waveform";
-import {
-  type AudioPeaks,
-  computePeaks,
-  decodeAudioChannels,
-  normalizePeaks,
-} from "@/registry-audio/bases/base/lib/waveform-peaks";
+import { decodeAudioChannels } from "@/registry-audio/bases/base/lib/audio-decode";
 
 // More slices than the waveform has bars at any width or zoom; it keeps each bar's lowest and highest.
 const PEAK_COUNT = 4096;
