@@ -9,8 +9,10 @@ import {
   FrameHeader,
 } from "@/components/custom/frame";
 import { ExpandPreview } from "@/components/expand-preview";
+import { MidiConnect } from "@/components/midi-connect";
 import type { PreviewHost } from "@/components/preview-host";
 import { Spinner } from "@/components/ui/spinner";
+import { takesMidi } from "@/lib/is-block";
 import { cn } from "@/lib/utils";
 
 /**
@@ -103,6 +105,7 @@ export function PreviewBar({
       </p>
       <div className="flex items-center gap-1.5">
         {badge}
+        {takesMidi(name) ? <MidiConnect /> : null}
         {expand?.host ? (
           <ExpandPreview hint={hint} label={name} preview={expand} />
         ) : null}

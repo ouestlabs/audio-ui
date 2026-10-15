@@ -15,6 +15,7 @@ import {
   FrameFooter,
   FrameHeader,
 } from "@/components/custom/frame";
+import { MidiConnect } from "@/components/midi-connect";
 import { HostSlot, type PreviewHost } from "@/components/preview-host";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,6 +26,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { takesMidi } from "@/lib/is-block";
 import { cn } from "@/lib/utils";
 
 /** The floating menus a block opens: they sit outside the dialog's DOM, though the block is inside it. */
@@ -108,6 +110,7 @@ export function ExpandPreview({
               <span className="sr-only">{label}</span>
             </DialogTitle>
             <div className="flex items-center gap-1.5">
+              {takesMidi(label) ? <MidiConnect /> : null}
               <CopyRegistry value={`@audio-ui/${label}`} />
               <DialogClose
                 render={

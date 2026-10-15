@@ -102,6 +102,20 @@ import { Piano } from "@/components/audio-ui/piano";
 <Piano activeNotes={midiInputNotes} maxPitch={72} minPitch={48} />
 ```
 
+**A MIDI keyboard:** `useMidiInput` listens to the page's MIDI input. Browsers ask for permission, so connect it from a click: with `requestAccess`, or the ready-made button, `npx shadcn@latest add @audio-ui/midi-connect-control`.
+
+```tsx
+import { useMidiInput } from "@/hooks/use-midi-input";
+
+const midi = useMidiInput({
+  onNoteOff: (pitch) => synth.release(pitch),
+  onNoteOn: (pitch, velocity) => synth.trigger(pitch, velocity),
+});
+
+<button onClick={midi.requestAccess} type="button">Connect MIDI</button>
+<Piano activeNotes={midi.activeNotes} maxPitch={72} minPitch={48} />
+```
+
 ## Interaction
 
 ### Pointer

@@ -4,7 +4,14 @@ import {
   createSource,
   type PianoRoll as PianoRollPrimitive,
 } from "@audio-ui/react";
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder";
 import { Button } from "@/registry/bases/base/ui/button";
 import { BpmControl } from "@/registry-audio/bases/base/audio/elements/bpm-control";
@@ -29,6 +36,7 @@ import {
   TimelineRuler,
 } from "@/registry-audio/bases/base/audio/elements/timeline";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
+import { useMidiInput } from "@/registry-audio/bases/base/hooks/use-midi-input";
 import {
   type UseSynthVoicesReturn,
   useSynthVoices,
@@ -37,6 +45,7 @@ import {
   type TransportRegion,
   useTransportClock,
 } from "@/registry-audio/bases/base/hooks/use-transport-clock";
+import { useWebAudio } from "@/registry-audio/bases/base/hooks/use-web-audio";
 import {
   encodeMidiFile,
   type MidiFileNote,
@@ -408,6 +417,28 @@ export default function BlockPianoRoll() {
     triggerNote,
   });
 
+  // A MIDI keyboard plays the roll's voices and lights its keys, once the page's MIDI input is connected.
+  const webAudio = useWebAudio();
+  const midiNoteOn = useCallback(
+    (pitch: number, velocity: number) => {
+      const ctx = webAudio.getContext();
+      if (ctx?.state === "suspended") {
+        ctx.resume();
+      }
+      triggerNote(pitch, DEFAULT_ENVELOPE, velocity);
+    },
+    [triggerNote, webAudio]
+  );
+  const midiNoteOff = useCallback(
+    (pitch: number) => releaseNote(pitch, DEFAULT_ENVELOPE),
+    [releaseNote]
+  );
+  const midi = useMidiInput({ onNoteOff: midiNoteOff, onNoteOn: midiNoteOn });
+  const activePitches = useMemo(
+    () => [...playingPitches, ...midi.activeNotes],
+    [midi.activeNotes, playingPitches]
+  );
+
   /** A double-click on the loop goes back to looping the whole grid. */
   const clearLoopRegion = useCallback(() => {
     setLoopRegion(null);
@@ -594,7 +625,7 @@ export default function BlockPianoRoll() {
         source={position}
       >
         <PianoRoll
-          activePitches={playingPitches}
+          activePitches={activePitches}
           className="h-104"
           folded={folded}
           getNoteLabel={describeNote}
