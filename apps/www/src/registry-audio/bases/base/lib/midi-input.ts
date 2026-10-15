@@ -116,4 +116,4 @@ export class MidiInput {
   }
 }
 
-export const $midiInput = new MidiInput();
+export const midiInput = new MidiInput();

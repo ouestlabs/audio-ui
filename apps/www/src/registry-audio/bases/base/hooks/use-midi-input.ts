@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { $midiInput } from "@/registry-audio/bases/base/lib/midi-input";
+import { midiInput } from "@/registry-audio/bases/base/lib/midi-input";
 
 /** The top of MIDI's 7-bit velocity. */
 const MAX_MIDI_VELOCITY = 127;
@@ -38,9 +38,9 @@ export function useMidiInput({
   onPitchBend,
 }: UseMidiInputOptions = {}): UseMidiInputReturn {
   const state = useSyncExternalStore(
-    $midiInput.subscribe,
-    $midiInput.getSnapshot,
-    $midiInput.getServerSnapshot
+    midiInput.subscribe,
+    midiInput.getSnapshot,
+    midiInput.getServerSnapshot
   );
   const [activeNotes, setActiveNotes] = useState<number[]>([]);
 
@@ -49,7 +49,7 @@ export function useMidiInput({
 
   useEffect(
     () =>
-      $midiInput.listen((event) => {
+      midiInput.listen((event) => {
         if (event.type === "noteon") {
           setActiveNotes((held) =>
             held.includes(event.note) ? held : [...held, event.note]
@@ -77,11 +77,11 @@ export function useMidiInput({
 
   return {
     activeNotes,
-    disconnect: $midiInput.disconnect,
+    disconnect: midiInput.disconnect,
     error: state.error,
     inputNames: state.inputs,
     isConnected: state.connected,
     isSupported: state.supported,
-    requestAccess: $midiInput.connect,
+    requestAccess: midiInput.connect,
   };
 }
