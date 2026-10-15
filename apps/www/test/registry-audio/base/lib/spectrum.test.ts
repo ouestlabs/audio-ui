@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import {
+  holdPeaks,
   logSpectrum,
   SPECTRUM_FLOOR_DB,
 } from "@/registry-audio/bases/base/lib/spectrum";
@@ -52,5 +53,34 @@ describe("logSpectrum", () => {
     const out = new Float32Array(32);
     logSpectrum(silent, SAMPLE_RATE, out);
     expect(out.every((value) => value === SPECTRUM_FLOOR_DB)).toBe(true);
+  });
+});
+
+describe("holdPeaks", () => {
+  const run = (levels: number[], elapsed: number[]) => {
+    const peaks = new Float32Array(1).fill(SPECTRUM_FLOOR_DB);
+    const holding = new Float32Array(1);
+    return levels.map(
+      (level, step) =>
+        holdPeaks([level], peaks, holding, elapsed[step] ?? 0, {
+          fall: 10,
+          hold: 1,
+        })[0]
+    );
+  };
+
+  test("a peak rises with the spectrum at once", () => {
+    expect(run([-60, -20], [0, 0.016])).toEqual([-60, -20]);
+  });
+
+  test("it stays put through its hold, then falls at its rate", () => {
+    // Held for 1 s (0.5 + 0.5), then 2 s of falling at 10 dB/s.
+    expect(run([-20, -80, -80, -80], [0, 0.5, 0.5, 2])).toEqual([
+      -20, -20, -20, -40,
+    ]);
+  });
+
+  test("it never falls below the spectrum", () => {
+    expect(run([-20, -80, -25], [0, 2, 10]).at(-1)).toBe(-25);
   });
 });

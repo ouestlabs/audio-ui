@@ -18,6 +18,7 @@ npm install @audio-ui/core   # no dependencies
 | `@audio-ui/core/meter` | `createMeterConfig` |
 | `@audio-ui/core/plot` | `createPlotHandleController` |
 | `@audio-ui/core/sequencer` | `createSequencerController` |
+| `@audio-ui/core/pad` | `createPadController` |
 | `@audio-ui/core/piano` | `createPianoController` |
 | `@audio-ui/core/piano-roll` | `createPianoRollController` |
 | `@audio-ui/core/timeline` | `createTimelineController`, `createTrackController`, `createClipController`, `createRangeController`, `createNavigatorController`, `createWheelZoom` |

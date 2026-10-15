@@ -18,7 +18,6 @@ export {
   DownloadIcon,
   HeadphonesIcon,
   InfoIcon,
-  KeyboardIcon,
   MagnifyingGlassIcon,
   MagnifyingGlassMinusIcon,
   MagnifyingGlassPlusIcon,

@@ -1,6 +1,6 @@
 ---
 name: audio-ui
-description: "Builds audio interfaces with audio/ui: React (@audio-ui/react and the @audio-ui shadcn registry) or any other framework and the plain DOM (@audio-ui/core): knobs, faders, XY pads, envelopes, level meters, waveforms, EQ and filter plots, timelines, step sequencers, piano keyboards, piano rolls, transport bars, and the synths, mixers, DAWs, samplers and players made from them. Covers picking and installing components, wiring them to the Web Audio API, live meters and playheads, styling the headless primitives, building controls for Vue, Svelte, Solid, Angular, web components or vanilla JS on the framework-free controllers, and letting an AI model drive them through tools. Applies whenever the user wants any audio control or display on the web, even without naming audio/ui, and whenever a project imports @audio-ui/react or @audio-ui/core or has an @audio-ui registry in components.json."
+description: "Builds audio interfaces with audio/ui: React (@audio-ui/react and the @audio-ui shadcn registry) or any other framework and the plain DOM (@audio-ui/core): knobs, faders, XY pads, envelopes, level meters, waveforms, EQ and filter plots, timelines, step sequencers, drum pads, piano keyboards, piano rolls, transport bars, and the synths, mixers, DAWs, samplers and players made from them. Covers picking and installing components, wiring them to the Web Audio API, live meters and playheads, styling the headless primitives, building controls for Vue, Svelte, Solid, Angular, web components or vanilla JS on the framework-free controllers, and letting an AI model drive them through tools. Applies whenever the user wants any audio control or display on the web, even without naming audio/ui, and whenever a project imports @audio-ui/react or @audio-ui/core or has an @audio-ui registry in components.json."
 license: MIT
 metadata:
   author: audio/ui
@@ -22,7 +22,7 @@ Run commands with the project's package manager, read from its lockfile: `npx sh
 
 ## When to Apply
 
-- Adding a knob, fader, XY pad, envelope, meter, waveform, plot, timeline, sequencer, piano or piano roll
+- Adding a knob, fader, XY pad, envelope, meter, waveform, plot, timeline, sequencer, drum pad, piano or piano roll
 - Building a synth, mixer, DAW, sampler, recorder or player interface
 - Connecting controls to the Web Audio API, or displays to live audio
 - Styling `@audio-ui/react` primitives with your own design system
@@ -114,8 +114,10 @@ Run commands with the project's package manager, read from its lockfile: `npx sh
 | Level in dB with peak hold | `meter` |
 | Audio file shape, seeking, live scope | `waveform` |
 | EQ, filter or compressor curve with handles | `plot` |
+| Live spectrum, frequency analyzer | `spectrum-analyzer` |
 | Arrangement view, clips, ruler, playhead | `timeline` |
 | Step pattern | `sequencer` |
+| Drum pads, sample triggers | `pad` |
 | Playable keyboard | `piano` |
 | Note editor | `piano-roll` |
 | Play, stop, record, loop, bars and tempo | `transport` |

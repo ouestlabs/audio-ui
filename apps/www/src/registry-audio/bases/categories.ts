@@ -82,9 +82,21 @@ export const categories: CategoryDef[] = [
   },
   {
     description:
+      "Spectrum analyzers: the level of a sound across frequencies, live, with held peaks.",
+    label: "Spectrum",
+    name: "spectrum",
+  },
+  {
+    description:
       "Plots for drawing curves and dragging points on them: equalizers, filters and compressors.",
     label: "Plot",
     name: "plot",
+  },
+  {
+    description:
+      "Drum pad grids: strike them by pointer or keyboard, with velocity and choke groups.",
+    label: "Pad",
+    name: "pad",
   },
   {
     description:

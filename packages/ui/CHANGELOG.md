@@ -1,5 +1,16 @@
 # @audio-ui/react
 
+## 0.3.0
+
+### Minor Changes
+
+- aa6d721: Pad: a new primitive for drum pads, `Pad.Root` and `Pad.Item` from `@audio-ui/react/pad`, with its framework-free controller in `@audio-ui/core/pad`. Each pad sounds while held, by pointer or with Enter or Space, and reports `onPadOn(value, eventDetails)` with a velocity taken from the pointer's pressure, or else from how high on the pad it lands. Pads sharing a `chokeGroup` stop each other, `activePads` lights pads from elsewhere, and the pads are one tab stop walked with the arrow keys.
+
+### Patch Changes
+
+- Updated dependencies [aa6d721]
+  - @audio-ui/core@0.2.0
+
 ## 0.2.2
 
 ### Patch Changes

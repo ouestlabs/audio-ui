@@ -49,6 +49,17 @@ export const audio: RegistryItem[] = [
     dependencies: ["@audio-ui/react"],
     files: [
       {
+        path: "audio/elements/pad.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "pad",
+    type: "registry:ui",
+  },
+  {
+    dependencies: ["@audio-ui/react"],
+    files: [
+      {
         path: "audio/elements/piano.tsx",
         type: "registry:ui",
       },
@@ -66,6 +77,18 @@ export const audio: RegistryItem[] = [
     ],
     name: "piano-roll",
     registryDependencies: ["@audio-ui/timeline"],
+    type: "registry:ui",
+  },
+  {
+    dependencies: ["@audio-ui/react"],
+    files: [
+      {
+        path: "audio/elements/spectrum-analyzer.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "spectrum-analyzer",
+    registryDependencies: ["@audio-ui/plot", "@audio-ui/use-spectrum"],
     type: "registry:ui",
   },
   {

@@ -125,5 +125,5 @@ The parameter controls are form fields. Give one a `name` and its native input s
 
 - **Knob and Fader** submit one number under their `name`. The Knob also takes `form` to belong to a form elsewhere in the page.
 - **XY Pad** submits two, as `pad.x` and `pad.y`.
-- The other primitives (Envelope, Plot, Sequencer, Piano, PianoRoll, Timeline, Waveform, Meter) hold a value that is not a single number, a curve or a pattern for instance, so they do not submit by themselves: read it from `onValueChange` or `onValueCommitted` and send it as you like.
+- The other primitives (Envelope, Plot, Sequencer, Pad, Piano, PianoRoll, Timeline, Waveform, Meter) hold a value that is not a single number, a curve or a pattern for instance, so they do not submit by themselves: read it from `onValueChange` or `onValueCommitted` and send it as you like.
 - A disabled control is left out of the submission, as with any input.

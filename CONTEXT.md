@@ -17,7 +17,7 @@ The moment a gesture ends and the parameter's pending value becomes final. Disti
 _Avoid_: change (for gesture-end), submit
 
 **Primitive**:
-A headless, unstyled, accessible control published in `@audio-ui/react` (Envelope, Fader, Knob, Meter, Piano, PianoRoll, Plot, Sequencer, Timeline, Waveform, XYPad), its framework-free logic in `@audio-ui/core`.
+A headless, unstyled, accessible control published in `@audio-ui/react` (Envelope, Fader, Knob, Meter, Pad, Piano, PianoRoll, Plot, Sequencer, Timeline, Waveform, XYPad), its framework-free logic in `@audio-ui/core`.
 _Avoid_: component (when the headless building block is meant), widget
 
 **Element**:

@@ -3,8 +3,10 @@
 import { createSource, type Source } from "@audio-ui/react";
 import { useEffect, useState } from "react";
 import {
+  holdPeaks,
   type LogSpectrumOptions,
   logSpectrum,
+  type PeakHoldOptions,
   SPECTRUM_FLOOR_DB,
 } from "@/registry-audio/bases/base/lib/spectrum";
 
@@ -54,4 +56,47 @@ export function useSpectrum(
   }, [analyser, maxHz, minHz, points, source]);
 
   return source;
+}
+
+/**
+ * The peaks of a spectrum `source`, as a live source of their own: each point
+ * keeps the loudest level it reached for `hold` seconds, then falls at `fall`
+ * dB per second. Drawn as a second `Plot.Trace` over the spectrum, with no
+ * React render per frame.
+ */
+export function useSpectrumPeaks(
+  source: Source<Float32Array>,
+  { fall, hold }: PeakHoldOptions = {}
+): Source<Float32Array> {
+  const [peaks] = useState(() =>
+    createSource<Float32Array>(
+      new Float32Array(source.getSnapshot().length).fill(SPECTRUM_FLOOR_DB)
+    )
+  );
+
+  useEffect(() => {
+    let values = peaks.getSnapshot();
+    let holding = new Float32Array(values.length);
+    let followed = source.getSnapshot();
+    let last = performance.now();
+    return source.subscribe(() => {
+      const spectrum = source.getSnapshot();
+      // A spectrum source keeps one array while it runs: a new one means it restarted or went quiet.
+      if (spectrum !== followed) {
+        followed = spectrum;
+        values = new Float32Array(spectrum.length).fill(SPECTRUM_FLOOR_DB);
+        holding = new Float32Array(spectrum.length);
+      }
+      const now = performance.now();
+      peaks.set(
+        holdPeaks(spectrum, values, holding, (now - last) / 1000, {
+          fall,
+          hold,
+        })
+      );
+      last = now;
+    });
+  }, [fall, hold, peaks, source]);
+
+  return peaks;
 }

@@ -329,6 +329,11 @@
     @apply bg-primary;
   }
 
+  /* MARK: Pad (pad ← cn-sequencer-cell, flash mixes primary by --pad-velocity) */
+  .cn-pad-item {
+    @apply rounded-[min(var(--radius-md),10px)] border bg-muted/60 text-muted-foreground outline-none transition-[background-color,border-color,color,transform] duration-100 ease-out hover:not-data-active:bg-muted focus-visible:ring-2 focus-visible:ring-ring/50 data-active:scale-[0.97] data-active:border-primary data-active:bg-[color-mix(in_oklab,var(--primary)_calc(55%_+_var(--pad-velocity,1)*45%),var(--muted))] data-active:text-primary-foreground data-active:duration-0 motion-reduce:transition-none motion-reduce:data-active:scale-100;
+  }
+
   /* MARK: Plot */
   .cn-plot {
     @apply rounded-4xl border bg-card;

@@ -30,8 +30,6 @@ export {
   HeadphonesIcon,
   Info,
   InfoIcon,
-  Keyboard,
-  KeyboardIcon,
   Loader2,
   Loader2Icon,
   Minus,

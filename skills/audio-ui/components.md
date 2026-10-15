@@ -30,6 +30,7 @@ Without the registry, the headless primitive comes from the package: `import { K
 | --- | --- | --- | --- |
 | `meter` | `Meter` from `@/components/audio-ui/meter` | `@audio-ui/react/meter` | Stereo or multi-channel dB level with peak hold, display only. Live levels come from a `source`, not from React state |
 | `waveform` | `Waveform`, `WaveformRegion`, `WaveformMarker`, `LiveWaveform`, `BarVisualizer` from `@/components/audio-ui/waveform` | `@audio-ui/react/waveform` | A seekable waveform with regions and markers, a live scrolling one, or a bar visualizer (`waveform-dsp` lib turns a file into peaks) |
+| `spectrum-analyzer` | `SpectrumAnalyzer` from `@/components/audio-ui/spectrum-analyzer` | registry only, built on `Plot` | A live spectrum on a log frequency axis with held peaks. Feed it `useSpectrum(analyser)` from the `use-spectrum` hook, with the same `minHz`/`maxHz` |
 | `plot` | `Plot`, `PlotGraph`, `PlotCurve`, `PlotHandle`, `PlotTraceArea`… from `@/components/audio-ui/plot` | `@audio-ui/react/plot` | A curve with draggable points: equalizers, filters, compressors |
 
 ## Time and sequencing
@@ -38,6 +39,7 @@ Without the registry, the headless primitive comes from the package: `import { K
 | --- | --- | --- | --- |
 | `timeline` | `Timeline`, `TimelineRuler`, `TimelineTrack`, `TimelineClip`, `TimelinePlayhead`… from `@/components/audio-ui/timeline` | `@audio-ui/react/timeline` | A zoomable arrangement view: ruler that seeks on the grid, lanes, a playhead that moves without re-rendering (`musical-time` lib converts tempo to seconds) |
 | `sequencer` | `Sequencer` from `@/components/audio-ui/sequencer` | `@audio-ui/react/sequencer` | A step grid: press a step to flip it (on pointer down, so press it, don't `click`), drag across steps to paint a pattern, `Space` or `Enter` on the focused step. The playing step comes from a `source`, not state |
+| `pad` | `Pad`, `PadItem` from `@/components/audio-ui/pad` | `@audio-ui/react/pad` | Drum pads to strike (on pointer down, so press them, don't `click`): velocity from pressure or height, `chokeGroup` to cut a ringing pad, `Space` or `Enter` on the focused pad, an `activePads` overlay |
 | `piano` | `Piano` from `@/components/audio-ui/piano` | `@audio-ui/react/piano` | A virtual keyboard with a MIDI pitch range, glissando, multi-touch, an `activeNotes` overlay |
 | `piano-roll` | `PianoRoll`, `PianoRollKeys`, `PianoRollGrid`, `PianoRollVelocity`… from `@/components/audio-ui/piano-roll` | `@audio-ui/react/piano-roll` | A DAW-style note editor with grid, keyboard, velocity lane and keyboard editing |
 | `transport` | `Transport` from `@/components/audio-ui/transport` | registry only | Play or pause, stop, the position in bars, beats and sixteenths, tempo and time signature, and loop and metronome toggles when you pass their handlers. The position follows a `source`, so a playing transport does not re-render |

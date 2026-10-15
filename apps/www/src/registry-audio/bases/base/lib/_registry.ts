@@ -184,7 +184,7 @@ export const lib: RegistryItem[] = [
     categories: ["lib", "audio", "synth", "sequencer"],
     dependencies: [],
     description:
-      "One-shot percussion synthesis (kick, snare, hihat) built from oscillators and noise bursts",
+      "One-shot percussion synthesis (kick, snare, hihat) built from oscillators and noise bursts, each with its own tune and decay",
     files: [
       {
         path: "lib/drum-synthesis.ts",

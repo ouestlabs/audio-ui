@@ -1,6 +1,6 @@
 {
   "name": "@audio-ui/core",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "The framework-agnostic logic of audio/ui's primitives: values and scales, geometry, live sources, frame scheduling.",
   "keywords": [
     "audio-ui",
@@ -44,6 +44,10 @@
     "./meter": {
       "types": "./dist/primitives/meter/index.d.ts",
       "import": "./dist/meter.js"
+    },
+    "./pad": {
+      "types": "./dist/primitives/pad/index.d.ts",
+      "import": "./dist/pad.js"
     },
     "./piano": {
       "types": "./dist/primitives/piano/index.d.ts",
