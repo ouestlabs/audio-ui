@@ -1,6 +1,6 @@
 import type { RegistryItem } from "shadcn/schema";
 
-export const lib: RegistryItem[] = [
+const items: RegistryItem[] = [
   {
     categories: ["lib", "audio", "web-audio"],
     dependencies: [],
@@ -11,7 +11,7 @@ export const lib: RegistryItem[] = [
         type: "registry:lib",
       },
     ],
-    name: "web",
+    name: "web-audio",
     registryDependencies: [],
     type: "registry:lib",
   },
@@ -97,11 +97,11 @@ export const lib: RegistryItem[] = [
       "Framework-agnostic waveform DSP, decode audio bytes to samples, downsample to peak amplitudes, normalize, and reduce a live spectrum to frequency bands",
     files: [
       {
-        path: "lib/waveform-dsp.ts",
+        path: "lib/waveform-peaks.ts",
         type: "registry:lib",
       },
     ],
-    name: "waveform-dsp",
+    name: "waveform-peaks",
     registryDependencies: [],
     type: "registry:lib",
   },
@@ -127,11 +127,11 @@ export const lib: RegistryItem[] = [
       "Undo and redo as a value: a pure history of any document, with bursts (a drag is one entry), redo that drops on a new change, and a depth limit",
     files: [
       {
-        path: "lib/history.ts",
+        path: "lib/undo-history.ts",
         type: "registry:lib",
       },
     ],
-    name: "history",
+    name: "undo-history",
     registryDependencies: [],
     type: "registry:lib",
   },
@@ -210,4 +210,28 @@ export const lib: RegistryItem[] = [
     registryDependencies: [],
     type: "registry:lib",
   },
+];
+
+/**
+ * Names that were renamed. Each installs its new name, so a command copied
+ * from an older page or answer still works; remove them once they are old
+ * enough. They carry no file of their own.
+ */
+const renamed: [from: string, to: string][] = [
+  ["web", "web-audio"],
+  ["waveform-dsp", "waveform-peaks"],
+  ["history", "undo-history"],
+];
+
+export const lib: RegistryItem[] = [
+  ...items,
+  ...renamed.map(
+    ([from, to]): RegistryItem => ({
+      description: `Renamed to ${to}: installs it.`,
+      files: [],
+      name: from,
+      registryDependencies: [`@audio-ui/${to}`],
+      type: "registry:lib",
+    })
+  ),
 ];

@@ -10,7 +10,7 @@ export const hooks: RegistryItem[] = [
       },
     ],
     name: "use-web-audio",
-    registryDependencies: ["@audio-ui/web"],
+    registryDependencies: ["@audio-ui/web-audio"],
     type: "registry:hook",
   },
   {
@@ -55,7 +55,7 @@ export const hooks: RegistryItem[] = [
       },
     ],
     name: "use-arrangement",
-    registryDependencies: ["@audio-ui/arrangement", "@audio-ui/history"],
+    registryDependencies: ["@audio-ui/arrangement", "@audio-ui/undo-history"],
     type: "registry:hook",
   },
   {

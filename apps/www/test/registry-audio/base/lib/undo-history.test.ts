@@ -7,7 +7,7 @@ import {
   recordChange,
   redo,
   undo,
-} from "@/registry-audio/bases/base/lib/history";
+} from "@/registry-audio/bases/base/lib/undo-history";
 
 describe("undo", () => {
   test("has nothing to take back on a fresh history", () => {

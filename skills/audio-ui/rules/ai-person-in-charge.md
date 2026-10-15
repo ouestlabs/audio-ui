@@ -40,8 +40,8 @@ const tools = {
 ```
 
 ```tsx
-// npx shadcn@latest add @audio-ui/history
-import { emptyHistory, recordChange, settleChange, undo } from "@/lib/history";
+// npx shadcn@latest add @audio-ui/undo-history
+import { emptyHistory, recordChange, settleChange, undo } from "@/lib/undo-history";
 
 const historyRef = useRef(emptyHistory<PianoRollState>());
 

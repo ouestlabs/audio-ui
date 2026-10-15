@@ -263,7 +263,7 @@ export const components: RegistryItem[] = [
       "@audio-ui/scrubber",
       "@audio-ui/timeline",
       "@audio-ui/waveform",
-      "@audio-ui/waveform-dsp",
+      "@audio-ui/waveform-peaks",
       "@shadcn/button",
       "@shadcn/toggle",
     ],
