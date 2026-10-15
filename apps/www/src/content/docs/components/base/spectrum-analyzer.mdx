@@ -100,6 +100,7 @@ The peaks come from `useSpectrumPeaks(spectrum, { hold, fall })` in the same hoo
 <TypeRow name={"minDb"} type={"number"} default={"-100"}>The quietest level drawn, in dB.</TypeRow>
 <TypeRow name={"maxDb"} type={"number"} default={"-10"}>The loudest level drawn, in dB.</TypeRow>
 <TypeRow name={"peakHold"} type={"boolean"} default={"true"}>Draws each point's recent peak over the spectrum, held a moment and then falling.</TypeRow>
+<TypeRow name={"peaks"} type={"Source<Float32Array>"}>The peaks to draw, in place of the ones worked out from `source`: your own `useSpectrumPeaks` with another hold or fall, or peaks you compute yourself.</TypeRow>
 <TypeRow name={"aria-label"} type={"string"}>Names the analyzer.</TypeRow>
 </TypeTable>
 

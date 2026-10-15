@@ -9,6 +9,7 @@ import { PianoRollShowcase } from "./piano-roll.tsx";
 import { PlotShowcase } from "./plot.tsx";
 import { ScrubberShowcase } from "./scrubber.tsx";
 import { SequencerShowcase } from "./sequencer.tsx";
+import { SpectrumAnalyzerShowcase } from "./spectrum-analyzer.tsx";
 import { TimelineShowcase } from "./timeline.tsx";
 import { TransportShowcase } from "./transport.tsx";
 import { WaveformShowcase } from "./waveform.tsx";
@@ -56,6 +57,12 @@ export const SHOWCASES: Record<string, Showcase> = {
     Demo: SequencerShowcase,
     height: 200,
     title: "Sequencer",
+    width: 760,
+  },
+  "spectrum-analyzer": {
+    Demo: SpectrumAnalyzerShowcase,
+    height: 300,
+    title: "Spectrum Analyzer",
     width: 760,
   },
   timeline: {
