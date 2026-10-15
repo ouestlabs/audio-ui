@@ -12,10 +12,15 @@ It has no dependencies.
 
 ## Layout
 
-- `shared/`: language helpers, math, pitch names
+Two kinds of module are published, each as its own subpath, and the folders tell them apart:
+
+- `primitives/<name>/`: the logic of a UI primitive (a knob, a timeline, a piano roll): its controller, geometry and value handling. Imported as `@audio-ui/core/<name>`.
+- `audio/<name>/`: audio and music logic with no interface in it: `pitch` (notes, frequencies, pitch detection) and `midi` (messages, files, the Web MIDI input). Imported as `@audio-ui/core/<name>`.
+
+What both build on:
+
 - `value/`: scales, ranges, formatting, change and commit event details, live sources and stores
 - `dom/`: frame scheduling, pointer release, visibility, data attributes
-- `pitch/`: notes and frequencies, cents and pitch detection on samples, imported as `@audio-ui/core/pitch`
-- `primitives/<name>/`: each primitive's own logic, such as timeline clips, waveform peaks or envelope geometry, imported as `@audio-ui/core/<name>`
+- `shared/`: language helpers, math, pitch names
 
 `index.ts` is the public API of what the primitives share. `@audio-ui/core/internal` holds helpers for adapters and may change in any release.

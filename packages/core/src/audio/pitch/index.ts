@@ -1,4 +1,4 @@
-export { isBlackKey, pitchClassName, pitchName } from "../shared/pitch.ts";
+export { isBlackKey, pitchClassName, pitchName } from "../../shared/pitch.ts";
 export {
   detectPitch,
   type PitchDetectionOptions,

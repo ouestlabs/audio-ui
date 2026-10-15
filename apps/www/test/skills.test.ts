@@ -192,13 +192,13 @@ test("core.md lists only names its entries export", async () => {
   const core = await Bun.file(`${SKILL_DIR}/core.md`).text();
   const rows = await Promise.all(
     [...core.matchAll(CORE_EXPORT_ROW)].map(async ([, entry, names = ""]) => {
-      // A primitive lives in primitives/<entry>, an audio module in src/<entry>.
+      // A primitive lives in primitives/<entry>, an audio module in audio/<entry>.
       const primitive = `${ROOT}/packages/core/src/primitives/${entry}/index.ts`;
       let index = `${ROOT}/packages/core/src/index.ts`;
       if (entry) {
         index = (await Bun.file(primitive).exists())
           ? primitive
-          : `${ROOT}/packages/core/src/${entry}/index.ts`;
+          : `${ROOT}/packages/core/src/audio/${entry}/index.ts`;
       }
       const source = await Bun.file(index).text();
       return matches(names, IDENTIFIER)

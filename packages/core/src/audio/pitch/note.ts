@@ -1,4 +1,4 @@
-import { pitchClassName } from "../shared/pitch.ts";
+import { pitchClassName } from "../../shared/pitch.ts";
 
 /**
  * The frequency of A4 in hertz that every other note is tuned from: concert
