@@ -187,7 +187,8 @@ describe("deviceTools", () => {
       type: "number",
     });
     expect(schema.properties.enabled).toMatchObject({ type: "boolean" });
-    expect(schema.properties.release.description).toContain("log scale");
+    const release = schema.properties.release as { description: string };
+    expect(release.description).toContain("log scale");
   });
 
   test("set changes the state and reports it in a sentence", () => {
