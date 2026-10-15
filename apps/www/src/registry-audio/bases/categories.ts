@@ -23,6 +23,8 @@ export interface CategorySeoOverrides {
 
 export interface CategoryDef {
   description: string;
+  /** The slug of the component's docs page, when it is not `name`. */
+  docs?: string;
   label: string;
   name: string;
   seo?: CategorySeoOverrides;
@@ -89,6 +91,7 @@ export const categories: CategoryDef[] = [
   {
     description:
       "Spectrum analyzers: the level of a sound across frequencies, live, with held peaks.",
+    docs: "spectrum-analyzer",
     label: "Spectrum",
     name: "spectrum",
   },
