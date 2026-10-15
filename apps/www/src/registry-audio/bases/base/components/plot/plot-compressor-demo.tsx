@@ -1,6 +1,6 @@
 "use client";
 
-import { compressorOutput } from "@audio-ui/core/analysis";
+import { webAudioCompressorOutput } from "@audio-ui/core/analysis";
 import { useCallback, useMemo, useState } from "react";
 import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder";
 import { Button } from "@/registry/bases/base/ui/button";
@@ -21,18 +21,46 @@ const MAX_DB = 0;
 /** Headroom past 0 dB, so the handle on the loudest level is not cut by the frame. */
 const PLOT_MAX_DB = 6;
 const MAX_RATIO = 20;
-/** The least the loudest level can rise above the threshold, so the ratio stays finite. */
-const MIN_RISE_DB = 0.5;
+const BISECTION_STEPS = 24;
 const DB_TICKS = [-48, -24, 0];
 const describePointer = (point: { x: number; y: number }) =>
   `in ${point.x.toFixed(0)} dB`;
 const UNITY = (inputDb: number) => inputDb;
 
-/** A compressor's transfer curve: one handle sets the threshold, the other how hard the loudest level is held down (the ratio). */
+/** The curve of the browser's own compressor node, with no knee, as the pulses are played through it. */
+const curveOf = (settings: { ratio: number; thresholdDb: number }) =>
+  webAudioCompressorOutput({ ...settings, kneeDb: 0 });
+
+/**
+ * The ratio that puts the curve at `outputDb` for the loudest input. The node
+ * adds a make-up gain that depends on the ratio, so the level it ends at is
+ * not a plain function to invert: it falls as the ratio rises, so bisect.
+ */
+function ratioFor(thresholdDb: number, outputDb: number) {
+  let low = 1;
+  let high = MAX_RATIO;
+  for (let step = 0; step < BISECTION_STEPS; step += 1) {
+    const middle = (low + high) / 2;
+    if (curveOf({ ratio: middle, thresholdDb })(MAX_DB) > outputDb) {
+      low = middle;
+    } else {
+      high = middle;
+    }
+  }
+  return (low + high) / 2;
+}
+
+/**
+ * A compressor's transfer curve, the one of the node that plays: one handle
+ * sets the threshold, the other how hard the loudest level is held down (the
+ * ratio). Below the threshold the line sits above the dashed unity line by the
+ * make-up gain the node adds on its own.
+ */
 export default function PlotCompressorDemo() {
   const [compressor, setCompressor] = useState({ ratio: 4, thresholdDb: -24 });
-  const output = useMemo(() => compressorOutput(compressor), [compressor]);
+  const output = useMemo(() => curveOf(compressor), [compressor]);
   const loudest = output(MAX_DB);
+  const makeupDb = output(MIN_DB) - MIN_DB;
   const { level, playing, toggle } = usePulsesThroughCompressor(compressor);
   // The input level, riding the curve: where the signal is right now.
   const dot = useMemo(
@@ -54,14 +82,7 @@ export default function PlotCompressorDemo() {
     ({ y }: { y: number }) =>
       setCompressor((current) => ({
         ...current,
-        ratio: Math.min(
-          MAX_RATIO,
-          Math.max(
-            1,
-            (MAX_DB - current.thresholdDb) /
-              Math.max(y - current.thresholdDb, MIN_RISE_DB)
-          )
-        ),
+        ratio: ratioFor(current.thresholdDb, y),
       })),
     []
   );
@@ -137,7 +158,7 @@ export default function PlotCompressorDemo() {
         </Button>
         <output className="font-mono text-muted-foreground text-xs">
           Threshold {compressor.thresholdDb.toFixed(0)} dB,{" "}
-          {compressor.ratio.toFixed(1)}:1
+          {compressor.ratio.toFixed(1)}:1, make-up +{makeupDb.toFixed(1)} dB
         </output>
       </div>
     </div>

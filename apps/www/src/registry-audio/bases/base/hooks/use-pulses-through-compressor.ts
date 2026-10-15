@@ -71,6 +71,12 @@ export function usePulsesThroughCompressor(controls: CompressorControls) {
     const tap = ctx.createAnalyser();
     tap.fftSize = FFT_SIZE;
     const compressor = ctx.createDynamicsCompressor();
+    // The node starts at its own defaults (12:1, a 30 dB knee): set it to the
+    // controls now, or it plays something else until a control moves.
+    const { kneeDb = 0, ratio, thresholdDb } = controlsRef.current;
+    compressor.threshold.value = thresholdDb;
+    compressor.ratio.value = ratio;
+    compressor.knee.value = kneeDb;
     compressor.attack.value = 0.003;
     compressor.release.value = 0.15;
     const output = ctx.createGain();
