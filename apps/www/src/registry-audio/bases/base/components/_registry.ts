@@ -400,6 +400,28 @@ export const components: RegistryItem[] = [
     type: "registry:example",
   },
   {
+    categories: ["spectrum"],
+    description:
+      "Play the keyboard and watch the spectrum: a sawtooth note lights its pitch and every harmonic above it, and the peaks hold a moment",
+    files: [
+      {
+        path: "components/spectrum/spectrum-analyzer-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "spectrum-analyzer-demo",
+    registryDependencies: [
+      "@audio-ui/spectrum-analyzer",
+      "@audio-ui/piano",
+      "@audio-ui/use-master-bus",
+      "@audio-ui/use-spectrum",
+      "@audio-ui/use-synth-voices",
+      "@audio-ui/use-web-audio",
+      "@audio-ui/synth-voice",
+    ],
+    type: "registry:example",
+  },
+  {
     categories: ["sequencer"],
     description:
       "A drum machine: draw a pattern and hear it. Press a step or drag across several; the playing column lights up",

@@ -8,6 +8,7 @@ export const DOCS_MENU_UPDATES: Record<string, string> = {
   "piano-roll": "New",
   scrubber: "New",
   sequencer: "Updated",
+  "spectrum-analyzer": "New",
   timeline: "New",
   waveform: "Updated",
 };
@@ -22,6 +23,7 @@ export const PATTERNS_MENU_UPDATES: Record<string, string> = {
   plot: "New",
   scrubber: "New",
   sequencer: "Updated",
+  spectrum: "New",
   timeline: "New",
   waveform: "Updated",
 };

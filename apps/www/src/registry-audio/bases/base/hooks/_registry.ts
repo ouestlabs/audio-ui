@@ -127,7 +127,7 @@ export const hooks: RegistryItem[] = [
     categories: ["hooks", "audio", "plot"],
     dependencies: ["@audio-ui/react"],
     description:
-      "The spectrum of an AnalyserNode as a live source for Plot.Trace: dB per point on a logarithmic frequency axis, refreshed every frame without re-rendering",
+      "The spectrum of an AnalyserNode as a live source for Plot.Trace: dB per point on a logarithmic frequency axis, refreshed every frame without re-rendering, and its held peaks as a second source",
     files: [
       {
         path: "hooks/use-spectrum.ts",

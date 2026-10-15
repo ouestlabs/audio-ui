@@ -13,6 +13,7 @@ const CANONICAL_COMPONENT_DOC_SLUGS = [
   "plot",
   "scrubber",
   "sequencer",
+  "spectrum-analyzer",
   "timeline",
   "transport",
   "waveform",

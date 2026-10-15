@@ -36,6 +36,11 @@
     "intro": "Browse {{count}} meter components for audio/ui, built on top of shadcn/ui.",
     "title": "Meter"
   },
+  "spectrum": {
+    "description": "Spectrum analyzers: the level of a sound across frequencies, live, with held peaks. {{count}} components.",
+    "intro": "Browse {{count}} spectrum components for audio/ui, built on top of shadcn/ui.",
+    "title": "Spectrum"
+  },
   "plot": {
     "description": "Plots for drawing curves and dragging points on them: equalizers, filters and compressors. {{count}} components.",
     "intro": "Browse {{count}} plot components for audio/ui, built on top of shadcn/ui.",

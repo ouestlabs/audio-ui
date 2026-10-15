@@ -1,0 +1,106 @@
+---
+title: Spectrum Analyzer
+description: The level of a sound across frequencies, live, on a log axis in hertz, with held peaks.
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="spectrum-analyzer-demo" />
+
+Shows what a sound is made of: the fundamental and harmonics of a note, the low end of a mix, what an equalizer changes. It is drawn on a `Plot`, so it shares its axes, grid and pointer readout, and follows the audio frame by frame without re-rendering React.
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">CLI</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash component
+npx shadcn@latest add @audio-ui/spectrum-analyzer
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the following dependencies:</Step>
+
+```bash
+npm install @audio-ui/react
+```
+
+<Step>Copy and paste the following code into your project.</Step>
+
+<ComponentSource
+  styleName="base-nova"
+  name="spectrum-analyzer"
+  title="components/audio-ui/spectrum-analyzer.tsx"
+/>
+
+<Step>Update the import paths to match your project setup.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Anatomy
+
+The analyzer is a Plot: a log frequency axis, a filled trace for the spectrum, and a second trace for the peaks.
+
+```tsx
+import { Plot } from "@audio-ui/react";
+
+<Plot.Root scaleX="log">
+  <Plot.Grid />
+  <Plot.Graph>
+    <Plot.Trace /> {/* the spectrum, filled */}
+    <Plot.Trace /> {/* the spectrum's line */}
+    <Plot.Trace /> {/* the held peaks */}
+  </Plot.Graph>
+  <Plot.Cursor />
+</Plot.Root>
+```
+
+## Usage
+
+Tap an `AnalyserNode` anywhere in your graph and turn it into a spectrum with the `use-spectrum` hook:
+
+```tsx
+import { SpectrumAnalyzer } from "@/components/audio-ui/spectrum-analyzer";
+import { useSpectrum } from "@/hooks/use-spectrum";
+
+const analyser = ctx.createAnalyser();
+analyser.fftSize = 8192; // finer low end
+output.connect(analyser);
+
+const spectrum = useSpectrum(analyser);
+
+<SpectrumAnalyzer aria-label="Spectrum" source={spectrum} />;
+```
+
+Give the analyzer the same `minHz` and `maxHz` as the hook, so each point lands on its frequency. A larger `fftSize` separates low notes better, and `smoothingTimeConstant` sets how fast the spectrum settles.
+
+The peaks come from `useSpectrumPeaks(spectrum, { hold, fall })` in the same hook file: each point keeps its loudest level for `hold` seconds (default 1), then falls at `fall` dB per second (default 24).
+
+## API reference
+
+<TypeTable>
+<TypeRow name={"source"} type={"Source<Float32Array>"}>The live spectrum, dB per point along a log frequency axis, such as `useSpectrum` returns.</TypeRow>
+<TypeRow name={"minHz"} type={"number"} default={"20"}>Lowest frequency on the axis: the same as the spectrum's.</TypeRow>
+<TypeRow name={"maxHz"} type={"number"} default={"20000"}>Highest frequency on the axis: the same as the spectrum's.</TypeRow>
+<TypeRow name={"minDb"} type={"number"} default={"-100"}>The quietest level drawn, in dB.</TypeRow>
+<TypeRow name={"maxDb"} type={"number"} default={"-10"}>The loudest level drawn, in dB.</TypeRow>
+<TypeRow name={"peakHold"} type={"boolean"} default={"true"}>Draws each point's recent peak over the spectrum, held a moment and then falling.</TypeRow>
+<TypeRow name={"aria-label"} type={"string"}>Names the analyzer.</TypeRow>
+</TypeTable>
+
+Other props go to the `Plot` root, such as `className` for its height.
