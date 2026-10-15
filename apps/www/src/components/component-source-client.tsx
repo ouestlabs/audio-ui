@@ -215,7 +215,7 @@ function ComponentCode({
   copyButtonClassName?: string;
 }) {
   return (
-    <figure className="[&>pre]:max-h-96" data-rehype-pretty-code-figure="">
+    <figure data-rehype-pretty-code-figure="">
       {title ? (
         <figcaption
           className="flex items-center gap-2 text-site-code-foreground [&_svg]:size-4 [&_svg]:text-site-code-foreground [&_svg]:opacity-70"
