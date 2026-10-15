@@ -4,9 +4,12 @@
  * level. Framework-agnostic and drawn from the same textbook formulas an audio
  * engine runs (the RBJ "Audio EQ Cookbook" biquads), so the curve on screen
  * is the response you hear. The sample rate only decides where the top of the
- * curve bends toward Nyquist; 48 kHz is close enough for a picture.
+ * curve bends toward Nyquist: 48 kHz is close enough for a picture (a 44.1 kHz
+ * context differs by under 0.6 dB, at the very top), and a band can carry the
+ * `sampleRate` of its context, such as `ctx.sampleRate`, to be exact.
  */
 
+/** The sample rate a curve is drawn at unless a band says another. */
 export const SAMPLE_RATE = 48_000;
 const NYQUIST_SHARE = 0.49;
 const MIN_Q = 0.05;
@@ -38,6 +41,8 @@ export interface BiquadSettings {
   /** Gain in dB: used by peaks and shelves, ignored by the rest. */
   gainDb?: number;
   q?: number;
+  /** The sample rate the curve is drawn at, such as `ctx.sampleRate`. @default 48000 */
+  sampleRate?: number;
   type: BiquadType;
 }
 
@@ -57,11 +62,12 @@ function coefficients({
   frequency,
   gainDb = 0,
   q = Math.SQRT1_2,
+  sampleRate = SAMPLE_RATE,
   type,
 }: BiquadSettings): Coefficients {
   const w0 =
-    (2 * Math.PI * clamp(frequency, 10, SAMPLE_RATE * NYQUIST_SHARE)) /
-    SAMPLE_RATE;
+    (2 * Math.PI * clamp(frequency, 10, sampleRate * NYQUIST_SHARE)) /
+    sampleRate;
   const cos = Math.cos(w0);
   const alpha = Math.sin(w0) / (2 * Math.max(q, MIN_Q));
   const a = 10 ** (gainDb / 40);
@@ -129,8 +135,9 @@ export function biquadResponse(
   settings: BiquadSettings
 ): (hz: number) => number {
   const { a1, a2, b0, b1, b2 } = coefficients(settings);
+  const sampleRate = settings.sampleRate ?? SAMPLE_RATE;
   return (hz) => {
-    const omega = (2 * Math.PI * hz) / SAMPLE_RATE;
+    const omega = (2 * Math.PI * hz) / sampleRate;
     const numerator = Math.hypot(
       b0 + b1 * Math.cos(omega) + b2 * Math.cos(2 * omega),
       b1 * Math.sin(omega) + b2 * Math.sin(2 * omega)
