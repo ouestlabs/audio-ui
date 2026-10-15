@@ -41,6 +41,11 @@
     "intro": "Browse {{count}} plot components for audio/ui, built on top of shadcn/ui.",
     "title": "Plot"
   },
+  "pad": {
+    "description": "Drum pad grids: strike them by pointer or keyboard, with velocity and choke groups. {{count}} components.",
+    "intro": "Browse {{count}} pad components for audio/ui, built on top of shadcn/ui.",
+    "title": "Pad"
+  },
   "piano": {
     "description": "Virtual piano keyboard components with MIDI note ranges and glissando. {{count}} components.",
     "intro": "Browse {{count}} piano components for audio/ui, built on top of shadcn/ui.",

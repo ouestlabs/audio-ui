@@ -1,0 +1,183 @@
+---
+title: Pad
+description: A grid of drum pads struck by pointer, touch or keyboard, with velocity and choke groups.
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="pad-demo" />
+
+Triggers sounds, for a drum machine, a sampler or a clip launcher. The registry component wraps the `Pad` primitive from `@audio-ui/react` and lays the pads out in a grid of `columns`.
+
+## Overview
+
+- **Events:** `onPadOn(value, eventDetails)` and `onPadOff(value, eventDetails)` report the pad's `value`, ready for an audio engine. `eventDetails.velocity` says how hard it was struck, from 0 to 1, and `eventDetails.cancel()` in `onPadOn` keeps the pad silent.
+- **Velocity:** a pen or a pressure-sensitive screen strikes as hard as it presses. Other pointers strike harder toward the top of the pad. The keyboard strikes at `0.8`. Each pad exposes its last velocity as `--pad-velocity`, so the flash can follow it.
+- **Choke groups:** pads sharing a `chokeGroup` stop each other, like a closed hihat cutting an open one. Striking one fires `onPadOff` with `reason: "choke"` for the last pad struck in its group, held or still ringing.
+- **Pointer:** each pointer holds its own pad, so several play at once on a touch screen. Sliding off a pad does not strike the next one.
+- **External pads:** `activePads` lights pads from outside, such as the steps of a sequencer, without calling `onPadOn` or `onPadOff`.
+- **Accessibility:** each pad is a button named by its content, behind one tab stop. The arrow keys move between pads, and Space or Enter holds the focused pad until it is released.
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">CLI</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash component
+npx shadcn@latest add @audio-ui/pad
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the following dependencies:</Step>
+
+```bash
+npm install @audio-ui/react
+```
+
+<Step>Copy and paste the following code into your project.</Step>
+
+<ComponentSource
+  styleName="base-nova"
+  name="pad"
+  title="components/audio-ui/pad.tsx"
+/>
+
+<Step>Update the import paths to match your project setup.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Anatomy
+
+Import the primitive and assemble its parts.
+
+```tsx
+import { Pad } from "@audio-ui/react";
+
+<Pad.Root>
+  <Pad.Item value="kick">Kick</Pad.Item>
+</Pad.Root>
+```
+
+## Usage
+
+```tsx
+import { Pad, PadItem } from "@/components/audio-ui/pad";
+```
+
+**Pad events:**
+
+```tsx
+<Pad
+  aria-label="Drum pads"
+  columns={2}
+  onPadOn={(value, { velocity }) => sampler.trigger(value, velocity)}
+>
+  <PadItem value="kick">Kick</PadItem>
+  <PadItem value="snare">Snare</PadItem>
+</Pad>
+```
+
+**Choke groups (a closed hat cuts the open one):**
+
+```tsx
+<Pad
+  aria-label="Hats"
+  columns={2}
+  onPadOff={(value, { reason }) => {
+    if (reason === "choke") {
+      sampler.stop(value);
+    }
+  }}
+  onPadOn={(value, { velocity }) => sampler.trigger(value, velocity)}
+>
+  <PadItem chokeGroup="hat" value="closed-hat">
+    Closed hat
+  </PadItem>
+  <PadItem chokeGroup="hat" value="open-hat">
+    Open hat
+  </PadItem>
+</Pad>
+```
+
+## Interaction
+
+### Pointer
+
+<KeyTable title="Behavior">
+<KeyRow gesture={"Press a pad"}>Fires `onPadOn` with a velocity; the pad stays active while held.</KeyRow>
+<KeyRow gesture={"Release"}>Fires `onPadOff`.</KeyRow>
+<KeyRow gesture={"Multiple pointers"}>Each pointer (finger) holds its own pad, so several play at once on touch devices.</KeyRow>
+</KeyTable>
+
+### Keyboard
+
+The pads share one tab stop. On the focused pad:
+
+<KeyTable title="Keys">
+<KeyRow gesture={"`ArrowLeft` / `ArrowRight`"}>Move focus to the previous / next pad in reading order</KeyRow>
+<KeyRow gesture={"`ArrowUp` / `ArrowDown`"}>Move focus a row up / down</KeyRow>
+<KeyRow gesture={"`Space` / `Enter`"}>Hold the focused pad: `onPadOn` on press, `onPadOff` on release</KeyRow>
+<KeyRow gesture={"`Home` / `End`"}>Move focus to the first / last pad</KeyRow>
+</KeyTable>
+
+## API reference
+
+### Root
+
+A grid of pads to strike: each one sounds while held, by pointer or from the keyboard, and each pointer holds its own pad, so several can be played at once on a touch screen. A strike is harder where a pen or screen presses harder, or else toward the top of the pad. The pads are one tab stop: the left and right arrows walk them in reading order, the up and down arrows by a row of `columns`. Renders a `<div>` element.
+
+<TypeTable>
+<TypeRow name={"activePads"} type={"readonly string[]"}>Pads lit from elsewhere, such as a sequencer or a MIDI input, on top of the ones held here.</TypeRow>
+<TypeRow name={"columns"} type={"number"} default={"4"}>How many pads a row holds: what the up and down arrows move by. Lay the grid out to match.</TypeRow>
+<TypeRow name={"disabled"} type={"boolean"}></TypeRow>
+<TypeRow name={"onPadOff"} type={"(value: string, eventDetails: OffEventDetails) => void"}>Fires when a pad is released, loses focus while held, or is choked by another pad of its group (`reason: "choke"`).</TypeRow>
+<TypeRow name={"onPadOn"} type={"(value: string, eventDetails: OnEventDetails) => void"}>Fires when a pad is struck, with `eventDetails.velocity` from 0 to 1. `eventDetails.cancel()` keeps it silent.</TypeRow>
+</TypeTable>
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+</TypeTable>
+
+### Item
+
+One pad. It sounds while held: by pointer, or with Enter or Space while focused. Its accessible name comes from its content, or `aria-label`. How hard it was last struck is the `--pad-velocity` CSS variable, from 0 to 1. Renders a `<button>` element.
+
+<TypeTable>
+<TypeRow name={"chokeGroup"} type={"string"}>Pads sharing a choke group stop each other: striking one stops the last one struck, held or still ringing.</TypeRow>
+<TypeRow name={"disabled"} type={"boolean"}></TypeRow>
+<TypeRow name={"value"} type={"string"}>What identifies this pad in `onPadOn`, `onPadOff` and `activePads`.</TypeRow>
+</TypeTable>
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-active"}>Whether the pad is sounding: held here, or listed in `activePads`.</TypeRow>
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+</TypeTable>
+
+### Registry component
+
+`Pad` accepts `className` and `style` plus primitive props from `PadPrimitive.Root.Props`, and sets the grid's columns from `columns`. `PadItem` accepts the props of `PadPrimitive.Item`.
+
+Additional valid HTML attributes passed to `Pad.Root` and `Pad.Item` are forwarded.
+
+## Examples
+
+### Drum rack
+
+Sixteen pads, each its own sound: strike a pad to play and select it, then shape it with the knobs. The three hihats share a choke group.
+
+<ComponentPreview styleName="base-nova" name="block-drum-rack" />

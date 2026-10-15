@@ -31,7 +31,11 @@ function Sequencer({
   return (
     <SequencerPrimitive.Root
       className={cn(
-        "cn-sequencer flex w-full min-w-0 select-none flex-col gap-1.5 data-disabled:opacity-50",
+        "cn-sequencer w-full min-w-0 select-none data-disabled:opacity-50",
+        // Labelled rows share one label column, as wide as the longest label.
+        rowLabels
+          ? "grid grid-cols-[auto_minmax(0,1fr)] gap-x-2 gap-y-1.5"
+          : "flex flex-col gap-1.5",
         className
       )}
       data-slot="sequencer"
@@ -41,13 +45,17 @@ function Sequencer({
         {(row) => (
           <SequencerPrimitive.Row
             aria-label={rowLabels?.[row] ?? `Row ${row + 1}`}
-            className="flex items-center gap-2"
+            className={
+              rowLabels
+                ? "col-span-2 grid grid-cols-subgrid items-center"
+                : "flex items-center"
+            }
             index={row}
           >
             {rowLabels ? (
               <span
                 aria-hidden="true"
-                className="w-12 shrink-0 text-muted-foreground text-xs"
+                className="max-w-24 truncate text-muted-foreground text-xs"
               >
                 {rowLabels[row]}
               </span>
