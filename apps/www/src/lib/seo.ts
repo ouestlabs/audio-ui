@@ -17,6 +17,7 @@ const CANONICAL_COMPONENT_DOC_SLUGS = [
   "spectrum-analyzer",
   "timeline",
   "transport",
+  "tuner",
   "waveform",
   "xypad",
 ] as const;

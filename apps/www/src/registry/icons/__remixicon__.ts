@@ -22,6 +22,8 @@ export {
   RiHeadphoneLine,
   RiInformationLine,
   RiLoaderLine,
+  RiMicLine,
+  RiMicOffLine,
   RiMoreLine,
   RiPauseFill,
   RiPauseLine,

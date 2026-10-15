@@ -26,13 +26,14 @@ How to build audio interfaces in React with audio/ui, for AI agents and LLMs. Ru
    - 1.6 [Clean up what you create](#16-clean-up-what-you-create)
 2. [Live Data](#2-live-data): **CRITICAL**
    - 2.1 [Signals go through a source, not state](#21-signals-go-through-a-source-not-state)
-   - 2.2 [Meter a microphone as it delivers the signal](#22-meter-a-microphone-as-it-delivers-the-signal)
-   - 2.3 [Meter levels from an AnalyserNode](#23-meter-levels-from-an-analysernode)
-   - 2.4 [One MIDI input for the page, connected from a click](#24-one-midi-input-for-the-page-connected-from-a-click)
-   - 2.5 [Playheads and playback position](#25-playheads-and-playback-position)
-   - 2.6 [Waveform peaks: decode once](#26-waveform-peaks-decode-once)
-   - 2.7 [Showing a live value as text](#27-showing-a-live-value-as-text)
-   - 2.8 [Spectrum on a Plot](#28-spectrum-on-a-plot)
+   - 2.2 [Detect pitch with a period search, not the loudest FFT bin](#22-detect-pitch-with-a-period-search-not-the-loudest-fft-bin)
+   - 2.3 [Meter a microphone as it delivers the signal](#23-meter-a-microphone-as-it-delivers-the-signal)
+   - 2.4 [Meter levels from an AnalyserNode](#24-meter-levels-from-an-analysernode)
+   - 2.5 [One MIDI input for the page, connected from a click](#25-one-midi-input-for-the-page-connected-from-a-click)
+   - 2.6 [Playheads and playback position](#26-playheads-and-playback-position)
+   - 2.7 [Waveform peaks: decode once](#27-waveform-peaks-decode-once)
+   - 2.8 [Showing a live value as text](#28-showing-a-live-value-as-text)
+   - 2.9 [Spectrum on a Plot](#29-spectrum-on-a-plot)
 3. [Values & Events](#3-values--events): **HIGH**
    - 3.1 [Controlled or uncontrolled, never both](#31-controlled-or-uncontrolled-never-both)
    - 3.2 [Size step and largeStep to the range](#32-size-step-and-largestep-to-the-range)
@@ -296,7 +297,42 @@ useEffect(() => {
 
 `value` is right for levels that change rarely (a static mock, a settings preview).
 
-### 2.2 Meter a microphone as it delivers the signal
+### 2.2 Detect pitch with a period search, not the loudest FFT bin
+
+**Impact: HIGH (a tuner that names the right note and its cents, down to the low strings)**
+
+The loudest bin of an FFT is the loudest harmonic, not the pitch: a plucked string often has a stronger second harmonic, so the tuner reads an octave high. And bins are linear, 11 Hz apart at 2048 samples: at 82 Hz (low E) one bin is 13% of the pitch, far from the single cents a tuner needs. Pitch is the repeating period of the waveform, found in the time domain.
+
+**Incorrect (the loudest frequency bin):**
+
+```ts
+const bins = new Float32Array(analyser.frequencyBinCount);
+analyser.getFloatFrequencyData(bins);
+const loudest = bins.indexOf(Math.max(...bins));
+const hz = (loudest * ctx.sampleRate) / analyser.fftSize; // a harmonic, 11 Hz coarse
+```
+
+**Correct (the registry's YIN period search on the time-domain samples):**
+
+```bash
+npx shadcn@latest add @audio-ui/tuner @audio-ui/use-microphone @audio-ui/use-pitch
+```
+
+```tsx
+import { Tuner } from "@/components/audio-ui/tuner";
+import { useMicrophone } from "@/hooks/use-microphone";
+import { usePitch } from "@/hooks/use-pitch";
+
+const microphone = useMicrophone(); // raw signal, never played back
+const pitch = usePitch(microphone.analyser); // a source: no render per reading
+
+<button onClick={microphone.start}>Listen</button>; // from a click
+<Tuner source={pitch} />;
+```
+
+For a frequency from samples you already have, `detectPitch(samples, sampleRate)` and `nearestNote(frequency)` from `@/lib/pitch-detection` are pure functions. The analyser's `fftSize` must hold two periods of the lowest pitch: 4096 at 48 kHz reaches about 40 Hz.
+
+### 2.3 Meter a microphone as it delivers the signal
 
 **Impact: HIGH (a meter that reads true on both bars, with no feedback)**
 
@@ -352,9 +388,9 @@ const release = () => {
 };
 ```
 
-Feed `analysers` to the `useLevels` hook of the rule `live-meter-levels`. The up-mix copies a mono signal to both channels (left and right both read the full level), and passes a real stereo signal through unchanged.
+Feed `analysers` to the `useAudioLevels` hook of the rule `live-meter-levels`, or the registry's `useMicrophone` hook does all of this and gives the analyser. The up-mix copies a mono signal to both channels (left and right both read the full level), and passes a real stereo signal through unchanged.
 
-### 2.3 Meter levels from an AnalyserNode
+### 2.4 Meter levels from an AnalyserNode
 
 **Impact: HIGH (the meter shows real dB levels)**
 
@@ -387,7 +423,7 @@ const levels = useAudioLevels(analysers);
 
 For stereo, split the signal with a `ChannelSplitterNode` and connect each output to its own `AnalyserNode`. The hook's source also carries each channel's held peak, and publishes nothing while the signal is silent.
 
-### 2.4 One MIDI input for the page, connected from a click
+### 2.5 One MIDI input for the page, connected from a click
 
 **Impact: HIGH (a MIDI keyboard that plays every instrument, with no stuck notes)**
 
@@ -434,7 +470,7 @@ const midi = useMidiInput({
 
 Every component that calls `useMidiInput` hears the same devices, and one `MidiConnectControl` (or `midi.requestAccess` from a click) connects them all. Held keys are released when the device goes away.
 
-### 2.5 Playheads and playback position
+### 2.6 Playheads and playback position
 
 **Impact: HIGH (a smooth playhead instead of 4 jumps a second)**
 
@@ -465,7 +501,7 @@ useEffect(() => {
 
 Commit seeks (the user dropping the playhead) through `onValueCommitted`, then set `audio.currentTime`.
 
-### 2.6 Waveform peaks: decode once
+### 2.7 Waveform peaks: decode once
 
 **Impact: HIGH (no audio decoding on render)**
 
@@ -490,7 +526,7 @@ const values = normalizePeaks(computePeaks(channels, 4096)); // once, at load
 
 The waveform fits the peaks to its own width and zoom.
 
-### 2.7 Showing a live value as text
+### 2.8 Showing a live value as text
 
 **Impact: MEDIUM (only the readout re-renders, not the mixer around it)**
 
@@ -540,7 +576,7 @@ function ChannelStrip({ levels }: { levels: Levels }) {
 }
 ```
 
-### 2.8 Spectrum on a Plot
+### 2.9 Spectrum on a Plot
 
 **Impact: MEDIUM (a readable spectrum on a log axis, without a render per frame)**
 

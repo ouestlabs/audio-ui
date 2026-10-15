@@ -12,6 +12,7 @@
     "waveform",
     "plot",
     "spectrum-analyzer",
+    "tuner",
     "---Time and sequencing---",
     "timeline",
     "sequencer",

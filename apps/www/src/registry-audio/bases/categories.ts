@@ -97,6 +97,12 @@ export const categories: CategoryDef[] = [
   },
   {
     description:
+      "Tuners: the note and the pitch of a sound, live from the microphone.",
+    label: "Tuner",
+    name: "tuner",
+  },
+  {
+    description:
       "Plots for drawing curves and dragging points on them: equalizers, filters and compressors.",
     label: "Plot",
     name: "plot",

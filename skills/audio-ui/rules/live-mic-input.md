@@ -59,4 +59,4 @@ const release = () => {
 };
 ```
 
-Feed `analysers` to the `useLevels` hook of the rule `live-meter-levels`. The up-mix copies a mono signal to both channels (left and right both read the full level), and passes a real stereo signal through unchanged.
+Feed `analysers` to the `useAudioLevels` hook of the rule `live-meter-levels`, or the registry's `useMicrophone` hook does all of this and gives the analyser. The up-mix copies a mono signal to both channels (left and right both read the full level), and passes a real stereo signal through unchanged.

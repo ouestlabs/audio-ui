@@ -21,6 +21,8 @@ export {
   MagnifyingGlassIcon,
   MagnifyingGlassMinusIcon,
   MagnifyingGlassPlusIcon,
+  MicrophoneIcon,
+  MicrophoneSlashIcon,
   MinusIcon,
   PauseIcon,
   PlayIcon,

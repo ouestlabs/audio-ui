@@ -467,6 +467,25 @@ export const components: RegistryItem[] = [
     type: "registry:example",
   },
   {
+    categories: ["tuner"],
+    description:
+      "A chromatic tuner on the microphone: the nearest note, a needle on a scale of cents and the frequency, in the primary color when in tune",
+    files: [
+      {
+        path: "components/tuner/tuner-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "tuner-demo",
+    registryDependencies: [
+      "@audio-ui/tuner",
+      "@audio-ui/use-microphone",
+      "@audio-ui/use-pitch",
+      "@shadcn/button",
+    ],
+    type: "registry:example",
+  },
+  {
     categories: ["spectrum"],
     description:
       "Play the keyboard and watch the spectrum: a sawtooth note lights its pitch and every harmonic above it, and the peaks hold a moment",

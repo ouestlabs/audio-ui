@@ -59,6 +59,7 @@ Run commands with the project's package manager, read from its lockfile: `npx sh
 - `live-meter-levels` - `use-audio-levels` for RMS in dB from time-domain samples, with peak hold
 - `live-mic-input` - Raw microphone signal up-mixed to stereo, analysers never connected to the speakers
 - `live-midi-input` - `use-midi-input` for the page's one MIDI input, connected from a click
+- `live-pitch-detection` - A YIN period search (`use-pitch`) for a tuner, never the loudest FFT bin
 - `live-playhead-source` - Playback position through a source updated every frame
 - `live-decode-once` - Decode and reduce waveform peaks once per file
 - `live-leaf-subscription` - Subscribe to a source only in the leaf that prints it
@@ -121,6 +122,7 @@ Run commands with the project's package manager, read from its lockfile: `npx sh
 | Drum pads, sample triggers | `pad` |
 | Playable keyboard | `piano` |
 | Play from a MIDI keyboard | `use-midi-input` hook, `midi-connect-control` |
+| Tune an instrument, name the note of a sound | `tuner`, with `use-microphone` and `use-pitch` |
 | Note editor | `piano-roll` |
 | Play, stop, record, loop, bars and tempo | `transport` |
 | Play and pause with a seek bar | `scrubber` |

@@ -1,0 +1,128 @@
+---
+title: Tuner
+description: The note and the pitch of a sound, live from the microphone, with a needle on a scale of cents.
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="tuner-demo" />
+
+Tells you which note a sound is and how far from it you are: tune a guitar, check a vocal, find the key of a sample. The note, the needle and the frequency follow the sound frame by frame without re-rendering React, and everything runs on the Web Audio API: the microphone, an `AnalyserNode` and a pitch detector with no audio library.
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">CLI</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash component
+npx shadcn@latest add @audio-ui/tuner
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the following dependencies:</Step>
+
+```bash
+npm install @audio-ui/react
+```
+
+<Step>Copy and paste the following code into your project.</Step>
+
+<ComponentSource
+  styleName="base-nova"
+  name="tuner"
+  title="components/audio-ui/tuner.tsx"
+/>
+
+<Step>Update the import paths to match your project setup.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+Three pieces, each with one job: `useMicrophone` gives the signal, `usePitch` finds its pitch, `Tuner` shows it.
+
+```bash
+npx shadcn@latest add @audio-ui/use-microphone @audio-ui/use-pitch
+```
+
+```tsx
+import { Tuner } from "@/components/audio-ui/tuner";
+import { useMicrophone } from "@/hooks/use-microphone";
+import { usePitch } from "@/hooks/use-pitch";
+
+const microphone = useMicrophone();
+const pitch = usePitch(microphone.analyser);
+
+<button onClick={microphone.start} type="button">Listen</button>
+<Tuner source={pitch} />;
+```
+
+Call `start` from a click: the browser asks for permission then, and a suspended audio context resumes. The microphone is released on `stop` and when the component unmounts.
+
+The signal is raw: echo cancellation, noise suppression and automatic gain are what a call needs, and they flatten the very level a tuner reads. The analyser is never connected to the speakers, so nothing plays back.
+
+## Pitch of any signal
+
+`usePitch` takes any `AnalyserNode`, not only the microphone's: tap a synth, a track or the master bus and the tuner shows what plays.
+
+```tsx
+const analyser = ctx.createAnalyser();
+analyser.fftSize = 4096; // two periods of the lowest pitch: 4096 at 48 kHz reaches about 40 Hz
+synth.connect(analyser);
+
+const pitch = usePitch(analyser, { minHz: 60, maxHz: 1200, reference: 432 });
+```
+
+The detector is the YIN algorithm, in `lib/pitch-detection`: `detectPitch(samples, sampleRate)` for the frequency of an array of samples, `nearestNote(frequency)` for the note and its offset in cents. They are pure functions, so you can use them off the audio thread or in a test.
+
+## Accessibility
+
+The tuner is a `meter` of cents, from -50 to +50, and its text value reads the note and how far off it is: "A 4, 12 cents flat", "A 4, in tune", "No sound". The display itself is hidden from assistive technology, so a screen reader does not read a new figure twenty times a second.
+
+## API reference
+
+### Tuner
+
+<TypeTable>
+<TypeRow name={"source"} type={"Source<PitchReading | null>"}>The live reading, such as `usePitch` returns: the note, its octave, the offset in cents and the frequency, or `null` while nothing clear is playing.</TypeRow>
+<TypeRow name={"tolerance"} type={"number"} default={"5"}>How far from the note still counts as in tune, in cents. The display turns to the primary color within it.</TypeRow>
+<TypeRow name={"className"} type={"string"}>Styles the root.</TypeRow>
+</TypeTable>
+
+### useMicrophone
+
+<TypeTable>
+<TypeRow name={"analyser"} type={"AnalyserNode | null"}>Taps the microphone while it listens, `null` otherwise.</TypeRow>
+<TypeRow name={"start"} type={"() => Promise<void>"}>Asks for the microphone and starts listening. Call it from a user gesture.</TypeRow>
+<TypeRow name={"stop"} type={"() => void"}>Releases the microphone.</TypeRow>
+<TypeRow name={"isListening"} type={"boolean"}>Whether the microphone is on.</TypeRow>
+<TypeRow name={"error"} type={"string | null"}>Why it could not start: no microphone access in this browser, or the permission was denied.</TypeRow>
+</TypeTable>
+
+### usePitch
+
+<TypeTable>
+<TypeRow name={"analyser"} type={"AnalyserNode | null"}>The signal to read, with an `fftSize` of at least two periods of `minHz`.</TypeRow>
+<TypeRow name={"reference"} type={"number"} default={"440"}>The frequency of A4 in hertz.</TypeRow>
+<TypeRow name={"minHz"} type={"number"} default={"40"}>The lowest pitch looked for.</TypeRow>
+<TypeRow name={"maxHz"} type={"number"} default={"2000"}>The highest pitch looked for.</TypeRow>
+<TypeRow name={"minLevel"} type={"number"} default={"0.01"}>How quiet the signal may be, as an RMS level from 0 to 1, before nothing is detected.</TypeRow>
+<TypeRow name={"threshold"} type={"number"} default={"0.15"}>How aperiodic a period may be and still count. Lower is stricter.</TypeRow>
+<TypeRow name={"median"} type={"number"} default={"5"}>How many recent detections the reading is the median of: it drops the octave jumps a plucked string starts with.</TypeRow>
+<TypeRow name={"holdMs"} type={"number"} default={"600"}>How long the last note stays after the sound stops, so a string's decay does not flicker.</TypeRow>
+</TypeTable>
