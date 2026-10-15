@@ -23,7 +23,10 @@
       "@/*": ["./src/*"],
       "@audio-ui/core": ["../../packages/core/src/index.ts"],
       "@audio-ui/core/internal": ["../../packages/core/src/internal.ts"],
-      "@audio-ui/core/*": ["../../packages/core/src/primitives/*/index.ts"],
+      "@audio-ui/core/*": [
+        "../../packages/core/src/primitives/*/index.ts",
+        "../../packages/core/src/audio/*/index.ts"
+      ],
       "@audio-ui/react": ["../../packages/ui/src/index.ts"],
       "fumadocs-mdx:collections/*": ["./.source/*"]
     },

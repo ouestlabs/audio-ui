@@ -15,7 +15,10 @@
     "paths": {
       "@audio-ui/core": ["../core/src/index.ts"],
       "@audio-ui/core/internal": ["../core/src/internal.ts"],
-      "@audio-ui/core/*": ["../core/src/primitives/*/index.ts"]
+      "@audio-ui/core/*": [
+        "../core/src/primitives/*/index.ts",
+        "../core/src/audio/*/index.ts"
+      ]
     },
     "resolveJsonModule": true,
     "rewriteRelativeImportExtensions": true,
