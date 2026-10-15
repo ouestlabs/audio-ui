@@ -1,10 +1,7 @@
+import { DEFAULT_TEMPO, secondsPerBar } from "@audio-ui/core/time";
 import { createSource } from "@audio-ui/react";
 import { useLayoutEffect, useState } from "react";
 import { Transport } from "@/registry-audio/bases/base/audio/elements/transport";
-import {
-  DEFAULT_TEMPO,
-  secondsPerBar,
-} from "@/registry-audio/bases/base/lib/musical-time";
 
 const LOOP_BARS = 4;
 const START = 0.3;

@@ -31,21 +31,6 @@ const items: RegistryItem[] = [
     type: "registry:lib",
   },
   {
-    categories: ["lib", "audio", "sequencer", "piano"],
-    dependencies: [],
-    description:
-      "Framework-agnostic core of the look-ahead scheduler, the drift-free stepping cursor and self-correcting catch-up loop behind use-transport-clock",
-    files: [
-      {
-        path: "lib/lookahead-scheduler.ts",
-        type: "registry:lib",
-      },
-    ],
-    name: "lookahead-scheduler",
-    registryDependencies: [],
-    type: "registry:lib",
-  },
-  {
     categories: ["lib", "audio", "waveform"],
     dependencies: [],
     description:
@@ -87,21 +72,6 @@ const items: RegistryItem[] = [
       },
     ],
     name: "undo-history",
-    registryDependencies: [],
-    type: "registry:lib",
-  },
-  {
-    categories: ["lib", "audio", "timeline"],
-    dependencies: [],
-    description:
-      "Framework-agnostic musical time, bars and beats against seconds, fixed and zoom-adaptive grid divisions with triplets, ruler label spacing, and bar/beat readouts",
-    files: [
-      {
-        path: "lib/musical-time.ts",
-        type: "registry:lib",
-      },
-    ],
-    name: "musical-time",
     registryDependencies: [],
     type: "registry:lib",
   },
@@ -184,13 +154,15 @@ const movedToCore: [name: string, entry: string][] = [
   ["midi", "midi"],
   ["midi-input", "midi"],
   ["pitch-detection", "pitch"],
+  ["musical-time", "time"],
+  ["lookahead-scheduler", "time"],
 ];
 
 export const lib: RegistryItem[] = [
   ...items,
   ...movedToCore.map(
     ([name, entry]): RegistryItem => ({
-      dependencies: ["@audio-ui/core@^0.3.0"],
+      dependencies: ["@audio-ui/core@^0.4.0"],
       description: `Moved to @audio-ui/core/${entry}: installs the package.`,
       files: [],
       name,

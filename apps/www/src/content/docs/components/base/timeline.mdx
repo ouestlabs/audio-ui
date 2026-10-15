@@ -31,7 +31,8 @@ The base for an arrangement view, a clip editor or a piano roll. The registry co
 <TabsContent value="cli">
 
 ```bash component
-npx shadcn@latest add @audio-ui/timeline @audio-ui/musical-time
+npx shadcn@latest add @audio-ui/timeline
+npm install @audio-ui/core
 ```
 
 </TabsContent>
@@ -121,7 +122,7 @@ import {
   DEFAULT_TEMPO,
   describeBarsBeats,
   gridInterval,
-} from "@/lib/musical-time";
+} from "@audio-ui/core/time";
 ```
 
 ```tsx
@@ -256,7 +257,7 @@ Place it anywhere inside the timeline, outside the viewport. Dragging an edge zo
 
 ## Musical time
 
-The `musical-time` lib (`npx shadcn@latest add @audio-ui/musical-time`) turns a tempo into what a timeline needs, in seconds:
+`@audio-ui/core/time` turns a tempo into what a timeline needs, in seconds:
 
 - `gridInterval(division, zoom, tempo)` is the grid's step: a fixed division (`"1-bar"`, `"1/8"`, …), or `"adaptive"` for the finest division still 24px apart at this zoom. Pass `{ triplet: true }` for three in the space of two. Give the same number to `snapStep` and to the lanes' `gridStep`, so gestures land on the lines you see.
 - `barLabelInterval(zoom, tempo)` is how far apart the ruler's bar numbers go: whole bars, spread out until they no longer collide.

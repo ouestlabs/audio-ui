@@ -181,7 +181,6 @@ export const audio: RegistryItem[] = [
     name: "timeline",
     registryDependencies: [
       "@audio-ui/arrangement",
-      "@audio-ui/musical-time",
       "@audio-ui/fader",
       "@audio-ui/knob",
       "@shadcn/button",
@@ -259,7 +258,6 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
-    dependencies: ["@audio-ui/react", "@base-ui/react"],
     files: [
       {
         path: "audio/elements/transport.tsx",
@@ -272,9 +270,9 @@ export const audio: RegistryItem[] = [
       },
     ],
     name: "transport",
+    dependencies: ["@audio-ui/core@^0.4.0"],
     registryDependencies: [
       "@audio-ui/bpm-control",
-      "@audio-ui/musical-time",
       "@shadcn/button",
       "@shadcn/button-group",
       "@shadcn/dropdown-menu",

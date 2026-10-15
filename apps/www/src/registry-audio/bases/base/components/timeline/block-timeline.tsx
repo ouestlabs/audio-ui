@@ -1,6 +1,18 @@
 "use client";
 
 import {
+  barLabelInterval,
+  DEFAULT_TEMPO,
+  describeBarsBeats,
+  GRID_DIVISIONS,
+  type GridDivision,
+  gridInterval,
+  gridLabel,
+  type MetronomeRhythm,
+  secondsPerBar,
+  type Tempo,
+} from "@audio-ui/core/time";
+import {
   adjacentPoint,
   type FadeShape,
   type Timeline as TimelinePrimitive,
@@ -84,18 +96,6 @@ import type {
   Arranged,
   ArrangementTrack,
 } from "@/registry-audio/bases/base/lib/arrangement";
-import {
-  barLabelInterval,
-  DEFAULT_TEMPO,
-  describeBarsBeats,
-  GRID_DIVISIONS,
-  type GridDivision,
-  gridInterval,
-  gridLabel,
-  type MetronomeRhythm,
-  secondsPerBar,
-  type Tempo,
-} from "@/registry-audio/bases/base/lib/musical-time";
 
 const BARS = 32;
 /** The arrangement is laid out at the first tempo; a tempo change keeps its musical positions. */
