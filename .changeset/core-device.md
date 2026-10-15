@@ -1,0 +1,5 @@
+---
+"@audio-ui/core": minor
+---
+
+New `@audio-ui/core/device` entry: an effect or an instrument as a set of named parameters, with no interface and no audio in it. `defineDevice({ id, name, description, parameters })` takes a descriptor per parameter (a number with its range, step, scale and unit, or a toggle) and gives back the device's defaults, `set`, `sanitize` (a state loaded from a saved project, repaired), `clampValue`, `normalize` and `denormalize` along the parameter's scale, and `format` for a readout. The state is a plain object typed by the parameter ids. A device that cannot work (a default outside its range, a log scale from zero, a duplicate id) throws a `DeviceDefinitionError` naming the parameter when it is defined.
