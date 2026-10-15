@@ -12,9 +12,10 @@ It has no dependencies.
 
 ## Layout
 
-- `shared/`: language helpers, math, pitch
+- `shared/`: language helpers, math, pitch names
 - `value/`: scales, ranges, formatting, change and commit event details, live sources and stores
 - `dom/`: frame scheduling, pointer release, visibility, data attributes
+- `pitch/`: notes and frequencies, cents and pitch detection on samples, imported as `@audio-ui/core/pitch`
 - `primitives/<name>/`: each primitive's own logic, such as timeline clips, waveform peaks or envelope geometry, imported as `@audio-ui/core/<name>`
 
 `index.ts` is the public API of what the primitives share. `@audio-ui/core/internal` holds helpers for adapters and may change in any release.

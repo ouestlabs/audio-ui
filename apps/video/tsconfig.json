@@ -18,6 +18,7 @@
       "@/*": ["../www/src/*"],
       "@audio-ui/core": ["../../packages/core/src/index.ts"],
       "@audio-ui/core/internal": ["../../packages/core/src/internal.ts"],
+      "@audio-ui/core/pitch": ["../../packages/core/src/pitch/index.ts"],
       "@audio-ui/core/*": ["../../packages/core/src/primitives/*/index.ts"],
       "@audio-ui/react": ["../../packages/ui/src/index.ts"]
     },

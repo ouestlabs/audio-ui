@@ -1,6 +1,8 @@
 import { defineConfig } from "tsup";
 
 // One entry per primitive, so `@audio-ui/core/<name>` ships only that primitive.
+// The audio modules beside them (pitch...) are entries of their own for the same
+// reason: `@audio-ui/core/pitch` ships only the pitch maths.
 const primitives = [
   "envelope",
   "fader",
@@ -24,6 +26,7 @@ export default defineConfig({
   entry: {
     index: "src/index.ts",
     internal: "src/internal.ts",
+    pitch: "src/pitch/index.ts",
     ...Object.fromEntries(
       primitives.map((name) => [name, `src/primitives/${name}/index.ts`])
     ),

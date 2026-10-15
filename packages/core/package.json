@@ -37,6 +37,10 @@
       "types": "./dist/primitives/fader/index.d.ts",
       "import": "./dist/fader.js"
     },
+    "./pitch": {
+      "types": "./dist/pitch/index.d.ts",
+      "import": "./dist/pitch.js"
+    },
     "./knob": {
       "types": "./dist/primitives/knob/index.d.ts",
       "import": "./dist/knob.js"
