@@ -21,7 +21,7 @@ function Track({ file }: { file: ArrayBuffer }) {
 **Correct:**
 
 ```ts
-// npx shadcn@latest add @audio-ui/waveform-dsp
+// npx shadcn@latest add @audio-ui/waveform-peaks
 const channels = await decodeAudioChannels(ctx, file);
 const values = normalizePeaks(computePeaks(channels, 4096)); // once, at load
 ```

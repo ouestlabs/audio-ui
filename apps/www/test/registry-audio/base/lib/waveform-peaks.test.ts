@@ -5,7 +5,7 @@ import {
   normalizePeaks,
   normalizeWaveform,
   spectrumBands,
-} from "@/registry-audio/bases/base/lib/waveform-dsp";
+} from "@/registry-audio/bases/base/lib/waveform-peaks";
 
 describe("downsampleWaveform", () => {
   test("returns [] for empty input or non-positive target", () => {

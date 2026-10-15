@@ -133,14 +133,14 @@ const { bands } = useAudioSignal(analyser);
 
 ## Feeding real audio
 
-`values` is a plain prop: the component does not decode audio. The `waveform-dsp` lib (`npx shadcn@latest add @audio-ui/waveform-dsp`) turns a real audio file into `values`: `decodeAudioChannels` reads every channel's PCM samples out of an `AudioContext`, `computePeaks` reduces them to each slice's lowest and highest sample across all channels (so a take panned hard to one side still draws), and `normalizePeaks` scales them so the loudest sample reaches full height.
+`values` is a plain prop: the component does not decode audio. The `waveform-peaks` lib (`npx shadcn@latest add @audio-ui/waveform-peaks`) turns a real audio file into `values`: `decodeAudioChannels` reads every channel's PCM samples out of an `AudioContext`, `computePeaks` reduces them to each slice's lowest and highest sample across all channels (so a take panned hard to one side still draws), and `normalizePeaks` scales them so the loudest sample reaches full height.
 
 ```tsx
 import {
   computePeaks,
   decodeAudioChannels,
   normalizePeaks,
-} from "@/lib/waveform-dsp";
+} from "@/lib/waveform-peaks";
 
 const context = new AudioContext();
 const channels = await decodeAudioChannels(context, await file.arrayBuffer());

@@ -108,7 +108,7 @@ export const getContext = () => (ctx ??= new AudioContext());
 </Button>
 ```
 
-The registry ships this as a lib: `npx shadcn@latest add @audio-ui/web`. Use one context per page; every connected node must come from it.
+The registry ships this as a lib: `npx shadcn@latest add @audio-ui/web-audio`. Use one context per page; every connected node must come from it.
 
 ### 1.2 Ramp parameters, never assign them
 
@@ -519,7 +519,7 @@ function Track({ file }: { file: ArrayBuffer }) {
 **Correct:**
 
 ```ts
-// npx shadcn@latest add @audio-ui/waveform-dsp
+// npx shadcn@latest add @audio-ui/waveform-peaks
 const channels = await decodeAudioChannels(ctx, file);
 const values = normalizePeaks(computePeaks(channels, 4096)); // once, at load
 ```
@@ -1269,8 +1269,8 @@ const tools = {
 ```
 
 ```tsx
-// npx shadcn@latest add @audio-ui/history
-import { emptyHistory, recordChange, settleChange, undo } from "@/lib/history";
+// npx shadcn@latest add @audio-ui/undo-history
+import { emptyHistory, recordChange, settleChange, undo } from "@/lib/undo-history";
 
 const historyRef = useRef(emptyHistory<PianoRollState>());
 

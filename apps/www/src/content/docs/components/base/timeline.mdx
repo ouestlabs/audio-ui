@@ -266,7 +266,7 @@ The `musical-time` lib (`npx shadcn@latest add @audio-ui/musical-time`) turns a 
 
 ## Undo and redo
 
-The `history` lib (`npx shadcn@latest add @audio-ui/history`) implements undo and redo as values: every function takes the present and returns the new present, and keeps no state of its own. Keep the history in a ref and the document in state, so two undos in one tick are fed the first one's result instead of reading the same stack twice.
+The `undo-history` lib (`npx shadcn@latest add @audio-ui/undo-history`) implements undo and redo as values: every function takes the present and returns the new present, and keeps no state of its own. Keep the history in a ref and the document in state, so two undos in one tick are fed the first one's result instead of reading the same stack twice.
 
 ```ts
 let history = emptyHistory<Clip[]>();

@@ -37,4 +37,4 @@ export const getContext = () => (ctx ??= new AudioContext());
 </Button>
 ```
 
-The registry ships this as a lib: `npx shadcn@latest add @audio-ui/web`. Use one context per page; every connected node must come from it.
+The registry ships this as a lib: `npx shadcn@latest add @audio-ui/web-audio`. Use one context per page; every connected node must come from it.

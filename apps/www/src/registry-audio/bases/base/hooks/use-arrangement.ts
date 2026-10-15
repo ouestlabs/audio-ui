@@ -29,7 +29,7 @@ import {
   redo,
   settleChange,
   undo,
-} from "@/registry-audio/bases/base/lib/history";
+} from "@/registry-audio/bases/base/lib/undo-history";
 
 /** What a clip's menu can do: renaming is the clip's own, in place. */
 export type ClipAction = "duplicate" | "remove" | "rename" | "split" | "toggle";
@@ -68,7 +68,7 @@ export interface UseArrangementOptions {
  * selecting, moving a group, copying, laying a clip so it covers what is
  * under it, splitting, duplicating, deleting, adding and removing tracks, each
  * track's mix and height, and undo and redo over the tracks and the clips. The
- * pure side is `lib/arrangement` and `lib/history`; this is what keeps them in
+ * pure side is `lib/arrangement` and `lib/undo-history`; this is what keeps them in
  * a component.
  */
 export function useArrangement({

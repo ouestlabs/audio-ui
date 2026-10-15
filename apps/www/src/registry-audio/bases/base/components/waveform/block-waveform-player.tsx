@@ -27,7 +27,7 @@ import {
   computePeaks,
   decodeAudioChannels,
   normalizePeaks,
-} from "@/registry-audio/bases/base/lib/waveform-dsp";
+} from "@/registry-audio/bases/base/lib/waveform-peaks";
 
 // More slices than the waveform has bars at any width or zoom; it keeps each bar's lowest and highest.
 const PEAK_COUNT = 4096;
