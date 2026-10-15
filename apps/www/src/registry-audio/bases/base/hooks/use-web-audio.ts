@@ -1,6 +1,6 @@
 "use client";
 
-import { $webAudio } from "@/registry-audio/bases/base/lib/web-audio";
+import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 /**
  * Access the Web Audio API instance, synthesis, effects, one-shot sounds.
@@ -13,5 +13,5 @@ import { $webAudio } from "@/registry-audio/bases/base/lib/web-audio";
  * ```
  */
 export function useWebAudio() {
-  return $webAudio;
+  return webAudio;
 }
