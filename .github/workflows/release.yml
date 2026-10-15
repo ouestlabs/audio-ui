@@ -13,9 +13,9 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      # npm trusted publishing: lets `npm publish` exchange this job's OIDC token
-      # for a short-lived publish token (a no-op until the trusted publisher is
-      # configured on npmjs.com).
+      # npm trusted publishing: `npm publish` exchanges this job's OIDC token for
+      # a short-lived publish token. Each package's trusted publisher on npmjs.com
+      # names this workflow file, release.yml.
       id-token: write
       pull-requests: write
     steps:
@@ -49,7 +49,3 @@ jobs:
           # every branch but changeset-release/main. The git CLI pushes straight
           # to that branch instead.
           push-with-git-cli: true
-        env:
-          # The fallback while no trusted publisher is configured. Once a release
-          # has published through OIDC, remove this line and the NPM_TOKEN secret.
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
