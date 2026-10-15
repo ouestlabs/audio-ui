@@ -226,7 +226,7 @@ function MetronomeMenu({
         render={
           <Toolbar.Button
             aria-label="Metronome settings"
-            className="hidden @2xl/transport:flex"
+            className="hidden @lg/transport:flex"
             render={<Button size="icon" variant="outline" />}
           />
         }
@@ -324,7 +324,7 @@ function TransportTempo({
   return (
     <>
       <Toolbar.Group
-        className="hidden @2xl/transport:flex"
+        className="hidden @lg/transport:flex"
         render={<ButtonGroup className="shrink-0" />}
       >
         <BpmControl onValueChange={handleBpm} value={tempo.bpm} />
@@ -352,12 +352,14 @@ function TransportTempo({
           render={
             <Button
               aria-label={`Tempo: ${tempo.bpm} BPM, ${signature}`}
-              className="@2xl/transport:hidden tabular-nums"
+              className="@lg/transport:hidden tabular-nums"
               variant="outline"
             />
           }
         >
-          {tempo.bpm} BPM
+          {tempo.bpm}
+          {/* The unit goes when the bar is too narrow for it: the accessible name keeps it. */}
+          <span className="hidden @[17rem]/transport:inline">BPM</span>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start">
           <div className="p-2">
@@ -559,7 +561,7 @@ function Transport({
             <Toolbar.Button
               aria-label="Loop"
               aria-pressed={looping}
-              className="hidden @2xl/transport:flex"
+              className="hidden @lg/transport:flex"
               onClick={toggleLooping}
               render={
                 <Button size="icon" variant={looping ? "default" : "outline"} />
@@ -579,7 +581,7 @@ function Transport({
             <Toolbar.Button
               aria-label="Metronome"
               aria-pressed={metronome}
-              className="hidden @2xl/transport:flex"
+              className="hidden @lg/transport:flex"
               onClick={toggleMetronome}
               render={
                 <Button
