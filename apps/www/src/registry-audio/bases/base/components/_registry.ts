@@ -414,7 +414,7 @@ export const components: RegistryItem[] = [
       },
     ],
     name: "block-mixer",
-    dependencies: ["@audio-ui/core@^0.5.0"],
+    dependencies: ["@audio-ui/react", "@audio-ui/core@^0.5.0"],
     registryDependencies: [
       "@audio-ui/fader",
       "@audio-ui/knob",
@@ -424,7 +424,6 @@ export const components: RegistryItem[] = [
       "@audio-ui/use-transport-clock",
       "@audio-ui/web-audio",
       "@audio-ui/drum-synthesis",
-      "@audio-ui/envelope-ramp",
       "@shadcn/button",
       "@shadcn/toggle",
     ],

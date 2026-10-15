@@ -1,0 +1,98 @@
+---
+title: Mixer
+description: "A mixing console: tracks with pan, fader, meter, mute and solo into a master with a stereo meter, every meter reading the real signal of its channel."
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="block-mixer" />
+
+A channel strip per track and a master, built from the [Knob](/docs/components/base/knob), [Fader](/docs/components/base/fader) and [Meter](/docs/components/base/meter), and run on the Web Audio API alone: each strip is a few nodes, and each meter reads an `AnalyserNode`, not a number made up for the picture.
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">CLI</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash component
+npx shadcn@latest add @audio-ui/block-mixer
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the following dependencies:</Step>
+
+```bash
+npm install @audio-ui/react @audio-ui/core
+```
+
+<Step>Add the components and hooks it is made of:</Step>
+
+```bash
+npx shadcn@latest add @audio-ui/fader @audio-ui/knob @audio-ui/meter @audio-ui/use-audio-levels @audio-ui/use-master-bus @audio-ui/use-transport-clock @audio-ui/web-audio @audio-ui/drum-synthesis @shadcn/button @shadcn/toggle
+```
+
+<Step>Copy and paste the following code into your project.</Step>
+
+<ComponentSource
+  styleName="base-nova"
+  name="block-mixer"
+  title="components/examples/block-mixer.tsx"
+/>
+
+<Step>Update the import paths to match your project setup.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Signal path
+
+Each channel is a chain of four nodes into the master bus:
+
+```
+input → fader (GainNode) → mute (GainNode) → panner (StereoPannerNode) → master
+                                  └→ AnalyserNode → its meter
+```
+
+- **The fader is in dB**, from silent at the bottom to +6 dB, and sets the node's gain as `10 ** (db / 20)`. It moves the gain with `setTargetAtTime`, so dragging it does not click.
+- **Mute and solo go through their own gain**, not through the fader, so un-muting returns to where the fader was. A track is audible when it is not muted and either it is soloed or nothing is: a muted track stays silent even if soloed.
+- **The meter taps the channel after its fader and its mute**, before the pan: it shows what reaches the mix.
+- **The master's meter reads its two sides** through a `ChannelSplitterNode`, ahead of the bus's safety limiter. The bus is the one every block shares (`use-master-bus`).
+
+The analysers are never connected to `ctx.destination`, so reading a level plays nothing.
+
+## Meters
+
+A meter takes a live `source`, so a channel costs no React render per frame. `useAudioLevels` makes one from the analysers of a channel:
+
+```tsx
+import { Meter } from "@/components/audio-ui/meter";
+import { useAudioLevels } from "@/hooks/use-audio-levels";
+
+const levels = useAudioLevels(analysers); // memoize the array: a new one restarts sampling
+
+<Meter aria-label="Drums level" peakMarks="hidden" source={levels} />;
+```
+
+The level is the RMS of the time-domain samples in dB. It rises at once and falls back at 30 dB a second, so a drum hit reads as a hit and does not flicker. Nothing is published while the signal is silent.
+
+## Playing your own sources
+
+The block plays a small loop of its own, so it sounds on first load. To mix your own tracks, connect each source to the `input` node of a channel instead of to the destination, and drop the loop. A channel's nodes are created once, with the shared context, and its fader, mute and pan are driven from state with `setTargetAtTime`.
+
+## Accessibility
+
+Every control is a native input behind its own role: the pan is a slider named "Drums pan" and the volume "Drums volume", and mute and solo are toggle buttons, "Mute Drums" and "Solo Drums". A strip is a group with the track's name, so a screen reader reads "Drums, group" then each control, and tabbing goes pan, volume, mute, solo, then the next track. The faders and knobs take the arrow keys, Home and End.
