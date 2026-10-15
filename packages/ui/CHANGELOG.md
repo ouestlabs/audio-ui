@@ -1,5 +1,12 @@
 # @audio-ui/react
 
+## 0.3.4
+
+### Patch Changes
+
+- Updated dependencies [90d6c74]
+  - @audio-ui/core@0.5.0
+
 ## 0.3.3
 
 ### Patch Changes

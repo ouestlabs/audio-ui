@@ -1,6 +1,6 @@
 {
   "name": "@audio-ui/react",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "A collection of React UI primitives for Audio UI.",
   "keywords": [
     "audio-ui",
@@ -95,7 +95,7 @@
     "test": "bun test"
   },
   "dependencies": {
-    "@audio-ui/core": "^0.4.0"
+    "@audio-ui/core": "^0.5.0"
   },
   "devDependencies": {
     "@happy-dom/global-registrator": "^20.10.6",
