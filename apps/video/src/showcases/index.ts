@@ -3,11 +3,13 @@ import { EnvelopeShowcase } from "./envelope.tsx";
 import { FaderShowcase } from "./fader.tsx";
 import { KnobShowcase } from "./knob.tsx";
 import { MeterShowcase } from "./meter.tsx";
+import { PadShowcase } from "./pad.tsx";
 import { PianoShowcase } from "./piano.tsx";
 import { PianoRollShowcase } from "./piano-roll.tsx";
 import { PlotShowcase } from "./plot.tsx";
 import { ScrubberShowcase } from "./scrubber.tsx";
 import { SequencerShowcase } from "./sequencer.tsx";
+import { SpectrumAnalyzerShowcase } from "./spectrum-analyzer.tsx";
 import { TimelineShowcase } from "./timeline.tsx";
 import { TransportShowcase } from "./transport.tsx";
 import { WaveformShowcase } from "./waveform.tsx";
@@ -36,6 +38,7 @@ export const SHOWCASES: Record<string, Showcase> = {
   fader: { Demo: FaderShowcase, height: 160, title: "Fader", width: 584 },
   knob: { Demo: KnobShowcase, height: 240, title: "Knob", width: 520 },
   meter: { Demo: MeterShowcase, height: 260, title: "Meter", width: 160 },
+  pad: { Demo: PadShowcase, height: 420, title: "Pad", width: 420 },
   piano: { Demo: PianoShowcase, height: 192, title: "Piano", width: 584 },
   "piano-roll": {
     Demo: PianoRollShowcase,
@@ -54,6 +57,12 @@ export const SHOWCASES: Record<string, Showcase> = {
     Demo: SequencerShowcase,
     height: 200,
     title: "Sequencer",
+    width: 760,
+  },
+  "spectrum-analyzer": {
+    Demo: SpectrumAnalyzerShowcase,
+    height: 300,
+    title: "Spectrum Analyzer",
     width: 760,
   },
   timeline: {

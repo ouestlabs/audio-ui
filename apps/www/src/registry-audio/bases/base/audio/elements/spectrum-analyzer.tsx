@@ -41,6 +41,8 @@ type SpectrumAnalyzerProps = Omit<
   minHz?: number;
   /** Draws each point's recent peak over the spectrum, held a moment and then falling. @default true */
   peakHold?: boolean;
+  /** The peaks to draw, in place of the ones worked out from `source`: your own `useSpectrumPeaks` with another hold or fall, or peaks you compute yourself. */
+  peaks?: Source<Float32Array>;
   /** The live spectrum, dB per point along a log frequency axis, such as `useSpectrum` returns. */
   source: Source<Float32Array>;
 };
@@ -58,10 +60,11 @@ function SpectrumAnalyzer({
   minDb = -100,
   minHz = 20,
   peakHold = true,
+  peaks,
   source,
   ...props
 }: SpectrumAnalyzerProps) {
-  const peaks = useSpectrumPeaks(source);
+  const held = useSpectrumPeaks(source);
   return (
     <Plot
       className={cn("h-40", className)}
@@ -81,7 +84,7 @@ function SpectrumAnalyzer({
         />
         <PlotTrace className="stroke-primary/80" source={source} />
         {peakHold ? (
-          <PlotTrace className="stroke-foreground/40" source={peaks} />
+          <PlotTrace className="stroke-foreground/40" source={peaks ?? held} />
         ) : null}
       </PlotGraph>
       <PlotCursor format={describePointer} />
