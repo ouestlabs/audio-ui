@@ -1,5 +1,14 @@
 "use client";
 
+import {
+  barsBeatsAt,
+  gridLabel,
+  METRONOME_RHYTHMS,
+  type MetronomeRhythm,
+  metronomeRhythmSeconds,
+  secondsPerBeat,
+  type Tempo,
+} from "@audio-ui/core/time";
 import type { Source } from "@audio-ui/react";
 import { Toolbar } from "@base-ui/react/toolbar";
 import { useCallback, useEffect, useRef } from "react";
@@ -33,15 +42,6 @@ import {
   SelectValue,
 } from "@/registry/bases/base/ui/select";
 import { BpmControl } from "@/registry-audio/bases/base/audio/elements/bpm-control";
-import {
-  barsBeatsAt,
-  gridLabel,
-  METRONOME_RHYTHMS,
-  type MetronomeRhythm,
-  metronomeRhythmSeconds,
-  secondsPerBeat,
-  type Tempo,
-} from "@/registry-audio/bases/base/lib/musical-time";
 
 const SIGNATURES = ["4/4", "3/4", "6/8", "5/4", "7/8", "2/4"] as const;
 

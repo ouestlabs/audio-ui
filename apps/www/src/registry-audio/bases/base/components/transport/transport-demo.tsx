@@ -1,14 +1,14 @@
 "use client";
 
-import { createSource } from "@audio-ui/react";
-import { useCallback, useEffect, useState } from "react";
-import { Transport } from "@/registry-audio/bases/base/audio/elements/transport";
 import {
   DEFAULT_TEMPO,
   type MetronomeRhythm,
   secondsPerBar,
   type Tempo,
-} from "@/registry-audio/bases/base/lib/musical-time";
+} from "@audio-ui/core/time";
+import { createSource } from "@audio-ui/react";
+import { useCallback, useEffect, useState } from "react";
+import { Transport } from "@/registry-audio/bases/base/audio/elements/transport";
 
 const LOOP_BARS = 4;
 

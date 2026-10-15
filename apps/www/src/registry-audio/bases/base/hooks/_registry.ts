@@ -67,10 +67,8 @@ export const hooks: RegistryItem[] = [
       },
     ],
     name: "use-transport-clock",
-    registryDependencies: [
-      "@audio-ui/use-web-audio",
-      "@audio-ui/lookahead-scheduler",
-    ],
+    dependencies: ["@audio-ui/core@^0.4.0"],
+    registryDependencies: ["@audio-ui/use-web-audio"],
     type: "registry:hook",
   },
   {

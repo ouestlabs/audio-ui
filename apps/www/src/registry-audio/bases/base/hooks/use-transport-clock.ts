@@ -1,7 +1,5 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useWebAudio } from "@/registry-audio/bases/base/hooks/use-web-audio";
 import {
   advance,
   anchoredCursor,
@@ -11,7 +9,9 @@ import {
   type SchedulerAnchor,
   type SchedulerConfig,
   type SchedulerCursor,
-} from "@/registry-audio/bases/base/lib/lookahead-scheduler";
+} from "@audio-ui/core/time";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useWebAudio } from "@/registry-audio/bases/base/hooks/use-web-audio";
 
 const DEFAULT_BPM = 120;
 const DEFAULT_STEPS_PER_BEAT = 4;
