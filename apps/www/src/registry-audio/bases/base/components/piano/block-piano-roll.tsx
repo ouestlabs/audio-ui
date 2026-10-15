@@ -50,8 +50,8 @@ import {
   type TransportRegion,
   useTransportClock,
 } from "@/registry-audio/bases/base/hooks/use-transport-clock";
-import { useWebAudio } from "@/registry-audio/bases/base/hooks/use-web-audio";
 import type { EnvelopePoint } from "@/registry-audio/bases/base/lib/envelope-ramp";
+import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 /** C2 to C6: more than fits, so the roll scrolls and opens on middle C. */
 const MIN_PITCH = 36;
@@ -418,7 +418,6 @@ export default function BlockPianoRoll() {
   });
 
   // A MIDI keyboard plays the roll's voices and lights its keys, once the page's MIDI input is connected.
-  const webAudio = useWebAudio();
   const midiNoteOn = useCallback(
     (pitch: number, velocity: number) => {
       const ctx = webAudio.getContext();
@@ -427,7 +426,7 @@ export default function BlockPianoRoll() {
       }
       triggerNote(pitch, DEFAULT_ENVELOPE, velocity);
     },
-    [triggerNote, webAudio]
+    [triggerNote]
   );
   const midiNoteOff = useCallback(
     (pitch: number) => releaseNote(pitch, DEFAULT_ENVELOPE),

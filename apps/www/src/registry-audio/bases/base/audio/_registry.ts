@@ -233,7 +233,7 @@ export const audio: RegistryItem[] = [
     registryDependencies: [
       "@audio-ui/use-master-bus",
       "@audio-ui/use-transport-clock",
-      "@audio-ui/use-web-audio",
+      "@audio-ui/web-audio",
       "@audio-ui/drum-synthesis",
       "@shadcn/button",
     ],

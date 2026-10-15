@@ -8,8 +8,8 @@ import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 import { useMidiInput } from "@/registry-audio/bases/base/hooks/use-midi-input";
 import { useSpectrum } from "@/registry-audio/bases/base/hooks/use-spectrum";
 import { useSynthVoices } from "@/registry-audio/bases/base/hooks/use-synth-voices";
-import { useWebAudio } from "@/registry-audio/bases/base/hooks/use-web-audio";
 import type { EnvelopePoint } from "@/registry-audio/bases/base/lib/envelope-ramp";
+import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 const VOLUME = 0.5;
 /** ADSR-shaped, with a long sustain so a held note stays on the analyzer. */
@@ -23,7 +23,6 @@ const ENVELOPE: EnvelopePoint[] = [
 
 /** Play the keyboard, or a MIDI one, and watch the spectrum: a sawtooth note lights its pitch and every harmonic above it, and the peaks hold a moment after you let go. */
 export default function SpectrumAnalyzerDemo() {
-  const webAudio = useWebAudio();
   const master = useMasterBus(VOLUME);
   const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
   const spectrum = useSpectrum(analyser);
@@ -45,7 +44,7 @@ export default function SpectrumAnalyzerDemo() {
     setAnalyser(node);
     // No disconnect here: the master bus drops all its outputs when it goes, and may already have.
     return () => setAnalyser(null);
-  }, [master, webAudio]);
+  }, [master]);
 
   useEffect(() => releaseAll, [releaseAll]);
 
@@ -57,7 +56,7 @@ export default function SpectrumAnalyzerDemo() {
       }
       triggerNote(pitch, ENVELOPE, velocity);
     },
-    [triggerNote, webAudio]
+    [triggerNote]
   );
   const noteOn = useCallback(
     (pitch: number, details: PianoPrimitive.Root.NoteOnEventDetails) =>

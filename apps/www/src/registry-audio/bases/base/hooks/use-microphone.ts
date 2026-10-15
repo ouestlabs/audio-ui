@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useWebAudio } from "@/registry-audio/bases/base/hooks/use-web-audio";
+import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 const ANALYSER_FFT_SIZE = 4096;
 
@@ -24,7 +24,6 @@ export interface UseMicrophoneReturn {
  * speakers. The microphone is released on `stop` and on unmount.
  */
 export function useMicrophone(): UseMicrophoneReturn {
-  const webAudio = useWebAudio();
   const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
   const [error, setError] = useState<string | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -66,7 +65,7 @@ export function useMicrophone(): UseMicrophoneReturn {
     } catch {
       setError("Microphone access was denied.");
     }
-  }, [webAudio]);
+  }, []);
 
   useEffect(() => stop, [stop]);
 

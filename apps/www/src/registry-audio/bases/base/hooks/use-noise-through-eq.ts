@@ -6,7 +6,7 @@ import {
   WEB_AUDIO_FILTER_TYPES,
 } from "@audio-ui/core/analysis";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useWebAudio } from "@/registry-audio/bases/base/hooks/use-web-audio";
+import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 const NOISE_SECONDS = 4;
 const OUTPUT_GAIN = 0.12;
@@ -43,7 +43,6 @@ function pinkNoise(ctx: AudioContext): AudioBuffer {
  * `useSpectrum`, and whether it is playing. Stops when the component unmounts.
  */
 export function useNoiseThroughEq(bands: readonly EqBand[]) {
-  const webAudio = useWebAudio();
   const [playing, setPlaying] = useState(false);
   const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
   const filtersRef = useRef<BiquadFilterNode[]>([]);
@@ -116,7 +115,7 @@ export function useNoiseThroughEq(bands: readonly EqBand[]) {
         PARAM_RAMP_SECONDS
       );
     });
-  }, [bands, webAudio]);
+  }, [bands]);
 
   return { analyser, playing, toggle };
 }

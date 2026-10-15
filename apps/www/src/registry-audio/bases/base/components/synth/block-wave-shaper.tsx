@@ -8,7 +8,7 @@ import {
 import { Fader } from "@/registry-audio/bases/base/audio/elements/fader";
 import { Knob } from "@/registry-audio/bases/base/audio/elements/knob";
 import { XYPad } from "@/registry-audio/bases/base/audio/elements/xypad";
-import { useWebAudio } from "@/registry-audio/bases/base/hooks/use-web-audio";
+import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 /** Graduations around the dials and along the fader: ticks only, the readout beneath says the value. */
 const PERCENT_MARKS = [0, 25, 50, 75, 100];
@@ -18,7 +18,6 @@ const VOLUME_MARKS = [0, 0.25, 0.5, 0.75, 1];
 type WaveformType = "sine" | "triangle" | "sawtooth" | "square";
 
 export default function BlockWaveShaper() {
-  const webAudio = useWebAudio();
   const driveId = React.useId();
   const driveLabelId = React.useId();
   const driveValueId = React.useId();
@@ -150,7 +149,6 @@ export default function BlockWaveShaper() {
       tone,
       volume,
       waveform,
-      webAudio,
     ]
   );
 
@@ -188,7 +186,7 @@ export default function BlockWaveShaper() {
     shaperRef.current = null;
     filterRef.current = null;
     setIsPlaying(false);
-  }, [webAudio]);
+  }, []);
 
   const updateSound = React.useCallback(
     (x: number, y: number) => {
@@ -212,7 +210,7 @@ export default function BlockWaveShaper() {
       oscillator2Ref.current.frequency.setTargetAtTime(frequency, now, 0.01);
       filterRef.current.Q.setTargetAtTime(resonance, now, 0.01);
     },
-    [getFrequency, getResonance, webAudio]
+    [getFrequency, getResonance]
   );
 
   React.useEffect(() => {
@@ -231,7 +229,7 @@ export default function BlockWaveShaper() {
         0.01
       );
     }
-  }, [detune, webAudio]);
+  }, [detune]);
 
   React.useEffect(() => {
     if (shaperRef.current) {
@@ -245,7 +243,7 @@ export default function BlockWaveShaper() {
       const now = ctx.currentTime;
       filterRef.current.frequency.setTargetAtTime(500 + tone * 75, now, 0.01);
     }
-  }, [tone, webAudio]);
+  }, [tone]);
 
   React.useEffect(() => {
     const ctx = webAudio.getContext();
@@ -256,7 +254,7 @@ export default function BlockWaveShaper() {
       dryGainRef.current.gain.setTargetAtTime(dryLevel, now, 0.01);
       wetGainRef.current.gain.setTargetAtTime(wetLevel, now, 0.01);
     }
-  }, [mix, webAudio]);
+  }, [mix]);
 
   React.useEffect(() => {
     const ctx = webAudio.getContext();
@@ -267,7 +265,7 @@ export default function BlockWaveShaper() {
         0.01
       );
     }
-  }, [volume, webAudio]);
+  }, [volume]);
 
   React.useEffect(
     () => () => {

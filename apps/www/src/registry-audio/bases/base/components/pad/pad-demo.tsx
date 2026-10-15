@@ -4,12 +4,12 @@ import type { Pad as PadPrimitive } from "@audio-ui/react";
 import { useCallback, useRef } from "react";
 import { Pad, PadItem } from "@/registry-audio/bases/base/audio/elements/pad";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
-import { useWebAudio } from "@/registry-audio/bases/base/hooks/use-web-audio";
 import {
   triggerHihat,
   triggerKick,
   triggerSnare,
 } from "@/registry-audio/bases/base/lib/drum-synthesis";
+import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 const VOLUME = 0.7;
 /** How long the open hat rings, in seconds, unless the closed one chokes it. */
@@ -48,7 +48,6 @@ const PADS: {
 
 /** Four drum pads: strike harder near the top. The closed hat cuts the open one short, as on a drum machine. */
 export default function PadDemo() {
-  const webAudio = useWebAudio();
   const master = useMasterBus(VOLUME);
   // The hits each pad still has ringing, so a choke can silence them.
   const ringing = useRef(new Map<string, GainNode[]>());
@@ -75,7 +74,7 @@ export default function PadDemo() {
         ]);
       }
     },
-    [master, webAudio]
+    [master]
   );
 
   // Drum hits ring on after the pad is released: only a choke stops them.
@@ -90,7 +89,7 @@ export default function PadDemo() {
       }
       ringing.current.delete(value);
     },
-    [webAudio]
+    []
   );
 
   return (

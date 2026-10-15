@@ -12,12 +12,12 @@ import { Meter } from "@/registry-audio/bases/base/audio/elements/meter";
 import { useAudioLevels } from "@/registry-audio/bases/base/hooks/use-audio-levels";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 import { useTransportClock } from "@/registry-audio/bases/base/hooks/use-transport-clock";
-import { useWebAudio } from "@/registry-audio/bases/base/hooks/use-web-audio";
 import {
   triggerHihat,
   triggerKick,
   triggerSnare,
 } from "@/registry-audio/bases/base/lib/drum-synthesis";
+import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 const BPM = 100;
 const STEPS_PER_BEAT = 4;
@@ -386,7 +386,6 @@ const INITIAL_CHANNELS: ChannelState[] = TRACKS.map((track) => ({
 export default function BlockMixer() {
   const [channels, setChannels] = useState(INITIAL_CHANNELS);
   const [masterGain, setMasterGain] = useState(0);
-  const webAudio = useWebAudio();
   const master = useMasterBus(dbToGain(masterGain));
   const [nodes, setNodes] = useState<ChannelNodes[] | null>(null);
   const [masterAnalysers, setMasterAnalysers] = useState<AnalyserNode[]>();
@@ -417,7 +416,7 @@ export default function BlockMixer() {
       setNodes(null);
       setMasterAnalysers(undefined);
     };
-  }, [master, webAudio]);
+  }, [master]);
 
   // A soloed channel silences every channel that is not.
   const anySoloed = channels.some((channel) => channel.soloed);
@@ -440,7 +439,7 @@ export default function BlockMixer() {
       node.mute.gain.setTargetAtTime(audible ? 1 : 0, ctx.currentTime, RAMP);
       node.panner.pan.setTargetAtTime(channel.pan, ctx.currentTime, RAMP);
     });
-  }, [anySoloed, channels, nodes, webAudio]);
+  }, [anySoloed, channels, nodes]);
 
   const playStep = useCallback(
     (step: number, time: number) => {
@@ -464,7 +463,7 @@ export default function BlockMixer() {
         }
       });
     },
-    [nodes, webAudio]
+    [nodes]
   );
   const { isPlaying, start, stop } = useTransportClock({
     bpm: BPM,
@@ -482,7 +481,7 @@ export default function BlockMixer() {
       ctx.resume();
     }
     start();
-  }, [isPlaying, start, stop, webAudio]);
+  }, [isPlaying, start, stop]);
 
   const change = useCallback(
     (index: number, update: Partial<ChannelState>) =>

@@ -2,7 +2,7 @@
 
 import { createSource, type Source } from "@audio-ui/react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useWebAudio } from "@/registry-audio/bases/base/hooks/use-web-audio";
+import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 const LOOP_SECONDS = 2;
 const PULSES_PER_LOOP = 8;
@@ -48,7 +48,6 @@ function pulses(ctx: AudioContext): AudioBuffer {
  * level moves. Stops when the component unmounts.
  */
 export function usePulsesThroughCompressor(controls: CompressorControls) {
-  const webAudio = useWebAudio();
   const [playing, setPlaying] = useState(false);
   const [level] = useState(() => createSource(FLOOR_DB));
   const compressorRef = useRef<DynamicsCompressorNode | null>(null);
@@ -108,7 +107,7 @@ export function usePulsesThroughCompressor(controls: CompressorControls) {
       compressorRef.current = null;
       level.set(FLOOR_DB);
     };
-  }, [level, playing, webAudio]);
+  }, [level, playing]);
 
   // The controls move the compressor while it plays.
   useEffect(() => {
@@ -129,7 +128,7 @@ export function usePulsesThroughCompressor(controls: CompressorControls) {
       now,
       PARAM_RAMP_SECONDS
     );
-  }, [controls, webAudio]);
+  }, [controls]);
 
   return { level: level as Source<number>, playing, toggle };
 }

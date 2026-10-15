@@ -11,7 +11,7 @@ import {
   type SchedulerCursor,
 } from "@audio-ui/core/time";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useWebAudio } from "@/registry-audio/bases/base/hooks/use-web-audio";
+import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 const DEFAULT_BPM = 120;
 const DEFAULT_STEPS_PER_BEAT = 4;
@@ -78,7 +78,6 @@ export function useTransportClock({
   stepsPerBeat = DEFAULT_STEPS_PER_BEAT,
   totalSteps,
 }: UseTransportClockOptions): UseTransportClockReturn {
-  const webAudio = useWebAudio();
   const [isPlaying, setIsPlaying] = useState(false);
 
   const secondsPerStep = 60 / bpm / stepsPerBeat;
@@ -132,7 +131,7 @@ export function useTransportClock({
     for (const boundary of result.boundaries) {
       onStepRef.current?.(boundary.step, boundary.time);
     }
-  }, [webAudio]);
+  }, []);
 
   const anchorAt = useCallback(
     (step: number) => {
@@ -146,7 +145,7 @@ export function useTransportClock({
       onResetRef.current?.();
       poll();
     },
-    [poll, webAudio]
+    [poll]
   );
 
   const stop = useCallback(() => {
@@ -169,7 +168,7 @@ export function useTransportClock({
     setIsPlaying(true);
     anchorAt(configRef.current.regionStart);
     intervalRef.current = window.setInterval(poll, SCHEDULER_POLL_MS);
-  }, [anchorAt, poll, webAudio]);
+  }, [anchorAt, poll]);
 
   const reanchor = useCallback(
     (step?: number) => {
@@ -188,7 +187,7 @@ export function useTransportClock({
       return configRef.current.regionStart;
     }
     return positionAt(ctx.currentTime, anchorRef.current, configRef.current);
-  }, [webAudio]);
+  }, []);
 
   useEffect(() => stop, [stop]);
 
