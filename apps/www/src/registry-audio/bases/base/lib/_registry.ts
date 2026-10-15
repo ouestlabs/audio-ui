@@ -16,6 +16,21 @@ export const lib: RegistryItem[] = [
     type: "registry:lib",
   },
   {
+    categories: ["lib", "audio", "tuner"],
+    dependencies: [],
+    description:
+      "Pitch detection on audio samples (the YIN algorithm) and the nearest note with its offset in cents: pure functions, no Web Audio",
+    files: [
+      {
+        path: "lib/pitch-detection.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "pitch-detection",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
     categories: ["lib", "audio", "synth", "piano", "envelope"],
     dependencies: [],
     description:

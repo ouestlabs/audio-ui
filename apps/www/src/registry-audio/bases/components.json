@@ -140,6 +140,11 @@
     "title": "pad-demo"
   },
   {
+    "categories": ["tuner"],
+    "name": "tuner-demo",
+    "title": "tuner-demo"
+  },
+  {
     "categories": ["spectrum"],
     "name": "spectrum-analyzer-demo",
     "title": "spectrum-analyzer-demo"

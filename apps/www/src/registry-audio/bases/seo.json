@@ -46,6 +46,11 @@
     "intro": "Browse {{count}} spectrum components for audio/ui, built on top of shadcn/ui.",
     "title": "Spectrum"
   },
+  "tuner": {
+    "description": "Tuners: the note and the pitch of a sound, live from the microphone. {{count}} components.",
+    "intro": "Browse {{count}} tuner components for audio/ui, built on top of shadcn/ui.",
+    "title": "Tuner"
+  },
   "plot": {
     "description": "Plots for drawing curves and dragging points on them: equalizers, filters and compressors. {{count}} components.",
     "intro": "Browse {{count}} plot components for audio/ui, built on top of shadcn/ui.",

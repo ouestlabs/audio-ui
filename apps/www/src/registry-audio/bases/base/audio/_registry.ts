@@ -83,6 +83,18 @@ export const audio: RegistryItem[] = [
     dependencies: ["@audio-ui/react"],
     files: [
       {
+        path: "audio/elements/tuner.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "tuner",
+    registryDependencies: ["@audio-ui/use-pitch"],
+    type: "registry:ui",
+  },
+  {
+    dependencies: ["@audio-ui/react"],
+    files: [
+      {
         path: "audio/elements/spectrum-analyzer.tsx",
         type: "registry:ui",
       },

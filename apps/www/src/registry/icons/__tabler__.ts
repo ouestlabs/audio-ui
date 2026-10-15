@@ -22,6 +22,8 @@ export {
   IconInfoCircle,
   IconLayoutSidebar,
   IconLoader,
+  IconMicrophone,
+  IconMicrophoneOff,
   IconMinus,
   IconPlayerPause,
   IconPlayerPauseFilled,

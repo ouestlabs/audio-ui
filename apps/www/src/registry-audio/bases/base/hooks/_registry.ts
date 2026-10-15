@@ -110,6 +110,35 @@ export const hooks: RegistryItem[] = [
     type: "registry:hook",
   },
   {
+    categories: ["hooks", "audio", "tuner"],
+    description:
+      "The microphone as an AnalyserNode on the shared AudioContext: raw signal, never connected to the speakers, released on stop and on unmount",
+    files: [
+      {
+        path: "hooks/use-microphone.ts",
+        type: "registry:hook",
+      },
+    ],
+    name: "use-microphone",
+    registryDependencies: ["@audio-ui/use-web-audio"],
+    type: "registry:hook",
+  },
+  {
+    categories: ["hooks", "audio", "tuner"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "The pitch of a signal as a live source: the note nearest the sound and its offset in cents, steadied by a median and held a moment after the sound stops, with no React render per reading",
+    files: [
+      {
+        path: "hooks/use-pitch.ts",
+        type: "registry:hook",
+      },
+    ],
+    name: "use-pitch",
+    registryDependencies: ["@audio-ui/pitch-detection"],
+    type: "registry:hook",
+  },
+  {
     categories: ["hooks", "audio", "meter"],
     dependencies: ["@audio-ui/react"],
     description:

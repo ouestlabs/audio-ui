@@ -21,6 +21,8 @@ export {
   HeadphonesIcon,
   InformationCircleIcon,
   Loading03Icon,
+  Mic01Icon,
+  MicOff01Icon,
   MinusSignIcon,
   MoreHorizontalCircle01Icon,
   MoreHorizontalIcon,

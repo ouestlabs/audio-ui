@@ -37,6 +37,12 @@
       "name": "spectrum"
     },
     {
+      "count": 1,
+      "description": "Tuners: the note and the pitch of a sound, live from the microphone.",
+      "label": "Tuner",
+      "name": "tuner"
+    },
+    {
       "count": 3,
       "description": "Plots for drawing curves and dragging points on them: equalizers, filters and compressors.",
       "label": "Plot",
@@ -97,5 +103,5 @@
       "name": "xypad"
     }
   ],
-  "totalComponents": 32
+  "totalComponents": 33
 }

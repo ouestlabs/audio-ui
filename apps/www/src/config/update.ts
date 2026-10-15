@@ -11,6 +11,7 @@ export const DOCS_MENU_UPDATES: Record<string, string> = {
   sequencer: "Updated",
   "spectrum-analyzer": "New",
   timeline: "New",
+  tuner: "New",
   waveform: "Updated",
 };
 
@@ -28,5 +29,6 @@ export const PATTERNS_MENU_UPDATES: Record<string, string> = {
   sequencer: "Updated",
   spectrum: "New",
   timeline: "New",
+  tuner: "New",
   waveform: "Updated",
 };
