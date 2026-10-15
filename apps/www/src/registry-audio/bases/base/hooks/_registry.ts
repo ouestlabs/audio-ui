@@ -111,6 +111,20 @@ export const hooks: RegistryItem[] = [
   },
   {
     categories: ["hooks", "audio", "meter"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "The live levels of a signal from its AnalyserNodes, in the shape a Meter paints from: RMS in dB per channel with a peak that holds and falls, refreshed every frame without re-rendering",
+    files: [
+      {
+        path: "hooks/use-audio-levels.ts",
+        type: "registry:hook",
+      },
+    ],
+    name: "use-audio-levels",
+    type: "registry:hook",
+  },
+  {
+    categories: ["hooks", "audio", "meter"],
     dependencies: [],
     description:
       "Levels that move on their own, with a peak that holds and falls, in the shape a Meter paints from: a demo meter that is never at rest",

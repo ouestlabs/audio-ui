@@ -109,56 +109,29 @@ interface MeterSource {
 }
 ```
 
-`createSource` from `@audio-ui/react` makes one you push to. This one samples the RMS level of one `AnalyserNode` per channel every animation frame:
+`createSource` from `@audio-ui/react` makes one you push to. The `use-audio-levels` hook is one: it samples the RMS level of one `AnalyserNode` per channel every animation frame, lets it fall back smoothly, and holds each channel's peak a moment before it falls.
 
-```tsx
-"use client";
-
-import { createSource, type Meter } from "@audio-ui/react";
-import { useEffect, useState } from "react";
-
-const SILENCE_DB = -100;
-
-function rmsDb(analyser: AnalyserNode, buffer: Float32Array<ArrayBuffer>) {
-  analyser.getFloatTimeDomainData(buffer);
-  let sum = 0;
-  for (const sample of buffer) {
-    sum += sample * sample;
-  }
-  const rms = Math.sqrt(sum / buffer.length);
-  return rms > 0 ? 20 * Math.log10(rms) : SILENCE_DB;
-}
-
-export function useLevels(analysers: AnalyserNode[]) {
-  const [source] = useState(() => createSource<Meter.Root.Frame>({ levels: [] }));
-
-  useEffect(() => {
-    const channels = analysers.map((analyser) => ({
-      analyser,
-      buffer: new Float32Array(analyser.fftSize),
-    }));
-    let frame = 0;
-    const tick = () => {
-      source.set({
-        levels: channels.map(({ analyser, buffer }) => rmsDb(analyser, buffer)),
-      });
-      frame = requestAnimationFrame(tick);
-    };
-    frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
-  }, [analysers, source]);
-
-  return source;
-}
+```bash
+npx shadcn@latest add @audio-ui/use-audio-levels
 ```
 
 ```tsx
-const levels = useLevels(analysers); // memoize the array: a new one restarts sampling
+import { Meter } from "@/components/audio-ui/meter";
+import { useAudioLevels } from "@/hooks/use-audio-levels";
 
-<Meter aria-label="Stereo output" source={levels} />;
+// One analyser per channel, made once: a new array restarts the sampling.
+const analysers = useMemo(() => {
+  const analyser = ctx.createAnalyser();
+  output.connect(analyser); // a tap: the analyser plays nothing
+  return [analyser];
+}, [ctx, output]);
+
+const levels = useAudioLevels(analysers);
+
+<Meter aria-label="Output" source={levels} />;
 ```
 
-For a peak-hold mark, keep the loudest recent level per channel in the loop (hold it for a second or so, then let it fall) and publish it as `peaks` next to `levels`.
+For a stereo meter, split the signal with a `ChannelSplitter` and give the hook one analyser per side.
 
 To read the levels in React as well, for a numeric readout for example, use `useSyncExternalStore(levels.subscribe, levels.getSnapshot)`.
 
@@ -264,6 +237,12 @@ A graduation of the level scale at `value`, such as -18 dB: placed along the met
 `@audio-ui/react/meter` exposes `Meter.Root` (the group), `Meter.Channels` (one child per channel), `Meter.Channel` (a `role="meter"`), `Meter.Track`, `Meter.Indicator` (the lit part), `Meter.Peak` (the peak-hold mark), `Meter.Value` (the formatted level) and `Meter.Label`. Channel parts expose `data-orientation` and `data-clipping`.
 
 ## Examples
+
+### Mixing console
+
+Each channel's meter reads its real signal after the fader, and the master's reads both sides.
+
+<ComponentPreview styleName="base-nova" name="block-mixer" />
 
 ### Horizontal orientation
 

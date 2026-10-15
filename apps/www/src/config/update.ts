@@ -20,6 +20,7 @@ export const PATTERNS_MENU_UPDATES: Record<string, string> = {
   fader: "Updated",
   knob: "Updated",
   meter: "Updated",
+  mixer: "New",
   pad: "New",
   piano: "New",
   plot: "New",

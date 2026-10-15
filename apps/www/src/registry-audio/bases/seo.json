@@ -36,6 +36,11 @@
     "intro": "Browse {{count}} meter components for audio/ui, built on top of shadcn/ui.",
     "title": "Meter"
   },
+  "mixer": {
+    "description": "Mixing consoles: channel strips with pan, fader, meter, mute and solo, into a master. {{count}} components.",
+    "intro": "Browse {{count}} mixer components for audio/ui, built on top of shadcn/ui.",
+    "title": "Mixer"
+  },
   "spectrum": {
     "description": "Spectrum analyzers: the level of a sound across frequencies, live, with held peaks. {{count}} components.",
     "intro": "Browse {{count}} spectrum components for audio/ui, built on top of shadcn/ui.",
