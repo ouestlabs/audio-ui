@@ -73,6 +73,10 @@ export function MobileNav({
   const pathname = usePathname();
   const currentBase = getCurrentBase(pathname);
   const [chosen, setChosen] = React.useState<Section | null>(null);
+  const handleSectionChange = React.useCallback(
+    (value: string) => setChosen(value as Section),
+    []
+  );
   const section: Section =
     chosen ?? (isActive(pathname, "/components") ? "components" : "docs");
   const close = React.useCallback(() => setOpen(false), []);
@@ -140,7 +144,7 @@ export function MobileNav({
       >
         <Tabs
           className="shrink-0"
-          onValueChange={(value) => setChosen(value as Section)}
+          onValueChange={handleSectionChange}
           value={section}
         >
           <TabsList

@@ -57,6 +57,7 @@ export function ComponentPreviewTabs({
   });
 
   const hosted = usePreviewHost(expand);
+  const expandCode = React.useCallback(() => setIsCodeExpanded(true), []);
   const shown = expand ? (
     <HostedPreview host={hosted.host} open={hosted.open}>
       {component}
@@ -102,9 +103,7 @@ export function ComponentPreviewTabs({
                 />
                 <Button
                   className="relative z-10 bg-site-background text-site-foreground hover:bg-site-muted dark:bg-site-background dark:text-site-foreground dark:hover:bg-site-muted"
-                  onClick={() => {
-                    setIsCodeExpanded(true);
-                  }}
+                  onClick={expandCode}
                   size="sm"
                   type="button"
                   variant="outline"

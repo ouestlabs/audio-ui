@@ -85,7 +85,7 @@ export function DesignSystemSyncProvider({
   children: React.ReactNode;
 }) {
   const [_config, setConfig] = useConfig();
-  const hasSyncedRef = React.useRef(false);
+  const hasSyncedRef = React.useRef<boolean>(false);
 
   // Initial sync on mount: URL -> localStorage only
   // Using useLayoutEffect to sync before paint, but still render children immediately
@@ -132,6 +132,39 @@ export function DesignSystemSyncProvider({
  * wraps nothing: it sits beside the page, in a boundary of its own, because
  * reading the URL must not take the page's content with it.
  */
+/** What the host page had before an embedded preview styled it. */
+interface DocumentState {
+  baseColorClasses: string[];
+  bodyFontFamily: string;
+  fontHeading: string;
+  fontSans: string;
+  styleClasses: string[];
+}
+
+/** Sets a style property, or removes it when there is no value to set. */
+function setOrRemove(style: CSSStyleDeclaration, name: string, value: string) {
+  if (value) {
+    style.setProperty(name, value);
+  } else {
+    style.removeProperty(name);
+  }
+}
+
+/** Gives the host page back its own style and base color classes and fonts. */
+function restoreDocumentState(state: DocumentState) {
+  const { body } = document;
+  for (const className of [...body.classList]) {
+    if (className.startsWith("style-") || className.startsWith("base-color-")) {
+      body.classList.remove(className);
+    }
+  }
+  body.classList.add(...state.styleClasses, ...state.baseColorClasses);
+  const rootStyle = document.documentElement.style;
+  setOrRemove(rootStyle, "--font-sans", state.fontSans);
+  setOrRemove(rootStyle, "--font-heading", state.fontHeading);
+  setOrRemove(body.style, "font-family", state.bodyFontFamily);
+}
+
 export function DesignSystemEffects() {
   const [params, setParams] = useDesignSystemSearchParams({
     history: "replace",
@@ -177,13 +210,7 @@ export function DesignSystemEffects() {
     }
     return FONTS.find((fontOption) => fontOption.value === fontHeading);
   }, [font, fontHeading, selectedFont]);
-  const previousDocumentStateRef = React.useRef<{
-    styleClasses: string[];
-    baseColorClasses: string[];
-    fontSans: string;
-    fontHeading: string;
-    bodyFontFamily: string;
-  } | null>(null);
+  const previousDocumentStateRef = React.useRef<DocumentState | null>(null);
   const previousThemeStyleRef = React.useRef<{
     existed: boolean;
     textContent: string;
@@ -279,44 +306,9 @@ export function DesignSystemEffects() {
       }
 
       const previousDocumentState = previousDocumentStateRef.current;
-      const { body } = document;
-      const root = document.documentElement;
 
       if (previousDocumentState) {
-        for (const className of [...body.classList]) {
-          if (
-            className.startsWith("style-") ||
-            className.startsWith("base-color-")
-          ) {
-            body.classList.remove(className);
-          }
-        }
-
-        body.classList.add(
-          ...previousDocumentState.styleClasses,
-          ...previousDocumentState.baseColorClasses
-        );
-
-        if (previousDocumentState.fontSans) {
-          root.style.setProperty("--font-sans", previousDocumentState.fontSans);
-        } else {
-          root.style.removeProperty("--font-sans");
-        }
-
-        if (previousDocumentState.fontHeading) {
-          root.style.setProperty(
-            "--font-heading",
-            previousDocumentState.fontHeading
-          );
-        } else {
-          root.style.removeProperty("--font-heading");
-        }
-
-        if (previousDocumentState.bodyFontFamily) {
-          body.style.fontFamily = previousDocumentState.bodyFontFamily;
-        } else {
-          body.style.removeProperty("font-family");
-        }
+        restoreDocumentState(previousDocumentState);
       }
 
       const styleElement = document.getElementById(

@@ -104,7 +104,7 @@ export function ChartColorPicker({
                 {
                   "--color":
                     currentChartColor?.cssVars?.[
-                      (resolvedTheme as "light" | "dark") ?? "dark"
+                      resolvedTheme === "light" ? "light" : "dark"
                     ]?.[
                       currentChartColorIsBaseColor
                         ? "muted-foreground"

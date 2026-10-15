@@ -82,29 +82,32 @@ export function PresetPicker({
     [presets, effectiveParams.base]
   );
 
-  const handlePresetChange = (value: string) => {
-    const preset = presets.find((p) => p.title === value);
-    if (!preset) {
-      return;
-    }
+  const handlePresetChange = React.useCallback(
+    (value: string) => {
+      const preset = presets.find((p) => p.title === value);
+      if (!preset) {
+        return;
+      }
 
-    const newValues = {
-      base: preset.base,
-      baseColor: preset.baseColor,
-      custom: false,
-      font: preset.font,
-      iconLibrary: preset.iconLibrary,
-      menuAccent: preset.menuAccent,
-      menuColor: preset.menuColor,
-      radius: preset.radius,
-      style: preset.style,
-      theme: preset.theme,
-    };
+      const newValues = {
+        base: preset.base,
+        baseColor: preset.baseColor,
+        custom: false,
+        font: preset.font,
+        iconLibrary: preset.iconLibrary,
+        menuAccent: preset.menuAccent,
+        menuColor: preset.menuColor,
+        radius: preset.radius,
+        style: preset.style,
+        theme: preset.theme,
+      };
 
-    // Update all params including base.
-    setParams(newValues);
-    setConfig((prev) => ({ ...prev, ...newValues }));
-  };
+      // Update all params including base.
+      setParams(newValues);
+      setConfig((prev) => ({ ...prev, ...newValues }));
+    },
+    [presets, setConfig, setParams]
+  );
 
   return (
     <Picker>

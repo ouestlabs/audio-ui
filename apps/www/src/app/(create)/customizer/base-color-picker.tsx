@@ -27,6 +27,10 @@ export function BaseColorPicker({
   anchorRef: React.RefObject<HTMLDivElement | null>;
 }) {
   const { resolvedTheme, setTheme } = useTheme();
+  const toggleTheme = React.useCallback(
+    () => setTheme(resolvedTheme === "dark" ? "light" : "dark"),
+    [resolvedTheme, setTheme]
+  );
   const mounted = useMounted();
   const [params, setParams] = useDesignSystemSearchParams();
   const [config, setConfig] = useConfig();
@@ -109,11 +113,7 @@ export function BaseColorPicker({
             </PickerGroup>
             <PickerSeparator />
             <PickerGroup>
-              <PickerItem
-                onClick={() => {
-                  setTheme(resolvedTheme === "dark" ? "light" : "dark");
-                }}
-              >
+              <PickerItem onClick={toggleTheme}>
                 <div className="flex flex-col justify-start pointer-coarse:gap-1">
                   <div>
                     Switch to {resolvedTheme === "dark" ? "Light" : "Dark"} Mode

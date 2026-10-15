@@ -56,6 +56,7 @@ export function MenuAccentPicker({
           {mounted ? (
             <div className="-translate-y-1/2 pointer-events-none absolute top-1/2 right-4 flex size-4 select-none items-center justify-center text-base text-site-foreground">
               <svg
+                aria-hidden="true"
                 className="text-site-foreground"
                 fill="none"
                 height="128"

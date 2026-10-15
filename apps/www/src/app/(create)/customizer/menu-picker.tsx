@@ -118,6 +118,14 @@ export function MenuColorPicker({
     },
     [colorChoice, setParams, setConfig]
   );
+  const handleColorChange = useCallback(
+    (value: string) => setColor(value as ColorChoice),
+    [setColor]
+  );
+  const handleSurfaceChange = useCallback(
+    (value: string) => setSurface(value as SurfaceChoice),
+    [setSurface]
+  );
 
   return (
     <div className="group/picker relative">
@@ -141,7 +149,7 @@ export function MenuColorPicker({
           <PickerGroup>
             <PickerLabel>Color</PickerLabel>
             <PickerRadioGroup
-              onValueChange={(value) => setColor(value as ColorChoice)}
+              onValueChange={handleColorChange}
               value={colorChoice}
             >
               <PickerRadioItem closeOnClick={isMobile} value="default">
@@ -160,7 +168,7 @@ export function MenuColorPicker({
           <PickerGroup>
             <PickerLabel>Appearance</PickerLabel>
             <PickerRadioGroup
-              onValueChange={(value) => setSurface(value as SurfaceChoice)}
+              onValueChange={handleSurfaceChange}
               value={surfaceChoice}
             >
               <PickerRadioItem closeOnClick={isMobile} value="solid">

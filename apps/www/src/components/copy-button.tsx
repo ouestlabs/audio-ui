@@ -42,6 +42,22 @@ export function CopyButton({
     }
   }, [hasCopied]);
 
+  const handleCopy = React.useCallback(() => {
+    copyToClipboardWithMeta(
+      value,
+      event
+        ? {
+            name: event,
+            properties: {
+              code: value,
+              ...properties,
+            },
+          }
+        : undefined
+    );
+    setHasCopied(true);
+  }, [event, properties, value]);
+
   return (
     <Tooltip>
       <TooltipTrigger
@@ -52,21 +68,7 @@ export function CopyButton({
               className
             )}
             data-slot="copy-button"
-            onClick={() => {
-              copyToClipboardWithMeta(
-                value,
-                event
-                  ? {
-                      name: event,
-                      properties: {
-                        code: value,
-                        ...properties,
-                      },
-                    }
-                  : undefined
-              );
-              setHasCopied(true);
-            }}
+            onClick={handleCopy}
             size="icon"
             variant={variant}
             {...props}

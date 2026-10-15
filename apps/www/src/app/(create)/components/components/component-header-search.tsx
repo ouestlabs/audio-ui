@@ -157,7 +157,7 @@ export function ComponentHeaderSearch({
     return () => clearTimeout(timer);
   }, [localQuery, committedSearch, getSearchValueToCommit]);
 
-  const handleClear = () => {
+  const handleClear = useCallback(() => {
     setLocalQuery("");
     if (isOnCategoryPage) {
       router.replace(buildSearchUrl(pathname, null), {
@@ -167,7 +167,7 @@ export function ComponentHeaderSearch({
       setCurrentUrlQuery(null);
     }
     inputRef.current?.focus();
-  };
+  }, [buildSearchUrl, isOnCategoryPage, pathname, router, setCurrentUrlQuery]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -188,34 +188,34 @@ export function ComponentHeaderSearch({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      commitSearch(localQuery);
-    }
-    if (e.key === "Escape") {
-      if (localQuery) {
-        setLocalQuery("");
-        if (isOnCategoryPage) {
-          router.replace(buildSearchUrl(pathname, null), {
-            scroll: false,
-          });
-        } else {
-          setCurrentUrlQuery(null);
-        }
-        inputRef.current?.focus();
-      } else {
-        inputRef.current?.blur();
+  const handleInputKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        commitSearch(localQuery);
       }
-    }
-  };
+      if (e.key === "Escape") {
+        if (localQuery) {
+          handleClear();
+        } else {
+          inputRef.current?.blur();
+        }
+      }
+    },
+    [commitSearch, handleClear, localQuery]
+  );
 
-  const flushOnBlur = () => {
+  const flushOnBlur = useCallback(() => {
     const nextCommittedSearch = getSearchValueToCommit(localQuery) || "";
     if (nextCommittedSearch !== committedSearch) {
       commitSearch(localQuery);
     }
-  };
+  }, [commitSearch, committedSearch, getSearchValueToCommit, localQuery]);
+
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => setLocalQuery(e.target.value),
+    []
+  );
 
   const inSync = (getSearchValueToCommit(localQuery) || "") === committedSearch;
 
@@ -240,7 +240,7 @@ export function ComponentHeaderSearch({
           localQuery ? "pr-32" : "pr-0"
         )}
         onBlur={flushOnBlur}
-        onChange={(e) => setLocalQuery(e.target.value)}
+        onChange={handleInputChange}
         onKeyDown={handleInputKeyDown}
         placeholder={placeholder}
         ref={inputRef}
