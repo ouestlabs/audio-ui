@@ -9,7 +9,7 @@ import { useMidiInput } from "@/registry-audio/bases/base/hooks/use-midi-input";
 import { useSpectrum } from "@/registry-audio/bases/base/hooks/use-spectrum";
 import { useSynthVoices } from "@/registry-audio/bases/base/hooks/use-synth-voices";
 import { useWebAudio } from "@/registry-audio/bases/base/hooks/use-web-audio";
-import type { EnvelopePoint } from "@/registry-audio/bases/base/lib/synth-voice";
+import type { EnvelopePoint } from "@/registry-audio/bases/base/lib/envelope-ramp";
 
 const VOLUME = 0.5;
 /** ADSR-shaped, with a long sustain so a held note stays on the analyzer. */

@@ -356,9 +356,14 @@ async function buildItem(
   ).filter((file) => file !== null);
 
   // A barrel item (`@audio-ui/ui`, `@audio-ui/hooks`) has no files of its own,
-  // it only aggregates registryDependencies for a one-shot install. Still emit
-  // it; skip only when there is nothing to serve at all.
-  if (files.length === 0 && !item.registryDependencies?.length) {
+  // it only aggregates registryDependencies for a one-shot install, and an
+  // alias for a lib that moved into a package only installs that package.
+  // Still emit them; skip only when there is nothing to serve at all.
+  if (
+    files.length === 0 &&
+    !item.registryDependencies?.length &&
+    !item.dependencies?.length
+  ) {
     return null;
   }
 

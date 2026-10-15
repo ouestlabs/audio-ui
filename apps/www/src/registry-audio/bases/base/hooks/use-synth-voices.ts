@@ -1,15 +1,15 @@
 "use client";
 
+import { noteToFrequency } from "@audio-ui/core/pitch";
 import { useCallback, useEffect, useRef } from "react";
 import {
   type EnvelopePoint,
-  noteToFrequency,
-  SEMITONES_PER_OCTAVE,
   SUSTAIN_SPLIT_X,
   scheduleEnvelopeRamp,
   sliceEnvelope,
-} from "@/registry-audio/bases/base/lib/synth-voice";
+} from "@/registry-audio/bases/base/lib/envelope-ramp";
 
+const SEMITONES_PER_OCTAVE = 12;
 const DEFAULT_ATTACK_DECAY_SECONDS = 0.4;
 const DEFAULT_RELEASE_SECONDS = 0.3;
 const RELEASE_STOP_MARGIN_SECONDS = 0.05;

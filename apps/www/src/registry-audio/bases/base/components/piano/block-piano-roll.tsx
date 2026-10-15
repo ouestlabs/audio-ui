@@ -1,6 +1,11 @@
 "use client";
 
 import {
+  encodeMidiFile,
+  type MidiFileNote,
+  parseMidiFile,
+} from "@audio-ui/core/midi";
+import {
   createSource,
   type PianoRoll as PianoRollPrimitive,
 } from "@audio-ui/react";
@@ -46,12 +51,7 @@ import {
   useTransportClock,
 } from "@/registry-audio/bases/base/hooks/use-transport-clock";
 import { useWebAudio } from "@/registry-audio/bases/base/hooks/use-web-audio";
-import {
-  encodeMidiFile,
-  type MidiFileNote,
-  parseMidiFile,
-} from "@/registry-audio/bases/base/lib/midi";
-import type { EnvelopePoint } from "@/registry-audio/bases/base/lib/synth-voice";
+import type { EnvelopePoint } from "@/registry-audio/bases/base/lib/envelope-ramp";
 
 /** C2 to C6: more than fits, so the roll scrolls and opens on middle C. */
 const MIN_PITCH = 36;
@@ -153,7 +153,7 @@ function notesFromMidiFile(parsed: {
 /** The grid's own step/BPM timing converted to MIDI ticks at a fixed, common resolution, the inverse of `notesFromMidiFile`. */
 function notesToMidiFile(notes: Note[], bpm: number): Uint8Array {
   const ticksPerStep = MIDI_TICKS_PER_QUARTER_NOTE / STEPS_PER_BEAT;
-  const midiNotes: MidiFileNote[] = notes.map((note) => ({
+  const midiNotes: Omit<MidiFileNote, "track">[] = notes.map((note) => ({
     channel: 0,
     durationTicks: Math.round(note.length * ticksPerStep),
     note: note.pitch,

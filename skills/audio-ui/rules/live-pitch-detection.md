@@ -36,4 +36,4 @@ const pitch = usePitch(microphone.analyser); // a source: no render per reading
 <Tuner source={pitch} />;
 ```
 
-For a frequency from samples you already have, `detectPitch(samples, sampleRate)` and `nearestNote(frequency)` from `@/lib/pitch-detection` are pure functions. The analyser's `fftSize` must hold two periods of the lowest pitch: 4096 at 48 kHz reaches about 40 Hz.
+For a frequency from samples you already have, `detectPitch(samples, sampleRate)` and `nearestNote(frequency)` from `@audio-ui/core/pitch` are pure functions, with no React and no Web Audio: they work in any framework. The analyser's `fftSize` must hold two periods of the lowest pitch: 4096 at 48 kHz reaches about 40 Hz.

@@ -330,7 +330,7 @@ const pitch = usePitch(microphone.analyser); // a source: no render per reading
 <Tuner source={pitch} />;
 ```
 
-For a frequency from samples you already have, `detectPitch(samples, sampleRate)` and `nearestNote(frequency)` from `@/lib/pitch-detection` are pure functions. The analyser's `fftSize` must hold two periods of the lowest pitch: 4096 at 48 kHz reaches about 40 Hz.
+For a frequency from samples you already have, `detectPitch(samples, sampleRate)` and `nearestNote(frequency)` from `@audio-ui/core/pitch` are pure functions, with no React and no Web Audio: they work in any framework. The analyser's `fftSize` must hold two periods of the lowest pitch: 4096 at 48 kHz reaches about 40 Hz.
 
 ### 2.3 Meter a microphone as it delivers the signal
 
@@ -468,7 +468,7 @@ const midi = useMidiInput({
 <Piano activeNotes={midi.activeNotes} aria-label="Piano" />
 ```
 
-Every component that calls `useMidiInput` hears the same devices, and one `MidiConnectControl` (or `midi.requestAccess` from a click) connects them all. Held keys are released when the device goes away.
+Every component that calls `useMidiInput` hears the same devices, and one `MidiConnectControl` (or `midi.requestAccess` from a click) connects them all. Held keys are released when the device goes away. Without React, `createMidiInput()` from `@audio-ui/core/midi` is the same input as a source, and `parseMidiMessage` reads a raw message (channel, velocity from 0 to 1, pitch bend from -1 to 1).
 
 ### 2.6 Playheads and playback position
 

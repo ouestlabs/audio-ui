@@ -18,6 +18,7 @@
     "typecheck": "next typegen && tsc --noEmit"
   },
   "dependencies": {
+    "@audio-ui/core": "*",
     "@audio-ui/react": "*",
     "@base-ui/react": "^1.9.0",
     "@hugeicons/core-free-icons": "^4.2.2",
