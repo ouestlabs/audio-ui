@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useWebAudio } from "@/registry-audio/bases/base/hooks/use-web-audio";
+import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 const VOLUME_RAMP_SECONDS = 0.01;
 
@@ -37,7 +37,6 @@ const LIMITER_TRIM = 10 ** (-1.7 / 20);
  * render).
  */
 export function useMasterBus(volume: number): GainNode | null {
-  const webAudio = useWebAudio();
   const [masterGain, setMasterGain] = useState<GainNode | null>(null);
 
   // Seeds the node's initial gain from the volume at mount without recreating
@@ -67,7 +66,7 @@ export function useMasterBus(volume: number): GainNode | null {
       limiter.disconnect();
       trim.disconnect();
     };
-  }, [webAudio]);
+  }, []);
 
   useEffect(() => {
     const ctx = webAudio.getContext();
@@ -79,7 +78,7 @@ export function useMasterBus(volume: number): GainNode | null {
       ctx.currentTime,
       VOLUME_RAMP_SECONDS
     );
-  }, [volume, masterGain, webAudio]);
+  }, [volume, masterGain]);
 
   return masterGain;
 }

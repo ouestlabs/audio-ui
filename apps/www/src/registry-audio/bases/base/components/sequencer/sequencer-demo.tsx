@@ -7,12 +7,12 @@ import { Button } from "@/registry/bases/base/ui/button";
 import { Sequencer } from "@/registry-audio/bases/base/audio/elements/sequencer";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 import { useTransportClock } from "@/registry-audio/bases/base/hooks/use-transport-clock";
-import { useWebAudio } from "@/registry-audio/bases/base/hooks/use-web-audio";
 import {
   triggerHihat,
   triggerKick,
   triggerSnare,
 } from "@/registry-audio/bases/base/lib/drum-synthesis";
+import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 const STEPS = 16;
 const STEPS_PER_BEAT = 4;
@@ -43,7 +43,6 @@ export default function SequencerDemo() {
   const velocitiesRef = useRef(velocities);
   velocitiesRef.current = velocities;
   const [step] = useState(() => createSource(-1));
-  const webAudio = useWebAudio();
   const master = useMasterBus(VOLUME);
 
   const playStep = useCallback(
@@ -63,7 +62,7 @@ export default function SequencerDemo() {
         TRIGGERS[at]?.(ctx, hit, time);
       });
     },
-    [master, webAudio]
+    [master]
   );
   const { getPosition, isPlaying, start, stop } = useTransportClock({
     bpm: BPM,

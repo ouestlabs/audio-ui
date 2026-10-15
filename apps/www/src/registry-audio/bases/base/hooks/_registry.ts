@@ -2,13 +2,9 @@ import type { RegistryItem } from "shadcn/schema";
 
 export const hooks: RegistryItem[] = [
   {
-    categories: ["audio", "web-audio"],
-    files: [
-      {
-        path: "hooks/use-web-audio.ts",
-        type: "registry:hook",
-      },
-    ],
+    description:
+      "Gone: the page's one AudioContext is the webAudio of the web-audio lib, imported where it is used. Installs that lib.",
+    files: [],
     name: "use-web-audio",
     registryDependencies: ["@audio-ui/web-audio"],
     type: "registry:hook",
@@ -68,7 +64,7 @@ export const hooks: RegistryItem[] = [
     ],
     name: "use-transport-clock",
     dependencies: ["@audio-ui/core@^0.5.0"],
-    registryDependencies: ["@audio-ui/use-web-audio"],
+    registryDependencies: ["@audio-ui/web-audio"],
     type: "registry:hook",
   },
   {
@@ -80,7 +76,7 @@ export const hooks: RegistryItem[] = [
       },
     ],
     name: "use-master-bus",
-    registryDependencies: ["@audio-ui/use-web-audio"],
+    registryDependencies: ["@audio-ui/web-audio"],
     type: "registry:hook",
   },
   {
@@ -97,7 +93,7 @@ export const hooks: RegistryItem[] = [
   },
   {
     categories: ["audio", "piano", "synth"],
-    dependencies: ["@audio-ui/core@^0.3.0"],
+    dependencies: ["@audio-ui/core@^0.5.0"],
     files: [
       {
         path: "hooks/use-midi-input.ts",
@@ -119,12 +115,12 @@ export const hooks: RegistryItem[] = [
       },
     ],
     name: "use-microphone",
-    registryDependencies: ["@audio-ui/use-web-audio"],
+    registryDependencies: ["@audio-ui/web-audio"],
     type: "registry:hook",
   },
   {
     categories: ["hooks", "audio", "tuner"],
-    dependencies: ["@audio-ui/react", "@audio-ui/core@^0.3.0"],
+    dependencies: ["@audio-ui/react", "@audio-ui/core@^0.5.0"],
     description:
       "The pitch of a signal as a live source: the note nearest the sound and its offset in cents, steadied by a median and held a moment after the sound stops, with no React render per reading",
     files: [
@@ -192,7 +188,7 @@ export const hooks: RegistryItem[] = [
       },
     ],
     name: "use-noise-through-eq",
-    registryDependencies: ["@audio-ui/use-web-audio"],
+    registryDependencies: ["@audio-ui/web-audio"],
     type: "registry:hook",
   },
   {
@@ -207,7 +203,7 @@ export const hooks: RegistryItem[] = [
       },
     ],
     name: "use-pulses-through-compressor",
-    registryDependencies: ["@audio-ui/use-web-audio"],
+    registryDependencies: ["@audio-ui/web-audio"],
     type: "registry:hook",
   },
 ];

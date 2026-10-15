@@ -3,8 +3,8 @@ import { act, renderHook } from "@testing-library/react";
 
 // The shared audio context, with a clock the test moves by hand.
 const context = { currentTime: 0 };
-mock.module("@/registry-audio/bases/base/hooks/use-web-audio", () => ({
-  useWebAudio: () => ({ getContext: () => context }),
+mock.module("@/registry-audio/bases/base/lib/web-audio", () => ({
+  webAudio: { getContext: () => context },
 }));
 
 const { useTransportClock } = await import(

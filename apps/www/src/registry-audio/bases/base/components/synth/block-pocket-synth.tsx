@@ -7,7 +7,7 @@ import {
 } from "@/registry/bases/base/ui/toggle-group";
 import { Fader } from "@/registry-audio/bases/base/audio/elements/fader";
 import { XYPad } from "@/registry-audio/bases/base/audio/elements/xypad";
-import { useWebAudio } from "@/registry-audio/bases/base/hooks/use-web-audio";
+import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 /** Graduations along the fader: ticks only, the readout beside it says the value. */
 const VOLUME_MARKS = [0, 0.25, 0.5, 0.75, 1];
@@ -16,7 +16,6 @@ type WaveformType = "sine" | "triangle" | "sawtooth" | "square";
 type FilterType = "lowpass" | "highpass" | "bandpass" | "allpass";
 
 export default function BlockPocketSynth() {
-  const webAudio = useWebAudio();
   const faderId = React.useId();
   const faderLabelId = React.useId();
   const faderValueId = React.useId();
@@ -72,7 +71,7 @@ export default function BlockPocketSynth() {
       filterNodeRef.current = filterNode;
       setIsPlaying(true);
     },
-    [filterType, getFilterCutoff, getFrequency, webAudio, volume, waveform]
+    [filterType, getFilterCutoff, getFrequency, volume, waveform]
   );
 
   const stopSound = React.useCallback(() => {
@@ -93,7 +92,7 @@ export default function BlockPocketSynth() {
     gainNodeRef.current = null;
     filterNodeRef.current = null;
     setIsPlaying(false);
-  }, [webAudio]);
+  }, []);
 
   const updateSound = React.useCallback(
     (x: number, y: number) => {
@@ -114,7 +113,7 @@ export default function BlockPocketSynth() {
         0.01
       );
     },
-    [getFilterCutoff, getFrequency, webAudio]
+    [getFilterCutoff, getFrequency]
   );
 
   React.useEffect(() => {
@@ -138,7 +137,7 @@ export default function BlockPocketSynth() {
         0.01
       );
     }
-  }, [volume, webAudio]);
+  }, [volume]);
 
   React.useEffect(
     () => () => {
