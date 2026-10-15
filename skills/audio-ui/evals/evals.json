@@ -110,6 +110,48 @@
         "Calls setOptions with all the options before the first draw, so the log scale applies from the start",
         "Prepares the pointer before press: primary button only, preventDefault, focuses the hidden input, touch-action none"
       ]
+    },
+    {
+      "id": 8,
+      "prompt": "Add a guitar tuner to my Next.js app: listen to the microphone and show the note and how many cents sharp or flat it is.",
+      "expected_output": "The registry Tuner with use-microphone and use-pitch: the microphone started from a click, raw signal, an analyser never connected to the speakers, a period search for the pitch, and a live source, not state per frame.",
+      "files": [],
+      "expectations": [
+        "Installs `@audio-ui/tuner`, `@audio-ui/use-microphone` and `@audio-ui/use-pitch` from the registry (or uses `detectPitch` and `nearestNote` from `@audio-ui/core/pitch`), not a hand-written pitch detector",
+        "Starts the microphone from a user gesture (a click), so the permission prompt and the context resume have one",
+        "Takes the raw microphone signal: echo cancellation, noise suppression and auto gain are off",
+        "Does not connect the analyser to `ctx.destination`, so the microphone is not played back",
+        "Finds the pitch from the time-domain samples (a period search such as YIN), not from the loudest FFT bin, which reads a harmonic",
+        "Gives the display a live source (what `usePitch` returns), not `setState` on every reading",
+        "Releases the microphone's tracks when listening stops or the component unmounts"
+      ]
+    },
+    {
+      "id": 9,
+      "prompt": "I want to play my synth from a USB MIDI keyboard. Harder keys should be louder, and the pitch wheel should bend the notes.",
+      "expected_output": "use-midi-input connected from a button click, velocity from 0 to 1 scaling the voice gain, a note on with velocity 0 treated as a release, pitch bend in semitones, and the AudioContext resumed because MIDI is not a gesture.",
+      "files": [],
+      "expectations": [
+        "Uses `useMidiInput` (registry `@audio-ui/use-midi-input`) or `createMidiInput` and `parseMidiMessage` from `@audio-ui/core/midi`, not its own `onmidimessage` handlers on each component",
+        "Asks for MIDI access from a click (a connect button such as `MidiConnectControl`), never on mount",
+        "Scales a voice's gain by the note's velocity from 0 to 1, not a fixed gain",
+        "Treats a note on with velocity 0 as a note off",
+        "Applies the pitch bend as a number of semitones to the sounding voices (a bend range of 2 by default), with a ramp",
+        "Resumes a suspended AudioContext before the first note, since a MIDI message is not a user gesture for audio"
+      ]
+    },
+    {
+      "id": 10,
+      "prompt": "My equalizer plot draws a low-pass at Q 2 with a bump at the cutoff, but the sound I hear has a different bump. The plot uses a BiquadFilterNode with filter.Q.value = 2 for the audio.",
+      "expected_output": "Explain that a low-pass and a high-pass take Q in decibels in the Web Audio node, convert it with toWebAudioQ, draw the curve from biquadResponse, and note that a shelf ignores Q.",
+      "files": [],
+      "expectations": [
+        "Says that a `lowpass` or `highpass` BiquadFilterNode reads its `Q` in decibels, so `Q.value = 2` is a 2 dB resonance, not a linear Q of 2",
+        "Converts with `toWebAudioQ` from `@audio-ui/core/analysis` (20 * log10 of the linear Q), or sets Q to about 6.02 dB for a linear Q of 2",
+        "Draws the curve with `biquadResponse` or `eqResponse` from `@audio-ui/core/analysis` rather than a hand-made formula, so the plot equals `getFrequencyResponse`",
+        "Mentions that a shelf's Q is ignored by the node",
+        "Sets parameters on the node with `setTargetAtTime`, not `.value =`, while it plays"
+      ]
     }
   ]
 }

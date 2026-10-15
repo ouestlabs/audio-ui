@@ -122,6 +122,7 @@ export const categories: CategoryDef[] = [
   {
     description:
       "Synth control patterns combining knobs, XY pads, and toggles.",
+    docs: "xypad",
     label: "Synth",
     name: "synth",
   },

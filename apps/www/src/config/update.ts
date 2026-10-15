@@ -4,6 +4,7 @@ export const DOCS_MENU_UPDATES: Record<string, string> = {
   fader: "Updated",
   knob: "Updated",
   meter: "Updated",
+  mixer: "New",
   pad: "New",
   plot: "New",
   "piano-roll": "New",
