@@ -4,6 +4,7 @@
   width="32"
   xmlns="http://www.w3.org/2000/svg"
 >
+  <title>audio/ui</title>
   <rect fill="#000" height="32" rx="5" width="32" />
   <path
     d="M17.799 15.884L22.243 8.188A10 10 0 1 1 19.645 6.688L15.201 14.384Z"

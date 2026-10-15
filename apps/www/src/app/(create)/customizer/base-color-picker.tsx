@@ -27,6 +27,10 @@ export function BaseColorPicker({
   anchorRef: React.RefObject<HTMLDivElement | null>;
 }) {
   const { resolvedTheme, setTheme } = useTheme();
+  const toggleTheme = React.useCallback(
+    () => setTheme(resolvedTheme === "dark" ? "light" : "dark"),
+    [resolvedTheme, setTheme]
+  );
   const mounted = useMounted();
   const [params, setParams] = useDesignSystemSearchParams();
   const [config, setConfig] = useConfig();
@@ -62,7 +66,7 @@ export function BaseColorPicker({
               {mounted ? currentBaseColor?.title : "..."}
             </div>
           </div>
-          {mounted && resolvedTheme && (
+          {mounted && resolvedTheme ? (
             <div
               className="site-rounded-full -translate-y-1/2 pointer-events-none absolute top-1/2 right-4 size-4 select-none bg-(--color)"
               style={
@@ -74,7 +78,7 @@ export function BaseColorPicker({
                 } as React.CSSProperties
               }
             />
-          )}
+          ) : null}
         </PickerTrigger>
         <PickerContent
           align={isMobile ? "center" : "start"}
@@ -89,7 +93,7 @@ export function BaseColorPicker({
               {BASE_COLORS.map((baseColor) => (
                 <PickerRadioItem key={baseColor.name} value={baseColor.name}>
                   <div className="flex items-center gap-2">
-                    {mounted && resolvedTheme && (
+                    {mounted && resolvedTheme ? (
                       <div
                         className="site-rounded-full size-4 bg-(--color)"
                         style={
@@ -101,7 +105,7 @@ export function BaseColorPicker({
                           } as React.CSSProperties
                         }
                       />
-                    )}
+                    ) : null}
                     {baseColor.title}
                   </div>
                 </PickerRadioItem>
@@ -109,11 +113,7 @@ export function BaseColorPicker({
             </PickerGroup>
             <PickerSeparator />
             <PickerGroup>
-              <PickerItem
-                onClick={() => {
-                  setTheme(resolvedTheme === "dark" ? "light" : "dark");
-                }}
-              >
+              <PickerItem onClick={toggleTheme}>
                 <div className="flex flex-col justify-start pointer-coarse:gap-1">
                   <div>
                     Switch to {resolvedTheme === "dark" ? "Light" : "Dark"} Mode

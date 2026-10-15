@@ -84,7 +84,7 @@ export function ThemePicker({
               {mounted ? currentTheme?.title : "..."}
             </div>
           </div>
-          {mounted && resolvedTheme && (
+          {mounted && resolvedTheme ? (
             <div
               className="site-rounded-full -translate-y-1/2 pointer-events-none absolute top-1/2 right-4 size-4 select-none bg-(--color)"
               style={
@@ -98,7 +98,7 @@ export function ThemePicker({
                 } as React.CSSProperties
               }
             />
-          )}
+          ) : null}
         </PickerTrigger>
         <PickerContent
           align={isMobile ? "center" : "start"}
@@ -114,7 +114,7 @@ export function ThemePicker({
               {baseColorThemes.map((theme) => (
                 <PickerRadioItem key={theme.name} value={theme.name}>
                   <div className="flex items-start gap-2">
-                    {mounted && resolvedTheme && (
+                    {mounted && resolvedTheme ? (
                       <div
                         className="site-rounded-full size-4 translate-y-1 bg-(--color)"
                         style={
@@ -126,7 +126,7 @@ export function ThemePicker({
                           } as React.CSSProperties
                         }
                       />
-                    )}
+                    ) : null}
                     <div className="flex flex-col justify-start pointer-coarse:gap-1">
                       <div>{theme.title}</div>
                       <div className="pointer-coarse:text-sm text-site-muted-foreground text-xs">
@@ -142,7 +142,7 @@ export function ThemePicker({
               {otherThemes.map((theme) => (
                 <PickerRadioItem key={theme.name} value={theme.name}>
                   <div className="flex items-center gap-2">
-                    {mounted && resolvedTheme && (
+                    {mounted && resolvedTheme ? (
                       <div
                         className="site-rounded-full size-4 bg-(--color)"
                         style={
@@ -153,7 +153,7 @@ export function ThemePicker({
                           } as React.CSSProperties
                         }
                       />
-                    )}
+                    ) : null}
                     {theme.title}
                   </div>
                 </PickerRadioItem>

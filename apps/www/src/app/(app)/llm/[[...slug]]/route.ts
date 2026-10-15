@@ -10,7 +10,7 @@ export async function GET(
   _req: NextRequest,
   { params }: RouteContext<"/llm/[[...slug]]">
 ) {
-  const slug = (await params).slug;
+  const { slug } = await params;
   const page = source.getPage(slug);
 
   if (!page) {

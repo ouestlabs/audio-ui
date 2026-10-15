@@ -243,6 +243,28 @@ export default function BlockPocketSynth() {
     { label: "BP", value: "bandpass" },
   ];
 
+  const handleMove = React.useCallback(
+    (value: { x: number; y: number }) => {
+      const normalizedX = value.x / 100;
+      const normalizedY = value.y / 100;
+      setPosition({ x: normalizedX, y: normalizedY });
+      if (isPlaying) {
+        updateSound(normalizedX, normalizedY);
+      } else {
+        startSound(normalizedX, normalizedY);
+      }
+    },
+    [isPlaying, startSound, updateSound]
+  );
+  const handleWaveform = React.useCallback(
+    (values: unknown[]) => setWaveform(values[0] as WaveformType),
+    []
+  );
+  const handleFilterType = React.useCallback(
+    (values: unknown[]) => setFilterType(values[0] as FilterType),
+    []
+  );
+
   return (
     <div className="cn-audio-panel flex w-full min-w-0 flex-col gap-4 border bg-card p-4">
       <XYPad
@@ -253,22 +275,13 @@ export default function BlockPocketSynth() {
         maxY={100}
         minX={0}
         minY={0}
-        onValueChange={(val) => {
-          const normalizedX = val.x / 100;
-          const normalizedY = val.y / 100;
-          setPosition({ x: normalizedX, y: normalizedY });
-          if (isPlaying) {
-            updateSound(normalizedX, normalizedY);
-          } else {
-            startSound(normalizedX, normalizedY);
-          }
-        }}
-        onValueCommitted={() => stopSound()}
+        onValueChange={handleMove}
+        onValueCommitted={stopSound}
         value={{ x: position.x * 100, y: position.y * 100 }}
       />
       <ToggleGroup
         className="w-full"
-        onValueChange={(values) => setWaveform(values[0] as WaveformType)}
+        onValueChange={handleWaveform}
         size="sm"
         value={[waveform]}
         variant="outline"
@@ -286,7 +299,7 @@ export default function BlockPocketSynth() {
       </ToggleGroup>
       <ToggleGroup
         className="w-full"
-        onValueChange={(values) => setFilterType(values[0] as FilterType)}
+        onValueChange={handleFilterType}
         size="sm"
         value={[filterType]}
         variant="outline"

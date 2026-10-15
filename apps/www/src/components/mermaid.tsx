@@ -1,7 +1,7 @@
 "use client";
 
 import { useTheme } from "next-themes";
-import { use, useId, useMemo } from "react";
+import { use, useCallback, useId, useMemo } from "react";
 import { useMounted } from "@/hooks/use-mounted";
 
 function Mermaid({ chart }: { chart: string }) {
@@ -56,16 +56,20 @@ function MermaidContent({ chart }: { chart: string }) {
   }, [chart, resolvedTheme, id, mermaid]);
 
   const { svg, bindFunctions } = use(renderPromise);
+  const bindDiagram = useCallback(
+    (container: HTMLDivElement | null) => {
+      if (container) {
+        bindFunctions?.(container);
+      }
+    },
+    [bindFunctions]
+  );
 
   return (
     <div
       // biome-ignore lint/security/noDangerouslySetInnerHtml: <!-- Mermaid renders SVG content -->
       dangerouslySetInnerHTML={{ __html: svg }}
-      ref={(container) => {
-        if (container) {
-          bindFunctions?.(container);
-        }
-      }}
+      ref={bindDiagram}
     />
   );
 }

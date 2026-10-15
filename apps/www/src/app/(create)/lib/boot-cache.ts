@@ -38,7 +38,7 @@ function activeFontCss() {
 export function saveDesignSystemBoot() {
   try {
     const root = document.documentElement;
-    const body = document.body;
+    const { body } = document;
     const css = document.getElementById(THEME_STYLE_ID)?.textContent ?? "";
     if (!css) {
       return;

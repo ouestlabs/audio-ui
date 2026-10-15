@@ -139,6 +139,7 @@ const PREVIEW_ICONS = {
 const logos = {
   hugeicons: (
     <svg
+      aria-hidden="true"
       fill="none"
       height="128"
       stroke="currentColor"
@@ -162,6 +163,7 @@ const logos = {
   ),
   lucide: (
     <svg
+      aria-hidden="true"
       fill="none"
       height="24"
       stroke="currentColor"
@@ -184,6 +186,7 @@ const logos = {
   ),
   phosphor: (
     <svg
+      aria-hidden="true"
       height="32"
       viewBox="0 0 32 32"
       width="32"
@@ -202,6 +205,7 @@ const logos = {
   ),
   remixicon: (
     <svg
+      aria-hidden="true"
       fill="currentColor"
       height="24"
       viewBox="0 0 24 24"
@@ -213,6 +217,7 @@ const logos = {
   ),
   tabler: (
     <svg
+      aria-hidden="true"
       fill="none"
       height="32"
       viewBox="0 0 32 32"
@@ -332,7 +337,16 @@ function IconLibraryPickerItem({
   );
 }
 
-const IconLibraryPreview = memo(function IconLibraryPreview({
+/** The preview grid's renderer for each icon library. */
+const ICON_RENDERERS = {
+  hugeicons: IconHugeicons,
+  lucide: IconLucide,
+  phosphor: IconPhosphor,
+  remixicon: IconRemixicon,
+  tabler: IconTabler,
+} satisfies Record<IconLibraryName, unknown>;
+
+function IconLibraryPreviewIcons({
   iconLibrary,
 }: {
   iconLibrary: IconLibraryName;
@@ -343,16 +357,7 @@ const IconLibraryPreview = memo(function IconLibraryPreview({
     return null;
   }
 
-  const IconRenderer =
-    iconLibrary === "lucide"
-      ? IconLucide
-      : iconLibrary === "tabler"
-        ? IconTabler
-        : iconLibrary === "hugeicons"
-          ? IconHugeicons
-          : iconLibrary === "phosphor"
-            ? IconPhosphor
-            : IconRemixicon;
+  const IconRenderer = ICON_RENDERERS[iconLibrary];
 
   return (
     <Suspense
@@ -379,4 +384,6 @@ const IconLibraryPreview = memo(function IconLibraryPreview({
       </div>
     </Suspense>
   );
-});
+}
+
+const IconLibraryPreview = memo(IconLibraryPreviewIcons);

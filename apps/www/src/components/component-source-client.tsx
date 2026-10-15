@@ -3,11 +3,11 @@
 import * as React from "react";
 import { CodeCollapsibleWrapper } from "@/components/code-collapsible-wrapper";
 import { CopyButton } from "@/components/copy-button";
+import { HighlightedCode } from "@/components/highlighted-code";
 import { getIconForLanguageExtension } from "@/components/icons";
 import { Spinner } from "@/components/ui/spinner";
 import { useConfig } from "@/hooks/use-config";
 import { transformStyleClassNames } from "@/lib/code-utils";
-import { highlightCode } from "@/lib/highlight-code";
 import { getIconLibraryFromStyle, transformIcons } from "@/lib/icons";
 import { getRegistryDeploymentId, getRegistryJsonUrl } from "@/lib/registry";
 import { cn } from "@/lib/utils";
@@ -51,10 +51,8 @@ export function ComponentSourceClient({
 }: React.ComponentProps<"div"> & ComponentSourceClientProps) {
   const [config] = useConfig();
 
-  const [code, setCode] = React.useState<string | undefined>(initialCode);
-  const [highlightedCode, setHighlightedCode] = React.useState<string | null>(
-    null
-  );
+  // The code to show, once it is transformed for the style: nothing shows before.
+  const [code, setCode] = React.useState<string | undefined>();
   const [isLoading, setIsLoading] = React.useState(!initialCode);
 
   const abortControllerRef = React.useRef<AbortController | null>(null);
@@ -70,7 +68,6 @@ export function ComponentSourceClient({
 
       setIsLoading(true);
       let currentCode = initialCode;
-      let highlighted: string | null = null;
 
       if (name) {
         if (styleName.includes("undefined")) {
@@ -131,15 +128,11 @@ export function ComponentSourceClient({
           currentCode = currentCode.split("\n").slice(0, maxLines).join("\n");
         }
 
-        const lang = language ?? title?.split(".").pop() ?? "tsx";
-        highlighted = highlightCode(currentCode, lang);
-
         if (!isMounted) {
           return;
         }
 
         setCode(currentCode);
-        setHighlightedCode(highlighted);
       }
       setIsLoading(false);
     }
@@ -150,16 +143,7 @@ export function ComponentSourceClient({
       isMounted = false;
       abortControllerRef.current?.abort();
     };
-  }, [
-    name,
-    src,
-    initialCode,
-    styleName,
-    _iconLibrary,
-    language,
-    title,
-    maxLines,
-  ]);
+  }, [name, src, initialCode, styleName, _iconLibrary, maxLines]);
 
   if (isLoading) {
     return (
@@ -171,7 +155,7 @@ export function ComponentSourceClient({
     );
   }
 
-  if (!(code && highlightedCode)) {
+  if (!code) {
     return null;
   }
 
@@ -186,7 +170,6 @@ export function ComponentSourceClient({
           code={code}
           config={config}
           eventName={effectiveEventName}
-          highlightedCode={highlightedCode}
           language={lang}
           name={name}
           showCopyButton={showCopyButton}
@@ -203,7 +186,6 @@ export function ComponentSourceClient({
         config={config}
         copyButtonClassName={COLLAPSIBLE_COPY_BUTTON_CLASS_NAME}
         eventName={effectiveEventName}
-        highlightedCode={highlightedCode}
         language={lang}
         name={name}
         showCopyButton={showCopyButton}
@@ -215,7 +197,6 @@ export function ComponentSourceClient({
 
 function ComponentCode({
   code,
-  highlightedCode,
   language,
   title,
   eventName,
@@ -225,7 +206,6 @@ function ComponentCode({
   copyButtonClassName,
 }: {
   code: string;
-  highlightedCode: string;
   language: string;
   title: string | undefined;
   eventName?: string;
@@ -236,7 +216,7 @@ function ComponentCode({
 }) {
   return (
     <figure className="[&>pre]:max-h-96" data-rehype-pretty-code-figure="">
-      {title && (
+      {title ? (
         <figcaption
           className="flex items-center gap-2 text-site-code-foreground [&_svg]:size-4 [&_svg]:text-site-code-foreground [&_svg]:opacity-70"
           data-language={language}
@@ -245,8 +225,8 @@ function ComponentCode({
           {getIconForLanguageExtension(language)}
           {title}
         </figcaption>
-      )}
-      {showCopyButton && (
+      ) : null}
+      {showCopyButton ? (
         <CopyButton
           className={copyButtonClassName}
           event={eventName as any}
@@ -258,9 +238,8 @@ function ComponentCode({
           }}
           value={code}
         />
-      )}
-      {/* biome-ignore lint/security/noDangerouslySetInnerHtml: highlightedCode is HTML produced by the trusted shiki highlighter, not user input */}
-      <div dangerouslySetInnerHTML={{ __html: highlightedCode }} />
+      ) : null}
+      <HighlightedCode code={code} language={language} />
     </figure>
   );
 }

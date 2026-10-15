@@ -104,6 +104,19 @@ export function DocsTableOfContents({
   const activeIndex = toc.findIndex((item) => item.url === `#${activeHeading}`);
   const activeItemUrl = toc[activeIndex]?.url;
   const itemRefs = React.useRef<Map<string, HTMLLIElement> | null>(null);
+  const togglePinned = React.useCallback(() => setPinned((prev) => !prev), []);
+  // One callback for every entry: each names itself with data-url, and forgets itself on unmount.
+  const registerItem = React.useCallback((element: HTMLLIElement | null) => {
+    const url = element?.dataset.url;
+    if (!(element && url)) {
+      return;
+    }
+    itemRefs.current ??= new Map();
+    itemRefs.current.set(url, element);
+    return () => {
+      itemRefs.current?.delete(url);
+    };
+  }, []);
 
   React.useEffect(() => {
     if (!(pinned && activeItemUrl)) {
@@ -154,7 +167,7 @@ export function DocsTableOfContents({
                 "before:-inset-1.5 relative before:absolute before:content-['']",
                 pinned ? "text-site-foreground" : "text-site-muted-foreground"
               )}
-              onClick={() => setPinned((prev) => !prev)}
+              onClick={togglePinned}
               size="icon-sm"
               variant="ghost"
             >
@@ -182,17 +195,7 @@ export function DocsTableOfContents({
           <FrameContent className="flex min-h-0 flex-col">
             <ul className="no-scrollbar scroll-fade-y overflow-y-auto p-1">
               {toc.map((item, index) => (
-                <li
-                  key={item.url}
-                  ref={(el) => {
-                    if (el) {
-                      itemRefs.current ??= new Map();
-                      itemRefs.current.set(item.url, el);
-                    } else {
-                      itemRefs.current?.delete(item.url);
-                    }
-                  }}
-                >
+                <li data-url={item.url} key={item.url} ref={registerItem}>
                   <Button
                     className={cn(
                       "w-full justify-start",

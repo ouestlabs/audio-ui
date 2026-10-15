@@ -100,6 +100,43 @@ const formatTime = (seconds: number) => {
   return `${Math.floor(whole / 60)}:${String(whole % 60).padStart(2, "0")}`;
 };
 
+interface LoopState {
+  on: boolean;
+  region: readonly [number, number];
+}
+
+interface ZoomState {
+  /** Pixels per second. */
+  px: number;
+  zoomed: boolean;
+}
+
+/** The seconds the ruler labels: the smallest step that keeps labels apart at this zoom, in pixels per second. */
+function rulerLabels(duration: number, zoom: number) {
+  const step =
+    LABEL_STEPS.find((candidate) => candidate * zoom >= MIN_LABEL_GAP_PX) ??
+    LABEL_STEPS.at(-1) ??
+    1;
+  const count = duration > 0 ? Math.floor(duration / step) + 1 : 0;
+  return Array.from({ length: count }, (_, index) => index * step);
+}
+
+/** One frame of playback: back to the loop's start past its end, and the view turned to follow a zoomed playhead. */
+function playbackFrame(
+  audio: HTMLAudioElement,
+  loop: LoopState,
+  zoom: ZoomState,
+  viewport: HTMLDivElement | null
+) {
+  const [start, end] = loop.region;
+  if (loop.on && end > start && audio.currentTime >= end) {
+    audio.currentTime = start;
+  }
+  if (zoom.zoomed) {
+    followPlayhead(viewport, audio.currentTime * zoom.px);
+  }
+}
+
 /**
  * A player that shows what a seekable waveform does: a press or a drag seeks,
  * hovering names the time under the pointer, Shift + drag selects the loop, a
@@ -112,10 +149,7 @@ export default function BlockWaveformPlayer() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const objectUrlRef = useRef<string | null>(null);
-  const loopRef = useRef({
-    on: true,
-    region: [0, 0] as readonly [number, number],
-  });
+  const loopRef = useRef<LoopState>({ on: true, region: [0, 0] });
   const [position] = useState(() => createSource(0));
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [fileName, setFileName] = useState(SAMPLE_NAME);
@@ -135,7 +169,7 @@ export default function BlockWaveformPlayer() {
   const fitPx = width > 0 && duration > 0 ? width / duration : 0;
   const zoom = Math.max(zoomPx ?? fitPx, fitPx);
   const zoomed = fitPx > 0 && zoom > fitPx * 1.001;
-  const zoomRef = useRef({ px: 0, zoomed: false });
+  const zoomRef = useRef<ZoomState>({ px: 0, zoomed: false });
   zoomRef.current = { px: zoom, zoomed };
 
   loopRef.current = { on: loopOn, region: loop };
@@ -211,6 +245,19 @@ export default function BlockWaveformPlayer() {
     fileInputRef.current?.click();
   }, []);
 
+  // The player has no visible media element: an Audio object per file plays it.
+  useEffect(() => {
+    if (!audioUrl) {
+      return;
+    }
+    const audio = new Audio(audioUrl);
+    audioRef.current = audio;
+    return () => {
+      audio.pause();
+      audioRef.current = null;
+    };
+  }, [audioUrl]);
+
   // biome-ignore lint/correctness/useExhaustiveDependencies: audioUrl gates when audioRef.current first exists
   useEffect(() => {
     const audio = audioRef.current;
@@ -243,15 +290,13 @@ export default function BlockWaveformPlayer() {
     }
     let frame = 0;
     const tick = () => {
-      const { on, region } = loopRef.current;
-      if (on && region[1] > region[0] && audio.currentTime >= region[1]) {
-        audio.currentTime = region[0];
-      }
+      playbackFrame(
+        audio,
+        loopRef.current,
+        zoomRef.current,
+        viewportRef.current
+      );
       position.set(audio.currentTime);
-      const { px, zoomed: isZoomed } = zoomRef.current;
-      if (isZoomed) {
-        followPlayhead(viewportRef.current, audio.currentTime * px);
-      }
       frame = requestAnimationFrame(tick);
     };
     frame = requestAnimationFrame(tick);
@@ -301,14 +346,7 @@ export default function BlockWaveformPlayer() {
   );
   const handleZoomChange = useCallback((next: number) => setZoomPx(next), []);
 
-  const labelStep =
-    LABEL_STEPS.find((step) => step * zoom >= MIN_LABEL_GAP_PX) ??
-    LABEL_STEPS.at(-1) ??
-    1;
-  const labels = Array.from(
-    { length: duration > 0 ? Math.floor(duration / labelStep) + 1 : 0 },
-    (_, index) => index * labelStep
-  );
+  const labels = rulerLabels(duration, zoom);
 
   const ready = peaks !== null && duration > 0;
 
@@ -321,11 +359,6 @@ export default function BlockWaveformPlayer() {
         ref={fileInputRef}
         type="file"
       />
-      {audioUrl ? (
-        <audio ref={audioRef} src={audioUrl}>
-          <track kind="metadata" />
-        </audio>
-      ) : null}
       <div ref={frameRef}>
         <Timeline
           disabled={!ready}

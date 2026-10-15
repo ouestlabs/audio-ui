@@ -1,6 +1,7 @@
 "use client";
 
 import { LockSimpleIcon, LockSimpleOpenIcon } from "@phosphor-icons/react/ssr";
+import { useCallback } from "react";
 import { type LockableParam, useLocks } from "@/app/(create)/hooks/use-locks";
 import {
   Tooltip,
@@ -18,6 +19,7 @@ export function LockButton({
 }) {
   const { isLocked, toggleLock } = useLocks();
   const locked = isLocked(param);
+  const handleClick = useCallback(() => toggleLock(param), [param, toggleLock]);
 
   return (
     <Tooltip>
@@ -30,7 +32,7 @@ export function LockButton({
               className
             )}
             data-locked={locked}
-            onClick={() => toggleLock(param)}
+            onClick={handleClick}
             type="button"
           >
             {locked ? (

@@ -41,6 +41,15 @@ const inputGroupAddonVariants = cva(
   }
 );
 
+/** A press on an addon's text focuses the group's input, as on a label; its own buttons keep the press. Only the mouse needs it: the keyboard reaches the input directly. */
+function focusGroupInput(event: React.MouseEvent<HTMLDivElement>) {
+  if ((event.target as HTMLElement).closest("button")) {
+    return;
+  }
+  event.preventDefault();
+  event.currentTarget.parentElement?.querySelector("input")?.focus();
+}
+
 function InputGroupAddon({
   className,
   align = "inline-start",
@@ -51,12 +60,7 @@ function InputGroupAddon({
       className={cn(inputGroupAddonVariants({ align }), className)}
       data-align={align}
       data-slot="input-group-addon"
-      onClick={(e) => {
-        if ((e.target as HTMLElement).closest("button")) {
-          return;
-        }
-        e.currentTarget.parentElement?.querySelector("input")?.focus();
-      }}
+      onMouseDown={focusGroupInput}
       role="group"
       {...props}
     />

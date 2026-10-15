@@ -89,6 +89,9 @@ function ComponentGridContent({
   );
 }
 
+/** The cards shown while the catalog loads: six places, always the same. */
+const SKELETON_SLOTS = Array.from({ length: 6 }, (_, slot) => slot);
+
 export function ComponentGrid({ catalogItems }: ComponentGridProps) {
   return (
     <div className="flex flex-col">
@@ -96,8 +99,8 @@ export function ComponentGrid({ catalogItems }: ComponentGridProps) {
         fallback={
           <div className="w-full p-3 sm:px-8 sm:py-6 xl:px-10">
             <div className="grid items-stretch gap-4 sm:gap-6 grid-cols-[repeat(auto-fill,minmax(min(100%,max(320px,calc((100%-24px)/2))),1fr))]">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <ComponentCardSkeleton key={i} />
+              {SKELETON_SLOTS.map((slot) => (
+                <ComponentCardSkeleton key={slot} />
               ))}
             </div>
           </div>

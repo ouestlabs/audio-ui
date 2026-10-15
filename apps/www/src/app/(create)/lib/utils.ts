@@ -17,8 +17,8 @@ export function groupItemsByType(
   );
 
   return Object.entries(grouped)
-    .map(([type, items]) => ({
-      items,
+    .map(([type, typeItems]) => ({
+      items: typeItems,
       title: mapping[type as keyof typeof mapping] || type,
       type,
     }))

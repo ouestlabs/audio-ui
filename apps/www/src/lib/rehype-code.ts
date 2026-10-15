@@ -29,10 +29,12 @@ function isCodeBlock(node: HastNode) {
   );
 }
 
+const TRAILING_NEWLINE = /\n$/;
+
 /** A fence becomes a figure: its title above it, its code highlighted, and an install command carries its other package managers' forms. */
 function toFigure(pre: HastNode): HastNode | null {
   const code = pre.children?.[0] as HastNode;
-  const raw = textOf(code).replace(/\n$/, "");
+  const raw = textOf(code).replace(TRAILING_NEWLINE, "");
   const title = TITLE.exec(code.data?.meta ?? "")?.[1];
 
   const block = rehypePreCodeToHast(pre as never, {

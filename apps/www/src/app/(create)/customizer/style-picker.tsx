@@ -52,13 +52,13 @@ export function StylePicker({
               {mounted ? currentStyle?.title : "..."}
             </div>
           </div>
-          {mounted && currentStyle?.icon && (
+          {mounted && currentStyle?.icon ? (
             <div className="-translate-y-1/2 pointer-events-none absolute top-1/2 right-4 flex size-4 select-none items-center justify-center">
               {React.cloneElement(currentStyle.icon, {
                 className: "size-4",
               })}
             </div>
-          )}
+          ) : null}
         </PickerTrigger>
         <PickerContent
           align={isMobile ? "center" : "start"}
@@ -75,13 +75,13 @@ export function StylePicker({
                 <React.Fragment key={style.name}>
                   <PickerRadioItem value={style.name}>
                     <div className="flex items-start gap-2">
-                      {style.icon && (
+                      {style.icon ? (
                         <div className="flex size-4 translate-y-0.5 items-center justify-center">
                           {React.cloneElement(style.icon, {
                             className: "size-4",
                           })}
                         </div>
-                      )}
+                      ) : null}
                       <div className="flex flex-col justify-start pointer-coarse:gap-1">
                         <div>{style.title}</div>
                         <div className="pointer-coarse:text-sm text-site-muted-foreground text-xs">

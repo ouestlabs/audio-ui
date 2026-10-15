@@ -13,7 +13,7 @@ import type { FontName } from "@/lib/font-definitions";
 import { buildRegistryTheme, DEFAULT_CONFIG } from "@/registry/config";
 
 function syncBodyStyleClass(styleClass: string) {
-  const body = document.body;
+  const { body } = document;
   const styleClasses = Array.from(body.classList).filter((className) =>
     className.startsWith("style-")
   );
@@ -26,9 +26,7 @@ function syncBodyStyleClass(styleClass: string) {
     return;
   }
 
-  styleClasses.forEach((className) => {
-    body.classList.remove(className);
-  });
+  body.classList.remove(...styleClasses);
 
   if (styleClass) {
     body.classList.add(styleClass);
@@ -71,7 +69,7 @@ export function DocsDesignSystemEffects() {
 
   // The theme's colors and radius, and the base color, so the previews show what the customizer picks.
   React.useLayoutEffect(() => {
-    const body = document.body;
+    const { body } = document;
     const { element } = getThemeStyleElement();
     const { cssVars } = buildRegistryTheme({
       ...DEFAULT_CONFIG,
@@ -98,7 +96,7 @@ export function DocsDesignSystemEffects() {
   ]);
 
   React.useLayoutEffect(() => {
-    const body = document.body;
+    const { body } = document;
     const root = document.documentElement;
     const styleClass = `style-${config.style}`;
 
@@ -192,9 +190,7 @@ export function DocsDesignSystemEffects() {
         }
       }
 
-      previousStyleClassesRef.current?.forEach((className) => {
-        document.body.classList.add(className);
-      });
+      document.body.classList.add(...(previousStyleClassesRef.current ?? []));
     },
     []
   );

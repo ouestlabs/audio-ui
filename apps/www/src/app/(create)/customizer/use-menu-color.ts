@@ -7,6 +7,28 @@ import * as React from "react";
  * menu gets the `dark` class, a translucent one `cn-menu-translucent`. Menus
  * are the `.cn-menu-target` elements, including ones that open later.
  */
+/**
+ * Applies a Menu choice to one menu. The translucent class is swapped for a
+ * data attribute when it is off, so the element stays queryable for the next
+ * toggle.
+ */
+function applyMenuColor(
+  element: HTMLElement,
+  inverted: boolean,
+  translucent: boolean
+) {
+  if (element.classList.contains("cn-menu-target")) {
+    element.classList.toggle("dark", inverted);
+  }
+  if (translucent) {
+    element.classList.add("cn-menu-translucent");
+    element.removeAttribute("data-menu-translucent");
+  } else if (element.classList.contains("cn-menu-translucent")) {
+    element.classList.remove("cn-menu-translucent");
+    element.setAttribute("data-menu-translucent", "");
+  }
+}
+
 export function useMenuColor(menuColor: string | null | undefined) {
   React.useEffect(() => {
     if (!menuColor) {
@@ -30,35 +52,19 @@ export function useMenuColor(menuColor: string | null | undefined) {
       }
 
       // Disable transitions while toggling classes.
-      allElements.forEach((element) => {
+      for (const element of allElements) {
         element.style.transition = "none";
-      });
+      }
 
-      allElements.forEach((element) => {
-        if (element.classList.contains("cn-menu-target")) {
-          if (isInvertedMenu) {
-            element.classList.add("dark");
-          } else {
-            element.classList.remove("dark");
-          }
-        }
-
-        // Toggle translucent class: use class when active, data-attr when inactive
-        // so the element stays queryable for future toggles.
-        if (isTranslucentMenu) {
-          element.classList.add("cn-menu-translucent");
-          element.removeAttribute("data-menu-translucent");
-        } else if (element.classList.contains("cn-menu-translucent")) {
-          element.classList.remove("cn-menu-translucent");
-          element.setAttribute("data-menu-translucent", "");
-        }
-      });
+      for (const element of allElements) {
+        applyMenuColor(element, isInvertedMenu, isTranslucentMenu);
+      }
 
       // Force reflow, then re-enable transitions.
-      void document.body.offsetHeight;
-      allElements.forEach((element) => {
+      document.body.getBoundingClientRect();
+      for (const element of allElements) {
         element.style.transition = "";
-      });
+      }
     };
 
     const scheduleMenuUpdate = () => {

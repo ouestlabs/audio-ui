@@ -58,6 +58,16 @@ function isEditableTarget(target: EventTarget | null) {
   );
 }
 
+type HighlightType = "color" | "page" | "component" | "category";
+
+/** Whether an entry matches what is typed, its keywords included: 1 or 0, as the command list ranks. */
+const matchesSearch = (value: string, search: string, keywords?: string[]) =>
+  `${value} ${keywords?.join(" ") ?? ""}`
+    .toLowerCase()
+    .includes(search.toLowerCase())
+    ? 1
+    : 0;
+
 export type CommandMenuGroup = {
   id: string;
   name: string;
@@ -79,37 +89,29 @@ export function CommandMenu({
   const isMac = useIsMac();
   const [config] = useConfig();
   const [open, setOpen] = React.useState(false);
-  const [selectedType, setSelectedType] = React.useState<
-    "color" | "page" | "component" | "category" | null
-  >(null);
+  const [selectedType, setSelectedType] = React.useState<HighlightType | null>(
+    null
+  );
   const [copyPayload, setCopyPayload] = React.useState("");
   const packageManager = config.packageManager || "pnpm";
 
-  const handlePageHighlight = React.useCallback(
-    (isComponent: boolean, item: { url: string; name?: React.ReactNode }) => {
-      if (isComponent) {
-        const componentName = item.url.split("/").pop();
-        setSelectedType("component");
-        setCopyPayload(
-          `${packageManager} dlx shadcn@latest add ${componentName}`
-        );
-      } else {
-        setSelectedType("page");
-        setCopyPayload("");
-      }
+  const highlight = React.useCallback(
+    (type: HighlightType, payload: string) => {
+      setSelectedType(type);
+      setCopyPayload(payload);
     },
-    [packageManager]
+    []
   );
-
-  const handleCategoryHighlight = React.useCallback(() => {
-    setSelectedType("category");
-    setCopyPayload("");
-  }, []);
 
   const runCommand = React.useCallback((command: () => unknown) => {
     setOpen(false);
     command();
   }, []);
+
+  const navigate = React.useCallback(
+    (href: string) => runCommand(() => router.push(href)),
+    [router, runCommand]
+  );
 
   const copyStateRef = React.useRef({
     copyPayload,
@@ -121,7 +123,7 @@ export function CommandMenu({
   }, [selectedType, copyPayload, packageManager]);
 
   const copyHighlightedPayload = React.useCallback(() => {
-    const current = copyStateRef.current;
+    const { current } = copyStateRef;
 
     if (current.selectedType === "color") {
       copyToClipboardWithMeta(current.copyPayload, {
@@ -176,7 +178,6 @@ export function CommandMenu({
           <Button
             aria-label="Search"
             className="justify-between gap-2 bg-site-foreground/8 pr-1.5 hover:bg-site-foreground/12"
-            onClick={() => setOpen(true)}
             variant="secondary"
           >
             <MagnifyingGlassIcon aria-hidden className="shrink-0 opacity-60" />
@@ -197,13 +198,7 @@ export function CommandMenu({
         </DialogHeader>
         <Command
           className="min-h-0 flex-1 gap-0 rounded-none! p-0"
-          filter={(value, search, keywords) => {
-            const extendValue = `${value} ${keywords?.join(" ") || ""}`;
-            if (extendValue.toLowerCase().includes(search.toLowerCase())) {
-              return 1;
-            }
-            return 0;
-          }}
+          filter={matchesSearch}
         >
           <FrameHeader className="shrink-0 flex-row items-center gap-1 p-1 **:data-[slot=command-input-wrapper]:flex-1 **:data-[slot=command-input-wrapper]:p-0">
             <CommandInput placeholder="Search…" />
@@ -233,17 +228,12 @@ export function CommandMenu({
                   {navItems.map((item) => (
                     <CommandMenuItem
                       disabled={item.soon}
+                      highlightType="page"
+                      href={item.soon ? undefined : item.href}
                       key={item.href}
                       keywords={["nav", "navigation", item.label.toLowerCase()]}
-                      onHighlight={() => {
-                        setSelectedType("page");
-                        setCopyPayload("");
-                      }}
-                      onSelect={() => {
-                        if (!item.soon) {
-                          runCommand(() => router.push(item.href));
-                        }
-                      }}
+                      onHighlight={highlight}
+                      onNavigate={navigate}
                       value={`Navigation ${item.label}`}
                     >
                       <BookOpenIcon weight="fill" />
@@ -255,11 +245,11 @@ export function CommandMenu({
                       >
                         {item.label}
                       </span>
-                      {item.soon && (
+                      {item.soon ? (
                         <span className="site-rounded-sm ml-auto bg-site-muted px-1.5 py-0.5 font-medium text-[10px] text-site-muted-foreground leading-none">
                           Soon
                         </span>
-                      )}
+                      ) : null}
                     </CommandMenuItem>
                   ))}
                 </CommandGroup>
@@ -272,14 +262,17 @@ export function CommandMenu({
                 >
                   {group.pages.map((item) => (
                     <CommandMenuItem
+                      highlightPayload={
+                        item.isComponent
+                          ? `${packageManager} dlx shadcn@latest add ${item.url.split("/").pop()}`
+                          : ""
+                      }
+                      highlightType={item.isComponent ? "component" : "page"}
+                      href={item.url}
                       key={item.url}
                       keywords={item.isComponent ? ["component"] : undefined}
-                      onHighlight={() =>
-                        handlePageHighlight(item.isComponent, item)
-                      }
-                      onSelect={() => {
-                        runCommand(() => router.push(item.url));
-                      }}
+                      onHighlight={highlight}
+                      onNavigate={navigate}
                       value={item.name ? `${group.name} ${item.name}` : ""}
                     >
                       {item.isComponent ? (
@@ -301,6 +294,8 @@ export function CommandMenu({
                 >
                   {componentCategories.map((category) => (
                     <CommandMenuItem
+                      highlightType="category"
+                      href={`/components/${normalizeSlug(category.name)}`}
                       key={`component-cat-${category.name}`}
                       keywords={[
                         "component",
@@ -308,14 +303,8 @@ export function CommandMenu({
                         category.name,
                         category.label,
                       ]}
-                      onHighlight={handleCategoryHighlight}
-                      onSelect={() => {
-                        runCommand(() =>
-                          router.push(
-                            `/components/${normalizeSlug(category.name)}`
-                          )
-                        );
-                      }}
+                      onHighlight={highlight}
+                      onNavigate={navigate}
                       value={`Component category ${category.label}`}
                     >
                       <SquaresFourIcon weight="fill" />
@@ -340,7 +329,7 @@ export function CommandMenu({
             {selectedType === "category" ? "View Category" : null}
             {selectedType === "color" ? "Copy OKLCH" : null}
           </div>
-          {copyPayload && (
+          {copyPayload ? (
             <>
               <Separator orientation="vertical" />
               <div className="flex min-w-0 flex-1 items-center gap-1">
@@ -351,24 +340,38 @@ export function CommandMenu({
                 <span className="truncate">{copyPayload}</span>
               </div>
             </>
-          )}
+          ) : null}
         </FrameFooter>
       </DialogContent>
     </Dialog>
   );
 }
 
+/** An entry of the menu: highlighting it shows what Enter and Ctrl+C do, selecting it goes to `href`. */
 function CommandMenuItem({
   children,
   className,
+  highlightPayload = "",
+  highlightType,
+  href,
   onHighlight,
+  onNavigate,
   ...props
 }: React.ComponentProps<typeof CommandItem> & {
-  onHighlight?: () => void;
+  highlightPayload?: string;
+  highlightType: HighlightType;
+  href?: string;
+  onHighlight: (type: HighlightType, payload: string) => void;
+  onNavigate: (href: string) => void;
   "data-selected"?: string;
   "aria-selected"?: string;
 }) {
   const ref = React.useRef<HTMLDivElement>(null);
+  const handleSelect = React.useCallback(() => {
+    if (href) {
+      onNavigate(href);
+    }
+  }, [href, onNavigate]);
 
   useMutationObserver(ref, (mutations) => {
     for (const mutation of mutations) {
@@ -377,7 +380,7 @@ function CommandMenuItem({
         mutation.attributeName === "aria-selected" &&
         ref.current?.getAttribute("aria-selected") === "true"
       ) {
-        onHighlight?.();
+        onHighlight(highlightType, highlightPayload);
       }
     }
   });
@@ -388,6 +391,7 @@ function CommandMenuItem({
         "site-rounded-md h-9 border border-transparent px-3! font-medium data-[selected=true]:border-site-input data-[selected=true]:bg-site-input/50",
         className
       )}
+      onSelect={handleSelect}
       ref={ref}
       {...props}
     >

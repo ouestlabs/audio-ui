@@ -40,7 +40,6 @@
     "fumadocs-ui": "16.17.1",
     "input-otp": "^1.4.2",
     "jotai": "3.0.1",
-    "lru-cache": "11.5.3",
     "lucide-react": "1.55.0",
     "mermaid": "12.1.0",
     "next": "16.4.0",

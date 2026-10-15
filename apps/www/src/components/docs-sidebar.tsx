@@ -16,7 +16,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { getDocsPageUpdateHint } from "@/lib/docs";
-import { showMcpDocs } from "@/lib/flags";
 import { getCurrentBase, getSectionsFromFolder } from "@/lib/page-tree";
 import type { source } from "@/lib/source";
 
@@ -86,10 +85,6 @@ export function DocsNavigation({
                     ) : null}
                     <SidebarMenu className="gap-0.5">
                       {section.pages.map((page) => {
-                        if (!showMcpDocs && page.url.includes("/mcp")) {
-                          return null;
-                        }
-
                         if (EXCLUDED_PAGES.includes(page.url)) {
                           return null;
                         }

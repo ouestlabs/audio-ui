@@ -3,10 +3,10 @@ export const STYLES = [
     description: "Clean, neutral, and familiar",
     icon: (
       <svg
+        aria-hidden="true"
         color="currentColor"
         fill="none"
         height="128"
-        role="img"
         viewBox="0 0 24 24"
         width="128"
         xmlns="http://www.w3.org/2000/svg"
@@ -25,10 +25,10 @@ export const STYLES = [
     description: "Reduced padding and margins",
     icon: (
       <svg
+        aria-hidden="true"
         color="currentColor"
         fill="none"
         height="128"
-        role="img"
         viewBox="0 0 24 24"
         width="128"
         xmlns="http://www.w3.org/2000/svg"
@@ -48,10 +48,10 @@ export const STYLES = [
     description: "Rounded, with generous spacing.",
     icon: (
       <svg
+        aria-hidden="true"
         color="currentColor"
         fill="none"
         height="128"
-        role="img"
         viewBox="0 0 24 24"
         width="128"
         xmlns="http://www.w3.org/2000/svg"
@@ -73,10 +73,10 @@ export const STYLES = [
     description: "Boxy and sharp. For mono fonts.",
     icon: (
       <svg
+        aria-hidden="true"
         color="currentColor"
         fill="none"
         height="128"
-        role="img"
         viewBox="0 0 24 24"
         width="128"
         xmlns="http://www.w3.org/2000/svg"
@@ -95,10 +95,10 @@ export const STYLES = [
     description: "Made for compact interfaces.",
     icon: (
       <svg
+        aria-hidden="true"
         color="currentColor"
         fill="none"
         height="128"
-        role="img"
         viewBox="0 0 24 24"
         width="128"
         xmlns="http://www.w3.org/2000/svg"
@@ -118,10 +118,10 @@ export const STYLES = [
     description: "Fluid, luminous, and soft.",
     icon: (
       <svg
+        aria-hidden="true"
         color="currentColor"
         fill="none"
         height="128"
-        role="img"
         viewBox="0 0 24 24"
         width="128"
         xmlns="http://www.w3.org/2000/svg"
@@ -141,10 +141,10 @@ export const STYLES = [
     description: "Editorial and typographic.",
     icon: (
       <svg
+        aria-hidden="true"
         color="currentColor"
         fill="none"
         height="128"
-        role="img"
         viewBox="0 0 24 24"
         width="128"
         xmlns="http://www.w3.org/2000/svg"
@@ -166,10 +166,10 @@ export const STYLES = [
     description: "Like Luma but compact.",
     icon: (
       <svg
+        aria-hidden="true"
         color="currentColor"
         fill="none"
         height="128"
-        role="img"
         viewBox="0 0 24 24"
         width="128"
         xmlns="http://www.w3.org/2000/svg"

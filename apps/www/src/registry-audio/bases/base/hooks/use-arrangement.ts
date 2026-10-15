@@ -488,9 +488,9 @@ export function useArrangement({
         const at = afterId
           ? current.tracks.findIndex((item) => item.id === afterId) + 1
           : current.tracks.length;
-        const tracks = [...current.tracks];
-        tracks.splice(at || current.tracks.length, 0, track);
-        return { ...current, tracks };
+        const nextTracks = [...current.tracks];
+        nextTracks.splice(at || current.tracks.length, 0, track);
+        return { ...current, tracks: nextTracks };
       });
       return track;
     },
@@ -510,8 +510,12 @@ export function useArrangement({
         name: `${source.name} copy`,
       };
       edit((current) => {
-        const tracks = [...current.tracks];
-        tracks.splice(tracks.findIndex((item) => item.id === id) + 1, 0, copy);
+        const nextTracks = [...current.tracks];
+        nextTracks.splice(
+          nextTracks.findIndex((item) => item.id === id) + 1,
+          0,
+          copy
+        );
         const copies = current.clips
           .filter((clip) => clip.track === id)
           .map((clip) => {
@@ -522,7 +526,7 @@ export function useArrangement({
               track: copy.id,
             };
           });
-        return { clips: [...current.clips, ...copies], tracks };
+        return { clips: [...current.clips, ...copies], tracks: nextTracks };
       });
     },
     [edit]

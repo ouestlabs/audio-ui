@@ -100,7 +100,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
       // Default codeblock.
       return (
         <>
-          {__raw__ && <CopyButton src={__src__} value={__raw__} />}
+          {__raw__ ? <CopyButton src={__src__} value={__raw__} /> : null}
           <code {...props} />
         </>
       );

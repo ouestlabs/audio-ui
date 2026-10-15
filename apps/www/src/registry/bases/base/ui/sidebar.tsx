@@ -81,8 +81,13 @@ function SidebarProvider({
         _setOpen(openState);
       }
 
-      // This sets the cookie to keep the sidebar state.
-      document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`;
+      // A cookie keeps the sidebar state, for a server render to read.
+      cookieStore.set({
+        expires: Date.now() + SIDEBAR_COOKIE_MAX_AGE * 1000,
+        name: SIDEBAR_COOKIE_NAME,
+        path: "/",
+        value: String(openState),
+      });
     },
     [setOpenProp, open]
   );
@@ -90,7 +95,9 @@ function SidebarProvider({
   // Helper to toggle the sidebar.
   const toggleSidebar = React.useCallback(
     () =>
-      isMobile ? setOpenMobile((open) => !open) : setOpen((open) => !open),
+      isMobile
+        ? setOpenMobile((wasOpen) => !wasOpen)
+        : setOpen((wasOpen) => !wasOpen),
     [isMobile, setOpen]
   );
 
@@ -258,16 +265,20 @@ function SidebarTrigger({
   ...props
 }: React.ComponentProps<typeof Button>) {
   const { toggleSidebar } = useSidebar();
+  const handleClick = React.useCallback(
+    (event: Parameters<NonNullable<typeof onClick>>[0]) => {
+      onClick?.(event);
+      toggleSidebar();
+    },
+    [onClick, toggleSidebar]
+  );
 
   return (
     <Button
       className={cn("cn-sidebar-trigger", className)}
       data-sidebar="trigger"
       data-slot="sidebar-trigger"
-      onClick={(event) => {
-        onClick?.(event);
-        toggleSidebar();
-      }}
+      onClick={handleClick}
       size="icon-sm"
       variant="ghost"
       {...props}
@@ -626,12 +637,12 @@ function SidebarMenuSkeleton({
       data-slot="sidebar-menu-skeleton"
       {...props}
     >
-      {showIcon && (
+      {showIcon ? (
         <Skeleton
           className="cn-sidebar-menu-skeleton-icon"
           data-sidebar="menu-skeleton-icon"
         />
-      )}
+      ) : null}
       <Skeleton
         className="cn-sidebar-menu-skeleton-text max-w-(--skeleton-width) flex-1"
         data-sidebar="menu-skeleton-text"

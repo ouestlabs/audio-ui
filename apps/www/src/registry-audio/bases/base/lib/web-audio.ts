@@ -3,25 +3,9 @@ declare global {
     webkitAudioContext: typeof AudioContext;
   }
 }
+/** The page's one AudioContext, made the first time something asks for it. */
 export class WebAudio {
   #audioContext: AudioContext | null = null;
-  #isInitialized = false;
-
-  init(): void {
-    if (this.#isInitialized || !this.isClient()) {
-      return;
-    }
-
-    this.#isInitialized = true;
-
-    if (this.isClient()) {
-      const AudioContextClass =
-        window.AudioContext || window.webkitAudioContext;
-      if (AudioContextClass) {
-        this.#audioContext = new AudioContextClass();
-      }
-    }
-  }
 
   getContext(): AudioContext | null {
     if (!this.isClient()) {
@@ -47,7 +31,6 @@ export class WebAudio {
       this.#audioContext.close();
       this.#audioContext = null;
     }
-    this.#isInitialized = false;
   }
 
   private isClient(): boolean {

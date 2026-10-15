@@ -85,7 +85,7 @@ export function DesignSystemSyncProvider({
   children: React.ReactNode;
 }) {
   const [_config, setConfig] = useConfig();
-  const hasSyncedRef = React.useRef(false);
+  const hasSyncedRef = React.useRef<boolean>(false);
 
   // Initial sync on mount: URL -> localStorage only
   // Using useLayoutEffect to sync before paint, but still render children immediately
@@ -106,12 +106,12 @@ export function DesignSystemSyncProvider({
 
       setConfig((prev) => {
         const next = { ...prev };
-        DESIGN_SYSTEM_URL_KEYS.forEach((key) => {
+        for (const key of DESIGN_SYSTEM_URL_KEYS) {
           if (urlParams.has(key)) {
             // @ts-expect-error
             next[key] = parsed[key];
           }
-        });
+        }
         return next;
       });
     }
@@ -132,6 +132,39 @@ export function DesignSystemSyncProvider({
  * wraps nothing: it sits beside the page, in a boundary of its own, because
  * reading the URL must not take the page's content with it.
  */
+/** What the host page had before an embedded preview styled it. */
+interface DocumentState {
+  baseColorClasses: string[];
+  bodyFontFamily: string;
+  fontHeading: string;
+  fontSans: string;
+  styleClasses: string[];
+}
+
+/** Sets a style property, or removes it when there is no value to set. */
+function setOrRemove(style: CSSStyleDeclaration, name: string, value: string) {
+  if (value) {
+    style.setProperty(name, value);
+  } else {
+    style.removeProperty(name);
+  }
+}
+
+/** Gives the host page back its own style and base color classes and fonts. */
+function restoreDocumentState(state: DocumentState) {
+  const { body } = document;
+  for (const className of [...body.classList]) {
+    if (className.startsWith("style-") || className.startsWith("base-color-")) {
+      body.classList.remove(className);
+    }
+  }
+  body.classList.add(...state.styleClasses, ...state.baseColorClasses);
+  const rootStyle = document.documentElement.style;
+  setOrRemove(rootStyle, "--font-sans", state.fontSans);
+  setOrRemove(rootStyle, "--font-heading", state.fontHeading);
+  setOrRemove(body.style, "font-family", state.bodyFontFamily);
+}
+
 export function DesignSystemEffects() {
   const [params, setParams] = useDesignSystemSearchParams({
     history: "replace",
@@ -177,13 +210,7 @@ export function DesignSystemEffects() {
     }
     return FONTS.find((fontOption) => fontOption.value === fontHeading);
   }, [font, fontHeading, selectedFont]);
-  const previousDocumentStateRef = React.useRef<{
-    styleClasses: string[];
-    baseColorClasses: string[];
-    fontSans: string;
-    fontHeading: string;
-    bodyFontFamily: string;
-  } | null>(null);
+  const previousDocumentStateRef = React.useRef<DocumentState | null>(null);
   const previousThemeStyleRef = React.useRef<{
     existed: boolean;
     textContent: string;
@@ -204,7 +231,7 @@ export function DesignSystemEffects() {
       return;
     }
 
-    const body = document.body;
+    const { body } = document;
     const root = document.documentElement;
 
     if (!previousDocumentStateRef.current) {
@@ -222,19 +249,20 @@ export function DesignSystemEffects() {
     }
 
     // Update style class in place (remove old, add new).
-    body.classList.forEach((className) => {
+    // A copy: removing from the live list while walking it would skip classes.
+    for (const className of [...body.classList]) {
       if (className.startsWith("style-")) {
         body.classList.remove(className);
       }
-    });
+    }
     body.classList.add(`style-${style}`);
 
     // Update base color class in place.
-    body.classList.forEach((className) => {
+    for (const className of [...body.classList]) {
       if (className.startsWith("base-color-")) {
         body.classList.remove(className);
       }
-    });
+    }
     body.classList.add(`base-color-${baseColor}`);
 
     // Body / UI font (--font-sans) and heading (--font-heading).
@@ -278,47 +306,9 @@ export function DesignSystemEffects() {
       }
 
       const previousDocumentState = previousDocumentStateRef.current;
-      const body = document.body;
-      const root = document.documentElement;
 
       if (previousDocumentState) {
-        body.classList.forEach((className) => {
-          if (
-            className.startsWith("style-") ||
-            className.startsWith("base-color-")
-          ) {
-            body.classList.remove(className);
-          }
-        });
-
-        previousDocumentState.styleClasses.forEach((className) => {
-          body.classList.add(className);
-        });
-
-        previousDocumentState.baseColorClasses.forEach((className) => {
-          body.classList.add(className);
-        });
-
-        if (previousDocumentState.fontSans) {
-          root.style.setProperty("--font-sans", previousDocumentState.fontSans);
-        } else {
-          root.style.removeProperty("--font-sans");
-        }
-
-        if (previousDocumentState.fontHeading) {
-          root.style.setProperty(
-            "--font-heading",
-            previousDocumentState.fontHeading
-          );
-        } else {
-          root.style.removeProperty("--font-heading");
-        }
-
-        if (previousDocumentState.bodyFontFamily) {
-          body.style.fontFamily = previousDocumentState.bodyFontFamily;
-        } else {
-          body.style.removeProperty("font-family");
-        }
+        restoreDocumentState(previousDocumentState);
       }
 
       const styleElement = document.getElementById(
@@ -395,7 +385,7 @@ export function DesignSystemEffects() {
 
     const getDocumentHeight = () => {
       const root = document.documentElement;
-      const body = document.body;
+      const { body } = document;
 
       return Math.ceil(
         Math.max(
@@ -453,9 +443,7 @@ export function DesignSystemEffects() {
 
     window.addEventListener("resize", scheduleHeightUpdate);
 
-    void document.fonts?.ready?.then(() => {
-      scheduleHeightUpdate();
-    });
+    document.fonts?.ready?.then(scheduleHeightUpdate);
 
     return () => {
       if (frameId) {

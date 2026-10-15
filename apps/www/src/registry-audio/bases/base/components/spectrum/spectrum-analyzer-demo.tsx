@@ -43,10 +43,8 @@ export default function SpectrumAnalyzerDemo() {
     node.smoothingTimeConstant = 0.75;
     master.connect(node);
     setAnalyser(node);
-    return () => {
-      master.disconnect(node);
-      setAnalyser(null);
-    };
+    // No disconnect here: the master bus drops all its outputs when it goes, and may already have.
+    return () => setAnalyser(null);
   }, [master, webAudio]);
 
   useEffect(() => releaseAll, [releaseAll]);

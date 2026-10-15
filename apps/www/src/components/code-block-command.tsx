@@ -37,16 +37,19 @@ export function CodeBlockCommand({
   );
 
   const command = tabs[packageManager] ?? "";
+  const handlePackageManagerChange = React.useCallback(
+    (value: string) =>
+      setConfig({
+        ...config,
+        packageManager: value as "pnpm" | "npm" | "yarn" | "bun",
+      }),
+    [config, setConfig]
+  );
 
   return (
     <Tabs
       className="gap-0"
-      onValueChange={(value) => {
-        setConfig({
-          ...config,
-          packageManager: value as "pnpm" | "npm" | "yarn" | "bun",
-        });
-      }}
+      onValueChange={handlePackageManagerChange}
       value={packageManager}
     >
       {/* The frame of the site: the package managers in its header, the command in its panel. */}

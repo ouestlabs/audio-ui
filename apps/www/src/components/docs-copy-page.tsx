@@ -1,17 +1,22 @@
 "use client";
 
 import { CheckIcon, CopyIcon } from "@phosphor-icons/react/ssr";
+import { useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 import { cn } from "@/lib/utils";
 
 export function DocsCopyPage({ page }: { page: string; url: string }) {
   const { copyToClipboard, isCopied } = useCopyToClipboard();
+  const handleCopy = useCallback(
+    () => copyToClipboard(page),
+    [copyToClipboard, page]
+  );
 
   return (
     <Button
       className="site-rounded-md h-8 shadow-none md:h-7 md:text-[0.8rem]"
-      onClick={() => copyToClipboard(page)}
+      onClick={handleCopy}
       size="sm"
       variant="secondary"
     >

@@ -11,6 +11,7 @@ import {
   usePickerSide,
 } from "@/app/(create)/customizer/picker";
 import { useDesignSystemSearchParams } from "@/app/(create)/lib/search-params";
+import { BaseLogo } from "@/components/built-on";
 import { useConfig } from "@/hooks/use-config";
 import { useMounted } from "@/hooks/use-mounted";
 import { BASES as ALL_BASES } from "@/registry/config";
@@ -62,14 +63,11 @@ export function BasePicker({
             {mounted ? currentBase?.title : "..."}
           </div>
         </div>
-        {mounted && currentBase?.meta?.logo && (
-          <div
-            className="-translate-y-1/2 pointer-events-none absolute top-1/2 right-4 size-4 select-none text-site-foreground *:[svg]:size-4 *:[svg]:text-site-foreground!"
-            dangerouslySetInnerHTML={{
-              __html: currentBase.meta.logo,
-            }}
-          />
-        )}
+        {mounted && currentBase ? (
+          <div className="-translate-y-1/2 pointer-events-none absolute top-1/2 right-4 size-4 select-none text-site-foreground">
+            <BaseLogo className="size-4" name={currentBase.name} />
+          </div>
+        ) : null}
       </PickerTrigger>
       <PickerContent
         align={isMobile ? "center" : "start"}
@@ -83,14 +81,10 @@ export function BasePicker({
           <PickerGroup>
             {BASES.map((base) => (
               <PickerRadioItem key={base.name} value={base.name}>
-                {base.meta?.logo && (
-                  <div
-                    className="size-4 shrink-0 text-site-foreground [&_svg]:size-4 *:[svg]:text-site-foreground!"
-                    dangerouslySetInnerHTML={{
-                      __html: base.meta.logo,
-                    }}
-                  />
-                )}
+                <BaseLogo
+                  className="size-4 shrink-0 text-site-foreground"
+                  name={base.name}
+                />
                 {base.title}
               </PickerRadioItem>
             ))}

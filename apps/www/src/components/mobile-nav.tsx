@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/popover";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getDocsPageUpdateHint } from "@/lib/docs";
-import { showMcpDocs } from "@/lib/flags";
 import { getCurrentBase, getSectionsFromFolder } from "@/lib/page-tree";
 import type { CategoryInfo } from "@/lib/registry";
 import type { source } from "@/lib/source";
@@ -73,6 +72,10 @@ export function MobileNav({
   const pathname = usePathname();
   const currentBase = getCurrentBase(pathname);
   const [chosen, setChosen] = React.useState<Section | null>(null);
+  const handleSectionChange = React.useCallback(
+    (value: string) => setChosen(value as Section),
+    []
+  );
   const section: Section =
     chosen ?? (isActive(pathname, "/components") ? "components" : "docs");
   const close = React.useCallback(() => setOpen(false), []);
@@ -140,7 +143,7 @@ export function MobileNav({
       >
         <Tabs
           className="shrink-0"
-          onValueChange={(value) => setChosen(value as Section)}
+          onValueChange={handleSectionChange}
           value={section}
         >
           <TabsList
@@ -208,14 +211,10 @@ export function MobileNav({
               if (folder.type !== "folder") {
                 return null;
               }
-              const sections = getSectionsFromFolder(folder, currentBase)
-                .map((part) => ({
-                  ...part,
-                  pages: part.pages.filter(
-                    (page) => showMcpDocs || !page.url?.includes("/mcp")
-                  ),
-                }))
-                .filter((part) => part.pages.length > 0);
+              const sections = getSectionsFromFolder(
+                folder,
+                currentBase
+              ).filter((part) => part.pages.length > 0);
               if (sections.length === 0) {
                 return null;
               }

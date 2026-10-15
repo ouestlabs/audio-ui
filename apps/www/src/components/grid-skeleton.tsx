@@ -15,8 +15,8 @@ export function GridSkeleton({ count = 6, className }: GridSkeletonProps) {
   return (
     <div className={cn("p-3 sm:px-8 sm:py-6 xl:px-10", className)}>
       <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2">
-        {Array.from({ length: count }).map((_, index) => (
-          <Frame key={index}>
+        {Array.from({ length: count }, (_, slot) => slot).map((slot) => (
+          <Frame key={slot}>
             <FrameContent className="flex min-h-60 items-center justify-center p-4">
               <PreviewLoading />
             </FrameContent>

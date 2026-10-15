@@ -11,27 +11,9 @@
  * - Components are lazy-loaded on-demand
  */
 
-import { LRUCache } from "lru-cache";
 import * as React from "react";
-import { registryItemSchema } from "shadcn/schema";
-
-import { transformStyleClassNames } from "@/lib/code-utils";
-
-// ============================================================================
-// Server-side modules (lazy-loaded to avoid client-side bundling issues)
-// ============================================================================
-
-// eval('require("...")') keeps the require call as a static string so it is
-// only resolved on the server and never bundled client-side.
-// biome-ignore lint/security/noGlobalEval: intentional bundler-hidden server-only require
-const requireNodePath = () => eval('require("node:path")');
-// biome-ignore lint/security/noGlobalEval: intentional bundler-hidden server-only require
-const requireNodeFs = () => eval('require("fs").promises');
-const pathNode = typeof window === "undefined" ? requireNodePath() : null;
-const fs = typeof window === "undefined" ? requireNodeFs() : null;
 
 const WHITESPACE_REGEX = /\s+/;
-const GENERATED_BASE_PATH_REGEX = /registry-audio\/bases\/__generated\/[^/]+\//;
 
 function normalizeRegistrySlug(value: string) {
   return value.toLowerCase().replace(/\s+/g, "-");
@@ -239,13 +221,11 @@ let _categoryIndex: Map<string, ComponentCatalogItem[]> | null = null;
 function getStats(): StatsData {
   if (!_stats) {
     try {
-      const raw =
-        require("../registry-audio/bases/registry.json") as StatsData & {
-          totalPatterns?: number;
-        };
+      const stats =
+        require("../registry-audio/bases/registry.json") as StatsData;
       _stats = {
-        categories: raw.categories ?? [],
-        totalComponents: raw.totalComponents ?? raw.totalPatterns ?? 0,
+        categories: stats.categories,
+        totalComponents: stats.totalComponents,
       };
     } catch (e) {
       console.error("Failed to load registry stats", e);
@@ -303,12 +283,8 @@ export function getRegistryMetadata(base?: string) {
     return Metadata[base] || {};
   }
 
-  const allMetadata: Record<string, Record<string, RegistryItem>> = {};
   const { Metadata } = getMetadata("base");
-  if (Metadata.base) {
-    allMetadata.base = Metadata.base;
-  }
-  return allMetadata;
+  return { base: Metadata.base };
 }
 
 /**
@@ -358,18 +334,6 @@ export function getComponent(
 export function hasComponent(base: string, name: string): boolean {
   return !!getRegistryItemMetadata(name, base);
 }
-
-// ============================================================================
-// LRU Cache for cross-request caching
-// ============================================================================
-
-const registryCache = new LRUCache<string, any>({
-  max: 500,
-  ttl: 1000 * 60 * 20, // 20 minutes
-});
-
-// Track in-flight requests to prevent duplicate network calls (e.g. from StrictMode)
-const inFlightRequests = new Map<string, Promise<any>>();
 
 // ============================================================================
 // Category Functions - Use registry.json category manifest
@@ -550,10 +514,10 @@ function applyCountToSeoContent(
  */
 export function getComponentIndexSeo(): ComponentCategorySeo {
   const count = getTotalComponentCount();
-  const root = getRegistrySeoMapCached().root;
+  const { root } = getRegistrySeoMapCached();
   const fallbackDescription = `Browse ${count}+ free open-source shadcn/ui components for React and Tailwind CSS.`;
 
-  if (!(root?.content || root?.description || root?.intro)) {
+  if (!(root.content || root.description || root.intro)) {
     return {
       description: fallbackDescription,
       intro: fallbackDescription,
@@ -662,7 +626,7 @@ function loadCatalogItemsByName(): Map<string, ComponentCatalogItem> {
 
     for (const item of manifest) {
       const itemCategories = item.categories || [];
-      let primaryCategory = itemCategories[0];
+      let [primaryCategory] = itemCategories;
 
       if (!primaryCategory) {
         const nameParts = item.name.split("-");
@@ -822,311 +786,9 @@ export function getRegistryComponent(name: string, styleName = "base-nova") {
   return getComponent(base, name);
 }
 
-// ============================================================================
-// Registry Item Functions (for code display, etc.)
-// ============================================================================
-
-const DEFAULT_STYLE_NAME = "base-nova";
-
 function getRegistryKey(styleName: string): string {
   if (styleName.startsWith("base-")) {
     return "base";
   }
   return styleName;
-}
-
-function transformAudioPath(filePath: string, _styleName: string): string {
-  if (filePath.includes("/__generated/")) {
-    return filePath.replace(GENERATED_BASE_PATH_REGEX, (match) => {
-      if (match.includes("base-")) {
-        return "src/registry-audio/bases/base/";
-      }
-      return match;
-    });
-  }
-  return filePath;
-}
-
-// biome-ignore lint/suspicious/useAwait: async unifies sync cache hits and the in-flight promise into one Promise return type
-export async function getRegistryItem(
-  name: string,
-  styleName: string = DEFAULT_STYLE_NAME,
-  iconLibrary?: string
-) {
-  const cacheKey = `${getRegistryDeploymentId()}:${styleName}:${iconLibrary || ""}:${name}`;
-
-  if (registryCache.has(cacheKey)) {
-    return registryCache.get(cacheKey);
-  }
-
-  // Deduplicate in-flight requests
-  if (inFlightRequests.has(cacheKey)) {
-    return inFlightRequests.get(cacheKey);
-  }
-
-  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: sequential client/server load pipeline with layered fallbacks; splitting it would obscure the caching flow
-  const requestPromise = (async () => {
-    try {
-      if (typeof window !== "undefined") {
-        try {
-          // Use static /r/styles/ files (CDN-served, zero function invocations)
-          const url = getRegistryJsonUrl(styleName, name);
-          const res = await fetch(url);
-          if (res.ok) {
-            const data = await res.json();
-            const rawCode = data.files?.[0]?.content;
-            const item: RegistryItem = {
-              files: [
-                {
-                  content: rawCode,
-                  path: "",
-                  type: "registry:ui",
-                },
-              ],
-              name: data.name || name,
-              title: data.title || data.name || name,
-              type: "registry:ui",
-            };
-            registryCache.set(cacheKey, item);
-            return item;
-          }
-        } catch (error) {
-          console.error("Error fetching registry item from API:", error);
-        }
-        return null;
-      }
-
-      const projectRoot = process.cwd();
-      let item: RegistryItem | undefined;
-
-      try {
-        const registryPath = pathNode.join(
-          projectRoot,
-          "public",
-          "r",
-          "styles",
-          styleName,
-          `${name}.json`
-        );
-        const content = await fs.readFile(registryPath, "utf-8");
-        item = JSON.parse(content);
-      } catch {
-        // Fall back to metadata
-      }
-
-      if (!item) {
-        const registryKey = getRegistryKey(styleName);
-        const { Metadata } = getMetadata(registryKey);
-        item = Metadata[registryKey]?.[name] as RegistryItem | undefined;
-
-        if (item) {
-          try {
-            const registryPath = pathNode.join(
-              projectRoot,
-              "public",
-              "r",
-              "styles",
-              styleName,
-              `${item.name}.json`
-            );
-            const content = await fs.readFile(registryPath, "utf-8");
-            const jsonItem = JSON.parse(content);
-            if (jsonItem?.files) {
-              item = jsonItem;
-            }
-          } catch {
-            // Use metadata version
-          }
-        }
-      }
-
-      if (!item) {
-        registryCache.set(cacheKey, null);
-        return null;
-      }
-
-      const files: RegistryItemFile[] = (item.files ?? []).map((file) => {
-        const fileObj =
-          typeof file === "string"
-            ? { path: file, type: "registry:file" }
-            : { ...file };
-        fileObj.path = transformAudioPath(fileObj.path, styleName);
-        return fileObj;
-      });
-
-      const result = registryItemSchema.safeParse({ ...item, files });
-      if (!result.success) {
-        registryCache.set(cacheKey, null);
-        return null;
-      }
-
-      const processedFiles: RegistryItemFile[] = await Promise.all(
-        files.map(async (file) => {
-          let content = file.content ?? "";
-          if (!content) {
-            content = await getFileContent(file, styleName);
-          }
-          return {
-            ...file,
-            content,
-            path: pathNode.relative(process.cwd(), file.path),
-          };
-        })
-      );
-
-      const fixedFiles = fixFilePaths(processedFiles);
-      const parsed = registryItemSchema.safeParse({
-        ...result.data,
-        files: fixedFiles,
-      });
-
-      if (!parsed.success) {
-        registryCache.set(cacheKey, null);
-        return null;
-      }
-
-      registryCache.set(cacheKey, parsed.data);
-      return parsed.data;
-    } finally {
-      inFlightRequests.delete(cacheKey);
-    }
-  })();
-
-  inFlightRequests.set(cacheKey, requestPromise);
-  return requestPromise;
-}
-
-async function getFileContent(
-  file: RegistryItemFile,
-  styleName: string = DEFAULT_STYLE_NAME
-) {
-  const filePath = pathNode.resolve(process.cwd(), file.path);
-
-  let code = "";
-  try {
-    code = await fs.readFile(filePath, "utf-8");
-  } catch {
-    return "";
-  }
-
-  if (file.type !== "registry:page") {
-    code = code.replaceAll("export default", "export");
-  }
-
-  code = fixImport(code);
-  code = transformStyleClassNames(code, styleName);
-  code = code.replace(
-    /^\s*\/\/[*\s]*(?:Description|Order|GridSize|PreviewHeight):.*$\n?/gm,
-    ""
-  );
-
-  return code.trim();
-}
-
-function getFileTarget(file: RegistryItemFile) {
-  let target = file.target;
-  if (!target || target === "") {
-    const fileName = file.path.split("/").pop();
-    if (
-      ["registry:block", "registry:component", "registry:example"].includes(
-        file.type
-      )
-    ) {
-      target = `components/${fileName}`;
-    } else if (file.type === "registry:ui") {
-      target = `components/ui/${fileName}`;
-    } else if (file.type === "registry:hook") {
-      target = `hooks/${fileName}`;
-    } else if (file.type === "registry:lib") {
-      target = `lib/${fileName}`;
-    }
-  }
-  return target ?? "";
-}
-
-function fixFilePaths(files: RegistryItemFile[]) {
-  if (!files?.length) {
-    return [];
-  }
-  const firstFilePathDir = pathNode.dirname(files[0].path);
-  return files.map((file) => ({
-    ...file,
-    path: pathNode.relative(firstFilePathDir, file.path),
-    target: getFileTarget(file),
-  }));
-}
-
-export function fixImport(content: string) {
-  const regex = /@\/(.+?)\/((?:.*?\/)?(?:components|ui|hooks|lib))\/([\w-]+)/g;
-  const replacement = (
-    match: string,
-    _path: string,
-    type: string,
-    component: string
-  ) => {
-    if (type.endsWith("components")) {
-      return `@/components/${component}`;
-    }
-    if (type.endsWith("ui")) {
-      return `@/components/ui/${component}`;
-    }
-    if (type.endsWith("hooks")) {
-      return `@/hooks/${component}`;
-    }
-    if (type.endsWith("lib")) {
-      return `@/lib/${component}`;
-    }
-    return match;
-  };
-
-  return content
-    .replaceAll("@/registry/shadcn/base/", "@/components/ui/")
-    .replaceAll("@/registry/default/", "@/components/")
-    .replaceAll("@/registry/bases/base/", "@/components/")
-    .replaceAll("/* eslint-disable react/no-children-prop */\n", "")
-    .replace(regex, replacement);
-}
-
-export type FileTree = { name: string; path?: string; children?: FileTree[] };
-
-// Insert a single file path into the tree, creating folder nodes as needed.
-function insertFilePathIntoTree(root: FileTree[], filePath: string) {
-  const parts = filePath.split("/");
-  let currentLevel = root;
-
-  for (let i = 0; i < parts.length; i++) {
-    const part = parts[i];
-    const isFile = i === parts.length - 1;
-    const existingNode = currentLevel.find((n) => n.name === part);
-
-    if (existingNode) {
-      if (isFile) {
-        existingNode.path = filePath;
-      } else {
-        existingNode.children ??= [];
-        currentLevel = existingNode.children;
-      }
-      continue;
-    }
-
-    if (isFile) {
-      currentLevel.push({ name: part, path: filePath });
-    } else {
-      const children: FileTree[] = [];
-      currentLevel.push({ children, name: part });
-      currentLevel = children;
-    }
-  }
-}
-
-export function createFileTreeForRegistryItemFiles(
-  files: Array<{ path: string; target?: string }>
-) {
-  const root: FileTree[] = [];
-
-  for (const file of files) {
-    insertFilePathIntoTree(root, file.target ?? file.path);
-  }
-
-  return root;
 }
