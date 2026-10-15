@@ -27,8 +27,8 @@ body:
     id: components-affected
     attributes:
       label: Affected component/components
-      description: Which audio/ui components are affected?
-      placeholder: ex. Button, Checkbox...
+      description: Which audio/ui components, hooks or primitives are affected?
+      placeholder: ex. Knob, Timeline, use-transport-clock...
     validations:
       required: true
 
@@ -41,6 +41,15 @@ body:
         1. Go to '...'
         2. Click on '....'
         3. See error
+    validations:
+      required: true
+
+  - type: input
+    id: versions
+    attributes:
+      label: Package versions
+      description: "The version of `@audio-ui/react` or `@audio-ui/core` you use, or the registry item and style you installed (ex. `@audio-ui/knob`, `base-nova`)."
+      placeholder: ex. "@audio-ui/react 0.2.2"
     validations:
       required: true
 
