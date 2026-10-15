@@ -8,6 +8,7 @@ const CANONICAL_COMPONENT_DOC_SLUGS = [
   "fader",
   "knob",
   "meter",
+  "pad",
   "piano",
   "piano-roll",
   "plot",

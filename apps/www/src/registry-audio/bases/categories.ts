@@ -88,6 +88,12 @@ export const categories: CategoryDef[] = [
   },
   {
     description:
+      "Drum pad grids: strike them by pointer or keyboard, with velocity and choke groups.",
+    label: "Pad",
+    name: "pad",
+  },
+  {
+    description:
       "Virtual piano keyboard components with MIDI note ranges and glissando.",
     label: "Piano",
     name: "piano",
