@@ -106,12 +106,12 @@ export function DesignSystemSyncProvider({
 
       setConfig((prev) => {
         const next = { ...prev };
-        DESIGN_SYSTEM_URL_KEYS.forEach((key) => {
+        for (const key of DESIGN_SYSTEM_URL_KEYS) {
           if (urlParams.has(key)) {
             // @ts-expect-error
             next[key] = parsed[key];
           }
-        });
+        }
         return next;
       });
     }
@@ -204,7 +204,7 @@ export function DesignSystemEffects() {
       return;
     }
 
-    const body = document.body;
+    const { body } = document;
     const root = document.documentElement;
 
     if (!previousDocumentStateRef.current) {
@@ -222,19 +222,20 @@ export function DesignSystemEffects() {
     }
 
     // Update style class in place (remove old, add new).
-    body.classList.forEach((className) => {
+    // A copy: removing from the live list while walking it would skip classes.
+    for (const className of [...body.classList]) {
       if (className.startsWith("style-")) {
         body.classList.remove(className);
       }
-    });
+    }
     body.classList.add(`style-${style}`);
 
     // Update base color class in place.
-    body.classList.forEach((className) => {
+    for (const className of [...body.classList]) {
       if (className.startsWith("base-color-")) {
         body.classList.remove(className);
       }
-    });
+    }
     body.classList.add(`base-color-${baseColor}`);
 
     // Body / UI font (--font-sans) and heading (--font-heading).
@@ -278,26 +279,23 @@ export function DesignSystemEffects() {
       }
 
       const previousDocumentState = previousDocumentStateRef.current;
-      const body = document.body;
+      const { body } = document;
       const root = document.documentElement;
 
       if (previousDocumentState) {
-        body.classList.forEach((className) => {
+        for (const className of [...body.classList]) {
           if (
             className.startsWith("style-") ||
             className.startsWith("base-color-")
           ) {
             body.classList.remove(className);
           }
-        });
+        }
 
-        previousDocumentState.styleClasses.forEach((className) => {
-          body.classList.add(className);
-        });
-
-        previousDocumentState.baseColorClasses.forEach((className) => {
-          body.classList.add(className);
-        });
+        body.classList.add(
+          ...previousDocumentState.styleClasses,
+          ...previousDocumentState.baseColorClasses
+        );
 
         if (previousDocumentState.fontSans) {
           root.style.setProperty("--font-sans", previousDocumentState.fontSans);
@@ -395,7 +393,7 @@ export function DesignSystemEffects() {
 
     const getDocumentHeight = () => {
       const root = document.documentElement;
-      const body = document.body;
+      const { body } = document;
 
       return Math.ceil(
         Math.max(
@@ -453,9 +451,7 @@ export function DesignSystemEffects() {
 
     window.addEventListener("resize", scheduleHeightUpdate);
 
-    void document.fonts?.ready?.then(() => {
-      scheduleHeightUpdate();
-    });
+    document.fonts?.ready?.then(scheduleHeightUpdate);
 
     return () => {
       if (frameId) {

@@ -24,7 +24,7 @@ export function Callout({
       {...props}
     >
       {icon}
-      {title && <AlertTitle>{title}</AlertTitle>}
+      {title ? <AlertTitle>{title}</AlertTitle> : null}
       <AlertDescription className="text-site-card-foreground/80">
         {children}
       </AlertDescription>

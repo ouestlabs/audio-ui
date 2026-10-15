@@ -40,9 +40,9 @@ function ResizableHandle({
       data-slot="resizable-handle"
       {...props}
     >
-      {withHandle && (
+      {withHandle ? (
         <div className="cn-resizable-handle-icon z-10 flex shrink-0" />
-      )}
+      ) : null}
     </ResizablePrimitive.Separator>
   );
 }

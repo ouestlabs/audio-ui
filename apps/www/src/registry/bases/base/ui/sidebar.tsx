@@ -626,12 +626,12 @@ function SidebarMenuSkeleton({
       data-slot="sidebar-menu-skeleton"
       {...props}
     >
-      {showIcon && (
+      {showIcon ? (
         <Skeleton
           className="cn-sidebar-menu-skeleton-icon"
           data-sidebar="menu-skeleton-icon"
         />
-      )}
+      ) : null}
       <Skeleton
         className="cn-sidebar-menu-skeleton-text max-w-(--skeleton-width) flex-1"
         data-sidebar="menu-skeleton-text"

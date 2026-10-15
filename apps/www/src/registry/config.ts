@@ -439,7 +439,7 @@ export function buildRegistryTheme(config: DesignSystemConfig) {
   if (chartTheme) {
     const chartLight = chartTheme.cssVars?.light as Record<string, string>;
     const chartDark = chartTheme.cssVars?.dark as Record<string, string>;
-    for (let i = 1; i <= 5; i++) {
+    for (let i = 1; i <= 5; i += 1) {
       const key = `chart-${i}`;
       if (chartLight?.[key]) {
         lightVars[key] = chartLight[key];

@@ -147,14 +147,14 @@ function FieldSeparator({
       {...props}
     >
       <Separator className="absolute inset-0 top-1/2" />
-      {children && (
+      {children ? (
         <span
           className="cn-field-separator-content relative mx-auto block w-fit bg-background"
           data-slot="field-separator-content"
         >
           {children}
         </span>
-      )}
+      ) : null}
     </div>
   );
 }

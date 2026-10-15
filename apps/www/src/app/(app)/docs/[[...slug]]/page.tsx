@@ -36,8 +36,108 @@ export function generateStaticParams() {
   return source.generateParams();
 }
 
+type Neighbours = ReturnType<typeof findNeighbour>;
+
+/** The previous and next pages as icon buttons, beside the title. */
+function DocsNeighbourIcons({ neighbours }: { neighbours: Neighbours }) {
+  return (
+    <>
+      {neighbours.previous ? (
+        <Button
+          className="extend-touch-target ml-auto hidden shadow-none md:size-7"
+          nativeButton={false}
+          render={
+            <Link href={neighbours.previous.url}>
+              <ArrowLeftIcon />
+              <span className="sr-only">Previous</span>
+            </Link>
+          }
+          size="icon"
+          variant="secondary"
+        />
+      ) : null}
+      {neighbours.next ? (
+        <Button
+          className="extend-touch-target hidden shadow-none md:size-7"
+          nativeButton={false}
+          render={
+            <Link href={neighbours.next.url}>
+              <span className="sr-only">Next</span>
+              <ArrowRightIcon />
+            </Link>
+          }
+          size="icon"
+          variant="secondary"
+        />
+      ) : null}
+    </>
+  );
+}
+
+/** Links to the docs and the API reference of what a page covers. */
+function DocsLinks({ links }: { links: { api?: string; doc?: string } }) {
+  return (
+    <div className="flex items-center gap-2 pt-4">
+      {links.doc ? (
+        <Badge
+          className="site-rounded-full"
+          render={
+            <a href={links.doc} rel="noreferrer" target="_blank">
+              Docs <ArrowUpRightIcon />
+            </a>
+          }
+          variant="secondary"
+        />
+      ) : null}
+      {links.api ? (
+        <Badge
+          className="site-rounded-full"
+          render={
+            <a href={links.api} rel="noreferrer" target="_blank">
+              API Reference <ArrowUpRightIcon />
+            </a>
+          }
+          variant="secondary"
+        />
+      ) : null}
+    </div>
+  );
+}
+
+/** The previous and next pages, named, under the page. */
+function DocsPager({ neighbours }: { neighbours: Neighbours }) {
+  return (
+    <div className="mx-auto flex h-16 w-full max-w-2xl items-center gap-2 px-4 md:px-0">
+      {neighbours.previous ? (
+        <Button
+          className="shadow-none"
+          nativeButton={false}
+          render={
+            <Link href={neighbours.previous.url}>
+              <ArrowLeftIcon /> {neighbours.previous.name}
+            </Link>
+          }
+          variant="secondary"
+        />
+      ) : null}
+      {neighbours.next ? (
+        <Button
+          className="ml-auto shadow-none"
+          nativeButton={false}
+          render={
+            <Link href={neighbours.next.url}>
+              {neighbours.next.name} <ArrowRightIcon />
+            </Link>
+          }
+          variant="secondary"
+        />
+      ) : null}
+    </div>
+  );
+}
+
 export async function generateMetadata(props: {
-  params: Promise<{ slug: string[] }>;
+  params: Promise<{ slug?: string[] }>;
 }) {
   const params = await props.params;
   const page = source.getPage(params.slug);
@@ -84,7 +184,7 @@ export async function generateMetadata(props: {
 }
 
 export default async function Page(props: {
-  params: Promise<{ slug: string[] }>;
+  params: Promise<{ slug?: string[] }>;
 }) {
   const params = await props.params;
   const page = source.getPage(params.slug);
@@ -93,16 +193,14 @@ export default async function Page(props: {
   }
 
   const doc = page.data;
-  const MDX = doc.body;
-  const toc = doc.toc;
+  const { body: MDX, toc } = doc;
   const neighbours = findNeighbour(source.getPageTree(), page.url);
 
   const raw = await page.data.getText("raw");
   const { links, base, component } = doc;
 
   const isComponentDoc = component === true && base !== undefined;
-  const componentName =
-    isComponentDoc && params.slug?.length >= 3 ? params.slug[2] : undefined;
+  const componentName = isComponentDoc ? params.slug?.[2] : undefined;
   const componentSeo =
     isComponentDoc && componentName && isCanonicalComponentDoc(componentName)
       ? getComponentDocSeo(componentName, doc.title, base, doc.description)
@@ -133,34 +231,7 @@ export default async function Page(props: {
                   <div className="docs-nav flex items-center gap-2 pt-1.5">
                     <DocsCopyPage page={raw} url={absoluteUrl(page.url)} />
 
-                    {neighbours.previous && (
-                      <Button
-                        className="extend-touch-target ml-auto hidden shadow-none md:size-7"
-                        nativeButton={false}
-                        render={
-                          <Link href={neighbours.previous.url}>
-                            <ArrowLeftIcon />
-                            <span className="sr-only">Previous</span>
-                          </Link>
-                        }
-                        size="icon"
-                        variant="secondary"
-                      />
-                    )}
-                    {neighbours.next && (
-                      <Button
-                        className="extend-touch-target hidden shadow-none md:size-7"
-                        nativeButton={false}
-                        render={
-                          <Link href={neighbours.next.url}>
-                            <span className="sr-only">Next</span>
-                            <ArrowRightIcon />
-                          </Link>
-                        }
-                        size="icon"
-                        variant="secondary"
-                      />
-                    )}
+                    <DocsNeighbourIcons neighbours={neighbours} />
                   </div>
                 </div>
                 {docLead ? (
@@ -169,32 +240,7 @@ export default async function Page(props: {
                   </p>
                 ) : null}
               </div>
-              {links ? (
-                <div className="flex items-center gap-2 pt-4">
-                  {links?.doc && (
-                    <Badge
-                      className="site-rounded-full"
-                      render={
-                        <a href={links.doc} rel="noreferrer" target="_blank">
-                          Docs <ArrowUpRightIcon />
-                        </a>
-                      }
-                      variant="secondary"
-                    />
-                  )}
-                  {links?.api && (
-                    <Badge
-                      className="site-rounded-full"
-                      render={
-                        <a href={links.api} rel="noreferrer" target="_blank">
-                          API Reference <ArrowUpRightIcon />
-                        </a>
-                      }
-                      variant="secondary"
-                    />
-                  )}
-                </div>
-              ) : null}
+              {links ? <DocsLinks links={links} /> : null}
             </div>
             <div className="hidden md:block xl:hidden">
               {toc.length ? <DocsTableOfContents toc={toc} /> : null}
@@ -210,32 +256,7 @@ export default async function Page(props: {
               <DocsComponentCatalogSection componentSlug={componentName} />
             ) : null}
           </div>
-          <div className="mx-auto flex h-16 w-full max-w-2xl items-center gap-2 px-4 md:px-0">
-            {neighbours.previous && (
-              <Button
-                className="shadow-none"
-                nativeButton={false}
-                render={
-                  <Link href={neighbours.previous.url}>
-                    <ArrowLeftIcon /> {neighbours.previous.name}
-                  </Link>
-                }
-                variant="secondary"
-              />
-            )}
-            {neighbours.next && (
-              <Button
-                className="ml-auto shadow-none"
-                nativeButton={false}
-                render={
-                  <Link href={neighbours.next.url}>
-                    {neighbours.next.name} <ArrowRightIcon />
-                  </Link>
-                }
-                variant="secondary"
-              />
-            )}
-          </div>
+          <DocsPager neighbours={neighbours} />
         </div>
         <div className="sticky top-0 z-30 ml-auto hidden h-[calc(100svh-var(--header-height)-4rem)] w-0 xl:block">
           {toc.length ? (

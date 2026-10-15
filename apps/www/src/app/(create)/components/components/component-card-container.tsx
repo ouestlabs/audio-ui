@@ -29,7 +29,7 @@ export function ComponentRenderer({
 
   React.useEffect(() => {
     const handleReload = (e: Event) => {
-      const detail = (e as CustomEvent).detail;
+      const { detail } = e as CustomEvent;
       if (detail && detail.name === name) {
         setIsReloading(true);
         setKey((k) => k + 1);

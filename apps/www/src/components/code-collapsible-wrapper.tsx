@@ -42,9 +42,9 @@ export function CodeCollapsibleWrapper({
             >
               {isOpened ? "Collapse" : "Expand"}
             </Button>
-            {isOpened && (
+            {isOpened ? (
               <Separator className="mx-1.5" orientation="vertical" />
-            )}
+            ) : null}
           </div>
         }
       />

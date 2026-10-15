@@ -6,7 +6,7 @@ import { siteConfig } from "@/lib/config";
 import { buildPageMetadata, buildSoftwareJsonLd } from "@/lib/seo";
 
 const title = "audio/ui – Audio UI Components for React";
-const description = siteConfig.description;
+const { description } = siteConfig;
 
 export const dynamic = "force-static";
 export const revalidate = false;

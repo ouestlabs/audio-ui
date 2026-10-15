@@ -220,7 +220,7 @@ function ComponentCode({
 }) {
   return (
     <figure className="[&>pre]:max-h-96" data-rehype-pretty-code-figure="">
-      {title && (
+      {title ? (
         <figcaption
           className="flex items-center gap-2 text-site-code-foreground [&_svg]:size-4 [&_svg]:text-site-code-foreground [&_svg]:opacity-70"
           data-language={language}
@@ -229,8 +229,8 @@ function ComponentCode({
           {getIconForLanguageExtension(language)}
           {title}
         </figcaption>
-      )}
-      {showCopyButton && (
+      ) : null}
+      {showCopyButton ? (
         <CopyButton
           className={copyButtonClassName}
           event={eventName as any}
@@ -241,7 +241,7 @@ function ComponentCode({
           }}
           value={code}
         />
-      )}
+      ) : null}
       <div dangerouslySetInnerHTML={{ __html: highlightedCode }} />
     </figure>
   );

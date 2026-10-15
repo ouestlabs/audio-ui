@@ -133,7 +133,7 @@ export function ChartColorPicker({
                   value={theme.name}
                 >
                   <div className="flex items-start gap-2">
-                    {mounted && resolvedTheme && (
+                    {mounted && resolvedTheme ? (
                       <div
                         className="site-rounded-full size-4 translate-y-1 bg-(--color)"
                         style={
@@ -145,7 +145,7 @@ export function ChartColorPicker({
                           } as React.CSSProperties
                         }
                       />
-                    )}
+                    ) : null}
                     <div className="flex flex-col justify-start pointer-coarse:gap-1">
                       <div>{theme.title}</div>
                       <div className="pointer-coarse:text-sm text-site-muted-foreground text-xs">
@@ -165,7 +165,7 @@ export function ChartColorPicker({
                   value={theme.name}
                 >
                   <div className="flex items-center gap-2">
-                    {mounted && resolvedTheme && (
+                    {mounted && resolvedTheme ? (
                       <div
                         className="site-rounded-full size-4 bg-(--color)"
                         style={
@@ -176,7 +176,7 @@ export function ChartColorPicker({
                           } as React.CSSProperties
                         }
                       />
-                    )}
+                    ) : null}
                     {theme.title}
                   </div>
                 </PickerRadioItem>

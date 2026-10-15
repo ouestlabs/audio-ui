@@ -22,12 +22,9 @@ class SharedObserver {
   private getObserver() {
     if (!this.observer) {
       this.observer = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-          const callback = this.callbacks.get(entry.target);
-          if (callback) {
-            callback(entry.isIntersecting);
-          }
-        });
+        for (const entry of entries) {
+          this.callbacks.get(entry.target)?.(entry.isIntersecting);
+        }
       }, this.options);
     }
     return this.observer;

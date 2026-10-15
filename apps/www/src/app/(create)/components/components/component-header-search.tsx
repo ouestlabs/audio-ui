@@ -257,7 +257,7 @@ export function ComponentHeaderSearch({
             <Separator className="shrink-0" orientation="vertical" />
           </div>
         ) : null}
-        {localQuery && (
+        {localQuery ? (
           <Button
             className="opacity-60 hover:bg-transparent hover:opacity-100"
             onClick={handleClear}
@@ -268,7 +268,7 @@ export function ComponentHeaderSearch({
             <XIcon />
             <span className="sr-only">Clear search</span>
           </Button>
-        )}
+        ) : null}
       </div>
     </div>
   );

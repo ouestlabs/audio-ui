@@ -132,13 +132,13 @@ export function PresetPicker({
               return (
                 <PickerRadioItem key={preset.title} value={preset.title}>
                   <div className="flex items-center gap-2">
-                    {style?.icon && (
+                    {style?.icon ? (
                       <div className="flex size-4 shrink-0 items-center justify-center">
                         {React.cloneElement(style.icon, {
                           className: "size-4",
                         })}
                       </div>
-                    )}
+                    ) : null}
                     {preset.description}
                   </div>
                 </PickerRadioItem>

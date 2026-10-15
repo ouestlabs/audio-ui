@@ -121,7 +121,7 @@ export function CommandMenu({
   }, [selectedType, copyPayload, packageManager]);
 
   const copyHighlightedPayload = React.useCallback(() => {
-    const current = copyStateRef.current;
+    const { current } = copyStateRef;
 
     if (current.selectedType === "color") {
       copyToClipboardWithMeta(current.copyPayload, {
@@ -255,11 +255,11 @@ export function CommandMenu({
                       >
                         {item.label}
                       </span>
-                      {item.soon && (
+                      {item.soon ? (
                         <span className="site-rounded-sm ml-auto bg-site-muted px-1.5 py-0.5 font-medium text-[10px] text-site-muted-foreground leading-none">
                           Soon
                         </span>
-                      )}
+                      ) : null}
                     </CommandMenuItem>
                   ))}
                 </CommandGroup>
@@ -340,7 +340,7 @@ export function CommandMenu({
             {selectedType === "category" ? "View Category" : null}
             {selectedType === "color" ? "Copy OKLCH" : null}
           </div>
-          {copyPayload && (
+          {copyPayload ? (
             <>
               <Separator orientation="vertical" />
               <div className="flex min-w-0 flex-1 items-center gap-1">
@@ -351,7 +351,7 @@ export function CommandMenu({
                 <span className="truncate">{copyPayload}</span>
               </div>
             </>
-          )}
+          ) : null}
         </FrameFooter>
       </DialogContent>
     </Dialog>

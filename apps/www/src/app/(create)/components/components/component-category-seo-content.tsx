@@ -77,9 +77,18 @@ function isInternalAppPath(href: string) {
   );
 }
 
+/** A markdown link at the start of a string: `[label](url)`. */
+const LEADING_LINK = /^\[[^\]]+\]\([^)]+\)/;
+/** The literal count placeholders, left for `applySeoCountPlaceholder`. */
+const COUNT_PLACEHOLDERS = ["{{count}}", "[[count]]"];
+const STRONG_CLASS = "font-semibold text-foreground";
+const COVERS = /\.\s*Covers\s+/i;
+const SUPPORTS = /\.\s*Supports\s+/i;
+const LIST_SEPARATOR = /,\s+/;
+
 /** Popular items (root): `title` is `[Component](/components/...)` then `: description`. */
 function isFeatureItemLinkColonTitle(title: string) {
-  return /^\[[^\]]+\]\([^)]+\)/.test(title.trimStart());
+  return LEADING_LINK.test(title.trimStart());
 }
 
 function renderInternalMarkdownLink(
@@ -106,6 +115,81 @@ function renderBacktickContent(content: string, key: string): React.ReactNode {
   return <SeoInlineBadge key={key}>{trimmed || content}</SeoInlineBadge>;
 }
 
+function renderMarkdownLink(
+  label: string,
+  url: string,
+  key: string
+): React.ReactNode {
+  const external = url.startsWith("http://") || url.startsWith("https://");
+  if (!external && isInternalAppPath(url)) {
+    return renderInternalMarkdownLink(label, url, key);
+  }
+  return (
+    <SeoInlineLink href={url} key={key}>
+      {label || url}
+    </SeoInlineLink>
+  );
+}
+
+/** One inline construct: what it looks like at the start of the text, and what it renders. */
+interface InlineToken {
+  pattern: RegExp;
+  render: (match: RegExpExecArray, key: string) => React.ReactNode;
+}
+
+/** Tried in order at each position; the first that matches wins. */
+const INLINE_TOKENS: InlineToken[] = [
+  {
+    // Legacy `[[pkg:name]]`.
+    pattern: /^\[\[pkg:([^\]]+)\]\]/,
+    render: ([, name], key) => (
+      <SeoInlineBadge key={key}>{name}</SeoInlineBadge>
+    ),
+  },
+  {
+    // Legacy `[[slug|Label]]`.
+    pattern: /^\[\[([a-z0-9-]+)\|([^\]]+)\]\]/,
+    render: ([, slug = "", label = ""], key) =>
+      renderInternalMarkdownLink(label, hrefForCategorySlug(slug), key),
+  },
+  {
+    pattern: /^\[(?!\[)([^\]]*)\]\(([^)]+)\)/,
+    render: ([, label = "", url = ""], key) =>
+      renderMarkdownLink(label, url, key),
+  },
+  {
+    pattern: /^`([^`]*)`/,
+    render: ([, inner = ""], key) => renderBacktickContent(inner, key),
+  },
+  {
+    pattern: /^\*\*([^*\n]+)\*\*/,
+    render: ([, text], key) => (
+      <strong className={STRONG_CLASS} key={key}>
+        {text}
+      </strong>
+    ),
+  },
+  {
+    pattern: /^\*([^*\n]+)\*/,
+    render: ([, text], key) => (
+      <strong className={STRONG_CLASS} key={key}>
+        {text}
+      </strong>
+    ),
+  },
+];
+
+/** The inline construct at the start of `rest`, if there is one. */
+function matchInlineToken(rest: string) {
+  for (const token of INLINE_TOKENS) {
+    const match = token.pattern.exec(rest);
+    if (match) {
+      return { match, render: token.render };
+    }
+  }
+  return null;
+}
+
 /**
  * Inline SEO mini-markdown:
  * - `[label](url)` → internal or external link (same text-link style as category cards)
@@ -122,121 +206,30 @@ export function SeoLinkedText({
   keyPrefix: string;
 }): React.ReactNode {
   const parts: React.ReactNode[] = [];
+  let plain = "";
   let pos = 0;
-  let k = 0;
-
-  const pushText = (s: string) => {
-    if (s) {
-      parts.push(s);
-    }
-  };
 
   while (pos < text.length) {
     const rest = text.slice(pos);
-
-    if (rest.startsWith("{{count}}")) {
-      pushText("{{count}}");
-      pos += 9;
-      continue;
-    }
-    if (rest.startsWith("[[count]]")) {
-      pushText("[[count]]");
-      pos += 9;
-      continue;
-    }
-
-    const pkgLegacy = /^\[\[pkg:([^\]]+)\]\]/.exec(rest);
-    if (pkgLegacy) {
-      const name = pkgLegacy[1];
-      parts.push(
-        <SeoInlineBadge key={`${keyPrefix}-${k++}`}>{name}</SeoInlineBadge>
-      );
-      pos += pkgLegacy[0].length;
-      continue;
-    }
-
-    const linkLegacy = /^\[\[([a-z0-9-]+)\|([^\]]+)\]\]/.exec(rest);
-    if (linkLegacy) {
-      const slug = linkLegacy[1];
-      const label = linkLegacy[2];
-      parts.push(
-        renderInternalMarkdownLink(
-          label,
-          hrefForCategorySlug(slug),
-          `${keyPrefix}-${k++}`
-        )
-      );
-      pos += linkLegacy[0].length;
-      continue;
-    }
-
-    if (rest[0] === "[" && rest[1] !== "[") {
-      const md = /^\[([^\]]*)\]\(([^)]+)\)/.exec(rest);
-      if (md) {
-        const label = md[1];
-        const url = md[2];
-        if (url.startsWith("http://") || url.startsWith("https://")) {
-          parts.push(
-            <SeoInlineLink href={url} key={`${keyPrefix}-${k++}`}>
-              {label || url}
-            </SeoInlineLink>
-          );
-        } else if (isInternalAppPath(url)) {
-          parts.push(
-            renderInternalMarkdownLink(label, url, `${keyPrefix}-${k++}`)
-          );
-        } else {
-          parts.push(
-            <SeoInlineLink href={url} key={`${keyPrefix}-${k++}`}>
-              {label || url}
-            </SeoInlineLink>
-          );
-        }
-        pos += md[0].length;
-        continue;
+    const placeholder = COUNT_PLACEHOLDERS.find((literal) =>
+      rest.startsWith(literal)
+    );
+    const token = placeholder ? null : matchInlineToken(rest);
+    if (token) {
+      if (plain) {
+        parts.push(plain);
+        plain = "";
       }
+      parts.push(token.render(token.match, `${keyPrefix}-${parts.length}`));
+      pos += token.match[0].length;
+    } else {
+      const literal = placeholder ?? rest.charAt(0);
+      plain += literal;
+      pos += literal.length;
     }
-
-    if (rest[0] === "`") {
-      const end = rest.indexOf("`", 1);
-      if (end > 0) {
-        const inner = rest.slice(1, end);
-        parts.push(renderBacktickContent(inner, `${keyPrefix}-${k++}`));
-        pos += end + 1;
-        continue;
-      }
-    }
-
-    const strongDouble = /^\*\*([^*\n]+)\*\*/.exec(rest);
-    if (strongDouble) {
-      parts.push(
-        <strong
-          className="font-semibold text-foreground"
-          key={`${keyPrefix}-${k++}`}
-        >
-          {strongDouble[1]}
-        </strong>
-      );
-      pos += strongDouble[0].length;
-      continue;
-    }
-
-    const strong = /^\*([^*\n]+)\*/.exec(rest);
-    if (strong) {
-      parts.push(
-        <strong
-          className="font-semibold text-foreground"
-          key={`${keyPrefix}-${k++}`}
-        >
-          {strong[1]}
-        </strong>
-      );
-      pos += strong[0].length;
-      continue;
-    }
-
-    pushText(rest[0]);
-    pos += 1;
+  }
+  if (plain) {
+    parts.push(plain);
   }
 
   return parts.length ? parts : [text];
@@ -278,7 +271,7 @@ export function ComponentCategoryRelatedComponents({
 
         <div className="w-full space-y-4 text-pretty text-[15px] text-site-muted-foreground leading-7 sm:text-base">
           {block.integrationBody.map((paragraph, paragraphIndex) => (
-            <p key={paragraphIndex}>
+            <p key={paragraph}>
               <SeoLinkedText
                 keyPrefix={`int${paragraphIndex}`}
                 text={paragraph}
@@ -327,8 +320,8 @@ function extractComponentListLeadAndBullets(description: string): {
   bullets: string[];
 } {
   const text = description.trim();
-  const splitCovers = text.split(/\.\s*Covers\s+/i);
-  const splitSupports = text.split(/\.\s*Supports\s+/i);
+  const splitCovers = text.split(COVERS);
+  const splitSupports = text.split(SUPPORTS);
 
   let lead: string;
   let rest: string;
@@ -358,7 +351,7 @@ function extractComponentListLeadAndBullets(description: string): {
 
   const bullets = rest
     ? rest
-        .split(/,\s+/)
+        .split(LIST_SEPARATOR)
         .map((s) => s.trim())
         .filter((s) => s.length > 2)
         .slice(0, 12)
@@ -378,7 +371,7 @@ export function ComponentCategorySeoContent({
     return null;
   }
 
-  const content = seo.content;
+  const { content } = seo;
 
   return (
     <section
@@ -403,7 +396,7 @@ export function ComponentCategorySeoContent({
                 {content.summary.map((paragraph, i) => (
                   <p
                     className="w-full text-pretty text-site-muted-foreground text-sm leading-7 sm:text-base"
-                    key={i}
+                    key={paragraph}
                   >
                     <SeoLinkedText keyPrefix={`sum-${i}`} text={paragraph} />
                   </p>
@@ -458,7 +451,7 @@ export function ComponentCategorySeoContent({
                                 </p>
                                 <ul className="mt-2 list-disc space-y-1.5 pl-5 text-site-muted-foreground text-sm leading-6 sm:list-outside">
                                   {bullets.map((b, bi) => (
-                                    <li className="text-pretty" key={bi}>
+                                    <li className="text-pretty" key={b}>
                                       <SeoLinkedText
                                         keyPrefix={`comp-${item.slug}-b${bi}`}
                                         text={b}
@@ -484,7 +477,7 @@ export function ComponentCategorySeoContent({
                   {section.paragraphs?.map((paragraph, pi) => (
                     <p
                       className="w-full text-pretty text-site-muted-foreground text-sm leading-7 sm:text-base"
-                      key={pi}
+                      key={paragraph}
                     >
                       <SeoLinkedText
                         keyPrefix={`sec-${si}-p${pi}`}
@@ -500,10 +493,7 @@ export function ComponentCategorySeoContent({
                         const keyD = `sec-${si}-feat-${fi}-d`;
                         if (isFeatureItemLinkColonTitle(item.title)) {
                           return (
-                            <li
-                              className="text-pretty"
-                              key={`sec-${si}-feat-${fi}`}
-                            >
+                            <li className="text-pretty" key={item.title}>
                               <SeoLinkedText
                                 keyPrefix={keyT}
                                 text={item.title}
@@ -517,10 +507,7 @@ export function ComponentCategorySeoContent({
                           );
                         }
                         return (
-                          <li
-                            className="text-pretty"
-                            key={`sec-${si}-feat-${fi}`}
-                          >
+                          <li className="text-pretty" key={item.title}>
                             <span className="font-medium text-foreground">
                               {item.title}
                             </span>{" "}

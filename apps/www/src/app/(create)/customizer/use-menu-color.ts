@@ -30,11 +30,11 @@ export function useMenuColor(menuColor: string | null | undefined) {
       }
 
       // Disable transitions while toggling classes.
-      allElements.forEach((element) => {
+      for (const element of allElements) {
         element.style.transition = "none";
-      });
+      }
 
-      allElements.forEach((element) => {
+      for (const element of allElements) {
         if (element.classList.contains("cn-menu-target")) {
           if (isInvertedMenu) {
             element.classList.add("dark");
@@ -52,13 +52,13 @@ export function useMenuColor(menuColor: string | null | undefined) {
           element.classList.remove("cn-menu-translucent");
           element.setAttribute("data-menu-translucent", "");
         }
-      });
+      }
 
       // Force reflow, then re-enable transitions.
-      void document.body.offsetHeight;
-      allElements.forEach((element) => {
+      document.body.getBoundingClientRect();
+      for (const element of allElements) {
         element.style.transition = "";
-      });
+      }
     };
 
     const scheduleMenuUpdate = () => {

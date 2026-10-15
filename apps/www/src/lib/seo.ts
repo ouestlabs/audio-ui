@@ -48,7 +48,7 @@ type PageMetadataOptions = {
 function getSocialHandle(url: string) {
   try {
     const socialUrl = new URL(url);
-    const handle = socialUrl.pathname.split("/").filter(Boolean)[0];
+    const [handle] = socialUrl.pathname.split("/").filter(Boolean);
     return handle ? `@${handle}` : undefined;
   } catch {}
 }

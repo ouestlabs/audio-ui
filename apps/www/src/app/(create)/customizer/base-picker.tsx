@@ -62,14 +62,14 @@ export function BasePicker({
             {mounted ? currentBase?.title : "..."}
           </div>
         </div>
-        {mounted && currentBase?.meta?.logo && (
+        {mounted && currentBase?.meta?.logo ? (
           <div
             className="-translate-y-1/2 pointer-events-none absolute top-1/2 right-4 size-4 select-none text-site-foreground *:[svg]:size-4 *:[svg]:text-site-foreground!"
             dangerouslySetInnerHTML={{
               __html: currentBase.meta.logo,
             }}
           />
-        )}
+        ) : null}
       </PickerTrigger>
       <PickerContent
         align={isMobile ? "center" : "start"}
@@ -83,14 +83,14 @@ export function BasePicker({
           <PickerGroup>
             {BASES.map((base) => (
               <PickerRadioItem key={base.name} value={base.name}>
-                {base.meta?.logo && (
+                {base.meta?.logo ? (
                   <div
                     className="size-4 shrink-0 text-site-foreground [&_svg]:size-4 *:[svg]:text-site-foreground!"
                     dangerouslySetInnerHTML={{
                       __html: base.meta.logo,
                     }}
                   />
-                )}
+                ) : null}
                 {base.title}
               </PickerRadioItem>
             ))}

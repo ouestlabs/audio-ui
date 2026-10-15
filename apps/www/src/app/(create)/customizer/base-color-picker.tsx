@@ -62,7 +62,7 @@ export function BaseColorPicker({
               {mounted ? currentBaseColor?.title : "..."}
             </div>
           </div>
-          {mounted && resolvedTheme && (
+          {mounted && resolvedTheme ? (
             <div
               className="site-rounded-full -translate-y-1/2 pointer-events-none absolute top-1/2 right-4 size-4 select-none bg-(--color)"
               style={
@@ -74,7 +74,7 @@ export function BaseColorPicker({
                 } as React.CSSProperties
               }
             />
-          )}
+          ) : null}
         </PickerTrigger>
         <PickerContent
           align={isMobile ? "center" : "start"}
@@ -89,7 +89,7 @@ export function BaseColorPicker({
               {BASE_COLORS.map((baseColor) => (
                 <PickerRadioItem key={baseColor.name} value={baseColor.name}>
                   <div className="flex items-center gap-2">
-                    {mounted && resolvedTheme && (
+                    {mounted && resolvedTheme ? (
                       <div
                         className="site-rounded-full size-4 bg-(--color)"
                         style={
@@ -101,7 +101,7 @@ export function BaseColorPicker({
                           } as React.CSSProperties
                         }
                       />
-                    )}
+                    ) : null}
                     {baseColor.title}
                   </div>
                 </PickerRadioItem>

@@ -5,7 +5,7 @@ import { buildRegistryBase, designSystemConfigSchema } from "@/registry/config";
 
 export function GET(request: NextRequest) {
   try {
-    const searchParams = request.nextUrl.searchParams;
+    const { searchParams } = request.nextUrl;
 
     const result = designSystemConfigSchema.safeParse({
       base: searchParams.get("base"),
