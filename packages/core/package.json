@@ -37,6 +37,10 @@
       "types": "./dist/primitives/fader/index.d.ts",
       "import": "./dist/fader.js"
     },
+    "./analysis": {
+      "types": "./dist/audio/analysis/index.d.ts",
+      "import": "./dist/analysis.js"
+    },
     "./midi": {
       "types": "./dist/audio/midi/index.d.ts",
       "import": "./dist/midi.js"
