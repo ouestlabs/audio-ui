@@ -25,6 +25,17 @@ Add the audio/ui registry namespace to your `components.json` and set your compo
 
 You can install audio/ui using the [**shadcn CLI**](https://ui.shadcn.com/docs/cli) for automation or by manual installation for full control. Both methods apply to everything in [Docs](/docs/) and the [component catalog](/components), including the `block-*` blocks and demos you install with `@audio-ui/…`.
 
+### The package a component needs
+
+Some components import from `@audio-ui/core` (pitch, MIDI, musical time, analysis). Installing one adds it to your `package.json`, with the range it needs, and it is the only package a component adds beyond `@audio-ui/react`.
+
+If the build then says it cannot resolve `@audio-ui/core/time` (or `/pitch`, `/midi`, `/analysis`), your lockfile or your package manager's cache kept an older version than the range now in `package.json`. Update it explicitly, and bypass the cache if it still resolves the old one:
+
+```bash
+npm install @audio-ui/core@latest
+# bun: bun add @audio-ui/core@latest --no-cache
+```
+
 ## Styling
 
 Components are styled with a design token system defined by CSS variables and implemented with Tailwind CSS, following the same conventions as shadcn/ui so they're fully customizable. See the [Styling guide](/docs/styling) for details.
