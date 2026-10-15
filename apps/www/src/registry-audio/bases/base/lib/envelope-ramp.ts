@@ -3,14 +3,6 @@ export interface EnvelopePoint {
   y: number;
 }
 
-const A4_FREQUENCY = 440;
-const A4_MIDI_NOTE = 69;
-export const SEMITONES_PER_OCTAVE = 12;
-
-export function noteToFrequency(note: number): number {
-  return A4_FREQUENCY * 2 ** ((note - A4_MIDI_NOTE) / SEMITONES_PER_OCTAVE);
-}
-
 /** Floor under which gain automation never ramps, exponential-style approach to silence without hitting exactly 0 (which some ramp curves reject) or an audible hard stop. */
 export const MIN_GAIN = 0.0001;
 

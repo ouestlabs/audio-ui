@@ -1,14 +1,15 @@
 "use client";
 
-import { createSource, type Source } from "@audio-ui/react";
-import { useEffect, useState } from "react";
 import {
-  DEFAULT_REFERENCE_HZ,
+  CONCERT_PITCH_HZ,
   detectPitch,
   type Note,
   nearestNote,
   type PitchDetectionOptions,
-} from "@/registry-audio/bases/base/lib/pitch-detection";
+  type PitchEstimate,
+} from "@audio-ui/core/pitch";
+import { createSource, type Source } from "@audio-ui/react";
+import { useEffect, useState } from "react";
 
 /** What a tuner shows: the note nearest the sound, and how far from it the sound is. */
 export interface PitchReading extends Note {
@@ -32,6 +33,22 @@ const DETECTIONS_PER_SECOND = 20;
 const middle = (values: number[]) =>
   [...values].sort((a, b) => a - b)[Math.floor(values.length / 2)] ?? 0;
 
+/** Adds a detection to the recent ones and returns the reading they steady to: the median frequency and its note. */
+function steadied(
+  recent: number[],
+  { confidence, frequency }: PitchEstimate,
+  size: number,
+  reference: number
+): PitchReading | null {
+  recent.push(frequency);
+  if (recent.length > size) {
+    recent.shift();
+  }
+  const steady = middle(recent);
+  const note = nearestNote(steady, reference);
+  return note ? { ...note, confidence, frequency: steady } : null;
+}
+
 /**
  * The pitch of a signal, live: `null` while nothing clear is playing. Pass the
  * `AnalyserNode` of `useMicrophone` (or any tap on your graph). It is a stable
@@ -45,7 +62,7 @@ export function usePitch(
     median = 5,
     minHz,
     minLevel,
-    reference = DEFAULT_REFERENCE_HZ,
+    reference = CONCERT_PITCH_HZ,
     threshold,
   }: UsePitchOptions = {}
 ): Source<PitchReading | null> {
@@ -77,16 +94,10 @@ export function usePitch(
       });
       if (found) {
         lastHeard = now;
-        recent.push(found.frequency);
-        if (recent.length > median) {
-          recent.shift();
+        const reading = steadied(recent, found, median, reference);
+        if (reading) {
+          source.set(reading);
         }
-        const frequency = middle(recent);
-        source.set({
-          ...nearestNote(frequency, reference),
-          confidence: found.confidence,
-          frequency,
-        });
       } else if (now - lastHeard > holdMs) {
         recent.length = 0;
         if (source.getSnapshot() !== null) {

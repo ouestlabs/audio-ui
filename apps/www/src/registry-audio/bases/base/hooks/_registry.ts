@@ -94,11 +94,12 @@ export const hooks: RegistryItem[] = [
       },
     ],
     name: "use-synth-voices",
-    registryDependencies: ["@audio-ui/synth-voice"],
+    registryDependencies: ["@audio-ui/envelope-ramp"],
     type: "registry:hook",
   },
   {
     categories: ["audio", "piano", "synth"],
+    dependencies: ["@audio-ui/core@^0.3.0"],
     files: [
       {
         path: "hooks/use-midi-input.ts",
@@ -106,7 +107,7 @@ export const hooks: RegistryItem[] = [
       },
     ],
     name: "use-midi-input",
-    registryDependencies: ["@audio-ui/midi-input"],
+    registryDependencies: [],
     type: "registry:hook",
   },
   {
@@ -125,7 +126,7 @@ export const hooks: RegistryItem[] = [
   },
   {
     categories: ["hooks", "audio", "tuner"],
-    dependencies: ["@audio-ui/react"],
+    dependencies: ["@audio-ui/react", "@audio-ui/core@^0.3.0"],
     description:
       "The pitch of a signal as a live source: the note nearest the sound and its offset in cents, steadied by a median and held a moment after the sound stops, with no React render per reading",
     files: [
@@ -135,7 +136,7 @@ export const hooks: RegistryItem[] = [
       },
     ],
     name: "use-pitch",
-    registryDependencies: ["@audio-ui/pitch-detection"],
+    registryDependencies: [],
     type: "registry:hook",
   },
   {

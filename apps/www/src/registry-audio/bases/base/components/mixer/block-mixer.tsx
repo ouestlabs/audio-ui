@@ -1,5 +1,6 @@
 "use client";
 
+import { noteToFrequency } from "@audio-ui/core/pitch";
 import { createSource, type Meter as MeterPrimitive } from "@audio-ui/react";
 import { useCallback, useEffect, useState } from "react";
 import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder";
@@ -17,7 +18,6 @@ import {
   triggerKick,
   triggerSnare,
 } from "@/registry-audio/bases/base/lib/drum-synthesis";
-import { noteToFrequency } from "@/registry-audio/bases/base/lib/synth-voice";
 
 const BPM = 100;
 const STEPS_PER_BEAT = 4;

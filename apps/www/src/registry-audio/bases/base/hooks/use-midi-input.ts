@@ -1,10 +1,10 @@
 "use client";
 
+import { createMidiInput, pitchBendToSemitones } from "@audio-ui/core/midi";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { midiInput } from "@/registry-audio/bases/base/lib/midi-input";
 
-/** The top of MIDI's 7-bit velocity. */
-const MAX_MIDI_VELOCITY = 127;
+/** The page's one MIDI input: every component that calls the hook shares it. */
+const midiInput = createMidiInput();
 
 export interface UseMidiInputOptions {
   onNoteOff?: (note: number) => void;
@@ -49,20 +49,19 @@ export function useMidiInput({
 
   useEffect(
     () =>
-      midiInput.listen((event) => {
-        if (event.type === "noteon") {
+      midiInput.listen((message) => {
+        if (message.type === "noteon") {
           setActiveNotes((held) =>
-            held.includes(event.note) ? held : [...held, event.note]
+            held.includes(message.note) ? held : [...held, message.note]
           );
-          handlers.current.onNoteOn?.(
-            event.note,
-            event.velocity / MAX_MIDI_VELOCITY
+          handlers.current.onNoteOn?.(message.note, message.velocity);
+        } else if (message.type === "noteoff") {
+          setActiveNotes((held) =>
+            held.filter((note) => note !== message.note)
           );
-        } else if (event.type === "noteoff") {
-          setActiveNotes((held) => held.filter((note) => note !== event.note));
-          handlers.current.onNoteOff?.(event.note);
-        } else {
-          handlers.current.onPitchBend?.(event.semitones);
+          handlers.current.onNoteOff?.(message.note);
+        } else if (message.type === "pitchbend") {
+          handlers.current.onPitchBend?.(pitchBendToSemitones(message.value));
         }
       }),
     []

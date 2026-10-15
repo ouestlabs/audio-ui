@@ -16,63 +16,18 @@ const items: RegistryItem[] = [
     type: "registry:lib",
   },
   {
-    categories: ["lib", "audio", "tuner"],
-    dependencies: [],
-    description:
-      "Pitch detection on audio samples (the YIN algorithm) and the nearest note with its offset in cents: pure functions, no Web Audio",
-    files: [
-      {
-        path: "lib/pitch-detection.ts",
-        type: "registry:lib",
-      },
-    ],
-    name: "pitch-detection",
-    registryDependencies: [],
-    type: "registry:lib",
-  },
-  {
     categories: ["lib", "audio", "synth", "piano", "envelope"],
     dependencies: [],
     description:
-      "Note-to-frequency conversion and envelope-curve-to-gain-automation helpers for polyphonic synth voices",
+      "Envelope curves to gain automation: slicing an envelope at its sustain and scheduling its ramps on a GainNode's AudioParam, for synth voices",
     files: [
       {
-        path: "lib/synth-voice.ts",
+        path: "lib/envelope-ramp.ts",
         type: "registry:lib",
       },
     ],
-    name: "synth-voice",
+    name: "envelope-ramp",
     registryDependencies: [],
-    type: "registry:lib",
-  },
-  {
-    categories: ["lib", "audio", "piano", "synth"],
-    dependencies: [],
-    description:
-      "Web MIDI message parsing (note-on/note-off/velocity from raw MIDI bytes) plus Standard MIDI File (.mid) import/export, parseMidiFile/encodeMidiFile",
-    files: [
-      {
-        path: "lib/midi.ts",
-        type: "registry:lib",
-      },
-    ],
-    name: "midi",
-    registryDependencies: [],
-    type: "registry:lib",
-  },
-  {
-    categories: ["lib", "audio", "piano", "synth"],
-    dependencies: [],
-    description:
-      "The page's one Web MIDI input: connect it from any button, and every component listening hears the same devices",
-    files: [
-      {
-        path: "lib/midi-input.ts",
-        type: "registry:lib",
-      },
-    ],
-    name: "midi-input",
-    registryDependencies: ["@audio-ui/midi"],
     type: "registry:lib",
   },
   {
@@ -221,10 +176,27 @@ const renamed: [from: string, to: string][] = [
   ["web", "web-audio"],
   ["waveform-dsp", "waveform-peaks"],
   ["history", "undo-history"],
+  ["synth-voice", "envelope-ramp"],
+];
+
+/** Libs that moved into `@audio-ui/core`: they install the package, which has them. */
+const movedToCore: [name: string, entry: string][] = [
+  ["midi", "midi"],
+  ["midi-input", "midi"],
+  ["pitch-detection", "pitch"],
 ];
 
 export const lib: RegistryItem[] = [
   ...items,
+  ...movedToCore.map(
+    ([name, entry]): RegistryItem => ({
+      dependencies: ["@audio-ui/core@^0.3.0"],
+      description: `Moved to @audio-ui/core/${entry}: installs the package.`,
+      files: [],
+      name,
+      type: "registry:lib",
+    })
+  ),
   ...renamed.map(
     ([from, to]): RegistryItem => ({
       description: `Renamed to ${to}: installs it.`,
