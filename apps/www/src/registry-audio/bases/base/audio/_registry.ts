@@ -104,7 +104,7 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
-    dependencies: ["@audio-ui/react"],
+    dependencies: ["@audio-ui/react", "@audio-ui/core@^0.5.0"],
     files: [
       {
         path: "audio/elements/plot.tsx",
@@ -118,7 +118,6 @@ export const audio: RegistryItem[] = [
     ],
     name: "plot",
     registryDependencies: [
-      "@audio-ui/filter-response",
       "@audio-ui/knob",
       "@audio-ui/use-noise-through-eq",
       "@audio-ui/use-spectrum",
@@ -167,7 +166,7 @@ export const audio: RegistryItem[] = [
       },
     ],
     name: "waveform",
-    registryDependencies: ["@audio-ui/waveform-peaks"],
+    registryDependencies: [],
     type: "registry:ui",
   },
   {
@@ -270,7 +269,7 @@ export const audio: RegistryItem[] = [
       },
     ],
     name: "transport",
-    dependencies: ["@audio-ui/core@^0.4.0"],
+    dependencies: ["@audio-ui/core@^0.5.0"],
     registryDependencies: [
       "@audio-ui/bpm-control",
       "@shadcn/button",

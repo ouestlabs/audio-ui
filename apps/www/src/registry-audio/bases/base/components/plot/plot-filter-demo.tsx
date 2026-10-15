@@ -1,5 +1,6 @@
 "use client";
 
+import { biquadResponse, formatHz } from "@audio-ui/core/analysis";
 import { useCallback, useMemo, useState } from "react";
 import {
   Plot,
@@ -12,10 +13,6 @@ import {
   PlotHandle,
   PlotLine,
 } from "@/registry-audio/bases/base/audio/elements/plot";
-import {
-  biquadResponse,
-  formatHz,
-} from "@/registry-audio/bases/base/lib/filter-response";
 
 const MIN_HZ = 20;
 const MAX_HZ = 20_000;

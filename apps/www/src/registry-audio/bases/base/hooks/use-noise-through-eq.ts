@@ -1,11 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useWebAudio } from "@/registry-audio/bases/base/hooks/use-web-audio";
 import {
   type EqBand,
+  toWebAudioQ,
   WEB_AUDIO_FILTER_TYPES,
-} from "@/registry-audio/bases/base/lib/filter-response";
+} from "@audio-ui/core/analysis";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useWebAudio } from "@/registry-audio/bases/base/hooks/use-web-audio";
 
 const NOISE_SECONDS = 4;
 const OUTPUT_GAIN = 0.12;
@@ -109,7 +110,11 @@ export function useNoiseThroughEq(bands: readonly EqBand[]) {
       const now = ctx.currentTime;
       filter.frequency.setTargetAtTime(band.frequency, now, PARAM_RAMP_SECONDS);
       filter.gain.setTargetAtTime(band.gainDb ?? 0, now, PARAM_RAMP_SECONDS);
-      filter.Q.setTargetAtTime(band.q ?? Math.SQRT1_2, now, PARAM_RAMP_SECONDS);
+      filter.Q.setTargetAtTime(
+        toWebAudioQ(band.type, band.q),
+        now,
+        PARAM_RAMP_SECONDS
+      );
     });
   }, [bands, webAudio]);
 

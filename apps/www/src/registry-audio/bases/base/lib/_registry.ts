@@ -34,14 +34,14 @@ const items: RegistryItem[] = [
     categories: ["lib", "audio", "waveform"],
     dependencies: [],
     description:
-      "Framework-agnostic waveform DSP, decode audio bytes to samples, downsample to peak amplitudes, normalize, and reduce a live spectrum to frequency bands",
+      "Decoding an audio file into samples with the Web Audio API (decodeAudioData), the step before the waveform maths of @audio-ui/core/analysis",
     files: [
       {
-        path: "lib/waveform-peaks.ts",
+        path: "lib/audio-decode.ts",
         type: "registry:lib",
       },
     ],
-    name: "waveform-peaks",
+    name: "audio-decode",
     registryDependencies: [],
     type: "registry:lib",
   },
@@ -91,36 +91,6 @@ const items: RegistryItem[] = [
     type: "registry:lib",
   },
   {
-    categories: ["lib", "audio", "plot"],
-    dependencies: [],
-    description:
-      "What a filter, an equalizer and a compressor do to a signal, as curves for a plot: biquad and EQ responses in dB per frequency, a compressor's transfer curve, and Hz/dB formatting",
-    files: [
-      {
-        path: "lib/filter-response.ts",
-        type: "registry:lib",
-      },
-    ],
-    name: "filter-response",
-    registryDependencies: [],
-    type: "registry:lib",
-  },
-  {
-    categories: ["lib", "audio", "plot"],
-    dependencies: [],
-    description:
-      "Resamples an analyser's linear frequency bins onto a logarithmic axis, taking the loudest bin each point covers",
-    files: [
-      {
-        path: "lib/spectrum.ts",
-        type: "registry:lib",
-      },
-    ],
-    name: "spectrum",
-    registryDependencies: [],
-    type: "registry:lib",
-  },
-  {
     categories: ["lib", "audio", "synth", "sequencer"],
     dependencies: [],
     description:
@@ -156,13 +126,24 @@ const movedToCore: [name: string, entry: string][] = [
   ["pitch-detection", "pitch"],
   ["musical-time", "time"],
   ["lookahead-scheduler", "time"],
+  ["spectrum", "analysis"],
+  ["filter-response", "analysis"],
 ];
 
 export const lib: RegistryItem[] = [
   ...items,
+  {
+    dependencies: ["@audio-ui/core@^0.5.0"],
+    description:
+      "Moved: the peaks are in @audio-ui/core/analysis and the decoding is audio-decode, as this lib gave both.",
+    files: [],
+    name: "waveform-peaks",
+    registryDependencies: ["@audio-ui/audio-decode"],
+    type: "registry:lib",
+  },
   ...movedToCore.map(
     ([name, entry]): RegistryItem => ({
-      dependencies: ["@audio-ui/core@^0.4.0"],
+      dependencies: ["@audio-ui/core@^0.5.0"],
       description: `Moved to @audio-ui/core/${entry}: installs the package.`,
       files: [],
       name,

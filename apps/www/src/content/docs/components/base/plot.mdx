@@ -85,7 +85,7 @@ import {
   PlotGrid,
   PlotHandle,
 } from "@/components/audio-ui/plot";
-import { eqResponse } from "@/lib/filter-response";
+import { eqResponse } from "@audio-ui/core/analysis";
 
 <Plot minX={20} maxX={20000} minY={-18} maxY={18} scaleX="log">
   <PlotGrid x={{ count: 6 }} y={{ ticks: [-12, 0, 12] }} />
@@ -101,7 +101,7 @@ import { eqResponse } from "@/lib/filter-response";
 </Plot>;
 ```
 
-`fn` is `y = fn(x)` in the axes' units. The `filter-response` lib gives you the functions for the usual curves: `eqResponse`, `biquadResponse` and `compressorOutput`, and for keeping a band's handle on the curve, `bandHandleDb` (where it sits) and `bandGainForHandle` (the gain that puts it where the pointer is).
+`fn` is `y = fn(x)` in the axes' units. `@audio-ui/core/analysis` gives you the functions for the usual curves: `eqResponse`, `biquadResponse` and `compressorOutput` (and `webAudioCompressorOutput`, the curve of the browser's own compressor node), and for keeping a band's handle on the curve, `bandHandleDb` (where it sits) and `bandGainForHandle` (the gain that puts it where the pointer is).
 
 ## Handles
 

@@ -67,7 +67,7 @@ export const hooks: RegistryItem[] = [
       },
     ],
     name: "use-transport-clock",
-    dependencies: ["@audio-ui/core@^0.4.0"],
+    dependencies: ["@audio-ui/core@^0.5.0"],
     registryDependencies: ["@audio-ui/use-web-audio"],
     type: "registry:hook",
   },
@@ -139,7 +139,7 @@ export const hooks: RegistryItem[] = [
   },
   {
     categories: ["hooks", "audio", "meter"],
-    dependencies: ["@audio-ui/react"],
+    dependencies: ["@audio-ui/react", "@audio-ui/core@^0.5.0"],
     description:
       "The live levels of a signal from its AnalyserNodes, in the shape a Meter paints from: RMS in dB per channel with a peak that holds and falls, refreshed every frame without re-rendering",
     files: [
@@ -167,7 +167,7 @@ export const hooks: RegistryItem[] = [
   },
   {
     categories: ["hooks", "audio", "plot"],
-    dependencies: ["@audio-ui/react"],
+    dependencies: ["@audio-ui/react", "@audio-ui/core@^0.5.0"],
     description:
       "The spectrum of an AnalyserNode as a live source for Plot.Trace: dB per point on a logarithmic frequency axis, refreshed every frame without re-rendering, and its held peaks as a second source",
     files: [
@@ -177,12 +177,12 @@ export const hooks: RegistryItem[] = [
       },
     ],
     name: "use-spectrum",
-    registryDependencies: ["@audio-ui/spectrum"],
+    registryDependencies: [],
     type: "registry:hook",
   },
   {
     categories: ["hooks", "audio", "plot"],
-    dependencies: [],
+    dependencies: ["@audio-ui/core@^0.5.0"],
     description:
       "Pink noise played through an equalizer that follows your bands, with the analyser after it: what a plot draws is what is heard",
     files: [
@@ -192,10 +192,7 @@ export const hooks: RegistryItem[] = [
       },
     ],
     name: "use-noise-through-eq",
-    registryDependencies: [
-      "@audio-ui/use-web-audio",
-      "@audio-ui/filter-response",
-    ],
+    registryDependencies: ["@audio-ui/use-web-audio"],
     type: "registry:hook",
   },
   {
