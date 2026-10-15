@@ -58,6 +58,7 @@ Run commands with the project's package manager, read from its lockfile: `npx sh
 - `live-source-not-state` - Meters, traces, waveforms and playheads take a `source` (`createSource`), never per-frame state
 - `live-meter-levels` - `use-audio-levels` for RMS in dB from time-domain samples, with peak hold
 - `live-mic-input` - Raw microphone signal up-mixed to stereo, analysers never connected to the speakers
+- `live-midi-input` - `use-midi-input` for the page's one MIDI input, connected from a click
 - `live-playhead-source` - Playback position through a source updated every frame
 - `live-decode-once` - Decode and reduce waveform peaks once per file
 - `live-leaf-subscription` - Subscribe to a source only in the leaf that prints it
@@ -119,6 +120,7 @@ Run commands with the project's package manager, read from its lockfile: `npx sh
 | Step pattern | `sequencer` |
 | Drum pads, sample triggers | `pad` |
 | Playable keyboard | `piano` |
+| Play from a MIDI keyboard | `use-midi-input` hook, `midi-connect-control` |
 | Note editor | `piano-roll` |
 | Play, stop, record, loop, bars and tempo | `transport` |
 | Play and pause with a seek bar | `scrubber` |

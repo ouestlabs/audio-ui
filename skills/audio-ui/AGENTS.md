@@ -28,10 +28,11 @@ How to build audio interfaces in React with audio/ui, for AI agents and LLMs. Ru
    - 2.1 [Signals go through a source, not state](#21-signals-go-through-a-source-not-state)
    - 2.2 [Meter a microphone as it delivers the signal](#22-meter-a-microphone-as-it-delivers-the-signal)
    - 2.3 [Meter levels from an AnalyserNode](#23-meter-levels-from-an-analysernode)
-   - 2.4 [Playheads and playback position](#24-playheads-and-playback-position)
-   - 2.5 [Waveform peaks: decode once](#25-waveform-peaks-decode-once)
-   - 2.6 [Showing a live value as text](#26-showing-a-live-value-as-text)
-   - 2.7 [Spectrum on a Plot](#27-spectrum-on-a-plot)
+   - 2.4 [One MIDI input for the page, connected from a click](#24-one-midi-input-for-the-page-connected-from-a-click)
+   - 2.5 [Playheads and playback position](#25-playheads-and-playback-position)
+   - 2.6 [Waveform peaks: decode once](#26-waveform-peaks-decode-once)
+   - 2.7 [Showing a live value as text](#27-showing-a-live-value-as-text)
+   - 2.8 [Spectrum on a Plot](#28-spectrum-on-a-plot)
 3. [Values & Events](#3-values--events): **HIGH**
    - 3.1 [Controlled or uncontrolled, never both](#31-controlled-or-uncontrolled-never-both)
    - 3.2 [Size step and largeStep to the range](#32-size-step-and-largestep-to-the-range)
@@ -386,7 +387,54 @@ const levels = useAudioLevels(analysers);
 
 For stereo, split the signal with a `ChannelSplitterNode` and connect each output to its own `AnalyserNode`. The hook's source also carries each channel's held peak, and publishes nothing while the signal is silent.
 
-### 2.4 Playheads and playback position
+### 2.4 One MIDI input for the page, connected from a click
+
+**Impact: HIGH (a MIDI keyboard that plays every instrument, with no stuck notes)**
+
+`navigator.requestMIDIAccess()` may prompt for permission, so asking on mount either shows a prompt nobody asked for or is refused. Each component that opens its own access replaces the others' `onmidimessage` handler, so only the last one hears the keyboard. And raw messages hide traps: many keyboards send a note-on with velocity 0 to release a key, so a parser that only reads note-off leaves notes stuck.
+
+**Incorrect (access on mount, one handler per component, raw bytes):**
+
+```tsx
+useEffect(() => {
+  navigator.requestMIDIAccess().then((access) => {
+    for (const input of access.inputs.values()) {
+      input.onmidimessage = ({ data }) => {
+        if (data?.[0] === 0x90) voices.triggerNote(data[1], envelope); // velocity 0 never releases
+        if (data?.[0] === 0x80) voices.releaseNote(data[1], envelope);
+      };
+    }
+  });
+}, []);
+```
+
+**Correct (the registry hook, and a connect button anywhere on the page):**
+
+```bash
+npx shadcn@latest add @audio-ui/use-midi-input @audio-ui/midi-connect-control
+```
+
+```tsx
+import { MidiConnectControl } from "@/components/audio-ui/midi-connect-control";
+import { Piano } from "@/components/audio-ui/piano";
+import { useMidiInput } from "@/hooks/use-midi-input";
+
+const midi = useMidiInput({
+  onNoteOff: (note) => voices.releaseNote(note, envelope),
+  // velocity from 0 to 1; notes arrive outside a click, so resume a suspended context
+  onNoteOn: (note, velocity) => {
+    if (ctx.state === "suspended") ctx.resume();
+    voices.triggerNote(note, envelope, velocity);
+  },
+});
+
+<MidiConnectControl /> {/* asks for access on click; renders nothing without Web MIDI */}
+<Piano activeNotes={midi.activeNotes} aria-label="Piano" />
+```
+
+Every component that calls `useMidiInput` hears the same devices, and one `MidiConnectControl` (or `midi.requestAccess` from a click) connects them all. Held keys are released when the device goes away.
+
+### 2.5 Playheads and playback position
 
 **Impact: HIGH (a smooth playhead instead of 4 jumps a second)**
 
@@ -417,7 +465,7 @@ useEffect(() => {
 
 Commit seeks (the user dropping the playhead) through `onValueCommitted`, then set `audio.currentTime`.
 
-### 2.5 Waveform peaks: decode once
+### 2.6 Waveform peaks: decode once
 
 **Impact: HIGH (no audio decoding on render)**
 
@@ -442,7 +490,7 @@ const values = normalizePeaks(computePeaks(channels, 4096)); // once, at load
 
 The waveform fits the peaks to its own width and zoom.
 
-### 2.6 Showing a live value as text
+### 2.7 Showing a live value as text
 
 **Impact: MEDIUM (only the readout re-renders, not the mixer around it)**
 
@@ -492,7 +540,7 @@ function ChannelStrip({ levels }: { levels: Levels }) {
 }
 ```
 
-### 2.7 Spectrum on a Plot
+### 2.8 Spectrum on a Plot
 
 **Impact: MEDIUM (a readable spectrum on a log axis, without a render per frame)**
 
