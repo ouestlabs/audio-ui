@@ -402,6 +402,32 @@ export const components: RegistryItem[] = [
     type: "registry:example",
   },
   {
+    categories: ["mixer", "fader", "meter", "knob"],
+    description:
+      "Mixing console: four tracks of a loop with pan, fader, meter, mute and solo, into a master with a stereo meter, every meter reading its real signal",
+    files: [
+      {
+        path: "components/mixer/block-mixer.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-mixer",
+    registryDependencies: [
+      "@audio-ui/fader",
+      "@audio-ui/knob",
+      "@audio-ui/meter",
+      "@audio-ui/use-audio-levels",
+      "@audio-ui/use-master-bus",
+      "@audio-ui/use-transport-clock",
+      "@audio-ui/use-web-audio",
+      "@audio-ui/drum-synthesis",
+      "@audio-ui/synth-voice",
+      "@shadcn/button",
+      "@shadcn/toggle",
+    ],
+    type: "registry:block",
+  },
+  {
     categories: ["pad", "knob"],
     description:
       "Drum rack: sixteen pads, each its own sound, shaped with tune, decay and level knobs",

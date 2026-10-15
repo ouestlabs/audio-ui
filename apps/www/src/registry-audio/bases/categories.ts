@@ -82,6 +82,12 @@ export const categories: CategoryDef[] = [
   },
   {
     description:
+      "Mixing consoles: channel strips with pan, fader, meter, mute and solo, into a master.",
+    label: "Mixer",
+    name: "mixer",
+  },
+  {
+    description:
       "Spectrum analyzers: the level of a sound across frequencies, live, with held peaks.",
     label: "Spectrum",
     name: "spectrum",

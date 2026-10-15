@@ -56,7 +56,7 @@ Run commands with the project's package manager, read from its lockfile: `npx sh
 ### 2. Live Data (CRITICAL)
 
 - `live-source-not-state` - Meters, traces, waveforms and playheads take a `source` (`createSource`), never per-frame state
-- `live-meter-levels` - RMS in dB from time-domain samples, peak hold in the loop
+- `live-meter-levels` - `use-audio-levels` for RMS in dB from time-domain samples, with peak hold
 - `live-mic-input` - Raw microphone signal up-mixed to stereo, analysers never connected to the speakers
 - `live-playhead-source` - Playback position through a source updated every frame
 - `live-decode-once` - Decode and reduce waveform peaks once per file

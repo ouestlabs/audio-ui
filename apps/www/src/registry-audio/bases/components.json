@@ -125,6 +125,11 @@
     "title": "plot-compressor-demo"
   },
   {
+    "categories": ["mixer", "fader", "meter", "knob"],
+    "name": "block-mixer",
+    "title": "block-mixer"
+  },
+  {
     "categories": ["pad", "knob"],
     "name": "block-drum-rack",
     "title": "block-drum-rack"
