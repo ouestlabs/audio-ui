@@ -90,7 +90,7 @@ import {
   useArrangement,
 } from "@/registry-audio/bases/base/hooks/use-arrangement";
 import { useMarquee } from "@/registry-audio/bases/base/hooks/use-marquee-selection";
-import { usePlaybackClock } from "@/registry-audio/bases/base/hooks/use-playback-clock";
+import { useSimulatedClock } from "@/registry-audio/bases/base/hooks/use-simulated-clock";
 import { useSimulatedLevels } from "@/registry-audio/bases/base/hooks/use-simulated-levels";
 import type {
   Arranged,
@@ -777,7 +777,7 @@ export default function BlockTimeline() {
   ]);
   const [metronome, setMetronome] = useState(false);
   const [rhythm, setRhythm] = useState<MetronomeRhythm>("auto");
-  const { clock, playing, setPlaying } = usePlaybackClock({
+  const { clock, playing, setPlaying } = useSimulatedClock({
     duration,
     loop,
     looping,

@@ -3,8 +3,13 @@
 import { createSource } from "@audio-ui/react";
 import { useEffect, useRef, useState } from "react";
 
-/** A transport clock as a source: the playhead follows it without re-rendering React. */
-export function usePlaybackClock(limits: {
+/**
+ * A clock for a timeline that makes no sound: it runs with `requestAnimationFrame` while
+ * `playing`, loops between two points, and publishes its position as a source, so the
+ * playhead follows it without re-rendering React. It is not on the audio clock: to start
+ * sound at a position, use `useTransportClock`, which schedules against the AudioContext.
+ */
+export function useSimulatedClock(limits: {
   duration: number;
   loop: readonly [number, number];
   looping: boolean;

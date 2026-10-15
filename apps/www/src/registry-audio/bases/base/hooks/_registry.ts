@@ -10,17 +10,25 @@ export const hooks: RegistryItem[] = [
     type: "registry:hook",
   },
   {
+    description:
+      "Renamed to use-simulated-clock: installs it. It is a clock for a timeline that makes no sound, not one on the audio clock.",
+    files: [],
+    name: "use-playback-clock",
+    registryDependencies: ["@audio-ui/use-simulated-clock"],
+    type: "registry:hook",
+  },
+  {
     categories: ["audio", "timeline"],
     dependencies: ["@audio-ui/react"],
     description:
-      "A transport clock as a live source for a timeline: it runs while playing, loops between two points, and the playhead follows it without re-rendering React",
+      "A clock for a timeline that makes no sound: it runs while playing, loops between two points, and the playhead follows it without re-rendering React. Not on the audio clock: use use-transport-clock to schedule sound",
     files: [
       {
-        path: "hooks/use-playback-clock.ts",
+        path: "hooks/use-simulated-clock.ts",
         type: "registry:hook",
       },
     ],
-    name: "use-playback-clock",
+    name: "use-simulated-clock",
     registryDependencies: [],
     type: "registry:hook",
   },
