@@ -15,7 +15,7 @@ It has no dependencies.
 Two kinds of module are published, each as its own subpath, and the folders tell them apart:
 
 - `primitives/<name>/`: the logic of a UI primitive (a knob, a timeline, a piano roll): its controller, geometry and value handling. Imported as `@audio-ui/core/<name>`.
-- `audio/<name>/`: audio and music logic with no interface in it: `pitch` (notes, frequencies, pitch detection), `midi` (messages, files, the Web MIDI input) and `time` (tempo, bars and beats, ticks and seconds, the grid, the look-ahead scheduler). Imported as `@audio-ui/core/<name>`.
+- `audio/<name>/`: audio and music logic with no interface in it: `analysis` (spectrum, waveform peaks, filter and compressor curves, levels), `pitch` (notes, frequencies, pitch detection), `midi` (messages, files, the Web MIDI input) and `time` (tempo, bars and beats, ticks and seconds, the grid, the look-ahead scheduler). Imported as `@audio-ui/core/<name>`.
 
 What both build on:
 
