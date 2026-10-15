@@ -20,6 +20,8 @@
     "piano",
     "piano-roll",
     "transport",
-    "scrubber"
+    "scrubber",
+    "---Blocks---",
+    "mixer"
   ]
 }
