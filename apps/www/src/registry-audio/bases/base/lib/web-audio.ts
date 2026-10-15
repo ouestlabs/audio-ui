@@ -38,4 +38,4 @@ export class WebAudio {
   }
 }
 
-export const $webAudio = new WebAudio();
+export const webAudio = new WebAudio();

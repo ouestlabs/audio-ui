@@ -8,7 +8,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { $midiInput } from "@/registry-audio/bases/base/lib/midi-input";
+import { midiInput } from "@/registry-audio/bases/base/lib/midi-input";
 
 /**
  * Connects the page's MIDI input from a preview's bar, for the previews that
@@ -17,9 +17,9 @@ import { $midiInput } from "@/registry-audio/bases/base/lib/midi-input";
  */
 export function MidiConnect() {
   const midi = useSyncExternalStore(
-    $midiInput.subscribe,
-    $midiInput.getSnapshot,
-    $midiInput.getServerSnapshot
+    midiInput.subscribe,
+    midiInput.getSnapshot,
+    midiInput.getServerSnapshot
   );
   if (!midi.supported) {
     return null;
@@ -35,9 +35,7 @@ export function MidiConnect() {
             aria-label={midi.connected ? "Disconnect MIDI" : "Connect MIDI"}
             aria-pressed={midi.connected}
             className="shrink-0 aria-pressed:bg-site-accent"
-            onClick={
-              midi.connected ? $midiInput.disconnect : $midiInput.connect
-            }
+            onClick={midi.connected ? midiInput.disconnect : midiInput.connect}
             size="icon"
             variant="outline"
           >
