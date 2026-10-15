@@ -21,7 +21,8 @@
     "paths": {
       "@/*": ["./*"]
     },
-    "strictNullChecks": true
+    "strictNullChecks": true,
+    "types": ["bun", "node", "react", "react-dom"]
   },
   "include": [
     "next-env.d.ts",

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Noto_Serif, Oxanium } from "next/font/google";
 import "./globals.css";
-import { cn } from "@/lib/utils";
 
 const oxaniumHeading = Oxanium({
   subsets: ["latin"],
@@ -34,12 +33,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      className={cn(
-        notoSerif.variable,
-        oxaniumHeading.variable,
-        "font-sans",
-        geist.variable
-      )}
+      className={`${notoSerif.variable} ${oxaniumHeading.variable} ${geist.variable} font-sans`}
       lang="en"
     >
       <body
