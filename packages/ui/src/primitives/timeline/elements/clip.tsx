@@ -108,6 +108,7 @@ export function Clip(componentProps: Clip.Props) {
   controller.setOptions(options);
   const snapshot = React.useSyncExternalStore(
     controller.subscribe,
+    controller.getSnapshot,
     controller.getSnapshot
   );
   const { dragOffset, value, selected } = snapshot;

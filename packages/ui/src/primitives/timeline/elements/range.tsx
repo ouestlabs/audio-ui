@@ -136,6 +136,7 @@ export function Range(componentProps: Range.Props) {
   controller.setOptions(options);
   const snapshot = React.useSyncExternalStore(
     controller.subscribe,
+    controller.getSnapshot,
     controller.getSnapshot
   );
 

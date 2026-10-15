@@ -79,6 +79,7 @@ export function Handle(componentProps: Handle.Props) {
   controller.setOptions(options);
   const snapshot = React.useSyncExternalStore(
     controller.subscribe,
+    controller.getSnapshot,
     controller.getSnapshot
   );
   const { dragging, position: at, value } = snapshot;
