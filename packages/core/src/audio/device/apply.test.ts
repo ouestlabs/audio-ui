@@ -1,6 +1,9 @@
 import { describe, expect, test } from "bun:test";
 import { defineDevice, deviceTools } from "./index.ts";
 
+/** A name every model API accepts. */
+const TOOL_NAME = /^[a-zA-Z0-9_-]{1,64}$/;
+
 const device = defineDevice({
   description: "Brings loud parts down.",
   id: "audioui.compressor",
@@ -167,7 +170,7 @@ describe("deviceTools", () => {
     expect(set?.name).toBe("audioui_compressor_set");
     expect(reset?.name).toBe("audioui_compressor_reset");
     for (const tool of [set, reset]) {
-      expect(tool?.name).toMatch(/^[a-zA-Z0-9_-]{1,64}$/);
+      expect(tool?.name).toMatch(TOOL_NAME);
       expect(tool?.description.length).toBeGreaterThan(10);
     }
   });
@@ -184,7 +187,7 @@ describe("deviceTools", () => {
       type: "number",
     });
     expect(schema.properties.enabled).toMatchObject({ type: "boolean" });
-    expect(schema.properties.release?.description).toContain("log scale");
+    expect(schema.properties.release.description).toContain("log scale");
   });
 
   test("set changes the state and reports it in a sentence", () => {
