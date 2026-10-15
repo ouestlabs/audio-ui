@@ -156,3 +156,35 @@ describe("a tempo change while playing", () => {
     expect(positionAt(0.875, anchor, region(0.25))).toBe(11);
   });
 });
+
+describe("a scheduler that cannot hang", () => {
+  test("emits nothing and keeps its cursor for a spacing that is not a step forward", () => {
+    for (const secondsPerStep of [
+      0,
+      -0.125,
+      Number.NaN,
+      Number.POSITIVE_INFINITY,
+    ]) {
+      const cursor = anchoredCursor(0, 3);
+      const result = advance(cursor, 5, { ...fullGrid(16), secondsPerStep });
+      expect(result.boundaries).toEqual([]);
+      expect(result.cursor).toEqual(cursor);
+    }
+  });
+
+  test("keeps a playhead at the start of its region when the spacing is no step", () => {
+    const config = { regionEnd: 8, regionStart: 2, secondsPerStep: 0 };
+    expect(positionAt(10, { step: 5, time: 0 }, config)).toBe(2);
+  });
+});
+
+describe("a stall too long to catch up on", () => {
+  test("skips whole steps to where the time is, keeping the step in phase", () => {
+    const { boundaries } = advance(anchoredCursor(0, 0), 3600, fullGrid(16));
+    expect(boundaries.length).toBeLessThanOrEqual(2);
+    expect(boundaries[0]?.time).toBeGreaterThanOrEqual(3600 - STEP);
+    for (const boundary of boundaries) {
+      expect(boundary.step).toBe(Math.round(boundary.time / STEP) % 16);
+    }
+  });
+});

@@ -11,6 +11,16 @@
 export const SCHEDULE_AHEAD_SECONDS = 0.1;
 /** How often the hooks poll the core, in milliseconds. */
 export const SCHEDULER_POLL_MS = 25;
+/**
+ * How late a boundary may be and still be played, half a second. A stall that
+ * short (a layout, a garbage collection) is caught up on: the steps it missed
+ * are emitted so none is lost, a little late. A longer one, a hidden tab whose
+ * timer ran once a second or a suspended laptop, is a dropout the listener
+ * hears anyway, and replaying every step missed would sound them all at once:
+ * the cursor jumps ahead by whole steps to where the time now is, and the
+ * music carries on in time.
+ */
+export const MAX_CATCH_UP_SECONDS = 0.5;
 
 export interface SchedulerConfig {
   /** One past the last step of the window, exclusive. `totalSteps` for a full-grid clock. */
@@ -44,6 +54,10 @@ export interface SchedulerAnchor {
   time: number;
 }
 
+/** Whether the spacing is a step forward in time: a zero, negative or `NaN` spacing never reaches the horizon. */
+const isStepping = ({ secondsPerStep }: SchedulerConfig) =>
+  Number.isFinite(secondsPerStep) && secondsPerStep > 0;
+
 function regionLength(config: SchedulerConfig): number {
   return Math.max(1, config.regionEnd - config.regionStart);
 }
@@ -65,19 +79,29 @@ export function anchoredCursor(now: number, step: number): SchedulerCursor {
 /**
  * Advances `cursor`, emitting every step boundary now within
  * `SCHEDULE_AHEAD_SECONDS` of `now`. The `while` (not `if`) is what makes this
- * self-correcting: a poll delayed past a whole step, a stalled main thread, a
- * throttled background tab, catches up by emitting the missed boundaries
- * rather than letting one slip past unscheduled.
+ * self-correcting: a poll delayed past a whole step catches up by emitting the
+ * boundaries it missed rather than letting one slip past unscheduled, up to
+ * `MAX_CATCH_UP_SECONDS` late, past which it skips them (see there). A spacing
+ * that is not a positive number emits nothing and leaves the cursor as it was,
+ * where it would otherwise never leave the loop.
  */
 export function advance(
   cursor: SchedulerCursor,
   now: number,
   config: SchedulerConfig
 ): { boundaries: StepBoundary[]; cursor: SchedulerCursor } {
+  if (!isStepping(config)) {
+    return { boundaries: [], cursor };
+  }
   const horizon = now + SCHEDULE_AHEAD_SECONDS;
   const boundaries: StepBoundary[] = [];
   let step = wrapStep(cursor.nextStep, config);
   let time = cursor.nextStepTime;
+  if (now - time > MAX_CATCH_UP_SECONDS) {
+    const skipped = Math.floor((now - time) / config.secondsPerStep);
+    step = wrapStep(step + skipped, config);
+    time += skipped * config.secondsPerStep;
+  }
   while (time < horizon) {
     boundaries.push({ step, time });
     time += config.secondsPerStep;
@@ -97,6 +121,9 @@ export function positionAt(
   anchor: SchedulerAnchor,
   config: SchedulerConfig
 ): number {
+  if (!isStepping(config)) {
+    return config.regionStart;
+  }
   const length = regionLength(config);
   const elapsedSteps = (now - anchor.time) / config.secondsPerStep;
   const within =
