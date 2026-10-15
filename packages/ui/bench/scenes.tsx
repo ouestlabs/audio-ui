@@ -450,7 +450,7 @@ const scenes: Record<string, ReactNode> = {
 
 window.__changes = 0;
 const name = location.hash.slice(1);
-const tick = ticks[name];
+const tick = Object.hasOwn(ticks, name) ? ticks[name] : undefined;
 if (tick) {
   window.__tick = (frame) => {
     count();
@@ -460,6 +460,8 @@ if (tick) {
 const container = document.getElementById("root");
 if (container) {
   createRoot(container).render(
-    <div style={{ padding: 40 }}>{scenes[name] ?? null}</div>
+    <div style={{ padding: 40 }}>
+      {(Object.hasOwn(scenes, name) ? scenes[name] : null) ?? null}
+    </div>
   );
 }

@@ -12,8 +12,6 @@ const KNOWN_ICON_LIBRARIES = new Set([
   "remixicon",
 ]);
 
-const SELF_CLOSING_TAG_REGEX = /\/>/;
-const TAG_CLOSE_REGEX = />/;
 const NAMED_IMPORT_BRACES_REGEX = /{([^}]+)}/;
 const IMPORT_END_REGEX =
   /from\s+["'][^"']+["'];?\n?|import\s+["'][^"']+["'];?\n?/;
@@ -90,10 +88,12 @@ function buildIconUsage(
     .join(" ");
 
   if (otherAttrs) {
-    if (usage.includes("/>")) {
-      usage = usage.replace(SELF_CLOSING_TAG_REGEX, ` ${otherAttrs} />`);
-    } else if (usage.includes(">")) {
-      usage = usage.replace(TAG_CLOSE_REGEX, ` ${otherAttrs}>`);
+    // The template is one tag: the attributes go before its last closer.
+    const selfClosing = usage.lastIndexOf("/>");
+    const closer = selfClosing === -1 ? usage.lastIndexOf(">") : selfClosing;
+    if (closer !== -1) {
+      const tail = selfClosing === -1 ? ">" : " />";
+      usage = `${usage.slice(0, closer)} ${otherAttrs}${tail}${usage.slice(closer + (selfClosing === -1 ? 1 : 2))}`;
     }
   }
 
