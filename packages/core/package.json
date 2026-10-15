@@ -45,6 +45,10 @@
       "types": "./dist/primitives/meter/index.d.ts",
       "import": "./dist/meter.js"
     },
+    "./pad": {
+      "types": "./dist/primitives/pad/index.d.ts",
+      "import": "./dist/pad.js"
+    },
     "./piano": {
       "types": "./dist/primitives/piano/index.d.ts",
       "import": "./dist/piano.js"

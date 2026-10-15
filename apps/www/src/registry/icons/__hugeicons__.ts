@@ -20,7 +20,6 @@ export {
   Download01Icon,
   HeadphonesIcon,
   InformationCircleIcon,
-  KeyboardIcon,
   Loading03Icon,
   MinusSignIcon,
   MoreHorizontalCircle01Icon,

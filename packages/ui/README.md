@@ -52,7 +52,7 @@ Changes arrive as `onValueChange(value, eventDetails)`: `eventDetails.reason` sa
 | `Envelope`, `Plot` | Breakpoint and curve editors (ADSR, EQ, filters, compressors) |
 | `Meter`, `Waveform` | Levels, peak hold, waveforms, live signals and visualizers |
 | `Timeline` | The ground of an arrangement: zoom, grid, ranges, clips with trim and fades, a seekable lane |
-| `Sequencer`, `Piano`, `PianoRoll` | Step grids, keyboards and a note editor |
+| `Sequencer`, `Pad`, `Piano`, `PianoRoll` | Step grids, drum pads, keyboards and a note editor |
 
 Live values (a playhead, a meter) take a `source`, `{ getSnapshot, subscribe }`, and are written to the DOM as they move. `createSource` makes one.
 

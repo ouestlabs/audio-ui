@@ -400,6 +400,45 @@ export const components: RegistryItem[] = [
     type: "registry:example",
   },
   {
+    categories: ["pad", "knob"],
+    description:
+      "Drum rack: sixteen pads, each its own sound, shaped with tune, decay and level knobs",
+    files: [
+      {
+        path: "components/pad/block-drum-rack.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-drum-rack",
+    registryDependencies: [
+      "@audio-ui/pad",
+      "@audio-ui/knob",
+      "@audio-ui/use-master-bus",
+      "@audio-ui/use-web-audio",
+      "@audio-ui/drum-synthesis",
+    ],
+    type: "registry:block",
+  },
+  {
+    categories: ["pad"],
+    description:
+      "Four drum pads that play harder near the top; the closed hat cuts the open one short",
+    files: [
+      {
+        path: "components/pad/pad-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "pad-demo",
+    registryDependencies: [
+      "@audio-ui/pad",
+      "@audio-ui/use-master-bus",
+      "@audio-ui/use-web-audio",
+      "@audio-ui/drum-synthesis",
+    ],
+    type: "registry:example",
+  },
+  {
     categories: ["spectrum"],
     description:
       "Play the keyboard and watch the spectrum: a sawtooth note lights its pitch and every harmonic above it, and the peaks hold a moment",

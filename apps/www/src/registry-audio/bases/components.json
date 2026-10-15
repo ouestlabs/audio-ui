@@ -125,6 +125,16 @@
     "title": "plot-compressor-demo"
   },
   {
+    "categories": ["pad", "knob"],
+    "name": "block-drum-rack",
+    "title": "block-drum-rack"
+  },
+  {
+    "categories": ["pad"],
+    "name": "pad-demo",
+    "title": "pad-demo"
+  },
+  {
     "categories": ["spectrum"],
     "name": "spectrum-analyzer-demo",
     "title": "spectrum-analyzer-demo"

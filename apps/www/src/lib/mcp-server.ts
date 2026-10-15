@@ -51,7 +51,7 @@ export function createAudioUiMcpServer() {
     {
       annotations: readOnly,
       description:
-        "List every audio/ui component (Knob, Fader, XY Pad, Envelope, Meter, Waveform, Plot, Spectrum Analyzer, Timeline, Sequencer, Piano, Piano Roll, Transport, Scrubber) with its summary, docs URL and install command. Start here to see what exists.",
+        "List every audio/ui component (Knob, Fader, XY Pad, Envelope, Meter, Waveform, Plot, Spectrum Analyzer, Timeline, Sequencer, Pad, Piano, Piano Roll, Transport, Scrubber) with its summary, docs URL and install command. Start here to see what exists.",
       inputSchema: {},
       title: "List audio/ui components",
     },
