@@ -116,6 +116,7 @@ export default function RootLayout({
           // biome-ignore lint/security/noDangerouslySetInnerHtml: puts the saved design system back before the first paint
           dangerouslySetInnerHTML={{ __html: DESIGN_SYSTEM_BOOT_SCRIPT }}
         />
+        {/* A hoisted resource (href, precedence): React leaves it out of hydration, so the style the boot script adds to the head does not trip it. */}
         <style href="highlight-theme" precedence="default">
           {createThemeCss({
             dark: githubDarkTheme,

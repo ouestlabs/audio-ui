@@ -345,8 +345,7 @@
     border: 1px solid color-mix(in oklab, var(--site-border) 80%, transparent);
     border-radius: var(--frame-radius);
 
-    > pre,
-    > div > pre {
+    > :is(pre, div > pre) {
       margin: 0;
       overflow: auto;
       background-color: var(--site-code) !important;
@@ -370,31 +369,6 @@
     }
   }
 
-  /* An install command is a frame of its own: the figure around it steps aside. */
-  [data-rehype-pretty-code-figure]:has([data-code-command]) {
-    padding: 0;
-    overflow: visible;
-    background: transparent;
-    border: 0;
-    border-radius: 0;
-
-    > pre,
-    > div > pre {
-      overflow: visible;
-      background: transparent !important;
-      border: 0;
-      border-radius: 0;
-    }
-  }
-
-  /* The code scrolls sideways in its panel, fading at the edges it runs past, and keeps its inset at the far end. */
-  [data-rehype-pretty-code-figure]:not(:has([data-code-command])) pre code {
-    display: block;
-    padding-inline-end: calc(var(--spacing) * 4);
-    overflow-x: auto;
-    @apply no-scrollbar scroll-fade-x;
-  }
-
   /* Inside another frame (a preview's code, a sheet), the figure gives its own up. */
   [data-slot="code"] [data-rehype-pretty-code-figure],
   [data-slot="sheet-content"] [data-rehype-pretty-code-figure] {
@@ -404,8 +378,23 @@
     border: 0;
     border-radius: 0;
 
-    > pre,
-    > div > pre {
+    > :is(pre, div > pre) {
+      background: transparent !important;
+      border: 0;
+      border-radius: 0;
+    }
+  }
+
+  /* An install command is a frame of its own: the figure around it steps aside. */
+  [data-rehype-pretty-code-figure]:has([data-code-command]) {
+    padding: 0;
+    overflow: visible;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+
+    > :is(pre, div > pre) {
+      overflow: visible;
       background: transparent !important;
       border: 0;
       border-radius: 0;
@@ -470,6 +459,14 @@
   .th-code--line-numbers {
     padding-inline: 0;
   }
+
+  /* The code scrolls sideways in its panel, fading at the edges it runs past, and keeps its inset at the far end. */
+  [data-rehype-pretty-code-figure]:not(:has([data-code-command])) pre code {
+    display: block;
+    padding-inline-end: calc(var(--spacing) * 4);
+    overflow-x: auto;
+    @apply no-scrollbar scroll-fade-x;
+  }
 }
 
 /* A menu the customizer can invert (its `.dark` class is toggled on `.cn-menu-target`): the site's tokens are read again inside it. */
@@ -523,28 +520,34 @@
     padding-left: 0;
   }
 
-  [data-framed-layout][data-nav="closed"] .inset-pane,
-  html[data-nav-closed] .inset-pane {
+  :is([data-framed-layout][data-nav="closed"], html[data-nav-closed])
+    .inset-pane {
     padding-left: 0.5rem;
   }
 
-  [data-framed-layout][data-customizer="closed"] .inset-pane,
-  html[data-customizer-closed] .inset-pane {
+  :is(
+      [data-framed-layout][data-customizer="closed"],
+      html[data-customizer-closed]
+    )
+    .inset-pane {
     padding-right: 0.5rem;
   }
 
-  [data-framed-layout][data-nav="closed"] [data-slot="sidebar-gap"],
-  html[data-nav-closed] [data-slot="sidebar-gap"] {
+  :is([data-framed-layout][data-nav="closed"], html[data-nav-closed])
+    [data-slot="sidebar-gap"] {
     width: 0;
   }
 
-  [data-framed-layout][data-nav="closed"] [data-slot="sidebar-container"],
-  html[data-nav-closed] [data-slot="sidebar-container"] {
+  :is([data-framed-layout][data-nav="closed"], html[data-nav-closed])
+    [data-slot="sidebar-container"] {
     left: calc(var(--sidebar-width) * -1);
   }
 
-  [data-framed-layout][data-customizer="closed"] .customizer-aside,
-  html[data-customizer-closed] .customizer-aside {
+  :is(
+      [data-framed-layout][data-customizer="closed"],
+      html[data-customizer-closed]
+    )
+    .customizer-aside {
     width: 0;
   }
 }

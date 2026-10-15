@@ -2,6 +2,17 @@ import { Slider as SliderPrimitive } from "@base-ui/react/slider";
 
 import { cn } from "@/registry/bases/base/lib/utils";
 
+/** How many thumbs the slider has: one per value, or a range of two. */
+function thumbCount(value: unknown, defaultValue: unknown) {
+  if (Array.isArray(value)) {
+    return value.length;
+  }
+  if (Array.isArray(defaultValue)) {
+    return defaultValue.length;
+  }
+  return 2;
+}
+
 function Slider({
   className,
   defaultValue,
@@ -10,11 +21,11 @@ function Slider({
   max = 100,
   ...props
 }: SliderPrimitive.Root.Props) {
-  const _values = Array.isArray(value)
-    ? value
-    : Array.isArray(defaultValue)
-      ? defaultValue
-      : [min, max];
+  // A thumb is known by its place: the first, the second.
+  const thumbs = Array.from(
+    { length: thumbCount(value, defaultValue) },
+    (_, index) => index
+  );
 
   return (
     <SliderPrimitive.Root
@@ -37,11 +48,12 @@ function Slider({
             data-slot="slider-range"
           />
         </SliderPrimitive.Track>
-        {Array.from({ length: _values.length }, (_, index) => (
+        {thumbs.map((thumb) => (
           <SliderPrimitive.Thumb
             className="cn-slider-thumb block shrink-0 select-none disabled:pointer-events-none disabled:opacity-50"
             data-slot="slider-thumb"
-            key={index}
+            index={thumb}
+            key={thumb}
           />
         ))}
       </SliderPrimitive.Control>

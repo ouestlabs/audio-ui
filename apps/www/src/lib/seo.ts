@@ -50,7 +50,9 @@ function getSocialHandle(url: string) {
     const socialUrl = new URL(url);
     const [handle] = socialUrl.pathname.split("/").filter(Boolean);
     return handle ? `@${handle}` : undefined;
-  } catch {}
+  } catch {
+    // A malformed social URL has no handle to show.
+  }
 }
 
 function getAbsoluteMetadataUrl(path: string) {

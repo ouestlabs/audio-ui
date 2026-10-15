@@ -437,8 +437,12 @@ export function buildRegistryTheme(config: DesignSystemConfig) {
   // Apply chart color override.
   const chartTheme = getTheme(config.chartColor);
   if (chartTheme) {
-    const chartLight = chartTheme.cssVars?.light as Record<string, string>;
-    const chartDark = chartTheme.cssVars?.dark as Record<string, string>;
+    const chartLight = chartTheme.cssVars?.light as
+      | Record<string, string>
+      | undefined;
+    const chartDark = chartTheme.cssVars?.dark as
+      | Record<string, string>
+      | undefined;
     for (let i = 1; i <= 5; i += 1) {
       const key = `chart-${i}`;
       if (chartLight?.[key]) {
@@ -484,10 +488,12 @@ export function buildRegistryTheme(config: DesignSystemConfig) {
 export function buildThemeForPreset(config: DesignSystemConfig) {
   const registryTheme = buildRegistryTheme(config);
   const radius = RADII.find((r) => r.name === config.radius);
+  // A theme may leave the radius out.
+  const themeRadius: string | undefined = registryTheme.cssVars.light.radius;
   const radiusValue =
     config.radius === "default"
-      ? (registryTheme.cssVars?.light?.radius ?? DEFAULT_RADIUS_VALUE)
-      : (radius?.value ?? registryTheme.cssVars?.light?.radius);
+      ? (themeRadius ?? DEFAULT_RADIUS_VALUE)
+      : (radius?.value ?? themeRadius);
 
   return registryItemSchema.parse({
     $schema: "https://ui.shadcn.com/schema/registry-item.json",
@@ -529,7 +535,7 @@ export function buildRegistryBase(config: DesignSystemConfig) {
 
   const registryDependencies = ["utils"];
   const themeVars = {
-    ...(registryTheme.cssVars?.theme ?? {}),
+    ...(registryTheme.cssVars.theme ?? {}),
     ...(normalizedFontHeading === "inherit"
       ? { "--font-heading": getInheritedHeadingFontValue(config.font) }
       : {}),

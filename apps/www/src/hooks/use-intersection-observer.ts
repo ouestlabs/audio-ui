@@ -52,10 +52,12 @@ const observers = new Map<string, SharedObserver>();
 
 function getSharedObserver(options: IntersectionObserverInit) {
   const key = JSON.stringify(options);
-  if (!observers.has(key)) {
-    observers.set(key, new SharedObserver(options));
+  let observer = observers.get(key);
+  if (!observer) {
+    observer = new SharedObserver(options);
+    observers.set(key, observer);
   }
-  return observers.get(key)!;
+  return observer;
 }
 
 export function useIntersectionObserver(
@@ -71,7 +73,7 @@ export function useIntersectionObserver(
   const frozen = React.useRef(false);
 
   React.useEffect(() => {
-    const element = elementRef?.current;
+    const element = elementRef.current;
     if (!element || (freezeOnceVisible && frozen.current)) {
       return;
     }

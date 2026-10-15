@@ -204,7 +204,7 @@ function usePianoRoll({
   /** The current tempo's step duration, mirrored from the transport clock so note-off offsets use its canonical step↔time mapping instead of a second copy. */
   const secondsPerStepRef = useRef(0);
   /** Mirrors the clock's `isPlaying` for the audition guard, which runs inside pointer callbacks rather than on render. */
-  const isPlayingRef = useRef(false);
+  const isPlayingRef = useRef<boolean>(false);
   /** The pitches auditioned and not yet released. */
   const auditionedRef = useRef(new Set<number>());
 

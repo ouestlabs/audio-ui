@@ -1,13 +1,3 @@
-import { highlighter } from "./highlighter";
-
-/** The code as HTML, line numbers included, ready to place in a panel. Colors come from the `th-*` classes (see `styles/highlight.css`). */
-export function highlightCode(code: string, language = "tsx") {
-  return highlighter.highlight(code, {
-    lang: highlighter.normalizeLanguage(language),
-    lineNumbers: true,
-  }).html;
-}
-
 export type PackageManagerCommands = {
   bun: string;
   npm: string;

@@ -10,7 +10,6 @@ import {
 import { SiteNavTabs } from "@/components/site-nav-tabs";
 import { Separator } from "@/components/ui/separator";
 import { siteConfig } from "@/lib/config";
-import { showMcpDocs } from "@/lib/flags";
 import { getCategories } from "@/lib/registry";
 import { source } from "@/lib/source";
 import { cn } from "@/lib/utils";
@@ -31,10 +30,6 @@ function collectCommandMenuPages(
     }
 
     if (item.type !== "page") {
-      continue;
-    }
-
-    if (!showMcpDocs && item.url.includes("/mcp")) {
       continue;
     }
 

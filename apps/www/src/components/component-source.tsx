@@ -3,9 +3,9 @@ import path from "node:path";
 import type * as React from "react";
 import { CodeCollapsibleWrapper } from "@/components/code-collapsible-wrapper";
 import { CopyButton } from "@/components/copy-button";
+import { HighlightedCode } from "@/components/highlighted-code";
 import { getIconForLanguageExtension } from "@/components/icons";
 import { transformStyleClassNames } from "@/lib/code-utils";
-import { highlightCode } from "@/lib/highlight-code";
 import { getIconLibraryFromStyle, transformIcons } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 import type { IconLibraryName } from "@/registry/config";
@@ -17,6 +17,57 @@ const DEFAULT_STYLE_NAME = "base-nova";
 
 const COLLAPSIBLE_COPY_BUTTON_CLASS_NAME =
   "pointer-events-none invisible opacity-0 transition-opacity group-data-open/collapsible:pointer-events-auto group-data-open/collapsible:visible group-data-open/collapsible:opacity-100";
+
+/** The code of a registry item, from the JSON the registry build wrote for the style. */
+async function readRegistryItemCode(name: string, styleName: string) {
+  try {
+    const jsonPath = path.join(
+      process.cwd(),
+      "public",
+      "r",
+      "styles",
+      styleName,
+      `${name}.json`
+    );
+    const item = JSON.parse(await fs.readFile(jsonPath, "utf-8"));
+    return item?.files?.[0]?.content as string | undefined;
+  } catch (error) {
+    console.error(`Error reading static registry: ${name}`, error);
+  }
+}
+
+const REGISTRY_AUDIO_PREFIX = "registry-audio/";
+
+/** A file of the project, by a path relative to it; a path that leaves the project reads nothing. */
+async function readProjectFile(src: string) {
+  const projectRoot = process.cwd();
+  let absolutePath: string;
+  if (src.startsWith("registry/")) {
+    absolutePath = path.join(projectRoot, "src/registry", src.slice(9));
+  } else if (src.startsWith(REGISTRY_AUDIO_PREFIX)) {
+    absolutePath = path.join(
+      projectRoot,
+      "src/registry-audio",
+      src.slice(REGISTRY_AUDIO_PREFIX.length)
+    );
+  } else {
+    absolutePath = path.join(projectRoot, src);
+  }
+
+  const resolvedPath = path.resolve(absolutePath);
+  if (
+    !resolvedPath.startsWith(projectRoot + path.sep) &&
+    resolvedPath !== projectRoot
+  ) {
+    console.error(`Path traversal blocked: ${src}`);
+    return;
+  }
+  try {
+    return await fs.readFile(resolvedPath, "utf-8");
+  } catch (error) {
+    console.error("Error reading source file", error);
+  }
+}
 
 export async function ComponentSource({
   name,
@@ -65,82 +116,28 @@ export async function ComponentSource({
     );
   }
 
-  let code = initialCode;
-
-  if (code) {
-    // Transform classNames for display (code prop comes raw, not from static JSON)
-    code = transformStyleClassNames(code, styleName);
-
-    // Transform icons for display if code is provided via prop (e.g. from rehype)
-    const effectiveIconLibrary =
-      iconLibrary ?? getIconLibraryFromStyle(styleName);
-    code = transformIcons(code, effectiveIconLibrary);
+  const effectiveIconLibrary =
+    iconLibrary ?? getIconLibraryFromStyle(styleName);
+  let code: string | undefined;
+  if (initialCode) {
+    // The code prop comes raw, not from the static JSON.
+    code = transformIcons(
+      transformStyleClassNames(initialCode, styleName),
+      effectiveIconLibrary
+    );
+  } else if (name) {
+    // The static JSON has the style's classes already: only the icons are left to swap.
+    const itemCode = await readRegistryItemCode(name, styleName);
+    code = itemCode && transformIcons(itemCode, effectiveIconLibrary);
   }
-
-  if (!code && name) {
-    // Read from pre-built static JSON (style classes already transformed at build time)
-    try {
-      const jsonPath = path.join(
-        process.cwd(),
-        "public",
-        "r",
-        "styles",
-        styleName,
-        `${name}.json`
-      );
-      const jsonContent = await fs.readFile(jsonPath, "utf-8");
-      const item = JSON.parse(jsonContent);
-      code = item?.files?.[0]?.content;
-    } catch (error) {
-      console.error(`Error reading static registry: ${name}`, error);
-    }
-
-    if (code) {
-      // Transform icons for display (not baked into static JSON)
-      const effectiveIconLibrary =
-        iconLibrary ?? getIconLibraryFromStyle(styleName);
-      code = transformIcons(code, effectiveIconLibrary);
-    }
-  }
-
   if (!code && src) {
-    const projectRoot = process.cwd();
-    let absolutePath: string;
-    const REGISTRY_AUDIO_PREFIX = "registry-audio/";
-    if (src.startsWith("registry/")) {
-      absolutePath = path.join(projectRoot, "src/registry", src.slice(9));
-    } else if (src.startsWith(REGISTRY_AUDIO_PREFIX)) {
-      absolutePath = path.join(
-        projectRoot,
-        "src/registry-audio",
-        src.slice(REGISTRY_AUDIO_PREFIX.length)
+    const fileCode = await readProjectFile(src);
+    code =
+      fileCode &&
+      transformIcons(
+        transformStyleClassNames(fileCode, styleName),
+        effectiveIconLibrary
       );
-    } else {
-      absolutePath = path.join(projectRoot, src);
-    }
-
-    // Resolve and verify the path stays within the project directory
-    const resolvedPath = path.resolve(absolutePath);
-    if (
-      !resolvedPath.startsWith(projectRoot + path.sep) &&
-      resolvedPath !== projectRoot
-    ) {
-      console.error(`Path traversal blocked: ${src}`);
-    } else {
-      try {
-        code = await fs.readFile(resolvedPath, "utf-8");
-
-        // Transform classNames for display
-        code = transformStyleClassNames(code, styleName);
-
-        // Transform icons for file-based source
-        const effectiveIconLibrary =
-          iconLibrary ?? getIconLibraryFromStyle(styleName);
-        code = transformIcons(code, effectiveIconLibrary);
-      } catch (error) {
-        console.error("Error reading source file", error);
-      }
-    }
   }
 
   if (!code) {
@@ -155,7 +152,6 @@ export async function ComponentSource({
   }
 
   const lang = language ?? title?.split(".").pop() ?? "tsx";
-  const highlightedCode = highlightCode(code, lang);
 
   const effectiveEventName = eventName ?? "copy_component_code";
 
@@ -165,7 +161,6 @@ export async function ComponentSource({
         <ComponentCode
           code={code}
           eventName={effectiveEventName}
-          highlightedCode={highlightedCode}
           iconLibrary={iconLibrary}
           language={lang}
           name={name}
@@ -183,7 +178,6 @@ export async function ComponentSource({
         code={code}
         copyButtonClassName={COLLAPSIBLE_COPY_BUTTON_CLASS_NAME}
         eventName={effectiveEventName}
-        highlightedCode={highlightedCode}
         iconLibrary={iconLibrary}
         language={lang}
         name={name}
@@ -197,7 +191,6 @@ export async function ComponentSource({
 
 function ComponentCode({
   code,
-  highlightedCode,
   language,
   title,
   eventName,
@@ -208,7 +201,6 @@ function ComponentCode({
   copyButtonClassName,
 }: {
   code: string;
-  highlightedCode: string;
   language: string;
   title: string | undefined;
   eventName?: string;
@@ -242,7 +234,7 @@ function ComponentCode({
           value={code}
         />
       ) : null}
-      <div dangerouslySetInnerHTML={{ __html: highlightedCode }} />
+      <HighlightedCode code={code} language={language} />
     </figure>
   );
 }

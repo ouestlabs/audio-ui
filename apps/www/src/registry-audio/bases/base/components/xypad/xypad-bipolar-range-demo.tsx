@@ -3,6 +3,9 @@
 import { useState } from "react";
 import { XYPad } from "@/registry-audio/bases/base/audio/elements/xypad";
 
+const formatPanMix = (next: { x: number; y: number }) =>
+  `Pan ${next.x} | Mix ${next.y.toFixed(2)}`;
+
 export default function XYPadBipolarRangeDemo() {
   const [value, setValue] = useState({ x: 0, y: 0 });
 
@@ -12,7 +15,7 @@ export default function XYPadBipolarRangeDemo() {
         aria-label="Pan and mix"
         className="aspect-square"
         defaultValue={{ x: 0, y: 0 }}
-        formatValue={(next) => `Pan ${next.x} | Mix ${next.y.toFixed(2)}`}
+        formatValue={formatPanMix}
         maxX={100}
         maxY={1}
         minX={-100}

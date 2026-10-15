@@ -7,10 +7,12 @@ import { use } from "react";
 const iconPromiseCaches = new Map<string, Map<string, Promise<any>>>();
 
 function getCache(libraryName: string) {
-  if (!iconPromiseCaches.has(libraryName)) {
-    iconPromiseCaches.set(libraryName, new Map());
+  let cache = iconPromiseCaches.get(libraryName);
+  if (!cache) {
+    cache = new Map();
+    iconPromiseCaches.set(libraryName, cache);
   }
-  return iconPromiseCaches.get(libraryName)!;
+  return cache;
 }
 
 function isIconData(data: any): data is IconSvgElement {
@@ -27,15 +29,16 @@ export function createIconLoader(libraryName: string) {
   }: {
     name: string;
   } & React.ComponentProps<"svg">) {
-    if (!cache.has(name)) {
-      const promise = import(`./__${libraryName}__`).then((mod) => {
+    let promise = cache.get(name);
+    if (!promise) {
+      promise = import(`./__${libraryName}__`).then((mod) => {
         const icon = mod[name as keyof typeof mod];
         return icon || null;
       });
       cache.set(name, promise);
     }
 
-    const iconData = use(cache.get(name)!);
+    const iconData = use(promise);
 
     if (!iconData) {
       return null;

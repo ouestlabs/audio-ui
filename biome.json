@@ -39,6 +39,10 @@
       },
       "nursery": "off",
       "suspicious": {
+        "noUnknownAttribute": {
+          "level": "error",
+          "options": { "ignore": ["href", "precedence"] }
+        },
         "noConsole": "off",
         "noExplicitAny": "off",
         "noBitwiseOperators": "off",

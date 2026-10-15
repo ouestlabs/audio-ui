@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/popover";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getDocsPageUpdateHint } from "@/lib/docs";
-import { showMcpDocs } from "@/lib/flags";
 import { getCurrentBase, getSectionsFromFolder } from "@/lib/page-tree";
 import type { CategoryInfo } from "@/lib/registry";
 import type { source } from "@/lib/source";
@@ -212,14 +211,10 @@ export function MobileNav({
               if (folder.type !== "folder") {
                 return null;
               }
-              const sections = getSectionsFromFolder(folder, currentBase)
-                .map((part) => ({
-                  ...part,
-                  pages: part.pages.filter(
-                    (page) => showMcpDocs || !page.url?.includes("/mcp")
-                  ),
-                }))
-                .filter((part) => part.pages.length > 0);
+              const sections = getSectionsFromFolder(
+                folder,
+                currentBase
+              ).filter((part) => part.pages.length > 0);
               if (sections.length === 0) {
                 return null;
               }

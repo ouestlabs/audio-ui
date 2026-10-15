@@ -444,6 +444,65 @@ const formatPan = (pan: number) => {
   return `${pan < 0 ? "L" : "R"}${amount}`;
 };
 
+/** A track's context menu: an entry for each action it is given, then the colors. */
+function TimelineTrackMenu({
+  folded,
+  onColor,
+  onDuplicate,
+  onFold,
+  onInsert,
+  onRemove,
+  onRename,
+}: {
+  folded?: boolean;
+  onColor: (event: MouseEvent<HTMLElement>) => void;
+  onDuplicate?: () => void;
+  onFold?: () => void;
+  onInsert?: () => void;
+  onRemove?: () => void;
+  onRename?: () => void;
+}) {
+  return (
+    <ContextMenuContent className="w-auto min-w-36">
+      {onRename ? (
+        <ContextMenuItem onClick={onRename}>Rename</ContextMenuItem>
+      ) : null}
+      {onDuplicate ? (
+        <ContextMenuItem onClick={onDuplicate}>Duplicate</ContextMenuItem>
+      ) : null}
+      {onFold ? (
+        <ContextMenuItem onClick={onFold}>
+          {folded ? "Unfold" : "Fold"}
+        </ContextMenuItem>
+      ) : null}
+      {onRemove ? (
+        <>
+          <ContextMenuSeparator />
+          <ContextMenuItem onClick={onRemove} variant="destructive">
+            Delete
+          </ContextMenuItem>
+        </>
+      ) : null}
+      {onInsert ? (
+        <>
+          <ContextMenuSeparator />
+          <ContextMenuItem onClick={onInsert}>Insert track</ContextMenuItem>
+        </>
+      ) : null}
+      <ContextMenuSeparator />
+      {TRACK_COLORS.map((swatch, index) => (
+        <ContextMenuItem data-color={index} key={swatch.name} onClick={onColor}>
+          <span
+            aria-hidden="true"
+            className={cn("size-2.5 rounded-full", swatch.dot)}
+          />
+          {swatch.name}
+        </ContextMenuItem>
+      ))}
+    </ContextMenuContent>
+  );
+}
+
 /**
  * What a track's header holds: its name, which selects the track (its content
  * is where the cursor goes), solo, mute and gain. The lower edge resizes it.
@@ -716,49 +775,15 @@ function TimelineTrackControls({
         ) : null}
         <TimelineTrackResizeHandle aria-label={`${name} height`} />
       </ContextMenuTrigger>
-      <ContextMenuContent className="w-auto min-w-36">
-        {onRename ? (
-          <ContextMenuItem onClick={handleRenameItem}>Rename</ContextMenuItem>
-        ) : null}
-        {onDuplicate ? (
-          <ContextMenuItem onClick={handleDuplicate}>Duplicate</ContextMenuItem>
-        ) : null}
-        {onToggleFold ? (
-          <ContextMenuItem onClick={handleFold}>
-            {folded ? "Unfold" : "Fold"}
-          </ContextMenuItem>
-        ) : null}
-        {onRemove ? (
-          <>
-            <ContextMenuSeparator />
-            <ContextMenuItem onClick={handleRemove} variant="destructive">
-              Delete
-            </ContextMenuItem>
-          </>
-        ) : null}
-        {onInsert ? (
-          <>
-            <ContextMenuSeparator />
-            <ContextMenuItem onClick={handleInsert}>
-              Insert track
-            </ContextMenuItem>
-          </>
-        ) : null}
-        <ContextMenuSeparator />
-        {TRACK_COLORS.map((swatch, index) => (
-          <ContextMenuItem
-            data-color={index}
-            key={swatch.name}
-            onClick={handleColor}
-          >
-            <span
-              aria-hidden="true"
-              className={cn("size-2.5 rounded-full", swatch.dot)}
-            />
-            {swatch.name}
-          </ContextMenuItem>
-        ))}
-      </ContextMenuContent>
+      <TimelineTrackMenu
+        folded={folded}
+        onColor={handleColor}
+        onDuplicate={onDuplicate ? handleDuplicate : undefined}
+        onFold={onToggleFold ? handleFold : undefined}
+        onInsert={onInsert ? handleInsert : undefined}
+        onRemove={onRemove ? handleRemove : undefined}
+        onRename={onRename ? handleRenameItem : undefined}
+      />
     </ContextMenu>
   );
 }
