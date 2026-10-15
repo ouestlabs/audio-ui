@@ -65,7 +65,73 @@ export interface DeviceDefinition<
   parameters: Parameters;
 }
 
+/** A parameter as an agent or a catalog reads it: JSON-safe, with no function in it. */
+export interface ParameterDescription {
+  default: number | boolean;
+  id: string;
+  label: string;
+  max?: number;
+  min?: number;
+  /** `"custom"` for a scale given as functions: the range alone does not say how it travels. */
+  scale?: "custom" | "linear" | "log";
+  step?: number;
+  type: "boolean" | "number";
+  unit?: string;
+}
+
+/** A device as an agent or a catalog reads it. */
+export interface DeviceDescription {
+  description: string;
+  id: string;
+  kind: "effect" | "instrument";
+  name: string;
+  parameters: ParameterDescription[];
+}
+
+/** One parameter `apply` changed. */
+export interface DeviceChange {
+  /** `true` when the value asked for was outside the range or off the grid and was brought in. */
+  adjusted: boolean;
+  from: number | boolean;
+  id: string;
+  to: number | boolean;
+}
+
+/** One parameter `apply` did not change, and why. */
+export interface DeviceRejection {
+  id: string;
+  reason: "not a boolean" | "not a number" | "unknown parameter";
+}
+
+export interface DeviceApplied<State> {
+  /** What changed, in the order asked. A value equal to the current one is not a change. */
+  changes: DeviceChange[];
+  rejected: DeviceRejection[];
+  state: State;
+}
+
+/**
+ * What a host gives a device to drive: an engine, a view, a store. The device
+ * knows nothing of it. `update` is called with each new state and must be cheap
+ * to repeat; `dispose` releases what it holds.
+ */
+export interface DeviceBinding<State> {
+  dispose: () => void;
+  update: (state: State) => void;
+}
+
 export interface Device<Parameters extends readonly ParameterDescriptor[]> {
+  /**
+   * Applies several changes at once and says what happened to each: the
+   * answer a model can act on. A value out of range is brought in and marked
+   * `adjusted`; an id the device does not have, or a value of the wrong type
+   * (a string where a number goes), is `rejected` and the parameter is left
+   * as it was, instead of being silently replaced by its default.
+   */
+  apply: (
+    state: DeviceState<Parameters>,
+    changes: Partial<Record<string, unknown>>
+  ) => DeviceApplied<DeviceState<Parameters>>;
   /** `value` brought into the device's own bounds, snapped to the steps: what `set` stores. */
   clampValue: (
     id: Parameters[number]["id"],
@@ -78,6 +144,8 @@ export interface Device<Parameters extends readonly ParameterDescriptor[]> {
     id: Parameters[number]["id"],
     position: number
   ) => number | boolean;
+  /** The device as JSON: what a catalog lists and an agent is told. */
+  describe: () => DeviceDescription;
   readonly description: string;
   /** Prints a parameter's value for a readout, with its unit. */
   format: (id: Parameters[number]["id"], value: number | boolean) => string;
@@ -284,6 +352,66 @@ export function defineDevice<
       );
     },
     parameters,
+    apply: (state, changes) => {
+      const applied: DeviceChange[] = [];
+      const rejected: DeviceRejection[] = [];
+      let next = { ...state } as Record<string, number | boolean>;
+      for (const [id, asked] of Object.entries(changes)) {
+        const parameter = byId.get(id);
+        if (!parameter) {
+          rejected.push({ id, reason: "unknown parameter" });
+          continue;
+        }
+        if (parameter.kind === "toggle") {
+          if (typeof asked !== "boolean") {
+            rejected.push({ id, reason: "not a boolean" });
+            continue;
+          }
+        } else if (!isNumber(asked)) {
+          rejected.push({ id, reason: "not a number" });
+          continue;
+        }
+        const to = clampValue(id, asked);
+        const from = next[id] ?? parameter.default;
+        if (to !== from) {
+          applied.push({ adjusted: to !== asked, from, id, to });
+          next = { ...next, [id]: to };
+        }
+      }
+      return {
+        changes: applied,
+        rejected,
+        state: next as DeviceState<Parameters>,
+      };
+    },
+    describe: () => ({
+      description: definition.description,
+      id: definition.id,
+      kind: definition.kind ?? "effect",
+      name: definition.name,
+      parameters: parameters.map((parameter): ParameterDescription => {
+        if (parameter.kind === "toggle") {
+          return {
+            default: parameter.default,
+            id: parameter.id,
+            label: parameter.label,
+            type: "boolean",
+          };
+        }
+        const scale = parameter.scale ?? "linear";
+        return {
+          default: parameter.default,
+          id: parameter.id,
+          label: parameter.label,
+          max: parameter.max,
+          min: parameter.min,
+          scale: typeof scale === "string" ? scale : "custom",
+          step: parameter.step,
+          type: "number",
+          unit: parameter.unit,
+        };
+      }),
+    }),
     sanitize: (state) => {
       const next = defaults() as Record<string, number | boolean>;
       for (const parameter of parameters) {
