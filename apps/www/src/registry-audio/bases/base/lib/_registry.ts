@@ -31,21 +31,6 @@ const items: RegistryItem[] = [
     type: "registry:lib",
   },
   {
-    categories: ["lib", "audio", "piano", "synth"],
-    dependencies: ["@audio-ui/core@^0.3.0"],
-    description:
-      "The page's one Web MIDI input, made with @audio-ui/core/midi: connect it from any button, and every component listening hears the same devices",
-    files: [
-      {
-        path: "lib/midi-input.ts",
-        type: "registry:lib",
-      },
-    ],
-    name: "midi-input",
-    registryDependencies: [],
-    type: "registry:lib",
-  },
-  {
     categories: ["lib", "audio", "sequencer", "piano"],
     dependencies: [],
     description:
@@ -197,6 +182,7 @@ const renamed: [from: string, to: string][] = [
 /** Libs that moved into `@audio-ui/core`: they install the package, which has them. */
 const movedToCore: [name: string, entry: string][] = [
   ["midi", "midi"],
+  ["midi-input", "midi"],
   ["pitch-detection", "pitch"],
 ];
 

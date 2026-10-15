@@ -107,7 +107,7 @@ export const hooks: RegistryItem[] = [
       },
     ],
     name: "use-midi-input",
-    registryDependencies: ["@audio-ui/midi-input"],
+    registryDependencies: [],
     type: "registry:hook",
   },
   {
