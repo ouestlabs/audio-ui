@@ -1,18 +1,8 @@
 "use client";
 
 import { useId, useState } from "react";
-import {
-  ChannelStrip,
-  ChannelStripContent,
-  ChannelStripFooter,
-  ChannelStripHeader,
-  ChannelStripLabel,
-  ChannelStripSection,
-  ChannelStripValue,
-} from "@/components/audio/channel-strip";
 import { Fader } from "@/components/audio/fader";
 import { Knob } from "@/components/audio/knob";
-import { Transport } from "@/components/audio/transport";
 import { XYPad } from "@/components/audio/xypad";
 
 export default function Home() {
@@ -20,7 +10,6 @@ export default function Home() {
   const [volume, setVolume] = useState(72);
   const [pan, setPan] = useState(50);
   const [filter, setFilter] = useState({ x: 50, y: 50 });
-  const [position, setPosition] = useState(35);
 
   return (
     <div className="mx-auto flex min-h-screen max-w-3xl flex-col items-center justify-center gap-10 p-8">
@@ -28,78 +17,51 @@ export default function Home() {
         registry · shadcn-installed · base-nova
       </p>
       <div className="flex flex-wrap items-start justify-center gap-6">
-        <ChannelStrip aria-label="Volume channel strip">
-          <ChannelStripHeader>Volume</ChannelStripHeader>
-          <ChannelStripContent>
-            <ChannelStripSection>
-              <Fader
-                aria-label="Volume"
-                id={volumeId}
-                max={100}
-                min={0}
-                onValueChange={setVolume}
-                value={volume}
-              />
-              <ChannelStripValue>{`${volume}%`}</ChannelStripValue>
-            </ChannelStripSection>
-          </ChannelStripContent>
-          <ChannelStripFooter>Ch. 1</ChannelStripFooter>
-        </ChannelStrip>
+        <section
+          aria-label="Volume"
+          className="flex flex-col items-center gap-3 rounded-xl border bg-card p-4"
+        >
+          <h2 className="font-medium text-xs">Volume</h2>
+          <Fader
+            aria-label="Volume"
+            id={volumeId}
+            max={100}
+            min={0}
+            onValueChange={setVolume}
+            value={volume}
+          />
+          <output className="text-xs tabular-nums">{`${volume}%`}</output>
+        </section>
 
-        <ChannelStrip aria-label="Pan channel strip">
-          <ChannelStripHeader>Pan</ChannelStripHeader>
-          <ChannelStripContent>
-            <ChannelStripSection>
-              <Knob
-                aria-label="Pan"
-                max={100}
-                min={0}
-                onValueChange={setPan}
-                size="lg"
-                value={pan}
-              />
-              <ChannelStripValue>{`${pan}%`}</ChannelStripValue>
-            </ChannelStripSection>
-          </ChannelStripContent>
-          <ChannelStripFooter>Ch. 2</ChannelStripFooter>
-        </ChannelStrip>
+        <section
+          aria-label="Pan"
+          className="flex flex-col items-center gap-3 rounded-xl border bg-card p-4"
+        >
+          <h2 className="font-medium text-xs">Pan</h2>
+          <Knob
+            aria-label="Pan"
+            max={100}
+            min={0}
+            onValueChange={setPan}
+            size="lg"
+            value={pan}
+          />
+          <output className="text-xs tabular-nums">{`${pan}%`}</output>
+        </section>
 
-        <ChannelStrip aria-label="Filter channel strip">
-          <ChannelStripHeader>Filter</ChannelStripHeader>
-          <ChannelStripContent>
-            <ChannelStripSection>
-              <XYPad
-                aria-label="Filter frequency and resonance"
-                onValueChange={setFilter}
-                value={filter}
-              />
-              <ChannelStripLabel>Freq / Reso</ChannelStripLabel>
-            </ChannelStripSection>
-          </ChannelStripContent>
-          <ChannelStripFooter>Ch. 3</ChannelStripFooter>
-        </ChannelStrip>
+        <section
+          aria-label="Filter"
+          className="flex flex-col items-center gap-3 rounded-xl border bg-card p-4"
+        >
+          <h2 className="font-medium text-xs">Filter</h2>
+          <XYPad
+            aria-label="Filter frequency and resonance"
+            onValueChange={setFilter}
+            value={filter}
+          />
+          <p className="text-xs">Freq / Reso</p>
+        </section>
       </div>
-
-      <ChannelStrip
-        aria-label="Transport"
-        className="w-full"
-        orientation="horizontal"
-      >
-        <ChannelStripHeader>Master</ChannelStripHeader>
-        <ChannelStripContent>
-          <ChannelStripSection>
-            <Transport
-              aria-label="Seek"
-              bufferedValue={Math.min(position + 15, 100)}
-              onSeek={setPosition}
-              value={position}
-            />
-          </ChannelStripSection>
-        </ChannelStripContent>
-        <ChannelStripFooter>
-          <ChannelStripValue>{`${Math.round(position)}%`}</ChannelStripValue>
-        </ChannelStripFooter>
-      </ChannelStrip>
     </div>
   );
 }
