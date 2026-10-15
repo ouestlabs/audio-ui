@@ -1,5 +1,11 @@
 # @audio-ui/core
 
+## 0.5.0
+
+### Minor Changes
+
+- 90d6c74: New `@audio-ui/core/analysis` entry: the maths behind a plot, a meter and a waveform, with no framework in it. Spectrum on a log frequency axis with peak hold (`logSpectrum`, `holdPeaks`), waveform peaks and bands (`computePeaks`, `downsampleWaveform`, `spectrumBands`), levels (`dbToGain`, `gainToDb`, `rmsDb`), the response of a biquad and of an equalizer (`biquadResponse`, `eqResponse`), and the transfer curve of a compressor. The curves are checked against the browser's own nodes: a filter's equals `BiquadFilterNode.getFrequencyResponse` to within 0.05 dB once the Q is passed to the node with `toWebAudioQ` (a low-pass and a high-pass take their Q in decibels, which differed by up to 7.7 dB, and a shelf ignores Q, which differed by up to 11 dB), and `webAudioCompressorOutput` draws the curve of `DynamicsCompressorNode`, with its one-sided knee and the make-up gain it adds on its own, where `compressorOutput` stays the textbook curve. `downsampleWaveform` covers every sample (it dropped the last ones when the length did not divide) and stretches a short input instead of padding it with silence. Input that is not a number gives silence or `NaN`-free output instead of a throw.
+
 ## 0.4.0
 
 ### Minor Changes
