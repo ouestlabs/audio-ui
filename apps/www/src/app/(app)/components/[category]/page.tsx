@@ -18,6 +18,7 @@ import {
 import { getComponentCategorySeo } from "@/lib/registry-seo-cache";
 import { buildBreadcrumbJsonLd, buildPageMetadata } from "@/lib/seo";
 import { normalizeSlug } from "@/lib/utils";
+import { categories } from "@/registry-audio/bases/categories";
 import { CategoryPageContent } from "./category-page-content";
 
 // Fully static, search filtering happens client-side in ComponentGrid
@@ -121,7 +122,12 @@ export default async function CategoryComponentsPage({
             <h1 className="mt-3 min-w-0 flex-1 font-bold text-balanc text-xl sm:text-3xl">
               {seo.title}
             </h1>
-            <ComponentDocsLink slug={normalized} />
+            <ComponentDocsLink
+              slug={
+                categories.find((item) => item.name === normalized)?.docs ??
+                normalized
+              }
+            />
           </div>
           {seo.intro ? <ComponentCategoryHeroIntro intro={seo.intro} /> : null}
         </div>
