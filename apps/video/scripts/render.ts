@@ -89,12 +89,14 @@ async function spotlightProps(
   const page = Bun.file(
     `${root}/apps/www/src/content/docs/components/base/${component}.mdx`
   );
-  if (!(await page.exists())) {
+  // A block or a composition has no docs page of its own: its showcase says what it is.
+  const hasPage = await page.exists();
+  if (!(hasPage || SHOWCASES[component]?.description)) {
     fail(
-      `No docs page for "${component}" in apps/www/src/content/docs/components/base/.`
+      `No docs page for "${component}" in apps/www/src/content/docs/components/base/, and its showcase has no description.`
     );
   }
-  const docs = await page.text();
+  const docs = hasPage ? await page.text() : "";
 
   let notes = values.note ?? [];
   if (kind === "update" && notes.length === 0) {
@@ -109,7 +111,10 @@ async function spotlightProps(
     );
   }
   return {
-    description: frontmatterField(docs, "description") ?? "",
+    description:
+      frontmatterField(docs, "description") ??
+      SHOWCASES[component]?.description ??
+      "",
     kind,
     name: component,
     notes: notes.slice(0, MAX_NOTES),
