@@ -35,6 +35,21 @@ const PROVIDED_BY_SHADCN = new Set([
   "@/app/(create)/components/icon-placeholder",
   "@/lib/utils",
 ]);
+// Every `from "<package>"` specifier in a built file.
+const PACKAGE_IMPORT = /from\s+"([^".@/][^"]*|@[^"/]+\/[^"/]+[^"]*)"/g;
+const BLOCK_COMMENT = /\/\*[\s\S]*?\*\//g;
+const LINE_COMMENT = /^\s*\/\/.*$/gm;
+// `@scope/name@^1.2.3` or `name@1.2.3`: a dependency with its version pinned.
+const PINNED_DEPENDENCY = /(?<=.)@[\^~]?\d/;
+// What a shadcn project already has, or that every shadcn component brings.
+const PROVIDED_PACKAGES = new Set([
+  "class-variance-authority",
+  "clsx",
+  "next",
+  "react",
+  "react-dom",
+  "tailwind-merge",
+]);
 // The extension of an installed file.
 const EXTENSION = /\.[a-z]+$/;
 // `A as B` in an import or export list.
@@ -47,6 +62,8 @@ const ICON_EXPRESSION =
   /\b(?:lucide|tabler|hugeicons|phosphor|remixicon)=\{(?!\s*["'`])/;
 
 interface BuiltItem {
+  dependencies?: string[];
+  description?: string;
   files?: { content?: string; target?: string }[];
   name?: string;
   registryDependencies?: string[];
@@ -257,4 +274,63 @@ test("icons are string literals, so the shadcn CLI can turn them into imports", 
       .map((file) => `${item.name}: ${file.target}`)
   );
   expect(expressions).toEqual([]);
+});
+
+/** `@scope/pkg/sub` or `pkg/sub` to the name npm installs. */
+function packageOf(specifier: string) {
+  const [first = "", second = ""] = specifier.split("/");
+  return specifier.startsWith("@") ? `${first}/${second}` : first;
+}
+
+test("every package a registry file imports is declared by it or by what it installs", () => {
+  const undeclared: string[] = [];
+  for (const item of items) {
+    const declared = new Set<string>();
+    for (const name of withDependencies(item.name ?? "")) {
+      for (const dependency of byName.get(name)?.dependencies ?? []) {
+        declared.add(dependency);
+      }
+    }
+    for (const file of item.files ?? []) {
+      // An import in a comment (a usage example) is not an import.
+      const code = (file.content ?? "")
+        .replace(BLOCK_COMMENT, "")
+        .replace(LINE_COMMENT, "");
+      for (const [, specifier = ""] of code.matchAll(PACKAGE_IMPORT)) {
+        const name = packageOf(specifier);
+        if (
+          !(
+            specifier.startsWith("node:") ||
+            PROVIDED_PACKAGES.has(name) ||
+            declared.has(name)
+          )
+        ) {
+          undeclared.push(`${item.name}: ${name}`);
+        }
+      }
+    }
+  }
+  expect([...new Set(undeclared)]).toEqual([]);
+});
+
+test("every item says what it is", () => {
+  // The catalog's search, the shadcn CLI's and the MCP server's all read it.
+  // `registry.json`, the style's index, is read with the items and has no files.
+  expect(
+    items
+      .filter((item) => item.files && !item.description?.trim())
+      .map((item) => item.name)
+  ).toEqual([]);
+});
+
+test("no item pins the version of a package it asks for", () => {
+  // The user's own range decides: the CLI installs what is missing and leaves
+  // a version an app already has, and the docs say how to update it.
+  expect(
+    items.flatMap((item) =>
+      (item.dependencies ?? [])
+        .filter((dependency) => PINNED_DEPENDENCY.test(dependency))
+        .map((dependency) => `${item.name}: ${dependency}`)
+    )
+  ).toEqual([]);
 });

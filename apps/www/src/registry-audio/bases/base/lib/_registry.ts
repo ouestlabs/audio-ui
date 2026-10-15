@@ -133,7 +133,7 @@ const movedToCore: [name: string, entry: string][] = [
 export const lib: RegistryItem[] = [
   ...items,
   {
-    dependencies: ["@audio-ui/core@^0.5.0"],
+    dependencies: ["@audio-ui/core"],
     description:
       "Moved: the peaks are in @audio-ui/core/analysis and the decoding is audio-decode, as this lib gave both.",
     files: [],
@@ -143,7 +143,7 @@ export const lib: RegistryItem[] = [
   },
   ...movedToCore.map(
     ([name, entry]): RegistryItem => ({
-      dependencies: ["@audio-ui/core@^0.5.0"],
+      dependencies: ["@audio-ui/core"],
       description: `Moved to @audio-ui/core/${entry}: installs the package.`,
       files: [],
       name,
