@@ -77,6 +77,7 @@ export function Root(componentProps: Root.Props) {
   controller.setOptions(options);
   const snapshot = React.useSyncExternalStore(
     controller.subscribe,
+    controller.getSnapshot,
     controller.getSnapshot
   );
 

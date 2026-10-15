@@ -120,6 +120,7 @@ export function Region(componentProps: Region.Props) {
   controller.setOptions(options);
   const snapshot = React.useSyncExternalStore(
     controller.subscribe,
+    controller.getSnapshot,
     controller.getSnapshot
   );
 
