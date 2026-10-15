@@ -169,3 +169,26 @@ describe("formatting", () => {
     expect(formatDb(-0.01)).toBe("0.0 dB");
   });
 });
+
+describe("sampleRate", () => {
+  const peak = { frequency: 12_000, gainDb: 12, q: 3, type: "peak" } as const;
+
+  test("defaults to 48 kHz", () => {
+    const explicit = biquadResponse({ ...peak, sampleRate: 48_000 });
+    expect(biquadResponse(peak)(13_000)).toBe(explicit(13_000));
+  });
+
+  test("bends the top of the curve at another rate, and not the bottom", () => {
+    const at44 = biquadResponse({ ...peak, sampleRate: 44_100 });
+    const at48 = biquadResponse(peak);
+    expect(Math.abs(at44(13_000) - at48(13_000))).toBeGreaterThan(0.3);
+    expect(Math.abs(at44(100) - at48(100))).toBeLessThan(0.01);
+  });
+
+  test("reaches every band of an equalizer", () => {
+    const bands = [{ ...peak, sampleRate: 44_100 }];
+    expect(eqResponse(bands)(13_000)).toBe(
+      biquadResponse({ ...peak, sampleRate: 44_100 })(13_000)
+    );
+  });
+});

@@ -26,13 +26,6 @@ export class WebAudio {
     return ctx;
   }
 
-  cleanup(): void {
-    if (this.#audioContext) {
-      this.#audioContext.close();
-      this.#audioContext = null;
-    }
-  }
-
   private isClient(): boolean {
     return typeof window !== "undefined" && !!window.document;
   }
