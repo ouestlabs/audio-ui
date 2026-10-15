@@ -45,6 +45,10 @@
       "types": "./dist/audio/pitch/index.d.ts",
       "import": "./dist/pitch.js"
     },
+    "./time": {
+      "types": "./dist/audio/time/index.d.ts",
+      "import": "./dist/time.js"
+    },
     "./knob": {
       "types": "./dist/primitives/knob/index.d.ts",
       "import": "./dist/knob.js"

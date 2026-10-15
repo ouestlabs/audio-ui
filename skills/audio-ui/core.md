@@ -24,6 +24,7 @@ npm install @audio-ui/core   # no dependencies
 | `@audio-ui/core/timeline` | `createTimelineController`, `createTrackController`, `createClipController`, `createRangeController`, `createNavigatorController`, `createWheelZoom` |
 | `@audio-ui/core/waveform` | `createWaveformController`, `createWaveformRegionController`, `createLevelsEngine`, `createLevelHistory` |
 | `@audio-ui/core/midi` | `parseMidiMessage`, `pitchBendToSemitones`, `parseMidiFile`, `encodeMidiFile`, `MidiFileError`, `createMidiInput` |
+| `@audio-ui/core/time` | `secondsPerQuarter`, `barsBeatsAt`, `ticksToSeconds`, `secondsToTicks`, `gridInterval`, `gridLabel`, `advance`, `positionAt`, `SCHEDULE_AHEAD_SECONDS` |
 | `@audio-ui/core/pitch` | `noteToFrequency`, `frequencyToNote`, `nearestNote`, `detectPitch`, `pitchName`, `CONCERT_PITCH_HZ` |
 
 Never import `@audio-ui/core/internal`: it may change in any release.

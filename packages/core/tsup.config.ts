@@ -18,7 +18,7 @@ const primitives = [
   "waveform",
   "xypad",
 ];
-const audio = ["midi", "pitch"];
+const audio = ["midi", "pitch", "time"];
 
 // Declarations are emitted by `tsc -p tsconfig.build.json` (see build:pkg):
 // tsup's dts step injects the deprecated `baseUrl` option, which TypeScript 6
