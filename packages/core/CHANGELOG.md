@@ -1,5 +1,12 @@
 # @audio-ui/core
 
+## 0.3.0
+
+### Minor Changes
+
+- 85fd7b8: New `@audio-ui/core/midi` entry: MIDI with no framework in it. `parseMidiMessage` reads note on and off, control change and pitch bend with their channel and values from 0 to 1 (pitch bend from -1 to 1, both ends reached); `parseMidiFile` reads a Standard MIDI File into notes with their track, tempos and time signatures, and `encodeMidiFile` writes one; `createMidiInput` listens to the Web MIDI inputs of the page as one source. A file that is truncated, malformed or counts time in SMPTE frames raises a `MidiFileError` that says what is wrong. The folders of the package now tell the two kinds of module apart: `primitives/` holds the logic of the interface primitives and `audio/` the audio logic with no interface (`pitch`, `midi`).
+- 43f455f: New `@audio-ui/core/pitch` entry: the maths of pitch with no framework or Web Audio in it. `noteToFrequency` and `frequencyToNote` convert between MIDI notes and hertz (equal temperament, A4 at 440 Hz or the reference you pass, fractional notes for cents), `nearestNote` names the note nearest a frequency with its offset in cents, and `detectPitch` finds the fundamental of an array of samples, such as an analyser's time-domain data, with the YIN algorithm. `pitchName`, `isBlackKey` and the new `pitchClassName` come with it. Input that is not a number a note or a frequency can be (zero, negative, `NaN`) gives `NaN` or `null`, never a wrong note.
+
 ## 0.2.0
 
 ### Minor Changes
