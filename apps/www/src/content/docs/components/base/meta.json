@@ -11,6 +11,7 @@
     "meter",
     "waveform",
     "plot",
+    "spectrum-analyzer",
     "---Time and sequencing---",
     "timeline",
     "sequencer",

@@ -63,3 +63,40 @@ export function logSpectrum(
   }
   return out;
 }
+
+export interface PeakHoldOptions {
+  /** How fast a peak falls once its hold is over, in dB per second. @default 24 */
+  fall?: number;
+  /** How long a peak stays put before it falls, in seconds. @default 1 */
+  hold?: number;
+}
+
+/**
+ * Keeps the loudest level each point of a spectrum reached: a peak rises with
+ * the spectrum at once, stays put for `hold` seconds, then falls at `fall` dB
+ * per second until the spectrum meets it again. `peaks` and `holding` (seconds
+ * of hold left per point) are updated in place, `elapsed` seconds after the
+ * last call. Returns `peaks`.
+ */
+export function holdPeaks(
+  spectrum: ArrayLike<number>,
+  peaks: Float32Array,
+  holding: Float32Array,
+  elapsed: number,
+  { fall = 24, hold = 1 }: PeakHoldOptions = {}
+): Float32Array {
+  for (let point = 0; point < peaks.length; point += 1) {
+    const level = spectrum[point] ?? SPECTRUM_FLOOR_DB;
+    const peak = peaks[point] ?? SPECTRUM_FLOOR_DB;
+    const left = holding[point] ?? 0;
+    if (level >= peak) {
+      peaks[point] = level;
+      holding[point] = hold;
+    } else if (left > 0) {
+      holding[point] = left - elapsed;
+    } else {
+      peaks[point] = Math.max(level, peak - fall * elapsed);
+    }
+  }
+  return peaks;
+}

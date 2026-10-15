@@ -135,6 +135,11 @@
     "title": "pad-demo"
   },
   {
+    "categories": ["spectrum"],
+    "name": "spectrum-analyzer-demo",
+    "title": "spectrum-analyzer-demo"
+  },
+  {
     "categories": ["sequencer"],
     "name": "sequencer-demo",
     "title": "sequencer-demo"

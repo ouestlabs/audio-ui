@@ -114,6 +114,7 @@ Run commands with the project's package manager, read from its lockfile: `npx sh
 | Level in dB with peak hold | `meter` |
 | Audio file shape, seeking, live scope | `waveform` |
 | EQ, filter or compressor curve with handles | `plot` |
+| Live spectrum, frequency analyzer | `spectrum-analyzer` |
 | Arrangement view, clips, ruler, playhead | `timeline` |
 | Step pattern | `sequencer` |
 | Drum pads, sample triggers | `pad` |

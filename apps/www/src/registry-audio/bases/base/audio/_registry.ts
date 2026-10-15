@@ -83,6 +83,18 @@ export const audio: RegistryItem[] = [
     dependencies: ["@audio-ui/react"],
     files: [
       {
+        path: "audio/elements/spectrum-analyzer.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "spectrum-analyzer",
+    registryDependencies: ["@audio-ui/plot", "@audio-ui/use-spectrum"],
+    type: "registry:ui",
+  },
+  {
+    dependencies: ["@audio-ui/react"],
+    files: [
+      {
         path: "audio/elements/plot.tsx",
         type: "registry:ui",
       },
