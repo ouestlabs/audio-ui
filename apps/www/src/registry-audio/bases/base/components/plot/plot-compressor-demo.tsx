@@ -96,6 +96,7 @@ export default function PlotCompressorDemo() {
         minX={MIN_DB}
         minY={MIN_DB}
       >
+        <PlotGrid x={{ ticks: DB_TICKS }} y={{ ticks: DB_TICKS.slice(0, 2) }} />
         <PlotGraph>
           <PlotCurve
             className="stroke-border [stroke-dasharray:4_4]"
@@ -108,7 +109,6 @@ export default function PlotCompressorDemo() {
           />
           <PlotCurve fn={output} />
         </PlotGraph>
-        <PlotGrid x={{ ticks: DB_TICKS }} y={{ ticks: DB_TICKS.slice(0, 2) }} />
         <PlotCursor format={describePointer} />
         <PlotDot source={dot} />
         <PlotHandle
