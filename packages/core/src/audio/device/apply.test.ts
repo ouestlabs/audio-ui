@@ -191,6 +191,14 @@ describe("deviceTools", () => {
     expect(release.description).toContain("log scale");
   });
 
+  test("set says why nothing changed when every value is already set", () => {
+    const result = set?.run(device.defaults(), { ratio: 4 });
+    expect(result?.state).toEqual(device.defaults());
+    expect(result?.summary).toBe(
+      "Nothing changed: every value given is already set."
+    );
+  });
+
   test("set changes the state and reports it in a sentence", () => {
     const result = set?.run(device.defaults(), { ratio: 8, thresholdDb: -300 });
     expect(result?.state).toMatchObject({ ratio: 8, thresholdDb: -60 });
