@@ -1,0 +1,99 @@
+---
+title: Reverb
+description: "A reverb as a device you can plug in: a decay, a pre-delay, a damping and a mix as a state, a panel that draws the tail with a handle, a Web Audio engine and the tools an agent drives it with."
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="block-reverb" />
+
+Puts the sound in a room. The panel draws the tail's level falling in dB from the end of the pre-delay to -60 dB: drag the handle at its end for the decay time. It is a device like the [compressor](/docs/components/compressor): a state, a panel that draws it, an engine that plays it and tools an agent calls, each its own file.
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">CLI</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash component
+npx shadcn@latest add @audio-ui/block-reverb
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the packages:</Step>
+
+```bash
+npm install @audio-ui/react @audio-ui/core
+```
+
+<Step>Add the pieces you want. All of them, or only the state and the panel if your engine is elsewhere:</Step>
+
+```bash
+npx shadcn@latest add @audio-ui/reverb-device @audio-ui/reverb-panel @audio-ui/reverb-engine
+```
+
+<Step>Copy and paste the demo that wires them, if you want it.</Step>
+
+<ComponentSource
+  styleName="base-nova"
+  name="block-reverb"
+  title="components/examples/block-reverb.tsx"
+/>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import { ReverbPanel } from "@/components/audio-ui/devices/reverb/panel";
+import { reverbDevice } from "@/components/audio-ui/devices/reverb/device";
+
+const [state, setState] = useState(() => reverbDevice.defaults());
+
+<ReverbPanel onValueChange={setState} value={state} />;
+```
+
+The state is a plain object keyed by parameter id, so a host stores it, saves it with its project and sends it where it likes. `reverbImpulse(sampleRate, state)` makes the impulse response of a room, and `reverbDecay(state)` the decay the panel draws.
+
+## The engine
+
+```ts
+import { createReverbEngine } from "@/components/audio-ui/devices/reverb/engine";
+
+const engine = createReverbEngine(ctx, state);
+source.connect(engine.input);
+engine.output.connect(ctx.destination);
+engine.update(nextState); // parameters ramp: no click
+engine.dispose();
+```
+
+The room is a convolver fed an impulse response made from the decay and the damping. A convolver cannot change its impulse without a click, so the engine has two and cross-fades: a new room is built in the idle one, at most every 120 ms while a knob moves.
+
+## The tools
+
+```ts
+import { deviceTools } from "@audio-ui/core/device";
+import { reverbDevice } from "@/components/audio-ui/devices/reverb/device";
+
+const [set, reset] = deviceTools(reverbDevice);
+```
+
+`set` and `reset` change the state, with the ranges the device enforces: a value out of range is brought in and reported, a wrong one is refused by name, and a call never throws.
+
+## Accessibility
+
+Every control is a native input: the knobs are sliders named after their parameter, with the value and unit as the text value, the switch is a toggle button, and everything takes the keyboard.

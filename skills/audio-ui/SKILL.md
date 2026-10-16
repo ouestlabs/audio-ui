@@ -123,7 +123,7 @@ Run commands with the project's package manager, read from its lockfile: `npx sh
 | Drum pads, sample triggers | `pad` |
 | Playable keyboard | `piano` |
 | Play from a MIDI keyboard | `use-midi-input` hook, `midi-connect-control` |
-| A compressor, or any effect, as a state a host and an agent can drive | `block-compressor`, `block-equalizer`, or `defineDevice` and `device-panel` |
+| A compressor, or any effect, as a state a host and an agent can drive | `block-compressor`, `block-equalizer`, `block-delay`, `block-reverb`, `block-filter`, `block-distortion`, `block-chorus`, or `defineDevice` and `device-panel` |
 | Tune an instrument, name the note of a sound | `tuner`, with `use-microphone` and `use-pitch` |
 | Note editor | `piano-roll` |
 | Play, stop, record, loop, bars and tempo | `transport` |

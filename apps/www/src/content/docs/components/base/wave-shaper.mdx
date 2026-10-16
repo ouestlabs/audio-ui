@@ -1,0 +1,109 @@
+---
+title: Wave Shaper
+description: "A wave shaper synth as a device you can plug in: a waveform, drive, tone, detune, mix and volume as a state, a panel with a pad that plays it, a Web Audio engine and the tools an agent plays it with."
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="block-wave-shaper" />
+
+Two detuned oscillators, a distortion mixed in with the clean sound and a low-pass filter. Press the pad: pitch goes across, the resonance up. It is a device like the [compressor](/docs/components/compressor): a state, a panel that draws it, an engine that plays it and tools an agent calls, each its own file.
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">CLI</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash component
+npx shadcn@latest add @audio-ui/block-wave-shaper
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the packages:</Step>
+
+```bash
+npm install @audio-ui/react @audio-ui/core
+```
+
+<Step>Add the pieces you want. All of them, or only the state and the panel if your engine is elsewhere:</Step>
+
+```bash
+npx shadcn@latest add @audio-ui/wave-shaper-device @audio-ui/wave-shaper-panel @audio-ui/wave-shaper-engine
+```
+
+<Step>Copy and paste the demo that wires them, if you want it.</Step>
+
+<ComponentSource
+  styleName="base-nova"
+  name="block-wave-shaper"
+  title="components/examples/block-wave-shaper.tsx"
+/>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import { WaveShaperPanel } from "@/components/audio-ui/devices/wave-shaper/panel";
+import { waveShaperDevice } from "@/components/audio-ui/devices/wave-shaper/device";
+
+const [state, setState] = useState(() => waveShaperDevice.defaults());
+
+<WaveShaperPanel onValueChange={setState} value={state} />;
+```
+
+The state is a plain object keyed by parameter id, so a host stores it, saves it with its project and sends it where it likes. `waveShaperPitch(position)` and `waveShaperResonance(position)` turn a pad position from 0 to 1 into a note.
+
+## The engine
+
+```ts
+import { createWaveShaperEngine } from "@/components/audio-ui/devices/wave-shaper/engine";
+
+const engine = createWaveShaperEngine(ctx, state);
+engine.output.connect(ctx.destination);
+engine.noteOn(note);  // starts a note, or glides the one being held
+engine.noteOff();     // lets it go
+engine.update(nextState);
+engine.dispose();
+```
+
+One voice at a time, as the Pocket Synth. The distortion curve is a table of 44,100 points, rebuilt only when the drive changes.
+
+## The tools
+
+```ts
+import { deviceTools } from "@audio-ui/core/device";
+import { waveShaperDevice } from "@/components/audio-ui/devices/wave-shaper/device";
+
+const [set, reset, play] = deviceTools(waveShaperDevice);
+```
+
+`set` and `reset` change the state, with the ranges the device enforces: a value out of range is brought in and reported, a wrong one is refused by name, and a call never throws.
+
+`play` plays a note: its call gives the parts of the note (a pitch, and a resonance) and how long it lasts, and returns the note and the duration for the host to give to the engine.
+
+```ts
+import { playNote } from "@audio-ui/core/device";
+
+const result = play.run(state, input);
+if (result.note) playNote(engine, result.note, result.duration ?? 0.5);
+```
+
+## Accessibility
+
+Every control is a native input: the knobs are sliders named after their parameter, with the value and unit as the text value, the switch is a toggle button, and everything takes the keyboard.

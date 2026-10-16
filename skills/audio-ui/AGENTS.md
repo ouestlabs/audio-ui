@@ -1430,6 +1430,8 @@ A device of your own is `defineDevice({ id, name, description, parameters })` fr
 
 An instrument is a device with `kind: "instrument"`: its parameters shape the timbre (a `choice` parameter holds a waveform or a filter type) and its engine adds `noteOn(note)` and `noteOff()` next to `update(state)`. `block-pocket-synth` is the reference: the panel is controlled and sends notes out through `onNoteOn` and `onNoteOff`, so it plays through any engine, or none.
 
+An agent can play an instrument that declares its `note` (a pitch, a cutoff, each with a range): `deviceTools` then returns a third tool, `<id>_play`, whose call gives back the note and how long it lasts, in bounds and refused by name when wrong, for the host to give to `playNote(engine, note, seconds)`. A parameter that is a pick from a list (a waveform, a filter type) is `kind: "choice"` with its `options`; the state holds the option's value, and a value that is not an option is refused, not replaced.
+
 ### 7.5 apply is pure and re-clamps
 
 **Impact: MEDIUM (every tool call yields a valid state)**
