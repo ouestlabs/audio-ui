@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
 import { ALL_CHECKS, type CheckResult } from "@/lib/conformance/checks";
 
 type Row = { result?: CheckResult; error?: string } | undefined;
 
-/** Runs every conformance check once, in order, and lists what each measured. */
-export function ConformanceReport() {
+/** Runs every conformance check once, together, and lists what each measured. */
+function Checks({ onAgain }: { onAgain: () => void }) {
   const [rows, setRows] = useState<Row[]>([]);
   const [done, setDone] = useState(false);
 
@@ -45,15 +46,20 @@ export function ConformanceReport() {
 
   return (
     <div className="flex flex-col gap-4">
-      <p
-        className="font-mono text-sm"
-        data-done={done || undefined}
-        id="conformance-summary"
-        role="status"
-      >
-        {done ? "Done" : "Running"}: {passed} passed, {failed} failed,{" "}
-        {ALL_CHECKS.length} checks.
-      </p>
+      <div className="flex items-center justify-between gap-3">
+        <p
+          className="font-mono text-sm"
+          data-done={done || undefined}
+          id="conformance-summary"
+          role="status"
+        >
+          {done ? "Done" : "Running"}: {passed} passed, {failed} failed,{" "}
+          {ALL_CHECKS.length} checks.
+        </p>
+        <Button disabled={!done} onClick={onAgain} size="sm" variant="outline">
+          Run again
+        </Button>
+      </div>
       <ul className="flex flex-col divide-y border">
         {ALL_CHECKS.map((check, index) => {
           const row = rows[index];
@@ -102,4 +108,11 @@ export function ConformanceReport() {
       </ul>
     </div>
   );
+}
+
+/** The report: it runs the checks on its own, and "Run again" runs them anew. */
+export function ConformanceReport() {
+  const [run, setRun] = useState(0);
+  const again = useCallback(() => setRun((count) => count + 1), []);
+  return <Checks key={run} onAgain={again} />;
 }

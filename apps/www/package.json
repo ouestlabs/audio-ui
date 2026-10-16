@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "build": "next build",
+    "conformance": "bun ./scripts/conformance.ts",
     "dev": "next dev --port 4000",
     "icons:build": "bun ./scripts/build-icons.ts",
     "icons:scan": "bun ./scripts/scan-icons.ts",
