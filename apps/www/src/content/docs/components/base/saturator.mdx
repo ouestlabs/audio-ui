@@ -1,0 +1,99 @@
+---
+title: Saturator
+description: "A saturator as a device you can plug in: a curve, a drive, a mix and an output as a state, a panel that draws its transfer curve, a Web Audio engine and the tools an agent drives it with."
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="block-saturator" />
+
+Adds warmth or dirt. The drive pushes the signal into one of four curves, a soft clip, a hard clip, a wavefold or an asymmetric tube, and the panel draws the transfer curve against the straight line of a clean sound. It is a device like the [compressor](/docs/components/compressor): a state, a panel that draws it, an engine that plays it and tools an agent calls, each its own file.
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">CLI</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash component
+npx shadcn@latest add @audio-ui/block-saturator
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the packages:</Step>
+
+```bash
+npm install @audio-ui/react @audio-ui/core
+```
+
+<Step>Add the pieces you want. All of them, or only the state and the panel if your engine is elsewhere:</Step>
+
+```bash
+npx shadcn@latest add @audio-ui/saturator-device @audio-ui/saturator-panel @audio-ui/saturator-engine
+```
+
+<Step>Copy and paste the demo that wires them, if you want it.</Step>
+
+<ComponentSource
+  styleName="base-nova"
+  name="block-saturator"
+  title="components/examples/block-saturator.tsx"
+/>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import { SaturatorPanel } from "@/components/audio-ui/devices/saturator/panel";
+import { saturatorDevice } from "@/components/audio-ui/devices/saturator/device";
+
+const [state, setState] = useState(() => saturatorDevice.defaults());
+
+<SaturatorPanel onValueChange={setState} value={state} />;
+```
+
+The state is a plain object keyed by parameter id, so a host stores it, saves it with its project and sends it where it likes. `saturate(curve, input)` is one curve and `saturatorCurve(state)` the whole transfer curve with the mix and the output.
+
+## The engine
+
+```ts
+import { createSaturatorEngine } from "@/components/audio-ui/devices/saturator/engine";
+
+const engine = createSaturatorEngine(ctx, state);
+source.connect(engine.input);
+engine.output.connect(ctx.destination);
+engine.update(nextState); // parameters ramp: no click
+engine.dispose();
+```
+
+The drive is a gain before the table of the curve, so turning it never rebuilds the table; only picking another curve does. The shaper oversamples 4x to keep the clip from aliasing.
+
+## The tools
+
+```ts
+import { deviceTools } from "@audio-ui/core/device";
+import { saturatorDevice } from "@/components/audio-ui/devices/saturator/device";
+
+const [set, reset] = deviceTools(saturatorDevice);
+```
+
+`set` and `reset` change the state, with the ranges the device enforces: a value out of range is brought in and reported, a wrong one is refused by name, and a call never throws. A choice such as the curve or the mode takes only the values of its options.
+
+## Accessibility
+
+Every control is a native input: the knobs are sliders named after their parameter, with the value and unit as the text value, the choices are toggle buttons, and everything takes the keyboard.

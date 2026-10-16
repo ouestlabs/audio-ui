@@ -398,6 +398,102 @@ const items: RegistryItem[] = [
     type: "registry:lib",
   },
   {
+    categories: ["lib", "audio", "device"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "The saturator as a device: a curve, a drive, a mix and an output level, the numbers that go on the nodes for a state, the four curves and the transfer curve a state plays, with no panel and no audio in it.",
+    files: [
+      {
+        path: "lib/saturator-device.ts",
+        target: "components/audio-ui/devices/saturator/device.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "saturator-device",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device"],
+    dependencies: [],
+    description:
+      "A saturator on the Web Audio API for a saturator state: a drive gain into the table of the chosen curve at 4x oversampling, mixed with the clean sound at an output level; the table is rebuilt only when the curve changes.",
+    files: [
+      {
+        path: "lib/saturator-engine.ts",
+        target: "components/audio-ui/devices/saturator/engine.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "saturator-engine",
+    registryDependencies: ["@audio-ui/saturator-device"],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "The phaser-flanger as a device: a mode, a rate, a depth, a centre frequency, a delay, a feedback and a mix, the numbers that go on the nodes for a state and the sweep, with no panel and no audio in it.",
+    files: [
+      {
+        path: "lib/phaser-device.ts",
+        target: "components/audio-ui/devices/phaser/device.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "phaser-device",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device"],
+    dependencies: [],
+    description:
+      "A phaser and flanger on the Web Audio API for a phaser state: four all-pass filters and a short delay swept by one oscillator, crossfaded by the mode, with feedback and a mix.",
+    files: [
+      {
+        path: "lib/phaser-engine.ts",
+        target: "components/audio-ui/devices/phaser/engine.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "phaser-engine",
+    registryDependencies: ["@audio-ui/phaser-device"],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "The auto pan as a device: a mode, a waveform, a rate and a depth, the numbers that go on the nodes for a state and the movement the oscillator makes, with no panel and no audio in it.",
+    files: [
+      {
+        path: "lib/auto-pan-device.ts",
+        target: "components/audio-ui/devices/auto-pan/device.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "auto-pan-device",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device"],
+    dependencies: [],
+    description:
+      "An auto pan and tremolo on the Web Audio API for an auto pan state: one oscillator that moves a stereo panner or the level of a gain, by the mode, at a rate, a depth and a waveform.",
+    files: [
+      {
+        path: "lib/auto-pan-engine.ts",
+        target: "components/audio-ui/devices/auto-pan/engine.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "auto-pan-engine",
+    registryDependencies: ["@audio-ui/auto-pan-device"],
+    type: "registry:lib",
+  },
+  {
     categories: ["lib", "audio", "web-audio"],
     dependencies: [],
     description:

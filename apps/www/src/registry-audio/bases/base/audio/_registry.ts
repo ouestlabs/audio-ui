@@ -376,6 +376,66 @@ export const audio: RegistryItem[] = [
   },
   {
     categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "The face of the saturator device: its transfer curve against the straight line of a clean sound, over the device knobs and the choice of curve.",
+    files: [
+      {
+        path: "audio/panels/saturator-panel.tsx",
+        target: "components/audio-ui/devices/saturator/panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "saturator-panel",
+    registryDependencies: [
+      "@audio-ui/device-panel",
+      "@audio-ui/plot",
+      "@audio-ui/saturator-device",
+    ],
+    type: "registry:ui",
+  },
+  {
+    categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "The face of the phaser-flanger device: the sweep of its oscillator over two seconds, over the device knobs, with the ones the mode does not use drawn off.",
+    files: [
+      {
+        path: "audio/panels/phaser-panel.tsx",
+        target: "components/audio-ui/devices/phaser/panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "phaser-panel",
+    registryDependencies: [
+      "@audio-ui/device-panel",
+      "@audio-ui/plot",
+      "@audio-ui/phaser-device",
+    ],
+    type: "registry:ui",
+  },
+  {
+    categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "The face of the auto pan device: what the oscillator does to the pan or the level over two seconds, over the device knobs.",
+    files: [
+      {
+        path: "audio/panels/auto-pan-panel.tsx",
+        target: "components/audio-ui/devices/auto-pan/panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "auto-pan-panel",
+    registryDependencies: [
+      "@audio-ui/device-panel",
+      "@audio-ui/plot",
+      "@audio-ui/auto-pan-device",
+    ],
+    type: "registry:ui",
+  },
+  {
+    categories: ["device", "plot", "knob"],
     dependencies: ["@audio-ui/react", "@audio-ui/core"],
     description:
       "The face of the equalizer device: the curve it plays with a handle on each band to drag its frequency and gain, an optional live spectrum behind it, over the device's knobs gathered by band.",

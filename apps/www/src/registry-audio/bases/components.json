@@ -175,6 +175,21 @@
     "title": "block-gate"
   },
   {
+    "categories": ["device", "plot", "knob"],
+    "name": "block-saturator",
+    "title": "block-saturator"
+  },
+  {
+    "categories": ["device", "plot", "knob"],
+    "name": "block-phaser",
+    "title": "block-phaser"
+  },
+  {
+    "categories": ["device", "plot", "knob"],
+    "name": "block-auto-pan",
+    "title": "block-auto-pan"
+  },
+  {
     "categories": ["mixer", "fader", "meter", "knob"],
     "name": "block-mixer",
     "title": "block-mixer"

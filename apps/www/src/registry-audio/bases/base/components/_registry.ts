@@ -632,6 +632,72 @@ export const components: RegistryItem[] = [
     type: "registry:block",
   },
   {
+    categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "A saturator you can plug in: its state, a panel that draws its transfer curve and an engine that plays it. Play a loop through it, pick a curve and turn the drive",
+    files: [
+      {
+        path: "components/device/block-saturator.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-saturator",
+    registryDependencies: [
+      "@audio-ui/saturator-panel",
+      "@audio-ui/saturator-device",
+      "@audio-ui/saturator-engine",
+      "@audio-ui/play-toggle",
+      "@audio-ui/use-device-loop",
+      "@audio-ui/use-master-bus",
+    ],
+    type: "registry:block",
+  },
+  {
+    categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "A phaser and flanger you can plug in: its state, a panel that draws the sweep and an engine that plays it. Play a loop through it, switch the mode and turn the rate and the feedback",
+    files: [
+      {
+        path: "components/device/block-phaser.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-phaser",
+    registryDependencies: [
+      "@audio-ui/phaser-panel",
+      "@audio-ui/phaser-device",
+      "@audio-ui/phaser-engine",
+      "@audio-ui/play-toggle",
+      "@audio-ui/use-device-loop",
+      "@audio-ui/use-master-bus",
+    ],
+    type: "registry:block",
+  },
+  {
+    categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "An auto pan you can plug in: its state, a panel that draws the movement and an engine that plays it. Play a loop through it, pick a waveform and switch to tremolo",
+    files: [
+      {
+        path: "components/device/block-auto-pan.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-auto-pan",
+    registryDependencies: [
+      "@audio-ui/auto-pan-panel",
+      "@audio-ui/auto-pan-device",
+      "@audio-ui/auto-pan-engine",
+      "@audio-ui/play-toggle",
+      "@audio-ui/use-device-loop",
+      "@audio-ui/use-master-bus",
+    ],
+    type: "registry:block",
+  },
+  {
     categories: ["mixer", "fader", "meter", "knob"],
     description:
       "Mixing console: four tracks of a loop with pan, fader, meter, mute and solo, into a master with a stereo meter, every meter reading its real signal",
