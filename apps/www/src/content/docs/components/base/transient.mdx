@@ -1,0 +1,107 @@
+---
+title: Transient shaper
+description: "A transient shaper as a device you can plug in: an attack and a sustain as a state, a panel with one handle for both, a Web Audio engine and the tools an agent drives it with."
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="block-transient" />
+
+Shapes the attack and the sustain of a sound, at any level. The attack is the moment a hit starts and the sustain is what rings after it: each is turned up or down by up to 12 dB, with no threshold, so a quiet hit and a loud one are shaped alike. A drum gains click or loses it, a pluck rings longer or shorter. The panel is a square with the sustain across and the attack up, and one handle to drag to both at once; the centre is a sound left as it is. It is a device like the [compressor](/docs/components/compressor): a state, a panel that draws it, an engine that plays it and tools an agent calls, each its own file.
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">CLI</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash component
+npx shadcn@latest add @audio-ui/block-transient
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the packages:</Step>
+
+```bash
+npm install @audio-ui/react @audio-ui/core
+```
+
+<Step>Add the pieces you want. All of them, or only the state and the panel if your engine is elsewhere:</Step>
+
+```bash
+npx shadcn@latest add @audio-ui/transient-device @audio-ui/transient-panel @audio-ui/transient-engine
+```
+
+<Step>Copy and paste the demo that wires them, if you want it.</Step>
+
+<ComponentSource
+  styleName="base-nova"
+  name="block-transient"
+  title="components/examples/block-transient.tsx"
+/>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import { TransientPanel } from "@/components/audio-ui/devices/transient/panel";
+import { transientDevice } from "@/components/audio-ui/devices/transient/device";
+
+const [state, setState] = useState(() => transientDevice.defaults());
+
+<TransientPanel onValueChange={setState} value={state} />;
+```
+
+The state is a plain object keyed by parameter id, so a host stores it, saves it with its project and sends it where it likes.
+
+## The engine
+
+```ts
+import { createTransientEngine } from "@/components/audio-ui/devices/transient/engine";
+
+const engine = createTransientEngine(ctx, state);
+source.connect(engine.input);
+engine.output.connect(ctx.destination);
+engine.update(nextState); // parameters ramp: no click
+engine.dispose();
+```
+
+The browser has no such node, so a detector reads the signal as an `AudioWorklet` loaded from a blob and writes the gain to apply. It follows the peak of the signal, which jumps up and falls over 15 ms so a low note does not ripple it, and the same peak smoothed over 25 ms. They meet when a sound holds and part when a hit starts: how far the peak is over the smoothed one says how much of the moment is attack (6 dB or more is all of it), and the rest is sustain. The gain is the attack amount times the attack share plus the sustain amount times the sustain share. Only the shape of the envelope counts, not its level.
+
+`engine.ready` resolves once the detector is in the graph; until then the signal passes unchanged, and a context with no worklets never resolves it to `true`.
+
+Measured in Chrome on a decaying tone, the sustain moves the tail by what the knob says, to the hundredth (+9 gives +9.00 dB and -9 gives -9.00 dB at 60, 200 and 2000 Hz), the attack leaves the tail alone, and +9 on the attack raises the first peak by 8.7 dB, at a level of -6 dB or of -26 dB alike. Taking the attack down lowers the peak by 6 to 7 dB for -9, since the gain needs a moment to fall.
+
+## Latency
+
+The audio waits a millisecond for the detector, so the gain is up when a hit has gone through the delay: the device has a latency of 1 ms to report to a host, on or off.
+
+## The tools
+
+```ts
+import { deviceTools } from "@audio-ui/core/device";
+import { transientDevice } from "@/components/audio-ui/devices/transient/device";
+
+const [set, reset] = deviceTools(transientDevice);
+```
+
+`set` and `reset` change the state, with the ranges the device enforces: a value out of range is brought in and reported, a wrong one is refused by name, and a call never throws.
+
+## Accessibility
+
+Every control is a native input: the knobs are sliders named after their parameter, with the value and unit as the text value, the switches are toggle buttons, and everything takes the keyboard. The handle on the plot is a slider pair for the sustain and the attack.

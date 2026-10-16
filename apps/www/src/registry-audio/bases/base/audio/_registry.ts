@@ -555,6 +555,26 @@ export const audio: RegistryItem[] = [
     categories: ["device", "plot", "knob"],
     dependencies: ["@audio-ui/react"],
     description:
+      "The face of the transient shaper device: a square with the sustain across and the attack up, and a handle to drag to both at once, over the output knob.",
+    files: [
+      {
+        path: "audio/panels/transient-panel.tsx",
+        target: "components/audio-ui/devices/transient/panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "transient-panel",
+    registryDependencies: [
+      "@audio-ui/device-panel",
+      "@audio-ui/plot",
+      "@audio-ui/transient-device",
+    ],
+    type: "registry:ui",
+  },
+  {
+    categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
       "The face of the redux device: the stairs the bits make against the straight line of a clean sound, over the device knobs.",
     files: [
       {

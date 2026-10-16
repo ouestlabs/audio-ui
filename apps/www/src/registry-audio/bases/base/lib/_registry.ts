@@ -644,6 +644,38 @@ const items: RegistryItem[] = [
   },
   {
     categories: ["lib", "audio", "device"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "The transient shaper as a device: an attack and a sustain, each up or down by 12 dB, and an output gain, the numbers that go on the nodes for a state and the source of the detector worklet, with no panel and no audio in it.",
+    files: [
+      {
+        path: "lib/transient-device.ts",
+        target: "components/audio-ui/devices/transient/device.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "transient-device",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "A transient shaper on the Web Audio API for a transient state: a worklet detector reads the shape of the envelope and writes the gain, and the audio waits a millisecond for it so the attack is shaped from its first sample.",
+    files: [
+      {
+        path: "lib/transient-engine.ts",
+        target: "components/audio-ui/devices/transient/engine.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "transient-engine",
+    registryDependencies: ["@audio-ui/transient-device"],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device"],
     dependencies: [],
     description:
       "The detector of a key: an AudioWorklet loaded once per context from a blob, which reads a signal and writes the gain a compressor would apply to it. The compressor's key and the de-esser use it.",
