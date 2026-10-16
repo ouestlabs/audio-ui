@@ -49,7 +49,7 @@ const REGISTRY_FOLDERS = ["audio", "hooks", "components", "lib"];
 
 // A folder a registry file imports from, and where it lands in a project.
 const INSTALL_FOLDERS: [folder: string, installed: string][] = [
-  ["audio/(?:elements/)?", "@/components/audio-ui/"],
+  ["audio/(?:elements/|panels/)?", "@/components/audio-ui/"],
   ["ui/", "@/components/ui/"],
   ["hooks/", "@/hooks/"],
   ["lib/", "@/lib/"],

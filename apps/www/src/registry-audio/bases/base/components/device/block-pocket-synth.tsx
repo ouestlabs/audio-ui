@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { PocketSynthPanel } from "@/registry-audio/bases/base/audio/elements/pocket-synth-panel";
+import { PocketSynthPanel } from "@/registry-audio/bases/base/audio/panels/pocket-synth-panel";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 import {
   type PocketSynthNote,

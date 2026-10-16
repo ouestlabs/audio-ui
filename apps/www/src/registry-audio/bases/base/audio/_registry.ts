@@ -113,7 +113,7 @@ export const audio: RegistryItem[] = [
       "A panel for any device: a knob per number and a toggle per switch, from its descriptors, controlled by a state a host owns.",
     files: [
       {
-        path: "audio/elements/device-panel.tsx",
+        path: "audio/panels/device-panel.tsx",
         type: "registry:ui",
       },
     ],
@@ -128,7 +128,7 @@ export const audio: RegistryItem[] = [
       "The face of the compressor device: the transfer curve it plays, with the threshold and the level going in on it, over the device's knobs.",
     files: [
       {
-        path: "audio/elements/compressor-panel.tsx",
+        path: "audio/panels/compressor-panel.tsx",
         type: "registry:ui",
       },
     ],
@@ -147,7 +147,7 @@ export const audio: RegistryItem[] = [
       "The face of the Pocket Synth device: a pad that plays it, its waveform and filter, and its volume. Controlled, with the notes leaving through onNoteOn and onNoteOff.",
     files: [
       {
-        path: "audio/elements/pocket-synth-panel.tsx",
+        path: "audio/panels/pocket-synth-panel.tsx",
         type: "registry:ui",
       },
     ],

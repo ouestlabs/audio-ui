@@ -4,10 +4,6 @@ import type { Source } from "@audio-ui/react";
 import { type ReactNode, useEffect, useMemo, useRef } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {
-  DevicePanel,
-  DeviceToggle,
-} from "@/registry-audio/bases/base/audio/elements/device-panel";
-import {
   Plot,
   PlotCurve,
   PlotDot,
@@ -15,6 +11,10 @@ import {
   PlotGrid,
   PlotLine,
 } from "@/registry-audio/bases/base/audio/elements/plot";
+import {
+  DevicePanel,
+  DeviceToggle,
+} from "@/registry-audio/bases/base/audio/panels/device-panel";
 import {
   type CompressorState,
   compressorCurve,

@@ -1,7 +1,7 @@
 import { describe, expect, mock, test } from "bun:test";
 import { defineDevice } from "@audio-ui/core/device";
 import { fireEvent, render, within } from "@testing-library/react";
-import { DevicePanel } from "@/registry-audio/bases/base/audio/elements/device-panel";
+import { DevicePanel } from "@/registry-audio/bases/base/audio/panels/device-panel";
 
 // A device the registry has never heard of: the panel is made from its descriptors.
 const tremolo = defineDevice({

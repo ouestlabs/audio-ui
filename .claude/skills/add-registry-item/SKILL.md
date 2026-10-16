@@ -12,6 +12,7 @@ All paths below are under `apps/www/src/registry-audio/bases/base/` unless they 
 | You are adding | File | `_registry.ts` | Item `type` |
 | --- | --- | --- | --- |
 | A styled element over a primitive | `audio/elements/<name>.tsx` | `audio/_registry.ts` | `registry:ui` |
+| The face of a device (controlled, no audio) | `audio/panels/<name>-panel.tsx` | `audio/_registry.ts` | `registry:ui` |
 | A composed screen | `components/<category>/block-<component>-<variant>.tsx` | `components/_registry.ts` | `registry:block` |
 | A focused example for the docs | `components/<category>/<component>-<feature>-demo.tsx` | `components/_registry.ts` | `registry:example` |
 | A hook | `hooks/use-<name>.ts` | `hooks/_registry.ts` | `registry:hook` |
