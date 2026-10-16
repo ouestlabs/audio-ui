@@ -424,6 +424,7 @@ export const components: RegistryItem[] = [
       "@audio-ui/compressor-panel",
       "@audio-ui/compressor-device",
       "@audio-ui/compressor-engine",
+      "@audio-ui/demo-loop",
       "@audio-ui/use-master-bus",
       "@audio-ui/web-audio",
       "@shadcn/button",

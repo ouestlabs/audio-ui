@@ -14,6 +14,10 @@ import {
   type CompressorEngine,
   createCompressorEngine,
 } from "@/registry-audio/bases/base/lib/compressor-engine";
+import {
+  renderHeldChord,
+  renderKickLoop,
+} from "@/registry-audio/bases/base/lib/demo-loop";
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 const LOOP_SECONDS = 2;
@@ -78,7 +82,7 @@ function ReductionReadout({ source }: { source: Source<number> }) {
  * A compressor you can plug in: its state, a panel that draws it, an engine
  * that plays it, side by side. Each is its own file and none knows the others:
  * the state is a plain object, so a host keeps its own and uses what it needs.
- * Press play and turn the knobs.
+ * Press play and turn the knobs; switch Key on and a kick ducks a held chord.
  */
 export default function BlockCompressor() {
   const [state, setState] = useState<CompressorState>(() =>
@@ -92,52 +96,81 @@ export default function BlockCompressor() {
   const stateRef = useRef(state);
   stateRef.current = state;
 
+  // With the key on the pulses give way to a held chord that the kick of a loop ducks: the key is heard by the compressor only.
+  const keyed = state.external;
   useEffect(() => {
     const ctx = webAudio.getContext();
     if (!(playing && ctx && master)) {
       return;
     }
     ctx.resume();
-    const source = ctx.createBufferSource();
-    source.buffer = pulses(ctx);
-    source.loop = true;
-    const compressor = createCompressorEngine(ctx, stateRef.current);
-    const tap = ctx.createAnalyser();
-    tap.fftSize = FFT_SIZE;
-    source.connect(tap);
-    source.connect(compressor.input);
-    compressor.output.connect(master);
-    engine.current = compressor;
-    source.start();
-
-    const samples = new Float32Array(new ArrayBuffer(tap.fftSize * 4));
-    let held = FLOOR_DB;
-    let frame = 0;
-    const tick = () => {
-      tap.getFloatTimeDomainData(samples);
-      let peak = 0;
-      for (const sample of samples) {
-        peak = Math.max(peak, Math.abs(sample));
+    let cancelled = false;
+    let stop = () => undefined;
+    const buffers = keyed
+      ? Promise.all([
+          renderHeldChord(ctx.sampleRate),
+          renderKickLoop(ctx.sampleRate),
+        ])
+      : Promise.resolve([pulses(ctx), null] as const);
+    buffers.then(([signal, key]) => {
+      if (cancelled) {
+        return;
       }
-      const db =
-        peak > 0 ? Math.max(FLOOR_DB, 20 * Math.log10(peak)) : FLOOR_DB;
-      held = Math.max(db, held - LEVEL_FALL_DB);
-      level.set(held);
-      reduction.set(compressor.reduction);
+      const source = ctx.createBufferSource();
+      source.buffer = signal;
+      source.loop = true;
+      const keySource = key ? ctx.createBufferSource() : null;
+      const compressor = createCompressorEngine(ctx, stateRef.current);
+      const tap = ctx.createAnalyser();
+      tap.fftSize = FFT_SIZE;
+      source.connect(tap);
+      source.connect(compressor.input);
+      if (keySource && key) {
+        keySource.buffer = key;
+        keySource.loop = true;
+        keySource.connect(compressor.sidechain);
+      }
+      compressor.output.connect(master);
+      engine.current = compressor;
+      const startAt = ctx.currentTime + 0.05;
+      source.start(startAt);
+      keySource?.start(startAt);
+
+      const samples = new Float32Array(new ArrayBuffer(tap.fftSize * 4));
+      let held = FLOOR_DB;
+      let frame = 0;
+      const tick = () => {
+        tap.getFloatTimeDomainData(samples);
+        let peak = 0;
+        for (const sample of samples) {
+          peak = Math.max(peak, Math.abs(sample));
+        }
+        const db =
+          peak > 0 ? Math.max(FLOOR_DB, 20 * Math.log10(peak)) : FLOOR_DB;
+        held = Math.max(db, held - LEVEL_FALL_DB);
+        level.set(held);
+        reduction.set(compressor.reduction);
+        frame = requestAnimationFrame(tick);
+      };
       frame = requestAnimationFrame(tick);
-    };
-    frame = requestAnimationFrame(tick);
+      stop = () => {
+        cancelAnimationFrame(frame);
+        source.stop();
+        source.disconnect();
+        keySource?.stop();
+        keySource?.disconnect();
+        tap.disconnect();
+        compressor.dispose();
+        engine.current = null;
+        level.set(FLOOR_DB);
+        reduction.set(0);
+      };
+    });
     return () => {
-      cancelAnimationFrame(frame);
-      source.stop();
-      source.disconnect();
-      tap.disconnect();
-      compressor.dispose();
-      engine.current = null;
-      level.set(FLOOR_DB);
-      reduction.set(0);
+      cancelled = true;
+      stop();
     };
-  }, [level, master, playing, reduction]);
+  }, [keyed, level, master, playing, reduction]);
 
   // The engine follows the state, whoever changed it: a knob or a call.
   useEffect(() => {
