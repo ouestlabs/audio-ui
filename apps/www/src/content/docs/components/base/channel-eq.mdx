@@ -1,0 +1,99 @@
+---
+title: Channel EQ
+description: "A channel EQ as a device you can plug in: a low shelf, a sweepable mid bell, a high shelf, a high-pass switch and an output as a state, a panel with a handle on the mid band, a Web Audio engine and the tools an agent drives it with."
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="block-channel-eq" />
+
+The EQ of a mixer strip, simpler than the [equalizer](/docs/components/equalizer): a low shelf at 100 Hz, a mid bell you sweep from 120 Hz to 7.5 kHz, a high shelf at 6 kHz, a switch for a high-pass at 80 Hz and an output level. Drag the handle on the curve for the mid band; the rest are knobs. It is a device like the [compressor](/docs/components/compressor): a state, a panel that draws it, an engine that plays it and tools an agent calls, each its own file.
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">CLI</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash component
+npx shadcn@latest add @audio-ui/block-channel-eq
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the packages:</Step>
+
+```bash
+npm install @audio-ui/react @audio-ui/core
+```
+
+<Step>Add the pieces you want. All of them, or only the state and the panel if your engine is elsewhere:</Step>
+
+```bash
+npx shadcn@latest add @audio-ui/channel-eq-device @audio-ui/channel-eq-panel @audio-ui/channel-eq-engine
+```
+
+<Step>Copy and paste the demo that wires them, if you want it.</Step>
+
+<ComponentSource
+  styleName="base-nova"
+  name="block-channel-eq"
+  title="components/examples/block-channel-eq.tsx"
+/>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import { ChannelEqPanel } from "@/components/audio-ui/devices/channel-eq/panel";
+import { channelEqDevice } from "@/components/audio-ui/devices/channel-eq/device";
+
+const [state, setState] = useState(() => channelEqDevice.defaults());
+
+<ChannelEqPanel onValueChange={setState} value={state} />;
+```
+
+The state is a plain object keyed by parameter id, so a host stores it, saves it with its project and sends it where it likes. `channelEqBands(state)` gives the filters and `channelEqCurve(state)` the curve the panel draws.
+
+## The engine
+
+```ts
+import { createChannelEqEngine } from "@/components/audio-ui/devices/channel-eq/engine";
+
+const engine = createChannelEqEngine(ctx, state);
+source.connect(engine.input);
+engine.output.connect(ctx.destination);
+engine.update(nextState); // parameters ramp: no click
+engine.dispose();
+```
+
+Four filters in series and a trim, the same the curve draws. The high-pass switch is a 10 Hz high-pass when off, which passes the whole spectrum, so the curve and the sound agree.
+
+## The tools
+
+```ts
+import { deviceTools } from "@audio-ui/core/device";
+import { channelEqDevice } from "@/components/audio-ui/devices/channel-eq/device";
+
+const [set, reset] = deviceTools(channelEqDevice);
+```
+
+`set` and `reset` change the state, with the ranges the device enforces: a value out of range is brought in and reported, a wrong one is refused by name, and a call never throws.
+
+## Accessibility
+
+Every control is a native input: the knobs are sliders named after their parameter, with the value and unit as the text value, the switches are toggle buttons, and everything takes the keyboard.

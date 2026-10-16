@@ -698,6 +698,73 @@ export const components: RegistryItem[] = [
     type: "registry:block",
   },
   {
+    categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "A channel EQ you can plug in: its state, a panel that draws the curve with a handle on the mid band and an engine that plays it. Play a loop through it and drag, the spectrum behind is what comes out",
+    files: [
+      {
+        path: "components/device/block-channel-eq.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-channel-eq",
+    registryDependencies: [
+      "@audio-ui/channel-eq-panel",
+      "@audio-ui/channel-eq-device",
+      "@audio-ui/channel-eq-engine",
+      "@audio-ui/play-toggle",
+      "@audio-ui/use-device-loop",
+      "@audio-ui/use-master-bus",
+      "@audio-ui/use-spectrum",
+    ],
+    type: "registry:block",
+  },
+  {
+    categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "An overdrive you can plug in: its state, a panel that draws the band that reaches the clip and an engine that plays it. Play a loop through it, drag the handle and turn the drive",
+    files: [
+      {
+        path: "components/device/block-overdrive.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-overdrive",
+    registryDependencies: [
+      "@audio-ui/overdrive-panel",
+      "@audio-ui/overdrive-device",
+      "@audio-ui/overdrive-engine",
+      "@audio-ui/play-toggle",
+      "@audio-ui/use-device-loop",
+      "@audio-ui/use-master-bus",
+    ],
+    type: "registry:block",
+  },
+  {
+    categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "A redux you can plug in: its state, a panel that draws the stairs the bits make and an engine that plays it. Play a loop through it and take the bits down",
+    files: [
+      {
+        path: "components/device/block-redux.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-redux",
+    registryDependencies: [
+      "@audio-ui/redux-panel",
+      "@audio-ui/redux-device",
+      "@audio-ui/redux-engine",
+      "@audio-ui/play-toggle",
+      "@audio-ui/use-device-loop",
+      "@audio-ui/use-master-bus",
+    ],
+    type: "registry:block",
+  },
+  {
     categories: ["mixer", "fader", "meter", "knob"],
     description:
       "Mixing console: four tracks of a loop with pan, fader, meter, mute and solo, into a master with a stereo meter, every meter reading its real signal",

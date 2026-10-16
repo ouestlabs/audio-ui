@@ -190,6 +190,21 @@
     "title": "block-auto-pan"
   },
   {
+    "categories": ["device", "plot", "knob"],
+    "name": "block-channel-eq",
+    "title": "block-channel-eq"
+  },
+  {
+    "categories": ["device", "plot", "knob"],
+    "name": "block-overdrive",
+    "title": "block-overdrive"
+  },
+  {
+    "categories": ["device", "plot", "knob"],
+    "name": "block-redux",
+    "title": "block-redux"
+  },
+  {
     "categories": ["mixer", "fader", "meter", "knob"],
     "name": "block-mixer",
     "title": "block-mixer"
