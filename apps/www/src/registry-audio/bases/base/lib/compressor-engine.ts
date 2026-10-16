@@ -1,5 +1,6 @@
-import type { DeviceBinding } from "@audio-ui/core/device";
+import type { SidechainBinding } from "@audio-ui/core/device";
 import {
+  COMPRESSOR_KEY_WORKLET,
   COMPRESSOR_LOOKAHEAD_SECONDS,
   type CompressorState,
   compressorSettings,
@@ -8,24 +9,66 @@ import {
 /** How fast a parameter follows a change, as a time constant in seconds: fast enough to feel direct, slow enough not to click. */
 const RAMP_SECONDS = 0.01;
 
-export interface CompressorEngine extends DeviceBinding<CompressorState> {
+export interface CompressorEngine
+  extends SidechainBinding<CompressorState, AudioNode> {
   /** Connect the signal to process here. */
   readonly input: AudioNode;
   /** Connect this to the destination, or to the next device. */
   readonly output: AudioNode;
+  /** Resolves once the detector of the key is in the graph. Until then a keyed compressor passes the signal unchanged. A context with no worklets never resolves it to `true`. */
+  readonly ready: Promise<boolean>;
   /** How many dB the compressor is taking off right now, 0 or negative. Read it per frame. */
   readonly reduction: number;
+  /** Connect the key here: with `external` on, the compressor follows this signal's level instead of the one it processes. It is only listened to, never heard. */
+  readonly sidechain: AudioNode;
 }
+
+const loaded = new WeakMap<BaseAudioContext, Promise<boolean>>();
+
+/** Loads the detector of the key into a context once. `false` when the context cannot run worklets. */
+function loadDetector(ctx: BaseAudioContext): Promise<boolean> {
+  const cached = loaded.get(ctx);
+  if (cached) {
+    return cached;
+  }
+  const worklet = (ctx as { audioWorklet?: AudioWorklet }).audioWorklet;
+  if (!(worklet && typeof AudioWorkletNode !== "undefined")) {
+    return Promise.resolve(false);
+  }
+  const url = URL.createObjectURL(
+    new Blob([COMPRESSOR_KEY_WORKLET], { type: "text/javascript" })
+  );
+  const done = worklet
+    .addModule(url)
+    .then(() => true)
+    .catch(() => false)
+    .finally(() => URL.revokeObjectURL(url));
+  loaded.set(ctx, done);
+  return done;
+}
+
+const DETECTOR_PARAMETERS = [
+  "attack",
+  "knee",
+  "ratio",
+  "release",
+  "threshold",
+] as const;
 
 /**
  * A compressor on the Web Audio API for a `CompressorState`:
  *
  * ```
  * input → delay (the node's lookahead) → dry ───────────────┐
- *       → DynamicsCompressorNode → trim → wet ──────────────┴→ output
+ *       │                               → keyed gain → trim → wet ──┤
+ *       → DynamicsCompressorNode → trim → wet ──────────────────────┴→ output
+ * sidechain → detector (an AudioWorklet) → the keyed gain's own gain
  * ```
  *
- * The dry path waits as long as the node looks ahead, so a mix of the two
+ * Without the key the signal goes through the node. With `external` on it goes
+ * through the keyed gain instead, which a detector drives from the sidechain:
+ * the same curve as the node's (a soft knee, a ratio), the node's make-up added
+ * by hand since there is no node. The dry path waits as long as the node looks ahead, so a mix of the two
  * does not comb. Parameters move with `setTargetAtTime`, never `.value =`,
  * so a knob turned while it plays does not click. What goes on each node
  * comes from `compressorSettings`, which is pure and tested.
@@ -41,16 +84,34 @@ export function createCompressorEngine(
   const dry = ctx.createGain();
   const trim = ctx.createGain();
   const wet = ctx.createGain();
+  const sidechain = ctx.createGain();
+  const keyed = ctx.createGain();
+  const keyedTrim = ctx.createGain();
+  const keyedWet = ctx.createGain();
   lookahead.delayTime.value = COMPRESSOR_LOOKAHEAD_SECONDS;
 
   input.connect(lookahead).connect(dry).connect(output);
   input.connect(compressor).connect(trim).connect(wet).connect(output);
+  lookahead.connect(keyed).connect(keyedTrim).connect(keyedWet).connect(output);
 
   const follow = (param: AudioParam, value: number) =>
     param.setTargetAtTime(value, ctx.currentTime, RAMP_SECONDS);
 
+  let detector: AudioWorkletNode | null = null;
+  let keyedReduction = 0;
+  let current = compressorSettings(initial);
+  const setDetector = (time: number) => {
+    for (const name of DETECTOR_PARAMETERS) {
+      detector?.parameters.get(name)?.setValueAtTime(current[name], time);
+    }
+  };
+
   const update = (state: CompressorState) => {
     const settings = compressorSettings(state);
+    current = settings;
+    setDetector(ctx.currentTime);
+    follow(keyedTrim.gain, 10 ** (settings.keyedTrimDb / 20));
+    follow(keyedWet.gain, settings.keyedWet);
     follow(compressor.threshold, settings.threshold);
     follow(compressor.ratio, settings.ratio);
     follow(compressor.knee, settings.knee);
@@ -58,7 +119,7 @@ export function createCompressorEngine(
     follow(compressor.release, settings.release);
     follow(trim.gain, 10 ** (settings.trimDb / 20));
     follow(dry.gain, settings.dry);
-    follow(wet.gain, settings.wet);
+    follow(wet.gain, settings.nativeWet);
   };
 
   // A fresh node has its own defaults: set the first state outright, ramps come after.
@@ -70,11 +131,39 @@ export function createCompressorEngine(
   compressor.release.value = first.release;
   trim.gain.value = 10 ** (first.trimDb / 20);
   dry.gain.value = first.dry;
-  wet.gain.value = first.wet;
+  wet.gain.value = first.nativeWet;
+  keyedTrim.gain.value = 10 ** (first.keyedTrimDb / 20);
+  keyedWet.gain.value = first.keyedWet;
+
+  let disposed = false;
+  const ready = loadDetector(ctx).then((ok) => {
+    if (!ok || disposed) {
+      return false;
+    }
+    detector = new AudioWorkletNode(ctx, "audioui-compressor-key", {
+      numberOfInputs: 1,
+      numberOfOutputs: 1,
+      outputChannelCount: [1],
+    });
+    detector.port.onmessage = (event: MessageEvent<number>) => {
+      keyedReduction = event.data;
+    };
+    setDetector(0);
+    sidechain.connect(detector);
+    keyed.gain.value = 0;
+    detector.connect(keyed.gain);
+    return true;
+  });
 
   return {
     dispose: () => {
+      disposed = true;
+      detector?.disconnect();
       for (const node of [
+        sidechain,
+        keyed,
+        keyedTrim,
+        keyedWet,
         input,
         lookahead,
         dry,
@@ -89,8 +178,10 @@ export function createCompressorEngine(
     input,
     output,
     get reduction() {
-      return compressor.reduction;
+      return current.external ? keyedReduction : compressor.reduction;
     },
+    ready,
+    sidechain,
     update,
   };
 }

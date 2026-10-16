@@ -31,7 +31,7 @@ const UNITY = (inputDb: number) => inputDb;
 const GROUPS = [
   { label: "Curve", parameters: ["thresholdDb", "ratio", "kneeDb"] },
   { label: "Time", parameters: ["attackMs", "releaseMs"] },
-  { label: "Output", parameters: ["makeupDb", "mix"] },
+  { label: "Output", parameters: ["makeupDb", "mix", "external"] },
 ] as const;
 const SWITCHES = ["enabled", "autoMakeup"] as const;
 /** With auto make-up on, the node's own make-up plays and this knob does nothing. */
@@ -109,7 +109,9 @@ function CompressorPanel({
         </DeviceHeader>
         <div className="flex min-h-0 grow flex-col gap-2 p-2">
           <Plot
-            aria-label="Transfer curve"
+            aria-label={
+              value.external ? "Threshold of the key" : "Transfer curve"
+            }
             className="h-28 min-h-24 grow"
             maxX={MAX_DB}
             maxY={MAX_DB}
@@ -130,9 +132,9 @@ function CompressorPanel({
                 className="stroke-foreground/40"
                 value={value.thresholdDb}
               />
-              <PlotCurve fn={output} />
+              {value.external ? null : <PlotCurve fn={output} />}
             </PlotGraph>
-            {dot ? (
+            {dot && !value.external ? (
               <PlotDot
                 className="group-data-idle/compressor:hidden"
                 source={dot}

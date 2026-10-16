@@ -26,6 +26,7 @@ describe("compressorDevice", () => {
       "autoMakeup",
       "makeupDb",
       "mix",
+      "external",
     ]);
   });
 
