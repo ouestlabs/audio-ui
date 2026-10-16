@@ -140,6 +140,11 @@
     "title": "block-delay"
   },
   {
+    "categories": ["device", "plot", "knob"],
+    "name": "block-reverb",
+    "title": "block-reverb"
+  },
+  {
     "categories": ["mixer", "fader", "meter", "knob"],
     "name": "block-mixer",
     "title": "block-mixer"

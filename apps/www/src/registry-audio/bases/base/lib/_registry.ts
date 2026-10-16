@@ -174,6 +174,38 @@ const items: RegistryItem[] = [
     type: "registry:lib",
   },
   {
+    categories: ["lib", "audio", "device"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "The reverb as a device: its decay, pre-delay, damping and mix, the numbers that go on the nodes for a state, the decay a state draws and the impulse response of its room, with no panel and no audio in it.",
+    files: [
+      {
+        path: "lib/reverb-device.ts",
+        target: "components/audio-ui/devices/reverb/device.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "reverb-device",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device"],
+    dependencies: [],
+    description:
+      "A reverb on the Web Audio API for a reverb state: a convolver fed a room made from the decay and the damping, two of them cross-faded so a new room never clicks, after a pre-delay and mixed with the dry sound.",
+    files: [
+      {
+        path: "lib/reverb-engine.ts",
+        target: "components/audio-ui/devices/reverb/engine.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "reverb-engine",
+    registryDependencies: ["@audio-ui/reverb-device"],
+    type: "registry:lib",
+  },
+  {
     categories: ["lib", "audio", "web-audio"],
     dependencies: [],
     description:

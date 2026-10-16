@@ -237,6 +237,26 @@ export const audio: RegistryItem[] = [
   },
   {
     categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "The face of the reverb device: the tail it makes, its level falling to -60 dB, with a handle where it ends to drag the decay time, over the device knobs.",
+    files: [
+      {
+        path: "audio/panels/reverb-panel.tsx",
+        target: "components/audio-ui/devices/reverb/panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "reverb-panel",
+    registryDependencies: [
+      "@audio-ui/device-panel",
+      "@audio-ui/plot",
+      "@audio-ui/reverb-device",
+    ],
+    type: "registry:ui",
+  },
+  {
+    categories: ["device", "plot", "knob"],
     dependencies: ["@audio-ui/react", "@audio-ui/core"],
     description:
       "The face of the equalizer device: the curve it plays with a handle on each band to drag its frequency and gain, an optional live spectrum behind it, over the device's knobs gathered by band.",
