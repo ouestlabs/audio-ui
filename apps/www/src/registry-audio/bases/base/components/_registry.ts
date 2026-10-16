@@ -23,21 +23,23 @@ export const components: RegistryItem[] = [
     type: "registry:block",
   },
   {
-    categories: ["synth", "xypad"],
-    description: "Wave shaper synth with distortion, tone, and detune controls",
+    categories: ["device", "synth", "xypad"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "A wave shaper synth you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file. Press the pad: pitch goes across, the resonance up",
     files: [
       {
-        path: "components/synth/block-wave-shaper.tsx",
+        path: "components/device/block-wave-shaper.tsx",
         type: "registry:block",
       },
     ],
     name: "block-wave-shaper",
     registryDependencies: [
+      "@audio-ui/wave-shaper-panel",
+      "@audio-ui/wave-shaper-device",
+      "@audio-ui/wave-shaper-engine",
+      "@audio-ui/use-master-bus",
       "@audio-ui/web-audio",
-      "@audio-ui/fader",
-      "@audio-ui/xypad",
-      "@audio-ui/knob",
-      "@shadcn/toggle-group",
     ],
     type: "registry:block",
   },

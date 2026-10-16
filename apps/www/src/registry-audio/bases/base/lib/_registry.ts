@@ -110,6 +110,38 @@ const items: RegistryItem[] = [
     type: "registry:lib",
   },
   {
+    categories: ["lib", "audio", "device", "synth"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "The Wave Shaper as an instrument device: its waveform, drive, tone, detune, mix and volume, the pitch and resonance a pad position plays, and the distortion curve, with no panel and no audio in it.",
+    files: [
+      {
+        path: "lib/wave-shaper-device.ts",
+        target: "components/audio-ui/devices/wave-shaper/device.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "wave-shaper-device",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device", "synth"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "A wave shaper synth on the Web Audio API for a Wave Shaper state: two detuned oscillators, a distortion mixed in parallel and a low-pass filter; noteOn starts a note or glides the held one, noteOff releases it.",
+    files: [
+      {
+        path: "lib/wave-shaper-engine.ts",
+        target: "components/audio-ui/devices/wave-shaper/engine.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "wave-shaper-engine",
+    registryDependencies: ["@audio-ui/wave-shaper-device"],
+    type: "registry:lib",
+  },
+  {
     categories: ["lib", "audio", "web-audio"],
     dependencies: [],
     description:

@@ -37,7 +37,7 @@
       "name": "spectrum"
     },
     {
-      "count": 3,
+      "count": 4,
       "description": "Devices: an effect as a state, a panel, an engine and the tools an agent drives it with, each one its own file so a host keeps its own and uses what it needs.",
       "label": "Device",
       "name": "device"

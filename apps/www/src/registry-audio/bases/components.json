@@ -5,7 +5,7 @@
     "title": "block-pocket-synth"
   },
   {
-    "categories": ["synth", "xypad"],
+    "categories": ["device", "synth", "xypad"],
     "name": "block-wave-shaper",
     "title": "block-wave-shaper"
   },

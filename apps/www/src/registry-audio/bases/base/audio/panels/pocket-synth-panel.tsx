@@ -7,6 +7,7 @@ import {
   ToggleGroupItem,
 } from "@/registry/bases/base/ui/toggle-group";
 import { Fader } from "@/registry-audio/bases/base/audio/elements/fader";
+import { WaveformSelect } from "@/registry-audio/bases/base/audio/elements/waveform-select";
 import { XYPad } from "@/registry-audio/bases/base/audio/elements/xypad";
 import {
   DeviceFrame,
@@ -24,13 +25,6 @@ import {
 const VOLUME_MARKS = [0, 0.25, 0.5, 0.75, 1];
 const PAD_MAX = 100;
 
-const WAVE_PATHS: Record<string, string> = {
-  sawtooth: "M2 18l8-12v12l8-12v12",
-  sine: "M2 12c2-4 4-4 6 0s4 4 6 0 4-4 6 0 4 4 6 0",
-  square: "M2 18h4V6h6v12h4V6h6",
-  triangle: "M2 12l5-6 5 12 5-12 5 6",
-};
-
 /** The two-letter names the filter buttons carry. */
 const FILTER_SHORT: Record<string, string> = {
   allpass: "AP",
@@ -40,21 +34,6 @@ const FILTER_SHORT: Record<string, string> = {
 };
 
 const [WAVE, FILTER] = pocketSynthDevice.parameters;
-
-function WaveIcon({ label, wave }: { label: string; wave: string }) {
-  return (
-    <svg
-      className="h-5 w-5"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      viewBox="0 0 24 24"
-    >
-      <title>{label}</title>
-      <path d={WAVE_PATHS[wave]} />
-    </svg>
-  );
-}
 
 const formatPad = (position: { x: number; y: number }): ReactNode => (
   <>
@@ -104,8 +83,7 @@ function PocketSynthPanel({
     [onNoteOn]
   );
   const pickWave = useCallback(
-    (values: unknown[]) =>
-      onValueChange(pocketSynthDevice.set(value, "wave", values[0])),
+    (wave: string) => onValueChange(pocketSynthDevice.set(value, "wave", wave)),
     [onValueChange, value]
   );
   const pickFilter = useCallback(
@@ -142,25 +120,12 @@ function PocketSynthPanel({
           onValueCommitted={onNoteOff}
           value={position}
         />
-        <ToggleGroup
+        <WaveformSelect
           aria-label={WAVE.label}
-          className="w-full"
           onValueChange={pickWave}
-          size="sm"
-          value={[value.wave]}
-          variant="outline"
-        >
-          {WAVE.options.map((option) => (
-            <ToggleGroupItem
-              aria-label={`${option.label} wave`}
-              className="flex-1"
-              key={option.value}
-              value={option.value}
-            >
-              <WaveIcon label={`${option.label} wave`} wave={option.value} />
-            </ToggleGroupItem>
-          ))}
-        </ToggleGroup>
+          options={WAVE.options}
+          value={value.wave}
+        />
         <ToggleGroup
           aria-label={FILTER.label}
           className="w-full"

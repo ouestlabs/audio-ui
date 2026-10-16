@@ -157,9 +157,46 @@ export const audio: RegistryItem[] = [
     registryDependencies: [
       "@audio-ui/device-panel",
       "@audio-ui/fader",
+      "@audio-ui/waveform-select",
       "@audio-ui/xypad",
       "@audio-ui/pocket-synth-device",
       "@shadcn/toggle-group",
+    ],
+    type: "registry:ui",
+  },
+  {
+    categories: ["device", "synth", "xypad"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "A row of buttons, one per waveform, each drawn as its shape: pick one. Fed by the options of a device's choice parameter.",
+    files: [
+      {
+        path: "audio/elements/waveform-select.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "waveform-select",
+    registryDependencies: ["@shadcn/toggle-group"],
+    type: "registry:ui",
+  },
+  {
+    categories: ["device", "synth", "xypad"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "The face of the Wave Shaper device: a pad that plays it, its waveform and its knobs. Controlled, with the notes leaving through onNoteOn and onNoteOff.",
+    files: [
+      {
+        path: "audio/panels/wave-shaper-panel.tsx",
+        target: "components/audio-ui/devices/wave-shaper/panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "wave-shaper-panel",
+    registryDependencies: [
+      "@audio-ui/device-panel",
+      "@audio-ui/waveform-select",
+      "@audio-ui/xypad",
+      "@audio-ui/wave-shaper-device",
     ],
     type: "registry:ui",
   },
