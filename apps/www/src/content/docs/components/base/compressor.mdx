@@ -1,22 +1,13 @@
 ---
 title: Compressor
-description: "A compressor as a device you can plug in: its state, a panel that draws it, a Web Audio engine that plays it and the tools an agent drives it with, each its own file."
+description: "A compressor device: threshold, ratio, attack, release, knee, make-up and mix, a panel that draws its transfer curve, a Web Audio engine with a sidechain, and tools for agents."
 component: true
 base: base
 ---
 
 <ComponentPreview styleName="base-nova" name="block-compressor" />
 
-A device is not a widget with audio inside. It is four pieces that share one description, so a host can take the ones it needs: a DAW that has its own engine keeps the state and the panel, an agent keeps the state and the tools, and a page that only wants sound takes them all.
-
-| Piece | What it is | File |
-| --- | --- | --- |
-| **State** | the parameters and their ranges, as a plain object | `device` |
-| **Panel** | draws a state, sends the new one back: no audio | `panel` |
-| **Engine** | plays a state with Web Audio nodes | `engine` |
-| **Tools** | what an agent calls to change the state | `deviceTools` |
-
-Each file installs in `components/audio-ui/devices/compressor/`; the tools come from `@audio-ui/core/device`.
+Brings loud parts down. Above the threshold, the level rises by one decibel for every `ratio` decibels in. With the sidechain on, it follows the level of another signal, so a kick can duck a pad. It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
 
 ## Installation
 
@@ -65,136 +56,48 @@ npx shadcn@latest add @audio-ui/compressor-device @audio-ui/compressor-panel @au
 
 </CodeTabs>
 
-## The state
+## Controls
 
-A state is a plain object keyed by parameter id: numbers and booleans, JSON-safe. The device holds no instance, so a host stores it, saves it with its project and sends it where it likes.
+<DeviceControls device="compressor">
+<Control id="thresholdDb">The level above which the compressor works.</Control>
+<Control id="ratio">How much the level is brought down above the threshold. At 4:1, 4 dB in give 1 dB out.</Control>
+<Control id="attackMs">How fast the compressor takes the gain down once the level is over the threshold.</Control>
+<Control id="releaseMs">How fast the gain comes back once the level is under it.</Control>
+<Control id="kneeDb">How gradually the compressor starts to work around the threshold. 0 is a hard knee.</Control>
+<Control id="autoMakeup">Keeps the make-up gain the browser's node adds on its own, which grows with the threshold and the ratio.</Control>
+<Control id="makeupDb">Makes up for the gain taken off. It does nothing while Auto make-up is on.</Control>
+<Control id="mix">The balance of the compressed signal and the dry one, for parallel compression.</Control>
+<Control id="external">Makes the compressor follow the signal connected to `engine.sidechain`. See [Sidechain](/docs/devices#sidechain).</Control>
+</DeviceControls>
 
-```ts
-import { compressorDevice } from "@/components/audio-ui/devices/compressor/device";
+## Panel
 
-const state = compressorDevice.defaults();
-// { enabled: true, thresholdDb: -18, ratio: 4, attackMs: 5, releaseMs: 80,
-//   kneeDb: 6, autoMakeup: true, makeupDb: 0, mix: 100 }
-
-compressorDevice.set(state, "thresholdDb", -200); // a new state, clamped to -60
-compressorDevice.sanitize(JSON.parse(saved)); // a loaded project, repaired
-```
-
-Its id, `audioui.compressor`, is what a project stores: not the panel that draws it, which can be restyled without rewriting anyone's session.
-
-## The panel
-
-Controlled: it keeps no state, it draws the one it is given and returns the whole new state.
+The panel draws the transfer curve the state plays: the threshold, the dashed unity line, and a dot that rides the curve at the level going in. Pass `level`, a live source in dB, to show the dot. Below the threshold the curve sits above unity by the make-up gain.
 
 ```tsx
 import { CompressorPanel } from "@/components/audio-ui/devices/compressor/panel";
+import { compressorDevice } from "@/components/audio-ui/devices/compressor/device";
 
-<CompressorPanel
-  level={inputLevel} // optional: a live source in dB, a dot rides the curve
-  onValueChange={setState}
-  value={state}
-/>;
+const [state, setState] = useState(() => compressorDevice.defaults());
+
+<CompressorPanel onValueChange={setState} value={state} />;
 ```
 
-It draws the curve the state plays: the threshold, the level going in on it, and the dashed unity line. Below the threshold the line sits above unity by the make-up gain.
+## Engine
 
-## The engine
+Create it, connect it and update it as for any device: see [The engine](/docs/devices#the-engine).
 
 ```ts
-import { createCompressorEngine } from "@/components/audio-ui/devices/compressor/engine";
-
-const engine = createCompressorEngine(ctx, state);
-source.connect(engine.input);
-engine.output.connect(ctx.destination);
-
-engine.update(nextState); // parameters ramp: no click
 engine.reduction; // dB being taken off, read per frame
-engine.dispose();
 ```
 
-What goes on each node comes from `compressorSettings(state)`, a pure function you can read and test without an `AudioContext`. Two things the browser's compressor node does that the engine accounts for:
+What goes on each node comes from `compressorSettings(state)`. Two things the browser's compressor node does that the engine accounts for:
 
-- **It adds a make-up gain of its own that cannot be turned off**, which grows with the threshold and the ratio (+10.8 dB at -24 dB and 4:1). With `autoMakeup` off the engine takes it back out and applies `makeupDb`; with it on, the node's is kept.
-- **It looks ahead by 6 ms.** The dry path waits as long, so a parallel mix does not comb.
+- **It adds a make-up gain of its own that cannot be turned off.** It grows with the threshold and the ratio (+10.8 dB at -24 dB and 4:1). With Auto make-up off, the engine takes it back out and applies Make-up. With it on, the node's is kept.
+- **It looks ahead by 6 ms.** The dry path waits as long, so a parallel mix does not comb. This is the [latency](/docs/devices#latency) of the device.
 
-## The key
-
-Switch **Key** on and the compressor follows the level of another signal, connected to `engine.sidechain`, instead of the one it processes: a kick ducks a pad, a voice ducks the music. The key is only listened to, never heard, and it is not a parameter: the state holds the switch, the host routes the signal.
-
-```ts
-const engine = createCompressorEngine(ctx, { ...state, external: true });
-pad.connect(engine.input);
-kick.connect(engine.sidechain); // listened to, not heard
-engine.output.connect(ctx.destination);
-```
-
-The browser's node has no key input, so with the key on the signal goes through a gain that an `AudioWorklet` loaded from a blob drives: the same curve as the node's (a soft knee around the threshold, a slope of 1/ratio over it), with the attack going down and the release coming back, and the node's make-up added by hand. The level of the key is a peak follower, instant up and 10 ms down. Measured in Chrome with a sine at -6 dB over a threshold of -18 dB at 4:1, it takes off 8.9 dB at 1 kHz and 8.5 dB at 60 Hz, where the curve says 9. `engine.ready` resolves once the detector is in the graph; until then a keyed compressor passes the signal unchanged, and a context with no worklets never resolves it to `true`. `engine.reduction` reads the detector's. With the key on the panel does not draw the transfer curve, since what the compressor does depends on the other signal.
-
-`compressorDevice.sidechain` is `true`, so a host knows to route something to it and an agent can be told.
-
-## Latency
-
-Working, it delays the signal by 6 ms, the look-ahead of the node; the dry path waits as long, so the mix stays aligned.
-
-## The tools
-
-The tools are derived from the device's parameters, with a JSON Schema input, so any agent can use them: they are not tied to an SDK.
-
-```ts
-import { deviceTools } from "@audio-ui/core/device";
-
-const [set, reset] = deviceTools(compressorDevice);
-// set.name === "audioui_compressor_set"
-
-const { state: next, summary } = set.run(state, { thresholdDb: -300, ratio: "high" });
-// summary: "Threshold: -18.0 dB to -60.0 dB (brought into range); ratio: refused, not a number"
-```
-
-The ranges a model is told are the ones the device enforces. A value out of range is brought in and reported, a value of the wrong type is refused by name and never replaced by a default, and a call never throws: the summary is the answer to give back to the model.
-
-## Your own device
-
-`defineDevice` is the one extension point and the core keeps no list: a device you define gets the same panel, tools and bindings as this one.
-
-```tsx
-import { defineDevice } from "@audio-ui/core/device";
-import { DevicePanel } from "@/components/audio-ui/device-panel";
-
-const tremolo = defineDevice({
-  id: "acme.tremolo",
-  name: "Tremolo",
-  description: "Moves the level up and down.",
-  parameters: [
-    { id: "on", kind: "toggle", label: "Active", default: true },
-    { id: "rate", label: "Rate", min: 0.5, max: 20, scale: "log", step: 0.5, unit: "Hz", default: 5 },
-    { id: "depth", label: "Depth", min: 0, max: 100, step: 1, unit: "%", default: 50 },
-  ],
-});
-
-<DevicePanel device={tremolo} onValueChange={setState} value={state} />;
-```
-
-`DevicePanel` makes a knob per number, a toggle per switch and a row of buttons per `choice` (a waveform, a filter type) from the descriptors, with their ranges, steps, scales and readouts. A face of your own (a curve, a spectrum) is optional.
-
-An instrument is the same with `kind: "instrument"`: its parameters shape the timbre, and its engine adds `noteOn` and `noteOff` next to `update`. The Pocket Synth block is the example: its panel is controlled and sends notes out, so it plays through any engine.
-
-## With an engine of your own
-
-A host that already has its audio engine, a DAW with one in a worklet for instance, keeps the state and the panel and translates the state into its own messages. A `DeviceBinding` is just that:
-
-```ts
-import type { DeviceBinding } from "@audio-ui/core/device";
-
-const binding: DeviceBinding<CompressorState> = {
-  update: (state) => engine.post({ type: "compressor", ...compressorSettings(state) }),
-  dispose: () => engine.post({ type: "compressor-off" }),
-};
-```
+With the sidechain on, the browser's node has no input for it, so the signal goes through a gain that a worklet drives. The worklet follows the peak of the sidechain, instant up and 10 ms down, and applies the same curve as the node, with a soft knee, a slope of 1/ratio over the threshold, and the attack and release on the reduction. The make-up of the node is added by hand. Measured in Chrome with a sine at -6 dB over a threshold of -18 dB at 4:1, it takes off 8.9 dB at 1 kHz and 8.5 dB at 60 Hz, where the curve says 9. With the sidechain on, `engine.reduction` reads the detector.
 
 ## How close the curve is
 
-The curve is the static curve of the browser's compressor node: the level once the gain has settled. A real detector follows a signal with an attack and a release, so what you hear sits a little above it: measured in Chrome with a 440 Hz sine, about 0.5 dB at the defaults and up to 1.3 dB with a slow attack and a short release. Below the threshold it is exact.
-
-## Accessibility
-
-Every control is a native input: the knobs are sliders named after their parameter, with their value and unit as the text value ("Threshold, -18.0 dB"), and the switches are toggle buttons. The panel is a group named after the device, the curve is decoration around them, and everything takes the keyboard.
+The curve is the static curve of the node: the level once the gain has settled. A real detector follows a signal with an attack and a release, so what you hear sits a little above it. Measured in Chrome with a 440 Hz sine, it is about 0.5 dB at the defaults and up to 1.3 dB with a slow attack and a short release. Below the threshold it is exact.

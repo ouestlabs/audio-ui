@@ -1,13 +1,13 @@
 ---
 title: Gate
-description: "A gate as a device you can plug in: a threshold, a floor, an attack, a hold, a release and a look-ahead as a state, a panel that draws its transfer curve with a handle on the threshold, a Web Audio engine and the tools an agent drives it with."
+description: "A gate device: threshold, floor, attack, hold, release and look-ahead, a panel that draws its transfer curve, a Web Audio engine with a sidechain, and tools for agents."
 component: true
 base: base
 ---
 
 <ComponentPreview styleName="base-nova" name="block-gate" />
 
-Cleans up between sounds: above the threshold the signal passes, below it it is turned down to the floor. Drag the handle across to set the threshold. It is a device like the [compressor](/docs/components/compressor): a state, a panel that draws it, an engine that plays it and tools an agent calls, each its own file.
+Cuts the sound between hits. Above the threshold the signal passes, and below it the signal is turned down to the floor. With the sidechain on, a kick can open a held chord. It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
 
 ## Installation
 
@@ -56,7 +56,21 @@ npx shadcn@latest add @audio-ui/gate-device @audio-ui/gate-panel @audio-ui/gate-
 
 </CodeTabs>
 
-## Usage
+## Controls
+
+<DeviceControls device="gate">
+<Control id="thresholdDb">The level above which the gate opens. Drag the handle on the plot across to set it.</Control>
+<Control id="floorDb">How far the signal is turned down while the gate is closed.</Control>
+<Control id="attackMs">How fast the gate opens.</Control>
+<Control id="holdMs">How long the gate stays open after the level drops under the threshold.</Control>
+<Control id="releaseMs">How fast the gate closes after the hold.</Control>
+<Control id="lookaheadMs">Delays the signal so the gate is open before a transient arrives. It adds the same [latency](/docs/devices#latency).</Control>
+<Control id="external">Makes the gate follow the signal connected to `engine.sidechain`. See [Sidechain](/docs/devices#sidechain).</Control>
+</DeviceControls>
+
+## Panel
+
+The panel draws the transfer curve against the straight line of a clean sound, with a handle on the threshold. With the sidechain on, the curve is not drawn, because what the gate does depends on the other signal. The plot then keeps the threshold, which is a level of the sidechain.
 
 ```tsx
 import { GatePanel } from "@/components/audio-ui/devices/gate/panel";
@@ -67,46 +81,12 @@ const [state, setState] = useState(() => gateDevice.defaults());
 <GatePanel onValueChange={setState} value={state} />;
 ```
 
-The state is a plain object keyed by parameter id, so a host stores it, saves it with its project and sends it where it likes. `gateCurve(state)` is the curve the panel draws and `gateSettings(state)` the numbers the engine puts on its nodes.
+## Engine
 
-## The engine
+Create it, connect it and update it as for any device: see [The engine](/docs/devices#the-engine).
 
-```ts
-import { createGateEngine } from "@/components/audio-ui/devices/gate/engine";
+The browser has no gate node, so the engine measures the level with an `AudioWorklet` that writes the gain to apply. The level is a peak follower. The gate is open while the level is over the threshold and for the hold after it, and the gain moves toward 1 or the floor with the attack or the release as a time constant.
 
-const engine = createGateEngine(ctx, state);
-source.connect(engine.input);
-engine.output.connect(ctx.destination);
-engine.update(nextState); // parameters ramp: no click
-engine.dispose();
-```
+A delay in front of the gain is the look-ahead. The detector reads the signal before it, so the gate is open when a transient arrives. `gateSettings(state)` gives the numbers the engine puts on its nodes.
 
-The browser has no gate node, so the engine measures the level with an `AudioWorklet` loaded from a blob, which writes the gain to apply. The level is a peak follower, the gate is open while it is over the threshold and for the **Hold** after, and the gain moves toward 1 or the floor with the **Attack** or the **Release** as a time constant. A delay in front of the gain is the **Look-ahead**: the detector reads the signal before it, so the gate is open when a transient arrives, and the device reports the delay as its latency. `engine.ready` resolves once the detector is in the graph; until then the gate stays open, and a context with no worklets never resolves it to `true`.
-
-## The key
-
-The gate takes a second signal, a key, besides the one it processes. Switch **Key** on and its level is the one of the signal connected to `engine.sidechain`: a kick can open a held chord, so the chord pumps on the beat. The key is only listened to, never heard, and it is not a parameter: the state holds the switch, the host routes the signal.
-
-```ts
-const engine = createGateEngine(ctx, { ...state, external: true });
-chord.connect(engine.input);
-kick.connect(engine.sidechain); // listened to, not heard
-engine.output.connect(ctx.destination);
-```
-
-The device says it takes one: `gateDevice.sidechain` is `true`, and so is `describe().sidechain`, so a host knows to route something to it and an agent can be told. With the key on, what the gate does to the signal depends on the other signal, so the panel does not draw the transfer curve; the threshold is a level of the key. The block starts keyed: a held chord opened by the kick of the loop. Raise the look-ahead when the key arrives with the signal, so the start of its attack is not cut.
-
-## The tools
-
-```ts
-import { deviceTools } from "@audio-ui/core/device";
-import { gateDevice } from "@/components/audio-ui/devices/gate/device";
-
-const [set, reset] = deviceTools(gateDevice);
-```
-
-`set` and `reset` change the state, with the ranges the device enforces: a value out of range is brought in and reported, a wrong one is refused by name, and a call never throws.
-
-## Accessibility
-
-Every control is a native input: the knobs are sliders named after their parameter, with the value and unit as the text value, the switches are toggle buttons, and everything takes the keyboard.
+Measured in Chrome, a hold of 100 ms keeps a quiet tone open for the 100 ms after a burst and then closes it to the floor, and 5 ms of look-ahead lets the first millisecond of a burst through at 0.50 instead of 0.26.

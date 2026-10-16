@@ -1,13 +1,13 @@
 ---
 title: Chorus
-description: "A chorus as a device you can plug in: a rate, a depth, a delay and a mix as a state, a panel that draws the sweep of the delay, a Web Audio engine and the tools an agent drives it with."
+description: "A chorus device: a rate or a note value, a depth, a delay and a mix, a panel that draws the sweep of the delay, a Web Audio engine and tools for agents."
 component: true
 base: base
 ---
 
 <ComponentPreview styleName="base-nova" name="block-chorus" />
 
-Thickens the sound with a short delay that a slow oscillator sweeps up and down. The panel draws the delay time over two seconds as the oscillator moves it. It is a device like the [compressor](/docs/components/compressor): a state, a panel that draws it, an engine that plays it and tools an agent calls, each its own file.
+Thickens the sound with a short delay that a slow oscillator sweeps up and down. It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
 
 ## Installation
 
@@ -56,7 +56,20 @@ npx shadcn@latest add @audio-ui/chorus-device @audio-ui/chorus-panel @audio-ui/c
 
 </CodeTabs>
 
-## Usage
+## Controls
+
+<DeviceControls device="chorus">
+<Control id="rateHz">How fast the oscillator sweeps the delay.</Control>
+<Control id="sync">Takes the rate from a note value and the tempo of the host. See [Tempo sync](/docs/devices#tempo-sync).</Control>
+<Control id="division">The note value of one cycle of the oscillator.</Control>
+<Control id="depth">How far the oscillator moves the delay.</Control>
+<Control id="delayMs">The delay the sweep is centred on.</Control>
+<Control id="mix">The balance of the delayed signal and the dry one.</Control>
+</DeviceControls>
+
+## Panel
+
+The panel draws the delay time over two seconds as the oscillator moves it. `chorusSweep(state)` is what it draws. With Sync on, it draws the oscillator at the rate it really has.
 
 ```tsx
 import { ChorusPanel } from "@/components/audio-ui/devices/chorus/panel";
@@ -67,45 +80,8 @@ const [state, setState] = useState(() => chorusDevice.defaults());
 <ChorusPanel onValueChange={setState} value={state} />;
 ```
 
-The state is a plain object keyed by parameter id, so a host stores it, saves it with its project and sends it where it likes. `chorusSweep(state)` is the delay time at each moment, which is what the panel draws.
+## Engine
 
-## The engine
+Create it, connect it and update it as for any device: see [The engine](/docs/devices#the-engine).
 
-```ts
-import { createChorusEngine } from "@/components/audio-ui/devices/chorus/engine";
-
-const engine = createChorusEngine(ctx, state);
-source.connect(engine.input);
-engine.output.connect(ctx.destination);
-engine.update(nextState); // parameters ramp: no click
-engine.dispose();
-```
-
-The oscillator's output, scaled by the sweep, is added to the delay time. The sweep is kept inside the delay, so the time never goes negative.
-
-## Synced to the tempo
-
-Switch **Sync** on and the rate is a note value instead of hertz: one cycle of the oscillator for each `1/4`, `1/8t` (a triplet), `1/2d` (dotted) and so on, from 1/32 to a whole note, read against the host's tempo. `1/4` at 120 BPM is 2 Hz, and the rate is held between a cycle in 50 seconds and 40 Hz. The tempo is the host's: give it to the engine with the first state or with any update.
-
-```ts
-const engine = createChorusEngine(ctx, state, { tempo }); // { bpm: 100, beatsPerBar: 4, beatUnit: 4 }
-engine.update(nextState, { tempo: { ...tempo, bpm: 120 } }); // the rate follows
-engine.update(otherState); // no context: the last tempo holds
-```
-
-The panel takes the same tempo as a prop, `tempo`, and draws the oscillator at the rate it really has. With Sync on the rate knob is drawn off, with it off the note list is. The tempo does not come from an agent's tool call: `audioui_chorus_set` can switch Sync on and pick a note, and the host decides the tempo it is read against.
-
-## The tools
-
-```ts
-import { deviceTools } from "@audio-ui/core/device";
-import { chorusDevice } from "@/components/audio-ui/devices/chorus/device";
-
-const [set, reset] = deviceTools(chorusDevice);
-```
-
-`set` and `reset` change the state, with the ranges the device enforces: a value out of range is brought in and reported, a wrong one is refused by name, and a call never throws.
-
-## Accessibility
-
-Every control is a native input: the knobs are sliders named after their parameter, with the value and unit as the text value, the switch is a toggle button, and everything takes the keyboard.
+The output of the oscillator, scaled by the depth, is added to the delay time. The sweep is kept inside the delay, so the time never goes negative.

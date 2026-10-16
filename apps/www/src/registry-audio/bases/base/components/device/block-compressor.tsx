@@ -82,7 +82,7 @@ function ReductionReadout({ source }: { source: Source<number> }) {
  * A compressor you can plug in: its state, a panel that draws it, an engine
  * that plays it, side by side. Each is its own file and none knows the others:
  * the state is a plain object, so a host keeps its own and uses what it needs.
- * Press play and turn the knobs; switch Key on and a kick ducks a held chord.
+ * Press play and turn the knobs; switch Sidechain on and a kick ducks a held chord.
  */
 export default function BlockCompressor() {
   const [state, setState] = useState<CompressorState>(() =>

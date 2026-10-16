@@ -110,7 +110,7 @@ function CompressorPanel({
         <div className="flex min-h-0 grow flex-col gap-2 p-2">
           <Plot
             aria-label={
-              value.external ? "Threshold of the key" : "Transfer curve"
+              value.external ? "Threshold of the sidechain" : "Transfer curve"
             }
             className="h-28 min-h-24 grow"
             maxX={MAX_DB}

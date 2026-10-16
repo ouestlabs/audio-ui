@@ -1,13 +1,13 @@
 ---
 title: Saturator
-description: "A saturator as a device you can plug in: a curve, a drive, a mix and an output as a state, a panel that draws its transfer curve, a Web Audio engine and the tools an agent drives it with."
+description: "A saturator device: four curves, a drive, a mix and an output, a panel that draws the transfer curve, a Web Audio engine and tools for agents."
 component: true
 base: base
 ---
 
 <ComponentPreview styleName="base-nova" name="block-saturator" />
 
-Adds warmth or dirt. The drive pushes the signal into one of four curves, a soft clip, a hard clip, a wavefold or an asymmetric tube, and the panel draws the transfer curve against the straight line of a clean sound. It is a device like the [compressor](/docs/components/compressor): a state, a panel that draws it, an engine that plays it and tools an agent calls, each its own file.
+Adds warmth or dirt. The drive pushes the signal into one of four curves: a soft clip, a hard clip, a wavefold or an asymmetric tube. It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
 
 ## Installation
 
@@ -56,7 +56,18 @@ npx shadcn@latest add @audio-ui/saturator-device @audio-ui/saturator-panel @audi
 
 </CodeTabs>
 
-## Usage
+## Controls
+
+<DeviceControls device="saturator">
+<Control id="curve">The shape of the saturation.</Control>
+<Control id="driveDb">How hard the signal is pushed into the curve.</Control>
+<Control id="mix">The balance of the saturated signal and the clean one.</Control>
+<Control id="outputDb">The level of the output.</Control>
+</DeviceControls>
+
+## Panel
+
+The panel draws the transfer curve against the straight line of a clean sound. `saturate(curve, input)` is one curve and `saturatorCurve(state)` is the whole transfer curve with the mix and the output.
 
 ```tsx
 import { SaturatorPanel } from "@/components/audio-ui/devices/saturator/panel";
@@ -67,37 +78,8 @@ const [state, setState] = useState(() => saturatorDevice.defaults());
 <SaturatorPanel onValueChange={setState} value={state} />;
 ```
 
-The state is a plain object keyed by parameter id, so a host stores it, saves it with its project and sends it where it likes. `saturate(curve, input)` is one curve and `saturatorCurve(state)` the whole transfer curve with the mix and the output.
+## Engine
 
-## The engine
+Create it, connect it and update it as for any device: see [The engine](/docs/devices#the-engine).
 
-```ts
-import { createSaturatorEngine } from "@/components/audio-ui/devices/saturator/engine";
-
-const engine = createSaturatorEngine(ctx, state);
-source.connect(engine.input);
-engine.output.connect(ctx.destination);
-engine.update(nextState); // parameters ramp: no click
-engine.dispose();
-```
-
-The drive is a gain before the table of the curve, so turning it never rebuilds the table; only picking another curve does. The shaper oversamples 4x to keep the clip from aliasing.
-
-## Latency
-
-The shaper oversamples 4x, which delays the signal by 4 ms in Chrome (192 samples). The dry path waits as long, so a partial mix does not comb; the device then has a latency of 4 ms to report to a host. The number was measured in Chrome and the specification does not give it, so measure it in another browser with `measureLatency` of `device-measure`.
-
-## The tools
-
-```ts
-import { deviceTools } from "@audio-ui/core/device";
-import { saturatorDevice } from "@/components/audio-ui/devices/saturator/device";
-
-const [set, reset] = deviceTools(saturatorDevice);
-```
-
-`set` and `reset` change the state, with the ranges the device enforces: a value out of range is brought in and reported, a wrong one is refused by name, and a call never throws. A choice such as the curve or the mode takes only the values of its options.
-
-## Accessibility
-
-Every control is a native input: the knobs are sliders named after their parameter, with the value and unit as the text value, the choices are toggle buttons, and everything takes the keyboard.
+The drive is a gain before the table of the curve, so turning it never rebuilds the table. Only picking another curve does. The shaper oversamples 4x to keep the clip from aliasing, which is the [latency](/docs/devices#latency) of the device.

@@ -1,13 +1,13 @@
 ---
 title: Distortion
-description: "A distortion as a device you can plug in: a drive, a tone, a mix and an output as a state, a panel that draws its transfer curve, a Web Audio engine and the tools an agent drives it with."
+description: "A distortion device: a drive, a tone, a mix and an output, a panel that draws the transfer curve, a Web Audio engine and tools for agents."
 component: true
 base: base
 ---
 
 <ComponentPreview styleName="base-nova" name="block-distortion" />
 
-Bends the sound. The panel draws the transfer curve, the output for each input against the straight line of a clean sound: the more the drive, the more the peaks round off. It is a device like the [compressor](/docs/components/compressor): a state, a panel that draws it, an engine that plays it and tools an agent calls, each its own file.
+Bends the sound. The more the drive, the more the peaks round off. It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
 
 ## Installation
 
@@ -56,7 +56,18 @@ npx shadcn@latest add @audio-ui/distortion-device @audio-ui/distortion-panel @au
 
 </CodeTabs>
 
-## Usage
+## Controls
+
+<DeviceControls device="distortion">
+<Control id="driveDb">How hard the signal is pushed into the clip.</Control>
+<Control id="toneHz">Closes the highs after the clip.</Control>
+<Control id="mix">The balance of the distorted signal and the clean one.</Control>
+<Control id="outputDb">The level of the output.</Control>
+</DeviceControls>
+
+## Panel
+
+The panel draws the transfer curve, the output for each input, against the straight line of a clean sound. `softClip(input, drive)` is the clip and `distortionCurve(state)` is the whole curve with the mix and the output.
 
 ```tsx
 import { DistortionPanel } from "@/components/audio-ui/devices/distortion/panel";
@@ -67,37 +78,8 @@ const [state, setState] = useState(() => distortionDevice.defaults());
 <DistortionPanel onValueChange={setState} value={state} />;
 ```
 
-The state is a plain object keyed by parameter id, so a host stores it, saves it with its project and sends it where it likes. `softClip(input, drive)` is the clip and `distortionCurve(state)` the whole curve with the mix and the output.
+## Engine
 
-## The engine
+Create it, connect it and update it as for any device: see [The engine](/docs/devices#the-engine).
 
-```ts
-import { createDistortionEngine } from "@/components/audio-ui/devices/distortion/engine";
-
-const engine = createDistortionEngine(ctx, state);
-source.connect(engine.input);
-engine.output.connect(ctx.destination);
-engine.update(nextState); // parameters ramp: no click
-engine.dispose();
-```
-
-The drive is a gain before one fixed soft-clip table, so turning it never rebuilds the table, and the shaper oversamples 4x to keep the clip from aliasing.
-
-## Latency
-
-The shaper oversamples 4x, which delays the signal by 4 ms in Chrome (192 samples). The dry path waits as long, so a partial mix does not comb; the device then has a latency of 4 ms to report to a host. The number was measured in Chrome and the specification does not give it, so measure it in another browser with `measureLatency` of `device-measure`.
-
-## The tools
-
-```ts
-import { deviceTools } from "@audio-ui/core/device";
-import { distortionDevice } from "@/components/audio-ui/devices/distortion/device";
-
-const [set, reset] = deviceTools(distortionDevice);
-```
-
-`set` and `reset` change the state, with the ranges the device enforces: a value out of range is brought in and reported, a wrong one is refused by name, and a call never throws.
-
-## Accessibility
-
-Every control is a native input: the knobs are sliders named after their parameter, with the value and unit as the text value, the switch is a toggle button, and everything takes the keyboard.
+The drive is a gain before one fixed soft-clip table, so turning it never rebuilds the table. The shaper oversamples 4x to keep the clip from aliasing, which is the [latency](/docs/devices#latency) of the device.

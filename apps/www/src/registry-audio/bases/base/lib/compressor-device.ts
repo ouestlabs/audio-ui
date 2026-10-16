@@ -11,7 +11,7 @@ export const COMPRESSOR_LOOKAHEAD_SECONDS = 0.006;
 
 export const compressorDevice = defineDevice({
   description:
-    "Brings loud parts down: above the threshold the level rises by one decibel for every ratio decibels in, with a soft knee, an attack and a release, make-up gain and a dry and compressed mix. With the key on, the level it follows is the one of another signal, the sidechain: a kick can duck a pad.",
+    "Brings loud parts down: above the threshold the level rises by one decibel for every ratio decibels in, with a soft knee, an attack and a release, make-up gain and a dry and compressed mix. With the sidechain on, the level it follows is the one of another signal: a kick can duck a pad.",
   id: "audioui.compressor",
   // The dry path waits for the node too, so the delay is the same on or off.
   latency: () => COMPRESSOR_LOOKAHEAD_SECONDS,
@@ -91,7 +91,7 @@ export const compressorDevice = defineDevice({
       step: 1,
       unit: "%",
     },
-    { default: false, id: "external", kind: "toggle", label: "Key" },
+    { default: false, id: "external", kind: "toggle", label: "Sidechain" },
   ],
 });
 

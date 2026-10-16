@@ -1,13 +1,13 @@
 ---
 title: Reverb
-description: "A reverb as a device you can plug in: a decay, a pre-delay, a damping and a mix as a state, a panel that draws the tail with a handle, a Web Audio engine and the tools an agent drives it with."
+description: "A reverb device: a decay, a pre-delay, a damping and a mix, a panel that draws the tail with a handle, a Web Audio engine and tools for agents."
 component: true
 base: base
 ---
 
 <ComponentPreview styleName="base-nova" name="block-reverb" />
 
-Puts the sound in a room. The panel draws the tail's level falling in dB from the end of the pre-delay to -60 dB: drag the handle at its end for the decay time. It is a device like the [compressor](/docs/components/compressor): a state, a panel that draws it, an engine that plays it and tools an agent calls, each its own file.
+Puts the sound in a room. It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
 
 ## Installation
 
@@ -56,7 +56,18 @@ npx shadcn@latest add @audio-ui/reverb-device @audio-ui/reverb-panel @audio-ui/r
 
 </CodeTabs>
 
-## Usage
+## Controls
+
+<DeviceControls device="reverb">
+<Control id="decay">How long the tail takes to fall by 60 dB. Drag the handle at the end of the tail to set it.</Control>
+<Control id="preDelayMs">The time between the sound and the start of the tail.</Control>
+<Control id="dampingHz">Closes the highs of the tail, as soft walls do.</Control>
+<Control id="mix">The balance of the room and the dry signal.</Control>
+</DeviceControls>
+
+## Panel
+
+The panel draws the level of the tail falling in dB, from the end of the pre-delay to -60 dB. `reverbDecay(state)` is the curve it draws, and `reverbImpulse(sampleRate, state)` makes the impulse response of the room.
 
 ```tsx
 import { ReverbPanel } from "@/components/audio-ui/devices/reverb/panel";
@@ -67,33 +78,8 @@ const [state, setState] = useState(() => reverbDevice.defaults());
 <ReverbPanel onValueChange={setState} value={state} />;
 ```
 
-The state is a plain object keyed by parameter id, so a host stores it, saves it with its project and sends it where it likes. `reverbImpulse(sampleRate, state)` makes the impulse response of a room, and `reverbDecay(state)` the decay the panel draws.
+## Engine
 
-## The engine
+Create it, connect it and update it as for any device: see [The engine](/docs/devices#the-engine).
 
-```ts
-import { createReverbEngine } from "@/components/audio-ui/devices/reverb/engine";
-
-const engine = createReverbEngine(ctx, state);
-source.connect(engine.input);
-engine.output.connect(ctx.destination);
-engine.update(nextState); // parameters ramp: no click
-engine.dispose();
-```
-
-The room is a convolver fed an impulse response made from the decay and the damping. A convolver cannot change its impulse without a click, so the engine has two and cross-fades: a new room is built in the idle one, at most every 120 ms while a knob moves.
-
-## The tools
-
-```ts
-import { deviceTools } from "@audio-ui/core/device";
-import { reverbDevice } from "@/components/audio-ui/devices/reverb/device";
-
-const [set, reset] = deviceTools(reverbDevice);
-```
-
-`set` and `reset` change the state, with the ranges the device enforces: a value out of range is brought in and reported, a wrong one is refused by name, and a call never throws.
-
-## Accessibility
-
-Every control is a native input: the knobs are sliders named after their parameter, with the value and unit as the text value, the switch is a toggle button, and everything takes the keyboard.
+The room is a convolver fed an impulse response made from the decay and the damping. A convolver cannot change its impulse without a click, so the engine has two and cross-fades: a new room is built in the idle one, at most every 120 ms while a control moves.

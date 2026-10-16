@@ -5,7 +5,7 @@ import { type DeviceState, defineDevice } from "@audio-ui/core/device";
  * down to a floor below it, with an attack and a release for how fast it opens
  * and closes, a hold for how long it stays open once the level has dropped, and
  * a look-ahead that delays the signal so the gate is open before a transient
- * arrives, and no panel and no audio in it. It takes a key: with `external` on, its
+ * arrives, and no panel and no audio in it. It takes a sidechain: with `external` on, its
  * level is the one of the signal connected to the engine's `sidechain` input,
  * so a kick can open a held chord.
  */
@@ -14,7 +14,7 @@ export const MAX_LOOKAHEAD_MS = 10;
 
 export const gateDevice = defineDevice({
   description:
-    "Cleans up between sounds: above the threshold the signal passes, below it the signal is turned down to the floor. The attack and the release say how fast it opens and closes, the hold how long it stays open after the level drops, and the look-ahead delays the signal so the gate is open before a transient arrives. With the key on, the level it follows is the one of another signal, the sidechain.",
+    "Cleans up between sounds: above the threshold the signal passes, below it the signal is turned down to the floor. The attack and the release say how fast it opens and closes, the hold how long it stays open after the level drops, and the look-ahead delays the signal so the gate is open before a transient arrives. With the sidechain on, the level it follows is the one of another signal.",
   id: "audioui.gate",
   // The look-ahead delays the signal, and so the device; off, the signal goes straight through.
   latency: (state) => (state.enabled ? state.lookaheadMs / 1000 : 0),
@@ -78,7 +78,7 @@ export const gateDevice = defineDevice({
       step: 0.5,
       unit: "ms",
     },
-    { default: false, id: "external", kind: "toggle", label: "Key" },
+    { default: false, id: "external", kind: "toggle", label: "Sidechain" },
   ],
 });
 
