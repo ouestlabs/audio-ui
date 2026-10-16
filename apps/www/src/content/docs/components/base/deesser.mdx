@@ -1,0 +1,104 @@
+---
+title: De-esser
+description: "A de-esser as a device you can plug in: a frequency, a threshold, a ratio and a range as a state, a panel that draws what it does at each frequency, a Web Audio engine and the tools an agent drives it with."
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="block-deesser" />
+
+Tames the sharp s and t of a voice. The signal is split at a frequency; when the highs above it go over the threshold they are taken down by the ratio, never by more than the range, and added back to the lows. The panel draws what the device does at each frequency at full reduction, and the handle sits on the curve at the frequency: drag it across for the frequency and down for the range. **Listen** plays only the highs, to find where the sibilants sit. It is a device like the [compressor](/docs/components/compressor): a state, a panel that draws it, an engine that plays it and tools an agent calls, each its own file.
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">CLI</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash component
+npx shadcn@latest add @audio-ui/block-deesser
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the packages:</Step>
+
+```bash
+npm install @audio-ui/react @audio-ui/core
+```
+
+<Step>Add the pieces you want. All of them, or only the state and the panel if your engine is elsewhere:</Step>
+
+```bash
+npx shadcn@latest add @audio-ui/deesser-device @audio-ui/deesser-panel @audio-ui/deesser-engine
+```
+
+<Step>Copy and paste the demo that wires them, if you want it.</Step>
+
+<ComponentSource
+  styleName="base-nova"
+  name="block-deesser"
+  title="components/examples/block-deesser.tsx"
+/>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import { DeesserPanel } from "@/components/audio-ui/devices/deesser/panel";
+import { deesserDevice } from "@/components/audio-ui/devices/deesser/device";
+
+const [state, setState] = useState(() => deesserDevice.defaults());
+
+<DeesserPanel onValueChange={setState} value={state} />;
+```
+
+The state is a plain object keyed by parameter id, so a host stores it, saves it with its project and sends it where it likes. `deesserResponse(state)` is the curve the panel draws, in dB at each frequency.
+
+## The engine
+
+```ts
+import { createDeesserEngine } from "@/components/audio-ui/devices/deesser/engine";
+
+const engine = createDeesserEngine(ctx, state);
+source.connect(engine.input);
+engine.output.connect(ctx.destination);
+engine.update(nextState); // parameters ramp: no click
+engine.reduction; // dB taken off the highs, read per frame
+engine.dispose();
+```
+
+Two biquads in a row make each half of a Linkwitz-Riley split, whose low and high halves add back to a flat response when nothing is taken down. A detector reads the highs and writes the gain they get: it is the one of the [compressor's key](/docs/components/compressor), an `AudioWorklet` loaded from a blob (`key-detector`), with a soft knee, a fast attack and a release of 60 ms. A table keeps the gain from going under the range. Measured in Chrome, with nothing over the threshold the output is within 0.01 dB of the input from 200 Hz to 12 kHz, and at full reduction a 10 kHz tone goes down by 5.1, 9.6 and 15.7 dB for ranges of 6, 12 and 24 dB: the curve the panel draws, to the hundredth. `engine.ready` resolves once the detector is in the graph; until then the highs pass unchanged, and a context with no worklets never resolves it to `true`.
+
+## Latency
+
+None to report: the split changes the phase of the signal, not its timing, so the device has no latency.
+
+## The tools
+
+```ts
+import { deviceTools } from "@audio-ui/core/device";
+import { deesserDevice } from "@/components/audio-ui/devices/deesser/device";
+
+const [set, reset] = deviceTools(deesserDevice);
+```
+
+`set` and `reset` change the state, with the ranges the device enforces: a value out of range is brought in and reported, a wrong one is refused by name, and a call never throws.
+
+## Accessibility
+
+Every control is a native input: the knobs are sliders named after their parameter, with the value and unit as the text value, the switches are toggle buttons, and everything takes the keyboard. The handle on the plot is a slider pair for the frequency and the reduction at it.

@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { compressorDevice } from "@/registry-audio/bases/base/lib/compressor-device";
+import { deesserDevice } from "@/registry-audio/bases/base/lib/deesser-device";
 import { delayDevice } from "@/registry-audio/bases/base/lib/delay-device";
 import { distortionDevice } from "@/registry-audio/bases/base/lib/distortion-device";
 import { equalizerDevice } from "@/registry-audio/bases/base/lib/equalizer-device";
@@ -48,5 +49,6 @@ describe("the latency devices declare", () => {
   test("a device with none declared adds none", () => {
     expect(delayDevice.latency(delayDevice.defaults(), 48_000)).toBe(0);
     expect(equalizerDevice.latency(equalizerDevice.defaults(), 48_000)).toBe(0);
+    expect(deesserDevice.latency(deesserDevice.defaults(), 48_000)).toBe(0);
   });
 });

@@ -21,6 +21,7 @@ const CANONICAL_COMPONENT_DOC_SLUGS = [
   "auto-pan",
   "channel-eq",
   "overdrive",
+  "deesser",
   "redux",
   "envelope",
   "fader",

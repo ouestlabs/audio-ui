@@ -25,6 +25,7 @@ export const DOCS_MENU_UPDATES: Record<string, string> = {
   "channel-eq": "New",
   overdrive: "New",
   redux: "New",
+  deesser: "New",
   "piano-roll": "New",
   scrubber: "New",
   sequencer: "Updated",

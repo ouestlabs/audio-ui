@@ -1,10 +1,13 @@
 import type { SidechainBinding } from "@audio-ui/core/device";
 import {
-  COMPRESSOR_KEY_WORKLET,
   COMPRESSOR_LOOKAHEAD_SECONDS,
   type CompressorState,
   compressorSettings,
 } from "@/registry-audio/bases/base/lib/compressor-device";
+import {
+  KEY_DETECTOR_PARAMETERS,
+  loadKeyDetector,
+} from "@/registry-audio/bases/base/lib/key-detector";
 
 /** How fast a parameter follows a change, as a time constant in seconds: fast enough to feel direct, slow enough not to click. */
 const RAMP_SECONDS = 0.01;
@@ -22,38 +25,6 @@ export interface CompressorEngine
   /** Connect the key here: with `external` on, the compressor follows this signal's level instead of the one it processes. It is only listened to, never heard. */
   readonly sidechain: AudioNode;
 }
-
-const loaded = new WeakMap<BaseAudioContext, Promise<boolean>>();
-
-/** Loads the detector of the key into a context once. `false` when the context cannot run worklets. */
-function loadDetector(ctx: BaseAudioContext): Promise<boolean> {
-  const cached = loaded.get(ctx);
-  if (cached) {
-    return cached;
-  }
-  const worklet = (ctx as { audioWorklet?: AudioWorklet }).audioWorklet;
-  if (!(worklet && typeof AudioWorkletNode !== "undefined")) {
-    return Promise.resolve(false);
-  }
-  const url = URL.createObjectURL(
-    new Blob([COMPRESSOR_KEY_WORKLET], { type: "text/javascript" })
-  );
-  const done = worklet
-    .addModule(url)
-    .then(() => true)
-    .catch(() => false)
-    .finally(() => URL.revokeObjectURL(url));
-  loaded.set(ctx, done);
-  return done;
-}
-
-const DETECTOR_PARAMETERS = [
-  "attack",
-  "knee",
-  "ratio",
-  "release",
-  "threshold",
-] as const;
 
 /**
  * A compressor on the Web Audio API for a `CompressorState`:
@@ -101,7 +72,7 @@ export function createCompressorEngine(
   let keyedReduction = 0;
   let current = compressorSettings(initial);
   const setDetector = (time: number) => {
-    for (const name of DETECTOR_PARAMETERS) {
+    for (const name of KEY_DETECTOR_PARAMETERS) {
       detector?.parameters.get(name)?.setValueAtTime(current[name], time);
     }
   };
@@ -136,7 +107,7 @@ export function createCompressorEngine(
   keyedWet.gain.value = first.keyedWet;
 
   let disposed = false;
-  const ready = loadDetector(ctx).then((ok) => {
+  const ready = loadKeyDetector(ctx).then((ok) => {
     if (!ok || disposed) {
       return false;
     }

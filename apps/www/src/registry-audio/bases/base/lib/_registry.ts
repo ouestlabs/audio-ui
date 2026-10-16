@@ -74,7 +74,10 @@ const items: RegistryItem[] = [
       },
     ],
     name: "compressor-engine",
-    registryDependencies: ["@audio-ui/compressor-device"],
+    registryDependencies: [
+      "@audio-ui/compressor-device",
+      "@audio-ui/key-detector",
+    ],
     type: "registry:lib",
   },
   {
@@ -567,6 +570,57 @@ const items: RegistryItem[] = [
       "@audio-ui/overdrive-device",
       "@audio-ui/oversampling",
     ],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "The de-esser as a device: a frequency, a threshold, a ratio and a range, the numbers that go on the nodes for a state, the table that keeps the highs above their floor and the response a state draws, with no panel and no audio in it.",
+    files: [
+      {
+        path: "lib/deesser-device.ts",
+        target: "components/audio-ui/devices/deesser/device.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "deesser-device",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device"],
+    dependencies: [],
+    description:
+      "A de-esser on the Web Audio API for a de-esser state: a Linkwitz-Riley split at the frequency, the highs read by the compressor's detector and taken down over the threshold, never under the range, and added back to the lows.",
+    files: [
+      {
+        path: "lib/deesser-engine.ts",
+        target: "components/audio-ui/devices/deesser/engine.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "deesser-engine",
+    registryDependencies: [
+      "@audio-ui/deesser-device",
+      "@audio-ui/key-detector",
+    ],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device"],
+    dependencies: [],
+    description:
+      "The detector of a key: an AudioWorklet loaded once per context from a blob, which reads a signal and writes the gain a compressor would apply to it. The compressor's key and the de-esser use it.",
+    files: [
+      {
+        path: "lib/key-detector.ts",
+        target: "components/audio-ui/devices/key-detector.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "key-detector",
+    registryDependencies: ["@audio-ui/compressor-device"],
     type: "registry:lib",
   },
   {
