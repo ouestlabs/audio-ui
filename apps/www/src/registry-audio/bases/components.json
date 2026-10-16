@@ -206,6 +206,11 @@
   },
   {
     "categories": ["device", "plot", "knob"],
+    "name": "block-multiband",
+    "title": "block-multiband"
+  },
+  {
+    "categories": ["device", "plot", "knob"],
     "name": "block-redux",
     "title": "block-redux"
   },

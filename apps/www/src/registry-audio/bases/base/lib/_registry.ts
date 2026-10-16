@@ -609,6 +609,41 @@ const items: RegistryItem[] = [
   },
   {
     categories: ["lib", "audio", "device"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "The multiband compressor as a device: two splits and a threshold and ratio for each of the three bands, with an attack, a release and an output gain, the numbers that go on the nodes for a state and the bands a state draws, with no panel and no audio in it.",
+    files: [
+      {
+        path: "lib/multiband-device.ts",
+        target: "components/audio-ui/devices/multiband/device.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "multiband-device",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "A multiband compressor on the Web Audio API for a multiband state: a Linkwitz-Riley split in three bands that add back flat, and for each band the compressor's detector driving its gain.",
+    files: [
+      {
+        path: "lib/multiband-engine.ts",
+        target: "components/audio-ui/devices/multiband/engine.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "multiband-engine",
+    registryDependencies: [
+      "@audio-ui/multiband-device",
+      "@audio-ui/key-detector",
+    ],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device"],
     dependencies: [],
     description:
       "The detector of a key: an AudioWorklet loaded once per context from a blob, which reads a signal and writes the gain a compressor would apply to it. The compressor's key and the de-esser use it.",

@@ -535,6 +535,26 @@ export const audio: RegistryItem[] = [
     categories: ["device", "plot", "knob"],
     dependencies: ["@audio-ui/react"],
     description:
+      "The face of the multiband compressor device: the three bands drawn against frequency with a handle on each split, over the knobs of each band.",
+    files: [
+      {
+        path: "audio/panels/multiband-panel.tsx",
+        target: "components/audio-ui/devices/multiband/panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "multiband-panel",
+    registryDependencies: [
+      "@audio-ui/device-panel",
+      "@audio-ui/plot",
+      "@audio-ui/multiband-device",
+    ],
+    type: "registry:ui",
+  },
+  {
+    categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
       "The face of the redux device: the stairs the bits make against the straight line of a clean sound, over the device knobs.",
     files: [
       {

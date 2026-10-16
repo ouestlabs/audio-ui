@@ -22,6 +22,7 @@ const CANONICAL_COMPONENT_DOC_SLUGS = [
   "channel-eq",
   "overdrive",
   "deesser",
+  "multiband",
   "redux",
   "envelope",
   "fader",
