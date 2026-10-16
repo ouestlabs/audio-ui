@@ -112,7 +112,7 @@ function GatePanel({
           ) : null}
         </Plot>
         <DevicePanel
-          className="grid-cols-3"
+          className="grid-cols-4"
           device={gateDevice}
           disabled={value.enabled ? undefined : OFF}
           exclude={SWITCHES}

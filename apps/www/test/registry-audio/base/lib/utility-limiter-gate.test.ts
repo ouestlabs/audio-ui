@@ -1,9 +1,9 @@
 import { describe, expect, test } from "bun:test";
 import {
+  GATE_WORKLET,
   gateCurve,
   gateDevice,
   gateSettings,
-  gateTable,
 } from "@/registry-audio/bases/base/lib/gate-device";
 import { createGateEngine } from "@/registry-audio/bases/base/lib/gate-engine";
 import {
@@ -53,6 +53,9 @@ class FakeFilter extends FakeNode {
 class FakeShaper extends FakeNode {
   curve: Float32Array | null = null;
 }
+class FakeDelay extends FakeNode {
+  readonly delayTime = new FakeParam();
+}
 class FakeCompressor extends FakeNode {
   readonly attack = new FakeParam();
   readonly knee = new FakeParam();
@@ -65,6 +68,7 @@ class FakeCompressor extends FakeNode {
 function fakeContext() {
   const made = {
     compressor: new FakeCompressor(),
+    delay: new FakeDelay(),
     filter: new FakeFilter(),
     gains: [] as FakeGain[],
     panner: new FakePanner(),
@@ -74,6 +78,7 @@ function fakeContext() {
     createBiquadFilter: () => made.filter,
     createChannelMerger: () => new FakeNode(),
     createChannelSplitter: () => new FakeNode(),
+    createDelay: () => made.delay,
     createDynamicsCompressor: () => made.compressor,
     createGain: () => {
       const gain = new FakeGain();
@@ -216,36 +221,52 @@ describe("the gate device", () => {
     expect(gateCurve({ ...defaults, enabled: false })(-80)).toBe(-80);
   });
 
-  test("the response is a low-pass cutoff: the slower it is, the lower", () => {
-    const fast = gateSettings({ ...defaults, responseMs: 5 }).smoothingHz;
-    const slow = gateSettings({ ...defaults, responseMs: 100 }).smoothingHz;
-    expect(fast).toBeGreaterThan(slow * 10);
+  test("the times go to the detector in seconds, and the floor is a gain", () => {
+    const settings = gateSettings({
+      ...defaults,
+      attackMs: 2,
+      floorDb: -40,
+      holdMs: 50,
+      lookaheadMs: 5,
+      releaseMs: 200,
+    });
+    expect(settings).toMatchObject({
+      attack: 0.002,
+      hold: 0.05,
+      lookahead: 0.005,
+      release: 0.2,
+    });
+    expect(settings.floor).toBeCloseTo(0.01, 9);
   });
 
-  test("the table is the floor under the threshold and 1 above it, and all open when off", () => {
-    const table = gateTable({ enabled: true, floorDb: -40, thresholdDb: -20 });
-    const at = (level: number) =>
-      table[Math.round(((level + 1) / 2) * (table.length - 1))];
-    expect(at(0.05)).toBeCloseTo(0.01, 6);
-    expect(at(0.5)).toBe(1);
+  test("off, the gate is open and has no look-ahead", () => {
+    const off = gateSettings({ ...defaults, enabled: false, lookaheadMs: 5 });
+    expect(off).toMatchObject({ floor: 1, lookahead: 0 });
+    expect(gateDevice.latency({ ...defaults, lookaheadMs: 5 }, 48_000)).toBe(
+      0.005
+    );
     expect(
-      gateTable({ enabled: false, floorDb: -40, thresholdDb: -20 }).every(
-        (v) => v === 1
+      gateDevice.latency(
+        { ...defaults, enabled: false, lookaheadMs: 5 },
+        48_000
       )
-    ).toBe(true);
+    ).toBe(0);
   });
 
-  test("the engine rectifies, smooths, steps and gates; the table is rebuilt only when it changes", () => {
+  test("the detector source is a processor with the five parameters the engine sets", () => {
+    expect(GATE_WORKLET).toContain('registerProcessor("audioui-gate"');
+    for (const name of ["threshold", "floor", "attack", "hold", "release"]) {
+      expect(GATE_WORKLET).toContain(`name: "${name}"`);
+    }
+  });
+
+  test("the engine delays the signal by the look-ahead, stays open without worklets and follows updates", async () => {
     const { ctx, made } = fakeContext();
-    const engine = createGateEngine(ctx, defaults);
-    const [rectifier, step] = made.shapers;
-    expect(Array.from(rectifier?.curve ?? [])).toEqual([1, 0, 1]);
-    const first = step?.curve;
-    engine.update({ ...defaults, responseMs: 100 });
-    expect(step?.curve).toBe(first);
-    engine.update({ ...defaults, thresholdDb: -20 });
-    expect(step?.curve).not.toBe(first);
-    expect(made.filter.type).toBe("lowpass");
+    const engine = createGateEngine(ctx, { ...defaults, lookaheadMs: 4 });
+    expect(made.delay.delayTime.value).toBeCloseTo(0.004, 9);
+    expect(await engine.ready).toBe(false);
+    engine.update({ ...defaults, lookaheadMs: 8 });
+    expect(made.delay.delayTime.targets.at(-1)).toBeCloseTo(0.008, 9);
   });
 });
 
