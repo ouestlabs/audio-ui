@@ -118,7 +118,11 @@ export const audio: RegistryItem[] = [
       },
     ],
     name: "device-panel",
-    registryDependencies: ["@audio-ui/knob", "@shadcn/toggle"],
+    registryDependencies: [
+      "@audio-ui/knob",
+      "@shadcn/toggle",
+      "@shadcn/select",
+    ],
     type: "registry:ui",
   },
   {

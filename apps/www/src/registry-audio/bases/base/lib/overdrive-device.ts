@@ -4,6 +4,7 @@ import {
   formatHz,
 } from "@audio-ui/core/analysis";
 import { type DeviceState, defineDevice } from "@audio-ui/core/device";
+import { oversamplingSeconds } from "@/registry-audio/bases/base/lib/oversampling";
 
 const TABLE_SAMPLES = 4096;
 
@@ -20,6 +21,8 @@ export const overdriveDevice = defineDevice({
   description:
     "A pedal-style distortion: a band-pass filter picks what is pushed into the soft clip (its frequency and width), the drive sets how hard, the tone closes the highs after it, mixed with the clean sound.",
   id: "audioui.overdrive",
+  // The shaper oversamples 4x and the dry path waits as long: the delay is the same on or off.
+  latency: (_state, sampleRate) => oversamplingSeconds("4x", sampleRate),
   name: "Overdrive",
   parameters: [
     { default: true, id: "enabled", kind: "toggle", label: "On" },

@@ -1,7 +1,10 @@
 import { webAudioCompressorOutput } from "@audio-ui/core/analysis";
 import { type DeviceState, defineDevice } from "@audio-ui/core/device";
+import { oversamplingSeconds } from "@/registry-audio/bases/base/lib/oversampling";
 
 const LIMITER_RATIO = 20;
+/** How far ahead the browser's compressor node looks, in seconds. */
+const NODE_LOOKAHEAD_SECONDS = 0.006;
 /** A level well under any threshold, where the node only adds its make-up. */
 const QUIET_DB = -120;
 
@@ -15,6 +18,11 @@ export const limiterDevice = defineDevice({
   description:
     "Keeps the sound under a ceiling: the input gain pushes the level against it, a compressor holds down what goes over with a release for how fast it lets go, and a final clip keeps every sample within 0.05 dB of the ceiling. It measures samples, not inter-sample (true) peaks.",
   id: "audioui.limiter",
+  // The node's look-ahead and the 4x oversampling of the clip; off, the signal goes round both.
+  latency: (state, sampleRate) =>
+    state.enabled
+      ? NODE_LOOKAHEAD_SECONDS + oversamplingSeconds("4x", sampleRate)
+      : 0,
   name: "Limiter",
   parameters: [
     { default: true, id: "enabled", kind: "toggle", label: "On" },

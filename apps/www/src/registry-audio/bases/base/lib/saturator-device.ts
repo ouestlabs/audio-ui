@@ -1,4 +1,5 @@
 import { type DeviceState, defineDevice } from "@audio-ui/core/device";
+import { oversamplingSeconds } from "@/registry-audio/bases/base/lib/oversampling";
 
 const TABLE_SAMPLES = 4096;
 const CURVES = ["soft", "hard", "fold", "tube"] as const;
@@ -12,6 +13,8 @@ export const saturatorDevice = defineDevice({
   description:
     "Adds warmth or dirt: the drive pushes the signal into a curve (soft clip, hard clip, wavefold or an asymmetric tube), mixed with the clean sound at an output level.",
   id: "audioui.saturator",
+  // The shaper oversamples 4x and the dry path waits as long: the delay is the same on or off.
+  latency: (_state, sampleRate) => oversamplingSeconds("4x", sampleRate),
   name: "Saturator",
   parameters: [
     { default: true, id: "enabled", kind: "toggle", label: "On" },

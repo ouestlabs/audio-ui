@@ -470,6 +470,7 @@ export const components: RegistryItem[] = [
       "@audio-ui/delay-panel",
       "@audio-ui/delay-device",
       "@audio-ui/delay-engine",
+      "@audio-ui/demo-loop",
       "@audio-ui/play-toggle",
       "@audio-ui/use-device-loop",
       "@audio-ui/use-master-bus",

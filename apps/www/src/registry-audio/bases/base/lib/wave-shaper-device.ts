@@ -1,4 +1,5 @@
 import { type DeviceState, defineDevice } from "@audio-ui/core/device";
+import { oversamplingSeconds } from "@/registry-audio/bases/base/lib/oversampling";
 
 const MIN_FREQUENCY = 55;
 const MAX_FREQUENCY = 880;
@@ -17,6 +18,8 @@ export const waveShaperDevice = defineDevice({
   description:
     "A monophonic synth: two detuned oscillators of a chosen waveform, a distortion mixed in with the clean sound, a low-pass filter with a tone and a resonance, played by pitch and resonance, at a level.",
   id: "audioui.wave-shaper",
+  // The shaper oversamples 4x and the dry path waits as long: the delay is the same on or off.
+  latency: (_state, sampleRate) => oversamplingSeconds("4x", sampleRate),
   kind: "instrument",
   name: "Wave Shaper",
   note: [

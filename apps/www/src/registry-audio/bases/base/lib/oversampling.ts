@@ -15,12 +15,20 @@ const SAMPLES: Record<OverSampleType, number> = {
   none: 0,
 };
 
+/** The delay in seconds a `WaveShaperNode` adds when it oversamples at `amount`, at a sample rate. Pure, so a device can declare it as its latency. */
+export function oversamplingSeconds(
+  amount: OverSampleType,
+  sampleRate: number
+): number {
+  return SAMPLES[amount] / sampleRate;
+}
+
 /** The delay in seconds a `WaveShaperNode` adds when it oversamples at `amount`, in a context. */
 export function oversamplingDelay(
   ctx: BaseAudioContext,
   amount: OverSampleType
 ): number {
-  return SAMPLES[amount] / ctx.sampleRate;
+  return oversamplingSeconds(amount, ctx.sampleRate);
 }
 
 /** A delay node that holds a dry path back by the oversampling of a shaper. Connect the dry path through it. */

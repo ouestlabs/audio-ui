@@ -1,5 +1,6 @@
 "use client";
 
+import type { DeviceContext } from "@audio-ui/core/device";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { renderDemoLoop } from "@/registry-audio/bases/base/lib/demo-loop";
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
@@ -13,12 +14,18 @@ export interface DemoEngine<State> {
   dispose: () => void;
   readonly input: AudioNode;
   readonly output: AudioNode;
-  update: (state: State) => void;
+  update: (state: State, context?: DeviceContext) => void;
 }
 
 export interface UseDeviceLoopOptions<State, Engine extends DemoEngine<State>> {
   /** Makes the engine for the first state. Called each time the demo starts. */
-  create: (ctx: BaseAudioContext, state: State) => Engine;
+  /** What the host knows, such as the tempo of the loop, given to the engine and to each update. */
+  context?: DeviceContext;
+  create: (
+    ctx: BaseAudioContext,
+    state: State,
+    context?: DeviceContext
+  ) => Engine;
   /** Where the processed sound goes, such as the node of `useMasterBus`. */
   destination: AudioNode | null;
   /** The state of the device, followed by the engine whoever changed it. */
@@ -33,6 +40,7 @@ export interface UseDeviceLoopOptions<State, Engine extends DemoEngine<State>> {
  * and an analyser of what comes out, for a spectrum. Stops on unmount.
  */
 export function useDeviceLoop<State, Engine extends DemoEngine<State>>({
+  context,
   create,
   destination,
   state,
@@ -42,6 +50,8 @@ export function useDeviceLoop<State, Engine extends DemoEngine<State>>({
   const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
   const stateRef = useRef(state);
   stateRef.current = state;
+  const contextRef = useRef(context);
+  contextRef.current = context;
   const createRef = useRef(create);
   createRef.current = create;
 
@@ -64,7 +74,7 @@ export function useDeviceLoop<State, Engine extends DemoEngine<State>>({
       source.loop = true;
       const level = ctx.createGain();
       level.gain.value = SIGNAL_LEVEL;
-      const made = createRef.current(ctx, stateRef.current);
+      const made = createRef.current(ctx, stateRef.current, contextRef.current);
       const tap = ctx.createAnalyser();
       tap.fftSize = FFT_SIZE;
       tap.smoothingTimeConstant = ANALYSER_SMOOTHING;
@@ -92,8 +102,8 @@ export function useDeviceLoop<State, Engine extends DemoEngine<State>>({
 
   // The engine follows the state, whoever changed it: a knob, a handle or a call.
   useEffect(() => {
-    engine?.update(state);
-  }, [engine, state]);
+    engine?.update(state, context);
+  }, [context, engine, state]);
 
   return { analyser, engine, playing, toggle };
 }

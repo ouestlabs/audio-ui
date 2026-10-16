@@ -1434,6 +1434,8 @@ An agent can play an instrument that declares its `note` (a pitch, a cutoff, eac
 
 A host that brings its own engine can measure it against the panel: `measureResponse(createEngine, state, curve)` from `device-measure` returns how far, in dB, its response is from the curve the device draws, and `measureLatency(createEngine, state)` how long it delays a signal, both rendered offline. It is a measurement, not a certification: the curve is the device's own and the tolerance is the host's.
 
+A time parameter that follows the tempo is a `choice` of `SYNCED_DIVISIONS` from `@audio-ui/core/time` (`1/8`, `1/8t` triplet, `1/8d` dotted) beside a toggle; the host gives the engine its tempo as `update(state, { tempo })`, never as a tool parameter, and `syncedSeconds(division, tempo)` is how long one lasts. A device that delays the sound declares `latency(state, sampleRate)` in seconds, and `device.latency(state, sampleRate)` is what a host that compensates latency asks for.
+
 ### 7.5 apply is pure and re-clamps
 
 **Impact: MEDIUM (every tool call yields a valid state)**
