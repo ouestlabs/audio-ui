@@ -133,7 +133,9 @@ export function deviceTools<
       ];
       return {
         state: result.state as State,
-        summary: parts.length ? parts.join("; ") : "Nothing changed.",
+        summary: parts.length
+          ? parts.join("; ")
+          : "Nothing changed: every value given is already set.",
       };
     },
   };
