@@ -316,6 +316,65 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
+    categories: ["device", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "The face of the utility device: its gain, pan and width as knobs and its mono and invert switches.",
+    files: [
+      {
+        path: "audio/panels/utility-panel.tsx",
+        target: "components/audio-ui/devices/utility/panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "utility-panel",
+    registryDependencies: [
+      "@audio-ui/device-panel",
+      "@audio-ui/utility-device",
+    ],
+    type: "registry:ui",
+  },
+  {
+    categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "The face of the limiter device: its transfer curve against the straight line of a clean sound with a handle for the ceiling and the input gain, over the device knobs.",
+    files: [
+      {
+        path: "audio/panels/limiter-panel.tsx",
+        target: "components/audio-ui/devices/limiter/panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "limiter-panel",
+    registryDependencies: [
+      "@audio-ui/device-panel",
+      "@audio-ui/plot",
+      "@audio-ui/limiter-device",
+    ],
+    type: "registry:ui",
+  },
+  {
+    categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "The face of the gate device: its transfer curve against the straight line of a clean sound with a handle on the threshold, over the device knobs.",
+    files: [
+      {
+        path: "audio/panels/gate-panel.tsx",
+        target: "components/audio-ui/devices/gate/panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "gate-panel",
+    registryDependencies: [
+      "@audio-ui/device-panel",
+      "@audio-ui/plot",
+      "@audio-ui/gate-device",
+    ],
+    type: "registry:ui",
+  },
+  {
     categories: ["device", "plot", "knob"],
     dependencies: ["@audio-ui/react", "@audio-ui/core"],
     description:

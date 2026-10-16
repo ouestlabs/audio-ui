@@ -302,6 +302,102 @@ const items: RegistryItem[] = [
     type: "registry:lib",
   },
   {
+    categories: ["lib", "audio", "device"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "The utility as a device: a gain, a pan, a stereo width, a mono switch and a phase invert, the numbers that go on the nodes for a state, with no panel and no audio in it.",
+    files: [
+      {
+        path: "lib/utility-device.ts",
+        target: "components/audio-ui/devices/utility/device.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "utility-device",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device"],
+    dependencies: [],
+    description:
+      "A utility on the Web Audio API for a utility state: the signal split into mid and side, the side scaled by the width, then a pan and a gain with an optional phase invert, moving without a click.",
+    files: [
+      {
+        path: "lib/utility-engine.ts",
+        target: "components/audio-ui/devices/utility/engine.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "utility-engine",
+    registryDependencies: ["@audio-ui/utility-device"],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "The limiter as a device: an input gain, a ceiling and a release, the numbers that go on the nodes for a state and the curve a state plays, with no panel and no audio in it.",
+    files: [
+      {
+        path: "lib/limiter-device.ts",
+        target: "components/audio-ui/devices/limiter/device.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "limiter-device",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device"],
+    dependencies: [],
+    description:
+      "A limiter on the Web Audio API for a limiter state: the browser compressor node at a ratio of 20 with no knee, its make-up taken back out, the signal going round it when it is off.",
+    files: [
+      {
+        path: "lib/limiter-engine.ts",
+        target: "components/audio-ui/devices/limiter/engine.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "limiter-engine",
+    registryDependencies: ["@audio-ui/limiter-device"],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "The gate as a device: a threshold, a floor and a response, the numbers that go on the nodes for a state, the table that turns a level into a gain and the curve a state plays, with no panel and no audio in it.",
+    files: [
+      {
+        path: "lib/gate-device.ts",
+        target: "components/audio-ui/devices/gate/device.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "gate-device",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device"],
+    dependencies: [],
+    description:
+      "A gate on the Web Audio API for a gate state, made of the nodes the browser has: the signal rectified and smoothed is the level, and a table turns it into a gain of the floor under the threshold and 1 above.",
+    files: [
+      {
+        path: "lib/gate-engine.ts",
+        target: "components/audio-ui/devices/gate/engine.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "gate-engine",
+    registryDependencies: ["@audio-ui/gate-device"],
+    type: "registry:lib",
+  },
+  {
     categories: ["lib", "audio", "web-audio"],
     dependencies: [],
     description:

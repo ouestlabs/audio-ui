@@ -1,0 +1,99 @@
+---
+title: Gate
+description: "A gate as a device you can plug in: a threshold, a floor and a response as a state, a panel that draws its transfer curve with a handle on the threshold, a Web Audio engine and the tools an agent drives it with."
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="block-gate" />
+
+Cleans up between sounds: above the threshold the signal passes, below it it is turned down to the floor. Drag the handle across to set the threshold. It is a device like the [compressor](/docs/components/compressor): a state, a panel that draws it, an engine that plays it and tools an agent calls, each its own file.
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">CLI</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash component
+npx shadcn@latest add @audio-ui/block-gate
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the packages:</Step>
+
+```bash
+npm install @audio-ui/react @audio-ui/core
+```
+
+<Step>Add the pieces you want. All of them, or only the state and the panel if your engine is elsewhere:</Step>
+
+```bash
+npx shadcn@latest add @audio-ui/gate-device @audio-ui/gate-panel @audio-ui/gate-engine
+```
+
+<Step>Copy and paste the demo that wires them, if you want it.</Step>
+
+<ComponentSource
+  styleName="base-nova"
+  name="block-gate"
+  title="components/examples/block-gate.tsx"
+/>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import { GatePanel } from "@/components/audio-ui/devices/gate/panel";
+import { gateDevice } from "@/components/audio-ui/devices/gate/device";
+
+const [state, setState] = useState(() => gateDevice.defaults());
+
+<GatePanel onValueChange={setState} value={state} />;
+```
+
+The state is a plain object keyed by parameter id, so a host stores it, saves it with its project and sends it where it likes. `gateCurve(state)` is the curve the panel draws and `gateTable(state)` the table the engine loads.
+
+## The engine
+
+```ts
+import { createGateEngine } from "@/components/audio-ui/devices/gate/engine";
+
+const engine = createGateEngine(ctx, state);
+source.connect(engine.input);
+engine.output.connect(ctx.destination);
+engine.update(nextState); // parameters ramp: no click
+engine.dispose();
+```
+
+The browser has no gate node, so the engine measures the level with the nodes it has: the signal rectified and smoothed is the level, and a table turns it into a gain of the floor under the threshold and 1 above. The response sets the smoothing, so a short one follows the peaks and a long one the average, and the gate opens and closes at the same speed. There is no hold and no sidechain.
+
+## The tools
+
+```ts
+import { deviceTools } from "@audio-ui/core/device";
+import { gateDevice } from "@/components/audio-ui/devices/gate/device";
+
+const [set, reset] = deviceTools(gateDevice);
+```
+
+`set` and `reset` change the state, with the ranges the device enforces: a value out of range is brought in and reported, a wrong one is refused by name, and a call never throws.
+
+## Accessibility
+
+Every control is a native input: the knobs are sliders named after their parameter, with the value and unit as the text value, the switches are toggle buttons, and everything takes the keyboard.

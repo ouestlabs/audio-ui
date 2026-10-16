@@ -1,0 +1,99 @@
+---
+title: Utility
+description: "A utility as a device you can plug in: a gain, a pan, a width, mono and a phase invert as a state, a panel, a Web Audio engine and the tools an agent drives it with."
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="block-utility" />
+
+Sets the level and the stereo image: a gain, a pan, a width from mono to twice as wide, a mono switch and a phase invert. It has no display, so its panel is only as tall as its knobs. It is a device like the [compressor](/docs/components/compressor): a state, a panel that draws it, an engine that plays it and tools an agent calls, each its own file.
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">CLI</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash component
+npx shadcn@latest add @audio-ui/block-utility
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the packages:</Step>
+
+```bash
+npm install @audio-ui/react @audio-ui/core
+```
+
+<Step>Add the pieces you want. All of them, or only the state and the panel if your engine is elsewhere:</Step>
+
+```bash
+npx shadcn@latest add @audio-ui/utility-device @audio-ui/utility-panel @audio-ui/utility-engine
+```
+
+<Step>Copy and paste the demo that wires them, if you want it.</Step>
+
+<ComponentSource
+  styleName="base-nova"
+  name="block-utility"
+  title="components/examples/block-utility.tsx"
+/>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import { UtilityPanel } from "@/components/audio-ui/devices/utility/panel";
+import { utilityDevice } from "@/components/audio-ui/devices/utility/device";
+
+const [state, setState] = useState(() => utilityDevice.defaults());
+
+<UtilityPanel onValueChange={setState} value={state} />;
+```
+
+The state is a plain object keyed by parameter id, so a host stores it, saves it with its project and sends it where it likes. `utilitySettings(state)` gives the numbers that go on the nodes.
+
+## The engine
+
+```ts
+import { createUtilityEngine } from "@/components/audio-ui/devices/utility/engine";
+
+const engine = createUtilityEngine(ctx, state);
+source.connect(engine.input);
+engine.output.connect(ctx.destination);
+engine.update(nextState); // parameters ramp: no click
+engine.dispose();
+```
+
+The signal is split into mid and side. The width scales the side: 0 is mono, 100 % is the input as it is, 200 % is twice as wide. A mono input is spread to both sides first. Off, the signal passes unchanged.
+
+## The tools
+
+```ts
+import { deviceTools } from "@audio-ui/core/device";
+import { utilityDevice } from "@/components/audio-ui/devices/utility/device";
+
+const [set, reset] = deviceTools(utilityDevice);
+```
+
+`set` and `reset` change the state, with the ranges the device enforces: a value out of range is brought in and reported, a wrong one is refused by name, and a call never throws.
+
+## Accessibility
+
+Every control is a native input: the knobs are sliders named after their parameter, with the value and unit as the text value, the switches are toggle buttons, and everything takes the keyboard.
