@@ -159,6 +159,28 @@ describe("the limiter device", () => {
     expect(curve(-3) - curve(0)).toBeLessThan(0.2);
   });
 
+  test("the curve never goes above the ceiling, whatever the input and the gain", () => {
+    for (const gainDb of [0, 12, 24]) {
+      const curve = limiterCurve({ ...defaults, ceilingDb: -3, gainDb });
+      for (const inputDb of [-30, -6, 0, 12, 40]) {
+        expect(curve(inputDb)).toBeLessThanOrEqual(-3);
+      }
+    }
+  });
+
+  test("the engine ends in a 4x hard clip scaled to the ceiling", () => {
+    const { ctx, made } = fakeContext();
+    createLimiterEngine(ctx, { ...defaults, ceilingDb: -6 });
+    const [clip] = made.shapers;
+    expect(Array.from(clip?.curve ?? [])).toEqual([-1, 1]);
+    expect(
+      made.gains.some((g) => Math.abs(g.gain.value - 10 ** (6 / 20)) < 1e-9)
+    ).toBe(true);
+    expect(
+      made.gains.some((g) => Math.abs(g.gain.value - 10 ** (-6 / 20)) < 1e-9)
+    ).toBe(true);
+  });
+
   test("off is the straight line", () => {
     expect(limiterCurve({ ...defaults, enabled: false })(-12)).toBe(-12);
     expect(limiterSettings({ ...defaults, enabled: false })).toMatchObject({

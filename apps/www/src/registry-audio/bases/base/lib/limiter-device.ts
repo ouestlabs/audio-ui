@@ -13,7 +13,7 @@ const QUIET_DB = -120;
  */
 export const limiterDevice = defineDevice({
   description:
-    "Keeps the sound under a ceiling: the input gain pushes the level against it and what goes over is held down, with a release for how fast it lets go.",
+    "Keeps the sound under a ceiling: the input gain pushes the level against it, a compressor holds down what goes over with a release for how fast it lets go, and a final clip guarantees that no sample is above the ceiling. It measures samples, not inter-sample (true) peaks.",
   id: "audioui.limiter",
   name: "Limiter",
   parameters: [
@@ -63,6 +63,7 @@ export function limiterSettings(state: LimiterState) {
   const node = nodeOf(state.ceilingDb);
   const makeupDb = node(QUIET_DB) - QUIET_DB;
   return {
+    ceiling: 10 ** (state.ceilingDb / 20),
     gain: state.enabled ? 10 ** (state.gainDb / 20) : 1,
     release: state.releaseMs / 1000,
     threshold: state.ceilingDb,
@@ -78,5 +79,7 @@ export function limiterCurve(state: LimiterState) {
   }
   const node = nodeOf(state.ceilingDb);
   const makeupDb = node(QUIET_DB) - QUIET_DB;
-  return (inputDb: number) => node(inputDb + state.gainDb) - makeupDb;
+  // The final clip: nothing is above the ceiling.
+  return (inputDb: number) =>
+    Math.min(state.ceilingDb, node(inputDb + state.gainDb) - makeupDb);
 }
