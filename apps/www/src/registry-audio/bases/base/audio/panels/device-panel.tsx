@@ -11,6 +11,14 @@ import type {
 } from "@audio-ui/core/device";
 import { type ReactNode, useCallback } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/registry/bases/base/ui/select";
 import { Toggle } from "@/registry/bases/base/ui/toggle";
 import { Knob } from "@/registry-audio/bases/base/audio/elements/knob";
 
@@ -114,13 +122,27 @@ function ToggleControl({
 }
 
 /** A pick from a short list: one button per option, the picked one filled. */
+/** More options than fit as buttons: they go in a list. */
+const MAX_BUTTONS = 6;
+
 function ChoiceControl({
   device,
+  disabled,
   onValueChange,
   parameter,
   value,
 }: ControlProps<ChoiceParameter>) {
   const current = value[parameter.id];
+  const pickFromList = useCallback(
+    (option: string | null) => {
+      if (option) {
+        onValueChange(
+          device.set(value as never, parameter.id, option) as AnyState
+        );
+      }
+    },
+    [device, onValueChange, parameter.id, value]
+  );
   const pick = useCallback(
     (option: string) =>
       onValueChange(
@@ -133,41 +155,76 @@ function ChoiceControl({
       <span aria-hidden="true" className="text-muted-foreground text-xs">
         {parameter.label}
       </span>
-      <div
-        aria-label={parameter.label}
-        className={cn(
-          "justify-center gap-1",
-          // Four options in a column are taller than a knob: they sit two by two.
-          parameter.options.length > 2 ? "grid grid-cols-2" : "flex flex-wrap"
-        )}
-        role="group"
-      >
-        {parameter.options.map((option) => (
-          <ChoiceOption
-            key={option.value}
-            label={option.label}
-            onPick={pick}
-            pressed={current === option.value}
-            value={option.value}
-          />
-        ))}
-      </div>
+      {parameter.options.length > MAX_BUTTONS ? (
+        <Select
+          disabled={disabled}
+          items={parameter.options}
+          onValueChange={pickFromList}
+          value={typeof current === "string" ? current : parameter.default}
+        >
+          <SelectTrigger
+            aria-label={parameter.label}
+            className="w-28"
+            size="sm"
+          >
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              {parameter.options.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+      ) : (
+        <div
+          aria-label={parameter.label}
+          className={cn(
+            "justify-center gap-1",
+            // Four options in a column are taller than a knob: they sit two by two.
+            parameter.options.length > 2 ? "grid grid-cols-2" : "flex flex-wrap"
+          )}
+          role="group"
+        >
+          {parameter.options.map((option) => (
+            <ChoiceOption
+              disabled={disabled}
+              key={option.value}
+              label={option.label}
+              onPick={pick}
+              pressed={current === option.value}
+              value={option.value}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
 
 interface ChoiceOptionProps {
+  disabled?: boolean;
   label: string;
   onPick: (value: string) => void;
   pressed: boolean;
   value: string;
 }
 
-function ChoiceOption({ label, onPick, pressed, value }: ChoiceOptionProps) {
+function ChoiceOption({
+  disabled,
+  label,
+  onPick,
+  pressed,
+  value,
+}: ChoiceOptionProps) {
   const change = useCallback(() => onPick(value), [onPick, value]);
   return (
     <Toggle
       className="aria-pressed:border-primary aria-pressed:bg-primary aria-pressed:text-primary-foreground"
+      disabled={disabled}
       onPressedChange={change}
       pressed={pressed}
       size="sm"
@@ -355,7 +412,12 @@ function DevicePanel<const Parameters extends readonly ParameterDescriptor[]>({
     }
     if (parameter.kind === "choice") {
       return (
-        <ChoiceControl {...props} key={parameter.id} parameter={parameter} />
+        <ChoiceControl
+          {...props}
+          disabled={disabled.includes(parameter.id as never)}
+          key={parameter.id}
+          parameter={parameter}
+        />
       );
     }
     return (

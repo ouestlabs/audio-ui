@@ -1,5 +1,6 @@
 import { formatHz } from "@audio-ui/core/analysis";
 import { type DeviceState, defineDevice } from "@audio-ui/core/device";
+import { oversamplingSeconds } from "@/registry-audio/bases/base/lib/oversampling";
 
 const CURVE_SAMPLES = 4096;
 
@@ -14,6 +15,8 @@ export const distortionDevice = defineDevice({
   description:
     "Bends the sound: the drive pushes the signal into a soft clip that rounds its peaks, the tone closes the highs after it, mixed with the clean sound at an output level.",
   id: "audioui.distortion",
+  // The shaper oversamples 4x and the dry path waits as long: the delay is the same on or off.
+  latency: (_state, sampleRate) => oversamplingSeconds("4x", sampleRate),
   name: "Distortion",
   parameters: [
     { default: true, id: "enabled", kind: "toggle", label: "On" },

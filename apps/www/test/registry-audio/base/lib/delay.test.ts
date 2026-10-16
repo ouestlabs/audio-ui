@@ -1,9 +1,11 @@
 import { describe, expect, test } from "bun:test";
 import {
   delayDevice,
+  delaySeconds,
   delaySettings,
   delayTaps,
   MAX_DELAY_SECONDS,
+  nearestDivision,
 } from "@/registry-audio/bases/base/lib/delay-device";
 import { createDelayEngine } from "@/registry-audio/bases/base/lib/delay-engine";
 
@@ -154,5 +156,61 @@ describe("createDelayEngine", () => {
     createDelayEngine(ctx, defaults).dispose();
     expect(made.gains.every((gain) => gain.disconnected === 1)).toBe(true);
     expect(made.delay.disconnected).toBe(1);
+  });
+});
+
+describe("a delay synced to the tempo", () => {
+  const tempo = { beatsPerBar: 4, beatUnit: 4, bpm: 120 };
+  const synced = { ...defaults, division: "1/8d", sync: true, timeMs: 777 };
+
+  test("the time is the note value at the tempo, the milliseconds ignored", () => {
+    expect(delaySeconds(synced, tempo)).toBeCloseTo(0.375, 9);
+    expect(delaySeconds({ ...synced, sync: false }, tempo)).toBeCloseTo(
+      0.777,
+      9
+    );
+    expect(delaySettings(synced, { ...tempo, bpm: 60 }).delay).toBeCloseTo(
+      0.75,
+      9
+    );
+  });
+
+  test("a note longer than the node holds is held to what it can", () => {
+    const slow = { ...tempo, bpm: 30 };
+    expect(
+      delaySeconds({ ...defaults, division: "1/1", sync: true }, slow)
+    ).toBe(MAX_DELAY_SECONDS);
+  });
+
+  test("the taps follow the tempo", () => {
+    const taps = delayTaps({ ...synced, feedback: 50, mix: 100 }, 3000, tempo);
+    expect(taps[1]?.timeMs).toBeCloseTo(375, 6);
+    expect(taps[2]?.timeMs).toBeCloseTo(750, 6);
+  });
+
+  test("a time dragged to lands on the nearest note value", () => {
+    expect(nearestDivision(0.5, tempo)).toBe("1/4");
+    expect(nearestDivision(0.37, tempo)).toBe("1/8d");
+    expect(nearestDivision(0.26, tempo)).toBe("1/8");
+  });
+
+  test("the engine reads the tempo it was given and the one an update brings", () => {
+    const { ctx, made } = fakeContext();
+    const engine = createDelayEngine(ctx, synced, { tempo });
+    expect(made.delay.delayTime.value).toBeCloseTo(0.375, 9);
+    engine.update(synced, { tempo: { ...tempo, bpm: 60 } });
+    expect(made.delay.delayTime.targets.at(-1)?.value).toBeCloseTo(0.75, 9);
+    // An update with no context keeps the last tempo.
+    engine.update(synced);
+    expect(made.delay.delayTime.targets.at(-1)?.value).toBeCloseTo(0.75, 9);
+  });
+
+  test("an agent can pick a note value, and a made-up one is refused by name", () => {
+    expect(
+      delayDevice.apply(defaults, { division: "1/16t" }).state.division
+    ).toBe("1/16t");
+    expect(delayDevice.apply(defaults, { division: "1/7" }).rejected).toEqual([
+      { id: "division", reason: "not one of the options" },
+    ]);
   });
 });

@@ -1,3 +1,5 @@
+import type { DeviceContext } from "@audio-ui/core/device";
+import { DEFAULT_TEMPO } from "@audio-ui/core/time";
 import {
   type DelayState,
   delaySettings,
@@ -15,7 +17,7 @@ export interface DelayEngine {
   readonly input: AudioNode;
   /** Connect this to the destination, or to the next device. */
   readonly output: AudioNode;
-  update: (state: DelayState) => void;
+  update: (state: DelayState, context?: DeviceContext) => void;
 }
 
 /**
@@ -28,12 +30,16 @@ export interface DelayEngine {
  * ```
  *
  * The repeats go round the loop through the tone filter, so each is darker than
- * the one before. Parameters move with `setTargetAtTime`, never `.value =`.
+ * the one before. A synced delay reads its note value at the tempo the host
+ * gave, the last one it was given. Parameters move with `setTargetAtTime`,
+ * never `.value =`.
  */
 export function createDelayEngine(
   ctx: BaseAudioContext,
-  initial: DelayState
+  initial: DelayState,
+  context?: DeviceContext
 ): DelayEngine {
+  let tempo = context?.tempo ?? DEFAULT_TEMPO;
   const input = ctx.createGain();
   const output = ctx.createGain();
   const dry = ctx.createGain();
@@ -51,7 +57,7 @@ export function createDelayEngine(
     state: DelayState,
     set: (param: AudioParam, value: number, ramp: number) => void
   ) => {
-    const settings = delaySettings(state);
+    const settings = delaySettings(state, tempo);
     set(delay.delayTime, settings.delay, TIME_RAMP_SECONDS);
     set(tone.frequency, settings.tone, RAMP_SECONDS);
     set(feedback.gain, settings.feedback, RAMP_SECONDS);
@@ -72,9 +78,11 @@ export function createDelayEngine(
     },
     input,
     output,
-    update: (state) =>
+    update: (state, next) => {
+      tempo = next?.tempo ?? tempo;
       apply(state, (param, value, ramp) =>
         param.setTargetAtTime(value, ctx.currentTime, ramp)
-      ),
+      );
+    },
   };
 }

@@ -5,6 +5,8 @@ import {
 } from "@/registry-audio/bases/base/lib/drum-synthesis";
 
 const BPM = 100;
+/** The tempo of the loop, for a device that follows it: a delay synced to it echoes on the beat. */
+export const DEMO_TEMPO = { beatsPerBar: 4, beatUnit: 4, bpm: BPM };
 const BEATS = 4;
 const BEAT_SECONDS = 60 / BPM;
 const LOOP_SECONDS = BEATS * BEAT_SECONDS;

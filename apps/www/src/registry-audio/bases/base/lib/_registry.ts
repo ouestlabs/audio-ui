@@ -122,7 +122,7 @@ const items: RegistryItem[] = [
       },
     ],
     name: "wave-shaper-device",
-    registryDependencies: [],
+    registryDependencies: ["@audio-ui/oversampling"],
     type: "registry:lib",
   },
   {
@@ -253,7 +253,7 @@ const items: RegistryItem[] = [
       },
     ],
     name: "distortion-device",
-    registryDependencies: [],
+    registryDependencies: ["@audio-ui/oversampling"],
     type: "registry:lib",
   },
   {
@@ -352,7 +352,7 @@ const items: RegistryItem[] = [
       },
     ],
     name: "limiter-device",
-    registryDependencies: [],
+    registryDependencies: ["@audio-ui/oversampling"],
     type: "registry:lib",
   },
   {
@@ -416,7 +416,7 @@ const items: RegistryItem[] = [
       },
     ],
     name: "saturator-device",
-    registryDependencies: [],
+    registryDependencies: ["@audio-ui/oversampling"],
     type: "registry:lib",
   },
   {
@@ -547,7 +547,7 @@ const items: RegistryItem[] = [
       },
     ],
     name: "overdrive-device",
-    registryDependencies: [],
+    registryDependencies: ["@audio-ui/oversampling"],
     type: "registry:lib",
   },
   {

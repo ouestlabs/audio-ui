@@ -83,6 +83,18 @@ engine.dispose();
 
 The repeats go round a low-pass tone filter, so each is darker than the one before. A change of time glides slowly, so the echo bends like a tape instead of clicking, and the feedback stops short of 95 % so it cannot run away.
 
+## Synced to the tempo
+
+Switch **Sync** on and the time is a note value instead of milliseconds: `1/8`, a triplet `1/8t`, a dotted `1/8d`, from 1/32 to a whole note, read against the host's tempo. The tempo is the host's, not the delay's: give it to the engine with the first state or with any update.
+
+```ts
+const engine = createDelayEngine(ctx, state, { tempo }); // { bpm: 100, beatsPerBar: 4, beatUnit: 4 }
+engine.update(nextState, { tempo: { ...tempo, bpm: 120 } }); // the echo follows
+engine.update(otherState); // no context: the last tempo holds
+```
+
+The panel takes the same tempo as a prop, `tempo`, and draws the echoes where the notes fall. With Sync on, the handle lands on the nearest note value and the time knob is drawn off; with it off, the note list is. A note longer than the delay can hold (two seconds) is held to that. The tempo does not come from an agent's tool call: `delay_set` can switch Sync on and pick a note, and the host decides the tempo it is read against. The `1/8d` the block starts on is a dotted eighth at the loop's 100 BPM, 450 ms.
+
 ## The tools
 
 ```ts

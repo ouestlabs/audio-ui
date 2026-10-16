@@ -1,7 +1,13 @@
 import { describe, expect, mock, test } from "bun:test";
 import { defineDevice } from "@audio-ui/core/device";
 import { fireEvent, render, within } from "@testing-library/react";
-import { DevicePanel } from "@/registry-audio/bases/base/audio/panels/device-panel";
+import { NuqsTestingAdapter } from "nuqs/adapters/testing";
+
+// The list a long choice goes in is the site's own select, which asks the router where it is.
+mock.module("next/navigation", () => ({ usePathname: () => "/" }));
+const { DevicePanel } = await import(
+  "@/registry-audio/bases/base/audio/panels/device-panel"
+);
 
 // A device the registry has never heard of: the panel is made from its descriptors.
 const tremolo = defineDevice({
@@ -218,5 +224,46 @@ describe("DevicePanel with a choice", () => {
     );
     expect(view.getByText("Gain")).toBeTruthy();
     expect(view.getByRole("slider", { name: "Low gain" })).toBeTruthy();
+  });
+});
+
+describe("DevicePanel with a long choice", () => {
+  const notes = defineDevice({
+    description: "A note value.",
+    id: "acme.notes",
+    name: "Notes",
+    parameters: [
+      {
+        default: "a",
+        id: "note",
+        kind: "choice",
+        label: "Note",
+        options: ["a", "b", "c", "d", "e", "f", "g", "h"].map((value) => ({
+          label: value.toUpperCase(),
+          value,
+        })),
+      },
+    ],
+  });
+
+  test("more options than fit as buttons go in a list, and the list can be drawn off", () => {
+    const view = render(
+      <NuqsTestingAdapter>
+        <DevicePanel
+          device={notes}
+          disabled={["note"]}
+          onValueChange={mock((_state: unknown) => undefined)}
+          value={notes.defaults()}
+        />
+      </NuqsTestingAdapter>
+    );
+    expect(view.queryAllByRole("button", { name: "A" })).toHaveLength(0);
+    const trigger = view.getByRole("combobox", { name: "Note" });
+    expect(trigger).toBeTruthy();
+    expect(
+      trigger.hasAttribute("disabled") ||
+        trigger.getAttribute("aria-disabled") === "true" ||
+        trigger.hasAttribute("data-disabled")
+    ).toBe(true);
   });
 });

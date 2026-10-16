@@ -6,10 +6,15 @@ import { type DeviceState, defineDevice } from "@audio-ui/core/device";
  * and no audio in it. A panel draws its state, an engine plays it, an agent
  * drives it through `deviceTools(compressorDevice)`.
  */
+/** How far ahead the node looks at the signal, in seconds: its latency, measured in Chrome at 44.1 and 48 kHz. The dry path is delayed by it so a parallel mix does not comb. */
+export const COMPRESSOR_LOOKAHEAD_SECONDS = 0.006;
+
 export const compressorDevice = defineDevice({
   description:
     "Brings loud parts down: above the threshold the level rises by one decibel for every ratio decibels in, with a soft knee, an attack and a release, make-up gain and a dry and compressed mix.",
   id: "audioui.compressor",
+  // The dry path waits for the node too, so the delay is the same on or off.
+  latency: () => COMPRESSOR_LOOKAHEAD_SECONDS,
   name: "Compressor",
   parameters: [
     { default: true, id: "enabled", kind: "toggle", label: "On" },
@@ -89,9 +94,6 @@ export const compressorDevice = defineDevice({
 });
 
 export type CompressorState = DeviceState<typeof compressorDevice.parameters>;
-
-/** How far ahead the node looks at the signal, in seconds: its latency, measured in Chrome at 44.1 and 48 kHz. The dry path is delayed by it so a parallel mix does not comb. */
-export const COMPRESSOR_LOOKAHEAD_SECONDS = 0.006;
 
 /** A level well under any threshold, where the node only adds its make-up. */
 const QUIET_DB = -120;

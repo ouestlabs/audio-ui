@@ -210,7 +210,7 @@ export const hooks: RegistryItem[] = [
   },
   {
     categories: ["hooks", "audio", "device"],
-    dependencies: [],
+    dependencies: ["@audio-ui/core"],
     description:
       "A short loop of drums and plucked notes played through an effect's engine and out to a destination, for a block to show what a device does: the engine follows the state, and an analyser of the output is there for a spectrum.",
     files: [
