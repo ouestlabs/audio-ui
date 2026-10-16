@@ -39,24 +39,24 @@ export function createUtilityEngine(
   const split = ctx.createChannelSplitter(2);
   const merge = ctx.createChannelMerger(2);
   const mid = ctx.createGain();
-  const side = ctx.createGain();
+  const sideFromLeft = ctx.createGain();
   const sideFromRight = ctx.createGain();
   const width = ctx.createGain();
   const widthInverted = ctx.createGain();
   const pan = ctx.createStereoPanner();
   const level = ctx.createGain();
   mid.gain.value = HALF;
-  side.gain.value = HALF;
+  sideFromLeft.gain.value = HALF;
   sideFromRight.gain.value = -HALF;
   widthInverted.gain.value = -1;
 
   input.connect(split);
   split.connect(mid, 0);
   split.connect(mid, 1);
-  split.connect(side, 0);
+  split.connect(sideFromLeft, 0);
   split.connect(sideFromRight, 1);
-  sideFromRight.connect(side);
-  side.connect(width);
+  sideFromLeft.connect(width);
+  sideFromRight.connect(width);
   mid.connect(merge, 0, 0);
   mid.connect(merge, 0, 1);
   width.connect(merge, 0, 0);
@@ -78,7 +78,7 @@ export function createUtilityEngine(
         input,
         split,
         mid,
-        side,
+        sideFromLeft,
         sideFromRight,
         width,
         widthInverted,

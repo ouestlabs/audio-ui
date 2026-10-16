@@ -11,6 +11,7 @@ import {
   distortionSettings,
   distortionTable,
   softClip,
+  TABLE_DOMAIN,
 } from "@/registry-audio/bases/base/lib/distortion-device";
 import { createDistortionEngine } from "@/registry-audio/bases/base/lib/distortion-engine";
 
@@ -91,10 +92,10 @@ describe("the distortion device", () => {
     expect(softClip(0.5, 20)).toBeGreaterThan(softClip(0.5, 2));
   });
 
-  test("the table is the fixed clip from -1 to 1", () => {
+  test("the table is the fixed clip over the drive's range", () => {
     const table = distortionTable();
-    expect(table[0]).toBeCloseTo(Math.tanh(-1), 6);
-    expect(table.at(-1)).toBeCloseTo(Math.tanh(1), 6);
+    expect(table[0]).toBeCloseTo(Math.tanh(-TABLE_DOMAIN), 6);
+    expect(table.at(-1)).toBeCloseTo(Math.tanh(TABLE_DOMAIN), 6);
   });
 
   test("a full mix at no drive and unity is close to straight; off is straight", () => {
@@ -126,9 +127,9 @@ describe("the distortion device", () => {
     expect(made.shaper.oversample).toBe("4x");
     expect(made.shaper.curve?.length).toBe(4096);
     expect(made.filter.frequency.value).toBe(3000);
-    expect(made.gains.some((g) => Math.abs(g.gain.value - 10) < 1e-6)).toBe(
-      true
-    );
+    expect(
+      made.gains.some((g) => Math.abs(g.gain.value - 10 / TABLE_DOMAIN) < 1e-6)
+    ).toBe(true);
   });
 
   test("an update ramps and never swaps the table", () => {

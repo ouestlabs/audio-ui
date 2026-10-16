@@ -4,8 +4,6 @@ import { type DeviceState, defineDevice } from "@audio-ui/core/device";
 const LOW_HZ = 100;
 const HIGH_HZ = 6000;
 const HIGH_PASS_HZ = 80;
-/** A high-pass this low passes everything: how the switch turns it off. */
-const HIGH_PASS_OFF_HZ = 10;
 const MID_Q = 0.9;
 
 /**
@@ -79,8 +77,10 @@ export type ChannelEqState = DeviceState<typeof channelEqDevice.parameters>;
 /** The four filters of a state, in series: the high-pass, the low shelf, the mid bell and the high shelf. */
 export function channelEqBands(state: ChannelEqState): EqBand[] {
   return [
+    // At 0 Hz a high-pass passes everything unchanged: how the switch, or the device, is off.
     {
-      frequency: state.highPass ? HIGH_PASS_HZ : HIGH_PASS_OFF_HZ,
+      frequency: state.enabled && state.highPass ? HIGH_PASS_HZ : 0,
+      on: state.enabled && state.highPass,
       type: "lowcut",
     },
     { frequency: LOW_HZ, gainDb: state.lowDb, type: "lowshelf" },

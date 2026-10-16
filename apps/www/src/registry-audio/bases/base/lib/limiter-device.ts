@@ -13,7 +13,7 @@ const QUIET_DB = -120;
  */
 export const limiterDevice = defineDevice({
   description:
-    "Keeps the sound under a ceiling: the input gain pushes the level against it, a compressor holds down what goes over with a release for how fast it lets go, and a final clip guarantees that no sample is above the ceiling. It measures samples, not inter-sample (true) peaks.",
+    "Keeps the sound under a ceiling: the input gain pushes the level against it, a compressor holds down what goes over with a release for how fast it lets go, and a final clip keeps every sample within 0.05 dB of the ceiling. It measures samples, not inter-sample (true) peaks.",
   id: "audioui.limiter",
   name: "Limiter",
   parameters: [

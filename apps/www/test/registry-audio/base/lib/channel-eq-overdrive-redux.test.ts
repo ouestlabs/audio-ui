@@ -10,6 +10,7 @@ import {
   overdriveDevice,
   overdriveSettings,
   overdriveTable,
+  TABLE_DOMAIN,
 } from "@/registry-audio/bases/base/lib/overdrive-device";
 import { createOverdriveEngine } from "@/registry-audio/bases/base/lib/overdrive-engine";
 import {
@@ -142,7 +143,7 @@ describe("the overdrive device", () => {
   test("the table is one soft clip and off is the clean sound", () => {
     const table = overdriveTable();
     expect(table).toHaveLength(4096);
-    expect(table[0]).toBeCloseTo(Math.tanh(-1), 6);
+    expect(table[0]).toBeCloseTo(Math.tanh(-TABLE_DOMAIN), 6);
     expect(overdriveSettings({ ...defaults, enabled: false })).toMatchObject({
       dry: 1,
       wet: 0,
