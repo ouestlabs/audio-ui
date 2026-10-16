@@ -1,0 +1,244 @@
+---
+title: Devices
+description: "What a device is, the four pieces it comes in, and what every device shares: the sidechain, the tempo, the latency and the tools an agent drives it with. The catalog is grouped as in a mixer: dynamics, EQ and filters, distortion, delay and reverb, modulation, utility and instruments."
+---
+
+A device is an effect or an instrument that you can plug in, not a widget with audio inside. It comes in four pieces that share one description, so you take the ones you need: a host that has its own audio engine keeps the state and the panel, an agent keeps the state and the tools, and a page that only wants sound takes them all.
+
+| Piece | What it is | Installs as |
+| --- | --- | --- |
+| **State** | The parameters and their ranges, as a plain object | `device` |
+| **Panel** | Draws a state and sends the new one back. It makes no sound | `panel` |
+| **Engine** | Plays a state with Web Audio nodes | `engine` |
+| **Tools** | What an agent calls to change the state | `deviceTools` |
+
+Each piece installs in `components/audio-ui/devices/<name>/`. The tools come from `@audio-ui/core/device`. Every device page has a block that wires the pieces together: `npx shadcn@latest add @audio-ui/block-compressor`.
+
+## Catalog
+
+### Dynamics
+
+| Device | Use it to |
+| --- | --- |
+| [Compressor](/docs/components/base/compressor) | Bring loud parts down, or duck one signal with another. |
+| [Multiband compressor](/docs/components/base/multiband) | Compress the lows, mids and highs apart. |
+| [Limiter](/docs/components/base/limiter) | Keep the sound under a ceiling. |
+| [Gate](/docs/components/base/gate) | Cut the sound between hits. |
+| [De-esser](/docs/components/base/deesser) | Soften the sharp s and t of a voice. |
+| [Transient shaper](/docs/components/base/transient) | Add or take away the attack and the sustain of a hit. |
+
+### EQ and filters
+
+| Device | Use it to |
+| --- | --- |
+| [Equalizer](/docs/components/base/equalizer) | Shape the spectrum with four bands. |
+| [Channel EQ](/docs/components/base/channel-eq) | Do the quick tone job of a mixer strip. |
+| [Filter](/docs/components/base/filter) | Cut or isolate part of the spectrum. |
+
+### Distortion
+
+| Device | Use it to |
+| --- | --- |
+| [Overdrive](/docs/components/base/overdrive) | Push only the mids into a soft clip, as a pedal does. |
+| [Saturator](/docs/components/base/saturator) | Add warmth or dirt with one of four curves. |
+| [Distortion](/docs/components/base/distortion) | Round off the peaks of the whole signal. |
+| [Redux](/docs/components/base/redux) | Roughen the sound by cutting its bits and its sample rate. |
+
+### Delay and reverb
+
+| Device | Use it to |
+| --- | --- |
+| [Delay](/docs/components/base/delay) | Repeat the sound, free or in time with the tempo. |
+| [Reverb](/docs/components/base/reverb) | Put the sound in a room. |
+
+### Modulation
+
+| Device | Use it to |
+| --- | --- |
+| [Chorus](/docs/components/base/chorus) | Thicken the sound with a swept delay. |
+| [Phaser](/docs/components/base/phaser) | Sweep notches through the sound, or flange it. |
+| [Auto pan](/docs/components/base/auto-pan) | Move the sound between the speakers, or its level up and down. |
+
+### Utility
+
+| Device | Use it to |
+| --- | --- |
+| [Utility](/docs/components/base/utility) | Set the gain, the pan and the width, switch to mono or flip the phase. |
+
+### Instruments
+
+| Device | Use it to |
+| --- | --- |
+| [Pocket synth](/docs/components/base/pocket-synth) | Play one oscillator through a resonant filter. |
+| [Wave shaper](/docs/components/base/wave-shaper) | Play two detuned oscillators through a distortion and a filter. |
+
+## The state
+
+A state is a plain object keyed by parameter id. It holds numbers, booleans and strings, and it is safe to turn into JSON. The device keeps no instance, so you store the state, save it with your project and send it where you like.
+
+```ts
+import { compressorDevice } from "@/components/audio-ui/devices/compressor/device";
+
+const state = compressorDevice.defaults();
+// { enabled: true, thresholdDb: -18, ratio: 4, attackMs: 5, ... }
+
+compressorDevice.set(state, "thresholdDb", -200); // a new state, brought to -60
+compressorDevice.sanitize(JSON.parse(saved)); // a loaded project, repaired
+```
+
+A parameter is a number with a range, a switch or a choice from a list. The id of the device, `audioui.compressor`, is what a project stores. It is not the panel, which you can restyle without breaking anyone's session.
+
+## The panel
+
+A panel is controlled. It keeps no state: it draws the one it is given and returns the whole new state.
+
+```tsx
+import { CompressorPanel } from "@/components/audio-ui/devices/compressor/panel";
+
+<CompressorPanel onValueChange={setState} value={state} />;
+```
+
+Most panels draw something the state means, such as a transfer curve, a frequency response or a set of echoes, with a handle you drag, over the knobs. The knobs come from the descriptors of the device, with their ranges, steps and readouts.
+
+## The engine
+
+```ts
+import { createCompressorEngine } from "@/components/audio-ui/devices/compressor/engine";
+
+const engine = createCompressorEngine(ctx, state);
+source.connect(engine.input);
+engine.output.connect(ctx.destination);
+
+engine.update(nextState); // parameters ramp: no click
+engine.dispose();
+```
+
+An engine is a function of an audio context and a state. It gives you an `input`, an `output`, an `update` and a `dispose`, and it moves every parameter with a ramp so that turning a knob never clicks. The numbers that go on the nodes come from a pure function of the state, such as `compressorSettings(state)`, that you can read and test without an audio context.
+
+Some engines add to this:
+
+| Member | On | What it is |
+| --- | --- | --- |
+| `sidechain` | Compressor, gate | The input of the signal that drives the device. |
+| `ready` | Every device that runs a worklet | A promise that resolves once the detector is in the graph. |
+| `reduction` | Compressor, limiter, de-esser | The gain being taken off, in dB. Read it each frame. |
+| `noteOn`, `noteOff` | Instruments | Start and release a note. |
+
+A worklet is loaded from a blob, so there is no file to serve. Until `ready` resolves, a device that needs one passes the signal unchanged. In a context with no worklets it never resolves to `true`.
+
+## Sidechain
+
+A compressor or a gate can follow the level of another signal instead of its own: a kick ducks a pad, a voice ducks the music. Switch **Sidechain** on, and connect the signal to `engine.sidechain`. It is only listened to, never heard.
+
+```ts
+const engine = createCompressorEngine(ctx, { ...state, external: true });
+pad.connect(engine.input);
+kick.connect(engine.sidechain); // listened to, not heard
+engine.output.connect(ctx.destination);
+```
+
+The sidechain is not a parameter. The state holds the switch and the host routes the signal. A device that takes one says so: `compressorDevice.sidechain` is `true`, and so is `describe().sidechain`, so a host knows to route something to it and an agent can be told. With the sidechain on, what the device does depends on the other signal, so its panel does not draw a transfer curve.
+
+## Tempo sync
+
+A delay, a chorus, a phaser and an auto pan can take their time or their rate from a note value, such as `1/8`, a triplet `1/8t` or a dotted `1/8d`, from 1/32 to a whole note. Switch **Sync** on and pick a **Note**. The tempo is the host's, not the device's: give it to the engine with the first state or with any update.
+
+```ts
+const engine = createDelayEngine(ctx, state, { tempo }); // { bpm: 100, beatsPerBar: 4, beatUnit: 4 }
+engine.update(nextState, { tempo: { ...tempo, bpm: 120 } }); // the echo follows
+engine.update(otherState); // no context: the last tempo holds
+```
+
+The panel takes the same tempo as a prop, `tempo`. With Sync on, the knob for the free value is drawn off; with it off, the list of notes is. A tool call can switch Sync on and pick a note, but it never sets the tempo.
+
+## Latency
+
+Some devices delay the signal. `device.latency(state, sampleRate)` returns it in seconds, so a host can compensate. The dry path waits as long as the wet one, so a partial mix does not comb.
+
+| Device | Latency | Why |
+| --- | --- | --- |
+| Compressor | 6 ms | The look-ahead of the browser's compressor node. |
+| Limiter | 10 ms | The look-ahead of the node and the 4x oversampling of the clip. |
+| Distortion, overdrive, saturator, wave shaper | 4 ms | The 4x oversampling of the shaper, 192 samples at 48 kHz. |
+| Transient shaper | 1 ms | The audio waits for the detector. |
+| Gate | The look-ahead you set | Up to 10 ms, 0 by default. |
+
+Every other device has none. The numbers were measured in Chrome and the specification does not give them, so measure them in another browser with `measureLatency`.
+
+## Tools
+
+The tools are derived from the parameters of the device, with a JSON Schema input, so any agent can use them. They are not tied to an SDK.
+
+```ts
+import { deviceTools } from "@audio-ui/core/device";
+
+const [set, reset] = deviceTools(compressorDevice);
+// set.name === "audioui_compressor_set"
+
+const { state: next, summary } = set.run(state, { thresholdDb: -300, ratio: "high" });
+// summary: "Threshold: -18.0 dB to -60.0 dB (brought into range); ratio: refused, not a number"
+```
+
+`set` changes parameters and `reset` puts them back to their defaults. An instrument adds a `play` tool that gives the host a note to start. The ranges a model is told are the ones the device enforces. A value out of range is brought in and reported, a value of the wrong type is refused by name and never replaced by a default, and a call never throws. The summary is the answer to give back to the model.
+
+## Measure your engine
+
+A host that brings its own engine can check it against what the panel draws. `device-measure` renders an engine in an offline audio context and compares it with the curve of the device. It works for any device whose curve is a frequency response, such as the equalizer, the filter and the channel EQ.
+
+```ts
+import { equalizerCurve, equalizerDevice } from "@/components/audio-ui/devices/equalizer/device";
+import { measureLatency, measureResponse } from "@/lib/device-measure";
+
+const state = equalizerDevice.defaults();
+// Your factory: (ctx, state) => { input, output, dispose }.
+const { worstDb, at } = await measureResponse(createMyEngine, state, equalizerCurve(state));
+// worstDb: how far your engine is from the panel, in dB, and where (at, in Hz).
+
+const latencyMs = await measureLatency(createMyEngine, state);
+// What a host reports to compensate it.
+```
+
+It is a measurement, not a certification: the curve is the device's own and the tolerance is yours.
+
+## Your own device
+
+`defineDevice` is the one extension point, and the core keeps no list of devices. A device you define gets the same panel, tools and bindings as the ones here.
+
+```tsx
+import { defineDevice } from "@audio-ui/core/device";
+import { DevicePanel } from "@/components/audio-ui/device-panel";
+
+const tremolo = defineDevice({
+  id: "acme.tremolo",
+  name: "Tremolo",
+  description: "Moves the level up and down.",
+  parameters: [
+    { id: "on", kind: "toggle", label: "Active", default: true },
+    { id: "rate", label: "Rate", min: 0.5, max: 20, scale: "log", step: 0.5, unit: "Hz", default: 5 },
+    { id: "depth", label: "Depth", min: 0, max: 100, step: 1, unit: "%", default: 50 },
+  ],
+});
+
+<DevicePanel device={tremolo} onValueChange={setState} value={state} />;
+```
+
+`DevicePanel` makes a knob for each number, a toggle for each switch and a row of buttons for each choice, such as a waveform or a filter type. A face of your own, such as a curve or a spectrum, is optional.
+
+An instrument is the same with `kind: "instrument"`. Its parameters shape the sound, and its engine adds `noteOn` and `noteOff` next to `update`. The [pocket synth](/docs/components/base/pocket-synth) is the example: its panel is controlled and sends notes out, so it plays through any engine.
+
+## Your own engine
+
+A host that has its own audio engine, such as a DAW with one in a worklet, keeps the state and the panel and turns the state into its own messages. A `DeviceBinding` is just that:
+
+```ts
+import type { DeviceBinding } from "@audio-ui/core/device";
+
+const binding: DeviceBinding<CompressorState> = {
+  update: (state) => engine.post({ type: "compressor", ...compressorSettings(state) }),
+  dispose: () => engine.post({ type: "compressor-off" }),
+};
+```
+
+## Accessibility
+
+Every control is a native input. A knob is a slider named after its parameter, with its value and unit as the text value ("Threshold, -18.0 dB"), and a switch is a toggle button. A panel is a group named after the device. The curve is decoration around the controls, a handle on it is a slider, and everything takes the keyboard.

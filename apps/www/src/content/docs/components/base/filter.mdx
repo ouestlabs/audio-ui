@@ -1,13 +1,13 @@
 ---
 title: Filter
-description: "A filter as a device you can plug in: a type, a cutoff and a resonance as a state, a panel with a handle on the curve and a live spectrum, a Web Audio engine and the tools an agent drives it with."
+description: "A filter device: a type, a cutoff and a resonance, a panel with a handle on the curve and a live spectrum, a Web Audio engine and tools for agents."
 component: true
 base: base
 ---
 
 <ComponentPreview styleName="base-nova" name="block-filter" />
 
-Takes part of the spectrum out: a low-pass, high-pass, band-pass or notch. Drag the handle on the curve across for the cutoff and up for the resonance; pass a spectrum to the panel to see what comes out behind it. It is a device like the [compressor](/docs/components/compressor): a state, a panel that draws it, an engine that plays it and tools an agent calls, each its own file.
+Takes part of the spectrum out: a low-pass, a high-pass, a band-pass or a notch. It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
 
 ## Installation
 
@@ -56,7 +56,17 @@ npx shadcn@latest add @audio-ui/filter-device @audio-ui/filter-panel @audio-ui/f
 
 </CodeTabs>
 
-## Usage
+## Controls
+
+<DeviceControls device="filter">
+<Control id="type">The shape of the filter.</Control>
+<Control id="cutoffHz">The frequency where the filter starts to work. Drag the handle across to set it.</Control>
+<Control id="resonance">How much the filter rings around the cutoff. Drag the handle up to raise it.</Control>
+</DeviceControls>
+
+## Panel
+
+The panel draws the curve of the filter, with a handle on it. Pass a spectrum to the panel to see what comes out behind the curve. `filterCurve(state)` is the curve it draws.
 
 ```tsx
 import { FilterPanel } from "@/components/audio-ui/devices/filter/panel";
@@ -67,33 +77,8 @@ const [state, setState] = useState(() => filterDevice.defaults());
 <FilterPanel onValueChange={setState} value={state} />;
 ```
 
-The state is a plain object keyed by parameter id, so a host stores it, saves it with its project and sends it where it likes. `filterCurve(state)` is the curve the panel draws and `filterSettings(state)` what goes on the node.
+## Engine
 
-## The engine
+Create it, connect it and update it as for any device: see [The engine](/docs/devices#the-engine).
 
-```ts
-import { createFilterEngine } from "@/components/audio-ui/devices/filter/engine";
-
-const engine = createFilterEngine(ctx, state);
-source.connect(engine.input);
-engine.output.connect(ctx.destination);
-engine.update(nextState); // parameters ramp: no click
-engine.dispose();
-```
-
-The node is the filter the curve draws. A low-pass and a high-pass read their resonance in decibels, so the device gives it to the node in that unit, and the curve and the sound agree.
-
-## The tools
-
-```ts
-import { deviceTools } from "@audio-ui/core/device";
-import { filterDevice } from "@/components/audio-ui/devices/filter/device";
-
-const [set, reset] = deviceTools(filterDevice);
-```
-
-`set` and `reset` change the state, with the ranges the device enforces: a value out of range is brought in and reported, a wrong one is refused by name, and a call never throws.
-
-## Accessibility
-
-Every control is a native input: the knobs are sliders named after their parameter, with the value and unit as the text value, the switch is a toggle button, and everything takes the keyboard.
+The node is the filter the curve draws. A low-pass and a high-pass read their resonance in decibels, so the device gives it to the node in that unit, and the curve and the sound agree. `filterSettings(state)` is what goes on the node.

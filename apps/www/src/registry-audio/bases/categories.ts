@@ -97,10 +97,51 @@ export const categories: CategoryDef[] = [
   },
   {
     description:
-      "Devices: an effect as a state, a panel, an engine and the tools an agent drives it with, each one its own file so a host keeps its own and uses what it needs.",
+      "Dynamics devices: compressors, a limiter, a gate, a de-esser and a transient shaper, each a state, a panel, an engine and the tools an agent drives it with.",
     docs: "compressor",
-    label: "Device",
-    name: "device",
+    label: "Dynamics",
+    name: "dynamics",
+  },
+  {
+    description:
+      "EQ and filter devices: an equalizer, a channel EQ and a filter, with a curve you drag.",
+    docs: "equalizer",
+    label: "EQ and filters",
+    name: "eq",
+  },
+  {
+    description:
+      "Distortion devices: an overdrive, a saturator, a distortion and a bit crusher.",
+    docs: "overdrive",
+    label: "Distortion",
+    name: "distortion",
+  },
+  {
+    description:
+      "Delay and reverb devices: echoes free or in time with the tempo, and a room.",
+    docs: "delay",
+    label: "Delay and reverb",
+    name: "delay-reverb",
+  },
+  {
+    description:
+      "Modulation devices: a chorus, a phaser and flanger, and an auto pan.",
+    docs: "chorus",
+    label: "Modulation",
+    name: "modulation",
+  },
+  {
+    description: "Utility devices: gain, pan, width, mono and phase invert.",
+    docs: "utility",
+    label: "Utility",
+    name: "utility",
+  },
+  {
+    description:
+      "Instrument devices: synths played from a pad, by pointer or by an agent.",
+    docs: "pocket-synth",
+    label: "Instruments",
+    name: "instrument",
   },
   {
     description:
@@ -167,5 +208,45 @@ export const categories: CategoryDef[] = [
       "Two-dimensional XY pad components for filter and effect controls.",
     label: "XY Pad",
     name: "xypad",
+  },
+];
+
+/**
+ * How the catalog sidebar sections the categories, as the docs sidebar does.
+ * Every category belongs to exactly one section, and a test fails otherwise.
+ */
+export const categoryGroups: { label: string; names: string[] }[] = [
+  {
+    label: "Controls",
+    names: ["knob", "fader", "xypad", "envelope"],
+  },
+  {
+    label: "Displays",
+    names: ["meter", "waveform", "plot", "spectrum", "tuner"],
+  },
+  {
+    label: "Time and sequencing",
+    names: [
+      "timeline",
+      "sequencer",
+      "pad",
+      "piano",
+      "synth",
+      "transport",
+      "scrubber",
+    ],
+  },
+  { label: "Mixing", names: ["mixer"] },
+  {
+    label: "Devices",
+    names: [
+      "dynamics",
+      "eq",
+      "distortion",
+      "delay-reverb",
+      "modulation",
+      "utility",
+      "instrument",
+    ],
   },
 ];

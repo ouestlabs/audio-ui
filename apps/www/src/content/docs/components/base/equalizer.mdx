@@ -1,13 +1,13 @@
 ---
 title: Equalizer
-description: "An equalizer as a device you can plug in: a low shelf, two bells and a high shelf as a state, a panel with a handle on each band, a Web Audio engine and the tools an agent drives it with."
+description: "An equalizer device: four bands with a type, a frequency, a gain and a width, a panel with a handle on each band, a Web Audio engine and tools for agents."
 component: true
 base: base
 ---
 
 <ComponentPreview styleName="base-nova" name="block-equalizer" />
 
-The equalizer is a device like the [compressor](/docs/components/compressor): a state, a panel that draws it, an engine that plays it and tools an agent calls, each its own file. What is specific to it is the curve: the panel draws the filters the engine runs, so what you see is what you hear.
+Shapes the spectrum with four bands in series, then an output level. The panel draws the filters the engine runs, so what you see is what you hear. It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
 
 ## Installation
 
@@ -56,77 +56,60 @@ npx shadcn@latest add @audio-ui/equalizer-device @audio-ui/equalizer-panel @audi
 
 </CodeTabs>
 
-## The state
+## Controls
 
-Four bands from the bottom up, in series, then an output trim. Each band has a type, a frequency, a gain and a width (Q), and the type decides which of them it uses:
+<DeviceControls device="equalizer">
+<Control id="lowType">The shape of the first band. A shelf by default.</Control>
+<Control id="lowHz">The frequency of the first band.</Control>
+<Control id="lowDb">The gain of the first band. A cut or a notch has none.</Control>
+<Control id="lowQ">The width of the first band. A shelf has a fixed slope and ignores it.</Control>
+<Control id="lowMidType">The shape of the second band. A bell by default.</Control>
+<Control id="lowMidHz">The frequency of the second band.</Control>
+<Control id="lowMidDb">The gain of the second band.</Control>
+<Control id="lowMidQ">The width of the second band.</Control>
+<Control id="highMidType">The shape of the third band. A bell by default.</Control>
+<Control id="highMidHz">The frequency of the third band.</Control>
+<Control id="highMidDb">The gain of the third band.</Control>
+<Control id="highMidQ">The width of the third band.</Control>
+<Control id="highType">The shape of the fourth band. A shelf by default.</Control>
+<Control id="highHz">The frequency of the fourth band.</Control>
+<Control id="highDb">The gain of the fourth band.</Control>
+<Control id="highQ">The width of the fourth band.</Control>
+<Control id="outputDb">The level of the output.</Control>
+</DeviceControls>
 
-| Type | Gain | Q |
+## Panel
+
+The curve is the sum of the four filters and the output level. Each band has a handle on it: drag it to set the frequency and the gain of the band, and it follows the pointer one to one. A cut or a notch has no gain, so its handle only slides. Double-click a handle to flatten the band.
+
+Pick a band by its number or its handle, and its type, frequency, gain and width appear under the curve, the unused ones drawn off. Pass a `spectrum` (from `useSpectrum`) to draw the level of the sound behind the curve.
+
+The type of a band decides what it uses:
+
+| Type | Gain | Width |
 | --- | --- | --- |
-| Low cut, high cut | no | yes |
-| Notch | no | yes |
-| Low shelf, high shelf | yes | no, a shelf has a fixed slope |
-| Bell | yes | yes |
+| Low cut, high cut | No | Yes |
+| Notch | No | Yes |
+| Low shelf, high shelf | Yes | No |
+| Bell | Yes | Yes |
 
-The bands start as a low shelf, two bells and a high shelf. A band's parameters are `lowType`, `lowHz`, `lowDb`, `lowQ`, then the same for `lowMid`, `highMid` and `high`, and `outputDb` for the trim. The cuts are 12 dB per octave, what a browser filter node does.
+The cuts are 12 dB per octave, which is what a browser filter node does.
 
 ```tsx
 import { EqualizerPanel } from "@/components/audio-ui/devices/equalizer/panel";
 import { equalizerDevice } from "@/components/audio-ui/devices/equalizer/device";
 
-const [state, setState] = useState(() => equalizerDevice.defaults()); // flat
+const [state, setState] = useState(() => equalizerDevice.defaults());
 
 <EqualizerPanel onValueChange={setState} value={state} />;
 ```
 
-## The panel
+## Engine
 
-The curve is the sum of the four filters and the trim. Each band has a handle on it: drag it to set the band's frequency and gain, and it follows the pointer one to one (a cut or a notch has no gain, so its handle only slides); double-click to flatten the band. Pick a band by its number or its handle, and its type, frequency, gain and Q appear under the curve, the unused ones drawn off. Pass a `spectrum` (from `useSpectrum`) to draw the level of the sound behind the curve.
+Create it, connect it and update it as for any device: see [The engine](/docs/devices#the-engine).
 
-## The engine
+Four `BiquadFilterNode`s in series and an output gain. The curve is drawn from the same formulas the node runs, and the width of a band goes through `toWebAudioQ` on the way to the node, so the two agree. Off, every band goes flat and the output goes to 0 dB.
 
-```ts
-import { createEqualizerEngine } from "@/components/audio-ui/devices/equalizer/engine";
+## Measure your engine
 
-const engine = createEqualizerEngine(ctx, state);
-source.connect(engine.input);
-engine.output.connect(ctx.destination);
-
-engine.update(nextState); // parameters ramp: no click
-engine.dispose();
-```
-
-Four `BiquadFilterNode`s in series and a trim. The curve is drawn from the same formulas the node runs, and a band's width goes through `toWebAudioQ` on the way to the node, so the two agree. Off, every band goes flat and the trim to 0 dB.
-
-## Measuring your engine
-
-A host that brings its own engine can check it against what the panel draws. `device-measure` renders an engine in an offline audio context and compares it with the device's curve. It works for any device whose curve is a frequency response, the filter and the channel EQ too:
-
-```ts
-import { equalizerCurve, equalizerDevice } from "@/components/audio-ui/devices/equalizer/device";
-import { measureLatency, measureResponse } from "@/lib/device-measure";
-
-const state = equalizerDevice.defaults();
-// Your factory: (ctx, state) => { input, output, dispose }.
-const { worstDb, at } = await measureResponse(createMyEngine, state, equalizerCurve(state));
-// worstDb: how far your engine is from the panel, in dB, and where (at, in Hz).
-
-const latencyMs = await measureLatency(createMyEngine, state);
-// What a host reports to compensate it.
-```
-
-It is a measurement, not a certification: the curve is the device's own and the tolerance is yours.
-
-## The tools
-
-```ts
-import { deviceTools } from "@audio-ui/core/device";
-
-const [set] = deviceTools(equalizerDevice);
-set.run(state, { lowMidHz: 1000, lowMidDb: -6 });
-```
-
-As for any device: the ranges a model is told are the ones the device enforces, a value out of range is brought in and reported, and a wrong one is refused by name.
-
-## Accessibility
-
-The handles and the knobs are sliders named after their parameter, with the value and unit as the text value ("Low mid freq, 400 Hz"), the switch is a toggle button, and everything takes the keyboard.
+A host that brings its own engine can check it against what the panel draws. See [Measure your engine](/docs/devices#measure-your-engine): it works for the equalizer, the filter and the channel EQ.

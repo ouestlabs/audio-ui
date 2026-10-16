@@ -1,13 +1,13 @@
 ---
 title: Overdrive
-description: "An overdrive as a device you can plug in: a band-pass, a drive, a tone and a mix as a state, a panel that draws the band that reaches the clip, a Web Audio engine and the tools an agent drives it with."
+description: "An overdrive device: a band-pass before a soft clip, a drive, a tone and a mix, a panel that draws the band that reaches the clip, a Web Audio engine and tools for agents."
 component: true
 base: base
 ---
 
 <ComponentPreview styleName="base-nova" name="block-overdrive" />
 
-A pedal-style distortion. A band-pass picks what is pushed into the soft clip, so the lows do not choke it: the panel draws that band, and the handle on its centre sets the frequency. The width, the drive, the tone and the mix are knobs. It is a device like the [compressor](/docs/components/compressor): a state, a panel that draws it, an engine that plays it and tools an agent calls, each its own file.
+A pedal-style distortion. A band-pass filter picks what is pushed into the soft clip, so the lows do not turn to mud. It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
 
 ## Installation
 
@@ -56,7 +56,19 @@ npx shadcn@latest add @audio-ui/overdrive-device @audio-ui/overdrive-panel @audi
 
 </CodeTabs>
 
-## Usage
+## Controls
+
+<DeviceControls device="overdrive">
+<Control id="bandHz">The centre of the band that reaches the clip. Drag the handle on the plot across to set it.</Control>
+<Control id="width">The width of that band. A high value is narrow.</Control>
+<Control id="driveDb">How hard the band is pushed into the clip.</Control>
+<Control id="toneHz">Closes the highs after the clip.</Control>
+<Control id="mix">The balance of the distorted signal and the clean one.</Control>
+</DeviceControls>
+
+## Panel
+
+The panel draws the band-pass that picks what reaches the clip, with a handle on its centre. `overdriveBand(state)` is the curve it draws.
 
 ```tsx
 import { OverdrivePanel } from "@/components/audio-ui/devices/overdrive/panel";
@@ -67,37 +79,8 @@ const [state, setState] = useState(() => overdriveDevice.defaults());
 <OverdrivePanel onValueChange={setState} value={state} />;
 ```
 
-The state is a plain object keyed by parameter id, so a host stores it, saves it with its project and sends it where it likes. `overdriveBand(state)` is the band the panel draws.
+## Engine
 
-## The engine
+Create it, connect it and update it as for any device: see [The engine](/docs/devices#the-engine).
 
-```ts
-import { createOverdriveEngine } from "@/components/audio-ui/devices/overdrive/engine";
-
-const engine = createOverdriveEngine(ctx, state);
-source.connect(engine.input);
-engine.output.connect(ctx.destination);
-engine.update(nextState); // parameters ramp: no click
-engine.dispose();
-```
-
-Only what the band-pass lets through goes into the clip; the clean sound goes round it in the dry path. The drive is a gain before one fixed soft-clip table, and the shaper oversamples 4x.
-
-## Latency
-
-The shaper oversamples 4x, which delays the signal by 4 ms in Chrome (192 samples). The dry path waits as long, so a partial mix does not comb; the device then has a latency of 4 ms to report to a host. The number was measured in Chrome and the specification does not give it, so measure it in another browser with `measureLatency` of `device-measure`.
-
-## The tools
-
-```ts
-import { deviceTools } from "@audio-ui/core/device";
-import { overdriveDevice } from "@/components/audio-ui/devices/overdrive/device";
-
-const [set, reset] = deviceTools(overdriveDevice);
-```
-
-`set` and `reset` change the state, with the ranges the device enforces: a value out of range is brought in and reported, a wrong one is refused by name, and a call never throws.
-
-## Accessibility
-
-Every control is a native input: the knobs are sliders named after their parameter, with the value and unit as the text value, the switches are toggle buttons, and everything takes the keyboard.
+Only what the band-pass lets through goes into the clip, and the clean sound goes round it in the dry path. The drive is a gain before one fixed soft-clip table, and the shaper oversamples 4x to keep the clip from aliasing. That oversampling is the [latency](/docs/devices#latency) of the device.

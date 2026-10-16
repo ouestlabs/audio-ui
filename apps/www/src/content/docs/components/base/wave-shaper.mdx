@@ -1,13 +1,13 @@
 ---
-title: Wave Shaper
-description: "A wave shaper synth as a device you can plug in: a waveform, drive, tone, detune, mix and volume as a state, a panel with a pad that plays it, a Web Audio engine and the tools an agent plays it with."
+title: Wave shaper
+description: "A wave shaper synth device: a waveform, a drive, a tone, a detune, a mix and a volume, a panel with a pad that plays it, a Web Audio engine with noteOn and noteOff, and tools for agents."
 component: true
 base: base
 ---
 
 <ComponentPreview styleName="base-nova" name="block-wave-shaper" />
 
-Two detuned oscillators, a distortion mixed in with the clean sound and a low-pass filter. Press the pad: pitch goes across, the resonance up. It is a device like the [compressor](/docs/components/compressor): a state, a panel that draws it, an engine that plays it and tools an agent calls, each its own file.
+Two detuned oscillators, a distortion mixed in with the clean sound, and a low-pass filter. Press the pad: the pitch goes across and the resonance goes up. It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
 
 ## Installation
 
@@ -56,7 +56,20 @@ npx shadcn@latest add @audio-ui/wave-shaper-device @audio-ui/wave-shaper-panel @
 
 </CodeTabs>
 
-## Usage
+## Controls
+
+<DeviceControls device="wave-shaper">
+<Control id="wave">The wave of the oscillators.</Control>
+<Control id="drive">How much of the distortion is pushed into the sound.</Control>
+<Control id="tone">The cutoff of the low-pass filter.</Control>
+<Control id="detune">How far apart the two oscillators are tuned.</Control>
+<Control id="mix">The balance of the distorted signal and the clean one.</Control>
+<Control id="volume">The level of the output.</Control>
+</DeviceControls>
+
+## Panel
+
+The panel has a pad that plays the synth: the pitch goes across and the resonance goes up. `waveShaperPitch(position)` and `waveShaperResonance(position)` turn a position from 0 to 1 into a note.
 
 ```tsx
 import { WaveShaperPanel } from "@/components/audio-ui/devices/wave-shaper/panel";
@@ -67,47 +80,13 @@ const [state, setState] = useState(() => waveShaperDevice.defaults());
 <WaveShaperPanel onValueChange={setState} value={state} />;
 ```
 
-The state is a plain object keyed by parameter id, so a host stores it, saves it with its project and sends it where it likes. `waveShaperPitch(position)` and `waveShaperResonance(position)` turn a pad position from 0 to 1 into a note.
+## Engine
 
-## The engine
-
-```ts
-import { createWaveShaperEngine } from "@/components/audio-ui/devices/wave-shaper/engine";
-
-const engine = createWaveShaperEngine(ctx, state);
-engine.output.connect(ctx.destination);
-engine.noteOn(note);  // starts a note, or glides the one being held
-engine.noteOff();     // lets it go
-engine.update(nextState);
-engine.dispose();
-```
-
-One voice at a time, as the Pocket Synth. The distortion curve is a table of 44,100 points, rebuilt only when the drive changes.
-
-## Latency
-
-The shaper oversamples 4x, which delays its path by 4 ms in Chrome (192 samples); the clean path waits as long, so the mix does not comb.
-
-## The tools
+Create it, connect it and update it as for any device: see [The engine](/docs/devices#the-engine).
 
 ```ts
-import { deviceTools } from "@audio-ui/core/device";
-import { waveShaperDevice } from "@/components/audio-ui/devices/wave-shaper/device";
-
-const [set, reset, play] = deviceTools(waveShaperDevice);
+engine.noteOn(note); // starts a note, or glides the one being held
+engine.noteOff(); // lets it go
 ```
 
-`set` and `reset` change the state, with the ranges the device enforces: a value out of range is brought in and reported, a wrong one is refused by name, and a call never throws.
-
-`play` plays a note: its call gives the parts of the note (a pitch, and a resonance) and how long it lasts, and returns the note and the duration for the host to give to the engine.
-
-```ts
-import { playNote } from "@audio-ui/core/device";
-
-const result = play.run(state, input);
-if (result.note) playNote(engine, result.note, result.duration ?? 0.5);
-```
-
-## Accessibility
-
-Every control is a native input: the knobs are sliders named after their parameter, with the value and unit as the text value, the switch is a toggle button, and everything takes the keyboard.
+One voice at a time, as the [pocket synth](/docs/components/base/pocket-synth). The distortion curve is a table of 44,100 points, rebuilt only when the drive changes. The shaper oversamples 4x, which delays its path by 4 ms, and the clean path waits as long so the mix does not comb.

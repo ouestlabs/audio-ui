@@ -1,13 +1,13 @@
 ---
 title: Limiter
-description: "A limiter as a device you can plug in: a gain, a ceiling and a release as a state, a panel that draws its transfer curve with a handle on the ceiling, a Web Audio engine and the tools an agent drives it with."
+description: "A limiter device: input gain, ceiling and release, a panel that draws its transfer curve with a handle on the ceiling, a Web Audio engine and tools for agents."
 component: true
 base: base
 ---
 
 <ComponentPreview styleName="base-nova" name="block-limiter" />
 
-Keeps the sound under a ceiling. The panel draws the transfer curve against the straight line of a clean sound: drag the handle up and down for the ceiling and across for the input gain. It is a device like the [compressor](/docs/components/compressor): a state, a panel that draws it, an engine that plays it and tools an agent calls, each its own file.
+Keeps the sound under a ceiling. The input gain pushes the level against it, and what goes over is held down. It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
 
 ## Installation
 
@@ -56,7 +56,17 @@ npx shadcn@latest add @audio-ui/limiter-device @audio-ui/limiter-panel @audio-ui
 
 </CodeTabs>
 
-## Usage
+## Controls
+
+<DeviceControls device="limiter">
+<Control id="gainDb">Pushes the level of the input against the ceiling.</Control>
+<Control id="ceilingDb">The level the output should not go over.</Control>
+<Control id="releaseMs">How fast the gain comes back after a peak.</Control>
+</DeviceControls>
+
+## Panel
+
+The panel draws the transfer curve against the straight line of a clean sound. Drag the handle up and down for the ceiling and across for the input gain.
 
 ```tsx
 import { LimiterPanel } from "@/components/audio-ui/devices/limiter/panel";
@@ -67,37 +77,16 @@ const [state, setState] = useState(() => limiterDevice.defaults());
 <LimiterPanel onValueChange={setState} value={state} />;
 ```
 
-The state is a plain object keyed by parameter id, so a host stores it, saves it with its project and sends it where it likes. `limiterCurve(state)` is the curve the panel draws.
+## Engine
 
-## The engine
-
-```ts
-import { createLimiterEngine } from "@/components/audio-ui/devices/limiter/engine";
-
-const engine = createLimiterEngine(ctx, state);
-source.connect(engine.input);
-engine.output.connect(ctx.destination);
-engine.update(nextState); // parameters ramp: no click
-engine.dispose();
-```
-
-It is the browser's compressor node at a ratio of 20 with no knee, then a hard clip. The node adds a make-up gain of its own that cannot be turned off, so the engine takes it back out and a signal under the ceiling is only as loud as the gain makes it. A ratio of 20 is not a wall: measured in Chrome, with a ceiling of -1 dB and +24 dB in, the node alone reaches +0.6 dBFS. The final clip, oversampled 4x, is what keeps the samples at the ceiling: in the conformance page the peak is never more than 0.05 dB over it, for ceilings of -1, -6 and -12 dB and up to +36 dB in (the filter of the oversampling rings a little, so it is not exactly zero). That is a sample peak, not an inter-sample (true) peak, so it is not a substitute for a true-peak limiter on a master that is checked against a loudness standard. `engine.reduction` is the gain being taken off, in dB, to read per frame.
-
-## Latency
-
-Working, it delays the signal by 10 ms in Chrome: 6 ms of look-ahead in the compressor node and 4 ms of the oversampling of the clip. A host that compensates latency should be told.
-
-## The tools
+Create it, connect it and update it as for any device: see [The engine](/docs/devices#the-engine).
 
 ```ts
-import { deviceTools } from "@audio-ui/core/device";
-import { limiterDevice } from "@/components/audio-ui/devices/limiter/device";
-
-const [set, reset] = deviceTools(limiterDevice);
+engine.reduction; // dB being taken off, read per frame
 ```
 
-`set` and `reset` change the state, with the ranges the device enforces: a value out of range is brought in and reported, a wrong one is refused by name, and a call never throws.
+The engine is the browser's compressor node at a ratio of 20 with no knee, then a hard clip. The node adds a make-up gain of its own that cannot be turned off, so the engine takes it back out, and a signal under the ceiling is only as loud as the gain makes it.
 
-## Accessibility
+A ratio of 20 is not a wall. Measured in Chrome, with a ceiling of -1 dB and +24 dB in, the node alone reaches +0.6 dBFS. The final clip, oversampled 4x, keeps the samples at the ceiling: in the conformance page the peak is never more than 0.05 dB over it, for ceilings of -1, -6 and -12 dB and up to +36 dB in. The filter of the oversampling rings a little, so it is not exactly zero.
 
-Every control is a native input: the knobs are sliders named after their parameter, with the value and unit as the text value, the switches are toggle buttons, and everything takes the keyboard.
+That is a sample peak, not an inter-sample (true) peak. It is not a substitute for a true-peak limiter on a master that is checked against a loudness standard.

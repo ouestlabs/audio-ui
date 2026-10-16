@@ -46,10 +46,40 @@
     "intro": "Browse {{count}} spectrum components for audio/ui, built on top of shadcn/ui.",
     "title": "Spectrum"
   },
-  "device": {
-    "description": "Devices: an effect as a state, a panel, an engine and the tools an agent drives it with, each one its own file so a host keeps its own and uses what it needs. {{count}} components.",
-    "intro": "Browse {{count}} device components for audio/ui, built on top of shadcn/ui.",
-    "title": "Device"
+  "dynamics": {
+    "description": "Dynamics devices: compressors, a limiter, a gate, a de-esser and a transient shaper, each a state, a panel, an engine and the tools an agent drives it with. {{count}} components.",
+    "intro": "Browse {{count}} dynamics components for audio/ui, built on top of shadcn/ui.",
+    "title": "Dynamics"
+  },
+  "eq": {
+    "description": "EQ and filter devices: an equalizer, a channel EQ and a filter, with a curve you drag. {{count}} components.",
+    "intro": "Browse {{count}} eq and filters components for audio/ui, built on top of shadcn/ui.",
+    "title": "EQ and filters"
+  },
+  "distortion": {
+    "description": "Distortion devices: an overdrive, a saturator, a distortion and a bit crusher. {{count}} components.",
+    "intro": "Browse {{count}} distortion components for audio/ui, built on top of shadcn/ui.",
+    "title": "Distortion"
+  },
+  "delay-reverb": {
+    "description": "Delay and reverb devices: echoes free or in time with the tempo, and a room. {{count}} components.",
+    "intro": "Browse {{count}} delay and reverb components for audio/ui, built on top of shadcn/ui.",
+    "title": "Delay and reverb"
+  },
+  "modulation": {
+    "description": "Modulation devices: a chorus, a phaser and flanger, and an auto pan. {{count}} components.",
+    "intro": "Browse {{count}} modulation components for audio/ui, built on top of shadcn/ui.",
+    "title": "Modulation"
+  },
+  "utility": {
+    "description": "Utility devices: gain, pan, width, mono and phase invert. {{count}} components.",
+    "intro": "Browse {{count}} utility components for audio/ui, built on top of shadcn/ui.",
+    "title": "Utility"
+  },
+  "instrument": {
+    "description": "Instrument devices: synths played from a pad, by pointer or by an agent. {{count}} components.",
+    "intro": "Browse {{count}} instruments components for audio/ui, built on top of shadcn/ui.",
+    "title": "Instruments"
   },
   "tuner": {
     "description": "Tuners: the note and the pitch of a sound, live from the microphone. {{count}} components.",

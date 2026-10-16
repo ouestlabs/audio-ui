@@ -67,13 +67,9 @@ export function ComponentHeaderSearch({
       }
       return totalCount;
     }
-    if (pathname !== "/components") {
-      return totalCount;
-    }
     return filterCatalogBySearchQuery(catalogItems, committedSearch).length;
   }, [
     committedSearch,
-    pathname,
     currentCategory,
     categoryCounts,
     totalCount,
