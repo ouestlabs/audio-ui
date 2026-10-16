@@ -75,12 +75,12 @@ function PhaserPanel({
         {children}
       </DeviceHeader>
       <div
-        className="flex min-h-0 grow flex-col gap-4 p-3"
+        className="flex min-h-0 grow flex-col gap-2 p-2"
         data-slot="phaser-panel"
       >
         <Plot
           aria-label="Sweep over two seconds"
-          className="min-h-40 grow"
+          className="h-28 min-h-24 grow"
           maxX={WINDOW_SECONDS}
           maxY={100}
           minX={0}

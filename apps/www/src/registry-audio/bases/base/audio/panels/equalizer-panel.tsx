@@ -216,12 +216,12 @@ function EqualizerPanel({
         {children}
       </DeviceHeader>
       <div
-        className="flex min-h-0 grow flex-col gap-3 p-3"
+        className="flex min-h-0 grow flex-col gap-2 p-2"
         data-slot="equalizer-panel"
       >
         <Plot
           aria-label="Frequency response"
-          className="min-h-40 grow"
+          className="h-28 min-h-24 grow"
           maxX={MAX_HZ}
           maxY={MAX_DB}
           minX={MIN_HZ}
@@ -276,7 +276,7 @@ function EqualizerPanel({
             value={type}
           />
         </div>
-        <div className="grid grid-cols-[1fr_auto] items-start gap-x-4">
+        <div className="grid grid-cols-[1fr_auto] items-start gap-x-3">
           <DevicePanel
             className="grid-cols-3"
             device={equalizerDevice}
