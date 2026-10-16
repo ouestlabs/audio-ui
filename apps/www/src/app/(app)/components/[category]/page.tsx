@@ -142,7 +142,7 @@ export default async function CategoryComponentsPage({
       />
       {faqJsonLd ? <JsonLd data={faqJsonLd} /> : null}
       <Suspense fallback={header}>
-        <HideDuringSearch>{header}</HideDuringSearch>
+        <HideDuringSearch results>{header}</HideDuringSearch>
       </Suspense>
       <Suspense fallback={<GridSkeleton count={4} />}>
         <CategoryPageContent catalogItems={catalogItems} />
