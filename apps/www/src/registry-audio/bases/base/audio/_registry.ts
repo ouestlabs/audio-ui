@@ -201,6 +201,21 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
+    categories: ["device", "plot"],
+    dependencies: [],
+    description:
+      "A row of buttons, one per transfer curve, each drawn from the curve itself: you give it the function of each option, so the icon is what the device does and never drifts from it.",
+    files: [
+      {
+        path: "audio/elements/curve-select.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "curve-select",
+    registryDependencies: ["@shadcn/toggle-group"],
+    type: "registry:ui",
+  },
+  {
     categories: ["device", "hooks"],
     dependencies: [],
     description:
@@ -410,6 +425,7 @@ export const audio: RegistryItem[] = [
     name: "saturator-panel",
     registryDependencies: [
       "@audio-ui/device-panel",
+      "@audio-ui/curve-select",
       "@audio-ui/plot",
       "@audio-ui/saturator-device",
     ],
