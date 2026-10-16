@@ -83,6 +83,10 @@ engine.dispose();
 
 It is the browser's compressor node at a ratio of 20 with no knee, then a hard clip. The node adds a make-up gain of its own that cannot be turned off, so the engine takes it back out and a signal under the ceiling is only as loud as the gain makes it. A ratio of 20 is not a wall: measured in Chrome, with a ceiling of -1 dB and +24 dB in, the node alone reaches +0.6 dBFS. The final clip, oversampled 4x, is what keeps the samples at the ceiling: in the conformance page the peak is never more than 0.05 dB over it, for ceilings of -1, -6 and -12 dB and up to +36 dB in (the filter of the oversampling rings a little, so it is not exactly zero). That is a sample peak, not an inter-sample (true) peak, so it is not a substitute for a true-peak limiter on a master that is checked against a loudness standard. `engine.reduction` is the gain being taken off, in dB, to read per frame.
 
+## Latency
+
+Working, it delays the signal by 10 ms in Chrome: 6 ms of look-ahead in the compressor node and 4 ms of the oversampling of the clip. A host that compensates latency should be told.
+
 ## The tools
 
 ```ts

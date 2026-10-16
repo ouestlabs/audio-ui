@@ -1,17 +1,3 @@
-import {
-  type EngineFactory,
-  impulse,
-  magnitudeDb,
-  peakDb,
-  peakIndex,
-  render,
-  reverberationTime,
-  SAMPLE_RATE,
-  type Signal,
-  sine,
-  toDb,
-  toLinear,
-} from "@/lib/conformance/measure";
 import { autoPanDevice } from "@/registry-audio/bases/base/lib/auto-pan-device";
 import { createAutoPanEngine } from "@/registry-audio/bases/base/lib/auto-pan-engine";
 import {
@@ -28,6 +14,22 @@ import {
 import { createCompressorEngine } from "@/registry-audio/bases/base/lib/compressor-engine";
 import { delayDevice } from "@/registry-audio/bases/base/lib/delay-device";
 import { createDelayEngine } from "@/registry-audio/bases/base/lib/delay-engine";
+import {
+  type EngineFactory,
+  impulse,
+  magnitudeDb,
+  measureLatency,
+  measureResponse,
+  peakDb,
+  peakIndex,
+  render,
+  reverberationTime,
+  SAMPLE_RATE,
+  type Signal,
+  sine,
+  toDb,
+  toLinear,
+} from "@/registry-audio/bases/base/lib/device-measure";
 import {
   distortionCurve,
   distortionDevice,
@@ -83,10 +85,10 @@ export interface Check {
   title: string;
 }
 
-const FREQUENCIES = [
+const _FREQUENCIES = [
   31, 62, 125, 250, 500, 1000, 2000, 4000, 8000, 12_000, 16_000,
 ];
-const IMPULSE_SECONDS = 0.5;
+const _IMPULSE_SECONDS = 0.5;
 
 const result = (
   measured: string,
@@ -98,30 +100,6 @@ const result = (
   pass,
 });
 const fixed = (value: number, digits = 2) => value.toFixed(digits);
-
-/** The largest gap between a curve and the response an engine really has, over the test frequencies where the curve is audible. */
-async function responseError<State>(
-  create: EngineFactory<State>,
-  state: State,
-  curve: (hertz: number) => number
-) {
-  const [response] = await render(create, state, impulse(), IMPULSE_SECONDS);
-  let worst = 0;
-  let at = 0;
-  for (const hertz of FREQUENCIES) {
-    const wanted = curve(hertz);
-    // A null deeper than -50 dB is below what a 24-bit signal can show.
-    if (wanted < -50 || !response) {
-      continue;
-    }
-    const gap = Math.abs(magnitudeDb(response, hertz) - wanted);
-    if (gap > worst) {
-      worst = gap;
-      at = hertz;
-    }
-  }
-  return { at, worst };
-}
 
 function responseCheck<State>(
   device: string,
@@ -136,7 +114,11 @@ function responseCheck<State>(
     reference:
       "the biquad formulas of the Audio EQ Cookbook, as the node runs them",
     run: async () => {
-      const { at, worst } = await responseError(create, state, curve);
+      const { at, worstDb: worst } = await measureResponse(
+        create,
+        state,
+        curve
+      );
       return result(
         `${fixed(worst)} dB at ${at} Hz`,
         "within 0.15 dB of the drawn curve",
@@ -251,6 +233,42 @@ export const CHECKS: Check[] = [
       );
     },
     title: "A steady sine comes out where the curve says",
+  },
+  {
+    device: "compressor",
+    id: "compressor-latency",
+    reference:
+      "the 6 ms look-ahead of the browser's compressor node, which the dry path waits for",
+    run: async () => {
+      const latency = await measureLatency(
+        createCompressorEngine,
+        compressorDevice.defaults()
+      );
+      return result(
+        `${fixed(latency, 2)} ms`,
+        "6 ms within 0.5 ms: what a host reports to compensate it",
+        Math.abs(latency - 6) <= 0.5
+      );
+    },
+    title: "Working, it delays the signal by the look-ahead of the node",
+  },
+  {
+    device: "limiter",
+    id: "limiter-latency",
+    reference:
+      "the look-ahead of the browser's compressor node, plus the 4x oversampling of the clip",
+    run: async () => {
+      const latency = await measureLatency(
+        createLimiterEngine,
+        limiterDevice.defaults()
+      );
+      return result(
+        `${fixed(latency, 2)} ms`,
+        "10 ms within 0.5 ms (6 of look-ahead, 4 of oversampling): reported, so a host can compensate it",
+        Math.abs(latency - 10) <= 0.5
+      );
+    },
+    title: "Working, it delays the signal by a look-ahead",
   },
   {
     device: "limiter",
@@ -464,6 +482,37 @@ export const CHECKS: Check[] = [
       );
     },
     title: "A steady input comes out where the transfer curve says",
+  },
+  {
+    device: "distortion",
+    id: "distortion-parallel-mix",
+    reference:
+      "a parallel mix of two paths that meet in time: with no drive, the dry and the shaped sound add up to the input, flat",
+    run: async () => {
+      const { state } = distortionDevice.apply(distortionDevice.defaults(), {
+        driveDb: 0,
+        mix: 50,
+        outputDb: 0,
+        toneHz: 20_000,
+      });
+      // Small enough to stay on the straight part of the clip.
+      const [out] = await render(
+        createDistortionEngine,
+        state,
+        (index) => (index === 0 ? 0.01 : 0),
+        0.5
+      );
+      const gaps = [200, 1000, 2500, 5000, 7500].map((hertz) =>
+        Math.abs(out ? magnitudeDb(out, hertz) - toDb(0.01) : 99)
+      );
+      const worst = Math.max(...gaps);
+      return result(
+        `${fixed(worst)} dB from flat at worst`,
+        "within 0.7 dB: a dry path that did not wait for the shaper would dip by several dB",
+        worst <= 0.7
+      );
+    },
+    title: "Mixed with its dry sound, it does not comb",
   },
   {
     device: "saturator",

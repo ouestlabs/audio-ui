@@ -117,6 +117,10 @@ What goes on each node comes from `compressorSettings(state)`, a pure function y
 - **It adds a make-up gain of its own that cannot be turned off**, which grows with the threshold and the ratio (+10.8 dB at -24 dB and 4:1). With `autoMakeup` off the engine takes it back out and applies `makeupDb`; with it on, the node's is kept.
 - **It looks ahead by 6 ms.** The dry path waits as long, so a parallel mix does not comb.
 
+## Latency
+
+Working, it delays the signal by 6 ms, the look-ahead of the node; the dry path waits as long, so the mix stays aligned.
+
 ## The tools
 
 The tools are derived from the device's parameters, with a JSON Schema input, so any agent can use them: they are not tied to an SDK.

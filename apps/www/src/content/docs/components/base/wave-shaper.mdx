@@ -84,6 +84,10 @@ engine.dispose();
 
 One voice at a time, as the Pocket Synth. The distortion curve is a table of 44,100 points, rebuilt only when the drive changes.
 
+## Latency
+
+The shaper oversamples 4x, which delays its path by 4 ms in Chrome (192 samples); the clean path waits as long, so the mix does not comb.
+
 ## The tools
 
 ```ts

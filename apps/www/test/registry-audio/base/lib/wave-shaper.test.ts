@@ -81,6 +81,11 @@ function fakeContext() {
   const ctx = {
     createBiquadFilter: () => track(made.filters, new FakeFilter()),
     createGain: () => track(made.gains, new FakeGain()),
+    createDelay: () => ({
+      connect: <T>(to: T) => to,
+      delayTime: { value: 0 },
+      disconnect: () => undefined,
+    }),
     createOscillator: () => track(made.oscillators, new FakeOscillator()),
     createWaveShaper: () => track(made.shapers, new FakeShaper()),
     currentTime: 2,

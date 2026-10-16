@@ -1,7 +1,7 @@
 /**
- * Runs the conformance page in a headless Chrome and fails when a check does.
+ * Runs the measurements page in a headless Chrome and fails when a check does.
  *
- *   bun run conformance [url]
+ *   bun run measure [url]
  *
  * The page renders the real engines in an offline audio context, so it needs a
  * browser: Chrome is started with `--dump-dom` and the result is read from the
@@ -11,7 +11,7 @@
  */
 export {};
 
-const URL_ARG = Bun.argv[2] ?? "http://localhost:4000/conformance";
+const URL_ARG = Bun.argv[2] ?? "http://localhost:4000/measurements";
 const TIMEOUT_MS = 120_000;
 const CANDIDATES = [
   Bun.env.CHROME,
@@ -23,7 +23,7 @@ const CANDIDATES = [
 ].filter((path): path is string => Boolean(path));
 
 const CHECK = /<li[^>]*data-check="([^"]+)"[^>]*data-state="([^"]+)"/g;
-const DONE = /id="conformance-summary"[^>]*data-done/;
+const DONE = /id="measurements-summary"[^>]*data-done/;
 
 const chrome = CANDIDATES.find(
   (path) =>

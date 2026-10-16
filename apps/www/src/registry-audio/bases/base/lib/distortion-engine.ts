@@ -4,6 +4,7 @@ import {
   distortionTable,
   TABLE_DOMAIN,
 } from "@/registry-audio/bases/base/lib/distortion-device";
+import { createOversamplingDelay } from "@/registry-audio/bases/base/lib/oversampling";
 
 const RAMP_SECONDS = 0.015;
 
@@ -21,7 +22,7 @@ export interface DistortionEngine {
  *
  * ```
  * input → drive → shaper (4x) → tone (low-pass) → wet ──┐
- *       → dry ──────────────────────────────────────────┴→ level → output
+ *       → dry (waits as long as the shaper) ──────────────────────────────────────────┴→ level → output
  * ```
  *
  * The drive is a gain before a fixed soft-clip table, so turning it never
@@ -38,6 +39,7 @@ export function createDistortionEngine(
   const tone = ctx.createBiquadFilter();
   const wet = ctx.createGain();
   const dry = ctx.createGain();
+  const dryDelay = createOversamplingDelay(ctx, "4x");
   const level = ctx.createGain();
   shaper.curve = distortionTable();
   shaper.oversample = "4x";
@@ -48,7 +50,7 @@ export function createDistortionEngine(
     .connect(tone)
     .connect(wet)
     .connect(level);
-  input.connect(dry).connect(level);
+  input.connect(dryDelay).connect(dry).connect(level);
   level.connect(output);
 
   const first = distortionSettings(initial);

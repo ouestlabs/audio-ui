@@ -2,11 +2,11 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ALL_CHECKS, type CheckResult } from "@/lib/conformance/checks";
+import { ALL_CHECKS, type CheckResult } from "@/lib/measurements/checks";
 
 type Row = { result?: CheckResult; error?: string } | undefined;
 
-/** Runs every conformance check once, together, and lists what each measured. */
+/** Runs every measurement once, together, and lists what each measured. */
 function Checks({ onAgain }: { onAgain: () => void }) {
   const [rows, setRows] = useState<Row[]>([]);
   const [done, setDone] = useState(false);
@@ -50,7 +50,7 @@ function Checks({ onAgain }: { onAgain: () => void }) {
         <p
           className="font-mono text-sm"
           data-done={done || undefined}
-          id="conformance-summary"
+          id="measurements-summary"
           role="status"
         >
           {done ? "Done" : "Running"}: {passed} passed, {failed} failed,{" "}
@@ -111,7 +111,7 @@ function Checks({ onAgain }: { onAgain: () => void }) {
 }
 
 /** The report: it runs the checks on its own, and "Run again" runs them anew. */
-export function ConformanceReport() {
+export function MeasurementsReport() {
   const [run, setRun] = useState(0);
   const again = useCallback(() => setRun((count) => count + 1), []);
   return <Checks key={run} onAgain={again} />;
