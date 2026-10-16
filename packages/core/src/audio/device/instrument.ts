@@ -37,3 +37,14 @@ export function playNote<Note>(
     release();
   };
 }
+
+/**
+ * What a host gives a device that takes a key signal: a `DeviceBinding` whose
+ * engine has a second input, `sidechain`, that the key is connected to. It is
+ * the shape of an audio engine, so it names no node type: `Input` is the node
+ * of the host's audio API, such as an `AudioNode` on the Web Audio API.
+ */
+export interface SidechainBinding<State, Input> extends DeviceBinding<State> {
+  /** Connect the signal that opens, closes or ducks the device here. */
+  readonly sidechain: Input;
+}
