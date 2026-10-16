@@ -97,6 +97,13 @@ export const categories: CategoryDef[] = [
   },
   {
     description:
+      "Devices: an effect as a state, a panel, an engine and the tools an agent drives it with, each one its own file so a host keeps its own and uses what it needs.",
+    docs: "compressor",
+    label: "Device",
+    name: "device",
+  },
+  {
+    description:
       "Tuners: the note and the pitch of a sound, live from the microphone.",
     label: "Tuner",
     name: "tuner",

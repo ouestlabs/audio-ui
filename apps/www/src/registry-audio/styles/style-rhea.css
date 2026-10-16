@@ -592,6 +592,11 @@
   .cn-audio-panel {
     @apply rounded-4xl;
   }
+
+  /* MARK: Device frame, the strip a device sits in: the same radius, but kept by the preview frames */
+  .cn-audio-device {
+    @apply rounded-4xl;
+  }
 }
 
 /* Envelope blocked-action shake, per-segment easing so each leg follows its own curve. Animates the standalone `translate` property (not `transform`) so it composites with Point's inline positioning transform instead of fighting it. */

@@ -152,6 +152,33 @@
         "Mentions that a shelf's Q is ignored by the node",
         "Sets parameters on the node with `setTargetAtTime`, not `.value =`, while it plays"
       ]
+    },
+    {
+      "id": 11,
+      "prompt": "I am building a small DAW. Add a compressor to a track: my project already has its own audio engine and stores each effect's settings in the project file. An AI assistant should also be able to change its settings from chat.",
+      "expected_output": "The compressor as a device: defineDevice's state stored in the project, the controlled panel, the host's own engine driven through a DeviceBinding or compressorSettings, and deviceTools for the assistant, with a device id stored rather than the panel.",
+      "files": [],
+      "expectations": [
+        "Keeps the compressor's settings as a plain state object (the `compressorDevice` state of `@audio-ui/core/device`) in the project, not inside a component's `useState` with audio nodes",
+        "Stores the device's `id` (`audioui.compressor`) and its state in the project file, and repairs a loaded state with `device.sanitize`",
+        "Uses the controlled panel (`CompressorPanel` or `DevicePanel`) with `value` and `onValueChange`, not a component that owns its state",
+        "Drives the project's own engine from the state (a `DeviceBinding` with `update(state)` and `dispose()`, or the numbers of `compressorSettings`), instead of the Web Audio engine of the registry",
+        "Gives the assistant `deviceTools(compressorDevice)` (or `describe()` and `apply`) with their JSON Schema input, not a hand-written prompt of parameter names",
+        "Feeds the tool's returned `state` back to the project and its `summary` back to the model, and does not parse prose from the model",
+        "Does not apply a model's value as is: it goes through the device, which clamps it and refuses an unknown or mistyped parameter"
+      ]
+    },
+    {
+      "id": 12,
+      "prompt": "My chat assistant should be able to play the Pocket Synth: when I say 'play an A, then a lower one', it should sound. The synth is already on the page.",
+      "expected_output": "The synth as an instrument device: deviceTools gives a play tool from the device's note, its result's note and duration go to the engine through playNote, with values brought into range.",
+      "files": [],
+      "expectations": [
+        "Uses `deviceTools(pocketSynthDevice)` and its third tool, `audioui_pocket_synth_play`, with its JSON Schema input, instead of a hand-written prompt of notes",
+        "Gives the result's `note` and `duration` to the engine with `playNote(engine, note, seconds)` or `noteOn` then `noteOff`, instead of parsing the model's prose",
+        "Gives the tool's `summary` back to the model, and lets the device bring a pitch outside the instrument's range into range instead of passing it on",
+        "Does not rebuild the synth: the engine's `noteOn` and `noteOff` are used as the registry gives them"
+      ]
     }
   ]
 }

@@ -46,6 +46,11 @@
     "intro": "Browse {{count}} spectrum components for audio/ui, built on top of shadcn/ui.",
     "title": "Spectrum"
   },
+  "device": {
+    "description": "Devices: an effect as a state, a panel, an engine and the tools an agent drives it with, each one its own file so a host keeps its own and uses what it needs. {{count}} components.",
+    "intro": "Browse {{count}} device components for audio/ui, built on top of shadcn/ui.",
+    "title": "Device"
+  },
   "tuner": {
     "description": "Tuners: the note and the pitch of a sound, live from the microphone. {{count}} components.",
     "intro": "Browse {{count}} tuner components for audio/ui, built on top of shadcn/ui.",

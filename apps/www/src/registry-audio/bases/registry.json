@@ -13,7 +13,7 @@
       "name": "fader"
     },
     {
-      "count": 5,
+      "count": 12,
       "description": "Rotary knob components for continuous parameters like level, cutoff, and pan.",
       "label": "Knob",
       "name": "knob"
@@ -37,13 +37,19 @@
       "name": "spectrum"
     },
     {
+      "count": 9,
+      "description": "Devices: an effect as a state, a panel, an engine and the tools an agent drives it with, each one its own file so a host keeps its own and uses what it needs.",
+      "label": "Device",
+      "name": "device"
+    },
+    {
       "count": 1,
       "description": "Tuners: the note and the pitch of a sound, live from the microphone.",
       "label": "Tuner",
       "name": "tuner"
     },
     {
-      "count": 3,
+      "count": 10,
       "description": "Plots for drawing curves and dragging points on them: equalizers, filters and compressors.",
       "label": "Plot",
       "name": "plot"
@@ -103,5 +109,5 @@
       "name": "xypad"
     }
   ],
-  "totalComponents": 33
+  "totalComponents": 40
 }

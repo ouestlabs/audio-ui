@@ -12,6 +12,7 @@ All paths below are under `apps/www/src/registry-audio/bases/base/` unless they 
 | You are adding | File | `_registry.ts` | Item `type` |
 | --- | --- | --- | --- |
 | A styled element over a primitive | `audio/elements/<name>.tsx` | `audio/_registry.ts` | `registry:ui` |
+| The face of a device (controlled, no audio) | `audio/panels/<name>-panel.tsx` | `audio/_registry.ts` | `registry:ui` |
 | A composed screen | `components/<category>/block-<component>-<variant>.tsx` | `components/_registry.ts` | `registry:block` |
 | A focused example for the docs | `components/<category>/<component>-<feature>-demo.tsx` | `components/_registry.ts` | `registry:example` |
 | A hook | `hooks/use-<name>.ts` | `hooks/_registry.ts` | `registry:hook` |
@@ -33,6 +34,7 @@ Add the entry to the matching `_registry.ts`:
 
 - `name` is the install name (`npx shadcn add @audio-ui/<name>`), usually the file name without extension
 - `files[].path` is relative to `bases/base/`
+- `target` (optional, per file): where the file lands in a project, for the items that belong in a folder of their own. A device's three files (`device.ts`, `engine.ts`, `panel.tsx`) install to `components/audio-ui/devices/<name>/`, and the build rewrites every import of them to match. Everything else installs flat by its type.
 - `registryDependencies`: `"@audio-ui/<name>"` for our items, `"@shadcn/<name>"` for shadcn's
 - `dependencies`: the npm packages the file imports (`"@audio-ui/react"`, `"zod"`)
 - `categories` (blocks and demos): the category folder at least. A new category also goes in `bases/categories.ts` (label + description); a category with no items fails the build.

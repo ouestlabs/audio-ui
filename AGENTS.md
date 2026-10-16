@@ -72,6 +72,7 @@ Published to npm: **don't break its public API without a changeset**.
 ```
 registry-audio/bases/base/
 ├── audio/elements/  # Styled elements over each primitive (knob.tsx, fader.tsx, timeline.tsx…)
+├── audio/panels/    # The face of a device: controlled, no audio (compressor-panel.tsx…)
 ├── components/      # Catalog by category folder: block-{component}-{variant}.tsx + {component}-*-demo.tsx
 ├── hooks/           # use-web-audio, use-transport-clock, use-spectrum…
 └── lib/             # web-audio, musical-time, waveform-dsp, lookahead-scheduler…

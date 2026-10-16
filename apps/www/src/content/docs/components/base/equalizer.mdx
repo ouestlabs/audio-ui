@@ -1,0 +1,113 @@
+---
+title: Equalizer
+description: "An equalizer as a device you can plug in: a low shelf, two bells and a high shelf as a state, a panel with a handle on each band, a Web Audio engine and the tools an agent drives it with."
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="block-equalizer" />
+
+The equalizer is a device like the [compressor](/docs/components/compressor): a state, a panel that draws it, an engine that plays it and tools an agent calls, each its own file. What is specific to it is the curve: the panel draws the filters the engine runs, so what you see is what you hear.
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">CLI</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash component
+npx shadcn@latest add @audio-ui/block-equalizer
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the packages:</Step>
+
+```bash
+npm install @audio-ui/react @audio-ui/core
+```
+
+<Step>Add the pieces you want. All of them, or only the state and the panel if your engine is elsewhere:</Step>
+
+```bash
+npx shadcn@latest add @audio-ui/equalizer-device @audio-ui/equalizer-panel @audio-ui/equalizer-engine
+```
+
+<Step>Copy and paste the demo that wires them, if you want it.</Step>
+
+<ComponentSource
+  styleName="base-nova"
+  name="block-equalizer"
+  title="components/examples/block-equalizer.tsx"
+/>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## The state
+
+Four bands from the bottom up, in series, then an output trim. Each band has a type, a frequency, a gain and a width (Q), and the type decides which of them it uses:
+
+| Type | Gain | Q |
+| --- | --- | --- |
+| Low cut, high cut | no | yes |
+| Notch | no | yes |
+| Low shelf, high shelf | yes | no, a shelf has a fixed slope |
+| Bell | yes | yes |
+
+The bands start as a low shelf, two bells and a high shelf. A band's parameters are `lowType`, `lowHz`, `lowDb`, `lowQ`, then the same for `lowMid`, `highMid` and `high`, and `outputDb` for the trim. The cuts are 12 dB per octave, what a browser filter node does.
+
+```tsx
+import { EqualizerPanel } from "@/components/audio-ui/devices/equalizer/panel";
+import { equalizerDevice } from "@/components/audio-ui/devices/equalizer/device";
+
+const [state, setState] = useState(() => equalizerDevice.defaults()); // flat
+
+<EqualizerPanel onValueChange={setState} value={state} />;
+```
+
+## The panel
+
+The curve is the sum of the four filters and the trim. Each band has a handle on it: drag it to set the band's frequency and gain, and it follows the pointer one to one (a cut or a notch has no gain, so its handle only slides); double-click to flatten the band. Pick a band by its number or its handle, and its type, frequency, gain and Q appear under the curve, the unused ones drawn off. Pass a `spectrum` (from `useSpectrum`) to draw the level of the sound behind the curve.
+
+## The engine
+
+```ts
+import { createEqualizerEngine } from "@/components/audio-ui/devices/equalizer/engine";
+
+const engine = createEqualizerEngine(ctx, state);
+source.connect(engine.input);
+engine.output.connect(ctx.destination);
+
+engine.update(nextState); // parameters ramp: no click
+engine.dispose();
+```
+
+Four `BiquadFilterNode`s in series and a trim. The curve is drawn from the same formulas the node runs, and a band's width goes through `toWebAudioQ` on the way to the node, so the two agree. Off, every band goes flat and the trim to 0 dB.
+
+## The tools
+
+```ts
+import { deviceTools } from "@audio-ui/core/device";
+
+const [set] = deviceTools(equalizerDevice);
+set.run(state, { lowMidHz: 1000, lowMidDb: -6 });
+```
+
+As for any device: the ranges a model is told are the ones the device enforces, a value out of range is brought in and reported, and a wrong one is refused by name.
+
+## Accessibility
+
+The handles and the knobs are sliders named after their parameter, with the value and unit as the text value ("Low mid freq, 400 Hz"), the switch is a toggle button, and everything takes the keyboard.

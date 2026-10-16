@@ -107,6 +107,237 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
+    categories: ["device", "knob"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "A panel for any device: a knob per number and a toggle per switch, from its descriptors, controlled by a state a host owns.",
+    files: [
+      {
+        path: "audio/panels/device-panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "device-panel",
+    registryDependencies: ["@audio-ui/knob", "@shadcn/toggle"],
+    type: "registry:ui",
+  },
+  {
+    categories: ["device", "plot"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "The face of the compressor device: the transfer curve it plays, with the threshold and the level going in on it, over the device's knobs.",
+    files: [
+      {
+        path: "audio/panels/compressor-panel.tsx",
+        target: "components/audio-ui/devices/compressor/panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "compressor-panel",
+    registryDependencies: [
+      "@audio-ui/device-panel",
+      "@audio-ui/plot",
+      "@audio-ui/compressor-device",
+    ],
+    type: "registry:ui",
+  },
+  {
+    categories: ["device", "synth", "xypad"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "The face of the Pocket Synth device: a pad that plays it, its waveform and filter, and its volume. Controlled, with the notes leaving through onNoteOn and onNoteOff.",
+    files: [
+      {
+        path: "audio/panels/pocket-synth-panel.tsx",
+        target: "components/audio-ui/devices/pocket-synth/panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "pocket-synth-panel",
+    registryDependencies: [
+      "@audio-ui/device-panel",
+      "@audio-ui/fader",
+      "@audio-ui/waveform-select",
+      "@audio-ui/xypad",
+      "@audio-ui/pocket-synth-device",
+      "@shadcn/toggle-group",
+    ],
+    type: "registry:ui",
+  },
+  {
+    categories: ["device", "synth", "xypad"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "A row of buttons, one per waveform, each drawn as its shape: pick one. Fed by the options of a device's choice parameter.",
+    files: [
+      {
+        path: "audio/elements/waveform-select.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "waveform-select",
+    registryDependencies: ["@shadcn/toggle-group"],
+    type: "registry:ui",
+  },
+  {
+    categories: ["device", "hooks"],
+    dependencies: [],
+    description:
+      "A play and pause button for a demo signal: the icon follows the state, the name says what pressing it does.",
+    files: [
+      {
+        path: "audio/elements/play-toggle.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "play-toggle",
+    registryDependencies: ["@shadcn/button"],
+    type: "registry:ui",
+  },
+  {
+    categories: ["device", "synth", "xypad"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "The face of the Wave Shaper device: a pad that plays it, its waveform and its knobs. Controlled, with the notes leaving through onNoteOn and onNoteOff.",
+    files: [
+      {
+        path: "audio/panels/wave-shaper-panel.tsx",
+        target: "components/audio-ui/devices/wave-shaper/panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "wave-shaper-panel",
+    registryDependencies: [
+      "@audio-ui/device-panel",
+      "@audio-ui/waveform-select",
+      "@audio-ui/xypad",
+      "@audio-ui/wave-shaper-device",
+    ],
+    type: "registry:ui",
+  },
+  {
+    categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "The face of the delay device: the echoes it makes, one line each and fainter as they fade, with a handle on the first to drag its time and feedback, over the device's knobs.",
+    files: [
+      {
+        path: "audio/panels/delay-panel.tsx",
+        target: "components/audio-ui/devices/delay/panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "delay-panel",
+    registryDependencies: [
+      "@audio-ui/device-panel",
+      "@audio-ui/plot",
+      "@audio-ui/delay-device",
+    ],
+    type: "registry:ui",
+  },
+  {
+    categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "The face of the reverb device: the tail it makes, its level falling to -60 dB, with a handle where it ends to drag the decay time, over the device knobs.",
+    files: [
+      {
+        path: "audio/panels/reverb-panel.tsx",
+        target: "components/audio-ui/devices/reverb/panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "reverb-panel",
+    registryDependencies: [
+      "@audio-ui/device-panel",
+      "@audio-ui/plot",
+      "@audio-ui/reverb-device",
+    ],
+    type: "registry:ui",
+  },
+  {
+    categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "The face of the filter device: the curve it plays with a handle on the cutoff to drag its frequency and resonance, an optional live spectrum behind it, over the device knobs.",
+    files: [
+      {
+        path: "audio/panels/filter-panel.tsx",
+        target: "components/audio-ui/devices/filter/panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "filter-panel",
+    registryDependencies: [
+      "@audio-ui/device-panel",
+      "@audio-ui/plot",
+      "@audio-ui/filter-device",
+    ],
+    type: "registry:ui",
+  },
+  {
+    categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "The face of the distortion device: its transfer curve against the straight line of a clean sound, over the device knobs.",
+    files: [
+      {
+        path: "audio/panels/distortion-panel.tsx",
+        target: "components/audio-ui/devices/distortion/panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "distortion-panel",
+    registryDependencies: [
+      "@audio-ui/device-panel",
+      "@audio-ui/plot",
+      "@audio-ui/distortion-device",
+    ],
+    type: "registry:ui",
+  },
+  {
+    categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "The face of the chorus device: the delay time as the oscillator sweeps it over two seconds, over the device knobs.",
+    files: [
+      {
+        path: "audio/panels/chorus-panel.tsx",
+        target: "components/audio-ui/devices/chorus/panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "chorus-panel",
+    registryDependencies: [
+      "@audio-ui/device-panel",
+      "@audio-ui/plot",
+      "@audio-ui/chorus-device",
+    ],
+    type: "registry:ui",
+  },
+  {
+    categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react", "@audio-ui/core"],
+    description:
+      "The face of the equalizer device: the curve it plays with a handle on each band to drag its frequency and gain, an optional live spectrum behind it, over the device's knobs gathered by band.",
+    files: [
+      {
+        path: "audio/panels/equalizer-panel.tsx",
+        target: "components/audio-ui/devices/equalizer/panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "equalizer-panel",
+    registryDependencies: [
+      "@audio-ui/device-panel",
+      "@audio-ui/plot",
+      "@audio-ui/equalizer-device",
+      "@shadcn/select",
+      "@shadcn/toggle",
+    ],
+    type: "registry:ui",
+  },
+  {
     dependencies: ["@audio-ui/react"],
     description:
       "The level of a sound across frequencies, live, on a log axis in hertz, with held peaks.",

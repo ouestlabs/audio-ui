@@ -2,39 +2,44 @@ import type { RegistryItem } from "shadcn/schema";
 
 export const components: RegistryItem[] = [
   {
-    categories: ["synth", "xypad"],
-    description: "Pocket synth with oscillator, filter, and XY pad",
+    categories: ["device", "synth", "xypad"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "A synth you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file. Press the pad: pitch goes across, the filter cutoff up",
     files: [
       {
-        path: "components/synth/block-pocket-synth.tsx",
+        path: "components/device/block-pocket-synth.tsx",
         type: "registry:block",
       },
     ],
     name: "block-pocket-synth",
     registryDependencies: [
+      "@audio-ui/pocket-synth-panel",
+      "@audio-ui/pocket-synth-device",
+      "@audio-ui/pocket-synth-engine",
+      "@audio-ui/use-master-bus",
       "@audio-ui/web-audio",
-      "@audio-ui/fader",
-      "@audio-ui/xypad",
-      "@shadcn/toggle-group",
     ],
     type: "registry:block",
   },
   {
-    categories: ["synth", "xypad"],
-    description: "Wave shaper synth with distortion, tone, and detune controls",
+    categories: ["device", "synth", "xypad"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "A wave shaper synth you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file. Press the pad: pitch goes across, the resonance up",
     files: [
       {
-        path: "components/synth/block-wave-shaper.tsx",
+        path: "components/device/block-wave-shaper.tsx",
         type: "registry:block",
       },
     ],
     name: "block-wave-shaper",
     registryDependencies: [
+      "@audio-ui/wave-shaper-panel",
+      "@audio-ui/wave-shaper-device",
+      "@audio-ui/wave-shaper-engine",
+      "@audio-ui/use-master-bus",
       "@audio-ui/web-audio",
-      "@audio-ui/fader",
-      "@audio-ui/xypad",
-      "@audio-ui/knob",
-      "@shadcn/toggle-group",
     ],
     type: "registry:block",
   },
@@ -402,6 +407,163 @@ export const components: RegistryItem[] = [
       "@shadcn/button",
     ],
     type: "registry:example",
+  },
+  {
+    categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "A compressor you can plug in: its state, a panel that draws it and a Web Audio engine that plays it, side by side. Play a pulsing signal and turn the knobs",
+    files: [
+      {
+        path: "components/device/block-compressor.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-compressor",
+    registryDependencies: [
+      "@audio-ui/compressor-panel",
+      "@audio-ui/compressor-device",
+      "@audio-ui/compressor-engine",
+      "@audio-ui/use-master-bus",
+      "@audio-ui/web-audio",
+      "@shadcn/button",
+    ],
+    type: "registry:block",
+  },
+  {
+    categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "An equalizer you can plug in: its state, a panel that draws it with a handle on each band and an engine that plays it, side by side. Play pink noise and the spectrum behind the curve is what comes out",
+    files: [
+      {
+        path: "components/device/block-equalizer.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-equalizer",
+    registryDependencies: [
+      "@audio-ui/equalizer-panel",
+      "@audio-ui/equalizer-device",
+      "@audio-ui/equalizer-engine",
+      "@audio-ui/pink-noise",
+      "@audio-ui/use-master-bus",
+      "@audio-ui/use-spectrum",
+      "@audio-ui/web-audio",
+      "@shadcn/button",
+    ],
+    type: "registry:block",
+  },
+  {
+    categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "A delay you can plug in: its state, a panel that draws the echoes it makes with a handle for the time and the feedback, and an engine that plays it. Play a loop through it and drag",
+    files: [
+      {
+        path: "components/device/block-delay.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-delay",
+    registryDependencies: [
+      "@audio-ui/delay-panel",
+      "@audio-ui/delay-device",
+      "@audio-ui/delay-engine",
+      "@audio-ui/play-toggle",
+      "@audio-ui/use-device-loop",
+      "@audio-ui/use-master-bus",
+    ],
+    type: "registry:block",
+  },
+  {
+    categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "A reverb you can plug in: its state, a panel that draws the tail it makes with a handle for the decay time, and an engine that plays it. Play a loop through it and drag",
+    files: [
+      {
+        path: "components/device/block-reverb.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-reverb",
+    registryDependencies: [
+      "@audio-ui/reverb-panel",
+      "@audio-ui/reverb-device",
+      "@audio-ui/reverb-engine",
+      "@audio-ui/play-toggle",
+      "@audio-ui/use-device-loop",
+      "@audio-ui/use-master-bus",
+    ],
+    type: "registry:block",
+  },
+  {
+    categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "A filter you can plug in: its state, a panel that draws the curve it plays with a handle for the cutoff and the resonance, and an engine that plays it. Play a loop through it and drag, the spectrum behind is what comes out",
+    files: [
+      {
+        path: "components/device/block-filter.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-filter",
+    registryDependencies: [
+      "@audio-ui/filter-panel",
+      "@audio-ui/filter-device",
+      "@audio-ui/filter-engine",
+      "@audio-ui/play-toggle",
+      "@audio-ui/use-device-loop",
+      "@audio-ui/use-master-bus",
+      "@audio-ui/use-spectrum",
+    ],
+    type: "registry:block",
+  },
+  {
+    categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "A distortion you can plug in: its state, a panel that draws its transfer curve and an engine that plays it. Play a loop through it and turn the drive",
+    files: [
+      {
+        path: "components/device/block-distortion.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-distortion",
+    registryDependencies: [
+      "@audio-ui/distortion-panel",
+      "@audio-ui/distortion-device",
+      "@audio-ui/distortion-engine",
+      "@audio-ui/play-toggle",
+      "@audio-ui/use-device-loop",
+      "@audio-ui/use-master-bus",
+    ],
+    type: "registry:block",
+  },
+  {
+    categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "A chorus you can plug in: its state, a panel that draws the sweep of its delay and an engine that plays it. Play a loop through it and turn the rate and the depth",
+    files: [
+      {
+        path: "components/device/block-chorus.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-chorus",
+    registryDependencies: [
+      "@audio-ui/chorus-panel",
+      "@audio-ui/chorus-device",
+      "@audio-ui/chorus-engine",
+      "@audio-ui/play-toggle",
+      "@audio-ui/use-device-loop",
+      "@audio-ui/use-master-bus",
+    ],
+    type: "registry:block",
   },
   {
     categories: ["mixer", "fader", "meter", "knob"],

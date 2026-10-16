@@ -1,11 +1,11 @@
 [
   {
-    "categories": ["synth", "xypad"],
+    "categories": ["device", "synth", "xypad"],
     "name": "block-pocket-synth",
     "title": "block-pocket-synth"
   },
   {
-    "categories": ["synth", "xypad"],
+    "categories": ["device", "synth", "xypad"],
     "name": "block-wave-shaper",
     "title": "block-wave-shaper"
   },
@@ -123,6 +123,41 @@
     "categories": ["plot"],
     "name": "plot-compressor-demo",
     "title": "plot-compressor-demo"
+  },
+  {
+    "categories": ["device", "plot", "knob"],
+    "name": "block-compressor",
+    "title": "block-compressor"
+  },
+  {
+    "categories": ["device", "plot", "knob"],
+    "name": "block-equalizer",
+    "title": "block-equalizer"
+  },
+  {
+    "categories": ["device", "plot", "knob"],
+    "name": "block-delay",
+    "title": "block-delay"
+  },
+  {
+    "categories": ["device", "plot", "knob"],
+    "name": "block-reverb",
+    "title": "block-reverb"
+  },
+  {
+    "categories": ["device", "plot", "knob"],
+    "name": "block-filter",
+    "title": "block-filter"
+  },
+  {
+    "categories": ["device", "plot", "knob"],
+    "name": "block-distortion",
+    "title": "block-distortion"
+  },
+  {
+    "categories": ["device", "plot", "knob"],
+    "name": "block-chorus",
+    "title": "block-chorus"
   },
   {
     "categories": ["mixer", "fader", "meter", "knob"],

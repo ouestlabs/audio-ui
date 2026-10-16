@@ -4,6 +4,15 @@ import { siteConfig } from "@/lib/config";
 import { getCategoryDocsDescription } from "@/lib/registry";
 
 const CANONICAL_COMPONENT_DOC_SLUGS = [
+  "compressor",
+  "equalizer",
+  "delay",
+  "reverb",
+  "filter",
+  "distortion",
+  "chorus",
+  "pocket-synth",
+  "wave-shaper",
   "envelope",
   "fader",
   "knob",

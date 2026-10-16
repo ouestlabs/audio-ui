@@ -23,7 +23,10 @@ export interface DrumOptions {
 
 const ratio = (tune = 0) => 2 ** (tune / 12);
 
-function createNoiseBuffer(ctx: AudioContext, duration: number): AudioBuffer {
+function createNoiseBuffer(
+  ctx: BaseAudioContext,
+  duration: number
+): AudioBuffer {
   const length = Math.floor(ctx.sampleRate * duration);
   const buffer = ctx.createBuffer(1, length, ctx.sampleRate);
   const noise = Float32Array.from({ length }, () => Math.random() * 2 - 1);
@@ -33,7 +36,7 @@ function createNoiseBuffer(ctx: AudioContext, duration: number): AudioBuffer {
 
 /** Sine oscillator with a fast pitch sweep (150Hz→40Hz) and exponential amplitude decay, a classic 808-style kick. */
 export function triggerKick(
-  ctx: AudioContext,
+  ctx: BaseAudioContext,
   destination: AudioNode,
   time: number,
   { decay = KICK_AMP_DECAY, tune }: DrumOptions = {}
@@ -60,7 +63,7 @@ export function triggerKick(
 
 /** Band-passed noise burst for body plus a short triangle "click" for attack transient. */
 export function triggerSnare(
-  ctx: AudioContext,
+  ctx: BaseAudioContext,
   destination: AudioNode,
   time: number,
   { decay = SNARE_NOISE_DECAY, tune }: DrumOptions = {}
@@ -105,7 +108,7 @@ export function triggerSnare(
 
 /** High-passed noise burst, a closed-hihat-style tick by default; a longer `decay`, such as 0.5 seconds, rings like an open hihat. */
 export function triggerHihat(
-  ctx: AudioContext,
+  ctx: BaseAudioContext,
   destination: AudioNode,
   time: number,
   { decay = HIHAT_DECAY, tune }: DrumOptions = {}

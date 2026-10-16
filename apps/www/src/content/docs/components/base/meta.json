@@ -22,6 +22,15 @@
     "transport",
     "scrubber",
     "---Blocks---",
-    "mixer"
+    "mixer",
+    "compressor",
+    "equalizer",
+    "delay",
+    "reverb",
+    "filter",
+    "distortion",
+    "chorus",
+    "pocket-synth",
+    "wave-shaper"
   ]
 }
