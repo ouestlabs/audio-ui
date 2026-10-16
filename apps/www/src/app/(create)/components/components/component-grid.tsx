@@ -69,12 +69,18 @@ function ComponentGridContent({
 
   if (filteredItems.length === 0) {
     return (
-      <div className="w-full p-3 sm:px-8 sm:py-6 xl:px-10">
+      <div className="flex min-h-[calc(100svh-22rem)] w-full grow p-3 sm:px-8 sm:py-6 xl:px-10">
         <ComponentEmptyState
-          message={
+          className="grow"
+          description={
             hasActiveSearch
-              ? `No components found for "${searchQuery}"`
-              : "No components found in this category"
+              ? "Try another word, such as a device, a control or an effect."
+              : "Nothing is listed here yet."
+          }
+          title={
+            hasActiveSearch
+              ? `No components for “${searchQuery}”`
+              : "No components in this category"
           }
         />
       </div>
