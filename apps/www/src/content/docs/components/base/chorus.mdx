@@ -83,6 +83,18 @@ engine.dispose();
 
 The oscillator's output, scaled by the sweep, is added to the delay time. The sweep is kept inside the delay, so the time never goes negative.
 
+## Synced to the tempo
+
+Switch **Sync** on and the rate is a note value instead of hertz: one cycle of the oscillator for each `1/4`, `1/8t` (a triplet), `1/2d` (dotted) and so on, from 1/32 to a whole note, read against the host's tempo. `1/4` at 120 BPM is 2 Hz, and the rate is held between a cycle in 50 seconds and 40 Hz. The tempo is the host's: give it to the engine with the first state or with any update.
+
+```ts
+const engine = createChorusEngine(ctx, state, { tempo }); // { bpm: 100, beatsPerBar: 4, beatUnit: 4 }
+engine.update(nextState, { tempo: { ...tempo, bpm: 120 } }); // the rate follows
+engine.update(otherState); // no context: the last tempo holds
+```
+
+The panel takes the same tempo as a prop, `tempo`, and draws the oscillator at the rate it really has. With Sync on the rate knob is drawn off, with it off the note list is. The tempo does not come from an agent's tool call: `audioui_chorus_set` can switch Sync on and pick a note, and the host decides the tempo it is read against.
+
 ## The tools
 
 ```ts

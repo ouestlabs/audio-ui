@@ -1,5 +1,6 @@
 "use client";
 
+import { DEFAULT_TEMPO, type Tempo } from "@audio-ui/core/time";
 import { type ReactNode, useMemo } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {
@@ -25,6 +26,8 @@ const MAX_MS = 48;
 const TIME_TICKS = [0.5, 1, 1.5];
 const MS_TICKS = [10, 20, 30, 40];
 const SWITCHES = ["enabled"] as const;
+const SYNCED_OFF = ["rateHz"] as const;
+const FREE_OFF = ["division"] as const;
 const OFF = chorusDevice.parameters
   .map((parameter) => parameter.id)
   .filter((id) => id !== "enabled");
@@ -37,6 +40,8 @@ interface ChorusPanelProps {
   children?: ReactNode;
   className?: string;
   onValueChange: (state: ChorusState) => void;
+  /** The host's tempo, which a synced rate is read against. @default 120 BPM */
+  tempo?: Tempo;
   value: ChorusState;
 }
 
@@ -49,9 +54,14 @@ function ChorusPanel({
   children,
   className,
   onValueChange,
+  tempo = DEFAULT_TEMPO,
   value,
 }: ChorusPanelProps) {
-  const sweep = useMemo(() => chorusSweep(value), [value]);
+  const sweep = useMemo(() => chorusSweep(value, tempo), [tempo, value]);
+  let unused: readonly (typeof OFF)[number][] = OFF;
+  if (value.enabled) {
+    unused = value.sync ? SYNCED_OFF : FREE_OFF;
+  }
   return (
     <DeviceFrame className={cn("h-full", className)}>
       <DeviceHeader
@@ -83,9 +93,9 @@ function ChorusPanel({
           </PlotGraph>
         </Plot>
         <DevicePanel
-          className="grid-cols-4"
+          className="grid-cols-3"
           device={chorusDevice}
-          disabled={value.enabled ? undefined : OFF}
+          disabled={unused}
           exclude={SWITCHES}
           onValueChange={onValueChange}
           value={value}

@@ -1,3 +1,5 @@
+import type { DeviceContext } from "@audio-ui/core/device";
+import { DEFAULT_TEMPO } from "@audio-ui/core/time";
 import {
   PHASER_STAGES,
   type PhaserState,
@@ -12,7 +14,7 @@ export interface PhaserEngine {
   readonly input: AudioNode;
   /** Connect this to the destination, or to the next device. */
   readonly output: AudioNode;
-  update: (state: PhaserState) => void;
+  update: (state: PhaserState, context?: DeviceContext) => void;
 }
 
 /**
@@ -28,8 +30,10 @@ export interface PhaserEngine {
  */
 export function createPhaserEngine(
   ctx: BaseAudioContext,
-  initial: PhaserState
+  initial: PhaserState,
+  context?: DeviceContext
 ): PhaserEngine {
+  let tempo = context?.tempo ?? DEFAULT_TEMPO;
   const input = ctx.createGain();
   const output = ctx.createGain();
   const dry = ctx.createGain();
@@ -73,7 +77,7 @@ export function createPhaserEngine(
     state: PhaserState,
     write: (param: AudioParam, value: number) => void
   ) => {
-    const settings = phaserSettings(state);
+    const settings = phaserSettings(state, tempo);
     oscillator.frequency.value = settings.rate;
     write(dry.gain, settings.dry);
     write(phaserWet.gain, settings.phaserWet);
@@ -115,12 +119,13 @@ export function createPhaserEngine(
     },
     input,
     output,
-    update: (state) => {
+    update: (state, next) => {
+      tempo = next?.tempo ?? tempo;
       set(state, (param, value) =>
         param.setTargetAtTime(value, ctx.currentTime, RAMP_SECONDS)
       );
       oscillator.frequency.setTargetAtTime(
-        phaserSettings(state).rate,
+        phaserSettings(state, tempo).rate,
         ctx.currentTime,
         RAMP_SECONDS
       );

@@ -1,5 +1,6 @@
 "use client";
 
+import { DEFAULT_TEMPO, type Tempo } from "@audio-ui/core/time";
 import { type ReactNode, useMemo } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {
@@ -24,6 +25,8 @@ const WINDOW_SECONDS = 2;
 const TIME_TICKS = [0.5, 1, 1.5];
 const PERCENT_TICKS = [-50, 0, 50];
 const SWITCHES = ["enabled"] as const;
+const SYNCED_OFF = ["rateHz"] as const;
+const FREE_OFF = ["division"] as const;
 const ALL = autoPanDevice.parameters
   .map((parameter) => parameter.id)
   .filter((id) => id !== "enabled");
@@ -36,6 +39,8 @@ interface AutoPanPanelProps {
   children?: ReactNode;
   className?: string;
   onValueChange: (state: AutoPanState) => void;
+  /** The host's tempo, which a synced rate is read against. @default 120 BPM */
+  tempo?: Tempo;
   value: AutoPanState;
 }
 
@@ -47,9 +52,14 @@ function AutoPanPanel({
   children,
   className,
   onValueChange,
+  tempo = DEFAULT_TEMPO,
   value,
 }: AutoPanPanelProps) {
-  const sweep = useMemo(() => autoPanSweep(value), [value]);
+  const sweep = useMemo(() => autoPanSweep(value, tempo), [tempo, value]);
+  let unused: readonly (typeof ALL)[number][] = ALL;
+  if (value.enabled) {
+    unused = value.sync ? SYNCED_OFF : FREE_OFF;
+  }
   return (
     <DeviceFrame className={cn("h-full", className)}>
       <DeviceHeader
@@ -81,9 +91,9 @@ function AutoPanPanel({
           </PlotGraph>
         </Plot>
         <DevicePanel
-          className="grid-cols-4"
+          className="grid-cols-3"
           device={autoPanDevice}
-          disabled={value.enabled ? undefined : ALL}
+          disabled={unused}
           exclude={SWITCHES}
           onValueChange={onValueChange}
           value={value}

@@ -1,3 +1,5 @@
+import type { DeviceContext } from "@audio-ui/core/device";
+import { DEFAULT_TEMPO } from "@audio-ui/core/time";
 import {
   type AutoPanState,
   autoPanSettings,
@@ -11,7 +13,7 @@ export interface AutoPanEngine {
   readonly input: AudioNode;
   /** Connect this to the destination, or to the next device. */
   readonly output: AudioNode;
-  update: (state: AutoPanState) => void;
+  update: (state: AutoPanState, context?: DeviceContext) => void;
 }
 
 /**
@@ -26,8 +28,10 @@ export interface AutoPanEngine {
  */
 export function createAutoPanEngine(
   ctx: BaseAudioContext,
-  initial: AutoPanState
+  initial: AutoPanState,
+  context?: DeviceContext
 ): AutoPanEngine {
+  let tempo = context?.tempo ?? DEFAULT_TEMPO;
   const input = ctx.createGain();
   const output = ctx.createGain();
   const tremolo = ctx.createGain();
@@ -44,7 +48,7 @@ export function createAutoPanEngine(
     state: AutoPanState,
     write: (param: AudioParam, value: number) => void
   ) => {
-    const settings = autoPanSettings(state);
+    const settings = autoPanSettings(state, tempo);
     write(oscillator.frequency, settings.rate);
     write(tremolo.gain, settings.tremoloBase);
     write(tremoloDepth.gain, settings.tremoloDepth);
@@ -73,7 +77,8 @@ export function createAutoPanEngine(
     },
     input,
     output,
-    update: (state) => {
+    update: (state, next) => {
+      tempo = next?.tempo ?? tempo;
       oscillator.type = state.shape;
       set(state, (param, value) =>
         param.setTargetAtTime(value, ctx.currentTime, RAMP_SECONDS)
