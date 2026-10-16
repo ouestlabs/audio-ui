@@ -124,7 +124,7 @@
     },
     "packages/core": {
       "name": "@audio-ui/core",
-      "version": "0.3.0",
+      "version": "0.6.0",
       "devDependencies": {
         "@happy-dom/global-registrator": "^20.10.6",
         "@types/bun": "1.4.2",
@@ -134,9 +134,9 @@
     },
     "packages/ui": {
       "name": "@audio-ui/react",
-      "version": "0.3.2",
+      "version": "0.3.5",
       "dependencies": {
-        "@audio-ui/core": "^0.3.0",
+        "@audio-ui/core": "^0.6.0",
       },
       "devDependencies": {
         "@happy-dom/global-registrator": "^20.10.6",
