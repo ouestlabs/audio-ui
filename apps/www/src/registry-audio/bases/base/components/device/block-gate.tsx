@@ -20,7 +20,9 @@ const MASTER_VOLUME = 0.7;
 const START = {
   external: true,
   floorDb: -70,
-  responseMs: 15,
+  attackMs: 1,
+  holdMs: 20,
+  releaseMs: 80,
   thresholdDb: -24,
 };
 

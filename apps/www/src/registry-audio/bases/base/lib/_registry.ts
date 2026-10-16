@@ -375,7 +375,7 @@ const items: RegistryItem[] = [
     categories: ["lib", "audio", "device"],
     dependencies: ["@audio-ui/core"],
     description:
-      "The gate as a device: a threshold, a floor and a response, the numbers that go on the nodes for a state, the table that turns a level into a gain and the curve a state plays, with no panel and no audio in it.",
+      "The gate as a device: a threshold, a floor, an attack, a hold, a release and a look-ahead, the numbers that go on the nodes for a state, the detector worklet and the curve a state plays, with no panel and no audio in it.",
     files: [
       {
         path: "lib/gate-device.ts",
@@ -391,7 +391,7 @@ const items: RegistryItem[] = [
     categories: ["lib", "audio", "device"],
     dependencies: [],
     description:
-      "A gate on the Web Audio API for a gate state, made of the nodes the browser has: the signal rectified and smoothed is the level, and a table turns it into a gain of the floor under the threshold and 1 above.",
+      "A gate on the Web Audio API for a gate state: a worklet detector reads the key and writes the gain (threshold, attack, hold, release), and a delay in front of the gain gives the look-ahead.",
     files: [
       {
         path: "lib/gate-engine.ts",
