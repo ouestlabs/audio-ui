@@ -1,5 +1,6 @@
 import { MagnifyingGlassIcon } from "@phosphor-icons/react/ssr";
 import type { ReactNode } from "react";
+import { cn } from "@/lib/utils";
 import {
   Empty,
   EmptyContent,
@@ -24,7 +25,7 @@ export function ComponentEmptyState({
   title,
 }: ComponentEmptyStateProps) {
   return (
-    <Empty className={className}>
+    <Empty className={cn("border", className)}>
       <EmptyHeader>
         <EmptyMedia variant="icon">
           <MagnifyingGlassIcon aria-hidden />
