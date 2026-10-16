@@ -211,6 +211,11 @@
   },
   {
     "categories": ["device", "plot", "knob"],
+    "name": "block-transient",
+    "title": "block-transient"
+  },
+  {
+    "categories": ["device", "plot", "knob"],
     "name": "block-redux",
     "title": "block-redux"
   },

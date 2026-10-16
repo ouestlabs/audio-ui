@@ -796,6 +796,28 @@ export const components: RegistryItem[] = [
     categories: ["device", "plot", "knob"],
     dependencies: ["@audio-ui/react"],
     description:
+      "A transient shaper you can plug in: its state, a panel with a handle for the attack and the sustain and an engine that plays it. Play a loop through it and drag the handle: up for more click, left for a shorter ring",
+    files: [
+      {
+        path: "components/device/block-transient.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-transient",
+    registryDependencies: [
+      "@audio-ui/transient-panel",
+      "@audio-ui/transient-device",
+      "@audio-ui/transient-engine",
+      "@audio-ui/play-toggle",
+      "@audio-ui/use-device-loop",
+      "@audio-ui/use-master-bus",
+    ],
+    type: "registry:block",
+  },
+  {
+    categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
       "A redux you can plug in: its state, a panel that draws the stairs the bits make and an engine that plays it. Play a loop through it and take the bits down",
     files: [
       {

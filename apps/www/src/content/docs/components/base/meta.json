@@ -43,6 +43,7 @@
     "overdrive",
     "redux",
     "deesser",
-    "multiband"
+    "multiband",
+    "transient"
   ]
 }

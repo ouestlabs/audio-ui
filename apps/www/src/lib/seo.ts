@@ -23,6 +23,7 @@ const CANONICAL_COMPONENT_DOC_SLUGS = [
   "overdrive",
   "deesser",
   "multiband",
+  "transient",
   "redux",
   "envelope",
   "fader",
