@@ -2,13 +2,13 @@ import type { RegistryItem } from "shadcn/schema";
 
 export const components: RegistryItem[] = [
   {
-    categories: ["synth", "xypad", "device"],
+    categories: ["device", "synth", "xypad"],
     dependencies: ["@audio-ui/react"],
     description:
       "A synth you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file. Press the pad: pitch goes across, the filter cutoff up",
     files: [
       {
-        path: "components/synth/block-pocket-synth.tsx",
+        path: "components/device/block-pocket-synth.tsx",
         type: "registry:block",
       },
     ],

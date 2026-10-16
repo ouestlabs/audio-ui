@@ -75,7 +75,7 @@ interface PocketSynthPanelProps {
  * filter cutoff up), its waveform and filter, and its volume. It is controlled
  * like `DevicePanel`: the state is `value`, and the notes leave through
  * `onNoteOn` and `onNoteOff`, so it plays through whatever engine a host
- * gives it, or none.
+ * gives it, or none. It takes the height it is given: the pad grows to fill it.
  */
 function PocketSynthPanel({
   className,
@@ -117,7 +117,7 @@ function PocketSynthPanel({
 
   return (
     <div
-      className={cn("flex w-full min-w-0 flex-col gap-4", className)}
+      className={cn("flex h-full w-full min-w-0 flex-col gap-4", className)}
       data-slot="pocket-synth-panel"
     >
       <XYPad
