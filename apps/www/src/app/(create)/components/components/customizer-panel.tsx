@@ -1,11 +1,8 @@
 "use client";
 
-import { Popover as PopoverPrimitive } from "@base-ui/react/popover";
 import dynamic from "next/dynamic";
 import * as React from "react";
 
-import { PickerSideProvider } from "@/app/(create)/customizer/picker";
-import { FrameContent, frameClassName } from "@/components/custom/frame";
 import { CustomizerChoicesSkeleton } from "@/components/framed-skeleton";
 import {
   Sheet,
@@ -16,10 +13,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useCustomizer } from "./components-context";
 import { CustomizerSidebarHeader } from "./customizer-sidebar-header";
-import {
-  useIsDesktopCustomizer,
-  useIsMediumScreen,
-} from "./use-is-desktop-customizer";
+import { useIsDesktopCustomizer } from "./use-is-desktop-customizer";
 
 /** Client-only: nuqs + jotai + theme pickers diverge from SSR; avoids hydration errors. */
 const CustomizerSidebarContent = dynamic(
@@ -32,8 +26,6 @@ const CustomizerSidebarContent = dynamic(
     ssr: false,
   }
 );
-
-type CustomizerPanelVariant = "sidebar" | "floating";
 
 /** Full-height bordered aside for the /components layout. */
 function CustomizerPanelSidebar() {
@@ -59,61 +51,6 @@ function CustomizerPanelSidebar() {
         <CustomizerSidebarContent anchorRef={anchorRef} isMobile={false} />
       </div>
     </aside>
-  );
-}
-
-/** Room kept between the popup and the viewport's edges: the header above, a margin elsewhere. */
-/** Always above the trigger: it never flips to its side, however tall it is. */
-const FLOATING_AVOIDANCE = { align: "shift", side: "none" } as const;
-
-const FLOATING_PADDING = { bottom: 12, left: 12, right: 12, top: 64 };
-
-/**
- * A popover opened from the global trigger, which it sits above. It stays
- * where it is while the page behind keeps being used, so each choice shows as
- * it is made, and it takes the height the viewport leaves it from `md` up. Its
- * menus open leftwards, into the page, as it sits against the right edge.
- * Renders inside a `Popover.Root` whose trigger it is anchored to.
- */
-function CustomizerPanelFloating({ animate }: { animate: boolean }) {
-  const isMedium = useIsMediumScreen();
-  const anchorRef = React.useRef<HTMLDivElement | null>(null);
-
-  return (
-    <PopoverPrimitive.Portal>
-      <PopoverPrimitive.Positioner
-        align="end"
-        className="isolate z-40"
-        collisionAvoidance={FLOATING_AVOIDANCE}
-        collisionPadding={FLOATING_PADDING}
-        positionMethod="fixed"
-        side="top"
-        sideOffset={8}
-      >
-        <PopoverPrimitive.Popup
-          aria-label="Customize"
-          className={cn(
-            frameClassName,
-            "w-[calc(100vw-1.5rem)] origin-(--transform-origin) shadow-xl outline-none md:w-64 md:h-[calc(100dvh-8rem)] md:max-h-none",
-            animate &&
-              "data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 data-closed:animate-out data-open:animate-in data-closed:duration-100 data-open:duration-150 motion-reduce:data-closed:animate-none motion-reduce:data-open:animate-none"
-          )}
-          data-slot="customizer-popover"
-          ref={anchorRef}
-        >
-          <PickerSideProvider value="left">
-            <CustomizerSidebarHeader className="border-b-0" />
-            <FrameContent className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
-              <CustomizerSidebarContent
-                anchorRef={anchorRef}
-                isMobile={!isMedium}
-                layout={isMedium ? "list" : "strip"}
-              />
-            </FrameContent>
-          </PickerSideProvider>
-        </PopoverPrimitive.Popup>
-      </PopoverPrimitive.Positioner>
-    </PopoverPrimitive.Portal>
   );
 }
 
@@ -145,19 +82,8 @@ function CustomizerPanelSheet() {
  * (`sidebar` or `frame` styling) at `lg+` and the mobile sheet below, both
  * driven by the surrounding `CustomizerContext`.
  */
-export function CustomizerPanel({
-  animate = true,
-  variant = "sidebar",
-}: {
-  /** Whether the floating panel eases in; off when a key opened it. */
-  animate?: boolean;
-  variant?: CustomizerPanelVariant;
-}) {
+export function CustomizerPanel() {
   const isDesktop = useIsDesktopCustomizer();
-
-  if (variant === "floating") {
-    return <CustomizerPanelFloating animate={animate} />;
-  }
 
   if (!isDesktop) {
     return <CustomizerPanelSheet />;

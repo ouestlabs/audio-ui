@@ -9,8 +9,6 @@ import { cn } from "@/registry/bases/base/lib/utils";
 /** Which side a picker's menu opens on: a panel against the right edge opens them leftwards. */
 const PickerSideContext = createContext<"left" | "right">("right");
 
-const PickerSideProvider = PickerSideContext.Provider;
-
 /** The side for a picker's menu: above its anchor on small screens, else the surrounding panel's. */
 function usePickerSide(isMobile: boolean) {
   const side = use(PickerSideContext);
@@ -295,7 +293,6 @@ export {
   PickerRadioItem,
   PickerSeparator,
   PickerShortcut,
-  PickerSideProvider,
   PickerSub,
   PickerSubContent,
   PickerSubTrigger,

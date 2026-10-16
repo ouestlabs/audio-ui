@@ -264,7 +264,7 @@ export function FramedLayout({
         </InsetPane>
         {/* The choices read the URL: their own boundary keeps the page around them rendered. */}
         <Suspense fallback={<CustomizerSkeleton />}>
-          <CustomizerPanel variant="sidebar" />
+          <CustomizerPanel />
         </Suspense>
       </SidebarProvider>
     </CustomizerContext>
