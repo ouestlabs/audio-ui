@@ -35,6 +35,9 @@
     "wave-shaper",
     "utility",
     "limiter",
-    "gate"
+    "gate",
+    "saturator",
+    "phaser",
+    "auto-pan"
   ]
 }

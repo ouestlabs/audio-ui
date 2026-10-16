@@ -135,7 +135,11 @@ function ChoiceControl({
       </span>
       <div
         aria-label={parameter.label}
-        className="flex flex-wrap justify-center gap-1"
+        className={cn(
+          "justify-center gap-1",
+          // Four options in a column are taller than a knob: they sit two by two.
+          parameter.options.length > 2 ? "grid grid-cols-2" : "flex flex-wrap"
+        )}
         role="group"
       >
         {parameter.options.map((option) => (
