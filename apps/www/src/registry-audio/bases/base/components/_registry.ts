@@ -522,6 +522,50 @@ export const components: RegistryItem[] = [
     type: "registry:block",
   },
   {
+    categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "A distortion you can plug in: its state, a panel that draws its transfer curve and an engine that plays it. Play a loop through it and turn the drive",
+    files: [
+      {
+        path: "components/device/block-distortion.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-distortion",
+    registryDependencies: [
+      "@audio-ui/distortion-panel",
+      "@audio-ui/distortion-device",
+      "@audio-ui/distortion-engine",
+      "@audio-ui/play-toggle",
+      "@audio-ui/use-device-loop",
+      "@audio-ui/use-master-bus",
+    ],
+    type: "registry:block",
+  },
+  {
+    categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "A chorus you can plug in: its state, a panel that draws the sweep of its delay and an engine that plays it. Play a loop through it and turn the rate and the depth",
+    files: [
+      {
+        path: "components/device/block-chorus.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-chorus",
+    registryDependencies: [
+      "@audio-ui/chorus-panel",
+      "@audio-ui/chorus-device",
+      "@audio-ui/chorus-engine",
+      "@audio-ui/play-toggle",
+      "@audio-ui/use-device-loop",
+      "@audio-ui/use-master-bus",
+    ],
+    type: "registry:block",
+  },
+  {
     categories: ["mixer", "fader", "meter", "knob"],
     description:
       "Mixing console: four tracks of a loop with pan, fader, meter, mute and solo, into a master with a stereo meter, every meter reading its real signal",

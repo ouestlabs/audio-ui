@@ -277,6 +277,46 @@ export const audio: RegistryItem[] = [
   },
   {
     categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "The face of the distortion device: its transfer curve against the straight line of a clean sound, over the device knobs.",
+    files: [
+      {
+        path: "audio/panels/distortion-panel.tsx",
+        target: "components/audio-ui/devices/distortion/panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "distortion-panel",
+    registryDependencies: [
+      "@audio-ui/device-panel",
+      "@audio-ui/plot",
+      "@audio-ui/distortion-device",
+    ],
+    type: "registry:ui",
+  },
+  {
+    categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "The face of the chorus device: the delay time as the oscillator sweeps it over two seconds, over the device knobs.",
+    files: [
+      {
+        path: "audio/panels/chorus-panel.tsx",
+        target: "components/audio-ui/devices/chorus/panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "chorus-panel",
+    registryDependencies: [
+      "@audio-ui/device-panel",
+      "@audio-ui/plot",
+      "@audio-ui/chorus-device",
+    ],
+    type: "registry:ui",
+  },
+  {
+    categories: ["device", "plot", "knob"],
     dependencies: ["@audio-ui/react", "@audio-ui/core"],
     description:
       "The face of the equalizer device: the curve it plays with a handle on each band to drag its frequency and gain, an optional live spectrum behind it, over the device's knobs gathered by band.",

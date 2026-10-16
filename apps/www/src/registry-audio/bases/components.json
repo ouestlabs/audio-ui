@@ -150,6 +150,16 @@
     "title": "block-filter"
   },
   {
+    "categories": ["device", "plot", "knob"],
+    "name": "block-distortion",
+    "title": "block-distortion"
+  },
+  {
+    "categories": ["device", "plot", "knob"],
+    "name": "block-chorus",
+    "title": "block-chorus"
+  },
+  {
     "categories": ["mixer", "fader", "meter", "knob"],
     "name": "block-mixer",
     "title": "block-mixer"

@@ -238,6 +238,70 @@ const items: RegistryItem[] = [
     type: "registry:lib",
   },
   {
+    categories: ["lib", "audio", "device"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "The distortion as a device: a drive, a tone, a mix and an output level, the numbers that go on the nodes for a state, the soft clip and the transfer curve a state plays, with no panel and no audio in it.",
+    files: [
+      {
+        path: "lib/distortion-device.ts",
+        target: "components/audio-ui/devices/distortion/device.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "distortion-device",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device"],
+    dependencies: [],
+    description:
+      "A distortion on the Web Audio API for a distortion state: a drive gain into a fixed soft-clip table at 4x oversampling, a tone filter, mixed with the clean sound at an output level, moving without a click.",
+    files: [
+      {
+        path: "lib/distortion-engine.ts",
+        target: "components/audio-ui/devices/distortion/engine.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "distortion-engine",
+    registryDependencies: ["@audio-ui/distortion-device"],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "The chorus as a device: a rate, a depth, a delay and a mix, the numbers that go on the nodes for a state and the sweep of the delay time, with no panel and no audio in it.",
+    files: [
+      {
+        path: "lib/chorus-device.ts",
+        target: "components/audio-ui/devices/chorus/device.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "chorus-device",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device"],
+    dependencies: [],
+    description:
+      "A chorus on the Web Audio API for a chorus state: a short delay whose time an oscillator sweeps, mixed with the dry sound, moving without a click.",
+    files: [
+      {
+        path: "lib/chorus-engine.ts",
+        target: "components/audio-ui/devices/chorus/engine.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "chorus-engine",
+    registryDependencies: ["@audio-ui/chorus-device"],
+    type: "registry:lib",
+  },
+  {
     categories: ["lib", "audio", "web-audio"],
     dependencies: [],
     description:
