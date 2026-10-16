@@ -1,5 +1,6 @@
 import { clamp } from "../../shared/math.ts";
 import { type ParameterScaleProp, resolveScale } from "../../value/scale.ts";
+import type { Tempo } from "../time/tempo.ts";
 
 /**
  * A device: an effect or an instrument as a set of named parameters, with no
@@ -87,6 +88,13 @@ export interface DeviceDefinition<
   id: string;
   /** Whether it processes sound or makes it. @default "effect" */
   kind?: "effect" | "instrument";
+  /**
+   * How long the device delays the sound it processes for a state, in seconds,
+   * at a sample rate: what a host that compensates latency needs to know. A
+   * look-ahead is a time and an oversampling filter a number of samples, hence
+   * the sample rate. Leave it out for a device that adds none.
+   */
+  latency?: (state: DeviceState<Parameters>, sampleRate: number) => number;
   name: string;
   /**
    * What a note of this instrument is made of, as numbers with a range: a pitch
@@ -158,7 +166,16 @@ export interface DeviceApplied<State> {
  */
 export interface DeviceBinding<State> {
   dispose: () => void;
-  update: (state: State) => void;
+  update: (state: State, context?: DeviceContext) => void;
+}
+
+/**
+ * What the host knows and the device does not: the tempo a time parameter that
+ * follows it is read against. Given with each `update`; a binding keeps the
+ * last one it was given, and a host that has no tempo gives none.
+ */
+export interface DeviceContext {
+  tempo: Tempo;
 }
 
 export interface Device<Parameters extends readonly ParameterDescriptor[]> {
@@ -189,6 +206,8 @@ export interface Device<Parameters extends readonly ParameterDescriptor[]> {
   format: (id: Parameters[number]["id"], value: ParameterValue) => string;
   readonly id: string;
   readonly kind: "effect" | "instrument";
+  /** How long the device delays the sound for a state, in seconds, at a sample rate. 0 for a device that adds none. */
+  latency: (state: DeviceState<Parameters>, sampleRate: number) => number;
   readonly name: string;
   /** Where a value sits along its parameter's travel, from 0 to 1, on its scale. A toggle is 0 or 1, a choice its place in the list. */
   normalize: (id: Parameters[number]["id"], value: ParameterValue) => number;
@@ -494,6 +513,8 @@ export function defineDevice<
     },
     id: definition.id,
     kind: definition.kind ?? "effect",
+    latency: (state, sampleRate) =>
+      Math.max(0, definition.latency?.(state, sampleRate) ?? 0),
     name: definition.name,
     normalize: (id, value) => {
       const parameter = byId.get(id);

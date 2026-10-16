@@ -189,3 +189,45 @@ export function barLabelInterval(
   }
   return interval;
 }
+
+/** A straight note value, in the form a time parameter lists it. */
+const SYNCED_NOTES = [32, 16, 8, 4, 2, 1] as const;
+
+/** Three halves: a dotted note is its straight one and half again. */
+export const DOTTED_FACTOR = 3 / 2;
+
+/**
+ * The note values a time parameter that follows the tempo can take, shortest
+ * first: `1/16` is a sixteenth note, `1/8t` a triplet eighth (two thirds of
+ * it) and `1/8d` a dotted eighth (one and a half times it). The `value` goes in
+ * a device's state, the `label` is what a panel shows.
+ */
+export const SYNCED_DIVISIONS = SYNCED_NOTES.flatMap((note) => {
+  const name = note === 1 ? "1/1" : `1/${note}`;
+  return [
+    { label: `${name} triplet`, value: `${name}t` },
+    { label: name, value: name },
+    { label: `${name} dotted`, value: `${name}d` },
+  ];
+});
+
+export type SyncedDivision = string;
+
+/**
+ * How long a synced note value lasts at `tempo`, in seconds: `1/8` an eighth,
+ * `1/8t` its triplet, `1/8d` its dotted one. A value that is not in
+ * `SYNCED_DIVISIONS` is read as a quarter note, so a stale state still sounds
+ * on the beat instead of at zero.
+ */
+export function syncedSeconds(division: SyncedDivision, tempo: Tempo): number {
+  const match = /^1\/(\d+)([td]?)$/.exec(division);
+  const note = match ? Number(match[1]) : 4;
+  const suffix = match?.[2] ?? "";
+  let factor = 1;
+  if (suffix === "t") {
+    factor = TRIPLET_FACTOR;
+  } else if (suffix === "d") {
+    factor = DOTTED_FACTOR;
+  }
+  return (4 / note) * secondsPerQuarter(tempo) * factor;
+}

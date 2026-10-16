@@ -1,5 +1,6 @@
 export {
   barLabelInterval,
+  DOTTED_FACTOR,
   divisionSeconds,
   type FixedGridDivision,
   GRID_DIVISIONS,
@@ -10,6 +11,9 @@ export {
   METRONOME_RHYTHMS,
   type MetronomeRhythm,
   metronomeRhythmSeconds,
+  SYNCED_DIVISIONS,
+  type SyncedDivision,
+  syncedSeconds,
   TRIPLET_FACTOR,
 } from "./grid.ts";
 export {

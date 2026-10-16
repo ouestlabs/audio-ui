@@ -166,3 +166,31 @@ describe("playNote", () => {
     expect(instrument.noteOff).toHaveBeenCalledTimes(1);
   });
 });
+
+describe("latency and context", () => {
+  const delayed = defineDevice({
+    description: "A device that looks ahead.",
+    id: "audioui.test-latency",
+    latency: (state, sampleRate) => 0.006 + (state.deep ? 192 / sampleRate : 0),
+    name: "Look-ahead",
+    parameters: [{ default: false, id: "deep", kind: "toggle", label: "Deep" }],
+  });
+
+  test("a device that declares a latency reports it for a state and a sample rate", () => {
+    expect(delayed.latency({ deep: false }, 48_000)).toBeCloseTo(0.006, 9);
+    expect(delayed.latency({ deep: true }, 48_000)).toBeCloseTo(0.01, 9);
+    expect(delayed.latency({ deep: true }, 96_000)).toBeCloseTo(0.008, 9);
+  });
+
+  test("a device that does not declare one adds none, and a negative one is none", () => {
+    expect(synth.latency(synth.defaults(), 48_000)).toBe(0);
+    const odd = defineDevice({
+      description: "x",
+      id: "audioui.odd",
+      latency: () => -1,
+      name: "Odd",
+      parameters: [{ default: 1, id: "a", label: "A", max: 2, min: 0 }],
+    });
+    expect(odd.latency(odd.defaults(), 48_000)).toBe(0);
+  });
+});

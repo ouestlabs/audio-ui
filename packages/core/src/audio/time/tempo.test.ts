@@ -6,9 +6,11 @@ import {
   DEFAULT_TEMPO,
   describeBarsBeats,
   microsecondsPerQuarterNoteToBpm,
+  SYNCED_DIVISIONS,
   secondsPerBar,
   secondsPerBeat,
   secondsPerQuarter,
+  syncedSeconds,
 } from "./index.ts";
 
 describe("MIDI tempo", () => {
@@ -56,5 +58,44 @@ describe("a tempo that is not one", () => {
         sixteenth: 1,
       });
     }
+  });
+});
+
+describe("synced note values", () => {
+  const tempo = { beatsPerBar: 4, beatUnit: 4, bpm: 120 };
+
+  test("a quarter is half a second at 120 BPM, an eighth a quarter of one", () => {
+    expect(syncedSeconds("1/4", tempo)).toBeCloseTo(0.5, 9);
+    expect(syncedSeconds("1/8", tempo)).toBeCloseTo(0.25, 9);
+    expect(syncedSeconds("1/1", tempo)).toBeCloseTo(2, 9);
+  });
+
+  test("a triplet is two thirds of its note and a dotted note one and a half", () => {
+    expect(syncedSeconds("1/8t", tempo)).toBeCloseTo((0.25 * 2) / 3, 9);
+    expect(syncedSeconds("1/8d", tempo)).toBeCloseTo(0.375, 9);
+  });
+
+  test("it follows the tempo", () => {
+    expect(syncedSeconds("1/4", { ...tempo, bpm: 60 })).toBeCloseTo(1, 9);
+    expect(syncedSeconds("1/16", { ...tempo, bpm: 240 })).toBeCloseTo(
+      0.0625,
+      9
+    );
+  });
+
+  test("every listed value reads, and a stale one falls back to a quarter", () => {
+    for (const { value } of SYNCED_DIVISIONS) {
+      expect(syncedSeconds(value, tempo)).toBeGreaterThan(0);
+    }
+    expect(syncedSeconds("1/7x", tempo)).toBeCloseTo(0.5, 9);
+    expect(new Set(SYNCED_DIVISIONS.map(({ value }) => value)).size).toBe(
+      SYNCED_DIVISIONS.length
+    );
+  });
+
+  test("the list starts at the shortest note and ends at the longest, each in three forms", () => {
+    expect(SYNCED_DIVISIONS[0]?.value).toBe("1/32t");
+    expect(SYNCED_DIVISIONS.at(-1)?.value).toBe("1/1d");
+    expect(SYNCED_DIVISIONS).toHaveLength(18);
   });
 });
