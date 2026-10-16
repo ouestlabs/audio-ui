@@ -20,12 +20,15 @@ export interface LimiterEngine {
  * A limiter on the Web Audio API for a `LimiterState`:
  *
  * ```
- * input → gain → compressor (ratio 20, no knee) → trim → wet ──┐
- *       → bypass ──────────────────────────────────────────────┴→ output
+ * input → gain → compressor (ratio 20, no knee) → trim → clip → wet ──┐
+ *       → bypass ─────────────────────────────────────────────────────┴→ output
  * ```
  *
  * The node adds a make-up of its own that cannot be turned off: the trim
- * takes it back out. Off, the signal goes round it.
+ * takes it back out. A ratio of 20 is not a wall: a loud enough signal still
+ * gets over the ceiling, so a final hard clip, oversampled 4x, guarantees that
+ * no sample is above it. That is a sample peak, not an inter-sample (true)
+ * peak. Off, the signal goes round it.
  */
 export function createLimiterEngine(
   ctx: BaseAudioContext,
@@ -36,15 +39,24 @@ export function createLimiterEngine(
   const gain = ctx.createGain();
   const limiter = ctx.createDynamicsCompressor();
   const trim = ctx.createGain();
+  const scale = ctx.createGain();
+  const clip = ctx.createWaveShaper();
+  const unscale = ctx.createGain();
   const wet = ctx.createGain();
   const bypass = ctx.createGain();
   limiter.knee.value = 0;
   limiter.ratio.value = 20;
   limiter.attack.value = 0;
+  // Two points, the line from -1 to 1: a value past either end is held at it.
+  clip.curve = new Float32Array([-1, 1]);
+  clip.oversample = "4x";
   input
     .connect(gain)
     .connect(limiter)
     .connect(trim)
+    .connect(scale)
+    .connect(clip)
+    .connect(unscale)
     .connect(wet)
     .connect(output);
   input.connect(bypass).connect(output);
@@ -54,6 +66,8 @@ export function createLimiterEngine(
   limiter.threshold.value = first.threshold;
   limiter.release.value = first.release;
   trim.gain.value = first.trim;
+  scale.gain.value = 1 / first.ceiling;
+  unscale.gain.value = first.ceiling;
   wet.gain.value = first.wet;
   bypass.gain.value = 1 - first.wet;
 
@@ -62,7 +76,18 @@ export function createLimiterEngine(
 
   return {
     dispose: () => {
-      for (const node of [input, gain, limiter, trim, wet, bypass, output]) {
+      for (const node of [
+        input,
+        gain,
+        limiter,
+        trim,
+        scale,
+        clip,
+        unscale,
+        wet,
+        bypass,
+        output,
+      ]) {
         node.disconnect();
       }
     },
@@ -77,6 +102,8 @@ export function createLimiterEngine(
       follow(limiter.threshold, settings.threshold);
       follow(limiter.release, settings.release);
       follow(trim.gain, settings.trim);
+      follow(scale.gain, 1 / settings.ceiling);
+      follow(unscale.gain, settings.ceiling);
       follow(wet.gain, settings.wet);
       follow(bypass.gain, 1 - settings.wet);
     },
