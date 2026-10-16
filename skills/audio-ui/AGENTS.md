@@ -1436,6 +1436,8 @@ A host that brings its own engine can measure it against the panel: `measureResp
 
 A time parameter that follows the tempo is a `choice` of `SYNCED_DIVISIONS` from `@audio-ui/core/time` (`1/8`, `1/8t` triplet, `1/8d` dotted) beside a toggle; the host gives the engine its tempo as `update(state, { tempo })`, never as a tool parameter, and `syncedSeconds(division, tempo)` is how long one lasts. A device that delays the sound declares `latency(state, sampleRate)` in seconds, and `device.latency(state, sampleRate)` is what a host that compensates latency asks for.
 
+A device that listens to a second signal (a gate opened by a kick) declares `sidechain: true` in `defineDevice`, and its engine has a `sidechain` input to connect the key to (`SidechainBinding`). The key is a signal, never a parameter: the state holds only the switch that says to listen to it, and an agent can switch it on but the host routes the signal.
+
 ### 7.5 apply is pure and re-clamps
 
 **Impact: MEDIUM (every tool call yields a valid state)**

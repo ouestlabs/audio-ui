@@ -20,7 +20,15 @@ import {
   SelectValue,
 } from "@/registry/bases/base/ui/select";
 import { Toggle } from "@/registry/bases/base/ui/toggle";
+import {
+  FilterTypeSelect,
+  isFilterType,
+} from "@/registry-audio/bases/base/audio/elements/filter-type-select";
 import { Knob } from "@/registry-audio/bases/base/audio/elements/knob";
+import {
+  isWaveform,
+  WaveformSelect,
+} from "@/registry-audio/bases/base/audio/elements/waveform-select";
 
 type AnyDevice = Device<readonly ParameterDescriptor[]>;
 type AnyState = Record<string, ParameterValue>;
@@ -150,57 +158,83 @@ function ChoiceControl({
       ),
     [device, onValueChange, parameter.id, value]
   );
+  let control: ReactNode;
+  if (parameter.options.every((option) => isWaveform(option.value))) {
+    // A choice of waveforms is drawn as the waves, not named.
+    control = (
+      <WaveformSelect
+        aria-label={parameter.label}
+        className="grid w-auto grid-cols-2 gap-1"
+        disabled={disabled}
+        onValueChange={pick}
+        options={parameter.options}
+        value={typeof current === "string" ? current : parameter.default}
+      />
+    );
+  } else if (parameter.options.every((option) => isFilterType(option.value))) {
+    // A choice of filter types is drawn as the responses, not named.
+    control = (
+      <FilterTypeSelect
+        aria-label={parameter.label}
+        className="grid w-auto grid-cols-2 gap-1"
+        disabled={disabled}
+        onValueChange={pickFromList}
+        options={parameter.options}
+        value={typeof current === "string" ? current : parameter.default}
+      />
+    );
+  } else if (parameter.options.length > MAX_BUTTONS) {
+    control = (
+      <Select
+        disabled={disabled}
+        items={parameter.options}
+        onValueChange={pickFromList}
+        value={typeof current === "string" ? current : parameter.default}
+      >
+        <SelectTrigger aria-label={parameter.label} className="w-28" size="sm">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            {parameter.options.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectGroup>
+        </SelectContent>
+      </Select>
+    );
+  } else {
+    control = (
+      <div
+        aria-label={parameter.label}
+        className={cn(
+          "justify-center gap-1",
+          // Four options in a column are taller than a knob: they sit two by two.
+          parameter.options.length > 2 ? "grid grid-cols-2" : "flex flex-wrap"
+        )}
+        role="group"
+      >
+        {parameter.options.map((option) => (
+          <ChoiceOption
+            disabled={disabled}
+            key={option.value}
+            label={option.label}
+            onPick={pick}
+            pressed={current === option.value}
+            value={option.value}
+          />
+        ))}
+      </div>
+    );
+  }
   return (
     <div className="flex flex-col items-center gap-1.5">
       <span aria-hidden="true" className="text-muted-foreground text-xs">
         {parameter.label}
       </span>
-      {parameter.options.length > MAX_BUTTONS ? (
-        <Select
-          disabled={disabled}
-          items={parameter.options}
-          onValueChange={pickFromList}
-          value={typeof current === "string" ? current : parameter.default}
-        >
-          <SelectTrigger
-            aria-label={parameter.label}
-            className="w-28"
-            size="sm"
-          >
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              {parameter.options.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
-      ) : (
-        <div
-          aria-label={parameter.label}
-          className={cn(
-            "justify-center gap-1",
-            // Four options in a column are taller than a knob: they sit two by two.
-            parameter.options.length > 2 ? "grid grid-cols-2" : "flex flex-wrap"
-          )}
-          role="group"
-        >
-          {parameter.options.map((option) => (
-            <ChoiceOption
-              disabled={disabled}
-              key={option.value}
-              label={option.label}
-              onPick={pick}
-              pressed={current === option.value}
-              value={option.value}
-            />
-          ))}
-        </div>
-      )}
+      {control}
     </div>
   );
 }

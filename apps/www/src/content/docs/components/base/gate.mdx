@@ -83,6 +83,19 @@ engine.dispose();
 
 The browser has no gate node, so the engine measures the level with the nodes it has: the signal rectified and smoothed is the level, and a table turns it into a gain of the floor under the threshold and 1 above. The response sets the smoothing, so a short one follows the peaks and a long one the average, and the gate opens and closes at the same speed. There is no hold and no sidechain.
 
+## The key
+
+The gate takes a second signal, a key, besides the one it processes. Switch **Key** on and its level is the one of the signal connected to `engine.sidechain`: a kick can open a held chord, so the chord pumps on the beat. The key is only listened to, never heard, and it is not a parameter: the state holds the switch, the host routes the signal.
+
+```ts
+const engine = createGateEngine(ctx, { ...state, external: true });
+chord.connect(engine.input);
+kick.connect(engine.sidechain); // listened to, not heard
+engine.output.connect(ctx.destination);
+```
+
+The device says it takes one: `gateDevice.sidechain` is `true`, and so is `describe().sidechain`, so a host knows to route something to it and an agent can be told. With the key on, what the gate does to the signal depends on the other signal, so the panel does not draw the transfer curve; the threshold is a level of the key. The block starts keyed: a held chord opened by the kick of the loop. There is no hold and no look-ahead, so a key that arrives with the signal can cut the start of its attack.
+
 ## The tools
 
 ```ts

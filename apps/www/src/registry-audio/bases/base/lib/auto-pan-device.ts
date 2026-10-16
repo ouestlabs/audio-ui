@@ -35,6 +35,7 @@ export const autoPanDevice = defineDevice({
       options: [
         { label: "Sine", value: "sine" },
         { label: "Triangle", value: "triangle" },
+        { label: "Saw", value: "sawtooth" },
         { label: "Square", value: "square" },
       ],
     },
@@ -84,6 +85,10 @@ export function autoPanWave(shape: AutoPanState["shape"], phase: number) {
   const cycle = phase - Math.floor(phase);
   if (shape === "square") {
     return cycle < 0.5 ? 1 : -1;
+  }
+  if (shape === "sawtooth") {
+    // A ramp up from -1 to 1, then back at once, as the node's own sawtooth.
+    return 2 * cycle - 1;
   }
   if (shape === "triangle") {
     return cycle < 0.5 ? 4 * cycle - 1 : 3 - 4 * cycle;

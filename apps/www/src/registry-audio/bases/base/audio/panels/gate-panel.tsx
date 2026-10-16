@@ -42,6 +42,9 @@ interface GatePanelProps {
 
 /**
  * The face of the gate device: its transfer curve against the straight line of a clean sound, with a handle on the threshold to drag across, over the knobs.
+ * With the key on, what the gate does to the signal depends on the other
+ * signal, so the curve is not drawn: the plot keeps the threshold, which is a
+ * level of the key then.
  * Controlled like `DevicePanel`, which it uses for the knobs. Its children sit
  * at the end of the title bar.
  */
@@ -72,7 +75,9 @@ function GatePanel({
         data-slot="gate-panel"
       >
         <Plot
-          aria-label="Transfer curve"
+          aria-label={
+            value.external ? "Threshold of the key" : "Transfer curve"
+          }
           className="min-h-40 grow"
           maxX={MAX_DB}
           maxY={MAX_DB}
@@ -84,16 +89,18 @@ function GatePanel({
             y={{ ticks: DB_TICKS.slice(0, 2) }}
           />
           <PlotGraph>
-            <PlotCurve
-              className="stroke-border [stroke-dasharray:4_4]"
-              fn={UNITY}
-            />
+            {value.external ? null : (
+              <PlotCurve
+                className="stroke-border [stroke-dasharray:4_4]"
+                fn={UNITY}
+              />
+            )}
             <PlotLine
               axis="x"
               className="stroke-foreground/40"
               value={value.thresholdDb}
             />
-            <PlotCurve fn={curve} />
+            {value.external ? null : <PlotCurve fn={curve} />}
           </PlotGraph>
           {value.enabled ? (
             <PlotHandle

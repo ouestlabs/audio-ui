@@ -9,15 +9,8 @@ import {
 import type { Source } from "@audio-ui/react";
 import { type ReactNode, useCallback, useMemo, useState } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/registry/bases/base/ui/select";
 import { Toggle } from "@/registry/bases/base/ui/toggle";
+import { FilterTypeSelect } from "@/registry-audio/bases/base/audio/elements/filter-type-select";
 import {
   Plot,
   PlotArea,
@@ -62,7 +55,7 @@ const BAND_IDS: ParameterId[][] = EQUALIZER_BANDS.map((band) => [
   band.db,
   band.q,
 ]);
-/** What a band can be, for the list under its number. */
+/** What a band can be, as the buttons beside its number. */
 const FILTER_ITEMS =
   equalizerDevice
     .describe()
@@ -203,7 +196,7 @@ function EqualizerPanel({
     },
     [picked, onValueChange, value]
   );
-  // Two rows of knobs from one device: the picked picked, and the output apart.
+  // Two rows of knobs from one device: the one picked, and the output apart.
   const hiddenFromBand = useMemo(
     () => ALL_IDS.filter((id) => !BAND_IDS[selected]?.includes(id)),
     [selected]
@@ -274,29 +267,14 @@ function EqualizerPanel({
               selected={index === selected}
             />
           ))}
-          <Select
+          <FilterTypeSelect
+            aria-label={`${BAND_NAMES[selected]} filter type`}
+            className="ms-auto w-auto"
             disabled={!value.enabled}
-            items={FILTER_ITEMS}
             onValueChange={pickType}
+            options={FILTER_ITEMS}
             value={type}
-          >
-            <SelectTrigger
-              aria-label={`${BAND_NAMES[selected]} filter type`}
-              className="ms-auto w-28"
-              size="sm"
-            >
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                {FILTER_ITEMS.map((item) => (
-                  <SelectItem key={item.value} value={item.value}>
-                    {item.label}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+          />
         </div>
         <div className="grid grid-cols-[1fr_auto] items-start gap-x-4">
           <DevicePanel
