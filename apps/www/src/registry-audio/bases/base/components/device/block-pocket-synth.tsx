@@ -54,7 +54,7 @@ export default function BlockPocketSynth() {
   const release = useCallback(() => engine?.noteOff(), [engine]);
 
   return (
-    <div className="h-full w-full min-w-0">
+    <div className="cn-audio-panel h-full w-full min-w-0">
       <PocketSynthPanel
         onNoteOff={release}
         onNoteOn={play}
