@@ -85,7 +85,7 @@ The drive is a gain before the table of the curve, so turning it never rebuilds 
 
 ## Latency
 
-The shaper oversamples 4x, which delays the signal by 4 ms in Chrome (192 samples). The dry path waits as long, so a partial mix does not comb; the device then has a latency of 4 ms to report to a host. The number was measured in Chrome and the specification does not give it, so [measure it](/measurements) in another browser.
+The shaper oversamples 4x, which delays the signal by 4 ms in Chrome (192 samples). The dry path waits as long, so a partial mix does not comb; the device then has a latency of 4 ms to report to a host. The number was measured in Chrome and the specification does not give it, so measure it in another browser with `measureLatency` of `device-measure`.
 
 ## The tools
 
