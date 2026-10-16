@@ -436,6 +436,66 @@ export const audio: RegistryItem[] = [
   },
   {
     categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "The face of the channel EQ device: the curve it plays with a handle on the mid band and an optional live spectrum, over the shelf knobs and the high-pass switch.",
+    files: [
+      {
+        path: "audio/panels/channel-eq-panel.tsx",
+        target: "components/audio-ui/devices/channel-eq/panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "channel-eq-panel",
+    registryDependencies: [
+      "@audio-ui/device-panel",
+      "@audio-ui/plot",
+      "@audio-ui/channel-eq-device",
+    ],
+    type: "registry:ui",
+  },
+  {
+    categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "The face of the overdrive device: the band that reaches the clip with a handle on its centre, over the device knobs.",
+    files: [
+      {
+        path: "audio/panels/overdrive-panel.tsx",
+        target: "components/audio-ui/devices/overdrive/panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "overdrive-panel",
+    registryDependencies: [
+      "@audio-ui/device-panel",
+      "@audio-ui/plot",
+      "@audio-ui/overdrive-device",
+    ],
+    type: "registry:ui",
+  },
+  {
+    categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "The face of the redux device: the stairs the bits make against the straight line of a clean sound, over the device knobs.",
+    files: [
+      {
+        path: "audio/panels/redux-panel.tsx",
+        target: "components/audio-ui/devices/redux/panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "redux-panel",
+    registryDependencies: [
+      "@audio-ui/device-panel",
+      "@audio-ui/plot",
+      "@audio-ui/redux-device",
+    ],
+    type: "registry:ui",
+  },
+  {
+    categories: ["device", "plot", "knob"],
     dependencies: ["@audio-ui/react", "@audio-ui/core"],
     description:
       "The face of the equalizer device: the curve it plays with a handle on each band to drag its frequency and gain, an optional live spectrum behind it, over the device's knobs gathered by band.",

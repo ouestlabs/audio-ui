@@ -38,6 +38,9 @@
     "gate",
     "saturator",
     "phaser",
-    "auto-pan"
+    "auto-pan",
+    "channel-eq",
+    "overdrive",
+    "redux"
   ]
 }

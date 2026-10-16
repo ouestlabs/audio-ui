@@ -494,6 +494,102 @@ const items: RegistryItem[] = [
     type: "registry:lib",
   },
   {
+    categories: ["lib", "audio", "device"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "The channel EQ as a device: a low shelf, a sweepable mid bell, a high shelf, a high-pass switch and an output level, their filters as a state describes them and the curve a state plays, with no panel and no audio in it.",
+    files: [
+      {
+        path: "lib/channel-eq-device.ts",
+        target: "components/audio-ui/devices/channel-eq/device.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "channel-eq-device",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device"],
+    dependencies: [],
+    description:
+      "A channel EQ on the Web Audio API for a channel EQ state: a high-pass, a low shelf, a mid bell and a high shelf in series with an output trim, the same filters its curve draws, moving without a click.",
+    files: [
+      {
+        path: "lib/channel-eq-engine.ts",
+        target: "components/audio-ui/devices/channel-eq/engine.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "channel-eq-engine",
+    registryDependencies: ["@audio-ui/channel-eq-device"],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "The overdrive as a device: a band-pass before a soft clip with a drive, a tone and a mix, the numbers that go on the nodes for a state and the band that reaches the clip, with no panel and no audio in it.",
+    files: [
+      {
+        path: "lib/overdrive-device.ts",
+        target: "components/audio-ui/devices/overdrive/device.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "overdrive-device",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device"],
+    dependencies: [],
+    description:
+      "An overdrive on the Web Audio API for an overdrive state: a band-pass, a drive gain, a soft-clip table at 4x oversampling and a tone filter, mixed with the clean sound, moving without a click.",
+    files: [
+      {
+        path: "lib/overdrive-engine.ts",
+        target: "components/audio-ui/devices/overdrive/engine.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "overdrive-engine",
+    registryDependencies: ["@audio-ui/overdrive-device"],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "The redux as a device: a number of bits, a downsample factor and a mix, the numbers that go on the nodes for a state, the stairs of the quantizer and the source of the sample-hold worklet, with no panel and no audio in it.",
+    files: [
+      {
+        path: "lib/redux-device.ts",
+        target: "components/audio-ui/devices/redux/device.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "redux-device",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device"],
+    dependencies: [],
+    description:
+      "A redux on the Web Audio API for a redux state: a sample hold in an AudioWorklet loaded from a blob and a quantizer table for the bits, mixed with the clean sound; the bits are crushed at once and the hold joins when the worklet is ready.",
+    files: [
+      {
+        path: "lib/redux-engine.ts",
+        target: "components/audio-ui/devices/redux/engine.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "redux-engine",
+    registryDependencies: ["@audio-ui/redux-device"],
+    type: "registry:lib",
+  },
+  {
     categories: ["lib", "audio", "web-audio"],
     dependencies: [],
     description:
