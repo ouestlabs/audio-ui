@@ -42,9 +42,9 @@ interface GatePanelProps {
 
 /**
  * The face of the gate device: its transfer curve against the straight line of a clean sound, with a handle on the threshold to drag across, over the knobs.
- * With the key on, what the gate does to the signal depends on the other
+ * With the sidechain on, what the gate does to the signal depends on the other
  * signal, so the curve is not drawn: the plot keeps the threshold, which is a
- * level of the key then.
+ * level of the sidechain then.
  * Controlled like `DevicePanel`, which it uses for the knobs. Its children sit
  * at the end of the title bar.
  */
@@ -76,7 +76,7 @@ function GatePanel({
       >
         <Plot
           aria-label={
-            value.external ? "Threshold of the key" : "Transfer curve"
+            value.external ? "Threshold of the sidechain" : "Transfer curve"
           }
           className="h-28 min-h-24 grow"
           maxX={MAX_DB}

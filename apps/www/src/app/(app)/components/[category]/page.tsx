@@ -7,6 +7,7 @@ import {
   ComponentCategorySeoContent,
 } from "@/app/(create)/components/components/component-category-seo-content";
 import { ComponentDocsLink } from "@/app/(create)/components/components/component-docs-link";
+import { HideDuringSearch } from "@/app/(create)/components/components/hide-during-search";
 import { GridSkeleton } from "@/components/grid-skeleton";
 import { JsonLd } from "@/components/json-ld";
 import { siteConfig } from "@/lib/config";
@@ -106,6 +107,30 @@ export default async function CategoryComponentsPage({
         })),
       }
     : null;
+  const header = (
+    <section>
+      <div className="w-full px-6 pt-8 pb-6 sm:px-8 xl:px-10">
+        <div className="flex w-full flex-wrap items-end justify-between gap-3">
+          <h1 className="mt-3 min-w-0 flex-1 font-bold text-balanc text-xl sm:text-3xl">
+            {seo.title}
+          </h1>
+          <ComponentDocsLink
+            slug={
+              categories.find((item) => item.name === normalized)?.docs ??
+              normalized
+            }
+          />
+        </div>
+        {seo.intro ? <ComponentCategoryHeroIntro intro={seo.intro} /> : null}
+      </div>
+    </section>
+  );
+  const footer = (
+    <>
+      <ComponentCategorySeoContent seo={seo} />
+      <ComponentCategoryPager currentCategory={normalized} />
+    </>
+  );
   return (
     <>
       <JsonLd
@@ -116,27 +141,15 @@ export default async function CategoryComponentsPage({
         ])}
       />
       {faqJsonLd ? <JsonLd data={faqJsonLd} /> : null}
-      <section>
-        <div className="w-full px-6 pt-8 pb-6 sm:px-8 xl:px-10">
-          <div className="flex w-full flex-wrap items-end justify-between gap-3">
-            <h1 className="mt-3 min-w-0 flex-1 font-bold text-balanc text-xl sm:text-3xl">
-              {seo.title}
-            </h1>
-            <ComponentDocsLink
-              slug={
-                categories.find((item) => item.name === normalized)?.docs ??
-                normalized
-              }
-            />
-          </div>
-          {seo.intro ? <ComponentCategoryHeroIntro intro={seo.intro} /> : null}
-        </div>
-      </section>
+      <Suspense fallback={header}>
+        <HideDuringSearch results>{header}</HideDuringSearch>
+      </Suspense>
       <Suspense fallback={<GridSkeleton count={4} />}>
         <CategoryPageContent catalogItems={catalogItems} />
       </Suspense>
-      <ComponentCategorySeoContent seo={seo} />
-      <ComponentCategoryPager currentCategory={normalized} />
+      <Suspense fallback={footer}>
+        <HideDuringSearch>{footer}</HideDuringSearch>
+      </Suspense>
     </>
   );
 }

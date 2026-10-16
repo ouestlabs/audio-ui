@@ -9,8 +9,9 @@ import {
 } from "@/app/(create)/lib/search-params";
 import { ComponentUpdateIndicator } from "@/components/component-update-indicator";
 import { SidebarGroup, SidebarGroupContent } from "@/components/ui/sidebar";
-import { getCategoryNames } from "@/lib/registry";
+import { getCategoryInfo } from "@/lib/registry";
 import { cn, formatLabel, normalizeSlug } from "@/lib/utils";
+import { categoryGroups } from "@/registry-audio/bases/categories";
 
 import { useComponents } from "./components-context";
 
@@ -30,8 +31,6 @@ export const ComponentSidebarCategoryMenu = React.memo(
     const { totalCount, categoryCounts } = useComponents();
     const pathname = usePathname();
     const [params] = useDesignSystemSearchParams();
-
-    const categoryNames = React.useMemo(() => getCategoryNames(), []);
 
     // Build href with preserved design system params
     const buildHref = React.useCallback(
@@ -59,30 +58,40 @@ export const ComponentSidebarCategoryMenu = React.memo(
               {totalCount}
             </span>
           </Link>
-          {categoryNames.map((category) => {
-            const basePath = `/components/${normalizeSlug(category)}`;
+          {categoryGroups.map((group) => (
+            <React.Fragment key={group.label}>
+              <p className="mt-3 mb-1 px-2 text-site-muted-foreground text-xs">
+                {group.label}
+              </p>
+              {group.names.map((category) => {
+                const basePath = `/components/${normalizeSlug(category)}`;
 
-            return (
-              <Link
-                className={cn(
-                  linkClassName,
-                  pathname === basePath && activeClassName
-                )}
-                href={buildHref(basePath)}
-                key={category}
-                onClick={onSelect}
-                prefetch={false}
-              >
-                <span>{formatLabel(category)}</span>
-                <span className="flex shrink-0 items-center gap-2">
-                  <ComponentUpdateIndicator category={category} />
-                  <span className="text-site-muted-foreground text-xs">
-                    {categoryCounts[category] || 0}
-                  </span>
-                </span>
-              </Link>
-            );
-          })}
+                return (
+                  <Link
+                    className={cn(
+                      linkClassName,
+                      pathname === basePath && activeClassName
+                    )}
+                    href={buildHref(basePath)}
+                    key={category}
+                    onClick={onSelect}
+                    prefetch={false}
+                  >
+                    <span>
+                      {getCategoryInfo(category)?.label ??
+                        formatLabel(category)}
+                    </span>
+                    <span className="flex shrink-0 items-center gap-2">
+                      <ComponentUpdateIndicator category={category} />
+                      <span className="text-site-muted-foreground text-xs">
+                        {categoryCounts[category] || 0}
+                      </span>
+                    </span>
+                  </Link>
+                );
+              })}
+            </React.Fragment>
+          ))}
         </SidebarGroupContent>
       </SidebarGroup>
     );

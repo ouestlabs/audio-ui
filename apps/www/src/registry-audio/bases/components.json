@@ -1,11 +1,11 @@
 [
   {
-    "categories": ["device", "synth", "xypad"],
+    "categories": ["instrument", "synth", "xypad"],
     "name": "block-pocket-synth",
     "title": "block-pocket-synth"
   },
   {
-    "categories": ["device", "synth", "xypad"],
+    "categories": ["instrument", "synth", "xypad"],
     "name": "block-wave-shaper",
     "title": "block-wave-shaper"
   },
@@ -125,97 +125,97 @@
     "title": "plot-compressor-demo"
   },
   {
-    "categories": ["device", "plot", "knob"],
+    "categories": ["dynamics", "plot", "knob"],
     "name": "block-compressor",
     "title": "block-compressor"
   },
   {
-    "categories": ["device", "plot", "knob"],
+    "categories": ["eq", "plot", "knob"],
     "name": "block-equalizer",
     "title": "block-equalizer"
   },
   {
-    "categories": ["device", "plot", "knob"],
+    "categories": ["delay-reverb", "plot", "knob"],
     "name": "block-delay",
     "title": "block-delay"
   },
   {
-    "categories": ["device", "plot", "knob"],
+    "categories": ["delay-reverb", "plot", "knob"],
     "name": "block-reverb",
     "title": "block-reverb"
   },
   {
-    "categories": ["device", "plot", "knob"],
+    "categories": ["eq", "plot", "knob"],
     "name": "block-filter",
     "title": "block-filter"
   },
   {
-    "categories": ["device", "plot", "knob"],
+    "categories": ["distortion", "plot", "knob"],
     "name": "block-distortion",
     "title": "block-distortion"
   },
   {
-    "categories": ["device", "plot", "knob"],
+    "categories": ["modulation", "plot", "knob"],
     "name": "block-chorus",
     "title": "block-chorus"
   },
   {
-    "categories": ["device", "knob"],
+    "categories": ["utility", "knob"],
     "name": "block-utility",
     "title": "block-utility"
   },
   {
-    "categories": ["device", "plot", "knob"],
+    "categories": ["dynamics", "plot", "knob"],
     "name": "block-limiter",
     "title": "block-limiter"
   },
   {
-    "categories": ["device", "plot", "knob"],
+    "categories": ["dynamics", "plot", "knob"],
     "name": "block-gate",
     "title": "block-gate"
   },
   {
-    "categories": ["device", "plot", "knob"],
+    "categories": ["distortion", "plot", "knob"],
     "name": "block-saturator",
     "title": "block-saturator"
   },
   {
-    "categories": ["device", "plot", "knob"],
+    "categories": ["modulation", "plot", "knob"],
     "name": "block-phaser",
     "title": "block-phaser"
   },
   {
-    "categories": ["device", "plot", "knob"],
+    "categories": ["modulation", "plot", "knob"],
     "name": "block-auto-pan",
     "title": "block-auto-pan"
   },
   {
-    "categories": ["device", "plot", "knob"],
+    "categories": ["eq", "plot", "knob"],
     "name": "block-channel-eq",
     "title": "block-channel-eq"
   },
   {
-    "categories": ["device", "plot", "knob"],
+    "categories": ["distortion", "plot", "knob"],
     "name": "block-overdrive",
     "title": "block-overdrive"
   },
   {
-    "categories": ["device", "plot", "knob"],
+    "categories": ["dynamics", "plot", "knob"],
     "name": "block-deesser",
     "title": "block-deesser"
   },
   {
-    "categories": ["device", "plot", "knob"],
+    "categories": ["dynamics", "plot", "knob"],
     "name": "block-multiband",
     "title": "block-multiband"
   },
   {
-    "categories": ["device", "plot", "knob"],
+    "categories": ["dynamics", "plot", "knob"],
     "name": "block-transient",
     "title": "block-transient"
   },
   {
-    "categories": ["device", "plot", "knob"],
+    "categories": ["distortion", "plot", "knob"],
     "name": "block-redux",
     "title": "block-redux"
   },

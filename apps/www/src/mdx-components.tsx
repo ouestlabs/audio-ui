@@ -9,6 +9,7 @@ import { CodeCollapsibleWrapper } from "@/components/code-collapsible-wrapper";
 import { CodeTabs } from "@/components/code-tabs";
 import { CopyButton } from "@/components/copy-button";
 import { Frame, FrameContent } from "@/components/custom/frame";
+import { Control, DeviceControls } from "@/components/device-controls";
 import { DocsComponentPreview } from "@/components/docs-component-preview";
 import { DocsComponentSource } from "@/components/docs-component-source";
 import { getIconForLanguageExtension, Icons } from "@/components/icons";
@@ -40,6 +41,8 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     AspectRatio,
     Button,
     Callout,
+    Control,
+    DeviceControls,
     CodeBlockCommand,
     CodeCollapsibleWrapper,
     CodeTabs,

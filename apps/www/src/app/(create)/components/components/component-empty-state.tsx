@@ -1,17 +1,40 @@
-import { cn } from "@/lib/utils";
+import { MagnifyingGlassIcon } from "@phosphor-icons/react/ssr";
+import type { ReactNode } from "react";
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/registry/bases/base/ui/empty";
 
 interface ComponentEmptyStateProps {
+  /** What to do next, such as a link back to the whole catalog. */
+  children?: ReactNode;
   className?: string;
-  message: string;
+  description?: string;
+  title: string;
 }
 
 export function ComponentEmptyState({
-  message,
+  children,
   className,
+  description,
+  title,
 }: ComponentEmptyStateProps) {
   return (
-    <div className={cn("py-12 text-center", className)}>
-      <p className="text-site-muted-foreground">{message}</p>
-    </div>
+    <Empty className={className}>
+      <EmptyHeader>
+        <EmptyMedia variant="icon">
+          <MagnifyingGlassIcon aria-hidden />
+        </EmptyMedia>
+        <EmptyTitle>{title}</EmptyTitle>
+        {description ? (
+          <EmptyDescription>{description}</EmptyDescription>
+        ) : null}
+      </EmptyHeader>
+      {children ? <EmptyContent>{children}</EmptyContent> : null}
+    </Empty>
   );
 }

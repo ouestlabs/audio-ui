@@ -15,6 +15,7 @@ import type { CatalogItem } from "../types";
 import { ComponentCard } from "./component-card";
 import { ComponentCardContainer } from "./component-card-container";
 import { ComponentEmptyState } from "./component-empty-state";
+import { useComponents } from "./components-context";
 
 interface ComponentGridProps {
   catalogItems: CatalogItem[];
@@ -55,19 +56,31 @@ function ComponentGridContent({
   const searchQuery = normalizeCatalogSearchQuery(filters.search || "");
   const hasActiveSearch = hasActiveCatalogSearch(searchQuery);
 
+  // A search looks in the whole catalog, whichever category page it is typed on.
+  const { catalogItems: wholeCatalog } = useComponents();
   const filteredItems = useMemo(
-    () => filterCatalogBySearchQuery(catalogItems, searchQuery),
-    [catalogItems, searchQuery]
+    () =>
+      filterCatalogBySearchQuery(
+        hasActiveSearch ? (wholeCatalog as CatalogItem[]) : catalogItems,
+        searchQuery
+      ),
+    [catalogItems, hasActiveSearch, searchQuery, wholeCatalog]
   );
 
   if (filteredItems.length === 0) {
     return (
-      <div className="w-full p-3 sm:px-8 sm:py-6 xl:px-10">
+      <div className="flex min-h-[calc(100svh-22rem)] w-full grow p-3 sm:px-8 sm:py-6 xl:px-10">
         <ComponentEmptyState
-          message={
+          className="grow"
+          description={
             hasActiveSearch
-              ? `No components found for "${searchQuery}"`
-              : "No components found in this category"
+              ? "Try another word, such as a device, a control or an effect."
+              : "Nothing is listed here yet."
+          }
+          title={
+            hasActiveSearch
+              ? `No components for “${searchQuery}”`
+              : "No components in this category"
           }
         />
       </div>

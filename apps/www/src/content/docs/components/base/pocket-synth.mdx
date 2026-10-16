@@ -1,13 +1,13 @@
 ---
-title: Pocket Synth
-description: "A synth as a device you can plug in: a waveform, a filter and a volume as a state, a panel with a pad that plays it, a Web Audio engine and the tools an agent plays it with."
+title: Pocket synth
+description: "A synth device: a waveform, a filter and a volume, a panel with a pad that plays it, a Web Audio engine with noteOn and noteOff, and tools for agents."
 component: true
 base: base
 ---
 
 <ComponentPreview styleName="base-nova" name="block-pocket-synth" />
 
-One oscillator through a resonant filter. Press the pad: pitch goes across, the filter cutoff up. It is a device like the [compressor](/docs/components/compressor): a state, a panel that draws it, an engine that plays it and tools an agent calls, each its own file.
+One oscillator through a resonant filter. Press the pad: the pitch goes across and the filter cutoff goes up. It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
 
 ## Installation
 
@@ -56,7 +56,17 @@ npx shadcn@latest add @audio-ui/pocket-synth-device @audio-ui/pocket-synth-panel
 
 </CodeTabs>
 
-## Usage
+## Controls
+
+<DeviceControls device="pocket-synth">
+<Control id="wave">The wave of the oscillator.</Control>
+<Control id="filter">The type of the filter.</Control>
+<Control id="volume">The level of the output.</Control>
+</DeviceControls>
+
+## Panel
+
+The panel has a pad that plays the synth: its position gives the note, so the pitch goes across and the cutoff goes up. `pocketSynthPitch(position)` and `pocketSynthCutoff(position)` turn a position from 0 to 1 into hertz. The panel sends notes out and does not make the sound, so it plays through any engine.
 
 ```tsx
 import { PocketSynthPanel } from "@/components/audio-ui/devices/pocket-synth/panel";
@@ -67,43 +77,13 @@ const [state, setState] = useState(() => pocketSynthDevice.defaults());
 <PocketSynthPanel onValueChange={setState} value={state} />;
 ```
 
-The state is a plain object keyed by parameter id, so a host stores it, saves it with its project and sends it where it likes. `pocketSynthPitch(position)` and `pocketSynthCutoff(position)` turn a pad position from 0 to 1 into hertz.
+## Engine
 
-## The engine
-
-```ts
-import { createPocketSynthEngine } from "@/components/audio-ui/devices/pocket-synth/engine";
-
-const engine = createPocketSynthEngine(ctx, state);
-engine.output.connect(ctx.destination);
-engine.noteOn(note);  // starts a note, or glides the one being held
-engine.noteOff();     // lets it go
-engine.update(nextState);
-engine.dispose();
-```
-
-One voice at a time: `noteOn` starts a note, or glides the one being held to the new one, and `noteOff` releases it. The wave and the filter type of a state change under a held note.
-
-## The tools
+Create it, connect it and update it as for any device: see [The engine](/docs/devices#the-engine).
 
 ```ts
-import { deviceTools } from "@audio-ui/core/device";
-import { pocketSynthDevice } from "@/components/audio-ui/devices/pocket-synth/device";
-
-const [set, reset, play] = deviceTools(pocketSynthDevice);
+engine.noteOn(note); // starts a note, or glides the one being held
+engine.noteOff(); // lets it go
 ```
 
-`set` and `reset` change the state, with the ranges the device enforces: a value out of range is brought in and reported, a wrong one is refused by name, and a call never throws.
-
-`play` plays a note: its call gives the parts of the note (a pitch, and a cutoff) and how long it lasts, and returns the note and the duration for the host to give to the engine.
-
-```ts
-import { playNote } from "@audio-ui/core/device";
-
-const result = play.run(state, input);
-if (result.note) playNote(engine, result.note, result.duration ?? 0.5);
-```
-
-## Accessibility
-
-Every control is a native input: the knobs are sliders named after their parameter, with the value and unit as the text value, the switch is a toggle button, and everything takes the keyboard.
+One voice at a time. `noteOn` starts a note, or glides the one being held to the new one, and `noteOff` releases it. The wave and the filter type of a state change under a held note. An agent plays the synth with the `play` tool.

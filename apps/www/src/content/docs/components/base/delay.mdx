@@ -1,13 +1,13 @@
 ---
 title: Delay
-description: "A delay as a device you can plug in: a time, a feedback, a tone and a mix as a state, a panel that draws the echoes with a handle, a Web Audio engine and the tools an agent drives it with."
+description: "A delay device: a time or a note value, a feedback, a tone and a mix, a panel that draws the echoes with a handle, a Web Audio engine and tools for agents."
 component: true
 base: base
 ---
 
 <ComponentPreview styleName="base-nova" name="block-delay" />
 
-Repeats the sound. The panel draws the echoes the state makes, one line each, fainter as they fade: drag the handle on the first one across for the time and up for the feedback. It is a device like the [compressor](/docs/components/compressor): a state, a panel that draws it, an engine that plays it and tools an agent calls, each its own file.
+Repeats the sound. The echoes fade by the feedback, each darker than the one before. It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
 
 ## Installation
 
@@ -56,7 +56,20 @@ npx shadcn@latest add @audio-ui/delay-device @audio-ui/delay-panel @audio-ui/del
 
 </CodeTabs>
 
-## Usage
+## Controls
+
+<DeviceControls device="delay">
+<Control id="timeMs">The time between the echoes. Drag the handle on the first echo across to set it.</Control>
+<Control id="sync">Takes the time from a note value and the tempo of the host instead of milliseconds. See [Tempo sync](/docs/devices#tempo-sync).</Control>
+<Control id="division">The note value of the time, from 1/32 to a whole note, with triplets and dotted notes.</Control>
+<Control id="feedback">How much of the output goes back in. Drag the handle on the first echo up to raise it.</Control>
+<Control id="toneHz">Closes the highs of each repeat.</Control>
+<Control id="mix">The balance of the echoes and the dry signal.</Control>
+</DeviceControls>
+
+## Panel
+
+The panel draws the echoes the state makes, one line each, fainter as they fade. `delayTaps(state, windowMs)` returns them. With Sync on, the handle lands on the nearest note value and the Time control is drawn off. With Sync off, the note list is.
 
 ```tsx
 import { DelayPanel } from "@/components/audio-ui/devices/delay/panel";
@@ -67,45 +80,8 @@ const [state, setState] = useState(() => delayDevice.defaults());
 <DelayPanel onValueChange={setState} value={state} />;
 ```
 
-The state is a plain object keyed by parameter id, so a host stores it, saves it with its project and sends it where it likes. `delayTaps(state, windowMs)` returns the echoes a state makes, which is what the panel draws.
+## Engine
 
-## The engine
+Create it, connect it and update it as for any device: see [The engine](/docs/devices#the-engine).
 
-```ts
-import { createDelayEngine } from "@/components/audio-ui/devices/delay/engine";
-
-const engine = createDelayEngine(ctx, state);
-source.connect(engine.input);
-engine.output.connect(ctx.destination);
-engine.update(nextState); // parameters ramp: no click
-engine.dispose();
-```
-
-The repeats go round a low-pass tone filter, so each is darker than the one before. A change of time glides slowly, so the echo bends like a tape instead of clicking, and the feedback stops short of 95 % so it cannot run away.
-
-## Synced to the tempo
-
-Switch **Sync** on and the time is a note value instead of milliseconds: `1/8`, a triplet `1/8t`, a dotted `1/8d`, from 1/32 to a whole note, read against the host's tempo. The tempo is the host's, not the delay's: give it to the engine with the first state or with any update.
-
-```ts
-const engine = createDelayEngine(ctx, state, { tempo }); // { bpm: 100, beatsPerBar: 4, beatUnit: 4 }
-engine.update(nextState, { tempo: { ...tempo, bpm: 120 } }); // the echo follows
-engine.update(otherState); // no context: the last tempo holds
-```
-
-The panel takes the same tempo as a prop, `tempo`, and draws the echoes where the notes fall. With Sync on, the handle lands on the nearest note value and the time knob is drawn off; with it off, the note list is. A note longer than the delay can hold (two seconds) is held to that. The tempo does not come from an agent's tool call: `delay_set` can switch Sync on and pick a note, and the host decides the tempo it is read against. The `1/8d` the block starts on is a dotted eighth at the loop's 100 BPM, 450 ms.
-
-## The tools
-
-```ts
-import { deviceTools } from "@audio-ui/core/device";
-import { delayDevice } from "@/components/audio-ui/devices/delay/device";
-
-const [set, reset] = deviceTools(delayDevice);
-```
-
-`set` and `reset` change the state, with the ranges the device enforces: a value out of range is brought in and reported, a wrong one is refused by name, and a call never throws.
-
-## Accessibility
-
-Every control is a native input: the knobs are sliders named after their parameter, with the value and unit as the text value, the switch is a toggle button, and everything takes the keyboard.
+The repeats go round a low-pass filter, so each is darker than the one before. A change of time glides slowly, so the echo bends like a tape instead of clicking, and the feedback stops short of 95 % so it cannot run away. A note longer than the delay can hold (two seconds) is held to that. The `1/8d` the block starts on is a dotted eighth at the loop's 100 BPM, 450 ms.

@@ -1,13 +1,13 @@
 ---
-title: Auto Pan
-description: "An auto pan and tremolo as a device you can plug in: a mode, a waveform, a rate and a depth as a state, a panel that draws the movement, a Web Audio engine and the tools an agent drives it with."
+title: Auto pan
+description: "An auto pan device: a pan or tremolo mode, a wave shape, a rate or a note value and a depth, a panel that draws the movement, a Web Audio engine and tools for agents."
 component: true
 base: base
 ---
 
 <ComponentPreview styleName="base-nova" name="block-auto-pan" />
 
-Moves the sound with a slow oscillator: in pan mode from one speaker to the other, in tremolo mode its level up and down, with a sine, triangle, saw or square wave. The panel draws the movement over two seconds. It is a device like the [compressor](/docs/components/compressor): a state, a panel that draws it, an engine that plays it and tools an agent calls, each its own file.
+Moves the sound with a slow oscillator. In Pan mode it moves from one speaker to the other. In Tremolo mode its level goes up and down. It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
 
 ## Installation
 
@@ -56,7 +56,20 @@ npx shadcn@latest add @audio-ui/auto-pan-device @audio-ui/auto-pan-panel @audio-
 
 </CodeTabs>
 
-## Usage
+## Controls
+
+<DeviceControls device="auto-pan">
+<Control id="mode">Pan moves the sound between the speakers, Tremolo moves its level.</Control>
+<Control id="shape">The wave of the oscillator: sine, triangle, saw or square.</Control>
+<Control id="rateHz">How fast the oscillator moves.</Control>
+<Control id="sync">Takes the rate from a note value and the tempo of the host. See [Tempo sync](/docs/devices#tempo-sync).</Control>
+<Control id="division">The note value of one cycle of the oscillator.</Control>
+<Control id="depth">How far the oscillator moves the pan or the level.</Control>
+</DeviceControls>
+
+## Panel
+
+The panel draws the movement over two seconds. `autoPanWave(shape, phase)` is the wave and `autoPanSweep(state)` is what the panel draws.
 
 ```tsx
 import { AutoPanPanel } from "@/components/audio-ui/devices/auto-pan/panel";
@@ -67,45 +80,8 @@ const [state, setState] = useState(() => autoPanDevice.defaults());
 <AutoPanPanel onValueChange={setState} value={state} />;
 ```
 
-The state is a plain object keyed by parameter id, so a host stores it, saves it with its project and sends it where it likes. `autoPanWave(shape, phase)` is the wave and `autoPanSweep(state)` what the panel draws.
+## Engine
 
-## The engine
+Create it, connect it and update it as for any device: see [The engine](/docs/devices#the-engine).
 
-```ts
-import { createAutoPanEngine } from "@/components/audio-ui/devices/auto-pan/engine";
-
-const engine = createAutoPanEngine(ctx, state);
-source.connect(engine.input);
-engine.output.connect(ctx.destination);
-engine.update(nextState); // parameters ramp: no click
-engine.dispose();
-```
-
-One oscillator feeds both a stereo panner and a gain; the mode sets which of the two depths is on. In tremolo mode the level swings around the middle of its range, so a depth of 100 % goes from silence to full level.
-
-## Synced to the tempo
-
-Switch **Sync** on and the rate is a note value instead of hertz: one cycle of the oscillator for each `1/4`, `1/8t` (a triplet), `1/2d` (dotted) and so on, from 1/32 to a whole note, read against the host's tempo. `1/4` at 120 BPM is 2 Hz, and the rate is held between a cycle in 50 seconds and 40 Hz. The tempo is the host's: give it to the engine with the first state or with any update.
-
-```ts
-const engine = createAutoPanEngine(ctx, state, { tempo }); // { bpm: 100, beatsPerBar: 4, beatUnit: 4 }
-engine.update(nextState, { tempo: { ...tempo, bpm: 120 } }); // the rate follows
-engine.update(otherState); // no context: the last tempo holds
-```
-
-The panel takes the same tempo as a prop, `tempo`, and draws the oscillator at the rate it really has. With Sync on the rate knob is drawn off, with it off the note list is. The tempo does not come from an agent's tool call: `audioui_auto_pan_set` can switch Sync on and pick a note, and the host decides the tempo it is read against.
-
-## The tools
-
-```ts
-import { deviceTools } from "@audio-ui/core/device";
-import { autoPanDevice } from "@/components/audio-ui/devices/auto-pan/device";
-
-const [set, reset] = deviceTools(autoPanDevice);
-```
-
-`set` and `reset` change the state, with the ranges the device enforces: a value out of range is brought in and reported, a wrong one is refused by name, and a call never throws. A choice such as the curve or the mode takes only the values of its options.
-
-## Accessibility
-
-Every control is a native input: the knobs are sliders named after their parameter, with the value and unit as the text value, the choices are toggle buttons, and everything takes the keyboard.
+One oscillator feeds both a stereo panner and a gain, and the mode sets which of the two depths is on. In Tremolo mode the level swings around the middle of its range, so a depth of 100 % goes from silence to full level.

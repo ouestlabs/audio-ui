@@ -1,13 +1,13 @@
 ---
-title: Phaser-Flanger
-description: "A phaser and flanger as a device you can plug in: a mode, a rate, a depth, a centre, a delay, a feedback and a mix as a state, a panel that draws the sweep, a Web Audio engine and the tools an agent drives it with."
+title: Phaser
+description: "A phaser device: a phaser or flanger mode, a rate or a note value, a depth, a centre frequency, a delay, a feedback and a mix, a panel that draws the sweep, a Web Audio engine and tools for agents."
 component: true
 base: base
 ---
 
 <ComponentPreview styleName="base-nova" name="block-phaser" />
 
-Sweeps notches through the sound with a slow oscillator: in phaser mode a chain of four all-pass filters around the centre frequency, in flanger mode a very short delay. The panel draws what the oscillator does over two seconds; the knobs the mode does not use are drawn off. It is a device like the [compressor](/docs/components/compressor): a state, a panel that draws it, an engine that plays it and tools an agent calls, each its own file.
+Sweeps notches through the sound with a slow oscillator. In Phaser mode it is a chain of four all-pass filters around a centre frequency. In Flanger mode it is a very short delay. It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
 
 ## Installation
 
@@ -56,7 +56,23 @@ npx shadcn@latest add @audio-ui/phaser-device @audio-ui/phaser-panel @audio-ui/p
 
 </CodeTabs>
 
-## Usage
+## Controls
+
+<DeviceControls device="phaser">
+<Control id="mode">Phaser sweeps the filters, Flanger sweeps the delay. The controls the mode does not use are drawn off.</Control>
+<Control id="rateHz">How fast the oscillator sweeps.</Control>
+<Control id="sync">Takes the rate from a note value and the tempo of the host. See [Tempo sync](/docs/devices#tempo-sync).</Control>
+<Control id="division">The note value of one cycle of the oscillator.</Control>
+<Control id="depth">How far the oscillator moves the filters or the delay.</Control>
+<Control id="centerHz">The frequency the phaser sweeps around.</Control>
+<Control id="delayMs">The delay the flanger sweeps around.</Control>
+<Control id="feedback">How much of the output goes back in, which deepens the notches.</Control>
+<Control id="mix">The balance of the processed signal and the dry one.</Control>
+</DeviceControls>
+
+## Panel
+
+The panel draws what the oscillator does over two seconds. `phaserSweep(state)` is what it draws, and `phaserSettings(state)` gives the numbers that go on the nodes.
 
 ```tsx
 import { PhaserPanel } from "@/components/audio-ui/devices/phaser/panel";
@@ -67,45 +83,8 @@ const [state, setState] = useState(() => phaserDevice.defaults());
 <PhaserPanel onValueChange={setState} value={state} />;
 ```
 
-The state is a plain object keyed by parameter id, so a host stores it, saves it with its project and sends it where it likes. `phaserSettings(state)` gives the numbers that go on the nodes and `phaserSweep(state)` what the panel draws.
+## Engine
 
-## The engine
+Create it, connect it and update it as for any device: see [The engine](/docs/devices#the-engine).
 
-```ts
-import { createPhaserEngine } from "@/components/audio-ui/devices/phaser/engine";
-
-const engine = createPhaserEngine(ctx, state);
-source.connect(engine.input);
-engine.output.connect(ctx.destination);
-engine.update(nextState); // parameters ramp: no click
-engine.dispose();
-```
-
-Both paths are always built and the mode crossfades them, so switching does not click. One oscillator moves the filters, in cents, and the delay, in seconds, and the flanger's sweep is kept inside its delay so the time never goes negative.
-
-## Synced to the tempo
-
-Switch **Sync** on and the rate is a note value instead of hertz: one cycle of the oscillator for each `1/4`, `1/8t` (a triplet), `1/2d` (dotted) and so on, from 1/32 to a whole note, read against the host's tempo. `1/4` at 120 BPM is 2 Hz, and the rate is held between a cycle in 50 seconds and 40 Hz. The tempo is the host's: give it to the engine with the first state or with any update.
-
-```ts
-const engine = createPhaserEngine(ctx, state, { tempo }); // { bpm: 100, beatsPerBar: 4, beatUnit: 4 }
-engine.update(nextState, { tempo: { ...tempo, bpm: 120 } }); // the rate follows
-engine.update(otherState); // no context: the last tempo holds
-```
-
-The panel takes the same tempo as a prop, `tempo`, and draws the oscillator at the rate it really has. With Sync on the rate knob is drawn off, with it off the note list is. The tempo does not come from an agent's tool call: `audioui_phaser_set` can switch Sync on and pick a note, and the host decides the tempo it is read against.
-
-## The tools
-
-```ts
-import { deviceTools } from "@audio-ui/core/device";
-import { phaserDevice } from "@/components/audio-ui/devices/phaser/device";
-
-const [set, reset] = deviceTools(phaserDevice);
-```
-
-`set` and `reset` change the state, with the ranges the device enforces: a value out of range is brought in and reported, a wrong one is refused by name, and a call never throws. A choice such as the curve or the mode takes only the values of its options.
-
-## Accessibility
-
-Every control is a native input: the knobs are sliders named after their parameter, with the value and unit as the text value, the choices are toggle buttons, and everything takes the keyboard.
+Both paths are always built and the mode crossfades them, so switching does not click. One oscillator moves the filters, in cents, and the delay, in seconds. The flanger's sweep is kept inside its delay so the time never goes negative.
