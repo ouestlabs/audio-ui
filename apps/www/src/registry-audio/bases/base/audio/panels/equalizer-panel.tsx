@@ -9,6 +9,14 @@ import {
 import type { Source } from "@audio-ui/react";
 import { type ReactNode, useCallback, useMemo, useState } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/registry/bases/base/ui/select";
 import { Toggle } from "@/registry/bases/base/ui/toggle";
 import {
   Plot,
@@ -31,6 +39,7 @@ import {
   equalizerBands,
   equalizerCurve,
   equalizerDevice,
+  FILTER_TAKES,
 } from "@/registry-audio/bases/base/lib/equalizer-device";
 
 const MIN_HZ = 20;
@@ -42,7 +51,6 @@ const SPECTRUM_MIN_DB = -100;
 const SPECTRUM_MAX_DB = -10;
 /** What each band is called in the list and over its knobs. */
 const BAND_NAMES = ["Low", "Low mid", "High mid", "High"] as const;
-const BAND_KINDS = ["Low shelf", "Bell", "Bell", "High shelf"] as const;
 /** The knobs of a band, and the output that is always there. */
 const OUTPUT = ["outputDb"] as const;
 type ParameterId = (typeof equalizerDevice.parameters)[number]["id"];
@@ -52,8 +60,13 @@ const ALL_IDS: readonly ParameterId[] = equalizerDevice.parameters.map(
 const BAND_IDS: ParameterId[][] = EQUALIZER_BANDS.map((band) => [
   band.hz,
   band.db,
-  ...("q" in band ? [band.q] : []),
+  band.q,
 ]);
+/** What a band can be, for the list under its number. */
+const FILTER_ITEMS =
+  equalizerDevice
+    .describe()
+    .parameters.find((parameter) => parameter.id === "lowType")?.options ?? [];
 
 const formatDbMark = (db: number) => (db > 0 ? `+${db}` : String(db));
 const describePointer = (point: { x: number; y: number }) =>
@@ -87,6 +100,11 @@ function BandHandle({
         return;
       }
       onSelect(index);
+      // A cut or a notch has no gain: the handle only slides along the axis.
+      if (!FILTER_TAKES[value[band.type]].gain) {
+        onValueChange(equalizerDevice.set(value, band.hz, x));
+        return;
+      }
       const gain = clampGain(bandGainForHandle(bands, index, x, y));
       onValueChange(
         equalizerDevice.apply(value, { [band.db]: gain, [band.hz]: x }).state
@@ -128,8 +146,8 @@ function BandTab({ index, onSelect, selected }: BandTabProps) {
   const pick = useCallback(() => onSelect(index), [index, onSelect]);
   return (
     <Toggle
-      aria-label={`${BAND_NAMES[index]}, ${BAND_KINDS[index]?.toLowerCase()}`}
-      className="size-6 min-h-0 min-w-0 rounded-[2px] p-0 font-mono text-xs aria-pressed:border-primary aria-pressed:bg-primary aria-pressed:text-primary-foreground"
+      aria-label={`${BAND_NAMES[index]} band`}
+      className="size-6 min-h-0 min-w-0 p-0 font-mono text-xs aria-pressed:border-primary aria-pressed:bg-primary aria-pressed:text-primary-foreground"
       onPressedChange={pick}
       pressed={selected}
       size="sm"
@@ -167,11 +185,25 @@ function EqualizerPanel({
 }: EqualizerPanelProps) {
   const [selected, setSelected] = useState(1);
   const curve = useMemo(() => equalizerCurve(value), [value]);
-  const shown = useMemo<readonly ParameterId[]>(
-    () => [...(BAND_IDS[selected] ?? []), ...OUTPUT],
-    [selected]
+  const picked = EQUALIZER_BANDS[selected];
+  const type = picked ? value[picked.type] : "peak";
+  const takes = FILTER_TAKES[type];
+  // Off, every knob is drawn off; on, the ones the type does not use are.
+  const unused = useMemo<readonly ParameterId[]>(() => {
+    if (!(picked && value.enabled)) {
+      return [...(BAND_IDS[selected] ?? []), ...OUTPUT];
+    }
+    return [...(takes.gain ? [] : [picked.db]), ...(takes.q ? [] : [picked.q])];
+  }, [picked, selected, takes, value.enabled]);
+  const pickType = useCallback(
+    (next: string | null) => {
+      if (picked && next) {
+        onValueChange(equalizerDevice.set(value, picked.type, next));
+      }
+    },
+    [picked, onValueChange, value]
   );
-  // Two rows of knobs from one device: the band picked, and the output apart.
+  // Two rows of knobs from one device: the picked picked, and the output apart.
   const hiddenFromBand = useMemo(
     () => ALL_IDS.filter((id) => !BAND_IDS[selected]?.includes(id)),
     [selected]
@@ -181,7 +213,7 @@ function EqualizerPanel({
     []
   );
   return (
-    <DeviceFrame className={className}>
+    <DeviceFrame className={cn("h-full", className)}>
       <DeviceHeader
         activator="enabled"
         device={equalizerDevice}
@@ -190,10 +222,13 @@ function EqualizerPanel({
       >
         {children}
       </DeviceHeader>
-      <div className="flex flex-col gap-3 p-3" data-slot="equalizer-panel">
+      <div
+        className="flex min-h-0 grow flex-col gap-3 p-3"
+        data-slot="equalizer-panel"
+      >
         <Plot
           aria-label="Frequency response"
-          className="h-40"
+          className="min-h-40 grow"
           maxX={MAX_HZ}
           maxY={MAX_DB}
           minX={MIN_HZ}
@@ -230,35 +265,53 @@ function EqualizerPanel({
               ))
             : null}
         </Plot>
-        <div className="grid grid-cols-[auto_1fr_auto] items-start gap-x-5">
-          <div className="flex flex-col gap-2">
-            <div className="grid grid-cols-2 gap-1.5">
-              {EQUALIZER_BANDS.map((band, index) => (
-                <BandTab
-                  index={index}
-                  key={band.id}
-                  onSelect={setSelected}
-                  selected={index === selected}
-                />
-              ))}
-            </div>
-            <span className="text-muted-foreground text-xs">
-              {BAND_NAMES[selected]}, {BAND_KINDS[selected]?.toLowerCase()}
-            </span>
-          </div>
+        <div className="flex items-center gap-1.5">
+          {EQUALIZER_BANDS.map((band, index) => (
+            <BandTab
+              index={index}
+              key={band.id}
+              onSelect={setSelected}
+              selected={index === selected}
+            />
+          ))}
+          <Select
+            disabled={!value.enabled}
+            items={FILTER_ITEMS}
+            onValueChange={pickType}
+            value={type}
+          >
+            <SelectTrigger
+              aria-label={`${BAND_NAMES[selected]} filter type`}
+              className="ms-auto w-28"
+              size="sm"
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                {FILTER_ITEMS.map((item) => (
+                  <SelectItem key={item.value} value={item.value}>
+                    {item.label}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="grid grid-cols-[1fr_auto] items-start gap-x-4">
           <DevicePanel
             className="grid-cols-3"
             device={equalizerDevice}
-            disabled={value.enabled ? undefined : shown}
+            disabled={unused}
             exclude={hiddenFromBand}
             labelPrefix={BAND_NAMES[selected]}
             onValueChange={onValueChange}
             value={value}
           />
           <DevicePanel
-            className="border-s ps-5"
+            className="border-s ps-4"
             device={equalizerDevice}
-            disabled={value.enabled ? undefined : shown}
+            disabled={unused}
             exclude={hiddenFromOutput}
             onValueChange={onValueChange}
             value={value}

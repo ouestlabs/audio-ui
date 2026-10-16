@@ -147,7 +147,7 @@ export default function BlockCompressor() {
   const togglePlaying = useCallback(() => setPlaying((on) => !on), []);
 
   return (
-    <div className="w-full min-w-0">
+    <div className="h-full w-full min-w-0">
       <CompressorPanel level={level} onValueChange={setState} value={state}>
         <Button
           aria-label={

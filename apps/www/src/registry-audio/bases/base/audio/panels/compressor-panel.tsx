@@ -87,12 +87,12 @@ function CompressorPanel({
   }, [level]);
   return (
     <div
-      className={cn("group/compressor w-full", className)}
+      className={cn("group/compressor h-full w-full", className)}
       data-idle=""
       data-slot="compressor-panel"
       ref={root}
     >
-      <DeviceFrame>
+      <DeviceFrame className="h-full">
         <DeviceHeader
           activator="enabled"
           device={compressorDevice}
@@ -107,10 +107,10 @@ function CompressorPanel({
             value={value}
           />
         </DeviceHeader>
-        <div className="flex flex-col gap-4 p-3">
+        <div className="flex min-h-0 grow flex-col gap-4 p-3">
           <Plot
             aria-label="Transfer curve"
-            className="h-40"
+            className="min-h-40 grow"
             maxX={MAX_DB}
             maxY={MAX_DB}
             minX={MIN_DB}

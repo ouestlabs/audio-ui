@@ -9,6 +9,10 @@ import {
 import { Fader } from "@/registry-audio/bases/base/audio/elements/fader";
 import { XYPad } from "@/registry-audio/bases/base/audio/elements/xypad";
 import {
+  DeviceFrame,
+  DeviceHeader,
+} from "@/registry-audio/bases/base/audio/panels/device-panel";
+import {
   type PocketSynthNote,
   type PocketSynthState,
   pocketSynthCutoff,
@@ -116,91 +120,98 @@ function PocketSynthPanel({
   );
 
   return (
-    <div
-      className={cn("flex h-full w-full min-w-0 flex-col gap-4", className)}
-      data-slot="pocket-synth-panel"
-    >
-      <XYPad
-        aria-label="Tone"
-        fill
-        formatValue={formatPad}
-        maxX={PAD_MAX}
-        maxY={PAD_MAX}
-        minX={0}
-        minY={0}
-        onValueChange={move}
-        onValueCommitted={onNoteOff}
-        value={position}
+    <DeviceFrame className={cn("h-full", className)}>
+      <DeviceHeader
+        device={pocketSynthDevice}
+        onValueChange={onValueChange}
+        value={value}
       />
-      <ToggleGroup
-        aria-label={WAVE.label}
-        className="w-full"
-        onValueChange={pickWave}
-        size="sm"
-        value={[value.wave]}
-        variant="outline"
+      <div
+        className="flex min-h-0 grow flex-col gap-4 p-3"
+        data-slot="pocket-synth-panel"
       >
-        {WAVE.options.map((option) => (
-          <ToggleGroupItem
-            aria-label={`${option.label} wave`}
-            className="flex-1"
-            key={option.value}
-            value={option.value}
-          >
-            <WaveIcon label={`${option.label} wave`} wave={option.value} />
-          </ToggleGroupItem>
-        ))}
-      </ToggleGroup>
-      <ToggleGroup
-        aria-label={FILTER.label}
-        className="w-full"
-        onValueChange={pickFilter}
-        size="sm"
-        value={[value.filter]}
-        variant="outline"
-      >
-        {FILTER.options.map((option) => (
-          <ToggleGroupItem
-            aria-label={option.label}
-            className="flex-1"
-            key={option.value}
-            value={option.value}
-          >
-            {FILTER_SHORT[option.value]}
-          </ToggleGroupItem>
-        ))}
-      </ToggleGroup>
-      <div aria-label="Volume" role="group">
-        <div className="flex w-full min-w-0 items-center justify-between gap-4 [&>*:not(output):not(span)]:min-w-0 [&>*:not(output):not(span)]:flex-1">
-          <span
-            className="text-center text-muted-foreground text-xs"
-            id={faderLabelId}
-          >
-            Volume
-          </span>
-          <Fader
-            aria-describedby={faderValueId}
-            aria-labelledby={faderLabelId}
-            id={faderId}
-            marks={VOLUME_MARKS}
-            max={1}
-            min={0}
-            onValueChange={setVolume}
-            orientation="horizontal"
-            step={0.01}
-            value={value.volume}
-            valueLabel="hidden"
-          />
-          <output
-            aria-live="polite"
-            className="min-w-12 text-center font-mono text-muted-foreground text-xs tabular-nums"
-            id={faderValueId}
-          >
-            {pocketSynthDevice.format("volume", value.volume)}
-          </output>
+        <XYPad
+          aria-label="Tone"
+          fill
+          formatValue={formatPad}
+          maxX={PAD_MAX}
+          maxY={PAD_MAX}
+          minX={0}
+          minY={0}
+          onValueChange={move}
+          onValueCommitted={onNoteOff}
+          value={position}
+        />
+        <ToggleGroup
+          aria-label={WAVE.label}
+          className="w-full"
+          onValueChange={pickWave}
+          size="sm"
+          value={[value.wave]}
+          variant="outline"
+        >
+          {WAVE.options.map((option) => (
+            <ToggleGroupItem
+              aria-label={`${option.label} wave`}
+              className="flex-1"
+              key={option.value}
+              value={option.value}
+            >
+              <WaveIcon label={`${option.label} wave`} wave={option.value} />
+            </ToggleGroupItem>
+          ))}
+        </ToggleGroup>
+        <ToggleGroup
+          aria-label={FILTER.label}
+          className="w-full"
+          onValueChange={pickFilter}
+          size="sm"
+          value={[value.filter]}
+          variant="outline"
+        >
+          {FILTER.options.map((option) => (
+            <ToggleGroupItem
+              aria-label={option.label}
+              className="flex-1"
+              key={option.value}
+              value={option.value}
+            >
+              {FILTER_SHORT[option.value]}
+            </ToggleGroupItem>
+          ))}
+        </ToggleGroup>
+        <div aria-label="Volume" role="group">
+          <div className="flex w-full min-w-0 items-center justify-between gap-4 [&>*:not(output):not(span)]:min-w-0 [&>*:not(output):not(span)]:flex-1">
+            <span
+              className="text-center text-muted-foreground text-xs"
+              id={faderLabelId}
+            >
+              Volume
+            </span>
+            <Fader
+              aria-describedby={faderValueId}
+              aria-labelledby={faderLabelId}
+              id={faderId}
+              marks={VOLUME_MARKS}
+              max={1}
+              min={0}
+              onValueChange={setVolume}
+              orientation="horizontal"
+              step={0.01}
+              value={value.volume}
+              valueLabel="hidden"
+            />
+            <output
+              aria-live="polite"
+              className="min-w-12 text-center font-mono text-muted-foreground text-xs tabular-nums"
+              id={faderValueId}
+            >
+              {pocketSynthDevice.format("volume", value.volume)}
+            </output>
+          </div>
         </div>
       </div>
-    </div>
+    </DeviceFrame>
   );
 }
 

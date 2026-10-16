@@ -83,7 +83,7 @@ export default function BlockEqualizer() {
   const togglePlaying = useCallback(() => setPlaying((on) => !on), []);
 
   return (
-    <div className="w-full min-w-0">
+    <div className="h-full w-full min-w-0">
       <EqualizerPanel
         onValueChange={setState}
         spectrum={spectrum}

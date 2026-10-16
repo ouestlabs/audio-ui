@@ -155,6 +155,7 @@ export const audio: RegistryItem[] = [
     ],
     name: "pocket-synth-panel",
     registryDependencies: [
+      "@audio-ui/device-panel",
       "@audio-ui/fader",
       "@audio-ui/xypad",
       "@audio-ui/pocket-synth-device",
@@ -179,6 +180,8 @@ export const audio: RegistryItem[] = [
       "@audio-ui/device-panel",
       "@audio-ui/plot",
       "@audio-ui/equalizer-device",
+      "@shadcn/select",
+      "@shadcn/toggle",
     ],
     type: "registry:ui",
   },

@@ -1,9 +1,9 @@
 import { describe, expect, test } from "bun:test";
 import {
-  EQUALIZER_BANDS,
   equalizerBands,
   equalizerCurve,
   equalizerDevice,
+  FILTER_TAKES,
 } from "@/registry-audio/bases/base/lib/equalizer-device";
 import { createEqualizerEngine } from "@/registry-audio/bases/base/lib/equalizer-engine";
 
@@ -73,13 +73,42 @@ describe("the equalizer device", () => {
     }
   });
 
-  test("its bands are a low shelf, two bells and a high shelf, from its state", () => {
-    expect(EQUALIZER_BANDS.map((band) => band.type)).toEqual([
+  test("its bands start as a low shelf, two bells and a high shelf, and each can be another type", () => {
+    expect(equalizerBands(defaults).map((band) => band.type)).toEqual([
       "lowshelf",
       "peak",
       "peak",
       "highshelf",
     ]);
+    const changed = equalizerDevice.apply(defaults, {
+      highType: "highcut",
+      lowType: "lowcut",
+    }).state;
+    expect(equalizerBands(changed).map((band) => band.type)).toEqual([
+      "lowcut",
+      "peak",
+      "peak",
+      "highcut",
+    ]);
+    expect(
+      equalizerDevice.apply(defaults, { lowType: "fuzz" }).rejected
+    ).toEqual([{ id: "lowType", reason: "not one of the options" }]);
+    expect(FILTER_TAKES.lowcut).toEqual({ gain: false, q: true });
+    expect(FILTER_TAKES.peak).toEqual({ gain: true, q: true });
+    expect(FILTER_TAKES.lowshelf).toEqual({ gain: true, q: false });
+  });
+
+  test("a high cut takes the top off the curve", () => {
+    const cut = equalizerDevice.apply(defaults, {
+      highHz: 4000,
+      highType: "highcut",
+    }).state;
+    const curve = equalizerCurve(cut);
+    expect(curve(300)).toBeCloseTo(0, 0);
+    expect(curve(16_000)).toBeLessThan(-20);
+  });
+
+  test("its bands, from the state", () => {
     const bands = equalizerBands(shaped);
     expect(bands[0]).toMatchObject({ frequency: 100, gainDb: -4 });
     expect(bands[1]).toMatchObject({ frequency: 400, gainDb: 5, q: 2 });
@@ -128,6 +157,13 @@ describe("createEqualizerEngine", () => {
     expect(output).toBeDefined();
     expect(created.filters[0]?.connections).toEqual([created.filters[1]]);
     expect(created.filters[3]?.connections).toEqual([trim]);
+  });
+
+  test("a type changed in the state changes the node's type", () => {
+    const { created, ctx } = fakeContext();
+    const engine = createEqualizerEngine(ctx, defaults);
+    engine.update(equalizerDevice.apply(defaults, { lowType: "lowcut" }).state);
+    expect(created.filters[0]?.type).toBe("highpass");
   });
 
   test("starts the nodes at the first state, not at their own defaults", () => {

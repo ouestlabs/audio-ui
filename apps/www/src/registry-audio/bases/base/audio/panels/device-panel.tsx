@@ -56,8 +56,10 @@ function NumberControl({
       onValueChange(device.set(value as never, parameter.id, next) as AnyState),
     [device, onValueChange, parameter.id, value]
   );
+  // The readout under a knob is positioned, not in the flow: the padding
+  // below keeps its room, or the edge of the frame cuts it.
   return (
-    <div className="flex min-w-0 max-w-full flex-col items-center gap-1.5">
+    <div className="flex min-w-0 max-w-full flex-col items-center gap-1.5 pb-5">
       <span
         aria-hidden="true"
         className="max-w-full truncate text-muted-foreground text-xs"
@@ -179,11 +181,14 @@ interface DeviceFrameProps {
   className?: string;
 }
 
-/** The frame of a device: a bordered strip with a header over a body, as a device sits in a chain. */
+/** The frame of a device: a bordered strip with a header over a body, as a device sits in a chain. Its corners follow the style, like the blocks' surface. */
 function DeviceFrame({ children, className }: DeviceFrameProps) {
   return (
     <div
-      className={cn("flex w-full min-w-0 flex-col border bg-card", className)}
+      className={cn(
+        "cn-audio-device flex w-full min-w-0 flex-col overflow-hidden border bg-card",
+        className
+      )}
       data-slot="device-frame"
     >
       {children}
@@ -218,7 +223,7 @@ function Activator({
   return (
     <Toggle
       aria-label={parameter.label}
-      className="size-4 min-h-0 min-w-0 rounded-[2px] p-0 aria-pressed:border-primary aria-pressed:bg-primary"
+      className="size-4 min-h-0 min-w-0 p-0 aria-pressed:border-primary aria-pressed:bg-primary"
       onPressedChange={change}
       pressed={on}
       size="sm"
