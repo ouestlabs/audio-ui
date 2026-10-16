@@ -117,6 +117,21 @@ What goes on each node comes from `compressorSettings(state)`, a pure function y
 - **It adds a make-up gain of its own that cannot be turned off**, which grows with the threshold and the ratio (+10.8 dB at -24 dB and 4:1). With `autoMakeup` off the engine takes it back out and applies `makeupDb`; with it on, the node's is kept.
 - **It looks ahead by 6 ms.** The dry path waits as long, so a parallel mix does not comb.
 
+## The key
+
+Switch **Key** on and the compressor follows the level of another signal, connected to `engine.sidechain`, instead of the one it processes: a kick ducks a pad, a voice ducks the music. The key is only listened to, never heard, and it is not a parameter: the state holds the switch, the host routes the signal.
+
+```ts
+const engine = createCompressorEngine(ctx, { ...state, external: true });
+pad.connect(engine.input);
+kick.connect(engine.sidechain); // listened to, not heard
+engine.output.connect(ctx.destination);
+```
+
+The browser's node has no key input, so with the key on the signal goes through a gain that an `AudioWorklet` loaded from a blob drives: the same curve as the node's (a soft knee around the threshold, a slope of 1/ratio over it), with the attack going down and the release coming back, and the node's make-up added by hand. The level of the key is a peak follower, instant up and 10 ms down. Measured in Chrome with a sine at -6 dB over a threshold of -18 dB at 4:1, it takes off 8.9 dB at 1 kHz and 8.5 dB at 60 Hz, where the curve says 9. `engine.ready` resolves once the detector is in the graph; until then a keyed compressor passes the signal unchanged, and a context with no worklets never resolves it to `true`. `engine.reduction` reads the detector's. With the key on the panel does not draw the transfer curve, since what the compressor does depends on the other signal.
+
+`compressorDevice.sidechain` is `true`, so a host knows to route something to it and an agent can be told.
+
 ## Latency
 
 Working, it delays the signal by 6 ms, the look-ahead of the node; the dry path waits as long, so the mix stays aligned.
