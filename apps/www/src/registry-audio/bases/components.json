@@ -145,6 +145,11 @@
     "title": "block-reverb"
   },
   {
+    "categories": ["device", "plot", "knob"],
+    "name": "block-filter",
+    "title": "block-filter"
+  },
+  {
     "categories": ["mixer", "fader", "meter", "knob"],
     "name": "block-mixer",
     "title": "block-mixer"

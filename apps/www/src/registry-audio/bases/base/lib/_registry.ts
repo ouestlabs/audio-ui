@@ -206,6 +206,38 @@ const items: RegistryItem[] = [
     type: "registry:lib",
   },
   {
+    categories: ["lib", "audio", "device"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "The filter as a device: a type, a cutoff and a resonance, the numbers that go on the node for a state and the curve a state plays, with no panel and no audio in it.",
+    files: [
+      {
+        path: "lib/filter-device.ts",
+        target: "components/audio-ui/devices/filter/device.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "filter-device",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device"],
+    dependencies: [],
+    description:
+      "A filter on the Web Audio API for a filter state: the node the curve draws, with the resonance in the unit it wants, and the signal going round it when it is off, moving without a click.",
+    files: [
+      {
+        path: "lib/filter-engine.ts",
+        target: "components/audio-ui/devices/filter/engine.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "filter-engine",
+    registryDependencies: ["@audio-ui/filter-device"],
+    type: "registry:lib",
+  },
+  {
     categories: ["lib", "audio", "web-audio"],
     dependencies: [],
     description:

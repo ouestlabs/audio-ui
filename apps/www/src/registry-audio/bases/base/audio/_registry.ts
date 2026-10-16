@@ -257,6 +257,26 @@ export const audio: RegistryItem[] = [
   },
   {
     categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "The face of the filter device: the curve it plays with a handle on the cutoff to drag its frequency and resonance, an optional live spectrum behind it, over the device knobs.",
+    files: [
+      {
+        path: "audio/panels/filter-panel.tsx",
+        target: "components/audio-ui/devices/filter/panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "filter-panel",
+    registryDependencies: [
+      "@audio-ui/device-panel",
+      "@audio-ui/plot",
+      "@audio-ui/filter-device",
+    ],
+    type: "registry:ui",
+  },
+  {
+    categories: ["device", "plot", "knob"],
     dependencies: ["@audio-ui/react", "@audio-ui/core"],
     description:
       "The face of the equalizer device: the curve it plays with a handle on each band to drag its frequency and gain, an optional live spectrum behind it, over the device's knobs gathered by band.",
