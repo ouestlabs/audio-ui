@@ -4,6 +4,7 @@ import {
   overdriveTable,
   TABLE_DOMAIN,
 } from "@/registry-audio/bases/base/lib/overdrive-device";
+import { createOversamplingDelay } from "@/registry-audio/bases/base/lib/oversampling";
 
 const RAMP_SECONDS = 0.015;
 
@@ -39,13 +40,14 @@ export function createOverdriveEngine(
   const tone = ctx.createBiquadFilter();
   const wet = ctx.createGain();
   const dry = ctx.createGain();
+  const dryDelay = createOversamplingDelay(ctx, "4x");
   band.type = "bandpass";
   tone.type = "lowpass";
   shaper.curve = overdriveTable();
   shaper.oversample = "4x";
   input.connect(band).connect(drive).connect(shaper).connect(tone).connect(wet);
   wet.connect(output);
-  input.connect(dry).connect(output);
+  input.connect(dryDelay).connect(dry).connect(output);
 
   const first = overdriveSettings(initial);
   band.frequency.value = first.bandHz;

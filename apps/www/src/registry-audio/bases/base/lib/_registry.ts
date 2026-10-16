@@ -138,7 +138,10 @@ const items: RegistryItem[] = [
       },
     ],
     name: "wave-shaper-engine",
-    registryDependencies: ["@audio-ui/wave-shaper-device"],
+    registryDependencies: [
+      "@audio-ui/wave-shaper-device",
+      "@audio-ui/oversampling",
+    ],
     type: "registry:lib",
   },
   {
@@ -266,7 +269,10 @@ const items: RegistryItem[] = [
       },
     ],
     name: "distortion-engine",
-    registryDependencies: ["@audio-ui/distortion-device"],
+    registryDependencies: [
+      "@audio-ui/distortion-device",
+      "@audio-ui/oversampling",
+    ],
     type: "registry:lib",
   },
   {
@@ -426,7 +432,10 @@ const items: RegistryItem[] = [
       },
     ],
     name: "saturator-engine",
-    registryDependencies: ["@audio-ui/saturator-device"],
+    registryDependencies: [
+      "@audio-ui/saturator-device",
+      "@audio-ui/oversampling",
+    ],
     type: "registry:lib",
   },
   {
@@ -554,7 +563,10 @@ const items: RegistryItem[] = [
       },
     ],
     name: "overdrive-engine",
-    registryDependencies: ["@audio-ui/overdrive-device"],
+    registryDependencies: [
+      "@audio-ui/overdrive-device",
+      "@audio-ui/oversampling",
+    ],
     type: "registry:lib",
   },
   {
@@ -601,6 +613,36 @@ const items: RegistryItem[] = [
       },
     ],
     name: "pink-noise",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device", "web-audio"],
+    dependencies: [],
+    description:
+      "Measure an engine against what its device claims, in an offline audio context: how far its frequency response is from the curve the panel draws, how long it delays a signal, and the helpers to render and read a signal. For a host that brings its own engine.",
+    files: [
+      {
+        path: "lib/device-measure.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "device-measure",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device", "web-audio"],
+    dependencies: [],
+    description:
+      "What a waveshaper that oversamples costs in time, and a delay that holds a dry path back by it, so a distortion mixed with its dry sound does not comb. Measured in Chrome.",
+    files: [
+      {
+        path: "lib/oversampling.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "oversampling",
     registryDependencies: [],
     type: "registry:lib",
   },

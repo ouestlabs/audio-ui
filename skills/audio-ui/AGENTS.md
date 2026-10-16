@@ -1432,6 +1432,8 @@ An instrument is a device with `kind: "instrument"`: its parameters shape the ti
 
 An agent can play an instrument that declares its `note` (a pitch, a cutoff, each with a range): `deviceTools` then returns a third tool, `<id>_play`, whose call gives back the note and how long it lasts, in bounds and refused by name when wrong, for the host to give to `playNote(engine, note, seconds)`. A parameter that is a pick from a list (a waveform, a filter type) is `kind: "choice"` with its `options`; the state holds the option's value, and a value that is not an option is refused, not replaced.
 
+A host that brings its own engine can measure it against the panel: `measureResponse(createEngine, state, curve)` from `device-measure` returns how far, in dB, its response is from the curve the device draws, and `measureLatency(createEngine, state)` how long it delays a signal, both rendered offline. It is a measurement, not a certification: the curve is the device's own and the tolerance is the host's.
+
 ### 7.5 apply is pure and re-clamps
 
 **Impact: MEDIUM (every tool call yields a valid state)**

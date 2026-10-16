@@ -66,6 +66,11 @@ function fakeContext() {
       made.filters.push(filter);
       return filter;
     },
+    createDelay: () => ({
+      connect: <T>(to: T) => to,
+      delayTime: { value: 0 },
+      disconnect: () => undefined,
+    }),
     createGain: () => {
       const gain = new FakeGain();
       made.gains.push(gain);
@@ -89,7 +94,13 @@ describe("the channel EQ device", () => {
   });
 
   test("the shelves sit at 100 Hz and 6 kHz, the mid goes where it is told", () => {
-    const [, low, mid, high] = channelEqBands({ ...defaults, midHz: 2000 });
+    const [highPass, low, mid, high] = channelEqBands({
+      ...defaults,
+      midHz: 2000,
+    });
+    // The high-pass is a 0 Hz one while its switch is off: it passes everything.
+    expect(highPass?.frequency).toBe(0);
+    expect(highPass?.on).toBe(false);
     expect(low?.frequency).toBe(100);
     expect(high?.frequency).toBe(6000);
     expect(mid?.frequency).toBe(2000);

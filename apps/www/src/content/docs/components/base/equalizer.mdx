@@ -97,6 +97,25 @@ engine.dispose();
 
 Four `BiquadFilterNode`s in series and a trim. The curve is drawn from the same formulas the node runs, and a band's width goes through `toWebAudioQ` on the way to the node, so the two agree. Off, every band goes flat and the trim to 0 dB.
 
+## Measuring your engine
+
+A host that brings its own engine can check it against what the panel draws. `device-measure` renders an engine in an offline audio context and compares it with the device's curve. It works for any device whose curve is a frequency response, the filter and the channel EQ too:
+
+```ts
+import { equalizerCurve, equalizerDevice } from "@/components/audio-ui/devices/equalizer/device";
+import { measureLatency, measureResponse } from "@/lib/device-measure";
+
+const state = equalizerDevice.defaults();
+// Your factory: (ctx, state) => { input, output, dispose }.
+const { worstDb, at } = await measureResponse(createMyEngine, state, equalizerCurve(state));
+// worstDb: how far your engine is from the panel, in dB, and where (at, in Hz).
+
+const latencyMs = await measureLatency(createMyEngine, state);
+// What a host reports to compensate it.
+```
+
+It is a measurement, not a certification: the curve is the device's own and the tolerance is yours. The [measurements page](/measurements) runs the same helpers on every engine of the registry.
+
 ## The tools
 
 ```ts

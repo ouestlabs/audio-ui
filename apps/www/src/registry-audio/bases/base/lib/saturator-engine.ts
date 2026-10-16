@@ -1,3 +1,4 @@
+import { createOversamplingDelay } from "@/registry-audio/bases/base/lib/oversampling";
 import {
   type SaturatorState,
   saturatorSettings,
@@ -20,7 +21,7 @@ export interface SaturatorEngine {
  *
  * ```
  * input → drive → shaper (4x) → wet ──┐
- *       → dry ────────────────────────┴→ level → output
+ *       → dry (waits as long as the shaper) ────────────────────────┴→ level → output
  * ```
  *
  * The drive is a gain before the table of the curve, so turning it never
@@ -36,12 +37,13 @@ export function createSaturatorEngine(
   const shaper = ctx.createWaveShaper();
   const wet = ctx.createGain();
   const dry = ctx.createGain();
+  const dryDelay = createOversamplingDelay(ctx, "4x");
   const level = ctx.createGain();
   shaper.oversample = "4x";
   shaper.curve = saturatorTable(initial.curve);
   let { curve } = initial;
   input.connect(drive).connect(shaper).connect(wet).connect(level);
-  input.connect(dry).connect(level);
+  input.connect(dryDelay).connect(dry).connect(level);
   level.connect(output);
 
   const first = saturatorSettings(initial);
@@ -55,7 +57,16 @@ export function createSaturatorEngine(
 
   return {
     dispose: () => {
-      for (const node of [input, drive, shaper, wet, dry, level, output]) {
+      for (const node of [
+        input,
+        dryDelay,
+        drive,
+        shaper,
+        wet,
+        dry,
+        level,
+        output,
+      ]) {
         node.disconnect();
       }
     },

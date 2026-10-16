@@ -83,6 +83,10 @@ engine.dispose();
 
 The drive is a gain before one fixed soft-clip table, so turning it never rebuilds the table, and the shaper oversamples 4x to keep the clip from aliasing.
 
+## Latency
+
+The shaper oversamples 4x, which delays the signal by 4 ms in Chrome (192 samples). The dry path waits as long, so a partial mix does not comb; the device then has a latency of 4 ms to report to a host. The number was measured in Chrome and the specification does not give it, so [measure it](/measurements) in another browser.
+
 ## The tools
 
 ```ts

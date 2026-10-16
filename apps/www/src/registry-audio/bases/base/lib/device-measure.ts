@@ -1,4 +1,14 @@
-/** Rendering and measuring helpers for the conformance checks: everything runs in an `OfflineAudioContext`, so a check hears exactly what the engine makes, with no clock and no speakers. */
+/**
+ * Measure an engine against what its device claims. Everything runs in an
+ * `OfflineAudioContext`, so a measurement hears exactly what the engine makes,
+ * with no clock and no speakers.
+ *
+ * It is made for the host that brings its own engine: give `measureResponse`
+ * your engine's factory, a state and the curve of the device (such as
+ * `equalizerCurve(state)`), and it says how far what your engine does is from
+ * what the panel draws. A measurement, not a certification: the curve is the
+ * device's own, and the tolerance is yours to choose.
+ */
 
 export const SAMPLE_RATE = 48_000;
 
@@ -130,4 +140,56 @@ export function reverberationTime(response: Float32Array) {
   const from = at(-5);
   const to = at(-35);
   return (((to - from) / SAMPLE_RATE) * 60) / 30;
+}
+
+/** What a measurement of a frequency response found. */
+export interface ResponseMeasurement {
+  /** The frequency, in hertz, where the engine is furthest from the curve. */
+  at: number;
+  /** How far, in dB. 0 when no tested frequency had a curve audible enough to compare. */
+  worstDb: number;
+}
+
+const RESPONSE_FREQUENCIES = [
+  31, 62, 125, 250, 500, 1000, 2000, 4000, 8000, 12_000, 16_000,
+];
+const IMPULSE_SECONDS = 0.5;
+/** A level under this is below what a 24-bit signal can show, so it is not compared. */
+const AUDIBLE_FLOOR_DB = -50;
+
+/**
+ * How far an engine's frequency response is from `curve`, the gain in dB the
+ * device draws at each frequency. The response is read from the engine's
+ * impulse response, at 11 frequencies from 31 Hz to 16 kHz.
+ */
+export async function measureResponse<State>(
+  create: EngineFactory<State>,
+  state: State,
+  curve: (hertz: number) => number,
+  frequencies: readonly number[] = RESPONSE_FREQUENCIES
+): Promise<ResponseMeasurement> {
+  const [response] = await render(create, state, impulse(), IMPULSE_SECONDS);
+  let worstDb = 0;
+  let at = 0;
+  for (const hertz of frequencies) {
+    const wanted = curve(hertz);
+    if (!response || wanted < AUDIBLE_FLOOR_DB) {
+      continue;
+    }
+    const gap = Math.abs(magnitudeDb(response, hertz) - wanted);
+    if (gap > worstDb) {
+      worstDb = gap;
+      at = hertz;
+    }
+  }
+  return { at, worstDb };
+}
+
+/** How long an engine delays a signal, in milliseconds, read where its impulse response peaks. A host reports this to compensate it. */
+export async function measureLatency<State>(
+  create: EngineFactory<State>,
+  state: State
+): Promise<number> {
+  const [response] = await render(create, state, impulse(), 0.3);
+  return response ? (peakIndex(response) / SAMPLE_RATE) * 1000 : 0;
 }

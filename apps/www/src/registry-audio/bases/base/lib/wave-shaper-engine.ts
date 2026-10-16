@@ -1,4 +1,5 @@
 import type { InstrumentBinding } from "@audio-ui/core/device";
+import { createOversamplingDelay } from "@/registry-audio/bases/base/lib/oversampling";
 import {
   type WaveShaperNote,
   type WaveShaperState,
@@ -99,6 +100,7 @@ export function createWaveShaperEngine(
       const detuned = ctx.createOscillator();
       const mixed = ctx.createGain();
       const dry = ctx.createGain();
+      const dryDelay = createOversamplingDelay(ctx, "4x");
       const wet = ctx.createGain();
       const shaper = ctx.createWaveShaper();
       const filter = ctx.createBiquadFilter();
@@ -122,11 +124,20 @@ export function createWaveShaperEngine(
 
       main.connect(mixed);
       detuned.connect(mixed);
-      mixed.connect(dry).connect(filter);
+      mixed.connect(dryDelay).connect(dry).connect(filter);
       mixed.connect(shaper).connect(wet).connect(filter);
       filter.connect(envelope).connect(output);
       main.onended = () => {
-        for (const node of [main, detuned, mixed, dry, wet, shaper, filter]) {
+        for (const node of [
+          main,
+          detuned,
+          mixed,
+          dryDelay,
+          dry,
+          wet,
+          shaper,
+          filter,
+        ]) {
           node.disconnect();
         }
         envelope.disconnect();
