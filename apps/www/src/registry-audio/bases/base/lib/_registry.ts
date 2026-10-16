@@ -46,6 +46,36 @@ const items: RegistryItem[] = [
     type: "registry:lib",
   },
   {
+    categories: ["lib", "audio", "device"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "The compressor as a device: its parameters and what they mean, the numbers that go on the nodes for a state, and the curve a state plays, with no panel and no audio in it.",
+    files: [
+      {
+        path: "lib/compressor-device.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "compressor-device",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "A compressor on the Web Audio API for a compressor state: the node, its make-up taken back out or kept, a dry and compressed mix aligned to the node's lookahead, parameters that move without a click.",
+    files: [
+      {
+        path: "lib/compressor-engine.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "compressor-engine",
+    registryDependencies: ["@audio-ui/compressor-device"],
+    type: "registry:lib",
+  },
+  {
     categories: ["lib", "audio", "timeline"],
     dependencies: ["@audio-ui/react"],
     description:

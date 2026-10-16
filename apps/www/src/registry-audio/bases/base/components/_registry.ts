@@ -404,6 +404,29 @@ export const components: RegistryItem[] = [
     type: "registry:example",
   },
   {
+    categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react", "@audio-ui/core"],
+    description:
+      "A compressor you can plug in: its state, a panel that draws it, a Web Audio engine that plays it and the tools an agent drives it with, side by side. Play a pulsing signal, turn the knobs, or type a tool call as a model would send it",
+    files: [
+      {
+        path: "components/device/block-compressor.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-compressor",
+    registryDependencies: [
+      "@audio-ui/compressor-panel",
+      "@audio-ui/compressor-device",
+      "@audio-ui/compressor-engine",
+      "@audio-ui/use-master-bus",
+      "@audio-ui/web-audio",
+      "@shadcn/button",
+      "@shadcn/textarea",
+    ],
+    type: "registry:block",
+  },
+  {
     categories: ["mixer", "fader", "meter", "knob"],
     description:
       "Mixing console: four tracks of a loop with pan, fader, meter, mute and solo, into a master with a stereo meter, every meter reading its real signal",

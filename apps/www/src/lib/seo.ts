@@ -4,6 +4,7 @@ import { siteConfig } from "@/lib/config";
 import { getCategoryDocsDescription } from "@/lib/registry";
 
 const CANONICAL_COMPONENT_DOC_SLUGS = [
+  "compressor",
   "envelope",
   "fader",
   "knob",

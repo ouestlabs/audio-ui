@@ -1,0 +1,120 @@
+import { describe, expect, mock, test } from "bun:test";
+import { defineDevice } from "@audio-ui/core/device";
+import { fireEvent, render, within } from "@testing-library/react";
+import { DevicePanel } from "@/registry-audio/bases/base/audio/elements/device-panel";
+
+// A device the registry has never heard of: the panel is made from its descriptors.
+const tremolo = defineDevice({
+  description: "Moves the level up and down.",
+  id: "acme.tremolo",
+  name: "Tremolo",
+  parameters: [
+    { default: true, id: "on", kind: "toggle", label: "Active" },
+    {
+      default: 5,
+      id: "rate",
+      label: "Rate",
+      max: 20,
+      min: 0.5,
+      scale: "log",
+      step: 0.5,
+      unit: "Hz",
+    },
+    {
+      default: 50,
+      id: "depth",
+      label: "Depth",
+      max: 100,
+      min: 0,
+      step: 1,
+      unit: "%",
+    },
+  ],
+});
+
+function setup(value = tremolo.defaults(), exclude?: readonly string[]) {
+  const onValueChange = mock((_state: unknown) => undefined);
+  const view = render(
+    <DevicePanel
+      device={tremolo}
+      exclude={exclude as never}
+      onValueChange={onValueChange}
+      value={value}
+    />
+  );
+  return { onValueChange, view: within(view.container) };
+}
+
+describe("DevicePanel", () => {
+  test("is a group named after the device", () => {
+    const { view } = setup();
+    expect(view.getByRole("group", { name: "Tremolo" })).toBeTruthy();
+  });
+
+  test("makes a knob per number and a toggle per switch, from the descriptors", () => {
+    const { view } = setup();
+    expect(
+      view
+        .getAllByRole("slider")
+        .map((slider) => slider.getAttribute("aria-label"))
+    ).toEqual(["Rate", "Depth"]);
+    expect(
+      view.getByRole("button", { name: "Active" }).getAttribute("aria-pressed")
+    ).toBe("true");
+  });
+
+  test("prints a value as the device formats it, with its unit", () => {
+    const { view } = setup();
+    expect(
+      view.getByRole("slider", { name: "Rate" }).getAttribute("aria-valuetext")
+    ).toBe("5.0 Hz");
+    expect(
+      view.getByRole("slider", { name: "Depth" }).getAttribute("aria-valuetext")
+    ).toBe("50 %");
+  });
+
+  test("draws the state it is given and keeps none of its own", () => {
+    const { view } = setup(tremolo.set(tremolo.defaults(), "depth", 80));
+    const depth = view.getByRole("slider", {
+      name: "Depth",
+    }) as HTMLInputElement;
+    expect(depth.value).toBe("80");
+  });
+
+  test("a toggle sends the whole new state, through the device", () => {
+    const { onValueChange, view } = setup();
+    fireEvent.click(view.getByRole("button", { name: "Active" }));
+    expect(onValueChange).toHaveBeenCalledTimes(1);
+    expect(onValueChange.mock.calls[0]?.[0]).toEqual({
+      depth: 50,
+      on: false,
+      rate: 5,
+    });
+  });
+
+  test("a key on a knob sends a state with that parameter changed and inside its bounds", () => {
+    const { onValueChange, view } = setup(
+      tremolo.set(tremolo.defaults(), "depth", 100)
+    );
+    const slider = view.getByRole("slider", { name: "Depth" });
+    fireEvent.keyDown(slider, { key: "ArrowUp" });
+    for (const [state] of onValueChange.mock.calls) {
+      expect((state as { depth: number }).depth).toBeLessThanOrEqual(100);
+    }
+    fireEvent.keyDown(slider, { key: "ArrowDown" });
+    expect(onValueChange).toHaveBeenCalled();
+    const [[state]] = onValueChange.mock.calls.slice(-1) as [
+      [{ depth: number }],
+    ];
+    expect(state.depth).toBe(99);
+  });
+
+  test("leaves out the parameters it is told to", () => {
+    const { view } = setup(tremolo.defaults(), ["rate"]);
+    expect(
+      view
+        .getAllByRole("slider")
+        .map((slider) => slider.getAttribute("aria-label"))
+    ).toEqual(["Depth"]);
+  });
+});

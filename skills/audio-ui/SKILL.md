@@ -105,6 +105,7 @@ Run commands with the project's package manager, read from its lockfile: `npx sh
 - `ai-pure-reducers` - `apply` is pure and re-clamps the model's output
 - `ai-current-state` - Give the model the state it edits
 - `ai-structured-tool-calls` - Tool calls with validated arguments, never parsed prose
+- `ai-device-contract` - A device is a state and a description (`defineDevice`), with a controlled panel, an engine and tools, not a widget with audio inside
 
 ## Component Selection
 
@@ -122,6 +123,7 @@ Run commands with the project's package manager, read from its lockfile: `npx sh
 | Drum pads, sample triggers | `pad` |
 | Playable keyboard | `piano` |
 | Play from a MIDI keyboard | `use-midi-input` hook, `midi-connect-control` |
+| A compressor, or any effect, as a state a host and an agent can drive | `block-compressor`, or `defineDevice` and `device-panel` |
 | Tune an instrument, name the note of a sound | `tuner`, with `use-microphone` and `use-pitch` |
 | Note editor | `piano-roll` |
 | Play, stop, record, loop, bars and tempo | `transport` |

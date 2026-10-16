@@ -1,0 +1,48 @@
+---
+title: A device is a state and a description, not a widget with audio inside
+impact: MEDIUM
+impactDescription: an effect a host can plug into its engine and an agent can drive, without rewriting it
+tags: device, state, agent, tools, plug-in, daw
+---
+
+## A device is a state and a description, not a widget with audio inside
+
+A component that creates its own nodes, keeps its own state and plays its own demo signal can only be used as it is: a DAW cannot give it a project's state or take its engine out, and an agent has no values to read or ranges to respect. Describe the device once, as parameters, and let a panel, an engine and an agent each use that description.
+
+**Incorrect (state, nodes and ranges inside one component):**
+
+```tsx
+function Compressor() {
+  const [threshold, setThreshold] = useState(-18); // the host cannot read or set this
+  useEffect(() => {
+    const node = ctx.createDynamicsCompressor();
+    node.threshold.value = threshold; // a jump, and a range only this file knows
+    // ...
+  }, [threshold]);
+  return <Knob min={-60} max={0} value={threshold} onValueChange={setThreshold} />;
+}
+```
+
+**Correct (a device: a state, a controlled panel, an engine, tools):**
+
+```bash
+npx shadcn@latest add @audio-ui/block-compressor
+```
+
+```tsx
+import { deviceTools } from "@audio-ui/core/device";
+import { CompressorPanel } from "@/components/audio-ui/compressor-panel";
+import { compressorDevice } from "@/lib/compressor-device";
+import { createCompressorEngine } from "@/lib/compressor-engine";
+
+const [state, setState] = useState(() => compressorDevice.defaults()); // a plain object: store it, save it
+<CompressorPanel onValueChange={setState} value={state} />; // controlled, no audio inside
+
+const engine = createCompressorEngine(ctx, state); // plays a state; ramps, no click
+engine.update(state);
+
+const [set] = deviceTools(compressorDevice); // for any agent: JSON Schema in, a sentence out
+const { state: next, summary } = set.run(state, modelInput); // clamped, refused by name, never throws
+```
+
+A device of your own is `defineDevice({ id, name, description, parameters })` from `@audio-ui/core/device`: `DevicePanel` and `deviceTools` work on it with no further code, and a host with its own engine implements `DeviceBinding` (`update(state)`, `dispose()`) instead of using the Web Audio one. Keep the state a plain object keyed by parameter id and store the device's `id`, not the panel that draws it.

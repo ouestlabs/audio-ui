@@ -107,6 +107,40 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
+    categories: ["device", "knob"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "A panel for any device: a knob per number and a toggle per switch, from its descriptors, controlled by a state a host owns.",
+    files: [
+      {
+        path: "audio/elements/device-panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "device-panel",
+    registryDependencies: ["@audio-ui/knob", "@shadcn/toggle"],
+    type: "registry:ui",
+  },
+  {
+    categories: ["device", "plot"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "The face of the compressor device: the transfer curve it plays, with the threshold and the level going in on it, over the device's knobs.",
+    files: [
+      {
+        path: "audio/elements/compressor-panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "compressor-panel",
+    registryDependencies: [
+      "@audio-ui/device-panel",
+      "@audio-ui/plot",
+      "@audio-ui/compressor-device",
+    ],
+    type: "registry:ui",
+  },
+  {
     dependencies: ["@audio-ui/react"],
     description:
       "The level of a sound across frequencies, live, on a log axis in hertz, with held peaks.",
