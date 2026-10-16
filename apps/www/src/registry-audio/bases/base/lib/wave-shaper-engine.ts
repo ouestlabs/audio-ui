@@ -1,4 +1,4 @@
-import type { DeviceBinding } from "@audio-ui/core/device";
+import type { InstrumentBinding } from "@audio-ui/core/device";
 import {
   type WaveShaperNote,
   type WaveShaperState,
@@ -15,11 +15,8 @@ const LEVEL = 0.4;
 /** Two oscillators in one voice: each at half, so the pair is not louder than one. */
 const OSCILLATOR_LEVEL = 0.5;
 
-export interface WaveShaperEngine extends DeviceBinding<WaveShaperState> {
-  /** Lets the held note die away. Does nothing with none held. */
-  noteOff: () => void;
-  /** Starts the note, or glides the one being held to it. */
-  noteOn: (note: WaveShaperNote) => void;
+export interface WaveShaperEngine
+  extends InstrumentBinding<WaveShaperState, WaveShaperNote> {
   /** Connect this to the destination, or to the next device. */
   readonly output: AudioNode;
 }

@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { deviceTools } from "@audio-ui/core/device";
 import {
   pocketSynthCutoff,
   pocketSynthDevice,
@@ -195,5 +196,30 @@ describe("the pocket synth device", () => {
     expect(applied.rejected).toEqual([
       { id: "wave", reason: "not one of the options" },
     ]);
+  });
+});
+
+describe("an agent playing the pocket synth", () => {
+  const [, , play] = deviceTools(pocketSynthDevice);
+
+  test("the play tool is there and gives a note the engine takes", () => {
+    expect(play?.name).toBe("audioui_pocket_synth_play");
+    const result = play?.run(pocketSynthDevice.defaults(), {
+      cutoff: 3000,
+      frequency: 440,
+    });
+    expect(result?.note).toEqual({ cutoff: 3000, frequency: 440 });
+    const { created, ctx } = fakeContext();
+    const engine = createPocketSynthEngine(ctx, pocketSynthDevice.defaults());
+    engine.noteOn(result?.note as { cutoff: number; frequency: number });
+    expect(created.oscillators[0]?.frequency.sets[0]?.value).toBe(440);
+    expect(created.filters[0]?.frequency.sets[0]?.value).toBe(3000);
+  });
+
+  test("a pitch beyond the instrument is brought in, not played", () => {
+    const result = play?.run(pocketSynthDevice.defaults(), {
+      frequency: 20_000,
+    });
+    expect(result?.note?.frequency).toBe(1046);
   });
 });

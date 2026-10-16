@@ -9,7 +9,8 @@ const MAX_CUTOFF = 8000;
  * A small monophonic synth as a device: a waveform, a filter and a level, with
  * no panel and no audio in it. It is an instrument, so it is played with
  * notes (a pitch and a filter cutoff, see `pocketSynthPitch`) and these
- * parameters shape the timbre. A panel draws its state, an engine plays it, an
+ * parameters shape the timbre. Its `note` descriptors give an agent the
+ * `audioui_pocket_synth_play` tool. A panel draws its state, an engine plays it, an
  * agent drives it through `deviceTools(pocketSynthDevice)`.
  */
 export const pocketSynthDevice = defineDevice({
@@ -18,6 +19,26 @@ export const pocketSynthDevice = defineDevice({
   id: "audioui.pocket-synth",
   kind: "instrument",
   name: "Pocket Synth",
+  note: [
+    {
+      default: 220,
+      id: "frequency",
+      label: "Pitch",
+      max: MAX_FREQUENCY,
+      min: MIN_FREQUENCY,
+      scale: "log",
+      unit: "Hz",
+    },
+    {
+      default: 1000,
+      id: "cutoff",
+      label: "Filter cutoff",
+      max: MAX_CUTOFF,
+      min: MIN_CUTOFF,
+      scale: "log",
+      unit: "Hz",
+    },
+  ],
   parameters: [
     {
       default: "square",

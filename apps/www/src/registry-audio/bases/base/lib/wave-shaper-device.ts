@@ -19,6 +19,25 @@ export const waveShaperDevice = defineDevice({
   id: "audioui.wave-shaper",
   kind: "instrument",
   name: "Wave Shaper",
+  note: [
+    {
+      default: 220,
+      id: "frequency",
+      label: "Pitch",
+      max: MAX_FREQUENCY,
+      min: MIN_FREQUENCY,
+      scale: "log",
+      unit: "Hz",
+    },
+    {
+      default: 1,
+      id: "resonance",
+      label: "Resonance",
+      max: MIN_RESONANCE + RESONANCE_RANGE,
+      min: MIN_RESONANCE,
+      step: 0.1,
+    },
+  ],
   parameters: [
     {
       default: "sine",

@@ -88,6 +88,13 @@ export interface DeviceDefinition<
   /** Whether it processes sound or makes it. @default "effect" */
   kind?: "effect" | "instrument";
   name: string;
+  /**
+   * What a note of this instrument is made of, as numbers with a range: a pitch
+   * in hertz, a filter cutoff. An instrument that has them is played by a host
+   * through `noteOn(note)` and by an agent through the `<id>_play` tool, which
+   * is derived from them. Only an instrument has notes. `duration` is reserved.
+   */
+  note?: readonly NumberParameter[];
   parameters: Parameters;
 }
 
@@ -113,6 +120,8 @@ export interface DeviceDescription {
   id: string;
   kind: "effect" | "instrument";
   name: string;
+  /** The numbers a note is made of, for an instrument that is played. */
+  note?: ParameterDescription[];
   parameters: ParameterDescription[];
 }
 
@@ -183,6 +192,8 @@ export interface Device<Parameters extends readonly ParameterDescriptor[]> {
   readonly name: string;
   /** Where a value sits along its parameter's travel, from 0 to 1, on its scale. A toggle is 0 or 1, a choice its place in the list. */
   normalize: (id: Parameters[number]["id"], value: ParameterValue) => number;
+  /** What a note of the instrument is made of. Empty for an effect, and for an instrument that is not played by notes. */
+  readonly note: readonly NumberParameter[];
   readonly parameters: Parameters;
   /** A state with every value in bounds: unknown ids dropped, missing ones defaulted, `NaN` replaced. */
   sanitize: (
@@ -307,6 +318,44 @@ function decimalsOf(step: number | undefined) {
   return Math.min(6, (String(step).split(".")[1] ?? "").length);
 }
 
+/** A parameter as an agent or a catalog reads it. */
+function describeParameter(
+  parameter: ParameterDescriptor
+): ParameterDescription {
+  if (parameter.kind === "toggle") {
+    return {
+      default: parameter.default,
+      id: parameter.id,
+      label: parameter.label,
+      type: "boolean",
+    };
+  }
+  if (parameter.kind === "choice") {
+    return {
+      default: parameter.default,
+      id: parameter.id,
+      label: parameter.label,
+      options: parameter.options.map(({ label, value }) => ({
+        label,
+        value,
+      })),
+      type: "string",
+    };
+  }
+  const scale = parameter.scale ?? "linear";
+  return {
+    default: parameter.default,
+    id: parameter.id,
+    label: parameter.label,
+    max: parameter.max,
+    min: parameter.min,
+    scale: typeof scale === "string" ? scale : "custom",
+    step: parameter.step,
+    type: "number",
+    unit: parameter.unit,
+  };
+}
+
 /**
  * Defines a device from its parameters. The definition is checked once, here:
  * a duplicate id, a default outside its range or a log scale from zero throws
@@ -319,6 +368,27 @@ export function defineDevice<
   const { parameters } = definition;
   if (!definition.id.trim()) {
     throw new DeviceDefinitionError("A device needs an id.");
+  }
+  const note = definition.note ?? [];
+  if (note.length > 0 && definition.kind !== "instrument") {
+    throw new DeviceDefinitionError(
+      `${definition.id}: only an instrument has notes.`
+    );
+  }
+  const noteIds = new Set<string>();
+  for (const part of note) {
+    check(part, `${definition.id}.note`);
+    if (part.id === "duration") {
+      throw new DeviceDefinitionError(
+        `${definition.id}.note.duration: this id is reserved for how long a note lasts.`
+      );
+    }
+    if (noteIds.has(part.id)) {
+      throw new DeviceDefinitionError(
+        `${definition.id}.note.${part.id}: two parts of a note have this id.`
+      );
+    }
+    noteIds.add(part.id);
   }
   const byId = new Map<string, ParameterDescriptor>();
   for (const parameter of parameters) {
@@ -445,6 +515,7 @@ export function defineDevice<
         parameter.max
       );
     },
+    note,
     parameters,
     apply: (state, changes) => {
       const applied: DeviceChange[] = [];
@@ -479,40 +550,8 @@ export function defineDevice<
       id: definition.id,
       kind: definition.kind ?? "effect",
       name: definition.name,
-      parameters: parameters.map((parameter): ParameterDescription => {
-        if (parameter.kind === "toggle") {
-          return {
-            default: parameter.default,
-            id: parameter.id,
-            label: parameter.label,
-            type: "boolean",
-          };
-        }
-        if (parameter.kind === "choice") {
-          return {
-            default: parameter.default,
-            id: parameter.id,
-            label: parameter.label,
-            options: parameter.options.map(({ label, value }) => ({
-              label,
-              value,
-            })),
-            type: "string",
-          };
-        }
-        const scale = parameter.scale ?? "linear";
-        return {
-          default: parameter.default,
-          id: parameter.id,
-          label: parameter.label,
-          max: parameter.max,
-          min: parameter.min,
-          scale: typeof scale === "string" ? scale : "custom",
-          step: parameter.step,
-          type: "number",
-          unit: parameter.unit,
-        };
-      }),
+      note: note.length > 0 ? note.map(describeParameter) : undefined,
+      parameters: parameters.map(describeParameter),
     }),
     sanitize: (state) => {
       const next = defaults() as Record<string, ParameterValue>;

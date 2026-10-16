@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { deviceTools } from "@audio-ui/core/device";
 import {
   waveShaperCurve,
   waveShaperCutoff,
@@ -195,5 +196,19 @@ describe("createWaveShaperEngine", () => {
     engine.dispose();
     expect(made.oscillators.every((o) => o.stopped.length === 1)).toBe(true);
     expect(made.gains[0]?.disconnected).toBe(1);
+  });
+});
+
+describe("an agent playing the wave shaper", () => {
+  const [, , play] = deviceTools(waveShaperDevice);
+
+  test("the play tool gives a pitch and a resonance, in bounds", () => {
+    expect(play?.name).toBe("audioui_wave_shaper_play");
+    const result = play?.run(waveShaperDevice.defaults(), {
+      frequency: 110,
+      resonance: 40,
+    });
+    expect(result?.note).toEqual({ frequency: 110, resonance: 15.5 });
+    expect(result?.summary).toContain("Resonance: 15.5 (brought into range)");
   });
 });

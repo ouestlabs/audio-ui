@@ -1,4 +1,4 @@
-import type { DeviceBinding } from "@audio-ui/core/device";
+import type { InstrumentBinding } from "@audio-ui/core/device";
 import type {
   PocketSynthNote,
   PocketSynthState,
@@ -12,11 +12,8 @@ const RELEASE_SECONDS = 0.05;
 const LEVEL = 0.3;
 const RESONANCE = 5;
 
-export interface PocketSynthEngine extends DeviceBinding<PocketSynthState> {
-  /** Lets the held note die away. Does nothing with none held. */
-  noteOff: () => void;
-  /** Starts the note, or glides the one being held to it. */
-  noteOn: (note: PocketSynthNote) => void;
+export interface PocketSynthEngine
+  extends InstrumentBinding<PocketSynthState, PocketSynthNote> {
   /** Connect this to the destination, or to the next device. */
   readonly output: AudioNode;
 }

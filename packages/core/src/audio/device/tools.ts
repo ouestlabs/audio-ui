@@ -1,4 +1,9 @@
-import type { Device, ParameterDescriptor, ParameterValue } from "./define.ts";
+import {
+  type Device,
+  defineDevice,
+  type ParameterDescriptor,
+  type ParameterValue,
+} from "./define.ts";
 
 /** The subset of JSON Schema the tools use: what OpenAI, Anthropic, MCP and the AI SDK all accept as an input schema. */
 export interface JsonSchema {
@@ -14,7 +19,14 @@ export interface JsonSchema {
   [key: string]: unknown;
 }
 
+/** How long a note lasts when a call does not say, and the shortest and longest it may ask for, in seconds. */
+export const NOTE_DURATION = { default: 0.5, max: 30, min: 0.05 } as const;
+
 export interface DeviceToolResult<State> {
+  /** How long the note lasts, in seconds, for the call of a `<id>_play` tool. The host gives it to `playNote`. */
+  duration?: number;
+  /** The note to play, for the call of a `<id>_play` tool: its parts by id, in bounds. The host gives it to `noteOn`. */
+  note?: Record<string, number>;
   /** The state after the call. The host stores it and drives its engine and view from it. */
   state: State;
   /** What happened, in a sentence a model can read back: the new values, what was adjusted, what was refused and why. */
@@ -165,5 +177,82 @@ export function deviceTools<
       };
     },
   };
-  return [set, reset];
+  if (device.note.length === 0) {
+    return [set, reset];
+  }
+  return [set, reset, playTool(device, base)];
+}
+
+/** `<id>_play`: the call that plays a note, from the descriptors of the instrument's note. */
+function playTool<const Parameters extends readonly ParameterDescriptor[]>(
+  device: Device<Parameters>,
+  base: string
+): DeviceTool<Record<string, ParameterValue>> {
+  // The note is checked as any set of parameters is: in bounds, refused by name.
+  const noteDevice = defineDevice({
+    description: device.description,
+    id: `${device.id}.note`,
+    kind: "instrument",
+    name: `${device.name} note`,
+    parameters: device.note,
+  });
+  const properties: Record<string, JsonSchema> = {
+    ...Object.fromEntries(
+      device.note.map((part) => [part.id, describeParameter(part)])
+    ),
+    duration: {
+      description: `How long the note lasts, in seconds, from ${NOTE_DURATION.min} to ${NOTE_DURATION.max}, ${NOTE_DURATION.default} by default.`,
+      maximum: NOTE_DURATION.max,
+      minimum: NOTE_DURATION.min,
+      type: "number",
+    },
+  };
+  return {
+    description: `Play a note on the ${device.name} with the sound it has now. Give the parts of the note you want: the others take their defaults. It sounds for the duration, then lets go.`,
+    inputSchema: {
+      additionalProperties: false,
+      properties,
+      type: "object",
+    },
+    name: `${base}_play`,
+    run: (state, input) => {
+      const asked = isRecord(input) ? input : {};
+      const { duration: askedDuration, ...parts } = asked;
+      const applied = noteDevice.apply(noteDevice.defaults(), parts);
+      const notes = [
+        ...applied.changes.map(
+          (change) =>
+            `${noteDevice.parameters.find((part) => part.id === change.id)?.label ?? change.id}: ${noteDevice.format(change.id as never, change.to)}${
+              change.adjusted ? " (brought into range)" : ""
+            }`
+        ),
+        ...applied.rejected.map(
+          (rejection) => `${rejection.id}: refused, ${rejection.reason}`
+        ),
+      ];
+      let duration: number = NOTE_DURATION.default;
+      if (askedDuration !== undefined) {
+        if (
+          typeof askedDuration === "number" &&
+          Number.isFinite(askedDuration)
+        ) {
+          duration = Math.min(
+            NOTE_DURATION.max,
+            Math.max(NOTE_DURATION.min, askedDuration)
+          );
+          if (duration !== askedDuration) {
+            notes.push(`duration: ${duration} s (brought into range)`);
+          }
+        } else {
+          notes.push("duration: refused, not a number");
+        }
+      }
+      return {
+        duration,
+        note: { ...applied.state } as Record<string, number>,
+        state,
+        summary: `Playing for ${duration} s${notes.length ? `: ${notes.join("; ")}` : "."}`,
+      };
+    },
+  };
 }
