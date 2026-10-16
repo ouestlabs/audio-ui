@@ -205,7 +205,7 @@ export const hooks: RegistryItem[] = [
       },
     ],
     name: "use-noise-through-eq",
-    registryDependencies: ["@audio-ui/web-audio"],
+    registryDependencies: ["@audio-ui/pink-noise", "@audio-ui/web-audio"],
     type: "registry:hook",
   },
   {

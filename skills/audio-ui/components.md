@@ -33,6 +33,7 @@ Without the registry, the headless primitive comes from the package: `import { K
 | `spectrum-analyzer` | `SpectrumAnalyzer` from `@/components/audio-ui/spectrum-analyzer` | registry only, built on `Plot` | A live spectrum on a log frequency axis with held peaks. Feed it `useSpectrum(analyser)` from the `use-spectrum` hook, with the same `minHz`/`maxHz` |
 | `device-panel` | `DevicePanel` from `@/components/audio-ui/device-panel` | registry only | A panel for any `defineDevice` device: a knob per number and a toggle per switch, from its descriptors. Controlled: `value` and `onValueChange(state)`; it keeps no state |
 | `compressor-panel` | `CompressorPanel` from `@/components/audio-ui/devices/compressor/panel` | registry only | The compressor device's face: the transfer curve it plays, with the threshold and the level going in, over its knobs. Pair it with the `compressor-device` and `compressor-engine` libs |
+| `equalizer-panel` | `EqualizerPanel` from `@/components/audio-ui/devices/equalizer/panel` | registry only | The equalizer device's face: the curve of its four bands with a handle on each to drag its frequency and gain, an optional live spectrum behind it, over its knobs. Pair it with the `equalizer-device` and `equalizer-engine` libs |
 | `tuner` | `Tuner` from `@/components/audio-ui/tuner` | registry only | A chromatic tuner's display: the nearest note, a needle on a scale of cents and the frequency, in the primary color when in tune. It follows a `source`: `usePitch(analyser)` from `use-pitch`, fed by `useMicrophone()` (start it from a click) or any `AnalyserNode` |
 | `plot` | `Plot`, `PlotGraph`, `PlotCurve`, `PlotHandle`, `PlotTraceArea`… from `@/components/audio-ui/plot` | `@audio-ui/react/plot` | A curve with draggable points: equalizers, filters, compressors |
 
@@ -58,4 +59,4 @@ Without the registry, the headless primitive comes from the package: `import { K
 import { BlockPocketSynth } from "@/components/examples/block-pocket-synth";
 ```
 
-Available today: `block-pocket-synth`, `block-wave-shaper`, `block-waveform-player`, `block-piano-roll`, `block-timeline`, `block-drum-rack`, `block-mixer`, `block-compressor`. The full catalog (with demos) is at https://www.audio-ui.dev/components, or ask the MCP `search_catalog` tool.
+Available today: `block-pocket-synth`, `block-wave-shaper`, `block-waveform-player`, `block-piano-roll`, `block-timeline`, `block-drum-rack`, `block-mixer`, `block-compressor`, `block-equalizer`. The full catalog (with demos) is at https://www.audio-ui.dev/components, or ask the MCP `search_catalog` tool.

@@ -23,6 +23,7 @@
     "scrubber",
     "---Blocks---",
     "mixer",
-    "compressor"
+    "compressor",
+    "equalizer"
   ]
 }

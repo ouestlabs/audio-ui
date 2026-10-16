@@ -5,6 +5,7 @@ import { getCategoryDocsDescription } from "@/lib/registry";
 
 const CANONICAL_COMPONENT_DOC_SLUGS = [
   "compressor",
+  "equalizer",
   "envelope",
   "fader",
   "knob",

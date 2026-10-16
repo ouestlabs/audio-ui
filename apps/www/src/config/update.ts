@@ -8,6 +8,7 @@ export const DOCS_MENU_UPDATES: Record<string, string> = {
   pad: "New",
   plot: "New",
   compressor: "New",
+  equalizer: "New",
   "piano-roll": "New",
   scrubber: "New",
   sequencer: "Updated",

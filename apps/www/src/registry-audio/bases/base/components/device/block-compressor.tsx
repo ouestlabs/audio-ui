@@ -147,7 +147,7 @@ export default function BlockCompressor() {
   const togglePlaying = useCallback(() => setPlaying((on) => !on), []);
 
   return (
-    <div className="cn-audio-panel flex w-full min-w-0 flex-col gap-4 border bg-card p-4">
+    <div className="w-full min-w-0">
       <CompressorPanel level={level} onValueChange={setState} value={state}>
         <Button
           aria-label={

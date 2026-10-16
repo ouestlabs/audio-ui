@@ -9,7 +9,7 @@ import type {
   ParameterValue,
   ToggleParameter,
 } from "@audio-ui/core/device";
-import { useCallback } from "react";
+import { type ReactNode, useCallback } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import { Toggle } from "@/registry/bases/base/ui/toggle";
 import { Knob } from "@/registry-audio/bases/base/audio/elements/knob";
@@ -21,15 +21,27 @@ interface ControlProps<Parameter> {
   device: AnyDevice;
   /** A parameter that has no effect for now: its knob is drawn off. */
   disabled?: boolean;
+  /** The group the control is shown in: a label that starts with its name drops it, since the group already says it. */
+  group?: string;
   /** Called with the whole new state. */
   onValueChange: (state: AnyState) => void;
   parameter: Parameter;
   value: AnyState;
 }
 
+/** `Low mid gain` under `Low mid` reads `Gain`. */
+function withoutGroup(label: string, group?: string) {
+  if (!(group && label.startsWith(`${group} `))) {
+    return label;
+  }
+  const rest = label.slice(group.length + 1);
+  return rest.charAt(0).toUpperCase() + rest.slice(1);
+}
+
 function NumberControl({
   device,
   disabled,
+  group,
   onValueChange,
   parameter,
   value,
@@ -45,9 +57,13 @@ function NumberControl({
     [device, onValueChange, parameter.id, value]
   );
   return (
-    <div className="flex flex-col items-center gap-1.5">
-      <span aria-hidden="true" className="text-muted-foreground text-xs">
-        {parameter.label}
+    <div className="flex min-w-0 max-w-full flex-col items-center gap-1.5">
+      <span
+        aria-hidden="true"
+        className="max-w-full truncate text-muted-foreground text-xs"
+        title={parameter.label}
+      >
+        {withoutGroup(parameter.label, group)}
       </span>
       <Knob
         anchor={parameter.anchor}
@@ -158,6 +174,92 @@ function ChoiceOption({ label, onPick, pressed, value }: ChoiceOptionProps) {
   );
 }
 
+interface DeviceFrameProps {
+  children: ReactNode;
+  className?: string;
+}
+
+/** The frame of a device: a bordered strip with a header over a body, as a device sits in a chain. */
+function DeviceFrame({ children, className }: DeviceFrameProps) {
+  return (
+    <div
+      className={cn("flex w-full min-w-0 flex-col border bg-card", className)}
+      data-slot="device-frame"
+    >
+      {children}
+    </div>
+  );
+}
+
+interface DeviceHeaderProps<Parameters extends readonly ParameterDescriptor[]> {
+  /** The id of the toggle that turns the device on and off, drawn as the square at the start of the header. */
+  activator?: Parameters[number]["id"];
+  /** What sits at the end of the header: a play button, a reading, a switch. */
+  children?: ReactNode;
+  device: Device<Parameters>;
+  onValueChange: (state: DeviceState<Parameters>) => void;
+  value: DeviceState<Parameters>;
+}
+
+function Activator({
+  device,
+  onValueChange,
+  parameter,
+  value,
+}: ControlProps<ToggleParameter>) {
+  const on = value[parameter.id] === true;
+  const change = useCallback(
+    (pressed: boolean) =>
+      onValueChange(
+        device.set(value as never, parameter.id, pressed) as AnyState
+      ),
+    [device, onValueChange, parameter.id, value]
+  );
+  return (
+    <Toggle
+      aria-label={parameter.label}
+      className="size-4 min-h-0 min-w-0 rounded-[2px] p-0 aria-pressed:border-primary aria-pressed:bg-primary"
+      onPressedChange={change}
+      pressed={on}
+      size="sm"
+      variant="outline"
+    />
+  );
+}
+
+/**
+ * The title bar of a device: its on and off square, its name, and whatever the
+ * face puts at the end.
+ */
+function DeviceHeader<const Parameters extends readonly ParameterDescriptor[]>({
+  activator,
+  children,
+  device,
+  onValueChange,
+  value,
+}: DeviceHeaderProps<Parameters>) {
+  const parameter = device.parameters.find(
+    (candidate) => candidate.id === activator
+  );
+  return (
+    <div
+      className="flex min-h-9 items-center gap-2 border-b bg-muted/40 px-3"
+      data-slot="device-header"
+    >
+      {parameter?.kind === "toggle" ? (
+        <Activator
+          device={device as unknown as AnyDevice}
+          onValueChange={onValueChange as unknown as (state: AnyState) => void}
+          parameter={parameter}
+          value={value as unknown as AnyState}
+        />
+      ) : null}
+      <span className="font-medium text-xs">{device.name}</span>
+      <div className="ms-auto flex items-center gap-2">{children}</div>
+    </div>
+  );
+}
+
 interface DeviceToggleProps<Parameters extends readonly ParameterDescriptor[]> {
   device: Device<Parameters>;
   /** The id of a toggle parameter. */
@@ -206,6 +308,8 @@ interface DevicePanelProps<Parameters extends readonly ParameterDescriptor[]> {
     label: string;
     parameters: readonly Parameters[number]["id"][];
   }[];
+  /** A name the labels start with, dropped from what is shown: `Low mid gain` under `Low mid` reads `Gain`. */
+  labelPrefix?: string;
   /** Called with the whole new state: store it, and drive the engine from it. */
   onValueChange: (state: DeviceState<Parameters>) => void;
   /** The state of the device. The panel keeps none: it draws this. */
@@ -226,6 +330,7 @@ function DevicePanel<const Parameters extends readonly ParameterDescriptor[]>({
   disabled = [],
   exclude = [],
   groups,
+  labelPrefix,
   onValueChange,
   value,
 }: DevicePanelProps<Parameters>) {
@@ -234,7 +339,7 @@ function DevicePanel<const Parameters extends readonly ParameterDescriptor[]>({
     onValueChange: onValueChange as unknown as (state: AnyState) => void,
     value: value as unknown as AnyState,
   };
-  const control = (parameter: ParameterDescriptor) => {
+  const control = (parameter: ParameterDescriptor, group?: string) => {
     if (parameter.kind === "toggle") {
       return (
         <ToggleControl {...props} key={parameter.id} parameter={parameter} />
@@ -249,6 +354,7 @@ function DevicePanel<const Parameters extends readonly ParameterDescriptor[]>({
       <NumberControl
         {...props}
         disabled={disabled.includes(parameter.id as never)}
+        group={group}
         key={parameter.id}
         parameter={parameter}
       />
@@ -268,7 +374,7 @@ function DevicePanel<const Parameters extends readonly ParameterDescriptor[]>({
         data-slot="device-panel"
         role="group"
       >
-        {shown.map(control)}
+        {shown.map((parameter) => control(parameter, labelPrefix))}
       </div>
     );
   }
@@ -299,15 +405,17 @@ function DevicePanel<const Parameters extends readonly ParameterDescriptor[]>({
               .filter((parameter) =>
                 group.parameters.includes(parameter.id as never)
               )
-              .map(control)}
+              .map((parameter) => control(parameter, group.label))}
           </div>
         </div>
       ))}
       {rest.length > 0 ? (
-        <div className="flex gap-3">{rest.map(control)}</div>
+        <div className="flex gap-3">
+          {rest.map((parameter) => control(parameter))}
+        </div>
       ) : null}
     </div>
   );
 }
 
-export { DevicePanel, DeviceToggle };
+export { DeviceFrame, DeviceHeader, DevicePanel, DeviceToggle };

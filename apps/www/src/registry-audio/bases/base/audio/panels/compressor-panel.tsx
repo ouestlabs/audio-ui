@@ -12,6 +12,8 @@ import {
   PlotLine,
 } from "@/registry-audio/bases/base/audio/elements/plot";
 import {
+  DeviceFrame,
+  DeviceHeader,
   DevicePanel,
   DeviceToggle,
 } from "@/registry-audio/bases/base/audio/panels/device-panel";
@@ -46,11 +48,11 @@ interface CompressorPanelProps {
 }
 
 /**
- * The face of the compressor device: its name and switches, the transfer curve
- * it plays with the threshold and the level going in on it, and its knobs
- * gathered by what they do. It is controlled like `DevicePanel`, which it uses
- * for the knobs: drawing the curve is all it adds. Its children sit in the
- * header, after the name.
+ * The face of the compressor device: a title bar with the on square and the
+ * auto make-up switch, the transfer curve it plays with the threshold and the
+ * level going in on it, and its knobs gathered by what they do. It is
+ * controlled like `DevicePanel`, which it uses for the knobs: drawing the
+ * curve is all it adds. Its children sit at the end of the title bar.
  */
 function CompressorPanel({
   children,
@@ -85,61 +87,68 @@ function CompressorPanel({
   }, [level]);
   return (
     <div
-      className={cn("group/compressor flex w-full flex-col gap-4", className)}
+      className={cn("group/compressor w-full", className)}
       data-idle=""
       data-slot="compressor-panel"
       ref={root}
     >
-      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
-        <div className="flex items-center gap-2">
-          <span className="font-medium text-sm">{compressorDevice.name}</span>
+      <DeviceFrame>
+        <DeviceHeader
+          activator="enabled"
+          device={compressorDevice}
+          onValueChange={onValueChange}
+          value={value}
+        >
           {children}
-        </div>
-        <div className="flex gap-1.5">
-          {SWITCHES.map((id) => (
-            <DeviceToggle
-              device={compressorDevice}
-              id={id}
-              key={id}
-              onValueChange={onValueChange}
-              value={value}
+          <DeviceToggle
+            device={compressorDevice}
+            id="autoMakeup"
+            onValueChange={onValueChange}
+            value={value}
+          />
+        </DeviceHeader>
+        <div className="flex flex-col gap-4 p-3">
+          <Plot
+            aria-label="Transfer curve"
+            className="h-40"
+            maxX={MAX_DB}
+            maxY={MAX_DB}
+            minX={MIN_DB}
+            minY={MIN_DB}
+          >
+            <PlotGraph>
+              <PlotCurve
+                className="stroke-border [stroke-dasharray:4_4]"
+                fn={UNITY}
+              />
+              <PlotLine
+                axis="x"
+                className="stroke-foreground/40"
+                value={value.thresholdDb}
+              />
+              <PlotCurve fn={output} />
+            </PlotGraph>
+            <PlotGrid
+              x={{ ticks: DB_TICKS }}
+              y={{ ticks: DB_TICKS.slice(0, 2) }}
             />
-          ))}
+            {dot ? (
+              <PlotDot
+                className="group-data-idle/compressor:hidden"
+                source={dot}
+              />
+            ) : null}
+          </Plot>
+          <DevicePanel
+            device={compressorDevice}
+            disabled={value.autoMakeup ? MAKEUP_OFF : undefined}
+            exclude={SWITCHES}
+            groups={GROUPS}
+            onValueChange={onValueChange}
+            value={value}
+          />
         </div>
-      </div>
-      <Plot
-        aria-label="Transfer curve"
-        className="h-40"
-        maxX={MAX_DB}
-        maxY={MAX_DB}
-        minX={MIN_DB}
-        minY={MIN_DB}
-      >
-        <PlotGraph>
-          <PlotCurve
-            className="stroke-border [stroke-dasharray:4_4]"
-            fn={UNITY}
-          />
-          <PlotLine
-            axis="x"
-            className="stroke-foreground/40"
-            value={value.thresholdDb}
-          />
-          <PlotCurve fn={output} />
-        </PlotGraph>
-        <PlotGrid x={{ ticks: DB_TICKS }} y={{ ticks: DB_TICKS.slice(0, 2) }} />
-        {dot ? (
-          <PlotDot className="group-data-idle/compressor:hidden" source={dot} />
-        ) : null}
-      </Plot>
-      <DevicePanel
-        device={compressorDevice}
-        disabled={value.autoMakeup ? MAKEUP_OFF : undefined}
-        exclude={SWITCHES}
-        groups={GROUPS}
-        onValueChange={onValueChange}
-        value={value}
-      />
+      </DeviceFrame>
     </div>
   );
 }

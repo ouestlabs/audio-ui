@@ -198,4 +198,25 @@ describe("DevicePanel with a choice", () => {
     fireEvent.click(view.getByRole("button", { name: "Sine" }));
     expect(onValueChange).toHaveBeenCalledWith({ wave: "sine" });
   });
+
+  test("a label that starts with its group's name drops it, the accessible name keeps it", () => {
+    const device = defineDevice({
+      description: "x",
+      id: "acme.bands",
+      name: "Bands",
+      parameters: [
+        { default: 1, id: "lowGain", label: "Low gain", max: 2, min: 0 },
+      ],
+    });
+    const view = render(
+      <DevicePanel
+        device={device}
+        groups={[{ label: "Low", parameters: ["lowGain"] }]}
+        onValueChange={mock((_state: unknown) => undefined)}
+        value={device.defaults()}
+      />
+    );
+    expect(view.getByText("Gain")).toBeTruthy();
+    expect(view.getByRole("slider", { name: "Low gain" })).toBeTruthy();
+  });
 });

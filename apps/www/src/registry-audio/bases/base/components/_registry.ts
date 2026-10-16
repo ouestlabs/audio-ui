@@ -429,6 +429,30 @@ export const components: RegistryItem[] = [
     type: "registry:block",
   },
   {
+    categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "An equalizer you can plug in: its state, a panel that draws it with a handle on each band and an engine that plays it, side by side. Play pink noise and the spectrum behind the curve is what comes out",
+    files: [
+      {
+        path: "components/device/block-equalizer.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-equalizer",
+    registryDependencies: [
+      "@audio-ui/equalizer-panel",
+      "@audio-ui/equalizer-device",
+      "@audio-ui/equalizer-engine",
+      "@audio-ui/pink-noise",
+      "@audio-ui/use-master-bus",
+      "@audio-ui/use-spectrum",
+      "@audio-ui/web-audio",
+      "@shadcn/button",
+    ],
+    type: "registry:block",
+  },
+  {
     categories: ["mixer", "fader", "meter", "knob"],
     description:
       "Mixing console: four tracks of a loop with pan, fader, meter, mute and solo, into a master with a stereo meter, every meter reading its real signal",

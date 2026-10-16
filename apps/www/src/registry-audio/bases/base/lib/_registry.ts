@@ -110,6 +110,53 @@ const items: RegistryItem[] = [
     type: "registry:lib",
   },
   {
+    categories: ["lib", "audio", "web-audio"],
+    dependencies: [],
+    description:
+      "Pink noise as an audio buffer: equal energy per octave, so a flat equalizer looks flat on a spectrum.",
+    files: [
+      {
+        path: "lib/pink-noise.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "pink-noise",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device", "plot"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "The equalizer as a device: a low shelf, two bells and a high shelf with an output trim, their filters as a state describes them, and the curve a state plays, with no panel and no audio in it.",
+    files: [
+      {
+        path: "lib/equalizer-device.ts",
+        target: "components/audio-ui/devices/equalizer/device.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "equalizer-device",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device", "plot"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "An equalizer on the Web Audio API for an equalizer state: four biquad filters in series with an output trim, the same filters its curve draws, moving without a click.",
+    files: [
+      {
+        path: "lib/equalizer-engine.ts",
+        target: "components/audio-ui/devices/equalizer/engine.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "equalizer-engine",
+    registryDependencies: ["@audio-ui/equalizer-device"],
+    type: "registry:lib",
+  },
+  {
     categories: ["lib", "audio", "timeline"],
     dependencies: ["@audio-ui/react"],
     description:
