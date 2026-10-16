@@ -32,6 +32,9 @@
     "distortion",
     "chorus",
     "pocket-synth",
-    "wave-shaper"
+    "wave-shaper",
+    "utility",
+    "limiter",
+    "gate"
   ]
 }

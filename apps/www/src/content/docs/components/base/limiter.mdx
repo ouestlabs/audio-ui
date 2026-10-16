@@ -1,0 +1,99 @@
+---
+title: Limiter
+description: "A limiter as a device you can plug in: a gain, a ceiling and a release as a state, a panel that draws its transfer curve with a handle on the ceiling, a Web Audio engine and the tools an agent drives it with."
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="block-limiter" />
+
+Keeps the sound under a ceiling. The panel draws the transfer curve against the straight line of a clean sound: drag the handle up and down for the ceiling and across for the input gain. It is a device like the [compressor](/docs/components/compressor): a state, a panel that draws it, an engine that plays it and tools an agent calls, each its own file.
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">CLI</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash component
+npx shadcn@latest add @audio-ui/block-limiter
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the packages:</Step>
+
+```bash
+npm install @audio-ui/react @audio-ui/core
+```
+
+<Step>Add the pieces you want. All of them, or only the state and the panel if your engine is elsewhere:</Step>
+
+```bash
+npx shadcn@latest add @audio-ui/limiter-device @audio-ui/limiter-panel @audio-ui/limiter-engine
+```
+
+<Step>Copy and paste the demo that wires them, if you want it.</Step>
+
+<ComponentSource
+  styleName="base-nova"
+  name="block-limiter"
+  title="components/examples/block-limiter.tsx"
+/>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import { LimiterPanel } from "@/components/audio-ui/devices/limiter/panel";
+import { limiterDevice } from "@/components/audio-ui/devices/limiter/device";
+
+const [state, setState] = useState(() => limiterDevice.defaults());
+
+<LimiterPanel onValueChange={setState} value={state} />;
+```
+
+The state is a plain object keyed by parameter id, so a host stores it, saves it with its project and sends it where it likes. `limiterCurve(state)` is the curve the panel draws.
+
+## The engine
+
+```ts
+import { createLimiterEngine } from "@/components/audio-ui/devices/limiter/engine";
+
+const engine = createLimiterEngine(ctx, state);
+source.connect(engine.input);
+engine.output.connect(ctx.destination);
+engine.update(nextState); // parameters ramp: no click
+engine.dispose();
+```
+
+It is the browser's compressor node at a ratio of 20 with no knee. The node adds a make-up gain of its own that cannot be turned off, so the engine takes it back out and a signal under the ceiling is only as loud as the gain makes it. `engine.reduction` is the gain being taken off, in dB, to read per frame. It is not a look-ahead true-peak limiter: the node's attack is as short as the browser allows.
+
+## The tools
+
+```ts
+import { deviceTools } from "@audio-ui/core/device";
+import { limiterDevice } from "@/components/audio-ui/devices/limiter/device";
+
+const [set, reset] = deviceTools(limiterDevice);
+```
+
+`set` and `reset` change the state, with the ranges the device enforces: a value out of range is brought in and reported, a wrong one is refused by name, and a call never throws.
+
+## Accessibility
+
+Every control is a native input: the knobs are sliders named after their parameter, with the value and unit as the text value, the switches are toggle buttons, and everything takes the keyboard.

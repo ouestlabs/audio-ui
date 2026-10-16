@@ -566,6 +566,72 @@ export const components: RegistryItem[] = [
     type: "registry:block",
   },
   {
+    categories: ["device", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "A utility you can plug in: its state, a panel and an engine that plays it. Play a loop through it and move the pan and the width",
+    files: [
+      {
+        path: "components/device/block-utility.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-utility",
+    registryDependencies: [
+      "@audio-ui/utility-panel",
+      "@audio-ui/utility-device",
+      "@audio-ui/utility-engine",
+      "@audio-ui/play-toggle",
+      "@audio-ui/use-device-loop",
+      "@audio-ui/use-master-bus",
+    ],
+    type: "registry:block",
+  },
+  {
+    categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "A limiter you can plug in: its state, a panel that draws its transfer curve with a handle on the ceiling and an engine that plays it. Play a loop through it, push the gain and pull the ceiling down",
+    files: [
+      {
+        path: "components/device/block-limiter.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-limiter",
+    registryDependencies: [
+      "@audio-ui/limiter-panel",
+      "@audio-ui/limiter-device",
+      "@audio-ui/limiter-engine",
+      "@audio-ui/play-toggle",
+      "@audio-ui/use-device-loop",
+      "@audio-ui/use-master-bus",
+    ],
+    type: "registry:block",
+  },
+  {
+    categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "A gate you can plug in: its state, a panel that draws its transfer curve with a handle on the threshold and an engine that plays it. Play a loop through it and raise the threshold: the quiet parts go",
+    files: [
+      {
+        path: "components/device/block-gate.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-gate",
+    registryDependencies: [
+      "@audio-ui/gate-panel",
+      "@audio-ui/gate-device",
+      "@audio-ui/gate-engine",
+      "@audio-ui/play-toggle",
+      "@audio-ui/use-device-loop",
+      "@audio-ui/use-master-bus",
+    ],
+    type: "registry:block",
+  },
+  {
     categories: ["mixer", "fader", "meter", "knob"],
     description:
       "Mixing console: four tracks of a loop with pan, fader, meter, mute and solo, into a master with a stereo meter, every meter reading its real signal",

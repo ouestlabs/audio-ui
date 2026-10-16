@@ -41,6 +41,9 @@ Without the registry, the headless primitive comes from the package: `import { K
 | `chorus-panel` | `ChorusPanel` from `@/components/audio-ui/devices/chorus/panel` | registry only | The chorus device's face: the sweep of its delay. Pair it with the `chorus-device` and `chorus-engine` libs |
 | `pocket-synth-panel` | `PocketSynthPanel` from `@/components/audio-ui/devices/pocket-synth/panel` | registry only | The pocket synth device's face: a pad that plays it, its waveform and filter and its volume. Pair it with the `pocket-synth-device` and `pocket-synth-engine` libs |
 | `wave-shaper-panel` | `WaveShaperPanel` from `@/components/audio-ui/devices/wave-shaper/panel` | registry only | The wave shaper device's face: a pad that plays it, its waveform and its knobs. Pair it with the `wave-shaper-device` and `wave-shaper-engine` libs |
+| `utility-panel` | `UtilityPanel` from `@/components/audio-ui/devices/utility/panel` | registry only | The utility device's face: its gain, pan and width as knobs and its mono and invert switches. Pair it with the `utility-device` and `utility-engine` libs |
+| `limiter-panel` | `LimiterPanel` from `@/components/audio-ui/devices/limiter/panel` | registry only | The limiter device's face: its transfer curve with a handle for the ceiling and the input gain. Pair it with the `limiter-device` and `limiter-engine` libs |
+| `gate-panel` | `GatePanel` from `@/components/audio-ui/devices/gate/panel` | registry only | The gate device's face: its transfer curve with a handle on the threshold. Pair it with the `gate-device` and `gate-engine` libs |
 | `tuner` | `Tuner` from `@/components/audio-ui/tuner` | registry only | A chromatic tuner's display: the nearest note, a needle on a scale of cents and the frequency, in the primary color when in tune. It follows a `source`: `usePitch(analyser)` from `use-pitch`, fed by `useMicrophone()` (start it from a click) or any `AnalyserNode` |
 | `plot` | `Plot`, `PlotGraph`, `PlotCurve`, `PlotHandle`, `PlotTraceArea`… from `@/components/audio-ui/plot` | `@audio-ui/react/plot` | A curve with draggable points: equalizers, filters, compressors |
 
@@ -66,4 +69,4 @@ Without the registry, the headless primitive comes from the package: `import { K
 import { BlockPocketSynth } from "@/components/examples/block-pocket-synth";
 ```
 
-Available today: `block-pocket-synth`, `block-wave-shaper`, `block-waveform-player`, `block-piano-roll`, `block-timeline`, `block-drum-rack`, `block-mixer`, `block-compressor`, `block-equalizer`, `block-delay`, `block-reverb`, `block-filter`, `block-distortion`, `block-chorus`. The full catalog (with demos) is at https://www.audio-ui.dev/components, or ask the MCP `search_catalog` tool.
+Available today: `block-pocket-synth`, `block-wave-shaper`, `block-waveform-player`, `block-piano-roll`, `block-timeline`, `block-drum-rack`, `block-mixer`, `block-compressor`, `block-equalizer`, `block-delay`, `block-reverb`, `block-filter`, `block-distortion`, `block-chorus`, `block-utility`, `block-limiter`, `block-gate`. The full catalog (with demos) is at https://www.audio-ui.dev/components, or ask the MCP `search_catalog` tool.
