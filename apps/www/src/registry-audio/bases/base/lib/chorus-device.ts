@@ -1,4 +1,9 @@
 import { type DeviceState, defineDevice } from "@audio-ui/core/device";
+import { DEFAULT_TEMPO, type Tempo } from "@audio-ui/core/time";
+import {
+  lfoRate,
+  SYNCED_RATE_PARAMETERS,
+} from "@/registry-audio/bases/base/lib/synced-rate";
 
 /**
  * A chorus as a device: a short delay swept by a slow oscillator, mixed with
@@ -21,6 +26,7 @@ export const chorusDevice = defineDevice({
       step: 0.05,
       unit: "Hz",
     },
+    ...SYNCED_RATE_PARAMETERS,
     {
       default: 40,
       id: "depth",
@@ -57,7 +63,10 @@ export type ChorusState = DeviceState<typeof chorusDevice.parameters>;
 const MAX_SWEEP_MS = 8;
 
 /** The numbers that go on the nodes for a state. The sweep is kept inside the delay so the time never goes negative. */
-export function chorusSettings(state: ChorusState) {
+export function chorusSettings(
+  state: ChorusState,
+  tempo: Tempo = DEFAULT_TEMPO
+) {
   const mix = state.enabled ? state.mix / 100 : 0;
   const sweepMs = Math.min(
     state.delayMs - 1,
@@ -66,15 +75,15 @@ export function chorusSettings(state: ChorusState) {
   return {
     delay: state.delayMs / 1000,
     dry: 1 - mix,
-    rate: state.rateHz,
+    rate: lfoRate(state, tempo),
     sweep: sweepMs / 1000,
     wet: mix,
   };
 }
 
 /** The delay time in milliseconds at `seconds`, as the oscillator sweeps it: what the panel draws. */
-export function chorusSweep(state: ChorusState) {
-  const { delay, rate, sweep } = chorusSettings(state);
+export function chorusSweep(state: ChorusState, tempo: Tempo = DEFAULT_TEMPO) {
+  const { delay, rate, sweep } = chorusSettings(state, tempo);
   return (seconds: number) =>
     (delay + sweep * Math.sin(2 * Math.PI * rate * seconds)) * 1000;
 }

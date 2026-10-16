@@ -10,8 +10,11 @@ import {
   chorusDevice,
 } from "@/registry-audio/bases/base/lib/chorus-device";
 import { createChorusEngine } from "@/registry-audio/bases/base/lib/chorus-engine";
+import { DEMO_TEMPO } from "@/registry-audio/bases/base/lib/demo-loop";
 
 const MASTER_VOLUME = 0.7;
+/** The loop's own tempo, so a synced rate moves with its beat. */
+const CONTEXT = { tempo: DEMO_TEMPO };
 
 /**
  * A chorus you can plug in: its state, a panel that draws the sweep of its
@@ -24,13 +27,14 @@ export default function BlockChorus() {
   );
   const master = useMasterBus(MASTER_VOLUME);
   const { playing, toggle } = useDeviceLoop({
+    context: CONTEXT,
     create: createChorusEngine,
     destination: master,
     state,
   });
   return (
     <div className="cn-audio-panel h-full w-full min-w-0">
-      <ChorusPanel onValueChange={setState} value={state}>
+      <ChorusPanel onValueChange={setState} tempo={DEMO_TEMPO} value={state}>
         <PlayToggle
           label="Play a loop through it"
           onToggle={toggle}

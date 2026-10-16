@@ -288,7 +288,7 @@ const items: RegistryItem[] = [
       },
     ],
     name: "chorus-device",
-    registryDependencies: [],
+    registryDependencies: ["@audio-ui/synced-rate"],
     type: "registry:lib",
   },
   {
@@ -451,7 +451,7 @@ const items: RegistryItem[] = [
       },
     ],
     name: "phaser-device",
-    registryDependencies: [],
+    registryDependencies: ["@audio-ui/synced-rate"],
     type: "registry:lib",
   },
   {
@@ -483,7 +483,7 @@ const items: RegistryItem[] = [
       },
     ],
     name: "auto-pan-device",
-    registryDependencies: [],
+    registryDependencies: ["@audio-ui/synced-rate"],
     type: "registry:lib",
   },
   {
@@ -643,6 +643,21 @@ const items: RegistryItem[] = [
       },
     ],
     name: "oversampling",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "The rate of an oscillator that is either free, in hertz, or synced: one cycle per note value of the host's tempo. The two parameters a device adds for it, and the function that reads the rate.",
+    files: [
+      {
+        path: "lib/synced-rate.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "synced-rate",
     registryDependencies: [],
     type: "registry:lib",
   },

@@ -1,5 +1,10 @@
 import { formatHz } from "@audio-ui/core/analysis";
 import { type DeviceState, defineDevice } from "@audio-ui/core/device";
+import { DEFAULT_TEMPO, type Tempo } from "@audio-ui/core/time";
+import {
+  lfoRate,
+  SYNCED_RATE_PARAMETERS,
+} from "@/registry-audio/bases/base/lib/synced-rate";
 
 /** The all-pass stages of the phaser: each pair makes one notch. */
 export const PHASER_STAGES = 4;
@@ -38,6 +43,7 @@ export const phaserDevice = defineDevice({
       step: 0.05,
       unit: "Hz",
     },
+    ...SYNCED_RATE_PARAMETERS,
     {
       default: 60,
       id: "depth",
@@ -95,7 +101,10 @@ export type PhaserState = DeviceState<typeof phaserDevice.parameters>;
  * oscillator adds to each stage) and a time for the flanger, kept inside the
  * delay so it never goes negative.
  */
-export function phaserSettings(state: PhaserState) {
+export function phaserSettings(
+  state: PhaserState,
+  tempo: Tempo = DEFAULT_TEMPO
+) {
   const mix = state.enabled ? state.mix / 100 : 0;
   const phaser = state.mode === "phaser";
   return {
@@ -110,13 +119,13 @@ export function phaserSettings(state: PhaserState) {
     flangerWet: phaser ? 0 : mix,
     phaserSweepCents: ((MAX_SWEEP_OCTAVES * 1200) / 2) * (state.depth / 100),
     phaserWet: phaser ? mix : 0,
-    rate: state.rateHz,
+    rate: lfoRate(state, tempo),
     center: state.centerHz,
   };
 }
 
 /** What the oscillator does to the swept value, from -100 % to 100 % of the depth, at `seconds`. */
-export function phaserSweep(state: PhaserState) {
+export function phaserSweep(state: PhaserState, tempo: Tempo = DEFAULT_TEMPO) {
   return (seconds: number) =>
-    state.depth * Math.sin(2 * Math.PI * state.rateHz * seconds);
+    state.depth * Math.sin(2 * Math.PI * lfoRate(state, tempo) * seconds);
 }

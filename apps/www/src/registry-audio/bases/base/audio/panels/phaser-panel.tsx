@@ -1,5 +1,6 @@
 "use client";
 
+import { DEFAULT_TEMPO, type Tempo } from "@audio-ui/core/time";
 import { type ReactNode, useMemo } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {
@@ -30,6 +31,8 @@ const ALL = phaserDevice.parameters
 
 const NO_DELAY = ["delayMs"] as const;
 const NO_CENTER = ["centerHz"] as const;
+const SYNCED_OFF = ["rateHz"] as const;
+const FREE_OFF = ["division"] as const;
 
 const formatSeconds = (seconds: number) => `${seconds}s`;
 const formatPercent = (percent: number) => `${percent}%`;
@@ -39,6 +42,8 @@ interface PhaserPanelProps {
   children?: ReactNode;
   className?: string;
   onValueChange: (state: PhaserState) => void;
+  /** The host's tempo, which a synced rate is read against. @default 120 BPM */
+  tempo?: Tempo;
   value: PhaserState;
 }
 
@@ -50,12 +55,14 @@ function PhaserPanel({
   children,
   className,
   onValueChange,
+  tempo = DEFAULT_TEMPO,
   value,
 }: PhaserPanelProps) {
-  const sweep = useMemo(() => phaserSweep(value), [value]);
+  const sweep = useMemo(() => phaserSweep(value, tempo), [tempo, value]);
   let unused: readonly (typeof ALL)[number][] = ALL;
   if (value.enabled) {
-    unused = value.mode === "phaser" ? NO_DELAY : NO_CENTER;
+    const byMode = value.mode === "phaser" ? NO_DELAY : NO_CENTER;
+    unused = [...byMode, ...(value.sync ? SYNCED_OFF : FREE_OFF)];
   }
   return (
     <DeviceFrame className={cn("h-full", className)}>
@@ -88,7 +95,7 @@ function PhaserPanel({
           </PlotGraph>
         </Plot>
         <DevicePanel
-          className="grid-cols-4"
+          className="grid-cols-3"
           device={phaserDevice}
           disabled={unused}
           exclude={SWITCHES}

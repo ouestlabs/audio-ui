@@ -1,3 +1,5 @@
+import type { DeviceContext } from "@audio-ui/core/device";
+import { DEFAULT_TEMPO } from "@audio-ui/core/time";
 import {
   type ChorusState,
   chorusSettings,
@@ -11,7 +13,7 @@ export interface ChorusEngine {
   readonly input: AudioNode;
   /** Connect this to the destination, or to the next device. */
   readonly output: AudioNode;
-  update: (state: ChorusState) => void;
+  update: (state: ChorusState, context?: DeviceContext) => void;
 }
 
 /**
@@ -27,8 +29,10 @@ export interface ChorusEngine {
  */
 export function createChorusEngine(
   ctx: BaseAudioContext,
-  initial: ChorusState
+  initial: ChorusState,
+  context?: DeviceContext
 ): ChorusEngine {
+  let tempo = context?.tempo ?? DEFAULT_TEMPO;
   const input = ctx.createGain();
   const output = ctx.createGain();
   const dry = ctx.createGain();
@@ -41,7 +45,7 @@ export function createChorusEngine(
   input.connect(delay).connect(wet).connect(output);
   oscillator.connect(sweep).connect(delay.delayTime);
 
-  const first = chorusSettings(initial);
+  const first = chorusSettings(initial, tempo);
   delay.delayTime.value = first.delay;
   oscillator.frequency.value = first.rate;
   sweep.gain.value = first.sweep;
@@ -61,8 +65,9 @@ export function createChorusEngine(
     },
     input,
     output,
-    update: (state) => {
-      const settings = chorusSettings(state);
+    update: (state, next) => {
+      tempo = next?.tempo ?? tempo;
+      const settings = chorusSettings(state, tempo);
       follow(delay.delayTime, settings.delay);
       follow(oscillator.frequency, settings.rate);
       follow(sweep.gain, settings.sweep);

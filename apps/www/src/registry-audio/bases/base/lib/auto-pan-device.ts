@@ -1,4 +1,9 @@
 import { type DeviceState, defineDevice } from "@audio-ui/core/device";
+import { DEFAULT_TEMPO, type Tempo } from "@audio-ui/core/time";
+import {
+  lfoRate,
+  SYNCED_RATE_PARAMETERS,
+} from "@/registry-audio/bases/base/lib/synced-rate";
 
 /**
  * An auto pan and tremolo as a device: a slow oscillator moves the sound
@@ -43,6 +48,7 @@ export const autoPanDevice = defineDevice({
       step: 0.05,
       unit: "Hz",
     },
+    ...SYNCED_RATE_PARAMETERS,
     {
       default: 60,
       id: "depth",
@@ -58,13 +64,16 @@ export const autoPanDevice = defineDevice({
 export type AutoPanState = DeviceState<typeof autoPanDevice.parameters>;
 
 /** The numbers that go on the nodes for a state. Off, there is no movement. */
-export function autoPanSettings(state: AutoPanState) {
+export function autoPanSettings(
+  state: AutoPanState,
+  tempo: Tempo = DEFAULT_TEMPO
+) {
   const depth = state.enabled ? state.depth / 100 : 0;
   const pan = state.mode === "pan";
   return {
     // The oscillator swings from -1 to 1: it moves the pan by the depth, or the level by half of it around its middle.
     panDepth: pan ? depth : 0,
-    rate: state.rateHz,
+    rate: lfoRate(state, tempo),
     tremoloBase: state.mode === "tremolo" ? 1 - depth / 2 : 1,
     tremoloDepth: state.mode === "tremolo" ? depth / 2 : 0,
   };
@@ -83,7 +92,10 @@ export function autoPanWave(shape: AutoPanState["shape"], phase: number) {
 }
 
 /** What is moved, from -100 to 100 %, at `seconds`: the pan, or the level around its middle. */
-export function autoPanSweep(state: AutoPanState) {
+export function autoPanSweep(
+  state: AutoPanState,
+  tempo: Tempo = DEFAULT_TEMPO
+) {
   return (seconds: number) =>
-    state.depth * autoPanWave(state.shape, state.rateHz * seconds);
+    state.depth * autoPanWave(state.shape, lfoRate(state, tempo) * seconds);
 }
