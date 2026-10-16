@@ -171,7 +171,8 @@ describe("latency and context", () => {
   const delayed = defineDevice({
     description: "A device that looks ahead.",
     id: "audioui.test-latency",
-    latency: (state, sampleRate) => 0.006 + (state.deep ? 192 / sampleRate : 0),
+    latency: (current, sampleRate) =>
+      0.006 + (current.deep ? 192 / sampleRate : 0),
     name: "Look-ahead",
     parameters: [{ default: false, id: "deep", kind: "toggle", label: "Deep" }],
   });

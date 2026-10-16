@@ -190,6 +190,9 @@ export function barLabelInterval(
   return interval;
 }
 
+/** `1/8`, `1/8t` or `1/8d`: a note value and, maybe, a triplet or dotted mark. */
+const SYNCED_PATTERN = /^1\/(\d+)([td]?)$/;
+
 /** A straight note value, in the form a time parameter lists it. */
 const SYNCED_NOTES = [32, 16, 8, 4, 2, 1] as const;
 
@@ -220,7 +223,7 @@ export type SyncedDivision = string;
  * on the beat instead of at zero.
  */
 export function syncedSeconds(division: SyncedDivision, tempo: Tempo): number {
-  const match = /^1\/(\d+)([td]?)$/.exec(division);
+  const match = SYNCED_PATTERN.exec(division);
   const note = match ? Number(match[1]) : 4;
   const suffix = match?.[2] ?? "";
   let factor = 1;
