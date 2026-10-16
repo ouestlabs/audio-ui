@@ -48,3 +48,16 @@ describe("the device pages", () => {
     expect(text).toContain("| Threshold | -70 dB to 0 dB | -36 dB |");
   });
 });
+
+describe("the catalog sidebar", () => {
+  test("puts every category in one section, and only categories", async () => {
+    const { categories, categoryGroups } = await import(
+      "@/registry-audio/bases/categories"
+    );
+    const grouped = categoryGroups.flatMap((group) => group.names);
+    expect([...grouped].sort()).toEqual(
+      categories.map((category) => category.name).sort()
+    );
+    expect(new Set(grouped).size).toBe(grouped.length);
+  });
+});

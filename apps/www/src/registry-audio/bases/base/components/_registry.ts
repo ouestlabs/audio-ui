@@ -2,7 +2,7 @@ import type { RegistryItem } from "shadcn/schema";
 
 export const components: RegistryItem[] = [
   {
-    categories: ["device", "synth", "xypad"],
+    categories: ["instrument", "synth", "xypad"],
     dependencies: ["@audio-ui/react"],
     description:
       "A synth you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file. Press the pad: pitch goes across, the filter cutoff up",
@@ -23,7 +23,7 @@ export const components: RegistryItem[] = [
     type: "registry:block",
   },
   {
-    categories: ["device", "synth", "xypad"],
+    categories: ["instrument", "synth", "xypad"],
     dependencies: ["@audio-ui/react"],
     description:
       "A wave shaper synth you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file. Press the pad: pitch goes across, the resonance up",
@@ -409,7 +409,7 @@ export const components: RegistryItem[] = [
     type: "registry:example",
   },
   {
-    categories: ["device", "plot", "knob"],
+    categories: ["dynamics", "plot", "knob"],
     dependencies: ["@audio-ui/react"],
     description:
       "A compressor you can plug in: its state, a panel that draws it and a Web Audio engine that plays it, side by side. Play a pulsing signal and turn the knobs",
@@ -432,7 +432,7 @@ export const components: RegistryItem[] = [
     type: "registry:block",
   },
   {
-    categories: ["device", "plot", "knob"],
+    categories: ["eq", "plot", "knob"],
     dependencies: ["@audio-ui/react"],
     description:
       "An equalizer you can plug in: its state, a panel that draws it with a handle on each band and an engine that plays it, side by side. Play pink noise and the spectrum behind the curve is what comes out",
@@ -456,7 +456,7 @@ export const components: RegistryItem[] = [
     type: "registry:block",
   },
   {
-    categories: ["device", "plot", "knob"],
+    categories: ["delay-reverb", "plot", "knob"],
     dependencies: ["@audio-ui/react"],
     description:
       "A delay you can plug in: its state, a panel that draws the echoes it makes with a handle for the time and the feedback, and an engine that plays it. Play a loop through it and drag",
@@ -479,7 +479,7 @@ export const components: RegistryItem[] = [
     type: "registry:block",
   },
   {
-    categories: ["device", "plot", "knob"],
+    categories: ["delay-reverb", "plot", "knob"],
     dependencies: ["@audio-ui/react"],
     description:
       "A reverb you can plug in: its state, a panel that draws the tail it makes with a handle for the decay time, and an engine that plays it. Play a loop through it and drag",
@@ -501,7 +501,7 @@ export const components: RegistryItem[] = [
     type: "registry:block",
   },
   {
-    categories: ["device", "plot", "knob"],
+    categories: ["eq", "plot", "knob"],
     dependencies: ["@audio-ui/react"],
     description:
       "A filter you can plug in: its state, a panel that draws the curve it plays with a handle for the cutoff and the resonance, and an engine that plays it. Play a loop through it and drag, the spectrum behind is what comes out",
@@ -524,7 +524,7 @@ export const components: RegistryItem[] = [
     type: "registry:block",
   },
   {
-    categories: ["device", "plot", "knob"],
+    categories: ["distortion", "plot", "knob"],
     dependencies: ["@audio-ui/react"],
     description:
       "A distortion you can plug in: its state, a panel that draws its transfer curve and an engine that plays it. Play a loop through it and turn the drive",
@@ -546,7 +546,7 @@ export const components: RegistryItem[] = [
     type: "registry:block",
   },
   {
-    categories: ["device", "plot", "knob"],
+    categories: ["modulation", "plot", "knob"],
     dependencies: ["@audio-ui/react"],
     description:
       "A chorus you can plug in: its state, a panel that draws the sweep of its delay and an engine that plays it. Play a loop through it and turn the rate and the depth",
@@ -569,7 +569,7 @@ export const components: RegistryItem[] = [
     type: "registry:block",
   },
   {
-    categories: ["device", "knob"],
+    categories: ["utility", "knob"],
     dependencies: ["@audio-ui/react"],
     description:
       "A utility you can plug in: its state, a panel and an engine that plays it. Play a loop through it and move the pan and the width",
@@ -591,7 +591,7 @@ export const components: RegistryItem[] = [
     type: "registry:block",
   },
   {
-    categories: ["device", "plot", "knob"],
+    categories: ["dynamics", "plot", "knob"],
     dependencies: ["@audio-ui/react"],
     description:
       "A limiter you can plug in: its state, a panel that draws its transfer curve with a handle on the ceiling and an engine that plays it. Play a loop through it, push the gain and pull the ceiling down",
@@ -613,7 +613,7 @@ export const components: RegistryItem[] = [
     type: "registry:block",
   },
   {
-    categories: ["device", "plot", "knob"],
+    categories: ["dynamics", "plot", "knob"],
     dependencies: ["@audio-ui/react"],
     description:
       "A gate you can plug in: its state, a panel that draws its transfer curve with a handle on the threshold and an engine that plays it. Play a loop through it and raise the threshold: the quiet parts go",
@@ -635,7 +635,7 @@ export const components: RegistryItem[] = [
     type: "registry:block",
   },
   {
-    categories: ["device", "plot", "knob"],
+    categories: ["distortion", "plot", "knob"],
     dependencies: ["@audio-ui/react"],
     description:
       "A saturator you can plug in: its state, a panel that draws its transfer curve and an engine that plays it. Play a loop through it, pick a curve and turn the drive",
@@ -657,7 +657,7 @@ export const components: RegistryItem[] = [
     type: "registry:block",
   },
   {
-    categories: ["device", "plot", "knob"],
+    categories: ["modulation", "plot", "knob"],
     dependencies: ["@audio-ui/react"],
     description:
       "A phaser and flanger you can plug in: its state, a panel that draws the sweep and an engine that plays it. Play a loop through it, switch the mode and turn the rate and the feedback",
@@ -680,7 +680,7 @@ export const components: RegistryItem[] = [
     type: "registry:block",
   },
   {
-    categories: ["device", "plot", "knob"],
+    categories: ["modulation", "plot", "knob"],
     dependencies: ["@audio-ui/react"],
     description:
       "An auto pan you can plug in: its state, a panel that draws the movement and an engine that plays it. Play a loop through it, pick a waveform and switch to tremolo",
@@ -703,7 +703,7 @@ export const components: RegistryItem[] = [
     type: "registry:block",
   },
   {
-    categories: ["device", "plot", "knob"],
+    categories: ["eq", "plot", "knob"],
     dependencies: ["@audio-ui/react"],
     description:
       "A channel EQ you can plug in: its state, a panel that draws the curve with a handle on the mid band and an engine that plays it. Play a loop through it and drag, the spectrum behind is what comes out",
@@ -726,7 +726,7 @@ export const components: RegistryItem[] = [
     type: "registry:block",
   },
   {
-    categories: ["device", "plot", "knob"],
+    categories: ["distortion", "plot", "knob"],
     dependencies: ["@audio-ui/react"],
     description:
       "An overdrive you can plug in: its state, a panel that draws the band that reaches the clip and an engine that plays it. Play a loop through it, drag the handle and turn the drive",
@@ -748,7 +748,7 @@ export const components: RegistryItem[] = [
     type: "registry:block",
   },
   {
-    categories: ["device", "plot", "knob"],
+    categories: ["dynamics", "plot", "knob"],
     dependencies: ["@audio-ui/react"],
     description:
       "A de-esser you can plug in: its state, a panel that draws what it does at each frequency and an engine that plays it. Play a voice through it, lower the threshold and the s sits back",
@@ -771,7 +771,7 @@ export const components: RegistryItem[] = [
     type: "registry:block",
   },
   {
-    categories: ["device", "plot", "knob"],
+    categories: ["dynamics", "plot", "knob"],
     dependencies: ["@audio-ui/react"],
     description:
       "A multiband compressor you can plug in: its state, a panel that draws the three bands and an engine that plays it. Play a loop through it and hold one band down",
@@ -793,7 +793,7 @@ export const components: RegistryItem[] = [
     type: "registry:block",
   },
   {
-    categories: ["device", "plot", "knob"],
+    categories: ["dynamics", "plot", "knob"],
     dependencies: ["@audio-ui/react"],
     description:
       "A transient shaper you can plug in: its state, a panel with a handle for the attack and the sustain and an engine that plays it. Play a loop through it and drag the handle: up for more click, left for a shorter ring",
@@ -815,7 +815,7 @@ export const components: RegistryItem[] = [
     type: "registry:block",
   },
   {
-    categories: ["device", "plot", "knob"],
+    categories: ["distortion", "plot", "knob"],
     dependencies: ["@audio-ui/react"],
     description:
       "A redux you can plug in: its state, a panel that draws the stairs the bits make and an engine that plays it. Play a loop through it and take the bits down",

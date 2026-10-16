@@ -37,10 +37,46 @@
       "name": "spectrum"
     },
     {
-      "count": 21,
-      "description": "Devices: an effect as a state, a panel, an engine and the tools an agent drives it with, each one its own file so a host keeps its own and uses what it needs.",
-      "label": "Device",
-      "name": "device"
+      "count": 6,
+      "description": "Dynamics devices: compressors, a limiter, a gate, a de-esser and a transient shaper, each a state, a panel, an engine and the tools an agent drives it with.",
+      "label": "Dynamics",
+      "name": "dynamics"
+    },
+    {
+      "count": 3,
+      "description": "EQ and filter devices: an equalizer, a channel EQ and a filter, with a curve you drag.",
+      "label": "EQ and filters",
+      "name": "eq"
+    },
+    {
+      "count": 4,
+      "description": "Distortion devices: an overdrive, a saturator, a distortion and a bit crusher.",
+      "label": "Distortion",
+      "name": "distortion"
+    },
+    {
+      "count": 2,
+      "description": "Delay and reverb devices: echoes free or in time with the tempo, and a room.",
+      "label": "Delay and reverb",
+      "name": "delay-reverb"
+    },
+    {
+      "count": 3,
+      "description": "Modulation devices: a chorus, a phaser and flanger, and an auto pan.",
+      "label": "Modulation",
+      "name": "modulation"
+    },
+    {
+      "count": 1,
+      "description": "Utility devices: gain, pan, width, mono and phase invert.",
+      "label": "Utility",
+      "name": "utility"
+    },
+    {
+      "count": 2,
+      "description": "Instrument devices: synths played from a pad, by pointer or by an agent.",
+      "label": "Instruments",
+      "name": "instrument"
     },
     {
       "count": 1,

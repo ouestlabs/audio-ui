@@ -15,6 +15,7 @@ import type { CatalogItem } from "../types";
 import { ComponentCard } from "./component-card";
 import { ComponentCardContainer } from "./component-card-container";
 import { ComponentEmptyState } from "./component-empty-state";
+import { useComponents } from "./components-context";
 
 interface ComponentGridProps {
   catalogItems: CatalogItem[];
@@ -55,9 +56,15 @@ function ComponentGridContent({
   const searchQuery = normalizeCatalogSearchQuery(filters.search || "");
   const hasActiveSearch = hasActiveCatalogSearch(searchQuery);
 
+  // A search looks in the whole catalog, whichever category page it is typed on.
+  const { catalogItems: wholeCatalog } = useComponents();
   const filteredItems = useMemo(
-    () => filterCatalogBySearchQuery(catalogItems, searchQuery),
-    [catalogItems, searchQuery]
+    () =>
+      filterCatalogBySearchQuery(
+        hasActiveSearch ? (wholeCatalog as CatalogItem[]) : catalogItems,
+        searchQuery
+      ),
+    [catalogItems, hasActiveSearch, searchQuery, wholeCatalog]
   );
 
   if (filteredItems.length === 0) {
