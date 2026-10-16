@@ -1,6 +1,5 @@
 import type * as React from "react";
 import { Icons } from "@/components/icons";
-import { BASES } from "@/registry/bases";
 
 /** The logo of the library a base is built on, decorative: its name is always written beside it. */
 const BASE_LOGOS: Record<
@@ -21,15 +20,12 @@ export function BaseLogo({
   return Logo ? <Logo className={className} /> : null;
 }
 
-/** The library a preview is built on: the only one there is for now. */
+/** What a preview header names: this library, with its logo. */
 export function BuiltOn() {
-  const base = BASES.find((item) => item.name === "base");
   return (
     <>
-      {base ? (
-        <BaseLogo className="size-3.5 shrink-0" name={base.name} />
-      ) : null}
-      <span className="truncate">{base?.title}</span>
+      <Icons.audioUi aria-hidden="true" className="size-3.5 shrink-0" />
+      <span className="truncate">Audio UI</span>
     </>
   );
 }
