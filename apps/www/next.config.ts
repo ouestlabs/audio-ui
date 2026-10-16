@@ -1,3 +1,4 @@
+import { withPostHogConfig } from "@posthog/nextjs-config";
 import { createMDX } from "fumadocs-mdx/next";
 import type { NextConfig } from "next";
 import type { Redirect } from "next/dist/lib/load-custom-routes";
@@ -270,4 +271,12 @@ const nextConfig: NextConfig = {
 
 const withMDX = createMDX({});
 
-export default withMDX(nextConfig);
+const config = withMDX(nextConfig);
+
+// Source maps go to PostHog on builds that have the keys (Vercel), so error stack traces read as source.
+export default process.env.POSTHOG_API_KEY && process.env.POSTHOG_PROJECT_ID
+  ? withPostHogConfig(config, {
+      personalApiKey: process.env.POSTHOG_API_KEY,
+      projectId: process.env.POSTHOG_PROJECT_ID,
+    })
+  : config;
