@@ -225,3 +225,47 @@ export function renderSibilantLoop(sampleRate: number): Promise<AudioBuffer> {
   sibilant.set(sampleRate, buffer);
   return buffer;
 }
+
+const wide = new Map<number, Promise<AudioBuffer>>();
+const WIDE_LEFT_HERTZ = [220, 277.18, 329.63, 55];
+const WIDE_RIGHT_HERTZ = [221.5, 275.9, 331.1, 55.4];
+const WIDE_LEVEL = 0.07;
+
+/**
+ * The loop of `renderDemoLoop`, which sits in the centre, with a pad that is
+ * wider than it: each channel has its own slightly detuned oscillators, and a
+ * low note at 55 Hz is a little different in each, so there is bass in the
+ * sides. What a mid/side device has something to move.
+ */
+export function renderWideLoop(sampleRate: number): Promise<AudioBuffer> {
+  const cached = wide.get(sampleRate);
+  if (cached) {
+    return cached;
+  }
+  const buffer = renderDemoLoop(sampleRate).then((centre) => {
+    const ctx = new OfflineAudioContext(2, centre.length, sampleRate);
+    const source = ctx.createBufferSource();
+    source.buffer = centre;
+    source.connect(ctx.destination);
+    source.start(0);
+    const merge = ctx.createChannelMerger(2);
+    merge.connect(ctx.destination);
+    for (const [channel, hertzList] of [
+      [0, WIDE_LEFT_HERTZ],
+      [1, WIDE_RIGHT_HERTZ],
+    ] as const) {
+      for (const hertz of hertzList) {
+        const oscillator = ctx.createOscillator();
+        const gain = ctx.createGain();
+        oscillator.type = hertz < 100 ? "sine" : "sawtooth";
+        oscillator.frequency.value = hertz;
+        gain.gain.value = hertz < 100 ? WIDE_LEVEL * 3 : WIDE_LEVEL;
+        oscillator.connect(gain).connect(merge, 0, channel);
+        oscillator.start(0);
+      }
+    }
+    return ctx.startRendering();
+  });
+  wide.set(sampleRate, buffer);
+  return buffer;
+}

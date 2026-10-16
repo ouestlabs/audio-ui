@@ -815,6 +815,29 @@ export const components: RegistryItem[] = [
     type: "registry:block",
   },
   {
+    categories: ["utility", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "A mid/side device you can plug in: its state, a panel with a handle for the mid and the side and an engine that plays it. Play a wide loop through it and take the side down",
+    files: [
+      {
+        path: "components/device/block-mid-side.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-mid-side",
+    registryDependencies: [
+      "@audio-ui/mid-side-panel",
+      "@audio-ui/mid-side-device",
+      "@audio-ui/mid-side-engine",
+      "@audio-ui/demo-loop",
+      "@audio-ui/play-toggle",
+      "@audio-ui/use-device-loop",
+      "@audio-ui/use-master-bus",
+    ],
+    type: "registry:block",
+  },
+  {
     categories: ["distortion", "plot", "knob"],
     dependencies: ["@audio-ui/react"],
     description:

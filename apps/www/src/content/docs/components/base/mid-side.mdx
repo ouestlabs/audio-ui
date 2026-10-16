@@ -1,0 +1,89 @@
+---
+title: Mid/side
+description: "A mid/side device: a level for the centre, a level for the sides and a bass mono frequency, a panel with one handle for the two levels, a Web Audio engine and tools for agents."
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="block-mid-side" />
+
+Sets the centre and the sides of a stereo signal apart. The mid is what both channels share, such as a kick or a voice, and the side is what sets them apart, such as a wide pad. Each has its own level, and Bass mono takes the lows out of the side so everything under a frequency sits in the middle. For a gain, a pan or a single width control, use the [utility](/docs/components/base/utility). It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">CLI</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash component
+npx shadcn@latest add @audio-ui/block-mid-side
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the packages:</Step>
+
+```bash
+npm install @audio-ui/react @audio-ui/core
+```
+
+<Step>Add the pieces you want. All of them, or only the state and the panel if your engine is elsewhere:</Step>
+
+```bash
+npx shadcn@latest add @audio-ui/mid-side-device @audio-ui/mid-side-panel @audio-ui/mid-side-engine
+```
+
+<Step>Copy and paste the demo that wires them, if you want it.</Step>
+
+<ComponentSource
+  styleName="base-nova"
+  name="block-mid-side"
+  title="components/examples/block-mid-side.tsx"
+/>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+
+## Controls
+
+<DeviceControls device="mid-side">
+<Control id="midDb">The level of the centre. Drag the handle on the plot up or down to set it.</Control>
+<Control id="sideDb">The level of the sides. Drag the handle on the plot across to set it.</Control>
+<Control id="bassMonoHz">The frequency under which the sides are taken out, so the bass sits in the centre. Off at 0.</Control>
+</DeviceControls>
+
+## Panel
+
+The panel is a square with the side level across and the mid level up, and one handle to drag to both at once. The crossing of the two lines is a signal left as it is.
+
+```tsx
+import { MidSidePanel } from "@/components/audio-ui/devices/mid-side/panel";
+import { midSideDevice } from "@/components/audio-ui/devices/mid-side/device";
+
+const [state, setState] = useState(() => midSideDevice.defaults());
+
+<MidSidePanel onValueChange={setState} value={state} />;
+```
+
+## Engine
+
+Create it, connect it and update it as for any device: see [The engine](/docs/devices#the-engine).
+
+The signal is split into mid, `(L + R) / 2`, and side, `(L - R) / 2`. Each has its own gain, and the output is `L = mid + side` and `R = mid - side`. A mono input is spread to both sides first, so it is all mid. Off, both levels are unity and the sides keep their lows.
+
+Bass mono is a high-pass on the side only. It is a second-order Butterworth filter, so the sides are 3 dB down at the frequency, and a signal in the centre is untouched.
+
+Measured in Chrome, with the levels at 0 dB a centre signal and a side signal come out as they went in. A mid of -6 dB takes 6 dB off a centre signal and nothing off a side one, and a side of -24 dB or +6 dB moves a side signal by that much and leaves a centre one alone. With Bass mono at 200 Hz, a side signal at 50 Hz is 24 dB down, one at 100 Hz is 12 dB down, one at 400 Hz is 0.3 dB down and one at 2 kHz is untouched, and a centre signal at 50 Hz is untouched.

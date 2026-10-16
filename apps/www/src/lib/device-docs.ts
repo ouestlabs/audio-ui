@@ -9,6 +9,7 @@ import { equalizerDevice } from "@/registry-audio/bases/base/lib/equalizer-devic
 import { filterDevice } from "@/registry-audio/bases/base/lib/filter-device";
 import { gateDevice } from "@/registry-audio/bases/base/lib/gate-device";
 import { limiterDevice } from "@/registry-audio/bases/base/lib/limiter-device";
+import { midSideDevice } from "@/registry-audio/bases/base/lib/mid-side-device";
 import { multibandDevice } from "@/registry-audio/bases/base/lib/multiband-device";
 import { overdriveDevice } from "@/registry-audio/bases/base/lib/overdrive-device";
 import { phaserDevice } from "@/registry-audio/bases/base/lib/phaser-device";
@@ -33,6 +34,7 @@ export const DEVICE_DOCS = {
   filter: filterDevice,
   gate: gateDevice,
   limiter: limiterDevice,
+  "mid-side": midSideDevice,
   multiband: multibandDevice,
   overdrive: overdriveDevice,
   phaser: phaserDevice,
