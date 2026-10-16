@@ -56,10 +56,8 @@ function NumberControl({
       onValueChange(device.set(value as never, parameter.id, next) as AnyState),
     [device, onValueChange, parameter.id, value]
   );
-  // The readout under a knob is positioned, not in the flow: the padding
-  // below keeps its room, or the edge of the frame cuts it.
   return (
-    <div className="flex min-w-0 max-w-full flex-col items-center gap-1.5 pb-5">
+    <div className="flex min-w-0 max-w-full flex-col items-center gap-1.5">
       <span
         aria-hidden="true"
         className="max-w-full truncate text-muted-foreground text-xs"
