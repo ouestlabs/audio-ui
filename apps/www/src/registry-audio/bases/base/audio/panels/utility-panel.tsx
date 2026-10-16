@@ -48,7 +48,7 @@ function UtilityPanel({
         {children}
       </DeviceHeader>
       <div
-        className="flex min-h-0 grow flex-col justify-center gap-4 p-3"
+        className="flex min-h-0 grow flex-col justify-center gap-2 p-2"
         data-slot="utility-panel"
       >
         <DevicePanel

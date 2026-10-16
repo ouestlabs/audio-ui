@@ -107,10 +107,10 @@ function CompressorPanel({
             value={value}
           />
         </DeviceHeader>
-        <div className="flex min-h-0 grow flex-col gap-4 p-3">
+        <div className="flex min-h-0 grow flex-col gap-2 p-2">
           <Plot
             aria-label="Transfer curve"
-            className="min-h-40 grow"
+            className="h-28 min-h-24 grow"
             maxX={MAX_DB}
             maxY={MAX_DB}
             minX={MIN_DB}

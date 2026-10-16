@@ -69,12 +69,12 @@ function SaturatorPanel({
         {children}
       </DeviceHeader>
       <div
-        className="flex min-h-0 grow flex-col gap-4 p-3"
+        className="flex min-h-0 grow flex-col gap-2 p-2"
         data-slot="saturator-panel"
       >
         <Plot
           aria-label="Transfer curve"
-          className="min-h-40 grow"
+          className="h-28 min-h-24 grow"
           maxX={1}
           maxY={1}
           minX={-1}
@@ -89,7 +89,7 @@ function SaturatorPanel({
             <PlotCurve fn={curve} />
           </PlotGraph>
         </Plot>
-        <div className="grid grid-cols-[auto_1fr] items-start gap-x-4">
+        <div className="grid grid-cols-[auto_1fr] items-start gap-x-3">
           <div className="flex flex-col items-center gap-1.5">
             <span aria-hidden="true" className="text-muted-foreground text-xs">
               {CURVE.label}

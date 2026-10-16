@@ -71,14 +71,14 @@ function GatePanel({
         {children}
       </DeviceHeader>
       <div
-        className="flex min-h-0 grow flex-col gap-4 p-3"
+        className="flex min-h-0 grow flex-col gap-2 p-2"
         data-slot="gate-panel"
       >
         <Plot
           aria-label={
             value.external ? "Threshold of the key" : "Transfer curve"
           }
-          className="min-h-40 grow"
+          className="h-28 min-h-24 grow"
           maxX={MAX_DB}
           maxY={MAX_DB}
           minX={MIN_DB}

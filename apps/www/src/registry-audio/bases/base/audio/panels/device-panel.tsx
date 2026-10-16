@@ -73,7 +73,7 @@ function NumberControl({
     [device, onValueChange, parameter.id, value]
   );
   return (
-    <div className="flex min-w-0 max-w-full flex-col items-center gap-1.5">
+    <div className="flex min-w-0 max-w-full flex-col items-center gap-0.5">
       <span
         aria-hidden="true"
         className="max-w-full truncate text-muted-foreground text-xs"
@@ -84,6 +84,7 @@ function NumberControl({
       <Knob
         anchor={parameter.anchor}
         aria-label={parameter.label}
+        className="mb-5"
         defaultValue={parameter.default}
         disabled={disabled}
         formatValue={format}
@@ -342,7 +343,7 @@ function DeviceHeader<const Parameters extends readonly ParameterDescriptor[]>({
   );
   return (
     <div
-      className="flex items-center gap-2 border-b bg-muted/40 py-1.5 ps-3 pe-1.5"
+      className="flex items-center gap-2 border-b bg-muted/40 py-1 ps-2.5 pe-1"
       data-slot="device-header"
     >
       {parameter?.kind === "toggle" ? (
@@ -472,7 +473,7 @@ function DevicePanel<const Parameters extends readonly ParameterDescriptor[]>({
       <div
         aria-label={device.name}
         className={cn(
-          "grid grid-cols-[repeat(auto-fit,minmax(4.5rem,1fr))] items-start justify-items-center gap-x-3 gap-y-4",
+          "grid grid-cols-[repeat(auto-fit,minmax(4.5rem,1fr))] items-start justify-items-center gap-x-2 gap-y-2",
           className
         )}
         data-slot="device-panel"
@@ -487,14 +488,14 @@ function DevicePanel<const Parameters extends readonly ParameterDescriptor[]>({
   return (
     <div
       aria-label={device.name}
-      className={cn("flex flex-wrap items-start gap-x-8 gap-y-5", className)}
+      className={cn("flex flex-wrap items-start gap-x-5 gap-y-2", className)}
       data-slot="device-panel"
       role="group"
     >
       {groups.map((group) => (
         <div
           aria-label={group.label}
-          className="flex flex-col gap-2"
+          className="flex flex-col gap-1"
           key={group.label}
           role="group"
         >
@@ -504,7 +505,7 @@ function DevicePanel<const Parameters extends readonly ParameterDescriptor[]>({
           >
             {group.label}
           </span>
-          <div className="flex gap-3">
+          <div className="flex gap-2">
             {shown
               .filter((parameter) =>
                 group.parameters.includes(parameter.id as never)
@@ -514,7 +515,7 @@ function DevicePanel<const Parameters extends readonly ParameterDescriptor[]>({
         </div>
       ))}
       {rest.length > 0 ? (
-        <div className="flex gap-3">
+        <div className="flex gap-2">
           {rest.map((parameter) => control(parameter))}
         </div>
       ) : null}

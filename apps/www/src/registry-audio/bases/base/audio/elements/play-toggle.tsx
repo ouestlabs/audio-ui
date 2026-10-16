@@ -23,7 +23,7 @@ function PlayToggle({
       aria-label={playing ? "Stop" : label}
       className={className}
       onClick={onToggle}
-      size="icon-sm"
+      size="icon-xs"
       variant="outline"
     >
       {playing ? (
