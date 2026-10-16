@@ -129,6 +129,7 @@ export const audio: RegistryItem[] = [
     files: [
       {
         path: "audio/panels/compressor-panel.tsx",
+        target: "components/audio-ui/devices/compressor/panel.tsx",
         type: "registry:ui",
       },
     ],
@@ -148,6 +149,7 @@ export const audio: RegistryItem[] = [
     files: [
       {
         path: "audio/panels/pocket-synth-panel.tsx",
+        target: "components/audio-ui/devices/pocket-synth/panel.tsx",
         type: "registry:ui",
       },
     ],

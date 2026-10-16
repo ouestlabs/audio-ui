@@ -284,10 +284,11 @@ async function buildManifests(): Promise<void> {
 // ---------------------------------------------------------------------------
 
 function transformImportPaths(code: string): string {
-  return IMPORT_REWRITES.reduce(
-    (text, [pattern, installed]) => text.replace(pattern, installed),
-    code
-  )
+  return [...explicitRewrites, ...IMPORT_REWRITES]
+    .reduce(
+      (text, [pattern, installed]) => text.replace(pattern, installed),
+      code
+    )
     .replace(DEMO_METADATA, "")
     .trimStart();
 }
@@ -546,6 +547,25 @@ const itemsByBase = new Map(
     BASES.map(async ({ name }) => [name, await loadItems(name)] as const)
   )
 );
+// A file that says where it installs (`target`) is imported from there: its
+// source module becomes that path, before the folder rules above apply.
+const REGEX_SPECIALS = /[.*+?^${}()|[\]\\]/g;
+const SOURCE_EXTENSION = /\.tsx?$/;
+const explicitRewrites = [...itemsByBase.values()]
+  .flatMap((items) => [...items.values()])
+  .flatMap((item) => item.files ?? [])
+  .flatMap((file) => {
+    if (!file.target) {
+      return [];
+    }
+    const source = file.path
+      .replace(SOURCE_EXTENSION, "")
+      .replace(REGEX_SPECIALS, "\\$&");
+    const installed = `@/${file.target.replace(SOURCE_EXTENSION, "")}`;
+    return SOURCE_ROOTS.map(
+      (root) => [new RegExp(`${root}${source}(?=")`, "g"), installed] as const
+    );
+  });
 // Every item name, once, in the order the registry lists them.
 const itemNames = new Set(
   [...itemsByBase.values()].flatMap((items) => [...items.keys()])

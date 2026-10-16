@@ -53,6 +53,7 @@ const items: RegistryItem[] = [
     files: [
       {
         path: "lib/compressor-device.ts",
+        target: "components/audio-ui/devices/compressor/device.ts",
         type: "registry:lib",
       },
     ],
@@ -68,6 +69,7 @@ const items: RegistryItem[] = [
     files: [
       {
         path: "lib/compressor-engine.ts",
+        target: "components/audio-ui/devices/compressor/engine.ts",
         type: "registry:lib",
       },
     ],
@@ -83,6 +85,7 @@ const items: RegistryItem[] = [
     files: [
       {
         path: "lib/pocket-synth-device.ts",
+        target: "components/audio-ui/devices/pocket-synth/device.ts",
         type: "registry:lib",
       },
     ],
@@ -98,6 +101,7 @@ const items: RegistryItem[] = [
     files: [
       {
         path: "lib/pocket-synth-engine.ts",
+        target: "components/audio-ui/devices/pocket-synth/engine.ts",
         type: "registry:lib",
       },
     ],

@@ -1412,9 +1412,9 @@ npx shadcn@latest add @audio-ui/block-compressor
 
 ```tsx
 import { deviceTools } from "@audio-ui/core/device";
-import { CompressorPanel } from "@/components/audio-ui/compressor-panel";
-import { compressorDevice } from "@/lib/compressor-device";
-import { createCompressorEngine } from "@/lib/compressor-engine";
+import { CompressorPanel } from "@/components/audio-ui/devices/compressor/panel";
+import { compressorDevice } from "@/components/audio-ui/devices/compressor/device";
+import { createCompressorEngine } from "@/components/audio-ui/devices/compressor/engine";
 
 const [state, setState] = useState(() => compressorDevice.defaults()); // a plain object: store it, save it
 <CompressorPanel onValueChange={setState} value={state} />; // controlled, no audio inside

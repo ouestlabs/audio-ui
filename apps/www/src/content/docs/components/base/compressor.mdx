@@ -68,7 +68,7 @@ npx shadcn@latest add @audio-ui/compressor-device @audio-ui/compressor-panel @au
 A state is a plain object keyed by parameter id: numbers and booleans, JSON-safe. The device holds no instance, so a host stores it, saves it with its project and sends it where it likes.
 
 ```ts
-import { compressorDevice } from "@/lib/compressor-device";
+import { compressorDevice } from "@/components/audio-ui/devices/compressor/device";
 
 const state = compressorDevice.defaults();
 // { enabled: true, thresholdDb: -18, ratio: 4, attackMs: 5, releaseMs: 80,
@@ -85,7 +85,7 @@ Its id, `audioui.compressor`, is what a project stores: not the panel that draws
 Controlled: it keeps no state, it draws the one it is given and returns the whole new state.
 
 ```tsx
-import { CompressorPanel } from "@/components/audio-ui/compressor-panel";
+import { CompressorPanel } from "@/components/audio-ui/devices/compressor/panel";
 
 <CompressorPanel
   level={inputLevel} // optional: a live source in dB, a dot rides the curve
@@ -99,7 +99,7 @@ It draws the curve the state plays: the threshold, the level going in on it, and
 ## The engine
 
 ```ts
-import { createCompressorEngine } from "@/lib/compressor-engine";
+import { createCompressorEngine } from "@/components/audio-ui/devices/compressor/engine";
 
 const engine = createCompressorEngine(ctx, state);
 source.connect(engine.input);

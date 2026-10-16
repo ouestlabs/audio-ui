@@ -9,10 +9,10 @@ import { expect, test } from "bun:test";
  */
 
 const ROOT = `${import.meta.dir}/../../..`;
-const AUDIO_UI_IMPORT = /@\/components\/audio-ui\/([a-z0-9-]+)/g;
+const AUDIO_UI_IMPORT = /@\/components\/audio-ui\/([a-z0-9/-]+)/g;
 // `import { A, B as C } from "@/components/audio-ui/<file>"`, possibly over several lines.
 const NAMED_IMPORT =
-  /import\s+(?:type\s+)?\{([^}]+)\}\s+from\s+"@\/components\/audio-ui\/([a-z0-9-]+)"/g;
+  /import\s+(?:type\s+)?\{([^}]+)\}\s+from\s+"@\/components\/audio-ui\/([a-z0-9/-]+)"/g;
 const EXPORTED_DECLARATION =
   /^export\s+(?:async\s+)?(?:function|const|class|type|interface)\s+([A-Za-z0-9_]+)/gm;
 const EXPORT_LIST = /^export\s+(?:type\s+)?\{([^}]+)\}/gm;
@@ -50,8 +50,6 @@ const PROVIDED_PACKAGES = new Set([
   "react-dom",
   "tailwind-merge",
 ]);
-// The extension of an installed file.
-const EXTENSION = /\.[a-z]+$/;
 // `A as B` in an import or export list.
 const ALIAS = /\s+as\s+/;
 // The folder components were installed to before `audio-ui`.
@@ -79,11 +77,31 @@ const items: BuiltItem[] = await Promise.all(
     )
   ).map((path) => Bun.file(path).json())
 );
+// The extension of an installed file.
+const EXTENSION = /\.[a-z]+$/;
 const installed = new Set(
-  items.flatMap((item) => (item.files ?? []).map((file) => file.target ?? ""))
+  items.flatMap((item) =>
+    (item.files ?? []).map((file) => (file.target ?? "").replace(EXTENSION, ""))
+  )
 );
 
 const byName = new Map(items.map((item) => [item.name ?? "", item]));
+
+// The item that installs `components/audio-ui/<path>`, by that path: most are
+// named after their file, a device's files sit in a folder of their own.
+const installedBy = new Map(
+  items.flatMap((item) =>
+    (item.files ?? []).map(
+      (file) =>
+        [
+          (file.target ?? "")
+            .replace("components/audio-ui/", "")
+            .replace(EXTENSION, ""),
+          item.name ?? "",
+        ] as const
+    )
+  )
+);
 
 /**
  * An item and everything `shadcn add` installs with it: our items by name, and
@@ -111,7 +129,7 @@ const imports = (text: string) =>
   [...text.matchAll(AUDIO_UI_IMPORT)].map((match) => match[1] ?? "");
 const missing = (names: string[]) =>
   [...new Set(names)].filter(
-    (name) => !installed.has(`components/audio-ui/${name}.tsx`)
+    (name) => !installed.has(`components/audio-ui/${name}`)
   );
 
 async function readAll(pattern: string, cwd: string) {
@@ -171,7 +189,11 @@ test("named imports from @/components/audio-ui exist in the installed file", asy
   const contentByTarget = new Map(
     items.flatMap((item) =>
       (item.files ?? []).map(
-        (file) => [file.target ?? "", file.content ?? ""] as const
+        (file) =>
+          [
+            (file.target ?? "").replace(EXTENSION, ""),
+            file.content ?? "",
+          ] as const
       )
     )
   );
@@ -182,7 +204,7 @@ test("named imports from @/components/audio-ui exist in the installed file", asy
   const missingNames: string[] = [];
   for (const [, list = "", file] of text.matchAll(NAMED_IMPORT)) {
     const exported = exportsOf(
-      contentByTarget.get(`components/audio-ui/${file}.tsx`) ?? ""
+      contentByTarget.get(`components/audio-ui/${file}`) ?? ""
     );
     for (const part of list.split(",")) {
       const [name] = part.trim().replace("type ", "").split(ALIAS);
@@ -210,7 +232,7 @@ test("a component's docs page only imports what installing it brings", async () 
         : `block-${component}`;
       const brought = withDependencies(itemName);
       return [...new Set(imports(await Bun.file(page).text()))]
-        .filter((used) => !brought.has(used))
+        .filter((used) => !brought.has(installedBy.get(used) ?? used))
         .map((used) => `${component}: ${used}`);
     })
   );
