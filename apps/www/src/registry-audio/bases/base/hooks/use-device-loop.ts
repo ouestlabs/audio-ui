@@ -14,6 +14,8 @@ export interface DemoEngine<State> {
   dispose: () => void;
   readonly input: AudioNode;
   readonly output: AudioNode;
+  /** The key input of an engine that takes one, such as a gate. */
+  readonly sidechain?: AudioNode;
   update: (state: State, context?: DeviceContext) => void;
 }
 
@@ -28,6 +30,10 @@ export interface UseDeviceLoopOptions<State, Engine extends DemoEngine<State>> {
   ) => Engine;
   /** Where the processed sound goes, such as the node of `useMasterBus`. */
   destination: AudioNode | null;
+  /** The signal that goes to the engine's `sidechain` input, when it has one: a loop drawn for the sample rate. It is only listened to, never heard. */
+  key?: (sampleRate: number) => Promise<AudioBuffer>;
+  /** The signal to process, drawn for the sample rate. @default renderDemoLoop */
+  signal?: (sampleRate: number) => Promise<AudioBuffer>;
   /** The state of the device, followed by the engine whoever changed it. */
   state: State;
 }
@@ -43,6 +49,8 @@ export function useDeviceLoop<State, Engine extends DemoEngine<State>>({
   context,
   create,
   destination,
+  key,
+  signal = renderDemoLoop,
   state,
 }: UseDeviceLoopOptions<State, Engine>) {
   const [playing, setPlaying] = useState(false);
@@ -65,7 +73,10 @@ export function useDeviceLoop<State, Engine extends DemoEngine<State>>({
     let cancelled = false;
     let stop = () => undefined;
     ctx.resume();
-    renderDemoLoop(ctx.sampleRate).then((buffer) => {
+    Promise.all([
+      signal(ctx.sampleRate),
+      key ? key(ctx.sampleRate) : Promise.resolve(null),
+    ]).then(([buffer, keyBuffer]) => {
       if (cancelled) {
         return;
       }
@@ -81,12 +92,24 @@ export function useDeviceLoop<State, Engine extends DemoEngine<State>>({
       source.connect(level).connect(made.input);
       made.output.connect(tap);
       made.output.connect(destination);
-      source.start();
+      // The key starts with the signal, on the same beat, and is not connected to the output.
+      const keySource =
+        keyBuffer && made.sidechain ? ctx.createBufferSource() : null;
+      if (keySource && keyBuffer && made.sidechain) {
+        keySource.buffer = keyBuffer;
+        keySource.loop = true;
+        keySource.connect(made.sidechain);
+      }
+      const startAt = ctx.currentTime + 0.05;
+      source.start(startAt);
+      keySource?.start(startAt);
       setEngine(made);
       setAnalyser(tap);
       stop = () => {
         source.stop();
         source.disconnect();
+        keySource?.stop();
+        keySource?.disconnect();
         level.disconnect();
         tap.disconnect();
         made.dispose();
@@ -98,7 +121,7 @@ export function useDeviceLoop<State, Engine extends DemoEngine<State>>({
       setEngine(null);
       setAnalyser(null);
     };
-  }, [destination, playing]);
+  }, [destination, key, playing, signal]);
 
   // The engine follows the state, whoever changed it: a knob, a handle or a call.
   useEffect(() => {

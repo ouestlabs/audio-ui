@@ -120,6 +120,8 @@ export const audio: RegistryItem[] = [
     name: "device-panel",
     registryDependencies: [
       "@audio-ui/knob",
+      "@audio-ui/waveform-select",
+      "@audio-ui/filter-type-select",
       "@shadcn/toggle",
       "@shadcn/select",
     ],
@@ -180,6 +182,21 @@ export const audio: RegistryItem[] = [
       },
     ],
     name: "waveform-select",
+    registryDependencies: ["@shadcn/toggle-group"],
+    type: "registry:ui",
+  },
+  {
+    categories: ["device", "plot"],
+    dependencies: [],
+    description:
+      "A row of buttons, one per filter type, each drawn as the response it has: low-pass, high-pass, band-pass, notch, low and high cut, low and high shelf, bell. Fed by the options of a device's choice parameter.",
+    files: [
+      {
+        path: "audio/elements/filter-type-select.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "filter-type-select",
     registryDependencies: ["@shadcn/toggle-group"],
     type: "registry:ui",
   },
@@ -515,7 +532,7 @@ export const audio: RegistryItem[] = [
       "@audio-ui/device-panel",
       "@audio-ui/plot",
       "@audio-ui/equalizer-device",
-      "@shadcn/select",
+      "@audio-ui/filter-type-select",
       "@shadcn/toggle",
     ],
     type: "registry:ui",

@@ -14,6 +14,9 @@ const WAVE_PATHS: Record<string, string> = {
   triangle: "M2 12l5-6 5 12 5-12 5 6",
 };
 
+/** Whether a value is one of the four shapes this element draws. */
+export const isWaveform = (value: string) => value in WAVE_PATHS;
+
 interface WaveformOption {
   label: string;
   /** `sine`, `triangle`, `sawtooth` or `square` draw their shape; any other value shows its label. */
@@ -23,6 +26,7 @@ interface WaveformOption {
 interface WaveformSelectProps {
   "aria-label"?: string;
   className?: string;
+  disabled?: boolean;
   onValueChange: (value: string) => void;
   /** What can be picked, such as the options of a device's `choice` parameter. */
   options: readonly WaveformOption[];
@@ -32,6 +36,7 @@ interface WaveformSelectProps {
 /** A row of buttons, one per waveform, each drawn as its shape: pick one. */
 function WaveformSelect({
   className,
+  disabled,
   onValueChange,
   options,
   value,
@@ -51,6 +56,7 @@ function WaveformSelect({
       aria-label={props["aria-label"]}
       className={cn("w-full", className)}
       data-slot="waveform-select"
+      disabled={disabled}
       onValueChange={pick}
       size="sm"
       value={[value]}

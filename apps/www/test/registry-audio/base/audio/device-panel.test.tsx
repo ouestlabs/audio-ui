@@ -187,7 +187,7 @@ describe("DevicePanel with a choice", () => {
     ],
   });
 
-  test("draws one button per option, the picked one pressed, and a press sets it", () => {
+  test("draws a choice of waveforms as the waves, the picked one pressed, and a press sets it", () => {
     const onValueChange = mock((_state: unknown) => undefined);
     const view = render(
       <DevicePanel
@@ -199,9 +199,11 @@ describe("DevicePanel with a choice", () => {
     const group = view.getByRole("group", { name: "Wave" });
     expect(within(group).getAllByRole("button")).toHaveLength(2);
     expect(
-      view.getByRole("button", { name: "Square" }).getAttribute("aria-pressed")
+      view
+        .getByRole("button", { name: "Square wave" })
+        .getAttribute("aria-pressed")
     ).toBe("true");
-    fireEvent.click(view.getByRole("button", { name: "Sine" }));
+    fireEvent.click(view.getByRole("button", { name: "Sine wave" }));
     expect(onValueChange).toHaveBeenCalledWith({ wave: "sine" });
   });
 

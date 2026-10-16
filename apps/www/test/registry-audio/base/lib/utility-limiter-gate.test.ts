@@ -248,3 +248,39 @@ describe("the gate device", () => {
     expect(made.filter.type).toBe("lowpass");
   });
 });
+
+describe("the gate's key", () => {
+  const defaults = gateDevice.defaults();
+
+  test("it says it takes a key, and the key is a switch, not a signal in the state", () => {
+    expect(gateDevice.sidechain).toBe(true);
+    expect(gateDevice.describe().sidechain).toBe(true);
+    expect(defaults.external).toBe(false);
+    expect(gateSettings({ ...defaults, external: true })).toMatchObject({
+      outerKey: 1,
+      ownKey: 0,
+    });
+    expect(gateSettings(defaults)).toMatchObject({ outerKey: 0, ownKey: 1 });
+  });
+
+  test("the engine has a sidechain input that only the key switch opens", () => {
+    const { ctx, made } = fakeContext();
+    const engine = createGateEngine(ctx, { ...defaults, external: true });
+    expect(engine.sidechain).toBeDefined();
+    expect(engine.sidechain).not.toBe(engine.input);
+    const keys = made.gains.filter(
+      (gain) => gain.gain.value === 0 || gain.gain.value === 1
+    );
+    expect(keys.length).toBeGreaterThanOrEqual(2);
+    engine.update({ ...defaults, external: false });
+    const targets = made.gains.flatMap((gain) => gain.gain.targets);
+    expect(targets).toContain(1);
+    expect(targets).toContain(0);
+  });
+
+  test("an agent can switch the key on", () => {
+    expect(gateDevice.apply(defaults, { external: true }).state.external).toBe(
+      true
+    );
+  });
+});

@@ -97,3 +97,64 @@ export function renderDemoLoop(sampleRate: number): Promise<AudioBuffer> {
   rendered.set(sampleRate, buffer);
   return buffer;
 }
+
+const keyed = new Map<number, Promise<AudioBuffer>>();
+
+/**
+ * The kick of the loop on its own: the key a sidechain listens to, in step with
+ * `renderDemoLoop` since both are drawn from the same beats.
+ */
+export function renderKickLoop(sampleRate: number): Promise<AudioBuffer> {
+  const cached = keyed.get(sampleRate);
+  if (cached) {
+    return cached;
+  }
+  const ctx = new OfflineAudioContext(
+    2,
+    Math.round(sampleRate * LOOP_SECONDS),
+    sampleRate
+  );
+  for (const beat of KICKS) {
+    const hit = ctx.createGain();
+    hit.gain.value = KICK_LEVEL;
+    hit.connect(ctx.destination);
+    triggerKick(ctx, hit, beat * BEAT_SECONDS);
+  }
+  const buffer = ctx.startRendering();
+  keyed.set(sampleRate, buffer);
+  return buffer;
+}
+
+const held = new Map<number, Promise<AudioBuffer>>();
+/** An A minor chord, held for the whole loop: what a key has something to open. */
+const CHORD_HERTZ = [110, 164.81, 220, 261.63];
+const CHORD_LEVEL = 0.12;
+
+/** A sustained chord for the length of the loop, a signal that is never quiet by itself. */
+export function renderHeldChord(sampleRate: number): Promise<AudioBuffer> {
+  const cached = held.get(sampleRate);
+  if (cached) {
+    return cached;
+  }
+  const ctx = new OfflineAudioContext(
+    2,
+    Math.round(sampleRate * LOOP_SECONDS),
+    sampleRate
+  );
+  const filter = ctx.createBiquadFilter();
+  filter.type = "lowpass";
+  filter.frequency.value = 1800;
+  filter.connect(ctx.destination);
+  for (const hertz of CHORD_HERTZ) {
+    const oscillator = ctx.createOscillator();
+    const gain = ctx.createGain();
+    oscillator.type = "sawtooth";
+    oscillator.frequency.value = hertz;
+    gain.gain.value = CHORD_LEVEL;
+    oscillator.connect(gain).connect(filter);
+    oscillator.start(0);
+  }
+  const buffer = ctx.startRendering();
+  held.set(sampleRate, buffer);
+  return buffer;
+}

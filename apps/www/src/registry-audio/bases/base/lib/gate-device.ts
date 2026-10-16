@@ -5,13 +5,16 @@ const TABLE_SAMPLES = 2048;
 /**
  * A gate as a device: it lets a signal through above a threshold and turns it
  * down to a floor below it, with a response for how fast it opens and closes,
- * and no panel and no audio in it.
+ * and no panel and no audio in it. It takes a key: with `external` on, its
+ * level is the one of the signal connected to the engine's `sidechain` input,
+ * so a kick can open a held chord.
  */
 export const gateDevice = defineDevice({
   description:
-    "Cleans up between sounds: above the threshold the signal passes, below it the signal is turned down to the floor, with a response for how fast the gate follows the level.",
+    "Cleans up between sounds: above the threshold the signal passes, below it the signal is turned down to the floor, with a response for how fast the gate follows the level. With the key on, the level it follows is the one of another signal, the sidechain.",
   id: "audioui.gate",
   name: "Gate",
+  sidechain: true,
   parameters: [
     { default: true, id: "enabled", kind: "toggle", label: "On" },
     {
@@ -32,6 +35,7 @@ export const gateDevice = defineDevice({
       step: 1,
       unit: "dB",
     },
+    { default: false, id: "external", kind: "toggle", label: "Key" },
     {
       default: 30,
       id: "responseMs",
@@ -52,6 +56,9 @@ const toGain = (db: number) => 10 ** (db / 20);
 /** The numbers that go on the nodes for a state. Off, the gate is fully open. */
 export function gateSettings(state: GateState) {
   return {
+    // Which signal the level is measured on: the key when it is on, the signal itself otherwise.
+    ownKey: state.external ? 0 : 1,
+    outerKey: state.external ? 1 : 0,
     floor: state.enabled ? toGain(state.floorDb) : 1,
     // A one-pole low-pass of the rectified signal: its cutoff gives the response time.
     smoothingHz: 1 / (2 * Math.PI * (state.responseMs / 1000)),

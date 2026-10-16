@@ -199,6 +199,10 @@ describe("the auto pan device", () => {
   test("the waves swing from -1 to 1 at the right phases", () => {
     expect(autoPanWave("sine", 0.25)).toBeCloseTo(1, 9);
     expect(autoPanWave("triangle", 0)).toBe(-1);
+    // The saw is a ramp from -1 up to 1 that falls back at the end of the cycle.
+    expect(autoPanWave("sawtooth", 0)).toBe(-1);
+    expect(autoPanWave("sawtooth", 0.5)).toBe(0);
+    expect(autoPanWave("sawtooth", 0.999)).toBeCloseTo(0.998, 3);
     expect(autoPanWave("triangle", 0.5)).toBe(1);
     expect(autoPanWave("square", 0.25)).toBe(1);
     expect(autoPanWave("square", 0.75)).toBe(-1);
