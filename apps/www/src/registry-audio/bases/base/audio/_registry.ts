@@ -575,6 +575,26 @@ export const audio: RegistryItem[] = [
     categories: ["device", "plot", "knob"],
     dependencies: ["@audio-ui/react"],
     description:
+      "The face of the mid/side device: a square with the side level across and the mid level up, and a handle to drag to both at once, over the bass mono knob.",
+    files: [
+      {
+        path: "audio/panels/mid-side-panel.tsx",
+        target: "components/audio-ui/devices/mid-side/panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "mid-side-panel",
+    registryDependencies: [
+      "@audio-ui/device-panel",
+      "@audio-ui/plot",
+      "@audio-ui/mid-side-device",
+    ],
+    type: "registry:ui",
+  },
+  {
+    categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
       "The face of the redux device: the stairs the bits make against the straight line of a clean sound, over the device knobs.",
     files: [
       {

@@ -676,6 +676,38 @@ const items: RegistryItem[] = [
   },
   {
     categories: ["lib", "audio", "device"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "The mid/side device as a device: a level for the mid, a level for the side and a bass mono frequency, the numbers that go on the nodes for a state, with no panel and no audio in it.",
+    files: [
+      {
+        path: "lib/mid-side-device.ts",
+        target: "components/audio-ui/devices/mid-side/device.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "mid-side-device",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "A mid/side device on the Web Audio API for a mid/side state: the signal split into mid and side, a level for each, a high-pass on the side for bass mono, and the two added back, moving without a click.",
+    files: [
+      {
+        path: "lib/mid-side-engine.ts",
+        target: "components/audio-ui/devices/mid-side/engine.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "mid-side-engine",
+    registryDependencies: ["@audio-ui/mid-side-device"],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device"],
     dependencies: [],
     description:
       "The detector of a key: an AudioWorklet loaded once per context from a blob, which reads a signal and writes the gain a compressor would apply to it. The compressor's key and the de-esser use it.",

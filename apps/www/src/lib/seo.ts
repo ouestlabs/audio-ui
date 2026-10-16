@@ -24,6 +24,7 @@ const CANONICAL_COMPONENT_DOC_SLUGS = [
   "deesser",
   "multiband",
   "transient",
+  "mid-side",
   "redux",
   "envelope",
   "fader",

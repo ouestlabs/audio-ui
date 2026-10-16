@@ -215,6 +215,11 @@
     "title": "block-transient"
   },
   {
+    "categories": ["utility", "plot", "knob"],
+    "name": "block-mid-side",
+    "title": "block-mid-side"
+  },
+  {
     "categories": ["distortion", "plot", "knob"],
     "name": "block-redux",
     "title": "block-redux"
