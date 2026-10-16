@@ -1,4 +1,6 @@
 export {
+  type ChoiceOption,
+  type ChoiceParameter,
   type Device,
   type DeviceApplied,
   type DeviceBinding,
@@ -12,11 +14,14 @@ export {
   type NumberParameter,
   type ParameterDescription,
   type ParameterDescriptor,
+  type ParameterValue,
   type ToggleParameter,
 } from "./define.ts";
+export { type InstrumentBinding, playNote } from "./instrument.ts";
 export {
   type DeviceTool,
   type DeviceToolResult,
   deviceTools,
   type JsonSchema,
+  NOTE_DURATION,
 } from "./tools.ts";
