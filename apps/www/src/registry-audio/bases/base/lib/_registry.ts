@@ -142,6 +142,38 @@ const items: RegistryItem[] = [
     type: "registry:lib",
   },
   {
+    categories: ["lib", "audio", "device"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "The delay as a device: its time, feedback, tone and mix, the numbers that go on the nodes for a state and the echoes a state makes, with no panel and no audio in it.",
+    files: [
+      {
+        path: "lib/delay-device.ts",
+        target: "components/audio-ui/devices/delay/device.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "delay-device",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device"],
+    dependencies: [],
+    description:
+      "A delay on the Web Audio API for a delay state: an echo that goes round a tone filter so each repeat is darker, mixed with the dry sound, with a time that bends like a tape instead of clicking.",
+    files: [
+      {
+        path: "lib/delay-engine.ts",
+        target: "components/audio-ui/devices/delay/engine.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "delay-engine",
+    registryDependencies: ["@audio-ui/delay-device"],
+    type: "registry:lib",
+  },
+  {
     categories: ["lib", "audio", "web-audio"],
     dependencies: [],
     description:
@@ -154,6 +186,21 @@ const items: RegistryItem[] = [
     ],
     name: "pink-noise",
     registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device", "web-audio"],
+    dependencies: [],
+    description:
+      "A two-second loop to put an effect on: a kick and a snare, a hat on the eighths and a short line of plucked notes, drawn once from the drum voices of the library and looped as a buffer.",
+    files: [
+      {
+        path: "lib/demo-loop.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "demo-loop",
+    registryDependencies: ["@audio-ui/drum-synthesis"],
     type: "registry:lib",
   },
   {

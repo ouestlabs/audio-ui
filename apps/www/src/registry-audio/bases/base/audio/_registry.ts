@@ -180,6 +180,21 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
+    categories: ["device", "hooks"],
+    dependencies: [],
+    description:
+      "A play and pause button for a demo signal: the icon follows the state, the name says what pressing it does.",
+    files: [
+      {
+        path: "audio/elements/play-toggle.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "play-toggle",
+    registryDependencies: ["@shadcn/button"],
+    type: "registry:ui",
+  },
+  {
     categories: ["device", "synth", "xypad"],
     dependencies: ["@audio-ui/react"],
     description:
@@ -197,6 +212,26 @@ export const audio: RegistryItem[] = [
       "@audio-ui/waveform-select",
       "@audio-ui/xypad",
       "@audio-ui/wave-shaper-device",
+    ],
+    type: "registry:ui",
+  },
+  {
+    categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "The face of the delay device: the echoes it makes, one line each and fainter as they fade, with a handle on the first to drag its time and feedback, over the device's knobs.",
+    files: [
+      {
+        path: "audio/panels/delay-panel.tsx",
+        target: "components/audio-ui/devices/delay/panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "delay-panel",
+    registryDependencies: [
+      "@audio-ui/device-panel",
+      "@audio-ui/plot",
+      "@audio-ui/delay-device",
     ],
     type: "registry:ui",
   },

@@ -209,6 +209,21 @@ export const hooks: RegistryItem[] = [
     type: "registry:hook",
   },
   {
+    categories: ["hooks", "audio", "device"],
+    dependencies: [],
+    description:
+      "A short loop of drums and plucked notes played through an effect's engine and out to a destination, for a block to show what a device does: the engine follows the state, and an analyser of the output is there for a spectrum.",
+    files: [
+      {
+        path: "hooks/use-device-loop.ts",
+        type: "registry:hook",
+      },
+    ],
+    name: "use-device-loop",
+    registryDependencies: ["@audio-ui/demo-loop", "@audio-ui/web-audio"],
+    type: "registry:hook",
+  },
+  {
     categories: ["hooks", "audio", "plot"],
     dependencies: ["@audio-ui/react"],
     description:

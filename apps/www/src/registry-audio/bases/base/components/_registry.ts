@@ -455,6 +455,28 @@ export const components: RegistryItem[] = [
     type: "registry:block",
   },
   {
+    categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "A delay you can plug in: its state, a panel that draws the echoes it makes with a handle for the time and the feedback, and an engine that plays it. Play a loop through it and drag",
+    files: [
+      {
+        path: "components/device/block-delay.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-delay",
+    registryDependencies: [
+      "@audio-ui/delay-panel",
+      "@audio-ui/delay-device",
+      "@audio-ui/delay-engine",
+      "@audio-ui/play-toggle",
+      "@audio-ui/use-device-loop",
+      "@audio-ui/use-master-bus",
+    ],
+    type: "registry:block",
+  },
+  {
     categories: ["mixer", "fader", "meter", "knob"],
     description:
       "Mixing console: four tracks of a loop with pan, fader, meter, mute and solo, into a master with a stereo meter, every meter reading its real signal",

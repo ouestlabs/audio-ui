@@ -135,6 +135,11 @@
     "title": "block-equalizer"
   },
   {
+    "categories": ["device", "plot", "knob"],
+    "name": "block-delay",
+    "title": "block-delay"
+  },
+  {
     "categories": ["mixer", "fader", "meter", "knob"],
     "name": "block-mixer",
     "title": "block-mixer"
