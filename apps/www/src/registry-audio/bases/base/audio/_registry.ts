@@ -515,6 +515,26 @@ export const audio: RegistryItem[] = [
     categories: ["device", "plot", "knob"],
     dependencies: ["@audio-ui/react"],
     description:
+      "The face of the de-esser device: what it does at each frequency with a handle at the frequency to drag across and up or down for the range, over the device knobs.",
+    files: [
+      {
+        path: "audio/panels/deesser-panel.tsx",
+        target: "components/audio-ui/devices/deesser/panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "deesser-panel",
+    registryDependencies: [
+      "@audio-ui/device-panel",
+      "@audio-ui/plot",
+      "@audio-ui/deesser-device",
+    ],
+    type: "registry:ui",
+  },
+  {
+    categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
       "The face of the redux device: the stairs the bits make against the straight line of a clean sound, over the device knobs.",
     files: [
       {

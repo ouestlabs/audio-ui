@@ -751,6 +751,29 @@ export const components: RegistryItem[] = [
     categories: ["device", "plot", "knob"],
     dependencies: ["@audio-ui/react"],
     description:
+      "A de-esser you can plug in: its state, a panel that draws what it does at each frequency and an engine that plays it. Play a voice through it, lower the threshold and the s sits back",
+    files: [
+      {
+        path: "components/device/block-deesser.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-deesser",
+    registryDependencies: [
+      "@audio-ui/deesser-panel",
+      "@audio-ui/deesser-device",
+      "@audio-ui/deesser-engine",
+      "@audio-ui/demo-loop",
+      "@audio-ui/play-toggle",
+      "@audio-ui/use-device-loop",
+      "@audio-ui/use-master-bus",
+    ],
+    type: "registry:block",
+  },
+  {
+    categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
       "A redux you can plug in: its state, a panel that draws the stairs the bits make and an engine that plays it. Play a loop through it and take the bits down",
     files: [
       {

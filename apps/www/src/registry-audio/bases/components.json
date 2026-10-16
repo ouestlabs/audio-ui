@@ -201,6 +201,11 @@
   },
   {
     "categories": ["device", "plot", "knob"],
+    "name": "block-deesser",
+    "title": "block-deesser"
+  },
+  {
+    "categories": ["device", "plot", "knob"],
     "name": "block-redux",
     "title": "block-redux"
   },

@@ -158,3 +158,70 @@ export function renderHeldChord(sampleRate: number): Promise<AudioBuffer> {
   held.set(sampleRate, buffer);
   return buffer;
 }
+
+const sibilant = new Map<number, Promise<AudioBuffer>>();
+const VOICE_HERTZ = 140;
+const VOICE_LEVEL = 0.22;
+const HISS_LEVEL = 0.5;
+/** Where an "s" starts and how long it lasts, in beats: four to a loop, after the vowel. */
+const HISS_BEATS = [1, 3, 5, 7];
+const HISS_BEAT_LENGTH = 0.4;
+
+/**
+ * A voice for a de-esser: a held vowel (a sawtooth through two formants) with
+ * a burst of high-passed noise, an "s", on each of four beats of the loop.
+ */
+export function renderSibilantLoop(sampleRate: number): Promise<AudioBuffer> {
+  const cached = sibilant.get(sampleRate);
+  if (cached) {
+    return cached;
+  }
+  const length = Math.round(sampleRate * LOOP_SECONDS);
+  const ctx = new OfflineAudioContext(2, length, sampleRate);
+  const voice = ctx.createOscillator();
+  voice.type = "sawtooth";
+  voice.frequency.value = VOICE_HERTZ;
+  const level = ctx.createGain();
+  level.gain.value = VOICE_LEVEL;
+  for (const formant of [700, 1200]) {
+    const filter = ctx.createBiquadFilter();
+    filter.type = "bandpass";
+    filter.frequency.value = formant;
+    filter.Q.value = 4;
+    voice.connect(filter).connect(level);
+  }
+  level.connect(ctx.destination);
+  voice.start(0);
+
+  const noise = ctx.createBuffer(1, length, sampleRate);
+  const samples = noise.getChannelData(0);
+  for (let index = 0; index < length; index += 1) {
+    samples[index] = Math.random() * 2 - 1;
+  }
+  const hiss = ctx.createBufferSource();
+  hiss.buffer = noise;
+  const highs = ctx.createBiquadFilter();
+  highs.type = "highpass";
+  highs.frequency.value = 5500;
+  const burst = ctx.createGain();
+  burst.gain.value = 0;
+  for (const beat of HISS_BEATS) {
+    const start = beat * BEAT_SECONDS;
+    burst.gain.setValueAtTime(0, start);
+    burst.gain.linearRampToValueAtTime(HISS_LEVEL, start + 0.02);
+    burst.gain.setValueAtTime(
+      HISS_LEVEL,
+      start + HISS_BEAT_LENGTH * BEAT_SECONDS
+    );
+    burst.gain.linearRampToValueAtTime(
+      0,
+      start + (HISS_BEAT_LENGTH + 0.2) * BEAT_SECONDS
+    );
+  }
+  hiss.connect(highs).connect(burst).connect(ctx.destination);
+  hiss.start(0);
+
+  const buffer = ctx.startRendering();
+  sibilant.set(sampleRate, buffer);
+  return buffer;
+}
