@@ -2,6 +2,7 @@ import {
   type OverdriveState,
   overdriveSettings,
   overdriveTable,
+  TABLE_DOMAIN,
 } from "@/registry-audio/bases/base/lib/overdrive-device";
 
 const RAMP_SECONDS = 0.015;
@@ -49,7 +50,7 @@ export function createOverdriveEngine(
   const first = overdriveSettings(initial);
   band.frequency.value = first.bandHz;
   band.Q.value = first.q;
-  drive.gain.value = first.drive;
+  drive.gain.value = first.drive / TABLE_DOMAIN;
   tone.frequency.value = first.tone;
   wet.gain.value = first.wet;
   dry.gain.value = first.dry;
@@ -69,7 +70,7 @@ export function createOverdriveEngine(
       const settings = overdriveSettings(state);
       follow(band.frequency, settings.bandHz);
       follow(band.Q, settings.q);
-      follow(drive.gain, settings.drive);
+      follow(drive.gain, settings.drive / TABLE_DOMAIN);
       follow(tone.frequency, settings.tone);
       follow(wet.gain, settings.wet);
       follow(dry.gain, settings.dry);

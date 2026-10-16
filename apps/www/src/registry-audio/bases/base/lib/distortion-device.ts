@@ -3,6 +3,9 @@ import { type DeviceState, defineDevice } from "@audio-ui/core/device";
 
 const CURVE_SAMPLES = 4096;
 
+/** The table covers the signal after the drive from -8 to 8, so a driven peak is still on the curve instead of held at its edge. */
+export const TABLE_DOMAIN = 8;
+
 /**
  * A distortion as a device: a drive that pushes the signal into a soft clip, a
  * tone, a mix and an output level, with no panel and no audio in it.
@@ -76,11 +79,13 @@ export function softClip(input: number, drive: number) {
   return Math.tanh(drive * input) / Math.tanh(drive);
 }
 
-/** The clip as a table for a `WaveShaperNode`. The drive is applied before it, so the table is one fixed shape. */
+/** The clip as a table for a `WaveShaperNode`: tanh over the drive's range. The drive is a gain before it (divided by `TABLE_DOMAIN`), so the table is one fixed shape. */
 export function distortionTable(): Float32Array<ArrayBuffer> {
   const table = new Float32Array(new ArrayBuffer(CURVE_SAMPLES * 4));
   for (let index = 0; index < CURVE_SAMPLES; index += 1) {
-    table[index] = Math.tanh((index * 2) / (CURVE_SAMPLES - 1) - 1);
+    table[index] = Math.tanh(
+      TABLE_DOMAIN * ((index * 2) / (CURVE_SAMPLES - 1) - 1)
+    );
   }
   return table;
 }

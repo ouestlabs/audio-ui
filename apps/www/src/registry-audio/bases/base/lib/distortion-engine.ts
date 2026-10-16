@@ -2,6 +2,7 @@ import {
   type DistortionState,
   distortionSettings,
   distortionTable,
+  TABLE_DOMAIN,
 } from "@/registry-audio/bases/base/lib/distortion-device";
 
 const RAMP_SECONDS = 0.015;
@@ -51,7 +52,7 @@ export function createDistortionEngine(
   level.connect(output);
 
   const first = distortionSettings(initial);
-  drive.gain.value = first.drive;
+  drive.gain.value = first.drive / TABLE_DOMAIN;
   tone.frequency.value = first.tone;
   wet.gain.value = first.wet;
   dry.gain.value = first.dry;
@@ -79,7 +80,7 @@ export function createDistortionEngine(
     output,
     update: (state) => {
       const settings = distortionSettings(state);
-      follow(drive.gain, settings.drive);
+      follow(drive.gain, settings.drive / TABLE_DOMAIN);
       follow(tone.frequency, settings.tone);
       follow(wet.gain, settings.wet);
       follow(dry.gain, settings.dry);

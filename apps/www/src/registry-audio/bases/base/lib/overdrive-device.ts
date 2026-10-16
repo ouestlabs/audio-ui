@@ -6,6 +6,9 @@ import {
 import { type DeviceState, defineDevice } from "@audio-ui/core/device";
 
 const TABLE_SAMPLES = 4096;
+
+/** The table covers the signal after the drive from -8 to 8, so a driven peak is still on the curve instead of held at its edge. */
+export const TABLE_DOMAIN = 8;
 const BAND_TYPE: BiquadType = "bandpass";
 
 /**
@@ -90,7 +93,9 @@ export function overdriveSettings(state: OverdriveState) {
 export function overdriveTable(): Float32Array<ArrayBuffer> {
   const table = new Float32Array(new ArrayBuffer(TABLE_SAMPLES * 4));
   for (let index = 0; index < TABLE_SAMPLES; index += 1) {
-    table[index] = Math.tanh((index * 2) / (TABLE_SAMPLES - 1) - 1);
+    table[index] = Math.tanh(
+      TABLE_DOMAIN * ((index * 2) / (TABLE_SAMPLES - 1) - 1)
+    );
   }
   return table;
 }
