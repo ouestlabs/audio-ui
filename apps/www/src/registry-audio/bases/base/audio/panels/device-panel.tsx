@@ -234,7 +234,8 @@ function Activator({
 
 /**
  * The title bar of a device: its on and off square, its name, and whatever the
- * face puts at the end.
+ * face puts at the end. The buttons at the end sit the same distance from the
+ * top, the bottom and the right edge of the bar.
  */
 function DeviceHeader<const Parameters extends readonly ParameterDescriptor[]>({
   activator,
@@ -248,7 +249,7 @@ function DeviceHeader<const Parameters extends readonly ParameterDescriptor[]>({
   );
   return (
     <div
-      className="flex min-h-9 items-center gap-2 border-b bg-muted/40 px-3"
+      className="flex items-center gap-2 border-b bg-muted/40 py-1.5 ps-3 pe-1.5"
       data-slot="device-header"
     >
       {parameter?.kind === "toggle" ? (
