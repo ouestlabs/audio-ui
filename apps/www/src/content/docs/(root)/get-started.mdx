@@ -29,12 +29,13 @@ You can install audio/ui using the [**shadcn CLI**](https://ui.shadcn.com/docs/c
 
 Some components import from `@audio-ui/core` (pitch, MIDI, musical time, analysis). Installing one adds the package to your `package.json` if it is not there, with no version pinned: the version is yours to choose.
 
-The CLI leaves a version you already have. If an older `@audio-ui/core` is installed and a component needs a subpath it did not have yet, your build says it cannot resolve `@audio-ui/core/time` (or `/pitch`, `/midi`, `/analysis`). Update the package, and bypass the cache if your package manager still resolves the old one:
+The CLI leaves a version you already have. If an older `@audio-ui/core` is installed and a component needs a subpath it did not have yet, your build says it cannot resolve `@audio-ui/core/time` (or `/pitch`, `/midi`, `/analysis`). Update the package:
 
 ```bash
 npm install @audio-ui/core@latest
-# bun: bun add @audio-ui/core@latest --no-cache
 ```
+
+If your package manager still resolves the old version, bypass its cache: with Bun, add `--no-cache`.
 
 ## Styling
 
