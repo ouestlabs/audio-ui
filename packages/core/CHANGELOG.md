@@ -1,5 +1,11 @@
 # @audio-ui/core
 
+## 0.8.1
+
+### Patch Changes
+
+- 0a4fb62: Device tools: when a `<id>_set` call gives only values that are already set, the sentence it returns says so ("Nothing changed: every value given is already set.") instead of "Nothing changed.", so a model reading it back knows the call worked and was a no-op.
+
 ## 0.8.0
 
 ### Minor Changes
