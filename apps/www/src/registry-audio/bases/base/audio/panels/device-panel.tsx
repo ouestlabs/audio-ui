@@ -355,7 +355,10 @@ function DeviceHeader<const Parameters extends readonly ParameterDescriptor[]>({
         />
       ) : null}
       <span className="font-medium text-xs">{device.name}</span>
-      <div className="ms-auto flex items-center gap-2">{children}</div>
+      {/* The buttons at the end sit 4 px from the frame's corner, so their own corner is the frame's less that and its 1 px border: concentric, whatever the style. */}
+      <div className="ms-auto flex items-center gap-2 [&_button]:rounded-[max(0px,calc(var(--device-radius,0.5rem)-0.375rem))]">
+        {children}
+      </div>
     </div>
   );
 }

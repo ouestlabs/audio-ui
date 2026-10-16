@@ -595,7 +595,7 @@
 
   /* MARK: Device frame, the strip a device sits in: the same radius, but kept by the preview frames */
   .cn-audio-device {
-    @apply rounded-4xl;
+    @apply rounded-4xl [--device-radius:calc(var(--radius)*2.6)];
   }
 }
 

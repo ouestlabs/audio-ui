@@ -595,7 +595,7 @@
 
   /* MARK: Device frame, the strip a device sits in: the same radius, but kept by the preview frames */
   .cn-audio-device {
-    @apply rounded-none;
+    @apply rounded-none [--device-radius:0px];
   }
 }
 
