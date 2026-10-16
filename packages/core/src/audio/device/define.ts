@@ -8,7 +8,8 @@ import { type ParameterScaleProp, resolveScale } from "../../value/scale.ts";
  * (which values it may ask for), so none of the three redefines a range.
  *
  * The state of a device is a plain object keyed by parameter id: numbers for
- * a continuous parameter, booleans for a toggle. It is a value, never an
+ * a continuous parameter, booleans for a toggle, the value of the picked
+ * option for a choice. It is a value, never an
  * instance: a host stores it, saves it and sends it as it likes.
  */
 
@@ -40,7 +41,30 @@ export interface ToggleParameter {
   label: string;
 }
 
-export type ParameterDescriptor = NumberParameter | ToggleParameter;
+/** One entry of a choice: the `value` that goes in the state and the `label` a panel shows. */
+export interface ChoiceOption {
+  label: string;
+  value: string;
+}
+
+/** A pick from a short list: a waveform, a filter type, a mode. */
+export interface ChoiceParameter {
+  /** One of the `value`s of `options`. */
+  default: string;
+  id: string;
+  kind: "choice";
+  label: string;
+  /** At least two, with distinct values. */
+  options: readonly ChoiceOption[];
+}
+
+export type ParameterDescriptor =
+  | NumberParameter
+  | ToggleParameter
+  | ChoiceParameter;
+
+/** What a parameter holds: a number, a boolean or the value of a choice. */
+export type ParameterValue = boolean | number | string;
 
 /** The state of a device: each parameter's id to its value. */
 export type DeviceState<
@@ -49,7 +73,9 @@ export type DeviceState<
 > = {
   [Parameter in Parameters[number] as Parameter["id"]]: Parameter extends ToggleParameter
     ? boolean
-    : number;
+    : Parameter extends ChoiceParameter
+      ? Parameter["options"][number]["value"]
+      : number;
 };
 
 export interface DeviceDefinition<
@@ -67,15 +93,17 @@ export interface DeviceDefinition<
 
 /** A parameter as an agent or a catalog reads it: JSON-safe, with no function in it. */
 export interface ParameterDescription {
-  default: number | boolean;
+  default: ParameterValue;
   id: string;
   label: string;
   max?: number;
   min?: number;
+  /** The values a choice takes. */
+  options?: ChoiceOption[];
   /** `"custom"` for a scale given as functions: the range alone does not say how it travels. */
   scale?: "custom" | "linear" | "log";
   step?: number;
-  type: "boolean" | "number";
+  type: "boolean" | "number" | "string";
   unit?: string;
 }
 
@@ -92,15 +120,19 @@ export interface DeviceDescription {
 export interface DeviceChange {
   /** `true` when the value asked for was outside the range or off the grid and was brought in. */
   adjusted: boolean;
-  from: number | boolean;
+  from: ParameterValue;
   id: string;
-  to: number | boolean;
+  to: ParameterValue;
 }
 
 /** One parameter `apply` did not change, and why. */
 export interface DeviceRejection {
   id: string;
-  reason: "not a boolean" | "not a number" | "unknown parameter";
+  reason:
+    | "not a boolean"
+    | "not a number"
+    | "not one of the options"
+    | "unknown parameter";
 }
 
 export interface DeviceApplied<State> {
@@ -133,27 +165,24 @@ export interface Device<Parameters extends readonly ParameterDescriptor[]> {
     changes: Partial<Record<string, unknown>>
   ) => DeviceApplied<DeviceState<Parameters>>;
   /** `value` brought into the device's own bounds, snapped to the steps: what `set` stores. */
-  clampValue: (
-    id: Parameters[number]["id"],
-    value: unknown
-  ) => number | boolean;
+  clampValue: (id: Parameters[number]["id"], value: unknown) => ParameterValue;
   /** A state of the device's own defaults. A new object each time. */
   defaults: () => DeviceState<Parameters>;
   /** The inverse of `normalize`: the value at a position along the travel, snapped and clamped. */
   denormalize: (
     id: Parameters[number]["id"],
     position: number
-  ) => number | boolean;
+  ) => ParameterValue;
   /** The device as JSON: what a catalog lists and an agent is told. */
   describe: () => DeviceDescription;
   readonly description: string;
   /** Prints a parameter's value for a readout, with its unit. */
-  format: (id: Parameters[number]["id"], value: number | boolean) => string;
+  format: (id: Parameters[number]["id"], value: ParameterValue) => string;
   readonly id: string;
   readonly kind: "effect" | "instrument";
   readonly name: string;
-  /** Where a value sits along its parameter's travel, from 0 to 1, on its scale. A toggle is 0 or 1. */
-  normalize: (id: Parameters[number]["id"], value: number | boolean) => number;
+  /** Where a value sits along its parameter's travel, from 0 to 1, on its scale. A toggle is 0 or 1, a choice its place in the list. */
+  normalize: (id: Parameters[number]["id"], value: ParameterValue) => number;
   readonly parameters: Parameters;
   /** A state with every value in bounds: unknown ids dropped, missing ones defaulted, `NaN` replaced. */
   sanitize: (
@@ -178,22 +207,26 @@ export class DeviceDefinitionError extends Error {
 const isNumber = (value: unknown): value is number =>
   typeof value === "number" && Number.isFinite(value);
 
-function check(parameter: ParameterDescriptor, device: string) {
-  const where = `${device}.${parameter.id || "(no id)"}`;
-  if (!parameter.id.trim()) {
-    throw new DeviceDefinitionError(`${device}: a parameter has no id.`);
+function checkChoice(parameter: ChoiceParameter, where: string) {
+  const values = parameter.options.map((option) => option.value);
+  if (values.length < 2) {
+    throw new DeviceDefinitionError(
+      `${where}: a choice needs at least two options.`
+    );
   }
-  if (!parameter.label.trim()) {
-    throw new DeviceDefinitionError(`${where}: it has no label.`);
+  if (new Set(values).size !== values.length) {
+    throw new DeviceDefinitionError(
+      `${where}: two options have the same value.`
+    );
   }
-  if (parameter.kind === "toggle") {
-    if (typeof parameter.default !== "boolean") {
-      throw new DeviceDefinitionError(
-        `${where}: a toggle's default is true or false.`
-      );
-    }
-    return;
+  if (!values.includes(parameter.default)) {
+    throw new DeviceDefinitionError(
+      `${where}: the default is not one of the options.`
+    );
   }
+}
+
+function checkNumber(parameter: NumberParameter, where: string) {
   if (
     !(
       isNumber(parameter.min) &&
@@ -229,6 +262,43 @@ function check(parameter: ParameterDescriptor, device: string) {
   }
 }
 
+function check(parameter: ParameterDescriptor, device: string) {
+  const where = `${device}.${parameter.id || "(no id)"}`;
+  if (!parameter.id.trim()) {
+    throw new DeviceDefinitionError(`${device}: a parameter has no id.`);
+  }
+  if (!parameter.label.trim()) {
+    throw new DeviceDefinitionError(`${where}: it has no label.`);
+  }
+  if (parameter.kind === "toggle") {
+    if (typeof parameter.default !== "boolean") {
+      throw new DeviceDefinitionError(
+        `${where}: a toggle's default is true or false.`
+      );
+    }
+  } else if (parameter.kind === "choice") {
+    checkChoice(parameter, where);
+  } else {
+    checkNumber(parameter, where);
+  }
+}
+
+/** Why a value cannot go in a parameter, or `undefined` when it can (it may still be brought into range). */
+function refusal(
+  parameter: ParameterDescriptor,
+  asked: unknown
+): DeviceRejection["reason"] | undefined {
+  if (parameter.kind === "toggle") {
+    return typeof asked === "boolean" ? undefined : "not a boolean";
+  }
+  if (parameter.kind === "choice") {
+    return parameter.options.some((option) => option.value === asked)
+      ? undefined
+      : "not one of the options";
+  }
+  return isNumber(asked) ? undefined : "not a number";
+}
+
 /** Decimals a step prints: 0.1 is one, 0.25 is two, 1 is none. */
 function decimalsOf(step: number | undefined) {
   if (!step || Number.isInteger(step)) {
@@ -261,13 +331,18 @@ export function defineDevice<
     byId.set(parameter.id, parameter);
   }
 
-  const clampValue = (id: string, value: unknown): number | boolean => {
+  const clampValue = (id: string, value: unknown): ParameterValue => {
     const parameter = byId.get(id);
     if (!parameter) {
       return Number.NaN;
     }
     if (parameter.kind === "toggle") {
       return typeof value === "boolean" ? value : parameter.default;
+    }
+    if (parameter.kind === "choice") {
+      return parameter.options.some((option) => option.value === value)
+        ? (value as string)
+        : parameter.default;
     }
     if (!isNumber(value)) {
       return parameter.default;
@@ -310,6 +385,13 @@ export function defineDevice<
       if (parameter.kind === "toggle") {
         return position >= 0.5;
       }
+      if (parameter.kind === "choice") {
+        const last = parameter.options.length - 1;
+        const index = Math.round(
+          clamp(isNumber(position) ? position : 0, 0, 1) * last
+        );
+        return parameter.options[index]?.value ?? parameter.default;
+      }
       const raw = resolveScale(parameter.scale ?? "linear").toValue(
         isNumber(position) ? position : 0,
         parameter.min,
@@ -324,6 +406,12 @@ export function defineDevice<
       }
       if (parameter.kind === "toggle") {
         return value ? "On" : "Off";
+      }
+      if (parameter.kind === "choice") {
+        return (
+          parameter.options.find((option) => option.value === value)?.label ??
+          ""
+        );
       }
       if (!isNumber(value)) {
         return "";
@@ -345,6 +433,12 @@ export function defineDevice<
       if (parameter.kind === "toggle") {
         return value ? 1 : 0;
       }
+      if (parameter.kind === "choice") {
+        const index = parameter.options.findIndex(
+          (option) => option.value === value
+        );
+        return index < 0 ? 0 : index / (parameter.options.length - 1);
+      }
       return resolveScale(parameter.scale ?? "linear").toPosition(
         isNumber(value) ? value : parameter.default,
         parameter.min,
@@ -355,20 +449,16 @@ export function defineDevice<
     apply: (state, changes) => {
       const applied: DeviceChange[] = [];
       const rejected: DeviceRejection[] = [];
-      let next = { ...state } as Record<string, number | boolean>;
+      let next = { ...state } as Record<string, ParameterValue>;
       for (const [id, asked] of Object.entries(changes)) {
         const parameter = byId.get(id);
         if (!parameter) {
           rejected.push({ id, reason: "unknown parameter" });
           continue;
         }
-        if (parameter.kind === "toggle") {
-          if (typeof asked !== "boolean") {
-            rejected.push({ id, reason: "not a boolean" });
-            continue;
-          }
-        } else if (!isNumber(asked)) {
-          rejected.push({ id, reason: "not a number" });
+        const reason = refusal(parameter, asked);
+        if (reason) {
+          rejected.push({ id, reason });
           continue;
         }
         const to = clampValue(id, asked);
@@ -398,6 +488,18 @@ export function defineDevice<
             type: "boolean",
           };
         }
+        if (parameter.kind === "choice") {
+          return {
+            default: parameter.default,
+            id: parameter.id,
+            label: parameter.label,
+            options: parameter.options.map(({ label, value }) => ({
+              label,
+              value,
+            })),
+            type: "string",
+          };
+        }
         const scale = parameter.scale ?? "linear";
         return {
           default: parameter.default,
@@ -413,7 +515,7 @@ export function defineDevice<
       }),
     }),
     sanitize: (state) => {
-      const next = defaults() as Record<string, number | boolean>;
+      const next = defaults() as Record<string, ParameterValue>;
       for (const parameter of parameters) {
         if (parameter.id in state) {
           next[parameter.id] = clampValue(parameter.id, state[parameter.id]);

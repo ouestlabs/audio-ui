@@ -1,4 +1,6 @@
 export {
+  type ChoiceOption,
+  type ChoiceParameter,
   type Device,
   type DeviceApplied,
   type DeviceBinding,
@@ -12,6 +14,7 @@ export {
   type NumberParameter,
   type ParameterDescription,
   type ParameterDescriptor,
+  type ParameterValue,
   type ToggleParameter,
 } from "./define.ts";
 export {

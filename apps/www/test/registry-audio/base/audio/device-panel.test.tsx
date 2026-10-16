@@ -160,3 +160,42 @@ describe("DevicePanel", () => {
     ).toBe(false);
   });
 });
+
+describe("DevicePanel with a choice", () => {
+  const voice = defineDevice({
+    description: "A voice.",
+    id: "acme.voice",
+    kind: "instrument",
+    name: "Voice",
+    parameters: [
+      {
+        default: "square",
+        id: "wave",
+        kind: "choice",
+        label: "Wave",
+        options: [
+          { label: "Sine", value: "sine" },
+          { label: "Square", value: "square" },
+        ],
+      },
+    ],
+  });
+
+  test("draws one button per option, the picked one pressed, and a press sets it", () => {
+    const onValueChange = mock((_state: unknown) => undefined);
+    const view = render(
+      <DevicePanel
+        device={voice}
+        onValueChange={onValueChange}
+        value={voice.defaults()}
+      />
+    );
+    const group = view.getByRole("group", { name: "Wave" });
+    expect(within(group).getAllByRole("button")).toHaveLength(2);
+    expect(
+      view.getByRole("button", { name: "Square" }).getAttribute("aria-pressed")
+    ).toBe("true");
+    fireEvent.click(view.getByRole("button", { name: "Sine" }));
+    expect(onValueChange).toHaveBeenCalledWith({ wave: "sine" });
+  });
+});

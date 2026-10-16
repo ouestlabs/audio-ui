@@ -1,4 +1,4 @@
-import type { Device, ParameterDescriptor } from "./define.ts";
+import type { Device, ParameterDescriptor, ParameterValue } from "./define.ts";
 
 /** The subset of JSON Schema the tools use: what OpenAI, Anthropic, MCP and the AI SDK all accept as an input schema. */
 export interface JsonSchema {
@@ -42,6 +42,16 @@ function describeParameter(parameter: ParameterDescriptor): JsonSchema {
       type: "boolean",
     };
   }
+  if (parameter.kind === "choice") {
+    const values = parameter.options
+      .map((option) => `"${option.value}" (${option.label})`)
+      .join(", ");
+    return {
+      description: `${parameter.label}, one of ${values}, "${parameter.default}" by default.`,
+      enum: parameter.options.map((option) => option.value),
+      type: "string",
+    };
+  }
   const unit = parameter.unit ? ` ${parameter.unit}` : "";
   return {
     description: `${parameter.label}, from ${parameter.min}${unit} to ${parameter.max}${unit}, ${parameter.default}${unit} by default${
@@ -67,8 +77,8 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
  */
 export function deviceTools<
   const Parameters extends readonly ParameterDescriptor[],
->(device: Device<Parameters>): DeviceTool<Record<string, number | boolean>>[] {
-  type State = Record<string, number | boolean>;
+>(device: Device<Parameters>): DeviceTool<Record<string, ParameterValue>>[] {
+  type State = Record<string, ParameterValue>;
   const base = slug(device.id);
   const properties = Object.fromEntries(
     device.parameters.map((parameter) => [
@@ -78,7 +88,7 @@ export function deviceTools<
   );
   const label = (id: string) =>
     device.parameters.find((parameter) => parameter.id === id)?.label ?? id;
-  const show = (id: string, value: number | boolean) =>
+  const show = (id: string, value: ParameterValue) =>
     device.format(id as never, value);
 
   const set: DeviceTool<State> = {

@@ -1,10 +1,12 @@
 "use client";
 
 import type {
+  ChoiceParameter,
   Device,
   DeviceState,
   NumberParameter,
   ParameterDescriptor,
+  ParameterValue,
   ToggleParameter,
 } from "@audio-ui/core/device";
 import { useCallback } from "react";
@@ -13,7 +15,7 @@ import { Toggle } from "@/registry/bases/base/ui/toggle";
 import { Knob } from "@/registry-audio/bases/base/audio/elements/knob";
 
 type AnyDevice = Device<readonly ParameterDescriptor[]>;
-type AnyState = Record<string, number | boolean>;
+type AnyState = Record<string, ParameterValue>;
 
 interface ControlProps<Parameter> {
   device: AnyDevice;
@@ -95,6 +97,67 @@ function ToggleControl({
   );
 }
 
+/** A pick from a short list: one button per option, the picked one filled. */
+function ChoiceControl({
+  device,
+  onValueChange,
+  parameter,
+  value,
+}: ControlProps<ChoiceParameter>) {
+  const current = value[parameter.id];
+  const pick = useCallback(
+    (option: string) =>
+      onValueChange(
+        device.set(value as never, parameter.id, option) as AnyState
+      ),
+    [device, onValueChange, parameter.id, value]
+  );
+  return (
+    <div className="flex flex-col items-center gap-1.5">
+      <span aria-hidden="true" className="text-muted-foreground text-xs">
+        {parameter.label}
+      </span>
+      <div
+        aria-label={parameter.label}
+        className="flex flex-wrap justify-center gap-1"
+        role="group"
+      >
+        {parameter.options.map((option) => (
+          <ChoiceOption
+            key={option.value}
+            label={option.label}
+            onPick={pick}
+            pressed={current === option.value}
+            value={option.value}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+interface ChoiceOptionProps {
+  label: string;
+  onPick: (value: string) => void;
+  pressed: boolean;
+  value: string;
+}
+
+function ChoiceOption({ label, onPick, pressed, value }: ChoiceOptionProps) {
+  const change = useCallback(() => onPick(value), [onPick, value]);
+  return (
+    <Toggle
+      className="aria-pressed:border-primary aria-pressed:bg-primary aria-pressed:text-primary-foreground"
+      onPressedChange={change}
+      pressed={pressed}
+      size="sm"
+      variant="outline"
+    >
+      {label}
+    </Toggle>
+  );
+}
+
 interface DeviceToggleProps<Parameters extends readonly ParameterDescriptor[]> {
   device: Device<Parameters>;
   /** The id of a toggle parameter. */
@@ -150,7 +213,8 @@ interface DevicePanelProps<Parameters extends readonly ParameterDescriptor[]> {
 }
 
 /**
- * A panel for any device: a knob per number and a toggle per switch, from its
+ * A panel for any device: a knob per number, a toggle per switch and a row of
+ * buttons per choice, from its
  * descriptors, so a device someone defines is usable the day it is defined.
  * Ranges, steps, scales and readouts come from the device, and every change
  * goes back through `device.set`, so a value is always inside its bounds.
@@ -170,10 +234,18 @@ function DevicePanel<const Parameters extends readonly ParameterDescriptor[]>({
     onValueChange: onValueChange as unknown as (state: AnyState) => void,
     value: value as unknown as AnyState,
   };
-  const control = (parameter: ParameterDescriptor) =>
-    parameter.kind === "toggle" ? (
-      <ToggleControl {...props} key={parameter.id} parameter={parameter} />
-    ) : (
+  const control = (parameter: ParameterDescriptor) => {
+    if (parameter.kind === "toggle") {
+      return (
+        <ToggleControl {...props} key={parameter.id} parameter={parameter} />
+      );
+    }
+    if (parameter.kind === "choice") {
+      return (
+        <ChoiceControl {...props} key={parameter.id} parameter={parameter} />
+      );
+    }
+    return (
       <NumberControl
         {...props}
         disabled={disabled.includes(parameter.id as never)}
@@ -181,6 +253,7 @@ function DevicePanel<const Parameters extends readonly ParameterDescriptor[]>({
         parameter={parameter}
       />
     );
+  };
   const shown = device.parameters.filter(
     (parameter) => !exclude.includes(parameter.id as never)
   );
