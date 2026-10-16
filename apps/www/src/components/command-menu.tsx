@@ -11,6 +11,7 @@ import {
 } from "@phosphor-icons/react/ssr";
 import { useRouter } from "next/navigation";
 import * as React from "react";
+import { ComponentEmptyState } from "@/app/(create)/components/components/component-empty-state";
 import { copyToClipboardWithMeta } from "@/components/copy-button";
 import {
   FrameContent,
@@ -217,8 +218,12 @@ export function CommandMenu({
           </FrameHeader>
           <FrameContent className="flex min-h-0 flex-1 flex-col rounded-(--frame-radius-inner) p-1">
             <CommandList className="no-scrollbar scroll-fade min-h-0 flex-1 scroll-pt-2 scroll-pb-1.5 max-sm:max-h-none sm:min-h-80 sm:flex-none">
-              <CommandEmpty className="py-12 text-center text-site-muted-foreground text-sm">
-                No results found.
+              <CommandEmpty className="flex h-full min-h-80 p-0">
+                <ComponentEmptyState
+                  className="m-1"
+                  description="Try another word, such as a component, a device or a page."
+                  title="No results found"
+                />
               </CommandEmpty>
               {navItems && navItems.length > 0 && (
                 <CommandGroup
