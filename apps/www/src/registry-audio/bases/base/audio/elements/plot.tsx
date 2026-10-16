@@ -130,7 +130,7 @@ function PlotGrid({ className, ...props }: PlotPrimitive.Grid.Props) {
       className={cn(
         "cn-plot-grid text-[10px] text-muted-foreground tabular-nums leading-none",
         "[&_[data-part=line]]:stroke-border [&_[data-part=line][data-zero]]:stroke-foreground/30",
-        "[&_[data-part=label]]:bg-card/80 [&_[data-part=label]]:px-0.5",
+        "[&_[data-part=label]]:z-1 [&_[data-part=label]]:bg-card/80 [&_[data-part=label]]:px-0.5",
         "[&_[data-part=label][data-axis=x]]:-translate-x-1/2 [&_[data-part=label][data-axis=x]]:bottom-1.5",
         "[&_[data-part=label][data-axis=y]]:-translate-y-1/2 [&_[data-part=label][data-axis=y]]:left-2",
         className
