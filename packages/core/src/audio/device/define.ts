@@ -104,6 +104,14 @@ export interface DeviceDefinition<
    */
   note?: readonly NumberParameter[];
   parameters: Parameters;
+  /**
+   * Whether the device takes a second signal besides the one it processes, a
+   * key that something else is listened to through: a compressor ducked by a
+   * kick, a gate opened by a snare. The device does not carry the signal, only
+   * the fact that it takes one, so a host knows to route something to its
+   * engine's `sidechain` input and an agent can be told. @default false
+   */
+  sidechain?: boolean;
 }
 
 /** A parameter as an agent or a catalog reads it: JSON-safe, with no function in it. */
@@ -131,6 +139,8 @@ export interface DeviceDescription {
   /** The numbers a note is made of, for an instrument that is played. */
   note?: ParameterDescription[];
   parameters: ParameterDescription[];
+  /** Whether the device takes a key signal beside the one it processes. */
+  sidechain?: boolean;
 }
 
 /** One parameter `apply` changed. */
@@ -224,6 +234,8 @@ export interface Device<Parameters extends readonly ParameterDescriptor[]> {
     id: string,
     value: unknown
   ) => DeviceState<Parameters>;
+  /** Whether the device takes a second signal, a key, besides the one it processes. Its engine then has a `sidechain` input to connect it to. */
+  readonly sidechain: boolean;
 }
 
 /** Raised when a device is defined with parameters that cannot work. */
@@ -538,6 +550,7 @@ export function defineDevice<
     },
     note,
     parameters,
+    sidechain: definition.sidechain === true,
     apply: (state, changes) => {
       const applied: DeviceChange[] = [];
       const rejected: DeviceRejection[] = [];
@@ -572,6 +585,7 @@ export function defineDevice<
       kind: definition.kind ?? "effect",
       name: definition.name,
       note: note.length > 0 ? note.map(describeParameter) : undefined,
+      sidechain: definition.sidechain === true ? true : undefined,
       parameters: parameters.map(describeParameter),
     }),
     sanitize: (state) => {

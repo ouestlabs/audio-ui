@@ -195,3 +195,30 @@ describe("latency and context", () => {
     expect(odd.latency(odd.defaults(), 48_000)).toBe(0);
   });
 });
+
+describe("a device that takes a key signal", () => {
+  const gate = defineDevice({
+    description: "Opens on a key.",
+    id: "audioui.test-gate",
+    name: "Gate",
+    parameters: [
+      { default: -30, id: "threshold", label: "Threshold", max: 0, min: -60 },
+    ],
+    sidechain: true,
+  });
+
+  test("says so, and an ordinary device does not", () => {
+    expect(gate.sidechain).toBe(true);
+    expect(gate.describe().sidechain).toBe(true);
+    expect(synth.sidechain).toBe(false);
+    expect(synth.describe().sidechain).toBeUndefined();
+  });
+
+  test("it is not a parameter: the key is a signal, so the state and the tools do not carry it", () => {
+    expect(Object.keys(gate.defaults())).toEqual(["threshold"]);
+    expect(gate.describe().parameters.map((part) => part.id)).toEqual([
+      "threshold",
+    ]);
+    expect(deviceTools(gate)).toHaveLength(2);
+  });
+});

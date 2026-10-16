@@ -18,7 +18,11 @@ export {
   type ParameterValue,
   type ToggleParameter,
 } from "./define.ts";
-export { type InstrumentBinding, playNote } from "./instrument.ts";
+export {
+  type InstrumentBinding,
+  playNote,
+  type SidechainBinding,
+} from "./instrument.ts";
 export {
   type DeviceTool,
   type DeviceToolResult,
