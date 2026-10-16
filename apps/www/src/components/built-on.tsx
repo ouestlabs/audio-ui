@@ -24,10 +24,7 @@ export function BaseLogo({
 export function BuiltOn() {
   return (
     <>
-      <Icons.audioUi
-        aria-hidden="true"
-        className="size-3.5 shrink-0 text-foreground"
-      />
+      <Icons.audioUi aria-hidden="true" className="size-3.5 shrink-0" />
       <span className="truncate">Audio UI</span>
     </>
   );
