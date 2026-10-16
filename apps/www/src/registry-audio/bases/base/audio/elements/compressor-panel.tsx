@@ -1,7 +1,7 @@
 "use client";
 
 import type { Source } from "@audio-ui/react";
-import { useEffect, useMemo, useRef } from "react";
+import { type ReactNode, useEffect, useMemo, useRef } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {
   DevicePanel,
@@ -36,6 +36,8 @@ const SWITCHES = ["enabled", "autoMakeup"] as const;
 const MAKEUP_OFF = ["makeupDb"] as const;
 
 interface CompressorPanelProps {
+  /** Whatever the host puts next to the name: a play button, a reading. */
+  children?: ReactNode;
   className?: string;
   /** The level going in, in dB, as a live source: a dot rides the curve at it. */
   level?: Source<number>;
@@ -47,9 +49,11 @@ interface CompressorPanelProps {
  * The face of the compressor device: its name and switches, the transfer curve
  * it plays with the threshold and the level going in on it, and its knobs
  * gathered by what they do. It is controlled like `DevicePanel`, which it uses
- * for the knobs: drawing the curve is all it adds.
+ * for the knobs: drawing the curve is all it adds. Its children sit in the
+ * header, after the name.
  */
 function CompressorPanel({
+  children,
   className,
   level,
   onValueChange,
@@ -86,8 +90,11 @@ function CompressorPanel({
       data-slot="compressor-panel"
       ref={root}
     >
-      <div className="flex items-center justify-between gap-3">
-        <span className="font-medium text-sm">{compressorDevice.name}</span>
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+        <div className="flex items-center gap-2">
+          <span className="font-medium text-sm">{compressorDevice.name}</span>
+          {children}
+        </div>
         <div className="flex gap-1.5">
           {SWITCHES.map((id) => (
             <DeviceToggle

@@ -148,8 +148,7 @@ export default function BlockCompressor() {
 
   return (
     <div className="cn-audio-panel flex w-full min-w-0 flex-col gap-4 border bg-card p-4">
-      <CompressorPanel level={level} onValueChange={setState} value={state} />
-      <div className="flex items-center justify-between gap-2">
+      <CompressorPanel level={level} onValueChange={setState} value={state}>
         <Button
           aria-label={
             playing ? "Stop the signal" : "Play a pulsing signal through it"
@@ -177,7 +176,7 @@ export default function BlockCompressor() {
           )}
         </Button>
         <ReductionReadout source={reduction} />
-      </div>
+      </CompressorPanel>
     </div>
   );
 }
