@@ -774,6 +774,28 @@ export const components: RegistryItem[] = [
     categories: ["device", "plot", "knob"],
     dependencies: ["@audio-ui/react"],
     description:
+      "A multiband compressor you can plug in: its state, a panel that draws the three bands and an engine that plays it. Play a loop through it and hold one band down",
+    files: [
+      {
+        path: "components/device/block-multiband.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-multiband",
+    registryDependencies: [
+      "@audio-ui/multiband-panel",
+      "@audio-ui/multiband-device",
+      "@audio-ui/multiband-engine",
+      "@audio-ui/play-toggle",
+      "@audio-ui/use-device-loop",
+      "@audio-ui/use-master-bus",
+    ],
+    type: "registry:block",
+  },
+  {
+    categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
       "A redux you can plug in: its state, a panel that draws the stairs the bits make and an engine that plays it. Play a loop through it and take the bits down",
     files: [
       {

@@ -26,6 +26,7 @@ export const DOCS_MENU_UPDATES: Record<string, string> = {
   overdrive: "New",
   redux: "New",
   deesser: "New",
+  multiband: "New",
   "piano-roll": "New",
   scrubber: "New",
   sequencer: "Updated",

@@ -1,0 +1,106 @@
+---
+title: Multiband compressor
+description: "A multiband compressor as a device you can plug in: two splits and a threshold and ratio for each of three bands as a state, a panel that draws the bands, a Web Audio engine and the tools an agent drives it with."
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="block-multiband" />
+
+Compresses three bands apart. The signal is split at two frequencies into low, mid and high, each band has its own threshold and ratio, the attack and the release are shared, and the three are added back with an output gain. A loud bass does not pump the highs, and a harsh band can be held down without dulling the rest. The panel draws the three bands against frequency, with a handle on each split to drag across (the splits have no knob: the handles are sliders and take the keyboard). It is a device like the [compressor](/docs/components/compressor): a state, a panel that draws it, an engine that plays it and tools an agent calls, each its own file.
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">CLI</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash component
+npx shadcn@latest add @audio-ui/block-multiband
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the packages:</Step>
+
+```bash
+npm install @audio-ui/react @audio-ui/core
+```
+
+<Step>Add the pieces you want. All of them, or only the state and the panel if your engine is elsewhere:</Step>
+
+```bash
+npx shadcn@latest add @audio-ui/multiband-device @audio-ui/multiband-panel @audio-ui/multiband-engine
+```
+
+<Step>Copy and paste the demo that wires them, if you want it.</Step>
+
+<ComponentSource
+  styleName="base-nova"
+  name="block-multiband"
+  title="components/examples/block-multiband.tsx"
+/>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import { MultibandPanel } from "@/components/audio-ui/devices/multiband/panel";
+import { multibandDevice } from "@/components/audio-ui/devices/multiband/device";
+
+const [state, setState] = useState(() => multibandDevice.defaults());
+
+<MultibandPanel onValueChange={setState} value={state} />;
+```
+
+The state is a plain object keyed by parameter id, so a host stores it, saves it with its project and sends it where it likes. `multibandBands(state)` is what the panel draws: what each band keeps of the signal, in dB at each frequency. The two splits have ranges that do not overlap (40 to 1000 Hz and 1.2 to 12 kHz), so they can never cross.
+
+## The engine
+
+```ts
+import { createMultibandEngine } from "@/components/audio-ui/devices/multiband/engine";
+
+const engine = createMultibandEngine(ctx, state);
+source.connect(engine.input);
+engine.output.connect(ctx.destination);
+engine.update(nextState); // parameters ramp: no click
+engine.reductions; // { low, mid, high }: dB taken off each band, read per frame
+engine.dispose();
+```
+
+Two biquads in a row make one Linkwitz-Riley filter, whose halves add back to a flat response. The low band also goes through the two halves of the high split, added, so that it is shifted in phase as the other two are and the three add back flat. Each band has its own detector: the one of the [compressor's key](/docs/components/compressor), an `AudioWorklet` loaded from a blob (`key-detector`), with a soft knee of 6 dB. `engine.ready` resolves once the detectors are in the graph; until then the bands pass unchanged, and a context with no worklets never resolves it to `true`.
+
+Measured in Chrome with all ratios at 1, the output is within 0.01 dB of the input from 60 Hz to 9 kHz. With a 100 Hz tone at -6 dB over a 6 kHz tone, a threshold of -30 dB at 8:1 on the low band takes 16.4 dB off the bass and nothing off the highs, and the same on the high band takes 10.6 dB off the highs and nothing off the bass.
+
+## Latency
+
+None to report: the split changes the phase of the signal, not its timing, so the device has no latency.
+
+## The tools
+
+```ts
+import { deviceTools } from "@audio-ui/core/device";
+import { multibandDevice } from "@/components/audio-ui/devices/multiband/device";
+
+const [set, reset] = deviceTools(multibandDevice);
+```
+
+`set` and `reset` change the state, with the ranges the device enforces: a value out of range is brought in and reported, a wrong one is refused by name, and a call never throws.
+
+## Accessibility
+
+Every control is a native input: the knobs are sliders named after their parameter, with the value and unit as the text value, the switches are toggle buttons, and everything takes the keyboard. Each handle on the plot is a slider for its split.

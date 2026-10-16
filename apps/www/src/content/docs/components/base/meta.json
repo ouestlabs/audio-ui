@@ -42,6 +42,7 @@
     "channel-eq",
     "overdrive",
     "redux",
-    "deesser"
+    "deesser",
+    "multiband"
   ]
 }
