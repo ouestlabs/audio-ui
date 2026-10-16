@@ -24,6 +24,7 @@ npm install @audio-ui/core   # no dependencies
 | `@audio-ui/core/timeline` | `createTimelineController`, `createTrackController`, `createClipController`, `createRangeController`, `createNavigatorController`, `createWheelZoom` |
 | `@audio-ui/core/waveform` | `createWaveformController`, `createWaveformRegionController`, `createLevelsEngine`, `createLevelHistory` |
 | `@audio-ui/core/analysis` | `logSpectrum`, `holdPeaks`, `computePeaks`, `downsampleWaveform`, `spectrumBands`, `biquadResponse`, `eqResponse`, `toWebAudioQ`, `compressorOutput`, `webAudioCompressorOutput`, `dbToGain`, `gainToDb`, `rmsDb`, `formatHz`, `formatDb` |
+| `@audio-ui/core/device` | `defineDevice`, `deviceTools`, `DeviceDefinitionError`, `Device`, `DeviceBinding`, `DeviceState`, `DeviceDescription`, `ParameterDescriptor` |
 | `@audio-ui/core/midi` | `parseMidiMessage`, `pitchBendToSemitones`, `parseMidiFile`, `encodeMidiFile`, `MidiFileError`, `createMidiInput` |
 | `@audio-ui/core/time` | `secondsPerQuarter`, `barsBeatsAt`, `ticksToSeconds`, `secondsToTicks`, `gridInterval`, `gridLabel`, `advance`, `positionAt`, `SCHEDULE_AHEAD_SECONDS` |
 | `@audio-ui/core/pitch` | `noteToFrequency`, `frequencyToNote`, `nearestNote`, `detectPitch`, `pitchName`, `CONCERT_PITCH_HZ` |

@@ -41,6 +41,10 @@
       "types": "./dist/audio/analysis/index.d.ts",
       "import": "./dist/analysis.js"
     },
+    "./device": {
+      "types": "./dist/audio/device/index.d.ts",
+      "import": "./dist/device.js"
+    },
     "./midi": {
       "types": "./dist/audio/midi/index.d.ts",
       "import": "./dist/midi.js"

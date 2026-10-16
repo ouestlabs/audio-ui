@@ -8,6 +8,14 @@ Accessible, composable audio UI components for React: headless primitives publis
 A bounded, stepped, continuously controllable value (gain, pan, playback position) that a control manipulates. Fader, Knob, and Transport each bind one parameter; XYPad binds two.
 _Avoid_: value control, setting, param
 
+**Device**:
+An effect or an instrument as a set of named Parameters, with no interface and no audio in it (`defineDevice` in `@audio-ui/core/device`). Its **state** is a plain object keyed by parameter id (numbers and booleans), a value a host stores and saves. One description feeds a panel, an engine adapter and an agent, so none of them redefines a range. Its id is stable and reverse-DNS (`audioui.compressor`): a project stores that, not the panel that draws it.
+_Avoid_: plugin (a Device is a description, not a package), module, processor
+
+**Parameter Descriptor**:
+What a Device says about one Parameter: id, label, range, step, Taper, unit, default. A toggle is a parameter with a boolean value.
+_Avoid_: schema, config
+
 **Taper**:
 The curve mapping a parameter's normalized position to its value. All tapers are linear today; log/dB tapers (as on hardware faders) are anticipated but not implemented.
 _Avoid_: curve, scale, easing
