@@ -5,6 +5,7 @@ export {
   type DeviceApplied,
   type DeviceBinding,
   type DeviceChange,
+  type DeviceContext,
   type DeviceDefinition,
   DeviceDefinitionError,
   type DeviceDescription,
