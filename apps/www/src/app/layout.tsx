@@ -4,11 +4,9 @@ import { githubLightTheme } from "@tanstack/highlight/themes/github-light";
 import { Provider as JotaiProvider } from "jotai";
 import type { Metadata } from "next";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
-import { Suspense } from "react";
 import { DESIGN_SYSTEM_BOOT_SCRIPT } from "@/app/(create)/lib/boot-cache";
 import { JsonLd } from "@/components/json-ld";
 import { QueryProvider } from "@/components/query-provider";
-import { SiteCustomizer } from "@/components/site-customizer";
 import { TailwindIndicator } from "@/components/tailwind-indicator";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
@@ -145,9 +143,6 @@ export default function RootLayout({
             <NuqsAdapter>
               <JotaiProvider>
                 {children}
-                <Suspense>
-                  <SiteCustomizer />
-                </Suspense>
                 <TailwindIndicator />
                 <Toaster position="top-center" />
               </JotaiProvider>
