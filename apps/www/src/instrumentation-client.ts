@@ -2,7 +2,7 @@ import posthog from "posthog-js";
 
 const posthogKey = process.env.NEXT_PUBLIC_POSTHOG_KEY;
 
-if (posthogKey) {
+if (posthogKey && window.location.hostname !== "localhost") {
   posthog.init(posthogKey, {
     api_host: "/ingest",
     capture_exceptions: true, // This enables capturing exceptions using Error Tracking
