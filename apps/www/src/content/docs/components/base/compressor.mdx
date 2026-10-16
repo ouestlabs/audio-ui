@@ -9,12 +9,14 @@ base: base
 
 A device is not a widget with audio inside. It is four pieces that share one description, so a host can take the ones it needs: a DAW that has its own engine keeps the state and the panel, an agent keeps the state and the tools, and a page that only wants sound takes them all.
 
-| Piece | What it is | Where it lives |
+| Piece | What it is | File |
 | --- | --- | --- |
-| **State** | the parameters, their ranges and the state, as a plain object | `@audio-ui/core/device`, and the `compressor-device` lib |
-| **Panel** | draws a state and sends the new one back: controlled, no audio | `compressor-panel`, over `device-panel` |
-| **Engine** | plays a state with Web Audio nodes | the `compressor-engine` lib |
-| **Tools** | what an agent calls to change the state | `deviceTools`, in `@audio-ui/core/device` |
+| **State** | the parameters and their ranges, as a plain object | `device` |
+| **Panel** | draws a state, sends the new one back: no audio | `panel` |
+| **Engine** | plays a state with Web Audio nodes | `engine` |
+| **Tools** | what an agent calls to change the state | `deviceTools` |
+
+Each file installs in `components/audio-ui/devices/compressor/`; the tools come from `@audio-ui/core/device`.
 
 ## Installation
 
