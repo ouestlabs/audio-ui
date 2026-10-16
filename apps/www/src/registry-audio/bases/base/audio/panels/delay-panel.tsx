@@ -85,6 +85,10 @@ function DelayPanel({
           minY={0}
         >
           <PlotCursor format={describePointer} />
+          <PlotGrid
+            x={{ format: formatMs, ticks: TIME_TICKS }}
+            y={{ format: formatPercentMark, ticks: PERCENT_TICKS }}
+          />
           <PlotGraph>
             {taps.map((tap) => (
               <PlotLine
@@ -96,10 +100,6 @@ function DelayPanel({
               />
             ))}
           </PlotGraph>
-          <PlotGrid
-            x={{ format: formatMs, ticks: TIME_TICKS }}
-            y={{ format: formatPercentMark, ticks: PERCENT_TICKS }}
-          />
           {value.enabled ? (
             <PlotHandle
               aria-label="Time and feedback"

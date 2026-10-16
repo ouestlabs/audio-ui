@@ -69,6 +69,7 @@ function DistortionPanel({
           minX={-1}
           minY={-1}
         >
+          <PlotGrid x={{ ticks: TICKS }} y={{ ticks: TICKS }} />
           <PlotGraph>
             <PlotCurve
               className="stroke-border [stroke-dasharray:4_4]"
@@ -76,7 +77,6 @@ function DistortionPanel({
             />
             <PlotCurve fn={curve} />
           </PlotGraph>
-          <PlotGrid x={{ ticks: TICKS }} y={{ ticks: TICKS }} />
         </Plot>
         <DevicePanel
           className="grid-cols-4"

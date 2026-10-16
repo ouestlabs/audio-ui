@@ -74,13 +74,13 @@ function ChorusPanel({
           minX={0}
           minY={0}
         >
-          <PlotGraph>
-            <PlotCurve fn={sweep} />
-          </PlotGraph>
           <PlotGrid
             x={{ format: formatSeconds, ticks: TIME_TICKS }}
             y={{ format: formatMs, ticks: MS_TICKS }}
           />
+          <PlotGraph>
+            <PlotCurve fn={sweep} />
+          </PlotGraph>
         </Plot>
         <DevicePanel
           className="grid-cols-4"

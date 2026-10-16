@@ -58,16 +58,16 @@ export default function PlotFilterDemo() {
         minY={MIN_DB}
         scaleX="log"
       >
+        <PlotGrid
+          x={{ count: 6 }}
+          y={{ format: formatDbMark, ticks: DB_TICKS }}
+        />
         <PlotGraph>
           <PlotBand axis="x" from={AUDIBLE_HZ[0]} to={AUDIBLE_HZ[1]} />
           <PlotLine axis="x" value={filter.cutoff} />
           <PlotArea fillTo={MIN_DB} fn={response} />
           <PlotCurve fn={response} />
         </PlotGraph>
-        <PlotGrid
-          x={{ count: 6 }}
-          y={{ format: formatDbMark, ticks: DB_TICKS }}
-        />
         <PlotCursor format={describePointer} />
         <PlotHandle
           aria-label="Cutoff and resonance"
