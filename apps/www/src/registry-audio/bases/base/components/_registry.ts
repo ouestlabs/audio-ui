@@ -2,8 +2,10 @@ import type { RegistryItem } from "shadcn/schema";
 
 export const components: RegistryItem[] = [
   {
-    categories: ["synth", "xypad"],
-    description: "Pocket synth with oscillator, filter, and XY pad",
+    categories: ["synth", "xypad", "device"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "A synth you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file. Press the pad: pitch goes across, the filter cutoff up",
     files: [
       {
         path: "components/synth/block-pocket-synth.tsx",
@@ -12,10 +14,11 @@ export const components: RegistryItem[] = [
     ],
     name: "block-pocket-synth",
     registryDependencies: [
+      "@audio-ui/pocket-synth-panel",
+      "@audio-ui/pocket-synth-device",
+      "@audio-ui/pocket-synth-engine",
+      "@audio-ui/use-master-bus",
       "@audio-ui/web-audio",
-      "@audio-ui/fader",
-      "@audio-ui/xypad",
-      "@shadcn/toggle-group",
     ],
     type: "registry:block",
   },
@@ -405,9 +408,9 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["device", "plot", "knob"],
-    dependencies: ["@audio-ui/react", "@audio-ui/core"],
+    dependencies: ["@audio-ui/react"],
     description:
-      "A compressor you can plug in: its state, a panel that draws it, a Web Audio engine that plays it and the tools an agent drives it with, side by side. Play a pulsing signal, turn the knobs, or type a tool call as a model would send it",
+      "A compressor you can plug in: its state, a panel that draws it and a Web Audio engine that plays it, side by side. Play a pulsing signal and turn the knobs",
     files: [
       {
         path: "components/device/block-compressor.tsx",
@@ -422,7 +425,6 @@ export const components: RegistryItem[] = [
       "@audio-ui/use-master-bus",
       "@audio-ui/web-audio",
       "@shadcn/button",
-      "@shadcn/textarea",
     ],
     type: "registry:block",
   },

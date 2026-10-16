@@ -141,6 +141,26 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
+    categories: ["device", "synth", "xypad"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "The face of the Pocket Synth device: a pad that plays it, its waveform and filter, and its volume. Controlled, with the notes leaving through onNoteOn and onNoteOff.",
+    files: [
+      {
+        path: "audio/elements/pocket-synth-panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "pocket-synth-panel",
+    registryDependencies: [
+      "@audio-ui/fader",
+      "@audio-ui/xypad",
+      "@audio-ui/pocket-synth-device",
+      "@shadcn/toggle-group",
+    ],
+    type: "registry:ui",
+  },
+  {
     dependencies: ["@audio-ui/react"],
     description:
       "The level of a sound across frequencies, live, on a log axis in hertz, with held peaks.",

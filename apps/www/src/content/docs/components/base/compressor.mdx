@@ -153,7 +153,9 @@ const tremolo = defineDevice({
 <DevicePanel device={tremolo} onValueChange={setState} value={state} />;
 ```
 
-`DevicePanel` makes a knob per number and a toggle per switch from the descriptors, with their ranges, steps, scales and readouts. A face of your own (a curve, a spectrum) is optional.
+`DevicePanel` makes a knob per number, a toggle per switch and a row of buttons per `choice` (a waveform, a filter type) from the descriptors, with their ranges, steps, scales and readouts. A face of your own (a curve, a spectrum) is optional.
+
+An instrument is the same with `kind: "instrument"`: its parameters shape the timbre, and its engine adds `noteOn` and `noteOff` next to `update`. The Pocket Synth block is the example: its panel is controlled and sends notes out, so it plays through any engine.
 
 ## With an engine of your own
 

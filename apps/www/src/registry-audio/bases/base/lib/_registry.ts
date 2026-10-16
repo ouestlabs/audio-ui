@@ -76,6 +76,36 @@ const items: RegistryItem[] = [
     type: "registry:lib",
   },
   {
+    categories: ["lib", "audio", "device", "synth"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "The Pocket Synth as an instrument device: its waveform, filter and volume, and the pitch and filter cutoff a position on a pad plays, with no panel and no audio in it.",
+    files: [
+      {
+        path: "lib/pocket-synth-device.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "pocket-synth-device",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device", "synth"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "A monophonic synth on the Web Audio API for a Pocket Synth state: noteOn starts a note or glides the held one, noteOff releases it, and the wave, filter and volume follow the state without a click.",
+    files: [
+      {
+        path: "lib/pocket-synth-engine.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "pocket-synth-engine",
+    registryDependencies: ["@audio-ui/pocket-synth-device"],
+    type: "registry:lib",
+  },
+  {
     categories: ["lib", "audio", "timeline"],
     dependencies: ["@audio-ui/react"],
     description:

@@ -1,6 +1,6 @@
 [
   {
-    "categories": ["synth", "xypad"],
+    "categories": ["synth", "xypad", "device"],
     "name": "block-pocket-synth",
     "title": "block-pocket-synth"
   },
