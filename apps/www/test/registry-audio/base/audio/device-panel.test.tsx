@@ -32,12 +32,21 @@ const tremolo = defineDevice({
   ],
 });
 
-function setup(value = tremolo.defaults(), exclude?: readonly string[]) {
+function setup(
+  value = tremolo.defaults(),
+  options: {
+    disabled?: readonly string[];
+    exclude?: readonly string[];
+    groups?: { label: string; parameters: readonly string[] }[];
+  } = {}
+) {
   const onValueChange = mock((_state: unknown) => undefined);
   const view = render(
     <DevicePanel
       device={tremolo}
-      exclude={exclude as never}
+      disabled={options.disabled as never}
+      exclude={options.exclude as never}
+      groups={options.groups as never}
       onValueChange={onValueChange}
       value={value}
     />
@@ -110,11 +119,44 @@ describe("DevicePanel", () => {
   });
 
   test("leaves out the parameters it is told to", () => {
-    const { view } = setup(tremolo.defaults(), ["rate"]);
+    const { view } = setup(tremolo.defaults(), { exclude: ["rate"] });
     expect(
       view
         .getAllByRole("slider")
         .map((slider) => slider.getAttribute("aria-label"))
     ).toEqual(["Depth"]);
+  });
+
+  test("a switch is one button with its own label, not a label twice", () => {
+    const { view } = setup();
+    expect(view.getAllByText("Active")).toHaveLength(1);
+    expect(view.getByRole("button", { name: "Active" }).textContent).toBe(
+      "Active"
+    );
+  });
+
+  test("gathers parameters under a named group, in order, and the rest after", () => {
+    const { view } = setup(tremolo.defaults(), {
+      groups: [{ label: "Motion", parameters: ["rate"] }],
+    });
+    const motion = view.getByRole("group", { name: "Motion" });
+    expect(
+      within(motion)
+        .getAllByRole("slider")
+        .map((slider) => slider.getAttribute("aria-label"))
+    ).toEqual(["Rate"]);
+    // Depth and the switch are in no group: they still show.
+    expect(view.getByRole("slider", { name: "Depth" })).toBeTruthy();
+    expect(view.getByRole("button", { name: "Active" })).toBeTruthy();
+  });
+
+  test("draws a knob off when told it has no effect for now", () => {
+    const { view } = setup(tremolo.defaults(), { disabled: ["rate"] });
+    expect(
+      (view.getByRole("slider", { name: "Rate" }) as HTMLInputElement).disabled
+    ).toBe(true);
+    expect(
+      (view.getByRole("slider", { name: "Depth" }) as HTMLInputElement).disabled
+    ).toBe(false);
   });
 });

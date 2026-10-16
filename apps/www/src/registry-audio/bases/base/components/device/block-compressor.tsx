@@ -1,17 +1,9 @@
 "use client";
 
-import { deviceTools } from "@audio-ui/core/device";
 import { createSource, type Source } from "@audio-ui/react";
-import {
-  type ChangeEvent,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder";
 import { Button } from "@/registry/bases/base/ui/button";
-import { Textarea } from "@/registry/bases/base/ui/textarea";
 import { CompressorPanel } from "@/registry-audio/bases/base/audio/elements/compressor-panel";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 import {
@@ -33,9 +25,6 @@ const FFT_SIZE = 1024;
 /** How fast the level falls back between pulses, in dB per frame. */
 const LEVEL_FALL_DB = 1.2;
 const MASTER_VOLUME = 0.7;
-
-const [setTool] = deviceTools(compressorDevice);
-const EXAMPLE_CALL = '{ "thresholdDb": -30, "ratio": 8, "mix": 70 }';
 
 /** Noise bursts that start loud and fade, eight to a loop, every other one quieter, so the level moves along the curve. */
 function pulses(ctx: AudioContext): AudioBuffer {
@@ -87,18 +76,15 @@ function ReductionReadout({ source }: { source: Source<number> }) {
 
 /**
  * A compressor you can plug in: its state, a panel that draws it, an engine
- * that plays it and the tools that let an agent drive it, side by side. Each
- * is its own file and none knows the others: the state is a plain object, so a
- * host keeps its own and uses what it needs. Press play, turn the knobs, or
- * type a call as a model would send it.
+ * that plays it, side by side. Each is its own file and none knows the others:
+ * the state is a plain object, so a host keeps its own and uses what it needs.
+ * Press play and turn the knobs.
  */
 export default function BlockCompressor() {
   const [state, setState] = useState<CompressorState>(() =>
     compressorDevice.defaults()
   );
   const [playing, setPlaying] = useState(false);
-  const [call, setCall] = useState(EXAMPLE_CALL);
-  const [answer, setAnswer] = useState("");
   const master = useMasterBus(MASTER_VOLUME);
   const [level] = useState(() => createSource(FLOOR_DB));
   const [reduction] = useState(() => createSource(0));
@@ -159,25 +145,6 @@ export default function BlockCompressor() {
   }, [state]);
 
   const togglePlaying = useCallback(() => setPlaying((on) => !on), []);
-  const editCall = useCallback(
-    (event: ChangeEvent<HTMLTextAreaElement>) => setCall(event.target.value),
-    []
-  );
-
-  const run = useCallback(() => {
-    let input: unknown;
-    try {
-      input = JSON.parse(call);
-    } catch {
-      setAnswer("That is not JSON.");
-      return;
-    }
-    const result = setTool?.run(stateRef.current, input);
-    if (result) {
-      setState(compressorDevice.sanitize(result.state));
-      setAnswer(result.summary);
-    }
-  }, [call]);
 
   return (
     <div className="cn-audio-panel flex w-full min-w-0 flex-col gap-4 border bg-card p-4">
@@ -211,32 +178,6 @@ export default function BlockCompressor() {
         </Button>
         <ReductionReadout source={reduction} />
       </div>
-      <details className="rounded-md border px-3 py-2 text-sm">
-        <summary className="cursor-pointer text-muted-foreground">
-          Drive it as an agent would
-        </summary>
-        <div className="mt-3 flex flex-col gap-2">
-          <p className="text-muted-foreground text-xs">
-            The call of <code>{setTool?.name}</code>: only the parameters to
-            change, by id.
-          </p>
-          <Textarea
-            aria-label="Tool call"
-            className="font-mono text-xs"
-            onChange={editCall}
-            rows={2}
-            value={call}
-          />
-          <div className="flex items-start justify-between gap-2">
-            <p className="text-xs" role="status">
-              {answer}
-            </p>
-            <Button onClick={run} size="sm" variant="outline">
-              Run
-            </Button>
-          </div>
-        </div>
-      </details>
     </div>
   );
 }

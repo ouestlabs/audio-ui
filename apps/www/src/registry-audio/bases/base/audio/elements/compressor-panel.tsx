@@ -1,9 +1,12 @@
 "use client";
 
 import type { Source } from "@audio-ui/react";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
-import { DevicePanel } from "@/registry-audio/bases/base/audio/elements/device-panel";
+import {
+  DevicePanel,
+  DeviceToggle,
+} from "@/registry-audio/bases/base/audio/elements/device-panel";
 import {
   Plot,
   PlotCurve,
@@ -22,8 +25,15 @@ const MIN_DB = -60;
 const MAX_DB = 6;
 const DB_TICKS = [-48, -24, 0];
 const UNITY = (inputDb: number) => inputDb;
-const _describePointer = (point: { x: number; y: number }) =>
-  `in ${point.x.toFixed(0)} dB`;
+/** What the knobs gather: the curve, the timing, the output. */
+const GROUPS = [
+  { label: "Curve", parameters: ["thresholdDb", "ratio", "kneeDb"] },
+  { label: "Time", parameters: ["attackMs", "releaseMs"] },
+  { label: "Output", parameters: ["makeupDb", "mix"] },
+] as const;
+const SWITCHES = ["enabled", "autoMakeup"] as const;
+/** With auto make-up on, the node's own make-up plays and this knob does nothing. */
+const MAKEUP_OFF = ["makeupDb"] as const;
 
 interface CompressorPanelProps {
   className?: string;
@@ -34,10 +44,10 @@ interface CompressorPanelProps {
 }
 
 /**
- * The face of the compressor device: the transfer curve it plays, with the
- * threshold and the level going in on it, over the device's own knobs. It is
- * controlled like `DevicePanel`, which it uses for the knobs: drawing the curve
- * is all it adds.
+ * The face of the compressor device: its name and switches, the transfer curve
+ * it plays with the threshold and the level going in on it, and its knobs
+ * gathered by what they do. It is controlled like `DevicePanel`, which it uses
+ * for the knobs: drawing the curve is all it adds.
  */
 function CompressorPanel({
   className,
@@ -57,11 +67,39 @@ function CompressorPanel({
       },
     [level, output]
   );
+  // The dot rides the curve while there is a signal; with none it has no place on it.
+  const root = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const element = root.current;
+    if (!(element && level)) {
+      return;
+    }
+    const sync = () =>
+      element.toggleAttribute("data-idle", level.getSnapshot() < MIN_DB);
+    sync();
+    return level.subscribe(sync);
+  }, [level]);
   return (
     <div
-      className={cn("flex w-full flex-col gap-4", className)}
+      className={cn("group/compressor flex w-full flex-col gap-4", className)}
+      data-idle=""
       data-slot="compressor-panel"
+      ref={root}
     >
+      <div className="flex items-center justify-between gap-3">
+        <span className="font-medium text-sm">{compressorDevice.name}</span>
+        <div className="flex gap-1.5">
+          {SWITCHES.map((id) => (
+            <DeviceToggle
+              device={compressorDevice}
+              id={id}
+              key={id}
+              onValueChange={onValueChange}
+              value={value}
+            />
+          ))}
+        </div>
+      </div>
       <Plot
         aria-label="Transfer curve"
         className="h-40"
@@ -83,10 +121,15 @@ function CompressorPanel({
           <PlotCurve fn={output} />
         </PlotGraph>
         <PlotGrid x={{ ticks: DB_TICKS }} y={{ ticks: DB_TICKS.slice(0, 2) }} />
-        {dot ? <PlotDot source={dot} /> : null}
+        {dot ? (
+          <PlotDot className="group-data-idle/compressor:hidden" source={dot} />
+        ) : null}
       </Plot>
       <DevicePanel
         device={compressorDevice}
+        disabled={value.autoMakeup ? MAKEUP_OFF : undefined}
+        exclude={SWITCHES}
+        groups={GROUPS}
         onValueChange={onValueChange}
         value={value}
       />
