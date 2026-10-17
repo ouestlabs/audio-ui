@@ -53,7 +53,6 @@ import {
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuSeparator,
@@ -910,16 +909,32 @@ function ScaleMenu({
   );
 }
 
-/** One labelled group of the Notes menu's edits. */
-function EditGroup({
+/** The Notes menu's submenus: the edits without a key of their own, by what they change. */
+const EDIT_MENUS = [
+  { edits: TIME_EDITS, label: "Time" },
+  { edits: PITCH_EDITS, label: "Pitch" },
+  { edits: VELOCITY_EDITS, label: "Velocity" },
+  { edits: PLAY_EDITS, label: "Chance" },
+].map((menu) => ({
+  ...menu,
+  edits: menu.edits.filter((item) => !item.shortcut),
+}));
+/** The edits with a key, at the top of the Notes menu where they are reached first. */
+const KEYED_EDITS = [
+  ...TIME_EDITS,
+  ...PITCH_EDITS,
+  ...VELOCITY_EDITS,
+  ...PLAY_EDITS,
+].filter((item) => item.shortcut);
+
+/** Menu items for `edits`, each running its edit. */
+function EditItems({
   disabled,
   edits,
-  label,
   onEdit,
 }: {
   disabled: (item: NoteEdit) => boolean;
   edits: NoteEdit[];
-  label: string;
   onEdit: (item: NoteEdit) => void;
 }) {
   const handleClick = useCallback(
@@ -933,27 +948,22 @@ function EditGroup({
     },
     [edits, onEdit]
   );
-  return (
-    <DropdownMenuGroup>
-      <DropdownMenuLabel>{label}</DropdownMenuLabel>
-      {edits.map((item) => (
-        <DropdownMenuItem
-          data-edit={item.id}
-          disabled={disabled(item)}
-          key={item.id}
-          onClick={handleClick}
-        >
-          {item.label}
-          {item.shortcut ? (
-            <DropdownMenuShortcut>{item.shortcut}</DropdownMenuShortcut>
-          ) : null}
-        </DropdownMenuItem>
-      ))}
-    </DropdownMenuGroup>
-  );
+  return edits.map((item) => (
+    <DropdownMenuItem
+      data-edit={item.id}
+      disabled={disabled(item)}
+      key={item.id}
+      onClick={handleClick}
+    >
+      {item.label}
+      {item.shortcut ? (
+        <DropdownMenuShortcut>{item.shortcut}</DropdownMenuShortcut>
+      ) : null}
+    </DropdownMenuItem>
+  ));
 }
 
-/** The edits for the selection, or every note with none selected, then the file and clear commands. */
+/** The edits with a key first, the others in a submenu each, then the file and clear commands. They act on the selection, or on every note with none selected. */
 function NotesMenu({
   hasNotes,
   hasScale,
@@ -986,33 +996,26 @@ function NotesMenu({
         />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-auto min-w-52">
-        <EditGroup
-          disabled={disabled}
-          edits={TIME_EDITS}
-          label="Time"
-          onEdit={onEdit}
-        />
+        <DropdownMenuGroup>
+          <EditItems disabled={disabled} edits={KEYED_EDITS} onEdit={onEdit} />
+        </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <EditGroup
-          disabled={disabled}
-          edits={PITCH_EDITS}
-          label="Pitch"
-          onEdit={onEdit}
-        />
-        <DropdownMenuSeparator />
-        <EditGroup
-          disabled={disabled}
-          edits={VELOCITY_EDITS}
-          label="Velocity"
-          onEdit={onEdit}
-        />
-        <DropdownMenuSeparator />
-        <EditGroup
-          disabled={disabled}
-          edits={PLAY_EDITS}
-          label="Play"
-          onEdit={onEdit}
-        />
+        <DropdownMenuGroup>
+          {EDIT_MENUS.map((menu) => (
+            <DropdownMenuSub key={menu.label}>
+              <DropdownMenuSubTrigger disabled={!hasNotes}>
+                {menu.label}
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent className="w-auto min-w-48">
+                <EditItems
+                  disabled={disabled}
+                  edits={menu.edits}
+                  onEdit={onEdit}
+                />
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
+          ))}
+        </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem onClick={onImport}>
