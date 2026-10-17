@@ -1,0 +1,76 @@
+---
+title: Input
+description: "A MIDI keyboard and the microphone: the notes of the page's MIDI input, and the microphone as an analyser."
+---
+
+## A MIDI keyboard
+
+```bash
+npx shadcn@latest add @audio-ui/use-midi-input
+```
+
+`useMidiInput` hears the page's MIDI input: every component that calls it hears the same devices, and connecting from one connects them all. Browsers ask for permission, so connect from a click, with `requestAccess` or with the ready-made button (`npx shadcn@latest add @audio-ui/midi-connect-control`).
+
+```tsx
+import { useMidiInput } from "@/hooks/use-midi-input";
+
+const midi = useMidiInput({
+  onNoteOff: (pitch) => voices.releaseNote(pitch, envelope),
+  onNoteOn: (pitch, velocity) => voices.triggerNote(pitch, envelope, velocity),
+  onPitchBend: voices.setPitchBend,
+});
+
+<button onClick={midi.requestAccess} type="button">Connect MIDI</button>
+<Piano activeNotes={midi.activeNotes} maxPitch={72} minPitch={48} />
+```
+
+`activeNotes` lights the keys held on the device, on a [Piano](/docs/components/base/piano) or a [Piano roll](/docs/components/base/piano-roll).
+
+<TypeTable title="Options">
+<TypeRow name={"onNoteOn"} type={"(pitch, velocity) => void"}>A key was pressed, with its velocity from 0 to 1.</TypeRow>
+<TypeRow name={"onNoteOff"} type={"(pitch) => void"}>A key was released.</TypeRow>
+<TypeRow name={"onPitchBend"} type={"(semitones) => void"}>The pitch bend wheel moved: ±2 semitones at its ends, 0 at rest.</TypeRow>
+</TypeTable>
+
+<TypeTable title="Returns">
+<TypeRow name={"requestAccess"} type={"() => void"}>Connects the page's MIDI input. Call it from a click.</TypeRow>
+<TypeRow name={"disconnect"} type={"() => void"}>Stops listening, for the whole page. Notes already sounding keep sounding: release them yourself.</TypeRow>
+<TypeRow name={"activeNotes"} type={"number[]"}>The pitches held on the device.</TypeRow>
+<TypeRow name={"isSupported, isConnected"} type={"boolean"}>Whether the browser has Web MIDI, and whether the page listens.</TypeRow>
+<TypeRow name={"inputNames"} type={"string[]"}>The names of the connected devices.</TypeRow>
+<TypeRow name={"error"} type={"string | null"}>Why connecting failed, such as a refused permission.</TypeRow>
+</TypeTable>
+
+Without React, `@audio-ui/core/midi` reads the messages themselves and the MIDI files.
+
+## The microphone
+
+```bash
+npx shadcn@latest add @audio-ui/use-microphone
+```
+
+`useMicrophone` taps the microphone into an `AnalyserNode` on the page's audio context. The signal is raw: echo cancellation, noise suppression and automatic gain are off, since they flatten a tuner or a meter. The analyser is never connected to the speakers.
+
+```tsx
+import { useMicrophone } from "@/hooks/use-microphone";
+
+const mic = useMicrophone();
+// Memoized: a new array restarts the sampling.
+const analysers = useMemo(() => (mic.analyser ? [mic.analyser] : []), [mic.analyser]);
+const levels = useAudioLevels(analysers);
+
+<button onClick={mic.isListening ? mic.stop : mic.start} type="button">
+  {mic.isListening ? "Stop" : "Listen"}
+</button>
+<Meter aria-label="Microphone" source={levels} />
+```
+
+Give the analyser to anything that reads one: [levels and spectra](/docs/engine/analysis), or the pitch a [Tuner](/docs/components/base/tuner) shows.
+
+<TypeTable title="Returns">
+<TypeRow name={"start"} type={"() => Promise<void>"}>Asks for the microphone and listens. Call it from a click.</TypeRow>
+<TypeRow name={"stop"} type={"() => void"}>Releases the microphone. Unmounting does too.</TypeRow>
+<TypeRow name={"analyser"} type={"AnalyserNode | null"}>The signal while it listens, `null` otherwise.</TypeRow>
+<TypeRow name={"isListening"} type={"boolean"}>Whether it listens.</TypeRow>
+<TypeRow name={"error"} type={"string | null"}>Why it could not listen, such as a refused permission.</TypeRow>
+</TypeTable>

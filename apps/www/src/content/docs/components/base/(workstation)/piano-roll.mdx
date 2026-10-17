@@ -186,7 +186,7 @@ const playback = usePianoRollPlayback({ meter, notes, tempo, voices });
 </Timeline>;
 ```
 
-The hook plays the notes; it does not hold them, so an undo, a file import or an agent can change them and the next pass plays the change. Time is in steps, four to a quarter note whatever the signature; `meterOf(tempo, bars)` gives a clip's length in steps and where its bars and beats fall. Notes are scheduled ahead on the audio clock, so they keep time when the page is busy, and each plays as the roll draws it: a deactivated note stays silent, a `chance` plays that often, a `deviation` strays its velocity each time round.
+The voices and the bus come from [Synthesis](/docs/engine/synthesis) and [Output](/docs/engine/output), and the clock under the hook from [Clock and time](/docs/engine/clock-and-time). The hook plays the notes; it does not hold them, so an undo, a file import or an agent can change them and the next pass plays the change. Time is in steps, four to a quarter note whatever the signature; `meterOf(tempo, bars)` gives a clip's length in steps and where its bars and beats fall. Notes are scheduled ahead on the audio clock, so they keep time when the page is busy, and each plays as the roll draws it: a deactivated note stays silent, a `chance` plays that often, a `deviation` strays its velocity each time round.
 
 It returns `play` (on from the playhead), `pause` (stops where it is), `stop` (back to the start of the loop), `seek`, `isPlaying`, `playingPitches`, `onNoteOn` and `onNoteOff` for the roll, `position` (in steps) for the timeline's `source`, and `clock` (in seconds) for a [Transport](/docs/components/base/transport)'s `source`. It also takes `looping` (on by default), a `loopRegion` of steps, whose `commitLoopRegion` makes a moved loop heard at once, `metronome` with the `destination` it clicks into, and the `envelope` the notes play with.
 
@@ -242,6 +242,33 @@ import { downloadMidiFile, MIDI_FILE_ACCEPT, readMidiFile } from "@/lib/midi-fil
 ```
 
 `readMidiFile` puts each note on the nearest step, at least one step long, drops the notes starting past `duration`, keeps the pitches between `minPitch` and `maxPitch` and returns the file's tempo, kept between `minBpm` and `maxBpm` (20 and 200 by default). It takes any `File` or `Blob`, so a drop works the same as an input. `writeMidiFile` goes the other way, at 480 ticks a quarter note, and leaves deactivated notes out; `downloadMidiFile` writes the file and saves it. A step is a sixteenth note: set `stepsPerQuarter` on both sides for another grid.
+
+### Driving it from an agent
+
+`createPianoRollTools` gives a language model the tools to write on the roll from what a user asks ("a walking bassline in C minor", "up an octave"): `setNotes`, `addNotes`, `removeNotes`, `transpose`, `clear` and `setTempo`, each a description, a zod schema and an `apply` that returns the next state. `npx shadcn@latest add @audio-ui/piano-roll-tools`.
+
+```tsx
+import { tool } from "ai";
+import { createPianoRollTools } from "@/lib/piano-roll-tools";
+
+const roll = createPianoRollTools({ maxPitch: 72, minPitch: 48, stepCount: 16 });
+
+const tools = Object.fromEntries(
+  Object.entries(roll).map(([name, t]) => [
+    name,
+    tool({
+      description: t.description,
+      execute: (args) => {
+        setState((state) => t.apply(state, args as never));
+        return `applied ${name}`;
+      },
+      inputSchema: t.schema,
+    }),
+  ])
+);
+```
+
+The pitch range and the grid are in the schemas, and every note a model writes is clamped into them, so whatever it answers lands on the roll's rows and steps. The tools read and write `{ notes, bpm }` and depend on no agent library: the example wires them to the AI SDK, and any tool-calling API takes the same description and schema.
 
 ## Interaction
 

@@ -122,12 +122,10 @@ The item installs two files: the menu, and `lib/note-edits.ts`, the commands it 
 
 ### The commands
 
-| Group | Commands |
-| --- | --- |
-| `TIME_EDITS` | Split (⌘E), Chop in two, Join (⌘J), Quantize (⌘U), Legato, Reverse, Twice as long, Half as long, Duplicate time (⇧⌘D), Delete time (⇧⌘⌫), Insert time (⌘I) |
-| `PITCH_EDITS` | Invert, Fit to scale |
-| `PLAY_EDITS` | Deactivate (0), Always play, Play 75%, 50% or 25% of the time |
-| `VELOCITY_EDITS` | Crescendo, Decrescendo, Humanize |
+- `TIME_EDITS`: Split (⌘E), Chop in two, Join (⌘J), Quantize (⌘U), Legato, Reverse, Twice as long, Half as long, Duplicate time (⇧⌘D), Delete time (⇧⌘⌫), Insert time (⌘I).
+- `PITCH_EDITS`: Invert, Fit to scale.
+- `PLAY_EDITS`: Deactivate (0), Always play, Play 75%, 50% or 25% of the time.
+- `VELOCITY_EDITS`: Crescendo, Decrescendo, Humanize.
 
 Split cuts the selected notes on every grid step, or, with nothing selected, the notes under the playhead at `at`. The work is done by the edits in `@audio-ui/core/piano-roll` (`splitNotes`, `quantizeNotes`, `fitNotesToScale`…); `note-edits` names them, groups them and gives them keys.
 

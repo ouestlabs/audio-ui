@@ -106,13 +106,7 @@ The tuner is a `meter` of cents, from -50 to +50, and its text value reads the n
 
 ### useMicrophone
 
-<TypeTable>
-<TypeRow name={"analyser"} type={"AnalyserNode | null"}>Taps the microphone while it listens, `null` otherwise.</TypeRow>
-<TypeRow name={"start"} type={"() => Promise<void>"}>Asks for the microphone and starts listening. Call it from a user gesture.</TypeRow>
-<TypeRow name={"stop"} type={"() => void"}>Releases the microphone.</TypeRow>
-<TypeRow name={"isListening"} type={"boolean"}>Whether the microphone is on.</TypeRow>
-<TypeRow name={"error"} type={"string | null"}>Why it could not start: no microphone access in this browser, or the permission was denied.</TypeRow>
-</TypeTable>
+Its reference is in [Input](/docs/engine/input#the-microphone).
 
 ### usePitch
 

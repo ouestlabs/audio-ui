@@ -12,12 +12,14 @@ function markdownUrl(url: string) {
 export function GET() {
   const pages = source.getPages();
   const byUrl = new Map(pages.map((p) => [p.url, p]));
-  // The components by space (Elements, Workstation, Devices), as the sidebar groups them.
+  // The pages by space (Elements, Workstation, Devices, Audio engine), as the sidebar groups them.
   const spaces = source
     .getPageTree()
     .children.flatMap((folder) =>
-      folder.type === "folder" && folder.$id === "components"
-        ? getGroupsFromFolder(folder, "base")
+      folder.type === "folder"
+        ? getGroupsFromFolder(folder, "base").filter(
+            (group) => group.collapsible
+          )
         : []
     );
   // A guide a space opens with, such as Devices, is listed in that space only.
