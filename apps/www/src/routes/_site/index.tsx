@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ComponentRenderer } from "@/components/catalog/component-card-container";
 import { HomeHero } from "@/components/home-hero";
+import { HomeTimelineSkeleton } from "@/components/home-timeline-skeleton";
 import { JsonLd } from "@/components/json-ld";
 import { siteConfig } from "@/lib/config";
 import { buildPageMetadata, buildSoftwareJsonLd } from "@/lib/seo";
@@ -50,7 +51,10 @@ function IndexPage() {
         <h2 className="sr-only" id="home-demo-heading">
           Live demo: an arrangement timeline built with audio/ui
         </h2>
-        <ComponentRenderer name="block-timeline" />
+        <ComponentRenderer
+          loading={<HomeTimelineSkeleton />}
+          name="block-timeline"
+        />
       </section>
     </div>
   );
