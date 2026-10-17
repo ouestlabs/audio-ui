@@ -1,7 +1,6 @@
 "use client";
 
 import type { Breakpoint } from "@audio-ui/core/envelope";
-import { noteToFrequency } from "@audio-ui/core/pitch";
 import {
   adjacentDivision,
   barLabelInterval,
@@ -13,33 +12,23 @@ import {
   type GridDivision,
   gridInterval,
   gridLabel,
-  isSignature,
   type MetronomeRhythm,
-  type SignatureChange,
   secondsPerBar,
   type Tempo,
   TRIPLET_FACTOR,
-  warpedTime,
 } from "@audio-ui/core/time";
 import { snapMove } from "@audio-ui/core/timeline";
 import {
   adjacentPoint,
-  type FadeShape,
-  type Source,
   type Timeline as TimelinePrimitive,
 } from "@audio-ui/react";
 import {
   type ComponentProps,
-  type FocusEvent,
-  Fragment,
   type KeyboardEvent,
   type MouseEvent,
-  memo,
   type PointerEvent,
   type ReactNode,
-  type SyntheticEvent,
   useCallback,
-  useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -53,8 +42,6 @@ import { ButtonGroup } from "@/registry/bases/base/ui/button-group";
 import {
   ContextMenu,
   ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuSeparator,
   ContextMenuTrigger,
 } from "@/registry/bases/base/ui/context-menu";
 import {
@@ -72,14 +59,9 @@ import {
 } from "@/registry/bases/base/ui/dropdown-menu";
 import { Kbd, KbdGroup } from "@/registry/bases/base/ui/kbd";
 import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/registry/bases/base/ui/select";
-import { AutomationEnvelope } from "@/registry-audio/bases/base/audio/elements/automation-envelope";
+  ArrangedClip,
+  ArrangedClipGhost,
+} from "@/registry-audio/bases/base/audio/elements/arranged-clip";
 import { NumberControl } from "@/registry-audio/bases/base/audio/elements/bpm-control";
 import { Meter } from "@/registry-audio/bases/base/audio/elements/meter";
 import {
@@ -87,11 +69,6 @@ import {
   MAX_TRACK_HEIGHT,
   MIN_TRACK_HEIGHT,
   Timeline,
-  TimelineClip,
-  TimelineClipFade,
-  TimelineClipFadeHandle,
-  TimelineClipHandle,
-  TimelineClipHeader,
   TimelineGridMenuItems,
   TimelineLane,
   TimelineMark,
@@ -107,6 +84,17 @@ import {
   TRACK_COLORS,
   TRACK_HEIGHT_STEP,
 } from "@/registry-audio/bases/base/audio/elements/timeline";
+import {
+  type Locator,
+  type Signature,
+  TimelineLocator,
+  TimelineSignature,
+} from "@/registry-audio/bases/base/audio/elements/timeline-markers";
+import {
+  AUTOMATED_PARAMETERS,
+  TrackAutomation,
+  TrackAutomationChooser,
+} from "@/registry-audio/bases/base/audio/elements/track-automation";
 import { Transport } from "@/registry-audio/bases/base/audio/elements/transport";
 import {
   ClipPanel,
@@ -121,31 +109,22 @@ import {
   useArrangement,
 } from "@/registry-audio/bases/base/hooks/use-arrangement";
 import { useMarquee } from "@/registry-audio/bases/base/hooks/use-marquee-selection";
-import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
+import {
+  type LevelsAt,
+  useMidiPlayback,
+} from "@/registry-audio/bases/base/hooks/use-midi-playback";
 import { useSimulatedClock } from "@/registry-audio/bases/base/hooks/use-simulated-clock";
 import { useSimulatedLevels } from "@/registry-audio/bases/base/hooks/use-simulated-levels";
-import { useSynthVoices } from "@/registry-audio/bases/base/hooks/use-synth-voices";
+import { useTrackReorder } from "@/registry-audio/bases/base/hooks/use-track-reorder";
 import {
   type Arranged,
   type ArrangementTrack,
   type AutomatedParameter,
   type Clipping,
-  flatAutomation,
   type Mix,
   mixAt,
-  panPosition,
-  playedNotes,
   type TimeSelection,
-  volumeGain,
-  volumeValue,
 } from "@/registry-audio/bases/base/lib/arrangement";
-import {
-  type EnvelopePoint,
-  SUSTAIN_SPLIT_X,
-  scheduleEnvelopeRamp,
-  sliceEnvelope,
-} from "@/registry-audio/bases/base/lib/envelope-ramp";
-import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 const BARS = 32;
 /** The arrangement is laid out at the first tempo; a tempo change keeps its musical positions. */
@@ -225,82 +204,6 @@ const TRACKS: ArrangementTrack[] = [
   { color: 2, id: "keys", kind: "midi", name: "Keys" },
   { color: 3, id: "vocals", name: "Vocals" },
 ] as const;
-
-/** A clip's menu: what is done to it, then what is done away with. */
-function clipMenuEntries(disabled: boolean): {
-  action: ClipAction;
-  destructive?: boolean;
-  label: string;
-  separatorBefore?: boolean;
-}[] {
-  return [
-    { action: "edit", label: "Edit clip" },
-    { action: "rename", label: "Rename" },
-    { action: "duplicate", label: "Duplicate" },
-    { action: "split", label: "Split at the cursor", separatorBefore: true },
-    {
-      action: "toggle",
-      label: disabled ? "Switch clip on" : "Switch clip off",
-    },
-    {
-      action: "remove",
-      destructive: true,
-      label: "Delete",
-      separatorBefore: true,
-    },
-  ];
-}
-
-const selectText = (element: HTMLInputElement | null) => element?.select();
-
-/** A clip's name edited where it is written: Enter keeps it, Escape gives it back. */
-function ClipNameField({
-  name,
-  onCommit,
-  onDone,
-}: {
-  name: string;
-  onCommit: (name: string) => void;
-  onDone: () => void;
-}) {
-  const handleKeyDown = useCallback(
-    (event: KeyboardEvent<HTMLInputElement>) => {
-      // The clip drags, deletes and splits on its own keys, and so does the panel: a name must not.
-      event.stopPropagation();
-      if (event.key === "Enter") {
-        onCommit(event.currentTarget.value);
-        onDone();
-      } else if (event.key === "Escape") {
-        onDone();
-      }
-    },
-    [onCommit, onDone]
-  );
-  const handleBlur = useCallback(
-    (event: FocusEvent<HTMLInputElement>) => {
-      onCommit(event.currentTarget.value);
-      onDone();
-    },
-    [onCommit, onDone]
-  );
-  const stop = useCallback(
-    (event: SyntheticEvent) => event.stopPropagation(),
-    []
-  );
-  return (
-    <input
-      aria-label="Clip name"
-      className="min-w-0 flex-1 bg-transparent outline-none"
-      defaultValue={name}
-      onBlur={handleBlur}
-      onClick={stop}
-      onDoubleClick={stop}
-      onKeyDown={handleKeyDown}
-      onPointerDown={stop}
-      ref={selectText}
-    />
-  );
-}
 
 /** What a track meter shows while nothing plays: one channel. */
 const SILENCE_MONO = {
@@ -411,47 +314,6 @@ const CLIPS: Arranged[] = [
   arranged("v2", "Hook", "vocals", 16, 24),
 ];
 
-/** A row of the arrangement: the track's header stuck to the left edge as it scrolls, its lane beside it. */
-/** The nearest ancestor that scrolls vertically, or null for the page. */
-function verticalScroller(node: HTMLElement): HTMLElement | null {
-  for (let parent = node.parentElement; parent; parent = parent.parentElement) {
-    const { overflowY } = getComputedStyle(parent);
-    if (
-      (overflowY === "auto" || overflowY === "scroll") &&
-      parent.scrollHeight > parent.clientHeight
-    ) {
-      return parent;
-    }
-  }
-  return null;
-}
-
-/** How far to scroll so a pointer held near the top or bottom edge of a view keeps it going; 0 away from the edges. */
-function edgeScrollStep(y: number, top: number, bottom: number): number {
-  if (y < top + 48) {
-    return -Math.min(24, Math.ceil((top + 48 - y) / 3));
-  }
-  if (y > bottom - 48) {
-    return Math.min(24, Math.ceil((y - bottom + 48) / 3));
-  }
-  return 0;
-}
-
-/** The line a track would land on: none when it stays where it is or one place below. */
-function dropLine(
-  gap: number,
-  from: number,
-  rows: { id: string }[]
-): { id: string; edge: "bottom" | "top" } | null {
-  if (gap === from || gap === from + 1) {
-    return null;
-  }
-  if (gap < rows.length) {
-    return { id: rows[gap].id, edge: "top" };
-  }
-  return { id: rows.at(-1)?.id ?? "", edge: "bottom" };
-}
-
 function Row({
   children,
   className,
@@ -538,249 +400,6 @@ const SHORTCUTS: { action: string; keys: string[] }[] = [
   { action: "Clear the selection", keys: ["Esc"] },
 ];
 
-interface Locator {
-  at: number;
-  name: string;
-}
-
-/**
- * A locator: press it to put the cursor there, double-click it or press
- * Enter to rename it (Enter keeps the name, Escape drops the change), Delete
- * takes it away.
- */
-function LocatorButton({
-  locator,
-  onJump,
-  onRemove,
-  onRename,
-}: {
-  locator: Locator;
-  onJump: (at: number) => void;
-  onRemove: (at: number) => void;
-  onRename: (at: number, name: string) => void;
-}) {
-  const { at, name } = locator;
-  const [editing, setEditing] = useState(false);
-  const handleClick = useCallback(() => onJump(at), [at, onJump]);
-  const startEditing = useCallback(() => setEditing(true), []);
-  const handleKeyDown = useCallback(
-    (event: KeyboardEvent<HTMLButtonElement>) => {
-      if (event.key === "Delete" || event.key === "Backspace") {
-        event.preventDefault();
-        event.stopPropagation();
-        onRemove(at);
-      } else if (event.key === "Enter") {
-        event.preventDefault();
-        event.stopPropagation();
-        setEditing(true);
-      }
-    },
-    [at, onRemove]
-  );
-  const handleEditKeyDown = useCallback(
-    (event: KeyboardEvent<HTMLInputElement>) => {
-      event.stopPropagation();
-      if (event.key === "Enter") {
-        const next = event.currentTarget.value.trim();
-        if (next) {
-          onRename(at, next);
-        }
-        setEditing(false);
-      } else if (event.key === "Escape") {
-        setEditing(false);
-      }
-    },
-    [at, onRename]
-  );
-  const handleBlur = useCallback(() => setEditing(false), []);
-  const handleRemove = useCallback(() => onRemove(at), [at, onRemove]);
-  // The menu hands focus back as it closes, which would end the edit: open the field after it.
-  const renameLater = useRef(false);
-  const renameWhenClosed = useCallback(() => {
-    renameLater.current = true;
-  }, []);
-  const handleMenuClosed = useCallback((open: boolean) => {
-    if (!open && renameLater.current) {
-      renameLater.current = false;
-      setEditing(true);
-    }
-  }, []);
-
-  if (editing) {
-    return (
-      <input
-        aria-label="Locator name"
-        autoFocus
-        className="h-full w-24 border-primary border-s-2 bg-background px-1 text-primary text-xs outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        defaultValue={name}
-        onBlur={handleBlur}
-        onKeyDown={handleEditKeyDown}
-        onPointerDown={stopPress}
-      />
-    );
-  }
-  return (
-    <ContextMenu onOpenChangeComplete={handleMenuClosed}>
-      <ContextMenuTrigger
-        render={
-          <button
-            aria-label={`Locator ${name}`}
-            className="pointer-events-auto flex h-full items-center whitespace-nowrap border-primary border-s-2 ps-1 pe-2 text-primary text-xs outline-none hover:bg-primary/10 focus-visible:ring-2 focus-visible:ring-ring"
-            onClick={handleClick}
-            onDoubleClick={startEditing}
-            onKeyDown={handleKeyDown}
-            type="button"
-          />
-        }
-      >
-        {name}
-      </ContextMenuTrigger>
-      <ContextMenuContent className="w-auto min-w-32">
-        <ContextMenuItem onClick={renameWhenClosed}>Rename</ContextMenuItem>
-        <ContextMenuSeparator />
-        <ContextMenuItem onClick={handleRemove} variant="destructive">
-          Delete
-        </ContextMenuItem>
-      </ContextMenuContent>
-    </ContextMenu>
-  );
-}
-
-/** Keeps a press inside a field from reaching the lane under it. */
-function stopPress(event: PointerEvent<HTMLElement>) {
-  event.stopPropagation();
-}
-
-/** A time-signature change, with an id that stays the same as it moves, so its button keeps the focus. */
-type Signature = SignatureChange & { id: string };
-
-/** "7/8" as a signature, or null when it is not one a bar can have. */
-function parseSignature(text: string) {
-  const [beats, unit] = text.split("/").map((part) => Number(part.trim()));
-  return beats !== undefined && unit !== undefined && isSignature(beats, unit)
-    ? { beatUnit: unit, beatsPerBar: beats }
-    : null;
-}
-
-/**
- * A time-signature change: press it to put the cursor there, double-click it
- * or press Enter to type a new signature such as 7/8 (Enter keeps it, Escape
- * drops it), Left and Right move it by a grid step, Delete takes it away.
- */
-function SignatureButton({
-  change,
-  editing,
-  onEditingChange,
-  onJump,
-  onMove,
-  onRemove,
-  onSet,
-  step,
-}: {
-  change: Signature;
-  editing: boolean;
-  onEditingChange: (id: string | null) => void;
-  onJump: (at: number) => void;
-  onMove: (id: string, to: number) => void;
-  onRemove: (id: string) => void;
-  onSet: (id: string, beatsPerBar: number, beatUnit: number) => void;
-  step: number;
-}) {
-  const { at, beatUnit, beatsPerBar, id } = change;
-  const label = `${beatsPerBar}/${beatUnit}`;
-  const handleClick = useCallback(() => onJump(at), [at, onJump]);
-  const startEditing = useCallback(
-    () => onEditingChange(id),
-    [id, onEditingChange]
-  );
-  const handleKeyDown = useCallback(
-    (event: KeyboardEvent<HTMLButtonElement>) => {
-      const direction = { ArrowLeft: -1, ArrowRight: 1 }[event.key];
-      if (event.key === "Delete" || event.key === "Backspace") {
-        onRemove(id);
-      } else if (event.key === "Enter") {
-        onEditingChange(id);
-      } else if (direction && step > 0) {
-        onMove(id, at + direction * step);
-      } else {
-        return;
-      }
-      event.preventDefault();
-      event.stopPropagation();
-    },
-    [at, id, onEditingChange, onMove, onRemove, step]
-  );
-  const handleEditKeyDown = useCallback(
-    (event: KeyboardEvent<HTMLInputElement>) => {
-      event.stopPropagation();
-      if (event.key === "Enter") {
-        const parsed = parseSignature(event.currentTarget.value);
-        if (parsed) {
-          onSet(id, parsed.beatsPerBar, parsed.beatUnit);
-        }
-        onEditingChange(null);
-      } else if (event.key === "Escape") {
-        onEditingChange(null);
-      }
-    },
-    [id, onEditingChange, onSet]
-  );
-  const stopEditing = useCallback(
-    () => onEditingChange(null),
-    [onEditingChange]
-  );
-  const handleRemove = useCallback(() => onRemove(id), [id, onRemove]);
-
-  if (editing) {
-    return (
-      <input
-        aria-label="Time signature, such as 7/8"
-        autoFocus
-        className="h-full w-14 border-primary border-s-2 bg-background px-1 text-primary text-xs tabular-nums outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        defaultValue={label}
-        onBlur={stopEditing}
-        onKeyDown={handleEditKeyDown}
-        onPointerDown={stopPress}
-      />
-    );
-  }
-  return (
-    <ContextMenu>
-      <ContextMenuTrigger
-        render={
-          <button
-            aria-label={`Time signature ${label}`}
-            className="pointer-events-auto flex h-full items-center whitespace-nowrap border-foreground/60 border-s-2 ps-1 pe-2 text-xs tabular-nums outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring"
-            onClick={handleClick}
-            onDoubleClick={startEditing}
-            onKeyDown={handleKeyDown}
-            type="button"
-          />
-        }
-      >
-        {label}
-      </ContextMenuTrigger>
-      <ContextMenuContent className="w-auto min-w-32">
-        <ContextMenuItem onClick={startEditing}>Edit</ContextMenuItem>
-        <ContextMenuSeparator />
-        <ContextMenuItem onClick={handleRemove} variant="destructive">
-          Delete
-        </ContextMenuItem>
-      </ContextMenuContent>
-    </ContextMenu>
-  );
-}
-
-/** How far a clip can be stretched on the timeline: forever looped, as its warp stretches its source, or as long as its source. */
-function sourceSpan(clip: Arranged) {
-  if (clip.loop) {
-    return;
-  }
-  return clip.warp
-    ? warpedTime(clip.warp, clip.sourceLength)
-    : clip.sourceLength;
-}
-
 /** What a piece of a clip adds to its id: the recording is the id before it. */
 const LEADING_ID = /-.*$/;
 
@@ -809,38 +428,6 @@ function standInPeaks(clip: Arranged): number[] {
   });
 }
 
-/** A MIDI clip's notes in miniature across its body: where they play in it, between its lowest and highest pitch. */
-function ClipNotes({ clip }: { clip: Arranged }) {
-  const notes = useMemo(() => playedNotes(clip), [clip]);
-  if (notes.length === 0) {
-    return null;
-  }
-  const pitches = notes.map((note) => note.pitch);
-  const high = Math.max(...pitches) + 1;
-  const rows = high - Math.min(...pitches) + 2;
-  const { length, start } = clip.value;
-  return (
-    <div
-      aria-hidden="true"
-      className="pointer-events-none absolute inset-x-0 top-5 bottom-1"
-      data-slot="timeline-clip-notes"
-    >
-      {notes.map((note) => (
-        <span
-          className="absolute min-h-0.5 rounded-[1px] bg-current opacity-70"
-          key={note.id}
-          style={{
-            height: `${100 / rows}%`,
-            left: `${((note.start - start) / length) * 100}%`,
-            top: `${((high - note.pitch) / rows) * 100}%`,
-            width: `${(note.length / length) * 100}%`,
-          }}
-        />
-      ))}
-    </div>
-  );
-}
-
 /** Closes the clip panel. */
 function CloseClipView({ onClose }: { onClose: () => void }) {
   return (
@@ -861,327 +448,6 @@ function CloseClipView({ onClose }: { onClose: () => void }) {
       />
     </Button>
   );
-}
-
-/** How a note of a MIDI clip sounds: a short attack, a held body and a release. */
-const NOTE_ENVELOPE: EnvelopePoint[] = [
-  { x: 0, y: 0.05 },
-  { x: 0.1, y: 1 },
-  { x: 0.3, y: 0.7 },
-  { x: 0.75, y: 0.6 },
-  { x: 1, y: 0.05 },
-];
-/** How far ahead of the playhead notes are scheduled on the audio clock, in seconds. */
-const SCHEDULE_AHEAD = 0.12;
-/** How long a note takes to reach its held level, and to fade once it ends, in seconds. */
-const NOTE_ATTACK = 0.4;
-const NOTE_RELEASE = 0.3;
-/** How loud a note plays at full velocity. */
-const NOTE_PEAK = 0.25;
-
-/** A note on its way to a track's channel: what cuts it short when the playhead jumps. */
-interface Tone {
-  gain: GainNode;
-  oscillator: OscillatorNode;
-}
-
-/** Plays `pitch` into `destination` from `at` for `length` seconds of the audio clock. */
-function scheduleTone(
-  destination: AudioNode,
-  pitch: number,
-  velocity: number,
-  at: number,
-  length: number
-): Tone {
-  const { context } = destination;
-  const oscillator = context.createOscillator();
-  const gain = context.createGain();
-  oscillator.type = "triangle";
-  oscillator.frequency.setValueAtTime(noteToFrequency(pitch), at);
-  gain.gain.value = 0;
-  oscillator.connect(gain).connect(destination);
-  const peak = NOTE_PEAK * velocity;
-  const attack = sliceEnvelope(NOTE_ENVELOPE, 0, SUSTAIN_SPLIT_X);
-  scheduleEnvelopeRamp(gain.gain, attack, at, NOTE_ATTACK, peak, 0);
-  scheduleEnvelopeRamp(
-    gain.gain,
-    sliceEnvelope(NOTE_ENVELOPE, SUSTAIN_SPLIT_X, 1),
-    at + length,
-    NOTE_RELEASE,
-    peak,
-    (attack.at(-1)?.y ?? 0) * peak
-  );
-  oscillator.start(at);
-  oscillator.stop(at + length + NOTE_RELEASE);
-  oscillator.addEventListener(
-    "ended",
-    () => {
-      oscillator.disconnect();
-      gain.disconnect();
-    },
-    { once: true }
-  );
-  return { gain, oscillator };
-}
-
-/**
- * Schedules on the audio clock the notes of the heard MIDI clips that start
- * from `from` to `until` in the arrangement, `offset` being the audio clock's
- * time minus the arrangement's: deactivated notes stay silent, each note's
- * chance is rolled and its velocity strays by up to its deviation.
- */
-function scheduleNotes({
-  audible,
-  clips,
-  from,
-  now,
-  offset,
-  play,
-  until,
-}: {
-  audible: (trackId: string) => boolean;
-  clips: readonly Arranged[];
-  from: number;
-  now: number;
-  offset: number;
-  play: (
-    trackId: string,
-    pitch: number,
-    velocity: number,
-    at: number,
-    length: number
-  ) => void;
-  until: number;
-}) {
-  for (const clip of clips) {
-    if (!clip.notes || clip.disabled || !audible(clip.track)) {
-      continue;
-    }
-    for (const note of playedNotes(clip)) {
-      if (
-        note.start < from ||
-        note.start >= until ||
-        note.muted ||
-        Math.random() >= (note.chance ?? 1)
-      ) {
-        continue;
-      }
-      const velocity = Math.min(
-        1,
-        Math.max(
-          0,
-          (note.velocity ?? 1) + Math.random() * (note.deviation ?? 0)
-        )
-      );
-      play(
-        clip.track,
-        note.pitch,
-        velocity,
-        offset + Math.max(now, note.start),
-        note.length
-      );
-    }
-  }
-}
-
-/** A track's own gain and pan, between its notes and the master. */
-interface Channel {
-  gain: GainNode;
-  pan: StereoPannerNode;
-}
-
-/** A track's gain and pan at a time of the arrangement: its mix, or its automation there. */
-type LevelsAt = (
-  trackId: string,
-  time: number
-) => { gain: number; pan: number };
-
-/**
- * Sets each channel to its track's gain and pan at `time` of the arrangement,
- * at `at` on the audio clock: gliding there from what was set before, or, on
- * a jump of the playhead, at once.
- */
-function setChannels(
-  channels: ReadonlyMap<string, Channel>,
-  levelsAt: LevelsAt,
-  time: number,
-  at: number,
-  glide: boolean
-) {
-  for (const [trackId, channel] of channels) {
-    const { gain, pan } = levelsAt(trackId, time);
-    const params = [
-      [channel.gain.gain, gain],
-      [channel.pan.pan, pan],
-    ] as const;
-    for (const [param, value] of params) {
-      if (glide) {
-        param.linearRampToValueAtTime(value, at);
-      } else {
-        param.cancelScheduledValues(at);
-        param.setValueAtTime(value, at);
-      }
-    }
-  }
-}
-
-/** Fades out at once the notes scheduled ahead, which belong to where the playhead was. */
-function cutTones(tones: Set<Tone>, now: number) {
-  for (const { gain, oscillator } of tones) {
-    gain.gain.cancelScheduledValues(now);
-    gain.gain.setTargetAtTime(0, now, 0.01);
-    oscillator.stop(now + 0.05);
-  }
-  tones.clear();
-}
-
-/**
- * Plays the MIDI clips while the arrangement plays, each MIDI track through
- * a channel of its own: each frame, it schedules on the audio clock the notes
- * the playhead is about to reach, on the tracks that are heard, skipping
- * deactivated notes, rolling each note's chance and straying its velocity by
- * its deviation, and glides each channel to its track's gain and pan there,
- * from the mix or the automation. A jump of the playhead (a seek, the loop
- * coming round) starts again from it. The piano roll's previews play through
- * a synth of their own, straight to the master.
- */
-function useMidiPlayback({
-  audible,
-  clips,
-  clock,
-  levelsAt,
-  loop,
-  looping,
-  playing,
-  tracks,
-}: {
-  audible: (trackId: string) => boolean;
-  clips: readonly Arranged[];
-  clock: Source<number>;
-  levelsAt: LevelsAt;
-  loop: Span;
-  looping: boolean;
-  playing: boolean;
-  tracks: readonly ArrangementTrack[];
-}) {
-  const masterGain = useMasterBus(0.5);
-  const voices = useSynthVoices({
-    destination: masterGain,
-    oscillatorType: "triangle",
-  });
-  const live = useRef({ audible, clips, levelsAt, loop, looping, tracks });
-  live.current = { audible, clips, levelsAt, loop, looping, tracks };
-
-  useEffect(() => {
-    const context = webAudio.getContext();
-    if (!(playing && context && masterGain)) {
-      return;
-    }
-    if (context.state === "suspended") {
-      context.resume();
-    }
-    const channels = new Map<string, Channel>();
-    const tones = new Set<Tone>();
-    // A channel for each MIDI track, new ones set at once to where they stand.
-    const openChannels = (time: number) => {
-      const fresh = new Map<string, Channel>();
-      for (const track of live.current.tracks) {
-        if (track.kind === "midi" && !channels.has(track.id)) {
-          const channel = {
-            gain: context.createGain(),
-            pan: context.createStereoPanner(),
-          };
-          channel.gain.connect(channel.pan).connect(masterGain);
-          channels.set(track.id, channel);
-          fresh.set(track.id, channel);
-        }
-      }
-      setChannels(
-        fresh,
-        live.current.levelsAt,
-        time,
-        context.currentTime,
-        false
-      );
-    };
-    const play = (
-      trackId: string,
-      pitch: number,
-      velocity: number,
-      at: number,
-      length: number
-    ) => {
-      const channel = channels.get(trackId);
-      if (channel) {
-        const tone = scheduleTone(channel.gain, pitch, velocity, at, length);
-        tones.add(tone);
-        tone.oscillator.addEventListener("ended", () => tones.delete(tone), {
-          once: true,
-        });
-      }
-    };
-    let scheduled = clock.getSnapshot();
-    openChannels(scheduled);
-    let frame = 0;
-    const tick = () => {
-      const now = clock.getSnapshot();
-      const { loop: span, looping: loops } = live.current;
-      openChannels(now);
-      if (now < scheduled - SCHEDULE_AHEAD || now > scheduled + 1) {
-        // The playhead jumped: what was scheduled ahead belongs to where it was.
-        cutTones(tones, context.currentTime);
-        scheduled =
-          loops && now >= span[0] && now < span[0] + SCHEDULE_AHEAD
-            ? span[0]
-            : now;
-        setChannels(
-          channels,
-          live.current.levelsAt,
-          scheduled,
-          context.currentTime,
-          false
-        );
-      }
-      // Never past the loop's end: the playhead comes round before it.
-      const until =
-        loops && now < span[1]
-          ? Math.min(now + SCHEDULE_AHEAD, span[1])
-          : now + SCHEDULE_AHEAD;
-      if (until > scheduled) {
-        const offset = context.currentTime - now;
-        setChannels(
-          channels,
-          live.current.levelsAt,
-          until,
-          offset + until,
-          true
-        );
-        scheduleNotes({
-          ...live.current,
-          from: scheduled,
-          now,
-          offset,
-          play,
-          until,
-        });
-        scheduled = until;
-      }
-      frame = requestAnimationFrame(tick);
-    };
-    frame = requestAnimationFrame(tick);
-    return () => {
-      cancelAnimationFrame(frame);
-      cutTones(tones, context.currentTime);
-      // Once the notes have faded.
-      setTimeout(() => {
-        for (const channel of channels.values()) {
-          channel.pan.disconnect();
-        }
-      }, 100);
-    };
-  }, [clock, masterGain, playing]);
-
-  return voices;
 }
 
 /** The clip panel stays in view at the bottom of the window while the tracks scroll past above it. */
@@ -1299,23 +565,6 @@ function ClipDock({
   );
 }
 
-/** The original of a clip being copied, left in its place while the copy is dragged away. */
-function CopyGhost({ clip }: { clip: Arranged }) {
-  const { length, start } = clip.value;
-  return (
-    <div
-      aria-hidden="true"
-      className="pointer-events-none absolute inset-y-1.5 overflow-hidden rounded-[inherit] border border-primary border-dashed bg-primary/10 px-2 text-primary text-xs"
-      style={{
-        left: `calc(var(--timeline-unit) * ${start})`,
-        width: `calc(var(--timeline-unit) * ${length})`,
-      }}
-    >
-      {clip.name}
-    </div>
-  );
-}
-
 /** A track's level, from a stand-in source: the block plays nothing, so it moves while the track would be heard. */
 function TrackLevel({ active, name }: { active: boolean; name: string }) {
   const simulated = useSimulatedLevels(1);
@@ -1331,391 +580,6 @@ function TrackLevel({ active, name }: { active: boolean; name: string }) {
     />
   );
 }
-
-/** A gain as the decibels it plays at. */
-function formatGain(gain: number) {
-  if (gain <= 0) {
-    return "-inf dB";
-  }
-  const db = 20 * Math.log10(gain);
-  return `${db > 0 ? "+" : ""}${db.toFixed(1)} dB`;
-}
-
-/** What each parameter a track automates is called, how its envelope's values read, and where it stands in the mix. */
-const PARAMETERS: Record<
-  AutomatedParameter,
-  { format: (y: number) => string; label: string; ofMix: (mix: Mix) => number }
-> = {
-  pan: {
-    format: (y) => {
-      const pan = Math.round(panPosition(y) * 100);
-      if (pan === 0) {
-        return "C";
-      }
-      return `${pan < 0 ? "L" : "R"}${Math.abs(pan)}`;
-    },
-    label: "Pan",
-    ofMix: (mix) => (mix.pan + 1) / 2,
-  },
-  volume: {
-    format: (y) => formatGain(volumeGain(y)),
-    label: "Volume",
-    ofMix: (mix) => volumeValue(mix.gain),
-  },
-};
-const PARAMETER_ITEMS = (["volume", "pan"] as const).map((value) => ({
-  label: PARAMETERS[value].label,
-  value,
-}));
-
-/** In a track's header in automation mode: which parameter its lane shows, and a button that clears that envelope. */
-function AutomationChooser({
-  onClear,
-  onParameterChange,
-  parameter,
-  track,
-}: {
-  onClear: (trackId: string, parameter: AutomatedParameter) => void;
-  onParameterChange: (trackId: string, parameter: AutomatedParameter) => void;
-  parameter: AutomatedParameter;
-  track: ArrangementTrack;
-}) {
-  const { automation, id: trackId, name } = track;
-  const change = useCallback(
-    (next: string | null) =>
-      onParameterChange(trackId, next === "pan" ? "pan" : "volume"),
-    [onParameterChange, trackId]
-  );
-  const clear = useCallback(
-    () => onClear(trackId, parameter),
-    [onClear, parameter, trackId]
-  );
-  const { label } = PARAMETERS[parameter];
-  return (
-    <div className="flex h-7 items-center gap-1 pe-1">
-      <Select items={PARAMETER_ITEMS} onValueChange={change} value={parameter}>
-        <SelectTrigger
-          aria-label={`${name} automation`}
-          className="min-w-0 flex-1"
-          size="sm"
-        >
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectGroup>
-            {PARAMETER_ITEMS.map((item) => (
-              <SelectItem key={item.value} value={item.value}>
-                {item.label}
-                {automation?.[item.value] ? (
-                  <span
-                    aria-label="automated"
-                    className="size-1.5 self-center rounded-full bg-primary"
-                    role="img"
-                  />
-                ) : null}
-              </SelectItem>
-            ))}
-          </SelectGroup>
-        </SelectContent>
-      </Select>
-      <Button
-        aria-label={`Clear the ${label.toLowerCase()} envelope of ${name}`}
-        disabled={!automation?.[parameter]}
-        onClick={clear}
-        size="icon-xs"
-        variant="ghost"
-      >
-        <IconPlaceholder
-          hugeicons="Delete02Icon"
-          lucide="Trash2Icon"
-          phosphor="TrashIcon"
-          remixicon="RiDeleteBinLine"
-          tabler="IconTrash"
-        />
-      </Button>
-    </div>
-  );
-}
-
-/**
- * A track's envelope for one parameter, over its lane in automation mode.
- * Until the track has one, the line stands flat at the mix's value, faint,
- * and the first edit draws it; a parameter moved by hand since is greyed, as
- * its mix is what plays.
- */
-function TrackAutomation({
-  describe,
-  duration,
-  mix,
-  onChange,
-  onCommit,
-  overridden = [],
-  parameter,
-  snapStep,
-  track,
-}: {
-  describe: (seconds: number) => string;
-  duration: number;
-  mix: Mix;
-  onChange: (
-    trackId: string,
-    parameter: AutomatedParameter,
-    points: readonly Breakpoint[]
-  ) => void;
-  onCommit: () => void;
-  /** The track's parameters moved by hand since they were automated. */
-  overridden?: readonly AutomatedParameter[];
-  parameter: AutomatedParameter;
-  snapStep: number;
-  track: ArrangementTrack;
-}) {
-  const { id: trackId, name: trackName } = track;
-  const points = track.automation?.[parameter];
-  const { format, label, ofMix } = PARAMETERS[parameter];
-  const standing = ofMix(mix);
-  const value = useMemo(
-    () => (points ? [...points] : flatAutomation(standing)),
-    [points, standing]
-  );
-  const change = useCallback(
-    (next: Breakpoint[]) => onChange(trackId, parameter, next),
-    [onChange, parameter, trackId]
-  );
-  const formatValue = useCallback(
-    (point: { x: number; y: number }) =>
-      `${describe(point.x * duration)}, ${format(point.y)}`,
-    [describe, duration, format]
-  );
-  return (
-    <AutomationEnvelope
-      aria-label={`${trackName} ${label.toLowerCase()} automation`}
-      className={cn(
-        !points && "opacity-50",
-        overridden.includes(parameter) && "opacity-50 grayscale"
-      )}
-      duration={duration}
-      formatValue={formatValue}
-      onValueChange={change}
-      onValueCommitted={onCommit}
-      snap={{ x: snapStep / duration, y: 0 }}
-      value={value}
-    />
-  );
-}
-
-/** One clip: move it, trim either edge into its recording, fade it in and out. */
-const ClipView = memo(function ArrangedClip({
-  clip,
-  onChange,
-  describe,
-  onCommit,
-  onRemove,
-  onSelect,
-  selected,
-  copying,
-  lift,
-  onLift,
-  multi,
-  onAction,
-  onFadeShape,
-  onRename,
-  swatch,
-  trackName,
-}: {
-  clip: Arranged;
-  /** Whether a press adds the clip to the selection, as Shift does: a touch screen has no Shift. */
-  multi: boolean;
-  /** A fade's curve was picked from the menu of its handle. */
-  onFadeShape: (id: string, edge: "in" | "out", shape: FadeShape) => void;
-  /** The clip's color, an index into `TRACK_COLORS`: the track's. */
-  swatch: number;
-  /** Something chosen from the clip's menu (renaming is the clip's own). */
-  onAction: (action: ClipAction, id: string) => void;
-  onRename: (id: string, name: string) => void;
-  /** How far, in px, the clip is held up or down by a group drag that is not its own. */
-  lift: number;
-  /** Tells the arrangement how far this clip is dragged up or down, for the rest of its group to follow. */
-  onLift: (id: string, offset: number) => void;
-  /** Whether this clip is being dragged with Alt held: it is the copy, and the original stays behind. */
-  copying: boolean;
-  describe: (seconds: number) => string;
-  onChange: (
-    id: string,
-    value: TimelinePrimitive.Clip.Value,
-    details: TimelinePrimitive.Clip.ChangeEventDetails
-  ) => void;
-  onCommit: (
-    id: string,
-    details: TimelinePrimitive.Clip.CommitEventDetails
-  ) => void;
-  onRemove: (id: string) => void;
-  onSelect: (id: string, additive: boolean) => void;
-  selected: boolean;
-  trackName: string;
-}) {
-  const handleRemove = useCallback(
-    () => onRemove(clip.id),
-    [clip.id, onRemove]
-  );
-  const handleFadeInShape = useCallback(
-    (shape: FadeShape) => onFadeShape(clip.id, "in", shape),
-    [clip.id, onFadeShape]
-  );
-  const handleFadeOutShape = useCallback(
-    (shape: FadeShape) => onFadeShape(clip.id, "out", shape),
-    [clip.id, onFadeShape]
-  );
-  const [renaming, setRenaming] = useState(false);
-  const stopRenaming = useCallback(() => setRenaming(false), []);
-  const startRenaming = useCallback(() => setRenaming(true), []);
-  // The name field takes focus once the menu has closed: closing hands focus back to the clip, which would end the edit.
-  const renameWhenClosed = useRef(false);
-  const handleMenuClosed = useCallback(
-    (open: boolean) => {
-      if (!open && renameWhenClosed.current) {
-        renameWhenClosed.current = false;
-        startRenaming();
-      }
-    },
-    [startRenaming]
-  );
-  const handleMenuItem = useCallback(
-    (event: MouseEvent<HTMLElement>) => {
-      const action = event.currentTarget.dataset.action as ClipAction;
-      if (action === "rename") {
-        renameWhenClosed.current = true;
-      } else {
-        onAction(action, clip.id);
-      }
-    },
-    [clip.id, onAction]
-  );
-  const handleRename = useCallback(
-    (name: string) => onRename(clip.id, name),
-    [clip.id, onRename]
-  );
-  // Right-clicking a clip selects it first, so the menu acts on what was pressed.
-  const handleMenuOpen = useCallback(
-    (open: boolean) => {
-      if (open) {
-        onSelect(clip.id, false);
-      }
-    },
-    [clip.id, onSelect]
-  );
-  const handleSelected = useCallback(
-    (
-      _selected: boolean,
-      details: TimelinePrimitive.Clip.SelectEventDetails
-    ) => {
-      const { event } = details;
-      onSelect(
-        clip.id,
-        multi || event.shiftKey || event.metaKey || event.ctrlKey
-      );
-    },
-    [clip.id, multi, onSelect]
-  );
-  const handleChange = useCallback(
-    (
-      value: TimelinePrimitive.Clip.Value,
-      details: TimelinePrimitive.Clip.ChangeEventDetails
-    ) => onChange(clip.id, value, details),
-    [clip.id, onChange]
-  );
-  const handleDragOffset = useCallback(
-    (offset: number) => onLift(clip.id, offset),
-    [clip.id, onLift]
-  );
-  const handleCommitted = useCallback(
-    (
-      _value: TimelinePrimitive.Clip.Value,
-      details: TimelinePrimitive.Clip.CommitEventDetails
-    ) => onCommit(clip.id, details),
-    [clip.id, onCommit]
-  );
-  return (
-    <ContextMenu
-      onOpenChange={handleMenuOpen}
-      onOpenChangeComplete={handleMenuClosed}
-    >
-      <ContextMenuTrigger render={<div className="contents" />}>
-        <TimelineClip
-          additive={multi}
-          aria-label={`${trackName}, ${clip.name}`}
-          className={cn(
-            "inset-y-1.5",
-            TRACK_COLORS[swatch]?.clip,
-            copying && "opacity-90 shadow-lg ring-2 ring-primary",
-            clip.disabled && "opacity-40"
-          )}
-          data-clip-id={clip.id}
-          getAriaValueText={describe}
-          onDragOffsetChange={handleDragOffset}
-          onRemove={handleRemove}
-          onSelectedChange={handleSelected}
-          onValueChange={handleChange}
-          onValueCommitted={handleCommitted}
-          selected={selected}
-          // A looped clip repeats its loop, as far as it is stretched; a warped one lasts as its warp stretches its source.
-          sourceLength={sourceSpan(clip)}
-          style={
-            lift
-              ? { transform: `translateY(${lift}px)`, zIndex: 10 }
-              : undefined
-          }
-          value={clip.value}
-        >
-          <TimelineClipHeader
-            className={copying ? "cursor-copy" : undefined}
-            onDoubleClick={startRenaming}
-          >
-            {renaming ? (
-              <ClipNameField
-                name={clip.name}
-                onCommit={handleRename}
-                onDone={stopRenaming}
-              />
-            ) : (
-              <span>{copying ? `+ ${clip.name}` : clip.name}</span>
-            )}
-          </TimelineClipHeader>
-          {clip.notes ? <ClipNotes clip={clip} /> : null}
-          <TimelineClipFade edge="in" />
-          <TimelineClipFade edge="out" />
-          <TimelineClipHandle aria-label={`${clip.name} start`} edge="start" />
-          <TimelineClipHandle aria-label={`${clip.name} end`} edge="end" />
-          <TimelineClipFadeHandle
-            aria-label={`${clip.name} fade in`}
-            edge="in"
-            onShapeChange={handleFadeInShape}
-            shape={clip.value.fadeInShape}
-          />
-          <TimelineClipFadeHandle
-            aria-label={`${clip.name} fade out`}
-            edge="out"
-            onShapeChange={handleFadeOutShape}
-            shape={clip.value.fadeOutShape}
-          />
-        </TimelineClip>
-      </ContextMenuTrigger>
-      <ContextMenuContent className="w-auto min-w-44">
-        {clipMenuEntries(Boolean(clip.disabled)).map((entry) => (
-          <Fragment key={entry.action}>
-            {entry.separatorBefore ? <ContextMenuSeparator /> : null}
-            <ContextMenuItem
-              data-action={entry.action}
-              onClick={handleMenuItem}
-              variant={entry.destructive ? "destructive" : "default"}
-            >
-              {entry.label}
-            </ContextMenuItem>
-          </Fragment>
-        ))}
-      </ContextMenuContent>
-    </ContextMenu>
-  );
-});
 
 /**
  * An arrangement: a bar ruler that seeks on the grid, a loop strip, a lane per
@@ -1918,7 +782,7 @@ export default function BlockTimeline() {
       const automation = tracks.find(
         (track) => track.id === trackId
       )?.automation;
-      const moved = PARAMETER_ITEMS.map((item) => item.value).filter(
+      const moved = AUTOMATED_PARAMETERS.filter(
         (parameter) =>
           automation?.[parameter] &&
           (parameter === "volume" ? "gain" : "pan") in patch
@@ -2011,146 +875,10 @@ export default function BlockTimeline() {
     (ratio: number) => setZoom(ratio <= 1 ? null : ratio * fitPx),
     [fitPx]
   );
-  // The track being dragged by its grip, and the gap it would land in: above or below the track under the pointer.
-  // The drag runs on pointer events, not the browser's drag and drop. The copy follows the pointer through a transform
-  // written straight onto its element, and the rows are measured once, so a move costs no render: React only hears
-  // about the drop gap when it changes.
-  const [dragId, setDragId] = useState<string | null>(null);
-  const [drop, setDrop] = useState<{
-    id: string;
-    edge: "bottom" | "top";
-  } | null>(null);
-  const [copy, setCopy] = useState<{
-    edge: string;
-    name: string;
-    top: number;
-    left: number;
-    width: number;
-    height: number;
-  } | null>(null);
-  const copyRef = useRef<HTMLDivElement>(null);
-  const startTrackDrag = useCallback(
-    (event: React.PointerEvent<HTMLButtonElement>) => {
-      if (event.button !== 0) {
-        return;
-      }
-      event.preventDefault();
-      const id = event.currentTarget.dataset.trackId ?? "";
-      const row = event.currentTarget.closest<HTMLElement>(
-        '[data-slot="timeline-track"]'
-      );
-      const panel = event.currentTarget.closest<HTMLElement>(".cn-audio-panel");
-      if (!(row && panel)) {
-        return;
-      }
-      // Each grip spans its row's height, so its box gives the row's top and bottom.
-      const rows = Array.from(
-        panel.querySelectorAll<HTMLElement>("button[data-track-id]")
-      ).map((grip) => {
-        const box = grip.getBoundingClientRect();
-        return {
-          id: grip.dataset.trackId ?? "",
-          top: box.top,
-          bottom: box.bottom,
-        };
-      });
-      const from = rows.findIndex((item) => item.id === id);
-      const box = row.getBoundingClientRect();
-      // The copy is the track's header, the column the name and the controls sit in.
-      const header = (
-        row.querySelector<HTMLElement>('[data-slot="timeline-track-header"]') ??
-        row
-      ).getBoundingClientRect();
-      const scroller = verticalScroller(row);
-      const scrollTop = () => (scroller ? scroller.scrollTop : window.scrollY);
-      const startScroll = scrollTop();
-      const startY = event.clientY;
-      let gap = from;
-      let lastY = startY;
-      let frame = 0;
-
-      // Once a frame while the track is dragged, whether or not the pointer moved: near an edge of the scroller, it
-      // scrolls; the rows are where they were at the press, moved by how far the scroller has gone since.
-      const tick = () => {
-        const view = scroller
-          ? scroller.getBoundingClientRect()
-          : { top: 0, bottom: window.innerHeight };
-        const step = edgeScrollStep(lastY, view.top, view.bottom);
-        if (scroller) {
-          scroller.scrollTop += step;
-        } else {
-          window.scrollBy(0, step);
-        }
-        if (copyRef.current) {
-          copyRef.current.style.transform = `translateY(${lastY - startY}px)`;
-        }
-        const shift = scrollTop() - startScroll;
-        const index = rows.findIndex(
-          (item) => lastY < (item.top + item.bottom) / 2 - shift
-        );
-        const next = index === -1 ? rows.length : index;
-        if (next !== gap) {
-          gap = next;
-          setDrop(dropLine(gap, from, rows));
-        }
-        frame = requestAnimationFrame(tick);
-      };
-      const move = (moveEvent: globalThis.PointerEvent) => {
-        lastY = moveEvent.clientY;
-      };
-      const finish = (commit: boolean) => {
-        window.removeEventListener("pointermove", move);
-        window.removeEventListener("pointerup", release);
-        window.removeEventListener("pointercancel", cancel);
-        cancelAnimationFrame(frame);
-        // The gap the track lands in; one less once the track has left a place above it.
-        const landed = gap > from ? gap - 1 : gap;
-        if (commit && from !== -1 && landed !== from) {
-          moveTrack(id, landed);
-        }
-        setCopy(null);
-        setDragId(null);
-        setDrop(null);
-      };
-      const release = () => finish(true);
-      const cancel = () => finish(false);
-
-      const dragged = tracks.find((track) => track.id === id);
-      setCopy({
-        edge:
-          TRACK_COLORS[mixOf(dragged ?? tracks[from] ?? tracks[0]).color]
-            ?.edge ?? "",
-        name: dragged?.name ?? "",
-        top: box.top,
-        left: header.left,
-        width: header.width,
-        height: box.height,
-      });
-      setDragId(id);
-      window.addEventListener("pointermove", move);
-      window.addEventListener("pointerup", release);
-      window.addEventListener("pointercancel", cancel);
-      frame = requestAnimationFrame(tick);
-    },
-    [mixOf, moveTrack, tracks]
-  );
-  const nudgeTrack = useCallback(
-    (event: React.KeyboardEvent<HTMLButtonElement>) => {
-      const id = event.currentTarget.dataset.trackId ?? "";
-      const from = tracks.findIndex((track) => track.id === id);
-      if (from === -1) {
-        return;
-      }
-      if (event.key === "ArrowUp") {
-        event.preventDefault();
-        moveTrack(id, from - 1);
-      } else if (event.key === "ArrowDown") {
-        event.preventDefault();
-        moveTrack(id, from + 1);
-      }
-    },
-    [moveTrack, tracks]
-  );
+  // A track moves by dragging its grip, or with Up and Down on it.
+  const trackOrder = useMemo(() => tracks.map((track) => track.id), [tracks]);
+  const reorder = useTrackReorder({ onMove: moveTrack, order: trackOrder });
+  const ghostTrack = tracks.find((track) => track.id === reorder.ghost?.id);
   const changeZoomPreset = useCallback(
     (value: string) => changeZoom(Number(value)),
     [changeZoom]
@@ -2399,15 +1127,6 @@ export default function BlockTimeline() {
     },
     [editClip, editedClip]
   );
-  const auditionOn = useCallback(
-    (pitch: number, details: { velocity: number }) =>
-      midi.triggerNote(pitch, NOTE_ENVELOPE, details.velocity),
-    [midi]
-  );
-  const auditionOff = useCallback(
-    (pitch: number) => midi.releaseNote(pitch, NOTE_ENVELOPE),
-    [midi]
-  );
   // A double-click on bare MIDI lane makes an empty clip a bar long there, looping, and opens it.
   const midiClipCount = useRef(0);
   const addMidiClipAt = useCallback(
@@ -2491,12 +1210,12 @@ export default function BlockTimeline() {
   );
   const midiEditing = useMemo(
     () => ({
-      onNoteOff: auditionOff,
-      onNoteOn: auditionOn,
+      onNoteOff: midi.onNoteOff,
+      onNoteOn: midi.onNoteOn,
       onNotesChange: changeNotes,
       onRegionChange: changeMidiRegion,
     }),
-    [auditionOff, auditionOn, changeMidiRegion, changeNotes]
+    [changeMidiRegion, changeNotes, midi.onNoteOff, midi.onNoteOn]
   );
   // The clip panel's switch: off, the clip stays on its track and is not heard.
   const setEditedActive = useCallback(
@@ -2661,7 +1380,7 @@ export default function BlockTimeline() {
     const parameter = shownParameters[track.id] ?? "volume";
     return {
       chooser: (
-        <AutomationChooser
+        <TrackAutomationChooser
           onClear={clearAutomation}
           onParameterChange={showParameter}
           parameter={parameter}
@@ -3371,7 +2090,7 @@ export default function BlockTimeline() {
                 <TimelineLane className="h-6 border-b-0">
                   {locators.map((locator) => (
                     <TimelineMark key={locator.at} value={locator.at}>
-                      <LocatorButton
+                      <TimelineLocator
                         locator={locator}
                         onJump={jumpToLocator}
                         onRemove={removeLocator}
@@ -3410,7 +2129,7 @@ export default function BlockTimeline() {
                 <TimelineLane className="h-6 border-b-0">
                   {signatures.map((change) => (
                     <TimelineMark key={change.id} value={change.at}>
-                      <SignatureButton
+                      <TimelineSignature
                         change={change}
                         editing={editingSignature === change.id}
                         onEditingChange={setEditingSignature}
@@ -3438,12 +2157,12 @@ export default function BlockTimeline() {
                     "border-foreground/25 border-b",
                     heights[track.id] === undefined && "flex-1",
                     // The track being moved stays in place, faded; the line marks the gap it would land in.
-                    dragId === track.id && "opacity-50",
-                    drop?.id === track.id &&
-                      drop.edge === "top" &&
+                    reorder.draggingId === track.id && "opacity-50",
+                    reorder.drop?.id === track.id &&
+                      reorder.drop.edge === "top" &&
                       "shadow-[inset_0_2px_0_0_var(--primary)]",
-                    drop?.id === track.id &&
-                      drop.edge === "bottom" &&
+                    reorder.drop?.id === track.id &&
+                      reorder.drop.edge === "bottom" &&
                       "shadow-[inset_0_-2px_0_0_var(--primary)]"
                   )}
                   height={heights[track.id]}
@@ -3453,12 +2172,10 @@ export default function BlockTimeline() {
                         aria-label={`Move ${track.name}`}
                         className={cn(
                           "absolute inset-y-0 inset-s-1 z-10 flex w-3 cursor-grab items-center justify-center text-muted-foreground/60 transition-colors hover:bg-muted/60 hover:text-foreground focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring focus-visible:outline-none active:cursor-grabbing",
-                          dragId === track.id &&
+                          reorder.draggingId === track.id &&
                             "cursor-grabbing bg-muted text-foreground"
                         )}
-                        data-track-id={track.id}
-                        onKeyDown={nudgeTrack}
-                        onPointerDown={startTrackDrag}
+                        {...reorder.gripProps(track.id)}
                         type="button"
                       >
                         <svg
@@ -3543,12 +2260,15 @@ export default function BlockTimeline() {
                         {copying
                           .filter((original) => original.track === track.id)
                           .map((original) => (
-                            <CopyGhost clip={original} key={original.id} />
+                            <ArrangedClipGhost
+                              clip={original}
+                              key={original.id}
+                            />
                           ))}
                         {clips
                           .filter((clip) => clip.track === track.id)
                           .map((clip) => (
-                            <ClipView
+                            <ArrangedClip
                               clip={clip}
                               copying={copying.some(
                                 (original) => original.id === clip.id
@@ -3694,23 +2414,23 @@ export default function BlockTimeline() {
           peaks={editedPeaks}
         />
       ) : null}
-      {copy
+      {reorder.ghost && ghostTrack
         ? createPortal(
             <div
               aria-hidden="true"
               className={cn(
                 "pointer-events-none fixed z-50 flex items-center border border-s-4 bg-card px-3 text-sm shadow-lg",
-                copy.edge
+                TRACK_COLORS[mixOf(ghostTrack).color]?.edge
               )}
-              ref={copyRef}
+              ref={reorder.ghostRef}
               style={{
-                height: copy.height,
-                left: copy.left,
-                top: copy.top,
-                width: copy.width,
+                height: reorder.ghost.height,
+                left: reorder.ghost.left,
+                top: reorder.ghost.top,
+                width: reorder.ghost.width,
               }}
             >
-              {copy.name}
+              {ghostTrack.name}
             </div>,
             document.body
           )

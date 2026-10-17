@@ -9,6 +9,15 @@ import {
   removeTime,
 } from "@audio-ui/react";
 
+/** What a clip's menu does to it. */
+export type ClipAction =
+  | "duplicate"
+  | "edit"
+  | "remove"
+  | "rename"
+  | "split"
+  | "toggle";
+
 /** A clip laid on a track of an arrangement. */
 export interface Arranged {
   /** A clip switched off stays on the page, drained, and is not heard. */

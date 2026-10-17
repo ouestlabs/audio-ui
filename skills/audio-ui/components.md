@@ -55,6 +55,12 @@ The surfaces of a DAW: the arrangement, the editors, the transport and the mixer
 | Name | Registry import | Package import | Use it for |
 | --- | --- | --- | --- |
 | `timeline` | `Timeline`, `TimelineRuler`, `TimelineTrack`, `TimelineClip`, `TimelinePlayhead`… from `@/components/audio-ui/timeline` | `@audio-ui/react/timeline` | A zoomable arrangement view: ruler that seeks on the grid, lanes, a playhead that moves without re-rendering (`musical-time` lib converts tempo to seconds) |
+| `arrangement-editor` | installs the parts below with `timeline`: `useArrangement` from `@/hooks/use-arrangement` and the pure side from `@/lib/arrangement` | registry only | A DAW's arrangement: tracks of clips with selection, group moves, split, time commands, mix, automation, undo. `block-timeline` wires it into a screen |
+| `arranged-clip` | `ArrangedClip`, `ArrangedClipGhost` from `@/components/audio-ui/arranged-clip` | registry only | A clip of the arrangement on its lane: move, trim, fade and its curves, rename in place, its menu; a MIDI clip draws its notes |
+| `timeline-markers` | `TimelineLocator`, `TimelineSignature` from `@/components/audio-ui/timeline-markers` | registry only | Locators to jump to and time-signature changes, in a `TimelineMark`: rename or retype in place, move, delete |
+| `track-automation` | `TrackAutomationChooser`, `TrackAutomation` from `@/components/audio-ui/track-automation` | registry only | A track's volume or pan envelope over its lane, and the chooser for its header |
+| `use-track-reorder` | `useTrackReorder` from `@/hooks/use-track-reorder` | registry only | Reorder tracks by dragging a grip (a ghost under the pointer, edge scrolling) or with Up and Down: `gripProps(id)`, `drop`, `ghost` |
+| `use-midi-playback` | `useMidiPlayback` from `@/hooks/use-midi-playback` | registry only | Play an arrangement's MIDI clips on the audio clock, a channel per track following its mix or automation; `onNoteOn`/`onNoteOff` for a clip's editor |
 
 ### Editors
 

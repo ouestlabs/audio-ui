@@ -63,6 +63,40 @@ export const hooks: RegistryItem[] = [
     type: "registry:hook",
   },
   {
+    categories: ["audio", "timeline", "piano"],
+    dependencies: ["@audio-ui/core", "@audio-ui/react"],
+    description:
+      "Plays an arrangement's MIDI clips while it plays: notes scheduled ahead on the audio clock, each MIDI track through a channel whose gain and pan follow its mix or its automation, and the notes a clip's editor auditions.",
+    files: [
+      {
+        path: "hooks/use-midi-playback.ts",
+        type: "registry:hook",
+      },
+    ],
+    name: "use-midi-playback",
+    registryDependencies: [
+      "@audio-ui/arrangement",
+      "@audio-ui/use-master-bus",
+      "@audio-ui/use-synth-voices",
+      "@audio-ui/envelope-ramp",
+      "@audio-ui/web-audio",
+    ],
+    type: "registry:hook",
+  },
+  {
+    categories: ["timeline", "mixer"],
+    description:
+      "Reorders tracks: drag a track's grip to move it, with the view scrolling at its edges and a copy of its header under the pointer, or press Up and Down on the grip.",
+    files: [
+      {
+        path: "hooks/use-track-reorder.ts",
+        type: "registry:hook",
+      },
+    ],
+    name: "use-track-reorder",
+    type: "registry:hook",
+  },
+  {
     categories: ["audio", "sequencer", "piano"],
     description:
       "A look-ahead transport clock on the audio clock: it calls back with the audio time of each step so notes are scheduled sample-accurately, with a loop region, seek and tempo changes.",
