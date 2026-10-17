@@ -62,6 +62,16 @@
   },
   "overrides": [
     {
+      "includes": ["apps/www/src/routes/__root.tsx"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noHeadElement": "off"
+          }
+        }
+      }
+    },
+    {
       "includes": ["packages/ui/bench/*"],
       "linter": {
         "rules": {
