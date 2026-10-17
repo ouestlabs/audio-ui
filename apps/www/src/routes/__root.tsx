@@ -12,6 +12,7 @@ import { Provider as JotaiProvider } from "jotai";
 import { NuqsAdapter } from "nuqs/adapters/tanstack-router";
 import posthog from "posthog-js";
 import { useEffect } from "react";
+import { PresetHandler } from "@/components/customizer/preset-handler";
 import { JsonLd } from "@/components/site/json-ld";
 import { QueryProvider } from "@/components/site/providers/query-provider";
 import { ThemeProvider } from "@/components/site/providers/theme-provider";
@@ -175,6 +176,7 @@ function RootDocument() {
                 </Analytics>
                 <TailwindIndicator />
                 <StyleSheets />
+                <PresetHandler />
                 <Toaster position="top-center" />
               </JotaiProvider>
             </NuqsAdapter>

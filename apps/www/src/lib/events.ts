@@ -6,6 +6,8 @@ const eventSchema = z.object({
     "copy_command",
     "copy_component_code",
     "copy_component_cli",
+    "copy_preset_command",
+    "open_preset",
     "registry_access",
     "set_layout",
   ]),

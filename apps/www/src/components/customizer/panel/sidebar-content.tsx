@@ -1,6 +1,8 @@
 "use client";
 
 import * as React from "react";
+import { CopyPreset } from "@/components/customizer/actions/copy-preset";
+import { OpenPreset } from "@/components/customizer/actions/open-preset";
 import { RandomButton } from "@/components/customizer/actions/random-button";
 import { ResetButton } from "@/components/customizer/actions/reset-button";
 import { MenuAccentPicker } from "@/components/customizer/pickers/accent-picker";
@@ -87,6 +89,8 @@ export function CustomizerSidebarContent({
         {strip ? (
           <div className="flex w-max flex-row gap-2 p-2">
             {pickers}
+            <CopyPreset />
+            <OpenPreset />
             <RandomButton />
             <ResetButton />
           </div>
@@ -98,6 +102,8 @@ export function CustomizerSidebarContent({
       </div>
       {!strip && (
         <div className="mt-auto flex shrink-0 flex-col gap-0 p-3">
+          <CopyPreset />
+          <OpenPreset />
           <RandomButton />
           <ResetButton />
         </div>

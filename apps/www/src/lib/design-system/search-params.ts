@@ -1,4 +1,3 @@
-import { useLocation } from "@tanstack/react-router";
 import { useQueryStates } from "nuqs";
 import {
   createLoader,
@@ -10,7 +9,15 @@ import {
   parseAsString,
   parseAsStringLiteral,
 } from "nuqs/server";
+import * as React from "react";
+import { useConfig } from "@/hooks/use-config";
 import { FONTS } from "@/lib/design-system/fonts";
+import {
+  DEFAULT_PRESET_CODE,
+  getPresetCode,
+  PRESET_KEYS,
+  readPresetCode,
+} from "@/lib/design-system/preset-code";
 import {
   BASE_COLORS,
   BASES,
@@ -57,6 +64,7 @@ const designSystemSearchParams = {
   menuColor: parseAsStringLiteral<MenuColorValue>(
     MENU_COLORS.map((m) => m.value)
   ),
+  preset: parseAsString,
   radius: parseAsStringLiteral<RadiusValue>(RADII.map((r) => r.name)),
   search: parseAsString.withOptions({ shallow: true }),
   size: parseAsInteger,
@@ -69,34 +77,92 @@ export const loadDesignSystemSearchParams = createLoader(
   designSystemSearchParams
 );
 
-export const serializeDesignSystemSearchParams = createSerializer(
-  designSystemSearchParams
-);
-
-/** What the hook returns where the URL carries no design params: none set, and nothing to write. */
-const NO_PARAMS = loadDesignSystemSearchParams(new URLSearchParams());
-const setNoParams = () => Promise.resolve(new URLSearchParams());
-
-/** The home page and the catalog keep the design system in their URL, to share; elsewhere it lives in the saved config only. */
-function carriesDesignParams(pathname: string) {
-  return pathname === "/" || pathname.startsWith("/components");
-}
-
-export const useDesignSystemSearchParams = (options: Options = {}) => {
-  const pathname = useLocation({ select: (location) => location.pathname });
-  const [params, setParams] = useQueryStates(designSystemSearchParams, {
-    history: "push",
-    shallow: true,
-    ...options,
-  });
-  return carriesDesignParams(pathname)
-    ? ([params, setParams] as const)
-    : ([NO_PARAMS, setNoParams] as const);
-};
+const serializeParams = createSerializer(designSystemSearchParams);
 
 export type DesignSystemSearchParams = inferParserType<
   typeof designSystemSearchParams
 >;
+
+type PresetKey = (typeof PRESET_KEYS)[number];
+
+const isPresetKey = (key: string): key is PresetKey =>
+  (PRESET_KEYS as readonly string[]).includes(key);
+
+/**
+ * The URL's design: the choices of its `preset` code when it carries one, else
+ * the separate parameters older links use. A code wins, so a link made today
+ * reads the same wherever it is opened.
+ */
+function withPreset(raw: DesignSystemSearchParams): DesignSystemSearchParams {
+  const decoded = raw.preset ? readPresetCode(raw.preset) : null;
+  return decoded ? { ...raw, ...decoded } : raw;
+}
+
+/** The design in a set of params as one code, or null when it is the default one: nothing to put in a link. */
+function presetOf(values: Partial<Record<PresetKey, string | null>>) {
+  const set: Partial<Record<PresetKey, string>> = {};
+  for (const key of PRESET_KEYS) {
+    const value = values[key];
+    if (value) {
+      set[key] = value;
+    }
+  }
+  const code = getPresetCode(set);
+  return code === DEFAULT_PRESET_CODE ? null : code;
+}
+
+/** Params as a link's query: the design as the one `preset` code, whatever else the params hold as itself. */
+export function serializeDesignSystemSearchParams(
+  base: string,
+  params: Partial<DesignSystemSearchParams>
+) {
+  const { preset: _preset, ...rest } = params;
+  const others = Object.fromEntries(
+    Object.entries(rest).filter(([key]) => !isPresetKey(key))
+  );
+  return serializeParams(base, { ...others, preset: presetOf(rest) });
+}
+
+/**
+ * The design system's URL state. The design is one `preset` code (what shadcn
+ * uses): reading gives its choices as the separate fields the customizer
+ * works with, writing puts the whole design back as one code, replacing the
+ * page's history entry, and clears the separate parameters old links carried.
+ */
+export const useDesignSystemSearchParams = (options: Options = {}) => {
+  const [raw, setRaw] = useQueryStates(designSystemSearchParams, {
+    history: "push",
+    shallow: true,
+    ...options,
+  });
+  const [config] = useConfig();
+  const params = React.useMemo(() => withPreset(raw), [raw]);
+
+  const setParams = React.useCallback(
+    (update: Partial<DesignSystemSearchParams>) => {
+      const designKeys = Object.keys(update).filter(isPresetKey);
+      if (designKeys.length === 0) {
+        return setRaw(update);
+      }
+      const next: Partial<Record<PresetKey, string | null>> = {};
+      for (const key of PRESET_KEYS) {
+        next[key] = params[key] ?? config[key];
+      }
+      for (const key of designKeys) {
+        next[key] = update[key] ?? null;
+      }
+      const cleared = Object.fromEntries(PRESET_KEYS.map((key) => [key, null]));
+      const { preset: _preset, ...others } = update;
+      return setRaw(
+        { ...others, ...cleared, preset: presetOf(next) },
+        { history: "replace" }
+      );
+    },
+    [config, params, setRaw]
+  );
+
+  return [params, setParams] as const;
+};
 
 export function isTranslucentMenuColor(
   menuColor?: MenuColorValue | null
