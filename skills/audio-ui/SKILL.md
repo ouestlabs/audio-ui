@@ -127,6 +127,8 @@ Run commands with the project's package manager, read from its lockfile: `npx sh
 | A compressor, or any effect, as a state a host and an agent can drive | `block-compressor`, `block-equalizer`, `block-delay`, `block-reverb`, `block-filter`, `block-distortion`, `block-chorus`, or `defineDevice` and `device-panel` |
 | Tune an instrument, name the note of a sound | `tuner`, with `use-microphone` and `use-pitch` |
 | Note editor | `piano-roll` |
+| A note editor's menus: scale, find, edit commands, MIDI files | `scale-menu`, `note-find`, `note-edit-menu`, `midi-file` |
+| Play a piano roll's notes, with undo and redo | `use-piano-roll-playback`, `use-undo-history` |
 | Play, stop, record, loop, bars and tempo | `transport` |
 | Play and pause with a seek bar | `scrubber` |
 

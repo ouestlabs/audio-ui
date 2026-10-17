@@ -1,47 +1,21 @@
 "use client";
 
 import {
-  encodeMidiFile,
-  type MidiFileNote,
-  parseMidiFile,
-} from "@audio-ui/core/midi";
-import {
-  chopNotes,
-  deleteTime,
-  duplicateTime,
   findNotes,
-  fitNotesToScale,
-  humanizeNotes,
-  insertTime,
-  invertNotes,
-  joinNotes,
-  legatoNotes,
+  type Note,
   type NoteId,
   type NoteLevel,
   type NoteQuery,
-  quantizeNotes,
-  type RollBounds,
-  rampVelocity,
-  reverseNotes,
   selectionSpan,
-  setChance,
-  splitNotes,
-  stretchNotes,
   toggleMuted,
 } from "@audio-ui/core/piano-roll";
-import {
-  pitchClassName,
-  SCALES,
-  type Scale,
-  type ScaleName,
-} from "@audio-ui/core/pitch";
+import { pitchClassName, type Scale } from "@audio-ui/core/pitch";
 import type { Tempo } from "@audio-ui/core/time";
 import {
-  createSource,
-  type PianoRoll as PianoRollPrimitive,
-} from "@audio-ui/react";
-import {
+  type ChangeEvent,
+  type DragEvent,
   type KeyboardEvent as ReactKeyboardEvent,
+  type RefObject,
   useCallback,
   useEffect,
   useId,
@@ -54,35 +28,21 @@ import { cn } from "@/registry/bases/base/lib/utils";
 import { Button } from "@/registry/bases/base/ui/button";
 import { ButtonGroup } from "@/registry/bases/base/ui/button-group";
 import {
-  DropdownMenu,
   DropdownMenuCheckboxItem,
-  DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuShortcut,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-  DropdownMenuTrigger,
 } from "@/registry/bases/base/ui/dropdown-menu";
-import { Input } from "@/registry/bases/base/ui/input";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/registry/bases/base/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/registry/bases/base/ui/select";
 import { Fader } from "@/registry-audio/bases/base/audio/elements/fader";
+import {
+  NoteEditMenu,
+  NoteEditMenuContent,
+  NoteEditMenuItems,
+  NoteEditMenuSub,
+  NoteEditMenuTrigger,
+} from "@/registry-audio/bases/base/audio/elements/note-edit-menu";
+import { NoteFind } from "@/registry-audio/bases/base/audio/elements/note-find";
 import {
   PianoRoll,
   PianoRollGrid,
@@ -94,6 +54,14 @@ import {
   PianoRollVelocityScale,
   PianoRollViewport,
 } from "@/registry-audio/bases/base/audio/elements/piano-roll";
+import {
+  ScaleMenu,
+  ScaleMenuContent,
+  ScaleMenuName,
+  ScaleMenuRoot,
+  ScaleMenuToggle,
+  ScaleMenuTrigger,
+} from "@/registry-audio/bases/base/audio/elements/scale-menu";
 import {
   Timeline,
   TimelineLane,
@@ -108,33 +76,35 @@ import { Transport } from "@/registry-audio/bases/base/audio/elements/transport"
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 import { useMidiInput } from "@/registry-audio/bases/base/hooks/use-midi-input";
 import {
-  type UseSynthVoicesReturn,
-  useSynthVoices,
-} from "@/registry-audio/bases/base/hooks/use-synth-voices";
+  DEFAULT_NOTE_ENVELOPE,
+  type Meter,
+  meterOf,
+  usePianoRollPlayback,
+} from "@/registry-audio/bases/base/hooks/use-piano-roll-playback";
+import { useSynthVoices } from "@/registry-audio/bases/base/hooks/use-synth-voices";
+import type { TransportRegion } from "@/registry-audio/bases/base/hooks/use-transport-clock";
+import { useUndoHistory } from "@/registry-audio/bases/base/hooks/use-undo-history";
 import {
-  type TransportRegion,
-  useTransportClock,
-} from "@/registry-audio/bases/base/hooks/use-transport-clock";
-import type { EnvelopePoint } from "@/registry-audio/bases/base/lib/envelope-ramp";
+  downloadMidiFile,
+  MIDI_FILE_ACCEPT,
+  readMidiFile,
+} from "@/registry-audio/bases/base/lib/midi-file";
 import {
-  beginChange,
-  canRedo,
-  canUndo,
-  emptyHistory,
-  type History,
-  recordChange,
-  redo,
-  settleChange,
-  undo,
-} from "@/registry-audio/bases/base/lib/undo-history";
+  applyNoteEdit,
+  canApplyNoteEdit,
+  type NoteEdit,
+  noteEditForKey,
+  PITCH_EDITS,
+  PLAY_EDITS,
+  TIME_EDITS,
+  VELOCITY_EDITS,
+} from "@/registry-audio/bases/base/lib/note-edits";
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 /** C2 to C6: more than fits, so the roll scrolls and opens on middle C. */
 const MIN_PITCH = 36;
 const MAX_PITCH = 84;
 const DEFAULT_VOLUME = 0.7;
-/** A step is a sixteenth note whatever the signature: BPM counts quarter notes. */
-const STEPS_PER_QUARTER = 4;
 /** The clip is four bars long, in whatever signature it is in. */
 const BARS = 4;
 /** The widest a step gets, in px: zoomed in all the way, a beat still shows its steps. */
@@ -148,56 +118,8 @@ const describeStep = (step: number) => `Step ${Math.floor(step) + 1}`;
 /** "C4, step 5, 2 steps": where a note is, in the grid's own terms. */
 const describeNote = (note: Note) =>
   `${pitchClassName(note.pitch)}${Math.floor(note.pitch / 12) - 1}, step ${note.start + 1}, ${note.length} ${note.length === 1 ? "step" : "steps"}`;
-/** Standard MIDI File resolution, ticks per quarter note, a common round value shared by most DAWs' own exports. */
-const MIDI_TICKS_PER_QUARTER_NOTE = 480;
-const MICROSECONDS_PER_MINUTE = 60_000_000;
-const MIDI_FILE_ACCEPT = ".mid,.midi,audio/midi,audio/x-midi";
-const MIN_BPM = 20;
-const MAX_BPM = 200;
 
-/** ADSR-shaped, matching the Envelope primitive's own default, this block doesn't expose an editable envelope, keeping it focused on the note grid. */
-const DEFAULT_ENVELOPE: EnvelopePoint[] = [
-  { x: 0, y: 0.05 },
-  { x: 0.15, y: 1 },
-  { x: 0.35, y: 0.6 },
-  { x: 0.7, y: 0.6 },
-  { x: 1, y: 0.05 },
-];
-
-const SCALE_LABELS: Record<ScaleName, string> = {
-  blues: "Blues",
-  chromatic: "Chromatic",
-  dorian: "Dorian",
-  "harmonic-minor": "Harmonic minor",
-  locrian: "Locrian",
-  lydian: "Lydian",
-  major: "Major",
-  "major-pentatonic": "Major pentatonic",
-  "melodic-minor": "Melodic minor",
-  minor: "Minor",
-  "minor-pentatonic": "Minor pentatonic",
-  mixolydian: "Mixolydian",
-  phrygian: "Phrygian",
-};
-const SCALE_NAMES = Object.keys(SCALES) as ScaleName[];
-const ROOTS = Array.from({ length: 12 }, (_, root) => root);
-
-type Note = PianoRollPrimitive.Root.Note;
 type LoopRegion = TransportRegion;
-
-/** Where bars and beats fall, in steps, for a signature: 6/8 has beats of two steps and bars of twelve. */
-interface Meter {
-  /** The clip's length in steps: `BARS` bars. */
-  duration: number;
-  stepsPerBar: number;
-  stepsPerBeat: number;
-}
-
-function meterOf(tempo: Tempo): Meter {
-  const stepsPerBeat = (STEPS_PER_QUARTER * 4) / tempo.beatUnit;
-  const stepsPerBar = stepsPerBeat * tempo.beatsPerBar;
-  return { duration: BARS * stepsPerBar, stepsPerBar, stepsPerBeat };
-}
 
 interface RulerMark {
   label: string;
@@ -253,592 +175,9 @@ function rulerMarks(unit: number, meter: Meter): RulerMark[] {
   return marks;
 }
 
-function clamp(value: number, min: number, max: number): number {
-  return Math.min(max, Math.max(min, value));
-}
-
-/** A short click on the beat, higher on the first of a bar, scheduled at `time` on the audio clock. */
-function scheduleClick(destination: AudioNode, time: number, accent: boolean) {
-  const { context } = destination;
-  const oscillator = context.createOscillator();
-  const gain = context.createGain();
-  oscillator.frequency.setValueAtTime(accent ? 1500 : 1000, time);
-  gain.gain.setValueAtTime(0.0001, time);
-  gain.gain.exponentialRampToValueAtTime(0.4, time + 0.002);
-  gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.05);
-  oscillator.connect(gain).connect(destination);
-  oscillator.start(time);
-  oscillator.stop(time + 0.06);
-}
-
-/** Quantizes a parsed MIDI file's tick-based notes onto the clip's steps, adopting the file's own tempo (clamped to the BPM range); notes starting past the clip's end are dropped. */
-function notesFromMidiFile(
-  parsed: {
-    microsecondsPerQuarterNote: number;
-    notes: MidiFileNote[];
-    ticksPerQuarterNote: number;
-  },
-  duration: number
-): { bpm: number; notes: Note[] } {
-  const bpm = clamp(
-    Math.round(MICROSECONDS_PER_MINUTE / parsed.microsecondsPerQuarterNote),
-    MIN_BPM,
-    MAX_BPM
-  );
-  const ticksPerStep = parsed.ticksPerQuarterNote / STEPS_PER_QUARTER;
-
-  const notes: Note[] = [];
-  for (const midiNote of parsed.notes) {
-    const start = Math.round(midiNote.startTick / ticksPerStep);
-    if (start < 0 || start >= duration) {
-      continue;
-    }
-    const length = clamp(
-      Math.round(midiNote.durationTicks / ticksPerStep),
-      1,
-      duration - start
-    );
-    notes.push({
-      id: `midi-import-${notes.length}`,
-      length,
-      pitch: clamp(midiNote.note, MIN_PITCH, MAX_PITCH),
-      start,
-      velocity: clamp(midiNote.velocity, 0, 1),
-    });
-  }
-  return { bpm, notes };
-}
-
-/** The clip's steps converted to MIDI ticks at a fixed, common resolution, the inverse of `notesFromMidiFile`. */
-function notesToMidiFile(notes: Note[], bpm: number): Uint8Array {
-  const ticksPerStep = MIDI_TICKS_PER_QUARTER_NOTE / STEPS_PER_QUARTER;
-  const midiNotes: Omit<MidiFileNote, "track">[] = notes
-    .filter((note) => !note.muted)
-    .map((note) => ({
-      channel: 0,
-      durationTicks: Math.round(note.length * ticksPerStep),
-      note: note.pitch,
-      startTick: Math.round(note.start * ticksPerStep),
-      velocity: note.velocity ?? 1,
-    }));
-  return encodeMidiFile({
-    bpm,
-    notes: midiNotes,
-    ticksPerQuarterNote: MIDI_TICKS_PER_QUARTER_NOTE,
-  });
-}
-
-/** Saves the notes as a `.mid` file. */
-function downloadMidiFile(notes: Note[], bpm: number) {
-  const bytes = notesToMidiFile(notes, bpm);
-  // `Uint8Array`'s `.buffer` types as `ArrayBufferLike` (which also covers
-  // `SharedArrayBuffer`) while `BlobPart` wants a concrete `ArrayBuffer`,
-  // safe here since `encodeMidiFile` always builds a fresh, non-shared one.
-  const blob = new Blob([bytes.buffer as ArrayBuffer], { type: "audio/midi" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = "piano-roll.mid";
-  link.click();
-  URL.revokeObjectURL(url);
-}
-
-interface EditContext {
-  /** Where the playhead is, in steps. */
-  at: number;
-  bounds: RollBounds;
-  /** Where the loop ends, in steps: what legato stretches the last notes to. */
-  loopEnd: number;
-  nextId: () => NoteId;
-  scale: Scale | null;
-  /** Whether notes are selected, rather than the edit taking every note. */
-  selected: boolean;
-}
-
-/** Every step of a clip: the times a chop to the grid cuts at. */
-const gridLines = (duration: number) =>
-  Array.from({ length: duration }, (_, step) => step);
-
-interface NoteEdit {
-  edit: (notes: Note[], ids: Set<NoteId>, context: EditContext) => Note[];
-  id: string;
-  label: string;
-  /** Whether the edit works on the time the selection covers, so needs one. */
-  needsSelection?: boolean;
-  shortcut?: string;
-}
-
-/** The time the selected notes cover, as a time command reads it. */
-const spanOf = (notes: Note[], ids: Set<NoteId>) =>
-  selectionSpan(notes, ids) ?? { end: 0, start: 0 };
-
-/** What the Notes menu does to the selected notes, or to every note with none selected. */
-const TIME_EDITS: NoteEdit[] = [
-  {
-    // Selected notes chop on the grid; with none, the notes crossing the playhead split there.
-    edit: (notes, ids, { at, bounds, nextId, selected }) =>
-      splitNotes(notes, ids, selected ? gridLines(bounds.duration) : at, nextId)
-        .notes,
-    id: "split",
-    label: "Split",
-    shortcut: "⌘E",
-  },
-  {
-    edit: (notes, ids, { nextId }) =>
-      chopNotes(notes, ids, 2, nextId, MIN_LENGTH).notes,
-    id: "chop",
-    label: "Chop in two",
-  },
-  {
-    edit: (notes, ids) => joinNotes(notes, ids),
-    id: "join",
-    label: "Join",
-    shortcut: "⌘J",
-  },
-  {
-    edit: (notes, ids, { bounds }) =>
-      quantizeNotes(notes, ids, Math.round, bounds),
-    id: "quantize",
-    label: "Quantize",
-    shortcut: "⌘U",
-  },
-  {
-    edit: (notes, ids, { loopEnd }) =>
-      legatoNotes(notes, ids, MIN_LENGTH, loopEnd),
-    id: "legato",
-    label: "Legato",
-  },
-  {
-    edit: (notes, ids) => reverseNotes(notes, ids),
-    id: "reverse",
-    label: "Reverse",
-  },
-  {
-    edit: (notes, ids, { bounds }) => stretchNotes(notes, ids, 2, bounds),
-    id: "double",
-    label: "Twice as long",
-  },
-  {
-    edit: (notes, ids, { bounds }) => stretchNotes(notes, ids, 0.5, bounds),
-    id: "half",
-    label: "Half as long",
-  },
-  {
-    edit: (notes, ids, { bounds, nextId }) => {
-      const { end, start } = spanOf(notes, ids);
-      return duplicateTime(notes, start, end, nextId, bounds.duration).notes;
-    },
-    id: "duplicate-time",
-    label: "Duplicate time",
-    needsSelection: true,
-    shortcut: "⇧⌘D",
-  },
-  {
-    edit: (notes, ids) => {
-      const { end, start } = spanOf(notes, ids);
-      return deleteTime(notes, start, end);
-    },
-    id: "delete-time",
-    label: "Delete time",
-    needsSelection: true,
-    shortcut: "⇧⌘⌫",
-  },
-  {
-    edit: (notes, ids, { bounds, nextId }) => {
-      const { end, start } = spanOf(notes, ids);
-      return insertTime(notes, start, end - start, nextId, bounds.duration);
-    },
-    id: "insert-time",
-    label: "Insert time",
-    needsSelection: true,
-    shortcut: "⌘I",
-  },
-];
-const PITCH_EDITS: NoteEdit[] = [
-  {
-    edit: (notes, ids) => invertNotes(notes, ids),
-    id: "invert",
-    label: "Invert",
-  },
-  {
-    edit: (notes, ids, { bounds, scale }) =>
-      scale ? fitNotesToScale(notes, ids, scale, bounds) : notes,
-    id: "fit",
-    label: "Fit to scale",
-  },
-];
-/** Whether and how often the notes play: deactivated stays on the roll, silent. */
-const PLAY_EDITS: NoteEdit[] = [
-  {
-    edit: (notes, ids) => toggleMuted(notes, ids),
-    id: "mute",
-    label: "Deactivate",
-    shortcut: "0",
-  },
-  ...[1, 0.75, 0.5, 0.25].map((chance) => ({
-    edit: (notes: Note[], ids: Set<NoteId>) => setChance(notes, ids, chance),
-    id: `chance-${chance}`,
-    label: chance === 1 ? "Always play" : `Play ${chance * 100}% of the time`,
-  })),
-];
-const VELOCITY_EDITS: NoteEdit[] = [
-  {
-    edit: (notes, ids) => rampVelocity(notes, ids, 0.3, 1),
-    id: "crescendo",
-    label: "Crescendo",
-  },
-  {
-    edit: (notes, ids) => rampVelocity(notes, ids, 1, 0.3),
-    id: "decrescendo",
-    label: "Decrescendo",
-  },
-  {
-    edit: (notes, ids, { bounds }) =>
-      humanizeNotes(notes, ids, { timing: 0.25, velocity: 0.15 }, bounds),
-    id: "humanize",
-    label: "Humanize",
-  },
-];
-/** Cmd/Ctrl + Shift with a key: the time commands. */
-const SHIFT_EDITS_BY_KEY: Record<string, NoteEdit | undefined> = {
-  backspace: TIME_EDITS.find((item) => item.id === "delete-time"),
-  d: TIME_EDITS.find((item) => item.id === "duplicate-time"),
-  delete: TIME_EDITS.find((item) => item.id === "delete-time"),
-};
-/** Cmd/Ctrl with a letter: the edits that have a key of their own. */
-const EDITS_BY_KEY: Record<string, NoteEdit | undefined> = {
-  e: TIME_EDITS.find((item) => item.id === "split"),
-  j: TIME_EDITS.find((item) => item.id === "join"),
-  i: TIME_EDITS.find((item) => item.id === "insert-time"),
-  u: TIME_EDITS.find((item) => item.id === "quantize"),
-};
-
-interface UsePianoRollOptions {
-  destination: AudioNode | null;
-  looping: boolean;
-  loopRegion: LoopRegion | null;
-  meter: Meter;
-  metronome: boolean;
-  releaseAll: UseSynthVoicesReturn["releaseAll"];
-  releaseNote: UseSynthVoicesReturn["releaseNote"];
-  tempo: Tempo;
-  triggerNote: UseSynthVoicesReturn["triggerNote"];
-}
-
-/**
- * Owns the notes, plays the ones the roll auditions (a key pressed, a note
- * drawn or dragged), and wires the playback: play on from where it stopped,
- * stop back at the start, the loop or once through, and the metronome. The
- * drift-free look-ahead timing lives in `useTransportClock`; this hook only
- * schedules notes on its step boundaries and reads its position, so the audio
- * and the playhead come from one source.
- */
-function usePianoRoll({
-  destination,
-  looping,
-  loopRegion,
-  meter,
-  metronome,
-  releaseAll,
-  releaseNote,
-  tempo,
-  triggerNote,
-}: UsePianoRollOptions) {
-  // Looping off, the clip plays once, from its start to its end.
-  const region =
-    looping && loopRegion ? loopRegion : { end: meter.duration, start: 0 };
-
-  const [notes, setNotes] = useState<Note[]>([]);
-  const [playingPitches, setPlayingPitches] = useState<number[]>([]);
-
-  // What the scheduler reads, outside React.
-  const live = useRef({
-    destination,
-    looping,
-    meter,
-    metronome,
-    notes,
-    region,
-  });
-  live.current = { destination, looping, meter, metronome, notes, region };
-
-  /** The playhead, in steps, for the timeline to follow outside React. */
-  const [position] = useState(() => createSource(0));
-  /** The same place in seconds, for the transport's bars, beats and sixteenths. */
-  const [clock] = useState(() => createSource(0));
-  /** The current tempo's step duration, mirrored from the transport clock so note-off offsets use its canonical step↔time mapping instead of a second copy. */
-  const secondsPerStepRef = useRef(0);
-  /** Mirrors the clock's `isPlaying` for the audition guard, which runs inside pointer callbacks rather than on render. */
-  const isPlayingRef = useRef<boolean>(false);
-  /** The pitches auditioned and not yet released. */
-  const auditionedRef = useRef(new Set<number>());
-  /** The last step scheduled, to tell when the clip comes back round to its start. */
-  const lastStepRef = useRef(-1);
-  /** When a clip played through ends, on the audio clock, once it has come back round: nothing more is scheduled. */
-  const endsAtRef = useRef<number | null>(null);
-  const endRef = useRef<() => void>(() => undefined);
-
-  const moveTo = useCallback(
-    (step: number) => {
-      position.set(step);
-      clock.set(step * secondsPerStepRef.current);
-    },
-    [clock, position]
-  );
-
-  /**
-   * Plays what the roll auditions. While the clip plays, only the keys do:
-   * the clip schedules its own notes ahead through the same voices, and an
-   * edit sounding a pitch it has scheduled would cut it off.
-   */
-  const handleNoteOn = useCallback(
-    (pitch: number, details: PianoRollPrimitive.Root.NoteOnEventDetails) => {
-      const fromKeys = details.reason === "press" || details.reason === "glide";
-      if (isPlayingRef.current && !fromKeys) {
-        return;
-      }
-      auditionedRef.current.add(pitch);
-      triggerNote(pitch, DEFAULT_ENVELOPE, details.velocity);
-    },
-    [triggerNote]
-  );
-
-  const handleNoteOff = useCallback(
-    (pitch: number) => {
-      if (auditionedRef.current.delete(pitch)) {
-        releaseNote(pitch, DEFAULT_ENVELOPE);
-      }
-    },
-    [releaseNote]
-  );
-
-  /** Played once through, the clip ends when the clock comes back round to its start: stop then, and schedule nothing more. */
-  const reachedEnd = useCallback((step: number, time: number) => {
-    if (endsAtRef.current !== null) {
-      return true;
-    }
-    if (live.current.looping || step >= lastStepRef.current) {
-      return false;
-    }
-    endsAtRef.current = time;
-    const now = webAudio.getContext()?.currentTime ?? time;
-    window.setTimeout(() => endRef.current(), Math.max(0, time - now) * 1000);
-    return true;
-  }, []);
-
-  /** Fired on each step boundary the clock emits: the metronome's click on a beat, and every note starting within the step, at its own time inside it, so a note off the grid plays where it is. */
-  const scheduleStep = useCallback(
-    (step: number, time: number) => {
-      if (reachedEnd(step, time)) {
-        return;
-      }
-      lastStepRef.current = step;
-      const { current } = live;
-      const secondsPerStep = secondsPerStepRef.current;
-      if (
-        current.metronome &&
-        current.destination &&
-        step % current.meter.stepsPerBeat === 0
-      ) {
-        scheduleClick(
-          current.destination,
-          time,
-          step % current.meter.stepsPerBar === 0
-        );
-      }
-      for (const note of current.notes) {
-        // A deactivated note stays silent, and one with a chance plays that often.
-        if (
-          note.start < step ||
-          note.start >= step + 1 ||
-          note.muted ||
-          Math.random() >= (note.chance ?? 1)
-        ) {
-          continue;
-        }
-        const at = time + (note.start - step) * secondsPerStep;
-        // A deviation strays the velocity by up to its amount, a new roll each time.
-        const velocity = clamp(
-          (note.velocity ?? 1) + Math.random() * (note.deviation ?? 0),
-          0,
-          1
-        );
-        triggerNote(note.pitch, DEFAULT_ENVELOPE, velocity, at);
-        releaseNote(
-          note.pitch,
-          DEFAULT_ENVELOPE,
-          at + note.length * secondsPerStep
-        );
-      }
-    },
-    [reachedEnd, releaseNote, triggerNote]
-  );
-
-  const reset = useCallback(() => {
-    releaseAll();
-    lastStepRef.current = -1;
-    endsAtRef.current = null;
-  }, [releaseAll]);
-
-  const { getPosition, isPlaying, reanchor, secondsPerStep, start, stop } =
-    useTransportClock({
-      bpm: tempo.bpm,
-      onReset: reset,
-      onStep: scheduleStep,
-      region,
-      stepsPerBeat: STEPS_PER_QUARTER,
-      totalSteps: meter.duration,
-    });
-  secondsPerStepRef.current = secondsPerStep;
-  isPlayingRef.current = isPlaying;
-
-  // A new tempo moves the seconds of a parked playhead, not its step.
-  useEffect(() => {
-    clock.set(position.getSnapshot() * secondsPerStep);
-  }, [clock, position, secondsPerStep]);
-
-  /** Plays on from the playhead, or from the start of the loop when the playhead is outside it. */
-  const play = useCallback(() => {
-    const { end, start: from } = live.current.region;
-    const at = Math.floor(position.getSnapshot());
-    start();
-    if (at > from && at < end) {
-      reanchor(at);
-    }
-  }, [position, reanchor, start]);
-
-  /** Stops and goes back to the start of the loop, or of the clip. */
-  const stopPlayback = useCallback(() => {
-    stop();
-    moveTo(live.current.region.start);
-  }, [moveTo, stop]);
-  endRef.current = stopPlayback;
-
-  /** Fired when a change to the loop range ends: re-anchors so the new loop is heard now. No-op while stopped. */
-  const commitLoopRegion = useCallback(() => {
-    reanchor();
-  }, [reanchor]);
-
-  /** Fired when the ruler moves the playhead: plays from there, or parks it there when stopped. */
-  const seekTo = useCallback(
-    (step: number) => {
-      const { end, start: from } = live.current.region;
-      if (isPlayingRef.current) {
-        reanchor(clamp(Math.floor(step), from, end - 1));
-      } else {
-        moveTo(clamp(step, 0, live.current.meter.duration));
-      }
-    },
-    [moveTo, reanchor]
-  );
-
-  // Playhead + "which pitches are sounding" highlight, both derived from the
-  // clock's continuous position (fractional steps), one source, so there is
-  // no second note→time formula to keep in sync.
-  useEffect(() => {
-    if (!isPlaying) {
-      setPlayingPitches([]);
-      return;
-    }
-    let rafId: number;
-    let lastSounding: number[] = [];
-    const tick = () => {
-      const at = getPosition();
-      moveTo(at);
-      const sounding = live.current.notes
-        .filter((note) => at >= note.start && at < note.start + note.length)
-        .map((note) => note.pitch);
-      const changed =
-        sounding.length !== lastSounding.length ||
-        sounding.some((pitch, i) => pitch !== lastSounding[i]);
-      if (changed) {
-        lastSounding = sounding;
-        setPlayingPitches(sounding);
-      }
-      rafId = requestAnimationFrame(tick);
-    };
-    rafId = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(rafId);
-  }, [getPosition, isPlaying, moveTo]);
-
-  return {
-    clock,
-    commitLoopRegion,
-    handleNoteOff,
-    handleNoteOn,
-    isPlaying,
-    notes,
-    // Stopping where it is, to play on from there.
-    pause: stop,
-    play,
-    playingPitches,
-    position,
-    seekTo,
-    setNotes,
-    stopPlayback,
-  };
-}
-
-/** Undo and redo over the notes: a drag is one change, from where it started to where it was let go. */
-function useNoteHistory(notes: Note[], setNotes: (notes: Note[]) => void) {
-  const historyRef = useRef<History<Note[]>>(emptyHistory());
-  const [history, setHistoryState] = useState(historyRef.current);
-  const notesRef = useRef(notes);
-  notesRef.current = notes;
-  const setHistory = useCallback((next: History<Note[]>) => {
-    historyRef.current = next;
-    setHistoryState(next);
-  }, []);
-
-  /** An edit made in one go, from a menu or a key. */
-  const edit = useCallback(
-    (next: Note[]) => {
-      setHistory(recordChange(historyRef.current, notesRef.current));
-      setNotes(next);
-    },
-    [setHistory, setNotes]
-  );
-  /** Each step of a gesture on the roll: one change until it is committed. */
-  const change = useCallback(
-    (next: Note[]) => {
-      setHistory(beginChange(historyRef.current, notesRef.current));
-      setNotes(next);
-    },
-    [setHistory, setNotes]
-  );
-  const commit = useCallback(
-    () => setHistory(settleChange(historyRef.current)),
-    [setHistory]
-  );
-  const undoNotes = useCallback(() => {
-    const step = undo(historyRef.current, notesRef.current);
-    if (step) {
-      setHistory(step.history);
-      setNotes(step.present);
-    }
-  }, [setHistory, setNotes]);
-  const redoNotes = useCallback(() => {
-    const step = redo(historyRef.current, notesRef.current);
-    if (step) {
-      setHistory(step.history);
-      setNotes(step.present);
-    }
-  }, [setHistory, setNotes]);
-
-  return {
-    canRedo: canRedo(history),
-    canUndo: canUndo(history),
-    change,
-    commit,
-    edit,
-    redo: redoNotes,
-    undo: undoNotes,
-  };
-}
-
 /** The px a step takes when the whole clip fits the view, the furthest out the roll zooms: the viewport's width past the keys, over the clip's steps. */
 function useFitZoom(
-  viewportRef: React.RefObject<HTMLDivElement | null>,
+  viewportRef: RefObject<HTMLDivElement | null>,
   duration: number
 ) {
   const [fit, setFit] = useState(0);
@@ -879,106 +218,6 @@ function useStepWidth(duration: number) {
   return { gridRef, unit };
 }
 
-const scaleName = (scale: Scale) =>
-  `${pitchClassName(scale.root)} ${SCALE_LABELS[scale.name]}`;
-
-/** The root and the scale the rows are marked in, and whether they are. */
-function ScaleMenu({
-  enabled,
-  limited,
-  onEnabledChange,
-  onLimitedChange,
-  onScaleChange,
-  scale,
-}: {
-  enabled: boolean;
-  limited: boolean;
-  onEnabledChange: (enabled: boolean) => void;
-  onLimitedChange: (limited: boolean) => void;
-  onScaleChange: (scale: Scale) => void;
-  scale: Scale;
-}) {
-  const changeRoot = useCallback(
-    (root: number) => {
-      onScaleChange({ ...scale, root });
-      onEnabledChange(true);
-    },
-    [onEnabledChange, onScaleChange, scale]
-  );
-  const changeName = useCallback(
-    (name: ScaleName) => {
-      onScaleChange({ ...scale, name });
-      onEnabledChange(true);
-    },
-    [onEnabledChange, onScaleChange, scale]
-  );
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger
-        render={
-          <Button
-            aria-label={`Scale: ${enabled ? scaleName(scale) : "off"}`}
-            variant={enabled ? "default" : "outline"}
-          />
-        }
-      >
-        {enabled ? scaleName(scale) : "Scale"}
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-auto min-w-48">
-        <DropdownMenuCheckboxItem
-          checked={enabled}
-          onCheckedChange={onEnabledChange}
-        >
-          Mark the scale
-          <DropdownMenuShortcut>K</DropdownMenuShortcut>
-        </DropdownMenuCheckboxItem>
-        <DropdownMenuCheckboxItem
-          checked={limited}
-          onCheckedChange={onLimitedChange}
-        >
-          Only its rows
-          <DropdownMenuShortcut>G</DropdownMenuShortcut>
-        </DropdownMenuCheckboxItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuSub>
-          <DropdownMenuSubTrigger>
-            Root: {pitchClassName(scale.root)}
-          </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent>
-            <DropdownMenuRadioGroup
-              onValueChange={changeRoot}
-              value={scale.root}
-            >
-              {ROOTS.map((root) => (
-                <DropdownMenuRadioItem key={root} value={root}>
-                  {pitchClassName(root)}
-                </DropdownMenuRadioItem>
-              ))}
-            </DropdownMenuRadioGroup>
-          </DropdownMenuSubContent>
-        </DropdownMenuSub>
-        <DropdownMenuSub>
-          <DropdownMenuSubTrigger>
-            Scale: {SCALE_LABELS[scale.name]}
-          </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent>
-            <DropdownMenuRadioGroup
-              onValueChange={changeName}
-              value={scale.name}
-            >
-              {SCALE_NAMES.map((name) => (
-                <DropdownMenuRadioItem key={name} value={name}>
-                  {SCALE_LABELS[name]}
-                </DropdownMenuRadioItem>
-              ))}
-            </DropdownMenuRadioGroup>
-          </DropdownMenuSubContent>
-        </DropdownMenuSub>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-}
-
 /** The edits used most, at the top of the Notes menu where they are reached first. */
 const TOP_EDITS = ["split", "join", "quantize", "mute"];
 /** The Notes menu's submenus: the edits without a key of their own, by what they change. */
@@ -994,403 +233,6 @@ const EDIT_MENUS = [
 const KEYED_EDITS = [...TIME_EDITS, ...PLAY_EDITS].filter((item) =>
   TOP_EDITS.includes(item.id)
 );
-
-/** Menu items for `edits`, each running its edit. */
-function EditItems({
-  disabled,
-  edits,
-  onEdit,
-}: {
-  disabled: (item: NoteEdit) => boolean;
-  edits: NoteEdit[];
-  onEdit: (item: NoteEdit) => void;
-}) {
-  const handleClick = useCallback(
-    (event: { currentTarget: HTMLElement }) => {
-      const item = edits.find(
-        (edit) => edit.id === event.currentTarget.dataset.edit
-      );
-      if (item) {
-        onEdit(item);
-      }
-    },
-    [edits, onEdit]
-  );
-  return edits.map((item) => (
-    <DropdownMenuItem
-      data-edit={item.id}
-      disabled={disabled(item)}
-      key={item.id}
-      onClick={handleClick}
-    >
-      {item.label}
-      {item.shortcut ? (
-        <DropdownMenuShortcut>{item.shortcut}</DropdownMenuShortcut>
-      ) : null}
-    </DropdownMenuItem>
-  ));
-}
-
-/** The Find panel's fields, as typed: empty means no limit. */
-const NO_FIND = {
-  chanceFrom: "",
-  chanceTo: "",
-  every: "1",
-  lengthFrom: "",
-  lengthTo: "",
-  pitch: "any",
-  rest: false,
-  scale: "any",
-  state: "any",
-  velocityFrom: "",
-  velocityTo: "",
-};
-type FindFields = typeof NO_FIND;
-
-/** A from…to pair read off two fields, divided by `unit` into the note's terms, or nothing when both are empty. */
-function rangeOf(
-  from: string,
-  to: string,
-  unit: number
-): [number, number] | undefined {
-  if (from === "" && to === "") {
-    return;
-  }
-  return [
-    from === "" ? 0 : Number(from) / unit,
-    to === "" ? Number.POSITIVE_INFINITY : Number(to) / unit,
-  ];
-}
-
-/** The query the Find panel's fields ask for. */
-function findQuery(fields: FindFields, scale: Scale | null): NoteQuery {
-  return {
-    chance: rangeOf(fields.chanceFrom, fields.chanceTo, 100),
-    every: { count: Number(fields.every), offset: 0 },
-    invert: fields.rest,
-    length: rangeOf(fields.lengthFrom, fields.lengthTo, 1),
-    muted: fields.state === "any" ? undefined : fields.state === "muted",
-    pitchClasses: fields.pitch === "any" ? undefined : [Number(fields.pitch)],
-    scale:
-      scale && fields.scale !== "any"
-        ? { scale, within: fields.scale === "in" }
-        : undefined,
-    velocity: rangeOf(fields.velocityFrom, fields.velocityTo, 127),
-  };
-}
-
-const FIND_ROW = "grid grid-cols-[4.5rem_1fr_1fr] items-center gap-1.5";
-
-/** A from…to pair of number fields, `name`From and `name`To, empty for no limit. */
-function RangeField({
-  fields,
-  label,
-  max,
-  min,
-  name,
-  onChange,
-}: {
-  fields: FindFields;
-  label: string;
-  max: number;
-  min: number;
-  name: "chance" | "length" | "velocity";
-  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-}) {
-  return (
-    <fieldset className={FIND_ROW}>
-      <legend className="contents text-muted-foreground text-xs">
-        {label}
-      </legend>
-      {(["From", "To"] as const).map((end) => (
-        <Input
-          aria-label={`${label} ${end === "From" ? "from" : "to"}`}
-          className="h-7 tabular-nums"
-          inputMode="numeric"
-          key={end}
-          max={max}
-          min={min}
-          name={`${name}${end}`}
-          onChange={onChange}
-          placeholder={String(end === "From" ? min : max)}
-          type="number"
-          value={fields[`${name}${end}`]}
-        />
-      ))}
-    </fieldset>
-  );
-}
-
-interface FindItem {
-  label: string;
-  value: string;
-}
-const PITCH_ITEMS: FindItem[] = [
-  { label: "Any", value: "any" },
-  ...ROOTS.map((root) => ({
-    label: pitchClassName(root),
-    value: String(root),
-  })),
-];
-const SCALE_ITEMS: FindItem[] = [
-  { label: "Any", value: "any" },
-  { label: "In the scale", value: "in" },
-  { label: "Out of it", value: "out" },
-];
-const STATE_ITEMS: FindItem[] = [
-  { label: "Any", value: "any" },
-  { label: "Active", value: "active" },
-  { label: "Deactivated", value: "muted" },
-];
-const EVERY_ITEMS: FindItem[] = [
-  { label: "Note", value: "1" },
-  { label: "Second note", value: "2" },
-  { label: "Third note", value: "3" },
-  { label: "Fourth note", value: "4" },
-];
-
-/** One labelled choice of the Find panel. */
-function FindSelect({
-  disabled = false,
-  items,
-  label,
-  name,
-  onField,
-  value,
-}: {
-  disabled?: boolean;
-  items: FindItem[];
-  label: string;
-  name: keyof FindFields;
-  onField: (name: string, value: string) => void;
-  value: string;
-}) {
-  const id = useId();
-  const handleChange = useCallback(
-    (next: string | null) => onField(name, next ?? items[0]?.value ?? ""),
-    [items, name, onField]
-  );
-  return (
-    <div className="grid grid-cols-[4.5rem_1fr] items-center gap-1.5">
-      <span className="text-muted-foreground text-xs" id={id}>
-        {label}
-      </span>
-      <Select
-        disabled={disabled}
-        items={items}
-        onValueChange={handleChange}
-        value={value}
-      >
-        <SelectTrigger aria-labelledby={id} className="w-full" size="sm">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectGroup>
-            {items.map((item) => (
-              <SelectItem key={item.value} value={item.value}>
-                {item.label}
-              </SelectItem>
-            ))}
-          </SelectGroup>
-        </SelectContent>
-      </Select>
-    </div>
-  );
-}
-
-/** Selects notes by what they are: a pitch, ranges of velocity, length and chance, in or out of the scale, active or not, every few, or the rest. */
-function FindPanel({
-  onFind,
-  scale,
-}: {
-  onFind: (query: NoteQuery) => void;
-  scale: Scale | null;
-}) {
-  const id = useId();
-  const [fields, setFields] = useState<FindFields>(NO_FIND);
-  const handleChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      const { checked, name, type, value } = event.currentTarget;
-      setFields((current) => ({
-        ...current,
-        [name]: type === "checkbox" ? checked : value,
-      }));
-    },
-    []
-  );
-  const find = useCallback(
-    () => onFind(findQuery(fields, scale)),
-    [fields, onFind, scale]
-  );
-  const onField = useCallback(
-    (name: string, value: string) =>
-      setFields((current) => ({ ...current, [name]: value })),
-    []
-  );
-  return (
-    <Popover>
-      <PopoverTrigger
-        render={
-          <Button aria-label="Find notes" size="icon" variant="outline" />
-        }
-      >
-        <IconPlaceholder
-          hugeicons="Search01Icon"
-          lucide="SearchIcon"
-          phosphor="MagnifyingGlassIcon"
-          remixicon="RiSearchLine"
-          tabler="IconSearch"
-        />
-      </PopoverTrigger>
-      <PopoverContent align="end" className="flex w-72 flex-col gap-2">
-        <FindSelect
-          items={PITCH_ITEMS}
-          label="Pitch"
-          name="pitch"
-          onField={onField}
-          value={fields.pitch}
-        />
-        <FindSelect
-          disabled={!scale}
-          items={SCALE_ITEMS}
-          label="Scale"
-          name="scale"
-          onField={onField}
-          value={fields.scale}
-        />
-        <FindSelect
-          items={STATE_ITEMS}
-          label="State"
-          name="state"
-          onField={onField}
-          value={fields.state}
-        />
-        <FindSelect
-          items={EVERY_ITEMS}
-          label="Every"
-          name="every"
-          onField={onField}
-          value={fields.every}
-        />
-        <RangeField
-          fields={fields}
-          label="Velocity"
-          max={127}
-          min={1}
-          name="velocity"
-          onChange={handleChange}
-        />
-        <RangeField
-          fields={fields}
-          label="Length"
-          max={64}
-          min={1}
-          name="length"
-          onChange={handleChange}
-        />
-        <RangeField
-          fields={fields}
-          label="Chance %"
-          max={100}
-          min={0}
-          name="chance"
-          onChange={handleChange}
-        />
-        <div className="flex items-center gap-2 text-xs">
-          <input
-            checked={fields.rest}
-            className="accent-primary"
-            id={`${id}-rest`}
-            name="rest"
-            onChange={handleChange}
-            type="checkbox"
-          />
-          <label htmlFor={`${id}-rest`}>The notes that do not match</label>
-        </div>
-        <Button onClick={find} size="sm" type="button">
-          Select
-        </Button>
-      </PopoverContent>
-    </Popover>
-  );
-}
-
-/** The edits with a key first, the others in a submenu each, then the file and clear commands. They act on the selection, or on every note with none selected. */
-function NotesMenu({
-  hasNotes,
-  hasScale,
-  hasSelection,
-  onClear,
-  onEdit,
-  onExport,
-  onImport,
-}: {
-  hasNotes: boolean;
-  hasScale: boolean;
-  hasSelection: boolean;
-  onClear: () => void;
-  onEdit: (item: NoteEdit) => void;
-  onExport: () => void;
-  onImport: () => void;
-}) {
-  const disabled = useCallback(
-    (item: NoteEdit) =>
-      !hasNotes ||
-      (item.id === "fit" && !hasScale) ||
-      (item.needsSelection === true && !hasSelection),
-    [hasNotes, hasScale, hasSelection]
-  );
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger render={<Button variant="outline" />}>
-        Notes
-        <IconPlaceholder
-          hugeicons="ArrowDown01Icon"
-          lucide="ChevronDownIcon"
-          phosphor="CaretDownIcon"
-          remixicon="RiArrowDownSLine"
-          tabler="IconChevronDown"
-        />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-auto min-w-52">
-        <DropdownMenuGroup>
-          <EditItems disabled={disabled} edits={KEYED_EDITS} onEdit={onEdit} />
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          {EDIT_MENUS.map((menu) => (
-            <DropdownMenuSub key={menu.label}>
-              <DropdownMenuSubTrigger>{menu.label}</DropdownMenuSubTrigger>
-              <DropdownMenuSubContent className="w-auto min-w-48">
-                <EditItems
-                  disabled={disabled}
-                  edits={menu.edits}
-                  onEdit={onEdit}
-                />
-              </DropdownMenuSubContent>
-            </DropdownMenuSub>
-          ))}
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          <DropdownMenuItem onClick={onImport}>
-            Import a MIDI file
-          </DropdownMenuItem>
-          <DropdownMenuItem disabled={!hasNotes} onClick={onExport}>
-            Export as a MIDI file
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            disabled={!hasNotes}
-            onClick={onClear}
-            variant="destructive"
-          >
-            Clear
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-}
 
 /** Whether a key press belongs to a field or a menu, which keep their keys. */
 function typedIntoControl(event: { target: EventTarget | null }) {
@@ -1462,7 +304,7 @@ export default function BlockPianoRoll() {
     beatUnit: 4,
     bpm: 120,
   });
-  const meter = useMemo(() => meterOf(tempo), [tempo]);
+  const meter = useMemo(() => meterOf(tempo, BARS), [tempo]);
   const [looping, setLooping] = useState(true);
   /** Px a step, once zoomed from the keys or the navigator; null fits the clip. */
   const [zoomed, setZoomed] = useState<number | null>(null);
@@ -1481,36 +323,33 @@ export default function BlockPianoRoll() {
   );
   const masterGain = useMasterBus(volume);
 
-  const { releaseAll, releaseNote, triggerNote } = useSynthVoices({
-    destination: masterGain,
-  });
+  const voices = useSynthVoices({ destination: masterGain });
+  const { releaseNote, triggerNote } = voices;
 
+  const [notes, setNotes] = useState<Note[]>([]);
+  const history = useUndoHistory(notes, setNotes);
   const {
     clock,
     commitLoopRegion,
-    handleNoteOff,
-    handleNoteOn,
     isPlaying,
-    notes,
+    onNoteOff,
+    onNoteOn,
     pause,
     play,
     playingPitches,
     position,
-    seekTo,
-    setNotes,
-    stopPlayback,
-  } = usePianoRoll({
+    seek,
+    stop,
+  } = usePianoRollPlayback({
     destination: masterGain,
     looping,
     loopRegion,
     meter,
     metronome,
-    releaseAll,
-    releaseNote,
+    notes,
     tempo,
-    triggerNote,
+    voices,
   });
-  const history = useNoteHistory(notes, setNotes);
 
   // A MIDI keyboard plays the roll's voices and lights its keys, once the page's MIDI input is connected.
   const midiNoteOn = useCallback(
@@ -1519,12 +358,12 @@ export default function BlockPianoRoll() {
       if (ctx?.state === "suspended") {
         ctx.resume();
       }
-      triggerNote(pitch, DEFAULT_ENVELOPE, velocity);
+      triggerNote(pitch, DEFAULT_NOTE_ENVELOPE, velocity);
     },
     [triggerNote]
   );
   const midiNoteOff = useCallback(
-    (pitch: number) => releaseNote(pitch, DEFAULT_ENVELOPE),
+    (pitch: number) => releaseNote(pitch, DEFAULT_NOTE_ENVELOPE),
     [releaseNote]
   );
   const midi = useMidiInput({ onNoteOff: midiNoteOff, onNoteOn: midiNoteOn });
@@ -1544,7 +383,7 @@ export default function BlockPianoRoll() {
   /** A new signature lays the clip out in its own bars: notes past its new end go, and the loop goes back to the whole clip. */
   const changeTempo = useCallback(
     (next: Tempo) => {
-      const { duration } = meterOf(next);
+      const { duration } = meterOf(next, BARS);
       if (duration !== meter.duration) {
         setLoopRegion(null);
         if (notes.some((note) => note.start + note.length > duration)) {
@@ -1559,10 +398,7 @@ export default function BlockPianoRoll() {
   const nextIdRef = useRef(0);
   const applyEdit = useCallback(
     (item: NoteEdit) => {
-      const ids = new Set(
-        selection.length > 0 ? selection : notes.map((note) => note.id)
-      );
-      const next = item.edit(notes, ids, {
+      const next = applyNoteEdit(item, notes, selection, {
         at: position.getSnapshot(),
         bounds: {
           duration: meter.duration,
@@ -1573,29 +409,30 @@ export default function BlockPianoRoll() {
         loopEnd: loopRegion?.end ?? meter.duration,
         nextId: () => {
           nextIdRef.current += 1;
-          return `;
-edit - $;
-{
-  nextIdRef.current;
-}
-`;
+          return `edit-${nextIdRef.current}`;
         },
         scale,
-        selected: selection.length > 0,
       });
       history.edit(next);
     },
     [history, loopRegion, meter.duration, notes, position, scale, selection]
   );
+  const isEditDisabled = useCallback(
+    (item: NoteEdit) =>
+      !canApplyNoteEdit(item, {
+        hasNotes: notes.length > 0,
+        hasScale: scale !== null,
+        hasSelection: selection.length > 0,
+      }),
+    [notes.length, scale, selection.length]
+  );
 
-  /** Zooms so `;
-start` to `;
-end` fills the view, and scrolls it into place. */
   /** A zoom out to the whole clip, or past it, goes back to fitting it. */
   const changeZoom = useCallback(
     (zoom: number) => setZoomed(zoom > fit + 0.01 ? zoom : null),
     [fit]
   );
+  /** Zooms so `start` to `end` fills the view, and scrolls it into place. */
   const zoomOnto = useCallback(
     (start: number, end: number) => {
       const viewport = viewportRef.current;
@@ -1643,11 +480,8 @@ end` fills the view, and scrolls it into place. */
       invertSelection();
       return true;
     }
-    const item = shiftKey ? SHIFT_EDITS_BY_KEY[key] : EDITS_BY_KEY[key];
-    if (item?.needsSelection && selection.length === 0) {
-      return false;
-    }
-    if (item && notes.length > 0) {
+    const item = noteEditForKey(key, shiftKey);
+    if (item && !isEditDisabled(item)) {
       applyEdit(item);
       return true;
     }
@@ -1709,13 +543,16 @@ end` fills the view, and scrolls it into place. */
 
   const importMidiFile = useCallback(
     async (file: File) => {
-      const buffer = await file.arrayBuffer();
-      const imported = notesFromMidiFile(parseMidiFile(buffer), meter.duration);
-      stopPlayback();
+      const imported = await readMidiFile(file, {
+        duration: meter.duration,
+        maxPitch: MAX_PITCH,
+        minPitch: MIN_PITCH,
+      });
+      stop();
       history.edit(imported.notes);
       setTempo((current) => ({ ...current, bpm: imported.bpm }));
     },
-    [history, meter.duration, stopPlayback]
+    [history, meter.duration, stop]
   );
 
   const handleImport = useCallback(() => {
@@ -1723,7 +560,7 @@ end` fills the view, and scrolls it into place. */
   }, []);
 
   const handleFileInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
+    (e: ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       e.target.value = "";
       if (file) {
@@ -1733,7 +570,7 @@ end` fills the view, and scrolls it into place. */
     [importMidiFile]
   );
 
-  const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+  const handleDragOver = useCallback((e: DragEvent<HTMLDivElement>) => {
     if (!e.dataTransfer.types.includes("Files")) {
       return;
     }
@@ -1741,7 +578,7 @@ end` fills the view, and scrolls it into place. */
     setIsDraggingFile(true);
   }, []);
 
-  const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+  const handleDragLeave = useCallback((e: DragEvent<HTMLDivElement>) => {
     if (e.currentTarget.contains(e.relatedTarget as Node | null)) {
       return;
     }
@@ -1749,7 +586,7 @@ end` fills the view, and scrolls it into place. */
   }, []);
 
   const handleDrop = useCallback(
-    (e: React.DragEvent<HTMLDivElement>) => {
+    (e: DragEvent<HTMLDivElement>) => {
       const [file] = e.dataTransfer.files;
       if (!file) {
         return;
@@ -1762,7 +599,8 @@ end` fills the view, and scrolls it into place. */
   );
 
   const handleExport = useCallback(
-    () => downloadMidiFile(notes, tempo.bpm),
+    () =>
+      downloadMidiFile(notes, { bpm: tempo.bpm, filename: "piano-roll.mid" }),
     [notes, tempo.bpm]
   );
   const clearNotes = useCallback(() => history.edit([]), [history]);
@@ -1802,7 +640,7 @@ end` fills the view, and scrolls it into place. */
           onLoopingChange={setLooping}
           onMetronomeChange={setMetronome}
           onPlayPause={playPause}
-          onStop={stopPlayback}
+          onStop={stop}
           onTempoChange={changeTempo}
           playing={isPlaying}
           source={clock}
@@ -1860,22 +698,66 @@ end` fills the view, and scrolls it into place. */
             </Button>
             <ScaleMenu
               enabled={scaleOn}
-              limited={scaleOnly}
               onEnabledChange={setScaleOn}
-              onLimitedChange={toggleScaleOnly}
               onScaleChange={setScaleChoice}
               scale={scaleChoice}
-            />
-            <FindPanel onFind={findAndSelect} scale={scale} />
-            <NotesMenu
-              hasNotes={notes.length > 0}
-              hasScale={scale !== null}
-              hasSelection={selection.length > 0}
-              onClear={clearNotes}
-              onEdit={applyEdit}
-              onExport={handleExport}
-              onImport={handleImport}
-            />
+            >
+              <ScaleMenuTrigger />
+              <ScaleMenuContent>
+                <ScaleMenuToggle>
+                  Mark the scale
+                  <DropdownMenuShortcut>K</DropdownMenuShortcut>
+                </ScaleMenuToggle>
+                <DropdownMenuCheckboxItem
+                  checked={scaleOnly}
+                  onCheckedChange={toggleScaleOnly}
+                >
+                  Only its rows
+                  <DropdownMenuShortcut>G</DropdownMenuShortcut>
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuSeparator />
+                <ScaleMenuRoot />
+                <ScaleMenuName />
+              </ScaleMenuContent>
+            </ScaleMenu>
+            <NoteFind onFind={findAndSelect} scale={scale} />
+            <NoteEditMenu disabled={isEditDisabled} onEdit={applyEdit}>
+              <NoteEditMenuTrigger />
+              <NoteEditMenuContent>
+                <DropdownMenuGroup>
+                  <NoteEditMenuItems edits={KEYED_EDITS} />
+                </DropdownMenuGroup>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup>
+                  {EDIT_MENUS.map((menu) => (
+                    <NoteEditMenuSub
+                      edits={menu.edits}
+                      key={menu.label}
+                      label={menu.label}
+                    />
+                  ))}
+                </DropdownMenuGroup>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup>
+                  <DropdownMenuItem onClick={handleImport}>
+                    Import a MIDI file
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    disabled={notes.length === 0}
+                    onClick={handleExport}
+                  >
+                    Export as a MIDI file
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    disabled={notes.length === 0}
+                    onClick={clearNotes}
+                    variant="destructive"
+                  >
+                    Clear
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+              </NoteEditMenuContent>
+            </NoteEditMenu>
           </ButtonGroup>
         </div>
       </div>
@@ -1883,7 +765,7 @@ end` fills the view, and scrolls it into place. */
         duration={meter.duration}
         maxZoom={MAX_ZOOM}
         minZoom={fit}
-        onPositionChange={seekTo}
+        onPositionChange={seek}
         onZoomChange={changeZoom}
         snapStep={1}
         source={position}
@@ -1899,8 +781,8 @@ end` fills the view, and scrolls it into place. */
           maxPitch={MAX_PITCH}
           minPitch={MIN_PITCH}
           mode={drawing ? "draw" : "select"}
-          onNoteOff={handleNoteOff}
-          onNoteOn={handleNoteOn}
+          onNoteOff={onNoteOff}
+          onNoteOn={onNoteOn}
           onSelectionChange={setSelection}
           onValueChange={history.change}
           onValueCommitted={history.commit}
@@ -1994,16 +876,7 @@ end` fills the view, and scrolls it into place. */
               lead={
                 <>
                   <Button
-                    aria-label={`;
-Lane: $;
-{
-  laneLevel;
-}
-, show $
-{
-  laneLevel === "velocity" ? "chance" : "velocity";
-}
-`}
+                    aria-label={`Lane: ${laneLevel}, show ${laneLevel === "velocity" ? "chance" : "velocity"}`}
                     className="h-5 w-full shrink-0 rounded-none text-[9px] uppercase tracking-wide"
                     onClick={toggleLaneLevel}
                     size="sm"

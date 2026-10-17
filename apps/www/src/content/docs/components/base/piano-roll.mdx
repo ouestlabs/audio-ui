@@ -144,9 +144,104 @@ import {
 
 A note is `{ id, pitch, start, length, velocity?, deviation?, muted?, chance? }`: `pitch` is a MIDI number (60 is middle C), `start` and `length` are in the timeline's units, `velocity` is 0 to 1 (full when left out), `deviation` is how far the velocity may stray each time it plays (-1 to 1, up or down), `muted` deactivates it (it stays on the roll, silent) and `chance` is how likely it is to play each time round, 0 to 1. The roll draws them; playing them is yours, so a sequencer skips a muted note, rolls the dice for its chance and strays its velocity by up to its deviation. `value` and `selection` are controlled; `defaultValue` and `defaultSelection` leave them to the roll. The roll reports every edit through `onValueChange` and, when a gesture or a key press ends, `onValueCommitted`; `eventDetails.edit` tells what happened (`"add"`, `"move"`, `"resize"`, `"remove"`, `"duplicate"`, `"paste"`, `"quantize"`, `"stretch"`, `"velocity"`, `"chance"` or `"deviation"`) and `eventDetails.cancel()` keeps the notes as they were.
 
-`onNoteOn` and `onNoteOff` say when a pitch should sound or stop: a key pressed, a note drawn, picked up or moved to a new pitch. A MIDI file can be read and written with the `midi` library (`@audio-ui/midi`); the preview above imports and exports `.mid` files with it.
+`onNoteOn` and `onNoteOff` say when a pitch should sound or stop: a key pressed, a note drawn, picked up or moved to a new pitch.
 
 `scale` marks the rows of a scale (`data-in-scale` on each `PianoRoll.Row`), and `folded="scale"` keeps only those rows and the ones carrying notes. `@audio-ui/core/pitch` holds the scales (`SCALES`, `inScale`, `nearestInScale`), and `@audio-ui/core/piano-roll` the edits a toolbar or a menu applies to the selection, each returning the new notes: `splitNotes`, `chopNotes`, `joinNotes`, `legatoNotes`, `reverseNotes`, `invertNotes`, `stretchNotes`, `fitNotesToScale`, `rampVelocity`, `humanizeNotes`, `toggleMuted`, `setChance`, `setDeviation` and `changeLevel`, and the time commands `deleteTime`, `insertTime` and `duplicateTime`; `selectionSpan` gives the time a selection covers and `findNotes` the notes a query matches, by pitch, velocity, length, chance, scale, state or count.
+
+The toolbar of the preview above is three menus that install on their own: the [Scale menu](/docs/components/base/scale-menu) picks the scale the roll marks, [Note find](/docs/components/base/note-find) selects notes by what they are, and the [Note edit menu](/docs/components/base/note-edit-menu) runs the commands above on the selection.
+
+### Playing the notes
+
+<ComponentPreview styleName="base-nova" name="piano-roll-playback-demo" />
+
+`usePianoRollPlayback` plays the notes you hold through a synth: play, pause and stop, a loop or once through, a metronome, and the notes the roll auditions. `npx shadcn@latest add @audio-ui/use-piano-roll-playback`.
+
+```tsx
+import { useMasterBus } from "@/hooks/use-master-bus";
+import { meterOf, usePianoRollPlayback } from "@/hooks/use-piano-roll-playback";
+import { useSynthVoices } from "@/hooks/use-synth-voices";
+
+const tempo = { beatsPerBar: 4, beatUnit: 4, bpm: 120 };
+const meter = meterOf(tempo, 4); // four bars, in steps
+
+const output = useMasterBus(0.7);
+const voices = useSynthVoices({ destination: output });
+const playback = usePianoRollPlayback({ meter, notes, tempo, voices });
+
+<Timeline
+  duration={meter.duration}
+  onPositionChange={playback.seek}
+  snapStep={1}
+  source={playback.position}
+>
+  <PianoRoll
+    activePitches={playback.playingPitches}
+    onNoteOff={playback.onNoteOff}
+    onNoteOn={playback.onNoteOn}
+    onValueChange={setNotes}
+    value={notes}
+  >
+    {/* … */}
+  </PianoRoll>
+</Timeline>;
+```
+
+The hook plays the notes; it does not hold them, so an undo, a file import or an agent can change them and the next pass plays the change. Time is in steps, four to a quarter note whatever the signature; `meterOf(tempo, bars)` gives a clip's length in steps and where its bars and beats fall. Notes are scheduled ahead on the audio clock, so they keep time when the page is busy, and each plays as the roll draws it: a deactivated note stays silent, a `chance` plays that often, a `deviation` strays its velocity each time round.
+
+It returns `play` (on from the playhead), `pause` (stops where it is), `stop` (back to the start of the loop), `seek`, `isPlaying`, `playingPitches`, `onNoteOn` and `onNoteOff` for the roll, `position` (in steps) for the timeline's `source`, and `clock` (in seconds) for a [Transport](/docs/components/base/transport)'s `source`. It also takes `looping` (on by default), a `loopRegion` of steps, whose `commitLoopRegion` makes a moved loop heard at once, `metronome` with the `destination` it clicks into, and the `envelope` the notes play with.
+
+### Undo and redo
+
+`useUndoHistory` undoes and redoes any value you hold. `npx shadcn@latest add @audio-ui/use-undo-history`.
+
+```tsx
+import { useUndoHistory } from "@/hooks/use-undo-history";
+
+const [notes, setNotes] = useState<Note[]>([]);
+const history = useUndoHistory(notes, setNotes);
+
+<PianoRoll
+  onValueChange={history.change}
+  onValueCommitted={history.commit}
+  value={notes}
+/>
+<Button disabled={!history.canUndo} onClick={history.undo}>Undo</Button>
+<Button disabled={!history.canRedo} onClick={history.redo}>Redo</Button>
+```
+
+`change` is each step of a gesture and `commit` ends it, so a whole drag undoes in one step. `edit` records a change made in one go, such as a menu command. A new change after an undo drops the redo, and the history keeps the last 100 changes. It works the same for an envelope's points or a sequencer's pattern.
+
+### MIDI files
+
+<ComponentPreview styleName="base-nova" name="piano-roll-midi-file-demo" />
+
+The `midi-file` library reads a `.mid` file onto the roll's steps and writes one back. `npx shadcn@latest add @audio-ui/midi-file`.
+
+```tsx
+import { downloadMidiFile, MIDI_FILE_ACCEPT, readMidiFile } from "@/lib/midi-file";
+
+<input
+  accept={MIDI_FILE_ACCEPT}
+  onChange={async (event) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const { bpm, notes } = await readMidiFile(file, {
+        duration: 64,
+        maxPitch: 84,
+        minPitch: 36,
+      });
+      setNotes(notes);
+      setBpm(bpm);
+    }
+  }}
+  type="file"
+/>
+<Button onClick={() => downloadMidiFile(notes, { bpm, filename: "clip.mid" })}>
+  Export
+</Button>
+```
+
+`readMidiFile` puts each note on the nearest step, at least one step long, drops the notes starting past `duration`, keeps the pitches between `minPitch` and `maxPitch` and returns the file's tempo, kept between `minBpm` and `maxBpm` (20 and 200 by default). It takes any `File` or `Blob`, so a drop works the same as an input. `writeMidiFile` goes the other way, at 480 ticks a quarter note, and leaves deactivated notes out; `downloadMidiFile` writes the file and saves it. A step is a sixteenth note: set `stepsPerQuarter` on both sides for another grid.
 
 ## Interaction
 

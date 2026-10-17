@@ -71,6 +71,19 @@ Without the registry, the headless primitive comes from the package: `import { K
 | `bpm-control` | `BpmControl` from `@/components/audio-ui/bpm-control` | registry only | A tempo field on its own: type it, step it with the arrows, or drag its `BPM` unit. `transport` brings it |
 | `scrubber` | `Scrubber` from `@/components/audio-ui/scrubber` | registry only, built on `Timeline` | Play or pause, position, a seek bar and the length |
 
+## Note editing
+
+The parts of `block-piano-roll`, each installed on its own, to build a note editor of your own around `piano-roll`.
+
+| Name | Registry import | Package import | Use it for |
+| --- | --- | --- | --- |
+| `scale-menu` | `ScaleMenu`, `ScaleMenuTrigger`, `ScaleMenuContent`, `ScaleMenuToggle`, `ScaleMenuRoot`, `ScaleMenuName` from `@/components/audio-ui/scale-menu` | registry only | Pick a root and a scale and turn it on or off. Pass `enabled ? scale : null` to the roll's `scale`. Items of your own go in the content beside the parts |
+| `note-find` | `NoteFind`, `NoteFindForm` from `@/components/audio-ui/note-find` | registry only | Find notes by pitch, scale, state, velocity, length, chance or every few: `onFind` gets a query, `findNotes(notes, query)` from `@audio-ui/core/piano-roll` the ids to select |
+| `note-edit-menu` | `NoteEditMenu`, `NoteEditMenuTrigger`, `NoteEditMenuContent`, `NoteEditMenuItems`, `NoteEditMenuSub` from `@/components/audio-ui/note-edit-menu`; the commands, `TIME_EDITS`, `PITCH_EDITS`, `PLAY_EDITS`, `VELOCITY_EDITS`, `applyNoteEdit`, `canApplyNoteEdit`, `noteEditForKey`, from `@/lib/note-edits`, which it installs too | registry only | A menu of note commands (split, join, quantize, legato, time commands, fit to scale, chance, velocity) with their keys, as items or submenus, beside items of your own (import, export, clear). The commands are data, so keys or a toolbar run them too |
+| `midi-file` | `readMidiFile`, `writeMidiFile`, `downloadMidiFile`, `MIDI_FILE_ACCEPT` from `@/lib/midi-file` | registry only | Import a `.mid` file onto the roll's steps, with its tempo, and export or download the notes as one |
+| `use-piano-roll-playback` | `usePianoRollPlayback`, `meterOf` from `@/hooks/use-piano-roll-playback` | registry only | Play the notes you hold, through `use-synth-voices`: play, pause, stop, loop, metronome, seek, a `position` for the timeline, a `clock` for the transport, and the roll's `onNoteOn` and `onNoteOff` |
+| `use-undo-history` | `useUndoHistory` from `@/hooks/use-undo-history` | registry only | Undo and redo over any value you hold: `edit` for a command, `change` and `commit` for a drag that undoes as one |
+
 ## Ready blocks
 
 `npx shadcn@latest add @audio-ui/block-<name>` installs a composed screen to `components/examples/block-<name>.tsx`, exported by name:

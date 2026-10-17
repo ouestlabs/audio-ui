@@ -1,0 +1,144 @@
+---
+title: Scale menu
+description: "A menu that picks a root and a scale and turns the scale on or off, in parts you place beside items of your own."
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="scale-menu-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">CLI</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash component
+npx shadcn@latest add @audio-ui/scale-menu
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the following dependencies:</Step>
+
+```bash
+npm install @audio-ui/core
+```
+
+<Step>Copy and paste the following code into your project.</Step>
+
+<ComponentSource
+  styleName="base-nova"
+  name="scale-menu"
+  title="components/audio-ui/scale-menu.tsx"
+/>
+
+<Step>Update the import paths to match your project setup.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Anatomy
+
+```tsx
+<ScaleMenu>
+  <ScaleMenuTrigger />
+  <ScaleMenuContent>
+    <ScaleMenuToggle />
+    <ScaleMenuRoot />
+    <ScaleMenuName />
+  </ScaleMenuContent>
+</ScaleMenu>
+```
+
+## Usage
+
+```tsx
+import type { Scale } from "@audio-ui/core/pitch";
+import {
+  ScaleMenu,
+  ScaleMenuContent,
+  ScaleMenuName,
+  ScaleMenuRoot,
+  ScaleMenuToggle,
+  ScaleMenuTrigger,
+} from "@/components/audio-ui/scale-menu";
+import { DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+
+const [enabled, setEnabled] = useState(false);
+const [scale, setScale] = useState<Scale>({ name: "major", root: 0 });
+
+<ScaleMenu
+  enabled={enabled}
+  onEnabledChange={setEnabled}
+  onScaleChange={setScale}
+  scale={scale}
+>
+  <ScaleMenuTrigger />
+  <ScaleMenuContent>
+    <ScaleMenuToggle />
+    <DropdownMenuSeparator />
+    <ScaleMenuRoot />
+    <ScaleMenuName />
+  </ScaleMenuContent>
+</ScaleMenu>;
+```
+
+A scale is `{ root, name }`: `root` is a pitch class, 0 for C to 11 for B, and `name` one of the scales in `SCALES` from `@audio-ui/core/pitch` (`"major"`, `"minor"`, `"dorian"`, `"blues"`…). The menu keeps the scale while it is off, so turning it back on brings back the last one; picking a root or a scale turns it on.
+
+Pass `enabled ? scale : null` to whatever marks the scale: a [Piano roll](/docs/components/base/piano-roll)'s `scale` marks its rows, and `inScale(pitch, scale)` from `@audio-ui/core/pitch` tells whether any pitch is in it.
+
+### Items of your own
+
+`ScaleMenuContent` is a dropdown menu's content, so any item goes beside the parts. The piano roll block adds a checkbox that folds the roll onto the scale's rows, and shows each item's key:
+
+```tsx
+<ScaleMenuContent>
+  <ScaleMenuToggle>
+    Mark the scale
+    <DropdownMenuShortcut>K</DropdownMenuShortcut>
+  </ScaleMenuToggle>
+  <DropdownMenuCheckboxItem checked={folded} onCheckedChange={setFolded}>
+    Only its rows
+    <DropdownMenuShortcut>G</DropdownMenuShortcut>
+  </DropdownMenuCheckboxItem>
+  <DropdownMenuSeparator />
+  <ScaleMenuRoot />
+  <ScaleMenuName />
+</ScaleMenuContent>
+```
+
+## API reference
+
+### ScaleMenu
+
+<TypeTable>
+<TypeRow name={"scale"} type={"{ root, name }"}>The root and the scale, kept while the scale is off.</TypeRow>
+<TypeRow name={"onScaleChange"} type={"(scale) => void"}>A root or a scale was picked. Picking one also turns the scale on.</TypeRow>
+<TypeRow name={"enabled"} type={"boolean"}>Whether the scale is in use.</TypeRow>
+<TypeRow name={"onEnabledChange"} type={"(enabled) => void"}>The scale was turned on or off.</TypeRow>
+</TypeTable>
+
+### Parts
+
+<TypeTable title="Components">
+<TypeRow name={"ScaleMenuTrigger"}>The button that opens the menu: filled and named after the scale ("D Dorian") when it is on, outlined and named "Scale" when off. Takes the button's props.</TypeRow>
+<TypeRow name={"ScaleMenuContent"}>The menu. Aligned to the trigger's end unless given `align`.</TypeRow>
+<TypeRow name={"ScaleMenuToggle"}>A checkbox item that turns the scale on or off. Its children are the label, "Mark the scale" when left out.</TypeRow>
+<TypeRow name={"ScaleMenuRoot"}>A submenu of the twelve roots.</TypeRow>
+<TypeRow name={"ScaleMenuName"}>A submenu of the scales.</TypeRow>
+</TypeTable>
+
+The file also exports `SCALE_LABELS`, each scale's name as the menu writes it, and `scaleLabel(scale)`, which writes a scale as "D Dorian".

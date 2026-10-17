@@ -65,6 +65,31 @@
     "title": "block-piano-roll"
   },
   {
+    "categories": ["piano"],
+    "name": "scale-menu-demo",
+    "title": "scale-menu-demo"
+  },
+  {
+    "categories": ["piano"],
+    "name": "note-find-demo",
+    "title": "note-find-demo"
+  },
+  {
+    "categories": ["piano"],
+    "name": "note-edit-menu-demo",
+    "title": "note-edit-menu-demo"
+  },
+  {
+    "categories": ["piano", "synth"],
+    "name": "piano-roll-playback-demo",
+    "title": "piano-roll-playback-demo"
+  },
+  {
+    "categories": ["piano"],
+    "name": "piano-roll-midi-file-demo",
+    "title": "piano-roll-midi-file-demo"
+  },
+  {
     "categories": ["meter"],
     "name": "meter-size-default-demo",
     "title": "meter-size-default-demo"

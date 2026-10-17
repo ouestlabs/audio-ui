@@ -1,0 +1,97 @@
+---
+title: Note find
+description: "Finds notes by what they are: a pitch, ranges of velocity, length and chance, in or out of the scale, active or not, every few, or the rest."
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="note-find-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">CLI</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash component
+npx shadcn@latest add @audio-ui/note-find
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the following dependencies:</Step>
+
+```bash
+npm install @audio-ui/core
+```
+
+<Step>Copy and paste the following code into your project.</Step>
+
+<ComponentSource
+  styleName="base-nova"
+  name="note-find"
+  title="components/audio-ui/note-find.tsx"
+/>
+
+<Step>Update the import paths to match your project setup.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import { findNotes } from "@audio-ui/core/piano-roll";
+import { NoteFind } from "@/components/audio-ui/note-find";
+
+<NoteFind
+  onFind={(query) => setSelection(findNotes(notes, query))}
+  scale={scale}
+/>;
+```
+
+`NoteFind` is a search button that opens the form in a popover. Pressing Select hands `onFind` a `NoteQuery`, and `findNotes` from `@audio-ui/core/piano-roll` returns the ids of the notes it matches, ready to be a [Piano roll](/docs/components/base/piano-roll)'s `selection`. The query is data, so it can also feed anything else that reads notes: a step sequencer, a list, an agent's tool.
+
+Each field narrows the notes found, and an empty one sets no limit:
+
+- **Pitch**: one pitch class, in any octave.
+- **Scale**: in the scale or out of it. Off until `scale` is given.
+- **State**: active notes, or deactivated ones.
+- **Every**: of the notes found, in the order they play, every second, third or fourth.
+- **Velocity** (1 to 127), **Length** (in steps) and **Chance %**: a range, from and to, either end left open.
+- **The notes that do not match**: finds the rest instead.
+
+### Without the popover
+
+`NoteFindForm` is the form alone, to put in a sheet, a sidebar or a panel of your own:
+
+```tsx
+import { NoteFindForm } from "@/components/audio-ui/note-find";
+
+<NoteFindForm onFind={selectFound} scale={scale} />;
+```
+
+## API reference
+
+### NoteFind
+
+<TypeTable>
+<TypeRow name={"onFind"} type={"(query: NoteQuery) => void"}>Fired with the query when Select is pressed.</TypeRow>
+<TypeRow name={"scale"} type={"Scale | null"}>The scale marked, which the Scale field reads. With `null`, that field is off.</TypeRow>
+</TypeTable>
+
+### NoteFindForm
+
+Takes `onFind` and `scale`, and the props of a `div`.

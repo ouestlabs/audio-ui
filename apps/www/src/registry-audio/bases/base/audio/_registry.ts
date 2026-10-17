@@ -106,6 +106,60 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
+    categories: ["piano"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "A menu that picks a root and a scale and turns the scale on or off, in parts you place, beside items of your own.",
+    files: [
+      {
+        path: "audio/elements/scale-menu.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "scale-menu",
+    registryDependencies: ["@shadcn/button", "@shadcn/dropdown-menu"],
+    type: "registry:ui",
+  },
+  {
+    categories: ["piano"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "Finds notes by what they are: a pitch, ranges of velocity, length and chance, in or out of the scale, active or not, every few, or the rest. A form, or the form in a popover.",
+    files: [
+      {
+        path: "audio/elements/note-find.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "note-find",
+    registryDependencies: [
+      "@shadcn/button",
+      "@shadcn/input",
+      "@shadcn/popover",
+      "@shadcn/select",
+    ],
+    type: "registry:ui",
+  },
+  {
+    categories: ["piano"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "A menu of commands over a piano roll's notes (split, join, quantize, legato, time commands, fit to scale, chance, velocity), with their keys: items and submenus you place, beside items of your own. The commands come as data in lib/note-edits, to run from keys or a toolbar too.",
+    files: [
+      {
+        path: "audio/elements/note-edit-menu.tsx",
+        type: "registry:ui",
+      },
+      {
+        path: "lib/note-edits.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "note-edit-menu",
+    registryDependencies: ["@shadcn/button", "@shadcn/dropdown-menu"],
+    type: "registry:ui",
+  },
+  {
     dependencies: ["@audio-ui/react"],
     description:
       "The note and the pitch of a sound, live from the microphone, with a needle on a scale of cents.",

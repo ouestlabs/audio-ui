@@ -892,6 +892,21 @@ const items: RegistryItem[] = [
     type: "registry:lib",
   },
   {
+    categories: ["lib", "piano"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "MIDI files to and from notes on a grid of steps: read one, with its tempo, write one, or download one",
+    files: [
+      {
+        path: "lib/midi-file.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "midi-file",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
     categories: ["lib", "audio", "piano", "ai"],
     dependencies: ["zod"],
     description:
