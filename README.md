@@ -28,13 +28,12 @@ Bun workspaces and Turborepo; use `bun` and `bunx`, not `npm` or `npx`.
 
 ```sh
 bun install
-bun run dev    # the docs site on http://localhost:4000, the sandbox on :4100
+bun run dev    # the docs site on http://localhost:4000
 ```
 
 | Path | What it is |
 | --- | --- |
 | `apps/www` | The docs site and the registry (TanStack Start, Fumadocs) |
-| `apps/sandbox` | A consumer app that installs from the registry |
 | `apps/video` | Remotion videos of the real components |
 | `packages/core` | `@audio-ui/core`, framework-agnostic logic |
 | `packages/ui` | `@audio-ui/react`, the headless primitives |

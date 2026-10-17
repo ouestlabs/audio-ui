@@ -11,8 +11,7 @@ The repo is a Turborepo + Bun workspace. **Always use `bun`, never `npm` or `pnp
 ```
 audio-ui/
 ├── apps/
-│   ├── www/        # TanStack Start docs site + registry → localhost:4000
-│   └── sandbox/    # Dev sandbox
+│   └── www/        # TanStack Start docs site + registry → localhost:4000
 └── packages/
     ├── core/       # @audio-ui/core, published npm package (framework-agnostic logic)
     └── ui/         # @audio-ui/react, published npm package (headless primitives)
