@@ -81,7 +81,7 @@ The piano roll and the parts of `block-piano-roll`, each installed on its own.
 
 ## Devices
 
-Audio effects and instruments, like plugins in a DAW. A device is a state (`<name>-device`), an engine (`<name>-engine`) and a face (`<name>-panel`), installed to `components/audio-ui/devices/<name>/`. A panel is controlled and makes no sound, so it also fronts an engine of your own. Docs: https://www.audio-ui.dev/docs/devices.
+Audio effects and instruments, like plugins in a DAW. A device is a state (`<name>-device`), an engine (`<name>-engine`) and a face (`<name>-panel`), installed to `components/audio-ui/devices/<name>/`. `npx shadcn@latest add @audio-ui/<name>` installs all three (`@audio-ui/compressor`, `@audio-ui/reverb`…); install a piece alone to keep only what you need, such as the state and the panel over an engine of your own. A panel is controlled and makes no sound, so it also fronts an engine of your own. Docs: https://www.audio-ui.dev/docs/devices.
 
 | Name | Registry import | Package import | Use it for |
 | --- | --- | --- | --- |

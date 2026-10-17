@@ -1,5 +1,50 @@
 import type { RegistryItem } from "shadcn/schema";
 
+/**
+ * The devices, each installed in one: its state, its engine and its panel,
+ * to `components/audio-ui/devices/<name>/`. Each piece stays an item of its
+ * own, for a panel over an engine of your own or an engine with no panel.
+ */
+const DEVICES = [
+  "auto-pan",
+  "channel-eq",
+  "chorus",
+  "compressor",
+  "deesser",
+  "delay",
+  "distortion",
+  "equalizer",
+  "filter",
+  "gate",
+  "limiter",
+  "mid-side",
+  "multiband",
+  "overdrive",
+  "phaser",
+  "pocket-synth",
+  "redux",
+  "reverb",
+  "saturator",
+  "transient",
+  "utility",
+  "wave-shaper",
+];
+
+const devices = DEVICES.map(
+  (name): RegistryItem => ({
+    categories: ["device"],
+    description: `The ${name.replaceAll("-", " ")} device in one install: its state, its Web Audio engine and its panel, to components/audio-ui/devices/${name}/.`,
+    files: [],
+    name,
+    registryDependencies: [
+      `@audio-ui/${name}-device`,
+      `@audio-ui/${name}-engine`,
+      `@audio-ui/${name}-panel`,
+    ],
+    type: "registry:ui",
+  })
+);
+
 export const audio: RegistryItem[] = [
   {
     dependencies: ["@audio-ui/react"],
@@ -957,4 +1002,5 @@ export const audio: RegistryItem[] = [
     ],
     type: "registry:ui",
   },
+  ...devices,
 ];
