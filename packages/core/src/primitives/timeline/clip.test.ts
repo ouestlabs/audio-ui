@@ -2,12 +2,15 @@ import { describe, expect, test } from "bun:test";
 import {
   type ClipValue,
   clipEnd,
+  copyRange,
   coverClips,
   duplicateClip,
   FADE_SHAPES,
   fadeGain,
+  insertTime,
   moveClip,
   nextFadeShape,
+  removeTime,
   setClipFadeIn,
   setClipFadeOut,
   setClipFadeShape,
@@ -235,5 +238,85 @@ describe("coverClips", () => {
       "a:0+10@0",
       "ab:30+20@30",
     ]);
+  });
+});
+
+describe("time commands", () => {
+  type Item = { id: string; value: ClipValue };
+  const range = { duration: 100 };
+  const at = (start: number, length: number, offset = 0): ClipValue => ({
+    fadeIn: 0,
+    fadeOut: 0,
+    length,
+    offset,
+    start,
+  });
+  const split = (item: Item, value: ClipValue): Item => ({
+    id: `${item.id}+`,
+    value,
+  });
+  const lay = (laid: Item[]) =>
+    laid.map((item) => [
+      item.id,
+      item.value.start,
+      item.value.length,
+      item.value.offset,
+    ]);
+
+  const items: Item[] = [
+    { id: "a", value: at(0, 10) },
+    { id: "b", value: at(20, 20, 5) },
+    { id: "c", value: at(50, 10) },
+  ];
+
+  test("copyRange keeps what a stretch holds, from 0, each part where it was in its source", () => {
+    expect(lay(copyRange(items, 5, 30, range))).toEqual([
+      ["a", 0, 5, 5],
+      ["b", 15, 10, 5],
+    ]);
+  });
+
+  test("removeTime takes a stretch out and closes the gap", () => {
+    expect(lay(removeTime(items, 25, 45, range, split))).toEqual([
+      ["a", 0, 10, 0],
+      ["b", 20, 5, 5],
+      ["c", 30, 10, 0],
+    ]);
+  });
+
+  test("removeTime across a clip keeps both its ends, now side by side", () => {
+    expect(lay(removeTime(items, 25, 30, range, split))).toEqual([
+      ["a", 0, 10, 0],
+      ["b", 20, 5, 5],
+      ["b+", 25, 10, 15],
+      ["c", 45, 10, 0],
+    ]);
+  });
+
+  test("insertTime opens a gap, cutting the clip across it, and drops what falls off the end", () => {
+    expect(lay(insertTime(items, 30, 55, range, split))).toEqual([
+      ["a", 0, 10, 0],
+      ["b", 20, 10, 5],
+      ["b+", 85, 10, 15],
+    ]);
+  });
+
+  test("insertTime cuts off a clip that would run past the end", () => {
+    expect(lay(insertTime(items, 45, 35, range, split))).toEqual([
+      ["a", 0, 10, 0],
+      ["b", 20, 20, 5],
+      ["c", 85, 10, 0],
+    ]);
+    expect(lay(insertTime(items, 45, 45, range, split)).at(-1)).toEqual([
+      "c",
+      95,
+      5,
+      0,
+    ]);
+  });
+
+  test("a stretch of no length changes nothing", () => {
+    expect(removeTime(items, 30, 30, range, split)).toEqual(items);
+    expect(insertTime(items, 30, 0, range, split)).toEqual(items);
   });
 });

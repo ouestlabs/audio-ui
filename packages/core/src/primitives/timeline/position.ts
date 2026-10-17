@@ -110,9 +110,16 @@ export interface TimelineController {
   pressRuler: (event: PointerEvent, handle: Element, lane: Element) => void;
   /**
    * Starts a press that seeks: `lane` is what the position is measured along,
-   * `handle` takes the pointer. A drag scrubs, on the grid unless Cmd/Ctrl is held.
+   * `handle` takes the pointer. A drag scrubs, on the grid unless Cmd/Ctrl is
+   * held. With `selecting` listeners, a drag selects the stretch from the press
+   * to the pointer instead, and the position stays where the press put it.
    */
-  pressSeek: (event: PointerEvent, handle: Element, lane: Element) => void;
+  pressSeek: (
+    event: PointerEvent,
+    handle: Element,
+    lane: Element,
+    selecting?: TimelineSelectionHandlers
+  ) => void;
   /** Clamps and proposes a position; returns whether it was applied. */
   seek: (next: number, details: TimelinePositionChangeEventDetails) => boolean;
   setOptions: (options: TimelineOptions) => void;
@@ -252,7 +259,12 @@ export function createTimelineController(
     notify();
   };
 
-  const pressSeek: TimelineController["pressSeek"] = (event, handle, lane) => {
+  const pressSeek: TimelineController["pressSeek"] = (
+    event,
+    handle,
+    lane,
+    selecting
+  ) => {
     if (options.disabled || event.button !== 0) {
       return;
     }
@@ -267,19 +279,39 @@ export function createTimelineController(
       );
       return bypassesGrid(pointer) ? raw : snapToGrid(raw, options.grid);
     };
-    const gesture: { changed: boolean; moved: boolean } = {
+    const anchor = landingAt(event);
+    const gesture: {
+      changed: boolean;
+      moved: boolean;
+      range: readonly [number, number] | null;
+    } = {
       changed: false,
       moved: false,
+      range: null,
     };
     setScrubbing(true);
-    gesture.changed = seek(
-      landingAt(event),
-      createChangeEventDetails("press", event)
-    );
+    gesture.changed = seek(anchor, createChangeEventDetails("press", event));
+    /** A drag that selects: the stretch from the press to the pointer, once it has length. */
+    const select = (move: PointerEvent) => {
+      const at = landingAt(move);
+      if (at === anchor && gesture.range === null) {
+        return;
+      }
+      const range = [Math.min(anchor, at), Math.max(anchor, at)] as const;
+      const details = createChangeEventDetails("drag", move);
+      selecting?.onSelectionChange?.(range, details);
+      if (!details.isCanceled) {
+        gesture.range = range;
+      }
+    };
     followPointer(
       handle,
       event.pointerId,
       (move) => {
+        if (selecting?.onSelectionChange) {
+          select(move);
+          return;
+        }
         gesture.moved = true;
         if (seek(landingAt(move), createChangeEventDetails("drag", move))) {
           gesture.changed = true;
@@ -294,6 +326,12 @@ export function createTimelineController(
             event: end,
             reason: gesture.moved ? "drag" : "press",
           } as TimelinePositionCommitEventDetails);
+        }
+        if (gesture.range) {
+          selecting?.onSelectionCommitted?.(gesture.range, {
+            event: end,
+            reason: "drag",
+          });
         }
       }
     );

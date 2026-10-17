@@ -106,3 +106,49 @@ describe("Timeline ruler input", () => {
     expect(onPositionCommitted.mock.calls[0]?.[0]).toBe(42);
   });
 });
+
+describe("Timeline lane press with a selection", () => {
+  test("a drag selects from the press to the pointer, and the position stays at the press", () => {
+    const onSelectionChange = mock(
+      (_range: unknown, _details: unknown) => undefined
+    );
+    const onSelectionCommitted = mock(
+      (_range: unknown, _details: unknown) => undefined
+    );
+    const timeline = create();
+    timeline.pressSeek(
+      pointer("pointerdown", { clientX: 50 }),
+      handle,
+      handle,
+      {
+        onSelectionChange,
+        onSelectionCommitted,
+      }
+    );
+    expect(timeline.getSnapshot().position).toBe(5);
+    document.dispatchEvent(pointer("pointermove", { clientX: 20 }));
+    expect(onSelectionChange.mock.calls[0]?.[0]).toEqual([2, 5]);
+    expect(timeline.getSnapshot().position).toBe(5);
+    document.dispatchEvent(pointer("pointerup", { clientX: 20, buttons: 0 }));
+    expect(onSelectionCommitted.mock.calls[0]?.[0]).toEqual([2, 5]);
+  });
+
+  test("a press that does not move selects nothing", () => {
+    const onSelectionCommitted = mock(
+      (_range: unknown, _details: unknown) => undefined
+    );
+    const timeline = create();
+    timeline.pressSeek(
+      pointer("pointerdown", { clientX: 50 }),
+      handle,
+      handle,
+      {
+        onSelectionChange: () => undefined,
+        onSelectionCommitted,
+      }
+    );
+    document.dispatchEvent(pointer("pointerup", { clientX: 50, buttons: 0 }));
+    expect(onSelectionCommitted).not.toHaveBeenCalled();
+    expect(timeline.getSnapshot().position).toBe(5);
+  });
+});

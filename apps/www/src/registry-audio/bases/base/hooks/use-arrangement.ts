@@ -12,11 +12,20 @@ import { useCallback, useRef, useState } from "react";
 import {
   type Arranged,
   type ArrangementTrack,
+  type Clipping,
+  clearTime,
+  consolidate,
+  copyClips,
+  copyTime,
+  deleteTime,
   land,
   lay,
   type Mix,
+  openTime,
   otherSelected,
+  pasteTime,
   scaleValue,
+  type TimeSelection,
   UNITY_MIX,
 } from "@/registry-audio/bases/base/lib/arrangement";
 import {
@@ -472,6 +481,90 @@ export function useArrangement({
     [duplicate, edit, removeClip, splitWhere]
   );
 
+  // --- Time: a stretch of time on some tracks, and stretches taken out of or opened on every track
+
+  const order = useCallback(
+    () => docRef.current.tracks.map((track) => track.id),
+    []
+  );
+  /** Empties a stretch of time on its tracks. */
+  const clearTimeSelection = useCallback(
+    (time: TimeSelection) =>
+      edit((current) => ({
+        ...current,
+        clips: clearTime(current.clips, time, duration),
+      })),
+    [duration, edit]
+  );
+  /** What a stretch of time holds, or the selected clips whole when there is no stretch: a copy to paste. */
+  const copyOf = useCallback(
+    (time: TimeSelection | null): Clipping =>
+      time
+        ? copyTime(docRef.current.clips, time, order(), duration)
+        : copyClips(
+            docRef.current.clips.filter((clip) =>
+              selectedRef.current.includes(clip.id)
+            ),
+            order(),
+            duration
+          ),
+    [duration, order]
+  );
+  /** Lays a copy down at `at` from the track `track` down, and selects what it laid. */
+  const paste = useCallback(
+    (clipping: Clipping, at: number, track: string) => {
+      const { clips: laid, ids } = pasteTime(
+        docRef.current.clips,
+        clipping,
+        at,
+        track,
+        order(),
+        duration
+      );
+      edit((current) => ({ ...current, clips: laid }));
+      setSelection({ clips: ids, tracks: [] });
+    },
+    [duration, edit, order]
+  );
+  /** Takes the stretch from `from` to `to` out of every track. */
+  const removeTimeSpan = useCallback(
+    (from: number, to: number) =>
+      edit((current) => ({
+        ...current,
+        clips: deleteTime(current.clips, from, to, duration),
+      })),
+    [duration, edit]
+  );
+  /** Opens a stretch `length` long at `at` on every track. */
+  const insertTimeSpan = useCallback(
+    (at: number, length: number) =>
+      edit((current) => ({
+        ...current,
+        clips: openTime(current.clips, at, length, duration),
+      })),
+    [duration, edit]
+  );
+  /** One clip per track of the stretch, and selects them. */
+  const consolidateTime = useCallback(
+    (time: TimeSelection) => {
+      const { clips: made, ids } = consolidate(
+        docRef.current.clips,
+        time,
+        duration
+      );
+      edit((current) => ({ ...current, clips: made }));
+      setSelection({ clips: ids, tracks: [] });
+    },
+    [duration, edit]
+  );
+  /** Switches the selected clips off, or back on when the first of them is off. */
+  const toggleSelected = useCallback(() => {
+    const [first] = selectedRef.current;
+    if (first) {
+      clipAction("toggle", first);
+    }
+  }, [clipAction]);
+
   // --- Tracks
 
   const trackCount = useRef(initialTracks.length);
@@ -634,18 +727,24 @@ export function useArrangement({
     changeClip,
     changeMix,
     clearSelection,
+    clearTimeSelection,
     clipAction,
     clips,
     commitClip,
+    consolidateTime,
     copying,
+    copyOf,
     duplicateSelection,
     duplicateTrack,
     folded,
     heights: shownHeights,
+    insertTimeSpan,
     mixOf,
+    paste,
     redo: redoEdit,
     releaseClips,
     removeClip,
+    removeTimeSpan,
     moveTrack,
     removeTrack,
     renameClip,
@@ -661,6 +760,7 @@ export function useArrangement({
     selection,
     selectTrack,
     splitAtCursor,
+    toggleSelected,
     tracks,
     toggleFold,
     undo: undoEdit,

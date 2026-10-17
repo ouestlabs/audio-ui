@@ -92,6 +92,32 @@ describe("Timeline.Lane seekable", () => {
     );
   });
 
+  test("with onSelectionChange, a drag selects a stretch instead of scrubbing", () => {
+    const onSelectionChange = mock(
+      (
+        _range: readonly [number, number],
+        _details: Timeline.Lane.SelectionChangeEventDetails
+      ) => undefined
+    );
+    const onSelectionCommitted = mock(
+      (
+        _range: readonly [number, number],
+        _details: Timeline.Lane.SelectionCommitEventDetails
+      ) => undefined
+    );
+    const { lane, onPositionChange } = renderSeekable({
+      onSelectionChange,
+      onSelectionCommitted,
+    });
+    fireEvent.pointerDown(lane, { clientX: 80, pointerId: 1 });
+    fireEvent.pointerMove(lane, { clientX: 120, pointerId: 1 });
+    expect(onSelectionChange.mock.calls.at(-1)?.[0]).toEqual([40, 60]);
+    // The press put the position at its start, and the drag left it there.
+    expect(onPositionChange.mock.calls.map((call) => call[0])).toEqual([40]);
+    fireEvent.pointerUp(lane, { clientX: 120, pointerId: 1 });
+    expect(onSelectionCommitted.mock.calls.at(-1)?.[0]).toEqual([40, 60]);
+  });
+
   test("a press on a part placed in the lane is left to that part", () => {
     const { onPositionChange, part } = renderSeekable();
     fireEvent.pointerDown(part, { clientX: 80, pointerId: 1 });

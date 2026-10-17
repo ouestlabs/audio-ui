@@ -61,12 +61,15 @@ export function useLaneProps(part: string) {
  * fitted, it takes the width it is given and the timeline is spread across
  * it. Its `--timeline-unit` CSS variable is the width of one unit. With
  * `seekable`, a press on its bare area moves the position, as on the ruler,
- * so the cursor can be put anywhere along a track.
+ * so the cursor can be put anywhere along a track; with `onSelectionChange`
+ * too, a drag from there selects a stretch of time instead of scrubbing.
  * Renders a `<div>` element.
  */
 export function Lane(componentProps: Lane.Props) {
   const {
     className,
+    onSelectionChange,
+    onSelectionCommitted,
     ref,
     render,
     seekable = false,
@@ -75,7 +78,12 @@ export function Lane(componentProps: Lane.Props) {
   } = componentProps;
   const { context, lane, laneRef, style: laneStyle } = useLaneProps("Lane");
   const { state } = context;
-  const seek = useSeekGesture(context, { enabled: seekable });
+  const seek = useSeekGesture(context, {
+    enabled: seekable,
+    selecting: onSelectionChange
+      ? { onSelectionChange, onSelectionCommitted }
+      : undefined,
+  });
   const element = useRender({
     defaultTagName: "div",
     props: mergeProps<"div">(
@@ -96,7 +104,28 @@ export function Lane(componentProps: Lane.Props) {
 
 export namespace Lane {
   export type State = TimelineState;
+  export type SelectionChangeEventDetails =
+    import("../context.ts").SelectionChangeEventDetails;
+  export type SelectionCommitEventDetails =
+    import("../context.ts").SelectionCommitEventDetails;
+
   export interface Props extends PartProps<"div", State> {
+    /**
+     * With `seekable`, fires while a drag from the lane's bare area selects a
+     * stretch of time, as `[start, end]` in timeline units on the grid unless
+     * Cmd/Ctrl is held: from where the press put the position to the pointer.
+     * The drag then no longer scrubs. `eventDetails.cancel()` keeps the
+     * selection as it was.
+     */
+    onSelectionChange?: (
+      range: readonly [number, number],
+      eventDetails: SelectionChangeEventDetails
+    ) => void;
+    /** Fires when a selection that changed ends. */
+    onSelectionCommitted?: (
+      range: readonly [number, number],
+      eventDetails: SelectionCommitEventDetails
+    ) => void;
     /**
      * Whether a press on the lane's bare area moves the position, and a drag
      * scrubs it, on the grid unless Cmd/Ctrl is held. @default false

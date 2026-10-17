@@ -100,6 +100,8 @@ import { useSimulatedLevels } from "@/registry-audio/bases/base/hooks/use-simula
 import type {
   Arranged,
   ArrangementTrack,
+  Clipping,
+  TimeSelection,
 } from "@/registry-audio/bases/base/lib/arrangement";
 
 const BARS = 32;
@@ -805,6 +807,13 @@ export default function BlockTimeline() {
   );
   const [loop, setLoop] = useState<Span>([bars(8), bars(16)]);
   const [looping, setLooping] = useState(true);
+  // A stretch of time on some tracks, drawn by dragging across bare lanes, and what was last copied.
+  const [timeSelection, setTimeSelection] = useState<TimeSelection | null>(
+    null
+  );
+  const clipboard = useRef<Clipping | null>(null);
+  // The track a press on bare lane began on: a time selection spans from it to the track under the pointer.
+  const pressTrackRef = useRef<string | null>(null);
   // Locators: named points to jump to, kept in seconds at the tempo they were set.
   const [locators, setLocators] = useState<Locator[]>([
     { at: bars(4), name: "Verse" },
@@ -860,19 +869,26 @@ export default function BlockTimeline() {
     changeClip,
     changeMix,
     clearSelection,
+    clearTimeSelection,
     clipAction,
     clips,
     commitClip,
+    consolidateTime,
     copying,
+    copyOf,
     duplicateSelection,
     duplicateTrack,
     folded,
     heights,
+    insertTimeSpan,
+    paste,
     toggleFold,
+    toggleSelected,
     mixOf,
     redo,
     moveTrack,
     removeClip,
+    removeTimeSpan,
     removeTrack,
     renameClip,
     renameTrack,
@@ -1109,6 +1125,8 @@ export default function BlockTimeline() {
     (event: PointerEvent<HTMLDivElement>) => {
       if (event.target === event.currentTarget && !event.shiftKey && !multi) {
         const { track } = event.currentTarget.dataset;
+        pressTrackRef.current = track ?? null;
+        setTimeSelection(null);
         if (track) {
           selectTrack(track);
         } else {
@@ -1270,46 +1288,181 @@ export default function BlockTimeline() {
     },
     [removeTrack, selectedIds.length, selectedTracks]
   );
-  // S, or Cmd/Ctrl + E, splits at the cursor, Cmd/Ctrl + D duplicates the clip; Escape drops the selection.
-  const handleKeyDown = useCallback(
-    (event: KeyboardEvent<HTMLDivElement>) => {
-      if (event.key === "Escape") {
-        clearSelection();
+  /** A drag across bare lanes selects time: from the track it began on to the track under the pointer. */
+  const selectTime = useCallback(
+    (
+      range: readonly [number, number],
+      details: TimelinePrimitive.Lane.SelectionChangeEventDetails
+    ) => {
+      const order = tracks.map((track) => track.id);
+      const first = order.indexOf(pressTrackRef.current ?? "");
+      if (first === -1) {
         return;
       }
-      const key = event.key.toLowerCase();
-      if (handleTrackKey(event)) {
-        return;
-      }
-      if (handleLocatorKey(event)) {
-        return;
-      }
-      if (key === "l" && (event.metaKey || event.ctrlKey) && selection) {
-        event.preventDefault();
-        loopSelection();
-        return;
-      }
-      if (handleSelectionKey(event)) {
-        return;
-      }
-      const split =
-        (key === "s" && !(event.metaKey || event.ctrlKey || event.altKey)) ||
-        (key === "e" && (event.metaKey || event.ctrlKey));
-      if (split && selection) {
-        event.preventDefault();
-        splitAtCursor();
-      }
+      const under = document
+        .elementFromPoint(details.event.clientX, details.event.clientY)
+        ?.closest<HTMLElement>("[data-track]")?.dataset.track;
+      const last = under ? order.indexOf(under) : -1;
+      const [top, bottom] =
+        last === -1
+          ? [first, first]
+          : [Math.min(first, last), Math.max(first, last)];
+      setTimeSelection({ range, tracks: order.slice(top, bottom + 1) });
     },
-    [
-      clearSelection,
-      handleTrackKey,
-      handleLocatorKey,
-      handleSelectionKey,
-      loopSelection,
-      selection,
-      splitAtCursor,
-    ]
+    [tracks]
   );
+  /** Picking a clip lets go of the time selection. */
+  const pickClip = useCallback(
+    (id: string, additive: boolean) => {
+      setTimeSelection(null);
+      selectClip(id, additive);
+    },
+    [selectClip]
+  );
+  /** Where a paste lands: the picked track, the top of the time selection, the track of a picked clip, or the first track. */
+  const pasteTrack = () =>
+    selectedTracks[0] ??
+    timeSelection?.tracks[0] ??
+    clips.find((clip) => selectedIds.includes(clip.id))?.track ??
+    tracks[0]?.id;
+  /** Cmd/Ctrl + D: the time selection again right after itself, which the selection moves onto; with Shift, time is opened for it first. */
+  const duplicateTime = (time: TimeSelection, opening: boolean) => {
+    const copied = copyOf(time);
+    const [from, to] = time.range;
+    if (opening) {
+      insertTimeSpan(to, to - from);
+    }
+    paste(copied, to, time.tracks[0] ?? "");
+    setTimeSelection({ ...time, range: [to, to + (to - from)] });
+  };
+  /** Cmd/Ctrl + V: the last copy at the cursor; with Shift, time is opened for it first. */
+  const pasteClipboard = (opening: boolean) => {
+    const copied = clipboard.current;
+    if (!copied) {
+      return;
+    }
+    const at = clock.getSnapshot();
+    if (opening) {
+      insertTimeSpan(at, copied.length);
+    }
+    paste(copied, at, pasteTrack() ?? "");
+  };
+  /** Cmd/Ctrl + X: copies, then empties the time selection (takes the time out, with Shift), or removes the selected clips. */
+  const cutSelection = (removing: boolean) => {
+    clipboard.current = copyOf(timeSelection);
+    if (timeSelection && removing) {
+      removeTimeSpan(...timeSelection.range);
+      setTimeSelection(null);
+    } else if (timeSelection) {
+      clearTimeSelection(timeSelection);
+    } else if (selectedIds[0]) {
+      removeClip(selectedIds[0]);
+    }
+  };
+  /** What Cmd/Ctrl + a letter does to the time selection, the clipboard or the cursor, or undefined when it does nothing here. */
+  const timeCommand = (key: string, shift: boolean) => {
+    const length = timeSelection
+      ? timeSelection.range[1] - timeSelection.range[0]
+      : bar;
+    const time = timeSelection;
+    const commands: Record<string, (() => void) | undefined> = {
+      c: () => {
+        clipboard.current = copyOf(time);
+      },
+      d: time ? () => duplicateTime(time, shift) : undefined,
+      i: () => insertTimeSpan(clock.getSnapshot(), length),
+      j: time ? () => consolidateTime(time) : undefined,
+      l: time
+        ? () => {
+            setLoop([...time.range]);
+            setLooping(true);
+          }
+        : undefined,
+      v: clipboard.current ? () => pasteClipboard(shift) : undefined,
+      x: () => cutSelection(shift),
+    };
+    return commands[key];
+  };
+  /** What Delete does: empties the time selection, or with Cmd/Ctrl + Shift takes the time out of every track. */
+  const deleteCommand = (event: KeyboardEvent<HTMLDivElement>) => {
+    const time = timeSelection;
+    if (!time) {
+      return;
+    }
+    if (event.metaKey || event.ctrlKey) {
+      return event.shiftKey
+        ? () => {
+            removeTimeSpan(...time.range);
+            setTimeSelection(null);
+          }
+        : undefined;
+    }
+    return () => clearTimeSelection(time);
+  };
+  /**
+   * Cmd/Ctrl + C and X copy and cut the time selection (the selected clips
+   * when there is none), V pastes at the cursor, I opens a stretch of silence
+   * there; with a time selection, D duplicates it after itself, J makes one
+   * clip per track of it and L loops it. With Shift too, X, V, D and Delete
+   * work on the time itself, on every track. Delete empties the time
+   * selection, and 0 switches the selected clips off or on. Returns whether
+   * the key was one of these.
+   */
+  const handleTimeKey = (event: KeyboardEvent<HTMLDivElement>) => {
+    // In a field, copying and deleting are the field's own.
+    if (event.altKey || typing(event.target)) {
+      return false;
+    }
+    const key = event.key.toLowerCase();
+    let command: (() => void) | undefined;
+    if (event.key === "Delete" || event.key === "Backspace") {
+      command = deleteCommand(event);
+    } else if (event.metaKey || event.ctrlKey) {
+      command = timeCommand(key, event.shiftKey);
+    } else if (
+      (key === "0" || event.code === "Digit0") &&
+      selectedIds.length > 0
+    ) {
+      command = toggleSelected;
+    }
+    if (!command) {
+      return false;
+    }
+    event.preventDefault();
+    command();
+    return true;
+  };
+  // S, or Cmd/Ctrl + E, splits at the cursor, Cmd/Ctrl + D duplicates the clip; Escape drops the selection.
+  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === "Escape") {
+      clearSelection();
+      setTimeSelection(null);
+      return;
+    }
+    const key = event.key.toLowerCase();
+    if (
+      handleTimeKey(event) ||
+      handleTrackKey(event) ||
+      handleLocatorKey(event)
+    ) {
+      return;
+    }
+    if (key === "l" && (event.metaKey || event.ctrlKey) && selection) {
+      event.preventDefault();
+      loopSelection();
+      return;
+    }
+    if (handleSelectionKey(event)) {
+      return;
+    }
+    const split =
+      (key === "s" && !(event.metaKey || event.ctrlKey || event.altKey)) ||
+      (key === "e" && (event.metaKey || event.ctrlKey));
+    if (split && selection) {
+      event.preventDefault();
+      splitAtCursor();
+    }
+  };
 
   // The grid the lanes draw is the grid everything snaps to.
   // Snap off draws no lines and snaps nothing: a step of 0 is no grid.
@@ -1538,14 +1691,11 @@ export default function BlockTimeline() {
     },
     [changeGrid, handleCursorKey, zoomAroundCursor, zoomBack, zoomToSelection]
   );
-  const handlePanelKey = useCallback(
-    (event: KeyboardEvent<HTMLDivElement>) => {
-      if (!handleNavigationKey(event)) {
-        handleKeyDown(event);
-      }
-    },
-    [handleKeyDown, handleNavigationKey]
-  );
+  const handlePanelKey = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (!handleNavigationKey(event)) {
+      handleKeyDown(event);
+    }
+  };
 
   return (
     // biome-ignore lint/a11y/noStaticElementInteractions: the editor's shortcuts, caught from the controls inside it
@@ -1963,6 +2113,7 @@ export default function BlockTimeline() {
                         data-track={track.id}
                         gridStep={snapStep}
                         onPointerDown={focusPanel}
+                        onSelectionChange={selectTime}
                         seekable
                       >
                         {copying
@@ -1996,12 +2147,23 @@ export default function BlockTimeline() {
                               onLift={lift}
                               onRemove={removeClip}
                               onRename={renameClip}
-                              onSelect={selectClip}
+                              onSelect={pickClip}
                               selected={selectedIds.includes(clip.id)}
                               swatch={mixOf(track).color}
                               trackName={track.name}
                             />
                           ))}
+                        {timeSelection?.tracks.includes(track.id) ? (
+                          <div
+                            aria-hidden="true"
+                            className="pointer-events-none absolute inset-y-0 z-10 bg-primary/15 ring-1 ring-primary/40 ring-inset"
+                            data-slot="timeline-time-selection"
+                            style={{
+                              left: `calc(var(--timeline-unit) * ${timeSelection.range[0]})`,
+                              width: `calc(var(--timeline-unit) * ${timeSelection.range[1] - timeSelection.range[0]})`,
+                            }}
+                          />
+                        ) : null}
                         <TimelinePlayhead />
                       </TimelineLane>
                     </ContextMenuTrigger>
