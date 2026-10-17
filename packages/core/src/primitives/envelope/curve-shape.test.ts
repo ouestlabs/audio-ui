@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import {
-  CURVE_EXPONENT_RANGE,
+  CURVE_RATE,
   curveForMidpoint,
   curveSamples,
   segmentShape,
@@ -14,6 +14,14 @@ describe("segmentShape", () => {
       expect(segmentShape(0, curve)).toBeCloseTo(0, 12);
       expect(segmentShape(1, curve)).toBeCloseTo(1, 12);
     }
+  });
+
+  test("is the exponential of an analog envelope stage", () => {
+    const rate = 0.5 * CURVE_RATE;
+    expect(segmentShape(0.3, 0.5)).toBeCloseTo(
+      (Math.exp(rate * 0.3) - 1) / (Math.exp(rate) - 1),
+      12
+    );
   });
 
   test("a positive curve holds the start and rushes the end, a negative one the opposite", () => {
@@ -30,9 +38,9 @@ describe("segmentShape", () => {
     }
   });
 
-  test("a positive curve is still a power of t", () => {
-    expect(segmentShape(0.5, 1)).toBeCloseTo(0.5 ** 8, 12);
-    expect(segmentShape(0.5, 0.5)).toBeCloseTo(0.5 ** (2 ** 1.5), 12);
+  test("at the full curve the middle sits at about 0.4% of the rise", () => {
+    expect(segmentShape(0.5, 1)).toBeCloseTo(0.004, 3);
+    expect(segmentShape(0.5, -1)).toBeCloseTo(0.996, 3);
   });
 
   test("never turns vertical, even at the full curve either way", () => {
@@ -42,9 +50,7 @@ describe("segmentShape", () => {
         (segmentShape(step, curve) - segmentShape(0, curve)) / step;
       const slopeAtEnd =
         (segmentShape(1, curve) - segmentShape(1 - step, curve)) / step;
-      expect(Math.max(slopeAtStart, slopeAtEnd)).toBeLessThan(
-        2 ** CURVE_EXPONENT_RANGE + 1
-      );
+      expect(Math.max(slopeAtStart, slopeAtEnd)).toBeLessThan(CURVE_RATE + 1);
     }
   });
 });
@@ -54,7 +60,7 @@ describe("curveForMidpoint", () => {
   const to = { x: 1, y: 1 };
 
   test("gives back the curve that puts the middle where it was dragged", () => {
-    for (const curve of [-0.8, -0.3, 0.2, 0.8]) {
+    for (const curve of [-0.9, -0.3, 0.2, 0.9]) {
       const middle = segmentShape(0.5, curve);
       expect(curveForMidpoint(from, to, middle)).toBeCloseTo(curve, 9);
     }
@@ -64,11 +70,9 @@ describe("curveForMidpoint", () => {
     expect(curveForMidpoint(from, to, 0.5)).toBeCloseTo(0, 12);
   });
 
-  test("stops a drag at the same curve either way, a mirror image of the other", () => {
-    const held = curveForMidpoint(from, to, 0.001) ?? 0;
-    const rushed = curveForMidpoint(from, to, 0.999) ?? 0;
-    expect(held).toBeGreaterThan(0.8);
-    expect(rushed).toBeCloseTo(-held, 12);
+  test("a drag to either edge reaches the full curve", () => {
+    expect(curveForMidpoint(from, to, 0)).toBe(1);
+    expect(curveForMidpoint(from, to, 1)).toBe(-1);
   });
 });
 

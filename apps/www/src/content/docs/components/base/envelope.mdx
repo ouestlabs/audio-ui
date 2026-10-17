@@ -12,7 +12,7 @@ Edits a ramp made of breakpoints, such as an ADSR shape or an automation curve. 
 ## Overview
 
 - **Value:** `value` is a list of `{ x, y, curve? }` points. Both axes are normalized to 0…1, and the points are sorted by `x`. Map that range to your own unit, such as time or level.
-- **Curves:** a point's `curve`, from -1 to 1, bends the segment that leaves it. 0, or no value, draws a straight line. A positive curve holds the start of the segment and steepens its end; a negative curve is its mirror image, rushing the start and holding the end, so the two look alike and neither turns vertical at an end. The last point has no segment.
+- **Curves:** a point's `curve`, from -1 to 1, bends the segment that leaves it. 0, or no value, draws a straight line. A positive curve holds the start of the segment and steepens its end; a negative curve is its mirror image, rushing the start and holding the end. The bend is the exponential of an analog envelope stage, `(e^(k·t) - 1) / (e^k - 1)` with `k` the curve times 11, so neither end turns vertical. The last point has no segment.
 - **Pointer:** drag a point to move it. Double-click empty space to add a point, or double-click a point to remove it. A point stays between its neighbors, so points never cross.
 - **Point count:** points are added and removed between `minPoints` (default `2`, a start and an end) and `maxPoints`. Set both to the same number to fix the shape.
 - **Grid:** `snap` sets the grid that points snap to, for example `0.25` for quarters. Hold Cmd/Ctrl to move off the grid. Without `snap`, points move freely. The registry component draws the grid.

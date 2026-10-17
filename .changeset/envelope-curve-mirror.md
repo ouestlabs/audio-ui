@@ -1,6 +1,6 @@
 ---
-"@audio-ui/core": patch
+"@audio-ui/core": minor
 "@audio-ui/react": patch
 ---
 
-Envelope: a negative `curve` is now the mirror image of the positive one, `1 - (1 - t) ** power`, instead of the inverse power `t ** (1 / power)`. A curve of -1 used to turn vertical at the start of its segment and show as a wall with a sharp elbow; it now rushes the start with a finite slope, like +1 does at the end. A positive curve, a straight line and the drag on a segment's handle are unchanged, and the handle still lands the midpoint where it is dragged.
+Envelope: a bent segment is now the exponential of an analog envelope stage, `(e^(k·t) - 1) / (e^k - 1)` with `k = curve × CURVE_RATE`, instead of a power of `t`. A curve and its opposite are mirror images, and neither turns vertical at an end: a curve of -1 used to show as a wall with a sharp elbow at the start of its segment. At ±1 the middle of the segment sits where it did before (0.4% or 99.6% of the rise), and a drag on a segment's handle still lands the midpoint under the pointer, now reaching the full curve at the edges. `CURVE_EXPONENT_RANGE` is replaced by `CURVE_RATE` (11). A saved `curve` keeps its sign and roughly its strength, but its shape between the ends changes.
