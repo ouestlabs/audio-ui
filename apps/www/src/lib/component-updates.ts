@@ -1,4 +1,4 @@
-import { PATTERNS_MENU_UPDATES } from "@/config/update";
+import { PATTERNS_MENU_UPDATES } from "@/lib/menu-updates";
 import { normalizeSlug } from "@/lib/utils";
 
 const PATTERN_REGEX = /[?#]/;
