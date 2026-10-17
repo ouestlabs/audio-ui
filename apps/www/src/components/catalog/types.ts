@@ -1,4 +1,4 @@
-import type { CategoryInfo } from "@/lib/registry";
+import type { CategoryInfo } from "@/lib/registry/core/registry";
 
 export type { CategoryInfo };
 export type GridSize = 1 | 2;

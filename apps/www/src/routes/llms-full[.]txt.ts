@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { processMdxForLLMs, readRawDoc } from "@/lib/docs-text";
-import { source } from "@/lib/source";
+import { processMdxForLLMs, readRawDoc } from "@/lib/docs/content/docs-text";
+import { source } from "@/lib/docs/content/source";
 
 export const Route = createFileRoute("/llms-full.txt")({
   server: {

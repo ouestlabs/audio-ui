@@ -1,4 +1,4 @@
-import { absoluteUrl as buildAbsoluteUrl } from "@/lib/seo";
+import { absoluteUrl as buildAbsoluteUrl } from "@/lib/seo/seo";
 
 export { cn } from "cn";
 

@@ -2,18 +2,26 @@ import { Link } from "@tanstack/react-router";
 import defaultMdxComponents from "fumadocs-ui/mdx";
 import type { MDXComponents } from "mdx/types";
 import type * as React from "react";
-import { Callout } from "@/components/callout";
-import { CodeBlockCommand } from "@/components/code-block-command";
-import { CodeCollapsibleWrapper } from "@/components/code-collapsible-wrapper";
-import { CodeTabs } from "@/components/code-tabs";
-import { CopyButton } from "@/components/copy-button";
-import { Frame, FrameContent } from "@/components/custom/frame";
-import { Control, DeviceControls } from "@/components/device-controls";
-import { DocsComponentPreview } from "@/components/docs-component-preview";
-import { DocsComponentSource } from "@/components/docs-component-source";
-import { getIconForLanguageExtension, Icons } from "@/components/icons";
-import { Mermaid } from "@/components/mermaid";
-import { KeyRow, KeyTable, TypeRow, TypeTable } from "@/components/type-table";
+import { CodeBlockCommand } from "@/components/code/block/code-block-command";
+import { CodeCollapsibleWrapper } from "@/components/code/block/code-collapsible-wrapper";
+import { CodeTabs } from "@/components/code/block/code-tabs";
+import { CopyButton } from "@/components/code/copy/copy-button";
+import { DocsComponentSource } from "@/components/code/source/docs-component-source";
+import { Callout } from "@/components/docs/mdx/callout";
+import { Mermaid } from "@/components/docs/mdx/mermaid";
+import {
+  KeyRow,
+  KeyTable,
+  TypeRow,
+  TypeTable,
+} from "@/components/docs/mdx/type-table";
+import { DocsComponentPreview } from "@/components/preview/component/docs-component-preview";
+import {
+  Control,
+  DeviceControls,
+} from "@/components/preview/controls/device-controls";
+import { getIconForLanguageExtension, Icons } from "@/components/site/icons";
+import { Frame, FrameContent } from "@/components/site/layout/frame";
 import {
   Accordion,
   AccordionContent,

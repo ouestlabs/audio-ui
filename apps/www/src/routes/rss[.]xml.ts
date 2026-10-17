@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { getRSS } from "@/lib/rss";
+import { getRSS } from "@/lib/seo/rss";
 
 export const Route = createFileRoute("/rss.xml")({
   server: {

@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { getCategories } from "@/lib/registry";
-import { getSiteUrl } from "@/lib/seo";
-import { source } from "@/lib/source";
+import { source } from "@/lib/docs/content/source";
+import { getCategories } from "@/lib/registry/core/registry";
+import { getSiteUrl } from "@/lib/seo/seo";
 
 interface Entry {
   lastModified?: Date;

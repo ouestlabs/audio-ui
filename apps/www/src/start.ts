@@ -1,6 +1,6 @@
 import { env, waitUntil } from "cloudflare:workers";
 import { createMiddleware, createStart } from "@tanstack/react-start";
-import { markdownOfPage } from "@/lib/llm-page";
+import { markdownOfPage } from "@/lib/agents/llm-page";
 
 /**
  * Runs before every request the Worker takes. Pages are prerendered files the

@@ -3,7 +3,7 @@ import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/
 import { instrument } from "@posthog/mcp";
 import { createFileRoute } from "@tanstack/react-router";
 import { PostHog } from "posthog-node";
-import { createAudioUiMcpServer } from "@/lib/mcp-server";
+import { createAudioUiMcpServer } from "@/lib/agents/mcp-server";
 
 const posthogKey = import.meta.env.VITE_PUBLIC_POSTHOG_KEY;
 const posthog = posthogKey

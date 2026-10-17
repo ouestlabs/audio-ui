@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useFumadocsLoader } from "fumadocs-core/source/client";
 import { Suspense } from "react";
-import { docsLoader, loadDocPage } from "@/components/docs-page";
+import { docsLoader, loadDocPage } from "@/components/docs/page/page";
 import { Route as SiteRoute } from "@/routes/_site";
 
 export const Route = createFileRoute("/_site/docs/")({

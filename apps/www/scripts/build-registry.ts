@@ -17,8 +17,8 @@
  */
 
 import { $ } from "bun";
-import { isCatalogItemName } from "../src/lib/catalog-name.ts";
-import { transformStyleClassNames } from "../src/lib/code-utils.ts";
+import { transformStyleClassNames } from "../src/lib/code/code-utils.ts";
+import { isCatalogItemName } from "../src/lib/registry/catalog/catalog-name.ts";
 import { BASES as ALL_BASES } from "../src/registry/bases.ts";
 import { categories, rootSeo } from "../src/registry-audio/bases/categories.ts";
 

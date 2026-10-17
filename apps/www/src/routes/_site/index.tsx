@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ComponentRenderer } from "@/components/catalog/component-card-container";
-import { HomeHero } from "@/components/home-hero";
-import { HomeTimelineSkeleton } from "@/components/home-timeline-skeleton";
-import { JsonLd } from "@/components/json-ld";
+import { ComponentRenderer } from "@/components/catalog/card/component-card-container";
+import { HomeHero } from "@/components/site/home/home-hero";
+import { HomeTimelineSkeleton } from "@/components/site/home/home-timeline-skeleton";
+import { JsonLd } from "@/components/site/json-ld";
 import { siteConfig } from "@/lib/config";
-import { buildPageMetadata, buildSoftwareJsonLd } from "@/lib/seo";
+import { buildPageMetadata, buildSoftwareJsonLd } from "@/lib/seo/seo";
 
 const title = "audio/ui – Audio UI Components for React";
 
