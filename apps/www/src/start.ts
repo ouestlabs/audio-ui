@@ -49,7 +49,7 @@ function agentEvent(pathname: string, method: string) {
   if (pathname === "/llms.txt" || pathname === "/llms-full.txt") {
     return { name: "llms_read", properties: { file: pathname } };
   }
-  if (pathname.startsWith("/docs/") && pathname.endsWith(".md")) {
+  if (pathname === "/docs.md" || DOCS_MARKDOWN.test(pathname)) {
     return { name: "docs_markdown_read", properties: { path: pathname } };
   }
 }
@@ -156,7 +156,10 @@ const edge = createMiddleware().server(async ({ next, request }) => {
       true
     );
   }
-  // A docs page as markdown, at its own address with `.md`.
+  // A docs page as markdown, at its own address with `.md`; the introduction is `/docs.md`.
+  if (url.pathname === "/docs.md") {
+    return markdownOfPage([]);
+  }
   const markdown = DOCS_MARKDOWN.exec(url.pathname);
   if (markdown) {
     return markdownOfPage(markdown[1]?.split("/") ?? []);
