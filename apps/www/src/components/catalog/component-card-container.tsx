@@ -19,9 +19,12 @@ interface ComponentCardContainerProps {
 export function ComponentRenderer({
   name,
   base = "base",
+  loading = <PreviewLoading />,
 }: {
   name: string;
   base?: string;
+  /** What shows until the component is drawn. */
+  loading?: React.ReactNode;
 }) {
   const [key, setKey] = React.useState(0);
   const [isReloading, setIsReloading] = React.useState(false);
@@ -44,7 +47,7 @@ export function ComponentRenderer({
 
   // Until the page is hydrated its styles are not applied: a preview drawn on the server would show unstyled.
   if (isReloading || !mounted) {
-    return <PreviewLoading />;
+    return loading;
   }
 
   // Get component using lazy loader (component created on-demand)
