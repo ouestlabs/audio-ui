@@ -767,6 +767,31 @@ function useNoteHistory(notes: Note[], setNotes: (notes: Note[]) => void) {
   };
 }
 
+/** The px a step takes when the whole clip fits the view, the furthest out the roll zooms: the viewport's width past the keys, over the clip's steps. */
+function useFitZoom(
+  viewportRef: React.RefObject<HTMLDivElement | null>,
+  duration: number
+) {
+  const [fit, setFit] = useState(0);
+  useEffect(() => {
+    const viewport = viewportRef.current;
+    if (!viewport) {
+      return;
+    }
+    const measure = () => {
+      const lead = viewport.querySelector<HTMLElement>(
+        '[data-slot="piano-roll-strip"] > div'
+      );
+      setFit((viewport.clientWidth - (lead?.offsetWidth ?? 0)) / duration);
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(viewport);
+    return () => observer.disconnect();
+  }, [duration, viewportRef]);
+  return fit;
+}
+
 /** The ruler's labels follow the zoom: the grid's width over its steps is the px a step takes. */
 function useStepWidth(duration: number) {
   const gridRef = useRef<HTMLDivElement>(null);
@@ -1074,6 +1099,7 @@ export default function BlockPianoRoll() {
   const [looping, setLooping] = useState(true);
   /** Px a step, once zoomed from the keys or the navigator; null fits the clip. */
   const [zoomed, setZoomed] = useState<number | null>(null);
+  const fit = useFitZoom(viewportRef, meter.duration);
   const [metronome, setMetronome] = useState(false);
   const [loopRegion, setLoopRegion] = useState<LoopRegion | null>(null);
   const loopRange: readonly [number, number] = loopRegion
@@ -1191,20 +1217,10 @@ export default function BlockPianoRoll() {
   );
 
   /** Zooms so `start` to `end` fills the view, and scrolls it into place. */
-  /** The px a step takes when the whole clip fits the view: the furthest out it zooms. */
-  const fitZoom = useCallback(() => {
-    const viewport = viewportRef.current;
-    const lead = viewport?.querySelector<HTMLElement>(
-      '[data-slot="piano-roll-strip"] > div'
-    );
-    return viewport
-      ? (viewport.clientWidth - (lead?.offsetWidth ?? 0)) / meter.duration
-      : 0;
-  }, [meter.duration]);
-  /** A zoom out past the whole clip goes back to fitting it. */
+  /** A zoom out to the whole clip, or past it, goes back to fitting it. */
   const changeZoom = useCallback(
-    (zoom: number) => setZoomed(zoom > fitZoom() + 0.01 ? zoom : null),
-    [fitZoom]
+    (zoom: number) => setZoomed(zoom > fit + 0.01 ? zoom : null),
+    [fit]
   );
   const zoomOnto = useCallback(
     (start: number, end: number) => {
@@ -1212,16 +1228,13 @@ export default function BlockPianoRoll() {
       if (!viewport || end <= start) {
         return;
       }
-      const zoom = Math.min(
-        MAX_ZOOM,
-        (fitZoom() * meter.duration) / (end - start)
-      );
+      const zoom = Math.min(MAX_ZOOM, (fit * meter.duration) / (end - start));
       changeZoom(zoom);
       requestAnimationFrame(() => {
         viewport.scrollLeft = start * zoom;
       });
     },
-    [changeZoom, fitZoom, meter.duration]
+    [changeZoom, fit, meter.duration]
   );
   /** Onto the selected notes, or the loop with none. */
   const zoomToSelection = () => {
@@ -1485,11 +1498,13 @@ export default function BlockPianoRoll() {
       <Timeline
         duration={meter.duration}
         maxZoom={MAX_ZOOM}
+        minZoom={fit}
         onPositionChange={seekTo}
         onZoomChange={changeZoom}
         snapStep={1}
         source={position}
-        zoom={zoomed ?? undefined}
+        // Always held here, never below the whole clip: once measured, fitting it is a zoom like any other.
+        zoom={fit > 0 ? Math.max(zoomed ?? fit, fit) : undefined}
       >
         <PianoRoll
           activePitches={activePitches}
