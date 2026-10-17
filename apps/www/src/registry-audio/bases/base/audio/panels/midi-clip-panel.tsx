@@ -58,8 +58,17 @@ const MIN_PITCH = 24;
 const MAX_PITCH = 96;
 /** The widest a sixteenth gets, in px. */
 const MAX_STEP_PX = 64;
-/** The roll's height, fixed whatever stretches the rolls around it. */
-const ROLL_SIZE = { flex: "none", height: "18rem" } as const;
+/**
+ * The roll's height, fixed whatever stretches the rolls around it, and flush
+ * in the view, which is the frame: no border or corners of its own, whatever
+ * the style gives a roll. Inline, so it outranks the style's rules.
+ */
+const ROLL_SIZE = Object.freeze({
+  border: 0,
+  borderRadius: 0,
+  flex: "none",
+  height: "18rem",
+});
 
 /** Where a MIDI clip plays in its source, in seconds: what the Clip box's fields and the ruler's brace set. */
 export interface MidiClipRegion {
