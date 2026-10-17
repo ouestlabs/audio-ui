@@ -1,9 +1,16 @@
 import { describe, expect, test } from "bun:test";
 import {
   type Arranged,
+  clearTime,
+  consolidate,
+  copyClips,
+  copyTime,
+  deleteTime,
   land,
   lay,
+  openTime,
   otherSelected,
+  pasteTime,
   scaleValue,
   shiftTrack,
 } from "@/registry-audio/bases/base/lib/arrangement";
@@ -113,5 +120,91 @@ describe("scaleValue", () => {
     expect(
       scaleValue({ fadeIn: 1, fadeOut: 2, length: 4, offset: 3, start: 5 }, 2)
     ).toEqual({ fadeIn: 2, fadeOut: 4, length: 8, offset: 6, start: 10 });
+  });
+});
+
+describe("time on tracks", () => {
+  const all = [
+    clip("a", "drums", 0, 40),
+    clip("b", "bass", 20, 40),
+    clip("c", "keys", 0, 40),
+  ];
+  const spans = (laid: Arranged[], track: string) =>
+    laid
+      .filter((item) => item.track === track)
+      .map((item) => [item.value.start, item.value.length])
+      .sort((x, y) => (x[0] ?? 0) - (y[0] ?? 0));
+
+  test("clearTime empties a stretch on its tracks only", () => {
+    const laid = clearTime(
+      all,
+      { range: [10, 30], tracks: ["drums", "bass"] },
+      DURATION
+    );
+    expect(spans(laid, "drums")).toEqual([
+      [0, 10],
+      [30, 10],
+    ]);
+    expect(spans(laid, "bass")).toEqual([[30, 30]]);
+    expect(spans(laid, "keys")).toEqual([[0, 40]]);
+  });
+
+  test("a copy pastes on the track picked and the ones below, at the cursor", () => {
+    const copy = copyTime(
+      all,
+      { range: [10, 30], tracks: ["drums", "bass"] },
+      ORDER,
+      DURATION
+    );
+    expect(copy.length).toBe(20);
+    const { clips, ids } = pasteTime([], copy, 50, "bass", ORDER, DURATION);
+    expect(ids).toHaveLength(2);
+    expect(spans(clips, "bass")).toEqual([[50, 20]]);
+    // The bass part of the copy started 10 into the stretch: it lands on keys, a row below.
+    expect(spans(clips, "keys")).toEqual([[60, 10]]);
+  });
+
+  test("a paste past the last track or the end of the timeline is left out or cut", () => {
+    const copy = copyClips([clip("x", "keys", 0, 20)], ORDER, DURATION);
+    expect(
+      pasteTime([], copy, 90, "keys", ORDER, DURATION).clips.map(
+        (item) => item.value.length
+      )
+    ).toEqual([10]);
+    const two = copyTime(
+      all,
+      { range: [0, 10], tracks: ["bass", "keys"] },
+      ORDER,
+      DURATION
+    );
+    expect(pasteTime([], two, 0, "keys", ORDER, DURATION).clips).toHaveLength(
+      0
+    );
+  });
+
+  test("deleteTime and openTime move what comes after on every track", () => {
+    expect(spans(deleteTime(all, 0, 20, DURATION), "bass")).toEqual([[0, 40]]);
+    expect(spans(openTime(all, 10, 10, DURATION), "drums")).toEqual([
+      [0, 10],
+      [20, 30],
+    ]);
+  });
+
+  test("consolidate makes one clip per track spanning the stretch", () => {
+    const { clips, ids } = consolidate(
+      all,
+      { range: [10, 50], tracks: ["drums", "bass"] },
+      DURATION
+    );
+    expect(ids).toHaveLength(2);
+    expect(spans(clips, "drums")).toEqual([
+      [0, 10],
+      [10, 40],
+    ]);
+    expect(spans(clips, "bass")).toEqual([
+      [10, 40],
+      [50, 10],
+    ]);
+    expect(clips.find((item) => item.id === ids[0])?.sourceLength).toBe(40);
   });
 });

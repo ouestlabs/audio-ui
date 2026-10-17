@@ -1,4 +1,10 @@
-import { type ClipValue, coverClips } from "@audio-ui/react";
+import {
+  type ClipValue,
+  copyRange,
+  coverClips,
+  insertTime,
+  removeTime,
+} from "@audio-ui/react";
 
 /** A clip laid on a track of an arrangement. */
 export interface Arranged {
@@ -43,6 +49,19 @@ export const UNITY_MIX: Mix = {
 
 let pieceCount = 0;
 
+/** A new id for a piece of the clip `id`. */
+function pieceId(id: string) {
+  pieceCount += 1;
+  return `${id}-c${pieceCount}`;
+}
+
+/** Makes the second piece of a cut clip from the first, with an id of its own. */
+const splitPiece = (item: Arranged, value: ClipValue): Arranged => ({
+  ...item,
+  id: pieceId(item.id),
+  value,
+});
+
 /**
  * Lays `placed` on its track: it covers what was under it, as a DAW's does,
  * rather than stacking on it. Pieces cut from a clip it lies inside get ids of
@@ -60,10 +79,7 @@ export function lay(
     onTrack,
     placed.value,
     { duration, sourceLength: placed.sourceLength },
-    (item, value) => {
-      pieceCount += 1;
-      return { ...item, id: `${item.id}-c${pieceCount}`, value };
-    }
+    splitPiece
   );
   return [...elsewhere, ...covered, placed];
 }
@@ -159,4 +175,172 @@ export function scaleValue(value: ClipValue, ratio: number): ClipValue {
     offset: value.offset * ratio,
     start: value.start * ratio,
   };
+}
+
+/** A stretch of time on some tracks: what a drag across bare lanes selects. */
+export interface TimeSelection {
+  range: readonly [number, number];
+  /** The tracks it spans, top to bottom. */
+  tracks: string[];
+}
+
+/** What a copy holds: how long it is, and the part of each clip in it, from 0, with how many tracks below the first one it came from. */
+export interface Clipping {
+  length: number;
+  parts: (Arranged & { row: number })[];
+}
+
+/** The parts of the clips in a stretch of time on some tracks, ready to paste. */
+export function copyTime(
+  all: Arranged[],
+  { range: [from, to], tracks }: TimeSelection,
+  order: readonly string[],
+  duration: number
+): Clipping {
+  const rows = tracks.map((track) => order.indexOf(track));
+  const first = Math.min(...rows);
+  const parts = copyRange(
+    all.filter((clip) => tracks.includes(clip.track)),
+    from,
+    to,
+    { duration }
+  ).map((part) => ({ ...part, row: order.indexOf(part.track) - first }));
+  return { length: to - from, parts };
+}
+
+/** The selected clips, whole, ready to paste: their span from the first start to the last end. */
+export function copyClips(
+  chosen: Arranged[],
+  order: readonly string[],
+  duration: number
+): Clipping {
+  if (chosen.length === 0) {
+    return { length: 0, parts: [] };
+  }
+  const from = Math.min(...chosen.map((clip) => clip.value.start));
+  const to = Math.max(
+    ...chosen.map((clip) => clip.value.start + clip.value.length)
+  );
+  return copyTime(
+    chosen,
+    {
+      range: [from, to],
+      tracks: [...new Set(chosen.map((clip) => clip.track))],
+    },
+    order,
+    duration
+  );
+}
+
+/** Empties a stretch of time on its tracks: what lies in it goes, the clips across its edges are cut there. */
+export function clearTime(
+  all: Arranged[],
+  { range: [from, to], tracks }: TimeSelection,
+  duration: number
+): Arranged[] {
+  const span = {
+    fadeIn: 0,
+    fadeOut: 0,
+    length: to - from,
+    offset: 0,
+    start: from,
+  };
+  const onTracks = all.filter((clip) => tracks.includes(clip.track));
+  return [
+    ...all.filter((clip) => !tracks.includes(clip.track)),
+    ...coverClips(onTracks, span, { duration }, splitPiece),
+  ];
+}
+
+/**
+ * Lays a copy down at `at`, its first row on the track `track` and the rest
+ * on the tracks below it (those that would fall off the bottom are left out),
+ * covering what is there. Returns the arrangement and the ids of the new clips.
+ */
+export function pasteTime(
+  all: Arranged[],
+  clipping: Clipping,
+  at: number,
+  track: string,
+  order: readonly string[],
+  duration: number
+): { clips: Arranged[]; ids: string[] } {
+  const top = order.indexOf(track);
+  let laid = all;
+  const ids: string[] = [];
+  for (const part of clipping.parts) {
+    const onto = order[top + part.row];
+    const start = at + part.value.start;
+    if (!onto || start >= duration) {
+      continue;
+    }
+    const { row: _row, ...clip } = part;
+    const length = Math.min(part.value.length, duration - start);
+    const placed = {
+      ...clip,
+      id: pieceId(part.id),
+      track: onto,
+      value: { ...part.value, length, start },
+    };
+    ids.push(placed.id);
+    laid = lay(laid, placed, duration);
+  }
+  return { clips: laid, ids };
+}
+
+/** Takes a stretch out of every track and closes the gap: what came after it moves back. */
+export function deleteTime(
+  all: Arranged[],
+  from: number,
+  to: number,
+  duration: number
+): Arranged[] {
+  return removeTime(all, from, to, { duration }, splitPiece);
+}
+
+/** Opens a stretch `length` long at `at` on every track: what came after it moves later. */
+export function openTime(
+  all: Arranged[],
+  at: number,
+  length: number,
+  duration: number
+): Arranged[] {
+  return insertTime(all, at, length, { duration }, splitPiece);
+}
+
+/**
+ * Makes one clip per track of a stretch of time: on each track that has
+ * anything in it, a clip spanning the stretch replaces what was there, named
+ * after the first clip it takes in.
+ */
+export function consolidate(
+  all: Arranged[],
+  selection: TimeSelection,
+  duration: number
+): { clips: Arranged[]; ids: string[] } {
+  const [from, to] = selection.range;
+  const length = to - from;
+  const made = selection.tracks.flatMap((track) => {
+    const [first] = all
+      .filter(
+        (clip) =>
+          clip.track === track &&
+          clip.value.start < to &&
+          clip.value.start + clip.value.length > from
+      )
+      .sort((a, b) => a.value.start - b.value.start);
+    return first
+      ? [
+          {
+            ...first,
+            disabled: false,
+            id: pieceId(first.id),
+            sourceLength: length,
+            value: { fadeIn: 0, fadeOut: 0, length, offset: 0, start: from },
+          },
+        ]
+      : [];
+  });
+  const cleared = clearTime(all, selection, duration);
+  return { clips: [...cleared, ...made], ids: made.map((clip) => clip.id) };
 }

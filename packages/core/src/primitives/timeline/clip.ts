@@ -239,3 +239,113 @@ export function coverClips<Item extends { value: ClipValue }>(
   }
   return result;
 }
+
+/** The part of `clip` between `from` and `to`, or null when it has none there. */
+function clipPart(
+  clip: ClipValue,
+  from: number,
+  to: number,
+  limits: ClipLimits
+): ClipValue | null {
+  if (clipEnd(clip) <= from || clip.start >= to) {
+    return null;
+  }
+  const loose = { ...limits, minLength: 0 };
+  const started = clip.start < from ? trimClipStart(clip, from, loose) : clip;
+  return clipEnd(started) > to ? trimClipEnd(started, to, loose) : started;
+}
+
+/**
+ * What the stretch from `from` to `to` holds of `items`: the part of each
+ * clip inside it, moved so the stretch starts at 0. Each part keeps its
+ * place in its source. Lay them back at `at` by adding `at` to their starts.
+ */
+export function copyRange<Item extends { value: ClipValue }>(
+  items: readonly Item[],
+  from: number,
+  to: number,
+  limits: ClipLimits
+): Item[] {
+  const parts: Item[] = [];
+  for (const item of items) {
+    const part = clipPart(item.value, from, to, limits);
+    if (part) {
+      parts.push({ ...item, value: { ...part, start: part.start - from } });
+    }
+  }
+  return parts;
+}
+
+/**
+ * Takes the stretch from `from` to `to` out of the timeline: what is in it
+ * goes, and everything after it moves back to close the gap. A clip across
+ * it keeps its two ends, which then meet; `split` makes the second piece's
+ * item from the first's, as with `coverClips`.
+ */
+export function removeTime<Item extends { value: ClipValue }>(
+  items: readonly Item[],
+  from: number,
+  to: number,
+  limits: ClipLimits,
+  split: (item: Item, value: ClipValue) => Item
+): Item[] {
+  const gap = to - from;
+  if (!(gap > 0)) {
+    return [...items];
+  }
+  const span = { fadeIn: 0, fadeOut: 0, length: gap, offset: 0, start: from };
+  return coverClips(items, span, limits, split).map((item) =>
+    item.value.start >= to
+      ? { ...item, value: { ...item.value, start: item.value.start - gap } }
+      : item
+  );
+}
+
+/**
+ * Opens a stretch `length` long at `at`: everything from there moves later,
+ * and a clip across `at` is cut in two around the gap. What would then run
+ * past the end of the timeline is cut off there, or dropped.
+ */
+export function insertTime<Item extends { value: ClipValue }>(
+  items: readonly Item[],
+  at: number,
+  length: number,
+  limits: ClipLimits,
+  split: (item: Item, value: ClipValue) => Item
+): Item[] {
+  if (!(length > 0)) {
+    return [...items];
+  }
+  const loose = { ...limits, minLength: 0 };
+  const later = (item: Item, value: ClipValue): Item[] => {
+    const start = value.start + length;
+    if (start >= limits.duration) {
+      return [];
+    }
+    const moved = { ...value, start };
+    return [
+      {
+        ...item,
+        value:
+          clipEnd(moved) > limits.duration
+            ? trimClipEnd(moved, limits.duration, loose)
+            : moved,
+      },
+    ];
+  };
+  return items.flatMap((item) => {
+    const { value } = item;
+    if (clipEnd(value) <= at) {
+      return [item];
+    }
+    if (value.start >= at) {
+      return later(item, value);
+    }
+    const cut = splitClip(value, at);
+    if (!cut) {
+      return [item];
+    }
+    const [left, right] = cut;
+    return [{ ...item, value: left }, ...later(split(item, right), right)];
+  });
+}

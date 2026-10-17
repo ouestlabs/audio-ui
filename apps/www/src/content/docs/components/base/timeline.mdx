@@ -309,9 +309,9 @@ arrangement.removeTrack(id); // with its clips; any track can go, the last inclu
 arrangement.undo();
 ```
 
-It also gives `selectClip`, `selectClips`, `selectAll`, `selectTrack`, `splitAtCursor`, `duplicateSelection`, `removeClip`, `renameClip`, `setFadeShape` (a fade's curve, as one undo step), `clipAction` (a clip's menu: duplicate, split, switch off, delete), `mixOf` and `changeMix` (gain, pan, mute, solo, color), `heights` and `resizeTrack`, `renameTrack`, `duplicateTrack(id)` (the track with its clips, placed after it), `folded` and `toggleFold` (a folded track is a strip of `foldedHeight` px that keeps its own height for when it opens), and `rescale(ratio)` for a tempo change, which also clears the history since it is not part of it.
+It also gives `selectClip`, `selectClips`, `selectAll`, `selectTrack`, `splitAtCursor`, `duplicateSelection`, `removeClip`, `renameClip`, `setFadeShape` (a fade's curve, as one undo step), `clipAction` (a clip's menu: duplicate, split, switch off, delete), `mixOf` and `changeMix` (gain, pan, mute, solo, color), `heights` and `resizeTrack`, `renameTrack`, `duplicateTrack(id)` (the track with its clips, placed after it), `folded` and `toggleFold` (a folded track is a strip of `foldedHeight` px that keeps its own height for when it opens), the time commands `clearTimeSelection`, `copyOf`, `paste`, `removeTimeSpan`, `insertTimeSpan` and `consolidateTime` (a time selection is `{ range, tracks }`, and `lib/arrangement` holds them as pure functions: `copyTime`, `clearTime`, `pasteTime`, `deleteTime`, `openTime`, `consolidate`), `toggleSelected`, and `rescale(ratio)` for a tempo change, which also clears the history since it is not part of it.
 
-The block's own keys work once a press on a lane has put the focus in it:
+A drag across the bare lanes selects a stretch of time on the tracks it sweeps, drawn over them; the time commands below work on it. The block's own keys work once a press on a lane has put the focus in it:
 
 <KeyTable title="Keys">
 <KeyRow gesture={"`Left` / `Right`"}>Move the cursor by a grid step. `Home` and `End` go to the start and to the end of the last clip.</KeyRow>
@@ -323,7 +323,13 @@ The block's own keys work once a press on a lane has put the focus in it:
 <KeyRow gesture={"`Cmd` / `Ctrl` + `3`, `4`, `5`"}>Triplets on or off, snapping on or off, and a grid fixed where it is or following the zoom again.</KeyRow>
 <KeyRow gesture={"`M`"}>Add a locator at the cursor.</KeyRow>
 <KeyRow gesture={"`S`, `Cmd` / `Ctrl` + `E`"}>Split the selected clips at the cursor.</KeyRow>
-<KeyRow gesture={"`Cmd` / `Ctrl` + `L`"}>Put the loop around the selection.</KeyRow>
+<KeyRow gesture={"`Cmd` / `Ctrl` + `L`"}>Put the loop around the time selection, or around the selected clips.</KeyRow>
+<KeyRow gesture={"`Cmd` / `Ctrl` + `C`, `X`, `V`"}>Copy or cut the time selection (the selected clips when there is none), and paste it at the cursor, from the picked track down.</KeyRow>
+<KeyRow gesture={"`Delete`"}>Empty the time selection on its tracks.</KeyRow>
+<KeyRow gesture={"`Cmd` / `Ctrl` + `D`, `J`"}>With a time selection: repeat it right after itself, and make one clip per track of it.</KeyRow>
+<KeyRow gesture={"`Cmd` / `Ctrl` + `Shift` + `X`, `V`, `D`, `Delete`"}>The same on time itself, on every track: cut it out, paste it in, repeat it, or take it out, moving what comes after.</KeyRow>
+<KeyRow gesture={"`Cmd` / `Ctrl` + `I`"}>Open a stretch of silence at the cursor, as long as the time selection (a bar when there is none).</KeyRow>
+<KeyRow gesture={"`0`"}>Switch the selected clips off, or back on.</KeyRow>
 <KeyRow gesture={"On the loop"}>`Left` / `Right` move it by a grid step, `Up` / `Down` by its own length; with `Cmd` / `Ctrl`, `Left` / `Right` shorten or lengthen it and `Up` / `Down` double or halve it.</KeyRow>
 </KeyTable>
 
@@ -419,10 +425,12 @@ The scrolling window onto the timeline. Cmd/Ctrl + wheel (and pinch on a trackpa
 
 ### Lane
 
-A strip along the timeline that its parts are placed on: a track, the ruler's strip, a row of markers. Zoomed, it is as long as the timeline; fitted, it takes the width it is given and the timeline is spread across it. Its `--timeline-unit` CSS variable is the width of one unit. With `seekable`, a press on its bare area moves the position, as on the ruler. Renders a `<div>` element.
+A strip along the timeline that its parts are placed on: a track, the ruler's strip, a row of markers. Zoomed, it is as long as the timeline; fitted, it takes the width it is given and the timeline is spread across it. Its `--timeline-unit` CSS variable is the width of one unit. With `seekable`, a press on its bare area moves the position, as on the ruler, so the cursor can be put anywhere along a track; with `onSelectionChange` too, a drag from there selects a stretch of time instead of scrubbing. Renders a `<div>` element.
 
 <TypeTable>
 <TypeRow name={"seekable"} type={"boolean"} default={"false"}>Whether a press on the lane's bare area moves the position, and a drag scrubs it, on the grid unless Cmd/Ctrl is held.</TypeRow>
+<TypeRow name={"onSelectionChange"} type={"(range: readonly [number, number], eventDetails) => void"}>With `seekable`, fires while a drag from the lane's bare area selects a stretch of time, as `[start, end]` in timeline units on the grid unless Cmd/Ctrl is held: from where the press put the position to the pointer. The drag then no longer scrubs. `eventDetails.cancel()` keeps the selection as it was.</TypeRow>
+<TypeRow name={"onSelectionCommitted"} type={"(range: readonly [number, number], eventDetails) => void"}>Fires when a selection that changed ends.</TypeRow>
 </TypeTable>
 
 <TypeTable title="Data attributes">
