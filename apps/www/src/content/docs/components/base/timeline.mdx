@@ -335,6 +335,24 @@ A drag across the bare lanes selects a stretch of time on the tracks it sweeps, 
 
 With snapping on, a dragged clip or loop also lands on the edges of the other clips, the locators and the loop, through `snapPoints`.
 
+The block's own keys work once a press on a lane has put the focus in it:
+
+<KeyTable title="Keys">
+<KeyRow gesture={"`Left` / `Right`"}>Move the cursor by a grid step. `Home` and `End` go to the start and to the end of the last clip.</KeyRow>
+<KeyRow gesture={"`Alt` + `Left` / `Right`"}>Jump to the previous or next locator or clip edge, on the picked tracks (on every track when none is picked).</KeyRow>
+<KeyRow gesture={"`Up` / `Down`"}>Pick the track above or below.</KeyRow>
+<KeyRow gesture={"`+` / `-`"}>Zoom in or out around the cursor.</KeyRow>
+<KeyRow gesture={"`Z`, `X`"}>Zoom onto the selected clips (the loop, when none is selected), and step back to the zoom before.</KeyRow>
+<KeyRow gesture={"`Cmd` / `Ctrl` + `1`, `2`"}>A finer or a wider grid.</KeyRow>
+<KeyRow gesture={"`Cmd` / `Ctrl` + `3`, `4`, `5`"}>Triplets on or off, snapping on or off, and a grid fixed where it is or following the zoom again.</KeyRow>
+<KeyRow gesture={"`M`"}>Add a locator at the cursor.</KeyRow>
+<KeyRow gesture={"`S`, `Cmd` / `Ctrl` + `E`"}>Split the selected clips at the cursor.</KeyRow>
+<KeyRow gesture={"`Cmd` / `Ctrl` + `L`"}>Put the loop around the selection.</KeyRow>
+<KeyRow gesture={"On the loop"}>`Left` / `Right` move it by a grid step, `Up` / `Down` by its own length; with `Cmd` / `Ctrl`, `Left` / `Right` shorten or lengthen it and `Up` / `Down` double or halve it.</KeyRow>
+</KeyTable>
+
+With snapping on, a dragged clip or loop also lands on the edges of the other clips, the locators and the loop, through `snapPoints`.
+
 ## Placing your own parts
 
 Every lane sets a `--timeline-unit` CSS variable, the width of one unit. Parts are placed with it, so anything you draw follows the zoom the same way:
