@@ -90,7 +90,11 @@ function proxyPostHog(request: Request, url: URL) {
   const headers = new Headers(request.headers);
   headers.set("host", host);
   headers.delete("cookie");
-  return fetch(new Request(target, { ...request, headers }));
+  return fetch(target, {
+    body: request.body,
+    headers,
+    method: request.method,
+  });
 }
 
 function redirect(location: string | URL, permanent: boolean) {

@@ -27,14 +27,10 @@ function normalizeRegistrySlug(value: string) {
 
 /**
  * Client and server must use the same deployment-scoped registry URL so a new
- * Vercel deploy gets a new cache key without turning /r/styles into a function.
+ * deploy gets a new cache key without turning /r/styles into a function.
  */
 export function getRegistryDeploymentId(): string {
-  return (
-    process.env.NEXT_PUBLIC_VERCEL_DEPLOYMENT_ID ??
-    process.env.VERCEL_DEPLOYMENT_ID ??
-    "local"
-  );
+  return import.meta.env.VITE_DEPLOYMENT_ID ?? "local";
 }
 
 export function getRegistryJsonUrl(styleName: string, name: string): string {
