@@ -10,12 +10,26 @@ import {
 export interface Arranged {
   /** A clip switched off stays on the page, drained, and is not heard. */
   disabled?: boolean;
+  /** How much louder or quieter it plays, in dB. @default 0 */
+  gain?: number;
   id: string;
+  /**
+   * A stretch of the source, `[start, end]` in the source's own time, that
+   * repeats for as long as the clip lasts: a looped clip can be longer than
+   * its source.
+   */
+  loop?: readonly [number, number];
   name: string;
+  /** Whether its source plays backwards. */
+  reversed?: boolean;
+  /** Where its source begins in the recording it was cut from, once cropped. @default 0 */
+  sourceFrom?: number;
   /** How long the recording behind the clip is: trimming stops where it runs out. */
   sourceLength: number;
   /** The id of the track it lies on. */
   track: string;
+  /** How far it is transposed, in semitones. @default 0 */
+  transpose?: number;
   /** Where the clip sits, how much of its source it plays, and its fades. */
   value: ClipValue;
 }
@@ -419,4 +433,23 @@ export function fadeTime(
       ? clip
       : { ...clip, value: { ...clip.value, fadeIn, fadeOut } };
   });
+}
+
+/**
+ * Cuts a clip's source down to what it plays: the loop when it has one, else
+ * the stretch from where it starts to where it ends. The clip sounds the same,
+ * and its source no longer holds what it never reached.
+ */
+export function cropClip(clip: Arranged): Arranged {
+  const [from, to] = clip.loop ?? [
+    clip.value.offset,
+    clip.value.offset + clip.value.length,
+  ];
+  return {
+    ...clip,
+    loop: clip.loop ? [0, to - from] : undefined,
+    sourceFrom: (clip.sourceFrom ?? 0) + from,
+    sourceLength: to - from,
+    value: { ...clip.value, offset: Math.max(0, clip.value.offset - from) },
+  };
 }

@@ -5,6 +5,7 @@ import {
   consolidate,
   copyClips,
   copyTime,
+  cropClip,
   crossfade,
   deleteTime,
   fadeTime,
@@ -254,5 +255,30 @@ describe("fades", () => {
       tracks: ["drums"],
     });
     expect(fade(laid)).toEqual([5, 5]);
+  });
+});
+
+describe("cropClip", () => {
+  test("keeps the stretch a clip plays, and where it was in the recording", () => {
+    const played = { ...clip("a", "drums", 10, 20), sourceLength: 100 };
+    played.value = { ...played.value, offset: 30 };
+    const cropped = cropClip(played);
+    expect([
+      cropped.sourceFrom,
+      cropped.sourceLength,
+      cropped.value.offset,
+    ]).toEqual([30, 20, 0]);
+  });
+
+  test("a looped clip keeps its loop, from the source's new start", () => {
+    const looped = { ...clip("a", "drums", 0, 64), loop: [16, 32] as const };
+    looped.value = { ...looped.value, offset: 20 };
+    const cropped = cropClip(looped);
+    expect([
+      cropped.sourceFrom,
+      cropped.sourceLength,
+      cropped.loop,
+      cropped.value.offset,
+    ]).toEqual([16, 16, [0, 16], 4]);
   });
 });

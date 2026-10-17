@@ -17,6 +17,7 @@ import {
   consolidate,
   copyClips,
   copyTime,
+  cropClip,
   crossfade,
   deleteTime,
   fadeTime,
@@ -42,8 +43,14 @@ import {
   undo,
 } from "@/registry-audio/bases/base/lib/undo-history";
 
-/** What a clip's menu can do: renaming is the clip's own, in place. */
-export type ClipAction = "duplicate" | "remove" | "rename" | "split" | "toggle";
+/** What a clip's menu can do: renaming is the clip's own, in place, and editing opens the app's clip panel. */
+export type ClipAction =
+  | "duplicate"
+  | "edit"
+  | "remove"
+  | "rename"
+  | "split"
+  | "toggle";
 
 /** What undo and redo move between: the tracks and the clips on them. */
 interface Doc {
@@ -575,6 +582,36 @@ export function useArrangement({
       edit((current) => ({ ...current, clips: fadeTime(current.clips, time) })),
     [edit]
   );
+  /**
+   * Changes a clip's settings as a gesture goes (its loop, gain, transpose,
+   * reverse, or what it plays): the gesture is one step of the history,
+   * closed by `settleClipEdit`.
+   */
+  const editClip = useCallback(
+    (id: string, change: (clip: Arranged) => Arranged) =>
+      burst((current) => ({
+        ...current,
+        clips: current.clips.map((clip) =>
+          clip.id === id ? change(clip) : clip
+        ),
+      })),
+    [burst]
+  );
+  const settleClipEdit = useCallback(
+    () => setHistory(settleChange(historyRef.current)),
+    [setHistory]
+  );
+  /** Cuts a clip's source down to what it plays. */
+  const crop = useCallback(
+    (id: string) =>
+      edit((current) => ({
+        ...current,
+        clips: current.clips.map((clip) =>
+          clip.id === id ? cropClip(clip) : clip
+        ),
+      })),
+    [edit]
+  );
   /** Switches the selected clips off, or back on when the first of them is off. */
   const toggleSelected = useCallback(() => {
     const [first] = selectedRef.current;
@@ -752,6 +789,8 @@ export function useArrangement({
     consolidateTime,
     copying,
     copyOf,
+    crop,
+    editClip,
     fadeTimeSelection,
     duplicateSelection,
     duplicateTrack,
@@ -778,6 +817,7 @@ export function useArrangement({
     selectedTracks,
     selection,
     selectTrack,
+    settleClipEdit,
     splitAtCursor,
     toggleSelected,
     tracks,

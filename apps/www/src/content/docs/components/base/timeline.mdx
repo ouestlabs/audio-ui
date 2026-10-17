@@ -332,12 +332,15 @@ A drag across the bare lanes selects a stretch of time on the tracks it sweeps, 
 <KeyRow gesture={"`0`"}>Switch the selected clips off, or back on.</KeyRow>
 <KeyRow gesture={"`Cmd` / `Ctrl` + `Alt` + `F`"}>Fade the clips whose edges the time selection covers, in or out; two clips that meet across it crossfade.</KeyRow>
 <KeyRow gesture={"`Delete` on a fade handle"}>Take the fade away.</KeyRow>
+<KeyRow gesture={"`Cmd` / `Ctrl` + `Alt` + `3`"}>Show or hide the clip panel, which also opens from a clip's menu (Edit clip).</KeyRow>
 <KeyRow gesture={"On the loop"}>`Left` / `Right` move it by a grid step, `Up` / `Down` by its own length; with `Cmd` / `Ctrl`, `Left` / `Right` shorten or lengthen it and `Up` / `Down` double or halve it.</KeyRow>
 </KeyTable>
 
 With snapping on, a dragged clip or loop also lands on the edges of the other clips, the locators and the loop, through `snapPoints`. Where two clips meet, the fade-out of one and the fade-in of the next move together, as a crossfade, and a dashed line shows how far a fade being dragged can go.
 
 The Signature strip holds time-signature changes: its + adds one at the cursor, in the signature already there, ready to be typed (such as 7/8). From a change on, bars are counted in its signature: the ruler's numbers, the hatched partial bar a change cuts short, and the position in the transport all follow, through `barsOf` and `barsBeatsWith` from `@audio-ui/core/time`. On a change, Left and Right move it by a grid step, Enter edits it and Delete takes it away. The grid's bar-long divisions and the tempo stay those of the song's start.
+
+Under the tracks, the clip panel (`clip-panel`, `npx shadcn@latest add @audio-ui/clip-panel`) edits the selected clip: its whole source as a waveform, with the stretch it plays to drag at both ends, or with Loop on the stretch that repeats (a looped clip can then be stretched past its source on the timeline), Reverse, Crop (the source cut down to what is played) and knobs for its gain and transpose. The block makes no sound, so these are kept on the clip (`gain`, `transpose`, `reversed`, `loop`, `sourceFrom` in `lib/arrangement`) and its waveform is a stand-in.
 
 ## Placing your own parts
 
