@@ -101,6 +101,11 @@
     "intro": "Browse {{count}} piano components for audio/ui, built on top of shadcn/ui.",
     "title": "Piano"
   },
+  "piano-roll": {
+    "description": "Piano roll editors and their parts: a scale menu, note find and note edits, playback, undo and MIDI files. {{count}} components.",
+    "intro": "Browse {{count}} piano roll components for audio/ui, built on top of shadcn/ui.",
+    "title": "Piano roll"
+  },
   "synth": {
     "description": "Synth control patterns combining knobs, XY pads, and toggles. {{count}} components.",
     "intro": "Browse {{count}} synth components for audio/ui, built on top of shadcn/ui.",

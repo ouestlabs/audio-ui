@@ -15,7 +15,11 @@ import { Meter } from "@/components/audio-ui/meter";
 
 Without the registry, the headless primitive comes from the package: `import { Knob } from "@audio-ui/react/knob"` (parts: `Knob.Root`, `Knob.Thumb`…).
 
-## Controls
+## Elements
+
+The pieces of any audio interface: controls, keyboards and displays. Each takes a value and reports changes, so it drives any engine.
+
+### Controls
 
 | Name | Registry import | Package import | Use it for |
 | --- | --- | --- | --- |
@@ -24,13 +28,63 @@ Without the registry, the headless primitive comes from the package: `import { K
 | `xypad` | `XYPad` from `@/components/audio-ui/xypad` | `@audio-ui/react/xypad` | Two parameters on one surface (filter cutoff and resonance, pan and send) |
 | `envelope` | `Envelope` from `@/components/audio-ui/envelope` | `@audio-ui/react/envelope` | A ramp edited by breakpoints: ADSR and other shapes, drag points, bend segments |
 
-## Displays
+### Keyboards and pads
+
+| Name | Registry import | Package import | Use it for |
+| --- | --- | --- | --- |
+| `piano` | `Piano` from `@/components/audio-ui/piano` | `@audio-ui/react/piano` | A virtual keyboard with a MIDI pitch range, glissando, multi-touch, an `activeNotes` overlay |
+| `pad` | `Pad`, `PadItem` from `@/components/audio-ui/pad` | `@audio-ui/react/pad` | Drum pads to strike (on pointer down, so press them, don't `click`): velocity from pressure or height, `chokeGroup` to cut a ringing pad, `Space` or `Enter` on the focused pad, an `activePads` overlay |
+| `midi-connect-control` | `MidiConnectControl` from `@/components/audio-ui/midi-connect-control` | registry only | A button that connects the page's MIDI input, with the device's name beside it. Its `use-midi-input` hook gives the held notes (for `activeNotes`), note-on with velocity from 0 to 1, note-off and pitch bend |
+
+### Displays
 
 | Name | Registry import | Package import | Use it for |
 | --- | --- | --- | --- |
 | `meter` | `Meter` from `@/components/audio-ui/meter` | `@audio-ui/react/meter` | Stereo or multi-channel dB level with peak hold, display only. Live levels come from a `source`, not from React state: `useAudioLevels(analysers)` from the `use-audio-levels` hook makes one |
 | `waveform` | `Waveform`, `WaveformRegion`, `WaveformMarker`, `LiveWaveform`, `BarVisualizer` from `@/components/audio-ui/waveform` | `@audio-ui/react/waveform` | A seekable waveform with regions and markers, a live scrolling one, or a bar visualizer (`waveform-peaks` lib turns a file into peaks) |
 | `spectrum-analyzer` | `SpectrumAnalyzer` from `@/components/audio-ui/spectrum-analyzer` | registry only, built on `Plot` | A live spectrum on a log frequency axis with held peaks. Feed it `useSpectrum(analyser)` from the `use-spectrum` hook, with the same `minHz`/`maxHz` |
+| `tuner` | `Tuner` from `@/components/audio-ui/tuner` | registry only | A chromatic tuner's display: the nearest note, a needle on a scale of cents and the frequency, in the primary color when in tune. It follows a `source`: `usePitch(analyser)` from `use-pitch`, fed by `useMicrophone()` (start it from a click) or any `AnalyserNode` |
+| `plot` | `Plot`, `PlotGraph`, `PlotCurve`, `PlotHandle`, `PlotTraceArea`… from `@/components/audio-ui/plot` | `@audio-ui/react/plot` | A curve with draggable points: equalizers, filters, compressors |
+
+## Workstation
+
+The surfaces of a DAW: the arrangement, the editors, the transport and the mixer. They are controlled and engine-agnostic: notes, clips and positions come in as values and live sources, edits go out through callbacks, so they work over audio/ui's Web Audio hooks or over an engine of your own (an AudioWorklet, WASM).
+
+### Arrangement
+
+| Name | Registry import | Package import | Use it for |
+| --- | --- | --- | --- |
+| `timeline` | `Timeline`, `TimelineRuler`, `TimelineTrack`, `TimelineClip`, `TimelinePlayhead`… from `@/components/audio-ui/timeline` | `@audio-ui/react/timeline` | A zoomable arrangement view: ruler that seeks on the grid, lanes, a playhead that moves without re-rendering (`musical-time` lib converts tempo to seconds) |
+
+### Editors
+
+The piano roll and the parts of `block-piano-roll`, each installed on its own.
+
+| Name | Registry import | Package import | Use it for |
+| --- | --- | --- | --- |
+| `piano-roll` | `PianoRoll`, `PianoRollKeys`, `PianoRollGrid`, `PianoRollVelocity`… from `@/components/audio-ui/piano-roll` | `@audio-ui/react/piano-roll` | A DAW-style note editor: grid, keyboard, a velocity or chance lane (a brush in draw mode), a `scale` it marks and folds onto, painted drawing, stretch handles on the selection, and keyboard editing |
+| `scale-menu` | `ScaleMenu`, `ScaleMenuTrigger`, `ScaleMenuContent`, `ScaleMenuToggle`, `ScaleMenuRoot`, `ScaleMenuName` from `@/components/audio-ui/scale-menu` | registry only | Pick a root and a scale and turn it on or off. Pass `enabled ? scale : null` to the roll's `scale`. Items of your own go in the content beside the parts |
+| `note-find` | `NoteFind`, `NoteFindForm` from `@/components/audio-ui/note-find` | registry only | Find notes by pitch, scale, state, velocity, length, chance or every few: `onFind` gets a query, `findNotes(notes, query)` from `@audio-ui/core/piano-roll` the ids to select |
+| `note-edit-menu` | `NoteEditMenu`, `NoteEditMenuTrigger`, `NoteEditMenuContent`, `NoteEditMenuItems`, `NoteEditMenuSub` from `@/components/audio-ui/note-edit-menu`; the commands, `TIME_EDITS`, `PITCH_EDITS`, `PLAY_EDITS`, `VELOCITY_EDITS`, `applyNoteEdit`, `canApplyNoteEdit`, `noteEditForKey`, from `@/lib/note-edits`, which it installs too | registry only | A menu of note commands (split, join, quantize, legato, time commands, fit to scale, chance, velocity) with their keys, as items or submenus, beside items of your own (import, export, clear). The commands are data, so keys or a toolbar run them too |
+| `sequencer` | `Sequencer` from `@/components/audio-ui/sequencer` | `@audio-ui/react/sequencer` | A step grid: press a step to flip it (on pointer down, so press it, don't `click`), drag across steps to paint a pattern, `Space` or `Enter` on the focused step. The playing step comes from a `source`, not state |
+| `midi-file` | `readMidiFile`, `writeMidiFile`, `downloadMidiFile`, `MIDI_FILE_ACCEPT` from `@/lib/midi-file` | registry only | Import a `.mid` file onto the roll's steps, with its tempo, and export or download the notes as one |
+| `use-piano-roll-playback` | `usePianoRollPlayback`, `meterOf` from `@/hooks/use-piano-roll-playback` | registry only | Play the notes you hold, through `use-synth-voices`: play, pause, stop, loop, metronome, seek, a `position` for the timeline, a `clock` for the transport, and the roll's `onNoteOn` and `onNoteOff` |
+| `use-undo-history` | `useUndoHistory` from `@/hooks/use-undo-history` | registry only | Undo and redo over any value you hold: `edit` for a command, `change` and `commit` for a drag that undoes as one |
+
+### Transport and mixer
+
+| Name | Registry import | Package import | Use it for |
+| --- | --- | --- | --- |
+| `transport` | `Transport` from `@/components/audio-ui/transport` | registry only | Play or pause, stop, the position in bars, beats and sixteenths, tempo and time signature, and loop and metronome toggles when you pass their handlers. The position follows a `source`, so a playing transport does not re-render |
+| `bpm-control` | `BpmControl` from `@/components/audio-ui/bpm-control` | registry only | A tempo field on its own: type it, step it with the arrows, or drag its `BPM` unit. `transport` brings it |
+| `scrubber` | `Scrubber` from `@/components/audio-ui/scrubber` | registry only, built on `Timeline` | Play or pause, position, a seek bar and the length |
+
+## Devices
+
+Audio effects and instruments, like plugins in a DAW. A device is a state (`<name>-device`), an engine (`<name>-engine`) and a face (`<name>-panel`), installed to `components/audio-ui/devices/<name>/`. A panel is controlled and makes no sound, so it also fronts an engine of your own. Docs: https://www.audio-ui.dev/docs/devices.
+
+| Name | Registry import | Package import | Use it for |
+| --- | --- | --- | --- |
 | `device-panel` | `DevicePanel` from `@/components/audio-ui/device-panel` | registry only | A panel for any `defineDevice` device: a knob per number and a toggle per switch, from its descriptors. Controlled: `value` and `onValueChange(state)`; it keeps no state |
 | `compressor-panel` | `CompressorPanel` from `@/components/audio-ui/devices/compressor/panel` | registry only | The compressor device's face: the transfer curve it plays, with the threshold and the level going in, over its knobs. Pair it with the `compressor-device` and `compressor-engine` libs |
 | `equalizer-panel` | `EqualizerPanel` from `@/components/audio-ui/devices/equalizer/panel` | registry only | The equalizer device's face: the curve of its four bands with a handle on each to drag its frequency and gain, an optional live spectrum behind it, over its knobs. Pair it with the `equalizer-device` and `equalizer-engine` libs |
@@ -54,35 +108,6 @@ Without the registry, the headless primitive comes from the package: `import { K
 | `transient-panel` | `TransientPanel` from `@/components/audio-ui/devices/transient/panel` | registry only | The transient shaper device's face: a square with the sustain across and the attack up and one handle for both. Pair it with the `transient-device` and `transient-engine` libs |
 | `mid-side-panel` | `MidSidePanel` from `@/components/audio-ui/devices/mid-side/panel` | registry only | The mid/side device's face: a square with the side across and the mid up and one handle for both. Pair it with the `mid-side-device` and `mid-side-engine` libs |
 | `redux-panel` | `ReduxPanel` from `@/components/audio-ui/devices/redux/panel` | registry only | The redux device's face: the stairs the bits make against a clean sound. Pair it with the `redux-device` and `redux-engine` libs |
-| `tuner` | `Tuner` from `@/components/audio-ui/tuner` | registry only | A chromatic tuner's display: the nearest note, a needle on a scale of cents and the frequency, in the primary color when in tune. It follows a `source`: `usePitch(analyser)` from `use-pitch`, fed by `useMicrophone()` (start it from a click) or any `AnalyserNode` |
-| `plot` | `Plot`, `PlotGraph`, `PlotCurve`, `PlotHandle`, `PlotTraceArea`… from `@/components/audio-ui/plot` | `@audio-ui/react/plot` | A curve with draggable points: equalizers, filters, compressors |
-
-## Time and sequencing
-
-| Name | Registry import | Package import | Use it for |
-| --- | --- | --- | --- |
-| `timeline` | `Timeline`, `TimelineRuler`, `TimelineTrack`, `TimelineClip`, `TimelinePlayhead`… from `@/components/audio-ui/timeline` | `@audio-ui/react/timeline` | A zoomable arrangement view: ruler that seeks on the grid, lanes, a playhead that moves without re-rendering (`musical-time` lib converts tempo to seconds) |
-| `sequencer` | `Sequencer` from `@/components/audio-ui/sequencer` | `@audio-ui/react/sequencer` | A step grid: press a step to flip it (on pointer down, so press it, don't `click`), drag across steps to paint a pattern, `Space` or `Enter` on the focused step. The playing step comes from a `source`, not state |
-| `pad` | `Pad`, `PadItem` from `@/components/audio-ui/pad` | `@audio-ui/react/pad` | Drum pads to strike (on pointer down, so press them, don't `click`): velocity from pressure or height, `chokeGroup` to cut a ringing pad, `Space` or `Enter` on the focused pad, an `activePads` overlay |
-| `piano` | `Piano` from `@/components/audio-ui/piano` | `@audio-ui/react/piano` | A virtual keyboard with a MIDI pitch range, glissando, multi-touch, an `activeNotes` overlay |
-| `midi-connect-control` | `MidiConnectControl` from `@/components/audio-ui/midi-connect-control` | registry only | A button that connects the page's MIDI input, with the device's name beside it. Its `use-midi-input` hook gives the held notes (for `activeNotes`), note-on with velocity from 0 to 1, note-off and pitch bend |
-| `piano-roll` | `PianoRoll`, `PianoRollKeys`, `PianoRollGrid`, `PianoRollVelocity`… from `@/components/audio-ui/piano-roll` | `@audio-ui/react/piano-roll` | A DAW-style note editor: grid, keyboard, a velocity or chance lane (a brush in draw mode), a `scale` it marks and folds onto, painted drawing, stretch handles on the selection, and keyboard editing |
-| `transport` | `Transport` from `@/components/audio-ui/transport` | registry only | Play or pause, stop, the position in bars, beats and sixteenths, tempo and time signature, and loop and metronome toggles when you pass their handlers. The position follows a `source`, so a playing transport does not re-render |
-| `bpm-control` | `BpmControl` from `@/components/audio-ui/bpm-control` | registry only | A tempo field on its own: type it, step it with the arrows, or drag its `BPM` unit. `transport` brings it |
-| `scrubber` | `Scrubber` from `@/components/audio-ui/scrubber` | registry only, built on `Timeline` | Play or pause, position, a seek bar and the length |
-
-## Note editing
-
-The parts of `block-piano-roll`, each installed on its own, to build a note editor of your own around `piano-roll`.
-
-| Name | Registry import | Package import | Use it for |
-| --- | --- | --- | --- |
-| `scale-menu` | `ScaleMenu`, `ScaleMenuTrigger`, `ScaleMenuContent`, `ScaleMenuToggle`, `ScaleMenuRoot`, `ScaleMenuName` from `@/components/audio-ui/scale-menu` | registry only | Pick a root and a scale and turn it on or off. Pass `enabled ? scale : null` to the roll's `scale`. Items of your own go in the content beside the parts |
-| `note-find` | `NoteFind`, `NoteFindForm` from `@/components/audio-ui/note-find` | registry only | Find notes by pitch, scale, state, velocity, length, chance or every few: `onFind` gets a query, `findNotes(notes, query)` from `@audio-ui/core/piano-roll` the ids to select |
-| `note-edit-menu` | `NoteEditMenu`, `NoteEditMenuTrigger`, `NoteEditMenuContent`, `NoteEditMenuItems`, `NoteEditMenuSub` from `@/components/audio-ui/note-edit-menu`; the commands, `TIME_EDITS`, `PITCH_EDITS`, `PLAY_EDITS`, `VELOCITY_EDITS`, `applyNoteEdit`, `canApplyNoteEdit`, `noteEditForKey`, from `@/lib/note-edits`, which it installs too | registry only | A menu of note commands (split, join, quantize, legato, time commands, fit to scale, chance, velocity) with their keys, as items or submenus, beside items of your own (import, export, clear). The commands are data, so keys or a toolbar run them too |
-| `midi-file` | `readMidiFile`, `writeMidiFile`, `downloadMidiFile`, `MIDI_FILE_ACCEPT` from `@/lib/midi-file` | registry only | Import a `.mid` file onto the roll's steps, with its tempo, and export or download the notes as one |
-| `use-piano-roll-playback` | `usePianoRollPlayback`, `meterOf` from `@/hooks/use-piano-roll-playback` | registry only | Play the notes you hold, through `use-synth-voices`: play, pause, stop, loop, metronome, seek, a `position` for the timeline, a `clock` for the transport, and the roll's `onNoteOn` and `onNoteOff` |
-| `use-undo-history` | `useUndoHistory` from `@/hooks/use-undo-history` | registry only | Undo and redo over any value you hold: `edit` for a command, `change` and `commit` for a drag that undoes as one |
 
 ## Ready blocks
 

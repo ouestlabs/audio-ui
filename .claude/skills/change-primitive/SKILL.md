@@ -24,7 +24,7 @@ Both packages are published to npm. Every change here is a change to someone's a
 
 1. **Test first.** Reproduce the bug or describe the new behavior in a test (`bun test` in the package). Pointer and keyboard tests for parts live in `packages/ui/src/primitives/<name>/test/`.
 2. **Change the code** in core first if the logic is framework-free, then the React part.
-3. **Docs API reference.** The JSDoc of each part in `elements/` and the `<TypeRow>` lines under "API reference" in `apps/www/src/content/docs/components/base/<name>.mdx` are hand-kept copies of each other. Change both, word for word.
+3. **Docs API reference.** The JSDoc of each part in `elements/` and the `<TypeRow>` lines under "API reference" in `apps/www/src/content/docs/components/base/(<space>)/<name>.mdx` are hand-kept copies of each other. Change both, word for word.
 4. **Shipped skill.** If a prop, part, data attribute or CSS variable that `skills/audio-ui/` names changed, update it; `bun test test/skills.test.ts` in `apps/www` checks the names.
 5. **Registry element.** If the styled element in `apps/www/src/registry-audio/bases/base/audio/elements/<name>.tsx` should use the new prop or part, update it and follow the `add-registry-item` skill's build step.
 6. **Changeset.** `bun run changeset`, or write `.changeset/<short-name>.md` by hand:

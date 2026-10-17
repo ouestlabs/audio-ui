@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/popover";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getDocsPageUpdateHint } from "@/lib/docs";
-import { getCurrentBase, getSectionsFromFolder } from "@/lib/page-tree";
+import { getCurrentBase, getGroupsFromFolder } from "@/lib/page-tree";
 import type { CategoryInfo } from "@/lib/registry";
 import type { source } from "@/lib/source";
 import { cn, isActive, normalizeSlug } from "@/lib/utils";
@@ -207,26 +207,19 @@ export function MobileNav({
               ))}
             </>
           ) : (
-            tree.children.map((folder) => {
+            tree.children.flatMap((folder) => {
               if (folder.type !== "folder") {
-                return null;
+                return [];
               }
-              const sections = getSectionsFromFolder(
-                folder,
-                currentBase
-              ).filter((part) => part.pages.length > 0);
-              if (sections.length === 0) {
-                return null;
-              }
-              return (
+              return getGroupsFromFolder(folder, currentBase).map((group) => (
                 <div
                   className="flex shrink-0 flex-col gap-0.5"
-                  key={folder.$id}
+                  key={group.title ?? folder.$id}
                 >
-                  <p className="px-2 pt-3 pb-1 font-medium text-site-muted-foreground text-xs">
-                    {folder.name}
+                  <p className="px-2 pt-3 pb-1 font-semibold text-site-foreground text-xs">
+                    {group.title}
                   </p>
-                  {sections.map((part) => (
+                  {group.sections.map((part) => (
                     <React.Fragment key={part.title ?? "untitled"}>
                       {part.title ? (
                         <p className="px-2 pt-1 pb-1 text-site-muted-foreground text-xs">
@@ -256,7 +249,7 @@ export function MobileNav({
                     </React.Fragment>
                   ))}
                 </div>
-              );
+              ));
             })
           )}
         </nav>

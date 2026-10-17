@@ -84,9 +84,21 @@ Each of `audio/`, `components/`, `hooks/`, `lib/` has an `_registry.ts`: **updat
 
 ### Docs (`apps/www/src/content/docs/`)
 
-MDX under `(root)/`, `components/base/`, `lib/`. Use the existing components (`<ComponentPreview>`, `<ComponentSource>`, `<CodeTabs>`, `<Steps>`), not raw HTML.
+MDX under `(root)/` (the Get started guides) and `components/base/`. Use the existing components (`<ComponentPreview>`, `<ComponentSource>`, `<CodeTabs>`, `<Steps>`), not raw HTML.
 
-The "API reference" of each `components/base/*.mdx` is a hand-kept copy of the JSDoc of the matching parts in `packages/ui/src/primitives/<name>/elements/`. Nothing syncs them: change both in the same commit.
+The docs, the catalog's `categoryGroups` and the shipped skill share one map, by what the reader builds. Each space is a folder of `components/base/` (the parentheses keep it out of the URL, so a page stays `/docs/components/base/<name>`), with its sections in its `meta.json`:
+
+- `(elements)/`: the pieces of any audio interface. Controls, keyboards and pads, displays.
+- `(workstation)/`: the surfaces of a DAW. Arrangement, editors, transport and mixer.
+- `(devices)/`: effects and instruments, like plugins. One page per device, by family.
+
+How items are grouped:
+
+- One item is something a user installs for itself. Split only where a piece is useful without the rest; code that only one piece uses ships in that piece's item (an item can hold several files).
+- One page is a component a user puts on screen. A hook or a lib that serves one component is documented in a section of that component's page.
+- Workstation and Devices parts are controlled and engine-agnostic: state comes in as values and live sources, changes go out through callbacks, never through one of our audio hooks. They must work over an engine of the user's own (an AudioWorklet, WASM).
+
+The "API reference" of each component page is a hand-kept copy of the JSDoc of the matching parts in `packages/ui/src/primitives/<name>/elements/`. Nothing syncs them: change both in the same commit.
 
 ---
 

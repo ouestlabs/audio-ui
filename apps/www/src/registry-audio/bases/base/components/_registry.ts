@@ -176,12 +176,12 @@ export const components: RegistryItem[] = [
     type: "registry:example",
   },
   {
-    categories: ["piano", "synth"],
+    categories: ["piano-roll", "synth"],
     description:
       "A MIDI clip editor: a scrolling roll with a playable keyboard down its side, a loop brace and a ruler that labels bars, beats and sixteenths as you zoom, and a velocity lane you can drag taller. The transport plays, pauses and stops, loops or plays once through, clicks a metronome and sets the tempo and signature. Draw or select notes, mark a scale and fold onto it, undo and redo, and edit the selection from the Notes menu: split at the playhead, chop, join, legato, reverse, invert, stretch, fit to scale, crescendo and humanize. Drop a MIDI file on it to import one, or export the clip as a .mid file",
     files: [
       {
-        path: "components/piano/block-piano-roll.tsx",
+        path: "components/piano-roll/block-piano-roll.tsx",
         type: "registry:block",
       },
     ],
@@ -209,12 +209,12 @@ export const components: RegistryItem[] = [
     type: "registry:block",
   },
   {
-    categories: ["piano"],
+    categories: ["piano-roll"],
     dependencies: ["@audio-ui/core"],
     description: "A scale menu lighting the keys of the scale it picks",
     files: [
       {
-        path: "components/piano/scale-menu-demo.tsx",
+        path: "components/piano-roll/scale-menu-demo.tsx",
         type: "registry:example",
       },
     ],
@@ -227,13 +227,13 @@ export const components: RegistryItem[] = [
     type: "registry:example",
   },
   {
-    categories: ["piano"],
+    categories: ["piano-roll"],
     dependencies: ["@audio-ui/core"],
     description:
       "Find notes on a piano roll by pitch, scale, state, velocity, length or chance, and select them",
     files: [
       {
-        path: "components/piano/note-find-demo.tsx",
+        path: "components/piano-roll/note-find-demo.tsx",
         type: "registry:example",
       },
     ],
@@ -246,13 +246,13 @@ export const components: RegistryItem[] = [
     type: "registry:example",
   },
   {
-    categories: ["piano"],
+    categories: ["piano-roll"],
     dependencies: ["@audio-ui/core"],
     description:
       "A menu of note edits over a piano roll's selection, beside an item of its own",
     files: [
       {
-        path: "components/piano/note-edit-menu-demo.tsx",
+        path: "components/piano-roll/note-edit-menu-demo.tsx",
         type: "registry:example",
       },
     ],
@@ -266,13 +266,13 @@ export const components: RegistryItem[] = [
     type: "registry:example",
   },
   {
-    categories: ["piano", "synth"],
+    categories: ["piano-roll", "synth"],
     dependencies: ["@audio-ui/core"],
     description:
       "A one-bar piano roll on loop with a metronome, played by a synth, which hears edits on its next pass",
     files: [
       {
-        path: "components/piano/piano-roll-playback-demo.tsx",
+        path: "components/piano-roll/piano-roll-playback-demo.tsx",
         type: "registry:example",
       },
     ],
@@ -288,13 +288,13 @@ export const components: RegistryItem[] = [
     type: "registry:example",
   },
   {
-    categories: ["piano"],
+    categories: ["piano-roll"],
     dependencies: ["@audio-ui/core"],
     description:
       "A piano roll that exports its clip as a .mid file and imports one onto its grid, with the file's tempo",
     files: [
       {
-        path: "components/piano/piano-roll-midi-file-demo.tsx",
+        path: "components/piano-roll/piano-roll-midi-file-demo.tsx",
         type: "registry:example",
       },
     ],
