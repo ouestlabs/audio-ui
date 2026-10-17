@@ -169,6 +169,12 @@ export const categories: CategoryDef[] = [
   },
   {
     description:
+      "Piano roll editors and their parts: a scale menu, note find and note edits, playback, undo and MIDI files.",
+    label: "Piano roll",
+    name: "piano-roll",
+  },
+  {
+    description:
       "Synth control patterns combining knobs, XY pads, and toggles.",
     docs: "xypad",
     label: "Synth",
@@ -217,26 +223,32 @@ export const categories: CategoryDef[] = [
  */
 export const categoryGroups: { label: string; names: string[] }[] = [
   {
-    label: "Controls",
-    names: ["knob", "fader", "xypad", "envelope"],
-  },
-  {
-    label: "Displays",
-    names: ["meter", "waveform", "plot", "spectrum", "tuner"],
-  },
-  {
-    label: "Time and sequencing",
+    label: "Elements",
     names: [
-      "timeline",
-      "sequencer",
-      "pad",
+      "knob",
+      "fader",
+      "xypad",
+      "envelope",
       "piano",
-      "synth",
-      "transport",
-      "scrubber",
+      "pad",
+      "meter",
+      "waveform",
+      "plot",
+      "spectrum",
+      "tuner",
     ],
   },
-  { label: "Mixing", names: ["mixer"] },
+  {
+    label: "Workstation",
+    names: [
+      "timeline",
+      "piano-roll",
+      "sequencer",
+      "transport",
+      "scrubber",
+      "mixer",
+    ],
+  },
   {
     label: "Devices",
     names: [
@@ -247,6 +259,7 @@ export const categoryGroups: { label: string; names: string[] }[] = [
       "modulation",
       "utility",
       "instrument",
+      "synth",
     ],
   },
 ];

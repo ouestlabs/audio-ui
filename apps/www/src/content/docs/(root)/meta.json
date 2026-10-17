@@ -1,12 +1,11 @@
 {
   "root": true,
-  "title": "Overview",
+  "title": "Get started",
   "pages": [
     "index",
     "get-started",
     "primitives",
     "styling",
-    "devices",
     "agents",
     "mcp",
     "registry",

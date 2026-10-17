@@ -218,7 +218,7 @@ test("named imports from @/components/audio-ui exist in the installed file", asy
 
 test("a component's docs page only imports what installing it brings", async () => {
   const pages = await Array.fromAsync(
-    new Bun.Glob("*.mdx").scan({
+    new Bun.Glob("**/*.mdx").scan({
       absolute: true,
       cwd: `${import.meta.dir}/../src/content/docs/components/base`,
     })

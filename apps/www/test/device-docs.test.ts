@@ -10,7 +10,7 @@ const DOCS = `${import.meta.dir}/../src/content/docs`;
 const names = Object.keys(DEVICE_DOCS) as DeviceDocName[];
 
 function page(name: string) {
-  return Bun.file(`${DOCS}/components/base/${name}.mdx`).text();
+  return Bun.file(`${DOCS}/components/base/(devices)/${name}.mdx`).text();
 }
 
 function documented(source: string) {
@@ -31,7 +31,7 @@ describe("the device pages", () => {
 
   test("every device has a page in the sidebar, under one group", async () => {
     const meta = JSON.parse(
-      await Bun.file(`${DOCS}/components/base/meta.json`).text()
+      await Bun.file(`${DOCS}/components/base/(devices)/meta.json`).text()
     );
     const pages: string[] = meta.pages;
     const start = pages.indexOf("---Dynamics---");

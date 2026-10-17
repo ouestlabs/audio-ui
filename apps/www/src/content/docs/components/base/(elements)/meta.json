@@ -1,0 +1,19 @@
+{
+  "title": "Elements",
+  "pages": [
+    "---Controls---",
+    "knob",
+    "fader",
+    "xypad",
+    "envelope",
+    "---Keyboards and pads---",
+    "piano",
+    "pad",
+    "---Displays---",
+    "meter",
+    "waveform",
+    "plot",
+    "spectrum-analyzer",
+    "tuner"
+  ]
+}

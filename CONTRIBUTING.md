@@ -297,9 +297,11 @@ Docs live in `apps/www/src/content/docs/` (Fumadocs + MDX):
 
 ```
 content/docs/
-├── (root)/            # get-started, styling, registry, changelog...
-├── components/base/   # one MDX per audio component (knob.mdx, fader.mdx, player.mdx...)
-└── lib/               # audio-store.mdx, html-audio.mdx
+├── (root)/                 # Get started: introduction, installation, styling, registry...
+└── components/base/
+    ├── (elements)/         # knob.mdx, fader.mdx, meter.mdx...
+    ├── (workstation)/      # timeline.mdx, piano-roll.mdx, transport.mdx...
+    └── (devices)/          # compressor.mdx, delay.mdx...
 ```
 
 Use the existing MDX components, not raw HTML:
@@ -309,6 +311,8 @@ Use the existing MDX components, not raw HTML:
 
 <ComponentSource styleName="base-nova" name="knob" title="components/audio-ui/knob.tsx" />
 ```
+
+A page goes in the folder of its space, and in that folder's `meta.json`; the folder does not show in its URL (`/docs/components/base/knob`). The spaces and the grouping rules are in [AGENTS.md](AGENTS.md#docs-appswwwsrccontentdocs).
 
 `<ComponentPreview>` renders the demo referenced by its registry `name` (the first file of the item is lazy-loaded), with `base-nova` as the default style. `<CodeTabs>`, `<Steps>`/`<Step>`, and `<TabsList>`/`<TabsTrigger>`/`<TabsContent>` are available for installation sections, copy the structure of an existing component page.
 

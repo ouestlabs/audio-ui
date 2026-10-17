@@ -97,10 +97,16 @@
       "name": "pad"
     },
     {
-      "count": 8,
+      "count": 2,
       "description": "Virtual piano keyboard components with MIDI note ranges and glissando.",
       "label": "Piano",
       "name": "piano"
+    },
+    {
+      "count": 6,
+      "description": "Piano roll editors and their parts: a scale menu, note find and note edits, playback, undo and MIDI files.",
+      "label": "Piano roll",
+      "name": "piano-roll"
     },
     {
       "count": 4,

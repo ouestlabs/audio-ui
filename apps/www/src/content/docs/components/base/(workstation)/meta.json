@@ -1,0 +1,17 @@
+{
+  "title": "Workstation",
+  "pages": [
+    "---Arrangement---",
+    "timeline",
+    "---Editors---",
+    "piano-roll",
+    "scale-menu",
+    "note-find",
+    "note-edit-menu",
+    "sequencer",
+    "---Transport and mixer---",
+    "transport",
+    "scrubber",
+    "mixer"
+  ]
+}

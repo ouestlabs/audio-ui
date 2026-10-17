@@ -60,32 +60,32 @@
     "title": "piano-active-notes-demo"
   },
   {
-    "categories": ["piano", "synth"],
+    "categories": ["piano-roll", "synth"],
     "name": "block-piano-roll",
     "title": "block-piano-roll"
   },
   {
-    "categories": ["piano"],
+    "categories": ["piano-roll"],
     "name": "scale-menu-demo",
     "title": "scale-menu-demo"
   },
   {
-    "categories": ["piano"],
+    "categories": ["piano-roll"],
     "name": "note-find-demo",
     "title": "note-find-demo"
   },
   {
-    "categories": ["piano"],
+    "categories": ["piano-roll"],
     "name": "note-edit-menu-demo",
     "title": "note-edit-menu-demo"
   },
   {
-    "categories": ["piano", "synth"],
+    "categories": ["piano-roll", "synth"],
     "name": "piano-roll-playback-demo",
     "title": "piano-roll-playback-demo"
   },
   {
-    "categories": ["piano"],
+    "categories": ["piano-roll"],
     "name": "piano-roll-midi-file-demo",
     "title": "piano-roll-midi-file-demo"
   },

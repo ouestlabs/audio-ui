@@ -44,13 +44,21 @@ function findBaseSubfolderChildren(
   return null;
 }
 
-// Find the pages inside the base subfolder (base) matching currentBase.
+// Find the pages inside the base subfolder (base) matching currentBase, in
+// its space folders too.
 function findBaseSubfolderPages(
   folder: PageTreeFolder,
   currentBase: string
 ): PageTreePage[] | null {
   const children = findBaseSubfolderChildren(folder, currentBase);
-  return children?.filter((c): c is PageTreePage => c.type === "page") ?? null;
+  return children
+    ? children.flatMap((child) => {
+        if (child.type === "page") {
+          return [child];
+        }
+        return child.type === "folder" ? getAllPagesFromFolder(child) : [];
+      })
+    : null;
 }
 
 // Get the pages from a folder, handling nested base folders (base).
@@ -59,7 +67,7 @@ export function getPagesFromFolder(
   currentBase: string
 ): PageTreePage[] {
   // For the components folder, find the base subfolder.
-  if (folder.$id === "components" || folder.name === "Components") {
+  if (isComponentsFolder(folder)) {
     const basePages = findBaseSubfolderPages(folder, currentBase);
     if (basePages) {
       return basePages;
@@ -78,23 +86,61 @@ export function getPagesFromFolder(
 }
 
 export type PageTreeSection = { pages: PageTreePage[]; title?: string };
+export type PageTreeGroup = {
+  /** Whether the reader may fold it: the spaces, not Get started. */
+  collapsible: boolean;
+  sections: PageTreeSection[];
+  title?: string;
+};
+
+const isComponentsFolder = (folder: PageTreeFolder) =>
+  folder.$id === "components" || folder.name === "Components";
+
+// Get a folder's groups, each a heading of the sidebar. The components' base
+// folder holds one folder per space (Elements, Workstation, Devices), and
+// each is a group of its own; any other folder is one group.
+export function getGroupsFromFolder(
+  folder: PageTreeFolder,
+  currentBase: string
+): PageTreeGroup[] {
+  const spaces = isComponentsFolder(folder)
+    ? findBaseSubfolderChildren(folder, currentBase)?.filter(
+        (child): child is PageTreeFolder => child.type === "folder"
+      )
+    : undefined;
+  if (spaces?.length) {
+    return spaces.map((space) => ({
+      collapsible: true,
+      sections: sectionsOf(space.children),
+      title: space.name?.toString(),
+    }));
+  }
+  return [
+    {
+      collapsible: false,
+      sections: getSectionsFromFolder(folder, currentBase),
+      title: folder.name?.toString(),
+    },
+  ];
+}
 
 // Get a folder's pages grouped under the separators of its meta.json: pages
 // before the first separator come first, with no title.
-export function getSectionsFromFolder(
+function getSectionsFromFolder(
   folder: PageTreeFolder,
   currentBase: string
 ): PageTreeSection[] {
-  const isComponents =
-    folder.$id === "components" || folder.name === "Components";
-  const children = isComponents
+  const children = isComponentsFolder(folder)
     ? findBaseSubfolderChildren(folder, currentBase)
     : folder.children;
 
   if (!children) {
     return [{ pages: getPagesFromFolder(folder, currentBase) }];
   }
+  return sectionsOf(children);
+}
 
+function sectionsOf(children: PageTreeFolder["children"]): PageTreeSection[] {
   const sections: PageTreeSection[] = [];
   for (const child of children) {
     if (child.type === "separator") {

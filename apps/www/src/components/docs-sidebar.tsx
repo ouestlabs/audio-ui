@@ -1,7 +1,8 @@
 "use client";
 
+import { CaretDownIcon } from "@phosphor-icons/react/ssr";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import * as React from "react";
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -15,11 +16,11 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useSidebarGroups } from "@/hooks/use-sidebar-groups";
 import { getDocsPageUpdateHint } from "@/lib/docs";
-import { getCurrentBase, getSectionsFromFolder } from "@/lib/page-tree";
 import type { source } from "@/lib/source";
+import { cn } from "@/lib/utils";
 
-const EXCLUDED_SECTIONS = ["test"];
 const EXCLUDED_PAGES = ["test"];
 
 function DocsUpdateIndicator({ path }: { path: string }) {
@@ -49,71 +50,108 @@ function DocsUpdateIndicator({ path }: { path: string }) {
   );
 }
 
+/** A group's title; a space's folds its pages away and back. */
+function GroupLabel({
+  collapsible,
+  onOpenChange,
+  open,
+  title,
+}: {
+  collapsible: boolean;
+  onOpenChange: (title: string, open: boolean) => void;
+  open: boolean;
+  title: string;
+}) {
+  const toggle = React.useCallback(
+    () => onOpenChange(title, !open),
+    [onOpenChange, open, title]
+  );
+  if (!collapsible) {
+    return (
+      <SidebarGroupLabel className="font-semibold text-site-foreground">
+        {title}
+      </SidebarGroupLabel>
+    );
+  }
+  return (
+    <SidebarGroupLabel
+      className="w-full cursor-pointer justify-between font-semibold text-site-foreground hover:bg-site-muted"
+      render={<button aria-expanded={open} onClick={toggle} type="button" />}
+    >
+      {title}
+      <CaretDownIcon
+        aria-hidden="true"
+        className={cn(
+          "text-site-muted-foreground transition-transform",
+          !open && "-rotate-90"
+        )}
+      />
+    </SidebarGroupLabel>
+  );
+}
+
 /** The docs' links, by section: the list a sidebar shows on the docs and on the home. */
 export function DocsNavigation({
   tree,
 }: {
   tree: ReturnType<typeof source.getPageTree>;
 }) {
-  const pathname = usePathname();
-  const currentBase = getCurrentBase(pathname);
+  const { groups, pathname, setOpen } = useSidebarGroups(tree);
 
   return (
     <div className="no-scrollbar scroll-fade-y min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-2 pb-12">
       <div className="h-(--top-spacing) shrink-0" />
-      {tree.children.map((item) => {
-        if (EXCLUDED_SECTIONS.includes(item.$id ?? "")) {
-          return null;
-        }
-
-        return (
-          <SidebarGroup key={item.$id}>
-            <SidebarGroupLabel className="font-medium text-site-muted-foreground">
-              {item.name}
-            </SidebarGroupLabel>
+      {groups.map((group) => (
+        <SidebarGroup key={group.title}>
+          <GroupLabel
+            collapsible={group.collapsible}
+            onOpenChange={setOpen}
+            open={group.open}
+            title={group.title ?? ""}
+          />
+          {group.open ? (
             <SidebarGroupContent>
-              {item.type === "folder" &&
-                getSectionsFromFolder(item, currentBase).map((section) => (
-                  <div
-                    className="not-first:mt-3"
-                    key={section.title ?? "untitled"}
-                  >
-                    {section.title ? (
-                      <p className="px-2 pb-1 text-site-muted-foreground text-xs">
-                        {section.title}
-                      </p>
-                    ) : null}
-                    <SidebarMenu className="gap-0.5">
-                      {section.pages.map((page) => {
-                        if (EXCLUDED_PAGES.includes(page.url)) {
-                          return null;
-                        }
+              {group.sections.map((section) => (
+                <div
+                  className="not-first:mt-3"
+                  key={section.title ?? "untitled"}
+                >
+                  {section.title ? (
+                    <p className="px-2 pb-1 text-site-muted-foreground text-xs">
+                      {section.title}
+                    </p>
+                  ) : null}
+                  <SidebarMenu className="gap-0.5">
+                    {section.pages.map((page) => {
+                      if (EXCLUDED_PAGES.includes(page.url)) {
+                        return null;
+                      }
 
-                        return (
-                          <SidebarMenuItem key={page.url}>
-                            <SidebarMenuButton
-                              className="after:site-rounded-md after:-inset-y-1 relative h-[30px] 3xl:fixed:w-full w-fit 3xl:fixed:max-w-48 overflow-visible border border-transparent font-medium text-[0.8rem] after:absolute after:inset-x-0 after:z-0 data-[active=true]:border-site-accent data-[active=true]:bg-site-accent"
-                              isActive={page.url === pathname}
-                              render={
-                                <Link href={page.url} prefetch={false}>
-                                  <span className="pointer-events-none absolute inset-0 flex w-(--sidebar-width) bg-transparent" />
-                                  <span className="relative z-10 inline-flex items-center gap-2">
-                                    <span>{page.name}</span>
-                                    <DocsUpdateIndicator path={page.url} />
-                                  </span>
-                                </Link>
-                              }
-                            />
-                          </SidebarMenuItem>
-                        );
-                      })}
-                    </SidebarMenu>
-                  </div>
-                ))}
+                      return (
+                        <SidebarMenuItem key={page.url}>
+                          <SidebarMenuButton
+                            className="after:site-rounded-md after:-inset-y-1 relative h-[30px] 3xl:fixed:w-full w-fit 3xl:fixed:max-w-48 overflow-visible border border-transparent font-medium text-[0.8rem] after:absolute after:inset-x-0 after:z-0 data-[active=true]:border-site-accent data-[active=true]:bg-site-accent"
+                            isActive={page.url === pathname}
+                            render={
+                              <Link href={page.url} prefetch={false}>
+                                <span className="pointer-events-none absolute inset-0 flex w-(--sidebar-width) bg-transparent" />
+                                <span className="relative z-10 inline-flex items-center gap-2">
+                                  <span>{page.name}</span>
+                                  <DocsUpdateIndicator path={page.url} />
+                                </span>
+                              </Link>
+                            }
+                          />
+                        </SidebarMenuItem>
+                      );
+                    })}
+                  </SidebarMenu>
+                </div>
+              ))}
             </SidebarGroupContent>
-          </SidebarGroup>
-        );
-      })}
+          ) : null}
+        </SidebarGroup>
+      ))}
     </div>
   );
 }

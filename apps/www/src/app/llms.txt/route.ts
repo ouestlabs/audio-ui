@@ -1,10 +1,9 @@
 import { siteConfig } from "@/lib/config";
+import { getGroupsFromFolder } from "@/lib/page-tree";
 import { getAllCatalogItems } from "@/lib/registry";
 import { source } from "@/lib/source";
 
 export const revalidate = false;
-
-const COMPONENTS_PREFIX = "components/base/";
 
 function markdownUrl(url: string) {
   return `${siteConfig.url}${url.replace("/docs", "/llm")}`;
@@ -12,11 +11,23 @@ function markdownUrl(url: string) {
 
 export function GET() {
   const pages = source.getPages();
-  const guides = pages.filter(
-    (p) => !p.slugs.join("/").startsWith("components")
+  const byUrl = new Map(pages.map((p) => [p.url, p]));
+  // The components by space (Elements, Workstation, Devices), as the sidebar groups them.
+  const spaces = source
+    .getPageTree()
+    .children.flatMap((folder) =>
+      folder.type === "folder" && folder.$id === "components"
+        ? getGroupsFromFolder(folder, "base")
+        : []
+    );
+  // A guide a space opens with, such as Devices, is listed in that space only.
+  const inSpaces = new Set(
+    spaces.flatMap((space) =>
+      space.sections.flatMap((section) => section.pages.map((p) => p.url))
+    )
   );
-  const components = pages.filter((p) =>
-    p.slugs.join("/").startsWith(COMPONENTS_PREFIX)
+  const guides = pages.filter(
+    (p) => !(p.slugs.join("/").startsWith("components") || inSpaces.has(p.url))
   );
 
   const line = (p: (typeof pages)[number]) =>
@@ -34,7 +45,17 @@ export function GET() {
       `- Created by [${siteConfig.author.name}](${siteConfig.author.url}). Source: ${siteConfig.links.github}`,
     ].join("\n"),
     ["## Guides", ...guides.map(line)].join("\n"),
-    ["## Components", ...components.map(line)].join("\n"),
+    ...spaces.map((space) =>
+      [
+        `## ${space.title}`,
+        ...space.sections.flatMap((section) =>
+          section.pages.flatMap((node) => {
+            const page = byUrl.get(node.url);
+            return page ? [line(page)] : [];
+          })
+        ),
+      ].join("\n")
+    ),
     [
       "## For agents",
       `- [MCP server](${siteConfig.url}/mcp): remote Streamable HTTP server with the tools list_components, get_component_docs and search_catalog.`,

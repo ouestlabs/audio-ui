@@ -86,17 +86,20 @@ async function spotlightProps(
       `No showcase for "${component}": add one to apps/video/src/showcases/ and list it in index.ts.\nKnown: ${Object.keys(SHOWCASES).join(", ")}`
     );
   }
-  const page = Bun.file(
-    `${root}/apps/www/src/content/docs/components/base/${component}.mdx`
+  // A component's page sits in its space's folder: (elements), (workstation) or (devices).
+  const [pagePath] = await Array.fromAsync(
+    new Bun.Glob(`*/${component}.mdx`).scan({
+      absolute: true,
+      cwd: `${root}/apps/www/src/content/docs/components/base`,
+    })
   );
   // A block or a composition has no docs page of its own: its showcase says what it is.
-  const hasPage = await page.exists();
-  if (!(hasPage || SHOWCASES[component]?.description)) {
+  if (!(pagePath || SHOWCASES[component]?.description)) {
     fail(
       `No docs page for "${component}" in apps/www/src/content/docs/components/base/, and its showcase has no description.`
     );
   }
-  const docs = hasPage ? await page.text() : "";
+  const docs = pagePath ? await Bun.file(pagePath).text() : "";
 
   let notes = values.note ?? [];
   if (kind === "update" && notes.length === 0) {
