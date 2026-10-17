@@ -1715,6 +1715,12 @@ export default function BlockTimeline() {
   // A press on a track's empty lane puts the cursor there (the lane does it) and picks the track, letting go of the clips; on the surface under the last track it lets go of everything, as nothing is there.
   // The shortcuts are caught on the panel, so a press on the lane, which takes no focus, hands it over.
   const panelRef = useRef<HTMLDivElement>(null);
+  // A press on any clip brings the closed clip panel back, even on a clip already picked, whose selection does not change.
+  const showClipView = useCallback((event: PointerEvent<HTMLDivElement>) => {
+    if ((event.target as HTMLElement).closest("[data-clip-id]")) {
+      setClipViewOpen(true);
+    }
+  }, []);
   const focusPanel = useCallback(
     (event: PointerEvent<HTMLDivElement>) => {
       if (event.target === event.currentTarget && !event.shiftKey && !multi) {
@@ -2983,6 +2989,7 @@ export default function BlockTimeline() {
                           track.kind === "midi" ? addMidiClipAt : undefined
                         }
                         onPointerDown={focusPanel}
+                        onPointerDownCapture={showClipView}
                         onSelectionChange={selectTime}
                         seekable
                       >
