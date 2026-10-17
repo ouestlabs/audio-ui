@@ -309,7 +309,7 @@ arrangement.removeTrack(id); // with its clips; any track can go, the last inclu
 arrangement.undo();
 ```
 
-It also gives `selectClip`, `selectClips`, `selectAll`, `selectTrack`, `splitAtCursor`, `duplicateSelection`, `removeClip`, `renameClip`, `setFadeShape` (a fade's curve, as one undo step), `clipAction` (a clip's menu: duplicate, split, switch off, delete), `mixOf` and `changeMix` (gain, pan, mute, solo, color), `heights` and `resizeTrack`, `renameTrack`, `duplicateTrack(id)` (the track with its clips, placed after it), `folded` and `toggleFold` (a folded track is a strip of `foldedHeight` px that keeps its own height for when it opens), the time commands `clearTimeSelection`, `copyOf`, `paste`, `removeTimeSpan`, `insertTimeSpan` and `consolidateTime` (a time selection is `{ range, tracks }`, and `lib/arrangement` holds them as pure functions: `copyTime`, `clearTime`, `pasteTime`, `deleteTime`, `openTime`, `consolidate`), `toggleSelected`, and `rescale(ratio)` for a tempo change, which also clears the history since it is not part of it.
+It also gives `selectClip`, `selectClips`, `selectAll`, `selectTrack`, `splitAtCursor`, `duplicateSelection`, `removeClip`, `renameClip`, `setFadeShape` (a fade's curve, as one undo step), `clipAction` (a clip's menu: duplicate, split, switch off, delete), `mixOf` and `changeMix` (gain, pan, mute, solo, color), `heights` and `resizeTrack`, `renameTrack`, `duplicateTrack(id)` (the track with its clips, placed after it), `folded` and `toggleFold` (a folded track is a strip of `foldedHeight` px that keeps its own height for when it opens), the time commands `clearTimeSelection`, `copyOf`, `paste`, `removeTimeSpan`, `insertTimeSpan` and `consolidateTime` (a time selection is `{ range, tracks }`, and `lib/arrangement` holds them as pure functions: `copyTime`, `clearTime`, `pasteTime`, `deleteTime`, `openTime`, `consolidate`), `fadeTimeSelection` and `crossfade` (fades from a time selection, and a fade where two clips meet given to both), `toggleSelected`, and `rescale(ratio)` for a tempo change, which also clears the history since it is not part of it.
 
 A drag across the bare lanes selects a stretch of time on the tracks it sweeps, drawn over them; the time commands below work on it. The block's own keys work once a press on a lane has put the focus in it:
 
@@ -330,28 +330,12 @@ A drag across the bare lanes selects a stretch of time on the tracks it sweeps, 
 <KeyRow gesture={"`Cmd` / `Ctrl` + `Shift` + `X`, `V`, `D`, `Delete`"}>The same on time itself, on every track: cut it out, paste it in, repeat it, or take it out, moving what comes after.</KeyRow>
 <KeyRow gesture={"`Cmd` / `Ctrl` + `I`"}>Open a stretch of silence at the cursor, as long as the time selection (a bar when there is none).</KeyRow>
 <KeyRow gesture={"`0`"}>Switch the selected clips off, or back on.</KeyRow>
+<KeyRow gesture={"`Cmd` / `Ctrl` + `Alt` + `F`"}>Fade the clips whose edges the time selection covers, in or out; two clips that meet across it crossfade.</KeyRow>
+<KeyRow gesture={"`Delete` on a fade handle"}>Take the fade away.</KeyRow>
 <KeyRow gesture={"On the loop"}>`Left` / `Right` move it by a grid step, `Up` / `Down` by its own length; with `Cmd` / `Ctrl`, `Left` / `Right` shorten or lengthen it and `Up` / `Down` double or halve it.</KeyRow>
 </KeyTable>
 
-With snapping on, a dragged clip or loop also lands on the edges of the other clips, the locators and the loop, through `snapPoints`.
-
-The block's own keys work once a press on a lane has put the focus in it:
-
-<KeyTable title="Keys">
-<KeyRow gesture={"`Left` / `Right`"}>Move the cursor by a grid step. `Home` and `End` go to the start and to the end of the last clip.</KeyRow>
-<KeyRow gesture={"`Alt` + `Left` / `Right`"}>Jump to the previous or next locator or clip edge, on the picked tracks (on every track when none is picked).</KeyRow>
-<KeyRow gesture={"`Up` / `Down`"}>Pick the track above or below.</KeyRow>
-<KeyRow gesture={"`+` / `-`"}>Zoom in or out around the cursor.</KeyRow>
-<KeyRow gesture={"`Z`, `X`"}>Zoom onto the selected clips (the loop, when none is selected), and step back to the zoom before.</KeyRow>
-<KeyRow gesture={"`Cmd` / `Ctrl` + `1`, `2`"}>A finer or a wider grid.</KeyRow>
-<KeyRow gesture={"`Cmd` / `Ctrl` + `3`, `4`, `5`"}>Triplets on or off, snapping on or off, and a grid fixed where it is or following the zoom again.</KeyRow>
-<KeyRow gesture={"`M`"}>Add a locator at the cursor.</KeyRow>
-<KeyRow gesture={"`S`, `Cmd` / `Ctrl` + `E`"}>Split the selected clips at the cursor.</KeyRow>
-<KeyRow gesture={"`Cmd` / `Ctrl` + `L`"}>Put the loop around the selection.</KeyRow>
-<KeyRow gesture={"On the loop"}>`Left` / `Right` move it by a grid step, `Up` / `Down` by its own length; with `Cmd` / `Ctrl`, `Left` / `Right` shorten or lengthen it and `Up` / `Down` double or halve it.</KeyRow>
-</KeyTable>
-
-With snapping on, a dragged clip or loop also lands on the edges of the other clips, the locators and the loop, through `snapPoints`.
+With snapping on, a dragged clip or loop also lands on the edges of the other clips, the locators and the loop, through `snapPoints`. Where two clips meet, the fade-out of one and the fade-in of the next move together, as a crossfade, and a dashed line shows how far a fade being dragged can go.
 
 ## Placing your own parts
 
@@ -535,7 +519,7 @@ Resizes one edge of the range: by dragging, on the grid unless Cmd/Ctrl is held,
 
 ### Clip
 
-A stretch of a source laid on a lane. Dragging its `Timeline.ClipHeader` moves it, on the grid unless Cmd/Ctrl is held, and over other lanes too; pressing its body selects it and puts the cursor there. Add a `Timeline.ClipHandle` per edge to trim it and a `Timeline.ClipFadeHandle` per fade. It sets `--clip-offset`, `--clip-source-length`, `--clip-fade-in` and `--clip-fade-out` for its content. Its own native `<input type="range">` moves it from the keyboard and carries its accessible name (`aria-label` / `aria-labelledby`); Delete and Backspace on it call `onRemove`. Renders a `<div>` element.
+A stretch of a source laid on a lane. Dragging its `Timeline.ClipHeader` moves it, on the grid unless Cmd/Ctrl is held, and over other lanes too; pressing its body selects it and puts the cursor there. Add a `Timeline.ClipHandle` per edge to trim it and a `Timeline.ClipFadeHandle` per fade. It sets `--clip-offset`, `--clip-source-length`, `--clip-fade-in` and `--clip-fade-out` for its content, and `--clip-fade-in-max` and `--clip-fade-out-max`, how long each fade can grow, to draw the limit of a fade being dragged (`data-fading`). Its own native `<input type="range">` moves it from the keyboard and carries its accessible name (`aria-label` / `aria-labelledby`); Delete and Backspace on it call `onRemove`. Renders a `<div>` element.
 
 <TypeTable>
 <TypeRow name={"value"} type={"Value"}>The clip: `{ start, length, offset, fadeIn, fadeOut }`, all in the timeline's units.</TypeRow>
@@ -557,6 +541,7 @@ A stretch of a source laid on a lane. Dragging its `Timeline.ClipHeader` moves i
 <TypeTable title="Data attributes">
 <TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
 <TypeRow name={"data-dragging"}>Whether a pointer is moving, trimming or fading the clip.</TypeRow>
+<TypeRow name={"data-fading"}>`"in"` or `"out"`: the fade a pointer is dragging.</TypeRow>
 <TypeRow name={"data-selected"}>Present when the clip is selected.</TypeRow>
 </TypeTable>
 
@@ -580,7 +565,7 @@ Trims one edge of the clip: by dragging, on the grid unless Cmd/Ctrl is held, or
 
 ### ClipFadeHandle
 
-Sets how long one of the clip's fades lasts: by dragging, or from the keyboard through the native `<input type="range">` it holds, which carries the accessible name. It sits where its fade ends, at the clip's top edge. The two fades cannot overlap. Renders a `<div>` element.
+Sets how long one of the clip's fades lasts: by dragging, or from the keyboard through the native `<input type="range">` it holds, which carries the accessible name. Double-clicking it, or pressing Enter on its input, steps the fade through its shapes, and Delete or Backspace takes the fade away. It sits where its fade ends, at the clip's top edge. The two fades cannot overlap. Renders a `<div>` element.
 
 <TypeTable>
 <TypeRow name={"edge"} type={"\"in\" | \"out\""}>The fade of the clip this handle sets: the one at its start or at its end. Double-click it, or press Enter on its input, to step the fade through its shapes.</TypeRow>

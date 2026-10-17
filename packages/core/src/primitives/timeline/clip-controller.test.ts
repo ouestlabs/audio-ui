@@ -107,6 +107,17 @@ describe("Clip controller edges and fades", () => {
     expect(clip.getSnapshot().value.fadeIn).toBe(5);
   });
 
+  test("Delete takes a fade away, and leaves a trim edge alone", () => {
+    const clip = create({
+      defaultValue: { fadeIn: 4, fadeOut: 6, length: 20, offset: 0, start: 10 },
+    });
+    expect(clip.edgeKeyDown("fade-out", key("Delete"))).toBe(true);
+    expect(clip.getSnapshot().value.fadeOut).toBe(0);
+    expect(clip.edgeKeyDown("fade-in", key("Backspace"))).toBe(true);
+    expect(clip.getSnapshot().value.fadeIn).toBe(0);
+    expect(clip.edgeKeyDown("trim-end", key("Delete"))).toBe(false);
+  });
+
   test("a fade shape cycles through its shapes", () => {
     const clip = create();
     const before = clip.getSnapshot().value.fadeInShape;
@@ -175,5 +186,30 @@ describe("Clip controller snap points", () => {
 
   test("its own edges do not hold it back", () => {
     expect(drag([10, 30], 3)).toBeCloseTo(10.3, 9);
+  });
+});
+
+describe("Clip controller drag target", () => {
+  test("names what a pointer drags, and nothing between drags", () => {
+    const handle = document.createElement("div");
+    const pointer = (type: string, clientX: number) =>
+      Object.assign(new Event(type), {
+        altKey: false,
+        button: 0,
+        buttons: type === "pointerup" ? 0 : 1,
+        clientX,
+        clientY: 0,
+        ctrlKey: false,
+        metaKey: false,
+        pointerId: 1,
+        pointerType: "mouse",
+        shiftKey: false,
+      }) as unknown as PointerEvent;
+    const clip = create({ zoom: 10 });
+    expect(clip.getSnapshot().dragTarget).toBeNull();
+    clip.press("fade-in", pointer("pointerdown", 0), handle, handle);
+    expect(clip.getSnapshot().dragTarget).toBe("fade-in");
+    document.dispatchEvent(pointer("pointerup", 0));
+    expect(clip.getSnapshot().dragTarget).toBeNull();
   });
 });

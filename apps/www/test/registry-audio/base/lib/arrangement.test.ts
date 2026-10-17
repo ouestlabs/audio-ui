@@ -5,7 +5,9 @@ import {
   consolidate,
   copyClips,
   copyTime,
+  crossfade,
   deleteTime,
+  fadeTime,
   land,
   lay,
   openTime,
@@ -206,5 +208,51 @@ describe("time on tracks", () => {
       [50, 10],
     ]);
     expect(clips.find((item) => item.id === ids[0])?.sourceLength).toBe(40);
+  });
+});
+
+describe("fades", () => {
+  const fade = (item: Arranged | undefined) => [
+    item?.value.fadeIn,
+    item?.value.fadeOut,
+  ];
+
+  test("a fade where two clips meet is given to the other one, as long as it can be", () => {
+    const left = clip("l", "drums", 0, 20);
+    const right = { ...clip("r", "drums", 20, 10) };
+    right.value = { ...right.value, fadeIn: 4 };
+    const other = clip("o", "bass", 0, 20);
+    const laid = crossfade([left, right, other], "r", "in");
+    expect(fade(laid.find((item) => item.id === "l"))).toEqual([0, 4]);
+    expect(fade(laid.find((item) => item.id === "o"))).toEqual([0, 0]);
+    const short = clip("s", "drums", 30, 3);
+    right.value = { ...right.value, fadeOut: 6 };
+    expect(
+      fade(
+        crossfade([right, short], "r", "out").find((item) => item.id === "s")
+      )
+    ).toEqual([3, 0]);
+  });
+
+  test("a stretch over a clip's edges fades it in and out, and two clips that meet across it crossfade", () => {
+    const laid = fadeTime(
+      [
+        clip("a", "drums", 0, 20),
+        clip("b", "drums", 20, 20),
+        clip("c", "bass", 0, 20),
+      ],
+      { range: [16, 24], tracks: ["drums"] }
+    );
+    expect(fade(laid.find((item) => item.id === "a"))).toEqual([0, 4]);
+    expect(fade(laid.find((item) => item.id === "b"))).toEqual([4, 0]);
+    expect(fade(laid.find((item) => item.id === "c"))).toEqual([0, 0]);
+  });
+
+  test("a stretch over a whole clip shares its length between the two fades", () => {
+    const [laid] = fadeTime([clip("a", "drums", 10, 10)], {
+      range: [0, 40],
+      tracks: ["drums"],
+    });
+    expect(fade(laid)).toEqual([5, 5]);
   });
 });

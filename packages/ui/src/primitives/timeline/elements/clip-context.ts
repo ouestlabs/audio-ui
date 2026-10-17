@@ -15,6 +15,8 @@ export type ClipState = {
   disabled: boolean;
   /** Whether a pointer is moving, trimming or fading the clip. */
   dragging: boolean;
+  /** The fade a pointer is dragging, if any. */
+  fading?: "in" | "out";
   selected: boolean;
 };
 

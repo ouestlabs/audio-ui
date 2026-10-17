@@ -14,8 +14,9 @@ import {
  * Sets how long one of the clip's fades lasts: by dragging, which is not on
  * the grid, or from the keyboard through the native `<input type="range">` it
  * holds, which carries the accessible name. Double-clicking it, or pressing
- * Enter on its input, steps the fade through its shapes. It sits where its
- * fade ends, from the clip's edge. Renders a `<div>` element.
+ * Enter on its input, steps the fade through its shapes, and Delete or
+ * Backspace takes the fade away. It sits where its fade ends, from the clip's
+ * edge. Renders a `<div>` element.
  */
 export function ClipFadeHandle(componentProps: ClipFadeHandle.Props) {
   const {
@@ -65,6 +66,10 @@ export function ClipFadeHandle(componentProps: ClipFadeHandle.Props) {
       }
       if (controller.edgeKeyDown(target, event.nativeEvent)) {
         event.preventDefault();
+        // Delete took the fade away: it is not for the clip, or the page, to remove anything too.
+        if (event.key === "Delete" || event.key === "Backspace") {
+          event.stopPropagation();
+        }
       }
     },
     [controller, disabled, edge, target]

@@ -876,6 +876,7 @@ export default function BlockTimeline() {
     consolidateTime,
     copying,
     copyOf,
+    fadeTimeSelection,
     duplicateSelection,
     duplicateTrack,
     folded,
@@ -1405,12 +1406,27 @@ export default function BlockTimeline() {
    * there; with a time selection, D duplicates it after itself, J makes one
    * clip per track of it and L loops it. With Shift too, X, V, D and Delete
    * work on the time itself, on every track. Delete empties the time
-   * selection, and 0 switches the selected clips off or on. Returns whether
-   * the key was one of these.
+   * selection, and 0 switches the selected clips off or on. Cmd/Ctrl + Alt + F
+   * fades the clips whose edges the time selection covers, crossfading two that
+   * meet. Returns whether the key was one of these.
    */
   const handleTimeKey = (event: KeyboardEvent<HTMLDivElement>) => {
     // In a field, copying and deleting are the field's own.
-    if (event.altKey || typing(event.target)) {
+    if (typing(event.target)) {
+      return false;
+    }
+    // Cmd/Ctrl + Alt + F: fades from the time selection. Read from the key's place: Alt changes the letter on a Mac.
+    if (
+      (event.metaKey || event.ctrlKey) &&
+      event.altKey &&
+      event.code === "KeyF" &&
+      timeSelection
+    ) {
+      event.preventDefault();
+      fadeTimeSelection(timeSelection);
+      return true;
+    }
+    if (event.altKey) {
       return false;
     }
     const key = event.key.toLowerCase();

@@ -225,7 +225,15 @@ function TimelineRangeHandle({
   );
 }
 
-function TimelineClip({ className, ...props }: TimelinePrimitive.Clip.Props) {
+/** Where a fade being dragged stops: the other fade's start, as a dashed line. */
+const FADE_LIMIT =
+  "pointer-events-none absolute inset-y-0 z-30 hidden border-foreground/60 border-l border-dashed";
+
+function TimelineClip({
+  children,
+  className,
+  ...props
+}: TimelinePrimitive.Clip.Props) {
   return (
     <TimelinePrimitive.Clip
       className={cn(
@@ -234,7 +242,25 @@ function TimelineClip({ className, ...props }: TimelinePrimitive.Clip.Props) {
       )}
       data-slot="timeline-clip"
       {...props}
-    />
+    >
+      {children}
+      <span
+        aria-hidden="true"
+        className={cn(FADE_LIMIT, "group-data-[fading=in]/clip:block")}
+        style={{
+          insetInlineStart:
+            "calc(var(--timeline-unit) * var(--clip-fade-in-max))",
+        }}
+      />
+      <span
+        aria-hidden="true"
+        className={cn(FADE_LIMIT, "group-data-[fading=out]/clip:block")}
+        style={{
+          insetInlineEnd:
+            "calc(var(--timeline-unit) * var(--clip-fade-out-max))",
+        }}
+      />
+    </TimelinePrimitive.Clip>
   );
 }
 
