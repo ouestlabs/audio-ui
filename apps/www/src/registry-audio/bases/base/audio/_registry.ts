@@ -721,7 +721,7 @@ export const audio: RegistryItem[] = [
   },
   {
     categories: ["timeline", "waveform", "knob"],
-    dependencies: ["@audio-ui/react"],
+    dependencies: ["@audio-ui/core", "@audio-ui/react"],
     description:
       "The clip view of an arrangement's clip: its source as a waveform with the stretch it plays or loops to drag, Loop, Reverse and Crop, and knobs for its gain and transpose.",
     files: [
