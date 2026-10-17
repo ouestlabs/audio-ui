@@ -3,6 +3,7 @@ import {
   type Arranged,
   automationAt,
   clearTime,
+  clipReach,
   consolidate,
   copyClips,
   copyTime,
@@ -64,6 +65,50 @@ describe("lay", () => {
     );
     expect(laid).toHaveLength(1);
     expect(laid[0]?.value.start).toBe(50);
+  });
+
+  test("shortens what it covers to where it starts, whatever its own source holds", () => {
+    const groove = clip("groove", "drums", 4, 12);
+    const fill = { ...clip("fill", "drums", 12, 4), sourceLength: 6 };
+    const laid = lay([groove], fill, DURATION);
+    expect(
+      laid.map((item) => [
+        item.id,
+        item.value.start,
+        item.value.start + item.value.length,
+      ])
+    ).toEqual([
+      ["groove", 4, 12],
+      ["fill", 12, 16],
+    ]);
+  });
+});
+
+describe("clipReach", () => {
+  const warp = [
+    { source: 0, target: 0 },
+    { source: 4, target: 8 },
+  ];
+
+  test("is the length of the source for a clip that plays it once", () => {
+    const once = { ...clip("a", "drums", 0, 10), sourceLength: 24 };
+    expect(clipReach(once)).toBe(24);
+  });
+
+  test("has no end for a clip that loops, warped or not", () => {
+    const looped = {
+      ...clip("a", "drums", 0, 10),
+      loop: [0, 4] as const,
+      sourceLength: 4,
+    };
+    expect(clipReach(looped)).toBeUndefined();
+    expect(clipReach({ ...looped, warp })).toBeUndefined();
+  });
+
+  test("is as far as its warp stretches the source for a warped clip", () => {
+    // Played at half speed: four seconds of source last eight on the clip.
+    const warped = { ...clip("a", "drums", 0, 10), sourceLength: 4, warp };
+    expect(clipReach(warped)).toBe(8);
   });
 });
 

@@ -1,6 +1,5 @@
 "use client";
 
-import { warpedTime } from "@audio-ui/core/time";
 import type { FadeShape, Timeline as TimelinePrimitive } from "@audio-ui/react";
 import {
   type FocusEvent,
@@ -33,6 +32,7 @@ import {
 import {
   type Arranged,
   type ClipAction,
+  clipReach,
   playedNotes,
 } from "@/registry-audio/bases/base/lib/arrangement";
 
@@ -59,16 +59,6 @@ function menuEntries(disabled: boolean): {
       separatorBefore: true,
     },
   ];
-}
-
-/** How far a clip can be stretched on the timeline: forever looped, as its warp stretches its source, or as long as its source. */
-function sourceSpan(clip: Arranged) {
-  if (clip.loop) {
-    return;
-  }
-  return clip.warp
-    ? warpedTime(clip.warp, clip.sourceLength)
-    : clip.sourceLength;
 }
 
 const selectText = (element: HTMLInputElement | null) => element?.select();
@@ -336,8 +326,8 @@ const ArrangedClip = memo(function ArrangedClipView({
           onValueChange={handleChange}
           onValueCommitted={handleCommitted}
           selected={selected}
-          // A looped clip repeats its loop, as far as it is stretched; a warped one lasts as its warp stretches its source.
-          sourceLength={sourceSpan(clip)}
+          // The clip's reach: the timeline reads it as how long the source is.
+          sourceLength={clipReach(clip)}
           style={
             lift
               ? { transform: `translateY(${lift}px)`, zIndex: 10 }

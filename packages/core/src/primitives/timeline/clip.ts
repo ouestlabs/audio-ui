@@ -206,16 +206,18 @@ export function duplicateClip(clip: ClipValue, limits: ClipLimits): ClipValue {
  * overlaps by an edge is trimmed to what is left; one it lies inside is cut
  * in two around it. Items are anything with a `value`, so the rest of what
  * the app keeps about a clip travels with each piece. `split` makes the
- * second piece's item from the first's.
+ * second piece's item from the first's. Only the timeline's length is read
+ * from `limits`: covering only shortens a clip, so no source limits it.
  */
 export function coverClips<Item extends { value: ClipValue }>(
   items: readonly Item[],
   placed: ClipValue,
-  limits: ClipLimits,
+  limits: Pick<ClipLimits, "duration">,
   split: (item: Item, value: ClipValue) => Item
 ): Item[] {
   const from = placed.start;
   const to = clipEnd(placed);
+  const loose = { duration: limits.duration, minLength: 0 };
   const result: Item[] = [];
   for (const item of items) {
     const { value } = item;
@@ -229,11 +231,11 @@ export function coverClips<Item extends { value: ClipValue }>(
     if (keepsLeft) {
       result.push({
         ...item,
-        value: trimClipEnd(value, from, { ...limits, minLength: 0 }),
+        value: trimClipEnd(value, from, loose),
       });
     }
     if (keepsRight) {
-      const right = trimClipStart(value, to, { ...limits, minLength: 0 });
+      const right = trimClipStart(value, to, loose);
       result.push(keepsLeft ? split(item, right) : { ...item, value: right });
     }
   }
@@ -245,12 +247,12 @@ function clipPart(
   clip: ClipValue,
   from: number,
   to: number,
-  limits: ClipLimits
+  limits: Pick<ClipLimits, "duration">
 ): ClipValue | null {
   if (clipEnd(clip) <= from || clip.start >= to) {
     return null;
   }
-  const loose = { ...limits, minLength: 0 };
+  const loose = { duration: limits.duration, minLength: 0 };
   const started = clip.start < from ? trimClipStart(clip, from, loose) : clip;
   return clipEnd(started) > to ? trimClipEnd(started, to, loose) : started;
 }
@@ -264,7 +266,7 @@ export function copyRange<Item extends { value: ClipValue }>(
   items: readonly Item[],
   from: number,
   to: number,
-  limits: ClipLimits
+  limits: Pick<ClipLimits, "duration">
 ): Item[] {
   const parts: Item[] = [];
   for (const item of items) {
@@ -286,7 +288,7 @@ export function removeTime<Item extends { value: ClipValue }>(
   items: readonly Item[],
   from: number,
   to: number,
-  limits: ClipLimits,
+  limits: Pick<ClipLimits, "duration">,
   split: (item: Item, value: ClipValue) => Item
 ): Item[] {
   const gap = to - from;
@@ -310,13 +312,13 @@ export function insertTime<Item extends { value: ClipValue }>(
   items: readonly Item[],
   at: number,
   length: number,
-  limits: ClipLimits,
+  limits: Pick<ClipLimits, "duration">,
   split: (item: Item, value: ClipValue) => Item
 ): Item[] {
   if (!(length > 0)) {
     return [...items];
   }
-  const loose = { ...limits, minLength: 0 };
+  const loose = { duration: limits.duration, minLength: 0 };
   const later = (item: Item, value: ClipValue): Item[] => {
     const start = value.start + length;
     if (start >= limits.duration) {

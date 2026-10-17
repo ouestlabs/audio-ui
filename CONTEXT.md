@@ -33,8 +33,16 @@ A styled registry wrapper over a primitive, copied into user projects via the re
 _Avoid_: styled component, wrapper
 
 **TransportClock**:
-The seam between musical time (tempo, steps, loop region, seek) and Web Audio scheduling. A drift-free look-ahead clock: it advances a stepping cursor against `AudioContext.currentTime` and emits `(step, audioTime)` boundaries so a caller schedules synthesis sample-accurately, and it exposes a continuous playhead position, but it knows nothing about *what* is played (drum hits, note-pairs). It owns start/stop/seek/region and fires a reset on every re-anchor so the caller can flush its scheduled-ahead sound. `use-transport-clock` is a thin adapter over its pure, framework-agnostic core in `lib/lookahead-scheduler.ts`.
+The seam between musical time (tempo, steps, loop region, seek) and Web Audio scheduling. A drift-free look-ahead clock: it advances a stepping cursor against `AudioContext.currentTime` and emits `(step, audioTime)` boundaries so a caller schedules synthesis sample-accurately, and it exposes a continuous playhead position, but it knows nothing about *what* is played (drum hits, note-pairs). It owns start, stop and seek, plays inside the loop region it is given, and fires a reset on every re-anchor so the caller can flush its scheduled-ahead sound. `use-transport-clock` is a thin adapter over its pure, framework-agnostic core in `@audio-ui/core/time`.
 _Avoid_: scheduler (bare: say the core or the clock), timer, metronome
+
+**Arrangement**:
+Everything laid out in time, as one document a host stores and saves: the tracks with their mixes and automation, the clips on them, the tempo, the time signatures, the locators, the loop and its own length. What is selected or copied is not part of it.
+_Avoid_: project (the host's whole saved file), song
+
+**Reach**:
+How far a clip can be stretched on the timeline: without end when it loops, as far as its warp stretches its source when it is warped, otherwise the length of its source. It belongs to the clip, so laying another clip over it never changes it.
+_Avoid_: extent, span, source length (the recording alone)
 
 **Category**:
 A curated, editorial grouping of catalog items (label, description, SEO, its own page). Declared in `categories.ts`; counts are derived, never hand-written.

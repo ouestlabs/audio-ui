@@ -239,6 +239,18 @@ describe("coverClips", () => {
       "ab:30+20@30",
     ]);
   });
+
+  test("a source's length never limits the clips it covers, which it only shortens", () => {
+    // A caller that still hands in the length of one clip's source changes nothing.
+    const limitedByASource = { duration: 100, sourceLength: 6 };
+    const covered = coverClips(
+      [at("a", 4, 12)],
+      at("n", 12, 10).value,
+      limitedByASource,
+      split
+    ).map((item) => [item.value.start, item.value.length]);
+    expect(covered).toEqual([[4, 8]]);
+  });
 });
 
 describe("time commands", () => {
@@ -312,6 +324,22 @@ describe("time commands", () => {
       95,
       5,
       0,
+    ]);
+  });
+
+  test("a source's length limits none of the clips they cut, move or copy", () => {
+    const limitedByASource = { duration: 100, sourceLength: 4 };
+    const long: Item[] = [{ id: "a", value: at(0, 50) }];
+    expect(lay(copyRange(long, 0, 15, limitedByASource))).toEqual([
+      ["a", 0, 15, 0],
+    ]);
+    expect(lay(removeTime(long, 10, 20, limitedByASource, split))).toEqual([
+      ["a", 0, 10, 0],
+      ["a+", 10, 30, 20],
+    ]);
+    const late: Item[] = [{ id: "b", value: at(40, 40) }];
+    expect(lay(insertTime(late, 10, 30, limitedByASource, split))).toEqual([
+      ["b", 70, 30, 0],
     ]);
   });
 

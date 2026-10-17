@@ -43,7 +43,7 @@ It also gives `selectClip`, `selectClips`, `selectAll`, `selectTrack`, `splitAtC
 
 ## Clips
 
-`ArrangedClip` (`npx shadcn@latest add @audio-ui/arranged-clip`) is a clip of the arrangement on its track's lane: drag its title bar to move it (with Alt, a copy), its edges to trim it into its source, its top corners to fade it, and pick a fade's curve from the menu of its handle. Double-click its title to rename it in place; right-click it for its menu (edit, rename, duplicate, split at the cursor, switch off, delete), which selects it first. A MIDI clip draws its notes across its body, and a looped or warped one stretches as far as its loop or its warp lets it.
+`ArrangedClip` (`npx shadcn@latest add @audio-ui/arranged-clip`) is a clip of the arrangement on its track's lane: drag its title bar to move it (with Alt, a copy), its edges to trim it into its source, its top corners to fade it, and pick a fade's curve from the menu of its handle. Double-click its title to rename it in place; right-click it for its menu (edit, rename, duplicate, split at the cursor, switch off, delete), which selects it first. A MIDI clip draws its notes across its body, and a looped clip has no end while a warped one lasts as long as its warp stretches its source: `clipReach(clip)` in `lib/arrangement` gives how far a clip can be stretched, `undefined` when it loops.
 
 ```tsx
 import { ArrangedClip, ArrangedClipGhost } from "@/components/audio-ui/arranged-clip";

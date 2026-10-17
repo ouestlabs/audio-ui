@@ -1,6 +1,6 @@
 import { type Breakpoint, levelAt } from "@audio-ui/core/envelope";
 import type { Note } from "@audio-ui/core/piano-roll";
-import type { WarpMarker } from "@audio-ui/core/time";
+import { type WarpMarker, warpedTime } from "@audio-ui/core/time";
 import {
   type ClipValue,
   copyRange,
@@ -106,6 +106,20 @@ export const UNITY_MIX: Mix = {
   soloed: false,
 };
 
+/**
+ * How far a clip can be stretched on the timeline: `undefined` when it loops,
+ * since it has no end then, as far as its warp stretches its source when it
+ * is warped, otherwise the length of its source.
+ */
+export function clipReach(clip: Arranged): number | undefined {
+  if (clip.loop) {
+    return;
+  }
+  return clip.warp
+    ? warpedTime(clip.warp, clip.sourceLength)
+    : clip.sourceLength;
+}
+
 let pieceCount = 0;
 
 /** A new id for a piece of the clip `id`. */
@@ -124,7 +138,8 @@ const splitPiece = (item: Arranged, value: ClipValue): Arranged => ({
 /**
  * Lays `placed` on its track: it covers what was under it, as a DAW's does,
  * rather than stacking on it. Pieces cut from a clip it lies inside get ids of
- * their own.
+ * their own. Covering only shortens a clip, so the reach of `placed` has no
+ * say in what is left of the others.
  */
 export function lay(
   all: Arranged[],
@@ -134,12 +149,7 @@ export function lay(
   const others = all.filter((clip) => clip.id !== placed.id);
   const onTrack = others.filter((clip) => clip.track === placed.track);
   const elsewhere = others.filter((clip) => clip.track !== placed.track);
-  const covered = coverClips(
-    onTrack,
-    placed.value,
-    { duration, sourceLength: placed.sourceLength },
-    splitPiece
-  );
+  const covered = coverClips(onTrack, placed.value, { duration }, splitPiece);
   return [...elsewhere, ...covered, placed];
 }
 
