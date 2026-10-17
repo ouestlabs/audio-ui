@@ -1,4 +1,4 @@
-import { DOCS_MENU_UPDATES } from "@/config/update";
+import { DOCS_MENU_UPDATES } from "@/lib/menu-updates";
 
 export const PAGES_NEW = Object.keys(DOCS_MENU_UPDATES);
 const PATTERN_REGEX = /[?#]/;
