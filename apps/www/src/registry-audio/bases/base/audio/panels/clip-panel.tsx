@@ -25,10 +25,11 @@ import {
 import {
   ClipBox,
   ClipField,
+  type ClipMeter,
   ClipRow,
-  ClipTitle,
   ClipToggle,
   ClipView,
+  formatBars,
   PositionField,
 } from "@/registry-audio/bases/base/audio/elements/clip-view";
 import {
@@ -74,24 +75,28 @@ interface ClipPanelProps {
   /** Whatever the host puts at the end of the title bar. */
   children?: ReactNode;
   className?: string;
-  /** Whether the panel is collapsed to its title, controlled: keep it outside to hold it across clips. Leave it out for the panel to keep its own. */
+  /** Whether the panel is rolled up to its strip, controlled: keep it outside to hold it from clip to clip. Leave it out for the panel to keep its own. */
   collapsed?: boolean;
+  /** The ids of its folded boxes ("audio:loop", "audio:sample"), controlled. */
+  foldedBoxes?: readonly string[];
   /** How a time in the source reads, in the hover and the handles. @default seconds with two decimals */
   format?: (seconds: number) => string;
   /** The clip's name, the panel's title. */
   name: string;
   /** The clip's switch was pressed. */
   onActiveChange?: (active: boolean) => void;
-  /** The chevron by the name was pressed. */
+  /** The caret on the strip was pressed. */
   onCollapsedChange?: (collapsed: boolean) => void;
   /** Crop was pressed: cut the source down to what the clip plays. Leave it out for a panel without it. */
   onCrop?: () => void;
+  /** Which boxes are folded was changed. */
+  onFoldedBoxesChange?: (folded: string[]) => void;
+  /** A name was typed in the strip. */
+  onRename?: (name: string) => void;
   /** Every change, as a gesture goes. */
   onValueChange: (value: ClipSettings) => void;
   /** A gesture that changed the settings ended. */
   onValueCommitted?: () => void;
-  /** The time signature the clip is counted in, as text such as "4/4". @default `${beatsPerBar}/4` */
-  signature?: string;
   value: ClipSettings;
   /** The source's peaks, the shape the waveform draws. */
   values: WaveformPrimitive.Root.Peaks;
@@ -225,6 +230,175 @@ function WarpMarkers({
   ));
 }
 
+/** The Loop box: the switch, where the loop sits in the source and how long it is, halved or doubled. */
+function LoopBox({
+  loop,
+  meter,
+  offset,
+  onCommit,
+  onDouble,
+  onHalve,
+  onLength,
+  onPosition,
+  onToggle,
+  span,
+  stretch,
+}: {
+  loop: readonly [number, number] | null;
+  meter: ClipMeter;
+  offset: number;
+  onCommit?: () => void;
+  onDouble: () => void;
+  onHalve: () => void;
+  onLength: (seconds: number) => void;
+  onPosition: (seconds: number) => void;
+  onToggle: () => void;
+  span: number;
+  stretch: number;
+}) {
+  return (
+    <ClipBox foldable id="audio:loop" title="Loop">
+      <ClipToggle onClick={onToggle} pressed={Boolean(loop)}>
+        Loop
+      </ClipToggle>
+      <ClipRow label="Position">
+        <PositionField
+          disabled={!loop}
+          label="Loop position"
+          max={span}
+          meter={meter}
+          onChange={onPosition}
+          onCommit={onCommit}
+          value={loop?.[0] ?? offset}
+        />
+      </ClipRow>
+      <ClipRow label="Length">
+        <PositionField
+          disabled={!loop}
+          kind="length"
+          label="Loop length"
+          meter={meter}
+          min={meter.bar / meter.beatsPerBar / 4}
+          onChange={onLength}
+          onCommit={onCommit}
+          value={stretch}
+        />
+      </ClipRow>
+      <div className="grid grid-cols-2 gap-1">
+        <ClipToggle
+          aria-label="Halve the loop"
+          disabled={!loop}
+          onClick={onHalve}
+        >
+          ÷2
+        </ClipToggle>
+        <ClipToggle
+          aria-label="Double the loop"
+          disabled={!loop}
+          onClick={onDouble}
+        >
+          ×2
+        </ClipToggle>
+      </div>
+    </ClipBox>
+  );
+}
+
+/** The Sample box: Warp, Reverse, Crop, the gain and the transpose, and the speed with ×2 and ÷2 while warped. */
+function SampleBox({
+  cropped,
+  gain,
+  onCommit,
+  onCrop,
+  onFaster,
+  onGain,
+  onReversed,
+  onSlower,
+  onTranspose,
+  onWarp,
+  rate,
+  reversed,
+  transpose,
+}: {
+  cropped: boolean;
+  gain: number;
+  onCommit?: () => void;
+  onCrop?: () => void;
+  onFaster: () => void;
+  onGain: (db: number) => void;
+  onReversed: () => void;
+  onSlower: () => void;
+  onTranspose: (semitones: number) => void;
+  onWarp: () => void;
+  /** The speed the warp plays at, or null when the source plays as recorded. */
+  rate: number | null;
+  reversed: boolean;
+  transpose: number;
+}) {
+  return (
+    <ClipBox foldable id="audio:sample" title="Sample">
+      <div className="grid grid-cols-3 gap-1">
+        <ClipToggle className="px-0" onClick={onWarp} pressed={rate !== null}>
+          Warp
+        </ClipToggle>
+        <ClipToggle className="px-0" onClick={onReversed} pressed={reversed}>
+          Rev
+        </ClipToggle>
+        {onCrop ? (
+          <ClipToggle className="px-0" disabled={cropped} onClick={onCrop}>
+            Crop
+          </ClipToggle>
+        ) : null}
+      </div>
+      <ClipRow label="Gain">
+        <ClipField
+          format={formatGain}
+          label="Gain"
+          onChange={onGain}
+          onCommit={onCommit}
+          parse={parseNumber}
+          step={0.5}
+          value={gain}
+        />
+      </ClipRow>
+      <ClipRow label="Transp.">
+        <ClipField
+          format={formatTranspose}
+          label="Transpose"
+          onChange={onTranspose}
+          onCommit={onCommit}
+          parse={parseNumber}
+          step={1}
+          value={transpose}
+        />
+      </ClipRow>
+      {rate === null ? null : (
+        <>
+          <ClipRow label="Speed">
+            <output className="truncate text-end tabular-nums">
+              {formatRate(rate)}
+            </output>
+          </ClipRow>
+          <div className="grid grid-cols-2 gap-1">
+            <ClipToggle
+              aria-label="Twice as long, half the speed"
+              onClick={onSlower}
+            >
+              ×2
+            </ClipToggle>
+            <ClipToggle
+              aria-label="Half as long, twice the speed"
+              onClick={onFaster}
+            >
+              ÷2
+            </ClipToggle>
+          </div>
+        </>
+      )}
+    </ClipBox>
+  );
+}
+
 /**
  * The clip view of an arrangement's audio clip, as a DAW's: a Clip box (its
  * switch and name, where it starts and ends in its source or with Loop on the
@@ -241,14 +415,16 @@ function ClipPanel({
   children,
   className,
   collapsed,
+  foldedBoxes,
   format = formatSeconds,
   name,
   onActiveChange,
   onCollapsedChange,
   onCrop,
+  onFoldedBoxesChange,
+  onRename,
   onValueChange,
   onValueCommitted,
-  signature = `${beatsPerBar}/4`,
   value,
   values,
 }: ClipPanelProps) {
@@ -401,6 +577,18 @@ function ClipPanel({
       }),
     [set]
   );
+  const halveLoop = useCallback(() => {
+    if (loop) {
+      setAndCommit({ loop: [loop[0], loop[0] + (loop[1] - loop[0]) / 2] });
+    }
+  }, [loop, setAndCommit]);
+  const doubleLoop = useCallback(() => {
+    if (loop) {
+      setAndCommit({
+        loop: [loop[0], Math.min(span, loop[0] + (loop[1] - loop[0]) * 2)],
+      });
+    }
+  }, [loop, setAndCommit, span]);
   // A warped source is cropped as it was recorded: warp off first.
   const cropped =
     Boolean(warp) ||
@@ -408,18 +596,15 @@ function ClipPanel({
       ? loop[0] === 0 && loop[1] === sourceLength
       : offset === 0 && length >= sourceLength);
 
-  const title = (
-    <ClipTitle active={active} name={name} onActiveChange={onActiveChange}>
-      {children}
-    </ClipTitle>
-  );
+  const status = `Length ${formatBars(length, meter, "length")}`;
 
   return (
     <ClipView
+      actions={children}
+      active={active}
       boxes={
         <>
           <ClipBox title="Clip">
-            {title}
             <ClipRow label="Start">
               <PositionField
                 label="Start"
@@ -430,117 +615,57 @@ function ClipPanel({
                 value={offset}
               />
             </ClipRow>
-            {loop ? (
-              <>
-                <ClipRow label="Position">
-                  <PositionField
-                    label="Loop position"
-                    max={span}
-                    meter={meter}
-                    onChange={setLoopPosition}
-                    onCommit={onValueCommitted}
-                    value={loop[0]}
-                  />
-                </ClipRow>
-                <ClipRow label="Length">
-                  <PositionField
-                    kind="length"
-                    label="Loop length"
-                    meter={meter}
-                    min={bar / beatsPerBar / 4}
-                    onChange={setLoopLength}
-                    onCommit={onValueCommitted}
-                    value={loop[1] - loop[0]}
-                  />
-                </ClipRow>
-              </>
-            ) : (
-              <ClipRow label="End">
-                <PositionField
-                  label="End"
-                  max={span}
-                  meter={meter}
-                  onChange={setEnd}
-                  onCommit={onValueCommitted}
-                  value={offset + length}
-                />
-              </ClipRow>
-            )}
-            <ClipRow label="Signature">
-              <span className="text-end tabular-nums">{signature}</span>
-            </ClipRow>
-            <ClipToggle onClick={toggleLoop} pressed={Boolean(loop)}>
-              Loop
-            </ClipToggle>
-          </ClipBox>
-          <ClipBox title="Audio">
-            <div className="grid grid-cols-3 gap-1">
-              <ClipToggle onClick={toggleWarp} pressed={Boolean(warp)}>
-                Warp
-              </ClipToggle>
-              <ClipToggle onClick={toggleReversed} pressed={reversed}>
-                Rev
-              </ClipToggle>
-              {onCrop ? (
-                <ClipToggle disabled={cropped} onClick={onCrop}>
-                  Crop
-                </ClipToggle>
-              ) : null}
-            </div>
-            <ClipRow label="Gain">
-              <ClipField
-                format={formatGain}
-                label="Gain"
-                onChange={setGain}
+            <ClipRow label="End">
+              <PositionField
+                label="End"
+                max={loop ? Number.POSITIVE_INFINITY : span}
+                meter={meter}
+                onChange={setEnd}
                 onCommit={onValueCommitted}
-                parse={parseNumber}
-                step={0.5}
-                value={gain}
+                value={offset + length}
               />
             </ClipRow>
-            <ClipRow label="Transpose">
-              <ClipField
-                format={formatTranspose}
-                label="Transpose"
-                onChange={setTranspose}
-                onCommit={onValueCommitted}
-                parse={parseNumber}
-                step={1}
-                value={transpose}
-              />
-            </ClipRow>
-            {warp ? (
-              <>
-                <ClipRow label="Speed">
-                  <output className="text-end tabular-nums">
-                    {formatRate(warpRate(warp, offset))}
-                  </output>
-                </ClipRow>
-                <div className="grid grid-cols-2 gap-1">
-                  <ClipToggle
-                    aria-label="Twice as long, half the speed"
-                    onClick={slower}
-                  >
-                    ×2
-                  </ClipToggle>
-                  <ClipToggle
-                    aria-label="Half as long, twice the speed"
-                    onClick={faster}
-                  >
-                    ÷2
-                  </ClipToggle>
-                </div>
-              </>
-            ) : null}
           </ClipBox>
+          <LoopBox
+            loop={loop}
+            meter={meter}
+            offset={offset}
+            onCommit={onValueCommitted}
+            onDouble={doubleLoop}
+            onHalve={halveLoop}
+            onLength={setLoopLength}
+            onPosition={setLoopPosition}
+            onToggle={toggleLoop}
+            span={span}
+            stretch={loop ? loop[1] - loop[0] : length}
+          />
+          <SampleBox
+            cropped={cropped}
+            gain={gain}
+            onCommit={onValueCommitted}
+            onCrop={onCrop}
+            onFaster={faster}
+            onGain={setGain}
+            onReversed={toggleReversed}
+            onSlower={slower}
+            onTranspose={setTranspose}
+            onWarp={toggleWarp}
+            rate={warp ? warpRate(warp, offset) : null}
+            reversed={reversed}
+            transpose={transpose}
+          />
         </>
       }
       className={className}
       collapsed={collapsed}
       data-slot="clip-panel"
+      foldedBoxes={foldedBoxes}
       name={name}
+      onActiveChange={onActiveChange}
       onCollapsedChange={onCollapsedChange}
-      title={title}
+      onFoldedBoxesChange={onFoldedBoxesChange}
+      onRename={onRename}
+      status={status}
     >
       <ClipSource
         bar={bar}

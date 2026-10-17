@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  duplicateTime,
   humanizeNotes,
   invertNotes,
   legatoNotes,
@@ -27,7 +28,6 @@ import { Button } from "@/registry/bases/base/ui/button";
 import {
   ClipBox,
   ClipRow,
-  ClipTitle,
   ClipToggle,
   ClipView,
   PositionField,
@@ -83,15 +83,19 @@ interface MidiClipPanelProps {
   /** Controls beside the name, such as a close button. */
   children?: ReactNode;
   className?: string;
-  /** Whether the panel is collapsed to its title, controlled: keep it outside to hold it across clips. Leave it out for the panel to keep its own. */
+  /** Whether the panel is rolled up to its strip, controlled: keep it outside to hold it from clip to clip. Leave it out for the panel to keep its own. */
   collapsed?: boolean;
+  /** The ids of its folded boxes ("midi:loop", "midi:notes"), controlled. */
+  foldedBoxes?: readonly string[];
   name: string;
   /** The clip's notes, in seconds from the start of its source. */
   notes: readonly Note[];
   /** The clip's switch was pressed. */
   onActiveChange?: (active: boolean) => void;
-  /** The chevron by the name was pressed. */
+  /** The caret on the strip was pressed. */
   onCollapsedChange?: (collapsed: boolean) => void;
+  /** Which boxes are folded was changed. */
+  onFoldedBoxesChange?: (folded: string[]) => void;
   /** Fires when a pitch stops sounding. */
   onNoteOff?: PianoRollPrimitive.Root.Props["onNoteOff"];
   /** Fires when a key is pressed or a note drawn: sound it. */
@@ -102,10 +106,10 @@ interface MidiClipPanelProps {
   onNotesCommitted?: () => void;
   /** Fires on every change of where the clip plays. Leave it out for a panel that only edits notes. */
   onRegionChange?: (region: MidiClipRegion) => void;
+  /** A name was typed in the strip. */
+  onRename?: (name: string) => void;
   /** Where the clip plays in its source, and its loop. */
   region: MidiClipRegion;
-  /** The time signature the clip is counted in, as text. @default the bar over the beat, such as "4/4" */
-  signature?: string;
   /** The grid notes are drawn and moved on, in seconds. @default a quarter of `beat` */
   step?: number;
 }
@@ -163,10 +167,170 @@ const RAMPS = [
   { from: 1, label: "↘", name: "Decrescendo", to: 0.3 },
 ];
 
+/** The Loop box: the switch, where the loop sits and how long it is, halved or doubled, and its notes played again after it. */
+function LoopBox({
+  disabled,
+  loop,
+  meter,
+  noteCount,
+  offset,
+  onCommit,
+  onDouble,
+  onDuplicate,
+  onHalve,
+  onLength,
+  onPosition,
+  onToggle,
+  span,
+  step,
+  stretch,
+}: {
+  disabled: boolean;
+  loop: readonly [number, number] | null;
+  meter: { bar: number; beatsPerBar: number };
+  noteCount: number;
+  offset: number;
+  onCommit?: () => void;
+  onDouble: () => void;
+  onDuplicate: () => void;
+  onHalve: () => void;
+  onLength: (seconds: number) => void;
+  onPosition: (seconds: number) => void;
+  onToggle: () => void;
+  span: number;
+  step: number;
+  stretch: number;
+}) {
+  const enabled = !disabled;
+  return (
+    <ClipBox foldable id="midi:loop" title="Loop">
+      <ClipToggle
+        disabled={disabled}
+        onClick={onToggle}
+        pressed={Boolean(loop)}
+      >
+        Loop
+      </ClipToggle>
+      <ClipRow label="Position">
+        <PositionField
+          disabled={!(enabled && loop)}
+          label="Loop position"
+          max={span}
+          meter={meter}
+          onChange={onPosition}
+          onCommit={onCommit}
+          value={loop?.[0] ?? offset}
+        />
+      </ClipRow>
+      <ClipRow label="Length">
+        <PositionField
+          disabled={!(enabled && loop)}
+          kind="length"
+          label="Loop length"
+          meter={meter}
+          min={step}
+          onChange={onLength}
+          onCommit={onCommit}
+          value={stretch}
+        />
+      </ClipRow>
+      <div className="grid grid-cols-2 gap-1">
+        <ClipToggle
+          aria-label="Halve the loop"
+          disabled={!(enabled && loop)}
+          onClick={onHalve}
+        >
+          ÷2
+        </ClipToggle>
+        <ClipToggle
+          aria-label="Double the loop"
+          disabled={!(enabled && loop)}
+          onClick={onDouble}
+        >
+          ×2
+        </ClipToggle>
+      </div>
+      <ClipToggle
+        disabled={!(enabled && loop) || noteCount === 0}
+        onClick={onDuplicate}
+        title="Duplicate the loop's notes into a second pass"
+      >
+        Dupl. Loop
+      </ClipToggle>
+    </ClipBox>
+  );
+}
+
+/** The Notes box: transposing, the note operations and the velocity ramps, on the selected notes or every note. */
+function NotesBox({
+  noteCount,
+  onEdit,
+  onRamp,
+  onTranspose,
+  selected,
+}: {
+  noteCount: number;
+  onEdit: (event: MouseEvent<HTMLButtonElement>) => void;
+  onRamp: (event: MouseEvent<HTMLButtonElement>) => void;
+  onTranspose: (event: MouseEvent<HTMLButtonElement>) => void;
+  selected: number;
+}) {
+  return (
+    <ClipBox foldable id="midi:notes" title="Notes">
+      <p className="text-[10px] text-muted-foreground leading-tight">
+        {selected > 0 ? `${selected} selected` : "All notes"}
+      </p>
+      <div className="grid grid-cols-4 gap-0.5">
+        {TRANSPOSE_STEPS.map((semitones) => (
+          <ClipToggle
+            aria-label={`Transpose ${semitones > 0 ? "up" : "down"} ${Math.abs(semitones) === 12 ? "an octave" : "a semitone"}`}
+            className="px-0"
+            data-semitones={semitones}
+            disabled={noteCount === 0}
+            key={semitones}
+            onClick={onTranspose}
+          >
+            {semitones > 0 ? `+${semitones}` : String(semitones)}
+          </ClipToggle>
+        ))}
+      </div>
+      <div className="grid grid-cols-3 gap-1">
+        {NOTE_EDITS.map((item, index) => (
+          <ClipToggle
+            aria-label={item.name}
+            className="px-0"
+            data-index={index}
+            disabled={noteCount === 0}
+            key={item.name}
+            onClick={onEdit}
+            title={item.name}
+          >
+            {item.label}
+          </ClipToggle>
+        ))}
+      </div>
+      <div className="grid grid-cols-2 gap-1">
+        {RAMPS.map((ramp, index) => (
+          <ClipToggle
+            aria-label={ramp.name}
+            data-index={index}
+            disabled={noteCount === 0}
+            key={ramp.name}
+            onClick={onRamp}
+            title={ramp.name}
+          >
+            {ramp.label}
+          </ClipToggle>
+        ))}
+      </div>
+    </ClipBox>
+  );
+}
+
 /**
  * The clip view of an arrangement's MIDI clip, as a DAW's: a Clip box (its
  * switch and name, where it starts and ends in its source or with Loop on
- * the stretch that repeats, in bars.beats.sixteenths, and its signature) and
+ * the stretch that repeats, in bars.beats.sixteenths) and
  * a Notes box (transpose, invert, reverse, legato, ×2, ÷2, humanize and
  * velocity ramps, on the selected notes or every note) beside its piano roll:
  * Draw at the top left, Fold above the keys, the loop brace on the ruler, and
@@ -181,17 +345,19 @@ function MidiClipPanel({
   children,
   className,
   collapsed,
+  foldedBoxes,
   name,
   notes,
   onActiveChange,
   onCollapsedChange,
+  onFoldedBoxesChange,
   onNoteOff,
   onNoteOn,
   onNotesChange,
   onNotesCommitted,
   onRegionChange,
+  onRename,
   region,
-  signature,
   step = beat / 4,
 }: MidiClipPanelProps) {
   const beatsPerBar = Math.round(bar / beat);
@@ -310,6 +476,47 @@ function MidiClipPanel({
     [loop, setRegion]
   );
 
+  const halveLoop = useCallback(() => {
+    if (loop) {
+      setRegion({
+        loop: [loop[0], loop[0] + Math.max(step, (loop[1] - loop[0]) / 2)],
+      });
+      onNotesCommitted?.();
+    }
+  }, [loop, onNotesCommitted, setRegion, step]);
+  const doubleLoop = useCallback(() => {
+    if (loop) {
+      const end = loop[0] + (loop[1] - loop[0]) * 2;
+      setRegion({
+        loop: [loop[0], end],
+        sourceLength: Math.max(sourceLength, end),
+      });
+      onNotesCommitted?.();
+    }
+  }, [loop, onNotesCommitted, setRegion, sourceLength]);
+  // The loop's notes played again right after it, and the loop twice as long to hold them.
+  const copies = useRef(0);
+  const duplicateLoop = useCallback(() => {
+    if (!loop) {
+      return;
+    }
+    const [from, to] = loop;
+    const end = to + (to - from);
+    const { notes: next } = duplicateTime(
+      [...notes],
+      from,
+      to,
+      () => {
+        copies.current += 1;
+        return `copy-${copies.current}`;
+      },
+      Number.POSITIVE_INFINITY
+    );
+    onNotesChange(next);
+    setRegion({ loop: [from, end], sourceLength: Math.max(sourceLength, end) });
+    onNotesCommitted?.();
+  }, [loop, notes, onNotesChange, onNotesCommitted, setRegion, sourceLength]);
+
   // Opens on the notes, or on middle C with none: once, when it mounts (key it by clip).
   const viewportRef = useRef<HTMLDivElement>(null);
   const centerRef = useRef(60);
@@ -333,18 +540,19 @@ function MidiClipPanel({
     return () => cancelAnimationFrame(frame);
   }, []);
 
-  const title = (
-    <ClipTitle active={active} name={name} onActiveChange={onActiveChange}>
-      {children}
-    </ClipTitle>
-  );
+  const loopSpan = loop ? loop[1] - loop[0] : length;
+  const status =
+    selection.length > 0
+      ? `${selection.length} of ${notes.length} selected`
+      : `${notes.length} ${notes.length === 1 ? "note" : "notes"}`;
 
   return (
     <ClipView
+      actions={children}
+      active={active}
       boxes={
         <>
           <ClipBox title="Clip">
-            {title}
             <ClipRow label="Start">
               <PositionField
                 disabled={!onRegionChange}
@@ -356,118 +564,53 @@ function MidiClipPanel({
                 value={offset}
               />
             </ClipRow>
-            {loop ? (
-              <>
-                <ClipRow label="Position">
-                  <PositionField
-                    disabled={!onRegionChange}
-                    label="Loop position"
-                    max={span}
-                    meter={meter}
-                    onChange={setLoopPosition}
-                    onCommit={onNotesCommitted}
-                    value={loop[0]}
-                  />
-                </ClipRow>
-                <ClipRow label="Length">
-                  <PositionField
-                    disabled={!onRegionChange}
-                    kind="length"
-                    label="Loop length"
-                    meter={meter}
-                    min={step}
-                    onChange={setLoopLength}
-                    onCommit={onNotesCommitted}
-                    value={loop[1] - loop[0]}
-                  />
-                </ClipRow>
-              </>
-            ) : (
-              <ClipRow label="End">
-                <PositionField
-                  disabled={!onRegionChange}
-                  label="End"
-                  meter={meter}
-                  onChange={setEnd}
-                  onCommit={onNotesCommitted}
-                  value={offset + length}
-                />
-              </ClipRow>
-            )}
-            <ClipRow label="Signature">
-              <span className="text-end tabular-nums">
-                {signature ?? `${beatsPerBar}/4`}
-              </span>
+            <ClipRow label="End">
+              <PositionField
+                disabled={!onRegionChange}
+                label="End"
+                meter={meter}
+                onChange={setEnd}
+                onCommit={onNotesCommitted}
+                value={offset + length}
+              />
             </ClipRow>
-            <ClipToggle
-              disabled={!onRegionChange}
-              onClick={toggleLoop}
-              pressed={Boolean(loop)}
-            >
-              Loop
-            </ClipToggle>
           </ClipBox>
-          <ClipBox title="Notes">
-            <ClipRow label="Transpose">
-              <div className="grid grid-cols-4 gap-0.5">
-                {TRANSPOSE_STEPS.map((semitones) => (
-                  <ClipToggle
-                    aria-label={`Transpose ${semitones > 0 ? "up" : "down"} ${Math.abs(semitones) === 12 ? "an octave" : "a semitone"}`}
-                    className="px-0"
-                    data-semitones={semitones}
-                    disabled={notes.length === 0}
-                    key={semitones}
-                    onClick={handleTranspose}
-                  >
-                    {semitones > 0 ? `+${semitones}` : String(semitones)}
-                  </ClipToggle>
-                ))}
-              </div>
-            </ClipRow>
-            <div className="grid grid-cols-3 gap-1">
-              {NOTE_EDITS.map((item, index) => (
-                <ClipToggle
-                  aria-label={item.name}
-                  data-index={index}
-                  disabled={notes.length === 0}
-                  key={item.name}
-                  onClick={handleNoteEdit}
-                  title={item.name}
-                >
-                  {item.label}
-                </ClipToggle>
-              ))}
-            </div>
-            <ClipRow label="Velocity">
-              <div className="grid grid-cols-2 gap-1">
-                {RAMPS.map((ramp, index) => (
-                  <ClipToggle
-                    aria-label={ramp.name}
-                    data-index={index}
-                    disabled={notes.length === 0}
-                    key={ramp.name}
-                    onClick={handleRamp}
-                    title={ramp.name}
-                  >
-                    {ramp.label}
-                  </ClipToggle>
-                ))}
-              </div>
-            </ClipRow>
-            <p className="text-muted-foreground tabular-nums">
-              {selection.length > 0
-                ? `${selection.length} of ${notes.length} selected`
-                : `${notes.length} ${notes.length === 1 ? "note" : "notes"}`}
-            </p>
-          </ClipBox>
+          <LoopBox
+            disabled={!onRegionChange}
+            loop={loop}
+            meter={meter}
+            noteCount={notes.length}
+            offset={offset}
+            onCommit={onNotesCommitted}
+            onDouble={doubleLoop}
+            onDuplicate={duplicateLoop}
+            onHalve={halveLoop}
+            onLength={setLoopLength}
+            onPosition={setLoopPosition}
+            onToggle={toggleLoop}
+            span={span}
+            step={step}
+            stretch={loopSpan}
+          />
+          <NotesBox
+            noteCount={notes.length}
+            onEdit={handleNoteEdit}
+            onRamp={handleRamp}
+            onTranspose={handleTranspose}
+            selected={selection.length}
+          />
         </>
       }
       className={className}
       collapsed={collapsed}
       data-slot="midi-clip-panel"
+      foldedBoxes={foldedBoxes}
       name={name}
+      onActiveChange={onActiveChange}
       onCollapsedChange={onCollapsedChange}
-      title={title}
+      onFoldedBoxesChange={onFoldedBoxesChange}
+      onRename={onRename}
+      status={status}
     >
       <Timeline
         className="min-w-0 flex-1"

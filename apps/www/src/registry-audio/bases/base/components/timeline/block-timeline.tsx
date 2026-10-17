@@ -1002,7 +1002,9 @@ function ClipDock({
   onValueChange,
   onValueCommitted,
   peaks,
-  signature,
+  foldedBoxes,
+  onFoldedBoxesChange,
+  onRename,
 }: {
   bar: number;
   beatsPerBar: number;
@@ -1021,9 +1023,16 @@ function ClipDock({
   onCrop: () => void;
   onValueChange: (next: ClipSettings) => void;
   onValueCommitted: () => void;
+  /** The ids of the boxes folded in the panel: held here, so they stay folded from clip to clip. */
+  foldedBoxes: readonly string[];
+  onFoldedBoxesChange: (folded: string[]) => void;
+  onRename: (id: string, name: string) => void;
   peaks: number[];
-  signature: string;
 }) {
+  const rename = useCallback(
+    (name: string) => clip && onRename(clip.id, name),
+    [clip, onRename]
+  );
   if (!clip) {
     return null;
   }
@@ -1035,19 +1044,21 @@ function ClipDock({
         beat={bar / beatsPerBar}
         className={DOCKED}
         collapsed={collapsed}
+        foldedBoxes={foldedBoxes}
         key={clip.id}
         name={clip.name}
         notes={clip.notes}
         onActiveChange={onActiveChange}
         onCollapsedChange={onCollapsedChange}
+        onFoldedBoxesChange={onFoldedBoxesChange}
         onNotesCommitted={onValueCommitted}
+        onRename={rename}
         region={{
           length: clip.value.length,
           loop: clip.loop ?? null,
           offset: clip.value.offset,
           sourceLength: clip.sourceLength,
         }}
-        signature={signature}
         {...midi}
       >
         <CloseClipView onClose={onClose} />
@@ -1061,14 +1072,16 @@ function ClipDock({
       beatsPerBar={beatsPerBar}
       className={DOCKED}
       collapsed={collapsed}
+      foldedBoxes={foldedBoxes}
       format={format}
       name={clip.name}
       onActiveChange={onActiveChange}
       onCollapsedChange={onCollapsedChange}
       onCrop={onCrop}
+      onFoldedBoxesChange={onFoldedBoxesChange}
+      onRename={rename}
       onValueChange={onValueChange}
       onValueCommitted={onValueCommitted}
-      signature={signature}
       value={{
         gain: clip.gain ?? 0,
         length: clip.value.length,
@@ -1897,6 +1910,7 @@ export default function BlockTimeline() {
   const [clipViewOpen, setClipViewOpen] = useState(true);
   // Collapsed to its title, the panel leaves the tracks the room, from clip to clip.
   const [clipViewCollapsed, setClipViewCollapsed] = useState(false);
+  const [clipBoxesFolded, setClipBoxesFolded] = useState<string[]>([]);
   const pickClip = useCallback(
     (id: string, additive: boolean) => {
       setTimeSelection(null);
@@ -3111,16 +3125,18 @@ export default function BlockTimeline() {
           beatsPerBar={tempo.beatsPerBar}
           clip={editedClip}
           collapsed={clipViewCollapsed}
+          foldedBoxes={clipBoxesFolded}
           format={describe}
           midi={midiEditing}
           onActiveChange={setEditedActive}
           onClose={closeClipView}
           onCollapsedChange={setClipViewCollapsed}
           onCrop={cropEdited}
+          onFoldedBoxesChange={setClipBoxesFolded}
+          onRename={renameClip}
           onValueChange={changeClipSettings}
           onValueCommitted={settleClipEdit}
           peaks={editedPeaks}
-          signature={`${tempo.beatsPerBar}/${tempo.beatUnit}`}
         />
       ) : null}
       {copy

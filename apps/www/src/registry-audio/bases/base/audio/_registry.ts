@@ -723,7 +723,7 @@ export const audio: RegistryItem[] = [
     categories: ["timeline", "waveform", "knob"],
     dependencies: ["@audio-ui/core", "@audio-ui/react"],
     description:
-      "The clip view of an arrangement's audio clip: a Clip box (switch, name, start and end or loop position and length in bars.beats.16ths, signature, Loop) and an Audio box (Warp, Reverse, Crop, Gain, Transpose, and the speed with ×2 and ÷2 when warped) beside its source on a timeline of its own (overview, bar ruler, the stretch it plays or loops to drag, warp markers on the waveform). Folds down to its title.",
+      "The clip view of an arrangement's audio clip: a strip with its switch and name that rolls the view up, then Clip (start, end), Loop (switch, position, length, ÷2, ×2) and Sample (Warp, Reverse, Crop, Gain, Transpose, speed) boxes in bars.beats.16ths, the last two foldable, beside its source on a timeline of its own (overview, bar ruler, the stretch it plays or loops to drag, warp markers on the waveform).",
     files: [
       {
         path: "audio/panels/clip-panel.tsx",
@@ -737,7 +737,7 @@ export const audio: RegistryItem[] = [
   {
     categories: ["timeline"],
     description:
-      "The frame of a clip's detail view: labelled boxes of its properties (ClipBox, ClipRow), its title with a switch and a fold chevron (ClipTitle), small toggles, text fields, and position fields in bars.beats.16ths, beside its editor. Folds down to its title.",
+      "The frame of a clip's detail view: a strip along its top (the caret that rolls the view up to it, the clip's switch, its name to rename, a status, actions), boxes of its properties beside its editor (ClipBox, foldable to a strip), rows, small toggles, text fields, and position fields in bars.beats.16ths.",
     files: [
       {
         path: "audio/elements/clip-view.tsx",
@@ -752,7 +752,7 @@ export const audio: RegistryItem[] = [
     categories: ["timeline", "piano"],
     dependencies: ["@audio-ui/core", "@audio-ui/react"],
     description:
-      "The clip view of an arrangement's MIDI clip: a Clip box (switch, name, start and end or loop position and length in bars.beats.16ths, signature, Loop) and a Notes box (transpose, invert, reverse, legato, ×2, ÷2, humanize, velocity ramps) beside its piano roll (Draw, Fold, the loop brace on the ruler, keys, grid, a velocity or chance lane). Notes are drawn a grid step at a time. Folds down to its title.",
+      "The clip view of an arrangement's MIDI clip: a strip with its switch and name that rolls the view up, then Clip (start, end), Loop (switch, position, length, ÷2, ×2, Dupl. Loop) and Notes (transpose, invert, reverse, legato, ×2, ÷2, humanize, velocity ramps) boxes, the last two foldable, beside its piano roll (Draw, Fold, the loop brace on the ruler, keys, grid, a velocity or chance lane). Notes are drawn a grid step at a time.",
     files: [
       {
         path: "audio/panels/midi-clip-panel.tsx",

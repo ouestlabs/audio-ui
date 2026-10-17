@@ -66,203 +66,308 @@ export function parseBars(
   );
 }
 
-/** Whether the clip view is collapsed to its title, and the switch for it. */
-const CollapseContext = createContext<{
-  collapsed: boolean;
-  toggle: () => void;
+/** Which boxes are folded, and the switch for one: what a `ClipBox` with `foldable` reads. */
+const BoxesContext = createContext<{
+  folded: readonly string[];
+  toggle: (id: string) => void;
 } | null>(null);
 
+/** A small filled triangle, pointing down unless turned. */
+function Caret({ className }: { className?: string }) {
+  return (
+    <svg
+      aria-hidden="true"
+      className={cn("size-3 shrink-0", className)}
+      fill="currentColor"
+      viewBox="0 0 12 12"
+    >
+      <path d="M2.5 4h7L6 8.5z" />
+    </svg>
+  );
+}
+
 /**
- * A clip's detail view: labelled boxes of its properties beside its editor,
- * side by side when there is room and stacked when not. Put `ClipBox`es in
- * `boxes`, the editor in `children`, and the `ClipTitle` in `title` as well as
- * in the first box: collapsed, from the chevron on the title, the view keeps
- * only that title.
+ * A clip's detail view, as a DAW's: a strip along its top with the caret that
+ * rolls the view up to that strip, the clip's switch and name, then boxes of
+ * its properties beside its editor. Rolled up, the strip still says which
+ * clip is open and opens it again. Put `ClipBox`es in `boxes` (the others
+ * than the first with `foldable`, which fold to a strip and give their width
+ * to the editor), the editor in `children`, and controls for the strip's end,
+ * such as a close button, in `actions`.
  */
 function ClipView({
+  actions,
+  active,
   boxes,
   children,
   className,
-  defaultCollapsed = false,
   collapsed: collapsedProp,
+  defaultCollapsed = false,
+  foldedBoxes: foldedProp,
   name,
+  onActiveChange,
   onCollapsedChange,
-  title,
+  onFoldedBoxesChange,
+  onRename,
+  status,
   ...props
-}: Omit<ComponentProps<"section">, "children" | "title"> & {
+}: Omit<ComponentProps<"section">, "children"> & {
+  /** At the end of the strip, such as a close button. */
+  actions?: ReactNode;
+  /** Whether the clip is on. Leave it out, with `onActiveChange`, for a view without the switch. */
+  active?: boolean;
   boxes: ReactNode;
   children: ReactNode;
-  /** Whether it starts collapsed to its title, uncontrolled. @default false */
-  defaultCollapsed?: boolean;
-  /** Whether it is collapsed to its title, controlled. */
+  /** Whether it is rolled up to its strip, controlled. */
   collapsed?: boolean;
+  /** Whether it starts rolled up, uncontrolled. @default false */
+  defaultCollapsed?: boolean;
+  /** The ids of the folded boxes, controlled: keep them outside to hold them from clip to clip. */
+  foldedBoxes?: readonly string[];
   name: string;
-  /** The chevron was pressed. */
+  onActiveChange?: (active: boolean) => void;
+  /** The caret was pressed. */
   onCollapsedChange?: (collapsed: boolean) => void;
-  /** The `ClipTitle`, shown alone while the view is collapsed. */
-  title: ReactNode;
+  onFoldedBoxesChange?: (folded: string[]) => void;
+  /** A name was typed in the strip. Leave it out for a name that only reads. */
+  onRename?: (name: string) => void;
+  /** What the strip says after the name, such as the notes selected or the clip's length. */
+  status?: ReactNode;
 }) {
   const [ownCollapsed, setOwnCollapsed] = useState(defaultCollapsed);
   const collapsed = collapsedProp ?? ownCollapsed;
-  const fold = useMemo(
+  const toggleCollapsed = useCallback(() => {
+    setOwnCollapsed(!collapsed);
+    onCollapsedChange?.(!collapsed);
+  }, [collapsed, onCollapsedChange]);
+  const toggleActive = useCallback(
+    () => onActiveChange?.(!active),
+    [active, onActiveChange]
+  );
+  const [ownFolded, setOwnFolded] = useState<readonly string[]>([]);
+  const folded = foldedProp ?? ownFolded;
+  const boxContext = useMemo(
     () => ({
-      collapsed,
-      toggle: () => {
-        setOwnCollapsed(!collapsed);
-        onCollapsedChange?.(!collapsed);
+      folded,
+      toggle: (id: string) => {
+        const next = folded.includes(id)
+          ? folded.filter((other) => other !== id)
+          : [...folded, id];
+        setOwnFolded(next);
+        onFoldedBoxesChange?.(next);
       },
     }),
-    [collapsed, onCollapsedChange]
+    [folded, onFoldedBoxesChange]
   );
   return (
-    <CollapseContext value={fold}>
-      <section
-        aria-label={`Clip ${name}`}
+    <section
+      aria-label={`Clip ${name}`}
+      className={cn(
+        "@container flex min-w-0 shrink-0 flex-col overflow-hidden rounded-xl border bg-card text-xs",
+        className
+      )}
+      data-collapsed={collapsed ? "" : undefined}
+      data-slot="clip-view"
+      {...props}
+    >
+      {/* The view's own edge: it rolls up from here, and rolled up it is all that stays. */}
+      <div
         className={cn(
-          "@container min-w-0 shrink-0 overflow-hidden rounded-xl border bg-card text-xs",
-          className
+          "flex h-9 shrink-0 items-center gap-2 px-2",
+          collapsed ? undefined : "border-b"
         )}
-        data-collapsed={collapsed ? "" : undefined}
-        data-slot="clip-view"
-        {...props}
+        data-slot="clip-view-strip"
       >
-        {collapsed ? (
-          <div className="w-44 p-2" data-slot="clip-view-bar">
-            {title}
+        <button
+          aria-expanded={!collapsed}
+          aria-label={
+            collapsed ? "Open the clip view" : "Roll the clip view up"
+          }
+          className="flex size-5 shrink-0 items-center justify-center rounded-sm text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+          onClick={toggleCollapsed}
+          type="button"
+        >
+          <Caret className={collapsed ? "-rotate-90" : undefined} />
+        </button>
+        {onActiveChange ? (
+          <button
+            aria-label={active ? "Switch the clip off" : "Switch the clip on"}
+            aria-pressed={active}
+            className="size-3 shrink-0 rounded-[2px] border border-muted-foreground outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring aria-pressed:border-primary aria-pressed:bg-primary"
+            onClick={toggleActive}
+            title="Take the clip out of the arrangement, or put it back"
+            type="button"
+          />
+        ) : null}
+        <ClipNameField name={name} onRename={onRename} />
+        <div className="flex min-w-0 flex-1 items-center gap-3 overflow-hidden text-muted-foreground tabular-nums">
+          {status}
+        </div>
+        {actions}
+      </div>
+      {collapsed ? null : (
+        <div className="flex min-h-0 min-w-0 flex-col @3xl:flex-row">
+          <BoxesContext value={boxContext}>
+            <div
+              className="flex shrink-0 overflow-x-auto border-b @3xl:border-e @3xl:border-b-0"
+              data-slot="clip-view-boxes"
+            >
+              {boxes}
+            </div>
+          </BoxesContext>
+          <div
+            className="flex min-w-0 flex-1 flex-col"
+            data-slot="clip-view-editor"
+          >
+            {children}
           </div>
-        ) : (
-          <ClipViewBody boxes={boxes}>{children}</ClipViewBody>
-        )}
-      </section>
-    </CollapseContext>
+        </div>
+      )}
+    </section>
   );
 }
 
-/** The boxes and the editor of an open clip view. */
-function ClipViewBody({
-  boxes,
-  children,
-}: {
-  boxes: ReactNode;
-  children: ReactNode;
-}) {
-  return (
-    <div className="flex min-w-0 flex-col @3xl:flex-row">
-      <div
-        className="flex shrink-0 divide-x overflow-x-auto border-b @3xl:border-e @3xl:border-b-0"
-        data-slot="clip-view-boxes"
-      >
-        {boxes}
-      </div>
-      <div
-        className="flex min-w-0 flex-1 flex-col"
-        data-slot="clip-view-editor"
-      >
-        {children}
-      </div>
-    </div>
-  );
-}
-
-/** One labelled box of a clip's properties, as a DAW's clip view groups them. */
+/**
+ * One box of a clip's properties, a column of a fixed width so the boxes
+ * beside it never move under the pointer. With `foldable`, a caret in its
+ * heading folds it to a narrow strip that keeps its name and the caret, and
+ * gives its width to the editor.
+ */
 function ClipBox({
   children,
   className,
+  foldable,
+  id,
   title,
 }: {
   children: ReactNode;
   className?: string;
+  /** Whether it folds to a strip from its heading. */
+  foldable?: boolean;
+  /** Its id among the folded boxes: what keeps it folded from clip to clip. @default title */
+  id?: string;
   title: string;
 }) {
+  const boxes = use(BoxesContext);
+  const key = id ?? title;
+  const folded = Boolean(foldable && boxes?.folded.includes(key));
+  const toggle = useCallback(() => boxes?.toggle(key), [boxes, key]);
+  const caret = foldable ? (
+    <button
+      aria-expanded={!folded}
+      aria-label={folded ? `Unfold ${title}` : `Fold ${title}`}
+      className="flex size-4 shrink-0 items-center justify-center rounded-sm text-muted-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+      onClick={toggle}
+      type="button"
+    >
+      <Caret className={folded ? "-rotate-90" : "rotate-90"} />
+    </button>
+  ) : null;
+  if (folded) {
+    return (
+      <section
+        aria-label={title}
+        className="flex w-6 shrink-0 flex-col items-center gap-2 border-s py-2 first:border-s-0"
+        data-folded=""
+        data-slot="clip-box"
+      >
+        {caret}
+        <h4 className="font-semibold text-muted-foreground uppercase tracking-wide [writing-mode:vertical-rl]">
+          {title}
+        </h4>
+      </section>
+    );
+  }
   return (
-    <fieldset
-      className={cn("flex w-44 shrink-0 flex-col gap-1.5 p-2", className)}
+    <section
+      aria-label={title}
+      className={cn(
+        "flex w-40 shrink-0 flex-col gap-1.5 border-s p-2 first:border-s-0",
+        className
+      )}
       data-slot="clip-box"
     >
-      <legend className="float-left mb-0.5 font-medium text-[10px] text-muted-foreground uppercase tracking-wide">
-        {title}
-      </legend>
+      <div className="flex h-5 items-center gap-1.5">
+        <h4 className="truncate font-semibold text-muted-foreground uppercase tracking-wide">
+          {title}
+        </h4>
+        <span className="ms-auto">{caret}</span>
+      </div>
       {children}
-    </fieldset>
+    </section>
   );
 }
 
-/** The clip's name with its switch: off, the clip stays on its track and is not heard. */
-function ClipTitle({
-  active,
-  children,
+const FIELD =
+  "h-6 w-full min-w-0 rounded-md border bg-background px-1.5 text-xs tabular-nums outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50";
+
+/** The clip's name, editable in place: Enter or leaving the field renames it, Escape gives it up. */
+function ClipNameField({
   name,
-  onActiveChange,
+  onRename,
 }: {
-  active?: boolean;
-  /** At the end of the row, such as a close button. */
-  children?: ReactNode;
   name: string;
-  onActiveChange?: (active: boolean) => void;
+  onRename?: (name: string) => void;
 }) {
-  const toggle = useCallback(
-    () => onActiveChange?.(!active),
-    [active, onActiveChange]
+  const [text, setText] = useState(name);
+  const [editing, setEditing] = useState(false);
+  useEffect(() => {
+    if (!editing) {
+      setText(name);
+    }
+  }, [editing, name]);
+  const commit = useCallback(() => {
+    setEditing(false);
+    if (text.trim() && text !== name) {
+      onRename?.(text.trim());
+    } else {
+      setText(name);
+    }
+  }, [name, onRename, text]);
+  const handleChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
+    setEditing(true);
+    setText(event.target.value);
+  }, []);
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLInputElement>) => {
+      if (event.key === "Enter") {
+        event.currentTarget.blur();
+      } else if (event.key === "Escape") {
+        setText(name);
+        setEditing(false);
+        event.currentTarget.blur();
+      }
+    },
+    [name]
   );
-  const fold = use(CollapseContext);
   return (
-    <div className="flex min-w-0 items-center gap-1.5">
-      {fold ? (
-        <button
-          aria-expanded={!fold.collapsed}
-          aria-label={
-            fold.collapsed ? "Expand the clip view" : "Collapse the clip view"
-          }
-          className="-ms-0.5 flex size-4 shrink-0 items-center justify-center rounded-sm text-muted-foreground outline-none transition-transform hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring aria-expanded:rotate-90"
-          onClick={fold.toggle}
-          type="button"
-        >
-          <svg
-            aria-hidden="true"
-            className="size-3"
-            fill="currentColor"
-            viewBox="0 0 12 12"
-          >
-            <path d="M4 2.5 8.5 6 4 9.5z" />
-          </svg>
-        </button>
-      ) : null}
-      {onActiveChange ? (
-        <button
-          aria-label={active ? "Switch the clip off" : "Switch the clip on"}
-          aria-pressed={active}
-          className="size-3 shrink-0 rounded-[2px] border border-primary outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring aria-pressed:bg-primary"
-          onClick={toggle}
-          type="button"
-        />
-      ) : null}
-      <h3 className="min-w-0 flex-1 truncate font-medium text-sm">{name}</h3>
-      {children}
-    </div>
+    <input
+      aria-label="Clip name"
+      className="h-6 w-40 min-w-0 rounded-md border border-transparent bg-transparent px-1.5 font-medium text-sm outline-none hover:border-border focus-visible:border-border focus-visible:bg-background focus-visible:ring-2 focus-visible:ring-ring read-only:hover:border-transparent"
+      onBlur={commit}
+      onChange={handleChange}
+      onKeyDown={handleKeyDown}
+      readOnly={!onRename}
+      spellCheck={false}
+      type="text"
+      value={text}
+    />
   );
 }
 
-/** A row of a box: a label, and its field or toggles. */
-function ClipRow({
-  children,
-  htmlFor,
-  label,
-}: {
-  children: ReactNode;
-  htmlFor?: string;
-  label: string;
-}) {
+/** A row of a box: a label, and its field. */
+function ClipRow({ children, label }: { children: ReactNode; label: string }) {
   return (
-    <div className="grid grid-cols-[4rem_1fr] items-center gap-1.5">
-      <label className="truncate text-muted-foreground" htmlFor={htmlFor}>
+    <div className="grid grid-cols-[3.25rem_1fr] items-center gap-1">
+      <span aria-hidden="true" className="truncate text-muted-foreground">
         {label}
-      </label>
+      </span>
       {children}
     </div>
   );
 }
 
-/** A switch of a box, small and labelled: filled while on. */
+/** A switch or an operation of a box, small: filled while `pressed`. */
 function ClipToggle({
   children,
   className,
@@ -284,9 +389,6 @@ function ClipToggle({
   );
 }
 
-const FIELD =
-  "h-6 w-full min-w-0 rounded-md border bg-background px-1.5 text-end text-xs tabular-nums outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50";
-
 /**
  * A text field for a value shown as `format` gives it and read back with
  * `parse`: Enter or leaving it sets what was typed, Escape gives it up, and
@@ -295,7 +397,6 @@ const FIELD =
 function ClipField({
   disabled,
   format,
-  id,
   label,
   onChange,
   onCommit,
@@ -305,7 +406,6 @@ function ClipField({
 }: {
   disabled?: boolean;
   format: (value: number) => string;
-  id?: string;
   label: string;
   onChange: (value: number) => void;
   onCommit?: () => void;
@@ -360,9 +460,8 @@ function ClipField({
   return (
     <input
       aria-label={label}
-      className={FIELD}
+      className={cn(FIELD, "text-end")}
       disabled={disabled}
-      id={id}
       onBlur={handleBlur}
       onChange={handleChange}
       onKeyDown={handleKeyDown}
@@ -414,12 +513,4 @@ function PositionField({
   );
 }
 
-export {
-  ClipBox,
-  ClipField,
-  ClipRow,
-  ClipTitle,
-  ClipToggle,
-  ClipView,
-  PositionField,
-};
+export { ClipBox, ClipField, ClipRow, ClipToggle, ClipView, PositionField };
