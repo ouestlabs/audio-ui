@@ -1003,9 +1003,7 @@ function NotesMenu({
         <DropdownMenuGroup>
           {EDIT_MENUS.map((menu) => (
             <DropdownMenuSub key={menu.label}>
-              <DropdownMenuSubTrigger disabled={!hasNotes}>
-                {menu.label}
-              </DropdownMenuSubTrigger>
+              <DropdownMenuSubTrigger>{menu.label}</DropdownMenuSubTrigger>
               <DropdownMenuSubContent className="w-auto min-w-48">
                 <EditItems
                   disabled={disabled}
