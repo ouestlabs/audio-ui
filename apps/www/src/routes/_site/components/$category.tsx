@@ -10,6 +10,7 @@ import {
 import { HideDuringSearch } from "@/components/catalog/sidebar/hide-during-search";
 import { JsonLd } from "@/components/site/json-ld";
 import { GridSkeleton } from "@/components/site/layout/grid-skeleton";
+import { NotFoundContent } from "@/components/site/pages/not-found-page";
 import { siteConfig } from "@/lib/config";
 import {
   getCategoryInfo,
@@ -27,6 +28,7 @@ export const Route = createFileRoute("/_site/components/$category")({
     }
   },
   component: CategoryComponentsPage,
+  notFoundComponent: NotFoundContent,
   head: ({ params }) => {
     const normalized = normalizeSlug(params.category);
     const categoryLabel = getCategoryInfo(normalized)?.label ?? params.category;
