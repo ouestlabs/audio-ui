@@ -17,7 +17,9 @@ import {
   consolidate,
   copyClips,
   copyTime,
+  crossfade,
   deleteTime,
+  fadeTime,
   land,
   lay,
   type Mix,
@@ -277,25 +279,35 @@ export function useArrangement({
         );
       }
       const origins = grouped ? groupOrigin.current : null;
+      // A fade where two clips meet is theirs together: the other clip's facing fade follows it.
+      const fadeEdges = { "fade-in": "in", "fade-out": "out" } as const;
+      const fading =
+        details.target === "fade-in" || details.target === "fade-out"
+          ? fadeEdges[details.target]
+          : null;
+      const linked = (laid: Arranged[]) =>
+        fading ? crossfade(laid, id, fading) : laid;
       // The first tick of a gesture keeps what it started from; the commit closes it.
       burst((now) => ({
         ...now,
-        clips: now.clips.map((clip) => {
-          if (clip.id === id) {
-            return { ...clip, value };
-          }
-          const origin = origins?.get(clip.id);
-          return origin && details.delta !== undefined
-            ? {
-                ...clip,
-                value: moveClip(
-                  origin.value,
-                  origin.value.start + details.delta,
-                  { duration }
-                ),
-              }
-            : clip;
-        }),
+        clips: linked(
+          now.clips.map((clip) => {
+            if (clip.id === id) {
+              return { ...clip, value };
+            }
+            const origin = origins?.get(clip.id);
+            return origin && details.delta !== undefined
+              ? {
+                  ...clip,
+                  value: moveClip(
+                    origin.value,
+                    origin.value.start + details.delta,
+                    { duration }
+                  ),
+                }
+              : clip;
+          })
+        ),
       }));
     },
     [burst, duration]
@@ -557,6 +569,12 @@ export function useArrangement({
     },
     [duration, edit]
   );
+  /** Fades the clips whose edges a stretch of time covers, in or out, and crossfades two that meet across it. */
+  const fadeTimeSelection = useCallback(
+    (time: TimeSelection) =>
+      edit((current) => ({ ...current, clips: fadeTime(current.clips, time) })),
+    [edit]
+  );
   /** Switches the selected clips off, or back on when the first of them is off. */
   const toggleSelected = useCallback(() => {
     const [first] = selectedRef.current;
@@ -734,6 +752,7 @@ export function useArrangement({
     consolidateTime,
     copying,
     copyOf,
+    fadeTimeSelection,
     duplicateSelection,
     duplicateTrack,
     folded,

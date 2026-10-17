@@ -344,3 +344,79 @@ export function consolidate(
   const cleared = clearTime(all, selection, duration);
   return { clips: [...cleared, ...made], ids: made.map((clip) => clip.id) };
 }
+
+/** How close two edges are to count as touching, in the timeline's units. */
+const TOUCHING = 1e-6;
+
+/**
+ * Gives the clip `id`'s fade at `edge` to the clip it touches there, on its
+ * track: the fade-out of the clip that ends where it starts, or the fade-in
+ * of the clip that starts where it ends, as long as it can be. Two clips that
+ * meet then fade across their meeting point together.
+ */
+export function crossfade(
+  all: Arranged[],
+  id: string,
+  edge: "in" | "out"
+): Arranged[] {
+  const clip = all.find((item) => item.id === id);
+  if (!clip) {
+    return all;
+  }
+  const { fadeIn, fadeOut, length, start } = clip.value;
+  const meeting = edge === "in" ? start : start + length;
+  const fade = edge === "in" ? fadeIn : fadeOut;
+  return all.map((other) => {
+    if (other.id === id || other.track !== clip.track) {
+      return other;
+    }
+    const { value } = other;
+    if (
+      edge === "in" &&
+      Math.abs(value.start + value.length - meeting) < TOUCHING
+    ) {
+      const fadeOutLength = Math.min(fade, value.length - value.fadeIn);
+      return { ...other, value: { ...value, fadeOut: fadeOutLength } };
+    }
+    if (edge === "out" && Math.abs(value.start - meeting) < TOUCHING) {
+      const fadeInLength = Math.min(fade, value.length - value.fadeOut);
+      return { ...other, value: { ...value, fadeIn: fadeInLength } };
+    }
+    return other;
+  });
+}
+
+/**
+ * Fades made from a stretch of time on its tracks: a clip whose start it
+ * covers fades in up to where the stretch ends (or the clip does), and one
+ * whose end it covers fades out from where it begins. Across two clips that
+ * meet, that is a crossfade.
+ */
+export function fadeTime(
+  all: Arranged[],
+  { range: [from, to], tracks }: TimeSelection
+): Arranged[] {
+  return all.map((clip) => {
+    if (!tracks.includes(clip.track)) {
+      return clip;
+    }
+    const { length, start } = clip.value;
+    const end = start + length;
+    let { fadeIn, fadeOut } = clip.value;
+    if (from <= start && start < to) {
+      fadeIn = Math.min(to, end) - start;
+    }
+    if (from < end && end <= to) {
+      fadeOut = end - Math.max(from, start);
+    }
+    // Both from one stretch over a whole clip: they share its length.
+    if (fadeIn + fadeOut > length) {
+      const scale = length / (fadeIn + fadeOut);
+      fadeIn *= scale;
+      fadeOut *= scale;
+    }
+    return fadeIn === clip.value.fadeIn && fadeOut === clip.value.fadeOut
+      ? clip
+      : { ...clip, value: { ...clip.value, fadeIn, fadeOut } };
+  });
+}

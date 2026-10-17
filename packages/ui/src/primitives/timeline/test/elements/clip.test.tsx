@@ -304,6 +304,32 @@ describe("Timeline.Clip", () => {
     );
   });
 
+  test("while a fade is dragged the clip says which, and how far each fade can grow", () => {
+    const { clip, fadeInHandle } = renderClip({
+      defaultValue: { ...start, fadeOut: 15 },
+    });
+    expect(clip.style.getPropertyValue("--clip-fade-in-max")).toBe("25");
+    expect(clip.style.getPropertyValue("--clip-fade-out-max")).toBe("40");
+    fireEvent.pointerDown(fadeInHandle, { clientX: 40, pointerId: 1 });
+    expect(clip.getAttribute("data-fading")).toBe("in");
+    fireEvent.pointerUp(fadeInHandle, { clientX: 40, pointerId: 1 });
+    expect(clip.hasAttribute("data-fading")).toBe(false);
+  });
+
+  test("Delete on a fade handle takes the fade away and removes nothing else", () => {
+    const { onRemove, onValueCommitted, view } = renderClip({
+      defaultValue: { ...start, fadeIn: 8 },
+    });
+    // Above the React root: what a page listening for Delete would hear.
+    const page = mock(() => undefined);
+    document.body.addEventListener("keydown", page);
+    fireEvent.keyDown(view.getByLabelText("Fade in"), { key: "Delete" });
+    document.body.removeEventListener("keydown", page);
+    expect(lastCall(onValueCommitted)[0].fadeIn).toBe(0);
+    expect(onRemove).not.toHaveBeenCalled();
+    expect(page).not.toHaveBeenCalled();
+  });
+
   test("double-clicking a fade handle, or Enter on its input, steps its shape", () => {
     const { fadeInHandle, onValueCommitted, view } = renderClip();
     fireEvent.doubleClick(fadeInHandle);

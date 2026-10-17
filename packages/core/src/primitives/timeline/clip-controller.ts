@@ -104,6 +104,8 @@ export interface ClipSnapshot {
   dragging: boolean;
   /** px the clip has been dragged up or down, while a move is under way. */
   dragOffset: number;
+  /** What a pointer is dragging: the clip, an edge or a fade; null between drags. */
+  dragTarget: ClipTarget | null;
   selected: boolean;
   /** The clip as displayed: the dragged one while a pointer moves it. */
   value: ClipValue;
@@ -269,6 +271,8 @@ interface ClipGesture {
   originLane: Element | null;
   startX: number;
   startY: number;
+  /** What the gesture drags. */
+  target: ClipTarget;
 }
 
 /** The edges a fade or a trim moves. */
@@ -281,7 +285,7 @@ export interface ClipController {
     reason: "double-click" | "keyboard",
     event: Event
   ) => void;
-  /** Keys on a fade or trim handle: arrows and Page keys move the edge, Home and End go to its limits. Returns `true` when the handle takes the key. */
+  /** Keys on a fade or trim handle: arrows and Page keys move the edge, Home and End go to its limits, and Delete takes a fade away. Returns `true` when the handle takes the key. */
   edgeKeyDown: (
     target: "fade-in" | "fade-out" | "trim-start" | "trim-end",
     event: KeyboardEvent
@@ -352,6 +356,7 @@ export function createClipController(initial: ClipOptions): ClipController {
   let snapshot: ClipSnapshot | null = null;
   const getSnapshot = (): ClipSnapshot => {
     const value = dragging && latest !== null ? latest : held();
+    const dragTarget = dragging ? (gesture?.target ?? null) : null;
     const disabled = options.disabled ?? false;
     const selected = isSelected();
     if (
@@ -360,11 +365,12 @@ export function createClipController(initial: ClipOptions): ClipController {
       snapshot.dragging === dragging &&
       snapshot.disabled === disabled &&
       snapshot.selected === selected &&
-      snapshot.dragOffset === dragOffset
+      snapshot.dragOffset === dragOffset &&
+      snapshot.dragTarget === dragTarget
     ) {
       return snapshot;
     }
-    snapshot = { disabled, dragging, dragOffset, selected, value };
+    snapshot = { disabled, dragging, dragOffset, dragTarget, selected, value };
     return snapshot;
   };
 
@@ -440,6 +446,7 @@ export function createClipController(initial: ClipOptions): ClipController {
     const started: ClipGesture = {
       changed: false,
       copy: target === "move" && event.altKey,
+      target,
       origin: current(),
       originLane: target === "move" ? laneUnder(event) : null,
       startX: event.clientX,
@@ -579,13 +586,19 @@ export function createClipController(initial: ClipOptions): ClipController {
       return false;
     }
     const clip = current();
-    const to = keyTargets(
-      edgeOf(clip, target),
-      options.step,
-      options.largeStep,
-      event.shiftKey,
-      edgeBounds(clip, target, limits())
-    )[event.key];
+    // Delete takes a fade away.
+    const removes =
+      (target === "fade-in" || target === "fade-out") &&
+      (event.key === "Delete" || event.key === "Backspace");
+    const to = removes
+      ? 0
+      : keyTargets(
+          edgeOf(clip, target),
+          options.step,
+          options.largeStep,
+          event.shiftKey,
+          edgeBounds(clip, target, limits())
+        )[event.key];
     if (to === undefined) {
       return false;
     }

@@ -38,7 +38,9 @@ const describeNumber: DescribePosition = (value) =>
  * `Timeline.ClipHandle` per edge to trim it, which moves where in the source
  * it begins instead of stretching it, and a `Timeline.ClipFadeHandle` per
  * fade. Its content is up to you: it sets `--clip-offset` and
- * `--clip-source-length` so a waveform can show the stretch that is played.
+ * `--clip-source-length` so a waveform can show the stretch that is played,
+ * and `--clip-fade-in-max` and `--clip-fade-out-max`, how long each fade can
+ * grow, to draw the limit of a fade being dragged (`data-fading`).
  * Its own native `<input type="range">` moves it from the keyboard and
  * carries its accessible name (`aria-label` / `aria-labelledby`); Delete and
  * Backspace on it call `onRemove`. Renders a `<div>` element.
@@ -113,9 +115,14 @@ export function Clip(componentProps: Clip.Props) {
   );
   const { dragOffset, value, selected } = snapshot;
 
+  const fadeTargets = { "fade-in": "in", "fade-out": "out" } as const;
+  const fading =
+    snapshot.dragTarget === "fade-in" || snapshot.dragTarget === "fade-out"
+      ? fadeTargets[snapshot.dragTarget]
+      : undefined;
   const state = React.useMemo<ClipState>(
-    () => ({ disabled, dragging: snapshot.dragging, selected }),
-    [disabled, selected, snapshot.dragging]
+    () => ({ disabled, dragging: snapshot.dragging, fading, selected }),
+    [disabled, fading, selected, snapshot.dragging]
   );
 
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -222,7 +229,10 @@ export function Clip(componentProps: Clip.Props) {
           ...placedOver(start, length),
           "--clip-drag-y": `${dragOffset}px`,
           "--clip-fade-in": fadeIn,
+          // How long each fade can grow: up to where the other one begins.
+          "--clip-fade-in-max": length - fadeOut,
           "--clip-fade-out": fadeOut,
+          "--clip-fade-out-max": length - fadeIn,
           "--clip-offset": offset,
           ...(sourceLength === undefined
             ? {}
