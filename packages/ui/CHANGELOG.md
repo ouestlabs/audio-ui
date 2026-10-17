@@ -1,5 +1,18 @@
 # @audio-ui/react
 
+## 0.4.0
+
+### Minor Changes
+
+- d0420b4: Timeline: `snapPoints` on the root pulls a dragged clip or range onto places such as the edges of other clips and the locators, from a few px away and ahead of the grid (Cmd/Ctrl lets go of them too); a moved clip or range lands either of its edges on one. A range's own input now moves it by its own length with Up and Down, and with Cmd/Ctrl, Left and Right shorten or lengthen it by a step while Up and Down double or halve it. Up and Down used to move it by a step, like Left and Right. Core adds `nearestSnapPoint`, `snapSpanMove`, `withSnapRadius`, `withoutSnapPoints` and `SNAP_RADIUS_PX` to the timeline module, and `adjacentDivision` and `divisionAt` to the time module, to step a fixed grid finer or coarser and to fix an adaptive grid where it is.
+- cb39296: Timeline: a seekable `Timeline.Lane` takes `onSelectionChange` and `onSelectionCommitted`, so a drag from its bare area selects a stretch of time instead of scrubbing, with the position left where the press put it. Core adds the time commands on a list of clips, re-exported by the React package: `copyRange` (what a stretch holds, from 0), `removeTime` (takes a stretch out and closes the gap) and `insertTime` (opens a gap, cutting the clip across it), and exports the `TimelineSelectionHandlers` type.
+
+### Patch Changes
+
+- Updated dependencies [d0420b4]
+- Updated dependencies [cb39296]
+  - @audio-ui/core@0.10.0
+
 ## 0.3.8
 
 ### Patch Changes
