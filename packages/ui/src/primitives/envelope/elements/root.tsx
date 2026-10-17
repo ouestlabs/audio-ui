@@ -2,6 +2,7 @@ import type {
   Breakpoint,
   EnvelopeChangeEventDetails,
   EnvelopeCommitEventDetails,
+  EnvelopeSnap,
 } from "@audio-ui/core/envelope";
 import { createEnvelopeController } from "@audio-ui/core/envelope";
 import type { Nullable } from "@audio-ui/core/internal";
@@ -217,8 +218,8 @@ export namespace Root {
       value: Breakpoint[],
       eventDetails: CommitEventDetails
     ) => void;
-    /** Grid the pointer snaps points to, in normalized units: 0.25 snaps to quarters, 0 is no grid. Holding Cmd/Ctrl leaves the grid, and Shift's fine drag ignores it. Keys move by `step`. @default 0 */
-    snap?: number;
+    /** Grid the pointer snaps points to, in normalized units: 0.25 snaps to quarters, 0 is no grid, and `{ x, y }` sets a step for each axis (`{ x: 0.125, y: 0 }` snaps across and leaves the level free). Holding Cmd/Ctrl leaves the grid, and Shift's fine drag ignores it. Keys move by `step`. @default 0 */
+    snap?: EnvelopeSnap;
     /** Keyboard step on both axes, in normalized units. @default 0.01 */
     step?: number;
     value?: Breakpoint[];

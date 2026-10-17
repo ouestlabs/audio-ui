@@ -74,13 +74,28 @@ export interface EnvelopeOptions {
     value: Breakpoint[],
     details: EnvelopeCommitEventDetails
   ) => void;
-  /** Grid points snap to, in normalized units; 0 is no grid. @default 0 */
-  snap?: number;
+  /** Grid points snap to, in normalized units, one step for both axes or one for each; 0 is no grid. @default 0 */
+  snap?: EnvelopeSnap;
   /** Keyboard step on both axes, in normalized units. @default 0.01 */
   step?: number;
   /** The controlled points; leave it out for the envelope to hold its own. */
   value?: Breakpoint[];
 }
+
+/** A grid step in normalized units: one for both axes, or one for each (0 leaves that axis free). */
+export type EnvelopeSnap = number | { x: number; y: number };
+
+/** A point on the grid of `snap`. */
+const snapPoint = (at: { x: number; y: number }, snap: EnvelopeSnap) =>
+  typeof snap === "number"
+    ? { x: snapTo(at.x, snap), y: snapTo(at.y, snap) }
+    : { x: snapTo(at.x, snap.x), y: snapTo(at.y, snap.y) };
+
+/** Whether two grids are the same, so a grid written inline each render keeps the snapshot. */
+const sameSnap = (a: EnvelopeSnap, b: EnvelopeSnap) =>
+  typeof a === "number" || typeof b === "number"
+    ? a === b
+    : a.x === b.x && a.y === b.y;
 
 /** What a view draws an envelope from. */
 export interface EnvelopeSnapshot {
@@ -96,7 +111,7 @@ export interface EnvelopeSnapshot {
   /** Whether an addition was just refused, for a short feedback signal. */
   isAddBlocked: boolean;
   minPoints: number;
-  snap: number;
+  snap: EnvelopeSnap;
   step: number;
   /** The points as displayed: the dragged ones while a pointer moves them. */
   value: Breakpoint[];
@@ -246,7 +261,7 @@ export function createEnvelopeController(
       snapshot.blockedIndex === blockedIndex &&
       snapshot.isAddBlocked === isAddBlocked &&
       snapshot.minPoints === bound.minPoints &&
-      snapshot.snap === bound.snap &&
+      sameSnap(snapshot.snap, bound.snap) &&
       snapshot.step === bound.step
     ) {
       return snapshot;
@@ -369,11 +384,10 @@ export function createEnvelopeController(
       return null;
     }
     const free = event.metaKey || event.ctrlKey;
-    const grid = free ? 0 : snap;
-    const { index, value: next } = insertPoint(base, {
-      x: snapTo(at.x, grid),
-      y: snapTo(at.y, grid),
-    });
+    const { index, value: next } = insertPoint(
+      base,
+      free ? { x: at.x, y: at.y } : snapPoint(at, snap)
+    );
     if (change(next, indexed(createChangeEventDetails("add", event), index))) {
       commit(next, { event, index, reason: "add" });
       return index;
@@ -502,8 +516,8 @@ export function createEnvelopeController(
           };
         } else {
           started.fine = null;
-          if (snap > 0 && !(move.metaKey || move.ctrlKey)) {
-            target = { x: snapTo(pointer.x, snap), y: snapTo(pointer.y, snap) };
+          if (!(move.metaKey || move.ctrlKey)) {
+            target = snapPoint(pointer, snap);
           }
         }
         if (

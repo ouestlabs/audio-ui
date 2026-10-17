@@ -1,3 +1,4 @@
+import { type Breakpoint, levelAt } from "@audio-ui/core/envelope";
 import type { Note } from "@audio-ui/core/piano-roll";
 import type { WarpMarker } from "@audio-ui/core/time";
 import {
@@ -51,8 +52,24 @@ export interface Arranged {
 /** What a track holds: recordings, or notes for an instrument to play. */
 export type TrackKind = "audio" | "midi";
 
+/** What a track's automation can move: its volume, or where it sits in the stereo field. */
+export type AutomatedParameter = "pan" | "volume";
+
+/**
+ * A track's automation: for each parameter it moves, the points of its
+ * envelope across the whole arrangement, `x` from its start (0) to its end
+ * (1) and `y` the parameter's value from 0 to 1, with the curve of the
+ * segment leaving each point. Being shares of the song, the points keep
+ * their musical place when the tempo changes.
+ */
+export type TrackAutomation = Partial<
+  Record<AutomatedParameter, readonly Breakpoint[]>
+>;
+
 /** A track of an arrangement. */
 export interface ArrangementTrack {
+  /** Its automation, by parameter. */
+  automation?: TrackAutomation;
   /** An index into the colors a track can take. */
   color: number;
   id: string;
@@ -547,4 +564,87 @@ export function playedNotes(clip: Arranged): PlayedNote[] {
     }
   }
   return played;
+}
+
+/** The quietest a volume envelope reaches before silence, in dB, and its loudest. */
+const VOLUME_FLOOR_DB = -60;
+const VOLUME_CEILING_DB = 6;
+
+/** A volume envelope's value, 0…1, as a gain: 0 is silence, then -60 dB up to +6 dB along the way. */
+export function volumeGain(value: number): number {
+  if (value <= 0) {
+    return 0;
+  }
+  const db =
+    VOLUME_FLOOR_DB +
+    Math.min(1, value) * (VOLUME_CEILING_DB - VOLUME_FLOOR_DB);
+  return 10 ** (db / 20);
+}
+
+/** The volume envelope's value, 0…1, that plays at `gain`: unity is 0 dB. */
+export function volumeValue(gain: number): number {
+  if (gain <= 0) {
+    return 0;
+  }
+  const db = 20 * Math.log10(gain);
+  return Math.min(
+    1,
+    Math.max(0, (db - VOLUME_FLOOR_DB) / (VOLUME_CEILING_DB - VOLUME_FLOOR_DB))
+  );
+}
+
+/** A pan envelope's value, 0…1, as a pan from -1 (left) to 1 (right). */
+export const panPosition = (value: number) =>
+  Math.min(1, Math.max(-1, value * 2 - 1));
+
+/** Where a parameter's envelope starts when it is first drawn: the mix's value, flat. */
+export function flatAutomation(value: number): Breakpoint[] {
+  return [
+    { x: 0, y: value },
+    { x: 1, y: value },
+  ];
+}
+
+/**
+ * An envelope's value at `x`, 0…1 of the arrangement: along the curve of the
+ * segment it falls in, the first point's value before it, the last's after.
+ */
+export function automationAt(points: readonly Breakpoint[], x: number): number {
+  const [first] = points;
+  if (!first) {
+    return 0;
+  }
+  if (x <= first.x) {
+    return first.y;
+  }
+  for (let index = 0; index < points.length - 1; index += 1) {
+    const from = points[index] as Breakpoint;
+    const to = points[index + 1] as Breakpoint;
+    if (x < to.x) {
+      const span = to.x - from.x;
+      return span > 0 ? levelAt(from, to, (x - from.x) / span) : to.y;
+    }
+  }
+  return (points.at(-1) as Breakpoint).y;
+}
+
+/**
+ * A track's gain and pan at `x`, 0…1 of the arrangement: its envelopes where
+ * it has them, its mix where it has none or where a change by hand has
+ * `overridden` them, until the automation is enabled again.
+ */
+export function mixAt(
+  track: ArrangementTrack,
+  mix: Mix,
+  x: number,
+  overridden: readonly AutomatedParameter[] = []
+): { gain: number; pan: number } {
+  const followed = (parameter: AutomatedParameter) =>
+    overridden.includes(parameter) ? undefined : track.automation?.[parameter];
+  const volume = followed("volume");
+  const pan = followed("pan");
+  return {
+    gain: volume ? volumeGain(automationAt(volume, x)) : mix.gain,
+    pan: pan ? panPosition(automationAt(pan, x)) : mix.pan,
+  };
 }

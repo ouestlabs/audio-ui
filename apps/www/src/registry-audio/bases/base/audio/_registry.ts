@@ -17,6 +17,19 @@ export const audio: RegistryItem[] = [
   {
     dependencies: ["@audio-ui/react"],
     description:
+      "A track's automation over its lane in a timeline: an envelope along the whole arrangement, under the same zoom and scroll as the clips, whose line and points alone take the pointer.",
+    files: [
+      {
+        path: "audio/elements/automation-envelope.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "automation-envelope",
+    type: "registry:ui",
+  },
+  {
+    dependencies: ["@audio-ui/react"],
+    description:
       "A rotary control for continuous parameters, with pointer, wheel and keyboard input.",
     files: [
       {

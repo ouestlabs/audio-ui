@@ -1,5 +1,6 @@
 "use client";
 
+import type { Breakpoint } from "@audio-ui/core/envelope";
 import {
   duplicateClip,
   type FadeShape,
@@ -12,6 +13,7 @@ import { useCallback, useRef, useState } from "react";
 import {
   type Arranged,
   type ArrangementTrack,
+  type AutomatedParameter,
   type Clipping,
   clearTime,
   consolidate,
@@ -596,6 +598,32 @@ export function useArrangement({
     () => setHistory(settleChange(historyRef.current)),
     [setHistory]
   );
+  /**
+   * Sets the points of a track's envelope for `parameter`, or clears it with
+   * `null`. A drag of its points is a burst, one step of the history, closed
+   * by `settleClipEdit` like a clip's.
+   */
+  const changeAutomation = useCallback(
+    (
+      trackId: string,
+      parameter: AutomatedParameter,
+      points: readonly Breakpoint[] | null
+    ) =>
+      burst((current) => ({
+        ...current,
+        tracks: current.tracks.map((track) => {
+          if (track.id !== trackId) {
+            return track;
+          }
+          const { [parameter]: _cleared, ...kept } = track.automation ?? {};
+          return {
+            ...track,
+            automation: points ? { ...kept, [parameter]: points } : kept,
+          };
+        }),
+      })),
+    [burst]
+  );
   /** Cuts a clip's source down to what it plays. */
   const crop = useCallback(
     (id: string) =>
@@ -788,6 +816,7 @@ export function useArrangement({
     addTrack,
     canRedo: flags.redo,
     canUndo: flags.undo,
+    changeAutomation,
     changeClip,
     changeMix,
     clearSelection,
