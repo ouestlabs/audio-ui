@@ -73,6 +73,57 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
+    dependencies: ["@audio-ui/core", "@audio-ui/react"],
+    description:
+      "A clip of an arrangement on its track's lane: move it, trim and fade it, pick a fade's curve, rename it in place and act on it from its menu. A MIDI clip draws its notes across its body.",
+    files: [
+      {
+        path: "audio/elements/arranged-clip.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "arranged-clip",
+    registryDependencies: [
+      "@audio-ui/timeline",
+      "@audio-ui/arrangement",
+      "@shadcn/context-menu",
+    ],
+    type: "registry:ui",
+  },
+  {
+    dependencies: ["@audio-ui/core"],
+    description:
+      "Locators and time-signature changes on a timeline's lane: press one to jump there, rename or retype it in place, move a signature with the arrows, delete either.",
+    files: [
+      {
+        path: "audio/elements/timeline-markers.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "timeline-markers",
+    registryDependencies: ["@shadcn/context-menu"],
+    type: "registry:ui",
+  },
+  {
+    dependencies: ["@audio-ui/core"],
+    description:
+      "A track's automation: a chooser of the parameter its lane shows, Volume or Pan, for its header, and that parameter's envelope over its lane, standing faint at the mix's value until it is drawn.",
+    files: [
+      {
+        path: "audio/elements/track-automation.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "track-automation",
+    registryDependencies: [
+      "@audio-ui/automation-envelope",
+      "@audio-ui/arrangement",
+      "@shadcn/button",
+      "@shadcn/select",
+    ],
+    type: "registry:ui",
+  },
+  {
     dependencies: ["@audio-ui/react"],
     description:
       "A rotary control for continuous parameters, with pointer, wheel and keyboard input.",
@@ -1003,4 +1054,22 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   ...devices,
+  {
+    description:
+      "The parts of an arrangement editor in one install: the timeline, the arrangement's state, its clips, markers and automation, track reordering and MIDI playback. block-timeline wires them into a screen.",
+    files: [],
+    name: "arrangement-editor",
+    registryDependencies: [
+      "@audio-ui/timeline",
+      "@audio-ui/arrangement",
+      "@audio-ui/use-arrangement",
+      "@audio-ui/arranged-clip",
+      "@audio-ui/timeline-markers",
+      "@audio-ui/track-automation",
+      "@audio-ui/use-track-reorder",
+      "@audio-ui/use-midi-playback",
+      "@audio-ui/use-marquee-selection",
+    ],
+    type: "registry:ui",
+  },
 ];

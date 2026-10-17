@@ -14,6 +14,7 @@ import {
   type Arranged,
   type ArrangementTrack,
   type AutomatedParameter,
+  type ClipAction,
   type Clipping,
   clearTime,
   consolidate,
@@ -47,13 +48,7 @@ import {
 } from "@/registry-audio/bases/base/lib/undo-history";
 
 /** What a clip's menu can do: renaming is the clip's own, in place, and editing opens the app's clip panel. */
-export type ClipAction =
-  | "duplicate"
-  | "edit"
-  | "remove"
-  | "rename"
-  | "split"
-  | "toggle";
+export type { ClipAction } from "@/registry-audio/bases/base/lib/arrangement";
 
 /** What undo and redo move between: the tracks and the clips on them. */
 interface Doc {

@@ -3,6 +3,7 @@
   "pages": [
     "---Arrangement---",
     "timeline",
+    "arrangement-editor",
     "---Editors---",
     "piano-roll",
     "scale-menu",
