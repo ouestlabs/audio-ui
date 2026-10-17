@@ -4,11 +4,14 @@ import {
   clampUnit,
   type Point as GeomPoint,
 } from "../../shared/math.ts";
+import { adaptiveSamples } from "../../shared/sample.ts";
 
 /** How far a segment can bend: the rate of its exponential at the ends of -1…1, which puts the middle of the segment at 0.4% of its rise (or 99.6%). */
 export const CURVE_RATE = 11;
-/** Straight lines between samples of a bent segment. */
+/** Straight lines between samples of a bent segment: where its drawing starts, before it adds vertices where the bend is tight. */
 export const CURVE_SAMPLES = 24;
+/** How far a bent segment's drawing may stray from it, as a share of the graph: a tenth of a pixel on a graph 200 px high. */
+const CURVE_TOLERANCE = 0.0005;
 /** A curve this close to flat is taken as straight, and dropped. */
 export const CURVE_EPSILON = 0.005;
 /** Keyboard step for a segment's curve, as a multiple of `step`. */
@@ -196,13 +199,15 @@ export function polylinePoints(value: Breakpoint[]): string {
     if (!(next && point.curve)) {
       return;
     }
-    for (const t of curveSamples(point.curve)) {
-      coordinates.push(
-        coordinate(
-          point.x + (next.x - point.x) * t,
-          point.y + (next.y - point.y) * segmentShape(t, point.curve)
-        )
-      );
+    const { curve } = point;
+    const bent = adaptiveSamples(
+      (t) => point.y + (next.y - point.y) * segmentShape(t, curve),
+      [0, ...curveSamples(curve), 1],
+      CURVE_TOLERANCE,
+      next.x - point.x
+    );
+    for (const [t, level] of bent.slice(1, -1)) {
+      coordinates.push(coordinate(point.x + (next.x - point.x) * t, level));
     }
   });
   coordinates.push(coordinate(1, last.y));

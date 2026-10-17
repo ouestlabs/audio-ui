@@ -3,7 +3,7 @@ import { type PartProps, resolveStyling } from "../../internal/part.ts";
 import { mergeProps, useRender } from "../../internal/render.ts";
 import { type PlotState, usePlotContext } from "../context.ts";
 
-/** Enough points for a smooth curve at any size the plot is drawn. */
+/** The points the curve starts from: enough for a smooth curve at any size the plot is drawn, before it adds more at the tight bends. */
 const DEFAULT_SAMPLES = 256;
 
 /**
@@ -46,7 +46,7 @@ export namespace Curve {
     fillTo?: number;
     /** The curve: y, in the y axis' units, at each x. */
     fn: (x: number) => number;
-    /** How many points the curve is drawn through. @default 256 */
+    /** How many points it starts from, evenly along the x axis. It adds more where the curve bends tighter than that shows, such as a corner or a knee. @default 256 */
     samples?: number;
   }
 }

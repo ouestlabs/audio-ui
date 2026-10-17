@@ -34,7 +34,10 @@ function PlotGraph({ className, ...props }: PlotPrimitive.Graph.Props) {
 function PlotCurve({ className, ...props }: PlotPrimitive.Curve.Props) {
   return (
     <PlotPrimitive.Curve
-      className={cn("cn-plot-curve fill-none", className)}
+      className={cn(
+        "cn-plot-curve fill-none [stroke-linecap:round] [stroke-linejoin:round]",
+        className
+      )}
       data-slot="plot-curve"
       {...props}
     />
@@ -56,7 +59,10 @@ function PlotArea({ className, ...props }: PlotPrimitive.Curve.Props) {
 function PlotTrace({ className, ...props }: PlotPrimitive.Trace.Props) {
   return (
     <PlotPrimitive.Trace
-      className={cn("cn-plot-trace fill-none", className)}
+      className={cn(
+        "cn-plot-trace fill-none [stroke-linecap:round] [stroke-linejoin:round]",
+        className
+      )}
       data-slot="plot-trace"
       {...props}
     />

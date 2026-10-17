@@ -1,11 +1,17 @@
+import { adaptiveSamples } from "../../shared/sample.ts";
 import { type PlotAxis, positionOn, valueOn } from "./axis.ts";
+
+/** How far a drawn curve may stray from the function, as a share of the plot's height: a tenth of a pixel on a plot 200 px high. */
+const TOLERANCE = 0.0005;
 
 /**
  * An SVG path drawing `y = fn(x)` across the whole x axis, in a 1 × 1 box
  * with y going up. Samples are spread evenly along the axis as drawn, so a
  * logarithmic frequency axis gets as many points per octave at the bottom as
- * at the top. With `fillTo`, the path closes down (or up) to that y value,
- * for a filled area.
+ * at the top. `samples` is where it starts: it adds vertices where the curve
+ * bends tighter than that grid shows, a corner or a knee, and keeps none on a
+ * straight stretch. With `fillTo`, the path closes down (or up) to that y
+ * value, for a filled area.
  */
 export function curvePath(
   fn: (x: number) => number,
@@ -15,13 +21,14 @@ export function curvePath(
   fillTo?: number
 ): string {
   const count = Math.max(2, Math.round(samples));
-  const points: string[] = [];
-  for (let index = 0; index < count; index += 1) {
-    const along = index / (count - 1);
+  const grid = Array.from({ length: count }, (_, index) => index / (count - 1));
+  const height = (along: number) => {
     const value = fn(valueOn(x, along));
-    const height = Number.isFinite(value) ? positionOn(y, value) : 0;
-    points.push(`${round(along)} ${round(1 - height)}`);
-  }
+    return Number.isFinite(value) ? positionOn(y, value) : 0;
+  };
+  const points = adaptiveSamples(height, grid, TOLERANCE).map(
+    ([along, up]) => `${round(along)} ${round(1 - up)}`
+  );
   const path = `M ${points.join(" L ")}`;
   if (fillTo === undefined) {
     return path;
