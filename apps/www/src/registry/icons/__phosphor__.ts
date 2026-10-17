@@ -4,6 +4,7 @@ export {
   ArrowLeftIcon,
   ArrowRightIcon,
   ArrowsHorizontalIcon,
+  ArrowsOutLineHorizontalIcon,
   ArrowUUpLeftIcon,
   ArrowUUpRightIcon,
   BagIcon,
