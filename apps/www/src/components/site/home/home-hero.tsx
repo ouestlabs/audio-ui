@@ -30,6 +30,15 @@ export function HomeHero() {
           render={<Link to="/components">Browse components</Link>}
           variant="outline"
         />
+        <Button
+          nativeButton={false}
+          render={
+            <Link params={{ _splat: "agents" }} to="/docs/$">
+              For agents
+            </Link>
+          }
+          variant="ghost"
+        />
       </div>
     </div>
   );

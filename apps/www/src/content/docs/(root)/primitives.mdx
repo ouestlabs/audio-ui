@@ -30,7 +30,7 @@ Nothing is painted: no colour, size or theme comes from a primitive. Each part s
 State is on the element, never behind a prop you have to read. Style it with the attribute selectors of your CSS or the variants of your framework:
 
 ```tsx
-<Knob.Thumb className="cursor-grab data-[dragging]:cursor-grabbing" />
+<Knob.Thumb className="cursor-grab data-dragging:cursor-grabbing" />
 ```
 
 - **Attributes.** A part has `data-disabled`, `data-dragging` and the like when they are true, and no attribute when they are not. Each part's page lists its own.
