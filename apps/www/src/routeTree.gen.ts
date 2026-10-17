@@ -19,6 +19,7 @@ import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as RssDotxmlRouteImport } from './routes/rss[.]xml'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SiteIndexRouteImport } from './routes/_site/index'
+import { Route as SiteSplatRouteImport } from './routes/_site/$'
 import { Route as SiteDocsRouteImport } from './routes/_site/docs'
 import { Route as LlmIndexRouteImport } from './routes/llm/index'
 import { Route as LlmSplatRouteImport } from './routes/llm/$'
@@ -76,6 +77,11 @@ const SiteIndexRoute = SiteIndexRouteImport.update({
   path: '/',
   getParentRoute: () => SiteRoute,
 } as any)
+const SiteSplatRoute = SiteSplatRouteImport.update({
+  id: '/$',
+  path: '/$',
+  getParentRoute: () => SiteRoute,
+} as any)
 const SiteDocsRoute = SiteDocsRouteImport.update({
   id: '/docs',
   path: '/docs',
@@ -122,6 +128,7 @@ export interface FileRoutesByFullPath {
   '/robots.txt': typeof RobotsDottxtRoute
   '/rss.xml': typeof RssDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/$': typeof SiteSplatRoute
   '/docs': typeof SiteDocsRouteWithChildren
   '/llm/$': typeof LlmSplatRoute
   '/llm/': typeof LlmIndexRoute
@@ -139,6 +146,7 @@ export interface FileRoutesByTo {
   '/robots.txt': typeof RobotsDottxtRoute
   '/rss.xml': typeof RssDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/$': typeof SiteSplatRoute
   '/llm/$': typeof LlmSplatRoute
   '/': typeof SiteIndexRoute
   '/llm': typeof LlmIndexRoute
@@ -158,6 +166,7 @@ export interface FileRoutesById {
   '/robots.txt': typeof RobotsDottxtRoute
   '/rss.xml': typeof RssDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/_site/$': typeof SiteSplatRoute
   '/_site/docs': typeof SiteDocsRouteWithChildren
   '/llm/$': typeof LlmSplatRoute
   '/_site/': typeof SiteIndexRoute
@@ -179,6 +188,7 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/rss.xml'
     | '/sitemap.xml'
+    | '/$'
     | '/docs'
     | '/llm/$'
     | '/llm/'
@@ -196,6 +206,7 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/rss.xml'
     | '/sitemap.xml'
+    | '/$'
     | '/llm/$'
     | '/'
     | '/llm'
@@ -214,6 +225,7 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/rss.xml'
     | '/sitemap.xml'
+    | '/_site/$'
     | '/_site/docs'
     | '/llm/$'
     | '/_site/'
@@ -310,6 +322,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SiteIndexRouteImport
       parentRoute: typeof SiteRoute
     }
+    '/_site/$': {
+      id: '/_site/$'
+      path: '/$'
+      fullPath: '/$'
+      preLoaderRoute: typeof SiteSplatRouteImport
+      parentRoute: typeof SiteRoute
+    }
     '/_site/docs': {
       id: '/_site/docs'
       path: '/docs'
@@ -377,6 +396,7 @@ const SiteDocsRouteWithChildren = SiteDocsRoute._addFileChildren(
 )
 
 interface SiteRouteChildren {
+  SiteSplatRoute: typeof SiteSplatRoute
   SiteDocsRoute: typeof SiteDocsRouteWithChildren
   SiteIndexRoute: typeof SiteIndexRoute
   SiteComponentsCategoryRoute: typeof SiteComponentsCategoryRoute
@@ -384,6 +404,7 @@ interface SiteRouteChildren {
 }
 
 const SiteRouteChildren: SiteRouteChildren = {
+  SiteSplatRoute: SiteSplatRoute,
   SiteDocsRoute: SiteDocsRouteWithChildren,
   SiteIndexRoute: SiteIndexRoute,
   SiteComponentsCategoryRoute: SiteComponentsCategoryRoute,

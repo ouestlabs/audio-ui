@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useFumadocsLoader } from "fumadocs-core/source/client";
 import { Suspense } from "react";
 import { docsLoader, loadDocPage } from "@/components/docs/page/page";
+import { NotFoundContent } from "@/components/site/pages/not-found-page";
 import { Route as SiteRoute } from "@/routes/_site";
 
 export const Route = createFileRoute("/_site/docs/$")({
@@ -12,6 +13,7 @@ export const Route = createFileRoute("/_site/docs/$")({
     return data;
   },
   head: ({ loaderData }) => loaderData?.head ?? {},
+  notFoundComponent: NotFoundContent,
 });
 
 function DocsPage() {
