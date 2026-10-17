@@ -1,0 +1,3 @@
+@import "./globals.css" reference;
+@import "../registry/styles/style-maia.css" layer(base);
+@import "../registry-audio/styles/style-maia.css" layer(base);

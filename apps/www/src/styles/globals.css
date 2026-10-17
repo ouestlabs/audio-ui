@@ -5,23 +5,9 @@
 @import "./default.css";
 
 /* begin: shadcn/create styles */
-@import "../registry/styles/style-vega.css" layer(base);
+/* The default style is part of this sheet; the other seven are sheets of their own (style-*.css), loaded when a style is picked (see lib/design-system/style-css.ts). */
 @import "../registry/styles/style-nova.css" layer(base);
-@import "../registry/styles/style-lyra.css" layer(base);
-@import "../registry/styles/style-maia.css" layer(base);
-@import "../registry/styles/style-mira.css" layer(base);
-@import "../registry/styles/style-luma.css" layer(base);
-@import "../registry/styles/style-rhea.css" layer(base);
-@import "../registry/styles/style-sera.css" layer(base);
-
-@import "../registry-audio/styles/style-vega.css" layer(base);
 @import "../registry-audio/styles/style-nova.css" layer(base);
-@import "../registry-audio/styles/style-lyra.css" layer(base);
-@import "../registry-audio/styles/style-maia.css" layer(base);
-@import "../registry-audio/styles/style-mira.css" layer(base);
-@import "../registry-audio/styles/style-luma.css" layer(base);
-@import "../registry-audio/styles/style-rhea.css" layer(base);
-@import "../registry-audio/styles/style-sera.css" layer(base);
 
 @custom-variant style-vega (&:where(.style-vega *));
 @custom-variant style-nova (&:where(.style-nova *));

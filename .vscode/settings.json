@@ -60,6 +60,6 @@
   "[yaml]": {
     "editor.defaultFormatter": "biomejs.biome"
   },
-  "typescript.tsdk": "packages/ui/node_modules/typescript/lib",
-  "typescript.enablePromptUseWorkspaceTsdk": true
+  "js/ts.tsdk.path": "node_modules/typescript/lib",
+  "js/ts.tsdk.promptToUseWorkspaceVersion": true
 }

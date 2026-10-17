@@ -19,6 +19,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { META_THEME_COLORS, siteConfig } from "@/lib/config";
 import { DESIGN_SYSTEM_BOOT_SCRIPT } from "@/lib/design-system/boot-cache";
+import { watchStyleCss } from "@/lib/design-system/style-css";
 import {
   buildAuthorJsonLd,
   buildOrganizationJsonLd,
@@ -46,6 +47,12 @@ const POSTHOG_OPTIONS = {
  * recorder walks the whole DOM once, a long task that would otherwise freeze
  * the page's first animations. Events fired before then queue up.
  */
+/** Keeps the page carrying the CSS of the style it shows. */
+function StyleSheets() {
+  useEffect(() => watchStyleCss(), []);
+  return null;
+}
+
 function Analytics({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!(import.meta.env.PROD && posthogKey)) {
@@ -167,6 +174,7 @@ function RootDocument() {
                   <Outlet />
                 </Analytics>
                 <TailwindIndicator />
+                <StyleSheets />
                 <Toaster position="top-center" />
               </JotaiProvider>
             </NuqsAdapter>
