@@ -9,10 +9,10 @@ export const Route = createFileRoute("/llms-full.txt")({
         const scanned = await Promise.all(
           source.getPages().map(async (page) => {
             const raw = await readRawDoc(page.path);
-            return `# ${page.data.title}\n\n${await processMdxForLLMs(raw)}`;
+            return processMdxForLLMs(raw);
           })
         );
-        return new Response(scanned.join("\n\n"), {
+        return new Response(scanned.join("\n\n---\n\n"), {
           headers: { "Content-Type": "text/plain; charset=utf-8" },
         });
       },
