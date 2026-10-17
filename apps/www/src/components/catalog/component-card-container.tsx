@@ -61,7 +61,12 @@ export function ComponentRenderer({
     );
   }
 
-  return <Component key={key} />;
+  // Its code loads on first render: a boundary of its own keeps the page, which would otherwise hide while it loads.
+  return (
+    <React.Suspense fallback={loading}>
+      <Component key={key} />
+    </React.Suspense>
+  );
 }
 
 export function ComponentName({ name }: { name: string }) {
