@@ -1,10 +1,12 @@
 import { describe, expect, test } from "bun:test";
 import type { Arranged } from "@/registry-audio/bases/base/lib/arrangement";
 import {
+  apply,
   clearTime,
   consolidate,
   copyClips,
   copyTime,
+  createArrangementState,
   cropClip,
   crossfade,
   deleteTime,
@@ -120,14 +122,13 @@ describe("land", () => {
     const dragged = { ...original, value: { ...original.value, start: 40 } };
     const laid = land([dragged], {
       ...base,
-      copyIds: ["a-copy"],
       id: "a",
       origins: [original],
       track: undefined,
     });
     const starts = laid.map((item) => item.value.start).sort((x, y) => x - y);
     expect(starts).toEqual([0, 40]);
-    expect(laid.some((item) => item.id === "a-copy")).toBe(true);
+    expect(laid.some((item) => item.id === "a-1")).toBe(true);
   });
 
   test("an unknown clip changes nothing", () => {
@@ -331,5 +332,118 @@ describe("scaleClip", () => {
       0.5
     );
     expect(audio.loop).toEqual([0, 4]);
+  });
+});
+
+describe("apply", () => {
+  const at = (id: string, start: number, length: number, track = "drums") => ({
+    id,
+    name: id,
+    sourceLength: 100,
+    track,
+    value: { fadeIn: 0, fadeOut: 0, length, offset: 0, start },
+  });
+  const init = (clips: Arranged[]) =>
+    createArrangementState({
+      colors: 5,
+      duration: 100,
+      initialClips: clips,
+      initialTracks: [
+        { color: 0, id: "drums", name: "Drums" },
+        { color: 1, id: "bass", name: "Bass" },
+      ],
+    });
+
+  test("a command that changes nothing returns the same state", () => {
+    const state = init([at("a", 0, 10)]);
+    expect(apply(state, { type: "remove-clip", id: "nope" })).toBe(state);
+  });
+
+  test("a drag is one step of the history, and undo takes all of it back", () => {
+    let state = init([at("a", 0, 10)]);
+    for (const start of [5, 12, 20]) {
+      state = apply(state, {
+        type: "change-clip",
+        id: "a",
+        value: { ...at("a", 0, 10).value, start },
+        details: { delta: start, target: "move" },
+      });
+    }
+    state = apply(state, {
+      type: "commit-clip",
+      id: "a",
+      copy: false,
+      track: undefined,
+    });
+    expect(state.history.past).toHaveLength(1);
+    expect(apply(state, { type: "undo" }).doc.clips[0]?.value.start).toBe(0);
+  });
+
+  test("a copy drag copies the clip and leaves the original where it was", () => {
+    let state = init([at("a", 0, 10)]);
+    state = apply(state, {
+      type: "change-clip",
+      id: "a",
+      value: { ...at("a", 0, 10).value, start: 40 },
+      details: { copy: true, delta: 40, target: "move" },
+    });
+    state = apply(state, {
+      type: "commit-clip",
+      id: "a",
+      copy: true,
+      track: undefined,
+    });
+    expect(
+      state.doc.clips.map((item) => item.value.start).sort((x, y) => x - y)
+    ).toEqual([0, 40]);
+    expect(state.doc.clips.some((item) => item.id === "a-1")).toBe(true);
+  });
+
+  test("a copy takes an id no clip has", () => {
+    let state = init([at("a", 0, 10), at("a-1", 50, 10)]);
+    state = apply(state, { type: "select-clip", id: "a", additive: false });
+    state = apply(state, { type: "duplicate-selection" });
+    expect(state.selection?.clips).toEqual(["a-2"]);
+  });
+
+  test("a new track takes the number after the last one added, even after a removal", () => {
+    let state = init([]);
+    state = apply(state, { type: "add-track" });
+    expect(state.doc.tracks.at(-1)?.id).toBe("track-3");
+    state = apply(state, { type: "remove-track", id: "track-3" });
+    state = apply(state, { type: "add-track" });
+    expect(state.doc.tracks.at(-1)?.id).toBe("track-4");
+  });
+
+  test("a tempo change clears the history, as it always has", () => {
+    let state = init([at("a", 0, 10)]);
+    state = apply(state, { type: "rename-clip", id: "a", name: "Intro" });
+    expect(state.history.past).toHaveLength(1);
+    state = apply(state, { type: "rescale", ratio: 2 });
+    expect(state.history.past).toHaveLength(0);
+    expect(state.doc.clips[0]?.value.length).toBe(20);
+  });
+
+  test("a split at the cursor cuts the selected clip, and its second piece takes a fresh id", () => {
+    let state = init([at("a", 0, 20)]);
+    state = apply(state, { type: "select-clip", id: "a", additive: false });
+    state = apply(state, { type: "split-cursor", at: 10, step: 1 });
+    expect(
+      state.doc.clips.map((item) => [
+        item.id,
+        item.value.start,
+        item.value.length,
+      ])
+    ).toEqual([
+      ["a", 0, 10],
+      ["a-1", 10, 10],
+    ]);
+  });
+
+  test("undo leaves nothing selected", () => {
+    let state = init([at("a", 0, 10)]);
+    state = apply(state, { type: "rename-clip", id: "a", name: "Intro" });
+    state = apply(state, { type: "select-clip", id: "a", additive: false });
+    expect(apply(state, { type: "undo" }).selection).toBeNull();
   });
 });
