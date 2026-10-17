@@ -1,5 +1,18 @@
 # @audio-ui/react
 
+## 0.5.0
+
+### Minor Changes
+
+- 8e26eb0: Timeline: Delete or Backspace on a `Timeline.ClipFadeHandle` takes its fade away, and nothing else hears the key. While a fade is dragged, the clip says which with `data-fading` (`"in"` or `"out"`), and it always sets `--clip-fade-in-max` and `--clip-fade-out-max`, how long each fade can grow, so the limit can be drawn. The core clip snapshot gains `dragTarget`, what a pointer is dragging.
+
+### Patch Changes
+
+- Updated dependencies [c039c0f]
+- Updated dependencies [8e26eb0]
+- Updated dependencies [92d62f5]
+  - @audio-ui/core@0.11.0
+
 ## 0.4.0
 
 ### Minor Changes

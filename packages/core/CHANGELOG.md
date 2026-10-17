@@ -1,5 +1,13 @@
 # @audio-ui/core
 
+## 0.11.0
+
+### Minor Changes
+
+- c039c0f: Time: signature changes along a song. `barsOf(tempo, changes, until)` lays out the bars from 0 through the changes, each with its number, start, length and signature, and marks a bar a change cuts short as `partial`; `barsBeatsWith(seconds, tempo, changes)` counts bars, beats and sixteenths through them; `isSignature` says whether a signature is one a bar can have (1 to 99 beats of a whole, half, quarter, eighth or sixteenth note). Exports the `Bar` and `SignatureChange` types.
+- 8e26eb0: Timeline: Delete or Backspace on a `Timeline.ClipFadeHandle` takes its fade away, and nothing else hears the key. While a fade is dragged, the clip says which with `data-fading` (`"in"` or `"out"`), and it always sets `--clip-fade-in-max` and `--clip-fade-out-max`, how long each fade can grow, so the limit can be drawn. The core clip snapshot gains `dragTarget`, what a pointer is dragging.
+- 92d62f5: Time: warp markers, which pin a time in a recording to a time on the clip it plays in. `warpedTime` and `unwarpedTime` map a time either way, the recording stretched evenly between two markers and keeping the speed of the stretch next to them past the ends; `warpRate` is how fast the recording plays at a time on the clip (by speed alone, also how far its pitch moves). `addWarpMarker`, `moveWarpMarker` (stretching both sides, short of its neighbours), `removeWarpMarker` (two stay) and `scaleWarp` edit a map, and `warpMarkers` keeps the markers that make one. Exports the `WarpMarker` type.
+
 ## 0.10.0
 
 ### Minor Changes
