@@ -733,15 +733,15 @@ export function deleteTime(
   start: number,
   end: number
 ): Note[] {
-  const cut = end - start;
-  if (!(cut > 0)) {
+  const gap = end - start;
+  if (!(gap > 0)) {
     return [...notes];
   }
   const moved = (time: number) => {
     if (time <= start) {
       return time;
     }
-    return time >= end ? time - cut : start;
+    return time >= end ? time - gap : start;
   };
   return notes.flatMap((note) => {
     const from = moved(note.start);
