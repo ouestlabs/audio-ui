@@ -91,6 +91,7 @@ The docs, the catalog's `categoryGroups` and the shipped skill share one map, by
 - `(elements)/`: the pieces of any audio interface. Controls, keyboards and pads, displays.
 - `(workstation)/`: the surfaces of a DAW. Arrangement, editors, transport and mixer.
 - `(devices)/`: effects and instruments, like plugins. One page per device, by family.
+- `engine/` (beside `components/`, at `/docs/engine/<page>`): what makes the sound, the hooks and libs that serve several spaces, a page per concept (output, clock and time, synthesis, input, analysis). Its overview says how an engine of the user's own drives the components.
 
 How items are grouped:
 

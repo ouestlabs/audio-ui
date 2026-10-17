@@ -89,7 +89,7 @@ const spectrum = useSpectrum(analyser);
 
 Give the analyzer the same `minHz` and `maxHz` as the hook, so each point lands on its frequency. A larger `fftSize` separates low notes better, and `smoothingTimeConstant` sets how fast the spectrum settles.
 
-The peaks come from `useSpectrumPeaks(spectrum, { hold, fall })` in the same hook file: each point keeps its loudest level for `hold` seconds (default 1), then falls at `fall` dB per second (default 24).
+The peaks come from `useSpectrumPeaks(spectrum, { hold, fall })` in the same hook file: each point keeps its loudest level for `hold` seconds (default 1), then falls at `fall` dB per second (default 24). Both hooks are in [Analysis](/docs/engine/analysis#spectrum).
 
 ## API reference
 

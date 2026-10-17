@@ -87,7 +87,7 @@ const levels = useAudioLevels(analysers); // memoize the array: a new one restar
 <Meter aria-label="Drums level" peakMarks="hidden" source={levels} />;
 ```
 
-The level is the RMS of the time-domain samples in dB. It rises at once and falls back at 30 dB a second, so a drum hit reads as a hit and does not flicker. Nothing is published while the signal is silent.
+The level is the RMS of the time-domain samples in dB. It rises at once and falls back at 30 dB a second, so a drum hit reads as a hit and does not flicker. Nothing is published while the signal is silent. The hooks a mixer plays through are in the Audio engine: [Output](/docs/engine/output) for the master bus, [Clock and time](/docs/engine/clock-and-time) for the transport clock and [Analysis](/docs/engine/analysis) for the levels.
 
 ## Playing your own sources
 

@@ -82,7 +82,7 @@ npx shadcn@latest add @audio-ui/equalizer-device @audio-ui/equalizer-panel @audi
 
 The curve is the sum of the four filters and the output level. Each band has a handle on it: drag it to set the frequency and the gain of the band, and it follows the pointer one to one. A cut or a notch has no gain, so its handle only slides. Double-click a handle to flatten the band.
 
-Pick a band by its number or its handle, and its type, frequency, gain and width appear under the curve, the unused ones drawn off. Pass a `spectrum` (from `useSpectrum`) to draw the level of the sound behind the curve.
+Pick a band by its number or its handle, and its type, frequency, gain and width appear under the curve, the unused ones drawn off. Pass a `spectrum` (from `useSpectrum`, see [Analysis](/docs/engine/analysis#spectrum)) to draw the level of the sound behind the curve.
 
 The type of a band decides what it uses:
 

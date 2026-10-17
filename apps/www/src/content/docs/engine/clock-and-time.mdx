@@ -1,0 +1,83 @@
+---
+title: Clock and time
+description: "A transport clock that schedules notes ahead on the audio clock, with a loop, seeking and tempo changes, and the musical time it counts in."
+---
+
+## The transport clock
+
+```bash
+npx shadcn@latest add @audio-ui/use-transport-clock
+```
+
+A timer in JavaScript drifts and stalls when the page is busy or in the background; the audio clock does not. `useTransportClock` looks a little ahead on the audio clock and calls you back with the exact audio time of each step, so you schedule the sound at that time and it plays on the beat whatever the page is doing.
+
+```tsx
+import { useTransportClock } from "@/hooks/use-transport-clock";
+
+const clock = useTransportClock({
+  bpm: 120,
+  stepsPerBeat: 4, // a step is a sixteenth note
+  totalSteps: 64, // four bars
+  region: loop, // { start, end } in steps, or null for all of it
+  onStep: (step, time) => {
+    for (const note of notesAt(step)) {
+      voices.triggerNote(note.pitch, envelope, note.velocity, time);
+    }
+  },
+  onReset: () => voices.releaseAll(),
+});
+
+<Button onClick={clock.isPlaying ? clock.stop : clock.start}>Play</Button>;
+```
+
+The clock knows when, never what: `onStep` decides what plays. `onReset` runs on every start, stop, seek and loop change, to drop what was already scheduled ahead. For a playhead, read `getPosition()` in an animation frame and push it to a [source](/docs/engine#your-own-engine): it gives fractional steps, so the playhead glides between them.
+
+The [piano roll](/docs/components/base/piano-roll#playing-the-notes) plays its notes with this clock through `usePianoRollPlayback`, which is a good example to copy.
+
+<TypeTable title="Options">
+<TypeRow name={"totalSteps"} type={"number"}>How many steps the grid has.</TypeRow>
+<TypeRow name={"bpm"} type={"number"} default={"120"}>The tempo. A change keeps the step that plays and carries on at the new speed.</TypeRow>
+<TypeRow name={"stepsPerBeat"} type={"number"} default={"4"}>Steps in a beat.</TypeRow>
+<TypeRow name={"region"} type={"{ start, end } | null"}>The steps the clock loops over, read on every poll. Unset, the whole grid.</TypeRow>
+<TypeRow name={"onStep"} type={"(step, time) => void"}>Called ahead of each step with its audio time: start your sounds at `time`.</TypeRow>
+<TypeRow name={"onReset"} type={"() => void"}>Called when playback jumps or stops: release what is scheduled.</TypeRow>
+</TypeTable>
+
+<TypeTable title="Returns">
+<TypeRow name={"start, stop"} type={"() => void"}>Play from the start of the region, or stop.</TypeRow>
+<TypeRow name={"isPlaying"} type={"boolean"}>Whether it plays.</TypeRow>
+<TypeRow name={"reanchor"} type={"(step?) => void"}>Plays on from `step` now (the start of the region when left out): seeking, or hearing a moved loop at once. No-op while stopped.</TypeRow>
+<TypeRow name={"getPosition"} type={"() => number"}>Where it is, in fractional steps.</TypeRow>
+<TypeRow name={"secondsPerStep"} type={"number"}>A step's length at the current tempo, to place a note's end.</TypeRow>
+</TypeTable>
+
+The scheduling itself is plain functions in `@audio-ui/core/time` (`advance`, `anchoredCursor`, `positionAt`, `SCHEDULE_AHEAD_SECONDS`): the hook only connects them to React and the audio context, so an engine outside React uses them directly.
+
+## Musical time
+
+`@audio-ui/core/time` turns seconds into bars and beats and back. A tempo is `{ bpm, beatsPerBar, beatUnit }`: `bpm` counts quarter notes, and `beatsPerBar` and `beatUnit` are the time signature, 6/8 being `{ beatsPerBar: 6, beatUnit: 8 }`.
+
+```tsx
+import {
+  barsBeatsAt,
+  describeBarsBeats,
+  secondsPerBar,
+  secondsPerBeat,
+} from "@audio-ui/core/time";
+
+const tempo = { beatsPerBar: 4, beatUnit: 4, bpm: 120 };
+secondsPerBeat(tempo); // 0.5
+secondsPerBar(tempo); // 2
+barsBeatsAt(5, tempo); // { bar: 3, beat: 3, sixteenth: 1 }
+describeBarsBeats(5, tempo); // "Bar 3, beat 3", for aria-valuetext
+```
+
+- `secondsPerQuarter`, `secondsPerBeat`, `secondsPerBar`: How long a quarter note, a beat and a bar last at a tempo.
+- `barsBeatsAt`, `describeBarsBeats`: Where a time falls, in bars, beats and sixteenths, as numbers or as words.
+- `barsOf`, `barsBeatsWith`: The same along a song whose time signature changes.
+- `gridInterval`, `gridLabel`, `GRID_DIVISIONS`: The grid a timeline snaps to at a zoom: bars, beats, triplets, an adaptive grid.
+- `ticksToSeconds`, `secondsToTicks`: MIDI ticks and seconds, along a map of tempo changes.
+- `warpedTime`, `warpMarkers`: Time stretched by warp markers, as a clip that follows the tempo.
+- `syncedSeconds`, `SYNCED_DIVISIONS`: The length of a note value, such as `1/8` or `1/4T`, for a delay or an LFO in sync.
+
+The [Transport](/docs/components/base/transport) and the [Timeline](/docs/components/base/timeline) count in this time, so a bar means the same everywhere.

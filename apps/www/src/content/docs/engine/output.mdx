@@ -1,0 +1,56 @@
+---
+title: Output
+description: "The page's one audio context, and a master bus with a safety limiter that every sound of a screen goes through."
+---
+
+## The audio context
+
+```bash
+npx shadcn@latest add @audio-ui/web-audio
+```
+
+A page has one `AudioContext`, shared by every hook and engine on it, made the first time something asks for it. Ask for it where you need it:
+
+```tsx
+import { webAudio } from "@/lib/web-audio";
+
+const ctx = webAudio.getContext(); // null on the server
+```
+
+Browsers start a context suspended until the user does something on the page. Resume it from the gesture that starts the sound, such as a play button:
+
+```tsx
+const play = () => {
+  const ctx = webAudio.getContext();
+  if (ctx?.state === "suspended") {
+    ctx.resume();
+  }
+  transport.play();
+};
+```
+
+## The master bus
+
+```bash
+npx shadcn@latest add @audio-ui/use-master-bus
+```
+
+Connect every sound of a screen into one master bus, never straight into `ctx.destination`. One fader then sets the level of everything, and a limiter at the end keeps a loud mix from clipping.
+
+```tsx
+import { useMasterBus } from "@/hooks/use-master-bus";
+
+const [volume, setVolume] = useState(0.7);
+const output = useMasterBus(volume);
+
+const voices = useSynthVoices({ destination: output });
+
+<Fader aria-label="Volume" max={1} min={0} onValueChange={setVolume} value={volume} />;
+```
+
+The bus is a gain, a limiter and a trim that cancels the limiter's make-up gain, so below its threshold (-3 dBFS) the sound passes unchanged. A change of `volume` ramps over 10 ms, so dragging the fader never clicks. The limiter adds a few milliseconds of latency.
+
+<TypeTable>
+<TypeRow name={"useMasterBus(volume)"} type={"GainNode | null"}>The node to connect sources into. `null` on the server and in the first render, before the context exists.</TypeRow>
+<TypeRow name={"volume"} type={"number"}>The bus's gain, 0 to 1 for silence to unity.</TypeRow>
+</TypeTable>

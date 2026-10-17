@@ -98,7 +98,8 @@ const isComponentsFolder = (folder: PageTreeFolder) =>
 
 // Get a folder's groups, each a heading of the sidebar. The components' base
 // folder holds one folder per space (Elements, Workstation, Devices), and
-// each is a group of its own; any other folder is one group.
+// each is a group of its own; any other folder is one group, a space too
+// (the Audio engine) unless it is the root one (Get started).
 export function getGroupsFromFolder(
   folder: PageTreeFolder,
   currentBase: string
@@ -115,9 +116,10 @@ export function getGroupsFromFolder(
       title: space.name?.toString(),
     }));
   }
+  // Any other folder but the root one (Get started) is a space of its own, such as the Audio engine.
   return [
     {
-      collapsible: false,
+      collapsible: folder.root !== true,
       sections: getSectionsFromFolder(folder, currentBase),
       title: folder.name?.toString(),
     },

@@ -109,6 +109,23 @@ Audio effects and instruments, like plugins in a DAW. A device is a state (`<nam
 | `mid-side-panel` | `MidSidePanel` from `@/components/audio-ui/devices/mid-side/panel` | registry only | The mid/side device's face: a square with the side across and the mid up and one handle for both. Pair it with the `mid-side-device` and `mid-side-engine` libs |
 | `redux-panel` | `ReduxPanel` from `@/components/audio-ui/devices/redux/panel` | registry only | The redux device's face: the stairs the bits make against a clean sound. Pair it with the `redux-device` and `redux-engine` libs |
 
+## Audio engine
+
+What makes the sound, on the Web Audio API: install each on its own, to `hooks/` or `lib/`. All optional: the components take values and live sources, so an engine of your own (an AudioWorklet, WASM) drives them the same way, through `createSource` from `@audio-ui/react`. Docs: https://www.audio-ui.dev/docs/engine.
+
+| Name | Import | Use it for |
+| --- | --- | --- |
+| `web-audio` | `webAudio` from `@/lib/web-audio` | The page's one `AudioContext`: `webAudio.getContext()`, `null` on the server. Resume it from the click that starts the sound |
+| `use-master-bus` | `useMasterBus` from `@/hooks/use-master-bus` | One gain and a safety limiter that every sound of a screen connects into, set by one volume |
+| `use-transport-clock` | `useTransportClock` from `@/hooks/use-transport-clock` | Schedule notes ahead on the audio clock: `onStep(step, time)` on each step, a loop region, seek with `reanchor`, `getPosition` for a playhead |
+| `use-synth-voices` | `useSynthVoices` from `@/hooks/use-synth-voices` | Polyphonic voices shaped by an `Envelope`'s points: `triggerNote`, `releaseNote`, `releaseAll`, `setPitchBend` |
+| `envelope-ramp` | `scheduleEnvelopeRamp`, `sliceEnvelope` from `@/lib/envelope-ramp` | An envelope's points as a gain ramp on any `AudioParam` |
+| `drum-synthesis` | `triggerKick`, `triggerSnare`, `triggerHihat` from `@/lib/drum-synthesis` | Drum hits from oscillators and noise, no samples, with `tune` and `decay` |
+| `use-midi-input` | `useMidiInput` from `@/hooks/use-midi-input` | The page's MIDI keyboard: note on with velocity, note off, pitch bend, `activeNotes` for a piano. Connect from a click |
+| `use-microphone` | `useMicrophone` from `@/hooks/use-microphone` | The microphone as an `AnalyserNode`, raw, never played out. Start it from a click |
+| `use-audio-levels` | `useAudioLevels` from `@/hooks/use-audio-levels` | Live levels and peaks from one analyser per channel, for a `Meter`'s `source`. Memoize the array |
+| `use-spectrum` | `useSpectrum`, `useSpectrumPeaks` from `@/hooks/use-spectrum` | A live spectrum on a log axis, for a `SpectrumAnalyzer` or a `PlotTrace` |
+
 ## Ready blocks
 
 `npx shadcn@latest add @audio-ui/block-<name>` installs a composed screen to `components/examples/block-<name>.tsx`, exported by name:

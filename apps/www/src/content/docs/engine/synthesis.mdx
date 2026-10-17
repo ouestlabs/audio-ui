@@ -1,0 +1,68 @@
+---
+title: Synthesis
+description: "Synth voices shaped by an envelope, the ramps that shape them, and drum hits made from oscillators and noise."
+---
+
+## Synth voices
+
+```bash
+npx shadcn@latest add @audio-ui/use-synth-voices
+```
+
+`useSynthVoices` plays notes on a pool of voices, one per held pitch: an oscillator through a gain shaped by an envelope. The attack and the decay play when the note starts and hold at the sustain level; the release plays when it ends.
+
+```tsx
+import { useMasterBus } from "@/hooks/use-master-bus";
+import { useSynthVoices } from "@/hooks/use-synth-voices";
+
+const output = useMasterBus(0.7);
+const voices = useSynthVoices({ destination: output, oscillatorType: "triangle" });
+
+<Piano
+  onNoteOff={(pitch) => voices.releaseNote(pitch, envelope)}
+  onNoteOn={(pitch) => voices.triggerNote(pitch, envelope)}
+/>;
+```
+
+`envelope` is the points of an [Envelope](/docs/components/base/envelope), `{ x, y }` from 0 to 1, so the shape a user draws is the shape the note plays: the points before the middle (`x` 0.5) are the attack and the decay, the points after it the release. Give `time` to `triggerNote` and `releaseNote` to schedule a note ahead, as a [transport clock](/docs/engine/clock-and-time) does; leave it out to play now.
+
+<TypeTable title="Options">
+<TypeRow name={"destination"} type={"AudioNode | null"}>Where the voices play, such as the master bus.</TypeRow>
+<TypeRow name={"oscillatorType"} type={"OscillatorType"} default={"\"sawtooth\""}>The waveform: `"sine"`, `"triangle"`, `"sawtooth"` or `"square"`.</TypeRow>
+<TypeRow name={"attackDecaySeconds"} type={"number"} default={"0.4"}>How long the first half of the envelope lasts.</TypeRow>
+<TypeRow name={"releaseSeconds"} type={"number"} default={"0.3"}>How long the second half lasts.</TypeRow>
+<TypeRow name={"peakGain"} type={"number"} default={"0.25"}>A voice's gain at the top of the envelope, at full velocity.</TypeRow>
+</TypeTable>
+
+<TypeTable title="Returns">
+<TypeRow name={"triggerNote"} type={"(pitch, envelope, velocity?, time?) => void"}>Starts a voice. `velocity` is 0 to 1. No-op if the pitch already sounds.</TypeRow>
+<TypeRow name={"releaseNote"} type={"(pitch, envelope, time?) => void"}>Plays the release and stops the voice.</TypeRow>
+<TypeRow name={"releaseAll"} type={"() => void"}>Stops every voice at once: on stop, on a seek, on unmount.</TypeRow>
+<TypeRow name={"setPitchBend"} type={"(semitones) => void"}>Retunes every voice, as a pitch bend wheel does. 0 is back to pitch.</TypeRow>
+</TypeTable>
+
+## Envelope ramps
+
+```bash
+npx shadcn@latest add @audio-ui/envelope-ramp
+```
+
+The ramps behind the voices, for your own sounds: `scheduleEnvelopeRamp(param, points, startTime, seconds, peak, from)` runs a gain through an envelope's points, and `sliceEnvelope(points, fromX, toX)` takes a part of one, such as the release after `SUSTAIN_SPLIT_X`. A ramp cancels what was scheduled on the param first, so starting a note again never clicks.
+
+## Drum hits
+
+```bash
+npx shadcn@latest add @audio-ui/drum-synthesis
+```
+
+A kick, a snare and a hihat made from oscillators and noise, with no samples to load. Each starts at `time` and plays out on its own.
+
+```tsx
+import { triggerHihat, triggerKick, triggerSnare } from "@/lib/drum-synthesis";
+
+triggerKick(ctx, output, time);
+triggerSnare(ctx, output, time, { tune: 2 });
+triggerHihat(ctx, output, time, { decay: 0.5 }); // a longer decay rings open
+```
+
+`tune` shifts a hit in semitones from its own pitch and `decay` sets how long it lasts, in seconds. The [Pad](/docs/components/base/pad) page plays a kit with them.

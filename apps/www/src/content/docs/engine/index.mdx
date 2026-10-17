@@ -1,0 +1,40 @@
+---
+title: Overview
+description: "What makes the sound behind the components: the hooks and libraries audio/ui ships on the Web Audio API, and how an engine of your own drives the same components."
+---
+
+The components draw and take input; they never make a sound. Something else plays: the hooks and libraries on these pages, which run on the browser's Web Audio API, or an engine of your own, such as one in an AudioWorklet or in WebAssembly.
+
+- [Output](/docs/engine/output): The page's one audio context, and a master bus with a limiter that every sound goes through.
+- [Clock and time](/docs/engine/clock-and-time): A transport clock that schedules notes ahead on the audio clock, and the musical time it counts in.
+- [Synthesis](/docs/engine/synthesis): Synth voices shaped by an envelope, and drum hits.
+- [Input](/docs/engine/input): A MIDI keyboard and the microphone.
+- [Analysis](/docs/engine/analysis): Live levels and spectra for meters and plots.
+
+Each installs on its own with `npx shadcn@latest add @audio-ui/<name>`, to `hooks/` or `lib/`, and the components that need one name it on their page.
+
+## Your own engine
+
+Every component takes its state as values and reports changes through callbacks, so an engine of your own drives it the same way the hooks do:
+
+- **Values that change on a gesture**, such as a gain, a clip or a note, are props: `value` and `onValueChange`, and `onValueCommitted` when the gesture ends.
+- **Values that change every frame**, such as a playhead, a level or a spectrum, are live sources. A component reads one through its `source` prop and repaints without a React render.
+
+`createSource` makes a source you push to from anywhere: an audio callback, a worker, a message from an AudioWorklet.
+
+```tsx
+import { createSource } from "@audio-ui/react";
+
+// Made once, outside a render.
+const position = createSource(0);
+
+// Wherever your engine reports where it is, such as each animation frame:
+engine.onPosition((seconds) => position.set(seconds));
+
+<Transport source={position} tempo={tempo} playing={playing} onPlayPause={toggle} />;
+<Timeline duration={duration} source={position}>{/* … */}</Timeline>;
+```
+
+A source is `{ getSnapshot, subscribe }`, the shape `useSyncExternalStore` reads, so any store that has those two works too. The hooks on these pages return sources in the same shape, which is why a component cannot tell them from yours.
+
+Without React, `@audio-ui/core` holds the same logic as plain functions: the scheduler and the musical time in `@audio-ui/core/time`, the analysis in `@audio-ui/core/analysis`, MIDI in `@audio-ui/core/midi` and pitch in `@audio-ui/core/pitch`.

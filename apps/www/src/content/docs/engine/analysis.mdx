@@ -1,0 +1,62 @@
+---
+title: Analysis
+description: "Live levels and spectra from an analyser, in the shape a meter or a plot reads, and the analysis functions behind them."
+---
+
+Tap a signal with an `AnalyserNode`, a tap that plays nothing, and these hooks turn it into a live [source](/docs/engine#your-own-engine) a component repaints from, with no React render per frame.
+
+## Levels
+
+```bash
+npx shadcn@latest add @audio-ui/use-audio-levels
+```
+
+```tsx
+import { useAudioLevels } from "@/hooks/use-audio-levels";
+
+// One analyser per channel, made once: a new array restarts the sampling.
+const analysers = useMemo(() => {
+  const analyser = ctx.createAnalyser();
+  output.connect(analyser);
+  return [analyser];
+}, [ctx, output]);
+
+const levels = useAudioLevels(analysers);
+
+<Meter aria-label="Output" source={levels} />;
+```
+
+`useAudioLevels(analysers)` gives `{ levels, peaks }`, one entry per analyser, in dB: the RMS level, which falls back smoothly as a needle would, and a peak that holds, then falls. A `ChannelSplitterNode` splits a stereo signal into one analyser per side. While the signal is silent, nothing is published. A [Meter](/docs/components/base/meter) paints it, and the [Mixer](/docs/components/base/mixer) gives one to each channel.
+
+## Spectrum
+
+```bash
+npx shadcn@latest add @audio-ui/use-spectrum
+```
+
+```tsx
+import { useSpectrum, useSpectrumPeaks } from "@/hooks/use-spectrum";
+
+const analyser = ctx.createAnalyser();
+analyser.fftSize = 8192; // finer low end
+output.connect(analyser);
+
+const spectrum = useSpectrum(analyser, { minHz: 20, maxHz: 20000 });
+const peaks = useSpectrumPeaks(spectrum, { hold: 1, fall: 24 });
+
+<SpectrumAnalyzer aria-label="Spectrum" peaks={peaks} source={spectrum} />;
+```
+
+`useSpectrum` gives dB per point along a logarithmic frequency axis, 160 points from 20 Hz to 20 kHz unless told otherwise. Draw it with the [Spectrum analyzer](/docs/components/base/spectrum-analyzer), or as a trace on a [Plot](/docs/components/base/plot) behind an equalizer's curve. `useSpectrumPeaks` keeps each point's loudest level for `hold` seconds, then lets it fall at `fall` dB per second.
+
+## The functions behind them
+
+`@audio-ui/core/analysis` holds the math as plain functions, for an engine of your own or a worker:
+
+- `rmsDb(samples)`: The RMS level of samples, in dBFS.
+- `dbToGain(db)`, `gainToDb(gain)`: dB and gain, both ways.
+- `logSpectrum(bins, sampleRate, out, { minHz, maxHz })`: An analyser's bins on a log frequency axis, written into `out`.
+- `holdPeaks(spectrum, peaks, holding, elapsed, { hold, fall })`: Held peaks, a frame at a time.
+- `computePeaks(channels, buckets)`: A waveform's peaks, for a [Waveform](/docs/components/base/waveform).
+- `formatDb(db)`, `formatHz(hz)`: A level and a frequency as text, such as "-6.0 dB" and "1.2 kHz".
+- `biquadResponse`, `eqResponse`, `compressorOutput`: What a filter, an equalizer and a compressor do, to draw their curves.
