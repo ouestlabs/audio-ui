@@ -11,8 +11,8 @@ export {
 export {
   type Breakpoint,
   CURVE_EPSILON,
-  CURVE_EXPONENT_RANGE,
   CURVE_HIT_TOLERANCE,
+  CURVE_RATE,
   CURVE_SAMPLES,
   CURVE_STEP_MULTIPLIER,
   clampToNeighbors,

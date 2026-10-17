@@ -5,8 +5,8 @@ import {
   type Point as GeomPoint,
 } from "../../shared/math.ts";
 
-/** How far a segment can bend: its curve exponent runs from 1/8 to 8 at the ends of -1…1. */
-export const CURVE_EXPONENT_RANGE = 3;
+/** How far a segment can bend: the rate of its exponential at the ends of -1…1, which puts the middle of the segment at 0.4% of its rise (or 99.6%). */
+export const CURVE_RATE = 11;
 /** Straight lines between samples of a bent segment. */
 export const CURVE_SAMPLES = 24;
 /** A curve this close to flat is taken as straight, and dropped. */
@@ -24,9 +24,19 @@ export const LARGE_STEP_MULTIPLIER = 10;
  */
 export type Breakpoint = GeomPoint & { curve?: number };
 
-/** Where along a bent segment a share `t` of its length lands, as a share of its rise. */
+/**
+ * Where along a bent segment a share `t` of its length lands, as a share of
+ * its rise: the exponential of an analog envelope stage,
+ * `(e^(k·t) - 1) / (e^k - 1)` with `k` the curve times `CURVE_RATE`. A positive
+ * curve holds the start and rushes the end, a negative one is its mirror
+ * image, and neither turns vertical at an end.
+ */
 export function segmentShape(t: number, curve: number | undefined): number {
-  return curve ? t ** (2 ** (curve * CURVE_EXPONENT_RANGE)) : t;
+  if (!curve) {
+    return t;
+  }
+  const rate = curve * CURVE_RATE;
+  return Math.expm1(rate * t) / Math.expm1(rate);
 }
 
 /** The curve that puts a segment's midpoint at height `y`, or null when the segment is flat and has nothing to bend. */
@@ -39,9 +49,9 @@ export function curveForMidpoint(
   if (Math.abs(rise) < 1e-6) {
     return null;
   }
-  const share = clamp((y - from.y) / rise, 0.02, 0.98);
-  const exponent = Math.log(share) / Math.log(0.5);
-  return clamp(Math.log2(exponent) / CURVE_EXPONENT_RANGE, -1, 1);
+  // The middle of the exponential is at 1 / (e^(k/2) + 1), so k = 2 ln((1 - share) / share).
+  const share = clamp((y - from.y) / rise, 0.001, 0.999);
+  return clamp((2 * Math.log((1 - share) / share)) / CURVE_RATE, -1, 1);
 }
 
 export function sortPoints<T extends GeomPoint>(points: T[]): T[] {
@@ -160,12 +170,12 @@ export function snapTo(value: number, step: number): number {
  * flat one and does not turn into a corner.
  */
 export function curveSamples(curve: number): number[] {
-  const exponent = 2 ** (curve * CURVE_EXPONENT_RANGE);
+  const rate = curve * CURVE_RATE;
   const samples = new Set<number>();
   for (let sample = 1; sample < CURVE_SAMPLES; sample += 1) {
     const share = sample / CURVE_SAMPLES;
     samples.add(share);
-    samples.add(share ** (1 / exponent));
+    samples.add(Math.log1p(share * Math.expm1(rate)) / rate);
   }
   return [...samples].filter((t) => t > 0 && t < 1).sort((a, b) => a - b);
 }

@@ -1,4 +1,5 @@
 import { describe, expect, mock, test } from "bun:test";
+import { CURVE_RATE, segmentShape } from "@audio-ui/core/envelope";
 import { fireEvent, render } from "@testing-library/react";
 import { mockRect } from "../../../../test/helpers.ts";
 import { Envelope } from "../../../entries/envelope.ts";
@@ -108,19 +109,22 @@ describe("Envelope segments", () => {
       pointerId: 1,
     });
     expect(segment(0).hasAttribute("data-dragging")).toBe(true);
-    // The pointer a quarter of the way up: the midpoint's share of the rise is 0.25, an exponent of 2.
+    // The pointer a quarter of the way up: the midpoint's share of the rise is 0.25, an exponential of rate 2 ln 3.
     fireEvent.pointerMove(segment(0), {
       clientX: 20,
       clientY: 75,
       pointerId: 1,
     });
     const [value, details] = lastCall(onValueChange);
-    expect(value[0]?.curve).toBeCloseTo(1 / 3, 3);
+    expect(value[0]?.curve).toBeCloseTo((2 * Math.log(3)) / CURVE_RATE, 3);
     expect(details.reason).toBe("curve");
     expect(onValueCommitted).not.toHaveBeenCalled();
 
     fireEvent.pointerUp(segment(0), { clientX: 20, clientY: 75, pointerId: 1 });
-    expect(lastCall(onValueCommitted)[0][0]?.curve).toBeCloseTo(1 / 3, 3);
+    expect(lastCall(onValueCommitted)[0][0]?.curve).toBeCloseTo(
+      (2 * Math.log(3)) / CURVE_RATE,
+      3
+    );
     expect(lastCall(onValueCommitted)[1].reason).toBe("curve");
     expect(segment(0).hasAttribute("data-dragging")).toBe(false);
   });
@@ -246,16 +250,14 @@ describe("Envelope adding inside a bent segment", () => {
     const [value, details] = lastCall(onValueChange);
     expect(details.reason).toBe("add");
     const [first, added] = value;
-    const exponent = 2 ** (0.5 * 3);
     expect(added?.x).toBe(0.5);
-    expect(added?.y).toBeCloseTo(0.5 ** exponent, 5);
+    expect(added?.y).toBeCloseTo(segmentShape(0.5, 0.5), 5);
     // Each half is bent to follow the part of the curve it replaces.
     expect(first?.curve).toBeGreaterThan(0);
     expect(added?.curve).toBeGreaterThan(0);
     // The curve through the new point's neighbours matches the original at their midpoints.
-    const original = (t: number) => t ** exponent;
-    const leftMid = (added?.y ?? 0) * 0.5 ** (2 ** ((first?.curve ?? 0) * 3));
-    expect(leftMid).toBeCloseTo(original(0.25), 1);
+    const leftMid = (added?.y ?? 0) * segmentShape(0.5, first?.curve);
+    expect(leftMid).toBeCloseTo(segmentShape(0.25, 0.5), 1);
   });
 
   test("added in a straight segment it lands under the pointer, as before", () => {
