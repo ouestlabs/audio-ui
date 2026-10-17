@@ -787,16 +787,17 @@ function ClipSource({
   const maxZoom = Math.max(fit, (peakCount(values) * PEAK_PX) / span);
   return (
     <Timeline
-      className="min-w-0 flex-1 gap-1 p-2"
+      className="min-w-0 flex-1"
       duration={span}
       maxZoom={maxZoom || undefined}
       minZoom={fit || undefined}
       onZoomChange={setZoom}
       zoom={zoom ?? undefined}
     >
-      <TimelineNavigator getAriaValueText={format} />
+      <TimelineNavigator className="mx-2 my-1.5" getAriaValueText={format} />
+      {/* Flush in the clip view, which is the frame: no border or corners of its own. */}
       <TimelineViewport
-        className="min-w-0 rounded-md border bg-muted/40"
+        className="min-w-0 border-t bg-muted/40"
         ref={viewportRef}
         scrollbar="hidden"
       >
