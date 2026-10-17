@@ -112,13 +112,7 @@ export function nodeText(node: ReactNode): string {
     const html = node.props.dangerouslySetInnerHTML?.__html;
     return html === undefined
       ? nodeText(node.props.children)
-      : html
-          .replace(/<[^>]*>/g, "")
-          .replaceAll("&amp;", "&")
-          .replaceAll("&lt;", "<")
-          .replaceAll("&gt;", ">")
-          .replaceAll("&quot;", '"')
-          .replaceAll("&#x27;", "'");
+      : html.replace(/<[^>]*>/g, "").replaceAll("&amp;", "&");
   }
   return "";
 }
