@@ -723,7 +723,7 @@ export const audio: RegistryItem[] = [
     categories: ["timeline", "waveform", "knob"],
     dependencies: ["@audio-ui/core", "@audio-ui/react"],
     description:
-      "The clip view of an arrangement's clip: its source as a waveform with the stretch it plays or loops to drag, Loop, Reverse and Crop, and knobs for its gain and transpose.",
+      "The clip view of an arrangement's clip: its source on a timeline of its own (overview, bar ruler, the stretch it plays or loops to drag, warp markers on the waveform), beside Loop, Warp, Reverse, Crop and knobs for its gain and transpose.",
     files: [
       {
         path: "audio/panels/clip-panel.tsx",
@@ -733,7 +733,7 @@ export const audio: RegistryItem[] = [
     name: "clip-panel",
     registryDependencies: [
       "@audio-ui/knob",
-      "@audio-ui/waveform",
+      "@audio-ui/timeline",
       "@shadcn/button",
     ],
     type: "registry:ui",
