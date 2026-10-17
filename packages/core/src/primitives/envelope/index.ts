@@ -6,6 +6,7 @@ export {
   type EnvelopeCommitEventReason,
   type EnvelopeController,
   type EnvelopeOptions,
+  type EnvelopeSnap,
   type EnvelopeSnapshot,
 } from "./controller.ts";
 export {

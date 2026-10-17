@@ -315,6 +315,17 @@ describe("Envelope snap", () => {
     });
     expect(lastCall(onValueChange)[0][2]).toEqual({ x: 0.5, y: 0 });
   });
+
+  test("a step per axis snaps across and leaves the level free", () => {
+    const { point, onValueChange } = renderEnvelope({
+      snap: { x: 0.25, y: 0 },
+    });
+    fireEvent.pointerDown(point(1), { clientX: 40, clientY: 0, pointerId: 1 });
+    fireEvent.pointerMove(point(1), { clientX: 74, clientY: 38, pointerId: 1 });
+    const [, moved] = lastCall(onValueChange)[0];
+    expect(moved?.x).toBe(0.25);
+    expect(moved?.y).toBeCloseTo(0.62, 5);
+  });
 });
 
 describe("Envelope alt-drag on a segment", () => {

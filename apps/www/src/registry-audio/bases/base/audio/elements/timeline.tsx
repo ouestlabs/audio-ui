@@ -534,6 +534,7 @@ function TimelineTrackMenu({
  * is where the cursor goes), solo, mute and gain. The lower edge resizes it.
  */
 function TimelineTrackControls({
+  children,
   compact,
   folded,
   mix,
@@ -549,6 +550,8 @@ function TimelineTrackControls({
   selected,
   trackId,
 }: {
+  /** More rows under the mix, such as the automation's parameter chooser. A short track leaves them out. */
+  children?: ReactNode;
   /** A level meter drawn down the header's right edge, such as a vertical `Meter` sized to fill it. */
   meter?: ReactNode;
   /** Whether the track is short: one row, with no gain. */
@@ -794,6 +797,7 @@ function TimelineTrackControls({
             />
           </div>
         )}
+        {compact ? null : <div className="contents">{children}</div>}
         {meter ? (
           <div className="pointer-events-none absolute inset-y-1.5 end-1.5 w-2">
             {meter}

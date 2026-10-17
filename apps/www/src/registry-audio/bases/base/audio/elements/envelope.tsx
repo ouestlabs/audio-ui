@@ -27,14 +27,20 @@ const describeCurve = (curve = 0) =>
 /** Above this level a point's label sits under it, not over it. */
 const LABEL_FLIP_ABOVE = 0.8;
 
-/** A line every `step` across and down, spread over the whole frame like a plot's: they sit on the data's own coordinates, so a point is on a line at 0, ¼, ½, ¾ and 1. */
-function gridLines(step: number): CSSProperties {
-  const share = `calc((100% - 2 * ${INSET}) * ${step})`;
+/** A grid step, or the default one where an axis has none. */
+const gridStep = (step: number | undefined) =>
+  step && step > 0 ? step : DEFAULT_GRID_STEP;
+
+/** A line every step of `snap` across and down, spread over the whole frame like a plot's: they sit on the data's own coordinates, so a point is on a line at 0, ¼, ½, ¾ and 1. */
+function gridLines(snap: EnvelopePrimitive.Root.Props["snap"]): CSSProperties {
+  const [x, y] = typeof snap === "object" ? [snap.x, snap.y] : [snap, snap];
+  const share = (step: number | undefined) =>
+    `calc((100% - 2 * ${INSET}) * ${gridStep(step)})`;
   return {
     backgroundImage:
       "linear-gradient(to right, var(--border) 1px, transparent 1px), linear-gradient(to bottom, var(--border) 1px, transparent 1px)",
     backgroundPosition: `${INSET} 0, 0 ${INSET}`,
-    backgroundSize: `${share} 100%, 100% ${share}`,
+    backgroundSize: `${share(x)} 100%, 100% ${share(y)}`,
   };
 }
 
@@ -99,7 +105,7 @@ export function Envelope({
         className
       )}
       data-slot="envelope"
-      style={gridLines(snap && snap > 0 ? snap : DEFAULT_GRID_STEP)}
+      style={gridLines(snap)}
     >
       <EnvelopePrimitive.Root
         className="size-full data-disabled:cursor-not-allowed"

@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import {
   type Arranged,
+  automationAt,
   clearTime,
   consolidate,
   copyClips,
@@ -9,15 +10,20 @@ import {
   crossfade,
   deleteTime,
   fadeTime,
+  flatAutomation,
   land,
   lay,
+  mixAt,
   openTime,
   otherSelected,
+  panPosition,
   pasteTime,
   playedNotes,
   scaleClip,
   scaleValue,
   shiftTrack,
+  volumeGain,
+  volumeValue,
 } from "@/registry-audio/bases/base/lib/arrangement";
 
 const ORDER = ["drums", "bass", "keys"];
@@ -371,5 +377,46 @@ describe("scaleClip", () => {
       0.5
     );
     expect(audio.loop).toEqual([0, 4]);
+  });
+});
+
+describe("automation", () => {
+  test("reads an envelope along its segments and their curves", () => {
+    const points = [
+      { x: 0, y: 0 },
+      { curve: 0.5, x: 0.5, y: 1 },
+      { x: 1, y: 0 },
+    ];
+    expect(automationAt(points, 0.25)).toBeCloseTo(0.5, 5);
+    expect(automationAt(points, 0.5)).toBe(1);
+    // A positive curve holds the start of its segment.
+    expect(automationAt(points, 0.75)).toBeGreaterThan(0.5);
+    expect(automationAt(points, -1)).toBe(0);
+    expect(automationAt(points, 2)).toBe(0);
+    expect(automationAt(flatAutomation(0.3), 0.6)).toBe(0.3);
+  });
+
+  test("maps volume to a gain and back, and pan to the stereo field", () => {
+    expect(volumeGain(0)).toBe(0);
+    expect(volumeGain(volumeValue(1))).toBeCloseTo(1, 6);
+    expect(volumeGain(1)).toBeCloseTo(10 ** (6 / 20), 6);
+    expect(volumeValue(0)).toBe(0);
+    expect(panPosition(0.5)).toBe(0);
+    expect(panPosition(0)).toBe(-1);
+  });
+
+  test("a track plays its envelopes, and its mix where it has none or is overridden", () => {
+    const mix = { color: 0, gain: 0.5, muted: false, pan: 0.25, soloed: false };
+    const track = {
+      automation: { volume: flatAutomation(0) },
+      color: 0,
+      id: "keys",
+      name: "Keys",
+    };
+    expect(mixAt(track, mix, 0.5)).toEqual({ gain: 0, pan: 0.25 });
+    expect(mixAt(track, mix, 0.5, ["volume"])).toEqual({
+      gain: 0.5,
+      pan: 0.25,
+    });
   });
 });

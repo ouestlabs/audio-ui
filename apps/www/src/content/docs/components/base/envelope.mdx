@@ -15,7 +15,7 @@ Edits a ramp made of breakpoints, such as an ADSR shape or an automation curve. 
 - **Curves:** a point's `curve`, from -1 to 1, bends the segment that leaves it. 0, or no value, draws a straight line. A positive curve holds the start of the segment and steepens its end; a negative curve is its mirror image, rushing the start and holding the end. The bend is the exponential of an analog envelope stage, `(e^(k·t) - 1) / (e^k - 1)` with `k` the curve times 11, so neither end turns vertical. The last point has no segment.
 - **Pointer:** drag a point to move it. Double-click empty space to add a point, or double-click a point to remove it. A point stays between its neighbors, so points never cross.
 - **Point count:** points are added and removed between `minPoints` (default `2`, a start and an end) and `maxPoints`. Set both to the same number to fix the shape.
-- **Grid:** `snap` sets the grid that points snap to, for example `0.25` for quarters. Hold Cmd/Ctrl to move off the grid. Without `snap`, points move freely. The registry component draws the grid.
+- **Grid:** `snap` sets the grid that points snap to, for example `0.25` for quarters, or one step per axis, `{ x: 0.125, y: 0 }`, to snap across and leave the level free. Hold Cmd/Ctrl to move off the grid. Without `snap`, points move freely. The registry component draws the grid.
 - **Fine control:** hold Shift while dragging to move a point at a quarter of the pointer's speed. The registry component shows the point's value above it while it is dragged or focused.
 - **Accessibility:** the points share one tab stop. The arrow keys move the focused point, and Delete or Backspace removes it. Each point is a `role="slider"`. The registry component names the points "Point n of N". With the primitive, set `aria-label` and `getAriaValueText` yourself.
 
@@ -169,7 +169,7 @@ Groups all parts of the breakpoint envelope and owns its points, each normalized
 <TypeRow name={"onValueChange"} type={"(value: GeomPoint[], eventDetails: ChangeEventDetails) => void"}>Fires on every change: drag, keyboard, add and remove.</TypeRow>
 <TypeRow name={"onValueCommitted"} type={"(value: GeomPoint[], eventDetails: CommitEventDetails) => void"}>Fires when an interaction that changed the points ends.</TypeRow>
 <TypeRow name={"step"} type={"number"} default={"0.01"}>Keyboard step on both axes, in normalized units.</TypeRow>
-<TypeRow name={"snap"} type={"number"} default={"0"}>Grid the pointer snaps points to, in normalized units: `0.25` snaps to quarters, `0` is no grid. Cmd/Ctrl leaves the grid and Shift's fine drag ignores it.</TypeRow>
+<TypeRow name={"snap"} type={"number | { x: number; y: number }"} default={"0"}>Grid the pointer snaps points to, in normalized units: `0.25` snaps to quarters, `0` is no grid, and `{ x, y }` sets a step for each axis (`{ x: 0.125, y: 0 }` snaps across and leaves the level free). Cmd/Ctrl leaves the grid and Shift's fine drag ignores it.</TypeRow>
 <TypeRow name={"value"} type={"GeomPoint[]"}></TypeRow>
 </TypeTable>
 

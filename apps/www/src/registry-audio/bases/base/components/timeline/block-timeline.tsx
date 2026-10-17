@@ -1,5 +1,7 @@
 "use client";
 
+import type { Breakpoint } from "@audio-ui/core/envelope";
+import { noteToFrequency } from "@audio-ui/core/pitch";
 import {
   adjacentDivision,
   barLabelInterval,
@@ -69,6 +71,15 @@ import {
   DropdownMenuTrigger,
 } from "@/registry/bases/base/ui/dropdown-menu";
 import { Kbd, KbdGroup } from "@/registry/bases/base/ui/kbd";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/registry/bases/base/ui/select";
+import { AutomationEnvelope } from "@/registry-audio/bases/base/audio/elements/automation-envelope";
 import { NumberControl } from "@/registry-audio/bases/base/audio/elements/bpm-control";
 import { Meter } from "@/registry-audio/bases/base/audio/elements/meter";
 import {
@@ -117,11 +128,23 @@ import { useSynthVoices } from "@/registry-audio/bases/base/hooks/use-synth-voic
 import {
   type Arranged,
   type ArrangementTrack,
+  type AutomatedParameter,
   type Clipping,
+  flatAutomation,
+  type Mix,
+  mixAt,
+  panPosition,
   playedNotes,
   type TimeSelection,
+  volumeGain,
+  volumeValue,
 } from "@/registry-audio/bases/base/lib/arrangement";
-import type { EnvelopePoint } from "@/registry-audio/bases/base/lib/envelope-ramp";
+import {
+  type EnvelopePoint,
+  SUSTAIN_SPLIT_X,
+  scheduleEnvelopeRamp,
+  sliceEnvelope,
+} from "@/registry-audio/bases/base/lib/envelope-ramp";
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 const BARS = 32;
@@ -510,6 +533,7 @@ const SHORTCUTS: { action: string; keys: string[] }[] = [
   { action: "Undo", keys: ["Cmd/Ctrl", "Z"] },
   { action: "Redo", keys: ["Cmd/Ctrl", "Shift", "Z"] },
   { action: "Select every clip", keys: ["Cmd/Ctrl", "A"] },
+  { action: "Show or hide the automation", keys: ["A"] },
   { action: "Select by dragging a rectangle", keys: ["Shift", "Drag"] },
   { action: "Clear the selection", keys: ["Esc"] },
 ];
@@ -849,6 +873,56 @@ const NOTE_ENVELOPE: EnvelopePoint[] = [
 ];
 /** How far ahead of the playhead notes are scheduled on the audio clock, in seconds. */
 const SCHEDULE_AHEAD = 0.12;
+/** How long a note takes to reach its held level, and to fade once it ends, in seconds. */
+const NOTE_ATTACK = 0.4;
+const NOTE_RELEASE = 0.3;
+/** How loud a note plays at full velocity. */
+const NOTE_PEAK = 0.25;
+
+/** A note on its way to a track's channel: what cuts it short when the playhead jumps. */
+interface Tone {
+  gain: GainNode;
+  oscillator: OscillatorNode;
+}
+
+/** Plays `pitch` into `destination` from `at` for `length` seconds of the audio clock. */
+function scheduleTone(
+  destination: AudioNode,
+  pitch: number,
+  velocity: number,
+  at: number,
+  length: number
+): Tone {
+  const { context } = destination;
+  const oscillator = context.createOscillator();
+  const gain = context.createGain();
+  oscillator.type = "triangle";
+  oscillator.frequency.setValueAtTime(noteToFrequency(pitch), at);
+  gain.gain.value = 0;
+  oscillator.connect(gain).connect(destination);
+  const peak = NOTE_PEAK * velocity;
+  const attack = sliceEnvelope(NOTE_ENVELOPE, 0, SUSTAIN_SPLIT_X);
+  scheduleEnvelopeRamp(gain.gain, attack, at, NOTE_ATTACK, peak, 0);
+  scheduleEnvelopeRamp(
+    gain.gain,
+    sliceEnvelope(NOTE_ENVELOPE, SUSTAIN_SPLIT_X, 1),
+    at + length,
+    NOTE_RELEASE,
+    peak,
+    (attack.at(-1)?.y ?? 0) * peak
+  );
+  oscillator.start(at);
+  oscillator.stop(at + length + NOTE_RELEASE);
+  oscillator.addEventListener(
+    "ended",
+    () => {
+      oscillator.disconnect();
+      gain.disconnect();
+    },
+    { once: true }
+  );
+  return { gain, oscillator };
+}
 
 /**
  * Schedules on the audio clock the notes of the heard MIDI clips that start
@@ -862,8 +936,7 @@ function scheduleNotes({
   from,
   now,
   offset,
-  releaseNote,
-  triggerNote,
+  play,
   until,
 }: {
   audible: (trackId: string) => boolean;
@@ -871,8 +944,13 @@ function scheduleNotes({
   from: number;
   now: number;
   offset: number;
-  releaseNote: ReturnType<typeof useSynthVoices>["releaseNote"];
-  triggerNote: ReturnType<typeof useSynthVoices>["triggerNote"];
+  play: (
+    trackId: string,
+    pitch: number,
+    velocity: number,
+    at: number,
+    length: number
+  ) => void;
   until: number;
 }) {
   for (const clip of clips) {
@@ -895,65 +973,174 @@ function scheduleNotes({
           (note.velocity ?? 1) + Math.random() * (note.deviation ?? 0)
         )
       );
-      const at = offset + Math.max(now, note.start);
-      triggerNote(note.pitch, NOTE_ENVELOPE, velocity, at);
-      releaseNote(note.pitch, NOTE_ENVELOPE, at + note.length);
+      play(
+        clip.track,
+        note.pitch,
+        velocity,
+        offset + Math.max(now, note.start),
+        note.length
+      );
     }
   }
 }
 
+/** A track's own gain and pan, between its notes and the master. */
+interface Channel {
+  gain: GainNode;
+  pan: StereoPannerNode;
+}
+
+/** A track's gain and pan at a time of the arrangement: its mix, or its automation there. */
+type LevelsAt = (
+  trackId: string,
+  time: number
+) => { gain: number; pan: number };
+
 /**
- * Plays the MIDI clips through a synth while the arrangement plays: each
- * frame, it schedules on the audio clock the notes the playhead is about to
- * reach, on the tracks that are heard, skipping deactivated notes, rolling
- * each note's chance and straying its velocity by its deviation. A jump of
- * the playhead (a seek, the loop coming round) starts again from it.
+ * Sets each channel to its track's gain and pan at `time` of the arrangement,
+ * at `at` on the audio clock: gliding there from what was set before, or, on
+ * a jump of the playhead, at once.
+ */
+function setChannels(
+  channels: ReadonlyMap<string, Channel>,
+  levelsAt: LevelsAt,
+  time: number,
+  at: number,
+  glide: boolean
+) {
+  for (const [trackId, channel] of channels) {
+    const { gain, pan } = levelsAt(trackId, time);
+    const params = [
+      [channel.gain.gain, gain],
+      [channel.pan.pan, pan],
+    ] as const;
+    for (const [param, value] of params) {
+      if (glide) {
+        param.linearRampToValueAtTime(value, at);
+      } else {
+        param.cancelScheduledValues(at);
+        param.setValueAtTime(value, at);
+      }
+    }
+  }
+}
+
+/** Fades out at once the notes scheduled ahead, which belong to where the playhead was. */
+function cutTones(tones: Set<Tone>, now: number) {
+  for (const { gain, oscillator } of tones) {
+    gain.gain.cancelScheduledValues(now);
+    gain.gain.setTargetAtTime(0, now, 0.01);
+    oscillator.stop(now + 0.05);
+  }
+  tones.clear();
+}
+
+/**
+ * Plays the MIDI clips while the arrangement plays, each MIDI track through
+ * a channel of its own: each frame, it schedules on the audio clock the notes
+ * the playhead is about to reach, on the tracks that are heard, skipping
+ * deactivated notes, rolling each note's chance and straying its velocity by
+ * its deviation, and glides each channel to its track's gain and pan there,
+ * from the mix or the automation. A jump of the playhead (a seek, the loop
+ * coming round) starts again from it. The piano roll's previews play through
+ * a synth of their own, straight to the master.
  */
 function useMidiPlayback({
   audible,
   clips,
   clock,
+  levelsAt,
   loop,
   looping,
   playing,
+  tracks,
 }: {
   audible: (trackId: string) => boolean;
   clips: readonly Arranged[];
   clock: Source<number>;
+  levelsAt: LevelsAt;
   loop: Span;
   looping: boolean;
   playing: boolean;
+  tracks: readonly ArrangementTrack[];
 }) {
   const masterGain = useMasterBus(0.5);
   const voices = useSynthVoices({
     destination: masterGain,
     oscillatorType: "triangle",
   });
-  const { releaseAll, releaseNote, triggerNote } = voices;
-  const live = useRef({ audible, clips, loop, looping });
-  live.current = { audible, clips, loop, looping };
+  const live = useRef({ audible, clips, levelsAt, loop, looping, tracks });
+  live.current = { audible, clips, levelsAt, loop, looping, tracks };
 
   useEffect(() => {
     const context = webAudio.getContext();
-    if (!(playing && context)) {
-      releaseAll();
+    if (!(playing && context && masterGain)) {
       return;
     }
     if (context.state === "suspended") {
       context.resume();
     }
+    const channels = new Map<string, Channel>();
+    const tones = new Set<Tone>();
+    // A channel for each MIDI track, new ones set at once to where they stand.
+    const openChannels = (time: number) => {
+      const fresh = new Map<string, Channel>();
+      for (const track of live.current.tracks) {
+        if (track.kind === "midi" && !channels.has(track.id)) {
+          const channel = {
+            gain: context.createGain(),
+            pan: context.createStereoPanner(),
+          };
+          channel.gain.connect(channel.pan).connect(masterGain);
+          channels.set(track.id, channel);
+          fresh.set(track.id, channel);
+        }
+      }
+      setChannels(
+        fresh,
+        live.current.levelsAt,
+        time,
+        context.currentTime,
+        false
+      );
+    };
+    const play = (
+      trackId: string,
+      pitch: number,
+      velocity: number,
+      at: number,
+      length: number
+    ) => {
+      const channel = channels.get(trackId);
+      if (channel) {
+        const tone = scheduleTone(channel.gain, pitch, velocity, at, length);
+        tones.add(tone);
+        tone.oscillator.addEventListener("ended", () => tones.delete(tone), {
+          once: true,
+        });
+      }
+    };
     let scheduled = clock.getSnapshot();
+    openChannels(scheduled);
     let frame = 0;
     const tick = () => {
       const now = clock.getSnapshot();
       const { loop: span, looping: loops } = live.current;
+      openChannels(now);
       if (now < scheduled - SCHEDULE_AHEAD || now > scheduled + 1) {
         // The playhead jumped: what was scheduled ahead belongs to where it was.
-        releaseAll();
+        cutTones(tones, context.currentTime);
         scheduled =
           loops && now >= span[0] && now < span[0] + SCHEDULE_AHEAD
             ? span[0]
             : now;
+        setChannels(
+          channels,
+          live.current.levelsAt,
+          scheduled,
+          context.currentTime,
+          false
+        );
       }
       // Never past the loop's end: the playhead comes round before it.
       const until =
@@ -961,13 +1148,20 @@ function useMidiPlayback({
           ? Math.min(now + SCHEDULE_AHEAD, span[1])
           : now + SCHEDULE_AHEAD;
       if (until > scheduled) {
+        const offset = context.currentTime - now;
+        setChannels(
+          channels,
+          live.current.levelsAt,
+          until,
+          offset + until,
+          true
+        );
         scheduleNotes({
           ...live.current,
           from: scheduled,
           now,
-          offset: context.currentTime - now,
-          releaseNote,
-          triggerNote,
+          offset,
+          play,
           until,
         });
         scheduled = until;
@@ -977,9 +1171,15 @@ function useMidiPlayback({
     frame = requestAnimationFrame(tick);
     return () => {
       cancelAnimationFrame(frame);
-      releaseAll();
+      cutTones(tones, context.currentTime);
+      // Once the notes have faded.
+      setTimeout(() => {
+        for (const channel of channels.values()) {
+          channel.pan.disconnect();
+        }
+      }, 100);
     };
-  }, [clock, playing, releaseAll, releaseNote, triggerNote]);
+  }, [clock, masterGain, playing]);
 
   return voices;
 }
@@ -1128,6 +1328,177 @@ function TrackLevel({ active, name }: { active: boolean; name: string }) {
       size="sm"
       source={active ? simulated : SILENCE_MONO}
       warnThreshold={-12}
+    />
+  );
+}
+
+/** A gain as the decibels it plays at. */
+function formatGain(gain: number) {
+  if (gain <= 0) {
+    return "-inf dB";
+  }
+  const db = 20 * Math.log10(gain);
+  return `${db > 0 ? "+" : ""}${db.toFixed(1)} dB`;
+}
+
+/** What each parameter a track automates is called, how its envelope's values read, and where it stands in the mix. */
+const PARAMETERS: Record<
+  AutomatedParameter,
+  { format: (y: number) => string; label: string; ofMix: (mix: Mix) => number }
+> = {
+  pan: {
+    format: (y) => {
+      const pan = Math.round(panPosition(y) * 100);
+      if (pan === 0) {
+        return "C";
+      }
+      return `${pan < 0 ? "L" : "R"}${Math.abs(pan)}`;
+    },
+    label: "Pan",
+    ofMix: (mix) => (mix.pan + 1) / 2,
+  },
+  volume: {
+    format: (y) => formatGain(volumeGain(y)),
+    label: "Volume",
+    ofMix: (mix) => volumeValue(mix.gain),
+  },
+};
+const PARAMETER_ITEMS = (["volume", "pan"] as const).map((value) => ({
+  label: PARAMETERS[value].label,
+  value,
+}));
+
+/** In a track's header in automation mode: which parameter its lane shows, and a button that clears that envelope. */
+function AutomationChooser({
+  onClear,
+  onParameterChange,
+  parameter,
+  track,
+}: {
+  onClear: (trackId: string, parameter: AutomatedParameter) => void;
+  onParameterChange: (trackId: string, parameter: AutomatedParameter) => void;
+  parameter: AutomatedParameter;
+  track: ArrangementTrack;
+}) {
+  const { automation, id: trackId, name } = track;
+  const change = useCallback(
+    (next: string | null) =>
+      onParameterChange(trackId, next === "pan" ? "pan" : "volume"),
+    [onParameterChange, trackId]
+  );
+  const clear = useCallback(
+    () => onClear(trackId, parameter),
+    [onClear, parameter, trackId]
+  );
+  const { label } = PARAMETERS[parameter];
+  return (
+    <div className="flex h-7 items-center gap-1 pe-1">
+      <Select items={PARAMETER_ITEMS} onValueChange={change} value={parameter}>
+        <SelectTrigger
+          aria-label={`${name} automation`}
+          className="min-w-0 flex-1"
+          size="sm"
+        >
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            {PARAMETER_ITEMS.map((item) => (
+              <SelectItem key={item.value} value={item.value}>
+                {item.label}
+                {automation?.[item.value] ? (
+                  <span
+                    aria-label="automated"
+                    className="size-1.5 self-center rounded-full bg-primary"
+                    role="img"
+                  />
+                ) : null}
+              </SelectItem>
+            ))}
+          </SelectGroup>
+        </SelectContent>
+      </Select>
+      <Button
+        aria-label={`Clear the ${label.toLowerCase()} envelope of ${name}`}
+        disabled={!automation?.[parameter]}
+        onClick={clear}
+        size="icon-xs"
+        variant="ghost"
+      >
+        <IconPlaceholder
+          hugeicons="Delete02Icon"
+          lucide="Trash2Icon"
+          phosphor="TrashIcon"
+          remixicon="RiDeleteBinLine"
+          tabler="IconTrash"
+        />
+      </Button>
+    </div>
+  );
+}
+
+/**
+ * A track's envelope for one parameter, over its lane in automation mode.
+ * Until the track has one, the line stands flat at the mix's value, faint,
+ * and the first edit draws it; a parameter moved by hand since is greyed, as
+ * its mix is what plays.
+ */
+function TrackAutomation({
+  describe,
+  duration,
+  mix,
+  onChange,
+  onCommit,
+  overridden = [],
+  parameter,
+  snapStep,
+  track,
+}: {
+  describe: (seconds: number) => string;
+  duration: number;
+  mix: Mix;
+  onChange: (
+    trackId: string,
+    parameter: AutomatedParameter,
+    points: readonly Breakpoint[]
+  ) => void;
+  onCommit: () => void;
+  /** The track's parameters moved by hand since they were automated. */
+  overridden?: readonly AutomatedParameter[];
+  parameter: AutomatedParameter;
+  snapStep: number;
+  track: ArrangementTrack;
+}) {
+  const { id: trackId, name: trackName } = track;
+  const points = track.automation?.[parameter];
+  const { format, label, ofMix } = PARAMETERS[parameter];
+  const standing = ofMix(mix);
+  const value = useMemo(
+    () => (points ? [...points] : flatAutomation(standing)),
+    [points, standing]
+  );
+  const change = useCallback(
+    (next: Breakpoint[]) => onChange(trackId, parameter, next),
+    [onChange, parameter, trackId]
+  );
+  const formatValue = useCallback(
+    (point: { x: number; y: number }) =>
+      `${describe(point.x * duration)}, ${format(point.y)}`,
+    [describe, duration, format]
+  );
+  return (
+    <AutomationEnvelope
+      aria-label={`${trackName} ${label.toLowerCase()} automation`}
+      className={cn(
+        !points && "opacity-50",
+        overridden.includes(parameter) && "opacity-50 grayscale"
+      )}
+      duration={duration}
+      formatValue={formatValue}
+      onValueChange={change}
+      onValueCommitted={onCommit}
+      snap={{ x: snapStep / duration, y: 0 }}
+      value={value}
     />
   );
 }
@@ -1430,6 +1801,7 @@ export default function BlockTimeline() {
     addTrack,
     canRedo,
     canUndo,
+    changeAutomation,
     changeClip,
     changeMix,
     clearSelection,
@@ -1522,13 +1894,89 @@ export default function BlockTimeline() {
     },
     [anySolo, mixOf, tracks]
   );
+  // Automation mode: each track's lane shows the envelope of one of its parameters over its clips.
+  const [automating, setAutomating] = useState(false);
+  const [shownParameters, setShownParameters] = useState<
+    Record<string, AutomatedParameter>
+  >({});
+  const showParameter = useCallback(
+    (trackId: string, parameter: AutomatedParameter) =>
+      setShownParameters((all) => ({ ...all, [trackId]: parameter })),
+    []
+  );
+  // The automated parameters moved by hand: they play their mix until the automation is enabled again.
+  const [overridden, setOverridden] = useState<
+    Record<string, AutomatedParameter[]>
+  >({});
+  const anyOverridden = Object.values(overridden).some(
+    (parameters) => parameters.length > 0
+  );
+  const reenableAutomation = useCallback(() => setOverridden({}), []);
+  const toggleAutomating = useCallback(() => setAutomating((on) => !on), []);
+  const changeTrackMix = useCallback(
+    (trackId: string, patch: Partial<Mix>) => {
+      const automation = tracks.find(
+        (track) => track.id === trackId
+      )?.automation;
+      const moved = PARAMETER_ITEMS.map((item) => item.value).filter(
+        (parameter) =>
+          automation?.[parameter] &&
+          (parameter === "volume" ? "gain" : "pan") in patch
+      );
+      if (moved.length > 0) {
+        setOverridden((all) => ({
+          ...all,
+          [trackId]: [...new Set([...(all[trackId] ?? []), ...moved])],
+        }));
+      }
+      changeMix(trackId, patch);
+    },
+    [changeMix, tracks]
+  );
+  // Drawing an envelope enables it again: what is drawn is what plays.
+  const editAutomation = useCallback(
+    (
+      trackId: string,
+      parameter: AutomatedParameter,
+      points: readonly Breakpoint[]
+    ) => {
+      setOverridden((all) =>
+        all[trackId]?.includes(parameter)
+          ? {
+              ...all,
+              [trackId]: all[trackId].filter((item) => item !== parameter),
+            }
+          : all
+      );
+      changeAutomation(trackId, parameter, points);
+    },
+    [changeAutomation]
+  );
+  const clearAutomation = useCallback(
+    (trackId: string, parameter: AutomatedParameter) => {
+      changeAutomation(trackId, parameter, null);
+      settleClipEdit();
+    },
+    [changeAutomation, settleClipEdit]
+  );
+  const levelsAt = useCallback<LevelsAt>(
+    (trackId, time) => {
+      const track = tracks.find((item) => item.id === trackId);
+      return track
+        ? mixAt(track, mixOf(track), time / duration, overridden[trackId])
+        : { gain: 0, pan: 0 };
+    },
+    [duration, mixOf, overridden, tracks]
+  );
   const midi = useMidiPlayback({
     audible,
     clips,
     clock,
+    levelsAt,
     loop,
     looping,
     playing,
+    tracks,
   });
 
   const playPause = useCallback(() => setPlaying((on) => !on), [setPlaying]);
@@ -1966,7 +2414,12 @@ export default function BlockTimeline() {
     (event: MouseEvent<HTMLDivElement>) => {
       const lane = event.currentTarget;
       const trackId = lane.dataset.track;
-      if (!trackId || (event.target as HTMLElement).closest("[data-clip-id]")) {
+      if (
+        !trackId ||
+        (event.target as HTMLElement).closest(
+          "[data-clip-id], [data-slot=automation-envelope]"
+        )
+      ) {
         return;
       }
       const rect = lane.getBoundingClientRect();
@@ -2200,6 +2653,52 @@ export default function BlockTimeline() {
     command();
     return true;
   };
+  /** In automation mode, what a track shows: the parameter chooser in its header, and the envelope over its lane. */
+  const automationOf = (track: ArrangementTrack) => {
+    if (!automating) {
+      return { chooser: null, envelope: null };
+    }
+    const parameter = shownParameters[track.id] ?? "volume";
+    return {
+      chooser: (
+        <AutomationChooser
+          onClear={clearAutomation}
+          onParameterChange={showParameter}
+          parameter={parameter}
+          track={track}
+        />
+      ),
+      envelope: (
+        <TrackAutomation
+          describe={describe}
+          duration={duration}
+          mix={mixOf(track)}
+          onChange={editAutomation}
+          onCommit={settleClipEdit}
+          overridden={overridden[track.id]}
+          parameter={parameter}
+          snapStep={snapStep}
+          track={track}
+        />
+      ),
+    };
+  };
+  /** A shows or hides the automation; returns whether the key was it. */
+  const handleAutomationKey = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (
+      event.key.toLowerCase() !== "a" ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.altKey ||
+      event.shiftKey ||
+      typing(event.target)
+    ) {
+      return false;
+    }
+    event.preventDefault();
+    toggleAutomating();
+    return true;
+  };
   // S, or Cmd/Ctrl + E, splits at the cursor, Cmd/Ctrl + D duplicates the clip; Escape drops the selection.
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     if (event.key === "Escape") {
@@ -2211,7 +2710,8 @@ export default function BlockTimeline() {
     if (
       handleTimeKey(event) ||
       handleTrackKey(event) ||
-      handleLocatorKey(event)
+      handleLocatorKey(event) ||
+      handleAutomationKey(event)
     ) {
       return;
     }
@@ -2552,6 +3052,45 @@ export default function BlockTimeline() {
           </div>
         </div>
         <div className="flex min-w-0 items-center gap-2">
+          {anyOverridden ? (
+            <Button
+              aria-label="Re-enable automation"
+              className="text-primary"
+              onClick={reenableAutomation}
+              size="icon"
+              variant="outline"
+            >
+              <IconPlaceholder
+                hugeicons="RotateLeft01Icon"
+                lucide="RotateCcwIcon"
+                phosphor="ArrowCounterClockwiseIcon"
+                remixicon="RiArrowGoBackLine"
+                tabler="IconRotate"
+              />
+            </Button>
+          ) : null}
+          <Button
+            aria-label="Automation mode"
+            aria-pressed={automating}
+            className="hidden @3xl/panel:inline-flex"
+            onClick={toggleAutomating}
+            size="icon"
+            variant={automating ? "default" : "outline"}
+          >
+            {/* An envelope, drawn as the selects draw their shapes: what automation draws over a lane. */}
+            <svg
+              aria-hidden="true"
+              className="size-4"
+              fill="none"
+              stroke="currentColor"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              viewBox="0 0 24 24"
+            >
+              <path d="M2 17h4l5-10h4c3 0 4 10 7 10" />
+            </svg>
+          </Button>
           <ButtonGroup className="hidden @3xl/panel:flex">
             <Button
               aria-label="Undo"
@@ -2636,6 +3175,12 @@ export default function BlockTimeline() {
                 onCheckedChange={setMulti}
               >
                 Multi-select
+              </DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem
+                checked={automating}
+                onCheckedChange={setAutomating}
+              >
+                Automation
               </DropdownMenuCheckboxItem>
               <DropdownMenuSeparator />
               <DropdownMenuSub>
@@ -2951,14 +3496,16 @@ export default function BlockTimeline() {
                         name={track.name}
                         onDuplicate={duplicateTrack}
                         onInsert={addTrack}
-                        onMix={changeMix}
+                        onMix={changeTrackMix}
                         onRemove={removeTrack}
                         onRename={renameTrack}
                         onSelect={pickTrack}
                         onToggleFold={toggleFold}
                         selected={selectedTracks.includes(track.id)}
                         trackId={track.id}
-                      />
+                      >
+                        {automationOf(track).chooser}
+                      </TimelineTrackControls>
                     </div>
                   }
                   onResize={resizeTrack}
@@ -3041,6 +3588,7 @@ export default function BlockTimeline() {
                             }}
                           />
                         ) : null}
+                        {automationOf(track).envelope}
                         <TimelinePlayhead />
                       </TimelineLane>
                     </ContextMenuTrigger>
