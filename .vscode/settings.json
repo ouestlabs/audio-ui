@@ -61,5 +61,5 @@
     "editor.defaultFormatter": "biomejs.biome"
   },
   "js/ts.tsdk.path": "packages/ui/node_modules/typescript/lib",
-  "typescript.enablePromptUseWorkspaceTsdk": true
+  "js/ts.tsdk.promptToUseWorkspaceVersion": true
 }
