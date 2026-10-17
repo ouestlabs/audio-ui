@@ -173,7 +173,7 @@ function ClipView({
       {/* The view's own edge: it rolls up from here, and rolled up it is all that stays. */}
       <div
         className={cn(
-          "flex h-9 shrink-0 items-center gap-2 px-2",
+          "flex min-h-9 shrink-0 items-center gap-2 p-1 ps-2",
           collapsed ? undefined : "border-b"
         )}
         data-slot="clip-view-strip"
