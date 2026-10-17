@@ -16,6 +16,12 @@ import {
   type AutomatedParameter,
   type ClipAction,
   type Clipping,
+  type Mix,
+  type TimeSelection,
+  type TrackKind,
+  UNITY_MIX,
+} from "@/registry-audio/bases/base/lib/arrangement";
+import {
   clearTime,
   consolidate,
   copyClips,
@@ -26,15 +32,11 @@ import {
   fadeTime,
   land,
   lay,
-  type Mix,
   openTime,
   otherSelected,
   pasteTime,
   scaleClip,
-  type TimeSelection,
-  type TrackKind,
-  UNITY_MIX,
-} from "@/registry-audio/bases/base/lib/arrangement";
+} from "@/registry-audio/bases/base/lib/arrangement-state";
 import {
   beginChange,
   canRedo,
