@@ -19,7 +19,7 @@ import {
 import { useSidebarGroups } from "@/hooks/use-sidebar-groups";
 import { getDocsPageUpdateHint } from "@/lib/docs/content/docs";
 import type { source } from "@/lib/docs/content/source";
-import { cn } from "@/lib/utils";
+import { cn, isFileUrl } from "@/lib/utils";
 
 const EXCLUDED_PAGES = ["test"];
 
@@ -133,7 +133,11 @@ export function DocsNavigation({
                             className="after:site-rounded-md after:-inset-y-1 relative h-[30px] 3xl:fixed:w-full w-fit 3xl:fixed:max-w-48 overflow-visible border border-transparent font-medium text-[0.8rem] after:absolute after:inset-x-0 after:z-0 data-[active=true]:border-site-accent data-[active=true]:bg-site-accent"
                             isActive={page.url === pathname}
                             render={
-                              <Link preload={false} to={page.url}>
+                              <Link
+                                preload={false}
+                                reloadDocument={isFileUrl(page.url)}
+                                to={page.url}
+                              >
                                 <span className="pointer-events-none absolute inset-0 flex w-(--sidebar-width) bg-transparent" />
                                 <span className="relative z-10 inline-flex items-center gap-2">
                                   <span>{page.name}</span>

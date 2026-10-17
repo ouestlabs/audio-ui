@@ -19,7 +19,7 @@ import { useSidebarGroups } from "@/hooks/use-sidebar-groups";
 import { getDocsPageUpdateHint } from "@/lib/docs/content/docs";
 import type { source } from "@/lib/docs/content/source";
 import type { CategoryInfo } from "@/lib/registry/core/registry";
-import { cn, isActive, normalizeSlug } from "@/lib/utils";
+import { cn, isActive, isFileUrl, normalizeSlug } from "@/lib/utils";
 
 type Section = "components" | "docs";
 
@@ -45,6 +45,7 @@ function NavRow({
       className={cn(rowClassName, active && activeRowClassName)}
       onClick={onNavigate}
       preload={false}
+      reloadDocument={isFileUrl(href)}
       to={href}
     >
       {children}
