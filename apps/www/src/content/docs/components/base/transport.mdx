@@ -84,6 +84,7 @@ Give `onRhythmChange` and a caret beside the metronome opens a menu of how often
 <TypeTable>
 <TypeRow name={"source"} type={"{ getSnapshot, subscribe }"}>The playback position in seconds, a live value.</TypeRow>
 <TypeRow name={"tempo"} type={"{ bpm, beatsPerBar, beatUnit }"}>The tempo and the time signature the position is counted in.</TypeRow>
+<TypeRow name={"signatures"} type={"{ at, beatsPerBar, beatUnit }[]"} default={"[]"}>The time-signature changes along the song, in seconds, which the position's bars follow.</TypeRow>
 <TypeRow name={"onTempoChange"} type={"(tempo) => void"}>The tempo or the signature was changed. Leave it out for a fixed tempo.</TypeRow>
 <TypeRow name={"playing, onPlayPause"} type={"boolean, () => void"}>Whether it plays, and play or pause was pressed.</TypeRow>
 <TypeRow name={"onStop"} type={"() => void"}>Stop was pressed.</TypeRow>
