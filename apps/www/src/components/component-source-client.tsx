@@ -25,6 +25,8 @@ export interface ComponentSourceClientProps {
   code?: string;
   collapsible?: boolean;
   eventName?: "copy_component_code";
+  /** Which file of the registry item to show, when it installs several. @default 0 */
+  file?: number;
   iconLibrary?: IconLibraryName;
   language?: string;
   maxLines?: number;
@@ -38,6 +40,7 @@ export interface ComponentSourceClientProps {
 export function ComponentSourceClient({
   name,
   src,
+  file = 0,
   title,
   language,
   collapsible = true,
@@ -74,7 +77,7 @@ export function ComponentSourceClient({
           return;
         }
 
-        const cacheKey = `${getRegistryDeploymentId()}:${styleName}:${name}`;
+        const cacheKey = `${getRegistryDeploymentId()}:${styleName}:${name}:${file}`;
 
         if (clientCodeCache.has(cacheKey)) {
           currentCode = clientCodeCache.get(cacheKey);
@@ -86,8 +89,10 @@ export function ComponentSourceClient({
             });
 
             if (res.ok) {
-              const data = await res.json();
-              currentCode = data.files?.[0]?.content;
+              const data = (await res.json()) as {
+                files?: { content?: string }[];
+              };
+              currentCode = data.files?.[file]?.content;
               if (currentCode) {
                 clientCodeCache.set(cacheKey, currentCode);
               }
@@ -143,7 +148,7 @@ export function ComponentSourceClient({
       isMounted = false;
       abortControllerRef.current?.abort();
     };
-  }, [name, src, initialCode, styleName, _iconLibrary, maxLines]);
+  }, [name, src, file, initialCode, styleName, _iconLibrary, maxLines]);
 
   if (isLoading) {
     return (

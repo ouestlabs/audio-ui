@@ -2,7 +2,7 @@
 
 import { createSource } from "@audio-ui/react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder";
+import { IconPlaceholder } from "@/components/icon-placeholder";
 import { Button } from "@/registry/bases/base/ui/button";
 import { Sequencer } from "@/registry-audio/bases/base/audio/elements/sequencer";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";

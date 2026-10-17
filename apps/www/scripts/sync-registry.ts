@@ -7,10 +7,6 @@
  * `registry-audio/bases/* /components`) are **not** copied from here, they
  * are ported from apps/www's registry, see plans/002.
  *
- * Also syncs `app/(create)/components/icon-placeholder.tsx` from the v4 app (thin re-export).
- * The upstream target is `@/app/(app)/create/...`; OSS rewrites it to the implementation at
- * `@/app/(create)/customizer/icon-placeholder`.
- *
  * Usage (from apps/www):
  *   bun ./scripts/sync-registry.ts           # sync changed/new files, remove the ones upstream dropped
  *   bun ./scripts/sync-registry.ts --dry     # preview without writing
@@ -32,16 +28,9 @@ const PROJECT_ROOT = Bun.fileURLToPath(new URL("..", import.meta.url)).slice(
 // The folder the log prints paths relative to: the one that holds apps/www.
 const LOG_ROOT = PROJECT_ROOT.slice(0, PROJECT_ROOT.lastIndexOf("/"));
 const DEST_DIR = `${PROJECT_ROOT}/src/registry`;
-const OSS_APP_ICON_PLACEHOLDER_DEST = `${PROJECT_ROOT}/src/app/(create)/components/icon-placeholder.tsx`;
 
 const SHADCN_UI_REMOTE = "https://github.com/shadcn-ui/ui.git";
 const TRAILING_SLASH = /\/$/;
-
-/** Shadcn re-exports the real component from the `(app)/create` tree; OSS keeps the impl under `customizer/`. */
-const SHADCN_ICON_PLACEHOLDER_REEXPORT =
-  '"@/app/(app)/create/components/icon-placeholder"';
-const OSS_ICON_PLACEHOLDER_IMPL =
-  '"@/app/(create)/customizer/icon-placeholder"';
 
 const SYNC_ITEMS = [
   "bases/base/hooks",
@@ -135,30 +124,6 @@ async function syncFile(src: string, dest: string): Promise<Change> {
   return exists ? "updated" : "added";
 }
 
-async function syncAppIconPlaceholder(src: string): Promise<Outcome> {
-  const label = relativeTo(LOG_ROOT, OSS_APP_ICON_PLACEHOLDER_DEST);
-
-  const source = Bun.file(src);
-  if (!(await source.exists())) {
-    return { change: "skipped", label };
-  }
-
-  const next = (await source.text()).replaceAll(
-    SHADCN_ICON_PLACEHOLDER_REEXPORT,
-    OSS_ICON_PLACEHOLDER_IMPL
-  );
-  const dest = Bun.file(OSS_APP_ICON_PLACEHOLDER_DEST);
-  const exists = await dest.exists();
-  if (exists && (await dest.text()) === next) {
-    return { change: "unchanged", label };
-  }
-
-  if (!DRY) {
-    await Bun.write(OSS_APP_ICON_PLACEHOLDER_DEST, next);
-  }
-  return { change: exists ? "updated" : "added", label };
-}
-
 // ---------------------------------------------------------------------------
 // Sync a directory src → dest (copy new/changed, remove orphaned dest files)
 // ---------------------------------------------------------------------------
@@ -245,9 +210,7 @@ function printSummary(
   const { added, deleted, skipped, unchanged, updated } = totals;
 
   console.log("\n──────────────────────────────────────────────");
-  console.log(
-    `  Sync complete: ${srcLabel} → ${destLabel} (+ app icon-placeholder)`
-  );
+  console.log(`  Sync complete: ${srcLabel} → ${destLabel} `);
   if (added + updated + deleted === 0 && skipped === 0) {
     console.log("  ✓ Everything is already up to date.");
   } else {
@@ -284,7 +247,6 @@ async function sync() {
   try {
     await cloneShadcnUi(cloneDir);
     const sourceDir = `${cloneDir}/apps/v4/registry`;
-    const appIconPlaceholderSrc = `${cloneDir}/apps/v4/app/(create)/components/icon-placeholder.tsx`;
 
     console.log(`\n${label}Syncing registry: ${srcLabel} → ${destLabel}\n`);
 
@@ -303,16 +265,7 @@ async function sync() {
     ).flat();
     report(items);
 
-    const appSrcLabel =
-      "shadcn-ui/ui:apps/v4/app/(create)/components/icon-placeholder.tsx";
-    const appDestLabel = relativeTo(LOG_ROOT, OSS_APP_ICON_PLACEHOLDER_DEST);
-    console.log(
-      `\n${label}Syncing app barrel: ${appSrcLabel} → ${appDestLabel}\n`
-    );
-    const app = await syncAppIconPlaceholder(appIconPlaceholderSrc);
-    report([app]);
-
-    printSummary([...items, app], srcLabel, destLabel);
+    printSummary(items, srcLabel, destLabel);
   } finally {
     await $`rm -rf ${cloneDir}`.quiet();
   }

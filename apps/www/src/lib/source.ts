@@ -8,10 +8,10 @@ export const source = loader({
 });
 
 export function getPageImage(page: InferPageType<typeof source>) {
-  const segments = page.slugs.length > 0 ? page.slugs : [];
-  const path = segments.length > 0 ? `/${segments.join("/")}` : "";
+  const segments = page.slugs;
+  // Built to public/og/docs by scripts/build-images.tsx, one file a page; the docs index is `index`.
   return {
     segments,
-    url: `/og/docs${path}`,
+    url: `/og/docs/${segments.length > 0 ? segments.join("/") : "index"}.png`,
   };
 }

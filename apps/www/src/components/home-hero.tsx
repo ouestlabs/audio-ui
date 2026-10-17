@@ -1,5 +1,5 @@
 import { ArrowRightIcon } from "@phosphor-icons/react/ssr";
-import Link from "next/link";
+import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 
 /** The line above the product on the landing page: what it is, and where to start. */
@@ -20,14 +20,14 @@ export function HomeHero() {
         <Button
           nativeButton={false}
           render={
-            <Link href="/docs/get-started">
+            <Link params={{ _splat: "get-started" }} to="/docs/$">
               Get started <ArrowRightIcon aria-hidden weight="bold" />
             </Link>
           }
         />
         <Button
           nativeButton={false}
-          render={<Link href="/components">Browse components</Link>}
+          render={<Link to="/components">Browse components</Link>}
           variant="outline"
         />
       </div>

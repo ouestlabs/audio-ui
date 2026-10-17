@@ -11,7 +11,7 @@ The repo is a Turborepo + Bun workspace. **Always use `bun`, never `npm` or `pnp
 ```
 audio-ui/
 ├── apps/
-│   ├── www/        # Next.js docs site + registry → localhost:4000
+│   ├── www/        # TanStack Start docs site + registry → localhost:4000
 │   └── sandbox/    # Dev sandbox
 └── packages/
     ├── core/       # @audio-ui/core, published npm package (framework-agnostic logic)
@@ -160,7 +160,7 @@ export default function BlockPlayerWidget() {
 The registry supports five icon libraries (Lucide, Phosphor, Tabler, Hugeicons, Remixicon). Registry sources never import an icon library directly, they use `IconPlaceholder`, which the build pipeline resolves to the user's chosen library:
 
 ```tsx
-import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder";
+import { IconPlaceholder } from "@/components/icon-placeholder";
 
 <IconPlaceholder
   className="size-4"

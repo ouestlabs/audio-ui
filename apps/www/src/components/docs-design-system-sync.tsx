@@ -1,14 +1,14 @@
 "use client";
 
 import * as React from "react";
-import { useMenuColor } from "@/app/(create)/customizer/use-menu-color";
-import { saveDesignSystemBoot } from "@/app/(create)/lib/boot-cache";
-import { ensurePreviewFontsLoaded, FONTS } from "@/app/(create)/lib/fonts";
+import { useMenuColor } from "@/components/customizer/use-menu-color";
+import { useConfig } from "@/hooks/use-config";
+import { saveDesignSystemBoot } from "@/lib/design-system/boot-cache";
+import { ensurePreviewFontsLoaded, FONTS } from "@/lib/design-system/fonts";
 import {
   getThemeStyleElement,
   writeThemeVars,
-} from "@/app/(create)/lib/theme-vars";
-import { useConfig } from "@/hooks/use-config";
+} from "@/lib/design-system/theme-vars";
 import type { FontName } from "@/lib/font-definitions";
 import { buildRegistryTheme, DEFAULT_CONFIG } from "@/registry/config";
 

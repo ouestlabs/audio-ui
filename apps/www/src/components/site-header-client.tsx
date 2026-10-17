@@ -1,12 +1,12 @@
 "use client";
 
 import { MagnifyingGlassIcon } from "@phosphor-icons/react/ssr";
-import dynamic from "next/dynamic";
 import type { CommandMenuGroup } from "@/components/command-menu";
 import { Button } from "@/components/ui/button";
+import { lazyComponent } from "@/lib/lazy";
 import type { CategoryInfo } from "@/lib/registry";
 
-const CommandMenu = dynamic(
+const CommandMenu = lazyComponent(
   () => import("@/components/command-menu").then((mod) => mod.CommandMenu),
   {
     loading: () => (
@@ -23,14 +23,14 @@ const CommandMenu = dynamic(
   }
 );
 
-const MobileNav = dynamic(
+const MobileNav = lazyComponent(
   () => import("@/components/mobile-nav").then((mod) => mod.MobileNav),
   {
     loading: () => <div aria-hidden="true" className="size-8 lg:hidden" />,
   }
 );
 
-const ModeSwitcher = dynamic(
+const ModeSwitcher = lazyComponent(
   () => import("@/components/mode-switcher").then((mod) => mod.ModeSwitcher),
   {
     loading: () => <div aria-hidden="true" className="size-8" />,

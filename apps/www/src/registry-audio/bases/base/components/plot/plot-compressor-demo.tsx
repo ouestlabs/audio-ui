@@ -2,7 +2,7 @@
 
 import { webAudioCompressorOutput } from "@audio-ui/core/analysis";
 import { useCallback, useMemo, useState } from "react";
-import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder";
+import { IconPlaceholder } from "@/components/icon-placeholder";
 import { Button } from "@/registry/bases/base/ui/button";
 import {
   Plot,

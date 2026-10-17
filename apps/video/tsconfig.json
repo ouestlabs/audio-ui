@@ -12,9 +12,7 @@
     "allowImportingTsExtensions": true,
     "jsx": "react-jsx",
     "paths": {
-      "@/app/(create)/components/icon-placeholder": [
-        "./src/icon-placeholder.tsx"
-      ],
+      "@/components/icon-placeholder": ["./src/icon-placeholder.tsx"],
       "@/*": ["../www/src/*"],
       "@audio-ui/core": ["../../packages/core/src/index.ts"],
       "@audio-ui/core/internal": ["../../packages/core/src/internal.ts"],

@@ -2,7 +2,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 
 import { siteConfig } from "@/lib/config";
-import { processMdxForLLMs } from "@/lib/llm";
+import { processMdxForLLMs, readRawDoc } from "@/lib/docs-text";
 import { getAllCatalogItems, searchCatalog } from "@/lib/registry";
 import { source } from "@/lib/source";
 
@@ -97,8 +97,8 @@ export function createAudioUiMcpServer() {
         };
       }
 
-      const raw = await page.data.getText("raw");
-      return text(processMdxForLLMs(raw));
+      const raw = await readRawDoc(page.path);
+      return text(await processMdxForLLMs(raw));
     }
   );
 

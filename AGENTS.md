@@ -18,7 +18,7 @@ Turborepo + Bun workspaces. **Always use `bun` / `bunx`, never `npm`, `npx` or `
 ```
 audio-ui/
 ├── apps/
-│   ├── www/        # Next.js docs site + registry (Fumadocs + MDX) → localhost:4000
+│   ├── www/        # TanStack Start docs site + registry (Fumadocs + MDX, prerendered, Cloudflare) → localhost:4000
 │   ├── sandbox/    # Copy-paste consumer of the registry → localhost:4100
 │   └── video/      # Remotion videos of the real components (see apps/video/README.md)
 ├── packages/
@@ -109,7 +109,7 @@ The "API reference" of each component page is a hand-kept copy of the JSDoc of t
 
 - Filename `block-{component}-{variant}.tsx` (blocks) or `{component}-{feature}-demo.tsx` (demos); default export `Block{Component}{Variant}` / `{Component}{Feature}Demo`, PascalCase of the filename, no params
 - `"use client"` only if the file uses hooks, state or browser APIs
-- Icons via `IconPlaceholder` (`@/app/(create)/components/icon-placeholder`) with a name for all five libraries (`lucide`, `phosphor`, `tabler`, `hugeicons`, `remixicon`), sized with `className="size-4"`, never a numeric `size`
+- Icons via `IconPlaceholder` (`@/components/icon-placeholder`) with a name for all five libraries (`lucide`, `phosphor`, `tabler`, `hugeicons`, `remixicon`), sized with `className="size-4"`, never a numeric `size`
 - Each icon name is a string literal: the shadcn CLI turns `IconPlaceholder` into an import, so `lucide={playing ? "PauseIcon" : "PlayIcon"}` installs as invalid code. Render one element per icon (`{playing ? <IconPlaceholder … /> : <IconPlaceholder … />}`); `apps/www/test/install-paths.test.ts` fails on an expression
 - Icon-only interactive elements get `aria-label`; decorative icons get `aria-hidden="true"`
 - Static data outside the component function

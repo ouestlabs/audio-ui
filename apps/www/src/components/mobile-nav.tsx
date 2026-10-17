@@ -5,7 +5,7 @@ import {
   CaretDownIcon,
   CubeIcon,
 } from "@phosphor-icons/react/ssr";
-import Link from "next/link";
+import { Link } from "@tanstack/react-router";
 import * as React from "react";
 import { ComponentUpdateIndicator } from "@/components/component-update-indicator";
 import { Button } from "@/components/ui/button";
@@ -43,9 +43,9 @@ function NavRow({
     <Link
       aria-current={active ? "page" : undefined}
       className={cn(rowClassName, active && activeRowClassName)}
-      href={href}
       onClick={onNavigate}
-      prefetch={false}
+      preload={false}
+      to={href}
     >
       {children}
     </Link>

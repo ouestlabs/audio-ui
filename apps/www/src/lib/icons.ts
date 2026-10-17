@@ -192,7 +192,7 @@ export function transformIcons(
   const usedIcons = new Set<string>();
   const replacedIcons = new Set<string>();
   const iconPlaceholderImportRegex =
-    /import\s+{\s*IconPlaceholder\s*}\s*from\s*["']@\/app\/\(create\)\/components\/icon-placeholder["'];?\n?/g;
+    /import\s+{\s*IconPlaceholder\s*}\s*from\s*["']@\/components\/icon-placeholder["'];?\n?/g;
 
   let transformedCode = code.replace(iconPlaceholderRegex, (match, attrs) => {
     const {

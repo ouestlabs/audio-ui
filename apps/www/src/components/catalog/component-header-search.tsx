@@ -1,0 +1,279 @@
+"use client";
+
+import { MagnifyingGlassIcon, XIcon } from "@phosphor-icons/react/ssr";
+import { useLocation, useRouter } from "@tanstack/react-router";
+import { useQueryState } from "nuqs";
+import {
+  useCallback,
+  useEffect,
+  useEffectEvent,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import {
+  filterCatalogBySearchQuery,
+  hasActiveCatalogSearch,
+  normalizeCatalogSearchQuery,
+} from "@/lib/catalog-search-filter";
+import { parseAsSearchStringClient } from "@/lib/nuqs";
+import { cn } from "@/lib/utils";
+
+import { useComponents } from "./components-context";
+
+const SEARCH_DEBOUNCE_MS = 320;
+
+interface ComponentHeaderSearchProps {
+  className?: string;
+  placeholder?: string;
+}
+
+export function ComponentHeaderSearch({
+  placeholder = "Search components…",
+  className,
+}: ComponentHeaderSearchProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const pathname = useLocation({ select: (location) => location.pathname });
+  const router = useRouter();
+  const searchStr = useLocation({ select: (location) => location.searchStr });
+  const searchParams = useMemo(
+    () => new URLSearchParams(searchStr),
+    [searchStr]
+  );
+  const { totalCount, categoryCounts, catalogItems } = useComponents();
+
+  const isOnCategoryPage =
+    pathname.startsWith("/components/") && pathname !== "/components";
+  const currentCategory = isOnCategoryPage
+    ? (pathname.split("/").at(-1) ?? "")
+    : "";
+
+  const [, setCurrentUrlQuery] = useQueryState(
+    "search",
+    parseAsSearchStringClient.withOptions({
+      history: "replace",
+      shallow: true,
+    })
+  );
+
+  const committedSearch = normalizeCatalogSearchQuery(
+    searchParams.get("search") || ""
+  );
+
+  const [localQuery, setLocalQuery] = useState<string>(() => committedSearch);
+
+  const resultCount = useMemo(() => {
+    if (!committedSearch) {
+      if (currentCategory) {
+        return categoryCounts[currentCategory] ?? 0;
+      }
+      return totalCount;
+    }
+    return filterCatalogBySearchQuery(catalogItems, committedSearch).length;
+  }, [
+    committedSearch,
+    currentCategory,
+    categoryCounts,
+    totalCount,
+    catalogItems,
+  ]);
+
+  const getSearchValueToCommit = useCallback((value: string) => {
+    const normalizedValue = normalizeCatalogSearchQuery(value);
+    return hasActiveCatalogSearch(normalizedValue) ? normalizedValue : null;
+  }, []);
+
+  const buildSearchUrl = useCallback(
+    (basePath: string, searchValue: string | null) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.delete("item");
+      if (searchValue) {
+        params.set("search", searchValue);
+      } else {
+        params.delete("search");
+      }
+      const queryString = params.toString();
+      return queryString ? `${basePath}?${queryString}` : basePath;
+    },
+    [searchParams]
+  );
+
+  const commitSearch = useCallback(
+    (value: string) => {
+      const finalValue = getSearchValueToCommit(value);
+      const currentValue = committedSearch || null;
+
+      if (finalValue === currentValue) {
+        return;
+      }
+
+      if (isOnCategoryPage) {
+        router.navigate({
+          href: buildSearchUrl(pathname, finalValue),
+          replace: true,
+          resetScroll: false,
+        });
+        return;
+      }
+
+      setCurrentUrlQuery(finalValue);
+    },
+    [
+      getSearchValueToCommit,
+      committedSearch,
+      isOnCategoryPage,
+      router,
+      buildSearchUrl,
+      pathname,
+      setCurrentUrlQuery,
+    ]
+  );
+
+  // URL changed externally (back/forward, programmatic): sync input when not typing
+  useEffect(() => {
+    if (document.activeElement === inputRef.current) {
+      return;
+    }
+    setLocalQuery(committedSearch);
+  }, [committedSearch]);
+
+  const commitLocalQuery = useEffectEvent(() => {
+    commitSearch(localQuery);
+  });
+
+  // Debounced URL update: search runs only after typing pauses,
+  // and only once the query becomes an active search (3+ chars).
+  useEffect(() => {
+    const nextCommittedSearch = getSearchValueToCommit(localQuery) || "";
+
+    if (nextCommittedSearch === committedSearch) {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      commitLocalQuery();
+    }, SEARCH_DEBOUNCE_MS);
+
+    return () => clearTimeout(timer);
+  }, [localQuery, committedSearch, getSearchValueToCommit]);
+
+  const handleClear = useCallback(() => {
+    setLocalQuery("");
+    if (isOnCategoryPage) {
+      router.navigate({
+        href: buildSearchUrl(pathname, null),
+        replace: true,
+        resetScroll: false,
+      });
+    } else {
+      setCurrentUrlQuery(null);
+    }
+    inputRef.current?.focus();
+  }, [buildSearchUrl, isOnCategoryPage, pathname, router, setCurrentUrlQuery]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const isSearchShortcut =
+        e.key === "/" || (e.key === "k" && (e.metaKey || e.ctrlKey));
+
+      if (
+        isSearchShortcut &&
+        !["INPUT", "TEXTAREA"].includes(
+          (e.target as HTMLElement)?.tagName || ""
+        )
+      ) {
+        e.preventDefault();
+        inputRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  const handleInputKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        commitSearch(localQuery);
+      }
+      if (e.key === "Escape") {
+        if (localQuery) {
+          handleClear();
+        } else {
+          inputRef.current?.blur();
+        }
+      }
+    },
+    [commitSearch, handleClear, localQuery]
+  );
+
+  const flushOnBlur = useCallback(() => {
+    const nextCommittedSearch = getSearchValueToCommit(localQuery) || "";
+    if (nextCommittedSearch !== committedSearch) {
+      commitSearch(localQuery);
+    }
+  }, [commitSearch, committedSearch, getSearchValueToCommit, localQuery]);
+
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => setLocalQuery(e.target.value),
+    []
+  );
+
+  const inSync = (getSearchValueToCommit(localQuery) || "") === committedSearch;
+
+  const showFound =
+    inSync &&
+    pathname === "/components" &&
+    hasActiveCatalogSearch(committedSearch) &&
+    resultCount > 0;
+
+  return (
+    <div
+      className={cn("group relative flex flex-1 items-center gap-2", className)}
+    >
+      <MagnifyingGlassIcon
+        className="size-4 mx-1 shrink-0 text-site-muted-foreground transition-colors group-focus-within:text-site-foreground"
+        weight="duotone"
+      />
+      <input
+        aria-label="Search components"
+        className={cn(
+          "h-8 w-full border-0 bg-transparent py-1 text-sm placeholder:text-site-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50",
+          localQuery ? "pr-32" : "pr-0"
+        )}
+        onBlur={flushOnBlur}
+        onChange={handleInputChange}
+        onKeyDown={handleInputKeyDown}
+        placeholder={placeholder}
+        ref={inputRef}
+        type="text"
+        value={localQuery}
+      />
+      <div className="-translate-y-1/2 absolute top-1/2 right-2 flex items-center gap-1.5">
+        {showFound ? (
+          <div className="flex items-center gap-1.5">
+            <div className="hidden items-center gap-1.5 font-medium text-site-muted-foreground text-xs tabular-nums sm:flex">
+              Found {resultCount}{" "}
+              {resultCount === 1 ? "component" : "components"}
+            </div>
+            <Separator className="shrink-0" orientation="vertical" />
+          </div>
+        ) : null}
+        {localQuery ? (
+          <Button
+            className="opacity-60 hover:bg-transparent hover:opacity-100"
+            onClick={handleClear}
+            size="icon"
+            type="button"
+            variant="outline"
+          >
+            <XIcon />
+            <span className="sr-only">Clear search</span>
+          </Button>
+        ) : null}
+      </div>
+    </div>
+  );
+}

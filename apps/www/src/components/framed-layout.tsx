@@ -6,9 +6,9 @@ import {
   CustomizerContext,
   type CustomizerContextValue,
   useCustomizer,
-} from "@/app/(create)/components/components/components-context";
-import { CustomizerPanel } from "@/app/(create)/components/components/customizer-panel";
-import { useIsDesktopCustomizer } from "@/app/(create)/components/components/use-is-desktop-customizer";
+} from "@/components/catalog/components-context";
+import { CustomizerPanel } from "@/components/catalog/customizer-panel";
+import { useIsDesktopCustomizer } from "@/components/catalog/use-is-desktop-customizer";
 import { Frame, FrameContent, FrameHeader } from "@/components/custom/frame";
 import { CustomizerSkeleton } from "@/components/framed-skeleton";
 import { Button } from "@/components/ui/button";

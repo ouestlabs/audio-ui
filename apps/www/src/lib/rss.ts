@@ -6,7 +6,7 @@ export function getRSS() {
   const feed = new Feed({
     copyright: `All rights reserved ${new Date().getFullYear()}, ${siteConfig.name}`,
     description: siteConfig.description,
-    favicon: `${siteConfig.url}/icon`,
+    favicon: `${siteConfig.url}/icon.png`,
     feedLinks: {
       rss: `${siteConfig.url}/rss.xml`,
     },

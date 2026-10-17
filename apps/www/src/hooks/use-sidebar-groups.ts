@@ -1,4 +1,4 @@
-import { usePathname } from "next/navigation";
+import { useLocation } from "@tanstack/react-router";
 import * as React from "react";
 import { getCurrentBase, getGroupsFromFolder } from "@/lib/page-tree";
 import type { source } from "@/lib/source";
@@ -60,7 +60,7 @@ const EXCLUDED_FOLDERS = ["test"];
  * opens when the reader lands on it.
  */
 export function useSidebarGroups(tree: ReturnType<typeof source.getPageTree>) {
-  const pathname = usePathname();
+  const pathname = useLocation({ select: (location) => location.pathname });
   const currentBase = getCurrentBase(pathname);
   const groups = React.useMemo(
     () =>

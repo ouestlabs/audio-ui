@@ -2,7 +2,7 @@
 
 import { NumberField } from "@base-ui/react/number-field";
 import { type ReactNode, useCallback, useRef } from "react";
-import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder";
+import { IconPlaceholder } from "@/components/icon-placeholder";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {
   InputGroup,

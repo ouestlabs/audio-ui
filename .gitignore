@@ -45,3 +45,6 @@ test-results
 plans/
 
 .ref/
+# Cloudflare local state and the generated TanStack route tree
+.wrangler
+apps/www/public/og/docs

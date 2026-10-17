@@ -1,5 +1,3 @@
-import type { Metadata } from "next";
-
 import { siteConfig } from "@/lib/config";
 import { getCategoryDocsDescription } from "@/lib/registry";
 
@@ -61,12 +59,23 @@ export function absoluteUrl(path: string) {
   return new URL(normalizedPath, `${getSiteUrl()}/`).toString();
 }
 
+/** A route's `head()`: the tags of the document's head, as TanStack Router takes them. */
+export interface PageHead {
+  links: Record<string, string>[];
+  meta: Record<string, string>[];
+}
+
+/** What every page tells the crawlers: indexed, followed, with large previews. */
+export const DEFAULT_ROBOTS =
+  "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1";
+
 type PageMetadataOptions = {
   title: string;
   description: string;
   path: string;
-  keywords?: Metadata["keywords"];
-  robots?: Metadata["robots"];
+  keywords?: readonly string[];
+  /** The content of the robots tag, such as `"noindex"`. */
+  robots?: string;
   type?: "website" | "article";
   titleSuffix?: string;
   /** Overrides the auto-generated /og image (e.g. a per-doc /og/docs/{slug} image). */
@@ -89,19 +98,16 @@ function getAbsoluteMetadataUrl(path: string) {
     : absoluteUrl(path);
 }
 
-export function getSiteAuthors(): NonNullable<Metadata["authors"]> {
+/** The tags that name the site's authors. */
+export function getSiteAuthors(): Record<string, string>[] {
   return [
-    {
-      name: siteConfig.author.name,
-      url: siteConfig.author.url,
-    },
-    {
-      name: siteConfig.name,
-      url: siteConfig.url,
-    },
+    { content: siteConfig.author.name, name: "author" },
+    { content: siteConfig.name, name: "publisher" },
+    { content: siteConfig.name, name: "creator" },
   ];
 }
 
+/** The Open Graph and Twitter tags of a page. */
 export function buildPageSocialMetadata({
   title,
   description,
@@ -111,35 +117,38 @@ export function buildPageSocialMetadata({
 }: Pick<
   PageMetadataOptions,
   "title" | "description" | "path" | "type" | "image"
->): Pick<Metadata, "openGraph" | "twitter"> {
-  // Explicit fallback to the generated /opengraph-image route: Next 16 stopped
-  // injecting the og:image tag from the file convention (the route itself still
-  // works), so relying on inheritance ships pages without any og:image.
-  const imageUrl = getAbsoluteMetadataUrl(image ?? "/opengraph-image");
+>): Record<string, string>[] {
+  // The page names its og:image itself, the home's image when it has none of its own.
+  const imageUrl = getAbsoluteMetadataUrl(image ?? "/og/home.png");
   const twitterCreator = getSocialHandle(siteConfig.links.twitter);
-  // The generated image is 1200×630 (`size` in app/opengraph-image.tsx); a page's own image has no known size.
-  const imageSize = image ? {} : { height: 630, width: 1200 };
+  // The generated image is 1200×630; a page's own image has no known size.
+  const imageSize = image
+    ? []
+    : [
+        { content: "1200", property: "og:image:width" },
+        { content: "630", property: "og:image:height" },
+      ];
 
-  return {
-    openGraph: {
-      description,
-      images: [{ url: imageUrl, ...imageSize }],
-      locale: siteConfig.metadata.locale,
-      siteName: siteConfig.name,
-      title,
-      type,
-      url: getAbsoluteMetadataUrl(path),
-    },
-    twitter: {
-      card: "summary_large_image",
-      description,
-      images: [{ url: imageUrl }],
-      title,
-      ...(twitterCreator ? { creator: twitterCreator } : {}),
-    },
-  };
+  return [
+    { content: title, property: "og:title" },
+    { content: description, property: "og:description" },
+    { content: getAbsoluteMetadataUrl(path), property: "og:url" },
+    { content: siteConfig.name, property: "og:site_name" },
+    { content: siteConfig.metadata.locale, property: "og:locale" },
+    { content: type, property: "og:type" },
+    { content: imageUrl, property: "og:image" },
+    ...imageSize,
+    { content: "summary_large_image", name: "twitter:card" },
+    { content: title, name: "twitter:title" },
+    { content: description, name: "twitter:description" },
+    { content: imageUrl, name: "twitter:image" },
+    ...(twitterCreator
+      ? [{ content: twitterCreator, name: "twitter:creator" }]
+      : []),
+  ];
 }
 
+/** The title, description, canonical address, alternates and social tags of a page. */
 export function buildPageMetadata({
   title,
   description,
@@ -149,36 +158,48 @@ export function buildPageMetadata({
   type = "website",
   titleSuffix,
   image,
-}: PageMetadataOptions): Metadata {
+}: PageMetadataOptions): PageHead {
   const resolvedTitle = titleSuffix ? `${title} - ${titleSuffix}` : title;
 
   return {
-    alternates: {
-      canonical: path,
-      types: {
-        "application/rss+xml": [
-          { title: `${siteConfig.name} Docs`, url: "/rss.xml" },
-        ],
-        "text/plain": [{ title: "llms.txt", url: "/llms.txt" }],
-        // Every docs page is also served as markdown, which agents read better than HTML.
-        ...(path === "/docs" || path.startsWith("/docs/")
-          ? {
-              "text/markdown": [{ url: path.replace("/docs", "/llm") }],
-            }
-          : {}),
+    links: [
+      { href: getAbsoluteMetadataUrl(path), rel: "canonical" },
+      {
+        href: "/rss.xml",
+        rel: "alternate",
+        title: `${siteConfig.name} Docs`,
+        type: "application/rss+xml",
       },
-    },
-    description,
-    title: resolvedTitle,
-    ...(keywords ? { keywords } : {}),
-    ...(robots ? { robots } : {}),
-    ...buildPageSocialMetadata({
-      description,
-      image,
-      path,
-      title,
-      type,
-    }),
+      {
+        href: "/llms.txt",
+        rel: "alternate",
+        title: "llms.txt",
+        type: "text/plain",
+      },
+      // Every docs page is also served as markdown, which agents read better than HTML.
+      ...(path === "/docs" || path.startsWith("/docs/")
+        ? [
+            {
+              href: path.replace("/docs", "/llm"),
+              rel: "alternate",
+              type: "text/markdown",
+            },
+          ]
+        : []),
+    ],
+    meta: [
+      { title: resolvedTitle },
+      { content: description, name: "description" },
+      ...(keywords ? [{ content: keywords.join(", "), name: "keywords" }] : []),
+      ...(robots ? [{ content: robots, name: "robots" }] : []),
+      ...buildPageSocialMetadata({
+        description,
+        image,
+        path,
+        title,
+        type,
+      }),
+    ],
   };
 }
 
@@ -280,7 +301,7 @@ export function buildOrganizationJsonLd() {
       "shadcn/ui",
       "Tailwind CSS",
     ],
-    logo: absoluteUrl("/icon"),
+    logo: absoluteUrl("/icon.png"),
     name: siteConfig.name,
     sameAs: [siteConfig.links.github, siteConfig.links.twitter],
     url: getSiteUrl(),

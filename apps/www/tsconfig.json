@@ -14,11 +14,6 @@
     "allowImportingTsExtensions": true,
     "jsx": "react-jsx",
     "incremental": true,
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
     "paths": {
       "@/*": ["./src/*"],
       "@audio-ui/core": ["../../packages/core/src/index.ts"],
@@ -30,15 +25,8 @@
       "@audio-ui/react": ["../../packages/ui/src/index.ts"],
       "fumadocs-mdx:collections/*": ["./.source/*"]
     },
-    "types": ["bun", "mdx", "node", "react", "react-dom"]
+    "types": ["bun", "mdx", "node", "react", "react-dom", "vite/client"]
   },
-  "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    ".next/types/**/*.ts",
-    "next.config.ts",
-    ".next/dev/types/**/*.ts"
-  ],
+  "include": ["**/*.ts", "**/*.tsx", "vite.config.mts"],
   "exclude": ["node_modules"]
 }

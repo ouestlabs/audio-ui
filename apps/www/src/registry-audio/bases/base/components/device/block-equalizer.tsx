@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder";
+import { IconPlaceholder } from "@/components/icon-placeholder";
 import { Button } from "@/registry/bases/base/ui/button";
 import { EqualizerPanel } from "@/registry-audio/bases/base/audio/panels/equalizer-panel";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";

@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense } from "react";
-import { ComponentSidebarContent } from "@/app/(create)/components/components/component-sidebar-content";
+import { ComponentSidebarContent } from "@/components/catalog/component-sidebar-content";
 import { DocsNavigation } from "@/components/docs-sidebar";
 import { Sidebar, SidebarContent, useSidebar } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";

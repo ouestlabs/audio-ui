@@ -1,0 +1,13 @@
+# The security headers every static page and file is served with (Cloudflare reads this file).
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-DNS-Prefetch-Control: on
+  # Clipboard and Web MIDI stay allowed: the copy buttons and the MIDI demos use them.
+  Permissions-Policy: camera=(), geolocation=(), payment=(), usb=()
+  Cross-Origin-Opener-Policy: same-origin
+  Content-Security-Policy: frame-ancestors 'self' https://shoogle.dev https://*.shoogle.dev
+
+# The build's files carry a hash in their name: they never change.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable

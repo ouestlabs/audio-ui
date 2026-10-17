@@ -1,7 +1,6 @@
+import { Link } from "@tanstack/react-router";
 import defaultMdxComponents from "fumadocs-ui/mdx";
 import type { MDXComponents } from "mdx/types";
-import Image from "next/image";
-import Link from "next/link.js";
 import type * as React from "react";
 import { Callout } from "@/components/callout";
 import { CodeBlockCommand } from "@/components/code-block-command";
@@ -149,13 +148,14 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
       alt,
       ...props
     }: React.ComponentProps<"img">) => (
-      <Image
+      <img
         alt={alt || ""}
         className={cn(
           "site-rounded-md mt-6 border border-site-border",
           className
         )}
         height={height ? Number(height) : undefined}
+        loading="lazy"
         src={typeof src === "string" ? src : ""}
         width={width ? Number(width) : undefined}
         {...props}
@@ -163,7 +163,6 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     ),
     img: ({ className, alt, ...props }: React.ComponentProps<"img">) => (
       // biome-ignore lint/correctness/useImageSize: <ignore>
-      // biome-ignore lint/performance/noImgElement: <ignore>
       <img alt={alt} className={cn("site-rounded-md", className)} {...props} />
     ),
     Kbd,
@@ -254,10 +253,13 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
       </Frame>
     ),
     ...components,
-    a: (props: any) => {
-      const A = components?.a || Link;
-      return <A {...props} />;
-    },
+    a: ({ href = "", ...props }: React.ComponentProps<"a">) =>
+      // An address on the site is a route; anything else (a hash, another site, a file) is a plain link.
+      href.startsWith("/") && !href.startsWith("//") ? (
+        <Link to={href} {...(props as object)} />
+      ) : (
+        <a href={href} {...props} />
+      ),
   };
 }
 

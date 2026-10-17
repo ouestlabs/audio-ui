@@ -4,6 +4,9 @@
 import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
 import { use } from "react";
 
+/** Each library's icons, a module of its own, loaded when one of them is first shown. */
+const iconModules = import.meta.glob<Record<string, any>>("./__*__.ts");
+
 const iconPromiseCaches = new Map<string, Map<string, Promise<any>>>();
 
 function getCache(libraryName: string) {
@@ -31,7 +34,8 @@ export function createIconLoader(libraryName: string) {
   } & React.ComponentProps<"svg">) {
     let promise = cache.get(name);
     if (!promise) {
-      promise = import(`./__${libraryName}__`).then((mod) => {
+      const load = iconModules[`./__${libraryName}__.ts`];
+      promise = (load ? load() : Promise.resolve({})).then((mod) => {
         const icon = mod[name as keyof typeof mod];
         return icon || null;
       });
