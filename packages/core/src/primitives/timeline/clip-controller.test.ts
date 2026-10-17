@@ -134,3 +134,46 @@ describe("Clip controller subscriptions", () => {
     expect(listener).not.toHaveBeenCalled();
   });
 });
+
+describe("Clip controller snap points", () => {
+  const pointer = (type: string, clientX: number) =>
+    Object.assign(new Event(type), {
+      altKey: false,
+      button: 0,
+      buttons: type === "pointerup" ? 0 : 1,
+      clientX,
+      clientY: 0,
+      ctrlKey: false,
+      metaKey: false,
+      pointerId: 1,
+      pointerType: "mouse",
+      shiftKey: false,
+    }) as unknown as PointerEvent;
+  const handle = document.createElement("div");
+
+  /** Drags the clip by its header from x = 0 to `to`, 10 px per unit, and lets go. */
+  const drag = (points: number[], to: number) => {
+    const clip = create({
+      grid: { offset: 0, points, step: 0 },
+      zoom: 10,
+    });
+    clip.press("move", pointer("pointerdown", 0), handle, handle);
+    document.dispatchEvent(pointer("pointermove", to));
+    const { start } = clip.getSnapshot().value;
+    document.dispatchEvent(pointer("pointerup", to));
+    return start;
+  };
+
+  test("a dragged clip lands its end on another clip's edge within a few px", () => {
+    // Start 10 + 14.8 = 24.8, so its end is at 44.8, 2 px from 45.
+    expect(drag([45], 148)).toBe(25);
+  });
+
+  test("further than that, it moves freely", () => {
+    expect(drag([45], 100)).toBe(20);
+  });
+
+  test("its own edges do not hold it back", () => {
+    expect(drag([10, 30], 3)).toBeCloseTo(10.3, 9);
+  });
+});

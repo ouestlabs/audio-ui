@@ -11,7 +11,15 @@ import {
 } from "../../value/range.ts";
 import { keyTargets } from "./clip-controller.ts";
 import { valueAtLane } from "./position.ts";
-import { bypassesGrid, type Grid, snapRangeMove, snapToGrid } from "./snap.ts";
+import {
+  bypassesGrid,
+  type Grid,
+  SNAP_RADIUS_PX,
+  snapRangeMove,
+  snapToGrid,
+  withoutSnapPoints,
+  withSnapRadius,
+} from "./snap.ts";
 
 type Edged<Details> = Details & {
   /** What moved: one edge, or the whole range with `"both"`. */
@@ -70,7 +78,13 @@ export interface RangeController {
   /** An input moves an edge to a position. */
   edgeTypeAt: (edge: "end" | "start", position: number, event: Event) => void;
   getSnapshot: () => RangeSnapshot;
-  /** Keys on the range's own input: arrows and Page keys move it, Home and End go to the ends of the timeline. Returns `true` when the range takes the key. */
+  /**
+   * Keys on the range's own input. Left and Right move it by a step, Up and
+   * Down by its own length, Page keys by a large step, Home and End to the
+   * ends of the timeline. With Cmd/Ctrl, Left and Right shorten or lengthen
+   * it by a step and Up and Down double or halve it, its start in place.
+   * Returns `true` when the range takes the key.
+   */
   keyDown: (event: KeyboardEvent) => boolean;
   /** An input moves the range to a start, keeping its length. */
   moveTypeAt: (start: number, event: Event) => void;
@@ -209,11 +223,40 @@ export function createRangeController(initial: RangeOptions): RangeController {
     }
   };
 
+  /** Cmd/Ctrl + arrows: the end moves, the start stays, so the range grows or shrinks. */
+  const resizeKey = (event: KeyboardEvent) => {
+    const [start, end] = current();
+    const length = end - start;
+    const lengths: Record<string, number> = {
+      ArrowDown: length / 2,
+      ArrowLeft: length - options.step,
+      ArrowRight: length + options.step,
+      ArrowUp: length * 2,
+    };
+    const next = lengths[event.key];
+    if (next === undefined) {
+      return false;
+    }
+    setEdge("end", start + next, "keyboard", event);
+    return true;
+  };
+
   const keyDown: RangeController["keyDown"] = (event) => {
     if (options.disabled) {
       return false;
     }
+    if (event.metaKey || event.ctrlKey) {
+      return resizeKey(event);
+    }
     const [start, end] = current();
+    if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+      moveTo(
+        start + (event.key === "ArrowUp" ? 1 : -1) * (end - start),
+        "keyboard",
+        event
+      );
+      return true;
+    }
     const target = keyTargets(
       start,
       options.step,
@@ -273,6 +316,15 @@ export function createRangeController(initial: RangeOptions): RangeController {
     }
   };
 
+  /** How many units a pixel is along `lane`. */
+  const perPixel = (lane: Element | null) => {
+    if (options.zoom !== null) {
+      return 1 / options.zoom;
+    }
+    const width = lane?.getBoundingClientRect().width ?? 0;
+    return options.duration / Math.max(width, 1);
+  };
+
   /** The grid applies unless Cmd/Ctrl is held: read from the pointer's own keys. */
   const valueAt = (lane: Element, event: PointerEvent) => {
     const raw = valueAtLane(
@@ -281,7 +333,12 @@ export function createRangeController(initial: RangeOptions): RangeController {
       options.zoom,
       options.duration
     );
-    return bypassesGrid(event) ? raw : snapToGrid(raw, options.grid);
+    return bypassesGrid(event)
+      ? raw
+      : snapToGrid(
+          raw,
+          withSnapRadius(options.grid, perPixel(lane) * SNAP_RADIUS_PX)
+        );
   };
 
   const press: RangeController["press"] = (edge, event, handle, lane) => {
@@ -304,15 +361,15 @@ export function createRangeController(initial: RangeOptions): RangeController {
       event.pointerId,
       (move) => {
         // Pixels become units along the lane, the same way a drag reads them.
-        const width = lane?.getBoundingClientRect().width ?? 0;
-        const perPixel =
-          options.zoom === null
-            ? options.duration / Math.max(width, 1)
-            : 1 / options.zoom;
-        const delta = (move.clientX - gesture.startX) * perPixel;
+        const units = perPixel(lane);
+        const delta = (move.clientX - gesture.startX) * units;
+        // Its own edges are not places for the range to snap to.
         const grid: Grid = bypassesGrid(move)
           ? { offset: 0, step: 0 }
-          : options.grid;
+          : withSnapRadius(
+              withoutSnapPoints(options.grid, gesture.origin),
+              units * SNAP_RADIUS_PX
+            );
         const next = snapRangeMove(gesture.origin, edge, delta, limits(), grid);
         const details = Object.assign(createChangeEventDetails("drag", move), {
           edge,

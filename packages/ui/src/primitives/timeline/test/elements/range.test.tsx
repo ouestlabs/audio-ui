@@ -188,6 +188,28 @@ describe("Timeline.Range", () => {
     expect(lastCall(onValueCommitted)[0]).toEqual([60, 100]);
   });
 
+  test("Up and Down move it by its own length; Cmd/Ctrl + Up and Down double or halve it", () => {
+    const { onValueCommitted, rangeInput } = renderRange();
+    fireEvent.keyDown(rangeInput, { key: "ArrowUp" });
+    expect(lastCall(onValueCommitted)[0]).toEqual([60, 100]);
+    fireEvent.keyDown(rangeInput, { key: "ArrowDown", metaKey: true });
+    expect(lastCall(onValueCommitted)).toEqual([
+      [60, 80],
+      expect.objectContaining({ edge: "end", reason: "keyboard" }),
+    ]);
+    fireEvent.keyDown(rangeInput, { ctrlKey: true, key: "ArrowUp" });
+    expect(lastCall(onValueCommitted)[0]).toEqual([60, 100]);
+  });
+
+  test("a drag lands its end on a snap point within a few px", () => {
+    const { range, span } = renderRange({}, { snapPoints: [70] });
+    // 18 px is 9 units: unpulled it would span 29 to 69, 2 px from 70.
+    fireEvent.pointerDown(range, { clientX: 80, pointerId: 1 });
+    fireEvent.pointerMove(range, { clientX: 98, pointerId: 1 });
+    expect(span()).toEqual(["30", "40"]);
+    fireEvent.pointerUp(range, { clientX: 98, pointerId: 1 });
+  });
+
   test("movable={false} keeps it in place and has no input of its own", () => {
     const { onValueChange, range, view } = renderRange({ movable: false });
     drag(range, 80, 120);

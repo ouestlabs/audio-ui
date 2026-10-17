@@ -1,5 +1,13 @@
 import { describe, expect, test } from "bun:test";
-import { bypassesGrid, snapMove, snapRangeMove, snapToGrid } from "./snap.ts";
+import {
+  bypassesGrid,
+  snapMove,
+  snapRangeMove,
+  snapSpanMove,
+  snapToGrid,
+  withoutSnapPoints,
+  withSnapRadius,
+} from "./snap.ts";
 
 const grid = { offset: 0, step: 4 };
 
@@ -64,5 +72,46 @@ describe("snapRangeMove", () => {
     expect(snapRangeMove([90, 98], "both", 30, limits, grid)).toEqual([
       92, 100,
     ]);
+  });
+});
+
+describe("snap points", () => {
+  const pulling = { offset: 0, points: [7.3, 20], radius: 0.5, step: 1 };
+
+  test("a point within reach wins over the grid line", () => {
+    expect(snapToGrid(7.1, pulling)).toBe(7.3);
+    expect(snapMove(7.6, 3, pulling)).toBe(7.3);
+  });
+
+  test("out of reach, the grid applies as before", () => {
+    expect(snapToGrid(6.6, pulling)).toBe(7);
+    expect(snapToGrid(6.6, { ...pulling, radius: 0 })).toBe(7);
+  });
+
+  test("a span lands either edge on a point, the nearer one", () => {
+    // Its end, 4 later, is 0.2 from 20: the span ends there.
+    expect(snapSpanMove(15.8, 10, 4, pulling)).toBe(16);
+    // Its start is nearer a point than its end.
+    expect(snapSpanMove(7.4, 3, 4, pulling)).toBe(7.3);
+    // Neither is near one: the start snaps to the grid.
+    expect(snapSpanMove(12.2, 10, 4, pulling)).toBe(12);
+  });
+
+  test("a gesture leaves out its own edges and sets the reach", () => {
+    expect(withoutSnapPoints(pulling, [20]).points).toEqual([7.3]);
+    expect(withSnapRadius({ offset: 0, step: 1 }, 3).radius).toBeUndefined();
+    expect(withSnapRadius(pulling, 3).radius).toBe(3);
+  });
+
+  test("a range moved whole lands its end on a point", () => {
+    expect(
+      snapRangeMove(
+        [10, 14],
+        "both",
+        5.8,
+        { duration: 100, minLength: 1 },
+        grid
+      )
+    ).toEqual([16, 20]);
   });
 });

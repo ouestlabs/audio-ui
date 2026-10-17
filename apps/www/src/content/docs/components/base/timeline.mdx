@@ -165,7 +165,7 @@ const [loop, setLoop] = useState<readonly [number, number]>([8, 16]);
 </TimelineLane>
 ```
 
-The range's own input moves it with the arrow keys, by the timeline's `step`; each handle's input moves its edge, which stops `minLength` short of the other one (the grid step by default). `onValueChange` receives `[start, end]` and `eventDetails` with the `edge` that moved (`"start"`, `"end"` or `"both"`) and the `reason` (`"drag"`, `"draw"`, `"keyboard"` or `"input-change"`). Leave the handles out for a range that only moves, or pass `movable={false}` for one that only resizes.
+The range's own input moves it with Left and Right, by the timeline's `step`, and with Up and Down by its own length; Cmd/Ctrl + Left and Right shorten or lengthen it by a step, Cmd/Ctrl + Up and Down double or halve it; each handle's input moves its edge, which stops `minLength` short of the other one (the grid step by default). `onValueChange` receives `[start, end]` and `eventDetails` with the `edge` that moved (`"start"`, `"end"` or `"both"`) and the `reason` (`"drag"`, `"draw"`, `"keyboard"` or `"input-change"`). Leave the handles out for a range that only moves, or pass `movable={false}` for one that only resizes.
 
 ## Tracks
 
@@ -311,6 +311,24 @@ arrangement.undo();
 
 It also gives `selectClip`, `selectClips`, `selectAll`, `selectTrack`, `splitAtCursor`, `duplicateSelection`, `removeClip`, `renameClip`, `setFadeShape` (a fade's curve, as one undo step), `clipAction` (a clip's menu: duplicate, split, switch off, delete), `mixOf` and `changeMix` (gain, pan, mute, solo, color), `heights` and `resizeTrack`, `renameTrack`, `duplicateTrack(id)` (the track with its clips, placed after it), `folded` and `toggleFold` (a folded track is a strip of `foldedHeight` px that keeps its own height for when it opens), and `rescale(ratio)` for a tempo change, which also clears the history since it is not part of it.
 
+The block's own keys work once a press on a lane has put the focus in it:
+
+<KeyTable title="Keys">
+<KeyRow gesture={"`Left` / `Right`"}>Move the cursor by a grid step. `Home` and `End` go to the start and to the end of the last clip.</KeyRow>
+<KeyRow gesture={"`Alt` + `Left` / `Right`"}>Jump to the previous or next locator or clip edge, on the picked tracks (on every track when none is picked).</KeyRow>
+<KeyRow gesture={"`Up` / `Down`"}>Pick the track above or below.</KeyRow>
+<KeyRow gesture={"`+` / `-`"}>Zoom in or out around the cursor.</KeyRow>
+<KeyRow gesture={"`Z`, `X`"}>Zoom onto the selected clips (the loop, when none is selected), and step back to the zoom before.</KeyRow>
+<KeyRow gesture={"`Cmd` / `Ctrl` + `1`, `2`"}>A finer or a wider grid.</KeyRow>
+<KeyRow gesture={"`Cmd` / `Ctrl` + `3`, `4`, `5`"}>Triplets on or off, snapping on or off, and a grid fixed where it is or following the zoom again.</KeyRow>
+<KeyRow gesture={"`M`"}>Add a locator at the cursor.</KeyRow>
+<KeyRow gesture={"`S`, `Cmd` / `Ctrl` + `E`"}>Split the selected clips at the cursor.</KeyRow>
+<KeyRow gesture={"`Cmd` / `Ctrl` + `L`"}>Put the loop around the selection.</KeyRow>
+<KeyRow gesture={"On the loop"}>`Left` / `Right` move it by a grid step, `Up` / `Down` by its own length; with `Cmd` / `Ctrl`, `Left` / `Right` shorten or lengthen it and `Up` / `Down` double or halve it.</KeyRow>
+</KeyTable>
+
+With snapping on, a dragged clip or loop also lands on the edges of the other clips, the locators and the loop, through `snapPoints`.
+
 ## Placing your own parts
 
 Every lane sets a `--timeline-unit` CSS variable, the width of one unit. Parts are placed with it, so anything you draw follows the zoom the same way:
@@ -323,7 +341,7 @@ Every lane sets a `--timeline-unit` CSS variable, the width of one unit. Parts a
 
 ### Root
 
-Groups the parts of a timeline and owns what they share: its length, its zoom, its grid and the playback position. Units are yours: seconds, beats, pulses or steps. `zoom` is how many px one unit takes; leave it unset and the timeline fits the width it is given. The position comes from `position`, or from a live `source` that the playhead follows straight in the DOM without re-rendering React. With a `snapStep`, every gesture lands on the grid unless Cmd/Ctrl is held. Renders a `<div>` element.
+Groups the parts of a timeline and owns what they share: its length, its zoom, its grid and the playback position. Units are yours: seconds, beats, pulses or steps. `zoom` is how many px one unit takes; leave it unset and the timeline fits the width it is given. The position comes from `position`, or from a live `source` that the playhead follows straight in the DOM without re-rendering React. With a `snapStep`, every gesture lands on the grid unless Cmd/Ctrl is held, and `snapPoints` (the edges of other clips, the locators) pull a dragged clip or range onto them from a few px away. Renders a `<div>` element.
 
 <TypeTable>
 <TypeRow name={"defaultPosition"} type={"number"} default={"0"}>Uncontrolled starting position.</TypeRow>
@@ -338,6 +356,7 @@ Groups the parts of a timeline and owns what they share: its length, its zoom, i
 <TypeRow name={"onZoomChange"} type={"(zoom: number, eventDetails: ZoomChangeEventDetails) => void"}>Fires when the zoom changes, already clamped. `eventDetails.cancel()` keeps the zoom where it was.</TypeRow>
 <TypeRow name={"position"} type={"number"}>Playback position, from 0 to `duration`.</TypeRow>
 <TypeRow name={"snapOffset"} type={"number"} default={"0"}>Where the grid's lines start, in your units.</TypeRow>
+<TypeRow name={"snapPoints"} type={"readonly number[]"}>Places that pull a dragged clip or range onto them from a few px away, ahead of the grid: the edges of other clips, the locators. Cmd/Ctrl lets go of them too.</TypeRow>
 <TypeRow name={"snapStep"} type={"number"} default={"0"}>Distance between grid lines, in your units. 0 is no grid.</TypeRow>
 <TypeRow name={"source"} type={"Source"}>A live position followed outside React; takes precedence over `position`.</TypeRow>
 <TypeRow name={"step"} type={"number"}>Step for the arrow keys. Defaults to `snapStep`, or a hundredth of `duration`.</TypeRow>
@@ -456,7 +475,7 @@ The lane that moves the position: a press jumps to the pointer and a drag scrubs
 
 ### Range
 
-A stretch of the timeline, such as a loop, a selection or a clip, laid on the lane it sits in from `value[0]` to `value[1]`. Dragging its body moves it, on the grid unless Cmd/Ctrl is held; add a `Timeline.RangeHandle` per edge to resize it. With `drawable`, dragging across empty lane draws a new range. Its own native `<input type="range">` moves it from the keyboard and carries its accessible name (`aria-label` / `aria-labelledby`). Renders a `<div>` element.
+A stretch of the timeline, such as a loop, a selection or a clip, laid on the lane it sits in from `value[0]` to `value[1]`. Dragging its body moves it, on the grid unless Cmd/Ctrl is held; add a `Timeline.RangeHandle` per edge to resize it. With `drawable`, dragging across empty lane draws a new range. Its own native `<input type="range">` moves it from the keyboard and carries its accessible name (`aria-label` / `aria-labelledby`): Left and Right by a step, Up and Down by its own length, and with Cmd/Ctrl, Left and Right shorten or lengthen it by a step while Up and Down double or halve it. A drag lands an edge on a `snapPoints` place within a few px. Renders a `<div>` element.
 
 <TypeTable>
 <TypeRow name={"defaultValue"} type={"Value"}>Uncontrolled starting range. Defaults to the whole timeline.</TypeRow>

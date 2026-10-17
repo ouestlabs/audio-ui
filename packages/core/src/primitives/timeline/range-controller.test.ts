@@ -60,6 +60,36 @@ describe("Range controller body and keys", () => {
     expect(onValueCommitted).toHaveBeenCalledTimes(2);
   });
 
+  test("Up and Down move the range by its own length", () => {
+    const range = create();
+    range.keyDown(key("ArrowUp"));
+    expect(range.getSnapshot().value).toEqual([40, 60]);
+    range.keyDown(key("ArrowDown"));
+    range.keyDown(key("ArrowDown"));
+    expect(range.getSnapshot().value).toEqual([0, 20]);
+  });
+
+  test("Cmd/Ctrl + Left and Right shorten or lengthen it by a step, its start in place", () => {
+    const range = create();
+    range.keyDown(key("ArrowRight", { metaKey: true }));
+    expect(range.getSnapshot().value).toEqual([20, 41]);
+    range.keyDown(key("ArrowLeft", { ctrlKey: true }));
+    range.keyDown(key("ArrowLeft", { ctrlKey: true }));
+    expect(range.getSnapshot().value).toEqual([20, 39]);
+  });
+
+  test("Cmd/Ctrl + Up and Down double or halve it, within the timeline and its minimum length", () => {
+    const range = create();
+    range.keyDown(key("ArrowUp", { metaKey: true }));
+    expect(range.getSnapshot().value).toEqual([20, 60]);
+    range.keyDown(key("ArrowUp", { metaKey: true }));
+    expect(range.getSnapshot().value).toEqual([20, 100]);
+    for (let index = 0; index < 8; index += 1) {
+      range.keyDown(key("ArrowDown", { metaKey: true }));
+    }
+    expect(range.getSnapshot().value).toEqual([20, 22]);
+  });
+
   test("Home and End stop the range at the ends of the timeline", () => {
     const range = create();
     range.keyDown(key("End"));

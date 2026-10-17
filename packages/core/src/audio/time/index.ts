@@ -1,6 +1,8 @@
 export {
+  adjacentDivision,
   barLabelInterval,
   DOTTED_FACTOR,
+  divisionAt,
   divisionSeconds,
   type FixedGridDivision,
   GRID_DIVISIONS,

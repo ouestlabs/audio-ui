@@ -25,7 +25,9 @@ import {
  * unit takes; leave it unset and the timeline fits the width it is given. The
  * position comes from `position`, or from a live `source` that the playhead
  * follows straight in the DOM without re-rendering React. With a `snapStep`,
- * every gesture lands on the grid unless Cmd/Ctrl is held.
+ * every gesture lands on the grid unless Cmd/Ctrl is held, and `snapPoints`
+ * (the edges of other clips, the locators) pull a dragged clip or range onto
+ * them from a few px away.
  * Renders a `<div>` element.
  */
 export function Root(componentProps: Root.Props) {
@@ -45,6 +47,7 @@ export function Root(componentProps: Root.Props) {
     ref,
     render,
     snapOffset = 0,
+    snapPoints,
     snapStep = 0,
     source,
     step: stepProp,
@@ -54,13 +57,17 @@ export function Root(componentProps: Root.Props) {
   } = componentProps;
   const step = stepProp ?? (snapStep > 0 ? snapStep : duration / 100);
   const largeStep = largeStepProp ?? step * 10;
+  const grid = React.useMemo(
+    () => ({ offset: snapOffset, points: snapPoints, step: snapStep }),
+    [snapOffset, snapPoints, snapStep]
+  );
 
   const options: TimelineOptions = {
     defaultPosition,
     defaultZoom: defaultZoom ?? null,
     disabled,
     duration,
-    grid: { offset: snapOffset, step: snapStep },
+    grid,
     largeStep,
     maxZoom,
     minZoom,
@@ -181,7 +188,7 @@ export function Root(componentProps: Root.Props) {
       meta: {
         anchorRef,
         duration,
-        grid: { offset: snapOffset, step: snapStep },
+        grid,
         largeStep,
         maxZoom,
         minZoom,
@@ -198,14 +205,13 @@ export function Root(componentProps: Root.Props) {
     [
       controller,
       duration,
+      grid,
       largeStep,
       maxZoom,
       minZoom,
       position,
       registerLane,
       scrollTo,
-      snapOffset,
-      snapStep,
       snapshot.zoom,
       state,
       step,
@@ -269,6 +275,8 @@ export namespace Root {
     position?: number;
     /** Where the grid's lines start, in your units. @default 0 */
     snapOffset?: number;
+    /** Places that pull a dragged clip or range onto them from a few px away, ahead of the grid: the edges of other clips, the locators. Cmd/Ctrl lets go of them too. */
+    snapPoints?: readonly number[];
     /** Distance between grid lines, in your units. 0 is no grid. @default 0 */
     snapStep?: number;
     /** A live position followed outside React; takes precedence over `position`. */

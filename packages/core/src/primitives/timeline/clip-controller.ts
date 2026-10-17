@@ -17,7 +17,15 @@ import {
   trimClipEnd,
   trimClipStart,
 } from "./clip.ts";
-import { bypassesGrid, type Grid, snapMove } from "./snap.ts";
+import {
+  bypassesGrid,
+  type Grid,
+  SNAP_RADIUS_PX,
+  snapMove,
+  snapSpanMove,
+  withoutSnapPoints,
+  withSnapRadius,
+} from "./snap.ts";
 
 /** What a change to the clip moves. */
 export type ClipTarget =
@@ -166,7 +174,7 @@ function draggedClip(
   if (target === "move") {
     return moveClip(
       origin,
-      snapMove(origin.start + delta, origin.start, grid),
+      snapSpanMove(origin.start + delta, origin.start, origin.length, grid),
       limits
     );
   }
@@ -445,8 +453,18 @@ export function createClipController(initial: ClipOptions): ClipController {
       handle,
       event.pointerId,
       (move) => {
-        const delta = (move.clientX - started.startX) * unitsPerPixel(lane);
-        const grid = bypassesGrid(move) ? { offset: 0, step: 0 } : options.grid;
+        const units = unitsPerPixel(lane);
+        const delta = (move.clientX - started.startX) * units;
+        // The clip's own edges are not places for it to snap to.
+        const grid = bypassesGrid(move)
+          ? { offset: 0, step: 0 }
+          : withSnapRadius(
+              withoutSnapPoints(options.grid, [
+                started.origin.start,
+                clipEnd(started.origin),
+              ]),
+              units * SNAP_RADIUS_PX
+            );
         const next = draggedClip(target, started.origin, delta, grid, limits());
         if (target === "move") {
           setDragOffset(move.clientY - started.startY);

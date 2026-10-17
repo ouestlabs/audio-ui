@@ -1,9 +1,11 @@
 import { describe, expect, test } from "bun:test";
 import {
+  adjacentDivision,
   barLabelInterval,
   barsBeatsAt,
   DEFAULT_TEMPO,
   describeBarsBeats,
+  divisionAt,
   divisionSeconds,
   gridInterval,
   gridLabel,
@@ -134,5 +136,23 @@ describe("metronomeRhythmSeconds", () => {
     const seconds = metronomeRhythmSeconds("1/8t", DEFAULT_TEMPO);
     expect(seconds).toBeCloseTo(0.25 * (2 / 3));
     expect(gridLabel(seconds ?? 0, DEFAULT_TEMPO)).toBe("1/8T");
+  });
+});
+
+describe("adjacentDivision and divisionAt", () => {
+  test("steps to a finer or a coarser division, held at the ends", () => {
+    expect(adjacentDivision("1/8", 1)).toBe("1/16");
+    expect(adjacentDivision("1/8", -1)).toBe("1/4");
+    expect(adjacentDivision("1/32", 1)).toBe("1/32");
+    expect(adjacentDivision("4-bars", -1)).toBe("4-bars");
+  });
+
+  test("names the division a step in seconds is nearest", () => {
+    expect(
+      divisionAt(divisionSeconds("1/16", DEFAULT_TEMPO), DEFAULT_TEMPO)
+    ).toBe("1/16");
+    expect(divisionAt(secondsPerBar(DEFAULT_TEMPO) * 1.1, DEFAULT_TEMPO)).toBe(
+      "1-bar"
+    );
   });
 });
