@@ -15,7 +15,6 @@ import {
   type MetronomeRhythm,
   type SignatureChange,
   secondsPerBar,
-  secondsPerBeat,
   type Tempo,
   TRIPLET_FACTOR,
   warpedTime,
@@ -28,6 +27,7 @@ import {
   type Timeline as TimelinePrimitive,
 } from "@audio-ui/react";
 import {
+  type ComponentProps,
   type FocusEvent,
   Fragment,
   type KeyboardEvent,
@@ -101,7 +101,10 @@ import {
   ClipPanel,
   type ClipSettings,
 } from "@/registry-audio/bases/base/audio/panels/clip-panel";
-import { MidiClipPanel } from "@/registry-audio/bases/base/audio/panels/midi-clip-panel";
+import {
+  MidiClipPanel,
+  type MidiClipRegion,
+} from "@/registry-audio/bases/base/audio/panels/midi-clip-panel";
 import {
   type ClipAction,
   useArrangement,
@@ -981,40 +984,91 @@ function useMidiPlayback({
   return voices;
 }
 
+/** The clip panel stays in view at the bottom of the window while the tracks scroll past above it. */
+const DOCKED = "sticky bottom-0 z-40 shadow-lg";
+
 /** The clip panel under the tracks, for the clip being edited, or a word on how to pick one. */
 function ClipDock({
   bar,
   beatsPerBar,
   clip,
+  collapsed,
   format,
+  midi,
+  onActiveChange,
   onClose,
+  onCollapsedChange,
   onCrop,
   onValueChange,
   onValueCommitted,
   peaks,
+  signature,
 }: {
   bar: number;
   beatsPerBar: number;
   clip: Arranged | undefined;
+  /** Whether the panel is collapsed to its title: held here, so it stays so from clip to clip. */
+  collapsed: boolean;
   format: (seconds: number) => string;
+  /** What a MIDI clip's panel edits and sounds. */
+  midi: Pick<
+    ComponentProps<typeof MidiClipPanel>,
+    "onNoteOff" | "onNoteOn" | "onNotesChange" | "onRegionChange"
+  >;
+  onActiveChange: (active: boolean) => void;
   onClose: () => void;
+  onCollapsedChange: (collapsed: boolean) => void;
   onCrop: () => void;
   onValueChange: (next: ClipSettings) => void;
   onValueCommitted: () => void;
   peaks: number[];
+  signature: string;
 }) {
   if (!clip) {
     return null;
   }
+  if (clip.notes) {
+    return (
+      <MidiClipPanel
+        active={!clip.disabled}
+        bar={bar}
+        beat={bar / beatsPerBar}
+        className={DOCKED}
+        collapsed={collapsed}
+        key={clip.id}
+        name={clip.name}
+        notes={clip.notes}
+        onActiveChange={onActiveChange}
+        onCollapsedChange={onCollapsedChange}
+        onNotesCommitted={onValueCommitted}
+        region={{
+          length: clip.value.length,
+          loop: clip.loop ?? null,
+          offset: clip.value.offset,
+          sourceLength: clip.sourceLength,
+        }}
+        signature={signature}
+        {...midi}
+      >
+        <CloseClipView onClose={onClose} />
+      </MidiClipPanel>
+    );
+  }
   return (
     <ClipPanel
+      active={!clip.disabled}
       bar={bar}
       beatsPerBar={beatsPerBar}
+      className={DOCKED}
+      collapsed={collapsed}
       format={format}
       name={clip.name}
+      onActiveChange={onActiveChange}
+      onCollapsedChange={onCollapsedChange}
       onCrop={onCrop}
       onValueChange={onValueChange}
       onValueCommitted={onValueCommitted}
+      signature={signature}
       value={{
         gain: clip.gain ?? 0,
         length: clip.value.length,
@@ -1841,6 +1895,8 @@ export default function BlockTimeline() {
   /** Picking a clip lets go of the time selection. */
   // Picking a clip shows it in the clip panel, as a DAW's detail view follows the selection.
   const [clipViewOpen, setClipViewOpen] = useState(true);
+  // Collapsed to its title, the panel leaves the tracks the room, from clip to clip.
+  const [clipViewCollapsed, setClipViewCollapsed] = useState(false);
   const pickClip = useCallback(
     (id: string, additive: boolean) => {
       setTimeSelection(null);
@@ -1941,6 +1997,43 @@ export default function BlockTimeline() {
       });
     },
     [duration, editClip, editedClip]
+  );
+  // Where a MIDI clip plays, from its clip panel: it keeps its place, and ends where the timeline does at most.
+  const changeMidiRegion = useCallback(
+    (region: MidiClipRegion) => {
+      if (!editedClip) {
+        return;
+      }
+      editClip(editedClip.id, (clip) => ({
+        ...clip,
+        loop: region.loop ?? undefined,
+        value: {
+          ...clip.value,
+          length: Math.min(region.length, duration - clip.value.start),
+          offset: region.offset,
+        },
+      }));
+    },
+    [duration, editClip, editedClip]
+  );
+  const midiEditing = useMemo(
+    () => ({
+      onNoteOff: auditionOff,
+      onNoteOn: auditionOn,
+      onNotesChange: changeNotes,
+      onRegionChange: changeMidiRegion,
+    }),
+    [auditionOff, auditionOn, changeMidiRegion, changeNotes]
+  );
+  // The clip panel's switch: off, the clip stays on its track and is not heard.
+  const setEditedActive = useCallback(
+    (active: boolean) => {
+      if (editedClip) {
+        editClip(editedClip.id, (clip) => ({ ...clip, disabled: !active }));
+        settleClipEdit();
+      }
+    },
+    [editClip, editedClip, settleClipEdit]
   );
   const cropEdited = useCallback(() => {
     if (editedClip) {
@@ -3012,33 +3105,22 @@ export default function BlockTimeline() {
             )
           : null}
       </Timeline>
-      {clipViewOpen && editedClip?.notes ? (
-        <MidiClipPanel
-          bar={bar}
-          beat={secondsPerBeat(tempo)}
-          key={editedClip.id}
-          length={editedClip.sourceLength}
-          name={editedClip.name}
-          notes={editedClip.notes}
-          onNoteOff={auditionOff}
-          onNoteOn={auditionOn}
-          onNotesChange={changeNotes}
-          onNotesCommitted={settleClipEdit}
-        >
-          <CloseClipView onClose={closeClipView} />
-        </MidiClipPanel>
-      ) : null}
-      {clipViewOpen && !editedClip?.notes ? (
+      {clipViewOpen ? (
         <ClipDock
           bar={bar}
           beatsPerBar={tempo.beatsPerBar}
           clip={editedClip}
+          collapsed={clipViewCollapsed}
           format={describe}
+          midi={midiEditing}
+          onActiveChange={setEditedActive}
           onClose={closeClipView}
+          onCollapsedChange={setClipViewCollapsed}
           onCrop={cropEdited}
           onValueChange={changeClipSettings}
           onValueCommitted={settleClipEdit}
           peaks={editedPeaks}
+          signature={`${tempo.beatsPerBar}/${tempo.beatUnit}`}
         />
       ) : null}
       {copy
