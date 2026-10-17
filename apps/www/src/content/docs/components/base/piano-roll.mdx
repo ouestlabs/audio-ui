@@ -84,6 +84,7 @@ import { PianoRoll, Timeline } from "@audio-ui/react";
     </PianoRoll.Keys>
     <PianoRoll.Grid aria-label="Notes">
       <PianoRoll.Rows>{(pitch) => <PianoRoll.Row pitch={pitch} />}</PianoRoll.Rows>
+      <PianoRoll.SelectionSpan />
       <PianoRoll.Notes>
         {(note) => (
           <PianoRoll.Note key={note.id} note={note}>
@@ -138,11 +139,11 @@ import {
 </Timeline>;
 ```
 
-A note is `{ id, pitch, start, length, velocity? }`: `pitch` is a MIDI number (60 is middle C), `start` and `length` are in the timeline's units, and `velocity` is 0 to 1 (full when left out). `value` and `selection` are controlled; `defaultValue` and `defaultSelection` leave them to the roll. The roll reports every edit through `onValueChange` and, when a gesture or a key press ends, `onValueCommitted`; `eventDetails.edit` tells what happened (`"add"`, `"move"`, `"resize"`, `"remove"`, `"duplicate"`, `"paste"`, `"quantize"` or `"velocity"`) and `eventDetails.cancel()` keeps the notes as they were.
+A note is `{ id, pitch, start, length, velocity?, muted?, chance? }`: `pitch` is a MIDI number (60 is middle C), `start` and `length` are in the timeline's units, `velocity` is 0 to 1 (full when left out), `muted` deactivates it (it stays on the roll, silent) and `chance` is how likely it is to play each time round, 0 to 1. The roll draws them; playing them is yours, so a sequencer skips a muted note and rolls the dice for its chance. `value` and `selection` are controlled; `defaultValue` and `defaultSelection` leave them to the roll. The roll reports every edit through `onValueChange` and, when a gesture or a key press ends, `onValueCommitted`; `eventDetails.edit` tells what happened (`"add"`, `"move"`, `"resize"`, `"remove"`, `"duplicate"`, `"paste"`, `"quantize"` or `"velocity"`) and `eventDetails.cancel()` keeps the notes as they were.
 
 `onNoteOn` and `onNoteOff` say when a pitch should sound or stop: a key pressed, a note drawn, picked up or moved to a new pitch. A MIDI file can be read and written with the `midi` library (`@audio-ui/midi`); the preview above imports and exports `.mid` files with it.
 
-`scale` marks the rows of a scale (`data-in-scale` on each `PianoRoll.Row`), and `folded="scale"` keeps only those rows and the ones carrying notes. `@audio-ui/core/pitch` holds the scales (`SCALES`, `inScale`, `nearestInScale`), and `@audio-ui/core/piano-roll` the edits a toolbar or a menu applies to the selection, each returning the new notes: `splitNotes`, `chopNotes`, `joinNotes`, `legatoNotes`, `reverseNotes`, `invertNotes`, `stretchNotes`, `fitNotesToScale`, `rampVelocity` and `humanizeNotes`.
+`scale` marks the rows of a scale (`data-in-scale` on each `PianoRoll.Row`), and `folded="scale"` keeps only those rows and the ones carrying notes. `@audio-ui/core/pitch` holds the scales (`SCALES`, `inScale`, `nearestInScale`), and `@audio-ui/core/piano-roll` the edits a toolbar or a menu applies to the selection, each returning the new notes: `splitNotes`, `chopNotes`, `joinNotes`, `legatoNotes`, `reverseNotes`, `invertNotes`, `stretchNotes`, `fitNotesToScale`, `rampVelocity`, `humanizeNotes`, `toggleMuted` and `setChance`; `selectionSpan` gives the time a selection covers.
 
 ## Interaction
 
@@ -205,6 +206,7 @@ Groups the parts of a piano roll and owns its notes and selection. Must be used 
 <TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
 <TypeRow name={"data-editing"}>Present while a gesture edits the notes.</TypeRow>
 <TypeRow name={"data-folded"}>Present when folded.</TypeRow>
+<TypeRow name={"data-has-selection"}>Present while notes are selected.</TypeRow>
 <TypeRow name={"data-mode"}>`"draw"` or `"select"`.</TypeRow>
 </TypeTable>
 
@@ -254,7 +256,7 @@ Renders `children` once per note, in the order they are read: by start, then fro
 
 ### Note
 
-One note, placed on its row from its start, as long as its length. A toggle button named after its pitch and span (`getNoteLabel` on `Root`). Renders a `<div>` element.
+One note, placed on its row from its start, as long as its length. A toggle button named after its pitch and span (`getNoteLabel` on `Root`). Its `--piano-roll-velocity` and `--piano-roll-chance` CSS variables are its velocity and how likely it is to play. Renders a `<div>` element.
 
 <TypeTable>
 <TypeRow name={"note"} type={"Note"}>The note to show; while it is being edited, the roll shows it where the edit has it.</TypeRow>
@@ -262,6 +264,7 @@ One note, placed on its row from its start, as long as its length. A toggle butt
 
 <TypeTable title="Data attributes">
 <TypeRow name={"data-selected"}>Whether the note is in the selection: also `aria-pressed`.</TypeRow>
+<TypeRow name={"data-muted"}>Whether the note is deactivated: it stays on the roll and does not play.</TypeRow>
 <TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
 </TypeTable>
 
@@ -277,6 +280,10 @@ One edge of the note it sits in, dragged to change the note's length: the end ma
 
 The selection rectangle being dragged across the grid; renders nothing the rest of the time. Hidden from assistive technology. Renders a `<div>` element.
 
+### SelectionSpan
+
+The time the selected notes cover, from the earliest start to the latest end, as a band from top to bottom of what it sits in: the grid, the velocity lane or the ruler. Renders nothing with no note selected. It lets presses through and is hidden from assistive technology. Renders a `<div>` element.
+
 ### VelocityLane
 
 A strip under the grid where each note's velocity stands as a bar, placed at the note's start: a timeline lane, like the grid. Put a `PianoRoll.Velocity` per note inside, with `PianoRoll.Notes`. Renders a `<div>` element.
@@ -288,6 +295,11 @@ One note's velocity, as a bar from the bottom of the lane: its height is the vel
 <TypeTable>
 <TypeRow name={"note"} type={"Note"}>The note whose velocity this is.</TypeRow>
 <TypeRow name={"getAriaValueText"} type={"(velocity: number) => string"}>Returns how a velocity, 0…1, is announced. Defaults to a percentage.</TypeRow>
+</TypeTable>
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-selected"}>Whether the note is in the selection.</TypeRow>
+<TypeRow name={"data-muted"}>Whether the note is deactivated.</TypeRow>
 </TypeTable>
 
 ### Registry components

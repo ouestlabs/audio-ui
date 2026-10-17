@@ -41,9 +41,12 @@ export {
   reverseNotes,
   sameNotes,
   sanitizeNote,
+  selectionSpan,
+  setChance,
   snapEdgeDelta,
   spatialOrder,
   splitNotes,
   stretchNotes,
+  toggleMuted,
 } from "./edits.ts";
 export { type Rows, rollRows } from "./rows.ts";

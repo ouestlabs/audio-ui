@@ -4,9 +4,13 @@ import { type Grid, snapMove } from "../timeline/snap.ts";
 export type NoteId = number | string;
 
 export interface Note {
+  /** How likely the note is to play each time it comes round, 0…1. @default 1 */
+  chance?: number;
   id: NoteId;
   /** Length, in the timeline's units. */
   length: number;
+  /** Whether the note is deactivated: it stays on the roll, and does not play. @default false */
+  muted?: boolean;
   /** MIDI pitch: 60 is middle C. */
   pitch: number;
   /** Where the note starts, in the timeline's units. */
@@ -266,7 +270,9 @@ export function sameNotes(a: readonly Note[], b: readonly Note[]): boolean {
         note.pitch === other.pitch &&
         note.start === other.start &&
         note.length === other.length &&
-        note.velocity === other.velocity
+        note.velocity === other.velocity &&
+        note.muted === other.muted &&
+        note.chance === other.chance
       );
     })
   );
@@ -624,4 +630,44 @@ export function humanizeNotes(
       velocity: Math.min(1, Math.max(0, velocity)),
     };
   });
+}
+
+/**
+ * Deactivates the notes in `ids`, or activates them again when every one of
+ * them already is: a deactivated note stays on the roll and does not play.
+ */
+export function toggleMuted(
+  notes: readonly Note[],
+  ids: ReadonlySet<NoteId>
+): Note[] {
+  const chosen = notes.filter((note) => ids.has(note.id));
+  const muted = !chosen.every((note) => note.muted);
+  return notes.map((note) => (ids.has(note.id) ? { ...note, muted } : note));
+}
+
+/** Sets how likely the notes in `ids` are to play each time round, 0…1: 1 always, 0.5 every other time on average. */
+export function setChance(
+  notes: readonly Note[],
+  ids: ReadonlySet<NoteId>,
+  chance: number
+): Note[] {
+  const value = Math.min(1, Math.max(0, chance));
+  return notes.map((note) =>
+    ids.has(note.id) ? { ...note, chance: value } : note
+  );
+}
+
+/** The time the notes in `ids` cover, from the earliest start to the latest end, or null with none. */
+export function selectionSpan(
+  notes: readonly Note[],
+  ids: ReadonlySet<NoteId>
+): { end: number; start: number } | null {
+  const chosen = notes.filter((note) => ids.has(note.id));
+  if (chosen.length === 0) {
+    return null;
+  }
+  return {
+    end: Math.max(...chosen.map((note) => note.start + note.length)),
+    start: Math.min(...chosen.map((note) => note.start)),
+  };
 }

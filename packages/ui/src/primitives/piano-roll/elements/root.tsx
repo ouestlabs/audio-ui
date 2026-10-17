@@ -36,7 +36,8 @@ const describeNote = (note: Note) =>
  * the pitches carrying notes have one, and with `folded="scale"` those in
  * `scale` as well. Its `--piano-roll-rows` CSS variable
  * is how many rows there are, so the grid and the keys can be given a height
- * per row. Renders a `<div>` element.
+ * per row. `data-has-selection` is set while notes are selected. Renders a
+ * `<div>` element.
  */
 export function Root(componentProps: Root.Props) {
   const {
@@ -141,6 +142,15 @@ export function Root(componentProps: Root.Props) {
     () => controller.getSnapshot().rows,
     [controller]
   );
+  const readHasSelection = React.useCallback(
+    () => controller.getSnapshot().selection.size > 0,
+    [controller]
+  );
+  const hasSelection = React.useSyncExternalStore(
+    controller.subscribe,
+    readHasSelection,
+    readHasSelection
+  );
   const rows: Rows = React.useSyncExternalStore(
     controller.subscribe,
     readRows,
@@ -197,7 +207,10 @@ export function Root(componentProps: Root.Props) {
   const element = useRender({
     defaultTagName: "div",
     props: mergeProps<"div">(
-      { style: { [ROWS_PROPERTY as string]: rows.pitches.length } },
+      {
+        "data-has-selection": hasSelection ? "" : undefined,
+        style: { [ROWS_PROPERTY as string]: rows.pitches.length },
+      },
       { ...elementProps, ...resolveStyling(className, style, rollState) }
     ),
     ref,

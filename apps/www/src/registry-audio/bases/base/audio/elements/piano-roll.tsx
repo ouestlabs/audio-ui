@@ -259,10 +259,11 @@ function PianoRollGrid({
           />
         )}
       </PianoRollPrimitive.Rows>
+      <PianoRollSelectionSpan />
       <PianoRollPrimitive.Notes>
         {(note) => (
           <PianoRollPrimitive.Note
-            className="cn-piano-roll-note cursor-grab touch-none select-none border border-primary bg-[color-mix(in_oklab,var(--primary)_calc(30%_+_var(--piano-roll-velocity)_*_60%),transparent)] outline-none active:cursor-grabbing data-[selected]:border-foreground"
+            className="cn-piano-roll-note cursor-grab touch-none select-none border border-primary bg-[color-mix(in_oklab,var(--primary)_calc(30%_+_var(--piano-roll-velocity)_*_60%),transparent)] opacity-[calc(0.4+var(--piano-roll-chance)*0.6)] outline-none active:cursor-grabbing data-muted:border-muted-foreground data-muted:bg-muted data-[selected]:border-foreground data-[selected]:bg-primary data-[selected]:ring-1 data-[selected]:ring-foreground data-muted:data-[selected]:bg-muted-foreground/40"
             key={note.id}
             note={note}
           >
@@ -371,6 +372,7 @@ function PianoRollVelocity({
         role="separator"
         tabIndex={0}
       />
+      <PianoRollSelectionSpan />
       <PianoRollPrimitive.Notes>
         {(note) => (
           <PianoRollPrimitive.Velocity
@@ -382,6 +384,22 @@ function PianoRollVelocity({
       </PianoRollPrimitive.Notes>
       {children}
     </PianoRollPrimitive.VelocityLane>
+  );
+}
+
+/** The time the selected notes cover, shaded down the grid, the velocity lane, or a ruler it is put in. */
+function PianoRollSelectionSpan({
+  className,
+  ...props
+}: Omit<PianoRollPrimitive.SelectionSpan.Props, "className"> & {
+  className?: string;
+}) {
+  return (
+    <PianoRollPrimitive.SelectionSpan
+      className={cn("cn-piano-roll-selection", className)}
+      data-slot="piano-roll-selection"
+      {...props}
+    />
   );
 }
 
@@ -432,6 +450,7 @@ export {
   PianoRoll,
   PianoRollGrid,
   PianoRollKeys,
+  PianoRollSelectionSpan,
   PianoRollStrip,
   PianoRollVelocity,
   PianoRollVelocityScale,

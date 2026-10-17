@@ -17,8 +17,11 @@ import {
   type RollBounds,
   rampVelocity,
   reverseNotes,
+  selectionSpan,
+  setChance,
   splitNotes,
   stretchNotes,
+  toggleMuted,
 } from "@audio-ui/core/piano-roll";
 import {
   pitchClassName,
@@ -65,6 +68,7 @@ import {
   PianoRoll,
   PianoRollGrid,
   PianoRollKeys,
+  PianoRollSelectionSpan,
   PianoRollStrip,
   PianoRollVelocity,
   PianoRollVelocityScale,
@@ -288,13 +292,15 @@ function notesFromMidiFile(
 /** The clip's steps converted to MIDI ticks at a fixed, common resolution, the inverse of `notesFromMidiFile`. */
 function notesToMidiFile(notes: Note[], bpm: number): Uint8Array {
   const ticksPerStep = MIDI_TICKS_PER_QUARTER_NOTE / STEPS_PER_QUARTER;
-  const midiNotes: Omit<MidiFileNote, "track">[] = notes.map((note) => ({
-    channel: 0,
-    durationTicks: Math.round(note.length * ticksPerStep),
-    note: note.pitch,
-    startTick: Math.round(note.start * ticksPerStep),
-    velocity: note.velocity ?? 1,
-  }));
+  const midiNotes: Omit<MidiFileNote, "track">[] = notes
+    .filter((note) => !note.muted)
+    .map((note) => ({
+      channel: 0,
+      durationTicks: Math.round(note.length * ticksPerStep),
+      note: note.pitch,
+      startTick: Math.round(note.start * ticksPerStep),
+      velocity: note.velocity ?? 1,
+    }));
   return encodeMidiFile({
     bpm,
     notes: midiNotes,
@@ -404,6 +410,20 @@ const PITCH_EDITS: NoteEdit[] = [
     id: "fit",
     label: "Fit to scale",
   },
+];
+/** Whether and how often the notes play: deactivated stays on the roll, silent. */
+const PLAY_EDITS: NoteEdit[] = [
+  {
+    edit: (notes, ids) => toggleMuted(notes, ids),
+    id: "mute",
+    label: "Deactivate",
+    shortcut: "0",
+  },
+  ...[1, 0.75, 0.5, 0.25].map((chance) => ({
+    edit: (notes: Note[], ids: Set<NoteId>) => setChance(notes, ids, chance),
+    id: `chance-${chance}`,
+    label: chance === 1 ? "Always play" : `Play ${chance * 100}% of the time`,
+  })),
 ];
 const VELOCITY_EDITS: NoteEdit[] = [
   {
@@ -564,7 +584,13 @@ function usePianoRoll({
         );
       }
       for (const note of current.notes) {
-        if (note.start < step || note.start >= step + 1) {
+        // A deactivated note stays silent, and one with a chance plays that often.
+        if (
+          note.start < step ||
+          note.start >= step + 1 ||
+          note.muted ||
+          Math.random() >= (note.chance ?? 1)
+        ) {
           continue;
         }
         const at = time + (note.start - step) * secondsPerStep;
@@ -956,6 +982,13 @@ function NotesMenu({
           onEdit={onEdit}
         />
         <DropdownMenuSeparator />
+        <EditGroup
+          disabled={disabled}
+          edits={PLAY_EDITS}
+          label="Play"
+          onEdit={onEdit}
+        />
+        <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem onClick={onImport}>
             Import a MIDI file
@@ -1039,6 +1072,8 @@ export default function BlockPianoRoll() {
   });
   const meter = useMemo(() => meterOf(tempo), [tempo]);
   const [looping, setLooping] = useState(true);
+  /** Px a step, once zoomed from the keys or the navigator; null fits the clip. */
+  const [zoomed, setZoomed] = useState<number | null>(null);
   const [metronome, setMetronome] = useState(false);
   const [loopRegion, setLoopRegion] = useState<LoopRegion | null>(null);
   const loopRange: readonly [number, number] = loopRegion
@@ -1155,6 +1190,46 @@ export default function BlockPianoRoll() {
     [history, loopRegion, meter.duration, notes, position, scale, selection]
   );
 
+  /** Zooms so `start` to `end` fills the view, and scrolls it into place. */
+  /** The px a step takes when the whole clip fits the view: the furthest out it zooms. */
+  const fitZoom = useCallback(() => {
+    const viewport = viewportRef.current;
+    const lead = viewport?.querySelector<HTMLElement>(
+      '[data-slot="piano-roll-strip"] > div'
+    );
+    return viewport
+      ? (viewport.clientWidth - (lead?.offsetWidth ?? 0)) / meter.duration
+      : 0;
+  }, [meter.duration]);
+  /** A zoom out past the whole clip goes back to fitting it. */
+  const changeZoom = useCallback(
+    (zoom: number) => setZoomed(zoom > fitZoom() + 0.01 ? zoom : null),
+    [fitZoom]
+  );
+  const zoomOnto = useCallback(
+    (start: number, end: number) => {
+      const viewport = viewportRef.current;
+      if (!viewport || end <= start) {
+        return;
+      }
+      const zoom = Math.min(
+        MAX_ZOOM,
+        (fitZoom() * meter.duration) / (end - start)
+      );
+      changeZoom(zoom);
+      requestAnimationFrame(() => {
+        viewport.scrollLeft = start * zoom;
+      });
+    },
+    [changeZoom, fitZoom, meter.duration]
+  );
+  /** Onto the selected notes, or the loop with none. */
+  const zoomToSelection = () => {
+    const span = selectionSpan(notes, new Set(selection));
+    const [start, end] = span ? [span.start, span.end] : loopRange;
+    zoomOnto(start, end);
+  };
+  const zoomOut = () => setZoomed(null);
   /** Selects the notes that are not selected, and deselects those that are. */
   const invertSelection = useCallback(() => {
     const selected = new Set(selection);
@@ -1183,12 +1258,19 @@ export default function BlockPianoRoll() {
     }
     return false;
   };
-  /** B draws, F folds onto the notes, G limits the rows to the scale and K marks it. */
+  /** B draws, F folds onto the notes, G limits the rows to the scale and K marks it, 0 deactivates the selection, Z zooms onto it and X out to the whole clip. */
   const plainKeys: Record<string, (() => void) | undefined> = {
+    0: () => {
+      if (selection.length > 0) {
+        history.edit(toggleMuted(notes, new Set(selection)));
+      }
+    },
     b: toggleDrawing,
     f: toggleFolded,
     g: () => toggleScaleOnly(!scaleOnly),
     k: () => setScaleOn((current) => !current),
+    x: zoomOut,
+    z: zoomToSelection,
   };
   const plainKey = (key: string) => {
     const action = plainKeys[key];
@@ -1404,8 +1486,10 @@ export default function BlockPianoRoll() {
         duration={meter.duration}
         maxZoom={MAX_ZOOM}
         onPositionChange={seekTo}
+        onZoomChange={changeZoom}
         snapStep={1}
         source={position}
+        zoom={zoomed ?? undefined}
       >
         <PianoRoll
           activePitches={activePitches}
@@ -1487,6 +1571,7 @@ export default function BlockPianoRoll() {
                     {mark.label}
                   </TimelineMark>
                 ))}
+                <PianoRollSelectionSpan className="bg-primary/25" />
                 <TimelinePlayhead />
               </TimelineRuler>
             </PianoRollStrip>

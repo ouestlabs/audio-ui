@@ -4,6 +4,7 @@ import { type PartProps, resolveStyling } from "../../internal/part.ts";
 import { mergeProps, useRender } from "../../internal/render.ts";
 import { placedOver } from "../../timeline/context.ts";
 import {
+  CHANCE_PROPERTY,
   placedOnRow,
   usePianoRollContext,
   useRollView,
@@ -27,8 +28,9 @@ const NoteContext = React.createContext<NoteContextValue | null>(null);
  * Focused, the arrow keys move it (Up and Down by a semitone, an octave with
  * Shift), Shift + Left and Right change its length, Enter or Space selects it
  * and Delete removes it, all of them acting on the selection when the note is
- * part of it. Its `--piano-roll-velocity` CSS variable is its velocity.
- * Renders a `<div>` element.
+ * part of it. Its `--piano-roll-velocity` and `--piano-roll-chance` CSS
+ * variables are its velocity and how likely it is to play. Renders a `<div>`
+ * element.
  */
 export function Note(componentProps: Note.Props) {
   const {
@@ -106,9 +108,10 @@ export function Note(componentProps: Note.Props) {
     }
   };
 
+  const muted = note.muted ?? false;
   const noteState = React.useMemo<Note.State>(
-    () => ({ disabled, selected }),
-    [disabled, selected]
+    () => ({ disabled, muted, selected }),
+    [disabled, muted, selected]
   );
   const context = React.useMemo<NoteContextValue>(
     () => ({ elementRef, note }),
@@ -133,6 +136,7 @@ export function Note(componentProps: Note.Props) {
           ...placedOver(note.start, note.length),
           ...placedOnRow(rows.rowOf(note.pitch)),
           [VELOCITY_PROPERTY as string]: note.velocity ?? 1,
+          [CHANCE_PROPERTY as string]: note.chance ?? 1,
           touchAction: "none",
         },
         tabIndex: disabled ? -1 : 0,
@@ -150,6 +154,8 @@ export function Note(componentProps: Note.Props) {
 export namespace Note {
   export type State = {
     disabled: boolean;
+    /** Whether the note is deactivated: it stays on the roll and does not play. */
+    muted: boolean;
     /** Whether the note is in the selection. */
     selected: boolean;
   };
@@ -203,9 +209,10 @@ export function NoteHandle(componentProps: NoteHandle.Props) {
       grid
     );
   };
+  const muted = note.muted ?? false;
   const state = React.useMemo<NoteHandle.State>(
-    () => ({ disabled: rollState.disabled, edge, selected }),
-    [edge, rollState.disabled, selected]
+    () => ({ disabled: rollState.disabled, edge, muted, selected }),
+    [edge, muted, rollState.disabled, selected]
   );
   return useRender({
     defaultTagName: "div",

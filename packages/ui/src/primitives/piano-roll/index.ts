@@ -7,4 +7,5 @@ export { Note, NoteHandle } from "./elements/note.tsx";
 export { Notes } from "./elements/notes.tsx";
 export { Root } from "./elements/root.tsx";
 export { Row, Rows } from "./elements/rows.tsx";
+export { SelectionSpan } from "./elements/selection-span.tsx";
 export { Velocity, VelocityLane } from "./elements/velocity.tsx";

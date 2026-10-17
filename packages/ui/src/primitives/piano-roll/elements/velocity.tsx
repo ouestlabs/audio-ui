@@ -123,9 +123,10 @@ export function Velocity(componentProps: Velocity.Props) {
     [controller, note.id]
   );
 
+  const muted = note.muted ?? false;
   const state = React.useMemo<Velocity.State>(
-    () => ({ disabled, selected }),
-    [disabled, selected]
+    () => ({ disabled, muted, selected }),
+    [disabled, muted, selected]
   );
 
   return useRender({
@@ -175,6 +176,8 @@ export function Velocity(componentProps: Velocity.Props) {
 export namespace Velocity {
   export type State = {
     disabled: boolean;
+    /** Whether the note is deactivated. */
+    muted: boolean;
     /** Whether the note is in the selection. */
     selected: boolean;
   };

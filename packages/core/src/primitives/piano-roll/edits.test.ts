@@ -20,10 +20,13 @@ import {
   reverseNotes,
   sameNotes,
   sanitizeNote,
+  selectionSpan,
+  setChance,
   snapEdgeDelta,
   spatialOrder,
   splitNotes,
   stretchNotes,
+  toggleMuted,
 } from "./edits.ts";
 
 const BOUNDS = { duration: 16, maxPitch: 72, minLength: 1, minPitch: 48 };
@@ -425,5 +428,47 @@ describe("humanizeNotes", () => {
       () => 0
     );
     expect(low[0]?.start).toBe(0);
+  });
+});
+
+describe("toggleMuted", () => {
+  test("deactivates the notes, and activates them once they all are", () => {
+    const some = toggleMuted(PHRASE, new Set([1]));
+    expect(some.map((note) => note.muted)).toEqual([
+      true,
+      undefined,
+      undefined,
+    ]);
+    const mixed = toggleMuted(some, new Set([1, 2]));
+    expect(mixed.map((note) => note.muted)).toEqual([true, true, undefined]);
+    const back = toggleMuted(mixed, new Set([1, 2]));
+    expect(back.map((note) => note.muted)).toEqual([false, false, undefined]);
+  });
+});
+
+describe("setChance", () => {
+  test("sets the chance, kept within 0…1", () => {
+    expect(
+      setChance(PHRASE, new Set([2, 3]), 1.5).map((note) => note.chance)
+    ).toEqual([undefined, 1, 1]);
+    expect(setChance(PHRASE, ALL, 0.25)[0]?.chance).toBe(0.25);
+  });
+});
+
+describe("selectionSpan", () => {
+  test("spans from the earliest start to the latest end", () => {
+    expect(selectionSpan(PHRASE, new Set([1, 2]))).toEqual({
+      end: 5,
+      start: 0,
+    });
+    expect(selectionSpan(PHRASE, new Set())).toBeNull();
+  });
+});
+
+describe("sameNotes", () => {
+  test("tells a deactivated or less likely note apart", () => {
+    const muted = toggleMuted(PHRASE, new Set([1]));
+    expect(sameNotes(PHRASE, muted)).toBe(false);
+    expect(sameNotes(PHRASE, setChance(PHRASE, new Set([3]), 0.5))).toBe(false);
   });
 });
