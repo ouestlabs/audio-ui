@@ -10,6 +10,8 @@ import {
 } from "@tanstack/react-router";
 import { Provider as JotaiProvider } from "jotai";
 import { NuqsAdapter } from "nuqs/adapters/tanstack-router";
+import posthog from "posthog-js";
+import { useEffect } from "react";
 import { JsonLd } from "@/components/json-ld";
 import { QueryProvider } from "@/components/query-provider";
 import { TailwindIndicator } from "@/components/tailwind-indicator";
@@ -38,15 +40,30 @@ const POSTHOG_OPTIONS = {
   ui_host: "https://us.posthog.com",
 } as const;
 
+/**
+ * PostHog's provider holds the client from the first render, but the client
+ * starts when the browser is idle, after the page is interactive: its session
+ * recorder walks the whole DOM once, a long task that would otherwise freeze
+ * the page's first animations. Events fired before then queue up.
+ */
 function Analytics({ children }: { children: React.ReactNode }) {
+  useEffect(() => {
+    if (!(import.meta.env.PROD && posthogKey)) {
+      return;
+    }
+    const start = () => posthog.init(posthogKey, POSTHOG_OPTIONS);
+    if (typeof requestIdleCallback === "function") {
+      const id = requestIdleCallback(start, { timeout: 5000 });
+      return () => cancelIdleCallback(id);
+    }
+    const id = setTimeout(start, 2000);
+    return () => clearTimeout(id);
+  }, []);
+
   if (!(import.meta.env.PROD && posthogKey)) {
     return children;
   }
-  return (
-    <PostHogProvider apiKey={posthogKey} options={POSTHOG_OPTIONS}>
-      {children}
-    </PostHogProvider>
-  );
+  return <PostHogProvider client={posthog}>{children}</PostHogProvider>;
 }
 
 const SITE_KEYWORDS = [
