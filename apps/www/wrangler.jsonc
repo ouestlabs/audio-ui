@@ -3,6 +3,7 @@
   "name": "audio-ui",
   "compatibility_date": "2026-09-01",
   "compatibility_flags": ["nodejs_compat"],
+  "previews": {},
   "main": "@tanstack/react-start/server-entry",
   "assets": {
     "binding": "ASSETS",
