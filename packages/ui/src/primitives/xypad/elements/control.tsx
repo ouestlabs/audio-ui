@@ -47,7 +47,7 @@ export function Control(componentProps: Control.Props) {
       {
         onDoubleClick: handleDoubleClick,
         onPointerDown: handlePointerDown,
-        style: { touchAction: "none" },
+        style: { position: "relative", touchAction: "none" },
       },
       { ...elementProps, ...resolveStyling(className, style, state) }
     ),

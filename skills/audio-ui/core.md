@@ -37,9 +37,20 @@ Every controller works the same way:
 
 1. **Create it once** per mounted control: `create<Name>Controller()`, then `setOptions(options)` before the first draw.
 2. **Draw from `getSnapshot()`**, and redraw when `subscribe` calls you. The snapshot is cached: the same object until something changes.
-3. **Send it the input**: `press(event, element)` on a primary-button `pointerdown` (it follows the drag on the document until release; prepare the pointer first: [core-pointer-handler](./rules/core-pointer-handler.md)), `attachWheel(element)`, `keyDown(event)` from the focusable input (prevent the default when it returns `true`), `type(value, event)` from the input's `input` event.
+3. **Send it the input**: `press` on a primary-button `pointerdown` (it follows the drag on the document until release; prepare the pointer first: [core-pointer-handler](./rules/core-pointer-handler.md)), `attachWheel(element)`, `keyDown` from the focusable input (prevent the default when it returns `true`), and `type` from the input's `input` event. The arguments differ per controller, as the table below shows.
 4. **Update options with `setOptions(allOptions)`**: it replaces every option and notifies no one, so redraw yourself afterwards.
 5. **Tear down** with the removers `subscribe` and `attachWheel` return.
+
+### Input signatures per controller
+
+| Controller | `press` | `keyDown` | `type` | Reset (double-click, Alt, Delete) |
+| --- | --- | --- | --- | --- |
+| `createKnobController` | `press(event, control)` | `keyDown(event)` | `type(value, event)` | in the controller |
+| `createFaderController` | `press(event, control, thumb)` | `keyDown(event, element)` | `type(value, event)` | `reset(event)`, called by the element |
+| `createXYPadController` | `press(event, control)` | `keyDown(event)` | `type(axis, value, event)` | `reset(event)`, called by the element |
+| `createPlotHandleController` | `press(event, element)` | `keyDown(event)` | `typeAt(along, position, event)` | `reset(event)`, called by the element |
+
+Read the signatures in the `*Controller` type of each module before calling one: they are the source of truth.
 
 The React primitives are the reference implementation of each adapter: `packages/ui/src/primitives/<name>/elements/` in https://github.com/ouestlabs/audio-ui shows which part gets which listener and attribute.
 

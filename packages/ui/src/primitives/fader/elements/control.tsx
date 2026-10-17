@@ -74,7 +74,7 @@ export function Control(componentProps: Control.Props) {
         onKeyDown: handleKeyDown,
         onPointerDown: handlePointerDown,
         onPointerDownCapture: handlePointerDownCapture,
-        style: { touchAction: "none" },
+        style: { position: "relative", touchAction: "none" },
       },
       elementProps,
       resolveStyling(className, style, state)

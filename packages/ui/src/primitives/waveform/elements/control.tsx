@@ -106,7 +106,7 @@ export function Control(componentProps: Control.Props) {
         onPointerDown: handlePointerDown,
         onPointerLeave: () => controller.leave(),
         onPointerMove: handlePointerMove,
-        style: { touchAction: "none" },
+        style: { position: "relative", touchAction: "none" },
       },
       { ...elementProps, ...resolveStyling(className, style, state) }
     ),
