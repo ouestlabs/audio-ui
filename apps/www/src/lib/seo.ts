@@ -43,6 +43,9 @@ const CANONICAL_COMPONENT_DOC_SLUGS = [
   "tuner",
   "waveform",
   "xypad",
+  "scale-menu",
+  "note-find",
+  "note-edit-menu",
 ] as const;
 
 export type CanonicalComponentDocSlug =

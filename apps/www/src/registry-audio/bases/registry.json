@@ -97,13 +97,13 @@
       "name": "pad"
     },
     {
-      "count": 3,
+      "count": 8,
       "description": "Virtual piano keyboard components with MIDI note ranges and glissando.",
       "label": "Piano",
       "name": "piano"
     },
     {
-      "count": 3,
+      "count": 4,
       "description": "Synth control patterns combining knobs, XY pads, and toggles.",
       "label": "Synth",
       "name": "synth"
@@ -145,5 +145,5 @@
       "name": "xypad"
     }
   ],
-  "totalComponents": 53
+  "totalComponents": 58
 }

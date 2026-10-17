@@ -192,20 +192,120 @@ export const components: RegistryItem[] = [
       "@audio-ui/timeline",
       "@audio-ui/transport",
       "@audio-ui/fader",
+      "@audio-ui/scale-menu",
+      "@audio-ui/note-find",
+      "@audio-ui/note-edit-menu",
+      "@audio-ui/midi-file",
       "@audio-ui/use-master-bus",
       "@audio-ui/use-midi-input",
       "@audio-ui/use-synth-voices",
-      "@audio-ui/use-transport-clock",
-      "@audio-ui/undo-history",
+      "@audio-ui/use-piano-roll-playback",
+      "@audio-ui/use-undo-history",
       "@audio-ui/web-audio",
       "@shadcn/button",
       "@shadcn/button-group",
       "@shadcn/dropdown-menu",
-      "@shadcn/input",
-      "@shadcn/popover",
-      "@shadcn/select",
     ],
     type: "registry:block",
+  },
+  {
+    categories: ["piano"],
+    dependencies: ["@audio-ui/core"],
+    description: "A scale menu lighting the keys of the scale it picks",
+    files: [
+      {
+        path: "components/piano/scale-menu-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "scale-menu-demo",
+    registryDependencies: [
+      "@audio-ui/scale-menu",
+      "@audio-ui/piano",
+      "@shadcn/dropdown-menu",
+    ],
+    type: "registry:example",
+  },
+  {
+    categories: ["piano"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "Find notes on a piano roll by pitch, scale, state, velocity, length or chance, and select them",
+    files: [
+      {
+        path: "components/piano/note-find-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "note-find-demo",
+    registryDependencies: [
+      "@audio-ui/note-find",
+      "@audio-ui/piano-roll",
+      "@audio-ui/timeline",
+    ],
+    type: "registry:example",
+  },
+  {
+    categories: ["piano"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "A menu of note edits over a piano roll's selection, beside an item of its own",
+    files: [
+      {
+        path: "components/piano/note-edit-menu-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "note-edit-menu-demo",
+    registryDependencies: [
+      "@audio-ui/note-edit-menu",
+      "@audio-ui/piano-roll",
+      "@audio-ui/timeline",
+      "@shadcn/dropdown-menu",
+    ],
+    type: "registry:example",
+  },
+  {
+    categories: ["piano", "synth"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "A one-bar piano roll on loop with a metronome, played by a synth, which hears edits on its next pass",
+    files: [
+      {
+        path: "components/piano/piano-roll-playback-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "piano-roll-playback-demo",
+    registryDependencies: [
+      "@audio-ui/use-piano-roll-playback",
+      "@audio-ui/use-synth-voices",
+      "@audio-ui/use-master-bus",
+      "@audio-ui/piano-roll",
+      "@audio-ui/timeline",
+      "@audio-ui/play-toggle",
+    ],
+    type: "registry:example",
+  },
+  {
+    categories: ["piano"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "A piano roll that exports its clip as a .mid file and imports one onto its grid, with the file's tempo",
+    files: [
+      {
+        path: "components/piano/piano-roll-midi-file-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "piano-roll-midi-file-demo",
+    registryDependencies: [
+      "@audio-ui/midi-file",
+      "@audio-ui/piano-roll",
+      "@audio-ui/timeline",
+      "@shadcn/button",
+    ],
+    type: "registry:example",
   },
   {
     categories: ["meter"],

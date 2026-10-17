@@ -1,0 +1,215 @@
+---
+title: Note edit menu
+description: "A menu of commands over a piano roll's notes, with their keys: split, join, quantize, legato, time commands, fit to scale, chance and velocity."
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="note-edit-menu-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">CLI</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash component
+npx shadcn@latest add @audio-ui/note-edit-menu
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the following dependencies:</Step>
+
+```bash
+npm install @audio-ui/core
+```
+
+<Step>Copy and paste the following code into your project.</Step>
+
+<ComponentSource
+  styleName="base-nova"
+  name="note-edit-menu"
+  title="components/audio-ui/note-edit-menu.tsx"
+/>
+
+<Step>Copy and paste the commands the menu lists.</Step>
+
+<ComponentSource
+  styleName="base-nova"
+  src="registry-audio/bases/base/lib/note-edits.ts"
+  title="lib/note-edits.ts"
+/>
+
+<Step>Update the import paths to match your project setup.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Anatomy
+
+```tsx
+<NoteEditMenu>
+  <NoteEditMenuTrigger />
+  <NoteEditMenuContent>
+    <NoteEditMenuItems />
+    <NoteEditMenuSub />
+  </NoteEditMenuContent>
+</NoteEditMenu>
+```
+
+## Usage
+
+```tsx
+import {
+  NoteEditMenu,
+  NoteEditMenuContent,
+  NoteEditMenuSub,
+  NoteEditMenuTrigger,
+} from "@/components/audio-ui/note-edit-menu";
+import {
+  applyNoteEdit,
+  canApplyNoteEdit,
+  PITCH_EDITS,
+  TIME_EDITS,
+  VELOCITY_EDITS,
+} from "@/lib/note-edits";
+
+<NoteEditMenu
+  disabled={(edit) =>
+    !canApplyNoteEdit(edit, {
+      hasNotes: notes.length > 0,
+      hasScale: scale !== null,
+      hasSelection: selection.length > 0,
+    })
+  }
+  onEdit={(edit) =>
+    setNotes(
+      applyNoteEdit(edit, notes, selection, {
+        at: playhead, // in steps: where Split cuts with nothing selected
+        bounds: { duration: 64, maxPitch: 84, minLength: 1, minPitch: 36 },
+        loopEnd: 64, // what Legato stretches the last notes to
+        nextId: () => crypto.randomUUID(), // an id for each note an edit makes
+        scale, // what Fit to scale fits to, or null
+      })
+    )
+  }
+>
+  <NoteEditMenuTrigger />
+  <NoteEditMenuContent>
+    <NoteEditMenuSub edits={TIME_EDITS} label="Time" />
+    <NoteEditMenuSub edits={PITCH_EDITS} label="Pitch" />
+    <NoteEditMenuSub edits={VELOCITY_EDITS} label="Velocity" />
+  </NoteEditMenuContent>
+</NoteEditMenu>;
+```
+
+The item installs two files: the menu, and `lib/note-edits.ts`, the commands it lists. A command is data, `{ id, label, shortcut?, edit }`, so the menu needs no prop per command: `NoteEditMenuItems` lists commands as items, `NoteEditMenuSub` lists them in a submenu, and you pick which go where. Each item shows its key beside it (`⌘E`), and `disabled` greys out the commands that can't run: there must be notes, a time command needs a selection and Fit to scale a scale.
+
+`onEdit` gets the command picked. `applyNoteEdit` runs it on the selected notes, or on every note with none selected, and returns the new notes. Hand them to `useUndoHistory`'s `edit` and every command undoes in one step (see [Piano roll](/docs/components/base/piano-roll#undo-and-redo)).
+
+### The commands
+
+| Group | Commands |
+| --- | --- |
+| `TIME_EDITS` | Split (⌘E), Chop in two, Join (⌘J), Quantize (⌘U), Legato, Reverse, Twice as long, Half as long, Duplicate time (⇧⌘D), Delete time (⇧⌘⌫), Insert time (⌘I) |
+| `PITCH_EDITS` | Invert, Fit to scale |
+| `PLAY_EDITS` | Deactivate (0), Always play, Play 75%, 50% or 25% of the time |
+| `VELOCITY_EDITS` | Crescendo, Decrescendo, Humanize |
+
+Split cuts the selected notes on every grid step, or, with nothing selected, the notes under the playhead at `at`. The work is done by the edits in `@audio-ui/core/piano-roll` (`splitNotes`, `quantizeNotes`, `fitNotesToScale`…); `note-edits` names them, groups them and gives them keys.
+
+### Items of your own
+
+`NoteEditMenuContent` is a dropdown menu's content, so commands that are not note edits sit beside the parts as plain items. The piano roll block puts its file commands there:
+
+```tsx
+<NoteEditMenuContent>
+  <NoteEditMenuItems edits={KEYED_EDITS} />
+  <DropdownMenuSeparator />
+  <NoteEditMenuSub edits={TIME_EDITS} label="Time" />
+  <DropdownMenuSeparator />
+  <DropdownMenuItem onClick={importFile}>Import a MIDI file</DropdownMenuItem>
+  <DropdownMenuItem onClick={exportFile}>Export as a MIDI file</DropdownMenuItem>
+  <DropdownMenuItem onClick={clear} variant="destructive">
+    Clear
+  </DropdownMenuItem>
+</NoteEditMenuContent>
+```
+
+A command of your own is a `NoteEdit` too:
+
+```tsx
+import { moveNotes } from "@audio-ui/core/piano-roll";
+import type { NoteEdit } from "@/lib/note-edits";
+
+const OCTAVE_UP: NoteEdit = {
+  edit: (notes, ids, { bounds }) => moveNotes(notes, ids, 0, 12, bounds),
+  id: "octave-up",
+  label: "Octave up",
+};
+```
+
+### Without the menu
+
+The same commands run from the keyboard, a toolbar or an agent's tool. `noteEditForKey(key, shiftKey)` returns the command Cmd/Ctrl with `key` runs (Shift too for the time commands), or nothing. `key` is lower case:
+
+```tsx
+const onKeyDown = (event: KeyboardEvent) => {
+  if (!(event.metaKey || event.ctrlKey)) return;
+  const edit = noteEditForKey(event.key.toLowerCase(), event.shiftKey);
+  if (edit && canApplyNoteEdit(edit, state)) {
+    event.preventDefault();
+    setNotes(applyNoteEdit(edit, notes, selection, context));
+  }
+};
+```
+
+## API reference
+
+### NoteEditMenu
+
+<TypeTable>
+<TypeRow name={"onEdit"} type={"(edit: NoteEdit) => void"}>A command was picked: run it with `applyNoteEdit`.</TypeRow>
+<TypeRow name={"disabled"} type={"(edit: NoteEdit) => boolean"}>Whether a command can't run now. Every command can when left out.</TypeRow>
+</TypeTable>
+
+### Parts
+
+<TypeTable title="Components">
+<TypeRow name={"NoteEditMenuTrigger"}>The button that opens the menu, "Notes" with a caret unless given children. Takes the button's props.</TypeRow>
+<TypeRow name={"NoteEditMenuContent"}>The menu. Aligned to the trigger's end unless given `align`.</TypeRow>
+<TypeRow name={"NoteEditMenuItems"}>A menu item per command in `edits`, with its key beside it.</TypeRow>
+<TypeRow name={"NoteEditMenuSub"}>A submenu named `label`, holding a menu item per command in `edits`.</TypeRow>
+</TypeTable>
+
+### note-edits
+
+<TypeTable>
+<TypeRow name={"applyNoteEdit"} type={"(edit, notes, selection, context) => Note[]"}>Runs `edit` on the selected notes, or on every note with none selected.</TypeRow>
+<TypeRow name={"canApplyNoteEdit"} type={"(edit, { hasNotes, hasScale, hasSelection }) => boolean"}>Whether `edit` can run now.</TypeRow>
+<TypeRow name={"noteEditForKey"} type={"(key, shiftKey) => NoteEdit | undefined"}>The command Cmd/Ctrl (and Shift) with `key` runs.</TypeRow>
+<TypeRow name={"TIME_EDITS, PITCH_EDITS, PLAY_EDITS, VELOCITY_EDITS"} type={"NoteEdit[]"}>The commands, by what they change.</TypeRow>
+</TypeTable>
+
+The context `applyNoteEdit` takes:
+
+<TypeTable>
+<TypeRow name={"at"} type={"number"}>Where the playhead is, in steps.</TypeRow>
+<TypeRow name={"bounds"} type={"{ duration, minPitch, maxPitch, minLength }"}>The roll's length and pitches, and the shortest a note gets from a command.</TypeRow>
+<TypeRow name={"loopEnd"} type={"number"}>Where the loop ends, in steps.</TypeRow>
+<TypeRow name={"nextId"} type={"() => NoteId"}>A new id for each note a command makes. Each call must return a different one.</TypeRow>
+<TypeRow name={"scale"} type={"Scale | null"}>The scale marked on the roll.</TypeRow>
+</TypeTable>

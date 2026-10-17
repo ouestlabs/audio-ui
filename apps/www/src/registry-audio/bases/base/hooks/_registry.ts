@@ -78,6 +78,40 @@ export const hooks: RegistryItem[] = [
     type: "registry:hook",
   },
   {
+    categories: ["audio", "piano", "sequencer"],
+    dependencies: ["@audio-ui/core", "@audio-ui/react"],
+    description:
+      "Plays a piano roll's notes, which you own: play, pause and stop, a loop or once through, a metronome, seeking, and the notes the roll auditions, with a playhead for the timeline and a clock for the transport.",
+    files: [
+      {
+        path: "hooks/use-piano-roll-playback.ts",
+        type: "registry:hook",
+      },
+    ],
+    name: "use-piano-roll-playback",
+    registryDependencies: [
+      "@audio-ui/use-transport-clock",
+      "@audio-ui/use-synth-voices",
+      "@audio-ui/envelope-ramp",
+      "@audio-ui/web-audio",
+    ],
+    type: "registry:hook",
+  },
+  {
+    categories: ["timeline", "piano", "envelope"],
+    description:
+      "Undo and redo over a value you own: an edit made in one go, or a gesture that undoes as one.",
+    files: [
+      {
+        path: "hooks/use-undo-history.ts",
+        type: "registry:hook",
+      },
+    ],
+    name: "use-undo-history",
+    registryDependencies: ["@audio-ui/undo-history"],
+    type: "registry:hook",
+  },
+  {
     categories: ["audio", "synth", "sequencer"],
     description:
       "A master output bus with a safety limiter: every source connects into one gain node that a single fader governs.",
