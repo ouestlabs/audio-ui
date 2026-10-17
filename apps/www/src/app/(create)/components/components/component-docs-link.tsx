@@ -1,7 +1,7 @@
 "use client";
 
+import { Link } from "@tanstack/react-router";
 import { BookOpenTextIcon } from "@phosphor-icons/react/ssr";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { isCanonicalComponentDoc } from "@/lib/seo";
 
@@ -17,7 +17,7 @@ export function ComponentDocsLink({ slug }: { slug: string }) {
       className="shrink-0"
       nativeButton={false}
       render={
-        <Link href={docsHref}>
+        <Link to={docsHref}>
           <BookOpenTextIcon className="size-3.5 opacity-60" />
           View docs
         </Link>

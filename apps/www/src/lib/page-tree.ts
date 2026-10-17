@@ -1,3 +1,4 @@
+import { isValidElement, type ReactNode } from "react";
 import { DEFAULT_CONFIG } from "@/hooks/use-config";
 import type { source } from "@/lib/source";
 
@@ -34,7 +35,7 @@ function findBaseSubfolderChildren(
     }
 
     // Match by $id or by name.
-    const isBase = child.$id === "base" || child.name === "Base UI";
+    const isBase = child.$id === "base" || nodeText(child.name) === "Base UI";
 
     if (currentBase === "base" && isBase) {
       return child.children;
@@ -93,8 +94,37 @@ export type PageTreeGroup = {
   title?: string;
 };
 
+/** The words of a tree node's name: a string, or the text inside the element a serialized tree turns it into. */
+export function nodeText(node: ReactNode): string {
+  if (typeof node === "string" || typeof node === "number") {
+    return String(node);
+  }
+  if (Array.isArray(node)) {
+    return node.map(nodeText).join("");
+  }
+  if (
+    isValidElement<{
+      children?: ReactNode;
+      dangerouslySetInnerHTML?: { __html: string };
+    }>(node)
+  ) {
+    // A serialized tree gives a name back as a span holding its HTML.
+    const html = node.props.dangerouslySetInnerHTML?.__html;
+    return html === undefined
+      ? nodeText(node.props.children)
+      : html
+          .replace(/<[^>]*>/g, "")
+          .replaceAll("&amp;", "&")
+          .replaceAll("&lt;", "<")
+          .replaceAll("&gt;", ">")
+          .replaceAll("&quot;", '"')
+          .replaceAll("&#x27;", "'");
+  }
+  return "";
+}
+
 const isComponentsFolder = (folder: PageTreeFolder) =>
-  folder.$id === "components" || folder.name === "Components";
+  folder.$id === "components" || nodeText(folder.name) === "Components";
 
 // Get a folder's groups, each a heading of the sidebar. The components' base
 // folder holds one folder per space (Elements, Workstation, Devices), and
@@ -113,7 +143,7 @@ export function getGroupsFromFolder(
     return spaces.map((space) => ({
       collapsible: true,
       sections: sectionsOf(space.children),
-      title: space.name?.toString(),
+      title: nodeText(space.name),
     }));
   }
   // Any other folder but the root one (Get started) is a space of its own, such as the Audio engine.
@@ -121,7 +151,7 @@ export function getGroupsFromFolder(
     {
       collapsible: folder.root !== true,
       sections: getSectionsFromFolder(folder, currentBase),
-      title: folder.name?.toString(),
+      title: nodeText(folder.name),
     },
   ];
 }
@@ -146,7 +176,7 @@ function sectionsOf(children: PageTreeFolder["children"]): PageTreeSection[] {
   const sections: PageTreeSection[] = [];
   for (const child of children) {
     if (child.type === "separator") {
-      sections.push({ pages: [], title: child.name?.toString() });
+      sections.push({ pages: [], title: nodeText(child.name) });
     } else if (child.type === "page") {
       if (sections.length === 0) {
         sections.push({ pages: [] });

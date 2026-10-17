@@ -1,7 +1,7 @@
 "use client";
 
 import { MagnifyingGlassIcon, XIcon } from "@phosphor-icons/react/ssr";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useLocation, useRouter } from "@tanstack/react-router";
 import { useQueryState } from "nuqs";
 import {
   useCallback,
@@ -35,9 +35,10 @@ export function ComponentHeaderSearch({
   className,
 }: ComponentHeaderSearchProps) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const pathname = usePathname();
+  const pathname = useLocation({ select: (location) => location.pathname });
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const searchStr = useLocation({ select: (location) => location.searchStr });
+  const searchParams = useMemo(() => new URLSearchParams(searchStr), [searchStr]);
   const { totalCount, categoryCounts, catalogItems } = useComponents();
 
   const isOnCategoryPage =
@@ -106,8 +107,10 @@ export function ComponentHeaderSearch({
       }
 
       if (isOnCategoryPage) {
-        router.replace(buildSearchUrl(pathname, finalValue), {
-          scroll: false,
+        router.navigate({
+          href: buildSearchUrl(pathname, finalValue),
+          replace: true,
+          resetScroll: false,
         });
         return;
       }
@@ -156,8 +159,10 @@ export function ComponentHeaderSearch({
   const handleClear = useCallback(() => {
     setLocalQuery("");
     if (isOnCategoryPage) {
-      router.replace(buildSearchUrl(pathname, null), {
-        scroll: false,
+      router.navigate({
+        href: buildSearchUrl(pathname, null),
+        replace: true,
+        resetScroll: false,
       });
     } else {
       setCurrentUrlQuery(null);

@@ -5,7 +5,7 @@ import {
   resolveRegistryStyleName,
 } from "@/lib/docs-registry-options";
 
-import { DocsComponentSourceSwitch } from "./docs-mdx-components.client";
+import { DocsComponentSourceSwitch } from "./docs-mdx-components-client";
 
 export function DocsComponentSource(
   props: React.ComponentProps<typeof ComponentSource>

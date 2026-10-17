@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@tanstack/react-router";
 import { SeoLinkedText } from "@/app/(create)/components/components/component-category-seo-content";
 import { cn } from "@/lib/utils";
 
@@ -40,7 +40,7 @@ export function DocsComponentCatalogCta({
         <p>
           <Link
             className="font-medium text-site-primary underline decoration-site-primary/60 underline-offset-[3px] hover:decoration-site-primary"
-            href={catalogHref}
+            to={catalogHref}
           >
             Browse all {componentCount} Shadcn {label} components
           </Link>{" "}

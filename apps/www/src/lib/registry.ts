@@ -12,6 +12,12 @@
  */
 
 import * as React from "react";
+import { audio } from "../registry-audio/bases/base/audio/_registry";
+import { components } from "../registry-audio/bases/base/components/_registry";
+import { lib } from "../registry-audio/bases/base/lib/_registry";
+import componentsManifest from "../registry-audio/bases/components.json";
+import registryStats from "../registry-audio/bases/registry.json";
+import registrySeo from "../registry-audio/bases/seo.json";
 
 const WHITESPACE_REGEX = /\s+/;
 
@@ -195,16 +201,10 @@ interface StatsData {
 
 let _registrySeo: Record<string, CategorySeoInfo> | null = null;
 
-/**
- * Lazy-load `seo.json` once per runtime (Node / edge worker).
- * Keeps the large SEO blob out of the client bundle unless these helpers run.
- */
+/** The SEO copy of every category, from `seo.json`. */
 function getRegistrySeoMapCached(): Record<string, CategorySeoInfo> {
   if (!_registrySeo) {
-    _registrySeo = require("../registry-audio/bases/seo.json") as Record<
-      string,
-      CategorySeoInfo
-    >;
+    _registrySeo = registrySeo as unknown as Record<string, CategorySeoInfo>;
   }
   return _registrySeo;
 }
@@ -221,8 +221,7 @@ let _categoryIndex: Map<string, ComponentCatalogItem[]> | null = null;
 function getStats(): StatsData {
   if (!_stats) {
     try {
-      const stats =
-        require("../registry-audio/bases/registry.json") as StatsData;
+      const stats = registryStats as unknown as StatsData;
       _stats = {
         categories: stats.categories,
         totalComponents: stats.totalComponents,
@@ -235,21 +234,18 @@ function getStats(): StatsData {
   return _stats;
 }
 
-/** Loads one registry-audio sub-registry module and merges its items by name. Swallows load errors (module may not exist for every base). */
+/** The sub-registries of each base, which `getMetadata` merges by item name. */
+const SUB_REGISTRIES: Record<string, unknown[][]> = {
+  base: [audio, components, lib],
+};
+
+/** Merges one sub-registry's items into `metadata` by name. */
 function mergeSubRegistry(
   metadata: Record<string, RegistryItem>,
-  base: string,
-  segment: string,
-  exportName: string
+  items: unknown[]
 ): void {
-  try {
-    const mod = require(`../registry-audio/bases/${base}/${segment}/_registry`);
-    const items = mod[exportName] || [];
-    for (const item of items) {
-      metadata[item.name] = item;
-    }
-  } catch (e) {
-    console.warn(`Could not load ${segment} registry for ${base}`, e);
+  for (const item of items as RegistryItem[]) {
+    metadata[item.name] = item;
   }
 }
 
@@ -260,9 +256,9 @@ function getMetadata(base = "base"): MetadataData {
 
       // Directly load audio, catalog, and lib registries for reliability and
       // performance. This avoids potential issues with the aggregate registry.ts file
-      mergeSubRegistry(metadata, base, "audio", "audio");
-      mergeSubRegistry(metadata, base, "components", "components");
-      mergeSubRegistry(metadata, base, "lib", "lib");
+      for (const items of SUB_REGISTRIES[base] ?? []) {
+        mergeSubRegistry(metadata, items);
+      }
 
       _metadataCache[base] = { Metadata: { [base]: metadata } };
     } catch (e) {
@@ -297,6 +293,11 @@ export function getRegistryItemMetadata(name: string, base = "base") {
 
 const componentCache = new Map<string, React.LazyExoticComponent<any>>();
 
+/** Every registry component a demo or a block can be loaded from, each its own chunk, by its path. */
+const componentModules = import.meta.glob<{ default: React.ComponentType }>([
+  "../registry-audio/bases/*/**/*.tsx",
+]);
+
 /**
  * Get a lazy-loaded component by base and name
  */
@@ -316,13 +317,13 @@ export function getComponent(
     return null;
   }
 
-  // Extract relative path from metadata
-  // e.g., "registry-audio/bases/base/audio/knob.tsx" -> "audio/knob.tsx"
-  const path = item.files[0].path.replace(`registry-audio/bases/${base}/`, "");
+  // The path in the metadata is relative to the base, e.g. "audio/elements/knob.tsx".
+  const load = componentModules[`../registry-audio/bases/${base}/${item.files[0].path}`];
+  if (!load) {
+    return null;
+  }
 
-  const lazyComponent = React.lazy(
-    () => import(`@/registry-audio/bases/${base}/${path}`)
-  );
+  const lazyComponent = React.lazy(load);
 
   componentCache.set(cacheKey, lazyComponent);
   return lazyComponent;
@@ -616,15 +617,22 @@ export function categories<T extends Category[]>(...cats: T): T {
 // Catalog (c-*), lazy index from components.json
 // ============================================================================
 
+/** One entry of `components.json`. */
+interface ComponentsManifestItem {
+  categories?: string[];
+  description?: string;
+  meta?: ComponentCatalogItem["meta"];
+  name: string;
+  title?: string;
+}
+
 // Load the catalog manifest into a name-keyed map of catalog items.
 function loadCatalogItemsByName(): Map<string, ComponentCatalogItem> {
   const itemsByName = new Map<string, ComponentCatalogItem>();
 
   try {
-    // Load from components.json - Compact manifest for high performance
-    const manifest = require("../registry-audio/bases/components.json");
-
-    for (const item of manifest) {
+    // The compact manifest of the catalog, from components.json
+    for (const item of componentsManifest as ComponentsManifestItem[]) {
       const itemCategories = item.categories || [];
       let [primaryCategory] = itemCategories;
 

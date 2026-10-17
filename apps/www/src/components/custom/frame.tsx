@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@tanstack/react-router";
 import type * as React from "react";
 
 import { cn } from "@/lib/utils";
@@ -28,7 +28,7 @@ export const Frame = ({
           outerClasses,
           "transition-[filter] duration-200 ease-out hover:drop-shadow-lg hover:ring-site-foreground/10"
         )}
-        href={url}
+        to={url}
         ref={ref as any}
       >
         {children}

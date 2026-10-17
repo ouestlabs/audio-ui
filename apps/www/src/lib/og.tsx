@@ -1,4 +1,3 @@
-import { ImageResponse } from "next/og";
 import type { ReactElement } from "react";
 import { siteConfig } from "@/lib/config";
 
@@ -463,23 +462,4 @@ export function generateDocsOG({
       ) : null}
     </div>
   );
-}
-
-export function makeImageResponse(
-  element: ReactElement,
-  fontData: ArrayBuffer | null
-): ImageResponse {
-  return new ImageResponse(element, {
-    ...OG_SIZE,
-    fonts: fontData
-      ? [
-          {
-            data: fontData,
-            name: "Instrument Serif",
-            style: "normal",
-            weight: 700,
-          },
-        ]
-      : [],
-  });
 }

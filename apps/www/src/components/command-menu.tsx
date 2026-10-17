@@ -9,7 +9,7 @@ import {
   SquaresFourIcon,
   XIcon,
 } from "@phosphor-icons/react/ssr";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@tanstack/react-router";
 import * as React from "react";
 import { ComponentEmptyState } from "@/app/(create)/components/components/component-empty-state";
 import { copyToClipboardWithMeta } from "@/components/copy-button";
@@ -110,7 +110,7 @@ export function CommandMenu({
   }, []);
 
   const navigate = React.useCallback(
-    (href: string) => runCommand(() => router.push(href)),
+    (href: string) => runCommand(() => router.navigate({ href })),
     [router, runCommand]
   );
 

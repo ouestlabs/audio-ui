@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
@@ -6,7 +7,6 @@ import {
 import { findNeighbour } from "fumadocs-core/page-tree";
 import { createRelativeLink } from "fumadocs-ui/mdx";
 import nextDynamic from "next/dynamic";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { DocsComponentCatalogSection } from "@/components/docs-component-catalog-section";
 import { DocsCopyPage } from "@/components/docs-copy-page";
@@ -47,7 +47,7 @@ function DocsNeighbourIcons({ neighbours }: { neighbours: Neighbours }) {
           className="extend-touch-target ml-auto hidden shadow-none md:size-7"
           nativeButton={false}
           render={
-            <Link href={neighbours.previous.url}>
+            <Link to={neighbours.previous.url}>
               <ArrowLeftIcon />
               <span className="sr-only">Previous</span>
             </Link>
@@ -61,7 +61,7 @@ function DocsNeighbourIcons({ neighbours }: { neighbours: Neighbours }) {
           className="extend-touch-target hidden shadow-none md:size-7"
           nativeButton={false}
           render={
-            <Link href={neighbours.next.url}>
+            <Link to={neighbours.next.url}>
               <span className="sr-only">Next</span>
               <ArrowRightIcon />
             </Link>
@@ -113,7 +113,7 @@ function DocsPager({ neighbours }: { neighbours: Neighbours }) {
           className="shadow-none"
           nativeButton={false}
           render={
-            <Link href={neighbours.previous.url}>
+            <Link to={neighbours.previous.url}>
               <ArrowLeftIcon /> {neighbours.previous.name}
             </Link>
           }
@@ -125,7 +125,7 @@ function DocsPager({ neighbours }: { neighbours: Neighbours }) {
           className="ml-auto shadow-none"
           nativeButton={false}
           render={
-            <Link href={neighbours.next.url}>
+            <Link to={neighbours.next.url}>
               {neighbours.next.name} <ArrowRightIcon />
             </Link>
           }

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@tanstack/react-router";
 import type { CommandMenuGroup } from "@/components/command-menu";
 import { GitHubLink } from "@/components/github-link";
 import { MainNav } from "@/components/main-nav";
@@ -84,7 +84,7 @@ function SiteLogo() {
       className="pl-2"
       nativeButton={false}
       render={
-        <Link aria-label="Home" className="flex items-center" href="/">
+        <Link aria-label="Home" className="flex items-center" to="/">
           <div
             aria-hidden
             className="flex shrink-0 select-none items-center justify-center gap-1 text-muted-foreground"
@@ -192,7 +192,7 @@ export function SiteHeader({
             className="hidden pl-2 md:flex"
             nativeButton={false}
             render={
-              <Link aria-label="Home" className="flex items-center" href={"/"}>
+              <Link aria-label="Home" className="flex items-center" to={"/"}>
                 <div
                   aria-hidden
                   className="flex shrink-0 select-none items-center justify-center gap-1 text-muted-foreground"

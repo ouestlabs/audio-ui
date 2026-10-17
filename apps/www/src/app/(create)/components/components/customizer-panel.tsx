@@ -1,6 +1,6 @@
 "use client";
 
-import dynamic from "next/dynamic";
+import { lazyComponent } from "@/lib/lazy";
 import * as React from "react";
 
 import { CustomizerChoicesSkeleton } from "@/components/framed-skeleton";
@@ -16,7 +16,7 @@ import { CustomizerSidebarHeader } from "./customizer-sidebar-header";
 import { useIsDesktopCustomizer } from "./use-is-desktop-customizer";
 
 /** Client-only: nuqs + jotai + theme pickers diverge from SSR; avoids hydration errors. */
-const CustomizerSidebarContent = dynamic(
+const CustomizerSidebarContent = lazyComponent(
   () =>
     import("./customizer-sidebar-content").then(
       (m) => m.CustomizerSidebarContent

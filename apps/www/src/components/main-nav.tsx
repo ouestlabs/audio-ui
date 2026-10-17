@@ -1,8 +1,8 @@
 "use client";
 
+import { Link } from "@tanstack/react-router";
 import { ArrowSquareOutIcon } from "@phosphor-icons/react/ssr";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useLocation } from "@tanstack/react-router";
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { cn, isActive } from "@/lib/utils";
@@ -14,7 +14,7 @@ export function MainNav({
 }: React.ComponentProps<"nav"> & {
   items: { href: string; label: string; soon?: boolean }[];
 }) {
-  const pathname = usePathname();
+  const pathname = useLocation({ select: (location) => location.pathname });
 
   return (
     <nav className={cn("flex items-center gap-0.5", className)} {...props}>
@@ -39,14 +39,14 @@ export function MainNav({
               item.href.startsWith("https://") ? (
                 <Link
                   className="flex items-center gap-0.5"
-                  href={item.href}
+                  to={item.href}
                   rel="noreferrer"
                   target="_blank"
                 >
                   {item.label} <ArrowSquareOutIcon className="size-3.5" />
                 </Link>
               ) : (
-                <Link href={item.href}>{item.label}</Link>
+                <Link to={item.href}>{item.label}</Link>
               )
             }
             variant="ghost"

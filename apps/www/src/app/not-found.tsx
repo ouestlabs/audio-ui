@@ -1,6 +1,6 @@
+import { Link } from "@tanstack/react-router";
 import { CaretLeftIcon } from "@phosphor-icons/react/ssr";
 import type { Metadata } from "next";
-import Link from "next/link";
 import {
   PageHeader,
   PageHeaderDescription,
@@ -32,7 +32,7 @@ export default function NotFound() {
           <Button
             className="group"
             nativeButton={false}
-            render={<Link href="/" />}
+            render={<Link to="/" />}
           >
             <CaretLeftIcon
               aria-hidden="true"

@@ -11,7 +11,8 @@ export function useCopyToClipboard({
 } = {}) {
   const [isCopied, setIsCopied] = React.useState(false);
 
-  const copyToClipboard = (value: string) => {
+  /** Copies a text, or a text still being fetched: Safari only allows the write in the click, so a promise is handed to the clipboard as it is. */
+  const copyToClipboard = (value: string | Promise<string>) => {
     if (typeof window === "undefined" || !navigator.clipboard.writeText) {
       return;
     }
@@ -20,7 +21,20 @@ export function useCopyToClipboard({
       return;
     }
 
-    navigator.clipboard.writeText(value).then(() => {
+    const written =
+      typeof value === "string" || typeof ClipboardItem === "undefined"
+        ? Promise.resolve(value).then((text) =>
+            navigator.clipboard.writeText(text)
+          )
+        : navigator.clipboard.write([
+            new ClipboardItem({
+              "text/plain": value.then(
+                (text) => new Blob([text], { type: "text/plain" })
+              ),
+            }),
+          ]);
+
+    written.then(() => {
       setIsCopied(true);
 
       if (onCopy) {

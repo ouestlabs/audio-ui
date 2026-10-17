@@ -1,5 +1,5 @@
+import { Link } from "@tanstack/react-router";
 import { CaretLeftIcon, CaretRightIcon } from "@phosphor-icons/react/ssr";
-import Link from "next/link";
 
 import {
   getCategoryInfo,
@@ -52,7 +52,8 @@ export function ComponentCategoryPager({
           {prevName ? (
             <Link
               className={cn(linkClass, "justify-between")}
-              href={`/components/${normalizeSlug(prevName)}`}
+              params={{ category: normalizeSlug(prevName) }}
+              to="/components/$category"
             >
               <CaretLeftIcon
                 aria-hidden
@@ -74,7 +75,8 @@ export function ComponentCategoryPager({
           {nextName ? (
             <Link
               className={cn(linkClass, "justify-between sm:w-full")}
-              href={`/components/${normalizeSlug(nextName)}`}
+              params={{ category: normalizeSlug(nextName) }}
+              to="/components/$category"
             >
               <span className="min-w-0 flex-1 text-left">
                 <span className="block font-medium text-site-muted-foreground text-xs">

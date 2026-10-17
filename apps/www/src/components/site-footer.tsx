@@ -1,5 +1,5 @@
+import { Link } from "@tanstack/react-router";
 import { RssSimpleIcon } from "@phosphor-icons/react/ssr";
-import Link from "next/link";
 import { FrameFooter } from "@/components/custom/frame";
 import { Separator } from "@/components/ui/separator";
 
@@ -29,7 +29,7 @@ function FooterLinks() {
       </div>
       <Separator orientation="vertical" />
 
-      <Link
+      <a
         className="ont-medium inline-flex items-center gap-1 text-orange-700 text-xs hover:text-orange-800 hover:underline dark:text-orange-400 dark:hover:text-orange-300"
         href="/rss.xml"
         rel="noopener noreferrer"
@@ -37,7 +37,7 @@ function FooterLinks() {
       >
         <RssSimpleIcon className="size-3" />
         RSS
-      </Link>
+      </a>
     </div>
   );
 }

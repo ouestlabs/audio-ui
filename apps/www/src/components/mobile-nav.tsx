@@ -1,11 +1,11 @@
 "use client";
 
+import { Link } from "@tanstack/react-router";
 import {
   BookOpenIcon,
   CaretDownIcon,
   CubeIcon,
 } from "@phosphor-icons/react/ssr";
-import Link from "next/link";
 import * as React from "react";
 import { ComponentUpdateIndicator } from "@/components/component-update-indicator";
 import { Button } from "@/components/ui/button";
@@ -43,9 +43,9 @@ function NavRow({
     <Link
       aria-current={active ? "page" : undefined}
       className={cn(rowClassName, active && activeRowClassName)}
-      href={href}
+      to={href}
       onClick={onNavigate}
-      prefetch={false}
+      preload={false}
     >
       {children}
     </Link>

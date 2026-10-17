@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@tanstack/react-router";
 import type * as React from "react";
 import {
   Accordion,
@@ -37,7 +37,7 @@ function SeoInlineLink({
     );
   }
   return (
-    <Link className={cls} href={href}>
+    <Link className={cls} to={href}>
       {children}
     </Link>
   );

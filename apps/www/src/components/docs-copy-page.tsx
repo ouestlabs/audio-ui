@@ -6,11 +6,17 @@ import { Button } from "@/components/ui/button";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 import { cn } from "@/lib/utils";
 
-export function DocsCopyPage({ page }: { page: string; url: string }) {
+/** Copies the page as markdown, which the site serves at the page's address under /llm. */
+export function DocsCopyPage({ url }: { url: string }) {
   const { copyToClipboard, isCopied } = useCopyToClipboard();
   const handleCopy = useCallback(
-    () => copyToClipboard(page),
-    [copyToClipboard, page]
+    () =>
+      copyToClipboard(
+        fetch(new URL(url).pathname.replace("/docs", "/llm")).then((response) =>
+          response.text()
+        )
+      ),
+    [copyToClipboard, url]
   );
 
   return (

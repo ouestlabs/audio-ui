@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Link } from "@tanstack/react-router";
+import { useLocation } from "@tanstack/react-router";
 import * as React from "react";
 import {
   serializeDesignSystemSearchParams,
@@ -29,7 +29,7 @@ export const ComponentSidebarCategoryMenu = React.memo(
     onSelect,
   }: ComponentSidebarCategoryMenuProps) {
     const { totalCount, categoryCounts } = useComponents();
-    const pathname = usePathname();
+    const pathname = useLocation({ select: (location) => location.pathname });
     const [params] = useDesignSystemSearchParams();
 
     // Build href with preserved design system params
@@ -49,9 +49,9 @@ export const ComponentSidebarCategoryMenu = React.memo(
               linkClassName,
               pathname === "/components" && activeClassName
             )}
-            href={buildHref("/components")}
+            to={buildHref("/components")}
             onClick={onSelect}
-            prefetch={false}
+            preload={false}
           >
             <span>All components</span>
             <span className="text-site-muted-foreground text-xs">
@@ -72,10 +72,10 @@ export const ComponentSidebarCategoryMenu = React.memo(
                       linkClassName,
                       pathname === basePath && activeClassName
                     )}
-                    href={buildHref(basePath)}
+                    to={buildHref(basePath)}
                     key={category}
                     onClick={onSelect}
-                    prefetch={false}
+                    preload={false}
                   >
                     <span>
                       {getCategoryInfo(category)?.label ??

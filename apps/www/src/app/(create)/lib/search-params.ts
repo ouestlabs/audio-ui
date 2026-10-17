@@ -1,4 +1,4 @@
-import { usePathname } from "next/navigation";
+import { useLocation } from "@tanstack/react-router";
 import { useQueryStates } from "nuqs";
 import {
   createLoader,
@@ -83,7 +83,7 @@ function carriesDesignParams(pathname: string) {
 }
 
 export const useDesignSystemSearchParams = (options: Options = {}) => {
-  const pathname = usePathname();
+  const pathname = useLocation({ select: (location) => location.pathname });
   const [params, setParams] = useQueryStates(designSystemSearchParams, {
     history: "push",
     shallow: true,

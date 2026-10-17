@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { useLocation } from "@tanstack/react-router";
 import { Suspense, useMemo } from "react";
 import { ComponentHeaderSearch } from "@/app/(create)/components/components/component-header-search";
 import {
@@ -44,7 +44,7 @@ export function SiteShell({
   siteEnd: React.ReactNode;
   tree: ReturnType<typeof source.getPageTree>;
 }) {
-  const pathname = usePathname();
+  const pathname = useLocation({ select: (location) => location.pathname });
   const inCatalog =
     pathname === "/components" || pathname.startsWith("/components/");
   const value = useMemo(() => catalog, [catalog]);

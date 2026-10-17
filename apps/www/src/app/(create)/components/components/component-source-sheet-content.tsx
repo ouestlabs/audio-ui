@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@tanstack/react-router";
 import * as React from "react";
 import {
   serializeDesignSystemSearchParams,
@@ -65,7 +65,7 @@ export function ComponentSourceSheetContent({
             <Button
               nativeButton={false}
               render={
-                <Link href={v0Url} rel="noopener noreferrer" target="_blank">
+                <Link to={v0Url} rel="noopener noreferrer" target="_blank">
                   Open in<span className="sr-only">v0</span>
                   <Icons.v0 className="ml-1 size-4" />
                 </Link>

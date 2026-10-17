@@ -5,7 +5,7 @@ import {
   resolveRegistryStyleName,
 } from "@/lib/docs-registry-options";
 
-import { DocsComponentPreviewSwitch } from "./docs-mdx-components.client";
+import { DocsComponentPreviewSwitch } from "./docs-mdx-components-client";
 
 export function DocsComponentPreview(
   props: React.ComponentProps<typeof ComponentPreview>

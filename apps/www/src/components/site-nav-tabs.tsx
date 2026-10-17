@@ -1,8 +1,8 @@
 "use client";
 
+import { Link } from "@tanstack/react-router";
 import { BookOpenTextIcon, CubeIcon } from "@phosphor-icons/react/ssr";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useLocation } from "@tanstack/react-router";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn, isActive } from "@/lib/utils";
 
@@ -17,7 +17,7 @@ export function SiteNavTabs({
 }: {
   items: { href: string; label: string; soon?: boolean }[];
 }) {
-  const pathname = usePathname();
+  const pathname = useLocation({ select: (location) => location.pathname });
   // Docs first: it is where one starts.
   const pages = items
     .filter((item) => !(item.soon || item.href.startsWith("https://")))
@@ -41,7 +41,7 @@ export function SiteNavTabs({
             <TabsTrigger
               key={item.href}
               nativeButton={false}
-              render={<Link href={item.href} />}
+              render={<Link to={item.href} />}
               value={item.href}
             >
               {Icon ? (

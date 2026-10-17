@@ -48,3 +48,4 @@ plans/
 # Cloudflare local state and the generated TanStack route tree
 .wrangler
 apps/www/src/routeTree.gen.ts
+apps/www/public/og/docs
