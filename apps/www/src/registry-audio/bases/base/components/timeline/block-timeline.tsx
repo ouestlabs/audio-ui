@@ -687,8 +687,8 @@ function sourceSpan(clip: Arranged) {
 /** What a piece of a clip adds to its id: the recording is the id before it. */
 const LEADING_ID = /-.*$/;
 
-/** How many peaks the clip panel draws of a source. */
-const PEAKS = 256;
+/** How many peaks the clip panel draws of a source: enough to zoom well in before they turn to blocks. */
+const PEAKS = 4096;
 
 /**
  * A stand-in for the peaks of a clip's recording, which the block does not
@@ -714,6 +714,8 @@ function standInPeaks(clip: Arranged): number[] {
 
 /** The clip panel under the tracks, for the clip being edited, or a word on how to pick one. */
 function ClipDock({
+  bar,
+  beatsPerBar,
   clip,
   format,
   onClose,
@@ -722,6 +724,8 @@ function ClipDock({
   onValueCommitted,
   peaks,
 }: {
+  bar: number;
+  beatsPerBar: number;
   clip: Arranged | undefined;
   format: (seconds: number) => string;
   onClose: () => void;
@@ -731,14 +735,12 @@ function ClipDock({
   peaks: number[];
 }) {
   if (!clip) {
-    return (
-      <p className="border bg-card p-3 text-muted-foreground text-sm">
-        Select a clip to edit it here.
-      </p>
-    );
+    return null;
   }
   return (
     <ClipPanel
+      bar={bar}
+      beatsPerBar={beatsPerBar}
       format={format}
       name={clip.name}
       onCrop={onCrop}
@@ -1558,15 +1560,17 @@ export default function BlockTimeline() {
     [tracks]
   );
   /** Picking a clip lets go of the time selection. */
+  // Picking a clip shows it in the clip panel, as a DAW's detail view follows the selection.
+  const [clipViewOpen, setClipViewOpen] = useState(true);
   const pickClip = useCallback(
     (id: string, additive: boolean) => {
       setTimeSelection(null);
+      setClipViewOpen(true);
       selectClip(id, additive);
     },
     [selectClip]
   );
   // The clip panel, under the tracks: it edits the first selected clip.
-  const [clipViewOpen, setClipViewOpen] = useState(false);
   const editedClip = clips.find((clip) => clip.id === selectedIds[0]);
   const editedPeaks = useMemo(
     () => (editedClip ? standInPeaks(editedClip) : []),
@@ -2663,6 +2667,8 @@ export default function BlockTimeline() {
       </Timeline>
       {clipViewOpen ? (
         <ClipDock
+          bar={bar}
+          beatsPerBar={tempo.beatsPerBar}
           clip={editedClip}
           format={describe}
           onClose={closeClipView}

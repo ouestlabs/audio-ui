@@ -10,26 +10,31 @@ import {
   warpedTime,
   warpRate,
 } from "@audio-ui/core/time";
-import type { Waveform as WaveformPrimitive } from "@audio-ui/react";
+import { Waveform as WaveformPrimitive } from "@audio-ui/react";
 import {
   type KeyboardEvent,
   type MouseEvent,
   type PointerEvent,
   type ReactNode,
   useCallback,
+  useLayoutEffect,
   useMemo,
+  useRef,
+  useState,
 } from "react";
 import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder";
 import { cn } from "@/registry/bases/base/lib/utils";
 import { Button } from "@/registry/bases/base/ui/button";
 import { Knob } from "@/registry-audio/bases/base/audio/elements/knob";
 import {
-  Waveform,
-  WaveformHover,
-  WaveformMarker,
-  WaveformRegion,
-  WaveformRegionHandle,
-} from "@/registry-audio/bases/base/audio/elements/waveform";
+  Timeline,
+  TimelineLane,
+  TimelineMark,
+  TimelineNavigator,
+  TimelineRange,
+  TimelineRangeHandle,
+  TimelineViewport,
+} from "@/registry-audio/bases/base/audio/elements/timeline";
 
 /** What the panel sets on a clip. Times are in the source's own time, from its start, or with `warp` on the clip's. */
 export interface ClipSettings {
@@ -55,6 +60,10 @@ export interface ClipSettings {
 }
 
 interface ClipPanelProps {
+  /** How long a bar lasts, in seconds: the ruler numbers bars and the lanes draw a line at each. @default 2 */
+  bar?: number;
+  /** Beats in a bar: zoomed in far enough, the ruler numbers them too. @default 4 */
+  beatsPerBar?: number;
   /** Whatever the host puts at the end of the title bar. */
   children?: ReactNode;
   className?: string;
@@ -131,7 +140,7 @@ function WarpMarkers({
     (event: PointerEvent<HTMLSpanElement>) => {
       const handle = event.currentTarget;
       const box = handle
-        .closest('[data-slot="waveform"]')
+        .closest('[data-slot="clip-panel-source"]')
         ?.getBoundingClientRect();
       if (
         !(handle.hasPointerCapture(event.pointerId) && box && box.width > 0)
@@ -204,6 +213,8 @@ function WarpMarkers({
  * Controlled: it reports every change and the end of each gesture.
  */
 function ClipPanel({
+  bar = 2,
+  beatsPerBar = 4,
   children,
   className,
   format = formatSeconds,
@@ -311,7 +322,7 @@ function ClipPanel({
   const addMarker = useCallback(
     (event: MouseEvent<HTMLDivElement>) => {
       const box = event.currentTarget
-        .querySelector('[data-slot="waveform"]')
+        .querySelector('[data-slot="clip-panel-source"]')
         ?.getBoundingClientRect();
       if (!(warp && box && box.width > 0)) {
         return;
@@ -341,200 +352,147 @@ function ClipPanel({
     <section
       aria-label={`Clip ${name}`}
       className={cn(
-        "flex min-w-0 shrink-0 flex-col gap-3 rounded-xl border bg-card p-3",
+        "@container min-w-0 shrink-0 overflow-hidden rounded-xl border bg-card",
         className
       )}
       data-slot="clip-panel"
     >
-      <div className="flex min-w-0 flex-wrap items-center gap-2">
-        <h3 className="min-w-0 flex-1 truncate font-medium text-sm">{name}</h3>
-        <Button
-          aria-pressed={Boolean(loop)}
-          onClick={toggleLoop}
-          size="sm"
-          variant={loop ? "default" : "outline"}
-        >
-          <IconPlaceholder
-            aria-hidden="true"
-            className="size-4"
-            hugeicons="RepeatIcon"
-            lucide="RepeatIcon"
-            phosphor="RepeatIcon"
-            remixicon="RiRepeatLine"
-            tabler="IconRepeat"
-          />
-          Loop
-        </Button>
-        <Button
-          aria-pressed={Boolean(warp)}
-          onClick={toggleWarp}
-          size="sm"
-          variant={warp ? "default" : "outline"}
-        >
-          <IconPlaceholder
-            aria-hidden="true"
-            className="size-4"
-            hugeicons="ArrowExpandIcon"
-            lucide="StretchHorizontalIcon"
-            phosphor="ArrowsOutLineHorizontalIcon"
-            remixicon="RiExpandWidthLine"
-            tabler="IconArrowsHorizontal"
-          />
-          Warp
-        </Button>
-        <Button
-          aria-pressed={reversed}
-          onClick={toggleReversed}
-          size="sm"
-          variant={reversed ? "default" : "outline"}
-        >
-          <IconPlaceholder
-            aria-hidden="true"
-            className="size-4"
-            hugeicons="ArrowLeftDoubleIcon"
-            lucide="RewindIcon"
-            phosphor="RewindIcon"
-            remixicon="RiRewindLine"
-            tabler="IconPlayerTrackPrev"
-          />
-          Reverse
-        </Button>
-        {onCrop ? (
-          <Button
-            disabled={cropped}
-            onClick={onCrop}
-            size="sm"
-            variant="outline"
-          >
-            <IconPlaceholder
-              aria-hidden="true"
-              className="size-4"
-              hugeicons="Crop02Icon"
-              lucide="CropIcon"
-              phosphor="CropIcon"
-              remixicon="RiCropLine"
-              tabler="IconCrop"
-            />
-            Crop
-          </Button>
-        ) : null}
-        {children}
-      </div>
-      <div className="flex min-w-0 flex-col gap-3">
-        {/* Warped, a double-click on the waveform pins what plays there with a new marker. */}
-        {/* biome-ignore lint/a11y/noStaticElementInteractions: a pointer shortcut; the markers' own keys and the Warp switch cover the keyboard */}
-        <div className="min-w-0" onDoubleClick={addMarker}>
-          <Waveform
-            aria-label={`${name} source`}
-            className="h-24 w-full min-w-0"
-            duration={span}
-            values={shown}
-          >
-            {loop ? (
-              <>
-                <WaveformRegion
-                  aria-label="Loop"
-                  onValueChange={setLoop}
-                  onValueCommitted={onValueCommitted}
-                  value={loop}
-                >
-                  <WaveformRegionHandle
-                    aria-label="Loop start"
-                    edge="start"
-                    getAriaValueText={format}
-                  />
-                  <WaveformRegionHandle
-                    aria-label="Loop end"
-                    edge="end"
-                    getAriaValueText={format}
-                  />
-                </WaveformRegion>
-                <WaveformMarker value={offset}>Start</WaveformMarker>
-              </>
-            ) : (
-              <WaveformRegion
-                aria-label="Played"
-                onValueChange={setPlayed}
-                onValueCommitted={onValueCommitted}
-                value={[offset, Math.min(span, offset + length)]}
-              >
-                <WaveformRegionHandle
-                  aria-label="Clip start"
-                  edge="start"
-                  getAriaValueText={format}
-                />
-                <WaveformRegionHandle
-                  aria-label="Clip end"
-                  edge="end"
-                  getAriaValueText={format}
-                />
-              </WaveformRegion>
-            )}
-            {warp ? (
-              <WarpMarkers
-                format={format}
-                markers={warp}
-                onChange={setWarp}
-                onCommit={onValueCommitted}
-                span={span}
+      <div className="flex min-w-0 flex-col @2xl:flex-row">
+        {/* The clip's properties, as a DAW's clip view lists them beside its editor. */}
+        <div className="flex shrink-0 flex-col gap-3 border-b p-3 @2xl:w-56 @2xl:border-e @2xl:border-b-0">
+          <div className="flex min-w-0 items-center gap-2">
+            <h3 className="min-w-0 flex-1 truncate font-medium text-sm">
+              {name}
+            </h3>
+            {children}
+          </div>
+          <div className="grid grid-cols-2 gap-1.5">
+            <Button
+              aria-pressed={Boolean(loop)}
+              onClick={toggleLoop}
+              size="sm"
+              variant={loop ? "default" : "outline"}
+            >
+              <IconPlaceholder
+                aria-hidden="true"
+                className="size-4"
+                hugeicons="RepeatIcon"
+                lucide="RepeatIcon"
+                phosphor="RepeatIcon"
+                remixicon="RiRepeatLine"
+                tabler="IconRepeat"
               />
+              Loop
+            </Button>
+            <Button
+              aria-pressed={Boolean(warp)}
+              onClick={toggleWarp}
+              size="sm"
+              variant={warp ? "default" : "outline"}
+            >
+              <IconPlaceholder
+                aria-hidden="true"
+                className="size-4"
+                hugeicons="ArrowExpandIcon"
+                lucide="StretchHorizontalIcon"
+                phosphor="ArrowsOutLineHorizontalIcon"
+                remixicon="RiExpandWidthLine"
+                tabler="IconArrowsHorizontal"
+              />
+              Warp
+            </Button>
+            <Button
+              aria-pressed={reversed}
+              onClick={toggleReversed}
+              size="sm"
+              variant={reversed ? "default" : "outline"}
+            >
+              <IconPlaceholder
+                aria-hidden="true"
+                className="size-4"
+                hugeicons="ArrowLeftDoubleIcon"
+                lucide="RewindIcon"
+                phosphor="RewindIcon"
+                remixicon="RiRewindLine"
+                tabler="IconPlayerTrackPrev"
+              />
+              Reverse
+            </Button>
+            {onCrop ? (
+              <Button
+                disabled={cropped}
+                onClick={onCrop}
+                size="sm"
+                variant="outline"
+              >
+                <IconPlaceholder
+                  aria-hidden="true"
+                  className="size-4"
+                  hugeicons="Crop02Icon"
+                  lucide="CropIcon"
+                  phosphor="CropIcon"
+                  remixicon="RiCropLine"
+                  tabler="IconCrop"
+                />
+                Crop
+              </Button>
             ) : null}
-            <WaveformHover format={format} />
-          </Waveform>
-        </div>
-        {/* Each knob named above and read out below, as on a device. */}
-        <div className="flex items-start gap-6">
-          <div className="flex flex-col items-center gap-0.5">
-            <span aria-hidden="true" className="text-muted-foreground text-xs">
-              Gain
-            </span>
-            <Knob
-              anchor={0}
-              aria-label="Gain"
-              className="mb-5"
-              formatValue={formatGain}
-              max={24}
-              min={-36}
-              onValueChange={setGain}
-              onValueCommitted={onValueCommitted}
-              size="sm"
-              step={0.1}
-              value={gain}
-              valueLabel="always"
-            />
           </div>
-          <div className="flex flex-col items-center gap-0.5">
-            <span aria-hidden="true" className="text-muted-foreground text-xs">
-              Transpose
-            </span>
-            <Knob
-              anchor={0}
-              aria-label="Transpose"
-              className="mb-5"
-              formatValue={formatTranspose}
-              max={48}
-              min={-48}
-              onValueChange={setTranspose}
-              onValueCommitted={onValueCommitted}
-              size="sm"
-              step={1}
-              value={transpose}
-              valueLabel="always"
-            />
-          </div>
-          {warp ? (
-            <div className="flex flex-col items-center gap-1">
+          {/* Each knob named above and read out below, as on a device. */}
+          <div className="flex items-start justify-around gap-4">
+            <div className="flex flex-col items-center gap-0.5">
               <span
                 aria-hidden="true"
                 className="text-muted-foreground text-xs"
               >
-                Speed
+                Gain
               </span>
+              <Knob
+                anchor={0}
+                aria-label="Gain"
+                className="mb-5"
+                formatValue={formatGain}
+                max={24}
+                min={-36}
+                onValueChange={setGain}
+                onValueCommitted={onValueCommitted}
+                size="sm"
+                step={0.1}
+                value={gain}
+                valueLabel="always"
+              />
+            </div>
+            <div className="flex flex-col items-center gap-0.5">
+              <span
+                aria-hidden="true"
+                className="text-muted-foreground text-xs"
+              >
+                Transpose
+              </span>
+              <Knob
+                anchor={0}
+                aria-label="Transpose"
+                className="mb-5"
+                formatValue={formatTranspose}
+                max={48}
+                min={-48}
+                onValueChange={setTranspose}
+                onValueCommitted={onValueCommitted}
+                size="sm"
+                step={1}
+                value={transpose}
+                valueLabel="always"
+              />
+            </div>
+          </div>
+          {warp ? (
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-muted-foreground text-xs">Speed</span>
               <div className="flex gap-1">
                 <Button
                   aria-label="Twice as long, half the speed"
                   onClick={slower}
-                  size="sm"
+                  size="xs"
                   variant="outline"
                 >
                   ×2
@@ -542,7 +500,7 @@ function ClipPanel({
                 <Button
                   aria-label="Half as long, twice the speed"
                   onClick={faster}
-                  size="sm"
+                  size="xs"
                   variant="outline"
                 >
                   ÷2
@@ -554,8 +512,214 @@ function ClipPanel({
             </div>
           ) : null}
         </div>
+        <ClipSource
+          bar={bar}
+          beatsPerBar={beatsPerBar}
+          format={format}
+          length={length}
+          loop={loop}
+          name={name}
+          offset={offset}
+          onAddMarker={addMarker}
+          onLoopChange={setLoop}
+          onPlayedChange={setPlayed}
+          onValueCommitted={onValueCommitted}
+          onWarpChange={setWarp}
+          span={span}
+          values={shown}
+          warp={warp}
+        />
       </div>
     </section>
+  );
+}
+
+/** The bars a ruler labels: every bar, or every second, fourth… so labels stay this far apart, in px. */
+const LABEL_SPACING = 40;
+/** The widest a peak of the waveform is drawn, in px: zooming in stops there, before the drawing turns to blocks. */
+const PEAK_PX = 3;
+
+/** How many peaks the waveform has across the source. */
+const peakCount = (values: WaveformPrimitive.Root.Peaks) =>
+  "length" in values ? values.length : values.max.length;
+
+/** The ruler's labels at `pxPerSecond`: each beat (`bar.beat`) once they are far enough apart, else every bar, every second, fourth… */
+function rulerLabels(
+  span: number,
+  bar: number,
+  beatsPerBar: number,
+  pxPerSecond: number
+) {
+  const beat = bar / beatsPerBar;
+  if (beat * pxPerSecond >= LABEL_SPACING) {
+    return Array.from({ length: Math.floor(span / beat) + 1 }, (_, index) => {
+      const number = Math.floor(index / beatsPerBar) + 1;
+      const inBar = (index % beatsPerBar) + 1;
+      return {
+        at: index * beat,
+        text: inBar === 1 ? `${number}` : `${number}.${inBar}`,
+      };
+    });
+  }
+  let every = 1;
+  while (every * bar * pxPerSecond < LABEL_SPACING && every < 1024) {
+    every *= 2;
+  }
+  return Array.from(
+    { length: Math.floor(span / (bar * every)) + 1 },
+    (_, index) => ({ at: index * every * bar, text: `${index * every + 1}` })
+  );
+}
+
+/**
+ * The clip's source on a timeline of its own: an overview bar to zoom and
+ * scroll with, a ruler in bars, the stretch the clip plays (or its loop) to
+ * drag at both ends, and the waveform, warped markers included, under it.
+ */
+function ClipSource({
+  bar,
+  beatsPerBar,
+  format,
+  length,
+  loop,
+  name,
+  offset,
+  onAddMarker,
+  onLoopChange,
+  onPlayedChange,
+  onValueCommitted,
+  onWarpChange,
+  span,
+  values,
+  warp,
+}: {
+  bar: number;
+  beatsPerBar: number;
+  format: (seconds: number) => string;
+  length: number;
+  loop: readonly [number, number] | null;
+  name: string;
+  offset: number;
+  onAddMarker: (event: MouseEvent<HTMLDivElement>) => void;
+  onLoopChange: (next: readonly [number, number]) => void;
+  onPlayedChange: (next: readonly [number, number]) => void;
+  onValueCommitted?: () => void;
+  onWarpChange: (next: readonly WarpMarker[]) => void;
+  span: number;
+  values: WaveformPrimitive.Root.Peaks;
+  warp: readonly WarpMarker[] | null;
+}) {
+  // Fitted to its width until zoomed, as the arrangement is.
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const [fit, setFit] = useState(0);
+  const [zoom, setZoom] = useState<number | null>(null);
+  useLayoutEffect(() => {
+    const element = viewportRef.current;
+    if (!element) {
+      return;
+    }
+    const measure = () => setFit(element.clientWidth / Math.max(span, 1e-6));
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [span]);
+  const pxPerSecond = zoom ?? fit;
+  const labels = rulerLabels(span, bar, beatsPerBar, pxPerSecond);
+  // Zoomed in, a line per beat; out, a line per bar.
+  const beat = bar / beatsPerBar;
+  const gridStep = beat * pxPerSecond >= LABEL_SPACING / 2 ? beat : bar;
+  // As far in as the waveform has detail for.
+  const maxZoom = Math.max(fit, (peakCount(values) * PEAK_PX) / span);
+  return (
+    <Timeline
+      className="min-w-0 flex-1 gap-1 p-2"
+      duration={span}
+      maxZoom={maxZoom || undefined}
+      minZoom={fit || undefined}
+      onZoomChange={setZoom}
+      zoom={zoom ?? undefined}
+    >
+      <TimelineNavigator getAriaValueText={format} />
+      <TimelineViewport
+        className="min-w-0 rounded-md border bg-muted/40"
+        ref={viewportRef}
+        scrollbar="hidden"
+      >
+        <div className="flex w-max min-w-full flex-col">
+          {/* Bar numbers, from the start of the source. */}
+          <TimelineLane className="h-5 border-foreground/25 border-b text-muted-foreground text-xs">
+            {labels.map((label) => (
+              <TimelineMark key={label.at} value={label.at}>
+                {label.text}
+              </TimelineMark>
+            ))}
+          </TimelineLane>
+          {/* What the clip plays, or the stretch it loops, with its start as a marker. */}
+          <TimelineLane className="h-6 border-foreground/25 border-b">
+            {loop ? (
+              <>
+                <TimelineRange
+                  aria-label="Loop"
+                  getAriaValueText={format}
+                  onValueChange={onLoopChange}
+                  onValueCommitted={onValueCommitted}
+                  value={loop}
+                >
+                  <TimelineRangeHandle aria-label="Loop start" edge="start" />
+                  <TimelineRangeHandle aria-label="Loop end" edge="end" />
+                </TimelineRange>
+                <TimelineMark value={offset}>
+                  <span className="border-foreground border-s-2 ps-1 text-xs">
+                    Start
+                  </span>
+                </TimelineMark>
+              </>
+            ) : (
+              <TimelineRange
+                aria-label="Played"
+                getAriaValueText={format}
+                onValueChange={onPlayedChange}
+                onValueCommitted={onValueCommitted}
+                value={[offset, Math.min(span, offset + length)]}
+              >
+                <TimelineRangeHandle aria-label="Clip start" edge="start" />
+                <TimelineRangeHandle aria-label="Clip end" edge="end" />
+              </TimelineRange>
+            )}
+          </TimelineLane>
+          {/* Warped, a double-click on the waveform pins what plays there with a new marker. */}
+          {/* biome-ignore lint/a11y/noStaticElementInteractions: a pointer shortcut; the markers' own keys and the Warp switch cover the keyboard */}
+          <div className="relative" onDoubleClick={onAddMarker}>
+            <TimelineLane className="h-28 border-b-0" gridStep={gridStep}>
+              <div
+                className="absolute inset-y-0 left-0"
+                data-slot="clip-panel-source"
+                style={{ width: `calc(var(--timeline-unit) * ${span})` }}
+              >
+                <WaveformPrimitive.Root
+                  aria-label={`${name} source`}
+                  className="absolute inset-0"
+                  duration={span}
+                  peaks={values}
+                >
+                  <WaveformPrimitive.Canvas className="cn-waveform-canvas block size-full" />
+                </WaveformPrimitive.Root>
+                {warp ? (
+                  <WarpMarkers
+                    format={format}
+                    markers={warp}
+                    onChange={onWarpChange}
+                    onCommit={onValueCommitted}
+                    span={span}
+                  />
+                ) : null}
+              </div>
+            </TimelineLane>
+          </div>
+        </div>
+      </TimelineViewport>
+    </Timeline>
   );
 }
 
