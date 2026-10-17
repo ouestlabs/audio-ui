@@ -24,9 +24,24 @@ export const LARGE_STEP_MULTIPLIER = 10;
  */
 export type Breakpoint = GeomPoint & { curve?: number };
 
-/** Where along a bent segment a share `t` of its length lands, as a share of its rise. */
+/** The power a curve raises a segment to: 1 for none, up to 8 at the ends of -1…1. */
+function curvePower(curve: number): number {
+  return 2 ** (Math.abs(curve) * CURVE_EXPONENT_RANGE);
+}
+
+/**
+ * Where along a bent segment a share `t` of its length lands, as a share of
+ * its rise. A positive curve holds the start and rushes the end, `t ** power`;
+ * a negative one is its mirror image, rushing the start and holding the end,
+ * `1 - (1 - t) ** power`, so its slope stays finite at the start instead of
+ * turning vertical, and a curve and its opposite look alike.
+ */
 export function segmentShape(t: number, curve: number | undefined): number {
-  return curve ? t ** (2 ** (curve * CURVE_EXPONENT_RANGE)) : t;
+  if (!curve) {
+    return t;
+  }
+  const power = curvePower(curve);
+  return curve > 0 ? t ** power : 1 - (1 - t) ** power;
 }
 
 /** The curve that puts a segment's midpoint at height `y`, or null when the segment is flat and has nothing to bend. */
@@ -40,8 +55,10 @@ export function curveForMidpoint(
     return null;
   }
   const share = clamp((y - from.y) / rise, 0.02, 0.98);
-  const exponent = Math.log(share) / Math.log(0.5);
-  return clamp(Math.log2(exponent) / CURVE_EXPONENT_RANGE, -1, 1);
+  const held = share < 0.5;
+  const power = Math.log(held ? share : 1 - share) / Math.log(0.5);
+  const curve = Math.log2(power) / CURVE_EXPONENT_RANGE;
+  return clamp(held ? curve : -curve, -1, 1);
 }
 
 export function sortPoints<T extends GeomPoint>(points: T[]): T[] {
@@ -160,12 +177,14 @@ export function snapTo(value: number, step: number): number {
  * flat one and does not turn into a corner.
  */
 export function curveSamples(curve: number): number[] {
-  const exponent = 2 ** (curve * CURVE_EXPONENT_RANGE);
+  const power = curvePower(curve);
   const samples = new Set<number>();
   for (let sample = 1; sample < CURVE_SAMPLES; sample += 1) {
     const share = sample / CURVE_SAMPLES;
     samples.add(share);
-    samples.add(share ** (1 / exponent));
+    samples.add(
+      curve > 0 ? share ** (1 / power) : 1 - (1 - share) ** (1 / power)
+    );
   }
   return [...samples].filter((t) => t > 0 && t < 1).sort((a, b) => a - b);
 }
