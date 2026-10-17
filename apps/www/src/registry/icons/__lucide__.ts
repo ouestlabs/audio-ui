@@ -68,6 +68,8 @@ export {
   ShoppingBagIcon,
   Square,
   SquareIcon,
+  StretchHorizontal,
+  StretchHorizontalIcon,
   Trash,
   TrashIcon,
   TriangleAlert,

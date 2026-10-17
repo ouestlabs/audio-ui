@@ -1,3 +1,4 @@
+import type { WarpMarker } from "@audio-ui/core/time";
 import {
   type ClipValue,
   copyRange,
@@ -32,6 +33,12 @@ export interface Arranged {
   transpose?: number;
   /** Where the clip sits, how much of its source it plays, and its fades. */
   value: ClipValue;
+  /**
+   * Markers pinning times in the source to times on the clip: the source is
+   * stretched between them, and the clip's other times (where it starts in
+   * its source, its loop) are on the clip.
+   */
+  warp?: readonly WarpMarker[];
 }
 
 /** A track of an arrangement. */

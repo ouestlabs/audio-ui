@@ -56,3 +56,14 @@ export {
   type TempoChange,
   ticksToSeconds,
 } from "./tempo-map.ts";
+export {
+  addWarpMarker,
+  moveWarpMarker,
+  removeWarpMarker,
+  scaleWarp,
+  unwarpedTime,
+  type WarpMarker,
+  warpedTime,
+  warpMarkers,
+  warpRate,
+} from "./warp.ts";

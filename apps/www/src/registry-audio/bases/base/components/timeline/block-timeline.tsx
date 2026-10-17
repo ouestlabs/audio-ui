@@ -17,6 +17,7 @@ import {
   secondsPerBar,
   type Tempo,
   TRIPLET_FACTOR,
+  warpedTime,
 } from "@audio-ui/core/time";
 import { snapMove } from "@audio-ui/core/timeline";
 import {
@@ -673,6 +674,16 @@ function SignatureButton({
   );
 }
 
+/** How far a clip can be stretched on the timeline: forever looped, as its warp stretches its source, or as long as its source. */
+function sourceSpan(clip: Arranged) {
+  if (clip.loop) {
+    return;
+  }
+  return clip.warp
+    ? warpedTime(clip.warp, clip.sourceLength)
+    : clip.sourceLength;
+}
+
 /** What a piece of a clip adds to its id: the recording is the id before it. */
 const LEADING_ID = /-.*$/;
 
@@ -741,6 +752,7 @@ function ClipDock({
         reversed: Boolean(clip.reversed),
         sourceLength: clip.sourceLength,
         transpose: clip.transpose ?? 0,
+        warp: clip.warp ?? null,
       }}
       values={peaks}
     >
@@ -951,8 +963,8 @@ const ClipView = memo(function ArrangedClip({
           onValueChange={handleChange}
           onValueCommitted={handleCommitted}
           selected={selected}
-          // A looped clip repeats its loop, as far as it is stretched.
-          sourceLength={clip.loop ? undefined : clip.sourceLength}
+          // A looped clip repeats its loop, as far as it is stretched; a warped one lasts as its warp stretches its source.
+          sourceLength={sourceSpan(clip)}
           style={
             lift
               ? { transform: `translateY(${lift}px)`, zIndex: 10 }
@@ -1586,6 +1598,7 @@ export default function BlockTimeline() {
           loop: next.loop ?? undefined,
           reversed: next.reversed,
           transpose: next.transpose,
+          warp: next.warp ?? undefined,
           value: {
             ...clip.value,
             fadeIn,
