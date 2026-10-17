@@ -30,13 +30,19 @@ export function processMdxForLLMs(content: string) {
         }
 
         const filePath = item.files[0].path;
-        const absolutePath = path.join(process.cwd(), filePath);
+        const absolutePath = path.join(
+          /*turbopackIgnore: true*/ process.cwd(),
+          filePath
+        );
 
-        if (!fs.existsSync(absolutePath)) {
+        if (!fs.existsSync(/*turbopackIgnore: true*/ absolutePath)) {
           return match;
         }
 
-        let source = fs.readFileSync(absolutePath, "utf8");
+        let source = fs.readFileSync(
+          /*turbopackIgnore: true*/ absolutePath,
+          "utf8"
+        );
         source = source.replaceAll(
           "@/registry-audio/bases/base/",
           "@/components/"

@@ -43,18 +43,22 @@ async function readProjectFile(src: string) {
   const projectRoot = process.cwd();
   let absolutePath: string;
   if (src.startsWith("registry/")) {
-    absolutePath = path.join(projectRoot, "src/registry", src.slice(9));
+    absolutePath = path.join(
+      /*turbopackIgnore: true*/ projectRoot,
+      "src/registry",
+      src.slice(9)
+    );
   } else if (src.startsWith(REGISTRY_AUDIO_PREFIX)) {
     absolutePath = path.join(
-      projectRoot,
+      /*turbopackIgnore: true*/ projectRoot,
       "src/registry-audio",
       src.slice(REGISTRY_AUDIO_PREFIX.length)
     );
   } else {
-    absolutePath = path.join(projectRoot, src);
+    absolutePath = path.join(/*turbopackIgnore: true*/ projectRoot, src);
   }
 
-  const resolvedPath = path.resolve(absolutePath);
+  const resolvedPath = path.resolve(/*turbopackIgnore: true*/ absolutePath);
   if (
     !resolvedPath.startsWith(projectRoot + path.sep) &&
     resolvedPath !== projectRoot
@@ -63,7 +67,7 @@ async function readProjectFile(src: string) {
     return;
   }
   try {
-    return await fs.readFile(resolvedPath, "utf-8");
+    return await fs.readFile(/*turbopackIgnore: true*/ resolvedPath, "utf-8");
   } catch (error) {
     console.error("Error reading source file", error);
   }
