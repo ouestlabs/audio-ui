@@ -6,6 +6,7 @@
     "clock-and-time",
     "synthesis",
     "input",
-    "analysis"
+    "analysis",
+    "controllers"
   ]
 }

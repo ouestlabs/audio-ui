@@ -1,0 +1,112 @@
+---
+title: Controllers
+description: "The logic under each primitive, from @audio-ui/core: one controller per control, with the same contract whatever draws it. A React part is one adapter of it; a plain DOM page, Vue or Svelte can be another."
+---
+
+The primitives in `@audio-ui/react` are a view over a controller from `@audio-ui/core`. The controller holds the value, the gesture, the keys and the formatting, and says nothing about how the control is drawn. Use it directly to drive a control from any framework, or from no framework at all.
+
+```ts
+import { createFaderController } from "@audio-ui/core/fader";
+
+const fader = createFaderController({ value: 0.5, onValueCommitted: (value) => save(value) });
+```
+
+## The contract
+
+Every controller follows the same steps, whatever the control:
+
+1. **Create it once** per mounted control, with its options: `create<Name>Controller(options)`. `setOptions(options)` replaces every option later and notifies no one, so redraw yourself afterwards.
+2. **Draw from `getSnapshot()`**, and redraw when `subscribe(listener)` calls you. The snapshot is the same object until something changes, so comparing it is cheap.
+3. **Send it the input**: `press` on a primary-button `pointerdown`, which follows the drag on the document until release, `attachWheel(element)` for the wheel, `keyDown` from the focusable element, and `type` from a text input's `input` event. The arguments differ per controller, as the tables below show.
+4. **Tear down** with the functions that `subscribe` and `attachWheel` return.
+
+The value moves in two steps. `onValueChange` reports every change during a drag, and `onValueCommitted` fires once when the gesture ends. Both carry a `reason` (a drag, a key, the wheel, a typed value, a reset) and the event that caused them, and each controller's `*EventReason` type lists its own. Save to the second one.
+
+The React primitives are the reference implementation of each adapter: the part that owns an element is the one that attaches its listeners and attributes.
+
+## Fader
+
+```ts
+import { createFaderController } from "@audio-ui/core/fader";
+
+const fader = createFaderController({ min: -60, max: 6, value: -12, step: 0.5, orientation: "vertical" });
+const unsubscribe = fader.subscribe(() => draw(fader.getSnapshot()));
+control.addEventListener("pointerdown", (event) => fader.press(event, control, thumb));
+control.addEventListener("keydown", (event) => { if (fader.keyDown(event, control)) event.preventDefault(); });
+const detach = fader.attachWheel(control);
+```
+
+| Option | Meaning |
+| --- | --- |
+| `value`, `defaultValue` | The controlled value, or the uncontrolled start and what a reset returns to |
+| `min`, `max`, `step`, `largeStep` | The range, the grid, and the step that Shift takes |
+| `anchor` | The value the fill starts from, for a fader that is centred on a value |
+| `orientation` | `"horizontal"` or `"vertical"` |
+| `format`, `locale` | `Intl.NumberFormat` options for `formatted` |
+| `disabled` | Takes every input away |
+
+`press(event, control, thumb)` takes the thumb too: a press on the thumb keeps the pointer where it grabbed the thumb, so the value does not jump to the pointer. `reset(event)` returns the value to its default: the element calls it on a double-click, on Alt with a press, and on Delete or Backspace.
+
+## Knob
+
+```ts
+import { createKnobController } from "@audio-ui/core/knob";
+
+const knob = createKnobController({ min: 20, max: 20000, value: 1000, scale: "log", format: { maximumFractionDigits: 0 } });
+```
+
+| Option | Meaning |
+| --- | --- |
+| `value`, `defaultValue`, `min`, `max`, `step`, `largeStep` | As for the fader |
+| `scale` | `"linear"`, `"log"`, or a function between 0 and 1 |
+| `dragMode` | How a drag turns into a value: `"vertical"`, `"circular"` (the angle around the centre) or `"revolution"` (the turns of the pointer) |
+| `anchor` | The value the arc grows from, such as 0 on a pan knob |
+| `format`, `locale`, `disabled` | As for the fader |
+
+A knob resets on a double tap and on Alt with a press, inside the controller: it has no reset gesture in the element. `press(event, control)` takes the control, the element that gives the angle; `keyDown(event)` returns `true` when it handled the key. The snapshot has the `angle` of the pointer, the `percent` and the `anchorPercent`, ready for an arc.
+
+## XYPad
+
+```ts
+import { createXYPadController } from "@audio-ui/core/xypad";
+
+const pad = createXYPadController({ minX: 0, maxX: 1, minY: 0, maxY: 1, value: { x: 0.5, y: 0.5 }, stepX: 0.01, stepY: 0.01 });
+```
+
+| Option | Meaning |
+| --- | --- |
+| `value`, `defaultValue` | A point, `{ x, y }` |
+| `minX`, `maxX`, `stepX`, `minY`, `maxY`, `stepY` | Each axis's range and grid |
+| `format`, `locale`, `disabled` | Formats each axis separately, as `formatted.x` and `formatted.y` |
+
+A pad has two parameters on one gesture. `type(axis, value, event)` takes the axis first, because a text input is per axis. `reset(event)` returns both axes to their defaults.
+
+## Plot handle
+
+`createPlotHandleController` (`@audio-ui/core/plot`) drives a handle on a plot's curve. Its options are `axis` (`"both"` by default, or one axis), `defaultValue`, `disabled`, the `measure(fresh)` function that returns the plot's box in the viewport, and the change and commit callbacks. `press(event, element)` follows the drag, `keyDown(event)` moves the handle by a step, `typeAt(along, position, event)` sets it on one axis from a typed value, and `reset(event)` returns it to its default.
+
+## Piano
+
+```ts
+import { createPianoController } from "@audio-ui/core/piano";
+
+const piano = createPianoController({
+  layout: "keyboard",
+  minPitch: 48,
+  maxPitch: 72,
+  orientation: "horizontal",
+  onNoteOn: (pitch) => synth.noteOn(pitch),
+  onNoteOff: (pitch) => synth.noteOff(pitch),
+});
+```
+
+The piano reports a note on when a key is pressed and a note off when it is released, one per pointer, so two fingers can hold two keys. `keyOn(pitch, event)` and `keyOff(pitch, event)` do the same for the keyboard, and `navigate(pitch, event)` moves focus between keys with the arrows. `getSnapshot()` gives each key's `placements` and the `active` set, which an element draws.
+
+## Meter
+
+A meter has no gesture, so it has no controller. Its scale and formatting come from `createMeterConfig` (`@audio-ui/core/meter`): `min`, `max`, `warnThreshold`, `clipThreshold`, and `scale`, which is `"iec"` (the deflection of a VU-style meter), `"linear"`, or a function. `position(level)` gives a level's place on the meter, from 0 to 1. The levels themselves come from a live source. The primitive has no clock, so its timing and its peak decay are yours.
+
+## Next
+
+- The primitives that draw these controllers: [Fader](/docs/components/base/fader), [Knob](/docs/components/base/knob), [XYPad](/docs/components/base/xypad), [Piano](/docs/components/base/piano), [Meter](/docs/components/base/meter).
+- The signatures are in the shipped skill's [core reference](https://github.com/ouestlabs/audio-ui/blob/main/skills/audio-ui/core.md). When they differ from this page, the source wins.
