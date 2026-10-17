@@ -1,6 +1,5 @@
 "use client";
 
-import { SquareIcon } from "lucide-react";
 import * as React from "react";
 import { lazy, Suspense } from "react";
 import type { IconLibraryName } from "shadcn/icons";
@@ -60,7 +59,7 @@ export function IconPlaceholder({
 
   return (
     <Suspense
-      fallback={<SquareIcon {...props} />}
+      fallback={<svg aria-hidden="true" className={props.className} />}
       key={`${iconLibraryValue}-${iconName}`}
     >
       {iconLibraryValue === "lucide" && (
