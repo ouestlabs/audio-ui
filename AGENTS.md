@@ -19,7 +19,6 @@ Turborepo + Bun workspaces. **Always use `bun` / `bunx`, never `npm`, `npx` or `
 audio-ui/
 ├── apps/
 │   ├── www/        # TanStack Start docs site + registry (Fumadocs + MDX, prerendered, Cloudflare) → localhost:4000
-│   ├── sandbox/    # Copy-paste consumer of the registry → localhost:4100
 │   └── video/      # Remotion videos of the real components (see apps/video/README.md)
 ├── packages/
 │   ├── core/       # @audio-ui/core, published (framework-agnostic logic)
