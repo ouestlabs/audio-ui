@@ -57,6 +57,10 @@ export const hooks: RegistryItem[] = [
         path: "hooks/use-arrangement.ts",
         type: "registry:hook",
       },
+      {
+        path: "lib/arrangement-state.ts",
+        type: "registry:lib",
+      },
     ],
     name: "use-arrangement",
     registryDependencies: ["@audio-ui/arrangement", "@audio-ui/undo-history"],

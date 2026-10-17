@@ -865,7 +865,7 @@ const items: RegistryItem[] = [
     categories: ["lib", "audio", "timeline"],
     dependencies: ["@audio-ui/core", "@audio-ui/react"],
     description:
-      "The pure side of an arrangement of clips on tracks: laying a clip so it covers what is under it, landing a dragged group (or its copies) on another track, shifting tracks, rescaling clips when the tempo changes, and reading a track's volume and pan automation",
+      "The document of an arrangement of clips on tracks: its clips, tracks and mixes, how far a clip reaches, where a MIDI clip's notes play, and what a track's volume and pan automation gives at a point of the song",
     files: [
       {
         path: "lib/arrangement.ts",
