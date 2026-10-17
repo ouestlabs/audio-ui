@@ -20,7 +20,10 @@ function Plot({ className, ...props }: PlotPrimitive.Root.Props) {
 function PlotGraph({ className, ...props }: PlotPrimitive.Graph.Props) {
   return (
     <PlotPrimitive.Graph
-      className={cn("cn-plot-graph", className)}
+      className={cn(
+        "cn-plot-graph overflow-hidden! rounded-[inherit]",
+        className
+      )}
       data-slot="plot-graph"
       {...props}
     />
@@ -128,7 +131,9 @@ function PlotGrid({ className, ...props }: PlotPrimitive.Grid.Props) {
   return (
     <PlotPrimitive.Grid
       className={cn(
-        "cn-plot-grid text-[10px] text-muted-foreground tabular-nums leading-none",
+        "cn-plot-grid rounded-[inherit] text-[10px] text-muted-foreground tabular-nums leading-none",
+        // The lines at the edges (0 dB, the dry sound) follow the rounded corners of the frame.
+        "[&>svg]:overflow-hidden! [&>svg]:rounded-[inherit]",
         "[&_[data-part=line]]:stroke-border [&_[data-part=line][data-zero]]:stroke-foreground/30",
         // A halo in the surface colour keeps a label readable over the curve without hiding any of it.
         "[&_[data-part=label]]:z-1 [&_[data-part=label]]:px-0.5 [&_[data-part=label]]:[text-shadow:0_0_2px_var(--card),0_0_2px_var(--card),0_0_4px_var(--card)]",
