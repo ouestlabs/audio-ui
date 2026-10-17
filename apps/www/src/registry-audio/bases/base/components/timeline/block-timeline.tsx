@@ -94,6 +94,10 @@ import {
 } from "@/registry-audio/bases/base/audio/elements/timeline";
 import { Transport } from "@/registry-audio/bases/base/audio/elements/transport";
 import {
+  ClipPanel,
+  type ClipSettings,
+} from "@/registry-audio/bases/base/audio/panels/clip-panel";
+import {
   type ClipAction,
   useArrangement,
 } from "@/registry-audio/bases/base/hooks/use-arrangement";
@@ -194,6 +198,7 @@ function clipMenuEntries(disabled: boolean): {
   separatorBefore?: boolean;
 }[] {
   return [
+    { action: "edit", label: "Edit clip" },
     { action: "rename", label: "Rename" },
     { action: "duplicate", label: "Duplicate" },
     { action: "split", label: "Split at the cursor", separatorBefore: true },
@@ -668,6 +673,97 @@ function SignatureButton({
   );
 }
 
+/** What a piece of a clip adds to its id: the recording is the id before it. */
+const LEADING_ID = /-.*$/;
+
+/** How many peaks the clip panel draws of a source. */
+const PEAKS = 256;
+
+/**
+ * A stand-in for the peaks of a clip's recording, which the block does not
+ * have: a shape of its own for each recording (the clip's id before any piece
+ * suffix), drawn over the stretch of it the clip's source holds.
+ */
+function standInPeaks(clip: Arranged): number[] {
+  const seed = [...clip.id.replace(LEADING_ID, "")].reduce(
+    (sum, char) => sum + char.charCodeAt(0),
+    0
+  );
+  const from = clip.sourceFrom ?? 0;
+  return Array.from({ length: PEAKS }, (_, index) => {
+    const time = from + (index / (PEAKS - 1)) * clip.sourceLength;
+    const swell = 0.55 + 0.3 * Math.sin(time * 0.9 + seed);
+    const beat = 0.6 + 0.4 * Math.abs(Math.cos(time * Math.PI));
+    const grain = Math.abs(
+      (Math.sin((time + seed) * 12.9898) * 43_758.5453) % 1
+    );
+    return Math.min(1, swell * beat * (0.5 + 0.5 * grain) + 0.05);
+  });
+}
+
+/** The clip panel under the tracks, for the clip being edited, or a word on how to pick one. */
+function ClipDock({
+  clip,
+  format,
+  onClose,
+  onCrop,
+  onValueChange,
+  onValueCommitted,
+  peaks,
+}: {
+  clip: Arranged | undefined;
+  format: (seconds: number) => string;
+  onClose: () => void;
+  onCrop: () => void;
+  onValueChange: (next: ClipSettings) => void;
+  onValueCommitted: () => void;
+  peaks: number[];
+}) {
+  if (!clip) {
+    return (
+      <p className="border bg-card p-3 text-muted-foreground text-sm">
+        Select a clip to edit it here.
+      </p>
+    );
+  }
+  return (
+    <ClipPanel
+      format={format}
+      name={clip.name}
+      onCrop={onCrop}
+      onValueChange={onValueChange}
+      onValueCommitted={onValueCommitted}
+      value={{
+        gain: clip.gain ?? 0,
+        length: clip.value.length,
+        loop: clip.loop ?? null,
+        offset: clip.value.offset,
+        reversed: Boolean(clip.reversed),
+        sourceLength: clip.sourceLength,
+        transpose: clip.transpose ?? 0,
+      }}
+      values={peaks}
+    >
+      <Button
+        aria-label="Close the clip panel"
+        onClick={onClose}
+        size="icon-sm"
+        variant="ghost"
+      >
+        <IconPlaceholder
+          aria-hidden="true"
+          className="size-4"
+          hugeicons="Cancel01Icon"
+          lucide="XIcon"
+          phosphor="XIcon"
+          remixicon="RiCloseLine"
+          tabler="IconX"
+        />
+      </Button>
+    </ClipPanel>
+  );
+}
+
 /** The original of a clip being copied, left in its place while the copy is dragged away. */
 function CopyGhost({ clip }: { clip: Arranged }) {
   const { length, start } = clip.value;
@@ -855,7 +951,8 @@ const ClipView = memo(function ArrangedClip({
           onValueChange={handleChange}
           onValueCommitted={handleCommitted}
           selected={selected}
-          sourceLength={clip.sourceLength}
+          // A looped clip repeats its loop, as far as it is stretched.
+          sourceLength={clip.loop ? undefined : clip.sourceLength}
           style={
             lift
               ? { transform: `translateY(${lift}px)`, zIndex: 10 }
@@ -1006,6 +1103,8 @@ export default function BlockTimeline() {
     consolidateTime,
     copying,
     copyOf,
+    crop,
+    editClip,
     fadeTimeSelection,
     duplicateSelection,
     duplicateTrack,
@@ -1033,6 +1132,7 @@ export default function BlockTimeline() {
     selectedTracks,
     selection,
     selectTrack,
+    settleClipEdit,
     splitAtCursor,
     tracks,
     undo,
@@ -1453,6 +1553,57 @@ export default function BlockTimeline() {
     },
     [selectClip]
   );
+  // The clip panel, under the tracks: it edits the first selected clip.
+  const [clipViewOpen, setClipViewOpen] = useState(false);
+  const editedClip = clips.find((clip) => clip.id === selectedIds[0]);
+  const editedPeaks = useMemo(
+    () => (editedClip ? standInPeaks(editedClip) : []),
+    [editedClip]
+  );
+  const handleClipAction = useCallback(
+    (action: ClipAction, id: string) => {
+      if (action === "edit") {
+        pickClip(id, false);
+        setClipViewOpen(true);
+      } else {
+        clipAction(action, id);
+      }
+    },
+    [clipAction, pickClip]
+  );
+  const changeClipSettings = useCallback(
+    (next: ClipSettings) => {
+      if (!editedClip) {
+        return;
+      }
+      editClip(editedClip.id, (clip) => {
+        // The clip keeps its place: what it plays changes, so it ends as early as the timeline needs.
+        const length = Math.min(next.length, duration - clip.value.start);
+        const fadeIn = Math.min(clip.value.fadeIn, length);
+        return {
+          ...clip,
+          gain: next.gain,
+          loop: next.loop ?? undefined,
+          reversed: next.reversed,
+          transpose: next.transpose,
+          value: {
+            ...clip.value,
+            fadeIn,
+            fadeOut: Math.min(clip.value.fadeOut, length - fadeIn),
+            length,
+            offset: next.offset,
+          },
+        };
+      });
+    },
+    [duration, editClip, editedClip]
+  );
+  const cropEdited = useCallback(() => {
+    if (editedClip) {
+      crop(editedClip.id);
+    }
+  }, [crop, editedClip]);
+  const closeClipView = useCallback(() => setClipViewOpen(false), []);
   /** Where a paste lands: the picked track, the top of the time selection, the track of a picked clip, or the first track. */
   const pasteTrack = () =>
     selectedTracks[0] ??
@@ -1534,6 +1685,25 @@ export default function BlockTimeline() {
     return () => clearTimeSelection(time);
   };
   /**
+   * Cmd/Ctrl + Alt + 3 shows or hides the clip panel, and Cmd/Ctrl + Alt + F
+   * makes fades from the time selection. Read from the key's place: Alt
+   * changes the letter on a Mac. Returns whether the key was one of these.
+   */
+  const handleAltCommand = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (!((event.metaKey || event.ctrlKey) && event.altKey)) {
+      return false;
+    }
+    if (event.code === "Digit3") {
+      setClipViewOpen((open) => !open);
+    } else if (event.code === "KeyF" && timeSelection) {
+      fadeTimeSelection(timeSelection);
+    } else {
+      return false;
+    }
+    event.preventDefault();
+    return true;
+  };
+  /**
    * Cmd/Ctrl + C and X copy and cut the time selection (the selected clips
    * when there is none), V pastes at the cursor, I opens a stretch of silence
    * there; with a time selection, D duplicates it after itself, J makes one
@@ -1548,15 +1718,7 @@ export default function BlockTimeline() {
     if (typing(event.target)) {
       return false;
     }
-    // Cmd/Ctrl + Alt + F: fades from the time selection. Read from the key's place: Alt changes the letter on a Mac.
-    if (
-      (event.metaKey || event.ctrlKey) &&
-      event.altKey &&
-      event.code === "KeyF" &&
-      timeSelection
-    ) {
-      event.preventDefault();
-      fadeTimeSelection(timeSelection);
+    if (handleAltCommand(event)) {
       return true;
     }
     if (event.altKey) {
@@ -2394,7 +2556,7 @@ export default function BlockTimeline() {
                                   : 0
                               }
                               multi={multi}
-                              onAction={clipAction}
+                              onAction={handleClipAction}
                               onChange={changeClip}
                               onCommit={commitClip}
                               onFadeShape={setFadeShape}
@@ -2486,6 +2648,17 @@ export default function BlockTimeline() {
             )
           : null}
       </Timeline>
+      {clipViewOpen ? (
+        <ClipDock
+          clip={editedClip}
+          format={describe}
+          onClose={closeClipView}
+          onCrop={cropEdited}
+          onValueChange={changeClipSettings}
+          onValueCommitted={settleClipEdit}
+          peaks={editedPeaks}
+        />
+      ) : null}
       {copy
         ? createPortal(
             <div

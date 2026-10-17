@@ -7,6 +7,7 @@ export {
   ArrowDownIcon,
   ArrowLeft01Icon,
   ArrowLeft02Icon,
+  ArrowLeftDoubleIcon,
   ArrowLeftIcon,
   ArrowLeftRightIcon,
   ArrowRight01Icon,

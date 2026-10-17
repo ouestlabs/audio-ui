@@ -300,6 +300,7 @@ export const components: RegistryItem[] = [
       "@audio-ui/use-arrangement",
       "@audio-ui/use-marquee-selection",
       "@audio-ui/use-simulated-clock",
+      "@audio-ui/clip-panel",
       "@shadcn/button",
       "@shadcn/button-group",
       "@shadcn/context-menu",
