@@ -1,0 +1,1 @@
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","description":"The filter device in one install: its state, its Web Audio engine and its panel, to components/audio-ui/devices/filter/.","files":[],"name":"filter","registryDependencies":["@audio-ui/filter-device","@audio-ui/filter-engine","@audio-ui/filter-panel"],"type":"registry:ui"}

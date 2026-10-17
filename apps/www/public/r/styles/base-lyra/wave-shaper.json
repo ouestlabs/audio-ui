@@ -1,0 +1,1 @@
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","description":"The wave shaper device in one install: its state, its Web Audio engine and its panel, to components/audio-ui/devices/wave-shaper/.","files":[],"name":"wave-shaper","registryDependencies":["@audio-ui/wave-shaper-device","@audio-ui/wave-shaper-engine","@audio-ui/wave-shaper-panel"],"type":"registry:ui"}

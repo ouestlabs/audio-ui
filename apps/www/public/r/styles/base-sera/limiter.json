@@ -1,0 +1,1 @@
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","description":"The limiter device in one install: its state, its Web Audio engine and its panel, to components/audio-ui/devices/limiter/.","files":[],"name":"limiter","registryDependencies":["@audio-ui/limiter-device","@audio-ui/limiter-engine","@audio-ui/limiter-panel"],"type":"registry:ui"}

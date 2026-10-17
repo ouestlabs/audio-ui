@@ -1,0 +1,1 @@
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","description":"The chorus device in one install: its state, its Web Audio engine and its panel, to components/audio-ui/devices/chorus/.","files":[],"name":"chorus","registryDependencies":["@audio-ui/chorus-device","@audio-ui/chorus-engine","@audio-ui/chorus-panel"],"type":"registry:ui"}

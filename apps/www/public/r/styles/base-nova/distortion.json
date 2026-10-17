@@ -1,0 +1,1 @@
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","description":"The distortion device in one install: its state, its Web Audio engine and its panel, to components/audio-ui/devices/distortion/.","files":[],"name":"distortion","registryDependencies":["@audio-ui/distortion-device","@audio-ui/distortion-engine","@audio-ui/distortion-panel"],"type":"registry:ui"}

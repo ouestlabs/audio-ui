@@ -1,0 +1,1 @@
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","description":"The delay device in one install: its state, its Web Audio engine and its panel, to components/audio-ui/devices/delay/.","files":[],"name":"delay","registryDependencies":["@audio-ui/delay-device","@audio-ui/delay-engine","@audio-ui/delay-panel"],"type":"registry:ui"}

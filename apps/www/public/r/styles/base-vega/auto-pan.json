@@ -1,0 +1,1 @@
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","description":"The auto pan device in one install: its state, its Web Audio engine and its panel, to components/audio-ui/devices/auto-pan/.","files":[],"name":"auto-pan","registryDependencies":["@audio-ui/auto-pan-device","@audio-ui/auto-pan-engine","@audio-ui/auto-pan-panel"],"type":"registry:ui"}

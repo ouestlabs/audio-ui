@@ -12,7 +12,7 @@ A device is an effect or an instrument that you can plug in, not a widget with a
 | **Engine** | Plays a state with Web Audio nodes | `engine` |
 | **Tools** | What an agent calls to change the state | `deviceTools` |
 
-Each piece installs in `components/audio-ui/devices/<name>/`. The tools come from `@audio-ui/core/device`. Every device page has a block that wires the pieces together: `npx shadcn@latest add @audio-ui/block-compressor`.
+`npx shadcn@latest add @audio-ui/compressor` installs a device's state, engine and panel in `components/audio-ui/devices/compressor/`. Each piece also installs on its own (`@audio-ui/compressor-device`, `-engine`, `-panel`), so a host with its own engine takes only the state and the panel. The tools come from `@audio-ui/core/device`. Every device page has a block that wires the pieces to a loop: `@audio-ui/block-compressor`.
 
 ## Catalog
 
