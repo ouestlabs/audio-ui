@@ -284,7 +284,7 @@ export const components: RegistryItem[] = [
   {
     categories: ["timeline"],
     description:
-      "An arrangement timeline made for a whole screen: a bar ruler that seeks on the grid, a loop strip, a lane per track with clips to move between tracks, trim and fade on the grid, a cursor to put anywhere on a track, and a split at the cursor, a transport with play or pause, stop, loop, a metronome and a tempo and signature that keep the arrangement's musical positions, a playhead following its clock, and a navigator to zoom and scroll, open it at full size and the tracks take the screen",
+      "An arrangement timeline made for a whole screen: a bar ruler that seeks on the grid, a loop strip, a lane per track with clips to move between tracks, trim and fade on the grid, a cursor to put anywhere on a track, and a split at the cursor, a transport with play or pause, stop, loop, a metronome and a tempo and signature that keep the arrangement's musical positions, a playhead following its clock, and a navigator to zoom and scroll. MIDI tracks hold MIDI clips that draw their notes, play through a synth and open on a piano roll in the clip panel; double-click a MIDI lane for a new clip. Open it at full size and the tracks take the screen",
     files: [
       {
         path: "components/timeline/block-timeline.tsx",
@@ -307,6 +307,11 @@ export const components: RegistryItem[] = [
       "@audio-ui/use-marquee-selection",
       "@audio-ui/use-simulated-clock",
       "@audio-ui/clip-panel",
+      "@audio-ui/midi-clip-panel",
+      "@audio-ui/use-master-bus",
+      "@audio-ui/use-synth-voices",
+      "@audio-ui/envelope-ramp",
+      "@audio-ui/web-audio",
       "@shadcn/button",
       "@shadcn/button-group",
       "@shadcn/context-menu",

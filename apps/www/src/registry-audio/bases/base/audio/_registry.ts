@@ -739,6 +739,25 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
+    categories: ["timeline", "piano"],
+    dependencies: ["@audio-ui/core", "@audio-ui/react"],
+    description:
+      "The clip view of an arrangement's MIDI clip: its notes on a piano roll of their own (overview, bar ruler, keys, grid and velocity lane), drawn a grid step at a time, beside Draw and Fold.",
+    files: [
+      {
+        path: "audio/panels/midi-clip-panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "midi-clip-panel",
+    registryDependencies: [
+      "@audio-ui/piano-roll",
+      "@audio-ui/timeline",
+      "@shadcn/button",
+    ],
+    type: "registry:ui",
+  },
+  {
     dependencies: ["@audio-ui/react"],
     description:
       "A zoomable timeline for arrangement views and editors, with a ruler that seeks, lanes and a playhead.",

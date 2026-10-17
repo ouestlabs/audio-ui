@@ -14,6 +14,8 @@ import {
   openTime,
   otherSelected,
   pasteTime,
+  playedNotes,
+  scaleClip,
   scaleValue,
   shiftTrack,
 } from "@/registry-audio/bases/base/lib/arrangement";
@@ -280,5 +282,94 @@ describe("cropClip", () => {
       cropped.loop,
       cropped.value.offset,
     ]).toEqual([16, 16, [0, 16], 4]);
+  });
+});
+
+describe("playedNotes", () => {
+  const midi = (overrides: Partial<Arranged> = {}): Arranged => ({
+    id: "m",
+    name: "Bass",
+    notes: [
+      { id: "a", length: 1, pitch: 40, start: 0 },
+      { id: "b", length: 3, pitch: 43, start: 2 },
+    ],
+    sourceLength: 4,
+    track: "bass",
+    value: { fadeIn: 0, fadeOut: 0, length: 4, offset: 0, start: 10 },
+    ...overrides,
+  });
+
+  test("places the notes where the clip plays them, cut at its end", () => {
+    const notes = playedNotes(
+      midi({
+        value: { fadeIn: 0, fadeOut: 0, length: 3, offset: 0, start: 10 },
+      })
+    );
+    expect(notes.map((note) => [note.start, note.length, note.pitch])).toEqual([
+      [10, 1, 40],
+      [12, 1, 43],
+    ]);
+  });
+
+  test("starts from the clip's offset, and transposes with it", () => {
+    const notes = playedNotes(
+      midi({
+        transpose: 12,
+        value: { fadeIn: 0, fadeOut: 0, length: 3, offset: 1, start: 10 },
+      })
+    );
+    expect(notes.map((note) => [note.start, note.pitch])).toEqual([[11, 55]]);
+  });
+
+  test("plays its loop again and again, each time a note of its own", () => {
+    const notes = playedNotes(
+      midi({
+        loop: [0, 4],
+        value: { fadeIn: 0, fadeOut: 0, length: 12, offset: 0, start: 0 },
+      })
+    );
+    expect(notes.map((note) => note.start)).toEqual([0, 2, 4, 6, 8, 10]);
+    expect(new Set(notes.map((note) => note.id)).size).toBe(6);
+    expect(notes.map((note) => note.sourceId)).toEqual([
+      "a",
+      "b",
+      "a",
+      "b",
+      "a",
+      "b",
+    ]);
+  });
+});
+
+describe("scaleClip", () => {
+  test("a MIDI clip's notes and loop follow the tempo, a recording's loop does not", () => {
+    const value = { fadeIn: 0, fadeOut: 0, length: 4, offset: 0, start: 2 };
+    const midi = scaleClip(
+      {
+        id: "m",
+        loop: [0, 4],
+        name: "Keys",
+        notes: [{ id: "a", length: 1, pitch: 60, start: 2 }],
+        sourceLength: 4,
+        track: "keys",
+        value,
+      },
+      0.5
+    );
+    expect(midi.loop).toEqual([0, 2]);
+    expect(midi.notes?.[0]).toMatchObject({ length: 0.5, start: 1 });
+    expect(midi.value.start).toBe(1);
+    const audio = scaleClip(
+      {
+        id: "a",
+        loop: [0, 4],
+        name: "Vox",
+        sourceLength: 4,
+        track: "v",
+        value,
+      },
+      0.5
+    );
+    expect(audio.loop).toEqual([0, 4]);
   });
 });
