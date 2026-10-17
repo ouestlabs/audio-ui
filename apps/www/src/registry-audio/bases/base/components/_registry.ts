@@ -178,7 +178,7 @@ export const components: RegistryItem[] = [
   {
     categories: ["piano", "synth"],
     description:
-      "A DAW-style piano roll, laid out like Sona's note editor, a scrolling roll with a playable keyboard stuck to its side, a loop brace and bar ruler stuck on top, a velocity lane stuck at the bottom and a navigator to zoom across four bars: click to add notes, drag to move or resize either edge, Alt-drag to copy, shift-click to select and move several at once, double-click a note to delete it, Fold to keep only the pitches in use, with a BPM-driven loop that plays back in real time and always-on live preview as you edit. A timeline above the grid lets you click to seek or drag out a loop range to dial in a short phrase instead of always looping the whole grid. Drop a MIDI file onto the panel (or use the Import MIDI button) to load its notes and tempo onto the grid, and Export MIDI to save the current pattern back out as a .mid file",
+      "A MIDI clip editor: a scrolling roll with a playable keyboard down its side, a loop brace and a ruler that labels bars, beats and sixteenths as you zoom, and a velocity lane you can drag taller. The transport plays, pauses and stops, loops or plays once through, clicks a metronome and sets the tempo and signature. Draw or select notes, mark a scale and fold onto it, undo and redo, and edit the selection from the Notes menu: split at the playhead, chop, join, legato, reverse, invert, stretch, fit to scale, crescendo and humanize. Drop a MIDI file on it to import one, or export the clip as a .mid file",
     files: [
       {
         path: "components/piano/block-piano-roll.tsx",
@@ -190,14 +190,20 @@ export const components: RegistryItem[] = [
     registryDependencies: [
       "@audio-ui/piano-roll",
       "@audio-ui/timeline",
+      "@audio-ui/transport",
       "@audio-ui/fader",
-      "@audio-ui/bpm-control",
       "@audio-ui/use-master-bus",
       "@audio-ui/use-midi-input",
       "@audio-ui/use-synth-voices",
       "@audio-ui/use-transport-clock",
+      "@audio-ui/undo-history",
       "@audio-ui/web-audio",
       "@shadcn/button",
+      "@shadcn/button-group",
+      "@shadcn/dropdown-menu",
+      "@shadcn/input",
+      "@shadcn/popover",
+      "@shadcn/select",
     ],
     type: "registry:block",
   },

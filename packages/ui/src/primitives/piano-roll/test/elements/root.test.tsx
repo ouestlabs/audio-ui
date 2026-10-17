@@ -61,4 +61,30 @@ describe("PianoRoll.Root", () => {
     expect(note("b").getAttribute("aria-pressed")).toBe("true");
     expect(note("a").getAttribute("aria-pressed")).toBe("false");
   });
+
+  test("says when notes are selected, and spans the time they cover", () => {
+    const { root, view } = renderRoll({ defaultSelection: [] });
+    expect(root.hasAttribute("data-has-selection")).toBe(false);
+    expect(view.queryByTestId("span")).toBeNull();
+    view.unmount();
+    const selected = renderRoll({ defaultSelection: ["a", "b"] });
+    expect(selected.root.hasAttribute("data-has-selection")).toBe(true);
+    const span = selected.view.getByTestId("span");
+    expect(span.style.getPropertyValue("--timeline-offset")).toBe("0");
+    expect(span.style.getPropertyValue("--timeline-length")).toBe("8");
+    expect(span.getAttribute("aria-hidden")).toBe("true");
+  });
+
+  test("marks a deactivated note and its velocity, and gives each note its chance", () => {
+    const { note, view } = renderRoll({
+      defaultValue: [
+        { chance: 0.5, id: "a", length: 2, muted: true, pitch: 60, start: 0 },
+      ],
+    });
+    expect(note("a").hasAttribute("data-muted")).toBe(true);
+    expect(note("a").style.getPropertyValue("--piano-roll-chance")).toBe("0.5");
+    expect(view.getByTestId("velocity-a").hasAttribute("data-muted")).toBe(
+      true
+    );
+  });
 });

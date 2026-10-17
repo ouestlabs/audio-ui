@@ -6,6 +6,7 @@ import {
   type PianoRollOptions,
   type Rows,
 } from "@audio-ui/core/piano-roll";
+import type { Scale } from "@audio-ui/core/pitch";
 import * as React from "react";
 import { shallowEqual } from "../../internal/equal.ts";
 import { type PartProps, resolveStyling } from "../../internal/part.ts";
@@ -32,9 +33,11 @@ const describeNote = (note: Note) =>
  * units, and every gesture lands on its grid unless Cmd/Ctrl is held.
  *
  * Rows run from `maxPitch` at the top to `minPitch`, or with `folded` only
- * the pitches carrying notes have one. Its `--piano-roll-rows` CSS variable
+ * the pitches carrying notes have one, and with `folded="scale"` those in
+ * `scale` as well. Its `--piano-roll-rows` CSS variable
  * is how many rows there are, so the grid and the keys can be given a height
- * per row. Renders a `<div>` element.
+ * per row. `data-has-selection` is set while notes are selected. Renders a
+ * `<div>` element.
  */
 export function Root(componentProps: Root.Props) {
   const {
@@ -44,6 +47,7 @@ export function Root(componentProps: Root.Props) {
     defaultSelection,
     defaultValue,
     disabled: disabledProp = false,
+    drawStyle,
     folded = false,
     getNoteLabel = describeNote,
     maxPitch = 72,
@@ -57,6 +61,7 @@ export function Root(componentProps: Root.Props) {
     onValueCommitted,
     ref,
     render,
+    scale,
     selection,
     style,
     value,
@@ -86,6 +91,7 @@ export function Root(componentProps: Root.Props) {
     defaultSelection,
     defaultValue,
     disabled,
+    drawStyle,
     folded,
     maxPitch,
     minLength,
@@ -97,6 +103,7 @@ export function Root(componentProps: Root.Props) {
     onValueChange,
     onValueCommitted,
     requestFocus: focusAfterRender,
+    scale,
     selection,
     timeline: {
       duration,
@@ -136,6 +143,15 @@ export function Root(componentProps: Root.Props) {
   const readRows = React.useCallback(
     () => controller.getSnapshot().rows,
     [controller]
+  );
+  const readHasSelection = React.useCallback(
+    () => controller.getSnapshot().selection.size > 0,
+    [controller]
+  );
+  const hasSelection = React.useSyncExternalStore(
+    controller.subscribe,
+    readHasSelection,
+    readHasSelection
   );
   const rows: Rows = React.useSyncExternalStore(
     controller.subscribe,
@@ -193,7 +209,10 @@ export function Root(componentProps: Root.Props) {
   const element = useRender({
     defaultTagName: "div",
     props: mergeProps<"div">(
-      { style: { [ROWS_PROPERTY as string]: rows.pitches.length } },
+      {
+        "data-has-selection": hasSelection ? "" : undefined,
+        style: { [ROWS_PROPERTY as string]: rows.pitches.length },
+      },
       { ...elementProps, ...resolveStyling(className, style, rollState) }
     ),
     ref,
@@ -228,8 +247,10 @@ export namespace Root {
     /** Uncontrolled starting notes. */
     defaultValue?: readonly Note[];
     disabled?: boolean;
-    /** Whether only the pitches carrying notes get a row. A roll without notes keeps them all. @default false */
-    folded?: boolean;
+    /** What a drag does after a press on the grid in draw mode: stretch the note drawn, or paint a note in each grid cell the pointer crosses, on the pitch under it, or with Alt on the first one. @default "stretch" */
+    drawStyle?: "paint" | "stretch";
+    /** Whether only the pitches carrying notes get a row, and with `"scale"` those in `scale` too. A roll with nothing to fold onto keeps them all. @default false */
+    folded?: boolean | "scale";
     /** Returns a note's accessible name. Defaults to its pitch and where it starts and ends, such as "C4, 4 to 6". */
     getNoteLabel?: (note: Note) => string;
     /** Highest MIDI pitch, inclusive. @default 72 */
@@ -259,6 +280,8 @@ export namespace Root {
       value: Note[],
       eventDetails: ValueCommitEventDetails
     ) => void;
+    /** The scale whose rows are marked `data-in-scale`, such as `{ name: "major", root: 0 }` for C major. */
+    scale?: Scale | null;
     /** The ids of the selected notes. */
     selection?: readonly NoteId[];
     /** The notes. */

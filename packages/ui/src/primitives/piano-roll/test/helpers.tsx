@@ -93,6 +93,7 @@ export function renderRoll(
             )}
           </PianoRoll.Notes>
           <PianoRoll.Marquee data-testid="marquee" />
+          <PianoRoll.SelectionSpan data-testid="span" />
         </PianoRoll.Grid>
         <PianoRoll.VelocityLane aria-label="Velocity" data-testid="velocities">
           <PianoRoll.Notes>

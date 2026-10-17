@@ -1,19 +1,38 @@
 import { describe, expect, test } from "bun:test";
 import {
   cellStart,
+  changeLevel,
   changeVelocity,
+  chopNotes,
+  deleteTime,
   duplicateAfter,
   duplicateNotes,
+  duplicateTime,
+  findNotes,
+  fitNotesToScale,
+  humanizeNotes,
+  insertTime,
+  invertNotes,
+  joinNotes,
+  legatoNotes,
   moveNotes,
   type Note,
   notesWithin,
   pasteNotes,
   quantizeNotes,
+  rampVelocity,
   resizeNotes,
+  reverseNotes,
   sameNotes,
   sanitizeNote,
+  selectionSpan,
+  setChance,
+  setDeviation,
   snapEdgeDelta,
   spatialOrder,
+  splitNotes,
+  stretchNotes,
+  toggleMuted,
 } from "./edits.ts";
 
 const BOUNDS = { duration: 16, maxPitch: 72, minLength: 1, minPitch: 48 };
@@ -235,5 +254,330 @@ describe("pasteNotes", () => {
     >;
     expect(result.notes.map((note) => note.start)).toEqual([7, 7, 15]);
     expect(pasteNotes([], [], 0, counter(), BOUNDS)).toBeNull();
+  });
+});
+
+const counter = () => {
+  let id = 100;
+  return () => {
+    id += 1;
+    return id;
+  };
+};
+const PHRASE: Note[] = [
+  { id: 1, length: 2, pitch: 60, start: 0, velocity: 0.5 },
+  { id: 2, length: 1, pitch: 64, start: 4 },
+  { id: 3, length: 2, pitch: 67, start: 6 },
+];
+const ALL = new Set([1, 2, 3]);
+
+describe("splitNotes", () => {
+  test("cuts the notes that hold the time, and leaves the rest", () => {
+    const { added, notes } = splitNotes(PHRASE, ALL, 1, counter());
+    expect(added).toEqual([101]);
+    expect(notes).toEqual([
+      { id: 1, length: 1, pitch: 60, start: 0, velocity: 0.5 },
+      { id: 101, length: 1, pitch: 60, start: 1, velocity: 0.5 },
+      PHRASE[1] as Note,
+      PHRASE[2] as Note,
+    ]);
+  });
+
+  test("does not cut at a note's edge", () => {
+    expect(splitNotes(PHRASE, ALL, 4, counter()).added).toEqual([]);
+  });
+
+  test("chops to the grid at every time it is given", () => {
+    const grid = Array.from({ length: 16 }, (_, step) => step);
+    const { added, notes } = splitNotes(PHRASE, ALL, grid, counter());
+    expect(added).toHaveLength(2);
+    expect(notes.every((note) => note.length === 1)).toBe(true);
+  });
+});
+
+describe("chopNotes", () => {
+  test("cuts each note in equal parts, as many as fit at the shortest length", () => {
+    const { added, notes } = chopNotes(PHRASE, ALL, 4, counter(), 0.5);
+    expect(added).toHaveLength(7);
+    const first = notes.filter((note) => note.pitch === 60);
+    expect(first.map((note) => [note.start, note.length])).toEqual([
+      [0, 0.5],
+      [0.5, 0.5],
+      [1, 0.5],
+      [1.5, 0.5],
+    ]);
+    expect(notes.filter((note) => note.pitch === 64)).toHaveLength(2);
+  });
+});
+
+describe("joinNotes", () => {
+  test("joins notes of one pitch from the first start to the last end", () => {
+    const notes: Note[] = [
+      { id: 1, length: 1, pitch: 60, start: 0, velocity: 0.5 },
+      { id: 2, length: 1, pitch: 60, start: 3 },
+      { id: 3, length: 1, pitch: 62, start: 1 },
+    ];
+    expect(joinNotes(notes, new Set([1, 2, 3]))).toEqual([
+      { id: 1, length: 4, pitch: 60, start: 0, velocity: 0.5 },
+      notes[2] as Note,
+    ]);
+  });
+});
+
+describe("legatoNotes", () => {
+  test("each note reaches the next start, the last keeps its length", () => {
+    expect(legatoNotes(PHRASE, ALL, 0.25).map((note) => note.length)).toEqual([
+      4, 2, 2,
+    ]);
+  });
+
+  test("the last notes reach the end, when there is one", () => {
+    expect(
+      legatoNotes(PHRASE, ALL, 0.25, 16).map((note) => note.length)
+    ).toEqual([4, 2, 10]);
+  });
+
+  test("the notes of a chord all reach the next one", () => {
+    const chord: Note[] = [
+      { id: 1, length: 1, pitch: 60, start: 0 },
+      { id: 2, length: 3, pitch: 64, start: 0 },
+      { id: 3, length: 1, pitch: 60, start: 2 },
+    ];
+    expect(legatoNotes(chord, ALL, 0.25).map((note) => note.length)).toEqual([
+      2, 2, 1,
+    ]);
+  });
+});
+
+describe("reverseNotes", () => {
+  test("mirrors the notes across their span", () => {
+    expect(reverseNotes(PHRASE, ALL).map((note) => note.start)).toEqual([
+      6, 3, 0,
+    ]);
+  });
+});
+
+describe("invertNotes", () => {
+  test("turns the range upside down", () => {
+    expect(invertNotes(PHRASE, ALL).map((note) => note.pitch)).toEqual([
+      67, 63, 60,
+    ]);
+  });
+});
+
+describe("stretchNotes", () => {
+  test("doubles from the earliest start, as far as the roll goes", () => {
+    const doubled = stretchNotes(PHRASE, new Set([2, 3]), 2, BOUNDS);
+    expect(doubled.slice(1).map((note) => [note.start, note.length])).toEqual([
+      [4, 2],
+      [8, 4],
+    ]);
+    const capped = stretchNotes(PHRASE, ALL, 4, BOUNDS);
+    expect(Math.max(...capped.map((note) => note.start + note.length))).toBe(
+      16
+    );
+  });
+
+  test("halves, and keeps every note at least the shortest length", () => {
+    const halved = stretchNotes(PHRASE, ALL, 0.5, BOUNDS);
+    expect(halved.map((note) => [note.start, note.length])).toEqual([
+      [0, 1],
+      [2, 1],
+      [3, 1],
+    ]);
+  });
+});
+
+describe("fitNotesToScale", () => {
+  test("moves the notes out of the scale to the nearest pitch in it", () => {
+    const notes: Note[] = [
+      { id: 1, length: 1, pitch: 61, start: 0 },
+      { id: 2, length: 1, pitch: 64, start: 1 },
+    ];
+    expect(
+      fitNotesToScale(
+        notes,
+        new Set([1, 2]),
+        { name: "major", root: 0 },
+        BOUNDS
+      ).map((note) => note.pitch)
+    ).toEqual([60, 64]);
+  });
+});
+
+describe("rampVelocity", () => {
+  test("sets the velocity along a line through the starts", () => {
+    expect(
+      rampVelocity(PHRASE, ALL, 0.2, 0.8).map((note) =>
+        Number(note.velocity?.toFixed(6))
+      )
+    ).toEqual([0.2, 0.6, 0.8]);
+  });
+});
+
+describe("humanizeNotes", () => {
+  test("moves starts and velocities by up to the amounts, on the roll", () => {
+    const high = humanizeNotes(
+      PHRASE,
+      ALL,
+      { timing: 0.5, velocity: 0.2 },
+      BOUNDS,
+      () => 1
+    );
+    expect(high.map((note) => note.start)).toEqual([0.5, 4.5, 6.5]);
+    expect(high.map((note) => note.velocity)).toEqual([0.7, 1, 1]);
+    const low = humanizeNotes(
+      PHRASE,
+      ALL,
+      { timing: 0.5, velocity: 0.2 },
+      BOUNDS,
+      () => 0
+    );
+    expect(low[0]?.start).toBe(0);
+  });
+});
+
+describe("toggleMuted", () => {
+  test("deactivates the notes, and activates them once they all are", () => {
+    const some = toggleMuted(PHRASE, new Set([1]));
+    expect(some.map((note) => note.muted)).toEqual([
+      true,
+      undefined,
+      undefined,
+    ]);
+    const mixed = toggleMuted(some, new Set([1, 2]));
+    expect(mixed.map((note) => note.muted)).toEqual([true, true, undefined]);
+    const back = toggleMuted(mixed, new Set([1, 2]));
+    expect(back.map((note) => note.muted)).toEqual([false, false, undefined]);
+  });
+});
+
+describe("setChance", () => {
+  test("sets the chance, kept within 0…1", () => {
+    expect(
+      setChance(PHRASE, new Set([2, 3]), 1.5).map((note) => note.chance)
+    ).toEqual([undefined, 1, 1]);
+    expect(setChance(PHRASE, ALL, 0.25)[0]?.chance).toBe(0.25);
+  });
+});
+
+describe("selectionSpan", () => {
+  test("spans from the earliest start to the latest end", () => {
+    expect(selectionSpan(PHRASE, new Set([1, 2]))).toEqual({
+      end: 5,
+      start: 0,
+    });
+    expect(selectionSpan(PHRASE, new Set())).toBeNull();
+  });
+});
+
+describe("sameNotes", () => {
+  test("tells a deactivated or less likely note apart", () => {
+    const muted = toggleMuted(PHRASE, new Set([1]));
+    expect(sameNotes(PHRASE, muted)).toBe(false);
+    expect(sameNotes(PHRASE, setChance(PHRASE, new Set([3]), 0.5))).toBe(false);
+  });
+});
+
+describe("changeLevel", () => {
+  test("changes the chance by the same amount, kept within 0…1", () => {
+    const notes = setChance(PHRASE, new Set([1]), 0.5);
+    expect(
+      changeLevel(notes, ALL, "chance", -0.25).map((note) => note.chance)
+    ).toEqual([0.25, 0.75, 0.75]);
+    expect(changeLevel(notes, ALL, "chance", 2)[0]?.chance).toBe(1);
+  });
+});
+
+describe("setDeviation", () => {
+  test("sets the deviation, kept within -1…1", () => {
+    expect(
+      setDeviation(PHRASE, new Set([1, 2]), -3).map((note) => note.deviation)
+    ).toEqual([-1, -1, undefined]);
+  });
+});
+
+describe("stretchNotes around an anchor", () => {
+  test("stretches back from the end, as far as the roll's start", () => {
+    const stretched = stretchNotes(PHRASE, new Set([2, 3]), 2, BOUNDS, 8);
+    expect(stretched.slice(1).map((note) => [note.start, note.length])).toEqual(
+      [
+        [0, 2],
+        [4, 4],
+      ]
+    );
+  });
+});
+
+describe("deleteTime", () => {
+  test("takes the time out, cutting the notes across it", () => {
+    expect(
+      deleteTime(PHRASE, 1, 5).map((note) => [note.id, note.start, note.length])
+    ).toEqual([
+      [1, 0, 1],
+      [3, 2, 2],
+    ]);
+  });
+});
+
+describe("insertTime", () => {
+  test("moves the notes on, and splits the one across", () => {
+    expect(
+      insertTime(PHRASE, 1, 2, counter(), 16).map((note) => [
+        note.id,
+        note.start,
+        note.length,
+      ])
+    ).toEqual([
+      [1, 0, 1],
+      [101, 3, 1],
+      [2, 6, 1],
+      [3, 8, 2],
+    ]);
+  });
+
+  test("cuts what it pushes past the clip", () => {
+    const pushed = insertTime(PHRASE, 0, 9, counter(), 16);
+    expect(pushed.map((note) => [note.start, note.length])).toEqual([
+      [9, 2],
+      [13, 1],
+      [15, 1],
+    ]);
+  });
+});
+
+describe("duplicateTime", () => {
+  test("repeats the range after itself, cut to it", () => {
+    const { added, notes } = duplicateTime(PHRASE, 0, 5, counter(), 16);
+    expect(added).toEqual([101, 102]);
+    expect(notes.map((note) => [note.id, note.start, note.length])).toEqual([
+      [1, 0, 2],
+      [2, 4, 1],
+      [3, 11, 2],
+      [101, 5, 2],
+      [102, 9, 1],
+    ]);
+  });
+});
+
+describe("findNotes", () => {
+  test("finds by pitch class, velocity, length and scale", () => {
+    expect(findNotes(PHRASE, { pitchClasses: [4, 7] })).toEqual([2, 3]);
+    expect(findNotes(PHRASE, { velocity: [0, 0.6] })).toEqual([1]);
+    expect(findNotes(PHRASE, { length: [2, 2] })).toEqual([1, 3]);
+    expect(
+      findNotes(PHRASE, {
+        scale: { scale: { name: "minor-pentatonic", root: 0 }, within: false },
+      })
+    ).toEqual([2]);
+  });
+
+  test("takes every other note, or what does not match", () => {
+    expect(findNotes(PHRASE, { every: { count: 2, offset: 0 } })).toEqual([
+      1, 3,
+    ]);
+    expect(findNotes(PHRASE, { invert: true, pitchClasses: [0] })).toEqual([
+      2, 3,
+    ]);
   });
 });

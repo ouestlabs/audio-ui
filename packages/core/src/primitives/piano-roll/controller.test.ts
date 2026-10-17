@@ -141,3 +141,128 @@ describe("Piano roll controller subscriptions", () => {
     expect(listener).not.toHaveBeenCalled();
   });
 });
+
+/** A 160×50 grid at the origin: 10px a unit across, five 10px rows down (64 to 60). */
+const gridElement = () => {
+  const element = document.createElement("div");
+  document.body.append(element);
+  element.getBoundingClientRect = () =>
+    ({
+      bottom: 50,
+      height: 50,
+      left: 0,
+      right: 160,
+      top: 0,
+      width: 160,
+    }) as DOMRect;
+  return element;
+};
+const pointer = (type: string, x: number, y: number, extra = {}) =>
+  new PointerEvent(type, {
+    bubbles: true,
+    button: 0,
+    buttons: type === "pointerup" ? 0 : 1,
+    clientX: x,
+    clientY: y,
+    pointerId: 1,
+    pointerType: "mouse",
+    ...extra,
+  });
+
+describe("Piano roll controller gestures", () => {
+  test("paint lays a note a cell, following the pitch, or held on it with Alt", () => {
+    const roll = create({
+      defaultValue: [],
+      drawStyle: "paint",
+      maxPitch: 64,
+      minPitch: 60,
+      mode: "draw",
+    });
+    const grid = gridElement();
+    roll.pressGrid(pointer("pointerdown", 5, 5), grid);
+    document.dispatchEvent(pointer("pointermove", 15, 25));
+    document.dispatchEvent(pointer("pointermove", 18, 25));
+    document.dispatchEvent(pointer("pointermove", 25, 45, { altKey: true }));
+    document.dispatchEvent(pointer("pointerup", 25, 45));
+    const { notes } = roll.getSnapshot();
+    expect(notes.map((note) => [note.start, note.pitch, note.length])).toEqual([
+      [0, 64, 1],
+      [1, 62, 1],
+      [2, 64, 1],
+    ]);
+    expect(roll.getSnapshot().selection.size).toBe(3);
+  });
+
+  test("a stretch handle stretches the selection from its other edge", () => {
+    const onValueCommitted = mock(
+      (_value: unknown, _details: unknown) => undefined
+    );
+    const roll = create({ defaultSelection: ["a", "b"], onValueCommitted });
+    const grid = gridElement();
+    roll.pressStretch("end", pointer("pointerdown", 30, 0), grid, grid);
+    document.dispatchEvent(pointer("pointermove", 60, 0));
+    document.dispatchEvent(pointer("pointerup", 60, 0));
+    expect(
+      roll.getSnapshot().notes.map((note) => [note.start, note.length])
+    ).toEqual([
+      [0, 2],
+      [4, 2],
+    ]);
+    expect(onValueCommitted.mock.calls[0]?.[1]).toMatchObject({
+      edit: "stretch",
+    });
+  });
+
+  test("a chance bar drags the chance, and Cmd on a velocity bar its deviation", () => {
+    const roll = create({ defaultSelection: ["a"] });
+    const lane = gridElement();
+    roll.pressVelocity(
+      "a",
+      pointer("pointerdown", 0, 40),
+      lane,
+      lane,
+      "chance"
+    );
+    document.dispatchEvent(pointer("pointermove", 0, 65));
+    document.dispatchEvent(pointer("pointerup", 0, 65));
+    expect(roll.getSnapshot().notes[0]?.chance).toBeCloseTo(0.5, 5);
+    expect(roll.getSnapshot().notes[0]?.velocity).toBe(0.5);
+    roll.pressVelocity(
+      "a",
+      pointer("pointerdown", 0, 40, { metaKey: true }),
+      lane,
+      lane
+    );
+    document.dispatchEvent(pointer("pointermove", 0, 30));
+    document.dispatchEvent(pointer("pointerup", 0, 30));
+    expect(roll.getSnapshot().notes[0]?.deviation).toBeCloseTo(0.2, 5);
+    expect(roll.getSnapshot().notes[0]?.velocity).toBe(0.5);
+  });
+
+  test("the arrow keys change a chance", () => {
+    const roll = create();
+    expect(roll.keyVelocity("a", key("ArrowDown"), "chance")).toBe(true);
+    expect(roll.getSnapshot().notes[0]?.chance).toBeCloseTo(0.95, 5);
+  });
+});
+
+describe("Piano roll controller velocity brush", () => {
+  test("in draw mode a drag paints each bar under the pointer to its height", () => {
+    const roll = create({ mode: "draw" });
+    const lane = gridElement();
+    roll.paintLevels(pointer("pointerdown", 5, 10), lane);
+    document.dispatchEvent(pointer("pointermove", 25, 40));
+    document.dispatchEvent(pointer("pointerup", 25, 40));
+    const [a, b] = roll.getSnapshot().notes;
+    expect(a?.velocity).toBeCloseTo(0.8, 5);
+    expect(b?.velocity).toBeCloseTo(0.2, 5);
+  });
+
+  test("does nothing in select mode", () => {
+    const roll = create();
+    const lane = gridElement();
+    roll.paintLevels(pointer("pointerdown", 5, 10), lane, "chance");
+    document.dispatchEvent(pointer("pointerup", 5, 10));
+    expect(roll.getSnapshot().notes[0]?.chance).toBeUndefined();
+  });
+});

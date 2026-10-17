@@ -1,11 +1,22 @@
+import {
+  inScale,
+  nearestInScale,
+  type Scale,
+} from "../../audio/pitch/scale.ts";
 import { type Grid, snapMove } from "../timeline/snap.ts";
 
 export type NoteId = number | string;
 
 export interface Note {
+  /** How likely the note is to play each time it comes round, 0…1. @default 1 */
+  chance?: number;
+  /** How far the velocity may stray each time the note plays, up (positive) or down, as a share of the full range. @default 0 */
+  deviation?: number;
   id: NoteId;
   /** Length, in the timeline's units. */
   length: number;
+  /** Whether the note is deactivated: it stays on the roll, and does not play. @default false */
+  muted?: boolean;
   /** MIDI pitch: 60 is middle C. */
   pitch: number;
   /** Where the note starts, in the timeline's units. */
@@ -265,7 +276,10 @@ export function sameNotes(a: readonly Note[], b: readonly Note[]): boolean {
         note.pitch === other.pitch &&
         note.start === other.start &&
         note.length === other.length &&
-        note.velocity === other.velocity
+        note.velocity === other.velocity &&
+        note.muted === other.muted &&
+        note.chance === other.chance &&
+        note.deviation === other.deviation
       );
     })
   );
@@ -326,12 +340,532 @@ export function changeVelocity(
   ids: ReadonlySet<NoteId>,
   delta: number
 ): Note[] {
+  return changeLevel(notes, ids, "velocity", delta);
+}
+
+/** A note's value a lane draws as a bar, 0…1: how hard it plays, or how likely it is to. */
+export type NoteLevel = "chance" | "velocity";
+
+/**
+ * Changes `level` of every note in `ids` by `delta`, each kept within 0…1, so
+ * the notes keep their differences: the velocity, or the chance to play.
+ */
+export function changeLevel(
+  notes: readonly Note[],
+  ids: ReadonlySet<NoteId>,
+  level: NoteLevel,
+  delta: number
+): Note[] {
   return notes.map((note) =>
     ids.has(note.id)
       ? {
           ...note,
-          velocity: Math.min(1, Math.max(0, (note.velocity ?? 1) + delta)),
+          [level]: Math.min(1, Math.max(0, (note[level] ?? 1) + delta)),
         }
       : note
   );
+}
+
+/** Sets how far the velocity of the notes in `ids` may stray each time they play, kept within -1…1. */
+export function setDeviation(
+  notes: readonly Note[],
+  ids: ReadonlySet<NoteId>,
+  deviation: number
+): Note[] {
+  const value = Math.min(1, Math.max(-1, deviation));
+  return notes.map((note) =>
+    ids.has(note.id) ? { ...note, deviation: value } : note
+  );
+}
+
+/** The notes in `ids`, with the earliest start and the latest end among them. */
+function span(notes: readonly Note[], ids: ReadonlySet<NoteId>) {
+  const chosen = notes.filter((note) => ids.has(note.id));
+  return {
+    chosen,
+    earliest: Math.min(...chosen.map((note) => note.start)),
+    latestEnd: Math.max(...chosen.map((note) => note.start + note.length)),
+  };
+}
+
+/** Cuts a note at each time in `at` it holds: the first piece keeps its id, the others take new ones. */
+function cut(note: Note, at: readonly number[], nextId: () => NoteId): Note[] {
+  const end = note.start + note.length;
+  const times = at.filter((time) => time > note.start && time < end);
+  const edges = [note.start, ...times, end];
+  return edges.slice(0, -1).map((start, index) => ({
+    ...note,
+    id: index === 0 ? note.id : nextId(),
+    length: (edges[index + 1] as number) - start,
+    start,
+  }));
+}
+
+function cutNotes(
+  notes: readonly Note[],
+  ids: ReadonlySet<NoteId>,
+  timesOf: (note: Note) => number[],
+  nextId: () => NoteId
+): { added: NoteId[]; notes: Note[] } {
+  const added: NoteId[] = [];
+  const next = notes.flatMap((note) => {
+    if (!ids.has(note.id)) {
+      return [note];
+    }
+    const pieces = cut(note, timesOf(note), nextId);
+    added.push(...pieces.slice(1).map((piece) => piece.id));
+    return pieces;
+  });
+  return { added, notes: next };
+}
+
+/**
+ * Splits the notes in `ids` at `at`, or at each time in it, wherever a note
+ * holds that time: the first piece keeps the note's id, the others take new
+ * ones. Every grid line as `at` chops the notes to the grid. `added` lists
+ * the new ids.
+ */
+export function splitNotes(
+  notes: readonly Note[],
+  ids: ReadonlySet<NoteId>,
+  at: number | readonly number[],
+  nextId: () => NoteId
+): { added: NoteId[]; notes: Note[] } {
+  const times = typeof at === "number" ? [at] : at;
+  return cutNotes(notes, ids, () => [...times], nextId);
+}
+
+/**
+ * Chops each note in `ids` into `parts` notes of the same length, as many as
+ * fit at `minLength` or longer: a held note becomes a repeated one.
+ */
+export function chopNotes(
+  notes: readonly Note[],
+  ids: ReadonlySet<NoteId>,
+  parts: number,
+  nextId: () => NoteId,
+  minLength: number
+): { added: NoteId[]; notes: Note[] } {
+  return cutNotes(
+    notes,
+    ids,
+    (note) => {
+      const count = Math.max(
+        1,
+        Math.min(Math.floor(parts), Math.floor(note.length / minLength))
+      );
+      const piece = note.length / count;
+      return Array.from(
+        { length: count - 1 },
+        (_, index) => note.start + piece * (index + 1)
+      );
+    },
+    nextId
+  );
+}
+
+/**
+ * Joins the notes in `ids` that share a pitch into one, from the earliest
+ * start to the latest end: the earliest keeps its id and velocity.
+ */
+export function joinNotes(
+  notes: readonly Note[],
+  ids: ReadonlySet<NoteId>
+): Note[] {
+  const joined = new Map<number, Note>();
+  for (const note of spatialOrder(notes)) {
+    if (!ids.has(note.id)) {
+      continue;
+    }
+    const first = joined.get(note.pitch);
+    joined.set(
+      note.pitch,
+      first
+        ? {
+            ...first,
+            length:
+              Math.max(first.start + first.length, note.start + note.length) -
+              first.start,
+          }
+        : note
+    );
+  }
+  const kept = new Set([...joined.values()].map((note) => note.id));
+  return notes.flatMap((note) => {
+    if (!ids.has(note.id)) {
+      return [note];
+    }
+    return kept.has(note.id) ? [joined.get(note.pitch) as Note] : [];
+  });
+}
+
+/**
+ * Lengthens or shortens each note in `ids` to end where the next of them
+ * starts, so a phrase plays without gaps. The notes that start last reach
+ * `end`, such as where the loop ends, or keep their length without one.
+ */
+export function legatoNotes(
+  notes: readonly Note[],
+  ids: ReadonlySet<NoteId>,
+  minLength: number,
+  end?: number
+): Note[] {
+  const starts = [
+    ...new Set(
+      notes.filter((note) => ids.has(note.id)).map((note) => note.start)
+    ),
+  ].sort((a, b) => a - b);
+  return notes.map((note) => {
+    const next =
+      starts.find((start) => start > note.start) ??
+      (end !== undefined && end > note.start ? end : undefined);
+    return ids.has(note.id) && next !== undefined
+      ? { ...note, length: Math.max(minLength, next - note.start) }
+      : note;
+  });
+}
+
+/** Plays the notes in `ids` backwards: each lands where it would end, mirrored across their span. */
+export function reverseNotes(
+  notes: readonly Note[],
+  ids: ReadonlySet<NoteId>
+): Note[] {
+  const { chosen, earliest, latestEnd } = span(notes, ids);
+  if (chosen.length === 0) {
+    return [...notes];
+  }
+  return notes.map((note) =>
+    ids.has(note.id)
+      ? { ...note, start: earliest + latestEnd - note.start - note.length }
+      : note
+  );
+}
+
+/** Turns the notes in `ids` upside down: the highest becomes the lowest, around the middle of their range. */
+export function invertNotes(
+  notes: readonly Note[],
+  ids: ReadonlySet<NoteId>
+): Note[] {
+  const chosen = notes.filter((note) => ids.has(note.id));
+  if (chosen.length === 0) {
+    return [...notes];
+  }
+  const sum =
+    Math.min(...chosen.map((note) => note.pitch)) +
+    Math.max(...chosen.map((note) => note.pitch));
+  return notes.map((note) =>
+    ids.has(note.id) ? { ...note, pitch: sum - note.pitch } : note
+  );
+}
+
+/**
+ * Makes the notes in `ids` `factor` times as long, around `anchor` (where the
+ * earliest starts, by default): 2 plays them at half the speed, 0.5 at twice.
+ * The factor stops where a note would leave the roll, and no note gets
+ * shorter than `minLength`.
+ */
+export function stretchNotes(
+  notes: readonly Note[],
+  ids: ReadonlySet<NoteId>,
+  factor: number,
+  bounds: RollBounds,
+  anchor?: number
+): Note[] {
+  const { chosen, earliest, latestEnd } = span(notes, ids);
+  if (chosen.length === 0 || !(Number.isFinite(factor) && factor > 0)) {
+    return [...notes];
+  }
+  const origin = anchor ?? earliest;
+  const limits = [
+    latestEnd > origin
+      ? (bounds.duration - origin) / (latestEnd - origin)
+      : Number.POSITIVE_INFINITY,
+    earliest < origin ? origin / (origin - earliest) : Number.POSITIVE_INFINITY,
+  ];
+  const scale = Math.min(factor, ...limits);
+  return notes.map((note) =>
+    ids.has(note.id)
+      ? {
+          ...note,
+          length: Math.max(bounds.minLength, note.length * scale),
+          start: origin + (note.start - origin) * scale,
+        }
+      : note
+  );
+}
+
+/**
+ * Moves each note in `ids` that is out of `scale` to the nearest pitch in it,
+ * the lower of two as near. One that would leave the roll stays where it is.
+ */
+export function fitNotesToScale(
+  notes: readonly Note[],
+  ids: ReadonlySet<NoteId>,
+  scale: Scale,
+  bounds: RollBounds
+): Note[] {
+  return notes.map((note) => {
+    if (!ids.has(note.id)) {
+      return note;
+    }
+    const pitch = nearestInScale(note.pitch, scale);
+    return pitch === note.pitch ||
+      pitch < bounds.minPitch ||
+      pitch > bounds.maxPitch
+      ? note
+      : { ...note, pitch };
+  });
+}
+
+/**
+ * Sets the velocity of the notes in `ids` along a line, from `from` on the
+ * earliest to `to` on the latest: a crescendo, or a fade.
+ */
+export function rampVelocity(
+  notes: readonly Note[],
+  ids: ReadonlySet<NoteId>,
+  from: number,
+  to: number
+): Note[] {
+  const chosen = notes.filter((note) => ids.has(note.id));
+  if (chosen.length === 0) {
+    return [...notes];
+  }
+  const first = Math.min(...chosen.map((note) => note.start));
+  const last = Math.max(...chosen.map((note) => note.start));
+  return notes.map((note) => {
+    if (!ids.has(note.id)) {
+      return note;
+    }
+    const at = last > first ? (note.start - first) / (last - first) : 0;
+    return {
+      ...note,
+      velocity: Math.min(1, Math.max(0, from + (to - from) * at)),
+    };
+  });
+}
+
+/**
+ * Loosens the notes in `ids` the way a player would: each start moves by up
+ * to `timing` either way and each velocity by up to `velocity`, from
+ * `random` (0…1, `Math.random` by default). Notes stay on the roll.
+ */
+export function humanizeNotes(
+  notes: readonly Note[],
+  ids: ReadonlySet<NoteId>,
+  amount: { timing: number; velocity: number },
+  bounds: RollBounds,
+  random: () => number = Math.random
+): Note[] {
+  return notes.map((note) => {
+    if (!ids.has(note.id)) {
+      return note;
+    }
+    const start = note.start + (random() * 2 - 1) * amount.timing;
+    const velocity =
+      (note.velocity ?? 1) + (random() * 2 - 1) * amount.velocity;
+    return {
+      ...note,
+      start: Math.min(bounds.duration - note.length, Math.max(0, start)),
+      velocity: Math.min(1, Math.max(0, velocity)),
+    };
+  });
+}
+
+/**
+ * Deactivates the notes in `ids`, or activates them again when every one of
+ * them already is: a deactivated note stays on the roll and does not play.
+ */
+export function toggleMuted(
+  notes: readonly Note[],
+  ids: ReadonlySet<NoteId>
+): Note[] {
+  const chosen = notes.filter((note) => ids.has(note.id));
+  const muted = !chosen.every((note) => note.muted);
+  return notes.map((note) => (ids.has(note.id) ? { ...note, muted } : note));
+}
+
+/** Sets how likely the notes in `ids` are to play each time round, 0…1: 1 always, 0.5 every other time on average. */
+export function setChance(
+  notes: readonly Note[],
+  ids: ReadonlySet<NoteId>,
+  chance: number
+): Note[] {
+  const value = Math.min(1, Math.max(0, chance));
+  return notes.map((note) =>
+    ids.has(note.id) ? { ...note, chance: value } : note
+  );
+}
+
+/** The time the notes in `ids` cover, from the earliest start to the latest end, or null with none. */
+export function selectionSpan(
+  notes: readonly Note[],
+  ids: ReadonlySet<NoteId>
+): { end: number; start: number } | null {
+  const chosen = notes.filter((note) => ids.has(note.id));
+  if (chosen.length === 0) {
+    return null;
+  }
+  return {
+    end: Math.max(...chosen.map((note) => note.start + note.length)),
+    start: Math.min(...chosen.map((note) => note.start)),
+  };
+}
+
+/** The notes cut to the clip: those past its end go, those crossing it end there. */
+function withinDuration(notes: Note[], duration: number): Note[] {
+  return notes
+    .filter((note) => note.start < duration)
+    .map((note) =>
+      note.start + note.length > duration
+        ? { ...note, length: duration - note.start }
+        : note
+    );
+}
+
+/**
+ * Takes the time from `start` to `end` out of the clip: the notes inside it
+ * go, those after it move back by its length, and one crossing it loses the
+ * part inside.
+ */
+export function deleteTime(
+  notes: readonly Note[],
+  start: number,
+  end: number
+): Note[] {
+  const gap = end - start;
+  if (!(gap > 0)) {
+    return [...notes];
+  }
+  const moved = (time: number) => {
+    if (time <= start) {
+      return time;
+    }
+    return time >= end ? time - gap : start;
+  };
+  return notes.flatMap((note) => {
+    const from = moved(note.start);
+    const to = moved(note.start + note.length);
+    return to > from ? [{ ...note, length: to - from, start: from }] : [];
+  });
+}
+
+/**
+ * Opens `length` of silence at `at`: the notes from there on move later by
+ * it, one crossing `at` is split there with its second part moved along, and
+ * what then runs past the clip's `duration` is cut off.
+ */
+export function insertTime(
+  notes: readonly Note[],
+  at: number,
+  length: number,
+  nextId: () => NoteId,
+  duration: number
+): Note[] {
+  if (!(length > 0)) {
+    return [...notes];
+  }
+  const next = notes.flatMap((note) => {
+    const end = note.start + note.length;
+    if (note.start >= at) {
+      return [{ ...note, start: note.start + length }];
+    }
+    if (end <= at) {
+      return [note];
+    }
+    return [
+      { ...note, length: at - note.start },
+      { ...note, id: nextId(), length: end - at, start: at + length },
+    ];
+  });
+  return withinDuration(next, duration);
+}
+
+/**
+ * Repeats the time from `start` to `end` right after itself: silence opens at
+ * `end` and the notes in the range, cut to it, are copied into it under new
+ * ids. `added` lists the copies.
+ */
+export function duplicateTime(
+  notes: readonly Note[],
+  start: number,
+  end: number,
+  nextId: () => NoteId,
+  duration: number
+): { added: NoteId[]; notes: Note[] } {
+  const length = end - start;
+  if (!(length > 0)) {
+    return { added: [], notes: [...notes] };
+  }
+  const copies = notes.flatMap((note) => {
+    const from = Math.max(note.start, start);
+    const to = Math.min(note.start + note.length, end);
+    return to > from
+      ? [{ ...note, id: nextId(), length: to - from, start: from + length }]
+      : [];
+  });
+  const spread = insertTime(notes, end, length, nextId, duration);
+  const kept = withinDuration(copies, duration);
+  return {
+    added: kept.map((note) => note.id),
+    notes: [...spread, ...kept],
+  };
+}
+
+/** What `findNotes` looks for; every condition given must hold. */
+export interface NoteQuery {
+  /** Chance from…to, 0…1, inclusive. */
+  chance?: readonly [number, number];
+  /** Of the notes found, in the order they play, every `count`th from the `offset`th (0 is the first). */
+  every?: { count: number; offset: number };
+  /** Whether to find the notes that do not match instead. */
+  invert?: boolean;
+  /** Length from…to, in the timeline's units, inclusive. */
+  length?: readonly [number, number];
+  /** Deactivated notes only, or active ones only. */
+  muted?: boolean;
+  /** Pitch classes, in any octave: 0 is C, 11 is B. */
+  pitchClasses?: readonly number[];
+  /** Notes in `scale`, or with `within: false` those out of it. */
+  scale?: { scale: Scale; within: boolean };
+  /** Velocity from…to, 0…1, inclusive. */
+  velocity?: readonly [number, number];
+}
+
+const inRange = (value: number, range?: readonly [number, number]) =>
+  !range || (value >= range[0] - 1e-9 && value <= range[1] + 1e-9);
+
+/** Whether a note meets every condition of `query` but its count. */
+function matches(note: Note, query: NoteQuery): boolean {
+  const pitchClass = ((Math.round(note.pitch) % 12) + 12) % 12;
+  return (
+    (!query.pitchClasses || query.pitchClasses.includes(pitchClass)) &&
+    inRange(note.velocity ?? 1, query.velocity) &&
+    inRange(note.length, query.length) &&
+    inRange(note.chance ?? 1, query.chance) &&
+    (query.muted === undefined || (note.muted ?? false) === query.muted) &&
+    (!query.scale ||
+      inScale(note.pitch, query.scale.scale) === query.scale.within)
+  );
+}
+
+/**
+ * The ids of the notes that match `query`, in the order they play: to select
+ * every note of a pitch, a range of velocities or lengths, out of a scale,
+ * or every other one.
+ */
+export function findNotes(notes: readonly Note[], query: NoteQuery): NoteId[] {
+  const ordered = spatialOrder(notes);
+  let found = ordered.filter((note) => matches(note, query));
+  const { every } = query;
+  if (every && every.count > 1) {
+    found = found.filter(
+      (_, index) =>
+        index >= every.offset && (index - every.offset) % every.count === 0
+    );
+  }
+  const ids = new Set(found.map((note) => note.id));
+  return ordered
+    .filter((note) => ids.has(note.id) !== (query.invert ?? false))
+    .map((note) => note.id);
 }

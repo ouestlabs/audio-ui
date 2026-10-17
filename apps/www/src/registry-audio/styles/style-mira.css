@@ -417,7 +417,7 @@
   }
 
   .cn-piano-roll-row {
-    @apply data-[color=black]:bg-foreground/13 data-folded:border-t data-folded:border-foreground/25 data-octave:border-t data-octave:border-foreground/25 data-active:bg-primary/10;
+    @apply data-[color=black]:bg-foreground/13 data-folded:border-t data-folded:border-foreground/25 data-octave:border-t data-octave:border-foreground/25 data-active:bg-primary/10 data-in-scale:bg-linear-to-r data-in-scale:from-primary/10 data-in-scale:to-primary/10;
   }
 
   .cn-piano-roll-velocity {
@@ -425,7 +425,15 @@
   }
 
   .cn-piano-roll-velocity-bar {
-    @apply rounded-t-[min(var(--radius-sm),2px)] bg-primary opacity-60 transition-opacity duration-150 ease-out hover:opacity-100 has-focus-visible:opacity-100 has-focus-visible:ring-2 has-focus-visible:ring-ring/50 data-[selected]:opacity-100 motion-reduce:transition-none;
+    @apply rounded-t-[min(var(--radius-sm),2px)] bg-primary opacity-60 transition-opacity duration-150 ease-out hover:opacity-100 has-focus-visible:opacity-100 has-focus-visible:ring-2 has-focus-visible:ring-ring/50 data-[selected]:opacity-100 group-data-has-selection/piano-roll:not-data-selected:opacity-25 data-muted:bg-muted-foreground motion-reduce:transition-none;
+  }
+
+  .cn-piano-roll-selection {
+    @apply bg-primary/10;
+  }
+
+  .cn-piano-roll-stretch-handle {
+    @apply rounded-[min(var(--radius-sm),2px)] opacity-70 transition-opacity hover:opacity-100 motion-reduce:transition-none;
   }
 
   .cn-piano-roll-marquee {
