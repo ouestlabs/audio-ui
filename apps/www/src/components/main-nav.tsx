@@ -1,8 +1,7 @@
 "use client";
 
-import { Link } from "@tanstack/react-router";
 import { ArrowSquareOutIcon } from "@phosphor-icons/react/ssr";
-import { useLocation } from "@tanstack/react-router";
+import { Link, useLocation } from "@tanstack/react-router";
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { cn, isActive } from "@/lib/utils";
@@ -39,9 +38,9 @@ export function MainNav({
               item.href.startsWith("https://") ? (
                 <Link
                   className="flex items-center gap-0.5"
-                  to={item.href}
                   rel="noreferrer"
                   target="_blank"
+                  to={item.href}
                 >
                   {item.label} <ArrowSquareOutIcon className="size-3.5" />
                 </Link>

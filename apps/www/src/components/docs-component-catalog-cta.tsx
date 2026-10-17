@@ -1,7 +1,7 @@
 "use client";
 
 import { Link } from "@tanstack/react-router";
-import { SeoLinkedText } from "@/app/(create)/components/components/component-category-seo-content";
+import { SeoLinkedText } from "@/components/catalog/component-category-seo-content";
 import { cn } from "@/lib/utils";
 
 interface DocsComponentCatalogCtaProps {

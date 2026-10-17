@@ -1,9 +1,9 @@
 "use client";
 
 import { MagnifyingGlassIcon } from "@phosphor-icons/react/ssr";
-import { lazyComponent } from "@/lib/lazy";
 import type { CommandMenuGroup } from "@/components/command-menu";
 import { Button } from "@/components/ui/button";
+import { lazyComponent } from "@/lib/lazy";
 import type { CategoryInfo } from "@/lib/registry";
 
 const CommandMenu = lazyComponent(

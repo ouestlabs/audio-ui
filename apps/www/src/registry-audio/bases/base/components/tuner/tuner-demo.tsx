@@ -1,6 +1,6 @@
 "use client";
 
-import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder";
+import { IconPlaceholder } from "@/components/icon-placeholder";
 import { Button } from "@/registry/bases/base/ui/button";
 import { Tuner } from "@/registry-audio/bases/base/audio/elements/tuner";
 import { useMicrophone } from "@/registry-audio/bases/base/hooks/use-microphone";

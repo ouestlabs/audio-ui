@@ -1,6 +1,6 @@
+import { siteConfig } from "@/lib/config";
 import { getGroupsFromFolder } from "@/lib/page-tree";
 import { getAllCatalogItems } from "@/lib/registry";
-import { siteConfig } from "@/lib/config";
 import { source } from "@/lib/source";
 
 function markdownUrl(url: string) {
@@ -16,7 +16,9 @@ export function getLlmsTxt() {
     .getPageTree()
     .children.flatMap((folder) =>
       folder.type === "folder"
-        ? getGroupsFromFolder(folder, "base").filter((group) => group.collapsible)
+        ? getGroupsFromFolder(folder, "base").filter(
+            (group) => group.collapsible
+          )
         : []
     );
   // A guide a space opens with, such as Devices, is listed in that space only.

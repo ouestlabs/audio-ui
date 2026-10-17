@@ -1,5 +1,5 @@
 import type * as React from "react";
-import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder";
+import { IconPlaceholder } from "@/components/icon-placeholder";
 import { cn } from "@/registry/bases/base/lib/utils";
 import { Button } from "@/registry/bases/base/ui/button";
 

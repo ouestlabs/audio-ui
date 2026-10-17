@@ -1,7 +1,7 @@
+import { waitUntil } from "cloudflare:workers";
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
 import { instrument } from "@posthog/mcp";
 import { createFileRoute } from "@tanstack/react-router";
-import { waitUntil } from "cloudflare:workers";
 import { PostHog } from "posthog-node";
 import { createAudioUiMcpServer } from "@/lib/mcp-server";
 

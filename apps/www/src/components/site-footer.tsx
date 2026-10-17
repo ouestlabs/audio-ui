@@ -1,4 +1,3 @@
-import { Link } from "@tanstack/react-router";
 import { RssSimpleIcon } from "@phosphor-icons/react/ssr";
 import { FrameFooter } from "@/components/custom/frame";
 import { Separator } from "@/components/ui/separator";

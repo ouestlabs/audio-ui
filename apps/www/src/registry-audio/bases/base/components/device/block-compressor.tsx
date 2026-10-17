@@ -2,7 +2,7 @@
 
 import { createSource, type Source } from "@audio-ui/react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder";
+import { IconPlaceholder } from "@/components/icon-placeholder";
 import { Button } from "@/registry/bases/base/ui/button";
 import { CompressorPanel } from "@/registry-audio/bases/base/audio/panels/compressor-panel";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";

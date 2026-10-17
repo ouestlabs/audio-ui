@@ -1,5 +1,5 @@
-import { createMiddleware, createStart } from "@tanstack/react-start";
 import { env, waitUntil } from "cloudflare:workers";
+import { createMiddleware, createStart } from "@tanstack/react-start";
 import { markdownOfPage } from "@/lib/llm-page";
 
 /**
@@ -26,6 +26,8 @@ const DEFAULT_STYLE = "base-nova";
 const REGISTRY_STYLES = /^\/r\/styles\/(.+)$/;
 const REGISTRY_ITEM = /^\/r\/([^/]+)\.json$/;
 const REGISTRY_STYLED_ITEM = /^\/r\/([^/]+)\/([^/]+)\.json$/;
+const MDX_SUFFIX = /\.mdx$/;
+const INGEST_PREFIX = /^\/ingest/;
 const REGISTRY_FILE = /^\/r\/styles\/([^/]+)\/([^/]+)\.json$/;
 const DOCS_MARKDOWN = /^\/docs\/(.+)\.md$/;
 const DOCS_MDX = /^\/docs\/(.+)\.mdx$/;
@@ -34,11 +36,11 @@ const IMMUTABLE = "public, max-age=31536000, s-maxage=31536000, immutable";
 
 /** What an agent reading the site's machine surfaces is told to PostHog, with no person attached. */
 function agentEvent(pathname: string, method: string) {
-  const registry = REGISTRY_FILE.exec(pathname);
-  if (registry) {
+  const item = REGISTRY_FILE.exec(pathname);
+  if (item) {
     return {
       name: "registry_access",
-      properties: { component: registry[2], style: registry[1] },
+      properties: { component: item[2], style: item[1] },
     };
   }
   if (pathname === "/mcp") {
@@ -84,7 +86,7 @@ function proxyPostHog(request: Request, url: URL) {
   target.hostname = host;
   target.port = "";
   target.protocol = "https:";
-  target.pathname = url.pathname.replace(/^\/ingest/, "");
+  target.pathname = url.pathname.replace(INGEST_PREFIX, "");
   const headers = new Headers(request.headers);
   headers.set("host", host);
   headers.delete("cookie");
@@ -146,7 +148,7 @@ const edge = createMiddleware().server(async ({ next, request }) => {
 
   if (DOCS_MDX.test(url.pathname)) {
     return redirect(
-      `${url.origin}${url.pathname.replace(/\.mdx$/, ".md")}`,
+      `${url.origin}${url.pathname.replace(MDX_SUFFIX, ".md")}`,
       true
     );
   }

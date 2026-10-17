@@ -11,7 +11,7 @@ import {
 } from "@phosphor-icons/react/ssr";
 import { useRouter } from "@tanstack/react-router";
 import * as React from "react";
-import { ComponentEmptyState } from "@/app/(create)/components/components/component-empty-state";
+import { ComponentEmptyState } from "@/components/catalog/component-empty-state";
 import { copyToClipboardWithMeta } from "@/components/copy-button";
 import {
   FrameContent,

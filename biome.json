@@ -2,7 +2,6 @@
   "extends": [
     "ultracite/biome/core",
     "ultracite/biome/react",
-    "ultracite/biome/next",
     "ultracite/biome/tanstack",
     "ultracite/biome/vitest"
   ],
@@ -61,16 +60,6 @@
     "globals": ["Bun"]
   },
   "overrides": [
-    {
-      "includes": ["apps/www/src/routes/__root.tsx"],
-      "linter": {
-        "rules": {
-          "style": {
-            "noHeadElement": "off"
-          }
-        }
-      }
-    },
     {
       "includes": ["packages/ui/bench/*"],
       "linter": {

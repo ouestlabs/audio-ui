@@ -1,8 +1,7 @@
 "use client";
 
-import { Link } from "@tanstack/react-router";
 import { BookOpenTextIcon, CubeIcon } from "@phosphor-icons/react/ssr";
-import { useLocation } from "@tanstack/react-router";
+import { Link, useLocation } from "@tanstack/react-router";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn, isActive } from "@/lib/utils";
 

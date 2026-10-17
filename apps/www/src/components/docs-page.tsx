@@ -46,6 +46,19 @@ export interface DocPageData {
   url: string;
 }
 
+/** The SEO a component's docs page may have of its own, or lend to another page: only a canonical component page has any. */
+function componentDocSeo(
+  slugs: string[],
+  doc: { base?: string; description?: string; title: string }
+) {
+  const slug = slugs[2] ?? "";
+  const onBase = slugs[0] === "components" && slugs[1] === "base";
+  if (!(onBase && slugs.length === 3 && isCanonicalComponentDoc(slug))) {
+    return null;
+  }
+  return getComponentDocSeo(slug, doc.title, "base", doc.description);
+}
+
 /** Reads a docs page's frontmatter and works out its SEO: a component's page may be another's canonical. */
 export const loadDocPage = createServerFn({ method: "GET" })
   .validator((slugs: string[]) => slugs)
@@ -55,44 +68,26 @@ export const loadDocPage = createServerFn({ method: "GET" })
       throw notFound();
     }
     const doc = page.data;
-    const docBase =
-      slugs[0] === "components" && slugs[1] === "base" ? slugs[1] : null;
-    const slug = slugs[2] ?? "";
-    const componentSlug =
-      slugs.length === 3 && docBase && isCanonicalComponentDoc(slug)
-        ? slug
-        : null;
-    const componentSeo =
-      docBase && componentSlug
-        ? getComponentDocSeo(componentSlug, doc.title, docBase, doc.description)
-        : null;
-    const canonicalPath = componentSeo?.canonicalPath ?? page.url;
+    const seo = componentDocSeo(slugs, doc);
     const isComponentDoc = doc.component === true && doc.base !== undefined;
-    const componentName = isComponentDoc ? (slugs[2] ?? null) : null;
-    const seoForHeading =
-      isComponentDoc && isCanonicalComponentDoc(slug)
-        ? getComponentDocSeo(slug, doc.title, doc.base ?? "base", doc.description)
-        : null;
 
     return {
       base: doc.base ?? null,
-      breadcrumbPath: seoForHeading?.canonicalPath ?? page.url,
-      componentName,
+      breadcrumbPath: seo?.canonicalPath ?? page.url,
+      componentName: isComponentDoc ? (slugs[2] ?? null) : null,
       description: doc.description ?? null,
       head: buildPageMetadata({
         description:
-          componentSeo?.description ??
-          doc.description ??
-          siteConfig.description,
+          seo?.description ?? doc.description ?? siteConfig.description,
         image: getPageImage(page).url,
-        path: canonicalPath,
-        robots: componentSeo && !componentSeo.shouldIndex ? "noindex, follow" : undefined,
-        title: componentSeo?.title ?? doc.title,
+        path: seo?.canonicalPath ?? page.url,
+        robots: seo && !seo.shouldIndex ? "noindex, follow" : undefined,
+        title: seo?.title ?? doc.title,
         titleSuffix: siteConfig.metadata.titleSuffixes.site,
         type: "article",
       }),
-      heading: seoForHeading?.displayTitle ?? doc.title,
-      lead: seoForHeading?.leadDescription ?? doc.description ?? null,
+      heading: seo?.displayTitle ?? doc.title,
+      lead: seo?.leadDescription ?? doc.description ?? null,
       links: doc.links ?? null,
       path: page.path,
       url: page.url,
@@ -278,9 +273,10 @@ function DocArticle({
 }
 
 /** The MDX of the docs, loaded in the browser bundle and rendered inside the page. */
-export const docsLoader = browserCollections.docs.createClientLoader<DocArticleProps>({
-  component: ({ default: Mdx, toc }, props) => (
-    <DocArticle Mdx={Mdx} props={props} toc={toc} />
-  ),
-  id: "docs",
-});
+export const docsLoader =
+  browserCollections.docs.createClientLoader<DocArticleProps>({
+    component: ({ default: Mdx, toc }, props) => (
+      <DocArticle Mdx={Mdx} props={props} toc={toc} />
+    ),
+    id: "docs",
+  });

@@ -32,7 +32,7 @@ const INSTALL_FOLDERS: Record<string, string> = {
 // Not ours to install: the `cn` helper shadcn's init writes, and the icon
 // import the shadcn CLI rewrites to the project's icon library.
 const PROVIDED_BY_SHADCN = new Set([
-  "@/app/(create)/components/icon-placeholder",
+  "@/components/icon-placeholder",
   "@/lib/utils",
 ]);
 // Every `from "<package>"` specifier in a built file.

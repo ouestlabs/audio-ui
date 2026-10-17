@@ -2,7 +2,7 @@
 
 import { ContextMenu as ContextMenuPrimitive } from "@base-ui/react/context-menu";
 import type * as React from "react";
-import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder";
+import { IconPlaceholder } from "@/components/icon-placeholder";
 import { cn } from "@/registry/bases/base/lib/utils";
 
 function ContextMenu({ ...props }: ContextMenuPrimitive.Root.Props) {

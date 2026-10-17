@@ -1,13 +1,13 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { Suspense } from "react";
-import { ComponentCategoryPager } from "@/app/(create)/components/components/component-category-pager";
+import { ComponentCategoryPager } from "@/components/catalog/component-category-pager";
 import {
   ComponentCategoryHeroIntro,
   ComponentCategorySeoContent,
-} from "@/app/(create)/components/components/component-category-seo-content";
-import { ComponentDocsLink } from "@/app/(create)/components/components/component-docs-link";
-import { ComponentPreviewView } from "@/app/(create)/components/components/component-preview-view";
-import { HideDuringSearch } from "@/app/(create)/components/components/hide-during-search";
+} from "@/components/catalog/component-category-seo-content";
+import { ComponentDocsLink } from "@/components/catalog/component-docs-link";
+import { ComponentPreviewView } from "@/components/catalog/component-preview-view";
+import { HideDuringSearch } from "@/components/catalog/hide-during-search";
 import { GridSkeleton } from "@/components/grid-skeleton";
 import { JsonLd } from "@/components/json-ld";
 import { siteConfig } from "@/lib/config";

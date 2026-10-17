@@ -318,7 +318,8 @@ export function getComponent(
   }
 
   // The path in the metadata is relative to the base, e.g. "audio/elements/knob.tsx".
-  const load = componentModules[`../registry-audio/bases/${base}/${item.files[0].path}`];
+  const load =
+    componentModules[`../registry-audio/bases/${base}/${item.files[0].path}`];
   if (!load) {
     return null;
   }

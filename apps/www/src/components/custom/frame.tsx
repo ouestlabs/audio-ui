@@ -28,8 +28,8 @@ export const Frame = ({
           outerClasses,
           "transition-[filter] duration-200 ease-out hover:drop-shadow-lg hover:ring-site-foreground/10"
         )}
-        to={url}
         ref={ref as any}
+        to={url}
       >
         {children}
       </Link>

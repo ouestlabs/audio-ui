@@ -3,7 +3,7 @@
 import { noteToFrequency } from "@audio-ui/core/pitch";
 import { createSource, type Meter as MeterPrimitive } from "@audio-ui/react";
 import { useCallback, useEffect, useState } from "react";
-import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder";
+import { IconPlaceholder } from "@/components/icon-placeholder";
 import { Button } from "@/registry/bases/base/ui/button";
 import { Toggle } from "@/registry/bases/base/ui/toggle";
 import { Fader } from "@/registry-audio/bases/base/audio/elements/fader";

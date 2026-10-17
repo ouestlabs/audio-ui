@@ -10,7 +10,9 @@ import { prerenderPages } from "./scripts/site-paths";
 // It lives beside the Next.js app (src/app) until every route has moved.
 // Changes on every build, so the registry's addresses are a new cache key on every deploy.
 const deploymentId =
-  process.env.GITHUB_SHA ?? process.env.WORKERS_CI_COMMIT_SHA ?? Date.now().toString(36);
+  process.env.GITHUB_SHA ??
+  process.env.WORKERS_CI_COMMIT_SHA ??
+  Date.now().toString(36);
 
 export default defineConfig({
   define: {
@@ -40,5 +42,5 @@ export default defineConfig({
     entries: ["src/router.tsx", "src/routes/**/*.tsx"],
   },
   resolve: { dedupe: ["react", "react-dom"], tsconfigPaths: true },
-  server: { port: 4300 },
+  server: { port: 4000 },
 });

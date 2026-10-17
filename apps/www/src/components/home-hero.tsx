@@ -1,5 +1,5 @@
-import { Link } from "@tanstack/react-router";
 import { ArrowRightIcon } from "@phosphor-icons/react/ssr";
+import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 
 /** The line above the product on the landing page: what it is, and where to start. */

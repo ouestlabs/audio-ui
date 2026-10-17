@@ -33,7 +33,7 @@ bun run dev    # the docs site on http://localhost:4000, the sandbox on :4100
 
 | Path | What it is |
 | --- | --- |
-| `apps/www` | The docs site and the registry (Next.js, Fumadocs) |
+| `apps/www` | The docs site and the registry (TanStack Start, Fumadocs) |
 | `apps/sandbox` | A consumer app that installs from the registry |
 | `apps/video` | Remotion videos of the real components |
 | `packages/core` | `@audio-ui/core`, framework-agnostic logic |

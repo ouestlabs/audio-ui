@@ -11,7 +11,7 @@ import {
   formatHz,
 } from "@audio-ui/core/analysis";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder";
+import { IconPlaceholder } from "@/components/icon-placeholder";
 import { Button } from "@/registry/bases/base/ui/button";
 import {
   Popover,

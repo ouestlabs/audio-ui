@@ -148,7 +148,6 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
       alt,
       ...props
     }: React.ComponentProps<"img">) => (
-      // biome-ignore lint/performance/noImgElement: Cloudflare serves the file as it is
       <img
         alt={alt || ""}
         className={cn(
@@ -164,7 +163,6 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     ),
     img: ({ className, alt, ...props }: React.ComponentProps<"img">) => (
       // biome-ignore lint/correctness/useImageSize: <ignore>
-      // biome-ignore lint/performance/noImgElement: <ignore>
       <img alt={alt} className={cn("site-rounded-md", className)} {...props} />
     ),
     Kbd,

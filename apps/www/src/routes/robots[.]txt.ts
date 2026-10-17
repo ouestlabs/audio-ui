@@ -18,7 +18,9 @@ const AI_CRAWLERS = [
 
 function robots() {
   const siteUrl = getSiteUrl();
-  const crawlers = AI_CRAWLERS.map((agent) => `User-Agent: ${agent}`).join("\n");
+  const crawlers = AI_CRAWLERS.map((agent) => `User-Agent: ${agent}`).join(
+    "\n"
+  );
   return `${crawlers}
 Allow: /
 Allow: /llms.txt

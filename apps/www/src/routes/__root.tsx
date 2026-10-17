@@ -1,3 +1,4 @@
+import { PostHogProvider } from "@posthog/react";
 import { createThemeCss } from "@tanstack/highlight/theme";
 import { githubDarkTheme } from "@tanstack/highlight/themes/github-dark";
 import { githubLightTheme } from "@tanstack/highlight/themes/github-light";
@@ -7,16 +8,15 @@ import {
   Outlet,
   Scripts,
 } from "@tanstack/react-router";
-import { PostHogProvider } from "@posthog/react";
 import { Provider as JotaiProvider } from "jotai";
 import { NuqsAdapter } from "nuqs/adapters/tanstack-router";
-import { DESIGN_SYSTEM_BOOT_SCRIPT } from "@/app/(create)/lib/boot-cache";
 import { JsonLd } from "@/components/json-ld";
 import { QueryProvider } from "@/components/query-provider";
 import { TailwindIndicator } from "@/components/tailwind-indicator";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { META_THEME_COLORS, siteConfig } from "@/lib/config";
+import { DESIGN_SYSTEM_BOOT_SCRIPT } from "@/lib/design-system/boot-cache";
 import {
   buildAuthorJsonLd,
   buildOrganizationJsonLd,

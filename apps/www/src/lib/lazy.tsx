@@ -24,6 +24,10 @@ export function lazyComponent<Props extends object>(
         <Lazy {...(props as Props & object)} />
       </Suspense>
     );
-    return ssr ? content : <ClientOnly fallback={loading()}>{content}</ClientOnly>;
+    return ssr ? (
+      content
+    ) : (
+      <ClientOnly fallback={loading()}>{content}</ClientOnly>
+    );
   };
 }

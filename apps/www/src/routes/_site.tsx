@@ -1,7 +1,6 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { useFumadocsLoader } from "fumadocs-core/source/client";
-import { CREATE_PREVIEW_FONTS_ATTR } from "@/app/(create)/lib/fonts";
 import { SiteFooter } from "@/components/site-footer";
 import {
   SiteBarContent,
@@ -9,6 +8,7 @@ import {
   SiteSidebarHeader,
 } from "@/components/site-header";
 import { SiteShell } from "@/components/site-shell";
+import { CREATE_PREVIEW_FONTS_ATTR } from "@/lib/design-system/fonts";
 import {
   getCategories,
   getTotalComponentCount,

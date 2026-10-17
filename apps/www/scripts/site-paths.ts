@@ -20,10 +20,12 @@ function mdxFiles(dir: string, base = ""): string[] {
   );
 }
 
+const MDX_EXTENSION = /\.mdx$/;
+
 /** A docs page's address from its file: groups in parentheses and a trailing `index` are not in the URL. */
 export function slugsOf(file: string): string[] {
   const parts = file
-    .replace(/\.mdx$/, "")
+    .replace(MDX_EXTENSION, "")
     .split("/")
     .filter((part) => !part.startsWith("("));
   return parts.at(-1) === "index" ? parts.slice(0, -1) : parts;
@@ -41,6 +43,8 @@ export function docsPages() {
   });
 }
 
+const WHITESPACE = /\s+/g;
+
 /** The addresses of the component catalog's categories. */
 export function categoryPaths(): string[] {
   const registry = JSON.parse(
@@ -50,7 +54,8 @@ export function categoryPaths(): string[] {
     )
   ) as { categories: { name: string }[] };
   return registry.categories.map(
-    (category) => `/components/${category.name.toLowerCase().replace(/\s+/g, "-")}`
+    (category) =>
+      `/components/${category.name.toLowerCase().replace(WHITESPACE, "-")}`
   );
 }
 

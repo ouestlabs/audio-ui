@@ -1,4 +1,3 @@
-
 import { siteConfig } from "@/lib/config";
 import { getCategoryDocsDescription } from "@/lib/registry";
 

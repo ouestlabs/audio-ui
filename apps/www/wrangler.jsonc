@@ -2,16 +2,11 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "audio-ui",
   "compatibility_date": "2026-09-01",
-  "compatibility_flags": [
-    "nodejs_compat"
-  ],
+  "compatibility_flags": ["nodejs_compat"],
   "main": "@tanstack/react-start/server-entry",
   "assets": {
     "binding": "ASSETS",
-    "run_worker_first": [
-      "/r/*",
-      "/ingest/*"
-    ],
+    "run_worker_first": ["/r/*", "/ingest/*"],
     "html_handling": "drop-trailing-slash"
   }
 }

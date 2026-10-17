@@ -2,7 +2,7 @@
 
 import { Command as CommandPrimitive } from "cmdk";
 import type * as React from "react";
-import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder";
+import { IconPlaceholder } from "@/components/icon-placeholder";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {
   Dialog,

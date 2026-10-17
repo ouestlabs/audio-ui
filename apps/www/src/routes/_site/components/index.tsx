@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Suspense } from "react";
-import { ComponentCategorySeoContent } from "@/app/(create)/components/components/component-category-seo-content";
-import { ComponentPreviewView } from "@/app/(create)/components/components/component-preview-view";
+import { ComponentCategorySeoContent } from "@/components/catalog/component-category-seo-content";
+import { ComponentPreviewView } from "@/components/catalog/component-preview-view";
 import { GridSkeleton } from "@/components/grid-skeleton";
 import { JsonLd } from "@/components/json-ld";
 import { siteConfig } from "@/lib/config";

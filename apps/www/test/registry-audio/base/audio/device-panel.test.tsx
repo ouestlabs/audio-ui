@@ -4,7 +4,10 @@ import { fireEvent, render, within } from "@testing-library/react";
 import { NuqsTestingAdapter } from "nuqs/adapters/testing";
 
 // The list a long choice goes in is the site's own select, which asks the router where it is.
-mock.module("next/navigation", () => ({ usePathname: () => "/" }));
+mock.module("@tanstack/react-router", () => ({
+  useLocation: ({ select }: { select: (l: { pathname: string }) => string }) =>
+    select({ pathname: "/" }),
+}));
 const { DevicePanel } = await import(
   "@/registry-audio/bases/base/audio/panels/device-panel"
 );

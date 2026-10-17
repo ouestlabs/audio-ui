@@ -2,17 +2,17 @@
 
 import { useLocation } from "@tanstack/react-router";
 import { Suspense, useMemo } from "react";
-import { ComponentHeaderSearch } from "@/app/(create)/components/components/component-header-search";
+import { ComponentHeaderSearch } from "@/components/catalog/component-header-search";
 import {
   ComponentsContext,
   type ComponentsContextValue,
-} from "@/app/(create)/components/components/components-context";
-import { DesignSystemEffects } from "@/app/(create)/customizer/design-system-provider";
-import { LocksProvider } from "@/app/(create)/hooks/use-locks";
+} from "@/components/catalog/components-context";
+import { DesignSystemEffects } from "@/components/customizer/design-system-provider";
 import { DocsDesignSystemEffects } from "@/components/docs-design-system-sync";
 import { FramedLayout } from "@/components/framed-layout";
 import { SiteSidebar } from "@/components/site-sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { LocksProvider } from "@/hooks/use-locks";
 import type { source } from "@/lib/source";
 
 /** What the bar's search is while it waits for the URL: the field's place, kept. */

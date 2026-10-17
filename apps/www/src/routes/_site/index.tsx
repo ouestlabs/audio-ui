@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ComponentRenderer } from "@/app/(create)/components/components/component-card-container";
+import { ComponentRenderer } from "@/components/catalog/component-card-container";
 import { HomeHero } from "@/components/home-hero";
 import { JsonLd } from "@/components/json-ld";
 import { siteConfig } from "@/lib/config";

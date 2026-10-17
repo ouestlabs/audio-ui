@@ -1,6 +1,5 @@
 "use client";
 
-import { Link } from "@tanstack/react-router";
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup, ButtonGroupText } from "@/components/ui/button-group";
@@ -16,11 +15,7 @@ export function GitHubLink() {
         className="shadow-none"
         nativeButton={false}
         render={
-          <a
-            href={siteConfig.links.github}
-            rel="noreferrer"
-            target="_blank"
-          />
+          <a href={siteConfig.links.github} rel="noreferrer" target="_blank" />
         }
         variant="outline"
       >

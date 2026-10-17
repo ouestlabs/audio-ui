@@ -92,7 +92,7 @@ export const webpackOverride: WebpackOverrideFn = (config) => ({
       ...corePrimitives,
       // The site's icon customizer drags the whole design system along, for
       // menu icons a video never opens.
-      "@/app/(create)/components/icon-placeholder$": path.resolve(
+      "@/components/icon-placeholder$": path.resolve(
         "src/icon-placeholder.tsx"
       ),
       "@": www,
