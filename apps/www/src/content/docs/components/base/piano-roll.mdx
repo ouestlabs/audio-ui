@@ -131,7 +131,7 @@ import {
         <PianoRollGrid aria-label="Notes" gridStep={1} />
       </PianoRollStrip>
       <PianoRollStrip lead={<PianoRollVelocityScale />} sticky="bottom">
-        <PianoRollVelocity />
+        <PianoRollVelocity gridStep={1} />
       </PianoRollStrip>
     </PianoRollViewport>
   </PianoRoll>
@@ -141,6 +141,8 @@ import {
 A note is `{ id, pitch, start, length, velocity? }`: `pitch` is a MIDI number (60 is middle C), `start` and `length` are in the timeline's units, and `velocity` is 0 to 1 (full when left out). `value` and `selection` are controlled; `defaultValue` and `defaultSelection` leave them to the roll. The roll reports every edit through `onValueChange` and, when a gesture or a key press ends, `onValueCommitted`; `eventDetails.edit` tells what happened (`"add"`, `"move"`, `"resize"`, `"remove"`, `"duplicate"`, `"paste"`, `"quantize"` or `"velocity"`) and `eventDetails.cancel()` keeps the notes as they were.
 
 `onNoteOn` and `onNoteOff` say when a pitch should sound or stop: a key pressed, a note drawn, picked up or moved to a new pitch. A MIDI file can be read and written with the `midi` library (`@audio-ui/midi`); the preview above imports and exports `.mid` files with it.
+
+`scale` marks the rows of a scale (`data-in-scale` on each `PianoRoll.Row`), and `folded="scale"` keeps only those rows and the ones carrying notes. `@audio-ui/core/pitch` holds the scales (`SCALES`, `inScale`, `nearestInScale`), and `@audio-ui/core/piano-roll` the edits a toolbar or a menu applies to the selection, each returning the new notes: `splitNotes`, `chopNotes`, `joinNotes`, `legatoNotes`, `reverseNotes`, `invertNotes`, `stretchNotes`, `fitNotesToScale`, `rampVelocity` and `humanizeNotes`.
 
 ## Interaction
 
@@ -186,7 +188,8 @@ Groups the parts of a piano roll and owns its notes and selection. Must be used 
 <TypeRow name={"maxPitch"} type={"number"} default={"72"}>Highest MIDI pitch, inclusive.</TypeRow>
 <TypeRow name={"minLength"} type={"number"}>The shortest a note can be, in the timeline's units. Defaults to the timeline's grid step.</TypeRow>
 <TypeRow name={"mode"} type={"\"draw\" | \"select\""} default={"\"select\""}>What a press on empty grid does: draw a note, or start a selection rectangle (a double-click draws).</TypeRow>
-<TypeRow name={"folded"} type={"boolean"} default={"false"}>Whether only the pitches carrying notes get a row. A roll without notes keeps them all.</TypeRow>
+<TypeRow name={"folded"} type={"boolean | \"scale\""} default={"false"}>Whether only the pitches carrying notes get a row, and with `"scale"` those in `scale` too. A roll with nothing to fold onto keeps them all.</TypeRow>
+<TypeRow name={"scale"} type={"Scale | null"}>The scale whose rows are marked `data-in-scale`, such as `{ name: "major", root: 0 }` for C major.</TypeRow>
 <TypeRow name={"activePitches"} type={"number[]"}>Pitches lit from elsewhere, such as a MIDI input or the notes playing, on the keys and rows.</TypeRow>
 <TypeRow name={"disabled"} type={"boolean"}></TypeRow>
 <TypeRow name={"createNoteId"} type={"() => NoteId"}>Returns the id of a note drawn, added or duplicated. Defaults to `"note-<n>"`, skipping ids in use.</TypeRow>
@@ -227,7 +230,7 @@ The surface notes are drawn on: a timeline lane, with the roll's rows stacked do
 
 ### Row
 
-The band a pitch takes across the grid, for shading black-key rows or ruling where an octave starts. It lets presses through to the grid and is hidden from assistive technology. Renders a `<div>` element.
+The band a pitch takes across the grid, for shading black-key rows, the rows of the roll's scale, or ruling where an octave starts. It lets presses through to the grid and is hidden from assistive technology. Renders a `<div>` element.
 
 <TypeTable>
 <TypeRow name={"pitch"} type={"number"}>The MIDI pitch of the row.</TypeRow>
@@ -237,6 +240,7 @@ The band a pitch takes across the grid, for shading black-key rows or ruling whe
 <TypeRow name={"data-active"}>Whether the pitch is sounding.</TypeRow>
 <TypeRow name={"data-color"}>`"black"` or `"white"`.</TypeRow>
 <TypeRow name={"data-folded"}>Whether the roll is folded.</TypeRow>
+<TypeRow name={"data-in-scale"}>Whether the pitch is in the roll's `scale`.</TypeRow>
 <TypeRow name={"data-octave"}>Whether the row is a C, where an octave starts.</TypeRow>
 </TypeTable>
 

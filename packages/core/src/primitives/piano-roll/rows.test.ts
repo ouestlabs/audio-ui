@@ -51,4 +51,22 @@ describe("rollRows", () => {
   test("keeps every row when there is nothing to fold onto", () => {
     expect(rollRows([], 60, 63, true).folded).toBe(false);
   });
+
+  test("folds onto a scale, and the notes out of it", () => {
+    const rows = rollRows([{ pitch: 61 }], 60, 67, "scale", {
+      name: "major",
+      root: 0,
+    });
+    expect(rows.pitches).toEqual([67, 65, 64, 62, 61, 60]);
+    expect(rows.scale).toEqual([0, 2, 4, 5, 7, 9, 11]);
+  });
+
+  test("keeps every row with a scale unfolded, or folded on the notes alone", () => {
+    const scale = { name: "minor-pentatonic", root: 9 } as const;
+    expect(rollRows([], 60, 63, false, scale).pitches).toHaveLength(4);
+    expect(rollRows([{ pitch: 61 }], 60, 63, true, scale).pitches).toEqual([
+      61,
+    ]);
+    expect(rollRows([], 60, 63, "scale").pitches).toHaveLength(4);
+  });
 });

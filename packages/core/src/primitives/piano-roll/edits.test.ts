@@ -2,18 +2,28 @@ import { describe, expect, test } from "bun:test";
 import {
   cellStart,
   changeVelocity,
+  chopNotes,
   duplicateAfter,
   duplicateNotes,
+  fitNotesToScale,
+  humanizeNotes,
+  invertNotes,
+  joinNotes,
+  legatoNotes,
   moveNotes,
   type Note,
   notesWithin,
   pasteNotes,
   quantizeNotes,
+  rampVelocity,
   resizeNotes,
+  reverseNotes,
   sameNotes,
   sanitizeNote,
   snapEdgeDelta,
   spatialOrder,
+  splitNotes,
+  stretchNotes,
 } from "./edits.ts";
 
 const BOUNDS = { duration: 16, maxPitch: 72, minLength: 1, minPitch: 48 };
@@ -235,5 +245,185 @@ describe("pasteNotes", () => {
     >;
     expect(result.notes.map((note) => note.start)).toEqual([7, 7, 15]);
     expect(pasteNotes([], [], 0, counter(), BOUNDS)).toBeNull();
+  });
+});
+
+const counter = () => {
+  let id = 100;
+  return () => {
+    id += 1;
+    return id;
+  };
+};
+const PHRASE: Note[] = [
+  { id: 1, length: 2, pitch: 60, start: 0, velocity: 0.5 },
+  { id: 2, length: 1, pitch: 64, start: 4 },
+  { id: 3, length: 2, pitch: 67, start: 6 },
+];
+const ALL = new Set([1, 2, 3]);
+
+describe("splitNotes", () => {
+  test("cuts the notes that hold the time, and leaves the rest", () => {
+    const { added, notes } = splitNotes(PHRASE, ALL, 1, counter());
+    expect(added).toEqual([101]);
+    expect(notes).toEqual([
+      { id: 1, length: 1, pitch: 60, start: 0, velocity: 0.5 },
+      { id: 101, length: 1, pitch: 60, start: 1, velocity: 0.5 },
+      PHRASE[1] as Note,
+      PHRASE[2] as Note,
+    ]);
+  });
+
+  test("does not cut at a note's edge", () => {
+    expect(splitNotes(PHRASE, ALL, 4, counter()).added).toEqual([]);
+  });
+
+  test("chops to the grid at every time it is given", () => {
+    const grid = Array.from({ length: 16 }, (_, step) => step);
+    const { added, notes } = splitNotes(PHRASE, ALL, grid, counter());
+    expect(added).toHaveLength(2);
+    expect(notes.every((note) => note.length === 1)).toBe(true);
+  });
+});
+
+describe("chopNotes", () => {
+  test("cuts each note in equal parts, as many as fit at the shortest length", () => {
+    const { added, notes } = chopNotes(PHRASE, ALL, 4, counter(), 0.5);
+    expect(added).toHaveLength(7);
+    const first = notes.filter((note) => note.pitch === 60);
+    expect(first.map((note) => [note.start, note.length])).toEqual([
+      [0, 0.5],
+      [0.5, 0.5],
+      [1, 0.5],
+      [1.5, 0.5],
+    ]);
+    expect(notes.filter((note) => note.pitch === 64)).toHaveLength(2);
+  });
+});
+
+describe("joinNotes", () => {
+  test("joins notes of one pitch from the first start to the last end", () => {
+    const notes: Note[] = [
+      { id: 1, length: 1, pitch: 60, start: 0, velocity: 0.5 },
+      { id: 2, length: 1, pitch: 60, start: 3 },
+      { id: 3, length: 1, pitch: 62, start: 1 },
+    ];
+    expect(joinNotes(notes, new Set([1, 2, 3]))).toEqual([
+      { id: 1, length: 4, pitch: 60, start: 0, velocity: 0.5 },
+      notes[2] as Note,
+    ]);
+  });
+});
+
+describe("legatoNotes", () => {
+  test("each note reaches the next start, the last keeps its length", () => {
+    expect(legatoNotes(PHRASE, ALL, 0.25).map((note) => note.length)).toEqual([
+      4, 2, 2,
+    ]);
+  });
+
+  test("the last notes reach the end, when there is one", () => {
+    expect(
+      legatoNotes(PHRASE, ALL, 0.25, 16).map((note) => note.length)
+    ).toEqual([4, 2, 10]);
+  });
+
+  test("the notes of a chord all reach the next one", () => {
+    const chord: Note[] = [
+      { id: 1, length: 1, pitch: 60, start: 0 },
+      { id: 2, length: 3, pitch: 64, start: 0 },
+      { id: 3, length: 1, pitch: 60, start: 2 },
+    ];
+    expect(legatoNotes(chord, ALL, 0.25).map((note) => note.length)).toEqual([
+      2, 2, 1,
+    ]);
+  });
+});
+
+describe("reverseNotes", () => {
+  test("mirrors the notes across their span", () => {
+    expect(reverseNotes(PHRASE, ALL).map((note) => note.start)).toEqual([
+      6, 3, 0,
+    ]);
+  });
+});
+
+describe("invertNotes", () => {
+  test("turns the range upside down", () => {
+    expect(invertNotes(PHRASE, ALL).map((note) => note.pitch)).toEqual([
+      67, 63, 60,
+    ]);
+  });
+});
+
+describe("stretchNotes", () => {
+  test("doubles from the earliest start, as far as the roll goes", () => {
+    const doubled = stretchNotes(PHRASE, new Set([2, 3]), 2, BOUNDS);
+    expect(doubled.slice(1).map((note) => [note.start, note.length])).toEqual([
+      [4, 2],
+      [8, 4],
+    ]);
+    const capped = stretchNotes(PHRASE, ALL, 4, BOUNDS);
+    expect(Math.max(...capped.map((note) => note.start + note.length))).toBe(
+      16
+    );
+  });
+
+  test("halves, and keeps every note at least the shortest length", () => {
+    const halved = stretchNotes(PHRASE, ALL, 0.5, BOUNDS);
+    expect(halved.map((note) => [note.start, note.length])).toEqual([
+      [0, 1],
+      [2, 1],
+      [3, 1],
+    ]);
+  });
+});
+
+describe("fitNotesToScale", () => {
+  test("moves the notes out of the scale to the nearest pitch in it", () => {
+    const notes: Note[] = [
+      { id: 1, length: 1, pitch: 61, start: 0 },
+      { id: 2, length: 1, pitch: 64, start: 1 },
+    ];
+    expect(
+      fitNotesToScale(
+        notes,
+        new Set([1, 2]),
+        { name: "major", root: 0 },
+        BOUNDS
+      ).map((note) => note.pitch)
+    ).toEqual([60, 64]);
+  });
+});
+
+describe("rampVelocity", () => {
+  test("sets the velocity along a line through the starts", () => {
+    expect(
+      rampVelocity(PHRASE, ALL, 0.2, 0.8).map((note) =>
+        Number(note.velocity?.toFixed(6))
+      )
+    ).toEqual([0.2, 0.6, 0.8]);
+  });
+});
+
+describe("humanizeNotes", () => {
+  test("moves starts and velocities by up to the amounts, on the roll", () => {
+    const high = humanizeNotes(
+      PHRASE,
+      ALL,
+      { timing: 0.5, velocity: 0.2 },
+      BOUNDS,
+      () => 1
+    );
+    expect(high.map((note) => note.start)).toEqual([0.5, 4.5, 6.5]);
+    expect(high.map((note) => note.velocity)).toEqual([0.7, 1, 1]);
+    const low = humanizeNotes(
+      PHRASE,
+      ALL,
+      { timing: 0.5, velocity: 0.2 },
+      BOUNDS,
+      () => 0
+    );
+    expect(low[0]?.start).toBe(0);
   });
 });

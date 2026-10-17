@@ -6,6 +6,7 @@ import {
   type PianoRollOptions,
   type Rows,
 } from "@audio-ui/core/piano-roll";
+import type { Scale } from "@audio-ui/core/pitch";
 import * as React from "react";
 import { shallowEqual } from "../../internal/equal.ts";
 import { type PartProps, resolveStyling } from "../../internal/part.ts";
@@ -32,7 +33,8 @@ const describeNote = (note: Note) =>
  * units, and every gesture lands on its grid unless Cmd/Ctrl is held.
  *
  * Rows run from `maxPitch` at the top to `minPitch`, or with `folded` only
- * the pitches carrying notes have one. Its `--piano-roll-rows` CSS variable
+ * the pitches carrying notes have one, and with `folded="scale"` those in
+ * `scale` as well. Its `--piano-roll-rows` CSS variable
  * is how many rows there are, so the grid and the keys can be given a height
  * per row. Renders a `<div>` element.
  */
@@ -57,6 +59,7 @@ export function Root(componentProps: Root.Props) {
     onValueCommitted,
     ref,
     render,
+    scale,
     selection,
     style,
     value,
@@ -97,6 +100,7 @@ export function Root(componentProps: Root.Props) {
     onValueChange,
     onValueCommitted,
     requestFocus: focusAfterRender,
+    scale,
     selection,
     timeline: {
       duration,
@@ -228,8 +232,8 @@ export namespace Root {
     /** Uncontrolled starting notes. */
     defaultValue?: readonly Note[];
     disabled?: boolean;
-    /** Whether only the pitches carrying notes get a row. A roll without notes keeps them all. @default false */
-    folded?: boolean;
+    /** Whether only the pitches carrying notes get a row, and with `"scale"` those in `scale` too. A roll with nothing to fold onto keeps them all. @default false */
+    folded?: boolean | "scale";
     /** Returns a note's accessible name. Defaults to its pitch and where it starts and ends, such as "C4, 4 to 6". */
     getNoteLabel?: (note: Note) => string;
     /** Highest MIDI pitch, inclusive. @default 72 */
@@ -259,6 +263,8 @@ export namespace Root {
       value: Note[],
       eventDetails: ValueCommitEventDetails
     ) => void;
+    /** The scale whose rows are marked `data-in-scale`, such as `{ name: "major", root: 0 }` for C major. */
+    scale?: Scale | null;
     /** The ids of the selected notes. */
     selection?: readonly NoteId[];
     /** The notes. */

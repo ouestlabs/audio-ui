@@ -1,3 +1,4 @@
+import type { Scale } from "../../audio/pitch/scale.ts";
 import { followPointer } from "../../dom/gesture.ts";
 import { clamp } from "../../shared/math.ts";
 import {
@@ -121,8 +122,8 @@ export interface PianoRollOptions {
   defaultSelection?: readonly NoteId[];
   defaultValue?: readonly Note[];
   disabled?: boolean;
-  /** Whether only the pitches carrying notes get a row. @default false */
-  folded?: boolean;
+  /** Whether only the pitches carrying notes get a row, and with `"scale"` those in `scale` too. @default false */
+  folded?: boolean | "scale";
   /** @default 72 */
   maxPitch?: number;
   /** The shortest a note can be, in the timeline's units. Defaults to the timeline's grid step. */
@@ -144,6 +145,8 @@ export interface PianoRollOptions {
   ) => void;
   /** Asks the view to move focus to a note, or to the grid with `null`, once it has rendered. */
   requestFocus?: (target: NoteId | null) => void;
+  /** The scale whose rows are marked, and which `folded: "scale"` keeps. */
+  scale?: Scale | null;
   selection?: readonly NoteId[];
   timeline: PianoRollTimeline;
   value?: readonly Note[];
@@ -415,10 +418,11 @@ export function createPianoRollController(
           .sort((a, b) => a - b)
           .join(",")
       : "";
-    const key = `${folded}|${min}|${max}|${pitchKey}`;
+    const scale = options.scale ?? null;
+    const key = `${folded}|${min}|${max}|${pitchKey}|${scale?.root}|${scale?.name}`;
     if (!rowsCache || key !== rowsKey) {
       rowsKey = key;
-      rowsCache = rollRows(notes, min, max, folded);
+      rowsCache = rollRows(notes, min, max, folded, scale);
     }
     return rowsCache;
   };

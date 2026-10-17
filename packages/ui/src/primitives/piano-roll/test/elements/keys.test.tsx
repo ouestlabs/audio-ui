@@ -88,4 +88,18 @@ describe("PianoRoll.Row", () => {
     expect(row.style.getPropertyValue("--piano-roll-row")).toBe("2");
     expect(view.getByTestId("row-60").hasAttribute("data-octave")).toBe(true);
   });
+
+  test("marks the rows of the roll's scale, and folds onto them", () => {
+    const scale = { name: "major", root: 0 } as const;
+    const { view } = renderRoll({ scale });
+    expect(view.getByTestId("row-62").hasAttribute("data-in-scale")).toBe(true);
+    expect(view.getByTestId("row-61").hasAttribute("data-in-scale")).toBe(
+      false
+    );
+    view.unmount();
+    const folded = renderRoll({ folded: "scale", scale }).view;
+    expect(folded.queryByTestId("row-61")).toBeNull();
+    expect(folded.queryByTestId("row-63")).toBeNull();
+    expect(folded.getByTestId("row-60")).toBeDefined();
+  });
 });

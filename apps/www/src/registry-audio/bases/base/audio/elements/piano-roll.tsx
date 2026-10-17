@@ -5,7 +5,17 @@ import {
   Timeline as TimelinePrimitive,
 } from "@audio-ui/react";
 import { cva, type VariantProps } from "class-variance-authority";
-import type { ComponentProps, CSSProperties, ReactNode } from "react";
+import {
+  type ComponentProps,
+  type CSSProperties,
+  type KeyboardEvent,
+  type PointerEvent,
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 
 const pianoRollVariants = cva("", {
@@ -21,8 +31,50 @@ const pianoRollVariants = cva("", {
   },
 });
 
-/** Velocities the scale beside the velocity lane labels, in MIDI's 1…127. */
-const VELOCITY_MARKS = [127, 64, 1];
+/**
+ * The velocities the scale beside the velocity lane labels, in MIDI's 1…127:
+ * every 16 when the lane is tall enough, else every 32 or 64, and only the
+ * ends when it is short. Labels stay about 13px apart, so they never touch.
+ */
+function velocityMarks(height: number): number[] {
+  const step = [16, 32, 64].find((every) => (height * every) / 127 >= 13);
+  if (!step) {
+    return [127, 1];
+  }
+  const marks = [127];
+  for (let mark = Math.floor(126 / step) * step; mark >= step; mark -= step) {
+    marks.push(mark);
+  }
+  marks.push(1);
+  return marks;
+}
+/** How tall the velocity lane can be dragged, in px, and how far an arrow key moves it. */
+const VELOCITY_HEIGHT = { default: 56, keyStep: 8, max: 240, min: 32 };
+
+/**
+ * The tallest the lane can get: half the room it shares with the notes in the
+ * viewport, below a strip stuck to the top, so the notes keep the other half.
+ */
+function tallestLane(element: HTMLElement): number {
+  const strip = element.closest<HTMLElement>('[data-slot="piano-roll-strip"]');
+  const viewport = element.closest<HTMLElement>(
+    '[data-slot="piano-roll-viewport"]'
+  );
+  if (!(strip && viewport)) {
+    return VELOCITY_HEIGHT.max;
+  }
+  const first = viewport.querySelector<HTMLElement>(
+    '[data-slot="piano-roll-strip"]'
+  );
+  const above =
+    first && first !== strip && getComputedStyle(first).position === "sticky"
+      ? first.offsetHeight
+      : 0;
+  return Math.max(
+    VELOCITY_HEIGHT.min,
+    Math.min(VELOCITY_HEIGHT.max, (viewport.clientHeight - above) / 2)
+  );
+}
 
 type PianoRollProps = Omit<PianoRollPrimitive.Root.Props, "className"> & {
   className?: string;
@@ -62,7 +114,7 @@ function PianoRollViewport({
       {...props}
     >
       {/* As wide as the lanes, so the sticky keys stay put however far it scrolls. */}
-      <div className="flex min-h-full w-max min-w-full flex-1 flex-col">
+      <div className="flex min-h-full w-max min-w-full shrink-0 grow flex-col">
         {children}
       </div>
     </TimelinePrimitive.Viewport>
@@ -233,21 +285,92 @@ function PianoRollGrid({
 
 type PianoRollVelocityProps = Omit<
   PianoRollPrimitive.VelocityLane.Props,
-  "className"
-> & { className?: string };
+  "className" | "style"
+> & {
+  /** A firmer line every `accentStep` units, as on the grid above. */
+  accentStep?: number;
+  className?: string;
+  /** Distance between lines, in the timeline's units: give it the grid's, so each bar lines up with its note. */
+  gridStep?: number;
+  style?: CSSProperties;
+};
 
-/** Each note's velocity as a bar: drag one up or down, or use the arrow keys. */
-function PianoRollVelocity({ className, ...props }: PianoRollVelocityProps) {
+/**
+ * Each note's velocity as a bar: drag one up or down, or use the arrow keys.
+ * Its top edge drags the lane taller or shorter, as do Up and Down on it.
+ */
+function PianoRollVelocity({
+  accentStep,
+  children,
+  className,
+  gridStep,
+  style,
+  ...props
+}: PianoRollVelocityProps) {
+  const [height, setHeight] = useState(VELOCITY_HEIGHT.default);
+  const [tallest, setTallest] = useState(VELOCITY_HEIGHT.max);
+  const dragRef = useRef<{ height: number; y: number } | null>(null);
+  const resize = useCallback((element: HTMLElement, next: number) => {
+    const max = tallestLane(element);
+    setTallest(max);
+    setHeight(Math.round(Math.min(max, Math.max(VELOCITY_HEIGHT.min, next))));
+  }, []);
+  const handlePointerDown = useCallback(
+    (event: PointerEvent<HTMLDivElement>) => {
+      event.stopPropagation();
+      event.currentTarget.setPointerCapture(event.pointerId);
+      dragRef.current = { height, y: event.clientY };
+    },
+    [height]
+  );
+  const handlePointerMove = useCallback(
+    (event: PointerEvent<HTMLDivElement>) => {
+      const drag = dragRef.current;
+      if (drag) {
+        resize(event.currentTarget, drag.height + drag.y - event.clientY);
+      }
+    },
+    [resize]
+  );
+  const handleLostPointerCapture = useCallback(() => {
+    dragRef.current = null;
+  }, []);
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLDivElement>) => {
+      const direction = { ArrowDown: -1, ArrowUp: 1 }[event.key];
+      if (direction) {
+        event.preventDefault();
+        resize(
+          event.currentTarget,
+          height + direction * VELOCITY_HEIGHT.keyStep
+        );
+      }
+    },
+    [height, resize]
+  );
   return (
     <PianoRollPrimitive.VelocityLane
       aria-label="Velocity"
-      className={cn(
-        "cn-piano-roll-velocity h-14 touch-none select-none",
-        className
-      )}
+      className={cn("cn-piano-roll-velocity touch-none select-none", className)}
       data-slot="piano-roll-velocity"
+      style={{ ...gridLines(gridStep, accentStep), height, ...style }}
       {...props}
     >
+      <div
+        aria-label="Velocity lane height"
+        aria-orientation="horizontal"
+        aria-valuemax={Math.round(tallest)}
+        aria-valuemin={VELOCITY_HEIGHT.min}
+        aria-valuenow={height}
+        className="absolute inset-x-0 -top-1 z-10 h-2 cursor-ns-resize outline-none transition-colors hover:bg-primary/30 focus-visible:bg-ring/50"
+        data-slot="piano-roll-velocity-resize"
+        onKeyDown={handleKeyDown}
+        onLostPointerCapture={handleLostPointerCapture}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        role="separator"
+        tabIndex={0}
+      />
       <PianoRollPrimitive.Notes>
         {(note) => (
           <PianoRollPrimitive.Velocity
@@ -257,15 +380,29 @@ function PianoRollVelocity({ className, ...props }: PianoRollVelocityProps) {
           />
         )}
       </PianoRollPrimitive.Notes>
+      {children}
     </PianoRollPrimitive.VelocityLane>
   );
 }
 
-/** The scale beside the velocity lane, for the `lead` of its strip. */
+/** The scale beside the velocity lane, for the `lead` of its strip: it labels more velocities as the lane grows taller. */
 function PianoRollVelocityScale({
   className,
   ...props
 }: ComponentProps<"div">) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [height, setHeight] = useState(0);
+  useEffect(() => {
+    const element = ref.current;
+    if (!element) {
+      return;
+    }
+    const observer = new ResizeObserver(([entry]) => {
+      setHeight(entry?.contentRect.height ?? 0);
+    });
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
   return (
     <div
       aria-hidden="true"
@@ -274,9 +411,10 @@ function PianoRollVelocityScale({
         className
       )}
       data-slot="piano-roll-velocity-scale"
+      ref={ref}
       {...props}
     >
-      {VELOCITY_MARKS.map((mark) => (
+      {velocityMarks(height).map((mark) => (
         <span
           className="absolute end-1.5 flex translate-y-1/2 items-center gap-1"
           key={mark}
