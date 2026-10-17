@@ -1,20 +1,20 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { useFumadocsLoader } from "fumadocs-core/source/client";
-import { SiteFooter } from "@/components/site-footer";
+import { SiteFooter } from "@/components/site/layout/footer";
+import { SiteShell } from "@/components/site/layout/shell";
 import {
   SiteBarContent,
   SiteHeader,
   SiteSidebarHeader,
-} from "@/components/site-header";
-import { SiteShell } from "@/components/site-shell";
+} from "@/components/site/navigation/header";
 import { CREATE_PREVIEW_FONTS_ATTR } from "@/lib/design-system/fonts";
+import { source } from "@/lib/docs/content/source";
 import {
   getCategories,
   getTotalComponentCount,
   searchCatalog,
-} from "@/lib/registry";
-import { source } from "@/lib/source";
+} from "@/lib/registry/core/registry";
 
 /** The docs' page tree, read once on the server: the sidebars list its pages. */
 const loadPageTree = createServerFn({ method: "GET" }).handler(async () => ({

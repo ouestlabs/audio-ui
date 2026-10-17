@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { markdownOfPage } from "@/lib/llm-page";
+import { markdownOfPage } from "@/lib/agents/llm-page";
 
 export const Route = createFileRoute("/llm/")({
   server: { handlers: { GET: () => markdownOfPage([]) } },

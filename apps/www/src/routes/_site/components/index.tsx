@@ -1,13 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Suspense } from "react";
-import { ComponentCategorySeoContent } from "@/components/catalog/component-category-seo-content";
-import { ComponentPreviewView } from "@/components/catalog/component-preview-view";
-import { GridSkeleton } from "@/components/grid-skeleton";
-import { JsonLd } from "@/components/json-ld";
+import { ComponentPreviewView } from "@/components/catalog/card/component-preview-view";
+import { ComponentCategorySeoContent } from "@/components/catalog/category/component-category-seo-content";
+import { JsonLd } from "@/components/site/json-ld";
+import { GridSkeleton } from "@/components/site/layout/grid-skeleton";
 import { siteConfig } from "@/lib/config";
-import { getTotalComponentCount, searchCatalog } from "@/lib/registry";
-import { getComponentIndexSeo } from "@/lib/registry-seo-cache";
-import { buildBreadcrumbJsonLd, buildPageMetadata } from "@/lib/seo";
+import {
+  getTotalComponentCount,
+  searchCatalog,
+} from "@/lib/registry/core/registry";
+import { getComponentIndexSeo } from "@/lib/registry/core/registry-seo-cache";
+import { buildBreadcrumbJsonLd, buildPageMetadata } from "@/lib/seo/seo";
 
 const totalComponentCount = getTotalComponentCount();
 const allCatalogItems = searchCatalog("");

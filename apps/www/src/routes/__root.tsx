@@ -12,10 +12,10 @@ import { Provider as JotaiProvider } from "jotai";
 import { NuqsAdapter } from "nuqs/adapters/tanstack-router";
 import posthog from "posthog-js";
 import { useEffect } from "react";
-import { JsonLd } from "@/components/json-ld";
-import { QueryProvider } from "@/components/query-provider";
-import { TailwindIndicator } from "@/components/tailwind-indicator";
-import { ThemeProvider } from "@/components/theme-provider";
+import { JsonLd } from "@/components/site/json-ld";
+import { QueryProvider } from "@/components/site/providers/query-provider";
+import { ThemeProvider } from "@/components/site/providers/theme-provider";
+import { TailwindIndicator } from "@/components/site/tailwind-indicator";
 import { Toaster } from "@/components/ui/sonner";
 import { META_THEME_COLORS, siteConfig } from "@/lib/config";
 import { DESIGN_SYSTEM_BOOT_SCRIPT } from "@/lib/design-system/boot-cache";
@@ -27,7 +27,7 @@ import {
   buildWebSiteJsonLd,
   DEFAULT_ROBOTS,
   getSiteAuthors,
-} from "@/lib/seo";
+} from "@/lib/seo/seo";
 import { cn } from "@/lib/utils";
 import fontsCss from "@/styles/fonts.css?url";
 import globalsCss from "@/styles/globals.css?url";

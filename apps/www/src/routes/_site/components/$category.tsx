@@ -1,19 +1,22 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { Suspense } from "react";
-import { ComponentCategoryPager } from "@/components/catalog/component-category-pager";
+import { ComponentDocsLink } from "@/components/catalog/card/component-docs-link";
+import { ComponentPreviewView } from "@/components/catalog/card/component-preview-view";
+import { ComponentCategoryPager } from "@/components/catalog/category/component-category-pager";
 import {
   ComponentCategoryHeroIntro,
   ComponentCategorySeoContent,
-} from "@/components/catalog/component-category-seo-content";
-import { ComponentDocsLink } from "@/components/catalog/component-docs-link";
-import { ComponentPreviewView } from "@/components/catalog/component-preview-view";
-import { HideDuringSearch } from "@/components/catalog/hide-during-search";
-import { GridSkeleton } from "@/components/grid-skeleton";
-import { JsonLd } from "@/components/json-ld";
+} from "@/components/catalog/category/component-category-seo-content";
+import { HideDuringSearch } from "@/components/catalog/sidebar/hide-during-search";
+import { JsonLd } from "@/components/site/json-ld";
+import { GridSkeleton } from "@/components/site/layout/grid-skeleton";
 import { siteConfig } from "@/lib/config";
-import { getCategoryInfo, getComponentsByCategory } from "@/lib/registry";
-import { getComponentCategorySeo } from "@/lib/registry-seo-cache";
-import { buildBreadcrumbJsonLd, buildPageMetadata } from "@/lib/seo";
+import {
+  getCategoryInfo,
+  getComponentsByCategory,
+} from "@/lib/registry/core/registry";
+import { getComponentCategorySeo } from "@/lib/registry/core/registry-seo-cache";
+import { buildBreadcrumbJsonLd, buildPageMetadata } from "@/lib/seo/seo";
 import { normalizeSlug } from "@/lib/utils";
 import { categories } from "@/registry-audio/bases/categories";
 

@@ -1,7 +1,10 @@
 import { useLocation } from "@tanstack/react-router";
 import * as React from "react";
-import { getCurrentBase, getGroupsFromFolder } from "@/lib/page-tree";
-import type { source } from "@/lib/source";
+import {
+  getCurrentBase,
+  getGroupsFromFolder,
+} from "@/lib/docs/content/page-tree";
+import type { source } from "@/lib/docs/content/source";
 
 const STORAGE_KEY = "docs-sidebar-collapsed";
 const listeners = new Set<() => void>();

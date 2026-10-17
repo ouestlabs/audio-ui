@@ -4,7 +4,7 @@ import { defineConfig, defineDocs } from "fumadocs-mdx/config";
 import lastModified from "fumadocs-mdx/plugins/last-modified";
 import { z } from "zod";
 
-import { rehypeCode } from "./src/lib/rehype-code";
+import { rehypeCode } from "./src/lib/code/rehype-code";
 
 export const docs = defineDocs({
   dir: "src/content/docs",

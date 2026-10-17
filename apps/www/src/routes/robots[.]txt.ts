@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { getSiteUrl } from "@/lib/seo";
+import { getSiteUrl } from "@/lib/seo/seo";
 
 /** Answer engines and agents are welcome: the docs are written to be read by them. */
 const AI_CRAWLERS = [

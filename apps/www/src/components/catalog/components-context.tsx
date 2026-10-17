@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, use } from "react";
-import type { ComponentCatalogItem } from "@/lib/registry";
+import type { ComponentCatalogItem } from "@/lib/registry/core/registry";
 
 export interface ComponentsContextValue {
   /** Full catalog list for search result counts in the header */

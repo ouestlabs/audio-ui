@@ -4,7 +4,7 @@ import {
   type DeviceDocName,
   deviceControlRows,
   expandDeviceControls,
-} from "@/lib/device-docs";
+} from "@/lib/docs/content/device-docs";
 
 const DOCS = `${import.meta.dir}/../src/content/docs`;
 const names = Object.keys(DEVICE_DOCS) as DeviceDocName[];

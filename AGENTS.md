@@ -81,6 +81,14 @@ Each of `audio/`, `components/`, `hooks/`, `lib/` has an `_registry.ts`: **updat
 
 `registry-audio/bases/{components,registry,seo}.json` are **generated** by `registry:build` from the `_registry.ts` files and `registry-audio/bases/categories.ts`: never edit them by hand. A new category goes in `categories.ts`; a category with zero items fails the build. Item tags not listed there (`ui`, `grid`) are free-form search tags.
 
+### The site's own code (`apps/www/src/components/`, `lib/`)
+
+Grouped by what it does for the reader of the docs, two levels deep, so no folder holds a long flat list:
+
+- `components/site/`: the chrome (`layout`, `navigation`, `home`, `pages`, `providers`). `docs/`: the docs page and what its MDX renders (`page`, `mdx`, `catalog`). `preview/`: what shows a component (`component`, `frame`, `controls`). `code/`: what shows its code (`source`, `block`, `copy`). `catalog/` and `customizer/`: the components catalog and the design-system customizer.
+- `components/ui/` is the shadcn UI, left as it comes from shadcn and synced from it: never move or reorganize it, and keep the site's own components out of it. `icon-placeholder.tsx` stays at the root of `components/`: its path is the contract with the shadcn CLI.
+- `lib/` follows the same idea: `docs/` (`content`, `menu`), `registry/` (`core`, `catalog`), `agents/` (MCP, llms), `seo/`, `code/`, `design-system/`.
+
 ### Docs (`apps/www/src/content/docs/`)
 
 MDX under `(root)/` (the Get started guides) and `components/base/`. Use the existing components (`<ComponentPreview>`, `<ComponentSource>`, `<CodeTabs>`, `<Steps>`), not raw HTML.
