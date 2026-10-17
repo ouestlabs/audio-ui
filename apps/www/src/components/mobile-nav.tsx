@@ -1,8 +1,11 @@
 "use client";
 
-import { BookOpenIcon, CubeIcon } from "@phosphor-icons/react/ssr";
+import {
+  BookOpenIcon,
+  CaretDownIcon,
+  CubeIcon,
+} from "@phosphor-icons/react/ssr";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import * as React from "react";
 import { ComponentUpdateIndicator } from "@/components/component-update-indicator";
 import { Button } from "@/components/ui/button";
@@ -12,8 +15,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useSidebarGroups } from "@/hooks/use-sidebar-groups";
 import { getDocsPageUpdateHint } from "@/lib/docs";
-import { getCurrentBase, getGroupsFromFolder } from "@/lib/page-tree";
 import type { CategoryInfo } from "@/lib/registry";
 import type { source } from "@/lib/source";
 import { cn, isActive, normalizeSlug } from "@/lib/utils";
@@ -49,6 +52,48 @@ function NavRow({
   );
 }
 
+/** A group's title; a space's folds its pages away and back. */
+function GroupLabel({
+  collapsible,
+  onOpenChange,
+  open,
+  title,
+}: {
+  collapsible: boolean;
+  onOpenChange: (title: string, open: boolean) => void;
+  open: boolean;
+  title: string;
+}) {
+  const toggle = React.useCallback(
+    () => onOpenChange(title, !open),
+    [onOpenChange, open, title]
+  );
+  if (!collapsible) {
+    return (
+      <p className="px-2 pt-3 pb-1 font-semibold text-site-foreground text-xs">
+        {title}
+      </p>
+    );
+  }
+  return (
+    <button
+      aria-expanded={open}
+      className="mt-2 flex h-8 items-center justify-between rounded-(--menu-inner-radius) px-2 font-semibold text-site-foreground text-xs hover:bg-site-muted"
+      onClick={toggle}
+      type="button"
+    >
+      {title}
+      <CaretDownIcon
+        aria-hidden="true"
+        className={cn(
+          "size-4 text-site-muted-foreground transition-transform",
+          !open && "-rotate-90"
+        )}
+      />
+    </button>
+  );
+}
+
 function Count({ children }: { children: React.ReactNode }) {
   return (
     <span className="text-site-muted-foreground text-xs tabular-nums">
@@ -69,8 +114,7 @@ export function MobileNav({
   className?: string;
 }) {
   const [open, setOpen] = React.useState(false);
-  const pathname = usePathname();
-  const currentBase = getCurrentBase(pathname);
+  const { groups, pathname, setOpen: setGroupOpen } = useSidebarGroups(tree);
   const [chosen, setChosen] = React.useState<Section | null>(null);
   const handleSectionChange = React.useCallback(
     (value: string) => setChosen(value as Section),
@@ -207,50 +251,47 @@ export function MobileNav({
               ))}
             </>
           ) : (
-            tree.children.flatMap((folder) => {
-              if (folder.type !== "folder") {
-                return [];
-              }
-              return getGroupsFromFolder(folder, currentBase).map((group) => (
-                <div
-                  className="flex shrink-0 flex-col gap-0.5"
-                  key={group.title ?? folder.$id}
-                >
-                  <p className="px-2 pt-3 pb-1 font-semibold text-site-foreground text-xs">
-                    {group.title}
-                  </p>
-                  {group.sections.map((part) => (
-                    <React.Fragment key={part.title ?? "untitled"}>
-                      {part.title ? (
-                        <p className="px-2 pt-1 pb-1 text-site-muted-foreground text-xs">
-                          {part.title}
-                        </p>
-                      ) : null}
-                      {part.pages.map((page) => {
-                        const hint = getDocsPageUpdateHint(page.url);
-                        return (
-                          <NavRow
-                            active={page.url === pathname}
-                            href={page.url}
-                            key={page.url}
-                            onNavigate={close}
-                          >
-                            {page.name}
-                            {hint ? (
-                              <span
-                                aria-hidden="true"
-                                className="site-rounded-full size-1.5 bg-blue-500"
-                                title={hint}
-                              />
-                            ) : null}
-                          </NavRow>
-                        );
-                      })}
-                    </React.Fragment>
-                  ))}
-                </div>
-              ));
-            })
+            groups.map((group) => (
+              <div className="flex shrink-0 flex-col gap-0.5" key={group.title}>
+                <GroupLabel
+                  collapsible={group.collapsible}
+                  onOpenChange={setGroupOpen}
+                  open={group.open}
+                  title={group.title ?? ""}
+                />
+                {group.open
+                  ? group.sections.map((part) => (
+                      <React.Fragment key={part.title ?? "untitled"}>
+                        {part.title ? (
+                          <p className="px-2 pt-1 pb-1 text-site-muted-foreground text-xs">
+                            {part.title}
+                          </p>
+                        ) : null}
+                        {part.pages.map((page) => {
+                          const hint = getDocsPageUpdateHint(page.url);
+                          return (
+                            <NavRow
+                              active={page.url === pathname}
+                              href={page.url}
+                              key={page.url}
+                              onNavigate={close}
+                            >
+                              {page.name}
+                              {hint ? (
+                                <span
+                                  aria-hidden="true"
+                                  className="site-rounded-full size-1.5 bg-blue-500"
+                                  title={hint}
+                                />
+                              ) : null}
+                            </NavRow>
+                          );
+                        })}
+                      </React.Fragment>
+                    ))
+                  : null}
+              </div>
+            ))
           )}
         </nav>
       </PopoverContent>

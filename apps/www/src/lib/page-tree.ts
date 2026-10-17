@@ -86,7 +86,12 @@ export function getPagesFromFolder(
 }
 
 export type PageTreeSection = { pages: PageTreePage[]; title?: string };
-export type PageTreeGroup = { sections: PageTreeSection[]; title?: string };
+export type PageTreeGroup = {
+  /** Whether the reader may fold it: the spaces, not Get started. */
+  collapsible: boolean;
+  sections: PageTreeSection[];
+  title?: string;
+};
 
 const isComponentsFolder = (folder: PageTreeFolder) =>
   folder.$id === "components" || folder.name === "Components";
@@ -105,12 +110,14 @@ export function getGroupsFromFolder(
     : undefined;
   if (spaces?.length) {
     return spaces.map((space) => ({
+      collapsible: true,
       sections: sectionsOf(space.children),
       title: space.name?.toString(),
     }));
   }
   return [
     {
+      collapsible: false,
       sections: getSectionsFromFolder(folder, currentBase),
       title: folder.name?.toString(),
     },

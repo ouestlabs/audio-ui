@@ -1,7 +1,8 @@
 "use client";
 
+import { CaretDownIcon } from "@phosphor-icons/react/ssr";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import * as React from "react";
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -15,11 +16,11 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useSidebarGroups } from "@/hooks/use-sidebar-groups";
 import { getDocsPageUpdateHint } from "@/lib/docs";
-import { getCurrentBase, getGroupsFromFolder } from "@/lib/page-tree";
 import type { source } from "@/lib/source";
+import { cn } from "@/lib/utils";
 
-const EXCLUDED_SECTIONS = ["test"];
 const EXCLUDED_PAGES = ["test"];
 
 function DocsUpdateIndicator({ path }: { path: string }) {
@@ -49,31 +50,66 @@ function DocsUpdateIndicator({ path }: { path: string }) {
   );
 }
 
+/** A group's title; a space's folds its pages away and back. */
+function GroupLabel({
+  collapsible,
+  onOpenChange,
+  open,
+  title,
+}: {
+  collapsible: boolean;
+  onOpenChange: (title: string, open: boolean) => void;
+  open: boolean;
+  title: string;
+}) {
+  const toggle = React.useCallback(
+    () => onOpenChange(title, !open),
+    [onOpenChange, open, title]
+  );
+  if (!collapsible) {
+    return (
+      <SidebarGroupLabel className="font-semibold text-site-foreground">
+        {title}
+      </SidebarGroupLabel>
+    );
+  }
+  return (
+    <SidebarGroupLabel
+      className="w-full cursor-pointer justify-between font-semibold text-site-foreground hover:bg-site-muted"
+      render={<button aria-expanded={open} onClick={toggle} type="button" />}
+    >
+      {title}
+      <CaretDownIcon
+        aria-hidden="true"
+        className={cn(
+          "text-site-muted-foreground transition-transform",
+          !open && "-rotate-90"
+        )}
+      />
+    </SidebarGroupLabel>
+  );
+}
+
 /** The docs' links, by section: the list a sidebar shows on the docs and on the home. */
 export function DocsNavigation({
   tree,
 }: {
   tree: ReturnType<typeof source.getPageTree>;
 }) {
-  const pathname = usePathname();
-  const currentBase = getCurrentBase(pathname);
+  const { groups, pathname, setOpen } = useSidebarGroups(tree);
 
   return (
     <div className="no-scrollbar scroll-fade-y min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-2 pb-12">
       <div className="h-(--top-spacing) shrink-0" />
-      {tree.children.flatMap((item) => {
-        if (
-          item.type !== "folder" ||
-          EXCLUDED_SECTIONS.includes(item.$id ?? "")
-        ) {
-          return [];
-        }
-
-        return getGroupsFromFolder(item, currentBase).map((group) => (
-          <SidebarGroup key={group.title ?? item.$id}>
-            <SidebarGroupLabel className="font-semibold text-site-foreground">
-              {group.title}
-            </SidebarGroupLabel>
+      {groups.map((group) => (
+        <SidebarGroup key={group.title}>
+          <GroupLabel
+            collapsible={group.collapsible}
+            onOpenChange={setOpen}
+            open={group.open}
+            title={group.title ?? ""}
+          />
+          {group.open ? (
             <SidebarGroupContent>
               {group.sections.map((section) => (
                 <div
@@ -113,9 +149,9 @@ export function DocsNavigation({
                 </div>
               ))}
             </SidebarGroupContent>
-          </SidebarGroup>
-        ));
-      })}
+          ) : null}
+        </SidebarGroup>
+      ))}
     </div>
   );
 }
