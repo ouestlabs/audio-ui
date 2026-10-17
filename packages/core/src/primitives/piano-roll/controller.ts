@@ -14,13 +14,14 @@ import {
 } from "../timeline/index.ts";
 import {
   cellStart,
-  changeVelocity,
+  changeLevel,
   duplicateAfter,
   duplicateNotes,
   keyboardEdit,
   moveNotes,
   type Note,
   type NoteId,
+  type NoteLevel,
   notesWithin,
   pasteNotes,
   quantizeNotes,
@@ -28,8 +29,11 @@ import {
   resizeNotes,
   sameNotes,
   sanitizeNote,
+  selectionSpan,
+  setDeviation,
   snapEdgeDelta,
   spatialOrder,
+  stretchNotes,
 } from "./edits.ts";
 import { type Rows, rollRows } from "./rows.ts";
 
@@ -45,12 +49,15 @@ const NO_GRID: Grid = { offset: 0, step: 0 };
 /** What a change did to the notes. */
 export type PianoRollEdit =
   | "add"
+  | "chance"
+  | "deviation"
   | "duplicate"
   | "move"
   | "paste"
   | "quantize"
   | "remove"
   | "resize"
+  | "stretch"
   | "velocity";
 
 type Edited<Details> = Details & {
@@ -122,6 +129,12 @@ export interface PianoRollOptions {
   defaultSelection?: readonly NoteId[];
   defaultValue?: readonly Note[];
   disabled?: boolean;
+  /**
+   * What a drag does after a press on the grid in draw mode: stretch the note
+   * drawn, or paint a note in each grid cell the pointer crosses, on the
+   * pitch under it, or with Alt on the first one. @default "stretch"
+   */
+  drawStyle?: "paint" | "stretch";
   /** Whether only the pitches carrying notes get a row, and with `"scale"` those in `scale` too. @default false */
   folded?: boolean | "scale";
   /** @default 72 */
@@ -186,8 +199,14 @@ export interface PianoRollController {
   keyOff: (pitch: number, details: PianoRollNoteOffEventDetails) => void;
   /** A key on the keyboard beside the roll: sounds it, or with Shift selects the notes on its row. */
   keyOn: (pitch: number, details: PianoRollKeyDetails) => void;
-  /** Handles a key on a velocity's input. Returns `true` when the velocity takes the key. */
-  keyVelocity: (id: NoteId, event: KeyboardEvent) => boolean;
+  /** Handles a key on a velocity's input, or a chance's with `level` "chance". Returns `true` when it takes the key. */
+  keyVelocity: (id: NoteId, event: KeyboardEvent, level?: NoteLevel) => boolean;
+  /**
+   * Starts a press on a velocity or chance lane in draw mode: a drag paints
+   * every bar under the pointer, in the grid cell it is over, to the
+   * pointer's height. Does nothing in select mode.
+   */
+  paintLevels: (event: PointerEvent, lane: Element, level?: NoteLevel) => void;
   /** Starts a press on the grid: a draw in draw mode, or a selection rectangle. */
   pressGrid: (event: PointerEvent, grid: Element) => void;
   /** Starts a press on a note: a drag moves it, or resizes it from an edge; Alt copies, Shift toggles its selection. */
@@ -198,18 +217,35 @@ export interface PianoRollController {
     element: Element,
     grid: Element
   ) => void;
-  /** Starts a press on a velocity bar: a drag changes the velocity of the selection, or of the note. */
+  /** Starts a press on one edge of the selection's span: a drag stretches the selected notes in time from the other edge. */
+  pressStretch: (
+    edge: "end" | "start",
+    event: PointerEvent,
+    element: Element,
+    grid: Element
+  ) => void;
+  /**
+   * Starts a press on a velocity bar, or a chance bar with `level` "chance": a
+   * drag changes the selection's, or the note's. On a velocity bar with
+   * Cmd/Ctrl, the drag sets how far the velocity may stray instead.
+   */
   pressVelocity: (
     id: NoteId,
     event: PointerEvent,
     element: Element,
-    lane: Element | null
+    lane: Element | null,
+    level?: NoteLevel
   ) => void;
   /** Stops the pitch a key moved a note to, once the key is released. */
   releaseKey: (event: Event) => void;
   setOptions: (options: PianoRollOptions) => void;
-  /** Sets a velocity from an input, reporting an `"input-change"` change and commit. */
-  setVelocity: (id: NoteId, velocity: number, event: Event) => void;
+  /** Sets a velocity, or a chance with `level` "chance", from an input, reporting an `"input-change"` change and commit. */
+  setVelocity: (
+    id: NoteId,
+    value: number,
+    event: Event,
+    level?: NoteLevel
+  ) => void;
   /** Handles a Cmd/Ctrl command: copy, cut, paste, duplicate, quantize. Returns `true` when the key is one of them. */
   shortcut: (event: KeyboardEvent) => boolean;
   subscribe: (listener: () => void) => () => void;
@@ -250,6 +286,17 @@ type GridGesture =
       startY: number;
     }
   | {
+      /** The cells painted, by their start, so a cell is painted once. */
+      cells: Set<number>;
+      grid: Element;
+      /** The notes painted, kept selected together. */
+      ids: NoteId[];
+      kind: "paint";
+      /** The pitch of the first note: Alt keeps the next ones on it. */
+      pitch: number;
+      sounding: number | null;
+    }
+  | {
       /** What was selected before, kept when Shift started the rectangle. */
       base: readonly NoteId[];
       grid: Element;
@@ -260,12 +307,35 @@ type GridGesture =
 
 interface VelocityGesture {
   changed: boolean;
+  /** Cmd/Ctrl was held on a velocity bar: the drag sets the deviation. */
+  deviation: boolean;
   /** The lane's height: a drag across all of it goes from silent to full. */
   height: number;
   id: NoteId;
   ids: ReadonlySet<NoteId>;
+  level: NoteLevel;
   origin: Note[];
   startY: number;
+}
+
+/** One drag across a lane in draw mode, painting the bars under the pointer. */
+interface PaintLevelGesture {
+  changed: boolean;
+  lane: Element;
+  level: NoteLevel;
+}
+
+/** One drag of an edge of the selection's span, stretching it from the other. */
+interface StretchGesture {
+  /** The edge that stays put. */
+  anchor: number;
+  changed: boolean;
+  edge: "end" | "start";
+  grid: Element;
+  ids: ReadonlySet<NoteId>;
+  /** Where the dragged edge was. */
+  moving: number;
+  origin: Note[];
 }
 
 /** The timeline's units under a point of `element`, clamped to the timeline. */
@@ -310,6 +380,11 @@ function draggedNotes(
   );
 }
 
+/** What a drag on a lane's bar edits: the velocity, its deviation, or the chance. */
+function velocityEdit(gesture: VelocityGesture): PianoRollEdit {
+  return gesture.deviation ? "deviation" : gesture.level;
+}
+
 /**
  * A piano roll's behavior with no view attached: its notes, held or
  * controlled, its selection and the pitches sounding, and every gesture and
@@ -352,6 +427,8 @@ export function createPianoRollController(
   let noteGesture: NoteGesture | null = null;
   let gridGesture: GridGesture | null = null;
   let velocityGesture: VelocityGesture | null = null;
+  let stretchGesture: StretchGesture | null = null;
+  let paintLevelGesture: PaintLevelGesture | null = null;
   // The length and velocity a drawn note gets: those last drawn or resized.
   let drawTemplate: { length: number; velocity: number } | null = null;
   let lastPitch: number | null = null;
@@ -760,26 +837,29 @@ export function createPianoRollController(
     );
   };
 
-  /** Moves a note's velocity by `delta`, and that of the selection with it when the note is part of it. */
-  const nudgeVelocity = (
+  /** Moves a note's velocity or chance by `delta`, and that of the selection with it when the note is part of it. */
+  const nudgeLevel = (
     id: NoteId,
+    level: NoteLevel,
     delta: number,
     reason: "input-change" | "keyboard",
     event: Event
   ) => {
-    const next = changeVelocity(displayed(), targetsOf(id), delta);
+    const next = changeLevel(displayed(), targetsOf(id), level, delta);
     const details = Object.assign(createChangeEventDetails(reason, event), {
-      edit: "velocity" as const,
+      edit: level,
     }) as PianoRollChangeEventDetails;
     if (!change(next, details)) {
       return;
     }
     commit(next, {
-      edit: "velocity",
+      edit: level,
       event,
       reason,
     } as PianoRollCommitEventDetails);
-    remember(id);
+    if (level === "velocity") {
+      remember(id);
+    }
   };
 
   // ---- grid
@@ -793,7 +873,72 @@ export function createPianoRollController(
       moveMarquee(current, event);
       return;
     }
+    if (current.kind === "paint") {
+      movePaint(current, event);
+      return;
+    }
     moveDraw(current, event);
+  };
+
+  /** Adds a note one grid cell long at `start` on `pitch`, painted by a drag; returns it, or null. */
+  const paintNote = (start: number, pitch: number, event: PointerEvent) => {
+    const cells = options.timeline.grid;
+    const note = sanitizeNote(
+      {
+        id: createId(),
+        length: cells.step > 0 ? cells.step : template().length,
+        pitch,
+        start,
+        velocity: template().velocity,
+      },
+      bounds()
+    );
+    const details = Object.assign(createChangeEventDetails("draw", event), {
+      edit: "add" as const,
+    }) as PianoRollChangeEventDetails;
+    return change([...displayed(), note], details) ? note : null;
+  };
+
+  /** Sounds `pitch` in place of what the painting was sounding. */
+  const soundPainted = (
+    current: Extract<GridGesture, { kind: "paint" }>,
+    pitch: number,
+    event: PointerEvent
+  ) => {
+    if (current.sounding === pitch) {
+      return;
+    }
+    if (current.sounding !== null) {
+      silence(current.sounding, { event, reason: "draw" });
+    }
+    const details = Object.assign(createChangeEventDetails("draw", event), {
+      velocity: template().velocity,
+    }) as PianoRollNoteOnEventDetails;
+    current.sounding = sound(pitch, details) ? pitch : null;
+  };
+
+  const movePaint = (
+    current: Extract<GridGesture, { kind: "paint" }>,
+    event: PointerEvent
+  ) => {
+    const start = startAt(current.grid, event);
+    if (current.cells.has(start)) {
+      return;
+    }
+    const pitch = event.altKey
+      ? current.pitch
+      : pitchAt(current.grid, event.clientY);
+    const note = paintNote(start, pitch, event);
+    if (!note) {
+      return;
+    }
+    current.cells.add(start);
+    current.ids.push(note.id);
+    select(
+      [...current.ids],
+      createChangeEventDetails("draw", event) as PianoRollSelectionEventDetails
+    );
+    soundPainted(current, pitch, event);
   };
 
   const moveMarquee = (
@@ -873,7 +1018,10 @@ export function createPianoRollController(
     // Read before settling: the notes fall back to the known value after.
     const committed = [...displayed()];
     endEditing();
-    const drawn = committed.find((note) => note.id === current.id);
+    const drawn =
+      current.kind === "draw"
+        ? committed.find((note) => note.id === current.id)
+        : undefined;
     if (drawn) {
       drawTemplate = {
         length: drawn.length,
@@ -884,6 +1032,30 @@ export function createPianoRollController(
     if (current.sounding !== null) {
       silence(current.sounding, { event, reason: "draw" });
     }
+  };
+
+  /** Starts painting: the first note under the pointer, then one per cell the drag crosses. */
+  const paintFrom = (event: PointerEvent, grid: Element) => {
+    const start = startAt(grid, event);
+    const pitch = pitchAt(grid, event.clientY);
+    const note = paintNote(start, pitch, event);
+    if (!note) {
+      endEditing();
+      return;
+    }
+    select([note.id], createChangeEventDetails("draw", event));
+    grid.setPointerCapture?.(event.pointerId);
+    const current: Extract<GridGesture, { kind: "paint" }> = {
+      cells: new Set([note.start]),
+      grid,
+      ids: [note.id],
+      kind: "paint",
+      pitch: note.pitch,
+      sounding: null,
+    };
+    gridGesture = current;
+    soundPainted(current, note.pitch, event);
+    followPointer(grid, event.pointerId, moveGrid, endGrid);
   };
 
   const pressGrid: PianoRollController["pressGrid"] = (event, grid) => {
@@ -908,6 +1080,10 @@ export function createPianoRollController(
     }
     editing = true;
     notify();
+    if (options.drawStyle === "paint") {
+      paintFrom(event, grid);
+      return;
+    }
     const added = addNote(
       startAt(grid, event),
       pitchAt(grid, event.clientY),
@@ -1189,11 +1365,13 @@ export function createPianoRollController(
     if (!current?.height) {
       return;
     }
-    // Up is louder: the bar follows the pointer.
+    // Up is louder, or likelier: the bar follows the pointer.
     const delta = (current.startY - event.clientY) / current.height;
-    const next = changeVelocity(current.origin, current.ids, delta);
+    const next = current.deviation
+      ? setDeviation(current.origin, current.ids, delta)
+      : changeLevel(current.origin, current.ids, current.level, delta);
     const details = Object.assign(createChangeEventDetails("drag", event), {
-      edit: "velocity" as const,
+      edit: velocityEdit(current),
     }) as PianoRollChangeEventDetails;
     if (change(next, details)) {
       current.changed = true;
@@ -1210,8 +1388,10 @@ export function createPianoRollController(
     const committed = [...displayed()];
     endEditing();
     if (current.changed) {
-      commit(committed, { edit: "velocity", event, reason: "drag" });
-      remember(current.id);
+      commit(committed, { edit: velocityEdit(current), event, reason: "drag" });
+      if (current.level === "velocity") {
+        remember(current.id);
+      }
     }
   };
 
@@ -1219,7 +1399,8 @@ export function createPianoRollController(
     id,
     event,
     element,
-    lane
+    lane,
+    level = "velocity"
   ) => {
     if (options.disabled || event.button !== 0) {
       return;
@@ -1227,6 +1408,15 @@ export function createPianoRollController(
     const selection = selectedIds();
     if (event.shiftKey) {
       toggleSelected(id, event, "press");
+      return;
+    }
+    // In draw mode the lane is a brush: the bars follow the pointer's height.
+    if (
+      (options.mode ?? "select") === "draw" &&
+      lane &&
+      !(event.metaKey || event.ctrlKey)
+    ) {
+      paintLevels(event, lane, level);
       return;
     }
     let ids = selection;
@@ -1239,20 +1429,26 @@ export function createPianoRollController(
     notify();
     velocityGesture = {
       changed: false,
+      deviation: level === "velocity" && (event.metaKey || event.ctrlKey),
       height: lane?.getBoundingClientRect().height ?? 0,
       id,
       ids,
+      level,
       origin: [...displayed()],
       startY: event.clientY,
     };
     followPointer(element, event.pointerId, moveVelocity, endVelocity);
   };
 
-  const keyVelocity: PianoRollController["keyVelocity"] = (id, event) => {
+  const keyVelocity: PianoRollController["keyVelocity"] = (
+    id,
+    event,
+    level = "velocity"
+  ) => {
     if (options.disabled) {
       return false;
     }
-    const velocity = displayed().find((note) => note.id === id)?.velocity ?? 1;
+    const velocity = displayed().find((note) => note.id === id)?.[level] ?? 1;
     const target = {
       ArrowDown: velocity - VELOCITY_STEP,
       ArrowLeft: velocity - VELOCITY_STEP,
@@ -1266,17 +1462,158 @@ export function createPianoRollController(
     if (target === undefined) {
       return false;
     }
-    nudgeVelocity(id, target - velocity, "keyboard", event);
+    nudgeLevel(id, level, target - velocity, "keyboard", event);
     return true;
   };
 
   const setVelocity: PianoRollController["setVelocity"] = (
     id,
     value,
-    event
+    event,
+    level = "velocity"
   ) => {
-    const velocity = displayed().find((note) => note.id === id)?.velocity ?? 1;
-    nudgeVelocity(id, value - velocity, "input-change", event);
+    const current = displayed().find((note) => note.id === id)?.[level] ?? 1;
+    nudgeLevel(id, level, value - current, "input-change", event);
+  };
+
+  // ---- painting a lane
+
+  /** Sets the bars in the grid cell under the pointer to its height. */
+  const movePaintLevel = (event: PointerEvent) => {
+    const current = paintLevelGesture;
+    if (!current) {
+      return;
+    }
+    const rect = current.lane.getBoundingClientRect();
+    if (rect.height <= 0) {
+      return;
+    }
+    const { duration, grid, zoom } = options.timeline;
+    const time = timeAt(current.lane, event.clientX, zoom, duration);
+    const from = grid.step > 0 ? cellStart(time, grid) : time;
+    const to = grid.step > 0 ? from + grid.step : time;
+    const value = clamp(1 - (event.clientY - rect.top) / rect.height, 0, 1);
+    const hit = (note: Note) =>
+      grid.step > 0 ? note.start >= from && note.start < to : false;
+    const next = displayed().map((note) =>
+      hit(note) && note[current.level] !== value
+        ? { ...note, [current.level]: value }
+        : note
+    );
+    const details = Object.assign(createChangeEventDetails("draw", event), {
+      edit: current.level,
+    }) as PianoRollChangeEventDetails;
+    if (change(next, details)) {
+      current.changed = true;
+    }
+  };
+
+  const endPaintLevel = (event: PointerEvent) => {
+    const current = paintLevelGesture;
+    if (!current) {
+      return;
+    }
+    paintLevelGesture = null;
+    // Read before settling: the notes fall back to the known value after.
+    const committed = [...displayed()];
+    endEditing();
+    if (current.changed) {
+      commit(committed, { edit: current.level, event, reason: "draw" });
+    }
+  };
+
+  const paintLevels: PianoRollController["paintLevels"] = (
+    event,
+    lane,
+    level = "velocity"
+  ) => {
+    if (
+      options.disabled ||
+      event.button !== 0 ||
+      (options.mode ?? "select") !== "draw"
+    ) {
+      return;
+    }
+    event.preventDefault();
+    lane.setPointerCapture?.(event.pointerId);
+    editing = true;
+    notify();
+    paintLevelGesture = { changed: false, lane, level };
+    movePaintLevel(event);
+    followPointer(lane, event.pointerId, movePaintLevel, endPaintLevel);
+  };
+
+  // ---- stretch
+
+  const moveStretch = (event: PointerEvent) => {
+    const current = stretchGesture;
+    if (!current) {
+      return;
+    }
+    const { duration, grid, zoom } = options.timeline;
+    const raw = timeAt(current.grid, event.clientX, zoom, duration);
+    const edge = bypassesGrid(event) ? raw : snapToGrid(raw, grid);
+    const factor = (edge - current.anchor) / (current.moving - current.anchor);
+    if (!(factor > 0)) {
+      return;
+    }
+    const next = stretchNotes(
+      current.origin,
+      current.ids,
+      factor,
+      bounds(),
+      current.anchor
+    );
+    const details = Object.assign(createChangeEventDetails("drag", event), {
+      edit: "stretch" as const,
+    }) as PianoRollChangeEventDetails;
+    if (change(next, details)) {
+      current.changed = true;
+    }
+  };
+
+  const endStretch = (event: PointerEvent) => {
+    const current = stretchGesture;
+    if (!current) {
+      return;
+    }
+    stretchGesture = null;
+    // Read before settling: the notes fall back to the known value after.
+    const committed = [...displayed()];
+    endEditing();
+    if (current.changed) {
+      commit(committed, { edit: "stretch", event, reason: "drag" });
+    }
+  };
+
+  const pressStretch: PianoRollController["pressStretch"] = (
+    edge,
+    event,
+    element,
+    grid
+  ) => {
+    if (options.disabled || event.button !== 0) {
+      return;
+    }
+    const ids = selectedIds();
+    const span = selectionSpan(displayed(), ids);
+    if (!span || span.end <= span.start) {
+      return;
+    }
+    event.preventDefault();
+    element.setPointerCapture?.(event.pointerId);
+    editing = true;
+    notify();
+    stretchGesture = {
+      anchor: edge === "end" ? span.start : span.end,
+      changed: false,
+      edge,
+      grid,
+      ids,
+      moving: edge === "end" ? span.end : span.start,
+      origin: [...displayed()],
+    };
+    followPointer(element, event.pointerId, moveStretch, endStretch);
   };
 
   // ---- keys and commands
@@ -1343,6 +1680,10 @@ export function createPianoRollController(
         event
       );
     };
+    // With Shift the keys are left to the editor around the roll, such as Cmd+Shift+D to duplicate time.
+    if (event.shiftKey) {
+      return false;
+    }
     const commands: Record<string, (() => void) | undefined> =
       event.metaKey || event.ctrlKey
         ? {
@@ -1405,6 +1746,8 @@ export function createPianoRollController(
     keyVelocity,
     pressGrid,
     pressNote,
+    pressStretch,
+    paintLevels,
     pressVelocity,
     releaseKey,
     setOptions: (next) => {

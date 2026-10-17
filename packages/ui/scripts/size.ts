@@ -12,7 +12,7 @@ const BUDGETS: Record<string, number> = {
   meter: 4000,
   pad: 3800,
   piano: 4000,
-  "piano-roll": 13_600,
+  "piano-roll": 15_200,
   plot: 7100,
   sequencer: 5300,
   timeline: 15_400,

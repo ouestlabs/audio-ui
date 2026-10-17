@@ -84,7 +84,10 @@ import { PianoRoll, Timeline } from "@audio-ui/react";
     </PianoRoll.Keys>
     <PianoRoll.Grid aria-label="Notes">
       <PianoRoll.Rows>{(pitch) => <PianoRoll.Row pitch={pitch} />}</PianoRoll.Rows>
-      <PianoRoll.SelectionSpan />
+      <PianoRoll.SelectionSpan>
+        <PianoRoll.StretchHandle edge="start" />
+        <PianoRoll.StretchHandle edge="end" />
+      </PianoRoll.SelectionSpan>
       <PianoRoll.Notes>
         {(note) => (
           <PianoRoll.Note key={note.id} note={note}>
@@ -139,11 +142,11 @@ import {
 </Timeline>;
 ```
 
-A note is `{ id, pitch, start, length, velocity?, muted?, chance? }`: `pitch` is a MIDI number (60 is middle C), `start` and `length` are in the timeline's units, `velocity` is 0 to 1 (full when left out), `muted` deactivates it (it stays on the roll, silent) and `chance` is how likely it is to play each time round, 0 to 1. The roll draws them; playing them is yours, so a sequencer skips a muted note and rolls the dice for its chance. `value` and `selection` are controlled; `defaultValue` and `defaultSelection` leave them to the roll. The roll reports every edit through `onValueChange` and, when a gesture or a key press ends, `onValueCommitted`; `eventDetails.edit` tells what happened (`"add"`, `"move"`, `"resize"`, `"remove"`, `"duplicate"`, `"paste"`, `"quantize"` or `"velocity"`) and `eventDetails.cancel()` keeps the notes as they were.
+A note is `{ id, pitch, start, length, velocity?, deviation?, muted?, chance? }`: `pitch` is a MIDI number (60 is middle C), `start` and `length` are in the timeline's units, `velocity` is 0 to 1 (full when left out), `deviation` is how far the velocity may stray each time it plays (-1 to 1, up or down), `muted` deactivates it (it stays on the roll, silent) and `chance` is how likely it is to play each time round, 0 to 1. The roll draws them; playing them is yours, so a sequencer skips a muted note, rolls the dice for its chance and strays its velocity by up to its deviation. `value` and `selection` are controlled; `defaultValue` and `defaultSelection` leave them to the roll. The roll reports every edit through `onValueChange` and, when a gesture or a key press ends, `onValueCommitted`; `eventDetails.edit` tells what happened (`"add"`, `"move"`, `"resize"`, `"remove"`, `"duplicate"`, `"paste"`, `"quantize"`, `"stretch"`, `"velocity"`, `"chance"` or `"deviation"`) and `eventDetails.cancel()` keeps the notes as they were.
 
 `onNoteOn` and `onNoteOff` say when a pitch should sound or stop: a key pressed, a note drawn, picked up or moved to a new pitch. A MIDI file can be read and written with the `midi` library (`@audio-ui/midi`); the preview above imports and exports `.mid` files with it.
 
-`scale` marks the rows of a scale (`data-in-scale` on each `PianoRoll.Row`), and `folded="scale"` keeps only those rows and the ones carrying notes. `@audio-ui/core/pitch` holds the scales (`SCALES`, `inScale`, `nearestInScale`), and `@audio-ui/core/piano-roll` the edits a toolbar or a menu applies to the selection, each returning the new notes: `splitNotes`, `chopNotes`, `joinNotes`, `legatoNotes`, `reverseNotes`, `invertNotes`, `stretchNotes`, `fitNotesToScale`, `rampVelocity`, `humanizeNotes`, `toggleMuted` and `setChance`; `selectionSpan` gives the time a selection covers.
+`scale` marks the rows of a scale (`data-in-scale` on each `PianoRoll.Row`), and `folded="scale"` keeps only those rows and the ones carrying notes. `@audio-ui/core/pitch` holds the scales (`SCALES`, `inScale`, `nearestInScale`), and `@audio-ui/core/piano-roll` the edits a toolbar or a menu applies to the selection, each returning the new notes: `splitNotes`, `chopNotes`, `joinNotes`, `legatoNotes`, `reverseNotes`, `invertNotes`, `stretchNotes`, `fitNotesToScale`, `rampVelocity`, `humanizeNotes`, `toggleMuted`, `setChance`, `setDeviation` and `changeLevel`, and the time commands `deleteTime`, `insertTime` and `duplicateTime`; `selectionSpan` gives the time a selection covers and `findNotes` the notes a query matches, by pitch, velocity, length, chance, scale, state or count.
 
 ## Interaction
 
@@ -157,6 +160,9 @@ A note is `{ id, pitch, start, length, velocity?, muted?, chance? }`: `pitch` is
 <KeyRow gesture={"`Shift` + click a note"}>Toggles it in the selection.</KeyRow>
 <KeyRow gesture={"Double-click a note"}>Deletes it.</KeyRow>
 <KeyRow gesture={"Drag a velocity bar"}>Changes the velocity of the selection by the same amount.</KeyRow>
+<KeyRow gesture={"`Cmd` / `Ctrl` + drag a velocity bar"}>Sets how far the velocity of the selection may stray each time it plays.</KeyRow>
+<KeyRow gesture={"Drag across a velocity or chance lane"}>With `mode="draw"`, paints every bar under the pointer to its height.</KeyRow>
+<KeyRow gesture={"Drag a stretch handle"}>Stretches the selection in time from its other edge.</KeyRow>
 <KeyRow gesture={"Press a key"}>Plays it; with `Shift`, selects every note on its row.</KeyRow>
 </KeyTable>
 
@@ -189,6 +195,7 @@ Groups the parts of a piano roll and owns its notes and selection. Must be used 
 <TypeRow name={"maxPitch"} type={"number"} default={"72"}>Highest MIDI pitch, inclusive.</TypeRow>
 <TypeRow name={"minLength"} type={"number"}>The shortest a note can be, in the timeline's units. Defaults to the timeline's grid step.</TypeRow>
 <TypeRow name={"mode"} type={"\"draw\" | \"select\""} default={"\"select\""}>What a press on empty grid does: draw a note, or start a selection rectangle (a double-click draws).</TypeRow>
+<TypeRow name={"drawStyle"} type={"\"paint\" | \"stretch\""} default={"\"stretch\""}>What a drag does after a press on the grid in draw mode: stretch the note drawn, or paint a note in each grid cell the pointer crosses, on the pitch under it, or with Alt on the first one.</TypeRow>
 <TypeRow name={"folded"} type={"boolean | \"scale\""} default={"false"}>Whether only the pitches carrying notes get a row, and with `"scale"` those in `scale` too. A roll with nothing to fold onto keeps them all.</TypeRow>
 <TypeRow name={"scale"} type={"Scale | null"}>The scale whose rows are marked `data-in-scale`, such as `{ name: "major", root: 0 }` for C major.</TypeRow>
 <TypeRow name={"activePitches"} type={"number[]"}>Pitches lit from elsewhere, such as a MIDI input or the notes playing, on the keys and rows.</TypeRow>
@@ -282,15 +289,32 @@ The selection rectangle being dragged across the grid; renders nothing the rest 
 
 ### SelectionSpan
 
-The time the selected notes cover, from the earliest start to the latest end, as a band from top to bottom of what it sits in: the grid, the velocity lane or the ruler. Renders nothing with no note selected. It lets presses through and is hidden from assistive technology. Renders a `<div>` element.
+The time the selected notes cover, from the earliest start to the latest end, as a band from top to bottom of what it sits in: the grid, the velocity lane or the ruler. Renders nothing with no note selected. It lets presses through, all but its `PianoRoll.StretchHandle`s, and is hidden from assistive technology. Renders a `<div>` element.
+
+### StretchHandle
+
+One edge of the selection's span, for its `SelectionSpan`: a drag stretches the selected notes in time from the other edge, on the grid unless Cmd/Ctrl is held. The Notes edits that double and halve lengths do the same from the keyboard, so it is hidden from assistive technology. Renders a `<div>` element.
+
+<TypeTable>
+<TypeRow name={"edge"} type={"\"start\" | \"end\""}>The edge of the span this handle drags; the other stays put.</TypeRow>
+</TypeTable>
 
 ### VelocityLane
 
-A strip under the grid where each note's velocity stands as a bar, placed at the note's start: a timeline lane, like the grid. Put a `PianoRoll.Velocity` per note inside, with `PianoRoll.Notes`. Renders a `<div>` element.
+A strip under the grid where each note's velocity, or with `level="chance"` its chance to play, stands as a bar placed at the note's start: a timeline lane, like the grid. In draw mode it is a brush: a drag across it sets every bar under the pointer, in the grid cell it is over, to the pointer's height. Put a `PianoRoll.Velocity` per note inside, with `PianoRoll.Notes`. Renders a `<div>` element.
+
+<TypeTable>
+<TypeRow name={"level"} type={"\"velocity\" | \"chance\""} default={"\"velocity\""}>What the bars stand for: each note's velocity, or its chance to play.</TypeRow>
+</TypeTable>
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-level"}>`"velocity"` or `"chance"`.</TypeRow>
+<TypeRow name={"data-mode"}>`"draw"` or `"select"`: in draw mode the lane is a brush.</TypeRow>
+</TypeTable>
 
 ### Velocity
 
-One note's velocity, as a bar from the bottom of the lane: its height is the velocity, through the `--piano-roll-velocity` CSS variable. Dragging it up or down changes the velocity of the selection by the same amount when the note is part of it, so a phrase keeps its dynamics; Shift + click toggles the note in the selection. A native `<input type="range">` inside takes the arrow keys and carries the accessible name, which defaults to the note's. The next drawn note gets the velocity set last. Renders a `<div>` element.
+One note's velocity, or its chance in a `level="chance"` lane, as a bar from the bottom of the lane: its height is the value, through the `--piano-roll-level` CSS variable. Dragging it up or down changes the value of the selection by the same amount when the note is part of it, so a phrase keeps its dynamics; Shift + click toggles the note in the selection. On a velocity bar, Cmd/Ctrl + drag sets how far the velocity may stray each time the note plays, its `--piano-roll-deviation`. A native `<input type="range">` inside takes the arrow keys (Page Up/Down for larger steps, Home/End for none and full) and carries the accessible name, which defaults to the note's. The next drawn note gets the velocity set last. Renders a `<div>` element.
 
 <TypeTable>
 <TypeRow name={"note"} type={"Note"}>The note whose velocity this is.</TypeRow>

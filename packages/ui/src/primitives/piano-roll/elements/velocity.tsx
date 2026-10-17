@@ -1,4 +1,4 @@
-import type { Note } from "@audio-ui/core/piano-roll";
+import type { Note, NoteLevel } from "@audio-ui/core/piano-roll";
 import * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part.ts";
 import { mergeProps, useRender } from "../../internal/render.ts";
@@ -6,6 +6,9 @@ import { VISUALLY_HIDDEN } from "../../internal/visually-hidden.ts";
 import { placedAt } from "../../timeline/context.ts";
 import { LaneContext, useLaneProps } from "../../timeline/elements/lane.tsx";
 import {
+  CHANCE_PROPERTY,
+  DEVIATION_PROPERTY,
+  LEVEL_PROPERTY,
   type PianoRollState,
   usePianoRollContext,
   useRollView,
@@ -14,43 +17,77 @@ import {
 
 const describeVelocity = (velocity: number) => `${Math.round(velocity * 100)}%`;
 
+/** What the bars of the lane stand for. */
+const LevelContext = React.createContext<NoteLevel>("velocity");
+
 /**
- * A strip under the grid where each note's velocity stands as a bar, placed
- * at the note's start: a timeline lane, like the grid. Put a
- * `PianoRoll.Velocity` per note inside, with `PianoRoll.Notes`.
+ * A strip under the grid where each note's velocity, or with `level="chance"`
+ * its chance to play, stands as a bar placed at the note's start: a timeline
+ * lane, like the grid. In draw mode it is a brush: a drag across it sets
+ * every bar under the pointer, in the grid cell it is over, to the pointer's
+ * height. Put a `PianoRoll.Velocity` per note inside, with `PianoRoll.Notes`.
  * Renders a `<div>` element.
  */
 export function VelocityLane(componentProps: VelocityLane.Props) {
-  const { className, ref, render, style, ...elementProps } = componentProps;
-  const { state } = usePianoRollContext("VelocityLane");
+  const {
+    className,
+    level = "velocity",
+    ref,
+    render,
+    style,
+    ...elementProps
+  } = componentProps;
+  const { controller, state: rollState } = usePianoRollContext("VelocityLane");
   const { lane, laneRef, style: laneStyle } = useLaneProps("Lane");
+  // A bar takes its own presses; one on the lane between them paints in draw mode.
+  const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (!event.defaultPrevented) {
+      controller.paintLevels(event.nativeEvent, event.currentTarget, level);
+    }
+  };
+  const state = React.useMemo<VelocityLane.State>(
+    () => ({ ...rollState, level }),
+    [level, rollState]
+  );
   const element = useRender({
     defaultTagName: "div",
     props: mergeProps<"div">(
-      { role: "group", style: laneStyle },
+      { onPointerDown: handlePointerDown, role: "group", style: laneStyle },
       { ...elementProps, ...resolveStyling(className, style, state) }
     ),
     ref: ref ? [ref, laneRef] : laneRef,
     render,
     state,
   });
-  return <LaneContext value={lane}>{element}</LaneContext>;
+  return (
+    <LaneContext value={lane}>
+      <LevelContext value={level}>{element}</LevelContext>
+    </LaneContext>
+  );
 }
 
 export namespace VelocityLane {
-  export type State = PianoRollState;
-  export type Props = PartProps<"div", State>;
+  export type State = PianoRollState & {
+    /** What the bars stand for: each note's velocity, or its chance to play. */
+    level: NoteLevel;
+  };
+  export interface Props extends PartProps<"div", State> {
+    /** What the bars stand for: each note's velocity, or its chance to play. @default "velocity" */
+    level?: NoteLevel;
+  }
 }
 
 /**
- * One note's velocity, as a bar from the bottom of the lane: its height is
- * the velocity, through the `--piano-roll-velocity` CSS variable. Dragging it
- * up or down changes the velocity of the selection by the same amount when
- * the note is part of it, so a phrase keeps its dynamics; Shift + click
- * toggles the note in the selection. A native `<input type="range">` inside
- * takes the arrow keys (Page Up/Down for larger steps, Home/End for silent
- * and full) and carries the accessible name, which defaults to the note's.
- * The next drawn note gets the velocity set last.
+ * One note's velocity, or its chance in a `level="chance"` lane, as a bar from
+ * the bottom of the lane: its height is the value, through the
+ * `--piano-roll-level` CSS variable. Dragging it up or down changes the value
+ * of the selection by the same amount when the note is part of it, so a
+ * phrase keeps its dynamics; Shift + click toggles the note in the selection.
+ * On a velocity bar, Cmd/Ctrl + drag sets how far the velocity may stray each
+ * time the note plays, its `--piano-roll-deviation`. A native
+ * `<input type="range">` inside takes the arrow keys (Page Up/Down for larger
+ * steps, Home/End for none and full) and carries the accessible name, which
+ * defaults to the note's. The next drawn note gets the velocity set last.
  * Renders a `<div>` element.
  */
 export function Velocity(componentProps: Velocity.Props) {
@@ -79,7 +116,8 @@ export function Velocity(componentProps: Velocity.Props) {
     view.noteById.get(noteProp.id)
   );
   const note: Note = shown ?? noteProp;
-  const velocity = note.velocity ?? 1;
+  const level = React.use(LevelContext);
+  const velocity = note[level] ?? 1;
   const { disabled } = rollState;
   const selected = useRollView("Velocity", (view) =>
     view.selection.has(note.id)
@@ -96,7 +134,8 @@ export function Velocity(componentProps: Velocity.Props) {
       note.id,
       event.nativeEvent,
       event.currentTarget,
-      lane.elementRef.current
+      lane.elementRef.current,
+      level
     );
   };
 
@@ -105,11 +144,11 @@ export function Velocity(componentProps: Velocity.Props) {
       if (disabled) {
         return;
       }
-      if (controller.keyVelocity(note.id, event.nativeEvent)) {
+      if (controller.keyVelocity(note.id, event.nativeEvent, level)) {
         event.preventDefault();
       }
     },
-    [controller, disabled, note.id]
+    [controller, disabled, level, note.id]
   );
 
   const handleChange = React.useCallback(
@@ -117,10 +156,11 @@ export function Velocity(componentProps: Velocity.Props) {
       controller.setVelocity(
         note.id,
         Number(event.currentTarget.value),
-        event.nativeEvent
+        event.nativeEvent,
+        level
       );
     },
-    [controller, note.id]
+    [controller, level, note.id]
   );
 
   const muted = note.muted ?? false;
@@ -159,9 +199,12 @@ export function Velocity(componentProps: Velocity.Props) {
         onPointerDown: handlePointerDown,
         style: {
           ...placedAt(note.start),
-          [VELOCITY_PROPERTY as string]: velocity,
+          [LEVEL_PROPERTY as string]: velocity,
+          [VELOCITY_PROPERTY as string]: note.velocity ?? 1,
+          [CHANCE_PROPERTY as string]: note.chance ?? 1,
+          [DEVIATION_PROPERTY as string]: note.deviation ?? 0,
           bottom: 0,
-          height: `calc(var(${VELOCITY_PROPERTY}) * 100%)`,
+          height: `calc(var(${LEVEL_PROPERTY}) * 100%)`,
           touchAction: "none",
         },
       },

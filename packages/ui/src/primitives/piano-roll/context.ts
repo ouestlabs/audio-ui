@@ -22,6 +22,10 @@ export const ROW_PROPERTY = "--piano-roll-row";
 export const VELOCITY_PROPERTY = "--piano-roll-velocity";
 /** Set on every note: how likely it is to play, 0…1. */
 export const CHANCE_PROPERTY = "--piano-roll-chance";
+/** Set on every note's velocity bar: how far its velocity may stray, -1…1. */
+export const DEVIATION_PROPERTY = "--piano-roll-deviation";
+/** Set on every bar of a lane: the value it stands for, 0…1, which is its height. */
+export const LEVEL_PROPERTY = "--piano-roll-level";
 
 /** Places a part on `row`, counted from the top, sharing the height with every other row. */
 export function placedOnRow(row: number): React.CSSProperties {

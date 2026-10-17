@@ -48,6 +48,22 @@ function velocityMarks(height: number): number[] {
   marks.push(1);
   return marks;
 }
+/** The chances the scale labels, in percent: every 25 when the lane is tall enough, else every 50, else the ends. */
+function chanceMarks(height: number): number[] {
+  const step = [25, 50].find((every) => (height * every) / 100 >= 13);
+  return step
+    ? Array.from({ length: 100 / step + 1 }, (_, index) => 100 - index * step)
+    : [100, 0];
+}
+
+/** A velocity bar's deviation, from its top: up past it when positive, down into it when negative, as a share of the lane. */
+const DEVIATION_BAND = {
+  bottom:
+    "calc(100% + min(var(--piano-roll-deviation), 0) / max(var(--piano-roll-velocity), 0.01) * 100%)",
+  height:
+    "calc(max(var(--piano-roll-deviation), -1 * var(--piano-roll-deviation)) / max(var(--piano-roll-velocity), 0.01) * 100%)",
+} as const;
+
 /** How tall the velocity lane can be dragged, in px, and how far an arrow key moves it. */
 const VELOCITY_HEIGHT = { default: 56, keyStep: 8, max: 240, min: 32 };
 
@@ -305,6 +321,7 @@ function PianoRollVelocity({
   children,
   className,
   gridStep,
+  level = "velocity",
   style,
   ...props
 }: PianoRollVelocityProps) {
@@ -351,9 +368,13 @@ function PianoRollVelocity({
   );
   return (
     <PianoRollPrimitive.VelocityLane
-      aria-label="Velocity"
-      className={cn("cn-piano-roll-velocity touch-none select-none", className)}
+      aria-label={level === "chance" ? "Chance" : "Velocity"}
+      className={cn(
+        "cn-piano-roll-velocity touch-none select-none data-[mode=draw]:cursor-crosshair",
+        className
+      )}
       data-slot="piano-roll-velocity"
+      level={level}
       style={{ ...gridLines(gridStep, accentStep), height, ...style }}
       {...props}
     >
@@ -376,14 +397,42 @@ function PianoRollVelocity({
       <PianoRollPrimitive.Notes>
         {(note) => (
           <PianoRollPrimitive.Velocity
-            className="cn-piano-roll-velocity-bar w-1.5 cursor-ns-resize after:absolute after:-inset-x-1 after:inset-y-0"
+            className="cn-piano-roll-velocity-bar w-1.5 cursor-ns-resize after:absolute after:-inset-x-1 after:inset-y-0 group-data-[mode=draw]/piano-roll:cursor-crosshair"
             key={note.id}
             note={note}
-          />
+          >
+            {/* How far the velocity may stray each time it plays, above the bar or into it. */}
+            {level === "velocity" ? (
+              <span
+                aria-hidden="true"
+                className="absolute inset-x-0 bg-primary/40"
+                style={DEVIATION_BAND}
+              />
+            ) : null}
+          </PianoRollPrimitive.Velocity>
         )}
       </PianoRollPrimitive.Notes>
       {children}
     </PianoRollPrimitive.VelocityLane>
+  );
+}
+
+/** One edge of the selection's span, for a `PianoRollSelectionSpan`: drag it to stretch the selected notes in time from the other edge. */
+function PianoRollStretchHandle({
+  className,
+  ...props
+}: Omit<PianoRollPrimitive.StretchHandle.Props, "className"> & {
+  className?: string;
+}) {
+  return (
+    <PianoRollPrimitive.StretchHandle
+      className={cn(
+        "cn-piano-roll-stretch-handle z-10 w-2 cursor-ew-resize bg-primary data-[edge=end]:translate-x-1/2 data-[edge=start]:-translate-x-1/2",
+        className
+      )}
+      data-slot="piano-roll-stretch-handle"
+      {...props}
+    />
   );
 }
 
@@ -403,11 +452,14 @@ function PianoRollSelectionSpan({
   );
 }
 
-/** The scale beside the velocity lane, for the `lead` of its strip: it labels more velocities as the lane grows taller. */
+/** The scale beside the velocity lane, for the `lead` of its strip: it labels more values as the lane grows taller, velocities from 1 to 127 or with `level="chance"` chances in percent. */
 function PianoRollVelocityScale({
   className,
+  level = "velocity",
   ...props
-}: ComponentProps<"div">) {
+}: ComponentProps<"div"> & {
+  level?: PianoRollPrimitive.VelocityLane.Props["level"];
+}) {
   const ref = useRef<HTMLDivElement>(null);
   const [height, setHeight] = useState(0);
   useEffect(() => {
@@ -432,16 +484,20 @@ function PianoRollVelocityScale({
       ref={ref}
       {...props}
     >
-      {velocityMarks(height).map((mark) => (
-        <span
-          className="absolute end-1.5 flex translate-y-1/2 items-center gap-1"
-          key={mark}
-          style={{ bottom: `${(mark / 127) * 100}%` }}
-        >
-          {mark}
-          <span className="h-px w-1 bg-muted-foreground" />
-        </span>
-      ))}
+      {(level === "chance" ? chanceMarks(height) : velocityMarks(height)).map(
+        (mark) => (
+          <span
+            className="absolute end-1.5 flex translate-y-1/2 items-center gap-1"
+            key={mark}
+            style={{
+              bottom: `${level === "chance" ? mark : (mark / 127) * 100}%`,
+            }}
+          >
+            {level === "chance" ? `${mark}%` : String(mark)}
+            <span className="h-px w-1 bg-muted-foreground" />
+          </span>
+        )
+      )}
     </div>
   );
 }
@@ -451,6 +507,7 @@ export {
   PianoRollGrid,
   PianoRollKeys,
   PianoRollSelectionSpan,
+  PianoRollStretchHandle,
   PianoRollStrip,
   PianoRollVelocity,
   PianoRollVelocityScale,

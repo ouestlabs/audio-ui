@@ -432,6 +432,10 @@
     @apply bg-primary/10;
   }
 
+  .cn-piano-roll-stretch-handle {
+    @apply rounded-[min(var(--radius-sm),2px)] opacity-70 transition-opacity hover:opacity-100 motion-reduce:transition-none;
+  }
+
   .cn-piano-roll-marquee {
     @apply border border-primary bg-primary/15;
   }

@@ -7,12 +7,18 @@ import {
 } from "@audio-ui/core/midi";
 import {
   chopNotes,
+  deleteTime,
+  duplicateTime,
+  findNotes,
   fitNotesToScale,
   humanizeNotes,
+  insertTime,
   invertNotes,
   joinNotes,
   legatoNotes,
   type NoteId,
+  type NoteLevel,
+  type NoteQuery,
   quantizeNotes,
   type RollBounds,
   rampVelocity,
@@ -62,12 +68,27 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/registry/bases/base/ui/dropdown-menu";
+import { Input } from "@/registry/bases/base/ui/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/registry/bases/base/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/registry/bases/base/ui/select";
 import { Fader } from "@/registry-audio/bases/base/audio/elements/fader";
 import {
   PianoRoll,
   PianoRollGrid,
   PianoRollKeys,
   PianoRollSelectionSpan,
+  PianoRollStretchHandle,
   PianoRollStrip,
   PianoRollVelocity,
   PianoRollVelocityScale,
@@ -342,8 +363,14 @@ interface NoteEdit {
   edit: (notes: Note[], ids: Set<NoteId>, context: EditContext) => Note[];
   id: string;
   label: string;
+  /** Whether the edit works on the time the selection covers, so needs one. */
+  needsSelection?: boolean;
   shortcut?: string;
 }
+
+/** The time the selected notes cover, as a time command reads it. */
+const spanOf = (notes: Note[], ids: Set<NoteId>) =>
+  selectionSpan(notes, ids) ?? { end: 0, start: 0 };
 
 /** What the Notes menu does to the selected notes, or to every note with none selected. */
 const TIME_EDITS: NoteEdit[] = [
@@ -396,6 +423,36 @@ const TIME_EDITS: NoteEdit[] = [
     id: "half",
     label: "Half as long",
   },
+  {
+    edit: (notes, ids, { bounds, nextId }) => {
+      const { end, start } = spanOf(notes, ids);
+      return duplicateTime(notes, start, end, nextId, bounds.duration).notes;
+    },
+    id: "duplicate-time",
+    label: "Duplicate time",
+    needsSelection: true,
+    shortcut: "⇧⌘D",
+  },
+  {
+    edit: (notes, ids) => {
+      const { end, start } = spanOf(notes, ids);
+      return deleteTime(notes, start, end);
+    },
+    id: "delete-time",
+    label: "Delete time",
+    needsSelection: true,
+    shortcut: "⇧⌘⌫",
+  },
+  {
+    edit: (notes, ids, { bounds, nextId }) => {
+      const { end, start } = spanOf(notes, ids);
+      return insertTime(notes, start, end - start, nextId, bounds.duration);
+    },
+    id: "insert-time",
+    label: "Insert time",
+    needsSelection: true,
+    shortcut: "⌘I",
+  },
 ];
 const PITCH_EDITS: NoteEdit[] = [
   {
@@ -442,10 +499,17 @@ const VELOCITY_EDITS: NoteEdit[] = [
     label: "Humanize",
   },
 ];
+/** Cmd/Ctrl + Shift with a key: the time commands. */
+const SHIFT_EDITS_BY_KEY: Record<string, NoteEdit | undefined> = {
+  backspace: TIME_EDITS.find((item) => item.id === "delete-time"),
+  d: TIME_EDITS.find((item) => item.id === "duplicate-time"),
+  delete: TIME_EDITS.find((item) => item.id === "delete-time"),
+};
 /** Cmd/Ctrl with a letter: the edits that have a key of their own. */
 const EDITS_BY_KEY: Record<string, NoteEdit | undefined> = {
   e: TIME_EDITS.find((item) => item.id === "split"),
   j: TIME_EDITS.find((item) => item.id === "join"),
+  i: TIME_EDITS.find((item) => item.id === "insert-time"),
   u: TIME_EDITS.find((item) => item.id === "quantize"),
 };
 
@@ -593,7 +657,13 @@ function usePianoRoll({
           continue;
         }
         const at = time + (note.start - step) * secondsPerStep;
-        triggerNote(note.pitch, DEFAULT_ENVELOPE, note.velocity ?? 1, at);
+        // A deviation strays the velocity by up to its amount, a new roll each time.
+        const velocity = clamp(
+          (note.velocity ?? 1) + Math.random() * (note.deviation ?? 0),
+          0,
+          1
+        );
+        triggerNote(note.pitch, DEFAULT_ENVELOPE, velocity, at);
         releaseNote(
           note.pitch,
           DEFAULT_ENVELOPE,
@@ -909,6 +979,8 @@ function ScaleMenu({
   );
 }
 
+/** The edits used most, at the top of the Notes menu where they are reached first. */
+const TOP_EDITS = ["split", "join", "quantize", "mute"];
 /** The Notes menu's submenus: the edits without a key of their own, by what they change. */
 const EDIT_MENUS = [
   { edits: TIME_EDITS, label: "Time" },
@@ -917,15 +989,11 @@ const EDIT_MENUS = [
   { edits: PLAY_EDITS, label: "Chance" },
 ].map((menu) => ({
   ...menu,
-  edits: menu.edits.filter((item) => !item.shortcut),
+  edits: menu.edits.filter((item) => !TOP_EDITS.includes(item.id)),
 }));
-/** The edits with a key, at the top of the Notes menu where they are reached first. */
-const KEYED_EDITS = [
-  ...TIME_EDITS,
-  ...PITCH_EDITS,
-  ...VELOCITY_EDITS,
-  ...PLAY_EDITS,
-].filter((item) => item.shortcut);
+const KEYED_EDITS = [...TIME_EDITS, ...PLAY_EDITS].filter((item) =>
+  TOP_EDITS.includes(item.id)
+);
 
 /** Menu items for `edits`, each running its edit. */
 function EditItems({
@@ -963,10 +1031,295 @@ function EditItems({
   ));
 }
 
+/** The Find panel's fields, as typed: empty means no limit. */
+const NO_FIND = {
+  chanceFrom: "",
+  chanceTo: "",
+  every: "1",
+  lengthFrom: "",
+  lengthTo: "",
+  pitch: "any",
+  rest: false,
+  scale: "any",
+  state: "any",
+  velocityFrom: "",
+  velocityTo: "",
+};
+type FindFields = typeof NO_FIND;
+
+/** A from…to pair read off two fields, divided by `unit` into the note's terms, or nothing when both are empty. */
+function rangeOf(
+  from: string,
+  to: string,
+  unit: number
+): [number, number] | undefined {
+  if (from === "" && to === "") {
+    return;
+  }
+  return [
+    from === "" ? 0 : Number(from) / unit,
+    to === "" ? Number.POSITIVE_INFINITY : Number(to) / unit,
+  ];
+}
+
+/** The query the Find panel's fields ask for. */
+function findQuery(fields: FindFields, scale: Scale | null): NoteQuery {
+  return {
+    chance: rangeOf(fields.chanceFrom, fields.chanceTo, 100),
+    every: { count: Number(fields.every), offset: 0 },
+    invert: fields.rest,
+    length: rangeOf(fields.lengthFrom, fields.lengthTo, 1),
+    muted: fields.state === "any" ? undefined : fields.state === "muted",
+    pitchClasses: fields.pitch === "any" ? undefined : [Number(fields.pitch)],
+    scale:
+      scale && fields.scale !== "any"
+        ? { scale, within: fields.scale === "in" }
+        : undefined,
+    velocity: rangeOf(fields.velocityFrom, fields.velocityTo, 127),
+  };
+}
+
+const FIND_ROW = "grid grid-cols-[4.5rem_1fr_1fr] items-center gap-1.5";
+
+/** A from…to pair of number fields, `name`From and `name`To, empty for no limit. */
+function RangeField({
+  fields,
+  label,
+  max,
+  min,
+  name,
+  onChange,
+}: {
+  fields: FindFields;
+  label: string;
+  max: number;
+  min: number;
+  name: "chance" | "length" | "velocity";
+  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+}) {
+  return (
+    <fieldset className={FIND_ROW}>
+      <legend className="contents text-muted-foreground text-xs">
+        {label}
+      </legend>
+      {(["From", "To"] as const).map((end) => (
+        <Input
+          aria-label={`${label} ${end === "From" ? "from" : "to"}`}
+          className="h-7 tabular-nums"
+          inputMode="numeric"
+          key={end}
+          max={max}
+          min={min}
+          name={`${name}${end}`}
+          onChange={onChange}
+          placeholder={String(end === "From" ? min : max)}
+          type="number"
+          value={fields[`${name}${end}`]}
+        />
+      ))}
+    </fieldset>
+  );
+}
+
+interface FindItem {
+  label: string;
+  value: string;
+}
+const PITCH_ITEMS: FindItem[] = [
+  { label: "Any", value: "any" },
+  ...ROOTS.map((root) => ({
+    label: pitchClassName(root),
+    value: String(root),
+  })),
+];
+const SCALE_ITEMS: FindItem[] = [
+  { label: "Any", value: "any" },
+  { label: "In the scale", value: "in" },
+  { label: "Out of it", value: "out" },
+];
+const STATE_ITEMS: FindItem[] = [
+  { label: "Any", value: "any" },
+  { label: "Active", value: "active" },
+  { label: "Deactivated", value: "muted" },
+];
+const EVERY_ITEMS: FindItem[] = [
+  { label: "Note", value: "1" },
+  { label: "Second note", value: "2" },
+  { label: "Third note", value: "3" },
+  { label: "Fourth note", value: "4" },
+];
+
+/** One labelled choice of the Find panel. */
+function FindSelect({
+  disabled = false,
+  items,
+  label,
+  name,
+  onField,
+  value,
+}: {
+  disabled?: boolean;
+  items: FindItem[];
+  label: string;
+  name: keyof FindFields;
+  onField: (name: string, value: string) => void;
+  value: string;
+}) {
+  const id = useId();
+  const handleChange = useCallback(
+    (next: string | null) => onField(name, next ?? items[0]?.value ?? ""),
+    [items, name, onField]
+  );
+  return (
+    <div className="grid grid-cols-[4.5rem_1fr] items-center gap-1.5">
+      <span className="text-muted-foreground text-xs" id={id}>
+        {label}
+      </span>
+      <Select
+        disabled={disabled}
+        items={items}
+        onValueChange={handleChange}
+        value={value}
+      >
+        <SelectTrigger aria-labelledby={id} className="w-full" size="sm">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            {items.map((item) => (
+              <SelectItem key={item.value} value={item.value}>
+                {item.label}
+              </SelectItem>
+            ))}
+          </SelectGroup>
+        </SelectContent>
+      </Select>
+    </div>
+  );
+}
+
+/** Selects notes by what they are: a pitch, ranges of velocity, length and chance, in or out of the scale, active or not, every few, or the rest. */
+function FindPanel({
+  onFind,
+  scale,
+}: {
+  onFind: (query: NoteQuery) => void;
+  scale: Scale | null;
+}) {
+  const id = useId();
+  const [fields, setFields] = useState<FindFields>(NO_FIND);
+  const handleChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const { checked, name, type, value } = event.currentTarget;
+      setFields((current) => ({
+        ...current,
+        [name]: type === "checkbox" ? checked : value,
+      }));
+    },
+    []
+  );
+  const find = useCallback(
+    () => onFind(findQuery(fields, scale)),
+    [fields, onFind, scale]
+  );
+  const onField = useCallback(
+    (name: string, value: string) =>
+      setFields((current) => ({ ...current, [name]: value })),
+    []
+  );
+  return (
+    <Popover>
+      <PopoverTrigger
+        render={
+          <Button aria-label="Find notes" size="icon" variant="outline" />
+        }
+      >
+        <IconPlaceholder
+          hugeicons="Search01Icon"
+          lucide="SearchIcon"
+          phosphor="MagnifyingGlassIcon"
+          remixicon="RiSearchLine"
+          tabler="IconSearch"
+        />
+      </PopoverTrigger>
+      <PopoverContent align="end" className="flex w-72 flex-col gap-2">
+        <FindSelect
+          items={PITCH_ITEMS}
+          label="Pitch"
+          name="pitch"
+          onField={onField}
+          value={fields.pitch}
+        />
+        <FindSelect
+          disabled={!scale}
+          items={SCALE_ITEMS}
+          label="Scale"
+          name="scale"
+          onField={onField}
+          value={fields.scale}
+        />
+        <FindSelect
+          items={STATE_ITEMS}
+          label="State"
+          name="state"
+          onField={onField}
+          value={fields.state}
+        />
+        <FindSelect
+          items={EVERY_ITEMS}
+          label="Every"
+          name="every"
+          onField={onField}
+          value={fields.every}
+        />
+        <RangeField
+          fields={fields}
+          label="Velocity"
+          max={127}
+          min={1}
+          name="velocity"
+          onChange={handleChange}
+        />
+        <RangeField
+          fields={fields}
+          label="Length"
+          max={64}
+          min={1}
+          name="length"
+          onChange={handleChange}
+        />
+        <RangeField
+          fields={fields}
+          label="Chance %"
+          max={100}
+          min={0}
+          name="chance"
+          onChange={handleChange}
+        />
+        <div className="flex items-center gap-2 text-xs">
+          <input
+            checked={fields.rest}
+            className="accent-primary"
+            id={`${id}-rest`}
+            name="rest"
+            onChange={handleChange}
+            type="checkbox"
+          />
+          <label htmlFor={`${id}-rest`}>The notes that do not match</label>
+        </div>
+        <Button onClick={find} size="sm" type="button">
+          Select
+        </Button>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
 /** The edits with a key first, the others in a submenu each, then the file and clear commands. They act on the selection, or on every note with none selected. */
 function NotesMenu({
   hasNotes,
   hasScale,
+  hasSelection,
   onClear,
   onEdit,
   onExport,
@@ -974,14 +1327,18 @@ function NotesMenu({
 }: {
   hasNotes: boolean;
   hasScale: boolean;
+  hasSelection: boolean;
   onClear: () => void;
   onEdit: (item: NoteEdit) => void;
   onExport: () => void;
   onImport: () => void;
 }) {
   const disabled = useCallback(
-    (item: NoteEdit) => !hasNotes || (item.id === "fit" && !hasScale),
-    [hasNotes, hasScale]
+    (item: NoteEdit) =>
+      !hasNotes ||
+      (item.id === "fit" && !hasScale) ||
+      (item.needsSelection === true && !hasSelection),
+    [hasNotes, hasScale, hasSelection]
   );
   return (
     <DropdownMenu>
@@ -1064,6 +1421,15 @@ export default function BlockPianoRoll() {
   const [folded, setFolded] = useState(false);
   const toggleFolded = useCallback(() => setFolded((current) => !current), []);
   const [drawing, setDrawing] = useState(true);
+  /** What the lane under the grid shows and edits: each note's velocity, or its chance. */
+  const [laneLevel, setLaneLevel] = useState<NoteLevel>("velocity");
+  const toggleLaneLevel = useCallback(
+    () =>
+      setLaneLevel((current) =>
+        current === "velocity" ? "chance" : "velocity"
+      ),
+    []
+  );
   const toggleDrawing = useCallback(
     () => setDrawing((current) => !current),
     []
@@ -1207,7 +1573,12 @@ export default function BlockPianoRoll() {
         loopEnd: loopRegion?.end ?? meter.duration,
         nextId: () => {
           nextIdRef.current += 1;
-          return `edit-${nextIdRef.current}`;
+          return `;
+edit - $;
+{
+  nextIdRef.current;
+}
+`;
         },
         scale,
         selected: selection.length > 0,
@@ -1217,7 +1588,9 @@ export default function BlockPianoRoll() {
     [history, loopRegion, meter.duration, notes, position, scale, selection]
   );
 
-  /** Zooms so `start` to `end` fills the view, and scrolls it into place. */
+  /** Zooms so `;
+start` to `;
+end` fills the view, and scrolls it into place. */
   /** A zoom out to the whole clip, or past it, goes back to fitting it. */
   const changeZoom = useCallback(
     (zoom: number) => setZoomed(zoom > fit + 0.01 ? zoom : null),
@@ -1244,6 +1617,11 @@ export default function BlockPianoRoll() {
     zoomOnto(start, end);
   };
   const zoomOut = () => setZoomed(null);
+  /** Selects the notes a Find query matches, in the scale marked when it asks for one. */
+  const findAndSelect = useCallback(
+    (query: NoteQuery) => setSelection(findNotes(notes, query)),
+    [notes]
+  );
   /** Selects the notes that are not selected, and deselects those that are. */
   const invertSelection = useCallback(() => {
     const selected = new Set(selection);
@@ -1265,7 +1643,10 @@ export default function BlockPianoRoll() {
       invertSelection();
       return true;
     }
-    const item = EDITS_BY_KEY[key];
+    const item = shiftKey ? SHIFT_EDITS_BY_KEY[key] : EDITS_BY_KEY[key];
+    if (item?.needsSelection && selection.length === 0) {
+      return false;
+    }
     if (item && notes.length > 0) {
       applyEdit(item);
       return true;
@@ -1485,9 +1866,11 @@ export default function BlockPianoRoll() {
               onScaleChange={setScaleChoice}
               scale={scaleChoice}
             />
+            <FindPanel onFind={findAndSelect} scale={scale} />
             <NotesMenu
               hasNotes={notes.length > 0}
               hasScale={scale !== null}
+              hasSelection={selection.length > 0}
               onClear={clearNotes}
               onEdit={applyEdit}
               onExport={handleExport}
@@ -1510,6 +1893,7 @@ export default function BlockPianoRoll() {
         <PianoRoll
           activePitches={activePitches}
           className="h-104"
+          drawStyle="paint"
           folded={scaleOnly && scale ? "scale" : folded}
           getNoteLabel={describeNote}
           maxPitch={MAX_PITCH}
@@ -1587,7 +1971,10 @@ export default function BlockPianoRoll() {
                     {mark.label}
                   </TimelineMark>
                 ))}
-                <PianoRollSelectionSpan className="bg-primary/25" />
+                <PianoRollSelectionSpan className="bg-primary/25">
+                  <PianoRollStretchHandle edge="start" />
+                  <PianoRollStretchHandle edge="end" />
+                </PianoRollSelectionSpan>
                 <TimelinePlayhead />
               </TimelineRuler>
             </PianoRollStrip>
@@ -1604,26 +1991,58 @@ export default function BlockPianoRoll() {
             </PianoRollStrip>
             <PianoRollStrip
               className="border-t"
-              lead={<PianoRollVelocityScale />}
+              lead={
+                <>
+                  <Button
+                    aria-label={`;
+Lane: $;
+{
+  laneLevel;
+}
+, show $
+{
+  laneLevel === "velocity" ? "chance" : "velocity";
+}
+`}
+                    className="h-5 w-full shrink-0 rounded-none text-[9px] uppercase tracking-wide"
+                    onClick={toggleLaneLevel}
+                    size="sm"
+                    type="button"
+                    variant="ghost"
+                  >
+                    {laneLevel === "velocity" ? "Vel" : "Chance"}
+                  </Button>
+                  <PianoRollVelocityScale level={laneLevel} />
+                </>
+              }
               sticky="bottom"
             >
-              <PianoRollVelocity accentStep={meter.stepsPerBeat} gridStep={1} />
+              <PianoRollVelocity
+                accentStep={meter.stepsPerBeat}
+                gridStep={1}
+                level={laneLevel}
+              />
             </PianoRollStrip>
           </PianoRollViewport>
         </PianoRoll>
       </Timeline>
       <p className="sr-only" id={helpId}>
-        Click the grid to add a note, or with drawing off (B), to start a
-        selection. Drag a note to move it, with Alt to copy it, and drag its
-        edges to change its length. Shift and a click adds a note to the
-        selection; Shift and a key selects every note on its row. The arrow keys
-        move the focused note, Shift with Left or Right changes its length,
-        Shift with Up or Down moves it an octave, and Delete removes it. Enter
-        on the grid adds a note at the playhead, and Escape clears the
-        selection. Cmd or Ctrl with E chops the selection on the grid, or splits
-        the notes at the playhead, with J joins, with U quantizes, with Shift
-        and A inverts the selection, and with Z undoes. F folds onto the notes,
-        K marks the scale and G keeps only its rows.
+        With drawing on (B), drag across the grid to paint notes, one a grid
+        step, following the pointer's pitch or with Alt keeping the first; drag
+        across the velocity or chance lane to paint each bar to the pointer's
+        height. With drawing off, drag to select. Drag a note to move it, with
+        Alt to copy it, and drag its edges to change its length; drag an edge of
+        the selection on the ruler to stretch it in time. Shift and a click adds
+        a note to the selection; Shift and a key selects every note on its row.
+        Cmd or Ctrl and a drag on a velocity bar sets how far it may stray. The
+        arrow keys move the focused note, Shift with Left or Right changes its
+        length, Shift with Up or Down moves it an octave, and Delete removes it.
+        Cmd or Ctrl with E chops the selection on the grid, or splits the notes
+        at the playhead, with J joins, with U quantizes, with I inserts the
+        selection's time, with Shift and D duplicates it, with Shift and Delete
+        deletes it, with Shift and A inverts the selection, and with Z undoes. 0
+        deactivates the selection, F folds onto the notes, K marks the scale and
+        G keeps only its rows, Z zooms onto the selection and X out.
       </p>
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div aria-label="Volume" className="flex-1" role="group">

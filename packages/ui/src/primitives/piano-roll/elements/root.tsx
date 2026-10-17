@@ -47,6 +47,7 @@ export function Root(componentProps: Root.Props) {
     defaultSelection,
     defaultValue,
     disabled: disabledProp = false,
+    drawStyle,
     folded = false,
     getNoteLabel = describeNote,
     maxPitch = 72,
@@ -90,6 +91,7 @@ export function Root(componentProps: Root.Props) {
     defaultSelection,
     defaultValue,
     disabled,
+    drawStyle,
     folded,
     maxPitch,
     minLength,
@@ -245,6 +247,8 @@ export namespace Root {
     /** Uncontrolled starting notes. */
     defaultValue?: readonly Note[];
     disabled?: boolean;
+    /** What a drag does after a press on the grid in draw mode: stretch the note drawn, or paint a note in each grid cell the pointer crosses, on the pitch under it, or with Alt on the first one. @default "stretch" */
+    drawStyle?: "paint" | "stretch";
     /** Whether only the pitches carrying notes get a row, and with `"scale"` those in `scale` too. A roll with nothing to fold onto keeps them all. @default false */
     folded?: boolean | "scale";
     /** Returns a note's accessible name. Defaults to its pitch and where it starts and ends, such as "C4, 4 to 6". */

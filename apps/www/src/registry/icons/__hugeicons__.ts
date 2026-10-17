@@ -34,6 +34,7 @@ export {
   PlusSignIcon,
   Redo02Icon,
   RepeatIcon,
+  Search01Icon,
   SearchIcon,
   Share03Icon,
   ShoppingBag01Icon,
