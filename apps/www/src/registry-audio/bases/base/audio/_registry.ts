@@ -723,7 +723,7 @@ export const audio: RegistryItem[] = [
     categories: ["timeline", "waveform", "knob"],
     dependencies: ["@audio-ui/core", "@audio-ui/react"],
     description:
-      "The clip view of an arrangement's clip: its source on a timeline of its own (overview, bar ruler, the stretch it plays or loops to drag, warp markers on the waveform), beside Loop, Warp, Reverse, Crop and knobs for its gain and transpose.",
+      "The clip view of an arrangement's audio clip: a strip with its switch and name that rolls the view up, then Clip (start, end), Loop (switch, position, length, ÷2, ×2) and Sample (Warp, Reverse, Crop, Gain, Transpose, speed) boxes in bars.beats.16ths, the last two foldable, beside its source on a timeline of its own (overview, bar ruler, the stretch it plays or loops to drag, warp markers on the waveform).",
     files: [
       {
         path: "audio/panels/clip-panel.tsx",
@@ -731,8 +731,38 @@ export const audio: RegistryItem[] = [
       },
     ],
     name: "clip-panel",
+    registryDependencies: ["@audio-ui/clip-view", "@audio-ui/timeline"],
+    type: "registry:ui",
+  },
+  {
+    categories: ["timeline"],
+    description:
+      "The frame of a clip's detail view: a strip along its top (the caret that rolls the view up to it, the clip's switch, its name to rename, a status, actions), boxes of its properties beside its editor (ClipBox, foldable to a strip), rows, small toggles, text fields, and position fields in bars.beats.16ths.",
+    files: [
+      {
+        path: "audio/elements/clip-view.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "clip-view",
+    registryDependencies: ["@shadcn/button"],
+    type: "registry:ui",
+  },
+  {
+    categories: ["timeline", "piano"],
+    dependencies: ["@audio-ui/core", "@audio-ui/react"],
+    description:
+      "The clip view of an arrangement's MIDI clip: a strip with its switch and name that rolls the view up, then Clip (start, end), Loop (switch, position, length, ÷2, ×2, Dupl. Loop) and Notes (transpose, invert, reverse, legato, ×2, ÷2, humanize, velocity ramps) boxes, the last two foldable, beside its piano roll (Draw, Fold, the loop brace on the ruler, keys, grid, a velocity or chance lane). Notes are drawn a grid step at a time.",
+    files: [
+      {
+        path: "audio/panels/midi-clip-panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "midi-clip-panel",
     registryDependencies: [
-      "@audio-ui/knob",
+      "@audio-ui/clip-view",
+      "@audio-ui/piano-roll",
       "@audio-ui/timeline",
       "@shadcn/button",
     ],

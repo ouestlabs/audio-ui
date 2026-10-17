@@ -1,3 +1,4 @@
+import type { Note } from "@audio-ui/core/piano-roll";
 import type { WarpMarker } from "@audio-ui/core/time";
 import {
   type ClipValue,
@@ -21,6 +22,12 @@ export interface Arranged {
    */
   loop?: readonly [number, number];
   name: string;
+  /**
+   * A MIDI clip's notes, in its source's time: a note's `start` is seconds
+   * from where the source begins, as an audio clip's offset is, so trimming
+   * or moving the clip leaves each note where it was in the source.
+   */
+  notes?: readonly Note[];
   /** Whether its source plays backwards. */
   reversed?: boolean;
   /** Where its source begins in the recording it was cut from, once cropped. @default 0 */
@@ -41,11 +48,16 @@ export interface Arranged {
   warp?: readonly WarpMarker[];
 }
 
+/** What a track holds: recordings, or notes for an instrument to play. */
+export type TrackKind = "audio" | "midi";
+
 /** A track of an arrangement. */
 export interface ArrangementTrack {
   /** An index into the colors a track can take. */
   color: number;
   id: string;
+  /** @default "audio" */
+  kind?: TrackKind;
   name: string;
 }
 
@@ -195,6 +207,31 @@ export function scaleValue(value: ClipValue, ratio: number): ClipValue {
     length: value.length * ratio,
     offset: value.offset * ratio,
     start: value.start * ratio,
+  };
+}
+
+/**
+ * A clip at a new tempo, `ratio` times as long: where it sits and its source.
+ * A MIDI clip's notes and loop are in beats at heart, so they follow the
+ * tempo too; a recording's loop stays where it is in the recording.
+ */
+export function scaleClip(clip: Arranged, ratio: number): Arranged {
+  const scaled: Arranged = {
+    ...clip,
+    sourceLength: clip.sourceLength * ratio,
+    value: scaleValue(clip.value, ratio),
+  };
+  if (!clip.notes) {
+    return scaled;
+  }
+  return {
+    ...scaled,
+    loop: clip.loop && [clip.loop[0] * ratio, clip.loop[1] * ratio],
+    notes: clip.notes.map((note) => ({
+      ...note,
+      length: note.length * ratio,
+      start: note.start * ratio,
+    })),
   };
 }
 
@@ -459,4 +496,55 @@ export function cropClip(clip: Arranged): Arranged {
     sourceLength: to - from,
     value: { ...clip.value, offset: Math.max(0, clip.value.offset - from) },
   };
+}
+
+/** Where a note of a MIDI clip plays in the arrangement, transposed with the clip. */
+export interface PlayedNote extends Note {
+  /** The id of the note in the clip's source, which a looped clip plays more than once. */
+  sourceId: Note["id"];
+}
+
+/**
+ * The notes a MIDI clip plays, where they play in the arrangement: the ones
+ * starting inside it, from where it starts in its source, and round its loop
+ * again and again when it has one. A note runs to the clip's end at most,
+ * and is transposed as the clip is. Each gets an id of its own, since a loop
+ * plays a note more than once.
+ */
+export function playedNotes(clip: Arranged): PlayedNote[] {
+  const notes = clip.notes ?? [];
+  const { length, offset, start } = clip.value;
+  const end = start + length;
+  const transpose = clip.transpose ?? 0;
+  const played: PlayedNote[] = [];
+  const place = (from: number, to: number, shift: number) => {
+    for (const note of notes) {
+      const at = note.start + shift;
+      if (note.start < from || note.start >= to || at >= end) {
+        continue;
+      }
+      played.push({
+        ...note,
+        id: `${note.id}@${at}`,
+        length: Math.min(note.length, end - at),
+        pitch: note.pitch + transpose,
+        sourceId: note.id,
+        start: at,
+      });
+    }
+  };
+  if (!clip.loop) {
+    place(offset, offset + length, start - offset);
+    return played;
+  }
+  const [loopStart, loopEnd] = clip.loop;
+  const span = loopEnd - loopStart;
+  // The first pass plays from the offset to the loop's end, then the loop repeats.
+  place(offset, loopEnd, start - offset);
+  if (span > 0) {
+    for (let pass = start + loopEnd - offset; pass < end; pass += span) {
+      place(loopStart, loopEnd, pass - loopStart);
+    }
+  }
+  return played;
 }

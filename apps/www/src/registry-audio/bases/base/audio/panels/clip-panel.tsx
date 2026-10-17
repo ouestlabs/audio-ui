@@ -22,10 +22,16 @@ import {
   useRef,
   useState,
 } from "react";
-import { IconPlaceholder } from "@/app/(create)/components/icon-placeholder";
-import { cn } from "@/registry/bases/base/lib/utils";
-import { Button } from "@/registry/bases/base/ui/button";
-import { Knob } from "@/registry-audio/bases/base/audio/elements/knob";
+import {
+  ClipBox,
+  ClipField,
+  type ClipMeter,
+  ClipRow,
+  ClipToggle,
+  ClipView,
+  formatBars,
+  PositionField,
+} from "@/registry-audio/bases/base/audio/elements/clip-view";
 import {
   Timeline,
   TimelineLane,
@@ -60,6 +66,8 @@ export interface ClipSettings {
 }
 
 interface ClipPanelProps {
+  /** Whether the clip is on: off, it stays on its track and is not heard. Leave it out, with `onActiveChange`, for a panel without the switch. */
+  active?: boolean;
   /** How long a bar lasts, in seconds: the ruler numbers bars and the lanes draw a line at each. @default 2 */
   bar?: number;
   /** Beats in a bar: zoomed in far enough, the ruler numbers them too. @default 4 */
@@ -67,12 +75,24 @@ interface ClipPanelProps {
   /** Whatever the host puts at the end of the title bar. */
   children?: ReactNode;
   className?: string;
+  /** Whether the panel is rolled up to its strip, controlled: keep it outside to hold it from clip to clip. Leave it out for the panel to keep its own. */
+  collapsed?: boolean;
+  /** The ids of its folded boxes ("audio:loop", "audio:sample"), controlled. */
+  foldedBoxes?: readonly string[];
   /** How a time in the source reads, in the hover and the handles. @default seconds with two decimals */
   format?: (seconds: number) => string;
   /** The clip's name, the panel's title. */
   name: string;
+  /** The clip's switch was pressed. */
+  onActiveChange?: (active: boolean) => void;
+  /** The caret on the strip was pressed. */
+  onCollapsedChange?: (collapsed: boolean) => void;
   /** Crop was pressed: cut the source down to what the clip plays. Leave it out for a panel without it. */
   onCrop?: () => void;
+  /** Which boxes are folded was changed. */
+  onFoldedBoxesChange?: (folded: string[]) => void;
+  /** A name was typed in the strip. */
+  onRename?: (name: string) => void;
   /** Every change, as a gesture goes. */
   onValueChange: (value: ClipSettings) => void;
   /** A gesture that changed the settings ended. */
@@ -107,6 +127,13 @@ const formatRate = (rate: number) => {
 const formatGain = (db: number) => `${db > 0 ? "+" : ""}${db.toFixed(1)} dB`;
 const formatTranspose = (semitones: number) =>
   `${semitones > 0 ? "+" : ""}${semitones} st`;
+/** A number typed in a field, its unit left out. */
+const parseNumber = (text: string) => {
+  const value = Number.parseFloat(text.replace(",", "."));
+  return Number.isFinite(value) ? value : null;
+};
+const GAIN_RANGE = [-36, 24] as const;
+const TRANSPOSE_RANGE = [-48, 48] as const;
 
 /** Which marker a handle stands for. */
 const markerIndex = (element: HTMLElement) => Number(element.dataset.index);
@@ -203,23 +230,199 @@ function WarpMarkers({
   ));
 }
 
+/** The Loop box: the switch, where the loop sits in the source and how long it is, halved or doubled. */
+function LoopBox({
+  loop,
+  meter,
+  offset,
+  onCommit,
+  onDouble,
+  onHalve,
+  onLength,
+  onPosition,
+  onToggle,
+  span,
+  stretch,
+}: {
+  loop: readonly [number, number] | null;
+  meter: ClipMeter;
+  offset: number;
+  onCommit?: () => void;
+  onDouble: () => void;
+  onHalve: () => void;
+  onLength: (seconds: number) => void;
+  onPosition: (seconds: number) => void;
+  onToggle: () => void;
+  span: number;
+  stretch: number;
+}) {
+  return (
+    <ClipBox foldable id="audio:loop" title="Loop">
+      <ClipToggle onClick={onToggle} pressed={Boolean(loop)}>
+        Loop
+      </ClipToggle>
+      <ClipRow label="Position">
+        <PositionField
+          disabled={!loop}
+          label="Loop position"
+          max={span}
+          meter={meter}
+          onChange={onPosition}
+          onCommit={onCommit}
+          value={loop?.[0] ?? offset}
+        />
+      </ClipRow>
+      <ClipRow label="Length">
+        <PositionField
+          disabled={!loop}
+          kind="length"
+          label="Loop length"
+          meter={meter}
+          min={meter.bar / meter.beatsPerBar / 4}
+          onChange={onLength}
+          onCommit={onCommit}
+          value={stretch}
+        />
+      </ClipRow>
+      <div className="grid grid-cols-2 gap-1">
+        <ClipToggle
+          aria-label="Halve the loop"
+          disabled={!loop}
+          onClick={onHalve}
+        >
+          ÷2
+        </ClipToggle>
+        <ClipToggle
+          aria-label="Double the loop"
+          disabled={!loop}
+          onClick={onDouble}
+        >
+          ×2
+        </ClipToggle>
+      </div>
+    </ClipBox>
+  );
+}
+
+/** The Sample box: Warp, Reverse, Crop, the gain and the transpose, and the speed with ×2 and ÷2 while warped. */
+function SampleBox({
+  cropped,
+  gain,
+  onCommit,
+  onCrop,
+  onFaster,
+  onGain,
+  onReversed,
+  onSlower,
+  onTranspose,
+  onWarp,
+  rate,
+  reversed,
+  transpose,
+}: {
+  cropped: boolean;
+  gain: number;
+  onCommit?: () => void;
+  onCrop?: () => void;
+  onFaster: () => void;
+  onGain: (db: number) => void;
+  onReversed: () => void;
+  onSlower: () => void;
+  onTranspose: (semitones: number) => void;
+  onWarp: () => void;
+  /** The speed the warp plays at, or null when the source plays as recorded. */
+  rate: number | null;
+  reversed: boolean;
+  transpose: number;
+}) {
+  return (
+    <ClipBox foldable id="audio:sample" title="Sample">
+      <div className="grid grid-cols-3 gap-1">
+        <ClipToggle className="px-0" onClick={onWarp} pressed={rate !== null}>
+          Warp
+        </ClipToggle>
+        <ClipToggle className="px-0" onClick={onReversed} pressed={reversed}>
+          Rev
+        </ClipToggle>
+        {onCrop ? (
+          <ClipToggle className="px-0" disabled={cropped} onClick={onCrop}>
+            Crop
+          </ClipToggle>
+        ) : null}
+      </div>
+      <ClipRow label="Gain">
+        <ClipField
+          format={formatGain}
+          label="Gain"
+          onChange={onGain}
+          onCommit={onCommit}
+          parse={parseNumber}
+          step={0.5}
+          value={gain}
+        />
+      </ClipRow>
+      <ClipRow label="Transp.">
+        <ClipField
+          format={formatTranspose}
+          label="Transpose"
+          onChange={onTranspose}
+          onCommit={onCommit}
+          parse={parseNumber}
+          step={1}
+          value={transpose}
+        />
+      </ClipRow>
+      {rate === null ? null : (
+        <>
+          <ClipRow label="Speed">
+            <output className="truncate text-end tabular-nums">
+              {formatRate(rate)}
+            </output>
+          </ClipRow>
+          <div className="grid grid-cols-2 gap-1">
+            <ClipToggle
+              aria-label="Twice as long, half the speed"
+              onClick={onSlower}
+            >
+              ×2
+            </ClipToggle>
+            <ClipToggle
+              aria-label="Half as long, twice the speed"
+              onClick={onFaster}
+            >
+              ÷2
+            </ClipToggle>
+          </div>
+        </>
+      )}
+    </ClipBox>
+  );
+}
+
 /**
- * The clip view of an arrangement's clip: its whole source as a waveform,
- * with the stretch it plays to drag at both ends, or with Loop on, the
- * stretch that repeats, and its start as a marker. Gain and Transpose are
- * knobs, Reverse plays the source backwards and Crop cuts it down to what is
- * played. Warp stretches the source between markers pinned to times on the
- * clip, speed and pitch together, with ×2 and ÷2 for the whole of it.
- * Controlled: it reports every change and the end of each gesture.
+ * The clip view of an arrangement's audio clip, as a DAW's: a Clip box (its
+ * switch and name, where it starts and ends in its source or with Loop on the
+ * stretch that repeats, in bars.beats.sixteenths, and its signature) and an
+ * Audio box (Warp, Reverse, Crop, Gain and Transpose, and with Warp on the
+ * speed, ×2 and ÷2) beside its whole source as a waveform, where the stretch
+ * it plays, its loop and its warp markers are dragged. Controlled: it reports
+ * every change and the end of each gesture.
  */
 function ClipPanel({
+  active,
   bar = 2,
   beatsPerBar = 4,
   children,
   className,
+  collapsed,
+  foldedBoxes,
   format = formatSeconds,
   name,
+  onActiveChange,
+  onCollapsedChange,
   onCrop,
+  onFoldedBoxesChange,
+  onRename,
   onValueChange,
   onValueCommitted,
   value,
@@ -235,6 +438,7 @@ function ClipPanel({
     transpose,
     warp,
   } = value;
+  const meter = useMemo(() => ({ bar, beatsPerBar }), [bar, beatsPerBar]);
   // How long the source lasts on the clip: as recorded, or as its warp stretches it.
   const span = warp ? warpedTime(warp, sourceLength) : sourceLength;
   // Warped, the source is drawn in the clip's time; reversed, backwards, as it plays.
@@ -271,6 +475,29 @@ function ClipPanel({
   const setLoop = useCallback(
     (next: readonly [number, number]) => set({ loop: next }),
     [set]
+  );
+  // The fields: Start moves where the clip starts in its source, its end staying put unless it loops.
+  const setStart = useCallback(
+    (start: number) =>
+      set(
+        loop
+          ? { offset: start }
+          : { length: Math.max(0, offset + length - start), offset: start }
+      ),
+    [length, loop, offset, set]
+  );
+  const setEnd = useCallback(
+    (end: number) => set({ length: Math.max(0, end - offset) }),
+    [offset, set]
+  );
+  const setLoopPosition = useCallback(
+    (position: number) =>
+      loop && set({ loop: [position, position + loop[1] - loop[0]] }),
+    [loop, set]
+  );
+  const setLoopLength = useCallback(
+    (stretch: number) => loop && set({ loop: [loop[0], loop[0] + stretch] }),
+    [loop, set]
   );
   // A loop begins on what the clip plays; switched off, the clip plays once, as far as its source goes.
   const toggleLoop = useCallback(
@@ -336,11 +563,32 @@ function ClipPanel({
     () => setAndCommit({ reversed: !reversed }),
     [reversed, setAndCommit]
   );
-  const setGain = useCallback((next: number) => set({ gain: next }), [set]);
-  const setTranspose = useCallback(
-    (next: number) => set({ transpose: next }),
+  const setGain = useCallback(
+    (next: number) =>
+      set({ gain: Math.min(GAIN_RANGE[1], Math.max(GAIN_RANGE[0], next)) }),
     [set]
   );
+  const setTranspose = useCallback(
+    (next: number) =>
+      set({
+        transpose: Math.round(
+          Math.min(TRANSPOSE_RANGE[1], Math.max(TRANSPOSE_RANGE[0], next))
+        ),
+      }),
+    [set]
+  );
+  const halveLoop = useCallback(() => {
+    if (loop) {
+      setAndCommit({ loop: [loop[0], loop[0] + (loop[1] - loop[0]) / 2] });
+    }
+  }, [loop, setAndCommit]);
+  const doubleLoop = useCallback(() => {
+    if (loop) {
+      setAndCommit({
+        loop: [loop[0], Math.min(span, loop[0] + (loop[1] - loop[0]) * 2)],
+      });
+    }
+  }, [loop, setAndCommit, span]);
   // A warped source is cropped as it was recorded: warp off first.
   const cropped =
     Boolean(warp) ||
@@ -348,189 +596,95 @@ function ClipPanel({
       ? loop[0] === 0 && loop[1] === sourceLength
       : offset === 0 && length >= sourceLength);
 
+  const status = `Length ${formatBars(length, meter, "length")}`;
+
   return (
-    <section
-      aria-label={`Clip ${name}`}
-      className={cn(
-        "@container min-w-0 shrink-0 overflow-hidden rounded-xl border bg-card",
-        className
-      )}
+    <ClipView
+      actions={children}
+      active={active}
+      boxes={
+        <>
+          <ClipBox title="Clip">
+            <ClipRow label="Start">
+              <PositionField
+                label="Start"
+                max={span}
+                meter={meter}
+                onChange={setStart}
+                onCommit={onValueCommitted}
+                value={offset}
+              />
+            </ClipRow>
+            <ClipRow label="End">
+              <PositionField
+                label="End"
+                max={loop ? Number.POSITIVE_INFINITY : span}
+                meter={meter}
+                onChange={setEnd}
+                onCommit={onValueCommitted}
+                value={offset + length}
+              />
+            </ClipRow>
+          </ClipBox>
+          <LoopBox
+            loop={loop}
+            meter={meter}
+            offset={offset}
+            onCommit={onValueCommitted}
+            onDouble={doubleLoop}
+            onHalve={halveLoop}
+            onLength={setLoopLength}
+            onPosition={setLoopPosition}
+            onToggle={toggleLoop}
+            span={span}
+            stretch={loop ? loop[1] - loop[0] : length}
+          />
+          <SampleBox
+            cropped={cropped}
+            gain={gain}
+            onCommit={onValueCommitted}
+            onCrop={onCrop}
+            onFaster={faster}
+            onGain={setGain}
+            onReversed={toggleReversed}
+            onSlower={slower}
+            onTranspose={setTranspose}
+            onWarp={toggleWarp}
+            rate={warp ? warpRate(warp, offset) : null}
+            reversed={reversed}
+            transpose={transpose}
+          />
+        </>
+      }
+      className={className}
+      collapsed={collapsed}
       data-slot="clip-panel"
+      foldedBoxes={foldedBoxes}
+      name={name}
+      onActiveChange={onActiveChange}
+      onCollapsedChange={onCollapsedChange}
+      onFoldedBoxesChange={onFoldedBoxesChange}
+      onRename={onRename}
+      status={status}
     >
-      <div className="flex min-w-0 flex-col @2xl:flex-row">
-        {/* The clip's properties, as a DAW's clip view lists them beside its editor. */}
-        <div className="flex shrink-0 flex-col gap-3 border-b p-3 @2xl:w-56 @2xl:border-e @2xl:border-b-0">
-          <div className="flex min-w-0 items-center gap-2">
-            <h3 className="min-w-0 flex-1 truncate font-medium text-sm">
-              {name}
-            </h3>
-            {children}
-          </div>
-          <div className="grid grid-cols-2 gap-1.5">
-            <Button
-              aria-pressed={Boolean(loop)}
-              onClick={toggleLoop}
-              size="sm"
-              variant={loop ? "default" : "outline"}
-            >
-              <IconPlaceholder
-                aria-hidden="true"
-                className="size-4"
-                hugeicons="RepeatIcon"
-                lucide="RepeatIcon"
-                phosphor="RepeatIcon"
-                remixicon="RiRepeatLine"
-                tabler="IconRepeat"
-              />
-              Loop
-            </Button>
-            <Button
-              aria-pressed={Boolean(warp)}
-              onClick={toggleWarp}
-              size="sm"
-              variant={warp ? "default" : "outline"}
-            >
-              <IconPlaceholder
-                aria-hidden="true"
-                className="size-4"
-                hugeicons="ArrowExpandIcon"
-                lucide="StretchHorizontalIcon"
-                phosphor="ArrowsOutLineHorizontalIcon"
-                remixicon="RiExpandWidthLine"
-                tabler="IconArrowsHorizontal"
-              />
-              Warp
-            </Button>
-            <Button
-              aria-pressed={reversed}
-              onClick={toggleReversed}
-              size="sm"
-              variant={reversed ? "default" : "outline"}
-            >
-              <IconPlaceholder
-                aria-hidden="true"
-                className="size-4"
-                hugeicons="ArrowLeftDoubleIcon"
-                lucide="RewindIcon"
-                phosphor="RewindIcon"
-                remixicon="RiRewindLine"
-                tabler="IconPlayerTrackPrev"
-              />
-              Reverse
-            </Button>
-            {onCrop ? (
-              <Button
-                disabled={cropped}
-                onClick={onCrop}
-                size="sm"
-                variant="outline"
-              >
-                <IconPlaceholder
-                  aria-hidden="true"
-                  className="size-4"
-                  hugeicons="Crop02Icon"
-                  lucide="CropIcon"
-                  phosphor="CropIcon"
-                  remixicon="RiCropLine"
-                  tabler="IconCrop"
-                />
-                Crop
-              </Button>
-            ) : null}
-          </div>
-          {/* Each knob named above and read out below, as on a device. */}
-          <div className="flex items-start justify-around gap-4">
-            <div className="flex flex-col items-center gap-0.5">
-              <span
-                aria-hidden="true"
-                className="text-muted-foreground text-xs"
-              >
-                Gain
-              </span>
-              <Knob
-                anchor={0}
-                aria-label="Gain"
-                className="mb-5"
-                formatValue={formatGain}
-                max={24}
-                min={-36}
-                onValueChange={setGain}
-                onValueCommitted={onValueCommitted}
-                size="sm"
-                step={0.1}
-                value={gain}
-                valueLabel="always"
-              />
-            </div>
-            <div className="flex flex-col items-center gap-0.5">
-              <span
-                aria-hidden="true"
-                className="text-muted-foreground text-xs"
-              >
-                Transpose
-              </span>
-              <Knob
-                anchor={0}
-                aria-label="Transpose"
-                className="mb-5"
-                formatValue={formatTranspose}
-                max={48}
-                min={-48}
-                onValueChange={setTranspose}
-                onValueCommitted={onValueCommitted}
-                size="sm"
-                step={1}
-                value={transpose}
-                valueLabel="always"
-              />
-            </div>
-          </div>
-          {warp ? (
-            <div className="flex items-center justify-between gap-2">
-              <span className="text-muted-foreground text-xs">Speed</span>
-              <div className="flex gap-1">
-                <Button
-                  aria-label="Twice as long, half the speed"
-                  onClick={slower}
-                  size="xs"
-                  variant="outline"
-                >
-                  ×2
-                </Button>
-                <Button
-                  aria-label="Half as long, twice the speed"
-                  onClick={faster}
-                  size="xs"
-                  variant="outline"
-                >
-                  ÷2
-                </Button>
-              </div>
-              <output className="text-muted-foreground text-xs tabular-nums">
-                {formatRate(warpRate(warp, offset))}
-              </output>
-            </div>
-          ) : null}
-        </div>
-        <ClipSource
-          bar={bar}
-          beatsPerBar={beatsPerBar}
-          format={format}
-          length={length}
-          loop={loop}
-          name={name}
-          offset={offset}
-          onAddMarker={addMarker}
-          onLoopChange={setLoop}
-          onPlayedChange={setPlayed}
-          onValueCommitted={onValueCommitted}
-          onWarpChange={setWarp}
-          span={span}
-          values={shown}
-          warp={warp}
-        />
-      </div>
-    </section>
+      <ClipSource
+        bar={bar}
+        beatsPerBar={beatsPerBar}
+        format={format}
+        length={length}
+        loop={loop}
+        name={name}
+        offset={offset}
+        onAddMarker={addMarker}
+        onLoopChange={setLoop}
+        onPlayedChange={setPlayed}
+        onValueCommitted={onValueCommitted}
+        onWarpChange={setWarp}
+        span={span}
+        values={shown}
+        warp={warp}
+      />
+    </ClipView>
   );
 }
 
@@ -633,16 +787,17 @@ function ClipSource({
   const maxZoom = Math.max(fit, (peakCount(values) * PEAK_PX) / span);
   return (
     <Timeline
-      className="min-w-0 flex-1 gap-1 p-2"
+      className="min-w-0 flex-1"
       duration={span}
       maxZoom={maxZoom || undefined}
       minZoom={fit || undefined}
       onZoomChange={setZoom}
       zoom={zoom ?? undefined}
     >
-      <TimelineNavigator getAriaValueText={format} />
+      <TimelineNavigator className="mx-2 my-1.5" getAriaValueText={format} />
+      {/* Flush in the clip view, which is the frame: no border or corners of its own. */}
       <TimelineViewport
-        className="min-w-0 rounded-md border bg-muted/40"
+        className="min-w-0 border-t bg-muted/40"
         ref={viewportRef}
         scrollbar="hidden"
       >

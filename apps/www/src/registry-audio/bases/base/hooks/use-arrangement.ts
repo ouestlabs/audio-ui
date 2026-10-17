@@ -27,8 +27,9 @@ import {
   openTime,
   otherSelected,
   pasteTime,
-  scaleValue,
+  scaleClip,
   type TimeSelection,
+  type TrackKind,
   UNITY_MIX,
 } from "@/registry-audio/bases/base/lib/arrangement";
 import {
@@ -178,13 +179,7 @@ export function useArrangement({
   // and what came before it no longer fits the history.
   const rescale = useCallback(
     (ratio: number) => {
-      setClips((all) =>
-        all.map((clip) => ({
-          ...clip,
-          sourceLength: clip.sourceLength * ratio,
-          value: scaleValue(clip.value, ratio),
-        }))
-      );
+      setClips((all) => all.map((clip) => scaleClip(clip, ratio)));
       clearHistory();
     },
     [clearHistory, setClips]
@@ -624,13 +619,15 @@ export function useArrangement({
 
   const trackCount = useRef(initialTracks.length);
   /** Adds a track in the next color: after the track `afterId`, or below the others; returns it. */
+  /** Adds a track after `afterId`, or last: one for recordings, or with `kind` "midi" one for notes. */
   const addTrack = useCallback(
-    (afterId?: string) => {
+    (afterId?: string, kind: TrackKind = "audio") => {
       trackCount.current += 1;
       const track: ArrangementTrack = {
         color: (trackCount.current - 1) % colors,
         id: `track-${trackCount.current}`,
-        name: `Track ${trackCount.current}`,
+        kind,
+        name: `${kind === "midi" ? "MIDI" : "Track"} ${trackCount.current}`,
       };
       edit((current) => {
         const at = afterId
@@ -643,6 +640,17 @@ export function useArrangement({
       return track;
     },
     [colors, edit]
+  );
+  /** Lays a new clip on its track, covering what is under it, and selects it. */
+  const addClip = useCallback(
+    (clip: Arranged) => {
+      edit((current) => ({
+        ...current,
+        clips: lay(current.clips, clip, duration),
+      }));
+      setSelection({ clips: [clip.id], tracks: [] });
+    },
+    [duration, edit]
   );
   /** Copies a track, with its clips, right below it. */
   const duplicateTrack = useCallback(
@@ -776,6 +784,7 @@ export function useArrangement({
   }
 
   return {
+    addClip,
     addTrack,
     canRedo: flags.redo,
     canUndo: flags.undo,

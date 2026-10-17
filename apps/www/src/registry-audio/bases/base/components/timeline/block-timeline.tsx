@@ -23,9 +23,11 @@ import { snapMove } from "@audio-ui/core/timeline";
 import {
   adjacentPoint,
   type FadeShape,
+  type Source,
   type Timeline as TimelinePrimitive,
 } from "@audio-ui/react";
 import {
+  type ComponentProps,
   type FocusEvent,
   Fragment,
   type KeyboardEvent,
@@ -35,6 +37,7 @@ import {
   type ReactNode,
   type SyntheticEvent,
   useCallback,
+  useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -99,18 +102,27 @@ import {
   type ClipSettings,
 } from "@/registry-audio/bases/base/audio/panels/clip-panel";
 import {
+  MidiClipPanel,
+  type MidiClipRegion,
+} from "@/registry-audio/bases/base/audio/panels/midi-clip-panel";
+import {
   type ClipAction,
   useArrangement,
 } from "@/registry-audio/bases/base/hooks/use-arrangement";
 import { useMarquee } from "@/registry-audio/bases/base/hooks/use-marquee-selection";
+import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 import { useSimulatedClock } from "@/registry-audio/bases/base/hooks/use-simulated-clock";
 import { useSimulatedLevels } from "@/registry-audio/bases/base/hooks/use-simulated-levels";
-import type {
-  Arranged,
-  ArrangementTrack,
-  Clipping,
-  TimeSelection,
+import { useSynthVoices } from "@/registry-audio/bases/base/hooks/use-synth-voices";
+import {
+  type Arranged,
+  type ArrangementTrack,
+  type Clipping,
+  playedNotes,
+  type TimeSelection,
 } from "@/registry-audio/bases/base/lib/arrangement";
+import type { EnvelopePoint } from "@/registry-audio/bases/base/lib/envelope-ramp";
+import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 const BARS = 32;
 /** The arrangement is laid out at the first tempo; a tempo change keeps its musical positions. */
@@ -186,8 +198,8 @@ const bars = (count: number) => count * BAR;
 
 const TRACKS: ArrangementTrack[] = [
   { color: 0, id: "drums", name: "Drums" },
-  { color: 1, id: "bass", name: "Bass" },
-  { color: 2, id: "keys", name: "Keys" },
+  { color: 1, id: "bass", kind: "midi", name: "Bass" },
+  { color: 2, id: "keys", kind: "midi", name: "Keys" },
   { color: 3, id: "vocals", name: "Vocals" },
 ] as const;
 
@@ -301,16 +313,77 @@ const arranged = (
   },
 });
 
+const BEAT = BAR / 4;
+
+/** Notes from `[pitch, beat, beats]`: where each starts and how long it lasts, in beats of the first tempo. */
+const notesOf = (pattern: readonly (readonly [number, number, number])[]) =>
+  pattern.map(([pitch, at, beats], index) => ({
+    id: `n${index}`,
+    length: beats * BEAT,
+    pitch,
+    start: at * BEAT,
+    velocity: 0.8,
+  }));
+
+/** Two bars of bass: A, then F, on the beat and the off-beats around it. */
+const BASSLINE = notesOf([
+  [33, 0, 0.75],
+  [33, 1.5, 0.5],
+  [45, 2, 0.5],
+  [33, 3, 0.75],
+  [29, 4, 0.75],
+  [29, 5.5, 0.5],
+  [41, 6, 0.5],
+  [31, 7, 0.75],
+]);
+
+/** Four bars of chords, one a bar: A minor, F, C, G. */
+const CHORDS = notesOf(
+  [
+    [57, 60, 64],
+    [53, 57, 60],
+    [55, 60, 64],
+    [55, 59, 62],
+  ].flatMap((chord, bar) =>
+    chord.map((pitch) => [pitch, bar * 4, 3.75] as const)
+  )
+);
+
+/** A MIDI clip that loops `notes` over `loopBars`, from bar `from` to bar `to`. */
+const midiArranged = (
+  id: string,
+  name: string,
+  track: string,
+  from: number,
+  to: number,
+  loopBars: number,
+  notes: Arranged["notes"]
+): Arranged => ({
+  id,
+  loop: [0, bars(loopBars)],
+  name,
+  notes,
+  sourceLength: bars(loopBars),
+  track,
+  value: {
+    fadeIn: 0,
+    fadeOut: 0,
+    length: bars(to - from),
+    offset: 0,
+    start: bars(from),
+  },
+});
+
 const CLIPS: Arranged[] = [
   arranged("d1", "Intro", "drums", 0, 4),
   arranged("d2", "Groove", "drums", 4, 16),
   arranged("d3", "Groove", "drums", 16, 28),
   arranged("d4", "Fill", "drums", 28, 32),
-  arranged("b1", "Sub", "bass", 4, 12),
-  arranged("b2", "Sub", "bass", 16, 28),
-  arranged("k1", "Pad", "keys", 0, 8),
-  arranged("k2", "Chords", "keys", 8, 16),
-  arranged("k3", "Pad", "keys", 20, 32),
+  midiArranged("b1", "Sub", "bass", 4, 12, 2, BASSLINE),
+  midiArranged("b2", "Sub", "bass", 16, 28, 2, BASSLINE),
+  midiArranged("k1", "Pad", "keys", 0, 8, 4, CHORDS),
+  midiArranged("k2", "Chords", "keys", 8, 16, 4, CHORDS),
+  midiArranged("k3", "Pad", "keys", 20, 32, 4, CHORDS),
   arranged("v1", "Verse", "vocals", 8, 16),
   arranged("v2", "Hook", "vocals", 16, 24),
 ];
@@ -712,38 +785,301 @@ function standInPeaks(clip: Arranged): number[] {
   });
 }
 
+/** A MIDI clip's notes in miniature across its body: where they play in it, between its lowest and highest pitch. */
+function ClipNotes({ clip }: { clip: Arranged }) {
+  const notes = useMemo(() => playedNotes(clip), [clip]);
+  if (notes.length === 0) {
+    return null;
+  }
+  const pitches = notes.map((note) => note.pitch);
+  const high = Math.max(...pitches) + 1;
+  const rows = high - Math.min(...pitches) + 2;
+  const { length, start } = clip.value;
+  return (
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-x-0 top-5 bottom-1"
+      data-slot="timeline-clip-notes"
+    >
+      {notes.map((note) => (
+        <span
+          className="absolute min-h-0.5 rounded-[1px] bg-current opacity-70"
+          key={note.id}
+          style={{
+            height: `${100 / rows}%`,
+            left: `${((note.start - start) / length) * 100}%`,
+            top: `${((high - note.pitch) / rows) * 100}%`,
+            width: `${(note.length / length) * 100}%`,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+/** Closes the clip panel. */
+function CloseClipView({ onClose }: { onClose: () => void }) {
+  return (
+    <Button
+      aria-label="Close the clip panel"
+      onClick={onClose}
+      size="icon-sm"
+      variant="ghost"
+    >
+      <IconPlaceholder
+        aria-hidden="true"
+        className="size-4"
+        hugeicons="Cancel01Icon"
+        lucide="XIcon"
+        phosphor="XIcon"
+        remixicon="RiCloseLine"
+        tabler="IconX"
+      />
+    </Button>
+  );
+}
+
+/** How a note of a MIDI clip sounds: a short attack, a held body and a release. */
+const NOTE_ENVELOPE: EnvelopePoint[] = [
+  { x: 0, y: 0.05 },
+  { x: 0.1, y: 1 },
+  { x: 0.3, y: 0.7 },
+  { x: 0.75, y: 0.6 },
+  { x: 1, y: 0.05 },
+];
+/** How far ahead of the playhead notes are scheduled on the audio clock, in seconds. */
+const SCHEDULE_AHEAD = 0.12;
+
+/**
+ * Schedules on the audio clock the notes of the heard MIDI clips that start
+ * from `from` to `until` in the arrangement, `offset` being the audio clock's
+ * time minus the arrangement's: deactivated notes stay silent, each note's
+ * chance is rolled and its velocity strays by up to its deviation.
+ */
+function scheduleNotes({
+  audible,
+  clips,
+  from,
+  now,
+  offset,
+  releaseNote,
+  triggerNote,
+  until,
+}: {
+  audible: (trackId: string) => boolean;
+  clips: readonly Arranged[];
+  from: number;
+  now: number;
+  offset: number;
+  releaseNote: ReturnType<typeof useSynthVoices>["releaseNote"];
+  triggerNote: ReturnType<typeof useSynthVoices>["triggerNote"];
+  until: number;
+}) {
+  for (const clip of clips) {
+    if (!clip.notes || clip.disabled || !audible(clip.track)) {
+      continue;
+    }
+    for (const note of playedNotes(clip)) {
+      if (
+        note.start < from ||
+        note.start >= until ||
+        note.muted ||
+        Math.random() >= (note.chance ?? 1)
+      ) {
+        continue;
+      }
+      const velocity = Math.min(
+        1,
+        Math.max(
+          0,
+          (note.velocity ?? 1) + Math.random() * (note.deviation ?? 0)
+        )
+      );
+      const at = offset + Math.max(now, note.start);
+      triggerNote(note.pitch, NOTE_ENVELOPE, velocity, at);
+      releaseNote(note.pitch, NOTE_ENVELOPE, at + note.length);
+    }
+  }
+}
+
+/**
+ * Plays the MIDI clips through a synth while the arrangement plays: each
+ * frame, it schedules on the audio clock the notes the playhead is about to
+ * reach, on the tracks that are heard, skipping deactivated notes, rolling
+ * each note's chance and straying its velocity by its deviation. A jump of
+ * the playhead (a seek, the loop coming round) starts again from it.
+ */
+function useMidiPlayback({
+  audible,
+  clips,
+  clock,
+  loop,
+  looping,
+  playing,
+}: {
+  audible: (trackId: string) => boolean;
+  clips: readonly Arranged[];
+  clock: Source<number>;
+  loop: Span;
+  looping: boolean;
+  playing: boolean;
+}) {
+  const masterGain = useMasterBus(0.5);
+  const voices = useSynthVoices({
+    destination: masterGain,
+    oscillatorType: "triangle",
+  });
+  const { releaseAll, releaseNote, triggerNote } = voices;
+  const live = useRef({ audible, clips, loop, looping });
+  live.current = { audible, clips, loop, looping };
+
+  useEffect(() => {
+    const context = webAudio.getContext();
+    if (!(playing && context)) {
+      releaseAll();
+      return;
+    }
+    if (context.state === "suspended") {
+      context.resume();
+    }
+    let scheduled = clock.getSnapshot();
+    let frame = 0;
+    const tick = () => {
+      const now = clock.getSnapshot();
+      const { loop: span, looping: loops } = live.current;
+      if (now < scheduled - SCHEDULE_AHEAD || now > scheduled + 1) {
+        // The playhead jumped: what was scheduled ahead belongs to where it was.
+        releaseAll();
+        scheduled =
+          loops && now >= span[0] && now < span[0] + SCHEDULE_AHEAD
+            ? span[0]
+            : now;
+      }
+      // Never past the loop's end: the playhead comes round before it.
+      const until =
+        loops && now < span[1]
+          ? Math.min(now + SCHEDULE_AHEAD, span[1])
+          : now + SCHEDULE_AHEAD;
+      if (until > scheduled) {
+        scheduleNotes({
+          ...live.current,
+          from: scheduled,
+          now,
+          offset: context.currentTime - now,
+          releaseNote,
+          triggerNote,
+          until,
+        });
+        scheduled = until;
+      }
+      frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => {
+      cancelAnimationFrame(frame);
+      releaseAll();
+    };
+  }, [clock, playing, releaseAll, releaseNote, triggerNote]);
+
+  return voices;
+}
+
+/** The clip panel stays in view at the bottom of the window while the tracks scroll past above it. */
+const DOCKED = "sticky bottom-0 z-40 shadow-lg";
+
 /** The clip panel under the tracks, for the clip being edited, or a word on how to pick one. */
 function ClipDock({
   bar,
   beatsPerBar,
   clip,
+  collapsed,
   format,
+  midi,
+  onActiveChange,
   onClose,
+  onCollapsedChange,
   onCrop,
   onValueChange,
   onValueCommitted,
   peaks,
+  foldedBoxes,
+  onFoldedBoxesChange,
+  onRename,
 }: {
   bar: number;
   beatsPerBar: number;
   clip: Arranged | undefined;
+  /** Whether the panel is collapsed to its title: held here, so it stays so from clip to clip. */
+  collapsed: boolean;
   format: (seconds: number) => string;
+  /** What a MIDI clip's panel edits and sounds. */
+  midi: Pick<
+    ComponentProps<typeof MidiClipPanel>,
+    "onNoteOff" | "onNoteOn" | "onNotesChange" | "onRegionChange"
+  >;
+  onActiveChange: (active: boolean) => void;
   onClose: () => void;
+  onCollapsedChange: (collapsed: boolean) => void;
   onCrop: () => void;
   onValueChange: (next: ClipSettings) => void;
   onValueCommitted: () => void;
+  /** The ids of the boxes folded in the panel: held here, so they stay folded from clip to clip. */
+  foldedBoxes: readonly string[];
+  onFoldedBoxesChange: (folded: string[]) => void;
+  onRename: (id: string, name: string) => void;
   peaks: number[];
 }) {
+  const rename = useCallback(
+    (name: string) => clip && onRename(clip.id, name),
+    [clip, onRename]
+  );
   if (!clip) {
     return null;
   }
+  if (clip.notes) {
+    return (
+      <MidiClipPanel
+        active={!clip.disabled}
+        bar={bar}
+        beat={bar / beatsPerBar}
+        className={DOCKED}
+        collapsed={collapsed}
+        foldedBoxes={foldedBoxes}
+        key={clip.id}
+        name={clip.name}
+        notes={clip.notes}
+        onActiveChange={onActiveChange}
+        onCollapsedChange={onCollapsedChange}
+        onFoldedBoxesChange={onFoldedBoxesChange}
+        onNotesCommitted={onValueCommitted}
+        onRename={rename}
+        region={{
+          length: clip.value.length,
+          loop: clip.loop ?? null,
+          offset: clip.value.offset,
+          sourceLength: clip.sourceLength,
+        }}
+        {...midi}
+      >
+        <CloseClipView onClose={onClose} />
+      </MidiClipPanel>
+    );
+  }
   return (
     <ClipPanel
+      active={!clip.disabled}
       bar={bar}
       beatsPerBar={beatsPerBar}
+      className={DOCKED}
+      collapsed={collapsed}
+      foldedBoxes={foldedBoxes}
       format={format}
       name={clip.name}
+      onActiveChange={onActiveChange}
+      onCollapsedChange={onCollapsedChange}
       onCrop={onCrop}
+      onFoldedBoxesChange={onFoldedBoxesChange}
+      onRename={rename}
       onValueChange={onValueChange}
       onValueCommitted={onValueCommitted}
       value={{
@@ -758,22 +1094,7 @@ function ClipDock({
       }}
       values={peaks}
     >
-      <Button
-        aria-label="Close the clip panel"
-        onClick={onClose}
-        size="icon-sm"
-        variant="ghost"
-      >
-        <IconPlaceholder
-          aria-hidden="true"
-          className="size-4"
-          hugeicons="Cancel01Icon"
-          lucide="XIcon"
-          phosphor="XIcon"
-          remixicon="RiCloseLine"
-          tabler="IconX"
-        />
-      </Button>
+      <CloseClipView onClose={onClose} />
     </ClipPanel>
   );
 }
@@ -988,6 +1309,7 @@ const ClipView = memo(function ArrangedClip({
               <span>{copying ? `+ ${clip.name}` : clip.name}</span>
             )}
           </TimelineClipHeader>
+          {clip.notes ? <ClipNotes clip={clip} /> : null}
           <TimelineClipFade edge="in" />
           <TimelineClipFade edge="out" />
           <TimelineClipHandle aria-label={`${clip.name} start`} edge="start" />
@@ -1104,6 +1426,7 @@ export default function BlockTimeline() {
   const zoom = Math.max(zoomed ?? fitPx, fitPx) || 8;
   const getPosition = useCallback(() => clock.getSnapshot(), [clock]);
   const {
+    addClip,
     addTrack,
     canRedo,
     canUndo,
@@ -1159,6 +1482,10 @@ export default function BlockTimeline() {
     splitStep: bar / 4,
   });
   const handleAddTrack = useCallback(() => addTrack(), [addTrack]);
+  const handleAddMidiTrack = useCallback(
+    () => addTrack(undefined, "midi"),
+    [addTrack]
+  );
   // Multi-select: a press on a clip adds it to the selection, and a drag on bare lane draws a rectangle. For touch, which has no Shift.
   const [multi, setMulti] = useState(false);
   // A touch screen has no Shift: in multi-select mode every press on a header adds to the tracks picked.
@@ -1184,6 +1511,25 @@ export default function BlockTimeline() {
   const simulated = useSimulatedLevels(2);
   // What is heard: a muted track is silent, and while any track is soloed so is every other.
   const anySolo = tracks.some((track) => mixOf(track).soloed);
+  const audible = useCallback(
+    (trackId: string) => {
+      const track = tracks.find((item) => item.id === trackId);
+      if (!track) {
+        return false;
+      }
+      const mix = mixOf(track);
+      return !mix.muted && (!anySolo || mix.soloed);
+    },
+    [anySolo, mixOf, tracks]
+  );
+  const midi = useMidiPlayback({
+    audible,
+    clips,
+    clock,
+    loop,
+    looping,
+    playing,
+  });
 
   const playPause = useCallback(() => setPlaying((on) => !on), [setPlaying]);
   // Stop goes back to the top, as a DAW's does.
@@ -1369,6 +1715,12 @@ export default function BlockTimeline() {
   // A press on a track's empty lane puts the cursor there (the lane does it) and picks the track, letting go of the clips; on the surface under the last track it lets go of everything, as nothing is there.
   // The shortcuts are caught on the panel, so a press on the lane, which takes no focus, hands it over.
   const panelRef = useRef<HTMLDivElement>(null);
+  // A press on any clip brings the closed clip panel back, even on a clip already picked, whose selection does not change.
+  const showClipView = useCallback((event: PointerEvent<HTMLDivElement>) => {
+    if ((event.target as HTMLElement).closest("[data-clip-id]")) {
+      setClipViewOpen(true);
+    }
+  }, []);
   const focusPanel = useCallback(
     (event: PointerEvent<HTMLDivElement>) => {
       if (event.target === event.currentTarget && !event.shiftKey && !multi) {
@@ -1562,6 +1914,9 @@ export default function BlockTimeline() {
   /** Picking a clip lets go of the time selection. */
   // Picking a clip shows it in the clip panel, as a DAW's detail view follows the selection.
   const [clipViewOpen, setClipViewOpen] = useState(true);
+  // Collapsed to its title, the panel leaves the tracks the room, from clip to clip.
+  const [clipViewCollapsed, setClipViewCollapsed] = useState(false);
+  const [clipBoxesFolded, setClipBoxesFolded] = useState<string[]>([]);
   const pickClip = useCallback(
     (id: string, additive: boolean) => {
       setTimeSelection(null);
@@ -1586,6 +1941,54 @@ export default function BlockTimeline() {
       }
     },
     [clipAction, pickClip]
+  );
+  // A MIDI clip's notes, from the clip panel's piano roll: a drag is one undo step.
+  const changeNotes = useCallback(
+    (notes: NonNullable<Arranged["notes"]>) => {
+      if (editedClip) {
+        editClip(editedClip.id, (clip) => ({ ...clip, notes }));
+      }
+    },
+    [editClip, editedClip]
+  );
+  const auditionOn = useCallback(
+    (pitch: number, details: { velocity: number }) =>
+      midi.triggerNote(pitch, NOTE_ENVELOPE, details.velocity),
+    [midi]
+  );
+  const auditionOff = useCallback(
+    (pitch: number) => midi.releaseNote(pitch, NOTE_ENVELOPE),
+    [midi]
+  );
+  // A double-click on bare MIDI lane makes an empty clip a bar long there, looping, and opens it.
+  const midiClipCount = useRef(0);
+  const addMidiClipAt = useCallback(
+    (event: MouseEvent<HTMLDivElement>) => {
+      const lane = event.currentTarget;
+      const trackId = lane.dataset.track;
+      if (!trackId || (event.target as HTMLElement).closest("[data-clip-id]")) {
+        return;
+      }
+      const rect = lane.getBoundingClientRect();
+      const time = ((event.clientX - rect.left) / rect.width) * duration;
+      const start = Math.max(
+        0,
+        Math.min(Math.floor(time / bar) * bar, duration - bar)
+      );
+      midiClipCount.current += 1;
+      addClip({
+        id: `midi-${midiClipCount.current}`,
+        loop: [0, bar],
+        name: "MIDI clip",
+        notes: [],
+        sourceLength: bar,
+        track: trackId,
+        value: { fadeIn: 0, fadeOut: 0, length: bar, offset: 0, start },
+      });
+      setTimeSelection(null);
+      setClipViewOpen(true);
+    },
+    [addClip, bar, duration]
   );
   const changeClipSettings = useCallback(
     (next: ClipSettings) => {
@@ -1614,6 +2017,43 @@ export default function BlockTimeline() {
       });
     },
     [duration, editClip, editedClip]
+  );
+  // Where a MIDI clip plays, from its clip panel: it keeps its place, and ends where the timeline does at most.
+  const changeMidiRegion = useCallback(
+    (region: MidiClipRegion) => {
+      if (!editedClip) {
+        return;
+      }
+      editClip(editedClip.id, (clip) => ({
+        ...clip,
+        loop: region.loop ?? undefined,
+        value: {
+          ...clip.value,
+          length: Math.min(region.length, duration - clip.value.start),
+          offset: region.offset,
+        },
+      }));
+    },
+    [duration, editClip, editedClip]
+  );
+  const midiEditing = useMemo(
+    () => ({
+      onNoteOff: auditionOff,
+      onNoteOn: auditionOn,
+      onNotesChange: changeNotes,
+      onRegionChange: changeMidiRegion,
+    }),
+    [auditionOff, auditionOn, changeMidiRegion, changeNotes]
+  );
+  // The clip panel's switch: off, the clip stays on its track and is not heard.
+  const setEditedActive = useCallback(
+    (active: boolean) => {
+      if (editedClip) {
+        editClip(editedClip.id, (clip) => ({ ...clip, disabled: !active }));
+        settleClipEdit();
+      }
+    },
+    [editClip, editedClip, settleClipEdit]
   );
   const cropEdited = useCallback(() => {
     if (editedClip) {
@@ -2545,7 +2985,11 @@ export default function BlockTimeline() {
                         )}
                         data-track={track.id}
                         gridStep={snapStep}
+                        onDoubleClick={
+                          track.kind === "midi" ? addMidiClipAt : undefined
+                        }
                         onPointerDown={focusPanel}
+                        onPointerDownCapture={showClipView}
                         onSelectionChange={selectTime}
                         seekable
                       >
@@ -2618,21 +3062,38 @@ export default function BlockTimeline() {
             <Row
               className="sticky bottom-0 z-30 border-foreground/25 border-b bg-background"
               lead={
-                <Button
-                  className="m-1 min-w-0 flex-1 justify-start gap-1.5"
-                  onClick={handleAddTrack}
-                  size="sm"
-                  variant="ghost"
-                >
-                  <IconPlaceholder
-                    hugeicons="PlusSignIcon"
-                    lucide="PlusIcon"
-                    phosphor="PlusIcon"
-                    remixicon="RiAddLine"
-                    tabler="IconPlus"
-                  />
-                  Add track
-                </Button>
+                <div className="m-1 flex min-w-0 flex-1 gap-1">
+                  <Button
+                    className="min-w-0 flex-1 justify-start gap-1.5"
+                    onClick={handleAddTrack}
+                    size="sm"
+                    variant="ghost"
+                  >
+                    <IconPlaceholder
+                      hugeicons="PlusSignIcon"
+                      lucide="PlusIcon"
+                      phosphor="PlusIcon"
+                      remixicon="RiAddLine"
+                      tabler="IconPlus"
+                    />
+                    Audio
+                  </Button>
+                  <Button
+                    className="min-w-0 flex-1 justify-start gap-1.5"
+                    onClick={handleAddMidiTrack}
+                    size="sm"
+                    variant="ghost"
+                  >
+                    <IconPlaceholder
+                      hugeicons="PlusSignIcon"
+                      lucide="PlusIcon"
+                      phosphor="PlusIcon"
+                      remixicon="RiAddLine"
+                      tabler="IconPlus"
+                    />
+                    MIDI
+                  </Button>
+                </div>
               }
             >
               <TimelineLane
@@ -2670,9 +3131,16 @@ export default function BlockTimeline() {
           bar={bar}
           beatsPerBar={tempo.beatsPerBar}
           clip={editedClip}
+          collapsed={clipViewCollapsed}
+          foldedBoxes={clipBoxesFolded}
           format={describe}
+          midi={midiEditing}
+          onActiveChange={setEditedActive}
           onClose={closeClipView}
+          onCollapsedChange={setClipViewCollapsed}
           onCrop={cropEdited}
+          onFoldedBoxesChange={setClipBoxesFolded}
+          onRename={renameClip}
           onValueChange={changeClipSettings}
           onValueCommitted={settleClipEdit}
           peaks={editedPeaks}
