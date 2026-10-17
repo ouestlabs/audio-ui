@@ -1,11 +1,12 @@
 "use client";
 
 import {
-  barsBeatsAt,
+  barsBeatsWith,
   gridLabel,
   METRONOME_RHYTHMS,
   type MetronomeRhythm,
   metronomeRhythmSeconds,
+  type SignatureChange,
   secondsPerBeat,
   type Tempo,
 } from "@audio-ui/core/time";
@@ -75,9 +76,11 @@ function PositionField({
  * rule on the page.
  */
 function TransportPosition({
+  signatures,
   source,
   tempo,
 }: {
+  signatures: readonly SignatureChange[];
   source: Source<number>;
   tempo: Tempo;
 }) {
@@ -95,7 +98,7 @@ function TransportPosition({
       return;
     }
     const paint = () => {
-      const at = barsBeatsAt(source.getSnapshot(), tempo);
+      const at = barsBeatsWith(source.getSnapshot(), tempo, signatures);
       barNode.data = String(at.bar);
       beatNode.data = String(at.beat);
       sixteenthNode.data = String(at.sixteenth);
@@ -109,7 +112,7 @@ function TransportPosition({
         node?.remove();
       }
     };
-  }, [source, tempo]);
+  }, [signatures, source, tempo]);
 
   return (
     <time
@@ -437,6 +440,9 @@ function TransportTempo({
   );
 }
 
+/** One shared empty list, so a transport without changes does not repaint its position on every render. */
+const NO_SIGNATURES: readonly SignatureChange[] = [];
+
 interface TransportProps {
   className?: string;
   /** Whether the loop is on. Leave it out, with `onLoopingChange`, for a transport without a loop. */
@@ -459,6 +465,8 @@ interface TransportProps {
   playing: boolean;
   /** How often the click sounds, and what the metronome's dots follow. @default "auto" */
   rhythm?: MetronomeRhythm;
+  /** The time-signature changes along the song, which the position's bars follow. @default [] */
+  signatures?: readonly SignatureChange[];
   /** The picked sound, one of `sounds`'s values. */
   sound?: string;
   /** The sounds the click can have: the menu lists them when `onSoundChange` is given. */
@@ -490,6 +498,7 @@ function Transport({
   onTempoChange,
   playing,
   rhythm = "auto",
+  signatures = NO_SIGNATURES,
   sound,
   sounds,
   source,
@@ -552,7 +561,11 @@ function Transport({
           />
         </Toolbar.Button>
         <ButtonGroupText>
-          <TransportPosition source={source} tempo={tempo} />
+          <TransportPosition
+            signatures={signatures}
+            source={source}
+            tempo={tempo}
+          />
         </ButtonGroupText>
       </Toolbar.Group>
       {hasClusterTwo ? (

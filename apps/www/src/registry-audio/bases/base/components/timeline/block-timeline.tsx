@@ -3,14 +3,17 @@
 import {
   adjacentDivision,
   barLabelInterval,
+  barsBeatsWith,
+  barsOf,
   DEFAULT_TEMPO,
-  describeBarsBeats,
   divisionAt,
   GRID_DIVISIONS,
   type GridDivision,
   gridInterval,
   gridLabel,
+  isSignature,
   type MetronomeRhythm,
+  type SignatureChange,
   secondsPerBar,
   type Tempo,
   TRIPLET_FACTOR,
@@ -545,6 +548,126 @@ function stopPress(event: PointerEvent<HTMLElement>) {
   event.stopPropagation();
 }
 
+/** A time-signature change, with an id that stays the same as it moves, so its button keeps the focus. */
+type Signature = SignatureChange & { id: string };
+
+/** "7/8" as a signature, or null when it is not one a bar can have. */
+function parseSignature(text: string) {
+  const [beats, unit] = text.split("/").map((part) => Number(part.trim()));
+  return beats !== undefined && unit !== undefined && isSignature(beats, unit)
+    ? { beatUnit: unit, beatsPerBar: beats }
+    : null;
+}
+
+/**
+ * A time-signature change: press it to put the cursor there, double-click it
+ * or press Enter to type a new signature such as 7/8 (Enter keeps it, Escape
+ * drops it), Left and Right move it by a grid step, Delete takes it away.
+ */
+function SignatureButton({
+  change,
+  editing,
+  onEditingChange,
+  onJump,
+  onMove,
+  onRemove,
+  onSet,
+  step,
+}: {
+  change: Signature;
+  editing: boolean;
+  onEditingChange: (id: string | null) => void;
+  onJump: (at: number) => void;
+  onMove: (id: string, to: number) => void;
+  onRemove: (id: string) => void;
+  onSet: (id: string, beatsPerBar: number, beatUnit: number) => void;
+  step: number;
+}) {
+  const { at, beatUnit, beatsPerBar, id } = change;
+  const label = `${beatsPerBar}/${beatUnit}`;
+  const handleClick = useCallback(() => onJump(at), [at, onJump]);
+  const startEditing = useCallback(
+    () => onEditingChange(id),
+    [id, onEditingChange]
+  );
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLButtonElement>) => {
+      const direction = { ArrowLeft: -1, ArrowRight: 1 }[event.key];
+      if (event.key === "Delete" || event.key === "Backspace") {
+        onRemove(id);
+      } else if (event.key === "Enter") {
+        onEditingChange(id);
+      } else if (direction && step > 0) {
+        onMove(id, at + direction * step);
+      } else {
+        return;
+      }
+      event.preventDefault();
+      event.stopPropagation();
+    },
+    [at, id, onEditingChange, onMove, onRemove, step]
+  );
+  const handleEditKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLInputElement>) => {
+      event.stopPropagation();
+      if (event.key === "Enter") {
+        const parsed = parseSignature(event.currentTarget.value);
+        if (parsed) {
+          onSet(id, parsed.beatsPerBar, parsed.beatUnit);
+        }
+        onEditingChange(null);
+      } else if (event.key === "Escape") {
+        onEditingChange(null);
+      }
+    },
+    [id, onEditingChange, onSet]
+  );
+  const stopEditing = useCallback(
+    () => onEditingChange(null),
+    [onEditingChange]
+  );
+  const handleRemove = useCallback(() => onRemove(id), [id, onRemove]);
+
+  if (editing) {
+    return (
+      <input
+        aria-label="Time signature, such as 7/8"
+        autoFocus
+        className="h-full w-14 border-primary border-s-2 bg-background px-1 text-primary text-xs tabular-nums outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        defaultValue={label}
+        onBlur={stopEditing}
+        onKeyDown={handleEditKeyDown}
+        onPointerDown={stopPress}
+      />
+    );
+  }
+  return (
+    <ContextMenu>
+      <ContextMenuTrigger
+        render={
+          <button
+            aria-label={`Time signature ${label}`}
+            className="pointer-events-auto flex h-full items-center whitespace-nowrap border-foreground/60 border-s-2 ps-1 pe-2 text-xs tabular-nums outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring"
+            onClick={handleClick}
+            onDoubleClick={startEditing}
+            onKeyDown={handleKeyDown}
+            type="button"
+          />
+        }
+      >
+        {label}
+      </ContextMenuTrigger>
+      <ContextMenuContent className="w-auto min-w-32">
+        <ContextMenuItem onClick={startEditing}>Edit</ContextMenuItem>
+        <ContextMenuSeparator />
+        <ContextMenuItem onClick={handleRemove} variant="destructive">
+          Delete
+        </ContextMenuItem>
+      </ContextMenuContent>
+    </ContextMenu>
+  );
+}
+
 /** The original of a clip being copied, left in its place while the copy is dragged away. */
 function CopyGhost({ clip }: { clip: Arranged }) {
   const { length, start } = clip.value;
@@ -801,9 +924,16 @@ export default function BlockTimeline() {
   const [tempo, setTempo] = useState<Tempo>(DEFAULT_TEMPO);
   const bar = secondsPerBar(tempo);
   const duration = BARS * bar;
+  // Time-signature changes along the song, in seconds; the bars, the ruler and the position follow them.
+  const [signatures, setSignatures] = useState<Signature[]>([]);
+  const [editingSignature, setEditingSignature] = useState<string | null>(null);
+  const signatureCount = useRef(0);
   const describe = useCallback(
-    (seconds: number) => describeBarsBeats(seconds, tempo),
-    [tempo]
+    (seconds: number) => {
+      const { bar: number, beat } = barsBeatsWith(seconds, tempo, signatures);
+      return `Bar ${number}, beat ${beat}`;
+    },
+    [signatures, tempo]
   );
   const [loop, setLoop] = useState<Span>([bars(8), bars(16)]);
   const [looping, setLooping] = useState(true);
@@ -954,6 +1084,9 @@ export default function BlockTimeline() {
       const ratio = secondsPerBar(next) / secondsPerBar(tempo);
       rescale(ratio);
       setLoop(([start, end]) => [start * ratio, end * ratio]);
+      setSignatures((all) =>
+        all.map((change) => ({ ...change, at: change.at * ratio }))
+      );
       setZoom((current) => (current === null ? null : current / ratio));
       clock.set(clock.getSnapshot() * ratio);
       setTempo(next);
@@ -1490,9 +1623,56 @@ export default function BlockTimeline() {
   const labelEvery = barLabelInterval(zoom, tempo);
   // Whole bars, counted rather than divided, so no tempo leaves a label like 6.9999.
   const labelBars = Math.max(1, Math.round(labelEvery / bar));
-  const labels = Array.from(
-    { length: Math.ceil(BARS / labelBars) },
-    (_, index) => index * labelBars
+  // The bars through the signature changes: the ruler numbers every few, and hatches the ones a change cuts short.
+  const songBars = useMemo(
+    () => barsOf(tempo, signatures, duration),
+    [duration, signatures, tempo]
+  );
+  const labels = songBars.filter((_, index) => index % labelBars === 0);
+
+  /** Adds a signature change at the cursor, in the signature already in force there, and opens it to be typed. */
+  const addSignature = useCallback(() => {
+    const at = clock.getSnapshot();
+    const [held] = signatures
+      .filter((change) => change.at <= at)
+      .sort((a, b) => b.at - a.at);
+    signatureCount.current += 1;
+    const id = `signature-${signatureCount.current}`;
+    setSignatures((all) => [
+      ...all.filter((change) => change.at !== at),
+      {
+        at,
+        beatUnit: held?.beatUnit ?? tempo.beatUnit,
+        beatsPerBar: held?.beatsPerBar ?? tempo.beatsPerBar,
+        id,
+      },
+    ]);
+    setEditingSignature(id);
+  }, [clock, signatures, tempo]);
+  const setSignature = useCallback(
+    (id: string, beatsPerBar: number, beatUnit: number) =>
+      setSignatures((all) =>
+        all.map((change) =>
+          change.id === id ? { ...change, beatUnit, beatsPerBar } : change
+        )
+      ),
+    []
+  );
+  const moveSignature = useCallback(
+    (id: string, to: number) =>
+      setSignatures((all) =>
+        all.map((change) =>
+          change.id === id
+            ? { ...change, at: Math.min(duration, Math.max(0, to)) }
+            : change
+        )
+      ),
+    [duration]
+  );
+  const removeSignature = useCallback(
+    (id: string) =>
+      setSignatures((all) => all.filter((change) => change.id !== id)),
+    []
   );
 
   // A dragged clip or loop is pulled onto the edges of the other clips, the locators and the loop.
@@ -1736,6 +1916,7 @@ export default function BlockTimeline() {
             onTempoChange={changeTempo}
             playing={playing}
             rhythm={rhythm}
+            signatures={signatures}
             source={clock}
             tempo={tempo}
           />
@@ -1993,9 +2174,23 @@ export default function BlockTimeline() {
                   className="border-b-0"
                   getAriaValueText={describe}
                 >
-                  {labels.map((count) => (
-                    <TimelineMark key={count} value={count * bar}>
-                      {count + 1}
+                  {songBars
+                    .filter((item) => item.partial)
+                    .map((item) => (
+                      <div
+                        aria-hidden="true"
+                        className="pointer-events-none absolute inset-y-0 bg-[repeating-linear-gradient(135deg,var(--muted-foreground)_0_1px,transparent_1px_6px)] opacity-30"
+                        data-slot="timeline-partial-bar"
+                        key={item.start}
+                        style={{
+                          left: `calc(var(--timeline-unit) * ${item.start})`,
+                          width: `calc(var(--timeline-unit) * ${item.length})`,
+                        }}
+                      />
+                    ))}
+                  {labels.map((item) => (
+                    <TimelineMark key={item.start} value={item.start}>
+                      {item.number}
                     </TimelineMark>
                   ))}
                   <TimelinePlayhead />
@@ -2017,6 +2212,49 @@ export default function BlockTimeline() {
                         onJump={jumpToLocator}
                         onRemove={removeLocator}
                         onRename={renameLocator}
+                      />
+                    </TimelineMark>
+                  ))}
+                </TimelineLane>
+              </Row>
+              <Row
+                className="shrink-0 border-foreground/25 border-b bg-background"
+                lead={
+                  <div className="flex h-full items-center justify-between ps-3 pe-1 text-muted-foreground text-xs">
+                    Signature
+                    <Button
+                      aria-label="Add a time signature at the cursor"
+                      className="size-5"
+                      onClick={addSignature}
+                      size="icon"
+                      title="Add a time signature at the cursor"
+                      variant="ghost"
+                    >
+                      <IconPlaceholder
+                        aria-hidden="true"
+                        className="size-3"
+                        hugeicons="PlusSignIcon"
+                        lucide="PlusIcon"
+                        phosphor="PlusIcon"
+                        remixicon="RiAddLine"
+                        tabler="IconPlus"
+                      />
+                    </Button>
+                  </div>
+                }
+              >
+                <TimelineLane className="h-6 border-b-0">
+                  {signatures.map((change) => (
+                    <TimelineMark key={change.id} value={change.at}>
+                      <SignatureButton
+                        change={change}
+                        editing={editingSignature === change.id}
+                        onEditingChange={setEditingSignature}
+                        onJump={jumpToLocator}
+                        onMove={moveSignature}
+                        onRemove={removeSignature}
+                        onSet={setSignature}
+                        step={snapStep}
                       />
                     </TimelineMark>
                   ))}
