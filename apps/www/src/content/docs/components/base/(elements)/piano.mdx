@@ -155,7 +155,7 @@ A keyboard to play: every key sounds while pressed, by pointer or from the keybo
 <TypeRow name={"onNoteOff"} type={"(pitch: number, eventDetails: NoteOffEventDetails) => void"}>Fires when a key is released, the pointer glides off it, or it loses focus while held.</TypeRow>
 <TypeRow name={"onNoteOn"} type={"(pitch: number, eventDetails: NoteOnEventDetails) => void"}>Fires when a key is pressed or glided onto. `eventDetails.cancel()` keeps it silent.</TypeRow>
 <TypeRow name={"orientation"} type={"\"horizontal\" | \"vertical\""} default={"\"horizontal\""}></TypeRow>
-<TypeRow name={"pitches"} type={"readonly number[]"}>Only these pitches, in place of `minPitch`…`maxPitch`.</TypeRow>
+<TypeRow name={"pitches"} type={"readonly number[]"}>Only these pitches get keys, instead of `minPitch`…`maxPitch`.</TypeRow>
 </TypeTable>
 
 <TypeTable title="Data attributes">
@@ -198,13 +198,13 @@ The name of the key it sits in, such as "C4". Hidden from assistive technology, 
 #### Value and state
 
 <TypeTable>
-<TypeRow name={"minPitch"} type={"number"} default={"48"}>Lowest MIDI pitch on the keyboard.</TypeRow>
-<TypeRow name={"maxPitch"} type={"number"} default={"72"}>Highest MIDI pitch on the keyboard.</TypeRow>
-<TypeRow name={"pitches"} type={"number[]"}>Exactly these pitches, in place of `minPitch`…`maxPitch`.</TypeRow>
-<TypeRow name={"activeNotes"} type={"number[]"}>Pitches lit from outside pointer interaction. Merged with the pressed keys for display.</TypeRow>
+<TypeRow name={"minPitch"} type={"number"} default={"48"}>Lowest MIDI pitch, inclusive: 60 is middle C.</TypeRow>
+<TypeRow name={"maxPitch"} type={"number"} default={"72"}>Highest MIDI pitch, inclusive.</TypeRow>
+<TypeRow name={"pitches"} type={"number[]"}>Only these pitches get keys, instead of `minPitch`…`maxPitch`.</TypeRow>
+<TypeRow name={"activeNotes"} type={"number[]"}>Pitches lit from elsewhere, such as a MIDI input or a sequencer, on top of the keys pressed here.</TypeRow>
 <TypeRow name={"disabled"} type={"boolean"} default={"false"}>Whether the keyboard is disabled.</TypeRow>
 <TypeRow name={"onNoteOn"} type={"(pitch: number, eventDetails) => void"}>Fires when a key is pressed or glided onto. `eventDetails.cancel()` keeps it silent.</TypeRow>
-<TypeRow name={"onNoteOff"} type={"(pitch: number, eventDetails) => void"}>Fires when a key is released, glided off, or loses focus while held.</TypeRow>
+<TypeRow name={"onNoteOff"} type={"(pitch: number, eventDetails) => void"}>Fires when a key is released, the pointer glides off it, or it loses focus while held.</TypeRow>
 <TypeRow name={"aria-label"} type={"string"}>Accessible name for the keyboard.</TypeRow>
 <TypeRow name={"aria-labelledby"} type={"string"}>ID of a labeling element.</TypeRow>
 </TypeTable>
