@@ -337,6 +337,8 @@ A drag across the bare lanes selects a stretch of time on the tracks it sweeps, 
 
 With snapping on, a dragged clip or loop also lands on the edges of the other clips, the locators and the loop, through `snapPoints`. Where two clips meet, the fade-out of one and the fade-in of the next move together, as a crossfade, and a dashed line shows how far a fade being dragged can go.
 
+The Signature strip holds time-signature changes: its + adds one at the cursor, in the signature already there, ready to be typed (such as 7/8). From a change on, bars are counted in its signature: the ruler's numbers, the hatched partial bar a change cuts short, and the position in the transport all follow, through `barsOf` and `barsBeatsWith` from `@audio-ui/core/time`. On a change, Left and Right move it by a grid step, Enter edits it and Delete takes it away. The grid's bar-long divisions and the tempo stay those of the song's start.
+
 ## Placing your own parts
 
 Every lane sets a `--timeline-unit` CSS variable, the width of one unit. Parts are placed with it, so anything you draw follows the zoom the same way:

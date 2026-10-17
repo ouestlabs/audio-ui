@@ -19,6 +19,13 @@ export {
   TRIPLET_FACTOR,
 } from "./grid.ts";
 export {
+  type Bar,
+  barsBeatsWith,
+  barsOf,
+  isSignature,
+  type SignatureChange,
+} from "./meter.ts";
+export {
   advance,
   anchoredCursor,
   anchorForTempoChange,
