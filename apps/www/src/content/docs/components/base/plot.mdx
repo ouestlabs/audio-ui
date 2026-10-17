@@ -264,7 +264,7 @@ A curve across the whole plot: `y = fn(x)` in the axes' units, such as an equali
 <TypeTable>
 <TypeRow name={"fillTo"} type={"number"}>Closes the curve to this y value, so it can be filled as an area.</TypeRow>
 <TypeRow name={"fn"} type={"(x: number) => number"}>The curve: y, in the y axis' units, at each x.</TypeRow>
-<TypeRow name={"samples"} type={"number"} default={"256"}>How many points the curve is drawn through.</TypeRow>
+<TypeRow name={"samples"} type={"number"} default={"256"}>How many points it starts from, evenly along the x axis. It adds more where the curve bends tighter than that shows, such as a corner or a knee.</TypeRow>
 </TypeTable>
 
 <TypeTable title="Data attributes">
