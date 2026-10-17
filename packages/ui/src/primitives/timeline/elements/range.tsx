@@ -83,7 +83,10 @@ function useRangeDrag(
  * it, on the grid unless Cmd/Ctrl is held; add a `Timeline.RangeHandle` per
  * edge to resize it. With `drawable`, dragging across empty lane draws a new
  * range. Its own native `<input type="range">` moves it from the keyboard and
- * carries its accessible name (`aria-label` / `aria-labelledby`).
+ * carries its accessible name (`aria-label` / `aria-labelledby`): Left and
+ * Right by a step, Up and Down by its own length, and with Cmd/Ctrl, Left and
+ * Right shorten or lengthen it by a step while Up and Down double or halve
+ * it. A drag lands an edge on a `snapPoints` place within a few px.
  * Renders a `<div>` element.
  */
 export function Range(componentProps: Range.Props) {

@@ -48,6 +48,39 @@ export function divisionSeconds(
     : (4 / found.note) * secondsPerQuarter(tempo);
 }
 
+/**
+ * The fixed division next to `division`: a finer one (`direction` 1, twice as
+ * dense) or a coarser one (-1), held at the ends of the list.
+ */
+export function adjacentDivision(
+  division: FixedGridDivision,
+  direction: 1 | -1
+): FixedGridDivision {
+  const index = GRID_DIVISIONS.findIndex((entry) => entry.id === division);
+  const next = Math.min(
+    GRID_DIVISIONS.length - 1,
+    Math.max(0, index + direction)
+  );
+  return GRID_DIVISIONS[next]?.id ?? division;
+}
+
+/**
+ * The fixed division whose step is nearest `seconds` at `tempo`: what a grid
+ * that follows the zoom becomes when it is fixed where it is.
+ */
+export function divisionAt(seconds: number, tempo: Tempo): FixedGridDivision {
+  let found: FixedGridDivision = "1-bar";
+  let distance = Number.POSITIVE_INFINITY;
+  for (const entry of GRID_DIVISIONS) {
+    const away = Math.abs(Math.log(divisionSeconds(entry.id, tempo) / seconds));
+    if (away < distance) {
+      distance = away;
+      found = entry.id;
+    }
+  }
+  return found;
+}
+
 export interface GridIntervalOptions {
   /** The closest two adaptive lines may be, in px. @default 24 */
   minSpacing?: number;

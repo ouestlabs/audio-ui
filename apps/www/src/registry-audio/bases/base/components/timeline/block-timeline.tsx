@@ -1,9 +1,11 @@
 "use client";
 
 import {
+  adjacentDivision,
   barLabelInterval,
   DEFAULT_TEMPO,
   describeBarsBeats,
+  divisionAt,
   GRID_DIVISIONS,
   type GridDivision,
   gridInterval,
@@ -11,7 +13,9 @@ import {
   type MetronomeRhythm,
   secondsPerBar,
   type Tempo,
+  TRIPLET_FACTOR,
 } from "@audio-ui/core/time";
+import { snapMove } from "@audio-ui/core/timeline";
 import {
   adjacentPoint,
   type FadeShape,
@@ -28,6 +32,7 @@ import {
   type SyntheticEvent,
   useCallback,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -103,6 +108,36 @@ const BAR = secondsPerBar(DEFAULT_TEMPO);
 /** The width of a track header, which the lanes start after. */
 const LEAD_PX = 160;
 const MAX_ZOOM = 240;
+/** How close an adaptive grid's lines may be, in px: Cmd/Ctrl + 1 and 2 halve and double it. */
+const DENSITIES = [6, 12, 24, 48, 96] as const;
+/** Cmd/Ctrl + a digit changes the grid, read from the key's place so it works on any keyboard layout. */
+const GRID_KEYS: Record<
+  string,
+  "finer" | "fixed" | "snap" | "triplet" | "wider"
+> = {
+  Digit1: "finer",
+  Digit2: "wider",
+  Digit3: "triplet",
+  Digit4: "snap",
+  Digit5: "fixed",
+};
+
+/** The width of the track headers, which the lanes start after. */
+function leadWidth(viewport: HTMLElement) {
+  return (
+    viewport.querySelector<HTMLElement>('[data-slot="timeline-track-header"]')
+      ?.offsetWidth ?? LEAD_PX
+  );
+}
+
+/** Whether a key went to a field you type in, where it is the field's own. */
+function typing(target: EventTarget) {
+  return (
+    (target instanceof HTMLInputElement && target.type !== "range") ||
+    target instanceof HTMLTextAreaElement ||
+    (target instanceof HTMLElement && target.isContentEditable)
+  );
+}
 /** The zoom presets, as shares of the fitted view: Fit shows everything. */
 const ZOOM_PRESETS = [1, 2, 4, 8];
 /** The zoom's steps are loupes, not a minus and a plus. */
@@ -881,6 +916,7 @@ export default function BlockTimeline() {
     []
   );
   const [division, setDivision] = useState<GridDivision>("adaptive");
+  const [density, setDensity] = useState<number>(24);
   const [triplet, setTriplet] = useState(false);
   const [snap, setSnap] = useState(true);
   // A stand-in for the mix's levels: the block plays nothing, so they move while it runs.
@@ -1127,7 +1163,7 @@ export default function BlockTimeline() {
     setLooping(true);
   }, [clips, selectedIds, selectedTracks]);
 
-  /** M adds a locator, Alt + arrows jump between them; returns whether the key was one of these. */
+  /** M adds a locator, Alt + arrows jump to the next locator or clip edge; returns whether the key was one of these. */
   const handleLocatorKey = useCallback(
     (event: KeyboardEvent<HTMLDivElement>) => {
       if (
@@ -1142,8 +1178,18 @@ export default function BlockTimeline() {
       if (!(event.altKey && direction)) {
         return false;
       }
+      // The locators, and the edges of the clips on the picked tracks (on every track when none is picked).
+      const edges = clips
+        .filter(
+          (clip) =>
+            selectedTracks.length === 0 || selectedTracks.includes(clip.track)
+        )
+        .flatMap((clip) => [
+          clip.value.start,
+          clip.value.start + clip.value.length,
+        ]);
       const target = adjacentPoint(
-        locators.map((locator) => locator.at),
+        [...locators.map((locator) => locator.at), ...edges],
         clock.getSnapshot(),
         direction === 1 ? 1 : -1
       );
@@ -1155,7 +1201,7 @@ export default function BlockTimeline() {
       clock.set(target);
       return true;
     },
-    [addLocator, clock, locators]
+    [addLocator, clips, clock, locators, selectedTracks]
   );
   // The copies are there to be seen: bring them into view once they are drawn.
   const duplicateAndShow = useCallback(() => {
@@ -1267,7 +1313,10 @@ export default function BlockTimeline() {
 
   // The grid the lanes draw is the grid everything snaps to.
   // Snap off draws no lines and snaps nothing: a step of 0 is no grid.
-  const gridSeconds = gridInterval(division, zoom, tempo, { triplet });
+  const gridSeconds = gridInterval(division, zoom, tempo, {
+    minSpacing: density,
+    triplet,
+  });
   const snapStep = snap ? gridSeconds : 0;
   const labelEvery = barLabelInterval(zoom, tempo);
   // Whole bars, counted rather than divided, so no tempo leaves a label like 6.9999.
@@ -1277,11 +1326,232 @@ export default function BlockTimeline() {
     (_, index) => index * labelBars
   );
 
+  // A dragged clip or loop is pulled onto the edges of the other clips, the locators and the loop.
+  const snapPoints = useMemo(() => {
+    if (!snap) {
+      return;
+    }
+    const points = new Set<number>(loop);
+    for (const clip of clips) {
+      points.add(clip.value.start);
+      points.add(clip.value.start + clip.value.length);
+    }
+    for (const locator of locators) {
+      points.add(locator.at);
+    }
+    return [...points];
+  }, [clips, locators, loop, snap]);
+
+  /** A finer or wider grid: a denser or sparser adaptive grid, or the next fixed division. */
+  const stepGrid = useCallback(
+    (finer: boolean) => {
+      if (division !== "adaptive") {
+        setDivision(adjacentDivision(division, finer ? 1 : -1));
+        return;
+      }
+      // Denser lines are closer together: finer halves how close they may be.
+      const index = DENSITIES.indexOf(density as (typeof DENSITIES)[number]);
+      const next = DENSITIES[index + (finer ? -1 : 1)];
+      if (next !== undefined) {
+        setDensity(next);
+      }
+    },
+    [density, division]
+  );
+  /** Cmd/Ctrl + 1 to 5: a finer or wider grid, triplets, snapping, and a grid fixed where it is or following the zoom again. */
+  const changeGrid = useCallback(
+    (change: (typeof GRID_KEYS)[string]) => {
+      if (change === "triplet") {
+        setTriplet((on) => !on);
+      } else if (change === "snap") {
+        setSnap((on) => !on);
+      } else if (change === "fixed") {
+        setDivision(
+          division === "adaptive"
+            ? divisionAt(gridSeconds / (triplet ? TRIPLET_FACTOR : 1), tempo)
+            : "adaptive"
+        );
+      } else {
+        stepGrid(change === "finer");
+      }
+    },
+    [division, gridSeconds, stepGrid, tempo, triplet]
+  );
+
+  // Z zooms onto the selection, + and - zoom around the cursor, X steps back through the zooms they left behind.
+  const zoomHistory = useRef<{ scroll: number; zoom: number | null }[]>([]);
+  /** Zooms to `next` px per second, with `value` seconds `offset` px from the viewport's left edge. */
+  const zoomOnto = useCallback(
+    (next: number, value: number, offset: number) => {
+      const element = viewportRef.current;
+      if (!element) {
+        return;
+      }
+      zoomHistory.current.push({ scroll: element.scrollLeft, zoom: zoomed });
+      const clamped = Math.min(MAX_ZOOM, Math.max(fitPx, next));
+      setZoom(clamped <= fitPx ? null : clamped);
+      // After the timeline has drawn the new zoom, which keeps its middle still.
+      requestAnimationFrame(() => {
+        element.scrollLeft = leadWidth(element) + value * clamped - offset;
+      });
+    },
+    [fitPx, zoomed]
+  );
+  const zoomAroundCursor = useCallback(
+    (factor: number) => {
+      const element = viewportRef.current;
+      if (!element) {
+        return;
+      }
+      const lead = leadWidth(element);
+      const at = clock.getSnapshot();
+      const x = lead + at * zoom - element.scrollLeft;
+      // A cursor out of view gives way to the middle of the view.
+      const offset =
+        x >= lead && x <= element.clientWidth
+          ? x
+          : (lead + element.clientWidth) / 2;
+      const value =
+        x >= lead && x <= element.clientWidth
+          ? at
+          : (element.scrollLeft + offset - lead) / zoom;
+      zoomOnto(zoom * factor, value, offset);
+    },
+    [clock, zoom, zoomOnto]
+  );
+  const zoomToSelection = useCallback(() => {
+    const element = viewportRef.current;
+    const chosen = clips.filter(
+      (clip) =>
+        selectedIds.includes(clip.id) || selectedTracks.includes(clip.track)
+    );
+    const [start, end] =
+      chosen.length > 0
+        ? [
+            Math.min(...chosen.map((clip) => clip.value.start)),
+            Math.max(
+              ...chosen.map((clip) => clip.value.start + clip.value.length)
+            ),
+          ]
+        : loop;
+    if (!element || end <= start) {
+      return;
+    }
+    const lead = leadWidth(element);
+    zoomOnto((element.clientWidth - lead) / (end - start), start, lead);
+  }, [clips, loop, selectedIds, selectedTracks, zoomOnto]);
+  const zoomBack = useCallback(() => {
+    const element = viewportRef.current;
+    const previous = zoomHistory.current.pop();
+    if (!(element && previous)) {
+      return;
+    }
+    setZoom(previous.zoom);
+    requestAnimationFrame(() => {
+      element.scrollLeft = previous.scroll;
+    });
+  }, []);
+
+  /** Up and Down pick the track above or below the one picked, or the first or last. */
+  const pickNextTrack = useCallback(
+    (direction: 1 | -1) => {
+      const current =
+        selectedTracks[0] ??
+        clips.find((clip) => selectedIds.includes(clip.id))?.track;
+      const index = tracks.findIndex((track) => track.id === current);
+      const next =
+        index === -1
+          ? tracks.at(direction === 1 ? 0 : -1)
+          : tracks[Math.min(tracks.length - 1, Math.max(0, index + direction))];
+      if (next) {
+        selectTrack(next.id);
+      }
+    },
+    [clips, selectTrack, selectedIds, selectedTracks, tracks]
+  );
+
+  /** On the panel itself: arrows move the cursor on the grid, Home and End go to the ends of the arrangement. */
+  const handleCursorKey = useCallback(
+    (event: KeyboardEvent<HTMLDivElement>) => {
+      if (event.altKey || event.metaKey || event.ctrlKey || event.shiftKey) {
+        return false;
+      }
+      const at = clock.getSnapshot();
+      const lastEnd = Math.max(
+        0,
+        ...clips.map((clip) => clip.value.start + clip.value.length)
+      );
+      const step = gridSeconds;
+      const targets: Record<string, number> = {
+        ArrowLeft: snapMove(at - step, at, { offset: 0, step }),
+        ArrowRight: snapMove(at + step, at, { offset: 0, step }),
+        End: lastEnd,
+        Home: 0,
+      };
+      const target = targets[event.key];
+      if (target !== undefined) {
+        event.preventDefault();
+        clock.set(Math.min(duration, Math.max(0, target)));
+        return true;
+      }
+      if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+        event.preventDefault();
+        pickNextTrack(event.key === "ArrowDown" ? 1 : -1);
+        return true;
+      }
+      return false;
+    },
+    [clips, clock, duration, gridSeconds, pickNextTrack]
+  );
+
+  /** The navigation keys: the grid with Cmd/Ctrl + 1 to 5, the zoom with +, -, Z and X, and the cursor from the panel. */
+  const handleNavigationKey = useCallback(
+    (event: KeyboardEvent<HTMLDivElement>) => {
+      if (event.metaKey || event.ctrlKey) {
+        const change = GRID_KEYS[event.code];
+        if (!(change && !event.altKey && !event.shiftKey)) {
+          return false;
+        }
+        event.preventDefault();
+        changeGrid(change);
+        return true;
+      }
+      if (typing(event.target) || event.altKey) {
+        return false;
+      }
+      const key = event.key.toLowerCase();
+      const zoomKeys: Record<string, () => void> = {
+        "+": () => zoomAroundCursor(2),
+        "-": () => zoomAroundCursor(0.5),
+        "=": () => zoomAroundCursor(2),
+        x: zoomBack,
+        z: zoomToSelection,
+      };
+      const zoomKey = event.shiftKey && key !== "+" ? undefined : zoomKeys[key];
+      if (zoomKey) {
+        event.preventDefault();
+        zoomKey();
+        return true;
+      }
+      // Anywhere else in the panel, a clip's or the loop's own input takes its arrows.
+      return event.target === event.currentTarget && handleCursorKey(event);
+    },
+    [changeGrid, handleCursorKey, zoomAroundCursor, zoomBack, zoomToSelection]
+  );
+  const handlePanelKey = useCallback(
+    (event: KeyboardEvent<HTMLDivElement>) => {
+      if (!handleNavigationKey(event)) {
+        handleKeyDown(event);
+      }
+    },
+    [handleKeyDown, handleNavigationKey]
+  );
+
   return (
     // biome-ignore lint/a11y/noStaticElementInteractions: the editor's shortcuts, caught from the controls inside it
     <div
       className="cn-audio-panel @container/panel flex w-full min-w-0 flex-col gap-4 border bg-card p-4 outline-none"
-      onKeyDown={handleKeyDown}
+      onKeyDown={handlePanelKey}
       ref={panelRef}
       tabIndex={-1}
     >
@@ -1476,6 +1746,7 @@ export default function BlockTimeline() {
         minZoom={fitPx || undefined}
         onPositionChange={seek}
         onZoomChange={setZoom}
+        snapPoints={snapPoints}
         snapStep={snapStep}
         source={clock}
         zoom={zoomed === null ? undefined : zoom}

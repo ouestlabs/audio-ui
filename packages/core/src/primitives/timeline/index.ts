@@ -67,9 +67,14 @@ export {
 export {
   bypassesGrid,
   type Grid,
+  nearestSnapPoint,
+  SNAP_RADIUS_PX,
   snapMove,
   snapRangeMove,
+  snapSpanMove,
   snapToGrid,
+  withoutSnapPoints,
+  withSnapRadius,
 } from "./snap.ts";
 export {
   createTrackController,
