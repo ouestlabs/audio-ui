@@ -23,7 +23,8 @@ How to build audio interfaces in React with audio/ui, for AI agents and LLMs. Ru
    - 1.3 [Schedule on the audio clock](#13-schedule-on-the-audio-clock)
    - 1.4 [dB on the control, linear gain on the node](#14-db-on-the-control-linear-gain-on-the-node)
    - 1.5 [Leave headroom below full scale](#15-leave-headroom-below-full-scale)
-   - 1.6 [Clean up what you create](#16-clean-up-what-you-create)
+   - 1.6 [Play the notes the way the roll shows them](#16-play-the-notes-the-way-the-roll-shows-them)
+   - 1.7 [Clean up what you create](#17-clean-up-what-you-create)
 2. [Live Data](#2-live-data): **CRITICAL**
    - 2.1 [Signals go through a source, not state](#21-signals-go-through-a-source-not-state)
    - 2.2 [Detect pitch with a period search, not the loudest FFT bin](#22-detect-pitch-with-a-period-search-not-the-loudest-fft-bin)
@@ -209,7 +210,45 @@ voice.gain.setTargetAtTime(VOICE_GAIN, ctx.currentTime, 0.01);
 
 Work the worst case out: voices × voice gain × resonance boost × master gain should stay below 1. A `DynamicsCompressorNode` before `ctx.destination` is a safety net for what you didn't foresee, not a replacement for sizing the gains.
 
-### 1.6 Clean up what you create
+### 1.6 Play the notes the way the roll shows them
+
+**Impact: HIGH (muted notes stay silent, chance and deviation are heard)**
+
+The piano roll draws a note's `muted`, `chance` and `deviation`, but it plays nothing: the sequencer you write does. One that reads only `pitch`, `start`, `length` and `velocity` plays a deactivated note, plays a 25% note every time and never varies a velocity the user gave room to stray. A note can also start between steps, after a humanize or a stretch, so it starts at its own time inside the step.
+
+**Incorrect (only the basic fields, only notes on a step):**
+
+```tsx
+onStep: (step, time) => {
+  for (const note of notes) {
+    if (note.start === step) {
+      playNote(note.pitch, note.velocity ?? 1, time, note.length * secondsPerStep);
+    }
+  }
+},
+```
+
+**Correct (every field the roll edits):**
+
+```tsx
+onStep: (step, time) => {
+  for (const note of notes) {
+    if (note.start < step || note.start >= step + 1) continue; // its step, even off the grid
+    if (note.muted) continue; // deactivated: on the roll, silent
+    if (Math.random() >= (note.chance ?? 1)) continue; // rolled each time round
+    const velocity = Math.min(
+      1,
+      Math.max(0, (note.velocity ?? 1) + Math.random() * (note.deviation ?? 0))
+    );
+    const at = time + (note.start - step) * secondsPerStep;
+    playNote(note.pitch, velocity, at, note.length * secondsPerStep);
+  }
+},
+```
+
+`deviation` is signed: positive strays up from the velocity, negative down. Leave muted notes out of a MIDI export too. `block-piano-roll` plays notes this way.
+
+### 1.7 Clean up what you create
 
 **Impact: MEDIUM (no orphan oscillators or loops after unmount)**
 
@@ -1139,8 +1178,8 @@ Common hooks (check the part's API reference for the exact list, don't invent na
 
 | Hook | Examples |
 | --- | --- |
-| Data attributes | `data-disabled`, `data-dragging`, `data-orientation` (Fader), `data-active` (Knob.Mark, live Waveform), `data-clipping` (Meter), `data-selected`, `data-scrubbing` |
-| CSS variables | `--xy-pad-x` / `--xy-pad-y`, `--knob-mark-angle`, `--waveform-position`, `--waveform-level`, `--timeline-unit`, `--sequencer-velocity`, `--piano-roll-velocity` |
+| Data attributes | `data-disabled`, `data-dragging`, `data-orientation` (Fader), `data-active` (Knob.Mark, live Waveform), `data-clipping` (Meter), `data-selected`, `data-scrubbing`, `data-in-scale` (PianoRoll.Row), `data-muted` (PianoRoll.Note), `data-has-selection` (PianoRoll.Root) |
+| CSS variables | `--xy-pad-x` / `--xy-pad-y`, `--knob-mark-angle`, `--waveform-position`, `--waveform-level`, `--timeline-unit`, `--sequencer-velocity`, `--piano-roll-velocity`, `--piano-roll-chance`, `--piano-roll-level`, `--piano-roll-deviation` |
 
 Read the part list in the docs' **Anatomy** section: a part outside its parent does nothing.
 
