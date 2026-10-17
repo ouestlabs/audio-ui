@@ -819,21 +819,8 @@ export const audio: RegistryItem[] = [
         path: "audio/elements/plot.tsx",
         type: "registry:ui",
       },
-      {
-        path: "components/plot/plot-demo.tsx",
-        target: "components/audio-ui/plot-default.tsx",
-        type: "registry:component",
-      },
     ],
     name: "plot",
-    registryDependencies: [
-      "@audio-ui/knob",
-      "@audio-ui/use-noise-through-eq",
-      "@audio-ui/use-spectrum",
-      "@shadcn/button",
-      "@shadcn/popover",
-      "@shadcn/select",
-    ],
     type: "registry:ui",
   },
   {
@@ -872,14 +859,8 @@ export const audio: RegistryItem[] = [
         path: "audio/elements/waveform.tsx",
         type: "registry:ui",
       },
-      {
-        path: "components/waveform/waveform-demo.tsx",
-        target: "components/audio-ui/waveform-default.tsx",
-        type: "registry:component",
-      },
     ],
     name: "waveform",
-    registryDependencies: [],
     type: "registry:ui",
   },
   {

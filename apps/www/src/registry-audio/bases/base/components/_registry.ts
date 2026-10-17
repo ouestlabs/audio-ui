@@ -481,9 +481,12 @@ export const components: RegistryItem[] = [
     dependencies: ["@audio-ui/core"],
     registryDependencies: [
       "@audio-ui/plot",
+      "@audio-ui/knob",
       "@audio-ui/use-noise-through-eq",
       "@audio-ui/use-spectrum",
       "@shadcn/button",
+      "@shadcn/popover",
+      "@shadcn/select",
     ],
     type: "registry:example",
   },
