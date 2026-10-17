@@ -62,6 +62,8 @@ export interface ClipSettings {
 interface ClipPanelProps {
   /** How long a bar lasts, in seconds: the ruler numbers bars and the lanes draw a line at each. @default 2 */
   bar?: number;
+  /** Beats in a bar: zoomed in far enough, the ruler numbers them too. @default 4 */
+  beatsPerBar?: number;
   /** Whatever the host puts at the end of the title bar. */
   children?: ReactNode;
   className?: string;
@@ -212,6 +214,7 @@ function WarpMarkers({
  */
 function ClipPanel({
   bar = 2,
+  beatsPerBar = 4,
   children,
   className,
   format = formatSeconds,
@@ -511,6 +514,7 @@ function ClipPanel({
         </div>
         <ClipSource
           bar={bar}
+          beatsPerBar={beatsPerBar}
           format={format}
           length={length}
           loop={loop}
@@ -532,6 +536,40 @@ function ClipPanel({
 
 /** The bars a ruler labels: every bar, or every second, fourth… so labels stay this far apart, in px. */
 const LABEL_SPACING = 40;
+/** The widest a peak of the waveform is drawn, in px: zooming in stops there, before the drawing turns to blocks. */
+const PEAK_PX = 3;
+
+/** How many peaks the waveform has across the source. */
+const peakCount = (values: WaveformPrimitive.Root.Peaks) =>
+  "length" in values ? values.length : values.max.length;
+
+/** The ruler's labels at `pxPerSecond`: each beat (`bar.beat`) once they are far enough apart, else every bar, every second, fourth… */
+function rulerLabels(
+  span: number,
+  bar: number,
+  beatsPerBar: number,
+  pxPerSecond: number
+) {
+  const beat = bar / beatsPerBar;
+  if (beat * pxPerSecond >= LABEL_SPACING) {
+    return Array.from({ length: Math.floor(span / beat) + 1 }, (_, index) => {
+      const number = Math.floor(index / beatsPerBar) + 1;
+      const inBar = (index % beatsPerBar) + 1;
+      return {
+        at: index * beat,
+        text: inBar === 1 ? `${number}` : `${number}.${inBar}`,
+      };
+    });
+  }
+  let every = 1;
+  while (every * bar * pxPerSecond < LABEL_SPACING && every < 1024) {
+    every *= 2;
+  }
+  return Array.from(
+    { length: Math.floor(span / (bar * every)) + 1 },
+    (_, index) => ({ at: index * every * bar, text: `${index * every + 1}` })
+  );
+}
 
 /**
  * The clip's source on a timeline of its own: an overview bar to zoom and
@@ -540,6 +578,7 @@ const LABEL_SPACING = 40;
  */
 function ClipSource({
   bar,
+  beatsPerBar,
   format,
   length,
   loop,
@@ -555,6 +594,7 @@ function ClipSource({
   warp,
 }: {
   bar: number;
+  beatsPerBar: number;
   format: (seconds: number) => string;
   length: number;
   loop: readonly [number, number] | null;
@@ -585,19 +625,17 @@ function ClipSource({
     return () => observer.disconnect();
   }, [span]);
   const pxPerSecond = zoom ?? fit;
-  let every = 1;
-  while (every * bar * pxPerSecond < LABEL_SPACING && every < 1024) {
-    every *= 2;
-  }
-  const labels = Array.from(
-    { length: Math.floor(span / (bar * every)) + 1 },
-    (_, index) => index * every
-  );
+  const labels = rulerLabels(span, bar, beatsPerBar, pxPerSecond);
+  // Zoomed in, a line per beat; out, a line per bar.
+  const beat = bar / beatsPerBar;
+  const gridStep = beat * pxPerSecond >= LABEL_SPACING / 2 ? beat : bar;
+  // As far in as the waveform has detail for.
+  const maxZoom = Math.max(fit, (peakCount(values) * PEAK_PX) / span);
   return (
     <Timeline
       className="min-w-0 flex-1 gap-1 p-2"
       duration={span}
-      maxZoom={fit * 64 || undefined}
+      maxZoom={maxZoom || undefined}
       minZoom={fit || undefined}
       onZoomChange={setZoom}
       zoom={zoom ?? undefined}
@@ -611,9 +649,9 @@ function ClipSource({
         <div className="flex w-max min-w-full flex-col">
           {/* Bar numbers, from the start of the source. */}
           <TimelineLane className="h-5 border-foreground/25 border-b text-muted-foreground text-xs">
-            {labels.map((count) => (
-              <TimelineMark key={count} value={count * bar}>
-                {count + 1}
+            {labels.map((label) => (
+              <TimelineMark key={label.at} value={label.at}>
+                {label.text}
               </TimelineMark>
             ))}
           </TimelineLane>
@@ -653,7 +691,7 @@ function ClipSource({
           {/* Warped, a double-click on the waveform pins what plays there with a new marker. */}
           {/* biome-ignore lint/a11y/noStaticElementInteractions: a pointer shortcut; the markers' own keys and the Warp switch cover the keyboard */}
           <div className="relative" onDoubleClick={onAddMarker}>
-            <TimelineLane className="h-28 border-b-0" gridStep={bar}>
+            <TimelineLane className="h-28 border-b-0" gridStep={gridStep}>
               <div
                 className="absolute inset-y-0 left-0"
                 data-slot="clip-panel-source"
