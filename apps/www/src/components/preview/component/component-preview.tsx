@@ -1,7 +1,7 @@
-import type * as React from "react";
+import * as React from "react";
 import { ComponentSource } from "@/components/code/source/component-source";
-import { ComponentClient } from "@/components/preview/component/component-client";
 import { ComponentPreviewTabs } from "@/components/preview/component/component-preview-tabs";
+import { PreviewLoading } from "@/components/preview/frame/preview-frame";
 import { getPreviewHint } from "@/lib/docs/menu/preview-hint";
 import { isBlock, isExpandable } from "@/lib/registry/catalog/is-block";
 import { getRegistryComponent } from "@/lib/registry/core/registry";
@@ -53,7 +53,11 @@ export function ComponentPreview({
       align={align}
       chromeLessOnMobile={chromeLessOnMobile}
       className={className}
-      component={<ComponentClient name={name} styleName={styleName} />}
+      component={
+        <React.Suspense fallback={<PreviewLoading />}>
+          <Component />
+        </React.Suspense>
+      }
       expand={isExpandable(name)}
       fitContent={isBlock(name)}
       hideCode={hideCode}
