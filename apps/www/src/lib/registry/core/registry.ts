@@ -291,7 +291,7 @@ const componentCache = new Map<string, React.LazyExoticComponent<any>>();
 
 /** Every registry component a demo or a block can be loaded from, each its own chunk, by its path. */
 const componentModules = import.meta.glob<{ default: React.ComponentType }>([
-  "../registry-audio/bases/*/**/*.tsx",
+  "../../../registry-audio/bases/*/**/*.tsx",
 ]);
 
 /**
@@ -315,7 +315,9 @@ export function getComponent(
 
   // The path in the metadata is relative to the base, e.g. "audio/elements/knob.tsx".
   const load =
-    componentModules[`../registry-audio/bases/${base}/${item.files[0].path}`];
+    componentModules[
+      `../../../registry-audio/bases/${base}/${item.files[0].path}`
+    ];
   if (!load) {
     return null;
   }
