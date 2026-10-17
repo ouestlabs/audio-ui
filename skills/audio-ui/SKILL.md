@@ -49,6 +49,7 @@ Run commands with the project's package manager, read from its lockfile: `npx sh
 - `audio-resume-in-gesture` - Create the AudioContext lazily on the client, resume it in the click that starts sound
 - `audio-ramp-parameters` - `setTargetAtTime`, never `param.value =` from a drag
 - `audio-schedule-on-audio-clock` - Start notes at an AudioContext time from a look-ahead clock, never from timers
+- `audio-play-note-state` - Skip muted notes, roll each note's chance, stray its velocity by its deviation
 - `audio-db-to-gain` - dB on the control, `10 ** (db / 20)` on the GainNode
 - `audio-headroom` - Size voices, resonance and master volume so the loudest case stays under full scale
 - `audio-cleanup` - Stop and disconnect nodes, cancel frames on unmount
