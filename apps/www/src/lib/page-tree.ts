@@ -94,6 +94,22 @@ export type PageTreeGroup = {
   title?: string;
 };
 
+/** What an HTML string reads as: everything outside its tags, so no tag can survive in the result. */
+function textOfHtml(html: string) {
+  let text = "";
+  let inTag = false;
+  for (const char of html) {
+    if (char === "<") {
+      inTag = true;
+    } else if (char === ">" && inTag) {
+      inTag = false;
+    } else if (!inTag) {
+      text += char;
+    }
+  }
+  return text;
+}
+
 /** The words of a tree node's name: a string, or the text inside the element a serialized tree turns it into. */
 export function nodeText(node: ReactNode): string {
   if (typeof node === "string" || typeof node === "number") {
@@ -112,7 +128,7 @@ export function nodeText(node: ReactNode): string {
     const html = node.props.dangerouslySetInnerHTML?.__html;
     return html === undefined
       ? nodeText(node.props.children)
-      : html.replace(/<[^>]*>/g, "").replaceAll("&amp;", "&");
+      : textOfHtml(html).replaceAll("&amp;", "&");
   }
   return "";
 }
