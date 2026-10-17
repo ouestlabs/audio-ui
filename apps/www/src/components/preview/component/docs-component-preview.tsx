@@ -1,32 +1,10 @@
 import type * as React from "react";
 import { ComponentPreview } from "@/components/preview/component/component-preview";
-import {
-  resolveRegistryIconLibrary,
-  resolveRegistryStyleName,
-} from "@/lib/docs/content/docs-registry-options";
-
-import { DocsComponentPreviewSwitch } from "../../docs/mdx/mdx-components-client";
+import { useDocsRegistryOptions } from "@/hooks/use-docs-registry-options";
 
 export function DocsComponentPreview(
   props: React.ComponentProps<typeof ComponentPreview>
 ) {
-  const initialStyleName = resolveRegistryStyleName(props.styleName);
-  const initialIconLibrary = resolveRegistryIconLibrary(
-    props.iconLibrary,
-    initialStyleName
-  );
-
-  return (
-    <DocsComponentPreviewSwitch
-      {...props}
-      initialIconLibrary={initialIconLibrary}
-      initialStyleName={initialStyleName}
-    >
-      <ComponentPreview
-        {...props}
-        iconLibrary={initialIconLibrary}
-        styleName={initialStyleName}
-      />
-    </DocsComponentPreviewSwitch>
-  );
+  const options = useDocsRegistryOptions(props.styleName, props.iconLibrary);
+  return <ComponentPreview {...props} {...options} />;
 }
