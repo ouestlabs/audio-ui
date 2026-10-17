@@ -89,7 +89,9 @@ const componentsLayoutStateAtom = atomWithStorage<ComponentsLayoutState>(
   "components-layout",
   {
     sidebarOpen: true,
-  }
+  },
+  undefined,
+  { getOnInit: true }
 );
 
 export function useComponentsLayoutState() {
