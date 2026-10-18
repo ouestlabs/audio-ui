@@ -1,4 +1,4 @@
-import { area, circle, type Glyph, path, rect } from "./glyph.ts";
+import { circle, curve, type Glyph, path, rect } from "./glyph.ts";
 
 /** A metronome: the count before the first note. */
 export const metronome: Glyph = [
@@ -88,57 +88,23 @@ export const bot: Glyph = [
 ];
 
 /** The four shapes of an oscillator. */
-export const sine: Glyph = [
-  area("M2 12C4.5 5 7.5 5 12 12S19.5 19 22 12"),
-  path("M2 12C4.5 5 7.5 5 12 12S19.5 19 22 12"),
-];
-export const square: Glyph = [
-  area("M2 18h4V6h6v12h4V6h6"),
-  path("M2 18h4V6h6v12h4V6h6"),
-];
-export const sawtooth: Glyph = [
-  area("M3 18l9-12v12l9-12"),
-  path("M3 18l9-12v12l9-12"),
-];
-export const triangle: Glyph = [
-  area("M2 12l5-6 5 12 5-12 5 6"),
-  path("M2 12l5-6 5 12 5-12 5 6"),
-];
+export const sine: Glyph = [...curve("M2 12C4.5 5 7.5 5 12 12S19.5 19 22 12")];
+export const square: Glyph = [...curve("M2 18h4V6h6v12h4V6h6")];
+export const sawtooth: Glyph = [...curve("M3 18l9-12v12l9-12")];
+export const triangle: Glyph = [...curve("M2 12l5-6 5 12 5-12 5 6")];
 
 /** The response of a filter, gain up the page and frequency across. */
-export const lowpass: Glyph = [
-  area("M2 7h9c6 0 8 3 11 12"),
-  path("M2 7h9c6 0 8 3 11 12"),
-];
-export const highpass: Glyph = [
-  area("M2 19c3-9 5-12 11-12h9"),
-  path("M2 19c3-9 5-12 11-12h9"),
-];
-export const bandpass: Glyph = [
-  area("M2 19c5 0 5-13 10-13s5 13 10 13"),
-  path("M2 19c5 0 5-13 10-13s5 13 10 13"),
-];
-export const notch: Glyph = [
-  area("M2 7c5 0 5 12 10 12s5-12 10-12"),
-  path("M2 7c5 0 5 12 10 12s5-12 10-12"),
-];
-export const lowshelf: Glyph = [
-  area("M2 8h7c3 0 4 9 7 9h6"),
-  path("M2 8h7c3 0 4 9 7 9h6"),
-];
-export const highshelf: Glyph = [
-  area("M2 17h8c3 0 4-9 7-9h5"),
-  path("M2 17h8c3 0 4-9 7-9h5"),
-];
-export const peak: Glyph = [
-  area("M2 17h6c3 0 3-10 4-10s1 10 4 10h6"),
-  path("M2 17h6c3 0 3-10 4-10s1 10 4 10h6"),
-];
+export const lowpass: Glyph = [...curve("M2 7h9c6 0 8 3 11 12")];
+export const highpass: Glyph = [...curve("M2 19c3-9 5-12 11-12h9")];
+export const bandpass: Glyph = [...curve("M2 19c5 0 5-13 10-13s5 13 10 13")];
+export const notch: Glyph = [...curve("M2 7c5 0 5 12 10 12s5-12 10-12")];
+export const lowshelf: Glyph = [...curve("M2 8h7c3 0 4 9 7 9h6")];
+export const highshelf: Glyph = [...curve("M2 17h8c3 0 4-9 7-9h5")];
+export const peak: Glyph = [...curve("M2 17h6c3 0 3-10 4-10s1 10 4 10h6")];
 
 /** An envelope: attack, decay, sustain and release as one smooth line. */
 export const envelope: Glyph = [
-  area("M2 19C4 19 5 5 8 5c2 0 2 6 4 6h5c2 0 3 8 5 8"),
-  path("M2 19C4 19 5 5 8 5c2 0 2 6 4 6h5c2 0 3 8 5 8"),
+  ...curve("M2 19C4 19 5 5 8 5c2 0 2 6 4 6h5c2 0 3 8 5 8"),
 ];
 
 /** Four tiles: a catalog. */
@@ -182,10 +148,7 @@ export const gauge: Glyph = [
 ];
 /** A spectrum: the level at each frequency, as one line. */
 export const spectrum: Glyph = [
-  area(
-    "M2 18c1.5 0 2-5 3.5-5s1.5 3 3 3S10 4 12 4s1.5 10 3 10 1.5-4 3-4 1.5 8 4 8"
-  ),
-  path(
+  ...curve(
     "M2 18c1.5 0 2-5 3.5-5s1.5 3 3 3S10 4 12 4s1.5 10 3 10 1.5-4 3-4 1.5 8 4 8"
   ),
 ];
@@ -248,23 +211,20 @@ export const pianoroll: Glyph = [
 ];
 
 /** The curve of a compressor: the level it lets through. */
-export const compressor: Glyph = [
-  area("M3 20C9 14 11 11 14 10s5-1 7-1"),
-  path("M3 20C9 14 11 11 14 10s5-1 7-1"),
-];
+export const compressor: Glyph = [...curve("M3 20C9 14 11 11 14 10s5-1 7-1")];
 /** An echo: the same hit, softer each time. */
 export const delay: Glyph = [
   path("M2 20h3l1.5-15 1.5 15h3l1.2-10 1.2 10h3l.9-5 .9 5H22"),
 ];
 /** A hit and the tail it leaves in the room. */
 export const reverb: Glyph = [
-  area("M2 20h3.5L7 4c.5 8 3 13 7 14.5 2.5.9 5 1.5 8 1.5"),
-  path("M2 20h3.5L7 4c.5 8 3 13 7 14.5 2.5.9 5 1.5 8 1.5"),
+  ...curve("M2 20h3.5L7 4c.5 8 3 13 7 14.5 2.5.9 5 1.5 8 1.5"),
 ];
 /** A wave pushed until it clips. */
 export const distortion: Glyph = [
-  area("M2 12c.8-4 1.5-6 3-6h4c1.5 0 2.2 2 3 6s1.5 6 3 6h4c1.5 0 2.2-2 3-6"),
-  path("M2 12c.8-4 1.5-6 3-6h4c1.5 0 2.2 2 3 6s1.5 6 3 6h4c1.5 0 2.2-2 3-6"),
+  ...curve(
+    "M2 12c.8-4 1.5-6 3-6h4c1.5 0 2.2 2 3 6s1.5 6 3 6h4c1.5 0 2.2-2 3-6"
+  ),
 ];
 
 /** Channel strip buttons: a key, and the letter on it. */
@@ -280,12 +240,12 @@ export const solo: Glyph = [
   ),
 ];
 
-/** Two channels that overlap. */
+/** Two channels, each with its own level. */
 export const stereo: Glyph = [
-  circle(8.5, 12, 6, { tint: true }),
-  circle(15.5, 12, 6, { tint: true }),
-  circle(8.5, 12, 6, { knock: true }),
-  circle(15.5, 12, 6, { knock: true }),
+  rect(3.5, 3, 7, 18, 3.5, { tint: true }),
+  path("M7 17v-6", { knock: true }),
+  rect(13.5, 3, 7, 18, 3.5, { tint: true }),
+  path("M17 17v-9", { knock: true }),
 ];
 
 /** A cassette: two reels in a case. */

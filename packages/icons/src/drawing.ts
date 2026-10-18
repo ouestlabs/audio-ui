@@ -98,7 +98,10 @@ const GAP = 1.25;
  * that sit on a line are drawn over it, and the line is masked out around
  * them: in every weight, no stroke crosses their outline.
  */
-export function draw(glyph: Glyph, weight: IconWeight, id: string) {
+export function draw(whole: Glyph, weight: IconWeight, id: string) {
+  const glyph = whole.filter(
+    (shape) => !shape.weights || shape.weights.includes(weight)
+  );
   const overs = glyph.filter((shape) => shape.over);
   if (overs.length === 0) {
     return drawShapes(glyph, weight, id);
