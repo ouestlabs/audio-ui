@@ -135,10 +135,8 @@ export const pad: Glyph = [
   path("M8.5 15.5h7", { knock: true }),
 ];
 export const piano: Glyph = [
-  rect(3, 5, 18, 14, 1.5, { tint: true }),
-  rect(7.5, 5, 3, 8, 0.5, { knock: true }),
-  rect(13.5, 5, 3, 8, 0.5, { knock: true }),
-  path("M9 13v6M15 13v6", { knock: true }),
+  rect(3, 5, 18, 14, 2, { tint: true }),
+  path("M7.5 5v14M12 5v14M16.5 5v14", { knock: true }),
 ];
 
 /** Displays: a level, a needle, a spectrum, a scope, a plot. */
@@ -166,10 +164,7 @@ export const pause: Glyph = [
   rect(14, 5, 3.5, 14, 1, { tint: true }),
 ];
 export const stop: Glyph = [rect(6, 6, 12, 12, 2, { tint: true })];
-export const record: Glyph = [
-  circle(12, 12, 8, { tint: true }),
-  circle(12, 12, 2.5, { knock: true }),
-];
+export const record: Glyph = [circle(12, 12, 6, { tint: true })];
 export const loop: Glyph = [
   path(
     "M12 12c-2-3-3-4-5-4a4 4 0 0 0 0 8c2 0 3-1 5-4s3-4 5-4a4 4 0 0 1 0 8c-2 0-3-1-5-4"
