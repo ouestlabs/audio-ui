@@ -224,3 +224,6 @@
   --focus: var(--ink);
   --waveform-color: #7a7260;
 }
+.skin-tape .knob-value {
+  text-transform: none;
+}

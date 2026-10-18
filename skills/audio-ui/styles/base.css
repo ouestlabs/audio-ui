@@ -136,7 +136,8 @@
 
 /* Layout of the example panel: a skin may override any of it */
 .panel {
-  padding: 1.75rem;
+  --panel-pad: 1.75rem;
+  padding: var(--panel-pad);
   border-radius: 1rem;
 }
 .panel-title {
@@ -501,4 +502,27 @@
   transform-origin: 50px 0;
   transform-box: view-box;
   scale: -1 1;
+}
+
+/* A VU's print: the scale's numerals and ticks as SVG text and lines, sized in the face's own units */
+.vu-tick {
+  stroke: currentColor;
+  stroke-width: 0.8;
+}
+.vu-num {
+  font:
+    600 4px / 1 "Helvetica Neue",
+    Arial,
+    sans-serif;
+  text-anchor: middle;
+  fill: currentColor;
+}
+.vu-legend {
+  font:
+    600 3px / 1 "Helvetica Neue",
+    Arial,
+    sans-serif;
+  letter-spacing: 0.2;
+  text-anchor: middle;
+  fill: currentColor;
 }

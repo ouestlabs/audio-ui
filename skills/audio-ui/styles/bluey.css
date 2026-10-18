@@ -176,22 +176,6 @@
   background: var(--accent);
 }
 
-.skin-bluey .toggle {
-  font:
-    700 0.6rem / 1 "Arial Narrow",
-    Arial,
-    sans-serif;
-  color: #111;
-  letter-spacing: 0.12em;
-  background: linear-gradient(180deg, #f2efe6 0 48%, #9c978c 52%);
-  border-radius: 3px;
-  box-shadow:
-    0 0 0 3px #050505,
-    0 4px 5px rgb(0 0 0 / 0.6);
-}
-.skin-bluey .toggle[aria-pressed="true"] {
-  background: linear-gradient(180deg, #9c978c 0 48%, #f2efe6 52%);
-}
 .skin-bluey {
   --legend-bg: #5c6360;
 }
@@ -246,22 +230,6 @@
 }
 
 /* A metal toggle lever */
-.skin-bluey .toggle {
-  min-width: 2.2rem;
-  min-height: 2.2rem;
-  color: var(--ink);
-  background: radial-gradient(circle at 35% 30%, #fff, #8e9092 60%, #55575a);
-  border-radius: 50%;
-  box-shadow:
-    0 3px 5px rgb(0 0 0 / 0.45),
-    inset 0 0 0 2px #2a2b2d;
-}
-.skin-bluey .toggle[aria-pressed="true"] {
-  box-shadow:
-    0 1px 2px rgb(0 0 0 / 0.45),
-    inset 0 0 0 2px var(--accent);
-  transform: translateY(1px);
-}
 .skin-bluey .toggle::before {
   display: none;
 }
