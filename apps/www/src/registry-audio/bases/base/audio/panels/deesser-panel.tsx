@@ -1,6 +1,7 @@
 "use client";
 
 import { formatDb, formatHz } from "@audio-ui/core/analysis";
+import type { Source } from "@audio-ui/react";
 import { type ReactNode, useCallback, useMemo } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {
@@ -11,6 +12,7 @@ import {
   PlotGraph,
   PlotGrid,
   PlotHandle,
+  PlotTraceArea,
 } from "@/registry-audio/bases/base/audio/elements/plot";
 import {
   DeviceFrame,
@@ -25,6 +27,9 @@ import {
 
 const MIN_HZ = 500;
 const MAX_HZ = 20_000;
+/** The scale a spectrum is drawn on, in dB of level: its own, behind the gain axis. */
+const SPECTRUM_MIN_DB = -100;
+const SPECTRUM_MAX_DB = -10;
 const MIN_DB = -30;
 const MAX_DB = 6;
 const MAX_RANGE_DB = 24;
@@ -53,6 +58,8 @@ interface DeesserPanelProps {
   children?: ReactNode;
   className?: string;
   onValueChange: (state: DeesserState) => void;
+  /** A live spectrum behind the curve, such as from `useSpectrum`. */
+  spectrum?: Source<Float32Array>;
   value: DeesserState;
 }
 
@@ -67,6 +74,7 @@ function DeesserPanel({
   children,
   className,
   onValueChange,
+  spectrum,
   value,
 }: DeesserPanelProps) {
   const response = useMemo(() => deesserResponse(value), [value]);
@@ -107,6 +115,14 @@ function DeesserPanel({
             y={{ format: formatDbMark, ticks: DB_TICKS }}
           />
           <PlotGraph>
+            {spectrum ? (
+              <PlotTraceArea
+                fillTo={SPECTRUM_MIN_DB}
+                max={SPECTRUM_MAX_DB}
+                min={SPECTRUM_MIN_DB}
+                source={spectrum}
+              />
+            ) : null}
             <PlotArea fillTo={0} fn={response} />
             <PlotCurve fn={response} />
           </PlotGraph>

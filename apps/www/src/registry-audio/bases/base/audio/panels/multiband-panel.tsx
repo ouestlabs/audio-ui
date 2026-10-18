@@ -1,6 +1,7 @@
 "use client";
 
 import { formatDb, formatHz } from "@audio-ui/core/analysis";
+import type { Source } from "@audio-ui/react";
 import { type ReactNode, useCallback, useMemo } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {
@@ -10,6 +11,7 @@ import {
   PlotGraph,
   PlotGrid,
   PlotHandle,
+  PlotTraceArea,
 } from "@/registry-audio/bases/base/audio/elements/plot";
 import {
   DeviceFrame,
@@ -24,6 +26,9 @@ import {
 
 const MIN_HZ = 20;
 const MAX_HZ = 20_000;
+/** The scale a spectrum is drawn on, in dB of level: its own, behind the gain axis. */
+const SPECTRUM_MIN_DB = -100;
+const SPECTRUM_MAX_DB = -10;
 const MIN_DB = -36;
 const MAX_DB = 6;
 const DB_TICKS = [-24, -12, 0];
@@ -53,6 +58,8 @@ interface MultibandPanelProps {
   children?: ReactNode;
   className?: string;
   onValueChange: (state: MultibandState) => void;
+  /** A live spectrum behind the curve, such as from `useSpectrum`. */
+  spectrum?: Source<Float32Array>;
   value: MultibandState;
 }
 
@@ -67,6 +74,7 @@ function MultibandPanel({
   children,
   className,
   onValueChange,
+  spectrum,
   value,
 }: MultibandPanelProps) {
   const bands = useMemo(() => multibandBands(value), [value]);
@@ -109,6 +117,14 @@ function MultibandPanel({
             y={{ format: formatDbMark, ticks: DB_TICKS }}
           />
           <PlotGraph>
+            {spectrum ? (
+              <PlotTraceArea
+                fillTo={SPECTRUM_MIN_DB}
+                max={SPECTRUM_MAX_DB}
+                min={SPECTRUM_MIN_DB}
+                source={spectrum}
+              />
+            ) : null}
             <PlotCurve className="stroke-primary/40" fn={bands.low} />
             <PlotCurve className="stroke-primary/70" fn={bands.mid} />
             <PlotCurve fn={bands.high} />
