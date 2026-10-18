@@ -49,11 +49,12 @@ export function ShowPartsToggle() {
 export function ShowPartsArea({ children }: { children: React.ReactNode }) {
   const { shown } = useShowParts();
   return (
+    // display: contents keeps the component laid out as it was without this wrapper.
     <div
       className={
         shown
-          ? "**:data-slot:outline-1 **:data-slot:outline-dashed **:data-slot:outline-site-muted-foreground/60"
-          : undefined
+          ? "contents **:data-slot:outline-1 **:data-slot:outline-dashed **:data-slot:outline-site-muted-foreground/60"
+          : "contents"
       }
     >
       {children}
