@@ -97,3 +97,40 @@ export function curve(d: string, baseline = 20): Shape[] {
     path(d),
   ];
 }
+
+export interface CurveOptions {
+  /** The start of the input, at the left of the grid. @default -1 */
+  from?: number;
+  /** The top of the output, at the top of the grid. @default 1 */
+  max?: number;
+  /** The bottom of the output, at the bottom of the grid. @default -1 */
+  min?: number;
+  /** How many points the line is drawn with. @default 25 */
+  samples?: number;
+  /** The end of the input, at the right of the grid. @default 1 */
+  to?: number;
+}
+
+const MARGIN = 3;
+const SPAN = 18;
+const trim = (value: number) => Number(value.toFixed(2));
+
+/**
+ * The glyph of a function: its curve over `from` to `to`, drawn on the 24 grid
+ * with the 3px margin of the other icons, output up the page. An output out of
+ * `min` to `max` is held at the edge. A device's own function gives a button
+ * that draws what the device does, in the style of the rest of the icons.
+ */
+export function curveGlyph(
+  shape: (input: number) => number,
+  { from = -1, max = 1, min = -1, samples = 25, to = 1 }: CurveOptions = {}
+): Glyph {
+  const points = Array.from({ length: samples }, (_, index) => {
+    const input = from + (index / (samples - 1)) * (to - from);
+    const output = Math.max(min, Math.min(max, shape(input)));
+    const x = MARGIN + ((input - from) / (to - from)) * SPAN;
+    const y = MARGIN + ((max - output) / (max - min)) * SPAN;
+    return `${index === 0 ? "M" : "L"}${trim(x)} ${trim(y)}`;
+  });
+  return curve(points.join(""), MARGIN + SPAN);
+}
