@@ -299,10 +299,10 @@ export const crate: Glyph = [
   path("M7 4v7M12 3v8M17 4v7"),
 ];
 
-/** A dial without its body: the sweep and the pointer, to be dressed. */
+/** A dial with its pointer: the part, to be dressed. */
 export const dial: Glyph = [
-  path("M6.3 17.7A8 8 0 1 1 17.7 17.7"),
-  path("M12 12l3.5-4"),
+  circle(12, 12, 8, { tint: true }),
+  path("M12 12 15.5 8", { knock: true }),
 ];
 
 /** Light and dark: a disc, half of it solid. */

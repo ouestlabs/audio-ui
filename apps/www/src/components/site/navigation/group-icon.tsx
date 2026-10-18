@@ -7,9 +7,9 @@ import {
   type IconProps,
   InsertIcon,
   KnobIcon,
-  MetronomeIcon,
   NoteIcon,
   PlayheadIcon,
+  PlayIcon,
   RackIcon,
   SparkleIcon,
   TracksIcon,
@@ -24,7 +24,7 @@ const GROUP_ICONS = {
   "Audio engine": WaveformIcon,
   Devices: RackIcon,
   Elements: KnobIcon,
-  "Get started": MetronomeIcon,
+  "Get started": PlayIcon,
   Workstation: TracksIcon,
 } as const;
 
