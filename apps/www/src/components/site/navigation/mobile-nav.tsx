@@ -320,8 +320,10 @@ export function MobileNav({
                               key={page.url}
                               onNavigate={close}
                             >
-                              <PageIcon url={page.url} />
-                              {page.name}
+                              <span className="flex min-w-0 items-center gap-2">
+                                <PageIcon url={page.url} />
+                                {page.name}
+                              </span>
                               {hint ? (
                                 <span
                                   aria-hidden="true"
