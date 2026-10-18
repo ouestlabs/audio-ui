@@ -146,9 +146,11 @@ export const gauge: Glyph = [
   path("M4 17a8 8 0 0 1 16 0z", { tint: true }),
   path("M12 17l3.5-6.5", { knock: true }),
 ];
-/** The skyline of a spectrum, as one shape. */
+/** A spectrum: the level at each frequency, as one line. */
 export const spectrum: Glyph = [
-  path("M3 20v-7h3.5V9h3.5V4h4v6h3.5V8H21v12z", { tint: true }),
+  path(
+    "M2 18c1.5 0 2-5 3.5-5s1.5 3 3 3S10 4 12 4s1.5 10 3 10 1.5-4 3-4 1.5 8 4 8"
+  ),
 ];
 export const scope: Glyph = [
   rect(3, 5, 18, 14, 2, { tint: true }),
