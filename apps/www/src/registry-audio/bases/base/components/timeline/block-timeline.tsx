@@ -1110,8 +1110,8 @@ export default function BlockTimeline() {
     [tracks]
   );
   /** Picking a clip lets go of the time selection. */
-  // The clip panel shows the clip picked, as a DAW's detail view follows the selection, for as long as it is open; picking a clip does not open it.
-  const [clipViewOpen, setClipViewOpen] = useState(true);
+  // The clip panel shows the clip picked, as a DAW's detail view follows the selection, for as long as it is open. It starts closed, and picking a clip does not open it: a click of a clip's head does.
+  const [clipViewOpen, setClipViewOpen] = useState(false);
   // Collapsed to its title, the panel leaves the tracks the room, from clip to clip.
   const [clipViewCollapsed, setClipViewCollapsed] = useState(false);
   const [clipBoxesFolded, setClipBoxesFolded] = useState<string[]>([]);
