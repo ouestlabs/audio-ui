@@ -14,10 +14,9 @@
   color: var(--ink);
   background:
     repeating-linear-gradient(
-      104deg,
-      transparent 0 37px,
-      rgb(255 255 255 / 0.35) 37px 38px,
-      transparent 38px 91px
+      0deg,
+      rgb(255 255 255 / 0.2) 0 1px,
+      rgb(0 0 0 / 0.045) 1px 2px
     ),
     linear-gradient(180deg, #c4c6c7, var(--panel) 40%, #a2a5a6);
   border-radius: 3px;
@@ -42,30 +41,6 @@
 }
 .skin-bluey .knob-indicator {
   color: var(--accent);
-}
-.skin-bluey .knob-thumb {
-  background: radial-gradient(
-    circle at var(--hl-x) var(--hl-y),
-    #55504a,
-    #1d1b19 55%,
-    #0b0a09
-  );
-  border-radius: 50%;
-  box-shadow:
-    var(--shadow-raised),
-    0 0 0 3px #050505,
-    0 0 0 4px rgb(255 255 255 / 0.1);
-}
-.skin-bluey .knob-thumb::after {
-  position: absolute;
-  top: 5%;
-  left: 50%;
-  width: 3px;
-  height: 32%;
-  content: "";
-  background: #fff;
-  border-radius: 1px;
-  translate: -50% 0;
 }
 .skin-bluey .knob-label {
   font:
@@ -238,25 +213,6 @@
 }
 
 /* Black bakelite knobs with a chrome center and a dense ring of ticks */
-.skin-bluey .knob-thumb {
-  background: radial-gradient(
-    circle at 50% 50%,
-    #f7f7f5 0 28%,
-    #9fa1a2 30% 34%,
-    #1b1b1c 36%,
-    #050505 100%
-  );
-  box-shadow:
-    0 6px 9px rgb(0 0 0 / 0.5),
-    0 0 0 3px #0b0b0c,
-    0 0 0 4px rgb(255 255 255 / 0.25);
-}
-.skin-bluey .knob-thumb::after {
-  top: 6%;
-  width: 2px;
-  height: 26%;
-  background: #f4f4f1;
-}
 .skin-bluey .knob-tick {
   top: -11px;
   width: 1px;
@@ -316,16 +272,6 @@
 .skin-bluey {
   --accent: #2f7fcb;
 }
-.skin-bluey .knob-thumb {
-  background: radial-gradient(circle at 50% 50%, #2c2c2e, #0b0b0c 70%);
-}
-.skin-bluey .knob-thumb::after {
-  width: 4px;
-  height: 36%;
-  background: #f4f4f1;
-  border-radius: 0;
-  clip-path: polygon(50% 0, 100% 100%, 0 100%);
-}
 .skin-bluey .knob-track,
 .skin-bluey .knob-indicator {
   display: none;
@@ -351,4 +297,67 @@
 }
 .skin-bluey .envelope-fill {
   fill: rgb(47 127 203 / 0.28);
+}
+.skin-bluey .vu-needle {
+  stroke: #c3281c;
+}
+.skin-bluey .vu {
+  padding: 0.9rem;
+  background: linear-gradient(180deg, #3a8ad6, #2569a8);
+  border-radius: 2px;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.35);
+}
+.skin-bluey .toggle {
+  min-width: 2.6rem;
+  color: #ecebe6;
+  background: linear-gradient(180deg, #2c2d30, #151618);
+  border-radius: 2px;
+  box-shadow:
+    inset 0 0 0 2px #0c0d10,
+    0 2px 3px rgb(0 0 0 / 0.4);
+}
+.skin-bluey .toggle[aria-pressed="true"] {
+  color: #151618;
+  background: linear-gradient(180deg, #e9f2fb, #8fbfec);
+  box-shadow:
+    inset 0 0 0 2px #0c0d10,
+    0 0 8px rgb(47 127 203 / 0.6);
+}
+
+/* A bakelite knob: a dark domed cap in a ringed skirt, and a lever pointer that crosses it from the hub to the rim */
+.skin-bluey .knob-thumb {
+  background:
+    radial-gradient(circle at 36% 28%, #55565b 0, #232326 38%, #08080a 78%),
+    #0b0b0c;
+  border-radius: 50%;
+  box-shadow:
+    0 9px 12px rgb(0 0 0 / 0.6),
+    inset 0 2px 3px rgb(255 255 255 / 0.22),
+    inset 0 -4px 6px rgb(0 0 0 / 0.7),
+    inset 0 0 0 7px rgb(255 255 255 / 0.035),
+    0 0 0 3px #060607,
+    0 0 0 4px rgb(255 255 255 / 0.22);
+}
+.skin-bluey .knob-thumb::before {
+  position: absolute;
+  inset: 22%;
+  content: "";
+  background: radial-gradient(circle at 38% 30%, #3b3c40, #121214 72%);
+  border-radius: 50%;
+  box-shadow:
+    inset 0 1px 2px rgb(255 255 255 / 0.25),
+    0 2px 3px rgb(0 0 0 / 0.5);
+}
+.skin-bluey .knob-thumb::after {
+  position: absolute;
+  top: 2%;
+  left: 50%;
+  width: 26%;
+  height: 50%;
+  content: "";
+  background: linear-gradient(90deg, #8d8e91, #f4f4f2 45%, #a8a9ab);
+  border-radius: 0;
+  filter: drop-shadow(0 2px 2px rgb(0 0 0 / 0.5));
+  clip-path: polygon(38% 0, 62% 0, 100% 100%, 0 100%);
+  translate: -50% 0;
 }

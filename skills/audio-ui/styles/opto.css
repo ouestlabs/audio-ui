@@ -14,10 +14,9 @@
   color: var(--ink);
   background:
     repeating-linear-gradient(
-      104deg,
-      transparent 0 37px,
-      rgb(255 255 255 / 0.35) 37px 38px,
-      transparent 38px 91px
+      0deg,
+      rgb(255 255 255 / 0.2) 0 1px,
+      rgb(0 0 0 / 0.045) 1px 2px
     ),
     linear-gradient(180deg, #c4c6c7, var(--panel) 40%, #a2a5a6);
   border-radius: 3px;
@@ -311,4 +310,7 @@
 }
 .skin-opto .pad {
   color: #ecebe6;
+}
+.skin-opto .vu-needle {
+  stroke: #c3281c;
 }

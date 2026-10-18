@@ -1,6 +1,6 @@
 # Directions
 
-Eighteen skins ready to copy, each verified in a browser on the same set of parts: knobs, faders, a stereo meter, an XY pad, drum pads and a keyboard. Copy `styles/base.css` and one skin into the project, then the markup below.
+Twenty skins ready to copy, each verified in a browser on the same set of parts: knobs, faders, a stereo meter, an XY pad, drum pads and a keyboard. Copy `styles/base.css` and one skin into the project, then the markup below.
 
 ```tsx
 import "./audio-ui/base.css";
@@ -388,6 +388,15 @@ The kit covers Knob, Fader, Meter, XYPad, Pad, Piano, Envelope, Sequencer, Wavef
 
 ## Layout facts
 
+- **Numerals and the footer:** put a `span.knob-numeral` inside each `Knob.Mark` (the kit counter-rotates it and keeps the label clear of it); a unit's secondary controls go in a `div.panel-footer` as the last child of the panel. Leave 3.6rem between knobs that carry numerals. A gain-reduction VU takes `data-reverse` on its figure.
+- **Reversed scales and units:** a knob cannot run backwards (a threshold printed +10 to -20 clockwise): map the value yourself. Do not print dark ink on a mid-grey panel: 3.3:1 fails, use cream with a dark shadow.
+- **Fader ticks:** a skin draws ten even ticks beside the cap's travel, so a nonlinear printed scale contradicts them: hide them (`display: none` on the fader control's two pseudo-elements) and draw your own on the `ol.scale`.
+- **Button LEDs:** every button needs a `data-cap` to light in a color, or it lights cream.
+- **Typed units:** a readout printed `8.00k` does not parse `5.5 k` back: print full hertz.
+- **Two toggles that must read differently** (solo and bypass): the skin has one accent, so give the second its own selector with more weight than the skin's (`.skin-modern .toggle.bypass[aria-pressed="true"]`), or a different cap color.
+- **Face switch:** swap the skin class on the same panel (`skin-blacky` to `skin-bluey`): the state stays mounted. Several skins and `materials.css` load together without conflict.
+- **Screws** sit 8px from a corner: a skin with an inset rule moves them (`gunmetal` does).
+
 - The panel carries the skin class itself (`<section class="panel skin-solidstate">`), so a descendant selector such as `.skin-solidstate .strip` is right only for something inside it.
 - A fader cap overhangs the control by half its height at each end: leave `calc(var(--fader-thumb-h) / 2)` free above and below, or it covers the buttons next to it.
 - A clip lamp is yours: `Meter` sets `data-clipping` on each channel, not on the Root. Subscribe to the same source in a leaf, set `data-on` on the lamp when a level passes the threshold and clear it after 400 ms.
@@ -400,6 +409,7 @@ The kit covers Knob, Fader, Meter, XYPad, Pad, Piano, Envelope, Sequencer, Wavef
 - **Plot.Trace:** `source` holds one value per point, spread evenly across `minX` to `maxX`; without `fillTo` it is a line, with it an area. A linear axis works for any curve (a decay, an envelope), the log axis for a spectrum.
 - **computePeaks(channels, bucketCount)** from `@audio-ui/core/analysis` takes the decoded channels (`audioBuffer.getChannelData(i)` for each) and returns `{ min, max }` Float32Arrays; `normalizePeaks` scales them to full height. Give the Waveform `peaks={normalizePeaks(computePeaks(channels, 2048))}`.
 - **Waveform.Root:** `peaks` (amplitudes 0 to 1, or `{ min, max }` pairs), `value` (a fraction, or seconds with `duration`), `onValueChange(position, details)` to seek your audio, `onValueCommitted`, `range`, `source` for a live signal (it drives the waveform's own position: for a moving playhead over a fixed start marker, keep `value` as the marker and overlay your own playhead element whose position a source writes into a CSS variable). The canvas reads `--waveform-color` and `--waveform-progress-color` as plain colors (a `color-mix()` or a gradient does not work there). Parts: `Control > Canvas`, `Playhead`, `Thumb`, `Region`, `Marker`, `Hover`. The `Bars` part is the DOM alternative to `Canvas`, with `count` (default 24) and `mirrored`.
+- **Plot.Handle** (a draggable point: an EQ band, a crossover): a direct child of `Plot.Root`, not of `Plot.Graph`. Props: `axis` (`"x"`, `"y"` or `"both"`), a controlled `value={{ x, y }}` in data units (an `x`-only handle still needs a `y`, which sets where the grabber sits), `onValueChange(value, details)`, `onValueCommitted`, `getAriaLabel(axis)` and `getAriaValueText(value, axis)` with a plain number. It renders a positioned `div` holding a native range input, so widen its hit area with a `::before` and draw its focus ring with `:has(:focus-visible)`. **Plot.Band:** `axis`, `from` and `to` in data units, inside `Plot.Graph`.
 - **Plot.Root:** `minX`, `maxX`, `minY`, `maxY`, `scaleX="log"`. Parts: `Graph` (the svg: children go inside it), `Line axis value`, `Trace source fillTo`, `Curve`, `Band`, `Handle`. `Plot.Root` has an inline `position: relative`, so size it with `height`.
 - **Computer keys on pads:** `activePads` on `Pad.Root` lights the pads (a list of their values) that something else is striking, so map `keydown` and `keyup` to your own strike and pass the held values there.
 - **Envelope.Root keyboard:** the points share one tab stop. The arrow keys move the focused point's value, and Page Up and Page Down (or Home and End) move focus between points.
@@ -412,7 +422,8 @@ The kit covers Knob, Fader, Meter, XYPad, Pad, Piano, Envelope, Sequencer, Wavef
 - **A stepped selector** (an attack time of 7 settings): a `Knob` with `min={1} max={7} step={1}`, a `Knob.Mark` at each value with its numeral, and `getAriaValueText={(_, value) => names[value - 1]}` on the thumb to announce the setting. It needs no `Knob.Value`. Give the label a `margin-top` of 0.7rem so the first and last numerals do not sit on it, and 3.6rem between neighbors.
 - **A VU for gain reduction:** the kit's needle goes left to right. For 0 on the right and a needle that falls as reduction grows, publish `1 - reduction / maxReduction`; draw ticks and numerals from the pivot and radius of the face (x = 50 + r·sin θ, y = 72 - r·cos θ, θ from -40 to 40 degrees). A backlit face is a radial gradient from a warm center to a darker edge on `.vu-face`, dimmed when the unit is off.
 - **A choice of one in N** (a waveform, a mode): a `role="group"` of `.toggle` buttons with `aria-pressed`, as `ChoiceControl` does.
-- **Meter zones:** the zone gradient puts amber at 60% and red at 85% of the strip. Compute the stops from the range (0 dB sits at `(0 - min) / (max - min)`: 88.9% for -48 to +6) and override the zone gradient and its dimming layer on your skin (see the the zone gradient lines of materials.css).
+- **A gain-reduction bar:** a `Meter` on a range from 0 to the deepest reduction (`min={0} max={18}`), flipped (`transform: scaleY(-1)` on `Meter.Root`) so it hangs from the top. Set `clipThreshold` above the range or `data-clipping` fires at the default 0.
+- **Meter zones:** the zone gradient puts amber at 60% and red at 85% of the strip. Compute the stops from the range (0 dB sits at `(0 - min) / (max - min)`: 88.9% for -48 to +6) and override the zone gradient and its dimming layer on your skin (the three zone variables are set on the panel in materials.css: set them again with `style` on `Meter.Root`, which they inherit down to).
 - **Tab stops:** a knob with an `editable` readout has two (the slider and the readout), so five knobs give ten. That is expected.
 - **Printed numerals on a knob:** a span inside `Knob.Mark` turns with the mark and reads upside down: place it outside the tick (`position: absolute; top: -1.6rem; left: 50%; translate: -50% 0`) and give it `rotate: calc(var(--knob-mark-angle) * -1)`. On a log knob, `Knob.Mark` takes real values, so evenly spaced angles need a geometric series (20, 200, 2000). Keep 2.4rem or more between knobs so numerals do not touch the next one.
 - **A writable source** is `WritableSource<T>` from `@audio-ui/react` (`Source` has no `set`); `subscribe(listener)` returns the remover.

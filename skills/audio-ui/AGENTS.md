@@ -1447,7 +1447,7 @@ A skeuomorphic panel is believable when every highlight and shadow agrees on one
 
 The primitives of `@audio-ui/react` draw nothing, so the look is yours to decide, and an agent that starts writing CSS without deciding produces a little of everything: a gradient here, a glass card there, a neon accent. Choose one direction, say it in a sentence, then style every part from it.
 
-Fourteen are ready to use (copy `styles/base.css` and one skin; the table of `design.md` maps a request to each): retro, tape, synth70, tube, blackface, solidstate and console for hardware, plugin for a glossy software window, minimal, modern and phosphor for flat tools, brutalist, y2k and hifi for a strong character. Take the one the user names. When they name none, pick from the product: a synth, drum machine or compressor is hardware, a tool or a player is minimal, a dense workstation is modern.
+More than a dozen are ready to use (copy `styles/base.css` and one skin; the table of `design.md` maps a request to each): retro, tape, synth70, tube, blackface, gunmetal, opto, blacky, bluey, solidstate and console for hardware, plugin for a glossy software window, minimal, modern and phosphor for flat tools, brutalist, y2k and hifi for a strong character. Take the one the user names. When they name none, pick from the product: a synth, drum machine or compressor is hardware, a tool or a player is minimal, a dense workstation is modern.
 
 **Incorrect (no direction, a bit of every trend):**
 

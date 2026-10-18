@@ -11,6 +11,8 @@ Before writing CSS, state one sentence: *"Direction: retro hardware, enamel pane
 | Retro, vintage, analog, skeuomorphic, hardware, synth | Retro | `styles/retro.css` (a dark faceplate), taste in [hardware.md](./hardware.md) |
 | A cream or silver hardware panel: drum machine, tape deck, sampler | Retro, light | `styles/tape.css` (with `styles/materials.css`), taste in [hardware.md](./hardware.md) |
 | A large-format studio console channel: strip, desk, colored caps by section | Console | `styles/solidstate.css` (with `styles/materials.css`) |
+| A mix-bus or buss compressor: brushed charcoal, big VU, backlit buttons | Rack | `styles/gunmetal.css` (with `styles/materials.css`) |
+| A leveling limiter or opto leveling amplifier, in black or in silver with a blue plate | Rack | `styles/blacky.css`, `styles/bluey.css` or `styles/opto.css` (with `styles/materials.css`) |
 | A black-face rack unit: limiter, compressor, preamp | Rack | `styles/blackface.css` (with `styles/materials.css`), `Vu` for the needle |
 | A vintage tube compressor, warm grey with a cream VU | Tube | `styles/tube.css` (with `styles/materials.css`) |
 | A glossy commercial software plugin window | Plugin | `styles/plugin.css` (with `styles/materials.css`) |

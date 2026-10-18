@@ -39,8 +39,8 @@ Type: a condensed grotesque for print (`"Arial Narrow", "Helvetica Neue", system
 What the references agree on, from the manuals of the console's plug-in models and from its history:
 
 - **Signal order, top to bottom:** input (mic/line, phase, 48V, pad), filters, dynamics (compressor, then expander or gate), a four-band equalizer, then routing, then the fader with its meters and the cut and solo buttons. A section is a ruled line with its title.
-- **EQ knobs are colored by band:** high frequency red, high-mid green, low-mid blue, low frequency brown or black (the early and late equalizers were told apart by the color of their knobs, "brown" and "black"). The solid-state kit does this with `nth-child`: set the cap color variable of the skin on a knob to override it.
-- **Dynamics:** the compressor knobs are grey or white, the gate and expander knobs green, the filter knobs grey. Set the cap color on each knob's Root with `style`.
+- **EQ knobs are colored by band:** high frequency red, high-mid green, low-mid blue, low frequency brown or black (the early and late equalizers were told apart by the color of their knobs, "brown" and "black"). The solid-state kit does this with a `data-cap` attribute on the knob: `red`, `green`, `blue`, `brown`, `black`, `grey`, `orange`, `yellow`, `ivory`, `white`.
+- **Dynamics:** the compressor knobs are grey or white, the gate and expander knobs green, the filter knobs grey. Put `data-cap="grey"` or `"ivory"` on each compressor knob, `"green"` on each gate knob.
 - **Buttons are small square caps** each with its own LED that lights when it is on (the kit's `.toggle` has the LED), the cut button red and solo yellow. Almost every switched function has an LED.
 - **A long fader** with a ruled dB scale beside it (+10 at the top, a gap near the bottom to infinity), a vertical LED ladder in green, yellow and red, and moving-coil VU meters on the channel input or bus on some desks.
 - **Print:** white or black silkscreen in a narrow sans, small uppercase legends, ruled sections, numbers around the knobs.

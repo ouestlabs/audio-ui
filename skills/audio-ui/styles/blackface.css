@@ -246,3 +246,6 @@
 .skin-blackface {
   --focus: var(--ink);
 }
+.skin-blackface .vu-needle {
+  stroke: #c3281c;
+}

@@ -48,16 +48,24 @@
 }
 .skin-retro .knob-thumb {
   background:
-    repeating-conic-gradient(
-      from 0deg,
-      rgb(255 255 255 / 0.1) 0 3deg,
-      rgb(0 0 0 / 0.12) 3deg 6deg
-    ),
     radial-gradient(
-      circle at 32% 26%,
+      circle,
+      transparent 0 60%,
+      rgb(0 0 0 / 0.22) 76%,
+      rgb(255 255 255 / 0.3) 90%,
+      rgb(0 0 0 / 0.32) 100%
+    ),
+    conic-gradient(
+      from 25deg,
       var(--metal-1),
-      var(--metal-2) 55%,
-      var(--metal-3)
+      var(--metal-2) 10%,
+      var(--metal-1) 22%,
+      var(--metal-3) 36%,
+      var(--metal-1) 50%,
+      var(--metal-2) 60%,
+      var(--metal-1) 72%,
+      var(--metal-3) 86%,
+      var(--metal-1)
     );
   border-radius: 50%;
   box-shadow:

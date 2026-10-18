@@ -364,6 +364,8 @@ describe("skills/audio-ui styles", () => {
       // Decorative helpers a skin offers for the author to add to the markup.
       const extras = new Set([
         "display",
+        "knob-numeral",
+        "panel-footer",
         "lamp",
         "legend",
         "panel",

@@ -420,3 +420,19 @@
 .skin-gunmetal .vu-zone {
   stroke: #ff6a4a;
 }
+.skin-gunmetal .screw-tl {
+  top: 1.4rem;
+  left: 1.4rem;
+}
+.skin-gunmetal .screw-tr {
+  top: 1.4rem;
+  right: 1.4rem;
+}
+.skin-gunmetal .screw-bl {
+  bottom: 1.4rem;
+  left: 1.4rem;
+}
+.skin-gunmetal .screw-br {
+  right: 1.4rem;
+  bottom: 1.4rem;
+}

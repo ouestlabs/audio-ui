@@ -45,25 +45,6 @@
 .skin-blacky .knob-indicator {
   color: rgb(236 235 230 / 0.85);
 }
-.skin-blacky .knob-thumb {
-  background: var(--metal);
-  border-radius: 50%;
-  box-shadow:
-    var(--shadow-raised),
-    0 0 0 3px #050505,
-    0 0 0 4px rgb(255 255 255 / 0.18);
-}
-.skin-blacky .knob-thumb::after {
-  position: absolute;
-  top: 5%;
-  left: 50%;
-  width: 3px;
-  height: 28%;
-  content: "";
-  background: #111;
-  border-radius: 1px;
-  translate: -50% 0;
-}
 .skin-blacky .knob-label {
   font:
     600 0.58rem / 1 "Helvetica Neue",
@@ -248,21 +229,6 @@
 }
 
 /* Black bakelite knobs: a black cap, a tapered white pointer, a ring of dots */
-.skin-blacky .knob-thumb {
-  background: radial-gradient(circle at 50% 50%, #2c2c2e, #0b0b0c 70%);
-  box-shadow:
-    0 6px 9px rgb(0 0 0 / 0.55),
-    0 0 0 3px #060607,
-    0 0 0 4px rgb(255 255 255 / 0.18);
-}
-.skin-blacky .knob-thumb::after {
-  top: 3%;
-  width: 4px;
-  height: 36%;
-  background: #f4f4f1;
-  border-radius: 0;
-  clip-path: polygon(50% 0, 100% 100%, 0 100%);
-}
 .skin-blacky .knob-track,
 .skin-blacky .knob-indicator {
   display: none;
@@ -297,4 +263,45 @@
   color: #151618;
   background: linear-gradient(180deg, #f0f0ee, #b9b9b6);
   box-shadow: inset 0 0 0 2px #0c0d10;
+}
+.skin-blacky .vu-needle {
+  stroke: #c3281c;
+}
+
+/* A bakelite knob: a dark domed cap in a ringed skirt, and a lever pointer that crosses it from the hub to the rim */
+.skin-blacky .knob-thumb {
+  background:
+    radial-gradient(circle at 36% 28%, #55565b 0, #232326 38%, #08080a 78%),
+    #0b0b0c;
+  border-radius: 50%;
+  box-shadow:
+    0 9px 12px rgb(0 0 0 / 0.6),
+    inset 0 2px 3px rgb(255 255 255 / 0.22),
+    inset 0 -4px 6px rgb(0 0 0 / 0.7),
+    inset 0 0 0 7px rgb(255 255 255 / 0.035),
+    0 0 0 3px #060607,
+    0 0 0 4px rgb(255 255 255 / 0.22);
+}
+.skin-blacky .knob-thumb::before {
+  position: absolute;
+  inset: 22%;
+  content: "";
+  background: radial-gradient(circle at 38% 30%, #3b3c40, #121214 72%);
+  border-radius: 50%;
+  box-shadow:
+    inset 0 1px 2px rgb(255 255 255 / 0.25),
+    0 2px 3px rgb(0 0 0 / 0.5);
+}
+.skin-blacky .knob-thumb::after {
+  position: absolute;
+  top: 2%;
+  left: 50%;
+  width: 26%;
+  height: 50%;
+  content: "";
+  background: linear-gradient(90deg, #8d8e91, #f4f4f2 45%, #a8a9ab);
+  border-radius: 0;
+  filter: drop-shadow(0 2px 2px rgb(0 0 0 / 0.5));
+  clip-path: polygon(38% 0, 62% 0, 100% 100%, 0 100%);
+  translate: -50% 0;
 }
