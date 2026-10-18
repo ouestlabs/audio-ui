@@ -1,9 +1,6 @@
 import type { Glyph, Shape } from "./glyph.ts";
 import { type IconWeight, STROKE_WIDTH, TINT_OPACITY } from "./weight.ts";
 
-const FAINT_BODY = 0.06;
-const FAINT_EDGE = 0.3;
-
 /** One element of the drawing, as plain data: a React icon and an SVG file both read it. */
 export interface DrawnNode {
   attrs: Record<string, number | string>;
@@ -79,16 +76,6 @@ export function draw(glyph: Glyph, weight: IconWeight, id: string) {
   const nodes = glyph.flatMap((shape) => {
     if (shape.backdrop) {
       return duotone ? [of(shape, { ...tint, stroke: "none" })] : [];
-    }
-    if (shape.faint) {
-      // A tile is a hint of the screen behind the curve: a pale edge and a pale body.
-      return [
-        of(shape, {
-          fill: "currentColor",
-          fillOpacity: duotone ? TINT_OPACITY : FAINT_BODY,
-          strokeOpacity: FAINT_EDGE,
-        }),
-      ];
     }
     return [of(shape, duotone && shape.tint ? tint : {})];
   });

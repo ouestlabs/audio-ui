@@ -1,6 +1,5 @@
 import { describe, expect, test } from "bun:test";
 import { renderToStaticMarkup } from "react-dom/server";
-import { scalePath } from "./glyph.ts";
 import * as icons from "./index.ts";
 import { catalog, toSvg } from "./index.ts";
 
@@ -72,21 +71,6 @@ describe("icons", () => {
         );
       }
     }
-  });
-
-  test("a path scales around the middle of the grid, whatever its commands", () => {
-    expect(scalePath("M2 12h20", 0.5)).toBe("M7 12h10");
-    expect(scalePath("M2 12c2-4 4-4 6 0", 0.5)).toBe("M7 12c1-2 2-2 3 0");
-    expect(scalePath("M4 4a2 2 0 0 1 4 0", 0.5)).toBe("M8 8a1 1 0 0 1 2 0");
-  });
-
-  test("a curve sits on a faint screen, solid in the fill weight with the curve cut out", () => {
-    const regular = renderToStaticMarkup(<icons.LowpassIcon />);
-    expect(regular).toContain('stroke-opacity="0.3"');
-    expect(regular).toContain('fill-opacity="0.06"');
-    const filled = renderToStaticMarkup(<icons.LowpassIcon weight="fill" />);
-    expect(filled).toContain("<mask");
-    expect(filled).not.toContain("stroke-opacity");
   });
 
   test("the fill weight is solid where a glyph has a body, and a bold line where it has none", () => {
