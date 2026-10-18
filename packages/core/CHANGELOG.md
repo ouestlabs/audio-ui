@@ -1,5 +1,12 @@
 # @audio-ui/core
 
+## 0.15.0
+
+### Minor Changes
+
+- 8982da8: Device: `DeviceBinding` takes an optional `readings()`, which says what a device is taking off the signal right now, in dB, 0 or negative: `gainReductionDb` for a device with one gain, and `bandGainReductionDb` for a device with one per band. It is additive: a binding without `readings()` is unchanged, so a host can draw one meter for every device that reports.
+- e73c37e: Meter: `createVuBallistics` and `createPpmBallistics` give the reading a meter shows, in dB, the way a VU or a PPM meter moves: a VU meter rises and falls symmetrically, reaching 99% of a step in 300 ms, and a PPM meter rises almost at once and falls at a steady 20 dB in 1.5 seconds. They are pure: a host calls `step(level, seconds)` once per frame and draws the value it returns.
+
 ## 0.14.0
 
 ### Minor Changes

@@ -1,5 +1,14 @@
 # @audio-ui/react
 
+## 0.8.1
+
+### Patch Changes
+
+- a082361: Fader, Knob, XYPad, Meter and Waveform: the control that holds their absolutely placed parts (a mark, a thumb, a hover) is `position: relative` by default, so those parts no longer land on the page when a project has no CSS for the control. A formatting locale the platform reports as a POSIX tag (`en-US@posix`) falls back to `en-US` instead of throwing during the render.
+- Updated dependencies [8982da8]
+- Updated dependencies [e73c37e]
+  - @audio-ui/core@0.15.0
+
 ## 0.8.0
 
 ### Minor Changes
