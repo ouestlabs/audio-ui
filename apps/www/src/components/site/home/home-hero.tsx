@@ -1,3 +1,4 @@
+import { SparkleIcon } from "@audio-ui/icons";
 import { ArrowRightIcon } from "@phosphor-icons/react/ssr";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
@@ -34,6 +35,7 @@ export function HomeHero() {
           nativeButton={false}
           render={
             <Link params={{ _splat: "agents" }} to="/docs/$">
+              <SparkleIcon aria-hidden className="size-4" />
               For agents
             </Link>
           }
