@@ -57,3 +57,17 @@ describe("outside a session", () => {
     expect(silentMicrophone.get()).toEqual({ error: null, on: false });
   });
 });
+
+describe("a switch that does not change", () => {
+  test("tells nobody", () => {
+    const { play } = createAudioSession();
+    let heard = 0;
+    play.subscribe(() => {
+      heard += 1;
+    });
+    play.setOn(false);
+    play.setOn(true);
+    play.setOn(true);
+    expect(heard).toBe(1);
+  });
+});

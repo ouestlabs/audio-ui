@@ -97,6 +97,10 @@ export function useMicrophoneSwitch() {
     microphone.get,
     () => OFF
   );
+  const toggle = useCallback(
+    () => microphone.set({ error: null, on: !microphone.get().on }),
+    [microphone]
+  );
   const fail = useCallback(
     (message: string) => microphone.set({ error: message, on: false }),
     [microphone]
@@ -107,7 +111,7 @@ export function useMicrophoneSwitch() {
     fail,
     on,
     setOn: microphone.setOn,
-    toggle: () => microphone.set({ error: null, on: !microphone.get().on }),
+    toggle,
   };
 }
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, type ReactNode, useContext, useState } from "react";
+import { createContext, type ReactNode, use, useState } from "react";
 
 /** A value others can follow, in the shape `useSyncExternalStore` takes. */
 function createStore<T extends object>(initial: T) {
@@ -9,6 +9,12 @@ function createStore<T extends object>(initial: T) {
   return {
     get: () => state,
     set: (patch: Partial<T>) => {
+      const changed = (Object.keys(patch) as (keyof T)[]).some(
+        (key) => patch[key] !== state[key]
+      );
+      if (!changed) {
+        return;
+      }
       state = { ...state, ...patch };
       for (const listener of listeners) {
         listener();
@@ -92,14 +98,10 @@ const AudioSessionContext = createContext<AudioSession | null>(null);
  */
 export function AudioSessionProvider({ children }: { children: ReactNode }) {
   const [session] = useState(createAudioSession);
-  return (
-    <AudioSessionContext.Provider value={session}>
-      {children}
-    </AudioSessionContext.Provider>
-  );
+  return <AudioSessionContext value={session}>{children}</AudioSessionContext>;
 }
 
 /** The nearest session, or nothing when the component is not inside one. */
 export function useAudioSession() {
-  return useContext(AudioSessionContext);
+  return use(AudioSessionContext);
 }
