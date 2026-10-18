@@ -5,6 +5,7 @@ import {
   computePeaks,
   normalizePeaks,
 } from "@audio-ui/core/analysis";
+import { LoopIcon } from "@audio-ui/icons/react";
 import { createSource } from "@audio-ui/react";
 import type { ChangeEvent } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -440,13 +441,7 @@ export default function BlockWaveformPlayer() {
           size="sm"
           variant="outline"
         >
-          <IconPlaceholder
-            hugeicons="RepeatIcon"
-            lucide="RepeatIcon"
-            phosphor="RepeatIcon"
-            remixicon="RiRepeatLine"
-            tabler="IconRepeat"
-          />
+          <LoopIcon weight="fill" />
           Loop
         </Toggle>
         <Button

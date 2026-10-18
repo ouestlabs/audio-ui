@@ -1,6 +1,6 @@
 "use client";
 
-import { IconPlaceholder } from "@/components/icon-placeholder";
+import { PauseIcon, PlayIcon } from "@audio-ui/icons/react";
 import { Button } from "@/registry/bases/base/ui/button";
 
 interface PlayToggleProps {
@@ -26,23 +26,7 @@ function PlayToggle({
       size="icon-xs"
       variant="outline"
     >
-      {playing ? (
-        <IconPlaceholder
-          hugeicons="PauseIcon"
-          lucide="PauseIcon"
-          phosphor="PauseIcon"
-          remixicon="RiPauseLine"
-          tabler="IconPlayerPause"
-        />
-      ) : (
-        <IconPlaceholder
-          hugeicons="PlayIcon"
-          lucide="PlayIcon"
-          phosphor="PlayIcon"
-          remixicon="RiPlayLine"
-          tabler="IconPlayerPlay"
-        />
-      )}
+      {playing ? <PauseIcon weight="fill" /> : <PlayIcon weight="fill" />}
     </Button>
   );
 }

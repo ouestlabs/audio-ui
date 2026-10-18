@@ -312,7 +312,7 @@ export const audio: RegistryItem[] = [
   },
   {
     categories: ["device", "synth", "xypad"],
-    dependencies: ["@audio-ui/react"],
+    dependencies: ["@audio-ui/react", "@audio-ui/icons"],
     description:
       "The face of the Pocket Synth device: a pad that plays it, its waveform and filter, and its volume. Controlled, with the notes leaving through onNoteOn and onNoteOff.",
     files: [
@@ -335,7 +335,7 @@ export const audio: RegistryItem[] = [
   },
   {
     categories: ["device", "synth", "xypad"],
-    dependencies: ["@audio-ui/react"],
+    dependencies: ["@audio-ui/react", "@audio-ui/icons"],
     description:
       "A row of buttons, one per waveform, each drawn as its shape: pick one. Fed by the options of a device's choice parameter.",
     files: [
@@ -350,7 +350,7 @@ export const audio: RegistryItem[] = [
   },
   {
     categories: ["device", "plot"],
-    dependencies: [],
+    dependencies: ["@audio-ui/icons"],
     description:
       "A row of buttons, one per filter type, each drawn as the response it has: low-pass, high-pass, band-pass, notch, low and high cut, low and high shelf, bell. Fed by the options of a device's choice parameter.",
     files: [
@@ -380,7 +380,7 @@ export const audio: RegistryItem[] = [
   },
   {
     categories: ["device", "hooks"],
-    dependencies: [],
+    dependencies: ["@audio-ui/icons"],
     description:
       "A play and pause button for a demo signal: the icon follows the state, the name says what pressing it does.",
     files: [
@@ -926,7 +926,7 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
-    dependencies: ["@audio-ui/react"],
+    dependencies: ["@audio-ui/react", "@audio-ui/icons"],
     description:
       "A zoomable timeline for arrangement views and editors, with a ruler that seeks, lanes and a playhead.",
     files: [
@@ -979,7 +979,7 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
-    dependencies: ["@audio-ui/react"],
+    dependencies: ["@audio-ui/react", "@audio-ui/icons"],
     description:
       "A step grid: press a step, or drag across several, to draw a pattern.",
     files: [
@@ -1004,7 +1004,7 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
-    dependencies: ["@audio-ui/react"],
+    dependencies: ["@audio-ui/react", "@audio-ui/icons"],
     description:
       "A compact player: play and pause, the position, a seek bar and the length.",
     files: [
@@ -1037,7 +1037,7 @@ export const audio: RegistryItem[] = [
       },
     ],
     name: "transport",
-    dependencies: ["@audio-ui/react", "@audio-ui/core"],
+    dependencies: ["@audio-ui/react", "@audio-ui/core", "@audio-ui/icons"],
     registryDependencies: [
       "@audio-ui/bpm-control",
       "@shadcn/button",

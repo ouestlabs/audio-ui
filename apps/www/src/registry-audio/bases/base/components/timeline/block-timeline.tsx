@@ -18,6 +18,7 @@ import {
   TRIPLET_FACTOR,
 } from "@audio-ui/core/time";
 import { snapMove } from "@audio-ui/core/timeline";
+import { EnvelopeIcon } from "@audio-ui/icons/react";
 import {
   adjacentPoint,
   type FadeShape,
@@ -1958,19 +1959,8 @@ export default function BlockTimeline() {
             size="icon"
             variant={automating ? "default" : "outline"}
           >
-            {/* An envelope, drawn as the selects draw their shapes: what automation draws over a lane. */}
-            <svg
-              aria-hidden="true"
-              className="size-4"
-              fill="none"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
-            >
-              <path d="M2 17h4l5-10h4c3 0 4 10 7 10" />
-            </svg>
+            {/* An envelope: what automation draws over a lane. */}
+            <EnvelopeIcon className="size-4" weight="bold" />
           </Button>
           <ButtonGroup className="hidden @3xl/panel:flex">
             <Button

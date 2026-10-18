@@ -1,21 +1,28 @@
 "use client";
 
-import { useCallback } from "react";
+import {
+  type IconProps,
+  SawtoothIcon,
+  SineIcon,
+  SquareIcon,
+  TriangleIcon,
+} from "@audio-ui/icons/react";
+import { type ComponentType, useCallback } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {
   ToggleGroup,
   ToggleGroupItem,
 } from "@/registry/bases/base/ui/toggle-group";
 
-const WAVE_PATHS: Record<string, string> = {
-  sawtooth: "M2 18l8-12v12l8-12v12",
-  sine: "M2 12c2-4 4-4 6 0s4 4 6 0 4-4 6 0 4 4 6 0",
-  square: "M2 18h4V6h6v12h4V6h6",
-  triangle: "M2 12l5-6 5 12 5-12 5 6",
+const WAVE_ICONS: Record<string, ComponentType<IconProps>> = {
+  sawtooth: SawtoothIcon,
+  sine: SineIcon,
+  square: SquareIcon,
+  triangle: TriangleIcon,
 };
 
 /** Whether a value is one of the four shapes this element draws. */
-export const isWaveform = (value: string) => value in WAVE_PATHS;
+export const isWaveform = (value: string) => value in WAVE_ICONS;
 
 interface WaveformOption {
   label: string;
@@ -63,7 +70,7 @@ function WaveformSelect({
       variant="outline"
     >
       {options.map((option) => {
-        const path = WAVE_PATHS[option.value];
+        const Icon = WAVE_ICONS[option.value];
         return (
           <ToggleGroupItem
             aria-label={`${option.label} wave`}
@@ -71,20 +78,7 @@ function WaveformSelect({
             key={option.value}
             value={option.value}
           >
-            {path ? (
-              <svg
-                aria-hidden="true"
-                className="h-5 w-5"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-              >
-                <path d={path} />
-              </svg>
-            ) : (
-              option.label
-            )}
+            {Icon ? <Icon className="size-5" weight="bold" /> : option.label}
           </ToggleGroupItem>
         );
       })}

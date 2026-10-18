@@ -1,5 +1,6 @@
 "use client";
 
+import { HeadphonesIcon } from "@audio-ui/icons/react";
 import {
   FADE_SHAPES,
   type FadeShape,
@@ -739,13 +740,7 @@ function TimelineTrackControls({
             size="icon-xs"
             variant={mix.soloed ? "default" : "ghost"}
           >
-            <IconPlaceholder
-              hugeicons="HeadphonesIcon"
-              lucide="HeadphonesIcon"
-              phosphor="HeadphonesIcon"
-              remixicon="RiHeadphoneLine"
-              tabler="IconHeadphones"
-            />
+            <HeadphonesIcon weight="fill" />
           </Button>
           <Button
             aria-label={`Mute ${name}`}
