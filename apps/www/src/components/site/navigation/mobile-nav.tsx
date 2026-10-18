@@ -8,7 +8,7 @@ import {
 import { Link } from "@tanstack/react-router";
 import * as React from "react";
 import { ComponentUpdateIndicator } from "@/components/docs/catalog/component-update-indicator";
-import { GroupIcon } from "@/components/site/navigation/group-icon";
+import { GroupIcon, PageIcon } from "@/components/site/navigation/group-icon";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -285,6 +285,7 @@ export function MobileNav({
                               key={page.url}
                               onNavigate={close}
                             >
+                              <PageIcon url={page.url} />
                               {page.name}
                               {hint ? (
                                 <span

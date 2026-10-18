@@ -3,7 +3,7 @@
 import { CaretDownIcon } from "@phosphor-icons/react/ssr";
 import { Link } from "@tanstack/react-router";
 import * as React from "react";
-import { GroupIcon } from "@/components/site/navigation/group-icon";
+import { GroupIcon, PageIcon } from "@/components/site/navigation/group-icon";
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -148,6 +148,7 @@ export function DocsNavigation({
                               >
                                 <span className="pointer-events-none absolute inset-0 flex w-(--sidebar-width) bg-transparent" />
                                 <span className="relative z-10 inline-flex items-center gap-2">
+                                  <PageIcon url={page.url} />
                                   <span>{page.name}</span>
                                   <DocsUpdateIndicator path={page.url} />
                                 </span>

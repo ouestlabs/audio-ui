@@ -27,3 +27,20 @@ export function GroupIcon({
     />
   ) : null;
 }
+
+const PAGE_ICONS: Record<
+  string,
+  (props: { className?: string }) => React.ReactNode
+> = {
+  "/docs/agents": Icons.sparkle,
+  "/docs/mcp": Icons.mcp,
+  "/llms.txt": Icons.bot,
+};
+
+/** The glyph of a page of the sidebar that has one (the pages for agents), or nothing. */
+export function PageIcon({ url }: { url: string }) {
+  const Icon = PAGE_ICONS[url];
+  return Icon ? (
+    <Icon className="size-3.5 shrink-0 text-site-muted-foreground" />
+  ) : null;
+}
