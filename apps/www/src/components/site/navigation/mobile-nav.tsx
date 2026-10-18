@@ -171,7 +171,7 @@ export function MobileNav({
                 <span
                   className={cn(
                     "absolute left-0 block h-0.5 w-4 bg-site-foreground top-2.5 transition-transform duration-150 ease-in-out",
-                    open && "-translate-y-[0.225rem] rotate-45"
+                    open && "translate-y-[-0.225rem] rotate-45"
                   )}
                 />
               </div>

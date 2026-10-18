@@ -212,13 +212,13 @@ A graduation of the level scale at `value`, such as -18 dB: placed along the met
 
 <TypeTable>
 <TypeRow name={"value"} type={"number[]"}>Level (dB) per channel; array length is the channel count.</TypeRow>
-<TypeRow name={"peak"} type={"number[]"}>Peak-hold level (dB) per channel. Omit to hide peak marks.</TypeRow>
+<TypeRow name={"peak"} type={"number[]"}>Peak-hold level per channel. Timing and decay live outside the primitive.</TypeRow>
 <TypeRow name={"source"} type={"MeterSource"}>A live signal painted outside React; takes precedence over `value` and `peak`.</TypeRow>
 <TypeRow name={"min"} type={"number"} default={"-60"}>Minimum of the dB range.</TypeRow>
 <TypeRow name={"max"} type={"number"} default={"6"}>Maximum of the dB range.</TypeRow>
-<TypeRow name={"clipThreshold"} type={"number"} default={"0"}>Level (dB) at or above which a channel is marked as clipping.</TypeRow>
+<TypeRow name={"clipThreshold"} type={"number"} default={"0"}>Level at or above which a channel is clipping.</TypeRow>
 <TypeRow name={"orientation"} type={"\"vertical\" | \"horizontal\""} default={"\"vertical\""}>Bar direction.</TypeRow>
-<TypeRow name={"format"} type={"Intl.NumberFormatOptions"} default={"one decimal"}>Formats each level for the value text.</TypeRow>
+<TypeRow name={"format"} type={"Intl.NumberFormatOptions"} default={"one decimal"}>Formats each level for `Meter.Value` and the channels' `aria-valuetext`. Defaults to one decimal.</TypeRow>
 <TypeRow name={"aria-label"} type={"string"}>Accessible name for the meter group and its channels.</TypeRow>
 </TypeTable>
 

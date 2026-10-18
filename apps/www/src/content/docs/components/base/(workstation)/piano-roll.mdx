@@ -327,7 +327,7 @@ Groups the parts of a piano roll and owns its notes and selection. Must be used 
 <TypeRow name={"onValueChange"} type={"(value: Note[], eventDetails) => void"}>Fires while notes are drawn, moved, resized, duplicated or removed.</TypeRow>
 <TypeRow name={"onValueCommitted"} type={"(value: Note[], eventDetails) => void"}>Fires when a gesture that changed the notes ends, and after each edit from the keyboard.</TypeRow>
 <TypeRow name={"onSelectionChange"} type={"(selection: NoteId[], eventDetails) => void"}>Fires when notes are selected or deselected.</TypeRow>
-<TypeRow name={"onNoteOn"} type={"(pitch: number, eventDetails) => void"}>Fires when a pitch should sound: a key pressed, a note drawn, picked up or moved to a new pitch. `eventDetails.velocity` is 0 to 1; `eventDetails.cancel()` keeps it silent.</TypeRow>
+<TypeRow name={"onNoteOn"} type={"(pitch: number, eventDetails) => void"}>Fires when a pitch should sound: a key pressed, a note drawn, picked up or moved to a new pitch. `eventDetails.cancel()` keeps it silent.</TypeRow>
 <TypeRow name={"onNoteOff"} type={"(pitch: number, eventDetails) => void"}>Fires when a pitch stops sounding.</TypeRow>
 </TypeTable>
 
@@ -388,7 +388,7 @@ Renders `children` once per note, in the order they are read: by start, then fro
 One note, placed on its row from its start, as long as its length. A toggle button named after its pitch and span (`getNoteLabel` on `Root`). Its `--piano-roll-velocity` and `--piano-roll-chance` CSS variables are its velocity and how likely it is to play. Renders a `<div>` element.
 
 <TypeTable>
-<TypeRow name={"note"} type={"Note"}>The note to show; while it is being edited, the roll shows it where the edit has it.</TypeRow>
+<TypeRow name={"note"} type={"Note"}>The note to draw: the roll's copy of it is used once it is edited.</TypeRow>
 </TypeTable>
 
 <TypeTable title="Data attributes">

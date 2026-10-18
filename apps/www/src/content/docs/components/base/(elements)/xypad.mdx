@@ -219,15 +219,15 @@ Accessible label, associated with both axis inputs. Renders a `<div>` element.
 
 <TypeTable>
 <TypeRow name={"value"} type={"{ x: number; y: number }"}>Controlled value.</TypeRow>
-<TypeRow name={"defaultValue"} type={"{ x: number; y: number }"} default={"center"}>Uncontrolled starting value.</TypeRow>
+<TypeRow name={"defaultValue"} type={"{ x: number; y: number }"} default={"center"}>Uncontrolled starting value. Defaults to the center of the pad.</TypeRow>
 <TypeRow name={"minX / maxX"} type={"number"} default={"0 / 100"}>X range.</TypeRow>
 <TypeRow name={"minY / maxY"} type={"number"} default={"0 / 100"}>Y range.</TypeRow>
 <TypeRow name={"stepX / stepY"} type={"number"} default={"1"}>Step per axis.</TypeRow>
 <TypeRow name={"disabled"} type={"boolean"} default={"false"}>Disables pointer, wheel, and keyboard.</TypeRow>
-<TypeRow name={"format"} type={"Intl.NumberFormatOptions"}>Formats each axis for the value display and the inputs' value text.</TypeRow>
+<TypeRow name={"format"} type={"Intl.NumberFormatOptions"}>Formats each axis for `XYPad.Value` and the inputs' `aria-valuetext`.</TypeRow>
 <TypeRow name={"locale"} type={"Intl.LocalesArgument"} default={"runtime"}>Locale used by `format`.</TypeRow>
-<TypeRow name={"onValueChange"} type={"(value, eventDetails) => void"}>Every change. `eventDetails.reason` is `"press"`, `"drag"`, `"keyboard"`, `"wheel"`, or `"input-change"`; call `eventDetails.cancel()` to reject it.</TypeRow>
-<TypeRow name={"onValueCommitted"} type={"(value, eventDetails) => void"}>When an interaction that changed the value ends.</TypeRow>
+<TypeRow name={"onValueChange"} type={"(value, eventDetails) => void"}>Fires on every change: press, drag, keyboard, wheel and input changes.</TypeRow>
+<TypeRow name={"onValueCommitted"} type={"(value, eventDetails) => void"}>Fires when an interaction ends with a new value.</TypeRow>
 <TypeRow name={"aria-label"} type={"string"}>Accessible name for the pad's inputs.</TypeRow>
 <TypeRow name={"aria-labelledby"} type={"string"}>ID of a labeling element.</TypeRow>
 </TypeTable>

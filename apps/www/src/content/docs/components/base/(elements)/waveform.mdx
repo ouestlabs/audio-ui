@@ -254,7 +254,7 @@ Groups the parts of a waveform and owns what they show: the audio's shape (`peak
 <TypeRow name={"disabled"} type={"boolean"}></TypeRow>
 <TypeRow name={"duration"} type={"number"} default={"1"}>Length of the audio, in the unit `value` is in (typically seconds).</TypeRow>
 <TypeRow name={"largeStep"} type={"number"}>Step for Page Up/Page Down and Shift + arrow keys. Defaults to a tenth of `duration`.</TypeRow>
-<TypeRow name={"levels"} type={"Levels"}>A live signal drawn outside React, in place of `peaks`: a microphone, an analyser, a stream.</TypeRow>
+<TypeRow name={"levels"} type={"Levels"}>A live signal drawn outside React, instead of `peaks`: a microphone, an analyser, a stream.</TypeRow>
 <TypeRow name={"loading"} type={"boolean"} default={"false"}>Whether the audio is still on its way. Seeking waits, and the bars sweep.</TypeRow>
 <TypeRow name={"onValueChange"} type={"(value: number, eventDetails: ChangeEventDetails) => void"}>Fires while seeking: press, drag, keyboard and input changes.</TypeRow>
 <TypeRow name={"onValueCommitted"} type={"(value: number, eventDetails: CommitEventDetails) => void"}>Fires when a seek that moved the position ends.</TypeRow>
@@ -296,7 +296,7 @@ Resizes one edge of the region: by dragging, or from the keyboard through the na
 
 <TypeTable>
 <TypeRow name={"edge"} type={"\"end\" | \"start\""}>The edge of the region this handle resizes.</TypeRow>
-<TypeRow name={"getAriaValueText"} type={"DescribeValue"}>Returns how the edge's position is announced, e.g. `"0:12"`. Defaults to its share of the timeline, e.g. `"30%"`.</TypeRow>
+<TypeRow name={"getAriaValueText"} type={"DescribeValue"}>Returns how the position is announced, e.g. `"0:12 of 1:42"`. Defaults to the played share, e.g. `"30%"`.</TypeRow>
 </TypeTable>
 
 <TypeTable title="Data attributes">
@@ -310,7 +310,7 @@ The seekable surface: a press jumps to the pointer and a drag scrubs. It tracks 
 
 <TypeTable>
 <TypeRow name={"getAriaValueText"} type={"DescribeValue"}>Returns how the position is announced, e.g. `"0:12 of 1:42"`. Defaults to the played share, e.g. `"30%"`.</TypeRow>
-<TypeRow name={"onSelectionChange"} type={"(range: readonly [number, number], eventDetails) => void"}>Fires while a stretch is selected by dragging with Shift held, as `[start, end]` in `duration` units: feed it to a `Waveform.Region`. A plain press and drag still seek. `eventDetails.cancel()` keeps the selection as it was.</TypeRow>
+<TypeRow name={"onSelectionChange"} type={"(range: readonly [number, number], eventDetails) => void"}>Fires while a stretch is selected by dragging with Shift held, as `[start, end]` in `duration` units; feed it to a `Waveform.Region`. A plain press and drag still seek. `eventDetails.cancel()` keeps the selection as it was.</TypeRow>
 <TypeRow name={"onSelectionCommitted"} type={"(range: readonly [number, number], eventDetails) => void"}>Fires when a selection that changed ends.</TypeRow>
 </TypeTable>
 
@@ -433,20 +433,20 @@ Shown while the pointer is over the `Control`, positioned at the hovered point. 
 
 <TypeTable>
 <TypeRow name={"values"} type={"ArrayLike<number> | { min, max }"}>The audio's shape at any resolution: `0–1` amplitudes, or each slice's lowest and highest sample, `-1–1`.</TypeRow>
-<TypeRow name={"range"} type={"readonly [number, number]"} default={"whole audio"}>The stretch shown, in `duration` units.</TypeRow>
+<TypeRow name={"range"} type={"readonly [number, number]"} default={"whole audio"}>The stretch of the audio to show, `[start, end]` in `duration` units: a clip's window onto its source, a zoomed view. The playhead, seeking, hover, regions and markers all follow it. Defaults to the whole audio. While the position is outside it, the root carries `data-outside`.</TypeRow>
 <TypeRow name={"value"} type={"number"}>Controlled position, from `0` to `duration`.</TypeRow>
 <TypeRow name={"defaultValue"} type={"number"} default={"0"}>Uncontrolled starting position.</TypeRow>
 <TypeRow name={"source"} type={"WaveformSource"}>A live position followed outside React; takes precedence over `value`.</TypeRow>
-<TypeRow name={"duration"} type={"number"} default={"1"}>Length of the audio, in the unit `value` is in.</TypeRow>
-<TypeRow name={"step"} type={"number"} default={"duration / 100"}>Arrow key step.</TypeRow>
-<TypeRow name={"largeStep"} type={"number"} default={"duration / 10"}>Step for `PageUp` / `PageDown` and `Shift` + arrows.</TypeRow>
+<TypeRow name={"duration"} type={"number"} default={"1"}>Length of the audio, in the unit `value` is in (typically seconds).</TypeRow>
+<TypeRow name={"step"} type={"number"} default={"duration / 100"}>Step for the arrow keys. Defaults to a hundredth of `duration`.</TypeRow>
+<TypeRow name={"largeStep"} type={"number"} default={"duration / 10"}>Step for Page Up/Page Down and Shift + arrow keys. Defaults to a tenth of `duration`.</TypeRow>
 <TypeRow name={"disabled"} type={"boolean"} default={"false"}>Disables pointer and keyboard interaction.</TypeRow>
-<TypeRow name={"loading"} type={"boolean"} default={"false"}>The audio is on its way: seeking waits and the bars sweep.</TypeRow>
+<TypeRow name={"loading"} type={"boolean"} default={"false"}>Whether the audio is still on its way. Seeking waits, and the bars sweep.</TypeRow>
 <TypeRow name={"onValueChange"} type={"(value: number, eventDetails) => void"}>Fires while seeking. `eventDetails.reason` is `"press"`, `"drag"`, `"keyboard"`, or `"input-change"`; call `eventDetails.cancel()` to reject it.</TypeRow>
 <TypeRow name={"onValueCommitted"} type={"(value: number, eventDetails) => void"}>Fires when a seek that moved the position ends.</TypeRow>
-<TypeRow name={"getAriaValueText"} type={"(value: number, duration: number) => string"} default={"played share"}>How the position is announced, e.g. `"0:12 of 1:42"`.</TypeRow>
-<TypeRow name={"onSelectionChange"} type={"(range: readonly [number, number], eventDetails) => void"}>Fires while a stretch is selected with Shift + drag: set a loop region from it.</TypeRow>
-<TypeRow name={"onSelectionCommitted"} type={"(range: readonly [number, number], eventDetails) => void"}>Fires when that selection ends.</TypeRow>
+<TypeRow name={"getAriaValueText"} type={"(value: number, duration: number) => string"} default={"played share"}>Returns how the position is announced, e.g. `"0:12 of 1:42"`. Defaults to the played share, e.g. `"30%"`.</TypeRow>
+<TypeRow name={"onSelectionChange"} type={"(range: readonly [number, number], eventDetails) => void"}>Fires while a stretch is selected by dragging with Shift held, as `[start, end]` in `duration` units; feed it to a `Waveform.Region`. A plain press and drag still seek. `eventDetails.cancel()` keeps the selection as it was.</TypeRow>
+<TypeRow name={"onSelectionCommitted"} type={"(range: readonly [number, number], eventDetails) => void"}>Fires when a selection that changed ends.</TypeRow>
 <TypeRow name={"shape"} type={"\"mirror\" | \"bars\" | \"line\""} default={"\"mirror\""}>How the amplitudes are drawn.</TypeRow>
 <TypeRow name={"variant"} type={"\"default\" | \"playhead\""} default={"\"default\""}>`playhead` adds a playhead line and a handle.</TypeRow>
 <TypeRow name={"className"} type={"string"}>Classes for the waveform surface.</TypeRow>
@@ -457,8 +457,8 @@ Shown while the pointer is over the `Control`, positioned at the hovered point. 
 <TypeTable>
 <TypeRow name={"value"} type={"readonly [number, number]"}>Controlled region, as `[start, end]` in `duration` units.</TypeRow>
 <TypeRow name={"defaultValue"} type={"readonly [number, number]"} default={"whole timeline"}>Uncontrolled starting region.</TypeRow>
-<TypeRow name={"minLength"} type={"number"} default={"the waveform's step"}>The shortest the region can be resized to.</TypeRow>
-<TypeRow name={"movable"} type={"boolean"} default={"true"}>Whether dragging the body moves the region.</TypeRow>
+<TypeRow name={"minLength"} type={"number"} default={"the waveform's step"}>The shortest the region can be resized to, in `duration` units. Defaults to the root's `step`.</TypeRow>
+<TypeRow name={"movable"} type={"boolean"} default={"true"}>Whether dragging the region's body moves it.</TypeRow>
 <TypeRow name={"disabled"} type={"boolean"} default={"false"}>Also disabled when the waveform is.</TypeRow>
 <TypeRow name={"onValueChange"} type={"(value, eventDetails) => void"}>Fires while moving or resizing. `eventDetails.edge` is `"start"`, `"end"` or `"both"`; `eventDetails.reason` is `"drag"`, `"keyboard"` or `"input-change"`.</TypeRow>
 <TypeRow name={"onValueCommitted"} type={"(value, eventDetails) => void"}>Fires when a move or resize that changed the region ends.</TypeRow>
@@ -469,26 +469,26 @@ Shown while the pointer is over the `Control`, positioned at the hovered point. 
 #### LiveWaveform
 
 <TypeTable>
-<TypeRow name={"source"} type={"LevelsSource | null"}>The live signal.</TypeRow>
+<TypeRow name={"source"} type={"LevelsSource | null"}>A live position followed outside React; takes precedence over `value`.</TypeRow>
 <TypeRow name={"mode"} type={"\"static\" | \"scrolling\""} default={"\"static\""}>`static` spreads the current levels across the width; `scrolling` records the loudest one over time.</TypeRow>
-<TypeRow name={"scrollSpeed"} type={"number"} default={"60"}>How fast `scrolling` moves, in pixels per second.</TypeRow>
+<TypeRow name={"scrollSpeed"} type={"number"} default={"60"}>How fast the scrolling mode moves, in CSS pixels per second.</TypeRow>
 <TypeRow name={"shape"} type={"\"mirror\" | \"bars\" | \"line\" | \"scope\""} default={"\"mirror\""}>How the signal is drawn. `scope` traces raw samples instead of levels.</TypeRow>
-<TypeRow name={"gain"} type={"number"} default={"1"}>Visual gain applied to the levels.</TypeRow>
+<TypeRow name={"gain"} type={"number"} default={"1"}>Visual gain applied to the levels before they are drawn.</TypeRow>
 <TypeRow name={"mirrored"} type={"boolean"} default={"false"}>Makes the drawing symmetric: the first level in the center, or, when scrolling, the newest one, with older ones moving out on both sides.</TypeRow>
 <TypeRow name={"idle"} type={"\"none\" | \"pulse\" | \"wave\""} default={"\"none\""}>In `static` mode, what the bars do while there is no signal.</TypeRow>
-<TypeRow name={"loading"} type={"boolean"} default={"false"}>Sweeps across the bars while the signal is on its way.</TypeRow>
+<TypeRow name={"loading"} type={"boolean"} default={"false"}>Whether the audio is still on its way. Seeking waits, and the bars sweep.</TypeRow>
 </TypeTable>
 
 #### BarVisualizer
 
 <TypeTable>
-<TypeRow name={"source"} type={"LevelsSource | null"}>The live signal.</TypeRow>
-<TypeRow name={"count"} type={"number"} default={"24"}>How many bars; the levels are fitted to them.</TypeRow>
+<TypeRow name={"source"} type={"LevelsSource | null"}>A live position followed outside React; takes precedence over `value`.</TypeRow>
+<TypeRow name={"count"} type={"number"} default={"24"}>How many bars to draw. The levels are fitted to them.</TypeRow>
 <TypeRow name={"mirrored"} type={"boolean"} default={"false"}>Mirrors the levels around the middle bar, the lowest band in the center.</TypeRow>
-<TypeRow name={"minLevel"} type={"number"} default={"0.08"}>Resting level: silent bars keep this much of their size.</TypeRow>
-<TypeRow name={"gain"} type={"number"} default={"1"}>Visual gain applied to the levels.</TypeRow>
+<TypeRow name={"minLevel"} type={"number"} default={"0.08"}>Resting level, 0…1: silent bars keep this much of their size.</TypeRow>
+<TypeRow name={"gain"} type={"number"} default={"1"}>Visual gain applied to the levels before they are drawn.</TypeRow>
 <TypeRow name={"idle"} type={"\"none\" | \"pulse\" | \"wave\""} default={"\"none\""}>What the bars do while there is no signal.</TypeRow>
-<TypeRow name={"loading"} type={"boolean"} default={"false"}>Sweeps across the bars while the signal is on its way.</TypeRow>
+<TypeRow name={"loading"} type={"boolean"} default={"false"}>Whether the audio is still on its way. Seeking waits, and the bars sweep.</TypeRow>
 <TypeRow name={"align"} type={"\"start\" | \"center\" | \"end\""} default={"\"center\""}>Where the bars grow from.</TypeRow>
 <TypeRow name={"orientation"} type={"\"horizontal\" | \"vertical\""} default={"\"horizontal\""}>`vertical` stacks the bars and grows them sideways.</TypeRow>
 </TypeTable>

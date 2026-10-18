@@ -169,7 +169,7 @@ Groups all parts of the breakpoint envelope and owns its points, each normalized
 <TypeRow name={"onValueChange"} type={"(value: GeomPoint[], eventDetails: ChangeEventDetails) => void"}>Fires on every change: drag, keyboard, add and remove.</TypeRow>
 <TypeRow name={"onValueCommitted"} type={"(value: GeomPoint[], eventDetails: CommitEventDetails) => void"}>Fires when an interaction that changed the points ends.</TypeRow>
 <TypeRow name={"step"} type={"number"} default={"0.01"}>Keyboard step on both axes, in normalized units.</TypeRow>
-<TypeRow name={"snap"} type={"number | { x: number; y: number }"} default={"0"}>Grid the pointer snaps points to, in normalized units: `0.25` snaps to quarters, `0` is no grid, and `{ x, y }` sets a step for each axis (`{ x: 0.125, y: 0 }` snaps across and leaves the level free). Cmd/Ctrl leaves the grid and Shift's fine drag ignores it.</TypeRow>
+<TypeRow name={"snap"} type={"number | { x: number; y: number }"} default={"0"}>Grid the pointer snaps points to, in normalized units: 0.25 snaps to quarters, 0 is no grid, and `{ x, y }` sets a step for each axis (`{ x: 0.125, y: 0 }` snaps across and leaves the level free). Holding Cmd/Ctrl leaves the grid, and Shift's fine drag ignores it. Keys move by `step`.</TypeRow>
 <TypeRow name={"value"} type={"GeomPoint[]"}></TypeRow>
 </TypeTable>
 
@@ -238,14 +238,14 @@ A draggable handle for the point at `index`, positioned with `left`/`bottom` per
 
 <TypeTable>
 <TypeRow name={"value"} type={"{ x: number; y: number; curve?: number }[]"}>Controlled points, normalized 0-1, sorted by `x`. `curve`, -1 to 1, bends the segment leaving the point.</TypeRow>
-<TypeRow name={"defaultValue"} type={"{ x: number; y: number; curve?: number }[]"} default={"ADSR-like 5-point shape"}>Uncontrolled starting points.</TypeRow>
+<TypeRow name={"defaultValue"} type={"{ x: number; y: number; curve?: number }[]"} default={"ADSR-like 5-point shape"}>Uncontrolled starting points. Defaults to an ADSR-like shape.</TypeRow>
 <TypeRow name={"minPoints"} type={"number"} default={"2"}>Floor on the number of points; removal is blocked at this count.</TypeRow>
-<TypeRow name={"maxPoints"} type={"number"}>Ceiling on the number of points; adding is blocked at this count.</TypeRow>
+<TypeRow name={"maxPoints"} type={"number"}>Ceiling on the number of points; adding is blocked at this count. Equal to `minPoints`, the shape is fixed.</TypeRow>
 <TypeRow name={"step"} type={"number"} default={"0.01"}>Keyboard step on both axes, in normalized units.</TypeRow>
 <TypeRow name={"disabled"} type={"boolean"} default={"false"}>Whether the envelope is disabled.</TypeRow>
-<TypeRow name={"format"} type={"Intl.NumberFormatOptions"}>Formats point coordinates for each point's value text.</TypeRow>
-<TypeRow name={"onValueChange"} type={"(points, eventDetails) => void"}>Every change. `eventDetails.reason` is `"drag"`, `"keyboard"`, `"add"`, `"remove"` or `"curve"`, and `eventDetails.index` is the affected point; call `eventDetails.cancel()` to reject it.</TypeRow>
-<TypeRow name={"onValueCommitted"} type={"(points, eventDetails) => void"}>When an interaction that changed the points ends (release, key press, add, or remove).</TypeRow>
+<TypeRow name={"format"} type={"Intl.NumberFormatOptions"}>Formats point coordinates for each point's `aria-valuetext`.</TypeRow>
+<TypeRow name={"onValueChange"} type={"(points, eventDetails) => void"}>Fires on every change: drag, keyboard, add and remove.</TypeRow>
+<TypeRow name={"onValueCommitted"} type={"(points, eventDetails) => void"}>Fires when an interaction that changed the points ends.</TypeRow>
 </TypeTable>
 
 #### Layout and display
