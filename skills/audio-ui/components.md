@@ -156,7 +156,7 @@ What makes the sound, on the Web Audio API: install each on its own, to `hooks/`
 | `use-audio-session` | `AudioSessionProvider` from `@/hooks/use-audio-session` | A play switch and a microphone switch of their own for a demo and its controls: inside one, `use-play-switch` and `use-microphone` follow it; outside one they stay off |
 | `use-device-loop`, `use-noise-through-eq`, `use-pulses-through-compressor` | `useDeviceLoop` and the others from `@/hooks/<name>` | A short loop of drums and plucked notes through an effect's engine, pink noise through an equalizer, or pulses through a compressor: what a device does, heard and measured. They play while the play switch of their `AudioSessionProvider` is on, and stay silent outside one |
 | `audio-decode` | `decodeAudioChannels` from `@/lib/audio-decode` | Decode an audio file into samples before `computePeaks` |
-| `key-detector`, `pink-noise`, `oversampling`, `synced-rate`, `demo-loop`, `device-measure` | from `@/lib/<name>` | The engine pieces of the devices: a key detector worklet, pink noise, oversampled waveshaping, a tempo-synced rate, a demo loop, measuring an engine against its panel |
+| `key-detector`, `oversampling`, `synced-rate`, `demo-sound`, `device-measure` | from `@/lib/<name>` | The engine pieces of the devices: a key detector worklet, oversampled waveshaping, a tempo-synced rate, the demo sounds by name (a loop, a kick, a held chord, a voice, wide chords, pink noise, pulses), measuring an engine against its panel |
 | `piano-roll-tools` | `createPianoRollTools` from `@/lib/piano-roll-tools` | Typed tools an AI model uses to edit a piano roll |
 
 ## Ready blocks

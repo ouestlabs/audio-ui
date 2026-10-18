@@ -7,7 +7,7 @@ import {
 } from "@audio-ui/core/analysis";
 import { useEffect, useRef, useState } from "react";
 import { usePlaySwitch } from "@/registry-audio/bases/base/hooks/use-play-switch";
-import { pinkNoise } from "@/registry-audio/bases/base/lib/pink-noise";
+import { pinkNoise } from "@/registry-audio/bases/base/lib/demo-sound";
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 const OUTPUT_GAIN = 0.12;

@@ -755,21 +755,6 @@ const items: RegistryItem[] = [
     type: "registry:lib",
   },
   {
-    categories: ["lib", "audio", "web-audio"],
-    dependencies: [],
-    description:
-      "Pink noise as an audio buffer: equal energy per octave, so a flat equalizer looks flat on a spectrum.",
-    files: [
-      {
-        path: "lib/pink-noise.ts",
-        type: "registry:lib",
-      },
-    ],
-    name: "pink-noise",
-    registryDependencies: [],
-    type: "registry:lib",
-  },
-  {
     categories: ["lib", "audio", "device", "web-audio"],
     dependencies: [],
     description:
@@ -818,14 +803,14 @@ const items: RegistryItem[] = [
     categories: ["lib", "audio", "device", "web-audio"],
     dependencies: [],
     description:
-      "A two-second loop to put an effect on: a kick and a snare, a hat on the eighths and a short line of plucked notes, drawn once from the drum voices of the library and looped as a buffer.",
+      "The sounds the previews play, by name: a loop to put an effect on (a kick and a snare, a hat on the eighths and plucked notes), a kick, a held chord, a voice with an s, wide chords, pink noise and pulses. Drawn once from the drum voices of the library and looped as a buffer.",
     files: [
       {
-        path: "lib/demo-loop.ts",
+        path: "lib/demo-sound.ts",
         type: "registry:lib",
       },
     ],
-    name: "demo-loop",
+    name: "demo-sound",
     registryDependencies: ["@audio-ui/drum-synthesis"],
     type: "registry:lib",
   },

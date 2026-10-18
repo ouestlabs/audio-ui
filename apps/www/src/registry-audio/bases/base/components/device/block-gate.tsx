@@ -7,7 +7,7 @@ import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 import {
   renderHeldChord,
   renderKickLoop,
-} from "@/registry-audio/bases/base/lib/demo-loop";
+} from "@/registry-audio/bases/base/lib/demo-sound";
 import {
   type GateState,
   gateDevice,

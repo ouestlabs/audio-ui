@@ -5,6 +5,7 @@ import { EqualizerPanel } from "@/registry-audio/bases/base/audio/panels/equaliz
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 import { usePlaySwitch } from "@/registry-audio/bases/base/hooks/use-play-switch";
 import { useSpectrum } from "@/registry-audio/bases/base/hooks/use-spectrum";
+import { pinkNoise } from "@/registry-audio/bases/base/lib/demo-sound";
 import {
   type EqualizerState,
   equalizerDevice,
@@ -13,7 +14,6 @@ import {
   createEqualizerEngine,
   type EqualizerEngine,
 } from "@/registry-audio/bases/base/lib/equalizer-engine";
-import { pinkNoise } from "@/registry-audio/bases/base/lib/pink-noise";
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 const FFT_SIZE = 4096;

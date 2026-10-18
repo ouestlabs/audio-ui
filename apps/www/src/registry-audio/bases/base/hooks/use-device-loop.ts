@@ -3,7 +3,7 @@
 import type { DeviceContext } from "@audio-ui/core/device";
 import { useEffect, useRef, useState } from "react";
 import { usePlaySwitch } from "@/registry-audio/bases/base/hooks/use-play-switch";
-import { renderDemoLoop } from "@/registry-audio/bases/base/lib/demo-loop";
+import { renderDemoLoop } from "@/registry-audio/bases/base/lib/demo-sound";
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 const FFT_SIZE = 4096;

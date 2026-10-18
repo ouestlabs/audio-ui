@@ -9,7 +9,7 @@ import {
   chorusDevice,
 } from "@/registry-audio/bases/base/lib/chorus-device";
 import { createChorusEngine } from "@/registry-audio/bases/base/lib/chorus-engine";
-import { DEMO_TEMPO } from "@/registry-audio/bases/base/lib/demo-loop";
+import { DEMO_TEMPO } from "@/registry-audio/bases/base/lib/demo-sound";
 
 const MASTER_VOLUME = 0.7;
 /** The loop's own tempo, so a synced rate moves with its beat. */
