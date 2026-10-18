@@ -83,7 +83,7 @@ export const sparkle: Glyph = [
 export const bot: Glyph = [
   rect(4, 8, 16, 11, 3, { tint: true }),
   path("M12 8V5"),
-  circle(12, 4, 1),
+  circle(12, 4, 1, { tint: true }),
   path("M9 13.5h.01M15 13.5h.01", { knock: true }),
 ];
 

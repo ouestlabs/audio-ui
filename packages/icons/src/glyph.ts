@@ -60,62 +60,11 @@ export const rect = (
   ...options,
 });
 
-const COMMAND = /([a-zA-Z])|(-?\d*\.?\d+(?:e-?\d+)?)/g;
 const START = /^M\s*(-?[\d.]+)/;
-const LETTER_GAP = / ?([a-zA-Z]) ?/g;
-const NEGATIVE_GAP = / -/g;
-/** What each number of a path command is: x, y, or a length. */
-const PARAMS: Record<string, ("x" | "y" | "k")[]> = {
-  a: ["k", "k", "k", "k", "k", "x", "y"],
-  c: ["x", "y", "x", "y", "x", "y"],
-  h: ["x"],
-  l: ["x", "y"],
-  m: ["x", "y"],
-  q: ["x", "y", "x", "y"],
-  s: ["x", "y", "x", "y"],
-  t: ["x", "y"],
-  v: ["y"],
-  z: [],
-};
-const round = (value: number) => Number(value.toFixed(2));
-
-/** A path drawn on a 24 grid, scaled by `scale` around the middle of the grid. */
-export function scalePath(d: string, scale: number): string {
-  const centre = 12 * (1 - scale);
-  let command = "";
-  let index = 0;
-  const out: string[] = [];
-  for (const [, letter, number] of d.matchAll(COMMAND)) {
-    if (letter) {
-      command = letter;
-      index = 0;
-      out.push(letter);
-      continue;
-    }
-    const params = PARAMS[command.toLowerCase()] ?? [];
-    const at = index % params.length;
-    // An arc's two flags are not coordinates.
-    const kind =
-      command.toLowerCase() === "a" && (at === 3 || at === 4)
-        ? undefined
-        : params[at];
-    const absolute = command === command.toUpperCase();
-    let value = Number(number);
-    if (kind === "x" || kind === "y") {
-      value = value * scale + (absolute ? centre : 0);
-    } else if (kind === "k") {
-      value *= scale;
-    }
-    out.push(String(round(value)));
-    index += 1;
-  }
-  return out.join(" ").replace(LETTER_GAP, "$1").replace(NEGATIVE_GAP, "-");
-}
 
 /**
- * A curve in every weight: a line in the thin ones, the line over a tint of
- * the area under it in duotone, and a solid screen with the curve cut out of
- * it in fill. The thin weights keep the full width of the grid.
+ * A curve in every weight: a line, over a tint of the area under it in
+ * duotone. A line has no body to fill, so its fill weight is the bold line.
  */
 export function curve(d: string, baseline = 20): Shape[] {
   const start = d.match(START)?.[1] ?? "2";
@@ -124,8 +73,6 @@ export function curve(d: string, baseline = 20): Shape[] {
       backdrop: true,
       weights: ["duotone"],
     }),
-    path(d, { weights: ["regular", "bold", "duotone"] }),
-    rect(3, 5, 18, 14, 3, { tint: true, weights: ["fill"] }),
-    path(scalePath(d, 0.7), { knock: true, weights: ["fill"] }),
+    path(d),
   ];
 }
