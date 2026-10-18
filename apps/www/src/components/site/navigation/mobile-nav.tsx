@@ -57,11 +57,13 @@ function NavRow({
 /** A group's title; a space's folds its pages away and back. */
 function GroupLabel({
   collapsible,
+  current,
   onOpenChange,
   open,
   title,
 }: {
   collapsible: boolean;
+  current: boolean;
   onOpenChange: (title: string, open: boolean) => void;
   open: boolean;
   title: string;
@@ -72,7 +74,8 @@ function GroupLabel({
   );
   if (!collapsible) {
     return (
-      <p className="px-2 pt-3 pb-1 font-semibold text-site-foreground text-xs">
+      <p className="flex items-center gap-2 px-2 pt-3 pb-1 font-semibold text-site-foreground text-xs">
+        <GroupIcon current={current} title={title} />
         {title}
       </p>
     );
@@ -85,7 +88,7 @@ function GroupLabel({
       type="button"
     >
       <span className="flex items-center gap-2">
-        <GroupIcon title={title} />
+        <GroupIcon current={current} title={title} />
         {title}
       </span>
       <CaretDownIcon
@@ -260,6 +263,7 @@ export function MobileNav({
               <div className="flex shrink-0 flex-col gap-0.5" key={group.title}>
                 <GroupLabel
                   collapsible={group.collapsible}
+                  current={group.current}
                   onOpenChange={setGroupOpen}
                   open={group.open}
                   title={group.title ?? ""}

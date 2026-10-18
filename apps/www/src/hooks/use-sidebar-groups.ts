@@ -101,6 +101,7 @@ export function useSidebarGroups(tree: ReturnType<typeof source.getPageTree>) {
   return {
     groups: groups.map((group) => ({
       ...group,
+      current: group.title === currentTitle,
       open: !(group.collapsible && group.title && collapsed.has(group.title)),
     })),
     pathname,

@@ -54,11 +54,13 @@ function DocsUpdateIndicator({ path }: { path: string }) {
 /** A group's title; a space's folds its pages away and back. */
 function GroupLabel({
   collapsible,
+  current,
   onOpenChange,
   open,
   title,
 }: {
   collapsible: boolean;
+  current: boolean;
   onOpenChange: (title: string, open: boolean) => void;
   open: boolean;
   title: string;
@@ -69,7 +71,8 @@ function GroupLabel({
   );
   if (!collapsible) {
     return (
-      <SidebarGroupLabel className="font-semibold text-site-foreground">
+      <SidebarGroupLabel className="gap-2 font-semibold text-site-foreground">
+        <GroupIcon current={current} title={title} />
         {title}
       </SidebarGroupLabel>
     );
@@ -80,7 +83,7 @@ function GroupLabel({
       render={<button aria-expanded={open} onClick={toggle} type="button" />}
     >
       <span className="flex items-center gap-2">
-        <GroupIcon title={title} />
+        <GroupIcon current={current} title={title} />
         {title}
       </span>
       <CaretDownIcon
@@ -109,6 +112,7 @@ export function DocsNavigation({
         <SidebarGroup key={group.title}>
           <GroupLabel
             collapsible={group.collapsible}
+            current={group.current}
             onOpenChange={setOpen}
             open={group.open}
             title={group.title ?? ""}

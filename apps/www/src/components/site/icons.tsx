@@ -1,6 +1,6 @@
 import { FileIcon } from "@phosphor-icons/react/ssr";
 
-type IconProps = React.HTMLAttributes<SVGElement>;
+type IconProps = React.SVGAttributes<SVGElement>;
 
 export const Icons = {
   apple: (props: IconProps) => (
