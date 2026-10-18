@@ -32,12 +32,19 @@ const PAGE_ICONS: Record<
   string,
   (props: { className?: string }) => React.ReactNode
 > = {
+  "/docs": Icons.introduction,
   "/docs/agents": Icons.sparkle,
+  "/docs/get-started": Icons.installation,
+  "/docs/headless-styling": Icons.headless,
   "/docs/mcp": Icons.mcp,
+  "/docs/primitives": Icons.primitives,
+  "/docs/registry": Icons.registry,
+  "/docs/roadmap": Icons.roadmap,
+  "/docs/styling": Icons.tokens,
   "/llms.txt": Icons.bot,
 };
 
-/** The glyph of a page of the sidebar that has one (the pages for agents), or nothing. */
+/** The glyph of a page of the sidebar that has one (the Get started pages), or nothing. */
 export function PageIcon({ url }: { url: string }) {
   const Icon = PAGE_ICONS[url];
   return Icon ? (
