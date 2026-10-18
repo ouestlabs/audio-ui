@@ -1,0 +1,28 @@
+{
+  "name": "@audio-ui/icons",
+  "version": "0.0.0",
+  "private": true,
+  "description": "The glyphs of audio/ui's own site: one thin stroke on a 24 grid, in the weights of Phosphor, for the things of audio.",
+  "license": "MIT",
+  "sideEffects": false,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "clean": "rm -rf node_modules .turbo",
+    "lint": "biome check --write .",
+    "lint:fix": "biome check --write --unsafe .",
+    "test": "bun test"
+  },
+  "devDependencies": {
+    "@types/bun": "1.4.2",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "peerDependencies": {
+    "react": "^19.3.0"
+  }
+}

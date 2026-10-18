@@ -1,15 +1,33 @@
+import {
+  BotIcon,
+  DevicesIcon,
+  ElementsIcon,
+  EngineIcon,
+  HeadlessIcon,
+  type IconProps,
+  InstallationIcon,
+  IntroductionIcon,
+  PrimitivesIcon,
+  RegistryIcon,
+  RoadmapIcon,
+  SparkleIcon,
+  StartIcon,
+  TokensIcon,
+  WorkstationIcon,
+} from "@audio-ui/icons";
+import type { ComponentType } from "react";
 import { Icons } from "@/components/site/icons";
 import { cn } from "@/lib/utils";
 
 const GROUP_ICONS = {
-  "Audio engine": Icons.engine,
-  Devices: Icons.devices,
-  Elements: Icons.elements,
-  "Get started": Icons.start,
-  Workstation: Icons.workstation,
+  "Audio engine": EngineIcon,
+  Devices: DevicesIcon,
+  Elements: ElementsIcon,
+  "Get started": StartIcon,
+  Workstation: WorkstationIcon,
 } as const;
 
-/** The glyph of a space of the docs (a group of the sidebar): muted, and in the title's color when the page being read is in it. Nothing for the other groups. */
+/** The glyph of a space of the docs (a group of the sidebar): thin and muted, and duotone in the title's color when the page being read is in it. Nothing for the other groups. */
 export function GroupIcon({
   current,
   title,
@@ -24,24 +42,22 @@ export function GroupIcon({
         "size-4 shrink-0",
         current ? "text-site-foreground" : "text-site-muted-foreground"
       )}
+      weight={current ? "duotone" : "regular"}
     />
   ) : null;
 }
 
-const PAGE_ICONS: Record<
-  string,
-  (props: { className?: string }) => React.ReactNode
-> = {
-  "/docs": Icons.introduction,
-  "/docs/agents": Icons.sparkle,
-  "/docs/get-started": Icons.installation,
-  "/docs/headless-styling": Icons.headless,
+const PAGE_ICONS: Record<string, ComponentType<IconProps>> = {
+  "/docs": IntroductionIcon,
+  "/docs/agents": SparkleIcon,
+  "/docs/get-started": InstallationIcon,
+  "/docs/headless-styling": HeadlessIcon,
   "/docs/mcp": Icons.mcp,
-  "/docs/primitives": Icons.primitives,
-  "/docs/registry": Icons.registry,
-  "/docs/roadmap": Icons.roadmap,
-  "/docs/styling": Icons.tokens,
-  "/llms.txt": Icons.bot,
+  "/docs/primitives": PrimitivesIcon,
+  "/docs/registry": RegistryIcon,
+  "/docs/roadmap": RoadmapIcon,
+  "/docs/styling": TokensIcon,
+  "/llms.txt": BotIcon,
 };
 
 /** The glyph of a page of the sidebar that has one (the Get started pages), or nothing. */
