@@ -11,52 +11,7 @@ Sets the level and the stereo image of a signal. It has no display, so its panel
 
 ## Installation
 
-<CodeTabs>
-
-<TabsList>
-  <TabsTrigger value="cli">CLI</TabsTrigger>
-  <TabsTrigger value="manual">Manual</TabsTrigger>
-</TabsList>
-
-<TabsContent value="cli">
-
-```bash component
-npx shadcn@latest add @audio-ui/utility
-```
-
-It installs the device's state, its engine and its panel to `components/audio-ui/devices/utility/`. The demo above, which wires them to a loop, is `@audio-ui/block-utility`.
-
-</TabsContent>
-
-<TabsContent value="manual">
-
-<Steps>
-
-<Step>Install the packages:</Step>
-
-```bash
-npm install @audio-ui/react @audio-ui/core
-```
-
-<Step>Add the pieces you want. All of them, or only the state and the panel if your engine is elsewhere:</Step>
-
-```bash
-npx shadcn@latest add @audio-ui/utility-device @audio-ui/utility-panel @audio-ui/utility-engine
-```
-
-<Step>Copy and paste the demo that wires them, if you want it.</Step>
-
-<ComponentSource
-  styleName="base-nova"
-  name="block-utility"
-  title="components/examples/block-utility.tsx"
-/>
-
-</Steps>
-
-</TabsContent>
-
-</CodeTabs>
+<Install name="utility" kind="device" />
 
 ## Controls
 

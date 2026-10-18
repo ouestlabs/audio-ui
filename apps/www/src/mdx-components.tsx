@@ -8,6 +8,7 @@ import { CodeTabs } from "@/components/code/block/code-tabs";
 import { CopyButton } from "@/components/code/copy/copy-button";
 import { DocsComponentSource } from "@/components/code/source/docs-component-source";
 import { Callout } from "@/components/docs/mdx/callout";
+import { Install } from "@/components/docs/mdx/install";
 import { Mermaid } from "@/components/docs/mdx/mermaid";
 import {
   KeyRow,
@@ -33,10 +34,11 @@ import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import type { InstallProps } from "@/lib/docs/content/install-docs";
 import { cn } from "@/lib/utils";
 
 export function getMDXComponents(components?: MDXComponents): MDXComponents {
-  return {
+  const mdx: MDXComponents = {
     ...defaultMdxComponents,
     Accordion,
     AccordionContent,
@@ -269,6 +271,16 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
         <a href={href} {...props} />
       ),
   };
+  // The Installation section is drawn with the page's own steps and tabs.
+  mdx.Install = (props: InstallProps) => (
+    <Install
+      Step={mdx.Step as never}
+      Steps={mdx.Steps as never}
+      TabsContent={mdx.TabsContent as never}
+      {...props}
+    />
+  );
+  return mdx;
 }
 
 export const mdxComponents = getMDXComponents();

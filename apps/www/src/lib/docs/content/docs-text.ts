@@ -1,4 +1,5 @@
 import { expandDeviceControls } from "@/lib/docs/content/device-docs";
+import { expandInstall } from "@/lib/docs/content/install-docs";
 import {
   mdxToMarkdown,
   parseAttrs,
@@ -41,7 +42,9 @@ export async function processMdxForLLMs(content: string): Promise<string> {
   if (!content || typeof content !== "string") {
     return content || "";
   }
-  const expanded = expandDeviceControls(replaceFrontmatter(content));
+  const expanded = expandInstall(
+    expandDeviceControls(replaceFrontmatter(content))
+  );
   const replacements = await Promise.all(
     [...expanded.matchAll(TAG_REGEX)].map(async (match) => {
       const { name, title } = parseAttrs(match[2] ?? "");

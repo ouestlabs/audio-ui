@@ -91,7 +91,7 @@ Grouped by what it does for the reader of the docs, two levels deep, so no folde
 
 ### Docs (`apps/www/src/content/docs/`)
 
-MDX under `(root)/` (the Get started guides) and `components/base/`. Use the existing components (`<ComponentPreview>`, `<ComponentSource>`, `<CodeTabs>`, `<Steps>`), not raw HTML.
+MDX under `(root)/` (the Get started guides) and `components/base/`. Use the existing components (`<ComponentPreview>`, `<ComponentSource>`, `<Install>`, `<Steps>`), not raw HTML. A component page's Installation section is one `<Install name="knob" packages="@audio-ui/react class-variance-authority" />` (or `kind="device"` for a device), drawn from `lib/docs/content/install-docs.ts`; only a page whose installation differs, such as the timeline's, writes its own `<CodeTabs>`.
 
 The docs, the catalog's `categoryGroups` and the shipped skill share one map, by what the reader builds. Each space is a folder of `components/base/` (the parentheses keep it out of the URL, so a page stays `/docs/components/base/<name>`), with its sections in its `meta.json`:
 

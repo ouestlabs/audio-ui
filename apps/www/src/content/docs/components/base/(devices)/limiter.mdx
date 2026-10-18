@@ -11,52 +11,7 @@ Keeps the sound under a ceiling. The input gain pushes the level against it, and
 
 ## Installation
 
-<CodeTabs>
-
-<TabsList>
-  <TabsTrigger value="cli">CLI</TabsTrigger>
-  <TabsTrigger value="manual">Manual</TabsTrigger>
-</TabsList>
-
-<TabsContent value="cli">
-
-```bash component
-npx shadcn@latest add @audio-ui/limiter
-```
-
-It installs the device's state, its engine and its panel to `components/audio-ui/devices/limiter/`. The demo above, which wires them to a loop, is `@audio-ui/block-limiter`.
-
-</TabsContent>
-
-<TabsContent value="manual">
-
-<Steps>
-
-<Step>Install the packages:</Step>
-
-```bash
-npm install @audio-ui/react @audio-ui/core
-```
-
-<Step>Add the pieces you want. All of them, or only the state and the panel if your engine is elsewhere:</Step>
-
-```bash
-npx shadcn@latest add @audio-ui/limiter-device @audio-ui/limiter-panel @audio-ui/limiter-engine
-```
-
-<Step>Copy and paste the demo that wires them, if you want it.</Step>
-
-<ComponentSource
-  styleName="base-nova"
-  name="block-limiter"
-  title="components/examples/block-limiter.tsx"
-/>
-
-</Steps>
-
-</TabsContent>
-
-</CodeTabs>
+<Install name="limiter" kind="device" />
 
 ## Controls
 
