@@ -26,7 +26,7 @@ describe("icons", () => {
 
   test("the glyphs of the sidebar's groups have a body in the duotone weight", () => {
     for (const Icon of [
-      icons.FlagIcon,
+      icons.MetronomeIcon,
       icons.KnobIcon,
       icons.TracksIcon,
       icons.RackIcon,

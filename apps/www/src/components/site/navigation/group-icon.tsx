@@ -1,19 +1,19 @@
 import {
   BotIcon,
-  BoxIcon,
   BracesIcon,
-  DownloadIcon,
-  DropIcon,
-  FlagIcon,
+  FadersIcon,
   GridIcon,
   type IconProps,
-  InfoIcon,
+  JackIcon,
   KnobIcon,
+  MetronomeIcon,
+  PatchbayIcon,
+  PlayheadIcon,
   RackIcon,
-  RouteIcon,
   ShapesIcon,
   SparkleIcon,
   TracksIcon,
+  TuningForkIcon,
   WaveformIcon,
 } from "@audio-ui/icons";
 import type { ComponentType } from "react";
@@ -24,7 +24,7 @@ const GROUP_ICONS = {
   "Audio engine": WaveformIcon,
   Devices: RackIcon,
   Elements: KnobIcon,
-  "Get started": FlagIcon,
+  "Get started": MetronomeIcon,
   Workstation: TracksIcon,
 } as const;
 
@@ -48,16 +48,16 @@ export function GroupIcon({
 }
 
 const PAGE_ICONS: Record<string, ComponentType<IconProps>> = {
-  "/docs": InfoIcon,
+  "/docs": TuningForkIcon,
   "/docs/agents": SparkleIcon,
-  "/docs/get-started": DownloadIcon,
+  "/docs/get-started": JackIcon,
   "/docs/headless-styling": BracesIcon,
   "/docs/icons": GridIcon,
   "/docs/mcp": Icons.mcp,
   "/docs/primitives": ShapesIcon,
-  "/docs/registry": BoxIcon,
-  "/docs/roadmap": RouteIcon,
-  "/docs/styling": DropIcon,
+  "/docs/registry": PatchbayIcon,
+  "/docs/roadmap": PlayheadIcon,
+  "/docs/styling": FadersIcon,
   "/llms.txt": BotIcon,
 };
 

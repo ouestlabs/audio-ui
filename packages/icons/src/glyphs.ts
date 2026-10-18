@@ -1,9 +1,9 @@
 import { circle, type Glyph, path, rect } from "./glyph.ts";
 
-/** A flag. */
-export const flag: Glyph = [
-  path("M6 20V4"),
-  path("M6 5h11l-2.5 4 2.5 4H6", { tint: true }),
+/** A metronome: the count before the first note. */
+export const metronome: Glyph = [
+  path("M8.5 21 10.7 4h2.6l2.2 17z", { tint: true }),
+  path("M12 16h.01"),
 ];
 
 /** A knob with its mark. */
@@ -20,7 +20,7 @@ export const tracks: Glyph = [
   rect(6, 15.5, 8, 3, 1, { backdrop: true }),
 ];
 
-/** A unit of a rack, with its knob. */
+/** A unit of a rack, with its indicator. */
 export const rack: Glyph = [
   rect(3, 7, 18, 10, 2, { tint: true }),
   path("M7.5 12h.01"),
@@ -32,19 +32,21 @@ export const waveform: Glyph = [
   rect(3, 4, 18, 16, 3, { backdrop: true }),
 ];
 
-export const info: Glyph = [
-  circle(12, 12, 9, { tint: true }),
-  path("M12 8h.01M11 12h1v4"),
+/** A tuning fork: the reference every sound is set against. */
+export const tuningfork: Glyph = [
+  path("M8.5 3v6.5a3.5 3.5 0 0 0 7 0V3M12 13v8"),
 ];
 
-export const download: Glyph = [
-  path("M12 4v11M8 11l4 4 4-4M5 19h14"),
-  rect(5, 15, 14, 4, 1, { backdrop: true }),
+/** A jack plug: connect it. */
+export const jack: Glyph = [
+  path("M12 3v4"),
+  rect(8, 7, 8, 13, 2, { tint: true }),
 ];
 
-export const box: Glyph = [
-  path("m12 3-8 4.5v9L12 21l8-4.5v-9z", { tint: true }),
-  path("m4 7.5 8 4.5 8-4.5M12 12v9"),
+/** A patchbay: a panel with its sockets. */
+export const patchbay: Glyph = [
+  rect(3, 7, 18, 10, 2, { tint: true }),
+  path("M8 12h.01M12 12h.01M16 12h.01"),
 ];
 
 export const shapes: Glyph = [
@@ -58,14 +60,18 @@ export const braces: Glyph = [
   ),
 ];
 
-export const drop: Glyph = [
-  path("M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z", { tint: true }),
+/** Three faders, each set to its own value. */
+export const faders: Glyph = [
+  path("M6 4v9M6 17v3M12 4v3M12 11v9M18 4v7M18 15v5"),
+  circle(6, 15, 2, { tint: true }),
+  circle(12, 9, 2, { tint: true }),
+  circle(18, 13, 2, { tint: true }),
 ];
 
-export const route: Glyph = [
-  circle(6, 18, 2, { tint: true }),
-  circle(18, 6, 2, { tint: true }),
-  path("M6 16v-5a4 4 0 0 1 4-4h6"),
+/** A playhead over its line. */
+export const playhead: Glyph = [
+  path("M12 8v12"),
+  path("M7 3h10l-5 5z", { tint: true }),
 ];
 
 /** An agent: a spark and its small one. */
