@@ -121,6 +121,11 @@
   },
   {
     "categories": ["timeline"],
+    "name": "timeline-clips-demo",
+    "title": "timeline-clips-demo"
+  },
+  {
+    "categories": ["timeline"],
     "name": "block-timeline",
     "title": "block-timeline"
   },
