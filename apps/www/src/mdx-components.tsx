@@ -9,6 +9,7 @@ import { CopyButton } from "@/components/code/copy/copy-button";
 import { DocsComponentSource } from "@/components/code/source/docs-component-source";
 import { Callout } from "@/components/docs/mdx/callout";
 import { DeviceUsage } from "@/components/docs/mdx/device-usage";
+import { IconCatalog } from "@/components/docs/mdx/icon-catalog";
 import { Install, InstallAgentParts } from "@/components/docs/mdx/install";
 import { Mermaid } from "@/components/docs/mdx/mermaid";
 import {
@@ -54,6 +55,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     Control,
     DeviceControls,
     DeviceUsage,
+    IconCatalog,
     CodeBlockCommand,
     InstallAgent: InstallAgentParts,
     CodeCollapsibleWrapper,

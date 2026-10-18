@@ -1,0 +1,32 @@
+import * as glyphs from "./glyphs.ts";
+import { createIcon } from "./icon.tsx";
+
+export { glyphs };
+
+export const BotIcon = createIcon(glyphs.bot, "BotIcon");
+export const RackIcon = createIcon(glyphs.rack, "RackIcon");
+export const KnobIcon = createIcon(glyphs.knob, "KnobIcon");
+export const WaveformIcon = createIcon(glyphs.waveform, "WaveformIcon");
+export const BracesIcon = createIcon(glyphs.braces, "BracesIcon");
+export const DownloadIcon = createIcon(glyphs.download, "DownloadIcon");
+export const InfoIcon = createIcon(glyphs.info, "InfoIcon");
+export const ShapesIcon = createIcon(glyphs.shapes, "ShapesIcon");
+export const BoxIcon = createIcon(glyphs.box, "BoxIcon");
+export const RouteIcon = createIcon(glyphs.route, "RouteIcon");
+export const SparkleIcon = createIcon(glyphs.sparkle, "SparkleIcon");
+export const FlagIcon = createIcon(glyphs.flag, "FlagIcon");
+export const DropIcon = createIcon(glyphs.drop, "DropIcon");
+export const TracksIcon = createIcon(glyphs.tracks, "TracksIcon");
+export const SineIcon = createIcon(glyphs.sine, "SineIcon");
+export const SquareIcon = createIcon(glyphs.square, "SquareIcon");
+export const SawtoothIcon = createIcon(glyphs.sawtooth, "SawtoothIcon");
+export const TriangleIcon = createIcon(glyphs.triangle, "TriangleIcon");
+export const LowpassIcon = createIcon(glyphs.lowpass, "LowpassIcon");
+export const HighpassIcon = createIcon(glyphs.highpass, "HighpassIcon");
+export const BandpassIcon = createIcon(glyphs.bandpass, "BandpassIcon");
+export const NotchIcon = createIcon(glyphs.notch, "NotchIcon");
+export const LowshelfIcon = createIcon(glyphs.lowshelf, "LowshelfIcon");
+export const HighshelfIcon = createIcon(glyphs.highshelf, "HighshelfIcon");
+export const PeakIcon = createIcon(glyphs.peak, "PeakIcon");
+export const EnvelopeIcon = createIcon(glyphs.envelope, "EnvelopeIcon");
+export const GridIcon = createIcon(glyphs.grid, "GridIcon");

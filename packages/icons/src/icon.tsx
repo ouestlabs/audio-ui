@@ -1,19 +1,6 @@
 import { createElement, type SVGProps } from "react";
 import type { Glyph } from "./glyph.ts";
-
-/**
- * How heavy the stroke is, as Phosphor names its weights. `regular` is the
- * thin line, `bold` a thicker one, and `duotone` the line over a tint of the
- * same color: the weight of a current page.
- */
-export type IconWeight = "bold" | "duotone" | "regular";
-
-const STROKE_WIDTH: Record<IconWeight, number> = {
-  bold: 2.25,
-  duotone: 1.5,
-  regular: 1.5,
-};
-const TINT_OPACITY = 0.2;
+import { type IconWeight, STROKE_WIDTH, TINT_OPACITY } from "./weight.ts";
 
 export interface IconProps extends Omit<SVGProps<SVGSVGElement>, "ref"> {
   /** The width and height of the icon. @default "1em" */

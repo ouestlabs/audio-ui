@@ -1,5 +1,6 @@
 import { expandDeviceControls } from "@/lib/docs/content/device-docs";
 import { expandDeviceUsage } from "@/lib/docs/content/device-usage";
+import { expandIconCatalog } from "@/lib/docs/content/icon-docs";
 import { expandInstall } from "@/lib/docs/content/install-docs";
 import {
   mdxToMarkdown,
@@ -43,8 +44,10 @@ export async function processMdxForLLMs(content: string): Promise<string> {
   if (!content || typeof content !== "string") {
     return content || "";
   }
-  const expanded = expandDeviceUsage(
-    expandInstall(expandDeviceControls(replaceFrontmatter(content)))
+  const expanded = expandIconCatalog(
+    expandDeviceUsage(
+      expandInstall(expandDeviceControls(replaceFrontmatter(content)))
+    )
   );
   const replacements = await Promise.all(
     [...expanded.matchAll(TAG_REGEX)].map(async (match) => {

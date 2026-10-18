@@ -1,0 +1,32 @@
+---
+title: Icons
+description: "The glyphs audio/ui draws for itself: one thin stroke on a 24 grid, in three weights, named for what they draw. Search them, pick a weight and a size, then copy the SVG."
+---
+
+Audio has things a general icon set does not draw: a knob, a rack unit, the shape of a sawtooth, the response of a high shelf. These glyphs are audio/ui's own, drawn to sit together and to take the color of the text around them.
+
+<IconCatalog />
+
+## Weights
+
+Each glyph comes in three weights, picked with the `weight` prop of its icon:
+
+- `regular` is the thin line, 1.5 on the 24 grid. It is the default.
+- `bold` is a thicker line, 2.25, for a small size or a state to show.
+- `duotone` is the line over a tint of the same color. Closed shapes take the tint; a glyph made of lines has a soft shape behind it.
+
+## Use them
+
+The icons are in `@audio-ui/icons`, a package of this repository that is not published yet, and the registry draws its own shapes for now. Until it is, **Copy SVG** gives the glyph as a file's text, in the current text color, and **Download** saves it.
+
+An icon is named for what it draws, with `Icon` after: `KnobIcon`, `TracksIcon`, `SineIcon`, `LowpassIcon`. It is `1em` wide unless `size` says otherwise, and it takes the color of its text.
+
+```tsx
+import { KnobIcon } from "@audio-ui/icons";
+
+<KnobIcon className="text-muted-foreground" size={20} weight="bold" />;
+```
+
+## Draw one
+
+A new glyph is a few shapes on a 24 grid with a 2px margin, drawn with one stroke width and round ends. Mark a closed shape as tinted so it has a body in `duotone`. The package's tests draw every glyph in every weight, so a glyph that breaks one fails them.

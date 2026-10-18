@@ -104,3 +104,11 @@ export const peak: Glyph = [path("M2 17h6c3 0 3-10 4-10s1 10 4 10h6")];
 
 /** What automation draws over a lane. */
 export const envelope: Glyph = [path("M2 17h4l5-10h4c3 0 4 10 7 10")];
+
+/** Four tiles: a catalog. */
+export const grid: Glyph = [
+  rect(3, 3, 7, 7, 1.5, { tint: true }),
+  rect(14, 3, 7, 7, 1.5, { tint: true }),
+  rect(3, 14, 7, 7, 1.5, { tint: true }),
+  rect(14, 14, 7, 7, 1.5, { tint: true }),
+];
