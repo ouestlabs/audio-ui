@@ -1,4 +1,4 @@
-import { circle, type Glyph, path, rect } from "./glyph.ts";
+import { circle, curve, type Glyph, path, rect, screen } from "./glyph.ts";
 
 /** A metronome: the count before the first note. */
 export const metronome: Glyph = [
@@ -92,22 +92,34 @@ export const bot: Glyph = [
 ];
 
 /** The four shapes of an oscillator. */
-export const sine: Glyph = [path("M2 12c2-4 4-4 6 0s4 4 6 0 4-4 6 0 4 4 6 0")];
-export const square: Glyph = [path("M2 18h4V6h6v12h4V6h6")];
-export const sawtooth: Glyph = [path("M2 18l8-12v12l8-12v12")];
-export const triangle: Glyph = [path("M2 12l5-6 5 12 5-12 5 6")];
+export const sine: Glyph = [
+  screen(),
+  curve("M2 12c2-4 4-4 6 0s4 4 6 0 4-4 6 0 4 4 6 0"),
+];
+export const square: Glyph = [screen(), curve("M2 18h4V6h6v12h4V6h6")];
+export const sawtooth: Glyph = [screen(), curve("M2 18l8-12v12l8-12v12")];
+export const triangle: Glyph = [screen(), curve("M2 12l5-6 5 12 5-12 5 6")];
 
 /** The response of a filter, gain up the page and frequency across. */
-export const lowpass: Glyph = [path("M2 7h9c6 0 8 3 11 12")];
-export const highpass: Glyph = [path("M2 19c3-9 5-12 11-12h9")];
-export const bandpass: Glyph = [path("M2 19c5 0 5-13 10-13s5 13 10 13")];
-export const notch: Glyph = [path("M2 7c5 0 5 12 10 12s5-12 10-12")];
-export const lowshelf: Glyph = [path("M2 8h7c3 0 4 9 7 9h6")];
-export const highshelf: Glyph = [path("M2 17h8c3 0 4-9 7-9h5")];
-export const peak: Glyph = [path("M2 17h6c3 0 3-10 4-10s1 10 4 10h6")];
+export const lowpass: Glyph = [screen(), curve("M2 7h9c6 0 8 3 11 12")];
+export const highpass: Glyph = [screen(), curve("M2 19c3-9 5-12 11-12h9")];
+export const bandpass: Glyph = [
+  screen(),
+  curve("M2 19c5 0 5-13 10-13s5 13 10 13"),
+];
+export const notch: Glyph = [screen(), curve("M2 7c5 0 5 12 10 12s5-12 10-12")];
+export const lowshelf: Glyph = [screen(), curve("M2 8h7c3 0 4 9 7 9h6")];
+export const highshelf: Glyph = [screen(), curve("M2 17h8c3 0 4-9 7-9h5")];
+export const peak: Glyph = [
+  screen(),
+  curve("M2 17h6c3 0 3-10 4-10s1 10 4 10h6"),
+];
 
 /** What automation draws over a lane. */
-export const envelope: Glyph = [path("M2 17h4l5-10h4c3 0 4 10 7 10")];
+export const envelope: Glyph = [
+  screen(),
+  curve("M2 17h4l5-10h4c3 0 4 10 7 10"),
+];
 
 /** Four tiles: a catalog. */
 export const grid: Glyph = [
@@ -206,10 +218,64 @@ export const pianoroll: Glyph = [
 ];
 
 /** Effects: a transfer curve, an echo, a hall, a clipped wave. */
-export const compressor: Glyph = [path("M4 20l8-8c1.5-1.5 2.5-2 4-2h4")];
+export const compressor: Glyph = [
+  screen(),
+  curve("M4 20l8-8c1.5-1.5 2.5-2 4-2h4"),
+];
 export const delay: Glyph = [path("M5 6v12M10 8v8M15 10v4M20 11.5v1")];
 export const reverb: Glyph = [
   path("M5 20v-9a7 7 0 0 1 14 0v9z", { tint: true }),
   path("M12 15h.01", { knock: true }),
 ];
-export const distortion: Glyph = [path("M3 12l3-6h4l3 12h4l3-6")];
+export const distortion: Glyph = [screen(), curve("M3 12l3-6h4l3 12h4l3-6")];
+
+/** Channel strip buttons: a key, and the letter on it. */
+export const mute: Glyph = [
+  rect(4, 4, 16, 16, 4, { tint: true }),
+  path("M7.5 16.5v-9l4.5 5.5 4.5-5.5v9", { knock: true }),
+];
+export const solo: Glyph = [
+  rect(4, 4, 16, 16, 4, { tint: true }),
+  path(
+    "M15.5 9c0-1.5-1.5-2-3.5-2s-3.5.7-3.5 2.2 1.5 2 3.5 2.8 3.5 1.2 3.5 2.8-1.5 2.2-3.5 2.2-3.5-.5-3.5-2",
+    { knock: true }
+  ),
+];
+
+/** Two channels that overlap. */
+export const stereo: Glyph = [
+  circle(8.5, 12, 6, { tint: true }),
+  circle(15.5, 12, 6, { tint: true }),
+];
+
+/** A cassette: two reels in a case. */
+export const tape: Glyph = [
+  rect(3, 6, 18, 12, 2, { tint: true }),
+  circle(8.5, 12, 2, { knock: true }),
+  circle(15.5, 12, 2, { knock: true }),
+];
+
+/** A record: its label and a groove. */
+export const vinyl: Glyph = [
+  circle(12, 12, 9, { tint: true }),
+  circle(12, 12, 2.5, { knock: true }),
+  path("M12 6a6 6 0 0 1 6 6", { knock: true }),
+];
+
+/** A clip with its waveform. */
+export const clip: Glyph = [
+  rect(3, 7, 18, 10, 2, { tint: true }),
+  path("M7 12h.01M10 10v4M13 9v6M16 11v2", { knock: true }),
+];
+
+/** A line of automation with its points, on its screen. */
+export const automation: Glyph = [
+  screen(),
+  path("M6 15.5l4-4 3 2 5-5", { knock: true }),
+  circle(10, 11.5, 0.5, { knock: true }),
+  circle(13, 13.5, 0.5, { knock: true }),
+  circle(18, 8.5, 0.5, { knock: true }),
+];
+
+/** A magnet: snap to the grid. */
+export const magnet: Glyph = [path("M6 4v8a6 6 0 0 0 12 0V4M6 8h4M14 8h4")];
