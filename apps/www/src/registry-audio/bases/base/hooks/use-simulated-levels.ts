@@ -14,10 +14,10 @@ export interface SimulatedFrame {
   peaks: readonly number[];
 }
 
-function wander(current: number, elapsedMs: number) {
+function wander(current: number, elapsedMs: number, min: number, max: number) {
   const next =
     current + (Math.random() - 0.5) * WANDER_DB_PER_SECOND * (elapsedMs / 1000);
-  return Math.min(MAX_DB, Math.max(MIN_DB, next));
+  return Math.min(max, Math.max(min, next));
 }
 
 /**
@@ -25,12 +25,17 @@ function wander(current: number, elapsedMs: number) {
  * random walk per channel with a peak that holds for a moment and then
  * falls, like a real signal's. A stand-in for the levels of an `AnalyserNode`
  * (see `useAudioLevels`), so a demo meter is never at rest. A stable source,
- * so each frame costs no React render.
+ * so each frame costs no React render. `min` and `max` keep the levels
+ * between two values, in dB, for a meter with a narrower scale.
  */
-export function useSimulatedLevels(channels = 2) {
+export function useSimulatedLevels(
+  channels = 2,
+  { max = MAX_DB, min = MIN_DB }: { max?: number; min?: number } = {}
+) {
+  const start = Math.min(max, Math.max(min, START_DB));
   const frameRef = useRef<SimulatedFrame>({
-    levels: Array.from({ length: channels }, () => START_DB),
-    peaks: Array.from({ length: channels }, () => START_DB),
+    levels: Array.from({ length: channels }, () => start),
+    peaks: Array.from({ length: channels }, () => start),
   });
   const listenersRef = useRef(new Set<() => void>());
 
@@ -43,10 +48,10 @@ export function useSimulatedLevels(channels = 2) {
       last = now;
       const previous = frameRef.current;
       const levels = Array.from({ length: channels }, (_, index) =>
-        wander(previous.levels[index] ?? START_DB, elapsed)
+        wander(previous.levels[index] ?? start, elapsed, min, max)
       );
       const peaks = levels.map((level, index) => {
-        const held = previous.peaks[index] ?? MIN_DB;
+        const held = previous.peaks[index] ?? min;
         if (level >= held) {
           holdUntil[index] = now + PEAK_HOLD_MS;
           return level;
@@ -67,7 +72,7 @@ export function useSimulatedLevels(channels = 2) {
     };
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
-  }, [channels]);
+  }, [channels, max, min, start]);
 
   return useMemo(
     () => ({
