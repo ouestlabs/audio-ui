@@ -115,8 +115,8 @@
 .skin-retro .fader-control::before,
 .skin-retro .fader-control::after {
   position: absolute;
-  top: calc(var(--fader-thumb-h) / 2);
-  bottom: calc(var(--fader-thumb-h) / 2);
+  top: 0;
+  bottom: 0;
   width: 0.35rem;
   pointer-events: none;
   content: "";

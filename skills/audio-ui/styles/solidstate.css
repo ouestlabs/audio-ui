@@ -40,11 +40,30 @@
   border-color: rgb(29 32 34 / 0.55);
 }
 
-.skin-solidstate .knob:nth-child(2) {
+/* Cap colors are named, not positional: put data-cap on a knob or a button */
+.skin-solidstate [data-cap="red"] {
+  --cap: #d33a2f;
+}
+.skin-solidstate [data-cap="green"] {
+  --cap: #2f9e4f;
+}
+.skin-solidstate [data-cap="blue"] {
   --cap: #2e6fc0;
 }
-.skin-solidstate .knob:nth-child(3) {
-  --cap: #2f9e4f;
+.skin-solidstate [data-cap="brown"] {
+  --cap: #8a5a35;
+}
+.skin-solidstate [data-cap="grey"] {
+  --cap: #c9ccce;
+}
+.skin-solidstate [data-cap="orange"] {
+  --cap: #e8742c;
+}
+.skin-solidstate [data-cap="yellow"] {
+  --cap: #e5b82a;
+}
+.skin-solidstate [data-cap="black"] {
+  --cap: #2a2d30;
 }
 .skin-solidstate .knob-control {
   --knob-cap: 10%;
@@ -111,8 +130,8 @@
 .skin-solidstate .fader-control::before,
 .skin-solidstate .fader-control::after {
   position: absolute;
-  top: calc(var(--fader-thumb-h) / 2);
-  bottom: calc(var(--fader-thumb-h) / 2);
+  top: 0;
+  bottom: 0;
   width: 0.35rem;
   pointer-events: none;
   content: "";
@@ -219,7 +238,7 @@
 .skin-solidstate .toggle[aria-pressed="true"] {
   box-shadow:
     inset 0 2px 4px rgb(0 0 0 / 0.4),
-    0 0 10px rgb(224 50 42 / 0.5);
+    0 0 10px color-mix(in oklab, var(--cap) 60%, transparent);
   filter: none;
   transform: translateY(1px);
 }
@@ -307,13 +326,13 @@
   width: 5px;
   height: 5px;
   content: "";
-  background: #3a1210;
+  background: color-mix(in oklab, var(--cap) 25%, black);
   border-radius: 50%;
   box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.5);
 }
 .skin-solidstate .toggle[aria-pressed="true"]::before {
-  background: #ff5a4a;
-  box-shadow: 0 0 6px 1px rgb(255 90 74 / 0.8);
+  background: color-mix(in oklab, var(--cap) 55%, white);
+  box-shadow: 0 0 6px 1px color-mix(in oklab, var(--cap) 80%, transparent);
 }
 
 /* A print line above the fader: dB legends are drawn by the .scale beside it, in the same ink */

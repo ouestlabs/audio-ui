@@ -349,7 +349,7 @@ Read [hardware.md](./hardware.md) before composing a retro panel: it explains wh
 - **y2k** (`styles/y2k.css`): translucent candy plastic. A pale blue shell, teal caps with a gloss band, one orange accent, large radii.
 - **console** (`styles/console.css`): a mixing console channel. A slate panel, caps colored by section (the second and third knob change color), a long fader with ticks and a lamp ladder.
 - **tube** (`styles/tube.css`): a vintage tube compressor. Warm grey enamel, cream print at 5.2:1, black knurled caps with a white line, an amber lamp; pair it with the `Vu` needle.
-- **solidstate** (`styles/solidstate.css`): a large-format console channel. Pale grey enamel, dark print, caps colored by section (red, blue, green), tall dark fader caps with a colored line, an LED ladder.
+- **solidstate** (`styles/solidstate.css`; color a cap with `data-cap="red"`, `green`, `blue`, `brown`, `grey`, `orange`, `yellow` or `black` on a knob or a button, EQ high red, high-mid green, low-mid blue, low brown): a large-format console channel. Pale grey enamel, dark print, caps colored by section (red, blue, green), tall dark fader caps with a colored line, an LED ladder.
 - **plugin** (`styles/plugin.css`): a glossy software plugin window. Light blue-grey metal, chunky white knobs with a blue value ring, dark glass displays, rounded white keys.
 - **blackface** (`styles/blackface.css`): a black-face rack unit. A brushed black faceplate in a silver trim, silver knurled caps, a big VU (the VU width variable), engraved white print, a red lamp.
 - **synth70** (`styles/synth70.css`): a 70s monophonic synth. A black panel between wood cheeks, white print, an amber lamp, rocker toggles.
@@ -382,6 +382,15 @@ Focus lands on the input nested in each thumb, so draw the ring on the thumb wit
 ## Not in the kit
 
 The kit covers Knob, Fader, Meter, XYPad, Pad, Piano, Envelope, Sequencer, Waveform and Plot. `Timeline` and `PianoRoll` have no skin yet: with shadcn, install their styled elements (`timeline`, `piano-roll`, [components.md](./components.md)); without it, read their component pages and style the parts with the tokens of the skin you chose (surface, ink, accent, hairlines), the way `Envelope` and `Plot` are styled in `styles/base.css`. Registry elements (`@audio-ui/knob`, `fader`, `meter`...) take `size`, `marks` and `orientation`, not these class names.
+
+## Layout facts
+
+- The panel carries the skin class itself (`<section class="panel skin-solidstate">`), so a descendant selector such as `.skin-solidstate .strip` is right only for something inside it.
+- A fader cap overhangs the control by half its height at each end: leave `calc(var(--fader-thumb-h) / 2)` free above and below, or it covers the buttons next to it.
+- A clip lamp is yours: `Meter` sets `data-clipping` on each channel, not on the Root. Subscribe to the same source in a leaf, set `data-on` on the lamp when a level passes the threshold and clear it after 400 ms.
+- `Fader.Root`'s `onValueChange` receives a number, or an array for a range fader: the kit's single fader sends a number.
+- Several knobs share a label ("Gain" four times): put a `.visually-hidden` prefix inside `Knob.Label` (`<span class="visually-hidden">HF </span>Gain`) so each slider has a distinct name.
+- A fixed hardware face does not scale with `rem` alone: use the `zoom` steps of [hardware.md](./hardware.md) at narrow widths.
 
 ## Controls beyond the kit's parts
 

@@ -107,8 +107,8 @@
 .skin-console .fader-control::before,
 .skin-console .fader-control::after {
   position: absolute;
-  top: calc(var(--fader-thumb-h) / 2);
-  bottom: calc(var(--fader-thumb-h) / 2);
+  top: 0;
+  bottom: 0;
   width: 0.3rem;
   pointer-events: none;
   content: "";

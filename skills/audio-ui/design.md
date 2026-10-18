@@ -8,7 +8,7 @@ Before writing CSS, state one sentence: *"Direction: retro hardware, enamel pane
 
 | User asks for | Direction | Kit |
 | --- | --- | --- |
-| Retro, vintage, analog, skeuomorphic, hardware, synth, tube, console | Retro | `styles/retro.css` (a dark faceplate), taste in [hardware.md](./hardware.md) |
+| Retro, vintage, analog, skeuomorphic, hardware, synth | Retro | `styles/retro.css` (a dark faceplate), taste in [hardware.md](./hardware.md) |
 | A cream or silver hardware panel: drum machine, tape deck, sampler | Retro, light | `styles/tape.css` (with `styles/materials.css`), taste in [hardware.md](./hardware.md) |
 | A large-format studio console channel: strip, desk, colored caps by section | Console | `styles/solidstate.css` (with `styles/materials.css`) |
 | A black-face rack unit: limiter, compressor, preamp | Rack | `styles/blackface.css` (with `styles/materials.css`), `Vu` for the needle |
