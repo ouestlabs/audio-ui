@@ -38,7 +38,7 @@ No dependencies. The framework-free controllers of every primitive, for Vue, Sve
 
 ## MCP server
 
-audio/ui runs a remote MCP server (Streamable HTTP, no auth): `https://www.audio-ui.dev/mcp`. Tools: `list_components`, `get_component_docs`, `search_catalog`.
+audio/ui runs a remote MCP server (Streamable HTTP, no auth): `https://www.audio-ui.dev/mcp`. Tools: `search_docs`, `list_components`, `get_component_docs`, `search_catalog`.
 
 - Claude Code: `claude mcp add --transport http audio-ui https://www.audio-ui.dev/mcp`
 - Cursor, VS Code and others: add a server of type `http` with that URL.

@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 
+import { closest, searchDocs } from "@/lib/agents/doc-search";
 import {
   pickSection,
   sectionNames,
@@ -18,6 +19,11 @@ const COMPONENT_DOCS_PREFIX = "components/base/";
 const SEARCH_LIMIT = 25;
 /** A whole page longer than this is cut, so one call stays a few thousand tokens. */
 const CHARACTER_LIMIT = 25_000;
+const DOC_HITS = 8;
+const KIND_OF_PATH = /\((\w+)\)/;
+
+const INSTRUCTIONS =
+  "audio/ui is a React library of audio interface components: elements (knob, fader, meter, piano), workstation parts (timeline, piano roll, mixer) and devices (compressor, reverb, synth). To find something, call search_docs with the question in plain words, or list_components to browse. Then call get_component_docs with the component and the section the hit names: fetch one section, not the whole page, which can be 100 KB. Every result carries the command that installs the component. Use search_catalog for a ready-made block, such as a device panel or a mixer.";
 
 const readOnly = Object.freeze({
   destructiveHint: false,
@@ -58,35 +64,91 @@ function fitText(markdown: string, hint = "") {
 }
 
 export function createAudioUiMcpServer() {
-  const server = new McpServer({
-    name: "audio-ui-mcp-server",
-    title: "audio/ui",
-    version: "1.0.0",
-    websiteUrl: siteConfig.url,
-  });
+  const server = new McpServer(
+    {
+      name: "audio-ui-mcp-server",
+      title: "audio/ui",
+      version: "1.0.0",
+      websiteUrl: siteConfig.url,
+    },
+    { instructions: INSTRUCTIONS }
+  );
 
   server.registerTool(
     "list_components",
     {
       annotations: readOnly,
       description:
-        "List every audio/ui component page (controls, displays, workstation parts and devices). Returns an array of { name, title, description, docs, install }; each name works with get_component_docs. Start here to see what exists.",
-      inputSchema: {},
+        "List the audio/ui component pages, optionally one kind: elements, workstation or devices. Returns an array of { name, kind, title, description, docs, install }; each name works with get_component_docs. To find a component by what it does, use search_docs instead.",
+      inputSchema: {
+        kind: z
+          .enum(["elements", "workstation", "devices"])
+          .optional()
+          .describe(
+            "Only this kind: elements (knob, fader, meter, piano), workstation (timeline, piano roll, mixer) or devices (compressor, reverb, synth). Empty lists all."
+          ),
+      },
       title: "List audio/ui components",
     },
-    () =>
+    ({ kind }) =>
       text(
-        componentPages().map((page) => {
-          const slug = page.slugs.at(-1) ?? "";
-          return {
-            description: page.data.description,
-            docs: `${siteConfig.url}${page.url}`,
-            install: installCommand(slug),
-            name: slug,
-            title: page.data.title,
-          };
-        })
+        componentPages()
+          .map((page) => {
+            const slug = page.slugs.at(-1) ?? "";
+            return {
+              description: page.data.description,
+              docs: `${siteConfig.url}${page.url}`,
+              install: installCommand(slug),
+              kind: KIND_OF_PATH.exec(page.path)?.[1],
+              name: slug,
+              title: page.data.title,
+            };
+          })
+          .filter((item) => !kind || item.kind === kind)
       )
+  );
+
+  server.registerTool(
+    "search_docs",
+    {
+      annotations: readOnly,
+      description:
+        "Search the text of the audio/ui component docs, such as 'log scale frequency knob' or 'drag handle on a plot'. Returns hits as { component, section, heading, snippet }, best first; pass component and section to get_component_docs to read that part. Returns an empty list when nothing matches.",
+      inputSchema: {
+        limit: z
+          .number()
+          .int()
+          .min(1)
+          .max(20)
+          .default(DOC_HITS)
+          .describe("Hits to return, 1 to 20."),
+        query: z
+          .string()
+          .min(2)
+          .describe("Words about what you want to build or understand."),
+      },
+      title: "Search the docs",
+    },
+    async ({ limit, query }) => {
+      const pages = await Promise.all(
+        componentPages().map(async (page) => ({
+          markdown: await readRawDoc(page.path),
+          name: page.slugs.at(-1) ?? "",
+        }))
+      );
+      const hits = searchDocs(pages, query, limit).map(
+        ({ score: _score, ...hit }) => hit
+      );
+      return text(
+        hits.length > 0
+          ? { hits, total: hits.length }
+          : {
+              hint: "Nothing matched. Try fewer or different words, or browse with list_components.",
+              hits,
+              total: 0,
+            }
+      );
+    }
   );
 
   server.registerTool(
@@ -113,11 +175,12 @@ export function createAudioUiMcpServer() {
       const page = componentPages().find((p) => p.slugs.at(-1) === slug);
 
       if (!page) {
-        const known = componentPages()
-          .map((p) => p.slugs.at(-1))
-          .join(", ");
+        const names = componentPages().map((p) => p.slugs.at(-1) ?? "");
+        const near = closest(name, names);
         return {
-          ...text(`No component named '${name}'. Available: ${known}.`),
+          ...text(
+            `No component named '${name}'. ${near.length > 0 ? `Did you mean: ${near.join(", ")}? ` : ""}Use search_docs to find a component by what it does, or list_components to browse.`
+          ),
           isError: true,
         };
       }
