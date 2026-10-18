@@ -1,25 +1,18 @@
 ---
-title: Timeline
-description: A zoomable timeline for arrangement views and editors, with a ruler that seeks, lanes and a playhead.
+title: Arrangement
+description: "A DAW's arrangement: a zoomable timeline with a ruler that seeks and lanes of clips, and the parts around it, its state, clips, tracks, locators, automation and MIDI playback, each installed on its own."
 component: true
 base: base
 ---
 
-<ComponentPreview styleName="base-nova" name="timeline-clips-demo" />
+<ComponentPreview styleName="base-nova" name="block-timeline" />
 
-The base for an arrangement view, a clip editor or a piano roll. The preview is the timeline alone: a loop, a ruler and two tracks with clips. A clip let go over another covers it, as `coverClips` does (see Clips below): drop Fill inside Groove and Groove is cut in two. For the whole arrangement around it, with tracks, mixes, selection and undo, see the [Arrangement editor](/docs/components/base/arrangement-editor). The registry component wraps the `Timeline` primitive from `@audio-ui/react`. The timeline has no notion of tempo: its units are whatever you count in (seconds, beats, pulses or steps). Musical time comes from the `musical-time` lib.
-
-## Overview
-
-- **Units and zoom:** `duration` is the length in your units, and `zoom` is the number of pixels per unit. Without `zoom`, the timeline fits its width. With it, every lane is as long as the timeline and the viewport scrolls.
-- **Zooming:** Cmd/Ctrl + scroll, or a trackpad pinch, zooms around the pointer. Every zoom change keeps its anchor point in place, or the middle of the view when there is none.
-- **Grid:** with a `snapStep`, the ruler snaps to the grid. Hold Cmd/Ctrl to place the playhead off the grid, and Shift to scrub four times finer.
-- **Playback:** pass a live `source` and every playhead follows it in the DOM, without a React render per frame.
-- **Ranges:** a `TimelineRange` is a stretch of the timeline, such as a loop, a selection or a clip. Drag it to move it, drag a handle to resize it, or, with `drawable`, drag across an empty lane to draw a new one. Ranges snap to the grid.
-- **Navigator:** `TimelineNavigator` shows the whole timeline as one bar, with the visible part inside it. Drag the window to scroll, drag an edge to zoom, and double-click to show everything. With `scrollbar="hidden"` on the viewport, it replaces the scrollbar.
-- **Accessibility:** the ruler, each range and range handle, and the navigator's window and edges hold a native `<input type="range">`, so every pointer action has a keyboard equivalent. The ruler's input spans the timeline: it takes focus, carries `aria-label` and announces the position (or the text from `getAriaValueText`, such as "Bar 3, beat 2"). The arrow keys move by `step`, <kbd>Page Up</kbd> / <kbd>Page Down</kbd> and Shift by `largeStep`, and <kbd>Home</kbd> / <kbd>End</kbd> go to the ends.
+An arrangement is tracks of clips along a song. It comes in two layers that install together and apart. The **timeline** draws and moves the clips on a zoomable ruler: lanes, ranges, a playhead and a navigator, with no notion of tempo. The **arrangement parts** hold what a DAW's arrangement needs around it: the state, the clips, track reordering, locators and time signatures, automation and MIDI playback. Each is a file you own, takes its state as values and reports changes through callbacks, so the arrangement can live in your own store and play through an engine of your own.
 
 ## Installation
+
+The whole arrangement installs with `npx shadcn@latest add @audio-ui/arrangement-editor`: every part below, with the timeline. A part installs alone by its name (`@audio-ui/arranged-clip`, `@audio-ui/use-track-reorder`…). The preview above is `@audio-ui/block-timeline`, which wires them into a screen. The tabs below are the timeline on its own.
+
 
 <CodeTabs>
 
@@ -63,13 +56,29 @@ npm install @audio-ui/react
 
 <TabsContent value="agent">
 
-<InstallAgent name="timeline" />
+<InstallAgent name="arrangement-editor" />
 
 </TabsContent>
 
 </CodeTabs>
 
-## Anatomy
+## The timeline
+
+<ComponentPreview styleName="base-nova" name="timeline-clips-demo" />
+
+The preview is the timeline alone: a loop, a ruler and two tracks with clips. A clip let go over another covers it, as `coverClips` does (see Clips below): drop Fill inside Groove and Groove is cut in two. The registry component wraps the `Timeline` primitive from `@audio-ui/react`. The timeline has no notion of tempo: its units are whatever you count in (seconds, beats, pulses or steps). Musical time comes from the `musical-time` lib.
+
+### Overview
+
+- **Units and zoom:** `duration` is the length in your units, and `zoom` is the number of pixels per unit. Without `zoom`, the timeline fits its width. With it, every lane is as long as the timeline and the viewport scrolls.
+- **Zooming:** Cmd/Ctrl + scroll, or a trackpad pinch, zooms around the pointer. Every zoom change keeps its anchor point in place, or the middle of the view when there is none.
+- **Grid:** with a `snapStep`, the ruler snaps to the grid. Hold Cmd/Ctrl to place the playhead off the grid, and Shift to scrub four times finer.
+- **Playback:** pass a live `source` and every playhead follows it in the DOM, without a React render per frame.
+- **Ranges:** a `TimelineRange` is a stretch of the timeline, such as a loop, a selection or a clip. Drag it to move it, drag a handle to resize it, or, with `drawable`, drag across an empty lane to draw a new one. Ranges snap to the grid.
+- **Navigator:** `TimelineNavigator` shows the whole timeline as one bar, with the visible part inside it. Drag the window to scroll, drag an edge to zoom, and double-click to show everything. With `scrollbar="hidden"` on the viewport, it replaces the scrollbar.
+- **Accessibility:** the ruler, each range and range handle, and the navigator's window and edges hold a native `<input type="range">`, so every pointer action has a keyboard equivalent. The ruler's input spans the timeline: it takes focus, carries `aria-label` and announces the position (or the text from `getAriaValueText`, such as "Bar 3, beat 2"). The arrow keys move by `step`, <kbd>Page Up</kbd> / <kbd>Page Down</kbd> and Shift by `largeStep`, and <kbd>Home</kbd> / <kbd>End</kbd> go to the ends.
+
+### Anatomy
 
 Import the primitive and assemble its parts.
 
@@ -113,7 +122,7 @@ import { Timeline } from "@audio-ui/react";
 </Timeline.Root>
 ```
 
-## Usage
+### Usage
 
 ```tsx
 import {
@@ -158,7 +167,7 @@ const snapStep = gridInterval("adaptive", zoom, DEFAULT_TEMPO);
 </Timeline>
 ```
 
-## Ranges
+### Ranges
 
 ```tsx
 const [loop, setLoop] = useState<readonly [number, number]>([8, 16]);
@@ -173,7 +182,7 @@ const [loop, setLoop] = useState<readonly [number, number]>([8, 16]);
 
 The range's own input moves it with Left and Right, by the timeline's `step`, and with Up and Down by its own length; Cmd/Ctrl + Left and Right shorten or lengthen it by a step, Cmd/Ctrl + Up and Down double or halve it; each handle's input moves its edge, which stops `minLength` short of the other one (the grid step by default). `onValueChange` receives `[start, end]` and `eventDetails` with the `edge` that moved (`"start"`, `"end"` or `"both"`) and the `reason` (`"drag"`, `"draw"`, `"keyboard"` or `"input-change"`). Leave the handles out for a range that only moves, or pass `movable={false}` for one that only resizes.
 
-## Tracks
+### Tracks
 
 A track is a row: a header beside a lane. `Timeline.Track` holds the row, `Timeline.TrackHeader` is the strip that names it and stays at the left edge while the lane scrolls, and `Timeline.TrackResizeHandle` sets its height. You hold the height: leave it out and the row shares the room it is given; set it and the row keeps it.
 
@@ -197,7 +206,7 @@ You put the header's controls in it, such as solo, mute and gain. The track does
 
 The block reorders tracks by their grip, the bar at the track's left edge: press it and drag. A copy of the track's header follows the pointer, the dragged track stays in place faded, and a line marks the place it would land in. Near the top or bottom of a view that scrolls, the view scrolls on its own while the track is held. The arrow keys move a focused grip one place up or down, and every move is one undo step with its clips. The move is `moveTrack(id, index)` in `useArrangement`; it uses a pointer drag rather than the browser's drag and drop, so it does not depend on how the browser handles a drag.
 
-## Clips
+### Clips
 
 A clip is a stretch of a source (a recording, a pattern) laid on a track. It is a range that knows about its source: trimming its start moves where in the source it begins, so its content stays where it is, and it cannot show more than the source holds.
 
@@ -238,19 +247,19 @@ Laying a clip where others already are is `coverClips(clips, placed, { duration 
 
 Cutting, copying and the like are plain functions on the clip, for the model behind your clips: `splitClip(clip, at)` returns the two pieces (or `null` when `at` leaves one too short), and `moveClip`, `trimClipStart`, `trimClipEnd`, `setClipFadeIn`, `setClipFadeOut`, `setClipFadeShape` and `duplicateClip` return the clip as it would end up, within the limits you give them.
 
-### Many clips
+#### Many clips
 
 Dragging one clip among 1 000 takes about a millisecond of script, and the playhead moves outside React, so it costs no render. The real cost is rendering every clip again whenever one moves, which happens when the clip component is not memoized. Put one clip in a `React.memo` component with stable props (the clip's own `value`, callbacks that take its id), so React skips every clip a drag did not touch.
 
-### Selecting several clips
+#### Selecting several clips
 
 The primitive keeps no selection: `selected` and `onSelectedChange` are yours, so a selection is any set of ids you keep. `onSelectedChange` fires when a press selects a clip, and again on a press with Shift, Cmd or Ctrl held (read `eventDetails.event`), which is how you add to a selection or take from it. A touch screen has no modifier keys: give the clip `additive` (from a "select several" mode of your own) and every press is reported, so a press adds a clip to the selection or takes it from it. To move a group, read `eventDetails.delta` on a move, how far the dragged clip is from where the drag began, and move each other selected clip by the same amount from where it was when the drag began; `moveClip` keeps each on the timeline. For the group to follow the clip up and down too, `onDragOffsetChange` reports how far it is dragged vertically, in px, and 0 when the drag ends: shift the other selected clips by that much. A drop on another lane then moves each by as many lanes as the dragged one did. The registry's arrangement block does all of this, with Cmd/Ctrl + A to select every clip and Shift + drag across bare lane to select the clips a rectangle touches (it measures each clip's `getBoundingClientRect()`, so it needs nothing from the primitive).
 
-### The cursor
+#### The cursor
 
 A `Timeline.Lane` with `seekable` puts the position where a press lands on its bare area, as the ruler does, and a drag scrubs it. Presses on the clips in it go to the clips. The cursor can then go anywhere along a track, and your track header selects the whole track. A split is then `splitClip(clip, position)` on the selected clip, or on each clip of the selected track that the cursor is over.
 
-## Navigator
+### Navigator
 
 ```tsx
 <Timeline zoom={zoom} onZoomChange={setZoom} duration={32}>
@@ -261,7 +270,7 @@ A `Timeline.Lane` with `seekable` puts the position where a press lands on its b
 
 Place it anywhere inside the timeline, outside the viewport. Dragging an edge zooms while holding the other edge in place, through `onZoomChange` with `reason: "drag"`; a double-click fits the whole timeline with `reason: "double-click"`.
 
-## Musical time
+### Musical time
 
 `@audio-ui/core/time` turns a tempo into what a timeline needs, in seconds:
 
@@ -271,17 +280,211 @@ Place it anywhere inside the timeline, outside the viewport. Dragging an edge zo
 - `gridLabel(seconds, tempo)` names an interval the way a grid readout does (`"1 bar"`, `"1/16"`, `"1/8T"`), so the adaptive grid reads out the division it uses, and a menu and a readout always name a grid the same way.
 - `metronomeRhythmSeconds(rhythm, tempo)` is the interval of a click rhythm (`"1/8"`, `"1/8t"`, …), or `null` for `"auto"`, which follows the beat.
 
-## An arrangement
-
-The arrangement block, the preview above, is a timeline with tracks of clips, locators, time signatures, automation and MIDI clips. Its parts, its state, its keys and its undo are on the [Arrangement editor](/docs/components/base/arrangement-editor) page.
-
-## Placing your own parts
+### Placing your own parts
 
 Every lane sets a `--timeline-unit` CSS variable, the width of one unit. Parts are placed with it, so anything you draw follows the zoom the same way:
 
 ```tsx
 <div style={{ left: "calc(var(--timeline-unit) * 12)", position: "absolute" }} />
 ```
+
+
+## The arrangement
+
+The parts on this page hold the arrangement and fill in what a DAW's arrangement needs around the timeline.
+
+### The state
+
+- `arrangement` (`npx shadcn@latest add @audio-ui/arrangement`) is the document: the types of a clip, a track and a mix, and what reads them. `clipReach` is how far a clip can stretch, `playedNotes` where a MIDI clip's notes play, and `mixAt` what a track plays at a point of the song. Its edits ship with `use-arrangement`, in `lib/arrangement-state`: `lay` puts a clip on a track so it covers what is under it, `land` drops a dragged group (or its copies) on another track, `shiftTrack` and `otherSelected` are what a group drop needs, and `scaleValue` rescales a clip when the tempo changes. Tracks are passed as an order of ids, so nothing assumes how many there are.
+- `use-arrangement` is the state: tracks, clips, selection, each track's mix, its height, the tempo, the time signatures, the locators and the loop, and every operation on them. It keeps undo and redo over all of them together.
+- `use-simulated-clock` is a clock for a timeline that makes no sound, as a live source that loops between two points (to start sound at a position, `use-transport-clock` schedules against the audio clock), and `use-marquee-selection` is the rectangle that selects the clips it touches.
+
+```tsx
+const arrangement = useArrangement({
+  duration, // the length of the song in seconds when it starts; a change of tempo scales it
+  initialClips,
+  initialLocators, // { at, name }[], in seconds
+  initialLoop, // { on, range: [start, end] }
+  initialTracks, // { id, name, color, mix? }[]
+  tempo, // { bpm, beatsPerBar, beatUnit }
+});
+
+arrangement.clips; // what the arrangement holds, with tracks, tempo, signatures, locators, loop and duration
+arrangement.dispatch({ type: "add-track" }); // every change is a command; it returns the state after it
+arrangement.dispatch({ type: "undo" });
+```
+
+The state is a plain value and a change is a command of `ArrangementCommand`, which `lib/arrangement-state`'s `apply(state, command)` takes: a pure function, so the arrangement runs, and is tested, with no React. The hook holds the state and returns it with `dispatch`, which returns the state after the command. A command that changes nothing returns the same state and adds no step to the history.
+
+- **Clips**: `add-clip`, `change-clip` (what `Timeline.Clip` reports on a drag, by `id`), `commit-clip` (lands the drag, on another track too), `edit-clip`, `remove-clip`, `rename-clip`, `set-fade-shape` (a fade's curve, as one undo step), `crop-clip`, `clip-action` (a clip's menu: duplicate, split, switch off, delete), `duplicate-selection` and `split-cursor` (`at` and the shortest piece `step` come with the command, since the host knows the playhead). A drag is a burst that `settle-clip-edit` closes into one step.
+- **Selection**: `select-clip` (`id`, `additive`), `select-clips`, `select-all`, `select-track` (`id`, `additive`), `clear-selection` and `toggle-selected`. The hook returns `selectedIds`, `selectedTracks` and `selection`.
+- **Tracks**: `add-track`, `remove-track`, `rename-track`, `duplicate-track` (the track with its clips and its mix, placed after it), `move-track`, `set-mix` (a switch: mute, solo) and `change-mix` (a drag of the gain or the pan, closed by `settle-clip-edit`), and `set-track-color`. A track's mix is its `mix`, so it is undoable; `mixOf(track)` is what a header reads. `heights`, `resizeTrack`, `folded` and `toggleFold` stay in the hook, since they are the view and not the document. `copyOf(time)` is a read, not a command: what a copy would hold.
+- **Time**: `clear-time`, `paste`, `remove-time`, `insert-time`, `consolidate-time` and `fade-time` act on a time selection (`{ range, tracks }`), and `copyOf(time)` copies one; `lib/arrangement-state` holds them as pure functions: `copyTime`, `clearTime`, `pasteTime`, `deleteTime`, `openTime`, `consolidate`, with `crossfade` for a fade where two clips meet, given to both.
+- **Tempo, signatures, locators and the loop**: `set-tempo` keeps the musical positions, so every time in the document is scaled to the new bar and a clip three bars long stays three bars long, as one undo step, since each step of the history carries its own tempo. Then `add-signature`, `set-signature`, `move-signature` and `remove-signature`, `add-locator`, `rename-locator` and `remove-locator`, `set-loop` (`{ on, range }`, either one) and `change-loop`, a drag of the range that is one step once `settle-clip-edit` closes it, and `set-duration`, which changes the song's length without a step. The hook returns `tempo`, `signatures`, `locators`, `loop` and `duration`.
+- **History**: `undo` and `redo`, and `canUndo` and `canRedo`.
+
+### Arranged clips
+
+`ArrangedClip` (`npx shadcn@latest add @audio-ui/arranged-clip`) is a clip of the arrangement on its track's lane: drag its title bar to move it (with Alt, a copy), its edges to trim it into its source, its top corners to fade it, and pick a fade's curve from the menu of its handle. Double-click its title to rename it in place; right-click it for its menu (edit, rename, duplicate, split at the cursor, switch off, delete), which selects it first. A MIDI clip draws its notes across its body, and a looped clip has no end while a warped one lasts as long as its warp stretches its source: `clipReach(clip)` in `lib/arrangement` gives how far a clip can be stretched, `undefined` when it loops.
+
+```tsx
+import { ArrangedClip, ArrangedClipGhost } from "@/components/audio-ui/arranged-clip";
+
+<TimelineLane>
+  {clips
+    .filter((clip) => clip.track === track.id)
+    .map((clip) => (
+      <ArrangedClip
+        clip={clip}
+        describe={describe}
+        key={clip.id}
+        onAction={(action, id) =>
+          arrangement.dispatch({
+            type: "clip-action",
+            action,
+            id,
+            at: clock.getSnapshot(),
+            step: bar / 4,
+          })
+        }
+        onChange={(id, value, details) =>
+          arrangement.dispatch({ type: "change-clip", id, value, details })
+        }
+        onCommit={(id, details) =>
+          arrangement.dispatch({
+            type: "commit-clip",
+            id,
+            copy: Boolean(details.copy),
+            track: details.lane instanceof HTMLElement ? details.lane.dataset.track : undefined,
+          })
+        }
+        onFadeShape={(id, edge, shape) =>
+          arrangement.dispatch({ type: "set-fade-shape", id, edge, shape })
+        }
+        onRemove={(id) => arrangement.dispatch({ type: "remove-clip", id })}
+        onRename={(id, name) =>
+          arrangement.dispatch({ type: "rename-clip", id, name })
+        }
+        onSelect={(id, additive) =>
+          arrangement.dispatch({ type: "select-clip", id, additive })
+        }
+        selected={arrangement.selectedIds.includes(clip.id)}
+        swatch={arrangement.mixOf(track).color}
+        trackName={track.name}
+      />
+    ))}
+</TimelineLane>;
+```
+
+While a clip is dragged with Alt, `arrangement.copying` lists the originals: draw an `ArrangedClipGhost` for each, where it stays. `lift` and `onLift` move the rest of a selection up or down with the clip being dragged across tracks.
+
+With snapping on, a dragged clip or loop also lands on the edges of the other clips, the locators and the loop, through `snapPoints`. Where two clips meet, the fade-out of one and the fade-in of the next move together, as a crossfade, and a dashed line shows how far a fade being dragged can go.
+
+### Arranged tracks
+
+A track's header is `TimelineTrackControls`, from the timeline: its name, gain, pan, mute, solo, color, fold and menu. `useTrackReorder` (`npx shadcn@latest add @audio-ui/use-track-reorder`) moves tracks: give each track a grip, and drag the grip, or press Up or Down on it.
+
+```tsx
+import { useTrackReorder } from "@/hooks/use-track-reorder";
+
+const reorder = useTrackReorder({
+  onMove: arrangement.moveTrack, // (id, index)
+  order: tracks.map((track) => track.id),
+});
+
+<button aria-label={`Move ${track.name}`} type="button" {...reorder.gripProps(track.id)}>
+  ⋮⋮
+</button>;
+```
+
+The grip sits in its track's row, inside the `Timeline`. While a track is dragged, `draggingId` is the track and `drop` (`{ id, edge }`) is the edge of the row it would land on, to draw a line there; `ghost` is the box of its header, and `ghostRef` goes on the copy you draw under the pointer, fixed, which the drag moves without a render. The view scrolls when the pointer nears its top or bottom edge.
+
+### Locators and time signatures
+
+`TimelineLocator` and `TimelineSignature` (`npx shadcn@latest add @audio-ui/timeline-markers`) go in a `TimelineMark` on a lane of their own. A locator is a named point: press it to put the cursor there, double-click it or press Enter to rename it, Delete to take it away. The block's M adds one at the cursor, and Alt with the arrows jumps from one to the next.
+
+```tsx
+import { TimelineLocator, TimelineSignature } from "@/components/audio-ui/timeline-markers";
+
+<TimelineLane>
+  {locators.map((locator) => (
+    <TimelineMark key={locator.at} value={locator.at}>
+      <TimelineLocator
+        locator={locator}
+        onJump={seek}
+        onRemove={removeLocator}
+        onRename={renameLocator}
+      />
+    </TimelineMark>
+  ))}
+</TimelineLane>;
+```
+
+The Signature strip holds time-signature changes: its + adds one at the cursor, in the signature already there, ready to be typed (such as 7/8). From a change on, bars are counted in its signature: the ruler's numbers, the hatched partial bar a change cuts short, and the position in the transport all follow, through `barsOf` and `barsBeatsWith` from `@audio-ui/core/time`. On a change, Left and Right move it by a grid step, Enter edits it and Delete takes it away. The grid's bar-long divisions and the tempo stay those of the song's start. Which change is being typed is yours to hold (`editing` and `onEditingChange`), so a change just added opens ready to type. `parseSignature("7/8")` reads what is typed.
+
+### Automation
+
+Press **A**, or the automation button, for automation mode: each track's header gets a chooser of what its lane shows, Volume or Pan, and its lane the envelope of that parameter over its clips (`automation-envelope`, `npx shadcn@latest add @audio-ui/automation-envelope`). Until the track has one, the line stands faint at the mix's value; double-click it to add a point, drag a point to move it on the grid (its level stays free), drag the small handle on a segment to bend it, and double-click a point to take it away. Beside the line, a press reaches the lane and the clips as before. A MIDI track's channel follows its envelopes as it plays, glided ahead on the audio clock. Moving an automated gain or pan by hand overrides it: the envelope greys, the mix plays, and **Re-enable automation** in the toolbar (or drawing on the envelope) brings it back. In `lib/arrangement`, a track keeps its `automation` per parameter as points across the whole arrangement, `x` from 0 to 1, so a tempo change keeps them in place; `automationAt` reads one, `volumeGain` and `panPosition` turn its values into a gain and a pan, and `mixAt` gives what a track plays at a point of the song.
+
+`TrackAutomationChooser` and `TrackAutomation` (`npx shadcn@latest add @audio-ui/track-automation`) are those two parts: the chooser goes in the track's header (`TimelineTrackControls` takes it as children), the envelope in its lane. `AUTOMATED_PARAMETERS` lists what a track automates, Volume and Pan.
+
+### MIDI clips
+
+A track can also hold MIDI: Bass and Keys are MIDI tracks, and **+ MIDI** under the tracks adds one. A MIDI clip draws its notes across its body and, picked, opens on a piano roll in the clip panel (`midi-clip-panel`, `npx shadcn@latest add @audio-ui/midi-clip-panel`), with the same strip and Clip and Loop boxes (Loop adds Dupl. Loop, which plays the loop's notes again after it) and a Notes box (transpose, invert, reverse, legato, ×2, ÷2, humanize and velocity ramps, on the selected notes or every note): draw notes a grid step at a time, drag the loop brace on its ruler, move, stretch and edit them as in the [piano roll](/docs/components/base/piano-roll), and each edit is one undo step of the arrangement. Double-click a bare MIDI lane for an empty clip a bar long, which loops as it is stretched. Unlike the recordings, MIDI clips are heard: while the arrangement plays, their notes go to a synth, scheduled ahead on the audio clock, on the tracks that are not muted or outside a solo, each MIDI track through a channel of its own that its header's gain and pan set. In `lib/arrangement`, a track's `kind` is `"audio"` or `"midi"`, a MIDI clip keeps its `notes` in its source's time, and `playedNotes` gives where they play through the clip's offset and loop.
+
+`useMidiPlayback` (`npx shadcn@latest add @audio-ui/use-midi-playback`) plays them. Give it the clips, the tracks, the arrangement's clock and whether it plays; `audible` says whether a track is heard and `levelsAt` gives a track's gain and pan at a time, from its mix or its automation. It returns `onNoteOn` and `onNoteOff` for a MIDI clip's editor, which sound what it auditions. Its voices and its bus are the Audio engine's [Synthesis](/docs/engine/synthesis) and [Output](/docs/engine/output); with an engine of your own, leave the hook out and play the clips from `playedNotes`.
+
+### The clip panel
+
+Under the tracks, the clip panel (`clip-panel`, `npx shadcn@latest add @audio-ui/clip-panel`) shows the clip you pick, as a detail view follows the selection. It starts closed, and a press that picks a clip, trims it, fades it or moves it does not open it; its × hides it. It opens on a click of a clip's head, a double-click on a clip's body, the clip menu's Edit, or `Cmd` / `Ctrl` + `Alt` + `3`, but not on a press that moves, trims or fades a clip, so you can work on a clip with the panel closed. Laid out as a DAW's clip view (`clip-view` holds the frame), a strip along its top carries the caret that rolls the panel up to that strip, the clip's switch, its name (type to rename it) and a word on it; under it, its properties sit in boxes beside the editor: Clip (where it starts and ends in its source), Loop (the switch, where the loop sits and how long it is, ÷2 and ×2) and Sample (Warp, Reverse, Crop, Gain and Transpose), all in bars.beats.16ths you can type or step with the arrow keys. Loop and Sample fold to a strip from their heading and give their width to the editor; what is rolled up or folded stays so from clip to clip, and the panel stays at the bottom of the block as the tracks scroll. Its source has a timeline of its own: an overview bar to zoom and scroll with, a ruler in bars, the stretch the clip plays to drag at both ends, or with Loop on the stretch that repeats (a looped clip can then be stretched past its source on the timeline), and the waveform under them. With Warp on, the source is stretched between markers that pin a time in it to a time on the clip: drag a marker, or press its arrows, to stretch what is on either side; double-click the waveform to add one, Delete to take one away, and ×2 or ÷2 to play the whole of it slower or faster. It plays by speed alone, so pitch follows (shown as a rate and its semitones), and a warped clip lasts as long as its warp stretches its source on the timeline. The map is `warpedTime`, `unwarpedTime`, `warpRate` and the marker functions in `@audio-ui/core/time`. The block makes no sound, so these are kept on the clip (`gain`, `transpose`, `reversed`, `loop`, `warp`, `sourceFrom` in `lib/arrangement`) and its waveform is a stand-in.
+
+### Keyboard
+
+A drag across the bare lanes selects a stretch of time on the tracks it sweeps, drawn over them; the time commands below work on it. The block's own keys work once a press on a lane has put the focus in it:
+
+<KeyTable title="Keys">
+<KeyRow gesture={"`Left` / `Right`"}>Move the cursor by a grid step. `Home` and `End` go to the start and to the end of the last clip.</KeyRow>
+<KeyRow gesture={"`Alt` + `Left` / `Right`"}>Jump to the previous or next locator or clip edge, on the picked tracks (on every track when none is picked).</KeyRow>
+<KeyRow gesture={"`Up` / `Down`"}>Pick the track above or below.</KeyRow>
+<KeyRow gesture={"`+` / `-`"}>Zoom in or out around the cursor.</KeyRow>
+<KeyRow gesture={"`Z`, `X`"}>Zoom onto the selected clips (the loop, when none is selected), and step back to the zoom before.</KeyRow>
+<KeyRow gesture={"`Cmd` / `Ctrl` + `1`, `2`"}>A finer or a wider grid.</KeyRow>
+<KeyRow gesture={"`Cmd` / `Ctrl` + `3`, `4`, `5`"}>Triplets on or off, snapping on or off, and a grid fixed where it is or following the zoom again.</KeyRow>
+<KeyRow gesture={"`M`"}>Add a locator at the cursor.</KeyRow>
+<KeyRow gesture={"`S`, `Cmd` / `Ctrl` + `E`"}>Split the selected clips at the cursor.</KeyRow>
+<KeyRow gesture={"`Cmd` / `Ctrl` + `L`"}>Put the loop around the time selection, or around the selected clips.</KeyRow>
+<KeyRow gesture={"`Cmd` / `Ctrl` + `C`, `X`, `V`"}>Copy or cut the time selection (the selected clips when there is none), and paste it at the cursor, from the picked track down.</KeyRow>
+<KeyRow gesture={"`Delete`"}>Empty the time selection on its tracks.</KeyRow>
+<KeyRow gesture={"`Cmd` / `Ctrl` + `D`, `J`"}>With a time selection: repeat it right after itself, and make one clip per track of it.</KeyRow>
+<KeyRow gesture={"`Cmd` / `Ctrl` + `Shift` + `X`, `V`, `D`, `Delete`"}>The same on time itself, on every track: cut it out, paste it in, repeat it, or take it out, moving what comes after.</KeyRow>
+<KeyRow gesture={"`Cmd` / `Ctrl` + `I`"}>Open a stretch of silence at the cursor, as long as the time selection (a bar when there is none).</KeyRow>
+<KeyRow gesture={"`0`"}>Switch the selected clips off, or back on.</KeyRow>
+<KeyRow gesture={"`Cmd` / `Ctrl` + `Alt` + `F`"}>Fade the clips whose edges the time selection covers, in or out; two clips that meet across it crossfade.</KeyRow>
+<KeyRow gesture={"`Delete` on a fade handle"}>Take the fade away.</KeyRow>
+<KeyRow gesture={"`Cmd` / `Ctrl` + `Alt` + `3`"}>Show or hide the clip panel.</KeyRow>
+<KeyRow gesture={"On the loop"}>`Left` / `Right` move it by a grid step, `Up` / `Down` by its own length; with `Cmd` / `Ctrl`, `Left` / `Right` shorten or lengthen it and `Up` / `Down` double or halve it.</KeyRow>
+</KeyTable>
+
+### Undo and redo
+
+The `undo-history` lib (`npx shadcn@latest add @audio-ui/undo-history`) implements undo and redo as values: every function takes the present and returns the new present, and keeps no state of its own. Keep the history in a ref and the document in state, so two undos in one tick are fed the first one's result instead of reading the same stack twice.
+
+```ts
+let history = emptyHistory<Clip[]>();
+
+// A change made in one go: delete, split, duplicate.
+history = recordChange(history, clips);
+
+// A drag reports every tick: open a burst on the first, close it on commit,
+// and the whole drag is one entry.
+history = beginChange(history, clips);
+history = settleChange(history);
+
+const step = undo(history, clips); // { history, present } or null
+```
+
+A new change clears redo, since the redo branch no longer follows from the present. `HISTORY_LIMIT` bounds the depth. The arrangement block uses it for its undo and redo buttons and for Cmd/Ctrl + Z, with Shift (or Y) to redo.
+
 
 ## API reference
 
@@ -584,3 +787,64 @@ Something placed at `value` on a lane: a bar number on the ruler, a cue, a grid 
 </TypeTable>
 
 `@audio-ui/react/timeline` exposes the same parts as `Timeline.Root`, `Timeline.Viewport`, `Timeline.Ruler`, `Timeline.Lane`, `Timeline.Mark`, `Timeline.Playhead`, `Timeline.Range`, `Timeline.RangeHandle`, `Timeline.Clip`, `Timeline.ClipHeader`, `Timeline.ClipHandle`, `Timeline.ClipFade`, `Timeline.ClipFadeHandle`, and `Timeline.Navigator` with its `Timeline.NavigatorWindow` and `Timeline.NavigatorHandle`. Every part accepts a `render` prop and `className` / `style` as functions of state, and exposes `data-disabled`, `data-fitted` and `data-scrubbing`.
+
+### ArrangedClip
+
+<TypeTable>
+<TypeRow name={"clip"} type={"Arranged"}>The clip: its place (`value`), its source and its notes.</TypeRow>
+<TypeRow name={"selected"} type={"boolean"}>Whether it is in the selection.</TypeRow>
+<TypeRow name={"swatch"} type={"number"}>Its color, an index into `TRACK_COLORS`: its track's.</TypeRow>
+<TypeRow name={"trackName"} type={"string"}>Its track's name, for its label.</TypeRow>
+<TypeRow name={"describe"} type={"(time) => string"}>A time in words, such as "Bar 3, beat 2".</TypeRow>
+<TypeRow name={"onChange, onCommit"} type={"(id, value, details) => void, (id, details) => void"}>The clip moved, trimmed or faded, and the gesture ended.</TypeRow>
+<TypeRow name={"onSelect"} type={"(id, additive) => void"}>It was pressed: `additive` with Shift, Cmd or Ctrl, or with `multi`.</TypeRow>
+<TypeRow name={"onAction"} type={"(action, id) => void"}>Picked from its menu: `"edit"`, `"duplicate"`, `"split"`, `"toggle"` or `"remove"`.</TypeRow>
+<TypeRow name={"onRename, onRemove, onFadeShape"} type={"(id, …) => void"}>Renamed in place, deleted with its key, and a fade's curve picked.</TypeRow>
+<TypeRow name={"multi"} type={"boolean"} default={"false"}>Whether a press adds it to the selection, for a touch screen.</TypeRow>
+<TypeRow name={"copying, lift, onLift"} type={"boolean, number, (id, offset) => void"}>For group drags: whether it is a copy being dragged, how far it is held up or down, and how far it is dragged.</TypeRow>
+</TypeTable>
+
+### useTrackReorder
+
+<TypeTable>
+<TypeRow name={"order"} type={"string[]"}>The tracks' ids, top to bottom.</TypeRow>
+<TypeRow name={"onMove"} type={"(id, index) => void"}>A track was dropped at `index`.</TypeRow>
+<TypeRow name={"gripProps(id)"} type={"props"}>For a track's grip: its pointer and key handlers.</TypeRow>
+<TypeRow name={"draggingId, drop"} type={"string | null, { id, edge } | null"}>The track dragged, and where it would land.</TypeRow>
+<TypeRow name={"ghost, ghostRef"} type={"{ id, top, left, width, height } | null, Ref"}>The copy to draw under the pointer, and the ref it takes.</TypeRow>
+</TypeTable>
+
+### TimelineLocator and TimelineSignature
+
+<TypeTable>
+<TypeRow name={"locator"} type={"{ at, name }"}>A locator.</TypeRow>
+<TypeRow name={"onJump, onRemove, onRename"} type={"(at) => void, (at) => void, (at, name) => void"}>Pressed, deleted and renamed.</TypeRow>
+<TypeRow name={"change"} type={"{ id, at, beatsPerBar, beatUnit }"}>A time-signature change.</TypeRow>
+<TypeRow name={"editing, onEditingChange"} type={"boolean, (id | null) => void"}>Whether it is being typed.</TypeRow>
+<TypeRow name={"onMove, onSet, onRemove"} type={"(id, to) => void, (id, beats, unit) => void, (id) => void"}>Moved by `step` with the arrows, typed, deleted.</TypeRow>
+<TypeRow name={"step"} type={"number"}>How far the arrows move a change: the grid.</TypeRow>
+</TypeTable>
+
+### TrackAutomationChooser and TrackAutomation
+
+<TypeTable>
+<TypeRow name={"track"} type={"ArrangementTrack"}>The track, with its `automation`.</TypeRow>
+<TypeRow name={"parameter"} type={"\"volume\" | \"pan\""}>What the lane shows.</TypeRow>
+<TypeRow name={"onParameterChange, onClear"} type={"(trackId, parameter) => void"}>The chooser's: another parameter picked, and its envelope cleared.</TypeRow>
+<TypeRow name={"mix"} type={"Mix"}>The track's mix, where a line with no points stands.</TypeRow>
+<TypeRow name={"onChange, onCommit"} type={"(trackId, parameter, points) => void, () => void"}>The envelope was edited, and the gesture ended.</TypeRow>
+<TypeRow name={"duration, snapStep, describe"} type={"number, number, (time) => string"}>The arrangement's length, the grid a point snaps to in time, and a time in words.</TypeRow>
+<TypeRow name={"overridden"} type={"(\"volume\" | \"pan\")[]"}>The parameters moved by hand since, drawn greyed.</TypeRow>
+</TypeTable>
+
+### useMidiPlayback
+
+<TypeTable>
+<TypeRow name={"clips, tracks"} type={"Arranged[], ArrangementTrack[]"}>The arrangement.</TypeRow>
+<TypeRow name={"clock"} type={"Source<number>"}>Where the arrangement plays, in its time.</TypeRow>
+<TypeRow name={"playing"} type={"boolean"}>Whether it plays.</TypeRow>
+<TypeRow name={"loop, looping"} type={"[start, end], boolean"}>The loop, which notes are scheduled up to.</TypeRow>
+<TypeRow name={"audible"} type={"(trackId) => boolean"}>Whether a track is heard: not muted, and in the solo if there is one.</TypeRow>
+<TypeRow name={"levelsAt"} type={"(trackId, time) => { gain, pan }"}>A track's gain and pan at a time.</TypeRow>
+<TypeRow name={"returns"} type={"{ onNoteOn, onNoteOff }"}>For a MIDI clip's editor.</TypeRow>
+</TypeTable>
