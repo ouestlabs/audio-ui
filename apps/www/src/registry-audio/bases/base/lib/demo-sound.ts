@@ -394,7 +394,7 @@ export const DEMO_SOURCES = {
   },
   wide: {
     about:
-      "Two detuned chords, one a little different in each ear, and a bass in the middle: a stereo image to narrow or widen.",
+      "The groove in the centre, with a pad on each side a little detuned from the other and a low note that differs in each ear: a stereo image to narrow or widen.",
     render: renderWideLoop,
     title: "Wide chords",
   },
