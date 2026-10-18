@@ -170,12 +170,27 @@ export interface DeviceApplied<State> {
 }
 
 /**
+ * What a device reports about what it is doing right now, for a meter. Every
+ * value is in dB, 0 or negative: the gain taken off the signal. A device reports
+ * the readings it has: a compressor its gain reduction, a multiband device one
+ * value per band. Read it per frame, as a meter does.
+ */
+export interface DeviceReadings {
+  /** The gain taken off each band, in dB, 0 or negative, by band name. */
+  bandGainReductionDb?: Record<string, number>;
+  /** The gain taken off the signal, in dB, 0 or negative. */
+  gainReductionDb?: number;
+}
+
+/**
  * What a host gives a device to drive: an engine, a view, a store. The device
  * knows nothing of it. `update` is called with each new state and must be cheap
  * to repeat; `dispose` releases what it holds.
  */
 export interface DeviceBinding<State> {
   dispose: () => void;
+  /** What the device is taking off right now. Optional: a device with no gain to report has none. */
+  readings?: () => DeviceReadings;
   update: (state: State, context?: DeviceContext) => void;
 }
 

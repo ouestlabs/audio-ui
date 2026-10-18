@@ -1,4 +1,4 @@
-import type { SidechainBinding } from "@audio-ui/core/device";
+import type { DeviceReadings, SidechainBinding } from "@audio-ui/core/device";
 import {
   COMPRESSOR_LOOKAHEAD_SECONDS,
   type CompressorState,
@@ -18,6 +18,8 @@ export interface CompressorEngine
   readonly input: AudioNode;
   /** Connect this to the destination, or to the next device. */
   readonly output: AudioNode;
+  /** What it is taking off right now, in dB. */
+  readings: () => DeviceReadings;
   /** Resolves once the detector of the key is in the graph. Until then a keyed compressor passes the signal unchanged. A context with no worklets never resolves it to `true`. */
   readonly ready: Promise<boolean>;
   /** How many dB the compressor is taking off right now, 0 or negative. Read it per frame. */
@@ -151,6 +153,9 @@ export function createCompressorEngine(
     get reduction() {
       return current.external ? keyedReduction : compressor.reduction;
     },
+    readings: (): DeviceReadings => ({
+      gainReductionDb: current.external ? keyedReduction : compressor.reduction,
+    }),
     ready,
     sidechain,
     update,

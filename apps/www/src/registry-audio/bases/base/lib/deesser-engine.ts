@@ -1,5 +1,5 @@
 import { toWebAudioQ } from "@audio-ui/core/analysis";
-import type { DeviceBinding } from "@audio-ui/core/device";
+import type { DeviceBinding, DeviceReadings } from "@audio-ui/core/device";
 import {
   CROSSOVER_Q,
   type DeesserState,
@@ -18,6 +18,8 @@ export interface DeesserEngine extends DeviceBinding<DeesserState> {
   readonly input: AudioNode;
   /** Connect this to the destination, or to the next device. */
   readonly output: AudioNode;
+  /** What the highs are taking off right now, in dB. */
+  readings: () => DeviceReadings;
   /** Resolves once the detector is in the graph. Until then the highs pass unchanged. A context with no worklets never resolves it to `true`. */
   readonly ready: Promise<boolean>;
   /** How many dB the highs are taken down by right now, 0 or negative. Read it per frame. */
@@ -124,6 +126,7 @@ export function createDeesserEngine(
     get reduction() {
       return reduction;
     },
+    readings: (): DeviceReadings => ({ gainReductionDb: reduction }),
     ready,
     update: (state) => {
       settings = deesserSettings(state);

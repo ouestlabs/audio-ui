@@ -5,12 +5,16 @@ import {
 
 const RAMP_SECONDS = 0.01;
 
+import type { DeviceReadings } from "@audio-ui/core/device";
+
 export interface LimiterEngine {
   dispose: () => void;
   /** Connect the signal to process here. */
   readonly input: AudioNode;
   /** Connect this to the destination, or to the next device. */
   readonly output: AudioNode;
+  /** What it is taking off right now, in dB. */
+  readings: () => DeviceReadings;
   /** How many dB the limiter is taking off right now, 0 or negative. Read it per frame. */
   readonly reduction: number;
   update: (state: LimiterState) => void;
@@ -96,6 +100,7 @@ export function createLimiterEngine(
     get reduction() {
       return limiter.reduction;
     },
+    readings: (): DeviceReadings => ({ gainReductionDb: limiter.reduction }),
     update: (state) => {
       const settings = limiterSettings(state);
       follow(gain.gain, settings.gain);
