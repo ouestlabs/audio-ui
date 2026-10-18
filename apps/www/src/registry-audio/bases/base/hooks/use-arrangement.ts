@@ -1,17 +1,13 @@
 "use client";
 
-import type { Breakpoint } from "@audio-ui/core/envelope";
 import type { Tempo } from "@audio-ui/core/time";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import {
   type Arranged,
   type ArrangementTrack,
-  type AutomatedParameter,
   type Clipping,
-  type Mix,
   mixOf,
   type TimeSelection,
-  type TrackKind,
 } from "@/registry-audio/bases/base/lib/arrangement";
 import {
   type ArrangementCommand,
@@ -48,13 +44,13 @@ export interface UseArrangementOptions {
 }
 
 /**
- * The state of an arrangement of clips on tracks, with the operations on it:
- * selecting, moving a group, copying, laying a clip so it covers what is
- * under it, splitting, duplicating, deleting, adding and removing tracks, each
- * track's mix and height, the tempo, the time signatures, the locators and the
- * loop, and undo and redo over all of them. The state and its commands are
- * `lib/arrangement-state`, and `lib/undo-history` holds the steps; this keeps
- * them in a component.
+ * Holds the state of an arrangement of clips on tracks in a component, and the
+ * view of its tracks (the heights set by hand, the folded ones). The state is
+ * a plain value and every change to it is a command sent with `dispatch`:
+ * `lib/arrangement-state` has `apply`, and `lib/undo-history` the steps of
+ * undo and redo over the clips, the tracks, their mixes, the tempo, the time
+ * signatures, the locators and the loop. The hook returns the state's parts,
+ * and what is read from it, such as `selectedIds` and `mixOf`.
  */
 export function useArrangement({
   colors = 5,
@@ -122,63 +118,14 @@ export function useArrangement({
     }
   }
 
-  const commands = useMemo(
-    () => ({
-      addTrack: (afterId?: string, kind?: TrackKind) => {
-        const next = dispatch({ type: "add-track", afterId, kind });
-        // The track it added is the one numbered last.
-        return next.doc.tracks.find(
-          (track) => track.id === `track-${next.trackCount}`
-        );
-      },
-      changeAutomation: (
-        trackId: string,
-        parameter: AutomatedParameter,
-        points: readonly Breakpoint[] | null
-      ) => dispatch({ type: "change-automation", trackId, parameter, points }),
-      changeMix: (trackId: string, patch: Partial<Mix>) => {
-        const { color, ...rest } = patch;
-        if (color !== undefined) {
-          dispatch({ type: "set-track-color", id: trackId, color });
-        }
-        if (Object.keys(rest).length === 0) {
-          return;
-        }
-        // A fader's drag is one step, closed by `settleClipEdit`; a switch is a step of its own.
-        dispatch({
-          type: "gain" in rest || "pan" in rest ? "change-mix" : "set-mix",
-          id: trackId,
-          patch: rest,
-        });
-      },
-      clearTimeSelection: (time: TimeSelection) =>
-        dispatch({ type: "clear-time", time }),
-      consolidateTime: (time: TimeSelection) =>
-        dispatch({ type: "consolidate-time", time }),
-      copyOf: (time: TimeSelection | null): Clipping =>
-        copyFrom(stateRef.current, time),
-      duplicateTrack: (id: string) => dispatch({ type: "duplicate-track", id }),
-      fadeTimeSelection: (time: TimeSelection) =>
-        dispatch({ type: "fade-time", time }),
-      insertTimeSpan: (at: number, length: number) =>
-        dispatch({ type: "insert-time", at, length }),
-      moveTrack: (id: string, index: number) =>
-        dispatch({ type: "move-track", id, index }),
-      paste: (clipping: Clipping, at: number, track: string) =>
-        dispatch({ type: "paste", clipping, at, track }),
-      redo: () => dispatch({ type: "redo" }),
-      removeTimeSpan: (from: number, to: number) =>
-        dispatch({ type: "remove-time", from, to }),
-      removeTrack: (id: string) => dispatch({ type: "remove-track", id }),
-      renameTrack: (id: string, name: string) =>
-        dispatch({ type: "rename-track", id, name }),
-      undo: () => dispatch({ type: "undo" }),
-    }),
-    [dispatch]
+  /** What a host copies: a time selection's stretch, or else the selected clips, read from the latest state. */
+  const copyOf = useCallback(
+    (time: TimeSelection | null): Clipping => copyFrom(stateRef.current, time),
+    []
   );
 
   return {
-    ...commands,
+    copyOf,
     /** The one way the time changes: `set-tempo`, `add-signature`, `set-loop`, `add-locator` and the rest of `ArrangementCommand`. Returns the state after the command. */
     dispatch,
     canRedo: canRedo(history),
