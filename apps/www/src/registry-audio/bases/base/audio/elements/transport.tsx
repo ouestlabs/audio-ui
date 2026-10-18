@@ -10,6 +10,7 @@ import {
   secondsPerBeat,
   type Tempo,
 } from "@audio-ui/core/time";
+import { LoopIcon, PauseIcon, PlayIcon, StopIcon } from "@audio-ui/icons/react";
 import type { Source } from "@audio-ui/react";
 import { Toolbar } from "@base-ui/react/toolbar";
 import { useCallback, useEffect, useRef } from "react";
@@ -529,36 +530,14 @@ function Transport({
           onClick={onPlayPause}
           render={<Button size="icon" />}
         >
-          {playing ? (
-            <IconPlaceholder
-              hugeicons="PauseIcon"
-              lucide="PauseIcon"
-              phosphor="PauseIcon"
-              remixicon="RiPauseFill"
-              tabler="IconPlayerPauseFilled"
-            />
-          ) : (
-            <IconPlaceholder
-              hugeicons="PlayIcon"
-              lucide="PlayIcon"
-              phosphor="PlayIcon"
-              remixicon="RiPlayFill"
-              tabler="IconPlayerPlayFilled"
-            />
-          )}
+          {playing ? <PauseIcon weight="fill" /> : <PlayIcon weight="fill" />}
         </Toolbar.Button>
         <Toolbar.Button
           aria-label="Stop"
           onClick={onStop}
           render={<Button size="icon" variant="outline" />}
         >
-          <IconPlaceholder
-            hugeicons="StopIcon"
-            lucide="SquareIcon"
-            phosphor="StopIcon"
-            remixicon="RiStopFill"
-            tabler="IconPlayerStopFilled"
-          />
+          <StopIcon weight="fill" />
         </Toolbar.Button>
         <ButtonGroupText>
           <TransportPosition
@@ -581,13 +560,7 @@ function Transport({
               }
               title="Loop"
             >
-              <IconPlaceholder
-                hugeicons="RepeatIcon"
-                lucide="RepeatIcon"
-                phosphor="RepeatIcon"
-                remixicon="RiRepeatLine"
-                tabler="IconRepeat"
-              />
+              <LoopIcon weight="fill" />
             </Toolbar.Button>
           ) : null}
           {onMetronomeChange ? (

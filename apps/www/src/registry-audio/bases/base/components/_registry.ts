@@ -403,7 +403,7 @@ export const components: RegistryItem[] = [
       },
     ],
     name: "block-waveform-player",
-    dependencies: ["@audio-ui/core"],
+    dependencies: ["@audio-ui/core", "@audio-ui/icons"],
     registryDependencies: [
       "@audio-ui/scrubber",
       "@audio-ui/timeline",
@@ -445,7 +445,7 @@ export const components: RegistryItem[] = [
       hint: "Click a track or clip to place the cursor, S to split, Cmd/Ctrl + D to duplicate. Drag a clip's title bar to move it (Alt to copy), its edges to trim, its corners to fade. Drag the loop strip to set a loop, M to add a locator, A for the automation, Cmd/Ctrl + scroll to zoom.",
     },
     name: "block-timeline",
-    dependencies: ["@audio-ui/core"],
+    dependencies: ["@audio-ui/core", "@audio-ui/icons"],
     registryDependencies: [
       "@audio-ui/timeline",
       "@audio-ui/transport",
@@ -579,7 +579,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["dynamics", "plot", "knob"],
-    dependencies: ["@audio-ui/react"],
+    dependencies: ["@audio-ui/react", "@audio-ui/icons"],
     description:
       "A compressor you can plug in: its state, a panel that draws it and a Web Audio engine that plays it, side by side. Play a pulsing signal and turn the knobs",
     files: [
@@ -602,7 +602,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["eq", "plot", "knob"],
-    dependencies: ["@audio-ui/react"],
+    dependencies: ["@audio-ui/react", "@audio-ui/icons"],
     description:
       "An equalizer you can plug in: its state, a panel that draws it with a handle on each band and an engine that plays it, side by side. Play pink noise and the spectrum behind the curve is what comes out",
     files: [
@@ -1054,7 +1054,7 @@ export const components: RegistryItem[] = [
       },
     ],
     name: "block-mixer",
-    dependencies: ["@audio-ui/react", "@audio-ui/core"],
+    dependencies: ["@audio-ui/react", "@audio-ui/core", "@audio-ui/icons"],
     registryDependencies: [
       "@audio-ui/fader",
       "@audio-ui/knob",
@@ -1150,6 +1150,7 @@ export const components: RegistryItem[] = [
     type: "registry:example",
   },
   {
+    dependencies: ["@audio-ui/icons"],
     categories: ["sequencer"],
     description:
       "A drum machine: draw a pattern and hear it. Press a step or drag across several; the playing column lights up",

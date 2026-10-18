@@ -1,8 +1,8 @@
 "use client";
 
+import { PauseIcon, PlayIcon } from "@audio-ui/icons/react";
 import { type Source, Timeline as TimelinePrimitive } from "@audio-ui/react";
 import { useCallback, useEffect, useRef } from "react";
-import { IconPlaceholder } from "@/components/icon-placeholder";
 import { cn } from "@/registry/bases/base/lib/utils";
 import { Button } from "@/registry/bases/base/ui/button";
 
@@ -101,23 +101,7 @@ function Scrubber({
         size="icon"
         variant="outline"
       >
-        {playing ? (
-          <IconPlaceholder
-            hugeicons="PauseIcon"
-            lucide="PauseIcon"
-            phosphor="PauseIcon"
-            remixicon="RiPauseLine"
-            tabler="IconPlayerPause"
-          />
-        ) : (
-          <IconPlaceholder
-            hugeicons="PlayIcon"
-            lucide="PlayIcon"
-            phosphor="PlayIcon"
-            remixicon="RiPlayLine"
-            tabler="IconPlayerPlay"
-          />
-        )}
+        {playing ? <PauseIcon weight="fill" /> : <PlayIcon weight="fill" />}
       </Button>
       <ScrubberTime
         className="text-right text-muted-foreground text-xs"

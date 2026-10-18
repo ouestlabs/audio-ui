@@ -1,8 +1,8 @@
 "use client";
 
+import { PauseIcon, PlayIcon } from "@audio-ui/icons/react";
 import { createSource, type Source } from "@audio-ui/react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { IconPlaceholder } from "@/components/icon-placeholder";
 import { Button } from "@/registry/bases/base/ui/button";
 import { CompressorPanel } from "@/registry-audio/bases/base/audio/panels/compressor-panel";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
@@ -190,23 +190,7 @@ export default function BlockCompressor() {
           size="icon-sm"
           variant="outline"
         >
-          {playing ? (
-            <IconPlaceholder
-              hugeicons="PauseIcon"
-              lucide="PauseIcon"
-              phosphor="PauseIcon"
-              remixicon="RiPauseLine"
-              tabler="IconPlayerPause"
-            />
-          ) : (
-            <IconPlaceholder
-              hugeicons="PlayIcon"
-              lucide="PlayIcon"
-              phosphor="PlayIcon"
-              remixicon="RiPlayLine"
-              tabler="IconPlayerPlay"
-            />
-          )}
+          {playing ? <PauseIcon weight="fill" /> : <PlayIcon weight="fill" />}
         </Button>
         <ReductionReadout source={reduction} />
       </CompressorPanel>

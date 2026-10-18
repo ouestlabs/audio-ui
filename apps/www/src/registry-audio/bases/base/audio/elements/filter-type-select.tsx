@@ -1,6 +1,16 @@
 "use client";
 
-import { useCallback } from "react";
+import {
+  BandpassIcon,
+  HighpassIcon,
+  HighshelfIcon,
+  type IconProps,
+  LowpassIcon,
+  LowshelfIcon,
+  NotchIcon,
+  PeakIcon,
+} from "@audio-ui/icons/react";
+import { type ComponentType, useCallback } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {
   ToggleGroup,
@@ -8,21 +18,21 @@ import {
 } from "@/registry/bases/base/ui/toggle-group";
 
 /** The response of each filter type, as the curve a plot draws: gain up the page, frequency across. */
-const FILTER_PATHS: Record<string, string> = {
-  bandpass: "M2 19c5 0 5-13 10-13s5 13 10 13",
-  highcut: "M2 7h9c6 0 8 3 11 12",
-  highpass: "M2 19c3-9 5-12 11-12h9",
-  highshelf: "M2 17h8c3 0 4-9 7-9h5",
+const FILTER_ICONS: Record<string, ComponentType<IconProps>> = {
+  bandpass: BandpassIcon,
   // A cut is the same curve as the pass of the opposite side: what the band keeps.
-  lowcut: "M2 19c3-9 5-12 11-12h9",
-  lowpass: "M2 7h9c6 0 8 3 11 12",
-  lowshelf: "M2 8h7c3 0 4 9 7 9h6",
-  notch: "M2 7c5 0 5 12 10 12s5-12 10-12",
-  peak: "M2 17h6c3 0 3-10 4-10s1 10 4 10h6",
+  highcut: LowpassIcon,
+  highpass: HighpassIcon,
+  highshelf: HighshelfIcon,
+  lowcut: HighpassIcon,
+  lowpass: LowpassIcon,
+  lowshelf: LowshelfIcon,
+  notch: NotchIcon,
+  peak: PeakIcon,
 };
 
 /** Whether a value is one of the filter types this element draws. */
-export const isFilterType = (value: string) => value in FILTER_PATHS;
+export const isFilterType = (value: string) => value in FILTER_ICONS;
 
 interface FilterTypeOption {
   label: string;
@@ -70,7 +80,7 @@ function FilterTypeSelect({
       variant="outline"
     >
       {options.map((option) => {
-        const path = FILTER_PATHS[option.value];
+        const Icon = FILTER_ICONS[option.value];
         return (
           <ToggleGroupItem
             aria-label={option.label}
@@ -79,22 +89,7 @@ function FilterTypeSelect({
             title={option.label}
             value={option.value}
           >
-            {path ? (
-              <svg
-                aria-hidden="true"
-                className="h-5 w-5"
-                fill="none"
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-              >
-                <path d={path} />
-              </svg>
-            ) : (
-              option.label
-            )}
+            {Icon ? <Icon className="size-5" weight="bold" /> : option.label}
           </ToggleGroupItem>
         );
       })}

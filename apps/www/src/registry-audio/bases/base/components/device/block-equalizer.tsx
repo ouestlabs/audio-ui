@@ -1,7 +1,7 @@
 "use client";
 
+import { PauseIcon, PlayIcon } from "@audio-ui/icons/react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { IconPlaceholder } from "@/components/icon-placeholder";
 import { Button } from "@/registry/bases/base/ui/button";
 import { EqualizerPanel } from "@/registry-audio/bases/base/audio/panels/equalizer-panel";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
@@ -95,23 +95,7 @@ export default function BlockEqualizer() {
           size="icon-sm"
           variant="outline"
         >
-          {playing ? (
-            <IconPlaceholder
-              hugeicons="PauseIcon"
-              lucide="PauseIcon"
-              phosphor="PauseIcon"
-              remixicon="RiPauseLine"
-              tabler="IconPlayerPause"
-            />
-          ) : (
-            <IconPlaceholder
-              hugeicons="PlayIcon"
-              lucide="PlayIcon"
-              phosphor="PlayIcon"
-              remixicon="RiPlayLine"
-              tabler="IconPlayerPlay"
-            />
-          )}
+          {playing ? <PauseIcon weight="fill" /> : <PlayIcon weight="fill" />}
         </Button>
       </EqualizerPanel>
     </div>

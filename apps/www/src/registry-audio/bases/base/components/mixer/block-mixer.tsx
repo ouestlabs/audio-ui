@@ -1,9 +1,9 @@
 "use client";
 
 import { noteToFrequency } from "@audio-ui/core/pitch";
+import { PlayIcon, StopIcon } from "@audio-ui/icons/react";
 import { createSource, type Meter as MeterPrimitive } from "@audio-ui/react";
 import { useCallback, useEffect, useState } from "react";
-import { IconPlaceholder } from "@/components/icon-placeholder";
 import { Button } from "@/registry/bases/base/ui/button";
 import { Toggle } from "@/registry/bases/base/ui/toggle";
 import { Fader } from "@/registry-audio/bases/base/audio/elements/fader";
@@ -517,21 +517,9 @@ export default function BlockMixer() {
             size="icon"
           >
             {isPlaying ? (
-              <IconPlaceholder
-                hugeicons="StopIcon"
-                lucide="SquareIcon"
-                phosphor="StopIcon"
-                remixicon="RiStopFill"
-                tabler="IconPlayerStopFilled"
-              />
+              <StopIcon weight="fill" />
             ) : (
-              <IconPlaceholder
-                hugeicons="PlayIcon"
-                lucide="PlayIcon"
-                phosphor="PlayIcon"
-                remixicon="RiPlayFill"
-                tabler="IconPlayerPlayFilled"
-              />
+              <PlayIcon weight="fill" />
             )}
           </Button>
           <ChannelLevel

@@ -739,13 +739,7 @@ function TimelineTrackControls({
             size="icon-xs"
             variant={mix.soloed ? "default" : "ghost"}
           >
-            <IconPlaceholder
-              hugeicons="HeadphonesIcon"
-              lucide="HeadphonesIcon"
-              phosphor="HeadphonesIcon"
-              remixicon="RiHeadphoneLine"
-              tabler="IconHeadphones"
-            />
+            S
           </Button>
           <Button
             aria-label={`Mute ${name}`}
@@ -754,23 +748,7 @@ function TimelineTrackControls({
             size="icon-xs"
             variant={mix.muted ? "default" : "ghost"}
           >
-            {mix.muted ? (
-              <IconPlaceholder
-                hugeicons="VolumeMute01Icon"
-                lucide="VolumeXIcon"
-                phosphor="SpeakerSimpleSlashIcon"
-                remixicon="RiVolumeMuteLine"
-                tabler="IconVolumeOff"
-              />
-            ) : (
-              <IconPlaceholder
-                hugeicons="VolumeHighIcon"
-                lucide="Volume2Icon"
-                phosphor="SpeakerSimpleHighIcon"
-                remixicon="RiVolumeUpLine"
-                tabler="IconVolume"
-              />
-            )}
+            M
           </Button>
         </div>
         {compact ? null : (
