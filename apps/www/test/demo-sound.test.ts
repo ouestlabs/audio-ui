@@ -25,6 +25,8 @@ describe("DEMO_SOURCES", () => {
   test("names every sound the previews play", () => {
     expect(Object.keys(DEMO_SOURCES).sort()).toEqual([
       "chord",
+      "crank",
+      "crankKick",
       "groove",
       "hiphop",
       "hiphopKick",

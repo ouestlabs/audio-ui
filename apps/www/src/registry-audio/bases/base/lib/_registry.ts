@@ -803,7 +803,7 @@ const items: RegistryItem[] = [
     categories: ["lib", "audio", "device", "web-audio"],
     dependencies: ["@audio-ui/core"],
     description:
-      "The sounds the previews play, by name: a two-bar groove to put an effect on (drums with ghost notes and a lilt, a bass, an electric piano and plucked notes), a dark, sparse half-time trap hip-hop scene (a clap on the third beat, rolling hats, an 808 driven over a clean sub, a haunting piano in F minor, ambient bells and a pad), a kick, a held chord, a voice with an s, wide chords, pink noise and pulses. Drawn once from the drum voices of the library and looped as a buffer.",
+      "The sounds the previews play, by name: a two-bar groove to put an effect on (drums with ghost notes and a lilt, a bass, an electric piano and plucked notes), a DMV hip-hop scene on the go-go pocket (swung hats, a syncopated kick and snare with a loud clap, congas and a cowbell, an 808 driven over a clean sub, a haunting piano in F minor, ambient bells and a pad) and a dry, fast crank scene (ticking hats, a clap on a dry snare, a cowbell, an 808 on each kick), a kick, a held chord, a voice with an s, wide chords, pink noise and pulses. Drawn once from the drum voices of the library and looped as a buffer.",
     files: [
       {
         path: "lib/demo-sound.ts",
