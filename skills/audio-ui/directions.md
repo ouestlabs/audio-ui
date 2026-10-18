@@ -379,6 +379,10 @@ Signatures: `Knob.Value` and `Fader.Value` take a render function `(formatted, v
 
 Focus lands on the input nested in each thumb, so draw the ring on the thumb with `:has(:focus-visible)` (the kit does). The ring takes --focus, then the accent: when the accent is also the value color, set --focus to the ink so the ring does not disappear into the arc. A fader's `.fader-indicator` is the filled part of the slot: show it for a level, hide it (`display: none`) for a hairline or a hardware slot. Every fader and meter takes its length from one variable, --strip-h, set on the panel or on a strip.
 
+## Not in the kit
+
+The kit covers Knob, Fader, Meter, XYPad, Pad, Piano, Envelope, Sequencer, Waveform and Plot. `Timeline` and `PianoRoll` have no skin yet: with shadcn, install their styled elements (`timeline`, `piano-roll`, [components.md](./components.md)); without it, read their component pages and style the parts with the tokens of the skin you chose (surface, ink, accent, hairlines), the way `Envelope` and `Plot` are styled in `styles/base.css`. Registry elements (`@audio-ui/knob`, `fader`, `meter`...) take `size`, `marks` and `orientation`, not these class names.
+
 ## Controls beyond the kit's parts
 
 - **Plot.Trace:** `source` holds one value per point, spread evenly across `minX` to `maxX`; without `fillTo` it is a line, with it an area. A linear axis works for any curve (a decay, an envelope), the log axis for a spectrum.
@@ -386,7 +390,7 @@ Focus lands on the input nested in each thumb, so draw the ring on the thumb wit
 - **Waveform.Root:** `peaks` (amplitudes 0 to 1, or `{ min, max }` pairs), `value` (a fraction, or seconds with `duration`), `onValueChange(position, details)` to seek your audio, `onValueCommitted`, `range`, `source` for a live signal (it drives the waveform's own position: for a moving playhead over a fixed start marker, keep `value` as the marker and overlay your own playhead element whose position a source writes into a CSS variable). The canvas reads `--waveform-color` and `--waveform-progress-color` as plain colors (a `color-mix()` or a gradient does not work there). Parts: `Control > Canvas`, `Playhead`, `Thumb`, `Region`, `Marker`, `Hover`. The `Bars` part is the DOM alternative to `Canvas`, with `count` (default 24) and `mirrored`.
 - **Plot.Root:** `minX`, `maxX`, `minY`, `maxY`, `scaleX="log"`. Parts: `Graph` (the svg: children go inside it), `Line axis value`, `Trace source fillTo`, `Curve`, `Band`, `Handle`. `Plot.Root` has an inline `position: relative`, so size it with `height`.
 - **Computer keys on pads:** `activePads` on `Pad.Root` lights the pads (a list of their values) that something else is striking, so map `keydown` and `keyup` to your own strike and pass the held values there.
-- **Envelope.Root keyboard:** the points share one tab stop and the arrow keys move the focused point's value, so a keyboard user reaches only one point. Offer the same parameters as four faders or knobs next to the envelope.
+- **Envelope.Root keyboard:** the points share one tab stop. The arrow keys move the focused point's value, and Page Up and Page Down (or Home and End) move focus between points.
 - **Pad.Root:** `onPadOn` and `onPadOff` go on the Root. Only the first pad is in the tab order (arrow keys move between pads), so a test must Tab to it, then press Space or Enter.
 - **Piano.Root:** `minPitch`, `maxPitch`, `onNoteOn(pitch, details)`, `onNoteOff(pitch, details)`, `activeNotes` (pitches held by something else, such as a computer keyboard). The black keys come before the white keys in the DOM.
 - **Envelope.Root:** `defaultValue` or `value` as `{ x, y, curve? }[]` (both axes 0 to 1), `onValueChange(points, details)`, `minPoints`, `maxPoints`, `snap`, `locale` for the announced text. `Envelope.Points` takes a render function `(point, index) => <Envelope.Point index={index} aria-label />`.

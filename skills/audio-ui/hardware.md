@@ -34,6 +34,18 @@ Type: a condensed grotesque for print (`"Arial Narrow", "Helvetica Neue", system
 - **Meters have behavior.** A VU wants about 300ms to rise and fall; a peak ladder holds its top lamp. Calibration (0 dB reference) is a choice, so label it.
 - **A mouse is not a hand.** A knob on the web is dragged vertically or turned with the wheel and arrow keys: keep the pointer line big and the hit area generous.
 
+## A large-format console channel (`styles/solidstate.css`)
+
+What the references agree on, from the manuals of the console's plug-in models and from its history:
+
+- **Signal order, top to bottom:** input (mic/line, phase, 48V, pad), filters, dynamics (compressor, then expander or gate), a four-band equalizer, then routing, then the fader with its meters and the cut and solo buttons. A section is a ruled line with its title.
+- **EQ knobs are colored by band:** high frequency red, high-mid green, low-mid blue, low frequency brown or black (the early and late equalizers were told apart by the color of their knobs, "brown" and "black"). The solid-state kit does this with `nth-child`: set the cap color variable of the skin on a knob to override it.
+- **Dynamics:** the compressor knobs are grey or white, the gate and expander knobs green, the filter knobs grey. Set the cap color on each knob's Root with `style`.
+- **Buttons are small square caps** each with its own LED that lights when it is on (the kit's `.toggle` has the LED), the cut button red and solo yellow. Almost every switched function has an LED.
+- **A long fader** with a ruled dB scale beside it (+10 at the top, a gap near the bottom to infinity), a vertical LED ladder in green, yellow and red, and moving-coil VU meters on the channel input or bus on some desks.
+- **Print:** white or black silkscreen in a narrow sans, small uppercase legends, ruled sections, numbers around the knobs.
+- Conventions differ between the console's revisions (the filter and compressor knob colors especially): pick one and keep it consistent.
+
 ## A VU needle, a compressor face
 
 `Vu` in the `Panel` markup of [directions.md](./directions.md) is the needle: a paper face, a red zone, one CSS variable from a source. Feed it a 0 to 1 gain reduction (or level) and the CSS transition gives it about 300 ms of ballistics. For a tube compressor: take `styles/tube.css` (warm grey enamel, black caps with a white line, amber lamp), make the three main knobs large (5 to 6rem) and the two timing knobs small, give the caps a dark collar with a white line (copy the conic knurl of `retro.css` and darken it), and put the VU in the middle. Printed numerals around a knob collide with the next knob when the gap is under about 2.4rem. A fixed hardware face may keep its width: scale the whole panel with `zoom` at narrow widths rather than reflowing the controls (`@media (max-width: 70rem) { .panel { zoom: 0.8 } }`, then 0.65 and 0.5 as it narrows), or let the page scroll.

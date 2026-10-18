@@ -8,7 +8,7 @@ import type { Root } from "./root.tsx";
 /**
  * A draggable handle for the point at `index`, positioned with `left`/`bottom`
  * percentages over the `Graph`. It is a `role="slider"` on the point's level
- * (`y`): give it an `aria-label`. One point at a time is the tab stop; arrow
+ * (`y`): give it an `aria-label`. One point at a time is the tab stop; Page Up and Page Down (or Home and End) move between points, and the arrow
  * keys move it (Shift for larger steps), Delete or a double click removes it.
  * Carries `data-blocked` briefly when removal is refused at `minPoints`.
  * Renders a `<div>` element.
@@ -26,6 +26,7 @@ export function Point(componentProps: Point.Props) {
   const {
     controller,
     focusedIndex,
+    focusPoint,
     graphRef,
     registerPoint,
     removePoint,
@@ -87,6 +88,20 @@ export function Point(componentProps: Point.Props) {
     if (event.key === "Delete" || event.key === "Backspace") {
       event.preventDefault();
       removePoint(index, native);
+      return;
+    }
+    // The points share one tab stop: these keys move between them.
+    const last = state.value.length - 1;
+    const moves: Record<string, number> = {
+      End: last,
+      Home: 0,
+      PageDown: Math.max(0, index - 1),
+      PageUp: Math.min(last, index + 1),
+    };
+    const move = moves[event.key];
+    if (move !== undefined) {
+      event.preventDefault();
+      focusPoint(move);
       return;
     }
     if (controller.keyPoint(index, native)) {

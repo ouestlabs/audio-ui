@@ -206,6 +206,21 @@ describe("Envelope value semantics", () => {
 });
 
 describe("Envelope keyboard", () => {
+  test("Page Up and Page Down, Home and End move between the points", () => {
+    const { point, points } = renderEnvelope();
+    fireEvent.keyDown(point(0), { key: "PageUp" });
+    expect(document.activeElement).toBe(point(1));
+    fireEvent.keyDown(point(1), { key: "End" });
+    expect(document.activeElement).toBe(point(3));
+    fireEvent.keyDown(point(3), { key: "PageUp" });
+    expect(document.activeElement).toBe(point(3));
+    fireEvent.keyDown(point(3), { key: "PageDown" });
+    expect(document.activeElement).toBe(point(2));
+    fireEvent.keyDown(point(2), { key: "Home" });
+    expect(document.activeElement).toBe(point(0));
+    expect(points().map((p) => p.tabIndex)).toEqual([0, -1, -1, -1]);
+  });
+
   test("arrow keys move the focused point and commit, with a keyboard reason and the point's index", () => {
     const { point, onValueChange, onValueCommitted } = renderEnvelope();
     fireEvent.keyDown(point(2), { key: "ArrowUp" });

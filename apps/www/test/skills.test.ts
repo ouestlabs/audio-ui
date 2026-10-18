@@ -41,6 +41,9 @@ const IDENTIFIER = /`([A-Za-z_][A-Za-z0-9_]*)`/g;
 // A number in a selector, such as the `.5` of a decimal value.
 const DIGIT_START = /^\d/;
 
+// A registry item kept only to redirect an old install name.
+const RETIRED = /^(Gone|Renamed|Moved)/;
+
 const PACKAGES = new Set(["react", "core"]);
 
 function matches(text: string, pattern: RegExp): string[] {
@@ -492,4 +495,15 @@ describe("the Claude Code marketplace", () => {
       skills.map((name) => `./skills/${name}`).sort()
     );
   });
+});
+
+test("components.md names every registry item, but demos and retired items", async () => {
+  const catalog = await Bun.file(`${SKILL_DIR}/components.md`).text();
+  const items = [...audio, ...hooks, ...lib].filter(
+    (item) => !RETIRED.test(item.description ?? "")
+  );
+  const missing = items
+    .map((item) => item.name)
+    .filter((name) => !catalog.includes(name));
+  expect(missing).toEqual([]);
 });

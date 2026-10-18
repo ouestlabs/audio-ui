@@ -140,6 +140,24 @@ What makes the sound, on the Web Audio API: install each on its own, to `hooks/`
 | `use-audio-levels` | `useAudioLevels` from `@/hooks/use-audio-levels` | Live levels and peaks from one analyser per channel, for a `Meter`'s `source`. Memoize the array |
 | `use-spectrum` | `useSpectrum`, `useSpectrumPeaks` from `@/hooks/use-spectrum` | A live spectrum on a log axis, for a `SpectrumAnalyzer` or a `PlotTrace` |
 
+## More pieces
+
+| Name | Import | Use it for |
+| --- | --- | --- |
+| `waveform-select` | `WaveformSelect` from `@/components/audio-ui/waveform-select` | A row of buttons, one per waveform, each drawn as its shape |
+| `filter-type-select` | `FilterTypeSelect` from `@/components/audio-ui/filter-type-select` | A row of buttons, one per filter type, each drawn as its response |
+| `curve-select` | `CurveSelect` from `@/components/audio-ui/curve-select` | A row of buttons, one per transfer curve, each drawn from the function you give it |
+| `play-toggle` | `PlayToggle` from `@/components/audio-ui/play-toggle` | A play and pause button for a demo signal |
+| `automation-envelope` | `AutomationEnvelope` from `@/components/audio-ui/automation-envelope` | A track's automation over its lane in a timeline, under the same zoom and scroll as the clips |
+| `clip-view`, `clip-panel`, `midi-clip-panel` | from `@/components/audio-ui/<name>` | The detail view of an arrangement's audio or MIDI clip: its strip, start and end, loop, and the waveform or notes |
+| `use-marquee-selection` | `useMarquee` from `@/hooks/use-marquee-selection` | A selection rectangle for the clips of a timeline |
+| `use-audio-signal` | `useAudioSignal` from `@/hooks/use-audio-signal` | An `AnalyserNode` as live signals for a waveform: loudest sample, frequency bands, raw samples |
+| `use-simulated-clock`, `use-simulated-levels`, `use-play-switch` | from `@/hooks/<name>` | A clock, levels and a play switch for a demo that makes no sound |
+| `use-device-loop`, `use-noise-through-eq`, `use-pulses-through-compressor` | `useDeviceLoop` and the others from `@/hooks/<name>` | A short loop of drums and plucked notes through an effect's engine, pink noise through an equalizer, or pulses through a compressor: what a device does, heard and measured |
+| `audio-decode` | `decodeAudioChannels` from `@/lib/audio-decode` | Decode an audio file into samples before `computePeaks` |
+| `key-detector`, `pink-noise`, `oversampling`, `synced-rate`, `demo-loop`, `device-measure` | from `@/lib/<name>` | The engine pieces of the devices: a key detector worklet, pink noise, oversampled waveshaping, a tempo-synced rate, a demo loop, measuring an engine against its panel |
+| `piano-roll-tools` | `createPianoRollTools` from `@/lib/piano-roll-tools` | Typed tools an AI model uses to edit a piano roll |
+
 ## Ready blocks
 
 `npx shadcn@latest add @audio-ui/block-<name>` installs a composed screen to `components/examples/block-<name>.tsx`, exported by name:
