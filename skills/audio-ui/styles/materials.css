@@ -111,3 +111,20 @@
     var(--clip, #e5432c) 85% 100%
   );
 }
+
+/* Helpers drawn from the materials: a lamp and a screw. Decorative: aria-hidden and pointer-events none */
+.lamp {
+  width: 0.75rem;
+  height: 0.75rem;
+  background: var(--lens-off);
+  border-radius: 50%;
+  box-shadow:
+    inset 0 1px 2px #000,
+    0 0 0 2px var(--groove);
+}
+.lamp[data-on] {
+  background: var(--lens-on);
+  box-shadow:
+    0 0 0 2px var(--groove),
+    var(--lens-halo);
+}

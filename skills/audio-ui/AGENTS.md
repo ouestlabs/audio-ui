@@ -476,6 +476,28 @@ For stereo, split the signal with a `ChannelSplitterNode` and connect each outpu
 
 A mono source through a `ChannelSplitterNode` leaves the second analyser at zero. Up-mix first: give the node feeding the splitter `channelCount: 2` with `channelCountMode: "explicit"`, so both bars move.
 
+Without the registry, the same loop is a few lines per channel:
+
+```ts
+import { createSource } from "@audio-ui/react";
+
+const buffer = new Float32Array(analyser.fftSize);
+const source = createSource({ levels: [-60, -60], peaks: [-60, -60] });
+const peaks = [-60, -60];
+
+function read(analyser: AnalyserNode, channel: number) {
+  analyser.getFloatTimeDomainData(buffer);
+  let sum = 0;
+  for (const sample of buffer) {
+    sum += sample * sample;
+  }
+  const db = Math.max(-60, 20 * Math.log10(Math.sqrt(sum / buffer.length) || 1e-6));
+  peaks[channel] = Math.max(db, peaks[channel] - 0.4); // a slow fall holds the peak
+  return db;
+}
+// In one requestAnimationFrame loop: source.set({ levels: [read(left, 0), read(right, 1)], peaks: [...peaks] });
+```
+
 ### 2.5 One MIDI input for the page, connected from a click
 
 **Impact: HIGH (a MIDI keyboard that plays every instrument, with no stuck notes)**

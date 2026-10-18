@@ -63,7 +63,7 @@ Copy `styles/base.css` and `styles/materials.css`. A direction is one scope clas
 .skin-modular .meter-indicator { background: var(--zones); background-size: 100% var(--strip-h, 9.5rem); background-position: bottom; mask: var(--segments); }
 ```
 
-Add one part at a time and look at it. The materials give you --metal, --brushed, --plastic, --rubber, --enamel, --groove, --glass, --paper, --lens-off, --lens-on, --segments and --zones, and the shadows --shadow-raised, --shadow-flat and --shadow-sunk. They all read the same light, so a part drawn from them agrees with the rest of the panel.
+To use another palette on one part (cream keys on a dark panel), redefine the material on that part, `.key { --plastic: <your gradient>; }`, not the tokens: the materials are computed on the panel, so setting the light and dark tokens on a child changes nothing. Add one part at a time and look at it. The materials give you --metal, --brushed, --plastic, --rubber, --enamel, --groove, --glass, --paper, --lens-off, --lens-on, --segments and --zones, and the shadows --shadow-raised, --shadow-flat and --shadow-sunk. They all read the same light, so a part drawn from them agrees with the rest of the panel.
 
 ## 4. What to vary per part
 
