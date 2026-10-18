@@ -3,11 +3,9 @@
 import { createSource, type Source } from "@audio-ui/react";
 import { useEffect, useRef, useState } from "react";
 import { usePlaySwitch } from "@/registry-audio/bases/base/hooks/use-play-switch";
+import { pulses } from "@/registry-audio/bases/base/lib/demo-sound";
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
-const LOOP_SECONDS = 2;
-const PULSES_PER_LOOP = 8;
-const PULSE_DECAY_SECONDS = 0.18;
 const OUTPUT_GAIN = 0.4;
 const FLOOR_DB = -80;
 const FFT_SIZE = 1024;
@@ -19,27 +17,6 @@ export interface CompressorControls {
   kneeDb?: number;
   ratio: number;
   thresholdDb: number;
-}
-
-/** Noise bursts that start loud and fade, eight to a loop, the loudest reaching about 0 dB. */
-function pulses(ctx: AudioContext): AudioBuffer {
-  const buffer = ctx.createBuffer(
-    1,
-    ctx.sampleRate * LOOP_SECONDS,
-    ctx.sampleRate
-  );
-  const data = buffer.getChannelData(0);
-  const pulseLength = data.length / PULSES_PER_LOOP;
-  for (let index = 0; index < data.length; index += 1) {
-    const seconds = (index % pulseLength) / ctx.sampleRate;
-    // Every other pulse is quieter, so the level moves along the curve.
-    const accent = Math.floor(index / pulseLength) % 2 === 0 ? 1 : 0.35;
-    data[index] =
-      (Math.random() * 2 - 1) *
-      accent *
-      Math.exp(-seconds / PULSE_DECAY_SECONDS);
-  }
-  return buffer;
 }
 
 /**

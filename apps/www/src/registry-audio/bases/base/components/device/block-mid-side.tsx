@@ -4,7 +4,7 @@ import { useState } from "react";
 import { MidSidePanel } from "@/registry-audio/bases/base/audio/panels/mid-side-panel";
 import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
-import { renderWideLoop } from "@/registry-audio/bases/base/lib/demo-loop";
+import { renderWideLoop } from "@/registry-audio/bases/base/lib/demo-sound";
 import {
   type MidSideState,
   midSideDevice,

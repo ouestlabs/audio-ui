@@ -9,7 +9,7 @@ import {
   delayDevice,
 } from "@/registry-audio/bases/base/lib/delay-device";
 import { createDelayEngine } from "@/registry-audio/bases/base/lib/delay-engine";
-import { DEMO_TEMPO } from "@/registry-audio/bases/base/lib/demo-loop";
+import { DEMO_TEMPO } from "@/registry-audio/bases/base/lib/demo-sound";
 
 const MASTER_VOLUME = 0.7;
 /** The loop's own tempo, so a synced delay echoes on its beat. */

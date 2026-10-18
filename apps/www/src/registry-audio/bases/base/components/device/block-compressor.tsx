@@ -14,41 +14,18 @@ import {
   createCompressorEngine,
 } from "@/registry-audio/bases/base/lib/compressor-engine";
 import {
+  pulses,
   renderHeldChord,
   renderKickLoop,
-} from "@/registry-audio/bases/base/lib/demo-loop";
+} from "@/registry-audio/bases/base/lib/demo-sound";
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
-const LOOP_SECONDS = 2;
-const PULSES_PER_LOOP = 8;
-const PULSE_DECAY_SECONDS = 0.18;
 const SIGNAL_GAIN = 0.8;
 const FLOOR_DB = -80;
 const FFT_SIZE = 1024;
 /** How fast the level falls back between pulses, in dB per frame. */
 const LEVEL_FALL_DB = 1.2;
 const MASTER_VOLUME = 0.7;
-
-/** Noise bursts that start loud and fade, eight to a loop, every other one quieter, so the level moves along the curve. */
-function pulses(ctx: AudioContext): AudioBuffer {
-  const buffer = ctx.createBuffer(
-    1,
-    ctx.sampleRate * LOOP_SECONDS,
-    ctx.sampleRate
-  );
-  const data = buffer.getChannelData(0);
-  const pulseLength = data.length / PULSES_PER_LOOP;
-  for (let index = 0; index < data.length; index += 1) {
-    const seconds = (index % pulseLength) / ctx.sampleRate;
-    const accent = Math.floor(index / pulseLength) % 2 === 0 ? 1 : 0.35;
-    data[index] =
-      (Math.random() * 2 - 1) *
-      accent *
-      SIGNAL_GAIN *
-      Math.exp(-seconds / PULSE_DECAY_SECONDS);
-  }
-  return buffer;
-}
 
 /**
  * A compressor you can plug in: its state, a panel that draws it, an engine
@@ -82,7 +59,7 @@ export default function BlockCompressor() {
           renderHeldChord(ctx.sampleRate),
           renderKickLoop(ctx.sampleRate),
         ])
-      : Promise.resolve([pulses(ctx), null] as const);
+      : Promise.resolve([pulses(ctx, SIGNAL_GAIN), null] as const);
     buffers.then(([signal, key]) => {
       if (cancelled) {
         return;

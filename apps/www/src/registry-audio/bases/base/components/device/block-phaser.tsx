@@ -4,7 +4,7 @@ import { useState } from "react";
 import { PhaserPanel } from "@/registry-audio/bases/base/audio/panels/phaser-panel";
 import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
-import { DEMO_TEMPO } from "@/registry-audio/bases/base/lib/demo-loop";
+import { DEMO_TEMPO } from "@/registry-audio/bases/base/lib/demo-sound";
 import {
   type PhaserState,
   phaserDevice,

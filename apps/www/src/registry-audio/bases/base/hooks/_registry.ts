@@ -324,7 +324,7 @@ export const hooks: RegistryItem[] = [
     ],
     name: "use-noise-through-eq",
     registryDependencies: [
-      "@audio-ui/pink-noise",
+      "@audio-ui/demo-sound",
       "@audio-ui/use-play-switch",
       "@audio-ui/web-audio",
     ],
@@ -343,7 +343,7 @@ export const hooks: RegistryItem[] = [
     ],
     name: "use-device-loop",
     registryDependencies: [
-      "@audio-ui/demo-loop",
+      "@audio-ui/demo-sound",
       "@audio-ui/use-play-switch",
       "@audio-ui/web-audio",
     ],
@@ -361,7 +361,11 @@ export const hooks: RegistryItem[] = [
       },
     ],
     name: "use-pulses-through-compressor",
-    registryDependencies: ["@audio-ui/use-play-switch", "@audio-ui/web-audio"],
+    registryDependencies: [
+      "@audio-ui/demo-sound",
+      "@audio-ui/use-play-switch",
+      "@audio-ui/web-audio",
+    ],
     type: "registry:hook",
   },
 ];
