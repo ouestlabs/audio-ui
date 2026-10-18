@@ -278,3 +278,61 @@
 .skin-solidstate .waveform-control {
   --waveform-color: #8d949a;
 }
+
+/* Section dividers: a ruled line with a white legend plate, as the strip prints them */
+.skin-solidstate .section {
+  padding-top: 1.3rem;
+  border: 0;
+  border-top: 2px solid #25282a;
+}
+.skin-solidstate .section > .legend {
+  left: 0;
+  padding: 0.2rem 0.5rem;
+  color: #f2f4f4;
+  background: #25282a;
+  translate: 0 -50%;
+}
+
+/* Buttons: square caps with a small LED that lights when pressed */
+.skin-solidstate .toggle {
+  position: relative;
+  min-width: 2.6rem;
+  min-height: 2rem;
+  border-radius: 2px;
+}
+.skin-solidstate .toggle::before {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 5px;
+  height: 5px;
+  content: "";
+  background: #3a1210;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.5);
+}
+.skin-solidstate .toggle[aria-pressed="true"]::before {
+  background: #ff5a4a;
+  box-shadow: 0 0 6px 1px rgb(255 90 74 / 0.8);
+}
+
+/* A print line above the fader: dB legends are drawn by the .scale beside it, in the same ink */
+.skin-solidstate .scale {
+  font:
+    700 0.55rem / 1 "Helvetica Neue",
+    Arial,
+    sans-serif;
+  color: var(--ink);
+}
+
+.skin-solidstate .display {
+  font:
+    600 0.7rem / 1 ui-monospace,
+    monospace;
+  color: #3be07a;
+  background: #050505;
+  border-radius: 2px;
+  box-shadow:
+    inset 0 1px 3px #000,
+    0 0 0 1px #3a3c40;
+}

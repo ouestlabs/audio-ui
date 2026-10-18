@@ -10,6 +10,10 @@ Before writing CSS, state one sentence: *"Direction: retro hardware, enamel pane
 | --- | --- | --- |
 | Retro, vintage, analog, skeuomorphic, hardware, synth, tube, console | Retro | `styles/retro.css` (a dark faceplate), taste in [hardware.md](./hardware.md) |
 | A cream or silver hardware panel: drum machine, tape deck, sampler | Retro, light | `styles/tape.css` (with `styles/materials.css`), taste in [hardware.md](./hardware.md) |
+| A large-format studio console channel: strip, desk, colored caps by section | Console | `styles/solidstate.css` (with `styles/materials.css`) |
+| A black-face rack unit: limiter, compressor, preamp | Rack | `styles/blackface.css` (with `styles/materials.css`), `Vu` for the needle |
+| A vintage tube compressor, warm grey with a cream VU | Tube | `styles/tube.css` (with `styles/materials.css`) |
+| A glossy commercial software plugin window | Plugin | `styles/plugin.css` (with `styles/materials.css`) |
 | Minimal, clean, editorial, quiet, light, Swiss | Minimal | `styles/minimal.css` |
 | Modern, dark, pro, DAW, dense, flat | Modern | `styles/modern.css` |
 | Another look: a named era, an instrument, a material (modular, hi-fi, brutalist, Y2K, paper) | Compose it: [taste.md](./taste.md) and `styles/materials.css` |
@@ -20,8 +24,8 @@ Two directions in one panel is the most common failure. A hybrid needs a reason 
 
 ## 2. Start from the kit, never from memory
 
-1. Copy `styles/base.css` (the structure of every part) and one skin into the project (`styles/materials.css` too for every skin but `retro`, `minimal`, `modern` and `brutalist`, and for a direction of your own).
-2. Copy the markup of `Panel` from [directions.md](./directions.md). Its class names are the contract with the CSS, and its part tree is the verified one.
+1. Copy `styles/base.css` (the structure of every part; in TypeScript, add `declare module "*.css";` to a `.d.ts` so the CSS imports compile) and one skin into the project (`styles/materials.css` too for every skin but `retro`, `minimal`, `modern` and `brutalist`, and for a direction of your own).
+2. Copy the markup of `Panel` from [directions.md](./directions.md): it is one code block, so take only the parts you need (a plugin with five knobs, a plot and two meters needs `KnobControl`, `SpectrumControl` and `Meter`). Its class names are the contract with the CSS, and its part tree is the verified one.
 3. Change the skin's tokens (colors, sizes) before changing its rules.
 
 A display-only app (a tuner, a readout, a scope) uses none of the knob, fader or meter markup: take the tokens and the type of a skin and draw the display yourself, keeping its contrast, focus and motion rules. The kit names only real parts, props, `data-*` attributes and CSS variables, and a test renders it in CI. When a part, prop or attribute is not in the kit or the component's docs page, do not invent it.

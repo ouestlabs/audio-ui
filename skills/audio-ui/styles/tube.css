@@ -219,3 +219,15 @@
 .skin-tube {
   --legend-bg: #5c6360;
 }
+
+.skin-tube .display {
+  font:
+    600 0.7rem / 1 ui-monospace,
+    monospace;
+  color: #ffb028;
+  background: #050505;
+  border-radius: 2px;
+  box-shadow:
+    inset 0 1px 3px #000,
+    0 0 0 1px #3a3c40;
+}

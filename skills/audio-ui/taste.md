@@ -27,7 +27,9 @@ Starting points, each a set of decisions. Mix none of them: pick one.
 | 80s Japanese hi-fi | Silver or black brushed plate, thin print, a green fluorescent readout | `styles/hifi.css` |
 | 90s rack unit | Grey steel, a blue backlit LCD, small black caps | Tight rows of small knobs, an LCD, a bar of LED segments |
 | Tube compressor | Warm grey enamel, cream VU face, black caps with a white line | `styles/tube.css` |
-| Console channel | Dark slate, caps colored by section | `styles/console.css` |
+| Console channel | Dark slate, caps colored by section | `styles/console.css`, or `styles/solidstate.css` for a large-format desk |
+| Software plugin | Light metal, glossy white knobs, dark glass displays | `styles/plugin.css` |
+| Black-face rack unit | Black brushed plate in a silver trim, silver caps, a big VU | `styles/blackface.css` |
 | Drum machine | Cream or grey panel, a row of colored keys | Large pads, a row of small round knobs, a step row |
 | Lo-fi tape | Cream plastic, orange print, a paper meter | `styles/tape.css` |
 | Modular | Black panel, thin white print, patch jacks, one red cable | Small knobs, jacks as rings, dense and symmetric |

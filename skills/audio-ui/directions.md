@@ -13,7 +13,7 @@ import { Panel } from "./audio-ui/panel";
 
 ## The markup
 
-`panel.tsx`, the verified part tree of every skin (a test renders it in CI). Its class names are the contract with the CSS: keep them, and add your own parts the same way.
+This is the verified part tree of every skin (a test renders it in CI). It is one code block: copy the pieces you need into your own files. Its class names are the contract with the CSS: keep them, and add your own parts the same way.
 
 ```tsx
 import { Envelope } from "@audio-ui/react/envelope";
@@ -60,7 +60,6 @@ function KnobControl({
 }) {
   return (
     <Knob.Root
-      aria-label={label}
       className="knob"
       defaultValue={defaultValue}
       dragMode="vertical"
@@ -86,7 +85,7 @@ function KnobControl({
 
 function FaderControl({ label, defaultValue }: { label: string; defaultValue: number }) {
   return (
-    <Fader.Root aria-label={label} className="fader" defaultValue={defaultValue} max={100} min={0} orientation="vertical">
+    <Fader.Root className="fader" defaultValue={defaultValue} max={100} min={0} orientation="vertical">
       <Fader.Control className="fader-control">
         <Fader.Track className="fader-track">
           <Fader.Indicator className="fader-indicator" />
@@ -361,23 +360,28 @@ With shadcn and a distinct look, take the headless parts from `@audio-ui/react` 
 
 Minimal, modern and brutalist hide the knob ticks (`.knob-tick { display: none }`). Delete that rule to print a scale: an EQ's bipolar knob wants its marks. Each skin styles the panel, not the page: set the page background and `color-scheme` yourself. The kit covers knob, fader, meter, XY pad, pad, piano and a toggle; read the component page of Envelope, Plot, Waveform, Timeline and the rest (an ADSR can also be four faders), and style them with the same tokens and the part's own `className`.
 
+## Header bars and displays
+
+A plugin window or a rack unit has a header with a name display and prev/next buttons: use `.toggle` for the buttons and `.display` for the name window (a dark readout, the same look as a knob's value). Both are yours to place; the skins style `.display` where it matters.
+
 ## Props you will need
 
 | Part | Props and signals |
 | --- | --- |
 | `Knob.Root` | `dragMode` (`"vertical"` drags up and down like a fader; the default `"circular"` needs a gesture around the dial), `min`, `max`, `step`, `largeStep`, `defaultValue` or `value` with `onValueChange(value, details)`, `onValueCommitted`, `scale="log"`, `anchor`, `format`, `locale` |
 | `Fader.Root` | `orientation`, `min`, `max`, `step`, `largeStep`, `defaultValue` or `value` with `onValueChange(value, details)`, `onValueCommitted`, `anchor`, `format`. No `scale`: for a log law, map a linear fader yourself |
-| `Fader.Label`, `Fader.Value`, `Knob.Label`, `Knob.Value` | The name and the formatted value, announced and drawn from the same state. `editable` on a value lets people type an exact number (double-click, or Enter while it has focus; Enter commits, Escape drops, a unit or a decimal comma is fine and the result is clamped), as in the kit. `Intl` has no Hz, ms or dB unit: pass a render function, `<Knob.Value>{(formatted, value) => `${Math.round(value)} Hz`}</Knob.Value>`, and put the unit in `getAriaValueText` on the thumb. `format` and `locale` on the Root set the number format, so set `locale` to keep one decimal mark |
+| `Fader.Label`, `Fader.Value`, `Knob.Label`, `Knob.Value` | The name and the formatted value, announced and drawn from the same state. `editable` on a value lets people type an exact number (double-click, or Enter while it has focus; Enter commits, Escape drops, a unit or a decimal comma is fine and the result is clamped; your own render function's unit is ignored when parsing: typing `5.5 s` or `70%` works), as in the kit. `Intl` has no Hz, ms or dB unit: pass a render function, `<Knob.Value>{(formatted, value) => `${Math.round(value)} Hz`}</Knob.Value>`, and put the unit in `getAriaValueText` on the thumb. `format` and `locale` on the Root set the number format, so set `locale` to keep one decimal mark |
 | `Meter.Root` | `value` and `peak` (one level per channel, in dB) or a live `source` (`createSource` of `{ levels, peaks }`, where `peaks` is optional), `min`, `max`, `clipThreshold` (default 0 dB: `data-clipping` never fires if the range stops below it), `warnThreshold`; `data-clipping` and `data-warning` on a channel |
 | `Pad.Root`, `Pad.Item` | `columns`, `value`, `onPadOn(value, { velocity })` and `onPadOff(value)` for the strike; `data-active` and `--pad-velocity` while struck |
 | `XYPad.Root` | `defaultValue={{ x, y }}` or `value`, `onValueChange`; `--xy-pad-x` and `--xy-pad-y` |
 
-Signatures: `Knob.Value` and `Fader.Value` take a render function `(formatted, value) => ReactNode` (the Fader's receives arrays, one entry per thumb: `<Fader.Value>{(_formatted, [value]) => `${value.toFixed(1)} dB`}</Fader.Value>`), and `getAriaValueText(formatted, value) => string` goes on `Knob.Thumb`. To keep the readout and the announced text equal, write one `format(value)` and use it in both, and set `locale` on the Root (a French browser would announce "3,6" beside a readout of "3.6"). `Meter.Root` sets `data-clipping` from the level, not from the peak: style `.meter-channel[data-clipping] .meter-indicator`. The slider takes its name from `Knob.Label` or `Fader.Label` (the kit has one), or from `aria-label` on `Knob.Thumb` or `Fader.Thumb`. An `aria-label` on the Root alone names a group, not the slider, so a test that looks for `getByRole("slider", { name })` finds nothing. Tests read the value with `inputValue()`.
+Signatures: `Knob.Value` and `Fader.Value` take a render function `(formatted, value) => ReactNode` (the Fader's receives arrays, one entry per thumb: `<Fader.Value>{(_formatted, [value]) => `${value.toFixed(1)} dB`}</Fader.Value>`), and `getAriaValueText(formatted, value) => string` goes on `Knob.Thumb`. To keep the readout and the announced text equal, write one `format(value)` and use it in both, and set `locale` on the Root (a French browser would announce "3,6" beside a readout of "3.6"). `Meter.Root` sets `data-clipping` from the level, not from the peak: style `.meter-channel[data-clipping] .meter-indicator`. The slider takes its name from `Knob.Label` or `Fader.Label` (the kit has one, so its Roots carry no `aria-label`), or from `aria-label` on `Knob.Thumb` or `Fader.Thumb`. An `aria-label` on the Root alone names a group, not the slider, so a test that looks for `getByRole("slider", { name })` finds nothing. Tests read the value with `inputValue()`.
 
 Focus lands on the input nested in each thumb, so draw the ring on the thumb with `:has(:focus-visible)` (the kit does). The ring takes --focus, then the accent: when the accent is also the value color, set --focus to the ink so the ring does not disappear into the arc. A fader's `.fader-indicator` is the filled part of the slot: show it for a level, hide it (`display: none`) for a hairline or a hardware slot. Every fader and meter takes its length from one variable, --strip-h, set on the panel or on a strip.
 
 ## Controls beyond the kit's parts
 
+- **Plot.Trace:** `source` holds one value per point, spread evenly across `minX` to `maxX`; without `fillTo` it is a line, with it an area. A linear axis works for any curve (a decay, an envelope), the log axis for a spectrum.
 - **Waveform.Root:** `peaks` (amplitudes 0 to 1, or `{ min, max }` pairs), `value` (a fraction, or seconds with `duration`), `onValueChange(position, details)` to seek your audio, `onValueCommitted`, `range`, `source` for a live signal. The canvas reads `--waveform-color` and `--waveform-progress-color` as plain colors (a `color-mix()` or a gradient does not work there). Parts: `Control > Canvas`, `Playhead`, `Thumb`, `Region`, `Marker`, `Hover`. The `Bars` part is the DOM alternative to `Canvas`, with `count` (default 24) and `mirrored`.
 - **Plot.Root:** `minX`, `maxX`, `minY`, `maxY`, `scaleX="log"`. Parts: `Graph` (the svg: children go inside it), `Line axis value`, `Trace source fillTo`, `Curve`, `Band`, `Handle`. `Plot.Root` has an inline `position: relative`, so size it with `height`.
 - **Pad.Root:** `onPadOn` and `onPadOff` go on the Root. Only the first pad is in the tab order (arrow keys move between pads), so a test must Tab to it, then press Space or Enter.
@@ -410,7 +414,7 @@ Start the voice with `gain.setValueAtTime(0, t)`, `linearRampToValueAtTime(1, t 
 
 ## Printed scales
 
-A fader or meter on a real panel has numbers beside it. Draw them as an `ol.scale` (give it a width, and put it in the same flex row as the control, next to the `Fader.Root`) next to the control, one `li` per mark, at `style={{ bottom: "<percent>%" }}` of the strip (the percent of the range, 0 at the bottom), with `aria-hidden="true"` because the control already announces its value.
+A fader or meter on a real panel has numbers beside it. A skin whose meter has padding (retro, tape, plugin, blackface) needs the same `margin-block` on the scale, or the labels sit off the channels. If the meter's top is 0 dB, the default zones are right as they are. Draw them as an `ol.scale` (give it a width, and put it in the same flex row as the control, next to the `Fader.Root`) next to the control, one `li` per mark, at `style={{ bottom: "<percent>%" }}` of the strip (the percent of the range, 0 at the bottom), with `aria-hidden="true"` because the control already announces its value.
 
 ## A mixer strip
 

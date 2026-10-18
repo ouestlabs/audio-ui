@@ -356,6 +356,7 @@ describe("skills/audio-ui styles", () => {
       const used = new Set(matches(await readPanel(), CLASS_NAME));
       // Decorative helpers a skin offers for the author to add to the markup.
       const extras = new Set([
+        "display",
         "lamp",
         "legend",
         "panel",
@@ -365,6 +366,7 @@ describe("skills/audio-ui styles", () => {
         "screw-br",
         "screw-tl",
         "screw-tr",
+        "scale",
         "section",
       ]);
       const unknown = matches(css, SELECTOR_CLASS).filter(
