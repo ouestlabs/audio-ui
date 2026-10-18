@@ -9,16 +9,33 @@ description: What audio/ui ships today, and what comes next.
 
 Available today:
 
-### Components
+### Elements
+
+The pieces of any audio interface:
 
 - **Controls**: Knob, Fader, XY Pad and Envelope, with scales, rulers and fine drag
-- **Metering and visualization**: Meter and Waveform, from peaks, a live signal or a range of the audio
-- **Time**: Timeline, a zoomable ruler with lanes, ranges and a navigator; Piano, Piano Roll, Sequencer, Transport and Scrubber
-- **Plot**: Curves and draggable points, for equalizers, filters and compressors
+- **Keyboards and pads**: Piano and Pad
+- **Displays**: Meter and Needle meter (a VU dial to the standard), Waveform, from peaks, a live signal or a range of the audio, Plot, for curves and draggable points, Spectrum analyzer and Tuner
+
+### Workstation
+
+The surfaces of a DAW, controlled and independent of any audio engine:
+
+- **Arrangement**: Timeline, a zoomable ruler with lanes, ranges and a navigator, and the arrangement editor on top of it: tracks of clips, selection, time commands, mixes, tempo, signatures, locators, loop and undo
+- **Editors**: Piano Roll, with scales, edits, lanes and a MIDI file in and out, and Sequencer
+- **Transport and mixer**: Transport, Scrubber and Mixer
+
+### Devices
+
+22 effects and instruments, each a definition, a Web Audio engine and a panel generated from its parameters: dynamics (compressor, multiband, limiter, gate, de-esser, transient shaper), EQ and filters, distortion, delay and reverb, modulation, utility and two instruments. A device reports what it takes off the signal for a meter, and exposes tools for an agent. See [Devices](/docs/devices).
+
+### Audio engine
+
+The hooks and libraries on the Web Audio API that make the sound, for the components that need it: output, clock and time, synthesis, input and analysis, and the controllers of `@audio-ui/core` for use with no framework. An engine of your own can drive the same components. See [Audio engine](/docs/engine).
 
 ### Blocks
 
-- **Pre-assembled patterns**: a piano roll, a pocket synth, a wave shaper and a waveform player. Browse the [component catalog](/components)
+Pre-assembled patterns: a mixing console, a drum rack, a piano roll, a timeline, a waveform player, and a block for each device. Browse the [component catalog](/components).
 
 ### For agents
 
