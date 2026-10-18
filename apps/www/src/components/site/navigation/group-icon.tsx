@@ -1,7 +1,7 @@
 import {
   BotIcon,
   BracesIcon,
-  FadersIcon,
+  FaderIcon,
   GridIcon,
   type IconProps,
   JackIcon,
@@ -57,7 +57,7 @@ const PAGE_ICONS: Record<string, ComponentType<IconProps>> = {
   "/docs/primitives": ShapesIcon,
   "/docs/registry": PatchbayIcon,
   "/docs/roadmap": PlayheadIcon,
-  "/docs/styling": FadersIcon,
+  "/docs/styling": FaderIcon,
   "/llms.txt": BotIcon,
 };
 

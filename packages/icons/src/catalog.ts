@@ -5,7 +5,7 @@ import {
   BotIcon,
   BracesIcon,
   EnvelopeIcon,
-  FadersIcon,
+  FaderIcon,
   GridIcon,
   type glyphs,
   HighpassIcon,
@@ -136,7 +136,7 @@ export const catalog: readonly IconEntry[] = [
   ]),
   entry("Shapes", ShapesIcon, "Docs", ["primitives", "circle", "square"]),
   entry("Braces", BracesIcon, "Docs", ["code", "headless", "css", "curly"]),
-  entry("Faders", FadersIcon, "Docs", ["theme", "tokens", "values", "mixer"]),
+  entry("Fader", FaderIcon, "Docs", ["theme", "tokens", "values", "mixer"]),
   entry("Playhead", PlayheadIcon, "Docs", [
     "roadmap",
     "timeline",

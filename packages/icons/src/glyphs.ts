@@ -60,12 +60,10 @@ export const braces: Glyph = [
   ),
 ];
 
-/** Three faders, each set to its own value. */
-export const faders: Glyph = [
-  path("M6 4v9M6 17v3M12 4v3M12 11v9M18 4v7M18 15v5"),
-  circle(6, 15, 2, { tint: true }),
-  circle(12, 9, 2, { tint: true }),
-  circle(18, 13, 2, { tint: true }),
+/** A fader: its slot and its cap. */
+export const fader: Glyph = [
+  path("M12 3v7M12 15v6"),
+  rect(7, 10, 10, 5, 1.5, { tint: true }),
 ];
 
 /** A playhead over its line. */
