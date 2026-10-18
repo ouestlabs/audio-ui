@@ -20,16 +20,18 @@ It installs every part below, with the timeline. Install a part alone by its nam
 ## The state
 
 - `arrangement` (`npx shadcn@latest add @audio-ui/arrangement`) is the document: the types of a clip, a track and a mix, and what reads them. `clipReach` is how far a clip can stretch, `playedNotes` where a MIDI clip's notes play, and `mixAt` what a track plays at a point of the song. Its edits ship with `use-arrangement`, in `lib/arrangement-state`: `lay` puts a clip on a track so it covers what is under it, `land` drops a dragged group (or its copies) on another track, `shiftTrack` and `otherSelected` are what a group drop needs, and `scaleValue` rescales a clip when the tempo changes. Tracks are passed as an order of ids, so nothing assumes how many there are.
-- `use-arrangement` is the state: tracks, clips, selection, each track's mix and height, and every operation on them. It keeps undo and redo over tracks and clips together.
+- `use-arrangement` is the state: tracks, clips, selection, each track's mix and height, the tempo, the time signatures, the locators and the loop, and every operation on them. It keeps undo and redo over all of them together.
 - `use-simulated-clock` is a clock for a timeline that makes no sound, as a live source that loops between two points (to start sound at a position, `use-transport-clock` schedules against the audio clock), and `use-marquee-selection` is the rectangle that selects the clips it touches.
 
 ```tsx
 const arrangement = useArrangement({
-  duration,
+  duration, // the length of the song in seconds when it starts; a change of tempo scales it
   getPosition: () => clock.getSnapshot(), // where a split cuts
   initialClips,
+  initialLocators, // { at, name }[], in seconds
+  initialLoop, // { on, range: [start, end] }
   initialTracks, // { id, name, color }[]
-  splitStep: bar / 4, // the shortest a split piece may be
+  tempo, // { bpm, beatsPerBar, beatUnit }
 });
 
 arrangement.changeClip; // Timeline.Clip's onValueChange, by id
@@ -39,7 +41,7 @@ arrangement.removeTrack(id); // with its clips; any track can go, the last inclu
 arrangement.undo();
 ```
 
-It also gives `selectClip`, `selectClips`, `selectAll`, `selectTrack`, `splitAtCursor`, `duplicateSelection`, `removeClip`, `renameClip`, `setFadeShape` (a fade's curve, as one undo step), `clipAction` (a clip's menu: duplicate, split, switch off, delete), `mixOf` and `changeMix` (gain, pan, mute, solo, color), `heights` and `resizeTrack`, `renameTrack`, `duplicateTrack(id)` (the track with its clips, placed after it), `folded` and `toggleFold` (a folded track is a strip of `foldedHeight` px that keeps its own height for when it opens), the time commands `clearTimeSelection`, `copyOf`, `paste`, `removeTimeSpan`, `insertTimeSpan` and `consolidateTime` (a time selection is `{ range, tracks }`, and `lib/arrangement-state` holds them as pure functions: `copyTime`, `clearTime`, `pasteTime`, `deleteTime`, `openTime`, `consolidate`), `fadeTimeSelection` and `crossfade` (fades from a time selection, and a fade where two clips meet given to both), `toggleSelected`, and `rescale(ratio)` for a tempo change, which also clears the history since it is not part of it.
+It also gives `selectClip`, `selectClips`, `selectAll`, `selectTrack`, `splitAtCursor`, `duplicateSelection`, `removeClip`, `renameClip`, `setFadeShape` (a fade's curve, as one undo step), `clipAction` (a clip's menu: duplicate, split, switch off, delete), `mixOf` and `changeMix` (gain, pan, mute, solo, color), `heights` and `resizeTrack`, `renameTrack`, `duplicateTrack(id)` (the track with its clips, placed after it), `folded` and `toggleFold` (a folded track is a strip of `foldedHeight` px that keeps its own height for when it opens), the time commands `clearTimeSelection`, `copyOf`, `paste`, `removeTimeSpan`, `insertTimeSpan` and `consolidateTime` (a time selection is `{ range, tracks }`, and `lib/arrangement-state` holds them as pure functions: `copyTime`, `clearTime`, `pasteTime`, `deleteTime`, `openTime`, `consolidate`), `fadeTimeSelection` and `crossfade` (fades from a time selection, and a fade where two clips meet given to both), `toggleSelected`, and the time. `tempo` and `setTempo(tempo)` keep the musical positions: every time in the document is scaled to the new bar, a clip three bars long stays three bars long, and it is one undo step, since each step of the history carries its own tempo. `signatures` come with `addSignature(at)`, `setSignature`, `moveSignature` and `removeSignature`, `locators` with `addLocator(at)`, `renameLocator` and `removeLocator`, and `loop` (`{ on, range }`) with `setLoop` and `changeLoop`, a drag of the range that is one step once `settleClipEdit` closes it. `duration` is the song's length, and `setDuration` changes it without a step of the history. A split leaves no piece shorter than a sixteenth of the bar.
 
 ## Clips
 
