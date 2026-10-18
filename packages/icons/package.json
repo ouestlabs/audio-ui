@@ -30,7 +30,7 @@
       "import": "./dist/index.js"
     },
     "./react": {
-      "types": "./dist/react/index.d.ts",
+      "types": "./dist/providers/react/index.d.ts",
       "import": "./dist/react.js"
     }
   },

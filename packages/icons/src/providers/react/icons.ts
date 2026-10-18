@@ -1,4 +1,4 @@
-import * as glyphs from "../core/glyphs.ts";
+import * as glyphs from "../../core/glyphs.ts";
 import { createIcon } from "./icon.tsx";
 
 export const BotIcon = createIcon(glyphs.bot, "BotIcon");

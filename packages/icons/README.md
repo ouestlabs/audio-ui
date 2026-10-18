@@ -6,7 +6,7 @@ Icons for audio interfaces: a knob, a fader, a rack unit, a piano, the shape of 
 npm install @audio-ui/icons
 ```
 
-The package has two parts. `@audio-ui/icons` is data and works with any framework, or none: the glyphs, the catalog, `toSvg` and `draw`. `@audio-ui/icons/react` is the React 19 components.
+The package has two parts. `@audio-ui/icons` is data and works with any framework, or none: the glyphs, the catalog, `toSvg` and `draw`. `@audio-ui/icons/react` is the React 19 components, the first provider: a provider turns the core's drawing into the elements of one framework, and lives in `src/providers/<name>`.
 
 ```tsx
 import { KnobIcon } from "@audio-ui/icons/react";
@@ -41,4 +41,4 @@ The [Icons page](https://www.audio-ui.dev/docs/icons) lets you search the catalo
 
 ## Adding a glyph
 
-Draw it in `src/core/glyphs.ts` with `path`, `circle` and `rect`, on a 24 grid with a 2px margin, and add its entry to `src/core/catalog.ts` and its React icon to `src/react/icons.ts`. Mark a closed shape `{ tint: true }` so it has a body in `duotone` and `fill`, a detail inside it `{ knock: true }` so `fill` cuts it out, and a shape that sits on a line `{ over: true }` so the line stops short of it. `bun test` draws every icon in every weight.
+Draw it in `src/core/glyphs.ts` with `path`, `circle` and `rect`, on a 24 grid with a 2px margin, and add its entry to `src/core/catalog.ts` and its icon to each provider (`src/providers/react/icons.ts`). Mark a closed shape `{ tint: true }` so it has a body in `duotone` and `fill`, a detail inside it `{ knock: true }` so `fill` cuts it out, and a shape that sits on a line `{ over: true }` so the line stops short of it. `bun test` draws every icon in every weight.
