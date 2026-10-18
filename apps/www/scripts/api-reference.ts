@@ -128,7 +128,8 @@ async function filesOf(primitive: string) {
 function rowsOf(
   page: string,
   text: string,
-  files: Map<string, Map<string, string>>
+  files: Map<string, Map<string, string>>,
+  strict = false
 ) {
   const wide = new Map<string, Set<string>>();
   for (const docs of files.values()) {
@@ -147,30 +148,36 @@ function rowsOf(
       names: (row[1] ?? "").split(",").map((name) => name.trim()),
       page,
       section,
-      source: sourceOf(
-        (row[1] ?? "").split(",").map((name) => name.trim()),
-        own,
-        wide
-      ),
+      // The parts a page documents beside its primitive (a registry part) are not read against it.
+      source:
+        strict && !own
+          ? undefined
+          : sourceOf(
+              (row[1] ?? "").split(",").map((name) => name.trim()),
+              own,
+              wide
+            ),
       row: row[0],
     }));
   });
 }
+
+/** The pages whose primitive is not their name: the arrangement page documents the timeline. */
+const PRIMITIVE_OF_PAGE: Record<string, string> = { arrangement: "timeline" };
 
 /** Every row whose description is not the JSDoc of its prop. Rewrites them when `write` is set. */
 export async function sync(write: boolean) {
   const mismatches: Mismatch[] = [];
   const skipped: string[] = [];
   for await (const page of new Glob("**/*.mdx").scan(PAGES)) {
-    const files = await filesOf(
-      page.split("/").pop()?.replace(".mdx", "") ?? ""
-    );
+    const name = page.split("/").pop()?.replace(".mdx", "") ?? "";
+    const files = await filesOf(PRIMITIVE_OF_PAGE[name] ?? name);
     if (files.size === 0) {
       continue;
     }
     const path = `${PAGES}/${page}`;
     let text = await Bun.file(path).text();
-    for (const row of rowsOf(page, text, files)) {
+    for (const row of rowsOf(page, text, files, name in PRIMITIVE_OF_PAGE)) {
       const label = `${page} / ${row.section} / ${row.names.join(", ")}`;
       if (row.source === undefined) {
         skipped.push(label);
