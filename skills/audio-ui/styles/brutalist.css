@@ -1,0 +1,175 @@
+/* BRUTALIST: flat colour, 2px black borders, a hard offset shadow, mono type. No gradients, no blur. */
+.skin-brutalist {
+  --panel: #f3efe6;
+  --ink: #111;
+  --accent: #ffd02e;
+  --hard: 4px 4px 0 #111;
+  font-family: ui-monospace, "SF Mono", "Courier New", monospace;
+  color: var(--ink);
+  background: var(--panel);
+  border: 2px solid #111;
+  border-radius: 0;
+  box-shadow: 8px 8px 0 #111;
+}
+.skin-brutalist .panel-title {
+  display: inline-block;
+  padding: 0.3rem 0.5rem;
+  font:
+    700 0.8rem / 1 ui-monospace,
+    monospace;
+  color: var(--panel);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: #111;
+}
+
+.skin-brutalist .knob-control {
+  --knob-cap: 14%;
+  color: #111;
+}
+.skin-brutalist .knob-track {
+  color: #d6d0c0;
+}
+.skin-brutalist .knob-indicator {
+  color: var(--accent);
+  filter: drop-shadow(0 0 0 #111);
+}
+.skin-brutalist .knob-thumb {
+  background: #fff;
+  border: 2px solid #111;
+  border-radius: 50%;
+  box-shadow: 3px 3px 0 #111;
+}
+.skin-brutalist .knob-thumb::after {
+  position: absolute;
+  top: 4%;
+  left: 50%;
+  width: 4px;
+  height: 34%;
+  content: "";
+  background: #111;
+  translate: -50% 0;
+}
+.skin-brutalist .knob-label,
+.skin-brutalist .knob-value {
+  font:
+    700 0.7rem / 1 ui-monospace,
+    monospace;
+  text-transform: uppercase;
+}
+.skin-brutalist .knob-value {
+  font-variant-numeric: tabular-nums;
+}
+.skin-brutalist .knob-tick {
+  display: none;
+}
+
+.skin-brutalist {
+  --fader-track: 12px;
+  --fader-thumb-w: 2rem;
+  --fader-thumb-h: 1.5rem;
+}
+.skin-brutalist .fader-track {
+  box-sizing: border-box;
+  background: #fff;
+  border: 2px solid #111;
+}
+.skin-brutalist .fader-indicator {
+  width: 100%;
+  background: var(--accent);
+}
+.skin-brutalist .fader-thumb {
+  box-sizing: border-box;
+  background: #fff;
+  border: 2px solid #111;
+  box-shadow: 3px 3px 0 #111;
+}
+.skin-brutalist .fader-control[data-dragging] .fader-thumb {
+  background: var(--accent);
+}
+
+.skin-brutalist {
+  --meter-w: 0.9rem;
+  --clip: #ff4d2e;
+}
+.skin-brutalist .meter {
+  gap: 6px;
+}
+.skin-brutalist .meter-channel {
+  box-sizing: border-box;
+  background: #fff;
+  border: 2px solid #111;
+}
+.skin-brutalist .meter-indicator {
+  background: #111;
+}
+.skin-brutalist .meter-channel[data-clipping] .meter-indicator {
+  background: var(--clip);
+}
+.skin-brutalist .meter-peak {
+  height: 4px;
+  background: var(--accent);
+  border-block: 1px solid #111;
+}
+
+.skin-brutalist .xypad-control {
+  background: #fff;
+  border: 2px solid #111;
+  box-shadow: var(--hard);
+}
+.skin-brutalist .xypad-thumb {
+  box-sizing: border-box;
+  width: 1.25rem;
+  height: 1.25rem;
+  background: var(--accent);
+  border: 2px solid #111;
+}
+
+.skin-brutalist .pad {
+  font:
+    700 0.7rem / 1 ui-monospace,
+    monospace;
+  color: #111;
+  text-transform: uppercase;
+  background: #fff;
+  border: 2px solid #111;
+  border-radius: 0;
+  box-shadow: var(--hard);
+  transition:
+    transform 60ms linear,
+    box-shadow 60ms linear;
+}
+.skin-brutalist .pad[data-active] {
+  background: var(--accent);
+  box-shadow: 0 0 0 #111;
+  transform: translate(4px, 4px);
+}
+
+.skin-brutalist .piano {
+  border: 2px solid #111;
+  box-shadow: var(--hard);
+}
+.skin-brutalist .piano-key[data-color="white"] {
+  background: #fff;
+  border-right: 2px solid #111;
+}
+.skin-brutalist .piano-key[data-color="black"] {
+  background: #111;
+}
+.skin-brutalist .piano-key[data-active] {
+  background: var(--accent);
+}
+
+.skin-brutalist .toggle {
+  font:
+    700 0.7rem / 1 ui-monospace,
+    monospace;
+  background: #fff;
+  border: 2px solid #111;
+  box-shadow: 3px 3px 0 #111;
+}
+.skin-brutalist .toggle[aria-pressed="true"] {
+  background: var(--accent);
+  box-shadow: none;
+  transform: translate(3px, 3px);
+}

@@ -306,6 +306,16 @@ describe("Knob drag modes", () => {
     expect(thumb.hasAttribute("data-dragging")).toBe(false);
   });
 
+  test("exposes the drag mode as data-drag-mode, circular by default", () => {
+    const { control } = renderKnob();
+    expect(control.getAttribute("data-drag-mode")).toBe("circular");
+  });
+
+  test("exposes a vertical drag mode as data-drag-mode", () => {
+    const { control } = renderKnob({ dragMode: "vertical" });
+    expect(control.getAttribute("data-drag-mode")).toBe("vertical");
+  });
+
   test("a controlled value that lags behind doesn't pull the knob back mid-drag", () => {
     const { control, input } = renderKnob({ dragMode: "vertical", value: 10 });
     fireEvent.pointerDown(control, { clientX: 50, clientY: 90, pointerId: 1 });

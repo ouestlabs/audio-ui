@@ -10,6 +10,7 @@
   position: relative;
   width: var(--knob-size, 4.5rem);
   aspect-ratio: 1;
+  cursor: grab;
 }
 .knob-track,
 .knob-indicator {
@@ -206,4 +207,27 @@
   position: absolute;
   list-style: none;
   translate: 0 50%;
+}
+
+/* The cursor follows the drag: a knob dragged up and down is a fader, the others turn around the dial */
+.knob-control[data-drag-mode="vertical"] {
+  cursor: ns-resize;
+}
+.knob-control[data-dragging]:not([data-drag-mode="vertical"]) {
+  cursor: grabbing;
+}
+.knob-control[data-disabled] {
+  cursor: not-allowed;
+  translate: 0 50%;
+}
+
+/* The cursor follows the drag: a knob dragged up and down is a fader, the others turn around the dial */
+.knob-control[data-drag-mode="vertical"] {
+  cursor: ns-resize;
+}
+.knob-control[data-dragging]:not([data-drag-mode="vertical"]) {
+  cursor: grabbing;
+}
+.knob-control[data-disabled] {
+  cursor: not-allowed;
 }

@@ -1,11 +1,11 @@
 # Directions
 
-Five skins ready to copy, each verified in a browser on the same set of parts: knobs, faders, a stereo meter, an XY pad, drum pads and a keyboard. Copy `styles/base.css` and one skin into the project, then the markup below.
+Ten skins ready to copy, each verified in a browser on the same set of parts: knobs, faders, a stereo meter, an XY pad, drum pads and a keyboard. Copy `styles/base.css` and one skin into the project, then the markup below.
 
 ```tsx
 import "./audio-ui/base.css";
-import "./audio-ui/materials.css"; // only for tape.css, phosphor.css or a direction of your own
-import "./audio-ui/retro.css"; // or minimal.css, modern.css, tape.css, phosphor.css
+import "./audio-ui/materials.css"; // for every skin except retro, minimal, modern and brutalist, and for a direction of your own
+import "./audio-ui/retro.css"; // or any other skin of styles/
 import { Panel } from "./audio-ui/panel";
 
 <Panel skin="retro" title="Synth" />
@@ -93,7 +93,7 @@ export function Panel({
   skin,
   title,
 }: {
-  skin: "retro" | "minimal" | "modern" | "tape" | "phosphor";
+  skin: "retro" | "minimal" | "modern" | "tape" | "phosphor" | "hifi" | "brutalist" | "y2k" | "console" | "synth70";
   title: string;
 }) {
   return (
@@ -186,6 +186,16 @@ Read [hardware.md](./hardware.md) before composing a retro panel: it explains wh
 ## Phosphor: a monochrome terminal
 
 `styles/phosphor.css`. One green on near-black with scanline grain, mono type, bracketed values, square handles, segmented meters. Also built only from `materials.css`.
+
+## More skins
+
+- **hifi** (`styles/hifi.css`): an 80s Japanese hi-fi component. A black brushed plate, small silver caps, thin print, a green fluorescent readout and an LED ladder.
+- **brutalist** (`styles/brutalist.css`): flat colors, 2px black borders, a hard offset shadow, mono type. A pad sinks into its shadow when struck.
+- **y2k** (`styles/y2k.css`): translucent candy plastic. A pale blue shell, teal caps with a gloss band, one orange accent, large radii.
+- **console** (`styles/console.css`): a mixing console channel. A slate panel, caps colored by section (the second and third knob change color), a long fader with ticks and a lamp ladder.
+- **synth70** (`styles/synth70.css`): a 70s monophonic synth. A black panel between wood cheeks, white print, an amber lamp, rocker toggles.
+
+Every one is built from `styles/materials.css` and the shared tokens, so each is about sixty lines: read the closest one before writing your own.
 
 ## Props you will need
 

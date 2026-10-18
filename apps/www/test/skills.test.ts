@@ -298,7 +298,18 @@ describe("skills/audio-ui styles", () => {
   const STYLES = `${SKILL_DIR}/styles`;
   const CLASS_NAME = /className="([a-z-]+)"/g;
   const SELECTOR_CLASS = /\.([a-z][a-z0-9-]*)/g;
-  const SKINS = ["retro", "minimal", "modern", "tape", "phosphor"] as const;
+  const SKINS = [
+    "retro",
+    "minimal",
+    "modern",
+    "tape",
+    "phosphor",
+    "hifi",
+    "brutalist",
+    "y2k",
+    "console",
+    "synth70",
+  ] as const;
 
   /** The kit's markup: the code block of directions.md that exports `Panel`. */
   const readPanel = async () => {

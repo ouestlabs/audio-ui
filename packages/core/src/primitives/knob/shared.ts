@@ -41,8 +41,9 @@ export const POSITION_STEP = 0.01;
 
 export const LARGE_POSITION_STEP = 0.1;
 
-/** Only `disabled` and `dragging` become data attributes; the numbers stay in `state`. */
+/** `disabled`, `dragging` and the drag mode become data attributes; the numbers stay in `state`. */
 export const STATE_ATTRIBUTES_MAPPING = {
+  dragMode: (value: string) => ({ "data-drag-mode": value }),
   max: () => null,
   min: () => null,
   value: () => null,

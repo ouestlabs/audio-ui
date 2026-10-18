@@ -1,0 +1,217 @@
+/* HIFI: an 80s Japanese hi-fi component. Black brushed plate, silver caps, thin print, a green fluorescent readout. */
+.skin-hifi {
+  --panel: #1a1b1d;
+  --ink: #c9cdd0;
+  --accent: #7dffb4;
+  --hi: #f2f3f4;
+  --lo: #4a4d50;
+  --lift: 4;
+  --ok: #7dffb4;
+  --warn: #ffd35c;
+  --clip: #ff5a4a;
+  font-family: "Helvetica Neue", Arial, sans-serif;
+  color: var(--ink);
+  background:
+    var(
+      --brushed-dark,
+      repeating-linear-gradient(
+        90deg,
+        rgb(255 255 255 / 0.03) 0 1px,
+        rgb(0 0 0 / 0.08) 1px 2px
+      )
+    ),
+    linear-gradient(180deg, #2a2b2e, var(--panel) 12%);
+  border-radius: 3px;
+  box-shadow:
+    0 0 0 1px #000,
+    inset 0 1px 0 rgb(255 255 255 / 0.18),
+    0 12px 24px rgb(0 0 0 / 0.5);
+}
+.skin-hifi .panel-title {
+  font:
+    500 0.65rem / 1 "Helvetica Neue",
+    Arial,
+    sans-serif;
+  color: var(--ink);
+  text-transform: uppercase;
+  letter-spacing: 0.28em;
+}
+
+.skin-hifi .knob-control {
+  --knob-cap: 10%;
+  color: var(--ink);
+}
+.skin-hifi .knob-track {
+  color: rgb(255 255 255 / 0.12);
+}
+.skin-hifi .knob-indicator {
+  color: var(--accent);
+}
+.skin-hifi .knob-thumb {
+  background: var(--metal);
+  border-radius: 50%;
+  box-shadow:
+    var(--shadow-raised),
+    0 0 0 2px #0c0c0d;
+}
+.skin-hifi .knob-thumb::after {
+  position: absolute;
+  top: 6%;
+  left: 50%;
+  width: 2px;
+  height: 26%;
+  content: "";
+  background: #111;
+  translate: -50% 0;
+}
+.skin-hifi .knob-label {
+  font:
+    500 0.55rem / 1 "Helvetica Neue",
+    Arial,
+    sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+}
+.skin-hifi .knob-value {
+  font:
+    400 0.7rem / 1 ui-monospace,
+    monospace;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+  text-shadow: 0 0 6px rgb(125 255 180 / 0.55);
+}
+.skin-hifi .knob-tick {
+  top: -8px;
+  height: 4px;
+  background: var(--ink);
+}
+
+.skin-hifi {
+  --fader-track: 3px;
+  --fader-thumb-w: 1.1rem;
+  --fader-thumb-h: 2.1rem;
+}
+.skin-hifi .fader-control {
+  width: 2.5rem;
+}
+.skin-hifi .fader-track {
+  background: #000;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 0.12);
+}
+.skin-hifi .fader-indicator {
+  width: 100%;
+  background: var(--accent);
+  box-shadow: 0 0 6px rgb(125 255 180 / 0.5);
+}
+.skin-hifi .fader-thumb {
+  background:
+    linear-gradient(
+      180deg,
+      transparent calc(50% - 1px),
+      #111 calc(50% - 1px) calc(50% + 1px),
+      transparent calc(50% + 1px)
+    ),
+    var(--brushed);
+  border-radius: 2px;
+  box-shadow: var(--shadow-raised);
+}
+
+.skin-hifi {
+  --meter-w: 0.6rem;
+}
+.skin-hifi .meter {
+  box-sizing: border-box;
+  height: calc(var(--strip-h, 9.5rem) + 12px);
+  padding: 6px;
+  background: #05100a;
+  border-radius: 2px;
+  box-shadow:
+    inset 0 0 8px #000,
+    0 0 0 1px rgb(255 255 255 / 0.14);
+}
+.skin-hifi .meter-channel {
+  background: var(--zones-dim), var(--zones);
+  isolation: isolate;
+  -webkit-mask: var(--segments);
+  mask: var(--segments);
+}
+.skin-hifi .meter-indicator {
+  background: var(--zones-lit);
+  mix-blend-mode: color-dodge;
+}
+.skin-hifi .meter-peak {
+  height: 2px;
+  background: var(--ink);
+}
+
+.skin-hifi .xypad-control {
+  background: #04100b;
+  background-image:
+    linear-gradient(rgb(125 255 180 / 0.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(125 255 180 / 0.12) 1px, transparent 1px);
+  background-size: 25% 25%;
+  border-radius: 2px;
+  box-shadow:
+    inset 0 0 14px #000,
+    0 0 0 1px rgb(255 255 255 / 0.14);
+}
+.skin-hifi .xypad-thumb {
+  background: var(--accent);
+  border-radius: 50%;
+  box-shadow: 0 0 10px 2px rgb(125 255 180 / 0.6);
+}
+
+.skin-hifi .pad {
+  font:
+    500 0.6rem / 1 "Helvetica Neue",
+    Arial,
+    sans-serif;
+  color: var(--ink);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  background: var(--rubber);
+  border-radius: 3px;
+  box-shadow: var(--shadow-raised);
+  transition:
+    transform 60ms linear,
+    box-shadow 60ms linear;
+}
+.skin-hifi .pad[data-active] {
+  color: var(--accent);
+  box-shadow: inset 0 2px 5px #000;
+  transform: translateY(2px);
+}
+
+.skin-hifi .piano {
+  box-shadow: 0 0 0 2px #000;
+}
+.skin-hifi .piano-key[data-color="white"] {
+  background: linear-gradient(180deg, #f2f3f4, #c9cdd0);
+  border: 1px solid #000;
+}
+.skin-hifi .piano-key[data-color="black"] {
+  background: linear-gradient(180deg, #2c2d30, #050506);
+}
+.skin-hifi .piano-key[data-active] {
+  background: var(--accent);
+}
+
+.skin-hifi .toggle {
+  font:
+    500 0.6rem / 1 "Helvetica Neue",
+    Arial,
+    sans-serif;
+  color: var(--ink);
+  letter-spacing: 0.15em;
+  background: var(--rubber);
+  border-radius: 2px;
+  box-shadow: var(--shadow-raised);
+}
+.skin-hifi .toggle[aria-pressed="true"] {
+  color: var(--accent);
+  box-shadow:
+    inset 0 2px 4px #000,
+    0 0 8px rgb(125 255 180 / 0.3);
+  transform: translateY(1px);
+}

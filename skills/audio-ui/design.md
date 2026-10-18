@@ -19,7 +19,7 @@ Two directions in one panel is the most common failure. A hybrid needs a reason 
 
 ## 2. Start from the kit, never from memory
 
-1. Copy `styles/base.css` (the structure of every part) and one skin into the project (`styles/materials.css` too for `tape`, `phosphor` or a direction of your own).
+1. Copy `styles/base.css` (the structure of every part) and one skin into the project (`styles/materials.css` too for every skin but `retro`, `minimal`, `modern` and `brutalist`, and for a direction of your own).
 2. Copy the markup of `Panel` from [directions.md](./directions.md). Its class names are the contract with the CSS, and its part tree is the verified one.
 3. Change the skin's tokens (colors, sizes) before changing its rules.
 

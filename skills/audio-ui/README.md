@@ -15,7 +15,7 @@ npx skills add ouestlabs/audio-ui
   - `<prefix>-<name>.md`: a rule, with an incorrect and a correct example
 - `AGENTS.md`: every rule expanded in one document, for agents without skill support (**generated**)
 - `components.md`, `setup.md`, `core.md`: the catalog; setup for the registry, the packages and the MCP server; the framework-free controllers outside React
-- `design.md`, `directions.md`, `taste.md`, `hardware.md`, `styles/`: choosing a visual direction, and the CSS skins (retro, minimal, modern, tape, phosphor) and the materials they are composed from with the verified markup; a test renders the markup and checks every class
+- `design.md`, `directions.md`, `taste.md`, `hardware.md`, `styles/`: choosing a visual direction, and the CSS skins (retro, minimal, modern, tape, phosphor, hifi, brutalist, y2k, console, synth70) and the materials they are composed from with the verified markup; a test renders the markup and checks every class
 - `metadata.json`: version, organization, abstract and references used in `AGENTS.md`
 - `evals/evals.json`: prompts with checkable expectations, to measure the skill against a model
 - `agents/openai.yml`, `assets/`: how Codex displays the skill

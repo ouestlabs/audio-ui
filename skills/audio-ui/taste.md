@@ -23,19 +23,19 @@ Starting points, each a set of decisions. Mix none of them: pick one.
 
 | Look | Surface and color | Parts |
 | --- | --- | --- |
-| 70s analog synth | Black panel, wood cheeks, white print, amber lamp | Machined caps with a skirt, rocker switches, a slider bank |
-| 80s Japanese hi-fi | Silver or black brushed plate, thin print, a green fluorescent readout | Small knurled knobs, a segmented level display, flat keys |
+| 70s analog synth | Black panel, wood cheeks, white print, amber lamp | `styles/synth70.css` |
+| 80s Japanese hi-fi | Silver or black brushed plate, thin print, a green fluorescent readout | `styles/hifi.css` |
 | 90s rack unit | Grey steel, a blue backlit LCD, small black caps | Tight rows of small knobs, an LCD, a bar of LED segments |
 | Tube compressor | Warm grey enamel, cream VU face, black caps with a white line | A big VU needle, a few large knobs, a red zone |
-| Console channel | Dark slate, caps colored by section | A long fader, colored caps, a vertical strip of meters |
+| Console channel | Dark slate, caps colored by section | `styles/console.css` |
 | Drum machine | Cream or grey panel, a row of colored keys | Large pads, a row of small round knobs, a step row |
 | Lo-fi tape | Cream plastic, orange print, a paper meter | `styles/tape.css` |
 | Modular | Black panel, thin white print, patch jacks, one red cable | Small knobs, jacks as rings, dense and symmetric |
 | Terminal | Green on near-black, mono, no radius | `styles/phosphor.css` |
 | Editorial | Paper, ink, one red-orange, hairlines | `styles/minimal.css` |
 | Pro dark tool | Graphite in three steps, one signal color, mono labels | `styles/modern.css` |
-| Brutalist | White or one flat color, 2px black borders, a hard offset shadow, mono | Square caps, thick bars, no gradients |
-| Y2K plastic | Translucent colored plastic, a glossy top highlight, big radius | Rounded caps with an inner glow, bubbly meters |
+| Brutalist | White or one flat color, 2px black borders, a hard offset shadow, mono | `styles/brutalist.css` |
+| Y2K plastic | Translucent colored plastic, a glossy top highlight, big radius | `styles/y2k.css` |
 | Zine and paper | Off-white grain, ink print, slightly rotated labels | Hand-drawn marks, stamped values |
 
 ## 3. Compose it
