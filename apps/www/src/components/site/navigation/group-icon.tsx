@@ -1,15 +1,16 @@
 import {
   BotIcon,
-  BoxIcon,
-  BracesIcon,
-  DownloadIcon,
-  DropIcon,
-  FlagIcon,
+  ContrastIcon,
+  CrateIcon,
+  DialIcon,
+  GridIcon,
   type IconProps,
-  InfoIcon,
+  InsertIcon,
   KnobIcon,
+  NoteIcon,
+  PlayheadIcon,
+  PlayIcon,
   RackIcon,
-  RouteIcon,
   ShapesIcon,
   SparkleIcon,
   TracksIcon,
@@ -23,7 +24,7 @@ const GROUP_ICONS = {
   "Audio engine": WaveformIcon,
   Devices: RackIcon,
   Elements: KnobIcon,
-  "Get started": FlagIcon,
+  "Get started": PlayIcon,
   Workstation: TracksIcon,
 } as const;
 
@@ -42,27 +43,37 @@ export function GroupIcon({
         "size-4 shrink-0",
         current ? "text-site-foreground" : "text-site-muted-foreground"
       )}
+      weight="fill"
     />
   ) : null;
 }
 
 const PAGE_ICONS: Record<string, ComponentType<IconProps>> = {
-  "/docs": InfoIcon,
+  "/docs": NoteIcon,
   "/docs/agents": SparkleIcon,
-  "/docs/get-started": DownloadIcon,
-  "/docs/headless-styling": BracesIcon,
-  "/docs/mcp": Icons.mcp,
+  "/docs/get-started": InsertIcon,
+  "/docs/headless-styling": DialIcon,
+  "/docs/icons": GridIcon,
   "/docs/primitives": ShapesIcon,
-  "/docs/registry": BoxIcon,
-  "/docs/roadmap": RouteIcon,
-  "/docs/styling": DropIcon,
+  "/docs/registry": CrateIcon,
+  "/docs/roadmap": PlayheadIcon,
+  "/docs/styling": ContrastIcon,
   "/llms.txt": BotIcon,
 };
 
 /** The glyph of a page of the sidebar that has one (the Get started pages), or nothing. */
 export function PageIcon({ url }: { url: string }) {
+  // The MCP mark is a logo: it has no weights.
+  if (url === "/docs/mcp") {
+    return (
+      <Icons.mcp className="size-3.5 shrink-0 text-site-muted-foreground" />
+    );
+  }
   const Icon = PAGE_ICONS[url];
   return Icon ? (
-    <Icon className="size-3.5 shrink-0 text-site-muted-foreground" />
+    <Icon
+      className="size-3.5 shrink-0 text-site-muted-foreground"
+      weight="fill"
+    />
   ) : null;
 }
