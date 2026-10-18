@@ -1,312 +1,374 @@
 [
   {
     "categories": ["instrument", "synth", "xypad"],
+    "description": "A synth you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file. Press the pad: pitch goes across, the filter cutoff up",
     "name": "block-pocket-synth",
-    "title": "block-pocket-synth"
+    "title": "Block pocket synth"
   },
   {
     "categories": ["instrument", "synth", "xypad"],
+    "description": "A wave shaper synth you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file. Press the pad: pitch goes across, the resonance up",
     "name": "block-wave-shaper",
-    "title": "block-wave-shaper"
+    "title": "Block wave shaper"
   },
   {
     "categories": ["fader"],
+    "description": "Vertical fader",
     "name": "fader-vertical-demo",
-    "title": "fader-vertical-demo"
+    "title": "Fader vertical demo"
   },
   {
     "categories": ["fader"],
+    "description": "Fader component example with horizontal orientation",
     "name": "fader-horizontal-demo",
-    "title": "fader-horizontal-demo"
+    "title": "Fader horizontal demo"
   },
   {
     "categories": ["fader"],
+    "description": "Pan fader filling from the center: anchored at 0 on a -1…1 range",
     "name": "fader-pan-demo",
-    "title": "fader-pan-demo"
+    "title": "Fader pan demo"
   },
   {
     "categories": ["knob"],
+    "description": "A knob turned by dragging up and down, like a fader: 150px of travel spans the whole range",
     "name": "knob-vertical-drag-demo",
-    "title": "knob-vertical-drag-demo"
+    "title": "Knob vertical drag demo"
   },
   {
     "categories": ["knob"],
+    "description": "Knob component example",
     "name": "knob-demo",
-    "title": "knob-demo"
+    "title": "Knob demo"
   },
   {
     "categories": ["knob"],
+    "description": "Filter cutoff knob on a logarithmic scale, 20 Hz to 20 kHz, every decade the same share of the dial",
     "name": "knob-filter-control-demo",
-    "title": "knob-filter-control-demo"
+    "title": "Knob filter control demo"
   },
   {
     "categories": ["knob"],
+    "description": "Knob value arc (rail + highlight) and optional anchor range",
     "name": "knob-arc-and-anchor-demo",
-    "title": "knob-arc-and-anchor-demo"
+    "title": "Knob arc and anchor demo"
   },
   {
     "categories": ["envelope"],
+    "description": "Envelope size default example",
     "name": "envelope-size-default-demo",
-    "title": "envelope-size-default-demo"
+    "title": "Envelope size default demo"
   },
   {
     "categories": ["envelope"],
+    "description": "Controlled envelope with a live point count",
     "name": "envelope-adsr-demo",
-    "title": "envelope-adsr-demo"
+    "title": "Envelope adsr demo"
   },
   {
     "categories": ["piano"],
+    "description": "Piano size default example",
     "name": "piano-size-default-demo",
-    "title": "piano-size-default-demo"
+    "title": "Piano size default demo"
   },
   {
     "categories": ["piano"],
+    "description": "Piano lit from an external source via activeNotes",
     "name": "piano-active-notes-demo",
-    "title": "piano-active-notes-demo"
+    "title": "Piano active notes demo"
   },
   {
     "categories": ["piano-roll", "synth"],
+    "description": "A MIDI clip editor: a scrolling roll with a playable keyboard down its side, a loop brace and a ruler that labels bars, beats and sixteenths as you zoom, and a velocity lane you can drag taller. The transport plays, pauses and stops, loops or plays once through, clicks a metronome and sets the tempo and signature. Draw or select notes, mark a scale and fold onto it, undo and redo, and edit the selection from the Notes menu: split at the playhead, chop, join, legato, reverse, invert, stretch, fit to scale, crescendo and humanize. Drop a MIDI file on it to import one, or export the clip as a .mid file",
     "name": "block-piano-roll",
-    "title": "block-piano-roll"
+    "title": "Block piano roll"
   },
   {
     "categories": ["piano-roll"],
+    "description": "A scale menu lighting the keys of the scale it picks",
     "name": "scale-menu-demo",
-    "title": "scale-menu-demo"
+    "title": "Scale menu demo"
   },
   {
     "categories": ["piano-roll"],
+    "description": "Find notes on a piano roll by pitch, scale, state, velocity, length or chance, and select them",
     "name": "note-find-demo",
-    "title": "note-find-demo"
+    "title": "Note find demo"
   },
   {
     "categories": ["piano-roll"],
+    "description": "A menu of note edits over a piano roll's selection, beside an item of its own",
     "name": "note-edit-menu-demo",
-    "title": "note-edit-menu-demo"
+    "title": "Note edit menu demo"
   },
   {
     "categories": ["piano-roll", "synth"],
+    "description": "A one-bar piano roll on loop with a metronome, played by a synth, which hears edits on its next pass",
     "name": "piano-roll-playback-demo",
-    "title": "piano-roll-playback-demo"
+    "title": "Piano roll playback demo"
   },
   {
     "categories": ["piano-roll"],
+    "description": "A piano roll that exports its clip as a .mid file and imports one onto its grid, with the file's tempo",
     "name": "piano-roll-midi-file-demo",
-    "title": "piano-roll-midi-file-demo"
+    "title": "Piano roll midi file demo"
   },
   {
     "categories": ["meter"],
+    "description": "Meter size default example",
     "name": "meter-size-default-demo",
-    "title": "meter-size-default-demo"
+    "title": "Meter size default demo"
   },
   {
     "categories": ["meter"],
+    "description": "A VU needle that follows the microphone when it is on, and a moving signal when it is not",
     "name": "needle-meter-demo",
-    "title": "needle-meter-demo"
+    "title": "Needle meter demo"
   },
   {
     "categories": ["meter"],
+    "description": "Horizontal meter example",
     "name": "meter-horizontal-demo",
-    "title": "meter-horizontal-demo"
+    "title": "Meter horizontal demo"
   },
   {
     "categories": ["xypad"],
+    "description": "XYPad with live x/y readout",
     "name": "xypad-live-value-demo",
-    "title": "xypad-live-value-demo"
+    "title": "Xypad live value demo"
   },
   {
     "categories": ["xypad"],
+    "description": "XYPad with bipolar pan/mix style ranges",
     "name": "xypad-bipolar-range-demo",
-    "title": "xypad-bipolar-range-demo"
+    "title": "Xypad bipolar range demo"
   },
   {
     "categories": ["waveform"],
+    "description": "A waveform player that shows what the waveform does: seek and hover, a loop region with handles, markers and zoom that follows the playhead. It starts on a synthesized phrase and takes any audio file",
     "name": "block-waveform-player",
-    "title": "block-waveform-player"
+    "title": "Block waveform player"
   },
   {
     "categories": ["timeline"],
+    "description": "A timeline with a loop range, a ruler and two tracks, each with a clip you move, trim and fade, and a playhead on a clock: the timeline alone, with no arrangement around it",
     "name": "timeline-clips-demo",
-    "title": "timeline-clips-demo"
+    "title": "Timeline clips demo"
   },
   {
     "categories": ["timeline"],
+    "description": "An arrangement timeline made for a whole screen: a bar ruler that seeks on the grid, a loop strip, a lane per track with clips to move between tracks, trim and fade on the grid, a cursor to put anywhere on a track, and a split at the cursor, a transport with play or pause, stop, loop, a metronome and a tempo and signature that keep the arrangement's musical positions, a playhead following its clock, and a navigator to zoom and scroll. MIDI tracks hold MIDI clips that draw their notes, play through a synth and open on a piano roll in the clip panel; double-click a MIDI lane for a new clip. In automation mode each track draws an envelope of its volume or pan over its clips, which a MIDI track's own channel follows as it plays. Open it at full size and the tracks take the screen",
     "name": "block-timeline",
-    "title": "block-timeline"
+    "title": "Block timeline"
   },
   {
     "categories": ["waveform"],
+    "description": "Waveform default example",
     "name": "waveform-demo",
-    "title": "waveform-demo"
+    "title": "Waveform demo"
   },
   {
     "categories": ["waveform"],
+    "description": "Waveform with a resizable loop region, markers and a hover time",
     "name": "waveform-region-demo",
-    "title": "waveform-region-demo"
+    "title": "Waveform region demo"
   },
   {
     "categories": ["waveform"],
+    "description": "Live waveform scrolling with the microphone, or with a speech-like signal while it is off",
     "name": "waveform-live-demo",
-    "title": "waveform-live-demo"
+    "title": "Waveform live demo"
   },
   {
     "categories": ["plot"],
+    "description": "An equalizer: drag each band to set its frequency and gain, and the curve is the response of all three",
     "name": "plot-demo",
-    "title": "plot-demo"
+    "title": "Plot demo"
   },
   {
     "categories": ["plot"],
+    "description": "A low-pass filter: one handle on the resonance peak sets the cutoff and how much it rings",
     "name": "plot-filter-demo",
-    "title": "plot-filter-demo"
+    "title": "Plot filter demo"
   },
   {
     "categories": ["plot"],
+    "description": "A compressor transfer curve: one handle sets the threshold, the other the ratio",
     "name": "plot-compressor-demo",
-    "title": "plot-compressor-demo"
+    "title": "Plot compressor demo"
   },
   {
     "categories": ["dynamics", "plot", "knob"],
+    "description": "A compressor you can plug in: its state, a panel that draws it and a Web Audio engine that plays it, side by side. Play a pulsing signal and turn the knobs",
     "name": "block-compressor",
-    "title": "block-compressor"
+    "title": "Block compressor"
   },
   {
     "categories": ["eq", "plot", "knob"],
+    "description": "An equalizer you can plug in: its state, a panel that draws it with a handle on each band and an engine that plays it, side by side. Play pink noise and the spectrum behind the curve is what comes out",
     "name": "block-equalizer",
-    "title": "block-equalizer"
+    "title": "Block equalizer"
   },
   {
     "categories": ["utility", "knob"],
+    "description": "A device of your own, defined by its parameters alone: the panel, the state and the tool an agent calls come from that one description. Turn a knob, or send the call a model could send",
     "name": "device-contract-demo",
-    "title": "device-contract-demo"
+    "title": "Device contract demo"
   },
   {
     "categories": ["delay-reverb", "plot", "knob"],
+    "description": "A delay you can plug in: its state, a panel that draws the echoes it makes with a handle for the time and the feedback, and an engine that plays it. Play a loop through it and drag",
     "name": "block-delay",
-    "title": "block-delay"
+    "title": "Block delay"
   },
   {
     "categories": ["delay-reverb", "plot", "knob"],
+    "description": "A reverb you can plug in: its state, a panel that draws the tail it makes with a handle for the decay time, and an engine that plays it. Play a loop through it and drag",
     "name": "block-reverb",
-    "title": "block-reverb"
+    "title": "Block reverb"
   },
   {
     "categories": ["eq", "plot", "knob"],
+    "description": "A filter you can plug in: its state, a panel that draws the curve it plays with a handle for the cutoff and the resonance, and an engine that plays it. Play a loop through it and drag, the spectrum behind is what comes out",
     "name": "block-filter",
-    "title": "block-filter"
+    "title": "Block filter"
   },
   {
     "categories": ["distortion", "plot", "knob"],
+    "description": "A distortion you can plug in: its state, a panel that draws its transfer curve and an engine that plays it. Play a loop through it and turn the drive",
     "name": "block-distortion",
-    "title": "block-distortion"
+    "title": "Block distortion"
   },
   {
     "categories": ["modulation", "plot", "knob"],
+    "description": "A chorus you can plug in: its state, a panel that draws the sweep of its delay and an engine that plays it. Play a loop through it and turn the rate and the depth",
     "name": "block-chorus",
-    "title": "block-chorus"
+    "title": "Block chorus"
   },
   {
     "categories": ["utility", "knob"],
+    "description": "A utility you can plug in: its state, a panel and an engine that plays it. Play a loop through it and move the pan and the width",
     "name": "block-utility",
-    "title": "block-utility"
+    "title": "Block utility"
   },
   {
     "categories": ["dynamics", "plot", "knob"],
+    "description": "A limiter you can plug in: its state, a panel that draws its transfer curve with a handle on the ceiling and an engine that plays it. Play a loop through it, push the gain and pull the ceiling down",
     "name": "block-limiter",
-    "title": "block-limiter"
+    "title": "Block limiter"
   },
   {
     "categories": ["dynamics", "plot", "knob"],
+    "description": "A gate you can plug in: its state, a panel that draws its transfer curve with a handle on the threshold and an engine that plays it. Play a loop through it and raise the threshold: the quiet parts go",
     "name": "block-gate",
-    "title": "block-gate"
+    "title": "Block gate"
   },
   {
     "categories": ["distortion", "plot", "knob"],
+    "description": "A saturator you can plug in: its state, a panel that draws its transfer curve and an engine that plays it. Play a loop through it, pick a curve and turn the drive",
     "name": "block-saturator",
-    "title": "block-saturator"
+    "title": "Block saturator"
   },
   {
     "categories": ["modulation", "plot", "knob"],
+    "description": "A phaser and flanger you can plug in: its state, a panel that draws the sweep and an engine that plays it. Play a loop through it, switch the mode and turn the rate and the feedback",
     "name": "block-phaser",
-    "title": "block-phaser"
+    "title": "Block phaser"
   },
   {
     "categories": ["modulation", "plot", "knob"],
+    "description": "An auto pan you can plug in: its state, a panel that draws the movement and an engine that plays it. Play a loop through it, pick a waveform and switch to tremolo",
     "name": "block-auto-pan",
-    "title": "block-auto-pan"
+    "title": "Block auto pan"
   },
   {
     "categories": ["eq", "plot", "knob"],
+    "description": "A channel EQ you can plug in: its state, a panel that draws the curve with a handle on the mid band and an engine that plays it. Play a loop through it and drag, the spectrum behind is what comes out",
     "name": "block-channel-eq",
-    "title": "block-channel-eq"
+    "title": "Block channel eq"
   },
   {
     "categories": ["distortion", "plot", "knob"],
+    "description": "An overdrive you can plug in: its state, a panel that draws the band that reaches the clip and an engine that plays it. Play a loop through it, drag the handle and turn the drive",
     "name": "block-overdrive",
-    "title": "block-overdrive"
+    "title": "Block overdrive"
   },
   {
     "categories": ["dynamics", "plot", "knob"],
+    "description": "A de-esser you can plug in: its state, a panel that draws what it does at each frequency and an engine that plays it. Play a voice through it, lower the threshold and the s sits back",
     "name": "block-deesser",
-    "title": "block-deesser"
+    "title": "Block deesser"
   },
   {
     "categories": ["dynamics", "plot", "knob"],
+    "description": "A multiband compressor you can plug in: its state, a panel that draws the three bands and an engine that plays it. Play a loop through it and hold one band down",
     "name": "block-multiband",
-    "title": "block-multiband"
+    "title": "Block multiband"
   },
   {
     "categories": ["dynamics", "plot", "knob"],
+    "description": "A transient shaper you can plug in: its state, a panel with a handle for the attack and the sustain and an engine that plays it. Play a loop through it and drag the handle: up for more click, left for a shorter ring",
     "name": "block-transient",
-    "title": "block-transient"
+    "title": "Block transient"
   },
   {
     "categories": ["utility", "plot", "knob"],
+    "description": "A mid/side device you can plug in: its state, a panel with a handle for the mid and the side and an engine that plays it. Play a wide loop through it and take the side down",
     "name": "block-mid-side",
-    "title": "block-mid-side"
+    "title": "Block mid side"
   },
   {
     "categories": ["distortion", "plot", "knob"],
+    "description": "A redux you can plug in: its state, a panel that draws the stairs the bits make and an engine that plays it. Play a loop through it and take the bits down",
     "name": "block-redux",
-    "title": "block-redux"
+    "title": "Block redux"
   },
   {
     "categories": ["mixer", "fader", "meter", "knob"],
+    "description": "Mixing console: four tracks of a loop with pan, fader, meter, mute and solo, into a master with a stereo meter, every meter reading its real signal",
     "name": "block-mixer",
-    "title": "block-mixer"
+    "title": "Block mixer"
   },
   {
     "categories": ["pad", "knob"],
+    "description": "Drum rack: sixteen pads, each its own sound, shaped with tune, decay and level knobs",
     "name": "block-drum-rack",
-    "title": "block-drum-rack"
+    "title": "Block drum rack"
   },
   {
     "categories": ["pad"],
+    "description": "Four drum pads that play harder near the top; the closed hat cuts the open one short",
     "name": "pad-demo",
-    "title": "pad-demo"
+    "title": "Pad demo"
   },
   {
     "categories": ["tuner"],
+    "description": "A chromatic tuner on the microphone: the nearest note, a needle on a scale of cents and the frequency, in the primary color when in tune",
     "name": "tuner-demo",
-    "title": "tuner-demo"
+    "title": "Tuner demo"
   },
   {
     "categories": ["spectrum"],
+    "description": "Press play, or play a MIDI keyboard, and watch the spectrum: each sawtooth note lights its pitch and every harmonic above it, and the peaks hold a moment",
     "name": "spectrum-analyzer-demo",
-    "title": "spectrum-analyzer-demo"
+    "title": "Spectrum analyzer demo"
   },
   {
     "categories": ["sequencer"],
+    "description": "A drum machine: draw a pattern and hear it. Press a step or drag across several; the playing column lights up",
     "name": "sequencer-demo",
-    "title": "sequencer-demo"
+    "title": "Sequencer demo"
   },
   {
     "categories": ["scrubber"],
+    "description": "A bar to seek on, with play or pause, the position and the length: a clock stands in for a player, and the bar and the time follow it",
     "name": "scrubber-demo",
-    "title": "scrubber-demo"
+    "title": "Scrubber demo"
   },
   {
     "categories": ["transport"],
+    "description": "The transport of a DAW as joined clusters: play or pause, stop and the position in bars, beats and sixteenths; loop and metronome toggles; the tempo and the time signature. A clock stands in for the engine",
     "name": "transport-demo",
-    "title": "transport-demo"
+    "title": "Transport demo"
   }
 ]
