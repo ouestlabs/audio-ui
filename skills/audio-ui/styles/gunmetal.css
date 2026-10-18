@@ -436,3 +436,8 @@
   right: 1.4rem;
   bottom: 1.4rem;
 }
+.skin-gunmetal .screw {
+  --screw-size: 0.9rem;
+  width: var(--screw-size);
+  height: var(--screw-size);
+}
