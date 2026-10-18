@@ -1,4 +1,4 @@
-import { SparkleIcon } from "@audio-ui/icons";
+import { SparkleIcon } from "@audio-ui/icons/react";
 import { FileIcon } from "@phosphor-icons/react/ssr";
 
 type IconProps = React.SVGAttributes<SVGElement>;

@@ -1,16 +1,48 @@
 {
   "name": "@audio-ui/icons",
   "version": "0.0.0",
-  "private": true,
-  "description": "The glyphs of audio/ui's own site: one thin stroke on a 24 grid, in the weights of Phosphor, for the things of audio.",
+  "description": "Icons for audio interfaces: a knob, a fader, a rack unit, the shape of a filter. One thin stroke on a 24 grid, in four weights, as data and SVG for any framework, and as React components.",
+  "keywords": [
+    "audio-ui",
+    "audio",
+    "icons",
+    "svg",
+    "react",
+    "daw",
+    "music",
+    "framework-agnostic"
+  ],
+  "homepage": "https://github.com/ouestlabs/audio-ui/tree/main/packages/icons",
+  "bugs": {
+    "url": "https://github.com/ouestlabs/audio-ui/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ouestlabs/audio-ui.git",
+    "directory": "packages/icons"
+  },
   "license": "MIT",
   "sideEffects": false,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": {
+      "types": "./dist/core/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./react": {
+      "types": "./dist/providers/react/index.d.ts",
+      "import": "./dist/react.js"
+    }
   },
+  "module": "dist/index.js",
+  "types": "dist/core/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "clean": "rm -rf node_modules .turbo",
+    "build:pkg": "bunx --bun tsup && tsc -p tsconfig.build.json",
+    "clean": "rm -rf dist node_modules .turbo",
+    "dev": "bunx --bun tsup --watch",
     "lint": "biome check --write .",
     "lint:fix": "biome check --write --unsafe .",
     "test": "bun test"
@@ -20,9 +52,19 @@
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "react": "19.3.1",
-    "react-dom": "19.3.1"
+    "react-dom": "19.3.1",
+    "tsup": "^8.5.0",
+    "typescript": "^7.0.2"
   },
   "peerDependencies": {
-    "react": "^19.3.0"
+    "react": "^19.0.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

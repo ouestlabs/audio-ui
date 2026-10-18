@@ -1,7 +1,53 @@
-import * as glyphs from "./glyphs.ts";
-import { createIcon } from "./icon.tsx";
+import { createElement, type ReactNode, type SVGProps, useId } from "react";
+import { type DrawnNode, draw } from "../../core/draw.ts";
+import type { Glyph, IconWeight } from "../../core/glyph.ts";
+import * as glyphs from "../../core/glyphs.ts";
 
-export { glyphs };
+export interface IconProps extends Omit<SVGProps<SVGSVGElement>, "ref"> {
+  /** The width and height of the icon. @default "1em" */
+  size?: number | string;
+  /** @default "regular" */
+  weight?: IconWeight;
+}
+
+function toElement(drawn: DrawnNode, key: number): ReactNode {
+  return createElement(
+    drawn.tag,
+    { ...drawn.attrs, key },
+    drawn.children?.map(toElement)
+  );
+}
+
+/** An icon that draws `glyph` in the current text color. */
+export function createIcon(glyph: Glyph, name: string) {
+  function GlyphIcon({
+    size = "1em",
+    weight = "regular",
+    ...props
+  }: IconProps) {
+    const id = `icon-${useId().replaceAll(":", "")}`;
+    const { nodes, strokeWidth } = draw(glyph, weight, id);
+    return (
+      <svg
+        aria-hidden="true"
+        fill="none"
+        height={size}
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={strokeWidth}
+        viewBox="0 0 24 24"
+        width={size}
+        xmlns="http://www.w3.org/2000/svg"
+        {...props}
+      >
+        {nodes.map(toElement)}
+      </svg>
+    );
+  }
+  GlyphIcon.displayName = name;
+  return GlyphIcon;
+}
 
 export const BotIcon = createIcon(glyphs.bot, "BotIcon");
 export const RackIcon = createIcon(glyphs.rack, "RackIcon");
@@ -31,7 +77,7 @@ export const PeakIcon = createIcon(glyphs.peak, "PeakIcon");
 export const EnvelopeIcon = createIcon(glyphs.envelope, "EnvelopeIcon");
 export const GridIcon = createIcon(glyphs.grid, "GridIcon");
 export const FadersIcon = createIcon(glyphs.faders, "FadersIcon");
-export const XypadIcon = createIcon(glyphs.xypad, "XypadIcon");
+export const XYPadIcon = createIcon(glyphs.xypad, "XYPadIcon");
 export const PadIcon = createIcon(glyphs.pad, "PadIcon");
 export const PianoIcon = createIcon(glyphs.piano, "PianoIcon");
 export const MeterIcon = createIcon(glyphs.meter, "MeterIcon");
@@ -66,3 +112,70 @@ export const InsertIcon = createIcon(glyphs.insert, "InsertIcon");
 export const CrateIcon = createIcon(glyphs.crate, "CrateIcon");
 export const DialIcon = createIcon(glyphs.dial, "DialIcon");
 export const ContrastIcon = createIcon(glyphs.contrast, "ContrastIcon");
+
+/** Every icon, by the name its catalog entry carries. */
+export const icons = {
+  Automation: AutomationIcon,
+  Bandpass: BandpassIcon,
+  Bot: BotIcon,
+  Braces: BracesIcon,
+  Clip: ClipIcon,
+  Compressor: CompressorIcon,
+  Contrast: ContrastIcon,
+  Crate: CrateIcon,
+  Delay: DelayIcon,
+  Dial: DialIcon,
+  Distortion: DistortionIcon,
+  Envelope: EnvelopeIcon,
+  Fader: FaderIcon,
+  Faders: FadersIcon,
+  Gauge: GaugeIcon,
+  Grid: GridIcon,
+  Headphones: HeadphonesIcon,
+  Highpass: HighpassIcon,
+  Highshelf: HighshelfIcon,
+  Insert: InsertIcon,
+  Jack: JackIcon,
+  Knob: KnobIcon,
+  Loop: LoopIcon,
+  Lowpass: LowpassIcon,
+  Lowshelf: LowshelfIcon,
+  Magnet: MagnetIcon,
+  Meter: MeterIcon,
+  Metronome: MetronomeIcon,
+  Mic: MicIcon,
+  Midi: MidiIcon,
+  Mono: MonoIcon,
+  Notch: NotchIcon,
+  Note: NoteIcon,
+  Pad: PadIcon,
+  Patchbay: PatchbayIcon,
+  Pause: PauseIcon,
+  Peak: PeakIcon,
+  Piano: PianoIcon,
+  PianoRoll: PianoRollIcon,
+  Play: PlayIcon,
+  Playhead: PlayheadIcon,
+  Plot: PlotIcon,
+  Rack: RackIcon,
+  Record: RecordIcon,
+  Reverb: ReverbIcon,
+  Sawtooth: SawtoothIcon,
+  Scope: ScopeIcon,
+  Sequencer: SequencerIcon,
+  Shapes: ShapesIcon,
+  Sine: SineIcon,
+  Sparkle: SparkleIcon,
+  Speaker: SpeakerIcon,
+  Spectrum: SpectrumIcon,
+  Square: SquareIcon,
+  Stereo: StereoIcon,
+  Stop: StopIcon,
+  Tape: TapeIcon,
+  Tracks: TracksIcon,
+  Triangle: TriangleIcon,
+  TuningFork: TuningForkIcon,
+  Vinyl: VinylIcon,
+  Waveform: WaveformIcon,
+  XYPad: XYPadIcon,
+};

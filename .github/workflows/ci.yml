@@ -30,7 +30,7 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Lint
-        run: bunx biome ci packages/core packages/ui
+        run: bunx biome ci packages/core packages/ui packages/icons
 
       - name: Build
         run: bun run build:pkg
@@ -43,12 +43,20 @@ jobs:
         working-directory: packages/ui
         run: bunx tsc --noEmit
 
+      - name: Typecheck icons
+        working-directory: packages/icons
+        run: bunx tsc --noEmit
+
       - name: Test core
         working-directory: packages/core
         run: bun test
 
       - name: Test ui
         working-directory: packages/ui
+        run: bun test
+
+      - name: Test icons
+        working-directory: packages/icons
         run: bun test
 
       - name: Size budgets
