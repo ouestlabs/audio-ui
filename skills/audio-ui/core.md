@@ -329,9 +329,19 @@ export function mountKitFader(
     }
     event.preventDefault();
     input.focus({ preventScroll: true });
+    // Alt and a press reset the fader, as Delete does from the keyboard
+    if (event.altKey) {
+      fader.reset(event);
+      return;
+    }
     fader.press(event, control, thumb);
   };
   const onKeyDown = (event: KeyboardEvent) => {
+    if (event.key === "Delete") {
+      event.preventDefault();
+      fader.reset(event);
+      return;
+    }
     if (fader.keyDown(event, input)) {
       event.preventDefault();
     }
