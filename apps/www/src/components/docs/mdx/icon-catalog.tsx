@@ -11,6 +11,7 @@ import {
 } from "@audio-ui/icons";
 import { MagnifyingGlassIcon } from "@phosphor-icons/react/ssr";
 import * as React from "react";
+import { ComponentEmptyState } from "@/components/catalog/card/component-empty-state";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -418,12 +419,15 @@ export function IconCatalog({ className }: { className?: string }) {
         />
       </div>
       {visible.length === 0 ? (
-        <div className="flex flex-col items-center gap-2 py-16 text-center text-site-muted-foreground text-sm">
-          <p>No icon matches “{query}”.</p>
+        <ComponentEmptyState
+          className="border"
+          description={`No icon matches “${query}”. Try a word like “filter” or “wave”.`}
+          title="No icons found"
+        >
           <Button onClick={clear} size="sm" variant="outline">
             Clear the search
           </Button>
-        </div>
+        </ComponentEmptyState>
       ) : (
         <div className="grid items-start gap-4 lg:grid-cols-[1fr_16rem]">
           {active ? (
