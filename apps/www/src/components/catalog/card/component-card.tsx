@@ -64,7 +64,6 @@ export function ComponentCard({
                 <ComponentName name={name} />
               ) : null
             }
-            description={item.description}
             expand={hosted}
             hint={hint}
             name={name}
