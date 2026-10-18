@@ -6,11 +6,9 @@ import { markdownOfPage } from "@/lib/agents/llm-page";
  * Runs before every request the Worker takes. Pages are prerendered files the
  * CDN serves without it, so it only sees what needs logic: the registry
  * (versioned addresses and their cache), PostHog's proxy, the markdown of the
- * docs, the former domain, and the routes that run code (/mcp, /llm, /init).
+ * docs, and the routes that run code (/mcp, /llm, /init).
  */
 
-const SITE = "https://www.audio-ui.dev";
-const FORMER_HOST = /^(www\.)?audio-ui\.xyz$/;
 const POSTHOG_KEY = import.meta.env.VITE_PUBLIC_POSTHOG_KEY as
   | string
   | undefined;
@@ -141,10 +139,6 @@ async function registry(request: Request, url: URL) {
 const edge = createMiddleware().server(async ({ next, request }) => {
   const url = new URL(request.url);
 
-  // The former domain keeps working, registry URLs included, so installed `components.json` files do not break.
-  if (FORMER_HOST.test(url.hostname)) {
-    return redirect(`${SITE}${url.pathname}${url.search}`, true);
-  }
   if (url.pathname.startsWith("/ingest/")) {
     return proxyPostHog(request, url);
   }
