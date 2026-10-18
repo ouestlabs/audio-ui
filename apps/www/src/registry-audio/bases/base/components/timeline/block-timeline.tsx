@@ -123,6 +123,7 @@ import {
   type Mix,
   mixAt,
   type TimeSelection,
+  type TrackKind,
 } from "@/registry-audio/bases/base/lib/arrangement";
 
 const BARS = 32;
@@ -603,35 +604,20 @@ export default function BlockTimeline() {
     loop: { on: looping, range: loop },
     signatures,
     tempo,
-    addTrack,
     canRedo,
     canUndo,
-    changeAutomation,
-    changeMix,
-    clearTimeSelection,
     clips,
-    consolidateTime,
     copying,
     copyOf,
-    fadeTimeSelection,
-    duplicateTrack,
     folded,
     heights,
-    insertTimeSpan,
-    paste,
     toggleFold,
     mixOf,
-    redo,
-    moveTrack,
-    removeTimeSpan,
-    removeTrack,
-    renameTrack,
     resizeTrack,
     selectedIds,
     selectedTracks,
     selection,
     tracks,
-    undo,
   } = useArrangement({
     colors: TRACK_COLORS.length,
     duration: BARS * BAR,
@@ -765,6 +751,86 @@ export default function BlockTimeline() {
       dispatch({ type: "split-cursor", at: getPosition(), step: splitStep }),
     [dispatch, getPosition, splitStep]
   );
+  // The tracks, the time selection and the history, as the commands that change them.
+  const addTrack = useCallback(
+    (afterId?: string, kind?: TrackKind) => {
+      const next = dispatch({ type: "add-track", afterId, kind });
+      // The track it added is the one numbered last.
+      return next.doc.tracks.find(
+        (track) => track.id === `track-${next.trackCount}`
+      );
+    },
+    [dispatch]
+  );
+  const changeAutomation = useCallback(
+    (
+      trackId: string,
+      parameter: AutomatedParameter,
+      points: readonly Breakpoint[] | null
+    ) => dispatch({ type: "change-automation", trackId, parameter, points }),
+    [dispatch]
+  );
+  const changeMix = useCallback(
+    (trackId: string, patch: Partial<Mix>) => {
+      const { color, ...rest } = patch;
+      if (color !== undefined) {
+        dispatch({ type: "set-track-color", id: trackId, color });
+      }
+      if (Object.keys(rest).length > 0) {
+        // A fader's drag is one step, closed by `settleClipEdit`; a switch is a step of its own.
+        dispatch({
+          type: "gain" in rest || "pan" in rest ? "change-mix" : "set-mix",
+          id: trackId,
+          patch: rest,
+        });
+      }
+    },
+    [dispatch]
+  );
+  const clearTimeSelection = useCallback(
+    (time: TimeSelection) => dispatch({ type: "clear-time", time }),
+    [dispatch]
+  );
+  const consolidateTime = useCallback(
+    (time: TimeSelection) => dispatch({ type: "consolidate-time", time }),
+    [dispatch]
+  );
+  const duplicateTrack = useCallback(
+    (id: string) => dispatch({ type: "duplicate-track", id }),
+    [dispatch]
+  );
+  const fadeTimeSelection = useCallback(
+    (time: TimeSelection) => dispatch({ type: "fade-time", time }),
+    [dispatch]
+  );
+  const insertTimeSpan = useCallback(
+    (at: number, length: number) =>
+      dispatch({ type: "insert-time", at, length }),
+    [dispatch]
+  );
+  const moveTrack = useCallback(
+    (id: string, index: number) => dispatch({ type: "move-track", id, index }),
+    [dispatch]
+  );
+  const paste = useCallback(
+    (clipping: Clipping, at: number, track: string) =>
+      dispatch({ type: "paste", clipping, at, track }),
+    [dispatch]
+  );
+  const redo = useCallback(() => dispatch({ type: "redo" }), [dispatch]);
+  const removeTimeSpan = useCallback(
+    (from: number, to: number) => dispatch({ type: "remove-time", from, to }),
+    [dispatch]
+  );
+  const removeTrack = useCallback(
+    (id: string) => dispatch({ type: "remove-track", id }),
+    [dispatch]
+  );
+  const renameTrack = useCallback(
+    (id: string, name: string) => dispatch({ type: "rename-track", id, name }),
+    [dispatch]
+  );
+  const undo = useCallback(() => dispatch({ type: "undo" }), [dispatch]);
   // The timeline fits the width it is given until it is zoomed.
   const viewportRef = useRef<HTMLDivElement>(null);
   const [fitPx, setFitPx] = useState(0);
