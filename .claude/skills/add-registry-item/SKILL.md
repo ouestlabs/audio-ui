@@ -46,7 +46,7 @@ Renaming or removing an item: also search for its old name in `apps/www/src/cont
 - A demo appears in a docs page through `<ComponentPreview styleName="base-nova" name="<demo-name>" />`.
 - In docs, an installed component is imported as `@/components/audio-ui/<name>` (where the registry puts it), and its source titled `components/audio-ui/<name>.tsx`. `bun test test/install-paths.test.ts` checks every such import.
 - Group first, by the rules in AGENTS.md ("Docs"): a hook or a lib that serves one component gets a section in that component's page, not a page of its own.
-- A new component page: `apps/www/src/content/docs/components/base/(<space>)/<name>.mdx` (`(elements)`, `(workstation)` or `(devices)`), copying the sections of `(elements)/knob.mdx` (Overview, Installation, Anatomy, Usage, Interaction, API reference); list it in that space's `meta.json`, add the slug to `CANONICAL_COMPONENT_DOC_SLUGS` in `apps/www/src/lib/seo.ts`, and add it to `skills/audio-ui/components.md` (and the Component Selection table in `skills/audio-ui/SKILL.md`).
+- A new component page: `apps/www/src/content/docs/components/base/(<space>)/<name>.mdx` (`(elements)`, `(workstation)` or `(devices)`), copying the sections of `(elements)/knob.mdx` (Overview, Installation as `<Install name="<name>" packages="..." />`, Anatomy, Usage, Interaction, API reference); list it in that space's `meta.json`, add the slug to `CANONICAL_COMPONENT_DOC_SLUGS` in `apps/www/src/lib/seo.ts`, and add it to `skills/audio-ui/components.md` (and the Component Selection table in `skills/audio-ui/SKILL.md`).
 
 ## 5. Build and check (from `apps/www/`)
 

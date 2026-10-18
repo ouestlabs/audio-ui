@@ -313,7 +313,7 @@ Use the existing MDX components, not raw HTML:
 
 A page goes in the folder of its space, and in that folder's `meta.json`; the folder does not show in its URL (`/docs/components/base/knob`). The spaces and the grouping rules are in [AGENTS.md](AGENTS.md#docs-appswwwsrccontentdocs).
 
-`<ComponentPreview>` renders the demo referenced by its registry `name` (the first file of the item is lazy-loaded), with `base-nova` as the default style. `<CodeTabs>`, `<Steps>`/`<Step>`, and `<TabsList>`/`<TabsTrigger>`/`<TabsContent>` are available for installation sections, copy the structure of an existing component page.
+`<ComponentPreview>` renders the demo referenced by its registry `name` (the first file of the item is lazy-loaded), with `base-nova` as the default style. The Installation section is `<Install name="<item>" packages="<npm packages>" />`, or `kind="device"` for a device (its three pieces and its demo); `source` and `title` say which item's code the Manual tab shows and where it lands, when they are not the defaults. A page whose installation differs writes its own `<CodeTabs>` with `<Steps>`/`<Step>` and `<TabsList>`/`<TabsTrigger>`/`<TabsContent>`.
 
 ---
 
