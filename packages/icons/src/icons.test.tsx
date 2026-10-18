@@ -31,7 +31,7 @@ describe("icons", () => {
       icons.KnobIcon,
       icons.TracksIcon,
       icons.RackIcon,
-      icons.WaveformIcon,
+      icons.EnvelopeIcon,
     ]) {
       expect(renderToStaticMarkup(<Icon weight="duotone" />)).toContain(
         'fill-opacity="0.2"'
