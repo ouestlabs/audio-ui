@@ -6,13 +6,15 @@
     "arrangement-editor",
     "---Editors---",
     "piano-roll",
+    "sequencer",
+    "---Piano roll tools---",
     "scale-menu",
     "note-find",
     "note-edit-menu",
-    "sequencer",
-    "---Transport and mixer---",
+    "---Transport---",
     "transport",
     "scrubber",
+    "---Mixing---",
     "mixer"
   ]
 }
