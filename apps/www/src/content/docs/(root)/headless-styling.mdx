@@ -41,6 +41,46 @@ Three styles are behaviour, not look, and each part sets them itself:
 
 A stylesheet can still change anything else about them. The behaviour of these three is the primitive's contract.
 
+An inline style beats any class, so a class cannot change them. To place a part itself, say an envelope at the corner of a panel, pass the `style` prop: it is applied after the part's own, so `style={{ position: "absolute", top: 8 }}` wins. In a skin of CSS alone, put the part in an element you position.
+
+What a part sets inline for its value, such as a thumb's `left` and `translate` or an indicator's `height`, is the value itself: a class does not replace it, it adds to it.
+
+## Give each part a size
+
+A part has no size of its own, and one that sits at a position along a line or a plane does not lay itself out: it needs a box, and for a part placed with `bottom`, `left` or `inset`, `position: absolute`. These are the least that draws each of the five controls below, from the part names of their anatomy:
+
+```css
+/* Fader: the control is the box, the thumb sits at the value */
+.fader-control { width: 2rem; height: 8rem; }
+.fader-track { width: 0.5rem; height: 100%; margin-inline: auto; background: #333; }
+.fader-indicator { position: absolute; background: #6cf; }
+.fader-thumb { width: 1.5rem; height: 0.75rem; background: #eee; }
+
+/* XYPad: the control is the surface */
+.xypad-control { width: 8rem; height: 8rem; background: #222; }
+.xypad-thumb { position: absolute; width: 1rem; height: 1rem; border-radius: 50%; background: #6cf; }
+
+/* Knob: the arcs are SVGs that fill the control, one over the other */
+.knob-control { width: 4rem; height: 4rem; }
+.knob-track,
+.knob-indicator { position: absolute; inset: 0; width: 100%; height: 100%; }
+.knob-track { color: #333; }
+.knob-indicator { color: #6cf; }
+.knob-thumb { position: absolute; inset: 0; } /* turns with the value */
+.knob-thumb::after { content: ""; position: absolute; top: 12%; left: 50%; width: 2px; height: 28%; background: #eee; transform: translateX(-50%); }
+
+/* Meter: the channel is the bar, the indicator is scaled to the level */
+.meter { height: 8rem; display: flex; gap: 2px; }
+.meter-channel { width: 0.75rem; height: 100%; background: #222; }
+.meter-indicator { position: absolute; bottom: 0; background: #6c6; }
+
+/* Plot: the root is the box, the graph fills it */
+.plot { width: 12rem; height: 6rem; background: #222; }
+.plot-line { stroke: #6cf; }
+```
+
+Each class goes on the part it is named after, with `className`. Sizes are in your units and colours are yours; what matters is which part takes which rule.
+
 ## Reference
 
 Generated from the source of each primitive: the data attributes of the state each part exposes, and the CSS variables it sets. A value of the state of a plain type (a boolean, a number, a string) is an attribute, unless the primitive keeps it off the element. A callback or an object is not.

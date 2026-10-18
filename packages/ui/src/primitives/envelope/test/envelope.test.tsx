@@ -93,6 +93,20 @@ describe("Envelope parts", () => {
     );
   });
 
+  test("the root is positioned for its points, and a style prop places it elsewhere", () => {
+    const view = render(
+      <>
+        <Envelope.Root data-testid="default" />
+        <Envelope.Root
+          data-testid="placed"
+          style={{ position: "absolute", top: 4 }}
+        />
+      </>
+    );
+    expect(view.getByTestId("default").style.position).toBe("relative");
+    expect(view.getByTestId("placed").style.position).toBe("absolute");
+  });
+
   test("the graph is decorative and points carry only the names they are given", () => {
     const { graph, point } = renderEnvelope();
     expect(graph.getAttribute("aria-hidden")).toBe("true");
