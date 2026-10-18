@@ -85,6 +85,20 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["knob"],
+    description:
+      "A knob turned by dragging up and down, like a fader: 150px of travel spans the whole range",
+    files: [
+      {
+        path: "components/knob/knob-vertical-drag-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "knob-vertical-drag-demo",
+    registryDependencies: ["@audio-ui/knob"],
+    type: "registry:example",
+  },
+  {
+    categories: ["knob"],
     description: "Knob component example",
     files: [
       {

@@ -13,7 +13,7 @@
       "name": "fader"
     },
     {
-      "count": 26,
+      "count": 27,
       "description": "Rotary knob components for continuous parameters like level, cutoff, and pan.",
       "label": "Knob",
       "name": "knob"
@@ -151,5 +151,5 @@
       "name": "xypad"
     }
   ],
-  "totalComponents": 61
+  "totalComponents": 62
 }

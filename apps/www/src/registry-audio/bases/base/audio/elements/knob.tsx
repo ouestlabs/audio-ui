@@ -64,6 +64,7 @@ function Knob({
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledBy,
   className,
+  dragMode,
   editableValue = false,
   formatValue,
   marks,
@@ -84,10 +85,15 @@ function Knob({
         className
       )}
       data-slot="knob"
+      dragMode={dragMode}
       {...props}
     >
       <KnobPrimitive.Control
-        className={knobControlClassName}
+        className={cn(
+          knobControlClassName,
+          // Dragged up and down, it is a fader: the cursor says so.
+          dragMode === "vertical" && "cursor-ns-resize active:cursor-ns-resize"
+        )}
         data-slot="knob-control"
       >
         <div className={knobBodyVariants({ size })} data-slot="knob-body" />

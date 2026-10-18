@@ -26,6 +26,11 @@
   },
   {
     "categories": ["knob"],
+    "name": "knob-vertical-drag-demo",
+    "title": "knob-vertical-drag-demo"
+  },
+  {
+    "categories": ["knob"],
     "name": "knob-demo",
     "title": "knob-demo"
   },
