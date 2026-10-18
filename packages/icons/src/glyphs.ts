@@ -132,17 +132,12 @@ export const pad: Glyph = [
   rect(4, 4, 16, 16, 4, { tint: true }),
   path("M8.5 15.5h7", { knock: true }),
 ];
-/** A keyboard: seven white keys and the five black ones between them. */
+/** A keyboard: three white keys, the two black keys between them. */
 export const piano: Glyph = [
-  rect(2, 5, 20, 14, 2, { tint: true }),
-  path(
-    "M10.57 5v14M4.86 12.5V19M7.71 12.5V19M13.43 12.5V19M16.29 12.5V19M19.14 12.5V19"
-  ),
-  rect(4.06, 5, 1.6, 7.5, 0.6, { knock: true }),
-  rect(6.91, 5, 1.6, 7.5, 0.6, { knock: true }),
-  rect(12.63, 5, 1.6, 7.5, 0.6, { knock: true }),
-  rect(15.49, 5, 1.6, 7.5, 0.6, { knock: true }),
-  rect(18.34, 5, 1.6, 7.5, 0.6, { knock: true }),
+  rect(3, 3, 18, 18, 3, { tint: true }),
+  rect(7.5, 3, 3, 9, 1, { knock: true }),
+  rect(13.5, 3, 3, 9, 1, { knock: true }),
+  path("M9 12v9M15 12v9", { knock: true }),
 ];
 
 /** Displays: a level, a needle, a spectrum, a scope, a plot. */
