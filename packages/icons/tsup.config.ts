@@ -5,7 +5,7 @@ import { defineConfig } from "tsup";
 // rejects.
 export default defineConfig({
   clean: true,
-  entry: { index: "src/core/index.ts", react: "src/providers/react/index.ts" },
+  entry: { index: "src/core/index.ts", react: "src/providers/react/index.tsx" },
   external: ["react"],
   format: ["esm"],
   sourcemap: true,

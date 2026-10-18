@@ -24,7 +24,7 @@
       ],
       "@audio-ui/icons": ["../../packages/icons/src/core/index.ts"],
       "@audio-ui/icons/react": [
-        "../../packages/icons/src/providers/react/index.ts"
+        "../../packages/icons/src/providers/react/index.tsx"
       ],
       "@audio-ui/react": ["../../packages/ui/src/index.ts"],
       "fumadocs-mdx:collections/*": ["./.source/*"]

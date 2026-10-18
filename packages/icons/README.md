@@ -41,4 +41,4 @@ The [Icons page](https://www.audio-ui.dev/docs/icons) lets you search the catalo
 
 ## Adding a glyph
 
-Draw it in `src/core/glyphs.ts` with `path`, `circle` and `rect`, on a 24 grid with a 2px margin, and add its entry to `src/core/catalog.ts` and its icon to each provider (`src/providers/react/icons.ts`). Mark a closed shape `{ tint: true }` so it has a body in `duotone` and `fill`, a detail inside it `{ knock: true }` so `fill` cuts it out, and a shape that sits on a line `{ over: true }` so the line stops short of it. `bun test` draws every icon in every weight.
+Draw it in `src/core/glyphs.ts` with `path`, `circle` and `rect`, on a 24 grid with a 2px margin, and add its entry to `src/core/catalog.ts` and its icon to each provider (`src/providers/react/index.tsx`). Mark a closed shape `{ tint: true }` so it has a body in `duotone` and `fill`, a detail inside it `{ knock: true }` so `fill` cuts it out, and a shape that sits on a line `{ over: true }` so the line stops short of it. `bun test` draws every icon in every weight.

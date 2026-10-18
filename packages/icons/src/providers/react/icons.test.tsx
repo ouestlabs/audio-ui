@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { renderToStaticMarkup } from "react-dom/server";
 import { catalog, glyphs, toSvg, WEIGHTS } from "../../core/index.ts";
-import * as icons from "./index.ts";
+import * as icons from "./index.tsx";
 
 const components = Object.entries(icons).filter(
   ([name]) => name.endsWith("Icon") && name !== "createIcon"
