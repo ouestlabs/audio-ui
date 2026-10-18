@@ -365,7 +365,7 @@ export const audio: RegistryItem[] = [
   },
   {
     categories: ["device", "plot"],
-    dependencies: [],
+    dependencies: ["@audio-ui/icons"],
     description:
       "A row of buttons, one per transfer curve, each drawn from the curve itself: you give it the function of each option, so the icon is what the device does and never drifts from it.",
     files: [
@@ -926,7 +926,7 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
-    dependencies: ["@audio-ui/react"],
+    dependencies: ["@audio-ui/react", "@audio-ui/icons"],
     description:
       "A zoomable timeline for arrangement views and editors, with a ruler that seeks, lanes and a playhead.",
     files: [

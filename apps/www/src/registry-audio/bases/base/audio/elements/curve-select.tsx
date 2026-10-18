@@ -1,27 +1,12 @@
 "use client";
 
+import { CurveIcon } from "@audio-ui/icons/react";
 import { useCallback, useMemo } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {
   ToggleGroup,
   ToggleGroupItem,
 } from "@/registry/bases/base/ui/toggle-group";
-
-const SIZE = 24;
-const MARGIN = 3;
-const SAMPLES = 25;
-
-/** The polyline of `shape` over inputs from -1 to 1, in a square of `SIZE`, output up the page. */
-function pathOf(shape: (input: number) => number) {
-  const span = SIZE - 2 * MARGIN;
-  return Array.from({ length: SAMPLES }, (_, index) => {
-    const input = (index / (SAMPLES - 1)) * 2 - 1;
-    const output = Math.max(-1, Math.min(1, shape(input)));
-    const x = MARGIN + ((input + 1) / 2) * span;
-    const y = MARGIN + ((1 - output) / 2) * span;
-    return `${index === 0 ? "M" : "L"}${x.toFixed(2)} ${y.toFixed(2)}`;
-  }).join("");
-}
 
 interface CurveOption {
   label: string;
@@ -61,14 +46,12 @@ function CurveSelect({
     },
     [onValueChange]
   );
-  const paths = useMemo(
+  const curves = useMemo(
     () =>
-      Object.fromEntries(
-        options.map((option) => [
-          option.value,
-          pathOf((input) => shape(option.value, input)),
-        ])
-      ),
+      options.map((option) => ({
+        option,
+        shape: (input: number) => shape(option.value, input),
+      })),
     [options, shape]
   );
   return (
@@ -82,7 +65,7 @@ function CurveSelect({
       value={[value]}
       variant="outline"
     >
-      {options.map((option) => (
+      {curves.map(({ option, shape: curve }) => (
         <ToggleGroupItem
           aria-label={option.label}
           className="flex-1"
@@ -90,18 +73,7 @@ function CurveSelect({
           title={option.label}
           value={option.value}
         >
-          <svg
-            aria-hidden="true"
-            className="h-5 w-5"
-            fill="none"
-            stroke="currentColor"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            viewBox={`0 0 ${SIZE} ${SIZE}`}
-          >
-            <path d={paths[option.value]} />
-          </svg>
+          <CurveIcon className="size-5" shape={curve} weight="bold" />
         </ToggleGroupItem>
       ))}
     </ToggleGroup>
