@@ -12,8 +12,8 @@
       <answer>66</answer>
    </qa_pair>
    <qa_pair>
-      <question>Which of the knob and the fader starts its range at 0 and moves in steps of 1 by default? Answer with the component name only.</question>
-      <answer>knob</answer>
+      <question>One component lets you set the level, in dB, that reads 0 VU on its dial. What is that level by default? Answer with a number.</question>
+      <answer>-18</answer>
    </qa_pair>
    <qa_pair>
       <question>When a tuner stops hearing a note, how many milliseconds does it keep showing that note by default? Answer with a number.</question>
@@ -28,8 +28,8 @@
       <answer>90</answer>
    </qa_pair>
    <qa_pair>
-      <question>On a knob, which key sets the value straight to its minimum? Answer with the key name as written in the docs.</question>
-      <answer>Home</answer>
+      <question>In which component's docs does a 20 Hz to 20 kHz cutoff on a logarithmic scale put 632 Hz at the middle of the dial? Answer with the component name only.</question>
+      <answer>knob</answer>
    </qa_pair>
    <qa_pair>
       <question>Across the component pages, how many of them give a disabled prop a default of false in their API reference? Answer with a number.</question>
