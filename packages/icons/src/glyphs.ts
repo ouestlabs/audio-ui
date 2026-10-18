@@ -25,11 +25,9 @@ export const rack: Glyph = [
   path("M7.5 12h.01", { knock: true }),
 ];
 
-/** Three bars of a waveform. */
+/** A sound that dies away. */
 export const waveform: Glyph = [
-  rect(4.5, 9, 3.5, 6, 1.5, { tint: true }),
-  rect(10.25, 4, 3.5, 16, 1.5, { tint: true }),
-  rect(16, 9, 3.5, 6, 1.5, { tint: true }),
+  path("M2 12C4 12 4 5 6 5S8 19 10 19 12 7 14 7 16 17 18 17 20 12 22 12"),
 ];
 
 /** A tuning fork: the reference every sound is set against. */
@@ -148,11 +146,9 @@ export const gauge: Glyph = [
   path("M4 17a8 8 0 0 1 16 0z", { tint: true }),
   path("M12 17l3.5-6.5", { knock: true }),
 ];
+/** The skyline of a spectrum, as one shape. */
 export const spectrum: Glyph = [
-  rect(3, 12, 3.5, 8, 1.2, { tint: true }),
-  rect(8.2, 6, 3.5, 14, 1.2, { tint: true }),
-  rect(13.4, 3, 3.5, 17, 1.2, { tint: true }),
-  rect(18.5, 9, 2.5, 11, 1.2, { tint: true }),
+  path("M3 20v-7h3.5V9h3.5V4h4v6h3.5V8H21v12z", { tint: true }),
 ];
 export const scope: Glyph = [
   rect(3, 5, 18, 14, 2, { tint: true }),
@@ -171,10 +167,10 @@ export const pause: Glyph = [
 ];
 export const stop: Glyph = [rect(6, 6, 12, 12, 2, { tint: true })];
 export const record: Glyph = [circle(12, 12, 6, { tint: true })];
+/** A loop's braces, with the region between them. */
 export const loop: Glyph = [
-  path(
-    "M12 12c-2-3-3-4-5-4a4 4 0 0 0 0 8c2 0 3-1 5-4s3-4 5-4a4 4 0 0 1 0 8c-2 0-3-1-5-4"
-  ),
+  path("M8 5H5v14h3M16 5h3v14h-3"),
+  rect(9.5, 10, 5, 4, 1.5, { tint: true }),
 ];
 
 /** Signal in and out. */
