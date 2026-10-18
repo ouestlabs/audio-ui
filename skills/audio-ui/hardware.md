@@ -38,9 +38,11 @@ Type: a condensed grotesque for print (`"Arial Narrow", "Helvetica Neue", system
 
 Pure black and pure white, rainbow gradients, glass on a hardware panel, one drop shadow on everything, a glow on knobs, thick bevels everywhere, faux scratches and dirt, text on a curve, and equal-size controls.
 
+`styles/retro.css` is the dark brown faceplate. For a cream or silver panel (the drum machine or tape rows above), start from `styles/tape.css`, or retune the retro tokens and then check every part that assumes a dark panel: section borders, legend ink, value text, rubber pads, the lamp.
+
 ## Recipes (all in `styles/retro.css`)
 
-- **Screw**: a radial metal gradient with a slot from a diagonal linear gradient; `aria-hidden`, `pointer-events: none`.
+- **Screw**: a radial metal gradient with a slot from a diagonal linear gradient; `aria-hidden`, `pointer-events: none`. Place it with `screw-tl`, `screw-tr`, `screw-bl` or `screw-br`, each at its own angle.
 - **Lamp**: dim lens by default, `data-on` adds the bright core and an 8px halo.
 - **Section**: a 1px border at 35% ink with a `.legend` positioned on the top edge over the panel color.
 - **Rocker**: a two-tone cap, pale above and metal below, in a dark bezel.

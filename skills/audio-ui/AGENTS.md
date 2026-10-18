@@ -121,6 +121,8 @@ export const getContext = () => (ctx ??= new AudioContext());
 
 The registry ships this as a lib: `npx shadcn@latest add @audio-ui/web-audio`. Use one context per page; every connected node must come from it.
 
+On touch, `pointerdown` does not count as a user activation: a pad that starts the context on strike can stay silent for its first tap. Resume the context on `pointerup` or `click` as well (`touchend` on older iOS), and keep playing from `pointerdown` once it runs.
+
 ### 1.2 Ramp parameters, never assign them
 
 **Impact: CRITICAL (removes clicks and zipper noise while dragging)**
@@ -895,6 +897,8 @@ The primitives set the role, `aria-valuenow` and `aria-valuetext`. Only you know
   <Knob aria-label="Resonance" />
 </div>
 ```
+
+On the headless primitives the slider is named by `Knob.Label` or `Fader.Label`, or by `aria-label` on the thumb: an `aria-label` on the Root names only a group.
 
 With several channels, a Meter names each one from its `aria-label` ("Master 1", "Master 2").
 

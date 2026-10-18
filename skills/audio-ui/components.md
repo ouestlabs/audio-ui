@@ -33,7 +33,7 @@ The pieces of any audio interface: controls, keyboards and displays. Each takes 
 | Name | Registry import | Package import | Use it for |
 | --- | --- | --- | --- |
 | `piano` | `Piano` from `@/components/audio-ui/piano` | `@audio-ui/react/piano` | A virtual keyboard with a MIDI pitch range, glissando, multi-touch, an `activeNotes` overlay |
-| `pad` | `Pad`, `PadItem` from `@/components/audio-ui/pad` | `@audio-ui/react/pad` | Drum pads to strike (on pointer down, so press them, don't `click`): velocity from pressure or height, `chokeGroup` to cut a ringing pad, `Space` or `Enter` on the focused pad, an `activePads` overlay |
+| `pad` | `Pad`, `PadItem` from `@/components/audio-ui/pad` | `@audio-ui/react/pad` | Drum pads to strike (on pointer down, so press them, don't `click`; `onPadOn(value, { velocity })` and `onPadOff(value)` carry the strike): velocity from pressure or height, `chokeGroup` to cut a ringing pad, `Space` or `Enter` on the focused pad, an `activePads` overlay |
 | `midi-connect-control` | `MidiConnectControl` from `@/components/audio-ui/midi-connect-control` | registry only | A button that connects the page's MIDI input, with the device's name beside it. Its `use-midi-input` hook gives the held notes (for `activeNotes`), note-on with velocity from 0 to 1, note-off and pitch bend |
 
 ### Displays
@@ -134,7 +134,7 @@ What makes the sound, on the Web Audio API: install each on its own, to `hooks/`
 | `use-transport-clock` | `useTransportClock` from `@/hooks/use-transport-clock` | Schedule notes ahead on the audio clock: `onStep(step, time)` on each step, a loop region, seek with `reanchor`, `getPosition` for a playhead |
 | `use-synth-voices` | `useSynthVoices` from `@/hooks/use-synth-voices` | Polyphonic voices shaped by an `Envelope`'s points: `triggerNote`, `releaseNote`, `releaseAll`, `setPitchBend` |
 | `envelope-ramp` | `scheduleEnvelopeRamp`, `sliceEnvelope` from `@/lib/envelope-ramp` | An envelope's points as a gain ramp on any `AudioParam` |
-| `drum-synthesis` | `triggerKick`, `triggerSnare`, `triggerHihat` from `@/lib/drum-synthesis` | Drum hits from oscillators and noise, no samples, with `tune` and `decay` |
+| `drum-synthesis` | `triggerKick`, `triggerSnare`, `triggerHihat` from `@/lib/drum-synthesis` | Drum hits from oscillators and noise, no samples: `triggerKick(ctx, destination, time, { tune, decay })`, the same for `triggerSnare` and `triggerHihat`, with `time` on the audio clock |
 | `use-midi-input` | `useMidiInput` from `@/hooks/use-midi-input` | The page's MIDI keyboard: note on with velocity, note off, pitch bend, `activeNotes` for a piano. Connect from a click |
 | `use-microphone` | `useMicrophone` from `@/hooks/use-microphone` | The microphone as an `AnalyserNode`, raw, never played out. Start it from a click |
 | `use-audio-levels` | `useAudioLevels` from `@/hooks/use-audio-levels` | Live levels and peaks from one analyser per channel, for a `Meter`'s `source`. Memoize the array |

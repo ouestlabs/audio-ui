@@ -357,6 +357,10 @@ describe("skills/audio-ui styles", () => {
         "panel",
         "rocker",
         "screw",
+        "screw-bl",
+        "screw-br",
+        "screw-tl",
+        "screw-tr",
         "section",
       ]);
       const unknown = matches(css, SELECTOR_CLASS).filter(

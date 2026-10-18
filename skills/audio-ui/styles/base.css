@@ -162,6 +162,8 @@
 .fader-thumb:has(:focus-visible),
 .knob-thumb:has(:focus-visible),
 .xypad-thumb:has(:focus-visible),
+.pad:focus-visible,
+.piano-key:focus-visible,
 .toggle:focus-visible {
   outline: 2px solid var(--focus, var(--accent, currentColor));
   outline-offset: 2px;
@@ -200,24 +202,14 @@
 .scale {
   position: relative;
   height: var(--strip-h, 9.5rem);
+  padding: 0;
+  margin: 0;
   font-size: 0.55rem;
   font-variant-numeric: tabular-nums;
 }
 .scale > li {
   position: absolute;
   list-style: none;
-  translate: 0 50%;
-}
-
-/* The cursor follows the drag: a knob dragged up and down is a fader, the others turn around the dial */
-.knob-control[data-drag-mode="vertical"] {
-  cursor: ns-resize;
-}
-.knob-control[data-dragging]:not([data-drag-mode="vertical"]) {
-  cursor: grabbing;
-}
-.knob-control[data-disabled] {
-  cursor: not-allowed;
   translate: 0 50%;
 }
 

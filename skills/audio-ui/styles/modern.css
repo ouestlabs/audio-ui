@@ -1,5 +1,6 @@
 /* MODERN: flat instrument UI. Graphite, hairline borders, one signal colour, tabular type. No glow, no gradients. */
 .skin-modern {
+  --panel: var(--bg);
   --bg: #161616;
   --surface: #202020;
   --raised: #2a2a2a;

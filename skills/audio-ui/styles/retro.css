@@ -45,7 +45,6 @@
 }
 .skin-retro .knob-indicator {
   color: var(--amber);
-  filter: drop-shadow(0 0 3px rgb(255 176 40 / 0.7));
 }
 .skin-retro .knob-thumb {
   background:
@@ -291,9 +290,6 @@
     0 1px 1px rgb(0 0 0 / 0.6),
     inset 0 0 0 1px rgb(0 0 0 / 0.25);
 }
-.skin-retro .screw:nth-child(2) {
-  rotate: 70deg;
-}
 .skin-retro .lamp {
   width: 0.75rem;
   height: 0.75rem;
@@ -370,4 +366,23 @@
     inset 0 2px 6px rgb(0 0 0 / 0.6),
     0 0 8px rgb(255 176 40 / 0.35);
   transform: translateY(2px);
+}
+.skin-retro .screw-tl {
+  top: 8px;
+  left: 8px;
+}
+.skin-retro .screw-tr {
+  top: 8px;
+  right: 8px;
+  rotate: 70deg;
+}
+.skin-retro .screw-bl {
+  bottom: 8px;
+  left: 8px;
+  rotate: 35deg;
+}
+.skin-retro .screw-br {
+  right: 8px;
+  bottom: 8px;
+  rotate: 110deg;
 }
