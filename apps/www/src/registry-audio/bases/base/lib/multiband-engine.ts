@@ -1,5 +1,5 @@
 import { toWebAudioQ } from "@audio-ui/core/analysis";
-import type { DeviceBinding } from "@audio-ui/core/device";
+import type { DeviceBinding, DeviceReadings } from "@audio-ui/core/device";
 import {
   KEY_DETECTOR_PARAMETERS,
   loadKeyDetector,
@@ -19,6 +19,8 @@ export interface MultibandEngine extends DeviceBinding<MultibandState> {
   readonly input: AudioNode;
   /** Connect this to the destination, or to the next device. */
   readonly output: AudioNode;
+  /** What each band is taking off right now, in dB. */
+  readings: () => DeviceReadings;
   /** Resolves once the detectors are in the graph. Until then the bands pass unchanged. A context with no worklets never resolves it to `true`. */
   readonly ready: Promise<boolean>;
   /** How many dB each band is taken down by right now, 0 or negative. Read it per frame. */
@@ -158,6 +160,9 @@ export function createMultibandEngine(
     output,
     ready,
     reductions,
+    readings: (): DeviceReadings => ({
+      bandGainReductionDb: { ...reductions },
+    }),
     update: (state) => {
       settings = multibandSettings(state);
       for (const filter of [...lowSplit, ...highOfLow]) {

@@ -9,6 +9,7 @@ export {
   type DeviceDefinition,
   DeviceDefinitionError,
   type DeviceDescription,
+  type DeviceReadings,
   type DeviceRejection,
   type DeviceState,
   defineDevice,

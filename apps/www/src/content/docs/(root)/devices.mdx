@@ -166,6 +166,17 @@ Some devices delay the signal. `device.latency(state, sampleRate)` returns it in
 
 Every other device has none. The numbers were measured in Chrome and the specification does not give them, so measure them in another browser with `measureLatency`.
 
+## Readings
+
+A device that takes gain off the signal says how much, through `readings()` on its engine, in dB, 0 or negative. A meter reads it per frame, in the same way for every device: the compressor, the limiter and the de-esser report the gain they take, and the multiband device one value per band.
+
+```ts
+const { gainReductionDb } = engine.readings(); // compressor, limiter, de-esser
+const { bandGainReductionDb } = multibandEngine.readings(); // low, mid, high
+```
+
+A device with no gain to take off has no `readings()`, and a host that draws a meter for it draws none.
+
 ## Tools
 
 The tools are derived from the parameters of the device, with a JSON Schema input, so any agent can use them. They are not tied to an SDK.
