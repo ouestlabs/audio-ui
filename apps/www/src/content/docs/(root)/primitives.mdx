@@ -23,7 +23,7 @@ import { Knob } from "@audio-ui/react";
 </Knob.Root>
 ```
 
-Nothing is styled. Parts you leave out are not rendered, so a knob with no value readout is a knob without `Knob.Value`.
+Nothing is painted: no colour, size or theme comes from a primitive. Each part sets only the inline styles its behaviour needs (`touch-action` on a drag surface, `position: relative` on a container that holds absolutely placed parts, `pointer-events` on decorations), and the look is yours. Parts you leave out are not rendered, so a knob with no value readout is a knob without `Knob.Value`.
 
 ## Style from state
 

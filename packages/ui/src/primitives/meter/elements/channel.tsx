@@ -40,6 +40,7 @@ export function Channel(componentProps: Channel.Props) {
   const element = useRender({
     defaultTagName: "div",
     props: mergeProps<"div">(
+      { style: { position: "relative" } },
       {
         "aria-labelledby": labelId,
         "aria-valuemax": config.max,
