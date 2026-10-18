@@ -128,9 +128,10 @@ export const xypad: Glyph = [
   rect(3, 3, 18, 18, 2, { tint: true }),
   path("M15.5 8.5h.01", { knock: true }),
 ];
+/** A drum pad: its frame and the pad you strike. */
 export const pad: Glyph = [
-  rect(4, 4, 16, 16, 4, { tint: true }),
-  path("M8.5 15.5h7", { knock: true }),
+  rect(3, 3, 18, 18, 4, { tint: true }),
+  rect(8, 8, 8, 8, 2, { knock: true }),
 ];
 /** A keyboard: three white keys, the two black keys between them. */
 export const piano: Glyph = [
