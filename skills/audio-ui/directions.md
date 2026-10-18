@@ -22,7 +22,9 @@ import { Knob } from "@audio-ui/react/knob";
 import { Meter } from "@audio-ui/react/meter";
 import { Pad } from "@audio-ui/react/pad";
 import { Piano } from "@audio-ui/react/piano";
+import { Plot } from "@audio-ui/react/plot";
 import { Sequencer } from "@audio-ui/react/sequencer";
+import { Waveform } from "@audio-ui/react/waveform";
 import { XYPad } from "@audio-ui/react/xypad";
 import { createSource, type Source } from "@audio-ui/react";
 import { useEffect, useRef, useState } from "react";
@@ -35,6 +37,10 @@ const PADS = ["Kick", "Snare", "Hat", "Clap"];
 const STEPS = Array.from({ length: 16 }, (_, step) => step % 4 === 0);
 const PATTERN = [STEPS, STEPS.map((on) => !on)];
 const WAVES = ["Sine", "Saw", "Square"];
+const PEAKS = Array.from({ length: 160 }, (_, i) => 0.2 + 0.7 * Math.abs(Math.sin(i / 9) * Math.cos(i / 23)));
+const DB_LINES = [-24, -48, -72];
+const HZ_LINES = [100, 1000, 10_000];
+const spectrum = createSource(Float32Array.from({ length: 64 }, (_, i) => -20 - i * 1.1));
 const reduction = createSource(0.35);
 const playing = createSource(4);
 const ADSR = [
@@ -118,6 +124,38 @@ function EnvelopeControl({ label }: { label: string }) {
         )}
       </Envelope.Points>
     </Envelope.Root>
+  );
+}
+
+// A seekable waveform: `peaks` are amplitudes 0 to 1 (computed once), the canvas draws them,
+// `value` is the position (a fraction by default). Colors come from --waveform-color and --waveform-progress-color.
+function WaveformControl({ label }: { label: string }) {
+  return (
+    <Waveform.Root defaultValue={0.4} peaks={PEAKS}>
+      <Waveform.Control aria-label={label} className="waveform-control">
+        <Waveform.Canvas className="waveform-canvas" />
+        <Waveform.Playhead className="waveform-playhead" />
+        <Waveform.Thumb className="waveform-thumb" />
+      </Waveform.Control>
+    </Waveform.Root>
+  );
+}
+
+// A spectrum: Plot.Root must be given a height (it is a positioned div), Plot.Graph is the svg.
+// Trace takes a source of one value per point (here dB, log frequency on x).
+function SpectrumControl() {
+  return (
+    <Plot.Root className="plot" maxX={20_000} maxY={0} minX={20} minY={-96} scaleX="log">
+      <Plot.Graph className="plot-graph">
+        {DB_LINES.map((db) => (
+          <Plot.Line axis="y" className="plot-grid" key={db} value={db} />
+        ))}
+        {HZ_LINES.map((hz) => (
+          <Plot.Line axis="x" className="plot-grid" key={hz} value={hz} />
+        ))}
+        <Plot.Trace className="plot-area" fillTo={-96} source={spectrum} />
+      </Plot.Graph>
+    </Plot.Root>
   );
 }
 
@@ -272,6 +310,8 @@ export function Panel({
       </div>
       <div className="panel-row">
         <SequencerControl step={playing} />
+        <WaveformControl label="Position" />
+        <SpectrumControl />
       </div>
     </section>
   );
@@ -333,6 +373,8 @@ Focus lands on the input nested in each thumb, so draw the ring on the thumb wit
 
 ## Controls beyond the kit's parts
 
+- **Waveform.Root:** `peaks` (amplitudes 0 to 1, or `{ min, max }` pairs), `value` (a fraction, or seconds with `duration`), `onValueChange(position, details)` to seek your audio, `onValueCommitted`, `range`, `source` for a live signal. Parts: `Control > Canvas`, `Playhead`, `Thumb`, `Region`, `Marker`, `Hover`. The `Bars` part is the DOM alternative to `Canvas`, with `count` (default 24) and `mirrored`.
+- **Plot.Root:** `minX`, `maxX`, `minY`, `maxY`, `scaleX="log"`. Parts: `Graph` (the svg: children go inside it), `Line axis value`, `Trace source fillTo`, `Curve`, `Band`, `Handle`. `Plot.Root` has an inline `position: relative`, so size it with `height`.
 - **Pad.Root:** `onPadOn` and `onPadOff` go on the Root. Only the first pad is in the tab order (arrow keys move between pads), so a test must Tab to it, then press Space or Enter.
 - **Piano.Root:** `minPitch`, `maxPitch`, `onNoteOn(pitch, details)`, `onNoteOff(pitch, details)`, `activeNotes` (pitches held by something else, such as a computer keyboard). The black keys come before the white keys in the DOM.
 - **Envelope.Root:** `defaultValue` or `value` as `{ x, y, curve? }[]` (both axes 0 to 1), `onValueChange(points, details)`, `minPoints`, `maxPoints`, `snap`, `locale` for the announced text. `Envelope.Points` takes a render function `(point, index) => <Envelope.Point index={index} aria-label />`.

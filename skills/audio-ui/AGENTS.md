@@ -560,6 +560,8 @@ function read(analyser: AnalyserNode, channel: number) {
 // In one requestAnimationFrame loop: source.set({ levels: [read(left, 0), read(right, 1)], peaks: [...peaks] });
 ```
 
+A loudness readout (LUFS) is not RMS: it filters the signal first (K-weighting, two biquads: a high shelf of +4 dB near 1.7 kHz and a high-pass near 38 Hz), averages the squared result over 400 ms (momentary) or 3 s (short term), and gates the integrated value (-70 LUFS absolute, then 10 LU below the average). A plain `rmsDb` is fine for a meter, and wrong to print as LUFS.
+
 ### 2.5 One MIDI input for the page, connected from a click
 
 **Impact: HIGH (a MIDI keyboard that plays every instrument, with no stuck notes)**
@@ -649,7 +651,7 @@ Decoding and reducing an audio file is expensive. Do it once per file, at a reso
 ```tsx
 function Track({ file }: { file: ArrayBuffer }) {
   const peaks = computePeaks(decode(file), width); // on every render, at the current width
-  return <Waveform values={peaks} />;
+  return <Waveform.Root peaks={peaks} />;
 }
 ```
 
@@ -662,6 +664,8 @@ const values = normalizePeaks(computePeaks(channels, 4096)); // once, at load
 ```
 
 The waveform fits the peaks to its own width and zoom.
+
+The primitive takes the result as `peaks` on `Waveform.Root` (the registry component calls the same prop `values`), and draws it on `Waveform.Canvas`; its color is the `--waveform-color` and `--waveform-progress-color` variables, and `count` and `mirrored` belong to `Waveform.Bars`, not the canvas. Markup and CSS: [directions.md](./directions.md).
 
 ### 2.8 Showing a live value as text
 
@@ -750,6 +754,37 @@ const spectrum = useSpectrum(analyser); // Source<Float32Array>, dB per point on
 
 <PlotTraceArea fillTo={-100} max={-10} min={-100} source={spectrum} />
 ```
+
+Without the registry, the same loop uses `logSpectrum` and `holdPeaks` from `@audio-ui/core/analysis`, and a `Plot.Trace` on the source. Set the analyser's `minDecibels` and `maxDecibels` first, or `getFloatFrequencyData` reads a different range than the plot shows:
+
+```ts
+import { createSource } from "@audio-ui/react";
+import { holdPeaks, logSpectrum } from "@audio-ui/core/analysis";
+
+analyser.fftSize = 4096;
+analyser.minDecibels = -96;
+analyser.maxDecibels = 0;
+const bins = new Float32Array(analyser.frequencyBinCount);
+const points = new Float32Array(256); // dB per point, log axis 20 Hz to 20 kHz
+const peaks = new Float32Array(256).fill(-96);
+const holding = new Float32Array(256);
+const live = createSource<ArrayLike<number>>(points);
+const held = createSource<ArrayLike<number>>(peaks);
+
+let last = performance.now();
+function tick(now: number) {
+  analyser.getFloatFrequencyData(bins);
+  logSpectrum(bins, ctx.sampleRate, points);
+  holdPeaks(points, peaks, holding, (now - last) / 1000);
+  last = now;
+  live.set(points); // the same arrays, published again
+  held.set(peaks);
+  frame = requestAnimationFrame(tick);
+}
+let frame = requestAnimationFrame(tick);
+```
+
+On the plot: `<Plot.Root minX={20} maxX={20000} minY={-96} maxY={0} scaleX="log">` with `<Plot.Trace fillTo={-96} source={live} />` and `<Plot.Trace source={held} />` inside `Plot.Graph`. `Plot.Root` is a positioned `div` that needs a height. Markup and CSS: [directions.md](./directions.md).
 
 ---
 

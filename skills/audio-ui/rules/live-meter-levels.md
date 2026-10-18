@@ -59,3 +59,5 @@ function read(analyser: AnalyserNode, channel: number) {
 }
 // In one requestAnimationFrame loop: source.set({ levels: [read(left, 0), read(right, 1)], peaks: [...peaks] });
 ```
+
+A loudness readout (LUFS) is not RMS: it filters the signal first (K-weighting, two biquads: a high shelf of +4 dB near 1.7 kHz and a high-pass near 38 Hz), averages the squared result over 400 ms (momentary) or 3 s (short term), and gates the integrated value (-70 LUFS absolute, then 10 LU below the average). A plain `rmsDb` is fine for a meter, and wrong to print as LUFS.

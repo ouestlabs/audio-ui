@@ -14,7 +14,7 @@ Decoding and reducing an audio file is expensive. Do it once per file, at a reso
 ```tsx
 function Track({ file }: { file: ArrayBuffer }) {
   const peaks = computePeaks(decode(file), width); // on every render, at the current width
-  return <Waveform values={peaks} />;
+  return <Waveform.Root peaks={peaks} />;
 }
 ```
 
@@ -27,3 +27,5 @@ const values = normalizePeaks(computePeaks(channels, 4096)); // once, at load
 ```
 
 The waveform fits the peaks to its own width and zoom.
+
+The primitive takes the result as `peaks` on `Waveform.Root` (the registry component calls the same prop `values`), and draws it on `Waveform.Canvas`; its color is the `--waveform-color` and `--waveform-progress-color` variables, and `count` and `mirrored` belong to `Waveform.Bars`, not the canvas. Markup and CSS: [directions.md](../directions.md).
