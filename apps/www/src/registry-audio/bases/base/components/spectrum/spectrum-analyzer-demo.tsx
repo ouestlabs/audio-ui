@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { SpectrumAnalyzer } from "@/registry-audio/bases/base/audio/elements/spectrum-analyzer";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
+import { useMidiInput } from "@/registry-audio/bases/base/hooks/use-midi-input";
 import { usePlaySwitch } from "@/registry-audio/bases/base/hooks/use-play-switch";
 import { useSpectrum } from "@/registry-audio/bases/base/hooks/use-spectrum";
 import { useSynthVoices } from "@/registry-audio/bases/base/hooks/use-synth-voices";
@@ -20,7 +21,7 @@ const ENVELOPE: EnvelopePoint[] = [
   { x: 1, y: 0.05 },
 ];
 
-/** Press play, in the bar above, to hold a chord of sawtooth notes and watch the spectrum: each note lights its pitch and every harmonic above it, and the peaks hold a moment after you stop. */
+/** Press play, in the bar above, or play a MIDI keyboard connected from it, to hold a chord of sawtooth notes and watch the spectrum: each note lights its pitch and every harmonic above it, and the peaks hold a moment after you stop. */
 export default function SpectrumAnalyzerDemo() {
   const master = useMasterBus(VOLUME);
   const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
@@ -66,6 +67,23 @@ export default function SpectrumAnalyzerDemo() {
       }
     };
   }, [playing, releaseNote, triggerNote]);
+
+  // A MIDI keyboard, connected from the bar, plays the same voices.
+  const noteOn = useCallback(
+    (pitch: number, velocity: number) => {
+      const ctx = webAudio.getContext();
+      if (ctx?.state === "suspended") {
+        ctx.resume();
+      }
+      triggerNote(pitch, ENVELOPE, velocity);
+    },
+    [triggerNote]
+  );
+  const noteOff = useCallback(
+    (pitch: number) => releaseNote(pitch, ENVELOPE),
+    [releaseNote]
+  );
+  useMidiInput({ onNoteOff: noteOff, onNoteOn: noteOn });
 
   return <SpectrumAnalyzer aria-label="Spectrum" source={spectrum} />;
 }
