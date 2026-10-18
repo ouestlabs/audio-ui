@@ -157,7 +157,7 @@ function TimelineTrackResizeHandle({
   return (
     <TimelinePrimitive.TrackResizeHandle
       className={cn(
-        "cn-timeline-track-resize-handle absolute touch-none outline-none before:absolute before:inset-x-0 before:-inset-y-1 before:content-['']",
+        "cn-timeline-track-resize-handle absolute touch-none outline-none before:absolute before:inset-x-0 before:-top-2 before:bottom-0 before:content-['']",
         className
       )}
       data-slot="timeline-track-resize-handle"

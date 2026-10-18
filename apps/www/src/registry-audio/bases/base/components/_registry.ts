@@ -400,6 +400,23 @@ export const components: RegistryItem[] = [
   {
     categories: ["timeline"],
     description:
+      "A timeline with a loop range, a ruler and two tracks, each with a clip you move, trim and fade, and a playhead on a clock: the timeline alone, with no arrangement around it",
+    files: [
+      {
+        path: "components/timeline/timeline-clips-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "timeline-clips-demo",
+    registryDependencies: [
+      "@audio-ui/timeline",
+      "@audio-ui/use-simulated-clock",
+    ],
+    type: "registry:example",
+  },
+  {
+    categories: ["timeline"],
+    description:
       "An arrangement timeline made for a whole screen: a bar ruler that seeks on the grid, a loop strip, a lane per track with clips to move between tracks, trim and fade on the grid, a cursor to put anywhere on a track, and a split at the cursor, a transport with play or pause, stop, loop, a metronome and a tempo and signature that keep the arrangement's musical positions, a playhead following its clock, and a navigator to zoom and scroll. MIDI tracks hold MIDI clips that draw their notes, play through a synth and open on a piano roll in the clip panel; double-click a MIDI lane for a new clip. In automation mode each track draws an envelope of its volume or pan over its clips, which a MIDI track's own channel follows as it plays. Open it at full size and the tracks take the screen",
     files: [
       {
