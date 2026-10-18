@@ -187,14 +187,14 @@ function WeightPick({
       aria-label={`${WEIGHT_LABELS[weight]} weight`}
       aria-pressed={active}
       className={cn(
-        "flex h-14 flex-1 flex-col items-center justify-center gap-1 rounded-md border border-transparent text-site-muted-foreground text-xs outline-none transition-colors hover:text-site-foreground focus-visible:ring-2 focus-visible:ring-site-foreground/40",
+        "flex h-11 flex-1 items-center justify-center rounded-md border border-transparent text-site-muted-foreground outline-none transition-colors hover:text-site-foreground focus-visible:ring-2 focus-visible:ring-site-foreground/40",
         active && "border-site-border bg-site-background text-site-foreground"
       )}
       onClick={pick}
+      title={WEIGHT_LABELS[weight]}
       type="button"
     >
       <Icon size={20} weight={weight} />
-      {WEIGHT_LABELS[weight]}
     </button>
   );
 }
@@ -417,55 +417,56 @@ export function IconCatalog({ className }: { className?: string }) {
           value={size}
         />
       </div>
-      <div className="grid items-start gap-4 lg:grid-cols-[1fr_16rem]">
-        {active ? (
-          <Inspector
-            entry={active}
-            onSearch={searchFor}
-            onWeight={setWeight}
-            weight={weight}
-          />
-        ) : null}
-        <div
-          className="flex min-w-0 flex-col gap-5 lg:col-start-1 lg:row-start-1"
-          ref={grid}
-        >
-          {sections.map((section) => (
-            <section
-              aria-label={section.category}
-              className="flex flex-col gap-1"
-              key={section.category}
-            >
-              <h2 className="px-1 font-medium text-site-muted-foreground text-xs">
-                {section.category}
-                <span className="ps-1.5 tabular-nums opacity-60">
-                  {section.entries.length}
-                </span>
-              </h2>
-              <div className="grid grid-cols-[repeat(auto-fill,minmax(6.5rem,1fr))] gap-1">
-                {section.entries.map((entry) => (
-                  <Tile
-                    entry={entry}
-                    key={entry.name}
-                    onSelect={setSelected}
-                    selected={entry.name === active?.name}
-                    size={size}
-                    weight={weight}
-                  />
-                ))}
-              </div>
-            </section>
-          ))}
-          {visible.length === 0 ? (
-            <div className="flex flex-col items-center gap-2 py-12 text-center text-site-muted-foreground text-sm">
-              <p>No icon matches “{query}”.</p>
-              <Button onClick={clear} size="sm" variant="outline">
-                Clear the search
-              </Button>
-            </div>
-          ) : null}
+      {visible.length === 0 ? (
+        <div className="flex flex-col items-center gap-2 py-16 text-center text-site-muted-foreground text-sm">
+          <p>No icon matches “{query}”.</p>
+          <Button onClick={clear} size="sm" variant="outline">
+            Clear the search
+          </Button>
         </div>
-      </div>
+      ) : (
+        <div className="grid items-start gap-4 lg:grid-cols-[1fr_16rem]">
+          {active ? (
+            <Inspector
+              entry={active}
+              onSearch={searchFor}
+              onWeight={setWeight}
+              weight={weight}
+            />
+          ) : null}
+          <div
+            className="flex min-w-0 flex-col gap-5 lg:col-start-1 lg:row-start-1"
+            ref={grid}
+          >
+            {sections.map((section) => (
+              <section
+                aria-label={section.category}
+                className="flex flex-col gap-1"
+                key={section.category}
+              >
+                <h2 className="px-1 font-medium text-site-muted-foreground text-xs">
+                  {section.category}
+                  <span className="ps-1.5 tabular-nums opacity-60">
+                    {section.entries.length}
+                  </span>
+                </h2>
+                <div className="grid grid-cols-[repeat(auto-fill,minmax(6.5rem,1fr))] gap-1">
+                  {section.entries.map((entry) => (
+                    <Tile
+                      entry={entry}
+                      key={entry.name}
+                      onSelect={setSelected}
+                      selected={entry.name === active?.name}
+                      size={size}
+                      weight={weight}
+                    />
+                  ))}
+                </div>
+              </section>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
