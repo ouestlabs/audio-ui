@@ -88,9 +88,9 @@ export const bot: Glyph = [
 ];
 
 /** The four shapes of an oscillator. */
-export const sine: Glyph = [path("M2 12c2-4 4-4 6 0s4 4 6 0 4-4 6 0 4 4 6 0")];
+export const sine: Glyph = [path("M2 12C4.5 5 7.5 5 12 12S19.5 19 22 12")];
 export const square: Glyph = [path("M2 18h4V6h6v12h4V6h6")];
-export const sawtooth: Glyph = [path("M2 18l8-12v12l8-12v12")];
+export const sawtooth: Glyph = [path("M3 18l9-12v12l9-12")];
 export const triangle: Glyph = [path("M2 12l5-6 5 12 5-12 5 6")];
 
 /** The response of a filter, gain up the page and frequency across. */
