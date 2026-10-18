@@ -22,14 +22,21 @@ import { Knob } from "@audio-ui/react/knob";
 import { Meter } from "@audio-ui/react/meter";
 import { Pad } from "@audio-ui/react/pad";
 import { Piano } from "@audio-ui/react/piano";
+import { Sequencer } from "@audio-ui/react/sequencer";
 import { XYPad } from "@audio-ui/react/xypad";
-import { useState } from "react";
+import { createSource, type Source } from "@audio-ui/react";
+import { useEffect, useRef, useState } from "react";
 
 // The class names are the contract with styles/base.css and every skin.
 // Keep them, change the skin: a part without its class has no size and draws nothing.
 
 const MARKS = [0, 25, 50, 75, 100];
 const PADS = ["Kick", "Snare", "Hat", "Clap"];
+const STEPS = Array.from({ length: 16 }, (_, step) => step % 4 === 0);
+const PATTERN = [STEPS, STEPS.map((on) => !on)];
+const WAVES = ["Sine", "Saw", "Square"];
+const reduction = createSource(0.35);
+const playing = createSource(4);
 const ADSR = [
   { x: 0, y: 0 },
   { x: 0.15, y: 1 },
@@ -114,6 +121,73 @@ function EnvelopeControl({ label }: { label: string }) {
   );
 }
 
+// A segmented choice (a waveform, a mode) is a group of toggles: aria-pressed carries the state.
+function ChoiceControl({ label }: { label: string }) {
+  const [wave, setWave] = useState(WAVES[0]);
+  return (
+    <div aria-label={label} className="choice" role="group">
+      {WAVES.map((name) => (
+        <button
+          aria-pressed={wave === name}
+          className="toggle"
+          key={name}
+          onClick={() => setWave(name)}
+          type="button"
+        >
+          {name}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// A step sequencer: Rows and Cells take render functions; `source` carries the playing step (-1 hides it).
+function SequencerControl({ step }: { step: Source<number> }) {
+  return (
+    <Sequencer.Root className="sequencer" defaultValue={PATTERN} source={step}>
+      <Sequencer.Rows>
+        {(row: number) => (
+          <Sequencer.Row aria-label={`Row ${row + 1}`} className="sequencer-row" index={row}>
+            <Sequencer.Cells>
+              {(cell: number) => (
+                <Sequencer.Cell
+                  aria-label={`Row ${row + 1}, step ${cell + 1}`}
+                  className="step"
+                  step={cell}
+                />
+              )}
+            </Sequencer.Cells>
+          </Sequencer.Row>
+        )}
+      </Sequencer.Rows>
+    </Sequencer.Root>
+  );
+}
+
+// A VU needle: a leaf that writes one CSS variable from a source, so React never renders per frame.
+// The 0..1 reading sweeps -50 to +50 degrees; the CSS transition is the needle's ballistics.
+function Vu({ label, source }: { label: string; source: Source<number> }) {
+  const needle = useRef<SVGGElement>(null);
+  useEffect(() => {
+    const draw = () => needle.current?.style.setProperty("--vu", String(source.getSnapshot()));
+    draw();
+    return source.subscribe(draw);
+  }, [source]);
+  return (
+    <figure className="vu">
+      <svg aria-hidden="true" className="vu-face" viewBox="0 0 100 60">
+        <path className="vu-zone" d="M 71 20 A 46 46 0 0 1 90 41" />
+        <path className="vu-arc" d="M 10 41 A 46 46 0 0 1 90 41" />
+        <g className="vu-needle" ref={needle}>
+          <line x1="50" x2="50" y1="56" y2="14" />
+        </g>
+        <circle className="vu-hub" cx="50" cy="56" r="3" />
+      </svg>
+      <figcaption className="knob-label">{label}</figcaption>
+    </figure>
+  );
+}
+
 // A toggle (mute, solo, power) is a plain button: aria-pressed carries the state.
 function ToggleControl({ label }: { label: string }) {
   const [on, setOn] = useState(false);
@@ -141,6 +215,7 @@ export function Panel({
         <FaderControl defaultValue={70} label="Level" />
         <FaderControl defaultValue={40} label="Pan" />
         <ToggleControl label="M" />
+        <Vu label="GR" source={reduction} />
         {/* Meter.Channels takes a render function and renders no element itself */}
         <Meter.Root
           aria-label="Output"
@@ -168,7 +243,7 @@ export function Panel({
           defaultValue={{ x: 60, y: 35 }}
         >
           <XYPad.Control className="xypad-control">
-            <XYPad.Thumb className="xypad-thumb" />
+            <XYPad.Thumb aria-label="Filter" className="xypad-thumb" />
           </XYPad.Control>
         </XYPad.Root>
       </div>
@@ -193,6 +268,10 @@ export function Panel({
           </Piano.Keys>
         </Piano.Root>
         <EnvelopeControl label="Amp" />
+        <ChoiceControl label="Wave" />
+      </div>
+      <div className="panel-row">
+        <SequencerControl step={playing} />
       </div>
     </section>
   );
@@ -231,7 +310,7 @@ Read [hardware.md](./hardware.md) before composing a retro panel: it explains wh
 - **console** (`styles/console.css`): a mixing console channel. A slate panel, caps colored by section (the second and third knob change color), a long fader with ticks and a lamp ladder.
 - **synth70** (`styles/synth70.css`): a 70s monophonic synth. A black panel between wood cheeks, white print, an amber lamp, rocker toggles.
 
-Every one is built from `styles/materials.css` and the shared tokens, so each is about sixty lines: read the closest one before writing your own.
+Most are built from `styles/materials.css` and the shared tokens (tape, phosphor, console and hifi lean on them most; y2k and synth70 set only the light and dark tokens and draw the rest by hand, since candy gloss and wood are not in the materials), so each is about sixty lines: read the closest one before writing your own. Screws, the rocker and the lamp rim are retro's; tape, hifi and the others take `.lamp` from `materials.css`.
 
 With shadcn and a distinct look, take the headless parts from `@audio-ui/react` for the kit's skins, and the registry only for the engine items (`web-audio`, `drum-synthesis`): the registry components take `size` and `marks`, not these class names.
 
@@ -251,6 +330,33 @@ Minimal, modern and brutalist hide the knob ticks (`.knob-tick { display: none }
 Signatures: `Knob.Value` and `Fader.Value` take a render function `(formatted, value) => ReactNode` (the Fader's receives arrays, one entry per thumb: `<Fader.Value>{(_formatted, [value]) => `${value.toFixed(1)} dB`}</Fader.Value>`), and `getAriaValueText(formatted, value) => string` goes on `Knob.Thumb`. To keep the readout and the announced text equal, write one `format(value)` and use it in both, and set `locale` on the Root (a French browser would announce "3,6" beside a readout of "3.6"). `Meter.Root` sets `data-clipping` from the level, not from the peak: style `.meter-channel[data-clipping] .meter-indicator`. The slider takes its name from `Knob.Label` or `Fader.Label` (the kit has one), or from `aria-label` on `Knob.Thumb` or `Fader.Thumb`. An `aria-label` on the Root alone names a group, not the slider, so a test that looks for `getByRole("slider", { name })` finds nothing. Tests read the value with `inputValue()`.
 
 Focus lands on the input nested in each thumb, so draw the ring on the thumb with `:has(:focus-visible)` (the kit does). The ring takes --focus, then the accent: when the accent is also the value color, set --focus to the ink so the ring does not disappear into the arc. A fader's `.fader-indicator` is the filled part of the slot: show it for a level, hide it (`display: none`) for a hairline or a hardware slot. Every fader and meter takes its length from one variable, --strip-h, set on the panel or on a strip.
+
+## Controls beyond the kit's parts
+
+- **Piano.Root:** `minPitch`, `maxPitch`, `onNoteOn(pitch, details)`, `onNoteOff(pitch, details)`, `activeNotes` (pitches held by something else, such as a computer keyboard). The black keys come before the white keys in the DOM.
+- **Envelope.Root:** `defaultValue` or `value` as `{ x, y, curve? }[]` (both axes 0 to 1), `onValueChange(points, details)`, `minPoints`, `maxPoints`, `snap`, `locale` for the announced text. `Envelope.Points` takes a render function `(point, index) => <Envelope.Point index={index} aria-label />`.
+- **Sequencer.Root:** `defaultValue` or `value` as `boolean[][]` (a row per sound, a list of steps), `onValueChange(pattern, details)`, `source` (a source of the playing step, `-1` for none), `velocities`. `Rows` and `Cells` take render functions, `Row` needs `index`, `Cell` needs `step`; a cell is a button with `aria-pressed`, `data-on` and `data-current`.
+- **XYPad:** name the axes with `aria-label` on `XYPad.Thumb` ("Filter X" and "Filter Y"), not on the Root.
+- **Sizes:** a pad is a 4rem square with a 0.65rem label, so a long name needs a wider column and a smaller font on `.pad`; size one knob with `style={{ "--knob-size": "6rem" }}` on its Root.
+- **A choice of one in N** (a waveform, a mode): a `role="group"` of `.toggle` buttons with `aria-pressed`, as `ChoiceControl` does.
+- **Printed numerals on a knob:** a span inside `Knob.Mark` turns with the mark and reads upside down: give it `rotate: calc(var(--knob-mark-angle) * -1)`.
+- **A writable source** is `WritableSource<T>` from `@audio-ui/react` (`Source` has no `set`); `subscribe(listener)` returns the remover.
+- Importing CSS in TypeScript needs `declare module "*.css";` in a `.d.ts` file under `moduleResolution: "Bundler"`.
+
+### Envelope points to ADSR times
+
+The points are normalized, so choose how long a full envelope is, then read the five default points:
+
+```ts
+const SPAN = 4; // seconds for x from 0 to 1
+const [, peak, sustain, hold] = points;
+const attack = peak.x * SPAN;
+const decay = (sustain.x - peak.x) * SPAN;
+const level = sustain.y; // 0 to 1
+const release = (1 - hold.x) * SPAN;
+```
+
+Start the voice with `gain.setValueAtTime(0, t)`, `linearRampToValueAtTime(1, t + attack)`, then `setTargetAtTime(level, t + attack, decay / 3)`; on release, `cancelScheduledValues` and `setTargetAtTime(0, now, release / 3)`.
 
 ## Printed scales
 

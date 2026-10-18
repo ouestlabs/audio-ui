@@ -6,7 +6,7 @@
   --hi: #2f6d44;
   --lo: #0b2314;
   --lift: 0;
-  --dim: color-mix(in oklab, var(--ink) 45%, var(--panel));
+  --dim: color-mix(in oklab, var(--ink) 52%, var(--panel));
   --ok: #6dff9c;
   --warn: #d9ff6d;
   --clip: #ff6d6d;

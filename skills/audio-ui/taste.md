@@ -40,7 +40,7 @@ Starting points, each a set of decisions. Mix none of them: pick one.
 
 ## 3. Compose it
 
-Copy `styles/base.css` and `styles/materials.css`. A direction is one scope class and about thirty lines:
+Copy `styles/base.css` and `styles/materials.css`. A simple direction is one scope class and about thirty lines (a rich one, with its own caps, rack ears and bezel, runs to a few hundred):
 
 ```css
 /* MODULAR: black panel, thin white print, one red patch. */

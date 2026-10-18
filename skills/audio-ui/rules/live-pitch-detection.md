@@ -37,3 +37,23 @@ const pitch = usePitch(microphone.analyser); // a source: no render per reading
 ```
 
 For a frequency from samples you already have, `detectPitch(samples, sampleRate)` and `nearestNote(frequency)` from `@audio-ui/core/pitch` are pure functions, with no React and no Web Audio: they work in any framework. The analyser's `fftSize` must hold two periods of the lowest pitch: 4096 at 48 kHz reaches about 40 Hz.
+
+Without the registry, `detectPitch(samples, sampleRate)` returns `{ frequency, confidence }`, or `null` when the signal is too quiet or has no clear pitch (noise, a chord, silence). `nearestNote(frequency)` returns `{ name, octave, pitch, cents }` (a sharp is written `"A#"`, and positive `cents` means sharp), or `null` for a frequency that is not positive and finite, so guard both. Feed an `AnalyserNode` that is never connected to the speakers, read it in a `requestAnimationFrame` loop, and publish the reading through a source:
+
+```ts
+import { createSource } from "@audio-ui/react";
+import { detectPitch, nearestNote } from "@audio-ui/core/pitch";
+
+const reading = createSource<{ name: string; octave: number; cents: number } | null>(null);
+const samples = new Float32Array(analyser.fftSize);
+
+function tick() {
+  analyser.getFloatTimeDomainData(samples);
+  const pitch = detectPitch(samples, ctx.sampleRate);
+  const note = pitch && pitch.confidence > 0.8 ? nearestNote(pitch.frequency) : null;
+  reading.set(note);
+  frame = requestAnimationFrame(tick);
+}
+```
+
+A tuner is a display, not a control: it needs none of the knob, fader or meter kit, only the tokens of a skin. Test it without a microphone by feeding an `OscillatorNode` into the same analyser.

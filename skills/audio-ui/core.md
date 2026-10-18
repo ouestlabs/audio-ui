@@ -152,6 +152,189 @@ const cutoff = mountKnob(document.getElementById("cutoff")!, {
 });
 ```
 
+## The kit's look in the plain DOM
+
+The skins in `styles/` select class names, not React parts, so they work on plain DOM: build the same tree with the kit's classes, copy `styles/base.css`, `styles/dom.css` and one skin, and put the skin's class on the panel (`<section class="panel skin-retro">`). These two functions build a knob and a fader that way. They are the verified starting point: `s.angle` is the rotation to apply to the thumb, `s.percent` and `s.anchorPercent` (0 to 1) bound the value arc drawn with `arcPath`, and a fader's `s.share` (0 to 100) is the cap's position along the strip, with `s.fill` the lit part of the slot.
+
+```ts
+import { createFaderController, type FaderOptions } from "@audio-ui/core/fader";
+import {
+  arcPath,
+  createKnobController,
+  type KnobOptions,
+  START_ANGLE,
+  SWEEP_ANGLE,
+} from "@audio-ui/core/knob";
+
+const SVG_NS = "http://www.w3.org/2000/svg";
+const MARKS = [0, 0.25, 0.5, 0.75, 1];
+
+function element<K extends keyof HTMLElementTagNameMap>(
+  tag: K,
+  className: string,
+  parent: HTMLElement
+) {
+  const node = document.createElement(tag);
+  node.className = className;
+  parent.append(node);
+  return node;
+}
+
+function arc(className: string, parent: HTMLElement) {
+  const svg = document.createElementNS(SVG_NS, "svg");
+  svg.setAttribute("class", className);
+  svg.setAttribute("viewBox", "0 0 48 48");
+  svg.setAttribute("aria-hidden", "true");
+  const path = document.createElementNS(SVG_NS, "path");
+  svg.append(path);
+  parent.append(svg);
+  return path;
+}
+
+// `root` is an empty element with class "knob"; `label` names the slider and prints under the dial.
+export function mountKitKnob(root: HTMLElement, label: string, options: KnobOptions) {
+  const control = element("div", "knob-control", root);
+  control.style.touchAction = "none";
+  // The controller takes dragMode; the attribute is only for the cursor in the CSS.
+  control.dataset.dragMode = options.dragMode ?? "circular";
+  const track = arc("knob-track", control);
+  const indicator = arc("knob-indicator", control);
+  const thumb = element("div", "knob-thumb", control);
+  const input = element("input", "visually-hidden", thumb);
+  input.type = "range";
+  input.setAttribute("aria-label", label);
+  for (const position of MARKS) {
+    const mark = element("div", "knob-mark", control);
+    mark.style.rotate = `${START_ANGLE + position * SWEEP_ANGLE}deg`;
+    mark.setAttribute("aria-hidden", "true");
+    element("span", "knob-tick", mark);
+  }
+  element("span", "knob-label", root).textContent = label;
+  const output = element("output", "knob-value", root);
+  track.setAttribute("d", arcPath(21, 0, 1));
+
+  const knob = createKnobController();
+  knob.setOptions(options);
+
+  const render = () => {
+    const s = knob.getSnapshot();
+    thumb.style.rotate = `${s.angle}deg`;
+    indicator.setAttribute(
+      "d",
+      arcPath(21, Math.min(s.anchorPercent, s.percent), Math.max(s.anchorPercent, s.percent))
+    );
+    output.textContent = s.formatted;
+    input.min = String(s.min);
+    input.max = String(s.max);
+    input.step = String(s.step);
+    input.value = String(s.value);
+    input.disabled = s.disabled;
+    input.setAttribute("aria-valuetext", s.formatted);
+    control.toggleAttribute("data-dragging", s.dragging);
+    control.toggleAttribute("data-disabled", s.disabled);
+  };
+  const onPointerDown = (event: PointerEvent) => {
+    if (event.button !== 0) {
+      return;
+    }
+    event.preventDefault();
+    input.focus({ preventScroll: true });
+    knob.press(event, control);
+  };
+  const onKeyDown = (event: KeyboardEvent) => {
+    if (knob.keyDown(event)) {
+      event.preventDefault();
+    }
+  };
+  const onInput = (event: Event) => knob.type(Number(input.value), event);
+
+  const unsubscribe = knob.subscribe(render);
+  const detachWheel = knob.attachWheel(control);
+  control.addEventListener("pointerdown", onPointerDown);
+  input.addEventListener("keydown", onKeyDown);
+  input.addEventListener("input", onInput);
+  render();
+
+  return () => {
+    unsubscribe();
+    detachWheel();
+    control.removeEventListener("pointerdown", onPointerDown);
+    input.removeEventListener("keydown", onKeyDown);
+    input.removeEventListener("input", onInput);
+  };
+}
+
+export function mountKitFader(root: HTMLElement, label: string, options: FaderOptions) {
+  const control = element("div", "fader-control", root);
+  control.style.touchAction = "none";
+  const track = element("div", "fader-track", control);
+  const indicator = element("div", "fader-indicator", track);
+  const thumb = element("div", "fader-thumb", control);
+  const input = element("input", "visually-hidden", thumb);
+  input.type = "range";
+  input.setAttribute("aria-label", label);
+  input.setAttribute("aria-orientation", "vertical");
+  element("span", "knob-label", root).textContent = label;
+  const output = element("output", "knob-value", root);
+
+  const fader = createFaderController();
+  fader.setOptions(options);
+
+  const render = () => {
+    const s = fader.getSnapshot();
+    // React sets this inline on the thumb; in the plain DOM it is yours. The cap travels inside the control.
+    thumb.style.bottom = `calc((100% - var(--fader-thumb-h)) * ${s.share / 100})`;
+    thumb.style.left = "50%";
+    thumb.style.translate = "-50% 0";
+    indicator.style.height = `${s.fill.to - s.fill.from}%`;
+    indicator.style.bottom = `${s.fill.from}%`;
+    output.textContent = s.formatted;
+    input.min = String(s.min);
+    input.max = String(s.max);
+    input.step = String(s.step);
+    input.value = String(s.value);
+    input.disabled = s.disabled;
+    input.setAttribute("aria-valuetext", s.formatted);
+    control.toggleAttribute("data-dragging", s.dragging);
+    control.toggleAttribute("data-disabled", s.disabled);
+  };
+  const onPointerDown = (event: PointerEvent) => {
+    if (event.button !== 0) {
+      return;
+    }
+    event.preventDefault();
+    input.focus({ preventScroll: true });
+    fader.press(event, control, thumb);
+  };
+  const onKeyDown = (event: KeyboardEvent) => {
+    if (fader.keyDown(event, input)) {
+      event.preventDefault();
+    }
+  };
+  const onInput = (event: Event) => fader.type(Number(input.value), event);
+  const onDoubleClick = (event: MouseEvent) => fader.reset(event);
+
+  const unsubscribe = fader.subscribe(render);
+  const detachWheel = fader.attachWheel(control);
+  control.addEventListener("pointerdown", onPointerDown);
+  control.addEventListener("dblclick", onDoubleClick);
+  input.addEventListener("keydown", onKeyDown);
+  input.addEventListener("input", onInput);
+  render();
+
+  return () => {
+    unsubscribe();
+    detachWheel();
+    control.removeEventListener("pointerdown", onPointerDown);
+    control.removeEventListener("dblclick", onDoubleClick);
+    input.removeEventListener("keydown", onKeyDown);
+    input.removeEventListener("input", onInput);
+  };
+}
+```
+
+Pass `dragMode: "vertical"` in the knob's options (the controller reads it, and the `data-drag-mode` attribute above only draws the cursor), and `locale: "en-US"` so the readout does not follow the browser's decimal mark. Units go in the readout yourself (`output.textContent = s.formatted + " Hz"`, and the same in `aria-valuetext`). The editable readout and the registry's value formats are React only.
+
 ## Vue
 
 ```ts

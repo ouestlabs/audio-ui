@@ -376,3 +376,71 @@ describe("skills/audio-ui styles", () => {
     }
   );
 });
+
+test("core.md's kit knob and fader work in the plain DOM", async () => {
+  const core = await Bun.file(`${SKILL_DIR}/core.md`).text();
+  const example = [...core.matchAll(CODE_FENCE)]
+    .map(([, code = ""]) => code)
+    .find((code) => code.includes("export function mountKitKnob"));
+  if (!example) {
+    throw new Error("core.md: the kit's plain DOM example is missing");
+  }
+  const source = new Bun.Transpiler({ loader: "ts" })
+    .transformSync(example)
+    .replace(
+      CORE_SPECIFIER,
+      (_, entry) => `"${ROOT}/packages/core/src/primitives/${entry}/index.ts"`
+    );
+  const copy = `${import.meta.dir}/skill-kit.tmp.js`;
+  await Bun.write(copy, source);
+  const { mountKitFader, mountKitKnob } = await import(copy).finally(() =>
+    Bun.file(copy).delete()
+  );
+
+  document.body.innerHTML =
+    '<div class="knob" id="k"></div><div class="fader" id="f"></div>';
+  const knobRoot = document.getElementById("k");
+  const faderRoot = document.getElementById("f");
+  if (!(knobRoot && faderRoot)) {
+    throw new Error("the kit's example has no roots");
+  }
+  const changes: number[] = [];
+  const cleanKnob = mountKitKnob(knobRoot, "Cutoff", {
+    dragMode: "vertical",
+    max: 100,
+    min: 0,
+    onValueChange: (value: number) => changes.push(value),
+  });
+  const cleanFader = mountKitFader(faderRoot, "Level", {
+    max: 0,
+    min: -60,
+    onValueChange: (value: number) => changes.push(value),
+    orientation: "vertical",
+  });
+  for (const name of [
+    "knob-control",
+    "knob-thumb",
+    "knob-track",
+    "knob-indicator",
+    "knob-mark",
+    "knob-label",
+    "knob-value",
+    "fader-control",
+    "fader-track",
+    "fader-indicator",
+    "fader-thumb",
+  ]) {
+    expect(document.querySelector(`.${name}`)).not.toBeNull();
+  }
+  expect(
+    knobRoot.querySelector(".knob-control")?.getAttribute("data-drag-mode")
+  ).toBe("vertical");
+  for (const input of document.querySelectorAll("input")) {
+    input.dispatchEvent(
+      new KeyboardEvent("keydown", { cancelable: true, key: "ArrowUp" })
+    );
+  }
+  expect(changes).toHaveLength(2);
+  cleanKnob();
+  cleanFader();
+});

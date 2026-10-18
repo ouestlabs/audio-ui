@@ -46,8 +46,9 @@ How to build audio interfaces in React with audio/ui, for AI agents and LLMs. Ru
    - 3.8 [Anchors for bipolar controls](#38-anchors-for-bipolar-controls)
 4. [Accessibility](#4-accessibility): **HIGH**
    - 4.1 [Accessible names](#41-accessible-names)
-   - 4.2 [Keep the focusable part](#42-keep-the-focusable-part)
-   - 4.3 [Focus and hit areas](#43-focus-and-hit-areas)
+   - 4.2 [Announce a live readout on change, not every frame](#42-announce-a-live-readout-on-change-not-every-frame)
+   - 4.3 [Keep the focusable part](#43-keep-the-focusable-part)
+   - 4.4 [Focus and hit areas](#44-focus-and-hit-areas)
 5. [Without React](#5-without-react): **HIGH**
    - 5.1 [Draw from the snapshot](#51-draw-from-the-snapshot)
    - 5.2 [Keep a native range input for keyboard and screen readers](#52-keep-a-native-range-input-for-keyboard-and-screen-readers)
@@ -120,9 +121,13 @@ export const getContext = () => (ctx ??= new AudioContext());
 </Button>
 ```
 
+A note that starts on a press (a pad, a key) must not wait for `resume()`: on the first press the promise can stay pending until the pointer is released, and the voice arrives after the key is up. Call `ctx.resume()` without awaiting it, schedule the voice at `ctx.currentTime` now, and add a one-time `pointerup` listener that resumes as well.
+
 The registry ships this as a lib: `npx shadcn@latest add @audio-ui/web-audio`. Use one context per page; every connected node must come from it.
 
 On touch, `pointerdown` does not count as a user activation: a pad that starts the context on strike can stay silent for its first tap. Resume the context on `pointerup` or `click` as well (`touchend` on older iOS), and keep playing from `pointerdown` once it runs.
+
+Track "playing" yourself: a context created inside the click can already be `running`, so a play/pause toggle that reads `ctx.state` right after `new AudioContext()` suspends it on the first click.
 
 ### 1.2 Ramp parameters, never assign them
 
@@ -148,7 +153,7 @@ onValueChange={(v) => {
 
 **Impact: CRITICAL (sample-accurate timing that survives background tabs)**
 
-`setInterval` and `setTimeout` drift, and browsers throttle them in background tabs. A sequencer driven by them swings and stalls.
+`setInterval` and `setTimeout` drift, and browsers throttle them in background tabs. A sequencer that plays a note when its own timer fires swings and stalls.
 
 **Incorrect:**
 
@@ -174,6 +179,24 @@ const clock = useTransportClock({
 ```
 
 The clock looks ahead and hands you the exact `AudioContext` time of each step. Start every node at that `time`. `clock.getPosition()` gives the playhead in steps for the UI; `@audio-ui/musical-time` converts tempo to seconds. `start()` does not resume a suspended context: call `ctx.resume()` in the same click first (rule `audio-resume-in-gesture`).
+
+Without the registry, the same clock is a timer that only looks ahead: every 25 ms it schedules the steps that fall in the next 120 ms at their exact audio time. The timer decides when to look, the audio clock decides when a note sounds:
+
+```ts
+let next = ctx.currentTime;
+let step = 0;
+const timer = setInterval(() => {
+  while (next < ctx.currentTime + 0.12) {
+    for (const row of pattern) {
+      if (row[step]) playAt(next); // osc.start(next)
+    }
+    next += 60 / bpm / 4;
+    step = (step + 1) % 16;
+  }
+}, 25);
+```
+
+Read `bpm` from a ref so a tempo change applies on the next step, publish `step` through a source (`-1` on stop), and `clearInterval(timer)` on cleanup.
 
 ### 1.4 dB on the control, linear gain on the node
 
@@ -383,6 +406,26 @@ const pitch = usePitch(microphone.analyser); // a source: no render per reading
 ```
 
 For a frequency from samples you already have, `detectPitch(samples, sampleRate)` and `nearestNote(frequency)` from `@audio-ui/core/pitch` are pure functions, with no React and no Web Audio: they work in any framework. The analyser's `fftSize` must hold two periods of the lowest pitch: 4096 at 48 kHz reaches about 40 Hz.
+
+Without the registry, `detectPitch(samples, sampleRate)` returns `{ frequency, confidence }`, or `null` when the signal is too quiet or has no clear pitch (noise, a chord, silence). `nearestNote(frequency)` returns `{ name, octave, pitch, cents }` (a sharp is written `"A#"`, and positive `cents` means sharp), or `null` for a frequency that is not positive and finite, so guard both. Feed an `AnalyserNode` that is never connected to the speakers, read it in a `requestAnimationFrame` loop, and publish the reading through a source:
+
+```ts
+import { createSource } from "@audio-ui/react";
+import { detectPitch, nearestNote } from "@audio-ui/core/pitch";
+
+const reading = createSource<{ name: string; octave: number; cents: number } | null>(null);
+const samples = new Float32Array(analyser.fftSize);
+
+function tick() {
+  analyser.getFloatTimeDomainData(samples);
+  const pitch = detectPitch(samples, ctx.sampleRate);
+  const note = pitch && pitch.confidence > 0.8 ? nearestNote(pitch.frequency) : null;
+  reading.set(note);
+  frame = requestAnimationFrame(tick);
+}
+```
+
+A tuner is a display, not a control: it needs none of the knob, fader or meter kit, only the tokens of a skin. Test it without a microphone by feeding an `OscillatorNode` into the same analyser.
 
 ### 2.3 Meter a microphone as it delivers the signal
 
@@ -967,7 +1010,28 @@ The value text is announced too. `format` takes `Intl.NumberFormat` options such
 <Knob.Thumb getAriaValueText={(formatted) => `${formatted} Hz`} />
 ```
 
-### 4.2 Keep the focusable part
+### 4.2 Announce a live readout on change, not every frame
+
+**Impact: HIGH (a screen reader that is usable, not flooded)**
+
+A display that updates every frame (a tuner's cents, a loudness number, a position) is not a control, so the primitives' slider semantics do not cover it. Putting `aria-live` on it makes a screen reader read every frame. Give the visual display `aria-hidden="true"`, or `role="meter"` with `aria-valuenow` and `aria-valuetext`, and put the spoken version in a separate polite status that changes only when the meaning does: a new note, in tune or not, a level class.
+
+**Incorrect (announced every frame):**
+
+```tsx
+<output aria-live="polite">{note.name} {note.cents.toFixed(1)} cents</output>
+```
+
+**Correct (the display is silent, a status speaks on a change):**
+
+```tsx
+<div aria-hidden="true">{note.name} {note.cents.toFixed(1)}</div>
+<p className="sr-only" role="status">
+  {inTune ? `${note.name}, in tune` : `${note.name}, ${note.cents > 0 ? "sharp" : "flat"}`}
+</p>
+```
+
+### 4.3 Keep the focusable part
 
 **Impact: HIGH (keyboard and screen reader access survive restyling)**
 
@@ -991,7 +1055,7 @@ The thumb holds the input that the keyboard and screen readers reach. Replacing 
 
 `render` takes an element (`render={<span />}`) or a function of `(props, state)`. Always spread `props`.
 
-### 4.3 Focus and hit areas
+### 4.4 Focus and hit areas
 
 **Impact: MEDIUM (visible focus, and thumbs you can grab on touch)**
 

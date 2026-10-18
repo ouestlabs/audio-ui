@@ -23,7 +23,7 @@ Two directions in one panel is the most common failure. A hybrid needs a reason 
 2. Copy the markup of `Panel` from [directions.md](./directions.md). Its class names are the contract with the CSS, and its part tree is the verified one.
 3. Change the skin's tokens (colors, sizes) before changing its rules.
 
-The kit names only real parts, props, `data-*` attributes and CSS variables, and a test renders it in CI. When a part, prop or attribute is not in the kit or the component's docs page, do not invent it.
+A display-only app (a tuner, a readout, a scope) uses none of the knob, fader or meter markup: take the tokens and the type of a skin and draw the display yourself, keeping its contrast, focus and motion rules. The kit names only real parts, props, `data-*` attributes and CSS variables, and a test renders it in CI. When a part, prop or attribute is not in the kit or the component's docs page, do not invent it.
 
 ## 3. What every direction shares
 

@@ -85,11 +85,12 @@
   /* Paper: a printed scale, for a VU face or a legend plate */
   --paper: radial-gradient(ellipse at 50% 30%, #f6edd0, #d9cb9a);
 
-  /* Lamp: a dim lens when off, a bright core with a small halo when on */
+  /* Lamp: a dim lens when off, a bright core with a small halo when on.
+     To retint a lamp, set these three on the same element as the panel's skin class, after materials.css. */
   --lens-off: radial-gradient(
     circle at 35% 30%,
-    color-mix(in oklab, var(--accent) 25%, black),
-    color-mix(in oklab, var(--accent) 8%, black)
+    color-mix(in oklab, var(--accent) 45%, black),
+    color-mix(in oklab, var(--accent) 22%, black)
   );
   --lens-on: radial-gradient(
     circle at 35% 30%,

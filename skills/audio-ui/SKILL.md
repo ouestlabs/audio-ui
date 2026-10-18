@@ -83,6 +83,7 @@ Run commands with the project's package manager, read from its lockfile: `npx sh
 
 - `a11y-accessible-name` - Every control has `aria-label` or its `Label` part
 - `a11y-keep-focusable-part` - Restyle the thumb with `render`, never replace it
+- `a11y-live-readout` - Silent display, a polite status that changes only when the meaning does
 - `a11y-focus-and-hit-area` - Draw `:focus-visible`, widen small hit areas
 
 ### 5. Without React (HIGH)
@@ -156,7 +157,7 @@ Installed components import from `@/components/audio-ui/<name>`. Every import, i
 3. **Read the component's docs before writing code**: `https://www.audio-ui.dev/llm/components/base/<name>` (markdown), or the MCP server ([setup.md](./setup.md)). Props are specific; a guessed prop compiles and misbehaves. Offline, the verified `Panel` markup and the props table of [directions.md](./directions.md) cover knob, fader, meter, XY pad, pad and piano; the entries are `@audio-ui/react/knob`, `fader`, `meter`, `xypad`, `pad`, `piano`.
 4. **Install, then import from where it landed.** Registry: `npx shadcn@latest add @audio-ui/<name>` (add the namespace once, [setup.md](./setup.md)) copies it to `components/audio-ui/<name>.tsx`: `import { Meter } from "@/components/audio-ui/meter"` (through the project's `components` alias). The CLI prints every file it writes: import from those paths, not from memory. React package: install `@audio-ui/react`, import from `@audio-ui/react/<name>`. Other frameworks: install `@audio-ui/core` and follow [core.md](./core.md).
 5. **Write the code against the CRITICAL and HIGH rules** first.
-6. **Verify.** Type check, render the page and look at a screenshot. Drag every control fast (no clicks in the sound), Tab to each control and use the arrow keys, background the tab during playback, and check nothing re-renders per frame.
+6. **Verify.** Type check, render the page and look at a screenshot. A headless browser has no microphone: feed an `OscillatorNode` through the same analyser to test an input path. Drag every control fast (no clicks in the sound), Tab to each control and use the arrow keys, background the tab during playback, and check nothing re-renders per frame.
 
 ## How to Use
 
