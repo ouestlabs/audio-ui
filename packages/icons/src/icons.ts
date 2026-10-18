@@ -62,3 +62,4 @@ export const VinylIcon = createIcon(glyphs.vinyl, "VinylIcon");
 export const ClipIcon = createIcon(glyphs.clip, "ClipIcon");
 export const AutomationIcon = createIcon(glyphs.automation, "AutomationIcon");
 export const MagnetIcon = createIcon(glyphs.magnet, "MagnetIcon");
+export const MonoIcon = createIcon(glyphs.mono, "MonoIcon");

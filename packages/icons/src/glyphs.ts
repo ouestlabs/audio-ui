@@ -132,12 +132,17 @@ export const pad: Glyph = [
   rect(4, 4, 16, 16, 4, { tint: true }),
   path("M8.5 15.5h7", { knock: true }),
 ];
-/** A keyboard: its black keys. */
+/** A keyboard: seven white keys and the five black ones between them. */
 export const piano: Glyph = [
-  rect(3, 4, 18, 16, 2.5, { tint: true }),
-  rect(5.5, 4, 3, 8, 1, { knock: true }),
-  rect(10.5, 4, 3, 8, 1, { knock: true }),
-  rect(15.5, 4, 3, 8, 1, { knock: true }),
+  rect(2, 5, 20, 14, 2, { tint: true }),
+  path(
+    "M10.57 5v14M4.86 12.5V19M7.71 12.5V19M13.43 12.5V19M16.29 12.5V19M19.14 12.5V19"
+  ),
+  rect(4.06, 5, 1.6, 7.5, 0.6, { knock: true }),
+  rect(6.91, 5, 1.6, 7.5, 0.6, { knock: true }),
+  rect(12.63, 5, 1.6, 7.5, 0.6, { knock: true }),
+  rect(15.49, 5, 1.6, 7.5, 0.6, { knock: true }),
+  rect(18.34, 5, 1.6, 7.5, 0.6, { knock: true }),
 ];
 
 /** Displays: a level, a needle, a spectrum, a scope, a plot. */
@@ -243,12 +248,12 @@ export const solo: Glyph = [
   ),
 ];
 
-/** Two channels, each with its own level. */
+/** Two speakers, left and right. */
 export const stereo: Glyph = [
-  rect(3.5, 3, 7, 18, 3.5, { tint: true }),
-  path("M7 17v-6", { knock: true }),
-  rect(13.5, 3, 7, 18, 3.5, { tint: true }),
-  path("M17 17v-9", { knock: true }),
+  rect(2.5, 5, 8, 14, 2, { tint: true }),
+  circle(6.5, 14, 2, { knock: true }),
+  rect(13.5, 5, 8, 14, 2, { tint: true }),
+  circle(17.5, 14, 2, { knock: true }),
 ];
 
 /** A cassette: two reels in a case. */
@@ -282,4 +287,10 @@ export const automation: Glyph = [
 export const magnet: Glyph = [
   path("M5 4v8a7 7 0 0 0 14 0V4h-4v8a3 3 0 0 1-6 0V4z", { tint: true }),
   path("M5 8h4M15 8h4", { knock: true }),
+];
+
+/** One speaker, in the middle: the mono of the stereo pair. */
+export const mono: Glyph = [
+  rect(7, 5, 10, 14, 2, { tint: true }),
+  circle(12, 14, 2.5, { knock: true }),
 ];
