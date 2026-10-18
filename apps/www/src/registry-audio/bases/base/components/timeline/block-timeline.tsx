@@ -20,6 +20,7 @@ import {
 import { snapMove } from "@audio-ui/core/timeline";
 import {
   adjacentPoint,
+  type FadeShape,
   type Timeline as TimelinePrimitive,
 } from "@audio-ui/react";
 import {
@@ -595,14 +596,7 @@ function TrackLevel({ active, name }: { active: boolean; name: string }) {
  */
 export default function BlockTimeline() {
   const [editingSignature, setEditingSignature] = useState<string | null>(null);
-  // The arrangement reads the playhead, where a split cuts, and the playhead reads the arrangement's loop and length: a ref ties the two.
-  const clockRef = useRef<{ getSnapshot: () => number } | null>(null);
-  const getPosition = useCallback(
-    () => clockRef.current?.getSnapshot() ?? 0,
-    []
-  );
   const {
-    addClip,
     dispatch,
     duration,
     locators,
@@ -613,19 +607,13 @@ export default function BlockTimeline() {
     canRedo,
     canUndo,
     changeAutomation,
-    changeClip,
     changeMix,
     clearTimeSelection,
-    clipAction,
     clips,
-    commitClip,
     consolidateTime,
     copying,
     copyOf,
-    crop,
-    editClip,
     fadeTimeSelection,
-    duplicateSelection,
     duplicateTrack,
     folded,
     heights,
@@ -635,24 +623,18 @@ export default function BlockTimeline() {
     mixOf,
     redo,
     moveTrack,
-    removeClip,
     removeTimeSpan,
     removeTrack,
-    renameClip,
     renameTrack,
-    setFadeShape,
     resizeTrack,
     selectedIds,
     selectedTracks,
     selection,
-    settleClipEdit,
-    splitAtCursor,
     tracks,
     undo,
   } = useArrangement({
     colors: TRACK_COLORS.length,
     duration: BARS * BAR,
-    getPosition,
     initialClips: CLIPS,
     initialLocators: LOCATORS,
     initialLoop: LOOP,
@@ -708,6 +690,81 @@ export default function BlockTimeline() {
     loop,
     looping,
   });
+  // The clips, as the commands that change them. A split cuts at the playhead, no closer to a clip's edge than a sixteenth of the bar.
+  const getPosition = useCallback(() => clock.getSnapshot(), [clock]);
+  const splitStep = bar / 4;
+  const addClip = useCallback(
+    (clip: Arranged) => dispatch({ type: "add-clip", clip }),
+    [dispatch]
+  );
+  const changeClip = useCallback(
+    (
+      id: string,
+      value: TimelinePrimitive.Clip.Value,
+      details: TimelinePrimitive.Clip.ChangeEventDetails
+    ) => dispatch({ type: "change-clip", id, value, details }),
+    [dispatch]
+  );
+  const clipAction = useCallback(
+    (action: ClipAction, id: string) =>
+      dispatch({
+        type: "clip-action",
+        action,
+        id,
+        at: getPosition(),
+        step: splitStep,
+      }),
+    [dispatch, getPosition, splitStep]
+  );
+  const commitClip = useCallback(
+    (id: string, details: TimelinePrimitive.Clip.CommitEventDetails) => {
+      // A clip dropped on another track moves to it: its lane names the track.
+      const track =
+        details.lane instanceof HTMLElement
+          ? details.lane.dataset.track
+          : undefined;
+      dispatch({ type: "commit-clip", id, copy: Boolean(details.copy), track });
+    },
+    [dispatch]
+  );
+  const crop = useCallback(
+    (id: string) => dispatch({ type: "crop-clip", id }),
+    [dispatch]
+  );
+  const duplicateSelection = useCallback(() => {
+    const next = dispatch({ type: "duplicate-selection" });
+    // The copies are the selection the command leaves, in the order it lists them.
+    return (next.selection?.clips ?? []).flatMap((id) =>
+      next.doc.clips.filter((clip) => clip.id === id)
+    );
+  }, [dispatch]);
+  const editClip = useCallback(
+    (id: string, change: (clip: Arranged) => Arranged) =>
+      dispatch({ type: "edit-clip", id, change }),
+    [dispatch]
+  );
+  const removeClip = useCallback(
+    (id: string) => dispatch({ type: "remove-clip", id }),
+    [dispatch]
+  );
+  const renameClip = useCallback(
+    (id: string, name: string) => dispatch({ type: "rename-clip", id, name }),
+    [dispatch]
+  );
+  const setFadeShape = useCallback(
+    (id: string, edge: "in" | "out", shape: FadeShape) =>
+      dispatch({ type: "set-fade-shape", id, edge, shape }),
+    [dispatch]
+  );
+  const settleClipEdit = useCallback(
+    () => dispatch({ type: "settle-clip-edit" }),
+    [dispatch]
+  );
+  const splitAtCursor = useCallback(
+    () =>
+      dispatch({ type: "split-cursor", at: getPosition(), step: splitStep }),
+    [dispatch, getPosition, splitStep]
+  );
   // The timeline fits the width it is given until it is zoomed.
   const viewportRef = useRef<HTMLDivElement>(null);
   const [fitPx, setFitPx] = useState(0);
@@ -741,9 +798,6 @@ export default function BlockTimeline() {
     observer.observe(element);
     return () => observer.disconnect();
   }, [duration]);
-  useLayoutEffect(() => {
-    clockRef.current = clock;
-  }, [clock]);
   const [zoomed, setZoom] = useState<number | null>(null);
   const zoom = Math.max(zoomed ?? fitPx, fitPx) || 8;
   // A change of tempo, or the undo of one, changes the bar: the playhead and the zoom keep their places in it.

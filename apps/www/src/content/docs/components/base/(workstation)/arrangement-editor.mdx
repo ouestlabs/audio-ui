@@ -26,22 +26,26 @@ It installs every part below, with the timeline. Install a part alone by its nam
 ```tsx
 const arrangement = useArrangement({
   duration, // the length of the song in seconds when it starts; a change of tempo scales it
-  getPosition: () => clock.getSnapshot(), // where a split cuts
   initialClips,
   initialLocators, // { at, name }[], in seconds
   initialLoop, // { on, range: [start, end] }
-  initialTracks, // { id, name, color }[]
+  initialTracks, // { id, name, color, mix? }[]
   tempo, // { bpm, beatsPerBar, beatUnit }
 });
 
-arrangement.changeClip; // Timeline.Clip's onValueChange, by id
-arrangement.commitClip; // its onValueCommitted: lands a drag, on another track too
-arrangement.addTrack();
-arrangement.removeTrack(id); // with its clips; any track can go, the last included
-arrangement.undo();
+arrangement.clips; // what the arrangement holds, with tracks, tempo, signatures, locators, loop and duration
+arrangement.dispatch({ type: "add-track" }); // every change is a command; it returns the state after it
+arrangement.dispatch({ type: "undo" });
 ```
 
-It also gives `splitAtCursor`, `duplicateSelection`, `removeClip`, `renameClip`, `setFadeShape` (a fade's curve, as one undo step), `clipAction` (a clip's menu: duplicate, split, switch off, delete), `mixOf` and `changeMix` (gain, pan, mute, solo, color: a track's mix is part of its `ArrangementTrack` as `mix`, so it is undoable, a duplicated track keeps it, and a drag of the gain or the pan is one step that the header's `onMixCommit` closes), `heights` and `resizeTrack`, `renameTrack`, `duplicateTrack(id)` (the track with its clips, placed after it), `folded` and `toggleFold` (a folded track is a strip of `foldedHeight` px that keeps its own height for when it opens), the time commands `clearTimeSelection`, `copyOf`, `paste`, `removeTimeSpan`, `insertTimeSpan` and `consolidateTime` (a time selection is `{ range, tracks }`, and `lib/arrangement-state` holds them as pure functions: `copyTime`, `clearTime`, `pasteTime`, `deleteTime`, `openTime`, `consolidate`), `fadeTimeSelection` and `crossfade` (fades from a time selection, and a fade where two clips meet given to both), and the time. `tempo` keeps the musical positions: every time in the document is scaled to the new bar, a clip three bars long stays three bars long, and it is one undo step, since each step of the history carries its own tempo. The selection and the time are changed by commands, sent with `dispatch`, which returns the state after it. The selection: `select-clip` (`id`, `additive`), `select-clips`, `select-all`, `select-track` (`id`, `additive`), `clear-selection` and `toggle-selected`, and the hook returns what they change: `selectedIds`, `selectedTracks` and `selection`. The time: `set-tempo`, `add-signature`, `set-signature`, `move-signature` and `remove-signature`, `add-locator`, `rename-locator` and `remove-locator`, `set-loop` (`{ on, range }`, either one) and `change-loop`, a drag of the range that is one step once `settle-clip-edit` closes it, and `set-duration`, which changes the song's length without a step of the history. The hook returns what they change: `tempo`, `signatures`, `locators`, `loop` and `duration`. A split leaves no piece shorter than a sixteenth of the bar.
+The state is a plain value and a change is a command of `ArrangementCommand`, which `lib/arrangement-state`'s `apply(state, command)` takes: a pure function, so the arrangement runs, and is tested, with no React. The hook holds the state and returns it with `dispatch`, which returns the state after the command. A command that changes nothing returns the same state and adds no step to the history.
+
+- **Clips**: `add-clip`, `change-clip` (what `Timeline.Clip` reports on a drag, by `id`), `commit-clip` (lands the drag, on another track too), `edit-clip`, `remove-clip`, `rename-clip`, `set-fade-shape` (a fade's curve, as one undo step), `crop-clip`, `clip-action` (a clip's menu: duplicate, split, switch off, delete), `duplicate-selection` and `split-cursor` (`at` and the shortest piece `step` come with the command, since the host knows the playhead). A drag is a burst that `settle-clip-edit` closes into one step.
+- **Selection**: `select-clip` (`id`, `additive`), `select-clips`, `select-all`, `select-track` (`id`, `additive`), `clear-selection` and `toggle-selected`. The hook returns `selectedIds`, `selectedTracks` and `selection`.
+- **Tracks**: `add-track`, `remove-track`, `rename-track`, `duplicate-track` (the track with its clips and its mix, placed after it), `move-track`, `set-mix` (a switch: mute, solo) and `change-mix` (a drag of the gain or the pan, closed by `settle-clip-edit`), and `set-track-color`. A track's mix is its `mix`, so it is undoable; `mixOf(track)` is what a header reads. `heights`, `resizeTrack`, `folded` and `toggleFold` stay in the hook, since they are the view and not the document.
+- **Time**: `clear-time`, `paste`, `remove-time`, `insert-time`, `consolidate-time` and `fade-time` act on a time selection (`{ range, tracks }`), and `copyOf(time)` copies one; `lib/arrangement-state` holds them as pure functions: `copyTime`, `clearTime`, `pasteTime`, `deleteTime`, `openTime`, `consolidate`, with `crossfade` for a fade where two clips meet, given to both.
+- **Tempo, signatures, locators and the loop**: `set-tempo` keeps the musical positions, so every time in the document is scaled to the new bar and a clip three bars long stays three bars long, as one undo step, since each step of the history carries its own tempo. Then `add-signature`, `set-signature`, `move-signature` and `remove-signature`, `add-locator`, `rename-locator` and `remove-locator`, `set-loop` (`{ on, range }`, either one) and `change-loop`, a drag of the range that is one step once `settle-clip-edit` closes it, and `set-duration`, which changes the song's length without a step. The hook returns `tempo`, `signatures`, `locators`, `loop` and `duration`.
+- **History**: `undo` and `redo`, and `canUndo` and `canRedo`.
 
 ## Clips
 
@@ -58,13 +62,36 @@ import { ArrangedClip, ArrangedClipGhost } from "@/components/audio-ui/arranged-
         clip={clip}
         describe={describe}
         key={clip.id}
-        onAction={arrangement.clipAction}
-        onChange={arrangement.changeClip}
-        onCommit={arrangement.commitClip}
-        onFadeShape={arrangement.setFadeShape}
-        onRemove={arrangement.removeClip}
-        onRename={arrangement.renameClip}
-        onSelect={arrangement.selectClip}
+        onAction={(action, id) =>
+          arrangement.dispatch({
+            type: "clip-action",
+            action,
+            id,
+            at: clock.getSnapshot(),
+            step: bar / 4,
+          })
+        }
+        onChange={(id, value, details) =>
+          arrangement.dispatch({ type: "change-clip", id, value, details })
+        }
+        onCommit={(id, details) =>
+          arrangement.dispatch({
+            type: "commit-clip",
+            id,
+            copy: Boolean(details.copy),
+            track: details.lane instanceof HTMLElement ? details.lane.dataset.track : undefined,
+          })
+        }
+        onFadeShape={(id, edge, shape) =>
+          arrangement.dispatch({ type: "set-fade-shape", id, edge, shape })
+        }
+        onRemove={(id) => arrangement.dispatch({ type: "remove-clip", id })}
+        onRename={(id, name) =>
+          arrangement.dispatch({ type: "rename-clip", id, name })
+        }
+        onSelect={(id, additive) =>
+          arrangement.dispatch({ type: "select-clip", id, additive })
+        }
         selected={arrangement.selectedIds.includes(clip.id)}
         swatch={arrangement.mixOf(track).color}
         trackName={track.name}
