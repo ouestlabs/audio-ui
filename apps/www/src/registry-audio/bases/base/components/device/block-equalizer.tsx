@@ -2,10 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import { EqualizerPanel } from "@/registry-audio/bases/base/audio/panels/equalizer-panel";
+import { useDemoSource } from "@/registry-audio/bases/base/hooks/use-demo-source";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 import { usePlaySwitch } from "@/registry-audio/bases/base/hooks/use-play-switch";
 import { useSpectrum } from "@/registry-audio/bases/base/hooks/use-spectrum";
-import { pinkNoise } from "@/registry-audio/bases/base/lib/demo-sound";
+import { renderDemoSource } from "@/registry-audio/bases/base/lib/demo-sound";
 import {
   type EqualizerState,
   equalizerDevice,
@@ -43,37 +44,49 @@ export default function BlockEqualizer() {
   stateRef.current = state;
   const spectrum = useSpectrum(analyser, { maxHz: MAX_HZ, minHz: MIN_HZ });
 
+  const name = useDemoSource("noise");
   useEffect(() => {
     const ctx = webAudio.getContext();
     if (!(playing && ctx && master)) {
       return;
     }
     ctx.resume();
-    const source = ctx.createBufferSource();
-    source.buffer = pinkNoise(ctx);
-    source.loop = true;
-    const level = ctx.createGain();
-    level.gain.value = NOISE_GAIN;
-    const eq = createEqualizerEngine(ctx, stateRef.current);
-    const tap = ctx.createAnalyser();
-    tap.fftSize = FFT_SIZE;
-    tap.smoothingTimeConstant = ANALYSER_SMOOTHING;
-    source.connect(level).connect(eq.input);
-    eq.output.connect(tap);
-    eq.output.connect(master);
-    engine.current = eq;
-    source.start();
-    setAnalyser(tap);
+    let cancelled = false;
+    let stop = () => undefined;
+    renderDemoSource(name, ctx.sampleRate).then((buffer) => {
+      if (cancelled) {
+        return;
+      }
+      const source = ctx.createBufferSource();
+      source.buffer = buffer;
+      source.loop = true;
+      const level = ctx.createGain();
+      level.gain.value = NOISE_GAIN;
+      const eq = createEqualizerEngine(ctx, stateRef.current);
+      const tap = ctx.createAnalyser();
+      tap.fftSize = FFT_SIZE;
+      tap.smoothingTimeConstant = ANALYSER_SMOOTHING;
+      source.connect(level).connect(eq.input);
+      eq.output.connect(tap);
+      eq.output.connect(master);
+      engine.current = eq;
+      source.start();
+      setAnalyser(tap);
+      stop = () => {
+        source.stop();
+        source.disconnect();
+        level.disconnect();
+        tap.disconnect();
+        eq.dispose();
+        engine.current = null;
+        setAnalyser(null);
+      };
+    });
     return () => {
-      source.stop();
-      source.disconnect();
-      level.disconnect();
-      tap.disconnect();
-      eq.dispose();
-      engine.current = null;
-      setAnalyser(null);
+      cancelled = true;
+      stop();
     };
-  }, [master, playing]);
+  }, [master, name, playing]);
 
   // The engine follows the state, whoever changed it: a handle, a knob or a call.
   useEffect(() => {

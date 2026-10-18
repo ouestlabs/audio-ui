@@ -2,8 +2,12 @@
 
 import type { DeviceContext } from "@audio-ui/core/device";
 import { useEffect, useRef, useState } from "react";
+import { useDemoSource } from "@/registry-audio/bases/base/hooks/use-demo-source";
 import { usePlaySwitch } from "@/registry-audio/bases/base/hooks/use-play-switch";
-import { renderDemoLoop } from "@/registry-audio/bases/base/lib/demo-sound";
+import {
+  type DemoSourceName,
+  renderDemoSource,
+} from "@/registry-audio/bases/base/lib/demo-sound";
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 const FFT_SIZE = 4096;
@@ -31,10 +35,10 @@ export interface UseDeviceLoopOptions<State, Engine extends DemoEngine<State>> {
   ) => Engine;
   /** Where the processed sound goes, such as the node of `useMasterBus`. */
   destination: AudioNode | null;
-  /** The signal that goes to the engine's `sidechain` input, when it has one: a loop drawn for the sample rate. It is only listened to, never heard. */
-  key?: (sampleRate: number) => Promise<AudioBuffer>;
-  /** The signal to process, drawn for the sample rate. @default renderDemoLoop */
-  signal?: (sampleRate: number) => Promise<AudioBuffer>;
+  /** The sound that goes to the engine's `sidechain` input, when it has one. It is only listened to, never heard. */
+  key?: DemoSourceName;
+  /** The sound to process, unless the session has another chosen: one of `DEMO_SOURCES`. @default "groove" */
+  source?: DemoSourceName;
   /** The state of the device, followed by the engine whoever changed it. */
   state: State;
 }
@@ -53,10 +57,11 @@ export function useDeviceLoop<State, Engine extends DemoEngine<State>>({
   create,
   destination,
   key,
-  signal = renderDemoLoop,
+  source: wanted = "groove",
   state,
 }: UseDeviceLoopOptions<State, Engine>) {
   const { playing } = usePlaySwitch();
+  const name = useDemoSource(wanted);
   const [engine, setEngine] = useState<Engine | null>(null);
   const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
   const stateRef = useRef(state);
@@ -75,8 +80,8 @@ export function useDeviceLoop<State, Engine extends DemoEngine<State>>({
     let stop = () => undefined;
     ctx.resume();
     Promise.all([
-      signal(ctx.sampleRate),
-      key ? key(ctx.sampleRate) : Promise.resolve(null),
+      renderDemoSource(name, ctx.sampleRate),
+      key ? renderDemoSource(key, ctx.sampleRate) : Promise.resolve(null),
     ]).then(([buffer, keyBuffer]) => {
       if (cancelled) {
         return;
@@ -122,7 +127,7 @@ export function useDeviceLoop<State, Engine extends DemoEngine<State>>({
       setEngine(null);
       setAnalyser(null);
     };
-  }, [destination, key, playing, signal]);
+  }, [destination, key, name, playing]);
 
   // The engine follows the state, whoever changed it: a knob, a handle or a call.
   useEffect(() => {

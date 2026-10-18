@@ -3,6 +3,7 @@
 import { createSource } from "@audio-ui/react";
 import { useEffect, useRef, useState } from "react";
 import { CompressorPanel } from "@/registry-audio/bases/base/audio/panels/compressor-panel";
+import { useDemoSource } from "@/registry-audio/bases/base/hooks/use-demo-source";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 import { usePlaySwitch } from "@/registry-audio/bases/base/hooks/use-play-switch";
 import {
@@ -13,11 +14,7 @@ import {
   type CompressorEngine,
   createCompressorEngine,
 } from "@/registry-audio/bases/base/lib/compressor-engine";
-import {
-  pulses,
-  renderHeldChord,
-  renderKickLoop,
-} from "@/registry-audio/bases/base/lib/demo-sound";
+import { renderDemoSource } from "@/registry-audio/bases/base/lib/demo-sound";
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 const SIGNAL_GAIN = 0.8;
@@ -46,6 +43,7 @@ export default function BlockCompressor() {
 
   // With the key on the pulses give way to a held chord that the kick of a loop ducks: the key is heard by the compressor only.
   const keyed = state.external;
+  const name = useDemoSource(keyed ? "chord" : "pulses");
   useEffect(() => {
     const ctx = webAudio.getContext();
     if (!(playing && ctx && master)) {
@@ -54,12 +52,10 @@ export default function BlockCompressor() {
     ctx.resume();
     let cancelled = false;
     let stop = () => undefined;
-    const buffers = keyed
-      ? Promise.all([
-          renderHeldChord(ctx.sampleRate),
-          renderKickLoop(ctx.sampleRate),
-        ])
-      : Promise.resolve([pulses(ctx, SIGNAL_GAIN), null] as const);
+    const buffers = Promise.all([
+      renderDemoSource(name, ctx.sampleRate),
+      keyed ? renderDemoSource("kick", ctx.sampleRate) : null,
+    ]);
     buffers.then(([signal, key]) => {
       if (cancelled) {
         return;
@@ -71,8 +67,12 @@ export default function BlockCompressor() {
       const compressor = createCompressorEngine(ctx, stateRef.current);
       const tap = ctx.createAnalyser();
       tap.fftSize = FFT_SIZE;
-      source.connect(tap);
-      source.connect(compressor.input);
+      // The pulses are drawn at full scale: the block lowers them to where it has always played them.
+      const gain = ctx.createGain();
+      gain.gain.value = name === "pulses" ? SIGNAL_GAIN : 1;
+      source.connect(gain);
+      gain.connect(tap);
+      gain.connect(compressor.input);
       if (keySource && key) {
         keySource.buffer = key;
         keySource.loop = true;
@@ -104,6 +104,7 @@ export default function BlockCompressor() {
         cancelAnimationFrame(frame);
         source.stop();
         source.disconnect();
+        gain.disconnect();
         keySource?.stop();
         keySource?.disconnect();
         tap.disconnect();
@@ -116,7 +117,7 @@ export default function BlockCompressor() {
       cancelled = true;
       stop();
     };
-  }, [keyed, level, master, playing]);
+  }, [keyed, level, master, name, playing]);
 
   // The engine follows the state, whoever changed it: a knob or a call.
   useEffect(() => {

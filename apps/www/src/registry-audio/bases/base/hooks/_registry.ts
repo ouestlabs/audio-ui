@@ -211,6 +211,23 @@ export const hooks: RegistryItem[] = [
   {
     categories: ["hooks", "audio"],
     description:
+      "The sound a device plays: the one chosen in its session, such as from a preview's bar, else the one that shows best what the device does. It tells the session its default, so a bar can offer the choice only where there is one. Outside a session it is always the default.",
+    files: [
+      {
+        path: "hooks/use-demo-source.ts",
+        type: "registry:hook",
+      },
+    ],
+    name: "use-demo-source",
+    registryDependencies: [
+      "@audio-ui/demo-sound",
+      "@audio-ui/use-audio-session",
+    ],
+    type: "registry:hook",
+  },
+  {
+    categories: ["hooks", "audio"],
+    description:
       "A session of its own for a demo and its controls: a play switch and a microphone switch that nothing outside it follows. Holds no audio, so two previews on a page never play together. Outside a session the switches stay off.",
     files: [
       {
@@ -344,6 +361,7 @@ export const hooks: RegistryItem[] = [
     name: "use-device-loop",
     registryDependencies: [
       "@audio-ui/demo-sound",
+      "@audio-ui/use-demo-source",
       "@audio-ui/use-play-switch",
       "@audio-ui/web-audio",
     ],

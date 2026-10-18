@@ -5,6 +5,7 @@ import { CopyRegistry } from "@/components/code/copy/copy-registry";
 import { MicrophoneSwitch } from "@/components/preview/controls/microphone-switch";
 import { MidiConnect } from "@/components/preview/controls/midi-connect";
 import { PlaySwitch } from "@/components/preview/controls/play-switch";
+import { SourceSelect } from "@/components/preview/controls/source-select";
 import { ExpandPreview } from "@/components/preview/frame/expand-preview";
 import type { PreviewHost } from "@/components/preview/frame/preview-host";
 import { BuiltOn } from "@/components/site/built-on";
@@ -13,6 +14,7 @@ import {
   FrameFooter,
   FrameHeader,
 } from "@/components/site/layout/frame";
+import { ButtonGroup } from "@/components/ui/button-group";
 import { Spinner } from "@/components/ui/spinner";
 import {
   takesMicrophone,
@@ -76,10 +78,10 @@ export function PreviewPanel({
 function PreviewName({ name }: { name: string }) {
   return (
     <div
-      className="flex h-8 select-all items-center gap-1.5 rounded-lg bg-site-background/50 px-2 font-medium text-[10px] text-site-muted-foreground ring ring-border transition-colors hover:bg-site-muted hover:text-site-foreground"
+      className="flex h-8 min-w-0 select-all items-center gap-1.5 rounded-lg bg-site-background/50 px-2 font-medium text-[10px] text-site-muted-foreground ring ring-border transition-colors hover:bg-site-muted hover:text-site-foreground"
       title="Component name"
     >
-      {name}
+      <span className="truncate">{name}</span>
     </div>
   );
 }
@@ -109,7 +111,7 @@ export function PreviewBar({
   return (
     <Bar className="flex-row items-center gap-3 px-2 py-1.5">
       {position === "footer" ? (
-        <div className="flex flex-1 items-center">
+        <div className="flex min-w-0 flex-1 items-center">
           <PreviewName name={name} />
         </div>
       ) : (
@@ -118,7 +120,12 @@ export function PreviewBar({
         </p>
       )}
       <div className="flex items-center gap-1.5">
-        {takesPlay(name) ? <PlaySwitch /> : null}
+        {takesPlay(name) ? (
+          <ButtonGroup>
+            <SourceSelect />
+            <PlaySwitch />
+          </ButtonGroup>
+        ) : null}
         {takesMicrophone(name) ? <MicrophoneSwitch /> : null}
         {takesMidi(name) ? <MidiConnect /> : null}
         {expand?.host ? (

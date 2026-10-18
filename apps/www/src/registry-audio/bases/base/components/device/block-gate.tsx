@@ -5,10 +5,6 @@ import { GatePanel } from "@/registry-audio/bases/base/audio/panels/gate-panel";
 import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 import {
-  renderHeldChord,
-  renderKickLoop,
-} from "@/registry-audio/bases/base/lib/demo-sound";
-import {
   type GateState,
   gateDevice,
 } from "@/registry-audio/bases/base/lib/gate-device";
@@ -40,8 +36,8 @@ export default function BlockGate() {
   useDeviceLoop({
     create: createGateEngine,
     destination: master,
-    key: renderKickLoop,
-    signal: renderHeldChord,
+    key: "kick",
+    source: "chord",
     state,
   });
   return (
