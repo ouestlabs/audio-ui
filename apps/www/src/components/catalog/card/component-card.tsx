@@ -11,6 +11,7 @@ import { useConfigBase } from "@/hooks/use-config";
 import { getPreviewHint } from "@/lib/docs/menu/preview-hint";
 import { isBlock, isExpandable } from "@/lib/registry/catalog/is-block";
 import { getRegistryItemMetadata } from "@/lib/registry/core/registry";
+import { AudioSessionProvider } from "@/registry-audio/bases/base/hooks/use-audio-session";
 
 import {
   ComponentCardContainer,
@@ -44,39 +45,41 @@ export function ComponentCard({
   const isFullWidth = item.meta?.gridSize === 1;
 
   return (
-    <ComponentCardContainer
-      block={isBlock(name)}
-      className={className}
-      footer={
-        <PreviewBar
-          actions={
-            <Sheet>
-              <SheetTrigger
-                render={<Button variant="outline">View code</Button>}
-              />
-              <ComponentSourceSheetContent base={base} name={name} />
-            </Sheet>
-          }
-          badge={
-            process.env.NODE_ENV === "development" ? (
-              <ComponentName name={name} />
-            ) : null
-          }
-          description={item.description}
-          expand={hosted}
-          hint={hint}
-          name={name}
-        />
-      }
-      isFullWidth={isFullWidth}
-    >
-      {isExpandable(name) ? (
-        <HostedPreview host={hosted.host} open={hosted.open}>
+    <AudioSessionProvider>
+      <ComponentCardContainer
+        block={isBlock(name)}
+        className={className}
+        footer={
+          <PreviewBar
+            actions={
+              <Sheet>
+                <SheetTrigger
+                  render={<Button variant="outline">View code</Button>}
+                />
+                <ComponentSourceSheetContent base={base} name={name} />
+              </Sheet>
+            }
+            badge={
+              process.env.NODE_ENV === "development" ? (
+                <ComponentName name={name} />
+              ) : null
+            }
+            description={item.description}
+            expand={hosted}
+            hint={hint}
+            name={name}
+          />
+        }
+        isFullWidth={isFullWidth}
+      >
+        {isExpandable(name) ? (
+          <HostedPreview host={hosted.host} open={hosted.open}>
+            <ComponentRenderer base={base} name={name} />
+          </HostedPreview>
+        ) : (
           <ComponentRenderer base={base} name={name} />
-        </HostedPreview>
-      ) : (
-        <ComponentRenderer base={base} name={name} />
-      )}
-    </ComponentCardContainer>
+        )}
+      </ComponentCardContainer>
+    </AudioSessionProvider>
   );
 }

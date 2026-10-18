@@ -10,26 +10,15 @@ import {
 } from "@/components/ui/tooltip";
 import { useMicrophoneSwitch } from "@/registry-audio/bases/base/hooks/use-microphone";
 
-/** The bars showing the switch: the card's, and the expanded view's while it is open. */
-let bars = 0;
-
 /**
  * Turns the microphone on for a preview from its bar, for the previews that
  * show a signal and can listen to yours. Nothing is recorded or played back,
- * and the microphone is released when the last bar goes, so expanding a
- * preview, or closing it again, does not cut it.
+ * and the microphone is released when the last bar of the session goes, so
+ * expanding a preview, or closing it again, does not cut it.
  */
 export function MicrophoneSwitch() {
-  const { error, on, setOn, toggle } = useMicrophoneSwitch();
-  useEffect(() => {
-    bars += 1;
-    return () => {
-      bars -= 1;
-      if (bars === 0) {
-        setOn(false);
-      }
-    };
-  }, [setOn]);
+  const { attach, error, on, toggle } = useMicrophoneSwitch();
+  useEffect(() => attach(), [attach]);
   const Icon = on ? MicrophoneSlashIcon : MicrophoneIcon;
   return (
     <Tooltip>

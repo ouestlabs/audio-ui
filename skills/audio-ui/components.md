@@ -153,6 +153,7 @@ What makes the sound, on the Web Audio API: install each on its own, to `hooks/`
 | `use-marquee-selection` | `useMarquee` from `@/hooks/use-marquee-selection` | A selection rectangle for the clips of a timeline |
 | `use-audio-signal` | `useAudioSignal` from `@/hooks/use-audio-signal` | An `AnalyserNode` as live signals for a waveform: loudest sample, frequency bands, raw samples |
 | `use-simulated-clock`, `use-simulated-levels`, `use-play-switch` | from `@/hooks/<name>` | A clock, levels and a play switch for a demo that makes no sound |
+| `use-audio-session` | `AudioSessionProvider` from `@/hooks/use-audio-session` | A play switch and a microphone switch of their own for a demo and its controls: inside one, `use-play-switch` and `use-microphone` follow it; outside one they stay off |
 | `use-device-loop`, `use-noise-through-eq`, `use-pulses-through-compressor` | `useDeviceLoop` and the others from `@/hooks/<name>` | A short loop of drums and plucked notes through an effect's engine, pink noise through an equalizer, or pulses through a compressor: what a device does, heard and measured |
 | `audio-decode` | `decodeAudioChannels` from `@/lib/audio-decode` | Decode an audio file into samples before `computePeaks` |
 | `key-detector`, `pink-noise`, `oversampling`, `synced-rate`, `demo-loop`, `device-measure` | from `@/lib/<name>` | The engine pieces of the devices: a key detector worklet, pink noise, oversampled waveshaping, a tempo-synced rate, a demo loop, measuring an engine against its panel |

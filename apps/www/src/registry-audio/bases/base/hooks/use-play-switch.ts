@@ -1,41 +1,26 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
+import {
+  silentPlay,
+  useAudioSession,
+} from "@/registry-audio/bases/base/hooks/use-audio-session";
 
-const listeners = new Set<() => void>();
-let playing = false;
-
-function subscribe(listener: () => void) {
-  listeners.add(listener);
-  return () => {
-    listeners.delete(listener);
-  };
-}
-
-function setPlaying(next: boolean) {
-  if (next === playing) {
-    return;
-  }
-  playing = next;
-  for (const listener of listeners) {
-    listener();
-  }
-}
-
-const getSnapshot = () => playing;
-const getServerSnapshot = () => false;
-const toggle = () => setPlaying(!playing);
+const OFF = { on: false };
 
 /**
- * The page's one play switch: a button anywhere on the page flips it, and
- * every component that reads it follows. It holds no audio, only whether the
- * sound should be on, so a demo can leave its play button to the page.
+ * The play switch of the nearest session: a button in its bar flips it, and
+ * every component inside the session that reads it follows. It holds no
+ * audio, only whether the sound should be on, so a demo can leave its play
+ * button to its host. Outside a session it stays off and does nothing.
  */
 export function usePlaySwitch() {
-  const isPlaying = useSyncExternalStore(
-    subscribe,
-    getSnapshot,
-    getServerSnapshot
-  );
-  return { playing: isPlaying, setPlaying, toggle };
+  const play = useAudioSession()?.play ?? silentPlay;
+  const { on } = useSyncExternalStore(play.subscribe, play.get, () => OFF);
+  return {
+    attach: play.attach,
+    playing: on,
+    setPlaying: play.setOn,
+    toggle: play.toggle,
+  };
 }

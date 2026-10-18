@@ -211,7 +211,21 @@ export const hooks: RegistryItem[] = [
   {
     categories: ["hooks", "audio"],
     description:
-      "The page's play switch: a button anywhere flips it, every component that reads it follows. Holds no audio, so a demo can leave its play button to the page.",
+      "A session of its own for a demo and its controls: a play switch and a microphone switch that nothing outside it follows. Holds no audio, so two previews on a page never play together. Outside a session the switches stay off.",
+    files: [
+      {
+        path: "hooks/use-audio-session.tsx",
+        type: "registry:hook",
+      },
+    ],
+    name: "use-audio-session",
+    registryDependencies: [],
+    type: "registry:hook",
+  },
+  {
+    categories: ["hooks", "audio"],
+    description:
+      "The play switch of the nearest session: a button in its bar flips it, every component inside the session that reads it follows. Holds no audio, so a demo can leave its play button to its host.",
     files: [
       {
         path: "hooks/use-play-switch.ts",
@@ -219,13 +233,13 @@ export const hooks: RegistryItem[] = [
       },
     ],
     name: "use-play-switch",
-    registryDependencies: [],
+    registryDependencies: ["@audio-ui/use-audio-session"],
     type: "registry:hook",
   },
   {
     categories: ["hooks", "audio", "tuner"],
     description:
-      "The microphone as an AnalyserNode on the shared AudioContext: raw signal, never connected to the speakers, released on stop and on unmount. A page switch, usePageMicrophone, lets a button anywhere turn it on for a demo",
+      "The microphone as an AnalyserNode on the shared AudioContext: raw signal, never connected to the speakers, released on stop and on unmount. The session's switch, usePageMicrophone, lets a button turn it on for a demo",
     files: [
       {
         path: "hooks/use-microphone.ts",
@@ -233,7 +247,10 @@ export const hooks: RegistryItem[] = [
       },
     ],
     name: "use-microphone",
-    registryDependencies: ["@audio-ui/web-audio"],
+    registryDependencies: [
+      "@audio-ui/web-audio",
+      "@audio-ui/use-audio-session",
+    ],
     type: "registry:hook",
   },
   {

@@ -14,6 +14,7 @@ import { Frame, FrameContent } from "@/components/site/layout/frame";
 import { Button } from "@/components/ui/button";
 import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
 import { cn } from "@/lib/utils";
+import { AudioSessionProvider } from "@/registry-audio/bases/base/hooks/use-audio-session";
 
 export function ComponentPreviewTabs({
   className,
@@ -70,54 +71,56 @@ export function ComponentPreviewTabs({
   );
 
   return (
-    <Frame
-      className={cn("group mt-4 mb-12", className)}
-      data-slot="component-preview"
-      {...props}
-    >
-      <PreviewBar expand={hosted} hint={hint} name={name} position="header" />
-      {/* The panel is the preview: no container inside it. */}
-      <PreviewPanel
-        block={fitContent}
-        className={previewClassName}
-        data-slot="preview"
-        ref={previewRef}
+    <AudioSessionProvider>
+      <Frame
+        className={cn("group mt-4 mb-12", className)}
+        data-slot="component-preview"
+        {...props}
       >
-        {hasBeenVisible ? shown : <PreviewLoading />}
-      </PreviewPanel>
-      {hideCode ? null : (
-        <FrameContent
-          className="mt-0.5 bg-site-code [&_pre]:max-h-72"
-          data-mobile-code-visible={isCodeExpanded}
-          data-slot="code"
+        <PreviewBar expand={hosted} hint={hint} name={name} position="header" />
+        {/* The panel is the preview: no container inside it. */}
+        <PreviewPanel
+          block={fitContent}
+          className={previewClassName}
+          data-slot="preview"
+          ref={previewRef}
         >
-          {isCodeExpanded ? (
-            source
-          ) : (
-            <div className="relative">
-              {sourcePreview}
-              <div className="absolute inset-0 flex items-end justify-center pb-3">
-                <div
-                  className="absolute inset-0"
-                  style={{
-                    background:
-                      "linear-gradient(to top, var(--color-site-code), color-mix(in oklab, var(--color-site-code) 60%, transparent), transparent)",
-                  }}
-                />
-                <Button
-                  className="relative z-10 bg-site-background text-site-foreground hover:bg-site-muted dark:bg-site-background dark:text-site-foreground dark:hover:bg-site-muted"
-                  onClick={expandCode}
-                  size="sm"
-                  type="button"
-                  variant="outline"
-                >
-                  View Code
-                </Button>
+          {hasBeenVisible ? shown : <PreviewLoading />}
+        </PreviewPanel>
+        {hideCode ? null : (
+          <FrameContent
+            className="mt-0.5 bg-site-code [&_pre]:max-h-72"
+            data-mobile-code-visible={isCodeExpanded}
+            data-slot="code"
+          >
+            {isCodeExpanded ? (
+              source
+            ) : (
+              <div className="relative">
+                {sourcePreview}
+                <div className="absolute inset-0 flex items-end justify-center pb-3">
+                  <div
+                    className="absolute inset-0"
+                    style={{
+                      background:
+                        "linear-gradient(to top, var(--color-site-code), color-mix(in oklab, var(--color-site-code) 60%, transparent), transparent)",
+                    }}
+                  />
+                  <Button
+                    className="relative z-10 bg-site-background text-site-foreground hover:bg-site-muted dark:bg-site-background dark:text-site-foreground dark:hover:bg-site-muted"
+                    onClick={expandCode}
+                    size="sm"
+                    type="button"
+                    variant="outline"
+                  >
+                    View Code
+                  </Button>
+                </div>
               </div>
-            </div>
-          )}
-        </FrameContent>
-      )}
-    </Frame>
+            )}
+          </FrameContent>
+        )}
+      </Frame>
+    </AudioSessionProvider>
   );
 }
