@@ -27,7 +27,8 @@ const ICON_PATH = /icon_(?:small|large): "([^"]+)"/g;
 // An `Intl.NumberFormat` unit the skill suggests, as in `{ style: "unit", unit: "hertz" }`.
 const INTL_UNIT = /unit: "([a-z-]+)"/g;
 const INTL_UNITS = new Set<string>(Intl.supportedValuesOf("unit"));
-const RULE_ID = /`((?:audio|live|values|a11y|core|style|ai)-[a-z0-9-]+)`/g;
+const RULE_ID =
+  /`((?:audio|live|values|a11y|core|design|style|ai)-[a-z0-9-]+)`/g;
 const CORE_ENTRY = /(?<!node_modules\/)@audio-ui\/core\/([a-z0-9-]+)/g;
 // A fenced code block of a markdown file.
 const CODE_FENCE = /```\w*\n([\s\S]*?)```/g;
@@ -36,6 +37,9 @@ const CORE_SPECIFIER = /"@audio-ui\/core\/([a-z-]+)"/g;
 // A row of core.md's export table: the entry, then the names it exports.
 const CORE_EXPORT_ROW = /^\| `@audio-ui\/core(?:\/([a-z-]+))?` \| (.+) \|$/gm;
 const IDENTIFIER = /`([A-Za-z_][A-Za-z0-9_]*)`/g;
+
+// A number in a selector, such as the `.5` of a decimal value.
+const DIGIT_START = /^\d/;
 
 const PACKAGES = new Set(["react", "core"]);
 
@@ -288,4 +292,72 @@ test("core.md's plain DOM knob works", async () => {
   knob.destroy();
   key();
   expect(changes).toBe(1);
+});
+
+describe("skills/audio-ui styles", () => {
+  const STYLES = `${SKILL_DIR}/styles`;
+  const CLASS_NAME = /className="([a-z-]+)"/g;
+  const SELECTOR_CLASS = /\.([a-z][a-z0-9-]*)/g;
+  const SKINS = ["retro", "minimal", "modern", "tape", "phosphor"] as const;
+
+  /** The kit's markup: the code block of directions.md that exports `Panel`. */
+  const readPanel = async () => {
+    const directions = await Bun.file(`${SKILL_DIR}/directions.md`).text();
+    const block = matches(directions, CODE_FENCE).find((code) =>
+      code.includes("export function Panel")
+    );
+    if (!block) {
+      throw new Error("directions.md: the Panel markup is missing");
+    }
+    return block;
+  };
+
+  test("the kit's markup renders and every class has a rule in the styles", async () => {
+    const { renderToString } = await import("react-dom/server");
+    const { createElement } = await import("react");
+    // Rendered from inside the app, where react and the primitives resolve.
+    const copy = `${import.meta.dir}/skill-panel.tmp.tsx`;
+    const source = await readPanel();
+    await Bun.write(copy, source);
+    const panel = await import(copy).finally(() => Bun.file(copy).delete());
+    const html = renderToString(
+      createElement(panel.Panel, { skin: "retro", title: "Kit" })
+    );
+    expect(html).toContain("skin-retro");
+    const sheets = await Promise.all(
+      ["base", ...SKINS].map((name) => Bun.file(`${STYLES}/${name}.css`).text())
+    );
+    const defined = new Set(matches(sheets.join("\n"), SELECTOR_CLASS));
+    const missing = matches(source, CLASS_NAME).filter(
+      (name) => !(defined.has(name) || name.startsWith("skin-"))
+    );
+    expect(missing).toEqual([]);
+  });
+
+  test.each([...SKINS])(
+    "the %s skin styles only classes the markup has",
+    async (skin) => {
+      const css = await Bun.file(`${STYLES}/${skin}.css`).text();
+      const used = new Set(matches(await readPanel(), CLASS_NAME));
+      // Decorative helpers a skin offers for the author to add to the markup.
+      const extras = new Set([
+        "lamp",
+        "legend",
+        "panel",
+        "rocker",
+        "screw",
+        "section",
+      ]);
+      const unknown = matches(css, SELECTOR_CLASS).filter(
+        (name) =>
+          !(
+            used.has(name) ||
+            extras.has(name) ||
+            name.startsWith("skin-") ||
+            DIGIT_START.test(name)
+          )
+      );
+      expect(unknown).toEqual([]);
+    }
+  );
 });

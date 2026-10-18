@@ -1,0 +1,210 @@
+# Directions
+
+Five skins ready to copy, each verified in a browser on the same set of parts: knobs, faders, a stereo meter, an XY pad, drum pads and a keyboard. Copy `styles/base.css` and one skin into the project, then the markup below.
+
+```tsx
+import "./audio-ui/base.css";
+import "./audio-ui/materials.css"; // only for tape.css, phosphor.css or a direction of your own
+import "./audio-ui/retro.css"; // or minimal.css, modern.css, tape.css, phosphor.css
+import { Panel } from "./audio-ui/panel";
+
+<Panel skin="retro" title="Synth" />
+```
+
+## The markup
+
+`panel.tsx`, the verified part tree of every skin (a test renders it in CI). Its class names are the contract with the CSS: keep them, and add your own parts the same way.
+
+```tsx
+import { Fader } from "@audio-ui/react/fader";
+import { Knob } from "@audio-ui/react/knob";
+import { Meter } from "@audio-ui/react/meter";
+import { Pad } from "@audio-ui/react/pad";
+import { Piano } from "@audio-ui/react/piano";
+import { XYPad } from "@audio-ui/react/xypad";
+import { useState } from "react";
+
+// The class names are the contract with styles/base.css and every skin.
+// Keep them, change the skin: a part without its class has no size and draws nothing.
+
+const MARKS = [0, 25, 50, 75, 100];
+const PADS = ["Kick", "Snare", "Hat", "Clap"];
+
+function KnobControl({
+  label,
+  defaultValue,
+}: {
+  label: string;
+  defaultValue: number;
+}) {
+  return (
+    <Knob.Root
+      aria-label={label}
+      className="knob"
+      defaultValue={defaultValue}
+      dragMode="vertical"
+      max={100}
+      min={0}
+    >
+      <Knob.Control className="knob-control">
+        <Knob.Track className="knob-track" />
+        <Knob.Indicator className="knob-indicator" />
+        <Knob.Thumb className="knob-thumb" />
+        {/* Marks go inside the control: they are centred on the dial, not on the label and value below it */}
+        {MARKS.map((value) => (
+          <Knob.Mark className="knob-mark" key={value} value={value}>
+            <span className="knob-tick" />
+          </Knob.Mark>
+        ))}
+      </Knob.Control>
+      <Knob.Label className="knob-label">{label}</Knob.Label>
+      <Knob.Value className="knob-value" />
+    </Knob.Root>
+  );
+}
+
+function FaderControl({ label, defaultValue }: { label: string; defaultValue: number }) {
+  return (
+    <Fader.Root aria-label={label} className="fader" defaultValue={defaultValue} max={100} min={0} orientation="vertical">
+      <Fader.Control className="fader-control">
+        <Fader.Track className="fader-track">
+          <Fader.Indicator className="fader-indicator" />
+        </Fader.Track>
+        <Fader.Thumb className="fader-thumb" />
+      </Fader.Control>
+      <Fader.Label className="knob-label">{label}</Fader.Label>
+      <Fader.Value className="knob-value" />
+    </Fader.Root>
+  );
+}
+
+// A toggle (mute, solo, power) is a plain button: aria-pressed carries the state.
+function ToggleControl({ label }: { label: string }) {
+  const [on, setOn] = useState(false);
+  return (
+    <button aria-pressed={on} className="toggle" onClick={() => setOn(!on)} type="button">
+      {label}
+    </button>
+  );
+}
+
+// `skin` is one of the skins in styles/: the class on the panel selects it.
+export function Panel({
+  skin,
+  title,
+}: {
+  skin: "retro" | "minimal" | "modern" | "tape" | "phosphor";
+  title: string;
+}) {
+  return (
+    <section className={`panel skin-${skin}`}>
+      <h2 className="panel-title">{title}</h2>
+      <div className="panel-row">
+        <KnobControl defaultValue={62} label="Drive" />
+        <KnobControl defaultValue={30} label="Tone" />
+        <FaderControl defaultValue={70} label="Level" />
+        <FaderControl defaultValue={40} label="Pan" />
+        <ToggleControl label="M" />
+        {/* Meter.Channels takes a render function and renders no element itself */}
+        <Meter.Root
+          aria-label="Output"
+          className="meter"
+          max={6}
+          min={-48}
+          peak={[-6, -2]}
+          value={[-14, -4]}
+        >
+          <Meter.Channels>
+            {(index: number) => (
+              <Meter.Channel
+                className="meter-channel"
+                index={index}
+                key={index}
+              >
+                <Meter.Indicator className="meter-indicator" />
+                <Meter.Peak className="meter-peak" />
+              </Meter.Channel>
+            )}
+          </Meter.Channels>
+        </Meter.Root>
+        <XYPad.Root
+          aria-label="Filter"
+         
+          defaultValue={{ x: 60, y: 35 }}
+        >
+          <XYPad.Control className="xypad-control">
+            <XYPad.Thumb className="xypad-thumb" />
+          </XYPad.Control>
+        </XYPad.Root>
+      </div>
+      <div className="panel-row">
+        <Pad.Root aria-label="Drum pads" className="pads" columns={4}>
+          {PADS.map((name) => (
+            <Pad.Item className="pad" key={name} value={name}>
+              {name}
+            </Pad.Item>
+          ))}
+        </Pad.Root>
+        <Piano.Root
+          aria-label="Keys"
+          className="piano"
+          maxPitch={71}
+          minPitch={60}
+        >
+          <Piano.Keys>
+            {(pitch: number) => (
+              <Piano.Key className="piano-key" key={pitch} pitch={pitch} />
+            )}
+          </Piano.Keys>
+        </Piano.Root>
+      </div>
+    </section>
+  );
+}
+```
+
+The skin is the class on the panel (`skin-retro`, `skin-minimal`, `skin-modern`), so every selector is scoped and two skins can sit on one page. The tokens are the custom properties at the top of each skin: change those first.
+
+## Retro: a hardware faceplate
+
+`styles/retro.css`. A warm enamel panel with a fine grain, machined metal caps with a knurled edge and a pointer line, a console fader with a dark cap and a white line, an amber ring of light for the value, lamp-style meter segments in green, amber and red, a CRT-green XY pad, rubber pads that sink when struck, ivory and ebony keys. Decorative pieces (`.screw`, `.lamp`, `.section` with a `.legend`, `.rocker`) are in the same file.
+
+Read [hardware.md](./hardware.md) before composing a retro panel: it explains what makes it look like a real instrument and what makes it look like a 2010 gloss.
+
+## Minimal: hairlines and one accent
+
+`styles/minimal.css`. Paper background, near-black ink, one red-orange accent. A knob is a hairline ring, the value an arc, the pointer a dot. A fader is a hairline and a small square, a meter two thin bars, a pad an outlined square that fills when struck. No shadows, no gradients, no radius beyond 2px. All the work is in spacing, type and the one accent. Needs room: generous gaps (2.5rem) and large margins.
+
+## Modern: flat graphite and a signal color
+
+`styles/modern.css`. Near-black surfaces in three steps, 1px borders, one acid-lime signal. Flat discs and flat caps, hard-edged meter segments, a dot-grid XY pad, a mono uppercase label. No glow, no glass, no gradients, no purple: when a panel starts to look like a landing page, remove effects until the controls read as tools.
+
+## Tape: a lo-fi cassette deck
+
+`styles/tape.css`. Cream plastic caps, a brushed fader plate, orange print, a paper face for the meter and the XY pad. Built only from `materials.css`: it is the proof that a direction is tokens plus a choice of material per part.
+
+## Phosphor: a monochrome terminal
+
+`styles/phosphor.css`. One green on near-black with scanline grain, mono type, bracketed values, square handles, segmented meters. Also built only from `materials.css`.
+
+## Props you will need
+
+| Part | Props and signals |
+| --- | --- |
+| `Knob.Root`, `Fader.Root` | `dragMode` (Knob: `"vertical"` drags up and down like a fader; the default `"circular"` needs a gesture around the dial), `min`, `max`, `step`, `largeStep`, `defaultValue` or `value` with `onValueChange(value, details)`, `onValueCommitted`, `scale="log"`, `anchor`, `formatValue`, `orientation` (Fader) |
+| `Fader.Label`, `Fader.Value`, `Knob.Label`, `Knob.Value` | The name and the formatted value, announced and drawn from the same state. `Intl` has no Hz, ms or dB unit: pass a render function, `<Knob.Value>{(formatted, value) => `${Math.round(value)} Hz`}</Knob.Value>`, and put the unit in `getAriaValueText` on the thumb. `format` and `locale` on the Root set the number format, so set `locale` to keep one decimal mark |
+| `Meter.Root` | `value` and `peak` (one level per channel, in dB) or a live `source` (`createSource` of `{ levels, peaks }`, where `peaks` is optional), `min`, `max`, `clipThreshold`, `warnThreshold`; `data-clipping` and `data-warning` on a channel |
+| `Pad.Root`, `Pad.Item` | `columns`, `value`; `data-active` and `--pad-velocity` while struck |
+| `XYPad.Root` | `defaultValue={{ x, y }}` or `value`, `onValueChange`; `--xy-pad-x` and `--xy-pad-y` |
+
+Focus lands on the input nested in each thumb, so draw the ring on the thumb with `:has(:focus-visible)` (the kit does). The ring takes --focus, then the accent: when the accent is also the value color, set --focus to the ink so the ring does not disappear into the arc. A fader's `.fader-indicator` is the filled part of the slot: show it for a level, hide it (`display: none`) for a hairline or a hardware slot. Every fader and meter takes its length from one variable, --strip-h, set on the panel or on a strip.
+
+## Printed scales
+
+A fader or meter on a real panel has numbers beside it. Draw them as an `ol.scale` next to the control, one `li` per mark, at `style={{ bottom: "<percent>%" }}` of the strip (the percent of the range, 0 at the bottom), with `aria-hidden="true"` because the control already announces its value.
+
+## Making a new direction
+
+Do not start from a blank file: read [taste.md](./taste.md), then compose from `styles/materials.css`.
+
+Copy a skin, rename its scope class, and change in this order: surface colors, the accent, type, then the parts' shapes. Keep one idea per direction ("brushed aluminium and orange", "paper and ink") and apply the rules of the `design-` section. Do not mix the kits' rules: a retro cap on a minimal panel looks like a mistake.

@@ -1,6 +1,6 @@
 # audio/ui
 
-**Version 1.0.0**  
+**Version 1.1.0**  
 audio/ui  
 October 2026
 
@@ -11,7 +11,7 @@ October 2026
 
 ## Abstract
 
-How to build audio interfaces in React with audio/ui, for AI agents and LLMs. Rules across six categories, prioritized by impact from critical (sound that starts, never clicks and stays in time; live data that never re-renders React per frame) to incremental (styling, AI control). Each rule explains what goes wrong, shows the incorrect code an agent tends to write and the correct code with the real audio/ui API.
+How to build audio interfaces in React with audio/ui, for AI agents and LLMs. Rules across eight categories, prioritized by impact from critical (sound that starts, never clicks and stays in time; live data that never re-renders React per frame) to incremental (design directions, styling, AI control). Each rule explains what goes wrong, shows the incorrect code an agent tends to write and the correct code with the real audio/ui API.
 
 ---
 
@@ -37,11 +37,12 @@ How to build audio interfaces in React with audio/ui, for AI agents and LLMs. Ru
    - 2.9 [Spectrum on a Plot](#29-spectrum-on-a-plot)
 3. [Values & Events](#3-values--events): **HIGH**
    - 3.1 [Controlled or uncontrolled, never both](#31-controlled-or-uncontrolled-never-both)
-   - 3.2 [Size step and largeStep to the range](#32-size-step-and-largestep-to-the-range)
-   - 3.3 [Sound on change, persistence on commit](#33-sound-on-change-persistence-on-commit)
-   - 3.4 [Logarithmic scales for frequency](#34-logarithmic-scales-for-frequency)
-   - 3.5 [Rejecting a change](#35-rejecting-a-change)
-   - 3.6 [Anchors for bipolar controls](#36-anchors-for-bipolar-controls)
+   - 3.2 [Set dragMode="vertical" on knobs](#32-set-dragmodevertical-on-knobs)
+   - 3.3 [Size step and largeStep to the range](#33-size-step-and-largestep-to-the-range)
+   - 3.4 [Sound on change, persistence on commit](#34-sound-on-change-persistence-on-commit)
+   - 3.5 [Logarithmic scales for frequency](#35-logarithmic-scales-for-frequency)
+   - 3.6 [Rejecting a change](#36-rejecting-a-change)
+   - 3.7 [Anchors for bipolar controls](#37-anchors-for-bipolar-controls)
 4. [Accessibility](#4-accessibility): **HIGH**
    - 4.1 [Accessible names](#41-accessible-names)
    - 4.2 [Keep the focusable part](#42-keep-the-focusable-part)
@@ -54,19 +55,27 @@ How to build audio interfaces in React with audio/ui, for AI agents and LLMs. Ru
    - 5.5 [Prepare the pointer before pressing the controller](#55-prepare-the-pointer-before-pressing-the-controller)
    - 5.6 [Import public entries, never internal](#56-import-public-entries-never-internal)
    - 5.7 [Tear down what you attach](#57-tear-down-what-you-attach)
-6. [Styling](#6-styling): **MEDIUM**
-   - 6.1 [Headless primitives: style by state](#61-headless-primitives-style-by-state)
-   - 6.2 [Registry components: props before className](#62-registry-components-props-before-classname)
-   - 6.3 [Semantic tokens only](#63-semantic-tokens-only)
-   - 6.4 [Never edit the package](#64-never-edit-the-package)
-7. [AI Control](#7-ai-control): **MEDIUM**
-   - 7.1 [Keep the person in charge](#71-keep-the-person-in-charge)
-   - 7.2 [Schemas come from the instance](#72-schemas-come-from-the-instance)
-   - 7.3 [Tools edit state, not the DOM](#73-tools-edit-state-not-the-dom)
-   - 7.4 [A device is a state and a description, not a widget with audio inside](#74-a-device-is-a-state-and-a-description-not-a-widget-with-audio-inside)
-   - 7.5 [apply is pure and re-clamps](#75-apply-is-pure-and-re-clamps)
-   - 7.6 [Give the model the current state](#76-give-the-model-the-current-state)
-   - 7.7 [Wiring: AI SDK, Anthropic or OpenAI SDKs, MCP](#77-wiring-ai-sdk-anthropic-or-openai-sdks-mcp)
+6. [Design](#6-design): **HIGH**
+   - 6.1 [Draw meter zones on the channel](#61-draw-meter-zones-on-the-channel)
+   - 6.2 [Give every part its structure before its skin](#62-give-every-part-its-structure-before-its-skin)
+   - 6.3 [One light source, a few materials](#63-one-light-source-a-few-materials)
+   - 6.4 [Pick a visual direction first](#64-pick-a-visual-direction-first)
+   - 6.5 [Print labels and scales on the panel](#65-print-labels-and-scales-on-the-panel)
+   - 6.6 [Show state with the parts' attributes, not only on hover](#66-show-state-with-the-parts-attributes-not-only-on-hover)
+   - 6.7 [Size and group controls by importance](#67-size-and-group-controls-by-importance)
+7. [Styling](#7-styling): **MEDIUM**
+   - 7.1 [Headless primitives: style by state](#71-headless-primitives-style-by-state)
+   - 7.2 [Registry components: props before className](#72-registry-components-props-before-classname)
+   - 7.3 [Semantic tokens only](#73-semantic-tokens-only)
+   - 7.4 [Never edit the package](#74-never-edit-the-package)
+8. [AI Control](#8-ai-control): **MEDIUM**
+   - 8.1 [Keep the person in charge](#81-keep-the-person-in-charge)
+   - 8.2 [Schemas come from the instance](#82-schemas-come-from-the-instance)
+   - 8.3 [Tools edit state, not the DOM](#83-tools-edit-state-not-the-dom)
+   - 8.4 [A device is a state and a description, not a widget with audio inside](#84-a-device-is-a-state-and-a-description-not-a-widget-with-audio-inside)
+   - 8.5 [apply is pure and re-clamps](#85-apply-is-pure-and-re-clamps)
+   - 8.6 [Give the model the current state](#86-give-the-model-the-current-state)
+   - 8.7 [Wiring: AI SDK, Anthropic or OpenAI SDKs, MCP](#87-wiring-ai-sdk-anthropic-or-openai-sdks-mcp)
 
 ---
 
@@ -463,6 +472,8 @@ const levels = useAudioLevels(analysers);
 
 For stereo, split the signal with a `ChannelSplitterNode` and connect each output to its own `AnalyserNode`. The hook's source also carries each channel's held peak, and publishes nothing while the signal is silent.
 
+A mono source through a `ChannelSplitterNode` leaves the second analyser at zero. Up-mix first: give the node feeding the splitter `channelCount: 2` with `channelCountMode: "explicit"`, so both bars move.
+
 ### 2.5 One MIDI input for the page, connected from a click
 
 **Impact: HIGH (a MIDI keyboard that plays every instrument, with no stuck notes)**
@@ -684,7 +695,33 @@ A control either owns its value (`defaultValue`) or follows yours (`value` + `on
 
 `defaultValue` is still useful on a controlled Knob: it is the double-tap reset target.
 
-### 3.2 Size step and largeStep to the range
+### 3.2 Set dragMode="vertical" on knobs
+
+**Impact: HIGH (a knob that follows the hand)**
+
+A knob defaults to `dragMode="circular"`: the value follows the pointer's angle around the center, which asks for a circular gesture and jumps when the press lands off to one side. On a mouse and on a phone, people drag a knob up and down, like a fader. Set `dragMode="vertical"` on every `Knob.Root` unless the dial is large and the circular gesture is the point (`"revolution"` spans a full turn per range). The wheel and the keyboard work in every mode.
+
+**Incorrect (the default circular drag on a small knob):**
+
+```tsx
+<Knob.Root aria-label="Cutoff" defaultValue={50}>
+  <Knob.Control>
+    <Knob.Thumb />
+  </Knob.Control>
+</Knob.Root>
+```
+
+**Correct (up and down, like a fader):**
+
+```tsx
+<Knob.Root aria-label="Cutoff" defaultValue={50} dragMode="vertical">
+  <Knob.Control>
+    <Knob.Thumb />
+  </Knob.Control>
+</Knob.Root>
+```
+
+### 3.3 Size step and largeStep to the range
 
 **Impact: HIGH (a 0 to 1 control gets a hundred positions instead of two)**
 
@@ -707,7 +744,7 @@ A control either owns its value (`defaultValue`) or follows yours (`value` + `on
 
 With `scale="log"` the keys and the wheel move a share of the travel instead (1%, or 10% with Shift and the Page keys), so `largeStep` matters only on linear scales.
 
-### 3.3 Sound on change, persistence on commit
+### 3.4 Sound on change, persistence on commit
 
 **Impact: HIGH (one write per gesture instead of hundreds)**
 
@@ -755,7 +792,7 @@ const saveTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 />
 ```
 
-### 3.4 Logarithmic scales for frequency
+### 3.5 Logarithmic scales for frequency
 
 **Impact: MEDIUM (usable travel across the audible range)**
 
@@ -775,7 +812,7 @@ Hearing is logarithmic. On a linear 20 Hz to 20 kHz knob, the whole musical rang
 
 `scale="log"` needs a positive `min`. Use it for frequency, Q and ratios. Level in dB is already logarithmic: keep it linear in dB.
 
-### 3.5 Rejecting a change
+### 3.6 Rejecting a change
 
 **Impact: MEDIUM (the control and its announced value stay in sync)**
 
@@ -804,7 +841,7 @@ To refuse a value (a locked track, a value an app rule forbids), cancel the chan
 
 `eventDetails.reason` says what caused the change (`"drag"`, `"keyboard"`, `"wheel"`, `"reset"`, `"input-change"`), and on a piano roll `eventDetails.edit` says what was edited.
 
-### 3.6 Anchors for bipolar controls
+### 3.7 Anchors for bipolar controls
 
 **Impact: LOW (the center reads as the center)**
 
@@ -1138,13 +1175,208 @@ In Vue, call the removers in `onScopeDispose`; in Svelte, return them from `$eff
 
 ---
 
-## 6. Styling
+## 6. Design
+
+**Impact: HIGH**
+
+Making the headless primitives look like something: one visual direction (retro hardware, minimal, modern), the structure each part needs, and the habits that make a panel read as an instrument.
+
+### 6.1 Draw meter zones on the channel
+
+**Impact: HIGH (green, amber and red stay where the levels are)**
+
+`Meter.Indicator` is a full-height bar scaled to the level. A gradient painted on it is squeezed with it, so the red zone slides down the bar as the level falls and shows at a third of the range. Paint the zones on the channel, dimmed, and let the indicator light them back up where it reaches (`mix-blend-mode: color-dodge`). A mask on the channel cuts the bar into lamps, and it must be on the channel too, since a mask on the indicator would squeeze as well. A flat direction (minimal, modern) needs no zones: one bar color, and a second only on `data-clipping`.
+
+**Incorrect (the gradient shrinks with the bar):**
+
+```css
+.meter-indicator {
+  background: linear-gradient(0deg, green 0 60%, orange 60% 85%, red 85%);
+  background-size: 100% 9.5rem;
+}
+```
+
+**Correct (zones on the channel, the indicator lights them):**
+
+```css
+.meter-channel {
+  isolation: isolate;
+  background: linear-gradient(rgb(0 0 0 / 0.72), rgb(0 0 0 / 0.72)),
+    linear-gradient(0deg, green 0 60%, orange 60% 85%, red 85%);
+  mask: repeating-linear-gradient(0deg, #000 0 4px, transparent 4px 6px);
+}
+.meter-indicator {
+  background: rgb(184 184 184);
+  mix-blend-mode: color-dodge;
+}
+```
+
+### 6.2 Give every part its structure before its skin
+
+**Impact: HIGH (parts that render at the right size and position)**
+
+A headless part has no size. A `Knob.Control` without a width collapses to nothing, a `Fader.Track` without a height is invisible, and a `Meter.Channels` renders no element at all. Start from `styles/base.css` (the structure of every part), then add a skin on top. The parts also set inline styles you cannot override from a class: never set `position`, `bottom`, `left`, `translate` or `rotate` on `Fader.Thumb`, `Knob.Thumb`, `XYPad.Thumb` or a `Meter.Indicator`.
+
+**Incorrect (a track with no height, a thumb placed by hand):**
+
+```css
+.fader-track { width: 6px; background: #222; }
+.fader-thumb { position: absolute; bottom: 40%; }
+```
+
+**Correct (structure sized by you, position left to the part):**
+
+```css
+.fader-control { position: relative; width: 2.75rem; height: 9.5rem; }
+.fader-track { width: 6px; height: 100%; margin-inline: auto; overflow: hidden; }
+.fader-indicator { position: absolute; }
+.fader-thumb { position: absolute; width: 2rem; height: 1rem; }
+```
+
+Meter channels need a flex `Meter.Root` with a height, and `Meter.Channels` takes a render function: `{(index) => <Meter.Channel index={index}>...</Meter.Channel>}`.
+
+### 6.3 One light source, a few materials
+
+**Impact: HIGH (depth that reads as real instead of as decoration)**
+
+A skeuomorphic panel is believable when every highlight and shadow agrees on one light, usually above and to the left. Highlights sit on the top edge, shadows fall down, an inset control is lit from the bottom. Limit the panel to four or five materials (enamel, metal, plastic, rubber, glass), each with its own highlight: metal has sharp streaks, plastic one broad soft spot, rubber almost none, glass a small bright reflection.
+
+**Incorrect (shadows in every direction, glow on everything):**
+
+```css
+.knob-thumb {
+  background: radial-gradient(circle at 70% 70%, #fff, #888);
+  box-shadow: 0 0 20px #0ff, -6px -6px 12px #fff, 6px 6px 12px #000;
+}
+```
+
+**Correct (light from the top left, a short hard shadow, glow only on lamps):**
+
+```css
+.knob-thumb {
+  background: radial-gradient(circle at 32% 26%, #f4f1ea, #9c978c 55%, #55524b);
+  box-shadow:
+    0 6px 8px rgb(0 0 0 / 0.55),
+    inset 0 1px 0 rgb(255 255 255 / 0.5),
+    inset 0 -2px 3px rgb(0 0 0 / 0.35);
+}
+```
+
+### 6.4 Pick a visual direction first
+
+**Impact: HIGH (one coherent look instead of a mix of styles)**
+
+The primitives of `@audio-ui/react` draw nothing, so the look is yours to decide, and an agent that starts writing CSS without deciding produces a little of everything: a gradient here, a glass card there, a neon accent. Choose one direction, say it in a sentence, then style every part from it.
+
+Three are ready to use (copy `styles/base.css` and one skin from the skill's `directions.md`): **retro** (a hardware faceplate), **minimal** (hairlines and one accent), **modern** (flat graphite and one signal color). Take the one the user names. When they name none, pick from the product: a synth, drum machine or compressor is retro, a tool or a player is minimal, a dense workstation is modern.
+
+**Incorrect (no direction, a bit of every trend):**
+
+```css
+.knob-thumb {
+  background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+  box-shadow: 0 0 24px #8b5cf6;
+  backdrop-filter: blur(12px);
+  border-radius: 50%;
+}
+```
+
+**Correct (one direction, one set of materials and one accent):**
+
+```tsx
+// Direction: retro hardware. Matte enamel panel, machined metal caps, amber lamp.
+<section className="panel skin-retro">
+  <Knob.Root aria-label="Drive" className="knob" defaultValue={62}>
+    ...
+  </Knob.Root>
+</section>
+```
+
+### 6.5 Print labels and scales on the panel
+
+**Impact: HIGH (a panel that reads as an instrument, and is legible)**
+
+On real hardware every control is named and graduated by ink printed on the panel, not by a tooltip. Use small uppercase labels with wide tracking in one ink color, tabular numbers for values, ticks at the marks (`Knob.Mark` with a `.knob-tick`) and a section title that sits on a line around a group. Keep contrast legible: dim ink is for secondary text, never for the value you are reading.
+
+**Incorrect (a mixed-case label in a default font, no scale):**
+
+```css
+.knob-label { font-size: 14px; font-weight: 400; }
+```
+
+**Correct (silkscreen type, tabular value, printed marks):**
+
+```css
+.knob-label {
+  font: 700 0.6rem/1 "Arial Narrow", Arial, sans-serif;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+.knob-value { font-variant-numeric: tabular-nums; }
+.knob-tick { background: currentColor; height: 5px; }
+```
+
+### 6.6 Show state with the parts' attributes, not only on hover
+
+**Impact: HIGH (controls that answer touch, keyboard and sound)**
+
+A control must answer the hand: a grabbed knob, a struck pad, a clipping meter. The parts expose it as `data-dragging`, `data-active`, `data-clipping`, `data-warning` and `data-disabled`, plus `--pad-velocity` on a pad. Draw those, and a visible `:focus-visible` ring. Hover does not exist on touch, and motion alone is not feedback: pair it with a color or a position change. Keep transitions under 120ms on a hit, and animate only the properties that change.
+
+**Incorrect (hover only, a transition on everything):**
+
+```css
+.pad { transition: all 0.4s ease; }
+.pad:hover { background: orange; }
+```
+
+**Correct (the struck state, scaled by velocity, with a short transition):**
+
+```css
+.pad { transition: background 60ms linear, transform 60ms linear; }
+.pad[data-active] {
+  transform: translateY(2px);
+  background: color-mix(in oklab, var(--accent) calc(40% + var(--pad-velocity, 0.6) * 60%), var(--surface));
+}
+.pad:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+```
+
+### 6.7 Size and group controls by importance
+
+**Impact: HIGH (a panel you can scan, not a grid of identical knobs)**
+
+A grid of twelve identical knobs reads as a spreadsheet. On a real panel the controls that matter are larger, related ones sit together in a labelled section, and the sections follow the signal: input, source, filter, amplifier, output. Use at most three knob sizes (the --knob-size variable of the kit, set on the control), one section per job, and keep a destructive or master control apart from the rest. In a mixer the same holds for strips: the master is wider and set apart by a hairline, the channels are equal.
+
+**Incorrect (twelve equal knobs in one grid):**
+
+```tsx
+<div className="grid grid-cols-6 gap-4">
+  {PARAMS.map((p) => <KnobControl key={p.id} {...p} />)}
+</div>
+```
+
+**Correct (sections in signal order, the master larger):**
+
+```tsx
+<div className="panel-row">
+  <div className="section"><span className="legend">Filter</span>
+    <KnobControl label="Cutoff" />
+    <KnobControl label="Resonance" />
+  </div>
+  <div className="section"><span className="legend">Output</span>
+    <KnobControl label="Level" style={{ "--knob-size": "6rem" }} />
+  </div>
+</div>
+```
+
+---
+
+## 7. Styling
 
 **Impact: MEDIUM**
 
 Styling the registry components through their props and tokens, and the headless primitives through their state.
 
-### 6.1 Headless primitives: style by state
+### 7.1 Headless primitives: style by state
 
 **Impact: MEDIUM (state styles without extra renders)**
 
@@ -1196,7 +1428,7 @@ import { Knob } from "@audio-ui/react/knob"; // one entry per primitive keeps th
 </Knob.Root>
 ```
 
-### 6.2 Registry components: props before className
+### 7.2 Registry components: props before className
 
 **Impact: MEDIUM (keeps proportions and theme)**
 
@@ -1221,7 +1453,7 @@ import { Knob } from "@/components/audio-ui/knob";
 
 `className` is for layout around the component (grid placement, margins). If a look needs a change the props don't offer, edit the copied file: it belongs to the project.
 
-### 6.3 Semantic tokens only
+### 7.3 Semantic tokens only
 
 **Impact: MEDIUM (themes and dark mode keep working)**
 
@@ -1241,7 +1473,7 @@ import { Knob } from "@/components/audio-ui/knob";
 </div>
 ```
 
-### 6.4 Never edit the package
+### 7.4 Never edit the package
 
 **Impact: LOW (upgrades keep working)**
 
@@ -1266,13 +1498,13 @@ npx shadcn@latest add @audio-ui/knob   # then edit components/audio-ui/knob.tsx:
 
 ---
 
-## 7. AI Control
+## 8. AI Control
 
 **Impact: MEDIUM**
 
 Letting a model operate the components through typed tools that edit the same state a person does.
 
-### 7.1 Keep the person in charge
+### 8.1 Keep the person in charge
 
 **Impact: HIGH (no unattended recording, no loud playback, edits stay undoable)**
 
@@ -1336,7 +1568,7 @@ The history lives in a ref and is updated from the handler, never from inside a 
 
 Starting the microphone, recording, uploading and starting playback stay behind a button the person presses.
 
-### 7.2 Schemas come from the instance
+### 8.2 Schemas come from the instance
 
 **Impact: HIGH (rejects hallucinated instruments and out-of-range steps)**
 
@@ -1375,7 +1607,7 @@ const tools = createPianoRollTools({ minPitch: 36, maxPitch: 72, stepCount: 32 }
 // state: { bpm, notes: { id, pitch, start, length, velocity }[] }, start/length in grid steps
 ```
 
-### 7.3 Tools edit state, not the DOM
+### 8.3 Tools edit state, not the DOM
 
 **Impact: HIGH (UI, audio and undo never fall out of sync)**
 
@@ -1423,7 +1655,7 @@ const applyTool = (name: string, input: unknown) => {
 
 The state lives in the browser, so this function does too. How a call from a server-side model reaches it is the rule `ai-structured-tool-calls`.
 
-### 7.4 A device is a state and a description, not a widget with audio inside
+### 8.4 A device is a state and a description, not a widget with audio inside
 
 **Impact: MEDIUM (an effect a host can plug into its engine and an agent can drive, without rewriting it)**
 
@@ -1477,7 +1709,7 @@ A time parameter that follows the tempo is a `choice` of `SYNCED_DIVISIONS` from
 
 A device that listens to a second signal (a gate opened by a kick) declares `sidechain: true` in `defineDevice`, and its engine has a `sidechain` input to connect the key to (`SidechainBinding`). The key is a signal, never a parameter: the state holds only the switch that says to listen to it, and an agent can switch it on but the host routes the signal.
 
-### 7.5 apply is pure and re-clamps
+### 8.5 apply is pure and re-clamps
 
 **Impact: MEDIUM (every tool call yields a valid state)**
 
@@ -1500,7 +1732,7 @@ apply: (state, { notes }) => ({
 
 Pure reducers are testable without a model: test them like any function.
 
-### 7.6 Give the model the current state
+### 8.6 Give the model the current state
 
 **Impact: MEDIUM (relative edits land on the right notes and values)**
 
@@ -1534,7 +1766,7 @@ const result = await generateText({
 
 For large states, expose a read tool (`getNotes`, `getMix`) instead of inlining everything.
 
-### 7.7 Wiring: AI SDK, Anthropic or OpenAI SDKs, MCP
+### 8.7 Wiring: AI SDK, Anthropic or OpenAI SDKs, MCP
 
 **Impact: MEDIUM (validated arguments instead of parsed prose, run where the state lives)**
 

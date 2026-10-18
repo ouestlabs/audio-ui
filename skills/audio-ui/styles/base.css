@@ -1,0 +1,209 @@
+/* Structure: what each part needs to exist, whatever the skin. Copy first, then add one skin.
+   --strip-h sets the length of every fader and meter at once. */
+.knob {
+  position: relative;
+  display: inline-grid;
+  gap: 0.5rem;
+  justify-items: center;
+}
+.knob-control {
+  position: relative;
+  width: var(--knob-size, 4.5rem);
+  aspect-ratio: 1;
+}
+.knob-track,
+.knob-indicator {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.knob-thumb {
+  position: absolute;
+  inset: var(--knob-cap, 0);
+  pointer-events: none;
+}
+.knob-mark {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.knob-tick {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 1px;
+  height: 6px;
+  background: currentColor;
+  translate: -50% 0;
+}
+
+.fader {
+  display: inline-grid;
+  gap: 0.5rem;
+  justify-items: center;
+}
+.fader-control {
+  position: relative;
+  width: 2.75rem;
+  height: var(--strip-h, 9.5rem);
+}
+.fader-track {
+  width: var(--fader-track, 0.375rem);
+  height: 100%;
+  margin-inline: auto;
+  overflow: hidden;
+}
+.fader-indicator {
+  position: absolute;
+}
+.fader-thumb {
+  position: absolute;
+  width: var(--fader-thumb-w, 2rem);
+  height: var(--fader-thumb-h, 1rem);
+}
+
+.meter {
+  display: flex;
+  gap: 3px;
+  height: var(--strip-h, 9.5rem);
+}
+.meter-channel {
+  position: relative;
+  width: var(--meter-w, 0.625rem);
+  height: 100%;
+  overflow: hidden;
+}
+.meter-indicator {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+.meter-peak {
+  position: absolute;
+  right: 0;
+  left: 0;
+  height: 2px;
+}
+
+.xypad-control {
+  position: relative;
+  width: 9.5rem;
+  height: 9.5rem;
+  overflow: hidden;
+}
+.xypad-thumb {
+  position: absolute;
+  width: 1rem;
+  height: 1rem;
+}
+
+.pads {
+  display: grid;
+  grid-template-columns: repeat(4, 4rem);
+  gap: 0.5rem;
+}
+.pad {
+  display: flex;
+  align-items: flex-end;
+  aspect-ratio: 1;
+  padding: 0.4rem;
+  font: 600 0.65rem / 1 system-ui;
+  cursor: pointer;
+}
+
+.piano {
+  position: relative;
+  display: block;
+  width: 14rem;
+  height: 5.5rem;
+}
+.piano-key {
+  position: absolute;
+  top: 0;
+}
+.piano-key[data-color="white"] {
+  height: 100%;
+}
+.piano-key[data-color="black"] {
+  z-index: 1;
+  height: 60%;
+}
+
+/* Layout of the example panel: a skin may override any of it */
+.panel {
+  padding: 1.75rem;
+  border-radius: 1rem;
+}
+.panel-title {
+  margin: 0 0 1rem;
+}
+.panel-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.75rem;
+  align-items: flex-end;
+}
+.panel-row + .panel-row {
+  align-items: flex-start;
+  margin-top: 1.75rem;
+}
+
+/* Hit areas and focus: the nested input of a thumb takes the focus, so the thumb shows the ring */
+.fader-thumb::before,
+.xypad-thumb::before {
+  position: absolute;
+  inset: -0.5rem;
+  content: "";
+}
+.fader-thumb:has(:focus-visible),
+.knob-thumb:has(:focus-visible),
+.xypad-thumb:has(:focus-visible),
+.toggle:focus-visible {
+  outline: 2px solid var(--focus, var(--accent, currentColor));
+  outline-offset: 2px;
+}
+
+/* A toggle (mute, solo, power) is a plain button with aria-pressed: a skin draws both states */
+.toggle {
+  display: inline-grid;
+  place-items: center;
+  min-width: 2rem;
+  min-height: 2rem;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+}
+
+/* A section groups related controls under a title cut into its line (a skin may restyle both) */
+.section {
+  position: relative;
+  padding: 1.1rem 1rem 0.9rem;
+  border: 1px solid color-mix(in oklab, currentColor 35%, transparent);
+}
+.section > .legend {
+  position: absolute;
+  top: 0;
+  left: 0.75rem;
+  padding: 0 0.4rem;
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  background: var(--panel, canvas);
+  translate: 0 -50%;
+}
+
+/* A printed scale beside a fader or meter: set each label's position with style={{ bottom: "<percent>%" }} */
+.scale {
+  position: relative;
+  height: var(--strip-h, 9.5rem);
+  font-size: 0.55rem;
+  font-variant-numeric: tabular-nums;
+}
+.scale > li {
+  position: absolute;
+  list-style: none;
+  translate: 0 50%;
+}

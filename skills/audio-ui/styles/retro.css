@@ -1,0 +1,373 @@
+/* RETRO: a hardware faceplate. One light, top left. Materials: enamel, brass, rubber, glass. */
+.skin-retro {
+  --panel: #2a2420;
+  --panel-hi: #3a322b;
+  --ink: #e9dcc0;
+  --ink-dim: #a89a80;
+  --metal-1: #f4f1ea;
+  --metal-2: #9c978c;
+  --metal-3: #55524b;
+  --amber: #ffb028;
+  --red: #e5432c;
+  --green: #7fd04a;
+  font-family: "Helvetica Neue", "Arial Narrow", Arial, sans-serif;
+  color: var(--ink);
+  background:
+    repeating-linear-gradient(
+      90deg,
+      rgb(255 255 255 / 0.018) 0 1px,
+      transparent 1px 3px
+    ),
+    linear-gradient(180deg, var(--panel-hi), var(--panel));
+  border: 1px solid #120f0d;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.12),
+    inset 0 -2px 0 rgb(0 0 0 / 0.4),
+    0 10px 30px rgb(0 0 0 / 0.5);
+}
+.skin-retro .panel-title {
+  font:
+    700 0.7rem / 1 "Arial Narrow",
+    Arial,
+    sans-serif;
+  color: var(--amber);
+  text-transform: uppercase;
+  letter-spacing: 0.32em;
+}
+
+/* Knob: a machined cap on a skirt, with a printed scale around it */
+.skin-retro .knob-control {
+  --knob-cap: 14%;
+  color: var(--ink-dim);
+}
+.skin-retro .knob-track {
+  color: rgb(0 0 0 / 0.55);
+}
+.skin-retro .knob-indicator {
+  color: var(--amber);
+  filter: drop-shadow(0 0 3px rgb(255 176 40 / 0.7));
+}
+.skin-retro .knob-thumb {
+  background:
+    repeating-conic-gradient(
+      from 0deg,
+      rgb(255 255 255 / 0.1) 0 3deg,
+      rgb(0 0 0 / 0.12) 3deg 6deg
+    ),
+    radial-gradient(
+      circle at 32% 26%,
+      var(--metal-1),
+      var(--metal-2) 55%,
+      var(--metal-3)
+    );
+  border-radius: 50%;
+  box-shadow:
+    0 6px 8px rgb(0 0 0 / 0.55),
+    0 1px 0 rgb(255 255 255 / 0.5) inset,
+    0 -2px 3px rgb(0 0 0 / 0.35) inset,
+    0 0 0 3px #1a1613,
+    0 0 0 4px rgb(255 255 255 / 0.08);
+}
+.skin-retro .knob-thumb::after {
+  position: absolute;
+  top: 9%;
+  left: 50%;
+  width: 3px;
+  height: 30%;
+  content: "";
+  background: #1a1613;
+  border-radius: 2px;
+  box-shadow: 0 1px 0 rgb(255 255 255 / 0.4);
+  translate: -50% 0;
+}
+.skin-retro .knob-control[data-dragging] .knob-thumb {
+  filter: brightness(1.08);
+}
+.skin-retro .knob-label,
+.skin-retro .knob-value {
+  font:
+    700 0.6rem / 1 "Arial Narrow",
+    Arial,
+    sans-serif;
+  color: var(--ink-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+}
+.skin-retro .knob-value {
+  font-variant-numeric: tabular-nums;
+  color: var(--amber);
+}
+.skin-retro .knob-tick {
+  top: -9px;
+  height: 5px;
+  background: var(--ink-dim);
+}
+
+/* Fader: a console fader. Slot in a recessed plate, scale ticks either side, a dark cap with a white line */
+.skin-retro {
+  --fader-track: 0.25rem;
+  --fader-thumb-w: 2.25rem;
+  --fader-thumb-h: 2.75rem;
+}
+.skin-retro .fader-control {
+  width: 3.5rem;
+  height: 10.5rem;
+}
+.skin-retro .fader-control::before,
+.skin-retro .fader-control::after {
+  position: absolute;
+  top: calc(var(--fader-thumb-h) / 2);
+  bottom: calc(var(--fader-thumb-h) / 2);
+  width: 0.35rem;
+  pointer-events: none;
+  content: "";
+  background: repeating-linear-gradient(
+    180deg,
+    var(--ink-dim) 0 1px,
+    transparent 1px calc(100% / 10)
+  );
+}
+.skin-retro .fader-control::before {
+  left: 0;
+}
+.skin-retro .fader-control::after {
+  right: 0;
+}
+.skin-retro .fader-track {
+  background: #060504;
+  border-radius: 2px;
+  box-shadow:
+    inset 0 1px 3px #000,
+    0 0 0 3px #17120f,
+    0 1px 0 3px rgb(255 255 255 / 0.1);
+}
+.skin-retro .fader-indicator {
+  display: none;
+}
+.skin-retro .fader-thumb {
+  background:
+    linear-gradient(
+      180deg,
+      transparent calc(50% - 1px),
+      #f4f1ea calc(50% - 1px) calc(50% + 1px),
+      transparent calc(50% + 1px)
+    ),
+    repeating-linear-gradient(
+      180deg,
+      transparent 0 4px,
+      rgb(0 0 0 / 0.5) 4px 5px
+    )
+    0 0 / 100% calc(50% - 3px) no-repeat,
+    linear-gradient(180deg, #5a5650, #2b2926 12%, #1b1a18 55%, #0f0e0d);
+  border-radius: 3px;
+  box-shadow:
+    0 6px 8px rgb(0 0 0 / 0.65),
+    inset 0 1px 0 rgb(255 255 255 / 0.35),
+    inset 1px 0 0 rgb(255 255 255 / 0.08),
+    inset -1px 0 0 rgb(0 0 0 / 0.6);
+}
+.skin-retro .fader-control[data-dragging] .fader-thumb {
+  filter: brightness(1.25);
+}
+
+/* Meter: lamps behind glass, in zones */
+.skin-retro {
+  --meter-w: 0.75rem;
+}
+.skin-retro .meter {
+  box-sizing: border-box;
+  height: calc(var(--strip-h, 9.5rem) + 10px);
+  padding: 5px;
+  background: #0a0807;
+  border-radius: 4px;
+  box-shadow:
+    inset 0 2px 5px #000,
+    0 1px 0 rgb(255 255 255 / 0.12);
+}
+.skin-retro .meter-channel {
+  background: var(--zones-dim), var(--zones);
+  border-radius: 1px;
+  isolation: isolate;
+  -webkit-mask: var(--segments);
+  mask: var(--segments);
+}
+/* The indicator is a full-height bar scaled to the level, so paint nothing on it that must keep its size:
+   the zones live on the channel, dimmed, and the indicator lights them back up where it reaches */
+.skin-retro .meter-indicator {
+  background: var(--zones-lit);
+  mix-blend-mode: color-dodge;
+}
+.skin-retro .meter-peak {
+  height: 3px;
+  background: var(--ink);
+}
+
+/* XY pad: a CRT-green scope */
+.skin-retro .xypad-control {
+  background: radial-gradient(circle at 50% 40%, #12331c, #06120a 75%), #06120a;
+  background-image:
+    linear-gradient(rgb(120 255 150 / 0.09) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(120 255 150 / 0.09) 1px, transparent 1px);
+  background-size: 25% 25%;
+  border-radius: 6px;
+  box-shadow:
+    inset 0 0 22px #000,
+    inset 0 0 0 2px #1a1613,
+    0 1px 0 rgb(255 255 255 / 0.14);
+}
+.skin-retro .xypad-thumb {
+  background: #9dffb2;
+  border-radius: 50%;
+  box-shadow: 0 0 12px 3px rgb(120 255 150 / 0.7);
+}
+
+/* Pads: rubber, lit by the velocity of the hit */
+.skin-retro .pad {
+  color: var(--ink-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  background: linear-gradient(180deg, #4a423a, #2d2722);
+  border-radius: 8px;
+  box-shadow:
+    0 3px 0 #0f0c0a,
+    0 5px 8px rgb(0 0 0 / 0.5),
+    inset 0 1px 0 rgb(255 255 255 / 0.18);
+}
+.skin-retro .pad[data-active] {
+  color: var(--amber);
+  background: radial-gradient(
+    circle at 50% 40%,
+    rgb(255 176 40 / calc(0.25 + var(--pad-velocity, 0.6) * 0.5)),
+    #2d2722 80%
+  );
+  box-shadow:
+    0 1px 0 #0f0c0a,
+    inset 0 2px 6px rgb(0 0 0 / 0.6);
+  transform: translateY(2px);
+}
+
+/* Keys: ivory and ebony */
+.skin-retro .piano {
+  padding-top: 4px;
+  background: #0d0b0a;
+  border-radius: 4px;
+  box-shadow:
+    0 0 0 3px #3a322b,
+    0 8px 14px rgb(0 0 0 / 0.5);
+}
+.skin-retro .piano-key[data-color="white"] {
+  background: linear-gradient(180deg, #fffdf6, #e6dfcc);
+  border: 1px solid #1a1613;
+  border-radius: 0 0 3px 3px;
+  box-shadow: inset 0 -5px 4px rgb(0 0 0 / 0.14);
+}
+.skin-retro .piano-key[data-color="black"] {
+  background: linear-gradient(180deg, #2e2a27, #050403);
+  border-radius: 0 0 3px 3px;
+  box-shadow:
+    0 3px 4px rgb(0 0 0 / 0.6),
+    inset 0 -3px 2px rgb(255 255 255 / 0.12);
+}
+.skin-retro .piano-key[data-active] {
+  filter: brightness(0.82) sepia(0.4);
+}
+
+/* Hardware details: decorative, so aria-hidden and pointer-events none */
+.skin-retro .screw {
+  position: absolute;
+  width: 0.7rem;
+  height: 0.7rem;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      45deg,
+      transparent 45%,
+      rgb(0 0 0 / 0.55) 45% 55%,
+      transparent 55%
+    ),
+    radial-gradient(circle at 35% 30%, #d8d4ca, #6f6b62);
+  border-radius: 50%;
+  box-shadow:
+    0 1px 1px rgb(0 0 0 / 0.6),
+    inset 0 0 0 1px rgb(0 0 0 / 0.25);
+}
+.skin-retro .screw:nth-child(2) {
+  rotate: 70deg;
+}
+.skin-retro .lamp {
+  width: 0.75rem;
+  height: 0.75rem;
+  background: radial-gradient(circle at 35% 30%, #5a3a10, #2a1a08);
+  border-radius: 50%;
+  box-shadow:
+    inset 0 1px 2px #000,
+    0 0 0 2px #17120f,
+    0 1px 0 2px rgb(255 255 255 / 0.12);
+}
+.skin-retro .lamp[data-on] {
+  background: radial-gradient(
+    circle at 35% 30%,
+    #fff3c4,
+    var(--amber) 45%,
+    #b8680a
+  );
+  box-shadow:
+    0 0 0 2px #17120f,
+    0 0 8px 2px rgb(255 176 40 / 0.65),
+    inset 0 -1px 2px rgb(0 0 0 / 0.3);
+}
+.skin-retro .section {
+  position: relative;
+  padding: 1.1rem 1rem 0.9rem;
+  border: 1px solid rgb(233 220 192 / 0.35);
+  border-radius: 3px;
+}
+.skin-retro .section > .legend {
+  position: absolute;
+  top: 0;
+  left: 0.75rem;
+  padding: 0 0.4rem;
+  font:
+    700 0.6rem / 1 "Arial Narrow",
+    Arial,
+    sans-serif;
+  color: var(--ink);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  background: var(--panel);
+  translate: 0 -50%;
+}
+.skin-retro .rocker {
+  width: 1.5rem;
+  height: 2.4rem;
+  background: linear-gradient(180deg, #f2efe6 0 48%, #9c978c 52%);
+  border-radius: 3px;
+  box-shadow:
+    0 0 0 3px #17120f,
+    0 4px 5px rgb(0 0 0 / 0.6),
+    inset 0 1px 0 #fff;
+}
+
+/* Toggle: a rocker-style key that sinks and lights when on */
+.skin-retro .toggle {
+  font:
+    700 0.65rem / 1 "Arial Narrow",
+    Arial,
+    sans-serif;
+  color: var(--ink-dim);
+  letter-spacing: 0.12em;
+  background: linear-gradient(180deg, #4a423a, #2d2722);
+  border-radius: 4px;
+  box-shadow:
+    0 3px 0 #0f0c0a,
+    0 5px 6px rgb(0 0 0 / 0.5),
+    inset 0 1px 0 rgb(255 255 255 / 0.18);
+}
+.skin-retro .toggle[aria-pressed="true"] {
+  color: var(--amber);
+  box-shadow:
+    0 1px 0 #0f0c0a,
+    inset 0 2px 6px rgb(0 0 0 / 0.6),
+    0 0 8px rgb(255 176 40 / 0.35);
+  transform: translateY(2px);
+}

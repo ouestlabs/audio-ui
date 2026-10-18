@@ -1,0 +1,206 @@
+/* MODERN: flat instrument UI. Graphite, hairline borders, one signal colour, tabular type. No glow, no gradients. */
+.skin-modern {
+  --bg: #161616;
+  --surface: #202020;
+  --raised: #2a2a2a;
+  --line: #3a3a3a;
+  --ink: #ededed;
+  --ink-dim: #858585;
+  --signal: #d7ff3a;
+  --clip: #ff4a3d;
+  padding: 1.5rem;
+  font-family: "Inter", system-ui, sans-serif;
+  color: var(--ink);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+.skin-modern .panel-title {
+  font:
+    600 0.7rem / 1 ui-monospace,
+    "SF Mono",
+    monospace;
+  color: var(--ink-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* Knob: a dark disc, a flat arc, a square-ended pointer */
+.skin-modern .knob-control {
+  --knob-cap: 18%;
+}
+.skin-modern .knob-track {
+  color: var(--line);
+}
+.skin-modern .knob-indicator {
+  color: var(--signal);
+}
+.skin-modern .knob-thumb {
+  background: var(--raised);
+  border: 1px solid var(--line);
+  border-radius: 50%;
+}
+.skin-modern .knob-thumb::after {
+  position: absolute;
+  top: 6%;
+  left: 50%;
+  width: 2px;
+  height: 30%;
+  content: "";
+  background: var(--ink);
+  translate: -50% 0;
+}
+.skin-modern .knob-control[data-dragging] .knob-thumb::after {
+  background: var(--signal);
+}
+.skin-modern .knob-label {
+  font:
+    500 0.65rem / 1 ui-monospace,
+    "SF Mono",
+    monospace;
+  color: var(--ink-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.skin-modern .knob-value {
+  font:
+    500 0.8rem / 1 ui-monospace,
+    "SF Mono",
+    monospace;
+  font-variant-numeric: tabular-nums;
+}
+.skin-modern .knob-tick {
+  display: none;
+}
+
+/* Fader: a flat channel, a rectangular cap with one signal line */
+.skin-modern {
+  --fader-track: 4px;
+  --fader-thumb-w: 1.75rem;
+  --fader-thumb-h: 2.25rem;
+}
+.skin-modern .fader-track {
+  box-sizing: border-box;
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+.skin-modern .fader-indicator {
+  width: 100%;
+  background: var(--signal);
+}
+.skin-modern .fader-thumb {
+  box-sizing: border-box;
+  background: var(--raised);
+  background-image: linear-gradient(var(--ink), var(--ink));
+  background-repeat: no-repeat;
+  background-position: 0 50%;
+  background-size: 100% 2px;
+  border: 1px solid var(--ink-dim);
+  border-radius: 2px;
+}
+.skin-modern .fader-control[data-dragging] .fader-thumb {
+  background-image: linear-gradient(var(--signal), var(--signal));
+  border-color: var(--signal);
+}
+
+/* Meter: hard segments, signal colour, one red cell at the top */
+.skin-modern {
+  --meter-w: 0.5rem;
+}
+.skin-modern .meter {
+  gap: 3px;
+}
+.skin-modern .meter-channel {
+  background: var(--surface);
+  -webkit-mask: repeating-linear-gradient(
+    0deg,
+    #000 0 4px,
+    transparent 4px 6px
+  );
+  mask: repeating-linear-gradient(0deg, #000 0 4px, transparent 4px 6px);
+}
+.skin-modern .meter-indicator {
+  background: var(--signal);
+}
+.skin-modern .meter-channel[data-clipping] .meter-indicator {
+  background: var(--clip);
+}
+.skin-modern .meter-peak {
+  height: 2px;
+  background: var(--ink);
+}
+
+/* XY pad: a dot grid, a crosshair, a square handle */
+.skin-modern .xypad-control {
+  background:
+    radial-gradient(circle, var(--line) 1px, transparent 1.5px) 0 0 / 1.25rem
+    1.25rem,
+    var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+}
+.skin-modern .xypad-thumb {
+  width: 14px;
+  height: 14px;
+  background: var(--signal);
+  border-radius: 1px;
+}
+
+/* Pads: flat tiles, filled solid at the strength of the hit */
+.skin-modern .pad {
+  font:
+    500 0.65rem / 1 ui-monospace,
+    "SF Mono",
+    monospace;
+  color: var(--ink-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  transition: background 60ms;
+}
+.skin-modern .pad[data-active] {
+  color: var(--bg);
+  background: color-mix(
+    in oklab,
+    var(--signal) calc(40% + var(--pad-velocity, 0.6) * 60%),
+    var(--surface)
+  );
+  border-color: var(--signal);
+}
+
+/* Keys: flat */
+.skin-modern .piano {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+}
+.skin-modern .piano-key[data-color="white"] {
+  background: var(--ink);
+  border-right: 1px solid var(--line);
+}
+.skin-modern .piano-key[data-color="black"] {
+  background: var(--bg);
+  border: 1px solid var(--line);
+}
+.skin-modern .piano-key[data-active] {
+  background: var(--signal);
+}
+
+.skin-modern .toggle {
+  font:
+    500 0.65rem / 1 ui-monospace,
+    "SF Mono",
+    monospace;
+  color: var(--ink-dim);
+  letter-spacing: 0.06em;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+}
+.skin-modern .toggle[aria-pressed="true"] {
+  color: var(--bg);
+  background: var(--signal);
+  border-color: var(--signal);
+}

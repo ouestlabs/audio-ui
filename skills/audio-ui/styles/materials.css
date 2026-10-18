@@ -1,0 +1,113 @@
+/*
+ * Materials: the vocabulary every direction is made of.
+ *
+ * A direction is tokens plus a choice of material per part. Set the tokens on the
+ * panel (`.skin-<name>`), pick a material per part with `background: var(--metal)`
+ * and `box-shadow: var(--metal-edge)`. Nothing here draws a part by itself.
+ *
+ * Tokens a direction sets:
+ *   --panel        the surface everything sits on
+ *   --ink          printed text and marks
+ *   --accent       the one signal color (value arcs, lamps, selection)
+ *   --hi / --lo    the light and the dark of the surface material (a pair per direction)
+ *   --hl-x --hl-y  where the light comes from, in %, one for the whole panel (default top left)
+ *   --lift         how far a raised part sits from the panel, in px (0 = flat)
+ */
+.panel {
+  --hl-x: 32%;
+  --hl-y: 26%;
+  --lift: 6;
+  --hi: #f4f1ea;
+  --lo: #55524b;
+  --mid: color-mix(in oklab, var(--hi) 50%, var(--lo));
+
+  /* Light: a highlight on the top edge, a shadow under a raised part */
+  --shadow-raised:
+    0 calc(var(--lift) * 1px) calc(var(--lift) * 1.3px) rgb(0 0 0 / 0.5),
+    inset 0 1px 0 rgb(255 255 255 / 0.45), inset 0 -2px 3px rgb(0 0 0 / 0.3);
+  --shadow-flat: 0 1px 0 rgb(0 0 0 / 0.35);
+  --shadow-sunk:
+    inset 0 2px 4px rgb(0 0 0 / 0.85), 0 1px 0 rgb(255 255 255 / 0.12);
+
+  /* Metal: sharp light at the light source, a dark rim, a knurled edge */
+  --metal:
+    repeating-conic-gradient(
+      from 0deg,
+      rgb(255 255 255 / 0.1) 0 3deg,
+      rgb(0 0 0 / 0.12) 3deg 6deg
+    ),
+    radial-gradient(
+      circle at var(--hl-x) var(--hl-y),
+      var(--hi),
+      var(--mid) 55%,
+      var(--lo)
+    );
+  /* Brushed: straight streaks, for a rectangular cap or a plate */
+  --brushed:
+    repeating-linear-gradient(
+      90deg,
+      rgb(255 255 255 / 0.05) 0 1px,
+      rgb(0 0 0 / 0.04) 1px 2px
+    ),
+    linear-gradient(180deg, var(--hi), var(--mid) 55%, var(--lo));
+  /* Plastic: one broad soft highlight, no streaks */
+  --plastic:
+    radial-gradient(
+      ellipse at var(--hl-x) var(--hl-y),
+      color-mix(in oklab, var(--hi) 70%, transparent),
+      transparent 60%
+    ),
+    linear-gradient(180deg, var(--mid), var(--lo));
+  /* Rubber: matte, almost no highlight */
+  --rubber: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--mid) 85%, black),
+    var(--lo)
+  );
+  /* Enamel: the panel itself, with a fine grain */
+  --enamel:
+    repeating-linear-gradient(
+      90deg,
+      rgb(255 255 255 / 0.018) 0 1px,
+      transparent 1px 3px
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--panel) 88%, white),
+      var(--panel)
+    );
+  /* Groove: a slot or recess the part runs in */
+  --groove: color-mix(in oklab, var(--panel) 15%, black);
+  /* Glass: a dark screen with a faint reflection */
+  --glass:
+    linear-gradient(160deg, rgb(255 255 255 / 0.07), transparent 40%),
+    color-mix(in oklab, var(--accent) 8%, black);
+  /* Paper: a printed scale, for a VU face or a legend plate */
+  --paper: radial-gradient(ellipse at 50% 30%, #f6edd0, #d9cb9a);
+
+  /* Lamp: a dim lens when off, a bright core with a small halo when on */
+  --lens-off: radial-gradient(
+    circle at 35% 30%,
+    color-mix(in oklab, var(--accent) 25%, black),
+    color-mix(in oklab, var(--accent) 8%, black)
+  );
+  --lens-on: radial-gradient(
+    circle at 35% 30%,
+    color-mix(in oklab, var(--accent) 30%, white),
+    var(--accent) 45%,
+    color-mix(in oklab, var(--accent) 60%, black)
+  );
+  --lens-halo: 0 0 8px 2px color-mix(in oklab, var(--accent) 65%, transparent);
+
+  /* Segments: mask the channel into lamps. Zones: paint them on the channel, dimmed, and let the
+     indicator light them back up (see the meter of tape.css). */
+  --segments: repeating-linear-gradient(0deg, #000 0 4px, transparent 4px 6px);
+  --zones-dim: linear-gradient(rgb(0 0 0 / 0.72), rgb(0 0 0 / 0.72));
+  --zones-lit: rgb(184 184 184);
+  --zones: linear-gradient(
+    0deg,
+    var(--ok, #7fd04a) 0 60%,
+    var(--warn, #ffb028) 60% 85%,
+    var(--clip, #e5432c) 85% 100%
+  );
+}
