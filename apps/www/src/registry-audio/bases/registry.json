@@ -19,7 +19,7 @@
       "name": "knob"
     },
     {
-      "count": 3,
+      "count": 4,
       "description": "Decibel meter components for monitoring stereo and multi-channel audio levels.",
       "label": "Meter",
       "name": "meter"
@@ -151,5 +151,5 @@
       "name": "xypad"
     }
   ],
-  "totalComponents": 58
+  "totalComponents": 59
 }

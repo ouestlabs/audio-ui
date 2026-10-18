@@ -322,6 +322,22 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["meter"],
+    description: "Needle meter example",
+    files: [
+      {
+        path: "components/meter/needle-meter-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "needle-meter-demo",
+    registryDependencies: [
+      "@audio-ui/needle-meter",
+      "@audio-ui/use-simulated-levels",
+    ],
+    type: "registry:example",
+  },
+  {
+    categories: ["meter"],
     description: "Horizontal meter example",
     files: [
       {
