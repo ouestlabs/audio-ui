@@ -5,6 +5,8 @@ export interface Shape {
   backdrop?: true;
   /** A detail inside a solid shape: the fill weight cuts it out of the shape. */
   knock?: true;
+  /** A closed shape that sits on a line: the line stops short of it, so no stroke crosses its outline. Implies tint. */
+  over?: true;
   tag: "circle" | "path" | "rect";
   /** A closed shape that takes the tint of the duotone weight and is solid in the fill weight. */
   tint?: true;
@@ -16,12 +18,14 @@ export type Glyph = readonly Shape[];
 interface Options {
   backdrop?: true;
   knock?: true;
+  over?: true;
   tint?: true;
 }
 
 export const path = (d: string, options: Options = {}): Shape => ({
   attrs: { d },
   tag: "path",
+  ...(options.over ? { tint: true } : {}),
   ...options,
 });
 
@@ -30,7 +34,12 @@ export const circle = (
   cy: number,
   r: number,
   options: Options = {}
-): Shape => ({ attrs: { cx, cy, r }, tag: "circle", ...options });
+): Shape => ({
+  attrs: { cx, cy, r },
+  tag: "circle",
+  ...(options.over ? { tint: true } : {}),
+  ...options,
+});
 
 export const rect = (
   x: number,
@@ -39,4 +48,9 @@ export const rect = (
   height: number,
   rx: number,
   options: Options = {}
-): Shape => ({ attrs: { height, rx, width, x, y }, tag: "rect", ...options });
+): Shape => ({
+  attrs: { height, rx, width, x, y },
+  tag: "rect",
+  ...(options.over ? { tint: true } : {}),
+  ...options,
+});

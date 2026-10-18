@@ -83,6 +83,18 @@ describe("icons", () => {
     expect(line).not.toContain("<mask");
   });
 
+  test("a shape that sits on a line clears it, and is tinted or solid like any body", () => {
+    const regular = renderToStaticMarkup(<icons.PlotIcon />);
+    expect(regular).toContain("<mask");
+    expect(regular).not.toContain('fill="currentColor"');
+    expect(renderToStaticMarkup(<icons.PlotIcon weight="duotone" />)).toContain(
+      'fill-opacity="0.2"'
+    );
+    const filled = renderToStaticMarkup(<icons.PlotIcon weight="fill" />);
+    expect(filled).toContain('fill="currentColor"');
+    expect(filled).toContain('stroke-width="1.5"');
+  });
+
   test("every knock detail of a solid glyph has a body to be cut from", () => {
     for (const item of catalog) {
       const glyph = icons.glyphs[item.glyph];

@@ -12,11 +12,14 @@ export const knob: Glyph = [
   path("M12 8h.01", { knock: true }),
 ];
 
-/** Clips on tracks. */
+/** Tracks: a header for each, and the clips on them. */
 export const tracks: Glyph = [
-  rect(3, 5, 10, 3.5, 1.5, { tint: true }),
-  rect(8, 10.25, 13, 3.5, 1.5, { tint: true }),
-  rect(5, 15.5, 9, 3.5, 1.5, { tint: true }),
+  rect(3, 3.5, 3.5, 3.5, 1, { tint: true }),
+  rect(9, 3.5, 8, 3.5, 1.5, { tint: true }),
+  rect(3, 10.25, 3.5, 3.5, 1, { tint: true }),
+  rect(11, 10.25, 10, 3.5, 1.5, { tint: true }),
+  rect(3, 17, 3.5, 3.5, 1, { tint: true }),
+  rect(9, 17, 6, 3.5, 1.5, { tint: true }),
 ];
 
 /** A unit of a rack, with its indicator. */
@@ -162,7 +165,7 @@ export const scope: Glyph = [
 /** A curve with the point you drag on it. */
 export const plot: Glyph = [
   path("M2 17c4 0 5-11 9-11s5 11 11 11"),
-  circle(11, 6, 2, { tint: true }),
+  circle(11, 6, 2, { over: true }),
 ];
 
 /** Transport. */
@@ -190,7 +193,7 @@ export const speaker: Glyph = [
   path("M12 7h.01", { knock: true }),
 ];
 export const headphones: Glyph = [
-  path("M4 15v-3a8 8 0 0 1 16 0v3"),
+  path("M4 14v-2a8 8 0 0 1 16 0v2"),
   rect(3, 14, 4, 6, 1.5, { tint: true }),
   rect(17, 14, 4, 6, 1.5, { tint: true }),
 ];
@@ -201,16 +204,16 @@ export const midi: Glyph = [
 
 /** A row of steps, two of them lit. */
 export const sequencer: Glyph = [
-  rect(3, 8, 3, 8, 1, { tint: true }),
-  rect(8, 8, 3, 8, 1),
-  rect(13, 8, 3, 8, 1, { tint: true }),
-  rect(18, 8, 3, 8, 1),
+  rect(3, 8, 4, 8, 1, { tint: true }),
+  rect(10.5, 8, 4, 8, 1),
+  rect(18, 8, 4, 8, 1, { tint: true }),
 ];
-/** Notes of a melody, rising. */
+/** A piano roll: its keys, and the notes beside them. */
 export const pianoroll: Glyph = [
-  rect(3, 15, 6, 3.5, 1.5, { tint: true }),
-  rect(9, 10, 6, 3.5, 1.5, { tint: true }),
-  rect(15, 5, 6, 3.5, 1.5, { tint: true }),
+  rect(3, 4, 5, 16, 1.5, { tint: true }),
+  path("M3 9.3h5M3 14.7h5", { knock: true }),
+  rect(11.5, 6, 5, 3.5, 1.5, { tint: true }),
+  rect(14.5, 13.5, 6.5, 3.5, 1.5, { tint: true }),
 ];
 
 /** The curve of a compressor: the level it lets through. */
@@ -245,6 +248,8 @@ export const solo: Glyph = [
 export const stereo: Glyph = [
   circle(8.5, 12, 6, { tint: true }),
   circle(15.5, 12, 6, { tint: true }),
+  circle(8.5, 12, 6, { knock: true }),
+  circle(15.5, 12, 6, { knock: true }),
 ];
 
 /** A cassette: two reels in a case. */

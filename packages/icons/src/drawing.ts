@@ -26,8 +26,13 @@ const hasBody = (glyph: Glyph) =>
  * weight is the glyph's closed shapes, solid, with its knock details cut out
  * through a mask: `id` names the mask.
  */
-export function draw(glyph: Glyph, weight: IconWeight, id: string) {
-  if (weight === "fill" && hasBody(glyph)) {
+function drawShapes(
+  glyph: Glyph,
+  weight: IconWeight,
+  id: string,
+  whole: Glyph = glyph
+) {
+  if (weight === "fill" && hasBody(whole)) {
     const solid = glyph
       .filter((shape) => shape.tint || shape.backdrop)
       .map((shape) =>
@@ -82,5 +87,57 @@ export function draw(glyph: Glyph, weight: IconWeight, id: string) {
   return {
     nodes,
     strokeWidth: weight === "fill" ? STROKE_WIDTH.bold : STROKE_WIDTH[weight],
+  };
+}
+
+/** The air left between a shape that sits on a line and the line that stops short of it. */
+const GAP = 1.25;
+
+/**
+ * What a glyph draws in a weight, and the stroke it is drawn with. The shapes
+ * that sit on a line are drawn over it, and the line is masked out around
+ * them: in every weight, no stroke crosses their outline.
+ */
+export function draw(glyph: Glyph, weight: IconWeight, id: string) {
+  const overs = glyph.filter((shape) => shape.over);
+  if (overs.length === 0) {
+    return drawShapes(glyph, weight, id);
+  }
+  const rest = drawShapes(
+    glyph.filter((shape) => !shape.over),
+    weight,
+    id,
+    glyph
+  );
+  const above = drawShapes(overs, weight, `${id}-over`, glyph);
+  const maskId = `${id}-clear`;
+  const clear = node(
+    "mask",
+    {
+      height: 24,
+      id: maskId,
+      maskUnits: "userSpaceOnUse",
+      width: 24,
+      x: 0,
+      y: 0,
+    },
+    [
+      node("rect", { fill: "white", height: 24, stroke: "none", width: 24 }),
+      ...overs.map((shape) =>
+        of(shape, {
+          fill: "black",
+          stroke: "black",
+          strokeWidth: rest.strokeWidth + 2 * GAP,
+        })
+      ),
+    ]
+  );
+  return {
+    nodes: [
+      clear,
+      node("g", { mask: `url(#${maskId})` }, rest.nodes),
+      ...above.nodes,
+    ],
+    strokeWidth: rest.strokeWidth,
   };
 }
