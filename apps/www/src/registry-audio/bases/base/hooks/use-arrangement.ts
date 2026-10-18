@@ -164,7 +164,6 @@ export function useArrangement({
         value: TimelinePrimitive.Clip.Value,
         details: TimelinePrimitive.Clip.ChangeEventDetails
       ) => dispatch({ type: "change-clip", id, value, details }),
-      clearSelection: () => dispatch({ type: "clear-selection" }),
       clearTimeSelection: (time: TimeSelection) =>
         dispatch({ type: "clear-time", time }),
       clipAction: (action: ClipAction, id: string) =>
@@ -215,7 +214,6 @@ export function useArrangement({
       paste: (clipping: Clipping, at: number, track: string) =>
         dispatch({ type: "paste", clipping, at, track }),
       redo: () => dispatch({ type: "redo" }),
-      releaseClips: () => dispatch({ type: "release-clips" }),
       removeClip: (id: string) => dispatch({ type: "remove-clip", id }),
       removeTimeSpan: (from: number, to: number) =>
         dispatch({ type: "remove-time", from, to }),
@@ -224,18 +222,11 @@ export function useArrangement({
         dispatch({ type: "rename-clip", id, name }),
       renameTrack: (id: string, name: string) =>
         dispatch({ type: "rename-track", id, name }),
-      selectAll: () => dispatch({ type: "select-all" }),
-      selectClip: (id: string, additive: boolean) =>
-        dispatch({ type: "select-clip", id, additive }),
-      selectClips: (ids: string[]) => dispatch({ type: "select-clips", ids }),
-      selectTrack: (id: string, additive = false) =>
-        dispatch({ type: "select-track", id, additive }),
       setFadeShape: (id: string, edge: "in" | "out", shape: FadeShape) =>
         dispatch({ type: "set-fade-shape", id, edge, shape }),
       settleClipEdit: () => dispatch({ type: "settle-clip-edit" }),
       splitAtCursor: () =>
         dispatch({ type: "split-cursor", at: getPosition(), step: splitStep }),
-      toggleSelected: () => dispatch({ type: "toggle-selected" }),
       undo: () => dispatch({ type: "undo" }),
     }),
     [dispatch, getPosition, splitStep]
