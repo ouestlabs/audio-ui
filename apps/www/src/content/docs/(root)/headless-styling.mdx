@@ -1,0 +1,145 @@
+---
+title: Headless styling
+description: "How to style the primitives of @audio-ui/react with nothing but CSS: each part exposes its state as data attributes and its live values as CSS variables, and the reference below lists them for every primitive."
+---
+
+The primitives paint nothing: no colour, no size, no theme. What a part looks like comes from your CSS, and the part gives that CSS everything it needs: its state as attributes, and what changes too often to be an attribute as a variable. A skin needs no React state of its own.
+
+## Style from the state
+
+A part carries its state on the element. A knob that is being dragged has `data-dragging`, a disabled fader `data-disabled`, a fader a `data-orientation`. Select on them:
+
+```css
+.my-knob [data-dragging] {
+  box-shadow: 0 0 0 4px color-mix(in oklab, currentColor 20%, transparent);
+}
+
+.my-knob [data-disabled] {
+  opacity: 0.4;
+}
+```
+
+A boolean that is off has no attribute, so the absence is a state too: `:not([data-active])` styles the rest.
+
+## Style from the variables
+
+What changes on every frame is a CSS variable, set on the element, not an attribute, so the browser does not re-match selectors on each change. A knob's mark turns with `--knob-mark-angle`, a pad's crosshair moves with `--xy-pad-x` and `--xy-pad-y`:
+
+```css
+.my-knob-mark {
+  transform: rotate(var(--knob-mark-angle));
+}
+```
+
+## What stays inline
+
+Three styles are behaviour, not look, and each part sets them itself:
+
+- `touch-action: none` on a surface that is dragged, so a touch drags the control and does not scroll the page.
+- `position: relative` on a container that holds parts placed absolutely, such as a fader's mark or a knob's arc, so those parts sit in the container and not on the page.
+- `pointer-events: none` on decoration that must not take the pointer.
+
+A stylesheet can still change anything else about them. The behaviour of these three is the primitive's contract.
+
+## Reference
+
+Generated from the source of each primitive: the data attributes of the state each part exposes, and the CSS variables it sets. A value of the state of a plain type (a boolean, a number, a string) is an attribute, unless the primitive keeps it off the element. A callback or an object is not.
+
+{/* reference:start */}
+
+### Envelope
+
+State on every part that takes it: `data-disabled`, `data-dragging`.
+
+| Part | Data attributes | CSS variables |
+| --- | --- | --- |
+
+### Fader
+
+State on every part that takes it: `data-disabled`, `data-dragging`, `data-orientation`.
+
+| Part | Data attributes | CSS variables |
+| --- | --- | --- |
+
+### Knob
+
+State on every part that takes it: `data-disabled`, `data-dragging`.
+
+| Part | Data attributes | CSS variables |
+| --- | --- | --- |
+| `Mark` |  | `--knob-mark-angle` |
+
+### Meter
+
+| Part | Data attributes | CSS variables |
+| --- | --- | --- |
+| `Root` | `data-clipped` |  |
+
+### Pad
+
+State on every part that takes it: `data-columns`, `data-disabled`.
+
+| Part | Data attributes | CSS variables |
+| --- | --- | --- |
+| `Item` |  | `--pad-velocity` |
+
+### Piano
+
+State on every part that takes it: `data-disabled`, `data-max-pitch`, `data-min-pitch`, `data-orientation`.
+
+| Part | Data attributes | CSS variables |
+| --- | --- | --- |
+
+### Piano-roll
+
+State on every part that takes it: `data-disabled`, `data-draw-style`, `data-folded`, `data-max-pitch`, `data-min-length`, `data-min-pitch`, `data-mode`.
+
+| Part | Data attributes | CSS variables |
+| --- | --- | --- |
+| `Root` | `data-has-selection` |  |
+| `Rows` | `data-in-scale` |  |
+
+### Plot
+
+State on every part that takes it: `data-disabled`, `data-max-x`, `data-max-y`, `data-min-x`, `data-min-y`.
+
+| Part | Data attributes | CSS variables |
+| --- | --- | --- |
+| `Cursor` | `data-active` | `--plot-cursor-x`, `--plot-cursor-y` |
+
+### Sequencer
+
+State on every part that takes it: `data-disabled`.
+
+| Part | Data attributes | CSS variables |
+| --- | --- | --- |
+| `Root` | `data-current`, `data-painting` |  |
+| `Velocity` |  | `--sequencer-velocity` |
+
+### Timeline
+
+State on every part that takes it: `data-default-position`, `data-default-zoom`, `data-disabled`, `data-duration`, `data-large-step`, `data-max-zoom`, `data-min-zoom`, `data-position`, `data-snap-offset`, `data-snap-step`, `data-step`, `data-value`, `data-zoom`.
+
+| Part | Data attributes | CSS variables |
+| --- | --- | --- |
+| `ClipFade` |  | `--clip-fade-in`, `--clip-fade-out` |
+| `Clip` |  | `--clip-drag-y`, `--clip-fade-in`, `--clip-fade-in-max`, `--clip-fade-out`, `--clip-fade-out-max`, `--clip-offset`, `--clip-source-length` |
+| `Lane` | `data-timeline-lane` |  |
+
+### Waveform
+
+| Part | Data attributes | CSS variables |
+| --- | --- | --- |
+| `Bars` | `data-index`, `data-played` | `--waveform-level` |
+| `Canvas` | `data-theme` | `--waveform-bar-radius`, `--waveform-color`, `--waveform-progress-color` |
+| `Root` | `data-active`, `data-outside` |  |
+
+### Xypad
+
+State on every part that takes it: `data-disabled`, `data-dragging`.
+
+| Part | Data attributes | CSS variables |
+| --- | --- | --- |
+| `Root` |  | `--xy-pad-x`, `--xy-pad-y` |
+
+{/* reference:end */}
