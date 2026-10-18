@@ -1,6 +1,10 @@
 import { describe, expect, test } from "bun:test";
 import { DEFAULT_TEMPO } from "@audio-ui/core/time";
-import type { Arranged } from "@/registry-audio/bases/base/lib/arrangement";
+import {
+  type Arranged,
+  type ArrangementTrack,
+  mixOf,
+} from "@/registry-audio/bases/base/lib/arrangement";
 import {
   apply,
   clearTime,
@@ -531,6 +535,54 @@ describe("apply", () => {
     expect(state.doc.loop.range).toEqual([20, 40]);
     expect(state.history.past).toHaveLength(2);
     expect(apply(state, { type: "undo" }).doc.loop.range).toEqual([10, 30]);
+  });
+
+  test("a track's mix is part of the document: a switch is one step, and undo takes it back", () => {
+    let state = init([]);
+    state = apply(state, {
+      type: "set-mix",
+      id: "drums",
+      patch: { muted: true },
+    });
+    expect(state.doc.tracks[0]?.mix?.muted).toBe(true);
+    expect(state.history.past).toHaveLength(1);
+    expect(
+      apply(state, { type: "set-mix", id: "drums", patch: { muted: true } })
+    ).toBe(state);
+    expect(apply(state, { type: "undo" }).doc.tracks[0]?.mix).toBeUndefined();
+  });
+
+  test("a drag of a track's gain is one step, closed by settle-clip-edit", () => {
+    let state = init([]);
+    for (const gain of [0.9, 0.7, 0.4]) {
+      state = apply(state, { type: "change-mix", id: "bass", patch: { gain } });
+    }
+    state = apply(state, { type: "settle-clip-edit" });
+    expect(state.doc.tracks[1]?.mix?.gain).toBe(0.4);
+    expect(state.history.past).toHaveLength(1);
+    expect(apply(state, { type: "undo" }).doc.tracks[1]?.mix).toBeUndefined();
+  });
+
+  test("a track's color is its own, and the mix a header reads carries it", () => {
+    let state = init([]);
+    state = apply(state, { type: "set-track-color", id: "drums", color: 3 });
+    expect(state.doc.tracks[0]?.color).toBe(3);
+    expect(mixOf(state.doc.tracks[0] as ArrangementTrack).color).toBe(3);
+    expect(
+      apply(state, { type: "set-track-color", id: "drums", color: 3 })
+    ).toBe(state);
+  });
+
+  test("a duplicated track keeps its mix", () => {
+    let state = init([]);
+    state = apply(state, {
+      type: "set-mix",
+      id: "drums",
+      patch: { gain: 0.5, pan: -1 },
+    });
+    state = apply(state, { type: "duplicate-track", id: "drums" });
+    const copy = state.doc.tracks.find((track) => track.id === "track-3");
+    expect(copy?.mix).toMatchObject({ gain: 0.5, pan: -1 });
   });
 
   test("a split at the cursor cuts the selected clip, and its second piece takes a fresh id", () => {
