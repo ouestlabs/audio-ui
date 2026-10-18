@@ -61,8 +61,8 @@
   /* Rubber: matte, almost no highlight */
   --rubber: linear-gradient(
     180deg,
-    color-mix(in oklab, var(--mid) 85%, black),
-    var(--lo)
+    color-mix(in oklab, var(--lo) 80%, black),
+    color-mix(in oklab, var(--lo) 50%, black)
   );
   /* Enamel: the panel itself, with a fine grain */
   --enamel:
@@ -128,4 +128,43 @@
   box-shadow:
     0 0 0 2px var(--groove),
     var(--lens-halo);
+}
+
+/* A screw: a slotted head. Place it with the position classes, which sit 8px from a corner */
+.screw {
+  position: absolute;
+  width: 0.7rem;
+  height: 0.7rem;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      45deg,
+      transparent 45%,
+      rgb(0 0 0 / 0.55) 45% 55%,
+      transparent 55%
+    ),
+    radial-gradient(circle at 35% 30%, #d8d4ca, #6f6b62);
+  border-radius: 50%;
+  box-shadow:
+    0 1px 1px rgb(0 0 0 / 0.6),
+    inset 0 0 0 1px rgb(0 0 0 / 0.25);
+}
+.screw-tl {
+  top: 8px;
+  left: 8px;
+}
+.screw-tr {
+  top: 8px;
+  right: 8px;
+  rotate: 70deg;
+}
+.screw-bl {
+  bottom: 8px;
+  left: 8px;
+  rotate: 35deg;
+}
+.screw-br {
+  right: 8px;
+  bottom: 8px;
+  rotate: 110deg;
 }
