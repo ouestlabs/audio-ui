@@ -1,5 +1,17 @@
 # @audio-ui/react
 
+## 0.9.0
+
+### Minor Changes
+
+- d7e0e9e: Knob: every part carries `data-drag-mode` (`circular`, `revolution` or `vertical`), so a style can show the right cursor, such as `ns-resize` for a knob dragged up and down.
+
+### Patch Changes
+
+- 1072d6e: Envelope: Page Up and Page Down, or Home and End, move focus between the points, so a keyboard user reaches every point and not only the first.
+- Updated dependencies [d7e0e9e]
+  - @audio-ui/core@0.17.0
+
 ## 0.8.2
 
 ### Patch Changes
