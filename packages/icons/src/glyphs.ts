@@ -231,19 +231,6 @@ export const distortion: Glyph = [
   ),
 ];
 
-/** Muted: a monitor with a bar through it. */
-export const mute: Glyph = [
-  rect(5, 3, 14, 18, 2.5, { tint: true }),
-  circle(12, 14, 3, { knock: true }),
-  path("M3.5 20.5 20.5 3.5", { over: true }),
-];
-/** Solo: one cup of the headphones plays, the other is silent. */
-export const solo: Glyph = [
-  path("M4 14v-2a8 8 0 0 1 16 0v2"),
-  rect(3, 14, 4, 6, 1.5, { tint: true }),
-  rect(17, 14, 4, 6, 1.5),
-];
-
 /** Two speakers, left and right. */
 export const stereo: Glyph = [
   rect(2.5, 5, 8, 14, 2, { tint: true }),
