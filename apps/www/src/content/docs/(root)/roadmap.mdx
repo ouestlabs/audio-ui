@@ -27,8 +27,10 @@ Available today:
 
 ## What's Next
 
-- **More Audio Components**: Additional audio-specific UI patterns and controls
-- **Visualization Components**: Waveform displays, spectrum analyzers, and other audio visualizations
+- **Adapters beyond React**: the controllers of `@audio-ui/core` already drive a control with no framework, so the next step is to package that: custom elements over the controllers, and Vue and Svelte adapters, each one kept in step with the React primitives. How many to maintain is still to decide. A page would show one knob and one fader in React, Vue, Svelte and a web component, all on the same store and in sync.
+- **Agents**: the Agent Skill and the MCP server have a link on the home page and a page each. They should be easier to find, from the documentation overview and from the component pages, with what an agent gets from each in a few lines.
+- **Devices**: a device is a definition, an engine and a panel, and the panel is generated from the parameters alone, with no code of its own per device. That is shown on the Devices page as one device in two skins; it should be shown as the idea it is, with the contract (the parameters, the readings, the tools for an agent) in plain view.
+- **More audio components**: further audio-specific patterns and controls.
 
 ## Contributing
 
