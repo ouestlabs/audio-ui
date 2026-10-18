@@ -27,7 +27,8 @@ const ICON_PATH = /icon_(?:small|large): "([^"]+)"/g;
 // An `Intl.NumberFormat` unit the skill suggests, as in `{ style: "unit", unit: "hertz" }`.
 const INTL_UNIT = /unit: "([a-z-]+)"/g;
 const INTL_UNITS = new Set<string>(Intl.supportedValuesOf("unit"));
-const RULE_ID = /`((?:audio|live|values|a11y|core|style|ai)-[a-z0-9-]+)`/g;
+const RULE_ID =
+  /`((?:audio|live|values|a11y|core|design|style|ai)-[a-z0-9-]+)`/g;
 const CORE_ENTRY = /(?<!node_modules\/)@audio-ui\/core\/([a-z0-9-]+)/g;
 // A fenced code block of a markdown file.
 const CODE_FENCE = /```\w*\n([\s\S]*?)```/g;
@@ -36,6 +37,12 @@ const CORE_SPECIFIER = /"@audio-ui\/core\/([a-z-]+)"/g;
 // A row of core.md's export table: the entry, then the names it exports.
 const CORE_EXPORT_ROW = /^\| `@audio-ui\/core(?:\/([a-z-]+))?` \| (.+) \|$/gm;
 const IDENTIFIER = /`([A-Za-z_][A-Za-z0-9_]*)`/g;
+
+// A number in a selector, such as the `.5` of a decimal value.
+const DIGIT_START = /^\d/;
+
+// A registry item kept only to redirect an old install name.
+const RETIRED = /^(Gone|Renamed|Moved)/;
 
 const PACKAGES = new Set(["react", "core"]);
 
@@ -290,6 +297,169 @@ test("core.md's plain DOM knob works", async () => {
   expect(changes).toBe(1);
 });
 
+describe("skills/audio-ui styles", () => {
+  const STYLES = `${SKILL_DIR}/styles`;
+  const CLASS_NAME = /className="([a-z-]+)"/g;
+  const SELECTOR_CLASS = /\.([a-z][a-z0-9-]*)/g;
+  const SKINS = [
+    "retro",
+    "minimal",
+    "modern",
+    "tape",
+    "phosphor",
+    "hifi",
+    "brutalist",
+    "y2k",
+    "console",
+    "synth70",
+    "tube",
+    "solidstate",
+    "plugin",
+    "blackface",
+    "gunmetal",
+    "opto",
+    "blacky",
+    "bluey",
+  ] as const;
+
+  /** The kit's markup: the code block of directions.md that exports `Panel`. */
+  const readPanel = async () => {
+    const directions = await Bun.file(`${SKILL_DIR}/directions.md`).text();
+    const block = matches(directions, CODE_FENCE).find((code) =>
+      code.includes("export function Panel")
+    );
+    if (!block) {
+      throw new Error("directions.md: the Panel markup is missing");
+    }
+    return block;
+  };
+
+  test("the kit's markup renders and every class has a rule in the styles", async () => {
+    const { renderToString } = await import("react-dom/server");
+    const { createElement } = await import("react");
+    // Rendered from inside the app, where react and the primitives resolve.
+    const copy = `${import.meta.dir}/skill-panel.tmp.tsx`;
+    const source = await readPanel();
+    await Bun.write(copy, source);
+    const panel = await import(copy).finally(() => Bun.file(copy).delete());
+    const html = renderToString(
+      createElement(panel.Panel, { skin: "retro", title: "Kit" })
+    );
+    expect(html).toContain("skin-retro");
+    const sheets = await Promise.all(
+      ["base", ...SKINS].map((name) => Bun.file(`${STYLES}/${name}.css`).text())
+    );
+    const defined = new Set(matches(sheets.join("\n"), SELECTOR_CLASS));
+    const missing = matches(source, CLASS_NAME).filter(
+      (name) => !(defined.has(name) || name.startsWith("skin-"))
+    );
+    expect(missing).toEqual([]);
+  });
+
+  test.each([...SKINS])(
+    "the %s skin styles only classes the markup has",
+    async (skin) => {
+      const css = await Bun.file(`${STYLES}/${skin}.css`).text();
+      const used = new Set(matches(await readPanel(), CLASS_NAME));
+      // Decorative helpers a skin offers for the author to add to the markup.
+      const extras = new Set([
+        "display",
+        "knob-numeral",
+        "panel-footer",
+        "lamp",
+        "legend",
+        "panel",
+        "rocker",
+        "screw",
+        "screw-bl",
+        "screw-br",
+        "screw-tl",
+        "screw-tr",
+        "scale",
+        "section",
+      ]);
+      const unknown = matches(css, SELECTOR_CLASS).filter(
+        (name) =>
+          !(
+            used.has(name) ||
+            extras.has(name) ||
+            name.startsWith("skin-") ||
+            DIGIT_START.test(name)
+          )
+      );
+      expect(unknown).toEqual([]);
+    }
+  );
+});
+
+test("core.md's kit knob and fader work in the plain DOM", async () => {
+  const core = await Bun.file(`${SKILL_DIR}/core.md`).text();
+  const example = [...core.matchAll(CODE_FENCE)]
+    .map(([, code = ""]) => code)
+    .find((code) => code.includes("export function mountKitKnob"));
+  if (!example) {
+    throw new Error("core.md: the kit's plain DOM example is missing");
+  }
+  const source = new Bun.Transpiler({ loader: "ts" })
+    .transformSync(example)
+    .replace(
+      CORE_SPECIFIER,
+      (_, entry) => `"${ROOT}/packages/core/src/primitives/${entry}/index.ts"`
+    );
+  const copy = `${import.meta.dir}/skill-kit.tmp.js`;
+  await Bun.write(copy, source);
+  const { mountKitFader, mountKitKnob } = await import(copy).finally(() =>
+    Bun.file(copy).delete()
+  );
+
+  document.body.innerHTML =
+    '<div class="knob" id="k"></div><div class="fader" id="f"></div>';
+  const knobRoot = document.getElementById("k");
+  const faderRoot = document.getElementById("f");
+  if (!(knobRoot && faderRoot)) {
+    throw new Error("the kit's example has no roots");
+  }
+  const changes: number[] = [];
+  const cleanKnob = mountKitKnob(knobRoot, "Cutoff", {
+    dragMode: "vertical",
+    max: 100,
+    min: 0,
+    onValueChange: (value: number) => changes.push(value),
+  });
+  const cleanFader = mountKitFader(faderRoot, "Level", {
+    max: 0,
+    min: -60,
+    onValueChange: (value: number) => changes.push(value),
+    orientation: "vertical",
+  });
+  for (const name of [
+    "knob-control",
+    "knob-thumb",
+    "knob-track",
+    "knob-indicator",
+    "knob-mark",
+    "knob-label",
+    "knob-value",
+    "fader-control",
+    "fader-track",
+    "fader-indicator",
+    "fader-thumb",
+  ]) {
+    expect(document.querySelector(`.${name}`)).not.toBeNull();
+  }
+  expect(
+    knobRoot.querySelector(".knob-control")?.getAttribute("data-drag-mode")
+  ).toBe("vertical");
+  for (const input of document.querySelectorAll("input")) {
+    input.dispatchEvent(
+      new KeyboardEvent("keydown", { cancelable: true, key: "ArrowUp" })
+    );
+  }
+  expect(changes).toHaveLength(2);
+  cleanKnob();
+  cleanFader();
+});
+
 describe("the Claude Code marketplace", () => {
   const manifest = Bun.file(
     `${ROOT}/.claude-plugin/marketplace.json`
@@ -331,4 +501,15 @@ describe("the Claude Code marketplace", () => {
       skills.map((name) => `./skills/${name}`).sort()
     );
   });
+});
+
+test("components.md names every registry item, but demos and retired items", async () => {
+  const catalog = await Bun.file(`${SKILL_DIR}/components.md`).text();
+  const items = [...audio, ...hooks, ...lib].filter(
+    (item) => !RETIRED.test(item.description ?? "")
+  );
+  const missing = items
+    .map((item) => item.name)
+    .filter((name) => !catalog.includes(name));
+  expect(missing).toEqual([]);
 });

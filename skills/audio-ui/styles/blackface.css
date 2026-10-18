@@ -1,0 +1,251 @@
+/* BLACKFACE: a black-face rack unit. Black brushed faceplate, silver knurled caps, a big backlit VU, engraved white print, a red lamp. */
+.skin-blackface {
+  --panel: #131416;
+  --ink: #ecebe6;
+  --accent: #ff4a2d;
+  --hi: #f7f7f4;
+  --lo: #6a6c70;
+  --lift: 5;
+  --ok: #7ed957;
+  --warn: #ffb21a;
+  --clip: #ff4a2d;
+  --legend-bg: #131416;
+  position: relative;
+  font-family: "Helvetica Neue", Arial, sans-serif;
+  color: var(--ink);
+  background:
+    repeating-linear-gradient(
+      90deg,
+      rgb(255 255 255 / 0.03) 0 1px,
+      rgb(0 0 0 / 0.2) 1px 2px
+    ),
+    linear-gradient(180deg, #202225, var(--panel) 20%, #0e0f10);
+  border-radius: 3px;
+  box-shadow:
+    0 0 0 2px #b8bbbe,
+    0 0 0 4px #5d6064,
+    0 16px 30px rgb(0 0 0 / 0.6);
+}
+.skin-blackface .panel-title {
+  font:
+    600 0.7rem / 1 "Helvetica Neue",
+    Arial,
+    sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.4em;
+}
+
+.skin-blackface .knob-control {
+  --knob-cap: 9%;
+  color: var(--ink);
+}
+.skin-blackface .knob-track {
+  color: rgb(255 255 255 / 0.1);
+}
+.skin-blackface .knob-indicator {
+  color: rgb(236 235 230 / 0.85);
+}
+.skin-blackface .knob-thumb {
+  background: var(--metal);
+  border-radius: 50%;
+  box-shadow:
+    var(--shadow-raised),
+    0 0 0 3px #050505,
+    0 0 0 4px rgb(255 255 255 / 0.18);
+}
+.skin-blackface .knob-thumb::after {
+  position: absolute;
+  top: 5%;
+  left: 50%;
+  width: 3px;
+  height: 28%;
+  content: "";
+  background: #111;
+  border-radius: 1px;
+  translate: -50% 0;
+}
+.skin-blackface .knob-label {
+  font:
+    600 0.58rem / 1 "Helvetica Neue",
+    Arial,
+    sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+}
+.skin-blackface .knob-value {
+  font:
+    500 0.62rem / 1 ui-monospace,
+    monospace;
+  font-variant-numeric: tabular-nums;
+  color: var(--warn);
+}
+.skin-blackface .knob-tick {
+  top: -9px;
+  height: 5px;
+  background: var(--ink);
+}
+
+.skin-blackface {
+  --fader-track: 0.25rem;
+  --fader-thumb-w: 1.6rem;
+  --fader-thumb-h: 2.6rem;
+}
+.skin-blackface .fader-control {
+  width: 3rem;
+}
+.skin-blackface .fader-track {
+  background: #000;
+  border-radius: 2px;
+  box-shadow: 0 0 0 2px #3a3c40;
+}
+.skin-blackface .fader-indicator {
+  display: none;
+}
+.skin-blackface .fader-thumb {
+  background:
+    linear-gradient(
+      180deg,
+      transparent calc(50% - 1px),
+      #111 calc(50% - 1px) calc(50% + 1px),
+      transparent calc(50% + 1px)
+    ),
+    var(--brushed);
+  border-radius: 2px;
+  box-shadow: var(--shadow-raised);
+}
+
+.skin-blackface {
+  --meter-w: 0.5rem;
+}
+.skin-blackface .meter {
+  box-sizing: border-box;
+  gap: 3px;
+  height: calc(var(--strip-h, 9.5rem) + 8px);
+  padding: 4px;
+  background: #050505;
+  border-radius: 2px;
+  box-shadow:
+    inset 0 2px 5px #000,
+    0 0 0 1px #3a3c40;
+}
+.skin-blackface .meter-channel {
+  background: var(--zones-dim), var(--zones);
+  isolation: isolate;
+  -webkit-mask: var(--segments);
+  mask: var(--segments);
+}
+.skin-blackface .meter-indicator {
+  background: var(--zones-lit);
+  mix-blend-mode: color-dodge;
+}
+.skin-blackface .meter-peak {
+  height: 2px;
+  background: #fff;
+}
+
+.skin-blackface .xypad-control {
+  background: #050505;
+  background-image:
+    linear-gradient(rgb(255 255 255 / 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 255 255 / 0.07) 1px, transparent 1px);
+  background-size: 25% 25%;
+  border-radius: 2px;
+  box-shadow:
+    inset 0 0 14px #000,
+    0 0 0 2px #3a3c40;
+}
+.skin-blackface .xypad-thumb {
+  background: var(--accent);
+  border-radius: 50%;
+  box-shadow: 0 0 10px 2px rgb(255 74 45 / 0.6);
+}
+
+.skin-blackface .pad,
+.skin-blackface .toggle {
+  font:
+    600 0.58rem / 1 "Helvetica Neue",
+    Arial,
+    sans-serif;
+  color: var(--ink);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  background: var(--rubber);
+  border-radius: 3px;
+  box-shadow: var(--shadow-raised);
+  transition:
+    transform 60ms linear,
+    box-shadow 60ms linear;
+}
+.skin-blackface .pad[data-active],
+.skin-blackface .toggle[aria-pressed="true"] {
+  color: var(--accent);
+  box-shadow: inset 0 2px 5px #000;
+  transform: translateY(2px);
+}
+
+.skin-blackface .piano {
+  box-shadow: 0 0 0 2px #3a3c40;
+}
+.skin-blackface .piano-key[data-color="white"] {
+  background: linear-gradient(180deg, #f1f0ea, #c8c7c0);
+  border: 1px solid #111;
+}
+.skin-blackface .piano-key[data-color="black"] {
+  background: linear-gradient(180deg, #2a2b2e, #050505);
+}
+.skin-blackface .piano-key[data-active] {
+  background: var(--accent);
+}
+
+.skin-blackface .step {
+  background: #25272a;
+  border: 0;
+  border-radius: 2px;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.1);
+}
+.skin-blackface .step[data-on] {
+  background: var(--accent);
+}
+.skin-blackface .envelope,
+.skin-blackface .plot,
+.skin-blackface .waveform-control {
+  color: var(--ink);
+  background: #050505;
+}
+.skin-blackface {
+  --vu-w: 13rem;
+}
+.skin-blackface .vu-face {
+  box-shadow:
+    0 0 0 3px #b8bbbe,
+    0 0 0 5px #3a3c40;
+}
+.skin-blackface .waveform-control {
+  --waveform-color: #8d949a;
+}
+
+.skin-blackface .display {
+  font:
+    600 0.7rem / 1 ui-monospace,
+    monospace;
+  color: #ff7a5c;
+  background: #050505;
+  border-radius: 2px;
+  box-shadow:
+    inset 0 1px 3px #000,
+    0 0 0 1px #3a3c40;
+}
+.skin-blackface .vu-face {
+  background: radial-gradient(
+    ellipse at 50% 85%,
+    #fff1c9,
+    #f0d594 55%,
+    #b98f4a
+  );
+}
+.skin-blackface {
+  --focus: var(--ink);
+}
+.skin-blackface .vu-needle {
+  stroke: #c3281c;
+}

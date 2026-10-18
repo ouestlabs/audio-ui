@@ -1,0 +1,259 @@
+/* PLUGIN: a glossy software plugin window. Light blue-grey metal, chunky white knobs with a blue ring, dark glass displays. */
+.skin-plugin {
+  --panel: #c9d3dc;
+  --ink: #1c2a38;
+  --accent: #1e90ff;
+  --hi: #ffffff;
+  --lo: #8795a3;
+  --lift: 5;
+  --ok: #2fcf86;
+  --warn: #ffc94a;
+  --clip: #ff4d5e;
+  --legend-bg: #c9d3dc;
+  position: relative;
+  font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  color: var(--ink);
+  background: linear-gradient(180deg, #e4ebf1, var(--panel) 45%, #b9c5d0);
+  border-radius: 10px;
+  box-shadow:
+    0 0 0 1px #8795a3,
+    0 14px 26px rgb(20 40 60 / 0.35),
+    inset 0 2px 0 rgb(255 255 255 / 0.85);
+}
+.skin-plugin .panel-title {
+  font:
+    700 0.75rem / 1 "Avenir Next",
+    system-ui,
+    sans-serif;
+  color: #3b5068;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+.skin-plugin .section {
+  border-color: rgb(28 42 56 / 0.3);
+  border-radius: 6px;
+}
+
+.skin-plugin .knob-control {
+  --knob-cap: 11%;
+  color: #3b5068;
+}
+.skin-plugin .knob-track {
+  color: rgb(28 42 56 / 0.18);
+}
+.skin-plugin .knob-indicator {
+  color: var(--accent);
+}
+.skin-plugin .knob-thumb {
+  background: radial-gradient(
+    circle at var(--hl-x) var(--hl-y),
+    #fff,
+    #dfe6ec 55%,
+    #aab6c2
+  );
+  border-radius: 50%;
+  box-shadow:
+    0 7px 10px rgb(20 40 60 / 0.4),
+    inset 0 -3px 5px rgb(20 40 60 / 0.2),
+    inset 0 0 0 2px #fff;
+}
+.skin-plugin .knob-thumb::after {
+  position: absolute;
+  top: 8%;
+  left: 50%;
+  width: 4px;
+  height: 26%;
+  content: "";
+  background: var(--accent);
+  border-radius: 2px;
+  translate: -50% 0;
+}
+.skin-plugin .knob-label {
+  font:
+    700 0.65rem / 1 "Avenir Next",
+    system-ui,
+    sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.skin-plugin .knob-value {
+  padding: 0.2rem 0.5rem;
+  font:
+    600 0.72rem / 1 "Avenir Next",
+    system-ui,
+    sans-serif;
+  font-variant-numeric: tabular-nums;
+  color: #bfe3ff;
+  background: #0f1b27;
+  border-radius: 4px;
+  box-shadow: inset 0 1px 3px #000;
+}
+.skin-plugin .knob-tick {
+  display: none;
+}
+
+.skin-plugin {
+  --fader-track: 0.5rem;
+  --fader-thumb-w: 2rem;
+  --fader-thumb-h: 1.1rem;
+}
+.skin-plugin .fader-track {
+  background: #0f1b27;
+  border-radius: 999px;
+  box-shadow:
+    inset 0 2px 4px #000,
+    0 1px 0 #fff;
+}
+.skin-plugin .fader-indicator {
+  width: 100%;
+  background: linear-gradient(0deg, #1e90ff, #6cc0ff);
+  border-radius: 999px;
+}
+.skin-plugin .fader-thumb {
+  background: linear-gradient(180deg, #fff, #cfd9e2);
+  border-radius: 6px;
+  box-shadow:
+    0 4px 6px rgb(20 40 60 / 0.4),
+    inset 0 0 0 1px rgb(255 255 255 / 0.9);
+}
+
+.skin-plugin {
+  --meter-w: 0.75rem;
+}
+.skin-plugin .meter {
+  box-sizing: border-box;
+  gap: 4px;
+  height: calc(var(--strip-h, 9.5rem) + 10px);
+  padding: 5px;
+  background: #0f1b27;
+  border-radius: 5px;
+  box-shadow: inset 0 2px 6px #000;
+}
+.skin-plugin .meter-channel {
+  background: var(--zones-dim), var(--zones);
+  border-radius: 2px;
+  isolation: isolate;
+}
+.skin-plugin .meter-indicator {
+  background: var(--zones-lit);
+  mix-blend-mode: color-dodge;
+}
+.skin-plugin .meter-peak {
+  height: 2px;
+  background: #fff;
+}
+
+.skin-plugin .xypad-control {
+  background: #0f1b27;
+  background-image:
+    linear-gradient(rgb(110 190 255 / 0.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(110 190 255 / 0.12) 1px, transparent 1px);
+  background-size: 25% 25%;
+  border-radius: 8px;
+  box-shadow:
+    inset 0 3px 8px #000,
+    0 1px 0 #fff;
+}
+.skin-plugin .xypad-thumb {
+  background: var(--accent);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 3px rgb(255 255 255 / 0.85),
+    0 0 12px rgb(30 144 255 / 0.7);
+}
+
+.skin-plugin .pad,
+.skin-plugin .toggle {
+  font:
+    700 0.68rem / 1 "Avenir Next",
+    system-ui,
+    sans-serif;
+  color: var(--ink);
+  background: linear-gradient(180deg, #fff, #cbd6df);
+  border-radius: 8px;
+  box-shadow:
+    0 4px 0 #8795a3,
+    0 6px 8px rgb(20 40 60 / 0.3),
+    inset 0 0 0 1px #fff;
+  transition:
+    transform 60ms linear,
+    box-shadow 60ms linear;
+}
+.skin-plugin .toggle {
+  box-shadow:
+    0 2px 0 #8795a3,
+    inset 0 0 0 1px #fff;
+}
+.skin-plugin .pad[data-active],
+.skin-plugin .toggle[aria-pressed="true"] {
+  color: #fff;
+  background: linear-gradient(180deg, #6cc0ff, var(--accent));
+  box-shadow: inset 0 2px 5px rgb(20 40 60 / 0.4);
+  transform: translateY(2px);
+}
+
+.skin-plugin .piano {
+  overflow: hidden;
+  border-radius: 6px;
+  box-shadow:
+    0 0 0 2px #fff,
+    0 4px 8px rgb(20 40 60 / 0.3);
+}
+.skin-plugin .piano-key[data-color="white"] {
+  background: linear-gradient(180deg, #fff, #e3eaf0);
+  border-right: 1px solid #aab6c2;
+}
+.skin-plugin .piano-key[data-color="black"] {
+  background: linear-gradient(180deg, #2b3a4a, #0f1b27);
+  border-radius: 0 0 4px 4px;
+}
+.skin-plugin .piano-key[data-active] {
+  background: var(--accent);
+}
+
+.skin-plugin .step {
+  background: linear-gradient(180deg, #fff, #cbd6df);
+  border: 0;
+  border-radius: 4px;
+  box-shadow: 0 2px 0 #8795a3;
+}
+.skin-plugin .step[data-on] {
+  background: var(--accent);
+  box-shadow: inset 0 2px 4px rgb(0 0 0 / 0.3);
+}
+.skin-plugin .envelope,
+.skin-plugin .plot {
+  color: #bfe3ff;
+  background: #0f1b27;
+  border-radius: 6px;
+}
+.skin-plugin .waveform-control {
+  color: #bfe3ff;
+  background: #0f1b27;
+  border-radius: 6px;
+}
+.skin-plugin .vu-face {
+  color: #1c2a38;
+}
+.skin-plugin .waveform-control {
+  --waveform-color: #8d949a;
+}
+.skin-plugin .display {
+  font:
+    600 0.75rem / 1 "Avenir Next",
+    system-ui,
+    sans-serif;
+  color: #bfe3ff;
+  background: #0f1b27;
+  border-radius: 4px;
+  box-shadow:
+    inset 0 1px 3px #000,
+    0 1px 0 #fff;
+}
+.skin-plugin .plot-area {
+  fill: rgb(30 144 255 / 0.35);
+  stroke: #6cc0ff;
+}
+.skin-plugin {
+  --focus: var(--ink);
+}

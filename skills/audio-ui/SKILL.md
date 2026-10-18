@@ -1,10 +1,10 @@
 ---
 name: audio-ui
-description: "Builds audio interfaces with audio/ui: React (@audio-ui/react and the @audio-ui shadcn registry) or any other framework and the plain DOM (@audio-ui/core): knobs, faders, XY pads, envelopes, level meters, waveforms, EQ and filter plots, timelines, step sequencers, drum pads, piano keyboards, piano rolls, transport bars, and the synths, mixers, DAWs, samplers and players made from them. Covers picking and installing components, wiring them to the Web Audio API, live meters and playheads, styling the headless primitives, building controls for Vue, Svelte, Solid, Angular, web components or vanilla JS on the framework-free controllers, and letting an AI model drive them through tools. Applies whenever the user wants any audio control or display on the web, even without naming audio/ui, and whenever a project imports @audio-ui/react or @audio-ui/core or has an @audio-ui registry in components.json."
+description: "Builds and designs audio interfaces with audio/ui, with or without shadcn: React (@audio-ui/react and the @audio-ui shadcn registry) or any other framework and the plain DOM (@audio-ui/core): knobs, faders, XY pads, envelopes, level meters, waveforms, EQ and filter plots, timelines, step sequencers, drum pads, piano keyboards, piano rolls, transport bars, and the synths, mixers, DAWs, samplers and players made from them. Covers picking and installing components, wiring them to the Web Audio API, live meters and playheads, styling the headless primitives into retro hardware, skeuomorphic, minimalist or modern skins, building controls for Vue, Svelte, Solid, Angular, web components or vanilla JS on the framework-free controllers, and letting an AI model drive them through tools. Applies whenever the user wants any audio control or display on the web, even without naming audio/ui, and whenever a project imports @audio-ui/react or @audio-ui/core or has an @audio-ui registry in components.json."
 license: MIT
 metadata:
   author: audio/ui
-  version: "1.0.0"
+  version: "1.1.0"
 allowed-tools: Bash(npx shadcn@latest *), Bash(pnpm dlx shadcn@latest *), Bash(bunx --bun shadcn@latest *), Bash(yarn dlx shadcn@latest *)
 ---
 
@@ -15,7 +15,7 @@ Accessible, composable audio controls, in three layers:
 | Layer | What it is | Pick it when |
 | --- | --- | --- |
 | `@audio-ui` registry (shadcn) | Styled components and blocks copied into the project | The project has a `components.json` (shadcn/ui, Tailwind v4) |
-| `@audio-ui/react` (npm) | Headless React primitives: behavior, input handling and ARIA, no styles | React without shadcn, or the project brings its own design system |
+| `@audio-ui/react` (npm) | Headless React primitives: behavior, input handling and ARIA, no styles | React without shadcn, or the project brings its own design system. Ready skins: [directions.md](./directions.md) |
 | `@audio-ui/core` (npm) | Framework-free controllers: value math, scales, pointer, wheel and keyboard handling, live sources | Vue, Svelte, Solid, Angular, web components or the plain DOM → [core.md](./core.md) |
 
 Run commands with the project's package manager, read from its lockfile: `npx shadcn@latest`, `pnpm dlx shadcn@latest`, `bunx --bun shadcn@latest` or `yarn dlx shadcn@latest`. Examples use `npx`.
@@ -25,6 +25,7 @@ Run commands with the project's package manager, read from its lockfile: `npx sh
 - Adding a knob, fader, XY pad, envelope, meter, waveform, plot, timeline, sequencer, drum pad, piano or piano roll
 - Building a synth, mixer, DAW, sampler, recorder or player interface
 - Connecting controls to the Web Audio API, or displays to live audio
+- Designing how an audio interface looks: retro hardware, skeuomorphic, minimalist or modern, with or without shadcn/ui or Tailwind
 - Styling `@audio-ui/react` primitives with your own design system
 - Building audio controls outside React (Vue, Svelte, Solid, Angular, web components, vanilla JS)
 - Letting a chat, voice or agent compose, edit or mix through the interface
@@ -39,8 +40,9 @@ Run commands with the project's package manager, read from its lockfile: `npx sh
 | 3 | Values & Events | HIGH | `values-` |
 | 4 | Accessibility | HIGH | `a11y-` |
 | 5 | Without React | HIGH | `core-` |
-| 6 | Styling | MEDIUM | `style-` |
-| 7 | AI Control | MEDIUM | `ai-` |
+| 6 | Design | HIGH | `design-` |
+| 7 | Styling | MEDIUM | `style-` |
+| 8 | AI Control | MEDIUM | `ai-` |
 
 ## Quick Reference
 
@@ -74,11 +76,14 @@ Run commands with the project's package manager, read from its lockfile: `npx sh
 - `values-log-scale-frequency` - `scale="log"` for frequency, Q and ratios
 - `values-cancel-change` - Reject a change with `eventDetails.cancel()`
 - `values-anchor-bipolar` - `anchor={0}` for pan and detune
+- `values-editable-readout` - `editable` on `Knob.Value` and `Fader.Value` lets people type an exact number
+- `values-knob-drag-mode` - `dragMode="vertical"` on knobs: up and down, not around the dial
 
 ### 4. Accessibility (HIGH)
 
 - `a11y-accessible-name` - Every control has `aria-label` or its `Label` part
 - `a11y-keep-focusable-part` - Restyle the thumb with `render`, never replace it
+- `a11y-live-readout` - Silent display, a polite status that changes only when the meaning does
 - `a11y-focus-and-hit-area` - Draw `:focus-visible`, widen small hit areas
 
 ### 5. Without React (HIGH)
@@ -91,14 +96,24 @@ Run commands with the project's package manager, read from its lockfile: `npx sh
 - `core-cleanup` - Call the removers `subscribe` and `attachWheel` return
 - `core-public-entries` - `@audio-ui/core` and `@audio-ui/core/<name>`, never `/internal`
 
-### 6. Styling (MEDIUM)
+### 6. Design (HIGH)
+
+- `design-pick-a-direction` - Choose retro, minimal or modern first, say it, and style every part from it
+- `design-structure-before-skin` - Start from `styles/base.css`: every part needs a size, and the inline position is the part's
+- `design-one-light-source` - One light, four or five materials, glow only on lamps
+- `design-print-the-labels` - Uppercase tracked labels, tabular values, printed ticks
+- `design-size-by-importance` - Group by signal flow in labelled sections, three sizes at most
+- `design-feedback-by-state` - Draw `data-dragging`, `data-active`, `data-clipping` and focus, not only hover
+- `design-meter-zones` - Zones on the channel, dimmed, lit by the indicator: a gradient on the indicator squeezes with the level
+
+### 7. Styling (MEDIUM)
 
 - `style-headless-state` - Style primitives by state: `className` functions, `data-*`, CSS variables
 - `style-props-before-classname` - Registry components: `size`, `marks`, `orientation` before classes
 - `style-semantic-tokens` - Theme tokens, never raw palette colors
 - `style-never-edit-package` - Style the parts or copy the registry component, never patch the package
 
-### 7. AI Control (MEDIUM)
+### 8. AI Control (MEDIUM)
 
 - `ai-person-in-charge` - No tool records or plays on its own; bounded levels; undoable edits
 - `ai-schema-from-instance` - Tool schemas built from this component's config
@@ -137,11 +152,12 @@ Installed components import from `@/components/audio-ui/<name>`. Every import, i
 ## Workflow
 
 1. **Read the project.** `package.json` (framework, and React 19 for the React layers), `components.json` if any, the lockfile for the package manager.
-2. **Pick the layer and the component** from the two tables above.
-3. **Read the component's docs before writing code**: `https://www.audio-ui.dev/llm/components/base/<name>` (markdown), or the MCP server ([setup.md](./setup.md)). Props are specific; a guessed prop compiles and misbehaves.
+2. **Pick the layer and the component** from the two tables above. No `components.json`, or the user wants a distinct look (retro, minimalist, modern): use `@audio-ui/react` with the kit of [design.md](./design.md), never a hand-written slider.
+2b. **Choose a visual direction** and say it in one sentence (retro hardware, minimal or modern). Copy `styles/base.css`, one skin and the `Panel` markup from [directions.md](./directions.md). Outside React, also `styles/dom.css` and the plain DOM kit of [core.md](./core.md). For a look the skins do not cover, or any reference the user names, compose it from `styles/materials.css` with [taste.md](./taste.md). For retro, read [hardware.md](./hardware.md).
+3. **Read the component's docs before writing code**: `https://www.audio-ui.dev/llm/components/base/<name>` (markdown), or the MCP server ([setup.md](./setup.md)). Props are specific; a guessed prop compiles and misbehaves. Offline, the verified `Panel` markup and the props table of [directions.md](./directions.md) cover knob, fader, meter, XY pad, pad and piano; the entries are `@audio-ui/react/knob`, `fader`, `meter`, `xypad`, `pad`, `piano`.
 4. **Install, then import from where it landed.** Registry: `npx shadcn@latest add @audio-ui/<name>` (add the namespace once, [setup.md](./setup.md)) copies it to `components/audio-ui/<name>.tsx`: `import { Meter } from "@/components/audio-ui/meter"` (through the project's `components` alias). The CLI prints every file it writes: import from those paths, not from memory. React package: install `@audio-ui/react`, import from `@audio-ui/react/<name>`. Other frameworks: install `@audio-ui/core` and follow [core.md](./core.md).
 5. **Write the code against the CRITICAL and HIGH rules** first.
-6. **Verify.** Type check. Drag every control fast (no clicks in the sound), Tab to each control and use the arrow keys, background the tab during playback, and check nothing re-renders per frame.
+6. **Verify.** Type check, render the page and look at a screenshot. A headless browser has no microphone: feed an `OscillatorNode` through the same analyser to test an input path. Drag every control fast (no clicks in the sound), Tab to each control and use the arrow keys, background the tab during playback, and check nothing re-renders per frame.
 
 ## How to Use
 
@@ -153,6 +169,10 @@ rules/live-source-not-state.md
 ```
 
 - [components.md](./components.md): every component and block with its install name and import
+- [design.md](./design.md): choosing a direction, what every direction shares, the part gotchas
+- [directions.md](./directions.md): retro, minimal and modern skins to copy (`styles/`), with the verified markup
+- [taste.md](./taste.md): composing any direction from a brief, with a vocabulary of looks and the slop signals to avoid
+- [hardware.md](./hardware.md): what gives a retro panel taste, palettes by instrument
 - [setup.md](./setup.md): registry namespace, npm packages, MCP server
 - [core.md](./core.md): the controllers outside React, with a plain DOM knob and Vue and Svelte bindings
 - Full docs: https://www.audio-ui.dev/llms.txt

@@ -1,0 +1,226 @@
+/* Y2K: translucent candy plastic. A pale blue shell, a teal cap with a gloss band, one orange accent, big radii. */
+.skin-y2k {
+  --panel: #d9f0f6;
+  --ink: #12333d;
+  --accent: #ff7a1a;
+  --hi: #c9fbff;
+  --lo: #0d7e8c;
+  --lift: 4;
+  --ok: #2bc48a;
+  --warn: #ffb21a;
+  --clip: #ff4d4d;
+  padding: 2rem;
+  font-family: "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
+  color: var(--ink);
+  background: linear-gradient(180deg, #eaf9fc, var(--panel));
+  border-radius: 28px;
+  box-shadow:
+    0 0 0 3px #b3dde7,
+    0 14px 26px rgb(13 126 140 / 0.3),
+    inset 0 3px 0 rgb(255 255 255 / 0.9);
+}
+.skin-y2k .panel-title {
+  font:
+    700 0.8rem / 1 "Trebuchet MS",
+    system-ui,
+    sans-serif;
+  color: var(--lo);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.skin-y2k .knob-control {
+  --knob-cap: 12%;
+  color: var(--lo);
+}
+.skin-y2k .knob-track {
+  color: rgb(13 126 140 / 0.18);
+}
+.skin-y2k .knob-indicator {
+  color: var(--accent);
+}
+.skin-y2k .knob-thumb {
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.75), rgb(255 255 255 / 0) 48%),
+    radial-gradient(circle at 50% 80%, #6fe3ee, #11a3b5 70%);
+  border-radius: 50%;
+  box-shadow:
+    0 6px 10px rgb(13 126 140 / 0.45),
+    inset 0 -3px 6px rgb(0 80 90 / 0.35),
+    inset 0 0 0 2px rgb(255 255 255 / 0.45);
+}
+.skin-y2k .knob-thumb::after {
+  position: absolute;
+  top: 8%;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  content: "";
+  background: var(--accent);
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px rgb(255 255 255 / 0.7);
+  translate: -50% 0;
+}
+.skin-y2k .knob-label {
+  font:
+    700 0.65rem / 1 "Trebuchet MS",
+    system-ui,
+    sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.skin-y2k .knob-value {
+  font:
+    700 0.8rem / 1 "Trebuchet MS",
+    system-ui,
+    sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+.skin-y2k .knob-tick {
+  display: none;
+}
+
+.skin-y2k {
+  --fader-track: 0.6rem;
+  --fader-thumb-w: 1.9rem;
+  --fader-thumb-h: 1.9rem;
+}
+.skin-y2k .fader-track {
+  background: #bfe6ee;
+  border-radius: 999px;
+  box-shadow:
+    inset 0 2px 4px rgb(13 126 140 / 0.45),
+    0 1px 0 #fff;
+}
+.skin-y2k .fader-indicator {
+  width: 100%;
+  background: linear-gradient(90deg, #ffa75a, var(--accent));
+}
+.skin-y2k .fader-thumb {
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.8), rgb(255 255 255 / 0) 50%),
+    radial-gradient(circle at 50% 85%, #6fe3ee, #11a3b5 75%);
+  border-radius: 50%;
+  box-shadow:
+    0 5px 8px rgb(13 126 140 / 0.45),
+    inset 0 0 0 2px rgb(255 255 255 / 0.5);
+}
+
+.skin-y2k {
+  --meter-w: 0.9rem;
+}
+.skin-y2k .meter {
+  gap: 5px;
+}
+.skin-y2k .meter-channel {
+  background: #bfe6ee;
+  border-radius: 999px;
+  box-shadow: inset 0 2px 4px rgb(13 126 140 / 0.4);
+}
+.skin-y2k .meter-indicator {
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.6), transparent 40%), #11a3b5;
+}
+.skin-y2k .meter-channel[data-clipping] .meter-indicator {
+  background: var(--clip);
+}
+.skin-y2k .meter-peak {
+  height: 3px;
+  background: var(--accent);
+  border-radius: 2px;
+}
+
+.skin-y2k .xypad-control {
+  background:
+    radial-gradient(
+      circle at 30% 25%,
+      rgb(255 255 255 / 0.8),
+      rgb(255 255 255 / 0) 45%
+    ),
+    linear-gradient(180deg, #b6e8f0, #8cd6e2);
+  border-radius: 22px;
+  box-shadow:
+    inset 0 3px 8px rgb(13 126 140 / 0.4),
+    0 0 0 3px #fff;
+}
+.skin-y2k .xypad-thumb {
+  background: var(--accent);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 3px #fff,
+    0 4px 6px rgb(0 0 0 / 0.3);
+}
+
+.skin-y2k .pad {
+  font:
+    700 0.7rem / 1 "Trebuchet MS",
+    system-ui,
+    sans-serif;
+  color: var(--ink);
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.8), rgb(255 255 255 / 0) 50%),
+    #7fe0ea;
+  border-radius: 18px;
+  box-shadow:
+    0 6px 0 #1296a8,
+    0 8px 10px rgb(13 126 140 / 0.4),
+    inset 0 0 0 2px rgb(255 255 255 / 0.55);
+  transition:
+    transform 60ms linear,
+    box-shadow 60ms linear;
+}
+.skin-y2k .pad[data-active] {
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.7), rgb(255 255 255 / 0) 50%),
+    var(--accent);
+  box-shadow:
+    0 2px 0 #1296a8,
+    inset 0 0 0 2px rgb(255 255 255 / 0.55);
+  transform: translateY(4px);
+}
+
+.skin-y2k .piano {
+  overflow: hidden;
+  border-radius: 14px;
+  box-shadow:
+    0 0 0 3px #fff,
+    0 6px 10px rgb(13 126 140 / 0.35);
+}
+.skin-y2k .piano-key[data-color="white"] {
+  background: linear-gradient(180deg, #fff, #d2eef3);
+  border-right: 1px solid #a8d4dd;
+}
+.skin-y2k .piano-key[data-color="black"] {
+  background: linear-gradient(180deg, #2b5d68, #0c2f38);
+  border-radius: 0 0 6px 6px;
+}
+.skin-y2k .piano-key[data-active] {
+  background: var(--accent);
+}
+
+.skin-y2k .toggle {
+  font:
+    700 0.7rem / 1 "Trebuchet MS",
+    system-ui,
+    sans-serif;
+  color: var(--ink);
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.8), rgb(255 255 255 / 0) 50%),
+    #7fe0ea;
+  border-radius: 999px;
+  box-shadow:
+    0 3px 0 #1296a8,
+    inset 0 0 0 2px rgb(255 255 255 / 0.55);
+}
+.skin-y2k .toggle[aria-pressed="true"] {
+  color: #fff;
+  background: var(--accent);
+  box-shadow:
+    0 1px 0 #1296a8,
+    inset 0 0 0 2px rgb(255 255 255 / 0.55);
+  transform: translateY(2px);
+}
+.skin-y2k {
+  --focus: var(--ink);
+  --waveform-color: #5aa7b3;
+}

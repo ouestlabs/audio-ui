@@ -1,0 +1,8 @@
+/* For the kit in the plain DOM (see core.md): what the React parts do for you */
+.knob-track,
+.knob-indicator {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 3;
+  stroke-linecap: round;
+}

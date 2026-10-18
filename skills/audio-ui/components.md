@@ -33,7 +33,7 @@ The pieces of any audio interface: controls, keyboards and displays. Each takes 
 | Name | Registry import | Package import | Use it for |
 | --- | --- | --- | --- |
 | `piano` | `Piano` from `@/components/audio-ui/piano` | `@audio-ui/react/piano` | A virtual keyboard with a MIDI pitch range, glissando, multi-touch, an `activeNotes` overlay |
-| `pad` | `Pad`, `PadItem` from `@/components/audio-ui/pad` | `@audio-ui/react/pad` | Drum pads to strike (on pointer down, so press them, don't `click`): velocity from pressure or height, `chokeGroup` to cut a ringing pad, `Space` or `Enter` on the focused pad, an `activePads` overlay |
+| `pad` | `Pad`, `PadItem` from `@/components/audio-ui/pad` | `@audio-ui/react/pad` | Drum pads to strike (on pointer down, so press them, don't `click`; `onPadOn(value, { velocity })` and `onPadOff(value)` carry the strike): velocity from pressure or height, `chokeGroup` to cut a ringing pad, `Space` or `Enter` on the focused pad, an `activePads` overlay |
 | `midi-connect-control` | `MidiConnectControl` from `@/components/audio-ui/midi-connect-control` | registry only | A button that connects the page's MIDI input, with the device's name beside it. Its `use-midi-input` hook gives the held notes (for `activeNotes`), note-on with velocity from 0 to 1, note-off and pitch bend |
 
 ### Displays
@@ -134,11 +134,29 @@ What makes the sound, on the Web Audio API: install each on its own, to `hooks/`
 | `use-transport-clock` | `useTransportClock` from `@/hooks/use-transport-clock` | Schedule notes ahead on the audio clock: `onStep(step, time)` on each step, a loop region, seek with `reanchor`, `getPosition` for a playhead |
 | `use-synth-voices` | `useSynthVoices` from `@/hooks/use-synth-voices` | Polyphonic voices shaped by an `Envelope`'s points: `triggerNote`, `releaseNote`, `releaseAll`, `setPitchBend` |
 | `envelope-ramp` | `scheduleEnvelopeRamp`, `sliceEnvelope` from `@/lib/envelope-ramp` | An envelope's points as a gain ramp on any `AudioParam` |
-| `drum-synthesis` | `triggerKick`, `triggerSnare`, `triggerHihat` from `@/lib/drum-synthesis` | Drum hits from oscillators and noise, no samples, with `tune` and `decay` |
+| `drum-synthesis` | `triggerKick`, `triggerSnare`, `triggerHihat` from `@/lib/drum-synthesis` | Drum hits from oscillators and noise, no samples: `triggerKick(ctx, destination, time, { tune, decay })`, the same for `triggerSnare` and `triggerHihat`, with `time` on the audio clock |
 | `use-midi-input` | `useMidiInput` from `@/hooks/use-midi-input` | The page's MIDI keyboard: note on with velocity, note off, pitch bend, `activeNotes` for a piano. Connect from a click |
 | `use-microphone` | `useMicrophone` from `@/hooks/use-microphone` | The microphone as an `AnalyserNode`, raw, never played out. Start it from a click |
 | `use-audio-levels` | `useAudioLevels` from `@/hooks/use-audio-levels` | Live levels and peaks from one analyser per channel, for a `Meter`'s `source`. Memoize the array |
 | `use-spectrum` | `useSpectrum`, `useSpectrumPeaks` from `@/hooks/use-spectrum` | A live spectrum on a log axis, for a `SpectrumAnalyzer` or a `PlotTrace` |
+
+## More pieces
+
+| Name | Import | Use it for |
+| --- | --- | --- |
+| `waveform-select` | `WaveformSelect` from `@/components/audio-ui/waveform-select` | A row of buttons, one per waveform, each drawn as its shape |
+| `filter-type-select` | `FilterTypeSelect` from `@/components/audio-ui/filter-type-select` | A row of buttons, one per filter type, each drawn as its response |
+| `curve-select` | `CurveSelect` from `@/components/audio-ui/curve-select` | A row of buttons, one per transfer curve, each drawn from the function you give it |
+| `play-toggle` | `PlayToggle` from `@/components/audio-ui/play-toggle` | A play and pause button for a demo signal |
+| `automation-envelope` | `AutomationEnvelope` from `@/components/audio-ui/automation-envelope` | A track's automation over its lane in a timeline, under the same zoom and scroll as the clips |
+| `clip-view`, `clip-panel`, `midi-clip-panel` | from `@/components/audio-ui/<name>` | The detail view of an arrangement's audio or MIDI clip: its strip, start and end, loop, and the waveform or notes |
+| `use-marquee-selection` | `useMarquee` from `@/hooks/use-marquee-selection` | A selection rectangle for the clips of a timeline |
+| `use-audio-signal` | `useAudioSignal` from `@/hooks/use-audio-signal` | An `AnalyserNode` as live signals for a waveform: loudest sample, frequency bands, raw samples |
+| `use-simulated-clock`, `use-simulated-levels`, `use-play-switch` | from `@/hooks/<name>` | A clock, levels and a play switch for a demo that makes no sound |
+| `use-device-loop`, `use-noise-through-eq`, `use-pulses-through-compressor` | `useDeviceLoop` and the others from `@/hooks/<name>` | A short loop of drums and plucked notes through an effect's engine, pink noise through an equalizer, or pulses through a compressor: what a device does, heard and measured |
+| `audio-decode` | `decodeAudioChannels` from `@/lib/audio-decode` | Decode an audio file into samples before `computePeaks` |
+| `key-detector`, `pink-noise`, `oversampling`, `synced-rate`, `demo-loop`, `device-measure` | from `@/lib/<name>` | The engine pieces of the devices: a key detector worklet, pink noise, oversampled waveshaping, a tempo-synced rate, a demo loop, measuring an engine against its panel |
+| `piano-roll-tools` | `createPianoRollTools` from `@/lib/piano-roll-tools` | Typed tools an AI model uses to edit a piano roll |
 
 ## Ready blocks
 

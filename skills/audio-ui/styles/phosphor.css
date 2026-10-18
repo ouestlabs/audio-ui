@@ -1,0 +1,194 @@
+/* PHOSPHOR: a monochrome terminal. One green on near-black, scanline grain, mono type, no radius. Built from the materials only. */
+.skin-phosphor {
+  --panel: #07110a;
+  --ink: #6dff9c;
+  --accent: #6dff9c;
+  --hi: #2f6d44;
+  --lo: #0b2314;
+  --lift: 0;
+  --dim: color-mix(in oklab, var(--ink) 52%, var(--panel));
+  --ok: #6dff9c;
+  --warn: #d9ff6d;
+  --clip: #ff6d6d;
+  padding: 1.5rem;
+  font-family: ui-monospace, "SF Mono", "Cascadia Mono", monospace;
+  color: var(--ink);
+  background:
+    repeating-linear-gradient(
+      180deg,
+      rgb(109 255 156 / 0.035) 0 1px,
+      transparent 1px 3px
+    ),
+    var(--panel);
+  border: 1px solid var(--dim);
+  border-radius: 0;
+}
+.skin-phosphor .panel-title {
+  font:
+    500 0.7rem / 1 ui-monospace,
+    monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.skin-phosphor .panel-title::before {
+  content: "> ";
+}
+
+.skin-phosphor .knob-control {
+  --knob-cap: 22%;
+  color: var(--dim);
+}
+.skin-phosphor .knob-track {
+  color: var(--lo);
+}
+.skin-phosphor .knob-indicator {
+  color: var(--ink);
+  filter: drop-shadow(0 0 2px rgb(109 255 156 / 0.6));
+}
+.skin-phosphor .knob-thumb {
+  background: var(--panel);
+  border: 1px solid var(--dim);
+  border-radius: 50%;
+}
+.skin-phosphor .knob-thumb::after {
+  position: absolute;
+  top: 4%;
+  left: 50%;
+  width: 2px;
+  height: 36%;
+  content: "";
+  background: var(--ink);
+  translate: -50% 0;
+}
+.skin-phosphor .knob-label,
+.skin-phosphor .knob-value {
+  font:
+    500 0.65rem / 1 ui-monospace,
+    monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.skin-phosphor .knob-value {
+  font-variant-numeric: tabular-nums;
+}
+.skin-phosphor .knob-value::before {
+  content: "[";
+}
+.skin-phosphor .knob-value::after {
+  content: "]";
+}
+.skin-phosphor .knob-tick {
+  display: none;
+}
+
+.skin-phosphor {
+  --fader-track: 3px;
+  --fader-thumb-w: 1.5rem;
+  --fader-thumb-h: 0.9rem;
+}
+.skin-phosphor .fader-track {
+  box-sizing: border-box;
+  background: var(--lo);
+  border: 1px solid var(--dim);
+}
+.skin-phosphor .fader-indicator {
+  width: 100%;
+  background: var(--ink);
+}
+.skin-phosphor .fader-thumb {
+  background: var(--panel);
+  border: 1px solid var(--ink);
+}
+.skin-phosphor .fader-control[data-dragging] .fader-thumb {
+  background: var(--ink);
+}
+
+.skin-phosphor {
+  --meter-w: 0.6rem;
+}
+.skin-phosphor .meter-channel {
+  box-sizing: border-box;
+  background: var(--zones-dim), var(--zones);
+  border: 1px solid var(--dim);
+  isolation: isolate;
+  -webkit-mask: var(--segments);
+  mask: var(--segments);
+}
+/* The indicator is a full-height bar scaled to the level, so paint nothing on it that must keep its size:
+   the zones live on the channel, dimmed, and the indicator lights them back up where it reaches */
+.skin-phosphor .meter-indicator {
+  background: var(--zones-lit);
+  mix-blend-mode: color-dodge;
+}
+.skin-phosphor .meter-peak {
+  height: 1px;
+  background: var(--ink);
+}
+
+.skin-phosphor .xypad-control {
+  background-image:
+    linear-gradient(var(--lo) 1px, transparent 1px),
+    linear-gradient(90deg, var(--lo) 1px, transparent 1px);
+  background-size: 25% 25%;
+  border: 1px solid var(--dim);
+}
+.skin-phosphor .xypad-thumb {
+  width: 0.75rem;
+  height: 0.75rem;
+  background: transparent;
+  border: 1px solid var(--ink);
+}
+.skin-phosphor .xypad-thumb::after {
+  position: absolute;
+  inset: 3px;
+  content: "";
+  background: var(--ink);
+}
+
+.skin-phosphor .pad {
+  font:
+    500 0.65rem / 1 ui-monospace,
+    monospace;
+  color: var(--dim);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: transparent;
+  border: 1px solid var(--dim);
+}
+.skin-phosphor .pad[data-active] {
+  color: var(--panel);
+  background: var(--ink);
+  border-color: var(--ink);
+}
+
+.skin-phosphor .piano {
+  border: 1px solid var(--dim);
+}
+.skin-phosphor .piano-key[data-color="white"] {
+  background: transparent;
+  border-right: 1px solid var(--dim);
+}
+.skin-phosphor .piano-key[data-color="black"] {
+  background: var(--dim);
+}
+.skin-phosphor .piano-key[data-active] {
+  background: var(--ink);
+}
+
+.skin-phosphor .toggle {
+  font:
+    500 0.65rem / 1 ui-monospace,
+    monospace;
+  color: var(--dim);
+  background: transparent;
+  border: 1px solid var(--dim);
+}
+.skin-phosphor .toggle[aria-pressed="true"] {
+  color: var(--panel);
+  background: var(--ink);
+  border-color: var(--ink);
+}
+.skin-phosphor {
+  --focus: var(--ink);
+  --waveform-color: #3d8c5c;
+}

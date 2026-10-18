@@ -1,0 +1,528 @@
+/* Structure: what each part needs to exist, whatever the skin. Copy first, then add one skin.
+   --strip-h sets the length of every fader and meter at once. */
+.knob {
+  position: relative;
+  display: inline-grid;
+  gap: 0.5rem;
+  justify-items: center;
+}
+.knob-control {
+  position: relative;
+  width: var(--knob-size, 4.5rem);
+  aspect-ratio: 1;
+  cursor: grab;
+}
+.knob-track,
+.knob-indicator {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.knob-thumb {
+  position: absolute;
+  inset: var(--knob-cap, 0);
+  pointer-events: none;
+}
+.knob-mark {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.knob-tick {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 1px;
+  height: 6px;
+  background: currentColor;
+  translate: -50% 0;
+}
+
+.fader {
+  display: inline-grid;
+  gap: calc(var(--fader-thumb-h, 1rem) / 2 + 0.5rem);
+  justify-items: center;
+}
+.fader-control {
+  position: relative;
+  width: 2.75rem;
+  height: var(--strip-h, 9.5rem);
+}
+.fader-track {
+  position: relative;
+  width: var(--fader-track, 0.375rem);
+  height: 100%;
+  margin-inline: auto;
+  overflow: hidden;
+}
+.fader-indicator {
+  position: absolute;
+}
+.fader-thumb {
+  position: absolute;
+  width: var(--fader-thumb-w, 2rem);
+  height: var(--fader-thumb-h, 1rem);
+}
+
+.meter {
+  display: flex;
+  gap: 3px;
+  height: var(--strip-h, 9.5rem);
+}
+.meter-channel {
+  position: relative;
+  width: var(--meter-w, 0.625rem);
+  height: 100%;
+  overflow: hidden;
+}
+.meter-indicator {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+.meter-peak {
+  position: absolute;
+  right: 0;
+  left: 0;
+  height: 2px;
+}
+
+.xypad-control {
+  position: relative;
+  width: 9.5rem;
+  height: 9.5rem;
+  overflow: hidden;
+}
+.xypad-thumb {
+  position: absolute;
+  width: 1rem;
+  height: 1rem;
+}
+
+.pads {
+  display: grid;
+  grid-template-columns: repeat(4, 4rem);
+  gap: 0.5rem;
+}
+.pad {
+  display: flex;
+  align-items: flex-end;
+  aspect-ratio: 1;
+  padding: 0.4rem;
+  font: 600 0.65rem / 1 system-ui;
+  cursor: pointer;
+}
+
+.piano {
+  position: relative;
+  display: block;
+  width: 14rem;
+  height: 5.5rem;
+}
+.piano-key {
+  position: absolute;
+  top: 0;
+}
+.piano-key[data-color="white"] {
+  height: 100%;
+}
+.piano-key[data-color="black"] {
+  z-index: 1;
+  height: 60%;
+}
+
+/* Layout of the example panel: a skin may override any of it */
+.panel {
+  --panel-pad: 1.75rem;
+  padding: var(--panel-pad);
+  border-radius: 1rem;
+}
+.panel-title {
+  margin: 0 0 1rem;
+}
+.panel-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.75rem;
+  align-items: flex-end;
+}
+.panel-row + .panel-row {
+  align-items: flex-start;
+  margin-top: 1.75rem;
+}
+
+/* Hit areas and focus: the nested input of a thumb takes the focus, so the thumb shows the ring */
+.fader-thumb::before,
+.xypad-thumb::before {
+  position: absolute;
+  inset: -0.5rem;
+  content: "";
+}
+.fader-thumb:has(:focus-visible),
+.knob-thumb:has(:focus-visible),
+.xypad-thumb:has(:focus-visible),
+.pad:focus-visible,
+.piano-key:focus-visible,
+.toggle:focus-visible {
+  outline: 2px solid var(--focus, var(--accent, currentColor));
+  outline-offset: 2px;
+}
+
+/* A toggle (mute, solo, power) is a plain button with aria-pressed: a skin draws both states */
+.toggle {
+  display: inline-grid;
+  place-items: center;
+  min-width: 2rem;
+  min-height: 2rem;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  border: 0;
+}
+
+/* A section groups related controls under a title cut into its line (a skin may restyle both) */
+.section {
+  position: relative;
+  padding: 1.1rem 1rem 0.9rem;
+  border: 1px solid color-mix(in oklab, currentColor 35%, transparent);
+}
+.section > .legend {
+  position: absolute;
+  top: 0;
+  left: 0.75rem;
+  padding: 0 0.4rem;
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  background: var(--legend-bg, var(--panel, canvas));
+  translate: 0 -50%;
+}
+
+/* A printed scale beside a fader or meter: set each label's position with style={{ bottom: "<percent>%" }} */
+.scale {
+  position: relative;
+  height: var(--strip-h, 9.5rem);
+  padding: 0;
+  margin: 0;
+  font-size: 0.55rem;
+  font-variant-numeric: tabular-nums;
+}
+.scale > li {
+  position: absolute;
+  list-style: none;
+  translate: 0 50%;
+}
+
+/* The cursor follows the drag: a knob dragged up and down is a fader, the others turn around the dial */
+.knob-control[data-drag-mode="vertical"] {
+  cursor: ns-resize;
+}
+.knob-control[data-dragging]:not([data-drag-mode="vertical"]) {
+  cursor: grabbing;
+}
+.knob-control[data-disabled] {
+  cursor: not-allowed;
+}
+
+/* Envelope: the structure, and a look drawn from the skin's own tokens so it fits any of them */
+.envelope {
+  position: relative;
+  width: 12rem;
+  height: 6rem;
+  background: color-mix(in oklab, currentColor 6%, transparent);
+  border: 1px solid color-mix(in oklab, currentColor 30%, transparent);
+}
+.envelope-graph {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.envelope-line {
+  fill: none;
+  stroke: var(
+    --focus,
+    var(--accent, var(--signal, var(--amber, currentColor)))
+  );
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+.envelope-fill {
+  fill: color-mix(
+    in oklab,
+    var(--accent, var(--signal, var(--amber, currentColor))) 22%,
+    transparent
+  );
+  stroke: none;
+}
+.envelope-point {
+  box-sizing: border-box;
+  width: 0.8rem;
+  height: 0.8rem;
+  background: var(--panel, canvas);
+  border: 2px solid var(--accent, var(--signal, var(--amber, currentColor)));
+  border-radius: 50%;
+}
+.envelope-point[data-dragging],
+.envelope-point:focus-visible {
+  outline: 2px solid var(--focus, currentColor);
+  outline-offset: 2px;
+  background: var(--accent, var(--signal, var(--amber, currentColor)));
+}
+
+/* An editable readout turns into an input while it is typed in */
+.knob-value[tabindex],
+.knob-value:has(input) {
+  cursor: text;
+}
+.knob-value input {
+  width: 5ch;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  text-align: center;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid currentColor;
+}
+.knob-value input:focus-visible {
+  outline: 2px solid var(--focus, var(--accent, currentColor));
+  outline-offset: 2px;
+}
+
+/* A segmented choice: a row of toggles that touch */
+.choice {
+  display: inline-flex;
+  gap: 2px;
+}
+
+/* Sequencer: a column of rows, each a line of equal cells. data-on is a lit step, data-current the playing one */
+.sequencer {
+  display: grid;
+  gap: 0.35rem;
+  touch-action: none;
+}
+.sequencer-row {
+  display: grid;
+  grid-auto-columns: minmax(1.1rem, 1.6rem);
+  grid-auto-flow: column;
+  gap: 0.25rem;
+}
+.step {
+  box-sizing: border-box;
+  height: 2rem;
+  padding: 0;
+  color: inherit;
+  cursor: pointer;
+  background: color-mix(in oklab, currentColor 6%, transparent);
+  border: 1px solid color-mix(in oklab, currentColor 35%, transparent);
+  border-radius: 2px;
+}
+.step[data-on] {
+  background: var(--accent, var(--signal, var(--amber, currentColor)));
+}
+.step[data-current] {
+  outline: 2px solid var(--focus, currentColor);
+  outline-offset: 1px;
+}
+.step:focus-visible {
+  outline: 2px solid var(--focus, var(--accent, currentColor));
+  outline-offset: 2px;
+}
+
+/* VU: a paper face, a red zone, a needle that swings from the --vu variable (0 to 1) */
+.vu {
+  display: grid;
+  gap: 0.4rem;
+  justify-items: center;
+  margin: 0;
+}
+.vu-face {
+  width: var(--vu-w, 11rem);
+  height: calc(var(--vu-w, 11rem) * 0.6);
+  color: #1d1a16;
+  background: var(--paper, #efe6c8);
+  border-radius: 4px;
+}
+.vu-arc,
+.vu-zone {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.2;
+}
+.vu-zone {
+  stroke: var(--clip, #c8372d);
+  stroke-width: 3;
+}
+.vu-needle {
+  --vu: 0;
+  stroke: currentColor;
+  stroke-width: 1;
+  transform-origin: var(--vu-pivot, 50px 72px);
+  transform-box: view-box;
+  rotate: calc(var(--vu) * 80deg - 40deg);
+  transition: rotate 300ms cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+.vu-hub {
+  fill: currentColor;
+}
+@media (prefers-reduced-motion: reduce) {
+  .vu-needle {
+    transition: none;
+  }
+}
+
+/* Waveform: the canvas draws the peaks, the playhead sits at --waveform-position (set inline by the part) */
+.waveform-control {
+  --waveform-color: var(--ink-dim, currentColor);
+  --waveform-progress-color: var(
+    --accent,
+    var(--signal, var(--amber, currentColor))
+  );
+  position: relative;
+  width: 20rem;
+  height: 5rem;
+  touch-action: none;
+  cursor: pointer;
+}
+.waveform-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.waveform-playhead {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--accent, var(--signal, var(--amber, currentColor)));
+}
+.waveform-thumb {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+}
+.waveform-control:has(:focus-visible) {
+  outline: 2px solid var(--focus, var(--accent, currentColor));
+  outline-offset: 2px;
+}
+
+/* Plot: Plot.Root has an inline position, so give it a size, and the svg fills it */
+.plot {
+  width: 20rem;
+  height: 8rem;
+  border: 1px solid color-mix(in oklab, currentColor 30%, transparent);
+}
+.plot-graph {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+.plot-grid {
+  stroke: color-mix(in oklab, currentColor 18%, transparent);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+.plot-area {
+  fill: color-mix(
+    in oklab,
+    var(--accent, var(--signal, var(--amber, currentColor))) 28%,
+    transparent
+  );
+  stroke: var(--accent, var(--signal, var(--amber, currentColor)));
+  stroke-width: 1.25;
+  vector-effect: non-scaling-stroke;
+}
+
+/* A name or number window: a preset name, a time, a tempo */
+.display {
+  display: inline-grid;
+  place-items: center;
+  min-width: 8rem;
+  padding: 0.35rem 0.7rem;
+  font-variant-numeric: tabular-nums;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* A visually hidden element that stays focusable: the native range input of a plain DOM control, a file input */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  white-space: nowrap;
+  border: 0;
+  clip-path: inset(50%);
+}
+
+/* A knob's label never wraps, and the numerals printed around a cap sit outside it, upright */
+.knob-label {
+  white-space: nowrap;
+}
+.knob-numeral {
+  position: absolute;
+  top: -1.7rem;
+  left: 50%;
+  font-size: 0.6rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  rotate: calc(var(--knob-mark-angle) * -1);
+  translate: -50% 0;
+}
+.knob:has(.knob-numeral) .knob-label {
+  margin-top: 1rem;
+}
+
+/* The darker strip along the foot of a unit: analog, mix, trim and pill selectors */
+.panel-footer {
+  --ink: #ecebe6;
+  --focus: #fff;
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  padding: 0.9rem 1.75rem;
+  margin: 1.75rem -1.75rem -1.75rem;
+  color: var(--ink);
+  background: linear-gradient(180deg, #26272a, #17181a);
+  border-top: 1px solid rgb(255 255 255 / 0.18);
+}
+
+/* A gain-reduction VU, 0 on the right: mirror the red zone to the left, and publish 1 - reduction to the source */
+.vu[data-reverse] .vu-zone {
+  transform-origin: 50px 0;
+  transform-box: view-box;
+  scale: -1 1;
+}
+
+/* A VU's print: the scale's numerals and ticks as SVG text and lines, sized in the face's own units */
+.vu-tick {
+  stroke: currentColor;
+  stroke-width: 0.8;
+}
+.vu-num {
+  font:
+    600 4px / 1 "Helvetica Neue",
+    Arial,
+    sans-serif;
+  text-anchor: middle;
+  fill: currentColor;
+}
+.vu-legend {
+  font:
+    600 3px / 1 "Helvetica Neue",
+    Arial,
+    sans-serif;
+  letter-spacing: 0.2;
+  text-anchor: middle;
+  fill: currentColor;
+}

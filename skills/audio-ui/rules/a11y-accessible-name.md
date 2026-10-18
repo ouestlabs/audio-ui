@@ -27,6 +27,8 @@ The primitives set the role, `aria-valuenow` and `aria-valuetext`. Only you know
 </div>
 ```
 
+On the headless primitives the slider is named by `Knob.Label` or `Fader.Label`, or by `aria-label` on the thumb: an `aria-label` on the Root names only a group.
+
 With several channels, a Meter names each one from its `aria-label` ("Master 1", "Master 2").
 
 The value text is announced too. `format` takes `Intl.NumberFormat` options such as `{ maximumFractionDigits: 1 }` or `{ style: "percent" }`, but `Intl` has no hertz or decibel unit, and an unknown unit throws while the control renders. Put the unit in `formatValue` on the registry Knob and Fader (it prints the readout and the announced text), or in `getAriaValueText` on the primitive's thumb:

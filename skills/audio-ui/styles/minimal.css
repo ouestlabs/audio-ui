@@ -1,0 +1,178 @@
+/* MINIMAL: no material at all. Hairlines, one accent, plenty of air, type does the work. */
+.skin-minimal {
+  --panel: var(--paper);
+  --paper: #f6f5f1;
+  --ink: #17181a;
+  --ink-dim: #6e6e69;
+  --line: #d9d7d0;
+  --accent: #e8452c;
+  padding: 2.25rem;
+  font-family: "Inter", "Helvetica Neue", system-ui, sans-serif;
+  color: var(--ink);
+  background: var(--paper);
+}
+.skin-minimal .panel-title {
+  font: 500 0.7rem / 1 system-ui;
+  color: var(--ink-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
+/* Knob: a hairline ring, the value as an arc, a single dot. No cap. */
+.skin-minimal .knob-control {
+  --knob-size: 4rem;
+  color: var(--ink);
+}
+.skin-minimal .knob-track {
+  color: var(--line);
+}
+.skin-minimal .knob-indicator {
+  color: var(--accent);
+}
+.skin-minimal .knob-thumb {
+  inset: 0;
+}
+.skin-minimal .knob-thumb::after {
+  position: absolute;
+  top: 16%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  content: "";
+  background: var(--ink);
+  border-radius: 50%;
+  translate: -50% 0;
+}
+.skin-minimal .knob-control[data-dragging] .knob-thumb::after {
+  background: var(--accent);
+  scale: 1.4;
+}
+.skin-minimal .knob-label {
+  font: 500 0.65rem / 1 system-ui;
+  color: var(--ink-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.skin-minimal .knob-value {
+  font:
+    400 0.8rem / 1 ui-monospace,
+    "SF Mono",
+    monospace;
+  font-variant-numeric: tabular-nums;
+}
+.skin-minimal .knob-tick {
+  display: none;
+}
+
+/* Fader: a hairline and a small square */
+.skin-minimal {
+  --fader-track: 1px;
+  --fader-thumb-w: 0.875rem;
+  --fader-thumb-h: 0.875rem;
+}
+.skin-minimal .fader-track {
+  background: var(--line);
+}
+.skin-minimal .fader-indicator {
+  width: 1px;
+  background: var(--ink);
+}
+.skin-minimal .fader-thumb {
+  background: var(--paper);
+  border: 1px solid var(--ink);
+  border-radius: 2px;
+  transition:
+    background 120ms,
+    scale 120ms;
+}
+.skin-minimal .fader-control[data-dragging] .fader-thumb {
+  background: var(--accent);
+  border-color: var(--accent);
+  scale: 1.12;
+}
+
+/* Meter: two thin bars, one colour change at the top */
+.skin-minimal {
+  --meter-w: 3px;
+}
+.skin-minimal .meter {
+  gap: 4px;
+}
+.skin-minimal .meter-channel {
+  background: var(--line);
+}
+.skin-minimal .meter-indicator {
+  background: var(--ink);
+}
+.skin-minimal .meter-channel[data-clipping] .meter-indicator,
+.skin-minimal .meter-channel[data-warning] .meter-indicator {
+  background: var(--accent);
+}
+.skin-minimal .meter-peak {
+  height: 1px;
+  background: var(--ink);
+}
+
+/* XY pad: a frame, a cross, a dot */
+.skin-minimal .xypad-control {
+  background:
+    linear-gradient(var(--line), var(--line)) 50% 0 / 1px 100% no-repeat,
+    linear-gradient(var(--line), var(--line)) 0 50% / 100% 1px no-repeat;
+  border: 1px solid var(--ink);
+  border-radius: 0;
+}
+.skin-minimal .xypad-thumb {
+  background: var(--accent);
+  border-radius: 50%;
+}
+
+/* Pads: outlined squares that fill when struck */
+.skin-minimal .pad {
+  color: var(--ink);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: transparent;
+  border: 1px solid var(--ink);
+  border-radius: 0;
+  transition:
+    background 80ms,
+    color 80ms;
+}
+.skin-minimal .pad[data-active] {
+  color: var(--paper);
+  background: var(--ink);
+}
+
+/* Keys: outlines only */
+.skin-minimal .piano {
+  border: 1px solid var(--ink);
+}
+.skin-minimal .piano-key[data-color="white"] {
+  background: var(--paper);
+  border-right: 1px solid var(--line);
+}
+.skin-minimal .piano-key[data-color="black"] {
+  background: var(--ink);
+}
+.skin-minimal .piano-key[data-active] {
+  background: var(--accent);
+}
+
+.skin-minimal .toggle {
+  font: 500 0.65rem / 1 system-ui;
+  color: var(--ink);
+  letter-spacing: 0.1em;
+  background: transparent;
+  border: 1px solid var(--ink);
+  border-radius: 0;
+  transition:
+    background 80ms,
+    color 80ms;
+}
+.skin-minimal .toggle[aria-pressed="true"] {
+  color: var(--paper);
+  background: var(--ink);
+}
+.skin-minimal {
+  --focus: var(--ink);
+}

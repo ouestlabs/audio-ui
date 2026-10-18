@@ -17,7 +17,7 @@ Edits a ramp made of breakpoints, such as an ADSR shape or an automation curve. 
 - **Point count:** points are added and removed between `minPoints` (default `2`, a start and an end) and `maxPoints`. Set both to the same number to fix the shape.
 - **Grid:** `snap` sets the grid that points snap to, for example `0.25` for quarters, or one step per axis, `{ x: 0.125, y: 0 }`, to snap across and leave the level free. Hold Cmd/Ctrl to move off the grid. Without `snap`, points move freely. The registry component draws the grid.
 - **Fine control:** hold Shift while dragging to move a point at a quarter of the pointer's speed. The registry component shows the point's value above it while it is dragged or focused.
-- **Accessibility:** the points share one tab stop. The arrow keys move the focused point, and Delete or Backspace removes it. Each point is a `role="slider"`. The registry component names the points "Point n of N". With the primitive, set `aria-label` and `getAriaValueText` yourself.
+- **Accessibility:** the points share one tab stop. The arrow keys move the focused point, Page Up and Page Down (or Home and End) move between points, and Delete or Backspace removes it. Each point is a `role="slider"`. The registry component names the points "Point n of N". With the primitive, set `aria-label` and `getAriaValueText` yourself.
 
 ## Installation
 
@@ -102,6 +102,8 @@ The points share one tab stop. On the focused point:
 <KeyRow gesture={"`ArrowUp` / `ArrowDown`"}>Nudge the focused point's `y` by `step`</KeyRow>
 <KeyRow gesture={"`ArrowLeft` / `ArrowRight`"}>Nudge the focused point's `x` by `step` (clamped between neighbors)</KeyRow>
 <KeyRow gesture={"`Shift` + arrow"}>Nudge by 10 steps</KeyRow>
+<KeyRow gesture={"`PageUp` / `PageDown`"}>Move focus to the next or previous point</KeyRow>
+<KeyRow gesture={"`Home` / `End`"}>Move focus to the first or last point</KeyRow>
 <KeyRow gesture={"`Delete` / `Backspace`"}>Remove the focused point, unless at `minPoints`</KeyRow>
 </KeyTable>
 

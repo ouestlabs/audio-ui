@@ -75,6 +75,7 @@ export function Root(componentProps: Root.Props) {
   const state = React.useMemo<Root.State>(
     () => ({
       disabled: snapshot.disabled,
+      dragMode: snapshot.dragMode,
       dragging: snapshot.dragging,
       max: snapshot.max,
       min: snapshot.min,
@@ -113,6 +114,8 @@ export function Root(componentProps: Root.Props) {
 export namespace Root {
   export type State = {
     disabled: boolean;
+    /** How a pointer drag turns into value, exposed as `data-drag-mode` so a style can pick the cursor. */
+    dragMode: DragMode;
     /** Whether a pointer is dragging the knob. */
     dragging: boolean;
     max: number;

@@ -30,12 +30,17 @@ The section ID (in parentheses) is the filename prefix used to group rules.
 **Impact:** HIGH  
 **Description:** Vue, Svelte, Solid, Angular, web components or the plain DOM: the same controls built on the framework-free controllers of `@audio-ui/core`.
 
-## 6. Styling (style)
+## 6. Design (design)
+
+**Impact:** HIGH  
+**Description:** Making the headless primitives look like something: one visual direction (retro hardware, minimal, modern), the structure each part needs, and the habits that make a panel read as an instrument.
+
+## 7. Styling (style)
 
 **Impact:** MEDIUM  
 **Description:** Styling the registry components through their props and tokens, and the headless primitives through their state.
 
-## 7. AI Control (ai)
+## 8. AI Control (ai)
 
 **Impact:** MEDIUM  
 **Description:** Letting a model operate the components through typed tools that edit the same state a person does.
