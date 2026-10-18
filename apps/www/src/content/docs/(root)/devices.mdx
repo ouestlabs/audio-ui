@@ -101,6 +101,16 @@ import { CompressorPanel } from "@/components/audio-ui/devices/compressor/panel"
 
 Most panels draw something the state means, such as a transfer curve, a frequency response or a set of echoes, with a handle you drag, over the knobs. The knobs come from the descriptors of the device, with their ranges, steps and readouts.
 
+## One device, several skins
+
+The panel is a view over the descriptors of the device, so a skin changes how it looks and nothing else: the same state, the same engine, the same values. The compressor, drawn with the Nova style:
+
+<ComponentPreview styleName="base-nova" name="block-compressor" />
+
+and with the Vega style, from the same device and the same panel:
+
+<ComponentPreview styleName="base-vega" name="block-compressor" />
+
 ## The engine
 
 ```ts
