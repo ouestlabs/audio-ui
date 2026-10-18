@@ -21,7 +21,7 @@ describe("the icons page", () => {
     expect(mdx).toContain("<IconCatalog />");
     const expanded = expandIconCatalog(mdx);
     expect(expanded).not.toContain("<IconCatalog");
-    expect(expanded).toContain("| Knob | `KnobIcon` | Audio |");
+    expect(expanded).toContain("| Knob | `KnobIcon` | Controls |");
   });
 
   test("a keyword is how a reader finds an icon, and no two icons share a name", () => {

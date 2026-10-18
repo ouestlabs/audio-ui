@@ -4,44 +4,77 @@ import {
   BandpassIcon,
   BotIcon,
   BracesIcon,
+  CompressorIcon,
+  DelayIcon,
+  DistortionIcon,
   EnvelopeIcon,
   FaderIcon,
   FadersIcon,
+  GaugeIcon,
   GridIcon,
   type glyphs,
+  HeadphonesIcon,
   HighpassIcon,
   HighshelfIcon,
   JackIcon,
   KnobIcon,
+  LoopIcon,
   LowpassIcon,
   LowshelfIcon,
+  MeterIcon,
   MetronomeIcon,
+  MicIcon,
+  MidiIcon,
   NotchIcon,
+  PadIcon,
   PatchbayIcon,
+  PauseIcon,
   PeakIcon,
+  PianoIcon,
+  PianoRollIcon,
   PlayheadIcon,
+  PlayIcon,
+  PlotIcon,
   RackIcon,
+  RecordIcon,
+  ReverbIcon,
   SawtoothIcon,
+  ScopeIcon,
+  SequencerIcon,
   ShapesIcon,
   SineIcon,
   SparkleIcon,
+  SpeakerIcon,
+  SpectrumIcon,
   SquareIcon,
+  StopIcon,
   TracksIcon,
   TriangleIcon,
   TuningForkIcon,
   WaveformIcon,
+  XypadIcon,
 } from "./icons.ts";
 
 export type IconCategory =
   | "Agents"
-  | "Audio"
+  | "Controls"
+  | "Displays"
   | "Docs"
+  | "Editors"
+  | "Effects"
   | "Filters"
-  | "Oscillators";
+  | "Oscillators"
+  | "Signal"
+  | "Transport";
 
 /** The order the catalog lists the categories in. */
 export const categories: readonly IconCategory[] = [
-  "Audio",
+  "Controls",
+  "Displays",
+  "Transport",
+  "Editors",
+  "Signal",
+  "Effects",
   "Oscillators",
   "Filters",
   "Docs",
@@ -74,27 +107,78 @@ const entry = (
 
 /** Every icon of the package, by category. */
 export const catalog: readonly IconEntry[] = [
-  entry("Knob", KnobIcon, "Audio", ["control", "dial", "rotary", "parameter"]),
-  entry("Tracks", TracksIcon, "Audio", [
+  entry("Knob", KnobIcon, "Controls", [
+    "control",
+    "dial",
+    "rotary",
+    "parameter",
+  ]),
+  entry("Tracks", TracksIcon, "Editors", [
     "arrangement",
     "clips",
     "timeline",
     "daw",
   ]),
-  entry("Rack", RackIcon, "Audio", ["device", "plugin", "effect", "unit"]),
-  entry("Faders", FadersIcon, "Audio", [
+  entry("Rack", RackIcon, "Effects", ["device", "plugin", "effect", "unit"]),
+  entry("Faders", FadersIcon, "Controls", [
     "mixer",
     "levels",
     "channels",
     "sliders",
   ]),
-  entry("Waveform", WaveformIcon, "Audio", [
+  entry("Waveform", WaveformIcon, "Displays", [
     "engine",
     "signal",
     "bars",
     "meter",
   ]),
-  entry("Envelope", EnvelopeIcon, "Audio", ["adsr", "automation", "curve"]),
+  entry("Envelope", EnvelopeIcon, "Editors", ["adsr", "automation", "curve"]),
+  entry("XYPad", XypadIcon, "Controls", [
+    "pad",
+    "two values",
+    "position",
+    "xy",
+  ]),
+  entry("Pad", PadIcon, "Controls", ["drum", "trigger", "strike", "velocity"]),
+  entry("Piano", PianoIcon, "Controls", ["keyboard", "keys", "notes"]),
+  entry("Meter", MeterIcon, "Displays", ["level", "peak", "vu", "bar"]),
+  entry("Gauge", GaugeIcon, "Displays", ["needle", "vu", "dial", "tuner"]),
+  entry("Spectrum", SpectrumIcon, "Displays", [
+    "analyzer",
+    "frequency",
+    "fft",
+    "bars",
+  ]),
+  entry("Scope", ScopeIcon, "Displays", ["oscilloscope", "signal", "trace"]),
+  entry("Plot", PlotIcon, "Displays", ["graph", "curve", "axes", "eq"]),
+  entry("Play", PlayIcon, "Transport", ["start", "run"]),
+  entry("Pause", PauseIcon, "Transport", ["hold"]),
+  entry("Stop", StopIcon, "Transport", ["halt", "end"]),
+  entry("Record", RecordIcon, "Transport", ["arm", "capture"]),
+  entry("Loop", LoopIcon, "Transport", ["repeat", "cycle", "region"]),
+  entry("Mic", MicIcon, "Signal", ["microphone", "input", "voice"]),
+  entry("Speaker", SpeakerIcon, "Signal", ["output", "monitor", "loudspeaker"]),
+  entry("Headphones", HeadphonesIcon, "Signal", ["output", "cue", "monitor"]),
+  entry("Midi", MidiIcon, "Signal", ["din", "keyboard", "controller", "plug"]),
+  entry("Sequencer", SequencerIcon, "Editors", [
+    "steps",
+    "pattern",
+    "drum machine",
+  ]),
+  entry("PianoRoll", PianoRollIcon, "Editors", ["notes", "midi", "editor"]),
+  entry("Compressor", CompressorIcon, "Effects", [
+    "dynamics",
+    "curve",
+    "knee",
+    "ratio",
+  ]),
+  entry("Delay", DelayIcon, "Effects", ["echo", "repeat", "feedback"]),
+  entry("Reverb", ReverbIcon, "Effects", ["room", "space", "tail"]),
+  entry("Distortion", DistortionIcon, "Effects", [
+    "overdrive",
+    "clip",
+    "saturation",
+  ]),
   entry("Sine", SineIcon, "Oscillators", ["wave", "oscillator", "smooth"]),
   entry("Square", SquareIcon, "Oscillators", ["wave", "oscillator", "pulse"]),
   entry("Sawtooth", SawtoothIcon, "Oscillators", [
@@ -116,7 +200,7 @@ export const catalog: readonly IconEntry[] = [
     "treble",
   ]),
   entry("Peak", PeakIcon, "Filters", ["filter", "eq", "bell", "band"]),
-  entry("Metronome", MetronomeIcon, "Docs", [
+  entry("Metronome", MetronomeIcon, "Transport", [
     "start",
     "begin",
     "count in",
@@ -129,13 +213,13 @@ export const catalog: readonly IconEntry[] = [
     "reference",
     "pitch",
   ]),
-  entry("Jack", JackIcon, "Docs", [
+  entry("Jack", JackIcon, "Signal", [
     "install",
     "installation",
     "plug",
     "connect",
   ]),
-  entry("Patchbay", PatchbayIcon, "Docs", [
+  entry("Patchbay", PatchbayIcon, "Signal", [
     "registry",
     "sockets",
     "patch",
@@ -143,8 +227,8 @@ export const catalog: readonly IconEntry[] = [
   ]),
   entry("Shapes", ShapesIcon, "Docs", ["primitives", "circle", "square"]),
   entry("Braces", BracesIcon, "Docs", ["code", "headless", "css", "curly"]),
-  entry("Fader", FaderIcon, "Docs", ["theme", "tokens", "values", "mixer"]),
-  entry("Playhead", PlayheadIcon, "Docs", [
+  entry("Fader", FaderIcon, "Controls", ["theme", "tokens", "values", "mixer"]),
+  entry("Playhead", PlayheadIcon, "Editors", [
     "roadmap",
     "timeline",
     "plan",
