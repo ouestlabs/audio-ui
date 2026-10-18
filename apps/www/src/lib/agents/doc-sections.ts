@@ -15,8 +15,9 @@ export function sectionSlug(heading: string) {
     .replace(/^-+|-+$/g, "");
 }
 
-function sections(markdown: string) {
-  const found: { lines: string[]; slug: string }[] = [];
+/** The sections of a page: each with its heading, its slug and the lines it holds, heading first. */
+export function readSections(markdown: string) {
+  const found: { heading: string; lines: string[]; slug: string }[] = [];
   let fenced = false;
   for (const line of markdown.split("\n")) {
     if (FENCE.test(line)) {
@@ -24,7 +25,8 @@ function sections(markdown: string) {
     }
     const heading = fenced ? null : H2.exec(line);
     if (heading) {
-      found.push({ lines: [line], slug: sectionSlug(heading[1] ?? "") });
+      const title = heading[1] ?? "";
+      found.push({ heading: title, lines: [line], slug: sectionSlug(title) });
     } else {
       found.at(-1)?.lines.push(line);
     }
@@ -34,11 +36,11 @@ function sections(markdown: string) {
 
 /** The slugs of a page's sections, in order. */
 export function sectionNames(markdown: string) {
-  return sections(markdown).map((section) => section.slug);
+  return readSections(markdown).map((section) => section.slug);
 }
 
 /** The Markdown of the section with this slug, or nothing when the page has none. */
 export function pickSection(markdown: string, slug: string) {
-  const section = sections(markdown).find((item) => item.slug === slug);
+  const section = readSections(markdown).find((item) => item.slug === slug);
   return section?.lines.join("\n").trimEnd();
 }
