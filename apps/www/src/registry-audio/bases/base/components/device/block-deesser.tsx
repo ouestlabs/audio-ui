@@ -9,7 +9,6 @@ import {
   deesserDevice,
 } from "@/registry-audio/bases/base/lib/deesser-device";
 import { createDeesserEngine } from "@/registry-audio/bases/base/lib/deesser-engine";
-import { renderSibilantLoop } from "@/registry-audio/bases/base/lib/demo-sound";
 
 const MASTER_VOLUME = 0.7;
 
@@ -27,7 +26,7 @@ export default function BlockDeesser() {
   useDeviceLoop({
     create: createDeesserEngine,
     destination: master,
-    signal: renderSibilantLoop,
+    source: "voice",
     state,
   });
   return (
