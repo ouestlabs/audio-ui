@@ -1,6 +1,11 @@
 import * as React from "react";
 import { ComponentSource } from "@/components/code/source/component-source";
 import { ComponentPreviewTabs } from "@/components/preview/component/component-preview-tabs";
+import {
+  ShowPartsArea,
+  ShowPartsProvider,
+  ShowPartsToggle,
+} from "@/components/preview/component/show-parts";
 import { PreviewLoading } from "@/components/preview/frame/preview-frame";
 import { getPreviewHint } from "@/lib/docs/menu/preview-hint";
 import { isBlock, isExpandable } from "@/lib/registry/catalog/is-block";
@@ -49,43 +54,48 @@ export function ComponentPreview({
   }
 
   return (
-    <ComponentPreviewTabs
-      align={align}
-      chromeLessOnMobile={chromeLessOnMobile}
-      className={className}
-      component={
-        <React.Suspense fallback={<PreviewLoading />}>
-          <Component />
-        </React.Suspense>
-      }
-      expand={isExpandable(name)}
-      fitContent={isBlock(name)}
-      hideCode={hideCode}
-      hint={getPreviewHint(name)}
-      name={name}
-      previewClassName={previewClassName}
-      source={
-        <ComponentSource
-          code={code}
-          collapsible={false}
-          iconLibrary={iconLibrary}
-          name={name}
-          showCopyButton
-          styleName={styleName}
-        />
-      }
-      sourcePreview={
-        <ComponentSource
-          code={code}
-          collapsible={false}
-          iconLibrary={iconLibrary}
-          maxLines={3}
-          name={name}
-          showCopyButton={false}
-          styleName={styleName}
-        />
-      }
-      {...props}
-    />
+    <ShowPartsProvider>
+      <ComponentPreviewTabs
+        actions={<ShowPartsToggle />}
+        align={align}
+        chromeLessOnMobile={chromeLessOnMobile}
+        className={className}
+        component={
+          <React.Suspense fallback={<PreviewLoading />}>
+            <ShowPartsArea>
+              <Component />
+            </ShowPartsArea>
+          </React.Suspense>
+        }
+        expand={isExpandable(name)}
+        fitContent={isBlock(name)}
+        hideCode={hideCode}
+        hint={getPreviewHint(name)}
+        name={name}
+        previewClassName={previewClassName}
+        source={
+          <ComponentSource
+            code={code}
+            collapsible={false}
+            iconLibrary={iconLibrary}
+            name={name}
+            showCopyButton
+            styleName={styleName}
+          />
+        }
+        sourcePreview={
+          <ComponentSource
+            code={code}
+            collapsible={false}
+            iconLibrary={iconLibrary}
+            maxLines={3}
+            name={name}
+            showCopyButton={false}
+            styleName={styleName}
+          />
+        }
+        {...props}
+      />
+    </ShowPartsProvider>
   );
 }
