@@ -11,8 +11,6 @@ import {
   formatHz,
 } from "@audio-ui/core/analysis";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { IconPlaceholder } from "@/components/icon-placeholder";
-import { Button } from "@/registry/bases/base/ui/button";
 import {
   Popover,
   PopoverContent,
@@ -383,8 +381,8 @@ export default function PlotDemo() {
       )
     );
   }, []);
-  const band = bands[selected];
-  const { analyser, playing, toggle } = useNoiseThroughEq(bands);
+  const _band = bands[selected];
+  const { analyser } = useNoiseThroughEq(bands);
   const spectrum = useSpectrum(analyser, { maxHz: MAX_HZ, minHz: MIN_HZ });
 
   return (
@@ -440,39 +438,6 @@ export default function PlotDemo() {
           />
         ))}
       </Plot>
-      <div className="flex items-center justify-between gap-2">
-        <Button
-          aria-label={
-            playing ? "Stop the noise" : "Play pink noise through the equalizer"
-          }
-          onClick={toggle}
-          size="icon-sm"
-          variant="outline"
-        >
-          {playing ? (
-            <IconPlaceholder
-              hugeicons="PauseIcon"
-              lucide="PauseIcon"
-              phosphor="PauseIcon"
-              remixicon="RiPauseLine"
-              tabler="IconPlayerPause"
-            />
-          ) : (
-            <IconPlaceholder
-              hugeicons="PlayIcon"
-              lucide="PlayIcon"
-              phosphor="PlayIcon"
-              remixicon="RiPlayLine"
-              tabler="IconPlayerPlay"
-            />
-          )}
-        </Button>
-        <output className="font-mono text-muted-foreground text-xs">
-          Band {selected + 1}: {formatHz(band?.frequency ?? 0)},{" "}
-          {formatDb(band?.gainDb ?? 0)}
-          {band?.q === undefined ? "" : `, Q ${band.q.toFixed(1)}`}
-        </output>
-      </div>
     </div>
   );
 }

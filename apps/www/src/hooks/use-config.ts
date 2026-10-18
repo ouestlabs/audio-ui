@@ -18,7 +18,7 @@ import type {
 export type Config = {
   // App preferences (not synced with URL)
   packageManager: "npm" | "yarn" | "pnpm" | "bun";
-  installationType: "cli" | "manual";
+  installationType: "agent" | "cli" | "manual";
 
   // Design system params (synced with URL)
   base: BaseName;

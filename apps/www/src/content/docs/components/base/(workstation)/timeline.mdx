@@ -24,15 +24,15 @@ The base for an arrangement view, a clip editor or a piano roll. The preview is 
 <CodeTabs>
 
 <TabsList>
-  <TabsTrigger value="cli">CLI</TabsTrigger>
-  <TabsTrigger value="manual">Manual</TabsTrigger>
+  <TabsTrigger value="cli"><Icons.shadcn className="size-3.5" /> CLI</TabsTrigger>
+  <TabsTrigger value="manual"><Icons.react className="size-3.5" /> Manual</TabsTrigger>
+  <TabsTrigger value="agent"><Icons.sparkle className="size-3.5" /> Agent</TabsTrigger>
 </TabsList>
 
 <TabsContent value="cli">
 
 ```bash component
 npx shadcn@latest add @audio-ui/timeline
-npm install @audio-ui/core
 ```
 
 </TabsContent>
@@ -58,6 +58,12 @@ npm install @audio-ui/react
 <Step>Update the import paths to match your project setup.</Step>
 
 </Steps>
+
+</TabsContent>
+
+<TabsContent value="agent">
+
+<InstallAgent name="timeline" />
 
 </TabsContent>
 

@@ -14,8 +14,9 @@ A channel strip per track and a master, built from the [Knob](/docs/components/b
 <CodeTabs>
 
 <TabsList>
-  <TabsTrigger value="cli">CLI</TabsTrigger>
-  <TabsTrigger value="manual">Manual</TabsTrigger>
+  <TabsTrigger value="cli"><Icons.shadcn className="size-3.5" /> CLI</TabsTrigger>
+  <TabsTrigger value="manual"><Icons.react className="size-3.5" /> Manual</TabsTrigger>
+  <TabsTrigger value="agent"><Icons.sparkle className="size-3.5" /> Agent</TabsTrigger>
 </TabsList>
 
 <TabsContent value="cli">
@@ -53,6 +54,12 @@ npx shadcn@latest add @audio-ui/fader @audio-ui/knob @audio-ui/meter @audio-ui/u
 <Step>Update the import paths to match your project setup.</Step>
 
 </Steps>
+
+</TabsContent>
+
+<TabsContent value="agent">
+
+<InstallAgent name="mixer" />
 
 </TabsContent>
 

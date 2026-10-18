@@ -8,7 +8,9 @@ import {
 } from "@phosphor-icons/react/ssr";
 import { useCallback } from "react";
 import { CopyRegistry } from "@/components/code/copy/copy-registry";
+import { MicrophoneSwitch } from "@/components/preview/controls/microphone-switch";
 import { MidiConnect } from "@/components/preview/controls/midi-connect";
+import { PlaySwitch } from "@/components/preview/controls/play-switch";
 import {
   HostSlot,
   type PreviewHost,
@@ -29,7 +31,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { takesMidi } from "@/lib/registry/catalog/is-block";
+import {
+  takesMicrophone,
+  takesMidi,
+  takesPlay,
+} from "@/lib/registry/catalog/is-block";
 import { cn } from "@/lib/utils";
 
 /** The floating menus a block opens: they sit outside the dialog's DOM, though the block is inside it. */
@@ -113,6 +119,8 @@ export function ExpandPreview({
               <span className="sr-only">{label}</span>
             </DialogTitle>
             <div className="flex items-center gap-1.5">
+              {takesPlay(label) ? <PlaySwitch /> : null}
+              {takesMicrophone(label) ? <MicrophoneSwitch /> : null}
               {takesMidi(label) ? <MidiConnect /> : null}
               <CopyRegistry value={`@audio-ui/${label}`} />
               <DialogClose

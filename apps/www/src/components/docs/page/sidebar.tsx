@@ -3,6 +3,7 @@
 import { CaretDownIcon } from "@phosphor-icons/react/ssr";
 import { Link } from "@tanstack/react-router";
 import * as React from "react";
+import { GroupIcon, PageIcon } from "@/components/site/navigation/group-icon";
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -53,11 +54,13 @@ function DocsUpdateIndicator({ path }: { path: string }) {
 /** A group's title; a space's folds its pages away and back. */
 function GroupLabel({
   collapsible,
+  current,
   onOpenChange,
   open,
   title,
 }: {
   collapsible: boolean;
+  current: boolean;
   onOpenChange: (title: string, open: boolean) => void;
   open: boolean;
   title: string;
@@ -68,7 +71,8 @@ function GroupLabel({
   );
   if (!collapsible) {
     return (
-      <SidebarGroupLabel className="font-semibold text-site-foreground">
+      <SidebarGroupLabel className="gap-2 font-semibold text-site-foreground">
+        <GroupIcon current={current} title={title} />
         {title}
       </SidebarGroupLabel>
     );
@@ -78,7 +82,10 @@ function GroupLabel({
       className="w-full cursor-pointer justify-between font-semibold text-site-foreground hover:bg-site-muted"
       render={<button aria-expanded={open} onClick={toggle} type="button" />}
     >
-      {title}
+      <span className="flex items-center gap-2">
+        <GroupIcon current={current} title={title} />
+        {title}
+      </span>
       <CaretDownIcon
         aria-hidden="true"
         className={cn(
@@ -105,6 +112,7 @@ export function DocsNavigation({
         <SidebarGroup key={group.title}>
           <GroupLabel
             collapsible={group.collapsible}
+            current={group.current}
             onOpenChange={setOpen}
             open={group.open}
             title={group.title ?? ""}
@@ -140,6 +148,7 @@ export function DocsNavigation({
                               >
                                 <span className="pointer-events-none absolute inset-0 flex w-(--sidebar-width) bg-transparent" />
                                 <span className="relative z-10 inline-flex items-center gap-2">
+                                  <PageIcon url={page.url} />
                                   <span>{page.name}</span>
                                   <DocsUpdateIndicator path={page.url} />
                                 </span>

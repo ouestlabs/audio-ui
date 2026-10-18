@@ -1,7 +1,8 @@
 "use client";
 
 import { createSource, type Source } from "@audio-ui/react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { usePlaySwitch } from "@/registry-audio/bases/base/hooks/use-play-switch";
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 const LOOP_SECONDS = 2;
@@ -45,16 +46,15 @@ function pulses(ctx: AudioContext): AudioBuffer {
  * A looping pulse played through a compressor that follows `controls`, with
  * the level going in as a live source in dB, falling back between pulses.
  * Pair it with a transfer curve's `Plot.Dot`: the dot rides the curve as the
- * level moves. Stops when the component unmounts.
+ * level moves. It plays while the page's play switch is on (`usePlaySwitch`),
+ * and stops when it goes off or when the component unmounts.
  */
 export function usePulsesThroughCompressor(controls: CompressorControls) {
-  const [playing, setPlaying] = useState(false);
+  const { playing } = usePlaySwitch();
   const [level] = useState(() => createSource(FLOOR_DB));
   const compressorRef = useRef<DynamicsCompressorNode | null>(null);
   const controlsRef = useRef(controls);
   controlsRef.current = controls;
-
-  const toggle = useCallback(() => setPlaying((on) => !on), []);
 
   useEffect(() => {
     if (!playing) {
@@ -136,5 +136,5 @@ export function usePulsesThroughCompressor(controls: CompressorControls) {
     );
   }, [controls]);
 
-  return { level: level as Source<number>, playing, toggle };
+  return { level: level as Source<number> };
 }

@@ -26,8 +26,9 @@ Components for drawing audio. `Waveform` shows a whole file and lets you scrub t
 <CodeTabs>
 
 <TabsList>
-  <TabsTrigger value="cli">CLI</TabsTrigger>
-  <TabsTrigger value="manual">Manual</TabsTrigger>
+  <TabsTrigger value="cli"><Icons.shadcn className="size-3.5" /> CLI</TabsTrigger>
+  <TabsTrigger value="manual"><Icons.react className="size-3.5" /> Manual</TabsTrigger>
+  <TabsTrigger value="agent"><Icons.sparkle className="size-3.5" /> Agent</TabsTrigger>
 </TabsList>
 
 <TabsContent value="cli">
@@ -61,6 +62,12 @@ npm install @audio-ui/react
 <Step>Update the import paths to match your project setup.</Step>
 
 </Steps>
+
+</TabsContent>
+
+<TabsContent value="agent">
+
+<InstallAgent name="waveform" />
 
 </TabsContent>
 

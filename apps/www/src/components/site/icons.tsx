@@ -1,8 +1,10 @@
+import { SparkleIcon } from "@audio-ui/icons";
 import { FileIcon } from "@phosphor-icons/react/ssr";
 
-type IconProps = React.HTMLAttributes<SVGElement>;
+type IconProps = React.SVGAttributes<SVGElement>;
 
 export const Icons = {
+  sparkle: SparkleIcon,
   apple: (props: IconProps) => (
     <svg aria-hidden="true" viewBox="0 0 24 24" {...props}>
       <path
@@ -182,15 +184,14 @@ export const Icons = {
   npm: (props: IconProps) => (
     <svg
       aria-hidden="true"
-      fill="none"
-      viewBox="0 0 32 32"
+      viewBox="0 0 2500 2500"
       xmlns="http://www.w3.org/2000/svg"
       {...props}
     >
-      <path d="M0 10V20H9V22H16V20H32V10H0Z" fill="#CB3837" />
+      <path d="M0 0h2500v2500H0z" fill="#c00" />
       <path
-        d="M5.46205 12H2V18H5.46205V13.6111H7.22344V18H8.98482V12H5.46205ZM10.7462 12V20H14.269V18H17.731V12H10.7462ZM15.9696 16.3889H14.269V13.6111H15.9696V16.3889ZM22.9545 12H19.4924V18H22.9545V13.6111H24.7158V18H26.4772V13.6111H28.2386V18H30V12H22.9545Z"
-        fill="white"
+        d="M1241.5 268.5h-973v1962.9h972.9V763.5h495v1467.9h495V268.5z"
+        fill="#fff"
       />
     </svg>
   ),
@@ -350,6 +351,18 @@ export const Icons = {
           fill="#FFFFFF"
         />
       </g>
+    </svg>
+  ),
+  mcp: (props: IconProps) => (
+    <svg
+      aria-hidden="true"
+      fill="currentColor"
+      viewBox="0 0 24 24"
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+    >
+      <path d="M15.688 2.343a2.588 2.588 0 00-3.61 0l-9.626 9.44a.863.863 0 01-1.203 0 .823.823 0 010-1.18l9.626-9.44a4.313 4.313 0 016.016 0 4.116 4.116 0 011.204 3.54 4.3 4.3 0 013.609 1.18l.05.05a4.115 4.115 0 010 5.9l-8.706 8.537a.274.274 0 000 .393l1.788 1.754a.823.823 0 010 1.18.863.863 0 01-1.203 0l-1.788-1.753a1.92 1.92 0 010-2.754l8.706-8.538a2.47 2.47 0 000-3.54l-.05-.049a2.588 2.588 0 00-3.607-.003l-7.172 7.034-.002.002-.098.097a.863.863 0 01-1.204 0 .823.823 0 010-1.18l7.273-7.133a2.47 2.47 0 00-.003-3.537z" />
+      <path d="M14.485 4.703a.823.823 0 000-1.18.863.863 0 00-1.204 0l-7.119 6.982a4.115 4.115 0 000 5.9 4.314 4.314 0 006.016 0l7.12-6.982a.823.823 0 000-1.18.863.863 0 00-1.204 0l-7.119 6.982a2.588 2.588 0 01-3.61 0 2.47 2.47 0 010-3.54l7.12-6.982z" />
     </svg>
   ),
 };

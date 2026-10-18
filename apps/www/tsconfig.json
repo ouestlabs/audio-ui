@@ -22,6 +22,7 @@
         "../../packages/core/src/primitives/*/index.ts",
         "../../packages/core/src/audio/*/index.ts"
       ],
+      "@audio-ui/icons": ["../../packages/icons/src/index.ts"],
       "@audio-ui/react": ["../../packages/ui/src/index.ts"],
       "fumadocs-mdx:collections/*": ["./.source/*"]
     },

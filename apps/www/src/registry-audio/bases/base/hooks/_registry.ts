@@ -194,9 +194,38 @@ export const hooks: RegistryItem[] = [
     type: "registry:hook",
   },
   {
+    categories: ["audio", "waveform"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "An AnalyserNode as live signals for a waveform: the loudest sample of the moment, frequency bands and the raw samples, read every frame without re-rendering",
+    files: [
+      {
+        path: "hooks/use-audio-signal.ts",
+        type: "registry:hook",
+      },
+    ],
+    name: "use-audio-signal",
+    registryDependencies: [],
+    type: "registry:hook",
+  },
+  {
+    categories: ["hooks", "audio"],
+    description:
+      "The page's play switch: a button anywhere flips it, every component that reads it follows. Holds no audio, so a demo can leave its play button to the page.",
+    files: [
+      {
+        path: "hooks/use-play-switch.ts",
+        type: "registry:hook",
+      },
+    ],
+    name: "use-play-switch",
+    registryDependencies: [],
+    type: "registry:hook",
+  },
+  {
     categories: ["hooks", "audio", "tuner"],
     description:
-      "The microphone as an AnalyserNode on the shared AudioContext: raw signal, never connected to the speakers, released on stop and on unmount",
+      "The microphone as an AnalyserNode on the shared AudioContext: raw signal, never connected to the speakers, released on stop and on unmount. A page switch, usePageMicrophone, lets a button anywhere turn it on for a demo",
     files: [
       {
         path: "hooks/use-microphone.ts",
@@ -277,7 +306,11 @@ export const hooks: RegistryItem[] = [
       },
     ],
     name: "use-noise-through-eq",
-    registryDependencies: ["@audio-ui/pink-noise", "@audio-ui/web-audio"],
+    registryDependencies: [
+      "@audio-ui/pink-noise",
+      "@audio-ui/use-play-switch",
+      "@audio-ui/web-audio",
+    ],
     type: "registry:hook",
   },
   {
@@ -307,7 +340,7 @@ export const hooks: RegistryItem[] = [
       },
     ],
     name: "use-pulses-through-compressor",
-    registryDependencies: ["@audio-ui/web-audio"],
+    registryDependencies: ["@audio-ui/use-play-switch", "@audio-ui/web-audio"],
     type: "registry:hook",
   },
 ];

@@ -85,6 +85,20 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["knob"],
+    description:
+      "A knob turned by dragging up and down, like a fader: 150px of travel spans the whole range",
+    files: [
+      {
+        path: "components/knob/knob-vertical-drag-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "knob-vertical-drag-demo",
+    registryDependencies: ["@audio-ui/knob"],
+    type: "registry:example",
+  },
+  {
+    categories: ["knob"],
     description: "Knob component example",
     files: [
       {
@@ -322,7 +336,8 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["meter"],
-    description: "Needle meter example",
+    description:
+      "A VU needle that follows the microphone when it is on, and a moving signal when it is not",
     files: [
       {
         path: "components/meter/needle-meter-demo.tsx",
@@ -332,6 +347,8 @@ export const components: RegistryItem[] = [
     name: "needle-meter-demo",
     registryDependencies: [
       "@audio-ui/needle-meter",
+      "@audio-ui/use-audio-levels",
+      "@audio-ui/use-microphone",
       "@audio-ui/use-simulated-levels",
     ],
     type: "registry:example",
@@ -486,7 +503,8 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["waveform"],
-    description: "Live waveform scrolling with the incoming signal",
+    description:
+      "Live waveform scrolling with the microphone, or with a speech-like signal while it is off",
     files: [
       {
         path: "components/waveform/waveform-live-demo.tsx",
@@ -494,7 +512,11 @@ export const components: RegistryItem[] = [
       },
     ],
     name: "waveform-live-demo",
-    registryDependencies: ["@audio-ui/waveform"],
+    registryDependencies: [
+      "@audio-ui/use-audio-signal",
+      "@audio-ui/use-microphone",
+      "@audio-ui/waveform",
+    ],
     type: "registry:example",
   },
   {
@@ -517,7 +539,6 @@ export const components: RegistryItem[] = [
       "@audio-ui/knob",
       "@audio-ui/use-noise-through-eq",
       "@audio-ui/use-spectrum",
-      "@shadcn/button",
       "@shadcn/popover",
       "@shadcn/select",
     ],
@@ -553,7 +574,6 @@ export const components: RegistryItem[] = [
     registryDependencies: [
       "@audio-ui/plot",
       "@audio-ui/use-pulses-through-compressor",
-      "@shadcn/button",
     ],
     type: "registry:example",
   },
@@ -603,6 +623,21 @@ export const components: RegistryItem[] = [
       "@shadcn/button",
     ],
     type: "registry:block",
+  },
+  {
+    categories: ["utility", "knob"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "A device of your own, defined by its parameters alone: the panel, the state and the tool an agent calls come from that one description. Turn a knob, or send the call a model could send",
+    files: [
+      {
+        path: "components/device/device-contract-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "device-contract-demo",
+    registryDependencies: ["@audio-ui/device-panel"],
+    type: "registry:example",
   },
   {
     categories: ["delay-reverb", "plot", "knob"],
@@ -1088,14 +1123,13 @@ export const components: RegistryItem[] = [
       "@audio-ui/tuner",
       "@audio-ui/use-microphone",
       "@audio-ui/use-pitch",
-      "@shadcn/button",
     ],
     type: "registry:example",
   },
   {
     categories: ["spectrum"],
     description:
-      "Play the keyboard and watch the spectrum: a sawtooth note lights its pitch and every harmonic above it, and the peaks hold a moment",
+      "Press play, or play a MIDI keyboard, and watch the spectrum: each sawtooth note lights its pitch and every harmonic above it, and the peaks hold a moment",
     files: [
       {
         path: "components/spectrum/spectrum-analyzer-demo.tsx",
@@ -1105,9 +1139,9 @@ export const components: RegistryItem[] = [
     name: "spectrum-analyzer-demo",
     registryDependencies: [
       "@audio-ui/spectrum-analyzer",
-      "@audio-ui/piano",
       "@audio-ui/use-master-bus",
       "@audio-ui/use-midi-input",
+      "@audio-ui/use-play-switch",
       "@audio-ui/use-spectrum",
       "@audio-ui/use-synth-voices",
       "@audio-ui/web-audio",

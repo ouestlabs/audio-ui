@@ -20,12 +20,35 @@ export interface InstallProps {
 
 export type InstallPart =
   | { code: string; type: "command" }
+  | { text: string; type: "prompt" }
   | { name: string; title: string; type: "source" }
   | { text: string; type: "text" };
 
 export interface InstallPlan {
+  /** What to tell an agent: the skill that wires the component, and the MCP server that reads the docs. */
+  agent: InstallPart[];
   cli: InstallPart[];
   manual: { parts: InstallPart[]; step: string }[];
+}
+
+/** The third tab of an installation: working with an agent, which is what the skill and the MCP server are for. */
+export function installAgent(name: string): InstallPart[] {
+  return [
+    {
+      text: "Give your agent the skill, and it picks the component, installs it and wires it to your audio:",
+      type: "text",
+    },
+    { code: "npx skills add ouestlabs/audio-ui", type: "command" },
+    { text: "Then ask it:", type: "text" },
+    {
+      text: `Add the ${name.replaceAll("-", " ")} from audio/ui to my project and wire it to my audio code.`,
+      type: "prompt",
+    },
+    {
+      text: "To let the agent read the docs live, connect the [MCP server](/docs/mcp). More in [Agent Skill](/docs/agents).",
+      type: "text",
+    },
+  ];
 }
 
 const REACT = "@audio-ui/react";
@@ -38,6 +61,7 @@ export function installPlan(props: InstallProps): InstallPlan {
   if (props.kind === "device") {
     const demo = props.source ?? `block-${name}`;
     return {
+      agent: installAgent(name),
       cli: [
         { code: add(`@audio-ui/${name}`), type: "command" },
         {
@@ -80,6 +104,7 @@ export function installPlan(props: InstallProps): InstallPlan {
     };
   }
   return {
+    agent: installAgent(name),
     cli: [{ code: add(`@audio-ui/${name}`), type: "command" }],
     manual: [
       {
@@ -116,6 +141,9 @@ function partMdx(part: InstallPart, fence = "bash"): string {
   if (part.type === "text") {
     return part.text;
   }
+  if (part.type === "prompt") {
+    return `\`\`\`text\n${part.text}\n\`\`\``;
+  }
   return `<ComponentSource\n  styleName="base-nova"\n  name="${part.name}"\n  title="${part.title}"\n/>`;
 }
 
@@ -128,6 +156,7 @@ export function installMdx(props: InstallProps): string {
     "<TabsList>",
     '  <TabsTrigger value="cli">CLI</TabsTrigger>',
     '  <TabsTrigger value="manual">Manual</TabsTrigger>',
+    '  <TabsTrigger value="agent">Agent</TabsTrigger>',
     "</TabsList>",
     "",
     '<TabsContent value="cli">',
@@ -146,6 +175,11 @@ export function installMdx(props: InstallProps): string {
     ]),
     "</Steps>",
     "",
+    "</TabsContent>",
+    "",
+    '<TabsContent value="agent">',
+    "",
+    ...plan.agent.flatMap((part) => [partMdx(part), ""]),
     "</TabsContent>",
     "",
     "</CodeTabs>",
@@ -175,10 +209,23 @@ export function parseInstallProps(attrs: string): InstallProps | null {
   };
 }
 
+const AGENT_REGEX = /<InstallAgent\s+name="([a-z-]+)"\s*\/>/g;
+
+/** Each `<InstallAgent />` of a page, in the pages that write their own tabs, as the text of the tab. */
+export function expandInstallAgent(content: string): string {
+  return content.replace(AGENT_REGEX, (_tag, name: string) =>
+    installAgent(name)
+      .map((part) => partMdx(part))
+      .join("\n\n")
+  );
+}
+
 /** Each `<Install />` of a page as the MDX it stands for, so the markdown pages read as they always did. */
 export function expandInstall(content: string): string {
-  return content.replace(INSTALL_REGEX, (tag, attrs: string) => {
-    const props = parseInstallProps(attrs);
-    return props ? installMdx(props) : tag;
-  });
+  return expandInstallAgent(
+    content.replace(INSTALL_REGEX, (tag, attrs: string) => {
+      const props = parseInstallProps(attrs);
+      return props ? installMdx(props) : tag;
+    })
+  );
 }

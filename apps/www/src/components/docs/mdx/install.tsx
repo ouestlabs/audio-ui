@@ -1,12 +1,16 @@
+import { Link } from "@tanstack/react-router";
 import * as React from "react";
 import { CodeBlockCommand } from "@/components/code/block/code-block-command";
 import { CodeTabs } from "@/components/code/block/code-tabs";
+import { CopyButton } from "@/components/code/copy/copy-button";
 import { DocsComponentSource } from "@/components/code/source/docs-component-source";
+import { Icons } from "@/components/site/icons";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { packageManagerCommands } from "@/lib/code/highlight-code";
 import {
   type InstallPart,
   type InstallProps,
+  installAgent,
   installPlan,
 } from "@/lib/docs/content/install-docs";
 
@@ -25,7 +29,7 @@ function Command({ code }: { code: string }) {
   return (
     <figure className="" data-not-typeset="" data-rehype-pretty-code-figure="">
       <pre
-        className="scrollbar-y min-w-0 overflow-x-auto px-4 py-3.5 outline-none has-data-[slot=tabs]:p-0 th-code th-code--shell"
+        className="scrollbar-y min-w-0 overflow-x-auto py-3.5 pr-14 pl-4 outline-none has-data-[slot=tabs]:p-0 th-code th-code--shell"
         data-language="shell"
       >
         {commands ? (
@@ -44,30 +48,59 @@ function Command({ code }: { code: string }) {
 }
 
 /** What a part is, as a key: its own text, so two parts of a list never share one. */
+// What the text of a part writes in Markdown: inline code and links.
+const INLINE = /(`[^`]+`|\[[^\]]+\]\([^)]+\))/;
+const LINK = /^\[([^\]]+)\]\(([^)]+)\)$/;
+
+function Inline({ piece }: { piece: string }) {
+  if (piece.startsWith("`")) {
+    return <code>{piece.slice(1, -1)}</code>;
+  }
+  const link = LINK.exec(piece);
+  if (link) {
+    return <Link to={link[2]}>{link[1]}</Link>;
+  }
+  return piece;
+}
+
 function keyOf(part: InstallPart) {
   if (part.type === "command") {
     return part.code;
   }
+  if (part.type === "prompt") {
+    return part.text;
+  }
   return part.type === "text" ? part.text : part.name;
+}
+
+/** A prompt to copy, drawn as a fence of the page is, with no package manager to choose. */
+function Prompt({ text }: { text: string }) {
+  return (
+    <figure className="" data-not-typeset="" data-rehype-pretty-code-figure="">
+      <pre
+        className="scrollbar-y min-w-0 overflow-x-auto py-3.5 pr-14 pl-4 outline-none has-data-[slot=tabs]:p-0 th-code th-code--text"
+        data-language="text"
+      >
+        <CopyButton value={text} />
+        <code className="whitespace-pre-wrap">{text}</code>
+      </pre>
+    </figure>
+  );
 }
 
 function Part({ part }: { part: InstallPart }) {
   if (part.type === "command") {
     return <Command code={part.code} />;
   }
+  if (part.type === "prompt") {
+    return <Prompt text={part.text} />;
+  }
   if (part.type === "text") {
-    // The text is Markdown with inline code: the odd pieces between backticks.
     return (
       <p>
-        {part.text
-          .split("`")
-          .map((piece, index) =>
-            index % 2 === 1 ? (
-              <code key={piece}>{piece}</code>
-            ) : (
-              <React.Fragment key={piece}>{piece}</React.Fragment>
-            )
-          )}
+        {part.text.split(INLINE).map((piece) => (
+          <Inline key={piece} piece={piece} />
+        ))}
       </p>
     );
   }
@@ -95,8 +128,15 @@ export function Install({
   return (
     <CodeTabs>
       <TabsList>
-        <TabsTrigger value="cli">CLI</TabsTrigger>
-        <TabsTrigger value="manual">Manual</TabsTrigger>
+        <TabsTrigger value="cli">
+          <Icons.shadcn className="size-3.5" /> CLI
+        </TabsTrigger>
+        <TabsTrigger value="manual">
+          <Icons.react className="size-3.5" /> Manual
+        </TabsTrigger>
+        <TabsTrigger value="agent">
+          <Icons.sparkle className="size-3.5" /> Agent
+        </TabsTrigger>
       </TabsList>
       <TabsContent value="cli">
         {plan.cli.map((part) => (
@@ -115,6 +155,16 @@ export function Install({
           ))}
         </Steps>
       </TabsContent>
+      <TabsContent value="agent">
+        <InstallAgentParts name={props.name} />
+      </TabsContent>
     </CodeTabs>
   );
+}
+
+/** What the Agent tab holds, for a page that writes its own tabs. */
+export function InstallAgentParts({ name }: { name: string }) {
+  return installAgent(name).map((part) => (
+    <Part key={keyOf(part)} part={part} />
+  ));
 }
