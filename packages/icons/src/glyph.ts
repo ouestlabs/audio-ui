@@ -12,6 +12,8 @@ export interface Shape {
   tint?: true;
 }
 
+const START = /^M\s*(-?[\d.]+)/;
+
 /** What an icon draws: shapes in one thin stroke. */
 export type Glyph = readonly Shape[];
 
@@ -54,3 +56,9 @@ export const rect = (
   ...(options.over ? { tint: true } : {}),
   ...options,
 });
+
+/** The body under a curve, down to a baseline: solid in the fill weight, tinted in the duotone one, and not drawn in the lines. */
+export function area(d: string, baseline = 20): Shape {
+  const start = d.match(START)?.[1] ?? "2";
+  return path(`${d}V${baseline}H${start}z`, { backdrop: true });
+}
