@@ -2,11 +2,14 @@ import { describe, expect, test } from "bun:test";
 import { renderToStaticMarkup } from "react-dom/server";
 import { catalog, glyphs, toSvg, WEIGHTS } from "../../core/index.ts";
 import * as icons from "./index.tsx";
+import { CurveIcon } from "./index.tsx";
 
 const components = Object.entries(icons).filter(
-  ([name]) => name.endsWith("Icon") && name !== "createIcon"
+  ([name]) =>
+    name.endsWith("Icon") && name !== "createIcon" && name !== "CurveIcon"
 ) as [string, (props: icons.IconProps) => React.JSX.Element][];
 
+const square = (input: number) => input * input;
 const STROKE = /stroke-width="([\d.]+)"/;
 
 describe("icons", () => {
@@ -104,5 +107,14 @@ describe("icons", () => {
         expect(glyph.some((shape) => shape.tint || shape.backdrop)).toBe(true);
       }
     }
+  });
+
+  test("CurveIcon draws a function in the same svg as the other icons", () => {
+    const markup = renderToStaticMarkup(
+      <CurveIcon shape={square} weight="bold" />
+    );
+    expect(markup).toContain('viewBox="0 0 24 24"');
+    expect(markup).toContain('stroke-width="2.25"');
+    expect(markup).toContain('d="M3 ');
   });
 });

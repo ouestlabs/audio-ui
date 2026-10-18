@@ -6,6 +6,8 @@ export {
 } from "./catalog.ts";
 export { type DrawnNode, draw, toSvg } from "./draw.ts";
 export {
+  type CurveOptions,
+  curveGlyph,
   type Glyph,
   type IconWeight,
   type Shape,

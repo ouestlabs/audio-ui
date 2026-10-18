@@ -1,6 +1,17 @@
-import { createElement, type ReactNode, type SVGProps, useId } from "react";
+import {
+  createElement,
+  type ReactNode,
+  type SVGProps,
+  useId,
+  useMemo,
+} from "react";
 import { type DrawnNode, draw } from "../../core/draw.ts";
-import type { Glyph, IconWeight } from "../../core/glyph.ts";
+import {
+  type CurveOptions,
+  curveGlyph,
+  type Glyph,
+  type IconWeight,
+} from "../../core/glyph.ts";
 import * as glyphs from "../../core/glyphs.ts";
 
 export interface IconProps extends Omit<SVGProps<SVGSVGElement>, "ref"> {
@@ -18,35 +29,64 @@ function toElement(drawn: DrawnNode, key: number): ReactNode {
   );
 }
 
+function GlyphSvg({
+  glyph,
+  size = "1em",
+  weight = "regular",
+  ...props
+}: IconProps & { glyph: Glyph }) {
+  const id = `icon-${useId().replaceAll(":", "")}`;
+  const { nodes, strokeWidth } = draw(glyph, weight, id);
+  return (
+    <svg
+      aria-hidden="true"
+      fill="none"
+      height={size}
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={strokeWidth}
+      viewBox="0 0 24 24"
+      width={size}
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+    >
+      {nodes.map(toElement)}
+    </svg>
+  );
+}
+
 /** An icon that draws `glyph` in the current text color. */
 export function createIcon(glyph: Glyph, name: string) {
-  function GlyphIcon({
-    size = "1em",
-    weight = "regular",
-    ...props
-  }: IconProps) {
-    const id = `icon-${useId().replaceAll(":", "")}`;
-    const { nodes, strokeWidth } = draw(glyph, weight, id);
-    return (
-      <svg
-        aria-hidden="true"
-        fill="none"
-        height={size}
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={strokeWidth}
-        viewBox="0 0 24 24"
-        width={size}
-        xmlns="http://www.w3.org/2000/svg"
-        {...props}
-      >
-        {nodes.map(toElement)}
-      </svg>
-    );
+  function GlyphIcon(props: IconProps) {
+    return <GlyphSvg glyph={glyph} {...props} />;
   }
   GlyphIcon.displayName = name;
   return GlyphIcon;
+}
+
+export interface CurveIconProps
+  extends Omit<IconProps, keyof CurveOptions>,
+    CurveOptions {
+  /** The function to draw: its output for an input from `from` to `to`. */
+  shape: (input: number) => number;
+}
+
+/** The curve of a function, as an icon: a button that draws what a device does. */
+export function CurveIcon({
+  from,
+  max,
+  min,
+  samples,
+  shape,
+  to,
+  ...props
+}: CurveIconProps) {
+  const glyph = useMemo(
+    () => curveGlyph(shape, { from, max, min, samples, to }),
+    [from, max, min, samples, shape, to]
+  );
+  return <GlyphSvg glyph={glyph} {...props} />;
 }
 
 export const BotIcon = createIcon(glyphs.bot, "BotIcon");
