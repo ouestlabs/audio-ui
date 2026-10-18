@@ -29,7 +29,7 @@ describe("icons", () => {
     for (const Icon of [
       icons.MetronomeIcon,
       icons.KnobIcon,
-      icons.TracksIcon,
+      icons.MidiIcon,
       icons.RackIcon,
       icons.VinylIcon,
     ]) {

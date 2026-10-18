@@ -12,14 +12,9 @@ export const knob: Glyph = [
   path("M12 8h.01", { knock: true }),
 ];
 
-/** Tracks: a header for each, and the clips on them. */
+/** Tracks: three lanes, each cut where a clip begins. */
 export const tracks: Glyph = [
-  rect(3, 3.5, 3.5, 3.5, 1, { tint: true }),
-  rect(9, 3.5, 8, 3.5, 1.5, { tint: true }),
-  rect(3, 10.25, 3.5, 3.5, 1, { tint: true }),
-  rect(11, 10.25, 10, 3.5, 1.5, { tint: true }),
-  rect(3, 17, 3.5, 3.5, 1, { tint: true }),
-  rect(9, 17, 6, 3.5, 1.5, { tint: true }),
+  path("M3 6h7M13 6h8M3 12h12M18 12h3M3 18h4M10 18h11"),
 ];
 
 /** A unit of a rack, with its indicator. */
@@ -208,12 +203,11 @@ export const sequencer: Glyph = [
   rect(10.5, 8, 4, 8, 1),
   rect(18, 8, 4, 8, 1, { tint: true }),
 ];
-/** A piano roll: its keys, and the notes beside them. */
+/** A piano roll: notes climbing. */
 export const pianoroll: Glyph = [
-  rect(3, 4, 5, 16, 1.5, { tint: true }),
-  path("M3 9.3h5M3 14.7h5", { knock: true }),
-  rect(11.5, 6, 5, 3.5, 1.5, { tint: true }),
-  rect(14.5, 13.5, 6.5, 3.5, 1.5, { tint: true }),
+  rect(3, 16, 5, 3.5, 1.5, { tint: true }),
+  rect(9.5, 10, 5, 3.5, 1.5, { tint: true }),
+  rect(16, 4, 5, 3.5, 1.5, { tint: true }),
 ];
 
 /** The curve of a compressor: the level it lets through. */
