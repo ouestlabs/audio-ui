@@ -52,7 +52,7 @@ function DocsUpdateIndicator({ path }: { path: string }) {
 }
 
 /** A group's title; a space's folds its pages away and back. */
-function GroupLabel({
+export function GroupLabel({
   collapsible,
   current,
   onOpenChange,

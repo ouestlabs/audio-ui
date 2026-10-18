@@ -16,11 +16,12 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useSidebarGroups } from "@/hooks/use-sidebar-groups";
+import { useGroupFolding, useSidebarGroups } from "@/hooks/use-sidebar-groups";
 import { getDocsPageUpdateHint } from "@/lib/docs/content/docs";
 import type { source } from "@/lib/docs/content/source";
 import type { CategoryInfo } from "@/lib/registry/core/registry";
 import { cn, isActive, isFileUrl, normalizeSlug } from "@/lib/utils";
+import { categoryGroups } from "@/registry-audio/bases/categories";
 
 type Section = "components" | "docs";
 
@@ -155,6 +156,16 @@ export function MobileNav({
     [componentCategories]
   );
   const totalCount = categoryLinks.reduce((sum, c) => sum + c.count, 0);
+  const categoryByName = React.useMemo(
+    () => new Map(categoryLinks.map((category) => [category.name, category])),
+    [categoryLinks]
+  );
+  const { collapsed } = useGroupFolding();
+  const currentCategoryGroup = categoryGroups.find((group) =>
+    group.names.some(
+      (name) => pathname === `/components/${normalizeSlug(name)}`
+    )
+  )?.label;
 
   return (
     <Popover modal onOpenChange={setOpen} open={open}>
@@ -243,20 +254,44 @@ export function MobileNav({
                 All components
                 <Count>{totalCount}</Count>
               </NavRow>
-              {categoryLinks.map((category) => (
-                <NavRow
-                  active={pathname === category.href}
-                  href={category.href}
-                  key={category.name}
-                  onNavigate={close}
-                >
-                  {category.label}
-                  <span className="flex items-center gap-2">
-                    <ComponentUpdateIndicator category={category.name} />
-                    <Count>{category.count}</Count>
-                  </span>
-                </NavRow>
-              ))}
+              {categoryGroups.map((group) => {
+                const unfolded = !collapsed.has(group.label);
+                return (
+                  <div
+                    className="flex shrink-0 flex-col gap-0.5"
+                    key={group.label}
+                  >
+                    <GroupLabel
+                      collapsible
+                      current={group.label === currentCategoryGroup}
+                      onOpenChange={setGroupOpen}
+                      open={unfolded}
+                      title={group.label}
+                    />
+                    {unfolded
+                      ? group.names.map((name) => {
+                          const category = categoryByName.get(name);
+                          return category ? (
+                            <NavRow
+                              active={pathname === category.href}
+                              href={category.href}
+                              key={category.name}
+                              onNavigate={close}
+                            >
+                              {category.label}
+                              <span className="flex items-center gap-2">
+                                <ComponentUpdateIndicator
+                                  category={category.name}
+                                />
+                                <Count>{category.count}</Count>
+                              </span>
+                            </NavRow>
+                          ) : null;
+                        })
+                      : null}
+                  </div>
+                );
+              })}
             </>
           ) : (
             groups.map((group) => (
@@ -285,8 +320,10 @@ export function MobileNav({
                               key={page.url}
                               onNavigate={close}
                             >
-                              <PageIcon url={page.url} />
-                              {page.name}
+                              <span className="flex min-w-0 items-center gap-2">
+                                <PageIcon url={page.url} />
+                                {page.name}
+                              </span>
                               {hint ? (
                                 <span
                                   aria-hidden="true"

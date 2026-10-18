@@ -65,15 +65,10 @@ const PAGE_ICONS: Record<string, ComponentType<IconProps>> = {
 export function PageIcon({ url }: { url: string }) {
   // The MCP mark is a logo: it has no weights.
   if (url === "/docs/mcp") {
-    return (
-      <Icons.mcp className="size-3.5 shrink-0 text-site-muted-foreground" />
-    );
+    return <Icons.mcp className="size-3.5 shrink-0 opacity-60" />;
   }
   const Icon = PAGE_ICONS[url];
   return Icon ? (
-    <Icon
-      className="size-3.5 shrink-0 text-site-muted-foreground"
-      weight="fill"
-    />
+    <Icon className="size-3.5 shrink-0 opacity-60" weight="fill" />
   ) : null;
 }

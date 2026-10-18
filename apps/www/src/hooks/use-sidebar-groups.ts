@@ -53,6 +53,26 @@ function parse(json: string): string[] {
   }
 }
 
+/**
+ * Which groups of a sidebar are folded: kept in the reader's browser and shared
+ * by the docs sidebar, the components sidebar and the mobile menu, so a group
+ * of one name is folded in all of them.
+ */
+export function useGroupFolding() {
+  const json = React.useSyncExternalStore(subscribe, read, () => "[]");
+  const collapsed = React.useMemo(() => new Set(parse(json)), [json]);
+  const setOpen = React.useCallback((title: string, open: boolean) => {
+    const titles = new Set(parse(read()));
+    if (open) {
+      titles.delete(title);
+    } else {
+      titles.add(title);
+    }
+    write([...titles]);
+  }, []);
+  return { collapsed, setOpen };
+}
+
 const EXCLUDED_FOLDERS = ["test"];
 
 /**
@@ -74,18 +94,7 @@ export function useSidebarGroups(tree: ReturnType<typeof source.getPageTree>) {
       ),
     [currentBase, tree]
   );
-  const json = React.useSyncExternalStore(subscribe, read, () => "[]");
-  const collapsed = React.useMemo(() => new Set(parse(json)), [json]);
-
-  const setOpen = React.useCallback((title: string, open: boolean) => {
-    const titles = new Set(parse(read()));
-    if (open) {
-      titles.delete(title);
-    } else {
-      titles.add(title);
-    }
-    write([...titles]);
-  }, []);
+  const { collapsed, setOpen } = useGroupFolding();
 
   const currentTitle = groups.find((group) =>
     group.sections.some((section) =>
