@@ -207,14 +207,20 @@ export const pianoroll: Glyph = [
   rect(15, 5, 6, 3.5, 1.5, { tint: true }),
 ];
 
-/** Effects: a transfer curve, an echo, a hall, a clipped wave. */
-export const compressor: Glyph = [path("M4 20l8-8c1.5-1.5 2.5-2 4-2h4")];
-export const delay: Glyph = [path("M5 6v12M10 8v8M15 10v4M20 11.5v1")];
-export const reverb: Glyph = [
-  path("M5 20v-9a7 7 0 0 1 14 0v9z", { tint: true }),
-  path("M12 15h.01", { knock: true }),
+/** The curve of a compressor: the level it lets through. */
+export const compressor: Glyph = [path("M3 20C9 14 11 11 14 10s5-1 7-1")];
+/** An echo: the same hit, softer each time. */
+export const delay: Glyph = [
+  path("M2 20h3l1.5-15 1.5 15h3l1.2-10 1.2 10h3l.9-5 .9 5H22"),
 ];
-export const distortion: Glyph = [path("M3 12l3-6h4l3 12h4l3-6")];
+/** A hit and the tail it leaves in the room. */
+export const reverb: Glyph = [
+  path("M2 20h3.5L7 4c.5 8 3 13 7 14.5 2.5.9 5 1.5 8 1.5"),
+];
+/** A wave pushed until it clips. */
+export const distortion: Glyph = [
+  path("M2 12c.8-4 1.5-6 3-6h4c1.5 0 2.2 2 3 6s1.5 6 3 6h4c1.5 0 2.2-2 3-6"),
+];
 
 /** Channel strip buttons: a key, and the letter on it. */
 export const mute: Glyph = [
