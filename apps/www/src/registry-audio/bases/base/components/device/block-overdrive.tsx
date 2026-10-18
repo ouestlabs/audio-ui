@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { PlayToggle } from "@/registry-audio/bases/base/audio/elements/play-toggle";
 import { OverdrivePanel } from "@/registry-audio/bases/base/audio/panels/overdrive-panel";
 import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
@@ -23,20 +22,14 @@ export default function BlockOverdrive() {
     overdriveDevice.defaults()
   );
   const master = useMasterBus(MASTER_VOLUME);
-  const { playing, toggle } = useDeviceLoop({
+  useDeviceLoop({
     create: createOverdriveEngine,
     destination: master,
     state,
   });
   return (
     <div className="cn-audio-panel h-full w-full min-w-0">
-      <OverdrivePanel onValueChange={setState} value={state}>
-        <PlayToggle
-          label="Play a loop through it"
-          onToggle={toggle}
-          playing={playing}
-        />
-      </OverdrivePanel>
+      <OverdrivePanel onValueChange={setState} value={state} />
     </div>
   );
 }

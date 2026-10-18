@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { PlayToggle } from "@/registry-audio/bases/base/audio/elements/play-toggle";
 import { GatePanel } from "@/registry-audio/bases/base/audio/panels/gate-panel";
 import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
@@ -38,7 +37,7 @@ export default function BlockGate() {
     () => gateDevice.apply(gateDevice.defaults(), START).state
   );
   const master = useMasterBus(MASTER_VOLUME);
-  const { playing, toggle } = useDeviceLoop({
+  useDeviceLoop({
     create: createGateEngine,
     destination: master,
     key: renderKickLoop,
@@ -47,13 +46,7 @@ export default function BlockGate() {
   });
   return (
     <div className="cn-audio-panel h-full w-full min-w-0">
-      <GatePanel onValueChange={setState} value={state}>
-        <PlayToggle
-          label="Play a loop through it"
-          onToggle={toggle}
-          playing={playing}
-        />
-      </GatePanel>
+      <GatePanel onValueChange={setState} value={state} />
     </div>
   );
 }

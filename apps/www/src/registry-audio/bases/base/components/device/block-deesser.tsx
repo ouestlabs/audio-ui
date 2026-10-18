@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { PlayToggle } from "@/registry-audio/bases/base/audio/elements/play-toggle";
 import { DeesserPanel } from "@/registry-audio/bases/base/audio/panels/deesser-panel";
 import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
@@ -25,7 +24,7 @@ export default function BlockDeesser() {
     deesserDevice.defaults()
   );
   const master = useMasterBus(MASTER_VOLUME);
-  const { playing, toggle } = useDeviceLoop({
+  useDeviceLoop({
     create: createDeesserEngine,
     destination: master,
     signal: renderSibilantLoop,
@@ -33,13 +32,7 @@ export default function BlockDeesser() {
   });
   return (
     <div className="cn-audio-panel h-full w-full min-w-0">
-      <DeesserPanel onValueChange={setState} value={state}>
-        <PlayToggle
-          label="Play a voice through it"
-          onToggle={toggle}
-          playing={playing}
-        />
-      </DeesserPanel>
+      <DeesserPanel onValueChange={setState} value={state} />
     </div>
   );
 }

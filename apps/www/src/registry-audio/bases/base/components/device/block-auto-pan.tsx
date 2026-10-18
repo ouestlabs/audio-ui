@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { PlayToggle } from "@/registry-audio/bases/base/audio/elements/play-toggle";
 import { AutoPanPanel } from "@/registry-audio/bases/base/audio/panels/auto-pan-panel";
 import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
@@ -26,7 +25,7 @@ export default function BlockAutoPan() {
     () => autoPanDevice.apply(autoPanDevice.defaults(), START).state
   );
   const master = useMasterBus(MASTER_VOLUME);
-  const { playing, toggle } = useDeviceLoop({
+  useDeviceLoop({
     context: CONTEXT,
     create: createAutoPanEngine,
     destination: master,
@@ -34,13 +33,7 @@ export default function BlockAutoPan() {
   });
   return (
     <div className="cn-audio-panel h-full w-full min-w-0">
-      <AutoPanPanel onValueChange={setState} tempo={DEMO_TEMPO} value={state}>
-        <PlayToggle
-          label="Play a loop through it"
-          onToggle={toggle}
-          playing={playing}
-        />
-      </AutoPanPanel>
+      <AutoPanPanel onValueChange={setState} tempo={DEMO_TEMPO} value={state} />
     </div>
   );
 }

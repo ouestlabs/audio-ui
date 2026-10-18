@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { PlayToggle } from "@/registry-audio/bases/base/audio/elements/play-toggle";
 import { FilterPanel } from "@/registry-audio/bases/base/audio/panels/filter-panel";
 import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
@@ -27,7 +26,7 @@ export default function BlockFilter() {
     filterDevice.defaults()
   );
   const master = useMasterBus(MASTER_VOLUME);
-  const { analyser, playing, toggle } = useDeviceLoop({
+  const { analyser } = useDeviceLoop({
     create: createFilterEngine,
     destination: master,
     state,
@@ -35,13 +34,7 @@ export default function BlockFilter() {
   const spectrum = useSpectrum(analyser, { maxHz: MAX_HZ, minHz: MIN_HZ });
   return (
     <div className="cn-audio-panel h-full w-full min-w-0">
-      <FilterPanel onValueChange={setState} spectrum={spectrum} value={state}>
-        <PlayToggle
-          label="Play a loop through it"
-          onToggle={toggle}
-          playing={playing}
-        />
-      </FilterPanel>
+      <FilterPanel onValueChange={setState} spectrum={spectrum} value={state} />
     </div>
   );
 }

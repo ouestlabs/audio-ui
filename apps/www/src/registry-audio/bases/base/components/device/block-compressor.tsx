@@ -1,11 +1,10 @@
 "use client";
 
-import { PauseIcon, PlayIcon } from "@audio-ui/icons/react";
 import { createSource, type Source } from "@audio-ui/react";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { Button } from "@/registry/bases/base/ui/button";
+import { useEffect, useRef, useState } from "react";
 import { CompressorPanel } from "@/registry-audio/bases/base/audio/panels/compressor-panel";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
+import { usePlaySwitch } from "@/registry-audio/bases/base/hooks/use-play-switch";
 import {
   type CompressorState,
   compressorDevice,
@@ -82,13 +81,13 @@ function ReductionReadout({ source }: { source: Source<number> }) {
  * A compressor you can plug in: its state, a panel that draws it, an engine
  * that plays it, side by side. Each is its own file and none knows the others:
  * the state is a plain object, so a host keeps its own and uses what it needs.
- * Press play and turn the knobs; switch Sidechain on and a kick ducks a held chord.
+ * Play it from its session and turn the knobs; switch Sidechain on and a kick ducks a held chord.
  */
 export default function BlockCompressor() {
   const [state, setState] = useState<CompressorState>(() =>
     compressorDevice.defaults()
   );
-  const [playing, setPlaying] = useState(false);
+  const { playing } = usePlaySwitch();
   const master = useMasterBus(MASTER_VOLUME);
   const [level] = useState(() => createSource(FLOOR_DB));
   const [reduction] = useState(() => createSource(0));
@@ -177,21 +176,9 @@ export default function BlockCompressor() {
     engine.current?.update(state);
   }, [state]);
 
-  const togglePlaying = useCallback(() => setPlaying((on) => !on), []);
-
   return (
     <div className="cn-audio-panel h-full w-full min-w-0">
       <CompressorPanel level={level} onValueChange={setState} value={state}>
-        <Button
-          aria-label={
-            playing ? "Stop the signal" : "Play a pulsing signal through it"
-          }
-          onClick={togglePlaying}
-          size="icon-sm"
-          variant="outline"
-        >
-          {playing ? <PauseIcon weight="fill" /> : <PlayIcon weight="fill" />}
-        </Button>
         <ReductionReadout source={reduction} />
       </CompressorPanel>
     </div>

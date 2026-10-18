@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { PlayToggle } from "@/registry-audio/bases/base/audio/elements/play-toggle";
 import { ReverbPanel } from "@/registry-audio/bases/base/audio/panels/reverb-panel";
 import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
@@ -23,20 +22,14 @@ export default function BlockReverb() {
     reverbDevice.defaults()
   );
   const master = useMasterBus(MASTER_VOLUME);
-  const { playing, toggle } = useDeviceLoop({
+  useDeviceLoop({
     create: createReverbEngine,
     destination: master,
     state,
   });
   return (
     <div className="cn-audio-panel h-full w-full min-w-0">
-      <ReverbPanel onValueChange={setState} value={state}>
-        <PlayToggle
-          label="Play a loop through it"
-          onToggle={toggle}
-          playing={playing}
-        />
-      </ReverbPanel>
+      <ReverbPanel onValueChange={setState} value={state} />
     </div>
   );
 }

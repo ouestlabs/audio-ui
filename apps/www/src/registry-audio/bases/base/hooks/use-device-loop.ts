@@ -1,7 +1,8 @@
 "use client";
 
 import type { DeviceContext } from "@audio-ui/core/device";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { usePlaySwitch } from "@/registry-audio/bases/base/hooks/use-play-switch";
 import { renderDemoLoop } from "@/registry-audio/bases/base/lib/demo-loop";
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
@@ -40,10 +41,12 @@ export interface UseDeviceLoopOptions<State, Engine extends DemoEngine<State>> {
 
 /**
  * A short loop of drums and plucked notes played through an effect's engine
- * and out to a destination, for a block to show what a device does. The engine
- * follows `state` while it plays. Returns whether it plays, how to start and
- * stop it, the engine (to read what it measures, such as a gain reduction),
- * and an analyser of what comes out, for a spectrum. Stops on unmount.
+ * and out to a destination, for a block to show what a device does. It plays
+ * while the play switch of its session is on (`usePlaySwitch`): the button is
+ * the host's, so the device keeps none, and outside a session it is silent.
+ * The engine follows `state` while it plays. Returns whether it plays, the
+ * engine (to read what it measures, such as a gain reduction), and an
+ * analyser of what comes out, for a spectrum. Stops on unmount.
  */
 export function useDeviceLoop<State, Engine extends DemoEngine<State>>({
   context,
@@ -53,7 +56,7 @@ export function useDeviceLoop<State, Engine extends DemoEngine<State>>({
   signal = renderDemoLoop,
   state,
 }: UseDeviceLoopOptions<State, Engine>) {
-  const [playing, setPlaying] = useState(false);
+  const { playing } = usePlaySwitch();
   const [engine, setEngine] = useState<Engine | null>(null);
   const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
   const stateRef = useRef(state);
@@ -62,8 +65,6 @@ export function useDeviceLoop<State, Engine extends DemoEngine<State>>({
   contextRef.current = context;
   const createRef = useRef(create);
   createRef.current = create;
-
-  const toggle = useCallback(() => setPlaying((on) => !on), []);
 
   useEffect(() => {
     const ctx = webAudio.getContext();
@@ -128,5 +129,5 @@ export function useDeviceLoop<State, Engine extends DemoEngine<State>>({
     engine?.update(state, context);
   }, [context, engine, state]);
 
-  return { analyser, engine, playing, toggle };
+  return { analyser, engine, playing };
 }

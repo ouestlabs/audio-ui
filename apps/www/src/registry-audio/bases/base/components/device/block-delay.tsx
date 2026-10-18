@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { PlayToggle } from "@/registry-audio/bases/base/audio/elements/play-toggle";
 import { DelayPanel } from "@/registry-audio/bases/base/audio/panels/delay-panel";
 import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
@@ -29,7 +28,7 @@ export default function BlockDelay() {
     () => delayDevice.apply(delayDevice.defaults(), START).state
   );
   const master = useMasterBus(MASTER_VOLUME);
-  const { playing, toggle } = useDeviceLoop({
+  useDeviceLoop({
     context: CONTEXT,
     create: createDelayEngine,
     destination: master,
@@ -37,13 +36,7 @@ export default function BlockDelay() {
   });
   return (
     <div className="cn-audio-panel h-full w-full min-w-0">
-      <DelayPanel onValueChange={setState} tempo={DEMO_TEMPO} value={state}>
-        <PlayToggle
-          label="Play a loop through it"
-          onToggle={toggle}
-          playing={playing}
-        />
-      </DelayPanel>
+      <DelayPanel onValueChange={setState} tempo={DEMO_TEMPO} value={state} />
     </div>
   );
 }

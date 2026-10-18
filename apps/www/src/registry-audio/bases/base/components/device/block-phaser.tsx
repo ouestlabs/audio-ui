@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { PlayToggle } from "@/registry-audio/bases/base/audio/elements/play-toggle";
 import { PhaserPanel } from "@/registry-audio/bases/base/audio/panels/phaser-panel";
 import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
@@ -24,7 +23,7 @@ export default function BlockPhaser() {
     phaserDevice.defaults()
   );
   const master = useMasterBus(MASTER_VOLUME);
-  const { playing, toggle } = useDeviceLoop({
+  useDeviceLoop({
     context: CONTEXT,
     create: createPhaserEngine,
     destination: master,
@@ -32,13 +31,7 @@ export default function BlockPhaser() {
   });
   return (
     <div className="cn-audio-panel h-full w-full min-w-0">
-      <PhaserPanel onValueChange={setState} tempo={DEMO_TEMPO} value={state}>
-        <PlayToggle
-          label="Play a loop through it"
-          onToggle={toggle}
-          playing={playing}
-        />
-      </PhaserPanel>
+      <PhaserPanel onValueChange={setState} tempo={DEMO_TEMPO} value={state} />
     </div>
   );
 }

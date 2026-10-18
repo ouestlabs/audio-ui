@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { PlayToggle } from "@/registry-audio/bases/base/audio/elements/play-toggle";
 import { MultibandPanel } from "@/registry-audio/bases/base/audio/panels/multiband-panel";
 import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
@@ -24,20 +23,14 @@ export default function BlockMultiband() {
     multibandDevice.defaults()
   );
   const master = useMasterBus(MASTER_VOLUME);
-  const { playing, toggle } = useDeviceLoop({
+  useDeviceLoop({
     create: createMultibandEngine,
     destination: master,
     state,
   });
   return (
     <div className="cn-audio-panel h-full w-full min-w-0">
-      <MultibandPanel onValueChange={setState} value={state}>
-        <PlayToggle
-          label="Play a loop through it"
-          onToggle={toggle}
-          playing={playing}
-        />
-      </MultibandPanel>
+      <MultibandPanel onValueChange={setState} value={state} />
     </div>
   );
 }
