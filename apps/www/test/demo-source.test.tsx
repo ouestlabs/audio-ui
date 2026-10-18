@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { act, render, screen } from "@testing-library/react";
+import { useCallback } from "react";
 import {
   AudioSessionProvider,
   useAudioSession,
@@ -9,16 +10,21 @@ import { useDemoSource } from "@/registry-audio/bases/base/hooks/use-demo-source
 function Device({ fallback }: { fallback: "groove" | "noise" }) {
   const name = useDemoSource(fallback);
   const source = useAudioSession()?.source;
+  const pickVoice = useCallback(
+    () => source?.set({ chosen: "voice" }),
+    [source]
+  );
+  const pickNope = useCallback(() => source?.set({ chosen: "nope" }), [source]);
   return (
     <>
       <output aria-label="playing">{name}</output>
       <output aria-label="offered">
         {source?.get().fallback ?? "nothing"}
       </output>
-      <button onClick={() => source?.set({ chosen: "voice" })} type="button">
+      <button onClick={pickVoice} type="button">
         voice
       </button>
-      <button onClick={() => source?.set({ chosen: "nope" })} type="button">
+      <button onClick={pickNope} type="button">
         nope
       </button>
     </>
