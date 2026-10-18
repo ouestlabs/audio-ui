@@ -1,7 +1,12 @@
 "use client";
 
+import {
+  DEFAULT_TEMPO,
+  describeBarsBeats,
+  secondsPerBar,
+} from "@audio-ui/core/time";
 import type { Timeline as TimelinePrimitive } from "@audio-ui/react";
-import { useCallback, useState } from "react";
+import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import {
   Timeline,
   TimelineClip,
@@ -11,54 +16,86 @@ import {
   TimelineClipHeader,
   TimelineLane,
   TimelineMark,
+  TimelineNavigator,
   TimelinePlayhead,
   TimelineRange,
   TimelineRangeHandle,
   TimelineRuler,
   TimelineTrack,
   TimelineTrackHeader,
+  TimelineTrackResizeHandle,
   TimelineViewport,
 } from "@/registry-audio/bases/base/audio/elements/timeline";
 import { useSimulatedClock } from "@/registry-audio/bases/base/hooks/use-simulated-clock";
 
 type ClipValue = TimelinePrimitive.Clip.Value;
 
-/** The length of the timeline, in seconds: the unit of everything below. */
-const DURATION = 32;
-const LOOP = [8, 16] as const;
-const MARKS = [0, 4, 8, 12, 16, 20, 24, 28];
+/** The timeline counts in seconds; a bar of 4/4 at 120 BPM lasts two of them. */
+const BAR = secondsPerBar(DEFAULT_TEMPO);
+const BARS = 16;
+const DURATION = BARS * BAR;
+const bars = (count: number) => count * BAR;
+
+const LOOP = [bars(4), bars(8)] as const;
+/** A label on every other bar. */
+const MARKS = Array.from({ length: BARS / 2 }, (_, index) => index * 2);
 
 const TRACKS = [
+  { id: "drums", name: "Drums" },
+  { id: "bass", name: "Bass" },
+] as const;
+
+const CLIPS = [
   {
-    clip: { fadeIn: 0.5, fadeOut: 1, length: 10, offset: 0, start: 2 },
-    id: "drums",
-    name: "Drums",
+    id: "groove",
     title: "Groove",
+    track: "drums",
+    value: { fadeIn: 0, fadeOut: 0.5, length: bars(4), offset: 0, start: 0 },
   },
   {
-    clip: { fadeIn: 0, fadeOut: 0, length: 12, offset: 0, start: 14 },
-    id: "bass",
-    name: "Bass",
+    id: "fill",
+    title: "Fill",
+    track: "drums",
+    value: {
+      fadeIn: 0,
+      fadeOut: 0,
+      length: bars(2),
+      offset: 0,
+      start: bars(6),
+    },
+  },
+  {
+    id: "sub",
     title: "Sub",
+    track: "bass",
+    value: {
+      fadeIn: 0.5,
+      fadeOut: 1,
+      length: bars(6),
+      offset: 0,
+      start: bars(3),
+    },
   },
 ] as const;
 
-/** A clip is laid on a track: where it sits, how long it plays, and how its edges fade. */
-function TrackClip({
-  name,
+const describe = (seconds: number) => describeBarsBeats(seconds, DEFAULT_TEMPO);
+
+function Clip({
   onChange,
   title,
+  track,
   value,
 }: {
-  name: string;
   onChange: (value: ClipValue) => void;
   title: string;
+  track: string;
   value: ClipValue;
 }) {
   return (
     <TimelineClip
-      aria-label={`${name}, ${title}`}
+      aria-label={`${track}, ${title}`}
       className="inset-y-1.5 bg-primary/30"
+      getAriaValueText={describe}
       onValueChange={onChange}
       sourceLength={DURATION}
       value={value}
@@ -79,8 +116,34 @@ function TrackClip({
 export default function TimelineClipsDemo() {
   const [loop, setLoop] = useState<readonly [number, number]>(LOOP);
   const [clips, setClips] = useState<Record<string, ClipValue>>(() =>
-    Object.fromEntries(TRACKS.map((track) => [track.id, { ...track.clip }]))
+    Object.fromEntries(CLIPS.map((clip) => [clip.id, { ...clip.value }]))
   );
+  // The timeline fits the width it is given until the navigator zooms it.
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const [fitPx, setFitPx] = useState(0);
+  const [zoomed, setZoomed] = useState<number | null>(null);
+  useLayoutEffect(() => {
+    const element = viewportRef.current;
+    if (!element) {
+      return;
+    }
+    const measure = () => {
+      const lead =
+        element.querySelector<HTMLElement>(
+          '[data-slot="timeline-track-header"]'
+        )?.offsetWidth ?? 0;
+      setFitPx(Math.max(0, (element.clientWidth - lead) / DURATION));
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+  const [heights, setHeights] = useState<Record<string, number | undefined>>(
+    {}
+  );
+  // Never less than what fits the width.
+  const zoom = Math.max(zoomed ?? fitPx, fitPx) || 8;
   const { clock } = useSimulatedClock({
     duration: DURATION,
     loop,
@@ -91,15 +154,29 @@ export default function TimelineClipsDemo() {
       setClips((all) => ({ ...all, [id]: value })),
     []
   );
+  const resizeTrack = useCallback(
+    (id: string) => (height: number | undefined) =>
+      setHeights((all) => ({ ...all, [id]: height })),
+    []
+  );
   return (
     <Timeline
-      className="w-full"
+      className="w-full gap-2"
       duration={DURATION}
+      maxZoom={96}
+      minZoom={fitPx || undefined}
       onPositionChange={clock.set}
+      onZoomChange={setZoomed}
+      snapStep={BAR / 4}
       source={clock}
-      zoom={16}
+      zoom={zoom}
     >
-      <TimelineViewport className="flex flex-col overflow-x-auto bg-muted/40">
+      <TimelineNavigator getAriaValueText={describe} />
+      <TimelineViewport
+        className="flex flex-col overflow-y-hidden bg-muted/40"
+        ref={viewportRef}
+        scrollbar="hidden"
+      >
         <TimelineTrack>
           <TimelineTrackHeader className="flex items-center px-3 text-muted-foreground text-xs">
             Loop
@@ -108,6 +185,7 @@ export default function TimelineClipsDemo() {
             <TimelineRange
               aria-label="Loop"
               drawable
+              getAriaValueText={describe}
               onValueChange={setLoop}
               value={loop}
             >
@@ -119,29 +197,45 @@ export default function TimelineClipsDemo() {
         </TimelineTrack>
         <TimelineTrack>
           <TimelineTrackHeader className="flex items-center px-3 text-xs">
-            Seconds
+            Bars
           </TimelineTrackHeader>
-          <TimelineRuler aria-label="Playhead" className="border-b-0">
-            {MARKS.map((mark) => (
-              <TimelineMark key={mark} value={mark}>
-                {mark}
+          <TimelineRuler
+            aria-label="Playhead"
+            className="border-b-0"
+            getAriaValueText={describe}
+          >
+            {MARKS.map((bar) => (
+              <TimelineMark key={bar} value={bars(bar)}>
+                {bar + 1}
               </TimelineMark>
             ))}
             <TimelinePlayhead />
           </TimelineRuler>
         </TimelineTrack>
         {TRACKS.map((track) => (
-          <TimelineTrack key={track.id}>
+          <TimelineTrack
+            height={heights[track.id]}
+            key={track.id}
+            maxHeight={200}
+            minHeight={56}
+            onHeightChange={resizeTrack(track.id)}
+          >
             <TimelineTrackHeader className="flex items-center px-3 font-medium text-sm">
               {track.name}
-            </TimelineTrackHeader>
-            <TimelineLane className="h-16" seekable>
-              <TrackClip
-                name={track.name}
-                onChange={moveClip(track.id)}
-                title={track.title}
-                value={clips[track.id] ?? track.clip}
+              <TimelineTrackResizeHandle
+                aria-label={`Height of ${track.name}`}
               />
+            </TimelineTrackHeader>
+            <TimelineLane gridStep={BAR} seekable>
+              {CLIPS.filter((clip) => clip.track === track.id).map((clip) => (
+                <Clip
+                  key={clip.id}
+                  onChange={moveClip(clip.id)}
+                  title={clip.title}
+                  track={track.name}
+                  value={clips[clip.id] ?? clip.value}
+                />
+              ))}
               <TimelinePlayhead />
             </TimelineLane>
           </TimelineTrack>
