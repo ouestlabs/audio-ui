@@ -279,3 +279,34 @@ export const mono: Glyph = [
   rect(7, 5, 10, 14, 2, { tint: true }),
   circle(12, 14, 2.5, { knock: true }),
 ];
+
+/** An eighth note. */
+export const note: Glyph = [
+  circle(10.5, 17, 3, { tint: true }),
+  path("M13.5 17V4c2 .5 4 2 4 5"),
+];
+
+/** A unit slid into a rack. */
+export const insert: Glyph = [
+  rect(3, 13, 18, 8, 2, { tint: true }),
+  path("M7.5 17h.01", { knock: true }),
+  path("M12 3v7.5M8.5 7l3.5 3.5L15.5 7"),
+];
+
+/** A crate of records. */
+export const crate: Glyph = [
+  rect(3, 11, 18, 9, 2, { tint: true }),
+  path("M7 4v7M12 3v8M17 4v7"),
+];
+
+/** A dial without its body: the sweep and the pointer, to be dressed. */
+export const dial: Glyph = [
+  path("M6.3 17.7A8 8 0 1 1 17.7 17.7"),
+  path("M12 12l3.5-4"),
+];
+
+/** Light and dark: a disc, half of it solid. */
+export const contrast: Glyph = [
+  circle(12, 12, 8),
+  path("M12 4a8 8 0 0 1 0 16z", { tint: true }),
+];

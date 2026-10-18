@@ -1,16 +1,16 @@
 import {
   BotIcon,
-  BracesIcon,
-  FaderIcon,
+  ContrastIcon,
+  CrateIcon,
+  DialIcon,
   GridIcon,
   type IconProps,
-  JackIcon,
+  InsertIcon,
   KnobIcon,
   MetronomeIcon,
-  PatchbayIcon,
+  NoteIcon,
   PlayheadIcon,
   RackIcon,
-  ShapesIcon,
   SparkleIcon,
   TracksIcon,
   TuningForkIcon,
@@ -49,15 +49,15 @@ export function GroupIcon({
 }
 
 const PAGE_ICONS: Record<string, ComponentType<IconProps>> = {
-  "/docs": TuningForkIcon,
+  "/docs": NoteIcon,
   "/docs/agents": SparkleIcon,
-  "/docs/get-started": JackIcon,
-  "/docs/headless-styling": BracesIcon,
+  "/docs/get-started": InsertIcon,
+  "/docs/headless-styling": DialIcon,
   "/docs/icons": GridIcon,
-  "/docs/primitives": ShapesIcon,
-  "/docs/registry": PatchbayIcon,
+  "/docs/primitives": TuningForkIcon,
+  "/docs/registry": CrateIcon,
   "/docs/roadmap": PlayheadIcon,
-  "/docs/styling": FaderIcon,
+  "/docs/styling": ContrastIcon,
   "/llms.txt": BotIcon,
 };
 
