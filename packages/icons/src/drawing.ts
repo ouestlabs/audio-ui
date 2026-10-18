@@ -65,7 +65,13 @@ function drawShapes(
               stroke: "none",
               width: 24,
             }),
-            ...cuts.map((shape) => of(shape, { stroke: "black" })),
+            ...cuts.map((shape) =>
+              of(shape, {
+                // A closed detail is cut out whole; a line is cut as drawn.
+                ...(shape.tag === "path" ? {} : { fill: "black" }),
+                stroke: "black",
+              })
+            ),
           ]
         ),
         node("g", { mask: `url(#${id})` }, solid)
