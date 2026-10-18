@@ -170,6 +170,11 @@
     "title": "block-equalizer"
   },
   {
+    "categories": ["utility", "knob"],
+    "name": "device-contract-demo",
+    "title": "device-contract-demo"
+  },
+  {
     "categories": ["delay-reverb", "plot", "knob"],
     "name": "block-delay",
     "title": "block-delay"

@@ -605,6 +605,21 @@ export const components: RegistryItem[] = [
     type: "registry:block",
   },
   {
+    categories: ["utility", "knob"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "A device of your own, defined by its parameters alone: the panel, the state and the tool an agent calls come from that one description. Turn a knob, or send the call a model could send",
+    files: [
+      {
+        path: "components/device/device-contract-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "device-contract-demo",
+    registryDependencies: ["@audio-ui/device-panel"],
+    type: "registry:example",
+  },
+  {
     categories: ["delay-reverb", "plot", "knob"],
     dependencies: ["@audio-ui/react"],
     description:

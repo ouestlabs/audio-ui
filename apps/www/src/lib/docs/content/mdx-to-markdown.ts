@@ -38,7 +38,7 @@ const STEP_REGEX = /<Step>([\s\S]*?)<\/Step>/g;
 const ATTRIBUTE_REGEX = /attribute/i;
 const KEYS_REGEX = /keys/i;
 const QUOTED_REGEX = /^(["'])(.*)\1$/;
-const ICON_REGEX = /<Icons\.\w+\s*\/>\s*/g;
+const ICON_REGEX = /<Icons\.\w+(?:\s[^>]*?)?\/>\s*/g;
 
 type Attrs = Record<string, string | true>;
 

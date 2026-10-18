@@ -14,6 +14,14 @@ A device is an effect or an instrument that you can plug in, not a widget with a
 
 `npx shadcn@latest add @audio-ui/compressor` installs a device's state, engine and panel in `components/audio-ui/devices/compressor/`. Each piece also installs on its own (`@audio-ui/compressor-device`, `-engine`, `-panel`), so a host with its own engine takes only the state and the panel. The tools come from `@audio-ui/core/device`. Every device page has a block that wires the pieces to a loop: `@audio-ui/block-compressor`.
 
+## One description
+
+A device is its parameters. Write them once, with their ranges and units, and the panel, the state and the tool an agent drives it with all come from that description. Turn a knob, or send the call a model could send:
+
+<ComponentPreview styleName="base-nova" name="device-contract-demo" />
+
+The call is out of range and has a word where a number goes, and it never throws: the rate is brought into range, the depth is refused by name, and the panel follows. The code of this device is under [Your own device](#your-own-device).
+
 ## Catalog
 
 ### Dynamics

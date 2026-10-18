@@ -3,6 +3,7 @@
 import { TerminalIcon } from "@phosphor-icons/react/ssr";
 import * as React from "react";
 import { CopyButton } from "@/components/code/copy/copy-button";
+import { Icons } from "@/components/site/icons";
 import {
   Frame,
   FrameContent,
@@ -66,11 +67,15 @@ export function CodeBlockCommand({
               weight="fill"
             />
             <TabsList>
-              {Object.entries(tabs).map(([key]) => (
-                <TabsTrigger key={key} value={key}>
-                  {key}
-                </TabsTrigger>
-              ))}
+              {(Object.keys(tabs) as (keyof typeof tabs)[]).map((key) => {
+                const Icon = Icons[key];
+                return (
+                  <TabsTrigger key={key} value={key}>
+                    <Icon className="size-3.5" />
+                    {key}
+                  </TabsTrigger>
+                );
+              })}
             </TabsList>
           </div>
           <CopyButton

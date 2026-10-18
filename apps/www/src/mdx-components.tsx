@@ -9,7 +9,7 @@ import { CopyButton } from "@/components/code/copy/copy-button";
 import { DocsComponentSource } from "@/components/code/source/docs-component-source";
 import { Callout } from "@/components/docs/mdx/callout";
 import { DeviceUsage } from "@/components/docs/mdx/device-usage";
-import { Install } from "@/components/docs/mdx/install";
+import { Install, InstallAgentParts } from "@/components/docs/mdx/install";
 import { Mermaid } from "@/components/docs/mdx/mermaid";
 import {
   KeyRow,
@@ -55,6 +55,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     DeviceControls,
     DeviceUsage,
     CodeBlockCommand,
+    InstallAgent: InstallAgentParts,
     CodeCollapsibleWrapper,
     CodeTabs,
     ComponentPreview: ({
