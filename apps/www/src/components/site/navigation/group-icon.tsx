@@ -27,7 +27,7 @@ const GROUP_ICONS = {
   Workstation: TracksIcon,
 } as const;
 
-/** The glyph of a space of the docs (a group of the sidebar): thin and muted, and bold in the title's color when the page being read is in it. Nothing for the other groups. */
+/** The glyph of a space of the docs (a group of the sidebar): thin and muted, and in the title's color when the page being read is in it. Nothing for the other groups. */
 export function GroupIcon({
   current,
   title,
@@ -42,7 +42,6 @@ export function GroupIcon({
         "size-4 shrink-0",
         current ? "text-site-foreground" : "text-site-muted-foreground"
       )}
-      weight={current ? "bold" : "regular"}
     />
   ) : null;
 }
