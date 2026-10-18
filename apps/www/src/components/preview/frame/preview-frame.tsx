@@ -2,6 +2,7 @@
 
 import type * as React from "react";
 import { CopyRegistry } from "@/components/code/copy/copy-registry";
+import { MicrophoneSwitch } from "@/components/preview/controls/microphone-switch";
 import { MidiConnect } from "@/components/preview/controls/midi-connect";
 import { PlaySwitch } from "@/components/preview/controls/play-switch";
 import { ExpandPreview } from "@/components/preview/frame/expand-preview";
@@ -13,7 +14,11 @@ import {
   FrameHeader,
 } from "@/components/site/layout/frame";
 import { Spinner } from "@/components/ui/spinner";
-import { takesMidi, takesPlay } from "@/lib/registry/catalog/is-block";
+import {
+  takesMicrophone,
+  takesMidi,
+  takesPlay,
+} from "@/lib/registry/catalog/is-block";
 import { cn } from "@/lib/utils";
 
 /**
@@ -107,6 +112,7 @@ export function PreviewBar({
       <div className="flex items-center gap-1.5">
         {badge}
         {takesPlay(name) ? <PlaySwitch /> : null}
+        {takesMicrophone(name) ? <MicrophoneSwitch /> : null}
         {takesMidi(name) ? <MidiConnect /> : null}
         {expand?.host ? (
           <ExpandPreview hint={hint} label={name} preview={expand} />

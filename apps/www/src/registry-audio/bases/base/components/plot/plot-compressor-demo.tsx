@@ -2,8 +2,6 @@
 
 import { webAudioCompressorOutput } from "@audio-ui/core/analysis";
 import { useCallback, useMemo, useState } from "react";
-import { IconPlaceholder } from "@/components/icon-placeholder";
-import { Button } from "@/registry/bases/base/ui/button";
 import {
   Plot,
   PlotCursor,
@@ -61,7 +59,7 @@ export default function PlotCompressorDemo() {
   const output = useMemo(() => curveOf(compressor), [compressor]);
   const loudest = output(MAX_DB);
   const makeupDb = output(MIN_DB) - MIN_DB;
-  const { level, playing, toggle } = usePulsesThroughCompressor(compressor);
+  const { level } = usePulsesThroughCompressor(compressor);
   // The input level, riding the curve: where the signal is right now.
   const dot = useMemo(
     () => ({
@@ -127,35 +125,7 @@ export default function PlotCompressorDemo() {
           value={{ x: MAX_DB, y: loudest }}
         />
       </Plot>
-      <div className="flex items-center justify-between gap-2">
-        <Button
-          aria-label={
-            playing
-              ? "Stop the signal"
-              : "Play a pulsing signal through the compressor"
-          }
-          onClick={toggle}
-          size="icon-sm"
-          variant="outline"
-        >
-          {playing ? (
-            <IconPlaceholder
-              hugeicons="PauseIcon"
-              lucide="PauseIcon"
-              phosphor="PauseIcon"
-              remixicon="RiPauseLine"
-              tabler="IconPlayerPause"
-            />
-          ) : (
-            <IconPlaceholder
-              hugeicons="PlayIcon"
-              lucide="PlayIcon"
-              phosphor="PlayIcon"
-              remixicon="RiPlayLine"
-              tabler="IconPlayerPlay"
-            />
-          )}
-        </Button>
+      <div className="flex items-center justify-end gap-2">
         <output className="font-mono text-muted-foreground text-xs">
           Threshold {compressor.thresholdDb.toFixed(0)} dB,{" "}
           {compressor.ratio.toFixed(1)}:1, make-up +{makeupDb.toFixed(1)} dB

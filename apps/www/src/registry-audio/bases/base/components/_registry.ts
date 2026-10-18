@@ -322,7 +322,8 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["meter"],
-    description: "Needle meter example",
+    description:
+      "A VU needle that follows the microphone when it is on, and a moving signal when it is not",
     files: [
       {
         path: "components/meter/needle-meter-demo.tsx",
@@ -332,6 +333,8 @@ export const components: RegistryItem[] = [
     name: "needle-meter-demo",
     registryDependencies: [
       "@audio-ui/needle-meter",
+      "@audio-ui/use-audio-levels",
+      "@audio-ui/use-microphone",
       "@audio-ui/use-simulated-levels",
     ],
     type: "registry:example",
@@ -486,7 +489,8 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["waveform"],
-    description: "Live waveform scrolling with the incoming signal",
+    description:
+      "Live waveform scrolling with the microphone, or with a speech-like signal while it is off",
     files: [
       {
         path: "components/waveform/waveform-live-demo.tsx",
@@ -494,7 +498,11 @@ export const components: RegistryItem[] = [
       },
     ],
     name: "waveform-live-demo",
-    registryDependencies: ["@audio-ui/waveform"],
+    registryDependencies: [
+      "@audio-ui/use-audio-signal",
+      "@audio-ui/use-microphone",
+      "@audio-ui/waveform",
+    ],
     type: "registry:example",
   },
   {
@@ -517,7 +525,6 @@ export const components: RegistryItem[] = [
       "@audio-ui/knob",
       "@audio-ui/use-noise-through-eq",
       "@audio-ui/use-spectrum",
-      "@shadcn/button",
       "@shadcn/popover",
       "@shadcn/select",
     ],
@@ -553,7 +560,6 @@ export const components: RegistryItem[] = [
     registryDependencies: [
       "@audio-ui/plot",
       "@audio-ui/use-pulses-through-compressor",
-      "@shadcn/button",
     ],
     type: "registry:example",
   },

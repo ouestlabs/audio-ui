@@ -5,7 +5,8 @@ import {
   toWebAudioQ,
   WEB_AUDIO_FILTER_TYPES,
 } from "@audio-ui/core/analysis";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { usePlaySwitch } from "@/registry-audio/bases/base/hooks/use-play-switch";
 import { pinkNoise } from "@/registry-audio/bases/base/lib/pink-noise";
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
@@ -17,18 +18,17 @@ const PARAM_RAMP_SECONDS = 0.02;
 /**
  * Pink noise played through an equalizer that follows `bands`, so what a plot
  * draws is what is heard. Returns the analyser after the filters, for
- * `useSpectrum`, and whether it is playing. Stops when the component unmounts.
+ * `useSpectrum`. It plays while the page's play switch is on (`usePlaySwitch`),
+ * and stops when it goes off or when the component unmounts.
  */
 export function useNoiseThroughEq(bands: readonly EqBand[]) {
-  const [playing, setPlaying] = useState(false);
+  const { playing } = usePlaySwitch();
   const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
   const filtersRef = useRef<BiquadFilterNode[]>([]);
   const bandsRef = useRef(bands);
   bandsRef.current = bands;
   // The chain is rebuilt when a band comes or goes, or changes type.
   const bandTypes = bands.map((band) => band.type).join();
-
-  const toggle = useCallback(() => setPlaying((on) => !on), []);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: rebuilds the chain when the band types change.
   useEffect(() => {
@@ -94,5 +94,5 @@ export function useNoiseThroughEq(bands: readonly EqBand[]) {
     });
   }, [bands]);
 
-  return { analyser, playing, toggle };
+  return { analyser };
 }

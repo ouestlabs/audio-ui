@@ -1,6 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 const ANALYSER_FFT_SIZE = 4096;
@@ -70,4 +76,70 @@ export function useMicrophone(): UseMicrophoneReturn {
   useEffect(() => stop, [stop]);
 
   return { analyser, error, isListening: analyser !== null, start, stop };
+}
+
+const switchListeners = new Set<() => void>();
+interface SwitchState {
+  error: string | null;
+  on: boolean;
+}
+
+let switchState: SwitchState = { error: null, on: false };
+
+function subscribeSwitch(listener: () => void) {
+  switchListeners.add(listener);
+  return () => {
+    switchListeners.delete(listener);
+  };
+}
+
+function setSwitch(next: Partial<SwitchState>) {
+  switchState = { ...switchState, ...next };
+  for (const listener of switchListeners) {
+    listener();
+  }
+}
+
+const getSwitch = () => switchState;
+const serverSwitch: SwitchState = { error: null, on: false };
+const getServerSwitch = () => serverSwitch;
+const setOn = (next: boolean) => setSwitch({ on: next });
+const toggleSwitch = () => setSwitch({ error: null, on: !switchState.on });
+
+/**
+ * The page's microphone switch: a button anywhere on the page flips it, and
+ * every component that listens with `usePageMicrophone` follows. It holds no
+ * audio, only whether the microphone should be on.
+ */
+export function useMicrophoneSwitch() {
+  const { error, on } = useSyncExternalStore(
+    subscribeSwitch,
+    getSwitch,
+    getServerSwitch
+  );
+  return { error, on, setOn, toggle: toggleSwitch };
+}
+
+/**
+ * The microphone while the page's switch is on, as an `AnalyserNode` to read
+ * (`null` while it is off). A preview's bar flips the switch, so a demo can
+ * leave its listen button to the page. A refused microphone puts the switch
+ * back off and says why.
+ */
+export function usePageMicrophone() {
+  const { on } = useMicrophoneSwitch();
+  const { analyser, error, start, stop } = useMicrophone();
+  useEffect(() => {
+    if (on) {
+      start();
+    } else {
+      stop();
+    }
+  }, [on, start, stop]);
+  useEffect(() => {
+    if (error) {
+      setSwitch({ error, on: false });
+    }
+  }, [error]);
+  return analyser;
 }

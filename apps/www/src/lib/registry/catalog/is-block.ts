@@ -26,6 +26,15 @@ const MIDI = new Set([
 export const takesMidi = (name: string) => MIDI.has(name);
 
 /** The previews that show a signal and make none: their bar gets a button that plays one. */
-const PLAY = new Set(["spectrum-analyzer-demo"]);
+const PLAY = new Set([
+  "plot-compressor-demo",
+  "plot-demo",
+  "spectrum-analyzer-demo",
+]);
 
 export const takesPlay = (name: string) => PLAY.has(name);
+
+/** The previews that can show your own sound: their bar gets a button that turns the microphone on. */
+const MICROPHONE = new Set(["needle-meter-demo", "waveform-live-demo"]);
+
+export const takesMicrophone = (name: string) => MICROPHONE.has(name);

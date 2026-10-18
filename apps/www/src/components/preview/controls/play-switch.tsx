@@ -10,14 +10,26 @@ import {
 } from "@/components/ui/tooltip";
 import { usePlaySwitch } from "@/registry-audio/bases/base/hooks/use-play-switch";
 
+/** The bars showing the switch: the card's, and the expanded view's while it is open. */
+let bars = 0;
+
 /**
  * Plays and stops the sound of a preview from its bar, for the previews that
  * show a signal and make none of their own: they follow the page's play
- * switch. It stops when the bar goes.
+ * switch. It stops when the last bar goes, so expanding a preview, or closing
+ * it again, does not cut the sound.
  */
 export function PlaySwitch() {
   const { playing, setPlaying, toggle } = usePlaySwitch();
-  useEffect(() => () => setPlaying(false), [setPlaying]);
+  useEffect(() => {
+    bars += 1;
+    return () => {
+      bars -= 1;
+      if (bars === 0) {
+        setPlaying(false);
+      }
+    };
+  }, [setPlaying]);
   const Icon = playing ? PauseIcon : PlayIcon;
   return (
     <Tooltip>
