@@ -8,6 +8,7 @@ import {
 import { Link } from "@tanstack/react-router";
 import * as React from "react";
 import { ComponentUpdateIndicator } from "@/components/docs/catalog/component-update-indicator";
+import { GroupIcon } from "@/components/site/navigation/group-icon";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -83,7 +84,10 @@ function GroupLabel({
       onClick={toggle}
       type="button"
     >
-      {title}
+      <span className="flex items-center gap-2">
+        <GroupIcon title={title} />
+        {title}
+      </span>
       <CaretDownIcon
         aria-hidden="true"
         className={cn(

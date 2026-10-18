@@ -367,6 +367,87 @@ export const Icons = {
       </g>
     </svg>
   ),
+  devices: (props: IconProps) => (
+    <svg
+      aria-hidden="true"
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={1.75}
+      viewBox="0 0 24 24"
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+    >
+      <rect height="12" rx="2" width="18" x="3" y="6" />
+      <circle cx="8" cy="12" r="2" />
+      <path d="M13 12h5" />
+    </svg>
+  ),
+  elements: (props: IconProps) => (
+    <svg
+      aria-hidden="true"
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={1.75}
+      viewBox="0 0 24 24"
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+    >
+      <circle cx="12" cy="12" r="8" />
+      <path d="m12 12 3.5-3.5" />
+    </svg>
+  ),
+  engine: (props: IconProps) => (
+    <svg
+      aria-hidden="true"
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={1.75}
+      viewBox="0 0 24 24"
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+    >
+      <path d="M3 12h2l2-5 3 10 3-14 3 12 2-3h3" />
+    </svg>
+  ),
+  workstation: (props: IconProps) => (
+    <svg
+      aria-hidden="true"
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={1.75}
+      viewBox="0 0 24 24"
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+    >
+      <rect height="4" rx="1" width="10" x="3" y="5" />
+      <rect height="4" rx="1" width="12" x="9" y="10" />
+      <rect height="4" rx="1" width="9" x="5" y="15" />
+    </svg>
+  ),
+  start: (props: IconProps) => (
+    <svg
+      aria-hidden="true"
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={1.75}
+      viewBox="0 0 24 24"
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+    >
+      <path d="M5 12h14" />
+      <path d="m13 6 6 6-6 6" />
+    </svg>
+  ),
 };
 
 export function getIconForLanguageExtension(

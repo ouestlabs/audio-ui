@@ -3,6 +3,7 @@
 import { CaretDownIcon } from "@phosphor-icons/react/ssr";
 import { Link } from "@tanstack/react-router";
 import * as React from "react";
+import { GroupIcon } from "@/components/site/navigation/group-icon";
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -78,7 +79,10 @@ function GroupLabel({
       className="w-full cursor-pointer justify-between font-semibold text-site-foreground hover:bg-site-muted"
       render={<button aria-expanded={open} onClick={toggle} type="button" />}
     >
-      {title}
+      <span className="flex items-center gap-2">
+        <GroupIcon title={title} />
+        {title}
+      </span>
       <CaretDownIcon
         aria-hidden="true"
         className={cn(
