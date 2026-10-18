@@ -16,7 +16,6 @@ import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
 import { cn } from "@/lib/utils";
 
 export function ComponentPreviewTabs({
-  actions,
   className,
   previewClassName,
   align: _align,
@@ -36,8 +35,6 @@ export function ComponentPreviewTabs({
   hideCode?: boolean;
   chromeLessOnMobile?: boolean;
   component: React.ReactNode;
-  /** What the preview header shows after its copy button, such as a switch for its parts. */
-  actions?: React.ReactNode;
   /** Adds a button that opens the preview at full size: for the editors made to take a screen. */
   expand?: boolean;
   /** Lets the preview be as tall as what it shows, rather than a fixed height: for blocks. */
@@ -78,13 +75,7 @@ export function ComponentPreviewTabs({
       data-slot="component-preview"
       {...props}
     >
-      <PreviewBar
-        actions={actions}
-        expand={hosted}
-        hint={hint}
-        name={name}
-        position="header"
-      />
+      <PreviewBar expand={hosted} hint={hint} name={name} position="header" />
       {/* The panel is the preview: no container inside it. */}
       <PreviewPanel
         block={fitContent}
