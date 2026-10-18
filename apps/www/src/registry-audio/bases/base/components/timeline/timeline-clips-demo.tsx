@@ -5,7 +5,10 @@ import {
   describeBarsBeats,
   secondsPerBar,
 } from "@audio-ui/core/time";
-import type { Timeline as TimelinePrimitive } from "@audio-ui/react";
+import {
+  coverClips,
+  type Timeline as TimelinePrimitive,
+} from "@audio-ui/react";
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import {
   Timeline,
@@ -45,7 +48,14 @@ const TRACKS = [
   { id: "bass", name: "Bass" },
 ] as const;
 
-const CLIPS = [
+interface DemoClip {
+  id: string;
+  title: string;
+  track: string;
+  value: ClipValue;
+}
+
+const CLIPS: DemoClip[] = [
   {
     id: "groove",
     title: "Groove",
@@ -76,17 +86,19 @@ const CLIPS = [
       start: bars(3),
     },
   },
-] as const;
+];
 
 const describe = (seconds: number) => describeBarsBeats(seconds, DEFAULT_TEMPO);
 
 function Clip({
   onChange,
+  onCommit,
   title,
   track,
   value,
 }: {
   onChange: (value: ClipValue) => void;
+  onCommit: (value: ClipValue) => void;
   title: string;
   track: string;
   value: ClipValue;
@@ -97,6 +109,7 @@ function Clip({
       className="inset-y-1.5 bg-primary/30"
       getAriaValueText={describe}
       onValueChange={onChange}
+      onValueCommitted={onCommit}
       sourceLength={DURATION}
       value={value}
     >
@@ -115,9 +128,9 @@ function Clip({
 
 export default function TimelineClipsDemo() {
   const [loop, setLoop] = useState<readonly [number, number]>(LOOP);
-  const [clips, setClips] = useState<Record<string, ClipValue>>(() =>
-    Object.fromEntries(CLIPS.map((clip) => [clip.id, { ...clip.value }]))
-  );
+  const [clips, setClips] = useState(CLIPS);
+  // The id of the second piece of a clip that is cut in two.
+  const pieces = useRef(0);
   // The timeline fits the width it is given until the navigator zooms it.
   const viewportRef = useRef<HTMLDivElement>(null);
   const [fitPx, setFitPx] = useState(0);
@@ -151,7 +164,34 @@ export default function TimelineClipsDemo() {
   });
   const moveClip = useCallback(
     (id: string) => (value: ClipValue) =>
-      setClips((all) => ({ ...all, [id]: value })),
+      setClips((all) =>
+        all.map((clip) => (clip.id === id ? { ...clip, value } : clip))
+      ),
+    []
+  );
+  // A clip let go over others covers them: they are trimmed, cut in two or removed, not stacked.
+  const placeClip = useCallback(
+    (id: string) => (placed: ClipValue) =>
+      setClips((all) => {
+        const clip = all.find((item) => item.id === id);
+        if (!clip) {
+          return all;
+        }
+        const covered = coverClips(
+          all.filter((item) => item.track === clip.track && item.id !== id),
+          placed,
+          { duration: DURATION },
+          (item, value) => {
+            pieces.current += 1;
+            return { ...item, id: `${item.id}-${pieces.current}`, value };
+          }
+        );
+        return [
+          ...all.filter((item) => item.track !== clip.track),
+          ...covered,
+          { ...clip, value: placed },
+        ];
+      }),
     []
   );
   const resizeTrack = useCallback(
@@ -233,15 +273,18 @@ export default function TimelineClipsDemo() {
                 gridStep={BAR}
                 seekable
               >
-                {CLIPS.filter((clip) => clip.track === track.id).map((clip) => (
-                  <Clip
-                    key={clip.id}
-                    onChange={moveClip(clip.id)}
-                    title={clip.title}
-                    track={track.name}
-                    value={clips[clip.id] ?? clip.value}
-                  />
-                ))}
+                {clips
+                  .filter((clip) => clip.track === track.id)
+                  .map((clip) => (
+                    <Clip
+                      key={clip.id}
+                      onChange={moveClip(clip.id)}
+                      onCommit={placeClip(clip.id)}
+                      title={clip.title}
+                      track={track.name}
+                      value={clip.value}
+                    />
+                  ))}
                 <TimelinePlayhead />
               </TimelineLane>
             </TimelineTrack>
