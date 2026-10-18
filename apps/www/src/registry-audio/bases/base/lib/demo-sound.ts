@@ -4,39 +4,144 @@ import {
   triggerSnare,
 } from "@/registry-audio/bases/base/lib/drum-synthesis";
 
-const BPM = 100;
+const BPM = 90;
 /** The tempo of the loop, for a device that follows it: a delay synced to it echoes on the beat. */
 export const DEMO_TEMPO = { beatsPerBar: 4, beatUnit: 4, bpm: BPM };
-const BEATS = 4;
+/** Two bars: the second answers the first on another chord. */
+const BEATS = 8;
 const BEAT_SECONDS = 60 / BPM;
+const STEP_SECONDS = BEAT_SECONDS / 4;
 const LOOP_SECONDS = BEATS * BEAT_SECONDS;
-const KICKS = [0, 2, 2.75];
-const SNARES = [1, 3];
-const HATS = [0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5];
-/** A short line on top: a beat, the pitch in hertz, so a delay or a reverb has notes to carry. */
-const PLUCKS: [beat: number, hertz: number][] = [
-  [0, 220],
-  [0.75, 329.63],
-  [1.5, 261.63],
-  [2, 220],
-  [2.75, 392],
-  [3.5, 329.63],
-];
-const PLUCK_SECONDS = 0.45;
-const PLUCK_LEVEL = 0.28;
-const KICK_LEVEL = 0.9;
-const SNARE_LEVEL = 0.5;
-const HAT_LEVEL = 0.3;
+/** What rings past the end of the loop is mixed into its start, so no note is cut where the loop turns. */
+const TAIL_SECONDS = 2;
+/** How far the off-beat sixteenths are pushed back, as a share of a step: the lilt of the groove. */
+const SWING = 0.18;
 const SILENCE_FLOOR = 0.001;
 
+/** A fixed run of numbers from 0 to 1, so the loop is the same each time it is drawn, and the kick of the key lands where the kick of the groove does. */
+function seededRandom(seed: number) {
+  let state = seed;
+  return () => {
+    state = (state + 0x6d_2b_79_f5) | 0;
+    let mixed = Math.imul(state ^ (state >>> 15), 1 | state);
+    mixed ^= mixed + Math.imul(mixed ^ (mixed >>> 7), 61 | mixed);
+    return ((mixed ^ (mixed >>> 14)) >>> 0) / 4_294_967_296;
+  };
+}
+
+/** The moment of a sixteenth step, with the off-beat ones pushed back by the swing. */
+const timeOf = (step: number) =>
+  step * STEP_SECONDS + (step % 2 === 1 ? SWING * STEP_SECONDS : 0);
+
+/** A hit: the step it falls on and how hard, 0 to 1. */
+type Hit = [step: number, velocity: number];
+
+const KICKS: Hit[] = [
+  [0, 1],
+  [7, 0.7],
+  [10, 0.85],
+  [16, 1],
+  [22, 0.75],
+  [25, 0.8],
+  [29, 0.55],
+];
+/** The backbeat on two and four, and quiet ghost notes in front of it. */
+const SNARES: Hit[] = [
+  [4, 1],
+  [12, 0.95],
+  [20, 1],
+  [28, 0.9],
+  [15, 0.28],
+  [23, 0.24],
+  [31, 0.3],
+];
+/** Closed hats on the eighths, the ones on the beat harder, and ghost sixteenths between. */
+const HATS: Hit[] = [
+  ...Array.from(
+    { length: 16 },
+    (_, index): Hit => [index * 2, index % 2 === 0 ? 0.85 : 0.55]
+  ),
+  [3, 0.25],
+  [11, 0.25],
+  [19, 0.25],
+  [27, 0.25],
+].filter(([step]) => step !== 14 && step !== 30) as Hit[];
+const OPEN_HATS: Hit[] = [
+  [14, 0.5],
+  [30, 0.5],
+];
+const KICK_LEVEL = 0.8;
+const SNARE_LEVEL = 0.4;
+const HAT_LEVEL = 0.4;
+const HAT_PAN = 0.4;
+
+/** The root of each bar, in hertz: A and F, low enough to be felt. */
+const BASS_ROOTS_HZ = [55, 43.65];
+/** A bass note: the step it starts on, how many steps it lasts, and the bar it belongs to. */
+const BASS: [step: number, steps: number, bar: number][] = [
+  [0, 3, 0],
+  [7, 1.5, 0],
+  [10, 3, 0],
+  [16, 3, 1],
+  [22, 1.5, 1],
+  [25, 4, 1],
+];
+const BASS_LEVEL = 0.34;
+
+/** A minor seventh, then an F major seventh: the two chords the bars play, voiced close, with their notes in hertz. */
+const CHORDS_HZ = [
+  [220, 261.63, 329.63, 392],
+  [174.61, 220, 261.63, 329.63],
+];
+/** A chord struck, and where: the step, the chord, and how hard. The second strike of each bar comes back off the beat, softer. */
+const KEYS: [step: number, chord: number, velocity: number][] = [
+  [0, 0, 1],
+  [6, 0, 0.6],
+  [16, 1, 1],
+  [22, 1, 0.6],
+];
+const KEY_LEVEL = 0.07;
+const KEY_STRUM_SECONDS = 0.012;
+const KEY_SPREAD = 0.6;
+
+/** The line on top: the step, the pitch in hertz and how hard, so a delay or a reverb has notes to carry. */
+const PLUCKS: [step: number, hertz: number, velocity: number][] = [
+  [3, 659.25, 0.7],
+  [9, 523.25, 0.5],
+  [13, 587.33, 0.6],
+  [19, 659.25, 0.65],
+  [24, 783.99, 0.5],
+  [27, 659.25, 0.4],
+];
+const PLUCK_SECONDS = 0.45;
+const PLUCK_LEVEL = 0.2;
+const PLUCK_PAN = 0.45;
+/** The whole groove sits this far under full scale, at about the level the loop it replaces had. */
+const GROOVE_TRIM = 0.8;
+
 const rendered = new Map<number, Promise<AudioBuffer>>();
+
+/** A gain for one hit, panned when it is not in the centre, into the mix. */
+function bus(ctx: BaseAudioContext, mix: AudioNode, level: number, pan = 0) {
+  const gain = ctx.createGain();
+  gain.gain.value = level;
+  if (pan === 0) {
+    gain.connect(mix);
+  } else {
+    const panner = ctx.createStereoPanner();
+    panner.pan.value = pan;
+    gain.connect(panner).connect(mix);
+  }
+  return gain;
+}
 
 /** One short note: a triangle through a low-pass that closes as it dies, enough to carry an echo or a tail. */
 function pluck(
   ctx: BaseAudioContext,
   destination: AudioNode,
   time: number,
-  hertz: number
+  hertz: number,
+  level: number
 ) {
   const oscillator = ctx.createOscillator();
   const filter = ctx.createBiquadFilter();
@@ -46,54 +151,198 @@ function pluck(
   filter.type = "lowpass";
   filter.frequency.setValueAtTime(4000, time);
   filter.frequency.exponentialRampToValueAtTime(500, time + PLUCK_SECONDS);
-  gain.gain.setValueAtTime(PLUCK_LEVEL, time);
+  gain.gain.setValueAtTime(level, time);
   gain.gain.exponentialRampToValueAtTime(SILENCE_FLOOR, time + PLUCK_SECONDS);
   oscillator.connect(filter).connect(gain).connect(destination);
   oscillator.start(time);
   oscillator.stop(time + PLUCK_SECONDS);
 }
 
+/** A bass note: a sine for the weight and a triangle an octave up for the body, so it is heard on a small speaker too. */
+function bassNote(
+  ctx: BaseAudioContext,
+  destination: AudioNode,
+  time: number,
+  hertz: number,
+  seconds: number
+) {
+  const sub = ctx.createOscillator();
+  const body = ctx.createOscillator();
+  const bodyLevel = ctx.createGain();
+  const filter = ctx.createBiquadFilter();
+  const gain = ctx.createGain();
+  sub.type = "sine";
+  sub.frequency.value = hertz;
+  body.type = "triangle";
+  body.frequency.value = hertz * 2;
+  bodyLevel.gain.value = 0.35;
+  filter.type = "lowpass";
+  filter.frequency.value = 400;
+  gain.gain.setValueAtTime(SILENCE_FLOOR, time);
+  gain.gain.linearRampToValueAtTime(BASS_LEVEL, time + 0.012);
+  gain.gain.exponentialRampToValueAtTime(
+    BASS_LEVEL * 0.55,
+    time + seconds * 0.6
+  );
+  gain.gain.exponentialRampToValueAtTime(SILENCE_FLOOR, time + seconds + 0.08);
+  sub.connect(gain);
+  body.connect(bodyLevel).connect(filter).connect(gain);
+  gain.connect(destination);
+  for (const oscillator of [sub, body]) {
+    oscillator.start(time);
+    oscillator.stop(time + seconds + 0.1);
+  }
+}
+
+/** A key of an electric piano: the note, a softer octave that dies sooner for the tine, and a twin a few cents sharp on the other side, whose beating moves the sound between the ears. */
+function key(
+  ctx: BaseAudioContext,
+  destination: AudioNode,
+  time: number,
+  hertz: number,
+  level: number,
+  pan: number
+) {
+  const partials: [
+    ratio: number,
+    share: number,
+    seconds: number,
+    side: number,
+  ][] = [
+    [1, 1, 1.6, pan],
+    [1.0029, 0.5, 1.6, pan >= 0 ? -0.5 : 0.5],
+    [2, 0.4, 0.5, pan],
+    [3, 0.12, 0.25, pan],
+  ];
+  for (const [ratio, share, seconds, side] of partials) {
+    const tone = ctx.createBiquadFilter();
+    const panner = ctx.createStereoPanner();
+    const oscillator = ctx.createOscillator();
+    const gain = ctx.createGain();
+    tone.type = "lowpass";
+    tone.frequency.value = 3200;
+    panner.pan.value = side;
+    oscillator.type = "sine";
+    oscillator.frequency.value = hertz * ratio;
+    gain.gain.setValueAtTime(SILENCE_FLOOR, time);
+    gain.gain.linearRampToValueAtTime(level * share, time + 0.005);
+    gain.gain.exponentialRampToValueAtTime(SILENCE_FLOOR, time + seconds);
+    oscillator.connect(gain).connect(tone).connect(panner).connect(destination);
+    oscillator.start(time);
+    oscillator.stop(time + seconds);
+  }
+}
+
+/** The kicks of the groove: the same each time, for the loop and for the key that follows it. */
+function drawKicks(ctx: BaseAudioContext, mix: AudioNode) {
+  const random = seededRandom(11);
+  for (const [step, velocity] of KICKS) {
+    const time = Math.max(0, timeOf(step) + (random() - 0.5) * 0.006);
+    triggerKick(ctx, bus(ctx, mix, KICK_LEVEL * velocity), time, {
+      decay: 0.3,
+      tune: -1,
+    });
+  }
+}
+
+/** What the drums, the bass, the keys and the line play, over two bars. */
+function drawGroove(ctx: BaseAudioContext, out: AudioNode) {
+  const random = seededRandom(23);
+  const mix = ctx.createGain();
+  mix.gain.value = GROOVE_TRIM;
+  mix.connect(out);
+  drawKicks(ctx, mix);
+  for (const [step, velocity] of SNARES) {
+    const time = timeOf(step) + (random() - 0.5) * 0.006;
+    triggerSnare(ctx, bus(ctx, mix, SNARE_LEVEL * velocity), time);
+  }
+  for (const [step, velocity] of HATS) {
+    const time = timeOf(step) + (random() - 0.5) * 0.012;
+    const level = HAT_LEVEL * velocity * (0.9 + 0.2 * random());
+    triggerHihat(ctx, bus(ctx, mix, level, HAT_PAN), time);
+  }
+  for (const [step, velocity] of OPEN_HATS) {
+    triggerHihat(
+      ctx,
+      bus(ctx, mix, HAT_LEVEL * velocity, HAT_PAN),
+      timeOf(step),
+      { decay: 0.3 }
+    );
+  }
+  for (const [step, steps, bar] of BASS) {
+    bassNote(
+      ctx,
+      mix,
+      timeOf(step),
+      BASS_ROOTS_HZ[bar] ?? 55,
+      steps * STEP_SECONDS
+    );
+  }
+  for (const [step, chord, velocity] of KEYS) {
+    const notes = CHORDS_HZ[chord] ?? [];
+    notes.forEach((hertz, index) => {
+      const pan =
+        (index / Math.max(1, notes.length - 1) - 0.5) * 2 * KEY_SPREAD;
+      key(
+        ctx,
+        mix,
+        timeOf(step) + index * KEY_STRUM_SECONDS,
+        hertz,
+        KEY_LEVEL * velocity,
+        pan
+      );
+    });
+  }
+  PLUCKS.forEach(([step, hertz, velocity], index) => {
+    const line = bus(ctx, mix, 1, index % 2 === 0 ? -PLUCK_PAN : PLUCK_PAN);
+    pluck(ctx, line, timeOf(step), hertz, PLUCK_LEVEL * velocity);
+  });
+}
+
+/** Draws a loop, then folds what rings past its end into its start. */
+async function drawLoop(
+  sampleRate: number,
+  draw: (ctx: BaseAudioContext, mix: AudioNode) => void
+) {
+  const loop = Math.round(sampleRate * LOOP_SECONDS);
+  const ctx = new OfflineAudioContext(
+    2,
+    loop + Math.round(sampleRate * TAIL_SECONDS),
+    sampleRate
+  );
+  const mix = ctx.createGain();
+  mix.connect(ctx.destination);
+  draw(ctx, mix);
+  const drawn = await ctx.startRendering();
+  const folded = new AudioBuffer({
+    length: loop,
+    numberOfChannels: 2,
+    sampleRate,
+  });
+  for (let channelIndex = 0; channelIndex < 2; channelIndex += 1) {
+    const from = drawn.getChannelData(channelIndex);
+    const to = folded.getChannelData(channelIndex);
+    for (let index = 0; index < loop; index += 1) {
+      to[index] = (from[index] ?? 0) + (from[loop + index] ?? 0);
+    }
+  }
+  return folded;
+}
+
 /**
- * A two-second loop to put an effect on: a kick and a snare, a hat on the
- * eighths and a short line of plucked notes, so there is a transient, a body
- * and a tail to hear what a delay, a reverb or a filter does. Drawn once per
- * sample rate by the drum voices of the library, then looped as a buffer.
+ * A two-bar groove to put an effect on, at 90 BPM with a lilt: a kick and a
+ * snare with ghost notes, hats that are not all the same, a bass, an electric
+ * piano on two chords and a line of plucked notes on top, so there is a
+ * transient, a body and a tail to hear what a delay, a reverb or a filter does.
+ * Drawn once per sample rate by the drum voices of the library, then looped as
+ * a buffer.
  */
 export function renderDemoLoop(sampleRate: number): Promise<AudioBuffer> {
   const cached = rendered.get(sampleRate);
   if (cached) {
     return cached;
   }
-  const ctx = new OfflineAudioContext(
-    2,
-    Math.round(sampleRate * LOOP_SECONDS),
-    sampleRate
-  );
-  const mix = ctx.createGain();
-  mix.connect(ctx.destination);
-  const at = (beat: number) => beat * BEAT_SECONDS;
-  for (const beat of KICKS) {
-    const hit = ctx.createGain();
-    hit.gain.value = KICK_LEVEL;
-    hit.connect(mix);
-    triggerKick(ctx, hit, at(beat));
-  }
-  for (const beat of SNARES) {
-    const hit = ctx.createGain();
-    hit.gain.value = SNARE_LEVEL;
-    hit.connect(mix);
-    triggerSnare(ctx, hit, at(beat));
-  }
-  for (const beat of HATS) {
-    const hit = ctx.createGain();
-    hit.gain.value = HAT_LEVEL;
-    hit.connect(mix);
-    triggerHihat(ctx, hit, at(beat));
-  }
-  for (const [beat, hertz] of PLUCKS) {
-    pluck(ctx, mix, at(beat), hertz);
-  }
-  const buffer = ctx.startRendering();
+  const buffer = drawLoop(sampleRate, drawGroove);
   rendered.set(sampleRate, buffer);
   return buffer;
 }
@@ -101,26 +350,15 @@ export function renderDemoLoop(sampleRate: number): Promise<AudioBuffer> {
 const keyed = new Map<number, Promise<AudioBuffer>>();
 
 /**
- * The kick of the loop on its own: the key a sidechain listens to, in step with
- * `renderDemoLoop` since both are drawn from the same beats.
+ * The kick of the groove on its own: the key a sidechain listens to, in step
+ * with `renderDemoLoop` since both are drawn from the same beats.
  */
 export function renderKickLoop(sampleRate: number): Promise<AudioBuffer> {
   const cached = keyed.get(sampleRate);
   if (cached) {
     return cached;
   }
-  const ctx = new OfflineAudioContext(
-    2,
-    Math.round(sampleRate * LOOP_SECONDS),
-    sampleRate
-  );
-  for (const beat of KICKS) {
-    const hit = ctx.createGain();
-    hit.gain.value = KICK_LEVEL;
-    hit.connect(ctx.destination);
-    triggerKick(ctx, hit, beat * BEAT_SECONDS);
-  }
-  const buffer = ctx.startRendering();
+  const buffer = drawLoop(sampleRate, drawKicks);
   keyed.set(sampleRate, buffer);
   return buffer;
 }
@@ -259,7 +497,7 @@ export function renderWideLoop(sampleRate: number): Promise<AudioBuffer> {
         const gain = ctx.createGain();
         oscillator.type = hertz < 100 ? "sine" : "sawtooth";
         oscillator.frequency.value = hertz;
-        gain.gain.value = hertz < 100 ? WIDE_LEVEL * 3 : WIDE_LEVEL;
+        gain.gain.value = hertz < 100 ? WIDE_LEVEL * 1.5 : WIDE_LEVEL;
         oscillator.connect(gain).connect(merge, 0, channel);
         oscillator.start(0);
       }
@@ -364,7 +602,7 @@ export const DEMO_SOURCES = {
   },
   groove: {
     about:
-      "A kick and a snare, a hat on the eighths and a short line of plucked notes: a transient, a body and a tail, to hear what a delay, a reverb or a filter does.",
+      "Two bars at 90 BPM with a lilt: a kick and a snare with ghost notes, hats that are not all alike, a bass, an electric piano on two chords and a line of plucked notes. A transient, a body and a tail, to hear what a delay, a reverb or a filter does.",
     render: renderDemoLoop,
     title: "Groove",
   },

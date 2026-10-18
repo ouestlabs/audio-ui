@@ -803,7 +803,7 @@ const items: RegistryItem[] = [
     categories: ["lib", "audio", "device", "web-audio"],
     dependencies: [],
     description:
-      "The sounds the previews play, by name: a loop to put an effect on (a kick and a snare, a hat on the eighths and plucked notes), a kick, a held chord, a voice with an s, wide chords, pink noise and pulses. Drawn once from the drum voices of the library and looped as a buffer.",
+      "The sounds the previews play, by name: a two-bar groove to put an effect on (drums with ghost notes and a lilt, a bass, an electric piano and plucked notes), a kick, a held chord, a voice with an s, wide chords, pink noise and pulses. Drawn once from the drum voices of the library and looped as a buffer.",
     files: [
       {
         path: "lib/demo-sound.ts",
