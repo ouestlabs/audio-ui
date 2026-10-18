@@ -17,10 +17,11 @@ const EXPANDABLE = new Set([
 export const isExpandable = (name: string) => EXPANDABLE.has(name);
 
 /** The previews that play from a keyboard: their bar gets a button to connect a MIDI one. */
-const MIDI = new Set([
-  "block-piano-roll",
-  "piano-size-default-demo",
-  "spectrum-analyzer-demo",
-]);
+const MIDI = new Set(["block-piano-roll", "piano-size-default-demo"]);
 
 export const takesMidi = (name: string) => MIDI.has(name);
+
+/** The previews that show a signal and make none: their bar gets a button that plays one. */
+const PLAY = new Set(["spectrum-analyzer-demo"]);
+
+export const takesPlay = (name: string) => PLAY.has(name);

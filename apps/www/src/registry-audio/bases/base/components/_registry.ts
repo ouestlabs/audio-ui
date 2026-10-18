@@ -1110,7 +1110,7 @@ export const components: RegistryItem[] = [
   {
     categories: ["spectrum"],
     description:
-      "Play a chord and watch the spectrum: each sawtooth note lights its pitch and every harmonic above it, and the peaks hold a moment",
+      "Press play and watch the spectrum: each sawtooth note of a chord lights its pitch and every harmonic above it, and the peaks hold a moment",
     files: [
       {
         path: "components/spectrum/spectrum-analyzer-demo.tsx",
@@ -1121,11 +1121,11 @@ export const components: RegistryItem[] = [
     registryDependencies: [
       "@audio-ui/spectrum-analyzer",
       "@audio-ui/use-master-bus",
+      "@audio-ui/use-play-switch",
       "@audio-ui/use-spectrum",
       "@audio-ui/use-synth-voices",
       "@audio-ui/web-audio",
       "@audio-ui/envelope-ramp",
-      "@shadcn/button",
     ],
     type: "registry:example",
   },

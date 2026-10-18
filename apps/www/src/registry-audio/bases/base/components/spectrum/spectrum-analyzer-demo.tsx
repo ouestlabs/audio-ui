@@ -1,10 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { IconPlaceholder } from "@/components/icon-placeholder";
-import { Button } from "@/registry/bases/base/ui/button";
+import { useEffect, useState } from "react";
 import { SpectrumAnalyzer } from "@/registry-audio/bases/base/audio/elements/spectrum-analyzer";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
+import { usePlaySwitch } from "@/registry-audio/bases/base/hooks/use-play-switch";
 import { useSpectrum } from "@/registry-audio/bases/base/hooks/use-spectrum";
 import { useSynthVoices } from "@/registry-audio/bases/base/hooks/use-synth-voices";
 import type { EnvelopePoint } from "@/registry-audio/bases/base/lib/envelope-ramp";
@@ -21,11 +20,11 @@ const ENVELOPE: EnvelopePoint[] = [
   { x: 1, y: 0.05 },
 ];
 
-/** Play a chord of sawtooth notes and watch the spectrum: each note lights its pitch and every harmonic above it, and the peaks hold a moment after you stop. */
+/** Press play, in the bar above, to hold a chord of sawtooth notes and watch the spectrum: each note lights its pitch and every harmonic above it, and the peaks hold a moment after you stop. */
 export default function SpectrumAnalyzerDemo() {
   const master = useMasterBus(VOLUME);
   const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
-  const [playing, setPlaying] = useState(false);
+  const { playing } = usePlaySwitch();
   const spectrum = useSpectrum(analyser);
   const { releaseAll, releaseNote, triggerNote } = useSynthVoices({
     destination: master,
@@ -49,49 +48,24 @@ export default function SpectrumAnalyzerDemo() {
 
   useEffect(() => releaseAll, [releaseAll]);
 
-  const toggle = useCallback(() => {
+  // The page's play switch, in the preview's bar, holds the chord.
+  useEffect(() => {
+    if (!playing) {
+      return;
+    }
     const ctx = webAudio.getContext();
     if (ctx?.state === "suspended") {
       ctx.resume();
     }
     for (const pitch of CHORD) {
-      if (playing) {
-        releaseNote(pitch, ENVELOPE);
-      } else {
-        triggerNote(pitch, ENVELOPE, 0.6);
-      }
+      triggerNote(pitch, ENVELOPE, 0.6);
     }
-    setPlaying(!playing);
+    return () => {
+      for (const pitch of CHORD) {
+        releaseNote(pitch, ENVELOPE);
+      }
+    };
   }, [playing, releaseNote, triggerNote]);
 
-  return (
-    <div className="flex w-full flex-col gap-3">
-      <SpectrumAnalyzer aria-label="Spectrum" source={spectrum} />
-      <Button
-        aria-label={playing ? "Stop the chord" : "Play a chord"}
-        className="self-start"
-        onClick={toggle}
-        size="icon-sm"
-        variant="outline"
-      >
-        {playing ? (
-          <IconPlaceholder
-            hugeicons="PauseIcon"
-            lucide="PauseIcon"
-            phosphor="PauseIcon"
-            remixicon="RiPauseLine"
-            tabler="IconPlayerPause"
-          />
-        ) : (
-          <IconPlaceholder
-            hugeicons="PlayIcon"
-            lucide="PlayIcon"
-            phosphor="PlayIcon"
-            remixicon="RiPlayLine"
-            tabler="IconPlayerPlay"
-          />
-        )}
-      </Button>
-    </div>
-  );
+  return <SpectrumAnalyzer aria-label="Spectrum" source={spectrum} />;
 }

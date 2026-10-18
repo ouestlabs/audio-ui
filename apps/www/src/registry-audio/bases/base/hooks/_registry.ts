@@ -194,6 +194,20 @@ export const hooks: RegistryItem[] = [
     type: "registry:hook",
   },
   {
+    categories: ["hooks", "audio"],
+    description:
+      "The page's play switch: a button anywhere flips it, every component that reads it follows. Holds no audio, so a demo can leave its play button to the page.",
+    files: [
+      {
+        path: "hooks/use-play-switch.ts",
+        type: "registry:hook",
+      },
+    ],
+    name: "use-play-switch",
+    registryDependencies: [],
+    type: "registry:hook",
+  },
+  {
     categories: ["hooks", "audio", "tuner"],
     description:
       "The microphone as an AnalyserNode on the shared AudioContext: raw signal, never connected to the speakers, released on stop and on unmount",
