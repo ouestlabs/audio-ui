@@ -5,7 +5,6 @@ import { CodeCollapsibleWrapper } from "@/components/code/block/code-collapsible
 import { HighlightedCode } from "@/components/code/block/highlighted-code";
 import { CopyButton } from "@/components/code/copy/copy-button";
 import { getIconForLanguageExtension } from "@/components/site/icons";
-import { Spinner } from "@/components/ui/spinner";
 import { useConfig } from "@/hooks/use-config";
 import { transformStyleClassNames } from "@/lib/code/code-utils";
 import {
@@ -157,13 +156,8 @@ export function ComponentSource({
   }, [name, src, file, initialCode, styleName, _iconLibrary, maxLines]);
 
   if (isLoading) {
-    return (
-      <div
-        className={cn("flex min-h-24 items-center justify-center", className)}
-      >
-        <Spinner className="size-4 opacity-60" />
-      </div>
-    );
+    // The room the code takes, with nothing moving in it.
+    return <div aria-hidden="true" className={cn("min-h-24", className)} />;
   }
 
   if (!code) {
