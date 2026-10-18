@@ -46,7 +46,9 @@ useDeviceLoop({ create, destination, source: "voice", state });
 
 A **drum hit** is a few nodes. The kick is a sine oscillator whose pitch falls fast, from 150 Hz to 40 Hz in 150 milliseconds, through a gain that decays: the body of a drum is a pitch that drops. The snare is noise through a band-pass, with a short tone under it. The hihat is noise through a high-pass at 7 kHz that dies in about fifty milliseconds. The [Synthesis](/docs/engine/synthesis#drum-hits) page has the voices.
 
-A **pluck** is a triangle oscillator through a low-pass filter that closes as the note dies, from 4 kHz down to 500 Hz, with a gain that falls to silence. The filter makes it sound like something struck rather than switched. It is the line of notes in the groove, there to give a delay or a reverb something to carry.
+The **groove** is two bars at 90 BPM, and most of what makes it feel played is small. The off-beat sixteenths are pushed back by a fraction of a step, which is the swing. The snare has quiet ghost notes in front of its backbeat, the hats are harder on the beat than between, a hat or two is left open, and each hit lands a few milliseconds early or late and a little harder or softer, from a fixed sequence so it is the same every time it is drawn. Under them a sine bass with a triangle an octave up plays the root of each chord, so it is heard on a small speaker too. An electric piano is four sine partials per note, a twin a few cents sharp on the other side of the stereo field whose beating moves the sound, and a lowpass over them, struck on an A minor seventh and then an F major seventh, with the notes of each chord a few milliseconds apart. What rings past the end of the loop is folded back into its start, so no note is cut where it turns.
+
+A **pluck** is a triangle oscillator through a low-pass filter that closes as the note dies, from 4 kHz down to 500 Hz, with a gain that falls to silence. The filter makes it sound like something struck rather than switched. It is the line of notes on top of the groove, there to give a delay or a reverb something to carry.
 
 ```ts
 oscillator.type = "triangle";
