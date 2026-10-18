@@ -29,14 +29,7 @@ Cuts the sound between hits. Above the threshold the signal passes, and below it
 
 The panel draws the transfer curve against the straight line of a clean sound, with a handle on the threshold. With the sidechain on, the curve is not drawn, because what the gate does depends on the other signal. The plot then keeps the threshold, which is a level of the sidechain.
 
-```tsx
-import { GatePanel } from "@/components/audio-ui/devices/gate/panel";
-import { gateDevice } from "@/components/audio-ui/devices/gate/device";
-
-const [state, setState] = useState(() => gateDevice.defaults());
-
-<GatePanel onValueChange={setState} value={state} />;
-```
+<DeviceUsage name="gate" />
 
 ## Engine
 

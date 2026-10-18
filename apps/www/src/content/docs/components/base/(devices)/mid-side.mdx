@@ -26,14 +26,7 @@ Sets the centre and the sides of a stereo signal apart. The mid is what both cha
 
 The panel is a square with the side level across and the mid level up, and one handle to drag to both at once. The crossing of the two lines is a signal left as it is.
 
-```tsx
-import { MidSidePanel } from "@/components/audio-ui/devices/mid-side/panel";
-import { midSideDevice } from "@/components/audio-ui/devices/mid-side/device";
-
-const [state, setState] = useState(() => midSideDevice.defaults());
-
-<MidSidePanel onValueChange={setState} value={state} />;
-```
+<DeviceUsage name="mid-side" />
 
 ## Engine
 

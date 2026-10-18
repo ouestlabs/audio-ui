@@ -52,14 +52,7 @@ The type of a band decides what it uses:
 
 The cuts are 12 dB per octave, which is what a browser filter node does.
 
-```tsx
-import { EqualizerPanel } from "@/components/audio-ui/devices/equalizer/panel";
-import { equalizerDevice } from "@/components/audio-ui/devices/equalizer/device";
-
-const [state, setState] = useState(() => equalizerDevice.defaults());
-
-<EqualizerPanel onValueChange={setState} value={state} />;
-```
+<DeviceUsage name="equalizer" />
 
 ## Engine
 

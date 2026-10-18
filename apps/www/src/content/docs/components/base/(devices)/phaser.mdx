@@ -31,14 +31,7 @@ Sweeps notches through the sound with a slow oscillator. In Phaser mode it is a 
 
 The panel draws what the oscillator does over two seconds. `phaserSweep(state)` is what it draws, and `phaserSettings(state)` gives the numbers that go on the nodes.
 
-```tsx
-import { PhaserPanel } from "@/components/audio-ui/devices/phaser/panel";
-import { phaserDevice } from "@/components/audio-ui/devices/phaser/device";
-
-const [state, setState] = useState(() => phaserDevice.defaults());
-
-<PhaserPanel onValueChange={setState} value={state} />;
-```
+<DeviceUsage name="phaser" />
 
 ## Engine
 

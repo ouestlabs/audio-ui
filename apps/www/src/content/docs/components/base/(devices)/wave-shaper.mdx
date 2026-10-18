@@ -28,14 +28,7 @@ Two detuned oscillators, a distortion mixed in with the clean sound, and a low-p
 
 The panel has a pad that plays the synth: the pitch goes across and the resonance goes up. `waveShaperPitch(position)` and `waveShaperResonance(position)` turn a position from 0 to 1 into a note.
 
-```tsx
-import { WaveShaperPanel } from "@/components/audio-ui/devices/wave-shaper/panel";
-import { waveShaperDevice } from "@/components/audio-ui/devices/wave-shaper/device";
-
-const [state, setState] = useState(() => waveShaperDevice.defaults());
-
-<WaveShaperPanel onValueChange={setState} value={state} />;
-```
+<DeviceUsage name="wave-shaper" />
 
 ## Engine
 

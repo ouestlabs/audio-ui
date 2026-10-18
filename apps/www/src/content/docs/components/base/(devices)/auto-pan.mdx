@@ -28,14 +28,7 @@ Moves the sound with a slow oscillator. In Pan mode it moves from one speaker to
 
 The panel draws the movement over two seconds. `autoPanWave(shape, phase)` is the wave and `autoPanSweep(state)` is what the panel draws.
 
-```tsx
-import { AutoPanPanel } from "@/components/audio-ui/devices/auto-pan/panel";
-import { autoPanDevice } from "@/components/audio-ui/devices/auto-pan/device";
-
-const [state, setState] = useState(() => autoPanDevice.defaults());
-
-<AutoPanPanel onValueChange={setState} value={state} />;
-```
+<DeviceUsage name="auto-pan" />
 
 ## Engine
 

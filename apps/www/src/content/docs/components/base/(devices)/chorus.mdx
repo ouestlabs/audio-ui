@@ -28,14 +28,7 @@ Thickens the sound with a short delay that a slow oscillator sweeps up and down.
 
 The panel draws the delay time over two seconds as the oscillator moves it. `chorusSweep(state)` is what it draws. With Sync on, it draws the oscillator at the rate it really has.
 
-```tsx
-import { ChorusPanel } from "@/components/audio-ui/devices/chorus/panel";
-import { chorusDevice } from "@/components/audio-ui/devices/chorus/device";
-
-const [state, setState] = useState(() => chorusDevice.defaults());
-
-<ChorusPanel onValueChange={setState} value={state} />;
-```
+<DeviceUsage name="chorus" />
 
 ## Engine
 

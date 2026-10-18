@@ -31,14 +31,7 @@ Brings loud parts down. Above the threshold, the level rises by one decibel for 
 
 The panel draws the transfer curve the state plays: the threshold, the dashed unity line, and a dot that rides the curve at the level going in. Pass `level`, a live source in dB, to show the dot. Below the threshold the curve sits above unity by the make-up gain.
 
-```tsx
-import { CompressorPanel } from "@/components/audio-ui/devices/compressor/panel";
-import { compressorDevice } from "@/components/audio-ui/devices/compressor/device";
-
-const [state, setState] = useState(() => compressorDevice.defaults());
-
-<CompressorPanel onValueChange={setState} value={state} />;
-```
+<DeviceUsage name="compressor" />
 
 ## Engine
 
