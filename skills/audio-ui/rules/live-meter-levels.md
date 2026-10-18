@@ -68,6 +68,7 @@ An `AnalyserNode` cannot give a true 400 ms window (its block is about 43 ms at 
 
 ```ts
 const LUFS_WORKLET = `
+
 class Lufs extends AudioWorkletProcessor {
   constructor() {
     super();
@@ -76,6 +77,7 @@ class Lufs extends AudioWorkletProcessor {
     this.hp = { b: [0.9950299263000474, -1.9900598526000948, 0.9950299263000474], a: [-1.9900474548339797, 0.9900722503662099], s: [0, 0] };
     this.block = Math.round(sampleRate * 0.1); // the 100 ms steps of BS.1770 (a 400 ms window, every 100 ms)
     this.blocks = []; // mean squares of the last 30 steps, enough for the 3 s short term
+    this.all = []; // every 400 ms block since the start, for the integrated value
     this.sum = 0;
     this.count = 0;
   }
@@ -94,6 +96,7 @@ class Lufs extends AudioWorkletProcessor {
       this.sum += y * y;
       if (++this.count === this.block) {
         this.blocks.push(this.sum / this.count);
+        this.all.push(this.sum / this.count);
         if (this.blocks.length > 30) this.blocks.shift();
         this.sum = 0;
         this.count = 0;
@@ -102,6 +105,7 @@ class Lufs extends AudioWorkletProcessor {
         this.port.postMessage({
           momentary: loudness(momentary),
           shortTerm: loudness(shortTerm),
+          integrated: integrated(this.all),
         });
       }
     }
@@ -113,8 +117,17 @@ function loudness(blocks) {
   const mean = blocks.reduce((s, x) => s + x, 0) / blocks.length;
   return -0.691 + 10 * Math.log10(mean + 1e-12);
 }
+// Integrated loudness: every 400 ms block above -70 LUFS, then drop the blocks 10 LU below the mean of the rest.
+function integrated(blocks) {
+  const kept = blocks.map((ms) => -0.691 + 10 * Math.log10(ms + 1e-12)).filter((l) => l > -70);
+  if (kept.length === 0) return -70;
+  const first = kept.reduce((s, l) => s + Math.pow(10, l / 10), 0) / kept.length;
+  const second = kept.filter((l) => l > 10 * Math.log10(first) - 10);
+  if (second.length === 0) return -70;
+  return 10 * Math.log10(second.reduce((s, l) => s + Math.pow(10, l / 10), 0) / second.length);
+}
 registerProcessor("audioui-lufs", Lufs);
-\`;
+`;
 
 const loaded = new WeakMap<BaseAudioContext, Promise<boolean>>();
 export function loadLufs(ctx: BaseAudioContext): Promise<boolean> {
@@ -127,6 +140,5 @@ export function loadLufs(ctx: BaseAudioContext): Promise<boolean> {
 }
 
 // After loadLufs(ctx): connect the source to new AudioWorkletNode(ctx, "audioui-lufs"). Its port posts
-// `{ momentary, shortTerm }` every 100 ms; publish each through a source. The integrated value gates
-// the 400 ms blocks: keep every block above -70 LUFS, then drop the ones 10 LU below the average of the
-// rest, and the integrated loudness is the mean of what is left. Keep those blocks in an array of your own.
+// `{ momentary, shortTerm, integrated }` every 100 ms; publish each through a source. The integrated value gates
+// the 400 ms blocks: the worklet posts `integrated` with the gate already applied (blocks above -70 LUFS, then the ones 10 LU below the average of the rest dropped), so publish it as it comes.

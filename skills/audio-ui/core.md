@@ -370,6 +370,26 @@ export function mountKitFader(
 
 Pass `dragMode: "vertical"` in the knob's options (the controller reads it, and the `data-drag-mode` attribute above only draws the cursor), and `locale: "en-US"` so the readout does not follow the browser's decimal mark. Pass the unit as the last argument (`mountKitKnob(root, "Cutoff", options, " Hz")`). `format` is an `Intl.NumberFormatOptions` object (`{ maximumFractionDigits: 0, useGrouping: false }` prints 4565, not 4,565). The editable readout and the registry's value formats are React only.
 
+
+### Numerals and sections in the plain DOM
+
+The factories above make five marks. For printed numerals, give each mark the variable its angle and put a `span.knob-numeral` in it: the skins counter-rotate the numeral with `--knob-mark-angle`, and nothing else sets it outside React.
+
+```ts
+function numerals(control: HTMLElement, marks: { value: number; label: string }[]) {
+  for (const { value, label } of marks) {
+    const position = (value - MIN) / (MAX - MIN); // the knob's own scale, here linear 0 to 1
+    const mark = element("div", "knob-mark", control);
+    mark.style.setProperty("--knob-mark-angle", `${START_ANGLE + position * SWEEP_ANGLE}deg`);
+    mark.style.rotate = `${START_ANGLE + position * SWEEP_ANGLE}deg`;
+    element("span", "knob-tick", mark);
+    element("span", "knob-numeral", mark).textContent = label;
+  }
+}
+```
+
+Give every section the layout the skins expect: `<section class="section">` with `display: flex` and a top padding of about 2.5rem, so the numerals of its knobs clear the legend, and the legend as `<span class="legend">` inside it. Keep `.panel-row` for top-level rows only: nested in a section it picks up the row's margins and alignment.
+
 ## Vue
 
 ```ts
