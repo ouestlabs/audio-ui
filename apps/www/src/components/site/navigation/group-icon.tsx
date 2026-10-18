@@ -11,9 +11,9 @@ import {
   PlayheadIcon,
   PlayIcon,
   RackIcon,
+  ShapesIcon,
   SparkleIcon,
   TracksIcon,
-  TuningForkIcon,
   WaveformIcon,
 } from "@audio-ui/icons";
 import type { ComponentType } from "react";
@@ -54,7 +54,7 @@ const PAGE_ICONS: Record<string, ComponentType<IconProps>> = {
   "/docs/get-started": InsertIcon,
   "/docs/headless-styling": DialIcon,
   "/docs/icons": GridIcon,
-  "/docs/primitives": TuningForkIcon,
+  "/docs/primitives": ShapesIcon,
   "/docs/registry": CrateIcon,
   "/docs/roadmap": PlayheadIcon,
   "/docs/styling": ContrastIcon,

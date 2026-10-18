@@ -160,6 +160,7 @@ function Tile({
       data-icon-tile=""
       onClick={select}
       onFocus={select}
+      tabIndex={selected ? 0 : -1}
       type="button"
     >
       <Icon size={size} weight={weight} />
@@ -198,12 +199,33 @@ function WeightPick({
   );
 }
 
+function Keyword({
+  onSearch,
+  word,
+}: {
+  onSearch: (word: string) => void;
+  word: string;
+}) {
+  const search = React.useCallback(() => onSearch(word), [onSearch, word]);
+  return (
+    <button
+      className="rounded-md bg-site-muted px-1.5 py-0.5 text-site-muted-foreground text-xs outline-none transition-colors hover:text-site-foreground focus-visible:ring-2 focus-visible:ring-site-foreground/40"
+      onClick={search}
+      type="button"
+    >
+      {word}
+    </button>
+  );
+}
+
 function Inspector({
   entry,
+  onSearch,
   onWeight,
   weight,
 }: {
   entry: IconEntry;
+  onSearch: (word: string) => void;
   onWeight: (weight: IconWeight) => void;
   weight: IconWeight;
 }) {
@@ -241,18 +263,22 @@ function Inspector({
   return (
     <aside
       aria-label={`${entry.name} icon`}
-      className="order-first flex flex-col gap-3 rounded-xl border border-site-border p-3 lg:sticky lg:top-24 lg:order-last"
+      className="sticky bottom-3 z-10 order-last flex flex-col gap-3 rounded-xl border border-site-border bg-site-background p-3 shadow-lg lg:top-24 lg:bottom-auto lg:shadow-none"
     >
-      <div className="flex h-32 items-center justify-center rounded-lg bg-site-muted text-site-foreground">
-        <Icon size={64} weight={weight} />
+      <div className="flex items-center gap-3 lg:flex-col lg:items-stretch">
+        <div className="flex size-14 shrink-0 items-center justify-center rounded-lg bg-site-muted text-site-foreground lg:h-32 lg:w-full">
+          <Icon className="size-8 lg:size-16" weight={weight} />
+        </div>
+        <div className="flex min-w-0 flex-col gap-0.5">
+          <p className="truncate font-medium font-site-heading text-base">
+            {entry.name}
+          </p>
+          <p className="truncate text-site-muted-foreground text-xs">
+            {entry.category} · <code>{entry.name}Icon</code>
+          </p>
+        </div>
       </div>
-      <div className="flex flex-col gap-0.5">
-        <p className="font-medium font-site-heading text-base">{entry.name}</p>
-        <p className="text-site-muted-foreground text-xs">
-          {entry.category} · <code>{entry.name}Icon</code>
-        </p>
-      </div>
-      <div className="grid grid-cols-4 gap-1 rounded-lg bg-site-muted p-1">
+      <div className="hidden grid-cols-4 gap-1 rounded-lg bg-site-muted p-1 lg:grid">
         {WEIGHTS.map((item) => (
           <WeightPick
             active={item === weight}
@@ -263,21 +289,19 @@ function Inspector({
           />
         ))}
       </div>
-      <div className="flex flex-wrap gap-1">
+      <div className="hidden flex-wrap gap-1 lg:flex">
         {entry.keywords.map((word) => (
-          <span
-            className="rounded-md bg-site-muted px-1.5 py-0.5 text-site-muted-foreground text-xs"
-            key={word}
-          >
-            {word}
-          </span>
+          <Keyword key={word} onSearch={onSearch} word={word} />
         ))}
       </div>
       <div className="flex flex-col gap-1.5">
-        <Button onClick={copySvg} size="sm">
+        <Button className="hidden lg:inline-flex" onClick={copySvg} size="sm">
           {copied === "SVG copied" ? "Copied" : "Copy SVG"}
         </Button>
         <div className="flex gap-1.5">
+          <Button className="flex-1 lg:hidden" onClick={copySvg} size="sm">
+            {copied === "SVG copied" ? "Copied" : "Copy SVG"}
+          </Button>
           <Button className="flex-1" onClick={save} size="sm" variant="outline">
             {copied === "Saved" ? "Saved" : "Download"}
           </Button>
@@ -323,6 +347,12 @@ export function IconCatalog({ className }: { className?: string }) {
     []
   );
   const clear = React.useCallback(() => setQuery(""), []);
+  const searchBox = React.useRef<HTMLInputElement>(null);
+  const searchFor = React.useCallback((word: string) => {
+    setQuery(word);
+    // The search is where the result is: bring the reader back to it.
+    searchBox.current?.focus();
+  }, []);
   // The arrow keys move among the tiles; the panel follows the focus.
   const grid = React.useRef<HTMLDivElement>(null);
   React.useEffect(() => {
@@ -361,10 +391,16 @@ export function IconCatalog({ className }: { className?: string }) {
             className="pl-8"
             onChange={search}
             placeholder={`Search ${catalog.length} icons`}
+            ref={searchBox}
             type="search"
             value={query}
           />
         </div>
+        <span aria-live="polite" className="sr-only" role="status">
+          {query
+            ? `${visible.length} ${visible.length === 1 ? "icon" : "icons"} for ${query}`
+            : `${catalog.length} icons`}
+        </span>
         <Segmented
           label="Weight"
           onChange={setWeight}
@@ -383,7 +419,12 @@ export function IconCatalog({ className }: { className?: string }) {
       </div>
       <div className="grid items-start gap-4 lg:grid-cols-[1fr_16rem]">
         {active ? (
-          <Inspector entry={active} onWeight={setWeight} weight={weight} />
+          <Inspector
+            entry={active}
+            onSearch={searchFor}
+            onWeight={setWeight}
+            weight={weight}
+          />
         ) : null}
         <div
           className="flex min-w-0 flex-col gap-5 lg:col-start-1 lg:row-start-1"
@@ -395,12 +436,12 @@ export function IconCatalog({ className }: { className?: string }) {
               className="flex flex-col gap-1"
               key={section.category}
             >
-              <h3 className="px-1 font-medium text-site-muted-foreground text-xs">
+              <h2 className="px-1 font-medium text-site-muted-foreground text-xs">
                 {section.category}
                 <span className="ps-1.5 tabular-nums opacity-60">
                   {section.entries.length}
                 </span>
-              </h3>
+              </h2>
               <div className="grid grid-cols-[repeat(auto-fill,minmax(6.5rem,1fr))] gap-1">
                 {section.entries.map((entry) => (
                   <Tile
@@ -417,7 +458,7 @@ export function IconCatalog({ className }: { className?: string }) {
           ))}
           {visible.length === 0 ? (
             <div className="flex flex-col items-center gap-2 py-12 text-center text-site-muted-foreground text-sm">
-              <p>No icon matches "{query}".</p>
+              <p>No icon matches “{query}”.</p>
               <Button onClick={clear} size="sm" variant="outline">
                 Clear the search
               </Button>
