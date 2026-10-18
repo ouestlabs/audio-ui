@@ -374,14 +374,13 @@ export const Icons = {
       stroke="currentColor"
       strokeLinecap="round"
       strokeLinejoin="round"
-      strokeWidth={1.75}
+      strokeWidth={1.5}
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
       {...props}
     >
-      <rect height="12" rx="2" width="18" x="3" y="6" />
-      <circle cx="8" cy="12" r="2" />
-      <path d="M13 12h5" />
+      <rect height="10" rx="2" width="18" x="3" y="7" />
+      <path d="M7.5 12h.01" />
     </svg>
   ),
   elements: (props: IconProps) => (
@@ -391,13 +390,13 @@ export const Icons = {
       stroke="currentColor"
       strokeLinecap="round"
       strokeLinejoin="round"
-      strokeWidth={1.75}
+      strokeWidth={1.5}
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
       {...props}
     >
       <circle cx="12" cy="12" r="8" />
-      <path d="m12 12 3.5-3.5" />
+      <path d="M12 8h.01" />
     </svg>
   ),
   engine: (props: IconProps) => (
@@ -407,12 +406,12 @@ export const Icons = {
       stroke="currentColor"
       strokeLinecap="round"
       strokeLinejoin="round"
-      strokeWidth={1.75}
+      strokeWidth={1.5}
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
       {...props}
     >
-      <path d="M3 12h2l2-5 3 10 3-14 3 12 2-3h3" />
+      <path d="M4 10v4M8 7v10M12 4v16M16 8v8M20 11v2" />
     </svg>
   ),
   workstation: (props: IconProps) => (
@@ -422,14 +421,12 @@ export const Icons = {
       stroke="currentColor"
       strokeLinecap="round"
       strokeLinejoin="round"
-      strokeWidth={1.75}
+      strokeWidth={1.5}
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
       {...props}
     >
-      <rect height="4" rx="1" width="10" x="3" y="5" />
-      <rect height="4" rx="1" width="12" x="9" y="10" />
-      <rect height="4" rx="1" width="9" x="5" y="15" />
+      <path d="M4 7h9M9 12h11M6 17h8" />
     </svg>
   ),
   start: (props: IconProps) => (
@@ -439,13 +436,12 @@ export const Icons = {
       stroke="currentColor"
       strokeLinecap="round"
       strokeLinejoin="round"
-      strokeWidth={1.75}
+      strokeWidth={1.5}
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
       {...props}
     >
-      <path d="M5 12h14" />
-      <path d="m13 6 6 6-6 6" />
+      <path d="M8 5.5v13l10.5-6.5z" />
     </svg>
   ),
 };
