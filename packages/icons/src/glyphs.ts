@@ -146,9 +146,11 @@ export const meter: Glyph = [
   rect(8, 3, 8, 18, 2, { tint: true }),
   path("M12 17v-5", { knock: true }),
 ];
+/** A dial gauge: its sweep, its needle and the pivot. */
 export const gauge: Glyph = [
-  path("M4 17a8 8 0 0 1 16 0z", { tint: true }),
-  path("M12 17l3.5-6.5", { knock: true }),
+  path("M5.5 19a9 9 0 1 1 13 0"),
+  circle(12, 14, 2, { tint: true }),
+  path("M13.2 12.4 16.5 8"),
 ];
 /** A spectrum: the level at each frequency, as one line. */
 export const spectrum: Glyph = [
