@@ -261,18 +261,17 @@ export const vinyl: Glyph = [
   path("M12 6a6 6 0 0 1 6 6", { knock: true }),
 ];
 
-/** A clip: its body and the strip with its name. */
+/** A clip: a block with its waveform. */
 export const clip: Glyph = [
-  rect(3, 6, 18, 12, 2, { tint: true }),
-  path("M3 10h18", { knock: true }),
+  rect(3, 6, 18, 12, 3, { tint: true }),
+  path("M6.5 12c1-4 2-4 3 0s2 4 3 0 2-4 3 0 2 4 3 0", { knock: true }),
 ];
 
-/** An automation lane: flats and ramps between the points you set. */
+/** A knob, and the curve its value draws over time. */
 export const automation: Glyph = [
-  path("M2 17h4l5-9h3l5 7h3"),
-  circle(6, 17, 1.8, { tint: true }),
-  circle(11, 8, 1.8, { tint: true }),
-  circle(19, 15, 1.8, { tint: true }),
+  circle(6.5, 7, 3.5, { tint: true }),
+  path("M6.5 5.5h.01", { knock: true }),
+  path("M11 9c4 0 5 9 11 9"),
 ];
 
 /** A magnet: snap to the grid. */
