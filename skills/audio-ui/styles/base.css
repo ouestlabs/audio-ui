@@ -493,7 +493,7 @@
   padding: 0.9rem 1.75rem;
   margin: 1.75rem -1.75rem -1.75rem;
   color: var(--ink);
-  background: linear-gradient(180deg, #26272a, #17181a);
+  background: var(--footer-bg, #17181a);
   border-top: 1px solid rgb(255 255 255 / 0.18);
 }
 

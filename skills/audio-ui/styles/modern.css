@@ -1,4 +1,4 @@
-/* MODERN: flat instrument UI. Graphite, hairline borders, one signal colour, tabular type. No glow, no gradients. */
+/* MODERN: flat instrument UI. Graphite, hairline borders, one signal colour, tabular type. No glow on the panel, and no decorative gradient: the dot grid of the XY pad and the line of a cap are the only ones, and they are structure, not shading. */
 .skin-modern {
   --panel: var(--bg);
   --bg: #161616;
