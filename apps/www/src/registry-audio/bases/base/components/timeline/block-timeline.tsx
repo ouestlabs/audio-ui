@@ -615,7 +615,6 @@ export default function BlockTimeline() {
     changeAutomation,
     changeClip,
     changeMix,
-    clearSelection,
     clearTimeSelection,
     clipAction,
     clips,
@@ -633,7 +632,6 @@ export default function BlockTimeline() {
     insertTimeSpan,
     paste,
     toggleFold,
-    toggleSelected,
     mixOf,
     redo,
     moveTrack,
@@ -644,13 +642,9 @@ export default function BlockTimeline() {
     renameTrack,
     setFadeShape,
     resizeTrack,
-    selectAll,
-    selectClip,
-    selectClips,
     selectedIds,
     selectedTracks,
     selection,
-    selectTrack,
     settleClipEdit,
     splitAtCursor,
     tracks,
@@ -665,6 +659,33 @@ export default function BlockTimeline() {
     initialTracks: TRACKS,
     tempo: DEFAULT_TEMPO,
   });
+  // What the lanes, the headers and the keys report, as the commands that change the selection.
+  const clearSelection = useCallback(
+    () => dispatch({ type: "clear-selection" }),
+    [dispatch]
+  );
+  const selectAll = useCallback(
+    () => dispatch({ type: "select-all" }),
+    [dispatch]
+  );
+  const selectClip = useCallback(
+    (id: string, additive: boolean) =>
+      dispatch({ type: "select-clip", id, additive }),
+    [dispatch]
+  );
+  const selectClips = useCallback(
+    (ids: string[]) => dispatch({ type: "select-clips", ids }),
+    [dispatch]
+  );
+  const selectTrack = useCallback(
+    (id: string, additive = false) =>
+      dispatch({ type: "select-track", id, additive }),
+    [dispatch]
+  );
+  const toggleSelected = useCallback(
+    () => dispatch({ type: "toggle-selected" }),
+    [dispatch]
+  );
   const bar = secondsPerBar(tempo);
   const describe = useCallback(
     (seconds: number) => {
