@@ -16,13 +16,14 @@ export interface NeedleMeterFrame {
 }
 
 /** The needle's travel, in degrees from the vertical: it rests at the left and ends at the right. */
-const SWEEP = 45;
+const SWEEP = 70;
 const PIVOT_X = 100;
 const PIVOT_Y = 104;
 const RADIUS = 88;
 
 /** The marks of the standard VU scale, in VU: from -20 to +3, the part from 0 up in red. */
 const MARKS = [-20, -10, -7, -5, -3, -2, -1, 0, 1, 2, 3] as const;
+const FIRST_MARK = -20;
 const LAST_MARK = 3;
 
 /** The fraction of the needle's travel at a level in VU: it follows the voltage, and rests at zero voltage. */
@@ -32,7 +33,13 @@ const position = levelPosition(
   LAST_MARK
 );
 
-const angleOf = (vu: number) => -SWEEP + position(vu) * 2 * SWEEP;
+const sweepAt = (vu: number) => -SWEEP + position(vu) * 2 * SWEEP;
+
+/** The lean of the scale: the needle's travel starts at zero voltage, so the first mark is not as far from the left stop as the last is from the right one. */
+const LEAN = (sweepAt(FIRST_MARK) + sweepAt(LAST_MARK)) / 2;
+
+/** The angle of a level, in degrees from the vertical, with the printed scale centered on it. */
+const angleOf = (vu: number) => sweepAt(vu) - LEAN;
 
 const pointOn = (angle: number, radius: number) => {
   const radians = (angle * Math.PI) / 180;
@@ -68,9 +75,12 @@ const SCALE = MARKS.map((mark) => {
     text: pointOn(angle, RADIUS + 10),
   };
 });
-// The scale line runs on, past the end marks, to the level of the pivot on both sides.
-const SCALE_ARC = arcBetween(-90, 90, ARC_WIDTH);
-// The red band runs half a tick past its end marks, so no tick sticks out of it.
+// The scale line and the red band run half a tick past their end marks, so no tick sticks out.
+const SCALE_ARC = arcBetween(
+  angleOf(FIRST_MARK) - TICK_MARGIN,
+  angleOf(0) + TICK_MARGIN,
+  ARC_WIDTH
+);
 const ZONE_ARC = arcBetween(
   angleOf(0) - TICK_MARGIN,
   angleOf(LAST_MARK) + TICK_MARGIN,
@@ -181,7 +191,7 @@ export function NeedleMeter({
           strokeLinecap="round"
           strokeWidth={2}
           style={{
-            transform: `rotate(${-SWEEP}deg)`,
+            transform: `rotate(${angleOf(Number.NEGATIVE_INFINITY)}deg)`,
             transformBox: "view-box",
             transformOrigin: `${PIVOT_X}px ${PIVOT_Y}px`,
           }}
