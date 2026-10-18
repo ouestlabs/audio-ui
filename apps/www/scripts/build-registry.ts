@@ -205,13 +205,20 @@ async function loadItems(base: string): Promise<Map<string, SourceItem>> {
 // category with zero items fails the build.
 // ---------------------------------------------------------------------------
 
+/** An item without a title is named by its slug, read as words: `block-delay` is `Block delay`. */
+function readableTitle(name: string) {
+  const words = name.replaceAll("-", " ");
+  return words.charAt(0).toUpperCase() + words.slice(1);
+}
+
 async function buildManifests(): Promise<void> {
   const items = await loadFolder(MANIFEST_BASE, "components");
 
   const catalog = items.map((item) => ({
     categories: item.categories ?? [],
+    description: item.description ?? "",
     name: item.name,
-    title: item.title ?? item.name,
+    title: item.title ?? readableTitle(item.name),
   }));
 
   const categoryEntries = categories.map((category) => {
