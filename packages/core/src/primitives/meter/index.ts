@@ -1,4 +1,10 @@
 export {
+  createPpmBallistics,
+  createVuBallistics,
+  FLOOR_DB,
+  type MeterBallistics,
+} from "./ballistics.ts";
+export {
   iecDeflection,
   type LevelScale,
   type LevelScaleFunction,
