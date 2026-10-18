@@ -18,15 +18,19 @@ Each glyph comes in four weights, picked with the `weight` prop of its icon:
 
 ## Use them
 
-The icons are in `@audio-ui/icons`, a package of this repository that is not published yet, and the registry draws its own shapes for now. Until it is, **Copy SVG** gives the glyph as a file's text, in the current text color, and **Download** saves it.
+The icons are in `@audio-ui/icons`, on npm. Install it, and an icon is a React component named for what it draws, with `Icon` after: `KnobIcon`, `TracksIcon`, `SineIcon`, `LowpassIcon`. It is `1em` wide unless `size` says otherwise, and it takes the color of its text.
 
-An icon is named for what it draws, with `Icon` after: `KnobIcon`, `TracksIcon`, `SineIcon`, `LowpassIcon`. It is `1em` wide unless `size` says otherwise, and it takes the color of its text.
+```sh
+npm install @audio-ui/icons
+```
 
 ```tsx
-import { KnobIcon } from "@audio-ui/icons";
+import { KnobIcon } from "@audio-ui/icons/react";
 
 <KnobIcon className="text-muted-foreground" size={20} weight="bold" />;
 ```
+
+The package works without React. `@audio-ui/icons` holds the glyphs as data, the catalog and `toSvg`, which gives the text of an SVG file for any glyph in any weight; `draw` gives the same drawing as plain nodes, for a Vue, Svelte or custom element adapter to render. **Copy SVG** and **Download** on this page give the same text.
 
 ## Draw one
 

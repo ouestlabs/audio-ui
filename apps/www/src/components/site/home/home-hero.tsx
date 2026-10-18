@@ -1,4 +1,4 @@
-import { SparkleIcon } from "@audio-ui/icons";
+import { SparkleIcon } from "@audio-ui/icons/react";
 import { ArrowRightIcon } from "@phosphor-icons/react/ssr";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";

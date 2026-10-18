@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { renderToStaticMarkup } from "react-dom/server";
+import { catalog, glyphs, toSvg, WEIGHTS } from "../core/index.ts";
 import * as icons from "./index.ts";
-import { catalog, toSvg } from "./index.ts";
 
 const components = Object.entries(icons).filter(
   ([name]) => name.endsWith("Icon") && name !== "createIcon"
@@ -11,7 +11,7 @@ const STROKE = /stroke-width="([\d.]+)"/;
 
 describe("icons", () => {
   test("every glyph has an icon, and every icon a glyph", () => {
-    expect(components.length).toBe(Object.keys(icons.glyphs).length);
+    expect(components.length).toBe(Object.keys(glyphs).length);
   });
 
   for (const [name, Icon] of components) {
@@ -47,18 +47,20 @@ describe("icons", () => {
 
   test("the catalog lists every glyph once, in a category, with its icon", () => {
     expect(catalog.map((item) => item.glyph as string).sort()).toEqual(
-      Object.keys(icons.glyphs).sort()
+      Object.keys(glyphs).sort()
     );
     for (const item of catalog) {
-      expect(renderToStaticMarkup(<item.Icon />)).toContain("<svg");
+      const Icon = icons.icons[item.name as keyof typeof icons.icons];
+      expect(renderToStaticMarkup(<Icon />)).toContain("<svg");
     }
   });
 
   test("toSvg draws what the icon renders", () => {
     for (const item of catalog) {
-      for (const weight of icons.WEIGHTS) {
-        const text = toSvg(icons.glyphs[item.glyph], { weight });
-        const markup = renderToStaticMarkup(<item.Icon weight={weight} />);
+      const Icon = icons.icons[item.name as keyof typeof icons.icons];
+      for (const weight of WEIGHTS) {
+        const text = toSvg(glyphs[item.glyph], { weight });
+        const markup = renderToStaticMarkup(<Icon weight={weight} />);
         // The same shapes, in the same order.
         const draws = (source: string) =>
           [...source.matchAll(/ d="([^"]+)"/g)].map((match) => match[1]);
@@ -97,7 +99,7 @@ describe("icons", () => {
 
   test("every knock detail of a solid glyph has a body to be cut from", () => {
     for (const item of catalog) {
-      const glyph = icons.glyphs[item.glyph];
+      const glyph = glyphs[item.glyph];
       if (glyph.some((shape) => shape.knock)) {
         expect(glyph.some((shape) => shape.tint || shape.backdrop)).toBe(true);
       }

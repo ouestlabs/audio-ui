@@ -1,7 +1,5 @@
-import * as glyphs from "./glyphs.ts";
+import * as glyphs from "../core/glyphs.ts";
 import { createIcon } from "./icon.tsx";
-
-export { glyphs };
 
 export const BotIcon = createIcon(glyphs.bot, "BotIcon");
 export const RackIcon = createIcon(glyphs.rack, "RackIcon");
@@ -31,7 +29,7 @@ export const PeakIcon = createIcon(glyphs.peak, "PeakIcon");
 export const EnvelopeIcon = createIcon(glyphs.envelope, "EnvelopeIcon");
 export const GridIcon = createIcon(glyphs.grid, "GridIcon");
 export const FadersIcon = createIcon(glyphs.faders, "FadersIcon");
-export const XypadIcon = createIcon(glyphs.xypad, "XypadIcon");
+export const XYPadIcon = createIcon(glyphs.xypad, "XYPadIcon");
 export const PadIcon = createIcon(glyphs.pad, "PadIcon");
 export const PianoIcon = createIcon(glyphs.piano, "PianoIcon");
 export const MeterIcon = createIcon(glyphs.meter, "MeterIcon");
@@ -66,3 +64,70 @@ export const InsertIcon = createIcon(glyphs.insert, "InsertIcon");
 export const CrateIcon = createIcon(glyphs.crate, "CrateIcon");
 export const DialIcon = createIcon(glyphs.dial, "DialIcon");
 export const ContrastIcon = createIcon(glyphs.contrast, "ContrastIcon");
+
+/** Every icon, by the name its catalog entry carries. */
+export const icons = {
+  Automation: AutomationIcon,
+  Bandpass: BandpassIcon,
+  Bot: BotIcon,
+  Braces: BracesIcon,
+  Clip: ClipIcon,
+  Compressor: CompressorIcon,
+  Contrast: ContrastIcon,
+  Crate: CrateIcon,
+  Delay: DelayIcon,
+  Dial: DialIcon,
+  Distortion: DistortionIcon,
+  Envelope: EnvelopeIcon,
+  Fader: FaderIcon,
+  Faders: FadersIcon,
+  Gauge: GaugeIcon,
+  Grid: GridIcon,
+  Headphones: HeadphonesIcon,
+  Highpass: HighpassIcon,
+  Highshelf: HighshelfIcon,
+  Insert: InsertIcon,
+  Jack: JackIcon,
+  Knob: KnobIcon,
+  Loop: LoopIcon,
+  Lowpass: LowpassIcon,
+  Lowshelf: LowshelfIcon,
+  Magnet: MagnetIcon,
+  Meter: MeterIcon,
+  Metronome: MetronomeIcon,
+  Mic: MicIcon,
+  Midi: MidiIcon,
+  Mono: MonoIcon,
+  Notch: NotchIcon,
+  Note: NoteIcon,
+  Pad: PadIcon,
+  Patchbay: PatchbayIcon,
+  Pause: PauseIcon,
+  Peak: PeakIcon,
+  Piano: PianoIcon,
+  PianoRoll: PianoRollIcon,
+  Play: PlayIcon,
+  Playhead: PlayheadIcon,
+  Plot: PlotIcon,
+  Rack: RackIcon,
+  Record: RecordIcon,
+  Reverb: ReverbIcon,
+  Sawtooth: SawtoothIcon,
+  Scope: ScopeIcon,
+  Sequencer: SequencerIcon,
+  Shapes: ShapesIcon,
+  Sine: SineIcon,
+  Sparkle: SparkleIcon,
+  Speaker: SpeakerIcon,
+  Spectrum: SpectrumIcon,
+  Square: SquareIcon,
+  Stereo: StereoIcon,
+  Stop: StopIcon,
+  Tape: TapeIcon,
+  Tracks: TracksIcon,
+  Triangle: TriangleIcon,
+  TuningFork: TuningForkIcon,
+  Vinyl: VinylIcon,
+  Waveform: WaveformIcon,
+  XYPad: XYPadIcon,
+};

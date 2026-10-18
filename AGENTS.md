@@ -23,7 +23,7 @@ audio-ui/
 ├── packages/
 │   ├── core/       # @audio-ui/core, published (framework-agnostic logic)
 │   ├── ui/         # @audio-ui/react, published (headless primitives)
-│   └── icons/      # @audio-ui/icons, private: the site's own glyphs (one thin stroke on a 24 grid, regular, bold and duotone weights)
+│   └── icons/      # @audio-ui/icons, published: audio glyphs (one thin stroke on a 24 grid, in four weights)
 └── skills/audio-ui # The agent skill we ship to library users (npx skills add ouestlabs/audio-ui)
 ```
 

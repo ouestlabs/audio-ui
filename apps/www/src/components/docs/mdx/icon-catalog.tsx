@@ -9,6 +9,7 @@ import {
   toSvg,
   WEIGHTS,
 } from "@audio-ui/icons";
+import { icons } from "@audio-ui/icons/react";
 import { MagnifyingGlassIcon } from "@phosphor-icons/react/ssr";
 import * as React from "react";
 import { ComponentEmptyState } from "@/components/catalog/card/component-empty-state";
@@ -149,7 +150,7 @@ function Tile({
     () => onSelect(entry.name),
     [entry.name, onSelect]
   );
-  const { Icon } = entry;
+  const Icon = icons[entry.name as keyof typeof icons];
   return (
     <button
       aria-pressed={selected}
@@ -182,7 +183,7 @@ function WeightPick({
   weight: IconWeight;
 }) {
   const pick = React.useCallback(() => onPick(weight), [onPick, weight]);
-  const { Icon } = entry;
+  const Icon = icons[entry.name as keyof typeof icons];
   return (
     <button
       aria-label={`${WEIGHT_LABELS[weight]} weight`}
@@ -232,7 +233,7 @@ function Inspector({
 }) {
   const [copied, setCopied] = React.useState("");
   const timer = React.useRef<number | undefined>(undefined);
-  const { Icon } = entry;
+  const Icon = icons[entry.name as keyof typeof icons];
   const svg = toSvg(glyphs[entry.glyph], { weight });
 
   const flash = React.useCallback((what: string) => {

@@ -1,7 +1,7 @@
 import { createElement, type ReactNode, type SVGProps, useId } from "react";
-import { type DrawnNode, draw } from "./drawing.ts";
-import type { Glyph } from "./glyph.ts";
-import type { IconWeight } from "./weight.ts";
+import { type DrawnNode, draw } from "../core/drawing.ts";
+import type { Glyph } from "../core/glyph.ts";
+import type { IconWeight } from "../core/weight.ts";
 
 export interface IconProps extends Omit<SVGProps<SVGSVGElement>, "ref"> {
   /** The width and height of the icon. @default "1em" */

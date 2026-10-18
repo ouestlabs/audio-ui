@@ -15,7 +15,7 @@ import {
   SparkleIcon,
   TracksIcon,
   WaveformIcon,
-} from "@audio-ui/icons";
+} from "@audio-ui/icons/react";
 import type { ComponentType } from "react";
 import { Icons } from "@/components/site/icons";
 import { cn } from "@/lib/utils";
