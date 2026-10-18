@@ -316,6 +316,10 @@ describe("skills/audio-ui styles", () => {
     "solidstate",
     "plugin",
     "blackface",
+    "gunmetal",
+    "opto",
+    "blacky",
+    "bluey",
   ] as const;
 
   /** The kit's markup: the code block of directions.md that exports `Panel`. */

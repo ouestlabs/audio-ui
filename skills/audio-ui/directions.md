@@ -1,6 +1,6 @@
 # Directions
 
-Fourteen skins ready to copy, each verified in a browser on the same set of parts: knobs, faders, a stereo meter, an XY pad, drum pads and a keyboard. Copy `styles/base.css` and one skin into the project, then the markup below.
+Eighteen skins ready to copy, each verified in a browser on the same set of parts: knobs, faders, a stereo meter, an XY pad, drum pads and a keyboard. Copy `styles/base.css` and one skin into the project, then the markup below.
 
 ```tsx
 import "./audio-ui/base.css";
@@ -241,7 +241,7 @@ export function Panel({
   skin,
   title,
 }: {
-  skin: "retro" | "minimal" | "modern" | "tape" | "phosphor" | "hifi" | "brutalist" | "y2k" | "console" | "synth70" | "tube" | "solidstate" | "plugin" | "blackface";
+  skin: "retro" | "minimal" | "modern" | "tape" | "phosphor" | "hifi" | "brutalist" | "y2k" | "console" | "synth70" | "tube" | "solidstate" | "plugin" | "blackface" | "gunmetal" | "opto" | "blacky" | "bluey";
   title: string;
 }) {
   return (
@@ -318,7 +318,7 @@ export function Panel({
 }
 ```
 
-`materials.css` is needed by tape, phosphor, hifi, y2k, console, synth70, tube, solidstate, plugin and blackface; retro, minimal, modern and brutalist are self-contained. The skin is the class on the panel (`skin-retro`, `skin-minimal`, `skin-modern`), so every selector is scoped and two skins can sit on one page. The tokens are the custom properties at the top of each skin: change those first.
+`materials.css` is needed by tape, phosphor, hifi, y2k, console, synth70, tube, solidstate, plugin, blackface, gunmetal, opto, blacky and bluey; retro, minimal, modern and brutalist are self-contained. The skin is the class on the panel (`skin-retro`, `skin-minimal`, `skin-modern`), so every selector is scoped and two skins can sit on one page. The tokens are the custom properties at the top of each skin: change those first.
 
 ## Retro: a hardware faceplate
 
@@ -349,7 +349,10 @@ Read [hardware.md](./hardware.md) before composing a retro panel: it explains wh
 - **y2k** (`styles/y2k.css`): translucent candy plastic. A pale blue shell, teal caps with a gloss band, one orange accent, large radii.
 - **console** (`styles/console.css`): a mixing console channel. A slate panel, caps colored by section (the second and third knob change color), a long fader with ticks and a lamp ladder.
 - **tube** (`styles/tube.css`): a vintage tube compressor. Warm grey enamel, cream print at 5.2:1, black knurled caps with a white line, an amber lamp; pair it with the `Vu` needle.
-- **solidstate** (`styles/solidstate.css`; color a cap with `data-cap="red"`, `green`, `blue`, `brown`, `grey`, `orange`, `yellow` or `black` on a knob or a button, EQ high red, high-mid green, low-mid blue, low brown): a large-format console channel. Pale grey enamel, dark print, caps colored by section (red, blue, green), tall dark fader caps with a colored line, an LED ladder.
+- **solidstate** (`styles/solidstate.css`): a console channel as drawn on the large-format desk's software strips: a dark navy panel with a fine grain, cream print, ruled sections, ivory caps with a dark pointer and a ring of printed dots, colored caps for the EQ bands (`data-cap="red"`, `green`, `blue`, `brown`, `black`, `grey`, `orange`, `yellow`, `ivory`: high red, high-mid green, low-mid blue, low black or brown, compressor ivory, gate green), small cream buttons with an LED beside them, a black meter window with a bright ladder.
+- **opto** (`styles/opto.css`): an opto leveling amplifier: a scratched silver-grey faceplate, black bakelite knobs with a chrome center and a dense tick ring, a cream VU in a dark bezel, red print, round metal toggles.
+- **blacky** (`styles/blacky.css`) and **bluey** (`styles/bluey.css`): the two faces of a leveling limiter: dark brushed steel (blacky) or brushed silver with a blue plate (bluey), black knobs with a tapered white pointer and a ring of dots, a cream VU in a dark bezel, a column of push buttons lit when selected.
+- **gunmetal** (`styles/gunmetal.css`): the same family as the buss compressor: brushed charcoal in an inset white rule, ivory and black caps with printed numerals, square backlit buttons in a black bezel, a black VU with a white needle. Add `.screw` elements for the corners.
 - **plugin** (`styles/plugin.css`): a glossy software plugin window. Light blue-grey metal, chunky white knobs with a blue value ring, dark glass displays, rounded white keys.
 - **blackface** (`styles/blackface.css`): a black-face rack unit. A brushed black faceplate in a silver trim, silver knurled caps, a big VU (the VU width variable), engraved white print, a red lamp.
 - **synth70** (`styles/synth70.css`): a 70s monophonic synth. A black panel between wood cheeks, white print, an amber lamp, rocker toggles.

@@ -46,6 +46,19 @@ What the references agree on, from the manuals of the console's plug-in models a
 - **Print:** white or black silkscreen in a narrow sans, small uppercase legends, ruled sections, numbers around the knobs.
 - Conventions differ between the console's revisions (the filter and compressor knob colors especially): pick one and keep it consistent.
 
+## What the studio references share
+
+Looked at on the screens of a large-format console strip, a buss compressor, a leveling amplifier and a limiter (the references the `solidstate`, `gunmetal`, `opto`, `blacky` and `bluey` skins are drawn from):
+
+- **Print and numerals ride the knob.** Every cap is ringed by small dots with numerals at the stops (0 to 10, -15 to +15, 1 to 7), the selected stop sometimes in a highlight color (yellow or blue). The label sits under the cap, uppercase, with its unit (dB, kHz) printed on the panel. Draw the dots with `.knob-tick`, and the numerals as spans inside `Knob.Mark`.
+- **Two kinds of caps.** Ivory or cream with a dark pointer for the main controls, black with a light pointer for the secondary ones; colored (red, green, blue) for an equalizer's bands. A leveling amplifier's knob is black with a chrome center, a limiter's is black with a tapered pointer.
+- **Panels are textured, not flat.** Navy with a fine grain, brushed charcoal, silver with scratches, black brushed steel. A thin inset rule and screws frame the unit.
+- **Section legends are ruled lines** (a title with a line each side), or a pale plate with dark text.
+- **Buttons are rectangular caps with an LED beside them**, or square backlit glass in a black bezel that glows warm when on; a column of push buttons chooses one ratio or mode, the selected one lit.
+- **The VU is cream in a dark bezel**, with black ticks, red above zero, a thin red needle and a small lamp in a corner; a screw below it.
+- **A footer strip** darker than the faceplate carries the secondary controls (analog, mix, trim) and pill-shaped selectors.
+- **Meters are bright green LED ladders** in a black window, numerals to their side.
+
 ## A VU needle, a compressor face
 
 `Vu` in the `Panel` markup of [directions.md](./directions.md) is the needle: a paper face, a red zone, one CSS variable from a source. Feed it a 0 to 1 gain reduction (or level) and the CSS transition gives it about 300 ms of ballistics. For a tube compressor: take `styles/tube.css` (warm grey enamel, black caps with a white line, amber lamp), make the three main knobs large (5 to 6rem) and the two timing knobs small, give the caps a dark collar with a white line (copy the conic knurl of `retro.css` and darken it), and put the VU in the middle. Printed numerals around a knob collide with the next knob when the gap is under about 2.4rem. A fixed hardware face may keep its width: scale the whole panel with `zoom` at narrow widths rather than reflowing the controls (`@media (max-width: 70rem) { .panel { zoom: 0.8 } }`, then 0.65 and 0.5 as it narrows), or let the page scroll.

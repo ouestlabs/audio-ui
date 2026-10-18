@@ -1,32 +1,35 @@
-/* SOLIDSTATE: a large-format console channel. Pale grey enamel, dark print, square colored caps by section, an LED ladder. */
+/* SOLIDSTATE: a console channel as drawn on the large-format desk's software strips. Dark navy panel, cream print, ruled sections,
+   dark-skirted caps in the band colors with a white pointer, small cream buttons with an LED, a bright green ladder. */
 .skin-solidstate {
-  --panel: #a2a8ab;
-  --ink: #1d2022;
-  --accent: #e0322a;
-  --hi: #f2f4f4;
-  --lo: #5b6064;
+  --panel: #262b3b;
+  --ink: #ece8da;
+  --accent: #6ee06e;
+  --hi: #8590a6;
+  --lo: #1c202b;
   --lift: 3;
-  --ok: #2fcf5b;
-  --warn: #f2c230;
-  --clip: #e0322a;
-  --cap: #d33a2f;
-  --focus: #1d2022;
-  --legend-bg: #a2a8ab;
+  --ok: #3fe05a;
+  --warn: #f2d03a;
+  --clip: #ff4a3a;
+  --cap: #e6e2d4;
+  --pointer: #1a1a1a;
+  --focus: #ffffff;
+  --legend-bg: #262b3b;
+  --waveform-color: #8c97ad;
   position: relative;
   font-family: "Helvetica Neue", Arial, sans-serif;
   color: var(--ink);
   background:
     repeating-linear-gradient(
       90deg,
-      rgb(0 0 0 / 0.025) 0 1px,
+      rgb(255 255 255 / 0.02) 0 1px,
       transparent 1px 3px
     ),
-    linear-gradient(180deg, #b0b6b9, var(--panel) 40%, #979da0);
-  border-radius: 3px;
+    linear-gradient(180deg, #2f3549, var(--panel) 35%, #20242f);
+  border-radius: 4px;
   box-shadow:
-    0 0 0 1px #2c3033,
-    0 12px 24px rgb(0 0 0 / 0.45),
-    inset 0 1px 0 rgb(255 255 255 / 0.6);
+    0 0 0 1px #0f1118,
+    0 12px 26px rgb(0 0 0 / 0.55),
+    inset 0 1px 0 rgb(255 255 255 / 0.12);
 }
 .skin-solidstate .panel-title {
   font:
@@ -36,41 +39,74 @@
   text-transform: uppercase;
   letter-spacing: 0.26em;
 }
+
+/* Sections: a title on a ruled line */
 .skin-solidstate .section {
-  border-color: rgb(29 32 34 / 0.55);
+  padding-top: 1.3rem;
+  border: 0;
+  border-top: 1px solid rgb(236 232 218 / 0.45);
+}
+.skin-solidstate .section > .legend {
+  left: 0.4rem;
+  padding: 0 0.5rem;
+  font-weight: 700;
+  color: var(--ink);
+  background: var(--legend-bg);
 }
 
 /* Cap colors are named, not positional: put data-cap on a knob or a button */
 .skin-solidstate [data-cap="red"] {
   --cap: #d33a2f;
+  --pointer: #fff;
 }
 .skin-solidstate [data-cap="green"] {
   --cap: #2f9e4f;
+  --pointer: #fff;
 }
 .skin-solidstate [data-cap="blue"] {
-  --cap: #2e6fc0;
+  --cap: #2e7fc8;
+  --pointer: #fff;
 }
 .skin-solidstate [data-cap="brown"] {
   --cap: #8a5a35;
+  --pointer: #fff;
 }
 .skin-solidstate [data-cap="grey"] {
   --cap: #c9ccce;
+  --pointer: #1a1a1a;
 }
 .skin-solidstate [data-cap="orange"] {
   --cap: #e8742c;
+  --pointer: #fff;
 }
 .skin-solidstate [data-cap="yellow"] {
   --cap: #e5b82a;
+  --pointer: #fff;
 }
 .skin-solidstate [data-cap="black"] {
   --cap: #2a2d30;
+  --pointer: #fff;
 }
+.skin-solidstate [data-cap="white"] {
+  --cap: #e9e6dc;
+  --pointer: #1a1a1a;
+}
+.skin-solidstate [data-cap="ivory"] {
+  --cap: #e6e2d4;
+  --pointer: #1a1a1a;
+}
+.skin-solidstate [data-cap="magenta"] {
+  --cap: #c43c8e;
+  --pointer: #fff;
+}
+
+/* Knobs: a dark skirt, a glossy colored cap, a white pointer, a printed ring of ticks */
 .skin-solidstate .knob-control {
-  --knob-cap: 10%;
+  --knob-cap: 11%;
   color: var(--ink);
 }
 .skin-solidstate .knob-track {
-  color: rgb(0 0 0 / 0.22);
+  color: rgb(236 232 218 / 0.12);
 }
 .skin-solidstate .knob-indicator {
   color: var(--cap);
@@ -78,23 +114,25 @@
 .skin-solidstate .knob-thumb {
   background: radial-gradient(
     circle at var(--hl-x) var(--hl-y),
-    color-mix(in oklab, var(--cap) 65%, white),
+    color-mix(in oklab, var(--cap) 60%, white),
     var(--cap) 55%,
     color-mix(in oklab, var(--cap) 55%, black)
   );
   border-radius: 50%;
   box-shadow:
-    var(--shadow-raised),
-    0 0 0 4px #25282a;
+    0 5px 7px rgb(0 0 0 / 0.55),
+    inset 0 1px 0 rgb(255 255 255 / 0.5),
+    0 0 0 4px #0e1017,
+    0 0 0 5px rgb(255 255 255 / 0.12);
 }
 .skin-solidstate .knob-thumb::after {
   position: absolute;
   top: 6%;
   left: 50%;
   width: 3px;
-  height: 30%;
+  height: 34%;
   content: "";
-  background: #fff;
+  background: var(--pointer);
   border-radius: 1px;
   translate: -50% 0;
 }
@@ -108,16 +146,26 @@
 }
 .skin-solidstate .knob-value {
   font:
-    700 0.62rem / 1 ui-monospace,
-    monospace;
+    600 0.6rem / 1 "Helvetica Neue",
+    Arial,
+    sans-serif;
   font-variant-numeric: tabular-nums;
+  color: rgb(236 232 218 / 0.8);
 }
+.skin-solidstate .knob-track,
+.skin-solidstate .knob-indicator {
+  display: none;
+}
+/* The ring of dots printed around a cap */
 .skin-solidstate .knob-tick {
-  top: -8px;
-  height: 4px;
+  top: -10px;
+  width: 3px;
+  height: 3px;
   background: var(--ink);
+  border-radius: 50%;
 }
 
+/* Fader: a long slot, a light cap with a dark line, ticks on the cap's travel */
 .skin-solidstate {
   --fader-track: 0.3rem;
   --fader-thumb-w: 2.1rem;
@@ -149,9 +197,9 @@
   right: 0;
 }
 .skin-solidstate .fader-track {
-  background: #15171a;
+  background: #0b0d12;
   border-radius: 2px;
-  box-shadow: 0 0 0 3px #2c3033;
+  box-shadow: 0 0 0 3px #1a1e29;
 }
 .skin-solidstate .fader-indicator {
   display: none;
@@ -160,15 +208,16 @@
   background:
     linear-gradient(
       180deg,
-      transparent calc(50% - 1.5px),
-      var(--cap) calc(50% - 1.5px) calc(50% + 1.5px),
-      transparent calc(50% + 1.5px)
+      transparent calc(50% - 1px),
+      #1c202b calc(50% - 1px) calc(50% + 1px),
+      transparent calc(50% + 1px)
     ),
-    linear-gradient(180deg, #4a4f54, #25282b 18%, #181a1c);
+    linear-gradient(180deg, #f2f0e8, #cfccc0 60%, #aaa89c);
   border-radius: 2px;
   box-shadow: var(--shadow-raised);
 }
 
+/* Meter: a black window, a bright ladder */
 .skin-solidstate {
   --meter-w: 0.55rem;
 }
@@ -177,8 +226,11 @@
   gap: 3px;
   height: calc(var(--strip-h, 9.5rem) + 8px);
   padding: 4px;
-  background: #15171a;
+  background: #05070b;
   border-radius: 2px;
+  box-shadow:
+    inset 0 1px 3px #000,
+    0 0 0 1px #3a4152;
 }
 .skin-solidstate .meter-channel {
   background: var(--zones-dim), var(--zones);
@@ -196,7 +248,7 @@
 }
 
 .skin-solidstate .xypad-control {
-  background: #15171a;
+  background: #0b0d12;
   background-image:
     linear-gradient(rgb(255 255 255 / 0.08) 1px, transparent 1px),
     linear-gradient(90deg, rgb(255 255 255 / 0.08) 1px, transparent 1px);
@@ -204,120 +256,33 @@
   border-radius: 2px;
   box-shadow:
     inset 0 2px 6px #000,
-    0 0 0 3px #2c3033;
+    0 0 0 3px #1a1e29;
 }
 .skin-solidstate .xypad-thumb {
   background: var(--warn);
   border-radius: 50%;
-  box-shadow: 0 0 8px rgb(242 194 48 / 0.6);
+  box-shadow: 0 0 8px rgb(242 208 58 / 0.6);
 }
 
+/* Buttons: small cream caps, each with an LED that takes the cap color when on */
 .skin-solidstate .pad,
 .skin-solidstate .toggle {
+  position: relative;
+  min-width: 2.6rem;
+  min-height: 2rem;
   font:
-    700 0.6rem / 1 "Helvetica Neue",
+    700 0.58rem / 1 "Helvetica Neue",
     Arial,
     sans-serif;
-  color: #fff;
+  color: #1c202b;
   text-transform: uppercase;
   letter-spacing: 0.14em;
-  background: linear-gradient(
-    180deg,
-    color-mix(in oklab, var(--cap) 80%, white),
-    var(--cap)
-  );
+  background: linear-gradient(180deg, #f4f1e6, #cfccbe);
   border-radius: 2px;
   box-shadow: var(--shadow-raised);
   transition:
     transform 60ms linear,
     box-shadow 60ms linear;
-}
-.skin-solidstate .toggle {
-  filter: saturate(0.5) brightness(0.8);
-}
-.skin-solidstate .toggle[aria-pressed="true"] {
-  box-shadow:
-    inset 0 2px 4px rgb(0 0 0 / 0.4),
-    0 0 10px color-mix(in oklab, var(--cap) 60%, transparent);
-  filter: none;
-  transform: translateY(1px);
-}
-.skin-solidstate .pad {
-  background: linear-gradient(180deg, #4a4f54, #25282b);
-}
-.skin-solidstate .pad[data-active] {
-  color: #111;
-  background: color-mix(
-    in oklab,
-    var(--warn) calc(30% + var(--pad-velocity, 0.6) * 60%),
-    #25282b
-  );
-  box-shadow: inset 0 2px 5px #000;
-  transform: translateY(2px);
-}
-
-.skin-solidstate .piano {
-  box-shadow: 0 0 0 2px #25282a;
-}
-.skin-solidstate .piano-key[data-color="white"] {
-  background: linear-gradient(180deg, #f6f6f2, #d4d4cc);
-  border: 1px solid #25282a;
-}
-.skin-solidstate .piano-key[data-color="black"] {
-  background: linear-gradient(180deg, #34383c, #0a0b0c);
-}
-.skin-solidstate .piano-key[data-active] {
-  background: var(--cap);
-}
-
-.skin-solidstate .step {
-  background: #25282b;
-  border: 0;
-  border-radius: 2px;
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.12);
-}
-.skin-solidstate .step[data-on] {
-  background: var(--cap);
-}
-.skin-solidstate .envelope {
-  color: #d9dde0;
-  background: #15171a;
-}
-.skin-solidstate .waveform-control {
-  color: #d9dde0;
-  background: #15171a;
-}
-.skin-solidstate .plot {
-  color: #d9dde0;
-  background: #15171a;
-}
-.skin-solidstate .vu-face {
-  color: #1d1a16;
-}
-.skin-solidstate .waveform-control {
-  --waveform-color: #8d949a;
-}
-
-/* Section dividers: a ruled line with a white legend plate, as the strip prints them */
-.skin-solidstate .section {
-  padding-top: 1.3rem;
-  border: 0;
-  border-top: 2px solid #25282a;
-}
-.skin-solidstate .section > .legend {
-  left: 0;
-  padding: 0.2rem 0.5rem;
-  color: #f2f4f4;
-  background: #25282a;
-  translate: 0 -50%;
-}
-
-/* Buttons: square caps with a small LED that lights when pressed */
-.skin-solidstate .toggle {
-  position: relative;
-  min-width: 2.6rem;
-  min-height: 2rem;
-  border-radius: 2px;
 }
 .skin-solidstate .toggle::before {
   position: absolute;
@@ -330,12 +295,63 @@
   border-radius: 50%;
   box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.5);
 }
+.skin-solidstate .toggle[aria-pressed="true"] {
+  box-shadow:
+    inset 0 2px 4px rgb(0 0 0 / 0.35),
+    0 0 10px color-mix(in oklab, var(--cap) 60%, transparent);
+  transform: translateY(1px);
+}
 .skin-solidstate .toggle[aria-pressed="true"]::before {
   background: color-mix(in oklab, var(--cap) 55%, white);
   box-shadow: 0 0 6px 1px color-mix(in oklab, var(--cap) 80%, transparent);
 }
+.skin-solidstate .pad {
+  color: var(--ink);
+  background: linear-gradient(180deg, #3b4258, #20242f);
+}
+.skin-solidstate .pad[data-active] {
+  color: #111;
+  background: color-mix(
+    in oklab,
+    var(--warn) calc(30% + var(--pad-velocity, 0.6) * 60%),
+    #20242f
+  );
+  box-shadow: inset 0 2px 5px #000;
+  transform: translateY(2px);
+}
 
-/* A print line above the fader: dB legends are drawn by the .scale beside it, in the same ink */
+.skin-solidstate .piano {
+  box-shadow: 0 0 0 2px #0e1017;
+}
+.skin-solidstate .piano-key[data-color="white"] {
+  background: linear-gradient(180deg, #f6f6f2, #d4d4cc);
+  border: 1px solid #0e1017;
+}
+.skin-solidstate .piano-key[data-color="black"] {
+  background: linear-gradient(180deg, #34383c, #0a0b0c);
+}
+.skin-solidstate .piano-key[data-active] {
+  background: var(--cap);
+}
+
+.skin-solidstate .step {
+  background: #1c202b;
+  border: 0;
+  border-radius: 2px;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.1);
+}
+.skin-solidstate .step[data-on] {
+  background: var(--cap);
+}
+.skin-solidstate .envelope,
+.skin-solidstate .plot,
+.skin-solidstate .waveform-control {
+  color: #d9dde6;
+  background: #0b0d12;
+}
+.skin-solidstate .vu-face {
+  color: #1d1a16;
+}
 .skin-solidstate .scale {
   font:
     700 0.55rem / 1 "Helvetica Neue",
@@ -343,15 +359,14 @@
     sans-serif;
   color: var(--ink);
 }
-
 .skin-solidstate .display {
   font:
     600 0.7rem / 1 ui-monospace,
     monospace;
-  color: #3be07a;
-  background: #050505;
+  color: #6ee06e;
+  background: #05070b;
   border-radius: 2px;
   box-shadow:
     inset 0 1px 3px #000,
-    0 0 0 1px #3a3c40;
+    0 0 0 1px #3a4152;
 }

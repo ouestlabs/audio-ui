@@ -1,0 +1,314 @@
+/* OPTO: an opto leveling amplifier. Scratched silver-grey faceplate, black bakelite knobs with a chrome center and a finely ticked ring, a cream VU in a dark bezel, red print for what matters, metal toggle levers. */
+.skin-opto {
+  --panel: #b4b6b7;
+  --ink: #16181a;
+  --accent: #b3191c;
+  --hi: #f2f2f0;
+  --lo: #6b6e70;
+  --lift: 5;
+  --ok: #8bd450;
+  --warn: #ffb028;
+  --clip: #e5432c;
+  position: relative;
+  font-family: "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  color: var(--ink);
+  background:
+    repeating-linear-gradient(
+      104deg,
+      transparent 0 37px,
+      rgb(255 255 255 / 0.35) 37px 38px,
+      transparent 38px 91px
+    ),
+    linear-gradient(180deg, #c4c6c7, var(--panel) 40%, #a2a5a6);
+  border-radius: 3px;
+  box-shadow: 0 14px 28px rgb(0 0 0 / 0.55);
+}
+.skin-opto .panel-title {
+  font:
+    700 0.7rem / 1 "Arial Narrow",
+    Arial,
+    sans-serif;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.35em;
+}
+
+.skin-opto .knob-control {
+  --knob-cap: 11%;
+  color: var(--ink);
+}
+.skin-opto .knob-track {
+  color: rgb(255 255 255 / 0.1);
+}
+.skin-opto .knob-indicator {
+  color: var(--accent);
+}
+.skin-opto .knob-thumb {
+  background: radial-gradient(
+    circle at var(--hl-x) var(--hl-y),
+    #55504a,
+    #1d1b19 55%,
+    #0b0a09
+  );
+  border-radius: 50%;
+  box-shadow:
+    var(--shadow-raised),
+    0 0 0 3px #050505,
+    0 0 0 4px rgb(255 255 255 / 0.1);
+}
+.skin-opto .knob-thumb::after {
+  position: absolute;
+  top: 5%;
+  left: 50%;
+  width: 3px;
+  height: 32%;
+  content: "";
+  background: #fff;
+  border-radius: 1px;
+  translate: -50% 0;
+}
+.skin-opto .knob-label {
+  font:
+    700 0.6rem / 1 "Arial Narrow",
+    Arial,
+    sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+}
+.skin-opto .knob-value {
+  font:
+    700 0.6rem / 1 "Arial Narrow",
+    Arial,
+    sans-serif;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+  letter-spacing: 0.1em;
+}
+.skin-opto .knob-tick {
+  top: -9px;
+  height: 5px;
+  background: var(--ink);
+}
+
+.skin-opto {
+  --fader-track: 0.3rem;
+  --fader-thumb-w: 1.5rem;
+  --fader-thumb-h: 2.4rem;
+}
+.skin-opto .fader-control {
+  width: 3rem;
+}
+.skin-opto .fader-track {
+  background: #000;
+  border-radius: 2px;
+  box-shadow: 0 0 0 2px #2a2724;
+}
+.skin-opto .fader-indicator {
+  display: none;
+}
+.skin-opto .fader-thumb {
+  background:
+    linear-gradient(
+      180deg,
+      transparent calc(50% - 1px),
+      #111 calc(50% - 1px) calc(50% + 1px),
+      transparent calc(50% + 1px)
+    ),
+    linear-gradient(180deg, #fff, #cfc9bb 60%, #a7a193);
+  border-radius: 2px;
+  box-shadow: var(--shadow-raised);
+}
+
+.skin-opto {
+  --meter-w: 0.55rem;
+}
+.skin-opto .meter {
+  box-sizing: border-box;
+  height: calc(var(--strip-h, 9.5rem) + 10px);
+  padding: 5px;
+  background: #050505;
+  border-radius: 3px;
+  box-shadow:
+    inset 0 2px 5px #000,
+    0 0 0 1px #2a2724;
+}
+.skin-opto .meter-channel {
+  background: var(--zones-dim), var(--zones);
+  isolation: isolate;
+  -webkit-mask: var(--segments);
+  mask: var(--segments);
+}
+.skin-opto .meter-indicator {
+  background: var(--zones-lit);
+  mix-blend-mode: color-dodge;
+}
+.skin-opto .meter-peak {
+  height: 2px;
+  background: var(--ink);
+}
+
+.skin-opto .xypad-control {
+  background: radial-gradient(circle at 50% 40%, #2a1b06, #0d0803 75%);
+  background-image:
+    linear-gradient(rgb(255 176 40 / 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 176 40 / 0.1) 1px, transparent 1px);
+  background-size: 25% 25%;
+  border-radius: 3px;
+  box-shadow:
+    inset 0 0 18px #000,
+    0 0 0 2px #2a2724;
+}
+.skin-opto .xypad-thumb {
+  background: #ffd27a;
+  border-radius: 50%;
+  box-shadow: 0 0 12px 3px rgb(255 176 40 / 0.65);
+}
+
+.skin-opto .pad {
+  font:
+    700 0.6rem / 1 "Arial Narrow",
+    Arial,
+    sans-serif;
+  color: var(--ink);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  background: var(--rubber);
+  border-radius: 4px;
+  box-shadow: var(--shadow-raised);
+  transition:
+    transform 60ms linear,
+    box-shadow 60ms linear;
+}
+.skin-opto .pad[data-active] {
+  color: var(--accent);
+  box-shadow: inset 0 2px 5px #000;
+  transform: translateY(2px);
+}
+
+.skin-opto .piano {
+  box-shadow: 0 0 0 3px #050505;
+}
+.skin-opto .piano-key[data-color="white"] {
+  background: linear-gradient(180deg, #fffdf4, #e2dac6);
+  border: 1px solid #111;
+  border-radius: 0 0 3px 3px;
+}
+.skin-opto .piano-key[data-color="black"] {
+  background: linear-gradient(180deg, #2a2724, #050505);
+  border-radius: 0 0 3px 3px;
+}
+.skin-opto .piano-key[data-active] {
+  background: var(--accent);
+}
+
+.skin-opto .toggle {
+  font:
+    700 0.6rem / 1 "Arial Narrow",
+    Arial,
+    sans-serif;
+  color: #111;
+  letter-spacing: 0.12em;
+  background: linear-gradient(180deg, #f2efe6 0 48%, #9c978c 52%);
+  border-radius: 3px;
+  box-shadow:
+    0 0 0 3px #050505,
+    0 4px 5px rgb(0 0 0 / 0.6);
+}
+.skin-opto .toggle[aria-pressed="true"] {
+  background: linear-gradient(180deg, #9c978c 0 48%, #f2efe6 52%);
+}
+.skin-opto {
+  --legend-bg: #5c6360;
+}
+
+.skin-opto .display {
+  font:
+    600 0.7rem / 1 ui-monospace,
+    monospace;
+  color: #ffb028;
+  background: #050505;
+  border-radius: 2px;
+  box-shadow:
+    inset 0 1px 3px #000,
+    0 0 0 1px #3a3c40;
+}
+.skin-opto {
+  --focus: var(--ink);
+  --waveform-color: #b5ad98;
+}
+
+/* Black bakelite knobs with a chrome center and a dense ring of ticks */
+.skin-opto .knob-thumb {
+  background: radial-gradient(
+    circle at 50% 50%,
+    #f7f7f5 0 28%,
+    #9fa1a2 30% 34%,
+    #1b1b1c 36%,
+    #050505 100%
+  );
+  box-shadow:
+    0 6px 9px rgb(0 0 0 / 0.5),
+    0 0 0 3px #0b0b0c,
+    0 0 0 4px rgb(255 255 255 / 0.25);
+}
+.skin-opto .knob-thumb::after {
+  top: 6%;
+  width: 2px;
+  height: 26%;
+  background: #f4f4f1;
+}
+.skin-opto .knob-tick {
+  top: -11px;
+  width: 1px;
+  height: 6px;
+  background: var(--ink);
+}
+.skin-opto .knob-label,
+.skin-opto .knob-value {
+  color: var(--ink);
+}
+.skin-opto .knob-value {
+  font-weight: 700;
+}
+.skin-opto .panel-title {
+  color: var(--accent);
+}
+.skin-opto {
+  --legend-bg: #b4b6b7;
+  --focus: #1b1b1c;
+}
+
+/* A cream VU in a dark bezel with red above zero */
+.skin-opto .vu-face {
+  color: #1a1a14;
+  background: radial-gradient(ellipse at 50% 90%, #f1eac4, #d8cf9c);
+  border-radius: 3px;
+  box-shadow:
+    0 0 0 4px #2b2c2e,
+    0 0 0 9px #4b4c4f,
+    0 0 0 10px #17181a;
+}
+
+/* A metal toggle lever */
+.skin-opto .toggle {
+  min-width: 2.2rem;
+  min-height: 2.2rem;
+  color: var(--ink);
+  background: radial-gradient(circle at 35% 30%, #fff, #8e9092 60%, #55575a);
+  border-radius: 50%;
+  box-shadow:
+    0 3px 5px rgb(0 0 0 / 0.45),
+    inset 0 0 0 2px #2a2b2d;
+}
+.skin-opto .toggle[aria-pressed="true"] {
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.45),
+    inset 0 0 0 2px var(--accent);
+  transform: translateY(1px);
+}
+.skin-opto .toggle::before {
+  display: none;
+}
+.skin-opto .pad {
+  color: #ecebe6;
+}
