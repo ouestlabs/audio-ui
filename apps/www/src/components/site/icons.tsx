@@ -441,7 +441,8 @@ export const Icons = {
       xmlns="http://www.w3.org/2000/svg"
       {...props}
     >
-      <path d="M8 5.5v13l10.5-6.5z" />
+      <path d="M6 20V4" />
+      <path d="M6 5h11l-2.5 4 2.5 4H6" />
     </svg>
   ),
   bot: (props: IconProps) => (
