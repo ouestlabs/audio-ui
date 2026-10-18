@@ -1,0 +1,42 @@
+<evaluation>
+   <qa_pair>
+      <question>A finger-drum grid is dropped into a page with no layout set. How many pads sit side by side in one row by default? Answer with a number.</question>
+      <answer>4</answer>
+   </qa_pair>
+   <qa_pair>
+      <question>Take the lowest and the highest MIDI note a piano shows when it is left at its defaults, and subtract the lowest from the highest. What is the difference in semitones? Answer with a number.</question>
+      <answer>24</answer>
+   </qa_pair>
+   <qa_pair>
+      <question>On the vertical level meter with default settings, how many dB separate the bottom and the top of its scale? Answer with a number.</question>
+      <answer>66</answer>
+   </qa_pair>
+   <qa_pair>
+      <question>Which of the knob and the fader starts its range at 0 and moves in steps of 1 by default? Answer with the component name only.</question>
+      <answer>knob</answer>
+   </qa_pair>
+   <qa_pair>
+      <question>When a tuner stops hearing a note, how many milliseconds does it keep showing that note by default? Answer with a number.</question>
+      <answer>600</answer>
+   </qa_pair>
+   <qa_pair>
+      <question>Subtract the lowest frequency a tuner listens for by default from the highest, in Hz. Answer with a number.</question>
+      <answer>1960</answer>
+   </qa_pair>
+   <qa_pair>
+      <question>A spectrum analyzer's level axis runs from its default bottom value to its default top value, in dB. What is the span of that axis? Answer with a number.</question>
+      <answer>90</answer>
+   </qa_pair>
+   <qa_pair>
+      <question>On a knob, which key sets the value straight to its minimum? Answer with the key name as written in the docs.</question>
+      <answer>Home</answer>
+   </qa_pair>
+   <qa_pair>
+      <question>Across the component pages, how many of them give a disabled prop a default of false in their API reference? Answer with a number.</question>
+      <answer>5</answer>
+   </qa_pair>
+   <qa_pair>
+      <question>Among the catalog entries in the pad category, which name comes first alphabetically? Answer with the full name.</question>
+      <answer>block-drum-rack</answer>
+   </qa_pair>
+</evaluation>
