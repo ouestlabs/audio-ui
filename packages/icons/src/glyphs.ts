@@ -116,3 +116,11 @@ export const grid: Glyph = [
   rect(3, 14, 7, 7, 1.5, { tint: true }),
   rect(14, 14, 7, 7, 1.5, { tint: true }),
 ];
+
+/** Three faders, each at its own level. */
+export const faders: Glyph = [
+  path("M5.5 3v10M5.5 16.5V21M12 3v3.5M12 10v11M18.5 3v7M18.5 13.5V21"),
+  rect(3, 13, 5, 3.5, 1, { tint: true }),
+  rect(9.5, 6.5, 5, 3.5, 1, { tint: true }),
+  rect(16, 10, 5, 3.5, 1, { tint: true }),
+];

@@ -6,6 +6,7 @@ import {
   BracesIcon,
   EnvelopeIcon,
   FaderIcon,
+  FadersIcon,
   GridIcon,
   type glyphs,
   HighpassIcon,
@@ -81,6 +82,12 @@ export const catalog: readonly IconEntry[] = [
     "daw",
   ]),
   entry("Rack", RackIcon, "Audio", ["device", "plugin", "effect", "unit"]),
+  entry("Faders", FadersIcon, "Audio", [
+    "mixer",
+    "levels",
+    "channels",
+    "sliders",
+  ]),
   entry("Waveform", WaveformIcon, "Audio", [
     "engine",
     "signal",

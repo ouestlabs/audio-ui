@@ -30,3 +30,4 @@ export const HighshelfIcon = createIcon(glyphs.highshelf, "HighshelfIcon");
 export const PeakIcon = createIcon(glyphs.peak, "PeakIcon");
 export const EnvelopeIcon = createIcon(glyphs.envelope, "EnvelopeIcon");
 export const GridIcon = createIcon(glyphs.grid, "GridIcon");
+export const FadersIcon = createIcon(glyphs.faders, "FadersIcon");
