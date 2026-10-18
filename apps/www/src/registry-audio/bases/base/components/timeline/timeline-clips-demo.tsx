@@ -177,69 +177,76 @@ export default function TimelineClipsDemo() {
         ref={viewportRef}
         scrollbar="hidden"
       >
-        <TimelineTrack>
-          <TimelineTrackHeader className="flex items-center px-3 text-muted-foreground text-xs">
-            Loop
-          </TimelineTrackHeader>
-          <TimelineLane className="h-6 cursor-cell border-b-0">
-            <TimelineRange
-              aria-label="Loop"
-              drawable
-              getAriaValueText={describe}
-              onValueChange={setLoop}
-              value={loop}
-            >
-              <TimelineRangeHandle aria-label="Loop start" edge="start" />
-              <TimelineRangeHandle aria-label="Loop end" edge="end" />
-            </TimelineRange>
-            <TimelinePlayhead />
-          </TimelineLane>
-        </TimelineTrack>
-        <TimelineTrack>
-          <TimelineTrackHeader className="flex items-center px-3 text-xs">
-            Bars
-          </TimelineTrackHeader>
-          <TimelineRuler
-            aria-label="Playhead"
-            className="border-b-0"
-            getAriaValueText={describe}
-          >
-            {MARKS.map((bar) => (
-              <TimelineMark key={bar} value={bars(bar)}>
-                {bar + 1}
-              </TimelineMark>
-            ))}
-            <TimelinePlayhead />
-          </TimelineRuler>
-        </TimelineTrack>
-        {TRACKS.map((track) => (
-          <TimelineTrack
-            height={heights[track.id]}
-            key={track.id}
-            maxHeight={200}
-            minHeight={56}
-            onHeightChange={resizeTrack(track.id)}
-          >
-            <TimelineTrackHeader className="flex items-center px-3 font-medium text-sm">
-              {track.name}
-              <TimelineTrackResizeHandle
-                aria-label={`Height of ${track.name}`}
-              />
+        {/* As wide as the lanes, so the stuck headers stay put however far it scrolls. */}
+        <div className="flex min-h-full w-max min-w-full shrink-0 flex-col">
+          <TimelineTrack>
+            <TimelineTrackHeader className="flex items-center px-3 text-muted-foreground text-xs">
+              Loop
             </TimelineTrackHeader>
-            <TimelineLane gridStep={BAR} seekable>
-              {CLIPS.filter((clip) => clip.track === track.id).map((clip) => (
-                <Clip
-                  key={clip.id}
-                  onChange={moveClip(clip.id)}
-                  title={clip.title}
-                  track={track.name}
-                  value={clips[clip.id] ?? clip.value}
-                />
-              ))}
+            <TimelineLane className="h-6 cursor-cell border-b-0">
+              <TimelineRange
+                aria-label="Loop"
+                drawable
+                getAriaValueText={describe}
+                onValueChange={setLoop}
+                value={loop}
+              >
+                <TimelineRangeHandle aria-label="Loop start" edge="start" />
+                <TimelineRangeHandle aria-label="Loop end" edge="end" />
+              </TimelineRange>
               <TimelinePlayhead />
             </TimelineLane>
           </TimelineTrack>
-        ))}
+          <TimelineTrack>
+            <TimelineTrackHeader className="flex items-center px-3 text-xs">
+              Bars
+            </TimelineTrackHeader>
+            <TimelineRuler
+              aria-label="Playhead"
+              className="border-b-0"
+              getAriaValueText={describe}
+            >
+              {MARKS.map((bar) => (
+                <TimelineMark key={bar} value={bars(bar)}>
+                  {bar + 1}
+                </TimelineMark>
+              ))}
+              <TimelinePlayhead />
+            </TimelineRuler>
+          </TimelineTrack>
+          {TRACKS.map((track) => (
+            <TimelineTrack
+              height={heights[track.id]}
+              key={track.id}
+              maxHeight={200}
+              minHeight={56}
+              onHeightChange={resizeTrack(track.id)}
+            >
+              <TimelineTrackHeader className="flex items-center px-3 font-medium text-sm">
+                {track.name}
+                <TimelineTrackResizeHandle
+                  aria-label={`Height of ${track.name}`}
+                />
+              </TimelineTrackHeader>
+              <TimelineLane
+                className="h-auto min-h-14 flex-1 border-b-0"
+                gridStep={BAR}
+                seekable
+              >
+                {CLIPS.filter((clip) => clip.track === track.id).map((clip) => (
+                  <Clip
+                    key={clip.id}
+                    onChange={moveClip(clip.id)}
+                    title={clip.title}
+                    track={track.name}
+                    value={clips[clip.id] ?? clip.value}
+                  />
+                ))}
+                <TimelinePlayhead />
+              </TimelineLane>
+            </TimelineTrack>
+          ))}
+        </div>
       </TimelineViewport>
     </Timeline>
   );
