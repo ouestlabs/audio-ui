@@ -1,14 +1,12 @@
 "use client";
 
 import type { Breakpoint } from "@audio-ui/core/envelope";
-import { secondsPerBar, type Tempo } from "@audio-ui/core/time";
-import type { FadeShape, Timeline as TimelinePrimitive } from "@audio-ui/react";
+import type { Tempo } from "@audio-ui/core/time";
 import { useCallback, useMemo, useRef, useState } from "react";
 import {
   type Arranged,
   type ArrangementTrack,
   type AutomatedParameter,
-  type ClipAction,
   type Clipping,
   type Mix,
   mixOf,
@@ -40,8 +38,6 @@ export interface UseArrangementOptions {
   duration: number;
   /** The height of a folded track, in px. @default 28 */
   foldedHeight?: number;
-  /** The playback position, in the timeline's units: where a split cuts. */
-  getPosition: () => number;
   initialClips?: Arranged[];
   initialLocators?: ArrangementLocator[];
   initialLoop?: ArrangementLoop;
@@ -64,7 +60,6 @@ export function useArrangement({
   colors = 5,
   duration,
   foldedHeight = 28,
-  getPosition,
   initialClips = [],
   initialLocators,
   initialLoop,
@@ -96,8 +91,6 @@ export function useArrangement({
   }, []);
 
   const { doc, gesture, history, selection } = state;
-  // A split may leave no piece shorter than a sixteenth note of the bar.
-  const splitStep = secondsPerBar(doc.tempo) / 4;
   const selectedIds = selection?.clips ?? NO_IDS;
   const selectedTracks = selection?.tracks ?? NO_IDS;
 
@@ -131,7 +124,6 @@ export function useArrangement({
 
   const commands = useMemo(
     () => ({
-      addClip: (clip: Arranged) => dispatch({ type: "add-clip", clip }),
       addTrack: (afterId?: string, kind?: TrackKind) => {
         const next = dispatch({ type: "add-track", afterId, kind });
         // The track it added is the one numbered last.
@@ -159,52 +151,13 @@ export function useArrangement({
           patch: rest,
         });
       },
-      changeClip: (
-        id: string,
-        value: TimelinePrimitive.Clip.Value,
-        details: TimelinePrimitive.Clip.ChangeEventDetails
-      ) => dispatch({ type: "change-clip", id, value, details }),
       clearTimeSelection: (time: TimeSelection) =>
         dispatch({ type: "clear-time", time }),
-      clipAction: (action: ClipAction, id: string) =>
-        dispatch({
-          type: "clip-action",
-          action,
-          id,
-          at: getPosition(),
-          step: splitStep,
-        }),
-      commitClip: (
-        id: string,
-        details: TimelinePrimitive.Clip.CommitEventDetails
-      ) => {
-        // A clip dropped on another track moves to it: its lane names the track.
-        const track =
-          details.lane instanceof HTMLElement
-            ? details.lane.dataset.track
-            : undefined;
-        dispatch({
-          type: "commit-clip",
-          id,
-          copy: Boolean(details.copy),
-          track,
-        });
-      },
       consolidateTime: (time: TimeSelection) =>
         dispatch({ type: "consolidate-time", time }),
       copyOf: (time: TimeSelection | null): Clipping =>
         copyFrom(stateRef.current, time),
-      crop: (id: string) => dispatch({ type: "crop-clip", id }),
-      duplicateSelection: () => {
-        const next = dispatch({ type: "duplicate-selection" });
-        // The copies are the selection the command leaves, in the order it lists them.
-        return (next.selection?.clips ?? NO_IDS).flatMap((id) =>
-          next.doc.clips.filter((clip) => clip.id === id)
-        );
-      },
       duplicateTrack: (id: string) => dispatch({ type: "duplicate-track", id }),
-      editClip: (id: string, change: (clip: Arranged) => Arranged) =>
-        dispatch({ type: "edit-clip", id, change }),
       fadeTimeSelection: (time: TimeSelection) =>
         dispatch({ type: "fade-time", time }),
       insertTimeSpan: (at: number, length: number) =>
@@ -214,22 +167,14 @@ export function useArrangement({
       paste: (clipping: Clipping, at: number, track: string) =>
         dispatch({ type: "paste", clipping, at, track }),
       redo: () => dispatch({ type: "redo" }),
-      removeClip: (id: string) => dispatch({ type: "remove-clip", id }),
       removeTimeSpan: (from: number, to: number) =>
         dispatch({ type: "remove-time", from, to }),
       removeTrack: (id: string) => dispatch({ type: "remove-track", id }),
-      renameClip: (id: string, name: string) =>
-        dispatch({ type: "rename-clip", id, name }),
       renameTrack: (id: string, name: string) =>
         dispatch({ type: "rename-track", id, name }),
-      setFadeShape: (id: string, edge: "in" | "out", shape: FadeShape) =>
-        dispatch({ type: "set-fade-shape", id, edge, shape }),
-      settleClipEdit: () => dispatch({ type: "settle-clip-edit" }),
-      splitAtCursor: () =>
-        dispatch({ type: "split-cursor", at: getPosition(), step: splitStep }),
       undo: () => dispatch({ type: "undo" }),
     }),
-    [dispatch, getPosition, splitStep]
+    [dispatch]
   );
 
   return {
