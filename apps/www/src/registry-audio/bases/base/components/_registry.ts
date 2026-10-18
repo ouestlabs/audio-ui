@@ -1109,7 +1109,6 @@ export const components: RegistryItem[] = [
       "@audio-ui/tuner",
       "@audio-ui/use-microphone",
       "@audio-ui/use-pitch",
-      "@shadcn/button",
     ],
     type: "registry:example",
   },

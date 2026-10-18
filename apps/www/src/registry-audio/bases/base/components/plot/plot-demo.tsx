@@ -381,7 +381,7 @@ export default function PlotDemo() {
       )
     );
   }, []);
-  const band = bands[selected];
+  const _band = bands[selected];
   const { analyser } = useNoiseThroughEq(bands);
   const spectrum = useSpectrum(analyser, { maxHz: MAX_HZ, minHz: MIN_HZ });
 
@@ -438,13 +438,6 @@ export default function PlotDemo() {
           />
         ))}
       </Plot>
-      <div className="flex items-center justify-end gap-2">
-        <output className="font-mono text-muted-foreground text-xs">
-          Band {selected + 1}: {formatHz(band?.frequency ?? 0)},{" "}
-          {formatDb(band?.gainDb ?? 0)}
-          {band?.q === undefined ? "" : `, Q ${band.q.toFixed(1)}`}
-        </output>
-      </div>
     </div>
   );
 }

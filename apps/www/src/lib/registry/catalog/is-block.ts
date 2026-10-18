@@ -35,6 +35,10 @@ const PLAY = new Set([
 export const takesPlay = (name: string) => PLAY.has(name);
 
 /** The previews that can show your own sound: their bar gets a button that turns the microphone on. */
-const MICROPHONE = new Set(["needle-meter-demo", "waveform-live-demo"]);
+const MICROPHONE = new Set([
+  "needle-meter-demo",
+  "tuner-demo",
+  "waveform-live-demo",
+]);
 
 export const takesMicrophone = (name: string) => MICROPHONE.has(name);
