@@ -272,11 +272,11 @@ export const clip: Glyph = [
   path("M6.5 12c1-4 2-4 3 0s2 4 3 0 2-4 3 0 2 4 3 0", { knock: true }),
 ];
 
-/** A knob, and the curve its value draws over time. */
+/** A value that moves: its first point, the curve, and its last point. */
 export const automation: Glyph = [
-  circle(6.5, 7, 3.5, { tint: true }),
-  path("M6.5 5.5h.01", { knock: true }),
-  path("M11 9c4 0 5 9 11 9"),
+  circle(5, 17, 2.2, { tint: true }),
+  path("M7.2 17c5 0 4-10 9.6-10"),
+  circle(19, 7, 2.2, { tint: true }),
 ];
 
 /** A magnet: snap to the grid. */
