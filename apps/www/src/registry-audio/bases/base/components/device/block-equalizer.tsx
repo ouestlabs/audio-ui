@@ -1,10 +1,9 @@
 "use client";
 
-import { PauseIcon, PlayIcon } from "@audio-ui/icons/react";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { Button } from "@/registry/bases/base/ui/button";
+import { useEffect, useRef, useState } from "react";
 import { EqualizerPanel } from "@/registry-audio/bases/base/audio/panels/equalizer-panel";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
+import { usePlaySwitch } from "@/registry-audio/bases/base/hooks/use-play-switch";
 import { useSpectrum } from "@/registry-audio/bases/base/hooks/use-spectrum";
 import {
   type EqualizerState,
@@ -28,14 +27,15 @@ const START = { highDb: 5, lowDb: 3, lowMidDb: -4 };
 
 /**
  * An equalizer you can plug in: its state, a panel that draws it and an engine
- * that plays it, each its own file and none knowing the others. Play pink
- * noise through it and the spectrum behind the curve is what comes out.
+ * that plays it, each its own file and none knowing the others. Pink noise
+ * plays through it while its session's play switch is on, and the spectrum
+ * behind the curve is what comes out.
  */
 export default function BlockEqualizer() {
   const [state, setState] = useState<EqualizerState>(
     () => equalizerDevice.apply(equalizerDevice.defaults(), START).state
   );
-  const [playing, setPlaying] = useState(false);
+  const { playing } = usePlaySwitch();
   const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
   const master = useMasterBus(MASTER_VOLUME);
   const engine = useRef<EqualizerEngine | null>(null);
@@ -80,24 +80,13 @@ export default function BlockEqualizer() {
     engine.current?.update(state);
   }, [state]);
 
-  const togglePlaying = useCallback(() => setPlaying((on) => !on), []);
-
   return (
     <div className="cn-audio-panel h-full w-full min-w-0">
       <EqualizerPanel
         onValueChange={setState}
         spectrum={spectrum}
         value={state}
-      >
-        <Button
-          aria-label={playing ? "Stop the noise" : "Play pink noise through it"}
-          onClick={togglePlaying}
-          size="icon-sm"
-          variant="outline"
-        >
-          {playing ? <PauseIcon weight="fill" /> : <PlayIcon weight="fill" />}
-        </Button>
-      </EqualizerPanel>
+      />
     </div>
   );
 }

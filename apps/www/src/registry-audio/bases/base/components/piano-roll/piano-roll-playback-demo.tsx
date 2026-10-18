@@ -2,7 +2,7 @@
 
 import type { Note } from "@audio-ui/core/piano-roll";
 import type { Tempo } from "@audio-ui/core/time";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   PianoRoll,
   PianoRollGrid,
@@ -10,7 +10,6 @@ import {
   PianoRollStrip,
   PianoRollViewport,
 } from "@/registry-audio/bases/base/audio/elements/piano-roll";
-import { PlayToggle } from "@/registry-audio/bases/base/audio/elements/play-toggle";
 import {
   Timeline,
   TimelinePlayhead,
@@ -20,6 +19,7 @@ import {
   meterOf,
   usePianoRollPlayback,
 } from "@/registry-audio/bases/base/hooks/use-piano-roll-playback";
+import { usePlaySwitch } from "@/registry-audio/bases/base/hooks/use-play-switch";
 import { useSynthVoices } from "@/registry-audio/bases/base/hooks/use-synth-voices";
 
 const TEMPO: Tempo = { beatsPerBar: 4, beatUnit: 4, bpm: 110 };
@@ -35,7 +35,7 @@ const PHRASE: Note[] = [
   { id: "7", length: 3, pitch: 62, start: 13, velocity: 0.6 },
 ];
 
-/** A bar on loop: edit the notes while it plays, and the next pass plays them. */
+/** A bar on loop: edit the notes while it plays, and the next pass plays them. It plays while the play switch of its session is on. */
 export default function PianoRollPlaybackDemo() {
   const [notes, setNotes] = useState(PHRASE);
   const output = useMasterBus(0.7);
@@ -48,13 +48,20 @@ export default function PianoRollPlaybackDemo() {
     tempo: TEMPO,
     voices,
   });
+  const { playing } = usePlaySwitch();
+  // Only the switch starts and stops it: editing a note must not restart it.
+  const controls = useRef(playback);
+  controls.current = playback;
+  useEffect(() => {
+    if (playing) {
+      controls.current.play();
+    } else {
+      controls.current.stop();
+    }
+  }, [playing]);
 
   return (
     <div className="flex w-full flex-col gap-3">
-      <PlayToggle
-        onToggle={playback.isPlaying ? playback.stop : playback.play}
-        playing={playback.isPlaying}
-      />
       <Timeline
         duration={METER.duration}
         onPositionChange={playback.seek}

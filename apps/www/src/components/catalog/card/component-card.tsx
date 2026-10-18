@@ -15,7 +15,6 @@ import { AudioSessionProvider } from "@/registry-audio/bases/base/hooks/use-audi
 
 import {
   ComponentCardContainer,
-  ComponentName,
   ComponentRenderer,
 } from "./component-card-container";
 import { ComponentSourceSheetContent } from "./component-source-sheet-content";
@@ -59,12 +58,6 @@ export function ComponentCard({
                 <ComponentSourceSheetContent base={base} name={name} />
               </Sheet>
             }
-            badge={
-              process.env.NODE_ENV === "development" ? (
-                <ComponentName name={name} />
-              ) : null
-            }
-            description={item.description}
             expand={hosted}
             hint={hint}
             name={name}

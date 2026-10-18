@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { PlayToggle } from "@/registry-audio/bases/base/audio/elements/play-toggle";
 import { ChannelEqPanel } from "@/registry-audio/bases/base/audio/panels/channel-eq-panel";
 import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
@@ -27,7 +26,7 @@ export default function BlockChannelEq() {
     channelEqDevice.defaults()
   );
   const master = useMasterBus(MASTER_VOLUME);
-  const { analyser, playing, toggle } = useDeviceLoop({
+  const { analyser } = useDeviceLoop({
     create: createChannelEqEngine,
     destination: master,
     state,
@@ -39,13 +38,7 @@ export default function BlockChannelEq() {
         onValueChange={setState}
         spectrum={spectrum}
         value={state}
-      >
-        <PlayToggle
-          label="Play a loop through it"
-          onToggle={toggle}
-          playing={playing}
-        />
-      </ChannelEqPanel>
+      />
     </div>
   );
 }

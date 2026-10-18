@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { PlayToggle } from "@/registry-audio/bases/base/audio/elements/play-toggle";
 import { ReduxPanel } from "@/registry-audio/bases/base/audio/panels/redux-panel";
 import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
@@ -22,20 +21,14 @@ const MASTER_VOLUME = 0.7;
 export default function BlockRedux() {
   const [state, setState] = useState<ReduxState>(() => reduxDevice.defaults());
   const master = useMasterBus(MASTER_VOLUME);
-  const { playing, toggle } = useDeviceLoop({
+  useDeviceLoop({
     create: createReduxEngine,
     destination: master,
     state,
   });
   return (
     <div className="cn-audio-panel h-full w-full min-w-0">
-      <ReduxPanel onValueChange={setState} value={state}>
-        <PlayToggle
-          label="Play a loop through it"
-          onToggle={toggle}
-          playing={playing}
-        />
-      </ReduxPanel>
+      <ReduxPanel onValueChange={setState} value={state} />
     </div>
   );
 }
