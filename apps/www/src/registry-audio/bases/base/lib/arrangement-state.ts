@@ -1,5 +1,10 @@
 import type { Breakpoint } from "@audio-ui/core/envelope";
 import {
+  type SignatureChange,
+  secondsPerBar,
+  type Tempo,
+} from "@audio-ui/core/time";
+import {
   type ClipValue,
   copyRange,
   coverClips,
@@ -452,9 +457,38 @@ export function cropClip(clip: Arranged): Arranged {
 
 // --- State and commands: what a host holds, and the one function that changes it
 
-/** What undo and redo move between: the tracks and the clips on them. */
+/** A stretch of time, in seconds: from where it starts to where it ends. */
+export type Span = readonly [number, number];
+
+/** A named point of the arrangement to jump to, in seconds. */
+export interface ArrangementLocator {
+  at: number;
+  name: string;
+}
+
+/** A change of time signature, with an id that stays the same as it moves. */
+export type ArrangementSignature = SignatureChange & { id: string };
+
+/** The loop: the stretch that repeats, and whether playback repeats it. */
+export interface ArrangementLoop {
+  on: boolean;
+  range: Span;
+}
+
+/**
+ * What undo and redo move between: the tracks and the clips on them, and the
+ * time they are laid out in. Every time in it is in seconds at its `tempo`, so
+ * a step of the history stays right whatever the tempo is now.
+ */
 export interface ArrangementDoc {
   clips: Arranged[];
+  /** The length of the timeline every clip is kept within, in seconds. */
+  duration: number;
+  locators: ArrangementLocator[];
+  loop: ArrangementLoop;
+  /** Changes of time signature along the song, in seconds; the tempo holds the one it starts in. */
+  signatures: ArrangementSignature[];
+  tempo: Tempo;
   tracks: ArrangementTrack[];
 }
 
@@ -486,8 +520,6 @@ export interface ArrangementState {
   /** How many colors a track can take: new tracks cycle through them. */
   colors: number;
   doc: ArrangementDoc;
-  /** The length of the timeline every clip is kept within. */
-  duration: number;
   /** A drag in progress: the clips a copy drag copies, and the group the dragged clip belongs to. */
   gesture: {
     copying: Arranged[] | null;
@@ -503,17 +535,32 @@ export function createArrangementState({
   colors,
   duration,
   initialClips = [],
+  initialLocators = [],
+  initialLoop = { on: false, range: [0, 0] },
+  initialSignatures = [],
   initialTracks,
+  tempo,
 }: {
   colors: number;
   duration: number;
   initialClips?: Arranged[];
+  initialLocators?: ArrangementLocator[];
+  initialLoop?: ArrangementLoop;
+  initialSignatures?: ArrangementSignature[];
   initialTracks: ArrangementTrack[];
+  tempo: Tempo;
 }): ArrangementState {
   return {
     colors,
-    doc: { clips: initialClips, tracks: initialTracks },
-    duration,
+    doc: {
+      clips: initialClips,
+      duration,
+      locators: initialLocators,
+      loop: initialLoop,
+      signatures: initialSignatures,
+      tempo,
+      tracks: initialTracks,
+    },
     gesture: { copying: null, group: null },
     history: emptyHistory(),
     selection: null,
@@ -524,6 +571,24 @@ export function createArrangementState({
 /** Every change the arrangement takes, as a plain value. */
 export type ArrangementCommand =
   | { type: "add-clip"; clip: Arranged }
+  // Time: the tempo, the signatures, the locators and the loop.
+  | { type: "add-locator"; at: number }
+  | { type: "add-signature"; at: number }
+  /** A drag of the loop: a burst, which `settle-clip-edit` closes into one step. */
+  | { type: "change-loop"; range: Span }
+  | { type: "move-signature"; id: string; to: number }
+  | { type: "remove-locator"; at: number }
+  | { type: "remove-signature"; id: string }
+  | { type: "rename-locator"; at: number; name: string }
+  | { type: "set-loop"; loop: Partial<ArrangementLoop> }
+  | {
+      type: "set-signature";
+      id: string;
+      beatsPerBar: number;
+      beatUnit: number;
+    }
+  /** Keeps the musical positions: everything is scaled to the new bar. */
+  | { type: "set-tempo"; tempo: Tempo }
   | { type: "add-track"; afterId?: string; kind?: TrackKind }
   | {
       type: "change-automation";
@@ -565,7 +630,6 @@ export type ArrangementCommand =
   | { type: "remove-track"; id: string }
   | { type: "rename-clip"; id: string; name: string }
   | { type: "rename-track"; id: string; name: string }
-  | { type: "rescale"; ratio: number }
   | { type: "select-all" }
   | { type: "select-clip"; id: string; additive: boolean }
   | { type: "select-clips"; ids: string[] }
@@ -588,7 +652,15 @@ function sameItems<T>(a: readonly T[], b: readonly T[]): boolean {
 
 /** Whether a change made nothing: the same clips and tracks, item for item. */
 function sameDoc(a: ArrangementDoc, b: ArrangementDoc): boolean {
-  return sameItems(a.clips, b.clips) && sameItems(a.tracks, b.tracks);
+  return (
+    sameItems(a.clips, b.clips) &&
+    sameItems(a.tracks, b.tracks) &&
+    sameItems(a.locators, b.locators) &&
+    sameItems(a.signatures, b.signatures) &&
+    a.duration === b.duration &&
+    a.loop === b.loop &&
+    a.tempo === b.tempo
+  );
 }
 
 /** A change made in one go: one step of the history, or none when it changed nothing. */
@@ -649,7 +721,7 @@ function duplicateClips(
   state: ArrangementState,
   chosen: Arranged[]
 ): ArrangementState {
-  const { duration } = state;
+  const { duration } = state.doc;
   const made: Arranged[] = [];
   const next = edit(state, (doc) => ({
     ...doc,
@@ -735,7 +807,7 @@ function changeClip(
         ? {
             ...clip,
             value: moveClip(origin.value, origin.value.start + details.delta, {
-              duration: state.duration,
+              duration: state.doc.duration,
             }),
           }
         : clip;
@@ -768,7 +840,7 @@ function commitClip(
     doc: {
       ...settled.doc,
       clips: land(settled.doc.clips, {
-        duration: state.duration,
+        duration: state.doc.duration,
         group: group
           ? [...group.keys()]
           : otherSelected(selected as string[], id),
@@ -862,7 +934,7 @@ function duplicateTrack(state: ArrangementState, id: string): ArrangementState {
         id: freshId(clip.id, taken),
         track: copy.id,
       }));
-    return { clips: [...doc.clips, ...copies], tracks };
+    return { ...doc, clips: [...doc.clips, ...copies], tracks };
   });
   return { ...next, trackCount: count };
 }
@@ -928,6 +1000,7 @@ function removeTrack(state: ArrangementState, id: string): ArrangementState {
   const gone = picked.includes(id) ? picked : [id];
   return withSelection(
     edit(state, (doc) => ({
+      ...doc,
       clips: doc.clips.filter((clip) => !gone.includes(clip.track)),
       tracks: doc.tracks.filter((track) => !gone.includes(track.id)),
     })),
@@ -968,16 +1041,119 @@ function changeAutomation(
   }));
 }
 
-/** A tempo change keeps the musical positions, and what came before it no longer fits the history. */
-function rescale(state: ArrangementState, ratio: number): ArrangementState {
-  return {
-    ...state,
-    doc: {
-      ...state.doc,
-      clips: state.doc.clips.map((clip) => scaleClip(clip, ratio)),
+const sameTempo = (a: Tempo, b: Tempo) =>
+  a.bpm === b.bpm &&
+  a.beatsPerBar === b.beatsPerBar &&
+  a.beatUnit === b.beatUnit;
+
+const sameSpan = (a: Span, b: Span) => a[0] === b[0] && a[1] === b[1];
+
+/**
+ * A tempo change keeps the musical positions: every time in the document is
+ * scaled to the new bar, so a clip three bars long stays three bars long. It
+ * is one step of the history, and the steps before it keep their own tempo.
+ */
+function setTempo(state: ArrangementState, tempo: Tempo): ArrangementState {
+  const ratio = secondsPerBar(tempo) / secondsPerBar(state.doc.tempo);
+  // A tempo that cannot be one has no bar to scale to: leave the document as it is.
+  if (
+    sameTempo(tempo, state.doc.tempo) ||
+    !Number.isFinite(ratio) ||
+    ratio <= 0
+  ) {
+    return state;
+  }
+  const scaled = <T extends { at: number }>(item: T): T => ({
+    ...item,
+    at: item.at * ratio,
+  });
+  return edit(state, (doc) => ({
+    ...doc,
+    clips: doc.clips.map((clip) => scaleClip(clip, ratio)),
+    duration: doc.duration * ratio,
+    locators: doc.locators.map(scaled),
+    loop: {
+      ...doc.loop,
+      range: [doc.loop.range[0] * ratio, doc.loop.range[1] * ratio],
     },
-    history: emptyHistory(),
-  };
+    signatures: doc.signatures.map(scaled),
+    tempo,
+  }));
+}
+
+/** A signature change at `at`, in the signature in force there, and the next free id. */
+function addSignature(state: ArrangementState, at: number): ArrangementState {
+  const { signatures, tempo } = state.doc;
+  const [held] = signatures
+    .filter((change) => change.at <= at)
+    .sort((a, b) => b.at - a.at);
+  const id = freshId(
+    "signature",
+    new Set(signatures.map((change) => change.id))
+  );
+  return edit(state, (doc) => ({
+    ...doc,
+    signatures: [
+      ...doc.signatures.filter((change) => change.at !== at),
+      {
+        at,
+        beatUnit: held?.beatUnit ?? tempo.beatUnit,
+        beatsPerBar: held?.beatsPerBar ?? tempo.beatsPerBar,
+        id,
+      },
+    ],
+  }));
+}
+
+function changeSignature(
+  state: ArrangementState,
+  id: string,
+  change: (signature: ArrangementSignature) => ArrangementSignature
+): ArrangementState {
+  return edit(state, (doc) => ({
+    ...doc,
+    signatures: doc.signatures.map((item) =>
+      item.id === id ? change(item) : item
+    ),
+  }));
+}
+
+function renameLocator(
+  state: ArrangementState,
+  at: number,
+  name: string
+): ArrangementState {
+  if (state.doc.locators.find((locator) => locator.at === at)?.name === name) {
+    return state;
+  }
+  return edit(state, (doc) => ({
+    ...doc,
+    locators: doc.locators.map((locator) =>
+      locator.at === at ? { ...locator, name } : locator
+    ),
+  }));
+}
+
+function setLoop(
+  state: ArrangementState,
+  change: Partial<ArrangementLoop>
+): ArrangementState {
+  const { on, range } = state.doc.loop;
+  if ((change.on ?? on) === on && sameSpan(change.range ?? range, range)) {
+    return state;
+  }
+  return edit(state, (doc) => ({
+    ...doc,
+    loop: { on: change.on ?? on, range: change.range ?? range },
+  }));
+}
+
+/** A drag of the loop's range: the first tick opens a step, `settle-clip-edit` closes it. */
+function changeLoop(state: ArrangementState, range: Span): ArrangementState {
+  if (sameSpan(range, state.doc.loop.range)) {
+    return state;
+  }
+  return burst(state, (doc) => ({ ...doc, loop: { ...doc.loop, range } }));
 }
 
 function selectClip(
@@ -1056,7 +1232,7 @@ function consolidateTime(
   state: ArrangementState,
   time: TimeSelection
 ): ArrangementState {
-  const { clips, ids } = consolidate(state.doc.clips, time, state.duration);
+  const { clips, ids } = consolidate(state.doc.clips, time, state.doc.duration);
   return withSelection(
     edit(state, (doc) => ({ ...doc, clips })),
     {
@@ -1078,7 +1254,7 @@ function paste(
     at,
     track,
     trackOrder(state.doc),
-    state.duration
+    state.doc.duration
   );
   return withSelection(
     edit(state, (doc) => ({ ...doc, clips })),
@@ -1104,10 +1280,23 @@ const handlers: Handlers = {
     withSelection(
       edit(state, (doc) => ({
         ...doc,
-        clips: lay(doc.clips, clip, state.duration),
+        clips: lay(doc.clips, clip, state.doc.duration),
       })),
       { clips: [clip.id], tracks: [] }
     ),
+  "add-locator": (state, { at }) =>
+    edit(state, (doc) =>
+      doc.locators.some((locator) => locator.at === at)
+        ? doc
+        : {
+            ...doc,
+            locators: [
+              ...doc.locators,
+              { at, name: `Locator ${doc.locators.length + 1}` },
+            ],
+          }
+    ),
+  "add-signature": (state, { at }) => addSignature(state, at),
   "add-track": (state, { afterId, kind = "audio" }) => {
     const count = state.trackCount + 1;
     const track: ArrangementTrack = {
@@ -1130,6 +1319,31 @@ const handlers: Handlers = {
     changeAutomation(state, trackId, parameter, points),
   "change-clip": (state, { id, value, details }) =>
     changeClip(state, id, value, details),
+  "change-loop": (state, { range }) => changeLoop(state, range),
+  "move-signature": (state, { id, to }) =>
+    changeSignature(state, id, (change) => ({
+      ...change,
+      at: Math.min(state.doc.duration, Math.max(0, to)),
+    })),
+  "remove-locator": (state, { at }) =>
+    edit(state, (doc) => ({
+      ...doc,
+      locators: doc.locators.filter((locator) => locator.at !== at),
+    })),
+  "remove-signature": (state, { id }) =>
+    edit(state, (doc) => ({
+      ...doc,
+      signatures: doc.signatures.filter((change) => change.id !== id),
+    })),
+  "rename-locator": (state, { at, name }) => renameLocator(state, at, name),
+  "set-loop": (state, { loop }) => setLoop(state, loop),
+  "set-signature": (state, { id, beatsPerBar, beatUnit }) =>
+    changeSignature(state, id, (change) => ({
+      ...change,
+      beatUnit,
+      beatsPerBar,
+    })),
+  "set-tempo": (state, { tempo }) => setTempo(state, tempo),
   "clip-action": (state, command) => clipAction(state, command),
   "commit-clip": (state, { id, copy, track }) =>
     commitClip(state, id, copy, track),
@@ -1138,7 +1352,7 @@ const handlers: Handlers = {
   "clear-time": (state, { time }) =>
     edit(state, (doc) => ({
       ...doc,
-      clips: clearTime(doc.clips, time, state.duration),
+      clips: clearTime(doc.clips, time, state.doc.duration),
     })),
   "crop-clip": (state, { id }) => cropOne(state, id),
   "duplicate-selection": (state) =>
@@ -1159,7 +1373,7 @@ const handlers: Handlers = {
   "insert-time": (state, { at, length }) =>
     edit(state, (doc) => ({
       ...doc,
-      clips: openTime(doc.clips, at, length, state.duration),
+      clips: openTime(doc.clips, at, length, state.doc.duration),
     })),
   "move-track": (state, { id, index }) => moveTrack(state, id, index),
   paste: (state, { clipping, at, track }) => paste(state, clipping, at, track),
@@ -1169,19 +1383,20 @@ const handlers: Handlers = {
   "remove-time": (state, { from, to }) =>
     edit(state, (doc) => ({
       ...doc,
-      clips: deleteTime(doc.clips, from, to, state.duration),
+      clips: deleteTime(doc.clips, from, to, state.doc.duration),
     })),
   "remove-track": (state, { id }) => removeTrack(state, id),
   "rename-clip": (state, { id, name }) => renameClip(state, id, name),
   "rename-track": (state, { id, name }) => renameTrack(state, id, name),
-  rescale: (state, { ratio }) => rescale(state, ratio),
   "select-all": (state) => selectAll(state),
   "select-clip": (state, { id, additive }) => selectClip(state, id, additive),
   "select-clips": (state, { ids }) =>
     withSelection(state, { clips: ids, tracks: [] }),
   "select-track": (state, { id, additive }) => selectTrack(state, id, additive),
   "set-duration": (state, { duration }) =>
-    state.duration === duration ? state : { ...state, duration },
+    state.doc.duration === duration
+      ? state
+      : { ...state, doc: { ...state.doc, duration } },
   "set-fade-shape": (state, { id, edge, shape }) =>
     fadeShape(state, id, edge, shape),
   "settle-clip-edit": (state) => ({
@@ -1218,12 +1433,12 @@ export function copyFrom(
 ): Clipping {
   const order = trackOrder(state.doc);
   if (time) {
-    return copyTime(state.doc.clips, time, order, state.duration);
+    return copyTime(state.doc.clips, time, order, state.doc.duration);
   }
   const selected = state.selection?.clips ?? NONE;
   return copyClips(
     state.doc.clips.filter((clip) => selected.includes(clip.id)),
     order,
-    state.duration
+    state.doc.duration
   );
 }
