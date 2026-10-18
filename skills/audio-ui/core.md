@@ -50,6 +50,8 @@ Every controller works the same way:
 | `createXYPadController` | `press(event, control)` | `keyDown(event)` | `type(axis, value, event)` | `reset(event)`, called by the element |
 | `createPlotHandleController` | `press(event, element)` | `keyDown(event)` | `typeAt(along, position, event)` | `reset(event)`, called by the element |
 
+The knob resets on a double tap by itself, because a tap on a knob changes nothing. For the fader, the pad and the plot handle a tap sets the value, so they have no double-tap reset: listen for `dblclick` on the control and call `reset(event)`. The pad and the plot handle reset on Alt with a press and on Delete themselves; for the fader, the element calls `reset(event)` on both.
+
 Read the signatures in the `*Controller` type of each module before calling one: they are the source of truth.
 
 The React primitives are the reference implementation of each adapter: `packages/ui/src/primitives/<name>/elements/` in https://github.com/ouestlabs/audio-ui shows which part gets which listener and attribute.
