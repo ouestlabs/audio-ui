@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "audio-ui",
+  "description": "The audio/ui skill for Claude Code: audio interfaces on the web, from a knob to a DAW.",
+  "owner": {
+    "name": "Ouest Labs",
+    "url": "https://www.audio-ui.dev"
+  },
+  "plugins": [
+    {
+      "name": "audio-ui",
+      "source": "./skills/audio-ui",
+      "description": "Builds audio interfaces with audio/ui: picks the component, installs it, wires it to the Web Audio API without clicks, feeds live meters and playheads without re-rendering React, styles the headless primitives and lets an AI model drive them.",
+      "category": "development",
+      "tags": ["audio", "web-audio", "react", "shadcn", "daw"],
+      "homepage": "https://www.audio-ui.dev/docs/agents",
+      "repository": "https://github.com/ouestlabs/audio-ui",
+      "license": "MIT",
+      "keywords": ["audio-ui", "audio", "knob", "fader", "midi", "synth"]
+    }
+  ]
+}

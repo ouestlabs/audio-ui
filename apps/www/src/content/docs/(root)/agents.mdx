@@ -13,6 +13,17 @@ Works with Claude Code, Cursor, Codex and any agent that supports the open skill
 npx skills add ouestlabs/audio-ui
 ```
 
+### In Claude Code, as a plugin
+
+The repository is also a Claude Code plugin marketplace, so Claude Code installs and updates the skill itself:
+
+```text
+/plugin marketplace add ouestlabs/audio-ui
+/plugin install audio-ui@audio-ui
+```
+
+On Claude Code 2.1.275 or later, one line does both: `/plugin install audio-ui --marketplace ouestlabs/audio-ui`. The skill is the plugin's only content, with no hook, command or server, and it follows the repository: `/plugin marketplace update audio-ui` brings the latest rules.
+
 The agent loads the skill on its own when a task needs it. Its rules come with incorrect and correct code for each case:
 
 | Rules | What they cover |

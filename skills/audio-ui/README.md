@@ -6,6 +6,12 @@ The skill coding agents use to build audio interfaces with audio/ui. People inst
 npx skills add ouestlabs/audio-ui
 ```
 
+In Claude Code it installs as a plugin (the repository's `.claude-plugin/marketplace.json` lists this folder as one):
+
+```text
+/plugin install audio-ui --marketplace ouestlabs/audio-ui
+```
+
 ## Structure
 
 - `SKILL.md`: what agents load first: when to apply, rule categories by priority, the quick reference, component selection and the workflow
