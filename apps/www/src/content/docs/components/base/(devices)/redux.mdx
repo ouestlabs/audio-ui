@@ -25,14 +25,7 @@ Roughens the sound like an early sampler. It keeps only some bits of each sample
 
 The panel draws the stairs the bits make against the straight line of a clean sound. `quantize(input, bits)` is one step of the quantizer.
 
-```tsx
-import { ReduxPanel } from "@/components/audio-ui/devices/redux/panel";
-import { reduxDevice } from "@/components/audio-ui/devices/redux/device";
-
-const [state, setState] = useState(() => reduxDevice.defaults());
-
-<ReduxPanel onValueChange={setState} value={state} />;
-```
+<DeviceUsage name="redux" />
 
 ## Engine
 

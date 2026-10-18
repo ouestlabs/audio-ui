@@ -25,14 +25,7 @@ Keeps the sound under a ceiling. The input gain pushes the level against it, and
 
 The panel draws the transfer curve against the straight line of a clean sound. Drag the handle up and down for the ceiling and across for the input gain.
 
-```tsx
-import { LimiterPanel } from "@/components/audio-ui/devices/limiter/panel";
-import { limiterDevice } from "@/components/audio-ui/devices/limiter/device";
-
-const [state, setState] = useState(() => limiterDevice.defaults());
-
-<LimiterPanel onValueChange={setState} value={state} />;
-```
+<DeviceUsage name="limiter" />
 
 ## Engine
 

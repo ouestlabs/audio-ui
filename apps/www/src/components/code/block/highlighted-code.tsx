@@ -40,6 +40,17 @@ function renderNodes(
  * highlighter writes as HTML, without injecting HTML. Colors come from the
  * `th-*` classes (see `styles/highlight.css`).
  */
+export function highlightedElements(
+  code: string,
+  language = "tsx",
+  lineNumbers = true
+) {
+  const lang = highlighter.normalizeLanguage(language);
+  const { tokens } = highlighter.tokenize(code, { lang });
+  const { elements } = renderNodes(renderTokens(tokens, { lineNumbers }), 0);
+  return { elements, lang };
+}
+
 export function HighlightedCode({
   code,
   language = "tsx",
@@ -47,12 +58,7 @@ export function HighlightedCode({
   code: string;
   language?: string;
 }) {
-  const lang = highlighter.normalizeLanguage(language);
-  const { tokens } = highlighter.tokenize(code, { lang });
-  const { elements } = renderNodes(
-    renderTokens(tokens, { lineNumbers: true }),
-    0
-  );
+  const { elements, lang } = highlightedElements(code, language);
   return (
     <pre
       className={`th-code th-code--${lang} th-code--line-numbers`}

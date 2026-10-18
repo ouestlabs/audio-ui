@@ -28,14 +28,7 @@ The EQ of a mixer strip, simpler than the [equalizer](/docs/components/base/equa
 
 The panel draws the curve of the four filters and the output level, with a handle on the mid band.
 
-```tsx
-import { ChannelEqPanel } from "@/components/audio-ui/devices/channel-eq/panel";
-import { channelEqDevice } from "@/components/audio-ui/devices/channel-eq/device";
-
-const [state, setState] = useState(() => channelEqDevice.defaults());
-
-<ChannelEqPanel onValueChange={setState} value={state} />;
-```
+<DeviceUsage name="channel-eq" />
 
 ## Engine
 

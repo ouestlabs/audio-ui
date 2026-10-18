@@ -27,14 +27,7 @@ A pedal-style distortion. A band-pass filter picks what is pushed into the soft 
 
 The panel draws the band-pass that picks what reaches the clip, with a handle on its centre. `overdriveBand(state)` is the curve it draws.
 
-```tsx
-import { OverdrivePanel } from "@/components/audio-ui/devices/overdrive/panel";
-import { overdriveDevice } from "@/components/audio-ui/devices/overdrive/device";
-
-const [state, setState] = useState(() => overdriveDevice.defaults());
-
-<OverdrivePanel onValueChange={setState} value={state} />;
-```
+<DeviceUsage name="overdrive" />
 
 ## Engine
 

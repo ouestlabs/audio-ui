@@ -25,14 +25,7 @@ Shapes the attack and the sustain of a sound, at any level. A drum gains click o
 
 The panel is a square with the sustain across and the attack up, and one handle to drag to both at once. The centre is a sound left as it is.
 
-```tsx
-import { TransientPanel } from "@/components/audio-ui/devices/transient/panel";
-import { transientDevice } from "@/components/audio-ui/devices/transient/device";
-
-const [state, setState] = useState(() => transientDevice.defaults());
-
-<TransientPanel onValueChange={setState} value={state} />;
-```
+<DeviceUsage name="transient" />
 
 ## Engine
 

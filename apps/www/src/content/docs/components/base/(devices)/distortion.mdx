@@ -26,14 +26,7 @@ Bends the sound. The more the drive, the more the peaks round off. It is a [devi
 
 The panel draws the transfer curve, the output for each input, against the straight line of a clean sound. `softClip(input, drive)` is the clip and `distortionCurve(state)` is the whole curve with the mix and the output.
 
-```tsx
-import { DistortionPanel } from "@/components/audio-ui/devices/distortion/panel";
-import { distortionDevice } from "@/components/audio-ui/devices/distortion/device";
-
-const [state, setState] = useState(() => distortionDevice.defaults());
-
-<DistortionPanel onValueChange={setState} value={state} />;
-```
+<DeviceUsage name="distortion" />
 
 ## Engine
 

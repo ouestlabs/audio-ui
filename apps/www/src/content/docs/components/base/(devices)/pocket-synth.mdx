@@ -25,14 +25,7 @@ One oscillator through a resonant filter. Press the pad: the pitch goes across a
 
 The panel has a pad that plays the synth: its position gives the note, so the pitch goes across and the cutoff goes up. `pocketSynthPitch(position)` and `pocketSynthCutoff(position)` turn a position from 0 to 1 into hertz. The panel sends notes out and does not make the sound, so it plays through any engine.
 
-```tsx
-import { PocketSynthPanel } from "@/components/audio-ui/devices/pocket-synth/panel";
-import { pocketSynthDevice } from "@/components/audio-ui/devices/pocket-synth/device";
-
-const [state, setState] = useState(() => pocketSynthDevice.defaults());
-
-<PocketSynthPanel onValueChange={setState} value={state} />;
-```
+<DeviceUsage name="pocket-synth" />
 
 ## Engine
 

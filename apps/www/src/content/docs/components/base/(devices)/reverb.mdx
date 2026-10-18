@@ -26,14 +26,7 @@ Puts the sound in a room. It is a [device](/docs/devices): a state, a panel, an 
 
 The panel draws the level of the tail falling in dB, from the end of the pre-delay to -60 dB. `reverbDecay(state)` is the curve it draws, and `reverbImpulse(sampleRate, state)` makes the impulse response of the room.
 
-```tsx
-import { ReverbPanel } from "@/components/audio-ui/devices/reverb/panel";
-import { reverbDevice } from "@/components/audio-ui/devices/reverb/device";
-
-const [state, setState] = useState(() => reverbDevice.defaults());
-
-<ReverbPanel onValueChange={setState} value={state} />;
-```
+<DeviceUsage name="reverb" />
 
 ## Engine
 

@@ -27,14 +27,7 @@ Sets the level and the stereo image of a signal. It has no display, so its panel
 
 The panel is the controls and nothing else. `utilitySettings(state)` gives the numbers that go on the nodes.
 
-```tsx
-import { UtilityPanel } from "@/components/audio-ui/devices/utility/panel";
-import { utilityDevice } from "@/components/audio-ui/devices/utility/device";
-
-const [state, setState] = useState(() => utilityDevice.defaults());
-
-<UtilityPanel onValueChange={setState} value={state} />;
-```
+<DeviceUsage name="utility" />
 
 ## Engine
 

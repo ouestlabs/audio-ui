@@ -28,14 +28,7 @@ Repeats the sound. The echoes fade by the feedback, each darker than the one bef
 
 The panel draws the echoes the state makes, one line each, fainter as they fade. `delayTaps(state, windowMs)` returns them. With Sync on, the handle lands on the nearest note value and the Time control is drawn off. With Sync off, the note list is.
 
-```tsx
-import { DelayPanel } from "@/components/audio-ui/devices/delay/panel";
-import { delayDevice } from "@/components/audio-ui/devices/delay/device";
-
-const [state, setState] = useState(() => delayDevice.defaults());
-
-<DelayPanel onValueChange={setState} value={state} />;
-```
+<DeviceUsage name="delay" />
 
 ## Engine
 

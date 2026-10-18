@@ -26,14 +26,7 @@ Adds warmth or dirt. The drive pushes the signal into one of four curves: a soft
 
 The panel draws the transfer curve against the straight line of a clean sound. `saturate(curve, input)` is one curve and `saturatorCurve(state)` is the whole transfer curve with the mix and the output.
 
-```tsx
-import { SaturatorPanel } from "@/components/audio-ui/devices/saturator/panel";
-import { saturatorDevice } from "@/components/audio-ui/devices/saturator/device";
-
-const [state, setState] = useState(() => saturatorDevice.defaults());
-
-<SaturatorPanel onValueChange={setState} value={state} />;
-```
+<DeviceUsage name="saturator" />
 
 ## Engine
 

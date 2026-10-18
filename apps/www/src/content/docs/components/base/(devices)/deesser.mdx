@@ -27,14 +27,7 @@ Softens the sharp s and t of a voice. The signal is split at a frequency, and wh
 
 The panel draws what the device does at each frequency at full reduction. The handle sits on the curve at the frequency: drag it across for the frequency and down for the range. `deesserResponse(state)` is the curve the panel draws.
 
-```tsx
-import { DeesserPanel } from "@/components/audio-ui/devices/deesser/panel";
-import { deesserDevice } from "@/components/audio-ui/devices/deesser/device";
-
-const [state, setState] = useState(() => deesserDevice.defaults());
-
-<DeesserPanel onValueChange={setState} value={state} />;
-```
+<DeviceUsage name="deesser" />
 
 ## Engine
 

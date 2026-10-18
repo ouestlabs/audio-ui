@@ -25,14 +25,7 @@ Takes part of the spectrum out: a low-pass, a high-pass, a band-pass or a notch.
 
 The panel draws the curve of the filter, with a handle on it. Pass a spectrum to the panel to see what comes out behind the curve. `filterCurve(state)` is the curve it draws.
 
-```tsx
-import { FilterPanel } from "@/components/audio-ui/devices/filter/panel";
-import { filterDevice } from "@/components/audio-ui/devices/filter/device";
-
-const [state, setState] = useState(() => filterDevice.defaults());
-
-<FilterPanel onValueChange={setState} value={state} />;
-```
+<DeviceUsage name="filter" />
 
 ## Engine
 
