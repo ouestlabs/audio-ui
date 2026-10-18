@@ -72,15 +72,26 @@ export function PreviewPanel({
   );
 }
 
+/** The name of a block, as it installs: selectable, in a small box at the start of the bar. */
+function PreviewName({ name }: { name: string }) {
+  return (
+    <div
+      className="flex h-8 select-all items-center gap-1.5 rounded-lg bg-site-background/50 px-2 font-medium text-[10px] text-site-muted-foreground ring ring-border transition-colors hover:bg-site-muted hover:text-site-foreground"
+      title="Component name"
+    >
+      {name}
+    </div>
+  );
+}
+
 /**
- * The bar of a preview's frame, the same wherever a preview is shown: the
- * library it is built on, then its actions. It is the footer of a card in the
- * catalog and the header of a preview on a page. `expand` is the
+ * The bar of a preview's frame: what it is named, then its actions. It is the
+ * footer of a card in the catalog, which says the name of the block, and the
+ * header of a preview on a page, which says the library it is built on. `expand` is the
  * live preview to open at full size, for the editors made to take a screen.
  */
 export function PreviewBar({
   actions,
-  badge,
   expand,
   hint,
   name,
@@ -88,8 +99,6 @@ export function PreviewBar({
 }: {
   /** What comes last: a button to see the code. */
   actions?: React.ReactNode;
-  /** Something about the preview that is not for everyone, such as its name in development. */
-  badge?: React.ReactNode;
   expand?: PreviewHost;
   /** How to use the preview, shown in the footer of the full-size view. */
   hint?: string;
@@ -99,11 +108,16 @@ export function PreviewBar({
   const Bar = position === "header" ? FrameHeader : FrameFooter;
   return (
     <Bar className="flex-row items-center gap-3 px-2 py-1.5">
-      <p className="flex flex-1 items-center gap-1.5 truncate ps-1 text-site-muted-foreground text-xs">
-        <BuiltOn />
-      </p>
+      {position === "footer" ? (
+        <div className="flex flex-1 items-center">
+          <PreviewName name={name} />
+        </div>
+      ) : (
+        <p className="flex flex-1 items-center gap-1.5 truncate ps-1 text-site-muted-foreground text-xs">
+          <BuiltOn />
+        </p>
+      )}
       <div className="flex items-center gap-1.5">
-        {badge}
         {takesPlay(name) ? <PlaySwitch /> : null}
         {takesMicrophone(name) ? <MicrophoneSwitch /> : null}
         {takesMidi(name) ? <MidiConnect /> : null}
