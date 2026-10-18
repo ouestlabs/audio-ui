@@ -1,5 +1,11 @@
 # @audio-ui/core
 
+## 0.17.0
+
+### Minor Changes
+
+- d7e0e9e: Knob: every part carries `data-drag-mode` (`circular`, `revolution` or `vertical`), so a style can show the right cursor, such as `ns-resize` for a knob dragged up and down.
+
 ## 0.16.0
 
 ### Minor Changes
