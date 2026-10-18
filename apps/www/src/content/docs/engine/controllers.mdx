@@ -45,7 +45,7 @@ const detach = fader.attachWheel(control);
 | `format`, `locale` | `Intl.NumberFormat` options for `formatted` |
 | `disabled` | Takes every input away |
 
-`press(event, control, thumb)` takes the thumb too: a press on the thumb keeps the pointer where it grabbed the thumb, so the value does not jump to the pointer. `reset(event)` returns the value to its default: the element calls it on a double-click, on Alt with a press, and on Delete or Backspace.
+`press(event, control, thumb)` takes the thumb too: a press on the thumb keeps the pointer where it grabbed the thumb, so the value does not jump to the pointer. `reset(event)` returns the value to its default: the element calls it on a double-click (listen for `dblclick` on the control), on Alt with a press, and on Delete or Backspace. A double tap on touch is not a reset for a fader, as it is for a knob: a tap on a fader's track sets the value, so two quick taps are two values.
 
 ## Knob
 
@@ -79,7 +79,7 @@ const pad = createXYPadController({ minX: 0, maxX: 1, minY: 0, maxY: 1, value: {
 | `minX`, `maxX`, `stepX`, `minY`, `maxY`, `stepY` | Each axis's range and grid |
 | `format`, `locale`, `disabled` | Formats each axis separately, as `formatted.x` and `formatted.y` |
 
-A pad has two parameters on one gesture. `type(axis, value, event)` takes the axis first, because a text input is per axis. `reset(event)` returns both axes to their defaults.
+A pad has two parameters on one gesture. `type(axis, value, event)` takes the axis first, because a text input is per axis. `reset(event)` returns both axes to their defaults: the element calls it on a double-click, and the controller itself resets on Alt with a press and on Delete or Backspace. A double tap is not a reset here, since a tap on a pad places the point, so two quick taps are two points and not a request to go back.
 
 ## Plot handle
 
