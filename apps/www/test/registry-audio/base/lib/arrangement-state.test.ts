@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { DEFAULT_TEMPO } from "@audio-ui/core/time";
 import type { Arranged } from "@/registry-audio/bases/base/lib/arrangement";
 import {
   apply,
@@ -348,11 +349,18 @@ describe("apply", () => {
       colors: 5,
       duration: 100,
       initialClips: clips,
+      initialLocators: [{ at: 20, name: "Verse" }],
+      initialLoop: { on: true, range: [10, 30] },
+      initialSignatures: [{ at: 40, beatUnit: 4, beatsPerBar: 3, id: "s" }],
       initialTracks: [
         { color: 0, id: "drums", name: "Drums" },
         { color: 1, id: "bass", name: "Bass" },
       ],
+      // A 4/4 bar at 120 BPM is two seconds.
+      tempo: DEFAULT_TEMPO,
     });
+  /** The same tempo at half the speed: its bar lasts twice as long. */
+  const SLOWER = { ...DEFAULT_TEMPO, bpm: 60 };
 
   test("a command that changes nothing returns the same state", () => {
     const state = init([at("a", 0, 10)]);
@@ -415,13 +423,114 @@ describe("apply", () => {
     expect(state.doc.tracks.at(-1)?.id).toBe("track-4");
   });
 
-  test("a tempo change clears the history, as it always has", () => {
-    let state = init([at("a", 0, 10)]);
+  test("a tempo change keeps the musical positions: every time in the document is scaled to the new bar", () => {
+    let state = init([at("a", 10, 20)]);
+    state = apply(state, { type: "set-tempo", tempo: SLOWER });
+    const { doc } = state;
+    expect(doc.tempo).toBe(SLOWER);
+    expect([doc.clips[0]?.value.start, doc.clips[0]?.value.length]).toEqual([
+      20, 40,
+    ]);
+    expect(doc.duration).toBe(200);
+    expect(doc.loop).toEqual({ on: true, range: [20, 60] });
+    expect(doc.locators).toEqual([{ at: 40, name: "Verse" }]);
+    expect(doc.signatures[0]?.at).toBe(80);
+  });
+
+  test("a tempo change is one step of the history, and undo gives the old tempo with the old times", () => {
+    let state = init([at("a", 10, 20)]);
     state = apply(state, { type: "rename-clip", id: "a", name: "Intro" });
-    expect(state.history.past).toHaveLength(1);
-    state = apply(state, { type: "rescale", ratio: 2 });
-    expect(state.history.past).toHaveLength(0);
-    expect(state.doc.clips[0]?.value.length).toBe(20);
+    state = apply(state, { type: "set-tempo", tempo: SLOWER });
+    expect(state.history.past).toHaveLength(2);
+    const undone = apply(state, { type: "undo" });
+    expect(undone.doc.tempo).toBe(DEFAULT_TEMPO);
+    expect(undone.doc.clips[0]?.value.start).toBe(10);
+    expect(undone.doc.duration).toBe(100);
+    const redone = apply(undone, { type: "redo" });
+    expect(redone.doc.tempo).toBe(SLOWER);
+    expect(redone.doc.clips[0]?.value.start).toBe(20);
+  });
+
+  test("the same tempo, or one that is not a tempo, changes nothing", () => {
+    const state = init([at("a", 0, 10)]);
+    expect(
+      apply(state, { type: "set-tempo", tempo: { ...DEFAULT_TEMPO } })
+    ).toBe(state);
+    expect(
+      apply(state, { type: "set-tempo", tempo: { ...DEFAULT_TEMPO, bpm: 0 } })
+    ).toBe(state);
+  });
+
+  test("a locator is added where the cursor is, named by its number, and not twice", () => {
+    let state = init([]);
+    state = apply(state, { type: "add-locator", at: 50 });
+    expect(state.doc.locators.at(-1)).toEqual({ at: 50, name: "Locator 2" });
+    expect(apply(state, { type: "add-locator", at: 50 })).toBe(state);
+  });
+
+  test("a locator is renamed, removed, and each is one step", () => {
+    let state = init([]);
+    state = apply(state, { type: "rename-locator", at: 20, name: "Chorus" });
+    expect(state.doc.locators).toEqual([{ at: 20, name: "Chorus" }]);
+    expect(
+      apply(state, { type: "rename-locator", at: 20, name: "Chorus" })
+    ).toBe(state);
+    state = apply(state, { type: "remove-locator", at: 20 });
+    expect(state.doc.locators).toEqual([]);
+    expect(state.history.past).toHaveLength(2);
+    expect(apply(state, { type: "undo" }).doc.locators[0]?.name).toBe("Chorus");
+  });
+
+  test("a signature takes the next free id and the signature in force where it is added", () => {
+    let state = init([]);
+    state = apply(state, { type: "add-signature", at: 60 });
+    const added = state.doc.signatures.find((change) => change.at === 60);
+    expect(added).toMatchObject({
+      beatUnit: 4,
+      beatsPerBar: 3,
+      id: "signature-1",
+    });
+    state = apply(state, { type: "remove-signature", id: "signature-1" });
+    state = apply(state, { type: "add-signature", at: 70 });
+    expect(state.doc.signatures.at(-1)?.id).toBe("signature-1");
+  });
+
+  test("a signature is set, moved within the timeline, and removed", () => {
+    let state = init([]);
+    state = apply(state, {
+      type: "set-signature",
+      id: "s",
+      beatsPerBar: 7,
+      beatUnit: 8,
+    });
+    expect(state.doc.signatures[0]).toMatchObject({
+      beatUnit: 8,
+      beatsPerBar: 7,
+    });
+    state = apply(state, { type: "move-signature", id: "s", to: 500 });
+    expect(state.doc.signatures[0]?.at).toBe(100);
+    state = apply(state, { type: "move-signature", id: "s", to: -5 });
+    expect(state.doc.signatures[0]?.at).toBe(0);
+    state = apply(state, { type: "remove-signature", id: "s" });
+    expect(state.doc.signatures).toEqual([]);
+  });
+
+  test("the loop is set in one step, and a drag of its range is one step too", () => {
+    let state = init([]);
+    state = apply(state, { type: "set-loop", loop: { on: false } });
+    expect(state.doc.loop).toEqual({ on: false, range: [10, 30] });
+    expect(apply(state, { type: "set-loop", loop: { on: false } })).toBe(state);
+    for (const range of [
+      [12, 30],
+      [15, 32],
+      [20, 40],
+    ] as const) {
+      state = apply(state, { type: "change-loop", range });
+    }
+    state = apply(state, { type: "settle-clip-edit" });
+    expect(state.doc.loop.range).toEqual([20, 40]);
+    expect(state.history.past).toHaveLength(2);
+    expect(apply(state, { type: "undo" }).doc.loop.range).toEqual([10, 30]);
   });
 
   test("a split at the cursor cuts the selected clip, and its second piece takes a fresh id", () => {

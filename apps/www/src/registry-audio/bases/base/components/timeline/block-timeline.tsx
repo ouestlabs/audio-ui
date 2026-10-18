@@ -14,7 +14,6 @@ import {
   gridLabel,
   type MetronomeRhythm,
   secondsPerBar,
-  type Tempo,
   TRIPLET_FACTOR,
 } from "@audio-ui/core/time";
 import { snapMove } from "@audio-ui/core/timeline";
@@ -85,8 +84,6 @@ import {
   TRACK_HEIGHT_STEP,
 } from "@/registry-audio/bases/base/audio/elements/timeline";
 import {
-  type Locator,
-  type Signature,
   TimelineLocator,
   TimelineSignature,
 } from "@/registry-audio/bases/base/audio/elements/timeline-markers";
@@ -198,6 +195,15 @@ const PERCENT: Intl.NumberFormatOptions = {
 
 const bars = (count: number) => count * BAR;
 
+/** The named points the timeline starts with. */
+const LOCATORS = [
+  { at: bars(4), name: "Verse" },
+  { at: bars(20), name: "Chorus" },
+];
+
+/** The loop it starts with: bars 8 to 16, switched on. */
+const LOOP = { on: true, range: [bars(8), bars(16)] } as const;
+
 const TRACKS: ArrangementTrack[] = [
   { color: 0, id: "drums", name: "Drums" },
   { color: 1, id: "bass", kind: "midi", name: "Bass" },
@@ -216,8 +222,6 @@ const SILENCE = {
   getSnapshot: () => ({ levels: [-60, -60], peaks: [-60, -60] }),
   subscribe: () => () => undefined,
 };
-
-type Span = readonly [number, number];
 
 const arranged = (
   id: string,
@@ -589,13 +593,87 @@ function TrackLevel({ active, name }: { active: boolean; name: string }) {
  * and zooms. Made to be opened at full size, where the tracks take the screen.
  */
 export default function BlockTimeline() {
-  const [tempo, setTempo] = useState<Tempo>(DEFAULT_TEMPO);
-  const bar = secondsPerBar(tempo);
-  const duration = BARS * bar;
-  // Time-signature changes along the song, in seconds; the bars, the ruler and the position follow them.
-  const [signatures, setSignatures] = useState<Signature[]>([]);
   const [editingSignature, setEditingSignature] = useState<string | null>(null);
-  const signatureCount = useRef(0);
+  // The arrangement reads the playhead, where a split cuts, and the playhead reads the arrangement's loop and length: a ref ties the two.
+  const clockRef = useRef<{ getSnapshot: () => number } | null>(null);
+  const getPosition = useCallback(
+    () => clockRef.current?.getSnapshot() ?? 0,
+    []
+  );
+  const {
+    addClip,
+    addLocator: addLocatorAt,
+    addSignature: addSignatureAt,
+    changeLoop,
+    duration,
+    locators,
+    loop: { on: looping, range: loop },
+    removeLocator,
+    removeSignature,
+    renameLocator,
+    moveSignature,
+    setLoop,
+    setSignature,
+    setTempo,
+    signatures,
+    tempo,
+    addTrack,
+    canRedo,
+    canUndo,
+    changeAutomation,
+    changeClip,
+    changeMix,
+    clearSelection,
+    clearTimeSelection,
+    clipAction,
+    clips,
+    commitClip,
+    consolidateTime,
+    copying,
+    copyOf,
+    crop,
+    editClip,
+    fadeTimeSelection,
+    duplicateSelection,
+    duplicateTrack,
+    folded,
+    heights,
+    insertTimeSpan,
+    paste,
+    toggleFold,
+    toggleSelected,
+    mixOf,
+    redo,
+    moveTrack,
+    removeClip,
+    removeTimeSpan,
+    removeTrack,
+    renameClip,
+    renameTrack,
+    setFadeShape,
+    resizeTrack,
+    selectAll,
+    selectClip,
+    selectClips,
+    selectedIds,
+    selectedTracks,
+    selection,
+    selectTrack,
+    settleClipEdit,
+    splitAtCursor,
+    tracks,
+    undo,
+  } = useArrangement({
+    colors: TRACK_COLORS.length,
+    duration: BARS * BAR,
+    getPosition,
+    initialClips: CLIPS,
+    initialLocators: LOCATORS,
+    initialLoop: LOOP,
+    initialTracks: TRACKS,
+    tempo: DEFAULT_TEMPO,
+  });
+  const bar = secondsPerBar(tempo);
   const describe = useCallback(
     (seconds: number) => {
       const { bar: number, beat } = barsBeatsWith(seconds, tempo, signatures);
@@ -603,8 +681,6 @@ export default function BlockTimeline() {
     },
     [signatures, tempo]
   );
-  const [loop, setLoop] = useState<Span>([bars(8), bars(16)]);
-  const [looping, setLooping] = useState(true);
   // A stretch of time on some tracks, drawn by dragging across bare lanes, and what was last copied.
   const [timeSelection, setTimeSelection] = useState<TimeSelection | null>(
     null
@@ -612,11 +688,6 @@ export default function BlockTimeline() {
   const clipboard = useRef<Clipping | null>(null);
   // The track a press on bare lane began on: a time selection spans from it to the track under the pointer.
   const pressTrackRef = useRef<string | null>(null);
-  // Locators: named points to jump to, kept in seconds at the tempo they were set.
-  const [locators, setLocators] = useState<Locator[]>([
-    { at: bars(4), name: "Verse" },
-    { at: bars(20), name: "Chorus" },
-  ]);
   const [metronome, setMetronome] = useState(false);
   const [rhythm, setRhythm] = useState<MetronomeRhythm>("auto");
   const { clock, playing, setPlaying } = useSimulatedClock({
@@ -657,66 +728,22 @@ export default function BlockTimeline() {
     observer.observe(element);
     return () => observer.disconnect();
   }, [duration]);
+  useLayoutEffect(() => {
+    clockRef.current = clock;
+  }, [clock]);
   const [zoomed, setZoom] = useState<number | null>(null);
   const zoom = Math.max(zoomed ?? fitPx, fitPx) || 8;
-  const getPosition = useCallback(() => clock.getSnapshot(), [clock]);
-  const {
-    addClip,
-    addTrack,
-    canRedo,
-    canUndo,
-    changeAutomation,
-    changeClip,
-    changeMix,
-    clearSelection,
-    clearTimeSelection,
-    clipAction,
-    clips,
-    commitClip,
-    consolidateTime,
-    copying,
-    copyOf,
-    crop,
-    editClip,
-    fadeTimeSelection,
-    duplicateSelection,
-    duplicateTrack,
-    folded,
-    heights,
-    insertTimeSpan,
-    paste,
-    toggleFold,
-    toggleSelected,
-    mixOf,
-    redo,
-    moveTrack,
-    removeClip,
-    removeTimeSpan,
-    removeTrack,
-    renameClip,
-    renameTrack,
-    setFadeShape,
-    rescale,
-    resizeTrack,
-    selectAll,
-    selectClip,
-    selectClips,
-    selectedIds,
-    selectedTracks,
-    selection,
-    selectTrack,
-    settleClipEdit,
-    splitAtCursor,
-    tracks,
-    undo,
-  } = useArrangement({
-    colors: TRACK_COLORS.length,
-    duration,
-    getPosition,
-    initialClips: CLIPS,
-    initialTracks: TRACKS,
-    splitStep: bar / 4,
-  });
+  // A change of tempo, or the undo of one, changes the bar: the playhead and the zoom keep their places in it.
+  const lastBar = useRef(bar);
+  useLayoutEffect(() => {
+    if (lastBar.current === bar) {
+      return;
+    }
+    const ratio = bar / lastBar.current;
+    lastBar.current = bar;
+    clock.set(clock.getSnapshot() * ratio);
+    setZoom((current) => (current === null ? null : current / ratio));
+  }, [bar, clock]);
   const handleAddTrack = useCallback(() => addTrack(), [addTrack]);
   const handleAddMidiTrack = useCallback(
     () => addTrack(undefined, "midi"),
@@ -849,22 +876,6 @@ export default function BlockTimeline() {
     setPlaying(false);
     clock.set(0);
   }, [clock, setPlaying]);
-  // A tempo change keeps the musical positions: everything is rescaled to the new bar.
-  const changeTempo = useCallback(
-    (next: Tempo) => {
-      // New bar over old: a clip three bars long stays three bars long.
-      const ratio = secondsPerBar(next) / secondsPerBar(tempo);
-      rescale(ratio);
-      setLoop(([start, end]) => [start * ratio, end * ratio]);
-      setSignatures((all) =>
-        all.map((change) => ({ ...change, at: change.at * ratio }))
-      );
-      setZoom((current) => (current === null ? null : current / ratio));
-      clock.set(clock.getSnapshot() * ratio);
-      setTempo(next);
-    },
-    [clock, rescale, tempo]
-  );
   // The zoom as a share of the fitted view: 100% shows everything.
   const zoomRatio = fitPx > 0 ? zoom / fitPx : 1;
   const maxRatio = fitPx > 0 ? MAX_ZOOM / fitPx : 1;
@@ -917,29 +928,11 @@ export default function BlockTimeline() {
     },
     [clearSelection, multi, selectTrack]
   );
-  const addLocator = useCallback(() => {
-    const at = clock.getSnapshot();
-    setLocators((all) =>
-      all.some((locator) => locator.at === at)
-        ? all
-        : [...all, { at, name: `Locator ${all.length + 1}` }]
-    );
-  }, [clock]);
+  const addLocator = useCallback(
+    () => addLocatorAt(clock.getSnapshot()),
+    [addLocatorAt, clock]
+  );
   const jumpToLocator = useCallback((at: number) => clock.set(at), [clock]);
-  const removeLocator = useCallback(
-    (at: number) =>
-      setLocators((all) => all.filter((locator) => locator.at !== at)),
-    []
-  );
-  const renameLocator = useCallback(
-    (at: number, name: string) =>
-      setLocators((all) =>
-        all.map((locator) =>
-          locator.at === at ? { ...locator, name } : locator
-        )
-      ),
-    []
-  );
 
   /** Puts the loop around the selected clip, or around the clips of the selected track. */
   const loopSelection = useCallback(() => {
@@ -950,12 +943,14 @@ export default function BlockTimeline() {
     if (chosen.length === 0) {
       return;
     }
-    setLoop([
-      Math.min(...chosen.map((clip) => clip.value.start)),
-      Math.max(...chosen.map((clip) => clip.value.start + clip.value.length)),
-    ]);
-    setLooping(true);
-  }, [clips, selectedIds, selectedTracks]);
+    setLoop({
+      on: true,
+      range: [
+        Math.min(...chosen.map((clip) => clip.value.start)),
+        Math.max(...chosen.map((clip) => clip.value.start + clip.value.length)),
+      ],
+    });
+  }, [clips, selectedIds, selectedTracks, setLoop]);
 
   /** M adds a locator, Alt + arrows jump to the next locator or clip edge; returns whether the key was one of these. */
   const handleLocatorKey = useCallback(
@@ -1288,8 +1283,7 @@ export default function BlockTimeline() {
       j: time ? () => consolidateTime(time) : undefined,
       l: time
         ? () => {
-            setLoop([...time.range]);
-            setLooping(true);
+            setLoop({ on: true, range: [...time.range] });
           }
         : undefined,
       v: clipboard.current ? () => pasteClipboard(shift) : undefined,
@@ -1470,47 +1464,14 @@ export default function BlockTimeline() {
 
   /** Adds a signature change at the cursor, in the signature already in force there, and opens it to be typed. */
   const addSignature = useCallback(() => {
-    const at = clock.getSnapshot();
-    const [held] = signatures
-      .filter((change) => change.at <= at)
-      .sort((a, b) => b.at - a.at);
-    signatureCount.current += 1;
-    const id = `signature-${signatureCount.current}`;
-    setSignatures((all) => [
-      ...all.filter((change) => change.at !== at),
-      {
-        at,
-        beatUnit: held?.beatUnit ?? tempo.beatUnit,
-        beatsPerBar: held?.beatsPerBar ?? tempo.beatsPerBar,
-        id,
-      },
-    ]);
-    setEditingSignature(id);
-  }, [clock, signatures, tempo]);
-  const setSignature = useCallback(
-    (id: string, beatsPerBar: number, beatUnit: number) =>
-      setSignatures((all) =>
-        all.map((change) =>
-          change.id === id ? { ...change, beatUnit, beatsPerBar } : change
-        )
-      ),
-    []
-  );
-  const moveSignature = useCallback(
-    (id: string, to: number) =>
-      setSignatures((all) =>
-        all.map((change) =>
-          change.id === id
-            ? { ...change, at: Math.min(duration, Math.max(0, to)) }
-            : change
-        )
-      ),
-    [duration]
-  );
-  const removeSignature = useCallback(
-    (id: string) =>
-      setSignatures((all) => all.filter((change) => change.id !== id)),
-    []
+    const added = addSignatureAt(clock.getSnapshot());
+    if (added) {
+      setEditingSignature(added.id);
+    }
+  }, [addSignatureAt, clock]);
+  const changeLooping = useCallback(
+    (on: boolean) => setLoop({ on }),
+    [setLoop]
   );
 
   // A dragged clip or loop is pulled onto the edges of the other clips, the locators and the loop.
@@ -1746,12 +1707,12 @@ export default function BlockTimeline() {
             className="min-w-0 flex-1 flex-nowrap"
             looping={looping}
             metronome={metronome}
-            onLoopingChange={setLooping}
+            onLoopingChange={changeLooping}
             onMetronomeChange={setMetronome}
             onPlayPause={playPause}
             onRhythmChange={setRhythm}
             onStop={stop}
-            onTempoChange={changeTempo}
+            onTempoChange={setTempo}
             playing={playing}
             rhythm={rhythm}
             signatures={signatures}
@@ -2010,7 +1971,8 @@ export default function BlockTimeline() {
                     aria-label="Loop"
                     drawable
                     getAriaValueText={describe}
-                    onValueChange={setLoop}
+                    onValueChange={changeLoop}
+                    onValueCommitted={settleClipEdit}
                     value={loop}
                   >
                     <TimelineRangeHandle aria-label="Loop start" edge="start" />

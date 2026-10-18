@@ -1,8 +1,9 @@
 "use client";
 
 import type { Breakpoint } from "@audio-ui/core/envelope";
+import { secondsPerBar, type Tempo } from "@audio-ui/core/time";
 import type { FadeShape, Timeline as TimelinePrimitive } from "@audio-ui/react";
-import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import {
   type Arranged,
   type ArrangementTrack,
@@ -16,9 +17,13 @@ import {
 } from "@/registry-audio/bases/base/lib/arrangement";
 import {
   type ArrangementCommand,
+  type ArrangementLocator,
+  type ArrangementLoop,
+  type ArrangementSignature,
   apply,
   copyFrom,
   createArrangementState,
+  type Span,
 } from "@/registry-audio/bases/base/lib/arrangement-state";
 import { canRedo, canUndo } from "@/registry-audio/bases/base/lib/undo-history";
 
@@ -32,24 +37,29 @@ const NO_COPIES: Arranged[] = [];
 export interface UseArrangementOptions {
   /** How many colors a track can take: new tracks cycle through them. @default 5 */
   colors?: number;
+  /** The length of the timeline when it starts, in seconds: a change of tempo scales it from then on, and `setDuration` sets it. */
   duration: number;
   /** The height of a folded track, in px. @default 28 */
   foldedHeight?: number;
   /** The playback position, in the timeline's units: where a split cuts. */
   getPosition: () => number;
   initialClips?: Arranged[];
+  initialLocators?: ArrangementLocator[];
+  initialLoop?: ArrangementLoop;
+  initialSignatures?: ArrangementSignature[];
   initialTracks: ArrangementTrack[];
-  /** The shortest a split piece may be, in the timeline's units. */
-  splitStep: number;
+  /** The tempo and the time signature the timeline starts in. */
+  tempo: Tempo;
 }
 
 /**
  * The state of an arrangement of clips on tracks, with the operations on it:
  * selecting, moving a group, copying, laying a clip so it covers what is
  * under it, splitting, duplicating, deleting, adding and removing tracks, each
- * track's mix and height, and undo and redo over the tracks and the clips. The
- * state and its commands are `lib/arrangement-state`, and `lib/undo-history`
- * holds the steps; this keeps them in a component.
+ * track's mix and height, the tempo, the time signatures, the locators and the
+ * loop, and undo and redo over all of them. The state and its commands are
+ * `lib/arrangement-state`, and `lib/undo-history` holds the steps; this keeps
+ * them in a component.
  */
 export function useArrangement({
   colors = 5,
@@ -57,11 +67,23 @@ export function useArrangement({
   foldedHeight = 28,
   getPosition,
   initialClips = [],
+  initialLocators,
+  initialLoop,
+  initialSignatures,
   initialTracks,
-  splitStep,
+  tempo,
 }: UseArrangementOptions) {
   const [state, setState] = useState(() =>
-    createArrangementState({ colors, duration, initialClips, initialTracks })
+    createArrangementState({
+      colors,
+      duration,
+      initialClips,
+      initialLocators,
+      initialLoop,
+      initialSignatures,
+      initialTracks,
+      tempo,
+    })
   );
   // Read by handlers that run several times before a render: always the latest.
   const stateRef = useRef(state);
@@ -73,12 +95,10 @@ export function useArrangement({
     }
     return next;
   }, []);
-  // The length of the timeline is the host's: the state takes it as soon as it changes.
-  useLayoutEffect(() => {
-    dispatch({ type: "set-duration", duration });
-  }, [dispatch, duration]);
 
   const { doc, gesture, history, selection } = state;
+  // A split may leave no piece shorter than a sixteenth note of the bar.
+  const splitStep = secondsPerBar(doc.tempo) / 4;
   const selectedIds = selection?.clips ?? NO_IDS;
   const selectedTracks = selection?.tracks ?? NO_IDS;
 
@@ -209,7 +229,27 @@ export function useArrangement({
         dispatch({ type: "rename-clip", id, name }),
       renameTrack: (id: string, name: string) =>
         dispatch({ type: "rename-track", id, name }),
-      rescale: (ratio: number) => dispatch({ type: "rescale", ratio }),
+      addLocator: (at: number) => dispatch({ type: "add-locator", at }),
+      addSignature: (at: number) => {
+        const next = dispatch({ type: "add-signature", at });
+        // The one it added is the one at that position.
+        return next.doc.signatures.find((change) => change.at === at);
+      },
+      changeLoop: (range: Span) => dispatch({ type: "change-loop", range }),
+      moveSignature: (id: string, to: number) =>
+        dispatch({ type: "move-signature", id, to }),
+      removeLocator: (at: number) => dispatch({ type: "remove-locator", at }),
+      removeSignature: (id: string) =>
+        dispatch({ type: "remove-signature", id }),
+      renameLocator: (at: number, name: string) =>
+        dispatch({ type: "rename-locator", at, name }),
+      setDuration: (next: number) =>
+        dispatch({ type: "set-duration", duration: next }),
+      setLoop: (loop: Partial<ArrangementLoop>) =>
+        dispatch({ type: "set-loop", loop }),
+      setSignature: (id: string, beatsPerBar: number, beatUnit: number) =>
+        dispatch({ type: "set-signature", id, beatsPerBar, beatUnit }),
+      setTempo: (next: Tempo) => dispatch({ type: "set-tempo", tempo: next }),
       selectAll: () => dispatch({ type: "select-all" }),
       selectClip: (id: string, additive: boolean) =>
         dispatch({ type: "select-clip", id, additive }),
@@ -234,13 +274,18 @@ export function useArrangement({
     changeMix,
     clips: doc.clips,
     copying: gesture.copying ?? NO_COPIES,
+    duration: doc.duration,
     folded,
     heights: shownHeights,
+    locators: doc.locators,
+    loop: doc.loop,
     mixOf,
     resizeTrack,
     selectedIds,
     selectedTracks,
     selection,
+    signatures: doc.signatures,
+    tempo: doc.tempo,
     toggleFold,
     tracks: doc.tracks,
   };
