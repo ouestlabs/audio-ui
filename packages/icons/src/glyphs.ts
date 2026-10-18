@@ -14,10 +14,9 @@ export const knob: Glyph = [
 
 /** Clips on tracks. */
 export const tracks: Glyph = [
-  path("M4 7h9M9 12h11M6 17h8"),
-  rect(4, 5.5, 9, 3, 1, { backdrop: true }),
-  rect(9, 10.5, 11, 3, 1, { backdrop: true }),
-  rect(6, 15.5, 8, 3, 1, { backdrop: true }),
+  rect(3, 5, 10, 3.5, 1.5, { tint: true }),
+  rect(8, 10.25, 13, 3.5, 1.5, { tint: true }),
+  rect(5, 15.5, 9, 3.5, 1.5, { tint: true }),
 ];
 
 /** A unit of a rack, with its indicator. */
@@ -67,10 +66,10 @@ export const fader: Glyph = [
   rect(7, 10, 10, 5, 1.5, { tint: true }),
 ];
 
-/** A playhead over its line. */
+/** A playhead: its handle and its line. */
 export const playhead: Glyph = [
-  path("M12 8v12"),
-  path("M7 3h10l-5 5z", { tint: true }),
+  path("M7 3h10v7l-5 4-5-4z", { tint: true }),
+  path("M12 14v7"),
 ];
 
 /** An agent: a spark and its small one. */
@@ -107,8 +106,8 @@ export const lowshelf: Glyph = [path("M2 8h7c3 0 4 9 7 9h6")];
 export const highshelf: Glyph = [path("M2 17h8c3 0 4-9 7-9h5")];
 export const peak: Glyph = [path("M2 17h6c3 0 3-10 4-10s1 10 4 10h6")];
 
-/** What automation draws over a lane. */
-export const envelope: Glyph = [path("M2 17h4l5-10h4c3 0 4 10 7 10")];
+/** An envelope: attack, decay, sustain and release as one shape. */
+export const envelope: Glyph = [path("M3 19 8 5l4 6h5l4 8z", { tint: true })];
 
 /** Four tiles: a catalog. */
 export const grid: Glyph = [
@@ -198,18 +197,18 @@ export const midi: Glyph = [
   path("M7 12h.01M8.5 8h.01M12 6.5h.01M15.5 8h.01M17 12h.01", { knock: true }),
 ];
 
-/** Editors. */
+/** A row of steps, two of them lit. */
 export const sequencer: Glyph = [
-  rect(3, 6, 4, 4, 1, { tint: true }),
-  rect(10, 6, 4, 4, 1),
-  rect(17, 6, 4, 4, 1),
-  rect(3, 14, 4, 4, 1),
-  rect(10, 14, 4, 4, 1, { tint: true }),
-  rect(17, 14, 4, 4, 1),
+  rect(3, 8, 3, 8, 1, { tint: true }),
+  rect(8, 8, 3, 8, 1),
+  rect(13, 8, 3, 8, 1, { tint: true }),
+  rect(18, 8, 3, 8, 1),
 ];
+/** Notes of a melody, rising. */
 export const pianoroll: Glyph = [
-  rect(3, 4, 18, 16, 2, { tint: true }),
-  path("M6 9h5M10 13h6M8 16.5h4", { knock: true }),
+  rect(3, 15, 6, 3.5, 1.5, { tint: true }),
+  rect(9, 10, 6, 3.5, 1.5, { tint: true }),
+  rect(15, 5, 6, 3.5, 1.5, { tint: true }),
 ];
 
 /** Effects: a transfer curve, an echo, a hall, a clipped wave. */
@@ -257,17 +256,19 @@ export const vinyl: Glyph = [
 /** A clip with its waveform. */
 export const clip: Glyph = [
   rect(3, 7, 18, 10, 2, { tint: true }),
-  path("M7 12h.01M10 10v4M13 9v6M16 11v2", { knock: true }),
+  path("M6.5 12h2l1.5-3 3 6 1.5-3h3", { knock: true }),
 ];
 
-/** A line of automation, with its points. */
+/** A line of automation and its points. */
 export const automation: Glyph = [
-  rect(3, 5, 18, 14, 2, { tint: true }),
-  path("M6 15.5l4-4 3 2 5-5", { knock: true }),
-  circle(10, 11.5, 0.5, { knock: true }),
-  circle(13, 13.5, 0.5, { knock: true }),
-  circle(18, 8.5, 0.5, { knock: true }),
+  path("M3 17 9 9l5 5 7-9"),
+  circle(9, 9, 1.8, { tint: true }),
+  circle(14, 14, 1.8, { tint: true }),
+  circle(21, 5, 1.8, { tint: true }),
 ];
 
 /** A magnet: snap to the grid. */
-export const magnet: Glyph = [path("M6 4v8a6 6 0 0 0 12 0V4M6 8h4M14 8h4")];
+export const magnet: Glyph = [
+  path("M5 4v8a7 7 0 0 0 14 0V4h-4v8a3 3 0 0 1-6 0V4z", { tint: true }),
+  path("M5 8h4M15 8h4", { knock: true }),
+];
