@@ -104,8 +104,10 @@ export const lowshelf: Glyph = [path("M2 8h7c3 0 4 9 7 9h6")];
 export const highshelf: Glyph = [path("M2 17h8c3 0 4-9 7-9h5")];
 export const peak: Glyph = [path("M2 17h6c3 0 3-10 4-10s1 10 4 10h6")];
 
-/** An envelope: attack, decay, sustain and release as one shape. */
-export const envelope: Glyph = [path("M3 19 8 5l4 6h5l4 8z", { tint: true })];
+/** An envelope: attack, decay, sustain and release as one smooth line. */
+export const envelope: Glyph = [
+  path("M2 19C4 19 5 5 8 5c2 0 2 6 4 6h5c2 0 3 8 5 8"),
+];
 
 /** Four tiles: a catalog. */
 export const grid: Glyph = [
@@ -152,13 +154,15 @@ export const spectrum: Glyph = [
     "M2 18c1.5 0 2-5 3.5-5s1.5 3 3 3S10 4 12 4s1.5 10 3 10 1.5-4 3-4 1.5 8 4 8"
   ),
 ];
+/** An oscilloscope's trace, and the trigger marker at its edge. */
 export const scope: Glyph = [
-  rect(3, 5, 18, 14, 2, { tint: true }),
-  path("M6 12l2-3 3 6 3-6 2 3", { knock: true }),
+  path("M7 12c1.2-5 2.4-5 3.6 0s2.4 5 3.6 0 2.4-5 3.6 0 2.4 5 3.6 0"),
+  path("M2 9.5 5 12l-3 2.5z", { tint: true }),
 ];
+/** A curve with the point you drag on it. */
 export const plot: Glyph = [
-  rect(3, 4, 18, 16, 2, { tint: true }),
-  path("M6 16c3 0 3-8 6-8s3 8 6 8", { knock: true }),
+  path("M2 17c4 0 5-11 9-11s5 11 11 11"),
+  circle(11, 6, 2, { tint: true }),
 ];
 
 /** Transport. */
@@ -257,18 +261,18 @@ export const vinyl: Glyph = [
   path("M12 6a6 6 0 0 1 6 6", { knock: true }),
 ];
 
-/** A clip with its waveform. */
+/** A clip: its body and the strip with its name. */
 export const clip: Glyph = [
-  rect(3, 7, 18, 10, 2, { tint: true }),
-  path("M6.5 12h2l1.5-3 3 6 1.5-3h3", { knock: true }),
+  rect(3, 6, 18, 12, 2, { tint: true }),
+  path("M3 10h18", { knock: true }),
 ];
 
-/** A line of automation and its points. */
+/** An automation lane: flats and ramps between the points you set. */
 export const automation: Glyph = [
-  path("M3 17 9 9l5 5 7-9"),
-  circle(9, 9, 1.8, { tint: true }),
-  circle(14, 14, 1.8, { tint: true }),
-  circle(21, 5, 1.8, { tint: true }),
+  path("M2 17h4l5-9h3l5 7h3"),
+  circle(6, 17, 1.8, { tint: true }),
+  circle(11, 8, 1.8, { tint: true }),
+  circle(19, 15, 1.8, { tint: true }),
 ];
 
 /** A magnet: snap to the grid. */
