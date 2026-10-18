@@ -2202,6 +2202,7 @@ export default function BlockTimeline() {
                         onDuplicate={duplicateTrack}
                         onInsert={addTrack}
                         onMix={changeTrackMix}
+                        onMixCommit={settleClipEdit}
                         onRemove={removeTrack}
                         onRename={renameTrack}
                         onSelect={pickTrack}

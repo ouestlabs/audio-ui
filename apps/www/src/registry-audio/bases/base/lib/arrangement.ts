@@ -78,6 +78,8 @@ export interface ArrangementTrack {
   id: string;
   /** @default "audio" */
   kind?: TrackKind;
+  /** What its header sets: a track that has none plays at unity. Undo takes it back, and a duplicate of the track keeps it. */
+  mix?: Mix;
   name: string;
 }
 
@@ -99,6 +101,11 @@ export const UNITY_MIX: Mix = {
   pan: 0,
   soloed: false,
 };
+
+/** What a track's header shows: its mix, over unity, with the track's own color. */
+export function mixOf(track: ArrangementTrack): Mix {
+  return { ...UNITY_MIX, ...track.mix, color: track.color };
+}
 
 /**
  * How far a clip can be stretched on the timeline: `undefined` when it loops,
