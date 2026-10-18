@@ -26,6 +26,8 @@ describe("DEMO_SOURCES", () => {
     expect(Object.keys(DEMO_SOURCES).sort()).toEqual([
       "chord",
       "groove",
+      "hiphop",
+      "hiphopKick",
       "kick",
       "noise",
       "pulses",

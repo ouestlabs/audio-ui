@@ -1,11 +1,13 @@
 "use client";
 
 import type { DeviceContext } from "@audio-ui/core/device";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useDemoSource } from "@/registry-audio/bases/base/hooks/use-demo-source";
 import { usePlaySwitch } from "@/registry-audio/bases/base/hooks/use-play-switch";
 import {
   type DemoSourceName,
+  demoKey,
+  demoTempo,
   renderDemoSource,
 } from "@/registry-audio/bases/base/lib/demo-sound";
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
@@ -26,8 +28,6 @@ export interface DemoEngine<State> {
 
 export interface UseDeviceLoopOptions<State, Engine extends DemoEngine<State>> {
   /** Makes the engine for the first state. Called each time the demo starts. */
-  /** What the host knows, such as the tempo of the loop, given to the engine and to each update. */
-  context?: DeviceContext;
   create: (
     ctx: BaseAudioContext,
     state: State,
@@ -35,8 +35,8 @@ export interface UseDeviceLoopOptions<State, Engine extends DemoEngine<State>> {
   ) => Engine;
   /** Where the processed sound goes, such as the node of `useMasterBus`. */
   destination: AudioNode | null;
-  /** The sound that goes to the engine's `sidechain` input, when it has one. It is only listened to, never heard. */
-  key?: DemoSourceName;
+  /** Whether the engine's `sidechain` input is fed, as a gate's is: with the kick that goes with the sound that plays. It is only listened to, never heard. */
+  key?: boolean;
   /** The sound to process, unless the session has another chosen: one of `DEMO_SOURCES`. @default "groove" */
   source?: DemoSourceName;
   /** The state of the device, followed by the engine whoever changed it. */
@@ -48,12 +48,12 @@ export interface UseDeviceLoopOptions<State, Engine extends DemoEngine<State>> {
  * and out to a destination, for a block to show what a device does. It plays
  * while the play switch of its session is on (`usePlaySwitch`): the button is
  * the host's, so the device keeps none, and outside a session it is silent.
- * The engine follows `state` while it plays. Returns whether it plays, the
- * engine (to read what it measures, such as a gain reduction), and an
- * analyser of what comes out, for a spectrum. Stops on unmount.
+ * The engine follows `state` while it plays, and the tempo of the sound it
+ * plays, for a time parameter that syncs to it. Returns whether it plays, that
+ * tempo, the engine (to read what it measures, such as a gain reduction), and
+ * an analyser of what comes out, for a spectrum. Stops on unmount.
  */
 export function useDeviceLoop<State, Engine extends DemoEngine<State>>({
-  context,
   create,
   destination,
   key,
@@ -66,6 +66,8 @@ export function useDeviceLoop<State, Engine extends DemoEngine<State>>({
   const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
   const stateRef = useRef(state);
   stateRef.current = state;
+  const tempo = demoTempo(name);
+  const context = useMemo<DeviceContext>(() => ({ tempo }), [tempo]);
   const contextRef = useRef(context);
   contextRef.current = context;
   const createRef = useRef(create);
@@ -81,7 +83,9 @@ export function useDeviceLoop<State, Engine extends DemoEngine<State>>({
     ctx.resume();
     Promise.all([
       renderDemoSource(name, ctx.sampleRate),
-      key ? renderDemoSource(key, ctx.sampleRate) : Promise.resolve(null),
+      key
+        ? renderDemoSource(demoKey(name), ctx.sampleRate)
+        : Promise.resolve(null),
     ]).then(([buffer, keyBuffer]) => {
       if (cancelled) {
         return;
@@ -134,5 +138,5 @@ export function useDeviceLoop<State, Engine extends DemoEngine<State>>({
     engine?.update(state, context);
   }, [context, engine, state]);
 
-  return { analyser, engine, playing };
+  return { analyser, engine, playing, tempo };
 }

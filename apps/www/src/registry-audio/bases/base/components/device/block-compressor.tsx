@@ -14,7 +14,10 @@ import {
   type CompressorEngine,
   createCompressorEngine,
 } from "@/registry-audio/bases/base/lib/compressor-engine";
-import { renderDemoSource } from "@/registry-audio/bases/base/lib/demo-sound";
+import {
+  demoKey,
+  renderDemoSource,
+} from "@/registry-audio/bases/base/lib/demo-sound";
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 const SIGNAL_GAIN = 0.8;
@@ -54,7 +57,7 @@ export default function BlockCompressor() {
     let stop = () => undefined;
     const buffers = Promise.all([
       renderDemoSource(name, ctx.sampleRate),
-      keyed ? renderDemoSource("kick", ctx.sampleRate) : null,
+      keyed ? renderDemoSource(demoKey(name), ctx.sampleRate) : null,
     ]);
     buffers.then(([signal, key]) => {
       if (cancelled) {

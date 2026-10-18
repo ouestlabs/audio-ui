@@ -1,3 +1,4 @@
+import type { Tempo } from "@audio-ui/core/time";
 import {
   triggerHihat,
   triggerKick,
@@ -299,12 +300,13 @@ function drawGroove(ctx: BaseAudioContext, out: AudioNode) {
   });
 }
 
-/** Draws a loop, then folds what rings past its end into its start. */
+/** Draws a loop of `seconds`, then folds what rings past its end into its start. */
 async function drawLoop(
   sampleRate: number,
+  seconds: number,
   draw: (ctx: BaseAudioContext, mix: AudioNode) => void
 ) {
-  const loop = Math.round(sampleRate * LOOP_SECONDS);
+  const loop = Math.round(sampleRate * seconds);
   const ctx = new OfflineAudioContext(
     2,
     loop + Math.round(sampleRate * TAIL_SECONDS),
@@ -342,7 +344,7 @@ export function renderDemoLoop(sampleRate: number): Promise<AudioBuffer> {
   if (cached) {
     return cached;
   }
-  const buffer = drawLoop(sampleRate, drawGroove);
+  const buffer = drawLoop(sampleRate, LOOP_SECONDS, drawGroove);
   rendered.set(sampleRate, buffer);
   return buffer;
 }
@@ -358,7 +360,7 @@ export function renderKickLoop(sampleRate: number): Promise<AudioBuffer> {
   if (cached) {
     return cached;
   }
-  const buffer = drawLoop(sampleRate, drawKicks);
+  const buffer = drawLoop(sampleRate, LOOP_SECONDS, drawKicks);
   keyed.set(sampleRate, buffer);
   return buffer;
 }
@@ -564,11 +566,481 @@ export function pulses(ctx: BaseAudioContext, level = 1): AudioBuffer {
   return buffer;
 }
 
+/*
+ * The hip-hop scene: dark trap in half-time at 140 BPM, straight on the grid
+ * and sparse. One clap on the third beat of each bar, a short kick that leaves
+ * the 808 room, hats on straight eighths with a skip and two rolls, and an 808
+ * driven hard over a clean sub. Over it a haunting piano in F minor,
+ * its notes a semitone apart for the tension, a few ambient bells and a slow
+ * pad, with a lot of room left between them.
+ */
+
+const HIPHOP_BPM = 140;
+/** The tempo of the hip-hop scene: what a delay synced to it echoes on. */
+export const HIPHOP_TEMPO: Tempo = {
+  beatsPerBar: 4,
+  beatUnit: 4,
+  bpm: HIPHOP_BPM,
+};
+const HIPHOP_STEP_SECONDS = 60 / HIPHOP_BPM / 4;
+const HIPHOP_LOOP_SECONDS = (8 * 60) / HIPHOP_BPM;
+const HIPHOP_TRIM = 0.4;
+
+/** The moment of a sixteenth step of the hip-hop scene: straight, since trap does not swing. */
+const hiphopTimeOf = (step: number) => step * HIPHOP_STEP_SECONDS;
+
+/** Few and short: on the one, then where the 808 moves. */
+const HIPHOP_KICKS: Hit[] = [
+  [0, 1],
+  [10, 0.85],
+  [16, 1],
+  [22, 0.65],
+  [26, 0.85],
+];
+/** The clap lands on the third beat of each bar: half-time. */
+const HIPHOP_CLAPS: Hit[] = [
+  [8, 1],
+  [24, 1],
+];
+/** A snare that climbs into the end of the loop, so the turn has a lift. */
+const HIPHOP_RISE: Hit[] = [
+  [28, 0.25],
+  [29, 0.35],
+  [30, 0.5],
+  [31, 0.7],
+];
+/** A hat: where it falls (a fraction of a step for a roll), how hard, and how far up in semitones. */
+type HipHopHat = [step: number, velocity: number, tune: number];
+/** Where the straight eighths leave room: for the two rolls, and for the snare that climbs. */
+const HIPHOP_HAT_GAPS = new Set([14, 18, 28, 30]);
+const HIPHOP_HATS: HipHopHat[] = [
+  // Straight eighths, the ones on the beat harder than the ones between.
+  ...Array.from(
+    { length: 16 },
+    (_, index): HipHopHat => [index * 2, index % 2 === 0 ? 0.8 : 0.5, 0]
+  ).filter(([step]) => !HIPHOP_HAT_GAPS.has(step)),
+  // A soft sixteenth just ahead of a beat: the skip.
+  [5, 0.3, 0],
+  [13, 0.3, 0],
+  [21, 0.3, 0],
+  // A triplet roll at the end of the first bar, and a thirty-second roll early in the second, each hit a little harder and higher than the last.
+  [14, 0.35, 0],
+  [14 + 1 / 3, 0.5, 1],
+  [14 + 2 / 3, 0.7, 2],
+  [18, 0.3, 0],
+  [18.25, 0.4, 1],
+  [18.5, 0.5, 2],
+  [18.75, 0.65, 3],
+];
+const HIPHOP_OPEN_HATS: Hit[] = [
+  [15, 0.5],
+  [23, 0.45],
+];
+const HIPHOP_KICK_LEVEL = 0.75;
+const HIPHOP_CLAP_LEVEL = 0.45;
+const HIPHOP_SNARE_LEVEL = 0.35;
+const HIPHOP_HAT_LEVEL = 0.65;
+const HIPHOP_HAT_PAN = 0.35;
+
+/** An 808: where it starts, how many steps it lasts, the pitch it starts on and the pitch it settles on, in hertz. */
+const HIPHOP_808: [step: number, steps: number, from: number, to: number][] = [
+  [0, 9, 43.65, 43.65],
+  [10, 6, 69.3, 69.3],
+  [16, 6, 43.65, 43.65],
+  [22, 4, 51.91, 51.91],
+  [26, 6, 65.41, 43.65],
+];
+const HIPHOP_808_LEVEL = 0.5;
+
+/** The piano's line, in F minor: the step, the pitch in hertz and how hard. Notes a semitone apart, E against F, B flat against C, are what makes it uneasy. */
+const HIPHOP_PIANO: [step: number, hertz: number, velocity: number][] = [
+  [0, 349.23, 0.8],
+  [4, 329.63, 0.55],
+  [6, 349.23, 0.7],
+  [10, 415.3, 0.6],
+  [16, 523.25, 0.75],
+  [20, 466.16, 0.5],
+  [22, 523.25, 0.65],
+  [26, 554.37, 0.6],
+];
+/** The first note of each bar again an octave down, to darken it. */
+const HIPHOP_PIANO_LOW: [step: number, hertz: number, velocity: number][] = [
+  [0, 174.61, 0.6],
+  [16, 261.63, 0.6],
+];
+const HIPHOP_PIANO_LEVEL = 0.09;
+const HIPHOP_PIANO_PAN = 0.2;
+
+/** A few high bells, far off: the step, the pitch in hertz and how hard. */
+const HIPHOP_BELLS: [step: number, hertz: number, velocity: number][] = [
+  [8, 1396.91, 0.6],
+  [14, 1046.5, 0.5],
+  [24, 1108.73, 0.6],
+];
+const HIPHOP_BELL_LEVEL = 0.035;
+const HIPHOP_BELL_PAN = 0.5;
+
+/** The pad of each bar, in hertz: F minor, then D flat major. */
+const HIPHOP_PAD_HZ = [
+  [174.61, 207.65, 261.63],
+  [138.59, 174.61, 207.65],
+];
+const HIPHOP_PAD_LEVEL = 0.03;
+
+/** A clip of a given drive: it gives a sine harmonics a small speaker can play, and makes a saw bite. */
+function clipCurve(drive: number) {
+  const curve = new Float32Array(2048);
+  for (let index = 0; index < curve.length; index += 1) {
+    const x = (index / (curve.length - 1)) * 2 - 1;
+    curve[index] = Math.tanh(x * drive) / Math.tanh(drive);
+  }
+  return curve;
+}
+const DRIVEN_CLIP = clipCurve(8);
+
+/**
+ * An 808: a sine that starts on `from` and slides to `to` in a tenth of a
+ * second. It goes two ways: a clean sub, low-passed so nothing above it is in
+ * the way, and the same note driven hard and high-passed, which is the bite.
+ */
+function sub808(
+  ctx: BaseAudioContext,
+  destination: AudioNode,
+  time: number,
+  from: number,
+  to: number,
+  seconds: number
+) {
+  const oscillator = ctx.createOscillator();
+  const gain = ctx.createGain();
+  const sub = ctx.createBiquadFilter();
+  const clip = ctx.createWaveShaper();
+  const bite = ctx.createBiquadFilter();
+  const top = ctx.createBiquadFilter();
+  const biteLevel = ctx.createGain();
+  oscillator.type = "sine";
+  oscillator.frequency.setValueAtTime(from, time);
+  if (from !== to) {
+    oscillator.frequency.exponentialRampToValueAtTime(to, time + 0.1);
+  }
+  gain.gain.setValueAtTime(SILENCE_FLOOR, time);
+  gain.gain.linearRampToValueAtTime(HIPHOP_808_LEVEL, time + 0.005);
+  gain.gain.exponentialRampToValueAtTime(HIPHOP_808_LEVEL * 0.5, time + 0.4);
+  gain.gain.exponentialRampToValueAtTime(SILENCE_FLOOR, time + seconds);
+  sub.type = "lowpass";
+  sub.frequency.value = 160;
+  clip.curve = DRIVEN_CLIP;
+  bite.type = "highpass";
+  bite.frequency.value = 110;
+  top.type = "lowpass";
+  top.frequency.value = 5000;
+  biteLevel.gain.value = 0.35;
+  oscillator.connect(gain);
+  gain.connect(sub).connect(destination);
+  gain
+    .connect(clip)
+    .connect(bite)
+    .connect(top)
+    .connect(biteLevel)
+    .connect(destination);
+  oscillator.start(time);
+  oscillator.stop(time + seconds + 0.05);
+}
+
+/** Noise from a fixed sequence, so a clap or a click is the same each time. */
+function noiseBuffer(ctx: BaseAudioContext, seconds: number, seed: number) {
+  const random = seededRandom(seed);
+  const length = Math.round(ctx.sampleRate * seconds);
+  const buffer = ctx.createBuffer(1, length, ctx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let index = 0; index < length; index += 1) {
+    data[index] = random() * 2 - 1;
+  }
+  return buffer;
+}
+
+/** A clap: four short bursts of band-passed noise a hair apart, the last one longer, which is what makes it a hand and not a snare. */
+function clap(
+  ctx: BaseAudioContext,
+  destination: AudioNode,
+  time: number,
+  level: number
+) {
+  const burstSeconds = 0.012;
+  for (const index of [0, 1, 2, 3]) {
+    const source = ctx.createBufferSource();
+    const filter = ctx.createBiquadFilter();
+    const gain = ctx.createGain();
+    const start = time + index * burstSeconds;
+    const decay = index === 3 ? 0.14 : 0.03;
+    source.buffer = noiseBuffer(ctx, decay + 0.05, 50 + index);
+    filter.type = "bandpass";
+    filter.frequency.value = 1500;
+    filter.Q.value = 1.2;
+    gain.gain.setValueAtTime(level, start);
+    gain.gain.exponentialRampToValueAtTime(SILENCE_FLOOR, start + decay);
+    source.connect(filter).connect(gain).connect(destination);
+    source.start(start);
+    source.stop(start + decay + 0.05);
+  }
+}
+
+/** A bell: a sine with two inharmonic partials above it, which die faster, so it rings rather than sings. */
+function bell(
+  ctx: BaseAudioContext,
+  destination: AudioNode,
+  time: number,
+  hertz: number,
+  level: number,
+  pan: number
+) {
+  const panner = ctx.createStereoPanner();
+  panner.pan.value = pan;
+  panner.connect(destination);
+  const partials: [ratio: number, share: number, seconds: number][] = [
+    [1, 1, 1.4],
+    [2.76, 0.35, 0.5],
+    [5.4, 0.12, 0.2],
+  ];
+  for (const [ratio, share, seconds] of partials) {
+    const oscillator = ctx.createOscillator();
+    const gain = ctx.createGain();
+    oscillator.type = "sine";
+    oscillator.frequency.value = hertz * ratio;
+    gain.gain.setValueAtTime(level * share, time);
+    gain.gain.exponentialRampToValueAtTime(SILENCE_FLOOR, time + seconds);
+    oscillator.connect(gain).connect(panner);
+    oscillator.start(time);
+    oscillator.stop(time + seconds);
+  }
+}
+
+/** A piano note, dark: a few sine partials, each a touch sharp of its harmonic as a string is, the higher ones dying faster, a soft click of felt at the strike, through a low-pass that takes the brightness off. */
+function pianoNote(
+  ctx: BaseAudioContext,
+  destination: AudioNode,
+  time: number,
+  hertz: number,
+  level: number,
+  pan: number
+) {
+  const tone = ctx.createBiquadFilter();
+  const panner = ctx.createStereoPanner();
+  tone.type = "lowpass";
+  tone.frequency.value = 2600;
+  panner.pan.value = pan;
+  tone.connect(panner).connect(destination);
+  const partials: [ratio: number, share: number, seconds: number][] = [
+    [1, 1, 2.2],
+    [2, 0.5, 1.4],
+    [3, 0.28, 0.9],
+    [4, 0.14, 0.6],
+    [5, 0.07, 0.4],
+  ];
+  for (const [ratio, share, seconds] of partials) {
+    const oscillator = ctx.createOscillator();
+    const gain = ctx.createGain();
+    oscillator.type = "sine";
+    oscillator.frequency.value = hertz * ratio * (1 + 0.0004 * ratio * ratio);
+    gain.gain.setValueAtTime(SILENCE_FLOOR, time);
+    gain.gain.linearRampToValueAtTime(level * share, time + 0.003);
+    gain.gain.exponentialRampToValueAtTime(SILENCE_FLOOR, time + seconds);
+    oscillator.connect(gain).connect(tone);
+    oscillator.start(time);
+    oscillator.stop(time + seconds);
+  }
+  const felt = ctx.createBufferSource();
+  const feltFilter = ctx.createBiquadFilter();
+  const feltGain = ctx.createGain();
+  felt.buffer = noiseBuffer(ctx, 0.03, 90);
+  feltFilter.type = "bandpass";
+  feltFilter.frequency.value = 1800;
+  feltGain.gain.setValueAtTime(level * 0.15, time);
+  feltGain.gain.exponentialRampToValueAtTime(SILENCE_FLOOR, time + 0.012);
+  felt.connect(feltFilter).connect(feltGain).connect(tone);
+  felt.start(time);
+  felt.stop(time + 0.03);
+}
+
+/** A pad: each note of the chord twice, a few cents apart, one on each side, as saws through a low-pass that keeps only the dark. It swells in slowly and lets go before the next. */
+function padChord(
+  ctx: BaseAudioContext,
+  destination: AudioNode,
+  time: number,
+  hertzList: number[],
+  seconds: number,
+  level: number
+) {
+  const tone = ctx.createBiquadFilter();
+  const gain = ctx.createGain();
+  tone.type = "lowpass";
+  tone.frequency.value = 650;
+  tone.Q.value = 0.7;
+  gain.gain.setValueAtTime(SILENCE_FLOOR, time);
+  gain.gain.linearRampToValueAtTime(level, time + 0.8);
+  gain.gain.setValueAtTime(level, time + seconds - 0.8);
+  gain.gain.exponentialRampToValueAtTime(SILENCE_FLOOR, time + seconds);
+  gain.connect(tone).connect(destination);
+  for (const hertz of hertzList) {
+    for (const [cents, pan] of [
+      [-9, -0.6],
+      [9, 0.6],
+    ] as const) {
+      const oscillator = ctx.createOscillator();
+      const panner = ctx.createStereoPanner();
+      oscillator.type = "sawtooth";
+      oscillator.frequency.value = hertz;
+      oscillator.detune.value = cents;
+      panner.pan.value = pan;
+      oscillator.connect(panner).connect(gain);
+      oscillator.start(time);
+      oscillator.stop(time + seconds);
+    }
+  }
+}
+
+/** The kicks of the hip-hop scene: the same each time, for the loop and for the key that follows it. */
+function drawHipHopKicks(ctx: BaseAudioContext, mix: AudioNode) {
+  const random = seededRandom(31);
+  for (const [step, velocity] of HIPHOP_KICKS) {
+    const time = Math.max(0, hiphopTimeOf(step) + (random() - 0.5) * 0.004);
+    triggerKick(ctx, bus(ctx, mix, HIPHOP_KICK_LEVEL * velocity), time, {
+      decay: 0.18,
+      tune: 2,
+    });
+  }
+}
+
+/** What the drums, the 808, the piano, the bells and the pad play, over two bars. */
+function drawHipHop(ctx: BaseAudioContext, out: AudioNode) {
+  const random = seededRandom(37);
+  const mix = ctx.createGain();
+  mix.gain.value = HIPHOP_TRIM;
+  mix.connect(out);
+  drawHipHopKicks(ctx, mix);
+  for (const [step, velocity] of HIPHOP_CLAPS) {
+    clap(ctx, mix, hiphopTimeOf(step), HIPHOP_CLAP_LEVEL * velocity);
+  }
+  for (const [step, velocity] of HIPHOP_RISE) {
+    triggerSnare(
+      ctx,
+      bus(ctx, mix, HIPHOP_SNARE_LEVEL * velocity),
+      hiphopTimeOf(step),
+      { tune: 4 }
+    );
+  }
+  for (const [step, velocity, tune] of HIPHOP_HATS) {
+    const time = hiphopTimeOf(step) + (random() - 0.5) * 0.006;
+    const level = HIPHOP_HAT_LEVEL * velocity * (0.9 + 0.2 * random());
+    triggerHihat(ctx, bus(ctx, mix, level, HIPHOP_HAT_PAN), time, {
+      decay: 0.04,
+      tune,
+    });
+  }
+  for (const [step, velocity] of HIPHOP_OPEN_HATS) {
+    triggerHihat(
+      ctx,
+      bus(ctx, mix, HIPHOP_HAT_LEVEL * velocity, HIPHOP_HAT_PAN),
+      hiphopTimeOf(step),
+      { decay: 0.25 }
+    );
+  }
+  for (const [step, steps, from, to] of HIPHOP_808) {
+    sub808(
+      ctx,
+      mix,
+      hiphopTimeOf(step),
+      from,
+      to,
+      steps * HIPHOP_STEP_SECONDS + 0.15
+    );
+  }
+  HIPHOP_PIANO.forEach(([step, hertz, velocity], index) => {
+    pianoNote(
+      ctx,
+      mix,
+      hiphopTimeOf(step),
+      hertz,
+      HIPHOP_PIANO_LEVEL * velocity,
+      index % 2 === 0 ? -HIPHOP_PIANO_PAN : HIPHOP_PIANO_PAN
+    );
+  });
+  for (const [step, hertz, velocity] of HIPHOP_PIANO_LOW) {
+    pianoNote(
+      ctx,
+      mix,
+      hiphopTimeOf(step),
+      hertz,
+      HIPHOP_PIANO_LEVEL * velocity,
+      0
+    );
+  }
+  HIPHOP_BELLS.forEach(([step, hertz, velocity], index) => {
+    bell(
+      ctx,
+      mix,
+      hiphopTimeOf(step),
+      hertz,
+      HIPHOP_BELL_LEVEL * velocity,
+      index % 2 === 0 ? -HIPHOP_BELL_PAN : HIPHOP_BELL_PAN
+    );
+  });
+  HIPHOP_PAD_HZ.forEach((chord, bar) => {
+    padChord(
+      ctx,
+      mix,
+      hiphopTimeOf(bar * 16),
+      chord,
+      16 * HIPHOP_STEP_SECONDS + 0.8,
+      HIPHOP_PAD_LEVEL
+    );
+  });
+}
+
+const hiphopped = new Map<number, Promise<AudioBuffer>>();
+
+/**
+ * Dark trap hip-hop in half-time at 140 BPM, two bars, straight on the grid and
+ * sparse: one clap on the third beat of each bar, a short kick, hats that run
+ * on the sixteenths and roll in two places, an 808 driven hard over a clean
+ * sub, a haunting piano in F minor with notes a semitone apart, a few ambient
+ * bells and a slow pad. Weight in the low end and plenty on top, to hear what
+ * a filter, a limiter or a saturator does.
+ */
+export function renderHipHopLoop(sampleRate: number): Promise<AudioBuffer> {
+  const cached = hiphopped.get(sampleRate);
+  if (cached) {
+    return cached;
+  }
+  const buffer = drawLoop(sampleRate, HIPHOP_LOOP_SECONDS, drawHipHop);
+  hiphopped.set(sampleRate, buffer);
+  return buffer;
+}
+
+const hiphopKeyed = new Map<number, Promise<AudioBuffer>>();
+
+/** The kick of the hip-hop scene on its own: the key a sidechain listens to, in step with `renderHipHopLoop`. */
+export function renderHipHopKick(sampleRate: number): Promise<AudioBuffer> {
+  const cached = hiphopKeyed.get(sampleRate);
+  if (cached) {
+    return cached;
+  }
+  const buffer = drawLoop(sampleRate, HIPHOP_LOOP_SECONDS, drawHipHopKicks);
+  hiphopKeyed.set(sampleRate, buffer);
+  return buffer;
+}
+
 /** A sound a preview can play: what it is called, what it is for, and how it is drawn for a sample rate. */
 export interface DemoSource {
   /** What to listen for, in a sentence. */
   about: string;
+  /** For a sound that is a key, not a sound to listen through: a gate or a ducker follows it. */
+  isKey?: boolean;
+  /** The name of the key that goes with the sound, when it is not `"kick"`: the one drawn on the same beats. */
+  key?: string;
   render: (sampleRate: number) => Promise<AudioBuffer>;
+  /** The tempo a device that follows one is read against, when the sound has its own. @default DEMO_TEMPO */
+  tempo?: Tempo;
   title: string;
 }
 
@@ -608,7 +1080,8 @@ export const DEMO_SOURCES = {
   },
   kick: {
     about:
-      "A kick on the beat and nothing else: the key that a gate opens on and a compressor ducks a chord by.",
+      "The kick of the groove on its own: the key that a gate opens on and a compressor ducks a chord by.",
+    isKey: true,
     render: renderKickLoop,
     title: "Kick",
   },
@@ -623,6 +1096,22 @@ export const DEMO_SOURCES = {
       "Noise bursts that start loud and fade, every other one quieter: a level that moves along a compressor's transfer curve.",
     render: drawn((ctx) => pulses(ctx)),
     title: "Pulses",
+  },
+  hiphop: {
+    about:
+      "Dark trap hip-hop in half-time at 140 BPM, straight on the grid and sparse: one clap on the third beat, a short kick, hats that roll, an 808 that bites over a clean sub, a haunting piano in F minor, a few ambient bells and a slow pad. To hear what a filter, a limiter or a saturator does.",
+    key: "hiphopKick",
+    render: renderHipHopLoop,
+    tempo: HIPHOP_TEMPO,
+    title: "Hip-hop",
+  },
+  hiphopKick: {
+    about:
+      "The kick of the hip-hop scene on its own: the key that goes with it, in step with its beats.",
+    isKey: true,
+    render: renderHipHopKick,
+    tempo: HIPHOP_TEMPO,
+    title: "Hip-hop kick",
   },
   voice: {
     about:
@@ -639,6 +1128,21 @@ export const DEMO_SOURCES = {
 } satisfies Record<string, DemoSource>;
 
 export type DemoSourceName = keyof typeof DEMO_SOURCES;
+
+/** The key that goes with a sound: a kick drawn on its own beats, so a gate opens on the kick of the scene it hears. */
+export function demoKey(name: DemoSourceName): DemoSourceName {
+  const source: DemoSource = DEMO_SOURCES[name];
+  const { key: keyName } = source;
+  return keyName !== undefined && keyName in DEMO_SOURCES
+    ? (keyName as DemoSourceName)
+    : "kick";
+}
+
+/** The tempo of a sound: what a delay synced to it echoes on. */
+export function demoTempo(name: DemoSourceName): Tempo {
+  const source: DemoSource = DEMO_SOURCES[name];
+  return source.tempo ?? DEMO_TEMPO;
+}
 
 /** The sound of a name, drawn for a sample rate and kept: the same buffer comes back each time. */
 export function renderDemoSource(name: DemoSourceName, sampleRate: number) {
