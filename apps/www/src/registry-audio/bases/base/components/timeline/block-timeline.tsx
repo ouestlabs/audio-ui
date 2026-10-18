@@ -14,6 +14,7 @@ import {
   gridLabel,
   type MetronomeRhythm,
   secondsPerBar,
+  type Tempo,
   TRIPLET_FACTOR,
 } from "@audio-ui/core/time";
 import { snapMove } from "@audio-ui/core/timeline";
@@ -602,19 +603,10 @@ export default function BlockTimeline() {
   );
   const {
     addClip,
-    addLocator: addLocatorAt,
-    addSignature: addSignatureAt,
-    changeLoop,
+    dispatch,
     duration,
     locators,
     loop: { on: looping, range: loop },
-    removeLocator,
-    removeSignature,
-    renameLocator,
-    moveSignature,
-    setLoop,
-    setSignature,
-    setTempo,
     signatures,
     tempo,
     addTrack,
@@ -956,8 +948,8 @@ export default function BlockTimeline() {
     [clearSelection, multi, selectTrack]
   );
   const addLocator = useCallback(
-    () => addLocatorAt(clock.getSnapshot()),
-    [addLocatorAt, clock]
+    () => dispatch({ type: "add-locator", at: clock.getSnapshot() }),
+    [clock, dispatch]
   );
   const jumpToLocator = useCallback((at: number) => clock.set(at), [clock]);
 
@@ -970,14 +962,19 @@ export default function BlockTimeline() {
     if (chosen.length === 0) {
       return;
     }
-    setLoop({
-      on: true,
-      range: [
-        Math.min(...chosen.map((clip) => clip.value.start)),
-        Math.max(...chosen.map((clip) => clip.value.start + clip.value.length)),
-      ],
+    dispatch({
+      type: "set-loop",
+      loop: {
+        on: true,
+        range: [
+          Math.min(...chosen.map((clip) => clip.value.start)),
+          Math.max(
+            ...chosen.map((clip) => clip.value.start + clip.value.length)
+          ),
+        ],
+      },
     });
-  }, [clips, selectedIds, selectedTracks, setLoop]);
+  }, [clips, dispatch, selectedIds, selectedTracks]);
 
   /** M adds a locator, Alt + arrows jump to the next locator or clip edge; returns whether the key was one of these. */
   const handleLocatorKey = useCallback(
@@ -1309,7 +1306,10 @@ export default function BlockTimeline() {
       j: time ? () => consolidateTime(time) : undefined,
       l: time
         ? () => {
-            setLoop({ on: true, range: [...time.range] });
+            dispatch({
+              type: "set-loop",
+              loop: { on: true, range: [...time.range] },
+            });
           }
         : undefined,
       v: clipboard.current ? () => pasteClipboard(shift) : undefined,
@@ -1490,14 +1490,48 @@ export default function BlockTimeline() {
 
   /** Adds a signature change at the cursor, in the signature already in force there, and opens it to be typed. */
   const addSignature = useCallback(() => {
-    const added = addSignatureAt(clock.getSnapshot());
+    const at = clock.getSnapshot();
+    const next = dispatch({ type: "add-signature", at });
+    const added = next.doc.signatures.find((change) => change.at === at);
     if (added) {
       setEditingSignature(added.id);
     }
-  }, [addSignatureAt, clock]);
+  }, [clock, dispatch]);
+  // What the time strips report, as the commands that change the arrangement.
+  const changeTempo = useCallback(
+    (next: Tempo) => dispatch({ type: "set-tempo", tempo: next }),
+    [dispatch]
+  );
   const changeLooping = useCallback(
-    (on: boolean) => setLoop({ on }),
-    [setLoop]
+    (on: boolean) => dispatch({ type: "set-loop", loop: { on } }),
+    [dispatch]
+  );
+  const changeLoop = useCallback(
+    (range: readonly [number, number]) =>
+      dispatch({ type: "change-loop", range }),
+    [dispatch]
+  );
+  const removeLocator = useCallback(
+    (at: number) => dispatch({ type: "remove-locator", at }),
+    [dispatch]
+  );
+  const renameLocator = useCallback(
+    (at: number, name: string) =>
+      dispatch({ type: "rename-locator", at, name }),
+    [dispatch]
+  );
+  const moveSignature = useCallback(
+    (id: string, to: number) => dispatch({ type: "move-signature", id, to }),
+    [dispatch]
+  );
+  const removeSignature = useCallback(
+    (id: string) => dispatch({ type: "remove-signature", id }),
+    [dispatch]
+  );
+  const setSignature = useCallback(
+    (id: string, beatsPerBar: number, beatUnit: number) =>
+      dispatch({ type: "set-signature", id, beatsPerBar, beatUnit }),
+    [dispatch]
   );
 
   // A dragged clip or loop is pulled onto the edges of the other clips, the locators and the loop.
@@ -1738,7 +1772,7 @@ export default function BlockTimeline() {
             onPlayPause={playPause}
             onRhythmChange={setRhythm}
             onStop={stop}
-            onTempoChange={setTempo}
+            onTempoChange={changeTempo}
             playing={playing}
             rhythm={rhythm}
             signatures={signatures}
