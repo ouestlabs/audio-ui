@@ -231,17 +231,15 @@ export const distortion: Glyph = [
   ),
 ];
 
-/** Channel strip buttons: a key, and the letter on it. */
+/** Muted: the wave goes flat. */
 export const mute: Glyph = [
-  rect(4, 4, 16, 16, 4, { tint: true }),
-  path("M7.5 16.5v-9l4.5 5.5 4.5-5.5v9", { knock: true }),
+  path("M2 12c1.5-6 3-6 4.5 0s3 6 4.5 0h2"),
+  path("M15 12h7"),
 ];
+/** Solo: one channel plays, the others are flat. */
 export const solo: Glyph = [
-  rect(4, 4, 16, 16, 4, { tint: true }),
-  path(
-    "M15.5 9c0-1.5-1.5-2-3.5-2s-3.5.7-3.5 2.2 1.5 2 3.5 2.8 3.5 1.2 3.5 2.8-1.5 2.2-3.5 2.2-3.5-.5-3.5-2",
-    { knock: true }
-  ),
+  path("M2 4h20M2 20h20"),
+  path("M2 12c1.5-3.5 3-3.5 4.5 0s3 3.5 4.5 0 3-3.5 4.5 0 3 3.5 4.5 0"),
 ];
 
 /** Two speakers, left and right. */
