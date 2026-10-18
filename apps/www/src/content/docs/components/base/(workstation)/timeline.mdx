@@ -7,7 +7,7 @@ base: base
 
 <ComponentPreview styleName="base-nova" name="timeline-clips-demo" />
 
-The base for an arrangement view, a clip editor or a piano roll. The preview is the timeline alone: a loop, a ruler and two tracks with a clip each. For the whole arrangement around it, with tracks, mixes, selection and undo, see the [Arrangement editor](/docs/components/base/arrangement-editor). The registry component wraps the `Timeline` primitive from `@audio-ui/react`. The timeline has no notion of tempo: its units are whatever you count in (seconds, beats, pulses or steps). Musical time comes from the `musical-time` lib.
+The base for an arrangement view, a clip editor or a piano roll. The preview is the timeline alone: a loop, a ruler and two tracks with clips. A clip let go over another covers it, as `coverClips` does (see Clips below): drop Fill inside Groove and Groove is cut in two. For the whole arrangement around it, with tracks, mixes, selection and undo, see the [Arrangement editor](/docs/components/base/arrangement-editor). The registry component wraps the `Timeline` primitive from `@audio-ui/react`. The timeline has no notion of tempo: its units are whatever you count in (seconds, beats, pulses or steps). Musical time comes from the `musical-time` lib.
 
 ## Overview
 
