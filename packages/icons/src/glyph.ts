@@ -3,8 +3,10 @@ export interface Shape {
   attrs: Record<string, number | string>;
   /** Drawn only in the duotone weight, as a tint without a stroke: what lines need to have a body. */
   backdrop?: true;
+  /** A detail inside a solid shape: the fill weight cuts it out of the shape. */
+  knock?: true;
   tag: "circle" | "path" | "rect";
-  /** A closed shape that takes the tint of the duotone weight. */
+  /** A closed shape that takes the tint of the duotone weight and is solid in the fill weight. */
   tint?: true;
 }
 
@@ -13,6 +15,7 @@ export type Glyph = readonly Shape[];
 
 interface Options {
   backdrop?: true;
+  knock?: true;
   tint?: true;
 }
 

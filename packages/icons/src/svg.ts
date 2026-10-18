@@ -1,10 +1,28 @@
+import { type DrawnNode, draw } from "./drawing.ts";
 import type { Glyph } from "./glyph.ts";
-import { type IconWeight, STROKE_WIDTH, TINT_OPACITY } from "./weight.ts";
+import type { IconWeight } from "./weight.ts";
 
-const attributes = (attrs: Record<string, number | string>) =>
-  Object.entries(attrs)
-    .map(([name, value]) => ` ${name}="${value}"`)
+const KEBAB = /[A-Z]/g;
+// A short fingerprint of the shapes, so the mask of an icon has a name of its own.
+const fingerprint = (glyph: Glyph) => {
+  let hash = 0;
+  for (const char of JSON.stringify(glyph)) {
+    hash = (hash * 31 + char.charCodeAt(0)) | 0;
+  }
+  return Math.abs(hash).toString(36);
+};
+
+const serialize = (drawn: DrawnNode): string => {
+  const attrs = Object.entries(drawn.attrs)
+    .map(
+      ([name, value]) =>
+        ` ${name.replace(KEBAB, (c) => `-${c.toLowerCase()}`)}="${value}"`
+    )
     .join("");
+  return drawn.children
+    ? `<${drawn.tag}${attrs}>${drawn.children.map(serialize).join("")}</${drawn.tag}>`
+    : `<${drawn.tag}${attrs}/>`;
+};
 
 /**
  * The glyph as an SVG file's text, to paste or to save: the same drawing the
@@ -14,18 +32,10 @@ export function toSvg(
   glyph: Glyph,
   { size = 24, weight = "regular" }: { size?: number; weight?: IconWeight } = {}
 ): string {
-  const duotone = weight === "duotone";
-  const tint = `fill="currentColor" fill-opacity="${TINT_OPACITY}"`;
-  const shapes = glyph
-    .map((shape) => {
-      if (shape.backdrop) {
-        return duotone
-          ? `<${shape.tag}${attributes(shape.attrs)} ${tint} stroke="none"/>`
-          : "";
-      }
-      const extra = duotone && shape.tint ? ` ${tint}` : "";
-      return `<${shape.tag}${attributes(shape.attrs)}${extra}/>`;
-    })
-    .join("");
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${STROKE_WIDTH[weight]}" stroke-linecap="round" stroke-linejoin="round">${shapes}</svg>`;
+  const { nodes, strokeWidth } = draw(
+    glyph,
+    weight,
+    `icon-${fingerprint(glyph)}`
+  );
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round">${nodes.map(serialize).join("")}</svg>`;
 }

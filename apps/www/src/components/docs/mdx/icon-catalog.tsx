@@ -19,6 +19,7 @@ const SIZES = [16, 24, 32] as const;
 const WEIGHT_LABELS: Record<IconWeight, string> = {
   bold: "Bold",
   duotone: "Duotone",
+  fill: "Fill",
   regular: "Regular",
 };
 const ARROWS = ["ArrowDown", "ArrowLeft", "ArrowRight", "ArrowUp"];
@@ -251,7 +252,7 @@ function Inspector({
           {entry.category} · <code>{entry.name}Icon</code>
         </p>
       </div>
-      <div className="flex gap-1 rounded-lg bg-site-muted p-1">
+      <div className="grid grid-cols-4 gap-1 rounded-lg bg-site-muted p-1">
         {WEIGHTS.map((item) => (
           <WeightPick
             active={item === weight}

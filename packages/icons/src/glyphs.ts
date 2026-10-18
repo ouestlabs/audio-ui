@@ -3,13 +3,13 @@ import { circle, type Glyph, path, rect } from "./glyph.ts";
 /** A metronome: the count before the first note. */
 export const metronome: Glyph = [
   path("M8.5 21 10.7 4h2.6l2.2 17z", { tint: true }),
-  path("M12 16h.01"),
+  path("M12 16h.01", { knock: true }),
 ];
 
 /** A knob with its mark. */
 export const knob: Glyph = [
   circle(12, 12, 8, { tint: true }),
-  path("M12 8h.01"),
+  path("M12 8h.01", { knock: true }),
 ];
 
 /** Clips on tracks. */
@@ -23,12 +23,12 @@ export const tracks: Glyph = [
 /** A unit of a rack, with its indicator. */
 export const rack: Glyph = [
   rect(3, 7, 18, 10, 2, { tint: true }),
-  path("M7.5 12h.01"),
+  path("M7.5 12h.01", { knock: true }),
 ];
 
 /** The bars of a waveform. */
 export const waveform: Glyph = [
-  path("M4 10v4M8 7v10M12 4v16M16 8v8M20 11v2"),
+  path("M4 10v4M8 7v10M12 4v16M16 8v8M20 11v2", { knock: true }),
   rect(3, 4, 18, 16, 3, { backdrop: true }),
 ];
 
@@ -37,16 +37,16 @@ export const tuningfork: Glyph = [
   path("M8.5 3v6.5a3.5 3.5 0 0 0 7 0V3M12 13v8"),
 ];
 
-/** A jack plug: connect it. */
+/** A jack plug: its cable, its body and its tip. */
 export const jack: Glyph = [
-  path("M12 3v4"),
-  rect(8, 7, 8, 13, 2, { tint: true }),
+  path("M2 12h5M15 12h7"),
+  rect(7, 8.5, 8, 7, 1.5, { tint: true }),
 ];
 
 /** A patchbay: a panel with its sockets. */
 export const patchbay: Glyph = [
   rect(3, 7, 18, 10, 2, { tint: true }),
-  path("M8 12h.01M12 12h.01M16 12h.01"),
+  path("M8 12h.01M12 12h.01M16 12h.01", { knock: true }),
 ];
 
 export const shapes: Glyph = [
@@ -88,7 +88,7 @@ export const bot: Glyph = [
   rect(4, 8, 16, 11, 3, { tint: true }),
   path("M12 8V5"),
   circle(12, 4, 1),
-  path("M9 13.5h.01M15 13.5h.01"),
+  path("M9 13.5h.01M15 13.5h.01", { knock: true }),
 ];
 
 /** The four shapes of an oscillator. */
@@ -128,34 +128,34 @@ export const faders: Glyph = [
 /** Controls: a pad that holds two values, a drum pad, a keyboard. */
 export const xypad: Glyph = [
   rect(3, 3, 18, 18, 2, { tint: true }),
-  path("M15.5 8.5h.01"),
+  path("M15.5 8.5h.01", { knock: true }),
 ];
 export const pad: Glyph = [
   rect(4, 4, 16, 16, 4, { tint: true }),
-  path("M8.5 15.5h7"),
+  path("M8.5 15.5h7", { knock: true }),
 ];
 export const piano: Glyph = [
   rect(3, 5, 18, 14, 1.5, { tint: true }),
-  rect(7.5, 5, 3, 8, 0.5),
-  rect(13.5, 5, 3, 8, 0.5),
-  path("M9 13v6M15 13v6"),
+  rect(7.5, 5, 3, 8, 0.5, { knock: true }),
+  rect(13.5, 5, 3, 8, 0.5, { knock: true }),
+  path("M9 13v6M15 13v6", { knock: true }),
 ];
 
 /** Displays: a level, a needle, a spectrum, a scope, a plot. */
 export const meter: Glyph = [
   rect(8, 3, 8, 18, 2, { tint: true }),
-  path("M12 17v-5"),
+  path("M12 17v-5", { knock: true }),
 ];
 export const gauge: Glyph = [
   path("M4 17a8 8 0 0 1 16 0z", { tint: true }),
-  path("M12 17l3.5-6.5"),
+  path("M12 17l3.5-6.5", { knock: true }),
 ];
 export const spectrum: Glyph = [
   path("M4 20v-7M8 20V8M12 20V4M16 20V10M20 20v-5"),
 ];
 export const scope: Glyph = [
   rect(3, 5, 18, 14, 2, { tint: true }),
-  path("M6 12l2-3 3 6 3-6 2 3"),
+  path("M6 12l2-3 3 6 3-6 2 3", { knock: true }),
 ];
 export const plot: Glyph = [path("M4 4v16h16"), path("M7 16c3-9 6-9 12-3")];
 
@@ -168,11 +168,12 @@ export const pause: Glyph = [
 export const stop: Glyph = [rect(6, 6, 12, 12, 2, { tint: true })];
 export const record: Glyph = [
   circle(12, 12, 8, { tint: true }),
-  circle(12, 12, 2.5),
+  circle(12, 12, 2.5, { knock: true }),
 ];
 export const loop: Glyph = [
-  rect(3, 7, 18, 10, 5, { tint: true }),
-  path("M14.5 4.5 17 7l-2.5 2.5"),
+  path(
+    "M12 12c-2-3-3-4-5-4a4 4 0 0 0 0 8c2 0 3-1 5-4s3-4 5-4a4 4 0 0 1 0 8c-2 0-3-1-5-4"
+  ),
 ];
 
 /** Signal in and out. */
@@ -182,8 +183,8 @@ export const mic: Glyph = [
 ];
 export const speaker: Glyph = [
   rect(5, 3, 14, 18, 2, { tint: true }),
-  circle(12, 14.5, 3.5),
-  path("M12 7h.01"),
+  circle(12, 14.5, 3.5, { knock: true }),
+  path("M12 7h.01", { knock: true }),
 ];
 export const headphones: Glyph = [
   path("M4 15v-3a8 8 0 0 1 16 0v3"),
@@ -192,7 +193,7 @@ export const headphones: Glyph = [
 ];
 export const midi: Glyph = [
   circle(12, 12, 9, { tint: true }),
-  path("M7 12h.01M8.5 8h.01M12 6.5h.01M15.5 8h.01M17 12h.01"),
+  path("M7 12h.01M8.5 8h.01M12 6.5h.01M15.5 8h.01M17 12h.01", { knock: true }),
 ];
 
 /** Editors. */
@@ -206,14 +207,13 @@ export const sequencer: Glyph = [
 ];
 export const pianoroll: Glyph = [
   rect(3, 4, 18, 16, 2, { tint: true }),
-  path("M6 9h5M10 13h6M8 16.5h4"),
+  path("M6 9h5M10 13h6M8 16.5h4", { knock: true }),
 ];
 
 /** Effects: a transfer curve, an echo, a room, a clipped wave. */
 export const compressor: Glyph = [path("M4 20l8-8c1.5-1.5 2.5-2 4-2h4")];
 export const delay: Glyph = [path("M5 6v12M10 8v8M15 10v4M20 11.5v1")];
 export const reverb: Glyph = [
-  path("M7 12h.01"),
-  path("M11 8a5 5 0 0 1 0 8M15 5a9 9 0 0 1 0 14"),
+  path("M3 12h3l1.5-7 2 14 2-10.5 1.5 6 1.5-3.5 1 1.5 1-.5h4"),
 ];
 export const distortion: Glyph = [path("M3 12l3-6h4l3 12h4l3-6")];

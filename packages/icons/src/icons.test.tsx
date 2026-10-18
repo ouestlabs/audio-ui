@@ -7,13 +7,15 @@ const components = Object.entries(icons).filter(
   ([name]) => name.endsWith("Icon") && name !== "createIcon"
 ) as [string, (props: icons.IconProps) => React.JSX.Element][];
 
+const STROKE = /stroke-width="([\d.]+)"/;
+
 describe("icons", () => {
   test("every glyph has an icon, and every icon a glyph", () => {
     expect(components.length).toBe(Object.keys(icons.glyphs).length);
   });
 
   for (const [name, Icon] of components) {
-    test(`${name} draws in the three weights`, () => {
+    test(`${name} draws in every weight`, () => {
       const regular = renderToStaticMarkup(<Icon />);
       const bold = renderToStaticMarkup(<Icon weight="bold" />);
       const _duotone = renderToStaticMarkup(<Icon weight="duotone" />);
@@ -62,12 +64,31 @@ describe("icons", () => {
         const draws = (source: string) =>
           [...source.matchAll(/ d="([^"]+)"/g)].map((match) => match[1]);
         expect(draws(text)).toEqual(draws(markup));
-        expect(text).toContain(
-          `stroke-width="${weight === "bold" ? 2.25 : 1.5}"`
-        );
+        const strokeOf = (source: string) => source.match(STROKE)?.[1];
+        expect(strokeOf(text)).toBe(strokeOf(markup));
+        expect(text.includes("<mask")).toBe(markup.includes("<mask"));
         expect(text.includes("fill-opacity")).toBe(
           markup.includes("fill-opacity")
         );
+      }
+    }
+  });
+
+  test("the fill weight is solid where a glyph has a body, and a bold line where it has none", () => {
+    const filled = renderToStaticMarkup(<icons.KnobIcon weight="fill" />);
+    expect(filled).toContain('fill="currentColor"');
+    // The knob's mark is cut out of the disc.
+    expect(filled).toContain("<mask");
+    const line = renderToStaticMarkup(<icons.SineIcon weight="fill" />);
+    expect(line).toContain('stroke-width="2.25"');
+    expect(line).not.toContain("<mask");
+  });
+
+  test("every knock detail of a solid glyph has a body to be cut from", () => {
+    for (const item of catalog) {
+      const glyph = icons.glyphs[item.glyph];
+      if (glyph.some((shape) => shape.knock)) {
+        expect(glyph.some((shape) => shape.tint || shape.backdrop)).toBe(true);
       }
     }
   });

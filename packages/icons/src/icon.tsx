@@ -1,12 +1,21 @@
-import { createElement, type SVGProps } from "react";
+import { createElement, type ReactNode, type SVGProps, useId } from "react";
+import { type DrawnNode, draw } from "./drawing.ts";
 import type { Glyph } from "./glyph.ts";
-import { type IconWeight, STROKE_WIDTH, TINT_OPACITY } from "./weight.ts";
+import type { IconWeight } from "./weight.ts";
 
 export interface IconProps extends Omit<SVGProps<SVGSVGElement>, "ref"> {
   /** The width and height of the icon. @default "1em" */
   size?: number | string;
   /** @default "regular" */
   weight?: IconWeight;
+}
+
+function toElement(drawn: DrawnNode, key: number): ReactNode {
+  return createElement(
+    drawn.tag,
+    { ...drawn.attrs, key },
+    drawn.children?.map(toElement)
+  );
 }
 
 /** An icon that draws `glyph` in the current text color. */
@@ -16,7 +25,8 @@ export function createIcon(glyph: Glyph, name: string) {
     weight = "regular",
     ...props
   }: IconProps) {
-    const duotone = weight === "duotone";
+    const id = `icon-${useId().replaceAll(":", "")}`;
+    const { nodes, strokeWidth } = draw(glyph, weight, id);
     return (
       <svg
         aria-hidden="true"
@@ -25,32 +35,13 @@ export function createIcon(glyph: Glyph, name: string) {
         stroke="currentColor"
         strokeLinecap="round"
         strokeLinejoin="round"
-        strokeWidth={STROKE_WIDTH[weight]}
+        strokeWidth={strokeWidth}
         viewBox="0 0 24 24"
         width={size}
         xmlns="http://www.w3.org/2000/svg"
         {...props}
       >
-        {glyph.map((shape) => {
-          if (shape.backdrop) {
-            return duotone
-              ? createElement(shape.tag, {
-                  ...shape.attrs,
-                  fill: "currentColor",
-                  fillOpacity: TINT_OPACITY,
-                  key: Object.values(shape.attrs).join(),
-                  stroke: "none",
-                })
-              : null;
-          }
-          return createElement(shape.tag, {
-            ...shape.attrs,
-            key: Object.values(shape.attrs).join(),
-            ...(duotone && shape.tint
-              ? { fill: "currentColor", fillOpacity: TINT_OPACITY }
-              : {}),
-          });
-        })}
+        {nodes.map(toElement)}
       </svg>
     );
   }

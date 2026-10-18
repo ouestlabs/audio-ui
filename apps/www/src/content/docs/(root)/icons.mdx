@@ -1,6 +1,6 @@
 ---
 title: Icons
-description: "The glyphs audio/ui draws for itself: one thin stroke on a 24 grid, in three weights, named for what they draw. Search them, pick a weight and a size, then copy the SVG."
+description: "The glyphs audio/ui draws for itself: one thin stroke on a 24 grid, in four weights, named for what they draw. Search them, pick a weight and a size, then copy the SVG."
 ---
 
 Audio has things a general icon set does not draw: a knob, a rack unit, the shape of a sawtooth, the response of a high shelf. These glyphs are audio/ui's own, drawn to sit together and to take the color of the text around them.
@@ -9,11 +9,12 @@ Audio has things a general icon set does not draw: a knob, a rack unit, the shap
 
 ## Weights
 
-Each glyph comes in three weights, picked with the `weight` prop of its icon:
+Each glyph comes in four weights, picked with the `weight` prop of its icon:
 
 - `regular` is the thin line, 1.5 on the 24 grid. It is the default.
 - `bold` is a thicker line, 2.25, for a small size or a state to show.
 - `duotone` is the line over a tint of the same color. Closed shapes take the tint; a glyph made of lines has a soft shape behind it.
+- `fill` is the solid shape, with its details cut out of it. A glyph made of lines only has no body to fill, so it is drawn as the bold line.
 
 ## Use them
 
@@ -29,4 +30,4 @@ import { KnobIcon } from "@audio-ui/icons";
 
 ## Draw one
 
-A new glyph is a few shapes on a 24 grid with a 2px margin, drawn with one stroke width and round ends. Mark a closed shape as tinted so it has a body in `duotone`. The package's tests draw every glyph in every weight, so a glyph that breaks one fails them.
+A new glyph is a few shapes on a 24 grid with a 2px margin, drawn with one stroke width and round ends. Mark a closed shape as tinted so it has a body in `duotone` and `fill`, and a detail inside it as a knock so `fill` cuts it out. The package's tests draw every glyph in every weight, so a glyph that breaks one fails them.
