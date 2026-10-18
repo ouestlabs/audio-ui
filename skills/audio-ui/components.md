@@ -49,7 +49,7 @@ The pieces of any audio interface: controls, keyboards and displays. Each takes 
 
 ## Workstation
 
-The surfaces of a DAW: the arrangement, the editors, the transport and the mixer. They are controlled and engine-agnostic: notes, clips and positions come in as values and live sources, edits go out through callbacks, so they work over audio/ui's Web Audio hooks or over an engine of your own (an AudioWorklet, WASM).
+The surfaces of a DAW: the arrangement, the editors, the piano roll's tools, the transport and the mixing. They are controlled and engine-agnostic: notes, clips and positions come in as values and live sources, edits go out through callbacks, so they work over audio/ui's Web Audio hooks or over an engine of your own (an AudioWorklet, WASM).
 
 ### Arrangement
 
@@ -65,20 +65,27 @@ The surfaces of a DAW: the arrangement, the editors, the transport and the mixer
 
 ### Editors
 
-The piano roll and the parts of `block-piano-roll`, each installed on its own.
+The piano roll and the sequencer, with what plays and undoes them.
 
 | Name | Registry import | Package import | Use it for |
 | --- | --- | --- | --- |
 | `piano-roll` | `PianoRoll`, `PianoRollKeys`, `PianoRollGrid`, `PianoRollVelocity`… from `@/components/audio-ui/piano-roll` | `@audio-ui/react/piano-roll` | A DAW-style note editor: grid, keyboard, a velocity or chance lane (a brush in draw mode), a `scale` it marks and folds onto, painted drawing, stretch handles on the selection, and keyboard editing |
-| `scale-menu` | `ScaleMenu`, `ScaleMenuTrigger`, `ScaleMenuContent`, `ScaleMenuToggle`, `ScaleMenuRoot`, `ScaleMenuName` from `@/components/audio-ui/scale-menu` | registry only | Pick a root and a scale and turn it on or off. Pass `enabled ? scale : null` to the roll's `scale`. Items of your own go in the content beside the parts |
-| `note-find` | `NoteFind`, `NoteFindForm` from `@/components/audio-ui/note-find` | registry only | Find notes by pitch, scale, state, velocity, length, chance or every few: `onFind` gets a query, `findNotes(notes, query)` from `@audio-ui/core/piano-roll` the ids to select |
-| `note-edit-menu` | `NoteEditMenu`, `NoteEditMenuTrigger`, `NoteEditMenuContent`, `NoteEditMenuItems`, `NoteEditMenuSub` from `@/components/audio-ui/note-edit-menu`; the commands, `TIME_EDITS`, `PITCH_EDITS`, `PLAY_EDITS`, `VELOCITY_EDITS`, `applyNoteEdit`, `canApplyNoteEdit`, `noteEditForKey`, from `@/lib/note-edits`, which it installs too | registry only | A menu of note commands (split, join, quantize, legato, time commands, fit to scale, chance, velocity) with their keys, as items or submenus, beside items of your own (import, export, clear). The commands are data, so keys or a toolbar run them too |
 | `sequencer` | `Sequencer` from `@/components/audio-ui/sequencer` | `@audio-ui/react/sequencer` | A step grid: press a step to flip it (on pointer down, so press it, don't `click`), drag across steps to paint a pattern, `Space` or `Enter` on the focused step. The playing step comes from a `source`, not state |
 | `midi-file` | `readMidiFile`, `writeMidiFile`, `downloadMidiFile`, `MIDI_FILE_ACCEPT` from `@/lib/midi-file` | registry only | Import a `.mid` file onto the roll's steps, with its tempo, and export or download the notes as one |
 | `use-piano-roll-playback` | `usePianoRollPlayback`, `meterOf` from `@/hooks/use-piano-roll-playback` | registry only | Play the notes you hold, through `use-synth-voices`: play, pause, stop, loop, metronome, seek, a `position` for the timeline, a `clock` for the transport, and the roll's `onNoteOn` and `onNoteOff` |
 | `use-undo-history` | `useUndoHistory` from `@/hooks/use-undo-history` | registry only | Undo and redo over any value you hold: `edit` for a command, `change` and `commit` for a drag that undoes as one |
 
-### Transport and mixer
+### Piano roll tools
+
+The parts of `block-piano-roll`, each installed on its own.
+
+| Name | Registry import | Package import | Use it for |
+| --- | --- | --- | --- |
+| `scale-menu` | `ScaleMenu`, `ScaleMenuTrigger`, `ScaleMenuContent`, `ScaleMenuToggle`, `ScaleMenuRoot`, `ScaleMenuName` from `@/components/audio-ui/scale-menu` | registry only | Pick a root and a scale and turn it on or off. Pass `enabled ? scale : null` to the roll's `scale`. Items of your own go in the content beside the parts |
+| `note-find` | `NoteFind`, `NoteFindForm` from `@/components/audio-ui/note-find` | registry only | Find notes by pitch, scale, state, velocity, length, chance or every few: `onFind` gets a query, `findNotes(notes, query)` from `@audio-ui/core/piano-roll` the ids to select |
+| `note-edit-menu` | `NoteEditMenu`, `NoteEditMenuTrigger`, `NoteEditMenuContent`, `NoteEditMenuItems`, `NoteEditMenuSub` from `@/components/audio-ui/note-edit-menu`; the commands, `TIME_EDITS`, `PITCH_EDITS`, `PLAY_EDITS`, `VELOCITY_EDITS`, `applyNoteEdit`, `canApplyNoteEdit`, `noteEditForKey`, from `@/lib/note-edits`, which it installs too | registry only | A menu of note commands (split, join, quantize, legato, time commands, fit to scale, chance, velocity) with their keys, as items or submenus, beside items of your own (import, export, clear). The commands are data, so keys or a toolbar run them too |
+
+### Transport
 
 | Name | Registry import | Package import | Use it for |
 | --- | --- | --- | --- |

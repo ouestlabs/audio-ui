@@ -97,7 +97,7 @@ MDX under `(root)/` (the Get started guides) and `components/base/`. Use the exi
 The docs, the catalog's `categoryGroups` and the shipped skill share one map, by what the reader builds. Each space is a folder of `components/base/` (the parentheses keep it out of the URL, so a page stays `/docs/components/base/<name>`), with its sections in its `meta.json`:
 
 - `(elements)/`: the pieces of any audio interface. Controls, keyboards and pads, displays.
-- `(workstation)/`: the surfaces of a DAW. Arrangement, editors, transport and mixer.
+- `(workstation)/`: the surfaces of a DAW. Arrangement, editors, the piano roll's tools, transport and mixing.
 - `(devices)/`: effects and instruments, like plugins. One page per device, by family.
 - `engine/` (beside `components/`, at `/docs/engine/<page>`): what makes the sound, the hooks and libs that serve several spaces, a page per concept (output, clock and time, synthesis, input, analysis). Its overview says how an engine of the user's own drives the components.
 
