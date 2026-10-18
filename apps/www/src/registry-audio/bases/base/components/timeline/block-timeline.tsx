@@ -902,12 +902,39 @@ export default function BlockTimeline() {
   // A press on a track's empty lane puts the cursor there (the lane does it) and picks the track, letting go of the clips; on the surface under the last track it lets go of everything, as nothing is there.
   // The shortcuts are caught on the panel, so a press on the lane, which takes no focus, hands it over.
   const panelRef = useRef<HTMLDivElement>(null);
-  // A press on any clip brings the closed clip panel back, even on a clip already picked, whose selection does not change.
-  const showClipView = useCallback((event: PointerEvent<HTMLDivElement>) => {
-    if ((event.target as HTMLElement).closest("[data-clip-id]")) {
+  // The closed clip panel comes back on a click of a clip's head, or a double-click on its body: not on a press, which may begin a move, a trim or a fade, and the panel takes room from the tracks under the pointer.
+  const pressRef = useRef<{ x: number; y: number } | null>(null);
+  const notePress = useCallback((event: PointerEvent<HTMLDivElement>) => {
+    pressRef.current = { x: event.clientX, y: event.clientY };
+  }, []);
+  const showClipView = useCallback((event: MouseEvent<HTMLDivElement>) => {
+    const press = pressRef.current;
+    // A click is a press that let go where it began, give or take a hand's shake.
+    const dragged =
+      press !== null &&
+      Math.hypot(event.clientX - press.x, event.clientY - press.y) > 4;
+    if (
+      !dragged &&
+      (event.target as HTMLElement).closest(
+        '[data-slot="timeline-clip-header"]'
+      )
+    ) {
       setClipViewOpen(true);
     }
   }, []);
+  const showClipViewOfBody = useCallback(
+    (event: MouseEvent<HTMLDivElement>) => {
+      const target = event.target as HTMLElement;
+      // On the head a double-click renames the clip.
+      if (
+        target.closest("[data-clip-id]") &&
+        !target.closest('[data-slot="timeline-clip-header"]')
+      ) {
+        setClipViewOpen(true);
+      }
+    },
+    []
+  );
   const focusPanel = useCallback(
     (event: PointerEvent<HTMLDivElement>) => {
       if (event.target === event.currentTarget && !event.shiftKey && !multi) {
@@ -1083,7 +1110,7 @@ export default function BlockTimeline() {
     [tracks]
   );
   /** Picking a clip lets go of the time selection. */
-  // Picking a clip shows it in the clip panel, as a DAW's detail view follows the selection.
+  // The clip panel shows the clip picked, as a DAW's detail view follows the selection, for as long as it is open; picking a clip does not open it.
   const [clipViewOpen, setClipViewOpen] = useState(true);
   // Collapsed to its title, the panel leaves the tracks the room, from clip to clip.
   const [clipViewCollapsed, setClipViewCollapsed] = useState(false);
@@ -1091,7 +1118,6 @@ export default function BlockTimeline() {
   const pickClip = useCallback(
     (id: string, additive: boolean) => {
       setTimeSelection(null);
-      setClipViewOpen(true);
       selectClip(id, additive);
     },
     [selectClip]
@@ -2211,11 +2237,13 @@ export default function BlockTimeline() {
                         )}
                         data-track={track.id}
                         gridStep={snapStep}
+                        onClick={showClipView}
                         onDoubleClick={
                           track.kind === "midi" ? addMidiClipAt : undefined
                         }
+                        onDoubleClickCapture={showClipViewOfBody}
                         onPointerDown={focusPanel}
-                        onPointerDownCapture={showClipView}
+                        onPointerDownCapture={notePress}
                         onSelectionChange={selectTime}
                         seekable
                       >
