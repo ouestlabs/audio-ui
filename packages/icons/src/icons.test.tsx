@@ -25,11 +25,11 @@ describe("icons", () => {
 
   test("the glyphs of the sidebar's groups have a body in the duotone weight", () => {
     for (const Icon of [
-      icons.StartIcon,
-      icons.ElementsIcon,
-      icons.WorkstationIcon,
-      icons.DevicesIcon,
-      icons.EngineIcon,
+      icons.FlagIcon,
+      icons.KnobIcon,
+      icons.TracksIcon,
+      icons.RackIcon,
+      icons.WaveformIcon,
     ]) {
       expect(renderToStaticMarkup(<Icon weight="duotone" />)).toContain(
         'fill-opacity="0.2"'

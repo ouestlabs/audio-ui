@@ -6,25 +6,16 @@ export { createIcon, type IconProps, type IconWeight } from "./icon.tsx";
 export { glyphs };
 
 export const BotIcon = createIcon(glyphs.bot, "BotIcon");
-export const DevicesIcon = createIcon(glyphs.devices, "DevicesIcon");
-export const ElementsIcon = createIcon(glyphs.elements, "ElementsIcon");
-export const EngineIcon = createIcon(glyphs.engine, "EngineIcon");
-export const HeadlessIcon = createIcon(glyphs.headless, "HeadlessIcon");
-export const InstallationIcon = createIcon(
-  glyphs.installation,
-  "InstallationIcon"
-);
-export const IntroductionIcon = createIcon(
-  glyphs.introduction,
-  "IntroductionIcon"
-);
-export const PrimitivesIcon = createIcon(glyphs.primitives, "PrimitivesIcon");
-export const RegistryIcon = createIcon(glyphs.registry, "RegistryIcon");
-export const RoadmapIcon = createIcon(glyphs.roadmap, "RoadmapIcon");
+export const RackIcon = createIcon(glyphs.rack, "RackIcon");
+export const KnobIcon = createIcon(glyphs.knob, "KnobIcon");
+export const WaveformIcon = createIcon(glyphs.waveform, "WaveformIcon");
+export const BracesIcon = createIcon(glyphs.braces, "BracesIcon");
+export const DownloadIcon = createIcon(glyphs.download, "DownloadIcon");
+export const InfoIcon = createIcon(glyphs.info, "InfoIcon");
+export const ShapesIcon = createIcon(glyphs.shapes, "ShapesIcon");
+export const BoxIcon = createIcon(glyphs.box, "BoxIcon");
+export const RouteIcon = createIcon(glyphs.route, "RouteIcon");
 export const SparkleIcon = createIcon(glyphs.sparkle, "SparkleIcon");
-export const StartIcon = createIcon(glyphs.start, "StartIcon");
-export const TokensIcon = createIcon(glyphs.tokens, "TokensIcon");
-export const WorkstationIcon = createIcon(
-  glyphs.workstation,
-  "WorkstationIcon"
-);
+export const FlagIcon = createIcon(glyphs.flag, "FlagIcon");
+export const DropIcon = createIcon(glyphs.drop, "DropIcon");
+export const TracksIcon = createIcon(glyphs.tracks, "TracksIcon");

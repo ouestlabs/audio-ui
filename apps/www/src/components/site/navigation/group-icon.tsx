@@ -1,30 +1,30 @@
 import {
   BotIcon,
-  DevicesIcon,
-  ElementsIcon,
-  EngineIcon,
-  HeadlessIcon,
+  BoxIcon,
+  BracesIcon,
+  DownloadIcon,
+  DropIcon,
+  FlagIcon,
   type IconProps,
-  InstallationIcon,
-  IntroductionIcon,
-  PrimitivesIcon,
-  RegistryIcon,
-  RoadmapIcon,
+  InfoIcon,
+  KnobIcon,
+  RackIcon,
+  RouteIcon,
+  ShapesIcon,
   SparkleIcon,
-  StartIcon,
-  TokensIcon,
-  WorkstationIcon,
+  TracksIcon,
+  WaveformIcon,
 } from "@audio-ui/icons";
 import type { ComponentType } from "react";
 import { Icons } from "@/components/site/icons";
 import { cn } from "@/lib/utils";
 
 const GROUP_ICONS = {
-  "Audio engine": EngineIcon,
-  Devices: DevicesIcon,
-  Elements: ElementsIcon,
-  "Get started": StartIcon,
-  Workstation: WorkstationIcon,
+  "Audio engine": WaveformIcon,
+  Devices: RackIcon,
+  Elements: KnobIcon,
+  "Get started": FlagIcon,
+  Workstation: TracksIcon,
 } as const;
 
 /** The glyph of a space of the docs (a group of the sidebar): thin and muted, and duotone in the title's color when the page being read is in it. Nothing for the other groups. */
@@ -48,15 +48,15 @@ export function GroupIcon({
 }
 
 const PAGE_ICONS: Record<string, ComponentType<IconProps>> = {
-  "/docs": IntroductionIcon,
+  "/docs": InfoIcon,
   "/docs/agents": SparkleIcon,
-  "/docs/get-started": InstallationIcon,
-  "/docs/headless-styling": HeadlessIcon,
+  "/docs/get-started": DownloadIcon,
+  "/docs/headless-styling": BracesIcon,
   "/docs/mcp": Icons.mcp,
-  "/docs/primitives": PrimitivesIcon,
-  "/docs/registry": RegistryIcon,
-  "/docs/roadmap": RoadmapIcon,
-  "/docs/styling": TokensIcon,
+  "/docs/primitives": ShapesIcon,
+  "/docs/registry": BoxIcon,
+  "/docs/roadmap": RouteIcon,
+  "/docs/styling": DropIcon,
   "/llms.txt": BotIcon,
 };
 
