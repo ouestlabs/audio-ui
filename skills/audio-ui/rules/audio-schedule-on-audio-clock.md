@@ -51,3 +51,21 @@ const timer = setInterval(() => {
 ```
 
 Read `bpm` from a ref so a tempo change applies on the next step, publish `step` through a source (`-1` on stop), and `clearInterval(timer)` on cleanup.
+
+Drum voices need no library: a kick is a sine whose pitch falls from 150 to 40 Hz while its gain decays, started at `time`:
+
+```ts
+function kick(ctx: AudioContext, out: AudioNode, time: number, decay = 0.4) {
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.frequency.setValueAtTime(150, time);
+  osc.frequency.exponentialRampToValueAtTime(40, time + 0.12);
+  gain.gain.setValueAtTime(1, time);
+  gain.gain.exponentialRampToValueAtTime(0.001, time + decay);
+  osc.connect(gain).connect(out);
+  osc.start(time);
+  osc.stop(time + decay);
+}
+```
+
+A snare is band-passed noise plus a short triangle click, a hat is high-passed noise with a very short decay. The registry's `drum-synthesis` lib is this same code with `triggerKick`, `triggerSnare` and `triggerHihat`, and it has no imports: copy `https://www.audio-ui.dev/r/base-nova/drum-synthesis.json` by hand if you do not use shadcn.

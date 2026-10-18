@@ -202,3 +202,21 @@
   box-shadow: inset 0 2px 5px rgb(0 0 0 / 0.5);
   transform: translateY(2px);
 }
+
+/* Step keys: sunk when on, in groups of four, the playing step ringed */
+.skin-tape .step {
+  background: var(--plastic);
+  border: 0;
+  border-radius: 3px;
+  box-shadow: var(--shadow-raised);
+}
+.skin-tape .step:nth-child(8n + 5),
+.skin-tape .step:nth-child(8n + 6),
+.skin-tape .step:nth-child(8n + 7),
+.skin-tape .step:nth-child(8n + 8) {
+  filter: brightness(0.93);
+}
+.skin-tape .step[data-on] {
+  background: var(--accent);
+  box-shadow: var(--shadow-sunk);
+}
