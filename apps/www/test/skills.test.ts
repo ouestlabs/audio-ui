@@ -289,3 +289,46 @@ test("core.md's plain DOM knob works", async () => {
   key();
   expect(changes).toBe(1);
 });
+
+describe("the Claude Code marketplace", () => {
+  const manifest = Bun.file(
+    `${ROOT}/.claude-plugin/marketplace.json`
+  ).json() as Promise<{
+    name: string;
+    owner: { name: string };
+    plugins: { description: string; name: string; source: string }[];
+  }>;
+
+  test("it is named and owned, and lists each plugin once", async () => {
+    const { name, owner, plugins } = await manifest;
+    expect(name).toMatch(SKILL_NAME);
+    expect(owner.name).toBeTruthy();
+    expect(new Set(plugins.map((plugin) => plugin.name)).size).toBe(
+      plugins.length
+    );
+  });
+
+  test("each plugin is a skill folder of this repository, under its own name", async () => {
+    const { plugins } = await manifest;
+    const sources = await Promise.all(
+      plugins.map((plugin) =>
+        Bun.file(`${ROOT}/${plugin.source}/SKILL.md`)
+          .text()
+          .catch(() => "")
+      )
+    );
+    plugins.forEach((plugin, index) => {
+      expect(plugin.name).toMatch(SKILL_NAME);
+      expect(plugin.description.length).toBeGreaterThan(20);
+      expect(plugin.source.startsWith("./skills/")).toBe(true);
+      expect(sources[index]).toContain(`name: ${plugin.name}\n`);
+    });
+  });
+
+  test("every skill of the repository is in it", async () => {
+    const { plugins } = await manifest;
+    expect(plugins.map((plugin) => plugin.source).sort()).toEqual(
+      skills.map((name) => `./skills/${name}`).sort()
+    );
+  });
+});
