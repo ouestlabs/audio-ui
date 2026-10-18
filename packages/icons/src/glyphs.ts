@@ -86,3 +86,21 @@ export const bot: Glyph = [
   circle(12, 4, 1),
   path("M9 13.5h.01M15 13.5h.01"),
 ];
+
+/** The four shapes of an oscillator. */
+export const sine: Glyph = [path("M2 12c2-4 4-4 6 0s4 4 6 0 4-4 6 0 4 4 6 0")];
+export const square: Glyph = [path("M2 18h4V6h6v12h4V6h6")];
+export const sawtooth: Glyph = [path("M2 18l8-12v12l8-12v12")];
+export const triangle: Glyph = [path("M2 12l5-6 5 12 5-12 5 6")];
+
+/** The response of a filter, gain up the page and frequency across. */
+export const lowpass: Glyph = [path("M2 7h9c6 0 8 3 11 12")];
+export const highpass: Glyph = [path("M2 19c3-9 5-12 11-12h9")];
+export const bandpass: Glyph = [path("M2 19c5 0 5-13 10-13s5 13 10 13")];
+export const notch: Glyph = [path("M2 7c5 0 5 12 10 12s5-12 10-12")];
+export const lowshelf: Glyph = [path("M2 8h7c3 0 4 9 7 9h6")];
+export const highshelf: Glyph = [path("M2 17h8c3 0 4-9 7-9h5")];
+export const peak: Glyph = [path("M2 17h6c3 0 3-10 4-10s1 10 4 10h6")];
+
+/** What automation draws over a lane. */
+export const envelope: Glyph = [path("M2 17h4l5-10h4c3 0 4 10 7 10")];
