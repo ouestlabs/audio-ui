@@ -136,7 +136,7 @@ export const pad: Glyph = [
 ];
 export const piano: Glyph = [
   rect(3, 5, 18, 14, 2, { tint: true }),
-  path("M7.5 5v14M12 5v14M16.5 5v14", { knock: true }),
+  path("M8 5v7M16 5v7M12 12v7", { knock: true }),
 ];
 
 /** Displays: a level, a needle, a spectrum, a scope, a plot. */
@@ -205,10 +205,11 @@ export const pianoroll: Glyph = [
   path("M6 9h5M10 13h6M8 16.5h4", { knock: true }),
 ];
 
-/** Effects: a transfer curve, an echo, a room, a clipped wave. */
+/** Effects: a transfer curve, an echo, a hall, a clipped wave. */
 export const compressor: Glyph = [path("M4 20l8-8c1.5-1.5 2.5-2 4-2h4")];
 export const delay: Glyph = [path("M5 6v12M10 8v8M15 10v4M20 11.5v1")];
 export const reverb: Glyph = [
-  path("M3 12h3l1.5-7 2 14 2-10.5 1.5 6 1.5-3.5 1 1.5 1-.5h4"),
+  path("M5 20v-9a7 7 0 0 1 14 0v9z", { tint: true }),
+  path("M12 15h.01", { knock: true }),
 ];
 export const distortion: Glyph = [path("M3 12l3-6h4l3 12h4l3-6")];
