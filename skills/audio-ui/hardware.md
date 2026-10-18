@@ -17,7 +17,7 @@ Notes from how real panels are made, and from what works and fails in plugin int
 | Kind | Panel | Ink | Accents |
 | --- | --- | --- | --- |
 | Analog drum machine | cream `#d9d2c0` | `#2b2926` | orange `#e8742c`, yellow `#f0c23a`, red `#d6392b` |
-| Tube compressor | warm grey `#6f7673` | cream `#efe6c8` | black caps `#151515` with a white line, a red zone on the VU |
+| Tube compressor | warm grey `#5a615e` | cream `#f0e8cf` (5.2:1 on the panel) | black caps `#151515` with a white line, a red zone on the VU |
 | Console channel | slate `#2b2f33` | `#e8e4da` | caps by section: red `#c8372d`, blue `#2f6fb2`, green `#3d9a58`, yellow `#d9b03a` |
 | 70s synth | black `#151311`, wood cheeks `#6b4226` | white | amber lamp `#ffb028`, white rocker switches |
 | Tape machine | brushed silver `#bfc2c4` | black | red record lamp, a VU on cream paper |
@@ -36,7 +36,7 @@ Type: a condensed grotesque for print (`"Arial Narrow", "Helvetica Neue", system
 
 ## A VU needle, a compressor face
 
-`Vu` in the `Panel` markup of [directions.md](./directions.md) is the needle: a paper face, a red zone, one CSS variable from a source. Feed it a 0 to 1 gain reduction (or level) and the CSS transition gives it about 300 ms of ballistics. For a tube compressor: take `tape.css` for the warm grey enamel, make the three main knobs large (5 to 6rem) and the two timing knobs small, give the caps a dark collar with a white line (copy the conic knurl of `retro.css` and darken it), and put the VU in the middle. Printed numerals around a knob collide with the next knob when the gap is under about 2.4rem. A fixed hardware face may keep its width: let the page scroll or scale the whole panel with `zoom` at narrow widths, rather than reflowing the controls.
+`Vu` in the `Panel` markup of [directions.md](./directions.md) is the needle: a paper face, a red zone, one CSS variable from a source. Feed it a 0 to 1 gain reduction (or level) and the CSS transition gives it about 300 ms of ballistics. For a tube compressor: take `styles/tube.css` (warm grey enamel, black caps with a white line, amber lamp), make the three main knobs large (5 to 6rem) and the two timing knobs small, give the caps a dark collar with a white line (copy the conic knurl of `retro.css` and darken it), and put the VU in the middle. Printed numerals around a knob collide with the next knob when the gap is under about 2.4rem. A fixed hardware face may keep its width: scale the whole panel with `zoom` at narrow widths rather than reflowing the controls (`@media (max-width: 70rem) { .panel { zoom: 0.8 } }`, then 0.65 and 0.5 as it narrows), or let the page scroll.
 
 ## Avoid
 

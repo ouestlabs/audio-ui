@@ -1,6 +1,6 @@
 # Directions
 
-Ten skins ready to copy, each verified in a browser on the same set of parts: knobs, faders, a stereo meter, an XY pad, drum pads and a keyboard. Copy `styles/base.css` and one skin into the project, then the markup below.
+Eleven skins ready to copy, each verified in a browser on the same set of parts: knobs, faders, a stereo meter, an XY pad, drum pads and a keyboard. Copy `styles/base.css` and one skin into the project, then the markup below.
 
 ```tsx
 import "./audio-ui/base.css";
@@ -203,7 +203,8 @@ function SequencerControl({ step }: { step: Source<number> }) {
 }
 
 // A VU needle: a leaf that writes one CSS variable from a source, so React never renders per frame.
-// The 0..1 reading sweeps -50 to +50 degrees; the CSS transition is the needle's ballistics.
+// The 0..1 reading sweeps -40 to +40 degrees about a pivot below the face (50, 72), the arc's center;
+// the CSS transition is the needle's ballistics. Draw ticks and numerals from the same center.
 function Vu({ label, source }: { label: string; source: Source<number> }) {
   const needle = useRef<SVGGElement>(null);
   useEffect(() => {
@@ -212,14 +213,14 @@ function Vu({ label, source }: { label: string; source: Source<number> }) {
     return source.subscribe(draw);
   }, [source]);
   return (
-    <figure className="vu">
+    <figure aria-label={label} className="vu" role="img">
       <svg aria-hidden="true" className="vu-face" viewBox="0 0 100 60">
-        <path className="vu-zone" d="M 71 20 A 46 46 0 0 1 90 41" />
-        <path className="vu-arc" d="M 10 41 A 46 46 0 0 1 90 41" />
+        <path className="vu-zone" d="M 66.0 16.2 A 58 58 0 0 1 87.3 27.6" />
+        <path className="vu-arc" d="M 12.7 27.6 A 58 58 0 0 1 87.3 27.6" />
         <g className="vu-needle" ref={needle}>
-          <line x1="50" x2="50" y1="56" y2="14" />
+          <line x1="50" x2="50" y1="72" y2="22" />
         </g>
-        <circle className="vu-hub" cx="50" cy="56" r="3" />
+        <circle className="vu-hub" cx="50" cy="72" r="5" />
       </svg>
       <figcaption className="knob-label">{label}</figcaption>
     </figure>
@@ -241,7 +242,7 @@ export function Panel({
   skin,
   title,
 }: {
-  skin: "retro" | "minimal" | "modern" | "tape" | "phosphor" | "hifi" | "brutalist" | "y2k" | "console" | "synth70";
+  skin: "retro" | "minimal" | "modern" | "tape" | "phosphor" | "hifi" | "brutalist" | "y2k" | "console" | "synth70" | "tube";
   title: string;
 }) {
   return (
@@ -318,7 +319,7 @@ export function Panel({
 }
 ```
 
-`materials.css` is needed by tape, phosphor, hifi, y2k, console and synth70; retro, minimal, modern and brutalist are self-contained. The skin is the class on the panel (`skin-retro`, `skin-minimal`, `skin-modern`), so every selector is scoped and two skins can sit on one page. The tokens are the custom properties at the top of each skin: change those first.
+`materials.css` is needed by tape, phosphor, hifi, y2k, console, synth70 and tube; retro, minimal, modern and brutalist are self-contained. The skin is the class on the panel (`skin-retro`, `skin-minimal`, `skin-modern`), so every selector is scoped and two skins can sit on one page. The tokens are the custom properties at the top of each skin: change those first.
 
 ## Retro: a hardware faceplate
 
@@ -348,6 +349,7 @@ Read [hardware.md](./hardware.md) before composing a retro panel: it explains wh
 - **brutalist** (`styles/brutalist.css`): flat colors, 2px black borders, a hard offset shadow, mono type. A pad sinks into its shadow when struck.
 - **y2k** (`styles/y2k.css`): translucent candy plastic. A pale blue shell, teal caps with a gloss band, one orange accent, large radii.
 - **console** (`styles/console.css`): a mixing console channel. A slate panel, caps colored by section (the second and third knob change color), a long fader with ticks and a lamp ladder.
+- **tube** (`styles/tube.css`): a vintage tube compressor. Warm grey enamel, cream print at 5.2:1, black knurled caps with a white line, an amber lamp; pair it with the `Vu` needle.
 - **synth70** (`styles/synth70.css`): a 70s monophonic synth. A black panel between wood cheeks, white print, an amber lamp, rocker toggles.
 
 Most are built from `styles/materials.css` and the shared tokens (tape, phosphor, console and hifi lean on them most; y2k and synth70 set only the light and dark tokens and draw the rest by hand, since candy gloss and wood are not in the materials), so each is about sixty lines: read the closest one before writing your own. Screws, the rocker and the lamp rim are retro's; tape, hifi and the others take `.lamp` from `materials.css`.
@@ -363,7 +365,7 @@ Minimal, modern and brutalist hide the knob ticks (`.knob-tick { display: none }
 | `Knob.Root` | `dragMode` (`"vertical"` drags up and down like a fader; the default `"circular"` needs a gesture around the dial), `min`, `max`, `step`, `largeStep`, `defaultValue` or `value` with `onValueChange(value, details)`, `onValueCommitted`, `scale="log"`, `anchor`, `format`, `locale` |
 | `Fader.Root` | `orientation`, `min`, `max`, `step`, `largeStep`, `defaultValue` or `value` with `onValueChange(value, details)`, `onValueCommitted`, `anchor`, `format`. No `scale`: for a log law, map a linear fader yourself |
 | `Fader.Label`, `Fader.Value`, `Knob.Label`, `Knob.Value` | The name and the formatted value, announced and drawn from the same state. `editable` on a value lets people type an exact number (double-click, or Enter while it has focus; Enter commits, Escape drops, a unit or a decimal comma is fine and the result is clamped), as in the kit. `Intl` has no Hz, ms or dB unit: pass a render function, `<Knob.Value>{(formatted, value) => `${Math.round(value)} Hz`}</Knob.Value>`, and put the unit in `getAriaValueText` on the thumb. `format` and `locale` on the Root set the number format, so set `locale` to keep one decimal mark |
-| `Meter.Root` | `value` and `peak` (one level per channel, in dB) or a live `source` (`createSource` of `{ levels, peaks }`, where `peaks` is optional), `min`, `max`, `clipThreshold`, `warnThreshold`; `data-clipping` and `data-warning` on a channel |
+| `Meter.Root` | `value` and `peak` (one level per channel, in dB) or a live `source` (`createSource` of `{ levels, peaks }`, where `peaks` is optional), `min`, `max`, `clipThreshold` (default 0 dB: `data-clipping` never fires if the range stops below it), `warnThreshold`; `data-clipping` and `data-warning` on a channel |
 | `Pad.Root`, `Pad.Item` | `columns`, `value`, `onPadOn(value, { velocity })` and `onPadOff(value)` for the strike; `data-active` and `--pad-velocity` while struck |
 | `XYPad.Root` | `defaultValue={{ x, y }}` or `value`, `onValueChange`; `--xy-pad-x` and `--xy-pad-y` |
 
@@ -382,7 +384,9 @@ Focus lands on the input nested in each thumb, so draw the ring on the thumb wit
 - **XYPad:** name the axes with `aria-label` on `XYPad.Thumb` ("Filter X" and "Filter Y"), not on the Root.
 - **Sizes:** a pad is a 4rem square with a 0.65rem label, so a long name needs a wider column and a smaller font on `.pad`; size one knob with `style={{ "--knob-size": "6rem" }}` on its Root.
 - **A choice of one in N** (a waveform, a mode): a `role="group"` of `.toggle` buttons with `aria-pressed`, as `ChoiceControl` does.
-- **Printed numerals on a knob:** a span inside `Knob.Mark` turns with the mark and reads upside down: give it `rotate: calc(var(--knob-mark-angle) * -1)`.
+- **Meter zones:** the zone gradient puts amber at 60% and red at 85% of the strip. Compute the stops from the range (0 dB sits at `(0 - min) / (max - min)`: 88.9% for -48 to +6) and override the zone gradient and its dimming layer on your skin (see the the zone gradient lines of materials.css).
+- **Tab stops:** a knob with an `editable` readout has two (the slider and the readout), so five knobs give ten. That is expected.
+- **Printed numerals on a knob:** a span inside `Knob.Mark` turns with the mark and reads upside down: place it outside the tick (`position: absolute; top: -1.6rem; left: 50%; translate: -50% 0`) and give it `rotate: calc(var(--knob-mark-angle) * -1)`. On a log knob, `Knob.Mark` takes real values, so evenly spaced angles need a geometric series (20, 200, 2000). Keep 2.4rem or more between knobs so numerals do not touch the next one.
 - **A writable source** is `WritableSource<T>` from `@audio-ui/react` (`Source` has no `set`); `subscribe(listener)` returns the remover.
 - Importing CSS in TypeScript needs `declare module "*.css";` in a `.d.ts` file under `moduleResolution: "Bundler"`.
 

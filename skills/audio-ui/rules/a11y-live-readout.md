@@ -23,3 +23,5 @@ A display that updates every frame (a tuner's cents, a loudness number, a positi
   {inTune ? `${note.name}, in tune` : `${note.name}, ${note.cents > 0 ? "sharp" : "flat"}`}
 </p>
 ```
+
+The kit's `Vu` is a `figure` with `role="img"` and the label: it names the gauge without announcing every swing. Announce a threshold crossing (gain reduction beyond 10 dB, say) through a `role="status"` as above.

@@ -1084,6 +1084,8 @@ A display that updates every frame (a tuner's cents, a loudness number, a positi
 </p>
 ```
 
+The kit's `Vu` is a `figure` with `role="img"` and the label: it names the gauge without announcing every swing. Announce a threshold crossing (gain reduction beyond 10 dB, say) through a `role="status"` as above.
+
 ### 4.3 Keep the focusable part
 
 **Impact: HIGH (keyboard and screen reader access survive restyling)**

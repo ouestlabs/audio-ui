@@ -26,7 +26,7 @@ Starting points, each a set of decisions. Mix none of them: pick one.
 | 70s analog synth | Black panel, wood cheeks, white print, amber lamp | `styles/synth70.css` |
 | 80s Japanese hi-fi | Silver or black brushed plate, thin print, a green fluorescent readout | `styles/hifi.css` |
 | 90s rack unit | Grey steel, a blue backlit LCD, small black caps | Tight rows of small knobs, an LCD, a bar of LED segments |
-| Tube compressor | Warm grey enamel, cream VU face, black caps with a white line | A big VU needle, a few large knobs, a red zone |
+| Tube compressor | Warm grey enamel, cream VU face, black caps with a white line | `styles/tube.css` |
 | Console channel | Dark slate, caps colored by section | `styles/console.css` |
 | Drum machine | Cream or grey panel, a row of colored keys | Large pads, a row of small round knobs, a step row |
 | Lo-fi tape | Cream plastic, orange print, a paper meter | `styles/tape.css` |

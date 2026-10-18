@@ -309,6 +309,7 @@ describe("skills/audio-ui styles", () => {
     "y2k",
     "console",
     "synth70",
+    "tube",
   ] as const;
 
   /** The kit's markup: the code block of directions.md that exports `Panel`. */
