@@ -216,6 +216,11 @@ test("named imports from @/components/audio-ui exist in the installed file", asy
   expect(missingNames).toEqual([]);
 });
 
+/** The pages whose item is not their name: the arrangement page installs `arrangement-editor`. */
+const PAGE_ITEM: Record<string, string> = {
+  arrangement: "arrangement-editor",
+};
+
 test("a component's docs page only imports what installing it brings", async () => {
   const pages = await Array.fromAsync(
     new Bun.Glob("**/*.mdx").scan({
@@ -227,8 +232,9 @@ test("a component's docs page only imports what installing it brings", async () 
     pages.map(async (page) => {
       const component = page.split("/").pop()?.replace(".mdx", "") ?? "";
       // The page of a block is installed as `block-<name>`.
-      const itemName = items.some((item) => item.name === component)
-        ? component
+      const own = PAGE_ITEM[component] ?? component;
+      const itemName = items.some((item) => item.name === own)
+        ? own
         : `block-${component}`;
       const brought = withDependencies(itemName);
       return [...new Set(imports(await Bun.file(page).text()))]

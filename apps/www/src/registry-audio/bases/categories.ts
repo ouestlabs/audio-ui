@@ -200,6 +200,7 @@ export const categories: CategoryDef[] = [
   {
     description:
       "Zoomable, snapping timeline components for arrangements, clip editors and piano rolls.",
+    docs: "arrangement",
     label: "Timeline",
     name: "timeline",
   },

@@ -2,8 +2,7 @@
   "title": "Workstation",
   "pages": [
     "---Arrangement---",
-    "timeline",
-    "arrangement-editor",
+    "arrangement",
     "---Editors---",
     "piano-roll",
     "sequencer",
