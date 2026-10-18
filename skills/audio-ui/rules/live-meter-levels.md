@@ -71,13 +71,13 @@ const LUFS_WORKLET = `
 class Lufs extends AudioWorkletProcessor {
   constructor() {
     super();
-    // K-weighting for 48 kHz: [b0, b1, b2, a1, a2] for the shelf and the high-pass
+    // K-weighting for 48 kHz: [b0, b1, b2] and [a1, a2] for the shelf and the high-pass
     this.shelf = { b: [1.5351248595869702, -2.6916961894063807, 1.19839281085285], a: [-1.6906592931824103, 0.7324807742158501], s: [0, 0] };
     this.hp = { b: [0.9950299263000474, -1.9900598526000948, 0.9950299263000474], a: [-1.9900474548339797, 0.9900722503662099], s: [0, 0] };
+    this.block = Math.round(sampleRate * 0.1); // the 100 ms steps of BS.1770 (a 400 ms window, every 100 ms)
+    this.blocks = []; // mean squares of the last 30 steps, enough for the 3 s short term
     this.sum = 0;
     this.count = 0;
-    this.window = Math.round(sampleRate * 0.4);
-    this.port.onmessage = () => {};
   }
   biquad(f, x) {
     const { b, a, s } = f;
@@ -92,18 +92,29 @@ class Lufs extends AudioWorkletProcessor {
     for (let i = 0; i < channel.length; i++) {
       const y = this.biquad(this.hp, this.biquad(this.shelf, channel[i]));
       this.sum += y * y;
-      if (++this.count === this.window) {
-        // mean square over 400 ms -> momentary loudness in LUFS (-0.691 is the BS.1770 offset)
-        this.port.postMessage(-0.691 + 10 * Math.log10(this.sum / this.count + 1e-12));
+      if (++this.count === this.block) {
+        this.blocks.push(this.sum / this.count);
+        if (this.blocks.length > 30) this.blocks.shift();
         this.sum = 0;
         this.count = 0;
+        const momentary = this.blocks.slice(-4); // the last 400 ms
+        const shortTerm = this.blocks; // the last 3 s
+        this.port.postMessage({
+          momentary: loudness(momentary),
+          shortTerm: loudness(shortTerm),
+        });
       }
     }
     return true;
   }
 }
+function loudness(blocks) {
+  if (blocks.length === 0) return -70;
+  const mean = blocks.reduce((s, x) => s + x, 0) / blocks.length;
+  return -0.691 + 10 * Math.log10(mean + 1e-12);
+}
 registerProcessor("audioui-lufs", Lufs);
-`;
+\`;
 
 const loaded = new WeakMap<BaseAudioContext, Promise<boolean>>();
 export function loadLufs(ctx: BaseAudioContext): Promise<boolean> {
@@ -115,6 +126,7 @@ export function loadLufs(ctx: BaseAudioContext): Promise<boolean> {
   return done;
 }
 
-// After loadLufs(ctx): connect the source to new AudioWorkletNode(ctx, "audioui-lufs"), read the
-// momentary value on node.port.onmessage, and publish it through a source. Short term is the same
-// mean square over 3 s (a window of sampleRate * 3), and the integrated value gates the 400 ms blocks.
+// After loadLufs(ctx): connect the source to new AudioWorkletNode(ctx, "audioui-lufs"). Its port posts
+// `{ momentary, shortTerm }` every 100 ms; publish each through a source. The integrated value gates
+// the 400 ms blocks: keep every block above -70 LUFS, then drop the ones 10 LU below the average of the
+// rest, and the integrated loudness is the mean of what is left. Keep those blocks in an array of your own.
