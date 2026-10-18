@@ -2,14 +2,19 @@
   "root": true,
   "title": "Get started",
   "pages": [
+    "---Basics---",
     "index",
     "get-started",
+    "registry",
+    "---Concepts---",
     "primitives",
+    "headless-styling",
     "styling",
+    "---For agents---",
     "agents",
     "mcp",
-    "registry",
-    "roadmap",
-    "[llms.txt](/llms.txt)"
+    "[llms.txt](/llms.txt)",
+    "---Project---",
+    "roadmap"
   ]
 }
