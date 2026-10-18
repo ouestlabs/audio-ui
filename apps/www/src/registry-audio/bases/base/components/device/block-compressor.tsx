@@ -1,6 +1,6 @@
 "use client";
 
-import { createSource, type Source } from "@audio-ui/react";
+import { createSource } from "@audio-ui/react";
 import { useEffect, useRef, useState } from "react";
 import { CompressorPanel } from "@/registry-audio/bases/base/audio/panels/compressor-panel";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
@@ -50,33 +50,6 @@ function pulses(ctx: AudioContext): AudioBuffer {
   return buffer;
 }
 
-/** Gain reduction in dB, written into one text node as the source moves: no React render per frame. */
-function ReductionReadout({ source }: { source: Source<number> }) {
-  const element = useRef<HTMLOutputElement>(null);
-  useEffect(() => {
-    const node = element.current?.appendChild(document.createTextNode(""));
-    if (!node) {
-      return;
-    }
-    const paint = () => {
-      node.data = `${source.getSnapshot().toFixed(1)} dB`;
-    };
-    paint();
-    const unsubscribe = source.subscribe(paint);
-    return () => {
-      unsubscribe();
-      node.remove();
-    };
-  }, [source]);
-  return (
-    <output
-      aria-label="Gain reduction"
-      className="font-mono text-muted-foreground text-xs tabular-nums"
-      ref={element}
-    />
-  );
-}
-
 /**
  * A compressor you can plug in: its state, a panel that draws it, an engine
  * that plays it, side by side. Each is its own file and none knows the others:
@@ -90,7 +63,6 @@ export default function BlockCompressor() {
   const { playing } = usePlaySwitch();
   const master = useMasterBus(MASTER_VOLUME);
   const [level] = useState(() => createSource(FLOOR_DB));
-  const [reduction] = useState(() => createSource(0));
   const engine = useRef<CompressorEngine | null>(null);
   const stateRef = useRef(state);
   stateRef.current = state;
@@ -148,7 +120,6 @@ export default function BlockCompressor() {
           peak > 0 ? Math.max(FLOOR_DB, 20 * Math.log10(peak)) : FLOOR_DB;
         held = Math.max(db, held - LEVEL_FALL_DB);
         level.set(held);
-        reduction.set(compressor.reduction);
         frame = requestAnimationFrame(tick);
       };
       frame = requestAnimationFrame(tick);
@@ -162,14 +133,13 @@ export default function BlockCompressor() {
         compressor.dispose();
         engine.current = null;
         level.set(FLOOR_DB);
-        reduction.set(0);
       };
     });
     return () => {
       cancelled = true;
       stop();
     };
-  }, [keyed, level, master, playing, reduction]);
+  }, [keyed, level, master, playing]);
 
   // The engine follows the state, whoever changed it: a knob or a call.
   useEffect(() => {
@@ -178,9 +148,7 @@ export default function BlockCompressor() {
 
   return (
     <div className="cn-audio-panel h-full w-full min-w-0">
-      <CompressorPanel level={level} onValueChange={setState} value={state}>
-        <ReductionReadout source={reduction} />
-      </CompressorPanel>
+      <CompressorPanel level={level} onValueChange={setState} value={state} />
     </div>
   );
 }
