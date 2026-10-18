@@ -16,6 +16,7 @@ import { Panel } from "./audio-ui/panel";
 `panel.tsx`, the verified part tree of every skin (a test renders it in CI). Its class names are the contract with the CSS: keep them, and add your own parts the same way.
 
 ```tsx
+import { Envelope } from "@audio-ui/react/envelope";
 import { Fader } from "@audio-ui/react/fader";
 import { Knob } from "@audio-ui/react/knob";
 import { Meter } from "@audio-ui/react/meter";
@@ -29,6 +30,13 @@ import { useState } from "react";
 
 const MARKS = [0, 25, 50, 75, 100];
 const PADS = ["Kick", "Snare", "Hat", "Clap"];
+const ADSR = [
+  { x: 0, y: 0 },
+  { x: 0.15, y: 1 },
+  { x: 0.4, y: 0.6 },
+  { x: 0.75, y: 0.6 },
+  { x: 1, y: 0 },
+];
 
 function KnobControl({
   label,
@@ -58,7 +66,7 @@ function KnobControl({
         ))}
       </Knob.Control>
       <Knob.Label className="knob-label">{label}</Knob.Label>
-      <Knob.Value className="knob-value" />
+      <Knob.Value className="knob-value" editable />
     </Knob.Root>
   );
 }
@@ -73,8 +81,36 @@ function FaderControl({ label, defaultValue }: { label: string; defaultValue: nu
         <Fader.Thumb className="fader-thumb" />
       </Fader.Control>
       <Fader.Label className="knob-label">{label}</Fader.Label>
-      <Fader.Value className="knob-value" />
+      <Fader.Value className="knob-value" editable />
     </Fader.Root>
+  );
+}
+
+// An envelope editor: points are normalized to 0..1 on both axes. Points takes a render function.
+function EnvelopeControl({ label }: { label: string }) {
+  return (
+    <Envelope.Root
+      aria-label={label}
+      className="envelope"
+      defaultValue={ADSR}
+      maxPoints={5}
+      minPoints={5}
+    >
+      <Envelope.Graph className="envelope-graph">
+        <Envelope.Fill className="envelope-fill" />
+        <Envelope.Line className="envelope-line" />
+      </Envelope.Graph>
+      <Envelope.Points>
+        {(_point, index) => (
+          <Envelope.Point
+            aria-label={`${label} point ${index + 1}`}
+            className="envelope-point"
+            index={index}
+            key={index}
+          />
+        )}
+      </Envelope.Points>
+    </Envelope.Root>
   );
 }
 
@@ -156,6 +192,7 @@ export function Panel({
             )}
           </Piano.Keys>
         </Piano.Root>
+        <EnvelopeControl label="Amp" />
       </div>
     </section>
   );
@@ -206,7 +243,7 @@ Minimal, modern and brutalist hide the knob ticks (`.knob-tick { display: none }
 | --- | --- |
 | `Knob.Root` | `dragMode` (`"vertical"` drags up and down like a fader; the default `"circular"` needs a gesture around the dial), `min`, `max`, `step`, `largeStep`, `defaultValue` or `value` with `onValueChange(value, details)`, `onValueCommitted`, `scale="log"`, `anchor`, `format`, `locale` |
 | `Fader.Root` | `orientation`, `min`, `max`, `step`, `largeStep`, `defaultValue` or `value` with `onValueChange(value, details)`, `onValueCommitted`, `anchor`, `format`. No `scale`: for a log law, map a linear fader yourself |
-| `Fader.Label`, `Fader.Value`, `Knob.Label`, `Knob.Value` | The name and the formatted value, announced and drawn from the same state. `Intl` has no Hz, ms or dB unit: pass a render function, `<Knob.Value>{(formatted, value) => `${Math.round(value)} Hz`}</Knob.Value>`, and put the unit in `getAriaValueText` on the thumb. `format` and `locale` on the Root set the number format, so set `locale` to keep one decimal mark |
+| `Fader.Label`, `Fader.Value`, `Knob.Label`, `Knob.Value` | The name and the formatted value, announced and drawn from the same state. `editable` on a value lets people type an exact number (double-click, or Enter while it has focus; Enter commits, Escape drops, a unit or a decimal comma is fine and the result is clamped), as in the kit. `Intl` has no Hz, ms or dB unit: pass a render function, `<Knob.Value>{(formatted, value) => `${Math.round(value)} Hz`}</Knob.Value>`, and put the unit in `getAriaValueText` on the thumb. `format` and `locale` on the Root set the number format, so set `locale` to keep one decimal mark |
 | `Meter.Root` | `value` and `peak` (one level per channel, in dB) or a live `source` (`createSource` of `{ levels, peaks }`, where `peaks` is optional), `min`, `max`, `clipThreshold`, `warnThreshold`; `data-clipping` and `data-warning` on a channel |
 | `Pad.Root`, `Pad.Item` | `columns`, `value`, `onPadOn(value, { velocity })` and `onPadOff(value)` for the strike; `data-active` and `--pad-velocity` while struck |
 | `XYPad.Root` | `defaultValue={{ x, y }}` or `value`, `onValueChange`; `--xy-pad-x` and `--xy-pad-y` |

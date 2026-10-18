@@ -6,9 +6,23 @@
   --hi: #6a655d;
   --lo: #121110;
   --lift: 5;
+  --wood:
+    repeating-linear-gradient(
+      180deg,
+      rgb(0 0 0 / 0.22) 0 1px,
+      transparent 1px 7px
+    ),
+    repeating-linear-gradient(
+      180deg,
+      rgb(255 255 255 / 0.07) 0 2px,
+      transparent 2px 11px
+    ),
+    linear-gradient(90deg, #7d4c2b, #5a351f 55%, #6c4125);
   --ok: #8bd450;
   --warn: #ffb028;
   --clip: #e5432c;
+  position: relative;
+  padding-inline: 3.2rem;
   font-family: "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
   color: var(--ink);
   background:
@@ -18,16 +32,7 @@
       transparent 1px 3px
     ),
     var(--panel);
-  border-inline: 1.4rem solid transparent;
   border-radius: 3px;
-  border-image: repeating-linear-gradient(
-      90deg,
-      #7a4a2a,
-      #5e3720 6px,
-      #6f4326 9px,
-      #4f2d19 14px
-    )
-    1;
   box-shadow: 0 14px 28px rgb(0 0 0 / 0.55);
 }
 .skin-synth70 .panel-title {
@@ -223,4 +228,22 @@
 }
 .skin-synth70 .toggle[aria-pressed="true"] {
   background: linear-gradient(180deg, #9c978c 0 48%, #f2efe6 52%);
+}
+
+/* The wood cheeks: two strips with their own grain, one at each side */
+.skin-synth70::before,
+.skin-synth70::after {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1.4rem;
+  pointer-events: none;
+  content: "";
+  background: var(--wood);
+}
+.skin-synth70::before {
+  left: 0;
+}
+.skin-synth70::after {
+  right: 0;
 }

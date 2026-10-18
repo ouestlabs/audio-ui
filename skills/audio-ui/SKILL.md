@@ -76,6 +76,7 @@ Run commands with the project's package manager, read from its lockfile: `npx sh
 - `values-log-scale-frequency` - `scale="log"` for frequency, Q and ratios
 - `values-cancel-change` - Reject a change with `eventDetails.cancel()`
 - `values-anchor-bipolar` - `anchor={0}` for pan and detune
+- `values-editable-readout` - `editable` on `Knob.Value` and `Fader.Value` lets people type an exact number
 - `values-knob-drag-mode` - `dragMode="vertical"` on knobs: up and down, not around the dial
 
 ### 4. Accessibility (HIGH)

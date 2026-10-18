@@ -37,12 +37,13 @@ How to build audio interfaces in React with audio/ui, for AI agents and LLMs. Ru
    - 2.9 [Spectrum on a Plot](#29-spectrum-on-a-plot)
 3. [Values & Events](#3-values--events): **HIGH**
    - 3.1 [Controlled or uncontrolled, never both](#31-controlled-or-uncontrolled-never-both)
-   - 3.2 [Set dragMode="vertical" on knobs](#32-set-dragmodevertical-on-knobs)
-   - 3.3 [Size step and largeStep to the range](#33-size-step-and-largestep-to-the-range)
-   - 3.4 [Sound on change, persistence on commit](#34-sound-on-change-persistence-on-commit)
-   - 3.5 [Logarithmic scales for frequency](#35-logarithmic-scales-for-frequency)
-   - 3.6 [Rejecting a change](#36-rejecting-a-change)
-   - 3.7 [Anchors for bipolar controls](#37-anchors-for-bipolar-controls)
+   - 3.2 [Make the readout editable](#32-make-the-readout-editable)
+   - 3.3 [Set dragMode="vertical" on knobs](#33-set-dragmodevertical-on-knobs)
+   - 3.4 [Size step and largeStep to the range](#34-size-step-and-largestep-to-the-range)
+   - 3.5 [Sound on change, persistence on commit](#35-sound-on-change-persistence-on-commit)
+   - 3.6 [Logarithmic scales for frequency](#36-logarithmic-scales-for-frequency)
+   - 3.7 [Rejecting a change](#37-rejecting-a-change)
+   - 3.8 [Anchors for bipolar controls](#38-anchors-for-bipolar-controls)
 4. [Accessibility](#4-accessibility): **HIGH**
    - 4.1 [Accessible names](#41-accessible-names)
    - 4.2 [Keep the focusable part](#42-keep-the-focusable-part)
@@ -719,7 +720,35 @@ A control either owns its value (`defaultValue`) or follows yours (`value` + `on
 
 `defaultValue` is still useful on a controlled Knob: it is the double-tap reset target.
 
-### 3.2 Set dragMode="vertical" on knobs
+### 3.2 Make the readout editable
+
+**Impact: HIGH (exact values by keyboard, with no extra UI)**
+
+A knob or fader is imprecise by hand: nobody lands on exactly 440 Hz or -6.0 dB with a drag. `Knob.Value` and `Fader.Value` take `editable`: a double-click, or Enter while the readout has focus, turns it into a field where a number is typed. Enter commits it (a unit or a decimal comma is fine, and it is clamped to the range), Escape drops it. It costs one prop and no extra control, and it is also the keyboard way to type a value. Style the field with a plain `input` inside the readout.
+
+**Incorrect (a readout that can only be read):**
+
+```tsx
+<Knob.Root aria-label="Cutoff" defaultValue={1000} max={20000} min={20} scale="log">
+  <Knob.Control>
+    <Knob.Thumb />
+  </Knob.Control>
+  <Knob.Value />
+</Knob.Root>
+```
+
+**Correct (type an exact value):**
+
+```tsx
+<Knob.Root aria-label="Cutoff" defaultValue={1000} max={20000} min={20} scale="log">
+  <Knob.Control>
+    <Knob.Thumb />
+  </Knob.Control>
+  <Knob.Value editable />
+</Knob.Root>
+```
+
+### 3.3 Set dragMode="vertical" on knobs
 
 **Impact: HIGH (a knob that follows the hand)**
 
@@ -750,7 +779,7 @@ A knob defaults to `dragMode="circular"`: the value follows the pointer's angle 
 .knob-control[data-drag-mode="vertical"] { cursor: ns-resize; }
 ```
 
-### 3.3 Size step and largeStep to the range
+### 3.4 Size step and largeStep to the range
 
 **Impact: HIGH (a 0 to 1 control gets a hundred positions instead of two)**
 
@@ -773,7 +802,7 @@ A knob defaults to `dragMode="circular"`: the value follows the pointer's angle 
 
 With `scale="log"` the keys and the wheel move a share of the travel instead (1%, or 10% with Shift and the Page keys), so `largeStep` matters only on linear scales.
 
-### 3.4 Sound on change, persistence on commit
+### 3.5 Sound on change, persistence on commit
 
 **Impact: HIGH (one write per gesture instead of hundreds)**
 
@@ -821,7 +850,7 @@ const saveTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 />
 ```
 
-### 3.5 Logarithmic scales for frequency
+### 3.6 Logarithmic scales for frequency
 
 **Impact: MEDIUM (usable travel across the audible range)**
 
@@ -841,7 +870,7 @@ Hearing is logarithmic. On a linear 20 Hz to 20 kHz knob, the whole musical rang
 
 `scale="log"` needs a positive `min`. Use it for frequency, Q and ratios. Level in dB is already logarithmic: keep it linear in dB.
 
-### 3.6 Rejecting a change
+### 3.7 Rejecting a change
 
 **Impact: MEDIUM (the control and its announced value stay in sync)**
 
@@ -870,7 +899,7 @@ To refuse a value (a locked track, a value an app rule forbids), cancel the chan
 
 `eventDetails.reason` says what caused the change (`"drag"`, `"keyboard"`, `"wheel"`, `"reset"`, `"input-change"`), and on a piano roll `eventDetails.edit` says what was edited.
 
-### 3.7 Anchors for bipolar controls
+### 3.8 Anchors for bipolar controls
 
 **Impact: LOW (the center reads as the center)**
 
