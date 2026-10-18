@@ -51,6 +51,7 @@
   height: var(--strip-h, 9.5rem);
 }
 .fader-track {
+  position: relative;
   width: var(--fader-track, 0.375rem);
   height: 100%;
   margin-inline: auto;

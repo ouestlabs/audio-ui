@@ -156,6 +156,19 @@ const cutoff = mountKnob(document.getElementById("cutoff")!, {
 
 The skins in `styles/` select class names, not React parts, so they work on plain DOM: build the same tree with the kit's classes, copy `styles/base.css`, `styles/dom.css` and one skin, and put the skin's class on the panel (`<section class="panel skin-retro">`). These two functions build a knob and a fader that way. They are the verified starting point: `s.angle` is the rotation to apply to the thumb, `s.percent` and `s.anchorPercent` (0 to 1) bound the value arc drawn with `arcPath`, and a fader's `s.share` (0 to 100) is the cap's position along the strip, with `s.fill` the lit part of the slot.
 
+```html
+<section class="panel skin-modern">
+  <h2 class="panel-title">Synth</h2>
+  <div class="panel-row">
+    <div class="knob" id="synth-cutoff"></div>
+    <div class="knob" id="resonance"></div>
+    <div class="fader" id="level"></div>
+  </div>
+</section>
+```
+
+Set the page's `background` and `color-scheme` yourself: a skin styles the panel, not the page. A momentary key (hold to play) is a `.toggle` button whose `aria-pressed` you set on `pointerdown` and `keydown`, and clear on `pointerup`, `pointerleave`, `keyup` and `blur`.
+
 ```ts
 import { createFaderController, type FaderOptions } from "@audio-ui/core/fader";
 import {
@@ -192,7 +205,12 @@ function arc(className: string, parent: HTMLElement) {
 }
 
 // `root` is an empty element with class "knob"; `label` names the slider and prints under the dial.
-export function mountKitKnob(root: HTMLElement, label: string, options: KnobOptions) {
+export function mountKitKnob(
+  root: HTMLElement,
+  label: string,
+  options: KnobOptions,
+  unit = ""
+) {
   const control = element("div", "knob-control", root);
   control.style.touchAction = "none";
   // The controller takes dragMode; the attribute is only for the cursor in the CSS.
@@ -223,13 +241,13 @@ export function mountKitKnob(root: HTMLElement, label: string, options: KnobOpti
       "d",
       arcPath(21, Math.min(s.anchorPercent, s.percent), Math.max(s.anchorPercent, s.percent))
     );
-    output.textContent = s.formatted;
+    output.textContent = s.formatted + unit;
     input.min = String(s.min);
     input.max = String(s.max);
     input.step = String(s.step);
     input.value = String(s.value);
     input.disabled = s.disabled;
-    input.setAttribute("aria-valuetext", s.formatted);
+    input.setAttribute("aria-valuetext", s.formatted + unit);
     control.toggleAttribute("data-dragging", s.dragging);
     control.toggleAttribute("data-disabled", s.disabled);
   };
@@ -264,10 +282,17 @@ export function mountKitKnob(root: HTMLElement, label: string, options: KnobOpti
   };
 }
 
-export function mountKitFader(root: HTMLElement, label: string, options: FaderOptions) {
+export function mountKitFader(
+  root: HTMLElement,
+  label: string,
+  options: FaderOptions,
+  unit = ""
+) {
   const control = element("div", "fader-control", root);
   control.style.touchAction = "none";
   const track = element("div", "fader-track", control);
+  // React sets this inline on the track; the indicator is positioned against it.
+  track.style.position = "relative";
   const indicator = element("div", "fader-indicator", track);
   const thumb = element("div", "fader-thumb", control);
   const input = element("input", "visually-hidden", thumb);
@@ -288,13 +313,13 @@ export function mountKitFader(root: HTMLElement, label: string, options: FaderOp
     thumb.style.translate = "-50% 0";
     indicator.style.height = `${s.fill.to - s.fill.from}%`;
     indicator.style.bottom = `${s.fill.from}%`;
-    output.textContent = s.formatted;
+    output.textContent = s.formatted + unit;
     input.min = String(s.min);
     input.max = String(s.max);
     input.step = String(s.step);
     input.value = String(s.value);
     input.disabled = s.disabled;
-    input.setAttribute("aria-valuetext", s.formatted);
+    input.setAttribute("aria-valuetext", s.formatted + unit);
     control.toggleAttribute("data-dragging", s.dragging);
     control.toggleAttribute("data-disabled", s.disabled);
   };
@@ -333,7 +358,7 @@ export function mountKitFader(root: HTMLElement, label: string, options: FaderOp
 }
 ```
 
-Pass `dragMode: "vertical"` in the knob's options (the controller reads it, and the `data-drag-mode` attribute above only draws the cursor), and `locale: "en-US"` so the readout does not follow the browser's decimal mark. Units go in the readout yourself (`output.textContent = s.formatted + " Hz"`, and the same in `aria-valuetext`). The editable readout and the registry's value formats are React only.
+Pass `dragMode: "vertical"` in the knob's options (the controller reads it, and the `data-drag-mode` attribute above only draws the cursor), and `locale: "en-US"` so the readout does not follow the browser's decimal mark. Pass the unit as the last argument (`mountKitKnob(root, "Cutoff", options, " Hz")`). `format` is an `Intl.NumberFormatOptions` object (`{ maximumFractionDigits: 0, useGrouping: false }` prints 4565, not 4,565). The editable readout and the registry's value formats are React only.
 
 ## Vue
 
