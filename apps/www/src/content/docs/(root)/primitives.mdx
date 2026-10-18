@@ -33,8 +33,7 @@ State is on the element, never behind a prop you have to read. Style it with the
 <Knob.Thumb className="cursor-grab data-dragging:cursor-grabbing" />
 ```
 
-- **Attributes.** A part has `data-disabled`, `data-dragging` and the like when they are true, and no attribute when they are not. Each part's page lists its own.
-- **CSS variables.** What changes too often to be an attribute is a variable: a knob mark's angle (`--knob-mark-angle`), a pad's position (`--xy-pad-x`, `--xy-pad-y`), a clip's source offset (`--clip-offset`), a waveform's position (`--waveform-position`), a timeline's unit (`--timeline-unit`). Position with `calc()`, and the browser follows without React re-rendering.
+- **Attributes and variables.** A part has `data-disabled`, `data-dragging` and the like when they are true, and no attribute when they are not. What changes too often to be an attribute is a CSS variable, such as a knob mark's angle or a timeline's unit. [Headless styling](/docs/headless-styling) lists both for every part.
 - **State functions.** `className` and `style` can be functions of the part's state:
 
 ```tsx
