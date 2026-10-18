@@ -188,3 +188,7 @@
   background: var(--ink);
   border-color: var(--ink);
 }
+.skin-phosphor {
+  --focus: var(--ink);
+  --waveform-color: #3d8c5c;
+}

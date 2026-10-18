@@ -247,3 +247,7 @@
 .skin-synth70::after {
   right: 0;
 }
+.skin-synth70 {
+  --focus: var(--ink);
+  --waveform-color: #8f8a80;
+}

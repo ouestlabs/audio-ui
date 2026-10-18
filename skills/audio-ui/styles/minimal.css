@@ -173,3 +173,6 @@
   color: var(--paper);
   background: var(--ink);
 }
+.skin-minimal {
+  --focus: var(--ink);
+}

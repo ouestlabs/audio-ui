@@ -245,3 +245,7 @@
   filter: none;
   transform: translateY(2px);
 }
+.skin-console {
+  --focus: var(--ink);
+  --waveform-color: #8c9096;
+}

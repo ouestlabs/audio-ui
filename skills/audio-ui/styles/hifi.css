@@ -215,3 +215,7 @@
     0 0 8px rgb(125 255 180 / 0.3);
   transform: translateY(1px);
 }
+.skin-hifi {
+  --focus: var(--ink);
+  --waveform-color: #8a8f93;
+}

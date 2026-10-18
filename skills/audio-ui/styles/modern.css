@@ -205,3 +205,6 @@
   background: var(--signal);
   border-color: var(--signal);
 }
+.skin-modern {
+  --focus: var(--ink);
+}

@@ -173,3 +173,7 @@
   box-shadow: none;
   transform: translate(3px, 3px);
 }
+.skin-brutalist {
+  --focus: var(--ink);
+  --waveform-color: #8a8576;
+}

@@ -243,3 +243,6 @@
     #b98f4a
   );
 }
+.skin-blackface {
+  --focus: var(--ink);
+}

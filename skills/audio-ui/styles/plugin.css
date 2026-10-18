@@ -254,3 +254,6 @@
   fill: rgb(30 144 255 / 0.35);
   stroke: #6cc0ff;
 }
+.skin-plugin {
+  --focus: var(--ink);
+}

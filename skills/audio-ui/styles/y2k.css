@@ -220,3 +220,7 @@
     inset 0 0 0 2px rgb(255 255 255 / 0.55);
   transform: translateY(2px);
 }
+.skin-y2k {
+  --focus: var(--ink);
+  --waveform-color: #5aa7b3;
+}
