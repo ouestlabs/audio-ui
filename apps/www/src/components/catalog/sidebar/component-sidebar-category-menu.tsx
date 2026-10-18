@@ -1,9 +1,12 @@
 "use client";
 
+import { GridIcon } from "@audio-ui/icons/react";
 import { Link, useLocation } from "@tanstack/react-router";
 import * as React from "react";
 import { ComponentUpdateIndicator } from "@/components/docs/catalog/component-update-indicator";
+import { GroupLabel } from "@/components/docs/page/sidebar";
 import { SidebarGroup, SidebarGroupContent } from "@/components/ui/sidebar";
+import { useGroupFolding } from "@/hooks/use-sidebar-groups";
 import {
   serializeDesignSystemSearchParams,
   useDesignSystemSearchParams,
@@ -30,6 +33,18 @@ export const ComponentSidebarCategoryMenu = React.memo(
     const { totalCount, categoryCounts } = useComponents();
     const pathname = useLocation({ select: (location) => location.pathname });
     const [params] = useDesignSystemSearchParams();
+    const { collapsed, setOpen } = useGroupFolding();
+    // The group of the category being read opens when the reader lands on it.
+    const currentGroup = categoryGroups.find((group) =>
+      group.names.some(
+        (category) => pathname === `/components/${normalizeSlug(category)}`
+      )
+    )?.label;
+    React.useEffect(() => {
+      if (currentGroup) {
+        setOpen(currentGroup, true);
+      }
+    }, [currentGroup, setOpen]);
 
     // Build href with preserved design system params
     const buildHref = React.useCallback(
@@ -52,45 +67,60 @@ export const ComponentSidebarCategoryMenu = React.memo(
             preload={false}
             to={buildHref("/components")}
           >
-            <span>All components</span>
+            <span className="flex items-center gap-2">
+              <GridIcon
+                className="size-3.5 shrink-0 text-site-muted-foreground"
+                weight="fill"
+              />
+              All components
+            </span>
             <span className="text-site-muted-foreground text-xs">
               {totalCount}
             </span>
           </Link>
-          {categoryGroups.map((group) => (
-            <React.Fragment key={group.label}>
-              <p className="mt-3 mb-1 px-2 text-site-muted-foreground text-xs">
-                {group.label}
-              </p>
-              {group.names.map((category) => {
-                const basePath = `/components/${normalizeSlug(category)}`;
+          {categoryGroups.map((group) => {
+            const open = !collapsed.has(group.label);
+            return (
+              <React.Fragment key={group.label}>
+                <GroupLabel
+                  collapsible
+                  current={group.label === currentGroup}
+                  onOpenChange={setOpen}
+                  open={open}
+                  title={group.label}
+                />
+                {open
+                  ? group.names.map((category) => {
+                      const basePath = `/components/${normalizeSlug(category)}`;
 
-                return (
-                  <Link
-                    className={cn(
-                      linkClassName,
-                      pathname === basePath && activeClassName
-                    )}
-                    key={category}
-                    onClick={onSelect}
-                    preload={false}
-                    to={buildHref(basePath)}
-                  >
-                    <span>
-                      {getCategoryInfo(category)?.label ??
-                        formatLabel(category)}
-                    </span>
-                    <span className="flex shrink-0 items-center gap-2">
-                      <ComponentUpdateIndicator category={category} />
-                      <span className="text-site-muted-foreground text-xs">
-                        {categoryCounts[category] || 0}
-                      </span>
-                    </span>
-                  </Link>
-                );
-              })}
-            </React.Fragment>
-          ))}
+                      return (
+                        <Link
+                          className={cn(
+                            linkClassName,
+                            pathname === basePath && activeClassName
+                          )}
+                          key={category}
+                          onClick={onSelect}
+                          preload={false}
+                          to={buildHref(basePath)}
+                        >
+                          <span>
+                            {getCategoryInfo(category)?.label ??
+                              formatLabel(category)}
+                          </span>
+                          <span className="flex shrink-0 items-center gap-2">
+                            <ComponentUpdateIndicator category={category} />
+                            <span className="text-site-muted-foreground text-xs">
+                              {categoryCounts[category] || 0}
+                            </span>
+                          </span>
+                        </Link>
+                      );
+                    })
+                  : null}
+              </React.Fragment>
+            );
+          })}
         </SidebarGroupContent>
       </SidebarGroup>
     );
