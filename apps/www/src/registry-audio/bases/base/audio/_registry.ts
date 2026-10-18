@@ -851,6 +851,19 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
+    dependencies: ["@audio-ui/core"],
+    description:
+      "A needle meter: a dial in dB that a live level moves, with the VU or the PPM ballistics of @audio-ui/core/meter. The needle turns outside React, so the dial does not re-render with the signal.",
+    files: [
+      {
+        path: "audio/elements/needle-meter.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "needle-meter",
+    type: "registry:ui",
+  },
+  {
     dependencies: ["@audio-ui/react"],
     description:
       "Draws audio: a seekable waveform with regions and markers, a live waveform that scrolls with the signal, and a bar visualizer.",

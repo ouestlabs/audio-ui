@@ -96,6 +96,11 @@
   },
   {
     "categories": ["meter"],
+    "name": "needle-meter-demo",
+    "title": "needle-meter-demo"
+  },
+  {
+    "categories": ["meter"],
     "name": "meter-horizontal-demo",
     "title": "meter-horizontal-demo"
   },

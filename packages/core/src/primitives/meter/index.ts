@@ -9,6 +9,7 @@ export {
   type LevelScale,
   type LevelScaleFunction,
   levelPosition,
+  vuDeflection,
 } from "./scale.ts";
 export {
   channelView,

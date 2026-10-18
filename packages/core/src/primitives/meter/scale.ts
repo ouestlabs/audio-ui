@@ -34,6 +34,16 @@ export function iecDeflection(level: number): number {
   return (level + 20) * 2.5 + 50;
 }
 
+/**
+ * The deflection of a VU meter's pointer. It moves with the voltage of the
+ * signal, not with its dB, so on a scale that ends at +3 VU the mark of 0 VU
+ * sits at 71% of the length and that of -20 VU at 7%. Give it to
+ * `levelPosition` from `Number.NEGATIVE_INFINITY`, where the pointer rests.
+ */
+export function vuDeflection(level: number): number {
+  return 10 ** (level / 20);
+}
+
 const evenly: LevelScaleFunction = (level) => level;
 
 /** A function from a level to its position along the length, 0 at `min` and 1 at `max`. */

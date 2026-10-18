@@ -29,6 +29,7 @@ const CANONICAL_COMPONENT_DOC_SLUGS = [
   "knob",
   "meter",
   "mixer",
+  "needle-meter",
   "pad",
   "piano",
   "piano-roll",

@@ -11,6 +11,7 @@
     "pad",
     "---Displays---",
     "meter",
+    "needle-meter",
     "waveform",
     "plot",
     "spectrum-analyzer",

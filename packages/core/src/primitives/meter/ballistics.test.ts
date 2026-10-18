@@ -18,35 +18,54 @@ function run(
   return meter.value;
 }
 
+/** The voltage a level in dB stands for: a VU pointer follows it. */
+const voltage = (level: number) => 10 ** (level / 20);
+
 describe("VU ballistics", () => {
-  test("reaches 99% of a step in 300 ms", () => {
+  test("first reaches 99% of a step in 300 ms", () => {
     const meter = createVuBallistics();
     meter.reset(FLOOR_DB);
-    const target = -6;
-    const after = run(meter, target, 0.3);
-    const reached = (after - FLOOR_DB) / (target - FLOOR_DB);
-    expect(reached).toBeGreaterThan(0.98);
-    expect(reached).toBeLessThan(1);
+    const target = voltage(-6);
+    expect(voltage(run(meter, -6, 0.28, 0.001))).toBeLessThan(0.99 * target);
+    expect(voltage(run(meter, -6, 0.04, 0.001))).toBeGreaterThan(0.99 * target);
   });
 
-  test("falls as slowly as it rises", () => {
-    const up = createVuBallistics();
-    up.reset(FLOOR_DB);
-    run(up, -6, 1);
-    const down = createVuBallistics();
-    down.reset(-6);
-    const fallen = run(down, FLOOR_DB, 0.3);
-    expect(fallen).toBeGreaterThan(-6 - 60 * 0.9);
+  test("overshoots a step by 1 to 1.5%", () => {
+    const meter = createVuBallistics();
+    meter.reset(FLOOR_DB);
+    let peak = 0;
+    for (let frame = 0; frame < 120; frame += 1) {
+      peak = Math.max(peak, voltage(meter.step(-6, 1 / 60)));
+    }
+    const overshoot = peak / voltage(-6) - 1;
+    expect(overshoot).toBeGreaterThan(0.01);
+    expect(overshoot).toBeLessThan(0.015);
   });
 
-  test("keeps the reading between the level it follows and where it started", () => {
+  test("falls as fast as it rises, and stops at the floor", () => {
+    const meter = createVuBallistics();
+    meter.reset(-6);
+    expect(voltage(run(meter, FLOOR_DB, 0.32, 0.001))).toBeLessThan(
+      0.01 * voltage(-6)
+    );
+    run(meter, FLOOR_DB, 2);
+    expect(meter.value).toBe(FLOOR_DB);
+  });
+
+  test("keeps the reading above where it started and within 1.5% of the level it follows", () => {
     const meter = createVuBallistics();
     meter.reset(-20);
     for (let i = 0; i < 1000; i += 1) {
       const value = meter.step(-3, 1 / 60);
       expect(value).toBeGreaterThanOrEqual(-20);
-      expect(value).toBeLessThanOrEqual(-3);
+      expect(voltage(value)).toBeLessThanOrEqual(voltage(-3) * 1.015);
     }
+  });
+
+  test("settles after a long pause between two frames", () => {
+    const meter = createVuBallistics();
+    meter.reset(FLOOR_DB);
+    expect(meter.step(-6, 30)).toBeCloseTo(-6, 1);
   });
 });
 
