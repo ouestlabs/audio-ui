@@ -11,9 +11,9 @@ import {
   type ClipAction,
   type Clipping,
   type Mix,
+  mixOf,
   type TimeSelection,
   type TrackKind,
-  UNITY_MIX,
 } from "@/registry-audio/bases/base/lib/arrangement";
 import {
   type ArrangementCommand,
@@ -102,26 +102,7 @@ export function useArrangement({
   const selectedIds = selection?.clips ?? NO_IDS;
   const selectedTracks = selection?.tracks ?? NO_IDS;
 
-  // What each track's header sets, and the heights set by hand (a track with none shares the room left).
-  const [mixes, setMixes] = useState<Record<string, Mix>>({});
-  const mixOf = useCallback(
-    (track: ArrangementTrack): Mix =>
-      mixes[track.id] ?? { ...UNITY_MIX, color: track.color },
-    [mixes]
-  );
-  const changeMix = useCallback(
-    (trackId: string, patch: Partial<Mix>) =>
-      setMixes((all) => {
-        const color =
-          stateRef.current.doc.tracks.find((track) => track.id === trackId)
-            ?.color ?? 0;
-        return {
-          ...all,
-          [trackId]: { ...(all[trackId] ?? { ...UNITY_MIX, color }), ...patch },
-        };
-      }),
-    []
-  );
+  // The heights set by hand (a track with none shares the room left).
   const [heights, setHeights] = useState<Record<string, number>>({});
   // Folded tracks are strips: they keep the height set by hand for when they open again.
   const [folded, setFolded] = useState<Record<string, boolean>>({});
@@ -164,6 +145,21 @@ export function useArrangement({
         parameter: AutomatedParameter,
         points: readonly Breakpoint[] | null
       ) => dispatch({ type: "change-automation", trackId, parameter, points }),
+      changeMix: (trackId: string, patch: Partial<Mix>) => {
+        const { color, ...rest } = patch;
+        if (color !== undefined) {
+          dispatch({ type: "set-track-color", id: trackId, color });
+        }
+        if (Object.keys(rest).length === 0) {
+          return;
+        }
+        // A fader's drag is one step, closed by `settleClipEdit`; a switch is a step of its own.
+        dispatch({
+          type: "gain" in rest || "pan" in rest ? "change-mix" : "set-mix",
+          id: trackId,
+          patch: rest,
+        });
+      },
       changeClip: (
         id: string,
         value: TimelinePrimitive.Clip.Value,
@@ -271,7 +267,6 @@ export function useArrangement({
     ...commands,
     canRedo: canRedo(history),
     canUndo: canUndo(history),
-    changeMix,
     clips: doc.clips,
     copying: gesture.copying ?? NO_COPIES,
     duration: doc.duration,

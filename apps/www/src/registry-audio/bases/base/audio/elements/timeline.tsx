@@ -540,6 +540,7 @@ function TimelineTrackControls({
   mix,
   name,
   onMix,
+  onMixCommit,
   onDuplicate,
   onInsert,
   onRemove,
@@ -563,6 +564,8 @@ function TimelineTrackControls({
   mix: Mix;
   name: string;
   onMix: (trackId: string, patch: Partial<Mix>) => void;
+  /** Called when a drag of the gain or the pan ends, to close it as one undo step. */
+  onMixCommit?: (trackId: string) => void;
   /** Gives the menu a "Duplicate" entry. */
   onDuplicate?: (trackId: string) => void;
   /** Gives the menu an "Insert track" entry: a new track after this one. */
@@ -593,6 +596,10 @@ function TimelineTrackControls({
     (value: number | readonly number[]) =>
       onMix(trackId, { pan: Array.isArray(value) ? value[0] : Number(value) }),
     [onMix, trackId]
+  );
+  const handleMixCommit = useCallback(
+    () => onMixCommit?.(trackId),
+    [onMixCommit, trackId]
   );
   const handleColor = useCallback(
     (event: MouseEvent<HTMLElement>) =>
@@ -775,6 +782,7 @@ function TimelineTrackControls({
               max={1}
               min={0}
               onValueChange={handleGain}
+              onValueCommitted={handleMixCommit}
               orientation="horizontal"
               size="sm"
               step={0.01}
@@ -791,6 +799,7 @@ function TimelineTrackControls({
               max={1}
               min={-1}
               onValueChange={handlePan}
+              onValueCommitted={handleMixCommit}
               size="sm"
               step={0.01}
               value={mix.pan}

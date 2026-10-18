@@ -16,14 +16,16 @@ import {
   setClipFadeShape,
   splitClip,
 } from "@audio-ui/react";
-import type {
-  Arranged,
-  ArrangementTrack,
-  AutomatedParameter,
-  ClipAction,
-  Clipping,
-  TimeSelection,
-  TrackKind,
+import {
+  type Arranged,
+  type ArrangementTrack,
+  type AutomatedParameter,
+  type ClipAction,
+  type Clipping,
+  type Mix,
+  mixOf,
+  type TimeSelection,
+  type TrackKind,
 } from "@/registry-audio/bases/base/lib/arrangement";
 import {
   beginChange,
@@ -576,11 +578,15 @@ export type ArrangementCommand =
   | { type: "add-signature"; at: number }
   /** A drag of the loop: a burst, which `settle-clip-edit` closes into one step. */
   | { type: "change-loop"; range: Span }
+  /** A drag of a header's gain or pan: a burst, which `settle-clip-edit` closes into one step. */
+  | { type: "change-mix"; id: string; patch: Partial<Omit<Mix, "color">> }
   | { type: "move-signature"; id: string; to: number }
   | { type: "remove-locator"; at: number }
   | { type: "remove-signature"; id: string }
   | { type: "rename-locator"; at: number; name: string }
   | { type: "set-loop"; loop: Partial<ArrangementLoop> }
+  | { type: "set-mix"; id: string; patch: Partial<Omit<Mix, "color">> }
+  | { type: "set-track-color"; id: string; color: number }
   | {
       type: "set-signature";
       id: string;
@@ -960,6 +966,48 @@ function moveTrack(
   });
 }
 
+function changeTrack(
+  state: ArrangementState,
+  id: string,
+  change: (track: ArrangementTrack) => ArrangementTrack,
+  write: typeof edit
+): ArrangementState {
+  return write(state, (doc) => ({
+    ...doc,
+    tracks: doc.tracks.map((track) =>
+      track.id === id ? change(track) : track
+    ),
+  }));
+}
+
+/** Whether `patch` says nothing the mix does not already say. */
+function sameMix(mix: Mix, patch: Partial<Mix>): boolean {
+  return (Object.keys(patch) as (keyof Mix)[]).every(
+    (key) => mix[key] === patch[key]
+  );
+}
+
+function setMix(
+  state: ArrangementState,
+  id: string,
+  patch: Partial<Omit<Mix, "color">>,
+  write: typeof edit
+): ArrangementState {
+  const track = state.doc.tracks.find((item) => item.id === id);
+  if (!track || sameMix(mixOf(track), patch)) {
+    return state;
+  }
+  return changeTrack(
+    state,
+    id,
+    (item) => {
+      const { color: _color, ...mix } = mixOf(item);
+      return { ...item, mix: { ...mix, ...patch } as Mix };
+    },
+    write
+  );
+}
+
 function renameTrack(
   state: ArrangementState,
   id: string,
@@ -1320,6 +1368,7 @@ const handlers: Handlers = {
   "change-clip": (state, { id, value, details }) =>
     changeClip(state, id, value, details),
   "change-loop": (state, { range }) => changeLoop(state, range),
+  "change-mix": (state, { id, patch }) => setMix(state, id, patch, burst),
   "move-signature": (state, { id, to }) =>
     changeSignature(state, id, (change) => ({
       ...change,
@@ -1337,6 +1386,11 @@ const handlers: Handlers = {
     })),
   "rename-locator": (state, { at, name }) => renameLocator(state, at, name),
   "set-loop": (state, { loop }) => setLoop(state, loop),
+  "set-mix": (state, { id, patch }) => setMix(state, id, patch, edit),
+  "set-track-color": (state, { id, color }) =>
+    state.doc.tracks.find((item) => item.id === id)?.color === color
+      ? state
+      : changeTrack(state, id, (track) => ({ ...track, color }), edit),
   "set-signature": (state, { id, beatsPerBar, beatUnit }) =>
     changeSignature(state, id, (change) => ({
       ...change,
