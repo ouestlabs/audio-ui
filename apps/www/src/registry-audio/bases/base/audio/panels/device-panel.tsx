@@ -315,21 +315,25 @@ function Activator({
     [device, onValueChange, parameter.id, value]
   );
   return (
-    <Toggle
-      aria-label={parameter.label}
-      className="size-4 min-h-0 min-w-0 p-0 aria-pressed:border-primary aria-pressed:bg-primary"
-      onPressedChange={change}
-      pressed={on}
-      size="sm"
-      variant="outline"
-    />
+    // A cell as tall as the buttons at the end, so the square sits the same distance from the top, the bottom and the start of the bar.
+    <span className="flex size-6 shrink-0 items-center justify-center">
+      <Toggle
+        aria-label={parameter.label}
+        className="size-4 min-h-0 min-w-0 rounded-[max(0px,calc(var(--device-radius,0.5rem)-0.5625rem))] p-0 aria-pressed:border-primary aria-pressed:bg-primary"
+        onPressedChange={change}
+        pressed={on}
+        size="sm"
+        variant="outline"
+      />
+    </span>
   );
 }
 
 /**
  * The title bar of a device: its on and off square, its name, and whatever the
  * face puts at the end. The buttons at the end sit the same distance from the
- * top, the bottom and the right edge of the bar.
+ * top, the bottom and the right edge of the bar, and the square sits the same
+ * distance from the top, the bottom and the left edge.
  */
 function DeviceHeader<const Parameters extends readonly ParameterDescriptor[]>({
   activator,
@@ -343,7 +347,7 @@ function DeviceHeader<const Parameters extends readonly ParameterDescriptor[]>({
   );
   return (
     <div
-      className="flex items-center gap-2 border-b bg-muted/40 py-1 ps-2.5 pe-1"
+      className="flex items-center gap-1 border-b bg-muted/40 p-1"
       data-slot="device-header"
     >
       {parameter?.kind === "toggle" ? (
@@ -354,7 +358,11 @@ function DeviceHeader<const Parameters extends readonly ParameterDescriptor[]>({
           value={value as unknown as AnyState}
         />
       ) : null}
-      <span className="font-medium text-xs">{device.name}</span>
+      <span
+        className={`font-medium text-xs ${parameter?.kind === "toggle" ? "" : "ps-1.5"}`}
+      >
+        {device.name}
+      </span>
       {/* The buttons at the end sit 4 px from the frame's corner, so their own corner is the frame's less that and its 1 px border: concentric, whatever the style. */}
       <div className="ms-auto flex items-center gap-2 [&_button]:rounded-[max(0px,calc(var(--device-radius,0.5rem)-0.375rem))]">
         {children}
