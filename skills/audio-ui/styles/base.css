@@ -376,7 +376,7 @@
 
 /* Waveform: the canvas draws the peaks, the playhead sits at --waveform-position (set inline by the part) */
 .waveform-control {
-  --waveform-color: color-mix(in oklab, currentColor 60%, transparent);
+  --waveform-color: var(--ink-dim, currentColor);
   --waveform-progress-color: var(
     --accent,
     var(--signal, var(--amber, currentColor))

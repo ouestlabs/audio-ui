@@ -1,6 +1,6 @@
 # Directions
 
-Eleven skins ready to copy, each verified in a browser on the same set of parts: knobs, faders, a stereo meter, an XY pad, drum pads and a keyboard. Copy `styles/base.css` and one skin into the project, then the markup below.
+Fourteen skins ready to copy, each verified in a browser on the same set of parts: knobs, faders, a stereo meter, an XY pad, drum pads and a keyboard. Copy `styles/base.css` and one skin into the project, then the markup below.
 
 ```tsx
 import "./audio-ui/base.css";
@@ -242,7 +242,7 @@ export function Panel({
   skin,
   title,
 }: {
-  skin: "retro" | "minimal" | "modern" | "tape" | "phosphor" | "hifi" | "brutalist" | "y2k" | "console" | "synth70" | "tube";
+  skin: "retro" | "minimal" | "modern" | "tape" | "phosphor" | "hifi" | "brutalist" | "y2k" | "console" | "synth70" | "tube" | "solidstate" | "plugin" | "blackface";
   title: string;
 }) {
   return (
@@ -319,7 +319,7 @@ export function Panel({
 }
 ```
 
-`materials.css` is needed by tape, phosphor, hifi, y2k, console, synth70 and tube; retro, minimal, modern and brutalist are self-contained. The skin is the class on the panel (`skin-retro`, `skin-minimal`, `skin-modern`), so every selector is scoped and two skins can sit on one page. The tokens are the custom properties at the top of each skin: change those first.
+`materials.css` is needed by tape, phosphor, hifi, y2k, console, synth70, tube, solidstate, plugin and blackface; retro, minimal, modern and brutalist are self-contained. The skin is the class on the panel (`skin-retro`, `skin-minimal`, `skin-modern`), so every selector is scoped and two skins can sit on one page. The tokens are the custom properties at the top of each skin: change those first.
 
 ## Retro: a hardware faceplate
 
@@ -350,6 +350,9 @@ Read [hardware.md](./hardware.md) before composing a retro panel: it explains wh
 - **y2k** (`styles/y2k.css`): translucent candy plastic. A pale blue shell, teal caps with a gloss band, one orange accent, large radii.
 - **console** (`styles/console.css`): a mixing console channel. A slate panel, caps colored by section (the second and third knob change color), a long fader with ticks and a lamp ladder.
 - **tube** (`styles/tube.css`): a vintage tube compressor. Warm grey enamel, cream print at 5.2:1, black knurled caps with a white line, an amber lamp; pair it with the `Vu` needle.
+- **solidstate** (`styles/solidstate.css`): a large-format console channel. Pale grey enamel, dark print, caps colored by section (red, blue, green), tall dark fader caps with a colored line, an LED ladder.
+- **plugin** (`styles/plugin.css`): a glossy software plugin window. Light blue-grey metal, chunky white knobs with a blue value ring, dark glass displays, rounded white keys.
+- **blackface** (`styles/blackface.css`): a black-face rack unit. A brushed black faceplate in a silver trim, silver knurled caps, a big VU (the VU width variable), engraved white print, a red lamp.
 - **synth70** (`styles/synth70.css`): a 70s monophonic synth. A black panel between wood cheeks, white print, an amber lamp, rocker toggles.
 
 Most are built from `styles/materials.css` and the shared tokens (tape, phosphor, console and hifi lean on them most; y2k and synth70 set only the light and dark tokens and draw the rest by hand, since candy gloss and wood are not in the materials), so each is about sixty lines: read the closest one before writing your own. Screws, the rocker and the lamp rim are retro's; tape, hifi and the others take `.lamp` from `materials.css`.
@@ -375,7 +378,7 @@ Focus lands on the input nested in each thumb, so draw the ring on the thumb wit
 
 ## Controls beyond the kit's parts
 
-- **Waveform.Root:** `peaks` (amplitudes 0 to 1, or `{ min, max }` pairs), `value` (a fraction, or seconds with `duration`), `onValueChange(position, details)` to seek your audio, `onValueCommitted`, `range`, `source` for a live signal. Parts: `Control > Canvas`, `Playhead`, `Thumb`, `Region`, `Marker`, `Hover`. The `Bars` part is the DOM alternative to `Canvas`, with `count` (default 24) and `mirrored`.
+- **Waveform.Root:** `peaks` (amplitudes 0 to 1, or `{ min, max }` pairs), `value` (a fraction, or seconds with `duration`), `onValueChange(position, details)` to seek your audio, `onValueCommitted`, `range`, `source` for a live signal. The canvas reads `--waveform-color` and `--waveform-progress-color` as plain colors (a `color-mix()` or a gradient does not work there). Parts: `Control > Canvas`, `Playhead`, `Thumb`, `Region`, `Marker`, `Hover`. The `Bars` part is the DOM alternative to `Canvas`, with `count` (default 24) and `mirrored`.
 - **Plot.Root:** `minX`, `maxX`, `minY`, `maxY`, `scaleX="log"`. Parts: `Graph` (the svg: children go inside it), `Line axis value`, `Trace source fillTo`, `Curve`, `Band`, `Handle`. `Plot.Root` has an inline `position: relative`, so size it with `height`.
 - **Pad.Root:** `onPadOn` and `onPadOff` go on the Root. Only the first pad is in the tab order (arrow keys move between pads), so a test must Tab to it, then press Space or Enter.
 - **Piano.Root:** `minPitch`, `maxPitch`, `onNoteOn(pitch, details)`, `onNoteOff(pitch, details)`, `activeNotes` (pitches held by something else, such as a computer keyboard). The black keys come before the white keys in the DOM.
