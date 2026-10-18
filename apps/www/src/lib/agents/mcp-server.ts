@@ -1,6 +1,11 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 
+import {
+  pickSection,
+  sectionNames,
+  sectionSlug,
+} from "@/lib/agents/doc-sections";
 import { siteConfig } from "@/lib/config";
 import { processMdxForLLMs, readRawDoc } from "@/lib/docs/content/docs-text";
 import { source } from "@/lib/docs/content/source";
@@ -33,8 +38,7 @@ function text(value: unknown) {
   return {
     content: [
       {
-        text:
-          typeof value === "string" ? value : JSON.stringify(value, null, 2),
+        text: typeof value === "string" ? value : JSON.stringify(value),
         type: "text" as const,
       },
     ],
@@ -54,7 +58,7 @@ export function createAudioUiMcpServer() {
     {
       annotations: readOnly,
       description:
-        "List every audio/ui component (Knob, Fader, XY Pad, Envelope, Meter, Waveform, Plot, Spectrum Analyzer, Timeline, Sequencer, Pad, Piano, Piano Roll, Transport, Scrubber) with its summary, docs URL and install command. Start here to see what exists.",
+        "List every audio/ui component page (controls, displays, workstation parts and devices) with its summary, docs URL and install command. Each name works with get_component_docs. Start here to see what exists.",
       inputSchema: {},
       title: "List audio/ui components",
     },
@@ -78,15 +82,21 @@ export function createAudioUiMcpServer() {
     {
       annotations: readOnly,
       description:
-        "Get the full documentation of one audio/ui component as markdown: installation, API, props, accessibility, examples and the source to copy. Use a name from list_components (for example 'knob' or 'piano-roll').",
+        "Get the documentation of one audio/ui component as markdown: installation, API, props, accessibility, examples and the source to copy. Use a name from list_components (for example 'knob' or 'piano-roll'). Pass a section (for example 'installation' or 'api-reference') to get only that part.",
       inputSchema: {
         name: z
           .string()
           .describe("Component slug from list_components, e.g. 'knob'."),
+        section: z
+          .string()
+          .optional()
+          .describe(
+            "One section of the page, e.g. 'installation', 'usage' or 'api-reference'. Empty returns the whole page."
+          ),
       },
       title: "Get component docs",
     },
-    async ({ name }) => {
+    async ({ name, section }) => {
       const slug = name.trim().toLowerCase();
       const page = componentPages().find((p) => p.slugs.at(-1) === slug);
 
@@ -100,8 +110,20 @@ export function createAudioUiMcpServer() {
         };
       }
 
-      const raw = await readRawDoc(page.path);
-      return text(await processMdxForLLMs(raw));
+      const markdown = await processMdxForLLMs(await readRawDoc(page.path));
+      if (!section) {
+        return text(markdown);
+      }
+      const part = pickSection(markdown, sectionSlug(section));
+      if (part === undefined) {
+        return {
+          ...text(
+            `No section '${section}' in ${slug}. Sections: ${sectionNames(markdown).join(", ")}.`
+          ),
+          isError: true,
+        };
+      }
+      return text(part);
     }
   );
 
