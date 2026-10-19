@@ -71,7 +71,7 @@ body {
 .synth-header {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem 1rem;
+  gap: 0.75rem 1.5rem;
   align-items: center;
 }
 
@@ -101,10 +101,10 @@ body {
 .lcd {
   display: grid;
   flex: 1;
-  gap: 0.15rem;
+  gap: 0.3rem;
   align-content: center;
-  height: 2.6rem;
-  padding: 0.3rem 0.65rem;
+  height: 3rem;
+  padding: 0.4rem 0.9rem;
   background: #0b0a07;
   border-radius: 3px;
   box-shadow:
@@ -124,7 +124,7 @@ body {
     monospace;
   color: var(--amber);
   text-transform: uppercase;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.14em;
   white-space: nowrap;
   text-shadow: 0 0 6px rgb(255 176 40 / 0.55);
 }
@@ -150,7 +150,7 @@ body {
 .lcd-button {
   display: grid;
   place-items: center;
-  width: 2.6rem;
+  width: 3rem;
   font-size: 0.9rem;
   color: var(--ink);
   cursor: pointer;
@@ -172,7 +172,7 @@ body {
 
 .synth-power {
   display: flex;
-  gap: 0.6rem;
+  gap: 0.9rem;
   align-items: center;
   margin-left: auto;
 }
@@ -220,7 +220,7 @@ body {
   --knob-size: 2.75rem;
   position: relative;
   display: inline-grid;
-  gap: 0.55rem;
+  gap: 1rem;
   justify-items: center;
   padding-top: 0.9rem;
 }
@@ -503,8 +503,8 @@ body {
 
 .power {
   grid-auto-flow: column;
-  gap: 0.5rem;
-  padding: 0.5rem 0.8rem;
+  gap: 0.7rem;
+  padding: 0.55rem 1rem;
   background: linear-gradient(180deg, #4a423a, #2d2722);
   border-radius: 4px;
   box-shadow:
@@ -536,7 +536,7 @@ body {
   position: relative;
   display: block;
   width: 100%;
-  height: 4.5rem;
+  height: 6.5rem;
   padding-top: 4px;
   background: #0d0b0a;
   border-radius: 4px;

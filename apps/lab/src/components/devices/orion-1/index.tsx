@@ -409,7 +409,7 @@ export default function Orion1() {
         <Piano.Root
           aria-label="Keyboard"
           className="piano"
-          maxPitch={71}
+          maxPitch={83}
           minPitch={48}
           onNoteOff={noteOff}
           onNoteOn={noteOn}
