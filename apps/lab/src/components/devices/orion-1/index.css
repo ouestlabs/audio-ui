@@ -511,13 +511,15 @@ body {
     0 3px 0 #0a0908,
     0 5px 6px rgb(0 0 0 / 0.5),
     inset 0 1px 0 rgb(255 255 255 / 0.18);
+  /* Raised, it stands 2px above the line the lamp and the LCD share; pressed, it sits on it. */
+  transform: translateY(-2px);
 }
 
 .power[aria-pressed="true"] {
   box-shadow:
     0 1px 0 #0a0908,
     inset 0 2px 6px rgb(0 0 0 / 0.6);
-  transform: translateY(2px);
+  transform: none;
 }
 
 .rocker:focus-visible,
