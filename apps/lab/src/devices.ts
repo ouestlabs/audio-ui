@@ -1,9 +1,21 @@
 import { type ComponentType, lazy } from "react";
 
 /**
- * A device is a folder of `components/devices/<slug>/`: `meta.json` (a `title`, a `description`, a `category` and the `uses`:
- * the audio/ui components it is made of), `index.tsx` (the device, as the default export, with its own `h1`) and
- * optionally `index.css` and `og.png` (its social image, 1200x630). Adding the folder adds the page and its link.
+ * A device is a folder of `components/devices/<slug>/`. Adding the folder adds
+ * its page, its link, its card and its place in the sitemap.
+ *
+ * What the lab reads, at the root of the folder:
+ * - `meta.json`: a `title`, a `description`, a `category` and the `uses` (the
+ *   audio/ui components it is made of)
+ * - `index.tsx`: the device, as the default export, with its own `h1`; it only
+ *   composes the panel
+ * - `index.css` (optional): its style
+ * - `og.png` (optional): its social image, 1200x630
+ *
+ * What a device keeps for itself, by role, with the same names in each one:
+ * - `audio/`: the sound, with no React (`engine.ts`, and what it plays, such as `presets.ts`)
+ * - `ui/`: the pieces of the panel (a dial, a slider, a screen)
+ * - `use-<name>.ts`: what the panel reads and calls, which joins `ui/` to `audio/`
  */
 const metas = import.meta.glob<{
   category?: string;
