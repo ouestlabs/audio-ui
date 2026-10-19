@@ -1,13 +1,13 @@
 import { type ComponentType, lazy } from "react";
 
 /**
- * A device is a folder of `components/devices/<slug>/`: `meta.ts` (a `title`
+ * A device is a folder of `components/devices/<slug>/`: `meta.json` (a `title`
  * and a `description`), `index.tsx` (the device, as the default export) and
  * optionally `index.css`. Adding the folder adds the page and its link.
  */
 const metas = import.meta.glob<{ description: string; title: string }>(
-  "./components/devices/*/meta.ts",
-  { eager: true }
+  "./components/devices/*/meta.json",
+  { eager: true, import: "default" }
 );
 const loaders = import.meta.glob<{ default: ComponentType }>(
   "./components/devices/*/index.tsx"
