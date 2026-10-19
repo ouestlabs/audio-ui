@@ -65,7 +65,7 @@ function Home() {
                     className="aspect-1200/630 w-full rounded-lg border object-cover"
                     height={630}
                     loading="lazy"
-                    src={device.image ?? "/og/default.png"}
+                    src={device.preview ?? "/og/default.png"}
                     width={1200}
                   />
                   <span className="flex flex-col gap-1 px-1 pb-1">

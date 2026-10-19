@@ -10,7 +10,8 @@ import { type ComponentType, lazy } from "react";
  * - `index.tsx`: the device, as the default export, with its own `h1`; it only
  *   composes the panel
  * - `index.css` (optional): its style
- * - `og.png` (optional): its social image, 1200x630
+ * - `preview.png` (optional): a capture of the device, 1200x630: the gallery
+ *   shows it, and the social image generated at build frames it
  *
  * What a device keeps for itself, by role, with the same names in each one:
  * - `audio/`: the sound, with no React (`engine.ts`, and what it plays, such as `presets.ts`)
@@ -32,11 +33,14 @@ const styles = import.meta.glob<string>("./components/devices/*/index.css", {
   query: "?url",
 });
 
-const images = import.meta.glob<string>("./components/devices/*/og.png", {
-  eager: true,
-  import: "default",
-  query: "?url",
-});
+const previews = import.meta.glob<string>(
+  "./components/devices/*/preview.png",
+  {
+    eager: true,
+    import: "default",
+    query: "?url",
+  }
+);
 
 const slugOf = (path: string) => path.split("/")[3] ?? "";
 
@@ -49,7 +53,8 @@ export const DEVICES = Object.entries(metas)
       category: meta.category ?? "Other",
       Component: load ? lazy(load) : null,
       description: meta.description,
-      image: images[`${base}/og.png`],
+      image: `/og/${slug}.png`,
+      preview: previews[`${base}/preview.png`],
       slug,
       style: styles[`${base}/index.css`],
       title: meta.title,
