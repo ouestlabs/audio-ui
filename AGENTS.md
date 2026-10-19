@@ -24,7 +24,7 @@ audio-ui/
 │   ├── core/       # @audio-ui/core, published (framework-agnostic logic)
 │   ├── ui/         # @audio-ui/react, published (headless primitives)
 │   └── icons/      # @audio-ui/icons, published: audio glyphs (one thin stroke on a 24 grid, in four weights)
-└── skills/audio-ui # The agent skill we ship to library users (npx skills add ouestlabs/audio-ui)
+└── skills/         # The agent skills we ship to library users: audio-ui, web-audio, design, core (npx skills add ouestlabs/audio-ui)
 ```
 
 ## Commands
@@ -162,7 +162,7 @@ Step-by-step guides for the recurring jobs live in `.claude/skills/` (mirrored a
 - `change-primitive`: change a primitive or the core logic of a published package
 - `film-component`: render a component's video with `apps/video`
 
-`skills/audio-ui/` is different: it's the skill we **ship** to people using the library, not a guide for working on this repo. One rule per file in `rules/`, compiled into its `AGENTS.md` by `bun run skill:build` (from `apps/www`); its [README](skills/audio-ui/README.md) explains how to add a rule. `apps/www/test/skills.test.ts` (run in CI) fails on a malformed rule, a stale `AGENTS.md`, or a registry item, entry, data attribute or CSS variable that doesn't exist: when you rename one, update the skill in the same commit.
+`skills/` is different: it holds the four skills we **ship** to people using the library (`audio-ui`, `web-audio`, `design`, `core`, one Claude Code plugin), not guides for working on this repo. One rule per file in each skill's `rules/`, compiled into its `AGENTS.md` by `bun run skill:build` (from `apps/www`); the [README](skills/audio-ui/README.md) explains how to add a rule. `apps/www/test/skills.test.ts` (run in CI) fails on a malformed rule, a stale `AGENTS.md`, or a registry item, entry, data attribute or CSS variable that doesn't exist: when you rename one, update the skill in the same commit.
 
 ---
 

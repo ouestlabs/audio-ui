@@ -22,6 +22,13 @@ npx shadcn@latest add @audio-ui/knob
 
 See [Get started](https://www.audio-ui.dev/docs/get-started) for the registry setup.
 
+For coding agents, four skills (`audio-ui`, `web-audio`, `design`, `core`) install as one Claude Code plugin, or with the open skills CLI:
+
+```sh
+/plugin install audio-ui --marketplace ouestlabs/audio-ui
+npx skills add ouestlabs/audio-ui
+```
+
 ## Develop
 
 Bun workspaces and Turborepo; use `bun` and `bunx`, not `npm` or `npx`.
@@ -37,7 +44,7 @@ bun run dev    # the docs site on http://localhost:4000
 | `apps/video` | Remotion videos of the real components |
 | `packages/core` | `@audio-ui/core`, framework-agnostic logic |
 | `packages/ui` | `@audio-ui/react`, the headless primitives |
-| `skills/audio-ui` | The agent skill we ship to people using the library |
+| `skills/` | The agent skills we ship to people using the library: `audio-ui`, `web-audio`, `design`, `core` |
 
 Before opening a pull request:
 

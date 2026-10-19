@@ -28,4 +28,4 @@ const values = normalizePeaks(computePeaks(channels, 4096)); // once, at load
 
 The waveform fits the peaks to its own width and zoom.
 
-The primitive takes the result as `peaks` on `Waveform.Root` (the registry component calls the same prop `values`), and draws it on `Waveform.Canvas`; its color is the `--waveform-color` and `--waveform-progress-color` variables, and `count` and `mirrored` belong to `Waveform.Bars`, not the canvas. Markup and CSS: [directions.md](../directions.md).
+The primitive takes the result as `peaks` on `Waveform.Root` (the registry component calls the same prop `values`), and draws it on `Waveform.Canvas`; its color is the `--waveform-color` and `--waveform-progress-color` variables, and `count` and `mirrored` belong to `Waveform.Bars`, not the canvas. Markup and CSS: the design skill's `directions.md`.

@@ -1,0 +1,10 @@
+{
+  "version": "1.2.0",
+  "organization": "audio/ui",
+  "date": "October 2026",
+  "abstract": "How to give the headless audio/ui primitives a look, for AI agents and LLMs: one visual direction (retro hardware, minimal, modern), the structure each part needs, and the habits that make a panel read as an instrument. Each rule shows the incorrect markup an agent tends to write and the correct markup with the real audio/ui API.",
+  "references": [
+    "https://www.audio-ui.dev/docs",
+    "https://www.audio-ui.dev/llms.txt"
+  ]
+}

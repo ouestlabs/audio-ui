@@ -3,7 +3,12 @@ import { audio } from "@/registry-audio/bases/base/audio/_registry";
 import { components } from "@/registry-audio/bases/base/components/_registry";
 import { hooks } from "@/registry-audio/bases/base/hooks/_registry";
 import { lib } from "@/registry-audio/bases/base/lib/_registry";
-import { compileSkill, readRules, SKILL_DIR } from "../scripts/build-skill";
+import {
+  compileSkill,
+  readRules,
+  readSkillNames,
+  SKILLS_DIR as SKILL_FOLDERS,
+} from "../scripts/build-skill";
 
 /**
  * The skills in `skills/` are installed by people using the library, and
@@ -12,7 +17,10 @@ import { compileSkill, readRules, SKILL_DIR } from "../scripts/build-skill";
  */
 
 const ROOT = `${import.meta.dir}/../../..`;
-const SKILLS_DIR = `${ROOT}/skills`;
+const SKILLS_DIR = SKILL_FOLDERS;
+const HUB_DIR = `${SKILLS_DIR}/audio-ui`;
+const CORE_DIR = `${SKILLS_DIR}/core`;
+const DESIGN_DIR = `${SKILLS_DIR}/design`;
 
 const FRONTMATTER = /^---\n([\s\S]*?)\n---/;
 const SKILL_NAME = /^[a-z0-9]+(-[a-z0-9]+)*$/;
@@ -27,8 +35,9 @@ const ICON_PATH = /icon_(?:small|large): "([^"]+)"/g;
 // An `Intl.NumberFormat` unit the skill suggests, as in `{ style: "unit", unit: "hertz" }`.
 const INTL_UNIT = /unit: "([a-z-]+)"/g;
 const INTL_UNITS = new Set<string>(Intl.supportedValuesOf("unit"));
+// Not the `audio-ui` skill's own name.
 const RULE_ID =
-  /`((?:audio|live|values|a11y|core|design|style|ai)-[a-z0-9-]+)`/g;
+  /`((?:audio|live|values|a11y|core|design|style|ai)-(?!ui`)[a-z0-9-]+)`/g;
 const CORE_ENTRY = /(?<!node_modules\/)@audio-ui\/core\/([a-z0-9-]+)/g;
 // A fenced code block of a markdown file.
 const CODE_FENCE = /```\w*\n([\s\S]*?)```/g;
@@ -78,8 +87,7 @@ const coreExports = Object.keys(
 const uiSource = (await read("**/*.{ts,tsx}", `${ROOT}/packages/ui/src`))
   .map((file) => file.text)
   .join("\n");
-const { errors, rules } = await readRules();
-const skill = await Bun.file(`${SKILL_DIR}/SKILL.md`).text();
+const withRules = await readSkillNames();
 
 describe.each(skills)("skills/%s", (name) => {
   const dir = `${SKILLS_DIR}/${name}`;
@@ -168,12 +176,19 @@ describe.each(markdown)("$path", ({ path, text }) => {
   });
 });
 
-describe("skills/audio-ui rules", () => {
-  test("every rule is well formed", () => {
-    expect(errors).toEqual([]);
+describe.each(withRules)("skills/%s rules", (name) => {
+  const dir = `${SKILLS_DIR}/${name}`;
+  const load = async () => ({
+    ...(await readRules(dir)),
+    skill: await Bun.file(`${dir}/SKILL.md`).text(),
   });
 
-  test("the Quick Reference lists exactly the rules", () => {
+  test("every rule is well formed", async () => {
+    expect((await load()).errors).toEqual([]);
+  });
+
+  test("the Quick Reference lists exactly the rules", async () => {
+    const { rules, skill } = await load();
     const listed = new Set(matches(skill, RULE_ID));
     const ids = new Set(rules.map((rule) => rule.id));
     expect([...ids].filter((id) => !listed.has(id))).toEqual([]);
@@ -181,13 +196,14 @@ describe("skills/audio-ui rules", () => {
   });
 
   test("AGENTS.md is the output of bun run skill:build", async () => {
-    expect(await Bun.file(`${SKILL_DIR}/AGENTS.md`).text()).toBe(
-      await compileSkill()
+    expect(await Bun.file(`${dir}/AGENTS.md`).text()).toBe(
+      await compileSkill(dir)
     );
   });
 
   test("SKILL.md and metadata.json carry the same version", async () => {
-    const metadata = await Bun.file(`${SKILL_DIR}/metadata.json`).json();
+    const { skill } = await load();
+    const metadata = await Bun.file(`${dir}/metadata.json`).json();
     const frontmatter = Bun.YAML.parse(skill.match(FRONTMATTER)?.[1] ?? "") as {
       metadata?: { version?: string };
     };
@@ -196,7 +212,7 @@ describe("skills/audio-ui rules", () => {
 });
 
 test("core.md lists only names its entries export", async () => {
-  const core = await Bun.file(`${SKILL_DIR}/core.md`).text();
+  const core = await Bun.file(`${CORE_DIR}/core.md`).text();
   const rows = await Promise.all(
     [...core.matchAll(CORE_EXPORT_ROW)].map(async ([, entry, names = ""]) => {
       // A primitive lives in primitives/<entry>, an audio module in audio/<entry>.
@@ -223,7 +239,7 @@ afterEach(() => {
 });
 
 test("core.md's plain DOM knob works", async () => {
-  const core = await Bun.file(`${SKILL_DIR}/core.md`).text();
+  const core = await Bun.file(`${CORE_DIR}/core.md`).text();
   const blocks = [...core.matchAll(CODE_FENCE)].map(([, code = ""]) => code);
   const html = blocks.find((code) => code.includes('id="cutoff"'));
   const example = blocks.find((code) =>
@@ -297,8 +313,8 @@ test("core.md's plain DOM knob works", async () => {
   expect(changes).toBe(1);
 });
 
-describe("skills/audio-ui styles", () => {
-  const STYLES = `${SKILL_DIR}/styles`;
+describe("skills/design styles", () => {
+  const STYLES = `${DESIGN_DIR}/styles`;
   const CLASS_NAME = /className="([a-z-]+)"/g;
   const SELECTOR_CLASS = /\.([a-z][a-z0-9-]*)/g;
   const SKINS = [
@@ -324,7 +340,7 @@ describe("skills/audio-ui styles", () => {
 
   /** The kit's markup: the code block of directions.md that exports `Panel`. */
   const readPanel = async () => {
-    const directions = await Bun.file(`${SKILL_DIR}/directions.md`).text();
+    const directions = await Bun.file(`${DESIGN_DIR}/directions.md`).text();
     const block = matches(directions, CODE_FENCE).find((code) =>
       code.includes("export function Panel")
     );
@@ -393,7 +409,7 @@ describe("skills/audio-ui styles", () => {
 });
 
 test("core.md's kit knob and fader work in the plain DOM", async () => {
-  const core = await Bun.file(`${SKILL_DIR}/core.md`).text();
+  const core = await Bun.file(`${CORE_DIR}/core.md`).text();
   const example = [...core.matchAll(CODE_FENCE)]
     .map(([, code = ""]) => code)
     .find((code) => code.includes("export function mountKitKnob"));
@@ -466,7 +482,12 @@ describe("the Claude Code marketplace", () => {
   ).json() as Promise<{
     name: string;
     owner: { name: string };
-    plugins: { description: string; name: string; source: string }[];
+    plugins: {
+      description: string;
+      name: string;
+      skills: string[];
+      source: string;
+    }[];
   }>;
 
   test("it is named and owned, and lists each plugin once", async () => {
@@ -478,33 +499,26 @@ describe("the Claude Code marketplace", () => {
     );
   });
 
-  test("each plugin is a skill folder of this repository, under its own name", async () => {
+  test("each plugin is the skills folder of this repository", async () => {
     const { plugins } = await manifest;
-    const sources = await Promise.all(
-      plugins.map((plugin) =>
-        Bun.file(`${ROOT}/${plugin.source}/SKILL.md`)
-          .text()
-          .catch(() => "")
-      )
-    );
-    plugins.forEach((plugin, index) => {
+    for (const plugin of plugins) {
       expect(plugin.name).toMatch(SKILL_NAME);
       expect(plugin.description.length).toBeGreaterThan(20);
-      expect(plugin.source.startsWith("./skills/")).toBe(true);
-      expect(sources[index]).toContain(`name: ${plugin.name}\n`);
-    });
+      expect(plugin.source).toBe("./skills");
+    }
   });
 
-  test("every skill of the repository is in it", async () => {
+  test("every skill of the repository is in a plugin, once", async () => {
     const { plugins } = await manifest;
-    expect(plugins.map((plugin) => plugin.source).sort()).toEqual(
-      skills.map((name) => `./skills/${name}`).sort()
+    const listed = plugins.flatMap((plugin) => plugin.skills);
+    expect([...listed].sort()).toEqual(
+      skills.map((name) => `./${name}`).sort()
     );
   });
 });
 
 test("components.md names every registry item, but demos and retired items", async () => {
-  const catalog = await Bun.file(`${SKILL_DIR}/components.md`).text();
+  const catalog = await Bun.file(`${HUB_DIR}/components.md`).text();
   const items = [...audio, ...hooks, ...lib].filter(
     (item) => !RETIRED.test(item.description ?? "")
   );

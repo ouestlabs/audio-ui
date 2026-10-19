@@ -18,7 +18,7 @@ Before writing CSS, state one sentence: *"Direction: retro hardware, enamel pane
 | A glossy commercial software plugin window | Plugin | `styles/plugin.css` (with `styles/materials.css`) |
 | Minimal, clean, editorial, quiet, light, Swiss | Minimal | `styles/minimal.css` |
 | Modern, dark, pro, DAW, dense, flat | Modern | `styles/modern.css` |
-| A mastering, analysis or metering panel: meters, a waveform, a spectrum, a loudness readout | Modern | `styles/modern.css` (with the analysis parts of [components.md](./components.md)) |
+| A mastering, analysis or metering panel: meters, a waveform, a spectrum, a loudness readout | Modern | `styles/modern.css` (with the analysis parts of the `audio-ui` skill's `components.md`) |
 | Another look: a named era, an instrument, a material (modular, hi-fi, brutalist, Y2K, paper) | Compose it: [taste.md](./taste.md) and `styles/materials.css` |
 | Nothing | Pick from the product: instrument or effect, retro; tool or player, minimal; workstation, modern | |
 | Their own design system | Keep it. Use only `styles/base.css` for structure and style the parts with their tokens | |

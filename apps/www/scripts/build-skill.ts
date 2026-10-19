@@ -1,13 +1,15 @@
 /**
- * Compiles the audio/ui agent skill's rules (`skills/audio-ui/rules/*.md`)
- * into `skills/audio-ui/AGENTS.md`, the single document agents without skill
+ * Compiles the rules of each audio/ui agent skill (`skills/<name>/rules/*.md`)
+ * into `skills/<name>/AGENTS.md`, the single document agents without skill
  * support read, and validates the rules on the way. `test/skills.test.ts`
- * fails when the compiled file is stale or a rule is malformed.
+ * fails when a compiled file is stale or a rule is malformed.
  *
  *   bun run skill:build
  */
 
-export const SKILL_DIR = `${import.meta.dir}/../../../skills/audio-ui`;
+export const SKILLS_DIR = `${import.meta.dir}/../../../skills`;
+/** The skill the others hang from: it keeps the components, the setup and the first rules. */
+export const SKILL_DIR = `${SKILLS_DIR}/audio-ui`;
 
 const IMPACTS = [
   "CRITICAL",
@@ -56,6 +58,14 @@ interface Metadata {
   organization: string;
   references: string[];
   version: string;
+}
+
+/** The skills with rules, by folder name. */
+export async function readSkillNames(): Promise<string[]> {
+  const files = await Array.fromAsync(
+    new Bun.Glob("*/rules/_sections.md").scan({ cwd: SKILLS_DIR })
+  );
+  return files.map((file) => file.split("/")[0] ?? "").sort();
 }
 
 const isImpact = (value: unknown): value is Impact =>
@@ -199,7 +209,7 @@ export async function compileSkill(dir = SKILL_DIR): Promise<string> {
   );
 
   return `${[
-    "# audio/ui",
+    `# ${dir.endsWith("/audio-ui") ? "audio/ui" : `audio/ui ${dir.split("/").pop()}`}`,
     `**Version ${metadata.version}**  \n${metadata.organization}  \n${metadata.date}`,
     "> **Note:**  \n> This document is for agents and LLMs building audio interfaces with audio/ui. It is generated from `rules/` by `bun run skill:build` in `apps/www`: edit the rules, not this file.",
     "---",
@@ -214,11 +224,26 @@ export async function compileSkill(dir = SKILL_DIR): Promise<string> {
 }
 
 if (import.meta.main) {
-  const { errors } = await readRules();
+  const dirs = (await readSkillNames()).map((name) => ({
+    dir: `${SKILLS_DIR}/${name}`,
+    name,
+  }));
+  const checked = await Promise.all(
+    dirs.map(async ({ dir, name }) => ({
+      dir,
+      errors: (await readRules(dir)).errors.map((error) => `${name}/${error}`),
+      name,
+    }))
+  );
+  const errors = checked.flatMap((skill) => skill.errors);
   if (errors.length > 0) {
     console.error(errors.join("\n"));
     process.exit(1);
   }
-  await Bun.write(`${SKILL_DIR}/AGENTS.md`, await compileSkill());
-  console.log("skills/audio-ui/AGENTS.md written");
+  await Promise.all(
+    checked.map(async ({ dir, name }) => {
+      await Bun.write(`${dir}/AGENTS.md`, await compileSkill(dir));
+      console.log(`skills/${name}/AGENTS.md written`);
+    })
+  );
 }

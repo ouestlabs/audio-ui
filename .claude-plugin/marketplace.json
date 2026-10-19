@@ -9,14 +9,38 @@
   "plugins": [
     {
       "name": "audio-ui",
-      "source": "./skills/audio-ui",
-      "description": "Builds audio interfaces with audio/ui: picks the component, installs it, wires it to the Web Audio API without clicks, feeds live meters and playheads without re-rendering React, styles the headless primitives and lets an AI model drive them.",
+      "source": "./skills",
+      "description": "Builds audio interfaces with audio/ui, in four skills: audio-ui picks, installs and wires the components, web-audio gets sound out without clicks and keeps live meters and playheads out of React state, design styles the headless primitives into retro hardware, minimal or modern panels, and core builds the controls for Vue, Svelte, Solid, Angular and the plain DOM.",
       "category": "development",
-      "tags": ["audio", "web-audio", "react", "shadcn", "daw"],
+      "tags": [
+        "audio",
+        "web-audio",
+        "react",
+        "shadcn",
+        "daw"
+      ],
       "homepage": "https://www.audio-ui.dev/docs/agents",
       "repository": "https://github.com/ouestlabs/audio-ui",
       "license": "MIT",
-      "keywords": ["audio-ui", "audio", "knob", "fader", "midi", "synth"]
+      "keywords": [
+        "audio-ui",
+        "audio",
+        "knob",
+        "fader",
+        "midi",
+        "synth",
+        "web-audio-api",
+        "design",
+        "vue",
+        "svelte"
+      ],
+      "strict": false,
+      "skills": [
+        "./audio-ui",
+        "./core",
+        "./design",
+        "./web-audio"
+      ]
     }
   ]
 }
