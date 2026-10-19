@@ -140,7 +140,7 @@ function Section({
   );
 }
 
-export default function RetroSynth() {
+export default function Orion1() {
   const [power, setPower] = useState(true);
   const [wave, setWave] = useState("Saw");
   const [octave, setOctave] = useState("8'");
