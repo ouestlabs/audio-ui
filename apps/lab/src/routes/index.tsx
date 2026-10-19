@@ -1,12 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { DEVICES, groupByCategory } from "../devices.ts";
-import {
-  absoluteUrl,
-  jsonLd,
-  pageHead,
-  SITE,
-  websiteJsonLd,
-} from "../lib/seo.ts";
+import { cn } from "cn";
+import { FrameContent, frameClassName } from "@/components/site/layout/frame";
+import { DEVICES, groupByCategory } from "@/lib/devices";
+import { absoluteUrl, jsonLd, pageHead, SITE, websiteJsonLd } from "../lib/seo";
 
 export const Route = createFileRoute("/")({
   component: Home,
@@ -56,19 +52,24 @@ function Home() {
             {group.devices.map((device) => (
               <li key={device.slug}>
                 <Link
-                  className="group/card flex flex-col gap-3 rounded-xl border p-2 transition-colors hover:bg-accent"
+                  className={cn(
+                    frameClassName,
+                    "transition-[filter] duration-200 hover:drop-shadow-lg"
+                  )}
                   params={{ device: device.slug }}
                   to="/$device"
                 >
-                  <img
-                    alt={`${device.title}, preview`}
-                    className="aspect-1200/630 w-full rounded-lg border object-cover"
-                    height={630}
-                    loading="lazy"
-                    src={device.preview ?? "/og/default.png"}
-                    width={1200}
-                  />
-                  <span className="flex flex-col gap-1 px-1 pb-1">
+                  <FrameContent>
+                    <img
+                      alt={`${device.title}, preview`}
+                      className="aspect-1200/630 w-full object-cover"
+                      height={630}
+                      loading="lazy"
+                      src={device.preview ?? "/og/default.png"}
+                      width={1200}
+                    />
+                  </FrameContent>
+                  <span className="flex flex-col gap-1 p-3">
                     <span className="font-medium">{device.title}</span>
                     <span className="text-muted-foreground text-sm">
                       {device.description}
@@ -77,7 +78,7 @@ function Home() {
                       <span className="mt-1 flex flex-wrap gap-1">
                         {device.uses.map((name) => (
                           <span
-                            className="rounded-md border px-1.5 py-0.5 text-muted-foreground text-xs"
+                            className="rounded-md border bg-background px-1.5 py-0.5 text-muted-foreground text-xs"
                             key={name}
                           >
                             {name}

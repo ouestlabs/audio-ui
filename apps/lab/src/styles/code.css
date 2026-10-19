@@ -1,0 +1,66 @@
+/* The highlighted code: one line per row, numbered from the left, in the colors of the highlight theme (see the root route). */
+pre.th-code {
+  min-width: 0;
+  padding: 0.875rem 0;
+  margin: 0;
+  overflow-x: auto;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  outline: none;
+  background: transparent;
+}
+
+.th-code code {
+  display: grid;
+  min-width: 100%;
+  white-space: pre;
+}
+
+.th-line {
+  display: inline-block;
+  width: max-content;
+  min-width: 100%;
+}
+
+/*
+ * The gutter sticks to the left edge while the code scrolls under it. The
+ * highlight theme gives `pre.th-code` a padding and the gutter a width after
+ * this sheet, so these rules are one class more specific: with any padding
+ * left of the gutter, the code would show in that strip.
+ */
+pre.th-code.th-code--line-numbers {
+  padding-inline: 0;
+}
+
+pre.th-code.th-code--line-numbers .th-line::before {
+  position: sticky;
+  left: 0;
+  display: inline-block;
+  width: 3.5rem;
+  padding-right: 1rem;
+  color: var(--muted-foreground);
+  text-align: right;
+  content: attr(data-line);
+  background-color: var(--background);
+}
+
+/* A quiet scrollbar: thin, and visible only as a faint thumb. */
+.slim-scroll,
+.slim-scroll pre.th-code {
+  scrollbar-color: color-mix(in oklab, var(--foreground) 22%, transparent)
+    transparent;
+  scrollbar-width: thin;
+}
+
+/* On a small screen the code is set smaller, with a narrower gutter, so more of each line shows. */
+@media (max-width: 639px) {
+  pre.th-code {
+    font-size: 0.72rem;
+  }
+
+  pre.th-code.th-code--line-numbers .th-line::before {
+    width: 2.5rem;
+    padding-right: 0.6rem;
+  }
+}

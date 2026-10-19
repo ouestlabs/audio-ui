@@ -1,11 +1,11 @@
 import { Piano } from "@audio-ui/react/piano";
-import type { Param, Wave } from "./audio/engine.ts";
-import { Dial } from "./ui/dial.tsx";
-import { Lcd } from "./ui/lcd.tsx";
-import { Section } from "./ui/section.tsx";
-import { Selector } from "./ui/selector.tsx";
-import { Slider } from "./ui/slider.tsx";
-import { useOrion } from "./use-orion.ts";
+import type { Param, Wave } from "./audio/engine";
+import { Dial } from "./ui/dial";
+import { Lcd } from "./ui/lcd";
+import { Section } from "./ui/section";
+import { Selector } from "./ui/selector";
+import { Slider } from "./ui/slider";
+import { useOrion } from "./use-orion";
 
 const WAVES: Wave[] = ["Tri", "Saw", "Square", "Pulse"];
 const ENVELOPE: { label: string; param: Param }[] = [

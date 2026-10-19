@@ -9,7 +9,7 @@
 import { Resvg } from "@resvg/resvg-js";
 import type { ReactElement } from "react";
 import satori from "satori";
-import { SITE } from "../src/lib/seo.ts";
+import { SITE } from "../src/lib/seo";
 
 const root = `${import.meta.dir}/..`;
 const DEVICES = `${root}/src/components/devices`;

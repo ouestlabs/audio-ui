@@ -1,3 +1,6 @@
+import { createThemeCss } from "@tanstack/highlight/theme";
+import { githubDarkTheme } from "@tanstack/highlight/themes/github-dark";
+import { githubLightTheme } from "@tanstack/highlight/themes/github-light";
 import { TanStackDevtools } from "@tanstack/react-devtools";
 import {
   createRootRoute,
@@ -7,14 +10,21 @@ import {
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { ThemeProvider } from "next-themes";
+import { LabShell } from "@/components/site/layout/shell";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { AppLayout } from "../components/layout/app-layout.tsx";
-import { SITE } from "../lib/seo.ts";
+import { SITE } from "../lib/seo";
 
-import appCss from "../styles.css?url";
+import appCss from "../styles/globals.css?url";
+
+const HIGHLIGHT_THEME_CSS = createThemeCss({
+  dark: githubDarkTheme,
+  darkSelector: ".dark",
+  light: githubLightTheme,
+});
 
 export const Route = createRootRoute({
   head: () => ({
+    styles: [{ children: HIGHLIGHT_THEME_CSS }],
     links: [
       { href: appCss, rel: "stylesheet" },
       { href: "/icon.svg", rel: "icon", type: "image/svg+xml" },
@@ -71,7 +81,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
           enableSystem
         >
           <TooltipProvider>
-            <AppLayout>{children}</AppLayout>
+            <LabShell>{children}</LabShell>
           </TooltipProvider>
         </ThemeProvider>
         <TanStackDevtools

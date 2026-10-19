@@ -1,7 +1,7 @@
 import { Fader } from "@audio-ui/react/fader";
 import { useCallback } from "react";
-import type { Param } from "../audio/engine.ts";
-import type { OnParam } from "./params.ts";
+import type { Param } from "../audio/engine";
+import type { OnParam } from "./params";
 
 /** A vertical slider on the panel's 0 to 10 scale. */
 export function Slider({
