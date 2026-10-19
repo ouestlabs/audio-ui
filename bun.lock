@@ -16,6 +16,7 @@
     "apps/lab": {
       "name": "lab",
       "dependencies": {
+        "@audio-ui/core": "*",
         "@audio-ui/react": "*",
         "@tailwindcss/vite": "^4.1.18",
         "@tanstack/react-devtools": "0.10.13",
