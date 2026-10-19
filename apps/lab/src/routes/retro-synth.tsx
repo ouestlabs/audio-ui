@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import retroSynthCss from "../components/devices/retro-synth.css?url";
-import { RetroSynth } from "../components/devices/retro-synth.tsx";
+import retroSynthCss from "../components/devices/retro-synth/retro-synth.css?url";
+import { RetroSynth } from "../components/devices/retro-synth/retro-synth.tsx";
 
 export const Route = createFileRoute("/retro-synth")({
   component: RetroSynth,
