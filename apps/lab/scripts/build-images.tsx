@@ -40,30 +40,30 @@ interface Device {
 
 const font = (path: string) => Bun.file(`${FONTS}/${path}`).arrayBuffer();
 const fonts = [
-  {
+  Object.freeze({
     data: await font(
       "instrument-serif/files/instrument-serif-latin-400-normal.woff"
     ),
     name: "Instrument Serif",
-    style: "normal" as const,
-    weight: 400 as const,
-  },
-  {
+    style: "normal",
+    weight: 400,
+  }),
+  Object.freeze({
     data: await font(
       "bricolage-grotesque/files/bricolage-grotesque-latin-400-normal.woff"
     ),
     name: "Bricolage Grotesque",
-    style: "normal" as const,
-    weight: 400 as const,
-  },
-  {
+    style: "normal",
+    weight: 400,
+  }),
+  Object.freeze({
     data: await font(
       "bricolage-grotesque/files/bricolage-grotesque-latin-600-normal.woff"
     ),
     name: "Bricolage Grotesque",
-    style: "normal" as const,
-    weight: 600 as const,
-  },
+    style: "normal",
+    weight: 600,
+  }),
 ];
 
 function Mark() {
