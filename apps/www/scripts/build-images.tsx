@@ -10,7 +10,7 @@ import { Resvg } from "@resvg/resvg-js";
 import type { ReactElement } from "react";
 import satori from "satori";
 import { generateDocsOG, generateHomeOG, OG_SIZE } from "../src/lib/seo/og";
-import { slugsOf } from "./site-paths";
+import { slugsOf } from "./site-paths.mts";
 
 const root = `${import.meta.dir}/..`;
 const DOCS = `${root}/src/content/docs`;

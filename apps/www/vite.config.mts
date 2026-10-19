@@ -4,7 +4,7 @@ import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import react from "@vitejs/plugin-react";
 import { fumadocsMdx } from "fumadocs-mdx/vite";
 import { defineConfig } from "vite";
-import { prerenderPages } from "./scripts/site-paths";
+import { prerenderPages } from "./scripts/site-paths.mts";
 
 // The TanStack Start app, run on Cloudflare's runtime in dev as in production.
 // It lives beside the Next.js app (src/app) until every route has moved.
