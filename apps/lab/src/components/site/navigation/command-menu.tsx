@@ -11,6 +11,7 @@ import {
 } from "@phosphor-icons/react/ssr";
 import { useHotkey } from "@tanstack/react-hotkeys";
 import { useNavigate } from "@tanstack/react-router";
+import { cn } from "cn";
 import { useTheme } from "next-themes";
 import { type ReactNode, useCallback, useState } from "react";
 import { HotkeyKbd } from "@/components/site/hotkey-kbd";
@@ -76,6 +77,7 @@ const matchesSearch = (value: string, search: string, keywords?: string[]) =>
 /** An entry of the menu: an icon, its name, and the key it has elsewhere. */
 function Entry({
   children,
+  className,
   icon,
   keywords,
   onRun,
@@ -83,6 +85,7 @@ function Entry({
   value,
 }: {
   children: string;
+  className?: string;
   icon: ReactNode;
   keywords?: string[];
   onRun: () => void;
@@ -91,7 +94,7 @@ function Entry({
 }) {
   return (
     <CommandItem
-      className={ITEM_CLASS}
+      className={cn(ITEM_CLASS, className)}
       keywords={keywords}
       onSelect={onRun}
       value={value}
@@ -288,6 +291,7 @@ export function CommandMenu() {
                   Toggle details
                 </Entry>
                 <Entry
+                  className="max-md:hidden"
                   hotkey={HOTKEYS.focus}
                   icon={<ArrowsOutIcon weight="fill" />}
                   onRun={focus}

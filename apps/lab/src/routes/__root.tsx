@@ -16,6 +16,14 @@ import { SITE } from "../lib/seo";
 
 import appCss from "../styles/globals.css?url";
 
+/**
+ * Run in the head, before anything is painted: notes which sidebars were left
+ * shut (the navigation) or open (the details) on the page itself, so the page
+ * is drawn that way from the start and nothing opens then closes while it
+ * loads. The keys are the ones `usePersistedState` writes.
+ */
+const LAYOUT_BOOT_SCRIPT = `(function(){try{var r=document.documentElement;if(localStorage.getItem("lab:navigation")==="false")r.setAttribute("data-nav-closed","");if(localStorage.getItem("lab:details")==="true")r.setAttribute("data-details-open","")}catch(_){}})()`;
+
 const HIGHLIGHT_THEME_CSS = createThemeCss({
   dark: githubDarkTheme,
   darkSelector: ".dark",
@@ -24,6 +32,7 @@ const HIGHLIGHT_THEME_CSS = createThemeCss({
 
 export const Route = createRootRoute({
   head: () => ({
+    scripts: [{ children: LAYOUT_BOOT_SCRIPT }],
     styles: [{ children: HIGHLIGHT_THEME_CSS }],
     links: [
       { href: appCss, rel: "stylesheet" },

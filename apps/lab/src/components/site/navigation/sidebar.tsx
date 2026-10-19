@@ -3,11 +3,13 @@ import { Link, useLocation } from "@tanstack/react-router";
 import { useCallback } from "react";
 import { HotkeyKbd } from "@/components/site/hotkey-kbd";
 import { ModeSwitcher } from "@/components/site/navigation/mode-switcher";
+import { Shortcuts } from "@/components/site/navigation/shortcuts";
 import { useLab } from "@/components/site/providers/lab-provider";
 import { Button } from "@/components/ui/button";
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -106,6 +108,10 @@ export function LabSidebar() {
           </SidebarGroup>
         ))}
       </SidebarContent>
+      {/* Keys have no use on a touch screen, where this sidebar is a sheet. */}
+      <SidebarFooter className="max-md:hidden">
+        <Shortcuts />
+      </SidebarFooter>
     </Sidebar>
   );
 }

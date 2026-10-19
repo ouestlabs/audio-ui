@@ -7,6 +7,7 @@ import {
 } from "@phosphor-icons/react/ssr";
 import { useHotkey } from "@tanstack/react-hotkeys";
 import { Link, useParams } from "@tanstack/react-router";
+import { cn } from "cn";
 import { type ReactNode, useCallback } from "react";
 import { MidiConnectControl } from "@/components/audio-ui/midi-connect-control";
 import { HotkeyKbd } from "@/components/site/hotkey-kbd";
@@ -33,12 +34,14 @@ import { HOTKEYS, type LabHotkey } from "@/lib/hotkeys";
 /** An icon button of the bar, with its name and its key in the tooltip. */
 function BarButton({
   children,
+  className,
   label,
   onClick,
   pressed,
   hotkey,
 }: {
   children: ReactNode;
+  className?: string;
   label: string;
   onClick: () => void;
   pressed?: boolean;
@@ -51,7 +54,7 @@ function BarButton({
           <Button
             aria-label={label}
             aria-pressed={pressed}
-            className="text-muted-foreground"
+            className={cn("text-muted-foreground", className)}
             onClick={onClick}
             size="icon"
             variant="outline"
@@ -134,6 +137,7 @@ export function FrameBar() {
               <CodeIcon aria-hidden />
             </BarButton>
             <BarButton
+              className="max-md:hidden"
               hotkey={HOTKEYS.focus}
               label={focus ? "Leave focus" : "Focus on the device"}
               onClick={toggleFocus}

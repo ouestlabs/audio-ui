@@ -2,7 +2,6 @@ import { ArrowUpRightIcon, CodeIcon } from "@phosphor-icons/react/ssr";
 import { useParams } from "@tanstack/react-router";
 import { cn } from "cn";
 import { useCallback, useSyncExternalStore } from "react";
-import { HotkeyKbd } from "@/components/site/hotkey-kbd";
 import { useLab } from "@/components/site/providers/lab-provider";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,20 +11,9 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { DEVICES } from "@/lib/devices";
-import { HOTKEYS } from "@/lib/hotkeys";
 
 const DOCS = "https://www.audio-ui.dev/docs/components/base";
 const DESKTOP_QUERY = "(min-width: 1024px)";
-
-/** The keys of the frame, as the bar and the command menu give them. */
-const SHORTCUTS = [
-  { hotkey: HOTKEYS.search, label: "Search" },
-  { hotkey: HOTKEYS.navigation, label: "Navigation" },
-  { hotkey: HOTKEYS.details, label: "Details" },
-  { hotkey: HOTKEYS.focus, label: "Focus on the device" },
-  { hotkey: HOTKEYS.source, label: "View the source" },
-  { hotkey: HOTKEYS.theme, label: "Theme" },
-] as const;
 
 function subscribe(callback: () => void) {
   const query = window.matchMedia(DESKTOP_QUERY);
@@ -54,24 +42,6 @@ function Section({
       <h3 className="font-medium text-muted-foreground text-xs">{title}</h3>
       {children}
     </section>
-  );
-}
-
-function Shortcuts() {
-  return (
-    <Section title="Shortcuts">
-      <ul className="flex flex-col gap-1.5 text-sm">
-        {SHORTCUTS.map((shortcut) => (
-          <li
-            className="flex items-center justify-between gap-2"
-            key={shortcut.label}
-          >
-            {shortcut.label}
-            <HotkeyKbd className="border" hotkey={shortcut.hotkey} />
-          </li>
-        ))}
-      </ul>
-    </Section>
   );
 }
 
@@ -114,7 +84,6 @@ function DeviceInfo() {
           </ul>
         </Section>
       ) : null}
-      <Shortcuts />
       {device ? (
         <Button onClick={openSource} variant="outline">
           <CodeIcon aria-hidden />
@@ -129,15 +98,18 @@ function DeviceInfo() {
 export function DetailsPanel({
   onOpenChange,
   open,
+  sheetOpen,
 }: {
   onOpenChange: (open: boolean) => void;
   open: boolean;
+  /** Whether the sheet is open on a narrow screen: only once it was asked for in this visit. */
+  sheetOpen: boolean;
 }) {
   const isDesktop = useIsDesktop();
 
   if (!isDesktop) {
     return (
-      <Sheet onOpenChange={onOpenChange} open={open}>
+      <Sheet onOpenChange={onOpenChange} open={sheetOpen}>
         <SheetContent className="w-full! gap-0 overflow-y-auto" side="right">
           <SheetTitle className="sr-only">Details</SheetTitle>
           <SheetDescription className="sr-only">
@@ -152,7 +124,7 @@ export function DetailsPanel({
   return (
     <aside
       className={cn(
-        "sticky top-0 hidden h-svh w-64 shrink-0 flex-col overflow-hidden lg:flex",
+        "details-aside sticky top-0 hidden h-svh w-64 shrink-0 flex-col overflow-hidden lg:flex",
         !open && "w-0"
       )}
       inert={!open}
