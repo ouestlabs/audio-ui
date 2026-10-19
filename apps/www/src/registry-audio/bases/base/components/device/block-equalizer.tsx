@@ -19,7 +19,6 @@ import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 const FFT_SIZE = 4096;
 const ANALYSER_SMOOTHING = 0.8;
-const NOISE_GAIN = 0.12;
 const MASTER_VOLUME = 0.7;
 const MIN_HZ = 20;
 const MAX_HZ = 20_000;
@@ -28,7 +27,7 @@ const START = { highDb: 5, lowDb: 3, lowMidDb: -4 };
 
 /**
  * An equalizer you can plug in: its state, a panel that draws it and an engine
- * that plays it, each its own file and none knowing the others. Pink noise
+ * that plays it, each its own file and none knowing the others. A loop
  * plays through it while its session's play switch is on, and the spectrum
  * behind the curve is what comes out.
  */
@@ -44,7 +43,7 @@ export default function BlockEqualizer() {
   stateRef.current = state;
   const spectrum = useSpectrum(analyser, { maxHz: MAX_HZ, minHz: MIN_HZ });
 
-  const name = useDemoSource("noise");
+  const name = useDemoSource("groove");
   useEffect(() => {
     const ctx = webAudio.getContext();
     if (!(playing && ctx && master)) {
@@ -60,13 +59,11 @@ export default function BlockEqualizer() {
       const source = ctx.createBufferSource();
       source.buffer = buffer;
       source.loop = true;
-      const level = ctx.createGain();
-      level.gain.value = NOISE_GAIN;
       const eq = createEqualizerEngine(ctx, stateRef.current);
       const tap = ctx.createAnalyser();
       tap.fftSize = FFT_SIZE;
       tap.smoothingTimeConstant = ANALYSER_SMOOTHING;
-      source.connect(level).connect(eq.input);
+      source.connect(eq.input);
       eq.output.connect(tap);
       eq.output.connect(master);
       engine.current = eq;
@@ -75,7 +72,6 @@ export default function BlockEqualizer() {
       stop = () => {
         source.stop();
         source.disconnect();
-        level.disconnect();
         tap.disconnect();
         eq.dispose();
         engine.current = null;

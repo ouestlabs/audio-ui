@@ -14,10 +14,12 @@ import {
   type CompressorEngine,
   createCompressorEngine,
 } from "@/registry-audio/bases/base/lib/compressor-engine";
-import { renderDemoSource } from "@/registry-audio/bases/base/lib/demo-sound";
+import {
+  demoKey,
+  renderDemoSource,
+} from "@/registry-audio/bases/base/lib/demo-sound";
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
-const SIGNAL_GAIN = 0.8;
 const FLOOR_DB = -80;
 const FFT_SIZE = 1024;
 /** How fast the level falls back between pulses, in dB per frame. */
@@ -41,9 +43,9 @@ export default function BlockCompressor() {
   const stateRef = useRef(state);
   stateRef.current = state;
 
-  // With the key on the pulses give way to a held chord that the kick of a loop ducks: the key is heard by the compressor only.
+  // With the key on, a held chord is ducked by the kick of a loop: the key is heard by the compressor only.
   const keyed = state.external;
-  const name = useDemoSource(keyed ? "chord" : "pulses");
+  const name = useDemoSource(keyed ? "chord" : "groove");
   useEffect(() => {
     const ctx = webAudio.getContext();
     if (!(playing && ctx && master)) {
@@ -54,7 +56,7 @@ export default function BlockCompressor() {
     let stop = () => undefined;
     const buffers = Promise.all([
       renderDemoSource(name, ctx.sampleRate),
-      keyed ? renderDemoSource("kick", ctx.sampleRate) : null,
+      keyed ? renderDemoSource(demoKey(name), ctx.sampleRate) : null,
     ]);
     buffers.then(([signal, key]) => {
       if (cancelled) {
@@ -67,12 +69,8 @@ export default function BlockCompressor() {
       const compressor = createCompressorEngine(ctx, stateRef.current);
       const tap = ctx.createAnalyser();
       tap.fftSize = FFT_SIZE;
-      // The pulses are drawn at full scale: the block lowers them to where it has always played them.
-      const gain = ctx.createGain();
-      gain.gain.value = name === "pulses" ? SIGNAL_GAIN : 1;
-      source.connect(gain);
-      gain.connect(tap);
-      gain.connect(compressor.input);
+      source.connect(tap);
+      source.connect(compressor.input);
       if (keySource && key) {
         keySource.buffer = key;
         keySource.loop = true;
@@ -104,7 +102,6 @@ export default function BlockCompressor() {
         cancelAnimationFrame(frame);
         source.stop();
         source.disconnect();
-        gain.disconnect();
         keySource?.stop();
         keySource?.disconnect();
         tap.disconnect();

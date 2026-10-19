@@ -36,7 +36,7 @@ export default function BlockGate() {
   useDeviceLoop({
     create: createGateEngine,
     destination: master,
-    key: "kick",
+    key: true,
     source: "chord",
     state,
   });

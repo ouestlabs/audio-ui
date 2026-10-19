@@ -9,11 +9,8 @@ import {
   delayDevice,
 } from "@/registry-audio/bases/base/lib/delay-device";
 import { createDelayEngine } from "@/registry-audio/bases/base/lib/delay-engine";
-import { DEMO_TEMPO } from "@/registry-audio/bases/base/lib/demo-sound";
 
 const MASTER_VOLUME = 0.7;
-/** The loop's own tempo, so a synced delay echoes on its beat. */
-const CONTEXT = { tempo: DEMO_TEMPO };
 /** A dotted eighth: the echo that has made a thousand guitars sound larger. */
 const START = { division: "1/8d", sync: true };
 
@@ -28,15 +25,14 @@ export default function BlockDelay() {
     () => delayDevice.apply(delayDevice.defaults(), START).state
   );
   const master = useMasterBus(MASTER_VOLUME);
-  useDeviceLoop({
-    context: CONTEXT,
+  const { tempo } = useDeviceLoop({
     create: createDelayEngine,
     destination: master,
     state,
   });
   return (
     <div className="cn-audio-panel h-full w-full min-w-0">
-      <DelayPanel onValueChange={setState} tempo={DEMO_TEMPO} value={state} />
+      <DelayPanel onValueChange={setState} tempo={tempo} value={state} />
     </div>
   );
 }

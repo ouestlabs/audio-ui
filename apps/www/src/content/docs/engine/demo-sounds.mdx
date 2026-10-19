@@ -1,9 +1,9 @@
 ---
 title: Demo sounds
-description: "The sounds the previews play, made with Web Audio and no samples: listen to each, see how it is built, and ask for one by name."
+description: "The two sounds the previews play, made with Web Audio and no samples: listen to each and ask for one by name."
 ---
 
-A device preview plays a loop through the effect so you can hear what it does. Those loops, like the noise behind the equalizer and the pulses behind the compressor, are not recordings: each is drawn in code with oscillators, filters and noise, once per sample rate, then looped as a buffer. They all live in one file, `demo-sound`, and each has a name.
+A device preview plays a loop through the effect so you can hear what it does. Those loops are not recordings: each is drawn in code with oscillators, filters and noise, once per sample rate, then looped as a buffer. They live in one file, `demo-sound`, and each has a name.
 
 ## Listen
 
@@ -17,7 +17,7 @@ One at a time, through the same master bus as a preview.
 npx shadcn@latest add @audio-ui/demo-sound
 ```
 
-`DEMO_SOURCES` holds every sound by name, with a title and what to listen for. `renderDemoSource` draws one for a sample rate and keeps it, so the same buffer comes back each time.
+`DEMO_SOURCES` holds the sounds by name, with a title and what to listen for. `renderDemoSource` draws one for a sample rate and keeps it, so the same buffer comes back each time.
 
 ```tsx
 import { renderDemoSource } from "@/lib/demo-sound";
@@ -30,42 +30,27 @@ source.connect(output);
 source.start();
 ```
 
-A device chooses its own sound. `useDeviceLoop` plays one through an engine, and a session lets a preview's bar change it:
+A device chooses its own sound. `useDeviceLoop` plays one through an engine, gives back its tempo for a time parameter that syncs to it, and a session lets a preview's bar change the sound:
 
 ```tsx
 import { useDemoSource } from "@/hooks/use-demo-source";
 import { useDeviceLoop } from "@/hooks/use-device-loop";
 
-// A de-esser plays the voice by default; a gate would play "chord", keyed by "kick".
-useDeviceLoop({ create, destination, source: "voice", state });
+// A de-esser plays the groove by default; a gate plays the chord and is keyed by the kick that goes with it.
+useDeviceLoop({ create, destination, source: "groove", state });
 ```
 
-`useDemoSource("voice")` returns the sound chosen in the nearest `AudioSessionProvider`, or `"voice"` when nobody has chosen. Outside a session it is always the default.
+`useDemoSource("groove")` returns the sound chosen in the nearest `AudioSessionProvider`, or `"groove"` when nobody has chosen. Outside a session it is always the default.
 
 ## How they are made
 
-A **drum hit** is a few nodes. The kick is a sine oscillator whose pitch falls fast, from 150 Hz to 40 Hz in 150 milliseconds, through a gain that decays: the body of a drum is a pitch that drops. The snare is noise through a band-pass, with a short tone under it. The hihat is noise through a high-pass at 7 kHz that dies in about fifty milliseconds. The [Synthesis](/docs/engine/synthesis#drum-hits) page has the voices.
+**Boom bap** (`groove`) is two bars at 90 BPM. The off-beat sixteenths are pushed back a fraction of a step, which is the swing. The snare has quiet ghost notes, the hats are harder on the beat, and each hit lands a few milliseconds early or late from a fixed sequence, so it is the same every time. A sine bass, an electric piano on two chords and a plucked line sit on top. What rings past the end is folded back into the start, so no note is cut where the loop turns.
 
-The **groove** is two bars at 90 BPM, and most of what makes it feel played is small. The off-beat sixteenths are pushed back by a fraction of a step, which is the swing. The snare has quiet ghost notes in front of its backbeat, the hats are harder on the beat than between, a hat or two is left open, and each hit lands a few milliseconds early or late and a little harder or softer, from a fixed sequence so it is the same every time it is drawn. Under them a sine bass with a triangle an octave up plays the root of each chord, so it is heard on a small speaker too. An electric piano is four sine partials per note, a twin a few cents sharp on the other side of the stereo field whose beating moves the sound, and a lowpass over them, struck on an A minor seventh and then an F major seventh, with the notes of each chord a few milliseconds apart. What rings past the end of the loop is folded back into its start, so no note is cut where it turns.
+**Drone** (`chord`) is four oscillators on an A minor chord that never stop. A signal that is never quiet by itself is what a gate has to open and close.
 
-A **pluck** is a triangle oscillator through a low-pass filter that closes as the note dies, from 4 kHz down to 500 Hz, with a gain that falls to silence. The filter makes it sound like something struck rather than switched. It is the line of notes on top of the groove, there to give a delay or a reverb something to carry.
+Boom bap has a kick to go with it, not offered in the picker: a gate or a ducker follows it.
 
-```ts
-oscillator.type = "triangle";
-filter.type = "lowpass";
-filter.frequency.setValueAtTime(4000, time);
-filter.frequency.exponentialRampToValueAtTime(500, time + 0.45);
-gain.gain.setValueAtTime(0.28, time);
-gain.gain.exponentialRampToValueAtTime(0.001, time + 0.45);
-```
-
-The **held chord** is four oscillators on an A minor chord that never stop. A signal that is never quiet by itself is what a gate has to open and close, and what a compressor ducks when the kick keys it.
-
-The **voice** is a sawtooth at 140 Hz through two band-pass filters at 700 Hz and 1.2 kHz, the formants of a vowel, with a burst of noise through a high-pass at 5.5 kHz on four beats: the "s" a de-esser takes off.
-
-The **wide chords** are the groove in the centre with a pad on each side. Each ear has its own oscillators, a little detuned from the other, and a low note that differs between them, so there is bass in the sides: a stereo image for a mid/side device to narrow or widen.
-
-**Pink noise** has equal energy in each octave, which is why a flat equalizer looks flat on a spectrum and each band you move shows. It is white noise through a filter. The **pulses** are noise bursts that start loud and fade, eight to a loop, every other one quieter, so a level that follows them moves along a compressor's transfer curve.
+The drum voices are the ones of [Synthesis](/docs/engine/synthesis#drum-hits).
 
 ## The code
 

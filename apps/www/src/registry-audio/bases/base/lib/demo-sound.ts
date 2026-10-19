@@ -1,3 +1,4 @@
+import type { Tempo } from "@audio-ui/core/time";
 import {
   triggerHihat,
   triggerKick,
@@ -299,12 +300,13 @@ function drawGroove(ctx: BaseAudioContext, out: AudioNode) {
   });
 }
 
-/** Draws a loop, then folds what rings past its end into its start. */
+/** Draws a loop of `seconds`, then folds what rings past its end into its start. */
 async function drawLoop(
   sampleRate: number,
+  seconds: number,
   draw: (ctx: BaseAudioContext, mix: AudioNode) => void
 ) {
-  const loop = Math.round(sampleRate * LOOP_SECONDS);
+  const loop = Math.round(sampleRate * seconds);
   const ctx = new OfflineAudioContext(
     2,
     loop + Math.round(sampleRate * TAIL_SECONDS),
@@ -342,7 +344,7 @@ export function renderDemoLoop(sampleRate: number): Promise<AudioBuffer> {
   if (cached) {
     return cached;
   }
-  const buffer = drawLoop(sampleRate, drawGroove);
+  const buffer = drawLoop(sampleRate, LOOP_SECONDS, drawGroove);
   rendered.set(sampleRate, buffer);
   return buffer;
 }
@@ -358,7 +360,7 @@ export function renderKickLoop(sampleRate: number): Promise<AudioBuffer> {
   if (cached) {
     return cached;
   }
-  const buffer = drawLoop(sampleRate, drawKicks);
+  const buffer = drawLoop(sampleRate, LOOP_SECONDS, drawKicks);
   keyed.set(sampleRate, buffer);
   return buffer;
 }
@@ -397,121 +399,7 @@ export function renderHeldChord(sampleRate: number): Promise<AudioBuffer> {
   return buffer;
 }
 
-const sibilant = new Map<number, Promise<AudioBuffer>>();
-const VOICE_HERTZ = 140;
-const VOICE_LEVEL = 0.22;
-const HISS_LEVEL = 0.5;
-/** Where an "s" starts and how long it lasts, in beats: four to a loop, after the vowel. */
-const HISS_BEATS = [1, 3, 5, 7];
-const HISS_BEAT_LENGTH = 0.4;
-
-/**
- * A voice for a de-esser: a held vowel (a sawtooth through two formants) with
- * a burst of high-passed noise, an "s", on each of four beats of the loop.
- */
-export function renderSibilantLoop(sampleRate: number): Promise<AudioBuffer> {
-  const cached = sibilant.get(sampleRate);
-  if (cached) {
-    return cached;
-  }
-  const length = Math.round(sampleRate * LOOP_SECONDS);
-  const ctx = new OfflineAudioContext(2, length, sampleRate);
-  const voice = ctx.createOscillator();
-  voice.type = "sawtooth";
-  voice.frequency.value = VOICE_HERTZ;
-  const level = ctx.createGain();
-  level.gain.value = VOICE_LEVEL;
-  for (const formant of [700, 1200]) {
-    const filter = ctx.createBiquadFilter();
-    filter.type = "bandpass";
-    filter.frequency.value = formant;
-    filter.Q.value = 4;
-    voice.connect(filter).connect(level);
-  }
-  level.connect(ctx.destination);
-  voice.start(0);
-
-  const noise = ctx.createBuffer(1, length, sampleRate);
-  const samples = noise.getChannelData(0);
-  for (let index = 0; index < length; index += 1) {
-    samples[index] = Math.random() * 2 - 1;
-  }
-  const hiss = ctx.createBufferSource();
-  hiss.buffer = noise;
-  const highs = ctx.createBiquadFilter();
-  highs.type = "highpass";
-  highs.frequency.value = 5500;
-  const burst = ctx.createGain();
-  burst.gain.value = 0;
-  for (const beat of HISS_BEATS) {
-    const start = beat * BEAT_SECONDS;
-    burst.gain.setValueAtTime(0, start);
-    burst.gain.linearRampToValueAtTime(HISS_LEVEL, start + 0.02);
-    burst.gain.setValueAtTime(
-      HISS_LEVEL,
-      start + HISS_BEAT_LENGTH * BEAT_SECONDS
-    );
-    burst.gain.linearRampToValueAtTime(
-      0,
-      start + (HISS_BEAT_LENGTH + 0.2) * BEAT_SECONDS
-    );
-  }
-  hiss.connect(highs).connect(burst).connect(ctx.destination);
-  hiss.start(0);
-
-  const buffer = ctx.startRendering();
-  sibilant.set(sampleRate, buffer);
-  return buffer;
-}
-
-const wide = new Map<number, Promise<AudioBuffer>>();
-const WIDE_LEFT_HERTZ = [220, 277.18, 329.63, 55];
-const WIDE_RIGHT_HERTZ = [221.5, 275.9, 331.1, 55.4];
-const WIDE_LEVEL = 0.07;
-
-/**
- * The loop of `renderDemoLoop`, which sits in the centre, with a pad that is
- * wider than it: each channel has its own slightly detuned oscillators, and a
- * low note at 55 Hz is a little different in each, so there is bass in the
- * sides. What a mid/side device has something to move.
- */
-export function renderWideLoop(sampleRate: number): Promise<AudioBuffer> {
-  const cached = wide.get(sampleRate);
-  if (cached) {
-    return cached;
-  }
-  const buffer = renderDemoLoop(sampleRate).then((centre) => {
-    const ctx = new OfflineAudioContext(2, centre.length, sampleRate);
-    const source = ctx.createBufferSource();
-    source.buffer = centre;
-    source.connect(ctx.destination);
-    source.start(0);
-    const merge = ctx.createChannelMerger(2);
-    merge.connect(ctx.destination);
-    for (const [channel, hertzList] of [
-      [0, WIDE_LEFT_HERTZ],
-      [1, WIDE_RIGHT_HERTZ],
-    ] as const) {
-      for (const hertz of hertzList) {
-        const oscillator = ctx.createOscillator();
-        const gain = ctx.createGain();
-        oscillator.type = hertz < 100 ? "sine" : "sawtooth";
-        oscillator.frequency.value = hertz;
-        gain.gain.value = hertz < 100 ? WIDE_LEVEL * 1.5 : WIDE_LEVEL;
-        oscillator.connect(gain).connect(merge, 0, channel);
-        oscillator.start(0);
-      }
-    }
-    return ctx.startRendering();
-  });
-  wide.set(sampleRate, buffer);
-  return buffer;
-}
-
-/*
- * Two signals made of noise, which a ctx can draw at once, and the catalogue
- * that names every sound a preview plays.
- */
+/* Two signals made of noise for the plots, then the catalogue of the sounds a preview plays. */
 
 const NOISE_SECONDS = 4;
 
@@ -568,77 +456,54 @@ export function pulses(ctx: BaseAudioContext, level = 1): AudioBuffer {
 export interface DemoSource {
   /** What to listen for, in a sentence. */
   about: string;
+  /** For a sound that is a key, not a sound to listen through: a gate or a ducker follows it. */
+  isKey?: boolean;
+  /** The name of the key that goes with the sound, when it is not `"kick"`: the one drawn on the same beats. */
+  key?: string;
   render: (sampleRate: number) => Promise<AudioBuffer>;
+  /** The tempo a device that follows one is read against, when the sound has its own. @default DEMO_TEMPO */
+  tempo?: Tempo;
   title: string;
 }
 
-const drawn = (draw: (ctx: BaseAudioContext) => AudioBuffer) => {
-  const cache = new Map<number, Promise<AudioBuffer>>();
-  return (sampleRate: number) => {
-    const cached = cache.get(sampleRate);
-    if (cached) {
-      return cached;
-    }
-    const buffer = Promise.resolve(
-      draw(new OfflineAudioContext(1, 1, sampleRate))
-    );
-    cache.set(sampleRate, buffer);
-    return buffer;
-  };
-};
-
-/**
- * Every sound of the library's previews, by name: the one place to find what a
- * preview plays and how it is made. A device takes the one that shows what it
- * does: a delay a loop with notes to echo, a gate a held chord to open, an
- * equalizer pink noise, a compressor pulses.
- */
+/** The sounds a preview plays, by name. The key is not offered: a gate or a ducker follows them. */
 export const DEMO_SOURCES = {
   chord: {
     about:
-      "An A minor chord held for the whole loop: never quiet by itself, so a gate or a ducker has something to open and close.",
+      "An A minor chord that never stops: a gate or a ducker has something to open and close.",
     render: renderHeldChord,
-    title: "Held chord",
+    title: "Drone",
   },
   groove: {
     about:
-      "Two bars at 90 BPM with a lilt: a kick and a snare with ghost notes, hats that are not all alike, a bass, an electric piano on two chords and a line of plucked notes. A transient, a body and a tail, to hear what a delay, a reverb or a filter does.",
+      "Two bars of boom bap at 90 BPM: drums, bass, keys and a plucked line.",
     render: renderDemoLoop,
-    title: "Groove",
+    title: "Boom bap",
   },
   kick: {
-    about:
-      "A kick on the beat and nothing else: the key that a gate opens on and a compressor ducks a chord by.",
+    about: "The kick of the boom bap alone: its key.",
+    isKey: true,
     render: renderKickLoop,
-    title: "Kick",
-  },
-  noise: {
-    about:
-      "Pink noise, with equal energy per octave: a flat equalizer looks flat on a spectrum, and each band you move shows.",
-    render: drawn((ctx) => pinkNoise(ctx)),
-    title: "Pink noise",
-  },
-  pulses: {
-    about:
-      "Noise bursts that start loud and fade, every other one quieter: a level that moves along a compressor's transfer curve.",
-    render: drawn((ctx) => pulses(ctx)),
-    title: "Pulses",
-  },
-  voice: {
-    about:
-      "A held vowel with an s after it, four to a loop: what a de-esser takes off and leaves.",
-    render: renderSibilantLoop,
-    title: "Voice with an s",
-  },
-  wide: {
-    about:
-      "The groove in the centre, with a pad on each side a little detuned from the other and a low note that differs in each ear: a stereo image to narrow or widen.",
-    render: renderWideLoop,
-    title: "Wide chords",
+    title: "Boom bap kick",
   },
 } satisfies Record<string, DemoSource>;
 
 export type DemoSourceName = keyof typeof DEMO_SOURCES;
+
+/** The key that goes with a sound: a kick drawn on its own beats, so a gate opens on the kick of the scene it hears. */
+export function demoKey(name: DemoSourceName): DemoSourceName {
+  const source: DemoSource = DEMO_SOURCES[name];
+  const { key: keyName } = source;
+  return keyName !== undefined && keyName in DEMO_SOURCES
+    ? (keyName as DemoSourceName)
+    : "kick";
+}
+
+/** The tempo of a sound: what a delay synced to it echoes on. */
+export function demoTempo(name: DemoSourceName): Tempo {
+  const source: DemoSource = DEMO_SOURCES[name];
+  return source.tempo ?? DEMO_TEMPO;
+}
 
 /** The sound of a name, drawn for a sample rate and kept: the same buffer comes back each time. */
 export function renderDemoSource(name: DemoSourceName, sampleRate: number) {

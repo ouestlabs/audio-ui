@@ -15,14 +15,15 @@ import {
 } from "@/registry-audio/bases/base/hooks/use-audio-session";
 import {
   DEMO_SOURCES,
+  type DemoSource,
   type DemoSourceName,
 } from "@/registry-audio/bases/base/lib/demo-sound";
 
 const NONE = { chosen: null, fallback: null };
 
-/** The kick is a key for a gate or a ducker, not a sound to listen to a device through. */
+/** A kick is a key for a gate or a ducker, not a sound to listen to a device through. */
 const OFFERED = (Object.keys(DEMO_SOURCES) as DemoSourceName[]).filter(
-  (name) => name !== "kick"
+  (name) => !(DEMO_SOURCES[name] as DemoSource).isKey
 );
 
 const ITEMS = OFFERED.map((name) => ({
