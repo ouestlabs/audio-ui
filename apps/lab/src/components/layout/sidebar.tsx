@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { EXAMPLES } from "../../examples.ts";
 
-export function ExampleNav() {
+export function Sidebar() {
   return (
     <nav
       aria-label="Examples"

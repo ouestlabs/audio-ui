@@ -1,7 +1,7 @@
 import { TanStackDevtools } from "@tanstack/react-devtools";
 import { createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
-import { ExampleNav } from "../components/layout/example-nav.tsx";
+import { Sidebar } from "../components/layout/sidebar.tsx";
 
 import appCss from "../styles.css?url";
 
@@ -37,7 +37,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body className="font-sans antialiased">
         <div className="flex h-screen">
-          <ExampleNav />
+          <Sidebar />
           <div className="min-w-0 flex-1 overflow-auto">{children}</div>
         </div>
         <TanStackDevtools
