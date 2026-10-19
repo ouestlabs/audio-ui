@@ -15,9 +15,9 @@
   "dependencies": {
     "@audio-ui/react": "*",
     "@tailwindcss/vite": "catalog:",
-    "@tanstack/react-devtools": "0.10.13",
+    "@tanstack/react-devtools": "catalog:",
     "@tanstack/react-router": "catalog:",
-    "@tanstack/react-router-devtools": "1.167.2",
+    "@tanstack/react-router-devtools": "catalog:",
     "@tanstack/react-start": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
@@ -26,7 +26,7 @@
   "devDependencies": {
     "@cloudflare/vite-plugin": "catalog:",
     "@tailwindcss/typography": "^0.5.20",
-    "@tanstack/devtools-vite": "0.8.5",
+    "@tanstack/devtools-vite": "catalog:",
     "@tanstack/router-cli": "^1.167.45",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
