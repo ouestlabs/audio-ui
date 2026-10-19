@@ -157,7 +157,7 @@ What makes the sound, on the Web Audio API: install each on its own, to `hooks/`
 | `use-demo-source` | `useDemoSource` from `@/hooks/use-demo-source` | The sound a device plays: the one chosen in its session, else its default from `DEMO_SOURCES` (`@/lib/demo-sound`) |
 | `use-device-loop`, `use-noise-through-eq`, `use-pulses-through-compressor` | `useDeviceLoop` and the others from `@/hooks/<name>` | A short loop of drums and plucked notes through an effect's engine, pink noise through an equalizer, or pulses through a compressor: what a device does, heard and measured. They play while the play switch of their `AudioSessionProvider` is on, and stay silent outside one |
 | `audio-decode` | `decodeAudioChannels` from `@/lib/audio-decode` | Decode an audio file into samples before `computePeaks` |
-| `key-detector`, `oversampling`, `synced-rate`, `demo-sound`, `device-measure` | from `@/lib/<name>` | The engine pieces of the devices: a key detector worklet, oversampled waveshaping, a tempo-synced rate, the demo sounds by name (a groove, a hip-hop scene, a crank scene, a kick, a held chord, a voice, wide chords, pink noise, pulses), measuring an engine against its panel |
+| `key-detector`, `oversampling`, `synced-rate`, `demo-sound`, `device-measure` | from `@/lib/<name>` | The engine pieces of the devices: a key detector worklet, oversampled waveshaping, a tempo-synced rate, the demo sounds by name (a groove, a trap scene, a kick, a held chord, a voice, wide chords, pink noise, pulses), measuring an engine against its panel |
 | `piano-roll-tools` | `createPianoRollTools` from `@/lib/piano-roll-tools` | Typed tools an AI model uses to edit a piano roll |
 
 ## Ready blocks
