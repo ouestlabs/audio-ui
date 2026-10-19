@@ -12,6 +12,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@audio-ui/core": "*",
     "@audio-ui/react": "*",
     "@tailwindcss/vite": "catalog:",
     "@tanstack/react-devtools": "catalog:",
