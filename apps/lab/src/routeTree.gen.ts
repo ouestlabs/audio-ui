@@ -10,43 +10,43 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as RetroSynthRouteImport } from './routes/retro-synth'
+import { Route as DeviceRouteImport } from './routes/$device'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const RetroSynthRoute = RetroSynthRouteImport.update({
-  id: '/retro-synth',
-  path: '/retro-synth',
+const DeviceRoute = DeviceRouteImport.update({
+  id: '/$device',
+  path: '/$device',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/retro-synth': typeof RetroSynthRoute
+  '/$device': typeof DeviceRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/retro-synth': typeof RetroSynthRoute
+  '/$device': typeof DeviceRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/retro-synth': typeof RetroSynthRoute
+  '/$device': typeof DeviceRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/retro-synth'
+  fullPaths: '/' | '/$device'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/retro-synth'
-  id: '__root__' | '/' | '/retro-synth'
+  to: '/' | '/$device'
+  id: '__root__' | '/' | '/$device'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  RetroSynthRoute: typeof RetroSynthRoute
+  DeviceRoute: typeof DeviceRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -58,11 +58,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/retro-synth': {
-      id: '/retro-synth'
-      path: '/retro-synth'
-      fullPath: '/retro-synth'
-      preLoaderRoute: typeof RetroSynthRouteImport
+    '/$device': {
+      id: '/$device'
+      path: '/$device'
+      fullPath: '/$device'
+      preLoaderRoute: typeof DeviceRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -70,7 +70,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  RetroSynthRoute: RetroSynthRoute,
+  DeviceRoute: DeviceRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
