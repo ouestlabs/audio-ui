@@ -17,7 +17,12 @@
   flex: 1 0 auto;
   justify-content: center;
   padding: 2rem 1.5rem;
-  background: radial-gradient(ellipse at 50% 0, #2c2824, #0c0b0a 70%);
+  /* The stage follows the theme; the faceplate on it stays black, like the device. */
+  background: radial-gradient(
+    ellipse at 50% 0,
+    color-mix(in oklab, var(--foreground) 7%, var(--background)),
+    var(--background) 70%
+  );
 }
 
 body {
