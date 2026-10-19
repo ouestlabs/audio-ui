@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { DEVICES } from "../devices.ts";
-import { absoluteUrl } from "../lib/seo.ts";
+import { DEVICES } from "@/lib/devices";
+import { absoluteUrl } from "../lib/seo";
 
 /** The home and every device: a new device folder is listed with no other change. */
 function sitemap() {

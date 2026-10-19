@@ -1,4 +1,4 @@
-import type { Param } from "../audio/engine.ts";
+import type { Param } from "../audio/engine";
 
 /** A control of the panel that moves a number: every parameter of the voice, and the volume. */
 export type Knobbed = Param | "volume";

@@ -1,4 +1,4 @@
-import { DEFAULTS, type Settings } from "./engine.ts";
+import { DEFAULTS, type Settings } from "./engine";
 
 /** A patch: what the panel's knobs and sliders read, plus the volume, from the defaults up. */
 export type Patch = Omit<Settings, "range"> & { volume: number };

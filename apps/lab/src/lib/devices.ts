@@ -23,18 +23,18 @@ const metas = import.meta.glob<{
   description: string;
   title: string;
   uses?: string[];
-}>("./components/devices/*/meta.json", { eager: true, import: "default" });
+}>("../components/devices/*/meta.json", { eager: true, import: "default" });
 const loaders = import.meta.glob<{ default: ComponentType }>(
-  "./components/devices/*/index.tsx"
+  "../components/devices/*/index.tsx"
 );
-const styles = import.meta.glob<string>("./components/devices/*/index.css", {
+const styles = import.meta.glob<string>("../components/devices/*/index.css", {
   eager: true,
   import: "default",
   query: "?url",
 });
 
 const previews = import.meta.glob<string>(
-  "./components/devices/*/preview.png",
+  "../components/devices/*/preview.png",
   {
     eager: true,
     import: "default",
@@ -47,7 +47,7 @@ const slugOf = (path: string) => path.split("/")[3] ?? "";
 export const DEVICES = Object.entries(metas)
   .map(([path, meta]) => {
     const slug = slugOf(path);
-    const base = `./components/devices/${slug}`;
+    const base = `../components/devices/${slug}`;
     const load = loaders[`${base}/index.tsx`];
     return {
       category: meta.category ?? "Other",
@@ -88,4 +88,45 @@ export function groupByCategory(devices: readonly Device[]) {
   return [...groups]
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([category, items]) => ({ category, devices: items }));
+}
+
+/** Every code file of every device, loaded as text only when its source is opened. */
+const sources = import.meta.glob<string>(
+  "../components/devices/*/**/*.{ts,tsx,css,json}",
+  { import: "default", query: "?raw" }
+);
+
+export interface SourceFile {
+  language: string;
+  load: () => Promise<string>;
+  /** Its path in the device's folder, such as `audio/engine.ts`. */
+  name: string;
+}
+
+const LANGUAGES: Record<string, string> = {
+  css: "css",
+  json: "json",
+  ts: "ts",
+  tsx: "tsx",
+};
+
+/** The code files of a device, its entry points first, then by folder and name. */
+export function sourceFiles(slug: string): SourceFile[] {
+  const prefix = `../components/devices/${slug}/`;
+  const rank = (name: string) =>
+    ["index.tsx", "index.css", "meta.json"].indexOf(name);
+  return Object.entries(sources)
+    .filter(([path]) => path.startsWith(prefix))
+    .map(([path, load]) => ({
+      language: LANGUAGES[path.split(".").pop() ?? ""] ?? "plaintext",
+      load,
+      name: path.slice(prefix.length),
+    }))
+    .sort((a, b) => {
+      const [ra, rb] = [rank(a.name), rank(b.name)];
+      if (ra !== -1 || rb !== -1) {
+        return (ra === -1 ? 99 : ra) - (rb === -1 ? 99 : rb);
+      }
+      return a.name.localeCompare(b.name);
+    });
 }

@@ -39,6 +39,8 @@ body {
   width: min(100%, 46rem);
   height: max-content;
   padding: 1rem 1.25rem 1.25rem;
+  /* Centered on the stage when there is room; at the top, scrolling, when there is not. */
+  margin-block: auto;
   font-family: "Helvetica Neue", "Arial Narrow", Arial, sans-serif;
   color: var(--ink);
   background:

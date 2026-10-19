@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { useMasterBus } from "@/hooks/use-master-bus";
 import { useMidiInput } from "@/hooks/use-midi-input";
-import { createOrionEngine, volumeGain, type Wave } from "./audio/engine.ts";
-import { type Patch, PRESETS, patchOf } from "./audio/presets.ts";
-import { type Knobbed, NAMES, type OnParam } from "./ui/params.ts";
+import { createOrionEngine, volumeGain, type Wave } from "./audio/engine";
+import { type Patch, PRESETS, patchOf } from "./audio/presets";
+import { type Knobbed, NAMES, type OnParam } from "./ui/params";
 
 const LAST_PRESET = PRESETS.length - 1;
 const pad = (n: number) => String(n + 1).padStart(2, "0");

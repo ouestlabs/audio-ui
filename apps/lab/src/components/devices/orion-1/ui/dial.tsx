@@ -1,6 +1,6 @@
 import { Knob } from "@audio-ui/react/knob";
 import { useCallback } from "react";
-import type { Knobbed, OnParam } from "./params.ts";
+import type { Knobbed, OnParam } from "./params";
 
 type Cap = "black" | "ivory" | "orange";
 

@@ -1,22 +1,15 @@
 import { MoonIcon, SunIcon } from "@phosphor-icons/react/ssr";
+import { useHotkey } from "@tanstack/react-hotkeys";
 import { useTheme } from "next-themes";
-import { useCallback, useEffect } from "react";
+import { useCallback } from "react";
+import { HotkeyKbd } from "@/components/site/hotkey-kbd";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-
-/** Whether a key press is for a field: the shortcut leaves it alone. */
-function isTyping(target: EventTarget | null) {
-  return (
-    target instanceof HTMLInputElement ||
-    target instanceof HTMLTextAreaElement ||
-    target instanceof HTMLSelectElement ||
-    (target instanceof HTMLElement && target.isContentEditable)
-  );
-}
+import { HOTKEYS } from "@/lib/hotkeys";
 
 /** Light and dark, as the docs have it: a button, and the D key. */
 export function ModeSwitcher() {
@@ -27,22 +20,7 @@ export function ModeSwitcher() {
     [resolvedTheme, setTheme]
   );
 
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (
-        event.key.toLowerCase() !== "d" ||
-        event.metaKey ||
-        event.ctrlKey ||
-        isTyping(event.target)
-      ) {
-        return;
-      }
-      event.preventDefault();
-      toggleTheme();
-    };
-    document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
-  }, [toggleTheme]);
+  useHotkey(HOTKEYS.theme, toggleTheme);
 
   return (
     <Tooltip>
@@ -67,7 +45,9 @@ export function ModeSwitcher() {
           </Button>
         }
       />
-      <TooltipContent side="bottom">Toggle theme (D)</TooltipContent>
+      <TooltipContent className="flex items-center gap-2" side="bottom">
+        Toggle theme <HotkeyKbd hotkey={HOTKEYS.theme} />
+      </TooltipContent>
     </Tooltip>
   );
 }

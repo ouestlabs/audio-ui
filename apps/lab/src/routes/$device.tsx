@@ -1,7 +1,7 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { Suspense } from "react";
-import { DEVICES } from "../devices.ts";
-import { absoluteUrl, jsonLd, pageHead, SITE } from "../lib/seo.ts";
+import { DEVICES } from "@/lib/devices";
+import { absoluteUrl, jsonLd, pageHead, SITE } from "../lib/seo";
 
 export const Route = createFileRoute("/$device")({
   component: DevicePage,

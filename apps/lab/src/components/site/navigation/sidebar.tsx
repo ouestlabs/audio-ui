@@ -1,20 +1,25 @@
+import { MagnifyingGlassIcon } from "@phosphor-icons/react/ssr";
 import { Link, useLocation } from "@tanstack/react-router";
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
+import { HotkeyKbd } from "@/components/site/hotkey-kbd";
+import { ModeSwitcher } from "@/components/site/navigation/mode-switcher";
+import { Shortcuts } from "@/components/site/navigation/shortcuts";
+import { useLab } from "@/components/site/providers/lab-provider";
 import { Button } from "@/components/ui/button";
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarHeader,
-  SidebarInput,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { groupByCategory, searchDevices } from "../../devices.ts";
-import { ModeSwitcher } from "./mode-switcher.tsx";
+import { DEVICES, groupByCategory } from "@/lib/devices";
+import { HOTKEYS } from "@/lib/hotkeys";
 
 /** The audio/ui mark, as the docs draw it. */
 function AudioUiIcon(props: React.ComponentProps<"svg">) {
@@ -31,15 +36,11 @@ function AudioUiIcon(props: React.ComponentProps<"svg">) {
   );
 }
 
-export function AppSidebar() {
+export function LabSidebar() {
   const pathname = useLocation({ select: (location) => location.pathname });
-  const [query, setQuery] = useState("");
-  const groups = groupByCategory(searchDevices(query));
-  const onSearch = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) =>
-      setQuery(event.target.value),
-    []
-  );
+  const { setCommandOpen } = useLab().actions;
+  const groups = groupByCategory(DEVICES);
+  const openSearch = useCallback(() => setCommandOpen(true), [setCommandOpen]);
 
   return (
     <Sidebar className="bg-transparent group-data-[side=left]:border-r-0 **:data-[slot=sidebar-inner]:bg-transparent">
@@ -59,7 +60,7 @@ export function AppSidebar() {
                   className="flex select-none items-center gap-1"
                 >
                   <AudioUiIcon className="pointer-events-none size-5 text-foreground" />
-                  <span className="-mt-[2.3px] font-medium font-serif text-xl leading-snug">
+                  <span className="mt-[-2.3px] font-medium font-serif text-xl leading-snug">
                     audio/ui
                   </span>
                   <span className="ml-1 rounded-md border px-1.5 py-0.5 text-muted-foreground text-xs">
@@ -72,20 +73,19 @@ export function AppSidebar() {
           />
           <ModeSwitcher />
         </div>
-        <SidebarInput
-          aria-label="Search devices"
-          onChange={onSearch}
-          placeholder="Search devices"
-          type="search"
-          value={query}
-        />
+        <Button
+          className="w-full justify-between bg-foreground/8 pr-1.5 font-normal hover:bg-foreground/12"
+          onClick={openSearch}
+          variant="secondary"
+        >
+          <span className="flex items-center gap-2 text-muted-foreground">
+            <MagnifyingGlassIcon aria-hidden />
+            Search devices
+          </span>
+          <HotkeyKbd className="border" hotkey={HOTKEYS.search} />
+        </Button>
       </SidebarHeader>
       <SidebarContent>
-        {groups.length === 0 ? (
-          <p className="px-4 py-2 text-muted-foreground text-sm">
-            No device matches “{query}”.
-          </p>
-        ) : null}
         {groups.map((group) => (
           <SidebarGroup key={group.category}>
             <SidebarGroupLabel>{group.category}</SidebarGroupLabel>
@@ -108,6 +108,10 @@ export function AppSidebar() {
           </SidebarGroup>
         ))}
       </SidebarContent>
+      {/* Keys have no use on a touch screen, where this sidebar is a sheet. */}
+      <SidebarFooter className="max-md:hidden">
+        <Shortcuts />
+      </SidebarFooter>
     </Sidebar>
   );
 }

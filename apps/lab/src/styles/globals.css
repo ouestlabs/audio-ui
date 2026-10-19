@@ -6,6 +6,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@import "./code.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -101,6 +102,29 @@
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) * 1.4);
+}
+
+/*
+ * The sidebars as they were left: the page is served with the navigation open
+ * and the details shut, and a small script notes before the first paint which
+ * were not (the `data-nav-closed` and `data-details-open` marks on the page),
+ * so nothing opens then closes while the page loads. Once the page is
+ * hydrated the layout's own state tells it, and the marks go.
+ */
+@media (min-width: 768px) {
+  html[data-nav-closed] [data-lab-layout] [data-slot="sidebar-gap"] {
+    width: 0;
+  }
+
+  html[data-nav-closed] [data-lab-layout] [data-slot="sidebar-container"] {
+    left: calc(var(--sidebar-width) * -1);
+  }
+}
+
+@media (min-width: 1024px) {
+  html[data-details-open] .details-aside {
+    width: 16rem;
+  }
 }
 
 @layer base {
