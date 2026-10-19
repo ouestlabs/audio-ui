@@ -1,6 +1,0 @@
-{
-  "title": "Mono",
-  "description": "A minimal synth that plays: one oscillator, one filter and a keyboard.",
-  "category": "Synths",
-  "uses": ["knob", "piano"]
-}
