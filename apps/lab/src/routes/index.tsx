@@ -39,7 +39,7 @@ export const Route = createFileRoute("/")({
 
 function Home() {
   return (
-    <main className="mx-auto flex max-w-2xl flex-col gap-8 p-10">
+    <div className="mx-auto flex max-w-2xl flex-col gap-8 p-10">
       <h1 className="font-semibold text-2xl">audio/ui lab</h1>
       <p className="text-white/60">
         Devices built with audio/ui, running on the sources of this repository.
@@ -60,6 +60,6 @@ function Home() {
           </li>
         ))}
       </ul>
-    </main>
+    </div>
   );
 }

@@ -6,7 +6,13 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
-import { Sidebar } from "../components/layout/sidebar.tsx";
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { AppSidebar } from "../components/layout/app-sidebar.tsx";
 import { SITE } from "../lib/seo.ts";
 
 import appCss from "../styles.css?url";
@@ -32,7 +38,7 @@ export const Route = createRootRoute({
 
 function NotFound() {
   return (
-    <main className="mx-auto flex max-w-2xl flex-col gap-4 p-10">
+    <div className="mx-auto flex max-w-2xl flex-col gap-4 p-10">
       <h1 className="font-semibold text-2xl">Device not found</h1>
       <p className="text-white/60">
         This address is not a device of the lab.{" "}
@@ -41,21 +47,28 @@ function NotFound() {
         </Link>
         .
       </p>
-    </main>
+    </div>
   );
 }
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html className="dark" lang="en">
       <head>
         <HeadContent />
       </head>
-      <body className="font-sans antialiased">
-        <div className="flex h-screen">
-          <Sidebar />
-          <div className="min-w-0 flex-1 overflow-auto">{children}</div>
-        </div>
+      <body className="antialiased">
+        <TooltipProvider>
+          <SidebarProvider>
+            <AppSidebar />
+            <SidebarInset>
+              <header className="flex h-12 shrink-0 items-center px-4 md:hidden">
+                <SidebarTrigger />
+              </header>
+              {children}
+            </SidebarInset>
+          </SidebarProvider>
+        </TooltipProvider>
         <TanStackDevtools
           config={{
             position: "bottom-right",
