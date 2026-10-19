@@ -64,6 +64,8 @@ const SMOOTHING = 0.02;
 const SILENCE_DB = -60;
 const MIN_VOLUME_DB = -40;
 const MAX_VOLUME_DB = -3;
+/** The softest key still sounds: a velocity of 0 is this fraction of a full one. */
+const MIN_LEVEL = 0.25;
 const NOISE_SECONDS = 2;
 const HARMONICS = 96;
 
@@ -139,6 +141,8 @@ export function createOrionEngine(initial: Settings = DEFAULTS) {
   let graph: Graph | null = null;
   let powered = true;
   let gate = false;
+  /** The pitch wheel, in cents, on top of the tune knob. */
+  let bend = 0;
   let unlock: (() => void) | null = null;
 
   const smooth = (param: AudioParam, value: number) => {
@@ -187,15 +191,15 @@ export function createOrionEngine(initial: Settings = DEFAULTS) {
     smooth(mixes.noise.gain, unit(settings.noise) * SOURCE_GAIN);
     smooth(filter.frequency, cutoffHertz(settings.cutoff));
     smooth(filter.Q, resonanceDecibels(settings.resonance));
-    smooth(osc.detune, (settings.tune - 5) * 10);
-    smooth(sub.detune, (settings.tune - 5) * 10);
+    smooth(osc.detune, (settings.tune - 5) * 10 + bend);
+    smooth(sub.detune, (settings.tune - 5) * 10 + bend);
     smooth(lfo.frequency, rateHertz(settings.rate));
     smooth(lfoDepth.gain, depthCents(settings.depth));
     applyWave();
   }
 
-  /** Opens the amplifier and the filter along the ADSR, from wherever they are. */
-  function open() {
+  /** Opens the amplifier and the filter along the ADSR, from wherever they are; `level` is how hard the key was struck. */
+  function open(level: number) {
     if (!graph) {
       return;
     }
@@ -207,8 +211,8 @@ export function createOrionEngine(initial: Settings = DEFAULTS) {
     const contour = contourCents(settings.contour);
     amp.gain.cancelScheduledValues(now);
     amp.gain.setValueAtTime(amp.gain.value, now);
-    amp.gain.setTargetAtTime(1, now, attack / 4);
-    amp.gain.setTargetAtTime(sustain, now + attack, decay / 3);
+    amp.gain.setTargetAtTime(level, now, attack / 4);
+    amp.gain.setTargetAtTime(level * sustain, now + attack, decay / 3);
     filter.detune.cancelScheduledValues(now);
     filter.detune.setValueAtTime(filter.detune.value, now);
     filter.detune.setTargetAtTime(contour, now, attack / 4);
@@ -310,7 +314,8 @@ export function createOrionEngine(initial: Settings = DEFAULTS) {
       // A key is still down: the voice glides back to it, the gate stays open.
       tuneTo(last, glideSeconds(settings.glide));
     },
-    noteOn(pitch: number) {
+    /** A key struck with a velocity from 0 to 1: a soft one is quieter, a hard one full. */
+    noteOn(pitch: number, velocity = 1) {
       if (!(graph && powered)) {
         return;
       }
@@ -330,7 +335,15 @@ export function createOrionEngine(initial: Settings = DEFAULTS) {
       tuneTo(pitch, legato ? glideSeconds(settings.glide) : 0);
       gate = true;
       if (!legato) {
-        open();
+        open(MIN_LEVEL + (1 - MIN_LEVEL) * velocity);
+      }
+    },
+    /** The pitch wheel, in semitones: every sounding note follows it. */
+    bend(semitones: number) {
+      bend = semitones * 100;
+      if (graph) {
+        smooth(graph.osc.detune, (settings.tune - 5) * 10 + bend);
+        smooth(graph.sub.detune, (settings.tune - 5) * 10 + bend);
       }
     },
     setPower(on: boolean) {

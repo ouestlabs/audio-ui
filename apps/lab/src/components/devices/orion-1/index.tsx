@@ -121,12 +121,13 @@ export default function Orion1() {
         </div>
 
         <Piano.Root
+          activeNotes={orion.activeNotes}
           aria-label="Keyboard"
           className="piano"
           maxPitch={83}
           minPitch={48}
           onNoteOff={orion.noteOff}
-          onNoteOn={orion.noteOn}
+          onNoteOn={orion.pressKey}
         >
           <Piano.Keys>
             {(pitch: number) => (

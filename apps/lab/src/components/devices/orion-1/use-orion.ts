@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useMasterBus } from "@/hooks/use-master-bus";
+import { useMidiInput } from "@/hooks/use-midi-input";
 import { createOrionEngine, volumeGain, type Wave } from "./audio/engine.ts";
 import { type Patch, PRESETS, patchOf } from "./audio/presets.ts";
 import { type Knobbed, NAMES, type OnParam } from "./ui/params.ts";
@@ -82,11 +83,17 @@ export function useOrion() {
   );
 
   const noteOn = useCallback(
-    (pitch: number) => {
+    (pitch: number, velocity?: number) => {
       setHeld((count) => count + 1);
-      engine.noteOn(pitch);
+      engine.noteOn(pitch, velocity);
     },
     [engine]
+  );
+  /** A key of the on-screen keyboard: its details carry the velocity. */
+  const pressKey = useCallback(
+    (pitch: number, details: { velocity: number }) =>
+      noteOn(pitch, details.velocity),
+    [noteOn]
   );
   const noteOff = useCallback(
     (pitch: number) => {
@@ -96,13 +103,22 @@ export function useOrion() {
     [engine]
   );
 
+  // The page's one MIDI input: a keyboard plays the voice, and its notes light the keys.
+  const midi = useMidiInput({
+    onNoteOff: noteOff,
+    onNoteOn: noteOn,
+    onPitchBend: engine.bend,
+  });
+
   return {
+    activeNotes: midi.activeNotes,
     changeWave,
     held,
     next,
     noteOff,
     noteOn,
     onParam,
+    pressKey,
     patch,
     power,
     presetTitle: `${pad(preset)} ${PRESETS[preset]?.name}`,

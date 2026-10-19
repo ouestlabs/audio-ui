@@ -1,5 +1,6 @@
 import { InfoIcon, SidebarIcon } from "@phosphor-icons/react/ssr";
 import { useCallback, useState } from "react";
+import { MidiConnectControl } from "@/components/audio-ui/midi-connect-control";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { SidebarProvider, useSidebar } from "@/components/ui/sidebar";
@@ -84,7 +85,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           <header className="flex min-h-11 shrink-0 items-center gap-2 px-2 py-1.5">
             <NavigationToggle />
             <Separator orientation="vertical" />
-            <div className="ml-auto">
+            <div className="ml-auto flex items-center gap-2">
+              <MidiConnectControl />
               <DetailsToggle onClick={toggleDetails} open={detailsOpen} />
             </div>
           </header>
