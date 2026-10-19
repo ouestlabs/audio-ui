@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { EXAMPLES } from "../examples.ts";
+import { EXAMPLES } from "../../examples.ts";
 
 export function ExampleNav() {
   return (
