@@ -1,13 +1,11 @@
 {
-  "version": "1.1.0",
+  "version": "1.2.0",
   "organization": "audio/ui",
   "date": "October 2026",
-  "abstract": "How to build audio interfaces in React with audio/ui, for AI agents and LLMs. Rules across eight categories, prioritized by impact from critical (sound that starts, never clicks and stays in time; live data that never re-renders React per frame) to incremental (design directions, styling, AI control). Each rule explains what goes wrong, shows the incorrect code an agent tends to write and the correct code with the real audio/ui API.",
+  "abstract": "How to pick, install and wire audio/ui components in React, for AI agents and LLMs: how a control's value flows, accessibility, styling and letting a model drive the interface. Rules across four categories, prioritized by impact, each with the incorrect code an agent tends to write and the correct code with the real audio/ui API.",
   "references": [
     "https://www.audio-ui.dev/docs",
     "https://www.audio-ui.dev/llms.txt",
-    "https://developer.mozilla.org/docs/Web/API/Web_Audio_API",
-    "https://web.dev/articles/audio-scheduling",
     "https://www.w3.org/WAI/ARIA/apg/patterns/slider/"
   ]
 }

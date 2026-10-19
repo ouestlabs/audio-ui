@@ -60,7 +60,7 @@ export function getLlmsTxt() {
     [
       "## For agents",
       `- [MCP server](${siteConfig.url}/mcp): remote Streamable HTTP server with the tools search_docs, list_components, get_component_docs and search_catalog.`,
-      `- [Agent skill](${siteConfig.links.github}/tree/main/skills/audio-ui): install with \`npx skills add ouestlabs/audio-ui\`.`,
+      `- [Agent skills](${siteConfig.links.github}/tree/main/skills): install with \`npx skills add ouestlabs/audio-ui\`.`,
       `- [Full docs in one file](${siteConfig.url}/llms-full.txt)`,
     ].join("\n"),
     [

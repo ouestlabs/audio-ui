@@ -1,0 +1,11 @@
+{
+  "version": "1.2.0",
+  "organization": "audio/ui",
+  "date": "October 2026",
+  "abstract": "How to build audio controls without React on @audio-ui/core, for AI agents and LLMs: one controller per control, a native range input, drawing from snapshots and clean teardown, in Vue, Svelte, Solid, Angular, web components or the plain DOM. Each rule shows the incorrect code an agent tends to write and the correct code with the real audio/ui API.",
+  "references": [
+    "https://www.audio-ui.dev/docs",
+    "https://www.audio-ui.dev/llms.txt",
+    "https://www.w3.org/WAI/ARIA/apg/patterns/slider/"
+  ]
+}

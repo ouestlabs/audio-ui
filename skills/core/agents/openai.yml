@@ -1,0 +1,5 @@
+interface:
+  display_name: "audio/ui Core"
+  short_description: "Builds audio controls for Vue, Svelte, Solid, Angular, web components and the plain DOM."
+  icon_small: "./assets/audio-ui-small.png"
+  icon_large: "./assets/audio-ui.png"

@@ -70,4 +70,4 @@ function tick(now: number) {
 let frame = requestAnimationFrame(tick);
 ```
 
-On the plot: `<Plot.Root minX={20} maxX={20000} minY={-96} maxY={0} scaleX="log">` with `<Plot.Trace fillTo={-96} source={live} />` and `<Plot.Trace source={held} />` inside `Plot.Graph`. `Plot.Root` is a positioned `div` that needs a height. Markup and CSS: [directions.md](../directions.md).
+On the plot: `<Plot.Root minX={20} maxX={20000} minY={-96} maxY={0} scaleX="log">` with `<Plot.Trace fillTo={-96} source={live} />` and `<Plot.Trace source={held} />` inside `Plot.Graph`. `Plot.Root` is a positioned `div` that needs a height. Markup and CSS: the design skill's `directions.md`.

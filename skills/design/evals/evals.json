@@ -1,0 +1,81 @@
+{
+  "skill_name": "design",
+  "evals": [
+    {
+      "id": 13,
+      "prompt": "Build a retro analog synth panel in React: oscillator waveform, a filter with cutoff and resonance, an amp envelope and a master volume with a stereo meter. It must look like real vintage hardware. The project has no shadcn and no Tailwind.",
+      "expected_output": "@audio-ui/react primitives styled from styles/base.css and styles/retro.css with hardware taste: sections by signal flow, a larger master knob, printed labels, one amber lamp.",
+      "files": [],
+      "expectations": [
+        "Reads the skill's design.md and directions.md, and states the chosen direction in one sentence before writing CSS",
+        "Imports only primitives that exist from @audio-ui/react (or @audio-ui/react/<entry>), with the real part tree: Knob.Root > Control > Track/Indicator/Thumb, Meter.Channels given a render function, Fader.Control containing Track and Thumb",
+        "Gives the parts the structure of styles/base.css (a sized control, a sized fader track, a flex Meter.Root with a height) and never sets position, bottom, left, translate or rotate on a thumb",
+        "Every control has an aria-label or a Label part, and a :focus-visible style exists",
+        "Uses the retro skin (skin-retro class and styles/retro.css) and does not add gradients, glass or glow from another direction",
+        "Groups the controls in labelled sections that follow the signal (oscillator, filter, amplifier, output), not one grid of equal knobs",
+        "The master volume is larger than the other knobs, and no more than three knob sizes are used",
+        "Labels are small uppercase tracked text and values use tabular numbers",
+        "Glow appears only on lamps (a power or clip lamp), not on knobs or the panel",
+        "The meter's zones are painted at the full channel size (background-size equal to the channel height), not on the shrinking indicator"
+      ]
+    },
+    {
+      "id": 14,
+      "prompt": "Make a minimalist mixer with four channel strips: a fader, a mute and a stereo meter for each, plus a master. Clean, quiet, editorial. Plain CSS, no component library.",
+      "expected_output": "Four faders and meters on the minimal skin: paper background, hairlines, one accent, generous spacing.",
+      "files": [],
+      "expectations": [
+        "Reads the skill's design.md and directions.md, and states the chosen direction in one sentence before writing CSS",
+        "Imports only primitives that exist from @audio-ui/react (or @audio-ui/react/<entry>), with the real part tree: Knob.Root > Control > Track/Indicator/Thumb, Meter.Channels given a render function, Fader.Control containing Track and Thumb",
+        "Gives the parts the structure of styles/base.css (a sized control, a sized fader track, a flex Meter.Root with a height) and never sets position, bottom, left, translate or rotate on a thumb",
+        "Every control has an aria-label or a Label part, and a :focus-visible style exists",
+        "Uses the minimal skin: no shadows, no gradients, radius of 2px or less, one accent color",
+        "Uses one accent color for value and the active state, and a second hue only for clipping",
+        "Channel values are printed in tabular numbers and the layout uses generous spacing (gaps of 2rem or more)",
+        "Each fader keeps a visible focus ring and a hit area of at least 24px"
+      ]
+    },
+    {
+      "id": 15,
+      "prompt": "Design a modern dark equalizer plugin UI: four band knobs, a gain fader, an input meter and an output meter. It should feel like a professional tool, nothing like a landing page.",
+      "expected_output": "The modern skin: flat graphite surfaces, hairline borders, one signal color, mono labels, no glow or purple gradients.",
+      "files": [],
+      "expectations": [
+        "Reads the skill's design.md and directions.md, and states the chosen direction in one sentence before writing CSS",
+        "Imports only primitives that exist from @audio-ui/react (or @audio-ui/react/<entry>), with the real part tree: Knob.Root > Control > Track/Indicator/Thumb, Meter.Channels given a render function, Fader.Control containing Track and Thumb",
+        "Gives the parts the structure of styles/base.css (a sized control, a sized fader track, a flex Meter.Root with a height) and never sets position, bottom, left, translate or rotate on a thumb",
+        "Every control has an aria-label or a Label part, and a :focus-visible style exists",
+        "Uses the modern skin: flat surfaces, 1px borders, one signal color, and no glow, glassmorphism, backdrop-filter or purple and cyan gradients",
+        "Meter segments have hard edges and a separate color for clipping, drawn from data-clipping",
+        "Labels are small uppercase monospace text and values use tabular numbers",
+        "A pressed or dragged control shows state through its data-dragging or data-active attribute, not only on hover"
+      ]
+    },
+    {
+      "id": 16,
+      "prompt": "I use Tailwind and shadcn/ui. Add a drum machine page with eight pads and a tempo knob, and give it a skeuomorphic hardware look.",
+      "expected_output": "Keeps the registry components where the project has shadcn, picks the retro direction for the look and applies the design rules to the panel.",
+      "files": [],
+      "expectations": [
+        "States the direction (retro hardware) in one sentence before styling",
+        "Uses semantic tokens or the retro skin's own scoped variables, and does not mix a second direction into the panel",
+        "Pad strikes are drawn from data-active and the --pad-velocity variable, and sink physically (a short translate and a shorter shadow)",
+        "Decorative pieces such as screws and lamps have aria-hidden and pointer-events none"
+      ]
+    },
+    {
+      "id": 17,
+      "prompt": "Make a modular-synth style panel in React with six small knobs, a patch of four sliders and a stereo meter. It should look like a black Eurorack-like panel with thin white print and one red accent. No shadcn.",
+      "expected_output": "A new direction composed from styles/materials.css: tokens plus a material per part, not one of the shipped skins copied.",
+      "files": [],
+      "expectations": [
+        "Reads taste.md and states the direction as decisions (surface, light, materials, color, type, shape) before writing CSS",
+        "Copies styles/base.css and styles/materials.css and defines its own scope class with the tokens (panel, ink, accent, hi, lo), instead of editing retro.css or modern.css",
+        "Picks a material per part from the vocabulary (plastic, brushed, groove, zones, segments) with background: var(--...) and the shared shadows",
+        "Uses one accent (the red) and no purple or cyan gradients, no glow on knobs, no glass",
+        "Uses the verified part tree and the kit's class names, so every part has a size, and keeps focus rings, labels and hit areas",
+        "Draws decorative pieces (jacks, screws) with aria-hidden and pointer-events none"
+      ]
+    }
+  ]
+}

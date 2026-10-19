@@ -384,7 +384,7 @@ Focus lands on the input nested in each thumb, so draw the ring on the thumb wit
 
 ## Not in the kit
 
-The kit covers Knob, Fader, Meter, XYPad, Pad, Piano, Envelope, Sequencer, Waveform and Plot. `Timeline` and `PianoRoll` have no skin yet: with shadcn, install their styled elements (`timeline`, `piano-roll`, [components.md](./components.md)); without it, read their component pages and style the parts with the tokens of the skin you chose (surface, ink, accent, hairlines), the way `Envelope` and `Plot` are styled in `styles/base.css`. Registry elements (`@audio-ui/knob`, `fader`, `meter`...) take `size`, `marks` and `orientation`, not these class names.
+The kit covers Knob, Fader, Meter, XYPad, Pad, Piano, Envelope, Sequencer, Waveform and Plot. `Timeline` and `PianoRoll` have no skin yet: with shadcn, install their styled elements (`timeline`, `piano-roll`, listed in the `audio-ui` skill's `components.md`); without it, read their component pages and style the parts with the tokens of the skin you chose (surface, ink, accent, hairlines), the way `Envelope` and `Plot` are styled in `styles/base.css`. Registry elements (`@audio-ui/knob`, `fader`, `meter`...) take `size`, `marks` and `orientation`, not these class names.
 
 ## Layout facts
 

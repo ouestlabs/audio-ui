@@ -1,0 +1,99 @@
+{
+  "skill_name": "web-audio",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I have a Next.js app with shadcn/ui (base-nova). Add a small synth panel: an oscillator I can start and stop, a filter cutoff knob, a resonance knob and an output volume fader in dB.",
+      "expected_output": "Registry Knob and Fader installed with npx shadcn@latest add @audio-ui/..., wired to Web Audio nodes with ramped parameters, a lazily created AudioContext resumed in the start click.",
+      "files": [],
+      "expectations": [
+        "Installs the controls from the registry with `shadcn@latest add @audio-ui/knob` and `@audio-ui/fader` (or the project's package runner), not a hand-written slider",
+        "The cutoff knob uses scale=\"log\" with a positive min (e.g. 20 to 20000)",
+        "Parameters are set with setTargetAtTime (or another ramp), never by assigning .value from onValueChange",
+        "The fader value in dB is converted to linear gain (10 ** (db / 20)) before reaching the GainNode",
+        "The AudioContext is created lazily on the client and resume() is called inside the click handler that starts sound",
+        "Every control has an aria-label or a visible label",
+        "The file that uses hooks or the browser starts with \"use client\"",
+        "Sets step and largeStep to fit the dB, Hz and resonance ranges, not the 0 to 100 defaults",
+        "Prints units with formatValue (or the label), never with an Intl unit such as hertz or decibel",
+        "Imports the installed components from the path the CLI wrote (components/audio-ui/<name>)",
+        "Keeps the loudest case under full scale: voice gain well below 1, resonance capped, and a master volume that stops at 0 dB"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Show the live level of the microphone as a stereo meter with peak hold.",
+      "expected_output": "A Meter fed by a source built with createSource and updated in requestAnimationFrame from AnalyserNodes, with getUserMedia behind a click.",
+      "files": [],
+      "expectations": [
+        "Levels reach the Meter through its `source` prop, built with createSource (or another getSnapshot/subscribe object), not through useState updated every frame",
+        "Levels are computed from AnalyserNode data (RMS in dB) in a requestAnimationFrame loop that is cancelled on cleanup",
+        "Stereo uses one analyser per channel (e.g. via ChannelSplitterNode)",
+        "Peak hold is computed by the app and published as `peaks`",
+        "getUserMedia is started from a user action, not on mount",
+        "Does not install a non-existent `@audio-ui/use-audio-levels` item",
+        "Imports the installed Meter from the path the CLI wrote (components/audio-ui/meter)",
+        "Turns off the browser's voice processing (echoCancellation, noiseSuppression, autoGainControl) so the meter shows the raw signal",
+        "A mono microphone still moves both bars (up-mixed to two channels), and the analysers are never connected to the destination"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Build a 16-step drum sequencer with kick, snare and hat rows, a tempo control and play/stop.",
+      "expected_output": "Sequencer from the registry, sounds scheduled at AudioContext time through use-transport-clock, playhead from getPosition via a source.",
+      "files": [],
+      "expectations": [
+        "Uses the audio/ui Sequencer (registry or @audio-ui/react), not a grid of buttons",
+        "Steps are scheduled on the audio clock (use-transport-clock onStep time, or an equivalent look-ahead), not with setInterval/setTimeout triggering sounds immediately",
+        "Each sound starts at the scheduled `time` (e.g. osc.start(time))",
+        "Stop or seek silences sound already scheduled ahead (onReset or equivalent)",
+        "The moving playhead does not re-render React every frame",
+        "The AudioContext is resumed inside the Play click handler, not on mount",
+        "The summed voices have headroom: a master gain below 1, or an equivalent",
+        "The grid and the controls have accessible names"
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "Add a guitar tuner to my Next.js app: listen to the microphone and show the note and how many cents sharp or flat it is.",
+      "expected_output": "The registry Tuner with use-microphone and use-pitch: the microphone started from a click, raw signal, an analyser never connected to the speakers, a period search for the pitch, and a live source, not state per frame.",
+      "files": [],
+      "expectations": [
+        "Installs `@audio-ui/tuner`, `@audio-ui/use-microphone` and `@audio-ui/use-pitch` from the registry (or uses `detectPitch` and `nearestNote` from `@audio-ui/core/pitch`), not a hand-written pitch detector",
+        "Starts the microphone from a user gesture (a click), so the permission prompt and the context resume have one",
+        "Takes the raw microphone signal: echo cancellation, noise suppression and auto gain are off",
+        "Does not connect the analyser to `ctx.destination`, so the microphone is not played back",
+        "Finds the pitch from the time-domain samples (a period search such as YIN), not from the loudest FFT bin, which reads a harmonic",
+        "Gives the display a live source (what `usePitch` returns), not `setState` on every reading",
+        "Releases the microphone's tracks when listening stops or the component unmounts"
+      ]
+    },
+    {
+      "id": 9,
+      "prompt": "I want to play my synth from a USB MIDI keyboard. Harder keys should be louder, and the pitch wheel should bend the notes.",
+      "expected_output": "use-midi-input connected from a button click, velocity from 0 to 1 scaling the voice gain, a note on with velocity 0 treated as a release, pitch bend in semitones, and the AudioContext resumed because MIDI is not a gesture.",
+      "files": [],
+      "expectations": [
+        "Uses `useMidiInput` (registry `@audio-ui/use-midi-input`) or `createMidiInput` and `parseMidiMessage` from `@audio-ui/core/midi`, not its own `onmidimessage` handlers on each component",
+        "Asks for MIDI access from a click (a connect button such as `MidiConnectControl`), never on mount",
+        "Scales a voice's gain by the note's velocity from 0 to 1, not a fixed gain",
+        "Treats a note on with velocity 0 as a note off",
+        "Applies the pitch bend as a number of semitones to the sounding voices (a bend range of 2 by default), with a ramp",
+        "Resumes a suspended AudioContext before the first note, since a MIDI message is not a user gesture for audio"
+      ]
+    },
+    {
+      "id": 10,
+      "prompt": "My equalizer plot draws a low-pass at Q 2 with a bump at the cutoff, but the sound I hear has a different bump. The plot uses a BiquadFilterNode with filter.Q.value = 2 for the audio.",
+      "expected_output": "Explain that a low-pass and a high-pass take Q in decibels in the Web Audio node, convert it with toWebAudioQ, draw the curve from biquadResponse, and note that a shelf ignores Q.",
+      "files": [],
+      "expectations": [
+        "Says that a `lowpass` or `highpass` BiquadFilterNode reads its `Q` in decibels, so `Q.value = 2` is a 2 dB resonance, not a linear Q of 2",
+        "Converts with `toWebAudioQ` from `@audio-ui/core/analysis` (20 * log10 of the linear Q), or sets Q to about 6.02 dB for a linear Q of 2",
+        "Draws the curve with `biquadResponse` or `eqResponse` from `@audio-ui/core/analysis` rather than a hand-made formula, so the plot equals `getFrequencyResponse`",
+        "Mentions that a shelf's Q is ignored by the node",
+        "Sets parameters on the node with `setTargetAtTime`, not `.value =`, while it plays"
+      ]
+    }
+  ]
+}

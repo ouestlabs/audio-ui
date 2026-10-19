@@ -15,27 +15,25 @@ npx skills add ouestlabs/audio-ui
 
 ### In Claude Code, as a plugin
 
-The repository is also a Claude Code plugin marketplace, so Claude Code installs and updates the skill itself:
+The repository is also a Claude Code plugin marketplace, so Claude Code installs and updates the skills itself:
 
 ```text
 /plugin marketplace add ouestlabs/audio-ui
 /plugin install audio-ui@audio-ui
 ```
 
-On Claude Code 2.1.275 or later, one line does both: `/plugin install audio-ui --marketplace ouestlabs/audio-ui`. The skill is the plugin's only content, with no hook, command or server, and it follows the repository: `/plugin marketplace update audio-ui` brings the latest rules.
+On Claude Code 2.1.275 or later, one line does both: `/plugin install audio-ui --marketplace ouestlabs/audio-ui`. The plugin holds four skills and no hook, command or server, and it follows the repository: `/plugin marketplace update audio-ui` brings the latest rules.
 
-The agent loads the skill on its own when a task needs it. Its rules come with incorrect and correct code for each case:
+The agent loads each skill on its own when a task needs it, so a Vue knob does not pay for the design skins. Their rules come with incorrect and correct code for each case:
 
-| Rules | What they cover |
-| --- | --- |
-| Values and events | Controlled values, change versus commit, log scales, accessible names |
-| Web Audio | Starting the audio context, ramping parameters, dB to gain, scheduling on the audio clock |
-| Live data | Meters, spectra, waveforms and playheads fed by a source, without a render per frame |
-| Without React | Building the controls for Vue, Svelte, web components or the plain DOM on the framework-free controllers of `@audio-ui/core` |
-| Styling | Registry props and tokens, styling the headless primitives by state |
-| AI control | Typed tools a model calls to compose, edit and mix through the components |
+| Skill | Rules | What they cover |
+| --- | --- | --- |
+| `audio-ui` | Values and events, accessibility, styling, AI control | Picking and installing components, controlled values, change versus commit, accessible names, registry props and tokens, typed tools a model calls to compose, edit and mix |
+| `web-audio` | Web Audio, live data | Starting the audio context, ramping parameters, dB to gain, scheduling on the audio clock, meters, spectra, waveforms and playheads fed by a source, without a render per frame |
+| `design` | Design | Retro, minimal and modern skins for the headless primitives, and composing a look from a brief |
+| `core` | Without React | Building the controls for Vue, Svelte, web components or the plain DOM on the framework-free controllers of `@audio-ui/core` |
 
-The skill lives in the [audio-ui repository](https://github.com/ouestlabs/audio-ui/tree/main/skills/audio-ui), and CI checks that every name it mentions exists in the library. To install it by hand, copy the `skills/audio-ui` folder into your agent's skills directory (for Claude Code, `.claude/skills/`).
+The skills live in the [audio-ui repository](https://github.com/ouestlabs/audio-ui/tree/main/skills), and CI checks that every name they mention exists in the library. To install them by hand, copy the folders of `skills/` into your agent's skills directory (for Claude Code, `.claude/skills/`).
 
 ## What it does
 

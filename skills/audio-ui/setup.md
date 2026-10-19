@@ -34,7 +34,7 @@ Primitives are unstyled and export `Knob`, `Fader`, `XYPad`, `Envelope`, `Meter`
 npm install @audio-ui/core
 ```
 
-No dependencies. The framework-free controllers of every primitive, for Vue, Svelte, Solid, Angular, web components or the plain DOM: see [core.md](./core.md).
+No dependencies. The framework-free controllers of every primitive, for Vue, Svelte, Solid, Angular, web components or the plain DOM: see the `core` skill.
 
 ## MCP server
 

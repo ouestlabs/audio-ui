@@ -1,0 +1,5 @@
+interface:
+  display_name: "audio/ui Web Audio"
+  short_description: "Wires audio controls to the Web Audio API without clicks, and keeps live meters and playheads out of React state."
+  icon_small: "./assets/audio-ui-small.png"
+  icon_large: "./assets/audio-ui.png"

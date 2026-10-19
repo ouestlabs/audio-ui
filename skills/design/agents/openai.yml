@@ -1,0 +1,5 @@
+interface:
+  display_name: "audio/ui Design"
+  short_description: "Gives audio interfaces a look: retro hardware, minimal and modern skins, composed from a brief."
+  icon_small: "./assets/audio-ui-small.png"
+  icon_large: "./assets/audio-ui.png"

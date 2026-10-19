@@ -23,7 +23,7 @@ function valueImportsOf(snippet: string) {
 }
 
 const DOCS = [
-  "../../../skills/audio-ui/core.md",
+  "../../../skills/core/core.md",
   "../src/content/docs/engine/controllers.mdx",
 ];
 

@@ -1,0 +1,12 @@
+{
+  "version": "1.2.0",
+  "organization": "audio/ui",
+  "date": "October 2026",
+  "abstract": "How to get sound out of audio/ui controls and show it live, for AI agents and LLMs: the audio context, click-free parameter ramps, gain, scheduling, and meters, spectra, waveforms and playheads that never re-render React per frame. Each rule shows the incorrect code an agent tends to write and the correct code with the real audio/ui API.",
+  "references": [
+    "https://www.audio-ui.dev/docs",
+    "https://www.audio-ui.dev/llms.txt",
+    "https://developer.mozilla.org/docs/Web/API/Web_Audio_API",
+    "https://web.dev/articles/audio-scheduling"
+  ]
+}
