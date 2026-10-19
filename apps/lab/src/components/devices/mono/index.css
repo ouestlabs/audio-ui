@@ -1,0 +1,153 @@
+/* Mono: a minimal synth. Plain CSS on the lab's tokens, so it follows the theme. */
+
+.mono-stage {
+  display: grid;
+  flex: 1 0 auto;
+  place-items: center;
+  padding: 2rem 1.5rem;
+}
+
+.mono {
+  display: grid;
+  gap: 2rem;
+  width: min(100%, 40rem);
+}
+
+.mono-header {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.mono-title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.mono-subtitle {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+
+.mono-waves {
+  display: flex;
+  width: fit-content;
+  padding: 2px;
+  background: var(--muted);
+  border-radius: 0.5rem;
+}
+
+.mono-wave {
+  padding: 0.35rem 0.8rem;
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  border-radius: 0.375rem;
+}
+
+.mono-wave[aria-pressed="true"] {
+  color: var(--foreground);
+  background: var(--background);
+  box-shadow: 0 0 0 1px var(--border);
+}
+
+.mono-wave:focus-visible,
+.mono-key:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.mono-knobs {
+  display: flex;
+  gap: 2.5rem;
+}
+
+.mono-knob {
+  --size: 4.5rem;
+  display: grid;
+  gap: 0.4rem;
+  justify-items: center;
+}
+
+.mono-knob-control {
+  position: relative;
+  width: var(--size);
+  aspect-ratio: 1;
+  touch-action: none;
+  cursor: ns-resize;
+}
+
+.mono-knob-thumb {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+}
+
+.mono-knob-thumb::after {
+  position: absolute;
+  top: 8%;
+  left: 50%;
+  width: 2px;
+  height: 28%;
+  content: "";
+  background: var(--foreground);
+  border-radius: 1px;
+  translate: -50% 0;
+}
+
+.mono-knob-control:has(:focus-visible) .mono-knob-thumb {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.mono-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.mono-readout {
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted-foreground);
+}
+
+.mono-piano {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 9rem;
+}
+
+.mono-key {
+  position: absolute;
+  top: 0;
+  border: 0;
+}
+
+.mono-key[data-color="white"] {
+  height: 100%;
+  background: #fafafa;
+  border: 1px solid #d4d4d4;
+  border-radius: 0 0 0.375rem 0.375rem;
+}
+
+.mono-key[data-color="black"] {
+  z-index: 1;
+  height: 60%;
+  background: #171717;
+  border-radius: 0 0 0.25rem 0.25rem;
+}
+
+.mono-key[data-active] {
+  background: color-mix(in oklab, currentcolor 18%, #d4d4d4);
+}
+
+.mono-key[data-color="black"][data-active] {
+  background: #525252;
+}
