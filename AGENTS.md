@@ -15,6 +15,8 @@ This file is the single source of instructions for every coding agent (Claude Co
 
 Turborepo + Bun workspaces. **Always use `bun` / `bunx`, never `npm`, `npx` or `pnpm`.**
 
+The apps share their dependency versions through the Bun catalog in the root `package.json` (`workspaces.catalog`): an app depends on `"react": "catalog:"`, and a version is changed once, there. The published packages keep explicit versions and peer ranges.
+
 ```
 audio-ui/
 ├── apps/

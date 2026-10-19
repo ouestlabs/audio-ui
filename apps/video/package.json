@@ -21,21 +21,21 @@
     "@remotion/cli": "4.0.535",
     "@remotion/google-fonts": "4.0.535",
     "@remotion/renderer": "4.0.535",
-    "lucide-react": "1.55.0",
-    "react": "19.3.1",
-    "react-dom": "19.3.1",
+    "lucide-react": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
     "remotion": "4.0.535"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.3.2",
-    "@types/bun": "1.4.2",
-    "@types/react": "^19.3.0",
-    "@types/react-dom": "^19.3.0",
+    "@tailwindcss/postcss": "catalog:",
+    "@types/bun": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
     "css-loader": "^7.1.4",
     "postcss": "^8.5.6",
     "postcss-loader": "^8.2.1",
     "style-loader": "^4.0.0",
-    "tailwindcss": "^4.3.2",
-    "typescript": "^7.0.2"
+    "tailwindcss": "catalog:",
+    "typescript": "catalog:"
   }
 }
