@@ -15,7 +15,7 @@
   box-sizing: border-box;
   display: flex;
   justify-content: center;
-  min-height: 100svh;
+  min-height: 100%;
   padding: 3rem 3rem;
   background: radial-gradient(ellipse at 50% 0, #2c2824, #0c0b0a 70%);
 }

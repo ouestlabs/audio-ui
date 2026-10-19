@@ -6,13 +6,8 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { AppSidebar } from "../components/layout/app-sidebar.tsx";
+import { AppLayout } from "../components/layout/app-layout.tsx";
 import { SITE } from "../lib/seo.ts";
 
 import appCss from "../styles.css?url";
@@ -59,15 +54,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body className="antialiased">
         <TooltipProvider>
-          <SidebarProvider>
-            <AppSidebar />
-            <SidebarInset>
-              <header className="flex h-12 shrink-0 items-center px-4 md:hidden">
-                <SidebarTrigger />
-              </header>
-              {children}
-            </SidebarInset>
-          </SidebarProvider>
+          <AppLayout>{children}</AppLayout>
         </TooltipProvider>
         <TanStackDevtools
           config={{

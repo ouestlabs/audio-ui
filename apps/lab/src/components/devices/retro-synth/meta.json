@@ -1,4 +1,5 @@
 {
   "title": "Orion-1",
-  "description": "A 70s monophonic synth: knobs, faders and a keyboard."
+  "description": "A 70s monophonic synth: knobs, faders and a keyboard.",
+  "uses": ["knob", "fader", "piano"]
 }

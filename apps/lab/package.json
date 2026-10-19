@@ -12,6 +12,8 @@
     "@audio-ui/core": "*",
     "@audio-ui/react": "*",
     "@base-ui/react": "^1.9.0",
+    "@fontsource/bricolage-grotesque": "^5.3.0",
+    "@fontsource/instrument-serif": "^5.3.0",
     "@phosphor-icons/react": "^2.1.10",
     "@tailwindcss/vite": "catalog:",
     "@tanstack/react-devtools": "catalog:",
