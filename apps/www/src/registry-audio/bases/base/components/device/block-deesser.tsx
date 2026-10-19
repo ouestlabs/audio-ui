@@ -18,8 +18,8 @@ const MAX_HZ = 20_000;
 /**
  * A de-esser you can plug in: its state, a panel that draws what it does at
  * each frequency and an engine that plays it, each its own file and none
- * knowing the others. It plays a held vowel with an "s" on four beats: lower
- * the threshold and the s sits back, switch Listen on to hear the highs alone.
+ * knowing the others. It plays a loop: lower
+ * the threshold and the highs sit back, switch Listen on to hear the highs alone.
  */
 export default function BlockDeesser() {
   const [state, setState] = useState<DeesserState>(() =>
@@ -29,7 +29,7 @@ export default function BlockDeesser() {
   const { analyser } = useDeviceLoop({
     create: createDeesserEngine,
     destination: master,
-    source: "voice",
+    source: "groove",
     state,
   });
   const spectrum = useSpectrum(analyser, { maxHz: MAX_HZ, minHz: MIN_HZ });

@@ -7,13 +7,10 @@ import {
 } from "@/registry-audio/bases/base/hooks/use-audio-session";
 import { useDemoSource } from "@/registry-audio/bases/base/hooks/use-demo-source";
 
-function Device({ fallback }: { fallback: "groove" | "noise" }) {
+function Device({ fallback }: { fallback: "groove" | "chord" }) {
   const name = useDemoSource(fallback);
   const source = useAudioSession()?.source;
-  const pickVoice = useCallback(
-    () => source?.set({ chosen: "voice" }),
-    [source]
-  );
+  const pickTrap = useCallback(() => source?.set({ chosen: "trap" }), [source]);
   const pickNope = useCallback(() => source?.set({ chosen: "nope" }), [source]);
   return (
     <>
@@ -21,8 +18,8 @@ function Device({ fallback }: { fallback: "groove" | "noise" }) {
       <output aria-label="offered">
         {source?.get().fallback ?? "nothing"}
       </output>
-      <button onClick={pickVoice} type="button">
-        voice
+      <button onClick={pickTrap} type="button">
+        trap
       </button>
       <button onClick={pickNope} type="button">
         nope
@@ -48,18 +45,18 @@ describe("useDemoSource", () => {
         <Device fallback="groove" />
       </AudioSessionProvider>
     );
-    act(() => screen.getByText("voice").click());
-    expect(screen.getByLabelText("playing").textContent).toBe("voice");
+    act(() => screen.getByText("trap").click());
+    expect(screen.getByLabelText("playing").textContent).toBe("trap");
   });
 
   test("falls back when the choice is not a sound of the library", () => {
     render(
       <AudioSessionProvider>
-        <Device fallback="noise" />
+        <Device fallback="chord" />
       </AudioSessionProvider>
     );
     act(() => screen.getByText("nope").click());
-    expect(screen.getByLabelText("playing").textContent).toBe("noise");
+    expect(screen.getByLabelText("playing").textContent).toBe("chord");
   });
 
   test("two previews choose on their own", () => {
@@ -73,15 +70,15 @@ describe("useDemoSource", () => {
         </AudioSessionProvider>
       </>
     );
-    act(() => screen.getAllByText("voice")[0]?.click());
+    act(() => screen.getAllByText("trap")[0]?.click());
     expect(
       screen.getAllByLabelText("playing").map((n) => n.textContent)
-    ).toEqual(["voice", "groove"]);
+    ).toEqual(["trap", "groove"]);
   });
 
   test("outside a session it is always the default", () => {
-    render(<Device fallback="noise" />);
-    expect(screen.getByLabelText("playing").textContent).toBe("noise");
+    render(<Device fallback="chord" />);
+    expect(screen.getByLabelText("playing").textContent).toBe("chord");
     expect(screen.getByLabelText("offered").textContent).toBe("nothing");
   });
 });

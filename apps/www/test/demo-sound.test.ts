@@ -27,12 +27,8 @@ describe("DEMO_SOURCES", () => {
       "chord",
       "groove",
       "kick",
-      "noise",
-      "pulses",
       "trap",
       "trapKick",
-      "voice",
-      "wide",
     ]);
   });
 
