@@ -2,9 +2,6 @@
   "name": "lab",
   "private": true,
   "type": "module",
-  "imports": {
-    "#/*": "./src/*"
-  },
   "scripts": {
     "build": "vite build",
     "deploy": "bun run build && wrangler deploy",

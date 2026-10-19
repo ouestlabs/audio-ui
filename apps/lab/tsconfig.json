@@ -4,18 +4,6 @@
     "target": "ES2022",
     "jsx": "react-jsx",
     "module": "ESNext",
-    "paths": {
-      "#/*": ["./src/*"],
-      "@/*": ["./src/*"],
-      "@audio-ui/core": ["../../packages/core/src/index.ts"],
-      "@audio-ui/core/internal": ["../../packages/core/src/internal.ts"],
-      "@audio-ui/core/*": [
-        "../../packages/core/src/primitives/*/index.ts",
-        "../../packages/core/src/audio/*/index.ts"
-      ],
-      "@audio-ui/react": ["../../packages/ui/src/index.ts"],
-      "@audio-ui/react/*": ["../../packages/ui/src/entries/*.ts"]
-    },
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "types": ["vite/client"],
 
@@ -28,8 +16,8 @@
     /* Linting */
     "skipLibCheck": true,
     "strict": true,
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   }
