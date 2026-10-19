@@ -1,4 +1,5 @@
 import { Link, useLocation } from "@tanstack/react-router";
+import { useCallback, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Sidebar,
@@ -7,11 +8,12 @@ import {
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarHeader,
+  SidebarInput,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { DEVICES } from "../../devices.ts";
+import { groupByCategory, searchDevices } from "../../devices.ts";
 import { ModeSwitcher } from "./mode-switcher.tsx";
 
 /** The audio/ui mark, as the docs draw it. */
@@ -31,54 +33,80 @@ function AudioUiIcon(props: React.ComponentProps<"svg">) {
 
 export function AppSidebar() {
   const pathname = useLocation({ select: (location) => location.pathname });
+  const [query, setQuery] = useState("");
+  const groups = groupByCategory(searchDevices(query));
+  const onSearch = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) =>
+      setQuery(event.target.value),
+    []
+  );
 
   return (
     <Sidebar className="bg-transparent group-data-[side=left]:border-r-0 **:data-[slot=sidebar-inner]:bg-transparent">
-      <SidebarHeader className="flex-row items-center justify-between">
-        <Button
-          className="w-fit pl-2"
-          nativeButton={false}
-          render={
-            <Link
-              aria-label="audio/ui lab, home"
-              className="flex items-center"
-              to="/"
-            >
-              <span aria-hidden className="flex select-none items-center gap-1">
-                <AudioUiIcon className="pointer-events-none size-5 text-foreground" />
-                <span className="-mt-[2.3px] font-medium font-serif text-xl leading-snug">
-                  audio/ui
+      <SidebarHeader className="gap-2">
+        <div className="flex items-center justify-between">
+          <Button
+            className="w-fit pl-2"
+            nativeButton={false}
+            render={
+              <Link
+                aria-label="audio/ui lab, home"
+                className="flex items-center"
+                to="/"
+              >
+                <span
+                  aria-hidden
+                  className="flex select-none items-center gap-1"
+                >
+                  <AudioUiIcon className="pointer-events-none size-5 text-foreground" />
+                  <span className="-mt-[2.3px] font-medium font-serif text-xl leading-snug">
+                    audio/ui
+                  </span>
+                  <span className="ml-1 rounded-md border px-1.5 py-0.5 text-muted-foreground text-xs">
+                    lab
+                  </span>
                 </span>
-                <span className="ml-1 rounded-md border px-1.5 py-0.5 text-muted-foreground text-xs">
-                  lab
-                </span>
-              </span>
-            </Link>
-          }
-          variant="ghost"
+              </Link>
+            }
+            variant="ghost"
+          />
+          <ModeSwitcher />
+        </div>
+        <SidebarInput
+          aria-label="Search devices"
+          onChange={onSearch}
+          placeholder="Search devices"
+          type="search"
+          value={query}
         />
-        <ModeSwitcher />
       </SidebarHeader>
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Devices</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {DEVICES.map((device) => (
-                <SidebarMenuItem key={device.slug}>
-                  <SidebarMenuButton
-                    isActive={pathname === `/${device.slug}`}
-                    render={
-                      <Link params={{ device: device.slug }} to="/$device">
-                        {device.title}
-                      </Link>
-                    }
-                  />
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {groups.length === 0 ? (
+          <p className="px-4 py-2 text-muted-foreground text-sm">
+            No device matches “{query}”.
+          </p>
+        ) : null}
+        {groups.map((group) => (
+          <SidebarGroup key={group.category}>
+            <SidebarGroupLabel>{group.category}</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {group.devices.map((device) => (
+                  <SidebarMenuItem key={device.slug}>
+                    <SidebarMenuButton
+                      isActive={pathname === `/${device.slug}`}
+                      render={
+                        <Link params={{ device: device.slug }} to="/$device">
+                          {device.title}
+                        </Link>
+                      }
+                    />
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ))}
       </SidebarContent>
     </Sidebar>
   );

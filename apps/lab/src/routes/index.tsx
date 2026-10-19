@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { DEVICES } from "../devices.ts";
+import { DEVICES, groupByCategory } from "../devices.ts";
 import {
   absoluteUrl,
   jsonLd,
@@ -39,27 +39,59 @@ export const Route = createFileRoute("/")({
 
 function Home() {
   return (
-    <div className="mx-auto flex max-w-2xl flex-col gap-8 p-10">
-      <h1 className="font-semibold text-2xl">audio/ui lab</h1>
-      <p className="text-muted-foreground">
-        Devices built with audio/ui, running on the sources of this repository.
-      </p>
-      <ul className="grid gap-3">
-        {DEVICES.map((device) => (
-          <li key={device.slug}>
-            <Link
-              className="block rounded-lg border p-4 transition-colors hover:bg-accent"
-              params={{ device: device.slug }}
-              to="/$device"
-            >
-              <span className="block font-medium">{device.title}</span>
-              <span className="block text-sm text-muted-foreground">
-                {device.description}
-              </span>
-            </Link>
-          </li>
-        ))}
-      </ul>
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-10 p-8">
+      <div className="flex flex-col gap-2">
+        <h1 className="font-semibold text-2xl">audio/ui lab</h1>
+        <p className="max-w-2xl text-muted-foreground">
+          Devices built with audio/ui, running on the sources of this
+          repository.
+        </p>
+      </div>
+      {groupByCategory(DEVICES).map((group) => (
+        <section className="flex flex-col gap-4" key={group.category}>
+          <h2 className="font-medium text-muted-foreground text-sm">
+            {group.category}
+          </h2>
+          <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {group.devices.map((device) => (
+              <li key={device.slug}>
+                <Link
+                  className="group/card flex flex-col gap-3 rounded-xl border p-2 transition-colors hover:bg-accent"
+                  params={{ device: device.slug }}
+                  to="/$device"
+                >
+                  <img
+                    alt={`${device.title}, preview`}
+                    className="aspect-1200/630 w-full rounded-lg border object-cover"
+                    height={630}
+                    loading="lazy"
+                    src={device.image ?? "/og/default.png"}
+                    width={1200}
+                  />
+                  <span className="flex flex-col gap-1 px-1 pb-1">
+                    <span className="font-medium">{device.title}</span>
+                    <span className="text-muted-foreground text-sm">
+                      {device.description}
+                    </span>
+                    {device.uses.length > 0 ? (
+                      <span className="mt-1 flex flex-wrap gap-1">
+                        {device.uses.map((name) => (
+                          <span
+                            className="rounded-md border px-1.5 py-0.5 text-muted-foreground text-xs"
+                            key={name}
+                          >
+                            {name}
+                          </span>
+                        ))}
+                      </span>
+                    ) : null}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
     </div>
   );
 }
