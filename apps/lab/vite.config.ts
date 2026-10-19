@@ -11,7 +11,16 @@ const config = defineConfig({
     devtools(),
     cloudflare({ viteEnvironment: { name: "ssr" } }),
     tailwindcss(),
-    tanstackStart(),
+    tanstackStart({
+      // Every page is built to HTML once and served as a static file; the lab's pages are found from its links.
+      pages: [{ path: "/" }, { path: "/robots.txt" }, { path: "/sitemap.xml" }],
+      prerender: {
+        autoSubfolderIndex: false,
+        crawlLinks: true,
+        enabled: true,
+        failOnError: true,
+      },
+    }),
     viteReact(),
   ],
 });

@@ -2,8 +2,8 @@ import { type ComponentType, lazy } from "react";
 
 /**
  * A device is a folder of `components/devices/<slug>/`: `meta.json` (a `title`
- * and a `description`), `index.tsx` (the device, as the default export) and
- * optionally `index.css`. Adding the folder adds the page and its link.
+ * and a `description`), `index.tsx` (the device, as the default export, with its own `h1`) and
+ * optionally `index.css` and `og.png` (its social image, 1200x630). Adding the folder adds the page and its link.
  */
 const metas = import.meta.glob<{ description: string; title: string }>(
   "./components/devices/*/meta.json",
@@ -13,6 +13,12 @@ const loaders = import.meta.glob<{ default: ComponentType }>(
   "./components/devices/*/index.tsx"
 );
 const styles = import.meta.glob<string>("./components/devices/*/index.css", {
+  eager: true,
+  import: "default",
+  query: "?url",
+});
+
+const images = import.meta.glob<string>("./components/devices/*/og.png", {
   eager: true,
   import: "default",
   query: "?url",
@@ -28,6 +34,7 @@ export const DEVICES = Object.entries(metas)
     return {
       Component: load ? lazy(load) : null,
       description: meta.description,
+      image: images[`${base}/og.png`],
       slug,
       style: styles[`${base}/index.css`],
       title: meta.title,
