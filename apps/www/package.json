@@ -40,7 +40,7 @@
     "@shadcn/react": "^0.3.1",
     "@tabler/icons-react": "^3.44.0",
     "@tailwindcss/postcss": "catalog:",
-    "@tanstack/highlight": "^1.1.0",
+    "@tanstack/highlight": "catalog:",
     "@tanstack/react-devtools": "catalog:",
     "@tanstack/react-query": "^5.101.2",
     "@tanstack/react-router": "catalog:",
