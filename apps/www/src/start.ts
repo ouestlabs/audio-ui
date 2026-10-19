@@ -1,5 +1,9 @@
 import { env, waitUntil } from "cloudflare:workers";
-import { createMiddleware, createStart } from "@tanstack/react-start";
+import {
+  createCsrfMiddleware,
+  createMiddleware,
+  createStart,
+} from "@tanstack/react-start";
 import { markdownOfPage } from "@/lib/agents/llm-page";
 
 /**
@@ -167,6 +171,11 @@ const edge = createMiddleware().server(async ({ next, request }) => {
   return next();
 });
 
+/** Server functions are same-origin calls: a request from another site is refused. */
+const csrf = createCsrfMiddleware({
+  filter: (ctx) => ctx.handlerType === "serverFn",
+});
+
 export const startInstance = createStart(() => ({
-  requestMiddleware: [edge],
+  requestMiddleware: [csrf, edge],
 }));
