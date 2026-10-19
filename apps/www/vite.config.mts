@@ -1,5 +1,6 @@
 import { cloudflare } from "@cloudflare/vite-plugin";
 import tailwindcss from "@tailwindcss/vite";
+import { devtools } from "@tanstack/devtools-vite";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import react from "@vitejs/plugin-react";
 import { fumadocsMdx } from "fumadocs-mdx/vite";
@@ -19,6 +20,7 @@ export default defineConfig({
     "import.meta.env.VITE_DEPLOYMENT_ID": JSON.stringify(deploymentId),
   },
   plugins: [
+    devtools(),
     cloudflare({ viteEnvironment: { name: "ssr" } }),
     fumadocsMdx(),
     tailwindcss(),
