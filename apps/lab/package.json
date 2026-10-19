@@ -9,7 +9,6 @@
     "build": "vite build",
     "deploy": "bun run build && wrangler deploy",
     "dev": "vite dev --port 3000",
-    "generate-routes": "tsr generate",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -27,7 +26,6 @@
     "@cloudflare/vite-plugin": "catalog:",
     "@tailwindcss/typography": "^0.5.20",
     "@tanstack/devtools-vite": "catalog:",
-    "@tanstack/router-cli": "^1.167.45",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
