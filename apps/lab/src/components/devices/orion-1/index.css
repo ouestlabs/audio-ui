@@ -16,7 +16,7 @@
   display: flex;
   flex: 1 0 auto;
   justify-content: center;
-  padding: 3rem 3rem;
+  padding: 2rem 1.5rem;
   background: radial-gradient(ellipse at 50% 0, #2c2824, #0c0b0a 70%);
 }
 
@@ -24,16 +24,16 @@ body {
   margin: 0;
 }
 
-/* Cabinet: wood cheeks either side of the faceplate */
+/* The faceplate: a flat dark panel, as small as the controls it holds */
 .synth {
   position: relative;
   box-sizing: border-box;
   display: grid;
-  gap: 1.75rem;
+  gap: 1rem;
   align-content: start;
-  width: min(100%, 64rem);
+  width: min(100%, 46rem);
   height: max-content;
-  padding: 2.25rem 2.5rem 2rem;
+  padding: 1rem 1.25rem 1.25rem;
   font-family: "Helvetica Neue", "Arial Narrow", Arial, sans-serif;
   color: var(--ink);
   background:
@@ -59,57 +59,26 @@ body {
     0 24px 50px rgb(0 0 0 / 0.6);
 }
 
-/* Wood cheeks either side of the faceplate */
-.synth::before,
-.synth::after {
-  position: absolute;
-  top: -0.5rem;
-  bottom: -0.5rem;
-  width: 1.75rem;
-  pointer-events: none;
-  content: "";
-  background:
-    repeating-linear-gradient(
-      100deg,
-      rgb(0 0 0 / 0.16) 0 2px,
-      transparent 2px 9px,
-      rgb(255 255 255 / 0.05) 9px 10px,
-      transparent 10px 17px
-    ),
-    linear-gradient(90deg, var(--wood-1), var(--wood-2));
-  border-radius: 6px;
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.18),
-    0 10px 24px rgb(0 0 0 / 0.5);
-}
-
-.synth::before {
-  right: 100%;
-}
-
-.synth::after {
-  left: 100%;
-}
-
 .synth-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
-  gap: 1.5rem;
-  align-items: stretch;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem 1rem;
+  align-items: flex-end;
+  justify-content: space-between;
 }
 
 /* Header: the name, a tagline in small print, and the power switch */
 .synth-header {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem 1.5rem;
-  align-items: baseline;
+  gap: 0.75rem 1rem;
+  align-items: center;
 }
 
 .synth-name {
   margin: 0;
   font:
-    800 1.9rem / 1 "Arial Narrow",
+    800 1.4rem / 1 "Arial Narrow",
     Arial,
     sans-serif;
   text-transform: uppercase;
@@ -126,6 +95,79 @@ body {
   color: var(--ink-dim);
   text-transform: uppercase;
   letter-spacing: 0.24em;
+}
+
+/* The LCD: the preset's name, and what the last control read */
+.lcd {
+  display: grid;
+  flex: 1;
+  gap: 0.15rem;
+  align-content: center;
+  height: 2.6rem;
+  padding: 0.3rem 0.65rem;
+  background: #0b0a07;
+  border-radius: 3px;
+  box-shadow:
+    inset 0 2px 5px #000,
+    0 0 0 2px #1d1914,
+    0 1px 0 2px rgb(255 255 255 / 0.06);
+}
+
+.lcd-line {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font:
+    600 0.78rem / 1.1 ui-monospace,
+    "SF Mono",
+    Menlo,
+    monospace;
+  color: var(--amber);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  white-space: nowrap;
+  text-shadow: 0 0 6px rgb(255 176 40 / 0.55);
+}
+
+.lcd-dim {
+  color: #a8721d;
+  text-shadow: none;
+}
+
+.synth:not([data-power]) .lcd-line {
+  color: #2a2418;
+  text-shadow: none;
+}
+
+.lcd-bar {
+  display: flex;
+  flex: 1;
+  gap: 0.5rem;
+  align-items: stretch;
+  min-width: 14rem;
+}
+
+.lcd-button {
+  display: grid;
+  place-items: center;
+  width: 2.6rem;
+  font-size: 0.9rem;
+  color: var(--ink);
+  cursor: pointer;
+  background: linear-gradient(180deg, #2c2722, #181512);
+  border-radius: 4px;
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 0.12) inset,
+    0 2px 3px rgb(0 0 0 / 0.6);
+}
+
+.lcd-button:active {
+  transform: translateY(1px);
+}
+
+.lcd-button:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
 }
 
 .synth-power {
@@ -145,36 +187,28 @@ body {
 
 /* Sections: a thin printed line with the title cut into it, as on a real panel */
 .section {
-  position: relative;
+  display: grid;
+  gap: 0.6rem;
   min-width: 0;
-  padding: 1.6rem 1rem 1.1rem;
   margin: 0;
-  border: 1px solid rgb(239 232 214 / 0.35);
-  border-radius: 3px;
 }
 
 .legend {
-  position: absolute;
-  top: 0;
-  left: 0.75rem;
-  padding: 0 0.45rem;
   margin: 0;
   font:
     700 0.6rem / 1 "Arial Narrow",
     Arial,
     sans-serif;
+  color: var(--ink-dim);
   text-transform: uppercase;
   letter-spacing: 0.22em;
-  background: var(--panel);
-  translate: 0 -50%;
 }
 
 .group {
   display: flex;
   flex-wrap: wrap;
-  gap: 1.1rem 1.4rem;
+  gap: 0.75rem 0.75rem;
   align-items: flex-end;
-  justify-content: space-around;
 }
 
 .group + .group {
@@ -183,20 +217,20 @@ body {
 
 /* Knob: a plastic cap with a pointer line, a printed scale of ticks and numerals around it */
 .knob {
-  --knob-size: 4rem;
+  --knob-size: 2.75rem;
   position: relative;
   display: inline-grid;
   gap: 0.55rem;
   justify-items: center;
-  padding-top: 1.1rem;
+  padding-top: 0.9rem;
 }
 
 .knob[data-size="sm"] {
-  --knob-size: 3rem;
+  --knob-size: 2.5rem;
 }
 
 .knob[data-size="lg"] {
-  --knob-size: 5.5rem;
+  --knob-size: 3.5rem;
 }
 
 .knob-control {
@@ -308,7 +342,7 @@ body {
 
 /* Fader: a short slide pot in a recessed slot, scale ticks either side */
 .fader {
-  --strip-h: 6.5rem;
+  --strip-h: 4.5rem;
   display: inline-grid;
   gap: 1.1rem;
   justify-items: center;
@@ -415,7 +449,7 @@ body {
 /* Rockers: a white key under its lamp. It sinks when pressed, and says so by its lamp, not only its color. */
 .selector {
   display: flex;
-  gap: 0.7rem;
+  gap: 0.35rem;
   justify-content: center;
 }
 
@@ -464,7 +498,7 @@ body {
 
 .rocker {
   grid-template-rows: auto auto auto;
-  min-width: 3.4rem;
+  min-width: 2.6rem;
 }
 
 .power {
@@ -500,7 +534,7 @@ body {
   position: relative;
   display: block;
   width: 100%;
-  height: 8rem;
+  height: 4.5rem;
   padding-top: 4px;
   background: #0d0b0a;
   border-radius: 4px;
@@ -548,49 +582,6 @@ body {
 .synth:not([data-power]) .knob-thumb,
 .synth:not([data-power]) .fader-thumb {
   filter: brightness(0.7);
-}
-
-/* Screws: decorative */
-.screw {
-  position: absolute;
-  width: 0.7rem;
-  height: 0.7rem;
-  pointer-events: none;
-  background:
-    linear-gradient(
-      45deg,
-      transparent 45%,
-      rgb(0 0 0 / 0.55) 45% 55%,
-      transparent 55%
-    ),
-    radial-gradient(circle at 35% 30%, #d8d4ca, #6f6b62);
-  border-radius: 50%;
-  box-shadow:
-    0 1px 1px rgb(0 0 0 / 0.6),
-    inset 0 0 0 1px rgb(0 0 0 / 0.25);
-}
-
-.screw-tl {
-  top: 8px;
-  left: 8px;
-}
-
-.screw-tr {
-  top: 8px;
-  right: 8px;
-  rotate: 70deg;
-}
-
-.screw-bl {
-  bottom: 8px;
-  left: 8px;
-  rotate: 35deg;
-}
-
-.screw-br {
-  right: 8px;
-  bottom: 8px;
-  rotate: 110deg;
 }
 
 @media (prefers-reduced-motion: no-preference) {
