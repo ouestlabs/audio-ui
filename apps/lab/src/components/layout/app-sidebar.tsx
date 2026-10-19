@@ -12,6 +12,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { DEVICES } from "../../devices.ts";
+import { ModeSwitcher } from "./mode-switcher.tsx";
 
 /** The audio/ui mark, as the docs draw it. */
 function AudioUiIcon(props: React.ComponentProps<"svg">) {
@@ -33,7 +34,7 @@ export function AppSidebar() {
 
   return (
     <Sidebar className="bg-transparent group-data-[side=left]:border-r-0 **:data-[slot=sidebar-inner]:bg-transparent">
-      <SidebarHeader>
+      <SidebarHeader className="flex-row items-center justify-between">
         <Button
           className="w-fit pl-2"
           nativeButton={false}
@@ -56,6 +57,7 @@ export function AppSidebar() {
           }
           variant="ghost"
         />
+        <ModeSwitcher />
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
