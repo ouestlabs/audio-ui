@@ -10,7 +10,10 @@ import { useDemoSource } from "@/registry-audio/bases/base/hooks/use-demo-source
 function Device({ fallback }: { fallback: "groove" | "chord" }) {
   const name = useDemoSource(fallback);
   const source = useAudioSession()?.source;
-  const pickTrap = useCallback(() => source?.set({ chosen: "trap" }), [source]);
+  const pickDrone = useCallback(
+    () => source?.set({ chosen: "chord" }),
+    [source]
+  );
   const pickNope = useCallback(() => source?.set({ chosen: "nope" }), [source]);
   return (
     <>
@@ -18,8 +21,8 @@ function Device({ fallback }: { fallback: "groove" | "chord" }) {
       <output aria-label="offered">
         {source?.get().fallback ?? "nothing"}
       </output>
-      <button onClick={pickTrap} type="button">
-        trap
+      <button onClick={pickDrone} type="button">
+        chord
       </button>
       <button onClick={pickNope} type="button">
         nope
@@ -45,8 +48,8 @@ describe("useDemoSource", () => {
         <Device fallback="groove" />
       </AudioSessionProvider>
     );
-    act(() => screen.getByText("trap").click());
-    expect(screen.getByLabelText("playing").textContent).toBe("trap");
+    act(() => screen.getByText("chord").click());
+    expect(screen.getByLabelText("playing").textContent).toBe("chord");
   });
 
   test("falls back when the choice is not a sound of the library", () => {
@@ -70,10 +73,10 @@ describe("useDemoSource", () => {
         </AudioSessionProvider>
       </>
     );
-    act(() => screen.getAllByText("trap")[0]?.click());
+    act(() => screen.getAllByText("chord")[0]?.click());
     expect(
       screen.getAllByLabelText("playing").map((n) => n.textContent)
-    ).toEqual(["trap", "groove"]);
+    ).toEqual(["chord", "groove"]);
   });
 
   test("outside a session it is always the default", () => {

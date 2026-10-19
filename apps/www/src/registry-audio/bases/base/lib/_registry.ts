@@ -803,7 +803,7 @@ const items: RegistryItem[] = [
     categories: ["lib", "audio", "device", "web-audio"],
     dependencies: ["@audio-ui/core"],
     description:
-      "The sounds the previews play, by name: Boom bap, Drone and Rage, a trap loop at 150 BPM, with the keys that go with them. Drawn once in code and looped as a buffer, no samples.",
+      "The sounds the previews play, by name: Boom bap and Drone, with the kick that goes with the first. Drawn once in code and looped as a buffer, no samples.",
     files: [
       {
         path: "lib/demo-sound.ts",

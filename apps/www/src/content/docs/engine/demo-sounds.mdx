@@ -1,6 +1,6 @@
 ---
 title: Demo sounds
-description: "The three sounds the previews play, made with Web Audio and no samples: listen to each and ask for one by name."
+description: "The two sounds the previews play, made with Web Audio and no samples: listen to each and ask for one by name."
 ---
 
 A device preview plays a loop through the effect so you can hear what it does. Those loops are not recordings: each is drawn in code with oscillators, filters and noise, once per sample rate, then looped as a buffer. They live in one file, `demo-sound`, and each has a name.
@@ -48,9 +48,7 @@ useDeviceLoop({ create, destination, source: "groove", state });
 
 **Drone** (`chord`) is four oscillators on an A minor chord that never stop. A signal that is never quiet by itself is what a gate has to open and close.
 
-**Rage** (`trap`) is 150 BPM felt in half-time, in F sharp minor, four bars, straight on the grid. A layered kick, a clap and a snare in a small room, metallic hats with rolls, an 808 that slides, a pad that opens, a small bell behind the clap, a vocal chop and a reversed cymbal. It has its own tempo, so a delay synced to it echoes on its beat.
-
-Each has a kick to go with it, not offered in the picker: a gate or a ducker follows it.
+Boom bap has a kick to go with it, not offered in the picker: a gate or a ducker follows it.
 
 The drum voices are the ones of [Synthesis](/docs/engine/synthesis#drum-hits).
 
