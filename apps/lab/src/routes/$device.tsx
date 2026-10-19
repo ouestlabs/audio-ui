@@ -64,13 +64,10 @@ export const Route = createFileRoute("/$device")({
 
 function DevicePage() {
   const { device } = Route.useParams();
-  const current = DEVICES.find((item) => item.slug === device);
-  const Component = current?.Component;
+  const Component = DEVICES.find((item) => item.slug === device)?.Component;
   return Component ? (
-    <main>
-      <Suspense>
-        <Component />
-      </Suspense>
-    </main>
+    <Suspense>
+      <Component />
+    </Suspense>
   ) : null;
 }

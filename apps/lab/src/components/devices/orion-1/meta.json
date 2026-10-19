@@ -1,0 +1,6 @@
+{
+  "title": "Orion-1",
+  "description": "A 70s monophonic synth: knobs, faders and a keyboard.",
+  "category": "Synths",
+  "uses": ["knob", "fader", "piano"]
+}

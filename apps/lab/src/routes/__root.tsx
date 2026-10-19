@@ -6,7 +6,9 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
-import { Sidebar } from "../components/layout/sidebar.tsx";
+import { ThemeProvider } from "next-themes";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { AppLayout } from "../components/layout/app-layout.tsx";
 import { SITE } from "../lib/seo.ts";
 
 import appCss from "../styles.css?url";
@@ -22,7 +24,16 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { content: "width=device-width, initial-scale=1", name: "viewport" },
-      { content: SITE.themeColor, name: "theme-color" },
+      {
+        content: SITE.themeColor.light,
+        media: "(prefers-color-scheme: light)",
+        name: "theme-color",
+      },
+      {
+        content: SITE.themeColor.dark,
+        media: "(prefers-color-scheme: dark)",
+        name: "theme-color",
+      },
       { content: "audio/ui", name: "author" },
     ],
   }),
@@ -32,30 +43,37 @@ export const Route = createRootRoute({
 
 function NotFound() {
   return (
-    <main className="mx-auto flex max-w-2xl flex-col gap-4 p-10">
+    <div className="mx-auto flex max-w-2xl flex-col gap-4 p-10">
       <h1 className="font-semibold text-2xl">Device not found</h1>
-      <p className="text-white/60">
+      <p className="text-muted-foreground">
         This address is not a device of the lab.{" "}
         <Link className="underline" to="/">
           See all devices
         </Link>
         .
       </p>
-    </main>
+    </div>
   );
 }
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>
-      <body className="font-sans antialiased">
-        <div className="flex h-screen">
-          <Sidebar />
-          <div className="min-w-0 flex-1 overflow-auto">{children}</div>
-        </div>
+      <body className="antialiased">
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          disableTransitionOnChange
+          enableColorScheme
+          enableSystem
+        >
+          <TooltipProvider>
+            <AppLayout>{children}</AppLayout>
+          </TooltipProvider>
+        </ThemeProvider>
         <TanStackDevtools
           config={{
             position: "bottom-right",

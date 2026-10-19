@@ -3,7 +3,7 @@ export const SITE = Object.freeze({
     "Interactive audio interfaces built with audio/ui: synths, mixers and devices that run on the real components, with Web Audio.",
   locale: "en_US",
   name: "audio/ui lab",
-  themeColor: "#0c0b0a",
+  themeColor: { dark: "#0a0a0a", light: "#ffffff" },
   twitter: "@ouestlabs",
   url: "https://lab.audio-ui.dev",
 });
