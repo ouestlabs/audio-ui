@@ -1,0 +1,10 @@
+# The security headers every static page and file is served with (Cloudflare reads this file).
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), geolocation=(), payment=(), usb=()
+  Cross-Origin-Opener-Policy: same-origin
+
+# The build's files carry a hash in their name: they never change.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable

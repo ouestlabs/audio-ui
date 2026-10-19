@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "vite build",
+    "build": "bun run --cwd ../.. build:pkg && vite build",
     "deploy": "bun run build && wrangler deploy",
     "dev": "vite dev --port 3000",
     "preview": "vite preview"

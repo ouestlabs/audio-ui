@@ -1,14 +1,58 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { Suspense } from "react";
 import { DEVICES } from "../devices.ts";
+import { absoluteUrl, jsonLd, pageHead, SITE } from "../lib/seo.ts";
 
 export const Route = createFileRoute("/$device")({
   component: DevicePage,
   head: ({ params }) => {
     const device = DEVICES.find((item) => item.slug === params.device);
+    if (!device) {
+      return pageHead(`/${params.device}`, {
+        description: "This address is not a device of the lab.",
+        robots: "noindex",
+        title: "Device not found",
+      });
+    }
+    const path = `/${device.slug}`;
+    const head = pageHead(path, {
+      description: device.description,
+      image: device.image,
+      title: device.title,
+    });
     return {
-      links: device?.style ? [{ href: device.style, rel: "stylesheet" }] : [],
-      meta: [{ title: device?.title ?? "audio/ui lab" }],
+      ...head,
+      links: [
+        ...head.links,
+        ...(device.style ? [{ href: device.style, rel: "stylesheet" }] : []),
+      ],
+      scripts: [
+        jsonLd({
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          breadcrumb: {
+            "@type": "BreadcrumbList",
+            itemListElement: [
+              {
+                "@type": "ListItem",
+                item: SITE.url,
+                name: SITE.name,
+                position: 1,
+              },
+              {
+                "@type": "ListItem",
+                item: absoluteUrl(path),
+                name: device.title,
+                position: 2,
+              },
+            ],
+          },
+          description: device.description,
+          isPartOf: { "@id": SITE.url },
+          name: device.title,
+          url: absoluteUrl(path),
+        }),
+      ],
     };
   },
   loader: ({ params }) => {
@@ -20,10 +64,13 @@ export const Route = createFileRoute("/$device")({
 
 function DevicePage() {
   const { device } = Route.useParams();
-  const Component = DEVICES.find((item) => item.slug === device)?.Component;
+  const current = DEVICES.find((item) => item.slug === device);
+  const Component = current?.Component;
   return Component ? (
-    <Suspense>
-      <Component />
-    </Suspense>
+    <main>
+      <Suspense>
+        <Component />
+      </Suspense>
+    </main>
   ) : null;
 }
