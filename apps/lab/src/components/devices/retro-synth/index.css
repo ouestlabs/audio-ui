@@ -1,0 +1,603 @@
+/* ORION-1: a 70s monophonic synth. One light, top left.
+   Materials: black enamel, plastic caps, white rockers, glass lamps, wood.
+   Plain CSS: change the tokens on .synth-cabinet first. */
+
+.synth-cabinet {
+  --wood-1: #7a4a2a;
+  --wood-2: #4e2c16;
+  --panel: #161311;
+  --panel-hi: #221d1a;
+  --ink: #efe8d6;
+  --ink-dim: #a39a86;
+  --amber: #ffb028;
+  --orange: #e8742c;
+  --focus: #fff;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  min-height: 100%;
+  padding: 3rem 3rem;
+  background: radial-gradient(ellipse at 50% 0, #2c2824, #0c0b0a 70%);
+}
+
+body {
+  margin: 0;
+}
+
+/* Cabinet: wood cheeks either side of the faceplate */
+.synth {
+  position: relative;
+  box-sizing: border-box;
+  display: grid;
+  gap: 1.75rem;
+  align-content: start;
+  width: min(100%, 64rem);
+  height: max-content;
+  padding: 2.25rem 2.5rem 2rem;
+  font-family: "Helvetica Neue", "Arial Narrow", Arial, sans-serif;
+  color: var(--ink);
+  background:
+    repeating-linear-gradient(
+      90deg,
+      rgb(255 255 255 / 0.02) 0 1px,
+      transparent 1px 3px
+    ),
+    linear-gradient(180deg, var(--panel-hi), var(--panel));
+  border-radius: 4px;
+  border-image:
+    repeating-linear-gradient(
+      100deg,
+      rgb(0 0 0 / 0.14) 0 2px,
+      transparent 2px 9px,
+      rgb(255 255 255 / 0.05) 9px 10px,
+      transparent 10px 17px
+    )
+    1 / 0 1.5rem / 0 stretch;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.1),
+    inset 0 -2px 0 rgb(0 0 0 / 0.5),
+    0 24px 50px rgb(0 0 0 / 0.6);
+}
+
+/* Wood cheeks either side of the faceplate */
+.synth::before,
+.synth::after {
+  position: absolute;
+  top: -0.5rem;
+  bottom: -0.5rem;
+  width: 1.75rem;
+  pointer-events: none;
+  content: "";
+  background:
+    repeating-linear-gradient(
+      100deg,
+      rgb(0 0 0 / 0.16) 0 2px,
+      transparent 2px 9px,
+      rgb(255 255 255 / 0.05) 9px 10px,
+      transparent 10px 17px
+    ),
+    linear-gradient(90deg, var(--wood-1), var(--wood-2));
+  border-radius: 6px;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.18),
+    0 10px 24px rgb(0 0 0 / 0.5);
+}
+
+.synth::before {
+  right: 100%;
+}
+
+.synth::after {
+  left: 100%;
+}
+
+.synth-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1.5rem;
+  align-items: stretch;
+}
+
+/* Header: the name, a tagline in small print, and the power switch */
+.synth-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  align-items: baseline;
+}
+
+.synth-name {
+  margin: 0;
+  font:
+    800 1.9rem / 1 "Arial Narrow",
+    Arial,
+    sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+}
+
+.synth-name span {
+  color: var(--amber);
+}
+
+.synth-tagline {
+  margin: 0;
+  font-size: 0.65rem;
+  color: var(--ink-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+}
+
+.synth-power {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  margin-left: auto;
+}
+
+.synth-power-note {
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: var(--ink-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+}
+
+/* Sections: a thin printed line with the title cut into it, as on a real panel */
+.section {
+  position: relative;
+  min-width: 0;
+  padding: 1.6rem 1rem 1.1rem;
+  margin: 0;
+  border: 1px solid rgb(239 232 214 / 0.35);
+  border-radius: 3px;
+}
+
+.legend {
+  position: absolute;
+  top: 0;
+  left: 0.75rem;
+  padding: 0 0.45rem;
+  margin: 0;
+  font:
+    700 0.6rem / 1 "Arial Narrow",
+    Arial,
+    sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  background: var(--panel);
+  translate: 0 -50%;
+}
+
+.group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.1rem 1.4rem;
+  align-items: flex-end;
+  justify-content: space-around;
+}
+
+.group + .group {
+  margin-top: 1.4rem;
+}
+
+/* Knob: a plastic cap with a pointer line, a printed scale of ticks and numerals around it */
+.knob {
+  --knob-size: 4rem;
+  position: relative;
+  display: inline-grid;
+  gap: 0.55rem;
+  justify-items: center;
+  padding-top: 1.1rem;
+}
+
+.knob[data-size="sm"] {
+  --knob-size: 3rem;
+}
+
+.knob[data-size="lg"] {
+  --knob-size: 5.5rem;
+}
+
+.knob-control {
+  position: relative;
+  width: var(--knob-size);
+  aspect-ratio: 1;
+  touch-action: none;
+  cursor: ns-resize;
+}
+
+.knob-control[data-disabled] {
+  cursor: not-allowed;
+}
+
+.knob-thumb {
+  position: absolute;
+  inset: 12%;
+  pointer-events: none;
+  border-radius: 50%;
+  box-shadow:
+    0 6px 8px rgb(0 0 0 / 0.65),
+    inset 0 1px 0 rgb(255 255 255 / 0.35),
+    inset 0 -3px 4px rgb(0 0 0 / 0.4),
+    0 0 0 3px #0a0908,
+    0 0 0 4px rgb(255 255 255 / 0.1);
+}
+
+/* The pointer line rides the cap, so it turns with it */
+.knob-thumb::after {
+  position: absolute;
+  top: 7%;
+  left: 50%;
+  width: 3px;
+  height: 32%;
+  content: "";
+  background: var(--pointer, #f4f1ea);
+  border-radius: 2px;
+  translate: -50% 0;
+}
+
+.knob[data-cap="black"] .knob-thumb {
+  background:
+    radial-gradient(circle at 32% 28%, rgb(255 255 255 / 0.22), transparent 45%),
+    repeating-conic-gradient(from 0deg, #1f1c1a 0 4deg, #0e0d0c 4deg 8deg);
+}
+
+.knob[data-cap="ivory"] {
+  --pointer: #1a1613;
+}
+
+.knob[data-cap="ivory"] .knob-thumb {
+  background:
+    radial-gradient(circle at 32% 28%, rgb(255 255 255 / 0.7), transparent 50%),
+    repeating-conic-gradient(from 0deg, #e9e1cb 0 4deg, #cfc6ad 4deg 8deg);
+}
+
+.knob[data-cap="orange"] .knob-thumb {
+  background:
+    radial-gradient(circle at 32% 28%, rgb(255 255 255 / 0.4), transparent 50%),
+    repeating-conic-gradient(from 0deg, var(--orange) 0 4deg, #c25a1c 4deg 8deg);
+}
+
+.knob-control[data-dragging] .knob-thumb {
+  filter: brightness(1.1);
+}
+
+.knob-mark {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.knob-tick {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 1px;
+  height: 5px;
+  background: var(--ink-dim);
+  translate: -50% 0;
+}
+
+.knob-mark[data-active] .knob-tick {
+  background: var(--amber);
+}
+
+.knob-numeral {
+  position: absolute;
+  top: -1.1rem;
+  left: 50%;
+  font-size: 0.6rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: var(--ink-dim);
+  rotate: calc(var(--knob-mark-angle) * -1);
+  translate: -50% 0;
+}
+
+.knob-label {
+  font:
+    700 0.6rem / 1 "Arial Narrow",
+    Arial,
+    sans-serif;
+  color: var(--ink);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  white-space: nowrap;
+}
+
+/* Fader: a short slide pot in a recessed slot, scale ticks either side */
+.fader {
+  --strip-h: 6.5rem;
+  display: inline-grid;
+  gap: 1.1rem;
+  justify-items: center;
+}
+
+.fader-control {
+  position: relative;
+  width: 2.5rem;
+  height: var(--strip-h);
+}
+
+.fader-control::before,
+.fader-control::after {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 0.3rem;
+  pointer-events: none;
+  content: "";
+  background: repeating-linear-gradient(
+    180deg,
+    var(--ink-dim) 0 1px,
+    transparent 1px calc(100% / 10)
+  );
+}
+
+.fader-control::before {
+  left: 0;
+}
+
+.fader-control::after {
+  right: 0;
+}
+
+.fader-track {
+  position: relative;
+  width: 0.25rem;
+  height: 100%;
+  margin-inline: auto;
+  background: #050403;
+  border-radius: 2px;
+  box-shadow:
+    inset 0 1px 3px #000,
+    0 0 0 3px #0e0c0b,
+    0 1px 0 3px rgb(255 255 255 / 0.1);
+}
+
+.fader-thumb {
+  position: absolute;
+  width: 1.9rem;
+  height: 2.4rem;
+  background:
+    linear-gradient(
+      180deg,
+      transparent calc(50% - 1px),
+      #f4f1ea calc(50% - 1px) calc(50% + 1px),
+      transparent calc(50% + 1px)
+    ),
+    linear-gradient(180deg, #5a5650, #2b2926 14%, #1b1a18 60%, #0f0e0d);
+  border-radius: 3px;
+  box-shadow:
+    0 6px 8px rgb(0 0 0 / 0.65),
+    inset 0 1px 0 rgb(255 255 255 / 0.35),
+    inset 1px 0 0 rgb(255 255 255 / 0.08),
+    inset -1px 0 0 rgb(0 0 0 / 0.6);
+}
+
+.fader-thumb::before {
+  position: absolute;
+  inset: -0.5rem;
+  content: "";
+}
+
+.fader-control[data-dragging] .fader-thumb {
+  filter: brightness(1.25);
+}
+
+/* Lamps are the only things that glow: a dim lens when off, a bright core and a small halo when on */
+.lamp {
+  display: block;
+  width: 0.7rem;
+  height: 0.7rem;
+  background: radial-gradient(circle at 35% 30%, #5a3a10, #2a1a08);
+  border-radius: 50%;
+  box-shadow:
+    inset 0 1px 2px #000,
+    0 0 0 2px #0e0c0b,
+    0 1px 0 2px rgb(255 255 255 / 0.12);
+}
+
+.lamp[data-on] {
+  background: radial-gradient(
+    circle at 35% 30%,
+    #fff3c4,
+    var(--amber) 45%,
+    #b8680a
+  );
+  box-shadow:
+    0 0 0 2px #0e0c0b,
+    0 0 8px 2px rgb(255 176 40 / 0.65),
+    inset 0 -1px 2px rgb(0 0 0 / 0.3);
+}
+
+/* Rockers: a white key under its lamp. It sinks when pressed, and says so by its lamp, not only its color. */
+.selector {
+  display: flex;
+  gap: 0.7rem;
+  justify-content: center;
+}
+
+.rocker,
+.power {
+  display: grid;
+  gap: 0.5rem;
+  justify-items: center;
+  padding: 0;
+  font:
+    700 0.6rem / 1 "Arial Narrow",
+    Arial,
+    sans-serif;
+  color: var(--ink);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  cursor: pointer;
+  background: none;
+  border: 0;
+}
+
+.rocker::after {
+  order: 1;
+  width: 1.5rem;
+  height: 1.9rem;
+  content: "";
+  background: linear-gradient(180deg, #f2efe6 0 48%, #9c978c 52%);
+  border-radius: 3px;
+  box-shadow:
+    0 0 0 3px #0e0c0b,
+    0 4px 5px rgb(0 0 0 / 0.6),
+    inset 0 1px 0 #fff;
+}
+
+.rocker[aria-pressed="true"]::after {
+  background: linear-gradient(180deg, #9c978c 0 52%, #f2efe6 56%);
+  box-shadow:
+    0 0 0 3px #0e0c0b,
+    0 1px 2px rgb(0 0 0 / 0.6),
+    inset 0 -1px 0 #fff;
+}
+
+.rocker .lamp {
+  order: 0;
+}
+
+.rocker {
+  grid-template-rows: auto auto auto;
+  min-width: 3.4rem;
+}
+
+.power {
+  grid-auto-flow: column;
+  gap: 0.5rem;
+  padding: 0.5rem 0.8rem;
+  background: linear-gradient(180deg, #4a423a, #2d2722);
+  border-radius: 4px;
+  box-shadow:
+    0 3px 0 #0a0908,
+    0 5px 6px rgb(0 0 0 / 0.5),
+    inset 0 1px 0 rgb(255 255 255 / 0.18);
+}
+
+.power[aria-pressed="true"] {
+  box-shadow:
+    0 1px 0 #0a0908,
+    inset 0 2px 6px rgb(0 0 0 / 0.6);
+  transform: translateY(2px);
+}
+
+.rocker:focus-visible,
+.power:focus-visible,
+.fader-thumb:has(:focus-visible),
+.knob-thumb:has(:focus-visible),
+.piano-key:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* Keys: ivory and ebony, in a black bed */
+.piano {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 8rem;
+  padding-top: 4px;
+  background: #0d0b0a;
+  border-radius: 4px;
+  box-shadow:
+    0 0 0 3px #3a322b,
+    0 8px 14px rgb(0 0 0 / 0.5);
+}
+
+.piano-key {
+  position: absolute;
+  top: 4px;
+  border: 0;
+}
+
+.piano-key[data-color="white"] {
+  height: calc(100% - 4px);
+  background: linear-gradient(180deg, #fffdf6, #e6dfcc);
+  border: 1px solid #1a1613;
+  border-radius: 0 0 3px 3px;
+  box-shadow: inset 0 -5px 4px rgb(0 0 0 / 0.14);
+}
+
+.piano-key[data-color="black"] {
+  z-index: 1;
+  height: 60%;
+  background: linear-gradient(180deg, #2e2a27, #050403);
+  border-radius: 0 0 3px 3px;
+  box-shadow:
+    0 3px 4px rgb(0 0 0 / 0.6),
+    inset 0 -3px 2px rgb(255 255 255 / 0.12);
+}
+
+.piano-key[data-active] {
+  filter: brightness(0.82) sepia(0.4);
+}
+
+/* A switched-off synth: dim the faceplate, lamps keep their lenses */
+.synth:not([data-power]) .lamp[data-on] {
+  background: radial-gradient(circle at 35% 30%, #5a3a10, #2a1a08);
+  box-shadow:
+    inset 0 1px 2px #000,
+    0 0 0 2px #0e0c0b;
+}
+
+.synth:not([data-power]) .knob-thumb,
+.synth:not([data-power]) .fader-thumb {
+  filter: brightness(0.7);
+}
+
+/* Screws: decorative */
+.screw {
+  position: absolute;
+  width: 0.7rem;
+  height: 0.7rem;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      45deg,
+      transparent 45%,
+      rgb(0 0 0 / 0.55) 45% 55%,
+      transparent 55%
+    ),
+    radial-gradient(circle at 35% 30%, #d8d4ca, #6f6b62);
+  border-radius: 50%;
+  box-shadow:
+    0 1px 1px rgb(0 0 0 / 0.6),
+    inset 0 0 0 1px rgb(0 0 0 / 0.25);
+}
+
+.screw-tl {
+  top: 8px;
+  left: 8px;
+}
+
+.screw-tr {
+  top: 8px;
+  right: 8px;
+  rotate: 70deg;
+}
+
+.screw-bl {
+  bottom: 8px;
+  left: 8px;
+  rotate: 35deg;
+}
+
+.screw-br {
+  right: 8px;
+  bottom: 8px;
+  rotate: 110deg;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .power,
+  .rocker::after {
+    transition:
+      transform 80ms linear,
+      box-shadow 80ms linear;
+  }
+}
