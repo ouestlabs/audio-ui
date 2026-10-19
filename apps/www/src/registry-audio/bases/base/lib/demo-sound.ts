@@ -572,7 +572,7 @@ export function pulses(ctx: BaseAudioContext, level = 1): AudioBuffer {
  * once a bar; the hats run on a pattern of their own with a roll in thirty-
  * second notes, a roll in triplets of sixteenths that swells, and in the last
  * bar a roll that climbs five semitones. An 808 on F sharp slides to A and
- * C sharp. Bells play the tune over a pad that opens, a pitched vocal chop
+ * C sharp. A pad opens under it, a small bell hides behind the clap, a pitched vocal chop
  * answers at the end of the second bar, and a reversed cymbal leads back to
  * the start.
  */
@@ -704,16 +704,6 @@ function barBass(bar: number): BassNote[] {
 }
 const TRAP_808: BassNote[] = [0, 1, 2, 3].flatMap(barBass);
 
-/** The bells' tune in each bar, in F sharp minor: the step, the pitch in hertz and how hard. */
-const TRAP_BELL_BAR: [step: number, hertz: number, velocity: number][] = [
-  [0, 739.99, 0.9],
-  [3, 554.37, 0.7],
-  [6, 440, 0.7],
-  [8, 415.3, 0.7],
-  [10, 440, 0.7],
-  [12, 554.37, 0.7],
-  [14, 659.25, 0.8],
-];
 /** The pad: an F sharp minor chord in each bar, in hertz. */
 const TRAP_PAD_HZ = [185, 220, 277.18];
 /** Where the pitched vocal chop answers: the sixteen of the second bar. */
@@ -729,8 +719,6 @@ const TRAP_CLAP_LEVEL = 0.5;
 const TRAP_ROOM_LEVEL = 0.22;
 const TRAP_HAT_LEVEL = 0.4;
 const TRAP_HAT_PAN = 0.5;
-const TRAP_BELL_LEVEL = 0.06;
-const TRAP_BELL_PAN = 0.4;
 const TRAP_PAD_LEVEL = 0.03;
 const TRAP_VOCAL_LEVEL = 0.1;
 const TRAP_CYMBAL_LEVEL = 0.08;
@@ -968,44 +956,6 @@ function hatHit(
   }
 }
 
-/** A glockenspiel bell, a little out of tune: the note with a twin a few cents sharp, and three inharmonic partials above that die faster, so it is bright and rings. */
-function glock(
-  ctx: BaseAudioContext,
-  destination: AudioNode,
-  time: number,
-  hertz: number,
-  level: number,
-  pan: number
-) {
-  const panner = ctx.createStereoPanner();
-  panner.pan.value = pan;
-  panner.connect(destination);
-  const partials: [
-    ratio: number,
-    share: number,
-    seconds: number,
-    cents: number,
-  ][] = [
-    [1, 1, 1.2, 0],
-    [1, 0.6, 1.2, 9],
-    [2.76, 0.5, 0.5, 0],
-    [5.4, 0.3, 0.25, 0],
-    [8.93, 0.15, 0.12, 0],
-  ];
-  for (const [ratio, share, seconds, cents] of partials) {
-    const oscillator = ctx.createOscillator();
-    const gain = ctx.createGain();
-    oscillator.type = "sine";
-    oscillator.frequency.value = hertz * ratio;
-    oscillator.detune.value = cents;
-    gain.gain.setValueAtTime(level * share, time);
-    gain.gain.exponentialRampToValueAtTime(SILENCE_FLOOR, time + seconds);
-    oscillator.connect(gain).connect(panner);
-    oscillator.start(time);
-    oscillator.stop(time + seconds);
-  }
-}
-
 /** A pad of detuned saws, each note three times a few cents apart and spread across the field, through a low-pass that opens slowly. It swells in and lets go before the next. */
 function ragePad(
   ctx: BaseAudioContext,
@@ -1156,7 +1106,7 @@ function drawTrapKicks(ctx: BaseAudioContext, mix: AudioNode) {
   }
 }
 
-/** What the drums, the 808, the bells, the pad, the vocal chop and the cymbal play, over four bars. */
+/** What the drums, the 808, the pad, the vocal chop, the cymbal and the small bell play, over four bars. */
 function drawTrap(
   ctx: BaseAudioContext,
   out: AudioNode,
@@ -1228,16 +1178,6 @@ function drawTrap(
     sub808(ctx, bass, trapTimeOf(step), path, seconds);
   }
   for (const bar of [0, 1, 2, 3]) {
-    for (const [index, [step, hertz, velocity]] of TRAP_BELL_BAR.entries()) {
-      glock(
-        ctx,
-        glue,
-        trapTimeOf(barStep(bar, step)),
-        hertz,
-        TRAP_BELL_LEVEL * velocity,
-        index % 2 === 0 ? -TRAP_BELL_PAN : TRAP_BELL_PAN
-      );
-    }
     ragePad(
       ctx,
       pad,
@@ -1262,7 +1202,7 @@ const trapped = new Map<number, Promise<AudioBuffer>>();
 /**
  * Trap hip-hop at 150 BPM felt in half-time, in F sharp minor, four bars: a
  * kick, a snare and a clap that fall together once a bar, hats with three
- * kinds of roll, an 808 that slides, bells over a pad that opens, a pitched
+ * kinds of roll, an 808 that slides, a pad that opens, a small bell behind the clap, a pitched
  * vocal chop and a reversed cymbal. To hear what a filter, a limiter or a
  * saturator does.
  */
@@ -1365,7 +1305,7 @@ export const DEMO_SOURCES = {
   },
   trap: {
     about:
-      "Trap hip-hop at 150 BPM felt in half-time, in F sharp minor, straight on the grid: a snare and a clap that fall together once a bar, hats with three kinds of roll, an 808 that slides, bells over a pad that opens, a pitched vocal chop and a reversed cymbal. To hear what a filter, a limiter or a saturator does.",
+      "Trap hip-hop at 150 BPM felt in half-time, in F sharp minor, straight on the grid: a snare and a clap that fall together once a bar, hats with three kinds of roll, an 808 that slides, a pad that opens, a small bell behind the clap, a pitched vocal chop and a reversed cymbal. To hear what a filter, a limiter or a saturator does.",
     key: "trapKick",
     render: renderTrapLoop,
     tempo: TRAP_TEMPO,
