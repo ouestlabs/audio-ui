@@ -567,81 +567,55 @@ export function pulses(ctx: BaseAudioContext, level = 1): AudioBuffer {
 }
 
 /*
- * The trap scene: trap hip-hop at 140 BPM in half-time, four bars on a
- * progression so it does not repeat itself. A layered kick, a long tuned 808
- * that ducks under it, one clap on the third beat of each bar thrown into a
- * small room, metallic hats that roll differently every bar and run into the
- * turn, and over it a haunting piano in F minor, a few far bells and a slow
- * pad. The drums and the bass go through a bus that glues them.
+ * The trap scene, from a written sketch: 150 BPM felt in half-time, F sharp
+ * minor, straight on the grid, four bars. The snare and the clap fall together
+ * once a bar; the hats run on a pattern of their own with a roll in thirty-
+ * second notes, a roll in triplets of sixteenths that swells, and in the last
+ * bar a roll that climbs five semitones. An 808 on F sharp slides to A and
+ * C sharp. Bells play the tune over a pad that opens, a pitched vocal chop
+ * answers at the end of the second bar, and a reversed cymbal leads back to
+ * the start.
  */
 
-const TRAP_BPM = 140;
+const TRAP_BPM = 150;
 /** The tempo of the trap scene: what a delay synced to it echoes on. */
 export const TRAP_TEMPO: Tempo = { beatsPerBar: 4, beatUnit: 4, bpm: TRAP_BPM };
 const TRAP_STEP_SECONDS = 60 / TRAP_BPM / 4;
 const TRAP_BARS = 4;
 const TRAP_STEPS_PER_BAR = 16;
 const TRAP_LOOP_SECONDS = (TRAP_BARS * 4 * 60) / TRAP_BPM;
-/** A light swing on the off-beat sixteenths: trap leans back a little, nowhere near a shuffle. */
-const TRAP_SWING = 0.05;
-const TRAP_TRIM = 0.3;
+const TRAP_TRIM = 0.33;
 
-const trapTimeOf = (step: number) =>
-  step * TRAP_STEP_SECONDS +
-  (Number.isInteger(step) && step % 2 === 1
-    ? TRAP_SWING * TRAP_STEP_SECONDS
-    : 0);
+/** The moment of a sixteenth step of the trap scene: straight. */
+const trapTimeOf = (step: number) => step * TRAP_STEP_SECONDS;
 
-/** The bar a step belongs to and the step in it, for patterns that repeat bar by bar. */
+/** The step of a bar, from the start of the loop. */
 const barStep = (bar: number, step: number) => bar * TRAP_STEPS_PER_BAR + step;
 
-/** The progression, one chord a bar: F minor, D flat, E flat, then C major, whose E against the F of the next bar is the pull back. The root of each, in hertz, is what the 808 plays. */
-const TRAP_ROOTS_HZ = [43.65, 69.3, 77.78, 65.41];
+/** Pitches of the scene, in hertz. */
+const E1_HZ = 41.2;
+const F_SHARP_1_HZ = 46.25;
+const A1_HZ = 55;
+const C_SHARP_2_HZ = 69.3;
+/** How long a slide of the 808 takes. */
+const GLIDE_SECONDS = 0.07;
 
-/** The kick: on the one, a ghost just before the third beat's push, and the 808's second note. The last bar adds a push into the turn. */
-const TRAP_KICK_BAR: Hit[] = [
-  [0, 1],
-  [7, 0.7],
-  [10, 0.9],
-];
-const TRAP_KICKS: Hit[] = [
-  ...[0, 1, 2, 3].flatMap((bar) =>
-    TRAP_KICK_BAR.map(([step, velocity]): Hit => [barStep(bar, step), velocity])
-  ),
-  [barStep(3, 13), 0.6],
-];
-/** The 808: its first note on the one, a slide up a minor third and back on the ghost, its second note on the push. */
-const TRAP_808: [step: number, steps: number, from: number, to: number][] = [
-  0, 1, 2, 3,
-].flatMap((bar) => {
-  const root = TRAP_ROOTS_HZ[bar] ?? 43.65;
-  return [
-    [barStep(bar, 0), 7, root, root],
-    [barStep(bar, 7), 3, root * 1.1892, root],
-    [barStep(bar, 10), 6, root, root],
-  ] as [number, number, number, number][];
-});
-/** One clap on the third beat of each bar: half-time. */
-const TRAP_CRACKS: Hit[] = [8, 24, 40, 56].map((step): Hit => [step, 1]);
-/** The snare that climbs into the turn of the loop. */
-const TRAP_RISE: Hit[] = [
-  [60, 0.25],
-  [61, 0.35],
-  [62, 0.5],
-  [63, 0.7],
-];
+/** The kick of the first three bars: the one and the eleven (counting steps from one). */
+const TRAP_KICK_STEPS = [0, 10];
+/** The kick of the last bar, which breaks the pattern: the one, the seven and the fourteen. */
+const TRAP_KICK_STEPS_LAST = [0, 6, 13];
+const TRAP_KICKS: Hit[] = [0, 1, 2, 3].flatMap((bar) =>
+  (bar === TRAP_BARS - 1 ? TRAP_KICK_STEPS_LAST : TRAP_KICK_STEPS).map(
+    (step): Hit => [barStep(bar, step), step === 0 ? 1 : 0.8]
+  )
+);
+/** The snare and the clap fall together on the nine of each bar: half-time. */
+const TRAP_CRACKS: Hit[] = [0, 1, 2, 3].map((bar): Hit => [barStep(bar, 8), 1]);
+
 /** A hat: where it falls (a fraction of a step for a roll), how hard, and how far up in semitones. */
 type TrapHat = [step: number, velocity: number, tune: number];
 
-/** How hard the hat of an eighth is struck: the beat hardest, the half beat next, the ones between softest. */
-function eighthVelocity(index: number) {
-  if (index % 4 === 0) {
-    return 0.9;
-  }
-  return index % 2 === 0 ? 0.7 : 0.5;
-}
-
-/** A roll of `count` hits from `step`, `spacing` of a step apart, each harder and higher than the last. */
+/** A roll of `count` hits from `step`, `spacing` of a step apart, each harder than the last and `tuneRise` semitones higher. */
 function roll(
   step: number,
   count: number,
@@ -652,66 +626,102 @@ function roll(
     { length: count },
     (_, index): TrapHat => [
       step + index * spacing,
-      0.3 + (0.45 * index) / Math.max(1, count - 1),
+      0.35 + (0.4 * index) / Math.max(1, count - 1),
       index * tuneRise,
     ]
   );
 }
 
-const TRAP_HATS: TrapHat[] = [
-  // Straight eighths all through, the beat hardest.
-  ...Array.from(
-    { length: TRAP_BARS * 8 },
-    (_, index): TrapHat => [index * 2, eighthVelocity(index % 8), 0]
-  ),
-  // Each bar rolls its own way: thirty-second notes, a triplet, a rising run, and a long run into the turn.
-  ...roll(barStep(0, 13), 4, 0.25, 1),
-  ...roll(barStep(1, 5), 3, 1 / 3, 1),
-  ...roll(barStep(2, 14), 6, 1 / 6, 0.8),
-  ...roll(barStep(3, 14.5), 12, 0.125, 0.5),
-];
-const TRAP_OPEN_HATS: Hit[] = [6, 22, 38, 54].map((step): Hit => [step, 0.5]);
+/** The hats of a bar. The pattern is struck on one, three, five, nine, eleven and thirteen, then on seven, eight, fifteen and sixteen, which two rolls replace. */
+function barHats(bar: number): TrapHat[] {
+  const last = bar === TRAP_BARS - 1;
+  const struck = [0, 2, 4, 8, 10, ...(last ? [] : [12])];
+  const hits: TrapHat[] = struck.map(
+    (step): TrapHat => [barStep(bar, step), step % 4 === 0 ? 0.9 : 0.65, 0]
+  );
+  return [
+    ...hits,
+    // Steps seven and eight: thirty-second notes.
+    ...roll(barStep(bar, 6), 4, 0.5, 0),
+    // The end of the bar: a roll of triplets of sixteenths that swells, and in the last bar thirty-second notes that climb five semitones.
+    ...(last
+      ? roll(barStep(bar, 12), 8, 0.5, 5 / 7)
+      : roll(barStep(bar, 14), 3, 2 / 3, 0)),
+  ];
+}
+const TRAP_HATS: TrapHat[] = [0, 1, 2, 3].flatMap(barHats);
 
-/** The piano's line over the four chords: the step, the pitch in hertz and how hard. The notes sit a semitone apart, E against F, B flat against C, D against E flat, which is what makes it uneasy. */
-const TRAP_PIANO: [step: number, hertz: number, velocity: number][] = [
-  [0, 349.23, 0.8],
-  [4, 329.63, 0.55],
-  [6, 349.23, 0.7],
-  [10, 415.3, 0.6],
-  [16, 523.25, 0.75],
-  [20, 466.16, 0.5],
-  [22, 523.25, 0.65],
-  [26, 554.37, 0.6],
-  [32, 311.13, 0.8],
-  [36, 293.66, 0.55],
-  [38, 311.13, 0.7],
-  [42, 392, 0.6],
-  [48, 659.25, 0.75],
-  [52, 622.25, 0.5],
-  [54, 659.25, 0.65],
-  [58, 783.99, 0.6],
+/** An open hat, light, on the fifteen of each bar, and when the closed hat after it cuts it off. */
+const TRAP_OPEN_HATS: [step: number, cutAt: number][] = [0, 1, 2, 3].map(
+  (bar): [number, number] => [
+    barStep(bar, 14),
+    barStep(bar, bar === TRAP_BARS - 1 ? 14.5 : 14 + 2 / 3),
+  ]
+);
+const TRAP_OPEN_HAT_VELOCITY = 0.4;
+
+/** An 808 note: the step it starts on, how long it lasts, and the pitches it passes through with where each slide begins, in seconds from the start. */
+type BassNote = {
+  path: [offset: number, hertz: number][];
+  seconds: number;
+  step: number;
+};
+const S = TRAP_STEP_SECONDS;
+function barBass(bar: number): BassNote[] {
+  const first: BassNote[] = [
+    // F sharp on the one, held until the four.
+    { path: [[0, F_SHARP_1_HZ]], seconds: 3 * S, step: barStep(bar, 0) },
+    // F sharp on the four, short.
+    { path: [[0, F_SHARP_1_HZ]], seconds: 1 * S, step: barStep(bar, 3) },
+  ];
+  if (bar === TRAP_BARS - 1) {
+    // The last bar: E on the seven, sliding up to F sharp on the fourteen.
+    return [
+      ...first,
+      {
+        path: [
+          [0, E1_HZ],
+          [7 * S, F_SHARP_1_HZ],
+        ],
+        seconds: 10 * S,
+        step: barStep(bar, 6),
+      },
+    ];
+  }
+  return [
+    ...first,
+    // A on the eleven, sliding up to C sharp on the thirteen, and falling back to F sharp just before the next bar.
+    {
+      path: [
+        [0, A1_HZ],
+        [2 * S, C_SHARP_2_HZ],
+        [6 * S - GLIDE_SECONDS, F_SHARP_1_HZ],
+      ],
+      seconds: 6 * S,
+      step: barStep(bar, 10),
+    },
+  ];
+}
+const TRAP_808: BassNote[] = [0, 1, 2, 3].flatMap(barBass);
+
+/** The bells' tune in each bar, in F sharp minor: the step, the pitch in hertz and how hard. */
+const TRAP_BELL_BAR: [step: number, hertz: number, velocity: number][] = [
+  [0, 739.99, 0.9],
+  [3, 554.37, 0.7],
+  [6, 440, 0.7],
+  [8, 415.3, 0.7],
+  [10, 440, 0.7],
+  [12, 554.37, 0.7],
+  [14, 659.25, 0.8],
 ];
-/** The first note of each bar again an octave down, to darken it. */
-const TRAP_PIANO_LOW: [step: number, hertz: number, velocity: number][] = [
-  [0, 174.61, 0.6],
-  [16, 138.59, 0.6],
-  [32, 155.56, 0.6],
-  [48, 130.81, 0.6],
-];
-/** A few high bells, far off. */
-const TRAP_BELLS: [step: number, hertz: number, velocity: number][] = [
-  [8, 1396.91, 0.6],
-  [24, 1108.73, 0.6],
-  [40, 1244.51, 0.6],
-  [56, 1318.51, 0.6],
-];
-/** The pad of each bar, in hertz: F minor, D flat major, E flat major, C major. */
-const TRAP_PAD_HZ = [
-  [174.61, 207.65, 261.63],
-  [138.59, 174.61, 207.65],
-  [155.56, 196, 233.08],
-  [130.81, 164.81, 196],
-];
+/** The pad: an F sharp minor chord in each bar, in hertz. */
+const TRAP_PAD_HZ = [185, 220, 277.18];
+/** Where the pitched vocal chop answers: the sixteen of the second bar. */
+const TRAP_VOCAL_STEP = barStep(1, 15);
+/** The reversed cymbal leads from the second half of the last bar back to the start. */
+const TRAP_CYMBAL_STEP = barStep(3, 8);
+/** The small high bell hidden behind the clap, on the nine of each bar. */
+const TRAP_TINY_BELL_HZ = 2959.96;
 const TRAP_KICK_LEVEL = 0.65;
 const TRAP_808_LEVEL = 0.55;
 const TRAP_SNARE_LEVEL = 0.4;
@@ -719,11 +729,12 @@ const TRAP_CLAP_LEVEL = 0.5;
 const TRAP_ROOM_LEVEL = 0.22;
 const TRAP_HAT_LEVEL = 0.4;
 const TRAP_HAT_PAN = 0.5;
-const TRAP_PIANO_LEVEL = 0.09;
-const TRAP_PIANO_PAN = 0.2;
-const TRAP_BELL_LEVEL = 0.035;
-const TRAP_BELL_PAN = 0.5;
+const TRAP_BELL_LEVEL = 0.06;
+const TRAP_BELL_PAN = 0.4;
 const TRAP_PAD_LEVEL = 0.03;
+const TRAP_VOCAL_LEVEL = 0.1;
+const TRAP_CYMBAL_LEVEL = 0.08;
+const TRAP_TINY_BELL_LEVEL = 0.03;
 /** How far the 808 and the pad dip under a kick, and how long they take to come back. */
 const TRAP_DUCK_808 = 0.45;
 const TRAP_DUCK_PAD = 0.6;
@@ -742,16 +753,16 @@ const DRIVEN_CLIP = clipCurve(8);
 const BUS_CLIP = clipCurve(1.6);
 
 /**
- * An 808: a sine that starts on `from` and slides to `to` in a tenth of a
- * second. It goes two ways: a clean sub, low-passed so nothing above it is in
- * the way, and the same note driven hard and high-passed, which is the bite.
+ * An 808: a sine that goes through the pitches of `path`, each slide taking a
+ * tenth of a second or so. It goes two ways: a clean sub, low-passed so
+ * nothing above it is in the way, and the same note driven hard and high-
+ * passed, which is the bite.
  */
 function sub808(
   ctx: BaseAudioContext,
   destination: AudioNode,
   time: number,
-  from: number,
-  to: number,
+  path: [offset: number, hertz: number][],
   seconds: number
 ) {
   const oscillator = ctx.createOscillator();
@@ -762,13 +773,22 @@ function sub808(
   const top = ctx.createBiquadFilter();
   const biteLevel = ctx.createGain();
   oscillator.type = "sine";
-  oscillator.frequency.setValueAtTime(from, time);
-  if (from !== to) {
-    oscillator.frequency.exponentialRampToValueAtTime(to, time + 0.1);
+  let previous = path[0]?.[1] ?? F_SHARP_1_HZ;
+  oscillator.frequency.setValueAtTime(previous, time);
+  for (const [offset, hertz] of path.slice(1)) {
+    oscillator.frequency.setValueAtTime(previous, time + offset);
+    oscillator.frequency.exponentialRampToValueAtTime(
+      hertz,
+      time + offset + GLIDE_SECONDS
+    );
+    previous = hertz;
   }
   gain.gain.setValueAtTime(SILENCE_FLOOR, time);
   gain.gain.linearRampToValueAtTime(TRAP_808_LEVEL, time + 0.008);
-  gain.gain.exponentialRampToValueAtTime(TRAP_808_LEVEL * 0.5, time + 0.4);
+  gain.gain.exponentialRampToValueAtTime(
+    TRAP_808_LEVEL * 0.6,
+    time + Math.min(0.4, seconds * 0.8)
+  );
   gain.gain.exponentialRampToValueAtTime(SILENCE_FLOOR, time + seconds);
   sub.type = "lowpass";
   sub.frequency.value = 160;
@@ -885,14 +905,13 @@ function clap(
 /** The inharmonic squares of an 808 hat, in hertz: what makes it metal and not noise. */
 const METAL_HZ = [205.3, 304.4, 369.6, 522.7, 540, 800];
 
-/** A hat as an 808 makes it: six square waves that do not fit together, high-passed, shut fast or let ring. `tune` lifts it in semitones. */
+/** A hat as an 808 makes it: six square waves that do not fit together, high-passed, shut fast or let ring. */
 function metalHat(
   ctx: BaseAudioContext,
   destination: AudioNode,
   time: number,
   level: number,
-  seconds: number,
-  tune: number
+  seconds: number
 ) {
   const highs = ctx.createBiquadFilter();
   const gain = ctx.createGain();
@@ -905,44 +924,52 @@ function metalHat(
   for (const hertz of METAL_HZ) {
     const oscillator = ctx.createOscillator();
     oscillator.type = "square";
-    oscillator.frequency.value = hertz * 2 ** (tune / 12);
+    oscillator.frequency.value = hertz;
     oscillator.connect(highs);
     oscillator.start(time);
     oscillator.stop(time + seconds + 0.02);
   }
 }
 
-/** A hat drawn once, as a buffer: every hat of the loop plays it again, as high as it is asked, so the loop does not build six oscillators for each of its sixty hits. */
+/** A hat drawn once, as a buffer: every hat of the loop plays it again, as high as it is asked, so the loop does not build six oscillators for each of its hits. */
 function drawHat(sampleRate: number, seconds: number) {
   const ctx = new OfflineAudioContext(
     1,
     Math.round(sampleRate * (seconds + 0.03)),
     sampleRate
   );
-  metalHat(ctx, ctx.destination, 0, 1, seconds, 0);
+  metalHat(ctx, ctx.destination, 0, 1, seconds);
   return ctx.startRendering();
 }
 
-/** One hit of a drawn hat, lifted by `tune` semitones: a source and a gain. */
+/** One hit of a drawn hat, lifted by `tune` semitones, and cut off at `cutAt` when a closed hat shuts it. */
 function hatHit(
   ctx: BaseAudioContext,
   destination: AudioNode,
   hat: AudioBuffer,
   time: number,
   level: number,
-  tune: number
+  tune: number,
+  cutAt?: number
 ) {
   const source = ctx.createBufferSource();
   const gain = ctx.createGain();
   source.buffer = hat;
   source.playbackRate.value = 2 ** (tune / 12);
-  gain.gain.value = level;
+  gain.gain.setValueAtTime(level, time);
+  if (cutAt !== undefined) {
+    gain.gain.setValueAtTime(level, cutAt - 0.004);
+    gain.gain.linearRampToValueAtTime(0, cutAt);
+  }
   source.connect(gain).connect(destination);
   source.start(time);
+  if (cutAt !== undefined) {
+    source.stop(cutAt + 0.01);
+  }
 }
 
-/** A bell: a sine with two inharmonic partials above it, which die faster, so it rings rather than sings. */
-function bell(
+/** A glockenspiel bell, a little out of tune: the note with a twin a few cents sharp, and three inharmonic partials above that die faster, so it is bright and rings. */
+function glock(
   ctx: BaseAudioContext,
   destination: AudioNode,
   time: number,
@@ -953,16 +980,24 @@ function bell(
   const panner = ctx.createStereoPanner();
   panner.pan.value = pan;
   panner.connect(destination);
-  const partials: [ratio: number, share: number, seconds: number][] = [
-    [1, 1, 1.4],
-    [2.76, 0.35, 0.5],
-    [5.4, 0.12, 0.2],
+  const partials: [
+    ratio: number,
+    share: number,
+    seconds: number,
+    cents: number,
+  ][] = [
+    [1, 1, 1.2, 0],
+    [1, 0.6, 1.2, 9],
+    [2.76, 0.5, 0.5, 0],
+    [5.4, 0.3, 0.25, 0],
+    [8.93, 0.15, 0.12, 0],
   ];
-  for (const [ratio, share, seconds] of partials) {
+  for (const [ratio, share, seconds, cents] of partials) {
     const oscillator = ctx.createOscillator();
     const gain = ctx.createGain();
     oscillator.type = "sine";
     oscillator.frequency.value = hertz * ratio;
+    oscillator.detune.value = cents;
     gain.gain.setValueAtTime(level * share, time);
     gain.gain.exponentialRampToValueAtTime(SILENCE_FLOOR, time + seconds);
     oscillator.connect(gain).connect(panner);
@@ -971,55 +1006,8 @@ function bell(
   }
 }
 
-/** A piano note, dark: a few sine partials, each a touch sharp of its harmonic as a string is, the higher ones dying faster, a soft click of felt at the strike, through a low-pass that takes the brightness off. */
-function pianoNote(
-  ctx: BaseAudioContext,
-  destination: AudioNode,
-  time: number,
-  hertz: number,
-  level: number,
-  pan: number
-) {
-  const tone = ctx.createBiquadFilter();
-  const panner = ctx.createStereoPanner();
-  tone.type = "lowpass";
-  tone.frequency.value = 2600;
-  panner.pan.value = pan;
-  tone.connect(panner).connect(destination);
-  const partials: [ratio: number, share: number, seconds: number][] = [
-    [1, 1, 2.2],
-    [2, 0.5, 1.4],
-    [3, 0.28, 0.9],
-    [4, 0.14, 0.6],
-    [5, 0.07, 0.4],
-  ];
-  for (const [ratio, share, seconds] of partials) {
-    const oscillator = ctx.createOscillator();
-    const gain = ctx.createGain();
-    oscillator.type = "sine";
-    oscillator.frequency.value = hertz * ratio * (1 + 0.0004 * ratio * ratio);
-    gain.gain.setValueAtTime(SILENCE_FLOOR, time);
-    gain.gain.linearRampToValueAtTime(level * share, time + 0.003);
-    gain.gain.exponentialRampToValueAtTime(SILENCE_FLOOR, time + seconds);
-    oscillator.connect(gain).connect(tone);
-    oscillator.start(time);
-    oscillator.stop(time + seconds);
-  }
-  const felt = ctx.createBufferSource();
-  const feltFilter = ctx.createBiquadFilter();
-  const feltGain = ctx.createGain();
-  felt.buffer = noiseBuffer(ctx, 0.03, 90);
-  feltFilter.type = "bandpass";
-  feltFilter.frequency.value = 1800;
-  feltGain.gain.setValueAtTime(level * 0.15, time);
-  feltGain.gain.exponentialRampToValueAtTime(SILENCE_FLOOR, time + 0.012);
-  felt.connect(feltFilter).connect(feltGain).connect(tone);
-  felt.start(time);
-  felt.stop(time + 0.03);
-}
-
-/** A pad: each note of the chord twice, a few cents apart, one on each side, as saws through a low-pass that keeps only the dark. It swells in slowly and lets go before the next. */
-function padChord(
+/** A pad of detuned saws, each note three times a few cents apart and spread across the field, through a low-pass that opens slowly. It swells in and lets go before the next. */
+function ragePad(
   ctx: BaseAudioContext,
   destination: AudioNode,
   time: number,
@@ -1030,17 +1018,19 @@ function padChord(
   const tone = ctx.createBiquadFilter();
   const gain = ctx.createGain();
   tone.type = "lowpass";
-  tone.frequency.value = 650;
-  tone.Q.value = 0.7;
+  tone.Q.value = 2;
+  tone.frequency.setValueAtTime(500, time);
+  tone.frequency.exponentialRampToValueAtTime(3200, time + seconds);
   gain.gain.setValueAtTime(SILENCE_FLOOR, time);
-  gain.gain.linearRampToValueAtTime(level, time + 0.8);
+  gain.gain.linearRampToValueAtTime(level, time + 0.6);
   gain.gain.setValueAtTime(level, time + seconds - 0.8);
   gain.gain.exponentialRampToValueAtTime(SILENCE_FLOOR, time + seconds);
   gain.connect(tone).connect(destination);
   for (const hertz of hertzList) {
     for (const [cents, pan] of [
-      [-9, -0.6],
-      [9, 0.6],
+      [-14, -0.7],
+      [0, 0],
+      [14, 0.7],
     ] as const) {
       const oscillator = ctx.createOscillator();
       const panner = ctx.createStereoPanner();
@@ -1053,6 +1043,98 @@ function padChord(
       oscillator.stop(time + seconds);
     }
   }
+}
+
+/** A vocal chop, "yuh", pitched up: a saw whose pitch rises, through two formants that slide from a "y" to an "uh", with a breath of noise at the start. */
+function vocalChop(
+  ctx: BaseAudioContext,
+  destination: AudioNode,
+  time: number,
+  level: number
+) {
+  const seconds = 0.22;
+  const voice = ctx.createOscillator();
+  const first = ctx.createBiquadFilter();
+  const second = ctx.createBiquadFilter();
+  const secondLevel = ctx.createGain();
+  const gain = ctx.createGain();
+  voice.type = "sawtooth";
+  voice.frequency.setValueAtTime(260, time);
+  voice.frequency.exponentialRampToValueAtTime(340, time + 0.12);
+  first.type = "bandpass";
+  first.Q.value = 6;
+  first.frequency.setValueAtTime(400, time);
+  first.frequency.exponentialRampToValueAtTime(700, time + 0.07);
+  second.type = "bandpass";
+  second.Q.value = 6;
+  second.frequency.setValueAtTime(2200, time);
+  second.frequency.exponentialRampToValueAtTime(1150, time + 0.07);
+  secondLevel.gain.value = 0.6;
+  gain.gain.setValueAtTime(SILENCE_FLOOR, time);
+  gain.gain.linearRampToValueAtTime(level, time + 0.01);
+  gain.gain.setValueAtTime(level, time + 0.07);
+  gain.gain.exponentialRampToValueAtTime(SILENCE_FLOOR, time + seconds);
+  voice.connect(first).connect(gain);
+  voice.connect(second).connect(secondLevel).connect(gain);
+  gain.connect(destination);
+  voice.start(time);
+  voice.stop(time + seconds + 0.02);
+  const breath = ctx.createBufferSource();
+  const breathHighs = ctx.createBiquadFilter();
+  const breathGain = ctx.createGain();
+  breath.buffer = noiseBuffer(ctx, 0.06, 110);
+  breathHighs.type = "highpass";
+  breathHighs.frequency.value = 3000;
+  breathGain.gain.setValueAtTime(level * 0.2, time);
+  breathGain.gain.exponentialRampToValueAtTime(SILENCE_FLOOR, time + 0.05);
+  breath.connect(breathHighs).connect(breathGain).connect(destination);
+  breath.start(time);
+  breath.stop(time + 0.06);
+}
+
+/** A reversed cymbal: noise that swells and brightens for `seconds`, then stops on the beat it leads to, as a cymbal played backwards does. */
+function reverseCymbal(
+  ctx: BaseAudioContext,
+  destination: AudioNode,
+  time: number,
+  seconds: number,
+  level: number
+) {
+  const source = ctx.createBufferSource();
+  const band = ctx.createBiquadFilter();
+  const highs = ctx.createBiquadFilter();
+  const gain = ctx.createGain();
+  source.buffer = noiseBuffer(ctx, seconds + 0.05, 120);
+  band.type = "bandpass";
+  band.Q.value = 0.8;
+  band.frequency.setValueAtTime(2000, time);
+  band.frequency.exponentialRampToValueAtTime(9000, time + seconds);
+  highs.type = "highpass";
+  highs.frequency.value = 1500;
+  gain.gain.setValueAtTime(SILENCE_FLOOR, time);
+  gain.gain.exponentialRampToValueAtTime(level, time + seconds - 0.01);
+  gain.gain.linearRampToValueAtTime(0, time + seconds);
+  source.connect(band).connect(highs).connect(gain).connect(destination);
+  source.start(time);
+  source.stop(time + seconds + 0.02);
+}
+
+/** A small high bell: a triangle that rings a quarter of a second, there to sit behind the clap. */
+function tinyBell(
+  ctx: BaseAudioContext,
+  destination: AudioNode,
+  time: number,
+  level: number
+) {
+  const oscillator = ctx.createOscillator();
+  const gain = ctx.createGain();
+  oscillator.type = "triangle";
+  oscillator.frequency.value = TRAP_TINY_BELL_HZ;
+  gain.gain.setValueAtTime(level, time);
+  gain.gain.exponentialRampToValueAtTime(SILENCE_FLOOR, time + 0.3);
+  oscillator.connect(gain).connect(destination);
+  oscillator.start(time);
+  oscillator.stop(time + 0.32);
 }
 
 /** Dips a gain under each of the times and lets it back up: what a sidechain does, drawn ahead since the times are known. */
@@ -1074,7 +1156,7 @@ function drawTrapKicks(ctx: BaseAudioContext, mix: AudioNode) {
   }
 }
 
-/** What the drums, the 808, the piano, the bells and the pad play, over four bars. */
+/** What the drums, the 808, the bells, the pad, the vocal chop and the cymbal play, over four bars. */
 function drawTrap(
   ctx: BaseAudioContext,
   out: AudioNode,
@@ -1117,17 +1199,10 @@ function drawTrap(
       tune: 1,
     });
     clap(ctx, crack, time, TRAP_CLAP_LEVEL * velocity);
-  }
-  for (const [step, velocity] of TRAP_RISE) {
-    triggerSnare(
-      ctx,
-      bus(ctx, crack, TRAP_SNARE_LEVEL * velocity),
-      trapTimeOf(step),
-      { tune: 4 }
-    );
+    tinyBell(ctx, crack, time, TRAP_TINY_BELL_LEVEL);
   }
   for (const [step, velocity, tune] of TRAP_HATS) {
-    const time = trapTimeOf(step) + (random() - 0.5) * 0.005;
+    const time = trapTimeOf(step) + (random() - 0.5) * 0.004;
     const level = TRAP_HAT_LEVEL * velocity * (0.92 + 0.16 * random());
     hatHit(
       ctx,
@@ -1138,77 +1213,58 @@ function drawTrap(
       tune
     );
   }
-  for (const [step, velocity] of TRAP_OPEN_HATS) {
+  for (const [step, cutAt] of TRAP_OPEN_HATS) {
     hatHit(
       ctx,
       bus(ctx, glue, 1, TRAP_HAT_PAN),
       hats.open,
       trapTimeOf(step),
-      TRAP_HAT_LEVEL * velocity,
-      0
+      TRAP_HAT_LEVEL * TRAP_OPEN_HAT_VELOCITY,
+      0,
+      trapTimeOf(cutAt)
     );
   }
-  for (const [step, steps, from, to] of TRAP_808) {
-    sub808(
-      ctx,
-      bass,
-      trapTimeOf(step),
-      from,
-      to,
-      steps * TRAP_STEP_SECONDS + 0.12
-    );
+  for (const { path, seconds, step } of TRAP_808) {
+    sub808(ctx, bass, trapTimeOf(step), path, seconds);
   }
-  for (const [index, [step, hertz, velocity]] of TRAP_PIANO.entries()) {
-    pianoNote(
-      ctx,
-      glue,
-      trapTimeOf(step),
-      hertz,
-      TRAP_PIANO_LEVEL * velocity,
-      index % 2 === 0 ? -TRAP_PIANO_PAN : TRAP_PIANO_PAN
-    );
-  }
-  for (const [step, hertz, velocity] of TRAP_PIANO_LOW) {
-    pianoNote(
-      ctx,
-      glue,
-      trapTimeOf(step),
-      hertz,
-      TRAP_PIANO_LEVEL * velocity,
-      0
-    );
-  }
-  for (const [index, [step, hertz, velocity]] of TRAP_BELLS.entries()) {
-    bell(
-      ctx,
-      glue,
-      trapTimeOf(step),
-      hertz,
-      TRAP_BELL_LEVEL * velocity,
-      index % 2 === 0 ? -TRAP_BELL_PAN : TRAP_BELL_PAN
-    );
-  }
-  for (const [bar, chord] of TRAP_PAD_HZ.entries()) {
-    padChord(
+  for (const bar of [0, 1, 2, 3]) {
+    for (const [index, [step, hertz, velocity]] of TRAP_BELL_BAR.entries()) {
+      glock(
+        ctx,
+        glue,
+        trapTimeOf(barStep(bar, step)),
+        hertz,
+        TRAP_BELL_LEVEL * velocity,
+        index % 2 === 0 ? -TRAP_BELL_PAN : TRAP_BELL_PAN
+      );
+    }
+    ragePad(
       ctx,
       pad,
       trapTimeOf(barStep(bar, 0)),
-      chord,
+      TRAP_PAD_HZ,
       TRAP_STEPS_PER_BAR * TRAP_STEP_SECONDS + 0.8,
       TRAP_PAD_LEVEL
     );
   }
+  vocalChop(ctx, glue, trapTimeOf(TRAP_VOCAL_STEP), TRAP_VOCAL_LEVEL);
+  reverseCymbal(
+    ctx,
+    glue,
+    trapTimeOf(TRAP_CYMBAL_STEP),
+    TRAP_LOOP_SECONDS - trapTimeOf(TRAP_CYMBAL_STEP),
+    TRAP_CYMBAL_LEVEL
+  );
 }
 
 const trapped = new Map<number, Promise<AudioBuffer>>();
 
 /**
- * Trap hip-hop at 140 BPM in half-time, four bars on a progression: a layered
- * kick, a long tuned 808 that ducks under it, one clap on the third beat in a
- * small room, metallic hats that roll differently every bar and run into the
- * turn, a haunting piano in F minor with notes a semitone apart, a few far
- * bells and a slow pad, all through a bus that glues them. To hear what a
- * filter, a limiter or a saturator does.
+ * Trap hip-hop at 150 BPM felt in half-time, in F sharp minor, four bars: a
+ * kick, a snare and a clap that fall together once a bar, hats with three
+ * kinds of roll, an 808 that slides, bells over a pad that opens, a pitched
+ * vocal chop and a reversed cymbal. To hear what a filter, a limiter or a
+ * saturator does.
  */
 export function renderTrapLoop(sampleRate: number): Promise<AudioBuffer> {
   const cached = trapped.get(sampleRate);
@@ -1309,7 +1365,7 @@ export const DEMO_SOURCES = {
   },
   trap: {
     about:
-      "Trap hip-hop at 140 BPM in half-time, four bars on a progression: a layered kick, a long tuned 808 that ducks under it, one clap on the third beat in a small room, metallic hats that roll differently every bar, a haunting piano in F minor, a few far bells and a slow pad. To hear what a filter, a limiter or a saturator does.",
+      "Trap hip-hop at 150 BPM felt in half-time, in F sharp minor, straight on the grid: a snare and a clap that fall together once a bar, hats with three kinds of roll, an 808 that slides, bells over a pad that opens, a pitched vocal chop and a reversed cymbal. To hear what a filter, a limiter or a saturator does.",
     key: "trapKick",
     render: renderTrapLoop,
     tempo: TRAP_TEMPO,
