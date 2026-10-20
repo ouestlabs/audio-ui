@@ -1,0 +1,6 @@
+{
+  "title": "Antares-1",
+  "description": "A compressor: a needle for the gain it takes off, a VU for what comes out, and loops to squeeze.",
+  "category": "Effects",
+  "uses": ["knob", "needle-meter", "compressor-engine"]
+}
