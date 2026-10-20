@@ -1,0 +1,6 @@
+{
+  "title": "Sirius-16",
+  "description": "An analog step sequencer and its bass voice: sixteen pitches, with accent and slide on every step.",
+  "category": "Sequencers",
+  "uses": ["sequencer", "knob", "use-transport-clock"]
+}
