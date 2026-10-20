@@ -1,0 +1,537 @@
+/* MIZAR-1: a spring reverb. One light, top left.
+   Materials: ice-blue enamel in a rack, a glass window on two springs, black caps, an ivory dial.
+   Plain CSS: change the tokens on .mizar-cabinet first. */
+
+.mizar-cabinet {
+  --panel: #8fb0c0;
+  --panel-hi: #acc7d4;
+  --ink: #10222c;
+  --ink-dim: #3a5a69;
+  --dial: #f1ebd2;
+  --dial-ink: #2a1f1a;
+  --red: #b5301f;
+  --lamp: #ffa84a;
+  --focus: #10222c;
+  box-sizing: border-box;
+  display: flex;
+  flex: 1 0 auto;
+  justify-content: center;
+  padding: 2rem 1.5rem;
+  /* The stage follows the theme; the unit on it keeps its enamel, like the device. */
+  background: radial-gradient(
+    ellipse at 50% 0,
+    color-mix(in oklab, var(--foreground) 7%, var(--background)),
+    var(--background) 70%
+  );
+}
+
+/* The faceplate: ice-blue enamel with a fine horizontal brush, between two rack ears */
+.mizar {
+  position: relative;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.1rem;
+  align-content: start;
+  width: min(100%, 56rem);
+  min-width: 0;
+  height: max-content;
+  padding: 1rem 1.25rem 1.2rem;
+  /* Centered on the stage when there is room; at the top, scrolling, when there is not. */
+  margin-block: auto;
+  font-family: "Helvetica Neue", "Arial Narrow", Arial, sans-serif;
+  color: var(--ink);
+  background:
+    repeating-linear-gradient(
+      0deg,
+      rgb(255 255 255 / 0.1) 0 1px,
+      transparent 1px 3px
+    ),
+    linear-gradient(180deg, var(--panel-hi), var(--panel));
+  border-inline: 1.4rem solid #1c1a1b;
+  border-radius: 4px;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.5),
+    inset 0 -2px 0 rgb(0 0 0 / 0.2),
+    0 24px 50px rgb(0 0 0 / 0.55);
+}
+
+.mizar::before,
+.mizar::after {
+  position: absolute;
+  top: 50%;
+  width: 0.7rem;
+  height: 0.7rem;
+  pointer-events: none;
+  content: "";
+  background: radial-gradient(circle at 35% 30%, #d9dadd, #6f7075);
+  border-radius: 50%;
+  box-shadow:
+    inset 0 0 0 2px #1c1a1b,
+    0 0 0 1px #000;
+  translate: 0 -50%;
+}
+
+.mizar::before {
+  left: -1.05rem;
+}
+
+.mizar::after {
+  right: -1.05rem;
+}
+
+.mizar-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mizar-name {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.22em;
+}
+
+.mizar-name span {
+  color: #b5301f;
+}
+
+.mizar-tagline {
+  margin: 0.3rem 0 0;
+  font-size: 0.55rem;
+  color: var(--ink-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+}
+
+.mizar-transport {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.1rem;
+  align-items: center;
+}
+
+/* Lamps are the only things that glow: a dim lens when off, a hot core and a small halo when on */
+.mizar-lamp {
+  width: 0.5rem;
+  height: 0.5rem;
+  background: #5a3511;
+  border-radius: 50%;
+  box-shadow: inset 0 1px 1px rgb(0 0 0 / 0.5);
+}
+
+.mizar-lamp[data-on] {
+  background: radial-gradient(circle at 40% 35%, #fff4dc, var(--lamp) 55%);
+  box-shadow: 0 0 6px 1px rgb(255 168 74 / 0.75);
+}
+
+/* Rockers: a cream key under its lamp. It sinks when pressed. */
+.mizar-selector {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.mizar-rocker {
+  display: grid;
+  gap: 0.45rem;
+  justify-items: center;
+  min-width: 2.7rem;
+  padding: 0;
+  font:
+    700 0.6rem / 1 "Arial Narrow",
+    Arial,
+    sans-serif;
+  color: var(--ink);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  cursor: pointer;
+  background: none;
+  border: 0;
+}
+
+.mizar-rocker::after {
+  order: 1;
+  width: 1.45rem;
+  height: 1.65rem;
+  content: "";
+  background: linear-gradient(180deg, #f6f2e6 0 48%, #a39d8f 52%);
+  border-radius: 3px;
+  box-shadow:
+    0 0 0 3px #10222c,
+    0 4px 5px rgb(0 0 0 / 0.4),
+    inset 0 1px 0 #fff;
+}
+
+.mizar-rocker[aria-pressed="true"]::after {
+  background: linear-gradient(180deg, #a39d8f 0 52%, #f6f2e6 56%);
+  box-shadow:
+    0 0 0 3px #10222c,
+    0 1px 2px rgb(0 0 0 / 0.5),
+    inset 0 -1px 0 #fff;
+}
+
+.mizar-rocker .mizar-lamp {
+  order: 0;
+}
+
+.mizar-play {
+  display: inline-flex;
+  gap: 0.6rem;
+  align-items: center;
+  padding: 0.6rem 1.1rem;
+  font:
+    700 0.65rem / 1 "Arial Narrow",
+    Arial,
+    sans-serif;
+  color: #eaf3f7;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  cursor: pointer;
+  background: linear-gradient(180deg, #3e4a52, #1d252a);
+  border: 0;
+  border-radius: 4px;
+  box-shadow:
+    0 3px 0 #070a0c,
+    0 5px 6px rgb(0 0 0 / 0.45),
+    inset 0 1px 0 rgb(255 255 255 / 0.18);
+}
+
+.mizar-play[aria-pressed="true"],
+.mizar-play:active {
+  box-shadow:
+    0 1px 0 #070a0c,
+    inset 0 2px 6px rgb(0 0 0 / 0.6);
+  translate: 0 2px;
+}
+
+.mizar-bump {
+  color: #ffd9b0;
+}
+
+.mizar-play:disabled {
+  cursor: progress;
+  opacity: 0.5;
+}
+
+.mizar-rocker:focus-visible,
+.mizar-play:focus-visible,
+.mizar-knob-thumb:has(:focus-visible) {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* The window: the tank's glass on the left, the output's dial on the right */
+.mizar-window {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: stretch;
+}
+
+.mizar-glass {
+  display: grid;
+  flex: 2 1 22rem;
+  align-items: center;
+  min-height: 7.5rem;
+  padding: 0.5rem 0.9rem;
+  background:
+    linear-gradient(115deg, rgb(255 255 255 / 0.1) 0 14%, transparent 14%),
+    linear-gradient(180deg, #0c1418, #05090b);
+  border-radius: 6px;
+  box-shadow:
+    inset 0 3px 10px #000,
+    0 0 0 4px #1c1a1b,
+    0 1px 0 4px rgb(255 255 255 / 0.12);
+}
+
+/* The springs shake with the sound; a bump shakes them all the way */
+.mizar-tank {
+  --shake: 0;
+  --bump: 0;
+}
+
+.mizar-tank[data-bumped] {
+  --bump: 1;
+}
+
+.mizar-tank-svg {
+  display: block;
+  width: 100%;
+}
+
+.mizar-rod {
+  stroke: #4a5258;
+  stroke-width: 2;
+}
+
+.mizar-coil-back {
+  stroke: #5c666d;
+  stroke-width: 3.2;
+  stroke-linecap: round;
+}
+
+.mizar-coil {
+  opacity: 0.9;
+  stroke: #e9eef1;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+
+.mizar-hook {
+  fill: #c9ced2;
+  stroke: #1c1a1b;
+  stroke-width: 1.5;
+}
+
+.mizar-spring {
+  transform-origin: center;
+  transform-box: fill-box;
+  animation: mizar-shake 0.085s linear infinite alternate;
+}
+
+.mizar-spring[data-spring="short"] {
+  animation-duration: 0.12s;
+  animation-direction: alternate-reverse;
+}
+
+@keyframes mizar-shake {
+  from {
+    transform: translateY(calc((var(--shake) + var(--bump)) * -3px))
+      scaleY(calc(1 - (var(--shake) + var(--bump)) * 0.08));
+  }
+
+  to {
+    transform: translateY(calc((var(--shake) + var(--bump)) * 3px))
+      scaleY(calc(1 + (var(--shake) + var(--bump)) * 0.08));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mizar-spring {
+    animation: none;
+  }
+}
+
+/* The installed VU brings the theme's classes; these rules, one level more specific, turn it into the dial */
+.mizar .mizar-vu {
+  display: block;
+  flex: 1 1 12rem;
+  gap: 0;
+  max-width: none;
+  min-height: 7.5rem;
+  padding: 0.6rem 0.8rem 0.4rem;
+  margin: 0;
+  color: var(--dial-ink);
+  background: radial-gradient(
+    ellipse at 50% 115%,
+    #fbf6df,
+    var(--dial) 60%,
+    #d9ceaa
+  );
+  border: 0;
+  border-radius: 6px 6px 3px 3px;
+  box-shadow:
+    inset 0 2px 8px rgb(0 0 0 / 0.35),
+    0 0 0 4px #1c1a1b,
+    0 1px 0 4px rgb(255 255 255 / 0.12);
+}
+
+.mizar .mizar-vu svg {
+  display: block;
+}
+
+.mizar .mizar-vu svg path {
+  stroke: var(--dial-ink);
+}
+
+.mizar .mizar-vu svg path:nth-of-type(2) {
+  stroke: var(--red);
+}
+
+.mizar .mizar-vu svg line {
+  stroke: var(--dial-ink);
+}
+
+.mizar .mizar-vu svg line[class*="destructive"] {
+  stroke: var(--red);
+}
+
+.mizar .mizar-vu svg line[class*="primary"] {
+  filter: drop-shadow(1px 2px 1px rgb(0 0 0 / 0.35));
+  stroke: #1a1110;
+}
+
+.mizar .mizar-vu svg text {
+  font-size: 8px;
+  font-weight: 700;
+  fill: var(--dial-ink);
+}
+
+.mizar .mizar-vu svg text[class*="destructive"] {
+  fill: var(--red);
+}
+
+.mizar .mizar-vu svg rect {
+  fill: #1a1110;
+}
+
+.mizar .mizar-vu figcaption {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.5rem;
+  color: #6a5642;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.mizar-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem 1rem;
+  align-items: flex-end;
+  justify-content: space-around;
+}
+
+.mizar-row > * {
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* Sections: a thin printed line with the title cut into it */
+.mizar-section {
+  position: relative;
+  display: grid;
+  gap: 0.4rem;
+  padding: 0.9rem 1rem 0.2rem;
+  border: 1px solid rgb(0 0 0 / 0.3);
+  border-radius: 3px;
+}
+
+.mizar-legend {
+  position: absolute;
+  top: 0;
+  left: 0.7rem;
+  padding: 0 0.35rem;
+  margin: 0;
+  font-size: 0.55rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+  background: var(--panel);
+  translate: 0 -50%;
+}
+
+.mizar-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+}
+
+/* Knob: a black cap with a white pointer, a printed scale of ticks and numerals around it */
+.mizar-knob {
+  --knob-size: 3rem;
+  position: relative;
+  display: inline-grid;
+  gap: 0.9rem;
+  justify-items: center;
+  padding-top: 0.9rem;
+}
+
+.mizar-knob-control {
+  position: relative;
+  width: var(--knob-size);
+  aspect-ratio: 1;
+  touch-action: none;
+  cursor: ns-resize;
+}
+
+.mizar-knob-thumb {
+  position: absolute;
+  inset: 12%;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 32% 28%, rgb(255 255 255 / 0.25), transparent 45%),
+    repeating-conic-gradient(from 0deg, #26221f 0 4deg, #131110 4deg 8deg);
+  border-radius: 50%;
+  box-shadow:
+    0 5px 7px rgb(0 0 0 / 0.5),
+    inset 0 1px 0 rgb(255 255 255 / 0.3),
+    inset 0 -3px 4px rgb(0 0 0 / 0.4),
+    0 0 0 3px #0a0908;
+}
+
+/* The pointer line rides the cap, so it turns with it */
+.mizar-knob-thumb::after {
+  position: absolute;
+  top: 7%;
+  left: 50%;
+  width: 3px;
+  height: 32%;
+  content: "";
+  background: #f4f1ea;
+  border-radius: 2px;
+  translate: -50% 0;
+}
+
+.mizar-knob-control[data-dragging] .mizar-knob-thumb {
+  filter: brightness(1.15);
+}
+
+.mizar-knob-mark {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.mizar-knob-tick {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 1px;
+  height: 5px;
+  background: var(--ink-dim);
+  translate: -50% 0;
+}
+
+.mizar-knob-mark[data-active] .mizar-knob-tick {
+  background: var(--red);
+}
+
+.mizar-knob-numeral {
+  position: absolute;
+  top: -1.1rem;
+  left: 50%;
+  font-size: 0.6rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: var(--ink-dim);
+  rotate: calc(var(--knob-mark-angle) * -1);
+  translate: -50% 0;
+}
+
+.mizar-knob-label {
+  font-size: 0.58rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+}
+
+@media (max-width: 639px) {
+  .mizar-cabinet {
+    padding-inline: 0.5rem;
+  }
+
+  .mizar {
+    border-inline-width: 0.8rem;
+    padding-inline: 0.7rem;
+  }
+
+  .mizar::before,
+  .mizar::after {
+    display: none;
+  }
+}
