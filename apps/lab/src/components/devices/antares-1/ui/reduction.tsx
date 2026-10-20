@@ -120,6 +120,7 @@ export function Reduction({ read }: { read: () => number }) {
         <rect
           className="antares-dial-pivot"
           height={8}
+          rx={4}
           width={8}
           x={PIVOT_X - 4}
           y={PIVOT_Y - 4}
