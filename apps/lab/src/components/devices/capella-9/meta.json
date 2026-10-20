@@ -1,0 +1,6 @@
+{
+  "title": "Capella-9",
+  "description": "A tonewheel organ: nine drawbars, percussion, a rotary speaker and a keyboard.",
+  "category": "Organs",
+  "uses": ["fader", "knob", "piano"]
+}

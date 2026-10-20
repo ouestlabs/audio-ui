@@ -214,6 +214,15 @@ function Card({
   );
 }
 
+/** Where the captures of the home card sit, the first at the top and each next one lower and further left. */
+const CASCADE = [
+  { left: 692, top: 44 },
+  { left: 640, top: 196 },
+  { left: 588, top: 348 },
+];
+/** The devices the home card shows, in the order they stack: three that look as different as they can. */
+const SHOWN = ["orion-1", "deneb-1", "vega-8"];
+
 /** One capture of a device in the home card, a frame on the stage: the cards of the devices draw theirs in `Frame`. */
 function Capture({
   preview,
@@ -237,10 +246,10 @@ function Capture({
     >
       <img
         alt=""
-        height={266}
+        height={231}
         src={preview}
         style={{ borderRadius: "14px", objectFit: "cover" }}
-        width={506}
+        width={440}
       />
     </div>
   );
@@ -300,18 +309,26 @@ function HomeCard({
             Synths, drum machines and devices that run on the real components.
           </div>
         </div>
-        <div style={{ display: "flex", gap: "10px" }}>
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: "10px",
+            maxWidth: "500px",
+          }}
+        >
           {chips.map((chip) => (
             <Chip key={chip}>{chip}</Chip>
           ))}
         </div>
       </div>
-      {previews[0] ? (
-        <Capture preview={previews[0]} style={{ left: 636, top: 64 }} />
-      ) : null}
-      {previews[1] ? (
-        <Capture preview={previews[1]} style={{ left: 556, top: 300 }} />
-      ) : null}
+      {previews.map((preview, index) => (
+        <Capture
+          key={preview.slice(-32)}
+          preview={preview}
+          style={CASCADE[index] ?? CASCADE[0] ?? { left: 0, top: 0 }}
+        />
+      ))}
     </div>
   );
 }
@@ -347,13 +364,29 @@ async function readDevices(): Promise<Device[]> {
 }
 
 const devices = await readDevices();
+
+/** The captures of the devices the home card shows; if one is missing, the first ones that have a capture fill in. */
+function shown(all: Device[]) {
+  const chosen = SHOWN.flatMap(
+    (slug) => all.find((device) => device.slug === slug)?.preview ?? []
+  );
+  const rest = all.flatMap((device) => device.preview ?? []);
+  return [
+    ...chosen,
+    ...rest.filter((preview) => !chosen.includes(preview)),
+  ].slice(0, CASCADE.length);
+}
+
 await Promise.all([
   Bun.write(
     `${root}/public/og/default.png`,
     await png(
       <HomeCard
-        chips={devices.map((device) => device.title)}
-        previews={devices.flatMap((device) => device.preview ?? [])}
+        chips={[
+          `${devices.length} devices`,
+          ...new Set(devices.map((device) => device.category)),
+        ]}
+        previews={shown(devices)}
       />
     )
   ),
