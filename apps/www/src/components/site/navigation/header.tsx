@@ -6,6 +6,7 @@ import {
   SiteHeaderMobileNav,
   SiteHeaderModeSwitcher,
 } from "@/components/site/navigation/header-client";
+import { LabLink } from "@/components/site/navigation/lab-link";
 import { MainNav } from "@/components/site/navigation/main-nav";
 import { SiteNavTabs } from "@/components/site/navigation/nav-tabs";
 import { Separator } from "@/components/ui/separator";
@@ -136,7 +137,12 @@ export function SiteSidebarHeader() {
  */
 export function SiteBarContent({ part }: { part: "end" | "github" | "start" }) {
   if (part === "github") {
-    return <GitHubLink />;
+    return (
+      <>
+        <LabLink />
+        <GitHubLink />
+      </>
+    );
   }
   if (part === "start") {
     return (
@@ -215,6 +221,7 @@ export function SiteHeader({
             />
             <Separator className="hidden sm:flex" orientation="vertical" />
             <div className="flex items-center gap-1">
+              <LabLink />
               <GitHubLink />
               <SiteHeaderModeSwitcher />
             </div>
