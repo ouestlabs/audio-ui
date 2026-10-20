@@ -19,7 +19,6 @@ export function StepKnob({
   );
   return (
     <Knob.Root
-      aria-label={`Step ${step + 1} pitch`}
       className="sirius-step-knob"
       dragMode="vertical"
       largeStep={5}
@@ -32,6 +31,7 @@ export function StepKnob({
       <Knob.Control className="sirius-step-knob-control">
         <Knob.Thumb className="sirius-step-knob-thumb" />
       </Knob.Control>
+      <Knob.Label className="sr-only">{`Step ${step + 1} pitch`}</Knob.Label>
       <span aria-hidden="true" className="sirius-note">
         {pitchName(ROOT + value)}
       </span>

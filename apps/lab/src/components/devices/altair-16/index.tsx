@@ -43,7 +43,6 @@ export default function Altair16() {
           title={altair.loaded?.name.toUpperCase() ?? "LOADING"}
         >
           <Waveform.Root
-            aria-label="Sample: press a slice to play it"
             className="altair-wave"
             disabled={!altair.loaded}
             duration={duration || 1}
@@ -53,7 +52,10 @@ export default function Altair16() {
             peaks={altair.loaded?.peaks}
             source={altair.position}
           >
-            <Waveform.Control className="altair-wave-control">
+            <Waveform.Control
+              aria-label="Sample: press a slice to play it"
+              className="altair-wave-control"
+            >
               <Waveform.Canvas
                 barGap={1}
                 barWidth={2}

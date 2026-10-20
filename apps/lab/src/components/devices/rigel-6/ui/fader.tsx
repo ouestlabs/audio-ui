@@ -18,7 +18,6 @@ export function Slide({
   const change = useCallback((next: number) => onChange(next), [onChange]);
   return (
     <Fader.Root
-      aria-label={label}
       className="rigel-fader"
       max={FADER_MAX}
       min={FADER_MIN}
@@ -36,6 +35,7 @@ export function Slide({
         <Fader.Track className="rigel-fader-track" />
         <Fader.Thumb className="rigel-fader-thumb" />
       </Fader.Control>
+      <Fader.Label className="sr-only">{label}</Fader.Label>
     </Fader.Root>
   );
 }
