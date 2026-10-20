@@ -268,59 +268,86 @@
   width: 100%;
 }
 
-.mizar-coil-back {
-  stroke: #36424b;
-  stroke-width: 3.2;
-  stroke-linecap: round;
-}
-
-.mizar-coil-front {
-  stroke-width: 4;
-  stroke-linecap: round;
-}
-
-.mizar-coil-light {
-  opacity: 0.7;
-  stroke: #fff;
-  stroke-width: 0.9;
-  stroke-linecap: round;
-}
-
-.mizar-shadow {
-  fill: rgb(0 0 0 / 0.55);
+.mizar-cavity {
+  fill: #06090b;
 }
 
 .mizar-bolt {
-  fill: #4a545b;
+  fill: #3b454c;
   stroke: #e8eef1;
   stroke-width: 0.5;
 }
 
-.mizar-hook {
-  stroke: #b9c3c9;
-  stroke-width: 3;
+.mizar-tail {
+  stroke: #cfd8dd;
+  stroke-width: 1.7;
   stroke-linecap: round;
 }
 
-/* A turn sags a little under its own weight, most in the middle, and shakes as a standing wave: the turns in the middle move most, the ones at the hooks not at all, each a hair behind the one before */
+/* The hole the wire goes through, and the knot in it that holds it fast */
+.mizar-hole {
+  fill: #04070a;
+  stroke: #cfd8dd;
+  stroke-width: 1.3;
+}
+
+.mizar-knot {
+  fill: #e9eff2;
+  stroke: #1a2227;
+  stroke-width: 0.6;
+}
+
+.mizar-shadow {
+  fill: rgb(0 0 0 / 0.5);
+}
+
+/* The wire: each turn is a piece of it, drawn solid, a dark edge, a lit body and a highlight along it, over the dark of the inside of the spring and the same wire going back behind */
+.mizar-wire-back {
+  stroke: #2a353c;
+  stroke-width: 2.1;
+  stroke-linecap: round;
+}
+
+.mizar-wire-shade,
+.mizar-wire-lit,
+.mizar-wire-spec {
+  stroke-linecap: round;
+}
+
+.mizar-wire-shade {
+  stroke: #4b575f;
+  stroke-width: 5.7;
+}
+
+.mizar-wire-lit {
+  stroke: #d3dde3;
+  stroke-width: 3.5;
+}
+
+.mizar-wire-spec {
+  opacity: 0.9;
+  stroke: #ffffff;
+  stroke-width: 1.2;
+}
+
+/* The spring is taut, so it hardly sags; it shakes as a standing wave: the turns in the middle move most, the ones at the hooks not at all, each a hair behind the one before */
 .mizar-turn {
   --k: calc(var(--shake) + var(--bump));
-  transform: translateY(calc(sin(var(--p)) * 2.5px));
-  animation: mizar-wave 0.11s linear infinite alternate;
-  animation-delay: calc(var(--i) * -4ms);
+  animation: mizar-wave 0.1s linear infinite alternate;
+  animation-delay: calc(var(--i) * -3ms);
 }
 
 .mizar-spring[data-spring="short"] .mizar-turn {
-  animation-duration: 0.085s;
+  animation-duration: 0.078s;
 }
 
 @keyframes mizar-wave {
   from {
-    transform: translateY(calc(sin(var(--p)) * (2.5px - var(--k) * 4.5px)));
+    transform: translateY(calc(sin(var(--p)) * var(--k) * -3.2px));
   }
 
   to {
-    transform: translateY(calc(sin(var(--p)) * (2.5px + var(--k) * 4.5px)));
+    transform: translateY(calc(sin(var(--p)) * var(--k) * 3.2px));
   }
 }
 
