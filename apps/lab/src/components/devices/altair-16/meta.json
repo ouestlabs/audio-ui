@@ -1,0 +1,6 @@
+{
+  "title": "Altair-16",
+  "description": "A sampler: a sound cut into sixteen slices, played on sixteen pads.",
+  "category": "Samplers",
+  "uses": ["waveform", "pad", "knob"]
+}
