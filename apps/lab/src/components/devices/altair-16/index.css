@@ -1,0 +1,497 @@
+/* ALTAIR-16: a sampling workstation. One light, top left.
+   Materials: grey enamel, black rubber pads, orange keys, a green-glow screen.
+   Plain CSS: change the tokens on .altair-cabinet first. */
+
+.altair-cabinet {
+  --plate: #b9b6ac;
+  --plate-hi: #cbc8be;
+  --ink: #1b1b1a;
+  --ink-dim: #5f5d56;
+  --orange: #e8621e;
+  --lcd: #0b1a17;
+  --glow: #7dffd0;
+  --glow-dim: #2f8a6e;
+  --focus: #1b1b1a;
+  box-sizing: border-box;
+  display: flex;
+  flex: 1 0 auto;
+  justify-content: center;
+  padding: 2rem 1.5rem;
+  container-type: inline-size;
+  /* The stage follows the theme; the faceplate on it keeps its enamel, like the device. */
+  background: radial-gradient(
+    ellipse at 50% 0,
+    color-mix(in oklab, var(--foreground) 7%, var(--background)),
+    var(--background) 70%
+  );
+}
+
+/* The faceplate: grey enamel in a black rim. The pads take the right column. */
+.altair {
+  position: relative;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-areas:
+    "header pads"
+    "lcd pads"
+    "row pads";
+  grid-template-rows: auto auto 1fr;
+  grid-template-columns: minmax(0, 1fr) 18rem;
+  gap: 1rem 1.25rem;
+  width: min(100%, 64rem);
+  height: max-content;
+  padding: 1rem 1.25rem 1.25rem;
+  /* Centered on the stage when there is room; at the top, scrolling, when there is not. */
+  margin-block: auto;
+  font-family: "Helvetica Neue", "Arial Narrow", Arial, sans-serif;
+  color: var(--ink);
+  background: linear-gradient(180deg, var(--plate-hi), var(--plate));
+  border: 0.5rem solid #1b1816;
+  border-radius: 6px;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.5),
+    inset 0 -2px 0 rgb(0 0 0 / 0.18),
+    0 24px 50px rgb(0 0 0 / 0.55);
+}
+
+.altair-header {
+  display: flex;
+  grid-area: header;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.altair-name {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.22em;
+}
+
+.altair-name span {
+  color: var(--orange);
+}
+
+.altair-tagline {
+  margin: 0.3rem 0 0;
+  font-size: 0.55rem;
+  color: var(--ink-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+}
+
+/* The screen: the sample's name and what the last control read, then its waveform in slices */
+.altair-lcd-bar {
+  display: flex;
+  grid-area: lcd;
+  gap: 0.4rem;
+  align-items: stretch;
+  min-width: 0;
+}
+
+.altair-lcd {
+  display: grid;
+  flex: 1;
+  gap: 0.4rem;
+  min-width: 0;
+  padding: 0.45rem 0.6rem 0.55rem;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  background: var(--lcd);
+  border-radius: 3px;
+  box-shadow:
+    inset 0 2px 5px rgb(0 0 0 / 0.8),
+    0 0 0 2px rgb(0 0 0 / 0.25);
+}
+
+.altair-lcd-lines {
+  display: flex;
+  gap: 0.75rem;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.altair-lcd-line {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--glow);
+  white-space: nowrap;
+  text-shadow: 0 0 6px rgb(125 255 208 / 0.5);
+}
+
+.altair-lcd-dim {
+  flex: none;
+  color: var(--glow-dim);
+  text-shadow: none;
+}
+
+.altair-lcd-button,
+.altair-switch {
+  color: #efe9dc;
+  cursor: pointer;
+  background: linear-gradient(180deg, #4a4540, #2b2825);
+  border: 0;
+  border-radius: 3px;
+  box-shadow:
+    0 2px 0 #0e0d0c,
+    inset 0 1px 0 rgb(255 255 255 / 0.18);
+}
+
+.altair-lcd-button {
+  display: grid;
+  place-items: center;
+  width: 1.9rem;
+}
+
+.altair-lcd-button:active,
+.altair-switch:active {
+  box-shadow: 0 1px 0 #0e0d0c;
+  translate: 0 1px;
+}
+
+.altair-lcd-button:focus-visible,
+.altair-switch:focus-visible,
+.altair-pad:focus-visible,
+.altair-knob-thumb:has(:focus-visible),
+.altair-wave-control:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* The waveform: bars in the screen's glow, a line and a number at each slice, the struck slice lit */
+.altair-wave {
+  --waveform-color: var(--glow-dim);
+  --waveform-progress-color: var(--glow-dim);
+  position: relative;
+  height: 5.5rem;
+}
+
+.altair-wave-control {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  cursor: pointer;
+}
+
+.altair-wave-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.altair-slice-line {
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  pointer-events: none;
+  background: rgb(125 255 208 / 0.22);
+}
+
+.altair-slice-number {
+  position: absolute;
+  top: 0;
+  left: 3px;
+  font-size: 0.5rem;
+  line-height: 1;
+  color: var(--glow-dim);
+}
+
+.altair-slice {
+  top: 0;
+  bottom: 0;
+  pointer-events: none;
+  background: rgb(125 255 208 / 0.16);
+  box-shadow: inset 0 0 0 1px rgb(125 255 208 / 0.5);
+}
+
+.altair-playhead {
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--glow);
+  box-shadow: 0 0 8px var(--glow);
+  translate: -50% 0;
+}
+
+.altair-wave[data-loading] {
+  opacity: 0.6;
+}
+
+/* Keys: grey, with their lamp */
+.altair-switch {
+  display: inline-flex;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.5rem 0.8rem;
+  font: inherit;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+}
+
+.altair-switch[aria-pressed="true"] {
+  box-shadow: 0 1px 0 #0e0d0c;
+  translate: 0 1px;
+}
+
+.altair-file {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+  opacity: 0;
+}
+
+/* Lamps are the only things that glow: a dim lens when off, a hot core and a small halo when on */
+.altair-lamp {
+  width: 0.5rem;
+  height: 0.5rem;
+  background: #5b2a14;
+  border-radius: 50%;
+  box-shadow: inset 0 1px 1px rgb(0 0 0 / 0.5);
+}
+
+.altair-lamp[data-on] {
+  background: radial-gradient(circle at 40% 35%, #fff1e6, var(--orange) 55%);
+  box-shadow:
+    0 0 6px 1px rgb(232 98 30 / 0.7),
+    inset 0 0 2px rgb(255 255 255 / 0.6);
+}
+
+.altair-row {
+  display: flex;
+  flex-wrap: wrap;
+  grid-area: row;
+  gap: 1.25rem 1rem;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+/* Sections: a thin printed line with the title cut into it */
+.altair-section {
+  position: relative;
+  display: grid;
+  gap: 0.4rem;
+  padding: 0.9rem 0.9rem 0.2rem;
+  border: 1px solid rgb(0 0 0 / 0.28);
+  border-radius: 3px;
+}
+
+.altair-legend {
+  position: absolute;
+  top: 0;
+  left: 0.7rem;
+  padding: 0 0.35rem;
+  margin: 0;
+  font-size: 0.55rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+  background: var(--plate);
+  translate: 0 -50%;
+}
+
+.altair-group {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.altair-keys {
+  display: grid;
+  gap: 0.5rem;
+  padding-bottom: 0.9rem;
+}
+
+/* Knob: a black cap with an orange pointer, a printed scale of ticks and numerals around it */
+.altair-knob {
+  --knob-size: 2.75rem;
+  position: relative;
+  display: inline-grid;
+  gap: 0.9rem;
+  justify-items: center;
+  padding-top: 0.9rem;
+}
+
+.altair-knob[data-size="lg"] {
+  --knob-size: 3.5rem;
+}
+
+.altair-knob-control {
+  position: relative;
+  width: var(--knob-size);
+  aspect-ratio: 1;
+  touch-action: none;
+  cursor: ns-resize;
+}
+
+.altair-knob-thumb {
+  position: absolute;
+  inset: 12%;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 32% 28%, rgb(255 255 255 / 0.25), transparent 45%),
+    repeating-conic-gradient(from 0deg, #26221f 0 4deg, #131110 4deg 8deg);
+  border-radius: 50%;
+  box-shadow:
+    0 5px 7px rgb(0 0 0 / 0.45),
+    inset 0 1px 0 rgb(255 255 255 / 0.3),
+    inset 0 -3px 4px rgb(0 0 0 / 0.4),
+    0 0 0 3px #0a0908;
+}
+
+/* The pointer line rides the cap, so it turns with it */
+.altair-knob-thumb::after {
+  position: absolute;
+  top: 7%;
+  left: 50%;
+  width: 3px;
+  height: 32%;
+  content: "";
+  background: var(--orange);
+  border-radius: 2px;
+  translate: -50% 0;
+}
+
+.altair-knob-control[data-dragging] .altair-knob-thumb {
+  filter: brightness(1.15);
+}
+
+.altair-knob-mark {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.altair-knob-tick {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 1px;
+  height: 5px;
+  background: var(--ink-dim);
+  translate: -50% 0;
+}
+
+.altair-knob-mark[data-active] .altair-knob-tick {
+  background: var(--orange);
+}
+
+.altair-knob-numeral {
+  position: absolute;
+  top: -1.1rem;
+  left: 50%;
+  font-size: 0.6rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: var(--ink-dim);
+  rotate: calc(var(--knob-mark-angle) * -1);
+  translate: -50% 0;
+}
+
+.altair-knob-label {
+  font-size: 0.58rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+}
+
+/* Pads: sixteen black rubber squares, a number in each, the struck one lit from within */
+.altair-pads {
+  display: grid;
+  grid-area: pads;
+  grid-template-rows: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.55rem;
+  padding: 0.7rem;
+  background: rgb(0 0 0 / 0.1);
+  border-radius: 4px;
+  box-shadow: inset 0 1px 3px rgb(0 0 0 / 0.3);
+}
+
+.altair-pad {
+  position: relative;
+  min-height: 3.5rem;
+  padding: 0;
+  touch-action: none;
+  cursor: pointer;
+  background: radial-gradient(circle at 50% 30%, #3a3633, #1b1917 70%);
+  border: 0;
+  border-radius: 6px;
+  box-shadow:
+    0 3px 0 #070606,
+    0 5px 6px rgb(0 0 0 / 0.4),
+    inset 0 1px 0 rgb(255 255 255 / 0.12);
+  transition: translate 50ms;
+}
+
+.altair-pad-number {
+  position: absolute;
+  top: 0.4rem;
+  left: 0.5rem;
+  font-size: 0.6rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #6e6a63;
+}
+
+/* The slice last struck keeps its number lit */
+.altair-pad[data-selected] .altair-pad-number {
+  color: var(--orange);
+}
+
+/* Struck: the pad sinks and glows from within, as hard as it was hit */
+.altair-pad[data-active] {
+  background: radial-gradient(
+    circle at 50% 40%,
+    color-mix(
+      in oklab,
+      var(--orange) calc(var(--pad-velocity, 1) * 70%),
+      #3a3633
+    ),
+    #1b1917 75%
+  );
+  box-shadow:
+    0 1px 0 #070606,
+    0 0 14px rgb(232 98 30 / 0.55),
+    inset 0 1px 0 rgb(255 255 255 / 0.12);
+  translate: 0 2px;
+}
+
+@container (max-width: 46rem) {
+  .altair {
+    grid-template-areas:
+      "header"
+      "lcd"
+      "row"
+      "pads";
+    grid-template-rows: none;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .altair-pads {
+    grid-template-rows: none;
+    width: min(100%, 22rem);
+    margin-inline: auto;
+  }
+
+  .altair-pad {
+    aspect-ratio: 1;
+  }
+}
+
+@media (max-width: 639px) {
+  .altair-cabinet {
+    padding-inline: 0.5rem;
+  }
+
+  .altair {
+    padding-inline: 0.75rem;
+  }
+}
