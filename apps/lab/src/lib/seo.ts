@@ -43,6 +43,7 @@ export function pageHead(path: string, options: PageOptions) {
       { content: "website", property: "og:type" },
       { content: image, property: "og:image" },
       { content: "summary_large_image", name: "twitter:card" },
+      { content: url, name: "twitter:url" },
       { content: title, name: "twitter:title" },
       { content: options.description, name: "twitter:description" },
       { content: image, name: "twitter:image" },
