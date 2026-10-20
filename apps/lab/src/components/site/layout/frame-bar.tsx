@@ -11,6 +11,7 @@ import { cn } from "cn";
 import { type ReactNode, useCallback } from "react";
 import { MidiConnectControl } from "@/components/audio-ui/midi-connect-control";
 import { HotkeyKbd } from "@/components/site/hotkey-kbd";
+import { GitHubLink } from "@/components/site/layout/github-link";
 import { useLab } from "@/components/site/providers/lab-provider";
 import {
   Breadcrumb,
@@ -126,6 +127,7 @@ export function FrameBar() {
         </BreadcrumbList>
       </Breadcrumb>
       <div className="ml-auto flex items-center gap-2">
+        <GitHubLink />
         <MidiConnectControl />
         {device ? (
           <>
