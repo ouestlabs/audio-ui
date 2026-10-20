@@ -278,15 +278,22 @@
   stroke-width: 0.5;
 }
 
-.mizar-eyelet {
-  fill: #05080a;
-  stroke: #d3dce1;
-  stroke-width: 1.4;
+.mizar-tail {
+  stroke: #cfd8dd;
+  stroke-width: 1.7;
+  stroke-linecap: round;
 }
 
-.mizar-tail {
-  stroke: #c3ccd2;
-  stroke-width: 1.5;
+/* The wire's loop round the peg: the half behind it dark, the half before it bright */
+.mizar-loop-back {
+  stroke: #2b353b;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+}
+
+.mizar-loop-front {
+  stroke: #eef3f5;
+  stroke-width: 1.8;
   stroke-linecap: round;
 }
 

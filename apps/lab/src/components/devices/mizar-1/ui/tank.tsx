@@ -21,6 +21,47 @@ const TURN_LIST = Array.from({ length: TURNS }, (_, index) => ({
   x: BODY_LEFT + index * PITCH,
 }));
 
+/** Where a spring's end is made fast: a peg out of the transducer bar, and the wire of the spring coming round it in a loop, its back half behind the peg and its front half before it, then on to the tube. */
+function Termination({
+  id,
+  side,
+  y,
+}: {
+  id: string;
+  side: "left" | "right";
+  y: number;
+}) {
+  const way = side === "left" ? 1 : -1;
+  const bar = side === "left" ? 28 : WIDTH - 28;
+  const centre = bar + way * 7.5;
+  const back = `M ${centre} ${y - 9.2} A 3.8 9.2 0 0 0 ${centre} ${y + 9.2}`;
+  const front = `M ${centre} ${y - 9.2} A 3.8 9.2 0 0 1 ${centre} ${y + 9.2}`;
+  const to = side === "left" ? BODY_LEFT : BODY_RIGHT;
+  return (
+    <g>
+      <path className="mizar-loop-back" d={back} fill="none" />
+      <rect
+        fill={`url(#${id}-peg)`}
+        height={6.4}
+        rx={3}
+        stroke="#12171a"
+        strokeWidth={0.6}
+        width={17}
+        x={side === "left" ? bar - 1 : bar - 16}
+        y={y - 3.2}
+      />
+      <path className="mizar-loop-front" d={front} fill="none" />
+      <line
+        className="mizar-tail"
+        x1={centre + way * 3.8}
+        x2={to}
+        y1={y}
+        y2={y}
+      />
+    </g>
+  );
+}
+
 /** The decibels from which the springs begin to shake, and from which they shake as hard as they do. */
 const FLOOR_DB = -55;
 const FULL_DB = -15;
@@ -83,6 +124,11 @@ export function Tank({
             <stop offset="0.5" stopColor="#c9d3d9" />
             <stop offset="1" stopColor="#58636b" />
           </linearGradient>
+          <linearGradient id={`${id}-peg`} x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0" stopColor="#2c363c" />
+            <stop offset="0.35" stopColor="#f0f5f7" />
+            <stop offset="1" stopColor="#4a555d" />
+          </linearGradient>
           <linearGradient id={`${id}-pan`} x1="0" x2="0" y1="0" y2="1">
             <stop offset="0" stopColor="#4c575f" />
             <stop offset="1" stopColor="#1b2227" />
@@ -141,27 +187,8 @@ export function Tank({
               rx={(BODY_RIGHT - BODY_LEFT) / 2}
               ry={2.6}
             />
-            <circle className="mizar-eyelet" cx={20} cy={spring.y} r={3.4} />
-            <circle
-              className="mizar-eyelet"
-              cx={WIDTH - 20}
-              cy={spring.y}
-              r={3.4}
-            />
-            <line
-              className="mizar-tail"
-              x1={20}
-              x2={BODY_LEFT}
-              y1={spring.y}
-              y2={spring.y}
-            />
-            <line
-              className="mizar-tail"
-              x1={BODY_RIGHT}
-              x2={WIDTH - 20}
-              y1={spring.y}
-              y2={spring.y}
-            />
+            <Termination id={id} side="left" y={spring.y} />
+            <Termination id={id} side="right" y={spring.y} />
             <rect
               fill={`url(#${id}-tube)`}
               height={TUBE * 2}
