@@ -3,28 +3,22 @@ import { useEffect, useId, useMemo, useRef } from "react";
 import { useAudioLevels } from "@/hooks/use-audio-levels";
 
 const WIDTH = 400;
-const TURNS = 24;
-const LEFT = 30;
-const RIGHT = WIDTH - 30;
-const STEP = (RIGHT - LEFT) / TURNS;
-/** How wide and how tall a turn is, and how far it leans: a coil seen from the side, its wire running diagonally. */
-const RADIUS_X = STEP * 0.92;
-const RADIUS_Y = 19;
-const LEAN = -20;
+/** The spring's body, between its two tails, and how it is wound: close, each turn a slant across the tube. */
+const BODY_LEFT = 44;
+const BODY_RIGHT = WIDTH - 44;
+const TURNS = 44;
+const PITCH = (BODY_RIGHT - BODY_LEFT) / TURNS;
+const TUBE = 6.5;
 const SPRINGS = [
-  { id: "long", y: 38 },
-  { id: "short", y: 82 },
+  { id: "long", y: 40 },
+  { id: "short", y: 80 },
 ] as const;
-
-/** One turn's two halves: the back one, behind the coil, and the front one, in the light. */
-const BACK = `M ${-RADIUS_X} 0 A ${RADIUS_X} ${RADIUS_Y} 0 0 1 ${RADIUS_X} 0`;
-const FRONT = `M ${-RADIUS_X} 0 A ${RADIUS_X} ${RADIUS_Y} 0 0 0 ${RADIUS_X} 0`;
 
 const TURN_LIST = Array.from({ length: TURNS }, (_, index) => ({
   index,
   /** Where the turn is along the spring, from 0 to 180 degrees: the shake is the greatest in the middle, as a plucked string's. */
   phase: ((index + 0.5) / TURNS) * 180,
-  x: LEFT + (index + 0.5) * STEP,
+  x: BODY_LEFT + index * PITCH,
 }));
 
 /** The decibels from which the springs begin to shake, and from which they shake as hard as they do. */
@@ -77,68 +71,104 @@ export function Tank({
         viewBox={`0 0 ${WIDTH} 120`}
       >
         <defs>
-          <linearGradient id={`${id}-wire`} x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0" stopColor="#ffffff" />
-            <stop offset="0.22" stopColor="#c4cfd6" />
-            <stop offset="0.5" stopColor="#6a7780" />
-            <stop offset="0.78" stopColor="#cdd8de" />
-            <stop offset="1" stopColor="#f4f8fa" />
+          <linearGradient id={`${id}-tube`} x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0" stopColor="#2a343a" />
+            <stop offset="0.3" stopColor="#d5dfe4" />
+            <stop offset="0.45" stopColor="#ffffff" />
+            <stop offset="0.7" stopColor="#7d8a93" />
+            <stop offset="1" stopColor="#222b31" />
           </linearGradient>
-          <linearGradient id={`${id}-plate`} x1="0" x2="1" y1="0" y2="0">
-            <stop offset="0" stopColor="#7b858c" />
-            <stop offset="0.5" stopColor="#d6dde1" />
-            <stop offset="1" stopColor="#7b858c" />
+          <linearGradient id={`${id}-bar`} x1="0" x2="1" y1="0" y2="0">
+            <stop offset="0" stopColor="#58636b" />
+            <stop offset="0.5" stopColor="#c9d3d9" />
+            <stop offset="1" stopColor="#58636b" />
+          </linearGradient>
+          <linearGradient id={`${id}-pan`} x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0" stopColor="#4c575f" />
+            <stop offset="1" stopColor="#1b2227" />
           </linearGradient>
         </defs>
+        <rect
+          fill={`url(#${id}-pan)`}
+          height={112}
+          rx={6}
+          stroke="#7b868d"
+          strokeWidth={1.2}
+          width={WIDTH - 4}
+          x={2}
+          y={4}
+        />
+        <rect
+          className="mizar-cavity"
+          height={98}
+          rx={4}
+          width={WIDTH - 20}
+          x={10}
+          y={11}
+        />
+        {[
+          { side: "left", x: 12 },
+          { side: "right", x: WIDTH - 28 },
+        ].map((bar) => (
+          <g key={bar.side}>
+            <rect
+              fill={`url(#${id}-bar)`}
+              height={84}
+              rx={2.5}
+              stroke="#12171a"
+              strokeWidth={0.8}
+              width={16}
+              x={bar.x}
+              y={18}
+            />
+            {[24, 96].map((y) => (
+              <circle
+                className="mizar-bolt"
+                cx={bar.x + 8}
+                cy={y}
+                key={y}
+                r={2.1}
+              />
+            ))}
+          </g>
+        ))}
         {SPRINGS.map((spring) => (
           <g className="mizar-spring" data-spring={spring.id} key={spring.id}>
             <ellipse
               className="mizar-shadow"
               cx={WIDTH / 2}
-              cy={spring.y + 27}
-              rx={RIGHT - LEFT - 20}
-              ry={3.5}
+              cy={spring.y + 10}
+              rx={(BODY_RIGHT - BODY_LEFT) / 2}
+              ry={2.6}
             />
-            <rect
-              fill={`url(#${id}-plate)`}
-              height={34}
-              rx={2}
-              width={9}
-              x={8}
-              y={spring.y - 17}
+            <circle className="mizar-eyelet" cx={20} cy={spring.y} r={3.4} />
+            <circle
+              className="mizar-eyelet"
+              cx={WIDTH - 20}
+              cy={spring.y}
+              r={3.4}
             />
-            <rect
-              fill={`url(#${id}-plate)`}
-              height={34}
-              rx={2}
-              width={9}
-              x={WIDTH - 17}
-              y={spring.y - 17}
-            />
-            {[12.5, WIDTH - 12.5].flatMap((x) =>
-              [spring.y - 10, spring.y + 10].map((y) => (
-                <circle
-                  className="mizar-bolt"
-                  cx={x}
-                  cy={y}
-                  key={`${x}-${y}`}
-                  r={1.7}
-                />
-              ))
-            )}
             <line
-              className="mizar-hook"
-              x1={17}
-              x2={LEFT}
+              className="mizar-tail"
+              x1={20}
+              x2={BODY_LEFT}
               y1={spring.y}
               y2={spring.y}
             />
             <line
-              className="mizar-hook"
-              x1={RIGHT}
-              x2={WIDTH - 17}
+              className="mizar-tail"
+              x1={BODY_RIGHT}
+              x2={WIDTH - 20}
               y1={spring.y}
               y2={spring.y}
+            />
+            <rect
+              fill={`url(#${id}-tube)`}
+              height={TUBE * 2}
+              rx={TUBE}
+              width={BODY_RIGHT - BODY_LEFT}
+              x={BODY_LEFT}
+              y={spring.y - TUBE}
             />
             {TURN_LIST.map((turn) => (
               <g
@@ -151,23 +181,20 @@ export function Tank({
                   } as React.CSSProperties
                 }
               >
-                <g
-                  transform={`translate(${turn.x} ${spring.y}) rotate(${LEAN})`}
-                >
-                  <path className="mizar-coil-back" d={BACK} fill="none" />
-                  <path
-                    className="mizar-coil-front"
-                    d={FRONT}
-                    fill="none"
-                    stroke={`url(#${id}-wire)`}
-                  />
-                  <path
-                    className="mizar-coil-light"
-                    d={FRONT}
-                    fill="none"
-                    transform="translate(0 -1.1) scale(0.97 1)"
-                  />
-                </g>
+                <line
+                  className="mizar-groove"
+                  x1={turn.x}
+                  x2={turn.x + PITCH * 0.9}
+                  y1={spring.y - TUBE + 0.6}
+                  y2={spring.y + TUBE - 0.6}
+                />
+                <line
+                  className="mizar-ridge"
+                  x1={turn.x + PITCH * 0.45}
+                  x2={turn.x + PITCH * 1.35}
+                  y1={spring.y - TUBE + 0.6}
+                  y2={spring.y + TUBE - 0.6}
+                />
               </g>
             ))}
           </g>

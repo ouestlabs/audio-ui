@@ -268,59 +268,65 @@
   width: 100%;
 }
 
-.mizar-coil-back {
-  stroke: #36424b;
-  stroke-width: 3.2;
-  stroke-linecap: round;
-}
-
-.mizar-coil-front {
-  stroke-width: 4;
-  stroke-linecap: round;
-}
-
-.mizar-coil-light {
-  opacity: 0.7;
-  stroke: #fff;
-  stroke-width: 0.9;
-  stroke-linecap: round;
-}
-
-.mizar-shadow {
-  fill: rgb(0 0 0 / 0.55);
+.mizar-cavity {
+  fill: #06090b;
 }
 
 .mizar-bolt {
-  fill: #4a545b;
+  fill: #3b454c;
   stroke: #e8eef1;
   stroke-width: 0.5;
 }
 
-.mizar-hook {
-  stroke: #b9c3c9;
-  stroke-width: 3;
+.mizar-eyelet {
+  fill: #05080a;
+  stroke: #d3dce1;
+  stroke-width: 1.4;
+}
+
+.mizar-tail {
+  stroke: #c3ccd2;
+  stroke-width: 1.5;
   stroke-linecap: round;
 }
 
-/* A turn sags a little under its own weight, most in the middle, and shakes as a standing wave: the turns in the middle move most, the ones at the hooks not at all, each a hair behind the one before */
+.mizar-shadow {
+  fill: rgb(0 0 0 / 0.5);
+}
+
+/* The winding: a dark groove and a bright ridge across the tube, one pair for every turn of wire */
+.mizar-groove {
+  opacity: 0.85;
+  stroke: #1a2227;
+  stroke-width: 1.15;
+  stroke-linecap: round;
+}
+
+.mizar-ridge {
+  opacity: 0.55;
+  stroke: #ffffff;
+  stroke-width: 0.9;
+  stroke-linecap: round;
+}
+
+/* The spring is taut, so it hardly sags; it shakes as a standing wave: the turns in the middle move most, the ones at the hooks not at all, each a hair behind the one before */
 .mizar-turn {
   --k: calc(var(--shake) + var(--bump));
-  transform: translateY(calc(sin(var(--p)) * 2.5px));
-  animation: mizar-wave 0.11s linear infinite alternate;
-  animation-delay: calc(var(--i) * -4ms);
+  animation: mizar-wave 0.1s linear infinite alternate;
+  animation-delay: calc(var(--i) * -3ms);
 }
 
 .mizar-spring[data-spring="short"] .mizar-turn {
-  animation-duration: 0.085s;
+  animation-duration: 0.078s;
 }
 
 @keyframes mizar-wave {
   from {
-    transform: translateY(calc(sin(var(--p)) * (2.5px - var(--k) * 4.5px)));
+    transform: translateY(calc(sin(var(--p)) * var(--k) * -3.2px));
   }
 
   to {
-    transform: translateY(calc(sin(var(--p)) * (2.5px + var(--k) * 4.5px)));
+    transform: translateY(calc(sin(var(--p)) * var(--k) * 3.2px));
   }
 }
 
