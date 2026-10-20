@@ -6,8 +6,6 @@
 export const HOTKEYS = Object.freeze({
   copy: "Mod+C",
   details: "I",
-  focus: "F",
-  leaveFocus: "Escape",
   navigation: "P",
   search: "Mod+K",
   searchSlash: "/",

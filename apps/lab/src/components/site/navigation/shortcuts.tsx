@@ -5,7 +5,6 @@ import { HOTKEYS } from "@/lib/hotkeys";
 const SHORTCUTS = [
   { hotkey: HOTKEYS.navigation, label: "Navigation" },
   { hotkey: HOTKEYS.details, label: "Details" },
-  { hotkey: HOTKEYS.focus, label: "Focus on the device" },
   { hotkey: HOTKEYS.source, label: "View the source" },
   { hotkey: HOTKEYS.theme, label: "Theme" },
 ] as const;

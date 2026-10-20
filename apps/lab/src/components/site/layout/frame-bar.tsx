@@ -1,10 +1,4 @@
-import {
-  ArrowsInIcon,
-  ArrowsOutIcon,
-  CodeIcon,
-  InfoIcon,
-  SidebarIcon,
-} from "@phosphor-icons/react/ssr";
+import { CodeIcon, InfoIcon, SidebarIcon } from "@phosphor-icons/react/ssr";
 import { useHotkey } from "@tanstack/react-hotkeys";
 import { Link, useParams } from "@tanstack/react-router";
 import { cn } from "cn";
@@ -75,34 +69,27 @@ function BarButton({
 /** The bar of the frame: the navigation, where you are, and what you can do with the device. */
 export function FrameBar() {
   const { actions, state } = useLab();
-  const { setFocus, setSourceOpen, toggleDetails, toggleFocus } = actions;
-  const { detailsOpen, focus } = state;
+  const { setSourceOpen, toggleDetails } = actions;
+  const { detailsOpen } = state;
   const { toggleSidebar } = useSidebar();
   const { device: slug } = useParams({ strict: false });
   const device = DEVICES.find((item) => item.slug === slug);
 
   useHotkey(HOTKEYS.navigation, toggleSidebar);
   useHotkey(HOTKEYS.details, toggleDetails);
-  useHotkey(HOTKEYS.focus, toggleFocus);
   const openSource = useCallback(() => setSourceOpen(true), [setSourceOpen]);
   useHotkey(HOTKEYS.source, openSource);
-  const leaveFocus = useCallback(() => setFocus(false), [setFocus]);
-  useHotkey(HOTKEYS.leaveFocus, leaveFocus, { enabled: focus });
 
   return (
     <>
-      {focus ? null : (
-        <>
-          <BarButton
-            hotkey={HOTKEYS.navigation}
-            label="Toggle navigation"
-            onClick={toggleSidebar}
-          >
-            <SidebarIcon aria-hidden />
-          </BarButton>
-          <Separator orientation="vertical" />
-        </>
-      )}
+      <BarButton
+        hotkey={HOTKEYS.navigation}
+        label="Toggle navigation"
+        onClick={toggleSidebar}
+      >
+        <SidebarIcon aria-hidden />
+      </BarButton>
+      <Separator orientation="vertical" />
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
@@ -130,39 +117,22 @@ export function FrameBar() {
         <GitHubLink />
         <MidiConnectControl />
         {device ? (
-          <>
-            <BarButton
-              hotkey={HOTKEYS.source}
-              label="View the source"
-              onClick={openSource}
-            >
-              <CodeIcon aria-hidden />
-            </BarButton>
-            <BarButton
-              className="max-md:hidden"
-              hotkey={HOTKEYS.focus}
-              label={focus ? "Leave focus" : "Focus on the device"}
-              onClick={toggleFocus}
-              pressed={focus}
-            >
-              {focus ? (
-                <ArrowsInIcon aria-hidden />
-              ) : (
-                <ArrowsOutIcon aria-hidden />
-              )}
-            </BarButton>
-          </>
-        ) : null}
-        {focus ? null : (
           <BarButton
-            hotkey={HOTKEYS.details}
-            label="Toggle details"
-            onClick={toggleDetails}
-            pressed={detailsOpen}
+            hotkey={HOTKEYS.source}
+            label="View the source"
+            onClick={openSource}
           >
-            <InfoIcon aria-hidden />
+            <CodeIcon aria-hidden />
           </BarButton>
-        )}
+        ) : null}
+        <BarButton
+          hotkey={HOTKEYS.details}
+          label="Toggle details"
+          onClick={toggleDetails}
+          pressed={detailsOpen}
+        >
+          <InfoIcon aria-hidden />
+        </BarButton>
       </div>
     </>
   );

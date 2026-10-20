@@ -14,7 +14,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 
 function Layout({ children }: { children: React.ReactNode }) {
   const { actions, state } = useLab();
-  const { detailsOpen, detailsSheetOpen, focus, navigationOpen } = state;
+  const { detailsOpen, detailsSheetOpen, navigationOpen } = state;
   const { setDetailsOpen, setNavigationOpen } = actions;
 
   // From here the state tells which sidebars are shut: the note the page started with is done.
@@ -44,7 +44,7 @@ function Layout({ children }: { children: React.ReactNode }) {
           }
         </style>
       )}
-      {focus ? null : <LabSidebar />}
+      <LabSidebar />
       <main className="min-h-0 min-w-0 flex-1 p-2">
         <Frame className="h-full">
           <FrameHeader>
@@ -57,13 +57,11 @@ function Layout({ children }: { children: React.ReactNode }) {
           </FrameContent>
         </Frame>
       </main>
-      {focus ? null : (
-        <DetailsPanel
-          onOpenChange={setDetailsOpen}
-          open={detailsOpen}
-          sheetOpen={detailsSheetOpen}
-        />
-      )}
+      <DetailsPanel
+        onOpenChange={setDetailsOpen}
+        open={detailsOpen}
+        sheetOpen={detailsSheetOpen}
+      />
       <CommandMenu />
       <SourceDialog />
     </SidebarProvider>
