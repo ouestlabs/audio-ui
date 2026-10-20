@@ -1,0 +1,6 @@
+{
+  "title": "Selene-73",
+  "description": "A tine electric piano: a bell on every attack, a pickup you can drive and a tremolo.",
+  "category": "Pianos",
+  "uses": ["knob", "piano"]
+}
