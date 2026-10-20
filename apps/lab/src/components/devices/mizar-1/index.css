@@ -240,6 +240,11 @@
   padding: 0.5rem 0.9rem;
   background:
     linear-gradient(115deg, rgb(255 255 255 / 0.1) 0 14%, transparent 14%),
+    radial-gradient(
+      ellipse at 50% 55%,
+      rgb(110 170 205 / 0.22),
+      transparent 72%
+    ),
     linear-gradient(180deg, #0c1418, #05090b);
   border-radius: 6px;
   box-shadow:
@@ -263,55 +268,64 @@
   width: 100%;
 }
 
-.mizar-rod {
-  stroke: #4a5258;
-  stroke-width: 2;
-}
-
 .mizar-coil-back {
-  stroke: #5c666d;
+  stroke: #36424b;
   stroke-width: 3.2;
   stroke-linecap: round;
 }
 
-.mizar-coil {
-  opacity: 0.9;
-  stroke: #e9eef1;
-  stroke-width: 1.6;
+.mizar-coil-front {
+  stroke-width: 4;
   stroke-linecap: round;
 }
 
+.mizar-coil-light {
+  opacity: 0.7;
+  stroke: #fff;
+  stroke-width: 0.9;
+  stroke-linecap: round;
+}
+
+.mizar-shadow {
+  fill: rgb(0 0 0 / 0.55);
+}
+
+.mizar-bolt {
+  fill: #4a545b;
+  stroke: #e8eef1;
+  stroke-width: 0.5;
+}
+
 .mizar-hook {
-  fill: #c9ced2;
-  stroke: #1c1a1b;
-  stroke-width: 1.5;
+  stroke: #b9c3c9;
+  stroke-width: 3;
+  stroke-linecap: round;
 }
 
-.mizar-spring {
-  transform-origin: center;
-  transform-box: fill-box;
-  animation: mizar-shake 0.085s linear infinite alternate;
+/* A turn sags a little under its own weight, most in the middle, and shakes as a standing wave: the turns in the middle move most, the ones at the hooks not at all, each a hair behind the one before */
+.mizar-turn {
+  --k: calc(var(--shake) + var(--bump));
+  transform: translateY(calc(sin(var(--p)) * 2.5px));
+  animation: mizar-wave 0.11s linear infinite alternate;
+  animation-delay: calc(var(--i) * -4ms);
 }
 
-.mizar-spring[data-spring="short"] {
-  animation-duration: 0.12s;
-  animation-direction: alternate-reverse;
+.mizar-spring[data-spring="short"] .mizar-turn {
+  animation-duration: 0.085s;
 }
 
-@keyframes mizar-shake {
+@keyframes mizar-wave {
   from {
-    transform: translateY(calc((var(--shake) + var(--bump)) * -3px))
-      scaleY(calc(1 - (var(--shake) + var(--bump)) * 0.08));
+    transform: translateY(calc(sin(var(--p)) * (2.5px - var(--k) * 4.5px)));
   }
 
   to {
-    transform: translateY(calc((var(--shake) + var(--bump)) * 3px))
-      scaleY(calc(1 + (var(--shake) + var(--bump)) * 0.08));
+    transform: translateY(calc(sin(var(--p)) * (2.5px + var(--k) * 4.5px)));
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .mizar-spring {
+  .mizar-turn {
     animation: none;
   }
 }
