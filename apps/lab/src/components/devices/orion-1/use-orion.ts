@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useMasterBus } from "@/hooks/use-master-bus";
 import { useMidiInput } from "@/hooks/use-midi-input";
+import { usePublishInspector } from "@/lib/inspector";
 import { createOrionEngine, volumeGain, type Wave } from "./audio/engine";
 import { type Patch, PRESETS, patchOf } from "./audio/presets";
 import { type Knobbed, NAMES, type OnParam } from "./ui/params";
@@ -30,6 +31,14 @@ export function useOrion() {
     engine.attach(bus);
     return () => engine.detach();
   }, [bus, engine]);
+
+  // What the lab shows of the device: where its sound comes out, and the patch it plays.
+  const presetTitle = `${pad(preset)} ${PRESETS[preset]?.name}`;
+  const inspected = useMemo(
+    () => ({ preset: presetTitle, ...patch }),
+    [presetTitle, patch]
+  );
+  usePublishInspector({ output: bus, patch: inspected });
 
   const togglePower = useCallback(() => {
     setPower((on) => {
@@ -121,7 +130,7 @@ export function useOrion() {
     pressKey,
     patch,
     power,
-    presetTitle: `${pad(preset)} ${PRESETS[preset]?.name}`,
+    presetTitle,
     previous,
     readout: touched
       ? `${NAMES[touched]} ${Math.round(patch[touched])}`

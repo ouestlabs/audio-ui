@@ -2,6 +2,9 @@ import { ArrowUpRightIcon, CodeIcon } from "@phosphor-icons/react/ssr";
 import { useParams } from "@tanstack/react-router";
 import { cn } from "cn";
 import { useCallback, useSyncExternalStore } from "react";
+import { Midi } from "@/components/site/details/midi";
+import { Output } from "@/components/site/details/output";
+import { Patch } from "@/components/site/details/patch";
 import { useLab } from "@/components/site/providers/lab-provider";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,6 +14,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { DEVICES } from "@/lib/devices";
+import { useInspector } from "@/lib/inspector";
 
 const DOCS = "https://www.audio-ui.dev/docs/components/base";
 const DESKTOP_QUERY = "(min-width: 1024px)";
@@ -45,23 +49,37 @@ function Section({
   );
 }
 
-/** What the panel says about the device on screen: what it is, what it is made of, how to read it. */
-function DeviceInfo() {
+/** What the panel shows of the device on screen: what it is, then its sound, its MIDI and its patch, live, and what it is made of. */
+function Inspector() {
   const { setSourceOpen } = useLab().actions;
   const openSource = useCallback(() => setSourceOpen(true), [setSourceOpen]);
   const { device: slug } = useParams({ strict: false });
   const device = DEVICES.find((item) => item.slug === slug);
+  const { output, patch } = useInspector();
 
   // pt-5: the first line sits on the middle of the frame bar beside it, not on the edge of the viewport.
   return (
-    <div className="flex flex-col gap-5 px-4 pt-5 pb-4">
+    <div className="flex flex-col gap-6 px-4 pt-5 pb-4">
       <div className="flex flex-col gap-1">
         <h3 className="font-medium text-sm">{device?.title ?? "Lab"}</h3>
         <p className="text-muted-foreground text-sm">
           {device?.description ??
-            "Pick a device: what it is and what it is made of are here."}
+            "Pick a device: what it plays is seen here, live."}
         </p>
       </div>
+      {output ? (
+        <Section title="Output">
+          <Output output={output} />
+        </Section>
+      ) : null}
+      <Section title="MIDI">
+        <Midi />
+      </Section>
+      {patch ? (
+        <Section title="Patch">
+          <Patch patch={patch} />
+        </Section>
+      ) : null}
       {device && device.uses.length > 0 ? (
         <Section title="Built with">
           <ul className="flex flex-col gap-0.5">
@@ -113,9 +131,9 @@ export function DetailsPanel({
         <SheetContent className="w-full! gap-0 overflow-y-auto" side="right">
           <SheetTitle className="sr-only">Details</SheetTitle>
           <SheetDescription className="sr-only">
-            What the device is, what it is made of and the keys of the frame.
+            What the device is playing, live, and what it is made of.
           </SheetDescription>
-          <DeviceInfo />
+          <Inspector />
         </SheetContent>
       </Sheet>
     );
@@ -138,7 +156,7 @@ export function DetailsPanel({
         )}
       >
         <div className="slim-scroll min-h-0 flex-1 overflow-y-auto">
-          <DeviceInfo />
+          <Inspector />
         </div>
       </div>
     </aside>

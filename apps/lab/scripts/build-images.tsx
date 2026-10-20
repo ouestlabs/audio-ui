@@ -9,7 +9,6 @@
 import { Resvg } from "@resvg/resvg-js";
 import type { ReactElement } from "react";
 import satori from "satori";
-import { SITE } from "../src/lib/seo";
 
 const root = `${import.meta.dir}/..`;
 const DEVICES = `${root}/src/components/devices`;
@@ -215,6 +214,108 @@ function Card({
   );
 }
 
+/** One capture of a device in the home card, a frame on the stage: the cards of the devices draw theirs in `Frame`. */
+function Capture({
+  preview,
+  style,
+}: {
+  preview: string;
+  style: { left: number; top: number };
+}) {
+  return (
+    <div
+      style={{
+        background: tokens.frame,
+        border: `1px solid ${tokens.border}`,
+        borderRadius: "20px",
+        boxShadow: "0 24px 48px rgba(0, 0, 0, 0.6)",
+        display: "flex",
+        padding: "6px",
+        position: "absolute",
+        ...style,
+      }}
+    >
+      <img
+        alt=""
+        height={266}
+        src={preview}
+        style={{ borderRadius: "14px", objectFit: "cover" }}
+        width={506}
+      />
+    </div>
+  );
+}
+
+/** The home's card: the title and the devices, two captures cascading on the right. */
+function HomeCard({
+  chips,
+  previews,
+}: {
+  chips: string[];
+  previews: string[];
+}) {
+  return (
+    <div
+      style={{
+        background: tokens.background,
+        display: "flex",
+        height: "100%",
+        padding: "56px",
+        position: "relative",
+        width: "100%",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          height: "100%",
+          justifyContent: "space-between",
+          width: "500px",
+        }}
+      >
+        <Mark />
+        <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+          <div
+            style={{
+              color: tokens.foreground,
+              display: "flex",
+              fontFamily: "Instrument Serif",
+              fontSize: "84px",
+              lineHeight: 1,
+            }}
+          >
+            Audio interfaces you can play
+          </div>
+          <div
+            style={{
+              color: "#a3a3a3",
+              display: "flex",
+              fontFamily: "Bricolage Grotesque",
+              fontSize: "26px",
+              lineHeight: 1.35,
+              maxWidth: "440px",
+            }}
+          >
+            Synths, drum machines and devices that run on the real components.
+          </div>
+        </div>
+        <div style={{ display: "flex", gap: "10px" }}>
+          {chips.map((chip) => (
+            <Chip key={chip}>{chip}</Chip>
+          ))}
+        </div>
+      </div>
+      {previews[0] ? (
+        <Capture preview={previews[0]} style={{ left: 636, top: 64 }} />
+      ) : null}
+      {previews[1] ? (
+        <Capture preview={previews[1]} style={{ left: 556, top: 300 }} />
+      ) : null}
+    </div>
+  );
+}
+
 async function png(element: ReactElement) {
   const svg = await satori(element, { ...SIZE, fonts });
   return new Resvg(svg, { fitTo: { mode: "width", value: SIZE.width } })
@@ -250,11 +351,9 @@ await Promise.all([
   Bun.write(
     `${root}/public/og/default.png`,
     await png(
-      <Card
+      <HomeCard
         chips={devices.map((device) => device.title)}
-        description={SITE.description}
-        preview={devices[0]?.preview ?? null}
-        title="Audio interfaces you can play"
+        previews={devices.flatMap((device) => device.preview ?? [])}
       />
     )
   ),
