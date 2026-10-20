@@ -258,10 +258,12 @@ export function FramedLayout({
                 <CustomizeToggle />
               </div>
             </FrameHeader>
-            <FrameContent className="flex min-h-0 flex-1 flex-col">
-              <div className="scroll-fade-y no-scrollbar flex min-h-0 flex-1 flex-col overflow-y-auto">
+            <FrameContent className="flex min-h-0 flex-1 flex-col [timeline-scope:--frame-y]">
+              <div className="no-scrollbar flex min-h-0 flex-1 flex-col overflow-y-auto [scroll-timeline:--frame-y_y]">
                 {children}
               </div>
+              <div aria-hidden="true" className="frame-fade-t" />
+              <div aria-hidden="true" className="frame-fade-b" />
             </FrameContent>
             {footer}
           </Frame>

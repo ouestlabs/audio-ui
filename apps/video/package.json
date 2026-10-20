@@ -8,6 +8,7 @@
     "lint": "biome check --write .",
     "lint:fix": "biome check --write --unsafe .",
     "new": "bun scripts/render.ts new",
+    "registry": "bun scripts/render.ts registry",
     "render": "bun scripts/render.ts",
     "showcase": "bun scripts/render.ts showcase",
     "studio": "remotion studio src/index.ts",

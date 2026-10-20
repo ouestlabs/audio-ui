@@ -1,4 +1,7 @@
 @import "../../www/src/styles/globals.css";
+/* The site loads each style with the page that shows it (globals.css keeps only Nova): the videos are filmed in Vega. */
+@import "../../www/src/registry/styles/style-vega.css" layer(base);
+@import "../../www/src/registry-audio/styles/style-vega.css" layer(base);
 
 @source "../../www/src/registry-audio/bases/base/audio";
 @source "../../www/src/registry/bases/base/ui";

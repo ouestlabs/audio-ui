@@ -1,6 +1,7 @@
 import "./styles.css";
 import "./fonts.ts";
 import { Composition } from "remotion";
+import { REGISTRY_SECONDS, Registry } from "./compositions/registry.tsx";
 import { Showcases } from "./compositions/showcases.tsx";
 import {
   SPOTLIGHT_DEFAULTS,
@@ -28,6 +29,14 @@ export function Root() {
         durationInFrames={Math.round(SPOTLIGHT_SECONDS * FPS)}
         fps={FPS}
         id="Spotlight"
+        {...LANDSCAPE}
+      />
+      <Composition
+        component={Registry}
+        defaultProps={{ theme: "light" as const }}
+        durationInFrames={Math.round(REGISTRY_SECONDS * FPS)}
+        fps={FPS}
+        id="Registry"
         {...LANDSCAPE}
       />
       <Composition

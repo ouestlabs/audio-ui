@@ -6,6 +6,7 @@
  *   bun run showcase <name>                   one component as it is, with no status
  *   bun run all                               every component: "New" where the docs' menu marks it, no status otherwise
  *   bun run teaser                            the whole library
+ *   bun run registry                          the shadcn CLI installing a knob, then the knob turning
  *
  * Options: --theme light|dark.
  * The videos land in apps/video/out/.
@@ -156,6 +157,14 @@ async function everyComponent(): Promise<Job[]> {
 let jobs: Job[];
 if (command === "teaser") {
   jobs = [{ file: "teaser.mp4", id: "Teaser", props: {} }];
+} else if (command === "registry") {
+  jobs = [
+    {
+      file: "registry.mp4",
+      id: "Registry",
+      props: { theme: values.theme === "dark" ? "dark" : "light" },
+    },
+  ];
 } else if (command === "all") {
   jobs = await everyComponent();
 } else if (
@@ -165,7 +174,7 @@ if (command === "teaser") {
   jobs = [await spotlight(command, name)];
 } else {
   fail(
-    "Usage: bun run new|update|showcase <name> [--note …] | bun run all | bun run teaser"
+    "Usage: bun run new|update|showcase <name> [--note …] | bun run all | bun run teaser | bun run registry"
   );
 }
 

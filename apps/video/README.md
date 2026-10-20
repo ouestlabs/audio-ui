@@ -43,6 +43,14 @@ bun run teaser
 
 The whole library in 28 seconds: the glyph becomes the first knob, the controls and the editors one by one, then the whole instrument while it turns dark.
 
+### The registry
+
+```sh
+bun run registry
+```
+
+The shadcn CLI in a terminal, `npx shadcn@latest add @audio-ui/knob` and what it prints, then the window opens a pane where the installed knob turns, in 10.6 seconds.
+
 ### Options
 
 - `--theme dark`: render on the dark theme (light by default).
@@ -57,6 +65,6 @@ Restart it after changing `webpack-override.ts` or `remotion.config.ts`.
 
 ## How it renders the registry
 
-`webpack-override.ts` makes the bundle resolve like `apps/www`: `@/` is www's `src`, `@audio-ui/react` and `@audio-ui/core` are their sources, and CSS goes through the site's own `globals.css` (Tailwind, theme tokens, `style-vega`). Transitions and CSS animations are turned off in `src/styles.css`: a frame is seeked, not played. The site's `IconPlaceholder` is stubbed, since it pulls in the whole design system for icons a video never shows.
+`webpack-override.ts` makes the bundle resolve like `apps/www`: `@/` is www's `src`, `@audio-ui/react` and `@audio-ui/core` are their sources, and CSS goes through the site's own `globals.css` (Tailwind, theme tokens) plus the Vega style sheets, which the site loads per page. Transitions and CSS animations are turned off in `src/styles.css`: a frame is seeked, not played. The site's `IconPlaceholder` is stubbed, since it pulls in the whole design system for icons a video never shows.
 
 Remotion is free for individuals and companies of up to 3 people; past that it needs a [company license](https://www.remotion.dev/license).
