@@ -9,6 +9,8 @@ const BODY_RIGHT = WIDTH - 44;
 const TURNS = 44;
 const PITCH = (BODY_RIGHT - BODY_LEFT) / TURNS;
 const TUBE = 6.5;
+/** How thick the wire is, a little less than a turn, so the turns lie close and the dark of the inside shows between them. */
+const WIRE = PITCH * 0.8;
 const SPRINGS = [
   { id: "long", y: 40 },
   { id: "short", y: 80 },
@@ -21,7 +23,7 @@ const TURN_LIST = Array.from({ length: TURNS }, (_, index) => ({
   x: BODY_LEFT + index * PITCH,
 }));
 
-/** Where a spring's end is made fast: a peg out of the transducer bar, and the wire of the spring coming round it in a loop, its back half behind the peg and its front half before it, then on to the tube. */
+/** Where a spring's end is made fast: the wire runs straight through a hole in the transducer bar, where a knot in it holds it, and a crimped sleeve joins it to the coil. */
 function Termination({
   id,
   side,
@@ -32,31 +34,23 @@ function Termination({
   y: number;
 }) {
   const way = side === "left" ? 1 : -1;
-  const bar = side === "left" ? 28 : WIDTH - 28;
-  const centre = bar + way * 7.5;
-  const back = `M ${centre} ${y - 9.2} A 3.8 9.2 0 0 0 ${centre} ${y + 9.2}`;
-  const front = `M ${centre} ${y - 9.2} A 3.8 9.2 0 0 1 ${centre} ${y + 9.2}`;
+  const hole = side === "left" ? 20 : WIDTH - 20;
   const to = side === "left" ? BODY_LEFT : BODY_RIGHT;
+  const sleeve = to - way * 7;
   return (
     <g>
-      <path className="mizar-loop-back" d={back} fill="none" />
+      <circle className="mizar-hole" cx={hole} cy={y} r={3.5} />
+      <line className="mizar-tail" x1={hole} x2={sleeve} y1={y} y2={y} />
+      <circle className="mizar-knot" cx={hole} cy={y} r={1.9} />
       <rect
         fill={`url(#${id}-peg)`}
-        height={6.4}
-        rx={3}
+        height={5.4}
+        rx={1.6}
         stroke="#12171a"
         strokeWidth={0.6}
-        width={17}
-        x={side === "left" ? bar - 1 : bar - 16}
-        y={y - 3.2}
-      />
-      <path className="mizar-loop-front" d={front} fill="none" />
-      <line
-        className="mizar-tail"
-        x1={centre + way * 3.8}
-        x2={to}
-        y1={y}
-        y2={y}
+        width={8}
+        x={side === "left" ? sleeve : to - 1}
+        y={y - 2.7}
       />
     </g>
   );
@@ -112,13 +106,6 @@ export function Tank({
         viewBox={`0 0 ${WIDTH} 120`}
       >
         <defs>
-          <linearGradient id={`${id}-tube`} x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0" stopColor="#2a343a" />
-            <stop offset="0.3" stopColor="#d5dfe4" />
-            <stop offset="0.45" stopColor="#ffffff" />
-            <stop offset="0.7" stopColor="#7d8a93" />
-            <stop offset="1" stopColor="#222b31" />
-          </linearGradient>
           <linearGradient id={`${id}-bar`} x1="0" x2="1" y1="0" y2="0">
             <stop offset="0" stopColor="#58636b" />
             <stop offset="0.5" stopColor="#c9d3d9" />
@@ -189,41 +176,62 @@ export function Tank({
             />
             <Termination id={id} side="left" y={spring.y} />
             <Termination id={id} side="right" y={spring.y} />
-            <rect
-              fill={`url(#${id}-tube)`}
-              height={TUBE * 2}
-              rx={TUBE}
-              width={BODY_RIGHT - BODY_LEFT}
-              x={BODY_LEFT}
-              y={spring.y - TUBE}
-            />
-            {TURN_LIST.map((turn) => (
-              <g
-                className="mizar-turn"
-                key={turn.index}
-                style={
-                  {
-                    "--i": turn.index,
-                    "--p": `${turn.phase}deg`,
-                  } as React.CSSProperties
-                }
-              >
-                <line
-                  className="mizar-groove"
-                  x1={turn.x}
-                  x2={turn.x + PITCH * 0.9}
-                  y1={spring.y - TUBE + 0.6}
-                  y2={spring.y + TUBE - 0.6}
-                />
-                <line
-                  className="mizar-ridge"
-                  x1={turn.x + PITCH * 0.45}
-                  x2={turn.x + PITCH * 1.35}
-                  y1={spring.y - TUBE + 0.6}
-                  y2={spring.y + TUBE - 0.6}
-                />
-              </g>
-            ))}
+            {/* The wire behind first, then the wire in front: no turn covers another, however far apart the shake takes them. */}
+            {(["back", "front"] as const).map((layer) =>
+              TURN_LIST.map((turn) => {
+                // The wire of a turn crosses the front of the spring from the top left to the bottom right; behind it, in the dark, the same wire comes back the other way.
+                const top = spring.y - TUBE + WIRE / 2;
+                const bottom = spring.y + TUBE - WIRE / 2;
+                const x1 = turn.x + 0.6;
+                const x2 = turn.x + PITCH * 0.95;
+                return (
+                  <g
+                    className="mizar-turn"
+                    key={`${layer}-${turn.index}`}
+                    style={
+                      {
+                        "--i": turn.index,
+                        "--p": `${turn.phase}deg`,
+                      } as React.CSSProperties
+                    }
+                  >
+                    {layer === "back" ? (
+                      <line
+                        className="mizar-wire-back"
+                        x1={x2}
+                        x2={x1}
+                        y1={top}
+                        y2={bottom}
+                      />
+                    ) : (
+                      <>
+                        <line
+                          className="mizar-wire-shade"
+                          x1={x1}
+                          x2={x2}
+                          y1={top}
+                          y2={bottom}
+                        />
+                        <line
+                          className="mizar-wire-lit"
+                          x1={x1 - 0.5}
+                          x2={x2 - 0.5}
+                          y1={top}
+                          y2={bottom}
+                        />
+                        <line
+                          className="mizar-wire-spec"
+                          x1={x1 - 1.1}
+                          x2={x2 - 1.1}
+                          y1={top - 0.4}
+                          y2={bottom - 0.4}
+                        />
+                      </>
+                    )}
+                  </g>
+                );
+              })
+            )}
           </g>
         ))}
       </svg>

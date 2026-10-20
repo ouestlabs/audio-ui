@@ -284,36 +284,50 @@
   stroke-linecap: round;
 }
 
-/* The wire's loop round the peg: the half behind it dark, the half before it bright */
-.mizar-loop-back {
-  stroke: #2b353b;
-  stroke-width: 1.8;
-  stroke-linecap: round;
+/* The hole the wire goes through, and the knot in it that holds it fast */
+.mizar-hole {
+  fill: #04070a;
+  stroke: #cfd8dd;
+  stroke-width: 1.3;
 }
 
-.mizar-loop-front {
-  stroke: #eef3f5;
-  stroke-width: 1.8;
-  stroke-linecap: round;
+.mizar-knot {
+  fill: #e9eff2;
+  stroke: #1a2227;
+  stroke-width: 0.6;
 }
 
 .mizar-shadow {
   fill: rgb(0 0 0 / 0.5);
 }
 
-/* The winding: a dark groove and a bright ridge across the tube, one pair for every turn of wire */
-.mizar-groove {
-  opacity: 0.85;
-  stroke: #1a2227;
-  stroke-width: 1.15;
+/* The wire: each turn is a piece of it, drawn solid, a dark edge, a lit body and a highlight along it, over the dark of the inside of the spring and the same wire going back behind */
+.mizar-wire-back {
+  stroke: #2a353c;
+  stroke-width: 2.1;
   stroke-linecap: round;
 }
 
-.mizar-ridge {
-  opacity: 0.55;
-  stroke: #ffffff;
-  stroke-width: 0.9;
+.mizar-wire-shade,
+.mizar-wire-lit,
+.mizar-wire-spec {
   stroke-linecap: round;
+}
+
+.mizar-wire-shade {
+  stroke: #4b575f;
+  stroke-width: 5.7;
+}
+
+.mizar-wire-lit {
+  stroke: #d3dde3;
+  stroke-width: 3.5;
+}
+
+.mizar-wire-spec {
+  opacity: 0.9;
+  stroke: #ffffff;
+  stroke-width: 1.2;
 }
 
 /* The spring is taut, so it hardly sags; it shakes as a standing wave: the turns in the middle move most, the ones at the hooks not at all, each a hair behind the one before */
