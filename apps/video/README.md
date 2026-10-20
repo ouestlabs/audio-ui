@@ -43,6 +43,14 @@ bun run teaser
 
 The whole library in 28 seconds: the glyph becomes the first knob, the controls and the editors one by one, then the whole instrument while it turns dark.
 
+### The registry
+
+```sh
+bun run registry
+```
+
+The shadcn CLI in a terminal, `npx shadcn@latest add @audio-ui/knob` and what it prints, then the window opens a pane where the installed knob turns, in 10.6 seconds.
+
 ### Options
 
 - `--theme dark`: render on the dark theme (light by default).
