@@ -1,0 +1,6 @@
+{
+  "title": "Vesta-16",
+  "description": "A sample drum machine: three kits of sixteen samples, played on pads and recorded in a loop.",
+  "category": "Drum machines",
+  "uses": ["pad", "knob", "use-transport-clock"]
+}
