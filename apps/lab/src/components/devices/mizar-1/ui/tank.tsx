@@ -44,13 +44,13 @@ function Termination({
       <circle className="mizar-knot" cx={hole} cy={y} r={1.9} />
       <rect
         fill={`url(#${id}-peg)`}
-        height={5.4}
-        rx={1.6}
+        height={TUBE * 2 + 1.2}
+        rx={2.6}
         stroke="#12171a"
         strokeWidth={0.6}
         width={8}
         x={side === "left" ? sleeve : to - 1}
-        y={y - 2.7}
+        y={y - TUBE - 0.6}
       />
     </g>
   );
@@ -174,64 +174,67 @@ export function Tank({
               rx={(BODY_RIGHT - BODY_LEFT) / 2}
               ry={2.6}
             />
+            {/* The wire behind first, then the wire in front: no turn covers another, however far apart the shake takes them. */}
+            {/* The coil goes on under the collars at its ends: a collar is what the spring is crimped into, so no turn is cut off in view. */}
+            <g>
+              {(["back", "front"] as const).map((layer) =>
+                TURN_LIST.map((turn) => {
+                  // The wire of a turn crosses the front of the spring from the top left to the bottom right; behind it, in the dark, the same wire comes back the other way.
+                  const top = spring.y - TUBE + WIRE / 2;
+                  const bottom = spring.y + TUBE - WIRE / 2;
+                  const x1 = turn.x + 0.6;
+                  const x2 = turn.x + PITCH * 0.95;
+                  return (
+                    <g
+                      className="mizar-turn"
+                      key={`${layer}-${turn.index}`}
+                      style={
+                        {
+                          "--i": turn.index,
+                          "--p": `${turn.phase}deg`,
+                        } as React.CSSProperties
+                      }
+                    >
+                      {layer === "back" ? (
+                        <line
+                          className="mizar-wire-back"
+                          x1={x2}
+                          x2={x1}
+                          y1={top}
+                          y2={bottom}
+                        />
+                      ) : (
+                        <>
+                          <line
+                            className="mizar-wire-shade"
+                            x1={x1}
+                            x2={x2}
+                            y1={top}
+                            y2={bottom}
+                          />
+                          <line
+                            className="mizar-wire-lit"
+                            x1={x1 - 0.5}
+                            x2={x2 - 0.5}
+                            y1={top}
+                            y2={bottom}
+                          />
+                          <line
+                            className="mizar-wire-spec"
+                            x1={x1 - 1.1}
+                            x2={x2 - 1.1}
+                            y1={top - 0.4}
+                            y2={bottom - 0.4}
+                          />
+                        </>
+                      )}
+                    </g>
+                  );
+                })
+              )}
+            </g>
             <Termination id={id} side="left" y={spring.y} />
             <Termination id={id} side="right" y={spring.y} />
-            {/* The wire behind first, then the wire in front: no turn covers another, however far apart the shake takes them. */}
-            {(["back", "front"] as const).map((layer) =>
-              TURN_LIST.map((turn) => {
-                // The wire of a turn crosses the front of the spring from the top left to the bottom right; behind it, in the dark, the same wire comes back the other way.
-                const top = spring.y - TUBE + WIRE / 2;
-                const bottom = spring.y + TUBE - WIRE / 2;
-                const x1 = turn.x + 0.6;
-                const x2 = turn.x + PITCH * 0.95;
-                return (
-                  <g
-                    className="mizar-turn"
-                    key={`${layer}-${turn.index}`}
-                    style={
-                      {
-                        "--i": turn.index,
-                        "--p": `${turn.phase}deg`,
-                      } as React.CSSProperties
-                    }
-                  >
-                    {layer === "back" ? (
-                      <line
-                        className="mizar-wire-back"
-                        x1={x2}
-                        x2={x1}
-                        y1={top}
-                        y2={bottom}
-                      />
-                    ) : (
-                      <>
-                        <line
-                          className="mizar-wire-shade"
-                          x1={x1}
-                          x2={x2}
-                          y1={top}
-                          y2={bottom}
-                        />
-                        <line
-                          className="mizar-wire-lit"
-                          x1={x1 - 0.5}
-                          x2={x2 - 0.5}
-                          y1={top}
-                          y2={bottom}
-                        />
-                        <line
-                          className="mizar-wire-spec"
-                          x1={x1 - 1.1}
-                          x2={x2 - 1.1}
-                          y1={top - 0.4}
-                          y2={bottom - 0.4}
-                        />
-                      </>
-                    )}
-                  </g>
-                );
-              })
-            )}
           </g>
         ))}
       </svg>
