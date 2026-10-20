@@ -1,0 +1,6 @@
+{
+  "title": "Castor-4",
+  "description": "A string machine: four registers on every key, a slow bow and an ensemble that thickens them.",
+  "category": "Strings",
+  "uses": ["fader", "knob", "piano"]
+}
