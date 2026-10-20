@@ -1,0 +1,545 @@
+/* VESTA-16: a sample drum machine. One light, top left.
+   Materials: cream enamel, black plastic knobs, colored keys, red LEDs.
+   Plain CSS: change the tokens on .vesta-cabinet first. */
+
+.vesta-cabinet {
+  --plate: #3f7a78;
+  --plate-hi: #4e8f8c;
+  --ink: #0f1f1f;
+  --ink-dim: #1f4747;
+  --red: #ff9a2e;
+  --orange: #ff9a2e;
+  --yellow: #ffd35a;
+  --cream: #f1ecdc;
+  --led: #ffb13d;
+  --focus: #0f1f1f;
+  box-sizing: border-box;
+  display: flex;
+  flex: 1 0 auto;
+  justify-content: center;
+  padding: 2rem 1.5rem;
+  container-type: inline-size;
+  /* The stage follows the theme; the faceplate on it keeps its enamel, like the device. */
+  background: radial-gradient(
+    ellipse at 50% 0,
+    color-mix(in oklab, var(--foreground) 7%, var(--background)),
+    var(--background) 70%
+  );
+}
+
+/* The faceplate: a flat cream panel in a black rim */
+.vesta {
+  position: relative;
+  box-sizing: border-box;
+  display: grid;
+  gap: 1.1rem;
+  align-content: start;
+  width: min(100%, 60rem);
+  height: max-content;
+  padding: 1rem 1.25rem 1.25rem;
+  /* Centered on the stage when there is room; at the top, scrolling, when there is not. */
+  margin-block: auto;
+  font-family: "Helvetica Neue", "Arial Narrow", Arial, sans-serif;
+  color: var(--ink);
+  background: linear-gradient(180deg, var(--plate-hi), var(--plate));
+  border: 0.5rem solid #1b1816;
+  border-radius: 6px;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.5),
+    inset 0 -2px 0 rgb(0 0 0 / 0.18),
+    0 24px 50px rgb(0 0 0 / 0.55);
+}
+
+/* Header: the name with its four stripes, the LCD and the start key */
+.vesta-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.vesta-name {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.22em;
+}
+
+.vesta-name span {
+  color: var(--red);
+}
+
+.vesta-tagline {
+  margin: 0.3rem 0 0;
+  font-size: 0.55rem;
+  color: var(--ink-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+}
+
+.vesta-tagline::after {
+  display: block;
+  width: 5.2rem;
+  height: 0.3rem;
+  margin-top: 0.35rem;
+  content: "";
+  background: linear-gradient(
+    90deg,
+    var(--red) 0 25%,
+    var(--orange) 25% 50%,
+    var(--yellow) 50% 75%,
+    var(--cream) 75% 100%
+  );
+  border-radius: 1px;
+}
+
+/* The LCD: the pattern's name, and what the last control read */
+.vesta-lcd-bar {
+  display: flex;
+  flex: 1 1 14rem;
+  gap: 0.4rem;
+  align-items: stretch;
+  max-width: 20rem;
+}
+
+.vesta-lcd {
+  display: grid;
+  flex: 1;
+  align-content: center;
+  min-width: 0;
+  padding: 0.35rem 0.6rem;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  background: #1a0d0b;
+  border-radius: 3px;
+  box-shadow:
+    inset 0 2px 5px rgb(0 0 0 / 0.8),
+    0 0 0 2px rgb(0 0 0 / 0.25);
+}
+
+.vesta-lcd-line {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: #ff6a4a;
+  white-space: nowrap;
+  text-shadow: 0 0 6px rgb(255 80 50 / 0.55);
+}
+
+.vesta-lcd-dim {
+  color: #b2402c;
+  text-shadow: none;
+}
+
+.vesta-lcd-button {
+  display: grid;
+  place-items: center;
+  width: 1.9rem;
+  color: var(--cream);
+  cursor: pointer;
+  background: linear-gradient(180deg, #4a4540, #2b2825);
+  border: 0;
+  border-radius: 3px;
+  box-shadow:
+    0 2px 0 #0e0d0c,
+    inset 0 1px 0 rgb(255 255 255 / 0.18);
+}
+
+.vesta-lcd-button:active {
+  box-shadow: 0 1px 0 #0e0d0c;
+  translate: 0 1px;
+}
+
+/* Lamps are the only things that glow: a dim lens when off, a hot core and a small halo when on */
+.vesta-lamp {
+  width: 0.55rem;
+  height: 0.55rem;
+  background: #5b1b14;
+  border-radius: 50%;
+  box-shadow: inset 0 1px 1px rgb(0 0 0 / 0.5);
+}
+
+.vesta-lamp[data-on] {
+  background: radial-gradient(circle at 40% 35%, #fff2ee, var(--led) 55%);
+  box-shadow:
+    0 0 6px 1px rgb(255 59 42 / 0.7),
+    inset 0 0 2px rgb(255 255 255 / 0.6);
+}
+
+.vesta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem 1rem;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+/* Sections: a thin printed line with the title cut into it */
+.vesta-section {
+  position: relative;
+  display: grid;
+  gap: 0.4rem;
+  padding: 0.9rem 0.9rem 0.2rem;
+  border: 1px solid rgb(0 0 0 / 0.28);
+  border-radius: 3px;
+}
+
+.vesta-legend {
+  position: absolute;
+  top: 0;
+  left: 0.7rem;
+  padding: 0 0.35rem;
+  margin: 0;
+  font-size: 0.55rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+  background: var(--plate);
+  translate: 0 -50%;
+}
+
+.vesta-group {
+  display: flex;
+  gap: 0.75rem;
+}
+
+/* Knob: a black cap with a white pointer, a printed scale of ticks and numerals around it */
+.vesta-knob {
+  --knob-size: 2.75rem;
+  position: relative;
+  display: inline-grid;
+  gap: 0.9rem;
+  justify-items: center;
+  padding-top: 0.9rem;
+}
+
+.vesta-knob[data-size="lg"] {
+  --knob-size: 3.5rem;
+}
+
+.vesta-knob-control {
+  position: relative;
+  width: var(--knob-size);
+  aspect-ratio: 1;
+  touch-action: none;
+  cursor: ns-resize;
+}
+
+.vesta-knob-thumb {
+  position: absolute;
+  inset: 12%;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 32% 28%, rgb(255 255 255 / 0.25), transparent 45%),
+    repeating-conic-gradient(from 0deg, #26221f 0 4deg, #131110 4deg 8deg);
+  border-radius: 50%;
+  box-shadow:
+    0 5px 7px rgb(0 0 0 / 0.45),
+    inset 0 1px 0 rgb(255 255 255 / 0.3),
+    inset 0 -3px 4px rgb(0 0 0 / 0.4),
+    0 0 0 3px #0a0908;
+}
+
+/* The pointer line rides the cap, so it turns with it */
+.vesta-knob-thumb::after {
+  position: absolute;
+  top: 7%;
+  left: 50%;
+  width: 3px;
+  height: 32%;
+  content: "";
+  background: #f4f1ea;
+  border-radius: 2px;
+  translate: -50% 0;
+}
+
+.vesta-knob-control[data-dragging] .vesta-knob-thumb {
+  filter: brightness(1.15);
+}
+
+.vesta-knob-mark {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.vesta-knob-tick {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 1px;
+  height: 5px;
+  background: var(--ink-dim);
+  translate: -50% 0;
+}
+
+.vesta-knob-mark[data-active] .vesta-knob-tick {
+  background: var(--red);
+}
+
+.vesta-knob-numeral {
+  position: absolute;
+  top: -1.1rem;
+  left: 50%;
+  font-size: 0.6rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: var(--ink-dim);
+  rotate: calc(var(--knob-mark-angle) * -1);
+  translate: -50% 0;
+}
+
+.vesta-knob-label {
+  font-size: 0.58rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+}
+
+/* Rockers: a cream key under its lamp. It sinks when pressed. */
+.vesta-selector {
+  display: flex;
+  gap: 0.4rem;
+  padding-bottom: 0.8rem;
+}
+
+.vesta-rocker {
+  display: grid;
+  gap: 0.45rem;
+  justify-items: center;
+  min-width: 2.6rem;
+  padding: 0;
+  font:
+    700 0.6rem / 1 "Arial Narrow",
+    Arial,
+    sans-serif;
+  color: var(--ink);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  cursor: pointer;
+  background: none;
+  border: 0;
+}
+
+.vesta-rocker::after {
+  order: 1;
+  width: 1.45rem;
+  height: 1.6rem;
+  content: "";
+  background: linear-gradient(180deg, #f6f1e0 0 48%, #a39d8a 52%);
+  border-radius: 3px;
+  box-shadow:
+    0 0 0 3px #0c1717,
+    0 4px 5px rgb(0 0 0 / 0.4),
+    inset 0 1px 0 #fff;
+}
+
+.vesta-rocker[aria-pressed="true"]::after {
+  background: linear-gradient(180deg, #a39d8a 0 52%, #f6f1e0 56%);
+  box-shadow:
+    0 0 0 3px #0c1717,
+    0 1px 2px rgb(0 0 0 / 0.5),
+    inset 0 -1px 0 #fff;
+}
+
+.vesta-rocker .vesta-lamp {
+  order: 0;
+}
+
+/* The layout: the controls on the left, the pads and the loop on the right */
+.vesta-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 21rem;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.vesta-controls {
+  display: grid;
+  gap: 1.1rem;
+  min-width: 0;
+}
+
+.vesta-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.vesta-machine {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+/* Transport: four dark keys, each with its lamp */
+.vesta-transport {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.vesta-key {
+  display: inline-flex;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.55rem 0.8rem;
+  font: inherit;
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: var(--cream);
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  cursor: pointer;
+  background: linear-gradient(180deg, #46524f, #232a29);
+  border: 0;
+  border-radius: 3px;
+  box-shadow:
+    0 3px 0 #070b0b,
+    inset 0 1px 0 rgb(255 255 255 / 0.18);
+}
+
+.vesta-key:active,
+.vesta-key[aria-pressed="true"] {
+  box-shadow: 0 1px 0 #070b0b;
+  translate: 0 2px;
+}
+
+.vesta-key:focus-visible,
+.vesta-rocker:focus-visible,
+.vesta-pad:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* Pads: sixteen black rubber squares with their sample's name, the struck one lit from within */
+.vesta-deck {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.vesta-pads {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.5rem;
+  padding: 0.6rem;
+  background: rgb(0 0 0 / 0.14);
+  border-radius: 4px;
+  box-shadow: inset 0 1px 3px rgb(0 0 0 / 0.4);
+}
+
+.vesta-pad {
+  position: relative;
+  display: grid;
+  align-content: end;
+  aspect-ratio: 1;
+  padding: 0.35rem 0.4rem;
+  text-align: left;
+  touch-action: none;
+  cursor: pointer;
+  background: radial-gradient(circle at 50% 30%, #3b3f3e, #161918 70%);
+  border: 0;
+  border-radius: 6px;
+  box-shadow:
+    0 3px 0 #050707,
+    0 5px 6px rgb(0 0 0 / 0.4),
+    inset 0 1px 0 rgb(255 255 255 / 0.12);
+  transition: translate 50ms;
+}
+
+.vesta-pad:disabled {
+  cursor: progress;
+  opacity: 0.6;
+}
+
+.vesta-pad-number {
+  position: absolute;
+  top: 0.35rem;
+  left: 0.45rem;
+  font-size: 0.55rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #7b817f;
+}
+
+.vesta-pad-name {
+  font-size: 0.55rem;
+  font-weight: 700;
+  color: #d8d2c0;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.vesta-pad[data-selected] .vesta-pad-number {
+  color: var(--led);
+}
+
+.vesta-pad[data-active] {
+  background: radial-gradient(
+    circle at 50% 40%,
+    color-mix(in oklab, var(--led) calc(var(--pad-velocity, 1) * 70%), #3b3f3e),
+    #161918 75%
+  );
+  box-shadow:
+    0 1px 0 #050707,
+    0 0 14px rgb(255 177 61 / 0.55),
+    inset 0 1px 0 rgb(255 255 255 / 0.12);
+  translate: 0 2px;
+}
+
+/* The loop of the chosen pad: sixteen lamps, lit where it has a hit, the played step underlined */
+.vesta-steps {
+  display: grid;
+  grid-template-columns: repeat(16, minmax(0, 1fr));
+  gap: 0.2rem;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.vesta-step {
+  display: grid;
+  place-items: center;
+  height: 1.3rem;
+  background: rgb(0 0 0 / 0.14);
+  border-radius: 2px;
+}
+
+.vesta-step[data-beat] {
+  background: rgb(0 0 0 / 0.26);
+}
+
+.vesta-step[data-current] {
+  outline: 2px solid var(--cream);
+  outline-offset: -2px;
+}
+
+.vesta-step[data-on] .vesta-lamp {
+  background: radial-gradient(circle at 40% 35%, #fff4dc, var(--led) 55%);
+  box-shadow: 0 0 6px 1px rgb(255 177 61 / 0.7);
+}
+
+@container (max-width: 50rem) {
+  .vesta-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .vesta-pads {
+    width: min(100%, 24rem);
+    margin-inline: auto;
+  }
+}
+
+@media (max-width: 639px) {
+  .vesta-cabinet {
+    padding-inline: 0.5rem;
+  }
+
+  .vesta {
+    padding-inline: 0.75rem;
+  }
+}
