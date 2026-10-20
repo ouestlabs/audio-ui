@@ -1,0 +1,6 @@
+{
+  "title": "Pulsar-X",
+  "description": "An XY synth: pitch across, brightness up, on a glass plate you play with a finger.",
+  "category": "Synths",
+  "uses": ["xypad", "knob"]
+}

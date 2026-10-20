@@ -1,0 +1,438 @@
+/* PULSAR-X: a touch plate synthesizer. One light, top left.
+   Materials: burnt orange enamel, cream caps, a glass plate with a green phosphor grid.
+   Plain CSS: change the tokens on .pulsar-cabinet first. */
+
+.pulsar-cabinet {
+  --panel: #b9501b;
+  --panel-hi: #cf6425;
+  --ink: #f6e9cc;
+  --ink-dim: #f0c79a;
+  --glass: #06120c;
+  --phosphor: #5be38d;
+  --lamp: #ffd66b;
+  --lcd: #14100c;
+  --focus: #fff;
+  box-sizing: border-box;
+  display: flex;
+  flex: 1 0 auto;
+  justify-content: center;
+  padding: 2rem 1.5rem;
+  /* The stage follows the theme; the unit on it keeps its enamel, like the device. */
+  background: radial-gradient(
+    ellipse at 50% 0,
+    color-mix(in oklab, var(--foreground) 7%, var(--background)),
+    var(--background) 70%
+  );
+}
+
+/* The faceplate: burnt orange enamel in a black rim */
+.pulsar {
+  position: relative;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.1rem;
+  align-content: start;
+  width: min(100%, 56rem);
+  min-width: 0;
+  height: max-content;
+  padding: 1rem 1.2rem 1.2rem;
+  /* Centered on the stage when there is room; at the top, scrolling, when there is not. */
+  margin-block: auto;
+  font-family: "Helvetica Neue", "Arial Narrow", Arial, sans-serif;
+  color: var(--ink);
+  background:
+    repeating-linear-gradient(
+      90deg,
+      rgb(255 255 255 / 0.05) 0 1px,
+      transparent 1px 3px
+    ),
+    linear-gradient(180deg, var(--panel-hi), var(--panel));
+  border: 0.5rem solid #1b1410;
+  border-radius: 6px;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.3),
+    inset 0 -2px 0 rgb(0 0 0 / 0.25),
+    0 24px 50px rgb(0 0 0 / 0.55);
+}
+
+.pulsar-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  align-items: center;
+}
+
+.pulsar-name {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.22em;
+}
+
+.pulsar-name span {
+  color: var(--lamp);
+}
+
+.pulsar-tagline {
+  margin: 0.3rem 0 0;
+  font-size: 0.55rem;
+  color: var(--ink-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+}
+
+/* The screen: the note under the finger, and the last thing touched */
+.pulsar-lcd {
+  display: grid;
+  flex: 1 1 13rem;
+  align-content: center;
+  max-width: 18rem;
+  padding: 0.4rem 0.8rem;
+  margin-inline: auto;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  background: var(--lcd);
+  border-radius: 3px;
+  box-shadow:
+    inset 0 2px 5px rgb(0 0 0 / 0.8),
+    0 0 0 2px rgb(0 0 0 / 0.3);
+}
+
+.pulsar-lcd-line {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--phosphor);
+  text-transform: uppercase;
+  white-space: pre;
+  text-shadow: 0 0 6px rgb(91 227 141 / 0.55);
+}
+
+.pulsar-lcd-dim {
+  color: #2e8a52;
+  text-shadow: none;
+}
+
+.pulsar-selectors {
+  display: flex;
+  gap: 1rem;
+}
+
+/* Lamps are the only things that glow: a dim lens when off, a hot core and a small halo when on */
+.pulsar-lamp {
+  width: 0.5rem;
+  height: 0.5rem;
+  background: #5a2f10;
+  border-radius: 50%;
+  box-shadow: inset 0 1px 1px rgb(0 0 0 / 0.5);
+}
+
+.pulsar-lamp[data-on] {
+  background: radial-gradient(circle at 40% 35%, #fffbe6, var(--lamp) 55%);
+  box-shadow: 0 0 7px 1px rgb(255 214 107 / 0.75);
+}
+
+/* Rockers: a cream key under its lamp. It sinks when pressed. */
+.pulsar-selector {
+  display: flex;
+  gap: 0.4rem;
+  padding-bottom: 0.9rem;
+}
+
+.pulsar-rocker {
+  display: grid;
+  gap: 0.45rem;
+  justify-items: center;
+  min-width: 2.6rem;
+  padding: 0;
+  font:
+    700 0.6rem / 1 "Arial Narrow",
+    Arial,
+    sans-serif;
+  color: var(--ink);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  cursor: pointer;
+  background: none;
+  border: 0;
+}
+
+.pulsar-rocker::after {
+  order: 1;
+  width: 1.45rem;
+  height: 1.65rem;
+  content: "";
+  background: linear-gradient(180deg, #f8f1de 0 48%, #aaa08a 52%);
+  border-radius: 3px;
+  box-shadow:
+    0 0 0 3px #1b1410,
+    0 4px 5px rgb(0 0 0 / 0.5),
+    inset 0 1px 0 #fff;
+}
+
+.pulsar-rocker[aria-pressed="true"]::after {
+  background: linear-gradient(180deg, #aaa08a 0 52%, #f8f1de 56%);
+  box-shadow:
+    0 0 0 3px #1b1410,
+    0 1px 2px rgb(0 0 0 / 0.6),
+    inset 0 -1px 0 #fff;
+}
+
+.pulsar-rocker .pulsar-lamp {
+  order: 0;
+}
+
+.pulsar-rocker:focus-visible,
+.pulsar-knob-thumb:has(:focus-visible),
+.pulsar-plate:has(:focus-visible) {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+
+/* The plate: dark glass with a green phosphor grid, a line for every note it can play */
+.pulsar-plate {
+  position: relative;
+  height: clamp(12rem, 36vh, 17rem);
+  background:
+    linear-gradient(115deg, rgb(255 255 255 / 0.07) 0 18%, transparent 18%),
+    radial-gradient(ellipse at 50% 120%, #0c2a1a, var(--glass) 70%);
+  border-radius: 8px;
+  box-shadow:
+    inset 0 3px 14px #000,
+    0 0 0 4px #1b1410,
+    0 1px 0 4px rgb(255 255 255 / 0.12);
+}
+
+.pulsar-plate-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.pulsar-plate-surface {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  touch-action: none;
+  cursor: crosshair;
+  border-radius: 8px;
+}
+
+.pulsar-note-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  pointer-events: none;
+  background: rgb(91 227 141 / 0.08);
+}
+
+.pulsar-note-line[data-in-scale] {
+  background: rgb(91 227 141 / 0.3);
+}
+
+.pulsar-note-line[data-octave] {
+  background: rgb(91 227 141 / 0.65);
+}
+
+.pulsar-note-name {
+  position: absolute;
+  bottom: 0.4rem;
+  left: 0.35rem;
+  font:
+    700 0.6rem / 1 ui-monospace,
+    "SF Mono",
+    Menlo,
+    monospace;
+  color: var(--phosphor);
+}
+
+.pulsar-row-line {
+  position: absolute;
+  right: 0;
+  left: 0;
+  height: 1px;
+  pointer-events: none;
+  background: rgb(91 227 141 / 0.1);
+}
+
+/* The finger's place: a glowing dot, brighter and wider while the voice sounds */
+.pulsar-dot {
+  position: absolute;
+  width: 1.7rem;
+  height: 1.7rem;
+  pointer-events: none;
+  background: radial-gradient(
+    circle,
+    #e8ffee 0 18%,
+    var(--phosphor) 22%,
+    transparent 70%
+  );
+  border-radius: 50%;
+  box-shadow: 0 0 14px 2px rgb(91 227 141 / 0.45);
+  transition:
+    scale 120ms,
+    box-shadow 120ms;
+}
+
+.pulsar-plate[data-touching] .pulsar-dot {
+  box-shadow: 0 0 30px 8px rgb(91 227 141 / 0.8);
+  scale: 1.5;
+}
+
+.pulsar-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem 1rem;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.pulsar-row > * {
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* Sections: a thin printed line with the title cut into it */
+.pulsar-section {
+  position: relative;
+  display: grid;
+  gap: 0.4rem;
+  padding: 0.9rem 0.9rem 0.2rem;
+  border: 1px solid rgb(0 0 0 / 0.3);
+  border-radius: 3px;
+}
+
+.pulsar-legend {
+  position: absolute;
+  top: 0;
+  left: 0.7rem;
+  padding: 0 0.35rem;
+  margin: 0;
+  font-size: 0.55rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+  background: var(--panel);
+  translate: 0 -50%;
+}
+
+.pulsar-selectors .pulsar-section {
+  padding-bottom: 0.2rem;
+}
+
+.pulsar-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+/* Knob: a cream cap with a dark pointer, a printed scale of ticks and numerals around it */
+.pulsar-knob {
+  --knob-size: 2.9rem;
+  position: relative;
+  display: inline-grid;
+  gap: 0.9rem;
+  justify-items: center;
+  padding-top: 0.9rem;
+}
+
+.pulsar-knob-control {
+  position: relative;
+  width: var(--knob-size);
+  aspect-ratio: 1;
+  touch-action: none;
+  cursor: ns-resize;
+}
+
+.pulsar-knob-thumb {
+  position: absolute;
+  inset: 12%;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 32% 28%, rgb(255 255 255 / 0.7), transparent 50%),
+    repeating-conic-gradient(from 0deg, #efe4c8 0 4deg, #cfc2a1 4deg 8deg);
+  border-radius: 50%;
+  box-shadow:
+    0 5px 7px rgb(0 0 0 / 0.5),
+    inset 0 1px 0 rgb(255 255 255 / 0.6),
+    inset 0 -3px 4px rgb(0 0 0 / 0.25),
+    0 0 0 3px #1b1410;
+}
+
+/* The pointer line rides the cap, so it turns with it */
+.pulsar-knob-thumb::after {
+  position: absolute;
+  top: 7%;
+  left: 50%;
+  width: 3px;
+  height: 32%;
+  content: "";
+  background: #1b1410;
+  border-radius: 2px;
+  translate: -50% 0;
+}
+
+.pulsar-knob-control[data-dragging] .pulsar-knob-thumb {
+  filter: brightness(1.08);
+}
+
+.pulsar-knob-mark {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.pulsar-knob-tick {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 1px;
+  height: 5px;
+  background: var(--ink-dim);
+  translate: -50% 0;
+}
+
+.pulsar-knob-mark[data-active] .pulsar-knob-tick {
+  background: var(--lamp);
+}
+
+.pulsar-knob-numeral {
+  position: absolute;
+  top: -1.1rem;
+  left: 50%;
+  font-size: 0.6rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: var(--ink-dim);
+  rotate: calc(var(--knob-mark-angle) * -1);
+  translate: -50% 0;
+}
+
+.pulsar-knob-label {
+  font-size: 0.58rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+}
+
+@media (max-width: 639px) {
+  .pulsar-cabinet {
+    padding-inline: 0.5rem;
+  }
+
+  .pulsar {
+    padding-inline: 0.7rem;
+  }
+
+  .pulsar-lcd {
+    margin-inline: 0;
+  }
+}
