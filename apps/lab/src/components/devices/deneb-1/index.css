@@ -1,0 +1,527 @@
+/* DENEB-1: a tape echo. One light, top left.
+   Materials: oxblood enamel in a rack, chrome caps, ivory dials, glass, a tape.
+   Plain CSS: change the tokens on .deneb-cabinet first. */
+
+.deneb-cabinet {
+  --panel: #4b1d20;
+  --panel-hi: #5d2629;
+  --ink: #f1e8d2;
+  --ink-dim: #c4a88f;
+  --brass: #d6aa58;
+  --lamp: #ffb347;
+  --dial: #efe5c8;
+  --dial-ink: #2a1f1a;
+  --focus: #fff;
+  box-sizing: border-box;
+  display: flex;
+  flex: 1 0 auto;
+  justify-content: center;
+  padding: 2rem 1.5rem;
+  /* The stage follows the theme; the unit on it keeps its enamel, like the device. */
+  background: radial-gradient(
+    ellipse at 50% 0,
+    color-mix(in oklab, var(--foreground) 7%, var(--background)),
+    var(--background) 70%
+  );
+}
+
+/* The faceplate: oxblood enamel with a fine horizontal brush, between two rack ears with their screws */
+.deneb {
+  position: relative;
+  box-sizing: border-box;
+  display: grid;
+  gap: 1.1rem;
+  align-content: start;
+  width: min(100%, 58rem);
+  height: max-content;
+  padding: 1rem 1.25rem 1.3rem;
+  /* Centered on the stage when there is room; at the top, scrolling, when there is not. */
+  margin-block: auto;
+  font-family: "Helvetica Neue", "Arial Narrow", Arial, sans-serif;
+  color: var(--ink);
+  background:
+    repeating-linear-gradient(
+      0deg,
+      rgb(255 255 255 / 0.025) 0 1px,
+      transparent 1px 3px
+    ),
+    linear-gradient(180deg, var(--panel-hi), var(--panel));
+  border-inline: 1.5rem solid #1c1a1b;
+  border-radius: 4px;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.12),
+    inset 0 -2px 0 rgb(0 0 0 / 0.4),
+    0 24px 50px rgb(0 0 0 / 0.55);
+}
+
+.deneb::before,
+.deneb::after {
+  position: absolute;
+  top: 50%;
+  width: 0.7rem;
+  height: 0.7rem;
+  pointer-events: none;
+  content: "";
+  background: radial-gradient(circle at 35% 30%, #d9dadd, #6f7075);
+  border-radius: 50%;
+  box-shadow:
+    inset 0 0 0 2px #1c1a1b,
+    0 0 0 1px #000;
+  translate: 0 -50%;
+}
+
+.deneb::before {
+  left: -1.1rem;
+}
+
+.deneb::after {
+  right: -1.1rem;
+}
+
+.deneb-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.deneb-name {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.24em;
+}
+
+.deneb-name span {
+  color: var(--brass);
+}
+
+.deneb-tagline {
+  margin: 0.35rem 0 0;
+  font-size: 0.58rem;
+  color: var(--ink-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.32em;
+}
+
+.deneb-transport {
+  display: flex;
+  gap: 1.2rem;
+  align-items: center;
+}
+
+/* Lamps are the only things that glow: a dim lens when off, a hot core and a small halo when on */
+.deneb-lamp {
+  width: 0.55rem;
+  height: 0.55rem;
+  background: #4a2a10;
+  border-radius: 50%;
+  box-shadow: inset 0 1px 1px rgb(0 0 0 / 0.55);
+}
+
+.deneb-lamp[data-on] {
+  background: radial-gradient(circle at 40% 35%, #fff4dc, var(--lamp) 55%);
+  box-shadow: 0 0 7px 1px rgb(255 179 71 / 0.7);
+}
+
+/* Rockers: a cream key under its lamp. It sinks when pressed. */
+.deneb-selector {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.deneb-rocker {
+  display: grid;
+  gap: 0.45rem;
+  justify-items: center;
+  min-width: 2.8rem;
+  padding: 0;
+  font:
+    700 0.6rem / 1 "Arial Narrow",
+    Arial,
+    sans-serif;
+  color: var(--ink);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  cursor: pointer;
+  background: none;
+  border: 0;
+}
+
+.deneb-rocker::after {
+  order: 1;
+  width: 1.5rem;
+  height: 1.7rem;
+  content: "";
+  background: linear-gradient(180deg, #f2eee2 0 48%, #a39d8f 52%);
+  border-radius: 3px;
+  box-shadow:
+    0 0 0 3px #1c1213,
+    0 4px 5px rgb(0 0 0 / 0.55),
+    inset 0 1px 0 #fff;
+}
+
+.deneb-rocker[aria-pressed="true"]::after {
+  background: linear-gradient(180deg, #a39d8f 0 52%, #f2eee2 56%);
+  box-shadow:
+    0 0 0 3px #1c1213,
+    0 1px 2px rgb(0 0 0 / 0.6),
+    inset 0 -1px 0 #fff;
+}
+
+.deneb-rocker .deneb-lamp {
+  order: 0;
+}
+
+.deneb-play {
+  display: inline-flex;
+  gap: 0.6rem;
+  align-items: center;
+  padding: 0.6rem 1.1rem;
+  font:
+    700 0.65rem / 1 "Arial Narrow",
+    Arial,
+    sans-serif;
+  color: var(--ink);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  cursor: pointer;
+  background: linear-gradient(180deg, #4a3d3a, #2a2120);
+  border: 0;
+  border-radius: 4px;
+  box-shadow:
+    0 3px 0 #0d0808,
+    0 5px 6px rgb(0 0 0 / 0.5),
+    inset 0 1px 0 rgb(255 255 255 / 0.18);
+}
+
+.deneb-play[aria-pressed="true"] {
+  box-shadow:
+    0 1px 0 #0d0808,
+    inset 0 2px 6px rgb(0 0 0 / 0.6);
+  translate: 0 2px;
+}
+
+.deneb-play:disabled {
+  cursor: progress;
+  opacity: 0.5;
+}
+
+.deneb-rocker:focus-visible,
+.deneb-play:focus-visible,
+.deneb-knob-thumb:has(:focus-visible) {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* The window: the tape between two reels on the left, the two dials on the right */
+.deneb-window {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: stretch;
+  margin-bottom: 0.9rem;
+}
+
+.deneb-tape {
+  position: relative;
+  display: flex;
+  flex: 1 1 22rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.4rem;
+  background:
+    linear-gradient(115deg, rgb(255 255 255 / 0.07) 0 12%, transparent 12%),
+    #0b0707;
+  border-radius: 6px;
+  box-shadow:
+    inset 0 3px 10px #000,
+    0 0 0 4px #1c1213,
+    0 1px 0 4px rgb(255 255 255 / 0.1);
+}
+
+.deneb-tape-path {
+  flex: 1;
+  height: 2px;
+  margin-inline: -0.4rem;
+  background: #6a4a35;
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 0.5);
+}
+
+/* A reel: the wound tape, three spokes and a hub, turning while the tape runs */
+.deneb-reel {
+  position: relative;
+  flex: none;
+  width: 6.2rem;
+  aspect-ratio: 1;
+  background:
+    radial-gradient(circle, transparent 0 33%, #170d09 33% 36%, transparent 36%),
+    radial-gradient(circle, #3a261b 0 100%);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 3px #1c1213,
+    0 3px 8px rgb(0 0 0 / 0.6);
+}
+
+.deneb-reel-wheel {
+  position: absolute;
+  inset: 0;
+  animation: deneb-turn var(--turn, 2s) linear infinite;
+  animation-play-state: paused;
+}
+
+.deneb-reel[data-playing] .deneb-reel-wheel {
+  animation-play-state: running;
+}
+
+.deneb-reel-spoke {
+  position: absolute;
+  top: 17%;
+  left: calc(50% - 0.45rem);
+  width: 0.9rem;
+  height: 33%;
+  background: linear-gradient(90deg, #8c8d92, #e2e3e6 45%, #8c8d92);
+  border-radius: 0.3rem 0.3rem 0 0;
+  transform-origin: 50% 100%;
+}
+
+.deneb-reel-hub {
+  position: absolute;
+  top: calc(50% - 0.8rem);
+  left: calc(50% - 0.8rem);
+  width: 1.6rem;
+  height: 1.6rem;
+  background: radial-gradient(circle at 35% 30%, #fff, #b0b2b7 45%, #6a6b70);
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px #1c1213;
+}
+
+@keyframes deneb-turn {
+  to {
+    rotate: 360deg;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .deneb-reel-wheel {
+    animation: none;
+  }
+}
+
+/* The meters: ivory dials in dark bezels, a name under each */
+.deneb-meters {
+  display: flex;
+  flex: 2 1 22rem;
+  gap: 0.8rem;
+}
+
+.deneb-meter {
+  position: relative;
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+}
+
+.deneb-meter > figcaption {
+  position: absolute;
+  top: calc(100% + 0.6rem);
+  right: 0;
+  left: 0;
+  font-size: 0.55rem;
+  font-weight: 700;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+}
+
+/* The installed meter brings the theme's classes; these rules, one level more specific, turn it into the dial */
+.deneb .deneb-vu {
+  display: block;
+  gap: 0;
+  max-width: none;
+  min-height: 7rem;
+  padding: 0.5rem 0.6rem 0.35rem;
+  margin: 0;
+  color: var(--dial-ink);
+  background: radial-gradient(
+    ellipse at 50% 115%,
+    #f9f1d8,
+    var(--dial) 60%,
+    #d9cba4
+  );
+  border: 0;
+  border-radius: 6px 6px 3px 3px;
+  box-shadow:
+    inset 0 2px 8px rgb(0 0 0 / 0.35),
+    0 0 0 4px #1c1213,
+    0 1px 0 4px rgb(255 255 255 / 0.1);
+}
+
+.deneb .deneb-vu svg {
+  display: block;
+}
+
+.deneb .deneb-vu svg path {
+  stroke: var(--dial-ink);
+}
+
+.deneb .deneb-vu svg path:nth-of-type(2) {
+  stroke: #b5301f;
+}
+
+.deneb .deneb-vu svg line {
+  stroke: var(--dial-ink);
+}
+
+.deneb .deneb-vu svg line[class*="destructive"] {
+  stroke: #b5301f;
+}
+
+.deneb .deneb-vu svg line[class*="primary"] {
+  filter: drop-shadow(1px 2px 1px rgb(0 0 0 / 0.35));
+  stroke: #1a1110;
+}
+
+.deneb .deneb-vu svg text {
+  font-size: 8px;
+  font-weight: 700;
+  fill: var(--dial-ink);
+}
+
+.deneb .deneb-vu svg text[class*="destructive"] {
+  fill: #b5301f;
+}
+
+.deneb .deneb-vu svg rect {
+  fill: #1a1110;
+}
+
+.deneb .deneb-vu figcaption {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.5rem;
+  color: #6a5642;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* The knobs: seven chrome caps with their scale printed round them */
+.deneb-knobs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 0.5rem;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding-top: 0.4rem;
+}
+
+.deneb-knob {
+  --knob-size: 3.4rem;
+  position: relative;
+  display: inline-grid;
+  gap: 1rem;
+  justify-items: center;
+  padding-top: 0.9rem;
+}
+
+.deneb-knob-control {
+  position: relative;
+  width: var(--knob-size);
+  aspect-ratio: 1;
+  touch-action: none;
+  cursor: ns-resize;
+}
+
+.deneb-knob-thumb {
+  position: absolute;
+  inset: 12%;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 32% 28%, rgb(255 255 255 / 0.75), transparent 48%),
+    repeating-conic-gradient(from 0deg, #dcdde0 0 4deg, #9fa1a6 4deg 8deg);
+  border-radius: 50%;
+  box-shadow:
+    0 6px 8px rgb(0 0 0 / 0.6),
+    inset 0 1px 0 rgb(255 255 255 / 0.6),
+    inset 0 -3px 4px rgb(0 0 0 / 0.35),
+    0 0 0 3px #150c0d;
+}
+
+/* The pointer line rides the cap, so it turns with it */
+.deneb-knob-thumb::after {
+  position: absolute;
+  top: 7%;
+  left: 50%;
+  width: 3px;
+  height: 32%;
+  content: "";
+  background: #1a1110;
+  border-radius: 2px;
+  translate: -50% 0;
+}
+
+.deneb-knob-control[data-dragging] .deneb-knob-thumb {
+  filter: brightness(1.1);
+}
+
+.deneb-knob-mark {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.deneb-knob-tick {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 1px;
+  height: 5px;
+  background: var(--ink-dim);
+  translate: -50% 0;
+}
+
+.deneb-knob-mark[data-active] .deneb-knob-tick {
+  background: var(--brass);
+}
+
+.deneb-knob-numeral {
+  position: absolute;
+  top: -1.1rem;
+  left: 50%;
+  font-size: 0.6rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: var(--ink-dim);
+  rotate: calc(var(--knob-mark-angle) * -1);
+  translate: -50% 0;
+}
+
+.deneb-knob-label {
+  font-size: 0.58rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+}
+
+@media (max-width: 639px) {
+  .deneb-cabinet {
+    padding-inline: 0.5rem;
+  }
+
+  .deneb {
+    border-inline-width: 0.9rem;
+    padding-inline: 0.75rem;
+  }
+
+  .deneb::before,
+  .deneb::after {
+    display: none;
+  }
+
+  .deneb-knobs {
+    justify-content: space-around;
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "title": "Deneb-1",
+  "description": "A tape echo: spinning reels, two VU meters and seven knobs, on loops of its own.",
+  "category": "Effects",
+  "uses": ["knob", "needle-meter", "use-audio-levels"]
+}
