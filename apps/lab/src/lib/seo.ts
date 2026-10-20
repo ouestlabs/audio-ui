@@ -5,6 +5,7 @@ export const SITE = Object.freeze({
   name: "audio/ui lab",
   themeColor: { dark: "#0a0a0a", light: "#ffffff" },
   twitter: "@ouestlabs",
+  repository: "https://github.com/ouestlabs/audio-ui",
   url: "https://lab.audio-ui.dev",
 });
 
