@@ -294,6 +294,49 @@
   }
 }
 
+/*
+ * The page's fade at the edges it scrolls past: a gradient laid over the scroller, its opacity driven by the
+ * scroller's `--frame-y` timeline. A mask on the scroller did the same, but repainted everything under it on
+ * every frame of the fade (140 ms per frame on the catalog); an overlay's opacity repaints nothing.
+ */
+@utility frame-fade-t {
+  @apply pointer-events-none absolute inset-x-0 top-0 z-10 h-10 bg-linear-to-b from-site-background to-transparent opacity-0;
+
+  @supports (animation-timeline: scroll()) {
+    animation: frame-fade-in linear both;
+    animation-timeline: --frame-y;
+    animation-range: 0 calc(var(--spacing) * 24);
+  }
+}
+
+@utility frame-fade-b {
+  @apply pointer-events-none absolute inset-x-0 bottom-0 z-10 h-10 bg-linear-to-t from-site-background to-transparent opacity-0;
+
+  @supports (animation-timeline: scroll()) {
+    animation: frame-fade-out linear both;
+    animation-timeline: --frame-y;
+    animation-range: calc(100% - var(--spacing) * 24) 100%;
+  }
+}
+
+@keyframes frame-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes frame-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
 @utility border-ghost {
   @apply after:border-site-border relative after:absolute after:inset-0 after:border after:mix-blend-darken dark:after:mix-blend-lighten;
 }
