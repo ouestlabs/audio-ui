@@ -1,0 +1,6 @@
+{
+  "title": "Rigel-6",
+  "description": "A mixing desk: six channels with EQ, pan, mute, solo and a fader each, and a stereo master.",
+  "category": "Mixers",
+  "uses": ["fader", "knob", "meter"]
+}
