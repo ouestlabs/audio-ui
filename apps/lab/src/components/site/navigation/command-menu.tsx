@@ -1,6 +1,5 @@
 import {
   ArrowBendDownLeftIcon,
-  ArrowsOutIcon,
   CodeIcon,
   InfoIcon,
   PianoKeysIcon,
@@ -133,7 +132,7 @@ function DeviceEntry({
 /** ⌘K or /: any device, and the frame's actions, from the keyboard. */
 export function CommandMenu() {
   const { actions, state } = useLab();
-  const { setCommandOpen, setSourceOpen, toggleDetails, toggleFocus } = actions;
+  const { setCommandOpen, setSourceOpen, toggleDetails } = actions;
   const { toggleSidebar } = useSidebar();
   const { resolvedTheme, setTheme } = useTheme();
   const navigate = useNavigate();
@@ -166,10 +165,6 @@ export function CommandMenu() {
     close();
     toggleDetails();
   }, [close, toggleDetails]);
-  const focus = useCallback(() => {
-    close();
-    toggleFocus();
-  }, [close, toggleFocus]);
   const source = useCallback(() => {
     close();
     setSourceOpen(true);
@@ -289,15 +284,6 @@ export function CommandMenu() {
                   value="action:details"
                 >
                   Toggle details
-                </Entry>
-                <Entry
-                  className="max-md:hidden"
-                  hotkey={HOTKEYS.focus}
-                  icon={<ArrowsOutIcon weight="fill" />}
-                  onRun={focus}
-                  value="action:focus"
-                >
-                  Focus on the device
                 </Entry>
                 <Entry
                   hotkey={HOTKEYS.source}
