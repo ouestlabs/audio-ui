@@ -18,6 +18,7 @@ export const siteConfig = {
 
   links: Object.freeze({
     github: "https://github.com/ouestlabs/audio-ui",
+    lab: "https://lab.audio-ui.dev",
     npm: "https://www.npmjs.com/package/@audio-ui/react",
     twitter: "https://x.com/ouestlabs",
   }),
