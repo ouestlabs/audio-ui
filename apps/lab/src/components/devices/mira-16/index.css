@@ -1,0 +1,607 @@
+/* MIRA-16: a groovebox. Drums over a bass line, one box.
+   Materials: blue-grey enamel, black plastic knobs, colored keys, red LEDs.
+   Plain CSS: change the tokens on .mira-cabinet first. */
+
+.mira-cabinet {
+  --plate: #bcc7ca;
+  --plate-hi: #d2dcde;
+  --ink: #1d1a17;
+  --ink-dim: #6d6759;
+  --red: #d13b2b;
+  --orange: #e6762b;
+  --yellow: #e8c02e;
+  --cream: #ece7d8;
+  --led: #ff3b2a;
+  --focus: #1d1a17;
+  box-sizing: border-box;
+  display: flex;
+  flex: 1 0 auto;
+  justify-content: center;
+  padding: 2rem 1.5rem;
+  /* The stage follows the theme; the faceplate on it keeps its enamel, like the device. */
+  background: radial-gradient(
+    ellipse at 50% 0,
+    color-mix(in oklab, var(--foreground) 7%, var(--background)),
+    var(--background) 70%
+  );
+}
+
+/* The faceplate: a flat cream panel in a black rim */
+.mira {
+  position: relative;
+  box-sizing: border-box;
+  display: grid;
+  gap: 1.1rem;
+  align-content: start;
+  width: min(100%, 48rem);
+  height: max-content;
+  padding: 1rem 1.25rem 1.25rem;
+  /* Centered on the stage when there is room; at the top, scrolling, when there is not. */
+  margin-block: auto;
+  font-family: "Helvetica Neue", "Arial Narrow", Arial, sans-serif;
+  color: var(--ink);
+  background: linear-gradient(180deg, var(--plate-hi), var(--plate));
+  border: 0.5rem solid #1b1816;
+  border-radius: 6px;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.5),
+    inset 0 -2px 0 rgb(0 0 0 / 0.18),
+    0 24px 50px rgb(0 0 0 / 0.55);
+}
+
+/* Header: the name with its four stripes, the LCD and the start key */
+.mira-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mira-name {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.22em;
+}
+
+.mira-name span {
+  color: var(--red);
+}
+
+.mira-tagline {
+  margin: 0.3rem 0 0;
+  font-size: 0.55rem;
+  color: var(--ink-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+}
+
+.mira-tagline::after {
+  display: block;
+  width: 5.2rem;
+  height: 0.3rem;
+  margin-top: 0.35rem;
+  content: "";
+  background: linear-gradient(
+    90deg,
+    var(--red) 0 25%,
+    var(--orange) 25% 50%,
+    var(--yellow) 50% 75%,
+    var(--cream) 75% 100%
+  );
+  border-radius: 1px;
+}
+
+/* The LCD: the pattern's name, and what the last control read */
+.mira-lcd-bar {
+  display: flex;
+  flex: 1 1 14rem;
+  gap: 0.4rem;
+  align-items: stretch;
+  max-width: 20rem;
+}
+
+.mira-lcd {
+  display: grid;
+  flex: 1;
+  align-content: center;
+  min-width: 0;
+  padding: 0.35rem 0.6rem;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  background: #1a0d0b;
+  border-radius: 3px;
+  box-shadow:
+    inset 0 2px 5px rgb(0 0 0 / 0.8),
+    0 0 0 2px rgb(0 0 0 / 0.25);
+}
+
+.mira-lcd-line {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: #ff6a4a;
+  white-space: nowrap;
+  text-shadow: 0 0 6px rgb(255 80 50 / 0.55);
+}
+
+.mira-lcd-dim {
+  color: #b2402c;
+  text-shadow: none;
+}
+
+.mira-lcd-button {
+  display: grid;
+  place-items: center;
+  width: 1.9rem;
+  color: var(--cream);
+  cursor: pointer;
+  background: linear-gradient(180deg, #4a4540, #2b2825);
+  border: 0;
+  border-radius: 3px;
+  box-shadow:
+    0 2px 0 #0e0d0c,
+    inset 0 1px 0 rgb(255 255 255 / 0.18);
+}
+
+.mira-lcd-button:active {
+  box-shadow: 0 1px 0 #0e0d0c;
+  translate: 0 1px;
+}
+
+.mira-lcd-button:focus-visible,
+.mira-start:focus-visible,
+.mira-key:focus-visible,
+.mira-step:focus-visible,
+.mira-bass-step:focus-visible,
+.mira-knob-thumb:has(:focus-visible) {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* Start: one key with its lamp */
+.mira-start {
+  display: inline-flex;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.55rem 0.9rem;
+  font: inherit;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--cream);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  cursor: pointer;
+  background: linear-gradient(180deg, #4a4540, #2b2825);
+  border: 0;
+  border-radius: 3px;
+  box-shadow:
+    0 3px 0 #0e0d0c,
+    inset 0 1px 0 rgb(255 255 255 / 0.18);
+}
+
+.mira-start[aria-pressed="true"] {
+  box-shadow: 0 1px 0 #0e0d0c;
+  translate: 0 2px;
+}
+
+/* Lamps are the only things that glow: a dim lens when off, a hot core and a small halo when on */
+.mira-lamp {
+  width: 0.55rem;
+  height: 0.55rem;
+  background: #5b1b14;
+  border-radius: 50%;
+  box-shadow: inset 0 1px 1px rgb(0 0 0 / 0.5);
+}
+
+.mira-lamp[data-on] {
+  background: radial-gradient(circle at 40% 35%, #fff2ee, var(--led) 55%);
+  box-shadow:
+    0 0 6px 1px rgb(255 59 42 / 0.7),
+    inset 0 0 2px rgb(255 255 255 / 0.6);
+}
+
+.mira-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem 1rem;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+/* Sections: a thin printed line with the title cut into it */
+.mira-section {
+  position: relative;
+  display: grid;
+  gap: 0.4rem;
+  padding: 0.9rem 0.9rem 0.2rem;
+  border: 1px solid rgb(0 0 0 / 0.28);
+  border-radius: 3px;
+}
+
+.mira-legend {
+  position: absolute;
+  top: 0;
+  left: 0.7rem;
+  padding: 0 0.35rem;
+  margin: 0;
+  font-size: 0.55rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+  background: var(--plate);
+  translate: 0 -50%;
+}
+
+.mira-group {
+  display: flex;
+  gap: 0.75rem;
+}
+
+/* Knob: a black cap with a white pointer, a printed scale of ticks and numerals around it */
+.mira-knob {
+  --knob-size: 2.75rem;
+  position: relative;
+  display: inline-grid;
+  gap: 0.9rem;
+  justify-items: center;
+  padding-top: 0.9rem;
+}
+
+.mira-knob[data-size="lg"] {
+  --knob-size: 3.5rem;
+}
+
+.mira-knob-control {
+  position: relative;
+  width: var(--knob-size);
+  aspect-ratio: 1;
+  touch-action: none;
+  cursor: ns-resize;
+}
+
+.mira-knob-thumb {
+  position: absolute;
+  inset: 12%;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 32% 28%, rgb(255 255 255 / 0.25), transparent 45%),
+    repeating-conic-gradient(from 0deg, #26221f 0 4deg, #131110 4deg 8deg);
+  border-radius: 50%;
+  box-shadow:
+    0 5px 7px rgb(0 0 0 / 0.45),
+    inset 0 1px 0 rgb(255 255 255 / 0.3),
+    inset 0 -3px 4px rgb(0 0 0 / 0.4),
+    0 0 0 3px #0a0908;
+}
+
+/* The pointer line rides the cap, so it turns with it */
+.mira-knob-thumb::after {
+  position: absolute;
+  top: 7%;
+  left: 50%;
+  width: 3px;
+  height: 32%;
+  content: "";
+  background: #f4f1ea;
+  border-radius: 2px;
+  translate: -50% 0;
+}
+
+.mira-knob-control[data-dragging] .mira-knob-thumb {
+  filter: brightness(1.15);
+}
+
+.mira-knob-mark {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.mira-knob-tick {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 1px;
+  height: 5px;
+  background: var(--ink-dim);
+  translate: -50% 0;
+}
+
+.mira-knob-mark[data-active] .mira-knob-tick {
+  background: var(--red);
+}
+
+.mira-knob-numeral {
+  position: absolute;
+  top: -1.1rem;
+  left: 50%;
+  font-size: 0.6rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: var(--ink-dim);
+  rotate: calc(var(--knob-mark-angle) * -1);
+  translate: -50% 0;
+}
+
+.mira-knob-label {
+  font-size: 0.58rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+}
+
+/* Steps: sixteen keys in four colors, a lamp in each, the played one lit from below */
+.mira-steps {
+  display: grid;
+  gap: 0.35rem 0.3rem;
+  padding: 0.8rem 0.6rem 0.5rem;
+  background: rgb(0 0 0 / 0.07);
+  border-radius: 3px;
+  box-shadow: inset 0 1px 3px rgb(0 0 0 / 0.25);
+}
+
+.mira-step {
+  --key: var(--red);
+  position: relative;
+  min-width: 0;
+  height: 3.1rem;
+  padding: 0;
+  cursor: pointer;
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--key), white 22%),
+    var(--key)
+  );
+  border: 0;
+  border-radius: 3px;
+  box-shadow:
+    0 3px 0 color-mix(in oklab, var(--key), black 55%),
+    0 4px 5px rgb(0 0 0 / 0.35),
+    inset 0 1px 0 rgb(255 255 255 / 0.45);
+  transition: translate 60ms;
+}
+
+.mira-step[data-group="1"] {
+  --key: var(--orange);
+}
+
+.mira-step[data-group="2"] {
+  --key: var(--yellow);
+}
+
+.mira-step[data-group="3"] {
+  --key: var(--cream);
+}
+
+/* The lamp in each key: dark until the step is on */
+.mira-step::before {
+  position: absolute;
+  top: 0.4rem;
+  left: 50%;
+  width: 0.5rem;
+  height: 0.5rem;
+  content: "";
+  background: rgb(0 0 0 / 0.35);
+  border-radius: 50%;
+  translate: -50% 0;
+}
+
+.mira-step[aria-pressed="true"]::before {
+  background: radial-gradient(circle at 40% 35%, #fff2ee, var(--led) 55%);
+  box-shadow: 0 0 6px 1px rgb(255 59 42 / 0.75);
+}
+
+/* The step being played: the key sinks and lights from below */
+.mira-step[data-current] {
+  box-shadow:
+    0 1px 0 color-mix(in oklab, var(--key), black 55%),
+    inset 0 -0.6rem 0.6rem -0.3rem rgb(255 255 255 / 0.7);
+  translate: 0 2px;
+}
+
+.mira-numbers {
+  padding: 0;
+  margin: 0;
+  font-size: 0.55rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-dim);
+  text-align: center;
+  list-style: none;
+}
+
+/* The bass: a gate and an accent row of dark keys, and a small knob over each step for its pitch */
+.mira-steps {
+  grid-template-columns: repeat(16, minmax(0, 1fr));
+}
+
+.mira-step-row,
+.mira-numbers,
+.mira-pitches {
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-column: 1 / -1;
+}
+
+.mira-steps > * {
+  min-width: 0;
+}
+
+.mira-grid {
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-column: 1 / -1;
+  row-gap: 0.35rem;
+}
+
+.mira-bass-step {
+  position: relative;
+  height: 1.4rem;
+  padding: 0;
+  cursor: pointer;
+  background: linear-gradient(180deg, #4a4742, #2a2826);
+  border: 0;
+  border-radius: 3px;
+  box-shadow:
+    0 2px 0 #0d0c0b,
+    inset 0 1px 0 rgb(255 255 255 / 0.15);
+}
+
+.mira-bass-step::before {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0.45rem;
+  height: 0.45rem;
+  content: "";
+  background: #5a3511;
+  border-radius: 50%;
+  box-shadow: inset 0 1px 1px rgb(0 0 0 / 0.5);
+  translate: -50% -50%;
+}
+
+.mira-bass-step[aria-pressed="true"]::before {
+  background: radial-gradient(circle at 40% 35%, #fff4dc, #ffb347 55%);
+  box-shadow: 0 0 6px 1px rgb(255 179 71 / 0.7);
+}
+
+.mira-bass-step[data-accent][aria-pressed="true"]::before {
+  background: radial-gradient(circle at 40% 35%, #ffe3de, var(--red) 55%);
+  box-shadow: 0 0 6px 1px rgb(226 57 47 / 0.7);
+}
+
+.mira-bass-step[data-current] {
+  background: linear-gradient(180deg, #8d8983, #4b4843);
+  box-shadow: 0 1px 0 #0d0c0b;
+  translate: 0 1px;
+}
+
+.mira-step-knob {
+  display: grid;
+  gap: 0.2rem;
+  justify-items: center;
+  min-width: 0;
+}
+
+.mira-step-knob-control {
+  position: relative;
+  width: min(100%, 1.9rem);
+  aspect-ratio: 1;
+  touch-action: none;
+  cursor: ns-resize;
+}
+
+.mira-step-knob-thumb {
+  position: absolute;
+  inset: 8%;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 32% 28%, rgb(255 255 255 / 0.25), transparent 45%),
+    repeating-conic-gradient(from 0deg, #26221f 0 4deg, #131110 4deg 8deg);
+  border-radius: 50%;
+  box-shadow:
+    0 4px 5px rgb(0 0 0 / 0.45),
+    inset 0 1px 0 rgb(255 255 255 / 0.3),
+    0 0 0 2px #0a0908;
+}
+
+.mira-step-knob-thumb::after {
+  position: absolute;
+  top: 7%;
+  left: 50%;
+  width: 3px;
+  height: 32%;
+  content: "";
+  background: var(--orange);
+  border-radius: 2px;
+  translate: -50% 0;
+}
+
+.mira-step-knob-thumb:has(:focus-visible) {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.mira-note {
+  font-size: 0.5rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-dim);
+}
+
+/* Instruments: eight grey keys, a lamp over the chosen one, the name printed under each */
+.mira-instruments {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.mira-instrument {
+  display: grid;
+  gap: 0.35rem;
+  justify-items: center;
+}
+
+.mira-key {
+  position: relative;
+  width: 100%;
+  height: 2rem;
+  cursor: pointer;
+  background: linear-gradient(180deg, #5a554f, #34302c);
+  border: 0;
+  border-radius: 3px;
+  box-shadow:
+    0 3px 0 #0e0d0c,
+    0 4px 5px rgb(0 0 0 / 0.35),
+    inset 0 1px 0 rgb(255 255 255 / 0.2);
+}
+
+.mira-key[aria-pressed="true"] {
+  box-shadow: 0 1px 0 #0e0d0c;
+  translate: 0 2px;
+}
+
+/* A dot on a key whose row has steps in it */
+.mira-key[data-filled]::after {
+  position: absolute;
+  right: 0.4rem;
+  bottom: 0.35rem;
+  width: 0.25rem;
+  height: 0.25rem;
+  content: "";
+  background: var(--cream);
+  border-radius: 50%;
+  opacity: 0.7;
+}
+
+.mira-key-label {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+}
+
+@media (max-width: 899px) {
+  .mira-steps {
+    grid-template-columns: repeat(16, 2.6rem);
+    overflow-x: auto;
+  }
+}
+
+@media (max-width: 639px) {
+  .mira-cabinet {
+    padding-inline: 0.5rem;
+  }
+
+  .mira {
+    padding-inline: 0.75rem;
+  }
+
+  .mira-instruments {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    row-gap: 0.75rem;
+  }
+}
