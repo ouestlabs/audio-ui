@@ -1,0 +1,6 @@
+{
+  "title": "Mizar-1",
+  "description": "A spring reverb: two springs that shake with the sound, a bump on the tank, and loops to drip.",
+  "category": "Effects",
+  "uses": ["knob", "needle-meter", "use-audio-levels"]
+}
