@@ -1,3 +1,4 @@
+import { MagnifyingGlassIcon } from "@phosphor-icons/react/ssr";
 import { createThemeCss } from "@tanstack/highlight/theme";
 import { githubDarkTheme } from "@tanstack/highlight/themes/github-dark";
 import { githubLightTheme } from "@tanstack/highlight/themes/github-light";
@@ -11,6 +12,15 @@ import {
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { ThemeProvider } from "next-themes";
 import { LabShell } from "@/components/site/layout/shell";
+import { Button } from "@/components/ui/button";
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SITE } from "../lib/seo";
 
@@ -62,16 +72,22 @@ export const Route = createRootRoute({
 
 function NotFound() {
   return (
-    <div className="mx-auto flex max-w-2xl flex-col gap-4 p-10">
-      <h1 className="font-semibold text-2xl">Device not found</h1>
-      <p className="text-muted-foreground">
-        This address is not a device of the lab.{" "}
-        <Link className="underline" to="/">
+    <Empty className="flex-1">
+      <EmptyHeader>
+        <EmptyMedia variant="icon">
+          <MagnifyingGlassIcon aria-hidden="true" />
+        </EmptyMedia>
+        <EmptyTitle>Device not found</EmptyTitle>
+        <EmptyDescription>
+          This address is not a device of the lab.
+        </EmptyDescription>
+      </EmptyHeader>
+      <EmptyContent>
+        <Button nativeButton={false} render={<Link to="/" />} variant="outline">
           See all devices
-        </Link>
-        .
-      </p>
-    </div>
+        </Button>
+      </EmptyContent>
+    </Empty>
   );
 }
 
