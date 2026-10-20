@@ -70,7 +70,10 @@ export function Dial({
           </Knob.Mark>
         ))}
       </Knob.Control>
-      <Knob.Label className="rigel-knob-label">{label}</Knob.Label>
+      <Knob.Label className="rigel-knob-label">
+        {label}
+        <span className="sr-only"> {channel}</span>
+      </Knob.Label>
     </Knob.Root>
   );
 }
