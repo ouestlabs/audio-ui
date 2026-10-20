@@ -1,0 +1,6 @@
+{
+  "title": "Mira-16",
+  "description": "A groovebox: eight drum voices and a bass line on sixteen steps, in one box.",
+  "category": "Grooveboxes",
+  "uses": ["sequencer", "knob", "use-transport-clock"]
+}
