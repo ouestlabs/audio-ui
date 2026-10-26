@@ -26,7 +26,41 @@ export const PAGES = [
     slugs: ["components", "base", "compressor"],
     url: "/docs/components/base/compressor",
   },
+  {
+    data: { description: "What makes the sound.", title: "Overview" },
+    path: "engine/index.mdx",
+    slugs: ["engine"],
+    url: "/docs/engine",
+  },
+  {
+    data: {
+      description: "A clock that schedules notes ahead.",
+      title: "Clock and time",
+    },
+    path: "engine/clock-and-time.mdx",
+    slugs: ["engine", "clock-and-time"],
+    url: "/docs/engine/clock-and-time",
+  },
 ];
+
+/** The sidebar's tree: one space, the Audio engine, its first page alone and the next under a separator. */
+const PAGE_TREE = {
+  children: [
+    {
+      children: [
+        { name: "Overview", type: "page", url: "/docs/engine" },
+        { name: "Time", type: "separator" },
+        {
+          name: "Clock and time",
+          type: "page",
+          url: "/docs/engine/clock-and-time",
+        },
+      ],
+      name: "Audio engine",
+      type: "folder",
+    },
+  ],
+};
 
 const DOCS: Record<string, string> = {
   "components/base/(devices)/compressor.mdx": [
@@ -71,7 +105,7 @@ export const CATALOG = [
 mock.module("@/lib/docs/content/source", () => ({
   source: {
     getPages: () => PAGES,
-    getPageTree: () => ({ children: [] }),
+    getPageTree: () => PAGE_TREE,
   },
 }));
 mock.module("@/lib/docs/content/docs-text", () => ({

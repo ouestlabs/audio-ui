@@ -10,6 +10,7 @@
     "icons:build": "bun ./scripts/build-icons.ts",
     "icons:scan": "bun ./scripts/scan-icons.ts",
     "images:build": "bun scripts/build-images.tsx",
+    "indexnow": "bun ./scripts/indexnow.ts",
     "postinstall": "fumadocs-mdx",
     "lint": "biome check --write .",
     "lint:fix": "biome check --write --unsafe .",

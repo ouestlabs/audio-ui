@@ -6,13 +6,16 @@
     "audio-ui",
     "audio",
     "icons",
+    "icon-set",
     "svg",
     "react",
     "daw",
     "music",
+    "synth",
+    "mixer",
     "framework-agnostic"
   ],
-  "homepage": "https://github.com/ouestlabs/audio-ui/tree/main/packages/icons",
+  "homepage": "https://www.audio-ui.dev/docs/icons",
   "bugs": {
     "url": "https://github.com/ouestlabs/audio-ui/issues"
   },

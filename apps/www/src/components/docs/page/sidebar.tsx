@@ -106,7 +106,11 @@ export function DocsNavigation({
   const { groups, pathname, setOpen } = useSidebarGroups(tree);
 
   return (
-    <div className="no-scrollbar scroll-fade-y min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-2 pb-12">
+    // A navigation landmark: screen readers jump to it, and crawlers read it as the site's chrome, not its content.
+    <nav
+      aria-label="Docs"
+      className="no-scrollbar scroll-fade-y min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-2 pb-12"
+    >
       <div className="h-(--top-spacing) shrink-0" />
       {groups.map((group) => (
         <SidebarGroup key={group.title}>
@@ -165,6 +169,6 @@ export function DocsNavigation({
           ) : null}
         </SidebarGroup>
       ))}
-    </div>
+    </nav>
   );
 }

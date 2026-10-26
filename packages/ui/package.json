@@ -1,14 +1,30 @@
 {
   "name": "@audio-ui/react",
   "version": "0.9.0",
-  "description": "A collection of React UI primitives for Audio UI.",
+  "description": "Accessible, headless React primitives for audio interfaces: knobs, faders, XY pads, envelopes, meters, waveforms, timelines, step sequencers, drum pads, piano keyboards and piano rolls.",
   "keywords": [
     "audio-ui",
     "react",
-    "ui",
-    "primitives"
+    "audio",
+    "headless",
+    "primitives",
+    "accessible",
+    "knob",
+    "fader",
+    "slider",
+    "meter",
+    "waveform",
+    "envelope",
+    "xy-pad",
+    "piano-roll",
+    "sequencer",
+    "midi",
+    "web-audio",
+    "daw",
+    "synth",
+    "music"
   ],
-  "homepage": "https://github.com/ouestlabs/audio-ui/tree/main/packages/ui",
+  "homepage": "https://www.audio-ui.dev/docs/primitives",
   "bugs": {
     "url": "https://github.com/ouestlabs/audio-ui/issues"
   },
