@@ -201,7 +201,7 @@ describe("getOpenApiDocument", () => {
     expect(doc.components.parameters.style.schema.enum).toEqual(BUILT_STYLES);
   });
 
-  test("names the REST API, the registry, the markdown docs, llms.txt and the MCP server", () => {
+  test("names the REST API, the registry and the MCP server", () => {
     expect(Object.keys(doc.paths)).toEqual(
       expect.arrayContaining([
         ...API_PATHS,
@@ -210,10 +210,26 @@ describe("getOpenApiDocument", () => {
         "/r/styles/{style}/{name}.json",
         "/r/styles/{style}/registry.json",
         "/r/{style}/{name}.json",
-        "/llm/components/base/{name}",
-        "/llms.txt",
         "/mcp",
       ])
     );
+  });
+
+  test("leaves the docs, which are documents, to llms.txt", () => {
+    expect(
+      Object.keys(doc.paths).filter((path) => path.startsWith("/llm"))
+    ).toEqual([]);
+    expect(doc.info.description).toContain(`${siteConfig.url}/llms.txt`);
+  });
+
+  test("most operations answer a typed JSON body", () => {
+    const typed = operations.filter(({ operation }) =>
+      Object.entries(operation.responses as Record<string, Json>).some(
+        ([status, response]) =>
+          status.startsWith("2") &&
+          (resolve(response).content as Json | undefined)?.["application/json"]
+      )
+    );
+    expect(typed.length / operations.length).toBeGreaterThan(0.6);
   });
 });

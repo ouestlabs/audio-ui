@@ -82,7 +82,7 @@ export function getLlmsTxt() {
       `- [Agent skills](${siteConfig.links.github}/tree/main/skills): install with \`npx skills add ouestlabs/audio-ui\`.`,
       `- [Full docs in one file](${siteConfig.url}/llms-full.txt)`,
       `- [REST API](${siteConfig.url}/api/v1): the components, their docs and the catalog as JSON, versioned, with no key. Docs: ${siteConfig.url}/llm/api`,
-      `- [OpenAPI](${siteConfig.url}/openapi.json): the REST API, the registry, the markdown docs and the MCP server, described.`,
+      `- [OpenAPI](${siteConfig.url}/openapi.json): the REST API, the registry and the MCP server, described.`,
       `- [API catalog](${siteConfig.url}/.well-known/api-catalog): the APIs as an RFC 9727 linkset.`,
       `- [Registry index](${siteConfig.url}/r/registry.json): every installable item, as JSON.`,
       "- [shadcn CLI](https://ui.shadcn.com/docs/cli): the command line that installs any item, `npx shadcn@latest add @audio-ui/<name>`.",

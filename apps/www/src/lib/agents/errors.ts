@@ -51,7 +51,7 @@ There is no page at \`${pathname}\` on ${siteConfig.name}. It may have moved, or
 - [Docs](${siteConfig.url}/llm): the introduction, as markdown
 - [Sitemap](${siteConfig.url}/sitemap.xml): every page of the site
 - [REST API](${siteConfig.url}/api/v1): the components, their docs and the catalog as JSON
-- [OpenAPI](${siteConfig.url}/openapi.json): the REST API, the registry and the docs, described
+- [OpenAPI](${siteConfig.url}/openapi.json): the REST API, the registry and the MCP server, described
 `;
   return new Response(markdown, {
     headers: {

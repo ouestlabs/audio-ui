@@ -37,31 +37,11 @@ const redirect = (to: string) => ({
   },
 });
 
-const markdown = (description: string) => ({
-  content: { "text/markdown": { schema: { type: "string" } } },
-  description,
-});
-
-const markdownNotFound = {
-  content: { "text/markdown": { schema: { type: "string" } } },
-  description:
-    "No docs page at this address. The body says so and links to llms.txt.",
-};
-
 const registryNotFound = {
   content: json("Error"),
   description:
     "The registry has no file at this address: the message names what is missing, the hint where to look.",
 };
-
-const pageParameter = (description: string, example: string) => ({
-  description,
-  example,
-  in: "path",
-  name: "page",
-  required: true,
-  schema: { pattern: NAME_PATTERN, type: "string" },
-});
 
 const VERSIONING = `## Versioning and deprecation
 
@@ -76,10 +56,11 @@ Each client address may send ${RATE_LIMIT.quota} requests every ${RATE_LIMIT.win
 The registry, the markdown docs, llms.txt and the MCP server follow their own formats (the shadcn registry schema, llmstxt.org, the MCP protocol version) and are not versioned by this policy.`;
 
 /**
- * `/openapi.json`: what the site serves to programs, as OpenAPI 3.1. The
- * REST API first, then the registry the shadcn CLI installs from, every docs
- * page as markdown, the llms.txt files and the MCP server. All of it is
- * public, read-only and needs no key.
+ * `/openapi.json`: the site's APIs, as OpenAPI 3.1. The REST API first,
+ * then the registry the shadcn CLI installs from, the MCP server and the API
+ * catalog. All of it is public, read-only and needs no key. The docs as
+ * markdown are documents, not an API: llms.txt lists them, as its format is
+ * made to, and getComponent answers a component's in JSON.
  */
 export function getOpenApiDocument() {
   const { url } = siteConfig;
@@ -486,7 +467,9 @@ export function getOpenApiDocument() {
 
 The REST API, at ${API_BASE}, answers JSON: the components, their docs as markdown, a search of the docs and the catalog of ready-made blocks, the same answers as the MCP tools. Every error is JSON too, with a code, a message and a hint.
 
-The other paths, served from the site's root: the shadcn registry, whose address for a file is \`/r/styles/{style}/{name}.json?v={deployment}\` (the shorter \`/r/{name}.json\` and \`/r/{style}/{name}.json\`, the one the shadcn CLI uses, redirect there with a 307, so follow redirects), the docs as markdown, llms.txt and the MCP server.
+The other paths, served from the site's root: the shadcn registry, whose address for a file is \`/r/styles/{style}/{name}.json?v={deployment}\` (the shorter \`/r/{name}.json\` and \`/r/{style}/{name}.json\`, the one the shadcn CLI uses, redirect there with a 307, so follow redirects), and the MCP server.
+
+The docs are not described here: every page is also served as markdown, and ${url}/llms.txt lists them all.
 
 ${VERSIONING}`,
       license: { identifier: "MIT", name: "MIT" },
@@ -651,101 +634,6 @@ ${VERSIONING}`,
           summary: "Read a component's docs",
           tags: ["API"],
         },
-      },
-      "/llm": {
-        get: {
-          description:
-            "The docs introduction as markdown: the two layers, how to install and where to go next.",
-          operationId: "getDocsIntroduction",
-          responses: { "200": markdown("The page, as markdown.") },
-          summary: "Read the docs introduction",
-          tags: ["Docs"],
-        },
-        servers: SITE,
-      },
-      "/llm/components/base/{name}": {
-        get: {
-          description:
-            "A component's docs page as markdown: what it is, how to install it, its usage, its API reference and examples. Read it before writing code with the component.",
-          operationId: "getComponentDocs",
-          parameters: [{ $ref: "#/components/parameters/name" }],
-          responses: {
-            "200": markdown("The page, as markdown."),
-            "404": markdownNotFound,
-          },
-          summary: "Read a component's docs as markdown",
-          tags: ["Docs"],
-        },
-        servers: SITE,
-      },
-      "/llm/engine/{page}": {
-        get: {
-          description:
-            "A page of the audio engine docs as markdown: the hooks and libs that make the sound (output, clock and time, synthesis, input, analysis).",
-          operationId: "getEngineDocs",
-          parameters: [
-            pageParameter(
-              "The page: output, clock-and-time, synthesis, demo-sounds, input, analysis or controllers.",
-              "clock-and-time"
-            ),
-          ],
-          responses: {
-            "200": markdown("The page, as markdown."),
-            "404": markdownNotFound,
-          },
-          summary: "Read an audio engine page",
-          tags: ["Docs"],
-        },
-        servers: SITE,
-      },
-      "/llm/{page}": {
-        get: {
-          description:
-            "A guide as markdown, such as get-started, registry, primitives, styling, mcp, api or engine. llms.txt lists them all.",
-          operationId: "getGuide",
-          parameters: [
-            pageParameter("The guide's address under /docs.", "get-started"),
-          ],
-          responses: {
-            "200": markdown("The page, as markdown."),
-            "404": markdownNotFound,
-          },
-          summary: "Read a guide",
-          tags: ["Docs"],
-        },
-        servers: SITE,
-      },
-      "/llms-full.txt": {
-        get: {
-          description:
-            "Every docs page in one markdown file. Large: prefer llms.txt and the pages it links to.",
-          operationId: "getLlmsFullTxt",
-          responses: {
-            "200": {
-              content: { "text/plain": { schema: { type: "string" } } },
-              description: "The docs, as markdown.",
-            },
-          },
-          summary: "Read all the docs at once",
-          tags: ["Docs"],
-        },
-        servers: SITE,
-      },
-      "/llms.txt": {
-        get: {
-          description:
-            "The map of the docs (llmstxt.org): when to use audio/ui, how to install it, and a link to every page as markdown.",
-          operationId: "getLlmsTxt",
-          responses: {
-            "200": {
-              content: { "text/plain": { schema: { type: "string" } } },
-              description: "The llms.txt file, in markdown.",
-            },
-          },
-          summary: "Read the map of the docs",
-          tags: ["Docs"],
-        },
-        servers: SITE,
       },
       "/mcp": {
         post: {
@@ -950,7 +838,6 @@ ${VERSIONING}`,
         description: "The shadcn registry: components, blocks, hooks and libs.",
         name: "Registry",
       },
-      { description: "The docs, as markdown.", name: "Docs" },
       { description: "The MCP server for AI agents.", name: "Agents" },
     ],
   };
