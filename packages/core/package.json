@@ -6,9 +6,20 @@
     "audio-ui",
     "audio",
     "headless",
-    "primitives"
+    "primitives",
+    "framework-agnostic",
+    "controller",
+    "knob",
+    "fader",
+    "web-audio",
+    "midi",
+    "vue",
+    "svelte",
+    "solid",
+    "web-components",
+    "music"
   ],
-  "homepage": "https://github.com/ouestlabs/audio-ui/tree/main/packages/core",
+  "homepage": "https://www.audio-ui.dev/docs/engine/controllers",
   "bugs": {
     "url": "https://github.com/ouestlabs/audio-ui/issues"
   },

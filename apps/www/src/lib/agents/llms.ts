@@ -1,6 +1,6 @@
 import { siteConfig } from "@/lib/config";
-import { getGroupsFromFolder } from "@/lib/docs/content/page-tree";
 import { source } from "@/lib/docs/content/source";
+import { getDocsSpaces, type SpacePage } from "@/lib/docs/content/spaces";
 import { getAllCatalogItems } from "@/lib/registry/core/registry";
 
 function markdownUrl(url: string) {
@@ -9,30 +9,27 @@ function markdownUrl(url: string) {
 
 /** `/llms.txt`: the docs by space, for agents to start from. */
 export function getLlmsTxt() {
-  const pages = source.getPages();
-  const byUrl = new Map(pages.map((p) => [p.url, p]));
-  // The pages by space (Elements, Workstation, Devices, Audio engine), as the sidebar groups them.
-  const spaces = source
-    .getPageTree()
-    .children.flatMap((folder) =>
-      folder.type === "folder"
-        ? getGroupsFromFolder(folder, "base").filter(
-            (group) => group.collapsible
-          )
-        : []
-    );
+  const spaces = getDocsSpaces();
   // A guide a space opens with, such as Devices, is listed in that space only.
   const inSpaces = new Set(
     spaces.flatMap((space) =>
       space.sections.flatMap((section) => section.pages.map((p) => p.url))
     )
   );
-  const guides = pages.filter(
-    (p) => !(p.slugs.join("/").startsWith("components") || inSpaces.has(p.url))
-  );
+  const guides = source
+    .getPages()
+    .filter(
+      (p) =>
+        !(p.slugs.join("/").startsWith("components") || inSpaces.has(p.url))
+    )
+    .map((p) => ({
+      description: p.data.description ?? "",
+      title: p.data.title,
+      url: p.url,
+    }));
 
-  const line = (p: (typeof pages)[number]) =>
-    `- [${p.data.title}](${markdownUrl(p.url)}): ${p.data.description}`;
+  const line = (p: SpacePage) =>
+    `- [${p.title}](${markdownUrl(p.url)}): ${p.description}`;
 
   const body = [
     "# audio/ui",
@@ -68,12 +65,7 @@ export function getLlmsTxt() {
     ...spaces.map((space) =>
       [
         `## ${space.title}`,
-        ...space.sections.flatMap((section) =>
-          section.pages.flatMap((node) => {
-            const page = byUrl.get(node.url);
-            return page ? [line(page)] : [];
-          })
-        ),
+        ...space.sections.flatMap((section) => section.pages.map(line)),
       ].join("\n")
     ),
     [

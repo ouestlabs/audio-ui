@@ -1,15 +1,27 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { createServerFn } from "@tanstack/react-start";
 import { ComponentRenderer } from "@/components/catalog/card/component-card-container";
+import { HomeGuide } from "@/components/site/home/home-guide";
 import { HomeHero } from "@/components/site/home/home-hero";
 import { HomeTimelineSkeleton } from "@/components/site/home/home-timeline-skeleton";
 import { JsonLd } from "@/components/site/json-ld";
 import { siteConfig } from "@/lib/config";
+import { getDocsSpaces } from "@/lib/docs/content/spaces";
 import { buildPageMetadata, buildSoftwareJsonLd } from "@/lib/seo/seo";
+
+/** Every component page by space, read once on the server for the list under the demo. */
+const loadSpaces = createServerFn({ method: "GET" }).handler(() =>
+  getDocsSpaces()
+);
 
 const title = "audio/ui: the Audio UI Component Library for React";
 
 export const Route = createFileRoute("/_site/")({
   component: IndexPage,
+  // The docs do not change while the site runs: read once, not on every visit.
+  gcTime: Number.POSITIVE_INFINITY,
+  loader: () => loadSpaces(),
+  staleTime: Number.POSITIVE_INFINITY,
   head: () =>
     buildPageMetadata({
       description: siteConfig.description,
@@ -39,23 +51,28 @@ export const Route = createFileRoute("/_site/")({
 });
 
 function IndexPage() {
+  const spaces = Route.useLoaderData();
   return (
-    <div className="homepage flex min-h-0 flex-1 flex-col">
-      <JsonLd data={buildSoftwareJsonLd()} />
-      <HomeHero />
-      {/* The product fills the panel: the arrangement, playable at once. */}
-      <section
-        aria-labelledby="home-demo-heading"
-        className="flex min-h-0 flex-1 flex-col p-4 font-sans sm:p-6 [&_.cn-audio-panel]:h-full [&_.cn-audio-panel]:overflow-hidden [&_[data-slot=piano-roll]]:h-auto [&_[data-slot=piano-roll]]:min-h-0 [&_[data-slot=piano-roll]]:flex-1 [&_[data-slot=timeline]]:flex [&_[data-slot=timeline]]:min-h-0 [&_[data-slot=timeline]]:flex-1 [&_[data-slot=timeline]]:flex-col [&_[data-slot=piano-roll-viewport]>div]:min-h-[calc(var(--piano-roll-rows)*1.25rem)]"
-      >
-        <h2 className="sr-only" id="home-demo-heading">
-          Live demo: an arrangement timeline built with audio/ui
-        </h2>
-        <ComponentRenderer
-          loading={<HomeTimelineSkeleton />}
-          name="block-timeline"
-        />
-      </section>
-    </div>
+    <>
+      {/* The first screen is the product: the arrangement fills the panel, playable at once. */}
+      <div className="homepage flex h-full min-h-0 shrink-0 flex-col">
+        <JsonLd data={buildSoftwareJsonLd()} />
+        <HomeHero />
+        <section
+          aria-labelledby="home-demo-heading"
+          className="flex min-h-0 flex-1 flex-col p-4 font-sans sm:p-6 [&_.cn-audio-panel]:h-full [&_.cn-audio-panel]:overflow-hidden [&_[data-slot=piano-roll]]:h-auto [&_[data-slot=piano-roll]]:min-h-0 [&_[data-slot=piano-roll]]:flex-1 [&_[data-slot=timeline]]:flex [&_[data-slot=timeline]]:min-h-0 [&_[data-slot=timeline]]:flex-1 [&_[data-slot=timeline]]:flex-col [&_[data-slot=piano-roll-viewport]>div]:min-h-[calc(var(--piano-roll-rows)*1.25rem)]"
+        >
+          <h2 className="sr-only" id="home-demo-heading">
+            Live demo: an arrangement timeline built with audio/ui
+          </h2>
+          <ComponentRenderer
+            loading={<HomeTimelineSkeleton />}
+            name="block-timeline"
+          />
+        </section>
+      </div>
+      {/* Under it, the page in words: what search engines and agents read without running it. */}
+      <HomeGuide spaces={spaces} />
+    </>
   );
 }

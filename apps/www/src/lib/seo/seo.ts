@@ -274,6 +274,24 @@ type BreadcrumbItem = {
   path: string;
 };
 
+export interface FaqItem {
+  answer: string;
+  question: string;
+}
+
+/** Questions a page answers, as a schema.org FAQPage: the same text the page shows. */
+export function buildFaqJsonLd(items: readonly FaqItem[]) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: items.map((item) => ({
+      "@type": "Question",
+      acceptedAnswer: { "@type": "Answer", text: item.answer },
+      name: item.question,
+    })),
+  };
+}
+
 export function buildBreadcrumbJsonLd(items: BreadcrumbItem[]) {
   return {
     "@context": "https://schema.org",
