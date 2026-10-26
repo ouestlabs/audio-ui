@@ -4,6 +4,7 @@ import { siteConfig } from "@/lib/config";
 import { BUILT_STYLES } from "@/lib/registry/core/styles";
 
 const { getOpenApiDocument } = await import("@/lib/agents/openapi");
+const { RATE_LIMIT } = await import("@/lib/agents/rest-api");
 
 const doc = getOpenApiDocument();
 type Json = Record<string, unknown>;
@@ -83,13 +84,12 @@ describe("getOpenApiDocument", () => {
   test("publishes the deprecation policy, naming both headers", () => {
     expect(doc.info.description).toContain("`Deprecation` header (RFC 9745)");
     expect(doc.info.description).toContain("`Sunset` header (RFC 8594)");
-    expect(Object.keys(doc.components.headers)).toEqual([
-      "Deprecation",
-      "Sunset",
-    ]);
+    expect(Object.keys(doc.components.headers)).toEqual(
+      expect.arrayContaining(["Deprecation", "Sunset"])
+    );
   });
 
-  test("every success of the REST API declares the deprecation headers", () => {
+  test("every success of the REST API declares the deprecation headers and the quota", () => {
     for (const { operation, path } of operations) {
       if (!API_PATHS.includes(path)) {
         continue;
@@ -97,8 +97,31 @@ describe("getOpenApiDocument", () => {
       const ok = (operation.responses as Record<string, Json>)["200"];
       expect(Object.keys(ok.headers as Json), path).toEqual([
         "Deprecation",
+        "RateLimit-Policy",
         "Sunset",
       ]);
+    }
+  });
+
+  test("states the rate limit it enforces, and every API operation its 429", () => {
+    expect(doc.info.description).toContain(
+      `\`"api";q=${RATE_LIMIT.quota};w=${RATE_LIMIT.window}\``
+    );
+    const tooMany = resolve({
+      $ref: "#/components/responses/TooManyRequests",
+    });
+    expect(Object.keys(tooMany.headers as Json)).toEqual([
+      "RateLimit",
+      "RateLimit-Policy",
+      "Retry-After",
+    ]);
+    for (const { operation, path } of operations) {
+      if (API_PATHS.includes(path) || path === "/api") {
+        expect(
+          (operation.responses as Record<string, Json>)["429"],
+          path
+        ).toEqual({ $ref: "#/components/responses/TooManyRequests" });
+      }
     }
   });
 

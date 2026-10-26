@@ -8,10 +8,15 @@ const {
   componentResponse,
   componentsResponse,
   methodResponse,
+  RATE_LIMIT,
+  rateLimitedResponse,
   rootResponse,
   searchResponse,
   versionsResponse,
 } = await import("@/lib/agents/rest-api");
+
+const POLICY = '"api";q=120;w=60';
+const FULL_LINE_COMMENT = /^\s*\/\/.*$/gm;
 
 const API = `${siteConfig.url}/api/v1`;
 const url = (path: string) => new URL(`${API}${path}`);
@@ -28,6 +33,16 @@ describe("the answers", () => {
     expect(response.headers.get("link")).toBe(
       `<${siteConfig.url}/openapi.json>; rel="service-desc", <${siteConfig.url}/docs/api>; rel="service-doc"`
     );
+  });
+
+  test("state the quota in RateLimit-Policy, errors included", async () => {
+    expect(rootResponse().headers.get("ratelimit-policy")).toBe(POLICY);
+    const error = componentsResponse(url("/components?kind=pedals"));
+    expect(error.headers.get("ratelimit-policy")).toBe(POLICY);
+    expect(methodResponse("POST")?.headers.get("ratelimit-policy")).toBe(
+      POLICY
+    );
+    await error.text();
   });
 
   test("GET /api lists the versions, v1 current", async () => {
@@ -221,7 +236,12 @@ describe("apiCatalogResponse", () => {
     const { linkset } = (await response.json()) as {
       linkset: Record<string, unknown>[];
     };
+    // The catalog's items first (the RFC's Appendix A.2), then each API (A.1).
     expect(linkset[0]).toEqual({
+      anchor: `${siteConfig.url}/.well-known/api-catalog`,
+      item: [{ href: API }, { href: `${siteConfig.url}/mcp` }],
+    });
+    expect(linkset[1]).toEqual({
       anchor: API,
       "service-desc": [
         { href: `${siteConfig.url}/openapi.json`, type: "application/json" },
@@ -231,7 +251,7 @@ describe("apiCatalogResponse", () => {
       ],
       status: [{ href: API, type: "application/json" }],
     });
-    expect(linkset[1]?.anchor).toBe(`${siteConfig.url}/mcp`);
+    expect(linkset[2]?.anchor).toBe(`${siteConfig.url}/mcp`);
   });
 
   test("a HEAD gets the api-catalog Link and no body", async () => {
@@ -240,5 +260,38 @@ describe("apiCatalogResponse", () => {
       `<${siteConfig.url}/.well-known/api-catalog>; rel="api-catalog"`
     );
     expect(await response.text()).toBe("");
+  });
+});
+
+describe("the rate limit", () => {
+  test("past the quota: a 429 with no quota left and a Retry-After at the window's end", async () => {
+    const response = rateLimitedResponse();
+    expect(response.status).toBe(429);
+    expect(response.headers.get("ratelimit")).toBe('"api";r=0;t=60');
+    expect(response.headers.get("retry-after")).toBe("60");
+    expect(response.headers.get("ratelimit-policy")).toBe(POLICY);
+    expect(response.headers.get("cache-control")).toBe("no-store");
+    expect(await body(response)).toEqual(
+      expect.objectContaining({ error: "rate_limited", status: 429 })
+    );
+  });
+
+  test("announces what the binding of wrangler.jsonc enforces, in production and in Previews", async () => {
+    const wrangler = JSON.parse(
+      (await Bun.file(`${import.meta.dir}/../wrangler.jsonc`).text()).replace(
+        FULL_LINE_COMMENT,
+        ""
+      )
+    );
+    const binding = expect.objectContaining({
+      name: "API_RATE_LIMIT",
+      simple: { limit: RATE_LIMIT.quota, period: RATE_LIMIT.window },
+    });
+    // A Preview inherits no binding: without its own, every /api request throws.
+    expect(wrangler.ratelimits).toEqual([binding]);
+    expect(wrangler.previews.ratelimits).toEqual([binding]);
+    expect(wrangler.previews.ratelimits[0].namespace_id).not.toBe(
+      wrangler.ratelimits[0].namespace_id
+    );
   });
 });

@@ -1,4 +1,9 @@
-import { API_BASE, API_DOCS, API_VERSION } from "@/lib/agents/rest-api";
+import {
+  API_BASE,
+  API_DOCS,
+  API_VERSION,
+  RATE_LIMIT,
+} from "@/lib/agents/rest-api";
 import { siteConfig } from "@/lib/config";
 import { BUILT_STYLES, DEFAULT_STYLE } from "@/lib/registry/core/styles";
 
@@ -17,6 +22,7 @@ const apiAnswer = (description: string, schema: string) => ({
   description,
   headers: {
     Deprecation: { $ref: "#/components/headers/Deprecation" },
+    "RateLimit-Policy": { $ref: "#/components/headers/RateLimit-Policy" },
     Sunset: { $ref: "#/components/headers/Sunset" },
   },
 });
@@ -63,6 +69,10 @@ The REST API is versioned in its path: \`/api/${API_VERSION}\`. Within a version
 
 An operation is deprecated at least six months before it is removed. From that day its answers carry a \`Deprecation\` header (RFC 9745) with the date it was deprecated and a \`Sunset\` header (RFC 8594) with the date after which it may stop answering, its entry here is marked \`deprecated\`, and ${API_DOCS} says what replaces it. Nothing is deprecated today.
 
+## Rate limits
+
+Each client address may send ${RATE_LIMIT.quota} requests every ${RATE_LIMIT.window} seconds, counted in each Cloudflare location and approximately. Every answer of the API states it in a \`RateLimit-Policy\` header (draft-ietf-httpapi-ratelimit-headers): \`"api";q=${RATE_LIMIT.quota};w=${RATE_LIMIT.window}\`. Past it, the API answers 429 with \`RateLimit: "api";r=0;t=${RATE_LIMIT.window}\` and a \`Retry-After\` header in seconds: wait that long before asking again.
+
 The registry, the markdown docs, llms.txt and the MCP server follow their own formats (the shadcn registry schema, llmstxt.org, the MCP protocol version) and are not versioned by this policy.`;
 
 /**
@@ -80,6 +90,27 @@ export function getOpenApiDocument() {
           description:
             "Sent once the operation is deprecated (RFC 9745): the moment it was, as `@` and a Unix time. Absent while the operation is current.",
           schema: { example: "@1798761600", type: "string" },
+        },
+        RateLimit: {
+          description:
+            "Sent on a 429 (draft-ietf-httpapi-ratelimit-headers): the quota left in the policy, none, and the seconds until the window ends.",
+          schema: {
+            example: `"api";r=0;t=${RATE_LIMIT.window}`,
+            type: "string",
+          },
+        },
+        "RateLimit-Policy": {
+          description:
+            "On every answer of the API (draft-ietf-httpapi-ratelimit-headers): the quota of a client address, in requests (q), and its window, in seconds (w).",
+          schema: {
+            example: `"api";q=${RATE_LIMIT.quota};w=${RATE_LIMIT.window}`,
+            type: "string",
+          },
+        },
+        "Retry-After": {
+          description:
+            "Sent on a 429 (RFC 9110): the seconds to wait before asking again.",
+          schema: { example: String(RATE_LIMIT.window), type: "string" },
         },
         Sunset: {
           description:
@@ -124,6 +155,17 @@ export function getOpenApiDocument() {
           content: json("Error"),
           description:
             "The API only reads: anything but GET and HEAD is refused, with the Allow header.",
+        },
+        TooManyRequests: {
+          content: json("Error"),
+          description: `This address sent more than ${RATE_LIMIT.quota} requests in ${RATE_LIMIT.window} seconds. Wait for Retry-After.`,
+          headers: {
+            RateLimit: { $ref: "#/components/headers/RateLimit" },
+            "RateLimit-Policy": {
+              $ref: "#/components/headers/RateLimit-Policy",
+            },
+            "Retry-After": { $ref: "#/components/headers/Retry-After" },
+          },
         },
       },
       schemas: {
@@ -463,6 +505,7 @@ ${VERSIONING}`,
           responses: {
             "200": apiAnswer("The API's entry point.", "ApiRoot"),
             "405": { $ref: "#/components/responses/MethodNotAllowed" },
+            "429": { $ref: "#/components/responses/TooManyRequests" },
           },
           summary: "Start here",
           tags: ["API"],
@@ -506,6 +549,7 @@ ${VERSIONING}`,
               description: "The versions.",
             },
             "405": { $ref: "#/components/responses/MethodNotAllowed" },
+            "429": { $ref: "#/components/responses/TooManyRequests" },
           },
           summary: "List the API's versions",
           tags: ["API"],
@@ -537,6 +581,7 @@ ${VERSIONING}`,
             "200": apiAnswer("A page of the catalog.", "CatalogPage"),
             "400": { $ref: "#/components/responses/InvalidParameter" },
             "405": { $ref: "#/components/responses/MethodNotAllowed" },
+            "429": { $ref: "#/components/responses/TooManyRequests" },
           },
           summary: "Search the catalog of blocks",
           tags: ["API"],
@@ -563,6 +608,7 @@ ${VERSIONING}`,
             "200": apiAnswer("The components.", "ComponentList"),
             "400": { $ref: "#/components/responses/InvalidParameter" },
             "405": { $ref: "#/components/responses/MethodNotAllowed" },
+            "429": { $ref: "#/components/responses/TooManyRequests" },
           },
           summary: "List the components",
           tags: ["API"],
@@ -600,6 +646,7 @@ ${VERSIONING}`,
                 "No component of that name: the hint names the nearest ones.",
             },
             "405": { $ref: "#/components/responses/MethodNotAllowed" },
+            "429": { $ref: "#/components/responses/TooManyRequests" },
           },
           summary: "Read a component's docs",
           tags: ["API"],
@@ -881,6 +928,7 @@ ${VERSIONING}`,
             "200": apiAnswer("The hits, best first.", "SearchResults"),
             "400": { $ref: "#/components/responses/InvalidParameter" },
             "405": { $ref: "#/components/responses/MethodNotAllowed" },
+            "429": { $ref: "#/components/responses/TooManyRequests" },
           },
           summary: "Search the docs",
           tags: ["API"],

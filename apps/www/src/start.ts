@@ -16,7 +16,7 @@ import {
 import { markdownOfPage } from "@/lib/agents/llm-page";
 import { getLlmsTxt } from "@/lib/agents/llms";
 import { negotiate } from "@/lib/agents/negotiate";
-import { methodResponse } from "@/lib/agents/rest-api";
+import { methodResponse, rateLimitedResponse } from "@/lib/agents/rest-api";
 import { BUILT_STYLES, DEFAULT_STYLE } from "@/lib/registry/core/styles";
 
 /**
@@ -190,6 +190,18 @@ async function home(request: Request) {
 }
 
 /**
+ * Whether a client went past the REST API's quota (RATE_LIMIT). It is counted
+ * per address, in each Cloudflare location and approximately: the API has no
+ * keys, so the address is the only name a client has.
+ */
+async function overQuota(request: Request) {
+  const { success } = await env.API_RATE_LIMIT.limit({
+    key: request.headers.get("cf-connecting-ip") ?? "unknown",
+  });
+  return !success;
+}
+
+/**
  * Every page that exists is a file the CDN serves first, so a page the router
  * answers has none: its 404 page, or its 406 when HTML is not accepted. A
  * route's own errors (the API's JSON, the docs' markdown, the MCP transport's
@@ -234,7 +246,9 @@ const edge = createMiddleware().server(async ({ next, request }) => {
     }
   }
   if (API_PATH.test(url.pathname)) {
-    const response = methodResponse(request.method);
+    const response =
+      methodResponse(request.method) ??
+      ((await overQuota(request)) ? rateLimitedResponse() : undefined);
     if (response) {
       return response;
     }

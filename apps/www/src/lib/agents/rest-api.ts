@@ -23,10 +23,19 @@ const OPENAPI = `${siteConfig.url}/openapi.json`;
 const API_CATALOG = `${siteConfig.url}/.well-known/api-catalog`;
 const DOC_HITS = 8;
 
-/** Every answer can be read from any origin, and links its description (RFC 8631). */
+/**
+ * The quota of each client address: the API_RATE_LIMIT binding of
+ * wrangler.jsonc enforces it, the RateLimit-Policy field announces it
+ * (draft-ietf-httpapi-ratelimit-headers).
+ */
+export const RATE_LIMIT = Object.freeze({ quota: 120, window: 60 });
+const RATE_LIMIT_POLICY = `"api";q=${RATE_LIMIT.quota};w=${RATE_LIMIT.window}`;
+
+/** Every answer can be read from any origin, links its description (RFC 8631) and states its quota. */
 const API_HEADERS = {
   "Access-Control-Allow-Origin": "*",
   Link: `<${OPENAPI}>; rel="service-desc", <${API_DOCS}>; rel="service-doc"`,
+  "RateLimit-Policy": RATE_LIMIT_POLICY,
 };
 
 function ok(body: unknown) {
@@ -121,6 +130,27 @@ export function methodResponse(method: string) {
       status: 405,
     },
     allow
+  );
+}
+
+/**
+ * Past the quota: a 429 whose RateLimit field says nothing is left in the
+ * window, and whose Retry-After points at the window's end, not before.
+ */
+export function rateLimitedResponse() {
+  const { quota, window } = RATE_LIMIT;
+  return jsonError(
+    {
+      error: "rate_limited",
+      hint: `Wait ${window} seconds, then go on below ${quota} requests a minute. Every answer's RateLimit-Policy header states the quota.`,
+      message: `This address sent more than ${quota} requests in ${window} seconds.`,
+      status: 429,
+    },
+    {
+      ...API_HEADERS,
+      RateLimit: `"api";r=0;t=${window}`,
+      "Retry-After": String(window),
+    }
   );
 }
 
@@ -234,11 +264,14 @@ export function catalogResponse(url: URL) {
 
 /**
  * /.well-known/api-catalog (RFC 9727): the site's APIs as a linkset
- * (RFC 9264), each with its description, its docs and its status. A HEAD
- * request gets the Link header alone.
+ * (RFC 9264). The catalog lists them first as its items (the RFC's
+ * Appendix A.2), then each with its description, its docs and its status
+ * (A.1). A HEAD request gets the Link header alone.
  */
 export function apiCatalogResponse(method: "GET" | "HEAD") {
+  const mcp = `${siteConfig.url}/mcp`;
   const linkset = [
+    { anchor: API_CATALOG, item: [{ href: API_BASE }, { href: mcp }] },
     {
       anchor: API_BASE,
       "service-desc": [{ href: OPENAPI, type: "application/json" }],
@@ -246,7 +279,7 @@ export function apiCatalogResponse(method: "GET" | "HEAD") {
       status: [{ href: API_BASE, type: "application/json" }],
     },
     {
-      anchor: `${siteConfig.url}/mcp`,
+      anchor: mcp,
       "service-desc": [{ href: OPENAPI, type: "application/json" }],
       "service-doc": [
         { href: `${siteConfig.url}/docs/mcp`, type: "text/html" },
