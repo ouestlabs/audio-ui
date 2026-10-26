@@ -47,7 +47,24 @@ Every error is JSON, whatever the request accepts, with the status, a stable cod
 <TypeRow name="invalid_parameter">400: a query parameter is missing or out of range. The message names it.</TypeRow>
 <TypeRow name="not_found">404: no component of that name, or no endpoint at that address.</TypeRow>
 <TypeRow name="method_not_allowed">405: the API only reads. Send a GET or a HEAD.</TypeRow>
+<TypeRow name="rate_limited">429: too many requests from one address. Wait for `Retry-After`.</TypeRow>
 </TypeTable>
+
+## Rate limits
+
+Each address may send 120 requests a minute, counted in each Cloudflare location. Every answer states the quota in a `RateLimit-Policy` header, from the IETF [RateLimit header fields](https://datatracker.ietf.org/doc/draft-ietf-httpapi-ratelimit-headers/):
+
+```
+RateLimit-Policy: "api";q=120;w=60
+```
+
+Past it, the API answers 429 with a `RateLimit` header that says nothing is left in the window, and a `Retry-After` header in seconds. Wait that long, then go on at a slower pace:
+
+```
+HTTP/1.1 429 Too Many Requests
+RateLimit: "api";r=0;t=60
+Retry-After: 60
+```
 
 ## Versioning and deprecation
 

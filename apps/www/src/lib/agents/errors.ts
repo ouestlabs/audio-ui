@@ -17,7 +17,8 @@ export interface ApiError {
     | "invalid_parameter"
     | "method_not_allowed"
     | "not_acceptable"
-    | "not_found";
+    | "not_found"
+    | "rate_limited";
   hint: string;
   message: string;
   status: number;

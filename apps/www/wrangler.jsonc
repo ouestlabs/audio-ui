@@ -10,5 +10,15 @@
     // The home runs the Worker first: it answers in HTML or in markdown, by the request's Accept.
     "run_worker_first": ["/", "/r/*", "/ingest/*"],
     "html_handling": "drop-trailing-slash"
-  }
+  },
+  // The REST API's quota per client address, per Cloudflare location
+  // (approximate): what its RateLimit-Policy header announces.
+  "ratelimits": [
+    {
+      "name": "API_RATE_LIMIT",
+      // Unique in the Cloudflare account: no other Worker counts against it.
+      "namespace_id": "61801",
+      "simple": { "limit": 120, "period": 60 }
+    }
+  ]
 }
