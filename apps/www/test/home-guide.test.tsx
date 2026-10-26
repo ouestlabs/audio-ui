@@ -13,6 +13,8 @@ const { HomeGuide } = await import("@/components/site/home/home-guide");
 const { buildFaqJsonLd } = await import("@/lib/seo/seo");
 
 const HEADING = /^H([1-6])$/;
+/** The MCP endpoint, written out or linked; the docs page /docs/mcp is fine. */
+const MCP_ENDPOINT = /audio-ui\.dev\/mcp\b|href="\/mcp"/;
 
 /** The guide in a router of its own, as the home renders it: its links need one. */
 async function renderGuide() {
@@ -104,6 +106,13 @@ describe("HomeGuide", () => {
     for (const question of faq.mainEntity) {
       expect(container.textContent).toContain(question.acceptedAnswer.text);
     }
+  });
+});
+
+describe("the home and the MCP server", () => {
+  test("gives no MCP endpoint address, which would get the site taken for an MCP server", async () => {
+    const { container } = await renderGuide();
+    expect(container.innerHTML).not.toMatch(MCP_ENDPOINT);
   });
 });
 
