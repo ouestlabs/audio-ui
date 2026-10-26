@@ -18,6 +18,7 @@ import { getLlmsTxt } from "@/lib/agents/llms";
 import { negotiate } from "@/lib/agents/negotiate";
 import { methodResponse, rateLimitedResponse } from "@/lib/agents/rest-api";
 import { BUILT_STYLES, DEFAULT_STYLE } from "@/lib/registry/core/styles";
+import { addressOfLayoutPath } from "@/lib/seo/layout-paths";
 
 /**
  * Runs before every request the Worker takes. Pages are prerendered files the
@@ -219,6 +220,11 @@ const edge = createMiddleware().server(async ({ next, request }) => {
 
   if (url.pathname.startsWith("/ingest/")) {
     return proxyPostHog(request, url);
+  }
+  // A layout's route id, found by a crawler in the router's state: the page it stands for.
+  const address = addressOfLayoutPath(url.pathname);
+  if (address) {
+    return redirect(`${url.origin}${address}${url.search}`, true);
   }
   trackAgentSurface(request, url);
 
