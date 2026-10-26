@@ -861,9 +861,17 @@ export default function BlockTimeline() {
       }
     };
     measure();
-    const observer = new ResizeObserver(measure);
+    // Measured again on the next frame, outside the layout pass that resized it.
+    let frame = 0;
+    const observer = new ResizeObserver(() => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(measure);
+    });
     observer.observe(element);
-    return () => observer.disconnect();
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+    };
   }, [duration]);
   const [zoomed, setZoom] = useState<number | null>(null);
   const zoom = Math.max(zoomed ?? fitPx, fitPx) || 8;

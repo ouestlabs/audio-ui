@@ -148,9 +148,17 @@ export default function TimelineClipsDemo() {
       setFitPx(Math.max(0, (element.clientWidth - lead) / DURATION));
     };
     measure();
-    const observer = new ResizeObserver(measure);
+    // Measured again on the next frame, outside the layout pass that resized it.
+    let frame = 0;
+    const observer = new ResizeObserver(() => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(measure);
+    });
     observer.observe(element);
-    return () => observer.disconnect();
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+    };
   }, []);
   const [heights, setHeights] = useState<Record<string, number | undefined>>(
     {}

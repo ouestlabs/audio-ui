@@ -774,9 +774,17 @@ function ClipSource({
     }
     const measure = () => setFit(element.clientWidth / Math.max(span, 1e-6));
     measure();
-    const observer = new ResizeObserver(measure);
+    // Measured again on the next frame, outside the layout pass that resized it.
+    let frame = 0;
+    const observer = new ResizeObserver(() => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(measure);
+    });
     observer.observe(element);
-    return () => observer.disconnect();
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+    };
   }, [span]);
   const pxPerSecond = zoom ?? fit;
   const labels = rulerLabels(span, bar, beatsPerBar, pxPerSecond);

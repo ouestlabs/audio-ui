@@ -1,7 +1,7 @@
 import { describe, expect, mock, test } from "bun:test";
 import { act, render } from "@testing-library/react";
 import { useState } from "react";
-import { mockRect } from "../../../../../test/helpers.ts";
+import { installFrames, mockRect } from "../../../../../test/helpers.ts";
 import { Timeline } from "../../../../entries/timeline.ts";
 
 /**
@@ -161,5 +161,59 @@ describe("Timeline.Viewport", () => {
     });
     wheel(viewport, { clientX: 140, ctrlKey: true, deltaY: -100 });
     expect(onZoomChange).not.toHaveBeenCalled();
+  });
+
+  test("reports a resize on the next frame, not inside the observer's callback", () => {
+    const original = globalThis.ResizeObserver;
+    const callbacks: ResizeObserverCallback[] = [];
+    globalThis.ResizeObserver = class {
+      constructor(callback: ResizeObserverCallback) {
+        callbacks.push(callback);
+      }
+      disconnect = () => undefined;
+      observe = () => undefined;
+      unobserve = () => undefined;
+    } as unknown as typeof ResizeObserver;
+    const frames = installFrames();
+    try {
+      const view = render(
+        <Timeline.Root defaultZoom={10} duration={100}>
+          <Timeline.Viewport data-testid="viewport">
+            <Timeline.Lane data-testid="lane" />
+          </Timeline.Viewport>
+          <Timeline.Navigator>
+            <Timeline.NavigatorWindow
+              aria-label="Visible range"
+              data-testid="window"
+            />
+          </Timeline.Navigator>
+        </Timeline.Root>
+      );
+      const viewport = view.getByTestId("viewport");
+      let width = 300;
+      Object.defineProperty(viewport, "clientWidth", { get: () => width });
+      mockRect(viewport, { right: 300, width: 300 });
+      view.getByTestId("lane").getBoundingClientRect = () =>
+        ({ left: 100, width: 1000 }) as DOMRect;
+      act(() => {
+        viewport.dispatchEvent(new Event("scroll"));
+      });
+      const shown = () => view.getByTestId("window").style.width;
+      // 200px of lane past the 100px of headers shows 20 units of 100
+      expect(shown()).toBe("20%");
+
+      width = 400;
+      act(() => {
+        for (const callback of callbacks) {
+          callback([], {} as ResizeObserver);
+        }
+      });
+      expect(shown()).toBe("20%");
+      act(() => frames.fire(16));
+      expect(shown()).toBe("30%");
+    } finally {
+      frames.restore();
+      globalThis.ResizeObserver = original;
+    }
   });
 });
