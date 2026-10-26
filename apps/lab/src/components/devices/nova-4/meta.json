@@ -1,0 +1,6 @@
+{
+  "title": "Nova-4",
+  "description": "An 80s FM synth: four operators, eight algorithms drawn on the screen, and a keyboard.",
+  "category": "Synths",
+  "uses": ["knob", "fader", "piano"]
+}

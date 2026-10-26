@@ -1,0 +1,497 @@
+/* LUMA-4: a photocell vibe. One light, top left.
+   Materials: olive hammertone enamel, black caps on chrome skirts, a porthole
+   on the light box, a red jewel.
+   Plain CSS: change the tokens on .luma-cabinet first. */
+
+.luma-cabinet {
+  --panel: #4b5741;
+  --panel-hi: #5d6a51;
+  --ink: #f0ead6;
+  --ink-dim: #c4c1a6;
+  --amber: #ffb347;
+  --jewel: #e0352b;
+  --focus: #fff;
+  box-sizing: border-box;
+  display: flex;
+  flex: 1 0 auto;
+  justify-content: center;
+  padding: 2rem 1.5rem;
+  /* The stage follows the theme; the unit on it keeps its own enamel. */
+  background: radial-gradient(
+    ellipse at 50% 0,
+    color-mix(in oklab, var(--foreground) 7%, var(--background)),
+    var(--background) 70%
+  );
+}
+
+/* The box: hammered enamel, its dimples catching the light from the top left */
+.luma {
+  position: relative;
+  box-sizing: border-box;
+  display: grid;
+  gap: 1.25rem;
+  align-content: start;
+  width: min(100%, 44rem);
+  height: max-content;
+  padding: 1.1rem 1.4rem 1.25rem;
+  margin-block: auto;
+  font-family: "Helvetica Neue", "Arial Narrow", Arial, sans-serif;
+  color: var(--ink);
+  background:
+    radial-gradient(
+      circle at 30% 30%,
+      rgb(255 255 255 / 0.07) 0 2px,
+      transparent 3px
+    )
+    0 0 / 11px 11px,
+    radial-gradient(circle at 70% 70%, rgb(0 0 0 / 0.1) 0 2px, transparent 3px)
+    5px 6px / 13px 13px,
+    linear-gradient(170deg, var(--panel-hi), var(--panel) 45%, #3f4937);
+  border-radius: 10px;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.18),
+    inset 0 -3px 0 rgb(0 0 0 / 0.35),
+    0 0 0 2px #22281e,
+    0 24px 50px rgb(0 0 0 / 0.55);
+}
+
+/* Header: the name, and the transport for the loops */
+.luma-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.luma-name {
+  margin: 0;
+  font:
+    800 1.5rem / 1 "Arial Narrow",
+    Arial,
+    sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+}
+
+.luma-name span {
+  color: var(--amber);
+}
+
+.luma-tagline {
+  margin: 0.3rem 0 0;
+  font-size: 0.65rem;
+  color: var(--ink-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+}
+
+.luma-transport {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+/* The body: the window on the left, the controls in sections on the right */
+.luma-body {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem 2rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.luma-controls {
+  display: grid;
+  flex: 1 1 16rem;
+  gap: 1.4rem;
+}
+
+.luma-section {
+  display: grid;
+  gap: 0.9rem;
+  align-content: start;
+  min-width: 0;
+  margin: 0;
+}
+
+.luma-legend {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  margin: 0;
+  font:
+    700 0.6rem / 1 "Arial Narrow",
+    Arial,
+    sans-serif;
+  color: var(--ink-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+}
+
+/* The title's printed line runs out to the edge of the section */
+.luma-legend::after {
+  flex: 1;
+  height: 1px;
+  content: "";
+  background: color-mix(in oklab, var(--ink) 35%, transparent);
+}
+
+.luma-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.2rem 1.6rem;
+  align-items: flex-end;
+}
+
+.luma-group > .luma-section {
+  flex: 1 1 auto;
+}
+
+/* The window: a chrome porthole on the dark light box */
+.luma-window {
+  --glow: 0.5;
+  flex: none;
+  width: 13rem;
+  aspect-ratio: 1;
+  padding: 0.55rem;
+  background: linear-gradient(
+    145deg,
+    #f2f4f1,
+    #9aa19a 45%,
+    #e3e6e2 60%,
+    #6e756f
+  );
+  border-radius: 50%;
+  box-shadow:
+    0 4px 8px rgb(0 0 0 / 0.5),
+    inset 0 1px 0 rgb(255 255 255 / 0.7);
+}
+
+.luma-box {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at 50% 50%, #1d1a16, #070605 75%);
+  border-radius: 50%;
+  box-shadow: inset 0 4px 10px #000;
+}
+
+/* The light: a halo that swells and fades with the lamp, warm on the cells */
+.luma-halo {
+  opacity: calc(0.05 + var(--glow) * 0.4);
+  filter: blur(12px);
+  fill: var(--amber);
+}
+
+.luma-cell-can {
+  fill: #2a2622;
+  stroke: #0e0c0a;
+  stroke-width: 1;
+}
+
+.luma-cell-face {
+  fill: color-mix(in oklab, #e08a3c calc(30% + var(--glow) * 45%), #3a2414);
+  stroke: #8f8a80;
+  stroke-width: 1.5;
+}
+
+.luma-cell-track {
+  fill: none;
+  stroke: #1b120a;
+  stroke-width: 1.2;
+  stroke-linejoin: round;
+}
+
+.luma-socket {
+  fill: #6e6a63;
+  stroke: #2a2724;
+}
+
+.luma-bulb {
+  fill: color-mix(
+    in oklab,
+    #ffd98a calc(var(--glow) * 70%),
+    rgb(255 255 255 / 0.08)
+  );
+  stroke: rgb(255 255 255 / 0.35);
+  stroke-width: 1;
+}
+
+.luma-post {
+  stroke: #8a857c;
+  stroke-width: 1.5;
+}
+
+.luma-filament {
+  fill: none;
+  stroke: color-mix(in oklab, #fff3c4 calc(var(--glow) * 100%), #6b3b14);
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+}
+
+.luma-glare {
+  fill: rgb(255 255 255 / 0.45);
+}
+
+/* Knob: a black cap with a white line on a knurled chrome skirt, a printed scale around it */
+.luma-knob {
+  --knob-size: 3rem;
+  position: relative;
+  display: inline-grid;
+  gap: 1rem;
+  justify-items: center;
+  padding-top: 0.9rem;
+}
+
+.luma-knob[data-size="lg"] {
+  --knob-size: 4.25rem;
+}
+
+.luma-knob-control {
+  position: relative;
+  width: var(--knob-size);
+  aspect-ratio: 1;
+  touch-action: none;
+  cursor: ns-resize;
+}
+
+.luma-knob-thumb {
+  position: absolute;
+  inset: 12%;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      circle at 50% 50%,
+      transparent 62%,
+      rgb(0 0 0 / 0.35) 63% 65%,
+      transparent 66%
+    ),
+    radial-gradient(circle at 32% 26%, rgb(255 255 255 / 0.25), transparent 40%),
+    radial-gradient(circle, #1c1b19 0 62%, transparent 63%),
+    repeating-conic-gradient(from 0deg, #eef0ed 0 5deg, #8d948e 5deg 10deg);
+  border-radius: 50%;
+  box-shadow:
+    0 6px 8px rgb(0 0 0 / 0.55),
+    inset 0 1px 0 rgb(255 255 255 / 0.4),
+    0 0 0 2px #262b22;
+}
+
+/* The pointer line rides the cap, so it turns with it */
+.luma-knob-thumb::after {
+  position: absolute;
+  top: 12%;
+  left: 50%;
+  width: 3px;
+  height: 30%;
+  content: "";
+  background: #f6f2e6;
+  border-radius: 2px;
+  translate: -50% 0;
+}
+
+.luma-knob-control[data-dragging] .luma-knob-thumb {
+  filter: brightness(1.12);
+}
+
+.luma-knob-mark {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.luma-knob-tick {
+  position: absolute;
+  top: -2px;
+  left: 50%;
+  width: 1px;
+  height: 5px;
+  background: var(--ink-dim);
+  translate: -50% 0;
+}
+
+.luma-knob-mark[data-active] .luma-knob-tick {
+  background: var(--amber);
+}
+
+.luma-knob-numeral {
+  position: absolute;
+  top: -1.15rem;
+  left: 50%;
+  font-size: 0.6rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: var(--ink-dim);
+  rotate: calc(var(--knob-mark-angle) * -1);
+  translate: -50% 0;
+}
+
+.luma-label {
+  font:
+    700 0.62rem / 1 "Arial Narrow",
+    Arial,
+    sans-serif;
+  color: var(--ink);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  white-space: nowrap;
+}
+
+/* Lamps: a dim lens when off, an amber core and a small halo when on */
+.luma-lamp {
+  display: block;
+  width: 0.55rem;
+  height: 0.55rem;
+  background: radial-gradient(circle at 35% 30%, #5a3a10, #2a1a08);
+  border-radius: 50%;
+  box-shadow:
+    inset 0 1px 2px #000,
+    0 0 0 2px #22281e;
+}
+
+.luma-lamp[data-on] {
+  background: radial-gradient(
+    circle at 35% 30%,
+    #fff3c4,
+    var(--amber) 45%,
+    #b8680a
+  );
+  box-shadow:
+    0 0 0 2px #22281e,
+    0 0 7px 2px rgb(255 179 71 / 0.6);
+}
+
+/* Push buttons: a small chrome cap with its lamp; pressed, it sinks */
+.luma-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.luma-choice {
+  display: inline-flex;
+  gap: 0.45rem;
+  align-items: center;
+  padding: 0.45rem 0.65rem;
+  font:
+    700 0.62rem / 1 "Arial Narrow",
+    Arial,
+    sans-serif;
+  color: #23271f;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  cursor: pointer;
+  background: linear-gradient(180deg, #f4f5f2, #b9beb8 60%, #9ca29b);
+  border: 0;
+  border-radius: 3px;
+  box-shadow:
+    0 0 0 2px #22281e,
+    0 3px 4px rgb(0 0 0 / 0.45),
+    inset 0 1px 0 #fff;
+}
+
+.luma-choice[aria-pressed="true"] {
+  background: linear-gradient(180deg, #a9aea8, #d3d7d1);
+  box-shadow:
+    0 0 0 2px #22281e,
+    0 1px 1px rgb(0 0 0 / 0.45),
+    inset 0 2px 3px rgb(0 0 0 / 0.25);
+  transform: translateY(1px);
+}
+
+.luma-choice:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
+/* The foot: the stomp switch and its jewel, set apart at the bottom as on a pedal */
+.luma-foot {
+  display: flex;
+  justify-content: center;
+  padding-top: 1rem;
+  border-top: 1px solid color-mix(in oklab, var(--ink) 25%, transparent);
+}
+
+.luma-footswitch {
+  display: grid;
+  gap: 0.6rem;
+  justify-items: center;
+  padding: 0;
+  font:
+    700 0.62rem / 1 "Arial Narrow",
+    Arial,
+    sans-serif;
+  color: var(--ink);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  cursor: pointer;
+  background: none;
+  border: 0;
+}
+
+.luma-jewel {
+  width: 1rem;
+  height: 1rem;
+  background: radial-gradient(circle at 35% 30%, #6a1d18, #2c0907);
+  border-radius: 50%;
+  box-shadow:
+    inset 0 1px 2px #000,
+    0 0 0 3px #b8bdb7,
+    0 0 0 4px #22281e;
+}
+
+.luma-jewel[data-on] {
+  background: radial-gradient(
+    circle at 35% 30%,
+    #ffd0c6,
+    var(--jewel) 45%,
+    #8f140d
+  );
+  box-shadow:
+    0 0 0 3px #b8bdb7,
+    0 0 0 4px #22281e,
+    0 0 10px 3px rgb(224 53 43 / 0.55);
+}
+
+.luma-stomp {
+  width: 2.6rem;
+  aspect-ratio: 1;
+  background:
+    radial-gradient(circle at 35% 30%, #fff, transparent 35%),
+    repeating-conic-gradient(from 0deg, #e8ebe7 0 6deg, #9aa19b 6deg 12deg);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 3px #2a2f26,
+    0 5px 7px rgb(0 0 0 / 0.55),
+    inset 0 -2px 3px rgb(0 0 0 / 0.3);
+}
+
+.luma-footswitch:active .luma-stomp {
+  box-shadow:
+    0 0 0 3px #2a2f26,
+    0 2px 3px rgb(0 0 0 / 0.55),
+    inset 0 -1px 2px rgb(0 0 0 / 0.3);
+  transform: translateY(2px);
+}
+
+.luma-choice:focus-visible,
+.luma-footswitch:focus-visible,
+.luma-knob-thumb:has(:focus-visible) {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .luma-choice,
+  .luma-stomp {
+    transition:
+      transform 80ms linear,
+      box-shadow 80ms linear;
+  }
+}
+
+@media (max-width: 47.99rem) {
+  .luma-cabinet {
+    padding-inline: 0.5rem;
+  }
+}

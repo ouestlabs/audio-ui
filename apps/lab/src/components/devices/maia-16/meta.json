@@ -1,0 +1,6 @@
+{
+  "title": "Maia-16",
+  "description": "A vocoder: sixteen bands lit by a voice, the built-in one or your microphone, and a keyboard that sings its words.",
+  "category": "Vocoders",
+  "uses": ["meter", "knob", "piano", "use-microphone"]
+}

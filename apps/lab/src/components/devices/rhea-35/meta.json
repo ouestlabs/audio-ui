@@ -1,0 +1,6 @@
+{
+  "title": "Rhea-35",
+  "description": "A tape replay keyboard: flutes, strings and a choir on a strip of tape under each of 35 keys, eight seconds each.",
+  "category": "Keyboards",
+  "uses": ["piano", "knob", "meter"]
+}
