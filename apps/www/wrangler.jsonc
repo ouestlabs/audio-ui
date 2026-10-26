@@ -7,7 +7,8 @@
   "main": "@tanstack/react-start/server-entry",
   "assets": {
     "binding": "ASSETS",
-    "run_worker_first": ["/r/*", "/ingest/*"],
+    // The home runs the Worker first: it answers in HTML or in markdown, by the request's Accept.
+    "run_worker_first": ["/", "/r/*", "/ingest/*"],
     "html_handling": "drop-trailing-slash"
   }
 }
