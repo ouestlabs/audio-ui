@@ -1,5 +1,14 @@
 # @audio-ui/react
 
+## 0.9.1
+
+### Patch Changes
+
+- 34db45a: The npm pages link to the docs on www.audio-ui.dev instead of the source folders on GitHub, and their keywords say what the packages hold: knobs, faders, meters, waveforms, piano rolls, MIDI and Web Audio. `@audio-ui/react` describes itself by its primitives.
+- fefca7d: Timeline and Waveform: a resize is handled on the next frame, not inside the ResizeObserver callback. `Timeline.Viewport` reports its new width, and `Waveform.Canvas` resizes and repaints its bitmap, before the frame is shown, so the browser no longer logs "ResizeObserver loop completed with undelivered notifications".
+- Updated dependencies [34db45a]
+  - @audio-ui/core@0.17.1
+
 ## 0.9.0
 
 ### Minor Changes
