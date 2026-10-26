@@ -15,12 +15,16 @@ import { Route as LlmsFullDottxtRouteImport } from './routes/llms-full[.]txt'
 import { Route as LlmsDottxtRouteImport } from './routes/llms[.]txt'
 import { Route as ManifestDotwebmanifestRouteImport } from './routes/manifest[.]webmanifest'
 import { Route as McpRouteImport } from './routes/mcp'
+import { Route as OpenapiDotjsonRouteImport } from './routes/openapi[.]json'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as RssDotxmlRouteImport } from './routes/rss[.]xml'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SiteIndexRouteImport } from './routes/_site/index'
 import { Route as SiteSplatRouteImport } from './routes/_site/$'
+import { Route as SiteAboutRouteImport } from './routes/_site/about'
+import { Route as SiteContactRouteImport } from './routes/_site/contact'
 import { Route as SiteDocsRouteImport } from './routes/_site/docs'
+import { Route as SitePrivacyRouteImport } from './routes/_site/privacy'
 import { Route as LlmIndexRouteImport } from './routes/llm/index'
 import { Route as LlmSplatRouteImport } from './routes/llm/$'
 import { Route as SiteComponentsIndexRouteImport } from './routes/_site/components/index'
@@ -57,6 +61,11 @@ const McpRoute = McpRouteImport.update({
   path: '/mcp',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OpenapiDotjsonRoute = OpenapiDotjsonRouteImport.update({
+  id: '/openapi.json',
+  path: '/openapi.json',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
   id: '/robots.txt',
   path: '/robots.txt',
@@ -82,9 +91,24 @@ const SiteSplatRoute = SiteSplatRouteImport.update({
   path: '/$',
   getParentRoute: () => SiteRoute,
 } as any)
+const SiteAboutRoute = SiteAboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => SiteRoute,
+} as any)
+const SiteContactRoute = SiteContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => SiteRoute,
+} as any)
 const SiteDocsRoute = SiteDocsRouteImport.update({
   id: '/docs',
   path: '/docs',
+  getParentRoute: () => SiteRoute,
+} as any)
+const SitePrivacyRoute = SitePrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => SiteRoute,
 } as any)
 const LlmIndexRoute = LlmIndexRouteImport.update({
@@ -125,11 +149,15 @@ export interface FileRoutesByFullPath {
   '/llms.txt': typeof LlmsDottxtRoute
   '/manifest.webmanifest': typeof ManifestDotwebmanifestRoute
   '/mcp': typeof McpRoute
+  '/openapi.json': typeof OpenapiDotjsonRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/rss.xml': typeof RssDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/$': typeof SiteSplatRoute
+  '/about': typeof SiteAboutRoute
+  '/contact': typeof SiteContactRoute
   '/docs': typeof SiteDocsRouteWithChildren
+  '/privacy': typeof SitePrivacyRoute
   '/llm/$': typeof LlmSplatRoute
   '/llm/': typeof LlmIndexRoute
   '/components/$category': typeof SiteComponentsCategoryRoute
@@ -143,10 +171,14 @@ export interface FileRoutesByTo {
   '/llms.txt': typeof LlmsDottxtRoute
   '/manifest.webmanifest': typeof ManifestDotwebmanifestRoute
   '/mcp': typeof McpRoute
+  '/openapi.json': typeof OpenapiDotjsonRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/rss.xml': typeof RssDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/$': typeof SiteSplatRoute
+  '/about': typeof SiteAboutRoute
+  '/contact': typeof SiteContactRoute
+  '/privacy': typeof SitePrivacyRoute
   '/llm/$': typeof LlmSplatRoute
   '/': typeof SiteIndexRoute
   '/llm': typeof LlmIndexRoute
@@ -163,11 +195,15 @@ export interface FileRoutesById {
   '/llms.txt': typeof LlmsDottxtRoute
   '/manifest.webmanifest': typeof ManifestDotwebmanifestRoute
   '/mcp': typeof McpRoute
+  '/openapi.json': typeof OpenapiDotjsonRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/rss.xml': typeof RssDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_site/$': typeof SiteSplatRoute
+  '/_site/about': typeof SiteAboutRoute
+  '/_site/contact': typeof SiteContactRoute
   '/_site/docs': typeof SiteDocsRouteWithChildren
+  '/_site/privacy': typeof SitePrivacyRoute
   '/llm/$': typeof LlmSplatRoute
   '/_site/': typeof SiteIndexRoute
   '/llm/': typeof LlmIndexRoute
@@ -185,11 +221,15 @@ export interface FileRouteTypes {
     | '/llms.txt'
     | '/manifest.webmanifest'
     | '/mcp'
+    | '/openapi.json'
     | '/robots.txt'
     | '/rss.xml'
     | '/sitemap.xml'
     | '/$'
+    | '/about'
+    | '/contact'
     | '/docs'
+    | '/privacy'
     | '/llm/$'
     | '/llm/'
     | '/components/$category'
@@ -203,10 +243,14 @@ export interface FileRouteTypes {
     | '/llms.txt'
     | '/manifest.webmanifest'
     | '/mcp'
+    | '/openapi.json'
     | '/robots.txt'
     | '/rss.xml'
     | '/sitemap.xml'
     | '/$'
+    | '/about'
+    | '/contact'
+    | '/privacy'
     | '/llm/$'
     | '/'
     | '/llm'
@@ -222,11 +266,15 @@ export interface FileRouteTypes {
     | '/llms.txt'
     | '/manifest.webmanifest'
     | '/mcp'
+    | '/openapi.json'
     | '/robots.txt'
     | '/rss.xml'
     | '/sitemap.xml'
     | '/_site/$'
+    | '/_site/about'
+    | '/_site/contact'
     | '/_site/docs'
+    | '/_site/privacy'
     | '/llm/$'
     | '/_site/'
     | '/llm/'
@@ -243,6 +291,7 @@ export interface RootRouteChildren {
   LlmsDottxtRoute: typeof LlmsDottxtRoute
   ManifestDotwebmanifestRoute: typeof ManifestDotwebmanifestRoute
   McpRoute: typeof McpRoute
+  OpenapiDotjsonRoute: typeof OpenapiDotjsonRoute
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   RssDotxmlRoute: typeof RssDotxmlRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -294,6 +343,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof McpRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/openapi.json': {
+      id: '/openapi.json'
+      path: '/openapi.json'
+      fullPath: '/openapi.json'
+      preLoaderRoute: typeof OpenapiDotjsonRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/robots.txt': {
       id: '/robots.txt'
       path: '/robots.txt'
@@ -329,11 +385,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SiteSplatRouteImport
       parentRoute: typeof SiteRoute
     }
+    '/_site/about': {
+      id: '/_site/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof SiteAboutRouteImport
+      parentRoute: typeof SiteRoute
+    }
+    '/_site/contact': {
+      id: '/_site/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof SiteContactRouteImport
+      parentRoute: typeof SiteRoute
+    }
     '/_site/docs': {
       id: '/_site/docs'
       path: '/docs'
       fullPath: '/docs'
       preLoaderRoute: typeof SiteDocsRouteImport
+      parentRoute: typeof SiteRoute
+    }
+    '/_site/privacy': {
+      id: '/_site/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof SitePrivacyRouteImport
       parentRoute: typeof SiteRoute
     }
     '/llm/': {
@@ -397,7 +474,10 @@ const SiteDocsRouteWithChildren = SiteDocsRoute._addFileChildren(
 
 interface SiteRouteChildren {
   SiteSplatRoute: typeof SiteSplatRoute
+  SiteAboutRoute: typeof SiteAboutRoute
+  SiteContactRoute: typeof SiteContactRoute
   SiteDocsRoute: typeof SiteDocsRouteWithChildren
+  SitePrivacyRoute: typeof SitePrivacyRoute
   SiteIndexRoute: typeof SiteIndexRoute
   SiteComponentsCategoryRoute: typeof SiteComponentsCategoryRoute
   SiteComponentsIndexRoute: typeof SiteComponentsIndexRoute
@@ -405,7 +485,10 @@ interface SiteRouteChildren {
 
 const SiteRouteChildren: SiteRouteChildren = {
   SiteSplatRoute: SiteSplatRoute,
+  SiteAboutRoute: SiteAboutRoute,
+  SiteContactRoute: SiteContactRoute,
   SiteDocsRoute: SiteDocsRouteWithChildren,
+  SitePrivacyRoute: SitePrivacyRoute,
   SiteIndexRoute: SiteIndexRoute,
   SiteComponentsCategoryRoute: SiteComponentsCategoryRoute,
   SiteComponentsIndexRoute: SiteComponentsIndexRoute,
@@ -420,6 +503,7 @@ const rootRouteChildren: RootRouteChildren = {
   LlmsDottxtRoute: LlmsDottxtRoute,
   ManifestDotwebmanifestRoute: ManifestDotwebmanifestRoute,
   McpRoute: McpRoute,
+  OpenapiDotjsonRoute: OpenapiDotjsonRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,
   RssDotxmlRoute: RssDotxmlRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,

@@ -4,13 +4,26 @@ import {
   createMiddleware,
   createStart,
 } from "@tanstack/react-start";
+import {
+  HTML,
+  jsonNotFound,
+  MARKDOWN,
+  missingResponse,
+  notAcceptable,
+  registryNotFound,
+  withVary,
+} from "@/lib/agents/errors";
 import { markdownOfPage } from "@/lib/agents/llm-page";
+import { getLlmsTxt } from "@/lib/agents/llms";
+import { negotiate } from "@/lib/agents/negotiate";
+import { BUILT_STYLES, DEFAULT_STYLE } from "@/lib/registry/core/styles";
 
 /**
  * Runs before every request the Worker takes. Pages are prerendered files the
- * CDN serves without it, so it only sees what needs logic: the registry
- * (versioned addresses and their cache), PostHog's proxy, the markdown of the
- * docs, and the routes that run code (/mcp, /llm, /init).
+ * CDN serves without it, so it only sees what needs logic: the home (HTML or
+ * markdown, by Accept), the registry (versioned addresses and their cache),
+ * PostHog's proxy, the markdown of the docs, the routes that run code (/mcp,
+ * /llm, /init), and the addresses that have no page.
  */
 
 const POSTHOG_KEY = import.meta.env.VITE_PUBLIC_POSTHOG_KEY as
@@ -19,12 +32,7 @@ const POSTHOG_KEY = import.meta.env.VITE_PUBLIC_POSTHOG_KEY as
 /** Changes on every deploy, so a registry address is a new cache key each time. */
 const DEPLOYMENT_ID = import.meta.env.VITE_DEPLOYMENT_ID as string;
 
-const BUILT_STYLES = new Set(
-  ["vega", "nova", "maia", "lyra", "mira", "luma", "rhea", "sera"].map(
-    (name) => `base-${name}`
-  )
-);
-const DEFAULT_STYLE = "base-nova";
+const HOME_TYPES = [HTML, MARKDOWN];
 const REGISTRY_STYLES = /^\/r\/styles\/(.+)$/;
 const REGISTRY_ITEM = /^\/r\/([^/]+)\.json$/;
 const REGISTRY_STYLED_ITEM = /^\/r\/([^/]+)\/([^/]+)\.json$/;
@@ -109,13 +117,27 @@ function redirect(location: string | URL, permanent: boolean) {
   });
 }
 
+/** A registry file of this deploy, cached for good. One the build did not make is a JSON 404, which the shadcn CLI prints. */
+async function registryFile(request: Request, url: URL) {
+  const asset = await env.ASSETS.fetch(request);
+  if (asset.status === 404) {
+    const file = REGISTRY_FILE.exec(url.pathname);
+    return file
+      ? registryNotFound(file[1] ?? "", file[2] ?? "")
+      : jsonNotFound(url.pathname);
+  }
+  const response = new Response(asset.body, asset);
+  response.headers.set("Cache-Control", IMMUTABLE);
+  return response;
+}
+
 /**
  * The registry's addresses. Whatever a project installed from, the item is at
  * `/r/styles/<style>/<name>.json?v=<deployment>`: the bare addresses redirect
  * there without being cached, so no client stays pinned to an older deploy,
  * and the versioned file is immutable for the life of the deploy.
  */
-async function registry(request: Request, url: URL) {
+function registry(request: Request, url: URL) {
   const version = url.searchParams.get("v");
   const style = REGISTRY_STYLED_ITEM.exec(url.pathname);
   const item = REGISTRY_ITEM.exec(url.pathname);
@@ -126,18 +148,43 @@ async function registry(request: Request, url: URL) {
     target.pathname = `/r/styles/${DEFAULT_STYLE}/${item[1]}.json`;
   } else if (style && style[1] !== "styles") {
     target.pathname = `/r/styles/${
-      BUILT_STYLES.has(style[1] ?? "") ? style[1] : DEFAULT_STYLE
+      BUILT_STYLES.includes(style[1] ?? "") ? style[1] : DEFAULT_STYLE
     }/${style[2]}.json`;
   } else if (REGISTRY_STYLES.test(url.pathname) && version) {
-    const asset = await env.ASSETS.fetch(request);
-    const response = new Response(asset.body, asset);
-    response.headers.set("Cache-Control", IMMUTABLE);
-    return response;
+    return registryFile(request, url);
   } else if (!REGISTRY_STYLES.test(url.pathname)) {
     return;
   }
   target.searchParams.set("v", version ?? DEPLOYMENT_ID);
   return redirect(target, version !== null);
+}
+
+/**
+ * The home in the form the request asks for: the prerendered page, or the
+ * map of the docs that llms.txt is, as markdown. The Worker runs first for
+ * `/` (wrangler.jsonc) to choose, so the answer varies on Accept. Nothing
+ * means the router renders the page: in development, and while the build
+ * prerenders it, there is no file yet.
+ */
+async function home(request: Request) {
+  const accept = request.headers.get("accept");
+  const type = negotiate(accept, HOME_TYPES);
+  if (type === MARKDOWN) {
+    return new Response(getLlmsTxt(), {
+      headers: {
+        "Content-Type": "text/markdown; charset=utf-8",
+        Vary: "Accept",
+      },
+    });
+  }
+  if (type !== HTML) {
+    return notAcceptable(accept, HOME_TYPES);
+  }
+  if (import.meta.env.DEV) {
+    return;
+  }
+  const page = await env.ASSETS.fetch(request);
+  return page.ok || page.status === 304 ? withVary(page) : undefined;
 }
 
 const edge = createMiddleware().server(async ({ next, request }) => {
@@ -162,13 +209,24 @@ const edge = createMiddleware().server(async ({ next, request }) => {
   if (markdown) {
     return markdownOfPage(markdown[1]?.split("/") ?? []);
   }
+  if (url.pathname === "/") {
+    return (await home(request)) ?? withVary((await next()).response);
+  }
   if (url.pathname.startsWith("/r/")) {
     const response = await registry(request, url);
     if (response) {
       return response;
     }
   }
-  return next();
+  const result = await next();
+  // Every page that exists is a file the CDN serves first, so a page the
+  // router answers has none: its 404, or its 406 when HTML is not accepted.
+  // The MCP transport's own 406 is its answer, and stays.
+  const { status } = result.response;
+  if (url.pathname !== "/mcp" && (status === 404 || status === 406)) {
+    return missingResponse(request, result.response);
+  }
+  return result;
 });
 
 /** Server functions are same-origin calls: a request from another site is refused. */

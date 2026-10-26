@@ -22,7 +22,14 @@ function entries(baseUrl: string): Entry[] {
     }
   }
   return [
-    ...[baseUrl, `${baseUrl}/docs`, `${baseUrl}/components`].map((url) => ({
+    ...[
+      baseUrl,
+      `${baseUrl}/docs`,
+      `${baseUrl}/components`,
+      `${baseUrl}/about`,
+      `${baseUrl}/contact`,
+      `${baseUrl}/privacy`,
+    ].map((url) => ({
       url,
     })),
     ...[...docs].map(([path, lastModified]) => ({

@@ -292,6 +292,16 @@ export function buildOrganizationJsonLd() {
     "@context": "https://schema.org",
     "@type": "Organization",
     "@id": `${getSiteUrl()}/#organization`,
+    contactPoint: {
+      "@type": "ContactPoint",
+      availableLanguage: "en",
+      contactType: "technical support",
+      email: siteConfig.email,
+      url: absoluteUrl("/contact"),
+    },
+    description:
+      "audio/ui is an open-source project by Ouest Labs: accessible audio controls for React, published as headless primitives on npm and as styled components in a shadcn/ui registry, under the MIT license.",
+    email: siteConfig.email,
     founder: { "@id": `${getSiteUrl()}/#author` },
     knowsAbout: [
       "React",

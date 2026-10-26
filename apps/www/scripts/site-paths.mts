@@ -67,6 +67,7 @@ export const STATIC_TEXT_PATHS = [
   "/rss.xml",
   "/robots.txt",
   "/manifest.webmanifest",
+  "/openapi.json",
 ];
 
 /** Everything the build prerenders. */
@@ -74,6 +75,9 @@ export function prerenderPages() {
   return [
     { path: "/" },
     { path: "/components" },
+    { path: "/about" },
+    { path: "/contact" },
+    { path: "/privacy" },
     ...categoryPaths().map((path) => ({ path })),
     ...docsPages().map(({ path }) => ({ path })),
     ...STATIC_TEXT_PATHS.map((path) => ({

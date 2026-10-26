@@ -1,3 +1,4 @@
+import { markdownNotFound } from "@/lib/agents/errors";
 import { processMdxForLLMs, readRawDoc } from "@/lib/docs/content/docs-text";
 import { source } from "@/lib/docs/content/source";
 
@@ -5,7 +6,7 @@ import { source } from "@/lib/docs/content/source";
 export async function markdownOfPage(slugs: string[]) {
   const page = source.getPage(slugs);
   if (!page) {
-    return new Response("Not found", { status: 404 });
+    return markdownNotFound(`/llm/${slugs.join("/")}`);
   }
   const raw = await readRawDoc(page.path);
   return new Response(await processMdxForLLMs(raw), {

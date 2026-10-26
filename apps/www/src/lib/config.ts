@@ -15,6 +15,8 @@ export const siteConfig = {
   }),
   description:
     "Audio controls for React: knobs, faders, meters, waveforms, timelines, sequencers and piano rolls, as headless primitives on npm or shadcn/ui components.",
+  /** Ouest Labs' public address, as on its GitHub profile. */
+  email: "contact.ouest.labs@gmail.com",
 
   links: Object.freeze({
     github: "https://github.com/ouestlabs/audio-ui",
