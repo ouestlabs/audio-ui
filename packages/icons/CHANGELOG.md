@@ -1,5 +1,11 @@
 # @audio-ui/icons
 
+## 0.2.1
+
+### Patch Changes
+
+- 34db45a: The npm pages link to the docs on www.audio-ui.dev instead of the source folders on GitHub, and their keywords say what the packages hold: knobs, faders, meters, waveforms, piano rolls, MIDI and Web Audio. `@audio-ui/react` describes itself by its primitives.
+
 ## 0.2.0
 
 ### Minor Changes
