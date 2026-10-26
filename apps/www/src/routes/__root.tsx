@@ -132,6 +132,9 @@ export const Route = createRootRoute({
       { href: "/manifest.webmanifest", rel: "manifest" },
       { href: "/icon.svg", rel: "icon", type: "image/svg+xml" },
       { href: "/apple-icon.png", rel: "apple-touch-icon" },
+      // Where a program finds the APIs (RFC 9727) and their description (RFC 8631).
+      { href: "/.well-known/api-catalog", rel: "api-catalog" },
+      { href: "/openapi.json", rel: "service-desc", type: "application/json" },
     ],
     meta: [
       { charSet: "utf-8" },

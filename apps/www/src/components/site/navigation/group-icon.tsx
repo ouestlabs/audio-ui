@@ -1,5 +1,6 @@
 import {
   BotIcon,
+  BracesIcon,
   ContrastIcon,
   CrateIcon,
   DialIcon,
@@ -51,6 +52,7 @@ export function GroupIcon({
 const PAGE_ICONS: Record<string, ComponentType<IconProps>> = {
   "/docs": NoteIcon,
   "/docs/agents": SparkleIcon,
+  "/docs/api": BracesIcon,
   "/docs/get-started": InsertIcon,
   "/docs/headless-styling": DialIcon,
   "/docs/icons": GridIcon,

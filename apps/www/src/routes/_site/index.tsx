@@ -6,7 +6,7 @@ import { JsonLd } from "@/components/site/json-ld";
 import { siteConfig } from "@/lib/config";
 import { buildPageMetadata, buildSoftwareJsonLd } from "@/lib/seo/seo";
 
-const title = "audio/ui – Audio UI Components for React";
+const title = "audio/ui: the Audio UI Component Library for React";
 
 export const Route = createFileRoute("/_site/")({
   component: IndexPage,

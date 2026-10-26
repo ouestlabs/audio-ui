@@ -353,6 +353,8 @@ export function buildWebSiteJsonLd() {
     "@context": "https://schema.org",
     "@type": "WebSite",
     "@id": `${getSiteUrl()}/#website`,
+    // How people type the name: search engines read these as the site's name too.
+    alternateName: ["audio-ui", "Audio UI", "audio/ui component library"],
     description: siteConfig.description,
     inLanguage: "en",
     name: siteConfig.name,

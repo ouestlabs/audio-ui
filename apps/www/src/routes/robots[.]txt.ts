@@ -27,11 +27,10 @@ Allow: /llms.txt
 Allow: /llms-full.txt
 Allow: /llm/
 Allow: /mcp
-Disallow: /api/
+Allow: /api/
 
 User-Agent: *
 Allow: /
-Disallow: /api/
 Disallow: /r/
 Disallow: /*?*
 

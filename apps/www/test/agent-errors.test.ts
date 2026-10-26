@@ -131,6 +131,28 @@ describe("missingResponse", () => {
     expect(((await response.json()) as ApiError).error).toBe("not_found");
   });
 
+  test.each(["/api", "/api/v2/components"])(
+    "the REST API answers JSON whatever the request accepts: %s",
+    (path) => {
+      const response = missingResponse(
+        request(path, "text/html"),
+        ROUTER_404()
+      );
+      expect(response.status).toBe(404);
+      expect(response.headers.get("content-type")).toContain(
+        "application/json"
+      );
+    }
+  );
+
+  test("an address that only starts like the API is a page", () => {
+    const response = missingResponse(
+      request("/apis", "text/html"),
+      ROUTER_404()
+    );
+    expect(response.headers.get("content-type")).toContain("text/html");
+  });
+
   test("the registry answers JSON whatever the request accepts", () => {
     const response = missingResponse(
       request("/r/a/b/c.json", "text/html"),
