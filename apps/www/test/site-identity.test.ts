@@ -78,6 +78,14 @@ describe("buildOrganizationJsonLd", () => {
       url: `${siteConfig.url}/contact`,
     });
   });
+
+  test("gives its address as a PostalAddress, the country in ISO 3166-1", () => {
+    expect(organization.address).toEqual({
+      "@type": "PostalAddress",
+      addressCountry: "GN",
+      addressLocality: "Conakry",
+    });
+  });
 });
 
 describe("buildWebSiteJsonLd", () => {

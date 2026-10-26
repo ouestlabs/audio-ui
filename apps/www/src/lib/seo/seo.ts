@@ -292,6 +292,12 @@ export function buildOrganizationJsonLd() {
     "@context": "https://schema.org",
     "@type": "Organization",
     "@id": `${getSiteUrl()}/#organization`,
+    // Where Ouest Labs is, as its maintainer gave it: no street.
+    address: {
+      "@type": "PostalAddress",
+      addressCountry: "GN",
+      addressLocality: "Conakry",
+    },
     contactPoint: {
       "@type": "ContactPoint",
       availableLanguage: "en",
