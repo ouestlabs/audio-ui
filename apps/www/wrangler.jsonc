@@ -3,7 +3,17 @@
   "name": "audio-ui",
   "compatibility_date": "2026-09-01",
   "compatibility_flags": ["nodejs_compat"],
-  "previews": {},
+  // A Preview inherits no binding: it gets the API's rate limit here, counted
+  // apart from production's (its own namespace_id).
+  "previews": {
+    "ratelimits": [
+      {
+        "name": "API_RATE_LIMIT",
+        "namespace_id": "61802",
+        "simple": { "limit": 120, "period": 60 }
+      }
+    ]
+  },
   "main": "@tanstack/react-start/server-entry",
   "assets": {
     "binding": "ASSETS",

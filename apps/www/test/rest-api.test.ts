@@ -276,18 +276,22 @@ describe("the rate limit", () => {
     );
   });
 
-  test("announces what the binding of wrangler.jsonc enforces", async () => {
+  test("announces what the binding of wrangler.jsonc enforces, in production and in Previews", async () => {
     const wrangler = JSON.parse(
       (await Bun.file(`${import.meta.dir}/../wrangler.jsonc`).text()).replace(
         FULL_LINE_COMMENT,
         ""
       )
     );
-    expect(wrangler.ratelimits).toEqual([
-      expect.objectContaining({
-        name: "API_RATE_LIMIT",
-        simple: { limit: RATE_LIMIT.quota, period: RATE_LIMIT.window },
-      }),
-    ]);
+    const binding = expect.objectContaining({
+      name: "API_RATE_LIMIT",
+      simple: { limit: RATE_LIMIT.quota, period: RATE_LIMIT.window },
+    });
+    // A Preview inherits no binding: without its own, every /api request throws.
+    expect(wrangler.ratelimits).toEqual([binding]);
+    expect(wrangler.previews.ratelimits).toEqual([binding]);
+    expect(wrangler.previews.ratelimits[0].namespace_id).not.toBe(
+      wrangler.ratelimits[0].namespace_id
+    );
   });
 });
