@@ -73,8 +73,10 @@ const FAQ: FaqItem[] = [
     question: "Can I use it outside React?",
   },
   {
+    // No MCP endpoint address on the home: a scanner that finds one takes the
+    // whole site for an MCP server. Its address is on the MCP page.
     answer:
-      "Yes. Connect the MCP server at https://www.audio-ui.dev/mcp, install the agent skills with npx skills add ouestlabs/audio-ui, or start from llms.txt and the REST API.",
+      "Yes. Connect the MCP server, install the agent skills with npx skills add ouestlabs/audio-ui, or start from llms.txt and the REST API.",
     question: "Can an AI agent build with it?",
   },
 ];
