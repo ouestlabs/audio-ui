@@ -10,6 +10,10 @@ import { prerenderPages } from "./scripts/site-paths.mts";
 // The TanStack Start app, run on Cloudflare's runtime in dev as in production.
 // It lives beside the Next.js app (src/app) until every route has moved.
 // Changes on every build, so the registry's addresses are a new cache key on every deploy.
+// The REST API and its catalog answer from the Worker, with their own headers:
+// the crawler follows the docs' links to them, and must not bake them into files.
+const WORKER_ONLY = /^\/(api|\.well-known\/api-catalog)(\/|$)/;
+
 const deploymentId =
   process.env.GITHUB_SHA ??
   process.env.WORKERS_CI_COMMIT_SHA ??
@@ -34,6 +38,7 @@ export default defineConfig({
         crawlLinks: true,
         enabled: true,
         failOnError: true,
+        filter: ({ path }) => !WORKER_ONLY.test(path),
         retryCount: 2,
       },
     }),

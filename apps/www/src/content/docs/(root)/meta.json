@@ -14,6 +14,7 @@
     "---For agents---",
     "agents",
     "mcp",
+    "api",
     "[llms.txt](/llms.txt)",
     "---Project---",
     "roadmap"

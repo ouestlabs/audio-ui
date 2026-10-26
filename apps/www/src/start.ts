@@ -16,6 +16,7 @@ import {
 import { markdownOfPage } from "@/lib/agents/llm-page";
 import { getLlmsTxt } from "@/lib/agents/llms";
 import { negotiate } from "@/lib/agents/negotiate";
+import { methodResponse } from "@/lib/agents/rest-api";
 import { BUILT_STYLES, DEFAULT_STYLE } from "@/lib/registry/core/styles";
 
 /**
@@ -33,6 +34,7 @@ const POSTHOG_KEY = import.meta.env.VITE_PUBLIC_POSTHOG_KEY as
 const DEPLOYMENT_ID = import.meta.env.VITE_DEPLOYMENT_ID as string;
 
 const HOME_TYPES = [HTML, MARKDOWN];
+const API_PATH = /^\/api(\/|$)/;
 const REGISTRY_STYLES = /^\/r\/styles\/(.+)$/;
 const REGISTRY_ITEM = /^\/r\/([^/]+)\.json$/;
 const REGISTRY_STYLED_ITEM = /^\/r\/([^/]+)\/([^/]+)\.json$/;
@@ -187,6 +189,19 @@ async function home(request: Request) {
   return page.ok || page.status === 304 ? withVary(page) : undefined;
 }
 
+/**
+ * Every page that exists is a file the CDN serves first, so a page the router
+ * answers has none: its 404 page, or its 406 when HTML is not accepted. A
+ * route's own errors (the API's JSON, the docs' markdown, the MCP transport's
+ * 406) are its answer, and stay.
+ */
+function isRouterMiss(response: Response, pathname: string) {
+  if (response.status === 404) {
+    return response.headers.get("content-type")?.startsWith(HTML) ?? false;
+  }
+  return response.status === 406 && pathname !== "/mcp";
+}
+
 const edge = createMiddleware().server(async ({ next, request }) => {
   const url = new URL(request.url);
 
@@ -218,15 +233,16 @@ const edge = createMiddleware().server(async ({ next, request }) => {
       return response;
     }
   }
-  const result = await next();
-  // Every page that exists is a file the CDN serves first, so a page the
-  // router answers has none: its 404, or its 406 when HTML is not accepted.
-  // The MCP transport's own 406 is its answer, and stays.
-  const { status } = result.response;
-  if (url.pathname !== "/mcp" && (status === 404 || status === 406)) {
-    return missingResponse(request, result.response);
+  if (API_PATH.test(url.pathname)) {
+    const response = methodResponse(request.method);
+    if (response) {
+      return response;
+    }
   }
-  return result;
+  const result = await next();
+  return isRouterMiss(result.response, url.pathname)
+    ? missingResponse(request, result.response)
+    : result;
 });
 
 /** Server functions are same-origin calls: a request from another site is refused. */

@@ -1,7 +1,25 @@
+import { API_BASE, API_DOCS, API_VERSION } from "@/lib/agents/rest-api";
 import { siteConfig } from "@/lib/config";
 import { BUILT_STYLES, DEFAULT_STYLE } from "@/lib/registry/core/styles";
 
 const NAME_PATTERN = "^[a-z0-9]+(?:-[a-z0-9]+)*$";
+
+/** The paths outside the REST API are served from the site's root. */
+const SITE = [{ description: "The site", url: siteConfig.url }];
+
+const json = (schema: string) => ({
+  "application/json": { schema: { $ref: `#/components/schemas/${schema}` } },
+});
+
+/** A success of the REST API: its body, and the headers that announce a deprecation. */
+const apiAnswer = (description: string, schema: string) => ({
+  content: json(schema),
+  description,
+  headers: {
+    Deprecation: { $ref: "#/components/headers/Deprecation" },
+    Sunset: { $ref: "#/components/headers/Sunset" },
+  },
+});
 
 const redirect = (to: string) => ({
   description: `Redirects to ${to}, the address of the current deployment. Follow it to get the file.`,
@@ -19,18 +37,13 @@ const markdown = (description: string) => ({
 });
 
 const markdownNotFound = {
-  content: {
-    "application/json": { schema: { $ref: "#/components/schemas/Error" } },
-    "text/markdown": { schema: { type: "string" } },
-  },
+  content: { "text/markdown": { schema: { type: "string" } } },
   description:
-    "No docs page at this address. The body says so and links to llms.txt; JSON when the request asks for application/json.",
+    "No docs page at this address. The body says so and links to llms.txt.",
 };
 
 const registryNotFound = {
-  content: {
-    "application/json": { schema: { $ref: "#/components/schemas/Error" } },
-  },
+  content: json("Error"),
   description:
     "The registry has no file at this address: the message names what is missing, the hint where to look.",
 };
@@ -44,16 +57,36 @@ const pageParameter = (description: string, example: string) => ({
   schema: { pattern: NAME_PATTERN, type: "string" },
 });
 
+const VERSIONING = `## Versioning and deprecation
+
+The REST API is versioned in its path: \`/api/${API_VERSION}\`. Within a version, changes only add: new endpoints, new optional parameters, new fields in the answers. A client ignores the fields it does not know. A change that could break a client (removing or renaming an endpoint, a parameter or a field, or changing what one means) ships as a new version, \`/api/v2\`, and \`/api/${API_VERSION}\` keeps answering beside it.
+
+An operation is deprecated at least six months before it is removed. From that day its answers carry a \`Deprecation\` header (RFC 9745) with the date it was deprecated and a \`Sunset\` header (RFC 8594) with the date after which it may stop answering, its entry here is marked \`deprecated\`, and ${API_DOCS} says what replaces it. Nothing is deprecated today.
+
+The registry, the markdown docs, llms.txt and the MCP server follow their own formats (the shadcn registry schema, llmstxt.org, the MCP protocol version) and are not versioned by this policy.`;
+
 /**
  * `/openapi.json`: what the site serves to programs, as OpenAPI 3.1. The
- * registry the shadcn CLI installs from, every docs page as markdown, the
- * llms.txt files and the MCP server. All of it is public, read-only and
- * needs no key.
+ * REST API first, then the registry the shadcn CLI installs from, every docs
+ * page as markdown, the llms.txt files and the MCP server. All of it is
+ * public, read-only and needs no key.
  */
 export function getOpenApiDocument() {
   const { url } = siteConfig;
   return {
     components: {
+      headers: {
+        Deprecation: {
+          description:
+            "Sent once the operation is deprecated (RFC 9745): the moment it was, as `@` and a Unix time. Absent while the operation is current.",
+          schema: { example: "@1798761600", type: "string" },
+        },
+        Sunset: {
+          description:
+            "Sent with Deprecation (RFC 8594): the HTTP date after which the operation may stop answering, at least six months after its deprecation.",
+          schema: { example: "Thu, 01 Jul 2027 00:00:00 GMT", type: "string" },
+        },
+      },
       parameters: {
         deployment: {
           description:
@@ -81,12 +114,167 @@ export function getOpenApiDocument() {
           schema: { enum: BUILT_STYLES, type: "string" },
         },
       },
+      responses: {
+        InvalidParameter: {
+          content: json("Error"),
+          description:
+            "A query parameter is missing or out of range: the message names it and says what it takes.",
+        },
+        MethodNotAllowed: {
+          content: json("Error"),
+          description:
+            "The API only reads: anything but GET and HEAD is refused, with the Allow header.",
+        },
+      },
       schemas: {
+        ApiRoot: {
+          description:
+            "The entry point of the REST API: its version and where every endpoint is, as URI templates (RFC 6570).",
+          properties: {
+            docs: { format: "uri", type: "string" },
+            endpoints: {
+              additionalProperties: { type: "string" },
+              type: "object",
+            },
+            name: { type: "string" },
+            openapi: { format: "uri", type: "string" },
+            status: { enum: ["current", "deprecated"], type: "string" },
+            version: { example: API_VERSION, type: "string" },
+          },
+          required: ["name", "version", "status", "endpoints"],
+          type: "object",
+        },
+        ApiVersions: {
+          properties: {
+            docs: { format: "uri", type: "string" },
+            openapi: { format: "uri", type: "string" },
+            versions: {
+              items: {
+                properties: {
+                  status: { enum: ["current", "deprecated"], type: "string" },
+                  url: { format: "uri", type: "string" },
+                  version: { type: "string" },
+                },
+                required: ["version", "url", "status"],
+                type: "object",
+              },
+              type: "array",
+            },
+          },
+          required: ["versions"],
+          type: "object",
+        },
+        CatalogItem: {
+          properties: {
+            categories: { items: { type: "string" }, type: "array" },
+            description: { type: "string" },
+            install: {
+              example: "npx shadcn@latest add @audio-ui/block-pocket-synth",
+              type: "string",
+            },
+            name: { type: "string" },
+            title: { type: "string" },
+          },
+          required: ["name", "title", "install"],
+          type: "object",
+        },
+        CatalogPage: {
+          description:
+            "One page of the catalog. When has_more is true, ask again with offset set to next_offset.",
+          properties: {
+            has_more: { type: "boolean" },
+            items: {
+              items: { $ref: "#/components/schemas/CatalogItem" },
+              type: "array",
+            },
+            next_offset: { type: "integer" },
+            total: { type: "integer" },
+          },
+          required: ["items", "total", "has_more"],
+          type: "object",
+        },
+        Component: {
+          description: "A component: what it is and how to install it.",
+          properties: {
+            api_url: { format: "uri", type: "string" },
+            description: { type: "string" },
+            docs: {
+              description: "Its docs page.",
+              format: "uri",
+              type: "string",
+            },
+            install: {
+              example: "npx shadcn@latest add @audio-ui/knob",
+              type: "string",
+            },
+            kind: {
+              enum: ["elements", "workstation", "devices"],
+              type: "string",
+            },
+            markdown_url: {
+              description: "Its docs page as markdown.",
+              format: "uri",
+              type: "string",
+            },
+            name: { example: "knob", type: "string" },
+            title: { type: "string" },
+          },
+          required: [
+            "name",
+            "title",
+            "description",
+            "docs",
+            "install",
+            "api_url",
+            "markdown_url",
+          ],
+          type: "object",
+        },
+        ComponentDocs: {
+          allOf: [
+            { $ref: "#/components/schemas/Component" },
+            {
+              properties: {
+                markdown: {
+                  description: "The docs page, or the section asked for.",
+                  type: "string",
+                },
+                section: { type: ["string", "null"] },
+                sections: {
+                  description: "The sections of the page, to ask for one.",
+                  items: { type: "string" },
+                  type: "array",
+                },
+              },
+              required: ["markdown", "section", "sections"],
+              type: "object",
+            },
+          ],
+        },
+        ComponentList: {
+          properties: {
+            components: {
+              items: { $ref: "#/components/schemas/Component" },
+              type: "array",
+            },
+            total: { type: "integer" },
+          },
+          required: ["components", "total"],
+          type: "object",
+        },
         Error: {
           description:
             "An error. `error` is a stable code, `message` says what went wrong and `hint` what to do next.",
           properties: {
-            error: { enum: ["not_found", "not_acceptable"], type: "string" },
+            error: {
+              enum: [
+                "invalid_parameter",
+                "method_not_allowed",
+                "not_acceptable",
+                "not_found",
+              ],
+              type: "string",
+            },
             hint: { type: "string" },
             message: { type: "string" },
             status: { description: "The HTTP status.", type: "integer" },
@@ -201,6 +389,37 @@ export function getOpenApiDocument() {
           required: ["name", "type"],
           type: "object",
         },
+        SearchHit: {
+          properties: {
+            api_url: {
+              description: "The section, from getComponent.",
+              format: "uri",
+              type: "string",
+            },
+            component: { example: "knob", type: "string" },
+            heading: { type: "string" },
+            section: { example: "api-reference", type: "string" },
+            snippet: { type: "string" },
+          },
+          required: ["component", "section", "heading", "snippet", "api_url"],
+          type: "object",
+        },
+        SearchResults: {
+          properties: {
+            hint: {
+              description: "What to try next, when nothing matched.",
+              type: "string",
+            },
+            hits: {
+              items: { $ref: "#/components/schemas/SearchHit" },
+              type: "array",
+            },
+            query: { type: "string" },
+            total: { type: "integer" },
+          },
+          required: ["hits", "query", "total"],
+          type: "object",
+        },
         Style: {
           properties: {
             label: { example: "Base Nova", type: "string" },
@@ -212,8 +431,8 @@ export function getOpenApiDocument() {
       },
     },
     externalDocs: {
-      description: "The docs, each page also served as markdown under /llm.",
-      url: `${url}/docs`,
+      description: "The REST API's docs, with examples.",
+      url: API_DOCS,
     },
     info: {
       contact: {
@@ -221,17 +440,171 @@ export function getOpenApiDocument() {
         name: "Ouest Labs",
         url: `${url}/contact`,
       },
-      description: `The public, read-only HTTP surface of ${siteConfig.name}: the shadcn registry of audio components, the docs as markdown and the MCP server. No key, no account.
+      description: `The public, read-only HTTP surface of ${siteConfig.name}. No key, no account.
 
-The registry has one address per file: \`/r/styles/{style}/{name}.json?v={deployment}\`. The shorter addresses, \`/r/{name}.json\` and \`/r/{style}/{name}.json\` (the one the shadcn CLI uses), and any address without \`v\`, redirect there with a 307. Follow redirects.`,
+The REST API, at ${API_BASE}, answers JSON: the components, their docs as markdown, a search of the docs and the catalog of ready-made blocks, the same answers as the MCP tools. Every error is JSON too, with a code, a message and a hint.
+
+The other paths, served from the site's root: the shadcn registry, whose address for a file is \`/r/styles/{style}/{name}.json?v={deployment}\` (the shorter \`/r/{name}.json\` and \`/r/{style}/{name}.json\`, the one the shadcn CLI uses, redirect there with a 307, so follow redirects), the docs as markdown, llms.txt and the MCP server.
+
+${VERSIONING}`,
       license: { identifier: "MIT", name: "MIT" },
       summary:
-        "The audio/ui registry, docs and MCP server, for programs and agents.",
-      title: `${siteConfig.name} registry and docs`,
+        "The audio/ui REST API, registry, docs and MCP server, for programs and agents.",
+      title: `${siteConfig.name} API`,
       version: "1.0.0",
     },
     openapi: "3.1.0",
     paths: {
+      "/": {
+        get: {
+          description:
+            "The entry point: the version of the API and where every endpoint is.",
+          operationId: "getApiRoot",
+          responses: {
+            "200": apiAnswer("The API's entry point.", "ApiRoot"),
+            "405": { $ref: "#/components/responses/MethodNotAllowed" },
+          },
+          summary: "Start here",
+          tags: ["API"],
+        },
+      },
+      "/.well-known/api-catalog": {
+        get: {
+          description:
+            "The site's APIs as a linkset (RFC 9727): for each, its OpenAPI description, its docs and its status.",
+          operationId: "getApiCatalog",
+          responses: {
+            "200": {
+              content: {
+                "application/linkset+json": {
+                  schema: {
+                    properties: {
+                      linkset: { items: { type: "object" }, type: "array" },
+                    },
+                    required: ["linkset"],
+                    type: "object",
+                  },
+                },
+              },
+              description:
+                'The API catalog, with the profile parameter "https://www.rfc-editor.org/info/rfc9727".',
+            },
+          },
+          summary: "List the site's APIs",
+          tags: ["API"],
+        },
+        servers: SITE,
+      },
+      "/api": {
+        get: {
+          description:
+            "The versions of the REST API and their status. Today there is one, v1.",
+          operationId: "listApiVersions",
+          responses: {
+            "200": {
+              content: json("ApiVersions"),
+              description: "The versions.",
+            },
+            "405": { $ref: "#/components/responses/MethodNotAllowed" },
+          },
+          summary: "List the API's versions",
+          tags: ["API"],
+        },
+        servers: SITE,
+      },
+      "/catalog": {
+        get: {
+          description:
+            "The catalog of ready-made blocks and demos (players, synth panels, mixers, piano rolls), 25 at a time. Leave q empty to list them all.",
+          operationId: "searchCatalog",
+          parameters: [
+            {
+              description: "Words such as synth, player or xypad.",
+              in: "query",
+              name: "q",
+              required: false,
+              schema: { type: "string" },
+            },
+            {
+              description: "Items to skip: the next_offset of the page before.",
+              in: "query",
+              name: "offset",
+              required: false,
+              schema: { default: 0, minimum: 0, type: "integer" },
+            },
+          ],
+          responses: {
+            "200": apiAnswer("A page of the catalog.", "CatalogPage"),
+            "400": { $ref: "#/components/responses/InvalidParameter" },
+            "405": { $ref: "#/components/responses/MethodNotAllowed" },
+          },
+          summary: "Search the catalog of blocks",
+          tags: ["API"],
+        },
+      },
+      "/components": {
+        get: {
+          description:
+            "Every component, or those of one kind: elements (knob, fader, meter, piano), workstation (timeline, piano roll, mixer) or devices (compressor, reverb, synth).",
+          operationId: "listComponents",
+          parameters: [
+            {
+              description: "Only the components of this kind.",
+              in: "query",
+              name: "kind",
+              required: false,
+              schema: {
+                enum: ["elements", "workstation", "devices"],
+                type: "string",
+              },
+            },
+          ],
+          responses: {
+            "200": apiAnswer("The components.", "ComponentList"),
+            "400": { $ref: "#/components/responses/InvalidParameter" },
+            "405": { $ref: "#/components/responses/MethodNotAllowed" },
+          },
+          summary: "List the components",
+          tags: ["API"],
+        },
+      },
+      "/components/{name}": {
+        get: {
+          description:
+            "One component and its docs as markdown: installation, usage, API reference and examples. A section returns only that part, which keeps the answer short; the sections are listed in every answer.",
+          operationId: "getComponent",
+          parameters: [
+            {
+              description: "The component's name, from listComponents.",
+              example: "knob",
+              in: "path",
+              name: "name",
+              required: true,
+              schema: { type: "string" },
+            },
+            {
+              description:
+                "One section of the page, such as installation, usage or api-reference.",
+              in: "query",
+              name: "section",
+              required: false,
+              schema: { type: "string" },
+            },
+          ],
+          responses: {
+            "200": apiAnswer("The component and its docs.", "ComponentDocs"),
+            "400": { $ref: "#/components/responses/InvalidParameter" },
+            "404": {
+              content: json("Error"),
+              description:
+                "No component of that name: the hint names the nearest ones.",
+            },
+            "405": { $ref: "#/components/responses/MethodNotAllowed" },
+          },
+          summary: "Read a component's docs",
+          tags: ["API"],
+        },
+      },
       "/llm": {
         get: {
           description:
@@ -241,6 +614,7 @@ The registry has one address per file: \`/r/styles/{style}/{name}.json?v={deploy
           summary: "Read the docs introduction",
           tags: ["Docs"],
         },
+        servers: SITE,
       },
       "/llm/components/base/{name}": {
         get: {
@@ -252,9 +626,10 @@ The registry has one address per file: \`/r/styles/{style}/{name}.json?v={deploy
             "200": markdown("The page, as markdown."),
             "404": markdownNotFound,
           },
-          summary: "Read a component's docs",
+          summary: "Read a component's docs as markdown",
           tags: ["Docs"],
         },
+        servers: SITE,
       },
       "/llm/engine/{page}": {
         get: {
@@ -274,11 +649,12 @@ The registry has one address per file: \`/r/styles/{style}/{name}.json?v={deploy
           summary: "Read an audio engine page",
           tags: ["Docs"],
         },
+        servers: SITE,
       },
       "/llm/{page}": {
         get: {
           description:
-            "A guide as markdown, such as get-started, registry, primitives, styling, mcp, agents or engine. llms.txt lists them all.",
+            "A guide as markdown, such as get-started, registry, primitives, styling, mcp, api or engine. llms.txt lists them all.",
           operationId: "getGuide",
           parameters: [
             pageParameter("The guide's address under /docs.", "get-started"),
@@ -290,6 +666,7 @@ The registry has one address per file: \`/r/styles/{style}/{name}.json?v={deploy
           summary: "Read a guide",
           tags: ["Docs"],
         },
+        servers: SITE,
       },
       "/llms-full.txt": {
         get: {
@@ -305,6 +682,7 @@ The registry has one address per file: \`/r/styles/{style}/{name}.json?v={deploy
           summary: "Read all the docs at once",
           tags: ["Docs"],
         },
+        servers: SITE,
       },
       "/llms.txt": {
         get: {
@@ -320,6 +698,7 @@ The registry has one address per file: \`/r/styles/{style}/{name}.json?v={deploy
           summary: "Read the map of the docs",
           tags: ["Docs"],
         },
+        servers: SITE,
       },
       "/mcp": {
         post: {
@@ -352,22 +731,14 @@ The registry has one address per file: \`/r/styles/{style}/{name}.json?v={deploy
           },
           responses: {
             "200": {
-              content: {
-                "application/json": {
-                  schema: { $ref: "#/components/schemas/JsonRpcResponse" },
-                },
-              },
+              content: json("JsonRpcResponse"),
               description: "The JSON-RPC response.",
             },
             "202": {
               description: "A notification, accepted. No body.",
             },
             "406": {
-              content: {
-                "application/json": {
-                  schema: { $ref: "#/components/schemas/JsonRpcResponse" },
-                },
-              },
+              content: json("JsonRpcResponse"),
               description:
                 "The Accept header does not take both application/json and text/event-stream.",
             },
@@ -375,6 +746,7 @@ The registry has one address per file: \`/r/styles/{style}/{name}.json?v={deploy
           summary: "Call the MCP server",
           tags: ["Agents"],
         },
+        servers: SITE,
       },
       "/r/styles/index.json": {
         get: {
@@ -398,6 +770,7 @@ The registry has one address per file: \`/r/styles/{style}/{name}.json?v={deploy
           summary: "List the registry's styles",
           tags: ["Registry"],
         },
+        servers: SITE,
       },
       "/r/styles/{style}/registry.json": {
         get: {
@@ -410,11 +783,7 @@ The registry has one address per file: \`/r/styles/{style}/{name}.json?v={deploy
           ],
           responses: {
             "200": {
-              content: {
-                "application/json": {
-                  schema: { $ref: "#/components/schemas/RegistryIndex" },
-                },
-              },
+              content: json("RegistryIndex"),
               description: "The registry index.",
             },
             "307": redirect("/r/styles/{style}/registry.json?v={deployment}"),
@@ -423,6 +792,7 @@ The registry has one address per file: \`/r/styles/{style}/{name}.json?v={deploy
           summary: "List the registry's items",
           tags: ["Registry"],
         },
+        servers: SITE,
       },
       "/r/styles/{style}/{name}.json": {
         get: {
@@ -436,11 +806,7 @@ The registry has one address per file: \`/r/styles/{style}/{name}.json?v={deploy
           ],
           responses: {
             "200": {
-              content: {
-                "application/json": {
-                  schema: { $ref: "#/components/schemas/RegistryItem" },
-                },
-              },
+              content: json("RegistryItem"),
               description: "The item.",
             },
             "307": redirect("/r/styles/{style}/{name}.json?v={deployment}"),
@@ -449,6 +815,7 @@ The registry has one address per file: \`/r/styles/{style}/{name}.json?v={deploy
           summary: "Get a registry item",
           tags: ["Registry"],
         },
+        servers: SITE,
       },
       "/r/{name}.json": {
         get: {
@@ -463,6 +830,7 @@ The registry has one address per file: \`/r/styles/{style}/{name}.json?v={deploy
           summary: "Find an item in the default style",
           tags: ["Registry"],
         },
+        servers: SITE,
       },
       "/r/{style}/{name}.json": {
         get: {
@@ -486,12 +854,50 @@ The registry has one address per file: \`/r/styles/{style}/{name}.json?v={deploy
           summary: "Find an item in a project's style",
           tags: ["Registry"],
         },
+        servers: SITE,
+      },
+      "/search": {
+        get: {
+          description:
+            "Search the text of the component docs, such as log scale frequency knob or drag handle on a plot. Each hit names a component and a section: read it with getComponent.",
+          operationId: "searchDocs",
+          parameters: [
+            {
+              description: "Words about what to build or understand.",
+              in: "query",
+              name: "q",
+              required: true,
+              schema: { minLength: 2, type: "string" },
+            },
+            {
+              description: "Hits to return.",
+              in: "query",
+              name: "limit",
+              required: false,
+              schema: { default: 8, maximum: 20, minimum: 1, type: "integer" },
+            },
+          ],
+          responses: {
+            "200": apiAnswer("The hits, best first.", "SearchResults"),
+            "400": { $ref: "#/components/responses/InvalidParameter" },
+            "405": { $ref: "#/components/responses/MethodNotAllowed" },
+          },
+          summary: "Search the docs",
+          tags: ["API"],
+        },
       },
     },
     // Public: no operation asks for a key.
     security: [],
-    servers: [{ description: "Production", url }],
+    servers: [
+      { description: `The REST API, version ${API_VERSION}`, url: API_BASE },
+    ],
     tags: [
+      {
+        description:
+          "The REST API: the components, their docs and the catalog, as JSON.",
+        name: "API",
+      },
       {
         description: "The shadcn registry: components, blocks, hooks and libs.",
         name: "Registry",

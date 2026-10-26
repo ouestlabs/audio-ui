@@ -1,27 +1,11 @@
-import { describe, expect, mock, test } from "bun:test";
+import { describe, expect, test } from "bun:test";
+import "./fixtures/agent-docs";
 import { siteConfig } from "@/lib/config";
 
-// The docs source and the registry are built by Vite (import.meta.glob): a
-// small stand-in of each lets llms.txt and the JSON-LD be read here.
-mock.module("@/lib/docs/content/source", () => ({
-  source: {
-    getPages: () => [
-      {
-        data: { description: "Start here.", title: "Introduction" },
-        slugs: [],
-        url: "/docs",
-      },
-    ],
-    getPageTree: () => ({ children: [] }),
-  },
-}));
-mock.module("@/lib/registry/core/registry", () => ({
-  getAllCatalogItems: () => [{}, {}, {}],
-  getCategoryDocsDescription: () => undefined,
-}));
-
 const { getLlmsTxt } = await import("@/lib/agents/llms");
-const { buildOrganizationJsonLd } = await import("@/lib/seo/seo");
+const { buildOrganizationJsonLd, buildWebSiteJsonLd } = await import(
+  "@/lib/seo/seo"
+);
 
 const FILE_LIST_ITEM = /^- \[[^\]]+\]\([^)]+\)/;
 
@@ -54,7 +38,9 @@ describe("llms.txt", () => {
     expect(lines.filter((line) => line.startsWith("#"))).toEqual([]);
   });
 
-  test("links the OpenAPI description, the registry index and the CLI", () => {
+  test("links the REST API, its catalog, the OpenAPI description, the registry index and the CLI", () => {
+    expect(llms).toContain(`[REST API](${siteConfig.url}/api/v1)`);
+    expect(llms).toContain(`(${siteConfig.url}/.well-known/api-catalog)`);
     expect(llms).toContain(`(${siteConfig.url}/openapi.json)`);
     expect(llms).toContain(`(${siteConfig.url}/r/registry.json)`);
     expect(llms).toContain("[shadcn CLI](https://ui.shadcn.com/docs/cli)");
@@ -91,5 +77,13 @@ describe("buildOrganizationJsonLd", () => {
       email: siteConfig.email,
       url: `${siteConfig.url}/contact`,
     });
+  });
+});
+
+describe("buildWebSiteJsonLd", () => {
+  test("names the site the ways people type it", () => {
+    expect(buildWebSiteJsonLd().alternateName).toEqual(
+      expect.arrayContaining(["audio-ui", "audio/ui component library"])
+    );
   });
 });

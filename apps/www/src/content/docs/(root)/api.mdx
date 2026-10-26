@@ -1,0 +1,64 @@
+---
+title: REST API
+description: "Read the components, their docs and the catalog as JSON from https://www.audio-ui.dev/api/v1: public, read-only and versioned."
+---
+
+The REST API gives programs and agents what the docs say, as JSON: the components, their docs as markdown, a search of the docs and the catalog of ready-made blocks. It answers the same questions as the [MCP server](/docs/mcp), for any client that speaks HTTP.
+
+```
+https://www.audio-ui.dev/api/v1
+```
+
+It is public and read-only: no key, no account. Answers can be read from any origin and are cached for five minutes. The whole API is described in OpenAPI 3.1 at [/openapi.json](/openapi.json), and listed at [/.well-known/api-catalog](/.well-known/api-catalog).
+
+## Endpoints
+
+<TypeTable title="Endpoints">
+<TypeRow name="GET /api/v1">The entry point: the version and where every endpoint is.</TypeRow>
+<TypeRow name="GET /api/v1/components">Every component. `kind` keeps one kind: `elements`, `workstation` or `devices`.</TypeRow>
+<TypeRow name="GET /api/v1/components/{name}">One component and its docs as markdown. `section` returns one part, such as `installation` or `api-reference`.</TypeRow>
+<TypeRow name="GET /api/v1/search">The parts of the docs that answer `q`, best first, `limit` of them (8 by default, 20 at most).</TypeRow>
+<TypeRow name="GET /api/v1/catalog">The ready-made blocks and demos, 25 at a time. `q` searches them, `offset` turns the page.</TypeRow>
+</TypeTable>
+
+Find a component, then read the part of its docs you need:
+
+```bash
+curl "https://www.audio-ui.dev/api/v1/search?q=log+scale+knob"
+curl "https://www.audio-ui.dev/api/v1/components/knob?section=api-reference"
+```
+
+Every component carries the command that installs it, such as `npx shadcn@latest add @audio-ui/knob`.
+
+## Errors
+
+Every error is JSON, whatever the request accepts, with the status, a stable code, what went wrong and what to do next:
+
+```json
+{
+  "error": "not_found",
+  "message": "There is no component named \"knobb\".",
+  "hint": "Did you mean knob? List the components at https://www.audio-ui.dev/api/v1/components, or search them at https://www.audio-ui.dev/api/v1/search?q=.",
+  "status": 404
+}
+```
+
+<TypeTable title="Error codes">
+<TypeRow name="invalid_parameter">400: a query parameter is missing or out of range. The message names it.</TypeRow>
+<TypeRow name="not_found">404: no component of that name, or no endpoint at that address.</TypeRow>
+<TypeRow name="method_not_allowed">405: the API only reads. Send a GET or a HEAD.</TypeRow>
+</TypeTable>
+
+## Versioning and deprecation
+
+The version is in the path: `/api/v1`. Within a version, changes only add: new endpoints, new optional parameters, new fields in the answers. Ignore the fields you do not know. A change that could break a client, such as removing or renaming an endpoint, a parameter or a field, ships as a new version, `/api/v2`, and `/api/v1` keeps answering beside it.
+
+An endpoint is deprecated at least six months before it is removed. From that day:
+
+- Its answers carry a `Deprecation` header ([RFC 9745](https://www.rfc-editor.org/rfc/rfc9745)) with the date it was deprecated, and a `Sunset` header ([RFC 8594](https://www.rfc-editor.org/rfc/rfc8594)) with the date after which it may stop answering.
+- Its entry in [/openapi.json](/openapi.json) is marked `deprecated`.
+- This page says what replaces it.
+
+Nothing is deprecated today. [/api](/api) lists the versions and their status.
+
+The registry, the markdown docs, [llms.txt](/llms.txt) and the MCP server are not part of this API: they follow their own formats, the shadcn registry schema, llmstxt.org and the MCP protocol version.

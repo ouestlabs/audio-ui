@@ -1,13 +1,24 @@
 import { describe, expect, test } from "bun:test";
-import { getOpenApiDocument } from "@/lib/agents/openapi";
+import "./fixtures/agent-docs";
 import { siteConfig } from "@/lib/config";
 import { BUILT_STYLES } from "@/lib/registry/core/styles";
+
+const { getOpenApiDocument } = await import("@/lib/agents/openapi");
 
 const doc = getOpenApiDocument();
 type Json = Record<string, unknown>;
 
 const OPERATION_ID = /^[a-z][A-Za-z]+$/;
 const PATH_PARAMETER = /\{(\w+)\}/g;
+const METHODS = new Set(["get", "head", "post", "put", "patch", "delete"]);
+/** The paths of the REST API, served from the top-level server. */
+const API_PATHS = [
+  "/",
+  "/catalog",
+  "/components",
+  "/components/{name}",
+  "/search",
+];
 
 /** Follows a local `$ref` such as `#/components/parameters/name`. */
 function resolve(node: Json): Json {
@@ -26,11 +37,13 @@ function resolve(node: Json): Json {
 }
 
 const operations = Object.entries(doc.paths).flatMap(([path, item]) =>
-  Object.entries(item).map(([method, operation]) => ({
-    method,
-    operation: operation as Json,
-    path,
-  }))
+  Object.entries(item)
+    .filter(([method]) => METHODS.has(method))
+    .map(([method, operation]) => ({
+      method,
+      operation: operation as Json,
+      path,
+    }))
 );
 
 function refsIn(node: unknown): string[] {
@@ -46,13 +59,64 @@ function refsIn(node: unknown): string[] {
 }
 
 describe("getOpenApiDocument", () => {
-  test("is OpenAPI 3.1, served from the site's own origin", () => {
+  test("is OpenAPI 3.1, its server the REST API, versioned in the path", () => {
     expect(doc.openapi).toBe("3.1.0");
     expect(doc.servers).toEqual([
-      { description: "Production", url: siteConfig.url },
+      expect.objectContaining({ url: `${siteConfig.url}/api/v1` }),
     ]);
     expect(doc.info.title).toBeTruthy();
     expect(doc.info.version).toBeTruthy();
+  });
+
+  test("serves every path outside the REST API from the site's root", () => {
+    for (const [path, item] of Object.entries(doc.paths) as [string, Json][]) {
+      if (API_PATHS.includes(path)) {
+        expect(item.servers, path).toBeUndefined();
+      } else {
+        expect(item.servers, path).toEqual([
+          expect.objectContaining({ url: siteConfig.url }),
+        ]);
+      }
+    }
+  });
+
+  test("publishes the deprecation policy, naming both headers", () => {
+    expect(doc.info.description).toContain("`Deprecation` header (RFC 9745)");
+    expect(doc.info.description).toContain("`Sunset` header (RFC 8594)");
+    expect(Object.keys(doc.components.headers)).toEqual([
+      "Deprecation",
+      "Sunset",
+    ]);
+  });
+
+  test("every success of the REST API declares the deprecation headers", () => {
+    for (const { operation, path } of operations) {
+      if (!API_PATHS.includes(path)) {
+        continue;
+      }
+      const ok = (operation.responses as Record<string, Json>)["200"];
+      expect(Object.keys(ok.headers as Json), path).toEqual([
+        "Deprecation",
+        "Sunset",
+      ]);
+    }
+  });
+
+  test("every REST API error answers with the Error schema", () => {
+    for (const { operation, path } of operations) {
+      if (!API_PATHS.includes(path)) {
+        continue;
+      }
+      const responses = operation.responses as Record<string, Json>;
+      for (const [status, response] of Object.entries(responses)) {
+        if (status.startsWith("4")) {
+          const content = resolve(response).content as Json;
+          expect(content["application/json"], `${path} ${status}`).toEqual({
+            schema: { $ref: "#/components/schemas/Error" },
+          });
+        }
+      }
+    }
   });
 
   test("says that no operation needs a key", () => {
@@ -114,9 +178,12 @@ describe("getOpenApiDocument", () => {
     expect(doc.components.parameters.style.schema.enum).toEqual(BUILT_STYLES);
   });
 
-  test("names the registry, the markdown docs, llms.txt and the MCP server", () => {
+  test("names the REST API, the registry, the markdown docs, llms.txt and the MCP server", () => {
     expect(Object.keys(doc.paths)).toEqual(
       expect.arrayContaining([
+        ...API_PATHS,
+        "/api",
+        "/.well-known/api-catalog",
         "/r/styles/{style}/{name}.json",
         "/r/styles/{style}/registry.json",
         "/r/{style}/{name}.json",

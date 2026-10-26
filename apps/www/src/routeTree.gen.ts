@@ -19,18 +19,25 @@ import { Route as OpenapiDotjsonRouteImport } from './routes/openapi[.]json'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as RssDotxmlRouteImport } from './routes/rss[.]xml'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as DotwellKnownApiCatalogRouteImport } from './routes/[.]well-known/api-catalog'
 import { Route as SiteIndexRouteImport } from './routes/_site/index'
 import { Route as SiteSplatRouteImport } from './routes/_site/$'
 import { Route as SiteAboutRouteImport } from './routes/_site/about'
 import { Route as SiteContactRouteImport } from './routes/_site/contact'
 import { Route as SiteDocsRouteImport } from './routes/_site/docs'
 import { Route as SitePrivacyRouteImport } from './routes/_site/privacy'
+import { Route as ApiIndexRouteImport } from './routes/api/index'
 import { Route as LlmIndexRouteImport } from './routes/llm/index'
 import { Route as LlmSplatRouteImport } from './routes/llm/$'
 import { Route as SiteComponentsIndexRouteImport } from './routes/_site/components/index'
 import { Route as SiteComponentsCategoryRouteImport } from './routes/_site/components/$category'
 import { Route as SiteDocsIndexRouteImport } from './routes/_site/docs/index'
 import { Route as SiteDocsSplatRouteImport } from './routes/_site/docs/$'
+import { Route as ApiV1IndexRouteImport } from './routes/api/v1/index'
+import { Route as ApiV1CatalogRouteImport } from './routes/api/v1/catalog'
+import { Route as ApiV1SearchRouteImport } from './routes/api/v1/search'
+import { Route as ApiV1ComponentsIndexRouteImport } from './routes/api/v1/components/index'
+import { Route as ApiV1ComponentsNameRouteImport } from './routes/api/v1/components/$name'
 
 const SiteRoute = SiteRouteImport.update({
   id: '/_site',
@@ -81,6 +88,11 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DotwellKnownApiCatalogRoute = DotwellKnownApiCatalogRouteImport.update({
+  id: '/.well-known/api-catalog',
+  path: '/.well-known/api-catalog',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SiteIndexRoute = SiteIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -110,6 +122,11 @@ const SitePrivacyRoute = SitePrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
   getParentRoute: () => SiteRoute,
+} as any)
+const ApiIndexRoute = ApiIndexRouteImport.update({
+  id: '/api/',
+  path: '/api/',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const LlmIndexRoute = LlmIndexRouteImport.update({
   id: '/llm/',
@@ -141,6 +158,31 @@ const SiteDocsSplatRoute = SiteDocsSplatRouteImport.update({
   path: '/$',
   getParentRoute: () => SiteDocsRoute,
 } as any)
+const ApiV1IndexRoute = ApiV1IndexRouteImport.update({
+  id: '/api/v1/',
+  path: '/api/v1/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1CatalogRoute = ApiV1CatalogRouteImport.update({
+  id: '/api/v1/catalog',
+  path: '/api/v1/catalog',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1SearchRoute = ApiV1SearchRouteImport.update({
+  id: '/api/v1/search',
+  path: '/api/v1/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1ComponentsIndexRoute = ApiV1ComponentsIndexRouteImport.update({
+  id: '/api/v1/components/',
+  path: '/api/v1/components/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1ComponentsNameRoute = ApiV1ComponentsNameRouteImport.update({
+  id: '/api/v1/components/$name',
+  path: '/api/v1/components/$name',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof SiteIndexRoute
@@ -153,17 +195,24 @@ export interface FileRoutesByFullPath {
   '/robots.txt': typeof RobotsDottxtRoute
   '/rss.xml': typeof RssDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/.well-known/api-catalog': typeof DotwellKnownApiCatalogRoute
   '/$': typeof SiteSplatRoute
   '/about': typeof SiteAboutRoute
   '/contact': typeof SiteContactRoute
   '/docs': typeof SiteDocsRouteWithChildren
   '/privacy': typeof SitePrivacyRoute
   '/llm/$': typeof LlmSplatRoute
+  '/api/': typeof ApiIndexRoute
   '/llm/': typeof LlmIndexRoute
   '/components/$category': typeof SiteComponentsCategoryRoute
   '/docs/$': typeof SiteDocsSplatRoute
+  '/api/v1/catalog': typeof ApiV1CatalogRoute
+  '/api/v1/search': typeof ApiV1SearchRoute
   '/components/': typeof SiteComponentsIndexRoute
   '/docs/': typeof SiteDocsIndexRoute
+  '/api/v1/': typeof ApiV1IndexRoute
+  '/api/v1/components/$name': typeof ApiV1ComponentsNameRoute
+  '/api/v1/components/': typeof ApiV1ComponentsIndexRoute
 }
 export interface FileRoutesByTo {
   '/init': typeof InitRoute
@@ -175,17 +224,24 @@ export interface FileRoutesByTo {
   '/robots.txt': typeof RobotsDottxtRoute
   '/rss.xml': typeof RssDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/.well-known/api-catalog': typeof DotwellKnownApiCatalogRoute
   '/$': typeof SiteSplatRoute
   '/about': typeof SiteAboutRoute
   '/contact': typeof SiteContactRoute
   '/privacy': typeof SitePrivacyRoute
   '/llm/$': typeof LlmSplatRoute
   '/': typeof SiteIndexRoute
+  '/api': typeof ApiIndexRoute
   '/llm': typeof LlmIndexRoute
   '/components/$category': typeof SiteComponentsCategoryRoute
   '/docs/$': typeof SiteDocsSplatRoute
+  '/api/v1/catalog': typeof ApiV1CatalogRoute
+  '/api/v1/search': typeof ApiV1SearchRoute
   '/components': typeof SiteComponentsIndexRoute
   '/docs': typeof SiteDocsIndexRoute
+  '/api/v1': typeof ApiV1IndexRoute
+  '/api/v1/components/$name': typeof ApiV1ComponentsNameRoute
+  '/api/v1/components': typeof ApiV1ComponentsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -199,6 +255,7 @@ export interface FileRoutesById {
   '/robots.txt': typeof RobotsDottxtRoute
   '/rss.xml': typeof RssDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/.well-known/api-catalog': typeof DotwellKnownApiCatalogRoute
   '/_site/$': typeof SiteSplatRoute
   '/_site/about': typeof SiteAboutRoute
   '/_site/contact': typeof SiteContactRoute
@@ -206,11 +263,17 @@ export interface FileRoutesById {
   '/_site/privacy': typeof SitePrivacyRoute
   '/llm/$': typeof LlmSplatRoute
   '/_site/': typeof SiteIndexRoute
+  '/api/': typeof ApiIndexRoute
   '/llm/': typeof LlmIndexRoute
   '/_site/components/$category': typeof SiteComponentsCategoryRoute
   '/_site/docs/$': typeof SiteDocsSplatRoute
+  '/api/v1/catalog': typeof ApiV1CatalogRoute
+  '/api/v1/search': typeof ApiV1SearchRoute
   '/_site/components/': typeof SiteComponentsIndexRoute
   '/_site/docs/': typeof SiteDocsIndexRoute
+  '/api/v1/': typeof ApiV1IndexRoute
+  '/api/v1/components/$name': typeof ApiV1ComponentsNameRoute
+  '/api/v1/components/': typeof ApiV1ComponentsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -225,17 +288,24 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/rss.xml'
     | '/sitemap.xml'
+    | '/.well-known/api-catalog'
     | '/$'
     | '/about'
     | '/contact'
     | '/docs'
     | '/privacy'
     | '/llm/$'
+    | '/api/'
     | '/llm/'
     | '/components/$category'
     | '/docs/$'
+    | '/api/v1/catalog'
+    | '/api/v1/search'
     | '/components/'
     | '/docs/'
+    | '/api/v1/'
+    | '/api/v1/components/$name'
+    | '/api/v1/components/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/init'
@@ -247,17 +317,24 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/rss.xml'
     | '/sitemap.xml'
+    | '/.well-known/api-catalog'
     | '/$'
     | '/about'
     | '/contact'
     | '/privacy'
     | '/llm/$'
     | '/'
+    | '/api'
     | '/llm'
     | '/components/$category'
     | '/docs/$'
+    | '/api/v1/catalog'
+    | '/api/v1/search'
     | '/components'
     | '/docs'
+    | '/api/v1'
+    | '/api/v1/components/$name'
+    | '/api/v1/components'
   id:
     | '__root__'
     | '/_site'
@@ -270,6 +347,7 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/rss.xml'
     | '/sitemap.xml'
+    | '/.well-known/api-catalog'
     | '/_site/$'
     | '/_site/about'
     | '/_site/contact'
@@ -277,11 +355,17 @@ export interface FileRouteTypes {
     | '/_site/privacy'
     | '/llm/$'
     | '/_site/'
+    | '/api/'
     | '/llm/'
     | '/_site/components/$category'
     | '/_site/docs/$'
+    | '/api/v1/catalog'
+    | '/api/v1/search'
     | '/_site/components/'
     | '/_site/docs/'
+    | '/api/v1/'
+    | '/api/v1/components/$name'
+    | '/api/v1/components/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -295,8 +379,15 @@ export interface RootRouteChildren {
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   RssDotxmlRoute: typeof RssDotxmlRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  DotwellKnownApiCatalogRoute: typeof DotwellKnownApiCatalogRoute
   LlmSplatRoute: typeof LlmSplatRoute
+  ApiIndexRoute: typeof ApiIndexRoute
   LlmIndexRoute: typeof LlmIndexRoute
+  ApiV1CatalogRoute: typeof ApiV1CatalogRoute
+  ApiV1SearchRoute: typeof ApiV1SearchRoute
+  ApiV1IndexRoute: typeof ApiV1IndexRoute
+  ApiV1ComponentsNameRoute: typeof ApiV1ComponentsNameRoute
+  ApiV1ComponentsIndexRoute: typeof ApiV1ComponentsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -371,6 +462,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/.well-known/api-catalog': {
+      id: '/.well-known/api-catalog'
+      path: '/.well-known/api-catalog'
+      fullPath: '/.well-known/api-catalog'
+      preLoaderRoute: typeof DotwellKnownApiCatalogRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_site/': {
       id: '/_site/'
       path: '/'
@@ -413,6 +511,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SitePrivacyRouteImport
       parentRoute: typeof SiteRoute
     }
+    '/api/': {
+      id: '/api/'
+      path: '/api'
+      fullPath: '/api/'
+      preLoaderRoute: typeof ApiIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/llm/': {
       id: '/llm/'
       path: '/llm'
@@ -454,6 +559,41 @@ declare module '@tanstack/react-router' {
       fullPath: '/docs/$'
       preLoaderRoute: typeof SiteDocsSplatRouteImport
       parentRoute: typeof SiteDocsRoute
+    }
+    '/api/v1/': {
+      id: '/api/v1/'
+      path: '/api/v1'
+      fullPath: '/api/v1/'
+      preLoaderRoute: typeof ApiV1IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/catalog': {
+      id: '/api/v1/catalog'
+      path: '/api/v1/catalog'
+      fullPath: '/api/v1/catalog'
+      preLoaderRoute: typeof ApiV1CatalogRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/search': {
+      id: '/api/v1/search'
+      path: '/api/v1/search'
+      fullPath: '/api/v1/search'
+      preLoaderRoute: typeof ApiV1SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/components/': {
+      id: '/api/v1/components/'
+      path: '/api/v1/components'
+      fullPath: '/api/v1/components/'
+      preLoaderRoute: typeof ApiV1ComponentsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/components/$name': {
+      id: '/api/v1/components/$name'
+      path: '/api/v1/components/$name'
+      fullPath: '/api/v1/components/$name'
+      preLoaderRoute: typeof ApiV1ComponentsNameRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }
@@ -507,8 +647,15 @@ const rootRouteChildren: RootRouteChildren = {
   RobotsDottxtRoute: RobotsDottxtRoute,
   RssDotxmlRoute: RssDotxmlRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  DotwellKnownApiCatalogRoute: DotwellKnownApiCatalogRoute,
   LlmSplatRoute: LlmSplatRoute,
+  ApiIndexRoute: ApiIndexRoute,
   LlmIndexRoute: LlmIndexRoute,
+  ApiV1CatalogRoute: ApiV1CatalogRoute,
+  ApiV1SearchRoute: ApiV1SearchRoute,
+  ApiV1IndexRoute: ApiV1IndexRoute,
+  ApiV1ComponentsNameRoute: ApiV1ComponentsNameRoute,
+  ApiV1ComponentsIndexRoute: ApiV1ComponentsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

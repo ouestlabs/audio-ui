@@ -1,26 +1,18 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 
-import { closest, searchDocs } from "@/lib/agents/doc-search";
 import {
-  pickSection,
-  sectionNames,
-  sectionSlug,
-} from "@/lib/agents/doc-sections";
+  COMPONENT_KINDS,
+  listComponents,
+  readComponentDocs,
+  searchCatalogItems,
+  searchComponentDocs,
+} from "@/lib/agents/queries";
 import { siteConfig } from "@/lib/config";
-import { processMdxForLLMs, readRawDoc } from "@/lib/docs/content/docs-text";
-import { source } from "@/lib/docs/content/source";
-import {
-  getAllCatalogItems,
-  searchCatalog,
-} from "@/lib/registry/core/registry";
 
-const COMPONENT_DOCS_PREFIX = "components/base/";
-const SEARCH_LIMIT = 25;
 /** A whole page longer than this is cut, so one call stays a few thousand tokens. */
 const CHARACTER_LIMIT = 25_000;
 const DOC_HITS = 8;
-const KIND_OF_PATH = /\((\w+)\)/;
 
 const INSTRUCTIONS =
   "audio/ui is a React library of audio interface components: elements (knob, fader, meter, piano), workstation parts (timeline, piano roll, mixer) and devices (compressor, reverb, synth). To find something, call search_docs with the question in plain words, or list_components to browse. Then call get_component_docs with the component and the section the hit names: fetch one section, not the whole page, which can be 100 KB. Every result carries the command that installs the component. Use search_catalog for a ready-made block, such as a device panel or a mixer.";
@@ -31,16 +23,6 @@ const readOnly = Object.freeze({
   openWorldHint: false,
   readOnlyHint: true,
 });
-
-function installCommand(name: string) {
-  return `npx shadcn@latest add @audio-ui/${name}`;
-}
-
-function componentPages() {
-  return source
-    .getPages()
-    .filter((page) => page.slugs.join("/").startsWith(COMPONENT_DOCS_PREFIX));
-}
 
 function text(value: unknown) {
   return {
@@ -82,7 +64,7 @@ export function createAudioUiMcpServer() {
         "List the audio/ui component pages, optionally one kind: elements, workstation or devices. Returns an array of { name, kind, title, description, docs, install }; each name works with get_component_docs. To find a component by what it does, use search_docs instead.",
       inputSchema: {
         kind: z
-          .enum(["elements", "workstation", "devices"])
+          .enum(COMPONENT_KINDS)
           .optional()
           .describe(
             "Only this kind: elements (knob, fader, meter, piano), workstation (timeline, piano roll, mixer) or devices (compressor, reverb, synth). Empty lists all."
@@ -90,22 +72,7 @@ export function createAudioUiMcpServer() {
       },
       title: "List audio/ui components",
     },
-    ({ kind }) =>
-      text(
-        componentPages()
-          .map((page) => {
-            const slug = page.slugs.at(-1) ?? "";
-            return {
-              description: page.data.description,
-              docs: `${siteConfig.url}${page.url}`,
-              install: installCommand(slug),
-              kind: KIND_OF_PATH.exec(page.path)?.[1],
-              name: slug,
-              title: page.data.title,
-            };
-          })
-          .filter((item) => !kind || item.kind === kind)
-      )
+    ({ kind }) => text(listComponents(kind))
   );
 
   server.registerTool(
@@ -130,15 +97,7 @@ export function createAudioUiMcpServer() {
       title: "Search the docs",
     },
     async ({ limit, query }) => {
-      const pages = await Promise.all(
-        componentPages().map(async (page) => ({
-          markdown: await readRawDoc(page.path),
-          name: page.slugs.at(-1) ?? "",
-        }))
-      );
-      const hits = searchDocs(pages, query, limit).map(
-        ({ score: _score, ...hit }) => hit
-      );
+      const hits = await searchComponentDocs(query, limit);
       return text(
         hits.length > 0
           ? { hits, total: hits.length }
@@ -171,39 +130,22 @@ export function createAudioUiMcpServer() {
       title: "Get component docs",
     },
     async ({ name, section }) => {
-      const slug = name.trim().toLowerCase();
-      const page = componentPages().find((p) => p.slugs.at(-1) === slug);
-
-      if (!page) {
-        const names = componentPages().map((p) => p.slugs.at(-1) ?? "");
-        const near = closest(name, names);
-        return {
-          ...text(
-            `No component named '${name}'. ${near.length > 0 ? `Did you mean: ${near.join(", ")}? ` : ""}Use search_docs to find a component by what it does, or list_components to browse.`
-          ),
-          isError: true,
-        };
+      const docs = await readComponentDocs(name, section);
+      if ("problem" in docs) {
+        const message =
+          docs.problem === "unknown-component"
+            ? `No component named '${name}'. ${docs.suggestions.length > 0 ? `Did you mean: ${docs.suggestions.join(", ")}? ` : ""}Use search_docs to find a component by what it does, or list_components to browse.`
+            : `No section '${section}' in ${docs.slug}. Sections: ${docs.sections.join(", ")}.`;
+        return { ...text(message), isError: true };
       }
-
-      const markdown = await processMdxForLLMs(await readRawDoc(page.path));
-      if (!section) {
-        return text(
-          fitText(
-            markdown,
-            ` Call again with section set to one of: ${sectionNames(markdown).join(", ")}.`
-          )
-        );
-      }
-      const part = pickSection(markdown, sectionSlug(section));
-      if (part === undefined) {
-        return {
-          ...text(
-            `No section '${section}' in ${slug}. Sections: ${sectionNames(markdown).join(", ")}.`
-          ),
-          isError: true,
-        };
-      }
-      return text(fitText(part));
+      return text(
+        section
+          ? fitText(docs.markdown)
+          : fitText(
+              docs.markdown,
+              ` Call again with section set to one of: ${docs.sections.join(", ")}.`
+            )
+      );
     }
   );
 
@@ -227,24 +169,7 @@ export function createAudioUiMcpServer() {
       },
       title: "Search the catalog",
     },
-    ({ offset, query }) => {
-      const items = query?.trim() ? searchCatalog(query) : getAllCatalogItems();
-      const page = items.slice(offset, offset + SEARCH_LIMIT);
-      const next = offset + page.length;
-      const hasMore = next < items.length;
-      return text({
-        has_more: hasMore,
-        items: page.map((item) => ({
-          categories: item.categories,
-          description: item.description,
-          install: installCommand(item.name),
-          name: item.name,
-          title: item.title,
-        })),
-        next_offset: hasMore ? next : undefined,
-        total: items.length,
-      });
-    }
+    ({ offset, query }) => text(searchCatalogItems(query, offset))
   );
 
   return server;

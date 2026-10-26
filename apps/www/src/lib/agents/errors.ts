@@ -5,19 +5,26 @@ export const HTML = "text/html";
 export const MARKDOWN = "text/markdown";
 export const JSON_TYPE = "application/json";
 
+/** The addresses of the JSON APIs, the REST API and the registry: they answer JSON whatever the request accepts. */
+const JSON_APIS = /^\/(api|r)(\/|$)/;
+
 /**
  * The body of a JSON error. `error` and `message` are the fields the shadcn
  * CLI prints (`[not_found] …`) when the registry answers with one.
  */
 export interface ApiError {
-  error: "not_acceptable" | "not_found";
+  error:
+    | "invalid_parameter"
+    | "method_not_allowed"
+    | "not_acceptable"
+    | "not_found";
   hint: string;
   message: string;
   status: number;
 }
 
 /** Where an agent that took a wrong turn starts again. */
-const START_HERE = `Start from ${siteConfig.url}/llms.txt (every docs page, as markdown) or ${siteConfig.url}/openapi.json (the registry and the docs as an API).`;
+const START_HERE = `Start from ${siteConfig.url}/api/v1 (the REST API), ${siteConfig.url}/openapi.json (its description) or ${siteConfig.url}/llms.txt (every docs page, as markdown).`;
 
 /** The answer depends on the request's `Accept`: a cache keeps one per value. */
 export function withVary(response: Response) {
@@ -42,7 +49,8 @@ There is no page at \`${pathname}\` on ${siteConfig.name}. It may have moved, or
 - [llms.txt](${siteConfig.url}/llms.txt): every docs page, each as markdown
 - [Docs](${siteConfig.url}/llm): the introduction, as markdown
 - [Sitemap](${siteConfig.url}/sitemap.xml): every page of the site
-- [OpenAPI](${siteConfig.url}/openapi.json): the registry and the docs as an API
+- [REST API](${siteConfig.url}/api/v1): the components, their docs and the catalog as JSON
+- [OpenAPI](${siteConfig.url}/openapi.json): the REST API, the registry and the docs, described
 `;
   return new Response(markdown, {
     headers: {
@@ -102,7 +110,7 @@ You requested: ${accept}
  */
 export function missingResponse(request: Request, routerResponse: Response) {
   const { pathname } = new URL(request.url);
-  const type = pathname.startsWith("/r/")
+  const type = JSON_APIS.test(pathname)
     ? JSON_TYPE
     : negotiate(request.headers.get("accept"), [HTML, MARKDOWN, JSON_TYPE]);
   if (type === MARKDOWN) {

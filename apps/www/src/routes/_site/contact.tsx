@@ -52,9 +52,16 @@ function ContactPage() {
       </p>
       <h2>Security</h2>
       <p>
-        Report a vulnerability privately by email to {email}, not in a public
-        issue. Name the package or the page that is affected and how to
-        reproduce it, so it can be fixed before it is made public.
+        Report a vulnerability privately through{" "}
+        <a
+          href={`${siteConfig.links.github}/security`}
+          rel="noopener noreferrer"
+        >
+          GitHub's security advisories
+        </a>
+        , as the site's security.txt says, not in a public issue. Name the
+        package or the page that is affected and how to reproduce it, so it can
+        be fixed before it is made public.
       </p>
       <h2>Everything else</h2>
       <p>
