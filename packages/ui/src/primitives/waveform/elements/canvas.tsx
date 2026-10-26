@@ -391,9 +391,14 @@ export function Canvas(componentProps: Canvas.Props) {
       task.flush();
     };
 
+    // A resize is drawn on the next frame, still before it is shown: drawing
+    // it in the observer's callback changes the canvas inside the layout pass
+    // that measured it.
+    let resizeFrame = 0;
     const resizeObserver = new ResizeObserver(([entry]) => {
       if (entry) {
-        resize(entry);
+        cancelAnimationFrame(resizeFrame);
+        resizeFrame = requestAnimationFrame(() => resize(entry));
       }
     });
     // Observing again reports the size afresh.
@@ -462,6 +467,7 @@ export function Canvas(componentProps: Canvas.Props) {
     return () => {
       task.stop();
       controller.abort();
+      cancelAnimationFrame(resizeFrame);
       resizeObserver.disconnect();
       themeObserver.disconnect();
       stopObservingVisibility();

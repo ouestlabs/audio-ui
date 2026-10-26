@@ -127,10 +127,19 @@ export function Viewport(componentProps: Viewport.Props) {
       report();
     };
     report();
+    // A resize is reported on the next frame: reporting it in the observer's
+    // callback re-renders the lanes inside the layout pass that measured them.
+    let frame = 0;
     const observer =
-      typeof ResizeObserver === "undefined" ? null : new ResizeObserver(report);
+      typeof ResizeObserver === "undefined"
+        ? null
+        : new ResizeObserver(() => {
+            cancelAnimationFrame(frame);
+            frame = requestAnimationFrame(report);
+          });
     observer?.observe(element);
     return () => {
+      cancelAnimationFrame(frame);
       observer?.disconnect();
       viewportRef.current = null;
       scrollerRef.current = null;

@@ -47,6 +47,15 @@ const DOCS_MDX = /^\/docs\/(.+)\.mdx$/;
 
 const IMMUTABLE = "public, max-age=31536000, s-maxage=31536000, immutable";
 
+/** Docs pages merged into another: each old address and the page that holds it now. */
+const MOVED_PAGES = new Map([
+  [
+    "/docs/components/base/arrangement-editor",
+    "/docs/components/base/arrangement",
+  ],
+  ["/docs/components/base/timeline", "/docs/components/base/arrangement"],
+]);
+
 /** What an agent reading the site's machine surfaces is told to PostHog, with no person attached. */
 function agentEvent(pathname: string, method: string) {
   const item = REGISTRY_FILE.exec(pathname);
@@ -221,8 +230,10 @@ const edge = createMiddleware().server(async ({ next, request }) => {
   if (url.pathname.startsWith("/ingest/")) {
     return proxyPostHog(request, url);
   }
-  // A layout's route id, found by a crawler in the router's state: the page it stands for.
-  const address = addressOfLayoutPath(url.pathname);
+  // A layout's route id, found by a crawler in the router's state, or the old
+  // address of a merged page: the page it stands for.
+  const address =
+    addressOfLayoutPath(url.pathname) ?? MOVED_PAGES.get(url.pathname);
   if (address) {
     return redirect(`${url.origin}${address}${url.search}`, true);
   }

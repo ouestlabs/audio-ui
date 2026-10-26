@@ -214,11 +214,19 @@ export default function BlockWaveformPlayer() {
     if (!frame) {
       return;
     }
+    // Measured on the next frame, outside the layout pass that resized it.
+    let measureFrame = 0;
     const observer = new ResizeObserver(([entry]) => {
-      setWidth(entry?.contentRect.width ?? 0);
+      cancelAnimationFrame(measureFrame);
+      measureFrame = requestAnimationFrame(() =>
+        setWidth(entry?.contentRect.width ?? 0)
+      );
     });
     observer.observe(frame);
-    return () => observer.disconnect();
+    return () => {
+      cancelAnimationFrame(measureFrame);
+      observer.disconnect();
+    };
   }, []);
 
   // Starts on the synthesized phrase.

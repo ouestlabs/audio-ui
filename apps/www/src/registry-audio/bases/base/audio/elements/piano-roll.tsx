@@ -467,11 +467,19 @@ function PianoRollVelocityScale({
     if (!element) {
       return;
     }
+    // Measured on the next frame, outside the layout pass that resized it.
+    let frame = 0;
     const observer = new ResizeObserver(([entry]) => {
-      setHeight(entry?.contentRect.height ?? 0);
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() =>
+        setHeight(entry?.contentRect.height ?? 0)
+      );
     });
     observer.observe(element);
-    return () => observer.disconnect();
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+    };
   }, []);
   return (
     <div

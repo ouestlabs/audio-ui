@@ -193,9 +193,17 @@ function useFitZoom(
       setFit((viewport.clientWidth - (lead?.offsetWidth ?? 0)) / duration);
     };
     measure();
-    const observer = new ResizeObserver(measure);
+    // Measured again on the next frame, outside the layout pass that resized it.
+    let frame = 0;
+    const observer = new ResizeObserver(() => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(measure);
+    });
     observer.observe(viewport);
-    return () => observer.disconnect();
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+    };
   }, [duration, viewportRef]);
   return fit;
 }
@@ -209,11 +217,19 @@ function useStepWidth(duration: number) {
     if (!grid) {
       return;
     }
+    // Measured on the next frame, outside the layout pass that resized it.
+    let frame = 0;
     const observer = new ResizeObserver(([entry]) => {
-      setUnit((entry?.contentRect.width ?? 0) / duration);
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() =>
+        setUnit((entry?.contentRect.width ?? 0) / duration)
+      );
     });
     observer.observe(grid);
-    return () => observer.disconnect();
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+    };
   }, [duration]);
   return { gridRef, unit };
 }
@@ -632,9 +648,10 @@ export default function BlockPianoRoll() {
           Drop a MIDI file to import
         </div>
       ) : null}
-      <div className="flex items-center justify-between gap-2 p-1">
+      {/* Narrow, the tools go under the transport rather than over its position. */}
+      <div className="flex flex-wrap items-center justify-between gap-2 p-1">
         <Transport
-          className="min-w-0 flex-1 flex-nowrap"
+          className="min-w-0 flex-1 basis-full flex-nowrap @lg/panel:basis-0"
           looping={looping}
           metronome={metronome}
           onLoopingChange={setLooping}
