@@ -1,11 +1,41 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  Link,
+  useHydrated,
+  useNavigate,
+} from "@tanstack/react-router";
 import { cn } from "cn";
+import { useCallback } from "react";
+import { GalleryFilters } from "@/components/site/gallery/filters";
 import { FrameContent, frameClassName } from "@/components/site/layout/frame";
-import { DEVICES, groupByCategory } from "@/lib/devices";
+import { Button } from "@/components/ui/button";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyTitle,
+} from "@/components/ui/empty";
+import {
+  DEVICES,
+  type DeviceFilter,
+  filterDevices,
+  groupByCategory,
+} from "@/lib/devices";
 import { absoluteUrl, jsonLd, pageHead, SITE, websiteJsonLd } from "../lib/seo";
+
+const NO_FILTER: DeviceFilter = {};
+/** A filter's value from the address: a word, or nothing when it is absent or empty. */
+const text = (value: unknown) =>
+  typeof value === "string" && value !== "" ? value : undefined;
 
 export const Route = createFileRoute("/")({
   component: Home,
+  // The gallery's filters live in the address, so a filtered view can be shared: `/?collection=shadcn-styles`.
+  validateSearch: (search: Record<string, unknown>): DeviceFilter => ({
+    category: text(search.category),
+    collection: text(search.collection),
+    q: text(search.q),
+  }),
   head: () => ({
     ...pageHead("/", {
       description: SITE.description,
@@ -34,6 +64,28 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
+  const search = Route.useSearch();
+  const navigate = useNavigate({ from: Route.fullPath });
+  // The page is prerendered with no filter: until it hydrates, it shows what the HTML shows, then the address's filter.
+  const filter = useHydrated() ? search : NO_FILTER;
+  const devices = filterDevices(filter);
+  const filtered = Boolean(filter.q || filter.category || filter.collection);
+
+  const setFilter = useCallback(
+    (next: DeviceFilter) =>
+      navigate({
+        replace: true,
+        resetScroll: false,
+        search: {
+          category: next.category,
+          collection: next.collection,
+          q: next.q || undefined,
+        },
+      }),
+    [navigate]
+  );
+  const clear = useCallback(() => setFilter(NO_FILTER), [setFilter]);
+
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 p-8">
       <div className="flex flex-col gap-2">
@@ -43,8 +95,34 @@ function Home() {
           repository.
         </p>
       </div>
+      <GalleryFilters filter={filter} onChange={setFilter} />
+      <div className="flex items-center gap-3 text-muted-foreground text-sm">
+        <p role="status">
+          {filtered
+            ? `${devices.length} of ${DEVICES.length} devices`
+            : `${DEVICES.length} devices`}
+        </p>
+        {filtered ? (
+          <Button onClick={clear} size="sm" variant="link">
+            Clear filters
+          </Button>
+        ) : null}
+      </div>
+      {devices.length === 0 ? (
+        <Empty className="border">
+          <EmptyHeader>
+            <EmptyTitle>No device matches</EmptyTitle>
+            <EmptyDescription>
+              Try other words, or another collection or category.
+            </EmptyDescription>
+          </EmptyHeader>
+          <Button onClick={clear} size="sm" variant="outline">
+            Clear filters
+          </Button>
+        </Empty>
+      ) : null}
       <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        {groupByCategory(DEVICES).flatMap((group) =>
+        {groupByCategory(devices).flatMap((group) =>
           group.devices.map((device) => (
             <li className="flex" key={device.slug}>
               <Link
@@ -67,7 +145,9 @@ function Home() {
                 </FrameContent>
                 <span className="flex flex-1 flex-col gap-1 p-3">
                   <span className="text-muted-foreground text-xs">
-                    {group.category}
+                    {device.collection
+                      ? `${group.category} · ${device.collection}`
+                      : group.category}
                   </span>
                   <span className="font-medium">{device.title}</span>
                   <span className="text-muted-foreground text-sm">

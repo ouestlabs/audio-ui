@@ -1,0 +1,422 @@
+/* MAIA-16: a sixteen-band vocoder. One light, top left.
+   Materials: aubergine enamel, cream caps, a black window of amber lamp ladders,
+   square plastic keys.
+   Plain CSS: change the tokens on .maia-cabinet first. */
+
+.maia-cabinet {
+  --panel: #33263a;
+  --panel-hi: #43334b;
+  --ink: #f1ebe3;
+  --ink-dim: #b8a9bd;
+  --amber: #ffb84a;
+  --orange: #ff7a2f;
+  --red: #ff3b30;
+  --focus: #fff;
+  box-sizing: border-box;
+  display: flex;
+  flex: 1 0 auto;
+  justify-content: center;
+  padding: 2rem 1.5rem;
+  /* The stage follows the theme; the faceplate on it keeps its enamel. */
+  background: radial-gradient(
+    ellipse at 50% 0,
+    color-mix(in oklab, var(--foreground) 7%, var(--background)),
+    var(--background) 70%
+  );
+}
+
+.maia {
+  position: relative;
+  box-sizing: border-box;
+  display: grid;
+  gap: 1rem;
+  align-content: start;
+  width: min(100%, 54rem);
+  height: max-content;
+  padding: 1rem 1.25rem 1.25rem;
+  margin-block: auto;
+  font-family: "Helvetica Neue", "Arial Narrow", Arial, sans-serif;
+  color: var(--ink);
+  background:
+    repeating-linear-gradient(
+      90deg,
+      rgb(255 255 255 / 0.018) 0 1px,
+      transparent 1px 3px
+    ),
+    linear-gradient(180deg, var(--panel-hi), var(--panel) 40%);
+  border-radius: 5px;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.12),
+    inset 0 -2px 0 rgb(0 0 0 / 0.45),
+    0 24px 50px rgb(0 0 0 / 0.6);
+}
+
+/* Header: the name, and the voice's source and transport */
+.maia-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.maia-name {
+  margin: 0;
+  font:
+    300 1.6rem / 1 "Helvetica Neue",
+    Arial,
+    sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.32em;
+}
+
+.maia-name span {
+  font-weight: 700;
+  color: var(--amber);
+}
+
+.maia-tagline {
+  margin: 0.3rem 0 0;
+  font-size: 0.62rem;
+  color: var(--ink-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+}
+
+.maia-transport {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.maia-status {
+  margin: -0.25rem 0 0;
+  font-size: 0.72rem;
+  color: var(--ink-dim);
+}
+
+/* The window: sixteen ladders of amber lamps, the band under each printed below */
+.maia-display {
+  display: grid;
+  gap: 0.45rem;
+  padding: 0.85rem 1rem 0.6rem;
+  background: linear-gradient(180deg, #0b080d, #151018);
+  border-radius: 4px;
+  box-shadow:
+    inset 0 3px 8px #000,
+    0 0 0 3px #1c1520,
+    0 1px 0 3px rgb(255 255 255 / 0.08);
+}
+
+.maia-bands {
+  display: flex;
+  gap: 0.4rem;
+  height: 8.5rem;
+}
+
+/* The zones are painted on the channel, dimmed; the level lights them back up where it reaches */
+.maia-band {
+  position: relative;
+  flex: 1;
+  height: 100%;
+  overflow: hidden;
+  background:
+    linear-gradient(rgb(0 0 0 / 0.78), rgb(0 0 0 / 0.78)),
+    linear-gradient(
+      0deg,
+      var(--amber) 0 74%,
+      var(--orange) 74% 92%,
+      var(--red) 92%
+    );
+  isolation: isolate;
+  mask: repeating-linear-gradient(0deg, #000 0 5px, transparent 5px 7px);
+}
+
+.maia-band-level {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: rgb(190 190 190);
+  mix-blend-mode: color-dodge;
+}
+
+.maia-band-scale {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.maia-band-scale span {
+  flex: 1;
+  font:
+    600 0.55rem / 1 ui-monospace,
+    "SF Mono",
+    Menlo,
+    monospace;
+  color: var(--ink-dim);
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* Sections: a printed line with the title cut into it */
+.maia-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem 1.75rem;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.maia-section {
+  display: grid;
+  gap: 0.8rem;
+  align-content: start;
+  min-width: 0;
+  margin: 0;
+}
+
+.maia-legend {
+  padding-bottom: 0.35rem;
+  margin: 0;
+  font:
+    700 0.6rem / 1 "Arial Narrow",
+    Arial,
+    sans-serif;
+  color: var(--ink-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  border-bottom: 1px solid color-mix(in oklab, var(--ink) 30%, transparent);
+}
+
+.maia-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem 1rem;
+  align-items: flex-end;
+}
+
+.maia-label {
+  font:
+    700 0.6rem / 1 "Arial Narrow",
+    Arial,
+    sans-serif;
+  color: var(--ink);
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  white-space: nowrap;
+}
+
+/* Knob: a cream cap with a dark pointer, a printed scale around it */
+.maia-knob {
+  --knob-size: 2.9rem;
+  position: relative;
+  display: inline-grid;
+  gap: 0.95rem;
+  justify-items: center;
+  padding-top: 0.9rem;
+}
+
+.maia-knob-control {
+  position: relative;
+  width: var(--knob-size);
+  aspect-ratio: 1;
+  touch-action: none;
+  cursor: ns-resize;
+}
+
+.maia-knob-thumb {
+  position: absolute;
+  inset: 13%;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 32% 28%, rgb(255 255 255 / 0.75), transparent 50%),
+    repeating-conic-gradient(from 0deg, #ece4d2 0 5deg, #d1c7b1 5deg 10deg);
+  border-radius: 50%;
+  box-shadow:
+    0 6px 8px rgb(0 0 0 / 0.55),
+    inset 0 -3px 4px rgb(0 0 0 / 0.2),
+    0 0 0 3px #1c1520,
+    0 0 0 4px rgb(255 255 255 / 0.08);
+}
+
+/* The pointer line rides the cap, so it turns with it */
+.maia-knob-thumb::after {
+  position: absolute;
+  top: 8%;
+  left: 50%;
+  width: 3px;
+  height: 32%;
+  content: "";
+  background: #2a1f2e;
+  border-radius: 2px;
+  translate: -50% 0;
+}
+
+.maia-knob-control[data-dragging] .maia-knob-thumb {
+  filter: brightness(1.06);
+}
+
+.maia-knob-mark {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.maia-knob-tick {
+  position: absolute;
+  top: -1px;
+  left: 50%;
+  width: 1px;
+  height: 5px;
+  background: var(--ink-dim);
+  translate: -50% 0;
+}
+
+.maia-knob-mark[data-active] .maia-knob-tick {
+  background: var(--amber);
+}
+
+.maia-knob-numeral {
+  position: absolute;
+  top: -1.1rem;
+  left: 50%;
+  font-size: 0.58rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: var(--ink-dim);
+  rotate: calc(var(--knob-mark-angle) * -1);
+  translate: -50% 0;
+}
+
+/* Lamps: a dim lens when off, an amber core and a small halo when on */
+.maia-lamp {
+  display: block;
+  width: 0.55rem;
+  height: 0.55rem;
+  background: radial-gradient(circle at 35% 30%, #5a3a10, #2a1a08);
+  border-radius: 50%;
+  box-shadow:
+    inset 0 1px 2px #000,
+    0 0 0 2px #1c1520;
+}
+
+.maia-lamp[data-on] {
+  background: radial-gradient(
+    circle at 35% 30%,
+    #fff3c4,
+    var(--amber) 45%,
+    #b8680a
+  );
+  box-shadow:
+    0 0 0 2px #1c1520,
+    0 0 7px 2px rgb(255 184 74 / 0.6);
+}
+
+/* Keys: square cream plastic with a lamp; pressed, the key sinks */
+.maia-selector {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.maia-key {
+  display: inline-flex;
+  gap: 0.45rem;
+  align-items: center;
+  padding: 0.5rem 0.7rem;
+  font:
+    700 0.62rem / 1 "Arial Narrow",
+    Arial,
+    sans-serif;
+  color: #2a1f2e;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  cursor: pointer;
+  background: linear-gradient(180deg, #f3ede1, #cfc5b2);
+  border: 0;
+  border-radius: 3px;
+  box-shadow:
+    0 0 0 2px #1c1520,
+    0 3px 4px rgb(0 0 0 / 0.5),
+    inset 0 1px 0 #fff;
+}
+
+.maia-key[aria-pressed="true"] {
+  background: linear-gradient(180deg, #cfc5b2, #e6dece);
+  box-shadow:
+    0 0 0 2px #1c1520,
+    0 1px 1px rgb(0 0 0 / 0.5),
+    inset 0 2px 3px rgb(0 0 0 / 0.18);
+  transform: translateY(1px);
+}
+
+.maia-key:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
+.maia-key:focus-visible,
+.maia-knob-thumb:has(:focus-visible),
+.maia-piano-key:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* Keys of the keyboard: ivory and ebony in a dark bed */
+.maia-piano {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 6.5rem;
+  padding-top: 4px;
+  background: #0d0a0e;
+  border-radius: 4px;
+  box-shadow:
+    0 0 0 3px #4a3a52,
+    0 8px 14px rgb(0 0 0 / 0.5);
+}
+
+.maia-piano-key {
+  position: absolute;
+  top: 4px;
+  border: 0;
+}
+
+.maia-piano-key[data-color="white"] {
+  height: calc(100% - 4px);
+  background: linear-gradient(180deg, #fffdf6, #e6dfcc);
+  border: 1px solid #1a1613;
+  border-radius: 0 0 3px 3px;
+  box-shadow: inset 0 -5px 4px rgb(0 0 0 / 0.14);
+}
+
+.maia-piano-key[data-color="black"] {
+  z-index: 1;
+  height: 60%;
+  background: linear-gradient(180deg, #2e2a2f, #050405);
+  border-radius: 0 0 3px 3px;
+  box-shadow:
+    0 3px 4px rgb(0 0 0 / 0.6),
+    inset 0 -3px 2px rgb(255 255 255 / 0.12);
+}
+
+.maia-piano-key[data-active] {
+  filter: brightness(0.82) sepia(0.5);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .maia-key {
+    transition:
+      transform 80ms linear,
+      box-shadow 80ms linear;
+  }
+}
+
+@media (max-width: 47.99rem) {
+  .maia-cabinet {
+    padding-inline: 0.5rem;
+  }
+
+  .maia-bands {
+    gap: 0.2rem;
+  }
+}

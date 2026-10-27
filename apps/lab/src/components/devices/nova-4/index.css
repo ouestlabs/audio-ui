@@ -1,0 +1,543 @@
+/* NOVA-4: an 80s FM synth. One light, top left.
+   Materials: dark chocolate enamel, flat membrane buttons in teal and maroon,
+   a yellow-green backlit LCD, red LEDs.
+   Plain CSS: change the tokens on .nova-cabinet first. */
+
+.nova-cabinet {
+  --panel: #2a2522;
+  --panel-hi: #37302b;
+  --ink: #efe8db;
+  --ink-dim: #a39a8f;
+  --maroon: #9d3346;
+  --teal: #2b9a90;
+  --led: #ff3b2f;
+  --lcd: #b3c65a;
+  --lcd-ink: #1d2a10;
+  --focus: #fff;
+  box-sizing: border-box;
+  display: flex;
+  flex: 1 0 auto;
+  justify-content: center;
+  padding: 2rem 1.5rem;
+  /* The stage follows the theme; the faceplate on it stays dark, like the device. */
+  background: radial-gradient(
+    ellipse at 50% 0,
+    color-mix(in oklab, var(--foreground) 7%, var(--background)),
+    var(--background) 70%
+  );
+}
+
+/* The faceplate: flat enamel, two printed stripes under the header */
+.nova {
+  position: relative;
+  box-sizing: border-box;
+  display: grid;
+  gap: 1.1rem;
+  align-content: start;
+  width: min(100%, 60rem);
+  height: max-content;
+  padding: 1rem 1.25rem 1.25rem;
+  /* Centered on the stage when there is room; at the top, scrolling, when there is not. */
+  margin-block: auto;
+  font-family: "Helvetica Neue", "Arial Narrow", Arial, sans-serif;
+  color: var(--ink);
+  background: linear-gradient(180deg, var(--panel-hi), var(--panel) 30%);
+  border-radius: 4px;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.1),
+    inset 0 -2px 0 rgb(0 0 0 / 0.5),
+    0 24px 50px rgb(0 0 0 / 0.6);
+}
+
+.nova-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem 1.5rem;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+/* Header: the name, and the screen. The stripes run under it. */
+.nova-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 0.9rem;
+  border-bottom: 3px solid var(--maroon);
+  box-shadow: 0 4px 0 -1px var(--teal);
+}
+
+.nova-name {
+  margin: 0;
+  font:
+    italic 800 1.5rem / 1 "Helvetica Neue",
+    Arial,
+    sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+}
+
+.nova-name span {
+  color: var(--teal);
+}
+
+.nova-tagline {
+  margin: 0.3rem 0 0;
+  font-size: 0.62rem;
+  color: var(--ink-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+}
+
+/* The LCD: dark characters on a yellow-green backlight, the algorithm drawn at its right */
+.nova-lcd {
+  display: flex;
+  flex: 1 1 18rem;
+  gap: 0.75rem;
+  align-items: center;
+  max-width: 26rem;
+  height: 4.8rem;
+  padding: 0.35rem 0.6rem 0.35rem 0.9rem;
+  background:
+    radial-gradient(ellipse at 30% 0, rgb(255 255 220 / 0.35), transparent 60%),
+    var(--lcd);
+  border-radius: 2px;
+  box-shadow:
+    inset 0 2px 5px rgb(0 0 0 / 0.45),
+    0 0 0 3px #12100e,
+    0 1px 0 3px rgb(255 255 255 / 0.08);
+}
+
+.nova-lcd-text {
+  display: grid;
+  flex: 1;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.nova-lcd-line {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font:
+    700 0.8rem / 1.1 ui-monospace,
+    "SF Mono",
+    Menlo,
+    monospace;
+  color: var(--lcd-ink);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  white-space: nowrap;
+}
+
+.nova-lcd-dim {
+  opacity: 0.7;
+}
+
+.nova-diagram {
+  flex: none;
+  width: 5.25rem;
+  height: 4.3rem;
+  overflow: visible;
+}
+
+.nova-diagram line,
+.nova-diagram path,
+.nova-diagram rect {
+  stroke: var(--lcd-ink);
+  stroke-width: 1;
+}
+
+.nova-diagram rect {
+  fill: var(--lcd);
+}
+
+.nova-diagram rect[data-carrier] {
+  fill: var(--lcd-ink);
+}
+
+.nova-diagram text {
+  font:
+    700 6.5px ui-monospace,
+    Menlo,
+    monospace;
+  text-anchor: middle;
+  fill: var(--lcd-ink);
+}
+
+.nova-diagram rect[data-carrier] + text {
+  fill: var(--lcd);
+}
+
+/* Sections: a small printed title over the group */
+.nova-section {
+  display: grid;
+  gap: 0.6rem;
+  align-content: start;
+  min-width: 0;
+  margin: 0;
+}
+
+.nova-legend {
+  margin: 0;
+  font:
+    700 0.6rem / 1 "Arial Narrow",
+    Arial,
+    sans-serif;
+  color: var(--ink-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+}
+
+.nova-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+  align-items: flex-end;
+}
+
+.nova-label {
+  font:
+    700 0.58rem / 1 "Arial Narrow",
+    Arial,
+    sans-serif;
+  color: var(--ink);
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  white-space: nowrap;
+}
+
+/* Membrane buttons: flat printed keys, a red LED over each. Pressed, the key sinks and its LED lights. */
+.nova-membranes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.nova-membrane {
+  display: grid;
+  gap: 0.35rem;
+  justify-items: center;
+  padding: 0;
+  cursor: pointer;
+  background: none;
+  border: 0;
+}
+
+.nova-membrane-face {
+  display: grid;
+  place-items: center;
+  width: 2.1rem;
+  height: 1.55rem;
+  font:
+    700 0.72rem / 1 "Helvetica Neue",
+    Arial,
+    sans-serif;
+  color: #f6efe2;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.14), transparent 40%),
+    var(--face, var(--teal));
+  border-radius: 2px;
+  box-shadow:
+    0 0 0 2px #141110,
+    0 3px 3px rgb(0 0 0 / 0.55),
+    inset 0 1px 0 rgb(255 255 255 / 0.3);
+}
+
+.nova-membrane[data-color="maroon"] {
+  --face: var(--maroon);
+}
+
+.nova-membrane[aria-pressed="true"] .nova-membrane-face {
+  box-shadow:
+    0 0 0 2px #141110,
+    0 1px 1px rgb(0 0 0 / 0.55),
+    inset 0 2px 3px rgb(0 0 0 / 0.35);
+  filter: brightness(0.9);
+  transform: translateY(1px);
+}
+
+.nova-membrane:focus-visible {
+  outline: none;
+}
+
+.nova-membrane:focus-visible .nova-membrane-face,
+.nova-fader-thumb:has(:focus-visible),
+.nova-knob-thumb:has(:focus-visible),
+.nova-piano-key:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* LEDs are the only things that glow: a dark red lens when off, a bright core and a small halo when on */
+.nova-led {
+  display: block;
+  width: 0.4rem;
+  height: 0.4rem;
+  background: radial-gradient(circle at 35% 30%, #5c1712, #2a0806);
+  border-radius: 50%;
+  box-shadow:
+    inset 0 1px 1px #000,
+    0 0 0 1px #0e0c0b;
+}
+
+.nova-led[data-on] {
+  background: radial-gradient(
+    circle at 35% 30%,
+    #ffd2c4,
+    var(--led) 50%,
+    #a3160e
+  );
+  box-shadow:
+    0 0 0 1px #0e0c0b,
+    0 0 6px 1px rgb(255 59 47 / 0.6);
+}
+
+/* Operators: four strips side by side, each in a thin ruled box */
+.nova-operators {
+  display: grid;
+  flex: 1 1 30rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.6rem;
+}
+
+.nova-operator {
+  display: grid;
+  gap: 0.7rem;
+  align-content: start;
+  padding: 0.55rem 0.65rem 0.75rem;
+  background: rgb(0 0 0 / 0.16);
+  border-radius: 3px;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.08);
+}
+
+.nova-operator-head {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nova-operator .nova-legend {
+  color: var(--ink);
+}
+
+.nova-out {
+  display: inline-flex;
+  gap: 0.3rem;
+  align-items: center;
+  font:
+    700 0.5rem / 1 "Arial Narrow",
+    Arial,
+    sans-serif;
+  color: var(--ink-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
+.nova-operator-body {
+  display: grid;
+  grid-template-columns: repeat(2, auto);
+  gap: 0.85rem 0.7rem;
+  align-items: end;
+  justify-items: center;
+}
+
+.nova-globals {
+  display: grid;
+  gap: 1.1rem;
+  align-content: end;
+}
+
+/* Knob: a small black cap with a white pointer, a ring of ticks, the reached ones teal */
+.nova-knob {
+  --knob-size: 2.4rem;
+  position: relative;
+  display: inline-grid;
+  gap: 0.55rem;
+  justify-items: center;
+  padding-top: 0.35rem;
+}
+
+.nova-knob-control {
+  position: relative;
+  width: var(--knob-size);
+  aspect-ratio: 1;
+  touch-action: none;
+  cursor: ns-resize;
+}
+
+.nova-knob-thumb {
+  position: absolute;
+  inset: 16%;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 32% 28%, rgb(255 255 255 / 0.2), transparent 45%),
+    repeating-conic-gradient(from 0deg, #24201d 0 5deg, #12100e 5deg 10deg);
+  border-radius: 50%;
+  box-shadow:
+    0 4px 6px rgb(0 0 0 / 0.6),
+    inset 0 1px 0 rgb(255 255 255 / 0.3),
+    inset 0 -2px 3px rgb(0 0 0 / 0.4),
+    0 0 0 2px #0a0908;
+}
+
+/* The pointer line rides the cap, so it turns with it */
+.nova-knob-thumb::after {
+  position: absolute;
+  top: 8%;
+  left: 50%;
+  width: 2px;
+  height: 34%;
+  content: "";
+  background: #f4efe4;
+  border-radius: 1px;
+  translate: -50% 0;
+}
+
+.nova-knob-control[data-dragging] .nova-knob-thumb {
+  filter: brightness(1.15);
+}
+
+.nova-knob-mark {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.nova-knob-tick {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 1px;
+  height: 4px;
+  background: var(--ink-dim);
+  translate: -50% 0;
+}
+
+.nova-knob-mark[data-active] .nova-knob-tick {
+  background: var(--teal);
+}
+
+/* Fader: a slot with a teal level in it, and a dark cap with a white line */
+.nova-fader {
+  --strip-h: 4.6rem;
+  display: inline-grid;
+  gap: 0.95rem;
+  justify-items: center;
+}
+
+.nova-fader-control {
+  position: relative;
+  width: 1.8rem;
+  height: var(--strip-h);
+}
+
+.nova-fader-track {
+  position: relative;
+  width: 0.3rem;
+  height: 100%;
+  margin-inline: auto;
+  overflow: hidden;
+  background: #0b0908;
+  border-radius: 2px;
+  box-shadow:
+    inset 0 1px 2px #000,
+    0 1px 0 rgb(255 255 255 / 0.08);
+}
+
+.nova-fader-indicator {
+  position: absolute;
+  left: 0;
+  background: linear-gradient(180deg, #5fd0c5, var(--teal));
+}
+
+.nova-fader-thumb {
+  position: absolute;
+  width: 1.5rem;
+  height: 0.9rem;
+  background:
+    linear-gradient(
+      180deg,
+      transparent calc(50% - 1px),
+      #f4efe4 calc(50% - 1px) calc(50% + 1px),
+      transparent calc(50% + 1px)
+    ),
+    linear-gradient(180deg, #4a423c, #2a2522 60%, #1c1917);
+  border-radius: 2px;
+  box-shadow:
+    0 4px 5px rgb(0 0 0 / 0.6),
+    inset 0 1px 0 rgb(255 255 255 / 0.25);
+}
+
+.nova-fader-thumb::before {
+  position: absolute;
+  inset: -0.5rem;
+  content: "";
+}
+
+.nova-fader-control[data-dragging] .nova-fader-thumb {
+  filter: brightness(1.25);
+}
+
+/* Keys: white and black plastic in a dark bed */
+.nova-piano {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 6.5rem;
+  padding-top: 4px;
+  background: #0d0b0a;
+  border-radius: 3px;
+  box-shadow:
+    0 0 0 3px #3a322b,
+    0 8px 14px rgb(0 0 0 / 0.5);
+}
+
+.nova-piano-key {
+  position: absolute;
+  top: 4px;
+  border: 0;
+}
+
+.nova-piano-key[data-color="white"] {
+  height: calc(100% - 4px);
+  background: linear-gradient(180deg, #fbfaf7, #e2ded6);
+  border: 1px solid #1a1613;
+  border-radius: 0 0 2px 2px;
+  box-shadow: inset 0 -5px 4px rgb(0 0 0 / 0.12);
+}
+
+.nova-piano-key[data-color="black"] {
+  z-index: 1;
+  height: 60%;
+  background: linear-gradient(180deg, #34302d, #080706);
+  border-radius: 0 0 2px 2px;
+  box-shadow:
+    0 3px 4px rgb(0 0 0 / 0.6),
+    inset 0 -3px 2px rgb(255 255 255 / 0.1);
+}
+
+.nova-piano-key[data-active] {
+  filter: brightness(0.85) sepia(0.3) hue-rotate(120deg);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .nova-membrane-face {
+    transition:
+      transform 80ms linear,
+      box-shadow 80ms linear;
+  }
+}
+
+@media (max-width: 47.99rem) {
+  .nova-cabinet {
+    padding-inline: 0.5rem;
+  }
+
+  .nova-operators {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

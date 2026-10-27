@@ -2,5 +2,6 @@
   "title": "Lyra-8",
   "description": "An 80s polyphonic synth: eight voices, sliders, a chorus and a keyboard.",
   "category": "Synths",
+  "collection": "shadcn styles",
   "uses": ["fader", "knob", "piano"]
 }

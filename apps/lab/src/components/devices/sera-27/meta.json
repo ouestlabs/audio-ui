@@ -1,0 +1,7 @@
+{
+  "title": "Sera-27",
+  "description": "A chord harp: 27 chord buttons, a plate of thirteen strings to strum, and a rhythm box that plays the chord.",
+  "category": "Chord harps",
+  "collection": "shadcn styles",
+  "uses": ["fader", "knob", "use-transport-clock", "drum-synthesis"]
+}

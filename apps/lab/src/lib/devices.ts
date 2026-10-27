@@ -5,8 +5,9 @@ import { type ComponentType, lazy } from "react";
  * its page, its link, its card and its place in the sitemap.
  *
  * What the lab reads, at the root of the folder:
- * - `meta.json`: a `title`, a `description`, a `category` and the `uses` (the
- *   audio/ui components it is made of)
+ * - `meta.json`: a `title`, a `description`, a `category`, the `uses` (the
+ *   audio/ui components it is made of) and, optionally, the `collection` it
+ *   belongs to (a series, such as the devices named after the shadcn styles)
  * - `index.tsx`: the device, as the default export, with its own `h1`; it only
  *   composes the panel
  * - `index.css` (optional): its style
@@ -20,6 +21,7 @@ import { type ComponentType, lazy } from "react";
  */
 const metas = import.meta.glob<{
   category?: string;
+  collection?: string;
   description: string;
   title: string;
   uses?: string[];
@@ -51,6 +53,7 @@ export const DEVICES = Object.entries(metas)
     const load = loaders[`${base}/index.tsx`];
     return {
       category: meta.category ?? "Other",
+      collection: meta.collection ?? null,
       Component: load ? lazy(load) : null,
       description: meta.description,
       image: `/og/${slug}.png`,
@@ -66,14 +69,44 @@ export const DEVICES = Object.entries(metas)
 
 export type Device = (typeof DEVICES)[number];
 
-/** The devices that match a search: in their title, description, category or components. */
+/** The devices that match a search: in their title, description, category, collection or components. */
 export function searchDevices(query: string) {
   const words = query.toLowerCase().split(" ").filter(Boolean);
   return DEVICES.filter((device) => {
     const text =
-      `${device.title} ${device.description} ${device.category} ${device.uses.join(" ")}`.toLowerCase();
+      `${device.title} ${device.description} ${device.category} ${device.collection ?? ""} ${device.uses.join(" ")}`.toLowerCase();
     return words.every((word) => text.includes(word));
   });
+}
+
+/** A category or a collection as it reads in an address: `Drum machines` is `drum-machines`. */
+export const paramOf = (name: string) =>
+  name.toLowerCase().replaceAll(" ", "-");
+
+const unique = (names: readonly (string | null)[]) =>
+  [...new Set(names.filter((name) => name !== null))].sort((a, b) =>
+    a.localeCompare(b)
+  );
+/** The categories and the collections the devices have, in alphabetical order. */
+export const CATEGORIES = unique(DEVICES.map((device) => device.category));
+export const COLLECTIONS = unique(DEVICES.map((device) => device.collection));
+
+/** What the gallery is filtered by: words, a category and a collection, each as its address form. */
+export interface DeviceFilter {
+  category?: string;
+  collection?: string;
+  q?: string;
+}
+
+/** The devices that pass every filter that is set. */
+export function filterDevices({ category, collection, q }: DeviceFilter) {
+  return searchDevices(q ?? "").filter(
+    (device) =>
+      (!category || paramOf(device.category) === category) &&
+      (!collection ||
+        (device.collection !== null &&
+          paramOf(device.collection) === collection))
+  );
 }
 
 /** Devices by category, the categories in alphabetical order. */

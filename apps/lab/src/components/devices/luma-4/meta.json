@@ -1,0 +1,7 @@
+{
+  "title": "Luma-4",
+  "description": "A photocell vibe: a lamp that pulses on four light cells, chorus or vibrato, and loops to throb.",
+  "category": "Effects",
+  "collection": "shadcn styles",
+  "uses": ["knob"]
+}

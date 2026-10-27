@@ -2,5 +2,6 @@
   "title": "Vega-8",
   "description": "An analog drum machine: eight synthesized voices and sixteen steps.",
   "category": "Drum machines",
+  "collection": "shadcn styles",
   "uses": ["sequencer", "knob", "use-transport-clock"]
 }
