@@ -13,7 +13,7 @@ bun run build    # the packages, the social images, then the site
 
 What the lab reads, at the root of the folder:
 
-- `meta.json`: `title`, `description`, `category` and `uses` (the audio/ui components it is made of)
+- `meta.json`: `title`, `description`, `category`, `uses` (the audio/ui components it is made of) and, optionally, `collection` (a series the gallery can show on its own, such as `"shadcn styles"`)
 - `index.tsx`: the device, as the default export, with its own `h1`. It only composes the panel
 - `index.css` (optional): its style
 - `preview.png` (optional): a capture, 1200x630, for its card and its social image
@@ -36,6 +36,7 @@ src/
 │   │   ├── layout/          shell (the sidebars and the frame), frame, frame-bar
 │   │   ├── navigation/      sidebar, command-menu, mode-switcher
 │   │   ├── details/         panel: the details of the device on the right
+│   │   ├── gallery/         filters: the home's search, collections and categories
 │   │   └── providers/       lab-provider: what the chrome's parts share
 │   ├── code/                reading a device's code: source-dialog, file-tree, highlighted-code
 │   ├── devices/             the devices themselves, a folder each
