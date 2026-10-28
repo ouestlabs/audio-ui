@@ -1,10 +1,19 @@
 import type { ErrorComponentProps } from "@tanstack/react-router";
 import posthog from "posthog-js";
 import { useEffect } from "react";
+import { isLoadFailure, reloadOnce } from "@/lib/load-failure";
 
-/** What a page that failed to render shows. The error goes to PostHog, which only the router's boundary would otherwise keep from it. */
+/**
+ * What a page that failed to render shows. A page whose code or data did not
+ * load reloads once, which fetches the current deploy; any other error, or a
+ * load failure the reload did not fix, goes to PostHog, which only the
+ * router's boundary would otherwise keep from it.
+ */
 export function ErrorPage({ error, reset }: ErrorComponentProps) {
   useEffect(() => {
+    if (isLoadFailure(error) && reloadOnce()) {
+      return;
+    }
     posthog.captureException(error);
   }, [error]);
 
