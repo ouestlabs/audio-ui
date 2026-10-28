@@ -23,6 +23,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { META_THEME_COLORS, siteConfig } from "@/lib/config";
 import { DESIGN_SYSTEM_BOOT_SCRIPT } from "@/lib/design-system/boot-cache";
 import { watchStyleCss } from "@/lib/design-system/style-css";
+import { watchPreloadErrors } from "@/lib/load-failure";
 import {
   buildAuthorJsonLd,
   buildOrganizationJsonLd,
@@ -53,6 +54,12 @@ const POSTHOG_OPTIONS = {
 /** Keeps the page carrying the CSS of the style it shows. */
 function StyleSheets() {
   useEffect(() => watchStyleCss(), []);
+  return null;
+}
+
+/** Reloads the page once when a newer deploy has replaced a chunk it asks for. */
+function PreloadErrors() {
+  useEffect(() => watchPreloadErrors(), []);
   return null;
 }
 
@@ -181,6 +188,7 @@ function RootDocument() {
                 </Analytics>
                 <TailwindIndicator />
                 <StyleSheets />
+                <PreloadErrors />
                 <PresetHandler />
                 <Toaster position="top-center" />
               </JotaiProvider>
