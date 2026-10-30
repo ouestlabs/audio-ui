@@ -7,10 +7,7 @@ import {
   useState,
   useSyncExternalStore,
 } from "react";
-import {
-  silentMicrophone,
-  useAudioSession,
-} from "@/hooks/use-audio-session";
+import { silentMicrophone, useAudioSession } from "@/hooks/use-audio-session";
 import { webAudio } from "@/lib/web-audio";
 
 const ANALYSER_FFT_SIZE = 4096;

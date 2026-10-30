@@ -259,7 +259,11 @@ export function FramedLayout({
               </div>
             </FrameHeader>
             <FrameContent className="flex min-h-0 flex-1 flex-col [timeline-scope:--frame-y]">
-              <div className="no-scrollbar flex min-h-0 flex-1 flex-col overflow-y-auto [scroll-timeline:--frame-y_y]">
+              {/* The router names it by this id: it scrolls to the top on a new page and back to where it was on a page it saw. */}
+              <div
+                className="no-scrollbar flex min-h-0 flex-1 flex-col overflow-y-auto [scroll-timeline:--frame-y_y]"
+                data-scroll-restoration-id="page"
+              >
                 {children}
               </div>
               <div aria-hidden="true" className="frame-fade-t" />

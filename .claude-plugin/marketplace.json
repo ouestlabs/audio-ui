@@ -12,13 +12,7 @@
       "source": "./skills",
       "description": "Builds audio interfaces with audio/ui, in four skills: audio-ui picks, installs and wires the components, web-audio gets sound out without clicks and keeps live meters and playheads out of React state, design styles the headless primitives into retro hardware, minimal or modern panels, and core builds the controls for Vue, Svelte, Solid, Angular and the plain DOM.",
       "category": "development",
-      "tags": [
-        "audio",
-        "web-audio",
-        "react",
-        "shadcn",
-        "daw"
-      ],
+      "tags": ["audio", "web-audio", "react", "shadcn", "daw"],
       "homepage": "https://www.audio-ui.dev/docs/agents",
       "repository": "https://github.com/ouestlabs/audio-ui",
       "license": "MIT",
@@ -35,12 +29,7 @@
         "svelte"
       ],
       "strict": false,
-      "skills": [
-        "./audio-ui",
-        "./core",
-        "./design",
-        "./web-audio"
-      ]
+      "skills": ["./audio-ui", "./core", "./design", "./web-audio"]
     }
   ]
 }
