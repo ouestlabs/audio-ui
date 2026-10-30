@@ -32,6 +32,7 @@ import {
   DEFAULT_ROBOTS,
   getSiteAuthors,
 } from "@/lib/seo/seo";
+import { guardTranslatedPage } from "@/lib/translated-page";
 import { cn } from "@/lib/utils";
 import fontsCss from "@/styles/fonts.css?url";
 import globalsCss from "@/styles/globals.css?url";
@@ -60,6 +61,12 @@ function StyleSheets() {
 /** Reloads the page once when a newer deploy has replaced a chunk it asks for. */
 function PreloadErrors() {
   useEffect(() => watchPreloadErrors(), []);
+  return null;
+}
+
+/** Keeps the page up when the browser translates it. */
+function TranslatedPage() {
+  useEffect(() => guardTranslatedPage(), []);
   return null;
 }
 
@@ -189,6 +196,7 @@ function RootDocument() {
                 <TailwindIndicator />
                 <StyleSheets />
                 <PreloadErrors />
+                <TranslatedPage />
                 <PresetHandler />
                 <Toaster position="top-center" />
               </JotaiProvider>
