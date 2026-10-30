@@ -10,5 +10,7 @@ export function getRouter() {
     defaultPreload: "intent",
     routeTree,
     scrollRestoration: true,
+    // The page scrolls in the frame's panel, not the window (framed-layout.tsx).
+    scrollToTopSelectors: ['[data-scroll-restoration-id="page"]'],
   });
 }
