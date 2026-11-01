@@ -86,7 +86,7 @@
     "@types/react-dom": "catalog:",
     "@vitejs/plugin-react": "catalog:",
     "chokidar": "^5.0.0",
-    "satori": "0.29.0",
+    "satori": "0.33.5",
     "shadcn": "catalog:",
     "tailwindcss": "catalog:",
     "tw-animate-css": "catalog:",
