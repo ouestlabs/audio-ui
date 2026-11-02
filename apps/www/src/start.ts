@@ -16,6 +16,7 @@ import {
 import { markdownOfPage } from "@/lib/agents/llm-page";
 import { getLlmsTxt } from "@/lib/agents/llms";
 import { negotiate } from "@/lib/agents/negotiate";
+import { registryEvent } from "@/lib/agents/registry-event";
 import { methodResponse, rateLimitedResponse } from "@/lib/agents/rest-api";
 import { BUILT_STYLES, DEFAULT_STYLE } from "@/lib/registry/core/styles";
 import { addressOfLayoutPath } from "@/lib/seo/layout-paths";
@@ -24,8 +25,8 @@ import { addressOfLayoutPath } from "@/lib/seo/layout-paths";
  * Runs before every request the Worker takes. Pages are prerendered files the
  * CDN serves without it, so it only sees what needs logic: the home (HTML or
  * markdown, by Accept), the registry (versioned addresses and their cache),
- * PostHog's proxy, the markdown of the docs, the routes that run code (/mcp,
- * /llm, /init), and the addresses that have no page.
+ * PostHog's proxy, the markdown of the docs, llms.txt (to count its reads), the
+ * routes that run code (/mcp, /llm, /init), and the addresses that have no page.
  */
 
 const POSTHOG_KEY = import.meta.env.VITE_PUBLIC_POSTHOG_KEY as
@@ -44,6 +45,7 @@ const INGEST_PREFIX = /^\/ingest/;
 const REGISTRY_FILE = /^\/r\/styles\/([^/]+)\/([^/]+)\.json$/;
 const DOCS_MARKDOWN = /^\/docs\/(.+)\.md$/;
 const DOCS_MDX = /^\/docs\/(.+)\.mdx$/;
+const LLMS_FILE = /^\/llms(-full)?\.txt$/;
 
 const IMMUTABLE = "public, max-age=31536000, s-maxage=31536000, immutable";
 
@@ -56,19 +58,12 @@ const MOVED_PAGES = new Map([
   ["/docs/components/base/timeline", "/docs/components/base/arrangement"],
 ]);
 
-/** What an agent reading the site's machine surfaces is told to PostHog, with no person attached. */
+/** What a read of the site's machine surfaces is told to PostHog. A registry file has its own: it counts once it is served (registryFile). */
 function agentEvent(pathname: string, method: string) {
-  const item = REGISTRY_FILE.exec(pathname);
-  if (item) {
-    return {
-      name: "registry_access",
-      properties: { component: item[2], style: item[1] },
-    };
-  }
   if (pathname === "/mcp") {
     return { name: "mcp_request", properties: { method } };
   }
-  if (pathname === "/llms.txt" || pathname === "/llms-full.txt") {
+  if (LLMS_FILE.test(pathname)) {
     return { name: "llms_read", properties: { file: pathname } };
   }
   if (pathname === "/docs.md" || DOCS_MARKDOWN.test(pathname)) {
@@ -76,11 +71,16 @@ function agentEvent(pathname: string, method: string) {
   }
 }
 
-function trackAgentSurface(request: Request, url: URL) {
-  const tracked = agentEvent(url.pathname, request.method);
+/** Tells PostHog, with no person attached. `$raw_user_agent` is what it reads to name a bot or an AI agent. */
+function trackAgentSurface(
+  request: Request,
+  url: URL,
+  tracked?: { name: string; properties: Record<string, unknown> }
+) {
   if (!(POSTHOG_KEY && tracked) || url.hostname === "localhost") {
     return;
   }
+  const userAgent = request.headers.get("user-agent");
   waitUntil(
     fetch("https://us.i.posthog.com/capture/", {
       body: JSON.stringify({
@@ -91,7 +91,8 @@ function trackAgentSurface(request: Request, url: URL) {
           ...tracked.properties,
           $host: url.host,
           $process_person_profile: false,
-          user_agent: request.headers.get("user-agent"),
+          $raw_user_agent: userAgent,
+          user_agent: userAgent,
         },
       }),
       headers: { "Content-Type": "application/json" },
@@ -132,11 +133,18 @@ function redirect(location: string | URL, permanent: boolean) {
 /** A registry file of this deploy, cached for good. One the build did not make is a JSON 404, which the shadcn CLI prints. */
 async function registryFile(request: Request, url: URL) {
   const asset = await env.ASSETS.fetch(request);
+  const file = REGISTRY_FILE.exec(url.pathname);
   if (asset.status === 404) {
-    const file = REGISTRY_FILE.exec(url.pathname);
     return file
       ? registryNotFound(file[1] ?? "", file[2] ?? "")
       : jsonNotFound(url.pathname);
+  }
+  if (file) {
+    trackAgentSurface(
+      request,
+      url,
+      registryEvent(request.headers, file[1] ?? "", file[2] ?? "")
+    );
   }
   const response = new Response(asset.body, asset);
   response.headers.set("Cache-Control", IMMUTABLE);
@@ -200,6 +208,22 @@ async function home(request: Request) {
 }
 
 /**
+ * A file of the build that the Worker stands in front of: the registry's, or an
+ * llms file, which it runs first for (wrangler.jsonc) only to count the read.
+ * Nothing means the router answers: in development, and while the build
+ * prerenders it.
+ */
+async function buildFile(request: Request, url: URL) {
+  if (url.pathname.startsWith("/r/")) {
+    return registry(request, url);
+  }
+  if (LLMS_FILE.test(url.pathname)) {
+    const file = await env.ASSETS.fetch(request);
+    return file.ok ? file : undefined;
+  }
+}
+
+/**
  * Whether a client went past the REST API's quota (RATE_LIMIT). It is counted
  * per address, in each Cloudflare location and approximately: the API has no
  * keys, so the address is the only name a client has.
@@ -237,7 +261,7 @@ const edge = createMiddleware().server(async ({ next, request }) => {
   if (address) {
     return redirect(`${url.origin}${address}${url.search}`, true);
   }
-  trackAgentSurface(request, url);
+  trackAgentSurface(request, url, agentEvent(url.pathname, request.method));
 
   if (DOCS_MDX.test(url.pathname)) {
     return redirect(
@@ -256,11 +280,9 @@ const edge = createMiddleware().server(async ({ next, request }) => {
   if (url.pathname === "/") {
     return (await home(request)) ?? withVary((await next()).response);
   }
-  if (url.pathname.startsWith("/r/")) {
-    const response = await registry(request, url);
-    if (response) {
-      return response;
-    }
+  const file = await buildFile(request, url);
+  if (file) {
+    return file;
   }
   if (API_PATH.test(url.pathname)) {
     const response =

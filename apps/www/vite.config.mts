@@ -44,6 +44,9 @@ export default defineConfig({
     }),
     react(),
   ],
+  // The source is public, so its maps can be too: served beside the chunks, they
+  // let PostHog read an error's frames with no upload step. Only an open DevTools loads them.
+  environments: { client: { build: { sourcemap: true } } },
   // Every route is an entry, so Vite finds all the dependencies at start, not one page at a time.
   optimizeDeps: {
     entries: ["src/router.tsx", "src/routes/**/*.tsx"],

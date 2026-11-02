@@ -12,7 +12,7 @@ import {
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { Provider as JotaiProvider } from "jotai";
 import { NuqsAdapter } from "nuqs/adapters/tanstack-router";
-import posthog from "posthog-js";
+import posthog, { type PostHogConfig } from "posthog-js";
 import { useEffect } from "react";
 import { PresetHandler } from "@/components/customizer/preset-handler";
 import { JsonLd } from "@/components/site/json-ld";
@@ -39,12 +39,14 @@ import globalsCss from "@/styles/globals.css?url";
 
 const posthogKey = import.meta.env.VITE_PUBLIC_POSTHOG_KEY;
 /** PostHog reads through the site's own address (/ingest), so blockers leave it be; it is off in development and without a key. */
-const POSTHOG_OPTIONS = {
+const POSTHOG_OPTIONS: Partial<PostHogConfig> = {
   api_host: "/ingest",
   capture_exceptions: true,
   defaults: "2026-01-30",
+  // A drum pad is there to be hit fast: that is playing, not a rage click.
+  rageclick: { css_selector_ignorelist: [".cn-pad-item"] },
   ui_host: "https://us.posthog.com",
-} as const;
+};
 
 /**
  * PostHog's provider holds the client from the first render, but the client

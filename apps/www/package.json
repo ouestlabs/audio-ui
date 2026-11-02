@@ -60,7 +60,7 @@
     "mermaid": "12.1.0",
     "next-themes": "catalog:",
     "nuqs": "2.10.2",
-    "posthog-js": "^1.438.12",
+    "posthog-js": "^1.444.0",
     "posthog-node": "^5.56.1",
     "react": "catalog:",
     "react-day-picker": "^10.0.1",

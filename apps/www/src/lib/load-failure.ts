@@ -16,13 +16,17 @@ export function isLoadFailure(error: unknown) {
 }
 
 /**
- * Reloads the page, which fetches the current deploy, and returns true; or
- * returns false when it already did so in the last minute, so a failure the
- * reload does not fix shows the error page instead of looping.
+ * Reloads the page, which fetches the current deploy, and returns true. A page
+ * that already asked also gets true, its reload is on the way. A page that came
+ * back from a reload in the last minute gets false, so a failure the reload
+ * does not fix shows the error page instead of looping.
  */
 export function reloadOnce() {
   try {
     const last = Number(sessionStorage.getItem(RELOAD_KEY));
+    if (last >= performance.timeOrigin) {
+      return true;
+    }
     if (Date.now() - last < RELOAD_WINDOW_MS) {
       return false;
     }
@@ -34,12 +38,14 @@ export function reloadOnce() {
   return true;
 }
 
-/** Reloads the page once when Vite fails to load a chunk, instead of letting the import throw. */
+/**
+ * Reloads the page once when Vite fails to load a chunk. The import still
+ * throws: cancelling the event would make it resolve to nothing, and the code
+ * waiting for it would fail on `undefined`, a bug report for a reload that works.
+ */
 export function watchPreloadErrors() {
-  const onPreloadError = (event: Event) => {
-    if (reloadOnce()) {
-      event.preventDefault();
-    }
+  const onPreloadError = () => {
+    reloadOnce();
   };
   window.addEventListener("vite:preloadError", onPreloadError);
   return () => window.removeEventListener("vite:preloadError", onPreloadError);
