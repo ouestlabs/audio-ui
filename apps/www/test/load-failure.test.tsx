@@ -32,6 +32,7 @@ describe("isLoadFailure", () => {
 });
 
 describe("reloadOnce", () => {
+  const reset = () => undefined;
   let reload: ReturnType<typeof spyOn>;
 
   beforeEach(() => {
@@ -45,25 +46,34 @@ describe("reloadOnce", () => {
     reload.mockRestore();
   });
 
-  test("reloads once, then lets a failure the reload did not fix through", () => {
+  test("a page that already asked for the reload just waits for it", () => {
     expect(reloadOnce()).toBe(true);
-    expect(reloadOnce()).toBe(false);
+    expect(reloadOnce()).toBe(true);
     expect(reload).toHaveBeenCalledTimes(1);
+  });
+
+  test("a page back from a reload lets a failure it did not fix through", () => {
+    sessionStorage.setItem(
+      "audio-ui:load-failure-reload",
+      String(performance.timeOrigin - 1)
+    );
+    expect(reloadOnce()).toBe(false);
+    expect(reload).not.toHaveBeenCalled();
   });
 
   test("reloads again a minute later, for the next deploy", () => {
     sessionStorage.setItem(
       "audio-ui:load-failure-reload",
-      String(Date.now() - 61_000)
+      String(performance.timeOrigin - 61_000)
     );
     expect(reloadOnce()).toBe(true);
+    expect(reload).toHaveBeenCalledTimes(1);
   });
 
   test("the error page reloads on a load failure and reports the rest", () => {
     const capture = spyOn(posthog, "captureException").mockImplementation(
       () => undefined
     );
-    const reset = () => undefined;
     render(<ErrorPage error={new TypeError("Load failed")} reset={reset} />);
     expect(reload).toHaveBeenCalledTimes(1);
     expect(capture).not.toHaveBeenCalled();
@@ -74,12 +84,31 @@ describe("reloadOnce", () => {
     capture.mockRestore();
   });
 
-  test("a Vite preload error reloads instead of throwing", () => {
+  test("a chunk that fails reloads, and nothing is reported while it does", () => {
+    const capture = spyOn(posthog, "captureException").mockImplementation(
+      () => undefined
+    );
     const stop = watchPreloadErrors();
     const event = new Event("vite:preloadError", { cancelable: true });
     window.dispatchEvent(event);
     stop();
-    expect(event.defaultPrevented).toBe(true);
     expect(reload).toHaveBeenCalledTimes(1);
+    // Left uncancelled, the import rejects with the browser's own words instead
+    // of resolving to undefined, so the error page knows it for what it is.
+    expect(event.defaultPrevented).toBe(false);
+
+    render(
+      <ErrorPage
+        error={
+          new TypeError(
+            "Failed to fetch dynamically imported module: https://www.audio-ui.dev/assets/phaser-x1.js"
+          )
+        }
+        reset={reset}
+      />
+    );
+    expect(reload).toHaveBeenCalledTimes(1);
+    expect(capture).not.toHaveBeenCalled();
+    capture.mockRestore();
   });
 });

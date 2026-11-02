@@ -8,8 +8,6 @@ const eventSchema = z.object({
     "copy_component_cli",
     "copy_preset_command",
     "open_preset",
-    "registry_access",
-    "set_layout",
   ]),
   // declare type AllowedPropertyValues = string | number | boolean | null
   properties: z

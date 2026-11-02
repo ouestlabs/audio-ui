@@ -18,7 +18,14 @@
   "assets": {
     "binding": "ASSETS",
     // The home runs the Worker first: it answers in HTML or in markdown, by the request's Accept.
-    "run_worker_first": ["/", "/r/*", "/ingest/*"],
+    // The llms files do too, or the CDN would serve them without their reads being counted.
+    "run_worker_first": [
+      "/",
+      "/r/*",
+      "/ingest/*",
+      "/llms.txt",
+      "/llms-full.txt"
+    ],
     "html_handling": "drop-trailing-slash"
   },
   // The REST API's quota per client address, per Cloudflare location

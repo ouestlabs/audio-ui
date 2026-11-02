@@ -5,8 +5,7 @@
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": [".next/**", "!.next/cache/**", "dist/**"],
-      "passThroughEnv": ["POSTHOG_API_KEY", "POSTHOG_PROJECT_ID"]
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
     },
     "build:pkg": {
       "dependsOn": ["^build:pkg"],
