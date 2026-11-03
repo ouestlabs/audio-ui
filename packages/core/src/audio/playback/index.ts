@@ -14,6 +14,7 @@ export {
   type SoloTrack,
   soloState,
 } from "./mixer.ts";
+export { type PlannedRecording, pagesAhead } from "./plan.ts";
 export {
   CLIP_PLAYER_PROCESSOR,
   type ClipPlayerMessage,
@@ -21,11 +22,26 @@ export {
 } from "./protocol.ts";
 export {
   DECLICK_SECONDS,
+  type DecodedRecording,
   type Recording,
   type Recordings,
   renderClips,
+  type StreamedRecording,
+  sourceIndexer,
   TrackRenderer,
 } from "./render.ts";
+export {
+  createPagePool,
+  createRecordingStream,
+  PAGE_FRAMES,
+  PageCache,
+  type PagePool,
+  type PageReader,
+  type PageRequest,
+  type RecordingStream,
+  slotOffset,
+  streamedSample,
+} from "./stream.ts";
 export {
   arrangementFrame,
   continuesFrom,

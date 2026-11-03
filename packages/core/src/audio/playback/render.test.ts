@@ -3,6 +3,7 @@ import { fadeGain, splitClip } from "../../primitives/timeline/clip.ts";
 import { type ArrangedAudio, type PlayedClip, playedClip } from "./clip.ts";
 import {
   DECLICK_SECONDS,
+  type DecodedRecording,
   type Recording,
   renderClips,
   TrackRenderer,
@@ -13,7 +14,11 @@ const RATE = 48_000;
 const BLOCK = 128;
 
 /** A recording whose every sample is different, so a frame read from the wrong place shows: a sine sweep with noise. */
-function recording(seconds: number, channels = 2, rate = RATE): Recording {
+function recording(
+  seconds: number,
+  channels = 2,
+  rate = RATE
+): DecodedRecording {
   const length = Math.round(seconds * rate);
   let seed = 7;
   const noise = () => {

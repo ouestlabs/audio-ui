@@ -1,5 +1,6 @@
 import { fadeGain } from "../../primitives/timeline/clip.ts";
 import { createWarpReader, type PlayedClip } from "./clip.ts";
+import { type RecordingStream, streamedSample } from "./stream.ts";
 import {
   continuesFrom,
   type PlaybackState,
@@ -7,11 +8,23 @@ import {
   STOPPED,
 } from "./transport.ts";
 
-/** A recording a clip plays, decoded: one array of samples per channel. */
-export interface Recording {
+/** A recording held in memory, decoded: one array of samples per channel. */
+export interface DecodedRecording {
   readonly channels: readonly Float32Array[];
   readonly sampleRate: number;
 }
+
+/** A recording read from the pages of a stream, which something else keeps filled ahead of playback. */
+export interface StreamedRecording {
+  readonly sampleRate: number;
+  readonly stream: RecordingStream;
+}
+
+/** A recording a clip plays: decoded in memory, or streamed. */
+export type Recording = DecodedRecording | StreamedRecording;
+
+/** A streamed channel's sample at an index of the recording, fractional when it is interpolated. */
+type Sampler = (source: number) => number;
 
 /** The recordings a player can read, by id. */
 export type Recordings = ReadonlyMap<string, Recording>;
@@ -19,18 +32,47 @@ export type Recordings = ReadonlyMap<string, Recording>;
 /** How long a stop or a jump fades the sound out, and the sound after a jump in. */
 export const DECLICK_SECONDS = 0.002;
 
-/** A sample at a fractional index, through a 4-point cubic (Catmull-Rom); outside the recording it is silence. */
-function interpolate(data: Float32Array, at: number): number {
-  const index = Math.floor(at);
-  const t = at - index;
-  const y0 = data[index - 1] ?? 0;
-  const y1 = data[index] ?? 0;
-  const y2 = data[index + 1] ?? 0;
-  const y3 = data[index + 2] ?? 0;
+/** The 4-point cubic (Catmull-Rom) through four samples, at `t` between the middle two. */
+function cubic(y0: number, y1: number, y2: number, y3: number, t: number) {
   const c1 = 0.5 * (y2 - y0);
   const c2 = y0 - 2.5 * y1 + 2 * y2 - 0.5 * y3;
   const c3 = 0.5 * (y3 - y0) + 1.5 * (y1 - y2);
   return ((c3 * t + c2) * t + c1) * t + y1;
+}
+
+/** A sample at a fractional index, through the cubic; outside the recording it is silence. */
+function interpolate(data: Float32Array, at: number): number {
+  const index = Math.floor(at);
+  return cubic(
+    data[index - 1] ?? 0,
+    data[index] ?? 0,
+    data[index + 1] ?? 0,
+    data[index + 2] ?? 0,
+    at - index
+  );
+}
+
+/** How each channel of a stream is sampled, a mono one in both: a copy of the frame when `exact`, the cubic otherwise. */
+function streamSamplers(
+  stream: RecordingStream,
+  exact: boolean
+): readonly [Sampler, Sampler] {
+  const of = (channel: number): Sampler => {
+    const read = (index: number) => streamedSample(stream, channel, index);
+    return exact
+      ? read
+      : (at) => {
+          const index = Math.floor(at);
+          return cubic(
+            read(index - 1),
+            read(index),
+            read(index + 1),
+            read(index + 2),
+            at - index
+          );
+        };
+  };
+  return [of(0), of(stream.channels > 1 ? 1 : 0)];
 }
 
 /** The clip's own frame at the arrangement's frame `frame`, folded into its loop once it passes the loop's end. */
@@ -64,10 +106,9 @@ function gainAt(clip: PlayedClip, frame: number): number {
  */
 function locator(
   clip: PlayedClip,
-  recording: Recording,
+  rate: number,
   sampleRate: number
 ): (read: number) => number {
-  const rate = recording.sampleRate;
   if (clip.warp === null && rate === sampleRate) {
     const first = Math.round(clip.sourceFrom * rate);
     return (read) => first + read;
@@ -76,6 +117,25 @@ function locator(
   const first = clip.sourceFrom * rate;
   return (read) =>
     first + (unwarp ? unwarp(read / sampleRate) : read / sampleRate) * rate;
+}
+
+/**
+ * Where in its recording `clip` reads at the arrangement's frame `frame`, in
+ * frames of the recording (fractional when warped or at another rate), or
+ * NaN where it plays nothing: what both the player and the planner of a
+ * stream's pages follow. `rate` is the recording's sample rate.
+ */
+export function sourceIndexer(
+  clip: PlayedClip,
+  rate: number,
+  sampleRate: number
+): (frame: number) => number {
+  const locate = locator(clip, rate, sampleRate);
+  return (frame) => {
+    const own = ownFrame(clip, frame);
+    const read = clip.reversed ? clip.span - 1 - own : own;
+    return read >= 0 && read < clip.span ? locate(read) : Number.NaN;
+  };
 }
 
 /**
@@ -93,6 +153,18 @@ function renderClip(
   recording: Recording,
   sampleRate: number
 ) {
+  if ("stream" in recording) {
+    renderStreamedClip(
+      output,
+      at,
+      length,
+      position,
+      clip,
+      recording,
+      sampleRate
+    );
+    return;
+  }
   const from = Math.max(position, clip.start);
   const to = Math.min(position + length, clip.end);
   const [left, right = left] = recording.channels;
@@ -100,10 +172,11 @@ function renderClip(
   if (from >= to || !left || !right || !outLeft) {
     return;
   }
+  // The loop of every block, kept as plain array reads: the fast path.
   const exact = clip.warp === null && recording.sampleRate === sampleRate;
   const sample = (data: Float32Array, source: number) =>
     exact ? (data[source] ?? 0) : interpolate(data, source);
-  const locate = locator(clip, recording, sampleRate);
+  const locate = locator(clip, recording.sampleRate, sampleRate);
   for (let frame = from; frame < to; frame += 1) {
     const own = ownFrame(clip, frame);
     const read = clip.reversed ? clip.span - 1 - own : own;
@@ -115,6 +188,38 @@ function renderClip(
       if (outRight) {
         outRight[index] =
           (outRight[index] as number) + sample(right, source) * gain;
+      }
+    }
+  }
+}
+
+/** What `renderClip` does for a recording read through the pages of its stream. */
+function renderStreamedClip(
+  output: readonly Float32Array[],
+  at: number,
+  length: number,
+  position: number,
+  clip: PlayedClip,
+  recording: StreamedRecording,
+  sampleRate: number
+) {
+  const from = Math.max(position, clip.start);
+  const to = Math.min(position + length, clip.end);
+  const [outLeft, outRight] = output;
+  if (from >= to || !outLeft) {
+    return;
+  }
+  const exact = clip.warp === null && recording.sampleRate === sampleRate;
+  const [left, right] = streamSamplers(recording.stream, exact);
+  const sourceAt = sourceIndexer(clip, recording.sampleRate, sampleRate);
+  for (let frame = from; frame < to; frame += 1) {
+    const source = sourceAt(frame);
+    if (!Number.isNaN(source)) {
+      const index = at + frame - position;
+      const gain = gainAt(clip, frame);
+      outLeft[index] = (outLeft[index] as number) + left(source) * gain;
+      if (outRight) {
+        outRight[index] = (outRight[index] as number) + right(source) * gain;
       }
     }
   }
