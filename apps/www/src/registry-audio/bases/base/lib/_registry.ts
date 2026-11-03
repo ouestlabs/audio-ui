@@ -906,6 +906,21 @@ const items: RegistryItem[] = [
     type: "registry:lib",
   },
   {
+    categories: ["lib", "audio", "timeline"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "A track's player of audio clips on an AudioWorklet: its recordings to the frame on the audio clock, with gain, fades, loops, reverse and warp, in a running or an offline context",
+    files: [
+      {
+        path: "lib/clip-player.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "clip-player",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
     categories: ["lib", "audio", "piano", "ai"],
     dependencies: ["zod"],
     description:

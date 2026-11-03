@@ -50,7 +50,26 @@ player.render(output, currentFrame, 128); // adds into output, a Float32Array pe
 - A stop or a jump fades what played out over 2 ms (`DECLICK_SECONDS`), and a jump fades the new place in. A start from a stop does not fade, and nor does the loop's own wrap.
 - A state that arrives late takes over at once and plays the frames its clock says, so a track that heard of a play a block late joins it in step.
 
-In a browser the player runs in an AudioWorklet. `CLIP_PLAYER_WORKLET` is its processor as the source of a module, whatever your bundler:
+In a browser the player runs in an AudioWorklet, and the `clip-player` library does the wiring: it loads the worklet once per context, posts each recording once for all the players of a context (into shared memory when the page is cross-origin isolated, so an offline render reads the same samples), and says when a player has heard everything, which an offline render waits for before it starts.
+
+```bash
+npx shadcn@latest add @audio-ui/clip-player
+```
+
+```ts
+import { playedClips } from "@audio-ui/core/playback";
+import { createClipPlayer, loadClipPlayer } from "@/lib/clip-player";
+
+if (await loadClipPlayer(context)) {
+  const player = createClipPlayer(context);
+  player.output.connect(trackInput); // stereo, into the track's chain
+  player.setClips(playedClips(clips, (clip) => clip.recording, rate), recordings); // id to AudioBuffer
+  player.schedule(state);
+  await player.synced(); // before an offline context's startRendering()
+}
+```
+
+Without the library, `CLIP_PLAYER_WORKLET` is the processor as the source of a module, whatever your bundler:
 
 ```ts
 import {

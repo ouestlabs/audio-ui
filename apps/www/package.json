@@ -18,6 +18,7 @@
     "skill:build": "bun ./scripts/build-skill.ts",
     "start": "vite preview",
     "test": "bun test",
+    "test:browser": "bun test/browser/run.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -86,6 +87,7 @@
     "@types/react-dom": "catalog:",
     "@vitejs/plugin-react": "catalog:",
     "chokidar": "^5.0.0",
+    "playwright-core": "1.64.0",
     "satori": "catalog:",
     "shadcn": "catalog:",
     "tailwindcss": "catalog:",

@@ -23,5 +23,10 @@ export type ClipPlayerMessage =
   | { clips: PlayedClip[]; type: "clips" }
   /** A state of the transport, taken over at its frame. */
   | { state: PlaybackState; type: "state" }
+  /** Asks the processor to answer `synced` with the same id once it has every message before this one. */
+  | { id: number; type: "sync" }
   /** Ends the player: its processor stops being called. */
   | { type: "dispose" };
+
+/** What a clip player's processor posts back. */
+export type ClipPlayerReply = { id: number; type: "synced" };

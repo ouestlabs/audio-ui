@@ -4,7 +4,11 @@
  * bundles it into `CLIP_PLAYER_WORKLET`, the source a context loads with
  * `audioWorklet.addModule`.
  */
-import { CLIP_PLAYER_PROCESSOR, type ClipPlayerMessage } from "./protocol.ts";
+import {
+  CLIP_PLAYER_PROCESSOR,
+  type ClipPlayerMessage,
+  type ClipPlayerReply,
+} from "./protocol.ts";
 import { type Recording, TrackRenderer } from "./render.ts";
 
 // The globals of an AudioWorkletGlobalScope, which no TypeScript library describes.
@@ -44,6 +48,12 @@ class ClipPlayerProcessor extends AudioWorkletProcessor {
         break;
       case "state":
         this.renderer.schedule(message.state);
+        break;
+      case "sync":
+        this.port.postMessage({
+          id: message.id,
+          type: "synced",
+        } satisfies ClipPlayerReply);
         break;
       case "dispose":
         this.alive = false;

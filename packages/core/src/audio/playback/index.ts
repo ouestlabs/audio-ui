@@ -14,7 +14,11 @@ export {
   type SoloTrack,
   soloState,
 } from "./mixer.ts";
-export { CLIP_PLAYER_PROCESSOR, type ClipPlayerMessage } from "./protocol.ts";
+export {
+  CLIP_PLAYER_PROCESSOR,
+  type ClipPlayerMessage,
+  type ClipPlayerReply,
+} from "./protocol.ts";
 export {
   DECLICK_SECONDS,
   type Recording,
