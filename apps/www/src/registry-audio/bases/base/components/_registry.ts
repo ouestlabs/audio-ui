@@ -434,7 +434,7 @@ export const components: RegistryItem[] = [
   {
     categories: ["timeline"],
     description:
-      "An arrangement timeline made for a whole screen: a bar ruler that seeks on the grid, a loop strip, a lane per track with clips to move between tracks, trim and fade on the grid, a cursor to put anywhere on a track, and a split at the cursor, a transport with play or pause, stop, loop, a metronome and a tempo and signature that keep the arrangement's musical positions, a playhead following its clock, and a navigator to zoom and scroll. MIDI tracks hold MIDI clips that draw their notes, play through a synth and open on a piano roll in the clip panel; double-click a MIDI lane for a new clip. Drop an audio file on an audio track for a clip of it, as long as the file, with its waveform in the clip panel; a clip dragged near an edge of the view scrolls it. In automation mode each track draws an envelope of its volume or pan over its clips, which a MIDI track's own channel follows as it plays. Open it at full size and the tracks take the screen",
+      "An arrangement timeline made for a whole screen: a bar ruler that seeks on the grid, a loop strip, a lane per track with clips to move between tracks, trim and fade on the grid, a cursor to put anywhere on a track, and a split at the cursor, a transport with play or pause, stop, loop, a metronome and a tempo and signature that keep the arrangement's musical positions, a playhead following the sound, and a navigator to zoom and scroll. It plays on the audio clock through the arrangement engine: audio clips loop a drum beat and a pad and draw their waveform, MIDI clips draw their notes, play a bass and chords through a synth and open on a piano roll in the clip panel; double-click a MIDI lane for a new clip. Drop an audio file on an audio track for a clip of it that plays, as long as the file; a clip dragged near an edge of the view scrolls it. Each track's meter reads its channel. In automation mode each track draws an envelope of its volume or pan over its clips, which its channel follows as it plays. Open it at full size and the tracks take the screen",
     files: [
       {
         path: "components/timeline/block-timeline.tsx",
@@ -451,18 +451,21 @@ export const components: RegistryItem[] = [
       "@audio-ui/transport",
       "@audio-ui/bpm-control",
       "@audio-ui/meter",
-      "@audio-ui/use-simulated-levels",
+      "@audio-ui/use-audio-levels",
       "@audio-ui/arrangement",
       "@audio-ui/use-arrangement",
+      "@audio-ui/arrangement-engine",
+      "@audio-ui/clip-player",
+      "@audio-ui/demo-sound",
+      "@audio-ui/pocket-synth-device",
+      "@audio-ui/web-audio",
       "@audio-ui/use-marquee-selection",
-      "@audio-ui/use-simulated-clock",
       "@audio-ui/clip-panel",
       "@audio-ui/midi-clip-panel",
       "@audio-ui/arranged-clip",
       "@audio-ui/timeline-markers",
       "@audio-ui/track-automation",
       "@audio-ui/use-track-reorder",
-      "@audio-ui/use-midi-playback",
       "@audio-ui/audio-decode",
       "@shadcn/button",
       "@shadcn/button-group",

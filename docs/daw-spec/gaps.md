@@ -9,16 +9,16 @@ Each entry: where it was found, what is wrong, the rule it breaks, and the fix w
 ### G-001 The Timeline block plays no audio
 Found reading `block-timeline.tsx`: dropped files are decoded for their length and peaks only, and audio clips are drawn but silent. Breaks ARR-001, CLP-001 to CLP-012.
 Fix: a clip player on an AudioWorklet (`@audio-ui/core/playback` for the render, a registry lib for the node), driven by the arrangement.
-Status: `clip-player` (registry) runs the core's renderer in an AudioWorklet, and `arrangement-engine` plays every audio clip of a document, bit-identical when neutral (checked in Chromium); the block does not use it yet.
+Status: `clip-player` (registry) runs the core's renderer in an AudioWorklet, and `arrangement-engine` plays every audio clip of a document, bit-identical when neutral (checked in Chromium). Fixed: the block plays through `arrangement-engine`: its drum and pad clips loop recordings drawn by `demo-sound` (`renderBeatLoop`, `renderHeldChord`, which now loops without a click), a dropped file is decoded at the engine's rate and plays, and each lane draws its clips' waveforms (checked in Chromium: every track's meter reads its channel).
 
 ### G-002 The arrangement runs on a timer, not the audio clock
 `use-simulated-clock` advances with `requestAnimationFrame`; `use-midi-playback` schedules notes from that frame loop. A busy frame shifts the notes, and nothing can line them up with audio clips. Breaks ENG-004, MID-002, TRN-009.
 Fix: a transport in frames of the audio clock, shared by the clip players, the note scheduler and the playhead.
-Status: `arrangement-engine` counts its transport in frames of the audio clock and schedules notes ahead on it, and its playhead is what the speakers play; the block still runs on `use-simulated-clock`.
+Status: `arrangement-engine` counts its transport in frames of the audio clock and schedules notes ahead on it, and its playhead is what the speakers play. Fixed: the block runs on it, and a seek while playing plays from there.
 
 ### G-003 MIDI clips play a fixed tone
 `use-midi-playback` plays every note on a triangle oscillator of its own instead of the track's instrument device. Breaks MID-001.
-Status: `arrangement-engine` plays notes through each MIDI track's instrument device; the block still uses `use-midi-playback`.
+Status: `arrangement-engine` plays notes through each MIDI track's instrument device. Fixed: the block's Bass and Keys are MIDI tracks with a pocket synth each, and a key pressed in the piano roll plays it.
 
 ### G-004 The arrangement view cannot be installed
 It lives in a 2,805-line example block, which the CLI writes to `components/examples/`. A project can only copy it whole. The view's parts (rows of tracks, file drops, the keyboard commands, the clip dock) need to be items of their own, which the block composes.
@@ -88,6 +88,10 @@ Fix: `device-panels`, every panel by stable id with its width.
 ### G-020 The clip panel and an arranged clip are not joined
 The clip panel takes `ClipSettings` and an arrangement holds `Arranged` clips: every host writes the mapping both ways by hand (the Timeline block does, the DAW does again), with the clamping of the length to the timeline.
 Fix: a mapping in the registry, next to the clip panel.
+
+### G-021 The arrangement engine has no metronome
+The transport element has a metronome switch and its rhythm, and the Timeline block shows them, but nothing in `arrangement-engine` clicks: the switch is silent now that the block plays. Breaks the metronome rules of the transport chapter (to write with OBS-007).
+Fix: a click on the audio clock in the engine, on the beats of the signature in force, the downbeat accented, heard in playback and left out of an export.
 
 ## Fixed
 

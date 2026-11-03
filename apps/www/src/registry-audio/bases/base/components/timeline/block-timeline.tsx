@@ -7,7 +7,6 @@ import {
   barLabelInterval,
   barsBeatsWith,
   barsOf,
-  DEFAULT_TEMPO,
   divisionAt,
   GRID_DIVISIONS,
   type GridDivision,
@@ -33,6 +32,7 @@ import {
   type PointerEvent,
   type ReactNode,
   useCallback,
+  useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -110,29 +110,32 @@ import {
   type ClipAction,
   useArrangement,
 } from "@/registry-audio/bases/base/hooks/use-arrangement";
+import { useArrangementEngine } from "@/registry-audio/bases/base/hooks/use-arrangement-engine";
+import { useAudioLevels } from "@/registry-audio/bases/base/hooks/use-audio-levels";
 import { useMarquee } from "@/registry-audio/bases/base/hooks/use-marquee-selection";
-import {
-  type LevelsAt,
-  useMidiPlayback,
-} from "@/registry-audio/bases/base/hooks/use-midi-playback";
-import { useSimulatedClock } from "@/registry-audio/bases/base/hooks/use-simulated-clock";
-import { useSimulatedLevels } from "@/registry-audio/bases/base/hooks/use-simulated-levels";
 import { useTrackReorder } from "@/registry-audio/bases/base/hooks/use-track-reorder";
-import {
-  type Arranged,
-  type ArrangementTrack,
-  type AutomatedParameter,
-  type Clipping,
-  type Mix,
-  mixAt,
-  type TimeSelection,
-  type TrackKind,
+import type {
+  Arranged,
+  ArrangementTrack,
+  AutomatedParameter,
+  Clipping,
+  Mix,
+  TimeSelection,
+  TrackKind,
 } from "@/registry-audio/bases/base/lib/arrangement";
 import { decodeAudioChannels } from "@/registry-audio/bases/base/lib/audio-decode";
+import type { RecordingSource } from "@/registry-audio/bases/base/lib/clip-player";
+import {
+  DEMO_TEMPO,
+  renderBeatLoop,
+  renderHeldChord,
+} from "@/registry-audio/bases/base/lib/demo-sound";
+import { pocketSynthDevice } from "@/registry-audio/bases/base/lib/pocket-synth-device";
+import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 const BARS = 32;
-/** The arrangement is laid out at the first tempo; a tempo change keeps its musical positions. */
-const BAR = secondsPerBar(DEFAULT_TEMPO);
+/** The arrangement is laid out at the first tempo, the demo sounds': a tempo change keeps its musical positions. */
+const BAR = secondsPerBar(DEMO_TEMPO);
 /** The width of a track header, which the lanes start after. */
 const LEAD_PX = 160;
 const MAX_ZOOM = 240;
@@ -211,35 +214,66 @@ const LOCATORS = [
 /** The loop it starts with: bars 8 to 16, switched on. */
 const LOOP = { on: true, range: [bars(8), bars(16)] } as const;
 
+/** A pocket synth on a MIDI track, set for the part it plays. */
+const synth = (
+  id: string,
+  patch: Partial<ReturnType<typeof pocketSynthDevice.defaults>>
+) => ({
+  device: pocketSynthDevice.id,
+  id,
+  instrument: true,
+  state: { ...pocketSynthDevice.defaults(), ...patch },
+});
+
 const TRACKS: ArrangementTrack[] = [
   { color: 0, id: "drums", name: "Drums" },
-  { color: 1, id: "bass", kind: "midi", name: "Bass" },
-  { color: 2, id: "keys", kind: "midi", name: "Keys" },
-  { color: 3, id: "vocals", name: "Vocals" },
+  {
+    color: 1,
+    devices: [
+      synth("device-1", { filter: "lowpass", volume: 0.7, wave: "sawtooth" }),
+    ],
+    id: "bass",
+    kind: "midi",
+    name: "Bass",
+  },
+  {
+    color: 2,
+    devices: [
+      synth("device-2", { filter: "lowpass", volume: 0.35, wave: "triangle" }),
+    ],
+    id: "keys",
+    kind: "midi",
+    name: "Keys",
+  },
+  { color: 3, id: "pad", name: "Pad" },
 ] as const;
 
-/** What a track meter shows while nothing plays: one channel. */
-const SILENCE_MONO = {
-  getSnapshot: () => ({ levels: [-60], peaks: [-60] }),
-  subscribe: () => () => undefined,
-};
+const NO_ANALYSERS: readonly AnalyserNode[] = [];
+const NO_PEAKS: number[] = [];
 
-/** What the master meter shows while nothing plays. */
+/** What a meter shows before the engine runs. */
 const SILENCE = {
   getSnapshot: () => ({ levels: [-60, -60], peaks: [-60, -60] }),
   subscribe: () => () => undefined,
 };
 
+/** How long the demo's recordings last: two bars at their tempo. */
+const RECORDING_BARS = 2;
+
+/** An audio clip from bar `from` to bar `to`, looping a recording of the demo. */
 const arranged = (
   id: string,
   name: string,
   track: string,
   from: number,
-  to: number
+  to: number,
+  recording: string
 ): Arranged => ({
   id,
+  loop: [0, bars(RECORDING_BARS)],
   name,
-  sourceLength: bars(to - from + 2),
+  recording,
+  sourceLength: bars(RECORDING_BARS),
   track,
   value: {
     fadeIn: 0,
@@ -312,17 +346,17 @@ const midiArranged = (
 });
 
 const CLIPS: Arranged[] = [
-  arranged("d1", "Intro", "drums", 0, 4),
-  arranged("d2", "Groove", "drums", 4, 16),
-  arranged("d3", "Groove", "drums", 16, 28),
-  arranged("d4", "Fill", "drums", 28, 32),
+  arranged("d1", "Intro", "drums", 0, 4, "beat"),
+  arranged("d2", "Groove", "drums", 4, 16, "beat"),
+  arranged("d3", "Groove", "drums", 16, 28, "beat"),
+  arranged("d4", "Fill", "drums", 28, 32, "beat"),
   midiArranged("b1", "Sub", "bass", 4, 12, 2, BASSLINE),
   midiArranged("b2", "Sub", "bass", 16, 28, 2, BASSLINE),
   midiArranged("k1", "Pad", "keys", 0, 8, 4, CHORDS),
   midiArranged("k2", "Chords", "keys", 8, 16, 4, CHORDS),
   midiArranged("k3", "Pad", "keys", 20, 32, 4, CHORDS),
-  arranged("v1", "Verse", "vocals", 8, 16),
-  arranged("v2", "Hook", "vocals", 16, 24),
+  arranged("p1", "Pad", "pad", 8, 16, "pad"),
+  arranged("p2", "Pad", "pad", 16, 24, "pad"),
 ];
 
 function Row({
@@ -411,49 +445,30 @@ const SHORTCUTS: { action: string; keys: string[] }[] = [
   { action: "Clear the selection", keys: ["Esc"] },
 ];
 
-/** What a piece of a clip adds to its id: the recording is the id before it. */
-const LEADING_ID = /-.*$/;
-
-/** How many peaks the clip panel draws of a source: enough to zoom well in before they turn to blocks. */
-const PEAKS = 4096;
-
-/**
- * A stand-in for the peaks of a clip's recording, which the block does not
- * have: a shape of its own for each recording (the clip's id before any piece
- * suffix), drawn over the stretch of it the clip's source holds.
- */
-function standInPeaks(clip: Arranged): number[] {
-  const seed = [...clip.id.replace(LEADING_ID, "")].reduce(
-    (sum, char) => sum + char.charCodeAt(0),
-    0
-  );
-  const from = clip.sourceFrom ?? 0;
-  return Array.from({ length: PEAKS }, (_, index) => {
-    const time = from + (index / (PEAKS - 1)) * clip.sourceLength;
-    const swell = 0.55 + 0.3 * Math.sin(time * 0.9 + seed);
-    const beat = 0.6 + 0.4 * Math.abs(Math.cos(time * Math.PI));
-    const grain = Math.abs(
-      (Math.sin((time + seed) * 12.9898) * 43_758.5453) % 1
-    );
-    return Math.min(1, swell * beat * (0.5 + 0.5 * grain) + 0.05);
-  });
-}
-
-/** How many slices of a dropped file the block keeps: the clip panel draws the stretch of them a clip holds. */
+/** How many slices of a recording the block keeps: the lanes and the clip panel draw the stretch of them a clip holds. */
 const RECORDING_PEAKS = 16_384;
 /** The end of a file's name that says its format. */
 const EXTENSION = /\.[^.]+$/;
 /** The files the browser can try to decode as sound when it does not give their type. */
 const AUDIO_FILE = /\.(aac|aif|aiff|flac|m4a|mp3|oga|ogg|opus|wav|weba|webm)$/i;
 
-/**
- * A file dropped on a track: the peaks of its sound, how long it lasts, and
- * how long a bar was when it was dropped, since a recording follows the tempo.
- */
+/** A recording the clips play: the demo's, or a file dropped on a track. Its sound, its peaks and how long it lasts, in seconds. */
 interface Recording {
-  bar: number;
   length: number;
   peaks: number[];
+  source: RecordingSource;
+}
+
+/** A decoded sound as a recording: its channels at the engine's rate, and the peaks its clips draw. */
+function recordingOf(
+  channels: readonly Float32Array[],
+  sampleRate: number
+): Recording {
+  return {
+    length: (channels[0]?.length ?? 0) / sampleRate,
+    peaks: amplitudes(channels),
+    source: { channels, sampleRate },
+  };
 }
 
 /** Whether a drag carries files from the desktop, rather than something of the page. */
@@ -467,13 +482,9 @@ function amplitudes(channels: readonly Float32Array[]): number[] {
   return Array.from(max, (high, index) => Math.max(high, -(min[index] ?? 0)));
 }
 
-/** The peaks of a dropped file over the stretch of it a clip's source holds, at the tempo the arrangement is at now. */
-function recordedPeaks(
-  recording: Recording,
-  clip: Arranged,
-  bar: number
-): number[] {
-  const length = recording.length * (bar / recording.bar);
+/** The peaks of a recording over the stretch of it a clip's source holds: a recording keeps its own seconds. */
+function recordedPeaks(recording: Recording, clip: Arranged): number[] {
+  const { length } = recording;
   const from = clip.sourceFrom ?? 0;
   const { peaks } = recording;
   const first = Math.max(0, Math.floor((from / length) * peaks.length));
@@ -637,33 +648,142 @@ function ClipDock({
   );
 }
 
-/** A track's level, from a stand-in source: the block plays nothing, so it moves while the track would be heard. */
-function TrackLevel({ active, name }: { active: boolean; name: string }) {
-  const simulated = useSimulatedLevels(1);
+/** A track's level as the engine meters it: what its channel sends on, after its volume, pan and switch, so a silent track reads silence. */
+function TrackLevel({
+  analysers,
+  name,
+}: {
+  analysers: readonly AnalyserNode[] | null;
+  name: string;
+}) {
+  const levels = useAudioLevels(analysers ?? NO_ANALYSERS);
   return (
     <Meter
       aria-label={`${name} level`}
-      className="data-[orientation=vertical]:h-full [--meter-thickness:--spacing(2)]"
+      className="gap-px data-[orientation=vertical]:h-full [--meter-thickness:--spacing(1)]"
       orientation="vertical"
       peakMarks="hidden"
       size="sm"
-      source={active ? simulated : SILENCE_MONO}
+      source={analysers ? levels : SILENCE}
       warnThreshold={-12}
     />
   );
 }
 
+/** The main track's level, as the engine meters it: what the arrangement sends to the speakers. */
+function MainLevel({
+  analysers,
+}: {
+  analysers: readonly AnalyserNode[] | null;
+}) {
+  const levels = useAudioLevels(analysers ?? NO_ANALYSERS);
+  return (
+    <Meter
+      aria-label="Master output level"
+      className="data-[orientation=horizontal]:[--meter-thickness:--spacing(3)]"
+      orientation="horizontal"
+      peakMarks="hidden"
+      size="sm"
+      source={analysers ? levels : SILENCE}
+      warnThreshold={-12}
+    />
+  );
+}
+
+/** A decoded buffer's channels. */
+function channelsOf(buffer: AudioBuffer) {
+  return Array.from({ length: buffer.numberOfChannels }, (_, channel) =>
+    buffer.getChannelData(channel)
+  );
+}
+
 /**
- * An arrangement: a bar ruler that seeks on the grid, a loop strip, a lane per
- * track with clips to move between tracks, trim and fade, a cursor to put
- * anywhere on a track and split at, and a playhead following a transport
- * clock. Cmd/Ctrl + scroll zooms around the pointer, and the bar below scrolls
- * and zooms. Made to be opened at full size, where the tracks take the screen.
+ * The recordings the audio clips play, by id: the demo's beat and pad, drawn
+ * once at the engine's rate, and the files dropped on the tracks, which
+ * `keepRecording` adds.
+ */
+function useRecordings() {
+  const [recordings, setRecordings] = useState<ReadonlyMap<string, Recording>>(
+    () => new Map()
+  );
+  useEffect(() => {
+    const context = webAudio.getContext();
+    if (!context) {
+      return;
+    }
+    let cancelled = false;
+    Promise.all([
+      renderBeatLoop(context.sampleRate),
+      renderHeldChord(context.sampleRate),
+    ]).then(([beat, pad]) => {
+      if (!cancelled) {
+        setRecordings((current) =>
+          new Map(current)
+            .set("beat", recordingOf(channelsOf(beat), context.sampleRate))
+            .set("pad", recordingOf(channelsOf(pad), context.sampleRate))
+        );
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  const keepRecording = useCallback(
+    (id: string, recording: Recording) =>
+      setRecordings((current) => new Map(current).set(id, recording)),
+    []
+  );
+  // What the engine plays: the sounds alone, the same map until a recording comes or goes.
+  const sources = useMemo(
+    () =>
+      new Map([...recordings].map(([id, recording]) => [id, recording.source])),
+    [recordings]
+  );
+  return { keepRecording, recordings, sources };
+}
+
+/** The engine as the transport: play from the playhead or pause where the sound is, and a seek that, while playing, plays from there. */
+function useEngineTransport({
+  play,
+  playing,
+  position,
+  stop,
+}: ReturnType<typeof useArrangementEngine>) {
+  const playPause = useCallback(() => {
+    if (playing) {
+      stop();
+    } else {
+      play(position.getSnapshot());
+    }
+  }, [play, playing, position, stop]);
+  const seek = useCallback(
+    (seconds: number) => {
+      if (playing) {
+        play(seconds);
+      } else {
+        position.set(seconds);
+      }
+    },
+    [play, playing, position]
+  );
+  return { playPause, seek };
+}
+
+/**
+ * An arrangement that plays: a bar ruler that seeks on the grid, a loop strip,
+ * a lane per track with clips to move between tracks, trim and fade, a cursor
+ * to put anywhere on a track and split at, and a playhead following the sound.
+ * The arrangement engine plays it on the audio clock: the audio clips loop the
+ * demo's recordings, the MIDI clips play through each track's synth, and every
+ * track through its mix. Cmd/Ctrl + scroll zooms around the pointer, and the
+ * bar below scrolls and zooms. Made to be opened at full size, where the
+ * tracks take the screen.
  */
 export default function BlockTimeline() {
   const [editingSignature, setEditingSignature] = useState<string | null>(null);
   const {
     dispatch,
+    doc,
     duration,
     locators,
     loop: { on: looping, range: loop },
@@ -690,7 +810,7 @@ export default function BlockTimeline() {
     initialLocators: LOCATORS,
     initialLoop: LOOP,
     initialTracks: TRACKS,
-    tempo: DEFAULT_TEMPO,
+    tempo: DEMO_TEMPO,
   });
   // What the lanes, the headers and the keys report, as the commands that change the selection.
   const clearSelection = useCallback(
@@ -736,11 +856,20 @@ export default function BlockTimeline() {
   const pressTrackRef = useRef<string | null>(null);
   const [metronome, setMetronome] = useState(false);
   const [rhythm, setRhythm] = useState<MetronomeRhythm>("auto");
-  const { clock, playing, setPlaying } = useSimulatedClock({
-    duration,
-    loop,
-    looping,
+  // The automated parameters moved by hand: they play their mix until the automation is enabled again.
+  const [overridden, setOverridden] = useState<
+    Record<string, AutomatedParameter[]>
+  >({});
+  const { keepRecording, recordings, sources } = useRecordings();
+  // The arrangement plays on the audio clock: its clips, its notes through each MIDI track's synth, its mix.
+  const engine = useArrangementEngine({
+    doc,
+    overridden,
+    recordings: sources,
   });
+  const clock = engine.position;
+  const { playing } = engine;
+  const { playPause, seek } = useEngineTransport(engine);
   // The clips, as the commands that change them. A split cuts at the playhead, no closer to a clip's edge than a sixteenth of the bar.
   const getPosition = useCallback(() => clock.getSnapshot(), [clock]);
   const splitStep = bar / 4;
@@ -991,21 +1120,8 @@ export default function BlockTimeline() {
   const [density, setDensity] = useState<number>(24);
   const [triplet, setTriplet] = useState(false);
   const [snap, setSnap] = useState(true);
-  // A stand-in for the mix's levels: the block plays nothing, so they move while it runs.
-  const simulated = useSimulatedLevels(2);
-  // What is heard: a muted track is silent, and while any track is soloed so is every other.
+  // A muted track is silent, and while any track is soloed so is every other: their clips are drawn drained.
   const anySolo = tracks.some((track) => mixOf(track).soloed);
-  const audible = useCallback(
-    (trackId: string) => {
-      const track = tracks.find((item) => item.id === trackId);
-      if (!track) {
-        return false;
-      }
-      const mix = mixOf(track);
-      return !mix.muted && (!anySolo || mix.soloed);
-    },
-    [anySolo, mixOf, tracks]
-  );
   // Automation mode: each track's lane shows the envelope of one of its parameters over its clips.
   const [automating, setAutomating] = useState(false);
   const [shownParameters, setShownParameters] = useState<
@@ -1016,10 +1132,6 @@ export default function BlockTimeline() {
       setShownParameters((all) => ({ ...all, [trackId]: parameter })),
     []
   );
-  // The automated parameters moved by hand: they play their mix until the automation is enabled again.
-  const [overridden, setOverridden] = useState<
-    Record<string, AutomatedParameter[]>
-  >({});
   const anyOverridden = Object.values(overridden).some(
     (parameters) => parameters.length > 0
   );
@@ -1071,32 +1183,13 @@ export default function BlockTimeline() {
     },
     [changeAutomation, settleClipEdit]
   );
-  const levelsAt = useCallback<LevelsAt>(
-    (trackId, time) => {
-      const track = tracks.find((item) => item.id === trackId);
-      return track
-        ? mixAt(track, mixOf(track), time / duration, overridden[trackId])
-        : { gain: 0, pan: 0 };
-    },
-    [duration, mixOf, overridden, tracks]
-  );
-  const midi = useMidiPlayback({
-    audible,
-    clips,
-    clock,
-    levelsAt,
-    loop,
-    looping,
-    playing,
-    tracks,
-  });
 
-  const playPause = useCallback(() => setPlaying((on) => !on), [setPlaying]);
   // Stop goes back to the top, as a DAW's does.
+  const { stop: stopEngine } = engine;
   const stop = useCallback(() => {
-    setPlaying(false);
+    stopEngine();
     clock.set(0);
-  }, [clock, setPlaying]);
+  }, [clock, stopEngine]);
   // The zoom as a share of the fitted view: 100% shows everything.
   const zoomRatio = fitPx > 0 ? zoom / fitPx : 1;
   const maxRatio = fitPx > 0 ? MAX_ZOOM / fitPx : 1;
@@ -1119,7 +1212,6 @@ export default function BlockTimeline() {
     (value: string) => setDivision(value as GridDivision),
     []
   );
-  const seek = useCallback((seconds: number) => clock.set(seconds), [clock]);
   // A press on a track's empty lane puts the cursor there (the lane does it) and picks the track, letting go of the clips; on the surface under the last track it lets go of everything, as nothing is there.
   // The shortcuts are caught on the panel, so a press on the lane, which takes no focus, hands it over.
   const panelRef = useRef<HTMLDivElement>(null);
@@ -1180,7 +1272,7 @@ export default function BlockTimeline() {
     () => dispatch({ type: "add-locator", at: clock.getSnapshot() }),
     [clock, dispatch]
   );
-  const jumpToLocator = useCallback((at: number) => clock.set(at), [clock]);
+  const jumpToLocator = useCallback((at: number) => seek(at), [seek]);
 
   /** Puts the loop around the selected clip, or around the clips of the selected track. */
   const loopSelection = useCallback(() => {
@@ -1240,10 +1332,10 @@ export default function BlockTimeline() {
       }
       event.preventDefault();
       event.stopPropagation();
-      clock.set(target);
+      seek(target);
       return true;
     },
-    [addLocator, clips, clock, locators, selectedTracks]
+    [addLocator, clips, clock, locators, seek, selectedTracks]
   );
   // The copies are there to be seen: bring them into view once they are drawn.
   const duplicateAndShow = useCallback(() => {
@@ -1348,21 +1440,27 @@ export default function BlockTimeline() {
     },
     [selectClip]
   );
+  // What each audio clip draws of its recording, once the recording is there.
+  const clipPeaks = useMemo(
+    () =>
+      new Map(
+        clips.flatMap((clip) => {
+          const recording = clip.recording
+            ? recordings.get(clip.recording)
+            : undefined;
+          return recording
+            ? [[clip.id, recordedPeaks(recording, clip)] as const]
+            : [];
+        })
+      ),
+    [clips, recordings]
+  );
   // The clip panel, under the tracks: it edits the first selected clip.
   const editedClip = clips.find((clip) => clip.id === selectedIds[0]);
-  // The files dropped on the tracks, by recording: the clip panel draws what they really hold.
-  const [recordings, setRecordings] = useState<ReadonlyMap<string, Recording>>(
-    () => new Map()
+  const editedPeaks = useMemo(
+    () => (editedClip && clipPeaks.get(editedClip.id)) ?? NO_PEAKS,
+    [clipPeaks, editedClip]
   );
-  const editedPeaks = useMemo(() => {
-    if (!editedClip) {
-      return [];
-    }
-    const recording = recordings.get(editedClip.id.replace(LEADING_ID, ""));
-    return recording
-      ? recordedPeaks(recording, editedClip, bar)
-      : standInPeaks(editedClip);
-  }, [bar, editedClip, recordings]);
   const handleClipAction = useCallback(
     (action: ClipAction, id: string) => {
       if (action === "edit") {
@@ -1464,14 +1562,32 @@ export default function BlockTimeline() {
     },
     [duration, editClip, editedClip]
   );
+  // A key pressed in the piano roll plays the track's synth.
+  const editedTrack = editedClip?.track;
+  const auditionOn = useCallback(
+    (pitch: number, details: { velocity: number }) => {
+      if (editedTrack) {
+        engine.engine?.noteOn(editedTrack, pitch, details.velocity);
+      }
+    },
+    [editedTrack, engine.engine]
+  );
+  const auditionOff = useCallback(
+    (pitch: number) => {
+      if (editedTrack) {
+        engine.engine?.noteOff(editedTrack, pitch);
+      }
+    },
+    [editedTrack, engine.engine]
+  );
   const midiEditing = useMemo(
     () => ({
-      onNoteOff: midi.onNoteOff,
-      onNoteOn: midi.onNoteOn,
+      onNoteOff: auditionOff,
+      onNoteOn: auditionOn,
       onNotesChange: changeNotes,
       onRegionChange: changeMidiRegion,
     }),
-    [changeMidiRegion, changeNotes, midi.onNoteOff, midi.onNoteOn]
+    [auditionOff, auditionOn, changeMidiRegion, changeNotes]
   );
   // The clip panel's switch: off, the clip stays on its track and is not heard.
   const setEditedActive = useCallback(
@@ -1744,8 +1860,11 @@ export default function BlockTimeline() {
   );
   const addFiles = useCallback(
     async (files: File[], trackId: string, start: number) => {
-      // Decoded for their length and their peaks only: the block plays no recordings. A file that is not sound is left out.
-      const context = new OfflineAudioContext(1, 1, 44_100);
+      // Decoded at the engine's rate, so they play as they are. A file that is not sound is left out.
+      const context = webAudio.getContext();
+      if (!context) {
+        return;
+      }
       const decoded = await Promise.all(
         files.map((file) =>
           file
@@ -1761,16 +1880,11 @@ export default function BlockTimeline() {
         if (channels && length > 0 && at < duration) {
           fileCount.current += 1;
           const id = `file${fileCount.current}`;
-          setRecordings((current) =>
-            new Map(current).set(id, {
-              bar,
-              length,
-              peaks: amplitudes(channels),
-            })
-          );
+          keepRecording(id, recordingOf(channels, context.sampleRate));
           addClip({
             id,
             name: file.name.replace(EXTENSION, ""),
+            recording: id,
             sourceLength: length,
             track: trackId,
             value: {
@@ -1786,7 +1900,7 @@ export default function BlockTimeline() {
         }
       }
     },
-    [addClip, bar, duration, selectClip]
+    [addClip, duration, keepRecording, selectClip]
   );
   const handleFileOver = useCallback(
     (event: DragEvent<HTMLDivElement>) => {
@@ -2044,7 +2158,7 @@ export default function BlockTimeline() {
       const target = targets[event.key];
       if (target !== undefined) {
         event.preventDefault();
-        clock.set(Math.min(duration, Math.max(0, target)));
+        seek(Math.min(duration, Math.max(0, target)));
         return true;
       }
       if (event.key === "ArrowUp" || event.key === "ArrowDown") {
@@ -2054,7 +2168,7 @@ export default function BlockTimeline() {
       }
       return false;
     },
-    [clips, clock, duration, gridSeconds, pickNextTrack]
+    [clips, clock, duration, gridSeconds, pickNextTrack, seek]
   );
 
   /** The navigation keys: the grid with Cmd/Ctrl + 1 to 5, the zoom with +, -, Z and X, and the cursor from the panel. */
@@ -2125,15 +2239,7 @@ export default function BlockTimeline() {
             tempo={tempo}
           />
           <div className="hidden h-7 w-10 shrink-0 items-center @3xl/panel:flex">
-            <Meter
-              aria-label="Master output level"
-              className="data-[orientation=horizontal]:[--meter-thickness:--spacing(3)]"
-              orientation="horizontal"
-              peakMarks="hidden"
-              size="sm"
-              source={playing ? simulated : SILENCE}
-              warnThreshold={-12}
-            />
+            <MainLevel analysers={engine.meter(doc.main.id)} />
           </div>
         </div>
         <div className="flex min-w-0 items-center gap-2">
@@ -2560,11 +2666,7 @@ export default function BlockTimeline() {
                         folded={folded[track.id]}
                         meter={
                           <TrackLevel
-                            active={
-                              playing &&
-                              !mixOf(track).muted &&
-                              (!anySolo || mixOf(track).soloed)
-                            }
+                            analysers={engine.meter(track.id)}
                             name={track.name}
                           />
                         }
@@ -2657,6 +2759,7 @@ export default function BlockTimeline() {
                               onRemove={removeClip}
                               onRename={renameClip}
                               onSelect={pickClip}
+                              peaks={clipPeaks.get(clip.id)}
                               selected={selectedIds.includes(clip.id)}
                               swatch={mixOf(track).color}
                               trackName={track.name}

@@ -246,12 +246,12 @@ function drawKicks(ctx: BaseAudioContext, mix: AudioNode) {
   }
 }
 
-/** What the drums, the bass, the keys and the line play, over two bars. */
-function drawGroove(ctx: BaseAudioContext, out: AudioNode) {
-  const random = seededRandom(23);
-  const mix = ctx.createGain();
-  mix.gain.value = GROOVE_TRIM;
-  mix.connect(out);
+/** What the drums of the groove play over two bars: the kick, the snare with its ghost notes, the hats. */
+function drawDrums(
+  ctx: BaseAudioContext,
+  mix: AudioNode,
+  random: () => number
+) {
   drawKicks(ctx, mix);
   for (const [step, velocity] of SNARES) {
     const time = timeOf(step) + (random() - 0.5) * 0.006;
@@ -270,6 +270,14 @@ function drawGroove(ctx: BaseAudioContext, out: AudioNode) {
       { decay: 0.3 }
     );
   }
+}
+
+/** What the drums, the bass, the keys and the line play, over two bars. */
+function drawGroove(ctx: BaseAudioContext, out: AudioNode) {
+  const mix = ctx.createGain();
+  mix.gain.value = GROOVE_TRIM;
+  mix.connect(out);
+  drawDrums(ctx, mix, seededRandom(23));
   for (const [step, steps, bar] of BASS) {
     bassNote(
       ctx,
@@ -349,6 +357,28 @@ export function renderDemoLoop(sampleRate: number): Promise<AudioBuffer> {
   return buffer;
 }
 
+const beats = new Map<number, Promise<AudioBuffer>>();
+
+/**
+ * The drums of the groove on their own, two bars at its tempo: what a drum
+ * track of an arrangement plays, in step with `renderDemoLoop` since both are
+ * drawn from the same hits.
+ */
+export function renderBeatLoop(sampleRate: number): Promise<AudioBuffer> {
+  const cached = beats.get(sampleRate);
+  if (cached) {
+    return cached;
+  }
+  const buffer = drawLoop(sampleRate, LOOP_SECONDS, (ctx, out) => {
+    const mix = ctx.createGain();
+    mix.gain.value = GROOVE_TRIM;
+    mix.connect(out);
+    drawDrums(ctx, mix, seededRandom(23));
+  });
+  beats.set(sampleRate, buffer);
+  return buffer;
+}
+
 const keyed = new Map<number, Promise<AudioBuffer>>();
 
 /**
@@ -370,17 +400,19 @@ const held = new Map<number, Promise<AudioBuffer>>();
 const CHORD_HERTZ = [110, 164.81, 220, 261.63];
 const CHORD_LEVEL = 0.12;
 
-/** A sustained chord for the length of the loop, a signal that is never quiet by itself. */
+/**
+ * A sustained chord for the length of the loop, a signal that is never quiet
+ * by itself. It loops without a click: each note is tuned to a whole number of
+ * cycles of the loop, and the loop kept is the second one drawn, once the
+ * filter has settled.
+ */
 export function renderHeldChord(sampleRate: number): Promise<AudioBuffer> {
   const cached = held.get(sampleRate);
   if (cached) {
     return cached;
   }
-  const ctx = new OfflineAudioContext(
-    2,
-    Math.round(sampleRate * LOOP_SECONDS),
-    sampleRate
-  );
+  const loop = Math.round(sampleRate * LOOP_SECONDS);
+  const ctx = new OfflineAudioContext(2, loop * 2, sampleRate);
   const filter = ctx.createBiquadFilter();
   filter.type = "lowpass";
   filter.frequency.value = 1800;
@@ -389,12 +421,23 @@ export function renderHeldChord(sampleRate: number): Promise<AudioBuffer> {
     const oscillator = ctx.createOscillator();
     const gain = ctx.createGain();
     oscillator.type = "sawtooth";
-    oscillator.frequency.value = hertz;
+    oscillator.frequency.value =
+      Math.round(hertz * LOOP_SECONDS) / LOOP_SECONDS;
     gain.gain.value = CHORD_LEVEL;
     oscillator.connect(gain).connect(filter);
     oscillator.start(0);
   }
-  const buffer = ctx.startRendering();
+  const buffer = ctx.startRendering().then((drawn) => {
+    const kept = new AudioBuffer({
+      length: loop,
+      numberOfChannels: 2,
+      sampleRate,
+    });
+    for (let channel = 0; channel < 2; channel += 1) {
+      kept.copyToChannel(drawn.getChannelData(channel).subarray(loop), channel);
+    }
+    return kept;
+  });
   held.set(sampleRate, buffer);
   return buffer;
 }

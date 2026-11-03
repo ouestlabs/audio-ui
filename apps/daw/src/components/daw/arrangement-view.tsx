@@ -333,6 +333,13 @@ export function ArrangementView({
       source={engine.position}
       zoom={zoom}
     >
+      {/* The overview of the whole arrangement, on top as a DAW has it, over the lanes alone. */}
+      <div
+        className="shrink-0 border-b px-1 py-1"
+        style={{ paddingInlineStart: LEAD_PX }}
+      >
+        <TimelineNavigator getAriaValueText={describe} />
+      </div>
       <TimelineViewport
         className="flex min-h-0 flex-1 flex-col overflow-y-auto bg-muted/30"
         scrollbar="hidden"
@@ -507,7 +514,6 @@ export function ArrangementView({
           </Row>
         </div>
       </TimelineViewport>
-      <TimelineNavigator getAriaValueText={describe} />
     </Timeline>
   );
 }
