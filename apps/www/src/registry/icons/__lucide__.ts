@@ -14,6 +14,8 @@ export {
   ChevronUpIcon,
   CircleCheck,
   CircleCheckIcon,
+  Download,
+  DownloadIcon,
   Ellipsis,
   EllipsisIcon,
   Info,

@@ -175,6 +175,21 @@ The block runs one engine per slot, in series, the output of each into the input
 
 Over an engine of your own, keep the same list and send it the order and the states: the chain and the panels never touch the audio.
 
+### Exporting
+
+**Export WAV** renders the loop through the chain into a file, faster than real time: the same engines made on an `OfflineAudioContext`, once those that load a worklet have it, and the file runs on for three seconds after the loop, for echoes and the tail of a reverb to die away. A render says nothing while it runs, so the block stops it a few times on the way (`suspend`) to show how far it has got. `wav-file` (`npx shadcn@latest add @audio-ui/wav-file`) turns what renders into a WAV file:
+
+```ts
+import { downloadWavFile } from "@/lib/wav-file";
+
+const offline = new OfflineAudioContext(2, seconds * 48_000, 48_000);
+// The same engines, made on `offline`, with the source connected and started.
+const rendered = await offline.startRendering();
+downloadWavFile(rendered, { bitDepth: 24, filename: "chain.wav" });
+```
+
+`downloadWavFile` writes 16-bit PCM unless told 24, and `normalize: true` scales the sound so its loudest sample sits at full scale. `encodeWav(channels, sampleRate, options)` gives the bytes instead, to upload or to keep.
+
 ## Interaction
 
 <KeyTable title="Chain">

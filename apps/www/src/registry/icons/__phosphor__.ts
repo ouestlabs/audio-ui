@@ -12,6 +12,7 @@ export {
   CheckCircleIcon,
   CheckIcon,
   DotsThreeIcon,
+  DownloadSimpleIcon,
   InfoIcon,
   MagnifyingGlassIcon,
   MagnifyingGlassMinusIcon,

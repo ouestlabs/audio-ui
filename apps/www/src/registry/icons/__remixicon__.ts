@@ -14,6 +14,7 @@ export {
   RiCloseCircleLine,
   RiCloseLine,
   RiDeleteBinLine,
+  RiDownloadLine,
   RiErrorWarningLine,
   RiInformationLine,
   RiLoaderLine,

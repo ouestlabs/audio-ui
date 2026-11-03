@@ -16,6 +16,8 @@ import {
   useRef,
   useState,
 } from "react";
+import { IconPlaceholder } from "@/components/icon-placeholder";
+import { Button } from "@/registry/bases/base/ui/button";
 import { DeviceBrowser } from "@/registry-audio/bases/base/audio/elements/device-browser";
 import {
   DeviceChain,
@@ -33,6 +35,7 @@ import { ReduxPanel } from "@/registry-audio/bases/base/audio/panels/redux-panel
 import { ReverbPanel } from "@/registry-audio/bases/base/audio/panels/reverb-panel";
 import { SaturatorPanel } from "@/registry-audio/bases/base/audio/panels/saturator-panel";
 import { UtilityPanel } from "@/registry-audio/bases/base/audio/panels/utility-panel";
+import { useDemoSource } from "@/registry-audio/bases/base/hooks/use-demo-source";
 import {
   type DemoEngine,
   useDeviceLoop,
@@ -44,6 +47,12 @@ import { compressorDevice } from "@/registry-audio/bases/base/lib/compressor-dev
 import { createCompressorEngine } from "@/registry-audio/bases/base/lib/compressor-engine";
 import { delayDevice } from "@/registry-audio/bases/base/lib/delay-device";
 import { createDelayEngine } from "@/registry-audio/bases/base/lib/delay-engine";
+import {
+  type DemoSourceName,
+  demoKey,
+  demoTempo,
+  renderDemoSource,
+} from "@/registry-audio/bases/base/lib/demo-sound";
 import { equalizerDevice } from "@/registry-audio/bases/base/lib/equalizer-device";
 import { createEqualizerEngine } from "@/registry-audio/bases/base/lib/equalizer-engine";
 import { filterDevice } from "@/registry-audio/bases/base/lib/filter-device";
@@ -58,6 +67,7 @@ import { saturatorDevice } from "@/registry-audio/bases/base/lib/saturator-devic
 import { createSaturatorEngine } from "@/registry-audio/bases/base/lib/saturator-engine";
 import { utilityDevice } from "@/registry-audio/bases/base/lib/utility-device";
 import { createUtilityEngine } from "@/registry-audio/bases/base/lib/utility-engine";
+import { downloadWavFile } from "@/registry-audio/bases/base/lib/wav-file";
 
 const MASTER_VOLUME = 0.7;
 
@@ -187,18 +197,25 @@ const START = [equalizerDevice.id, compressorDevice.id, delayDevice.id].flatMap(
   (device, index) => slotOf(device, `start-${index}`) ?? []
 );
 
+/** The chain's engines as one: and when those that load a worklet have it, for a render that must not start before. */
+type ChainEngine = DemoEngine<Slot[]> & {
+  ready: () => Promise<unknown>;
+  readonly sidechain: AudioNode;
+};
+
 /**
  * The devices of the chain on the Web Audio API, one engine per slot, in
  * series from `input` to `output`, and the key at `sidechain` fed to every
  * engine that takes one. It follows the slots it is given: an engine is made
  * for a new slot, let go with its slot, told a slot's new state, and the
- * engines are wired again when their order changes.
+ * engines are wired again when their order changes. It runs on any context,
+ * an `OfflineAudioContext` too.
  */
 function createChainEngine(
   ctx: BaseAudioContext,
   initial: Slot[],
   context?: DeviceContext
-): DemoEngine<Slot[]> {
+): ChainEngine {
   const input = ctx.createGain();
   const output = ctx.createGain();
   const sidechain = ctx.createGain();
@@ -208,6 +225,8 @@ function createChainEngine(
   >();
   let order: string[] = [];
   let tempo = context?.tempo;
+  // An engine with a worklet plays its signal through untouched until the worklet has loaded.
+  const loading: Promise<unknown>[] = [];
 
   const wire = () => {
     input.disconnect();
@@ -241,6 +260,10 @@ function createChainEngine(
     const engine = create(ctx, slot.state, next);
     if (engine.sidechain) {
       sidechain.connect(engine.sidechain);
+    }
+    const { ready } = engine as { ready?: Promise<unknown> };
+    if (ready) {
+      loading.push(ready);
     }
     running.set(slot.id, { engine, state: slot.state });
   };
@@ -284,9 +307,79 @@ function createChainEngine(
     },
     input,
     output,
+    ready: () => Promise.all(loading),
     sidechain,
     update,
   };
+}
+
+/** How many times the loop plays into an exported file. */
+const BOUNCE_LOOPS = 2;
+/** How long the file runs on after the loop, for echoes and the tail of a reverb to die away. */
+const BOUNCE_TAIL_SECONDS = 3;
+const BOUNCE_RATE = 48_000;
+/** How loud the loop goes into the chain: as loud as it plays. */
+const SIGNAL_LEVEL = 0.8;
+/** How many times the render stops on its way to say how far it has got. */
+const BOUNCE_STEPS = 20;
+
+/**
+ * Plays the loop through the chain's devices into a file, faster than real
+ * time: the same engines on an `OfflineAudioContext`, once those that load a
+ * worklet have it, with the kick at the key, as it plays. `onProgress` hears
+ * how far it has got, from 0 to 1.
+ */
+async function bounce(
+  slots: Slot[],
+  name: DemoSourceName,
+  onProgress: (done: number) => void
+): Promise<AudioBuffer> {
+  const [loop, key] = await Promise.all([
+    renderDemoSource(name, BOUNCE_RATE),
+    renderDemoSource(demoKey(name), BOUNCE_RATE),
+  ]);
+  const playing = loop.duration * BOUNCE_LOOPS;
+  const length = playing + BOUNCE_TAIL_SECONDS;
+  const ctx = new OfflineAudioContext(
+    2,
+    Math.ceil(length * BOUNCE_RATE),
+    BOUNCE_RATE
+  );
+  const chain = createChainEngine(ctx, slots, { tempo: demoTempo(name) });
+  await chain.ready();
+  const level = ctx.createGain();
+  level.gain.value = SIGNAL_LEVEL;
+  level.connect(chain.input);
+  for (const [buffer, into] of [
+    [loop, level],
+    [key, chain.sidechain],
+  ] as const) {
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    source.loop = true;
+    source.connect(into);
+    source.start(0);
+    source.stop(playing);
+  }
+  chain.output.connect(ctx.destination);
+  // A render says nothing while it runs: it stops a few times on the way, to tell how far it is.
+  for (let step = 1; step < BOUNCE_STEPS; step += 1) {
+    ctx.suspend((length * step) / BOUNCE_STEPS).then(() => {
+      onProgress(step / BOUNCE_STEPS);
+      return ctx.resume();
+    });
+  }
+  const rendered = await ctx.startRendering();
+  chain.dispose();
+  return rendered;
+}
+
+/** A file name with the time in it, so a second export does not take the first one's place. */
+function exportName(date: Date) {
+  const pad = (value: number) => String(value).padStart(2, "0");
+  const day = `${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}`;
+  const time = `${pad(date.getHours())}${pad(date.getMinutes())}${pad(date.getSeconds())}`;
+  return `device-chain-${day}-${time}.wav`;
 }
 
 interface ChainSlotProps {
@@ -341,7 +434,8 @@ function ChainSlot({ onChange, slot, tempo }: ChainSlotProps) {
  * a device by its header to move it, or press Left or Right on its grip. Play
  * the loop: it goes through the devices in the order they are drawn, each its
  * own panel over the real engine, and a compressor switched to its sidechain
- * ducks it with the kick.
+ * ducks it with the kick. Export WAV renders it through the same engines into
+ * a file, faster than real time.
  */
 export default function BlockDeviceChain() {
   const [slots, setSlots] = useState<Slot[]>(START);
@@ -349,6 +443,7 @@ export default function BlockDeviceChain() {
   const search = useRef<HTMLInputElement>(null);
   const made = useRef(START.length);
   const master = useMasterBus(MASTER_VOLUME);
+  const name = useDemoSource("groove");
   const { tempo } = useDeviceLoop({
     create: createChainEngine,
     destination: master,
@@ -391,6 +486,21 @@ export default function BlockDeviceChain() {
     requestAnimationFrame(() => search.current?.focus());
   }, []);
   const order = useMemo(() => slots.map((slot) => slot.id), [slots]);
+  // The loop through the chain as a file: how far the render has got, and what to announce of it.
+  const [progress, setProgress] = useState<number | null>(null);
+  const [announced, setAnnounced] = useState("");
+  const exportWav = useCallback(() => {
+    const filename = exportName(new Date());
+    setProgress(0);
+    setAnnounced("Exporting the loop through the chain.");
+    bounce(slots, name, setProgress)
+      .then((rendered) => {
+        downloadWavFile(rendered, { filename });
+        setAnnounced(`Exported as ${filename}.`);
+      })
+      .catch(() => setAnnounced("The export did not work."))
+      .finally(() => setProgress(null));
+  }, [name, slots]);
 
   return (
     <div className="cn-audio-panel @container/chain w-full min-w-0 overflow-hidden border bg-card">
@@ -422,6 +532,33 @@ export default function BlockDeviceChain() {
           ))}
           <DeviceChainAdd onClick={browse} />
         </DeviceChain>
+      </div>
+      <div className="flex items-center gap-2 border-t px-2 py-1.5 text-muted-foreground text-xs">
+        <span className="min-w-0 flex-1 truncate">
+          {`The loop through ${slots.length} ${slots.length === 1 ? "device" : "devices"}`}
+        </span>
+        <span aria-live="polite" className="sr-only">
+          {announced}
+        </span>
+        <Button
+          className="tabular-nums"
+          disabled={progress !== null}
+          onClick={exportWav}
+          size="sm"
+          variant="outline"
+        >
+          <IconPlaceholder
+            aria-hidden="true"
+            hugeicons="Download01Icon"
+            lucide="DownloadIcon"
+            phosphor="DownloadSimpleIcon"
+            remixicon="RiDownloadLine"
+            tabler="IconDownload"
+          />
+          {progress === null
+            ? "Export WAV"
+            : `Exporting ${Math.round(progress * 100)}%`}
+        </Button>
       </div>
     </div>
   );

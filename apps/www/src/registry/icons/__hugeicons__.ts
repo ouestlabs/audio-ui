@@ -13,6 +13,7 @@ export {
   Cancel01Icon,
   CheckmarkCircle02Icon,
   Delete02Icon,
+  Download01Icon,
   InformationCircleIcon,
   Loading03Icon,
   MinusSignIcon,

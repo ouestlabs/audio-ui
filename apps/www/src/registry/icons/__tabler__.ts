@@ -13,6 +13,7 @@ export {
   IconChevronUp,
   IconCircleCheck,
   IconDots,
+  IconDownload,
   IconInfoCircle,
   IconLayoutSidebar,
   IconLoader,
