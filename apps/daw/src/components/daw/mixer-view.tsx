@@ -56,7 +56,8 @@ function StripMeter({
   return (
     <Meter
       aria-label={`${label} level`}
-      className="data-[orientation=vertical]:h-full"
+      // The scale hangs off its right edge, outside the pair it would push off the channel's middle.
+      className="data-[orientation=vertical]:me-0 data-[orientation=vertical]:h-full"
       marks={marks}
       size="sm"
       source={levels}
