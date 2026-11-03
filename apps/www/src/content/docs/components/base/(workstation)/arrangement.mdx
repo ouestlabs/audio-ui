@@ -406,6 +406,8 @@ While a clip is dragged with Alt, `arrangement.copying` lists the originals: dra
 
 With snapping on, a dragged clip or loop also lands on the edges of the other clips, the locators and the loop, through `snapPoints`. Where two clips meet, the fade-out of one and the fade-in of the next move together, as a crossfade, and a dashed line shows how far a fade being dragged can go.
 
+`useArrangedClips` ships with them and wires a clip to the arrangement's commands. Spread `clipProps(clip)` on `ArrangedClip`, with what draws it (`describe`, `peaks`, `swatch`, `trackName`), and draw `ghostsOn(trackId)` with `ArrangedClipGhost` for the originals of a copy dragged with Alt. A clip dropped on a track moves to it if the track takes what it holds, and let go off the tracks it goes to the nearest one; the rest of a selection follows a clip dragged up or down.
+
 ### Arranged tracks
 
 A track's header is `TimelineTrackControls`, from the timeline: its name, gain, pan, mute, solo, color, fold and menu. `useTrackReorder` (`npx shadcn@latest add @audio-ui/use-track-reorder`) moves tracks: give each track a grip, and drag the grip, or press Up or Down on it.
@@ -907,6 +909,17 @@ Something placed at `value` on a lane: a bar number on the ruler, a cue, a grid 
 <TypeRow name={"onRename, onRemove, onFadeShape"} type={"(id, …) => void"}>Renamed in place, deleted with its key, and a fade's curve picked.</TypeRow>
 <TypeRow name={"multi"} type={"boolean"} default={"false"}>Whether a press adds it to the selection, for a touch screen.</TypeRow>
 <TypeRow name={"copying, lift, onLift"} type={"boolean, number, (id, offset) => void"}>For group drags: whether it is a copy being dragged, how far it is held up or down, and how far it is dragged.</TypeRow>
+</TypeTable>
+
+### useArrangedClips
+
+<TypeTable>
+<TypeRow name={"clips, copying, selectedIds, tracks, dispatch"} type={"as useArrangement returns them"}>The arrangement. A return track takes no clip: leave it out of `tracks`.</TypeRow>
+<TypeRow name={"getPosition, splitStep"} type={"() => number, number"}>Where the menu's split cuts, and the closest it comes to a clip's edge.</TypeRow>
+<TypeRow name={"viewportRef"} type={"Ref"}>The viewport the tracks scroll in: a clip let go off them goes to the nearest.</TypeRow>
+<TypeRow name={"onEdit, onPress"} type={"(id) => void, () => void"}>"Edit" chosen from a clip's menu, and a clip pressed, for what else it lets go of.</TypeRow>
+<TypeRow name={"clipProps(clip), ghostsOn(trackId)"} type={"props, Arranged[]"}>What an `ArrangedClip` takes, and the originals of the clips being copied on a track.</TypeRow>
+<TypeRow name={"onRemove, onRename"} type={"(id) => void, (id, name) => void"}>The same commands, for a clip's other editors.</TypeRow>
 </TypeTable>
 
 ### useTrackReorder

@@ -9,7 +9,6 @@ import {
 } from "@audio-ui/core/time";
 import { bypassesGrid } from "@audio-ui/core/timeline";
 import { EnvelopeIcon } from "@audio-ui/icons/react";
-import type { FadeShape, Timeline as TimelinePrimitive } from "@audio-ui/react";
 import {
   type ComponentProps,
   type DragEvent,
@@ -98,10 +97,8 @@ import {
   MidiClipPanel,
   type MidiClipRegion,
 } from "@/registry-audio/bases/base/audio/panels/midi-clip-panel";
-import {
-  type ClipAction,
-  useArrangement,
-} from "@/registry-audio/bases/base/hooks/use-arrangement";
+import { useArrangedClips } from "@/registry-audio/bases/base/hooks/use-arranged-clips";
+import { useArrangement } from "@/registry-audio/bases/base/hooks/use-arrangement";
 import { useArrangementEngine } from "@/registry-audio/bases/base/hooks/use-arrangement-engine";
 import { useAudioLevels } from "@/registry-audio/bases/base/hooks/use-audio-levels";
 import { useMarquee } from "@/registry-audio/bases/base/hooks/use-marquee-selection";
@@ -454,22 +451,6 @@ function recordedPeaks(recording: Recording, clip: Arranged): number[] {
     Math.ceil(((from + clip.sourceLength) / length) * peaks.length)
   );
   return peaks.slice(first, Math.max(first + 1, last));
-}
-
-/** The track whose lane is nearest `y`, up or down, in the view: where a clip let go off the tracks goes. */
-function nearestTrack(view: HTMLElement | null, y: number): string | undefined {
-  let nearest: string | undefined;
-  let best = Number.POSITIVE_INFINITY;
-  for (const lane of view?.querySelectorAll<HTMLElement>("[data-track]") ??
-    []) {
-    const box = lane.getBoundingClientRect();
-    const distance = Math.max(box.top - y, y - box.bottom, 0);
-    if (distance < best) {
-      best = distance;
-      nearest = lane.dataset.track;
-    }
-  }
-  return nearest;
 }
 
 /** Closes the clip panel. */
@@ -840,51 +821,6 @@ export default function BlockTimeline() {
     (clip: Arranged) => dispatch({ type: "add-clip", clip }),
     [dispatch]
   );
-  const changeClip = useCallback(
-    (
-      id: string,
-      value: TimelinePrimitive.Clip.Value,
-      details: TimelinePrimitive.Clip.ChangeEventDetails
-    ) => dispatch({ type: "change-clip", id, value, details }),
-    [dispatch]
-  );
-  const clipAction = useCallback(
-    (action: ClipAction, id: string) =>
-      dispatch({
-        type: "clip-action",
-        action,
-        id,
-        at: getPosition(),
-        step: splitStep,
-      }),
-    [dispatch, getPosition, splitStep]
-  );
-  const commitClip = useCallback(
-    (id: string, details: TimelinePrimitive.Clip.CommitEventDetails) => {
-      // A clip dropped on another track moves to it: its lane names the track. Off the tracks (the ruler, the
-      // row that adds one, the space below), it goes to the nearest, if that track takes what the clip holds.
-      const named =
-        details.lane instanceof HTMLElement
-          ? details.lane.dataset.track
-          : undefined;
-      const dragged =
-        details.reason === "drag" &&
-        details.target === "move" &&
-        "clientY" in details.event;
-      const onto =
-        named ??
-        (dragged
-          ? nearestTrack(viewportRef.current, details.event.clientY)
-          : undefined);
-      const clip = clips.find((candidate) => candidate.id === id);
-      const kind =
-        tracks.find((candidate) => candidate.id === onto)?.kind ?? "audio";
-      const track =
-        (clip?.notes ? "midi" : "audio") === kind ? onto : undefined;
-      dispatch({ type: "commit-clip", id, copy: Boolean(details.copy), track });
-    },
-    [clips, dispatch, tracks]
-  );
   const crop = useCallback(
     (id: string) => dispatch({ type: "crop-clip", id }),
     [dispatch]
@@ -899,19 +835,6 @@ export default function BlockTimeline() {
   const editClip = useCallback(
     (id: string, change: (clip: Arranged) => Arranged) =>
       dispatch({ type: "edit-clip", id, change }),
-    [dispatch]
-  );
-  const removeClip = useCallback(
-    (id: string) => dispatch({ type: "remove-clip", id }),
-    [dispatch]
-  );
-  const renameClip = useCallback(
-    (id: string, name: string) => dispatch({ type: "rename-clip", id, name }),
-    [dispatch]
-  );
-  const setFadeShape = useCallback(
-    (id: string, edge: "in" | "out", shape: FadeShape) =>
-      dispatch({ type: "set-fade-shape", id, edge, shape }),
     [dispatch]
   );
   const settleClipEdit = useCallback(
@@ -1017,15 +940,6 @@ export default function BlockTimeline() {
     [multi, selectTrack]
   );
   const marquee = useMarquee(selectedIds, selectClips, multi);
-  // A clip of a selection being dragged up or down, and how far: the rest of the selection follows it.
-  const [lifting, setLifting] = useState<{ id: string; offset: number } | null>(
-    null
-  );
-  const lift = useCallback(
-    (id: string, offset: number) =>
-      setLifting(offset === 0 ? null : { id, offset }),
-    []
-  );
   // A muted track is silent, and while any track is soloed so is every other: their clips are drawn drained.
   const anySolo = tracks.some((track) => mixOf(track).soloed);
 
@@ -1220,13 +1134,20 @@ export default function BlockTimeline() {
   // Collapsed to its title, the panel leaves the tracks the room, from clip to clip.
   const [clipViewCollapsed, setClipViewCollapsed] = useState(false);
   const [clipBoxesFolded, setClipBoxesFolded] = useState<string[]>([]);
-  const pickClip = useCallback(
-    (id: string, additive: boolean) => {
-      letGoOfTime();
-      selectClip(id, additive);
-    },
-    [letGoOfTime, selectClip]
-  );
+  // The clips, as the commands that change them. The menu's Edit opens the clip panel, and picking a clip lets go of the time selected.
+  const openClipView = useCallback(() => setClipViewOpen(true), []);
+  const arrangedClips = useArrangedClips({
+    clips,
+    copying,
+    dispatch,
+    getPosition,
+    onEdit: openClipView,
+    onPress: letGoOfTime,
+    selectedIds,
+    splitStep,
+    tracks,
+    viewportRef,
+  });
   // What each audio clip draws of its recording, once the recording is there.
   const clipPeaks = useMemo(
     () =>
@@ -1247,17 +1168,6 @@ export default function BlockTimeline() {
   const editedPeaks = useMemo(
     () => (editedClip && clipPeaks.get(editedClip.id)) ?? NO_PEAKS,
     [clipPeaks, editedClip]
-  );
-  const handleClipAction = useCallback(
-    (action: ClipAction, id: string) => {
-      if (action === "edit") {
-        pickClip(id, false);
-        setClipViewOpen(true);
-      } else {
-        clipAction(action, id);
-      }
-    },
-    [clipAction, pickClip]
   );
   // A MIDI clip's notes, from the clip panel's piano roll: a drag is one undo step.
   const changeNotes = useCallback(
@@ -2164,45 +2074,23 @@ export default function BlockTimeline() {
                         onSelectionChange={timeSelection.onSelectionChange}
                         seekable
                       >
-                        {copying
-                          .filter((original) => original.track === track.id)
-                          .map((original) => (
-                            <ArrangedClipGhost
-                              clip={original}
-                              key={original.id}
-                            />
-                          ))}
+                        {arrangedClips.ghostsOn(track.id).map((original) => (
+                          <ArrangedClipGhost
+                            clip={original}
+                            key={original.id}
+                          />
+                        ))}
                         {clips
                           .filter((clip) => clip.track === track.id)
                           .map((clip) => (
                             <ArrangedClip
-                              clip={clip}
-                              copying={copying.some(
-                                (original) => original.id === clip.id
-                              )}
                               describe={describe}
                               key={clip.id}
-                              lift={
-                                lifting &&
-                                lifting.id !== clip.id &&
-                                selectedIds.includes(clip.id) &&
-                                selectedIds.includes(lifting.id)
-                                  ? lifting.offset
-                                  : 0
-                              }
                               multi={multi}
-                              onAction={handleClipAction}
-                              onChange={changeClip}
-                              onCommit={commitClip}
-                              onFadeShape={setFadeShape}
-                              onLift={lift}
-                              onRemove={removeClip}
-                              onRename={renameClip}
-                              onSelect={pickClip}
                               peaks={clipPeaks.get(clip.id)}
-                              selected={selectedIds.includes(clip.id)}
                               swatch={mixOf(track).color}
                               trackName={track.name}
+                              {...arrangedClips.clipProps(clip)}
                             />
                           ))}
                         {selectedTime?.tracks.includes(track.id) ? (
@@ -2308,7 +2196,7 @@ export default function BlockTimeline() {
           onCollapsedChange={setClipViewCollapsed}
           onCrop={cropEdited}
           onFoldedBoxesChange={setClipBoxesFolded}
-          onRename={renameClip}
+          onRename={arrangedClips.onRename}
           onValueChange={changeClipSettings}
           onValueCommitted={settleClipEdit}
           peaks={editedPeaks}

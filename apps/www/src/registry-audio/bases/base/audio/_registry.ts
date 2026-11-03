@@ -81,11 +81,16 @@ export const audio: RegistryItem[] = [
         path: "audio/elements/arranged-clip.tsx",
         type: "registry:ui",
       },
+      {
+        path: "hooks/use-arranged-clips.ts",
+        type: "registry:hook",
+      },
     ],
     name: "arranged-clip",
     registryDependencies: [
       "@audio-ui/timeline",
       "@audio-ui/arrangement",
+      "@audio-ui/use-arrangement",
       "@shadcn/context-menu",
     ],
     type: "registry:ui",
