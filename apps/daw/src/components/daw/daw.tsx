@@ -165,7 +165,11 @@ export function Daw({ initial, initialRecordings }: DawProps) {
   });
   // Folded by the line dragged under the view's least height, or opened by dragging it up.
   const keepHeight = useCallback(
-    (size: { inPixels: number }) => {
+    (size: { inPixels: number }, id: string | number | undefined) => {
+      // A panel reports under its own id: the view it was, even as another takes its place.
+      if (id !== shown) {
+        return;
+      }
       const collapsed = panelRef.current?.isCollapsed() ?? false;
       setFolded(collapsed);
       if (!collapsed) {
@@ -189,14 +193,20 @@ export function Daw({ initial, initialRecordings }: DawProps) {
   const showView = useCallback(
     (next: PanelView) => {
       setPanelView(next);
-      foldPanel(false);
+      // Another view comes as a panel of its own, at its own height; the one shown opens where it was.
+      if (next === shown) {
+        foldPanel(false);
+      } else {
+        setFolded(false);
+      }
     },
-    [foldPanel]
+    [foldPanel, shown]
   );
   const pickView = useCallback(
     (value: unknown) => showView(value as PanelView),
     [showView]
   );
+  const showClip = useCallback(() => showView("clip"), [showView]);
   /** A view's key: shows it, or folds the panel when it is what is open. */
   const togglePanel = useCallback(
     (next: PanelView) => {
@@ -335,6 +345,13 @@ export function Daw({ initial, initialRecordings }: DawProps) {
   }, [bar, position, rescale, running]);
   // A stretch of time on some tracks, dragged across bare lanes, and what the keys do with it.
   const getCursor = useCallback(() => cursor, [cursor]);
+  // The tracks the keys work on: those picked by their headers, or the one last pressed.
+  const pickedTracks = useMemo(() => {
+    if (arrangement.selectedTracks.length > 0) {
+      return arrangement.selectedTracks;
+    }
+    return selectedTrack ? [selectedTrack] : [];
+  }, [arrangement.selectedTracks, selectedTrack]);
   const timeSelection = useTimeSelection({
     bar,
     clips: doc.clips,
@@ -342,7 +359,7 @@ export function Daw({ initial, initialRecordings }: DawProps) {
     dispatch,
     getPosition: getCursor,
     selectedIds: arrangement.selectedIds,
-    selectedTracks: arrangement.selectedTracks,
+    selectedTracks: pickedTracks,
     tracks: doc.tracks,
   });
   const selectedTime = timeSelection.time;
@@ -370,7 +387,7 @@ export function Daw({ initial, initialRecordings }: DawProps) {
     onPickTrack: pickNextTrack,
     onSeek: seek,
     selectedIds: arrangement.selectedIds,
-    selectedTracks: arrangement.selectedTracks,
+    selectedTracks: pickedTracks,
     step: grid.step,
     tracks: doc.tracks,
   });
@@ -524,12 +541,34 @@ export function Daw({ initial, initialRecordings }: DawProps) {
     "audio-track": () => dispatch({ kind: "audio", type: "add-track" }),
     continue: () => playFrom(stoppedAt.current),
     deactivate: () => dispatch({ type: "toggle-selected" }),
+    // Clips first; with none, the track its header picked: a press on a lane only puts the cursor there.
     delete: () => {
-      for (const id of arrangement.selectedIds) {
-        dispatch({ id, type: "remove-clip" });
+      const [track] = arrangement.selectedTracks;
+      if (arrangement.selectedIds.length > 0) {
+        dispatch({
+          commands: arrangement.selectedIds.map((id) => ({
+            id,
+            type: "remove-clip" as const,
+          })),
+          type: "batch",
+        });
+      } else if (track) {
+        dispatch({ id: track, type: "remove-track" });
       }
     },
-    duplicate: () => dispatch({ type: "duplicate-selection" }),
+    duplicate: () => {
+      if (arrangement.selectedIds.length > 0) {
+        dispatch({ type: "duplicate-selection" });
+        return;
+      }
+      dispatch({
+        commands: arrangement.selectedTracks.map((id) => ({
+          id,
+          type: "duplicate-track" as const,
+        })),
+        type: "batch",
+      });
+    },
     export: exportWav,
     "midi-track": () => dispatch({ kind: "midi", type: "add-track" }),
     "play-stop": playPause,
@@ -654,21 +693,28 @@ export function Daw({ initial, initialRecordings }: DawProps) {
       <div className="flex h-svh flex-col">
         <TopBar
           automating={automation.automating}
+          canRedo={arrangement.canRedo}
+          canUndo={arrangement.canUndo}
           exporting={exporting}
           looping={doc.loop.on}
           onAutomatingChange={automation.setAutomating}
           onExport={exportWav}
           onLoopingChange={setLooping}
           onPlayPause={playPause}
+          onRedo={commands.redo}
           onReenableAutomation={
             automation.anyOverridden ? automation.reenable : undefined
           }
           onStop={stop}
           onTempoChange={setTempo}
+          onUndo={commands.undo}
+          onZoomRatioChange={view.setRatio}
           playing={engine.playing}
           position={engine.position}
           signatures={doc.signatures}
           tempo={doc.tempo}
+          zoomMaxRatio={view.maxRatio}
+          zoomRatio={view.ratio}
         />
         <div className="flex min-h-0 flex-1">
           <LibraryPanel
@@ -697,6 +743,7 @@ export function Daw({ initial, initialRecordings }: DawProps) {
                   markers={markers}
                   onAddMidiClip={addMidiClip}
                   onDevice={dropDevice}
+                  onEditClip={showClip}
                   onFiles={addFiles}
                   onSeek={seek}
                   onSelectTrack={pickTrack}

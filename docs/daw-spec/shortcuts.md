@@ -43,4 +43,6 @@ Status: partial: which other keys Chrome and Safari keep is checked by hand (`ap
 | KEY-030 | Left, Right, End, Up, Down | Move the cursor on the grid, to the last clip's end; pick the track above or below |
 | KEY-031 | Cmd+C, Cmd+X, Cmd+V, Cmd+J | Copy, cut, paste; one clip per track of the time selected |
 
+Delete takes the selected clips or, with none, a track its header picked: a press on a lane only puts the cursor there (KEY-012, apps/daw/test/browser/run.ts). The menu of the top bar lists every key.
+
 Test: apps/daw/test/shortcuts.test.ts, one case per rule id.

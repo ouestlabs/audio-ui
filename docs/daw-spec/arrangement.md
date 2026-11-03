@@ -75,3 +75,7 @@ Test: apps/www/test/registry-audio/base/hooks/use-timeline-markers.test.tsx; app
 ### ARR-018 The cursor from the keyboard
 When a key reaches the arrangement, not a control with arrows of its own: Left and Right move the cursor by the grid, End goes to the end of the last clip, Up and Down pick the track above or below.
 Test: apps/www/test/registry-audio/base/hooks/use-timeline-cursor.test.tsx; apps/daw/test/browser/run.ts "ARR-018"
+
+### ARR-019 Moving and copying clips
+A clip dragged by its title moves along its track and to a track that takes what it holds: an audio clip an audio track, a MIDI clip a MIDI track, neither a return track. Let go off the tracks, it goes to the nearest that takes it. Option copies it, the original staying where it was, and the rest of a selection follows a clip dragged up or down.
+Test: apps/www/test/registry-audio/base/hooks/use-arranged-clips.test.tsx; apps/daw/test/browser/run.ts "ARR-019"

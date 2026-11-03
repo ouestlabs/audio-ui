@@ -2,21 +2,60 @@ import type { SignatureChange, Tempo } from "@audio-ui/core/time";
 import { EnvelopeIcon } from "@audio-ui/icons/react";
 import type { Source } from "@audio-ui/react";
 import {
+  ArrowArcLeftIcon,
+  ArrowArcRightIcon,
   ArrowCounterClockwiseIcon,
+  DotsThreeIcon,
   DownloadSimpleIcon,
+  MagnifyingGlassMinusIcon,
+  MagnifyingGlassPlusIcon,
 } from "@phosphor-icons/react";
 import { Link } from "@tanstack/react-router";
 import { type ReactNode, useCallback } from "react";
+import { NumberControl } from "@/components/audio-ui/bpm-control";
 import { Transport } from "@/components/audio-ui/transport";
 import { AudioUiIcon } from "@/components/site/audio-ui-icon";
 import { ModeSwitcher } from "@/components/site/mode-switcher";
 import { Button } from "@/components/ui/button";
+import { ButtonGroup } from "@/components/ui/button-group";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Kbd, KbdGroup } from "@/components/ui/kbd";
 import { Separator } from "@/components/ui/separator";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { SHORTCUT_HELP } from "@/lib/daw/shortcuts";
+
+/** The zoom presets, as shares of the fitted view: Fit shows everything. */
+const ZOOM_PRESETS = [1, 2, 4, 8];
+/** The zoom's steps are loupes, not a minus and a plus. */
+const ZOOM_STEPPERS = {
+  decrement: "Zoom out",
+  icons: {
+    decrement: <MagnifyingGlassMinusIcon aria-hidden="true" />,
+    increment: <MagnifyingGlassPlusIcon aria-hidden="true" />,
+  },
+  increment: "Zoom in",
+};
+/** How the zoom reads: as a share of the fitted view. */
+const PERCENT: Intl.NumberFormatOptions = {
+  maximumFractionDigits: 0,
+  style: "percent",
+};
+
+const noop = () => undefined;
 
 /** An icon button of the bar, as lab's has them: its name and its keys in the tooltip. */
 function BarButton({
@@ -57,21 +96,30 @@ function BarButton({
 export interface TopBarProps {
   /** Whether each lane shows its envelope (KEY-027). */
   automating: boolean;
+  canRedo: boolean;
+  canUndo: boolean;
   exporting: boolean;
   looping: boolean;
   onAutomatingChange: (automating: boolean) => void;
   onExport: () => void;
   onLoopingChange: (looping: boolean) => void;
   onPlayPause: () => void;
+  onRedo?: () => void;
   /** Plays every envelope again: there only while a hand overrides one. */
   onReenableAutomation?: () => void;
   onStop: () => void;
   onTempoChange: (tempo: Tempo) => void;
+  onUndo?: () => void;
+  onZoomRatioChange: (ratio: number) => void;
   playing: boolean;
   position: Source<number>;
   /** The time-signature changes: the position reads its bars through them. */
   signatures: readonly SignatureChange[];
   tempo: Tempo;
+  /** The largest share of the fitted view the zoom reaches. */
+  zoomMaxRatio: number;
+  /** The zoom as a share of the fitted view: 1 shows everything. */
+  zoomRatio: number;
 }
 
 /** The bar on top: the brand, as the lab has it, the transport, the automation, and the export. */
@@ -80,6 +128,14 @@ export function TopBar(props: TopBarProps) {
   const toggleAutomation = useCallback(
     () => onAutomatingChange(!automating),
     [automating, onAutomatingChange]
+  );
+  const { onZoomRatioChange, zoomRatio } = props;
+  const pickZoom = useCallback(
+    (value: unknown) => onZoomRatioChange(Number(value)),
+    [onZoomRatioChange]
+  );
+  const preset = ZOOM_PRESETS.find(
+    (ratio) => Math.abs(ratio - zoomRatio) < 0.01
   );
   return (
     <header className="flex h-12 shrink-0 items-center gap-3 border-b px-3">
@@ -130,6 +186,36 @@ export function TopBar(props: TopBarProps) {
             />
           </BarButton>
         ) : null}
+        <ButtonGroup>
+          <BarButton
+            disabled={!props.canUndo}
+            label="Undo (Cmd Z)"
+            onClick={props.onUndo ?? noop}
+          >
+            <ArrowArcLeftIcon aria-hidden="true" />
+          </BarButton>
+          <BarButton
+            disabled={!props.canRedo}
+            label="Redo (Cmd Shift Z)"
+            onClick={props.onRedo ?? noop}
+          >
+            <ArrowArcRightIcon aria-hidden="true" />
+          </BarButton>
+        </ButtonGroup>
+        <div className="hidden items-center xl:flex">
+          <NumberControl
+            format={PERCENT}
+            label="Zoom"
+            largeStep={1}
+            max={props.zoomMaxRatio}
+            min={1}
+            onValueChange={onZoomRatioChange}
+            step={0.25}
+            steppers={ZOOM_STEPPERS}
+            unit="Zoom"
+            value={zoomRatio}
+          />
+        </div>
         <BarButton
           label="Automation (A)"
           onClick={toggleAutomation}
@@ -144,6 +230,59 @@ export function TopBar(props: TopBarProps) {
         >
           <DownloadSimpleIcon aria-hidden="true" />
         </BarButton>
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            render={
+              <Button
+                aria-label="More controls"
+                className="text-muted-foreground"
+                size="icon"
+                variant="outline"
+              />
+            }
+          >
+            <DotsThreeIcon aria-hidden="true" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-auto min-w-48">
+            <DropdownMenuRadioGroup
+              onValueChange={pickZoom}
+              value={preset === undefined ? "" : String(preset)}
+            >
+              {ZOOM_PRESETS.map((ratio) => (
+                <DropdownMenuRadioItem
+                  disabled={ratio > props.zoomMaxRatio}
+                  key={ratio}
+                  value={String(ratio)}
+                >
+                  {ratio === 1 ? "Fit" : `Zoom ${ratio * 100} %`}
+                </DropdownMenuRadioItem>
+              ))}
+            </DropdownMenuRadioGroup>
+            <DropdownMenuSeparator />
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>
+                Keyboard shortcuts
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent className="flex max-h-(--available-height) w-auto flex-col">
+                <div className="flex min-h-0 flex-col gap-2 overflow-y-auto p-2 text-sm whitespace-nowrap">
+                  {SHORTCUT_HELP.map((shortcut) => (
+                    <div
+                      className="flex items-center justify-between gap-3"
+                      key={shortcut.action}
+                    >
+                      <span>{shortcut.action}</span>
+                      <KbdGroup>
+                        {shortcut.keys.map((key) => (
+                          <Kbd key={key}>{key}</Kbd>
+                        ))}
+                      </KbdGroup>
+                    </div>
+                  ))}
+                </div>
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
+          </DropdownMenuContent>
+        </DropdownMenu>
         <ModeSwitcher />
       </div>
     </header>

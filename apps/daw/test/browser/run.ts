@@ -742,6 +742,129 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         .getByText("2 Audio")
         .waitFor();
     },
+  "ARR-019: a clip moves to a track that takes it, and Option copies it":
+    async (browser) => {
+      const page = await open(browser);
+      // Zoomed in, a clip of a bar has a title bar to hold.
+      await page.keyboard.press("Meta+Equal");
+      await page.keyboard.press("Meta+Equal");
+      await page.waitForTimeout(150);
+      const lane = await page.locator('[data-track="track-3"]').boundingBox();
+      assert(lane, "the lane is there");
+      await page.mouse.dblclick(lane.x + 4, lane.y + lane.height / 2);
+      const head = page.locator(
+        "[data-clip-id] [data-slot=timeline-clip-header]"
+      );
+      await head.waitFor({ timeout: 5000 });
+      const trackOf = () =>
+        page
+          .locator("[data-clip-id]")
+          .first()
+          .evaluate((clip) =>
+            clip.closest("[data-track]")?.getAttribute("data-track")
+          );
+      const dragTo = async (track: string, sideways = 0) => {
+        const box = await head.first().boundingBox();
+        const to = await page.locator(`[data-track="${track}"]`).boundingBox();
+        assert(box && to, "the clip and the lane are there");
+        await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+        await page.mouse.down();
+        await page.mouse.move(
+          box.x + box.width / 2 + sideways,
+          to.y + to.height / 2,
+          { steps: 8 }
+        );
+      };
+      await dragTo("track-1");
+      await page.mouse.up();
+      await page.waitForTimeout(100);
+      assert(
+        (await trackOf()) === "track-3",
+        "an audio track took a MIDI clip"
+      );
+      await dragTo("track-4");
+      await page.mouse.up();
+      await page.waitForFunction(() =>
+        document.querySelector('[data-track="track-4"] [data-clip-id]')
+      );
+      await page.keyboard.down("Alt");
+      const box = await head.first().boundingBox();
+      assert(box, "the clip is there");
+      await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+      await page.mouse.down();
+      await page.mouse.move(box.x + box.width * 1.8, box.y + box.height / 2, {
+        steps: 8,
+      });
+      await page.waitForSelector("[data-slot=arranged-clip-ghost]");
+      await page.mouse.up();
+      await page.keyboard.up("Alt");
+      await page.waitForFunction(
+        () => document.querySelectorAll("[data-clip-id]").length === 2
+      );
+    },
+  "KEY-012: Delete takes a track its header picked, not one a press on its lane did":
+    async (browser) => {
+      const page = await open(browser);
+      const count = () => page.locator("[data-track]").count();
+      const before = await count();
+      await page
+        .locator('[data-track="track-2"]')
+        .click({ position: { x: 300, y: 10 } });
+      await page.keyboard.press("Delete");
+      await page.waitForTimeout(100);
+      assert(
+        (await count()) === before,
+        "a press on a lane let Delete take its track"
+      );
+      await page.getByText("2 Audio", { exact: true }).first().click();
+      await page.keyboard.press("Delete");
+      await page.waitForFunction(
+        (tracks) =>
+          document.querySelectorAll("[data-track]").length === tracks - 1,
+        before
+      );
+      await page.getByRole("button", { name: "Undo (Cmd Z)" }).click();
+      await page.waitForFunction(
+        (tracks) => document.querySelectorAll("[data-track]").length === tracks,
+        before
+      );
+    },
+  "the bar zooms, lists the keys, and a lane's menu sets the grid": async (
+    browser
+  ) => {
+    const page = await open(browser);
+    const wide = () =>
+      page
+        .locator('[data-track="track-1"]')
+        .evaluate((lane) => lane.getBoundingClientRect().width);
+    const fitted = await wide();
+    await page.getByRole("button", { name: "More controls" }).click();
+    await page.getByRole("menuitemradio", { name: "Zoom 400 %" }).click();
+    await page.waitForFunction(
+      (from) =>
+        (
+          document.querySelector('[data-track="track-1"]') as HTMLElement
+        ).getBoundingClientRect().width >
+        from * 3.9,
+      fitted
+    );
+    // A preset leaves the menu open, to try another.
+    await page.getByRole("menuitem", { name: "Keyboard shortcuts" }).click();
+    await page
+      .getByText("Add a locator at the cursor")
+      .waitFor({ timeout: 5000 });
+    await page.keyboard.press("Escape");
+    await page.keyboard.press("Escape");
+    await page
+      .locator('[data-track="track-2"]')
+      .click({ button: "right", position: { x: 300, y: 10 } });
+    await page.getByRole("menuitemradio", { name: "1/4" }).click();
+    await page.keyboard.press("Escape");
+    await page
+      .getByRole("button", { exact: true, name: "Grid" })
+      .filter({ hasText: "1/4" })
+      .waitFor({ timeout: 5000 });
+  },
   "PRJ-001: the project comes back when the page is loaded again": async (
     browser
   ) => {

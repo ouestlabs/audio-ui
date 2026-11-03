@@ -88,6 +88,50 @@ export const SHORTCUTS: readonly Shortcut[] = [
   { alt: true, command: "unfold-all", key: "u" },
 ];
 
+/** The keyboard in words, for the shortcuts menu: what each does, then its keys. */
+export const SHORTCUT_HELP: readonly { action: string; keys: string[] }[] = [
+  { action: "Play or stop", keys: ["Space"] },
+  { action: "Continue from where it stopped", keys: ["Shift", "Space"] },
+  { action: "Move the cursor on the grid", keys: ["Left", "Right"] },
+  { action: "Go to the start, or the last clip's end", keys: ["Home", "End"] },
+  { action: "Pick the track above or below", keys: ["Up", "Down"] },
+  { action: "Add a locator at the cursor", keys: ["M"] },
+  {
+    action: "Jump to the next locator or clip edge",
+    keys: ["Option", "Arrows"],
+  },
+  { action: "Undo", keys: ["Cmd", "Z"] },
+  { action: "Redo", keys: ["Cmd", "Shift", "Z"] },
+  { action: "Loop the selection", keys: ["Cmd", "L"] },
+  { action: "New audio track", keys: ["Ctrl", "T"] },
+  { action: "New MIDI track", keys: ["Ctrl", "Shift", "T"] },
+  { action: "New return track", keys: ["Cmd", "Option", "T"] },
+  { action: "Copy, cut, paste", keys: ["Cmd", "C", "X", "V"] },
+  { action: "Duplicate", keys: ["Cmd", "D"] },
+  { action: "Split at the cursor", keys: ["Cmd", "E"] },
+  { action: "One clip per track of the time selected", keys: ["Cmd", "J"] },
+  { action: "Insert silence at the cursor", keys: ["Cmd", "I"] },
+  { action: "Fades from the time selected", keys: ["Cmd", "Option", "F"] },
+  { action: "Delete what is selected", keys: ["Delete"] },
+  { action: "Delete the selected time", keys: ["Cmd", "Shift", "Delete"] },
+  { action: "Switch the selected clips off or on", keys: ["0"] },
+  { action: "Solo the selected track", keys: ["S"] },
+  { action: "Select every clip", keys: ["Cmd", "A"] },
+  { action: "Finer or wider grid", keys: ["Cmd", "1", "2"] },
+  { action: "Triplets, snapping, a fixed grid", keys: ["Cmd", "3", "4", "5"] },
+  { action: "Zoom in or out", keys: ["Cmd", "=", "-"] },
+  { action: "Zoom to the selection, and back", keys: ["Z", "X"] },
+  { action: "Copy a clip while dragging it", keys: ["Option", "Drag"] },
+  { action: "Select clips with a rectangle", keys: ["Shift", "Drag"] },
+  { action: "Show or hide the automation", keys: ["A"] },
+  { action: "Fold the track", keys: ["U"] },
+  { action: "Unfold every track", keys: ["Option", "U"] },
+  { action: "Fold or show the library", keys: ["Cmd", "Option", "B"] },
+  { action: "Show the mixer", keys: ["Cmd", "Option", "M"] },
+  { action: "Switch between the clip and the devices", keys: ["Shift", "Tab"] },
+  { action: "Export", keys: ["Cmd", "Shift", "R"] },
+];
+
 const APPLE = /Mac|iPhone|iPad/;
 const LETTER_CODE = /^Key[A-Z]$/;
 const DIGIT_CODE = /^Digit\d$/;

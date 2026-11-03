@@ -16,7 +16,10 @@ import {
   useState,
 } from "react";
 import { createPortal } from "react-dom";
-import { ArrangedClip } from "@/components/audio-ui/arranged-clip";
+import {
+  ArrangedClip,
+  ArrangedClipGhost,
+} from "@/components/audio-ui/arranged-clip";
 import { DEVICE_DRAG_TYPE } from "@/components/audio-ui/device-chain";
 import { TimelineTimeSelection } from "@/components/audio-ui/time-selection";
 import {
@@ -55,6 +58,11 @@ import {
 } from "@/components/audio-ui/track-grip";
 import { Button } from "@/components/ui/button";
 import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -62,6 +70,7 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useArrangedClips } from "@/hooks/use-arranged-clips";
 import type { useArrangement } from "@/hooks/use-arrangement";
 import type { useArrangementEngine } from "@/hooks/use-arrangement-engine";
 import { useMarquee } from "@/hooks/use-marquee-selection";
@@ -74,7 +83,7 @@ import type { useTimelineMarkers } from "@/hooks/use-timeline-markers";
 import type { useTimelineZoom } from "@/hooks/use-timeline-zoom";
 import type { useTrackAutomation } from "@/hooks/use-track-automation";
 import { useTrackReorder } from "@/hooks/use-track-reorder";
-import { type Arranged, type ClipAction, mixOf } from "@/lib/arrangement";
+import { type Arranged, mixOf } from "@/lib/arrangement";
 import { NEW_TRACK } from "@/lib/daw/drop";
 import { type Recording, sourcePeaks } from "@/lib/daw/recordings";
 import { cn } from "@/lib/utils";
@@ -168,6 +177,8 @@ export interface ArrangementViewProps {
   onAddMidiClip: (track: string, at: number) => void;
   /** A device of the library dropped on a track (its id), or on the add-track row (`NEW_TRACK`). */
   onDevice: (device: string, track: string) => void;
+  /** "Edit" chosen from a clip's menu: the clip is selected, to show it. */
+  onEditClip: () => void;
   /** Files dropped on a track (its id), or on the add-track row (`NEW_TRACK`), at a time of the arrangement. */
   onFiles: (files: File[], track: string, at: number) => void;
   /** A click in the ruler or a lane: where to start, and whether to play from there. */
@@ -201,6 +212,7 @@ export function ArrangementView({
   markers,
   onAddMidiClip,
   onDevice,
+  onEditClip,
   onFiles,
   onSeek,
   onSelectTrack,
@@ -281,65 +293,27 @@ export function ArrangementView({
     [bar, duration, onAddMidiClip, zoom]
   );
 
-  const changeClip = useCallback(
-    (
-      id: string,
-      value: TimelinePrimitive.Clip.Value,
-      details: TimelinePrimitive.Clip.ChangeEventDetails
-    ) => dispatch({ details, id, type: "change-clip", value }),
-    [dispatch]
-  );
-  const commitClip = useCallback(
-    (id: string, details: TimelinePrimitive.Clip.CommitEventDetails) => {
-      const named =
-        details.lane instanceof HTMLElement
-          ? details.lane.dataset.track
-          : undefined;
-      const clip = clips.find((candidate) => candidate.id === id);
-      const kind =
-        tracks.find((candidate) => candidate.id === named)?.kind ?? "audio";
-      const track =
-        (clip?.notes ? "midi" : "audio") === kind ? named : undefined;
-      dispatch({ copy: Boolean(details.copy), id, track, type: "commit-clip" });
-    },
-    [clips, dispatch, tracks]
-  );
-  const clipAction = useCallback(
-    (action: ClipAction, id: string) =>
-      dispatch({ action, at: cursor, id, step: beat / 4, type: "clip-action" }),
-    [beat, cursor, dispatch]
-  );
-  // Picking a clip lets go of the time selected.
+  // Picking a clip lets go of the time selected, and its menu's Edit shows it in the panel.
   const { clear: letGoOfTime, pressLane, time: selectedTime } = timeSelection;
-  const selectClip = useCallback(
-    (id: string, additive: boolean) => {
-      letGoOfTime();
-      dispatch({ additive, id, type: "select-clip" });
-    },
-    [dispatch, letGoOfTime]
-  );
+  const getCursor = useCallback(() => cursor, [cursor]);
+  const arrangedClips = useArrangedClips({
+    clips,
+    copying: arrangement.copying,
+    dispatch,
+    getPosition: getCursor,
+    onEdit: onEditClip,
+    onPress: letGoOfTime,
+    selectedIds,
+    splitStep: beat / 4,
+    tracks,
+    viewportRef,
+  });
   // Shift and a drag across bare lane draws a rectangle: the clips it touches join the selection.
   const selectClips = useCallback(
     (ids: string[]) => dispatch({ ids, type: "select-clips" }),
     [dispatch]
   );
   const marquee = useMarquee(selectedIds as string[], selectClips, false);
-  const removeClip = useCallback(
-    (id: string) => dispatch({ id, type: "remove-clip" }),
-    [dispatch]
-  );
-  const renameClip = useCallback(
-    (id: string, name: string) => dispatch({ id, name, type: "rename-clip" }),
-    [dispatch]
-  );
-  const fadeShape = useCallback(
-    (
-      id: string,
-      edge: "in" | "out",
-      shape: TimelinePrimitive.Clip.Value["fadeInShape"] & string
-    ) => dispatch({ edge, id, shape, type: "set-fade-shape" }),
-    [dispatch]
-  );
   // A track moves by its grip, dragged or with Up and Down on it; a new one goes after the one it is asked from, of its kind.
   const trackOrder = useMemo(() => tracks.map((track) => track.id), [tracks]);
   const moveTrack = useCallback(
@@ -374,14 +348,15 @@ export function ArrangementView({
       const { track } = event.currentTarget.dataset;
       if (track && event.target === event.currentTarget && !event.shiftKey) {
         pressLane(track);
-        pickTrack(track, false);
+        dispatch({ type: "clear-selection" });
+        onSelectTrack(track);
         // The keys now go to the arrangement, not to the control that had them.
         if (document.activeElement instanceof HTMLElement) {
           document.activeElement.blur();
         }
       }
     },
-    [pickTrack, pressLane]
+    [dispatch, onSelectTrack, pressLane]
   );
   const renameTrack = useCallback(
     (id: string, name: string) => dispatch({ id, name, type: "rename-track" }),
@@ -673,62 +648,76 @@ export function ArrangementView({
                   selected={selectedTracks.includes(track.id)}
                   trackId={track.id}
                 >
-                  <TimelineLane
-                    className={cn(
-                      "h-auto min-h-14 flex-1 border-b-0",
-                      dropOn === track.id && "ring-2 ring-primary ring-inset",
-                      silent && "**:data-clip-id:opacity-40"
-                    )}
-                    data-track={track.id}
-                    gridStep={grid.snapStep}
-                    onDoubleClick={
-                      track.kind === "midi" ? doubleClick : undefined
-                    }
-                    onDragLeave={fileLeave}
-                    onDragOver={dragOver(track.id, takesFiles)}
-                    onDrop={drop(track.id, takesFiles)}
-                    onPointerDown={pressBareLane}
-                    onSelectionChange={timeSelection.onSelectionChange}
-                    seekable
-                  >
-                    {clips
-                      .filter((clip) => clip.track === track.id)
-                      .map((clip) => (
-                        <ArrangedClip
-                          clip={clip}
-                          describe={describe}
-                          key={clip.id}
-                          onAction={clipAction}
-                          onChange={changeClip}
-                          onCommit={commitClip}
-                          onFadeShape={fadeShape}
-                          onRemove={removeClip}
-                          onRename={renameClip}
-                          onSelect={selectClip}
-                          peaks={peaksOf(clip)}
-                          selected={selectedIds.includes(clip.id)}
-                          swatch={mix.color}
-                          trackName={track.name}
-                        />
-                      ))}
-                    {selectedTime?.tracks.includes(track.id) ? (
-                      <TimelineTimeSelection range={selectedTime.range} />
-                    ) : null}
-                    {automation.automating ? (
-                      <TrackAutomation
-                        describe={describe}
-                        duration={duration}
-                        mix={mix}
-                        onChange={automation.edit}
-                        onCommit={settle}
-                        overridden={automation.overridden[track.id]}
-                        parameter={automation.parameterOf(track.id)}
-                        snapStep={grid.snapStep}
-                        track={track}
+                  <ContextMenu>
+                    <ContextMenuTrigger render={<div className="contents" />}>
+                      <TimelineLane
+                        className={cn(
+                          "h-auto min-h-14 flex-1 border-b-0",
+                          dropOn === track.id &&
+                            "ring-2 ring-primary ring-inset",
+                          silent && "**:data-clip-id:opacity-40"
+                        )}
+                        data-track={track.id}
+                        gridStep={grid.snapStep}
+                        onDoubleClick={
+                          track.kind === "midi" ? doubleClick : undefined
+                        }
+                        onDragLeave={fileLeave}
+                        onDragOver={dragOver(track.id, takesFiles)}
+                        onDrop={drop(track.id, takesFiles)}
+                        onPointerDown={pressBareLane}
+                        onSelectionChange={timeSelection.onSelectionChange}
+                        seekable
+                      >
+                        {arrangedClips.ghostsOn(track.id).map((original) => (
+                          <ArrangedClipGhost
+                            clip={original}
+                            key={original.id}
+                          />
+                        ))}
+                        {clips
+                          .filter((clip) => clip.track === track.id)
+                          .map((clip) => (
+                            <ArrangedClip
+                              describe={describe}
+                              key={clip.id}
+                              peaks={peaksOf(clip)}
+                              swatch={mix.color}
+                              trackName={track.name}
+                              {...arrangedClips.clipProps(clip)}
+                            />
+                          ))}
+                        {selectedTime?.tracks.includes(track.id) ? (
+                          <TimelineTimeSelection range={selectedTime.range} />
+                        ) : null}
+                        {automation.automating ? (
+                          <TrackAutomation
+                            describe={describe}
+                            duration={duration}
+                            mix={mix}
+                            onChange={automation.edit}
+                            onCommit={settle}
+                            overridden={automation.overridden[track.id]}
+                            parameter={automation.parameterOf(track.id)}
+                            snapStep={grid.snapStep}
+                            track={track}
+                          />
+                        ) : null}
+                        <TimelinePlayhead />
+                      </TimelineLane>
+                    </ContextMenuTrigger>
+                    <ContextMenuContent className="w-auto min-w-48">
+                      <TimelineGridMenuItems
+                        division={grid.division}
+                        divisions={GRID_DIVISION_OPTIONS}
+                        onDivisionChange={grid.chooseDivision}
+                        onSnapChange={grid.setSnap}
+                        onTripletChange={grid.setTriplet}
+                        snap={grid.snap}
+                        triplet={grid.triplet}
                       />
-                    ) : null}
-                    <TimelinePlayhead />
-                  </TimelineLane>
+                    </ContextMenuContent>
+                  </ContextMenu>
                 </Row>
               </div>
             );
