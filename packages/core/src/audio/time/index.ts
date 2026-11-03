@@ -23,6 +23,8 @@ export {
   barsBeatsWith,
   barsOf,
   isSignature,
+  type MetronomeClick,
+  metronomeClicks,
   type SignatureChange,
 } from "./meter.ts";
 export {

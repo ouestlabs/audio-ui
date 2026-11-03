@@ -21,6 +21,7 @@ export {
 } from "./define.ts";
 export {
   type InstrumentBinding,
+  type NoteTiming,
   playNote,
   type SidechainBinding,
 } from "./instrument.ts";

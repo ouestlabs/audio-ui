@@ -1,14 +1,27 @@
 import type { DeviceBinding } from "./define.ts";
 
 /**
+ * When a note starts or ends, and which note it is. `at` is a time of the
+ * audio clock (a context's `currentTime`), now when there is none: a host
+ * that schedules ahead gives the time each note falls at. `id` names the
+ * note, so a host that plays several at once ends the right one: a `noteOff`
+ * whose `id` is not the held note's lets nothing go.
+ */
+export interface NoteTiming {
+  at?: number;
+  id?: number | string;
+}
+
+/**
  * What a host gives an instrument to play: a `DeviceBinding` that also takes
  * notes. `Note` is the object the instrument's `note` descriptors describe,
  * a pitch in hertz and a cutoff for instance. `noteOn` starts a note, or moves
- * the one being held to it; `noteOff` lets it go.
+ * the one being held to it; `noteOff` lets it go. Both take an optional
+ * `NoteTiming`: with none, now, and whichever note is held.
  */
 export interface InstrumentBinding<State, Note> extends DeviceBinding<State> {
-  noteOff: () => void;
-  noteOn: (note: Note) => void;
+  noteOff: (timing?: NoteTiming) => void;
+  noteOn: (note: Note, timing?: NoteTiming) => void;
 }
 
 /**
