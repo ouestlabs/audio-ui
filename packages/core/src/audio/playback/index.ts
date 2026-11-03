@@ -5,6 +5,7 @@ export {
   playedClip,
   playedClips,
 } from "./clip.ts";
+export { RECORDING_LOADER_WORKER } from "./loader-worker-source.ts";
 export {
   type Compensation,
   type DelayedTrack,
@@ -19,6 +20,8 @@ export {
   CLIP_PLAYER_PROCESSOR,
   type ClipPlayerMessage,
   type ClipPlayerReply,
+  type RecordingLoaderMessage,
+  type RecordingLoaderReply,
 } from "./protocol.ts";
 export {
   DECLICK_SECONDS,
