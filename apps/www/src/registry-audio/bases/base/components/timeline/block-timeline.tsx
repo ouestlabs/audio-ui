@@ -1,7 +1,6 @@
 "use client";
 
 import { computePeaks, normalizePeaks } from "@audio-ui/core/analysis";
-import type { Breakpoint } from "@audio-ui/core/envelope";
 import {
   barLabelInterval,
   barsBeatsWith,
@@ -86,10 +85,14 @@ import {
   TimelineSignature,
 } from "@/registry-audio/bases/base/audio/elements/timeline-markers";
 import {
-  AUTOMATED_PARAMETERS,
   TrackAutomation,
   TrackAutomationChooser,
 } from "@/registry-audio/bases/base/audio/elements/track-automation";
+import {
+  TrackGrip,
+  TrackReorderGhost,
+  trackReorderClass,
+} from "@/registry-audio/bases/base/audio/elements/track-grip";
 import { Transport } from "@/registry-audio/bases/base/audio/elements/transport";
 import {
   ClipPanel,
@@ -112,13 +115,12 @@ import {
   useTimelineGrid,
 } from "@/registry-audio/bases/base/hooks/use-timeline-grid";
 import { useTimelineZoom } from "@/registry-audio/bases/base/hooks/use-timeline-zoom";
+import { useTrackAutomation } from "@/registry-audio/bases/base/hooks/use-track-automation";
 import { useTrackReorder } from "@/registry-audio/bases/base/hooks/use-track-reorder";
 import type {
   Arranged,
   ArrangementTrack,
-  AutomatedParameter,
   Clipping,
-  Mix,
   TimeSelection,
   TrackKind,
 } from "@/registry-audio/bases/base/lib/arrangement";
@@ -818,15 +820,13 @@ export default function BlockTimeline() {
   const pressTrackRef = useRef<string | null>(null);
   const [metronome, setMetronome] = useState(false);
   const [rhythm, setRhythm] = useState<MetronomeRhythm>("auto");
-  // The automated parameters moved by hand: they play their mix until the automation is enabled again.
-  const [overridden, setOverridden] = useState<
-    Record<string, AutomatedParameter[]>
-  >({});
+  // Automation mode, and the automated gains and pans moved by hand, which play their mix until enabled again.
+  const automation = useTrackAutomation({ dispatch, tracks });
   const { keepRecording, recordings, sources } = useRecordings();
   // The arrangement plays on the audio clock: its clips, its notes through each MIDI track's synth, its mix.
   const engine = useArrangementEngine({
     doc,
-    overridden,
+    overridden: automation.overridden,
     recordings: sources,
   });
   const clock = engine.position;
@@ -930,31 +930,6 @@ export default function BlockTimeline() {
       return next.doc.tracks.find(
         (track) => track.id === `track-${next.trackCount}`
       );
-    },
-    [dispatch]
-  );
-  const changeAutomation = useCallback(
-    (
-      trackId: string,
-      parameter: AutomatedParameter,
-      points: readonly Breakpoint[] | null
-    ) => dispatch({ type: "change-automation", trackId, parameter, points }),
-    [dispatch]
-  );
-  const changeMix = useCallback(
-    (trackId: string, patch: Partial<Mix>) => {
-      const { color, ...rest } = patch;
-      if (color !== undefined) {
-        dispatch({ type: "set-track-color", id: trackId, color });
-      }
-      if (Object.keys(rest).length > 0) {
-        // A fader's drag is one step, closed by `settleClipEdit`; a switch is a step of its own.
-        dispatch({
-          type: "gain" in rest || "pan" in rest ? "change-mix" : "set-mix",
-          id: trackId,
-          patch: rest,
-        });
-      }
     },
     [dispatch]
   );
@@ -1078,67 +1053,6 @@ export default function BlockTimeline() {
   );
   // A muted track is silent, and while any track is soloed so is every other: their clips are drawn drained.
   const anySolo = tracks.some((track) => mixOf(track).soloed);
-  // Automation mode: each track's lane shows the envelope of one of its parameters over its clips.
-  const [automating, setAutomating] = useState(false);
-  const [shownParameters, setShownParameters] = useState<
-    Record<string, AutomatedParameter>
-  >({});
-  const showParameter = useCallback(
-    (trackId: string, parameter: AutomatedParameter) =>
-      setShownParameters((all) => ({ ...all, [trackId]: parameter })),
-    []
-  );
-  const anyOverridden = Object.values(overridden).some(
-    (parameters) => parameters.length > 0
-  );
-  const reenableAutomation = useCallback(() => setOverridden({}), []);
-  const toggleAutomating = useCallback(() => setAutomating((on) => !on), []);
-  const changeTrackMix = useCallback(
-    (trackId: string, patch: Partial<Mix>) => {
-      const automation = tracks.find(
-        (track) => track.id === trackId
-      )?.automation;
-      const moved = AUTOMATED_PARAMETERS.filter(
-        (parameter) =>
-          automation?.[parameter] &&
-          (parameter === "volume" ? "gain" : "pan") in patch
-      );
-      if (moved.length > 0) {
-        setOverridden((all) => ({
-          ...all,
-          [trackId]: [...new Set([...(all[trackId] ?? []), ...moved])],
-        }));
-      }
-      changeMix(trackId, patch);
-    },
-    [changeMix, tracks]
-  );
-  // Drawing an envelope enables it again: what is drawn is what plays.
-  const editAutomation = useCallback(
-    (
-      trackId: string,
-      parameter: AutomatedParameter,
-      points: readonly Breakpoint[]
-    ) => {
-      setOverridden((all) =>
-        all[trackId]?.includes(parameter)
-          ? {
-              ...all,
-              [trackId]: all[trackId].filter((item) => item !== parameter),
-            }
-          : all
-      );
-      changeAutomation(trackId, parameter, points);
-    },
-    [changeAutomation]
-  );
-  const clearAutomation = useCallback(
-    (trackId: string, parameter: AutomatedParameter) => {
-      changeAutomation(trackId, parameter, null);
-      settleClipEdit();
-    },
-    [changeAutomation, settleClipEdit]
-  );
 
   // Stop goes back to the top, as a DAW's does.
   const { stop: stopEngine } = engine;
@@ -1693,15 +1607,15 @@ export default function BlockTimeline() {
   };
   /** In automation mode, what a track shows: the parameter chooser in its header, and the envelope over its lane. */
   const automationOf = (track: ArrangementTrack) => {
-    if (!automating) {
+    if (!automation.automating) {
       return { chooser: null, envelope: null };
     }
-    const parameter = shownParameters[track.id] ?? "volume";
+    const parameter = automation.parameterOf(track.id);
     return {
       chooser: (
         <TrackAutomationChooser
-          onClear={clearAutomation}
-          onParameterChange={showParameter}
+          onClear={automation.clear}
+          onParameterChange={automation.show}
           parameter={parameter}
           track={track}
         />
@@ -1711,9 +1625,9 @@ export default function BlockTimeline() {
           describe={describe}
           duration={duration}
           mix={mixOf(track)}
-          onChange={editAutomation}
+          onChange={automation.edit}
           onCommit={settleClipEdit}
-          overridden={overridden[track.id]}
+          overridden={automation.overridden[track.id]}
           parameter={parameter}
           snapStep={snapStep}
           track={track}
@@ -1734,7 +1648,7 @@ export default function BlockTimeline() {
       return false;
     }
     event.preventDefault();
-    toggleAutomating();
+    automation.toggle();
     return true;
   };
   // S, or Cmd/Ctrl + E, splits at the cursor, Cmd/Ctrl + D duplicates the clip; Escape drops the selection.
@@ -2093,11 +2007,11 @@ export default function BlockTimeline() {
           </div>
         </div>
         <div className="flex min-w-0 items-center gap-2">
-          {anyOverridden ? (
+          {automation.anyOverridden ? (
             <Button
               aria-label="Re-enable automation"
               className="text-primary"
-              onClick={reenableAutomation}
+              onClick={automation.reenable}
               size="icon"
               variant="outline"
             >
@@ -2112,11 +2026,11 @@ export default function BlockTimeline() {
           ) : null}
           <Button
             aria-label="Automation mode"
-            aria-pressed={automating}
+            aria-pressed={automation.automating}
             className="hidden @3xl/panel:inline-flex"
-            onClick={toggleAutomating}
+            onClick={automation.toggle}
             size="icon"
-            variant={automating ? "default" : "outline"}
+            variant={automation.automating ? "default" : "outline"}
           >
             {/* An envelope: what automation draws over a lane. */}
             <EnvelopeIcon className="size-4" weight="bold" />
@@ -2207,8 +2121,8 @@ export default function BlockTimeline() {
                 Multi-select
               </DropdownMenuCheckboxItem>
               <DropdownMenuCheckboxItem
-                checked={automating}
-                onCheckedChange={setAutomating}
+                checked={automation.automating}
+                onCheckedChange={automation.setAutomating}
               >
                 Automation
               </DropdownMenuCheckboxItem>
@@ -2346,10 +2260,7 @@ export default function BlockTimeline() {
                     >
                       {grid.label}
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                      align="start"
-                      className="w-auto min-w-48"
-                    >
+                    <DropdownMenuContent align="start">
                       <TimelineGridMenuItems
                         division={grid.division}
                         divisions={GRID_DIVISION_OPTIONS}
@@ -2468,43 +2379,16 @@ export default function BlockTimeline() {
                   className={cn(
                     "border-foreground/25 border-b",
                     heights[track.id] === undefined && "flex-1",
-                    // The track being moved stays in place, faded; the line marks the gap it would land in.
-                    reorder.draggingId === track.id && "opacity-50",
-                    reorder.drop?.id === track.id &&
-                      reorder.drop.edge === "top" &&
-                      "shadow-[inset_0_2px_0_0_var(--primary)]",
-                    reorder.drop?.id === track.id &&
-                      reorder.drop.edge === "bottom" &&
-                      "shadow-[inset_0_-2px_0_0_var(--primary)]"
+                    trackReorderClass(reorder, track.id)
                   )}
                   height={heights[track.id]}
                   lead={
                     <div className="flex min-w-0 flex-1">
-                      <button
-                        aria-label={`Move ${track.name}`}
-                        className={cn(
-                          "absolute inset-y-0 inset-s-1 z-10 flex w-3 cursor-grab items-center justify-center text-muted-foreground/60 transition-colors hover:bg-muted/60 hover:text-foreground focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring focus-visible:outline-none active:cursor-grabbing",
-                          reorder.draggingId === track.id &&
-                            "cursor-grabbing bg-muted text-foreground"
-                        )}
+                      <TrackGrip
+                        dragging={reorder.draggingId === track.id}
+                        trackName={track.name}
                         {...reorder.gripProps(track.id)}
-                        type="button"
-                      >
-                        <svg
-                          aria-hidden="true"
-                          className="size-3.5"
-                          fill="currentColor"
-                          focusable="false"
-                          viewBox="0 0 16 16"
-                        >
-                          <circle cx="5.5" cy="3.5" r="1.25" />
-                          <circle cx="10.5" cy="3.5" r="1.25" />
-                          <circle cx="5.5" cy="8" r="1.25" />
-                          <circle cx="10.5" cy="8" r="1.25" />
-                          <circle cx="5.5" cy="12.5" r="1.25" />
-                          <circle cx="10.5" cy="12.5" r="1.25" />
-                        </svg>
-                      </button>
+                      />
                       <TimelineTrackControls
                         compact={
                           heights[track.id] !== undefined &&
@@ -2521,7 +2405,7 @@ export default function BlockTimeline() {
                         name={track.name}
                         onDuplicate={duplicateTrack}
                         onInsert={addTrack}
-                        onMix={changeTrackMix}
+                        onMix={automation.changeMix}
                         onMixCommit={settleClipEdit}
                         onRemove={removeTrack}
                         onRename={renameTrack}
@@ -2729,27 +2613,14 @@ export default function BlockTimeline() {
           peaks={editedPeaks}
         />
       ) : null}
-      {reorder.ghost && ghostTrack
-        ? createPortal(
-            <div
-              aria-hidden="true"
-              className={cn(
-                "pointer-events-none fixed z-50 flex items-center border border-s-4 bg-card px-3 text-sm shadow-lg",
-                TRACK_COLORS[mixOf(ghostTrack).color]?.edge
-              )}
-              ref={reorder.ghostRef}
-              style={{
-                height: reorder.ghost.height,
-                left: reorder.ghost.left,
-                top: reorder.ghost.top,
-                width: reorder.ghost.width,
-              }}
-            >
-              {ghostTrack.name}
-            </div>,
-            document.body
-          )
-        : null}
+      <TrackReorderGhost
+        className={
+          ghostTrack ? TRACK_COLORS[mixOf(ghostTrack).color]?.edge : undefined
+        }
+        ghost={reorder.ghost}
+        ghostRef={reorder.ghostRef}
+        trackName={ghostTrack?.name}
+      />
     </div>
   );
 }

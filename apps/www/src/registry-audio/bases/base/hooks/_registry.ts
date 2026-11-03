@@ -90,11 +90,15 @@ export const hooks: RegistryItem[] = [
   {
     categories: ["timeline", "mixer"],
     description:
-      "Reorders tracks: drag a track's grip to move it, with the view scrolling at its edges and a copy of its header under the pointer, or press Up and Down on the grip.",
+      "Reorders tracks: drag a track's grip to move it, with the view scrolling at its edges and a copy of its header under the pointer, or press Up and Down on the grip. With the grip, the copy and the line where the track would land.",
     files: [
       {
         path: "hooks/use-track-reorder.ts",
         type: "registry:hook",
+      },
+      {
+        path: "audio/elements/track-grip.tsx",
+        type: "registry:ui",
       },
     ],
     name: "use-track-reorder",

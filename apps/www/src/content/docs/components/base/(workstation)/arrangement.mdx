@@ -411,19 +411,37 @@ With snapping on, a dragged clip or loop also lands on the edges of the other cl
 A track's header is `TimelineTrackControls`, from the timeline: its name, gain, pan, mute, solo, color, fold and menu. `useTrackReorder` (`npx shadcn@latest add @audio-ui/use-track-reorder`) moves tracks: give each track a grip, and drag the grip, or press Up or Down on it.
 
 ```tsx
+import {
+  TrackGrip,
+  TrackReorderGhost,
+  trackReorderClass,
+} from "@/components/audio-ui/track-grip";
 import { useTrackReorder } from "@/hooks/use-track-reorder";
 
 const reorder = useTrackReorder({
-  onMove: arrangement.moveTrack, // (id, index)
+  onMove: (id, index) => dispatch({ type: "move-track", id, index }),
   order: tracks.map((track) => track.id),
 });
 
-<button aria-label={`Move ${track.name}`} type="button" {...reorder.gripProps(track.id)}>
-  ⋮⋮
-</button>;
+<TimelineTrack className={trackReorderClass(reorder, track.id)}>
+  <TimelineTrackHeader>
+    <TrackGrip
+      dragging={reorder.draggingId === track.id}
+      trackName={track.name}
+      {...reorder.gripProps(track.id)}
+    />
+    …
+  </TimelineTrackHeader>
+</TimelineTrack>;
+
+<TrackReorderGhost
+  ghost={reorder.ghost}
+  ghostRef={reorder.ghostRef}
+  trackName={dragged?.name}
+/>;
 ```
 
-The grip sits in its track's row, inside the `Timeline`. While a track is dragged, `draggingId` is the track and `drop` (`{ id, edge }`) is the edge of the row it would land on, to draw a line there; `ghost` is the box of its header, and `ghostRef` goes on the copy you draw under the pointer, fixed, which the drag moves without a render. The view scrolls when the pointer nears its top or bottom edge.
+The grip sits in its track's row, inside the `Timeline`. While a track is dragged, `draggingId` is the track and `drop` (`{ id, edge }`) is the edge of the row it would land on: `trackReorderClass` fades the track where it was and draws a line at that edge. `ghost` is the box of its header, and `TrackReorderGhost` draws the copy under the pointer, fixed, which the drag moves without a render. The view scrolls when the pointer nears its top or bottom edge. The grip, the copy and the line ship with the hook, in `components/audio-ui/track-grip`.
 
 ### Locators and time signatures
 
@@ -456,7 +474,27 @@ Drag an audio file from the desktop onto an audio track: the track is outlined w
 
 Press **A**, or the automation button, for automation mode: each track's header gets a chooser of what its lane shows, Volume or Pan, and its lane the envelope of that parameter over its clips (`automation-envelope`, `npx shadcn@latest add @audio-ui/automation-envelope`). Until the track has one, the line stands faint at the mix's value; double-click it to add a point, drag a point to move it on the grid (its level stays free), drag the small handle on a segment to bend it, and double-click a point to take it away. Beside the line, a press reaches the lane and the clips as before. Each track's channel follows its envelopes as it plays. Moving an automated gain or pan by hand overrides it: the envelope greys, the mix plays, and **Re-enable automation** in the toolbar (or drawing on the envelope) brings it back. In `lib/arrangement`, a track keeps its `automation` per parameter as points across the whole arrangement, `x` from 0 to 1, so a tempo change keeps them in place; `automationAt` reads one, `volumeGain` and `panPosition` turn its values into a gain and a pan, and `mixAt` gives what a track plays at a point of the song.
 
-`TrackAutomationChooser` and `TrackAutomation` (`npx shadcn@latest add @audio-ui/track-automation`) are those two parts: the chooser goes in the track's header (`TimelineTrackControls` takes it as children), the envelope in its lane. `AUTOMATED_PARAMETERS` lists what a track automates, Volume and Pan.
+`TrackAutomationChooser` and `TrackAutomation` (`npx shadcn@latest add @audio-ui/track-automation`) are those two parts: the chooser goes in the track's header (`TimelineTrackControls` takes it as children), the envelope in its lane. `AUTOMATED_PARAMETERS` lists what a track automates, Volume and Pan. `useTrackAutomation` ships with them and holds the mode:
+
+```tsx
+import { useTrackAutomation } from "@/hooks/use-track-automation";
+
+const automation = useTrackAutomation({ dispatch, tracks });
+const engine = useArrangementEngine({ doc, overridden: automation.overridden, recordings });
+
+<TimelineTrackControls onMix={automation.changeMix} …>
+  {automation.automating ? (
+    <TrackAutomationChooser
+      onClear={automation.clear}
+      onParameterChange={automation.show}
+      parameter={automation.parameterOf(track.id)}
+      track={track}
+    />
+  ) : null}
+</TimelineTrackControls>;
+```
+
+`automating` and `toggle` are the mode, `parameterOf` and `show` what each lane shows. A gain or a pan moved through `changeMix` overrides an automated one: `overridden` lists, by track, what plays its mix instead, for the engine and for `TrackAutomation`'s greyed line, until `reenable` (`anyOverridden` says when to offer it) or until `edit` draws that envelope again. `clear` takes an envelope away in one step of undo.
 
 ### MIDI clips
 
@@ -843,6 +881,9 @@ Something placed at `value` on a lane: a bar number on the ruler, a cue, a grid 
 <TypeRow name={"gripProps(id)"} type={"props"}>For a track's grip: its pointer and key handlers.</TypeRow>
 <TypeRow name={"draggingId, drop"} type={"string | null, { id, edge } | null"}>The track dragged, and where it would land.</TypeRow>
 <TypeRow name={"ghost, ghostRef"} type={"{ id, top, left, width, height } | null, Ref"}>The copy to draw under the pointer, and the ref it takes.</TypeRow>
+<TypeRow name={"TrackGrip"} type={"dragging, trackName, ...gripProps(id)"}>The grip, down the left edge of a track's header.</TypeRow>
+<TypeRow name={"TrackReorderGhost"} type={"ghost, ghostRef, trackName"}>The copy of the dragged track's header under the pointer.</TypeRow>
+<TypeRow name={"trackReorderClass(reorder, id)"} type={"string"}>A row's classes while a track is dragged: faded where it was, a line where it would land.</TypeRow>
 </TypeTable>
 
 ### TimelineLocator and TimelineSignature
@@ -854,6 +895,17 @@ Something placed at `value` on a lane: a bar number on the ruler, a cue, a grid 
 <TypeRow name={"editing, onEditingChange"} type={"boolean, (id | null) => void"}>Whether it is being typed.</TypeRow>
 <TypeRow name={"onMove, onSet, onRemove"} type={"(id, to) => void, (id, beats, unit) => void, (id) => void"}>Moved by `step` with the arrows, typed, deleted.</TypeRow>
 <TypeRow name={"step"} type={"number"}>How far the arrows move a change: the grid.</TypeRow>
+</TypeTable>
+
+### useTrackAutomation
+
+<TypeTable>
+<TypeRow name={"dispatch, tracks"} type={"(command) => void, ArrangementTrack[]"}>The arrangement's commands, and the tracks whose automation a change by hand overrides.</TypeRow>
+<TypeRow name={"automating, setAutomating, toggle"} type={"boolean, (on) => void, () => void"}>Automation mode.</TypeRow>
+<TypeRow name={"parameterOf, show"} type={"(trackId) => parameter, (trackId, parameter) => void"}>What a track's lane shows, Volume until another is chosen.</TypeRow>
+<TypeRow name={"changeMix"} type={"(trackId, patch) => void"}>A mix changed by hand: a fader's drag is a burst, a switch a step, and an automated gain or pan is overridden.</TypeRow>
+<TypeRow name={"overridden, anyOverridden, reenable"} type={"Record<trackId, parameter[]>, boolean, () => void"}>What plays its mix instead of its envelope, and the way back.</TypeRow>
+<TypeRow name={"edit, clear"} type={"(trackId, parameter, points) => void, (trackId, parameter) => void"}>Draws an envelope, which plays again; takes one away.</TypeRow>
 </TypeTable>
 
 ### TrackAutomationChooser and TrackAutomation

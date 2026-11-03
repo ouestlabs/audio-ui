@@ -107,17 +107,22 @@ export const audio: RegistryItem[] = [
   {
     dependencies: ["@audio-ui/core"],
     description:
-      "A track's automation: a chooser of the parameter its lane shows, Volume or Pan, for its header, and that parameter's envelope over its lane, standing faint at the mix's value until it is drawn.",
+      "A track's automation: a chooser of the parameter its lane shows, Volume or Pan, for its header, and that parameter's envelope over its lane, standing faint at the mix's value until it is drawn, with a hook for automation mode and the gains and pans moved by hand, which play their mix until enabled again.",
     files: [
       {
         path: "audio/elements/track-automation.tsx",
         type: "registry:ui",
+      },
+      {
+        path: "hooks/use-track-automation.ts",
+        type: "registry:hook",
       },
     ],
     name: "track-automation",
     registryDependencies: [
       "@audio-ui/automation-envelope",
       "@audio-ui/arrangement",
+      "@audio-ui/use-arrangement",
       "@shadcn/button",
       "@shadcn/select",
     ],
