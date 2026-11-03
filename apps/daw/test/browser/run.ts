@@ -13,6 +13,9 @@ const URL = process.env.DAW_URL ?? "http://localhost:3300/";
 const RATE = /kHz/;
 const LATENCY = /ms out/;
 const EXPORT = /Export WAV/;
+const DELAY = /Delay/;
+const POCKET_SYNTH = /Pocket Synth/;
+const DEVICES = /^Devices/;
 
 /** A WAV file of `seconds` of a chord, made in the page and dropped on `selector`. */
 async function dropChord(
@@ -210,6 +213,102 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         `the main track is near silent while the note plays (${level} dB)`
       );
       await page.keyboard.press("Space");
+    },
+  "DEV-003: a device double-clicked in the library goes on the selected track":
+    async (browser) => {
+      const page = await open(browser);
+      await page
+        .locator('[aria-label="2 Audio"][data-track-id]')
+        .getByText("2 Audio")
+        .click();
+      const library = page.getByRole("region", { name: "Library" });
+      await library.getByRole("button", { name: "Space" }).click();
+      await library.getByRole("option", { name: DELAY }).first().dblclick();
+      const devices = page.getByRole("region", { name: "Devices" });
+      await devices.getByText("2 Audio").waitFor({ timeout: 5000 });
+      await devices
+        .getByText("Delay", { exact: true })
+        .waitFor({ timeout: 5000 });
+    },
+  "DEV-003: a device dropped on the add-track row makes a track for it": async (
+    browser
+  ) => {
+    const page = await open(browser);
+    const before = await page.locator("[data-track-id]").count();
+    const library = page.getByRole("region", { name: "Library" });
+    await library
+      .getByRole("option", { name: POCKET_SYNTH })
+      .dragTo(page.locator("[data-add-track]"));
+    await page.waitForSelector('[aria-label="Pocket Synth"][data-track-id]', {
+      timeout: 5000,
+    });
+    const after = await page.locator("[data-track-id]").count();
+    assert(after === before + 1, `${before} tracks, then ${after}`);
+  },
+  "KEY-021: Cmd+Option+B folds the library and shows it again": async (
+    browser
+  ) => {
+    const page = await open(browser);
+    await page.getByRole("region", { name: "Library" }).waitFor();
+    await page.keyboard.press("Meta+Alt+KeyB");
+    await page
+      .getByRole("button", { exact: true, name: "Open the library" })
+      .waitFor();
+    await page.keyboard.press("Meta+Alt+KeyB");
+    await page.getByRole("region", { name: "Library" }).waitFor();
+  },
+  "MIX-015: the mixer and the detail view take turns under the arrangement":
+    async (browser) => {
+      const page = await open(browser);
+      await page.getByRole("region", { name: "Devices" }).waitFor();
+      await showMixer(page);
+      assert(
+        (await page.getByRole("region", { name: "Devices" }).count()) === 0,
+        "the detail view stays open beside the mixer"
+      );
+      await page.getByRole("button", { name: DEVICES }).click();
+      await page.getByRole("region", { name: "Devices" }).waitFor();
+      assert(
+        (await page.locator('[aria-label="Main level"]').count()) === 0,
+        "the mixer stays open beside the detail view"
+      );
+    },
+  "MIX-015: the line over the mixer or the detail view shares the height, and each keeps its own":
+    async (browser) => {
+      const page = await open(browser);
+      const height = (name: string) =>
+        page
+          .getByRole("region", { exact: true, name })
+          .evaluate((element) => element.getBoundingClientRect().height);
+      const devices = await height("Devices");
+      const line = page.locator("[data-slot=resizable-handle]");
+      const box = await line.boundingBox();
+      assert(box, "the line is there");
+      await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+      await page.mouse.down();
+      await page.mouse.move(box.x + box.width / 2, box.y - 120, { steps: 6 });
+      await page.mouse.up();
+      const taller = await height("Devices");
+      assert(
+        Math.abs(taller - devices - 120) < 4,
+        `dragged up 120 px, the detail view went from ${devices} to ${taller}`
+      );
+      await line.focus();
+      await page.keyboard.press("ArrowDown");
+      assert(
+        (await height("Devices")) < taller,
+        "Down on the line does not make the detail view shorter"
+      );
+      // The mixer opens at its own height, and the detail view comes back at the one it was given.
+      const given = await height("Devices");
+      await showMixer(page);
+      await page.keyboard.press("Meta+Alt+KeyM");
+      await page.getByRole("button", { name: DEVICES }).click();
+      const back = await height("Devices");
+      assert(
+        Math.abs(back - given) < 4,
+        `the detail view came back at ${back}, not ${given}`
+      );
     },
   "PRJ-001: the project comes back when the page is loaded again": async (
     browser

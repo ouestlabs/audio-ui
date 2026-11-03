@@ -832,11 +832,11 @@ function ClipSource({
       <TimelineNavigator className="mx-2 my-1.5" getAriaValueText={format} />
       {/* Flush in the clip view, which is the frame: no border or corners of its own. */}
       <TimelineViewport
-        className="min-w-0 border-t bg-muted/40"
+        className="flex min-w-0 flex-1 flex-col border-t bg-muted/40"
         ref={viewportRef}
         scrollbar="hidden"
       >
-        <div className="flex w-max min-w-full flex-col">
+        <div className="flex w-max min-w-full flex-1 flex-col">
           {/* Bar numbers, from the start of the source. */}
           <TimelineLane className="h-5 border-foreground/25 border-b text-muted-foreground text-xs">
             {labels.map((label) => (
@@ -880,8 +880,15 @@ function ClipSource({
           </TimelineLane>
           {/* Warped, a double-click on the waveform pins what plays there with a new marker. */}
           {/* biome-ignore lint/a11y/noStaticElementInteractions: a pointer shortcut; the markers' own keys and the Warp switch cover the keyboard */}
-          <div className="relative" onDoubleClick={onAddMarker}>
-            <TimelineLane className="h-28 border-b-0" gridStep={gridStep}>
+          <div
+            className="relative flex flex-1 flex-col"
+            onDoubleClick={onAddMarker}
+          >
+            {/* At least its own height, and as tall as the panel lets it. */}
+            <TimelineLane
+              className="h-auto min-h-28 flex-1 border-b-0"
+              gridStep={gridStep}
+            >
               <div
                 className="absolute inset-y-0 left-0"
                 data-slot="clip-panel-source"

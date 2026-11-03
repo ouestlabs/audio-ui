@@ -64,6 +64,17 @@ describe("the keyboard", () => {
     ).toBe("mixer");
   });
 
+  test("KEY-021: Cmd+Option+B shows or folds the library, Ctrl+Alt+B off a Mac", () => {
+    on("MacIntel");
+    expect(
+      matchShortcut(press("∫", { altKey: true, code: "KeyB", metaKey: true }))
+    ).toBe("library");
+    on("Win32");
+    expect(
+      matchShortcut(press("b", { altKey: true, code: "KeyB", ctrlKey: true }))
+    ).toBe("library");
+  });
+
   test("KEY-011 and KEY-010: 0 deactivates, S solos, alone", () => {
     on("MacIntel");
     expect(matchShortcut(press("0"))).toBe("deactivate");

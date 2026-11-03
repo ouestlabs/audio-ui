@@ -14,6 +14,7 @@ import {
   useState,
 } from "react";
 import { ArrangedClip } from "@/components/audio-ui/arranged-clip";
+import { DEVICE_DRAG_TYPE } from "@/components/audio-ui/device-chain";
 import {
   MIN_TRACK_HEIGHT,
   Timeline,
@@ -30,6 +31,14 @@ import {
   TimelineViewport,
 } from "@/components/audio-ui/timeline";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import type { useArrangement } from "@/hooks/use-arrangement";
 import type { useArrangementEngine } from "@/hooks/use-arrangement-engine";
 import {
@@ -54,6 +63,11 @@ const MAX_ZOOM = 2000;
 
 function carriesFiles(event: DragEvent) {
   return Array.from(event.dataTransfer.types).includes("Files");
+}
+
+/** Whether a drag carries a device from the library. */
+function carriesDevice(event: DragEvent) {
+  return Array.from(event.dataTransfer.types).includes(DEVICE_DRAG_TYPE);
 }
 
 /** A row of the arrangement: its header in the sticky column, its lane beside it. */
@@ -100,6 +114,8 @@ export interface ArrangementViewProps {
   engine: Engine;
   /** A double-click on a MIDI lane: an empty clip a bar long, from the bar under the pointer. */
   onAddMidiClip: (track: string, at: number) => void;
+  /** A device of the library dropped on a track (its id), or on the add-track row (`NEW_TRACK`). */
+  onDevice: (device: string, track: string) => void;
   /** Files dropped on a track (its id), or on the add-track row (`NEW_TRACK`), at a time of the arrangement. */
   onFiles: (files: File[], track: string, at: number) => void;
   /** A click in the ruler or a lane: where to start, and whether to play from there. */
@@ -113,14 +129,16 @@ export interface ArrangementViewProps {
 /**
  * The arrangement: the loop and the ruler on top, a row per track with its
  * header and its clips, the return tracks, and the row that adds a track,
- * where dropped files each make a track of their own. Everything here is the
- * registry's timeline, driven by the arrangement's commands.
+ * where dropped files each make a track of their own and a dropped device a
+ * track for it. Everything here is the registry's timeline, driven by the
+ * arrangement's commands.
  */
 export function ArrangementView({
   arrangement,
   cursor,
   engine,
   onAddMidiClip,
+  onDevice,
   onFiles,
   onSeek,
   onSelectTrack,
@@ -288,9 +306,10 @@ export function ArrangementView({
     },
     [beat, zoom]
   );
-  const fileOver = useCallback(
-    (track: string) => (event: DragEvent<HTMLElement>) => {
-      if (carriesFiles(event)) {
+  // A lane takes a device of the library, and files when `files` (an audio track, or the add-track row).
+  const dragOver = useCallback(
+    (track: string, files: boolean) => (event: DragEvent<HTMLElement>) => {
+      if (carriesDevice(event) || (files && carriesFiles(event))) {
         event.preventDefault();
         event.dataTransfer.dropEffect = "copy";
         setDropOn(track);
@@ -298,16 +317,20 @@ export function ArrangementView({
     },
     []
   );
-  const fileDrop = useCallback(
-    (track: string) => (event: DragEvent<HTMLElement>) => {
-      if (!carriesFiles(event)) {
-        return;
+  const drop = useCallback(
+    (track: string, files: boolean) => (event: DragEvent<HTMLElement>) => {
+      const device = event.dataTransfer.getData(DEVICE_DRAG_TYPE);
+      if (device) {
+        event.preventDefault();
+        setDropOn(null);
+        onDevice(device, track);
+      } else if (files && carriesFiles(event)) {
+        event.preventDefault();
+        setDropOn(null);
+        onFiles(Array.from(event.dataTransfer.files), track, timeAt(event));
       }
-      event.preventDefault();
-      setDropOn(null);
-      onFiles(Array.from(event.dataTransfer.files), track, timeAt(event));
     },
-    [onFiles, timeAt]
+    [onDevice, onFiles, timeAt]
   );
   const fileLeave = useCallback(() => setDropOn(null), []);
   const addAudio = useCallback(
@@ -316,6 +339,10 @@ export function ArrangementView({
   );
   const addMidi = useCallback(
     () => dispatch({ kind: "midi", type: "add-track" }),
+    [dispatch]
+  );
+  const addReturn = useCallback(
+    () => dispatch({ kind: "return", type: "add-track" }),
     [dispatch]
   );
   const anySolo = tracks.some((track) => mixOf(track).soloed);
@@ -389,6 +416,8 @@ export function ArrangementView({
             const mix = mixOf(track);
             const isReturn = returns.includes(track);
             const silent = mix.muted || (anySolo && !mix.soloed && !isReturn);
+            // Files go on audio tracks; a device goes on any track that takes it.
+            const takesFiles = !isReturn && track.kind !== "midi";
             return (
               <div
                 aria-label={track.name}
@@ -399,7 +428,7 @@ export function ArrangementView({
               >
                 <Row
                   className={cn(
-                    "border-foreground/20 border-b",
+                    "flex-1 border-foreground/20 border-b",
                     isReturn && "bg-muted/40"
                   )}
                   lead={
@@ -434,16 +463,8 @@ export function ArrangementView({
                       track.kind === "midi" ? doubleClick : undefined
                     }
                     onDragLeave={fileLeave}
-                    onDragOver={
-                      isReturn || track.kind === "midi"
-                        ? undefined
-                        : fileOver(track.id)
-                    }
-                    onDrop={
-                      isReturn || track.kind === "midi"
-                        ? undefined
-                        : fileDrop(track.id)
-                    }
+                    onDragOver={dragOver(track.id, takesFiles)}
+                    onDrop={drop(track.id, takesFiles)}
                     seekable
                   >
                     {clips
@@ -474,29 +495,40 @@ export function ArrangementView({
           })}
           <Row
             className={cn(
-              "sticky bottom-0 z-30 border-foreground/20 border-b bg-background",
+              "sticky bottom-0 z-30 bg-background",
               dropOn === NEW_TRACK && "ring-2 ring-primary ring-inset"
             )}
             lead={
-              <div className="m-1 flex min-w-0 flex-1 gap-1">
-                <Button
-                  className="min-w-0 flex-1 justify-start gap-1.5"
-                  onClick={addAudio}
-                  size="sm"
-                  variant="ghost"
-                >
-                  <PlusIcon aria-hidden="true" />
-                  Audio
-                </Button>
-                <Button
-                  className="min-w-0 flex-1 justify-start gap-1.5"
-                  onClick={addMidi}
-                  size="sm"
-                  variant="ghost"
-                >
-                  <PlusIcon aria-hidden="true" />
-                  MIDI
-                </Button>
+              <div className="m-1 flex min-w-0 flex-1">
+                {/* One button for every kind of track, each with its keys (KEY-006 to KEY-008). */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger
+                    render={
+                      <Button
+                        className="min-w-0 flex-1 justify-start gap-1.5"
+                        variant="ghost"
+                      />
+                    }
+                  >
+                    <PlusIcon aria-hidden="true" />
+                    Add track
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-auto min-w-52">
+                    <DropdownMenuItem onClick={addAudio}>
+                      Audio track
+                      <DropdownMenuShortcut>Ctrl T</DropdownMenuShortcut>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={addMidi}>
+                      MIDI track
+                      <DropdownMenuShortcut>Ctrl Shift T</DropdownMenuShortcut>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={addReturn}>
+                      Return track
+                      <DropdownMenuShortcut>Cmd Option T</DropdownMenuShortcut>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             }
           >
@@ -504,11 +536,11 @@ export function ArrangementView({
               className="h-10 border-b-0 text-muted-foreground text-xs"
               data-add-track=""
               onDragLeave={fileLeave}
-              onDragOver={fileOver(NEW_TRACK)}
-              onDrop={fileDrop(NEW_TRACK)}
+              onDragOver={dragOver(NEW_TRACK, true)}
+              onDrop={drop(NEW_TRACK, true)}
             >
               <span className="pointer-events-none absolute inset-y-0 start-3 flex items-center">
-                Drop audio files here: a track for each
+                Drop audio files or a device here: a track for each
               </span>
             </TimelineLane>
           </Row>

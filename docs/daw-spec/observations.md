@@ -17,3 +17,5 @@ What the reference DAW is asked to show when the manual is silent, the state to 
 | OBS-011 | PRF-004 | The generated load set: N tracks with an equalizer and a compressor each, playing, for N = 8, 16, 32 | Screenshot of the CPU meter for each N | |
 | OBS-012 | PRF-005 | The reference arrangement of PRF-005, exported to WAV at 24 bits | The time from Export to done | |
 | OBS-013 | ARR-009 | A new set from the File menu | Screenshot | |
+| OBS-014 | DEV-003 | An audio track selected, then a double-click on an instrument in the browser; then the instrument dragged onto that audio track | Screen recording | |
+| OBS-015 | DEV-003 | An instrument, then an audio effect, dragged into the empty area below the tracks: the names of the tracks they make | Screenshot | |

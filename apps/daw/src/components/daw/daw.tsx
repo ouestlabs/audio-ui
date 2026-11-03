@@ -5,19 +5,27 @@ import { ArrangementView } from "@/components/daw/arrangement-view";
 import { ClipEditor } from "@/components/daw/clip-editor";
 import { DeviceView } from "@/components/daw/device-view";
 import { EngineLine } from "@/components/daw/engine-line";
+import { LibraryPanel } from "@/components/daw/library-panel";
 import { MixerView } from "@/components/daw/mixer-view";
 import { TopBar } from "@/components/daw/top-bar";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useArrangement } from "@/hooks/use-arrangement";
 import { useArrangementEngine } from "@/hooks/use-arrangement-engine";
 import { renderArrangement } from "@/lib/arrangement-engine";
 import type { ArrangementDoc } from "@/lib/arrangement-state";
-import { decodeFiles, dropCommands } from "@/lib/daw/drop";
+import { addDeviceCommand, takesDevice } from "@/lib/daw/devices";
+import { decodeFiles, dropCommands, NEW_TRACK } from "@/lib/daw/drop";
 import { TRACK_COLOR_COUNT } from "@/lib/daw/project";
 import { freshMidiClipId, type Recording } from "@/lib/daw/recordings";
 import { matchShortcut } from "@/lib/daw/shortcuts";
 import { canStore, saveProject, saveRecording } from "@/lib/daw/storage";
+import { libraryDevice } from "@/lib/device-library";
 import { downloadWavFile } from "@/lib/wav-file";
 import { webAudio } from "@/lib/web-audio";
 
@@ -72,8 +80,43 @@ export function Daw({ initial, initialRecordings }: DawProps) {
   const [selectedTrack, setSelectedTrack] = useState<string | null>(
     initial.tracks[0]?.id ?? null
   );
-  const [mixerOpen, setMixerOpen] = useState(false);
-  const [detailOpen, setDetailOpen] = useState(true);
+  // Under the arrangement, the detail view or the mixer, one at a time: both would leave the tracks no room.
+  const [panel, setPanel] = useState<"detail" | "mixer" | null>("detail");
+  const mixerOpen = panel === "mixer";
+  const detailOpen = panel === "detail";
+  // How tall each is, in px: a height dragged is kept for the next time it opens.
+  const panelHeights = useRef({ detail: 288, mixer: 416 });
+  const keepHeight = useCallback(
+    (size: { inPixels: number }) => {
+      if (panel) {
+        panelHeights.current[panel] = size.inPixels;
+      }
+    },
+    [panel]
+  );
+  // The clip panel rolled up and its boxes folded, held here so they stay from clip to clip.
+  const [clipRolled, setClipRolled] = useState(false);
+  const [clipFolded, setClipFolded] = useState<string[]>([]);
+  const setMixerOpen = useCallback(
+    (open: boolean) =>
+      setPanel((current) => {
+        if (open) {
+          return "mixer";
+        }
+        return current === "mixer" ? null : current;
+      }),
+    []
+  );
+  const setDetailOpen = useCallback(
+    (open: boolean) =>
+      setPanel((current) => {
+        if (open) {
+          return "detail";
+        }
+        return current === "detail" ? null : current;
+      }),
+    []
+  );
   // What the detail view shows: the selected clip, or the selected track's devices (KEY-022).
   const [detail, setDetail] = useState<"clip" | "devices">("devices");
   const [single] =
@@ -91,6 +134,41 @@ export function Daw({ initial, initialRecordings }: DawProps) {
     setSelectedTrack(id);
     setDetail("devices");
   }, []);
+  // The library on the left (KEY-021), and its search, which the end of a chain focuses.
+  const [libraryOpen, setLibraryOpen] = useState(true);
+  const librarySearch = useRef<HTMLInputElement>(null);
+  const openLibrary = useCallback(() => {
+    setLibraryOpen(true);
+    requestAnimationFrame(() => librarySearch.current?.focus());
+  }, []);
+  /** Puts a device of the library on `onto`, or on a track of its own (DEV-003), and shows it in the device view. */
+  const placeDevice = useCallback(
+    (device: string, onto: string | null) => {
+      const made = addDeviceCommand(doc, device, onto);
+      if (made) {
+        dispatch(made.command);
+        pickTrack(made.track);
+        setDetailOpen(true);
+      }
+    },
+    [dispatch, doc, pickTrack, setDetailOpen]
+  );
+  const pickDevice = useCallback(
+    (device: string) => placeDevice(device, selectedTrack),
+    [placeDevice, selectedTrack]
+  );
+  // Dropped, a device goes where it is dropped: a track that cannot take it is left as it is.
+  const dropDevice = useCallback(
+    (device: string, track: string) => {
+      const instrument = libraryDevice(device)?.device.kind === "instrument";
+      if (track !== NEW_TRACK && !takesDevice(doc, track, instrument)) {
+        toast.error("An instrument goes on a MIDI track.");
+        return;
+      }
+      placeDevice(device, track);
+    },
+    [doc, placeDevice]
+  );
   const addMidiClip = useCallback(
     (track: string, at: number) => {
       const bar = secondsPerBar(doc.tempo);
@@ -108,7 +186,7 @@ export function Daw({ initial, initialRecordings }: DawProps) {
       });
       setDetailOpen(true);
     },
-    [dispatch, doc.clips, doc.tempo]
+    [dispatch, doc.clips, doc.tempo, setDetailOpen]
   );
   const [exporting, setExporting] = useState(false);
   const [saved, setSaved] = useState(
@@ -306,7 +384,10 @@ export function Daw({ initial, initialRecordings }: DawProps) {
           dispatch({ type: "select-all" });
           break;
         case "mixer":
-          setMixerOpen((open) => !open);
+          setPanel((current) => (current === "mixer" ? null : "mixer"));
+          break;
+        case "library":
+          setLibraryOpen((open) => !open);
           break;
         case "detail":
           setDetail((shown) => (shown === "clip" ? "devices" : "clip"));
@@ -329,6 +410,7 @@ export function Daw({ initial, initialRecordings }: DawProps) {
     exportWav,
     playFrom,
     seek,
+    setDetailOpen,
   ]);
 
   // Saved as you go (PRJ-001): the document, and which recordings it keeps.
@@ -352,6 +434,21 @@ export function Daw({ initial, initialRecordings }: DawProps) {
     return () => clearTimeout(timer);
   }, [doc, recordings]);
 
+  const clipEditor =
+    detailOpen && detail === "clip" && selectedClip ? (
+      <ClipEditor
+        arrangement={arrangement}
+        clip={selectedClip}
+        collapsed={clipRolled}
+        engine={engine}
+        folded={clipFolded}
+        onCollapsedChange={setClipRolled}
+        onFoldedChange={setClipFolded}
+        recordings={recordings}
+      />
+    ) : null;
+  const rolledUp = clipEditor !== null && clipRolled;
+
   return (
     <TooltipProvider>
       <div className="flex h-svh flex-col">
@@ -371,46 +468,84 @@ export function Daw({ initial, initialRecordings }: DawProps) {
           position={engine.position}
           tempo={doc.tempo}
         />
-        <main className="flex min-h-0 flex-1 flex-col">
-          <ArrangementView
-            arrangement={arrangement}
-            cursor={cursor}
-            engine={engine}
-            onAddMidiClip={addMidiClip}
-            onFiles={addFiles}
-            onSeek={seek}
-            onSelectTrack={pickTrack}
-            recordings={recordings}
-            selectedTrack={selectedTrack}
+        <div className="flex min-h-0 flex-1">
+          <LibraryPanel
+            onOpenChange={setLibraryOpen}
+            onPick={pickDevice}
+            open={libraryOpen}
+            searchRef={librarySearch}
           />
-          {mixerOpen ? (
-            <section
-              aria-label="Mixer"
-              className="h-[26rem] shrink-0 border-t bg-muted/30"
+          <main className="flex min-h-0 min-w-0 flex-1 flex-col">
+            {/* The arrangement over the mixer or the detail view, the line between them dragged to share the height. */}
+            <ResizablePanelGroup
+              className="min-h-0 flex-1"
+              orientation="vertical"
             >
-              <MixerView
-                arrangement={arrangement}
-                engine={engine}
-                onSelectTrack={pickTrack}
-                selectedTrack={selectedTrack}
-              />
-            </section>
-          ) : null}
-          {detailOpen ? (
-            <section aria-label="Devices" className="h-72 shrink-0 border-t">
-              {detail === "clip" && selectedClip ? (
-                <ClipEditor
+              <ResizablePanel
+                className="flex flex-col"
+                id="arrangement"
+                minSize="8rem"
+              >
+                <ArrangementView
                   arrangement={arrangement}
-                  clip={selectedClip}
+                  cursor={cursor}
                   engine={engine}
+                  onAddMidiClip={addMidiClip}
+                  onDevice={dropDevice}
+                  onFiles={addFiles}
+                  onSeek={seek}
+                  onSelectTrack={pickTrack}
                   recordings={recordings}
+                  selectedTrack={selectedTrack}
                 />
-              ) : (
-                <DeviceView arrangement={arrangement} track={selectedTrack} />
-              )}
-            </section>
-          ) : null}
-        </main>
+              </ResizablePanel>
+              {panel && !rolledUp ? (
+                <>
+                  <ResizableHandle />
+                  <ResizablePanel
+                    defaultSize={`${panelHeights.current[panel]}px`}
+                    groupResizeBehavior="preserve-pixel-size"
+                    id={panel}
+                    key={panel}
+                    maxSize="85%"
+                    minSize="9rem"
+                    onResize={keepHeight}
+                  >
+                    {mixerOpen ? (
+                      <section
+                        aria-label="Mixer"
+                        className="h-full bg-muted/30"
+                      >
+                        <MixerView
+                          arrangement={arrangement}
+                          engine={engine}
+                          onSelectTrack={pickTrack}
+                          selectedTrack={selectedTrack}
+                        />
+                      </section>
+                    ) : (
+                      <section aria-label="Devices" className="h-full">
+                        {clipEditor ?? (
+                          <DeviceView
+                            arrangement={arrangement}
+                            onOpenLibrary={openLibrary}
+                            track={selectedTrack}
+                          />
+                        )}
+                      </section>
+                    )}
+                  </ResizablePanel>
+                </>
+              ) : null}
+            </ResizablePanelGroup>
+            {/* Rolled up, the clip panel is its strip alone: nothing to drag. */}
+            {rolledUp ? (
+              <section aria-label="Devices" className="shrink-0 border-t">
+                {clipEditor}
+              </section>
+            ) : null}
+          </main>
+        </div>
         <EngineLine saved={saved} status={engine.status} />
       </div>
       <Toaster />

@@ -17,7 +17,7 @@ bun run test:browser   # end to end in Chromium, against the dev server
 src/
 ├── routes/              the one page: it opens the project kept in the browser, or a new one
 ├── components/
-│   ├── daw/             the workstation: arrangement, mixer, devices, clip editor, top bar, engine line
+│   ├── daw/             the workstation: library, arrangement, mixer, devices, clip editor, top bar, engine line
 │   ├── site/            the theme switch, as lab and www have it
 │   ├── audio-ui/        installed from the registry: never edited here
 │   └── ui/              shadcn, as it comes

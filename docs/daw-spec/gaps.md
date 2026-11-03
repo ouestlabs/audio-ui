@@ -93,6 +93,11 @@ Fix: a mapping in the registry, next to the clip panel.
 The transport element has a metronome switch and its rhythm, and the Timeline block shows them, but nothing in `arrangement-engine` clicks: the switch is silent now that the block plays. Breaks the metronome rules of the transport chapter (to write with OBS-007).
 Fix: a click on the audio clock in the engine, on the beats of the signature in force, the downbeat accented, heard in playback and left out of an export.
 
+### G-022 A clip panel keeps its own height in a host that gives it one
+Docked under the tracks at a fixed height, the clip panel's boxes and waveform stopped where their content did, and the MIDI clip panel's roll kept 18rem whatever room there was, cut off below a shorter dock.
+Fix: the clip view's body fills its frame, the clip panel's waveform and the MIDI clip panel's roll take the room there is (the roll at 18rem when the panel has no height of its own, as before).
+Status: fixed (checked in Chromium in the DAW's detail view).
+
 ## Fixed
 
 None yet.

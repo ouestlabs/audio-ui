@@ -1,5 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from "react";
-import { DeviceBrowser } from "@/components/audio-ui/device-browser";
+import { useCallback, useMemo } from "react";
 import {
   DeviceChain,
   DeviceChainAdd,
@@ -10,7 +9,7 @@ import { devicePanel } from "@/components/audio-ui/device-panels";
 import type { useArrangement } from "@/hooks/use-arrangement";
 import type { TrackDevice } from "@/lib/arrangement";
 import { trackOf } from "@/lib/arrangement-state";
-import { DEVICE_SHELVES, libraryDevice } from "@/lib/device-library";
+import { libraryDevice } from "@/lib/device-library";
 
 type Arrangement = ReturnType<typeof useArrangement>;
 
@@ -53,31 +52,25 @@ function Slot({
 
 /**
  * The devices of the selected track in a row, in the order the sound goes
- * through them, with the library beside them: a device double-clicked or
- * dragged from it goes on the chain (DEV-003). Every change is a command of
- * the arrangement, so it is one step of undo and the engine follows it.
+ * through them: a device dragged from the library goes where it is dropped
+ * on the chain (DEV-003), and the end of the chain opens the library. Every
+ * change is a command of the arrangement, so it is one step of undo and the
+ * engine follows it.
  */
 export function DeviceView({
   arrangement,
+  onOpenLibrary,
   track,
 }: {
   arrangement: Arrangement;
+  /** Opens the library on the left, ready to search. */
+  onOpenLibrary: () => void;
   track: string | null;
 }) {
   const { dispatch, doc } = arrangement;
   const current = track ? trackOf(doc, track) : undefined;
   const devices = current?.devices ?? [];
   const order = useMemo(() => devices.map((device) => device.id), [devices]);
-  const [libraryOpen, setLibraryOpen] = useState(true);
-  const search = useRef<HTMLInputElement>(null);
-  const shelves = useMemo(
-    () =>
-      DEVICE_SHELVES.map((shelf) => ({
-        items: shelf.devices.map((entry) => entry.device),
-        label: shelf.label,
-      })),
-    []
-  );
 
   const add = useCallback(
     (id: string, index?: number) => {
@@ -117,10 +110,6 @@ export function DeviceView({
       current && dispatch({ id, track: current.id, type: "toggle-device" }),
     [current, dispatch]
   );
-  const openLibrary = useCallback(() => {
-    setLibraryOpen(true);
-    requestAnimationFrame(() => search.current?.focus());
-  }, []);
 
   if (!current) {
     return (
@@ -130,15 +119,7 @@ export function DeviceView({
     );
   }
   return (
-    <div className="flex h-full min-h-0 gap-2 p-2">
-      <DeviceBrowser
-        className="w-56 shrink-0"
-        onOpenChange={setLibraryOpen}
-        onPick={add}
-        open={libraryOpen}
-        searchRef={search}
-        shelves={shelves}
-      />
+    <div className="flex h-full min-h-0 p-2">
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         <span className="px-1 text-muted-foreground text-xs">
           {current.name}
@@ -159,7 +140,7 @@ export function DeviceView({
               tempo={doc.tempo}
             />
           ))}
-          <DeviceChainAdd onClick={openLibrary} />
+          <DeviceChainAdd onClick={onOpenLibrary} />
         </DeviceChain>
       </div>
     </div>

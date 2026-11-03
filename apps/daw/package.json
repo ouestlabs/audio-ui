@@ -29,6 +29,7 @@
     "next-themes": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
+    "react-resizable-panels": "catalog:",
     "sonner": "^2.0.8",
     "tailwindcss": "catalog:",
     "tw-animate-css": "catalog:"

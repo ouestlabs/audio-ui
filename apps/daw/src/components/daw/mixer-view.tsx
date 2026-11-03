@@ -147,18 +147,18 @@ function Strip({
     <section
       aria-label={track.name}
       className={cn(
-        "flex w-28 shrink-0 flex-col items-center gap-2 rounded-lg border bg-background p-2 *:shrink-0",
+        "row-span-6 grid w-28 grid-rows-subgrid justify-items-center rounded-lg border bg-background p-2",
         selected && "border-primary"
       )}
       onPointerDown={select}
     >
-      <span className="w-full truncate text-center font-medium text-xs">
+      <span className="row-start-1 w-full truncate text-center font-medium text-xs">
         {track.name}
       </span>
       {sends ? (
         <div
           aria-label={`${track.name} sends`}
-          className="flex flex-wrap justify-center gap-1"
+          className="row-start-2 flex flex-wrap justify-center gap-1"
           role="group"
         >
           {returns.map((back) => (
@@ -175,6 +175,7 @@ function Strip({
       <Knob
         anchor={0}
         aria-label={`${track.name} pan`}
+        className="row-start-3"
         formatValue={formatPan}
         max={1}
         min={-1}
@@ -185,7 +186,7 @@ function Strip({
         value={mix.pan}
         valueLabel="hidden"
       />
-      <div className="flex h-40 justify-center gap-1.5">
+      <div className="row-start-4 flex min-h-0 justify-center gap-1.5">
         <Fader
           aria-label={`${track.name} volume`}
           formatValue={formatDb}
@@ -203,12 +204,12 @@ function Strip({
       </div>
       <span
         aria-hidden="true"
-        className="text-muted-foreground text-xs tabular-nums"
+        className="row-start-5 text-muted-foreground text-xs tabular-nums"
       >
         {formatDb(db)}
       </span>
       {main ? null : (
-        <div className="flex w-full gap-1">
+        <div className="row-start-6 flex w-full gap-1">
           <Toggle
             aria-label={`${track.name} on`}
             className="flex-1"
@@ -282,15 +283,17 @@ export function MixerView({
     />
   );
   return (
+    // One grid for every channel, each a subgrid of its six rows (name, sends, pan, fader, level, switches): what one
+    // channel lacks leaves its row empty, so every fader starts and ends level, and the faders take the height there is.
     <div
       aria-label="Mixer"
-      className="flex h-full min-h-0 items-start gap-2 overflow-auto p-2"
+      className="grid h-full min-h-0 auto-cols-max grid-flow-col grid-rows-[auto_auto_auto_minmax(7rem,1fr)_auto_auto] gap-x-2 gap-y-2 overflow-auto p-2"
       role="group"
     >
       {doc.tracks.map((track) => strip(track, false, true))}
-      <div aria-hidden="true" className="w-px shrink-0 bg-border" />
+      <div aria-hidden="true" className="row-span-6 w-px bg-border" />
       {doc.returns.map((track) => strip(track))}
-      <div aria-hidden="true" className="w-px shrink-0 bg-border" />
+      <div aria-hidden="true" className="row-span-6 w-px bg-border" />
       {strip(doc.main, true)}
     </div>
   );

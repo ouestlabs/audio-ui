@@ -32,6 +32,7 @@
         "next-themes": "catalog:",
         "react": "catalog:",
         "react-dom": "catalog:",
+        "react-resizable-panels": "catalog:",
         "sonner": "^2.0.8",
         "tailwindcss": "catalog:",
         "tw-animate-css": "catalog:",
@@ -170,7 +171,7 @@
         "react": "catalog:",
         "react-day-picker": "^10.0.1",
         "react-dom": "catalog:",
-        "react-resizable-panels": "^4.12.1",
+        "react-resizable-panels": "catalog:",
         "recharts": "3.9.2",
         "sonner": "^2.0.7",
         "ts-morph": "28.0.0",
@@ -280,6 +281,7 @@
     "next-themes": "0.4.6",
     "react": "19.3.1",
     "react-dom": "19.3.1",
+    "react-resizable-panels": "^4.17.0",
     "satori": "0.33.5",
     "shadcn": "^4.22.1",
     "tailwindcss": "^4.3.2",
@@ -2435,7 +2437,7 @@
 
     "react-remove-scroll-bar": ["react-remove-scroll-bar@2.3.8", "", { "dependencies": { "react-style-singleton": "^2.2.2", "tslib": "^2.0.0" }, "peerDependencies": { "@types/react": "*", "react": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0" }, "optionalPeers": ["@types/react"] }, "sha512-9r+yi9+mgU33AKcj6IbT9oRCO78WriSj6t/cF8DWBZJ9aOGPOTEDvdUDz1FwKim7QXWwmHqtdHnRJfhAxEG46Q=="],
 
-    "react-resizable-panels": ["react-resizable-panels@4.12.1", "", { "peerDependencies": { "react": "^18.0.0 || ^19.0.0", "react-dom": "^18.0.0 || ^19.0.0" } }, "sha512-ElE/UpOvMLRWtAqbCgyizHXcbws8RPMyN3cBqmdY17Nxr5f01+DEwzOLqhgcy68GSnjtIUFgKWKl8aIgx5aypQ=="],
+    "react-resizable-panels": ["react-resizable-panels@4.17.0", "", { "peerDependencies": { "@types/react": "^18.2.6 || ^19.0.0", "react": "^18.0.0 || ^19.0.0", "react-dom": "^18.0.0 || ^19.0.0" }, "optionalPeers": ["@types/react"] }, "sha512-ln2vGr4/cBmK8OllGpyaeo6sfeYvlzmCaE40RDVSAiyGpmgaYsxrI+EBy06Vo6bQBd17jcMKaEKOAA+w+i03bQ=="],
 
     "react-style-singleton": ["react-style-singleton@2.2.3", "", { "dependencies": { "get-nonce": "^1.0.0", "tslib": "^2.0.0" }, "peerDependencies": { "@types/react": "*", "react": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc" }, "optionalPeers": ["@types/react"] }, "sha512-b6jSvxvVnyptAiLjbkWLE/lOnR4lfTtDAl+eUC7RZy+QQWc6wRzIV2CE6xBuMmDxc2qIihtDCZD5NPOFl7fRBQ=="],
 

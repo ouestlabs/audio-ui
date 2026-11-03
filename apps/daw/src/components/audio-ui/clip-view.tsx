@@ -205,8 +205,9 @@ function ClipView({
         </div>
         {actions}
       </div>
+      {/* Given a height, the boxes and the editor reach the bottom of it. */}
       {collapsed ? null : (
-        <div className="flex min-h-0 min-w-0 flex-col @3xl:flex-row">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col @3xl:flex-row">
           <BoxesContext value={boxContext}>
             <div
               className="flex shrink-0 overflow-x-auto border-b @3xl:border-e @3xl:border-b-0"

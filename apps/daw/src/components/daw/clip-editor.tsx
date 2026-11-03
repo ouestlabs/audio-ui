@@ -1,6 +1,6 @@
 import type { Note } from "@audio-ui/core/piano-roll";
 import { secondsPerBar, secondsPerBeat } from "@audio-ui/core/time";
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import { ClipPanel, type ClipSettings } from "@/components/audio-ui/clip-panel";
 import {
   MidiClipPanel,
@@ -10,6 +10,7 @@ import type { useArrangement } from "@/hooks/use-arrangement";
 import type { useArrangementEngine } from "@/hooks/use-arrangement-engine";
 import type { Arranged } from "@/lib/arrangement";
 import { type Recording, sourcePeaks } from "@/lib/daw/recordings";
+import { cn } from "@/lib/utils";
 
 type Arrangement = ReturnType<typeof useArrangement>;
 type Engine = ReturnType<typeof useArrangementEngine>;
@@ -62,18 +63,28 @@ function withSettings(
 export function ClipEditor({
   arrangement,
   clip,
+  collapsed,
   engine,
+  folded,
+  onCollapsedChange,
+  onFoldedChange,
   recordings,
 }: {
   arrangement: Arrangement;
   clip: Arranged;
+  /** Whether the panel is rolled up to its strip: the host's, so it stays so from clip to clip. */
+  collapsed: boolean;
   engine: Engine;
+  /** The boxes folded in the panel: the host's, so they stay folded from clip to clip. */
+  folded: readonly string[];
+  onCollapsedChange: (collapsed: boolean) => void;
+  onFoldedChange: (folded: string[]) => void;
   recordings: ReadonlyMap<string, Recording>;
 }) {
   const { dispatch, doc } = arrangement;
   const bar = secondsPerBar(doc.tempo);
-  const [collapsed, setCollapsed] = useState(false);
-  const [folded, setFolded] = useState<string[]>([]);
+  // Laid flat in the detail view, which draws the edge above it: no card of its own, and as tall as the view unless rolled up.
+  const docked = cn("rounded-none border-0", !collapsed && "h-full");
   const edit = useCallback(
     (change: (current: Arranged) => Arranged) =>
       dispatch({ change, id: clip.id, type: "edit-clip" }),
@@ -145,15 +156,15 @@ export function ClipEditor({
         active={!clip.disabled}
         bar={bar}
         beat={secondsPerBeat(doc.tempo)}
-        className="h-full"
+        className={docked}
         collapsed={collapsed}
         foldedBoxes={folded}
         key={clip.id}
         name={clip.name}
         notes={clip.notes}
         onActiveChange={setActive}
-        onCollapsedChange={setCollapsed}
-        onFoldedBoxesChange={setFolded}
+        onCollapsedChange={onCollapsedChange}
+        onFoldedBoxesChange={onFoldedChange}
         onNoteOff={noteOff}
         onNoteOn={noteOn}
         onNotesChange={changeNotes}
@@ -175,15 +186,15 @@ export function ClipEditor({
       active={!clip.disabled}
       bar={bar}
       beatsPerBar={doc.tempo.beatsPerBar}
-      className="h-full"
+      className={docked}
       collapsed={collapsed}
       foldedBoxes={folded}
       key={clip.id}
       name={clip.name}
       onActiveChange={setActive}
-      onCollapsedChange={setCollapsed}
+      onCollapsedChange={onCollapsedChange}
       onCrop={crop}
-      onFoldedBoxesChange={setFolded}
+      onFoldedBoxesChange={onFoldedChange}
       onRename={rename}
       onValueChange={changeSettings}
       onValueCommitted={settle}

@@ -12,6 +12,7 @@ export type ShortcutCommand =
   | "detail"
   | "duplicate"
   | "export"
+  | "library"
   | "loop"
   | "midi-track"
   | "mixer"
@@ -57,6 +58,7 @@ export const SHORTCUTS: readonly Shortcut[] = [
   { command: "solo", key: "s" },
   { command: "select-all", key: "a", mod: true },
   { alt: true, command: "mixer", key: "m", mod: true },
+  { alt: true, command: "library", key: "b", mod: true },
   { command: "detail", key: "tab", shift: true },
   { command: "export", key: "r", mod: true, shift: true },
 ];

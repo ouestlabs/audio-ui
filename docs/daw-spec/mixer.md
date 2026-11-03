@@ -60,3 +60,7 @@ Test: apps/www/test/mixer.test.ts "MIX-013"
 ### MIX-014 Several tracks at once
 With several tracks selected, moving the volume, the pan, the activator or the solo of one of them moves it on all of them.
 Test: apps/daw/test/mixer.test.ts "MIX-014"
+
+### MIX-015 The mixer and the detail view take turns
+Under the arrangement, the mixer and the detail view (the clip or the devices) are shown one at a time: opening one closes the other, from the bar, the keys, or a device or a clip that opens the detail view. Both at once would leave the tracks no room. The line between the arrangement and the one shown is dragged, or moved with the arrow keys, to share the height, and each comes back at the height it was given. The mixer's channels fill that height, every fader as long as the others. A choice of this workstation: the reference draws its mixer in another view.
+Test: apps/daw/test/browser/run.ts "MIX-015"
