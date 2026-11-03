@@ -631,6 +631,13 @@ export function createArrangementState({
 /** Every change the arrangement takes, as a plain value. */
 export type ArrangementCommand =
   | { type: "add-clip"; clip: Arranged }
+  /**
+   * Several commands as one step of undo, in order, each seeing what the one
+   * before it did: what one gesture that makes several changes sends, such as
+   * files dropped on the add-track row (a track, its name and its clip for
+   * each).
+   */
+  | { type: "batch"; commands: readonly ArrangementCommand[] }
   // Time: the tempo, the signatures, the locators and the loop.
   | { type: "add-locator"; at: number }
   | { type: "add-signature"; at: number }
@@ -653,8 +660,18 @@ export type ArrangementCommand =
     }
   /** Keeps the musical positions: everything is scaled to the new bar. */
   | { type: "set-tempo"; tempo: Tempo }
-  /** A return track goes after the others: `afterId` places it among the returns. */
-  | { type: "add-track"; afterId?: string; kind?: TrackKind | "return" }
+  /**
+   * A track, after `afterId` or after the others; a return track goes among
+   * the returns. `name` names it, as a file dropped to make it does; `id` is
+   * the id it takes when no track has it yet, so a `batch` can put clips on it.
+   */
+  | {
+      type: "add-track";
+      afterId?: string;
+      id?: string;
+      kind?: TrackKind | "return";
+      name?: string;
+    }
   // Devices: a track's chain, by the track's id (a track, a return or the main track).
   /** Puts a device on a track's chain at `index` (its end when there is none). An instrument goes first on a MIDI track, in place of the one there was, and on no other track. */
   | {
@@ -1638,6 +1655,13 @@ function restore(
 }
 
 const handlers: Handlers = {
+  batch: (state, { commands }) => {
+    const done = commands.reduce(apply, state);
+    // The steps the commands recorded become one, from the document before them.
+    return done.doc === state.doc
+      ? done
+      : { ...done, history: recordChange(state.history, state.doc) };
+  },
   "add-clip": (state, { clip }) =>
     withSelection(
       edit(state, (doc) => ({
@@ -1660,16 +1684,17 @@ const handlers: Handlers = {
     ),
   "add-signature": (state, { at }) => addSignature(state, at),
   "add-device": (state, command) => addDevice(state, command),
-  "add-track": (state, { afterId, kind = "audio" }) => {
+  "add-track": (state, { afterId, id, kind = "audio", name }) => {
     if (kind === "return") {
       return addReturn(state, afterId);
     }
     const count = state.trackCount + 1;
+    const free = id !== undefined && !trackOf(state.doc, id);
     const track: ArrangementTrack = {
       color: (count - 1) % state.colors,
-      id: `track-${count}`,
+      id: free ? id : `track-${count}`,
       kind,
-      name: `${kind === "midi" ? "MIDI" : "Track"} ${count}`,
+      name: name?.trim() || `${kind === "midi" ? "MIDI" : "Track"} ${count}`,
     };
     const next = edit(state, (doc) => {
       const at = afterId

@@ -65,6 +65,33 @@ export interface ClipSettings {
   warp: readonly WarpMarker[] | null;
 }
 
+/**
+ * The settings of a clip reversed, or played forwards again: the same stretch
+ * of the source plays the other way, so its region and its loop are mirrored
+ * across the source (as the source now plays backwards, what was its end is
+ * its start). A looped clip starts its mirrored loop from the mirror of where
+ * it started.
+ */
+export function reversedSettings(
+  settings: ClipSettings
+): Partial<ClipSettings> {
+  const { length, loop, offset, sourceLength, warp } = settings;
+  const span = warp ? warpedTime(warp, sourceLength) : sourceLength;
+  if (!loop) {
+    return {
+      offset: Math.max(0, span - (offset + length)),
+      reversed: !settings.reversed,
+    };
+  }
+  const mirrored = [span - loop[1], span - loop[0]] as const;
+  const start = span - offset;
+  return {
+    loop: mirrored,
+    offset: start >= mirrored[1] ? mirrored[0] : Math.max(0, start),
+    reversed: !settings.reversed,
+  };
+}
+
 interface ClipPanelProps {
   /** Whether the clip is on: off, it stays on its track and is not heard. Leave it out, with `onActiveChange`, for a panel without the switch. */
   active?: boolean;
@@ -560,8 +587,8 @@ function ClipPanel({
     [setAndCommit, span, warp]
   );
   const toggleReversed = useCallback(
-    () => setAndCommit({ reversed: !reversed }),
-    [reversed, setAndCommit]
+    () => setAndCommit(reversedSettings(value)),
+    [setAndCommit, value]
   );
   const setGain = useCallback(
     (next: number) =>

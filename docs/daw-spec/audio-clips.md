@@ -33,8 +33,7 @@ Test: packages/core/src/audio/playback/render.test.ts "CLP-007"
 
 ### CLP-008 Reverse
 A reversed clip plays the same stretch of its recording, backwards: its region and its loop are mirrored onto the reversed recording, so what it played from first it now plays last.
-Status: partial: today the registry mirrors the whole recording and keeps the region, so a clip that played the first bar of a recording plays its last bar backwards (gaps.md G-009).
-Test: packages/core/src/audio/playback/render.test.ts "CLP-008"
+Test: packages/core/src/audio/playback/render.test.ts "CLP-008" (the mirror), apps/www/test/registry-audio/base/audio/clip-panel.test.ts "CLP-008" (the region and the loop)
 
 ### CLP-009 Repitch
 Between two warp markers, the recording plays at the speed that takes it from one to the other, and its pitch moves with the speed: twice as fast is an octave up. Past the first and the last marker it keeps the speed of the stretch next to it.

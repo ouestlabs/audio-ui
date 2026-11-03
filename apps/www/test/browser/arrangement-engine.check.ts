@@ -322,3 +322,35 @@ check("MID-001: a chord plays all its notes, one voice each", async () => {
     `not every note of the chord sounds: ${levels.map((level) => level.toFixed(4)).join(", ")} against ${energy(missing).toFixed(4)}`
   );
 });
+
+check(
+  "a note played by hand sounds through the track's instrument and chain",
+  async () => {
+    const ctx = new OfflineAudioContext(2, RATE / 2, RATE);
+    const { createArrangementEngine } = await import(
+      "@/registry-audio/bases/base/lib/arrangement-engine"
+    );
+    const engine = await createArrangementEngine(ctx);
+    assert(engine, "the engine loads");
+    engine.update(
+      arrangement({
+        tracks: [
+          {
+            color: 0,
+            devices: [device("s", "audioui.pocket-synth", { wave: "sine" })],
+            id: "keys",
+            kind: "midi",
+            name: "Keys",
+          },
+        ],
+      }),
+      new Map()
+    );
+    await engine.ready();
+    engine.noteOn("keys", 69, 1);
+    const out = (await ctx.startRendering()).getChannelData(0);
+    const loudest = Math.max(...out.subarray(2400, 12_000).map(Math.abs));
+    engine.dispose();
+    assert(loudest > 0.05, `the note is near silent (${loudest})`);
+  }
+);

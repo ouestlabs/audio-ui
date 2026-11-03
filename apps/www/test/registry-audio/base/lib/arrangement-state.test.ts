@@ -881,3 +881,81 @@ describe("devices, sends and return tracks", () => {
     expect(state.doc.returns[0]?.name).toBe("Hall");
   });
 });
+
+describe("batch", () => {
+  const init = () =>
+    createArrangementState({
+      colors: 5,
+      duration: 100,
+      initialTracks: [{ color: 0, id: "vox", name: "Vox" }],
+      tempo: DEFAULT_TEMPO,
+    });
+
+  test("ARR-006: several commands are one step of undo, each seeing what the one before did", () => {
+    let state = init();
+    state = apply(state, {
+      commands: [
+        { kind: "audio", type: "add-track" },
+        { id: "track-2", name: "Take", type: "rename-track" },
+        {
+          clip: {
+            id: "rec-1",
+            name: "Take",
+            recording: "rec-1",
+            sourceLength: 4,
+            track: "track-2",
+            value: { fadeIn: 0, fadeOut: 0, length: 4, offset: 0, start: 0 },
+          },
+          type: "add-clip",
+        },
+      ],
+      type: "batch",
+    });
+    expect(state.doc.tracks.map((track) => track.name)).toEqual([
+      "Vox",
+      "Take",
+    ]);
+    expect(state.doc.clips.map((placed) => placed.track)).toEqual(["track-2"]);
+    expect(state.history.past).toHaveLength(1);
+    const undone = apply(state, { type: "undo" });
+    expect(undone.doc.tracks).toHaveLength(1);
+    expect(undone.doc.clips).toHaveLength(0);
+  });
+
+  test("a batch that changes nothing adds no step", () => {
+    const state = init();
+    const next = apply(state, {
+      commands: [{ id: "nope", type: "remove-clip" }],
+      type: "batch",
+    });
+    expect(next.history.past).toHaveLength(0);
+  });
+});
+
+describe("add-track with a name and an id", () => {
+  test("ARR-006: a track takes the name and the id it is given, and the id only while it is free", () => {
+    let state = createArrangementState({
+      colors: 5,
+      duration: 100,
+      initialTracks: [{ color: 0, id: "vox", name: "Vox" }],
+      tempo: DEFAULT_TEMPO,
+    });
+    state = apply(state, {
+      id: "take",
+      kind: "audio",
+      name: "Take 1",
+      type: "add-track",
+    });
+    state = apply(state, {
+      id: "vox",
+      kind: "audio",
+      name: " ",
+      type: "add-track",
+    });
+    expect(state.doc.tracks.map((track) => [track.id, track.name])).toEqual([
+      ["vox", "Vox"],
+      ["take", "Take 1"],
+      ["track-3", "Track 3"],
+    ]);
+  });
+});

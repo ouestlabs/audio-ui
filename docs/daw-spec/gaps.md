@@ -41,6 +41,7 @@ Status: fixed in `mixer-engine`, on `panGains` from `@audio-ui/core/playback`: e
 
 ### G-009 Reverse plays the other end of the recording
 Reversing a clip flips a flag: the whole recording is mirrored and the clip keeps its offset, so a clip that played the first bar plays the last bar backwards. Breaks CLP-008.
+Status: fixed: the clip panel's Reverse mirrors the region and the loop with the flag (`reversedSettings`).
 
 ### G-010 A clip names its recording through its id
 `Arranged` has no field for the recording it plays: the block finds it by cutting the piece suffix off the clip's id (`file3-2` is `file3`). Consolidating a stretch copies its first clip and renders nothing. Breaks ARR-008.
@@ -83,6 +84,10 @@ Fix: `clipWaveform` in `lib/arrangement` reads a clip's source peaks the way a p
 ### G-019 The panels have no catalog
 A host that draws a chain per track has to import 22 panels by hand and pair them with the ids a project stores, as the device chain block did for its 10.
 Fix: `device-panels`, every panel by stable id with its width.
+
+### G-020 The clip panel and an arranged clip are not joined
+The clip panel takes `ClipSettings` and an arrangement holds `Arranged` clips: every host writes the mapping both ways by hand (the Timeline block does, the DAW does again), with the clamping of the length to the timeline.
+Fix: a mapping in the registry, next to the clip panel.
 
 ## Fixed
 

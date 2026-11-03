@@ -141,6 +141,7 @@ const engine = useArrangementEngine({
 <Meter source={useAudioLevels(engine.meter(track.id) ?? NONE)} />;
 ```
 
+- `engine.noteOn(track, pitch, velocity)` and `engine.noteOff(track, pitch)` play a note on a MIDI track's instrument now, through its chain, as a key of a clip's piano roll does.
 - `play(from)` starts 20 ms from now (`START_SECONDS`), so every track has heard of it before its first frame, round the document's loop when it is on; a note already sounding where it starts plays from there. `stop()` stops the clips and the notes and lets the effects' tails ring.
 - `position` is a live source of the seconds the speakers play: the audio clock, less the output's latency and the engine's delay compensation, so the playhead is where the sound is. The engine stops itself at the end of the arrangement.
 - `status` is the context's sample rate, its latency in seconds (the output's and the delay compensation's), and its state: what an engine line shows.

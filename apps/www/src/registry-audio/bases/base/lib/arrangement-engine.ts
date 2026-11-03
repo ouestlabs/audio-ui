@@ -5,10 +5,12 @@ import {
   heardFrame,
   type PlaybackState,
   playedClips,
+  rescaled,
   STOPPED,
   startsInWindow,
   toFrames,
 } from "@audio-ui/core/playback";
+import { secondsPerBar } from "@audio-ui/core/time";
 import {
   type Arranged,
   type ArrangementTrack,
@@ -21,6 +23,7 @@ import {
 import {
   type ArrangementDoc,
   allTracks,
+  trackOf,
 } from "@/registry-audio/bases/base/lib/arrangement-state";
 import {
   type ClipPlayer,
@@ -103,6 +106,10 @@ export interface ArrangementEngine {
   /** The frames the engine delays its sound by: its delay compensation. */
   readonly latency: number;
   readonly mixer: Mixer;
+  /** Lets go of a note `noteOn` started on a MIDI track. */
+  noteOff: (track: string, pitch: number) => void;
+  /** Plays a note on a MIDI track's instrument now, through its chain, as a key of its editor does, until `noteOff`. */
+  noteOn: (track: string, pitch: number, velocity?: number) => void;
   /** Plays from `from` seconds of the arrangement, starting `START_SECONDS` from now (at the clock's frame `at` when given), round the loop when it is on. */
   play: (from: number, at?: number) => void;
   readonly playing: boolean;
@@ -687,6 +694,80 @@ export async function createArrangementEngine(
     }
   };
 
+  /** A track's devices, and what it plays: the clips of an audio track, the notes of a MIDI one. */
+  const syncTrack = (
+    track: ArrangementTrack,
+    next: ArrangementDoc,
+    recordings: ReadonlyMap<string, RecordingSource>
+  ) => {
+    const runtime = runtimeOf(track.id);
+    syncDevices(track, runtime);
+    if (!next.tracks.includes(track)) {
+      return;
+    }
+    if ((track.kind ?? "audio") === "audio") {
+      syncPlayer(track, runtime, next, recordings);
+    } else if (track.kind === "midi") {
+      runtime.notes = framesOf(
+        next.clips.filter((clip) => clip.track === track.id),
+        rate
+      );
+    }
+  };
+
+  /**
+   * While playing, a change of tempo scales every time of the document, so
+   * the transport carries on from the same bar and beat (TRN-012), the notes
+   * held let go and the ones sounding there start again; a new loop carries
+   * on from where the playhead is.
+   */
+  const carryOn = (previous: ArrangementDoc | null, next: ArrangementDoc) => {
+    if (!(previous && state.playing)) {
+      return;
+    }
+    const at = now() + toFrames(START_SECONDS, rate);
+    const ratio = secondsPerBar(next.tempo) / secondsPerBar(previous.tempo);
+    if (ratio !== 1 && Number.isFinite(ratio) && ratio > 0) {
+      for (const runtime of runtimes.values()) {
+        releaseVoices(runtime, at);
+      }
+      broadcast({ ...rescaled(state, ratio, at), loop: loopOf(next, rate) });
+      chase(at);
+      scheduled = at;
+    } else if (!sameLoop(previous.loop, next.loop)) {
+      broadcast({
+        at,
+        loop: loopOf(next, rate),
+        playing: true,
+        position: arrangementFrame(state, at),
+      });
+    }
+  };
+
+  /** A note started by hand: a voice of the track's instrument, now, as long as it is held. */
+  const audition = (track: string, pitch: number, velocity: number) => {
+    const runtime = runtimes.get(track);
+    const entry = doc && instrumentOf(trackOf(doc, track) ?? doc.main);
+    if (!(runtime?.instrument && entry)) {
+      return;
+    }
+    const at = now();
+    const id = `hand-${pitch}`;
+    noteOn(
+      runtime,
+      entry,
+      {
+        end: at + 1,
+        id,
+        note: { id, length: 0, pitch, start: 0, velocity },
+        pitch,
+        start: 0,
+      },
+      at,
+      id
+    );
+  };
+
   return {
     dispose: () => {
       stop();
@@ -699,6 +780,13 @@ export async function createArrangementEngine(
       return mixer.latency;
     },
     mixer,
+    noteOff: (track, pitch) => {
+      const runtime = runtimes.get(track);
+      if (runtime) {
+        noteOff(runtime, now(), `hand-${pitch}`);
+      }
+    },
+    noteOn: (track, pitch, velocity = 1) => audition(track, pitch, velocity),
     play,
     get playing() {
       return state.playing;
@@ -718,8 +806,7 @@ export async function createArrangementEngine(
     schedule,
     stop,
     update: (next, recordings, overridden = {}) => {
-      const loopChanged =
-        doc !== null && state.playing && !sameLoop(doc.loop, next.loop);
+      const previous = doc;
       doc = next;
       overrides = overridden;
       const kept = new Set(allTracks(next).map((track) => track.id));
@@ -731,31 +818,12 @@ export async function createArrangementEngine(
       // The mixer makes the channels first, so the tracks have somewhere to go.
       mixer.update(mixerState(next));
       for (const track of allTracks(next)) {
-        const runtime = runtimeOf(track.id);
-        syncDevices(track, runtime);
-        const playsClips = next.tracks.includes(track);
-        if (playsClips && (track.kind ?? "audio") === "audio") {
-          syncPlayer(track, runtime, next, recordings);
-        }
-        if (playsClips && track.kind === "midi") {
-          runtime.notes = framesOf(
-            next.clips.filter((clip) => clip.track === track.id),
-            rate
-          );
-        }
+        syncTrack(track, next, recordings);
       }
       recordingsIn = recordings;
       // The latencies may have changed with the devices.
       mixer.update(mixerState(next));
-      if (loopChanged) {
-        const at = now() + toFrames(START_SECONDS, rate);
-        broadcast({
-          at,
-          loop: loopOf(next, rate),
-          playing: true,
-          position: arrangementFrame(state, at),
-        });
-      }
+      carryOn(previous, next);
     },
   };
 }
