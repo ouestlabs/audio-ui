@@ -851,6 +851,48 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       await signature.waitFor({ timeout: 5000 });
       await movesLikeAMarker(page, signature);
     },
+  "TRN-016: the metronome clicks while it is on, and stops when it is off":
+    async (browser) => {
+      const context = await browser.newContext({
+        viewport: { height: 1000, width: 1440 },
+      });
+      const shared = await context.newPage();
+      await shared.addInitScript(() => {
+        const started = OscillatorNode.prototype.start;
+        const scope = window as unknown as { oscillators: number };
+        scope.oscillators = 0;
+        OscillatorNode.prototype.start = function (when) {
+          scope.oscillators += 1;
+          started.call(this, when);
+        };
+      });
+      const page = await open(browser, shared);
+      const count = () =>
+        page.evaluate(
+          () => (window as unknown as { oscillators: number }).oscillators
+        );
+      await page.keyboard.press("Space");
+      await page.waitForTimeout(1200);
+      assert(
+        (await count()) === 0,
+        `${await count()} clicks with the metronome off`
+      );
+      const metronome = page.getByRole("button", {
+        exact: true,
+        name: "Metronome",
+      });
+      await metronome.click();
+      await page.waitForTimeout(1600);
+      const clicked = await count();
+      // At 120 BPM, a click each half second.
+      assert(clicked >= 2, `${clicked} clicks in 1.6 seconds at 120 BPM`);
+      await metronome.click();
+      await page.waitForTimeout(150);
+      const after = await count();
+      await page.waitForTimeout(1200);
+      assert((await count()) === after, "the metronome kept clicking once off");
+      await page.keyboard.press("Space");
+    },
   "ARR-018: the arrows move the cursor on the grid, End goes to the last clip, Up and Down pick a track":
     async (browser) => {
       const page = await open(browser);

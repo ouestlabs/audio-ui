@@ -1,4 +1,8 @@
-import { secondsPerBar, type Tempo } from "@audio-ui/core/time";
+import {
+  type MetronomeRhythm,
+  secondsPerBar,
+  type Tempo,
+} from "@audio-ui/core/time";
 import {
   type ReactNode,
   useCallback,
@@ -135,8 +139,11 @@ export function Daw({ initial, initialRecordings }: DawProps) {
     [doc.returns, doc.tracks]
   );
   const automation = useTrackAutomation({ dispatch, tracks: automatedTracks });
+  const [metronome, setMetronome] = useState(false);
+  const [rhythm, setRhythm] = useState<MetronomeRhythm>("auto");
   const engine = useArrangementEngine({
     doc,
+    metronome: { on: metronome, rhythm },
     overridden: automation.overridden,
     recordings: sources,
   });
@@ -697,20 +704,24 @@ export function Daw({ initial, initialRecordings }: DawProps) {
           canUndo={arrangement.canUndo}
           exporting={exporting}
           looping={doc.loop.on}
+          metronome={metronome}
           onAutomatingChange={automation.setAutomating}
           onExport={exportWav}
           onLoopingChange={setLooping}
+          onMetronomeChange={setMetronome}
           onPlayPause={playPause}
           onRedo={commands.redo}
           onReenableAutomation={
             automation.anyOverridden ? automation.reenable : undefined
           }
+          onRhythmChange={setRhythm}
           onStop={stop}
           onTempoChange={setTempo}
           onUndo={commands.undo}
           onZoomRatioChange={view.setRatio}
           playing={engine.playing}
           position={engine.position}
+          rhythm={rhythm}
           signatures={doc.signatures}
           tempo={doc.tempo}
           zoomMaxRatio={view.maxRatio}

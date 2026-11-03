@@ -6,6 +6,7 @@ import type { AutomatedParameter } from "@/lib/arrangement";
 import {
   type ArrangementEngine,
   createArrangementEngine,
+  type MetronomeSettings,
 } from "@/lib/arrangement-engine";
 import type { ArrangementDoc } from "@/lib/arrangement-state";
 import type { RecordingSource } from "@/lib/clip-player";
@@ -29,6 +30,8 @@ const UNAVAILABLE: EngineStatus = {
 export interface UseArrangementEngineOptions {
   /** The document to play, as `useArrangement` returns it. */
   doc: ArrangementDoc;
+  /** The metronome, heard in playback and never in an export. @default off */
+  metronome?: MetronomeSettings;
   /** What a change by hand took from each track's automation, by track. */
   overridden?: Readonly<Record<string, readonly AutomatedParameter[]>>;
   /** The decoded recordings the audio clips name, by id. Memoize it: a new map posts every recording again. */
@@ -46,6 +49,7 @@ export interface UseArrangementEngineOptions {
  */
 export function useArrangementEngine({
   doc,
+  metronome,
   overridden,
   recordings,
 }: UseArrangementEngineOptions) {
@@ -113,6 +117,12 @@ export function useArrangementEngine({
       }));
     }
   }, [doc, engine, overridden, recordings]);
+
+  const metronomeOn = metronome?.on ?? false;
+  const metronomeRhythm = metronome?.rhythm;
+  useEffect(() => {
+    engine?.setMetronome({ on: metronomeOn, rhythm: metronomeRhythm });
+  }, [engine, metronomeOn, metronomeRhythm]);
 
   // The playhead follows the sound each frame, without a React render; the engine stops itself at the end.
   useEffect(() => {

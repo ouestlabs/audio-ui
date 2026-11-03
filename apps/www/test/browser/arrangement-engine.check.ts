@@ -4,7 +4,11 @@ import type {
   ArrangementTrack,
   TrackDevice,
 } from "@/registry-audio/bases/base/lib/arrangement";
-import { renderArrangement } from "@/registry-audio/bases/base/lib/arrangement-engine";
+import {
+  createArrangementEngine,
+  type MetronomeSettings,
+  renderArrangement,
+} from "@/registry-audio/bases/base/lib/arrangement-engine";
 import {
   type ArrangementDoc,
   createArrangementState,
@@ -327,9 +331,6 @@ check(
   "a note played by hand sounds through the track's instrument and chain",
   async () => {
     const ctx = new OfflineAudioContext(2, RATE / 2, RATE);
-    const { createArrangementEngine } = await import(
-      "@/registry-audio/bases/base/lib/arrangement-engine"
-    );
     const engine = await createArrangementEngine(ctx);
     assert(engine, "the engine loads");
     engine.update(
@@ -352,5 +353,158 @@ check(
     const loudest = Math.max(...out.subarray(2400, 12_000).map(Math.abs));
     engine.dispose();
     assert(loudest > 0.05, `the note is near silent (${loudest})`);
+  }
+);
+
+/** What the metronome alone plays of `doc` from `from`, for `seconds`. */
+async function clicked(
+  doc: ArrangementDoc,
+  seconds: number,
+  settings: MetronomeSettings = { on: true }
+) {
+  const frames = seconds * RATE;
+  const ctx = new OfflineAudioContext(2, frames, RATE);
+  const engine = await createArrangementEngine(ctx);
+  assert(engine, "the browser runs the engine offline");
+  engine.update(doc, new Map());
+  await engine.ready();
+  engine.setMetronome(settings);
+  engine.play(0, 0);
+  engine.schedule(0, frames);
+  const buffer = await ctx.startRendering();
+  const { latency } = engine;
+  engine.dispose();
+  return { data: buffer.getChannelData(0), latency };
+}
+
+/** The frames where a click begins out of silence. */
+function onsets(data: Float32Array) {
+  const found: number[] = [];
+  let quiet = true;
+  let silent = 0;
+  for (let index = 0; index < data.length; index += 1) {
+    if (Math.abs(data[index] ?? 0) > 0.002) {
+      if (quiet) {
+        found.push(index);
+      }
+      quiet = false;
+      silent = 0;
+    } else {
+      silent += 1;
+      if (silent > 1000) {
+        quiet = true;
+      }
+    }
+  }
+  return found;
+}
+
+/** How high a click rings: a click on a bar's first beat is the higher one. */
+function pitchAt(data: Float32Array, onset: number) {
+  const span = Math.round(0.03 * RATE);
+  let crossings = 0;
+  for (let index = onset + 1; index < onset + span; index += 1) {
+    if ((data[index - 1] ?? 0) < 0 !== (data[index] ?? 0) < 0) {
+      crossings += 1;
+    }
+  }
+  return crossings / 2 / 0.03;
+}
+
+const QUARTER = RATE / 2;
+/** How far a found onset may sit from its frame: the click's first millisecond rises under the threshold. */
+const ONSET_TOLERANCE = 96;
+
+const onTheBeats = (found: number[], beat: number, offset = 0) =>
+  found.every(
+    (frame, index) => Math.abs(frame - offset - index * beat) <= ONSET_TOLERANCE
+  );
+
+check(
+  "TRN-016: the metronome clicks on each beat, the first of a bar higher",
+  async () => {
+    const { data } = await clicked(
+      arrangement({ tracks: [{ color: 0, id: "a", name: "A" }] }),
+      4.2
+    );
+    const found = onsets(data);
+    assert(
+      found.length === 9,
+      `${found.length} clicks in 4.2 seconds at 120 BPM`
+    );
+    assert(onTheBeats(found, QUARTER), `clicks at ${found.join(", ")}`);
+    found.forEach((frame, index) => {
+      const pitch = pitchAt(data, frame);
+      const expected = index % 4 === 0 ? 1500 : 1000;
+      assert(
+        Math.abs(pitch - expected) < 100,
+        `click ${index} rings at ${pitch} Hz, not ${expected}`
+      );
+    });
+  }
+);
+
+check("TRN-016: the clicks follow the loop and the rhythm", async () => {
+  const doc = arrangement({ tracks: [{ color: 0, id: "a", name: "A" }] });
+  const looped = await clicked(
+    { ...doc, loop: { on: true, range: [0, 1] } },
+    2.2
+  );
+  const found = onsets(looped.data);
+  assert(
+    found.length === 5,
+    `${found.length} clicks over two passes of a loop`
+  );
+  assert(onTheBeats(found, QUARTER), `clicks at ${found.join(", ")}`);
+  assert(
+    pitchAt(looped.data, found[2] ?? 0) > 1400,
+    "a new pass of the loop does not click its first beat high"
+  );
+  const bars = await clicked(doc, 4.2, { on: true, rhythm: "1-bar" });
+  assert(
+    onTheBeats(onsets(bars.data), RATE * 2),
+    `a click a bar landed at ${onsets(bars.data).join(", ")}`
+  );
+});
+
+check(
+  "TRN-016: the clicks wait for the delay compensation of what they count",
+  async () => {
+    const { data, latency } = await clicked(
+      arrangement({
+        tracks: [
+          {
+            color: 0,
+            // A compressor that looks ahead.
+            devices: [device("late", "audioui.compressor")],
+            id: "a",
+            name: "A",
+          },
+        ],
+      }),
+      1.2
+    );
+    assert(latency > 0, "the chain delays the sound");
+    assert(
+      onTheBeats(onsets(data), QUARTER, latency),
+      `clicks at ${onsets(data).join(", ")} with ${latency} frames of latency`
+    );
+  }
+);
+
+check(
+  "TRN-016: the metronome stays out of an export, and off is silent",
+  async () => {
+    const doc = arrangement({ tracks: [{ color: 0, id: "a", name: "A" }] });
+    const rendered = await render(doc, new Map(), 1.2);
+    assert(
+      rendered.getChannelData(0).every((sample) => sample === 0),
+      "an export of an empty arrangement holds a click"
+    );
+    const { data } = await clicked(doc, 1.2, { on: false });
+    assert(
+      data.every((sample) => sample === 0),
+      "the metronome clicks while it is off"
+    );
   }
 );

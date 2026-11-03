@@ -10,7 +10,11 @@ import {
   startsInWindow,
   toFrames,
 } from "@audio-ui/core/playback";
-import { secondsPerBar } from "@audio-ui/core/time";
+import {
+  type MetronomeRhythm,
+  metronomeClicks,
+  secondsPerBar,
+} from "@audio-ui/core/time";
 import {
   type Arranged,
   type ArrangementTrack,
@@ -37,6 +41,7 @@ import {
   type LibraryEngine,
   libraryDevice,
 } from "@/registry-audio/bases/base/lib/device-library";
+import { triggerClick } from "@/registry-audio/bases/base/lib/drum-synthesis";
 import {
   type ChainLink,
   createMixer,
@@ -92,6 +97,13 @@ interface TrackRuntime {
   player: ClipPlayer | null;
 }
 
+/** What the metronome does. It is off until it is set, so an export never clicks. */
+export interface MetronomeSettings {
+  on: boolean;
+  /** How often it clicks. @default "auto", the beats of the signature in force */
+  rhythm?: MetronomeRhythm;
+}
+
 export interface ArrangementEngineOptions {
   /** Where the main track goes. @default the context's destination */
   destination?: AudioNode;
@@ -119,6 +131,8 @@ export interface ArrangementEngine {
   ready: () => Promise<void>;
   /** Schedules the notes and the automation from the clock's frame `from` to `to`: what an offline render calls step by step. */
   schedule: (from: number, to: number) => void;
+  /** Sets the metronome: it clicks on the audio clock, straight to the output, never through a track or the main track's meter. */
+  setMetronome: (settings: MetronomeSettings) => void;
   /** Stops playback: the clips and the notes stop, the effects' tails ring on. */
   stop: () => void;
   /**
@@ -217,6 +231,9 @@ export async function createArrangementEngine(
   let scheduled = 0;
   let timer: ReturnType<typeof setInterval> | null = null;
   let recordingsIn: ReadonlyMap<string, RecordingSource> = new Map();
+  let metronome: MetronomeSettings = { on: false };
+  let clicks: { accent: boolean; start: number }[] = [];
+  let pendingClicks: { at: number; oscillator: OscillatorNode }[] = [];
 
   const now = () => Math.ceil(ctx.currentTime * rate);
   const deviceContext = (): DeviceContext | undefined =>
@@ -563,10 +580,55 @@ export async function createArrangementEngine(
     );
   };
 
+  /** The metronome's clicks in frames of the arrangement, on the bars of the signatures in force. */
+  const readClicks = () => {
+    clicks =
+      doc && metronome.on
+        ? metronomeClicks(
+            doc.tempo,
+            doc.signatures,
+            doc.duration,
+            metronome.rhythm
+          ).map(({ accent, at }) => ({ accent, start: toFrames(at, rate) }))
+        : [];
+  };
+
+  /** Takes back the clicks still ahead; one already sounding rings out. */
+  const cancelClicks = () => {
+    const at = now();
+    for (const click of pendingClicks) {
+      if (click.at > at) {
+        click.oscillator.disconnect();
+      }
+    }
+    pendingClicks = [];
+  };
+
+  /** The clicks of a stretch of the clock, as late as delay compensation makes what they count. */
+  const scheduleClicks = (from: number, to: number) => {
+    const past = now();
+    pendingClicks = pendingClicks.filter((click) => click.at > past);
+    const starts = startsInWindow(
+      state,
+      from,
+      to - from,
+      clicks,
+      (click) => click.start
+    );
+    for (const { at, item } of starts) {
+      const heard = at + mixer.latency;
+      pendingClicks.push({
+        at: heard,
+        oscillator: triggerClick(destination, heard / rate, item.accent),
+      });
+    }
+  };
+
   const schedule = (from: number, to: number) => {
     if (!(doc && state.playing) || to <= from) {
       return;
     }
+    scheduleClicks(from, to);
     for (const track of doc.tracks) {
       scheduleNotes(track, from, to - from);
       scheduleAutomation(track, to);
@@ -601,6 +663,7 @@ export async function createArrangementEngine(
     if (!state.playing) {
       return;
     }
+    cancelClicks();
     const at = now();
     const stoppedAt = arrangementFrame(state, at);
     for (const runtime of runtimes.values()) {
@@ -649,6 +712,7 @@ export async function createArrangementEngine(
     if (!doc) {
       return;
     }
+    cancelClicks();
     for (const runtime of runtimes.values()) {
       releaseVoices(runtime, at);
     }
@@ -728,6 +792,7 @@ export async function createArrangementEngine(
     const at = now() + toFrames(START_SECONDS, rate);
     const ratio = secondsPerBar(next.tempo) / secondsPerBar(previous.tempo);
     if (ratio !== 1 && Number.isFinite(ratio) && ratio > 0) {
+      cancelClicks();
       for (const runtime of runtimes.values()) {
         releaseVoices(runtime, at);
       }
@@ -804,10 +869,26 @@ export async function createArrangementEngine(
       ]);
     },
     schedule,
+    setMetronome: (settings) => {
+      metronome = settings;
+      readClicks();
+      cancelClicks();
+      if (state.playing) {
+        // What the scheduler has already passed, from the moment it was asked.
+        scheduleClicks(Math.max(now(), state.at), scheduled);
+      }
+    },
     stop,
     update: (next, recordings, overridden = {}) => {
       const previous = doc;
       doc = next;
+      if (
+        previous?.tempo !== next.tempo ||
+        previous?.signatures !== next.signatures ||
+        previous?.duration !== next.duration
+      ) {
+        readClicks();
+      }
       overrides = overridden;
       const kept = new Set(allTracks(next).map((track) => track.id));
       for (const id of [...runtimes.keys()]) {

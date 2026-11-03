@@ -133,6 +133,7 @@ import { useArrangementEngine } from "@/hooks/use-arrangement-engine";
 const arrangement = useArrangement({ duration, initialTracks, tempo });
 const engine = useArrangementEngine({
   doc: arrangement.doc,
+  metronome: { on: clicking, rhythm }, // heard in playback, never in an export
   recordings, // a memoized Map of recording id to AudioBuffer
 });
 

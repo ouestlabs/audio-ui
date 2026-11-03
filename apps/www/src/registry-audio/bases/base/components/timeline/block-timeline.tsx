@@ -795,6 +795,7 @@ export default function BlockTimeline() {
   // The arrangement plays on the audio clock: its clips, its notes through each MIDI track's synth, its mix.
   const engine = useArrangementEngine({
     doc,
+    metronome: { on: metronome, rhythm },
     overridden: automation.overridden,
     recordings: sources,
   });

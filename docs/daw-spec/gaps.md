@@ -93,7 +93,8 @@ Fix: a mapping in the registry, next to the clip panel.
 
 ### G-021 The arrangement engine has no metronome
 The transport element has a metronome switch and its rhythm, and the Timeline block shows them, but nothing in `arrangement-engine` clicks: the switch is silent now that the block plays. Breaks the metronome rules of the transport chapter (to write with OBS-007).
-Fix: a click on the audio clock in the engine, on the beats of the signature in force, the downbeat accented, heard in playback and left out of an export.
+Fix: `metronomeClicks` in core gives the clicks through the signature changes, and `setMetronome` on the engine (`metronome` on `useArrangementEngine`) plays them on the audio clock, past the mixer, off by default so an export never has them. The dots of the transport's metronome still follow the first tempo's beat after a change of signature.
+Status: fixed (offline checks count the frames and the pitch of each click; I have not listened).
 
 ### G-022 A clip panel keeps its own height in a host that gives it one
 Docked under the tracks at a fixed height, the clip panel's boxes and waveform stopped where their content did, and the MIDI clip panel's roll kept 18rem whatever room there was, cut off below a shorter dock.

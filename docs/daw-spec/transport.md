@@ -58,6 +58,10 @@ Test: apps/daw/test/transport.test.ts "TRN-013"
 With Follow on, the view scrolls to keep the playhead in sight. It pauses on an edit or a scroll by hand, and comes back when playback starts or stops.
 Test: apps/daw/test/transport.test.ts "TRN-014"
 
+### TRN-016 Metronome
+With the metronome on, a click sounds on each beat of the signature in force, or on the rhythm chosen, the first of a bar higher, in time with the sound whatever delay compensation holds it back, and through a loop. Turning it on or off, or changing its rhythm, while playing takes effect at the next click. It goes straight to the output, past the main fader and off its meter, and an export has none.
+Test: packages/core/src/audio/time/metronome-clicks.test.ts; apps/www/test/browser/arrangement-engine.check.ts "TRN-016"; apps/daw/test/browser/run.ts "TRN-016"
+
 ### TRN-015 Start on time
 Every track starts on the same frame: a play is scheduled a little ahead (the start latency, PRF-003) so each part of the engine has heard of it before its first frame.
 Test: packages/core/src/audio/playback/transport.test.ts "TRN-015"

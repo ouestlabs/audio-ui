@@ -12,6 +12,7 @@ import {
   type TransportRegion,
   useTransportClock,
 } from "@/registry-audio/bases/base/hooks/use-transport-clock";
+import { triggerClick } from "@/registry-audio/bases/base/lib/drum-synthesis";
 import type { EnvelopePoint } from "@/registry-audio/bases/base/lib/envelope-ramp";
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
@@ -44,20 +45,6 @@ export function meterOf(tempo: Tempo, bars: number): Meter {
 
 const clamp = (value: number, min: number, max: number) =>
   Math.min(max, Math.max(min, value));
-
-/** A short click on the beat, higher on the first of a bar, scheduled at `time` on the audio clock. */
-function scheduleClick(destination: AudioNode, time: number, accent: boolean) {
-  const { context } = destination;
-  const oscillator = context.createOscillator();
-  const gain = context.createGain();
-  oscillator.frequency.setValueAtTime(accent ? 1500 : 1000, time);
-  gain.gain.setValueAtTime(0.0001, time);
-  gain.gain.exponentialRampToValueAtTime(0.4, time + 0.002);
-  gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.05);
-  oscillator.connect(gain).connect(destination);
-  oscillator.start(time);
-  oscillator.stop(time + 0.06);
-}
 
 export interface UsePianoRollPlaybackOptions {
   /** Where the metronome clicks; leave it out for no metronome. */
@@ -204,7 +191,7 @@ export function usePianoRollPlayback({
         current.destination &&
         step % current.meter.stepsPerBeat === 0
       ) {
-        scheduleClick(
+        triggerClick(
           current.destination,
           time,
           step % current.meter.stepsPerBar === 0

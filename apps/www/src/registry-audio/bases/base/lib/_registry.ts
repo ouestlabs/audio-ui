@@ -1012,6 +1012,7 @@ const items: RegistryItem[] = [
     ],
     name: "arrangement-engine",
     registryDependencies: [
+      "@audio-ui/drum-synthesis",
       "@audio-ui/arrangement",
       "@audio-ui/use-arrangement",
       "@audio-ui/clip-player",

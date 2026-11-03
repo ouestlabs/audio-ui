@@ -1,4 +1,8 @@
-import type { SignatureChange, Tempo } from "@audio-ui/core/time";
+import type {
+  MetronomeRhythm,
+  SignatureChange,
+  Tempo,
+} from "@audio-ui/core/time";
 import { EnvelopeIcon } from "@audio-ui/icons/react";
 import type { Source } from "@audio-ui/react";
 import {
@@ -100,19 +104,23 @@ export interface TopBarProps {
   canUndo: boolean;
   exporting: boolean;
   looping: boolean;
+  metronome: boolean;
   onAutomatingChange: (automating: boolean) => void;
   onExport: () => void;
   onLoopingChange: (looping: boolean) => void;
+  onMetronomeChange: (metronome: boolean) => void;
   onPlayPause: () => void;
   onRedo?: () => void;
   /** Plays every envelope again: there only while a hand overrides one. */
   onReenableAutomation?: () => void;
+  onRhythmChange: (rhythm: MetronomeRhythm) => void;
   onStop: () => void;
   onTempoChange: (tempo: Tempo) => void;
   onUndo?: () => void;
   onZoomRatioChange: (ratio: number) => void;
   playing: boolean;
   position: Source<number>;
+  rhythm: MetronomeRhythm;
   /** The time-signature changes: the position reads its bars through them. */
   signatures: readonly SignatureChange[];
   tempo: Tempo;
@@ -165,11 +173,15 @@ export function TopBar(props: TopBarProps) {
       <Transport
         className="min-w-0 flex-1"
         looping={props.looping}
+        metronome={props.metronome}
         onLoopingChange={props.onLoopingChange}
+        onMetronomeChange={props.onMetronomeChange}
         onPlayPause={props.onPlayPause}
+        onRhythmChange={props.onRhythmChange}
         onStop={props.onStop}
         onTempoChange={props.onTempoChange}
         playing={props.playing}
+        rhythm={props.rhythm}
         signatures={props.signatures}
         source={props.position}
         tempo={props.tempo}

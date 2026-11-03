@@ -196,6 +196,7 @@ export const hooks: RegistryItem[] = [
     ],
     name: "use-piano-roll-playback",
     registryDependencies: [
+      "@audio-ui/drum-synthesis",
       "@audio-ui/use-transport-clock",
       "@audio-ui/use-synth-voices",
       "@audio-ui/envelope-ramp",

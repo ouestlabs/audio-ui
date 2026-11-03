@@ -19,6 +19,7 @@ What the reference DAW is asked to show when the manual is silent, the state to 
 | OBS-013 | ARR-009 | A new set from the File menu | Screenshot | |
 | OBS-014 | DEV-003 | An audio track selected, then a double-click on an instrument in the browser; then the instrument dragged onto that audio track | Screen recording | |
 | OBS-015 | DEV-003 | An instrument, then an audio effect, dragged into the empty area below the tracks: the names of the tracks they make | Screenshot | |
+| OBS-019 | TRN-016 | Metronome on, the main fader all the way down, playing: whether the click is still heard | Screen recording with sound | |
 | OBS-016 | ARR-017 | A time signature marker dragged across a few bars: whether the ruler follows during the drag or when it lands | Screen recording | |
 | OBS-017 | ARR-016 | A locator dragged onto another locator, and a time signature marker onto another one: what is left | Screen recording | |
 | OBS-018 | ARR-016 | Insert Silence and Delete Time with locators and a time signature marker after that point | Screen recording | |
