@@ -133,7 +133,9 @@ export function useArrangedClips({
       const target = tracks.find((track) => track.id === onto);
       const holdsNotes = Boolean(clips.find((clip) => clip.id === id)?.notes);
       const takes =
-        target !== undefined && (target.kind === "midi") === holdsNotes;
+        target !== undefined &&
+        target.kind !== "group" &&
+        (target.kind === "midi") === holdsNotes;
       dispatch({
         copy: Boolean(details.copy),
         id,

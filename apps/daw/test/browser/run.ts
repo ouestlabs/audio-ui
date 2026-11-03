@@ -1260,6 +1260,41 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       await page.keyboard.press("Space");
       assert(level > -40, `the imported project plays at ${level} dB`);
     },
+  "MIX-020: Cmd+G groups the picked track, its sound plays through the group, and folding the group hides it":
+    async (browser) => {
+      const page = await open(browser);
+      await dropChord(page, '[data-track="track-1"]', "Grouped take", 2);
+      await page.getByText("1 Audio", { exact: true }).first().click();
+      await page.keyboard.press("Meta+KeyG");
+      await page.getByText("Group 1", { exact: true }).first().waitFor();
+      const depth = await page
+        .locator('[aria-label="1 Audio"][data-track-id] [data-depth]')
+        .first()
+        .getAttribute("data-depth");
+      assert(depth === "1", `the grouped track sits at depth ${depth}`);
+      assert(
+        (await page
+          .locator("[data-slot=arranged-group-preview] > div")
+          .count()) === 1,
+        "the group's lane does not show its track's clip"
+      );
+      await showMixer(page);
+      await page.keyboard.press("Home");
+      await page.keyboard.press("Space");
+      const level = await loudest(page, 1500);
+      await page.keyboard.press("Space");
+      assert(level > -40, `the grouped track plays at ${level} dB`);
+      await page.getByRole("button", { name: "Fold Group 1" }).click();
+      await page.waitForFunction(
+        () => !document.querySelector('[aria-label="1 Audio"][data-track-id]')
+      );
+      await page.keyboard.press("Meta+Shift+KeyG");
+      await page.waitForFunction(
+        () =>
+          document.querySelector('[aria-label="1 Audio"][data-track-id]') &&
+          !document.querySelector('[aria-label="Group 1"][data-track-id]')
+      );
+    },
   "PRJ-001: the project comes back when the page is loaded again": async (
     browser
   ) => {

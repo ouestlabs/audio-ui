@@ -185,7 +185,7 @@ const engine = useArrangementEngine({
 
 ## The mixer
 
-`mixer-engine` is the mixing desk the engine plays through, usable on its own with sources of your own: a channel per track and per return, each with a device chain (`setChain`), a volume, a pan, a switch and a solo, sends taken before or after the volume, pan and switch as each return asks, delay compensation from the latency each chain declares, a meter per channel, and the main track to the output. Nothing limits the main track, so a mix over full scale shows on the meters as it would in the file.
+`mixer-engine` is the mixing desk the engine plays through, usable on its own with sources of your own: a channel per track and per return (a track that names a `group` plays into that track's channel), each with a device chain (`setChain`), a volume, a pan, a switch and a solo, sends taken before or after the volume, pan and switch as each return asks, delay compensation from the latency each chain declares, a meter per channel, and the main track to the output. Nothing limits the main track, so a mix over full scale shows on the meters as it would in the file.
 
 ```ts
 import { createMixer } from "@/lib/mixer-engine";

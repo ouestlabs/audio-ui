@@ -161,15 +161,25 @@ function writeDevice(device: TrackDevice): string | null {
 }
 
 /** What a track of the arrangement holds, as the format names it. */
+const CONTENT_OF_KIND = { audio: "audio", group: "tracks", midi: "notes" };
 const contentOfKind = (track: ArrangementTrack) =>
-  (track.kind ?? "audio") === "midi" ? "notes" : "audio";
+  CONTENT_OF_KIND[track.kind ?? "audio"];
 
-/** A track and its channel: its devices, volume, pan, mute, solo and sends. */
+/** Where a channel plays into: its group's channel, or the main track's; the main track plays out. */
+function destinationOf(track: ArrangementTrack, role: string) {
+  if (role === "master") {
+    return;
+  }
+  return track.group ? `channel-${track.group}` : "channel-main";
+}
+
+/** A track and its channel: its devices, volume, pan, mute, solo and sends; a group, its tracks within it. */
 function writeTrack(
   track: ArrangementTrack,
-  role: "effect" | "master" | "regular",
+  role: "effect" | "master" | "regular" | "submix",
   report: string[],
-  returnsById: ReadonlyMap<string, ArrangementTrack>
+  returnsById: ReadonlyMap<string, ArrangementTrack>,
+  inner: readonly string[] = []
 ): string {
   const mix = mixOf(track);
   const devices: string[] = [];
@@ -190,7 +200,7 @@ function writeTrack(
     "Channel",
     {
       audioChannels: 2,
-      destination: role === "master" ? undefined : "channel-main",
+      destination: destinationOf(track, role),
       id: role === "master" ? "channel-main" : `channel-${track.id}`,
       role,
       solo: mix.soloed,
@@ -235,7 +245,10 @@ function writeTrack(
       }),
     ]
   );
-  const contentType = role === "regular" ? contentOfKind(track) : "audio notes";
+  const contentType =
+    role === "regular" || role === "submix"
+      ? contentOfKind(track)
+      : "audio notes";
   return element(
     "Track",
     {
@@ -245,7 +258,7 @@ function writeTrack(
       loaded: true,
       name: track.name,
     },
-    [channel]
+    [channel, ...inner]
   );
 }
 
@@ -393,10 +406,19 @@ export function writeDawproject(
 ): { metadata: string; project: string; report: string[] } {
   const report: string[] = [];
   const returnsById = new Map(doc.returns.map((track) => [track.id, track]));
+  const ids = new Set(doc.tracks.map((track) => track.id));
+  const nested = (track: ArrangementTrack): string =>
+    writeTrack(
+      track,
+      track.kind === "group" ? "submix" : "regular",
+      report,
+      returnsById,
+      doc.tracks.filter((each) => each.group === track.id).map(nested)
+    );
   const structure = [
-    ...doc.tracks.map((track) =>
-      writeTrack(track, "regular", report, returnsById)
-    ),
+    ...doc.tracks
+      .filter((track) => !(track.group && ids.has(track.group)))
+      .map(nested),
     ...doc.returns.map((track) =>
       writeTrack(track, "effect", report, returnsById)
     ),
@@ -675,6 +697,16 @@ interface ReadChannel {
   volume: string | null;
 }
 
+/** What a track of the format holds, as ours names it. */
+function kindOf(el: Element, content: string): ArrangementTrack["kind"] {
+  if (isGroup(el)) {
+    return "group";
+  }
+  return content.split(" ").includes("notes") && !content.includes("audio")
+    ? "midi"
+    : "audio";
+}
+
 function readTrack(
   el: Element,
   index: number,
@@ -704,10 +736,7 @@ function readTrack(
     color: index,
     ...(devices.length > 0 ? { devices } : {}),
     id,
-    kind:
-      content.split(" ").includes("notes") && !content.includes("audio")
-        ? "midi"
-        : "audio",
+    kind: kindOf(el, content),
     mix: {
       color: index,
       gain: volume ?? 1,
@@ -726,19 +755,21 @@ function readTrack(
 }
 
 /** Every track of the structure, a group's tracks after it, flattened; groups themselves are reported. */
-function flatTracks(structure: Element, report: string[]): Element[] {
-  return kids(structure, "Track")
-    .flatMap((track) => {
-      const inner = kids(track, "Track");
-      if (inner.length > 0) {
-        report.push(
-          `${track.getAttribute("name") ?? "A group"}: a group, its tracks laid out one by one`
-        );
-      }
-      return [track, ...inner.flatMap((child) => flatTracks(child, report))];
-    })
-    .filter((track) => kids(track, "Track").length === 0);
+function flatTracks(
+  structure: Element,
+  parent: Element | null = null
+): { el: Element; parent: Element | null }[] {
+  return kids(structure, "Track").flatMap((track) => [
+    { el: track, parent },
+    ...flatTracks(track, track),
+  ]);
 }
+
+/** Whether a track of the format is a group: it holds tracks, or it mixes them. */
+const isGroup = (el: Element) =>
+  kids(el, "Track").length > 0 ||
+  (el.getAttribute("contentType") ?? "").split(" ").includes("tracks") ||
+  kid(el, "Channel")?.getAttribute("role") === "submix";
 
 /** A clip's content, through one level of nested clips: its audio and warp map, or its notes. */
 function contentOf(clip: Element): {
@@ -853,10 +884,14 @@ function readStructure(reading: Reading, structure: Element | undefined) {
   const returns: ArrangementTrack[] = [];
   let main: ArrangementTrack = { color: 0, id: "main", name: "Main" };
   const sendsOf: { from: ArrangementTrack; sends: Element[] }[] = [];
-  const all = structure ? flatTracks(structure, reading.report) : [];
-  for (const [index, el] of all.entries()) {
+  const all = structure ? flatTracks(structure) : [];
+  for (const [index, { el, parent }] of all.entries()) {
     const { channel, role, track } = readTrack(el, index, reading.report);
-    const kept = placed(role, track, returns);
+    // A track within a group track plays into it.
+    const group = parent
+      ? reading.byTrack.get(parent.getAttribute("id") ?? "")?.id
+      : undefined;
+    const kept = placed(role, group ? { ...track, group } : track, returns);
     if (role === "master") {
       main = kept;
     } else if (role === "effect") {

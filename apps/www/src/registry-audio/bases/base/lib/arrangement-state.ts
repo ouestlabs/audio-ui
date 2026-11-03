@@ -1293,6 +1293,19 @@ export function trackBlock(
   return block;
 }
 
+/** The tracks shown: those inside a folded group are hidden, its own row stays. */
+export function unfoldedTracks(
+  tracks: readonly ArrangementTrack[],
+  folded: Readonly<Record<string, boolean>>
+): ArrangementTrack[] {
+  const hidden = new Set(
+    tracks
+      .filter((track) => track.kind === "group" && folded[track.id])
+      .flatMap((track) => trackBlock(tracks, track.id).slice(1))
+  );
+  return tracks.filter((track) => !hidden.has(track.id));
+}
+
 /** How deep a track sits: 0 at the top, 1 in a group, 2 in a group within one. */
 export function trackDepth(
   tracks: readonly ArrangementTrack[],

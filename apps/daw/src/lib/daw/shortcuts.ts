@@ -14,6 +14,7 @@ export type ShortcutCommand =
   | "duplicate"
   | "export"
   | "fold"
+  | "group"
   | "grid-finer"
   | "grid-fixed"
   | "grid-snap"
@@ -34,6 +35,7 @@ export type ShortcutCommand =
   | "split"
   | "to-start"
   | "undo"
+  | "ungroup"
   | "unfold-all"
   | "zoom-back"
   | "zoom-in"
@@ -91,6 +93,8 @@ export const SHORTCUTS: readonly Shortcut[] = [
   { command: "zoom-back", key: "x" },
   { command: "automation", key: "a" },
   { command: "fold", key: "u" },
+  { command: "group", key: "g", mod: true },
+  { command: "ungroup", key: "g", mod: true, shift: true },
   { alt: true, command: "unfold-all", key: "u" },
 ];
 
@@ -130,7 +134,9 @@ export const SHORTCUT_HELP: readonly { action: string; keys: string[] }[] = [
   { action: "Copy a clip while dragging it", keys: ["Option", "Drag"] },
   { action: "Select clips with a rectangle", keys: ["Shift", "Drag"] },
   { action: "Show or hide the automation", keys: ["A"] },
-  { action: "Fold the track", keys: ["U"] },
+  { action: "Fold the track, or a group's tracks", keys: ["U"] },
+  { action: "Group the selected tracks", keys: ["Cmd", "G"] },
+  { action: "Ungroup the selected group", keys: ["Cmd", "Shift", "G"] },
   { action: "Unfold every track", keys: ["Option", "U"] },
   { action: "Fold or show the library", keys: ["Cmd", "Option", "B"] },
   { action: "Show the mixer", keys: ["Cmd", "Option", "M"] },

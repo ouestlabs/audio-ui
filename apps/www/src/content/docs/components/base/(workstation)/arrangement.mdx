@@ -445,6 +445,15 @@ const reorder = useTrackReorder({
 
 The grip sits in its track's row, inside the `Timeline`. While a track is dragged, `draggingId` is the track and `drop` (`{ id, edge }`) is the edge of the row it would land on: `trackReorderClass` fades the track where it was and draws a line at that edge. `ghost` is the box of its header, and `TrackReorderGhost` draws the copy under the pointer, fixed, which the drag moves without a render. The view scrolls when the pointer nears its top or bottom edge. The grip, the copy and the line ship with the hook, in `components/audio-ui/track-grip`.
 
+### Groups
+
+A track can sit in a group track: it names it in `group`, and a group's tracks follow it in `tracks`. The group is a track of its own (`kind: "group"`), with its chain, its mix and its sends, and the tracks in it play into it instead of into the main track. A group can hold groups.
+
+- `{ type: "group-tracks", ids }` puts tracks into a new group where the first of them was. `{ type: "ungroup", id }` dissolves one, its tracks going up a level.
+- A group moves, and is removed, with its tracks; a track moved among a group's tracks joins it.
+- `unfoldedTracks` (from `useArrangement`) leaves out the tracks of a folded group. `trackBlock` and `trackDepth` give a group's tracks and how deep a track sits, to indent its header.
+- `ArrangedGroupPreview`, from `arranged-clip`, draws on a group's lane what its tracks play.
+
 ### Time selections
 
 `useTimeSelection` (`npx shadcn@latest add @audio-ui/use-time-selection`) is a stretch of time on some tracks and what the keyboard does with it. Tell it where a press on bare lane began, give its `onSelectionChange` to the lanes, and draw the overlay on the tracks it spans:

@@ -17,6 +17,8 @@ import {
   apply,
   copyFrom,
   createArrangementState,
+  trackOf,
+  unfoldedTracks,
 } from "@/registry-audio/bases/base/lib/arrangement-state";
 import { canRedo, canUndo } from "@/registry-audio/bases/base/lib/undo-history";
 
@@ -119,9 +121,10 @@ export function useArrangement({
     },
     []
   );
+  // A folded group keeps its row and hides its tracks; any other track folds to a strip.
   const shownHeights = { ...heights };
   for (const id of Object.keys(folded)) {
-    if (folded[id]) {
+    if (folded[id] && trackOf(doc, id)?.kind !== "group") {
       shownHeights[id] = foldedHeight;
     }
   }
@@ -160,5 +163,7 @@ export function useArrangement({
     tempo: doc.tempo,
     toggleFold,
     tracks: doc.tracks,
+    /** The tracks shown, those inside a folded group left out. */
+    unfoldedTracks: unfoldedTracks(doc.tracks, folded),
   };
 }

@@ -44,6 +44,13 @@ import {
  * A new id for a piece of the clip `id`: the first `-n` after it that no clip
  * in `taken` has. It is added to `taken`, so the next piece takes another.
  */
+/** What a new track is called, by what it holds, before its number. */
+const TRACK_NAMES: Record<TrackKind, string> = {
+  audio: "Track",
+  group: "Group",
+  midi: "MIDI",
+};
+
 function freshId(id: string, taken: Set<string>): string {
   let n = 1;
   while (taken.has(`${id}-${n}`)) {
@@ -746,7 +753,12 @@ export type ArrangementCommand =
   | { type: "edit-clip"; id: string; change: (clip: Arranged) => Arranged }
   | { type: "fade-time"; time: TimeSelection }
   | { type: "insert-time"; at: number; length: number }
+  /** Puts the tracks into a new group track, where the first of them was; it goes in the group they shared, if they shared one. */
+  | { type: "group-tracks"; ids: readonly string[]; name?: string }
+  /** Moves a track to \`index\` among the tracks, with the tracks of a group: it joins the group of the track it lands before. */
   | { type: "move-track"; id: string; index: number }
+  /** Dissolves a group: its tracks go into the group it was in, and its own devices and mix go with it. */
+  | { type: "ungroup"; id: string }
   | { type: "paste"; clipping: Clipping; at: number; track: string }
   | { type: "redo" }
   | { type: "release-clips" }
@@ -1263,28 +1275,165 @@ function duplicateTrack(state: ArrangementState, id: string): ArrangementState {
   return { ...next, trackCount: count };
 }
 
+/** A track and every track in it, down the groups within: a group's block, which stays together in the list. */
+export function trackBlock(
+  tracks: readonly ArrangementTrack[],
+  id: string
+): string[] {
+  const block = [id];
+  for (const track of tracks) {
+    if (
+      track.group !== undefined &&
+      block.includes(track.group) &&
+      !block.includes(track.id)
+    ) {
+      block.push(track.id);
+    }
+  }
+  return block;
+}
+
+/** The tracks shown: those inside a folded group are hidden, its own row stays. */
+export function unfoldedTracks(
+  tracks: readonly ArrangementTrack[],
+  folded: Readonly<Record<string, boolean>>
+): ArrangementTrack[] {
+  const hidden = new Set(
+    tracks
+      .filter((track) => track.kind === "group" && folded[track.id])
+      .flatMap((track) => trackBlock(tracks, track.id).slice(1))
+  );
+  return tracks.filter((track) => !hidden.has(track.id));
+}
+
+/** How deep a track sits: 0 at the top, 1 in a group, 2 in a group within one. */
+export function trackDepth(
+  tracks: readonly ArrangementTrack[],
+  id: string
+): number {
+  const groupOf = new Map(tracks.map((track) => [track.id, track.group]));
+  let depth = 0;
+  let at = groupOf.get(id);
+  while (at !== undefined && depth < tracks.length) {
+    depth += 1;
+    at = groupOf.get(at);
+  }
+  return depth;
+}
+
+/** The track as it stands in \`group\`, or at the top with none. */
+const inGroup = (
+  track: ArrangementTrack,
+  group: string | undefined
+): ArrangementTrack => {
+  if (track.group === group) {
+    return track;
+  }
+  const { group: _left, ...rest } = track;
+  return group === undefined ? rest : { ...rest, group };
+};
+
 function moveTrack(
   state: ArrangementState,
   id: string,
   index: number
 ): ArrangementState {
   return edit(state, (doc) => {
-    const list = doc.returns.some((item) => item.id === id)
-      ? "returns"
-      : "tracks";
-    const from = doc[list].findIndex((item) => item.id === id);
-    if (from === -1 || from === index) {
+    if (doc.returns.some((item) => item.id === id)) {
+      const from = doc.returns.findIndex((item) => item.id === id);
+      if (from === index) {
+        return doc;
+      }
+      const moved = [...doc.returns];
+      const [track] = moved.splice(from, 1);
+      moved.splice(
+        Math.min(Math.max(index, 0), moved.length),
+        0,
+        track as ArrangementTrack
+      );
+      return { ...doc, returns: moved };
+    }
+    const from = doc.tracks.findIndex((item) => item.id === id);
+    if (from === -1) {
       return doc;
     }
-    const moved = [...doc[list]];
-    const [track] = moved.splice(from, 1);
-    moved.splice(
-      Math.min(Math.max(index, 0), moved.length),
-      0,
-      track as ArrangementTrack
-    );
-    return { ...doc, [list]: moved };
+    const block = trackBlock(doc.tracks, id);
+    const rest = doc.tracks.filter((track) => !block.includes(track.id));
+    const at = Math.min(Math.max(index, 0), rest.length);
+    // It joins the group of the track it lands before: between a group and its tracks, the group.
+    const next = rest[at];
+    const group = next?.group;
+    const moved = doc.tracks
+      .filter((track) => block.includes(track.id))
+      .map((track) => (track.id === id ? inGroup(track, group) : track));
+    const tracks = [...rest.slice(0, at), ...moved, ...rest.slice(at)];
+    const same = tracks.every((track, place) => track === doc.tracks[place]);
+    return same ? doc : { ...doc, tracks };
   });
+}
+
+/** The tracks picked, put into a new group where the first of them was. */
+function groupTracks(
+  state: ArrangementState,
+  ids: readonly string[],
+  name: string | undefined
+): ArrangementState {
+  const { tracks } = state.doc;
+  // A track in a group that is grouped too goes along with it.
+  const tops = tracks.filter(
+    (track) =>
+      ids.includes(track.id) &&
+      !ids.some(
+        (other) =>
+          other !== track.id && trackBlock(tracks, other).includes(track.id)
+      )
+  );
+  if (tops.length === 0) {
+    return state;
+  }
+  const parents = new Set(tops.map((track) => track.group));
+  const parent = parents.size === 1 ? tops[0]?.group : undefined;
+  const id = freshId("group", new Set(tracks.map((track) => track.id)));
+  const count = state.trackCount + 1;
+  const group: ArrangementTrack = {
+    color: (count - 1) % state.colors,
+    id,
+    kind: "group",
+    name:
+      name?.trim() ||
+      `Group ${tracks.filter((track) => track.kind === "group").length + 1}`,
+    ...(parent === undefined ? {} : { group: parent }),
+  };
+  const moving = new Set(tops.flatMap((track) => trackBlock(tracks, track.id)));
+  const first = tracks.findIndex((track) => moving.has(track.id));
+  const before = tracks
+    .slice(0, first)
+    .filter((track) => !moving.has(track.id));
+  const after = tracks.slice(first).filter((track) => !moving.has(track.id));
+  const inside = tracks
+    .filter((track) => moving.has(track.id))
+    .map((track) => (tops.includes(track) ? inGroup(track, id) : track));
+  const next = edit(state, (doc) => ({
+    ...doc,
+    tracks: [...before, group, ...inside, ...after],
+  }));
+  return { ...next, trackCount: count };
+}
+
+/** A group dissolved: its tracks go up into the group it was in. */
+function ungroup(state: ArrangementState, id: string): ArrangementState {
+  const group = state.doc.tracks.find((track) => track.id === id);
+  if (group?.kind !== "group") {
+    return state;
+  }
+  return edit(state, (doc) => ({
+    ...doc,
+    tracks: doc.tracks
+      .filter((track) => track.id !== id)
+      .map((track) =>
+        track.group === id ? inGroup(track, group.group) : track
+      ),
+  }));
 }
 
 function changeTrack(
@@ -1374,9 +1523,11 @@ function removeTrack(state: ArrangementState, id: string): ArrangementState {
       tracks: doc.tracks.map(unsend),
     }));
   }
-  // A track among the tracks picked takes the others with it.
+  // A track among the tracks picked takes the others with it, and a group the tracks in it.
   const picked = state.selection?.tracks ?? NONE;
-  const gone = picked.includes(id) ? picked : [id];
+  const gone = (picked.includes(id) ? picked : [id]).flatMap((each) =>
+    trackBlock(state.doc.tracks, each)
+  );
   return withSelection(
     edit(state, (doc) => ({
       ...doc,
@@ -1704,14 +1855,21 @@ const handlers: Handlers = {
       color: (count - 1) % state.colors,
       id: free ? id : `track-${count}`,
       kind,
-      name: name?.trim() || `${kind === "midi" ? "MIDI" : "Track"} ${count}`,
+      name: name?.trim() || `${TRACK_NAMES[kind]} ${count}`,
     };
     const next = edit(state, (doc) => {
-      const at = afterId
-        ? doc.tracks.findIndex((item) => item.id === afterId) + 1
+      // After a track and, a group, after the tracks in it, in the group it is in.
+      const after = afterId ? trackOf(doc, afterId) : undefined;
+      const block = afterId ? trackBlock(doc.tracks, afterId) : [];
+      const at = after
+        ? Math.max(
+            ...block.map((each) =>
+              doc.tracks.findIndex((item) => item.id === each)
+            )
+          ) + 1
         : doc.tracks.length;
       const tracks = [...doc.tracks];
-      tracks.splice(at || doc.tracks.length, 0, track);
+      tracks.splice(at || doc.tracks.length, 0, inGroup(track, after?.group));
       return { ...doc, tracks };
     });
     return { ...next, trackCount: count };
@@ -1835,7 +1993,9 @@ const handlers: Handlers = {
       ...doc,
       clips: openTime(doc.clips, at, length, state.doc.duration),
     })),
+  "group-tracks": (state, { ids, name }) => groupTracks(state, ids, name),
   "move-track": (state, { id, index }) => moveTrack(state, id, index),
+  ungroup: (state, { id }) => ungroup(state, id),
   paste: (state, { clipping, at, track }) => paste(state, clipping, at, track),
   redo: (state) => restore(state, redo(state.history, state.doc)),
   "release-clips": (state) => releaseClips(state),

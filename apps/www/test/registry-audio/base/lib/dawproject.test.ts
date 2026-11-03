@@ -300,4 +300,42 @@ describe("DAWproject", () => {
       audio
     );
   });
+
+  test("PRJ-008 and MIX-020: groups within groups go out as tracks within tracks, mixed into their group, and come back as groups", () => {
+    const { doc } = createArrangementState({
+      colors: 5,
+      duration: 8,
+      initialTracks: [
+        { color: 0, id: "band", kind: "group", name: "Band" },
+        { color: 1, group: "band", id: "drums", kind: "group", name: "Drums" },
+        { color: 2, group: "drums", id: "kick", name: "Kick" },
+        { color: 3, group: "band", id: "bass", name: "Bass" },
+        { color: 4, id: "vocal", name: "Vocal" },
+      ],
+      tempo: TEMPO,
+    });
+    const { project: xml } = writeDawproject(doc, new Map());
+    expect(xml).toContain('role="submix"');
+    expect(xml).toContain('destination="channel-drums"');
+    const back = readDawproject(xml).doc.tracks;
+    const byName = new Map(back.map((track) => [track.name, track]));
+    const groupOf = (name: string) => {
+      const id = byName.get(name)?.group;
+      return back.find((track) => track.id === id)?.name;
+    };
+    expect(back.map((track) => track.name)).toEqual([
+      "Band",
+      "Drums",
+      "Kick",
+      "Bass",
+      "Vocal",
+    ]);
+    expect(byName.get("Drums")?.kind).toBe("group");
+    expect([
+      groupOf("Drums"),
+      groupOf("Kick"),
+      groupOf("Bass"),
+      groupOf("Vocal"),
+    ]).toEqual(["Band", "Drums", "Band", undefined]);
+  });
 });

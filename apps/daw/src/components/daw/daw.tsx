@@ -700,6 +700,12 @@ export function Daw({
         arrangement.toggleFold(id);
       }
     },
+    // The tracks picked go into a group (MIX-020), and a group picked lets its tracks go.
+    group: () => {
+      const picked = arrangement.selectedTracks;
+      const chosen = picked.length > 0 ? picked : [selectedTrack ?? ""];
+      dispatch({ ids: chosen, type: "group-tracks" });
+    },
     "grid-finer": () => grid.change("finer"),
     "grid-fixed": () => grid.change("fixed"),
     "grid-snap": () => grid.change("snap"),
@@ -708,6 +714,24 @@ export function Daw({
     loop: loopKey,
     library: () => setLibraryOpen((open) => !open),
     mixer: () => togglePanel("mixer"),
+    // A group picked, or the group a picked track is in.
+    ungroup: () => {
+      const picked = arrangement.selectedTracks;
+      const chosen = picked.length > 0 ? picked : [selectedTrack ?? ""];
+      const groups = new Set(
+        chosen.flatMap((id) => {
+          const track = trackOf(doc, id);
+          if (track?.kind === "group") {
+            return [id];
+          }
+          return track?.group ? [track.group] : [];
+        })
+      );
+      dispatch({
+        commands: [...groups].map((id) => ({ id, type: "ungroup" as const })),
+        type: "batch",
+      });
+    },
     "unfold-all": () => {
       for (const [id, on] of Object.entries(arrangement.folded)) {
         if (on) {

@@ -19,6 +19,7 @@ import { createPortal } from "react-dom";
 import {
   ArrangedClip,
   ArrangedClipGhost,
+  ArrangedGroupPreview,
 } from "@/components/audio-ui/arranged-clip";
 import { DEVICE_DRAG_TYPE } from "@/components/audio-ui/device-chain";
 import { TimelineTimeSelection } from "@/components/audio-ui/time-selection";
@@ -82,7 +83,8 @@ import type { useTimelineMarkers } from "@/hooks/use-timeline-markers";
 import type { useTimelineZoom } from "@/hooks/use-timeline-zoom";
 import type { useTrackAutomation } from "@/hooks/use-track-automation";
 import { useTrackReorder } from "@/hooks/use-track-reorder";
-import { type Arranged, mixOf } from "@/lib/arrangement";
+import { type Arranged, type ArrangementTrack, mixOf } from "@/lib/arrangement";
+import { trackBlock, trackDepth } from "@/lib/arrangement-state";
 import { NEW_TRACK } from "@/lib/daw/drop";
 import { type Recording, sourcePeaks } from "@/lib/daw/recordings";
 import { cn } from "@/lib/utils";
@@ -203,6 +205,30 @@ export interface ArrangementViewProps {
  * track for it. Everything here is the registry's timeline, driven by the
  * arrangement's commands.
  */
+
+/** What a row needs of its track: what it is, whether it sounds, whether it takes files, how deep it sits and, a group, the tracks in it. */
+function rowOf(
+  track: ArrangementTrack,
+  tracks: readonly ArrangementTrack[],
+  returns: readonly ArrangementTrack[],
+  anySolo: boolean
+) {
+  const mix = mixOf(track);
+  const isReturn = returns.includes(track);
+  const isGroup = track.kind === "group";
+  return {
+    depth: trackDepth(tracks, track.id),
+    // A group's lane shows what the tracks in it play.
+    inside: isGroup ? trackBlock(tracks, track.id).slice(1) : [],
+    isGroup,
+    isReturn,
+    mix,
+    silent: mix.muted || (anySolo && !mix.soloed && !isReturn),
+    // Files go on audio tracks; a device goes on any track that takes it.
+    takesFiles: !isReturn && (track.kind ?? "audio") === "audio",
+  };
+}
+
 export function ArrangementView({
   arrangement,
   automation,
@@ -583,13 +609,17 @@ export function ArrangementView({
               </TimelineLane>
             </Row>
           </div>
-          {[...tracks, ...returns].map((track) => {
-            const mix = mixOf(track);
-            const isReturn = returns.includes(track);
-            const silent = mix.muted || (anySolo && !mix.soloed && !isReturn);
+          {[...arrangement.unfoldedTracks, ...returns].map((track) => {
+            const {
+              depth,
+              inside,
+              isGroup,
+              isReturn,
+              mix,
+              silent,
+              takesFiles,
+            } = rowOf(track, tracks, returns, anySolo);
             const height = arrangement.heights[track.id];
-            // Files go on audio tracks; a device goes on any track that takes it.
-            const takesFiles = !isReturn && track.kind !== "midi";
             return (
               <div
                 aria-label={track.name}
@@ -607,7 +637,11 @@ export function ArrangementView({
                   )}
                   height={height}
                   lead={
-                    <div className="flex min-w-0 flex-1">
+                    <div
+                      className="flex min-w-0 flex-1"
+                      data-depth={depth}
+                      style={{ paddingInlineStart: `${depth * 0.75}rem` }}
+                    >
                       {isReturn ? null : (
                         <TrackGrip
                           dragging={reorder.draggingId === track.id}
@@ -669,6 +703,13 @@ export function ArrangementView({
                         onSelectionChange={timeSelection.onSelectionChange}
                         seekable
                       >
+                        {isGroup ? (
+                          <ArrangedGroupPreview
+                            clips={clips.filter((clip) =>
+                              inside.includes(clip.track)
+                            )}
+                          />
+                        ) : null}
                         {arrangedClips.ghostsOn(track.id).map((original) => (
                           <ArrangedClipGhost
                             clip={original}
