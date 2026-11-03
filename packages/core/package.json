@@ -64,6 +64,10 @@
       "types": "./dist/audio/pitch/index.d.ts",
       "import": "./dist/pitch.js"
     },
+    "./playback": {
+      "types": "./dist/audio/playback/index.d.ts",
+      "import": "./dist/playback.js"
+    },
     "./time": {
       "types": "./dist/audio/time/index.d.ts",
       "import": "./dist/time.js"
@@ -120,7 +124,8 @@
     "dev": "bunx --bun tsup --watch",
     "lint": "biome check --write .",
     "lint:fix": "biome check --write --unsafe .",
-    "test": "bun test"
+    "test": "bun test",
+    "worklet:build": "bun scripts/worklet.ts"
   },
   "devDependencies": {
     "@happy-dom/global-registrator": "^21.0.4",

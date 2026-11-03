@@ -4,6 +4,7 @@
     "index",
     "output",
     "clock-and-time",
+    "playback",
     "synthesis",
     "demo-sounds",
     "input",
