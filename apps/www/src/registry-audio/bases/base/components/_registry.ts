@@ -461,6 +461,7 @@ export const components: RegistryItem[] = [
       "@audio-ui/web-audio",
       "@audio-ui/use-marquee-selection",
       "@audio-ui/use-time-selection",
+      "@audio-ui/use-timeline-cursor",
       "@audio-ui/use-timeline-grid",
       "@audio-ui/use-timeline-zoom",
       "@audio-ui/clip-panel",

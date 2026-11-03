@@ -496,6 +496,10 @@ import { TimelineLocator, TimelineSignature } from "@/components/audio-ui/timeli
 </TimelineLane>;
 ```
 
+`useTimelineMarkers` ships with them and holds the commands: spread its `locator` on `TimelineLocator` and its `signature` on `TimelineSignature`, with `editing` set for the change `editingSignature` names. `addLocator` puts a locator at the cursor, `addSignature` a change, opened to be typed. `TimelineBarMarks`, inside a `TimelineRuler`, numbers the bars through those changes, every few bars at a far zoom, and hatches the ones a change cuts short.
+
+`useTimelineCursor` (`npx shadcn@latest add @audio-ui/use-timeline-cursor`) is what the keys do with the cursor. `handleKey` takes M, which adds a locator, and Alt with the arrows, which jump to the next locator or clip edge, of the picked tracks or of every track. `handleArrowKey` takes the plain arrows, Home and End, for when a key reached the view rather than a control with arrows of its own: Left and Right move the cursor on the grid, Up and Down pick a track. Both say whether the key was theirs.
+
 The Signature strip holds time-signature changes: its + adds one at the cursor, in the signature already there, ready to be typed (such as 7/8). From a change on, bars are counted in its signature: the ruler's numbers, the hatched partial bar a change cuts short, and the position in the transport all follow, through `barsOf` and `barsBeatsWith` from `@audio-ui/core/time`. On a change, Left and Right move it by a grid step, Enter edits it and Delete takes it away. The grid's bar-long divisions and the tempo stay those of the song's start. Which change is being typed is yours to hold (`editing` and `onEditingChange`), so a change just added opens ready to type. `parseSignature("7/8")` reads what is typed.
 
 ### Audio files
@@ -927,6 +931,24 @@ Something placed at `value` on a lane: a bar number on the ruler, a cue, a grid 
 <TypeRow name={"editing, onEditingChange"} type={"boolean, (id | null) => void"}>Whether it is being typed.</TypeRow>
 <TypeRow name={"onMove, onSet, onRemove"} type={"(id, to) => void, (id, beats, unit) => void, (id) => void"}>Moved by `step` with the arrows, typed, deleted.</TypeRow>
 <TypeRow name={"step"} type={"number"}>How far the arrows move a change: the grid.</TypeRow>
+</TypeTable>
+
+### useTimelineMarkers
+
+<TypeTable>
+<TypeRow name={"dispatch, getPosition"} type={"(command) => state, () => number"}>The arrangement's commands, and where the cursor is.</TypeRow>
+<TypeRow name={"onJump, step"} type={"(at) => void, number"}>A marker pressed, and how far the arrows move a change.</TypeRow>
+<TypeRow name={"locator, signature"} type={"props"}>To spread on `TimelineLocator` and `TimelineSignature`.</TypeRow>
+<TypeRow name={"addLocator, addSignature, editingSignature"} type={"() => void, () => void, string | null"}>New markers at the cursor, and the change being typed.</TypeRow>
+</TypeTable>
+
+### useTimelineCursor
+
+<TypeTable>
+<TypeRow name={"clips, tracks, locators, selectedIds, selectedTracks, duration"} type={"as useArrangement returns them"}>What the keys move through.</TypeRow>
+<TypeRow name={"getPosition, step"} type={"() => number, number"}>Where the cursor is, and the grid it moves on.</TypeRow>
+<TypeRow name={"onSeek, onPickTrack, onAddLocator"} type={"(seconds) => void, (id) => void, () => void"}>What the keys ask for.</TypeRow>
+<TypeRow name={"handleKey, handleArrowKey"} type={"(event) => boolean"}>M and Alt with the arrows; the plain arrows, Home and End.</TypeRow>
 </TypeTable>
 
 ### useTimeSelection

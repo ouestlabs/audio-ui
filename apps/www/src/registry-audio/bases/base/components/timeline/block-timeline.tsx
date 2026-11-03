@@ -2,20 +2,14 @@
 
 import { computePeaks, normalizePeaks } from "@audio-ui/core/analysis";
 import {
-  barLabelInterval,
   barsBeatsWith,
-  barsOf,
   type MetronomeRhythm,
   secondsPerBar,
   type Tempo,
 } from "@audio-ui/core/time";
-import { bypassesGrid, snapMove } from "@audio-ui/core/timeline";
+import { bypassesGrid } from "@audio-ui/core/timeline";
 import { EnvelopeIcon } from "@audio-ui/icons/react";
-import {
-  adjacentPoint,
-  type FadeShape,
-  type Timeline as TimelinePrimitive,
-} from "@audio-ui/react";
+import type { FadeShape, Timeline as TimelinePrimitive } from "@audio-ui/react";
 import {
   type ComponentProps,
   type DragEvent,
@@ -82,6 +76,7 @@ import {
   TRACK_HEIGHT_STEP,
 } from "@/registry-audio/bases/base/audio/elements/timeline";
 import {
+  TimelineBarMarks,
   TimelineLocator,
   TimelineSignature,
 } from "@/registry-audio/bases/base/audio/elements/timeline-markers";
@@ -111,11 +106,13 @@ import { useArrangementEngine } from "@/registry-audio/bases/base/hooks/use-arra
 import { useAudioLevels } from "@/registry-audio/bases/base/hooks/use-audio-levels";
 import { useMarquee } from "@/registry-audio/bases/base/hooks/use-marquee-selection";
 import { useTimeSelection } from "@/registry-audio/bases/base/hooks/use-time-selection";
+import { useTimelineCursor } from "@/registry-audio/bases/base/hooks/use-timeline-cursor";
 import {
   GRID_DIVISION_OPTIONS,
   GRID_KEYS,
   useTimelineGrid,
 } from "@/registry-audio/bases/base/hooks/use-timeline-grid";
+import { useTimelineMarkers } from "@/registry-audio/bases/base/hooks/use-timeline-markers";
 import { useTimelineZoom } from "@/registry-audio/bases/base/hooks/use-timeline-zoom";
 import { useTrackAutomation } from "@/registry-audio/bases/base/hooks/use-track-automation";
 import { useTrackReorder } from "@/registry-audio/bases/base/hooks/use-track-reorder";
@@ -744,7 +741,6 @@ function useEngineTransport({
  * tracks take the screen.
  */
 export default function BlockTimeline() {
-  const [editingSignature, setEditingSignature] = useState<string | null>(null);
   const {
     dispatch,
     doc,
@@ -1105,11 +1101,28 @@ export default function BlockTimeline() {
     },
     [clearSelection, multi, pressLane, selectTrack]
   );
-  const addLocator = useCallback(
-    () => dispatch({ type: "add-locator", at: clock.getSnapshot() }),
-    [clock, dispatch]
-  );
   const jumpToLocator = useCallback((at: number) => seek(at), [seek]);
+  // The locators and the time signatures, with the commands behind them.
+  const markers = useTimelineMarkers({
+    dispatch,
+    getPosition,
+    onJump: jumpToLocator,
+    step: snapStep,
+  });
+  // M, the arrows, Home and End: what the keys do with the cursor.
+  const cursorKeys = useTimelineCursor({
+    clips,
+    duration,
+    getPosition,
+    locators,
+    onAddLocator: markers.addLocator,
+    onPickTrack: selectTrack,
+    onSeek: seek,
+    selectedIds,
+    selectedTracks,
+    step: gridSeconds,
+    tracks,
+  });
 
   /** Puts the loop around the selected clip, or around the clips of the selected track. */
   const loopSelection = useCallback(() => {
@@ -1134,46 +1147,6 @@ export default function BlockTimeline() {
     });
   }, [clips, dispatch, selectedIds, selectedTracks]);
 
-  /** M adds a locator, Alt + arrows jump to the next locator or clip edge; returns whether the key was one of these. */
-  const handleLocatorKey = useCallback(
-    (event: KeyboardEvent<HTMLDivElement>) => {
-      if (
-        event.key.toLowerCase() === "m" &&
-        !(event.metaKey || event.ctrlKey || event.altKey)
-      ) {
-        event.preventDefault();
-        addLocator();
-        return true;
-      }
-      const direction = { ArrowLeft: -1, ArrowRight: 1 }[event.key];
-      if (!(event.altKey && direction)) {
-        return false;
-      }
-      // The locators, and the edges of the clips on the picked tracks (on every track when none is picked).
-      const edges = clips
-        .filter(
-          (clip) =>
-            selectedTracks.length === 0 || selectedTracks.includes(clip.track)
-        )
-        .flatMap((clip) => [
-          clip.value.start,
-          clip.value.start + clip.value.length,
-        ]);
-      const target = adjacentPoint(
-        [...locators.map((locator) => locator.at), ...edges],
-        clock.getSnapshot(),
-        direction === 1 ? 1 : -1
-      );
-      if (target === null) {
-        return false;
-      }
-      event.preventDefault();
-      event.stopPropagation();
-      seek(target);
-      return true;
-    },
-    [addLocator, clips, clock, locators, seek, selectedTracks]
-  );
   // The copies are there to be seen: bring them into view once they are drawn.
   const duplicateAndShow = useCallback(() => {
     const copies = duplicateSelection();
@@ -1503,7 +1476,7 @@ export default function BlockTimeline() {
       timeSelection.handleKey(event) ||
       handleClipKey(event) ||
       handleTrackKey(event) ||
-      handleLocatorKey(event) ||
+      cursorKeys.handleKey(event) ||
       handleAutomationKey(event)
     ) {
       return;
@@ -1526,16 +1499,6 @@ export default function BlockTimeline() {
   };
 
   // The grid the lanes draw is the grid everything snaps to. Snap off draws no lines and snaps nothing: a step of 0 is no grid.
-  const labelEvery = barLabelInterval(zoom, tempo);
-  // Whole bars, counted rather than divided, so no tempo leaves a label like 6.9999.
-  const labelBars = Math.max(1, Math.round(labelEvery / bar));
-  // The bars through the signature changes: the ruler numbers every few, and hatches the ones a change cuts short.
-  const songBars = useMemo(
-    () => barsOf(tempo, signatures, duration),
-    [duration, signatures, tempo]
-  );
-  const labels = songBars.filter((_, index) => index % labelBars === 0);
-
   // A file dragged over an audio track marks it; let go there, it becomes a clip at the grid line under the
   // pointer (anywhere with Cmd/Ctrl), named and as long as the file, and the files after it follow it on the track.
   const [fileTrack, setFileTrack] = useState<string | null>(null);
@@ -1641,15 +1604,6 @@ export default function BlockTimeline() {
     [addFiles, audioLaneUnder, duration, snapStep]
   );
 
-  /** Adds a signature change at the cursor, in the signature already in force there, and opens it to be typed. */
-  const addSignature = useCallback(() => {
-    const at = clock.getSnapshot();
-    const next = dispatch({ type: "add-signature", at });
-    const added = next.doc.signatures.find((change) => change.at === at);
-    if (added) {
-      setEditingSignature(added.id);
-    }
-  }, [clock, dispatch]);
   // What the time strips report, as the commands that change the arrangement.
   const changeTempo = useCallback(
     (next: Tempo) => dispatch({ type: "set-tempo", tempo: next }),
@@ -1664,29 +1618,6 @@ export default function BlockTimeline() {
       dispatch({ type: "change-loop", range }),
     [dispatch]
   );
-  const removeLocator = useCallback(
-    (at: number) => dispatch({ type: "remove-locator", at }),
-    [dispatch]
-  );
-  const renameLocator = useCallback(
-    (at: number, name: string) =>
-      dispatch({ type: "rename-locator", at, name }),
-    [dispatch]
-  );
-  const moveSignature = useCallback(
-    (id: string, to: number) => dispatch({ type: "move-signature", id, to }),
-    [dispatch]
-  );
-  const removeSignature = useCallback(
-    (id: string) => dispatch({ type: "remove-signature", id }),
-    [dispatch]
-  );
-  const setSignature = useCallback(
-    (id: string, beatsPerBar: number, beatUnit: number) =>
-      dispatch({ type: "set-signature", id, beatsPerBar, beatUnit }),
-    [dispatch]
-  );
-
   // A dragged clip or loop is pulled onto the edges of the other clips, the locators and the loop.
   const snapPoints = useMemo(() => {
     if (!snap) {
@@ -1728,58 +1659,6 @@ export default function BlockTimeline() {
     );
   }, [clips, loop, selectedIds, selectedTime, selectedTracks, zoomTo]);
 
-  /** Up and Down pick the track above or below the one picked, or the first or last. */
-  const pickNextTrack = useCallback(
-    (direction: 1 | -1) => {
-      const current =
-        selectedTracks[0] ??
-        clips.find((clip) => selectedIds.includes(clip.id))?.track;
-      const index = tracks.findIndex((track) => track.id === current);
-      const next =
-        index === -1
-          ? tracks.at(direction === 1 ? 0 : -1)
-          : tracks[Math.min(tracks.length - 1, Math.max(0, index + direction))];
-      if (next) {
-        selectTrack(next.id);
-      }
-    },
-    [clips, selectTrack, selectedIds, selectedTracks, tracks]
-  );
-
-  /** On the panel itself: arrows move the cursor on the grid, Home and End go to the ends of the arrangement. */
-  const handleCursorKey = useCallback(
-    (event: KeyboardEvent<HTMLDivElement>) => {
-      if (event.altKey || event.metaKey || event.ctrlKey || event.shiftKey) {
-        return false;
-      }
-      const at = clock.getSnapshot();
-      const lastEnd = Math.max(
-        0,
-        ...clips.map((clip) => clip.value.start + clip.value.length)
-      );
-      const step = gridSeconds;
-      const targets: Record<string, number> = {
-        ArrowLeft: snapMove(at - step, at, { offset: 0, step }),
-        ArrowRight: snapMove(at + step, at, { offset: 0, step }),
-        End: lastEnd,
-        Home: 0,
-      };
-      const target = targets[event.key];
-      if (target !== undefined) {
-        event.preventDefault();
-        seek(Math.min(duration, Math.max(0, target)));
-        return true;
-      }
-      if (event.key === "ArrowUp" || event.key === "ArrowDown") {
-        event.preventDefault();
-        pickNextTrack(event.key === "ArrowDown" ? 1 : -1);
-        return true;
-      }
-      return false;
-    },
-    [clips, clock, duration, gridSeconds, pickNextTrack, seek]
-  );
-
   /** The navigation keys: the grid with Cmd/Ctrl + 1 to 5, the zoom with +, -, Z and X, and the cursor from the panel. */
   const handleNavigationKey = useCallback(
     (event: KeyboardEvent<HTMLDivElement>) => {
@@ -1810,9 +1689,17 @@ export default function BlockTimeline() {
         return true;
       }
       // Anywhere else in the panel, a clip's or the loop's own input takes its arrows.
-      return event.target === event.currentTarget && handleCursorKey(event);
+      return (
+        event.target === event.currentTarget && cursorKeys.handleArrowKey(event)
+      );
     },
-    [grid.change, handleCursorKey, zoomAroundCursor, zoomBack, zoomToSelection]
+    [
+      cursorKeys.handleArrowKey,
+      grid.change,
+      zoomAroundCursor,
+      zoomBack,
+      zoomToSelection,
+    ]
   );
   const handlePanelKey = (event: KeyboardEvent<HTMLDivElement>) => {
     if (!handleNavigationKey(event)) {
@@ -2125,25 +2012,12 @@ export default function BlockTimeline() {
                   className="border-b-0"
                   getAriaValueText={describe}
                 >
-                  {songBars
-                    .filter((item) => item.partial)
-                    .map((item) => (
-                      <div
-                        aria-hidden="true"
-                        className="pointer-events-none absolute inset-y-0 bg-[repeating-linear-gradient(135deg,var(--muted-foreground)_0_1px,transparent_1px_6px)] opacity-30"
-                        data-slot="timeline-partial-bar"
-                        key={item.start}
-                        style={{
-                          left: `calc(var(--timeline-unit) * ${item.start})`,
-                          width: `calc(var(--timeline-unit) * ${item.length})`,
-                        }}
-                      />
-                    ))}
-                  {labels.map((item) => (
-                    <TimelineMark key={item.start} value={item.start}>
-                      {item.number}
-                    </TimelineMark>
-                  ))}
+                  <TimelineBarMarks
+                    duration={duration}
+                    signatures={signatures}
+                    tempo={tempo}
+                    zoom={zoom}
+                  />
                   <TimelinePlayhead />
                 </TimelineRuler>
               </Row>
@@ -2158,12 +2032,7 @@ export default function BlockTimeline() {
                 <TimelineLane className="h-6 border-b-0">
                   {locators.map((locator) => (
                     <TimelineMark key={locator.at} value={locator.at}>
-                      <TimelineLocator
-                        locator={locator}
-                        onJump={jumpToLocator}
-                        onRemove={removeLocator}
-                        onRename={renameLocator}
-                      />
+                      <TimelineLocator locator={locator} {...markers.locator} />
                     </TimelineMark>
                   ))}
                 </TimelineLane>
@@ -2176,7 +2045,7 @@ export default function BlockTimeline() {
                     <Button
                       aria-label="Add a time signature at the cursor"
                       className="size-5"
-                      onClick={addSignature}
+                      onClick={markers.addSignature}
                       size="icon"
                       title="Add a time signature at the cursor"
                       variant="ghost"
@@ -2199,13 +2068,8 @@ export default function BlockTimeline() {
                     <TimelineMark key={change.id} value={change.at}>
                       <TimelineSignature
                         change={change}
-                        editing={editingSignature === change.id}
-                        onEditingChange={setEditingSignature}
-                        onJump={jumpToLocator}
-                        onMove={moveSignature}
-                        onRemove={removeSignature}
-                        onSet={setSignature}
-                        step={snapStep}
+                        editing={markers.editingSignature === change.id}
+                        {...markers.signature}
                       />
                     </TimelineMark>
                   ))}

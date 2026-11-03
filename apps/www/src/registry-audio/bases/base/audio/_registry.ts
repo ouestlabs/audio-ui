@@ -93,15 +93,23 @@ export const audio: RegistryItem[] = [
   {
     dependencies: ["@audio-ui/core"],
     description:
-      "Locators and time-signature changes on a timeline's lane: press one to jump there, rename or retype it in place, move a signature with the arrows, delete either.",
+      "Locators and time-signature changes on a timeline's lane: press one to jump there, rename or retype it in place, move a signature with the arrows, delete either. With the bars of a ruler through those changes, and a hook for the commands behind them.",
     files: [
       {
         path: "audio/elements/timeline-markers.tsx",
         type: "registry:ui",
       },
+      {
+        path: "hooks/use-timeline-markers.ts",
+        type: "registry:hook",
+      },
     ],
     name: "timeline-markers",
-    registryDependencies: ["@shadcn/context-menu"],
+    registryDependencies: [
+      "@audio-ui/timeline",
+      "@audio-ui/use-arrangement",
+      "@shadcn/context-menu",
+    ],
     type: "registry:ui",
   },
   {
@@ -1144,6 +1152,7 @@ export const audio: RegistryItem[] = [
       "@audio-ui/use-timeline-zoom",
       "@audio-ui/use-timeline-grid",
       "@audio-ui/use-time-selection",
+      "@audio-ui/use-timeline-cursor",
     ],
     type: "registry:ui",
   },

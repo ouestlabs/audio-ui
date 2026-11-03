@@ -1,10 +1,18 @@
 "use client";
 
-import { isSignature, type SignatureChange } from "@audio-ui/core/time";
+import {
+  barLabelInterval,
+  barsOf,
+  isSignature,
+  type SignatureChange,
+  secondsPerBar,
+  type Tempo,
+} from "@audio-ui/core/time";
 import {
   type KeyboardEvent,
   type PointerEvent,
   useCallback,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -15,6 +23,7 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from "@/registry/bases/base/ui/context-menu";
+import { TimelineMark } from "@/registry-audio/bases/base/audio/elements/timeline";
 
 /** A named point of the arrangement, in its time. */
 export interface Locator {
@@ -256,4 +265,58 @@ function TimelineSignature({
   );
 }
 
-export { TimelineLocator, TimelineSignature };
+/**
+ * The bars of a ruler, through the time-signature changes: their numbers, every
+ * few bars so they never crowd at this zoom, and the bars a change cuts short,
+ * hatched. Put it inside a `TimelineRuler`.
+ */
+function TimelineBarMarks({
+  duration,
+  signatures,
+  tempo,
+  zoom,
+}: {
+  /** The arrangement's length, in seconds. */
+  duration: number;
+  signatures: readonly SignatureChange[];
+  tempo: Tempo;
+  /** The timeline's zoom, in px per second. */
+  zoom: number;
+}) {
+  const bars = useMemo(
+    () => barsOf(tempo, signatures, duration),
+    [duration, signatures, tempo]
+  );
+  // Whole bars, counted rather than divided, so no tempo leaves a label like 6.9999.
+  const every = Math.max(
+    1,
+    Math.round(barLabelInterval(zoom, tempo) / secondsPerBar(tempo))
+  );
+  return (
+    <>
+      {bars
+        .filter((item) => item.partial)
+        .map((item) => (
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-y-0 bg-[repeating-linear-gradient(135deg,var(--muted-foreground)_0_1px,transparent_1px_6px)] opacity-30"
+            data-slot="timeline-partial-bar"
+            key={item.start}
+            style={{
+              left: `calc(var(--timeline-unit) * ${item.start})`,
+              width: `calc(var(--timeline-unit) * ${item.length})`,
+            }}
+          />
+        ))}
+      {bars
+        .filter((_, index) => index % every === 0)
+        .map((item) => (
+          <TimelineMark key={item.start} value={item.start}>
+            {item.number}
+          </TimelineMark>
+        ))}
+    </>
+  );
+}
+
+export { TimelineBarMarks, TimelineLocator, TimelineSignature };

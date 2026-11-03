@@ -141,6 +141,21 @@ export const hooks: RegistryItem[] = [
   },
   {
     categories: ["timeline"],
+    dependencies: ["@audio-ui/core", "@audio-ui/react"],
+    description:
+      "What the keyboard does with an arrangement's cursor: the arrows on the grid, Home and End, Up and Down to pick a track, Alt and the arrows to jump between locators and clip edges, M to add a locator.",
+    files: [
+      {
+        path: "hooks/use-timeline-cursor.ts",
+        type: "registry:hook",
+      },
+    ],
+    name: "use-timeline-cursor",
+    registryDependencies: ["@audio-ui/arrangement"],
+    type: "registry:hook",
+  },
+  {
+    categories: ["timeline"],
     dependencies: ["@audio-ui/core"],
     description:
       "The grid of an arrangement's timeline: adaptive to the zoom or a fixed division, straight or triplet, snapping or not, its name for a menu button, and the changes Cmd/Ctrl + 1 to 5 make.",
