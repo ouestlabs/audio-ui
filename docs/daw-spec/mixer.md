@@ -47,7 +47,8 @@ Test: packages/core/src/audio/playback/mixer.test.ts "MIX-010"
 
 ### MIX-011 Meters
 Each track and the main track show their peak and their RMS level, the loudest peak held, and a mark when a frame went over 0 dBFS, until it is clicked.
-Test: apps/daw/test/mixer.test.ts "MIX-011"
+Status: partial: the main track has its loudest sample in dB under its fader, red over 0 dBFS until clicked, and a scale beside its meter; the tracks have their meters only.
+Test: apps/daw/test/mixer.test.ts "MIX-011"; apps/daw/test/browser/run.ts "MIX-011"
 
 ### MIX-012 Delay compensation
 Whatever the latency its devices declare, every path (each track, each send, each return) reaches the main track lined up to the frame. A bypassed device keeps the latency its settings declare, so bypassing it moves nothing.
@@ -62,5 +63,5 @@ With several tracks selected, moving the volume, the pan, the activator or the s
 Test: apps/daw/test/mixer.test.ts "MIX-014"
 
 ### MIX-015 The mixer and the detail view take turns
-Under the arrangement, the mixer and the detail view (the clip or the devices) are shown one at a time: opening one closes the other, from the bar, the keys, or a device or a clip that opens the detail view. Both at once would leave the tracks no room. The line between the arrangement and the one shown is dragged, or moved with the arrow keys, to share the height, and each comes back at the height it was given. The mixer's channels fill that height, every fader as long as the others. A choice of this workstation: the reference draws its mixer in another view.
+Under the arrangement, one panel shows the clip, the devices or the mixer, one at a time, chosen by the tabs of its bar (the clip view's own strip carries them while it shows a clip), by the keys, or by a device or a clip that opens it. Both at once would leave the tracks no room. Like the library on the left, the panel is always there: folded, it is its bar alone, and the whole bar opens it. The line between the arrangement and the panel is dragged, or moved with the arrow keys, to share the height, from the least each view needs to show all of it to 70 %; dragged under that least, it folds the panel. Each view comes back at the height it was given. The mixer's channels fill that height, every fader as long as the others and never under a fader's own least. A choice of this workstation: the reference draws its mixer in another view.
 Test: apps/daw/test/browser/run.ts "MIX-015"

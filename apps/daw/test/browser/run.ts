@@ -16,6 +16,7 @@ const EXPORT = /Export WAV/;
 const DELAY = /Delay/;
 const POCKET_SYNTH = /Pocket Synth/;
 const DEVICES = /^Devices/;
+const MAIN_PEAK = /^Main peak/;
 
 /** A WAV file of `seconds` of a chord, made in the page and dropped on `selector`. */
 async function dropChord(
@@ -379,6 +380,24 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         "dragged down, the devices still show"
       );
     },
+  "MIX-011: the main track holds its loudest peak until it is clicked": async (
+    browser
+  ) => {
+    const page = await open(browser);
+    await dropChord(page, "[data-add-track]", "Chord take");
+    await page.waitForSelector('[aria-label="Chord take"][data-track-id]');
+    await showMixer(page);
+    const peak = page.getByRole("button", { name: MAIN_PEAK });
+    assert((await peak.innerText()) === "-∞", "the peak starts at -∞");
+    await page.keyboard.press("Home");
+    await page.keyboard.press("Space");
+    await page.waitForTimeout(1000);
+    await page.keyboard.press("Space");
+    const held = await peak.innerText();
+    assert(held !== "-∞" && Number(held) > -40, `the peak held ${held}`);
+    await peak.click();
+    assert((await peak.innerText()) === "-∞", "a click did not clear the peak");
+  },
   "PRJ-001: the project comes back when the page is loaded again": async (
     browser
   ) => {

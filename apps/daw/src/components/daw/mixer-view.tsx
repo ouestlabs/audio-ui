@@ -1,6 +1,6 @@
-import { dbToGain, gainToDb } from "@audio-ui/core/analysis";
-import type { Meter as MeterPrimitive } from "@audio-ui/react";
-import { useCallback } from "react";
+import { dbToGain, gainToDb, peakDb } from "@audio-ui/core/analysis";
+import type { Meter as MeterPrimitive, Source } from "@audio-ui/react";
+import { useCallback, useEffect, useRef } from "react";
 import { Fader } from "@/components/audio-ui/fader";
 import { Knob } from "@/components/audio-ui/knob";
 import { Meter } from "@/components/audio-ui/meter";
@@ -41,22 +41,83 @@ const formatPan = (pan: number) => {
 const formatSend = (level: number) =>
   level <= 0 ? "-∞ dB" : `${gainToDb(level).toFixed(1)} dB`;
 
+/** The main track's meter is read to the dB: a scale beside it. */
+const MAIN_MARKS = [0, -6, -12, -24, -48];
+
 function StripMeter({
-  analysers,
   label,
+  levels,
+  marks,
 }: {
-  analysers: readonly AnalyserNode[] | null;
   label: string;
+  levels: Source<MeterPrimitive.Root.Frame>;
+  marks?: readonly number[];
 }) {
-  const levels = useAudioLevels(analysers ?? NO_ANALYSERS);
   return (
     <Meter
       aria-label={`${label} level`}
       className="data-[orientation=vertical]:h-full"
+      marks={marks}
       size="sm"
-      source={analysers ? levels : SILENT_SOURCE}
+      source={levels}
       warnThreshold={-12}
     />
+  );
+}
+
+/**
+ * The loudest sample the main track has played since it was last cleared, in
+ * dB (MIX-011), red once one went over 0 dBFS; a click clears it. Read from
+ * the channel's analysers each frame, and written straight into the page when
+ * it rises, so it costs no render.
+ */
+function PeakReadout({ analysers }: { analysers: readonly AnalyserNode[] }) {
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const held = useRef(Number.NEGATIVE_INFINITY);
+  const paint = useCallback(() => {
+    const button = buttonRef.current;
+    if (!button) {
+      return;
+    }
+    const text = formatDb(held.current);
+    button.textContent = text;
+    button.ariaLabel = `Main peak ${text} dB, click to clear`;
+    button.toggleAttribute("data-over", held.current >= 0);
+  }, []);
+  useEffect(() => {
+    const read = analysers.map((analyser) => ({
+      analyser,
+      buffer: new Float32Array(analyser.fftSize),
+    }));
+    let frame = 0;
+    const tick = () => {
+      for (const { analyser, buffer } of read) {
+        analyser.getFloatTimeDomainData(buffer);
+        const loudest = peakDb(buffer);
+        if (loudest > held.current) {
+          held.current = loudest;
+          paint();
+        }
+      }
+      frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [analysers, paint]);
+  const clear = useCallback(() => {
+    held.current = Number.NEGATIVE_INFINITY;
+    paint();
+  }, [paint]);
+  return (
+    <button
+      aria-label="Main peak -∞ dB, click to clear"
+      className="row-start-6 h-7 w-full rounded-md border text-muted-foreground text-xs tabular-nums outline-none transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring data-over:border-destructive data-over:bg-destructive/10 data-over:text-destructive"
+      onClick={clear}
+      ref={buttonRef}
+      type="button"
+    >
+      -∞
+    </button>
   );
 }
 
@@ -143,11 +204,15 @@ function Strip({
   );
   const select = useCallback(() => onSelect(track.id), [onSelect, track.id]);
   const db = decibels(mix.gain);
+  const levels = useAudioLevels(analysers ?? NO_ANALYSERS);
+  const source = analysers ? levels : SILENT_SOURCE;
   return (
     <section
       aria-label={track.name}
       className={cn(
         "row-span-6 grid w-28 grid-rows-subgrid justify-items-center rounded-lg border bg-background p-2",
+        // The main track is wider: its meter has a scale.
+        main && "w-36",
         selected && "border-primary"
       )}
       onPointerDown={select}
@@ -200,7 +265,11 @@ function Strip({
           value={db}
           valueLabel="hidden"
         />
-        <StripMeter analysers={analysers} label={track.name} />
+        <StripMeter
+          label={track.name}
+          levels={source}
+          marks={main ? MAIN_MARKS : undefined}
+        />
       </div>
       <span
         aria-hidden="true"
@@ -208,6 +277,7 @@ function Strip({
       >
         {formatDb(db)}
       </span>
+      {main ? <PeakReadout analysers={analysers ?? NO_ANALYSERS} /> : null}
       {main ? null : (
         <div className="row-start-6 flex w-full gap-1">
           <Toggle
