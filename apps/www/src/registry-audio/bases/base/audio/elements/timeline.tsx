@@ -421,36 +421,40 @@ export const COMPACT_TRACK_HEIGHT = 79;
 export const MAX_TRACK_HEIGHT = 320;
 export const TRACK_HEIGHT_STEP = 8;
 
-/** The colors a track can take: the theme's chart tokens, written out for the stylesheet to find. */
+/**
+ * The colors a track can take: the theme's chart tokens, written out for the
+ * stylesheet to find. A project whose theme has none gets the design system's
+ * own, so its tracks keep apart.
+ */
 export const TRACK_COLORS = [
   {
-    dot: "bg-chart-1",
-    clip: "[--primary:var(--chart-1)]",
-    edge: "border-s-chart-1",
+    dot: "bg-[var(--chart-1,oklch(0.87_0_0))]",
+    clip: "[--primary:var(--chart-1,oklch(0.87_0_0))]",
+    edge: "border-s-[var(--chart-1,oklch(0.87_0_0))]",
     name: "Color 1",
   },
   {
-    dot: "bg-chart-2",
-    clip: "[--primary:var(--chart-2)]",
-    edge: "border-s-chart-2",
+    dot: "bg-[var(--chart-2,oklch(0.556_0_0))]",
+    clip: "[--primary:var(--chart-2,oklch(0.556_0_0))]",
+    edge: "border-s-[var(--chart-2,oklch(0.556_0_0))]",
     name: "Color 2",
   },
   {
-    dot: "bg-chart-3",
-    clip: "[--primary:var(--chart-3)]",
-    edge: "border-s-chart-3",
+    dot: "bg-[var(--chart-3,oklch(0.439_0_0))]",
+    clip: "[--primary:var(--chart-3,oklch(0.439_0_0))]",
+    edge: "border-s-[var(--chart-3,oklch(0.439_0_0))]",
     name: "Color 3",
   },
   {
-    dot: "bg-chart-4",
-    clip: "[--primary:var(--chart-4)]",
-    edge: "border-s-chart-4",
+    dot: "bg-[var(--chart-4,oklch(0.371_0_0))]",
+    clip: "[--primary:var(--chart-4,oklch(0.371_0_0))]",
+    edge: "border-s-[var(--chart-4,oklch(0.371_0_0))]",
     name: "Color 4",
   },
   {
-    dot: "bg-chart-5",
-    clip: "[--primary:var(--chart-5)]",
-    edge: "border-s-chart-5",
+    dot: "bg-[var(--chart-5,oklch(0.269_0_0))]",
+    clip: "[--primary:var(--chart-5,oklch(0.269_0_0))]",
+    edge: "border-s-[var(--chart-5,oklch(0.269_0_0))]",
     name: "Color 5",
   },
 ] as const;
