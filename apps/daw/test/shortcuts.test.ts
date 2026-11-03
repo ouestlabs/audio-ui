@@ -64,6 +64,29 @@ describe("the keyboard", () => {
     ).toBe("mixer");
   });
 
+  test("KEY-016: Cmd+1 to 5 change the grid, by the digit's place on any layout", () => {
+    on("MacIntel");
+    expect(matchShortcut(press("1", { code: "Digit1", metaKey: true }))).toBe(
+      "grid-finer"
+    );
+    // AZERTY: the key that sits where 5 is gives "(" without Shift.
+    expect(matchShortcut(press("(", { code: "Digit5", metaKey: true }))).toBe(
+      "grid-fixed"
+    );
+  });
+
+  test("KEY-017 and KEY-018: Cmd+= and Cmd+- zoom, Z zooms onto the selection, X back", () => {
+    on("MacIntel");
+    expect(matchShortcut(press("=", { code: "Equal", metaKey: true }))).toBe(
+      "zoom-in"
+    );
+    expect(matchShortcut(press("-", { code: "Minus", metaKey: true }))).toBe(
+      "zoom-out"
+    );
+    expect(matchShortcut(press("z", { code: "KeyZ" }))).toBe("zoom-selection");
+    expect(matchShortcut(press("x", { code: "KeyX" }))).toBe("zoom-back");
+  });
+
   test("KEY-021: Cmd+Option+B shows or folds the library, Ctrl+Alt+B off a Mac", () => {
     on("MacIntel");
     expect(

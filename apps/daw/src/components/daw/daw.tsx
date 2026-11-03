@@ -1,5 +1,12 @@
 import { secondsPerBar, type Tempo } from "@audio-ui/core/time";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { toast } from "sonner";
 import { ArrangementView } from "@/components/daw/arrangement-view";
 import { ClipEditor } from "@/components/daw/clip-editor";
@@ -17,13 +24,15 @@ import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useArrangement } from "@/hooks/use-arrangement";
 import { useArrangementEngine } from "@/hooks/use-arrangement-engine";
+import { useTimelineGrid } from "@/hooks/use-timeline-grid";
+import { useTimelineZoom } from "@/hooks/use-timeline-zoom";
 import { renderArrangement } from "@/lib/arrangement-engine";
 import type { ArrangementDoc } from "@/lib/arrangement-state";
 import { addDeviceCommand, takesDevice } from "@/lib/daw/devices";
 import { decodeFiles, dropCommands, NEW_TRACK } from "@/lib/daw/drop";
 import { TRACK_COLOR_COUNT } from "@/lib/daw/project";
 import { freshMidiClipId, type Recording } from "@/lib/daw/recordings";
-import { matchShortcut } from "@/lib/daw/shortcuts";
+import { matchShortcut, type ShortcutCommand } from "@/lib/daw/shortcuts";
 import { canStore, saveProject, saveRecording } from "@/lib/daw/storage";
 import { libraryDevice } from "@/lib/device-library";
 import { downloadWavFile } from "@/lib/wav-file";
@@ -226,6 +235,41 @@ export function Daw({ initial, initialRecordings }: DawProps) {
     },
     [engine, playFrom]
   );
+  // The arrangement's zoom and grid, which the keys change too (KEY-016 to KEY-018).
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const view = useTimelineZoom({ duration: doc.duration, viewportRef });
+  const grid = useTimelineGrid({ tempo: doc.tempo, zoom: view.zoom });
+  // A change of tempo, or the undo of one, changes the bar: the start marker and the zoom keep their places in it.
+  const bar = secondsPerBar(doc.tempo);
+  const lastBar = useRef(bar);
+  const { rescale } = view;
+  const { playing: running, position } = engine;
+  useLayoutEffect(() => {
+    if (lastBar.current === bar) {
+      return;
+    }
+    const ratio = bar / lastBar.current;
+    lastBar.current = bar;
+    setCursor((at) => at * ratio);
+    if (!running) {
+      position.set(position.getSnapshot() * ratio);
+    }
+    rescale(ratio);
+  }, [bar, position, rescale, running]);
+  /** Z: the selected clips fill the view, or the loop when none is. */
+  const zoomToSelection = useCallback(() => {
+    const chosen = doc.clips.filter((clip) =>
+      arrangement.selectedIds.includes(clip.id)
+    );
+    if (chosen.length === 0) {
+      view.zoomTo(...doc.loop.range);
+      return;
+    }
+    view.zoomTo(
+      Math.min(...chosen.map((clip) => clip.value.start)),
+      Math.max(...chosen.map((clip) => clip.value.start + clip.value.length))
+    );
+  }, [arrangement.selectedIds, doc.clips, doc.loop.range, view]);
   const setLooping = useCallback(
     (on: boolean) => dispatch({ loop: { on }, type: "set-loop" }),
     [dispatch]
@@ -312,9 +356,21 @@ export function Daw({ initial, initialRecordings }: DawProps) {
     }
   }, [doc, sources]);
 
+  // The view's keys: the grid, and the zoom around the playhead, onto the selection and back.
+  const viewKeys: Partial<Record<ShortcutCommand, () => void>> = {
+    "grid-finer": () => grid.change("finer"),
+    "grid-fixed": () => grid.change("fixed"),
+    "grid-snap": () => grid.change("snap"),
+    "grid-triplet": () => grid.change("triplet"),
+    "grid-wider": () => grid.change("wider"),
+    "zoom-back": view.zoomBack,
+    "zoom-in": () => view.zoomAround(position.getSnapshot(), 2),
+    "zoom-out": () => view.zoomAround(position.getSnapshot(), 0.5),
+    "zoom-selection": zoomToSelection,
+  };
   // The keyboard (KEY-001 and on): one listener, before the focused control takes the key.
-  const keys = useRef({ cursor, playPause, selectedTrack });
-  keys.current = { cursor, playPause, selectedTrack };
+  const keys = useRef({ cursor, playPause, selectedTrack, viewKeys });
+  keys.current = { cursor, playPause, selectedTrack, viewKeys };
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (typing(event.target)) {
@@ -329,6 +385,7 @@ export function Daw({ initial, initialRecordings }: DawProps) {
         cursor: at,
         playPause: toggle,
         selectedTrack: picked,
+        viewKeys: forView,
       } = keys.current;
       switch (command) {
         case "play-stop":
@@ -397,6 +454,7 @@ export function Daw({ initial, initialRecordings }: DawProps) {
           exportWav();
           break;
         default:
+          forView[command]?.();
           break;
       }
     };
@@ -497,6 +555,9 @@ export function Daw({ initial, initialRecordings }: DawProps) {
                   onSelectTrack={pickTrack}
                   recordings={recordings}
                   selectedTrack={selectedTrack}
+                  timelineGrid={grid}
+                  timelineZoom={view}
+                  viewportRef={viewportRef}
                 />
               </ResizablePanel>
               {panel && !rolledUp ? (

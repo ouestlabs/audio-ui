@@ -460,6 +460,8 @@ export const components: RegistryItem[] = [
       "@audio-ui/pocket-synth-device",
       "@audio-ui/web-audio",
       "@audio-ui/use-marquee-selection",
+      "@audio-ui/use-timeline-grid",
+      "@audio-ui/use-timeline-zoom",
       "@audio-ui/clip-panel",
       "@audio-ui/midi-clip-panel",
       "@audio-ui/arranged-clip",

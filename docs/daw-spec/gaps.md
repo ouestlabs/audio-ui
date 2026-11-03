@@ -22,6 +22,8 @@ Status: `arrangement-engine` plays notes through each MIDI track's instrument de
 
 ### G-004 The arrangement view cannot be installed
 It lives in a 2,805-line example block, which the CLI writes to `components/examples/`. A project can only copy it whole. The view's parts (rows of tracks, file drops, the keyboard commands, the clip dock) need to be items of their own, which the block composes.
+Fix (decided): hooks and parts by concern, which the block composes and the DAW installs: grid and zoom, tracks and automation, selections, markers and the cursor.
+Status: grid and zoom done: `use-timeline-zoom` (fitted beside the headers, zoom around a time, onto a stretch, back) and `use-timeline-grid` (adaptive or fixed, triplet, snap, Cmd+1 to 5); the block and the DAW both run on them.
 
 ### G-005 The arrangement document has no mixer
 `arrangement-state` holds audio and MIDI tracks with a gain, a pan, a mute and a solo: no device chain, no send, no output, no return track, no main track. Breaks MIX-001 to MIX-009, DEV-001 to DEV-004.

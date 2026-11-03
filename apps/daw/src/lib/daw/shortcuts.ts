@@ -12,6 +12,11 @@ export type ShortcutCommand =
   | "detail"
   | "duplicate"
   | "export"
+  | "grid-finer"
+  | "grid-fixed"
+  | "grid-snap"
+  | "grid-triplet"
+  | "grid-wider"
   | "library"
   | "loop"
   | "midi-track"
@@ -23,7 +28,11 @@ export type ShortcutCommand =
   | "solo"
   | "split"
   | "to-start"
-  | "undo";
+  | "undo"
+  | "zoom-back"
+  | "zoom-in"
+  | "zoom-out"
+  | "zoom-selection";
 
 interface Shortcut {
   alt?: boolean;
@@ -61,18 +70,32 @@ export const SHORTCUTS: readonly Shortcut[] = [
   { alt: true, command: "library", key: "b", mod: true },
   { command: "detail", key: "tab", shift: true },
   { command: "export", key: "r", mod: true, shift: true },
+  { command: "grid-finer", key: "1", mod: true },
+  { command: "grid-wider", key: "2", mod: true },
+  { command: "grid-triplet", key: "3", mod: true },
+  { command: "grid-snap", key: "4", mod: true },
+  { command: "grid-fixed", key: "5", mod: true },
+  { command: "zoom-in", key: "=", mod: true },
+  { command: "zoom-in", key: "+", mod: true },
+  { command: "zoom-out", key: "-", mod: true },
+  { command: "zoom-selection", key: "z" },
+  { command: "zoom-back", key: "x" },
 ];
 
 const APPLE = /Mac|iPhone|iPad/;
 const LETTER_CODE = /^Key[A-Z]$/;
+const DIGIT_CODE = /^Digit\d$/;
 
 const isMac = () =>
   typeof navigator !== "undefined" && APPLE.test(navigator.platform);
 
-/** The key a press names: its letter even with Option held, which changes `key` on a Mac. */
+/** The key a press names: its letter even with Option held, which changes `key` on a Mac, and a digit by its place, which a layout such as AZERTY reaches with Shift. */
 function keyOf(event: KeyboardEvent): string {
   if (event.altKey && LETTER_CODE.test(event.code)) {
     return event.code.slice(3).toLowerCase();
+  }
+  if (DIGIT_CODE.test(event.code)) {
+    return event.code.slice(5);
   }
   return event.key.toLowerCase();
 }

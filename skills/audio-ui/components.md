@@ -61,6 +61,8 @@ The surfaces of a DAW: the arrangement, the editors, the piano roll's tools, the
 | `timeline-markers` | `TimelineLocator`, `TimelineSignature` from `@/components/audio-ui/timeline-markers` | registry only | Locators to jump to and time-signature changes, in a `TimelineMark`: rename or retype in place, move, delete |
 | `track-automation` | `TrackAutomationChooser`, `TrackAutomation` from `@/components/audio-ui/track-automation` | registry only | A track's volume or pan envelope over its lane, and the chooser for its header |
 | `use-track-reorder` | `useTrackReorder` from `@/hooks/use-track-reorder` | registry only | Reorder tracks by dragging a grip (a ghost under the pointer, edge scrolling) or with Up and Down: `gripProps(id)`, `drop`, `ghost` |
+| `use-timeline-zoom` | `useTimelineZoom` from `@/hooks/use-timeline-zoom` | registry only | A timeline's zoom: fitted beside the track headers until zoomed, `zoomAround(at, factor)`, `zoomTo(start, end)`, `zoomBack()`, `rescale(ratio)` on a tempo change; spread `timeline` on `Timeline` |
+| `use-timeline-grid` | `useTimelineGrid`, `GRID_KEYS`, `GRID_DIVISION_OPTIONS` from `@/hooks/use-timeline-grid` | registry only | A timeline's grid: adaptive or fixed, triplet, snap, `step` to draw, `snapStep` to snap to, `label` for its menu button, `change` for Cmd/Ctrl + 1 to 5 |
 | `use-midi-playback` | `useMidiPlayback` from `@/hooks/use-midi-playback` | registry only | Play an arrangement's MIDI clips on the audio clock, a channel per track following its mix or automation; `onNoteOn`/`onNoteOff` for a clip's editor |
 
 ### Editors

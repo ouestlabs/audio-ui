@@ -280,6 +280,28 @@ Place it anywhere inside the timeline, outside the viewport. Dragging an edge zo
 - `gridLabel(seconds, tempo)` names an interval the way a grid readout does (`"1 bar"`, `"1/16"`, `"1/8T"`), so the adaptive grid reads out the division it uses, and a menu and a readout always name a grid the same way.
 - `metronomeRhythmSeconds(rhythm, tempo)` is the interval of a click rhythm (`"1/8"`, `"1/8t"`, …), or `null` for `"auto"`, which follows the beat.
 
+### Zoom and grid
+
+Two hooks hold what the view needs to zoom and snap, so every arrangement zooms and snaps the same way:
+
+```tsx
+import { GRID_DIVISION_OPTIONS, useTimelineGrid } from "@/hooks/use-timeline-grid";
+import { useTimelineZoom } from "@/hooks/use-timeline-zoom";
+
+const viewportRef = useRef<HTMLDivElement>(null);
+const view = useTimelineZoom({ duration, viewportRef });
+const grid = useTimelineGrid({ tempo, zoom: view.zoom });
+
+<Timeline duration={duration} snapStep={grid.snapStep} {...view.timeline}>
+  <TimelineViewport ref={viewportRef}>
+    <TimelineLane gridStep={grid.snapStep}>…</TimelineLane>
+  </TimelineViewport>
+</Timeline>
+```
+
+- `use-timeline-zoom` (`npx shadcn@latest add @audio-ui/use-timeline-zoom`) fits the whole arrangement in the room beside the track headers until it is zoomed, and never goes wider. A Cmd/Ctrl + scroll zooms around the pointer; `zoomAround(at, factor)` keeps a time where it is on screen, as the + and - keys do around the cursor, `zoomTo(start, end)` fits a stretch (Z on the selection), and `zoomBack()` steps back through the zooms they left (X). `ratio` and `setRatio` read and set it as a share of the fitted view, and `rescale(ratio)` keeps it on the same bars when the tempo changes.
+- `use-timeline-grid` (`npx shadcn@latest add @audio-ui/use-timeline-grid`) is the grid: adaptive or a fixed division, triplet, snapping. `step` is what the lanes draw, `snapStep` what gestures snap to (0 with snapping off), and `label` names it for the button that opens `TimelineGridMenuItems` with `GRID_DIVISION_OPTIONS`. `change` is what Cmd/Ctrl + 1 to 5 do, by the key's place in `GRID_KEYS`: a finer or wider grid, triplets, snapping, and a grid fixed where it is or following the zoom again.
+
 ### Placing your own parts
 
 Every lane sets a `--timeline-unit` CSS variable, the width of one unit. Parts are placed with it, so anything you draw follows the zoom the same way:

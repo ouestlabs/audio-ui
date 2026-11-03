@@ -9,6 +9,7 @@ import {
   type DragEvent,
   type MouseEvent,
   type ReactNode,
+  type RefObject,
   useCallback,
   useMemo,
   useState,
@@ -18,6 +19,7 @@ import { DEVICE_DRAG_TYPE } from "@/components/audio-ui/device-chain";
 import {
   MIN_TRACK_HEIGHT,
   Timeline,
+  TimelineGridMenuItems,
   TimelineLane,
   TimelineMark,
   TimelineNavigator,
@@ -42,6 +44,11 @@ import {
 import type { useArrangement } from "@/hooks/use-arrangement";
 import type { useArrangementEngine } from "@/hooks/use-arrangement-engine";
 import {
+  GRID_DIVISION_OPTIONS,
+  type useTimelineGrid,
+} from "@/hooks/use-timeline-grid";
+import type { useTimelineZoom } from "@/hooks/use-timeline-zoom";
+import {
   type Arranged,
   type ClipAction,
   type Mix,
@@ -58,8 +65,6 @@ type Engine = ReturnType<typeof useArrangementEngine>;
 const LEAD_PX = 220;
 /** The closest the ruler's labels come, in px. */
 const LABEL_PX = 56;
-const MIN_ZOOM = 2;
-const MAX_ZOOM = 2000;
 
 function carriesFiles(event: DragEvent) {
   return Array.from(event.dataTransfer.types).includes("Files");
@@ -124,6 +129,12 @@ export interface ArrangementViewProps {
   recordings: ReadonlyMap<string, Recording>;
   /** The track whose devices the detail view shows. */
   selectedTrack: string | null;
+  /** The grid the lanes draw and the clips snap to. */
+  timelineGrid: ReturnType<typeof useTimelineGrid>;
+  /** The zoom, fitted to the view until it is zoomed. */
+  timelineZoom: ReturnType<typeof useTimelineZoom>;
+  /** The viewport the zoom fits: the one the tracks scroll in. */
+  viewportRef: RefObject<HTMLDivElement | null>;
 }
 
 /**
@@ -144,10 +155,13 @@ export function ArrangementView({
   onSelectTrack,
   recordings,
   selectedTrack,
+  timelineGrid: grid,
+  timelineZoom: view,
+  viewportRef,
 }: ArrangementViewProps) {
   const { dispatch, doc, selectedIds, selectedTracks } = arrangement;
   const { clips, duration, loop, returns, tempo, tracks } = doc;
-  const [zoom, setZoom] = useState(24);
+  const { zoom } = view;
   const [dropOn, setDropOn] = useState<string | null>(null);
   const beat = secondsPerBeat(tempo);
   const bar = secondsPerBar(tempo);
@@ -297,14 +311,16 @@ export function ArrangementView({
     [dispatch]
   );
 
-  /** The time under the pointer in a lane, snapped to the beat. */
+  /** The time under the pointer in a lane, on the grid when it snaps. */
   const timeAt = useCallback(
     (event: DragEvent<HTMLElement>) => {
       const lane = event.currentTarget.getBoundingClientRect();
       const at = Math.max(0, (event.clientX - lane.left) / zoom);
-      return Math.round(at / beat) * beat;
+      return grid.snapStep > 0
+        ? Math.round(at / grid.snapStep) * grid.snapStep
+        : at;
     },
-    [beat, zoom]
+    [grid.snapStep, zoom]
   );
   // A lane takes a device of the library, and files when `files` (an audio track, or the add-track row).
   const dragOver = useCallback(
@@ -351,14 +367,11 @@ export function ArrangementView({
     <Timeline
       className="min-h-0 flex-1"
       duration={duration}
-      maxZoom={MAX_ZOOM}
-      minZoom={MIN_ZOOM}
       onPositionChange={onSeek}
-      onZoomChange={setZoom}
       snapPoints={snapPoints}
-      snapStep={beat}
+      snapStep={grid.snapStep}
       source={engine.position}
-      zoom={zoom}
+      {...view.timeline}
     >
       {/* The overview of the whole arrangement, on top as a DAW has it, over the lanes alone. */}
       <div
@@ -369,6 +382,7 @@ export function ArrangementView({
       </div>
       <TimelineViewport
         className="flex min-h-0 flex-1 flex-col overflow-y-auto bg-muted/30"
+        ref={viewportRef}
         scrollbar="hidden"
       >
         <div className="flex min-h-full w-max min-w-full shrink-0 flex-col">
@@ -395,7 +409,34 @@ export function ArrangementView({
             <Row
               className="shrink-0 border-foreground/20 border-b"
               lead={
-                <Label>{`${tempo.bpm} BPM, ${tempo.beatsPerBar}/${tempo.beatUnit}`}</Label>
+                <DropdownMenu>
+                  <DropdownMenuTrigger
+                    render={
+                      <Button
+                        aria-label="Grid"
+                        className="h-full w-full justify-start rounded-none border-0 px-3 font-normal text-muted-foreground text-xs tabular-nums"
+                        variant="ghost"
+                      />
+                    }
+                  >
+                    {grid.label}
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="start"
+                    className="w-auto min-w-48"
+                  >
+                    <TimelineGridMenuItems
+                      division={grid.division}
+                      divisions={GRID_DIVISION_OPTIONS}
+                      onDivisionChange={grid.chooseDivision}
+                      onSnapChange={grid.setSnap}
+                      onTripletChange={grid.setTriplet}
+                      snap={grid.snap}
+                      triplet={grid.triplet}
+                      variant="dropdown"
+                    />
+                  </DropdownMenuContent>
+                </DropdownMenu>
               }
             >
               <TimelineRuler
@@ -458,7 +499,7 @@ export function ArrangementView({
                       silent && "**:data-clip-id:opacity-40"
                     )}
                     data-track={track.id}
-                    gridStep={beat}
+                    gridStep={grid.snapStep}
                     onDoubleClick={
                       track.kind === "midi" ? doubleClick : undefined
                     }

@@ -1123,7 +1123,7 @@ export const audio: RegistryItem[] = [
   ...devices,
   {
     description:
-      "The parts of an arrangement editor in one install: the timeline, the arrangement's state, its clips, markers and automation, track reordering and MIDI playback. block-timeline wires them into a screen.",
+      "The parts of an arrangement editor in one install: the timeline, its zoom and grid, the arrangement's state, its clips, markers and automation, track reordering and MIDI playback. block-timeline wires them into a screen.",
     files: [],
     name: "arrangement-editor",
     registryDependencies: [
@@ -1136,6 +1136,8 @@ export const audio: RegistryItem[] = [
       "@audio-ui/use-track-reorder",
       "@audio-ui/use-midi-playback",
       "@audio-ui/use-marquee-selection",
+      "@audio-ui/use-timeline-zoom",
+      "@audio-ui/use-timeline-grid",
     ],
     type: "registry:ui",
   },

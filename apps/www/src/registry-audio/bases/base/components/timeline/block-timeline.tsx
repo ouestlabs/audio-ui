@@ -3,19 +3,12 @@
 import { computePeaks, normalizePeaks } from "@audio-ui/core/analysis";
 import type { Breakpoint } from "@audio-ui/core/envelope";
 import {
-  adjacentDivision,
   barLabelInterval,
   barsBeatsWith,
   barsOf,
-  divisionAt,
-  GRID_DIVISIONS,
-  type GridDivision,
-  gridInterval,
-  gridLabel,
   type MetronomeRhythm,
   secondsPerBar,
   type Tempo,
-  TRIPLET_FACTOR,
 } from "@audio-ui/core/time";
 import { bypassesGrid, snapMove } from "@audio-ui/core/timeline";
 import { EnvelopeIcon } from "@audio-ui/icons/react";
@@ -113,6 +106,12 @@ import {
 import { useArrangementEngine } from "@/registry-audio/bases/base/hooks/use-arrangement-engine";
 import { useAudioLevels } from "@/registry-audio/bases/base/hooks/use-audio-levels";
 import { useMarquee } from "@/registry-audio/bases/base/hooks/use-marquee-selection";
+import {
+  GRID_DIVISION_OPTIONS,
+  GRID_KEYS,
+  useTimelineGrid,
+} from "@/registry-audio/bases/base/hooks/use-timeline-grid";
+import { useTimelineZoom } from "@/registry-audio/bases/base/hooks/use-timeline-zoom";
 import { useTrackReorder } from "@/registry-audio/bases/base/hooks/use-track-reorder";
 import type {
   Arranged,
@@ -136,31 +135,6 @@ import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 const BARS = 32;
 /** The arrangement is laid out at the first tempo, the demo sounds': a tempo change keeps its musical positions. */
 const BAR = secondsPerBar(DEMO_TEMPO);
-/** The width of a track header, which the lanes start after. */
-const LEAD_PX = 160;
-const MAX_ZOOM = 240;
-/** How close an adaptive grid's lines may be, in px: Cmd/Ctrl + 1 and 2 halve and double it. */
-const DENSITIES = [6, 12, 24, 48, 96] as const;
-/** Cmd/Ctrl + a digit changes the grid, read from the key's place so it works on any keyboard layout. */
-const GRID_KEYS: Record<
-  string,
-  "finer" | "fixed" | "snap" | "triplet" | "wider"
-> = {
-  Digit1: "finer",
-  Digit2: "wider",
-  Digit3: "triplet",
-  Digit4: "snap",
-  Digit5: "fixed",
-};
-
-/** The width of the track headers, which the lanes start after. */
-function leadWidth(viewport: HTMLElement) {
-  return (
-    viewport.querySelector<HTMLElement>('[data-slot="timeline-track-header"]')
-      ?.offsetWidth ?? LEAD_PX
-  );
-}
-
 /** Whether a key went to a field you type in, where it is the field's own. */
 function typing(target: EventTarget) {
   return (
@@ -402,18 +376,6 @@ function Row({
     </TimelineTrack>
   );
 }
-
-/** Adaptive follows the zoom; the others stay put however far you zoom. */
-const DIVISIONS: { label: string; value: GridDivision }[] = [
-  { label: "Grid: Adaptive", value: "adaptive" },
-  ...GRID_DIVISIONS.map((entry) => ({
-    label:
-      "bars" in entry
-        ? `Grid: ${entry.bars} ${entry.bars === 1 ? "bar" : "bars"}`
-        : `Grid: ${entry.id}`,
-    value: entry.id as GridDivision,
-  })),
-];
 
 /** What the keyboard does, for the shortcuts popover: the keys, then what they do. */
 const SHORTCUTS: { action: string; keys: string[] }[] = [
@@ -1040,27 +1002,26 @@ export default function BlockTimeline() {
     [dispatch]
   );
   const undo = useCallback(() => dispatch({ type: "undo" }), [dispatch]);
-  // The timeline fits the width it is given until it is zoomed.
+  // The timeline fits the width it is given until it is zoomed, and its grid follows the zoom.
   const viewportRef = useRef<HTMLDivElement>(null);
-  const [fitPx, setFitPx] = useState(0);
+  const view = useTimelineZoom({ duration, viewportRef });
+  const { zoom } = view;
+  const grid = useTimelineGrid({ tempo, zoom });
+  const { snap, snapStep, step: gridSeconds } = grid;
   // Whether the bar has room for the zoom control; the menu lists the zoom steps only when it does not.
   const zoomSlotRef = useRef<HTMLDivElement>(null);
   const [zoomInBar, setZoomInBar] = useState(true);
   // Below the bar's room, the tempo and the undo and redo move into the more-controls menu.
   const narrowProbeRef = useRef<HTMLDivElement>(null);
   const [narrow, setNarrow] = useState(false);
+  // The shortcuts are caught on the panel, so a press on the lane, which takes no focus, hands it over.
+  const panelRef = useRef<HTMLDivElement>(null);
   useLayoutEffect(() => {
-    const element = viewportRef.current;
+    const element = panelRef.current;
     if (!element) {
       return;
     }
-    // The header column is narrower in a narrow panel: fit what is left beside it.
     const measure = () => {
-      const lead =
-        element.querySelector<HTMLElement>(
-          '[data-slot="timeline-track-header"]'
-        )?.offsetWidth ?? LEAD_PX;
-      setFitPx(Math.max(0, (element.clientWidth - lead) / duration));
       if (zoomSlotRef.current) {
         setZoomInBar(getComputedStyle(zoomSlotRef.current).display !== "none");
       }
@@ -1080,11 +1041,10 @@ export default function BlockTimeline() {
       cancelAnimationFrame(frame);
       observer.disconnect();
     };
-  }, [duration]);
-  const [zoomed, setZoom] = useState<number | null>(null);
-  const zoom = Math.max(zoomed ?? fitPx, fitPx) || 8;
+  }, []);
   // A change of tempo, or the undo of one, changes the bar: the playhead and the zoom keep their places in it.
   const lastBar = useRef(bar);
+  const { rescale } = view;
   useLayoutEffect(() => {
     if (lastBar.current === bar) {
       return;
@@ -1092,8 +1052,8 @@ export default function BlockTimeline() {
     const ratio = bar / lastBar.current;
     lastBar.current = bar;
     clock.set(clock.getSnapshot() * ratio);
-    setZoom((current) => (current === null ? null : current / ratio));
-  }, [bar, clock]);
+    rescale(ratio);
+  }, [bar, clock, rescale]);
   const handleAddTrack = useCallback(() => addTrack(), [addTrack]);
   const handleAddMidiTrack = useCallback(
     () => addTrack(undefined, "midi"),
@@ -1116,10 +1076,6 @@ export default function BlockTimeline() {
       setLifting(offset === 0 ? null : { id, offset }),
     []
   );
-  const [division, setDivision] = useState<GridDivision>("adaptive");
-  const [density, setDensity] = useState<number>(24);
-  const [triplet, setTriplet] = useState(false);
-  const [snap, setSnap] = useState(true);
   // A muted track is silent, and while any track is soloed so is every other: their clips are drawn drained.
   const anySolo = tracks.some((track) => mixOf(track).soloed);
   // Automation mode: each track's lane shows the envelope of one of its parameters over its clips.
@@ -1191,15 +1147,10 @@ export default function BlockTimeline() {
     clock.set(0);
   }, [clock, stopEngine]);
   // The zoom as a share of the fitted view: 100% shows everything.
-  const zoomRatio = fitPx > 0 ? zoom / fitPx : 1;
-  const maxRatio = fitPx > 0 ? MAX_ZOOM / fitPx : 1;
   const zoomPreset = ZOOM_PRESETS.find(
-    (ratio) => Math.abs(ratio - zoomRatio) < 0.01
+    (ratio) => Math.abs(ratio - view.ratio) < 0.01
   );
-  const changeZoom = useCallback(
-    (ratio: number) => setZoom(ratio <= 1 ? null : ratio * fitPx),
-    [fitPx]
-  );
+  const { setRatio: changeZoom } = view;
   // A track moves by dragging its grip, or with Up and Down on it.
   const trackOrder = useMemo(() => tracks.map((track) => track.id), [tracks]);
   const reorder = useTrackReorder({ onMove: moveTrack, order: trackOrder });
@@ -1208,13 +1159,7 @@ export default function BlockTimeline() {
     (value: string) => changeZoom(Number(value)),
     [changeZoom]
   );
-  const handleDivisionValue = useCallback(
-    (value: string) => setDivision(value as GridDivision),
-    []
-  );
   // A press on a track's empty lane puts the cursor there (the lane does it) and picks the track, letting go of the clips; on the surface under the last track it lets go of everything, as nothing is there.
-  // The shortcuts are caught on the panel, so a press on the lane, which takes no focus, hands it over.
-  const panelRef = useRef<HTMLDivElement>(null);
   // The closed clip panel comes back on a click of a clip's head, or a double-click on its body: not on a press, which may begin a move, a trim or a fade, and the panel takes room from the tracks under the pointer.
   const pressRef = useRef<{ x: number; y: number } | null>(null);
   const notePress = useCallback((event: PointerEvent<HTMLDivElement>) => {
@@ -1825,13 +1770,7 @@ export default function BlockTimeline() {
     }
   };
 
-  // The grid the lanes draw is the grid everything snaps to.
-  // Snap off draws no lines and snaps nothing: a step of 0 is no grid.
-  const gridSeconds = gridInterval(division, zoom, tempo, {
-    minSpacing: density,
-    triplet,
-  });
-  const snapStep = snap ? gridSeconds : 0;
+  // The grid the lanes draw is the grid everything snaps to. Snap off draws no lines and snaps nothing: a step of 0 is no grid.
   const labelEvery = barLabelInterval(zoom, tempo);
   // Whole bars, counted rather than divided, so no tempo leaves a label like 6.9999.
   const labelBars = Math.max(1, Math.round(labelEvery / bar));
@@ -2009,115 +1948,26 @@ export default function BlockTimeline() {
     return [...points];
   }, [clips, locators, loop, snap]);
 
-  /** A finer or wider grid: a denser or sparser adaptive grid, or the next fixed division. */
-  const stepGrid = useCallback(
-    (finer: boolean) => {
-      if (division !== "adaptive") {
-        setDivision(adjacentDivision(division, finer ? 1 : -1));
-        return;
-      }
-      // Denser lines are closer together: finer halves how close they may be.
-      const index = DENSITIES.indexOf(density as (typeof DENSITIES)[number]);
-      const next = DENSITIES[index + (finer ? -1 : 1)];
-      if (next !== undefined) {
-        setDensity(next);
-      }
-    },
-    [density, division]
-  );
-  /** Cmd/Ctrl + 1 to 5: a finer or wider grid, triplets, snapping, and a grid fixed where it is or following the zoom again. */
-  const changeGrid = useCallback(
-    (change: (typeof GRID_KEYS)[string]) => {
-      if (change === "triplet") {
-        setTriplet((on) => !on);
-      } else if (change === "snap") {
-        setSnap((on) => !on);
-      } else if (change === "fixed") {
-        setDivision(
-          division === "adaptive"
-            ? divisionAt(gridSeconds / (triplet ? TRIPLET_FACTOR : 1), tempo)
-            : "adaptive"
-        );
-      } else {
-        stepGrid(change === "finer");
-      }
-    },
-    [division, gridSeconds, stepGrid, tempo, triplet]
-  );
-
   // Z zooms onto the selection, + and - zoom around the cursor, X steps back through the zooms they left behind.
-  const zoomHistory = useRef<{ scroll: number; zoom: number | null }[]>([]);
-  /** Zooms to `next` px per second, with `value` seconds `offset` px from the viewport's left edge. */
-  const zoomOnto = useCallback(
-    (next: number, value: number, offset: number) => {
-      const element = viewportRef.current;
-      if (!element) {
-        return;
-      }
-      zoomHistory.current.push({ scroll: element.scrollLeft, zoom: zoomed });
-      const clamped = Math.min(MAX_ZOOM, Math.max(fitPx, next));
-      setZoom(clamped <= fitPx ? null : clamped);
-      // After the timeline has drawn the new zoom, which keeps its middle still.
-      requestAnimationFrame(() => {
-        element.scrollLeft = leadWidth(element) + value * clamped - offset;
-      });
-    },
-    [fitPx, zoomed]
-  );
+  const { zoomAround, zoomBack, zoomTo } = view;
   const zoomAroundCursor = useCallback(
-    (factor: number) => {
-      const element = viewportRef.current;
-      if (!element) {
-        return;
-      }
-      const lead = leadWidth(element);
-      const at = clock.getSnapshot();
-      const x = lead + at * zoom - element.scrollLeft;
-      // A cursor out of view gives way to the middle of the view.
-      const offset =
-        x >= lead && x <= element.clientWidth
-          ? x
-          : (lead + element.clientWidth) / 2;
-      const value =
-        x >= lead && x <= element.clientWidth
-          ? at
-          : (element.scrollLeft + offset - lead) / zoom;
-      zoomOnto(zoom * factor, value, offset);
-    },
-    [clock, zoom, zoomOnto]
+    (factor: number) => zoomAround(clock.getSnapshot(), factor),
+    [clock, zoomAround]
   );
   const zoomToSelection = useCallback(() => {
-    const element = viewportRef.current;
     const chosen = clips.filter(
       (clip) =>
         selectedIds.includes(clip.id) || selectedTracks.includes(clip.track)
     );
-    const [start, end] =
-      chosen.length > 0
-        ? [
-            Math.min(...chosen.map((clip) => clip.value.start)),
-            Math.max(
-              ...chosen.map((clip) => clip.value.start + clip.value.length)
-            ),
-          ]
-        : loop;
-    if (!element || end <= start) {
+    if (chosen.length === 0) {
+      zoomTo(...loop);
       return;
     }
-    const lead = leadWidth(element);
-    zoomOnto((element.clientWidth - lead) / (end - start), start, lead);
-  }, [clips, loop, selectedIds, selectedTracks, zoomOnto]);
-  const zoomBack = useCallback(() => {
-    const element = viewportRef.current;
-    const previous = zoomHistory.current.pop();
-    if (!(element && previous)) {
-      return;
-    }
-    setZoom(previous.zoom);
-    requestAnimationFrame(() => {
-      element.scrollLeft = previous.scroll;
-    });
-  }, []);
+    zoomTo(
+      Math.min(...chosen.map((clip) => clip.value.start)),
+      Math.max(...chosen.map((clip) => clip.value.start + clip.value.length))
+    );
+  }, [clips, loop, selectedIds, selectedTracks, zoomTo]);
 
   /** Up and Down pick the track above or below the one picked, or the first or last. */
   const pickNextTrack = useCallback(
@@ -2180,7 +2030,7 @@ export default function BlockTimeline() {
           return false;
         }
         event.preventDefault();
-        changeGrid(change);
+        grid.change(change);
         return true;
       }
       if (typing(event.target) || event.altKey) {
@@ -2203,7 +2053,7 @@ export default function BlockTimeline() {
       // Anywhere else in the panel, a clip's or the loop's own input takes its arrows.
       return event.target === event.currentTarget && handleCursorKey(event);
     },
-    [changeGrid, handleCursorKey, zoomAroundCursor, zoomBack, zoomToSelection]
+    [grid.change, handleCursorKey, zoomAroundCursor, zoomBack, zoomToSelection]
   );
   const handlePanelKey = (event: KeyboardEvent<HTMLDivElement>) => {
     if (!handleNavigationKey(event)) {
@@ -2311,13 +2161,13 @@ export default function BlockTimeline() {
               format={PERCENT}
               label="Zoom"
               largeStep={1}
-              max={maxRatio}
+              max={view.maxRatio}
               min={1}
               onValueChange={changeZoom}
               step={0.25}
               steppers={ZOOM_STEPPERS}
               unit="Zoom"
-              value={zoomRatio}
+              value={view.ratio}
             />
           </div>
           <DropdownMenu>
@@ -2396,13 +2246,13 @@ export default function BlockTimeline() {
                           format={PERCENT}
                           label="Zoom"
                           largeStep={1}
-                          max={maxRatio}
+                          max={view.maxRatio}
                           min={1}
                           onValueChange={changeZoom}
                           step={0.25}
                           steppers={ZOOM_STEPPERS}
                           unit="Zoom"
-                          value={zoomRatio}
+                          value={view.ratio}
                         />
                       </div>
                       <DropdownMenuSeparator />
@@ -2414,7 +2264,7 @@ export default function BlockTimeline() {
                       >
                         {ZOOM_PRESETS.map((ratio) => (
                           <DropdownMenuRadioItem
-                            disabled={ratio > maxRatio}
+                            disabled={ratio > view.maxRatio}
                             key={ratio}
                             value={String(ratio)}
                           >
@@ -2433,14 +2283,11 @@ export default function BlockTimeline() {
       <Timeline
         className="min-h-0 flex-1 gap-2"
         duration={duration}
-        maxZoom={MAX_ZOOM}
-        minZoom={fitPx || undefined}
         onPositionChange={seek}
-        onZoomChange={setZoom}
         snapPoints={snapPoints}
         snapStep={snapStep}
         source={clock}
-        zoom={zoomed === null ? undefined : zoom}
+        {...view.timeline}
       >
         <TimelineNavigator getAriaValueText={describe} />
         <TimelineViewport
@@ -2497,20 +2344,20 @@ export default function BlockTimeline() {
                         />
                       }
                     >
-                      {snap ? gridLabel(gridSeconds, tempo) : "Snap off"}
+                      {grid.label}
                     </DropdownMenuTrigger>
                     <DropdownMenuContent
                       align="start"
                       className="w-auto min-w-48"
                     >
                       <TimelineGridMenuItems
-                        division={division}
-                        divisions={DIVISIONS}
-                        onDivisionChange={handleDivisionValue}
-                        onSnapChange={setSnap}
-                        onTripletChange={setTriplet}
+                        division={grid.division}
+                        divisions={GRID_DIVISION_OPTIONS}
+                        onDivisionChange={grid.chooseDivision}
+                        onSnapChange={grid.setSnap}
+                        onTripletChange={grid.setTriplet}
                         snap={snap}
-                        triplet={triplet}
+                        triplet={grid.triplet}
                         variant="dropdown"
                       />
                     </DropdownMenuContent>
@@ -2782,13 +2629,13 @@ export default function BlockTimeline() {
                     </ContextMenuTrigger>
                     <ContextMenuContent className="w-auto min-w-48">
                       <TimelineGridMenuItems
-                        division={division}
-                        divisions={DIVISIONS}
-                        onDivisionChange={handleDivisionValue}
-                        onSnapChange={setSnap}
-                        onTripletChange={setTriplet}
+                        division={grid.division}
+                        divisions={GRID_DIVISION_OPTIONS}
+                        onDivisionChange={grid.chooseDivision}
+                        onSnapChange={grid.setSnap}
+                        onTripletChange={grid.setTriplet}
                         snap={snap}
-                        triplet={triplet}
+                        triplet={grid.triplet}
                       />
                     </ContextMenuContent>
                   </ContextMenu>

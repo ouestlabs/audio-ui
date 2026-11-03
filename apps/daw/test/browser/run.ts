@@ -171,6 +171,10 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
   "EXP-001: export renders the main output to a 24-bit stereo WAV, to the end of the last clip":
     async (browser) => {
       const page = await open(browser);
+      // Zoomed in, with no grid to snap to, 10 px from the start is a fraction of a second in.
+      await page.keyboard.press("Meta+Equal");
+      await page.keyboard.press("Meta+Equal");
+      await page.keyboard.press("Meta+Digit4");
       await dropChord(page, "[data-add-track]", "Chord take", 2);
       await page.waitForSelector('[aria-label="Chord take"][data-track-id]');
       const download = page.waitForEvent("download", { timeout: 30_000 });
@@ -196,7 +200,8 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       const page = await open(browser);
       const lane = await page.locator('[data-track="track-3"]').boundingBox();
       assert(lane, "the MIDI lane is there");
-      await page.mouse.dblclick(lane.x + 30, lane.y + lane.height / 2);
+      // Near the start, in the first bar at any zoom.
+      await page.mouse.dblclick(lane.x + 4, lane.y + lane.height / 2);
       const grid = await page.waitForSelector("[data-slot=piano-roll-grid]", {
         timeout: 5000,
       });
@@ -310,6 +315,40 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         `the detail view came back at ${back}, not ${given}`
       );
     },
+  "KEY-016 to KEY-018: the grid's keys and menu, the zoom's keys": async (
+    browser
+  ) => {
+    const page = await open(browser);
+    const grid = page.getByRole("button", { exact: true, name: "Grid" });
+    const fitted = await grid.innerText();
+    await page.keyboard.press("Meta+Digit1");
+    const finer = await grid.innerText();
+    assert(finer !== fitted, `Cmd+1 left the grid at ${fitted}`);
+    await page.keyboard.press("Meta+Digit4");
+    assert(
+      (await grid.innerText()) === "Snap off",
+      "Cmd+4 did not turn snapping off"
+    );
+    await page.keyboard.press("Meta+Digit4");
+    await grid.click();
+    await page.getByRole("menuitemradio", { name: "1 bar" }).click();
+    assert(
+      (await grid.innerText()) === "1 bar",
+      "the menu did not fix the grid at a bar"
+    );
+    const unit = () =>
+      page
+        .locator("[data-track] ")
+        .first()
+        .evaluate((lane) => lane.getBoundingClientRect().width);
+    const wide = await unit();
+    await page.keyboard.press("Meta+Equal");
+    await page.waitForTimeout(100);
+    assert((await unit()) > wide * 1.9, "Cmd+= did not zoom in");
+    await page.keyboard.press("KeyX");
+    await page.waitForTimeout(100);
+    assert(Math.abs((await unit()) - wide) < 2, "X did not go back to the fit");
+  },
   "PRJ-001: the project comes back when the page is loaded again": async (
     browser
   ) => {

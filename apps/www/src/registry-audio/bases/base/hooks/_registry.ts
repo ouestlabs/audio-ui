@@ -101,6 +101,33 @@ export const hooks: RegistryItem[] = [
     type: "registry:hook",
   },
   {
+    categories: ["timeline"],
+    description:
+      "The zoom of an arrangement's timeline: it fits the view beside the track headers until it is zoomed, zooms around a time that stays put on screen, fits a stretch of time, steps back through the zooms it left, and keeps its bars when the tempo changes.",
+    files: [
+      {
+        path: "hooks/use-timeline-zoom.ts",
+        type: "registry:hook",
+      },
+    ],
+    name: "use-timeline-zoom",
+    type: "registry:hook",
+  },
+  {
+    categories: ["timeline"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "The grid of an arrangement's timeline: adaptive to the zoom or a fixed division, straight or triplet, snapping or not, its name for a menu button, and the changes Cmd/Ctrl + 1 to 5 make.",
+    files: [
+      {
+        path: "hooks/use-timeline-grid.ts",
+        type: "registry:hook",
+      },
+    ],
+    name: "use-timeline-grid",
+    type: "registry:hook",
+  },
+  {
     categories: ["audio", "sequencer", "piano"],
     description:
       "A look-ahead transport clock on the audio clock: it calls back with the audio time of each step so notes are scheduled sample-accurately, with a loop region, seek and tempo changes.",
