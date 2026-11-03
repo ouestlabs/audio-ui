@@ -15,7 +15,6 @@ import {
   DeviceFrame,
   DeviceHeader,
   DevicePanel,
-  DeviceToggle,
 } from "@/registry-audio/bases/base/audio/panels/device-panel";
 import {
   type CompressorState,
@@ -31,9 +30,12 @@ const UNITY = (inputDb: number) => inputDb;
 const GROUPS = [
   { label: "Curve", parameters: ["thresholdDb", "ratio", "kneeDb"] },
   { label: "Time", parameters: ["attackMs", "releaseMs"] },
-  { label: "Output", parameters: ["makeupDb", "mix", "external"] },
+  {
+    label: "Output",
+    parameters: ["makeupDb", "mix", "autoMakeup", "external"],
+  },
 ] as const;
-const SWITCHES = ["enabled", "autoMakeup"] as const;
+const SWITCHES = ["enabled"] as const;
 /** With auto make-up on, the node's own make-up plays and this knob does nothing. */
 const MAKEUP_OFF = ["makeupDb"] as const;
 
@@ -48,9 +50,9 @@ interface CompressorPanelProps {
 }
 
 /**
- * The face of the compressor device: a title bar with the on square and the
- * auto make-up switch, the transfer curve it plays with the threshold and the
- * level going in on it, and its knobs gathered by what they do. It is
+ * The face of the compressor device: a title bar with the on square, the
+ * transfer curve it plays with the threshold and the level going in on it, and
+ * its knobs and switches gathered by what they do. It is
  * controlled like `DevicePanel`, which it uses for the knobs: drawing the
  * curve is all it adds. Its children sit at the end of the title bar.
  */
@@ -100,12 +102,6 @@ function CompressorPanel({
           value={value}
         >
           {children}
-          <DeviceToggle
-            device={compressorDevice}
-            id="autoMakeup"
-            onValueChange={onValueChange}
-            value={value}
-          />
         </DeviceHeader>
         <div className="flex min-h-0 grow flex-col gap-2 p-2">
           <Plot

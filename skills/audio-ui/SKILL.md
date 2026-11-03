@@ -103,6 +103,7 @@ The CRITICAL rules (sound without clicks, live data without re-renders) are in t
 | Drum pads, sample triggers | `pad` |
 | Playable keyboard | `piano` |
 | Play from a MIDI keyboard | `use-midi-input` hook, `midi-connect-control` |
+| A track's effects in a row, reordered, with a library to add one from | `device-chain`, `device-browser`, `block-device-chain` |
 | A compressor, or any effect, as a state a host and an agent can drive | `block-compressor`, `block-equalizer`, `block-delay`, `block-reverb`, `block-filter`, `block-distortion`, `block-chorus`, or `defineDevice` and `device-panel` |
 | Tune an instrument, name the note of a sound | `tuner`, with `use-microphone` and `use-pitch` |
 | Note editor | `piano-roll` |

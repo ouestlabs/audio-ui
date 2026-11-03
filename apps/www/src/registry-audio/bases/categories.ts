@@ -90,6 +90,12 @@ export const categories: CategoryDef[] = [
   },
   {
     description:
+      "Device chains: a track's effects in a row, reordered, folded, switched off and removed, with a library to add one from.",
+    label: "Device chain",
+    name: "device-chain",
+  },
+  {
+    description:
       "Spectrum analyzers: the level of a sound across frequencies, live, with held peaks.",
     docs: "spectrum-analyzer",
     label: "Spectrum",
@@ -248,6 +254,7 @@ export const categoryGroups: { label: string; names: string[] }[] = [
       "transport",
       "scrubber",
       "mixer",
+      "device-chain",
     ],
   },
   {

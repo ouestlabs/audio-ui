@@ -216,9 +216,14 @@ test("named imports from @/components/audio-ui exist in the installed file", asy
   expect(missingNames).toEqual([]);
 });
 
-/** The pages whose item is not their name: the arrangement page installs `arrangement-editor`. */
+/**
+ * The pages whose item is not their name: the arrangement page installs
+ * `arrangement-editor`, and the device chain page puts devices in its chain,
+ * which its block brings with the chain and the library.
+ */
 const PAGE_ITEM: Record<string, string> = {
   arrangement: "arrangement-editor",
+  "device-chain": "block-device-chain",
 };
 
 test("a component's docs page only imports what installing it brings", async () => {

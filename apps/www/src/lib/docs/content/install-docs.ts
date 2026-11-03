@@ -103,19 +103,22 @@ export function installPlan(props: InstallProps): InstallPlan {
       ],
     };
   }
+  // A component built on shadcn/ui alone, `packages=""`, has no package to install first.
+  const packages = props.packages ?? REACT;
   return {
     agent: installAgent(name),
     cli: [{ code: add(`@audio-ui/${name}`), type: "command" }],
     manual: [
-      {
-        parts: [
-          {
-            code: `npm install ${props.packages ?? REACT}`,
-            type: "command",
-          },
-        ],
-        step: "Install the following dependencies:",
-      },
+      ...(packages
+        ? [
+            {
+              parts: [
+                { code: `npm install ${packages}`, type: "command" as const },
+              ],
+              step: "Install the following dependencies:",
+            },
+          ]
+        : []),
       {
         parts: [
           {

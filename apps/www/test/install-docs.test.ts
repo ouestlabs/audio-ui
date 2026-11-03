@@ -24,6 +24,17 @@ describe("installPlan", () => {
     ]);
   });
 
+  test("a component that imports no package has no npm step", () => {
+    const plan = installPlan({ name: "device-chain", packages: "" });
+    expect(plan.manual[0]?.parts).toEqual([
+      {
+        name: "device-chain",
+        title: "components/audio-ui/device-chain.tsx",
+        type: "source",
+      },
+    ]);
+  });
+
   test("a device installs its three pieces, and shows its demo", () => {
     const plan = installPlan({ kind: "device", name: "delay" });
     expect(plan.manual[1]?.parts).toEqual([

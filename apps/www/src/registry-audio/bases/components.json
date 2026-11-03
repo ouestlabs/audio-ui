@@ -330,6 +330,12 @@
     "title": "Block mixer"
   },
   {
+    "categories": ["device-chain", "knob"],
+    "description": "A track's devices in a row with the library beside them: drag a device to where it goes, move, fold, switch off or remove one, and play a loop through each device's own panel and engine, with a kick on the sidechain",
+    "name": "block-device-chain",
+    "title": "Block device chain"
+  },
+  {
     "categories": ["pad", "knob"],
     "description": "Drum rack: sixteen pads, each its own sound, shaped with tune, decay and level knobs",
     "name": "block-drum-rack",
