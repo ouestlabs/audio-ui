@@ -59,7 +59,8 @@ export interface Arranged {
 }
 
 /** What a track holds: recordings, or notes for an instrument to play. */
-export type TrackKind = "audio" | "midi";
+/** What a track holds: audio clips, MIDI clips, or other tracks (a group, which holds no clip and plays what its tracks play). */
+export type TrackKind = "audio" | "group" | "midi";
 
 /** What a track's automation can move: its volume, or where it sits in the stereo field. */
 export type AutomatedParameter = "pan" | "volume";
@@ -99,6 +100,8 @@ export interface ArrangementTrack {
   color: number;
   /** Its device chain, from first to last. */
   devices?: readonly TrackDevice[];
+  /** The group track it is in, which its sound plays into; none, it plays into the main track. A group's tracks follow it in the list. */
+  group?: string;
   id: string;
   /** @default "audio" */
   kind?: TrackKind;

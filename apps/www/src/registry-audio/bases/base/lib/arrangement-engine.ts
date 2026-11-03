@@ -468,6 +468,7 @@ export async function createArrangementEngine(
       })),
       tracks: current.tracks.map((track) => ({
         ...strip(track),
+        group: track.group ?? null,
         sends: track.sends ?? {},
       })),
     };

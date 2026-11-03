@@ -1,6 +1,6 @@
 import {
-  delayCompensation,
   panGains,
+  routedCompensation,
   soloState,
 } from "@audio-ui/core/playback";
 
@@ -22,6 +22,8 @@ export interface StripMix {
 
 /** A track as the mixer plays it. */
 export interface MixerTrack extends StripMix {
+  /** The group track it plays into: its sound goes to that track's input instead of the main track. */
+  group?: string | null;
   id: string;
   /** The frames its device chain delays it. */
   latency: number;
@@ -79,18 +81,19 @@ export interface Mixer {
 }
 
 interface Channel extends MixerStrip {
-  /** The wait after the chain that lines it up with the slowest track. */
-  compensation: DelayNode;
+  /** Where it plays into now: a group's input or the main track's. */
+  destination: AudioNode;
   /** The last value set on each param, so an update moves only what changed. */
   last: Map<AudioParam, number>;
-  /** The wait on its way to the main track alone, that lines it up with the returns. */
+  /** The wait on its way to where it plays into, that lines it up with what meets it there. */
   late: DelayNode;
   left: GainNode;
   nodes: AudioNode[];
   post: GainNode;
   pre: GainNode;
   right: GainNode;
-  sends: Map<string, { from: GainNode; gain: GainNode }>;
+  /** Each send: the tap it leaves from, its level, and the wait that lines it up at the return. */
+  sends: Map<string, { delay: DelayNode; from: GainNode; gain: GainNode }>;
   solo: GainNode;
   switch: GainNode;
   volume: GainNode;
@@ -101,14 +104,15 @@ interface Channel extends MixerStrip {
  * the main track, which goes to `destination`.
  *
  * ```
- * input → chain → compensation → pre ─→ volume → pan → switch → post → late → solo → main
- *                                  └─ pre-fader sends     post-fader sends ─┘
+ * input → chain → pre ─→ volume → pan → switch → post → late → solo → group or main
+ *                    └─ pre-fader sends     post-fader sends ─┘ (each with its wait)
  * ```
  *
  * The pan sets each channel on its own gain (`panGains`: 0 dB in the centre,
  * +3 dB at the side it is turned to); a solo silences the channels and sends
- * `soloState` says; delay compensation (`delayCompensation`) waits each path
- * so every one meets the main track on the same frame. A change by hand
+ * `soloState` says; delay compensation (`routedCompensation`) waits each path
+ * so every one meets the others on the same frame, at a group, a return or
+ * the main track. A track that names a group plays into that group's channel. A change by hand
  * glides within 10 ms. Nothing limits the main track: a mix over full scale
  * shows on the meters, as it would in the file.
  */
@@ -140,7 +144,6 @@ export function createMixer(
     input.channelCount = 2;
     input.channelCountMode = "explicit";
     const chainOut = gain();
-    const compensation = ctx.createDelay(MAX_COMPENSATION_SECONDS);
     const pre = gain();
     const volume = gain();
     const splitter = ctx.createChannelSplitter(2);
@@ -154,11 +157,7 @@ export function createMixer(
     const meterSplit = ctx.createChannelSplitter(2);
     const meter = [ctx.createAnalyser(), ctx.createAnalyser()];
     input.connect(chainOut);
-    chainOut
-      .connect(compensation)
-      .connect(pre)
-      .connect(volume)
-      .connect(splitter);
+    chainOut.connect(pre).connect(volume).connect(splitter);
     splitter.connect(left, 0).connect(merger, 0, 0);
     splitter.connect(right, 1).connect(merger, 0, 1);
     merger
@@ -174,7 +173,6 @@ export function createMixer(
     const nodes = [
       input,
       chainOut,
-      compensation,
       pre,
       volume,
       splitter,
@@ -189,7 +187,7 @@ export function createMixer(
       ...meter,
     ];
     return {
-      compensation,
+      destination: to,
       input,
       last: new Map(),
       late,
@@ -230,8 +228,9 @@ export function createMixer(
     for (const node of gone.nodes) {
       node.disconnect();
     }
-    for (const { gain } of gone.sends.values()) {
+    for (const { delay, gain } of gone.sends.values()) {
       gain.disconnect();
+      delay.disconnect();
     }
     channels.delete(id);
   };
@@ -256,16 +255,21 @@ export function createMixer(
     if (send?.from === from) {
       return send;
     }
-    let gain = send?.gain;
     if (send) {
       send.from.disconnect(send.gain);
       from.connect(send.gain);
-    } else {
-      gain = ctx.createGain();
-      gain.gain.value = 0;
-      from.connect(gain).connect((channels.get(back.id) as Channel).input);
+      const moved = { ...send, from };
+      target.sends.set(back.id, moved);
+      return moved;
     }
-    const made = { from, gain: gain as GainNode };
+    const gain = ctx.createGain();
+    gain.gain.value = 0;
+    const delay = ctx.createDelay(MAX_COMPENSATION_SECONDS);
+    from
+      .connect(gain)
+      .connect(delay)
+      .connect((channels.get(back.id) as Channel).input);
+    const made = { delay, from, gain };
     target.sends.set(back.id, made);
     return made;
   };
@@ -280,6 +284,7 @@ export function createMixer(
     for (const [to, send] of target.sends) {
       if (!returnIds.has(to)) {
         send.gain.disconnect();
+        send.delay.disconnect();
         target.sends.delete(to);
       }
     }
@@ -291,6 +296,35 @@ export function createMixer(
         passes(back.id) ? Math.max(0, track.sends[back.id] ?? 0) : 0
       );
     }
+  };
+
+  /** Sends a channel's sound to `to`, if it went elsewhere. */
+  const route = (target: Channel, to: AudioNode) => {
+    if (target.destination !== to) {
+      target.solo.disconnect(target.destination);
+      target.solo.connect(to);
+      target.destination = to;
+    }
+  };
+
+  /** Where a track plays into: its group's channel, unless the groups above it come round to it, then the main track. */
+  const destinationOf = (track: MixerTrack, state: MixerState): AudioNode => {
+    const groupOf = new Map(
+      state.tracks.map((each) => [each.id, each.group ?? null])
+    );
+    const seen = new Set([track.id]);
+    let at = groupOf.has(track.group ?? "") ? (track.group ?? null) : null;
+    while (at !== null) {
+      if (seen.has(at)) {
+        return main.input;
+      }
+      seen.add(at);
+      const next = groupOf.get(at) ?? null;
+      at = next !== null && groupOf.has(next) ? next : null;
+    }
+    return (
+      (track.group ? channels.get(track.group)?.input : undefined) ?? main.input
+    );
   };
 
   /** Makes the channels `state` has that the mixer has not, and removes the ones it no longer has. */
@@ -356,23 +390,32 @@ export function createMixer(
         ],
         { inPlace: state.soloInPlace ?? true }
       );
-      const plan = delayCompensation(state.tracks, state.returns);
+      const plan = routedCompensation(
+        state.tracks.map((track) => ({
+          ...track,
+          sends: Object.keys(track.sends).filter(
+            (to) => (track.sends[to] ?? 0) > 0
+          ),
+        })),
+        state.returns
+      );
       latency = plan.total;
       for (const track of state.returns) {
         const target = channels.get(track.id) as Channel;
         mix(target, track, solo.heard(track.id));
-        wait(target.compensation, plan.returns.get(track.id) ?? 0);
-        wait(target.late, 0);
+        wait(target.late, plan.out.get(track.id) ?? 0);
       }
       for (const track of state.tracks) {
         const target = channels.get(track.id) as Channel;
         mix(target, track, solo.heard(track.id));
-        const waits = plan.tracks.get(track.id);
-        wait(target.compensation, waits?.chain ?? 0);
-        wait(target.late, waits?.main ?? 0);
+        route(target, destinationOf(track, state));
+        wait(target.late, plan.out.get(track.id) ?? 0);
         routeSends(target, track, state.returns, (to) =>
           solo.sends(track.id, to)
         );
+        for (const [to, send] of target.sends) {
+          wait(send.delay, plan.sends.get(track.id)?.get(to) ?? 0);
+        }
       }
       const [left, right] = panGains(state.main.pan ?? 0);
       set(main, main.volume.gain, Math.max(0, state.main.gain));

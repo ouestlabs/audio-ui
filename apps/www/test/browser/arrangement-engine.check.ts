@@ -508,3 +508,109 @@ check(
     );
   }
 );
+
+/** The frame of the loudest sample, and its level, of a render's left channel. */
+function loudestOf(buffer: AudioBuffer) {
+  const data = buffer.getChannelData(0);
+  let at = 0;
+  for (let index = 1; index < data.length; index += 1) {
+    if (Math.abs(data[index] as number) > Math.abs(data[at] as number)) {
+      at = index;
+    }
+  }
+  return { at, level: Math.abs(data[at] as number) };
+}
+
+const unity = (gain: number, soloed = false) => ({
+  color: 0,
+  gain,
+  muted: false,
+  pan: 0,
+  soloed,
+});
+
+check(
+  "MIX-020: a track in a group plays through the group's channel",
+  async () => {
+    // Past the few milliseconds a fader takes to settle where it is set.
+    const at = 9600;
+    const doc = arrangement({
+      clips: [clip("a", "kick", 0, 0.5, "click")],
+      tracks: [
+        {
+          color: 0,
+          id: "drums",
+          kind: "group",
+          mix: unity(0.5),
+          name: "Drums",
+        },
+        { color: 1, group: "drums", id: "kick", mix: unity(1), name: "Kick" },
+      ],
+    });
+    const recordings = new Map([["click", impulse(0.5, at)]]);
+    const half = loudestOf(await render(doc, recordings, 0.5));
+    assert(
+      Math.abs(half.level - 0.25) < 1e-4,
+      `the kick through a group at half comes out at ${half.level}, not 0.25`
+    );
+    const silent = loudestOf(
+      await render(
+        {
+          ...doc,
+          tracks: doc.tracks.map((track) =>
+            track.id === "drums" ? { ...track, mix: unity(0) } : track
+          ),
+        },
+        recordings,
+        0.5
+      )
+    );
+    assert(
+      silent.level < 1e-6,
+      `the group's fader down leaves ${silent.level}`
+    );
+  }
+);
+
+check(
+  "MIX-021: a track behind a group that delays and a track outside it reach the main track on the same frame",
+  async () => {
+    const at = 1000;
+    const doc = arrangement({
+      clips: [
+        clip("a", "kick", 0, 0.5, "click"),
+        clip("b", "bass", 0, 0.5, "click"),
+      ],
+      tracks: [
+        {
+          color: 0,
+          // A compressor that looks ahead, set so it leaves an impulse alone.
+          devices: [device("d1", "audioui.compressor", { threshold: 0 })],
+          id: "drums",
+          kind: "group",
+          name: "Drums",
+        },
+        { color: 1, group: "drums", id: "kick", name: "Kick" },
+        { color: 2, id: "bass", name: "Bass" },
+      ],
+    });
+    const recordings = new Map([["click", impulse(0.5, at)]]);
+    const soloed = (id: string) => ({
+      ...doc,
+      tracks: doc.tracks.map((track) => ({
+        ...track,
+        mix: unity(1, track.id === id),
+      })),
+    });
+    const grouped = loudestOf(await render(soloed("kick"), recordings, 0.5));
+    const alone = loudestOf(await render(soloed("bass"), recordings, 0.5));
+    assert(
+      grouped.at === alone.at,
+      `the grouped track peaks at frame ${grouped.at}, the other at ${alone.at}`
+    );
+    assert(
+      alone.at > at,
+      `the track outside waits for the group (peak at ${alone.at})`
+    );
+  }
+);
