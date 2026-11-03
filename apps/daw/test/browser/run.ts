@@ -150,6 +150,22 @@ function assert(condition: unknown, message: string): asserts condition {
   }
 }
 
+/** The line of a marker just put at the cursor falls on the playhead, not beside it. */
+async function standsOnThePlayhead(page: Page, slot: string) {
+  const [line, playhead] = await Promise.all(
+    [slot, "timeline-playhead"].map((name) =>
+      page
+        .locator(`[data-slot=${name}]`)
+        .first()
+        .evaluate((element) => element.getBoundingClientRect().left)
+    )
+  );
+  assert(
+    Math.abs((line ?? 0) - (playhead ?? 0)) < 1,
+    `${slot} stands at ${line}, the playhead at ${playhead}`
+  );
+}
+
 const checks: Record<string, (browser: Browser) => Promise<void>> = {
   "ENG-001: the engine line shows the rate, the latency and the state": async (
     browser
@@ -666,6 +682,7 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       await page
         .getByRole("button", { name: "Locator 1" })
         .waitFor({ timeout: 5000 });
+      await standsOnThePlayhead(page, "timeline-locator");
       await page.keyboard.press("Home");
       await page.waitForFunction(
         () =>
@@ -703,6 +720,7 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         .getByText("7/8", { exact: true })
         .first()
         .waitFor({ timeout: 5000 });
+      await standsOnThePlayhead(page, "timeline-signature");
     },
   "ARR-018: the arrows move the cursor on the grid, End goes to the last clip, Up and Down pick a track":
     async (browser) => {

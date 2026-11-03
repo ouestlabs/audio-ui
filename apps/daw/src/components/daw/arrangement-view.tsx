@@ -29,7 +29,6 @@ import {
   Timeline,
   TimelineGridMenuItems,
   TimelineLane,
-  TimelineMark,
   TimelineNavigator,
   TimelinePlayhead,
   TimelineRange,
@@ -546,9 +545,11 @@ export function ArrangementView({
             >
               <TimelineLane className="h-6 border-b-0">
                 {locators.map((locator) => (
-                  <TimelineMark key={locator.at} value={locator.at}>
-                    <TimelineLocator locator={locator} {...markers.locator} />
-                  </TimelineMark>
+                  <TimelineLocator
+                    key={locator.at}
+                    locator={locator}
+                    {...markers.locator}
+                  />
                 ))}
               </TimelineLane>
             </Row>
@@ -572,13 +573,12 @@ export function ArrangementView({
             >
               <TimelineLane className="h-6 border-b-0">
                 {signatures.map((change) => (
-                  <TimelineMark key={change.id} value={change.at}>
-                    <TimelineSignature
-                      change={change}
-                      editing={markers.editingSignature === change.id}
-                      {...markers.signature}
-                    />
-                  </TimelineMark>
+                  <TimelineSignature
+                    change={change}
+                    editing={markers.editingSignature === change.id}
+                    key={change.id}
+                    {...markers.signature}
+                  />
                 ))}
               </TimelineLane>
             </Row>

@@ -479,21 +479,20 @@ const selection = useTimeSelection({
 
 ### Locators and time signatures
 
-`TimelineLocator` and `TimelineSignature` (`npx shadcn@latest add @audio-ui/timeline-markers`) go in a `TimelineMark` on a lane of their own. A locator is a named point: press it to put the cursor there, double-click it or press Enter to rename it, Delete to take it away. The block's M adds one at the cursor, and Alt with the arrows jumps from one to the next.
+`TimelineLocator` and `TimelineSignature` (`npx shadcn@latest add @audio-ui/timeline-markers`) go on a lane of their own, and stand on their time with their line. A locator is a named point: press it to put the cursor there, double-click it or press Enter to rename it, Delete to take it away. The block's M adds one at the cursor, and Alt with the arrows jumps from one to the next.
 
 ```tsx
 import { TimelineLocator, TimelineSignature } from "@/components/audio-ui/timeline-markers";
 
 <TimelineLane>
   {locators.map((locator) => (
-    <TimelineMark key={locator.at} value={locator.at}>
-      <TimelineLocator
-        locator={locator}
-        onJump={seek}
-        onRemove={removeLocator}
-        onRename={renameLocator}
-      />
-    </TimelineMark>
+    <TimelineLocator
+      key={locator.at}
+      locator={locator}
+      onJump={seek}
+      onRemove={removeLocator}
+      onRename={renameLocator}
+    />
   ))}
 </TimelineLane>;
 ```

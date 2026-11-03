@@ -859,7 +859,7 @@ function ClipSource({
                   <TimelineRangeHandle aria-label="Loop start" edge="start" />
                   <TimelineRangeHandle aria-label="Loop end" edge="end" />
                 </TimelineRange>
-                <TimelineMark value={offset}>
+                <TimelineMark className="border-s-0 ps-0" value={offset}>
                   <span className="border-foreground border-s-2 ps-1 text-xs">
                     Start
                   </span>

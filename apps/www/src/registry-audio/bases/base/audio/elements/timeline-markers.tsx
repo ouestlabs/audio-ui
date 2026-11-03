@@ -47,8 +47,11 @@ function stopPress(event: PointerEvent<HTMLElement>) {
   event.stopPropagation();
 }
 
+/** A mark for a marker: no tick or padding of a mark's own, so the marker's own line stands on its time. */
+const ON_ITS_TIME = "border-s-0 ps-0";
+
 /**
- * A locator, placed in a `TimelineMark`: press it to put the cursor there,
+ * A locator, on its time on a lane: press it to put the cursor there,
  * double-click it or press Enter to rename it (Enter keeps the name, Escape
  * drops the change), Delete takes it away.
  */
@@ -112,48 +115,52 @@ function TimelineLocator({
 
   if (editing) {
     return (
-      <input
-        aria-label="Locator name"
-        autoFocus
-        className="h-full w-24 border-primary border-s-2 bg-background px-1 text-primary text-xs outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        data-slot="timeline-locator-input"
-        defaultValue={name}
-        onBlur={handleBlur}
-        onKeyDown={handleEditKeyDown}
-        onPointerDown={stopPress}
-      />
+      <TimelineMark className={ON_ITS_TIME} value={at}>
+        <input
+          aria-label="Locator name"
+          autoFocus
+          className="h-full w-24 border-primary border-s-2 bg-background px-1 text-primary text-xs outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          data-slot="timeline-locator-input"
+          defaultValue={name}
+          onBlur={handleBlur}
+          onKeyDown={handleEditKeyDown}
+          onPointerDown={stopPress}
+        />
+      </TimelineMark>
     );
   }
   return (
-    <ContextMenu onOpenChangeComplete={handleMenuClosed}>
-      <ContextMenuTrigger
-        render={
-          <button
-            aria-label={`Locator ${name}`}
-            className="pointer-events-auto flex h-full items-center whitespace-nowrap border-primary border-s-2 ps-1 pe-2 text-primary text-xs outline-none hover:bg-primary/10 focus-visible:ring-2 focus-visible:ring-ring"
-            data-slot="timeline-locator"
-            onClick={handleClick}
-            onDoubleClick={startEditing}
-            onKeyDown={handleKeyDown}
-            type="button"
-          />
-        }
-      >
-        {name}
-      </ContextMenuTrigger>
-      <ContextMenuContent className="w-auto min-w-32">
-        <ContextMenuItem onClick={renameWhenClosed}>Rename</ContextMenuItem>
-        <ContextMenuSeparator />
-        <ContextMenuItem onClick={handleRemove} variant="destructive">
-          Delete
-        </ContextMenuItem>
-      </ContextMenuContent>
-    </ContextMenu>
+    <TimelineMark className={ON_ITS_TIME} value={at}>
+      <ContextMenu onOpenChangeComplete={handleMenuClosed}>
+        <ContextMenuTrigger
+          render={
+            <button
+              aria-label={`Locator ${name}`}
+              className="pointer-events-auto flex h-full items-center whitespace-nowrap border-primary border-s-2 ps-1 pe-2 text-primary text-xs outline-none hover:bg-primary/10 focus-visible:ring-2 focus-visible:ring-ring"
+              data-slot="timeline-locator"
+              onClick={handleClick}
+              onDoubleClick={startEditing}
+              onKeyDown={handleKeyDown}
+              type="button"
+            />
+          }
+        >
+          {name}
+        </ContextMenuTrigger>
+        <ContextMenuContent className="w-auto min-w-32">
+          <ContextMenuItem onClick={renameWhenClosed}>Rename</ContextMenuItem>
+          <ContextMenuSeparator />
+          <ContextMenuItem onClick={handleRemove} variant="destructive">
+            Delete
+          </ContextMenuItem>
+        </ContextMenuContent>
+      </ContextMenu>
+    </TimelineMark>
   );
 }
 
 /**
- * A time-signature change, placed in a `TimelineMark`: press it to put the
+ * A time-signature change, on its time on a lane: press it to put the
  * cursor there, double-click it or press Enter to type a new signature such
  * as 7/8 (Enter keeps it, Escape drops it), Left and Right move it by `step`,
  * Delete takes it away. Which change is being typed is held by the host
@@ -225,43 +232,47 @@ function TimelineSignature({
 
   if (editing) {
     return (
-      <input
-        aria-label="Time signature, such as 7/8"
-        autoFocus
-        className="h-full w-14 border-primary border-s-2 bg-background px-1 text-primary text-xs tabular-nums outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        data-slot="timeline-signature-input"
-        defaultValue={label}
-        onBlur={stopEditing}
-        onKeyDown={handleEditKeyDown}
-        onPointerDown={stopPress}
-      />
+      <TimelineMark className={ON_ITS_TIME} value={at}>
+        <input
+          aria-label="Time signature, such as 7/8"
+          autoFocus
+          className="h-full w-14 border-primary border-s-2 bg-background px-1 text-primary text-xs tabular-nums outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          data-slot="timeline-signature-input"
+          defaultValue={label}
+          onBlur={stopEditing}
+          onKeyDown={handleEditKeyDown}
+          onPointerDown={stopPress}
+        />
+      </TimelineMark>
     );
   }
   return (
-    <ContextMenu>
-      <ContextMenuTrigger
-        render={
-          <button
-            aria-label={`Time signature ${label}`}
-            className="pointer-events-auto flex h-full items-center whitespace-nowrap border-foreground/60 border-s-2 ps-1 pe-2 text-xs tabular-nums outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring"
-            data-slot="timeline-signature"
-            onClick={handleClick}
-            onDoubleClick={startEditing}
-            onKeyDown={handleKeyDown}
-            type="button"
-          />
-        }
-      >
-        {label}
-      </ContextMenuTrigger>
-      <ContextMenuContent className="w-auto min-w-32">
-        <ContextMenuItem onClick={startEditing}>Edit</ContextMenuItem>
-        <ContextMenuSeparator />
-        <ContextMenuItem onClick={handleRemove} variant="destructive">
-          Delete
-        </ContextMenuItem>
-      </ContextMenuContent>
-    </ContextMenu>
+    <TimelineMark className={ON_ITS_TIME} value={at}>
+      <ContextMenu>
+        <ContextMenuTrigger
+          render={
+            <button
+              aria-label={`Time signature ${label}`}
+              className="pointer-events-auto flex h-full items-center whitespace-nowrap border-foreground/60 border-s-2 ps-1 pe-2 text-xs tabular-nums outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring"
+              data-slot="timeline-signature"
+              onClick={handleClick}
+              onDoubleClick={startEditing}
+              onKeyDown={handleKeyDown}
+              type="button"
+            />
+          }
+        >
+          {label}
+        </ContextMenuTrigger>
+        <ContextMenuContent className="w-auto min-w-32">
+          <ContextMenuItem onClick={startEditing}>Edit</ContextMenuItem>
+          <ContextMenuSeparator />
+          <ContextMenuItem onClick={handleRemove} variant="destructive">
+            Delete
+          </ContextMenuItem>
+        </ContextMenuContent>
+      </ContextMenu>
+    </TimelineMark>
   );
 }
 
