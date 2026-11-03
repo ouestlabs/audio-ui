@@ -38,6 +38,14 @@ export const pocketSynthDevice = defineDevice({
       scale: "log",
       unit: "Hz",
     },
+    {
+      default: 1,
+      id: "velocity",
+      label: "Velocity",
+      max: 1,
+      min: 0,
+      step: 0.01,
+    },
   ],
   parameters: [
     {
@@ -78,10 +86,12 @@ export const pocketSynthDevice = defineDevice({
 
 export type PocketSynthState = DeviceState<typeof pocketSynthDevice.parameters>;
 
-/** What is played: a pitch and the cutoff of the filter, both in hertz. */
+/** What is played: a pitch and the cutoff of the filter, both in hertz, and how hard, from 0 to 1. */
 export interface PocketSynthNote {
   cutoff: number;
   frequency: number;
+  /** How loud the note plays, from 0 to 1. @default 1 */
+  velocity?: number;
 }
 
 /** The pitch at a position from 0 to 1 along a log axis from 30 Hz to 1046 Hz. */

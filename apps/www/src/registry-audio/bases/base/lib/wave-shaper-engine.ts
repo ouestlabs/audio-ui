@@ -1,4 +1,4 @@
-import type { InstrumentBinding } from "@audio-ui/core/device";
+import type { InstrumentBinding, NoteTiming } from "@audio-ui/core/device";
 import { createOversamplingDelay } from "@/registry-audio/bases/base/lib/oversampling";
 import {
   type WaveShaperNote,
@@ -27,8 +27,14 @@ interface Voice {
   dry: GainNode;
   envelope: GainNode;
   filter: BiquadFilterNode;
+  /** The note it plays, as `noteOn` named it. */
+  id: NoteTiming["id"];
   main: OscillatorNode;
+  /** The level its attack rises to: the note's velocity. */
+  peak: number;
   shaper: WaveShaperNode;
+  /** When its attack began, on the audio clock. */
+  start: number;
   wet: GainNode;
 }
 
@@ -55,8 +61,13 @@ export function createWaveShaperEngine(
   let curveDrive = Number.NaN;
   output.gain.value = initial.volume * LEVEL;
 
-  const follow = (param: AudioParam, value: number) =>
-    param.setTargetAtTime(value, ctx.currentTime, RAMP_SECONDS);
+  const follow = (param: AudioParam, value: number, at = ctx.currentTime) =>
+    param.setTargetAtTime(value, at, RAMP_SECONDS);
+  /** A time on the audio clock that has not passed: now at the earliest. */
+  const when = (at?: number) => Math.max(ctx.currentTime, at ?? 0);
+  /** Where the voice's envelope stands at `time`: up its attack, then held. */
+  const levelAt = (held: Voice, time: number) =>
+    held.peak * Math.min(1, Math.max(0, (time - held.start) / ATTACK_SECONDS));
 
   const curveFor = (drive: number) => {
     if (!curve || curveDrive !== drive) {
@@ -75,27 +86,32 @@ export function createWaveShaperEngine(
       voice = null;
       output.disconnect();
     },
-    noteOff: () => {
-      if (!voice) {
+    noteOff: ({ at, id } = {}) => {
+      if (
+        !voice ||
+        (id !== undefined && voice.id !== undefined && id !== voice.id)
+      ) {
         return;
       }
       const { detuned, envelope, main } = voice;
-      const now = ctx.currentTime;
-      envelope.gain.cancelScheduledValues(now);
-      envelope.gain.setValueAtTime(envelope.gain.value, now);
-      envelope.gain.linearRampToValueAtTime(0, now + RELEASE_SECONDS);
-      main.stop(now + RELEASE_SECONDS + RAMP_SECONDS);
-      detuned.stop(now + RELEASE_SECONDS + RAMP_SECONDS);
+      const time = when(at);
+      envelope.gain.cancelScheduledValues(time);
+      envelope.gain.setValueAtTime(levelAt(voice, time), time);
+      envelope.gain.linearRampToValueAtTime(0, time + RELEASE_SECONDS);
+      main.stop(time + RELEASE_SECONDS + RAMP_SECONDS);
+      detuned.stop(time + RELEASE_SECONDS + RAMP_SECONDS);
       voice = null;
     },
-    noteOn: (note) => {
+    noteOn: (note, { at, id } = {}) => {
+      const now = when(at);
       if (voice) {
-        follow(voice.main.frequency, note.frequency);
-        follow(voice.detuned.frequency, note.frequency);
-        follow(voice.filter.Q, note.resonance);
+        follow(voice.main.frequency, note.frequency, now);
+        follow(voice.detuned.frequency, note.frequency, now);
+        follow(voice.filter.Q, note.resonance, now);
+        voice.id = id;
         return;
       }
-      const now = ctx.currentTime;
+      const peak = Math.min(1, Math.max(0, note.velocity ?? 1));
       const main = ctx.createOscillator();
       const detuned = ctx.createOscillator();
       const mixed = ctx.createGain();
@@ -120,7 +136,7 @@ export function createWaveShaperEngine(
       filter.frequency.setValueAtTime(waveShaperCutoff(state.tone), now);
       filter.Q.setValueAtTime(note.resonance, now);
       envelope.gain.setValueAtTime(0, now);
-      envelope.gain.linearRampToValueAtTime(1, now + ATTACK_SECONDS);
+      envelope.gain.linearRampToValueAtTime(peak, now + ATTACK_SECONDS);
 
       main.connect(mixed);
       detuned.connect(mixed);
@@ -144,7 +160,18 @@ export function createWaveShaperEngine(
       };
       main.start(now);
       detuned.start(now);
-      voice = { detuned, dry, envelope, filter, main, shaper, wet };
+      voice = {
+        detuned,
+        dry,
+        envelope,
+        filter,
+        id,
+        main,
+        peak,
+        shaper,
+        start: now,
+        wet,
+      };
     },
     output,
     update: (next) => {

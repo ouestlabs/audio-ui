@@ -53,10 +53,12 @@ class FakeOscillator extends FakeNode {
   readonly frequency = new FakeParam();
   onended: (() => void) | null = null;
   started = 0;
+  startedAt: number[] = [];
   stopped: number[] = [];
   type = "";
-  start() {
+  start(when?: number) {
     this.started += 1;
+    this.startedAt.push(when ?? 0);
   }
   stop(when?: number) {
     this.stopped.push(when ?? 0);
@@ -162,6 +164,55 @@ describe("createPocketSynthEngine", () => {
     expect(created.filters[0]?.type).toBe("highpass");
   });
 
+  test("MID-002: a note starts and ends at the times it is given on the audio clock", () => {
+    const { created, ctx } = fakeContext();
+    const engine = createPocketSynthEngine(ctx, defaults);
+    engine.noteOn(NOTE, { at: 3 });
+    const [oscillator] = created.oscillators;
+    const [, envelope] = created.gains;
+    expect(oscillator?.startedAt).toEqual([3]);
+    expect(envelope?.gain.sets[0]).toEqual({ time: 3, value: 0 });
+    expect(envelope?.gain.ramps[0]).toEqual({ time: 3.02, value: 1 });
+    engine.noteOff({ at: 3.5 });
+    // Its release starts from where the attack had taken it.
+    expect(envelope?.gain.sets.at(-1)).toEqual({ time: 3.5, value: 1 });
+    expect(envelope?.gain.ramps.at(-1)?.time).toBeCloseTo(3.55, 9);
+    expect(oscillator?.stopped[0]).toBeCloseTo(3.56, 9);
+  });
+
+  test("a note off before the attack is over releases from where it had got to", () => {
+    const { created, ctx } = fakeContext();
+    const engine = createPocketSynthEngine(ctx, defaults);
+    engine.noteOn(NOTE, { at: 3 });
+    engine.noteOff({ at: 3.01 });
+    expect(created.gains[1]?.gain.sets.at(-1)?.value).toBeCloseTo(0.5, 9);
+  });
+
+  test("a time already past plays now", () => {
+    const { created, ctx } = fakeContext();
+    const engine = createPocketSynthEngine(ctx, defaults);
+    engine.noteOn(NOTE, { at: 1 });
+    expect(created.oscillators[0]?.startedAt).toEqual([2]);
+  });
+
+  test("a note off that names another note than the held one lets nothing go", () => {
+    const { created, ctx } = fakeContext();
+    const engine = createPocketSynthEngine(ctx, defaults);
+    engine.noteOn(NOTE, { id: "a" });
+    engine.noteOn({ cutoff: 1000, frequency: 330 }, { id: "b" });
+    engine.noteOff({ id: "a" });
+    expect(created.oscillators[0]?.stopped).toHaveLength(0);
+    engine.noteOff({ id: "b" });
+    expect(created.oscillators[0]?.stopped).toHaveLength(1);
+  });
+
+  test("a note plays as loud as its velocity", () => {
+    const { created, ctx } = fakeContext();
+    const engine = createPocketSynthEngine(ctx, defaults);
+    engine.noteOn({ ...NOTE, velocity: 0.25 });
+    expect(created.gains[1]?.gain.ramps[0]?.value).toBe(0.25);
+  });
+
   test("dispose stops the held voice", () => {
     const { created, ctx } = fakeContext();
     const engine = createPocketSynthEngine(ctx, defaults);
@@ -208,7 +259,7 @@ describe("an agent playing the pocket synth", () => {
       cutoff: 3000,
       frequency: 440,
     });
-    expect(result?.note).toEqual({ cutoff: 3000, frequency: 440 });
+    expect(result?.note).toEqual({ cutoff: 3000, frequency: 440, velocity: 1 });
     const { created, ctx } = fakeContext();
     const engine = createPocketSynthEngine(ctx, pocketSynthDevice.defaults());
     engine.noteOn(result?.note as { cutoff: number; frequency: number });

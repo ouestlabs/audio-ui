@@ -32,8 +32,12 @@ The panel has a pad that plays the synth: its position gives the note, so the pi
 Create it, connect it and update it as for any device: see [The engine](/docs/devices#the-engine).
 
 ```ts
-engine.noteOn(note); // starts a note, or glides the one being held
+engine.noteOn(note); // starts a note now, or glides the one being held
 engine.noteOff(); // lets it go
+
+// Scheduled ahead on the audio clock, by a host that plays notes from a song:
+engine.noteOn({ ...note, velocity: 0.8 }, { at: time, id: "c4" });
+engine.noteOff({ at: time + length, id: "c4" });
 ```
 
-One voice at a time. `noteOn` starts a note, or glides the one being held to the new one, and `noteOff` releases it. The wave and the filter type of a state change under a held note. An agent plays the synth with the `play` tool.
+One voice at a time. `noteOn` starts a note, or glides the one being held to the new one, and `noteOff` releases it. Both take an optional `{ at, id }`: `at` is a time of the audio clock, now when there is none, and a `noteOff` whose `id` is not the held note's lets nothing go, since the held note took over from it. A note plays as loud as its `velocity`, from 0 to 1. The wave and the filter type of a state change under a held note. An agent plays the synth with the `play` tool.
