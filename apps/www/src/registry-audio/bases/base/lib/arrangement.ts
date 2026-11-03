@@ -1,3 +1,4 @@
+import type { ParameterValue } from "@audio-ui/core/device";
 import { type Breakpoint, levelAt } from "@audio-ui/core/envelope";
 import type { Note } from "@audio-ui/core/piano-roll";
 import { type WarpMarker, warpedTime } from "@audio-ui/core/time";
@@ -32,6 +33,11 @@ export interface Arranged {
    * or moving the clip leaves each note where it was in the source.
    */
   notes?: readonly Note[];
+  /**
+   * The id of the recording an audio clip plays. Every piece cut from the clip,
+   * and every copy of it, plays the same one.
+   */
+  recording?: string;
   /** Whether its source plays backwards. */
   reversed?: boolean;
   /** Where its source begins in the recording it was cut from, once cropped. @default 0 */
@@ -69,18 +75,40 @@ export type TrackAutomation = Partial<
   Record<AutomatedParameter, readonly Breakpoint[]>
 >;
 
+/**
+ * A device on a track's chain: which one (its stable id, such as
+ * `audioui.compressor`), its state, and whether it is switched on. Its own id
+ * stays the same as it moves along the chain.
+ */
+export interface TrackDevice {
+  /** The id of the device it is, as its description gives it. */
+  device: string;
+  id: string;
+  /** An instrument comes first on a MIDI track, before every effect. */
+  instrument?: boolean;
+  /** A device switched off passes the sound on unchanged. @default true */
+  on?: boolean;
+  state: Readonly<Record<string, ParameterValue>>;
+}
+
 /** A track of an arrangement. */
 export interface ArrangementTrack {
   /** Its automation, by parameter. */
   automation?: TrackAutomation;
   /** An index into the colors a track can take. */
   color: number;
+  /** Its device chain, from first to last. */
+  devices?: readonly TrackDevice[];
   id: string;
   /** @default "audio" */
   kind?: TrackKind;
   /** What its header sets: a track that has none plays at unity. Undo takes it back, and a duplicate of the track keeps it. */
   mix?: Mix;
   name: string;
+  /** On a return track: whether what the others send it is taken before their volume, pan and switch, rather than after. @default false */
+  pre?: boolean;
+  /** How much it sends to each return track, by the return's id, as a gain from 0 (silence, the default) to 1 (0 dB). */
+  sends?: Readonly<Record<string, number>>;
 }
 
 /** What a track's header sets: how loud it is, where it sits in the stereo field, and whether it is silenced or soloed. */

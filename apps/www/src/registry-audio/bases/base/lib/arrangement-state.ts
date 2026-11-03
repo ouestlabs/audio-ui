@@ -15,6 +15,7 @@ import {
   removeTime,
   setClipFadeShape,
   splitClip,
+  trimClipEnd,
 } from "@audio-ui/react";
 import {
   type Arranged,
@@ -25,6 +26,7 @@ import {
   type Mix,
   mixOf,
   type TimeSelection,
+  type TrackDevice,
   type TrackKind,
 } from "@/registry-audio/bases/base/lib/arrangement";
 import {
@@ -181,19 +183,37 @@ export function scaleValue(value: ClipValue, ratio: number): ClipValue {
 }
 
 /**
- * A clip at a new tempo, `ratio` times as long: where it sits and its source.
- * A MIDI clip's notes and loop are in beats at heart, so they follow the
- * tempo too; a recording's loop stays where it is in the recording.
+ * A clip at a new tempo, every time of the song `ratio` times what it was. A
+ * MIDI clip is in beats at heart: its place, its notes and its loop all
+ * follow. A warped recording follows through its markers: its own times (its
+ * place, its length, where it starts, its loop) and the markers' places on
+ * it, while the recording itself stays as it is. A recording that is not
+ * warped keeps its speed: only its start follows the bar, and it lasts as
+ * many seconds as before.
  */
 export function scaleClip(clip: Arranged, ratio: number): Arranged {
+  if (!clip.notes) {
+    if (!clip.warp) {
+      return {
+        ...clip,
+        value: { ...clip.value, start: clip.value.start * ratio },
+      };
+    }
+    return {
+      ...clip,
+      loop: clip.loop && [clip.loop[0] * ratio, clip.loop[1] * ratio],
+      value: scaleValue(clip.value, ratio),
+      warp: clip.warp.map((marker) => ({
+        ...marker,
+        target: marker.target * ratio,
+      })),
+    };
+  }
   const scaled: Arranged = {
     ...clip,
     sourceLength: clip.sourceLength * ratio,
     value: scaleValue(clip.value, ratio),
   };
-  if (!clip.notes) {
-    return scaled;
-  }
   return {
     ...scaled,
     loop: clip.loop && [clip.loop[0] * ratio, clip.loop[1] * ratio],
@@ -203,6 +223,27 @@ export function scaleClip(clip: Arranged, ratio: number): Arranged {
       start: note.start * ratio,
     })),
   };
+}
+
+/**
+ * Clips that run into the next one on their track end where it starts, and
+ * none runs past the end of the timeline: what a change of tempo can leave
+ * when recordings keep their speed.
+ */
+export function settleOverlaps(all: Arranged[], duration: number): Arranged[] {
+  const byStart = [...all].sort((a, b) => a.value.start - b.value.start);
+  return all.map((clip) => {
+    const next = byStart.find(
+      (other) =>
+        other.track === clip.track &&
+        other.id !== clip.id &&
+        other.value.start > clip.value.start
+    );
+    const end = Math.min(duration, next?.value.start ?? duration);
+    return clip.value.start + clip.value.length > end
+      ? { ...clip, value: trimClipEnd(clip.value, end, { duration }) }
+      : clip;
+  });
 }
 
 /** The parts of the clips in a stretch of time on some tracks, ready to paste. */
@@ -488,6 +529,10 @@ export interface ArrangementDoc {
   duration: number;
   locators: ArrangementLocator[];
   loop: ArrangementLoop;
+  /** The track every other one goes to, and that goes to the output. */
+  main: ArrangementTrack;
+  /** The return tracks: what the tracks send to, after the tracks, before the main track. */
+  returns: ArrangementTrack[];
   /** Changes of time signature along the song, in seconds; the tempo holds the one it starts in. */
   signatures: ArrangementSignature[];
   tempo: Tempo;
@@ -533,12 +578,21 @@ export interface ArrangementState {
   trackCount: number;
 }
 
+/** The main track a new arrangement starts with. */
+export const MAIN_TRACK: ArrangementTrack = {
+  color: 0,
+  id: "main",
+  name: "Main",
+};
+
 export function createArrangementState({
   colors,
   duration,
   initialClips = [],
   initialLocators = [],
   initialLoop = { on: false, range: [0, 0] },
+  initialMain = MAIN_TRACK,
+  initialReturns = [],
   initialSignatures = [],
   initialTracks,
   tempo,
@@ -548,6 +602,8 @@ export function createArrangementState({
   initialClips?: Arranged[];
   initialLocators?: ArrangementLocator[];
   initialLoop?: ArrangementLoop;
+  initialMain?: ArrangementTrack;
+  initialReturns?: ArrangementTrack[];
   initialSignatures?: ArrangementSignature[];
   initialTracks: ArrangementTrack[];
   tempo: Tempo;
@@ -559,6 +615,8 @@ export function createArrangementState({
       duration,
       locators: initialLocators,
       loop: initialLoop,
+      main: initialMain,
+      returns: initialReturns,
       signatures: initialSignatures,
       tempo,
       tracks: initialTracks,
@@ -595,7 +653,48 @@ export type ArrangementCommand =
     }
   /** Keeps the musical positions: everything is scaled to the new bar. */
   | { type: "set-tempo"; tempo: Tempo }
-  | { type: "add-track"; afterId?: string; kind?: TrackKind }
+  /** A return track goes after the others: `afterId` places it among the returns. */
+  | { type: "add-track"; afterId?: string; kind?: TrackKind | "return" }
+  // Devices: a track's chain, by the track's id (a track, a return or the main track).
+  /** Puts a device on a track's chain at `index` (its end when there is none). An instrument goes first on a MIDI track, in place of the one there was, and on no other track. */
+  | {
+      type: "add-device";
+      track: string;
+      device: string;
+      instrument?: boolean;
+      state: TrackDevice["state"];
+      index?: number;
+    }
+  /** A turn of a device's knob: a burst, which `settle-clip-edit` closes into one step. */
+  | {
+      type: "change-device";
+      track: string;
+      id: string;
+      state: TrackDevice["state"];
+    }
+  /** Moves a device along its chain, or to another track's chain with `to`. */
+  | {
+      type: "move-device";
+      track: string;
+      id: string;
+      index: number;
+      to?: string;
+    }
+  | { type: "remove-device"; track: string; id: string }
+  | {
+      type: "set-device";
+      track: string;
+      id: string;
+      state: TrackDevice["state"];
+    }
+  /** Switches a device on or off. */
+  | { type: "toggle-device"; track: string; id: string }
+  // Sends: how much a track sends to a return, as a gain from 0 to 1.
+  /** A drag of a send: a burst, which `settle-clip-edit` closes into one step. */
+  | { type: "change-send"; track: string; to: string; level: number }
+  | { type: "set-send"; track: string; to: string; level: number }
+  /** Whether a return takes what is sent to it before the senders' volume, pan and switch. */
+  | { type: "set-send-mode"; id: string; pre: boolean }
   | {
       type: "change-automation";
       trackId: string;
@@ -651,6 +750,42 @@ const NONE: readonly string[] = [];
 
 const trackOrder = (doc: ArrangementDoc) => doc.tracks.map((track) => track.id);
 
+/** Every track of the document: the tracks, the returns, then the main track. */
+export function allTracks(doc: ArrangementDoc): ArrangementTrack[] {
+  return [...doc.tracks, ...doc.returns, doc.main];
+}
+
+/** The track `id`, wherever it is: one of the tracks, a return or the main track. */
+export function trackOf(
+  doc: ArrangementDoc,
+  id: string
+): ArrangementTrack | undefined {
+  return allTracks(doc).find((track) => track.id === id);
+}
+
+/** Whether `id` is a return track or the main track: they play no clips and hold no instrument. */
+function isBus(doc: ArrangementDoc, id: string): boolean {
+  return doc.main.id === id || doc.returns.some((track) => track.id === id);
+}
+
+/** The document with the track `id` changed, wherever it is; the same document when `change` changes nothing. */
+function withTrack(
+  doc: ArrangementDoc,
+  id: string,
+  change: (track: ArrangementTrack) => ArrangementTrack
+): ArrangementDoc {
+  if (doc.main.id === id) {
+    return { ...doc, main: change(doc.main) };
+  }
+  const list = doc.returns.some((track) => track.id === id)
+    ? "returns"
+    : "tracks";
+  return {
+    ...doc,
+    [list]: doc[list].map((track) => (track.id === id ? change(track) : track)),
+  };
+}
+
 /** A new id for a piece of the clip `id`: the first `-n` that no clip in `taken` has. */
 function sameItems<T>(a: readonly T[], b: readonly T[]): boolean {
   return a.length === b.length && a.every((item, index) => item === b[index]);
@@ -661,6 +796,8 @@ function sameDoc(a: ArrangementDoc, b: ArrangementDoc): boolean {
   return (
     sameItems(a.clips, b.clips) &&
     sameItems(a.tracks, b.tracks) &&
+    sameItems(a.returns, b.returns) &&
+    a.main === b.main &&
     sameItems(a.locators, b.locators) &&
     sameItems(a.signatures, b.signatures) &&
     a.duration === b.duration &&
@@ -910,6 +1047,162 @@ function selectTrack(
   });
 }
 
+/** The ids every device of the document has. */
+function deviceIds(doc: ArrangementDoc): Set<string> {
+  return new Set(
+    allTracks(doc).flatMap((track) =>
+      (track.devices ?? []).map((device) => device.id)
+    )
+  );
+}
+
+/**
+ * A chain with `device` at `index`, or at its end: an instrument goes first,
+ * in place of the one there was, and no effect goes before it.
+ */
+function placeDevice(
+  chain: readonly TrackDevice[],
+  device: TrackDevice,
+  index?: number
+): TrackDevice[] {
+  const others = chain.filter(
+    (item) => item.id !== device.id && !(device.instrument && item.instrument)
+  );
+  if (device.instrument) {
+    return [device, ...others];
+  }
+  const first = others[0]?.instrument ? 1 : 0;
+  const at = Math.min(others.length, Math.max(first, index ?? others.length));
+  return [...others.slice(0, at), device, ...others.slice(at)];
+}
+
+/** Whether the track `id` can hold an instrument: a MIDI track. */
+function holdsInstrument(doc: ArrangementDoc, id: string): boolean {
+  return !isBus(doc, id) && trackOf(doc, id)?.kind === "midi";
+}
+
+function addDevice(
+  state: ArrangementState,
+  command: Extract<ArrangementCommand, { type: "add-device" }>
+): ArrangementState {
+  const { device, index, instrument, state: values, track } = command;
+  if (
+    !trackOf(state.doc, track) ||
+    (instrument && !holdsInstrument(state.doc, track))
+  ) {
+    return state;
+  }
+  const added: TrackDevice = {
+    device,
+    id: freshId("device", deviceIds(state.doc)),
+    ...(instrument ? { instrument: true } : {}),
+    state: values,
+  };
+  return edit(state, (doc) =>
+    withTrack(doc, track, (item) => ({
+      ...item,
+      devices: placeDevice(item.devices ?? [], added, index),
+    }))
+  );
+}
+
+function moveDevice(
+  state: ArrangementState,
+  { id, index, to, track }: Extract<ArrangementCommand, { type: "move-device" }>
+): ArrangementState {
+  const target = to ?? track;
+  const device = trackOf(state.doc, track)?.devices?.find(
+    (item) => item.id === id
+  );
+  if (
+    !(device && trackOf(state.doc, target)) ||
+    (device.instrument && !holdsInstrument(state.doc, target))
+  ) {
+    return state;
+  }
+  const chain = trackOf(state.doc, target)?.devices ?? [];
+  const placed = placeDevice(chain, device, index);
+  if (sameItems(placed, chain)) {
+    return state;
+  }
+  return edit(state, (doc) => {
+    const left =
+      target === track
+        ? doc
+        : withTrack(doc, track, (item) => ({
+            ...item,
+            devices: (item.devices ?? []).filter((other) => other.id !== id),
+          }));
+    return withTrack(left, target, (item) => ({ ...item, devices: placed }));
+  });
+}
+
+/** The track's device `id` changed by `change`, as one step (`edit`) or a burst. */
+function changeDevice(
+  state: ArrangementState,
+  track: string,
+  id: string,
+  change: (device: TrackDevice) => TrackDevice,
+  write: typeof edit
+): ArrangementState {
+  return write(state, (doc) =>
+    withTrack(doc, track, (item) => {
+      const devices = (item.devices ?? []).map((device) =>
+        device.id === id ? change(device) : device
+      );
+      return sameItems(devices, item.devices ?? [])
+        ? item
+        : { ...item, devices };
+    })
+  );
+}
+
+/** How much `track` sends to the return `to`, as one step or a burst. */
+function setSend(
+  state: ArrangementState,
+  track: string,
+  to: string,
+  level: number,
+  write: typeof edit
+): ArrangementState {
+  const gain = Number.isFinite(level) ? Math.min(1, Math.max(0, level)) : 0;
+  if (
+    track === to ||
+    !state.doc.returns.some((item) => item.id === to) ||
+    (trackOf(state.doc, track)?.sends?.[to] ?? 0) === gain
+  ) {
+    return state;
+  }
+  return write(state, (doc) =>
+    withTrack(doc, track, (item) => ({
+      ...item,
+      sends: { ...item.sends, [to]: gain },
+    }))
+  );
+}
+
+/** A new return track, named by its letter, after the others or after `afterId`. */
+function addReturn(
+  state: ArrangementState,
+  afterId: string | undefined
+): ArrangementState {
+  const { returns } = state.doc;
+  const letter = String.fromCharCode(65 + (returns.length % 26));
+  const track: ArrangementTrack = {
+    color: returns.length % state.colors,
+    id: freshId("return", new Set(returns.map((item) => item.id))),
+    name: `${letter} Return`,
+  };
+  return edit(state, (doc) => {
+    const at = afterId
+      ? doc.returns.findIndex((item) => item.id === afterId) + 1
+      : doc.returns.length;
+    const next = [...doc.returns];
+    next.splice(at || doc.returns.length, 0, track);
+    return { ...doc, returns: next };
+  });
+}
+
 /** What one kind of command does to the state: its handler, given the command with its own fields. */
 type Handlers = {
   [K in ArrangementCommand["type"]]: (
@@ -924,8 +1217,13 @@ function duplicateTrack(state: ArrangementState, id: string): ArrangementState {
     return state;
   }
   const count = state.trackCount + 1;
+  const devicesTaken = deviceIds(state.doc);
   const copy: ArrangementTrack = {
     ...source,
+    devices: source.devices?.map((device) => ({
+      ...device,
+      id: freshId("device", devicesTaken),
+    })),
     id: `track-${count}`,
     name: `${source.name} copy`,
   };
@@ -951,18 +1249,21 @@ function moveTrack(
   index: number
 ): ArrangementState {
   return edit(state, (doc) => {
-    const from = doc.tracks.findIndex((item) => item.id === id);
+    const list = doc.returns.some((item) => item.id === id)
+      ? "returns"
+      : "tracks";
+    const from = doc[list].findIndex((item) => item.id === id);
     if (from === -1 || from === index) {
       return doc;
     }
-    const tracks = [...doc.tracks];
-    const [moved] = tracks.splice(from, 1);
-    tracks.splice(
-      Math.min(Math.max(index, 0), tracks.length),
+    const moved = [...doc[list]];
+    const [track] = moved.splice(from, 1);
+    moved.splice(
+      Math.min(Math.max(index, 0), moved.length),
       0,
-      moved as ArrangementTrack
+      track as ArrangementTrack
     );
-    return { ...doc, tracks };
+    return { ...doc, [list]: moved };
   });
 }
 
@@ -972,12 +1273,7 @@ function changeTrack(
   change: (track: ArrangementTrack) => ArrangementTrack,
   write: typeof edit
 ): ArrangementState {
-  return write(state, (doc) => ({
-    ...doc,
-    tracks: doc.tracks.map((track) =>
-      track.id === id ? change(track) : track
-    ),
-  }));
+  return write(state, (doc) => withTrack(doc, id, change));
 }
 
 /** Whether `patch` says nothing the mix does not already say. */
@@ -993,7 +1289,7 @@ function setMix(
   patch: Partial<Omit<Mix, "color">>,
   write: typeof edit
 ): ArrangementState {
-  const track = state.doc.tracks.find((item) => item.id === id);
+  const track = trackOf(state.doc, id);
   if (!track || sameMix(mixOf(track), patch)) {
     return state;
   }
@@ -1014,15 +1310,12 @@ function renameTrack(
   name: string
 ): ArrangementState {
   const next = name.trim();
-  if (!next || next === state.doc.tracks.find((item) => item.id === id)?.name) {
+  if (!next || next === trackOf(state.doc, id)?.name) {
     return state;
   }
-  return edit(state, (doc) => ({
-    ...doc,
-    tracks: doc.tracks.map((item) =>
-      item.id === id ? { ...item, name: next } : item
-    ),
-  }));
+  return edit(state, (doc) =>
+    withTrack(doc, id, (item) => ({ ...item, name: next }))
+  );
 }
 
 function renameClip(
@@ -1043,6 +1336,24 @@ function renameClip(
 }
 
 function removeTrack(state: ArrangementState, id: string): ArrangementState {
+  if (state.doc.main.id === id) {
+    return state;
+  }
+  if (state.doc.returns.some((track) => track.id === id)) {
+    const unsend = (track: ArrangementTrack): ArrangementTrack => {
+      if (!(track.sends && id in track.sends)) {
+        return track;
+      }
+      const { [id]: _gone, ...sends } = track.sends;
+      return { ...track, sends };
+    };
+    return edit(state, (doc) => ({
+      ...doc,
+      main: unsend(doc.main),
+      returns: doc.returns.filter((track) => track.id !== id).map(unsend),
+      tracks: doc.tracks.map(unsend),
+    }));
+  }
   // A track among the tracks picked takes the others with it.
   const picked = state.selection?.tracks ?? NONE;
   const gone = picked.includes(id) ? picked : [id];
@@ -1117,7 +1428,10 @@ function setTempo(state: ArrangementState, tempo: Tempo): ArrangementState {
   });
   return edit(state, (doc) => ({
     ...doc,
-    clips: doc.clips.map((clip) => scaleClip(clip, ratio)),
+    clips: settleOverlaps(
+      doc.clips.map((clip) => scaleClip(clip, ratio)),
+      doc.duration * ratio
+    ),
     duration: doc.duration * ratio,
     locators: doc.locators.map(scaled),
     loop: {
@@ -1345,7 +1659,11 @@ const handlers: Handlers = {
           }
     ),
   "add-signature": (state, { at }) => addSignature(state, at),
+  "add-device": (state, command) => addDevice(state, command),
   "add-track": (state, { afterId, kind = "audio" }) => {
+    if (kind === "return") {
+      return addReturn(state, afterId);
+    }
     const count = state.trackCount + 1;
     const track: ArrangementTrack = {
       color: (count - 1) % state.colors,
@@ -1368,7 +1686,52 @@ const handlers: Handlers = {
   "change-clip": (state, { id, value, details }) =>
     changeClip(state, id, value, details),
   "change-loop": (state, { range }) => changeLoop(state, range),
+  "change-device": (state, { id, state: values, track }) =>
+    changeDevice(
+      state,
+      track,
+      id,
+      (device) => ({ ...device, state: values }),
+      burst
+    ),
   "change-mix": (state, { id, patch }) => setMix(state, id, patch, burst),
+  "change-send": (state, { level, to, track }) =>
+    setSend(state, track, to, level, burst),
+  "move-device": (state, command) => moveDevice(state, command),
+  "remove-device": (state, { id, track }) =>
+    edit(state, (doc) =>
+      withTrack(doc, track, (item) =>
+        item.devices?.some((device) => device.id === id)
+          ? {
+              ...item,
+              devices: item.devices.filter((device) => device.id !== id),
+            }
+          : item
+      )
+    ),
+  "set-device": (state, { id, state: values, track }) =>
+    changeDevice(
+      state,
+      track,
+      id,
+      (device) => ({ ...device, state: values }),
+      edit
+    ),
+  "set-send": (state, { level, to, track }) =>
+    setSend(state, track, to, level, edit),
+  "set-send-mode": (state, { id, pre }) =>
+    state.doc.returns.some((item) => item.id === id) &&
+    Boolean(trackOf(state.doc, id)?.pre) !== pre
+      ? changeTrack(state, id, (track) => ({ ...track, pre }), edit)
+      : state,
+  "toggle-device": (state, { id, track }) =>
+    changeDevice(
+      state,
+      track,
+      id,
+      ({ on, ...device }) => (on === false ? device : { ...device, on: false }),
+      edit
+    ),
   "move-signature": (state, { id, to }) =>
     changeSignature(state, id, (change) => ({
       ...change,
@@ -1388,7 +1751,7 @@ const handlers: Handlers = {
   "set-loop": (state, { loop }) => setLoop(state, loop),
   "set-mix": (state, { id, patch }) => setMix(state, id, patch, edit),
   "set-track-color": (state, { id, color }) =>
-    state.doc.tracks.find((item) => item.id === id)?.color === color
+    trackOf(state.doc, id)?.color === color
       ? state
       : changeTrack(state, id, (track) => ({ ...track, color }), edit),
   "set-signature": (state, { id, beatsPerBar, beatUnit }) =>

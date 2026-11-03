@@ -23,6 +23,7 @@ It lives in a 2,805-line example block, which the CLI writes to `components/exam
 ### G-005 The arrangement document has no mixer
 `arrangement-state` holds audio and MIDI tracks with a gain, a pan, a mute and a solo: no device chain, no send, no output, no return track, no main track. Breaks MIX-001 to MIX-009, DEV-001 to DEV-004.
 Fix (decided): the document takes them, with one history.
+Status: the document holds them (devices, sends, return tracks, the main track, their commands, one history); nothing plays them yet (G-007).
 
 ### G-006 Automation is a share of the song
 A track's automation is only its volume and pan, and its points are fractions of the arrangement's length: `set-duration` stretches every envelope, and `insert-time` and `remove-time` move the clips but leave the envelopes where they were.
@@ -38,6 +39,7 @@ Reversing a clip flips a flag: the whole recording is mirrored and the clip keep
 
 ### G-010 A clip names its recording through its id
 `Arranged` has no field for the recording it plays: the block finds it by cutting the piece suffix off the clip's id (`file3-2` is `file3`). Consolidating a stretch copies its first clip and renders nothing. Breaks ARR-008.
+Status: `Arranged.recording` names it, and every piece and copy keeps it; the block still finds recordings by their ids, and consolidating still renders nothing (phase 3).
 
 ### G-011 The device catalog and the offline render are locked in a block
 The list that pairs each device with its engine and its panel, and `bounce()`, live inside `block-device-chain`: a project cannot install them to build a chain per track or render one.
@@ -51,6 +53,18 @@ Fix: phase 2, streaming from the project's storage.
 
 ### G-014 The master bus hides a limiter
 `use-master-bus` ends in a compressor set as a limiter, so a mix over full scale is squashed instead of shown, and a render cannot match playback. Breaks MIX-009, EXP-006.
+
+### G-015 A change of tempo moved what every recording plays
+`set-tempo` scaled an audio clip's length, offset and source length, but not its warp markers nor its loop: a player that reads the recording in seconds would play another stretch of it after the change. The reference keeps an unwarped recording at its speed and moves a warped one through its markers. Breaks TRN-012 for audio clips.
+Fix: `scaleClip` follows the warp; `settleOverlaps` ends a recording that keeps its speed where the next clip starts.
+
+### G-016 Instruments play now, and only now
+The instrument contract (`InstrumentBinding` in `@audio-ui/core/device`) has `noteOn(note)` and `noteOff()`, with no time and no note: a host cannot schedule a note ahead on the audio clock, nor say which held note ends. Breaks MID-002.
+Fix (decided): an optional time and a note identity on both.
+
+### G-017 The only instrument plays one note, at one level
+The pocket synth is monophonic and its notes have no velocity: chords collapse to their last note and every note plays at the same level. Breaks MID-001 for anything but a single line.
+Fix (decided): velocity on the pocket synth's notes; chords by a host that stacks one voice per note.
 
 ## Fixed
 
