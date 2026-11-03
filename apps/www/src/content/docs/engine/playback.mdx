@@ -117,3 +117,53 @@ A recording posted through one player is kept for every player of the context.
 <TypeRow name={"soloState(tracks, { inPlace? })"} type={"{ heard, sends }"}>Which tracks a solo lets through, and which sends. Soloed tracks are heard and the others silenced with their sends; the returns stay heard with `inPlace` (the default), and a soloed return is heard with what every track sends it.</TypeRow>
 <TypeRow name={"delayCompensation(tracks, returns)"} type={"Compensation"}>How many frames each path waits so all of them meet the main track on the same frame, from the latency each device chain declares, and the frames the whole mix comes out late.</TypeRow>
 </TypeTable>
+
+## Playing an arrangement
+
+`arrangement-engine` plays the document `useArrangement` holds: each audio track through a clip player, each MIDI track through the instrument of its chain with a voice for each note it holds (so a monophonic instrument plays chords), every device chain, every send and return, and the main track, on one transport counted in frames of the audio clock. The document comes in as a value; the engine follows it while it plays, and the interface never touches the audio.
+
+```bash
+npx shadcn@latest add @audio-ui/arrangement-engine
+```
+
+```tsx
+import { useArrangement } from "@/hooks/use-arrangement";
+import { useArrangementEngine } from "@/hooks/use-arrangement-engine";
+
+const arrangement = useArrangement({ duration, initialTracks, tempo });
+const engine = useArrangementEngine({
+  doc: arrangement.doc,
+  recordings, // a memoized Map of recording id to AudioBuffer
+});
+
+<Button onClick={() => (engine.playing ? engine.stop() : engine.play(cursor))}>Play</Button>;
+<TimelinePlayhead source={engine.position} />; // seconds, as the speakers play them
+<Meter source={useAudioLevels(engine.meter(track.id) ?? NONE)} />;
+```
+
+- `play(from)` starts 20 ms from now (`START_SECONDS`), so every track has heard of it before its first frame, round the document's loop when it is on; a note already sounding where it starts plays from there. `stop()` stops the clips and the notes and lets the effects' tails ring.
+- `position` is a live source of the seconds the speakers play: the audio clock, less the output's latency and the engine's delay compensation, so the playhead is where the sound is. The engine stops itself at the end of the arrangement.
+- `status` is the context's sample rate, its latency in seconds (the output's and the delay compensation's), and its state: what an engine line shows.
+- A device switched off passes the sound on unchanged, as late as it would make it, so switching it moves nothing in time.
+
+`renderArrangement(doc, recordings, { from, to, sampleRate })` renders the main output to a buffer through the same engine on an offline context, faster than real time, scheduling the notes a second at a time with `onProgress` as it goes: the same frames come out as play, and a neutral clip comes out bit for bit. `encodeWav` from `wav-file` turns it into a file.
+
+## The mixer
+
+`mixer-engine` is the mixing desk the engine plays through, usable on its own with sources of your own: a channel per track and per return, each with a device chain (`setChain`), a volume, a pan, a switch and a solo, sends taken before or after the volume, pan and switch as each return asks, delay compensation from the latency each chain declares, a meter per channel, and the main track to the output. Nothing limits the main track, so a mix over full scale shows on the meters as it would in the file.
+
+```ts
+import { createMixer } from "@/lib/mixer-engine";
+
+const mixer = createMixer(context);
+mixer.update({
+  main: { gain: 1 },
+  returns: [{ gain: 1, id: "hall", latency: 0, on: true, pan: 0, pre: false, soloed: false }],
+  tracks: [{ gain: 0.8, id: "vox", latency: 288, on: true, pan: -0.2, sends: { hall: 0.3 }, soloed: false }],
+});
+source.connect(mixer.strip("vox")!.input);
+```
+
+## The device library
+
+`device-library` is every device of the registry with its engine, by shelf: `libraryDevice("audioui.compressor")` gives the description and `create(context, state)` its engine, which is how a host turns the ids a project stores into sound, and `DEVICE_SHELVES` is what a device browser lists.

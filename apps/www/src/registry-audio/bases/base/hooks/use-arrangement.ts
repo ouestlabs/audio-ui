@@ -140,6 +140,8 @@ export function useArrangement({
     canUndo: canUndo(history),
     clips: doc.clips,
     copying: gesture.copying ?? NO_COPIES,
+    /** The whole document, what an engine plays and a project saves: the same object until a command changes it. */
+    doc,
     duration: doc.duration,
     folded,
     heights: shownHeights,
