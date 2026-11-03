@@ -50,8 +50,13 @@ import {
   type MixerStrip,
 } from "@/lib/mixer-engine";
 
-/** How far ahead a play is scheduled, so every part of the engine has heard of it before its first frame. */
-export const START_SECONDS = 0.02;
+/**
+ * How far ahead a play is scheduled, so every part of the engine has heard of
+ * it before its first frame. A message reaches a worklet within one render
+ * callback of the frame the clock reads (5.3 ms at 48 kHz, measured with 32
+ * tracks playing): this is a little over twice that.
+ */
+export const START_SECONDS = 0.012;
 /** How far ahead of the clock notes and automation are scheduled, and how often the scheduler wakes. */
 const LOOKAHEAD_SECONDS = 0.1;
 const POLL_MS = 25;

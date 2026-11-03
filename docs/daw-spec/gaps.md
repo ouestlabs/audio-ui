@@ -101,6 +101,16 @@ Docked under the tracks at a fixed height, the clip panel's boxes and waveform s
 Fix: the clip view's body fills its frame, the clip panel's waveform and the MIDI clip panel's roll take the room there is (the roll at 18rem when the panel has no height of its own, as before).
 Status: fixed (checked in Chromium in the DAW's detail view).
 
+### G-027 A lone underrun, now and then
+In about one short pass of PRF-004 in six, the browser counts one underrun, on a set of 8 or 16 tracks whose load peaked under 30 %: never in the three passes of 10 minutes, never in 8 plays and stops of 16 tracks counted apart. Each time it came on a set just opened, after the previous one closed in the same browser. Breaks PRF-004 when it happens.
+Fix: to find. The cause is not established: the browser's own audio stream opening, or the closed page's, are suspects, not the load. To take again on the USB output with Chrome itself.
+Status: open.
+
+### G-026 A play started later than the target
+Play reached the output 20 ms plus the output latency after the press, and the millisecond or two the press takes to reach the engine put it over PRF-003: the lead a play takes was a guess, never measured. Breaks PRF-003.
+Fix: measured with 32 tracks playing, a message reaches a worklet within one render callback (5.3 ms at 48 kHz) of the frame the engine reads, so `arrangement-engine` schedules a play 12 ms ahead, a little over twice that, and PRF-003's measure checks the margin each time it runs.
+Status: fixed (median 46.3 ms from the press to the output, was 55.9 ms).
+
 ### G-025 What the locators and time signatures still miss
 Double-clicking a locator starts playback there in a DAW, where ours renames it. A locator's menu has no way to loop to the next one, and there are no previous and next buttons (Alt with the arrows does that from the keyboard). Inserting or taking out time moves the clips and leaves the locators and the time signatures where they were.
 Fix: to decide, the first against renaming with a key; the rest are small.

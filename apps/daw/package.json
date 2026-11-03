@@ -10,6 +10,7 @@
     "registry:local": "bun scripts/registry-local.ts",
     "test": "bun test",
     "test:browser": "bun test/browser/run.ts",
+    "test:perf": "bun test/perf/run.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
