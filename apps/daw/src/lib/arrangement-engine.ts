@@ -3,7 +3,11 @@ import { noteToFrequency } from "@audio-ui/core/pitch";
 import {
   arrangementFrame,
   heardFrame,
+  PAGE_FRAMES,
+  type PageRequest,
   type PlaybackState,
+  type PlayedClip,
+  pagesAhead,
   playedClips,
   rescaled,
   STOPPED,
@@ -34,6 +38,8 @@ import {
   createClipPlayer,
   loadClipPlayer,
   type RecordingSource,
+  streamedRecording,
+  wantPages,
 } from "@/lib/clip-player";
 import {
   type AnyDeviceState,
@@ -59,6 +65,11 @@ import {
 export const START_SECONDS = 0.012;
 /** How far ahead of the clock notes and automation are scheduled, and how often the scheduler wakes. */
 const LOOKAHEAD_SECONDS = 0.1;
+/** How far ahead of playback the pages of streamed recordings are asked for, the first half second before the rest. */
+const PAGES_AHEAD_SECONDS = 4;
+const PAGES_FIRST_SECONDS = 0.5;
+/** The pages are asked for every fourth tick of the scheduler: ten times a second. */
+const PREFETCH_TICKS = 4;
 const POLL_MS = 25;
 /** How many notes a MIDI track plays at once by default: one voice of its instrument each. */
 const VOICES = 8;
@@ -99,6 +110,8 @@ interface TrackRuntime {
     voices: Voice[];
   } | null;
   notes: FrameNote[];
+  /** What its clip player plays, as it was last given: what the pages of streamed recordings are planned from. */
+  played: PlayedClip[];
   player: ClipPlayer | null;
 }
 
@@ -119,9 +132,21 @@ export interface ArrangementEngineOptions {
 }
 
 export interface ArrangementEngine {
+  /**
+   * Loads, while stopped, the pages of streamed recordings that a play from
+   * `from` seconds would read first, so it starts with its sound there;
+   * resolves once they are in. A host calls it when the cursor moves.
+   */
+  cue: (from: number) => Promise<void>;
   dispose: () => void;
   /** The frames the engine delays its sound by: its delay compensation. */
   readonly latency: number;
+  /**
+   * Loads the pages of streamed recordings the clock's frames from `from` to
+   * `to` read; resolves once they are in. What an offline render waits for
+   * before it renders those frames.
+   */
+  load: (from: number, to: number) => Promise<void>;
   readonly mixer: Mixer;
   /** Lets go of a note `noteOn` started on a MIDI track. */
   noteOff: (track: string, pitch: number) => void;
@@ -255,6 +280,7 @@ export async function createArrangementEngine(
       devices: new Map(),
       instrument: null,
       notes: [],
+      played: [],
       player: null,
     };
     runtimes.set(id, made);
@@ -696,12 +722,46 @@ export async function createArrangementEngine(
     }
   };
 
+  /**
+   * The pages of streamed recordings the tracks read over `count` frames of
+   * the clock from `from` under `playback`: those of the next half second of
+   * every track first, then the rest, so no track waits behind another's.
+   */
+  const pagesOf = (playback: PlaybackState, from: number, count: number) => {
+    const near = Math.min(count, toFrames(PAGES_FIRST_SECONDS, rate));
+    const plan = (length: number) =>
+      [...runtimes.values()].flatMap((runtime) =>
+        runtime.played.length > 0
+          ? pagesAhead(
+              playback,
+              runtime.played,
+              from,
+              length,
+              streamedRecording,
+              rate,
+              PAGE_FRAMES
+            )
+          : []
+      );
+    const first: PageRequest[] = plan(near);
+    return near < count ? [...first, ...plan(count)] : first;
+  };
+
+  /** Asks for the pages of the next seconds of playback, or of a play from where it stopped. */
+  const prefetch = () =>
+    wantPages(pagesOf(state, now(), toFrames(PAGES_AHEAD_SECONDS, rate)));
+
   /** The scheduler of a running context: it wakes often and schedules what the next moments hold, and stops at the end. */
   const startClock = () => {
+    let ticks = 0;
     const tick = () => {
       const until = now() + toFrames(LOOKAHEAD_SECONDS, rate);
       schedule(scheduled, until);
       scheduled = Math.max(scheduled, until);
+      if (ticks % PREFETCH_TICKS === 0) {
+        prefetch();
+      }
+      ticks += 1;
       if (now() >= endFrame()) {
         stop();
       }
@@ -727,6 +787,7 @@ export async function createArrangementEngine(
       playing: true,
       position: Math.max(0, toFrames(from, rate)),
     });
+    prefetch();
     chase(at);
     scheduled = at;
     if (!(ctx instanceof OfflineAudioContext)) {
@@ -756,10 +817,8 @@ export async function createArrangementEngine(
       clips.every((clip, index) => clip === runtime.clips?.[index]);
     if (runtime.player && !same) {
       runtime.clips = clips;
-      runtime.player.setClips(
-        playedClips(clips, (clip) => clip.recording, rate),
-        recordings
-      );
+      runtime.played = playedClips(clips, (clip) => clip.recording, rate);
+      runtime.player.setClips(runtime.played, recordings);
     }
   };
 
@@ -846,9 +905,28 @@ export async function createArrangementEngine(
       }
       mixer.dispose();
     },
+    cue: (from) => {
+      if (state.playing) {
+        return Promise.resolve();
+      }
+      const at = now();
+      return wantPages(
+        pagesOf(
+          {
+            at,
+            loop: state.loop,
+            playing: false,
+            position: toFrames(from, rate),
+          },
+          at,
+          toFrames(PAGES_AHEAD_SECONDS, rate)
+        )
+      );
+    },
     get latency() {
       return mixer.latency;
     },
+    load: (from, to) => wantPages(pagesOf(state, from, to - from)),
     mixer,
     noteOff: (track, pitch) => {
       const runtime = runtimes.get(track);
@@ -949,10 +1027,14 @@ export async function renderArrangement(
   // A second at a time, on whole render quanta, which is where a render can stop.
   const step = 128 * Math.max(1, Math.round(sampleRate / 128));
   const ahead = toFrames(LOOKAHEAD_SECONDS, sampleRate);
+  // The pages of streamed recordings each second reads are in before it is rendered.
+  await engine.load(0, Math.min(frames, step + ahead));
   engine.schedule(0, Math.min(frames, step + ahead));
   for (let at = step; at < frames; at += step) {
-    ctx.suspend(at / sampleRate).then(() => {
-      engine.schedule(at + ahead, Math.min(frames, at + step + ahead));
+    ctx.suspend(at / sampleRate).then(async () => {
+      const until = Math.min(frames, at + step + ahead);
+      await engine.load(at, until);
+      engine.schedule(at + ahead, until);
       onProgress?.(at / frames);
       ctx.resume();
     });

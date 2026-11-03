@@ -34,7 +34,9 @@ Measure: `apps/daw/test/perf/run.ts "PRF-005"`, from the press of Export to the 
 Measured: 41.7 s, 4.3 times faster than real time. The comparison waits for OBS-012.
 
 ### PRF-006 Memory
-Planned (phase 2): the user's longest set, 17 stereo stems of 11 min 48 s at 48 kHz, plays whole under 1.5 GB for the tab.
+The user's longest set, 17 stereo stems of 11 min 48 s at 48 kHz, plays whole under 1.5 GB for the tab.
+Measure: `apps/daw/test/perf/run.ts "PRF-006"`: the stems' caches written straight into the browser's storage, in a profile on disk (a context of the test keeps its storage in memory, too small for 4.6 GB), then the resident memory of the tab's process opened, after 30 s of playback, and after a play from the middle.
+Measured: 329 to 346 MB opened, 473 to 515 MB playing, 495 to 525 MB after a play from the middle, against 4.6 GB decoded. Met. One underrun in one of three passes (G-027).
 
 ### PRF-007 The interface keeps up
 During playback with N tracks, the page draws at the display's rate: no task longer than 50 ms, and meters and playhead move without React rendering on each frame.

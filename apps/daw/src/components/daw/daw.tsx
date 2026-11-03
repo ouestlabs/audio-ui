@@ -45,6 +45,7 @@ import { useTrackAutomation } from "@/hooks/use-track-automation";
 import type { Arranged, ArrangementTrack } from "@/lib/arrangement";
 import { renderArrangement } from "@/lib/arrangement-engine";
 import { type ArrangementDoc, trackOf } from "@/lib/arrangement-state";
+import { canStream, streamRecording } from "@/lib/daw/cache";
 import { addDeviceCommand, takesDevice } from "@/lib/daw/devices";
 import { decodeFiles, dropCommands, NEW_TRACK } from "@/lib/daw/drop";
 import { TRACK_COLOR_COUNT } from "@/lib/daw/project";
@@ -452,7 +453,8 @@ export function Daw({ initial, initialRecordings }: DawProps) {
       const { made, skipped } = await decodeFiles(
         context,
         files,
-        new Set(recordings.keys())
+        new Set(recordings.keys()),
+        canStream() ? streamRecording : undefined
       );
       if (skipped.length > 0) {
         toast.error(`Not a sound this browser can read: ${skipped.join(", ")}`);

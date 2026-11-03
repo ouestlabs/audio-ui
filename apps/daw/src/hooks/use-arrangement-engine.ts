@@ -124,6 +124,17 @@ export function useArrangementEngine({
     engine?.setMetronome({ on: metronomeOn, rhythm: metronomeRhythm });
   }, [engine, metronomeOn, metronomeRhythm]);
 
+  // Stopped, the pages of streamed recordings a play from the cursor reads first are loaded as it moves.
+  useEffect(() => {
+    if (!engine || playing) {
+      return;
+    }
+    engine.cue(position.getSnapshot());
+    return position.subscribe(() => {
+      engine.cue(position.getSnapshot());
+    });
+  }, [engine, playing, position]);
+
   // The playhead follows the sound each frame, without a React render; the engine stops itself at the end.
   useEffect(() => {
     if (!(engine && playing)) {

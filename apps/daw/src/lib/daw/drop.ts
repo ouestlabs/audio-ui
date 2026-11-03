@@ -17,36 +17,35 @@ export interface Dropped {
 }
 
 /**
- * The files decoded at once, in the order they were dropped, each under the
- * next free recording id; the names of those that are not sound (ARR-007).
+ * The files decoded one after the other, in the order they were dropped, each
+ * under the next free recording id and handed to `settle` (which streams it
+ * from the cache, so long files never sit decoded side by side); the names of
+ * those that are not sound (ARR-007).
  */
 export async function decodeFiles(
   context: BaseAudioContext,
   files: readonly File[],
-  taken: ReadonlySet<string>
+  taken: ReadonlySet<string>,
+  settle: (id: string, recording: Recording) => Promise<Recording> = (
+    _id,
+    recording
+  ) => Promise.resolve(recording)
 ): Promise<{ made: Map<string, Dropped>; skipped: string[] }> {
-  const decoded = await Promise.all(
-    files.map(async (file) => {
-      const bytes = await file.arrayBuffer();
-      return {
-        bytes,
-        file,
-        recording: await decodeRecording(context, bytes, nameOf(file)),
-      };
-    })
-  );
   const ids = new Set(taken);
   const made = new Map<string, Dropped>();
   const skipped: string[] = [];
-  for (const { bytes, file, recording } of decoded) {
-    if (recording) {
-      const id = freshRecordingId(ids);
-      ids.add(id);
-      made.set(id, { bytes, recording });
-    } else {
+  await files.reduce(async (done, file) => {
+    await done;
+    const bytes = await file.arrayBuffer();
+    const decoded = await decodeRecording(context, bytes, nameOf(file));
+    if (!decoded) {
       skipped.push(file.name);
+      return;
     }
-  }
+    const id = freshRecordingId(ids);
+    ids.add(id);
+    made.set(id, { bytes, recording: await settle(id, decoded) });
+  }, Promise.resolve());
   return { made, skipped };
 }
 

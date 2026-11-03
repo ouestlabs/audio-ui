@@ -85,3 +85,49 @@ export function loadSet({
   });
   return { doc, recordings: [{ id: TAKE, name: "Take" }], version: 1 };
 }
+
+/**
+ * A project of `tracks` stems of `seconds` each, every one its own recording
+ * from the start, with no device: a set as long as the user's longest. Its
+ * recordings are streamed from the cache, which the measure writes itself.
+ */
+export function stemSet({
+  seconds,
+  tracks,
+}: {
+  seconds: number;
+  tracks: number;
+}): SavedProject {
+  const stems: ArrangementTrack[] = Array.from(
+    { length: tracks },
+    (_, index) => ({
+      color: index % TRACK_COLOR_COUNT,
+      id: `track-${index + 1}`,
+      kind: "audio",
+      name: `${index + 1} Stem`,
+    })
+  );
+  const clips: Arranged[] = stems.map((track, index) => ({
+    id: `${track.id}-stem`,
+    name: "Stem",
+    recording: `rec-${index + 1}`,
+    sourceLength: seconds,
+    track: track.id,
+    value: { fadeIn: 0, fadeOut: 0, length: seconds, offset: 0, start: 0 },
+  }));
+  const { doc } = createArrangementState({
+    colors: TRACK_COLOR_COUNT,
+    duration: seconds,
+    initialClips: clips,
+    initialTracks: stems,
+    tempo: START_TEMPO,
+  });
+  return {
+    doc,
+    recordings: stems.map((_, index) => ({
+      id: `rec-${index + 1}`,
+      name: `Stem ${index + 1}`,
+    })),
+    version: 1,
+  };
+}

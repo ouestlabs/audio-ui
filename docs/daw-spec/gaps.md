@@ -59,7 +59,8 @@ Status: fixed by `delayCompensation` (core) in `mixer-engine`; a check in Chromi
 
 ### G-013 Every recording is decoded whole into memory
 A decoded recording is 32-bit floating point at the engine's rate: the user's 17 stems of 11 min 48 s (2.2 GB as 16-bit files) take about 4.6 GB, more than a tab holds. Breaks PRF-006.
-Fix: phase 2, streaming from the project's storage.
+Fix: streaming. The core keeps recordings in pages of shared memory (`createPagePool`, `createRecordingStream`, `PageCache`) and plans the pages each track will read (`pagesAhead`); a Worker (`RECORDING_LOADER_WORKER`) loads them from the origin private file system. `clip-player` takes a `StreamedSource`, `arrangement-engine` asks for the next 4 s of pages as it plays, cues them at the cursor while stopped and waits for them in an export. The DAW decodes each dropped file once into a cache of 32-bit floats (`cache/<id>.f32`), one file after the other, and opens a project from that cache without decoding.
+Status: fixed. The user's longest set, 17 stems of 11 min 48 s (4.6 GB decoded), plays with the tab at about 500 MB (PRF-006). A play from a place no page was loaded for, while playing, starts silent until the disk catches up.
 
 ### G-014 The master bus hides a limiter
 `use-master-bus` ends in a compressor set as a limiter, so a mix over full scale is squashed instead of shown, and a render cannot match playback. Breaks MIX-009, EXP-006.
@@ -102,7 +103,7 @@ Fix: the clip view's body fills its frame, the clip panel's waveform and the MID
 Status: fixed (checked in Chromium in the DAW's detail view).
 
 ### G-027 A lone underrun, now and then
-In about one short pass of PRF-004 in six, the browser counts one underrun, on a set of 8 or 16 tracks whose load peaked under 30 %: never in the three passes of 10 minutes, never in 8 plays and stops of 16 tracks counted apart. Each time it came on a set just opened, after the previous one closed in the same browser. Breaks PRF-004 when it happens.
+In about one short pass of PRF-004 in six, the browser counts one underrun, on a set of 8 or 16 tracks whose load peaked under 30 %: never in the three passes of 10 minutes, never in 8 plays and stops of 16 tracks counted apart. Each time it came on a set just opened, after the previous one closed in the same browser. It came again once in three passes of PRF-006, while 17 streamed stems played, in a browser of its own. Breaks PRF-004 when it happens.
 Fix: to find. The cause is not established: the browser's own audio stream opening, or the closed page's, are suspects, not the load. To take again on the USB output with Chrome itself.
 Status: open.
 

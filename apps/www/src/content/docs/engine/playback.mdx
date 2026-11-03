@@ -110,6 +110,39 @@ A recording posted through one player is kept for every player of the context.
 <TypeRow name={"CLIP_PLAYER_WORKLET"} type={"string"}>The player's processor, to load with `audioWorklet.addModule`, registered as `CLIP_PLAYER_PROCESSOR`.</TypeRow>
 </TypeTable>
 
+### Streaming long recordings
+
+A recording decoded into memory takes 32-bit floats for every frame of every channel: an hour of stereo at 48 kHz is 1.4 GB, more than a tab can hold for a few of them. A recording can be streamed instead, read from pages that a Worker loads ahead of playback. The pages sit in shared memory, so the page needs to be cross-origin isolated (`Cross-Origin-Opener-Policy: same-origin`, `Cross-Origin-Embedder-Policy: require-corp`).
+
+- **The file.** A streamed recording is a file of the origin private file system that holds its channels one after the other, each its frames as 32-bit floats at the engine's rate. Write it once, when the recording comes in.
+- **Giving it to the engine.** With `clip-player`, give it as a `StreamedSource`, `{ path, channels, length, sampleRate }`, where you would give an `AudioBuffer`. The first one played starts the loader and a pool of 512 pages of 32,768 frames (128 MB) that every streamed recording of the page shares.
+- **Pages ahead of time.** `arrangement-engine` asks for the pages of the next 4 seconds as it plays. `cue(from)` loads, while stopped, those a play from the cursor would read first: `useArrangementEngine` calls it as the position moves. `renderArrangement` waits for each second's pages before it renders that second.
+- **A page not there.** It plays silence: a play that runs ahead of the disk loses sound, never time.
+
+```ts
+import type { StreamedSource } from "@/lib/clip-player";
+
+const recordings = new Map<string, StreamedSource>([
+  ["take-1", { channels: 2, length: 33_984_000, path: ["cache", "take-1.f32"], sampleRate: 48_000 }],
+]);
+const engine = useArrangementEngine({ doc, recordings });
+```
+
+Without the library, `@audio-ui/core/playback` has the pieces:
+
+- `createPagePool` and `createRecordingStream` make the pool and each recording's directory of pages.
+- `RECORDING_LOADER_WORKER` is the loader, as the source of a module, to start as a Worker and post `RecordingLoaderMessage`s.
+- `pagesAhead` plans the pages a track's clips read over the next frames, loops, reverse and warp included.
+- The clip player's `stream` message gives it a recording to read from its stream.
+
+<TypeTable title="Streaming">
+<TypeRow name={"createPagePool(slots, { channels, pageFrames, shared })"} type={"PagePool"}>The pages every streamed recording of a page shares, in shared memory unless `shared` is false.</TypeRow>
+<TypeRow name={"createRecordingStream(pool, channels, length)"} type={"RecordingStream"}>A recording read from the pool, with the directory of the slot each of its pages is in.</TypeRow>
+<TypeRow name={"pagesAhead(state, clips, frame, count, recordings, sampleRate, pageFrames)"} type={"PageRequest[]"}>The pages a track's clips read over a stretch of the clock, the soonest first; stopped, those a play from the position reads.</TypeRow>
+<TypeRow name={"PageCache"} type={"class"}>Loads the pages asked for into the pool and gives up those asked for longest ago: what the loader runs.</TypeRow>
+<TypeRow name={"RECORDING_LOADER_WORKER"} type={"string"}>The loader, to start as a module Worker, which reads pages from files of the origin private file system.</TypeRow>
+</TypeTable>
+
 ## The mixer's arithmetic
 
 <TypeTable title="Mixer">

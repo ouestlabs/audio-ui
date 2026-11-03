@@ -1095,6 +1095,58 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       .filter({ hasText: "1/4" })
       .waitFor({ timeout: 5000 });
   },
+  "G-013: a dropped file plays streamed from its cache, and comes back from it without decoding":
+    async (browser) => {
+      const context = await browser.newContext({
+        viewport: { height: 1000, width: 1440 },
+      });
+      const shared = await context.newPage();
+      await shared.addInitScript(() => {
+        const decode = BaseAudioContext.prototype.decodeAudioData;
+        const scope = window as unknown as { decoded: number };
+        scope.decoded = 0;
+        BaseAudioContext.prototype.decodeAudioData = function (
+          this: BaseAudioContext,
+          ...args: Parameters<BaseAudioContext["decodeAudioData"]>
+        ) {
+          scope.decoded += 1;
+          return decode.apply(this, args);
+        };
+      });
+      const page = await open(browser, shared);
+      await dropChord(page, "[data-add-track]", "Streamed take", 4);
+      await page.waitForSelector('[aria-label="Streamed take"][data-track-id]');
+      await page.waitForSelector("text=Saved", { timeout: 5000 });
+      const cached = await page.evaluate(async () => {
+        const folder = await (
+          await navigator.storage.getDirectory()
+        ).getDirectoryHandle("cache");
+        return (await (await folder.getFileHandle("rec-1.f32")).getFile()).size;
+      });
+      // Two channels of 4 s at 48 kHz, as 32-bit floats.
+      assert(cached === 2 * 4 * 48_000 * 4, `the cache holds ${cached} bytes`);
+      const played = async () => {
+        await showMixer(page);
+        await page.keyboard.press("Home");
+        await page.keyboard.press("Space");
+        const level = await loudest(page, 1500);
+        await page.keyboard.press("Space");
+        return level;
+      };
+      const first = await played();
+      assert(first > -40, `the streamed take plays at ${first} dB`);
+      await open(browser, page);
+      await page.waitForSelector(
+        '[aria-label="Streamed take"][data-track-id]',
+        { timeout: 10_000 }
+      );
+      const again = await played();
+      const decoded = await page.evaluate(
+        () => (window as unknown as { decoded: number }).decoded
+      );
+      assert(decoded === 0, `the project decoded ${decoded} files again`);
+      assert(again > -40, `the take reopened plays at ${again} dB`);
+    },
   "PRJ-001: the project comes back when the page is loaded again": async (
     browser
   ) => {
