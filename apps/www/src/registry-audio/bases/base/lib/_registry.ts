@@ -893,6 +893,32 @@ const items: RegistryItem[] = [
   },
   {
     categories: ["lib", "audio"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "An arrangement to and from DAWproject, the open exchange format other DAWs read and write: tracks, returns and the main track with their mix and sends, audio clips with fades, loop and warp, MIDI clips, volume and pan automation, locators, tempo and time signatures, and the equalizer, compressor, gate and limiter; a report says what was left out. With the zip archives it is packed in.",
+    files: [
+      {
+        path: "lib/dawproject.ts",
+        type: "registry:lib",
+      },
+      {
+        path: "lib/zip.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "dawproject",
+    registryDependencies: [
+      "@audio-ui/arrangement",
+      "@audio-ui/use-arrangement",
+      "@audio-ui/compressor-device",
+      "@audio-ui/equalizer-device",
+      "@audio-ui/gate-device",
+      "@audio-ui/limiter-device",
+    ],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio"],
     description:
       "WAV files from rendered sound: 16 or 24-bit PCM, normalized or not, encoded to bytes or downloaded",
     files: [

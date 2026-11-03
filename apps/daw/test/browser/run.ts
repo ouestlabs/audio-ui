@@ -7,12 +7,14 @@
  * Each check opens a fresh profile, so the project starts new, except where
  * a check reloads to see what was kept.
  */
+
 import {
   type Browser,
   chromium,
   type Locator,
   type Page,
 } from "playwright-core";
+import { readZip } from "@/lib/zip";
 
 const URL = process.env.DAW_URL ?? "http://localhost:3300/";
 const RATE = /kHz/;
@@ -1219,6 +1221,42 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       const level = await loudest(page, 1500);
       await page.keyboard.press("Space");
       assert(level > -40, `the opened project plays at ${level} dB`);
+    },
+  "PRJ-008: a project goes out as a .dawproject file with its audio, and comes back in from it":
+    async (browser) => {
+      const page = await open(browser);
+      await dropChord(page, "[data-add-track]", "Exported take", 2);
+      await page.waitForSelector('[aria-label="Exported take"][data-track-id]');
+      const download = page.waitForEvent("download", { timeout: 30_000 });
+      await page.getByRole("button", { name: "More controls" }).click();
+      await page.getByRole("menuitem", { name: "Export DAWproject…" }).click();
+      const saved = await (await download).path();
+      const entries = await readZip(Bun.file(saved));
+      const project = new TextDecoder().decode(
+        await entries.get("project.xml")?.read()
+      );
+      assert(
+        project.includes('name="Exported take"') &&
+          entries.has("audio/Exported take.wav"),
+        `the archive holds ${[...entries.keys()].join(", ")}`
+      );
+      await page
+        .locator('input[type="file"][accept=".dawproject"]')
+        .setInputFiles({
+          buffer: Buffer.from(await Bun.file(saved).arrayBuffer()),
+          mimeType: "application/zip",
+          name: "arrangement.dawproject",
+        });
+      await page
+        .getByText("Opened arrangement.dawproject")
+        .waitFor({ timeout: 15_000 });
+      await page.waitForSelector('[aria-label="Exported take"][data-track-id]');
+      await showMixer(page);
+      await page.keyboard.press("Home");
+      await page.keyboard.press("Space");
+      const level = await loudest(page, 1500);
+      await page.keyboard.press("Space");
+      assert(level > -40, `the imported project plays at ${level} dB`);
     },
   "PRJ-001: the project comes back when the page is loaded again": async (
     browser

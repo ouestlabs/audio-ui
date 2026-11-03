@@ -573,6 +573,24 @@ A drag across the bare lanes selects a stretch of time on the tracks it sweeps, 
 <KeyRow gesture={"On the loop"}>`Left` / `Right` move it by a grid step, `Up` / `Down` by its own length; with `Cmd` / `Ctrl`, `Left` / `Right` shorten or lengthen it and `Up` / `Down` double or halve it.</KeyRow>
 </KeyTable>
 
+### Other DAWs
+
+The `dawproject` lib (`npx shadcn@latest add @audio-ui/dawproject`) writes an arrangement to a `.dawproject` file and reads one back. DAWproject is the open exchange format several DAWs read and write: a zip of `project.xml`, `metadata.xml` and the audio.
+
+```ts
+import { exportDawproject, importDawproject } from "@/lib/dawproject";
+
+// Out: every recording a clip plays, by its id, with the file it goes in.
+const { file, report } = await exportDawproject(doc, recordings, readBytes);
+
+// In: the arrangement, and the bytes of each recording under the id its clips name.
+const { doc: opened, recordings: files, report: lost } = await importDawproject(blob);
+```
+
+- **What crosses over:** the tracks, the return tracks and the main track, with their volume, pan, mute, solo and sends. Audio clips with their fades, loop and warp, MIDI clips with their notes. The automation of volume and pan. The locators, the tempo and the time signatures. The equalizer, compressor, gate and limiter, whose settings the format describes.
+- **What is left out:** a reversed clip, a clip's gain, the loop and any other device. Each loss is a line of `report`.
+- **Times:** written in seconds, and read in seconds or beats.
+
 ### Undo and redo
 
 The `undo-history` lib (`npx shadcn@latest add @audio-ui/undo-history`) implements undo and redo as values: every function takes the present and returns the new present, and keeps no state of its own. Keep the history in a ref and the document in state, so two undos in one tick are fed the first one's result instead of reading the same stack twice.

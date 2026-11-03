@@ -4,6 +4,7 @@ import {
   type Tempo,
 } from "@audio-ui/core/time";
 import {
+  type ChangeEvent,
   type ReactNode,
   useCallback,
   useEffect,
@@ -48,6 +49,11 @@ import { type ArrangementDoc, trackOf } from "@/lib/arrangement-state";
 import { canStream, streamRecording } from "@/lib/daw/cache";
 import { addDeviceCommand, takesDevice } from "@/lib/daw/devices";
 import { decodeFiles, dropCommands, NEW_TRACK } from "@/lib/daw/drop";
+import {
+  DAWPROJECT_ACCEPT,
+  exportProject,
+  importProject,
+} from "@/lib/daw/exchange";
 import {
   canUseFolders,
   mayWrite,
@@ -113,6 +119,15 @@ function typing(target: EventTarget | null) {
     target instanceof HTMLElement &&
     (target.isContentEditable || FIELDS.test(target.tagName))
   );
+}
+
+/** What an exchange left out, a few lines of it for a notice. */
+function lostLines(report: readonly string[]): string | undefined {
+  if (report.length === 0) {
+    return;
+  }
+  const shown = report.slice(0, 4).join("; ");
+  return report.length > 4 ? `${shown}; and ${report.length - 4} more` : shown;
 }
 
 export interface DawProps {
@@ -582,6 +597,54 @@ export function Daw({
     }
   }, [onOpen]);
 
+  // Projects of other DAWs, through DAWproject (PRJ-008).
+  const exportDawproject = useCallback(async () => {
+    const notice = toast.loading("Packing the project for other DAWs…");
+    try {
+      const { file, report } = await exportProject(doc, recordings);
+      const name = `${folder?.name ?? "arrangement"}.dawproject`;
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(file);
+      link.download = name;
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(link.href), 0);
+      toast.success(`Exported to ${name}`, {
+        description: lostLines(report),
+        id: notice,
+      });
+    } catch (error) {
+      toast.error(`Not exported: ${(error as Error).message}`, { id: notice });
+    }
+  }, [doc, folder, recordings]);
+  const importInput = useRef<HTMLInputElement>(null);
+  const importDawproject = useCallback(() => importInput.current?.click(), []);
+  const openDawproject = useCallback(
+    async (event: ChangeEvent<HTMLInputElement>) => {
+      const [file] = event.target.files ?? [];
+      event.target.value = "";
+      const context = webAudio.getContext();
+      if (!(file && context && onOpen)) {
+        return;
+      }
+      const notice = toast.loading(`Opening ${file.name}…`);
+      try {
+        const opened = await importProject(context, file, TRACK_COLOR_COUNT);
+        toast.success(`Opened ${file.name}`, {
+          description: lostLines(opened.report),
+          id: notice,
+        });
+        onOpen({
+          folder: null,
+          initial: opened.doc,
+          initialRecordings: opened.recordings,
+        });
+      } catch (error) {
+        toast.error((error as Error).message, { id: notice });
+      }
+    },
+    [onOpen]
+  );
+
   const exportWav = useCallback(async () => {
     // The time selected, or the whole arrangement to the end of its last clip (EXP-002).
     const [start, end] = selectedTime?.range ?? [
@@ -811,6 +874,15 @@ export function Daw({
 
   return (
     <TooltipProvider>
+      <input
+        accept={DAWPROJECT_ACCEPT}
+        aria-label="DAWproject file to open"
+        className="hidden"
+        onChange={openDawproject}
+        ref={importInput}
+        tabIndex={-1}
+        type="file"
+      />
       <div className="flex h-svh flex-col">
         <TopBar
           automating={automation.automating}
@@ -821,6 +893,8 @@ export function Daw({
           metronome={metronome}
           onAutomatingChange={automation.setAutomating}
           onExport={exportWav}
+          onExportDawproject={exportDawproject}
+          onImportDawproject={importDawproject}
           {...(canUseFolders()
             ? { onOpen: openProjectFolder, onSave: save, onSaveAs: saveAs }
             : {})}

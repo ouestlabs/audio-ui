@@ -109,6 +109,10 @@ export interface TopBarProps {
   metronome: boolean;
   onAutomatingChange: (automating: boolean) => void;
   onExport: () => void;
+  /** Sends the project to other DAWs as a .dawproject file. */
+  onExportDawproject: () => void;
+  /** Opens a .dawproject file of another DAW in place of the project. */
+  onImportDawproject: () => void;
   onLoopingChange: (looping: boolean) => void;
   onMetronomeChange: (metronome: boolean) => void;
   /** Opens a project folder, where the browser can: with it, the menu has Open, Save and Save As. */
@@ -276,9 +280,15 @@ export function TopBar(props: TopBarProps) {
                   Save as…
                   <DropdownMenuShortcut>⇧⌘S</DropdownMenuShortcut>
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
               </>
             ) : null}
+            <DropdownMenuItem onClick={props.onImportDawproject}>
+              Import DAWproject…
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={props.onExportDawproject}>
+              Export DAWproject…
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
             <DropdownMenuRadioGroup
               onValueChange={pickZoom}
               value={preset === undefined ? "" : String(preset)}

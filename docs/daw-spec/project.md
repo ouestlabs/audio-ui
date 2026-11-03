@@ -31,5 +31,6 @@ Cmd+O opens a project folder, Cmd+S saves to the folder the project came from (a
 Test: apps/daw/test/project-file.test.ts "PRJ-007"; apps/daw/test/browser/run.ts "PRJ-006 and PRJ-007"
 
 ### PRJ-008 Projects of other DAWs, through DAWproject
-A project goes out as a `.dawproject` file (the open exchange format: a zip of `project.xml`, `metadata.xml` and the audio) and one comes in from it: tracks, clips with their fades and warp, notes, the tempo and time signatures, the mix, sends, and the automation of volume, pan and sends. Its equalizer, compressor, gate and limiter become ours with their settings; any other device is left out, and a report says what was, by track.
-Status: planned (phase 2, after PRJ-006 and PRJ-007).
+A project goes out as a `.dawproject` file (the open exchange format: a zip of `project.xml`, `metadata.xml` and the audio) and one comes in from it: tracks, clips with their fades and warp, notes, the tempo and time signatures, the mix, sends, and the automation of volume, pan and sends. Its equalizer, compressor, gate and limiter become ours with their settings; any other device is left out, and a report says what was, by track. A reversed clip, a clip's gain and the loop have no place in the format: an export says so. A MIDI track that comes in with no instrument gets the one a new MIDI track gets. Times go out in seconds and come in in seconds or beats.
+Test: apps/www/test/registry-audio/base/lib/dawproject.test.ts "PRJ-008"; apps/daw/test/browser/run.ts "PRJ-008"
+Status: checked against the format's schema and a project written as other DAWs write theirs, not yet against a file another DAW made.
