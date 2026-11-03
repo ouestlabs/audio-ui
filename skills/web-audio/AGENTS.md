@@ -475,7 +475,7 @@ const level = data.reduce((sum, v) => sum + v, 0) / data.length; // 0..255, not 
 setLevels([level, level]);
 ```
 
-**Correct (the registry hook: RMS in dB per channel, peak hold, a source):**
+**Correct (the registry hook: RMS in dB per channel, the loudest sample held as the peak, a source):**
 
 ```bash
 npx shadcn@latest add @audio-ui/use-audio-levels
@@ -491,13 +491,14 @@ const levels = useAudioLevels(analysers);
 <Meter aria-label="Master" source={levels} />;
 ```
 
-For stereo, split the signal with a `ChannelSplitterNode` and connect each output to its own `AnalyserNode`. The hook's source also carries each channel's held peak, and publishes nothing while the signal is silent.
+For stereo, split the signal with a `ChannelSplitterNode` and connect each output to its own `AnalyserNode`. The hook's source also carries each channel's peak, the loudest sample held a moment, so the bar says how loud the signal sounds and the mark how near it comes to clipping, and it publishes nothing while the signal is silent.
 
 A mono source through a `ChannelSplitterNode` leaves the second analyser at zero. Up-mix first: give the node feeding the splitter `channelCount: 2` with `channelCountMode: "explicit"`, so both bars move.
 
 Without the registry, the same loop is a few lines per channel:
 
 ```ts
+import { peakDb, rmsDb } from "@audio-ui/core/analysis";
 import { createSource } from "@audio-ui/react";
 
 const buffer = new Float32Array(analyser.fftSize);
@@ -506,13 +507,10 @@ const peaks = [-60, -60];
 
 function read(analyser: AnalyserNode, channel: number) {
   analyser.getFloatTimeDomainData(buffer);
-  let sum = 0;
-  for (const sample of buffer) {
-    sum += sample * sample;
-  }
-  const db = Math.max(-60, 20 * Math.log10(Math.sqrt(sum / buffer.length) || 1e-6));
-  peaks[channel] = Math.max(db, peaks[channel] - 0.4); // a slow fall holds the peak
-  return db;
+  // The bar is the RMS, how loud it sounds; the mark the loudest sample, how near it comes to clipping.
+  const loudest = Math.max(-60, peakDb(buffer));
+  peaks[channel] = Math.max(loudest, peaks[channel] - 0.4); // a slow fall holds the peak
+  return Math.max(-60, rmsDb(buffer));
 }
 // In one requestAnimationFrame loop: source.set({ levels: [read(left, 0), read(right, 1)], peaks: [...peaks] });
 ```

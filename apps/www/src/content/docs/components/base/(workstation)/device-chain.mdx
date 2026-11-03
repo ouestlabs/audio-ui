@@ -1,0 +1,250 @@
+---
+title: Device chain
+description: "A track's devices in a row, each drawn by its own panel: move, fold, switch off and remove them, and drop one from a library where it goes. Controlled, with no audio in it."
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="block-device-chain" />
+
+The devices of a track, in the order the sound goes through them, with a library to add one from. Each slot shows the device's own panel, the face it has on its own page, so a [device](/docs/devices) looks the same alone and in a chain. The chain keeps no list and makes no sound: it draws the slots you give it, in the order you give it, and a move, a removal or a device dropped on it comes back through a callback. Your engine follows the same list, whether it runs on Web Audio, in an AudioWorklet or in WASM.
+
+## Installation
+
+<Install name="device-chain" packages="" />
+
+The library is an item of its own, `npx shadcn@latest add @audio-ui/device-browser`, which installs the chain with it. The block above, which plays a loop through the chain, is `@audio-ui/block-device-chain`.
+
+## Anatomy
+
+```tsx
+<DeviceChain>
+  <DeviceChainSlot>
+    <CompressorPanel>
+      <DeviceChainSlotControls />
+    </CompressorPanel>
+  </DeviceChainSlot>
+  <DeviceChainAdd />
+</DeviceChain>
+
+<DeviceBrowser />
+```
+
+## Usage
+
+A slot is an id, the device it holds and its state. Keep the list, give the chain its ids, and put the device's panel in each slot with `DeviceChainSlotControls` at the end of its header: the children of a panel go there. The devices are items of their own: `npx shadcn@latest add @audio-ui/compressor @audio-ui/delay` for the two below.
+
+```tsx
+import { useState } from "react";
+import {
+  DeviceChain,
+  DeviceChainAdd,
+  DeviceChainSlot,
+  DeviceChainSlotControls,
+} from "@/components/audio-ui/device-chain";
+import {
+  type CompressorState,
+  compressorDevice,
+} from "@/components/audio-ui/devices/compressor/device";
+import { CompressorPanel } from "@/components/audio-ui/devices/compressor/panel";
+import {
+  type DelayState,
+  delayDevice,
+} from "@/components/audio-ui/devices/delay/device";
+import { DelayPanel } from "@/components/audio-ui/devices/delay/panel";
+
+type Slot =
+  | { device: "compressor"; id: string; state: CompressorState }
+  | { device: "delay"; id: string; state: DelayState };
+
+const [slots, setSlots] = useState<Slot[]>([
+  { device: "compressor", id: "a", state: compressorDevice.defaults() },
+  { device: "delay", id: "b", state: delayDevice.defaults() },
+]);
+
+const move = (id: string, index: number) =>
+  setSlots((current) => {
+    const moved = current.find((slot) => slot.id === id);
+    const rest = current.filter((slot) => slot.id !== id);
+    return moved ? [...rest.slice(0, index), moved, ...rest.slice(index)] : current;
+  });
+
+const change = (id: string, state: Slot["state"]) =>
+  setSlots((current) =>
+    current.map((slot) => (slot.id === id ? ({ ...slot, state } as Slot) : slot))
+  );
+
+<DeviceChain
+  aria-label="Devices"
+  onMove={move}
+  onRemove={(id) => setSlots((current) => current.filter((slot) => slot.id !== id))}
+  order={slots.map((slot) => slot.id)}
+>
+  {slots.map((slot) => (
+    <DeviceChainSlot
+      enabled={slot.state.enabled}
+      key={slot.id}
+      onEnabledChange={(enabled) => change(slot.id, { ...slot.state, enabled })}
+      title={slot.device === "compressor" ? compressorDevice.name : delayDevice.name}
+      value={slot.id}
+    >
+      {slot.device === "compressor" ? (
+        <CompressorPanel
+          className="w-96"
+          onValueChange={(state) => change(slot.id, state)}
+          value={slot.state}
+        >
+          <DeviceChainSlotControls />
+        </CompressorPanel>
+      ) : (
+        <DelayPanel
+          className="w-80"
+          onValueChange={(state) => change(slot.id, state)}
+          value={slot.state}
+        >
+          <DeviceChainSlotControls />
+        </DelayPanel>
+      )}
+    </DeviceChainSlot>
+  ))}
+  <DeviceChainAdd onClick={openLibrary} />
+</DeviceChain>;
+```
+
+`onMove(id, index)` gives the place the slot lands in, counted once it has left its own: take it out of the list, then put it back at `index`. Leave out `onMove` and the slots stay where they are; leave out `onRemove` and none can be removed. The panel sets the width of its slot, so give it one with `className`. `enabled` and `onEnabledChange` are for the on and off square of the folded strip; open, the panel's own square does it.
+
+### A device of your own
+
+A device with no panel of its own, such as the tremolo of [Your own device](/docs/devices#your-own-device), is drawn from its parameters by the frame, the header and the panel of `@audio-ui/device-panel`, so any device goes in a chain the day it is defined:
+
+```tsx
+import {
+  DeviceFrame,
+  DeviceHeader,
+  DevicePanel,
+} from "@/components/audio-ui/device-panel";
+
+<DeviceChainSlot title={tremolo.name} value={slot.id}>
+  <DeviceFrame className="h-full w-72">
+    <DeviceHeader activator="on" device={tremolo} onValueChange={change} value={state}>
+      <DeviceChainSlotControls />
+    </DeviceHeader>
+    <DevicePanel
+      className="p-2"
+      device={tremolo}
+      exclude={["on"]}
+      onValueChange={change}
+      value={state}
+    />
+  </DeviceFrame>
+</DeviceChainSlot>;
+```
+
+## Library
+
+`DeviceBrowser` lists devices by shelf, with a search over all of them. A device definition is an item as it is: it has an `id`, a `name` and a `description`.
+
+```tsx
+import { DeviceBrowser } from "@/components/audio-ui/device-browser";
+
+<DeviceBrowser
+  onPick={(id) => add(id)}
+  shelves={[
+    { items: [compressorDevice, limiterDevice], label: "Dynamics" },
+    { items: [delayDevice, reverbDevice], label: "Space" },
+  ]}
+/>;
+```
+
+`onPick` gets the id of the device to add, at the end of the chain. A device dragged from the library onto the chain comes to its `onAdd(id, index)` instead, with the place it was dropped in. The drag carries the id under `DEVICE_DRAG_TYPE`, exported by `device-chain`, so anything of yours can be dragged onto a chain the same way:
+
+```tsx
+import { DEVICE_DRAG_TYPE } from "@/components/audio-ui/device-chain";
+
+<div
+  draggable
+  onDragStart={(event) => event.dataTransfer.setData(DEVICE_DRAG_TYPE, "audioui.reverb")}
+/>;
+```
+
+With `open` and `onOpenChange`, the library folds to a strip that opens it again. `searchRef` is its search field, for a `DeviceChainAdd` that opens the library and puts the focus in it.
+
+## Playing the chain
+
+The block runs one engine per slot, in series, the output of each into the input of the next: a slot added makes an engine, a slot removed lets its engine go, a new state goes to its engine only, and a move wires them again in the new order. A compressor's key input, its sidechain, is fed with the kick of the loop, so switching its Sidechain on ducks the loop with it. The engines are the devices' own (`<name>-engine`), the same ones their pages play.
+
+Over an engine of your own, keep the same list and send it the order and the states: the chain and the panels never touch the audio.
+
+### Exporting
+
+**Export WAV** renders the loop through the chain into a file, faster than real time: the same engines made on an `OfflineAudioContext`, once those that load a worklet have it, and the file runs on for three seconds after the loop, for echoes and the tail of a reverb to die away. A render says nothing while it runs, so the block stops it a few times on the way (`suspend`) to show how far it has got. `wav-file` (`npx shadcn@latest add @audio-ui/wav-file`) turns what renders into a WAV file:
+
+```ts
+import { downloadWavFile } from "@/lib/wav-file";
+
+const offline = new OfflineAudioContext(2, seconds * 48_000, 48_000);
+// The same engines, made on `offline`, with the source connected and started.
+const rendered = await offline.startRendering();
+downloadWavFile(rendered, { bitDepth: 24, filename: "chain.wav" });
+```
+
+`downloadWavFile` writes 16-bit PCM unless told 24, and `normalize: true` scales the sound so its loudest sample sits at full scale. `encodeWav(channels, sampleRate, options)` gives the bytes instead, to upload or to keep.
+
+## Interaction
+
+<KeyTable title="Chain">
+<KeyRow gesture={"Drag a device by its header or its grip"}>Moves it. A line shows where it lands, and the row scrolls near its edges.</KeyRow>
+<KeyRow gesture={"`ArrowLeft` / `ArrowRight` on the grip"}>Move the device a place.</KeyRow>
+<KeyRow gesture={"`Delete` / `Backspace` on the grip"}>Remove the device.</KeyRow>
+<KeyRow gesture={"Right-click a device"}>Move it left or right, or remove it.</KeyRow>
+<KeyRow gesture={"Fold button"}>Folds the device to a strip with its name down it; the strip unfolds it.</KeyRow>
+<KeyRow gesture={"Drop a device from the library"}>Adds it where it is dropped: between two devices, or at the end.</KeyRow>
+</KeyTable>
+
+<KeyTable title="Library">
+<KeyRow gesture={"Type in the search"}>Finds devices by name first, then by what they do, across every shelf.</KeyRow>
+<KeyRow gesture={"`Enter` in the search"}>Adds the first device found.</KeyRow>
+<KeyRow gesture={"`ArrowDown` in the search"}>Goes into the list.</KeyRow>
+<KeyRow gesture={"`ArrowUp` / `ArrowDown`, `Home` / `End` in the list"}>Mark a device.</KeyRow>
+<KeyRow gesture={"`Enter` / `Space` in the list, double-click, the Add button"}>Add the marked device.</KeyRow>
+<KeyRow gesture={"`Escape` in the search"}>Clears it.</KeyRow>
+</KeyTable>
+
+Each slot is a group named after its device, and its grip is a button, "Move Compressor", that says its keys. A move or a removal is announced ("Compressor moved to 2 of 3."). After a move the focus stays on the grip, after a removal it goes to the device that takes the place, and after a fold to the button that unfolds it. The library's list is a list box, and its shelves are toggle buttons.
+
+## API reference
+
+### DeviceChain
+
+<TypeTable>
+<TypeRow name={"order"} type={"readonly string[]"}>The ids of the slots, in the order the sound goes through them.</TypeRow>
+<TypeRow name={"onMove"} type={"(id: string, index: number) => void"}>A slot was moved to `index`, counted once it has left its place. Leave it out and the slots stay where they are.</TypeRow>
+<TypeRow name={"onRemove"} type={"(id: string) => void"}>A slot was removed. Leave it out and no slot can be.</TypeRow>
+<TypeRow name={"onAdd"} type={"(device: string, index: number) => void"}>A device was dropped on the chain from a library: its id, and the index it goes in. Leave it out and nothing can be dropped.</TypeRow>
+</TypeTable>
+
+### DeviceChainSlot
+
+<TypeTable>
+<TypeRow name={"value"} type={"string"}>The slot's id, as it is in the chain's `order`.</TypeRow>
+<TypeRow name={"title"} type={"string"}>The device's name, down the folded strip and in what the controls are called.</TypeRow>
+<TypeRow name={"enabled"} type={"boolean"}>Whether the device is on, for the square of the folded strip. Leave it out for a device that cannot be switched off.</TypeRow>
+<TypeRow name={"onEnabledChange"} type={"(enabled: boolean) => void"}>The square of the folded strip was pressed.</TypeRow>
+</TypeTable>
+
+### Parts
+
+<TypeTable title="Components">
+<TypeRow name={"DeviceChainSlotControls"}>The slot's grip, a button that removes the device and one that folds it, for the end of the device's own header.</TypeRow>
+<TypeRow name={"DeviceChainAdd"}>The end of the chain: where a device dragged from a library is dropped, and a button that opens the library through `onClick`. Its children replace the words.</TypeRow>
+</TypeTable>
+
+### DeviceBrowser
+
+<TypeTable>
+<TypeRow name={"shelves"} type={"{ label: string; items: { id, name, description? }[] }[]"}>The devices, by shelf, in the order they are shown.</TypeRow>
+<TypeRow name={"onPick"} type={"(id: string) => void"}>A device was picked: Enter, a double-click or the Add button.</TypeRow>
+<TypeRow name={"open"} type={"boolean"} default={"true"}>Whether the library is shown, or folded to a strip that opens it.</TypeRow>
+<TypeRow name={"onOpenChange"} type={"(open: boolean) => void"}>Called to open or fold the library. Leave it out and it stays open, with no button to fold it.</TypeRow>
+<TypeRow name={"searchRef"} type={"Ref<HTMLInputElement>"}>The search field, to focus it from elsewhere.</TypeRow>
+</TypeTable>

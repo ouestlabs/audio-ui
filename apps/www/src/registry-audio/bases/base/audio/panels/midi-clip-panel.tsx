@@ -14,6 +14,7 @@ import {
   reverseNotes,
   stretchNotes,
 } from "@audio-ui/core/piano-roll";
+import { pitchName } from "@audio-ui/core/pitch";
 import type { PianoRoll as PianoRollPrimitive } from "@audio-ui/react";
 import {
   type MouseEvent,
@@ -27,9 +28,11 @@ import {
 import { Button } from "@/registry/bases/base/ui/button";
 import {
   ClipBox,
+  type ClipMeter,
   ClipRow,
   ClipToggle,
   ClipView,
+  formatBars,
   PositionField,
 } from "@/registry-audio/bases/base/audio/elements/clip-view";
 import {
@@ -170,6 +173,47 @@ const NOTE_EDITS: { edit: NotesEdit; label: string; name: string }[] = [
     name: "Humanize",
   },
 ];
+/** One value when they all agree, the two ends when they do not: the first note's would read as true of every one. */
+function spread(values: readonly number[], format: (value: number) => string) {
+  const low = Math.min(...values);
+  const high = Math.max(...values);
+  return low === high ? format(low) : `${format(low)}–${format(high)}`;
+}
+
+/**
+ * What the strip says of the selected notes, as label and value pairs: their
+ * pitches, where they start and how long they last in the roll's own bars,
+ * and how hard they play, from 1 to 127. Nothing else on the page reads them
+ * out.
+ */
+export function noteSelectionReadout(
+  selected: readonly Note[],
+  meter: ClipMeter
+): { label: string; value: string }[] {
+  const start = Math.min(...selected.map((note) => note.start));
+  const end = Math.max(...selected.map((note) => note.start + note.length));
+  return [
+    {
+      label: "Pitch",
+      value: spread(
+        selected.map((note) => note.pitch),
+        pitchName
+      ),
+    },
+    { label: "Start", value: formatBars(start, meter) },
+    { label: "Length", value: formatBars(end - start, meter, "length") },
+    {
+      label: "Velocity",
+      value: spread(
+        selected.map((note) =>
+          Math.max(1, Math.round((note.velocity ?? 1) * 127))
+        ),
+        String
+      ),
+    },
+  ];
+}
+
 const TRANSPOSE_STEPS = [-12, -1, 1, 12];
 const RAMPS = [
   { from: 0.3, label: "↗", name: "Crescendo", to: 1 },
@@ -550,10 +594,24 @@ function MidiClipPanel({
   }, []);
 
   const loopSpan = loop ? loop[1] - loop[0] : length;
+  const held = useMemo(() => {
+    const ids = new Set<NoteId>(selection);
+    return notes.filter((note) => ids.has(note.id));
+  }, [notes, selection]);
+  // With notes held, the strip reads them out: what they are is shown nowhere else.
   const status =
-    selection.length > 0
-      ? `${selection.length} of ${notes.length} selected`
-      : `${notes.length} ${notes.length === 1 ? "note" : "notes"}`;
+    held.length > 0 ? (
+      <>
+        <span>{`${held.length} of ${notes.length} selected`}</span>
+        {noteSelectionReadout(held, meter).map((field) => (
+          <span className="whitespace-nowrap" key={field.label}>
+            {field.label} <span className="text-foreground">{field.value}</span>
+          </span>
+        ))}
+      </>
+    ) : (
+      `${notes.length} ${notes.length === 1 ? "note" : "notes"}`
+    );
 
   return (
     <ClipView

@@ -12,6 +12,7 @@ export const isBlock = (name: string) => name.startsWith("block-");
  * that fits a card does not need it.
  */
 const EXPANDABLE = new Set([
+  "block-device-chain",
   "block-piano-roll",
   "block-timeline",
   "plot-compressor-demo",

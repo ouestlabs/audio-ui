@@ -1,5 +1,6 @@
 "use client";
 
+import { computePeaks, normalizePeaks } from "@audio-ui/core/analysis";
 import type { Breakpoint } from "@audio-ui/core/envelope";
 import {
   adjacentDivision,
@@ -17,7 +18,7 @@ import {
   type Tempo,
   TRIPLET_FACTOR,
 } from "@audio-ui/core/time";
-import { snapMove } from "@audio-ui/core/timeline";
+import { bypassesGrid, snapMove } from "@audio-ui/core/timeline";
 import { EnvelopeIcon } from "@audio-ui/icons/react";
 import {
   adjacentPoint,
@@ -26,6 +27,7 @@ import {
 } from "@audio-ui/react";
 import {
   type ComponentProps,
+  type DragEvent,
   type KeyboardEvent,
   type MouseEvent,
   type PointerEvent,
@@ -126,6 +128,7 @@ import {
   type TimeSelection,
   type TrackKind,
 } from "@/registry-audio/bases/base/lib/arrangement";
+import { decodeAudioChannels } from "@/registry-audio/bases/base/lib/audio-decode";
 
 const BARS = 32;
 /** The arrangement is laid out at the first tempo; a tempo change keeps its musical positions. */
@@ -436,6 +439,67 @@ function standInPeaks(clip: Arranged): number[] {
   });
 }
 
+/** How many slices of a dropped file the block keeps: the clip panel draws the stretch of them a clip holds. */
+const RECORDING_PEAKS = 16_384;
+/** The end of a file's name that says its format. */
+const EXTENSION = /\.[^.]+$/;
+/** The files the browser can try to decode as sound when it does not give their type. */
+const AUDIO_FILE = /\.(aac|aif|aiff|flac|m4a|mp3|oga|ogg|opus|wav|weba|webm)$/i;
+
+/**
+ * A file dropped on a track: the peaks of its sound, how long it lasts, and
+ * how long a bar was when it was dropped, since a recording follows the tempo.
+ */
+interface Recording {
+  bar: number;
+  length: number;
+  peaks: number[];
+}
+
+/** Whether a drag carries files from the desktop, rather than something of the page. */
+function carriesFiles(event: DragEvent) {
+  return Array.from(event.dataTransfer.types).includes("Files");
+}
+
+/** One amplitude per slice, from 0 to 1, as the clip panel draws them. */
+function amplitudes(channels: readonly Float32Array[]): number[] {
+  const { max, min } = normalizePeaks(computePeaks(channels, RECORDING_PEAKS));
+  return Array.from(max, (high, index) => Math.max(high, -(min[index] ?? 0)));
+}
+
+/** The peaks of a dropped file over the stretch of it a clip's source holds, at the tempo the arrangement is at now. */
+function recordedPeaks(
+  recording: Recording,
+  clip: Arranged,
+  bar: number
+): number[] {
+  const length = recording.length * (bar / recording.bar);
+  const from = clip.sourceFrom ?? 0;
+  const { peaks } = recording;
+  const first = Math.max(0, Math.floor((from / length) * peaks.length));
+  const last = Math.min(
+    peaks.length,
+    Math.ceil(((from + clip.sourceLength) / length) * peaks.length)
+  );
+  return peaks.slice(first, Math.max(first + 1, last));
+}
+
+/** The track whose lane is nearest `y`, up or down, in the view: where a clip let go off the tracks goes. */
+function nearestTrack(view: HTMLElement | null, y: number): string | undefined {
+  let nearest: string | undefined;
+  let best = Number.POSITIVE_INFINITY;
+  for (const lane of view?.querySelectorAll<HTMLElement>("[data-track]") ??
+    []) {
+    const box = lane.getBoundingClientRect();
+    const distance = Math.max(box.top - y, y - box.bottom, 0);
+    if (distance < best) {
+      best = distance;
+      nearest = lane.dataset.track;
+    }
+  }
+  return nearest;
+}
+
 /** Closes the clip panel. */
 function CloseClipView({ onClose }: { onClose: () => void }) {
   return (
@@ -705,14 +769,29 @@ export default function BlockTimeline() {
   );
   const commitClip = useCallback(
     (id: string, details: TimelinePrimitive.Clip.CommitEventDetails) => {
-      // A clip dropped on another track moves to it: its lane names the track.
-      const track =
+      // A clip dropped on another track moves to it: its lane names the track. Off the tracks (the ruler, the
+      // row that adds one, the space below), it goes to the nearest, if that track takes what the clip holds.
+      const named =
         details.lane instanceof HTMLElement
           ? details.lane.dataset.track
           : undefined;
+      const dragged =
+        details.reason === "drag" &&
+        details.target === "move" &&
+        "clientY" in details.event;
+      const onto =
+        named ??
+        (dragged
+          ? nearestTrack(viewportRef.current, details.event.clientY)
+          : undefined);
+      const clip = clips.find((candidate) => candidate.id === id);
+      const kind =
+        tracks.find((candidate) => candidate.id === onto)?.kind ?? "audio";
+      const track =
+        (clip?.notes ? "midi" : "audio") === kind ? onto : undefined;
       dispatch({ type: "commit-clip", id, copy: Boolean(details.copy), track });
     },
-    [dispatch]
+    [clips, dispatch, tracks]
   );
   const crop = useCallback(
     (id: string) => dispatch({ type: "crop-clip", id }),
@@ -1271,10 +1350,19 @@ export default function BlockTimeline() {
   );
   // The clip panel, under the tracks: it edits the first selected clip.
   const editedClip = clips.find((clip) => clip.id === selectedIds[0]);
-  const editedPeaks = useMemo(
-    () => (editedClip ? standInPeaks(editedClip) : []),
-    [editedClip]
+  // The files dropped on the tracks, by recording: the clip panel draws what they really hold.
+  const [recordings, setRecordings] = useState<ReadonlyMap<string, Recording>>(
+    () => new Map()
   );
+  const editedPeaks = useMemo(() => {
+    if (!editedClip) {
+      return [];
+    }
+    const recording = recordings.get(editedClip.id.replace(LEADING_ID, ""));
+    return recording
+      ? recordedPeaks(recording, editedClip, bar)
+      : standInPeaks(editedClip);
+  }, [bar, editedClip, recordings]);
   const handleClipAction = useCallback(
     (action: ClipAction, id: string) => {
       if (action === "edit") {
@@ -1637,6 +1725,113 @@ export default function BlockTimeline() {
     [duration, signatures, tempo]
   );
   const labels = songBars.filter((_, index) => index % labelBars === 0);
+
+  // A file dragged over an audio track marks it; let go there, it becomes a clip at the grid line under the
+  // pointer (anywhere with Cmd/Ctrl), named and as long as the file, and the files after it follow it on the track.
+  const [fileTrack, setFileTrack] = useState<string | null>(null);
+  const fileCount = useRef(0);
+  const audioLaneUnder = useCallback(
+    (event: DragEvent) => {
+      const lane = (event.target as Element).closest<HTMLElement>(
+        "[data-track]"
+      );
+      const track = tracks.find(
+        (candidate) => candidate.id === lane?.dataset.track
+      );
+      return track && (track.kind ?? "audio") === "audio" ? lane : null;
+    },
+    [tracks]
+  );
+  const addFiles = useCallback(
+    async (files: File[], trackId: string, start: number) => {
+      // Decoded for their length and their peaks only: the block plays no recordings. A file that is not sound is left out.
+      const context = new OfflineAudioContext(1, 1, 44_100);
+      const decoded = await Promise.all(
+        files.map((file) =>
+          file
+            .arrayBuffer()
+            .then((bytes) => decodeAudioChannels(context, bytes))
+            .catch(() => null)
+        )
+      );
+      let at = start;
+      for (const [index, file] of files.entries()) {
+        const channels = decoded[index];
+        const length = (channels?.[0]?.length ?? 0) / context.sampleRate;
+        if (channels && length > 0 && at < duration) {
+          fileCount.current += 1;
+          const id = `file${fileCount.current}`;
+          setRecordings((current) =>
+            new Map(current).set(id, {
+              bar,
+              length,
+              peaks: amplitudes(channels),
+            })
+          );
+          addClip({
+            id,
+            name: file.name.replace(EXTENSION, ""),
+            sourceLength: length,
+            track: trackId,
+            value: {
+              fadeIn: 0,
+              fadeOut: 0,
+              length: Math.min(length, duration - at),
+              offset: 0,
+              start: at,
+            },
+          });
+          selectClip(id, false);
+          at += length;
+        }
+      }
+    },
+    [addClip, bar, duration, selectClip]
+  );
+  const handleFileOver = useCallback(
+    (event: DragEvent<HTMLDivElement>) => {
+      if (!carriesFiles(event)) {
+        return;
+      }
+      // The whole view takes the drag, so a file let go anywhere but an audio track does nothing, rather than open in the tab.
+      event.preventDefault();
+      const lane = audioLaneUnder(event);
+      event.dataTransfer.dropEffect = lane ? "copy" : "none";
+      setFileTrack(lane?.dataset.track ?? null);
+    },
+    [audioLaneUnder]
+  );
+  const handleFileLeave = useCallback((event: DragEvent<HTMLDivElement>) => {
+    if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+      setFileTrack(null);
+    }
+  }, []);
+  const handleFileDrop = useCallback(
+    (event: DragEvent<HTMLDivElement>) => {
+      if (!carriesFiles(event)) {
+        return;
+      }
+      event.preventDefault();
+      setFileTrack(null);
+      // The files are only there while the drop is handled: read them, and where they go, before decoding.
+      const lane = audioLaneUnder(event);
+      const trackId = lane?.dataset.track;
+      const files = Array.from(event.dataTransfer.files).filter(
+        (file) => file.type.startsWith("audio/") || AUDIO_FILE.test(file.name)
+      );
+      if (!(lane && trackId) || files.length === 0) {
+        return;
+      }
+      const box = lane.getBoundingClientRect();
+      const time = ((event.clientX - box.left) / box.width) * duration;
+      const start =
+        bypassesGrid(event) || snapStep <= 0
+          ? time
+          : Math.round(time / snapStep) * snapStep;
+      addFiles(files, trackId, Math.max(0, start));
+    },
+    [addFiles, audioLaneUnder, duration, snapStep]
+  );
 
   /** Adds a signature change at the cursor, in the signature already in force there, and opens it to be typed. */
   const addSignature = useCallback(() => {
@@ -2144,6 +2339,9 @@ export default function BlockTimeline() {
         <TimelineNavigator getAriaValueText={describe} />
         <TimelineViewport
           className="flex min-h-0 flex-1 flex-col overflow-y-auto bg-muted/40"
+          onDragLeave={handleFileLeave}
+          onDragOver={handleFileOver}
+          onDrop={handleFileDrop}
           ref={viewportRef}
           scrollbar="hidden"
         >
@@ -2404,6 +2602,9 @@ export default function BlockTimeline() {
                             heights[track.id] < COMPACT_TRACK_HEIGHT &&
                             "**:data-clip-id:inset-y-0.5",
                           selectedTracks.includes(track.id) && "bg-muted/40",
+                          // An audio file dragged over the track.
+                          fileTrack === track.id &&
+                            "ring-2 ring-primary ring-inset",
                           // A silent track keeps its clips on the page, drained.
                           (mixOf(track).muted ||
                             (anySolo && !mixOf(track).soloed)) &&

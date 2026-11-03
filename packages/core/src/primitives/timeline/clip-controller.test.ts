@@ -1,4 +1,5 @@
-import { describe, expect, mock, test } from "bun:test";
+import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
+import { installFrames } from "../../../test/helpers.ts";
 import { type ClipOptions, createClipController } from "./clip-controller.ts";
 
 const key = (name: string, extra: Partial<KeyboardEventInit> = {}) =>
@@ -211,5 +212,128 @@ describe("Clip controller drag target", () => {
     expect(clip.getSnapshot().dragTarget).toBe("fade-in");
     document.dispatchEvent(pointer("pointerup", 0));
     expect(clip.getSnapshot().dragTarget).toBeNull();
+  });
+});
+
+describe("Clip controller near the edges of its view", () => {
+  const pointer = (type: string, clientX: number, clientY = 20) =>
+    Object.assign(new Event(type), {
+      altKey: false,
+      button: 0,
+      buttons: type === "pointerup" ? 0 : 1,
+      clientX,
+      clientY,
+      ctrlKey: false,
+      metaKey: false,
+      pointerId: 1,
+      pointerType: "mouse",
+      shiftKey: false,
+    }) as unknown as PointerEvent;
+  const box = (left: number, top: number, width: number, height: number) =>
+    ({
+      bottom: top + height,
+      height,
+      left,
+      right: left + width,
+      top,
+      width,
+    }) as DOMRect;
+
+  /** A timeline view 200 px wide and 100 px tall that scrolls both ways, with two lanes 50 px tall from x = 0. */
+  function timeline() {
+    const view = document.createElement("div");
+    view.setAttribute("data-timeline-viewport", "");
+    view.style.overflowX = "auto";
+    view.style.overflowY = "auto";
+    let left = 0;
+    let top = 0;
+    Object.defineProperties(view, {
+      clientHeight: { value: 100 },
+      clientWidth: { value: 200 },
+      offsetWidth: { value: 200 },
+      scrollHeight: { value: 400 },
+      scrollLeft: {
+        get: () => left,
+        set: (next: number) => {
+          left = Math.max(0, next);
+        },
+      },
+      scrollTop: {
+        get: () => top,
+        set: (next: number) => {
+          top = Math.max(0, next);
+        },
+      },
+      scrollWidth: { value: 1000 },
+    });
+    view.getBoundingClientRect = () => box(0, 0, 200, 100);
+    const lanes = [0, 50].map((y) => {
+      const lane = document.createElement("div");
+      lane.setAttribute("data-timeline-lane", "");
+      lane.getBoundingClientRect = () => box(-left, y - top, 1000, 50);
+      view.append(lane);
+      return lane;
+    });
+    const handle = document.createElement("div");
+    lanes[0]?.append(handle);
+    document.body.append(view);
+    return { handle, lanes, view };
+  }
+
+  let frames: ReturnType<typeof installFrames>;
+  beforeEach(() => {
+    frames = installFrames();
+  });
+  afterEach(() => {
+    frames.restore();
+    document.body.replaceChildren();
+  });
+
+  test("a clip held near the end of the view scrolls it, and stays under the pointer", () => {
+    const { handle, lanes, view } = timeline();
+    const clip = create({ zoom: 10 });
+    clip.press("move", pointer("pointerdown", 100), handle, lanes[0] ?? null);
+    document.dispatchEvent(pointer("pointermove", 190));
+    expect(clip.getSnapshot().value.start).toBe(19);
+    frames.fire(16);
+    // 13 px of scroll is 1.3 units more.
+    expect(view.scrollLeft).toBe(13);
+    expect(clip.getSnapshot().value.start).toBeCloseTo(20.3, 9);
+    document.dispatchEvent(pointer("pointerup", 190));
+    frames.fire(32);
+    expect(view.scrollLeft).toBe(13);
+  });
+
+  test("a press alone does not scroll, nor does a fade dragged to the edge", () => {
+    const { handle, lanes, view } = timeline();
+    const clip = create({ zoom: 10 });
+    clip.press("move", pointer("pointerdown", 195), handle, lanes[0] ?? null);
+    frames.fire(16);
+    document.dispatchEvent(pointer("pointerup", 195));
+    clip.press(
+      "fade-in",
+      pointer("pointerdown", 100),
+      handle,
+      lanes[0] ?? null
+    );
+    document.dispatchEvent(pointer("pointermove", 199));
+    frames.fire(32);
+    document.dispatchEvent(pointer("pointerup", 199));
+    expect(view.scrollLeft).toBe(0);
+  });
+
+  test("off the lanes, a moved clip goes to the nearest one", () => {
+    const { handle, lanes } = timeline();
+    const committed = mock();
+    const clip = create({ onValueCommitted: committed, zoom: 10 });
+    clip.press(
+      "move",
+      pointer("pointerdown", 100, 20),
+      handle,
+      lanes[0] ?? null
+    );
+    document.dispatchEvent(pointer("pointermove", 100, 140));
+    document.dispatchEvent(pointer("pointerup", 100, 140));
+    expect(committed.mock.calls[0]?.[1].lane).toBe(lanes[1]);
   });
 });

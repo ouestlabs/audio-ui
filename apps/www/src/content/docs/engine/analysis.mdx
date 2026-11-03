@@ -26,7 +26,7 @@ const levels = useAudioLevels(analysers);
 <Meter aria-label="Output" source={levels} />;
 ```
 
-`useAudioLevels(analysers)` gives `{ levels, peaks }`, one entry per analyser, in dB: the RMS level, which falls back smoothly as a needle would, and a peak that holds, then falls. A `ChannelSplitterNode` splits a stereo signal into one analyser per side. While the signal is silent, nothing is published. A [Meter](/docs/components/base/meter) paints it, and the [Mixer](/docs/components/base/mixer) gives one to each channel.
+`useAudioLevels(analysers)` gives `{ levels, peaks }`, one entry per analyser, in dB: the RMS level, how loud the signal sounds, which falls back smoothly as a needle would, and the peak, its loudest sample, which holds, then falls, so a meter's mark shows how near the signal comes to clipping. `rmsDb` and `peakDb` from `@audio-ui/core/analysis` are the two readings. A `ChannelSplitterNode` splits a stereo signal into one analyser per side. While the signal is silent, nothing is published. A [Meter](/docs/components/base/meter) paints it, and the [Mixer](/docs/components/base/mixer) gives one to each channel.
 
 ## Spectrum
 
@@ -53,7 +53,8 @@ const peaks = useSpectrumPeaks(spectrum, { hold: 1, fall: 24 });
 
 `@audio-ui/core/analysis` holds the math as plain functions, for an engine of your own or a worker:
 
-- `rmsDb(samples)`: The RMS level of samples, in dBFS.
+- `rmsDb(samples)`: The RMS level of samples, in dBFS: how loud they sound.
+- `peakDb(samples)`: The level of their loudest sample, in dBFS: how near they come to clipping.
 - `dbToGain(db)`, `gainToDb(gain)`: dB and gain, both ways.
 - `logSpectrum(bins, sampleRate, out, { minHz, maxHz })`: An analyser's bins on a log frequency axis, written into `out`.
 - `holdPeaks(spectrum, peaks, holding, elapsed, { hold, fall })`: Held peaks, a frame at a time.

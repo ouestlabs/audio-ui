@@ -892,6 +892,20 @@ const items: RegistryItem[] = [
     type: "registry:lib",
   },
   {
+    categories: ["lib", "audio"],
+    description:
+      "WAV files from rendered sound: 16 or 24-bit PCM, normalized or not, encoded to bytes or downloaded",
+    files: [
+      {
+        path: "lib/wav-file.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "wav-file",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
     categories: ["lib", "audio", "piano", "ai"],
     dependencies: ["zod"],
     description:

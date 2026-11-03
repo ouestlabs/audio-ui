@@ -93,6 +93,13 @@ The parts of `block-piano-roll`, each installed on its own.
 | `bpm-control` | `BpmControl` from `@/components/audio-ui/bpm-control` | registry only | A tempo field on its own: type it, step it with the arrows, or drag its `BPM` unit. `transport` brings it |
 | `scrubber` | `Scrubber` from `@/components/audio-ui/scrubber` | registry only, built on `Timeline` | Play or pause, position, a seek bar and the length |
 
+### Mixing
+
+| Name | Registry import | Package import | Use it for |
+| --- | --- | --- | --- |
+| `device-chain` | `DeviceChain`, `DeviceChainSlot`, `DeviceChainSlotControls`, `DeviceChainAdd`, `DEVICE_DRAG_TYPE` from `@/components/audio-ui/device-chain` | registry only | A track's devices in a row, each drawn by its own panel with `DeviceChainSlotControls` at the end of its header: drag by the header or the grip, Left and Right on the grip, Delete, fold, and a device dropped from a library. Controlled by `order` with `onMove(id, index)`, `onRemove(id)` and `onAdd(device, index)`; no audio in it |
+| `device-browser` | `DeviceBrowser` from `@/components/audio-ui/device-browser` | registry only | A library of devices by shelf with a search: `onPick(id)` on Enter, a double-click or the Add button, or a drag onto a `device-chain`. A device definition is an item as it is (`id`, `name`, `description`) |
+
 ## Devices
 
 Audio effects and instruments, like plugins in a DAW. A device is a state (`<name>-device`), an engine (`<name>-engine`) and a face (`<name>-panel`), installed to `components/audio-ui/devices/<name>/`. `npx shadcn@latest add @audio-ui/<name>` installs all three (`@audio-ui/compressor`, `@audio-ui/reverb`…); install a piece alone to keep only what you need, such as the state and the panel over an engine of your own. A panel is controlled and makes no sound, so it also fronts an engine of your own. Docs: https://www.audio-ui.dev/docs/devices.
@@ -157,6 +164,7 @@ What makes the sound, on the Web Audio API: install each on its own, to `hooks/`
 | `use-demo-source` | `useDemoSource` from `@/hooks/use-demo-source` | The sound a device plays: the one chosen in its session, else its default from `DEMO_SOURCES` (`@/lib/demo-sound`) |
 | `use-device-loop`, `use-noise-through-eq`, `use-pulses-through-compressor` | `useDeviceLoop` and the others from `@/hooks/<name>` | A short loop of drums and plucked notes through an effect's engine, pink noise through an equalizer, or pulses through a compressor: what a device does, heard and measured. They play while the play switch of their `AudioSessionProvider` is on, and stay silent outside one |
 | `audio-decode` | `decodeAudioChannels` from `@/lib/audio-decode` | Decode an audio file into samples before `computePeaks` |
+| `wav-file` | `encodeWav`, `downloadWavFile` from `@/lib/wav-file` | Save rendered sound as a WAV file, 16 or 24-bit, normalized or not: what an `OfflineAudioContext` renders |
 | `key-detector`, `oversampling`, `synced-rate`, `demo-sound`, `device-measure` | from `@/lib/<name>` | The engine pieces of the devices: a key detector worklet, oversampled waveshaping, a tempo-synced rate, the demo sounds by name (a boom bap loop and a drone), measuring an engine against its panel |
 | `piano-roll-tools` | `createPianoRollTools` from `@/lib/piano-roll-tools` | Typed tools an AI model uses to edit a piano roll |
 
@@ -168,4 +176,4 @@ What makes the sound, on the Web Audio API: install each on its own, to `hooks/`
 import { BlockPocketSynth } from "@/components/examples/block-pocket-synth";
 ```
 
-Available today: `block-pocket-synth`, `block-wave-shaper`, `block-waveform-player`, `block-piano-roll`, `block-timeline`, `block-drum-rack`, `block-mixer`, `block-compressor`, `block-equalizer`, `block-delay`, `block-reverb`, `block-filter`, `block-distortion`, `block-chorus`, `block-utility`, `block-limiter`, `block-gate`, `block-saturator`, `block-phaser`, `block-auto-pan`, `block-channel-eq`, `block-overdrive`, `block-redux`, `block-deesser`, `block-multiband`, `block-transient`, `block-mid-side`. The full catalog (with demos) is at https://www.audio-ui.dev/components, or ask the MCP `search_catalog` tool.
+Available today: `block-pocket-synth`, `block-wave-shaper`, `block-waveform-player`, `block-piano-roll`, `block-timeline`, `block-drum-rack`, `block-mixer`, `block-device-chain`, `block-compressor`, `block-equalizer`, `block-delay`, `block-reverb`, `block-filter`, `block-distortion`, `block-chorus`, `block-utility`, `block-limiter`, `block-gate`, `block-saturator`, `block-phaser`, `block-auto-pan`, `block-channel-eq`, `block-overdrive`, `block-redux`, `block-deesser`, `block-multiband`, `block-transient`, `block-mid-side`. The full catalog (with demos) is at https://www.audio-ui.dev/components, or ask the MCP `search_catalog` tool.

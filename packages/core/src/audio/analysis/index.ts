@@ -16,7 +16,7 @@ export {
   WEB_AUDIO_FILTER_TYPES,
 } from "./filter.ts";
 export { formatDb, formatHz } from "./format.ts";
-export { dbToGain, gainToDb, rmsDb } from "./level.ts";
+export { dbToGain, gainToDb, peakDb, rmsDb } from "./level.ts";
 export {
   type AudioPeaks,
   computePeaks,

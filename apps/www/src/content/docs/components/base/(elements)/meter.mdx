@@ -70,7 +70,7 @@ interface MeterSource {
 }
 ```
 
-`createSource` from `@audio-ui/react` makes one you push to. The `use-audio-levels` hook is one: it samples the RMS level of one `AnalyserNode` per channel every animation frame, lets it fall back smoothly, and holds each channel's peak a moment before it falls.
+`createSource` from `@audio-ui/react` makes one you push to. The `use-audio-levels` hook is one: it samples the RMS level of one `AnalyserNode` per channel every animation frame, how loud the signal sounds, and lets it fall back smoothly; its peak is the loudest sample, held a moment before it falls, so the mark shows how near the signal comes to clipping.
 
 ```bash
 npx shadcn@latest add @audio-ui/use-audio-levels

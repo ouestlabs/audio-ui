@@ -1,6 +1,6 @@
 "use client";
 
-import { rmsDb } from "@audio-ui/core/analysis";
+import { peakDb, rmsDb } from "@audio-ui/core/analysis";
 import { createSource, type Meter } from "@audio-ui/react";
 import { useEffect, useState } from "react";
 
@@ -11,10 +11,17 @@ const RELEASE_DB_PER_SECOND = 30;
 const PEAK_HOLD_MS = 1500;
 const PEAK_FALL_DB_PER_SECOND = 12;
 
-/** The RMS level of the analyser's latest samples, in dB, `SILENCE_DB` at the quietest. */
-function levelDb(analyser: AnalyserNode, buffer: Float32Array<ArrayBuffer>) {
+/**
+ * The analyser's latest samples read twice, in dB, `SILENCE_DB` at the
+ * quietest: their RMS, how loud they sound, and their loudest sample, how
+ * near they come to clipping.
+ */
+function readDb(analyser: AnalyserNode, buffer: Float32Array<ArrayBuffer>) {
   analyser.getFloatTimeDomainData(buffer);
-  return Math.max(SILENCE_DB, rmsDb(buffer));
+  return {
+    loudest: Math.max(SILENCE_DB, peakDb(buffer)),
+    rms: Math.max(SILENCE_DB, rmsDb(buffer)),
+  };
 }
 
 const silence = (channels: number): Meter.Root.Frame => ({
@@ -24,8 +31,9 @@ const silence = (channels: number): Meter.Root.Frame => ({
 
 /**
  * The live levels of a signal, one channel per analyser, in the shape a
- * `Meter` paints from: RMS in dB that falls back smoothly, with a peak that
- * holds and then falls. Tap the signal with an `AnalyserNode` per channel (a
+ * `Meter` paints from: the RMS in dB, how loud it sounds, falling back
+ * smoothly, and the peak, its loudest sample, which holds and then falls, so
+ * the mark shows how near it comes to clipping. Tap the signal with an `AnalyserNode` per channel (a
  * `ChannelSplitter` splits a stereo one) and pass them here, memoized: a new
  * array restarts the sampling.
  * A stable source, so each frame costs no React render; while the signal is
@@ -52,19 +60,20 @@ export function useAudioLevels(analysers: readonly AnalyserNode[]) {
       const levels: number[] = [];
       const peaks: number[] = [];
       for (const channel of channels) {
+        const { loudest, rms } = readDb(channel.analyser, channel.buffer);
         // It rises at once and falls at the release rate.
         const db = Math.max(
-          levelDb(channel.analyser, channel.buffer),
+          rms,
           channel.level - RELEASE_DB_PER_SECOND * elapsed,
           SILENCE_DB
         );
         channel.level = db;
-        if (db >= channel.peak) {
-          channel.peak = db;
+        if (loudest >= channel.peak) {
+          channel.peak = loudest;
           channel.holdUntil = now + PEAK_HOLD_MS;
         } else if (now > channel.holdUntil) {
           channel.peak = Math.max(
-            db,
+            loudest,
             channel.peak - PEAK_FALL_DB_PER_SECOND * elapsed
           );
         }

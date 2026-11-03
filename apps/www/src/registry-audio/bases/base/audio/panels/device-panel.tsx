@@ -192,7 +192,11 @@ function ChoiceControl({
         onValueChange={pickFromList}
         value={typeof current === "string" ? current : parameter.default}
       >
-        <SelectTrigger aria-label={parameter.label} className="w-28" size="sm">
+        <SelectTrigger
+          aria-label={parameter.label}
+          className="w-28 max-w-full"
+          size="sm"
+        >
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
@@ -231,7 +235,8 @@ function ChoiceControl({
     );
   }
   return (
-    <div className="flex flex-col items-center gap-1.5">
+    // As wide as its column at most: in a narrow panel a list shrinks to fit instead of running over the edge.
+    <div className="flex min-w-0 max-w-full flex-col items-center gap-1.5">
       <span aria-hidden="true" className="text-muted-foreground text-xs">
         {parameter.label}
       </span>
@@ -412,8 +417,8 @@ interface DevicePanelProps<Parameters extends readonly ParameterDescriptor[]> {
   exclude?: readonly Parameters[number]["id"][];
   /**
    * Parameters gathered by what they do, each group under its name, in this
-   * order: a compressor's curve, its timing, its output. What is in no group
-   * follows them.
+   * order: a compressor's curve, its timing, its output. A group draws its
+   * parameters in the order it lists them. What is in no group follows them.
    */
   groups?: readonly {
     label: string;
@@ -517,11 +522,10 @@ function DevicePanel<const Parameters extends readonly ParameterDescriptor[]>({
             {group.label}
           </span>
           <div className="flex gap-2">
-            {shown
-              .filter((parameter) =>
-                group.parameters.includes(parameter.id as never)
-              )
-              .map((parameter) => control(parameter, group.label))}
+            {group.parameters.flatMap((id) => {
+              const parameter = shown.find((candidate) => candidate.id === id);
+              return parameter ? [control(parameter, group.label)] : [];
+            })}
           </div>
         </div>
       ))}

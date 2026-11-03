@@ -14,6 +14,7 @@
     "transport",
     "scrubber",
     "---Mixing---",
-    "mixer"
+    "mixer",
+    "device-chain"
   ]
 }

@@ -291,6 +291,42 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
+    categories: ["device-chain"],
+    description:
+      "A track's devices in a row, each drawn by its own panel: moved by drag or by the arrow keys, folded, switched off and removed, and a device dropped from a library where it goes. Controlled, with no audio in it.",
+    files: [
+      {
+        path: "audio/elements/device-chain.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "device-chain",
+    registryDependencies: [
+      "@shadcn/button",
+      "@shadcn/context-menu",
+      "@shadcn/toggle",
+    ],
+    type: "registry:ui",
+  },
+  {
+    categories: ["device-chain"],
+    description:
+      "A library of devices by shelf, with a search: a device is added with Enter, a double-click or the Add button, or dragged to where it goes on a device chain.",
+    files: [
+      {
+        path: "audio/elements/device-browser.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "device-browser",
+    registryDependencies: [
+      "@audio-ui/device-chain",
+      "@shadcn/button",
+      "@shadcn/input-group",
+    ],
+    type: "registry:ui",
+  },
+  {
     categories: ["device", "plot"],
     dependencies: ["@audio-ui/react"],
     description:
